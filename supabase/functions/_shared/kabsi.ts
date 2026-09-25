@@ -1,7 +1,7 @@
 // Shared helpers for every Kabsi Edge Function.
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
 
-export const APP_URL = Deno.env.get("APP_URL") ?? "https://id-preview--2f215f56-0677-42e1-b0d5-838eb32e1c1c.lovable.app";
+export const APP_URL = Deno.env.get("APP_URL") ?? "https://kabsi-app.lovable.app";
 const LOGO = "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/brand/mark.png";
 const SENTRY_DSN = Deno.env.get("SENTRY_DSN_EDGE") ??
   "https://59fbe71e08e8d7db4f7c5e477acb2fb5@o4512003528720384.ingest.de.sentry.io/4512145412456528";
@@ -132,6 +132,10 @@ export async function sendEmail(o: {
   if (error) {
     if (error.code === "23505") return { skipped: "duplicate" }; // already sent: jobs are safe to re-run
     throw error;
+  }
+  if (/@(test\.local|example\.(com|org))$/i.test(o.to)) {
+    await db.from("emails").update({ status: "failed", error: "test address, not sent" }).eq("id", row.id);
+    return { skipped: "test_address" };
   }
   const key = Deno.env.get("RESEND_API_KEY");
   if (!key) {

@@ -2,6 +2,7 @@
 // Each job decides what is due by looking at data, never at the clock alone, and is safe to run twice.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google.ts";
+import { activeLocations, draftPending, notifyLocation, syncLocation } from "../_shared/reviews.ts";
 
 // Job: Google access. Owner added hello@kabsi.co as Manager → mark access granted, refresh status, email the owner.
 async function accessJob() {
@@ -57,9 +58,35 @@ async function accessJob() {
   return { mode: googleMode(), pending: pending.length, accepted, granted };
 }
 
-const JOBS: Record<string, () => Promise<Record<string, unknown>>> = { access: accessJob };
+// Job: pull new reviews for every active location (Pub/Sub will trigger this sooner once live).
+async function syncJob() {
+  let added = 0;
+  const failed: string[] = [];
+  for (const loc of await activeLocations()) {
+    try { added += await syncLocation(loc); } catch (e) { failed.push(loc.id); await captureError("cron-tick", e, { job: "sync", location: loc.id }); }
+  }
+  return { added, failed: failed.length };
+}
 
-Deno.serve(async (req) => {
+// Job: draft replies for new reviews (at most 10 per tick to bound AI cost and run time).
+async function draftJob() {
+  return { drafted: await draftPending(10) };
+}
+
+// Job: owner emails — urgent and ≤3★ right away, 4–5★ in the daily digest, one backlog summary.
+async function notifyJob() {
+  let emails = 0;
+  for (const loc of await activeLocations()) {
+    try { emails += await notifyLocation(loc); } catch (e) { await captureError("cron-tick", e, { job: "notify", location: loc.id }); }
+  }
+  return { emails };
+}
+
+const JOBS: Record<string, () => Promise<Record<string, unknown>>> = {
+  access: accessJob, sync: syncJob, draft: draftJob, notify: notifyJob,
+};
+
+export async function cronTick(req: Request): Promise<Response> {
   if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
   const results: Record<string, unknown> = {};
   for (const [name, job] of Object.entries(JOBS)) {
@@ -75,4 +102,4 @@ Deno.serve(async (req) => {
     }
   }
   return json({ ok: true, results });
-});
+}

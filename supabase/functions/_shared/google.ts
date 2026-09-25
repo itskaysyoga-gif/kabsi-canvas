@@ -1,3 +1,5 @@
+import { admin } from "./kabsi.ts";
+
 // Google Business Profile access as hello@kabsi.co (one central Manager account, SPEC D203).
 // GOOGLE_MODE=mock (default until the GBP API grant) simulates Google so every flow is testable.
 // GOOGLE_MODE=live uses GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN.
@@ -61,4 +63,55 @@ export async function acceptInvitationsAndListLocations(): Promise<{ accepted: n
     } while (pageToken);
   }
   return { accepted, locations };
+}
+
+// ─── Reviews (mock reads/writes public.mock_google_reviews; live uses the v4 reviews API)
+
+export type GoogleReview = {
+  reviewId: string; reviewer: string; rating: number; comment: string | null;
+  createTime: string; updateTime: string | null; reply: string | null;
+};
+const RATING: Record<string, number> = { ONE: 1, TWO: 2, THREE: 3, FOUR: 4, FIVE: 5 };
+const V4 = "https://mybusiness.googleapis.com/v4";
+
+export async function listReviews(accountId: string, locationId: string, max = 50): Promise<GoogleReview[]> {
+  if (googleMode() === "mock") {
+    const { data, error } = await admin().from("mock_google_reviews").select("*")
+      .eq("google_location_id", locationId).order("create_time", { ascending: false }).limit(max);
+    if (error) throw error;
+    return (data ?? []).map((r) => ({
+      reviewId: r.review_id, reviewer: r.reviewer_name, rating: r.star_rating, comment: r.comment,
+      createTime: r.create_time, updateTime: r.reply_update_time, reply: r.reply_comment,
+    }));
+  }
+  const out: GoogleReview[] = [];
+  let pageToken = "";
+  do {
+    const data = await g(`${V4}/${accountId}/${locationId}/reviews?pageSize=50&orderBy=updateTime%20desc${pageToken ? `&pageToken=${pageToken}` : ""}`);
+    for (const r of data.reviews ?? []) {
+      out.push({
+        reviewId: r.reviewId ?? String(r.name).split("/").pop(), reviewer: r.reviewer?.displayName ?? "A customer",
+        rating: RATING[r.starRating] ?? 0, comment: r.comment ?? null, createTime: r.createTime,
+        updateTime: r.updateTime ?? null, reply: r.reviewReply?.comment ?? null,
+      });
+    }
+    pageToken = out.length < max ? (data.nextPageToken ?? "") : "";
+  } while (pageToken);
+  return out;
+}
+
+// Writes the exact approved text, then reads it back. Only ever called by publish() after approval (D202).
+export async function putReply(accountId: string, locationId: string, reviewId: string, text: string) {
+  if (googleMode() === "mock") {
+    const { error } = await admin().from("mock_google_reviews")
+      .update({ reply_comment: text, reply_update_time: new Date().toISOString() }).eq("review_id", reviewId);
+    if (error) throw error;
+    return { state: "live" as const, response: { mock: true } };
+  }
+  const name = `${accountId}/${locationId}/reviews/${reviewId}`;
+  const put = await g(`${V4}/${name}/reply`, { method: "PUT", body: JSON.stringify({ comment: text }) });
+  // Read back: Google may hold a reply for moderation or reject it.
+  const back = await g(`${V4}/${name}`);
+  const state = back.reviewReply?.comment === text ? "live" as const : "in_review" as const;
+  return { state, response: { put, reply: back.reviewReply ?? null } };
 }
