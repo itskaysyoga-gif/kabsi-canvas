@@ -99,15 +99,28 @@ Output only the reply text.`;
   return (await message(DRAFT_MODEL, system, user, 400)).replace(/^["“]|["”]$/g, "").trim();
 }
 
+// Rules a model judges badly are checked in code (D232): emojis/hearts and Arabizi (numbers used as letters).
+function codeChecks(draft: string) {
+  const issues: string[] = [];
+  if (/\p{Extended_Pictographic}|<3/u.test(draft)) issues.push("contains an emoji or heart");
+  const noTimes = draft.replace(/\b\d{1,2}(:\d{2})?\s?(am|pm)\b/gi, "");
+  if (/[a-z][2379][a-z]|(^|[\s,.!?])[2379][a-z]{2,}/i.test(noTimes)) issues.push("writes Arabic with numbers for letters (Arabizi)");
+  return issues;
+}
+
 // Safety check (D223): blocks drafts that break the rules above.
 export async function checkDraft(o: { review: ReviewInput; draft: string; card: Card }) {
+  const fixed = codeChecks(o.draft);
+  if (fixed.length) return { ok: false, issues: fixed, model: "code" };
   const out = await message(CHECK_MODEL,
     `You check a drafted reply to a Google review before a business owner sees it. Reply with JSON only:
 {"ok": <true|false>, "issues": ["<short issue>", ...]}
 Language rule: Franco-Arabic (Arabizi) reviews must get an English reply (one Lebanese word like "Yislamo" allowed); Arabic-script reviews get Arabic; others get the review's language.
+Judge ONLY the draft. The review's own wording (slang, Arabizi, emojis) is irrelevant.
+Replying to a topic the reviewer raised (e.g. apologising about the late delivery they complained about) is NOT promotion.
 Allowed and NOT problems: using the reviewer's own name; the owner's sign-off; saying sorry to hear it or sorry they feel unwell; thanking them; saying the business takes it seriously, wants to understand what happened or will look into it; inviting them to continue privately or to call the listed phone number.
 "Admits fault" means ONLY an explicit statement that the business caused the problem (e.g. "our food made you sick", "it was our mistake", "we will pay"). Empathy and investigating are not admitting fault.
-Set ok=false if the draft: states a fact about the business not in the allowed facts; mentions an allowed fact (like delivery or hours) on a topic the reviewer did not raise, i.e. promotes it; admits fault or liability; offers a discount, refund, voucher or compensation; insults or argues; includes personal data; names a staff member who is not the reviewer, not in the sign-off and not in the allowed list; asks to change or remove the review; includes links, promotions or unrelated service reminders; makes medical, legal or safety claims; uses emojis, emoticons, hearts or "<3"; writes Arabic with numbers for letters (2, 3, 7); assumes the reviewer's gender; invents a plan, event or promise; answers small talk at length; or breaks the language rule.`,
+Set ok=false if the draft: states a fact about the business not in the allowed facts; mentions an allowed fact (like delivery or hours) on a topic the reviewer did not raise, i.e. promotes it; admits fault or liability; offers a discount, refund, voucher or compensation; insults or argues; includes personal data; names a staff member who is not the reviewer, not in the sign-off and not in the allowed list; asks to change or remove the review; includes links, promotions or unrelated service reminders; makes medical, legal or safety claims; assumes the reviewer's gender; invents a plan, event or promise; answers small talk at length; or breaks the language rule.`,
     `Allowed facts:\n${cardFacts(o.card)}\n\nReview (${o.review.rating}/5) by ${o.review.reviewer} (the reviewer's name, always allowed in the reply):\n${o.review.comment ?? "(no text)"}\n\nDraft:\n${o.draft}`, 250);
   const j = parseJson<{ ok?: boolean; issues?: string[] }>(out);
   return { ok: j.ok === true, issues: (j.issues ?? []).slice(0, 6), model: CHECK_MODEL };
