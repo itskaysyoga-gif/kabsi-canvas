@@ -17,7 +17,9 @@ async function message(model: string, system: string, user: string, maxTokens: n
   });
   const data = await res.json();
   if (!res.ok) throw new Error(`anthropic ${res.status}: ${JSON.stringify(data).slice(0, 300)}`);
-  return (data.content ?? []).filter((b: { type: string }) => b.type === "text").map((b: { text: string }) => b.text).join("").trim();
+  const text = (data.content ?? []).filter((b: { type: string }) => b.type === "text").map((b: { text: string }) => b.text).join("").trim();
+  if (!text) throw new Error(`anthropic empty reply (${model}, stop_reason=${data.stop_reason})`);
+  return text;
 }
 
 function parseJson<T>(text: string): T {
@@ -76,6 +78,7 @@ export async function draftReply(o: { review: ReviewInput; business: string; car
 Rules — never break them:
 - Language: ${languageRule(o.language)}
 - This reply is public and speaks for the business. Warm but professional: 2 to 4 short sentences, at most 70 words. Tone: ${tone}. Sound like a real, respectful local owner.
+- Keep it simple: thank them, reflect one specific thing they said, and (if it fits) say you hope to see them again. No idioms, blessings, poetry or flowery phrases, and don't describe things they didn't say.
 - Thank them and respond to what they actually said about the business. Do not answer small talk ('how are you', 'hope all is well') beyond a short greeting.
 - No emojis, emoticons, hearts, '<3', hashtags, slang spellings or repeated exclamation marks. At most one exclamation mark in the whole reply.
 - Do not assume the reviewer's gender: use neutral wording (in Arabic, prefer plural or neutral forms).

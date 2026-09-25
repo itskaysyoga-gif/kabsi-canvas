@@ -1,5 +1,5 @@
 // Phase 4 pipeline: sync → classify → draft → safety check → owner email → approve → publish.
-import { admin, APP_URL, emailLayout, esc, sendEmail, sha256Hex } from "./kabsi.ts";
+import { admin, APP_URL, captureError, emailLayout, esc, sendEmail, sha256Hex } from "./kabsi.ts";
 import { listReviews, putReply } from "./google.ts";
 import { checkDraft, classify, draftReply, MODELS, type Card } from "./ai.ts";
 
@@ -72,11 +72,18 @@ export async function draftReview(reviewId: string, instruction?: string) {
   let check = { ok: false, issues: [] as string[] };
   for (let attempt = 0; attempt < 2; attempt++) {
     // Second attempt: rewrite the failed draft, telling the model what the check flagged.
-    const fix = attempt > 0 && check.issues.length ? `Fix these problems: ${check.issues.join("; ")}` : undefined;
-    body = await draftReply({
-      review, business: loc.name, card: loc.knowledge_card ?? {}, language: language!, urgent,
-      instruction: [instruction, fix].filter(Boolean).join(". ") || undefined, previous: fix ? body : last?.body,
-    });
+    const fix = attempt > 0 && body && check.issues.length ? `Fix these problems: ${check.issues.join("; ")}` : undefined;
+    try {
+      body = await draftReply({
+        review, business: loc.name, card: loc.knowledge_card ?? {}, language: language!, urgent,
+        instruction: [instruction, fix].filter(Boolean).join(". ") || undefined, previous: fix ? body : last?.body,
+      });
+    } catch (e) {
+      if (!String(e).includes("empty reply")) throw e;
+      body = "";
+      check = { ok: false, issues: ["the model returned an empty draft"] };
+      continue;
+    }
     check = await checkDraft({ review, draft: body, card: loc.knowledge_card ?? {} });
     if (check.ok) break;
   }
@@ -97,7 +104,14 @@ export async function draftPending(limit = 10) {
     .eq("state", "new").lt("draft_attempts", 3).eq("locations.status", "active")
     .order("review_created_at", { ascending: false }).limit(limit);
   let drafted = 0;
-  for (const r of data ?? []) { await draftReview(r.id); drafted++; }
+  for (const r of data ?? []) {
+    try { await draftReview(r.id); drafted++; } catch (e) {
+      // One bad review must not stop the others; after 3 failed attempts it stays 'new' and shows in the inbox.
+      const { data: cur } = await admin().from("reviews").select("draft_attempts").eq("id", r.id).single();
+      await admin().from("reviews").update({ draft_attempts: (cur?.draft_attempts ?? 0) + 1 }).eq("id", r.id);
+      await captureError("draft", e, { review: r.id });
+    }
+  }
   return drafted;
 }
 
