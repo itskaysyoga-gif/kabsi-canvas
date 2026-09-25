@@ -4,6 +4,7 @@ import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, jso
 import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google.ts";
 import { activeLocations, draftPending, notifyLocation, syncLocation } from "../_shared/reviews.ts";
 import { snapshotRatings, weeklyReports } from "../_shared/report.ts";
+import { shieldCheck } from "../_shared/shield.ts";
 
 // Job: Google access. Owner added hello@kabsi.co as Manager → mark access granted, refresh status, email the owner.
 async function accessJob() {
@@ -16,10 +17,16 @@ async function accessJob() {
   let matches: { id: string; accountId: string; locationId: string }[] = [];
   let accepted = 0;
   if (googleMode() === "mock") {
-    // Mock: pretend the invite arrived two minutes after the owner gave consent.
+    // Mock: pretend the invite arrived two minutes after consent, but only for Kabsi staff and test
+    // accounts. Real customers wait for real Google access (D235): no fake "connected" emails.
     const cutoff = Date.now() - 2 * 60_000;
-    matches = pending.filter((l) => l.consent_at && Date.parse(l.consent_at) < cutoff)
-      .map((l) => ({ id: l.id, accountId: "accounts/mock", locationId: `locations/mock-${l.id.slice(0, 8)}` }));
+    const { data: staff } = await db.from("staff").select("user_id");
+    const staffIds = new Set((staff ?? []).map((s) => s.user_id));
+    for (const l of pending.filter((l) => l.consent_at && Date.parse(l.consent_at) < cutoff)) {
+      const { data: members } = await db.rpc("location_member_recipients", { p_location: l.id });
+      const testOwner = ((members ?? []) as { user_id: string; email: string }[]).some((m) => staffIds.has(m.user_id) || m.email.endsWith("@test.local"));
+      if (testOwner) matches.push({ id: l.id, accountId: "accounts/mock", locationId: `locations/mock-${l.id.slice(0, 8)}` });
+    }
   } else {
     const result = await acceptInvitationsAndListLocations();
     accepted = result.accepted;
@@ -94,13 +101,18 @@ async function ratingsJob() {
   return { snapshots: await snapshotRatings(await reportLocations()) };
 }
 
+// Job: Listing Shield (D218) — detect listing changes and alert the owner.
+async function shieldJob() {
+  return { alerts: await shieldCheck() };
+}
+
 // Job: weekly report, Monday from 09:00 local (D222).
 async function weeklyJob() {
   return { reports: await weeklyReports(await reportLocations()) };
 }
 
 const JOBS: Record<string, () => Promise<Record<string, unknown>>> = {
-  access: accessJob, sync: syncJob, draft: draftJob, notify: notifyJob, ratings: ratingsJob, weekly: weeklyJob,
+  access: accessJob, sync: syncJob, draft: draftJob, notify: notifyJob, ratings: ratingsJob, weekly: weeklyJob, shield: shieldJob,
 };
 
 export async function cronTick(req: Request): Promise<Response> {

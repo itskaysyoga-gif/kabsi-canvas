@@ -84,7 +84,7 @@ export async function skipReview(reviewId: string) {
 // ── Email action links (/a/:token): the token is the credential, no login needed
 export type ActionView = {
   status: "ok" | "used" | "expired" | "invalid";
-  action?: "post" | "edit" | "skip" | "see_draft" | "handle_myself" | "open";
+  action?: "post" | "edit" | "skip" | "see_draft" | "handle_myself" | "open" | "revert" | "keep";
   business?: string;
   review?: {
     id: string;
@@ -96,6 +96,7 @@ export type ActionView = {
     reply: string | null;
   } | null;
   draft?: string | null;
+  change?: { id: string; field: string; before: string; after: string; state: string } | null;
 };
 export async function loadAction(token: string): Promise<ActionView> {
   const res = await fetch(`${supabaseUrl}/functions/v1/api/action?t=${encodeURIComponent(token)}`);
@@ -104,7 +105,7 @@ export async function loadAction(token: string): Promise<ActionView> {
 }
 export async function runAction(
   token: string,
-  doWhat: "post" | "skip" | "handle_myself",
+  doWhat: "post" | "skip" | "handle_myself" | "revert" | "keep",
   text?: string,
 ) {
   const res = await fetch(`${supabaseUrl}/functions/v1/api/action`, {

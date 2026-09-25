@@ -143,3 +143,52 @@ export async function addSpecialHours(locationId: string, s: SpecialDay) {
   const patched = await g(`${BI}/${locationId}?updateMask=specialHours`, { method: "PATCH", body: JSON.stringify({ specialHours: { specialHourPeriods: periods } }) });
   return { state: "live" as const, response: { specialHours: patched.specialHours ?? null } };
 }
+
+// ─── Listing Shield (Phase 7, D218): read the listing, and put one field back after the owner's approval.
+export const SHIELD_FIELDS = ["title", "phone", "address", "website", "hours", "categories"] as const;
+export type ShieldField = typeof SHIELD_FIELDS[number];
+export type FieldValue = { display: string; raw: unknown };
+export type Listing = Record<ShieldField, FieldValue>;
+
+const DAYS: Record<string, string> = { MONDAY: "Mon", TUESDAY: "Tue", WEDNESDAY: "Wed", THURSDAY: "Thu", FRIDAY: "Fri", SATURDAY: "Sat", SUNDAY: "Sun" };
+const t2 = (t?: { hours?: number; minutes?: number }) => `${String(t?.hours ?? 0).padStart(2, "0")}:${String(t?.minutes ?? 0).padStart(2, "0")}`;
+
+type MockSeed = { name: string; address: string | null; phone?: string; hours?: string };
+export async function getListing(locationId: string, seed: MockSeed): Promise<Listing> {
+  if (googleMode() === "mock") {
+    const db = admin();
+    let { data } = await db.from("mock_listings").select("fields").eq("google_location_id", locationId).maybeSingle();
+    if (!data) {
+      const fields = { title: seed.name, phone: seed.phone || "+961 1 000 000", address: seed.address ?? "", website: "", hours: seed.hours || "Mon–Sun 09:00–18:00", categories: "Restaurant" };
+      await db.from("mock_listings").insert({ google_location_id: locationId, fields });
+      data = { fields };
+    }
+    const f = data.fields as Record<string, string>;
+    return Object.fromEntries(SHIELD_FIELDS.map((k) => [k, { display: String(f[k] ?? ""), raw: String(f[k] ?? "") }])) as Listing;
+  }
+  const l = await g(`${BI}/${locationId}?readMask=title,phoneNumbers,storefrontAddress,websiteUri,regularHours,categories`);
+  const addr = l.storefrontAddress ?? null;
+  const hours = (l.regularHours?.periods ?? []).map((p: { openDay: string; openTime?: object; closeTime?: object }) => `${DAYS[p.openDay] ?? p.openDay} ${t2(p.openTime)}–${t2(p.closeTime)}`).join(", ");
+  return {
+    title: { display: l.title ?? "", raw: l.title ?? "" },
+    phone: { display: l.phoneNumbers?.primaryPhone ?? "", raw: l.phoneNumbers ?? null },
+    address: { display: addr ? [...(addr.addressLines ?? []), addr.locality].filter(Boolean).join(", ") : "", raw: addr },
+    website: { display: l.websiteUri ?? "", raw: l.websiteUri ?? "" },
+    hours: { display: hours, raw: l.regularHours ?? null },
+    categories: { display: l.categories?.primaryCategory?.displayName ?? "", raw: l.categories ?? null },
+  };
+}
+
+const MASK: Record<ShieldField, string> = { title: "title", phone: "phoneNumbers", address: "storefrontAddress", website: "websiteUri", hours: "regularHours", categories: "categories" };
+export async function patchListing(locationId: string, field: ShieldField, raw: unknown) {
+  if (googleMode() === "mock") {
+    const db = admin();
+    const { data } = await db.from("mock_listings").select("fields").eq("google_location_id", locationId).single();
+    const fields = { ...(data!.fields as Record<string, unknown>), [field]: raw };
+    await db.from("mock_listings").update({ fields, updated_at: new Date().toISOString() }).eq("google_location_id", locationId);
+    return { state: "live" as const, response: { mock: true } };
+  }
+  const mask = MASK[field];
+  const patched = await g(`${BI}/${locationId}?updateMask=${mask}`, { method: "PATCH", body: JSON.stringify({ [mask]: raw }) });
+  return { state: "live" as const, response: { [mask]: patched[mask] ?? null } };
+}

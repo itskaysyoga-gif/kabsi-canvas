@@ -5,8 +5,10 @@
 //   POST { do: "post_publish", post_id, body }                                          → posts exactly `body`
 //   POST { do: "post_skip", post_id }
 //   POST { do: "hours_publish", location_id, start_date, end_date, closed, open_time?, close_time?, reason? }
+//   POST { do: "shield_decide", change_id, decision: "revert" | "keep" }                  → Listing Shield (D218)
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
 import { addSpecialHours, createLocalPost } from "../_shared/google.ts";
+import { decideChange } from "../_shared/shield.ts";
 
 const DRAFT_MODEL = "claude-sonnet-5";
 const CTAS = ["CALL", "BOOK", "ORDER", "LEARN_MORE", "GET_DIRECTIONS"];
@@ -62,6 +64,11 @@ Deno.serve(async (req) => {
       const { data } = await db.from("gbp_posts").select("id, location_id, owner_input, body, cta_type, cta_url, state").eq("id", b.post_id).maybeSingle();
       if (!data) return fail("not_found", "Post not found.", 404);
       post = data;
+      locationId = data.location_id;
+    }
+    if (typeof b.change_id === "string") {
+      const { data } = await db.from("listing_changes").select("location_id").eq("id", b.change_id).maybeSingle();
+      if (!data) return fail("not_found", "Change not found.", 404);
       locationId = data.location_id;
     }
     if (!locationId) return fail("bad_input", "Missing business.");
@@ -145,6 +152,17 @@ Deno.serve(async (req) => {
           await db.from("publications").update({ status: "failed", error: String(err).slice(0, 500) }).eq("id", pub.id);
           await db.from("special_hours").update({ state: "failed" }).eq("id", row.id);
           throw err;
+        }
+      }
+      case "shield_decide": {
+        const decision = b.decision === "revert" ? "revert" : b.decision === "keep" ? "keep" : null;
+        if (!decision) return fail("bad_input", "Choose revert or keep.");
+        try {
+          const r = await decideChange(String(b.change_id), decision, user.id, "dashboard");
+          return json({ ok: true, state: r.state });
+        } catch (e) {
+          if (String(e).includes("already_decided")) return fail("already_decided", "This change was already handled.", 409);
+          throw e;
         }
       }
       default:

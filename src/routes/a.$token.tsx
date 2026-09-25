@@ -22,6 +22,8 @@ const DONE: Record<string, string> = {
   skipped: "Skipped. Nothing was posted.",
   handled_offline: "Noted. Kabsi won't post anything for this review.",
   in_review: "Sent. Google is checking your reply before it appears.",
+  reverted: "Done. Your version is back on Google.",
+  kept: "Noted. Kabsi will keep the new version as yours.",
 };
 
 function ActionPage() {
@@ -44,12 +46,14 @@ function ActionPage() {
       .catch(() => setView({ status: "invalid" }));
   }, [token, navigate]);
 
-  async function run(what: "post" | "skip" | "handle_myself") {
+  async function run(what: "post" | "skip" | "handle_myself" | "revert" | "keep") {
     setError("");
     setBusy(true);
     try {
       const result = await runAction(token, what, what === "post" ? text : undefined);
-      track(what === "post" ? "reply_published" : "reply_skipped", { channel: "email_link" });
+      if (what === "revert" || what === "keep")
+        track(what === "revert" ? "shield_reverted" : "shield_kept", { channel: "email_link" });
+      else track(what === "post" ? "reply_published" : "reply_skipped", { channel: "email_link" });
       setDone(result.state === "in_review" ? "in_review" : result.done);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong. Nothing was posted.");
@@ -74,6 +78,63 @@ function ActionPage() {
       <ConfirmLayout>
         <CheckCircle2 className="size-10 text-kb-green" aria-hidden="true" />
         <h1 className="mt-4 font-display text-3xl leading-tight">{DONE[done] ?? "Done."}</h1>
+        {inbox}
+      </ConfirmLayout>
+    );
+  }
+  if (view.change && (view.status === "ok" || view.status === "used")) {
+    const c = view.change;
+    const LABELS: Record<string, string> = {
+      title: "business name",
+      phone: "phone number",
+      address: "address",
+      website: "website",
+      hours: "opening hours",
+      categories: "main category",
+    };
+    const decided = c.state !== "open" || view.status === "used";
+    return (
+      <ConfirmLayout>
+        <p className="text-sm font-medium text-kb-stone">{view.business}</p>
+        <h1 className="mt-1 font-display text-3xl leading-tight">
+          Your {LABELS[c.field] ?? c.field} changed on Google
+        </h1>
+        <div className="mt-6 grid gap-3">
+          <div className="rounded-card bg-kb-sand p-4">
+            <p className="text-xs font-bold uppercase text-kb-stone">Before</p>
+            <p dir="auto" className="mt-1">
+              {c.before || "(empty)"}
+            </p>
+          </div>
+          <div className="rounded-card bg-kb-sand p-4">
+            <p className="text-xs font-bold uppercase text-kb-stone">Now</p>
+            <p dir="auto" className="mt-1">
+              {c.after || "(empty)"}
+            </p>
+          </div>
+        </div>
+        {decided ? (
+          <p className="mt-5 leading-7">This change was already handled.</p>
+        ) : (
+          <>
+            {error ? (
+              <p className="mt-3 text-sm text-kb-red" role="alert">
+                {error}
+              </p>
+            ) : null}
+            <Button className="mt-6 w-full" disabled={busy} onClick={() => void run("revert")}>
+              {busy ? "Working…" : "Put mine back"}
+            </Button>
+            <Button
+              variant="ghost"
+              className="mt-2 w-full"
+              disabled={busy}
+              onClick={() => void run("keep")}
+            >
+              Keep the new one
+            </Button>
+          </>
+        )}
         {inbox}
       </ConfirmLayout>
     );
