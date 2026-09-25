@@ -2,10 +2,10 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 
 export class GlobalErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
+  override state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
-  componentDidCatch(error: Error, info: ErrorInfo) { console.error(error, info); }
-  render() {
+  override componentDidCatch(error: Error, info: ErrorInfo) { console.error(error, info); }
+  override render() {
     if (!this.state.failed) return this.props.children;
     return (
       <main className="grid min-h-screen place-items-center bg-kb-sand px-5">
