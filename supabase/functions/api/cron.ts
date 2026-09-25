@@ -3,6 +3,7 @@
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google.ts";
 import { activeLocations, draftPending, notifyLocation, syncLocation } from "../_shared/reviews.ts";
+import { snapshotRatings, weeklyReports } from "../_shared/report.ts";
 
 // Job: Google access. Owner added hello@kabsi.co as Manager → mark access granted, refresh status, email the owner.
 async function accessJob() {
@@ -82,12 +83,34 @@ async function notifyJob() {
   return { emails };
 }
 
+async function reportLocations() {
+  const { data, error } = await admin().from("locations").select("id, name, place_id, time_zone, emails_paused_until").eq("status", "active");
+  if (error) throw error;
+  return data ?? [];
+}
+
+// Job: one public-rating snapshot per location per day (feeds the weekly change).
+async function ratingsJob() {
+  return { snapshots: await snapshotRatings(await reportLocations()) };
+}
+
+// Job: weekly report, Monday from 09:00 local (D222).
+async function weeklyJob() {
+  return { reports: await weeklyReports(await reportLocations()) };
+}
+
 const JOBS: Record<string, () => Promise<Record<string, unknown>>> = {
-  access: accessJob, sync: syncJob, draft: draftJob, notify: notifyJob,
+  access: accessJob, sync: syncJob, draft: draftJob, notify: notifyJob, ratings: ratingsJob, weekly: weeklyJob,
 };
 
 export async function cronTick(req: Request): Promise<Response> {
   if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
+  // Internal test hook: { "weekly_now": "<location id>" } sends that location's report immediately.
+  const body = await req.json().catch(() => ({})) as { weekly_now?: string };
+  if (body.weekly_now) {
+    await snapshotRatings((await reportLocations()).filter((l) => l.id === body.weekly_now));
+    return json({ ok: true, reports: await weeklyReports(await reportLocations(), { forceLocation: body.weekly_now }) });
+  }
   const results: Record<string, unknown> = {};
   for (const [name, job] of Object.entries(JOBS)) {
     const started = Date.now();

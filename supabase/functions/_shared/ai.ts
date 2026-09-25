@@ -66,7 +66,7 @@ function cardFacts(card: Card) {
 // and Lebanese owners answer mixed English/Franco reviews in English, so Franco gets English.
 function languageRule(language: string) {
   if (language === "none") return "The review has no text: reply in English with one or two short sentences thanking them for the rating.";
-  if (language === "franco") return "The review is in Franco-Arabic (Arabic in Latin letters, often mixed with English). Reply in simple, natural English. You may open with ONE common Lebanese word in Latin letters such as 'Yislamo' or 'Ahla w sahla', nothing more. Never write Franco with numbers for letters (no 2, 3, 7).";
+  if (language === "franco") return "The review is in Franco-Arabic (Arabic in Latin letters, often mixed with English). Reply in simple, natural English. If the review is positive you may open with ONE common Lebanese word in Latin letters such as 'Yislamo' or 'Ahla w sahla', nothing more; for a complaint, just use their name or 'Hi'. Never write Franco with numbers for letters (no 2, 3, 7).";
   if (language.startsWith("ar")) return "The review is in Arabic script. Reply in Arabic script. If it is Lebanese dialect, reply in natural, polite Lebanese Arabic as a respectful local owner would write it publicly; otherwise use simple Modern Standard Arabic.";
   return "Reply in the same language as the review.";
 }
