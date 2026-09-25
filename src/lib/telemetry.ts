@@ -33,7 +33,15 @@ declare global {
   }
 }
 
-const PRIVATE_PATHS = [/^\/app(\/|$)/, /^\/partner(\/|$)/, /^\/staff(\/|$)/, /^\/start(\/|$)/, /^\/login(\/|$)/, /^\/a\//, /^\/activate\//];
+const PRIVATE_PATHS = [
+  /^\/app(\/|$)/,
+  /^\/partner(\/|$)/,
+  /^\/staff(\/|$)/,
+  /^\/start(\/|$)/,
+  /^\/login(\/|$)/,
+  /^\/a\//,
+  /^\/activate\//,
+];
 
 export function isPrivatePath(path: string) {
   return PRIVATE_PATHS.some((pattern) => pattern.test(path));
@@ -65,7 +73,10 @@ const bootScript = `
 
 export const telemetryHeadScripts = [
   { children: bootScript },
-  { src: `https://js-de.sentry-cdn.com/${SENTRY_PUBLIC_KEY}.min.js`, crossOrigin: "anonymous" as const },
+  {
+    src: `https://js-de.sentry-cdn.com/${SENTRY_PUBLIC_KEY}.min.js`,
+    crossOrigin: "anonymous" as const,
+  },
 ];
 
 export function reportError(error: unknown, context: Record<string, unknown> = {}) {
@@ -79,13 +90,31 @@ export function reportError(error: unknown, context: Record<string, unknown> = {
 
 // Event names and allowed properties come from KABSI-SPEC §8.
 export type KabsiEvent =
-  | "signup_started" | "business_selected" | "consent_given" | "access_granted" | "plan_selected"
-  | "payment_recorded" | "draft_generated" | "draft_edited" | "reply_approved" | "reply_published"
-  | "reply_skipped" | "post_approved" | "photo_approved" | "special_hours_approved"
-  | "shield_alert_sent" | "shield_reverted" | "shield_kept" | "card_activated"
-  | "partner_invited" | "partner_location_activated" | "lead_submitted";
+  | "signup_started"
+  | "business_selected"
+  | "consent_given"
+  | "access_granted"
+  | "plan_selected"
+  | "payment_recorded"
+  | "draft_generated"
+  | "draft_edited"
+  | "reply_approved"
+  | "reply_published"
+  | "reply_skipped"
+  | "post_approved"
+  | "photo_approved"
+  | "special_hours_approved"
+  | "shield_alert_sent"
+  | "shield_reverted"
+  | "shield_kept"
+  | "card_activated"
+  | "partner_invited"
+  | "partner_location_activated"
+  | "lead_submitted";
 
-type SafeProps = Partial<Record<"location_id" | "partner_id" | "country" | "source" | "plan" | "channel", string>>;
+type SafeProps = Partial<
+  Record<"location_id" | "partner_id" | "country" | "source" | "plan" | "channel", string>
+>;
 
 export function track(event: KabsiEvent, properties: SafeProps = {}) {
   if (typeof window === "undefined") return;
