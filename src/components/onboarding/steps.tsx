@@ -278,7 +278,11 @@ export function AccessStep({ location, onChanged }: StepProps) {
 }
 
 // ── Step 3: the facts drafts may use
-export function KnowledgeStep({ location, onChanged }: StepProps) {
+export function KnowledgeStep({
+  location,
+  onChanged,
+  mode = "onboarding",
+}: StepProps & { mode?: "onboarding" | "settings" }) {
   const card = location?.knowledge_card ?? {};
   const [signature, setSignature] = useState(card.signature ?? "");
   const [tone, setTone] = useState<"warm" | "formal" | "short">(card.tone ?? "warm");
@@ -288,12 +292,14 @@ export function KnowledgeStep({ location, onChanged }: StepProps) {
   const [staff, setStaff] = useState((card.staff_names ?? []).join(", "));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
   if (!location) return null;
 
   async function save(event: FormEvent) {
     event.preventDefault();
     setBusy(true);
     setError("");
+    setSaved(false);
     try {
       await saveKnowledge(location!.id, {
         ...card,
@@ -308,8 +314,9 @@ export function KnowledgeStep({ location, onChanged }: StepProps) {
           .filter(Boolean)
           .slice(0, 20),
       });
-      await setStep(location!.id, "plan");
+      if (mode === "onboarding") await setStep(location!.id, "plan");
       await onChanged();
+      setSaved(true);
     } catch (e) {
       setError(friendlyError(e));
     }
@@ -398,8 +405,13 @@ export function KnowledgeStep({ location, onChanged }: StepProps) {
       />
       <ErrorNote message={error} />
       <Button type="submit" className="mt-6 w-full" disabled={busy}>
-        {busy ? "Saving…" : "Save and continue"}
+        {busy ? "Saving…" : mode === "onboarding" ? "Save and continue" : "Save"}
       </Button>
+      {saved && mode === "settings" ? (
+        <p className="mt-3 text-sm text-kb-green" role="status">
+          Saved. New drafts use this from now on.
+        </p>
+      ) : null}
     </form>
   );
 }
