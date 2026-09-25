@@ -1,0 +1,13 @@
+// Deploy from this folder only: `npx wrangler deploy` (never from the repo root, which is the app).
+{
+  "name": "kabsi-go",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-25",
+  "routes": [{ "pattern": "go.kabsi.co", "custom_domain": true }],
+  "kv_namespaces": [{ "binding": "STICKERS", "id": "d897cbaa4ff34c8bab5e6923b3c41542" }],
+  "vars": {
+    "APP_ORIGIN": "https://kabsi-app.lovable.app",
+    "TAP_FUNCTION_URL": "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/tap"
+  }
+  // Secret TAP_SECRET is set in the dashboard (or `npx wrangler secret put TAP_SECRET`).
+}

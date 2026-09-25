@@ -60,14 +60,27 @@ function cardFacts(card: Card) {
   return lines.length ? lines.join("\n") : "(no extra facts)";
 }
 
+// Which language the reply is written in (D232). Arabizi/Franco written by a model reads unnatural in public,
+// and Lebanese owners answer mixed English/Franco reviews in English, so Franco gets English.
+function languageRule(language: string) {
+  if (language === "none") return "The review has no text: reply in English with one or two short sentences thanking them for the rating.";
+  if (language === "franco") return "The review is in Franco-Arabic (Arabic in Latin letters, often mixed with English). Reply in simple, natural English. You may open with ONE common Lebanese word in Latin letters such as 'Yislamo' or 'Ahla w sahla', nothing more. Never write Franco with numbers for letters (no 2, 3, 7).";
+  if (language.startsWith("ar")) return "The review is in Arabic script. Reply in Arabic script. If it is Lebanese dialect, reply in natural, polite Lebanese Arabic as a respectful local owner would write it publicly; otherwise use simple Modern Standard Arabic.";
+  return "Reply in the same language as the review.";
+}
+
 // Grounded draft (D223). Returns the reply text only.
 export async function draftReply(o: { review: ReviewInput; business: string; card: Card; language: string; urgent: boolean; instruction?: string; previous?: string }) {
   const tone = o.card.tone === "formal" ? "formal and courteous" : o.card.tone === "short" ? "short and friendly" : "warm and personal";
   const system = `You write replies to Google reviews on behalf of "${o.business}". The owner reads every reply and approves it before it is posted.
 Rules — never break them:
-- Write in the same language and script as the review (Arabic stays Arabic, Franco-Arabic stays Franco, French stays French, English stays English).${o.language === "none" ? " The review has no text: reply briefly in English thanking them for the rating." : ""}
-- Match the reviewer's dialect and register (e.g. Lebanese Arabic gets a Lebanese reply, not formal Arabic).
-- At most 80 words. Tone: ${tone}. Sound like a real local owner, not a company. You may greet the reviewer by the name they used.
+- Language: ${languageRule(o.language)}
+- This reply is public and speaks for the business. Warm but professional: 2 to 4 short sentences, at most 70 words. Tone: ${tone}. Sound like a real, respectful local owner.
+- Thank them and respond to what they actually said about the business. Do not answer small talk ('how are you', 'hope all is well') beyond a short greeting.
+- No emojis, emoticons, hearts, '<3', hashtags, slang spellings or repeated exclamation marks. At most one exclamation mark in the whole reply.
+- Do not assume the reviewer's gender: use neutral wording (in Arabic, prefer plural or neutral forms).
+- Never invent plans, events, offers or promises (no 'see you at our next session', 'we'll improve X'). A simple 'we hope to see you again' is fine.
+- You may greet the reviewer by their name if it looks like a real first name; if the name is generic (e.g. 'A customer', 'Test customer'), don't use it.
 - Use ONLY these facts about the business, and only a fact that answers a topic the reviewer themselves raised (hours if they ask when you open, delivery if they mention delivery). Never add a fact just to promote it. If something is not listed, do not mention it:
 ${cardFacts(o.card)}
 - Never offer discounts, refunds, vouchers, free items or any compensation.
@@ -88,9 +101,10 @@ export async function checkDraft(o: { review: ReviewInput; draft: string; card: 
   const out = await message(CHECK_MODEL,
     `You check a drafted reply to a Google review before a business owner sees it. Reply with JSON only:
 {"ok": <true|false>, "issues": ["<short issue>", ...]}
+Language rule: Franco-Arabic (Arabizi) reviews must get an English reply (one Lebanese word like "Yislamo" allowed); Arabic-script reviews get Arabic; others get the review's language.
 Allowed and NOT problems: using the reviewer's own name; the owner's sign-off; saying sorry to hear it or sorry they feel unwell; thanking them; saying the business takes it seriously, wants to understand what happened or will look into it; inviting them to continue privately or to call the listed phone number.
 "Admits fault" means ONLY an explicit statement that the business caused the problem (e.g. "our food made you sick", "it was our mistake", "we will pay"). Empathy and investigating are not admitting fault.
-Set ok=false if the draft: states a fact about the business not in the allowed facts; mentions an allowed fact (like delivery or hours) on a topic the reviewer did not raise, i.e. promotes it; admits fault or liability; offers a discount, refund, voucher or compensation; insults or argues; includes personal data; names a staff member who is not the reviewer, not in the sign-off and not in the allowed list; asks to change or remove the review; includes links, promotions or unrelated service reminders; makes medical, legal or safety claims; or is in a different language from the review.`,
+Set ok=false if the draft: states a fact about the business not in the allowed facts; mentions an allowed fact (like delivery or hours) on a topic the reviewer did not raise, i.e. promotes it; admits fault or liability; offers a discount, refund, voucher or compensation; insults or argues; includes personal data; names a staff member who is not the reviewer, not in the sign-off and not in the allowed list; asks to change or remove the review; includes links, promotions or unrelated service reminders; makes medical, legal or safety claims; uses emojis, emoticons, hearts or "<3"; writes Arabic with numbers for letters (2, 3, 7); assumes the reviewer's gender; invents a plan, event or promise; answers small talk at length; or breaks the language rule.`,
     `Allowed facts:\n${cardFacts(o.card)}\n\nReview (${o.review.rating}/5) by ${o.review.reviewer} (the reviewer's name, always allowed in the reply):\n${o.review.comment ?? "(no text)"}\n\nDraft:\n${o.draft}`, 250);
   const j = parseJson<{ ok?: boolean; issues?: string[] }>(out);
   return { ok: j.ok === true, issues: (j.issues ?? []).slice(0, 6), model: CHECK_MODEL };
