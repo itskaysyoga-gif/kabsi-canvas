@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { KabsiLogo } from "@/components/shared/kabsi-logo";
+import { TestModeBanner } from "@/components/shared/test-mode-banner";
 import { useAuth } from "@/components/auth/auth-provider";
 import { cn } from "@/lib/utils";
 
@@ -226,6 +227,7 @@ export function AppLayout({
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
+        <TestModeBanner />
         <main>{children}</main>
       </div>
       {area === "app" ? (

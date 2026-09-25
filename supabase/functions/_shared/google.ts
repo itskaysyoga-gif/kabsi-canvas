@@ -115,3 +115,31 @@ export async function putReply(accountId: string, locationId: string, reviewId: 
   const state = back.reviewReply?.comment === text ? "live" as const : "in_review" as const;
   return { state, response: { put, reply: back.reviewReply ?? null } };
 }
+
+// ─── Local posts and special hours (Phase 6). Only called after the owner's approval (D202).
+export type PostInput = { summary: string; languageCode: string; ctaType?: string | null; ctaUrl?: string | null };
+
+export async function createLocalPost(accountId: string, locationId: string, p: PostInput) {
+  if (googleMode() === "mock") return { state: "live" as const, response: { mock: true } };
+  const body: Record<string, unknown> = { languageCode: p.languageCode, summary: p.summary, topicType: "STANDARD" };
+  if (p.ctaType) body.callToAction = p.ctaType === "CALL" ? { actionType: "CALL" } : { actionType: p.ctaType, url: p.ctaUrl };
+  const created = await g(`${V4}/${accountId}/${locationId}/localPosts`, { method: "POST", body: JSON.stringify(body) });
+  const state = created.state === "LIVE" ? "live" as const : created.state === "REJECTED" ? "rejected" as const : "in_review" as const;
+  return { state, response: created };
+}
+
+export type SpecialDay = { startDate: string; endDate: string; closed: boolean; openTime?: string | null; closeTime?: string | null };
+const ymd = (d: string) => { const [year, month, day] = d.split("-").map(Number); return { year, month, day }; };
+const hm = (t: string) => { const [hours, minutes] = t.split(":").map(Number); return { hours, minutes }; };
+
+// Adds one special-hours period, keeping the periods already on the profile (PATCH replaces the whole list).
+export async function addSpecialHours(locationId: string, s: SpecialDay) {
+  if (googleMode() === "mock") return { state: "live" as const, response: { mock: true } };
+  const current = await g(`${BI}/${locationId}?readMask=specialHours`);
+  const periods = [...(current.specialHours?.specialHourPeriods ?? [])];
+  periods.push(s.closed
+    ? { startDate: ymd(s.startDate), endDate: ymd(s.endDate), closed: true }
+    : { startDate: ymd(s.startDate), endDate: ymd(s.endDate), openTime: hm(s.openTime!), closeTime: hm(s.closeTime!) });
+  const patched = await g(`${BI}/${locationId}?updateMask=specialHours`, { method: "PATCH", body: JSON.stringify({ specialHours: { specialHourPeriods: periods } }) });
+  return { state: "live" as const, response: { specialHours: patched.specialHours ?? null } };
+}

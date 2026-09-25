@@ -134,3 +134,8 @@ export async function addTestReview(
   });
   if (error) throw new Error(error.message);
 }
+
+// ── Posts and special hours (content function). Posting sends exactly what the owner sees (D202).
+export async function contentCall<T>(body: Record<string, unknown>) {
+  return readJson<T>(await authed("content", body));
+}
