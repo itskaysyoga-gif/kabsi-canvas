@@ -1,10 +1,11 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { reportError } from "@/lib/telemetry";
 
 export class GlobalErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   override state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
-  override componentDidCatch(error: Error, info: ErrorInfo) { console.error(error, info); }
+  override componentDidCatch(error: Error, info: ErrorInfo) { console.error(error, info); reportError(error, { boundary: "global", componentStack: info.componentStack }); }
   override render() {
     if (!this.state.failed) return this.props.children;
     return (

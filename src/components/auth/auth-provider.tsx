@@ -1,6 +1,7 @@
 import type { Session, User } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
+import { identify } from "@/lib/telemetry";
 
 type AuthContextValue = {
   session: Session | null;
@@ -31,6 +32,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       data.subscription.unsubscribe();
     };
   }, []);
+
+  const userId = session?.user.id ?? null;
+  useEffect(() => { if (!loading) identify(userId); }, [loading, userId]);
 
   const value = useMemo<AuthContextValue>(() => ({
     session,
