@@ -82,7 +82,7 @@ async function loadPlan(locationId: string) {
   return {
     current,
     paidUntil,
-    queued: running.filter((p) => p !== current),
+    queued: running.filter((p) => p.starts_at && Date.parse(p.starts_at) > now),
     pending,
     claims: (claims.data ?? []) as Claim[],
     payments: (payments.data ?? []) as Payment[],
