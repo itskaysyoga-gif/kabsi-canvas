@@ -49,6 +49,14 @@ function Page() {
       </section>
 
       <section>
+        <h2>If you use the free review link tool</h2>
+        <p>
+          Your search text goes to Google's Places API to find the business. To stop abuse we keep a
+          one-way, salted hash of your IP address for one hour, never the address itself. Nothing
+          else is stored.
+        </p>
+      </section>
+      <section>
         <h2>If you use Kabsi for your business</h2>
         <p>To provide the service we hold:</p>
         <ul>

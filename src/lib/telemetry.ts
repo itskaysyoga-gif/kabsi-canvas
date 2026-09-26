@@ -132,7 +132,8 @@ export type KabsiEvent =
   | "card_activated"
   | "partner_invited"
   | "partner_location_activated"
-  | "lead_submitted";
+  | "lead_submitted"
+  | "free_tool_used";
 
 type SafeProps = Partial<
   Record<"location_id" | "partner_id" | "country" | "source" | "plan" | "channel", string>
