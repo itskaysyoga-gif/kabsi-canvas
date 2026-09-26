@@ -19,11 +19,14 @@
 | `lead` | no (honeypot + rate limit) | `/partners` form | Stores a lead, emails hello@kabsi.co |
 | `cron-tick` | no (cron secret) | pg_cron every 5 min | Jobs: `access` (accept Manager invites → access granted → email) |
 | `kv-sync` | no (cron secret) | DB trigger on `cards` | Clears the Worker's KV copy of a changed card |
+| `partner` | no (JWT checked by the RPCs it calls; `billing` needs the cron secret) | `/partner`, `/staff`, pg_cron 06:10 UTC | `invite`, `claim`, `decide` run membership-checked RPCs as the caller and send the emails; `billing` creates last month's partner invoices (only when `google_mode` is live) |
 
 Browser writes go through membership-checked RPCs (see migration `20260925060903`):
 `start_location`, `save_consent`, `set_onboarding_step`, `update_knowledge_card`, `choose_plan`,
 `activate_card`, `set_card_active`, `rename_card`, `update_notification_settings`,
 staff-only `staff_record_payment`, `generate_card_codes`.
+Partners (migration `20260926050830`): `claim_partner_membership`, `partner_create_invite`, `partner_submit_claim`,
+`partner_invoice_calc`, staff-only `staff_create_partner`, `staff_decide_claim`; service-only `partner_billing_run`.
 
 ## Secrets (Supabase → Edge Functions → Secrets)
 

@@ -24,6 +24,7 @@ const searchSchema = z.object({
     .regex(/^[a-z0-9-]{3,30}$/i)
     .optional()
     .catch(undefined), // partner handle
+  i: z.string().uuid().optional().catch(undefined), // partner invite
   code: z
     .string()
     .regex(/^[2-9A-HJKMNP-Za-hjkmnp-z]{6}$/)
@@ -45,7 +46,7 @@ export const Route = createFileRoute("/_authenticated/start")({
 });
 
 function StartPage() {
-  const { p, code, new: startNew } = Route.useSearch();
+  const { p, i, code, new: startNew } = Route.useSearch();
   const query = useQuery({
     queryKey: ["onboarding-location"],
     queryFn: myLatestLocation,
@@ -58,7 +59,7 @@ function StartPage() {
 
   useEffect(() => {
     if (!query.isLoading && !location)
-      track("signup_started", { source: p ? "partner_link" : "self" });
+      track("signup_started", { source: i ? "partner_invite" : p ? "partner_link" : "self" });
   }, [query.isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A card code in the link (from /activate/:code) is linked as soon as the business exists.
@@ -97,7 +98,7 @@ function StartPage() {
           {cardNote}
         </p>
       ) : null}
-      {step === "business" && <BusinessStep partnerHandle={p} onCreated={refresh} />}
+      {step === "business" && <BusinessStep partnerHandle={p} inviteId={i} onCreated={refresh} />}
       {step === "access" && <AccessStep location={location} onChanged={refresh} />}
       {step === "knowledge" && <KnowledgeStep location={location} onChanged={refresh} />}
       {step === "plan" && <PlanStep location={location} onChanged={refresh} />}

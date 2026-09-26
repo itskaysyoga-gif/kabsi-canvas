@@ -22,6 +22,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { myLatestLocation } from "@/lib/onboarding";
 import { amStaff } from "@/lib/reviews";
+import { myPartner } from "@/lib/partner";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -145,6 +146,7 @@ export function AppLayout({
   const location = useLocation();
   const [signOutError, setSignOutError] = useState("");
   const isStaff = useQuery({ queryKey: ["am-staff"], queryFn: amStaff, staleTime: Infinity });
+  const partner = useQuery({ queryKey: ["my-partner"], queryFn: myPartner, staleTime: 60_000 });
   const mobileMain = appNav.slice(0, 4);
   const areaTitle = area === "partner" ? "Partner" : area === "staff" ? "Staff" : "Business";
 
@@ -208,6 +210,13 @@ export function AppLayout({
                 {user?.email}
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-kb-hairline" />
+              {partner.data ? (
+                <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2.5 text-base">
+                  <Link to={area === "partner" ? "/app/inbox" : "/partner"}>
+                    {area === "partner" ? "Business app" : "Partner"}
+                  </Link>
+                </DropdownMenuItem>
+              ) : null}
               {isStaff.data ? (
                 <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2.5 text-base">
                   <Link to={area === "staff" ? "/app/inbox" : "/staff"}>

@@ -27,9 +27,11 @@ type StepProps = { location: Location | null; onChanged: () => Promise<unknown> 
 // ── Step 1: find the business on Google Maps
 export function BusinessStep({
   partnerHandle,
+  inviteId,
   onCreated,
 }: {
   partnerHandle?: string | undefined;
+  inviteId?: string | undefined;
   onCreated: () => Promise<unknown>;
 }) {
   const [query, setQuery] = useState("");
@@ -56,10 +58,10 @@ export function BusinessStep({
     setError("");
     setBusy(true);
     try {
-      await startLocation(picked, partnerHandle);
+      await startLocation(picked, partnerHandle, inviteId);
       track("business_selected", {
         country: picked.country ?? "",
-        source: partnerHandle ? "partner_link" : "self",
+        source: inviteId ? "partner_invite" : partnerHandle ? "partner_link" : "self",
       });
       await onCreated();
     } catch (e) {

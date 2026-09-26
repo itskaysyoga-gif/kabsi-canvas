@@ -74,7 +74,7 @@ export async function searchPlaces(query: string) {
   return result.places;
 }
 
-export const startLocation = (place: PlaceResult, partnerHandle?: string) =>
+export const startLocation = (place: PlaceResult, partnerHandle?: string, inviteId?: string) =>
   rpc<string>("start_location", {
     p_place_id: place.place_id,
     p_name: place.name,
@@ -82,6 +82,7 @@ export const startLocation = (place: PlaceResult, partnerHandle?: string) =>
     p_country: place.country ?? "",
     p_time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     p_partner_handle: partnerHandle ?? null,
+    p_invite: inviteId ?? null,
   });
 
 export const CONSENT_TEXT =
