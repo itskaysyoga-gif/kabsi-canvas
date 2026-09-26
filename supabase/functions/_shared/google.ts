@@ -192,3 +192,12 @@ export async function patchListing(locationId: string, field: ShieldField, raw: 
   const patched = await g(`${BI}/${locationId}?updateMask=${mask}`, { method: "PATCH", body: JSON.stringify({ [mask]: raw }) });
   return { state: "live" as const, response: { [mask]: patched[mask] ?? null } };
 }
+
+// ─── Photos (Phase 6b). sourceUrl is a short-lived signed Storage URL. Only after owner approval (D202).
+export async function createMedia(accountId: string, locationId: string, sourceUrl: string, category: string) {
+  if (googleMode() === "mock") return { state: "live" as const, response: { mock: true } };
+  const created = await g(`${V4}/${accountId}/${locationId}/media`, {
+    method: "POST", body: JSON.stringify({ mediaFormat: "PHOTO", locationAssociation: { category }, sourceUrl }),
+  });
+  return { state: "live" as const, response: { name: created.name ?? null, googleUrl: created.googleUrl ?? null } };
+}

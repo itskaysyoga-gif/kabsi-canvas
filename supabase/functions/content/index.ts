@@ -5,12 +5,39 @@
 //   POST { do: "post_publish", post_id, body }                                          → posts exactly `body`
 //   POST { do: "post_skip", post_id }
 //   POST { do: "hours_publish", location_id, start_date, end_date, closed, open_time?, close_time?, reason? }
+//   POST { do: "photo_check", photo_id } · { do: "photo_publish", photo_id, category } · { do: "photo_skip", photo_id }
 //   POST { do: "shield_decide", change_id, decision: "revert" | "keep" }                  → Listing Shield (D218)
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
-import { addSpecialHours, createLocalPost } from "../_shared/google.ts";
+import { addSpecialHours, createLocalPost, createMedia } from "../_shared/google.ts";
 import { decideChange } from "../_shared/shield.ts";
 
 const DRAFT_MODEL = "claude-sonnet-5";
+const CHECK_MODEL = "claude-haiku-4-5-20251001";
+const PHOTO_CATEGORIES = ["EXTERIOR", "INTERIOR", "PRODUCT", "FOOD_AND_DRINK", "TEAMS", "ADDITIONAL"];
+
+// Photo check (Haiku vision): is it a real, clear photo of the business that fits Google's photo rules?
+async function checkPhoto(bytes: Uint8Array, mime: string) {
+  const key = Deno.env.get("ANTHROPIC_API_KEY") ?? Deno.env.get("Anthropic_Api");
+  if (!key) throw new Error("anthropic_not_configured");
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+    body: JSON.stringify({
+      model: CHECK_MODEL, max_tokens: 300,
+      system: `You check a photo a business owner wants to add to their Google Business Profile. Reply with JSON only:
+{"suitable": true|false, "note": "<one short sentence for the owner>", "category": "EXTERIOR"|"INTERIOR"|"PRODUCT"|"FOOD_AND_DRINK"|"TEAMS"|"ADDITIONAL"}
+Not suitable: blurry or very dark; a screenshot, flyer, poster or mostly text; a stock-looking or AI-generated image; a logo alone; people's faces as the main subject; anything offensive. Suitable: a real, clear photo of the place, products, food, drinks or team at work.`,
+      messages: [{ role: "user", content: [{ type: "image", source: { type: "base64", media_type: mime, data: btoa(bin) } }, { type: "text", text: "Check this photo." }] }],
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(`anthropic ${res.status}: ${JSON.stringify(data).slice(0, 200)}`);
+  const text = (data.content ?? []).filter((b: { type: string }) => b.type === "text").map((b: { text: string }) => b.text).join("");
+  const j = JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1)) as { suitable?: boolean; note?: string; category?: string };
+  return { suitable: j.suitable === true, note: String(j.note ?? "").slice(0, 200), category: PHOTO_CATEGORIES.includes(String(j.category)) ? String(j.category) : "ADDITIONAL" };
+}
 const CTAS = ["CALL", "BOOK", "ORDER", "LEARN_MORE", "GET_DIRECTIONS"];
 
 async function claude(system: string, user: string) {
@@ -64,6 +91,13 @@ Deno.serve(async (req) => {
       const { data } = await db.from("gbp_posts").select("id, location_id, owner_input, body, cta_type, cta_url, state").eq("id", b.post_id).maybeSingle();
       if (!data) return fail("not_found", "Post not found.", 404);
       post = data;
+      locationId = data.location_id;
+    }
+    let photo: { id: string; location_id: string; storage_path: string; state: string; category: string | null } | null = null;
+    if (typeof b.photo_id === "string") {
+      const { data } = await db.from("photos").select("id, location_id, storage_path, state, category").eq("id", b.photo_id).maybeSingle();
+      if (!data) return fail("not_found", "Photo not found.", 404);
+      photo = data;
       locationId = data.location_id;
     }
     if (typeof b.change_id === "string") {
@@ -152,6 +186,44 @@ Deno.serve(async (req) => {
           await db.from("publications").update({ status: "failed", error: String(err).slice(0, 500) }).eq("id", pub.id);
           await db.from("special_hours").update({ state: "failed" }).eq("id", row.id);
           throw err;
+        }
+      }
+      case "photo_check": {
+        if (!photo || photo.state !== "checking") return fail("bad_input", "This photo was already checked.");
+        if (!(await rateLimit(`photo_check:${loc.id}`, 30, 86400))) return fail("rate_limited", "That's enough photos for today.", 429);
+        const { data: file, error } = await db.storage.from("owner-photos").download(photo.storage_path);
+        if (error || !file) throw error ?? new Error("download_failed");
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        const mime = file.type && file.type.startsWith("image/") ? file.type : "image/jpeg";
+        const r = await checkPhoto(bytes, mime);
+        await db.from("photos").update({ suitable: r.suitable, suitability_note: r.note, category: r.category, state: "draft" }).eq("id", photo.id);
+        return json({ ok: true, ...r });
+      }
+      case "photo_skip": {
+        if (!photo) return fail("bad_input", "Missing photo.");
+        await db.from("photos").update({ state: "skipped" }).eq("id", photo.id).in("state", ["checking", "draft"]);
+        return json({ ok: true });
+      }
+      case "photo_publish": {
+        if (!photo || photo.state !== "draft") return fail("bad_input", "This photo was already handled.");
+        const category = PHOTO_CATEGORIES.includes(String(b.category)) ? String(b.category) : (photo.category ?? "ADDITIONAL");
+        if (loc.status !== "active" || !loc.google_location_id) return fail("not_active", "This business isn't active yet.", 409);
+        const { data: signed, error: se } = await db.storage.from("owner-photos").createSignedUrl(photo.storage_path, 3600);
+        if (se || !signed) throw se ?? new Error("sign_failed");
+        const { data: pub, error } = await db.from("publications").insert({
+          location_id: loc.id, target_type: "photo", target_id: photo.id, payload: { storage_path: photo.storage_path, category },
+          approved_by: user.id, channel: "dashboard", status: "queued",
+        }).select("id").single();
+        if (error) throw error;
+        try {
+          const r = await createMedia(loc.google_account_id!, loc.google_location_id, signed.signedUrl, category);
+          await db.from("publications").update({ status: r.state, google_response: r.response }).eq("id", pub.id);
+          await db.from("photos").update({ state: "posted", category }).eq("id", photo.id);
+          return json({ ok: true, state: r.state });
+        } catch (e) {
+          await db.from("publications").update({ status: "failed", error: String(e).slice(0, 500) }).eq("id", pub.id);
+          await db.from("photos").update({ state: "failed" }).eq("id", photo.id);
+          throw e;
         }
       }
       case "shield_decide": {
