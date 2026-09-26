@@ -120,6 +120,15 @@ export function emailLayout(o: { preheader: string; title: string; bodyHtml: str
 </table></td></tr></table></body></html>`;
 }
 
+// The From address lives in app_settings.email_from (migration 016), so switching sender is one SQL update.
+let fromCache: { value: string; at: number } | null = null;
+async function emailFrom() {
+  if (fromCache && Date.now() - fromCache.at < 300_000) return fromCache.value;
+  const { data } = await admin().from("app_settings").select("value").eq("key", "email_from").maybeSingle();
+  fromCache = { value: (data?.value as string | undefined) || "Kabsi <hello@send.kabsi.co>", at: Date.now() };
+  return fromCache.value;
+}
+
 export async function sendEmail(o: {
   kind: string; to: string; subject: string; html: string; text: string; dedupeKey: string;
   locationId?: string | null; partnerId?: string | null;
@@ -145,7 +154,7 @@ export async function sendEmail(o: {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { authorization: `Bearer ${key}`, "content-type": "application/json", "idempotency-key": o.dedupeKey.slice(0, 256) },
-    body: JSON.stringify({ from: "Kabsi <hello@send.kabsi.co>", reply_to: "hello@kabsi.co", to: [o.to], subject: o.subject, html: o.html, text: o.text }),
+    body: JSON.stringify({ from: await emailFrom(), reply_to: "hello@kabsi.co", to: [o.to], subject: o.subject, html: o.html, text: o.text }),
   });
   const payload = await res.json().catch(() => ({}));
   if (!res.ok) {

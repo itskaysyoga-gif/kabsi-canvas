@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 import { amStaff } from "@/lib/reviews";
 import { PartnersPanel } from "@/components/staff/partners-panel";
+import { OpsPanel } from "@/components/staff/ops-panel";
 
-// Staff workspace: USDT payments to check, partners, leads, every business and offline payments (cash / Whish / OMT / USDT).
+// Staff workspace: USDT payments to check, partners, leads, job health, card codes and orders, every business
+// and offline payments (cash / Whish / OMT / USDT).
 // Payments go through the staff_record_payment RPC, which activates the plan and refreshes the status.
 export const Route = createFileRoute("/_authenticated/staff")({
   head: () => ({ meta: [{ title: "Staff | Kabsi" }, { name: "robots", content: "noindex" }] }),
@@ -59,6 +61,7 @@ function StaffPage() {
         {staff.data ? (
           <>
             <PartnersPanel />
+            <OpsPanel />
             <h2 className="mt-10 text-xl font-bold">Businesses</h2>
             <p className="mt-1 text-sm text-kb-stone">
               Newest first. Record a payment once the money is received.

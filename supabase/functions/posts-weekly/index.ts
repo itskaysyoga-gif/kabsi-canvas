@@ -77,6 +77,7 @@ Deno.serve(async (req) => {
       await captureError("posts-weekly", e, { location_id: raw.id });
     }
   }
-  await jobLog("posts-weekly", true, { checked: locs?.length ?? 0, results: done });
+  // Log only runs that did something (the job runs every 30 minutes).
+  if (Object.keys(done).length) await jobLog("posts-weekly", !Object.values(done).includes("error"), { checked: locs?.length ?? 0, results: done });
   return json({ ok: true, results: done });
 });
