@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { BadgeDollarSign, Eye, Send, Users } from "lucide-react";
+import { BadgeDollarSign, Eye, LayoutGrid, Nfc, Send, Wallet } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,8 +14,8 @@ import { PRICES, pageHead } from "@/lib/site";
 export const Route = createFileRoute("/partners")({
   head: () =>
     pageHead({
-      title: "Kabsi for partners — Wholesale for NFC card sellers",
-      description: `Sell Kabsi with your NFC review cards. $${PRICES.partnerRate} per active business per month, billed monthly in USDT. You set your own price.`,
+      title: "Kabsi for partners | Wholesale AI local SEO for agencies and card sellers",
+      description: `Add Kabsi's AI local SEO engine to what you sell. $${PRICES.partnerRate} per active business per month, billed monthly in USDT. You set the price and keep the margin.`,
       path: "/partners",
     }),
   component: Page,
@@ -25,41 +25,72 @@ function Page() {
   return (
     <PublicLayout>
       <PageHero
-        eyebrow="Partners"
-        title="You sell the card. Kabsi answers the reviews."
-        sub="For people who sell NFC review cards or look after businesses' Google profiles. Add Kabsi to what you sell, set your own price, and pay a small wholesale rate for each business that's live."
+        eyebrow="Partners and agencies"
+        title="Add a high-margin AI local SEO engine to your agency."
+        sub="Bring your clients grounded review replies, weekly keyword posts and a listing guard, with NFC cards if you sell them. You set the retail price and keep everything above a small wholesale rate per live business."
       />
 
       <Section>
         <Eyebrow>What you get</Eyebrow>
-        <H2>A partner workspace built for small sellers.</H2>
-        <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Point icon={<Send />} title="Invite businesses">
-            Send an invite from your workspace, or share your own signup link. Businesses that join
+        <H2>One workspace for all your clients.</H2>
+        <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Point icon={<BadgeDollarSign />} title="Wholesale seats">
+            Pay only for businesses that are live. Setting up, waiting for access or paused costs
+            you nothing.
+          </Point>
+          <Point icon={<LayoutGrid />} title="Every location in one place">
+            Each client's status and card taps for the last 7 and 30 days, side by side.
+          </Point>
+          <Point icon={<Send />} title="Invite in a minute">
+            Send an invite from your workspace, or share your own signup link. Clients who join
             through you are linked to you.
           </Point>
-          <Point icon={<Users />} title="See who's live">
-            Each business's status and card taps for the last 7 and 30 days.
+          <Point icon={<Wallet />} title="Settle in USDT">
+            One invoice on the 1st for the month before. Pay in USDT and paste the transaction ID.
           </Point>
-          <Point icon={<Eye />} title="Their reviews stay theirs">
+          <Point icon={<Eye />} title="Client data stays with the client">
             You never see review text, drafts or replies, and you can't post for them. Owners
-            approve everything themselves.
+            approve everything themselves, which keeps you and them safe.
           </Point>
-          <Point icon={<BadgeDollarSign />} title="One invoice a month">
-            On the 1st, for the month before. Pay in USDT and paste the transaction ID.
+          <Point icon={<Nfc />} title="Supply the cards">
+            Kabsi issues card codes for your stock, so the NFC cards you sell open each client's
+            Google review page.
           </Point>
         </div>
       </Section>
 
-      <Section tone="sand">
+      <Section tone="sand" className="grid items-center gap-12 md:grid-cols-2">
+        <img
+          src="/images/nfc-card-closeup.webp"
+          alt="An acrylic NFC review card with a tap area and a QR code, held in a hand"
+          width={640}
+          height={640}
+          loading="lazy"
+          decoding="async"
+          className="w-full max-w-md rounded-large shadow-kb"
+        />
+        <div>
+          <Eyebrow>Cards plus software</Eyebrow>
+          <H2>Sell more than a card.</H2>
+          <p className="mt-5 text-lg leading-8 text-kb-stone">
+            A card gets a customer to the review page. Kabsi makes sure every review gets a
+            thoughtful reply, the profile gets a fresh post each week, and the owner hears about
+            listing changes. Clients can also use Kabsi fully digitally, with a review link and QR
+            code instead of a card.
+          </p>
+          <p className="mt-3 text-xs text-kb-stone">Current card design shown.</p>
+        </div>
+      </Section>
+
+      <Section>
         <div className="grid gap-10 md:grid-cols-2">
           <div>
             <Eyebrow>Partner pricing</Eyebrow>
             <H2>${PRICES.partnerRate} per active business, per month.</H2>
             <p className="mt-5 text-lg leading-8 text-kb-stone">
               A business counts once it's connected to Google and live on Kabsi. Setting up, waiting
-              for access or paused businesses cost you nothing. You charge your customers whatever
-              you like.
+              for access or paused businesses cost you nothing. You charge your clients whatever you
+              like and keep the difference.
             </p>
           </div>
           <div className="rounded-large bg-kb-carbon p-7 text-kb-white">
@@ -77,7 +108,7 @@ function Page() {
         </div>
       </Section>
 
-      <Section className="grid gap-12 md:grid-cols-[1fr_1.1fr]">
+      <Section tone="sand" className="grid gap-12 md:grid-cols-[1fr_1.1fr]">
         <div>
           <Eyebrow>Apply</Eyebrow>
           <H2>Tell us about you.</H2>
@@ -153,7 +184,7 @@ function LeadForm() {
   return (
     <form
       onSubmit={submit}
-      className="grid gap-4 rounded-large bg-kb-sand p-6 sm:grid-cols-2 sm:p-8"
+      className="grid gap-4 rounded-large bg-kb-white p-6 shadow-kb sm:grid-cols-2 sm:p-8"
     >
       <Field label="Your name" id="l-name">
         <Input

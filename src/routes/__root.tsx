@@ -3,7 +3,7 @@ import { HeadContent, Link, Outlet, Scripts, createRootRouteWithContext, useLoca
 import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { reportError, syncReplayWithPath, telemetryHeadScripts } from "@/lib/telemetry";
+import { reportError, startAnalytics, syncReplayWithPath, telemetryHeadScripts } from "@/lib/telemetry";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { GlobalErrorBoundary } from "@/components/shared/error-boundary";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,6 @@ function RootShell({ children }: { children: ReactNode }) { return <html lang="e
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useLocation({ select: (location) => location.pathname });
-  useEffect(() => { syncReplayWithPath(pathname); }, [pathname]);
+  useEffect(() => { startAnalytics(); syncReplayWithPath(pathname); }, [pathname]);
   return <QueryClientProvider client={queryClient}><AuthProvider><GlobalErrorBoundary><Outlet /></GlobalErrorBoundary></AuthProvider></QueryClientProvider>;
 }

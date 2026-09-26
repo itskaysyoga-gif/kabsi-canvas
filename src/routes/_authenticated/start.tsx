@@ -37,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/start")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "Get set up — Kabsi" },
+      { title: "Get set up | Kabsi" },
       { name: "description", content: "Set up Kabsi for your business." },
       { name: "robots", content: "noindex" },
     ],

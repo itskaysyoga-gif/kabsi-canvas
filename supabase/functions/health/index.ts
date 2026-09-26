@@ -1,4 +1,4 @@
-// health — internal (cron secret). Reports which secrets are set (true/false only, never values)
+// health: internal (cron secret). Reports which secrets are set (true/false only, never values)
 // and whether each external service answers. Used by Claude to verify setup without seeing secrets.
 // Self-contained (no shared imports) so it stays tiny.
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { "content-type": "application/json" } });
@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
   const all = Object.keys(Deno.env.toObject());
   const set: Record<string, boolean> = {};
   for (const name of SECRETS) set[name] = Boolean(Deno.env.get(name));
-  // Secret names that look like ours but don't match exactly (e.g. wrong case) — names only.
+  // Secret names that look like ours but don't match exactly (e.g. wrong case): names only.
   const nearMisses = all.filter((n) => !SECRETS.includes(n) && /anthropic|resend|places|tap|cf_|google/i.test(n));
 
   const checks: Record<string, string> = {};
@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
   const resend = Deno.env.get("RESEND_API_KEY");
   if (resend) {
     const r = await fetch("https://api.resend.com/domains", { headers: { authorization: `Bearer ${resend}` } });
-    checks.resend = r.ok ? "key valid (full access)" : r.status === 401 ? "key rejected" : `sending-only key (${r.status}) — fine for sending`;
+    checks.resend = r.ok ? "key valid (full access)" : r.status === 401 ? "key rejected" : `sending-only key (${r.status}), fine for sending`;
   }
   const places = Deno.env.get("PLACES_API_KEY");
   if (places) {

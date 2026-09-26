@@ -20,8 +20,12 @@ export const FAQ: { q: string; a: string }[] = [
     a: "No. Nobody outside Google can remove a review. Kabsi helps you answer every review calmly, including the hard ones. For 1 and 2 star reviews it emails you a careful draft and no quick Post button, so you read it first.",
   },
   {
-    q: "Will Kabsi get me more reviews or a better rating?",
-    a: "We don't promise that, and nobody honest can. What Kabsi does is make sure every review gets a reply, and the card makes leaving a review one tap for every customer.",
+    q: "Will Kabsi get me more reviews, a better rating or a higher ranking?",
+    a: "We don't promise that, and nobody honest can. Google decides local results by relevance, distance and prominence. Kabsi does the parts you control: every review gets a reply, a keyword-rich post goes up each week you approve one, your details stay accurate, and leaving a review is one tap for every customer.",
+  },
+  {
+    q: "Do I need an NFC card?",
+    a: "No. The card is optional. Every business gets a review link (go.kabsi.co/…) and a printable QR code in the dashboard, so you can use Kabsi 100% digitally.",
   },
   {
     q: "Is Kabsi part of Google?",
@@ -30,6 +34,14 @@ export const FAQ: { q: string; a: string }[] = [
   {
     q: "Can I remove Kabsi's access?",
     a: "Yes, at any time, from your Google profile under People and access. You don't need to ask us.",
+  },
+  {
+    q: "What are the weekly posts?",
+    a: "Once a week Kabsi drafts a short Google post from your business facts, with the phrases customers search for in the first line and a button like Call or Book. It emails you the draft. Nothing is posted until you approve it, and you can switch weekly drafts off.",
+  },
+  {
+    q: "Is my Google data sold or used to train AI?",
+    a: "No. Your Google data is never sold or rented, and it is never used to train AI models. Kabsi uses it only to draft your replies and posts, watch your listing and send your reports.",
   },
   {
     q: "What is Listing Shield?",
@@ -45,7 +57,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "What happens when my plan ends?",
-    a: "Reply drafts, Listing Shield and the weekly report stop. Your card keeps working and still opens your Google review page.",
+    a: "Reply drafts, weekly posts, Listing Shield and the weekly report stop. Your card and review link keep working and still open your Google review page.",
   },
   {
     q: "Can I get a refund?",

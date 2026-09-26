@@ -1,4 +1,4 @@
-// action — the email links (/a/:token). Public: the token is the credential.
+// action: the email links (/a/:token). Public: the token is the credential.
 //   GET  ?t=TOKEN         → what the link does + the review and draft to show (never performs anything)
 //   POST { t, do, text? } → performs it once. do: "post" | "skip" | "handle_myself"
 // "post" publishes exactly the text shown (and possibly edited) on the confirm page (D202).

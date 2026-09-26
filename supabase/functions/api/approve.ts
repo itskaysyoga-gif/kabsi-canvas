@@ -1,4 +1,4 @@
-// approve — dashboard actions on a review. Signed-in members only.
+// approve: dashboard actions on a review. Signed-in members only.
 //   POST { review_id, do: "post", text }            → publishes exactly `text` (D202)
 //   POST { review_id, do: "redraft", instruction }  → new AI version following the owner's instruction
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";

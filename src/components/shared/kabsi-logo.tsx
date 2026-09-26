@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 
 // The official Kabsi mark (KABSI-BRAND.md): black ring, yellow field, off-centre black dot.
-// Geometry copied from kabsi-mark.svg — never redraw it.
+// Geometry copied from kabsi-mark.svg: never redraw it.
 export function KabsiMark({ className }: { className?: string | undefined }) {
   return (
     <svg

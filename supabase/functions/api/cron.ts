@@ -1,4 +1,4 @@
-// cron-tick — internal, every 5 minutes (pg_cron → public.call_internal('cron-tick')).
+// cron-tick: internal, every 5 minutes (pg_cron → public.call_internal('cron-tick')).
 // Each job decides what is due by looking at data, never at the clock alone, and is safe to run twice.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google.ts";
@@ -81,7 +81,7 @@ async function draftJob() {
   return { drafted: await draftPending(10) };
 }
 
-// Job: owner emails — urgent and ≤3★ right away, 4–5★ in the daily digest, one backlog summary.
+// Job: owner emails: urgent and ≤3★ right away, 4–5★ in the daily digest, one backlog summary.
 async function notifyJob() {
   let emails = 0;
   for (const loc of await activeLocations()) {
@@ -101,7 +101,7 @@ async function ratingsJob() {
   return { snapshots: await snapshotRatings(await reportLocations()) };
 }
 
-// Job: Listing Shield (D218) — detect listing changes and alert the owner.
+// Job: Listing Shield (D218): detect listing changes and alert the owner.
 async function shieldJob() {
   return { alerts: await shieldCheck() };
 }

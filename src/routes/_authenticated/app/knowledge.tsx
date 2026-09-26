@@ -6,7 +6,7 @@ import { myLatestLocation } from "@/lib/onboarding";
 
 // The knowledge card: the only facts reply drafts may use (D223). Same form as onboarding step 3.
 export const Route = createFileRoute("/_authenticated/app/knowledge")({
-  head: () => ({ meta: [{ title: "Knowledge — Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Knowledge | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: KnowledgePage,
 });
 

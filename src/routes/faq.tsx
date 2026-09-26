@@ -7,7 +7,7 @@ import { FAQ, faqJsonLd } from "@/lib/faq";
 export const Route = createFileRoute("/faq")({
   head: () =>
     pageHead({
-      title: "Questions — Kabsi",
+      title: "Questions | Kabsi",
       description:
         "Straight answers about Kabsi: approvals, languages, Google access, Listing Shield, the card, payment and refunds.",
       path: "/faq",

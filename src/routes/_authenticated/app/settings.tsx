@@ -10,7 +10,7 @@ import { myLatestLocation } from "@/lib/onboarding";
 // Email settings: extra alert addresses, daily digest hour, time zone, pause (D220).
 // Saved through the membership-checked update_notification_settings RPC.
 export const Route = createFileRoute("/_authenticated/app/settings")({
-  head: () => ({ meta: [{ title: "Settings — Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Settings | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: SettingsPage,
 });
 

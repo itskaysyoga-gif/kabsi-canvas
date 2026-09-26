@@ -1,4 +1,4 @@
-// kabsi-go — the card Worker on go.kabsi.co (SPEC §7, D212, D213, D227, D231).
+// kabsi-go: the card Worker on go.kabsi.co (SPEC §7, D212, D213, D227, D231).
 // Deployed on its own (never by the app's GitHub build). Bindings: KV `STICKERS`.
 // Vars: TAP_FUNCTION_URL, APP_ORIGIN. Secret: TAP_SECRET.
 //   GET /{CODE}      NFC tap  → 302 to the business's Google review page

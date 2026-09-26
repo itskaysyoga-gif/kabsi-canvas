@@ -1,4 +1,4 @@
-// kv-sync — internal (DB trigger on public.cards). Deletes the Worker's cached copy of a card
+// kv-sync: internal (DB trigger on public.cards). Deletes the Worker's cached copy of a card
 // (KV key "s:{CODE}" in namespace STICKERS) so the next tap re-reads the database.
 import { captureError, isInternal, json, log } from "../_shared/kabsi.ts";
 

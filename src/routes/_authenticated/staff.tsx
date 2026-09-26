@@ -11,7 +11,7 @@ import { PartnersPanel } from "@/components/staff/partners-panel";
 // Staff workspace: USDT payments to check, partners, leads, every business and offline payments (cash / Whish / OMT / USDT).
 // Payments go through the staff_record_payment RPC, which activates the plan and refreshes the status.
 export const Route = createFileRoute("/_authenticated/staff")({
-  head: () => ({ meta: [{ title: "Staff — Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Staff | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: StaffPage,
 });
 
@@ -111,7 +111,7 @@ function LocationRow({ row }: { row: Row }) {
         <div className="min-w-0">
           <p className="truncate font-bold">{row.name}</p>
           <p className="text-sm text-kb-stone">
-            {row.status.replace(/_/g, " ")} · step {row.onboarding_step} · {row.country ?? "—"} ·{" "}
+            {row.status.replace(/_/g, " ")} · step {row.onboarding_step} · {row.country ?? "-"} ·{" "}
             {new Date(row.created_at).toLocaleDateString()}
             {row.access_granted_at ? " · Google access ✓" : ""}
           </p>

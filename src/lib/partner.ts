@@ -258,4 +258,4 @@ export const monthName = (d: string) =>
 export const shortDate = (d: string | null) =>
   d
     ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
-    : "—";
+    : "-";

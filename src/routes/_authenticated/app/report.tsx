@@ -6,7 +6,7 @@ import { myLatestLocation } from "@/lib/onboarding";
 
 // Weekly reports (D222): the same facts as the Monday email. Read through RLS (members only).
 export const Route = createFileRoute("/_authenticated/app/report")({
-  head: () => ({ meta: [{ title: "Report — Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Report | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: ReportPage,
 });
 
@@ -89,7 +89,7 @@ function ReportPage() {
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
               <Stat
                 label="Google rating"
-                value={r.rating == null ? "—" : r.rating.toFixed(1)}
+                value={r.rating == null ? "-" : r.rating.toFixed(1)}
                 sub={
                   r.rating_change == null
                     ? r.rating_count != null

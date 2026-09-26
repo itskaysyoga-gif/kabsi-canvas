@@ -1,22 +1,32 @@
 import { useState, type FormEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, Nfc } from "lucide-react";
+import { Copy, Download, Link2, Nfc, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { activateCard, friendlyError, myLatestLocation } from "@/lib/onboarding";
 import { track } from "@/lib/telemetry";
+import { qrSvg } from "@/lib/qr";
 
-// Cards: each opens the business's Google review page for every customer, no filtering (D212).
-// Reads via RLS; activate / rename / switch off go through membership-checked RPCs.
+// Cards and review links: each opens the business's Google review page for every customer, no filtering
+// (D212). A physical card is optional: a review link (go.kabsi.co/CODE) and its printable QR do the same job
+// digitally. Reads via RLS; create / activate / rename / switch off go through membership-checked RPCs.
 export const Route = createFileRoute("/_authenticated/app/cards")({
-  head: () => ({ meta: [{ title: "Cards — Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Cards and links | Kabsi" }, { name: "robots", content: "noindex" }],
+  }),
   component: CardsPage,
 });
 
-type Card = { code: string; status: string; label: string | null; activated_at: string | null };
+type Card = {
+  code: string;
+  kind: string;
+  status: string;
+  label: string | null;
+  activated_at: string | null;
+};
 type Tap = { code: string; source: string; created_at: string };
 const DAY = 86400_000;
 
@@ -25,7 +35,7 @@ async function loadCards(locationId: string) {
   const [cards, taps] = await Promise.all([
     supabase
       .from("cards")
-      .select("code, status, label, activated_at")
+      .select("code, kind, status, label, activated_at")
       .eq("location_id", locationId)
       .order("activated_at"),
     supabase
@@ -51,9 +61,13 @@ function CardsPage() {
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["cards"] });
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">Cards</h1>
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
+        Physical and digital touchpoints
+      </p>
+      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Cards and links</h1>
       <p className="mt-2 text-kb-stone">
-        Each tap or scan opens your Google review page. Every customer sees the same page.
+        Each tap, scan or click opens your Google review page. Every customer sees the same page. A
+        card is optional: a review link and its QR code work without one.
       </p>
       {!location.isLoading && !loc ? (
         <Button asChild className="mt-6">
@@ -61,20 +75,32 @@ function CardsPage() {
         </Button>
       ) : null}
       {data.isLoading ? <p className="mt-6 text-kb-stone">Loading…</p> : null}
-      <div className="mt-7 space-y-4">
-        {data.data?.cards.map((c) => (
-          <CardRow
-            key={c.code}
-            card={c}
-            taps={data.data.taps.filter((t) => t.code === c.code)}
-            onChanged={refresh}
-          />
-        ))}
-        {data.data && !data.data.cards.length ? (
+      {loc ? (
+        <ReviewLinks
+          locationId={loc.id}
+          links={data.data?.cards.filter((c) => c.kind === "link") ?? []}
+          taps={data.data?.taps ?? []}
+          onChanged={refresh}
+        />
+      ) : null}
+      <h2 className="mt-10 text-lg font-bold">NFC cards</h2>
+      <div className="mt-3 space-y-4">
+        {data.data?.cards
+          .filter((c) => c.kind !== "link")
+          .map((c) => (
+            <CardRow
+              key={c.code}
+              card={c}
+              taps={data.data.taps.filter((t) => t.code === c.code)}
+              onChanged={refresh}
+            />
+          ))}
+        {data.data && !data.data.cards.some((c) => c.kind !== "link") ? (
           <div className="rounded-large bg-kb-white p-7 shadow-kb">
             <p className="font-bold">No cards yet.</p>
             <p className="mt-1 text-sm text-kb-stone">
-              Got a Kabsi card? Add it below with the code printed under the QR.
+              Got a Kabsi NFC card? Add it below with the code printed under the QR. You don't need
+              one to use Kabsi.
             </p>
           </div>
         ) : null}
@@ -219,5 +245,154 @@ function AddCard({ locationId, onAdded }: { locationId: string; onAdded: () => u
       </div>
       {msg ? <p className="mt-3 text-sm text-kb-stone">{msg}</p> : null}
     </form>
+  );
+}
+
+// Review links: the digital touchpoint. Share the link anywhere, or print the QR for a counter or menu.
+function ReviewLinks({
+  locationId,
+  links,
+  taps,
+  onChanged,
+}: {
+  locationId: string;
+  links: Card[];
+  taps: Tap[];
+  onChanged: () => unknown;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  async function create() {
+    setBusy(true);
+    setMsg("");
+    const { error } = await supabase.rpc("create_review_link", {
+      p_location: locationId,
+      p_label: null,
+    });
+    setBusy(false);
+    if (error) {
+      setMsg(
+        error.message.includes("too_many_links")
+          ? "You already have 5 links. Reuse one of them."
+          : friendlyError(error),
+      );
+      return;
+    }
+    track("card_activated", { source: "review_link" });
+    onChanged();
+  }
+  return (
+    <section className="mt-8">
+      <h2 className="text-lg font-bold">Review links</h2>
+      <p className="mt-1 text-sm text-kb-stone">
+        Put it in WhatsApp replies, your Instagram bio or receipts, or print the QR code.
+      </p>
+      <div className="mt-3 space-y-4">
+        {links.map((l) => (
+          <LinkRow
+            key={l.code}
+            link={l}
+            taps={taps.filter((t) => t.code === l.code)}
+            onChanged={onChanged}
+          />
+        ))}
+      </div>
+      {links.length < 5 ? (
+        <Button
+          variant={links.length ? "outline" : "default"}
+          className="mt-4"
+          disabled={busy}
+          onClick={() => void create()}
+        >
+          <Link2 />{" "}
+          {busy ? "Creating…" : links.length ? "Create another link" : "Create my review link"}
+        </Button>
+      ) : null}
+      {msg ? <p className="mt-3 text-sm text-kb-red">{msg}</p> : null}
+    </section>
+  );
+}
+
+function LinkRow({ link, taps, onChanged }: { link: Card; taps: Tap[]; onChanged: () => unknown }) {
+  const [msg, setMsg] = useState("");
+  const active = link.status === "active";
+  async function toggle() {
+    const { error } = await supabase.rpc("set_card_active", {
+      p_code: link.code,
+      p_active: !active,
+    });
+    setMsg(error ? "Couldn't change it. Try again." : active ? "Switched off." : "Switched on.");
+    if (!error) onChanged();
+  }
+  const url = `https://go.kabsi.co/${link.code}`;
+  const qrUrl = `${url}?s=q`;
+  const svg = qrSvg(qrUrl, 176);
+  const week = taps.filter((t) => Date.parse(t.created_at) > Date.now() - 7 * DAY).length;
+  function download() {
+    const blob = new Blob([qrSvg(qrUrl, 1024)], { type: "image/svg+xml" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `kabsi-review-qr-${link.code}.svg`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  function print() {
+    const w = window.open("", "_blank", "width=600,height=800");
+    if (!w) return;
+    w.document.write(
+      `<!doctype html><title>Review QR</title><body style="font-family:sans-serif;text-align:center;padding:40px">` +
+        `<p style="font-size:28px;font-weight:700;margin:0 0 20px">Leave us a Google review</p>${qrSvg(qrUrl, 360)}` +
+        `<p style="font-size:18px;margin:16px 0 0">Scan with your phone camera</p></body>`,
+    );
+    w.document.close();
+    w.focus();
+    w.print();
+  }
+  return (
+    <article className="flex flex-col gap-5 rounded-large bg-kb-white p-6 shadow-kb sm:flex-row">
+      <div
+        className="size-44 shrink-0 self-center overflow-hidden rounded-card border border-kb-hairline"
+        role="img"
+        aria-label={`QR code for ${url}`}
+        dangerouslySetInnerHTML={{ __html: svg }}
+      />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="font-bold">{link.label || "Review link"}</p>
+            <p className="text-sm text-kb-stone">{active ? "On" : "Off"}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-bold">{week}</p>
+            <p className="text-xs text-kb-stone">opens, 7 days</p>
+          </div>
+        </div>
+        <div className="mt-4 flex items-center gap-2 rounded-card bg-kb-sand px-4 py-2.5 text-sm">
+          <span className="min-w-0 flex-1 truncate font-mono">{url}</span>
+          <button
+            type="button"
+            className="shrink-0"
+            aria-label="Copy review link"
+            onClick={() =>
+              void navigator.clipboard?.writeText(url).then(() => setMsg("Link copied."))
+            }
+          >
+            <Copy className="size-4" />
+          </button>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button variant="outline" size="compact" onClick={download}>
+            <Download /> Download QR
+          </Button>
+          <Button variant="ghost" size="compact" onClick={print}>
+            <Printer /> Print
+          </Button>
+          <Button variant="ghost" size="compact" onClick={() => void toggle()}>
+            {active ? "Switch off" : "Switch on"}
+          </Button>
+        </div>
+        {msg ? <p className="mt-2 text-sm text-kb-stone">{msg}</p> : null}
+      </div>
+    </article>
   );
 }

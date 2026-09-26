@@ -1,4 +1,4 @@
-// places-search — onboarding step "Find your business". Signed-in users only.
+// places-search: onboarding step "Find your business". Signed-in users only.
 // POST { query } → { places: [{ place_id, name, address, country }] }  (max 5)
 // The Places API key never reaches the browser.
 import { captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";

@@ -12,7 +12,7 @@ import { track } from "@/lib/telemetry";
 // the owner always presses a button, and "Post" sends exactly the text in the box (D202).
 export const Route = createFileRoute("/a/$token")({
   head: () => ({
-    meta: [{ title: "Your review reply — Kabsi" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Your review reply | Kabsi" }, { name: "robots", content: "noindex" }],
   }),
   component: ActionPage,
 });

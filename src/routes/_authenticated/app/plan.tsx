@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 // Lebanon through the team, D211). A USDT payment is a claim that staff confirm; confirming starts or
 // extends the plan (migration 20260926052531). Partner-tagged businesses never see a price (D224).
 export const Route = createFileRoute("/_authenticated/app/plan")({
-  head: () => ({ meta: [{ title: "Plan — Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Plan | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: PlanPage,
 });
 

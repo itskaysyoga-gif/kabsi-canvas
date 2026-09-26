@@ -5,7 +5,7 @@ import { CONTACT_EMAIL, CONTACT_PHONE, pageHead } from "@/lib/site";
 export const Route = createFileRoute("/privacy")({
   head: () =>
     pageHead({
-      title: "Privacy — Kabsi",
+      title: "Privacy | Kabsi",
       description:
         "What Kabsi records, why, where it's kept, and how to delete it. No IP addresses, no advertising cookies, no selling data.",
       path: "/privacy",
@@ -21,6 +21,10 @@ function Page() {
         <p>
           Kabsi is an independent business in Beirut, Lebanon. Contact: {CONTACT_EMAIL}, or{" "}
           {CONTACT_PHONE} (phone or WhatsApp) for a person.
+        </p>
+        <p>
+          Kabsi is not affiliated with, endorsed by or sponsored by Google. Google and Google
+          Business Profile are trademarks of Google LLC.
         </p>
       </section>
 
@@ -72,13 +76,23 @@ function Page() {
             This lets us read your reviews and profile information and publish only what you
             approve.
           </li>
-          <li>We use Google's official Business Profile APIs and the Places API.</li>
           <li>
-            We use Google data only to provide the features you see in Kabsi. We don't sell it,
-            don't use it for advertising, and don't use it to train AI models.
+            We use Google's official Business Profile APIs and the Places API (for your business
+            category and area, used in post drafts).
           </li>
           <li>
-            You can remove our access at any time from your Google profile, without asking us.
+            We use Google data only to provide the features you see in Kabsi. We never sell or rent
+            it, never use it for advertising, and never use it to train AI models.
+          </li>
+          <li>
+            Google access is held server-side only. It never reaches your browser or anyone
+            else&apos;s.
+          </li>
+          <li>
+            You can remove our access at any time, without asking us: on your Business Profile, open{" "}
+            <b>Menu</b>, then <b>Business Profile settings</b>, then <b>People and access</b>,
+            select <b>hello@kabsi.co</b> and choose <b>Remove</b>. Kabsi stops reading and posting
+            at once.
           </li>
         </ul>
       </section>
@@ -86,7 +100,14 @@ function Page() {
       <section>
         <h2>How drafts are written</h2>
         <ul>
-          <li>Review text and your business facts are sent to Anthropic's API to draft a reply.</li>
+          <li>
+            Review text and your business facts are sent to Anthropic's API to draft replies and
+            posts. Anthropic does not use this data to train its models.
+          </li>
+          <li>
+            For post drafts, Kabsi may also use your category and area, phrases from your reviews,
+            and (once connected) the search terms Google reports for your profile.
+          </li>
           <li>
             Photos you upload are sent to Anthropic's API to check they're suitable for Google.
           </li>
@@ -111,7 +132,7 @@ function Page() {
           <li>Supabase (database, sign-in and file storage), Frankfurt, Germany.</li>
           <li>Cloudflare (card links) and Lovable (hosting the website and app).</li>
           <li>Resend (sending email) and Anthropic (writing drafts and checking photos).</li>
-          <li>Sentry (error reports, no review content).</li>
+          <li>Sentry (error reports, no review content, no IP addresses).</li>
           <li>
             PostHog (visit statistics). Screen recordings are only made on our public pages, never
             inside your dashboard, and events never contain review text, names or email addresses.
@@ -121,15 +142,20 @@ function Page() {
 
       <section>
         <h2>What we never do</h2>
-        <p>We don't sell your data, and we don't send you marketing emails without asking.</p>
+        <p>
+          We don't sell or rent your data, we don't use it to train AI models, and we don't send you
+          marketing emails without asking.
+        </p>
       </section>
 
       <section>
         <h2>Deleting</h2>
         <p>
-          Email {CONTACT_EMAIL} and we delete your business data, including reviews, drafts and
-          photos. Payment records are kept where the law requires. Tap records hold no personal
-          information.
+          Email {CONTACT_EMAIL} from your account email and we delete your business data, including
+          reviews, drafts, posts and photos, within 30 days, and confirm by email. Payment records
+          are kept where the law requires. Tap records hold no personal information. Removing Kabsi
+          from your Google profile stops access but doesn't delete what we hold, so email us for
+          that.
         </p>
       </section>
 

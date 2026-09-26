@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 // Partner workspace (Phase 9, D210): invite businesses, see status and tap counts (never review text),
 // cards, monthly invoices paid in USDT.
 export const Route = createFileRoute("/_authenticated/partner")({
-  head: () => ({ meta: [{ title: "Partner — Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Partner | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: PartnerPage,
 });
 

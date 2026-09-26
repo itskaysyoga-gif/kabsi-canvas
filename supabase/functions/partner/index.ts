@@ -1,4 +1,4 @@
-// partner — Phase 9 (D239). All rules live in membership-checked RPCs (migration 20260926050830); this function
+// partner: Phase 9 (D239). All rules live in membership-checked RPCs (migration 20260926050830); this function
 // only calls them as the signed-in user and sends the emails around them.
 //   POST /partner/invite   partner member  { partner_id, email, name? }        → invite row + email to the business
 //   POST /partner/claim    partner member  { invoice_id, network, tx_ref }     → USDT claim + alert to hello@kabsi.co

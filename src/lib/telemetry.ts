@@ -3,7 +3,7 @@
 //
 // Rules (KABSI-SPEC D219):
 // - Session replay only on public marketing pages. Never on /app, /partner, /staff, /start,
-//   /login, /a/*, /activate/* — those can show review text, names or emails.
+//   /login, /a/*, /activate/*: those can show review text, names or emails.
 // - Event properties carry ids, country, source, plan or channel only. Never review text,
 //   reviewer names or email addresses.
 // - People are identified by their Supabase user id only.
@@ -30,6 +30,7 @@ declare global {
     Sentry?: SentryLike;
     posthog?: PostHogLike;
     sentryOnLoad?: () => void;
+    __kabsiStartAnalytics?: () => void;
   }
 }
 
@@ -56,9 +57,15 @@ const bootScript = `
   window.__kabsiEnv = env;
   window.sentryOnLoad = function(){
     Sentry.init({ environment: env, sendDefaultPii: false, tracesSampleRate: 0,
+      beforeSend: function(event){ if (event.user) { event.user = event.user.id ? { id: event.user.id } : undefined; }
+        if (event.request && event.request.headers) { delete event.request.headers["X-Forwarded-For"]; delete event.request.cookies; } return event; },
       ignoreErrors: ["ResizeObserver loop limit exceeded", "ResizeObserver loop completed with undelivered notifications"] });
   };
   if (env === "local") return;
+  // PostHog starts only after React has hydrated the page (startAnalytics in __root): anything it inserts
+  // into the DOM earlier makes hydration fail (Sentry KABSI-WEB-1, 26 Sep 2026).
+  window.__kabsiStartAnalytics = function(){
+  if (window.__kabsiAnalyticsStarted) return; window.__kabsiAnalyticsStarted = true;
   !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
   posthog.init(${JSON.stringify(POSTHOG_KEY)}, {
     api_host: ${JSON.stringify(POSTHOG_HOST)},
@@ -67,8 +74,10 @@ const bootScript = `
     disable_session_recording: true,
     mask_all_text: false,
     session_recording: { maskAllInputs: true },
-    property_denylist: ["$el_text"]
+    property_denylist: ["$el_text"],
+    disable_surveys: true
   });
+  };
 })();`;
 
 export const telemetryHeadScripts = [
@@ -79,6 +88,18 @@ export const telemetryHeadScripts = [
     async: true, // never block the first paint; sentryOnLoad initialises it when it arrives
   },
 ];
+
+// Called once from the root component after hydration. Replays and the pending user id apply after it.
+let pendingUser: string | null = null;
+export function startAnalytics() {
+  if (typeof window === "undefined") return;
+  try {
+    window.__kabsiStartAnalytics?.();
+    if (pendingUser) window.posthog?.identify?.(pendingUser);
+  } catch {
+    /* ignore */
+  }
+}
 
 export function reportError(error: unknown, context: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;
@@ -128,6 +149,7 @@ export function track(event: KabsiEvent, properties: SafeProps = {}) {
 
 export function identify(userId: string | null) {
   if (typeof window === "undefined") return;
+  pendingUser = userId;
   try {
     if (userId) {
       window.posthog?.identify?.(userId);

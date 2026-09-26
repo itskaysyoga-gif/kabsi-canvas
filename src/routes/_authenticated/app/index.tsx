@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation, type Location } from "@/lib/onboarding";
 import {
+  daysSince,
   daysUntil,
   loadDashboard,
   PLAN_NAME,
@@ -28,7 +29,7 @@ import { cn } from "@/lib/utils";
 
 // Home: one calm page that says what needs the owner now, then how the week looks. Facts only (§3, D222).
 export const Route = createFileRoute("/_authenticated/app/")({
-  head: () => ({ meta: [{ title: "Home — Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Home | Kabsi" }, { name: "robots", content: "noindex" }] }),
   // A partner with no business of their own goes to the partner workspace instead.
   beforeLoad: async () => {
     try {
@@ -47,7 +48,7 @@ export const Route = createFileRoute("/_authenticated/app/")({
 const shortDate = (d: string | null) =>
   d
     ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
-    : "—";
+    : "-";
 
 function greeting() {
   const h = new Date().getHours();
@@ -301,7 +302,7 @@ function Active({ d }: { d: Dashboard }) {
       <div className="mt-3 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <Tile
           label="Google rating"
-          value={d.rating != null ? d.rating.toFixed(1) : "—"}
+          value={d.rating != null ? d.rating.toFixed(1) : "-"}
           icon={<Star className="fill-kb-yellow text-kb-yellow" />}
           sub={
             d.rating == null
@@ -317,7 +318,7 @@ function Active({ d }: { d: Dashboard }) {
         <Tile label="New reviews" value={String(d.newReviews7d)} icon={<MessageSquareText />} />
         <Tile
           label="Replied"
-          value={d.newReviews7d ? `${d.replied7d} of ${d.newReviews7d}` : "—"}
+          value={d.newReviews7d ? `${d.replied7d} of ${d.newReviews7d}` : "-"}
           icon={<Check />}
           sub={d.newReviews7d ? "new reviews this week" : "No new reviews this week"}
         />
@@ -328,6 +329,8 @@ function Active({ d }: { d: Dashboard }) {
           sub={`${d.taps30d} in the last 30 days`}
         />
       </div>
+
+      <ProfileHealth d={d} />
 
       <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         {/* Latest reviews */}
@@ -356,19 +359,6 @@ function Active({ d }: { d: Dashboard }) {
 
         {/* Status column */}
         <div className="space-y-5">
-          <StatusCard
-            icon={d.openChanges ? <ShieldAlert /> : <ShieldCheck />}
-            title="Listing Shield"
-            to="/app/shield"
-            line={
-              d.openChanges
-                ? "A change to your listing needs your decision."
-                : d.shieldWatching
-                  ? "Watching your name, phone, address, hours, website and categories."
-                  : "Starts watching after the first check."
-            }
-            dot={d.openChanges ? "alert" : d.shieldWatching ? "ok" : "idle"}
-          />
           <StatusCard
             icon={<CreditCard />}
             title={d.plan ? (PLAN_NAME[d.plan.kind] ?? "Kabsi Pro") : "Your plan"}
@@ -422,6 +412,99 @@ function Active({ d }: { d: Dashboard }) {
         />
       </div>
     </>
+  );
+}
+
+// Local SEO health: the facts Google's own guidance points to (answer reviews, keep the profile
+// current and accurate). Plain facts with a next step, no made-up score (D240).
+function ProfileHealth({ d }: { d: Dashboard }) {
+  const rate = d.reviews90d ? Math.round((d.answered90d / d.reviews90d) * 100) : null;
+  const postDays = daysSince(d.lastPostAt);
+  const rows: {
+    key: string;
+    icon: ReactNode;
+    label: string;
+    value: string;
+    note: string;
+    ok: boolean;
+    to: string;
+  }[] = [
+    {
+      key: "replies",
+      icon: <MessageSquareText />,
+      label: "Reviews answered",
+      value: rate == null ? "-" : `${rate}%`,
+      note:
+        rate == null
+          ? "No reviews in the last 90 days"
+          : `${d.answered90d} of ${d.reviews90d} in the last 90 days`,
+      ok: rate == null || rate >= 90,
+      to: "/app/inbox",
+    },
+    {
+      key: "posts",
+      icon: <Newspaper />,
+      label: "Last Google post",
+      value: postDays == null ? "None yet" : postDays === 0 ? "Today" : `${postDays}d ago`,
+      note:
+        postDays != null && postDays <= 7
+          ? "Your profile looks active"
+          : "A post a week keeps it fresh",
+      ok: postDays != null && postDays <= 7,
+      to: "/app/posts",
+    },
+    {
+      key: "shield",
+      icon: d.openChanges ? <ShieldAlert /> : <ShieldCheck />,
+      label: "Profile guard",
+      value: d.openChanges ? "Needs you" : d.shieldWatching ? "Watching" : "Starting",
+      note: d.openChanges
+        ? "A change to your listing is waiting for your decision"
+        : "Name, phone, address, hours, website, category",
+      ok: !d.openChanges,
+      to: "/app/shield",
+    },
+    {
+      key: "taps",
+      icon: <CreditCard />,
+      label: "Review link taps",
+      value: String(d.taps7d),
+      note: `Last 7 days · ${d.taps30d} in 30 days`,
+      ok: true,
+      to: "/app/cards",
+    },
+  ];
+  return (
+    <section className="mt-8 rounded-large bg-kb-white p-6 shadow-kb">
+      <h2 className="text-lg font-bold">Profile health</h2>
+      <p className="mt-1 text-sm text-kb-stone">
+        Google advises keeping your details complete and accurate and answering reviews. Regular
+        posts show customers you're active.
+      </p>
+      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+        {rows.map((r) => (
+          <li key={r.key}>
+            <Link
+              to={r.to}
+              className="flex items-center gap-3 rounded-card border border-kb-hairline p-4 transition-colors hover:bg-kb-sand/50 [&_svg]:size-5 [&_svg]:shrink-0"
+            >
+              <span className={r.ok ? "text-kb-stone" : "text-kb-black"}>{r.icon}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-medium text-kb-stone">{r.label}</span>
+                <span className="block truncate text-xs text-kb-stone">{r.note}</span>
+              </span>
+              <span className="flex items-center gap-2 text-right font-bold">
+                {r.value}
+                <span
+                  aria-hidden
+                  className={cn("size-2 rounded-full", r.ok ? "bg-kb-green" : "bg-kb-yellow")}
+                />
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

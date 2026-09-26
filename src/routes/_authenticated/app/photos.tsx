@@ -10,7 +10,7 @@ import { track } from "@/lib/telemetry";
 
 // Photos: the owner uploads, Kabsi checks the photo, the owner picks a category and posts it (D202).
 export const Route = createFileRoute("/_authenticated/app/photos")({
-  head: () => ({ meta: [{ title: "Photos — Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Photos | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: PhotosPage,
 });
 

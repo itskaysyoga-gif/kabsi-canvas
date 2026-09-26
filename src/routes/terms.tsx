@@ -5,7 +5,7 @@ import { CONTACT_EMAIL, CONTACT_PHONE, PRICES, pageHead } from "@/lib/site";
 export const Route = createFileRoute("/terms")({
   head: () =>
     pageHead({
-      title: "Terms — Kabsi",
+      title: "Terms | Kabsi",
       description:
         "Kabsi's terms in plain words: what we do, what we don't promise, your approval, prices, refunds and fair use.",
       path: "/terms",
@@ -24,8 +24,12 @@ function Page() {
             edit or skip it, watches your listing for changes, and sends a weekly report.
           </li>
           <li>
-            Optional tools you approve item by item: Google posts, special hours and photos. And an
-            optional NFC + QR card that opens your Google review page.
+            Tools you approve item by item: Google posts (including a weekly draft you can switch
+            off), special hours and photos.
+          </li>
+          <li>
+            A review link and QR code, and an optional NFC card, that open your Google review page
+            for every customer.
           </li>
         </ul>
       </section>
@@ -41,7 +45,12 @@ function Page() {
             Listing Shield alerts you and lets you put your details back. It can't lock your
             listing.
           </li>
-          <li>We are not part of Google and are not endorsed by Google.</li>
+          <li>
+            We are not part of Google and are not affiliated with, endorsed or sponsored by Google.
+          </li>
+          <li>
+            We don't use review gating: every customer is sent to the same Google review page.
+          </li>
         </ul>
       </section>
 
@@ -50,7 +59,7 @@ function Page() {
         <ul>
           <li>
             Nothing is published to your Google Business Profile unless you approve that exact
-            content. There is no automatic mode.
+            content. There is no automatic mode, including for weekly post drafts.
           </li>
           <li>You are responsible for what you approve.</li>
         </ul>

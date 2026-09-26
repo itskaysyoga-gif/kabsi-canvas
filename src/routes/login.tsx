@@ -14,7 +14,7 @@ const searchSchema = z.object({ next: z.string().optional().catch(undefined) });
 function safeNext(next?: string) { return next?.startsWith("/") && !next.startsWith("//") ? next : "/app"; }
 export const Route = createFileRoute("/login")({
   validateSearch: searchSchema,
-  head: () => ({ meta: [{ title: "Log in — Kabsi" }, { name: "description", content: "Log in to Kabsi with a secure email code." }, { property: "og:title", content: "Log in — Kabsi" }, { property: "og:description", content: "Log in to Kabsi with a secure email code." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
+  head: () => ({ meta: [{ title: "Log in | Kabsi" }, { name: "description", content: "Log in to Kabsi with a secure email code." }, { property: "og:title", content: "Log in | Kabsi" }, { property: "og:description", content: "Log in to Kabsi with a secure email code." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: LoginPage,
 });
 function LoginPage() {

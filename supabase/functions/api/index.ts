@@ -1,4 +1,4 @@
-// api — one Edge Function, three routes (one deploy keeps the shared code identical everywhere):
+// api: one Edge Function, three routes (one deploy keeps the shared code identical everywhere):
 //   /api/cron-tick  internal, pg_cron every 5 min (x-cron-secret)
 //   /api/action     public, email action links (the token is the credential)
 //   /api/approve    signed-in members (checked inside with the user's JWT)

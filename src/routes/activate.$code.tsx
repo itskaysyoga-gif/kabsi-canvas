@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 // Reached from go.kabsi.co/{CODE} when a card isn't linked to a business yet.
 export const Route = createFileRoute("/activate/$code")({
   head: () => ({
-    meta: [{ title: "Set up this card — Kabsi" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Set up this card | Kabsi" }, { name: "robots", content: "noindex" }],
   }),
   component: ActivatePage,
 });

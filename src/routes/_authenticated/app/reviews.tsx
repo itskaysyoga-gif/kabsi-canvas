@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 // Every review Kabsi has seen for this business, newest first, with its reply status. Replying happens in the Inbox.
 export const Route = createFileRoute("/_authenticated/app/reviews")({
-  head: () => ({ meta: [{ title: "Reviews — Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Reviews | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: ReviewsPage,
 });
 

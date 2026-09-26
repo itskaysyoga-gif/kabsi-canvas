@@ -153,7 +153,7 @@ async function reviewBlock(loc: Loc, r: PendingReview, userId: string | null, wi
     const open = await mk("open");
     return {
       html: head + reviewText + `<p style="margin:0 0 16px 0;">A reply couldn't be safely drafted for this one. Write your own reply in Kabsi, or ask us.</p><p style="margin:0;">${link(open, "Open in Kabsi")}</p>`,
-      text: `${r.star_rating}/5 — no safe draft. Open: ${open}`,
+      text: `${r.star_rating}/5: no safe draft. Open: ${open}`,
     };
   }
   if (r.urgency === "urgent" && !withPost) {

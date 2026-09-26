@@ -19,7 +19,7 @@ import { track } from "@/lib/telemetry";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/app/inbox")({
-  head: () => ({ meta: [{ title: "Inbox — Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Inbox | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: InboxPage,
 });
 
@@ -104,7 +104,10 @@ function InboxPage() {
 function Shell({ sub, children }: { sub?: string; children: ReactNode }) {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">To reply</h1>
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
+        Grounded AI drafts · one-tap approval
+      </p>
+      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">To reply</h1>
       {sub ? <p className="mt-2 text-kb-stone">{sub}</p> : null}
       <div className="mt-7">{children}</div>
     </div>

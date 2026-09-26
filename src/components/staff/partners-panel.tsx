@@ -57,7 +57,7 @@ export function PartnersPanel() {
                   ? `Founding · ${money(p.rate_usd)} until ${shortDate(p.price_locked_until)}`
                   : `${money(p.rate_usd)} per location`}{" "}
                 · {p.contact_email ?? "no email"}
-                {p.instagram ? ` · ${p.instagram}` : ""} · {p.country ?? "—"} ·{" "}
+                {p.instagram ? ` · ${p.instagram}` : ""} · {p.country ?? "-"} ·{" "}
                 {p.partner_members.length
                   ? `${p.partner_members.length} signed in`
                   : "hasn't signed in yet"}

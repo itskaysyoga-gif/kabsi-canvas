@@ -12,7 +12,7 @@ import { track } from "@/lib/telemetry";
 // Special hours: holidays, closures, late nights. The owner confirms the exact dates and times before
 // anything changes on Google (D202). Regular weekly hours are not changed here.
 export const Route = createFileRoute("/_authenticated/app/hours")({
-  head: () => ({ meta: [{ title: "Hours — Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Hours | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: HoursPage,
 });
 

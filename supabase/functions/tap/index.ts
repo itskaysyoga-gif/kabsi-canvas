@@ -1,4 +1,4 @@
-// tap — called only by the go.kabsi.co Worker (header x-kabsi-secret = TAP_SECRET).
+// tap: called only by the go.kabsi.co Worker (header x-kabsi-secret = TAP_SECRET).
 //   GET  ?code=ABC234  → { status, destination, business_id }   (KV miss: database is the source of truth)
 //   POST { code, source, country, device, is_bot }  → 204, one row in public.taps
 // No IP address is ever received or stored.

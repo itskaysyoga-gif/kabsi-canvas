@@ -1,4 +1,4 @@
-// lead — public form on /partners (and later a business contact form).
+// lead: public form on /partners (and later a business contact form).
 // POST { kind?, name, email, instagram?, country?, volume?, message?, website? }
 // `website` is a honeypot: humans never fill it. Rate limit uses a daily-salted hash, never the raw IP.
 import { admin, captureError, CORS, emailLayout, esc, fail, json, rateLimit, sendEmail, sha256Hex } from "../_shared/kabsi.ts";

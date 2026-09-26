@@ -201,3 +201,39 @@ export async function createMedia(accountId: string, locationId: string, sourceU
   });
   return { state: "live" as const, response: { name: created.name ?? null, googleUrl: created.googleUrl ?? null } };
 }
+
+// ─── Keyword sources for posts (read-only).
+// Search terms people used to find the profile (Business Profile Performance API). Live only: mock has none.
+export async function searchKeywords(locationId: string): Promise<{ keyword: string; count: number }[]> {
+  if (googleMode() === "mock") return [];
+  const end = new Date(), start = new Date(end.getFullYear(), end.getMonth() - 3, 1);
+  const m = (d: Date, k: string) => `monthlyRange.${k}.year=${d.getFullYear()}&monthlyRange.${k}.month=${d.getMonth() + 1}`;
+  const data = await g(`https://businessprofileperformance.googleapis.com/v1/${locationId}/searchkeywords/impressions/monthly?${m(start, "startMonth")}&${m(end, "endMonth")}&pageSize=50`);
+  type Row = { searchKeyword?: string; insightsValue?: { value?: string; threshold?: string } };
+  return ((data.searchKeywordsCounts ?? []) as Row[])
+    .map((r) => ({ keyword: String(r.searchKeyword ?? "").trim(), count: Number(r.insightsValue?.value ?? r.insightsValue?.threshold ?? 0) }))
+    .filter((r) => r.keyword)
+    .sort((a, b) => b.count - a.count);
+}
+
+// Category and area from the public Places API (works before the GBP API grant).
+export async function placeCategory(placeId: string) {
+  const key = Deno.env.get("PLACES_API_KEY");
+  if (!key) return null;
+  const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
+    headers: { "x-goog-api-key": key, "x-goog-fieldmask": "primaryType,primaryTypeDisplayName,types,addressComponents" },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(`places ${res.status}: ${JSON.stringify(data).slice(0, 200)}`);
+  type Comp = { longText?: string; types?: string[] };
+  const comps = (data.addressComponents ?? []) as Comp[];
+  const pick = (t: string) => comps.find((c) => c.types?.includes(t))?.longText ?? null;
+  // Some places have no primaryType: fall back to the first specific type ("meal_delivery" → "meal delivery").
+  const generic = ["point_of_interest", "establishment", "store", "food"];
+  const type = (data.primaryType as string | undefined) ?? ((data.types ?? []) as string[]).find((t) => !generic.includes(t)) ?? null;
+  return {
+    category: type,
+    category_label: (data.primaryTypeDisplayName?.text as string | undefined) ?? (type ? type.replace(/_/g, " ") : null),
+    area: pick("neighborhood") ?? pick("sublocality_level_1") ?? pick("sublocality") ?? pick("locality") ?? pick("administrative_area_level_2"),
+  };
+}

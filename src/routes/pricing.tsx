@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/pricing")({
   head: () =>
     pageHead({
-      title: "Pricing — Kabsi",
+      title: "Pricing | Kabsi",
       description: `Kabsi Pro: $${PRICES.pro6} for 6 months or $${PRICES.pro12} for 12 months, card included. Card only: $${PRICES.card}. Paid once, refundable within 14 days.`,
       path: "/pricing",
       jsonLd: [PRODUCT_LD],
@@ -19,12 +19,13 @@ export const Route = createFileRoute("/pricing")({
 });
 
 const PRO = [
-  "A drafted reply for every new Google review, in the reviewer's language",
-  "Post, edit or skip from your email or dashboard",
-  "Listing Shield: alert and one-tap revert",
-  "Google posts, photos and special hours, drafted for you",
-  "Monday report",
-  "One Kabsi card included",
+  "Grounded AI reply for every new Google review, in the reviewer's language",
+  "One-tap approval from your email or dashboard",
+  "A weekly keyword post drafted for you, with an action button",
+  "Listing Shield: change alerts and one-tap revert",
+  "Photos checked and special hours set in a minute",
+  "Profile health on your dashboard and a Monday report",
+  "Review link and printable QR code, plus one NFC card",
 ];
 
 function Page() {
@@ -52,11 +53,11 @@ function Page() {
             features={PRO}
           />
           <Plan
-            name="Card only"
+            name="NFC card only"
             price={PRICES.card}
             per="One-time"
             features={[
-              "NFC chip and QR code",
+              "Acrylic card with NFC chip and QR code",
               "Opens your Google review page in one tap",
               "Same page for every customer, no filtering",
               "Keeps working for good",
@@ -91,13 +92,16 @@ function Page() {
               Kabsi Pro is refundable in full within 14 days of the plan starting. Cards aren't.
             </Fact>
             <Fact>
-              When a plan ends, reply drafts, Listing Shield and reports stop. Your card keeps
-              working.
+              When a plan ends, reply drafts, weekly posts, Listing Shield and reports stop. Your
+              card and review link keep working.
             </Fact>
             <Fact>
               Renewing early adds the new period after the current one. You don't lose days.
             </Fact>
             <Fact>One plan covers one Google profile.</Fact>
+            <Fact>
+              The NFC card is optional. You can use Kabsi fully with a review link and QR code.
+            </Fact>
           </ul>
         </div>
       </Section>

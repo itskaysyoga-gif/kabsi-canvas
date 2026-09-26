@@ -13,7 +13,7 @@ import { track } from "@/lib/telemetry";
 // Google posts (D217): the owner says what's new, Kabsi drafts, the owner edits and posts. Nothing
 // goes to Google without the Post click, and it posts exactly the text in the box (D202).
 export const Route = createFileRoute("/_authenticated/app/posts")({
-  head: () => ({ meta: [{ title: "Posts — Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Posts | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: PostsPage,
 });
 
@@ -23,20 +23,25 @@ type Post = {
   body: string | null;
   cta_type: string | null;
   state: string;
+  source: string;
+  keywords: string[] | null;
   created_at: string;
 };
+// Buttons Google accepts on a post. "Call" uses the phone number on the profile.
 const CTA_LABEL: Record<string, string> = {
-  CALL: "Call",
+  CALL: "Call now",
   BOOK: "Book",
   ORDER: "Order online",
+  SHOP: "Shop",
   LEARN_MORE: "Learn more",
-  GET_DIRECTIONS: "Get directions",
+  SIGN_UP: "Sign up",
 };
+type Keyword = { keyword: string; source: "search" | "category" | "reviews" };
 
 async function loadPosts(locationId: string): Promise<Post[]> {
   const { data, error } = await supabase
     .from("gbp_posts")
-    .select("id, owner_input, body, cta_type, state, created_at")
+    .select("id, owner_input, body, cta_type, state, source, keywords, created_at")
     .eq("location_id", locationId)
     .order("created_at", { ascending: false })
     .limit(30);
@@ -58,9 +63,10 @@ function PostsPage() {
   const done = (posts.data ?? []).filter((p) => p.state !== "draft");
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">Posts</h1>
+      <h1 className="font-display text-4xl leading-none sm:text-5xl">Google Maps keyword posts</h1>
       <p className="mt-2 text-kb-stone">
-        Share what's new on your Google profile. Tell Kabsi in a sentence, and it writes the post.
+        Regular posts keep your profile fresh. Tell Kabsi what's new in a sentence, or let it draft
+        one each week from your facts. Nothing is posted until you press Post.
       </p>
       {!location.isLoading && !loc ? (
         <Button asChild className="mt-6">
@@ -70,7 +76,12 @@ function PostsPage() {
       {loc && loc.status !== "active" ? (
         <p className="mt-6 text-kb-stone">Posts start once your business is active.</p>
       ) : null}
-      {loc && loc.status === "active" ? <NewPost locationId={loc.id} onCreated={refresh} /> : null}
+      {loc && loc.status === "active" ? (
+        <>
+          <WeeklyToggle locationId={loc.id} />
+          <NewPost locationId={loc.id} onCreated={refresh} />
+        </>
+      ) : null}
       <div className="mt-7 space-y-5">
         {drafts.map((p) => (
           <DraftCard key={p.id} post={p} onChanged={refresh} />
@@ -89,6 +100,7 @@ function PostsPage() {
                       ? "Skipped"
                       : "Not posted"}{" "}
                   · {new Date(p.created_at).toLocaleDateString()}
+                  {p.source === "auto" ? " · weekly draft" : ""}
                 </p>
                 <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-6">
                   {p.body}
@@ -109,6 +121,30 @@ function NewPost({ locationId, onCreated }: { locationId: string; onCreated: () 
   const [url, setUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [ideas, setIdeas] = useState<Keyword[] | null>(null);
+  const [ideasBusy, setIdeasBusy] = useState(false);
+  const chosen = keywords
+    .split(",")
+    .map((k) => k.trim().toLowerCase())
+    .filter(Boolean);
+  async function suggest() {
+    setIdeasBusy(true);
+    setErr("");
+    try {
+      const r = await contentCall<{ keywords: Keyword[] }>({
+        do: "keyword_suggest",
+        location_id: locationId,
+      });
+      setIdeas(r.keywords);
+    } catch (x) {
+      setErr(x instanceof Error ? x.message : "Couldn't load suggestions.");
+    }
+    setIdeasBusy(false);
+  }
+  function addKeyword(k: string) {
+    if (chosen.includes(k.toLowerCase()) || chosen.length >= 5) return;
+    setKeywords(chosen.length ? `${keywords.replace(/,\s*$/, "")}, ${k}` : k);
+  }
   async function submit(e: FormEvent) {
     e.preventDefault();
     setErr("");
@@ -159,6 +195,46 @@ function NewPost({ locationId, onCreated }: { locationId: string; onCreated: () 
         placeholder="e.g. bakery in Hamra, sourdough"
         className="mt-2"
       />
+      <p className="mt-2 text-xs text-kb-stone">
+        Kabsi works the best fit into the first line of the post, where Google shows it.
+      </p>
+      {ideas === null ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="compact"
+          className="mt-1 px-0 underline"
+          disabled={ideasBusy}
+          onClick={() => void suggest()}
+        >
+          {ideasBusy ? "Looking…" : "Suggest phrases"}
+        </Button>
+      ) : ideas.length ? (
+        <div className="mt-2 flex flex-wrap gap-2" aria-label="Suggested phrases">
+          {ideas.map((k) => (
+            <button
+              key={k.keyword}
+              type="button"
+              onClick={() => addKeyword(k.keyword)}
+              disabled={chosen.includes(k.keyword.toLowerCase())}
+              title={
+                k.source === "search"
+                  ? "People searched this and found you on Google"
+                  : k.source === "reviews"
+                    ? "Customers mention this in reviews"
+                    : "Your category and area"
+              }
+              className="rounded-full border border-kb-hairline bg-kb-sand px-3 py-1 text-sm disabled:opacity-40"
+            >
+              + {k.keyword}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-2 text-sm text-kb-stone">
+          No suggestions yet. They grow as reviews come in.
+        </p>
+      )}
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div>
           <Label htmlFor="cta" className="text-sm">
@@ -236,13 +312,20 @@ function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }
   }
   return (
     <article className="rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
-      <p className="text-sm text-kb-stone">You said: “{post.owner_input}”</p>
+      <p className="text-sm text-kb-stone">
+        {post.source === "auto"
+          ? "This week's draft, written from your business facts."
+          : `You said: “${post.owner_input}”`}
+      </p>
+      {post.keywords?.length ? (
+        <p className="mt-1 text-xs text-kb-stone">Search phrases: {post.keywords.join(", ")}</p>
+      ) : null}
       <Label htmlFor={`post-${post.id}`} className="mt-4 block font-bold">
         Your post
       </Label>
       <p className="mt-1 text-sm text-kb-stone">
         Change anything you like. Kabsi posts exactly this text
-        {post.cta_type ? ` with a “${CTA_LABEL[post.cta_type]}” button` : ""}.
+        {post.cta_type ? ` with a “${CTA_LABEL[post.cta_type] ?? post.cta_type}” button` : ""}.
       </p>
       <Textarea
         id={`post-${post.id}`}
@@ -285,5 +368,54 @@ function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }
         </Button>
       </div>
     </article>
+  );
+}
+
+// Weekly draft switch (set_auto_posts RPC, members only). The draft still waits for the owner.
+function WeeklyToggle({ locationId }: { locationId: string }) {
+  const queryClient = useQueryClient();
+  const setting = useQuery({
+    queryKey: ["auto-posts", locationId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("locations")
+        .select("auto_posts")
+        .eq("id", locationId)
+        .single();
+      if (error) throw new Error(error.message);
+      return (data as { auto_posts: boolean }).auto_posts;
+    },
+  });
+  const [busy, setBusy] = useState(false);
+  const on = setting.data ?? true;
+  async function toggle() {
+    setBusy(true);
+    const { error } = await supabase.rpc("set_auto_posts", {
+      p_location: locationId,
+      p_enabled: !on,
+    });
+    if (!error) await queryClient.invalidateQueries({ queryKey: ["auto-posts", locationId] });
+    setBusy(false);
+  }
+  return (
+    <div className="mt-7 flex items-center justify-between gap-4 rounded-large bg-kb-white p-5 shadow-kb">
+      <div>
+        <p className="font-bold">Weekly draft</p>
+        <p className="text-sm text-kb-stone">
+          {on
+            ? "Kabsi drafts one post a week from your facts and emails it to you to approve."
+            : "Off. Kabsi only writes posts when you ask."}
+        </p>
+      </div>
+      <Button
+        variant={on ? "outline" : "default"}
+        size="compact"
+        disabled={busy || setting.isLoading}
+        onClick={() => void toggle()}
+        aria-pressed={on}
+      >
+        {on ? "Turn off" : "Turn on"}
+      </Button>
+    </div>
   );
 }

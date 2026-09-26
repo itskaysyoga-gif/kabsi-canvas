@@ -12,7 +12,7 @@ import { track } from "@/lib/telemetry";
 // Listing Shield (D218): Kabsi watches the listing and alerts you when something changes. It can't stop
 // Google or the public from editing, but it can put your version back with one tap.
 export const Route = createFileRoute("/_authenticated/app/shield")({
-  head: () => ({ meta: [{ title: "Shield — Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Shield | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: ShieldPage,
 });
 
@@ -74,7 +74,10 @@ function ShieldPage() {
   const past = (data.data?.changes ?? []).filter((c) => c.state !== "open");
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">Listing Shield</h1>
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
+        Profile guard · change alerts · one-tap revert
+      </p>
+      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Listing Shield</h1>
       <p className="mt-2 max-w-2xl text-kb-stone">
         Kabsi watches your Google listing and emails you when something changes. Google sometimes
         accepts edits from the public. Kabsi can't stop that, but it can put your version back in
@@ -106,7 +109,7 @@ function ShieldPage() {
               <div key={k} className="flex justify-between gap-4 py-2.5 text-sm">
                 <dt className="text-kb-stone">{label}</dt>
                 <dd dir="auto" className="text-right font-medium">
-                  {data.data!.base!.fields[k]?.display || "—"}
+                  {data.data!.base!.fields[k]?.display || "-"}
                 </dd>
               </div>
             ))}

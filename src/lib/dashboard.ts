@@ -39,6 +39,10 @@ export type Dashboard = {
   planPaidUntil: string | null;
   pendingClaim: boolean;
   latestReport: { week_of: string } | null;
+  // Profile health facts (D240: facts, no composite score)
+  reviews90d: number;
+  answered90d: number;
+  lastPostAt: string | null;
 };
 
 const count = (r: { count: number | null; error: { message: string } | null }) => {
@@ -59,6 +63,7 @@ export async function waitingCount(locationId: string) {
 export async function loadDashboard(locationId: string): Promise<Dashboard> {
   const since7 = new Date(Date.now() - 7 * DAY).toISOString();
   const since30 = new Date(Date.now() - 30 * DAY).toISOString();
+  const since90 = new Date(Date.now() - 90 * DAY).toISOString();
   const head = { count: "exact" as const, head: true };
   const [
     waiting,
@@ -77,6 +82,9 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
     plans,
     claims,
     report,
+    reviews90,
+    answered90,
+    lastPost,
   ] = await Promise.all([
     supabase
       .from("reviews")
@@ -165,6 +173,25 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
       .order("week_of", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from("reviews")
+      .select("id", head)
+      .eq("location_id", locationId)
+      .gte("review_created_at", since90),
+    supabase
+      .from("reviews")
+      .select("id", head)
+      .eq("location_id", locationId)
+      .gte("review_created_at", since90)
+      .or("state.eq.posted,state.eq.handled_offline,existing_reply.not.is.null"),
+    supabase
+      .from("gbp_posts")
+      .select("updated_at")
+      .eq("location_id", locationId)
+      .eq("state", "posted")
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
   if (recent.error) throw new Error(recent.error.message);
 
@@ -213,6 +240,9 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
     planPaidUntil: paidUntil,
     pendingClaim: count(claims) > 0,
     latestReport: (report.data as { week_of: string } | null) ?? null,
+    reviews90d: count(reviews90),
+    answered90d: count(answered90),
+    lastPostAt: (lastPost.data as { updated_at: string } | null)?.updated_at ?? null,
   };
 }
 
@@ -221,6 +251,11 @@ export const PLAN_NAME: Record<string, string> = {
   pro_12m: "Kabsi Pro · 12 months",
   partner: "Kabsi Pro · through your partner",
 };
+
+export function daysSince(iso: string | null) {
+  if (!iso) return null;
+  return Math.max(0, Math.floor((Date.now() - Date.parse(iso)) / DAY));
+}
 
 export function daysUntil(iso: string | null) {
   if (!iso) return null;

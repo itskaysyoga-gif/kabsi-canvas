@@ -9,7 +9,7 @@ function apiKey() {
   return key;
 }
 
-async function message(model: string, system: string, user: string, maxTokens: number) {
+export async function message(model: string, system: string, user: string, maxTokens: number) {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": apiKey(), "anthropic-version": "2023-06-01", "content-type": "application/json" },
@@ -22,7 +22,7 @@ async function message(model: string, system: string, user: string, maxTokens: n
   return text;
 }
 
-function parseJson<T>(text: string): T {
+export function parseJson<T>(text: string): T {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
   if (start < 0 || end < start) throw new Error(`model returned no JSON: ${text.slice(0, 120)}`);
@@ -75,12 +75,13 @@ function languageRule(language: string) {
 export async function draftReply(o: { review: ReviewInput; business: string; card: Card; language: string; urgent: boolean; instruction?: string; previous?: string }) {
   const tone = o.card.tone === "formal" ? "formal and courteous" : o.card.tone === "short" ? "short and friendly" : "warm and personal";
   const system = `You write replies to Google reviews on behalf of "${o.business}". The owner reads every reply and approves it before it is posted.
-Rules — never break them:
+Rules (never break them):
 - Language: ${languageRule(o.language)}
 - This reply is public and speaks for the business. Warm but professional: 2 to 4 short sentences, at most 70 words. Tone: ${tone}. Sound like a real, respectful local owner.
 - Keep it simple: thank them, reflect one specific thing they said, and (if it fits) say you hope to see them again. No idioms, blessings, poetry or flowery phrases, and don't describe things they didn't say.
 - Thank them and respond to what they actually said about the business. Do not answer small talk ('how are you', 'hope all is well') beyond a short greeting.
 - No emojis, emoticons, hearts, '<3', hashtags, slang spellings or repeated exclamation marks. At most one exclamation mark in the whole reply.
+- Never use em dashes or en dashes as punctuation. Use a comma or a full stop instead.
 - Do not assume the reviewer's gender: use neutral wording (in Arabic, prefer plural or neutral forms).
 - Never invent plans, events, offers or promises (no 'see you at our next session', 'we'll improve X'). A simple 'we hope to see you again' is fine.
 - You may greet the reviewer by their name if it looks like a real first name; if the name is generic (e.g. 'A customer', 'Test customer'), don't use it.
@@ -96,7 +97,17 @@ Output only the reply text.`;
   const user = o.instruction && o.previous
     ? `Review (${o.review.rating}/5) by ${o.review.reviewer}:\n${o.review.comment ?? "(no text)"}\n\nCurrent draft:\n${o.previous}\n\nOwner's instruction for the new version: ${o.instruction}`
     : `Review (${o.review.rating}/5) by ${o.review.reviewer}:\n${o.review.comment ?? "(no text)"}`;
-  return (await message(DRAFT_MODEL, system, user, 400)).replace(/^["“]|["”]$/g, "").trim();
+  return noDashes((await message(DRAFT_MODEL, system, user, 400)).replace(/^["“]|["”]$/g, "").trim());
+}
+
+// House rule: no em dashes in anything Kabsi writes (they read as machine-written). En dashes used as
+// punctuation go too; number ranges like 2–4 stay.
+export function noDashes(text: string) {
+  return text
+    .replace(/\s*—\s*/g, ", ")
+    .replace(/\s+–\s+/g, ", ")
+    .replace(/,\s*,/g, ",")
+    .replace(/,\s*([.!?])/g, "$1");
 }
 
 // Rules a model judges badly are checked in code (D232): emojis/hearts and Arabizi (numbers used as letters).

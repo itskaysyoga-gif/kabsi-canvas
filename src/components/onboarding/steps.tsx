@@ -280,6 +280,8 @@ export function AccessStep({ location, onChanged }: StepProps) {
 }
 
 // ── Step 3: the facts drafts may use
+type Faq = { q: string; a: string };
+
 export function KnowledgeStep({
   location,
   onChanged,
@@ -292,6 +294,9 @@ export function KnowledgeStep({
   const [hours, setHours] = useState(card.hours_note ?? "");
   const [mention, setMention] = useState(card.mention ?? "");
   const [staff, setStaff] = useState((card.staff_names ?? []).join(", "));
+  const [faqs, setFaqs] = useState<Faq[]>(() =>
+    ((card["faqs"] as Faq[] | undefined) ?? []).filter((f) => f && (f.q || f.a)),
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
@@ -315,6 +320,10 @@ export function KnowledgeStep({
           .map((s) => s.trim())
           .filter(Boolean)
           .slice(0, 20),
+        faqs: faqs
+          .map((f) => ({ q: f.q.trim(), a: f.a.trim() }))
+          .filter((f) => f.q && f.a)
+          .slice(0, 8),
       });
       if (mode === "onboarding") await setStep(location!.id, "plan");
       await onChanged();
@@ -405,6 +414,55 @@ export function KnowledgeStep({
         className={field}
         maxLength={300}
       />
+      {mode === "settings" ? (
+        <fieldset className="mt-6">
+          <legend className="font-medium">Questions customers ask</legend>
+          <p className="mt-1 text-sm text-kb-stone">
+            Replies and posts can use these answers, and nothing beyond them. Up to 8.
+          </p>
+          {faqs.map((f, i) => (
+            <div key={i} className="mt-3 rounded-card border border-kb-hairline p-3">
+              <Input
+                aria-label={`Question ${i + 1}`}
+                value={f.q}
+                onChange={(e) =>
+                  setFaqs(faqs.map((x, j) => (j === i ? { ...x, q: e.target.value } : x)))
+                }
+                placeholder="e.g. Do you have vegan options?"
+                maxLength={160}
+              />
+              <Textarea
+                aria-label={`Answer ${i + 1}`}
+                value={f.a}
+                onChange={(e) =>
+                  setFaqs(faqs.map((x, j) => (j === i ? { ...x, a: e.target.value } : x)))
+                }
+                placeholder="e.g. Yes, three vegan manakish every day."
+                className="mt-2 min-h-16"
+                maxLength={400}
+              />
+              <button
+                type="button"
+                className="mt-1 text-sm text-kb-stone underline"
+                onClick={() => setFaqs(faqs.filter((_, j) => j !== i))}
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+          {faqs.length < 8 ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="compact"
+              className="mt-3"
+              onClick={() => setFaqs([...faqs, { q: "", a: "" }])}
+            >
+              Add a question
+            </Button>
+          ) : null}
+        </fieldset>
+      ) : null}
       <ErrorNote message={error} />
       <Button type="submit" className="mt-6 w-full" disabled={busy}>
         {busy ? "Saving…" : mode === "onboarding" ? "Save and continue" : "Save"}

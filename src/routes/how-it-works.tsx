@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layouts/public-layout";
-import { CardRender, CtaBand, Eyebrow, H2, PageHero, Section } from "@/components/marketing/parts";
+import { CtaBand, Eyebrow, H2, PageHero, Section } from "@/components/marketing/parts";
 import { pageHead } from "@/lib/site";
 
 export const Route = createFileRoute("/how-it-works")({
   head: () =>
     pageHead({
-      title: "How Kabsi works — Reply drafts you approve",
+      title: "How Kabsi works | Reply drafts you approve",
       description:
         "Add Kabsi as a Manager on your Google profile. Every new review reaches you with a drafted reply. You tap Post, Edit or Skip. Nothing is posted without you.",
       path: "/how-it-works",
@@ -40,8 +40,9 @@ function Page() {
         <Block n="2" title="Tell Kabsi about your business">
           <p>
             A short form: how you sign your replies, your tone, your phone number, your hours note,
-            anything you'd like mentioned, and the names of staff it may thank. Drafts only use
-            these facts. If a fact is missing, it's left out instead of guessed.
+            anything you'd like mentioned, and the names of staff it may thank. Later you can add
+            answers to the questions customers ask. Replies and posts only use these facts. If a
+            fact is missing, it's left out instead of guessed.
           </p>
         </Block>
 
@@ -93,9 +94,12 @@ function Page() {
             and <b>Keep the new one</b>. It can't lock your listing or stop people suggesting edits
             to Google, and we won't pretend it can.
           </Card>
-          <Card title="Google posts">
-            Say what's new in a sentence and pick a few words customers search for. Kabsi drafts a
-            short post. You edit it and post it, or not.
+          <Card title="Weekly keyword posts">
+            Once a week Kabsi drafts a short post from your facts, with the phrase customers search
+            for (like your category and area) in the first line and a button like Call or Book. It
+            arrives by email: shops and restaurants on Thursday morning, clinics and offices on
+            Tuesday. You can also say what's new in a sentence any day. You post it, change it, or
+            skip it. Weekly drafts can be switched off.
           </Card>
           <Card title="Photos">
             Upload a photo from your phone. Kabsi checks that it's clear and fits Google's photo
@@ -109,24 +113,33 @@ function Page() {
             reply, and card taps. Facts only, no advice, nothing estimated.
           </Card>
           <Card title="Your dashboard">
-            Everything is also in one place online: replies waiting, your week, your listing, your
-            plan.
+            Everything in one place: replies waiting, your week, and profile health (reviews
+            answered, when you last posted, your listing guard and review link taps).
           </Card>
         </div>
       </Section>
 
       <Section className="grid items-center gap-12 md:grid-cols-2">
         <div>
-          <Eyebrow>The card</Eyebrow>
+          <Eyebrow>Cards and links</Eyebrow>
           <H2>One tap to your Google review page.</H2>
           <p className="mt-5 text-lg leading-8 text-kb-stone">
-            The Kabsi card has an NFC chip and a QR code. Tap or scan, and your Google review page
-            opens. It's the same page for every customer: no rating screen, no filter. Kabsi counts
+            The optional NFC card has a chip and a QR code. Tap or scan, and your Google review page
+            opens. It's the same page for every customer: no rating screen, no filter. No card? Your
+            dashboard gives you a review link and a printable QR code that do the same. Kabsi counts
             taps (never who tapped) and shows them in your report.
           </p>
         </div>
         <div className="flex justify-center">
-          <CardRender />
+          <img
+            src="/images/nfc-card-closeup.webp"
+            alt="An acrylic NFC review card with a tap area and a QR code"
+            width={640}
+            height={640}
+            loading="lazy"
+            decoding="async"
+            className="w-full max-w-sm rounded-large shadow-kb"
+          />
         </div>
       </Section>
 
