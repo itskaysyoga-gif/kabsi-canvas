@@ -67,13 +67,51 @@ async function accessJob() {
 }
 
 // Job: pull new reviews for every active location (Pub/Sub will trigger this sooner once live).
+// Google answering 403/404 for one business means Kabsi's Manager access was removed (or the listing is gone).
+// After 30 minutes of that, access is marked lost (migration 017) and the owner is told how to fix it.
+const ACCESS_GRACE_MS = 30 * 60_000;
+const accessRefused = (e: unknown) => /^Error: google (403|404) /.test(String(e));
+
 async function syncJob() {
-  let added = 0;
+  const db = admin();
+  let added = 0, lost = 0;
   const failed: string[] = [];
   for (const loc of await activeLocations()) {
-    try { added += await syncLocation(loc); } catch (e) { failed.push(loc.id); await captureError("cron-tick", e, { job: "sync", location: loc.id }); }
+    try {
+      added += await syncLocation(loc);
+      if (loc.access_error_since) await db.from("locations").update({ access_error_since: null }).eq("id", loc.id);
+    } catch (e) {
+      failed.push(loc.id);
+      if (!accessRefused(e)) { await captureError("cron-tick", e, { job: "sync", location: loc.id }); continue; }
+      if (!loc.access_error_since) {
+        await db.from("locations").update({ access_error_since: new Date().toISOString() }).eq("id", loc.id);
+        await captureError("cron-tick", e, { job: "sync", location: loc.id, note: "Google refused access; lost after 30 min" });
+      } else if (Date.now() - Date.parse(loc.access_error_since) > ACCESS_GRACE_MS) {
+        await db.rpc("mark_access_lost", { p_location: loc.id });
+        await emailAccessLost(loc.id, loc.name);
+        lost++;
+      }
+    }
   }
-  return { added, failed: failed.length };
+  return { added, failed: failed.length, lost };
+}
+
+async function emailAccessLost(locationId: string, name: string) {
+  const day = new Date().toISOString().slice(0, 10);
+  for (const to of await ownerEmails(locationId)) {
+    await sendEmail({
+      kind: "access_lost", to, locationId, dedupeKey: `access_lost:${locationId}:${day}:${to}`,
+      subject: `Kabsi can't reach ${name} on Google`,
+      html: emailLayout({
+        preheader: "Add hello@kabsi.co as a Manager again to continue.", title: "Kabsi lost access to your Google profile",
+        bodyHtml: `<p style="margin:0 0 16px 0;">Google stopped letting Kabsi read <strong>${esc(name)}</strong>'s reviews. This usually means hello@kabsi.co was removed from the profile's managers.</p>
+<p style="margin:0 0 16px 0;">To continue: on your Business Profile open <strong>Menu</strong>, then <strong>Business Profile settings</strong>, then <strong>People and access</strong>, and add <strong>hello@kabsi.co</strong> as a <strong>Manager</strong>. Kabsi reconnects on its own within a few minutes.</p>
+<p style="margin:0 0 20px 0;">Until then no replies are drafted and nothing is posted. If you removed Kabsi on purpose, you don't need to do anything.</p>`,
+        button: { label: "Open Kabsi", url: `${APP_URL}/app` },
+      }),
+      text: `Google stopped letting Kabsi read ${name}'s reviews, usually because hello@kabsi.co was removed as a Manager.\n\nTo continue, add hello@kabsi.co as a Manager again under People and access on your Business Profile. Kabsi reconnects within a few minutes.\n\nOpen Kabsi: ${APP_URL}/app`,
+    }).catch((e) => captureError("cron-tick", e, { job: "access_lost", location: locationId }));
+  }
 }
 
 // Job: draft replies for new reviews (at most 10 per tick to bound AI cost and run time).

@@ -51,5 +51,26 @@ Deno.serve(async (req) => {
     const r = await fetch("https://api.anthropic.com/v1/models?limit=1", { headers: { "x-api-key": anthropic, "anthropic-version": "2023-06-01" } });
     checks.anthropic = r.ok ? "key valid" : `key rejected (${r.status})`;
   }
+  // Go-live readiness (D250): can Kabsi get a Google token for hello@kabsi.co, and does the Business Profile
+  // API answer? Before the API grant, Google replies 429 with a zero quota; that is expected.
+  const gid = Deno.env.get("GOOGLE_CLIENT_ID"), gsecret = Deno.env.get("GOOGLE_CLIENT_SECRET"), grefresh = Deno.env.get("GOOGLE_REFRESH_TOKEN");
+  if (gid && gsecret && grefresh) {
+    const t = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ client_id: gid, client_secret: gsecret, refresh_token: grefresh, grant_type: "refresh_token" }),
+    });
+    const tj = await t.json().catch(() => ({}));
+    if (!t.ok) checks.google_token = `refresh failed (${t.status}): ${tj.error ?? ""}`;
+    else {
+      checks.google_token = `ok, scope ${String(tj.scope ?? "").includes("business.manage") ? "business.manage" : `MISSING business.manage (${tj.scope})`}`;
+      const a = await fetch("https://mybusinessaccountmanagement.googleapis.com/v1/accounts", { headers: { authorization: `Bearer ${tj.access_token}` } });
+      const aj = await a.json().catch(() => ({}));
+      checks.google_accounts = a.ok
+        ? `ok, ${(aj.accounts ?? []).length} account(s)`
+        : `${a.status}: ${String(aj.error?.message ?? "").slice(0, 160)}`;
+    }
+  } else checks.google_token = "not configured (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN)";
+  checks.google_mode = Deno.env.get("GOOGLE_MODE") === "live" ? "live" : "mock";
   return json({ set, nearMisses, checks });
 });

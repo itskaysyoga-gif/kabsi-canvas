@@ -1,6 +1,6 @@
 // Listing Shield (D218): watch the Google listing, alert the owner when a field changes, and put it back
 // with one tap if they want. Kabsi cannot stop Google or the public from editing; it can only restore.
-import { admin, APP_URL, emailLayout, esc, sendEmail, sha256Hex } from "./kabsi.ts";
+import { admin, APP_URL, captureError, emailLayout, esc, sendEmail, sha256Hex } from "./kabsi.ts";
 import { getListing, googleMode, patchListing, SHIELD_FIELDS, type FieldValue, type Listing, type ShieldField } from "./google.ts";
 
 const LABEL: Record<ShieldField, string> = { title: "business name", phone: "phone number", address: "address", website: "website", hours: "opening hours", categories: "main category" };
@@ -46,7 +46,10 @@ export async function shieldCheck() {
   for (const loc of (data ?? []) as Loc[]) {
     if (googleMode() === "live" && loc.shield_checked_at && Date.parse(loc.shield_checked_at) > Date.now() - 55 * 60_000) continue;
     const card = loc.knowledge_card ?? {};
-    const now = await getListing(loc.google_location_id!, { name: loc.name, address: loc.address, phone: card.contact_phone as string | undefined, hours: card.hours_note as string | undefined });
+    // One business Google refuses (e.g. access removed) must not stop the check for the others.
+    const now = await getListing(loc.google_location_id!, { name: loc.name, address: loc.address, phone: card.contact_phone as string | undefined, hours: card.hours_note as string | undefined })
+      .catch(async (e) => { await captureError("shield", e, { location: loc.id }); return null; });
+    if (!now) continue;
     await db.from("locations").update({ shield_checked_at: new Date().toISOString() }).eq("id", loc.id);
     const { data: base } = await db.from("listing_baselines").select("fields").eq("location_id", loc.id).maybeSingle();
     if (!base) { await db.from("listing_baselines").insert({ location_id: loc.id, fields: now }); continue; }

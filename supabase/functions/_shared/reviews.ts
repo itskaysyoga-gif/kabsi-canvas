@@ -8,9 +8,9 @@ const BACKLOG_LIMIT = 20; // D221
 type Loc = {
   id: string; name: string; status: string; google_account_id: string | null; google_location_id: string | null;
   knowledge_card: Card; time_zone: string; digest_hour: number; reviews_synced_at: string | null;
-  backlog_emailed_at: string | null; emails_paused_until: string | null; alert_emails: string[];
+  backlog_emailed_at: string | null; emails_paused_until: string | null; alert_emails: string[]; access_error_since?: string | null;
 };
-const LOC_COLS = "id, name, status, google_account_id, google_location_id, knowledge_card, time_zone, digest_hour, reviews_synced_at, backlog_emailed_at, emails_paused_until, alert_emails";
+const LOC_COLS = "id, name, status, google_account_id, google_location_id, knowledge_card, time_zone, digest_hour, reviews_synced_at, backlog_emailed_at, emails_paused_until, alert_emails, access_error_since";
 
 export async function activeLocations(): Promise<Loc[]> {
   const { data, error } = await admin().from("locations").select(LOC_COLS).eq("status", "active").not("google_location_id", "is", null);
