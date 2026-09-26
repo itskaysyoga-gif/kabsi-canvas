@@ -76,6 +76,7 @@ export const telemetryHeadScripts = [
   {
     src: `https://js-de.sentry-cdn.com/${SENTRY_PUBLIC_KEY}.min.js`,
     crossOrigin: "anonymous" as const,
+    async: true, // never block the first paint; sentryOnLoad initialises it when it arrives
   },
 ];
 

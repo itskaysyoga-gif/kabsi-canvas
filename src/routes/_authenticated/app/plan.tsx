@@ -41,7 +41,14 @@ type Claim = {
   note: string | null;
   created_at: string;
 };
-type Payment = { id: string; item: string; amount_usd: number; method: string; created_at: string };
+type Payment = {
+  id: string;
+  plan_id: string | null;
+  item: string;
+  amount_usd: number;
+  method: string;
+  created_at: string;
+};
 
 async function loadPlan(locationId: string) {
   const [plans, claims, payments] = await Promise.all([
@@ -59,7 +66,7 @@ async function loadPlan(locationId: string) {
       .limit(5),
     supabase
       .from("payments")
-      .select("id, item, amount_usd, method, created_at")
+      .select("id, plan_id, item, amount_usd, method, created_at")
       .eq("location_id", locationId)
       .order("created_at", { ascending: false })
       .limit(20),
@@ -78,12 +85,16 @@ async function loadPlan(locationId: string) {
     running
       .filter((p) => !p.starts_at || Date.parse(p.starts_at) <= now)
       .sort((a, b) => Date.parse(a.starts_at ?? "0") - Date.parse(b.starts_at ?? "0"))[0] ?? null;
-  const pending = all.find((p) => p.status === "pending") ?? null;
+  const paidIds = new Set(((payments.data ?? []) as Payment[]).map((p) => p.plan_id));
+  const pending = all.find((p) => p.status === "pending" && !paidIds.has(p.id)) ?? null;
+  // Paid but not started: the plan starts once Kabsi's Google access works (D224).
+  const paidWaiting = all.find((p) => p.status === "pending" && paidIds.has(p.id)) ?? null;
   return {
     current,
     paidUntil,
     queued: running.filter((p) => p.starts_at && Date.parse(p.starts_at) > now),
     pending,
+    paidWaiting,
     claims: (claims.data ?? []) as Claim[],
     payments: (payments.data ?? []) as Payment[],
   };
@@ -176,6 +187,21 @@ function PlanPage() {
                     </p>
                   ) : null}
                 </>
+              ) : d.paidWaiting ? (
+                <>
+                  <div className="mt-1 flex flex-wrap items-center gap-3">
+                    <p className="text-2xl font-bold">
+                      {ITEM_NAME[d.paidWaiting.kind] ?? "Kabsi Pro"}
+                    </p>
+                    <span className="rounded-pill bg-kb-sand px-2.5 py-1 text-xs font-bold text-kb-stone">
+                      Paid
+                    </span>
+                  </div>
+                  <p className="mt-2 leading-7 text-kb-stone">
+                    Your plan starts the day Kabsi's access to your Google profile works, so you
+                    don't lose any days while you wait.
+                  </p>
+                </>
               ) : (
                 <>
                   <p className="mt-1 text-2xl font-bold">No active plan</p>
@@ -190,7 +216,7 @@ function PlanPage() {
 
           <Pay
             locationId={loc.id}
-            renew={!!d.current}
+            renew={!!d.current || !!d.paidWaiting}
             defaultItem={
               (d.pending?.kind as Item | undefined) ??
               (d.current?.kind as Item | undefined) ??

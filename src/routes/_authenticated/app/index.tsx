@@ -118,13 +118,13 @@ function Skeleton() {
 }
 
 // ── Setup not finished: one checklist, one button.
+// Paid = a Pro payment is recorded (the plan itself starts once Google access works, D224).
 async function hasPaidPlan(locationId: string) {
   const { count } = await supabase
-    .from("plans")
+    .from("payments")
     .select("id", { count: "exact", head: true })
     .eq("location_id", locationId)
-    .eq("status", "active")
-    .gt("ends_at", new Date().toISOString());
+    .in("item", ["pro_6m", "pro_12m"]);
   return (count ?? 0) > 0;
 }
 
@@ -477,7 +477,7 @@ function ReviewLine({ r }: { r: RecentReview }) {
       <Link to={open ? "/app/inbox" : "/app/reviews"} className="block">
         <div className="flex items-center justify-between gap-3">
           <span className="flex items-center gap-2">
-            <span className="flex" aria-label={`${r.star_rating} stars`}>
+            <span className="flex" role="img" aria-label={`${r.star_rating} stars`}>
               {[1, 2, 3, 4, 5].map((i) => (
                 <Star
                   key={i}

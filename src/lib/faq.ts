@@ -1,0 +1,64 @@
+// Questions shown on /faq (all) and the homepage (the first five). Every answer must stay true of the
+// system as built (§3). Used for the FAQPage JSON-LD too, so answers are plain text.
+import { PRICES } from "@/lib/site";
+
+export const FAQ: { q: string; a: string }[] = [
+  {
+    q: "Does Kabsi post replies by itself?",
+    a: "No. Kabsi drafts a reply and emails it to you. Nothing goes on your Google profile until you tap Post, and you see the exact text before it goes.",
+  },
+  {
+    q: "What does Kabsi need from me?",
+    a: "Add hello@kabsi.co as a Manager on your Google Business Profile, then tell Kabsi a few facts about your business: how you sign off, your phone number, anything you want mentioned. Drafts only use the facts you give.",
+  },
+  {
+    q: "Which languages does it reply in?",
+    a: "The reviewer's language: Arabic, English, French and others. Reviews in Franco-Arabic get a simple English reply, because written Franco reads badly in public.",
+  },
+  {
+    q: "Can Kabsi remove bad reviews?",
+    a: "No. Nobody outside Google can remove a review. Kabsi helps you answer every review calmly, including the hard ones. For 1 and 2 star reviews it emails you a careful draft and no quick Post button, so you read it first.",
+  },
+  {
+    q: "Will Kabsi get me more reviews or a better rating?",
+    a: "We don't promise that, and nobody honest can. What Kabsi does is make sure every review gets a reply, and the card makes leaving a review one tap for every customer.",
+  },
+  {
+    q: "Is Kabsi part of Google?",
+    a: "No. Kabsi is an independent business in Beirut and is not affiliated with Google. It works through Google's official Business Profile access, the same way a staff member you add as a Manager would.",
+  },
+  {
+    q: "Can I remove Kabsi's access?",
+    a: "Yes, at any time, from your Google profile under People and access. You don't need to ask us.",
+  },
+  {
+    q: "What is Listing Shield?",
+    a: "Kabsi watches your listing's name, phone, address, hours, website and categories. If something changes that you didn't approve, you get an email and can put yours back with one tap. It can't lock your listing or stop people from suggesting edits to Google.",
+  },
+  {
+    q: "Does the card ask only happy customers?",
+    a: "No. Every tap and scan opens your Google review page, the same for every customer. There's no rating screen before it.",
+  },
+  {
+    q: "How do I pay?",
+    a: `In USDT (TRC20 or Binance Pay) from anywhere. In Lebanon you can also pay with Whish, OMT or cash. Kabsi Pro is $${PRICES.pro6} for 6 months or $${PRICES.pro12} for 12 months, card included.`,
+  },
+  {
+    q: "What happens when my plan ends?",
+    a: "Reply drafts, Listing Shield and the weekly report stop. Your card keeps working and still opens your Google review page.",
+  },
+  {
+    q: "Can I get a refund?",
+    a: "Kabsi Pro is refundable in full within 14 days of the plan starting. Cards aren't refunded.",
+  },
+];
+
+export const faqJsonLd = (items = FAQ) => ({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: items.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+});
