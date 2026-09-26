@@ -11,7 +11,7 @@ import {
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { myLatestLocation } from "@/lib/onboarding";
+import { chooseLocation, myLatestLocation, myLocations } from "@/lib/onboarding";
 import { amStaff } from "@/lib/reviews";
 import { myPartner } from "@/lib/partner";
 import { waitingCount } from "@/lib/dashboard";
@@ -170,8 +170,15 @@ const STATUS_LABEL: Record<string, string> = {
 
 // The business in the header. One business per account for now; "Add another business" starts /start again.
 function LocationMenu() {
+  const queryClient = useQueryClient();
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
+  const all = useQuery({ queryKey: ["my-locations"], queryFn: myLocations });
   const loc = location.data;
+  const others = (all.data ?? []).filter((l) => l.id !== loc?.id);
+  async function switchTo(id: string) {
+    chooseLocation(id);
+    await queryClient.invalidateQueries();
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -203,6 +210,23 @@ function LocationMenu() {
               <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2.5">
                 <Link to="/start">Continue setup</Link>
               </DropdownMenuItem>
+            ) : null}
+            {others.length ? (
+              <>
+                <DropdownMenuSeparator className="bg-kb-hairline" />
+                <DropdownMenuLabel className="text-xs font-normal text-kb-stone">
+                  Switch business
+                </DropdownMenuLabel>
+                {others.map((o) => (
+                  <DropdownMenuItem
+                    key={o.id}
+                    className="cursor-pointer rounded-lg py-2.5"
+                    onSelect={() => void switchTo(o.id)}
+                  >
+                    <span className="truncate">{o.name}</span>
+                  </DropdownMenuItem>
+                ))}
+              </>
             ) : null}
             <DropdownMenuSeparator className="bg-kb-hairline" />
             <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2.5">

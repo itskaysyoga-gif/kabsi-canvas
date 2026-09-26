@@ -56,17 +56,45 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-export async function myLatestLocation(): Promise<Location | null> {
+// The owner app works on one business at a time: the one picked in the header, else the newest. Only
+// businesses the signed-in user is a member of count. Staff can read every business through RLS, but the
+// owner app must never treat someone else's business as theirs (writes would be refused anyway).
+const LOCATION_COLUMNS =
+  "id, name, address, country, status, onboarding_step, partner_id, consent_at, access_granted_at, knowledge_card, created_at";
+const CHOSEN_KEY = "kabsi.location";
+
+export async function myLocations(): Promise<Location[]> {
+  const { data: session } = await supabase.auth.getSession();
+  const uid = session.session?.user.id;
+  if (!uid) return [];
   const { data, error } = await supabase
     .from("locations")
-    .select(
-      "id, name, address, country, status, onboarding_step, partner_id, consent_at, access_granted_at, knowledge_card, created_at",
-    )
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .select(`${LOCATION_COLUMNS}, location_members!inner(user_id)`)
+    .eq("location_members.user_id", uid)
+    .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return (data as Location | null) ?? null;
+  return ((data ?? []) as (Location & { location_members?: unknown })[]).map(
+    ({ location_members: _m, ...l }) => l as Location,
+  );
+}
+
+export function chooseLocation(id: string) {
+  try {
+    window.localStorage.setItem(CHOSEN_KEY, id);
+  } catch {
+    /* private mode: fall back to the newest business */
+  }
+}
+
+export async function myLatestLocation(): Promise<Location | null> {
+  const list = await myLocations();
+  let chosen: string | null = null;
+  try {
+    chosen = window.localStorage.getItem(CHOSEN_KEY);
+  } catch {
+    chosen = null;
+  }
+  return list.find((l) => l.id === chosen) ?? list[0] ?? null;
 }
 
 export async function searchPlaces(query: string) {

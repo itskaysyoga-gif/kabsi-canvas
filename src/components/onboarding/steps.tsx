@@ -15,6 +15,7 @@ import {
   searchPlaces,
   setStep,
   startLocation,
+  chooseLocation,
   type KnowledgeCard,
   type Location,
   type PlaceResult,
@@ -58,7 +59,7 @@ export function BusinessStep({
     setError("");
     setBusy(true);
     try {
-      await startLocation(picked, partnerHandle, inviteId);
+      chooseLocation(await startLocation(picked, partnerHandle, inviteId));
       track("business_selected", {
         country: picked.country ?? "",
         source: inviteId ? "partner_invite" : partnerHandle ? "partner_link" : "self",

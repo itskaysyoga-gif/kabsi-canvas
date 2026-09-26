@@ -16,7 +16,7 @@ export function LegalPage({
       <div className="mx-auto max-w-3xl px-5 py-14 sm:px-8 sm:py-20">
         <h1 className="font-display text-[clamp(2.6rem,6vw,4rem)] leading-none">{title}</h1>
         <p className="mt-3 text-sm text-kb-stone">Last updated {updated}</p>
-        <div className="mt-10 space-y-10 text-[17px] leading-8 text-kb-ink [&_h2]:text-2xl [&_h2]:font-bold [&_li]:mt-2 [&_p]:mt-3 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:pl-6">
+        <div className="mt-10 space-y-10 text-[17px] leading-8 text-kb-ink [&_a]:font-bold [&_a]:underline [&_a]:underline-offset-4 [&_h2]:text-2xl [&_h2]:font-bold [&_li]:mt-2 [&_p]:mt-3 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:pl-6">
           {children}
         </div>
       </div>
