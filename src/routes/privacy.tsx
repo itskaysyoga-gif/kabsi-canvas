@@ -151,7 +151,8 @@ function Page() {
       <section>
         <h2>Deleting</h2>
         <p>
-          Email {CONTACT_EMAIL} from your account email and we delete your business data, including
+          In Settings, choose <b>Delete this business</b> (you have 7 days to change your mind), or
+          email {CONTACT_EMAIL} from your account email, and we delete your business data, including
           reviews, drafts, posts and photos, within 30 days, and confirm by email. Payment records
           are kept where the law requires. Tap records hold no personal information. Removing Kabsi
           from your Google profile stops access but doesn't delete what we hold, so email us for

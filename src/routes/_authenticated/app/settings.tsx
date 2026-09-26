@@ -19,6 +19,7 @@ type Settings = {
   digest_hour: number;
   time_zone: string;
   emails_paused_until: string | null;
+  deletion_requested_at: string | null;
 };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const hourLabel = (h: number) => `${h % 12 === 0 ? 12 : h % 12}:00 ${h < 12 ? "am" : "pm"}`;
@@ -26,7 +27,7 @@ const hourLabel = (h: number) => `${h % 12 === 0 ? 12 : h % 12}:00 ${h < 12 ? "a
 async function loadSettings(id: string): Promise<Settings> {
   const { data, error } = await supabase
     .from("locations")
-    .select("alert_emails, digest_hour, time_zone, emails_paused_until")
+    .select("alert_emails, digest_hour, time_zone, emails_paused_until, deletion_requested_at")
     .eq("id", id)
     .single();
   if (error) throw new Error(error.message);
@@ -60,7 +61,100 @@ function SettingsPage() {
           onSaved={() => settings.refetch()}
         />
       ) : null}
+      {loc && settings.data ? (
+        <DeleteBusiness
+          locationId={loc.id}
+          name={loc.name}
+          requestedAt={settings.data.deletion_requested_at}
+          onChanged={() => settings.refetch()}
+        />
+      ) : null}
     </div>
+  );
+}
+
+// Owner-requested deletion (migration 019): 7 days to change your mind, then everything is deleted.
+function DeleteBusiness({
+  locationId,
+  name,
+  requestedAt,
+  onChanged,
+}: {
+  locationId: string;
+  name: string;
+  requestedAt: string | null;
+  onChanged: () => unknown;
+}) {
+  const [confirm, setConfirm] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const due = requestedAt
+    ? new Date(Date.parse(requestedAt) + 7 * 86_400_000).toLocaleDateString()
+    : null;
+  async function run(kind: "request" | "cancel") {
+    setBusy(true);
+    setErr("");
+    const { error } = await supabase.rpc(
+      kind === "request" ? "request_location_deletion" : "cancel_location_deletion",
+      { p_location: locationId },
+    );
+    setBusy(false);
+    if (error) return setErr("Something went wrong. Email hello@kabsi.co and we'll do it for you.");
+    setConfirm("");
+    onChanged();
+  }
+  return (
+    <section className="mt-12 rounded-large border-2 border-kb-hairline p-6">
+      <h2 className="text-xl font-bold">Delete this business from Kabsi</h2>
+      {due ? (
+        <>
+          <p className="mt-2 text-sm leading-6 text-kb-stone">
+            Deletion is scheduled for <b className="text-kb-ink">{due}</b>. Until then everything
+            keeps working and you can cancel.
+          </p>
+          <Button
+            variant="outline"
+            className="mt-4"
+            disabled={busy}
+            onClick={() => void run("cancel")}
+          >
+            {busy ? "Cancelling…" : "Cancel deletion"}
+          </Button>
+        </>
+      ) : (
+        <>
+          <p className="mt-2 text-sm leading-6 text-kb-stone">
+            After 7 days we delete its reviews, drafts, posts, photos, reports and settings, and
+            your NFC cards stop opening your review page. Payment records are kept where the law
+            requires. To stop Kabsi reaching your Google profile, also remove hello@kabsi.co under
+            People and access.
+          </p>
+          <Label htmlFor="confirm-delete" className="mt-4 block text-sm">
+            Type the business name to confirm
+          </Label>
+          <Input
+            id="confirm-delete"
+            className="mt-2"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            placeholder={name}
+          />
+          <Button
+            variant="outline"
+            className="mt-4 border-kb-red text-kb-red"
+            disabled={busy || confirm.trim().toLowerCase() !== name.trim().toLowerCase()}
+            onClick={() => void run("request")}
+          >
+            {busy ? "Scheduling…" : "Delete in 7 days"}
+          </Button>
+        </>
+      )}
+      {err ? (
+        <p className="mt-3 text-sm text-kb-red" role="alert">
+          {err}
+        </p>
+      ) : null}
+    </section>
   );
 }
 

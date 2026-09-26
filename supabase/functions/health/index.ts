@@ -46,7 +46,9 @@ Deno.serve(async (req) => {
     });
     checks.places = r.ok ? "search works" : `search failed (${r.status}): ${(await r.text()).slice(0, 160)}`;
   }
-  const anthropic = Deno.env.get("ANTHROPIC_API_KEY");
+  // The key was saved as "Anthropic_Api"; the functions accept both names.
+  const anthropic = Deno.env.get("ANTHROPIC_API_KEY") ?? Deno.env.get("Anthropic_Api");
+  set.ANTHROPIC_API_KEY = Boolean(anthropic);
   if (anthropic) {
     const r = await fetch("https://api.anthropic.com/v1/models?limit=1", { headers: { "x-api-key": anthropic, "anthropic-version": "2023-06-01" } });
     checks.anthropic = r.ok ? "key valid" : `key rejected (${r.status})`;

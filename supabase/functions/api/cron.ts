@@ -149,8 +149,58 @@ async function weeklyJob() {
   return { reports: await weeklyReports(await reportLocations()) };
 }
 
+// Job: owner-requested deletion (migration 019). Notice email when requested; after 7 days remove stored
+// photos, email the confirmation, then delete_location_now (cards unassigned, business data deleted).
+async function deletionsJob() {
+  const db = admin();
+  const { data: rows, error } = await db.from("locations")
+    .select("id, name, deletion_requested_at, deletion_notice_at").not("deletion_requested_at", "is", null);
+  if (error) throw error;
+  let notices = 0, deleted = 0;
+  for (const l of rows ?? []) {
+    const due = new Date(Date.parse(l.deletion_requested_at!) + 7 * 86400_000);
+    const dueText = due.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    const recipients = await ownerEmails(l.id);
+    if (!l.deletion_notice_at) {
+      for (const to of recipients) {
+        await sendEmail({
+          kind: "deletion_scheduled", to, locationId: l.id, dedupeKey: `deletion_scheduled:${l.id}:${l.deletion_requested_at}:${to}`,
+          subject: `${l.name} will be deleted from Kabsi on ${dueText}`,
+          html: emailLayout({
+            preheader: "You can cancel until then.", title: "Deletion scheduled",
+            bodyHtml: `<p style="margin:0 0 16px 0;">You asked Kabsi to delete <strong>${esc(l.name)}</strong>. On <strong>${dueText}</strong> we delete its reviews, drafts, posts, photos, reports and settings. Payment records are kept where the law requires.</p><p style="margin:0 0 20px 0;">Changed your mind? Cancel it in Settings before then. To stop Kabsi reaching your Google profile, also remove hello@kabsi.co under People and access.</p>`,
+            button: { label: "Open Settings", url: `${APP_URL}/app/settings` },
+          }),
+          text: `You asked Kabsi to delete ${l.name}. On ${dueText} we delete its reviews, drafts, posts, photos, reports and settings. Cancel in Settings before then: ${APP_URL}/app/settings`,
+        }).catch((e) => captureError("cron-tick", e, { job: "deletions", location: l.id }));
+      }
+      await db.from("locations").update({ deletion_notice_at: new Date().toISOString() }).eq("id", l.id);
+      notices++;
+    }
+    if (Date.now() < due.getTime()) continue;
+    const { data: files } = await db.storage.from("owner-photos").list(l.id, { limit: 1000 });
+    if (files?.length) await db.storage.from("owner-photos").remove(files.map((f) => `${l.id}/${f.name}`));
+    const { error: de } = await db.rpc("delete_location_now", { p_location: l.id });
+    if (de) throw de;
+    deleted++;
+    for (const to of recipients) {
+      await sendEmail({
+        kind: "deletion_done", to, locationId: null, dedupeKey: `deletion_done:${l.id}:${to}`,
+        subject: `${l.name} was deleted from Kabsi`,
+        html: emailLayout({
+          preheader: "Your business data is deleted.", title: "Deleted",
+          bodyHtml: `<p style="margin:0 0 16px 0;">We deleted <strong>${esc(l.name)}</strong> and its data from Kabsi. Your NFC cards no longer open your review page. If Kabsi is still a Manager on your Google profile, remove hello@kabsi.co under People and access.</p>`,
+        }),
+        text: `We deleted ${l.name} and its data from Kabsi. If Kabsi is still a Manager on your Google profile, remove hello@kabsi.co under People and access.`,
+      }).catch((e) => captureError("cron-tick", e, { job: "deletions", location: l.id }));
+    }
+  }
+  return { notices, deleted };
+}
+
 const JOBS: Record<string, () => Promise<Record<string, unknown>>> = {
   access: accessJob, sync: syncJob, draft: draftJob, notify: notifyJob, ratings: ratingsJob, weekly: weeklyJob, shield: shieldJob,
+  deletions: deletionsJob,
 };
 
 export async function cronTick(req: Request): Promise<Response> {
