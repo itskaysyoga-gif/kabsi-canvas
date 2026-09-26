@@ -1,19 +1,10 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
-  Building2,
   ChevronDown,
-  CircleHelp,
-  Clock3,
   CreditCard,
-  FileText,
-  Images,
-  Inbox,
-  Menu,
+  Home,
   MessageSquareText,
-  MoreHorizontal,
-  Newspaper,
   Settings,
-  ShieldCheck,
   Store,
   Users,
 } from "lucide-react";
@@ -23,6 +14,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { myLatestLocation } from "@/lib/onboarding";
 import { amStaff } from "@/lib/reviews";
 import { myPartner } from "@/lib/partner";
+import { waitingCount } from "@/lib/dashboard";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -32,41 +24,137 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { KabsiLogo } from "@/components/shared/kabsi-logo";
 import { TestModeBanner } from "@/components/shared/test-mode-banner";
 import { useAuth } from "@/components/auth/auth-provider";
 import { cn } from "@/lib/utils";
 
-const appNav = [
-  ["Inbox", "/app/inbox", Inbox],
-  ["Reviews", "/app/reviews", MessageSquareText],
-  ["Posts", "/app/posts", Newspaper],
-  ["Photos", "/app/photos", Images],
-  ["Hours", "/app/hours", Clock3],
-  ["Shield", "/app/shield", ShieldCheck],
-  ["Report", "/app/report", FileText],
-  ["Cards", "/app/cards", CreditCard],
-  ["Knowledge", "/app/knowledge", CircleHelp],
-  ["Plan", "/app/plan", Building2],
-  ["Settings", "/app/settings", Settings],
-] as const;
+// Five places, not eleven tabs. Related pages sit under one section as small tabs at the top.
+type Section = {
+  label: string;
+  short: string;
+  to: string;
+  icon: typeof Home;
+  paths: string[];
+  sub?: [string, string][];
+};
+const SECTIONS: Section[] = [
+  { label: "Home", short: "Home", to: "/app", icon: Home, paths: ["/app", "/app/report"] },
+  {
+    label: "Reviews",
+    short: "Reviews",
+    to: "/app/inbox",
+    icon: MessageSquareText,
+    paths: ["/app/inbox", "/app/reviews"],
+    sub: [
+      ["To reply", "/app/inbox"],
+      ["All reviews", "/app/reviews"],
+    ],
+  },
+  {
+    label: "Google profile",
+    short: "Profile",
+    to: "/app/posts",
+    icon: Store,
+    paths: ["/app/posts", "/app/photos", "/app/hours", "/app/shield"],
+    sub: [
+      ["Posts", "/app/posts"],
+      ["Photos", "/app/photos"],
+      ["Hours", "/app/hours"],
+      ["Listing Shield", "/app/shield"],
+    ],
+  },
+  { label: "Cards", short: "Cards", to: "/app/cards", icon: CreditCard, paths: ["/app/cards"] },
+  {
+    label: "Settings",
+    short: "Settings",
+    to: "/app/knowledge",
+    icon: Settings,
+    paths: ["/app/knowledge", "/app/plan", "/app/settings"],
+    sub: [
+      ["About your business", "/app/knowledge"],
+      ["Plan", "/app/plan"],
+      ["Emails", "/app/settings"],
+    ],
+  },
+];
+const clean = (p: string) => (p.length > 1 ? p.replace(/\/+$/, "") : p);
+const sectionFor = (path: string) => SECTIONS.find((s) => s.paths.includes(clean(path)));
 
-function NavLink({ item, mobile = false }: { item: (typeof appNav)[number]; mobile?: boolean }) {
-  const [label, to, Icon] = item;
+function NavLink({
+  section,
+  active,
+  badge,
+  mobile = false,
+}: {
+  section: Section;
+  active: boolean;
+  badge?: number | undefined;
+  mobile?: boolean;
+}) {
+  const Icon = section.icon;
   return (
     <Link
-      to={to}
-      activeOptions={{ exact: true }}
+      to={section.to}
+      aria-current={active ? "page" : undefined}
       className={cn(
-        "group flex items-center gap-3 rounded-card font-medium text-kb-stone transition-colors hover:bg-kb-white hover:text-kb-black",
-        mobile ? "flex-col gap-1 px-1 py-2 text-[11px]" : "px-3 py-2.5 text-sm",
+        "relative flex items-center gap-3 rounded-card font-medium transition-colors",
+        mobile
+          ? "flex-col gap-1 px-1 py-2 text-[11px]"
+          : "px-3 py-2.5 text-[15px] hover:bg-kb-sand hover:text-kb-black",
+        active ? (mobile ? "text-kb-black" : "bg-kb-sand text-kb-black") : "text-kb-stone",
       )}
-      activeProps={{ className: "bg-kb-white text-kb-black shadow-kb" }}
     >
-      <Icon className="size-5 shrink-0 stroke-2" />
-      <span>{label}</span>
+      <span className="relative">
+        <Icon className={cn("size-5 shrink-0", active ? "stroke-[2.4]" : "stroke-2")} />
+        {badge && mobile ? (
+          <span className="absolute -right-2.5 -top-1.5 grid min-w-4 place-items-center rounded-pill bg-kb-yellow px-1 text-[10px] font-bold text-kb-black">
+            {badge > 9 ? "9+" : badge}
+          </span>
+        ) : null}
+      </span>
+      <span className="flex-1">{mobile ? section.short : section.label}</span>
+      {badge && !mobile ? (
+        <span className="rounded-pill bg-kb-yellow px-2 py-0.5 text-xs font-bold text-kb-black">
+          {badge}
+        </span>
+      ) : null}
+      {active && mobile ? (
+        <span className="absolute inset-x-5 top-0 h-0.5 rounded-pill bg-kb-black" />
+      ) : null}
     </Link>
+  );
+}
+
+function SubNav({ section, path }: { section: Section; path: string }) {
+  if (!section.sub) return null;
+  return (
+    <nav
+      aria-label={`${section.label} pages`}
+      className="border-b border-kb-hairline bg-kb-white px-4 sm:px-7"
+    >
+      <div className="mx-auto flex max-w-5xl gap-1 overflow-x-auto">
+        {section.sub.map(([label, to]) => {
+          const on = clean(path) === to;
+          return (
+            <Link
+              key={to}
+              to={to}
+              aria-current={on ? "page" : undefined}
+              className={cn(
+                "relative whitespace-nowrap px-3 py-3.5 text-sm font-medium transition-colors",
+                on ? "text-kb-black" : "text-kb-stone hover:text-kb-black",
+              )}
+            >
+              {label}
+              {on ? (
+                <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-pill bg-kb-black" />
+              ) : null}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
 
@@ -147,7 +235,20 @@ export function AppLayout({
   const [signOutError, setSignOutError] = useState("");
   const isStaff = useQuery({ queryKey: ["am-staff"], queryFn: amStaff, staleTime: Infinity });
   const partner = useQuery({ queryKey: ["my-partner"], queryFn: myPartner, staleTime: 60_000 });
-  const mobileMain = appNav.slice(0, 4);
+  const myLoc = useQuery({
+    queryKey: ["my-location"],
+    queryFn: myLatestLocation,
+    enabled: area === "app",
+  });
+  const waiting = useQuery({
+    queryKey: ["waiting-count", myLoc.data?.id],
+    queryFn: () => waitingCount(myLoc.data!.id),
+    enabled: area === "app" && myLoc.data?.status === "active",
+    refetchInterval: 60_000,
+  });
+  const current = sectionFor(location.pathname);
+  const badgeFor = (sec: Section) =>
+    sec.label === "Reviews" && waiting.data ? waiting.data : undefined;
   const areaTitle = area === "partner" ? "Partner" : area === "staff" ? "Staff" : "Business";
 
   async function handleSignOut() {
@@ -169,8 +270,13 @@ export function AppLayout({
         <div className="mt-8 flex-1 overflow-y-auto">
           {area === "app" ? (
             <nav className="space-y-1" aria-label="Business navigation">
-              {appNav.map((item) => (
-                <NavLink key={item[1]} item={item} />
+              {SECTIONS.map((sec) => (
+                <NavLink
+                  key={sec.to}
+                  section={sec}
+                  active={current === sec}
+                  badge={badgeFor(sec)}
+                />
               ))}
             </nav>
           ) : (
@@ -237,6 +343,7 @@ export function AppLayout({
           </DropdownMenu>
         </header>
         <TestModeBanner />
+        {area === "app" && current ? <SubNav section={current} path={location.pathname} /> : null}
         <main>{children}</main>
       </div>
       {area === "app" ? (
@@ -244,31 +351,15 @@ export function AppLayout({
           className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-kb-hairline bg-kb-white px-1 pb-[env(safe-area-inset-bottom)] lg:hidden"
           aria-label="Business navigation"
         >
-          {mobileMain.map((item) => (
-            <NavLink key={item[1]} item={item} mobile />
+          {SECTIONS.map((sec) => (
+            <NavLink
+              key={sec.to}
+              section={sec}
+              active={current === sec}
+              badge={badgeFor(sec)}
+              mobile
+            />
           ))}
-          <Sheet>
-            <SheetTrigger asChild>
-              <button
-                type="button"
-                className="flex flex-col items-center gap-1 rounded-card px-1 py-2 text-[11px] font-medium text-kb-stone"
-                aria-label="More navigation"
-              >
-                <MoreHorizontal className="size-5" />
-                More
-              </button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="rounded-t-large border-kb-hairline bg-kb-white">
-              <SheetHeader>
-                <SheetTitle>More</SheetTitle>
-              </SheetHeader>
-              <nav className="mt-5 grid grid-cols-2 gap-2">
-                {appNav.slice(4).map((item) => (
-                  <NavLink key={item[1]} item={item} />
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
         </nav>
       ) : null}
     </div>

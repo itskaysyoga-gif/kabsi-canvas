@@ -30,7 +30,8 @@ const STATE_LABEL: Record<string, string> = {
 };
 
 function InboxPage() {
-  const [tab, setTab] = useState<"todo" | "done">("todo");
+  // Answered reviews live under "All reviews"; this page is only what still needs a reply.
+  const tab = "todo" as "todo" | "done";
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   const loc = location.data;
   const reviews = useQuery({
@@ -72,25 +73,6 @@ function InboxPage() {
   const list = reviews.data ?? [];
   return (
     <Shell sub={loc.name}>
-      <div className="mb-6 flex gap-2" role="tablist">
-        {(["todo", "done"] as const).map((t) => (
-          <button
-            key={t}
-            type="button"
-            role="tab"
-            aria-selected={tab === t}
-            onClick={() => setTab(t)}
-            className={cn(
-              "rounded-pill px-4 py-2 text-sm font-medium",
-              tab === t
-                ? "bg-kb-black text-kb-white"
-                : "bg-kb-white text-kb-stone hover:text-kb-black",
-            )}
-          >
-            {t === "todo" ? "To reply" : "Done"}
-          </button>
-        ))}
-      </div>
       {reviews.isLoading ? <p className="text-kb-stone">Loading reviews…</p> : null}
       {reviews.error ? (
         <p className="text-kb-red">Couldn't load reviews. Refresh the page.</p>
@@ -122,7 +104,7 @@ function InboxPage() {
 function Shell({ sub, children }: { sub?: string; children: ReactNode }) {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">Inbox</h1>
+      <h1 className="font-display text-4xl leading-none sm:text-5xl">To reply</h1>
       {sub ? <p className="mt-2 text-kb-stone">{sub}</p> : null}
       <div className="mt-7">{children}</div>
     </div>

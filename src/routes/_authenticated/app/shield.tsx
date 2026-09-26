@@ -74,7 +74,7 @@ function ShieldPage() {
   const past = (data.data?.changes ?? []).filter((c) => c.state !== "open");
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">Shield</h1>
+      <h1 className="font-display text-4xl leading-none sm:text-5xl">Listing Shield</h1>
       <p className="mt-2 max-w-2xl text-kb-stone">
         Kabsi watches your Google listing and emails you when something changes. Google sometimes
         accepts edits from the public. Kabsi can't stop that, but it can put your version back in

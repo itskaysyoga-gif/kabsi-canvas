@@ -56,7 +56,10 @@ function ReportPage() {
   });
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">Report</h1>
+      <Link to="/app" className="text-sm font-medium text-kb-stone hover:text-kb-black">
+        ← Home
+      </Link>
+      <h1 className="mt-3 font-display text-4xl leading-none sm:text-5xl">Weekly report</h1>
       <p className="mt-2 text-kb-stone">
         Every Monday morning, a short summary of your week on Google. Facts only.
       </p>

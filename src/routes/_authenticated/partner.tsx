@@ -1,8 +1,8 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Copy } from "lucide-react";
 import { AppLayout } from "@/components/layouts/app-layout";
+import { CopyButton } from "@/components/shared/copy-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -217,26 +217,6 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
       {sub ? <p className="mt-1 text-sm text-kb-stone">{sub}</p> : null}
       <div className="mt-5">{children}</div>
     </section>
-  );
-}
-
-function CopyButton({ text, label }: { text: string; label: string }) {
-  const [done, setDone] = useState(false);
-  return (
-    <Button
-      type="button"
-      size="compact"
-      variant="outline"
-      onClick={() => {
-        void navigator.clipboard?.writeText(text).then(() => {
-          setDone(true);
-          setTimeout(() => setDone(false), 1800);
-        });
-      }}
-    >
-      {done ? <Check /> : <Copy />}
-      {done ? "Copied" : label}
-    </Button>
   );
 }
 

@@ -72,7 +72,7 @@ function ReviewsPage() {
     : null;
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">Reviews</h1>
+      <h1 className="font-display text-4xl leading-none sm:text-5xl">All reviews</h1>
       <p className="mt-2 text-kb-stone">
         {count
           ? `${count} reviews since Kabsi started · average ${avg} of 5`

@@ -2,10 +2,11 @@
 // only calls them as the signed-in user and sends the emails around them.
 //   POST /partner/invite   partner member  { partner_id, email, name? }        → invite row + email to the business
 //   POST /partner/claim    partner member  { invoice_id, network, tx_ref }     → USDT claim + alert to hello@kabsi.co
-//   POST /partner/decide   staff           { claim_id, confirm, note? }        → invoice paid + "payment received" email
+//   POST /partner/plan-claim owner         { location_id, item, network, tx_ref } → owner Pro paid in USDT (kind 'plan')
+//   POST /partner/decide   staff           { claim_id, confirm, note? }        → invoice paid / plan started + "payment received" email
 //   POST /partner/billing  internal (x-cron-secret, pg_cron daily 06:10 UTC)  → last month's invoices + emails
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
-import { admin, APP_URL, captureError, CORS, emailLayout, esc, fail, isInternal, jobLog, json, log, sendEmail } from "../_shared/kabsi.ts";
+import { admin, APP_URL, captureError, CORS, emailLayout, esc, fail, isInternal, jobLog, json, log, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 
 const FN = "partner";
 const TRC20 = "TMbdkH9hY14RGgz9N99DCXu3LXGDZBDqMe";
@@ -23,6 +24,8 @@ const FRIENDLY: Record<string, string> = {
   bad_network: "Choose TRC20 or Binance Pay.",
   already_decided: "This payment was already confirmed or rejected.",
   unknown_claim: "Payment not found.",
+  plan_through_partner: "Your plan comes through your Kabsi partner, so there's nothing to pay here.",
+  bad_plan: "Choose 6 or 12 months.",
 };
 
 // Runs RPCs as the caller, so auth.uid() and every membership check apply exactly as in the browser.
@@ -113,6 +116,35 @@ async function claim(req: Request) {
   return json({ ok: true, claim_id: claimId });
 }
 
+// ── owner says they paid Kabsi Pro in USDT
+const PLAN_LABEL: Record<string, string> = { pro_6m: "Kabsi Pro, 6 months", pro_12m: "Kabsi Pro, 12 months" };
+async function planClaim(req: Request) {
+  const b = await req.json().catch(() => ({})) as { location_id?: string; item?: string; network?: string; tx_ref?: string };
+  const tx = (b.tx_ref ?? "").trim();
+  if (!b.location_id || !b.item || !tx) return fail("bad_input", "Paste the transaction ID.");
+  const { data: claimId, error } = await asUser(req).rpc("owner_submit_claim", {
+    p_location: b.location_id, p_item: b.item, p_network: b.network, p_tx_ref: tx,
+  });
+  if (error) return rpcFail(error);
+  const { data: loc } = await admin().from("locations").select("name").eq("id", b.location_id).single();
+  const { data: c } = await admin().from("usdt_claims").select("amount_usd").eq("id", claimId).single();
+  const net = b.network === "trc20" ? "USDT TRC20" : "Binance Pay";
+  const check = b.network === "trc20" ? ` <a href="https://tronscan.org/#/transaction/${encodeURIComponent(tx)}" style="color:#111111;">Check on Tronscan</a>` : "";
+  await sendEmail({
+    kind: "usdt_claim_alert", to: "hello@kabsi.co", locationId: b.location_id, dedupeKey: `usdt_claim:${claimId}`,
+    subject: `USDT to check: ${loc?.name ?? "a business"}, ${money(c?.amount_usd ?? 0)}`,
+    html: emailLayout({
+      preheader: "An owner says they paid.", title: "Payment to check",
+      bodyHtml: p(`<strong>${esc(loc?.name ?? "A business")}</strong> says they paid for ${PLAN_LABEL[b.item] ?? b.item} (${money(c?.amount_usd ?? 0)}).`) +
+        p(`${net}: <code>${esc(tx)}</code>.${check}`) + p("Confirm it in Staff once the money is in the wallet. Confirming starts the plan."),
+      button: { label: "Open Staff", url: `${APP_URL}/staff` },
+    }),
+    text: `${loc?.name ?? "A business"} says they paid for ${PLAN_LABEL[b.item] ?? b.item} (${money(c?.amount_usd ?? 0)}).\n${net}: ${tx}\n\nConfirm in Staff: ${APP_URL}/staff`,
+  }).catch((e) => captureError(FN, e, { route: "plan-claim" }));
+  log(FN, { ok: true, route: "plan-claim", location_id: b.location_id });
+  return json({ ok: true, claim_id: claimId });
+}
+
 // ── staff confirm or reject a claim
 async function decide(req: Request) {
   const b = await req.json().catch(() => ({})) as { claim_id?: string; confirm?: boolean; note?: string };
@@ -124,7 +156,21 @@ async function decide(req: Request) {
 
   if (status === "confirmed") {
     const { data: c } = await admin().from("usdt_claims")
-      .select("partner_id, amount_usd, partner_invoices(month)").eq("id", b.claim_id).single();
+      .select("kind, partner_id, location_id, item, amount_usd, partner_invoices(month)").eq("id", b.claim_id).single();
+    if (c?.kind === "plan" && c.location_id) {
+      const { data: plan } = await admin().from("plans").select("starts_at, ends_at")
+        .eq("location_id", c.location_id).eq("status", "active").order("ends_at", { ascending: false }).limit(1).maybeSingle();
+      const until = plan?.ends_at ? new Date(plan.ends_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : null;
+      const line = `We received your payment of ${money(c.amount_usd ?? 0)} for ${PLAN_LABEL[c.item ?? ""] ?? "Kabsi Pro"}.${until ? ` Your plan runs until ${until}.` : ""} Thank you.`;
+      for (const to of await ownerEmails(c.location_id)) {
+        await sendEmail({
+          kind: "payment_received", to, locationId: c.location_id, dedupeKey: `payment_received:${b.claim_id}:${to}`,
+          subject: "Payment received",
+          html: emailLayout({ preheader: "Thank you.", title: "Payment received", bodyHtml: p(esc(line)), button: { label: "Open Kabsi", url: `${APP_URL}/app` } }),
+          text: `${line}\n\n${APP_URL}/app`,
+        }).catch((e) => captureError(FN, e, { route: "decide" }));
+      }
+    }
     const month = (c?.partner_invoices as unknown as { month: string } | null)?.month;
     if (c?.partner_id && month) {
       for (const to of await recipients(c.partner_id)) {
@@ -192,6 +238,7 @@ Deno.serve(async (req) => {
     if (!/^Bearer\s+\S+/i.test(req.headers.get("authorization") ?? "")) return fail("unauthorized", "Please log in again.", 401);
     if (route === "invite") return await invite(req);
     if (route === "claim") return await claim(req);
+    if (route === "plan-claim") return await planClaim(req);
     if (route === "decide") return await decide(req);
     return fail("not_found", "Unknown route.", 404);
   } catch (e) {

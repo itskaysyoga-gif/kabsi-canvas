@@ -530,7 +530,11 @@ export function DoneStep({ location }: { location: Location | null }) {
             Binance Pay ID: <span className="font-mono">User-2ad9b</span>
           </p>
           <p className="mt-2 text-kb-stone">
-            After paying, send the transaction reference to hello@kabsi.co.
+            After paying in USDT, paste the transaction ID on your{" "}
+            <a href="/app/plan" className="font-medium text-kb-ink underline">
+              Plan page
+            </a>
+            .
           </p>
         </div>
       ) : null}
