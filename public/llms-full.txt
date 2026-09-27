@@ -689,6 +689,9 @@ No. Kabsi is independent and not affiliated with Google. It works through Google
 **Where is Kabsi based?**
 Kabsi is an independent business based in Beirut, Lebanon, serving businesses in any country.
 
+**Who runs Kabsi?**
+Kabsi was founded by Rasheed, who runs it from Beirut with a small team. You can reach the team, and Rasheed, at hello@kabsi.co.
+
 **Do I need to install anything?**
 No. Kabsi works from your email and your phone's web browser.
 
