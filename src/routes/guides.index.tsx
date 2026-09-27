@@ -4,7 +4,7 @@ import { PublicLayout } from "@/components/layouts/public-layout";
 import { CtaBand, IconBadge, PageHero, Section } from "@/components/marketing/parts";
 import { GUIDE_ICONS, GuidesVisual } from "@/components/marketing/visuals";
 import { GUIDES, type Guide } from "@/lib/guides";
-import { PHOTOS, photoFallback, photoSrcSet } from "@/lib/site-photos";
+import { SiteImg } from "@/components/marketing/site-img";
 import { pageHead } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -45,7 +45,6 @@ function Page() {
 }
 
 function GuideCard({ g, featured = false }: { g: Guide; featured?: boolean }) {
-  const p = PHOTOS[g.photo];
   return (
     <li className={cn(featured && "md:col-span-2")}>
       <Link
@@ -62,15 +61,9 @@ function GuideCard({ g, featured = false }: { g: Guide; featured?: boolean }) {
             featured ? "aspect-[16/9] md:aspect-auto md:h-full" : "aspect-[16/9]",
           )}
         >
-          <img
-            src={photoFallback(g.photo, 800)}
-            srcSet={photoSrcSet(g.photo)}
+          <SiteImg
+            id={g.photo}
             sizes={featured ? "(min-width: 768px) 600px, 100vw" : "(min-width: 768px) 540px, 100vw"}
-            alt={p.alt}
-            width={p.w}
-            height={p.h}
-            loading="lazy"
-            decoding="async"
             className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
           <IconBadge

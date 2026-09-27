@@ -97,19 +97,21 @@ export function renderReport(loc: Loc, r: Report) {
     row("Google rating", esc(ratingText) + (r.rating_count != null ? `<br><span style="font-weight:400;color:#5E5B55;font-size:14px;">${r.rating_count} reviews in total</span>` : "")),
     row("New reviews", String(r.new_reviews) + (r.new_avg != null ? `<br><span style="font-weight:400;color:#5E5B55;font-size:14px;">average ${r.new_avg.toFixed(1)} of 5</span>` : "")),
     row("Replied", `${r.replied} of ${r.new_reviews}`),
-    row("Card taps", r.taps.total ? `${r.taps.total}<br><span style="font-weight:400;color:#5E5B55;font-size:14px;">${r.taps.nfc} tap · ${r.taps.qr} QR</span>` : "0"),
+    row("Card and link opens", r.taps.total ? `${r.taps.total}<br><span style="font-weight:400;color:#5E5B55;font-size:14px;">${r.taps.nfc} tap · ${r.taps.qr} QR</span>` : "0"),
   ].join("");
+  // Honest about what a tap is (D257): an open of the review page, not a review.
+  const tapNote = `<p style="margin:10px 0 0 0;color:#5E5B55;font-size:14px;">Opens count how often your card or link opened your Google review page. They don't show whether a review was written.</p>`;
   const drop = r.rating_drop ? `<p style="margin:0 0 16px 0;padding:12px 14px;border:2px solid #111111;border-radius:14px;">Your Google rating went down ${Math.abs(r.rating_change!).toFixed(1)} this week.</p>` : "";
   const quotes = r.quotes.length
     ? `<p style="margin:22px 0 8px 0;font-weight:700;">What customers wrote</p>` + r.quotes.map((q) => `<p style="margin:0 0 8px 0;padding:10px 14px;background:#F6F4EF;border-radius:14px;" dir="auto">“${esc(q)}”</p>`).join("")
     : "";
   const waiting = r.waiting ? `<p style="margin:18px 0 0 0;">${r.waiting} ${r.waiting === 1 ? "review is" : "reviews are"} waiting for your reply.</p>` : "";
   const html = `<p style="margin:0 0 16px 0;color:#5E5B55;">${esc(loc.name)} · ${esc(r.period.from)} to ${esc(r.period.to)}</p>${drop}
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:16px;">${rows}</table>${quotes}${waiting}`;
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:16px;">${rows}</table>${tapNote}${quotes}${waiting}`;
   const text = [
     `${loc.name}, ${r.period.from} to ${r.period.to}`,
     `Google rating: ${ratingText}`,
-    `New reviews: ${r.new_reviews}`, `Replied: ${r.replied} of ${r.new_reviews}`, `Card taps: ${r.taps.total}`,
+    `New reviews: ${r.new_reviews}`, `Replied: ${r.replied} of ${r.new_reviews}`, `Card and link opens: ${r.taps.total} (opens of your review page, not reviews)`,
     ...r.quotes.map((q) => `"${q}"`),
     r.waiting ? `${r.waiting} waiting for your reply.` : "",
   ].filter(Boolean).join("\n");

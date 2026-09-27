@@ -1,7 +1,7 @@
 // Post drafting shared by `content` (owner asks) and `posts-weekly` (Kabsi drafts once a week).
 // Every post is a draft until the owner clicks Post on the exact text (D202).
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
-import { message, noDashes, parseJson } from "./ai.ts";
+import { fenceReview, message, noDashes, parseJson, UNTRUSTED } from "./ai.ts";
 import { googleMode, placeCategory, searchKeywords } from "./google.ts";
 
 const DRAFT_MODEL = "claude-sonnet-5";
@@ -47,15 +47,15 @@ function cardFacts(card: Record<string, unknown>) {
 }
 export const hasFacts = (card: Record<string, unknown>) => cardFacts(card).length > 0;
 
-// Phrases customers use in good reviews (Haiku), e.g. "knafeh", "fast delivery". Topics, never quotes.
+// Phrases customers use in good reviews (Haiku), e.g. "croissants", "fast delivery". Topics, never quotes.
 async function reviewPhrases(db: SupabaseClient, locId: string) {
   const { data } = await db.from("reviews").select("comment").eq("location_id", locId).gte("star_rating", 4)
     .not("comment", "is", null).order("review_created_at", { ascending: false }).limit(40);
-  const text = (data ?? []).map((r) => String(r.comment).slice(0, 400)).join("\n---\n");
+  const text = (data ?? []).map((r) => fenceReview({ reviewer: "", rating: 5, comment: String(r.comment).slice(0, 400) })).join("\n");
   if (text.length < 40) return [];
   try {
     const out = await message(CHECK_MODEL,
-      `From these customer reviews, list up to 6 short phrases (1 to 4 words) naming the specific products, dishes or services customers mention most, the way someone would search for them (e.g. \"manakish\", \"home delivery\", \"kids haircut\"). Use the reviews' own words and language. No generic praise (\"great food\", \"amazing staff\", \"nice place\"), no names of people, no ratings. Return fewer or none rather than generic ones. JSON only: {"phrases": ["..."]}`,
+      `From these customer reviews, list up to 6 short phrases (1 to 4 words) naming the specific products, dishes or services customers mention most, the way someone would search for them (e.g. \"croissants\", \"home delivery\", \"kids haircut\"). Use the reviews' own words and language. No generic praise (\"great food\", \"amazing staff\", \"nice place\"), no names of people, no ratings. Return fewer or none rather than generic ones. ${UNTRUSTED} JSON only: {"phrases": ["..."]}`,
       text, 200);
     return (parseJson<{ phrases?: string[] }>(out).phrases ?? []).map(String).map((p) => p.trim()).filter((p) => p && p.length <= 40).slice(0, 6);
   } catch { return []; }
@@ -88,8 +88,8 @@ Rules:
 - Use ONLY what the owner wrote and these facts, exactly as given (don't add "every day" or anything else they didn't say):
 ${facts.length ? facts.map((f) => `  * ${f}`).join("\n") : "  * (no extra facts)"}
 - Never invent prices, dates, offers, awards, numbers or claims. Never quote or mention reviews, ratings, rankings, SEO or "best in town". Never ask for reviews.
-${keywords.length ? `- Search phrases: ${keywords.join("; ")}. Work the most relevant one into the first sentence, within the first 80 characters, as normal speech (e.g. "our bakery in Hamra"). Use others only where they read naturally. Never list them.\n` : ""}- No phone numbers, links or URLs in the text (the button handles that).
-- Never use em dashes or en dashes as punctuation. Use a comma or a full stop instead.
+${keywords.length ? `- Search phrases: ${keywords.join("; ")}. Work the most relevant one into the first sentence, within the first 80 characters, as normal speech (e.g. "our bakery in Park Slope"). Use others only where they read naturally. Never list them.\n` : ""}- No phone numbers, links or URLs in the text (the button handles that).
+${typeof loc.knowledge_card?.avoid === "string" && loc.knowledge_card.avoid.trim() ? `- The owner asked never to mention or promise: ${loc.knowledge_card.avoid.trim()}\n` : ""}- Never use em dashes or en dashes as punctuation. Use a comma or a full stop instead.
 Output only the post text.`;
 }
 

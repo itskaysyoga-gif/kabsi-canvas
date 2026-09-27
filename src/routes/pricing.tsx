@@ -20,9 +20,9 @@ export const Route = createFileRoute("/pricing")({
 });
 
 const PRO = [
-  "Grounded AI reply for every new Google review, in the reviewer's language",
+  "A reply drafted for every new Google review, in the reviewer's language",
   "One-tap approval from your email or dashboard",
-  "A weekly keyword post drafted for you, with an action button",
+  "A weekly Google update drafted for you, with an action button",
   "Listing Shield: change alerts and one-tap revert",
   "Photos checked and special hours set in a minute",
   "Profile health on your dashboard and a Monday report",

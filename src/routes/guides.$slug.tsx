@@ -7,7 +7,8 @@ import { GUIDE_ICONS } from "@/components/marketing/visuals";
 import { KabsiMark } from "@/components/shared/kabsi-logo";
 import { Button } from "@/components/ui/button";
 import { GUIDES, guideBySlug } from "@/lib/guides";
-import { PHOTOS, photoFallback, photoSrc, photoSrcSet } from "@/lib/site-photos";
+import { photoSrc } from "@/lib/site-photos";
+import { SiteImg } from "@/components/marketing/site-img";
 import { ORG_LD, SITE_URL, pageHead } from "@/lib/site";
 
 // One guide (D253, D256). Content lives in src/lib/guides.tsx, building blocks in guide-kit.tsx.
@@ -25,7 +26,6 @@ export const Route = createFileRoute("/guides/$slug")({
       title: `${g.title} | Kabsi`,
       description: g.description,
       path: `/guides/${g.slug}`,
-      image,
       jsonLd: [
         {
           "@context": "https://schema.org",
@@ -144,7 +144,6 @@ function Page() {
         <h2 className="font-display text-3xl leading-tight">More guides</h2>
         <ul data-stagger="" className="mt-6 grid gap-4 md:grid-cols-3">
           {more.map((m) => {
-            const p = PHOTOS[m.photo];
             return (
               <li key={m.slug}>
                 <Link
@@ -153,15 +152,10 @@ function Page() {
                   className="kb-lift group flex h-full flex-col overflow-hidden rounded-large bg-kb-white shadow-kb"
                 >
                   <span className="block aspect-[16/9] overflow-hidden bg-kb-hairline">
-                    <img
-                      src={photoFallback(m.photo, 480)}
-                      srcSet={photoSrcSet(m.photo)}
+                    <SiteImg
+                      id={m.photo}
+                      min={480}
                       sizes="(min-width: 768px) 360px, 100vw"
-                      alt={p.alt}
-                      width={p.w}
-                      height={p.h}
-                      loading="lazy"
-                      decoding="async"
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   </span>

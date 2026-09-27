@@ -22,6 +22,7 @@ type Row = {
   state: string;
   existing_reply: string | null;
   review_created_at: string | null;
+  content_purged_at: string | null;
 };
 const STATE: Record<string, string> = {
   new: "Drafting",
@@ -42,7 +43,9 @@ const FILTERS = [
 async function loadReviews(locationId: string): Promise<Row[]> {
   const { data, error } = await supabase
     .from("reviews")
-    .select("id, reviewer_name, star_rating, comment, state, existing_reply, review_created_at")
+    .select(
+      "id, reviewer_name, star_rating, comment, state, existing_reply, review_created_at, content_purged_at",
+    )
     .eq("location_id", locationId)
     .order("review_created_at", { ascending: false })
     .limit(200);
@@ -118,9 +121,15 @@ function ReviewsPage() {
               </span>
             </div>
             <p dir="auto" className="mt-2 whitespace-pre-wrap leading-7">
-              {r.comment || (
-                <span className="text-kb-stone">No written review, just a rating.</span>
-              )}
+              {r.comment ||
+                (r.content_purged_at ? (
+                  <span className="text-kb-stone">
+                    Google's rules let Kabsi keep review text for 30 days. Read it on your Google
+                    profile.
+                  </span>
+                ) : (
+                  <span className="text-kb-stone">No written review, just a rating.</span>
+                ))}
             </p>
             {r.existing_reply ? (
               <p

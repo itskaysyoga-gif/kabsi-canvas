@@ -12,9 +12,9 @@ import {
   MailCheck,
   Newspaper,
   QrCode,
-  Search,
+  MapPin,
+  MousePointerClick,
   ShieldCheck,
-  Sparkles,
   UserPlus,
 } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
@@ -30,9 +30,9 @@ export const Route = createFileRoute("/")({
   validateSearch: z.object({ sticker: z.enum(["disabled"]).optional().catch(undefined) }),
   head: () =>
     pageHead({
-      title: "Kabsi | AI local SEO for your Google Business Profile",
+      title: "Kabsi | Your Google Business Profile, taken care of",
       description:
-        "Grounded AI replies to every Google review, weekly keyword posts and a listing guard that watches your profile. Nothing goes on Google until you approve it.",
+        "Kabsi drafts a reply to every Google review in your customer's language, keeps your profile fresh and tells you when your details change. Nothing goes on Google until you approve it.",
       path: "/",
       jsonLd: [ORG_LD, WEBSITE_LD, PRODUCT_LD],
     }),
@@ -58,20 +58,21 @@ function HomePage() {
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:py-28">
           <div>
             <p className="inline-flex items-center gap-2 rounded-pill border border-white/15 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-kb-yellow">
-              <Sparkles className="size-4" aria-hidden="true" />
-              AI local SEO and profile growth engine
+              <MapPin className="size-4" aria-hidden="true" />
+              For local businesses on Google Maps
             </p>
             <h1 className="mt-6 font-display text-[clamp(2.7rem,6.6vw,5.2rem)] leading-[0.95]">
-              Build maximum local visibility on Google Maps.
+              Your Google Business Profile, taken care of.
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-8 text-kb-stone-on-dark">
-              Grounded AI replies to every review, weekly search-optimized posts, and a listing
-              guard that watches your profile around the clock. You approve everything with one tap.
+              Kabsi drafts a reply to every Google review in your customer's language, keeps your
+              profile fresh, and tells you when your details change. Nothing goes on Google until
+              you tap approve.
             </p>
             <div className="mt-9 grid gap-3 sm:flex">
               <Button asChild className="w-full sm:w-auto">
                 <Link to="/start">
-                  Start growing your profile <ArrowRight />
+                  Get started <ArrowRight />
                 </Link>
               </Button>
               <Button
@@ -79,18 +80,16 @@ function HomePage() {
                 variant="outline"
                 className="w-full border-kb-white text-kb-white hover:bg-kb-white/10 sm:w-auto"
               >
-                <a href="#demo">Try the 1-click demo</a>
+                <a href="#demo">Try the demo</a>
               </Button>
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm text-kb-stone-on-dark">
-              {["Built for Google Business Profiles", "Set up in minutes", "NFC card optional"].map(
-                (t) => (
-                  <li key={t} className="flex items-center gap-2">
-                    <Check className="size-4 text-kb-yellow" aria-hidden="true" />
-                    {t}
-                  </li>
-                ),
-              )}
+              {["You approve everything", "Set up in minutes", "Any language"].map((t) => (
+                <li key={t} className="flex items-center gap-2">
+                  <Check className="size-4 text-kb-yellow" aria-hidden="true" />
+                  {t}
+                </li>
+              ))}
             </ul>
           </div>
           <div id="demo" className="flex scroll-mt-24 justify-center lg:justify-end">
@@ -113,12 +112,12 @@ function HomePage() {
         <BusinessGrid className="mt-10" />
       </Section>
 
-      {/* 1. Review command center */}
+      {/* 1. Reviews */}
       <Section>
         <div className="grid gap-12 lg:grid-cols-2">
           <div>
-            <Eyebrow>AI review command center</Eyebrow>
-            <H2>Every review answered, in your customer's language.</H2>
+            <Eyebrow>Reviews</Eyebrow>
+            <H2>Never wonder what to reply again.</H2>
             <p className="mt-5 max-w-xl text-lg leading-8 text-kb-stone">
               Each new Google review reaches your email with a reply already drafted. Drafts only
               use the facts you gave Kabsi, so nothing is made up. Read it, change it if you like,
@@ -129,7 +128,7 @@ function HomePage() {
             <Point icon={<Languages />} title="English, Spanish, Arabic, French and more">
               Replies match the reviewer's language. Hard reviews get a calm, careful draft.
             </Point>
-            <Point icon={<FileText />} title="Grounded in your facts">
+            <Point icon={<FileText />} title="Written from your facts">
               Hours, phone, what you want mentioned, your answers to common questions. Nothing else.
             </Point>
             <Point icon={<MailCheck />} title="One-tap approval">
@@ -139,21 +138,20 @@ function HomePage() {
         </div>
       </Section>
 
-      {/* 2. Maps visibility engine */}
+      {/* 2. Keep the profile fresh */}
       <Section tone="sand">
-        <Eyebrow>Google Maps visibility engine</Eyebrow>
-        <H2>A fresh, keyword-rich post every week.</H2>
+        <Eyebrow>Keep your profile fresh</Eyebrow>
+        <H2>Updates, photos and hours, ready for your OK.</H2>
         <p className="mt-5 max-w-2xl text-lg leading-8 text-kb-stone">
-          Kabsi drafts one Google post a week from your facts, using the words customers use for
-          businesses like yours: your category and area, what reviews mention most, and once
-          connected, the searches that found you. The strongest phrase goes in the first line, where
-          Google shows it.
+          Kabsi drafts one short Google update a week from what you told it, in the words customers
+          use for businesses like yours. Add a photo from your phone and Kabsi checks it first. Set
+          holiday hours in a minute. You don't have to write any of it yourself.
         </p>
         <div data-stagger="" className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Feature icon={<Search />} title="Search phrases built in">
-            Like "bakery in Brooklyn", written as normal speech, never keyword lists.
+          <Feature icon={<Newspaper />} title="Written like a person">
+            Like "our bakery in Brooklyn", as normal speech, never a list of keywords.
           </Feature>
-          <Feature icon={<Newspaper />} title="Action buttons">
+          <Feature icon={<MousePointerClick />} title="Action buttons">
             Call, Book, Order online, Shop, Learn more or Sign up, on every post you choose.
           </Feature>
           <Feature icon={<ImagePlus />} title="Photos, checked">
@@ -163,9 +161,10 @@ function HomePage() {
             Holidays and closures in a minute, so customers don't find a closed door.
           </Feature>
         </div>
-        <p className="mt-6 text-sm text-kb-stone">
-          Posts go out at the time that suits your trade: shops and restaurants before the weekend,
-          clinics and offices early in the week. Every draft waits for your approval.
+        <p className="mt-6 max-w-3xl text-sm leading-6 text-kb-stone">
+          Drafts arrive at the time that suits your trade: shops and restaurants before the weekend,
+          clinics and offices early in the week. Updates keep customers informed; Google doesn't say
+          they change your ranking, so we don't either.
         </p>
       </Section>
 
@@ -173,14 +172,15 @@ function HomePage() {
       <Section className="grid items-center gap-12 md:grid-cols-2">
         <div>
           <Eyebrow>Listing Shield</Eyebrow>
-          <H2>A profile guard that never sleeps.</H2>
+          <H2>Know when something changes on Google.</H2>
           <p className="mt-5 max-w-xl text-lg leading-8 text-kb-stone">
-            Google sometimes accepts edits from the public. Kabsi watches your name, phone, address,
-            hours, website and category, emails you when something changes, and puts yours back with
-            one tap.
+            Google sometimes accepts edits from the public. Kabsi quietly watches your name, phone,
+            address, hours, website and category. If one changes, you get an email with before and
+            after, and your details go back only if you say so.
           </p>
           <p className="mt-4 max-w-xl text-sm leading-6 text-kb-stone">
-            Nobody can lock a Google listing. Kabsi tells you fast and restores it when you say so.
+            Most weeks nothing changes, and that's the point. Nobody can lock a Google listing;
+            Kabsi tells you fast.
           </p>
         </div>
         <div className="rounded-large bg-kb-carbon p-6 text-kb-white shadow-kb">
@@ -222,12 +222,13 @@ function HomePage() {
           </p>
         </div>
         <div className="order-1 md:order-2">
-          <Eyebrow>Optional physical touchpoints</Eyebrow>
+          <Eyebrow>Make reviewing easy</Eyebrow>
           <H2>One tap opens your Google review page.</H2>
           <p className="mt-5 max-w-xl text-lg leading-8 text-kb-stone">
             Put an acrylic NFC card on your counter, door or table. Customers tap it with their
             phone or scan the QR code. Every customer sees the same Google review page: there's no
-            rating screen and no filtering.
+            rating screen and no filtering. Ask everyone the same way, and never offer a reward for
+            a review: Google doesn't allow it.
           </p>
           <ul className="mt-6 space-y-3 text-kb-ink">
             <li className="flex gap-3">
@@ -259,7 +260,8 @@ function HomePage() {
             How you sign off, your hours, what you want mentioned. Replies and posts only use these.
           </Step>
           <Step n={3} icon={<MailCheck />} title="Approve with one tap">
-            Replies and posts arrive ready. Edit, skip or post. Nothing goes on Google without you.
+            Replies and updates arrive ready. Edit, skip or post. Every Monday, a short email shows
+            your week.
           </Step>
         </ol>
       </Section>

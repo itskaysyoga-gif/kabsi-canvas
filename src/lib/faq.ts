@@ -21,7 +21,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Will Kabsi get me more reviews, a better rating or a higher ranking?",
-    a: "We don't promise that, and nobody honest can. Google decides local results by relevance, distance and prominence. Kabsi does the parts you control: every review gets a reply, a keyword-rich post goes up each week you approve one, your details stay accurate, and leaving a review is one tap for every customer.",
+    a: "We don't promise that, and nobody honest can. Google decides local results by relevance, distance and prominence. Kabsi does the parts you control: every review gets a reply, your details stay accurate, your profile stays up to date, and leaving a review is one tap for every customer. Replies and posts help customers; Google doesn't say they raise your ranking.",
   },
   {
     q: "Do I need an NFC card?",

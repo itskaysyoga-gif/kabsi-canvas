@@ -25,9 +25,10 @@ export function pageHead(o: {
   path: string;
   jsonLd?: Record<string, unknown>[];
   noindex?: boolean;
-  /** Absolute URL of a page-specific share image; defaults to og.png. */
-  image?: string;
 }) {
+  // Share image: one designed 1200x630 PNG, because some link previews (LinkedIn, older WhatsApp) skip WebP.
+  // Page photos are WebP and reach search through the image sitemap and Article JSON-LD instead.
+  const og = `${SITE_URL}/og.png`;
   const url = `${SITE_URL}${o.path === "/" ? "" : o.path}`;
   const meta: Meta[] = [
     { title: o.title },
@@ -37,9 +38,20 @@ export function pageHead(o: {
     { property: "og:type", content: "website" },
     { property: "og:url", content: url },
     { property: "og:site_name", content: "Kabsi" },
-    { property: "og:image", content: o.image ?? `${SITE_URL}/og.png` },
+    { property: "og:image", content: og },
+    { property: "og:image:type", content: "image/png" },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    {
+      property: "og:image:alt",
+      content: "Kabsi: Every Google review, answered. You just tap Post.",
+    },
     { name: "twitter:card", content: "summary_large_image" },
-    { name: "twitter:image", content: o.image ?? `${SITE_URL}/og.png` },
+    { name: "twitter:image", content: og },
+    {
+      name: "twitter:image:alt",
+      content: "Kabsi: Every Google review, answered. You just tap Post.",
+    },
   ];
   if (o.noindex) meta.push({ name: "robots", content: "noindex" });
   return {

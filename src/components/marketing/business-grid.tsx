@@ -11,7 +11,8 @@ import {
   Stethoscope,
   UtensilsCrossed,
 } from "lucide-react";
-import { PHOTOS, photoFallback, photoSrcSet, type PhotoId } from "@/lib/site-photos";
+import type { PhotoId } from "@/lib/site-photos";
+import { SiteImg } from "@/components/marketing/site-img";
 import { cn } from "@/lib/utils";
 
 const TYPES: { id: PhotoId; label: string; icon: ReactNode }[] = [
@@ -29,21 +30,15 @@ export function BusinessGrid({ className }: { className?: string }) {
   return (
     <ul data-stagger="" className={cn("grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4", className)}>
       {TYPES.map((t) => {
-        const p = PHOTOS[t.id];
         return (
           <li
             key={t.id}
             className="group relative aspect-[4/5] overflow-hidden rounded-large bg-kb-carbon"
           >
-            <img
-              src={photoFallback(t.id, 480)}
-              srcSet={photoSrcSet(t.id)}
+            <SiteImg
+              id={t.id}
+              min={480}
               sizes="(min-width: 1024px) 270px, 50vw"
-              alt={p.alt}
-              width={p.w}
-              height={p.h}
-              loading="lazy"
-              decoding="async"
               className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
             <div

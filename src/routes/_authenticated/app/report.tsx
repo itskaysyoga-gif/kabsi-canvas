@@ -112,11 +112,14 @@ function ReportPage() {
               />
               <Stat label="Replied" value={`${r.replied} of ${r.new_reviews}`} />
               <Stat
-                label="Card taps"
+                label="Card and link opens"
                 value={String(r.taps.total)}
                 sub={r.taps.total ? `${r.taps.nfc} tap · ${r.taps.qr} QR` : undefined}
               />
             </div>
+            <p className="mt-3 text-xs leading-5 text-kb-stone">
+              Opens count how often your review page was opened, not how many reviews were written.
+            </p>
             {r.quotes.length ? (
               <div className="mt-5">
                 <p className="text-sm font-bold">What customers wrote</p>

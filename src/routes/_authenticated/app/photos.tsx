@@ -174,7 +174,15 @@ function PhotoCard({
   return (
     <article className="overflow-hidden rounded-large bg-kb-white shadow-kb">
       {url ? (
-        <img src={url} alt="" className="aspect-[4/3] w-full object-cover" />
+        <img
+          src={url}
+          alt="Your photo"
+          width={800}
+          height={600}
+          loading="lazy"
+          decoding="async"
+          className="aspect-[4/3] w-full object-cover"
+        />
       ) : (
         <div className="aspect-[4/3] w-full bg-kb-sand" />
       )}

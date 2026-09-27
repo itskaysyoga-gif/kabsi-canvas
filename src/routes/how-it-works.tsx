@@ -132,12 +132,12 @@ function Page() {
             and <b>Keep the new one</b>. It can't lock your listing or stop people suggesting edits
             to Google, and we won't pretend it can.
           </Card>
-          <Card icon={<Megaphone />} title="Weekly keyword posts">
-            Once a week Kabsi drafts a short post from your facts, with the phrase customers search
-            for (like your category and area) in the first line and a button like Call or Book. It
-            arrives by email: shops and restaurants on Thursday morning, clinics and offices on
-            Tuesday. You can also say what's new in a sentence any day. You post it, change it, or
-            skip it. Weekly drafts can be switched off.
+          <Card icon={<Megaphone />} title="A weekly update, drafted for you">
+            Once a week Kabsi drafts a short Google update from your facts, in the words customers
+            use for businesses like yours, with a button like Call or Book. It arrives by email:
+            shops and restaurants on Thursday morning, clinics and offices on Tuesday. You can also
+            say what's new in a sentence any day. You post it, change it, or skip it. Weekly drafts
+            can be switched off.
           </Card>
           <Card icon={<Camera />} title="Photos">
             Upload a photo from your phone. Kabsi checks that it's clear and fits Google's photo

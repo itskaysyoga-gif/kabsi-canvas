@@ -295,6 +295,7 @@ export function KnowledgeStep({
   const [hours, setHours] = useState(card.hours_note ?? "");
   const [mention, setMention] = useState(card.mention ?? "");
   const [staff, setStaff] = useState((card.staff_names ?? []).join(", "));
+  const [avoid, setAvoid] = useState(card.avoid ?? "");
   const [faqs, setFaqs] = useState<Faq[]>(() =>
     ((card["faqs"] as Faq[] | undefined) ?? []).filter((f) => f && (f.q || f.a)),
   );
@@ -321,6 +322,7 @@ export function KnowledgeStep({
           .map((s) => s.trim())
           .filter(Boolean)
           .slice(0, 20),
+        avoid: avoid.trim(),
         faqs: faqs
           .map((f) => ({ q: f.q.trim(), a: f.a.trim() }))
           .filter((f) => f.q && f.a)
@@ -348,7 +350,7 @@ export function KnowledgeStep({
         required
         value={signature}
         onChange={(e) => setSignature(e.target.value)}
-        placeholder={`e.g. Rami, ${location.name}`}
+        placeholder={`e.g. Luca, ${location.name}`}
         className={field}
         maxLength={80}
       />
@@ -414,6 +416,17 @@ export function KnowledgeStep({
         onChange={(e) => setStaff(e.target.value)}
         className={field}
         maxLength={300}
+      />
+      <Label htmlFor="avoid" className="mt-5 block">
+        Anything Kabsi should never say or promise <span className="text-kb-stone">(optional)</span>
+      </Label>
+      <Textarea
+        id="avoid"
+        value={avoid}
+        onChange={(e) => setAvoid(e.target.value)}
+        placeholder="e.g. Don't promise same-day delivery. Don't mention the old location."
+        className="mt-2 min-h-20 rounded-card px-4 py-3 text-base"
+        maxLength={400}
       />
       {mode === "settings" ? (
         <fieldset className="mt-6">

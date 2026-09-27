@@ -4,7 +4,8 @@ import { ArrowRight, Nfc, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KabsiMark } from "@/components/shared/kabsi-logo";
 import { cn } from "@/lib/utils";
-import { PHOTOS, photoFallback, photoSrcSet, type PhotoId } from "@/lib/site-photos";
+import type { PhotoId } from "@/lib/site-photos";
+import { SiteImg } from "@/components/marketing/site-img";
 
 export function Section({
   children,
@@ -118,18 +119,12 @@ export function PageHero({
 /** Full-bleed hero photo. Desktop: the photo fills the right side and fades into Carbon on the left.
  *  Phones: the whole photo sits under a dark wash so white text stays readable. */
 export function HeroBackdrop({ photo }: { photo: PhotoId }) {
-  const p = PHOTOS[photo];
   return (
     <div className="pointer-events-none absolute inset-0 -z-10">
-      <img
-        src={photoFallback(photo, 800)}
-        srcSet={photoSrcSet(photo)}
+      <SiteImg
+        id={photo}
+        priority
         sizes="(min-width: 768px) 80vw, 100vw"
-        alt={p.alt}
-        width={p.w}
-        height={p.h}
-        fetchPriority="high"
-        decoding="async"
         className="absolute inset-0 h-full w-full object-cover object-[72%_center] md:left-auto md:right-0 md:w-[80%] md:object-right"
       />
       <div
@@ -221,7 +216,7 @@ export function CtaBand({
 }
 
 // Decorative QR-like pattern, deterministic, not scannable.
-export function demoQrCells() {
+function demoQrCells() {
   return Array.from({ length: 21 * 21 }, (_, n) => {
     const x = n % 21;
     const y = Math.floor(n / 21);
@@ -314,18 +309,11 @@ export function Photo({
   sizes?: string;
   priority?: boolean;
 }) {
-  const p = PHOTOS[id];
   return (
-    <img
-      src={photoFallback(id, 800)}
-      srcSet={photoSrcSet(id)}
+    <SiteImg
+      id={id}
       sizes={sizes}
-      alt={p.alt}
-      width={p.w}
-      height={p.h}
-      loading={priority ? "eager" : "lazy"}
-      fetchPriority={priority ? "high" : "auto"}
-      decoding="async"
+      priority={priority}
       className={cn("block h-auto w-full rounded-large bg-kb-sand object-cover", className)}
     />
   );

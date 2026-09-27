@@ -8,8 +8,11 @@ import {
   CreditCard,
   FileText,
   ImagePlus,
+  MessageSquareReply,
   MessageSquareText,
   Newspaper,
+  PenLine,
+  ScanSearch,
   ShieldAlert,
   ShieldCheck,
   Star,
@@ -20,7 +23,10 @@ import { myLatestLocation, type Location } from "@/lib/onboarding";
 import {
   daysSince,
   daysUntil,
+  loadActivity,
   loadDashboard,
+  timeAgo,
+  type ActivityKind,
   PLAN_NAME,
   type Dashboard,
   type RecentReview,
@@ -80,7 +86,7 @@ function HomePage() {
           ) : !dash.data ? (
             <Skeleton />
           ) : (
-            <Active d={dash.data} />
+            <Active d={dash.data} locationId={loc.id} />
           )}
         </>
       ) : null}
@@ -204,7 +210,7 @@ function Setup({ loc }: { loc: Location }) {
 }
 
 // ── Active business
-function Active({ d }: { d: Dashboard }) {
+function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
   const daysLeft = daysUntil(d.planPaidUntil);
   const extras: { key: string; icon: ReactNode; text: string; to: string; tone?: "alert" }[] = [];
   if (d.openChanges)
@@ -262,6 +268,18 @@ function Active({ d }: { d: Dashboard }) {
                 </Link>
               </Button>
             </div>
+          ) : extras.length ? (
+            <div className="relative max-w-xl">
+              <h2 className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-2xl font-bold sm:text-3xl">
+                <span className="font-display text-5xl leading-none text-kb-yellow sm:text-7xl">
+                  {extras.length}
+                </span>
+                {extras.length === 1 ? "thing needs your attention" : "things need your attention"}
+              </h2>
+              <p className="mt-2 max-w-xl leading-7 text-kb-stone-on-dark">
+                No replies are waiting. Everything else is taken care of.
+              </p>
+            </div>
           ) : (
             <div className="flex items-start gap-4">
               <span className="grid size-12 shrink-0 place-items-center rounded-full bg-kb-yellow text-kb-black">
@@ -270,7 +288,8 @@ function Active({ d }: { d: Dashboard }) {
               <div>
                 <h2 className="text-2xl font-bold sm:text-3xl">You're all caught up</h2>
                 <p className="mt-2 max-w-xl leading-7 text-kb-stone-on-dark">
-                  When a new Google review arrives, you'll get an email with a reply ready.
+                  Kabsi is taking care of the rest. When a new Google review arrives, you'll get an
+                  email with a reply ready.
                 </p>
               </div>
             </div>
@@ -324,10 +343,10 @@ function Active({ d }: { d: Dashboard }) {
           sub={d.newReviews7d ? "new reviews this week" : "No new reviews this week"}
         />
         <Tile
-          label="Card taps"
+          label="Card and link opens"
           value={String(d.taps7d)}
           icon={<CreditCard />}
-          sub={`${d.taps30d} in the last 30 days`}
+          sub={`${d.taps30d} in 30 days. Opens, not reviews.`}
         />
       </div>
 
@@ -335,7 +354,7 @@ function Active({ d }: { d: Dashboard }) {
 
       <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         {/* Latest reviews */}
-        <section className="rounded-large bg-kb-white p-6 shadow-kb">
+        <section className="self-start rounded-large bg-kb-white p-6 shadow-kb">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-lg font-bold">Latest reviews</h2>
             <Link
@@ -385,6 +404,7 @@ function Active({ d }: { d: Dashboard }) {
                 : "Your first report arrives on Monday morning."
             }
           />
+          <ActivityCard locationId={locationId} />
         </div>
       </div>
 
@@ -503,9 +523,9 @@ function ProfileHealth({ d }: { d: Dashboard }) {
     {
       key: "taps",
       icon: <CreditCard />,
-      label: "Review link taps",
+      label: "Review page opens",
       value: String(d.taps7d),
-      note: `Last 7 days · ${d.taps30d} in 30 days`,
+      note: `Last 7 days · ${d.taps30d} in 30 days · not reviews`,
       ok: true,
       to: "/app/cards",
     },
@@ -616,10 +636,61 @@ function ReviewLine({ r }: { r: RecentReview }) {
         {r.comment ? (
           <p className="mt-1.5 line-clamp-2 text-sm leading-6 text-kb-stone">{r.comment}</p>
         ) : (
-          <p className="mt-1.5 text-sm italic text-kb-stone">Rating only, no text</p>
+          <p className="mt-1.5 text-sm italic text-kb-stone">
+            {r.content_purged_at
+              ? "Text removed after 30 days (Google's rule)"
+              : "Rating only, no text"}
+          </p>
         )}
       </Link>
     </li>
+  );
+}
+
+const ACTIVITY_ICON: Record<ActivityKind, ReactNode> = {
+  reply: <MessageSquareReply />,
+  post: <Newspaper />,
+  photo: <ImagePlus />,
+  hours: <Clock3 />,
+  revert: <ShieldCheck />,
+  drafts: <PenLine />,
+  check: <ScanSearch />,
+  report: <FileText />,
+};
+
+// "What Kabsi did": proof that the work happens even when the owner isn't looking.
+function ActivityCard({ locationId }: { locationId: string }) {
+  const q = useQuery({
+    queryKey: ["activity", locationId],
+    queryFn: () => loadActivity(locationId),
+    refetchInterval: 120_000,
+  });
+  const items = q.data ?? [];
+  return (
+    <section className="rounded-large bg-kb-white p-5 shadow-kb">
+      <h2 className="font-bold">What Kabsi did</h2>
+      {q.isLoading ? (
+        <p className="mt-3 text-sm text-kb-stone">Loading…</p>
+      ) : items.length === 0 ? (
+        <p className="mt-3 text-sm leading-6 text-kb-stone">
+          Nothing yet. Kabsi's work shows up here as it happens.
+        </p>
+      ) : (
+        <ul className="mt-3 space-y-3">
+          {items.map((a) => (
+            <li key={a.key} className="flex items-start gap-3">
+              <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-kb-sand [&_svg]:size-4">
+                {ACTIVITY_ICON[a.kind]}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-medium leading-5">{a.text}</span>
+                <span className="block text-xs text-kb-stone">{timeAgo(a.at)}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 

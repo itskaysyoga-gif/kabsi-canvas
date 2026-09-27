@@ -22,8 +22,8 @@ type FieldValue = { display: string };
 type Change = {
   id: string;
   field: string;
-  old_value: FieldValue;
-  new_value: FieldValue;
+  old_value: FieldValue | null;
+  new_value: FieldValue | null;
   state: string;
   created_at: string;
 };
@@ -129,7 +129,10 @@ function ShieldPage() {
                   {LABEL[c.field] ?? c.field} · {STATE[c.state] ?? c.state}
                 </p>
                 <p className="text-kb-stone">
-                  {new Date(c.created_at).toLocaleDateString()} · “{c.new_value?.display}”
+                  {new Date(c.created_at).toLocaleDateString()} ·{" "}
+                  {c.new_value
+                    ? `“${c.new_value.display}”`
+                    : "Details removed after 30 days (Google's rule)"}
                 </p>
               </div>
             ))}

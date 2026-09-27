@@ -26,11 +26,23 @@ async function accessToken() {
   return cached.token;
 }
 
+// Retries with truncated exponential backoff and full jitter (base 500 ms, cap 8 s, 4 tries):
+// always on 429 (Google didn't process the call); on 5xx only for GET/PUT/PATCH, because a POST
+// (new post, new photo) may have gone through and must not be sent twice.
+const RETRIES = 4;
 async function g(url: string, init: RequestInit = {}) {
-  const res = await fetch(url, { ...init, headers: { authorization: `Bearer ${await accessToken()}`, "content-type": "application/json", ...(init.headers ?? {}) } });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(`google ${res.status} ${url.split("?")[0]}: ${JSON.stringify(data).slice(0, 300)}`);
-  return data;
+  const method = (init.method ?? "GET").toUpperCase();
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, { ...init, headers: { authorization: `Bearer ${await accessToken()}`, "content-type": "application/json", ...(init.headers ?? {}) } });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) return data;
+    const retryable = res.status === 429 || (res.status >= 500 && method !== "POST");
+    if (!retryable || attempt >= RETRIES - 1) {
+      throw new Error(`google ${res.status} ${url.split("?")[0]}: ${JSON.stringify(data).slice(0, 300)}`);
+    }
+    const wait = Math.random() * Math.min(8000, 500 * 2 ** attempt);
+    await new Promise((r) => setTimeout(r, wait));
+  }
 }
 
 const AM = "https://mybusinessaccountmanagement.googleapis.com/v1";
@@ -159,7 +171,7 @@ export async function getListing(locationId: string, seed: MockSeed): Promise<Li
     const db = admin();
     let { data } = await db.from("mock_listings").select("fields").eq("google_location_id", locationId).maybeSingle();
     if (!data) {
-      const fields = { title: seed.name, phone: seed.phone || "+961 1 000 000", address: seed.address ?? "", website: "", hours: seed.hours || "Mon–Sun 09:00–18:00", categories: "Restaurant" };
+      const fields = { title: seed.name, phone: seed.phone || "+1 (555) 010-0100", address: seed.address ?? "", website: "", hours: seed.hours || "Mon–Sun 09:00–18:00", categories: "Restaurant" };
       await db.from("mock_listings").insert({ google_location_id: locationId, fields });
       data = { fields };
     }

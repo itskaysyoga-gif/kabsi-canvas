@@ -16,8 +16,8 @@ import { PRICES, pageHead } from "@/lib/site";
 export const Route = createFileRoute("/partners")({
   head: () =>
     pageHead({
-      title: "Kabsi for partners | Wholesale AI local SEO for agencies and card sellers",
-      description: `Add Kabsi's AI local SEO engine to what you sell. $${PRICES.partnerRate} per active business per month, billed monthly in USDT. You set the price and keep the margin.`,
+      title: "Kabsi for partners | Google profile care your clients can buy from you",
+      description: `Offer Kabsi to the businesses you already help. $${PRICES.partnerRate} per active business per month, billed monthly in USDT. You set the price and keep the margin.`,
       path: "/partners",
     }),
   component: Page,
@@ -28,8 +28,8 @@ function Page() {
     <PublicLayout>
       <PageHero
         eyebrow="Partners and agencies"
-        title="Add a high-margin AI local SEO engine to your agency."
-        sub="Bring your clients grounded review replies, weekly keyword posts and a listing guard, with NFC cards if you sell them. You set the retail price and keep everything above a small wholesale rate per live business."
+        title="Your clients already need Google. Now you can take care of it."
+        sub="Offer the businesses you already help review replies they approve, a fresh profile and change alerts, with NFC cards if you sell them. You set the retail price and keep everything above a small wholesale rate per live business."
         visual={<WorkspaceVisual />}
         photo="heroPartners"
       />
@@ -80,7 +80,7 @@ function Page() {
       <Section className="grid items-center gap-12 md:grid-cols-2">
         <img
           src="/images/nfc-card-closeup.webp"
-          alt="An acrylic NFC review card with a tap area and a QR code, held in a hand"
+          alt="An acrylic NFC review card with a tap area and a QR code"
           width={640}
           height={640}
           loading="lazy"

@@ -166,16 +166,25 @@ export const PHOTOS = {
 
 export type PhotoId = keyof typeof PHOTOS;
 
+/** The registry entry, or undefined for an id this build doesn't know (e.g. mid-deploy in the editor preview). */
+export function photoOf(id: string): Photo | undefined {
+  return (PHOTOS as Record<string, Photo>)[id];
+}
+
 export function photoSrc(id: PhotoId, width: number) {
-  return `${BASE}/${PHOTOS[id].file}-${width}.webp`;
+  const p = photoOf(id);
+  return p ? `${BASE}/${p.file}-${width}.webp` : "";
 }
 
 export function photoSrcSet(id: PhotoId) {
-  return PHOTOS[id].widths.map((w) => `${photoSrc(id, w)} ${w}w`).join(", ");
+  const p = photoOf(id);
+  return p ? p.widths.map((w) => `${photoSrc(id, w)} ${w}w`).join(", ") : "";
 }
 
 /** The smallest variant at least `min` px wide (for `src`, the fallback when srcset isn't used). */
 export function photoFallback(id: PhotoId, min = 800) {
-  const ws = [...PHOTOS[id].widths].sort((a, b) => a - b);
+  const p = photoOf(id);
+  if (!p) return "";
+  const ws = [...p.widths].sort((a, b) => a - b);
   return photoSrc(id, ws.find((w) => w >= min) ?? ws[ws.length - 1]!);
 }

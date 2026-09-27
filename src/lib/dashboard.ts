@@ -12,6 +12,8 @@ export type RecentReview = {
   state: string;
   urgency: string | null;
   review_created_at: string | null;
+  /** Set when Google's text and name were removed after 30 days (D257). */
+  content_purged_at: string | null;
 };
 export type ActivePlan = {
   kind: string;
@@ -99,7 +101,9 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
       .eq("urgency", "urgent"),
     supabase
       .from("reviews")
-      .select("id, reviewer_name, star_rating, comment, state, urgency, review_created_at")
+      .select(
+        "id, reviewer_name, star_rating, comment, state, urgency, review_created_at, content_purged_at",
+      )
       .eq("location_id", locationId)
       .order("review_created_at", { ascending: false })
       .limit(3),
@@ -260,4 +264,111 @@ export function daysSince(iso: string | null) {
 export function daysUntil(iso: string | null) {
   if (!iso) return null;
   return Math.max(0, Math.ceil((Date.parse(iso) - Date.now()) / DAY));
+}
+
+// "What Kabsi did": the owner's recent approved Google writes and Kabsi's own background work, newest
+// first. Facts from the tables only; nothing is estimated.
+export type ActivityKind =
+  "reply" | "post" | "photo" | "hours" | "revert" | "drafts" | "check" | "report";
+export type Activity = { key: string; kind: ActivityKind; text: string; at: string };
+
+const FIELD_LABEL: Record<string, string> = {
+  title: "business name",
+  phone: "phone number",
+  address: "address",
+  website: "website",
+  hours: "opening hours",
+  categories: "main category",
+};
+
+export async function loadActivity(locationId: string): Promise<Activity[]> {
+  const since30 = new Date(Date.now() - 30 * DAY).toISOString();
+  const since7 = new Date(Date.now() - 7 * DAY).toISOString();
+  const [pubs, drafts, loc, reports] = await Promise.all([
+    supabase
+      .from("publications")
+      .select("id, target_type, status, payload, created_at")
+      .eq("location_id", locationId)
+      .in("status", ["live", "in_review", "sent"])
+      .gte("created_at", since30)
+      .order("created_at", { ascending: false })
+      .limit(8),
+    supabase
+      .from("reply_drafts")
+      .select("id, reviews!inner(location_id)", { count: "exact", head: true })
+      .eq("reviews.location_id", locationId)
+      .gte("created_at", since7),
+    supabase.from("locations").select("shield_checked_at").eq("id", locationId).maybeSingle(),
+    supabase
+      .from("weekly_reports")
+      .select("id, created_at")
+      .eq("location_id", locationId)
+      .order("created_at", { ascending: false })
+      .limit(1),
+  ]);
+  if (pubs.error) throw new Error(pubs.error.message);
+
+  const out: Activity[] = [];
+  for (const p of (pubs.data ?? []) as {
+    id: string;
+    target_type: string;
+    status: string;
+    payload: Record<string, unknown> | null;
+    created_at: string;
+  }[]) {
+    const review = p.status === "in_review" ? " (Google is reviewing it)" : "";
+    const text =
+      p.target_type === "review_reply"
+        ? "Posted a review reply you approved"
+        : p.target_type === "local_post"
+          ? "Posted your Google update"
+          : p.target_type === "photo"
+            ? "Added your photo to Google"
+            : p.target_type === "special_hours"
+              ? "Set your special hours on Google"
+              : p.target_type === "listing_revert"
+                ? `Put your ${FIELD_LABEL[String(p.payload?.["field"])] ?? "details"} back on Google`
+                : null;
+    if (!text) continue;
+    const kind: ActivityKind =
+      p.target_type === "review_reply"
+        ? "reply"
+        : p.target_type === "local_post"
+          ? "post"
+          : p.target_type === "photo"
+            ? "photo"
+            : p.target_type === "special_hours"
+              ? "hours"
+              : "revert";
+    out.push({ key: p.id, kind, text: text + review, at: p.created_at });
+  }
+  const drafted = drafts.count ?? 0;
+  if (drafted > 0)
+    out.push({
+      key: "drafts",
+      kind: "drafts",
+      text: `Drafted ${drafted} ${drafted === 1 ? "reply" : "replies"} for you this week`,
+      at: new Date().toISOString(),
+    });
+  const checked = (loc.data as { shield_checked_at: string | null } | null)?.shield_checked_at;
+  if (checked)
+    out.push({ key: "check", kind: "check", text: "Checked your Google details", at: checked });
+  const report = (reports.data ?? [])[0] as { id: string; created_at: string } | undefined;
+  if (report)
+    out.push({
+      key: report.id,
+      kind: "report",
+      text: "Sent your weekly report",
+      at: report.created_at,
+    });
+  return out.sort((a, b) => Date.parse(b.at) - Date.parse(a.at)).slice(0, 6);
+}
+
+export function timeAgo(iso: string) {
+  const mins = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60_000));
+  if (mins < 60) return mins <= 1 ? "Just now" : `${mins} min ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours} h ago`;
+  const days = Math.round(hours / 24);
+  return days === 1 ? "Yesterday" : `${days} days ago`;
 }

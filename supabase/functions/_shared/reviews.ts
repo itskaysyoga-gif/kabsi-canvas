@@ -29,8 +29,11 @@ export async function syncLocation(loc: Loc) {
   let backlogOpen = 0;
   for (const r of reviews) { // newest first
     if (knownIds.has(r.reviewId)) {
-      await db.from("reviews").update({ existing_reply: r.reply, review_updated_at: r.updateTime })
-        .eq("location_id", loc.id).eq("google_review_id", r.reviewId);
+      // Refresh the cached text too: Google content is kept at most 30 days after Google last returned it (D257).
+      await db.from("reviews").update({
+        existing_reply: r.reply, review_updated_at: r.updateTime, reviewer_name: r.reviewer, comment: r.comment,
+        star_rating: r.rating, fetched_at: new Date().toISOString(), content_purged_at: null,
+      }).eq("location_id", loc.id).eq("google_review_id", r.reviewId);
       // Owner replied directly on Google: nothing left for Kabsi to do on this one.
       if (r.reply) {
         await db.from("reviews").update({ state: "handled_offline" })

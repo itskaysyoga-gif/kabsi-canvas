@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, Download, Link2, Nfc, Printer } from "lucide-react";
+import { Copy, Download, HandHeart, Link2, MousePointerClick, Nfc, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,13 +65,29 @@ function CardsPage() {
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
       <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
-        Physical and digital touchpoints
+        Make reviewing easy
       </p>
       <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Cards and links</h1>
       <p className="mt-2 text-kb-stone">
         Each tap, scan or click opens your Google review page. Every customer sees the same page. A
         card is optional: a review link and its QR code work without one.
       </p>
+      <ul className="mt-5 grid gap-3 rounded-large border-2 border-kb-hairline bg-kb-white p-5 text-sm leading-6 sm:grid-cols-2">
+        <li className="flex gap-3">
+          <MousePointerClick className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+          <span>
+            Taps and scans count how often your review page was opened. They don't show whether a
+            review was written.
+          </span>
+        </li>
+        <li className="flex gap-3">
+          <HandHeart className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+          <span>
+            Ask every customer the same way. Never offer a discount, gift or prize for a review:
+            Google can remove those reviews.
+          </span>
+        </li>
+      </ul>
       {!location.isLoading && !loc ? (
         <Button asChild className="mt-6">
           <Link to="/start">Add your business</Link>

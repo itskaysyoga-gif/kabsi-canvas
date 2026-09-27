@@ -6,6 +6,8 @@ import { callFunction } from "@/lib/api";
 export type OnboardingStep = "business" | "access" | "knowledge" | "plan" | "done";
 export type KnowledgeCard = {
   signature?: string;
+  /** Things the owner never wants said or promised in replies and posts (D257). */
+  avoid?: string;
   tone?: "warm" | "formal" | "short";
   contact_phone?: string;
   hours_note?: string;
