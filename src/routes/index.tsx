@@ -190,10 +190,10 @@ function HomePage() {
           <p className="mt-4 text-lg font-bold">Your phone number changed on Google</p>
           <div className="mt-4 grid gap-2 text-sm">
             <p className="rounded-card bg-white/5 px-4 py-3">
-              <span className="text-kb-stone-on-dark">Before </span>+961 1 234 567
+              <span className="text-kb-stone-on-dark">Before </span>+1 (555) 010-0142
             </p>
             <p className="rounded-card bg-white/5 px-4 py-3">
-              <span className="text-kb-stone-on-dark">Now </span>+961 1 000 000
+              <span className="text-kb-stone-on-dark">Now </span>+1 (555) 010-0199
             </p>
           </div>
           <div className="mt-5 flex flex-wrap items-center gap-4">
