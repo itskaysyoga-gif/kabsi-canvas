@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, CalendarDays, Clock3, ExternalLink, QrCode } from "lucide-react";
+import { ArrowRight, CalendarDays, Clock3, ExternalLink, QrCode } from "lucide-react";
+import { IndustryLinks } from "@/components/marketing/business-grid";
 import { PublicLayout } from "@/components/layouts/public-layout";
-import { CtaBand, IconBadge, Photo, Section } from "@/components/marketing/parts";
+import { Breadcrumbs, CtaBand, IconBadge, Photo, Section } from "@/components/marketing/parts";
 import { KeyPoints } from "@/components/marketing/guide-kit";
 import { GUIDE_ICONS } from "@/components/marketing/visuals";
 import { KabsiMark } from "@/components/shared/kabsi-logo";
@@ -26,6 +27,11 @@ export const Route = createFileRoute("/guides/$slug")({
       title: `${g.title} | Kabsi`,
       description: g.description,
       path: `/guides/${g.slug}`,
+      type: "article",
+      crumbs: [
+        { name: "Guides", path: "/guides" },
+        { name: g.title, path: `/guides/${g.slug}` },
+      ],
       jsonLd: [
         {
           "@context": "https://schema.org",
@@ -36,6 +42,7 @@ export const Route = createFileRoute("/guides/$slug")({
           datePublished: "2026-09-26",
           dateModified: g.updated,
           mainEntityOfPage: `${SITE_URL}/guides/${g.slug}`,
+          inLanguage: "en",
           author: { "@type": "Organization", name: "Kabsi", url: SITE_URL },
           publisher: ORG_LD,
         },
@@ -55,12 +62,7 @@ function Page() {
   return (
     <PublicLayout>
       <Section rise={false} className="pb-10 pt-8 sm:pb-12 sm:pt-12">
-        <Link
-          to="/guides"
-          className="inline-flex items-center gap-2 text-sm font-bold text-kb-stone hover:text-kb-black"
-        >
-          <ArrowLeft className="size-4" /> All guides
-        </Link>
+        <Breadcrumbs items={[{ name: "Guides", to: "/guides" }, { name: g.title }]} />
         <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-14">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-kb-stone">
@@ -136,6 +138,7 @@ function Page() {
                 <span className="block text-sm text-kb-stone">No sign-up, from any phone.</span>
               </span>
             </Link>
+            <IndustryLinks className="mt-6" />
           </aside>
         </div>
       </Section>

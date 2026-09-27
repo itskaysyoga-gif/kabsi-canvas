@@ -9,6 +9,11 @@ import {
   Car,
   ClipboardList,
   Clock3,
+  Coffee,
+  Croissant,
+  Flower2,
+  Gift,
+  Phone,
   Globe2,
   HeartPulse,
   Languages,
@@ -26,9 +31,9 @@ import type { PhotoId } from "@/lib/site-photos";
 
 export type Vertical = {
   slug: string;
-  /** Short name used in titles and links, e.g. "restaurants and cafés". */
+  /** Short name used in titles and links, e.g. "restaurants". */
   name: string;
-  /** Menu label, e.g. "Restaurants and cafés". */
+  /** Menu label, e.g. "Restaurants". */
   label: string;
   icon: ReactNode;
   hero: PhotoId;
@@ -38,6 +43,10 @@ export type Vertical = {
   description: string;
   h1: string;
   sub: string;
+  /** One plain answer to "what does Kabsi do for this kind of business" (read by people and AI search). */
+  summary: string;
+  /** Section headings, unique per page. */
+  headings: { pains: string; example: string; helps: string; card: string };
   pains: { icon: ReactNode; title: string; text: string }[];
   example: {
     label: string;
@@ -58,17 +67,24 @@ export type Vertical = {
 
 export const VERTICALS: Vertical[] = [
   {
-    slug: "restaurants-and-cafes",
-    name: "restaurants and cafés",
-    label: "Restaurants and cafés",
+    slug: "restaurants",
+    name: "restaurants",
+    label: "Restaurants",
     icon: <UtensilsCrossed />,
     hero: "restaurant",
-    side: "cafe",
-    title: "Kabsi for restaurants and cafés | Google review replies you approve",
+    title: "Kabsi for restaurants | Google review replies you approve",
     description:
-      "Every Google review for your restaurant or café gets a reply drafted in the guest's language. Holiday hours, dish photos and a card on every table. You approve everything.",
+      "Every Google review of your restaurant gets a reply drafted in the guest's language. Holiday hours, dish photos and a card on every table. You approve it all.",
     h1: "Your restaurant's Google profile, taken care of.",
     sub: "Reviews arrive during service. Kabsi drafts a reply in the guest's language and emails it to you, so you can post it later with one tap. Nothing goes on Google until you approve it.",
+    summary:
+      "Kabsi emails a restaurant owner every new Google review with a reply already drafted in the guest's language. It also sets holiday hours, checks dish photos before they go up and alerts you when your phone or hours change on Google.",
+    headings: {
+      pains: "Service comes first. Google comes later.",
+      example: "A reply for every guest, in their language.",
+      helps: "What Kabsi handles for your restaurant.",
+      card: "A card on every table.",
+    },
     pains: [
       {
         icon: <Clock3 />,
@@ -78,7 +94,7 @@ export const VERTICALS: Vertical[] = [
       {
         icon: <Languages />,
         title: "Guests write in many languages",
-        text: "Tourists and locals review in their own language. Each draft is written in the language of the review.",
+        text: "Visitors and locals review in their own language. Each draft is written in the language of the review.",
       },
       {
         icon: <CalendarClock />,
@@ -127,7 +143,7 @@ export const VERTICALS: Vertical[] = [
     ],
     placements: [
       "On each table, next to the menu or the salt and pepper.",
-      "On the counter by the till or the coffee machine.",
+      "At the host stand or the till, where guests pay.",
       "Printed QR on the bill folder or the takeaway bag.",
     ],
     care: {
@@ -154,16 +170,125 @@ export const VERTICALS: Vertical[] = [
     ],
   },
   {
+    slug: "cafes-and-bakeries",
+    name: "cafés and bakeries",
+    label: "Cafés and bakeries",
+    icon: <Coffee />,
+    hero: "bakery",
+    side: "cafe",
+    title: "Kabsi for cafés and bakeries | Review replies you approve",
+    description:
+      "Reply drafts for every Google review of your café or bakery, in the customer's language. Weekly updates, early-morning hours and a card by the till.",
+    h1: "Your café's Google profile, taken care of.",
+    sub: "Your mornings are for coffee and bread, not for Google. Kabsi drafts a reply to every review and emails it to you, so you can post it after the rush. Nothing goes on Google until you approve it.",
+    summary:
+      "Kabsi emails a café or bakery every new Google review with a reply drafted in the customer's language. It drafts a short weekly update about what's fresh, keeps your opening hours right for holidays and alerts you when your listing changes on Google.",
+    headings: {
+      pains: "Busy mornings, no time for Google.",
+      example: "Regulars write in many languages.",
+      helps: "What Kabsi handles for your café or bakery.",
+      card: "A card by the coffee machine.",
+    },
+    pains: [
+      {
+        icon: <Clock3 />,
+        title: "The rush never stops",
+        text: "Drafts wait in your email. Post them when the queue is gone.",
+      },
+      {
+        icon: <Croissant />,
+        title: "Something new every week",
+        text: "A seasonal pastry or a new blend. Tell Kabsi in a sentence and it drafts a Google update.",
+      },
+      {
+        icon: <CalendarClock />,
+        title: "Early hours must be exact",
+        text: "Customers come before work. Wrong opening hours on Google mean a wasted trip.",
+      },
+      {
+        icon: <Languages />,
+        title: "Customers write in many languages",
+        text: "Each draft is written in the language of the review, Arabic included.",
+      },
+    ],
+    example: {
+      label: "Example review and draft",
+      lang: "العربية",
+      name: "Nour",
+      rating: 5,
+      review: "قهوة رائعة وكرواسون طازج كل صباح. المكان هادئ ومريح للعمل.",
+      reply:
+        "شكراً جزيلاً على كلماتك الجميلة! يسعدنا أن القهوة والكرواسون نالا إعجابك، وننتظرك دائماً في الصباح.\n\nفريق مخبز الزيتونة",
+      dir: "rtl",
+    },
+    exampleNote:
+      "Fictional example. The review is in Arabic, so the draft is too. It thanks the customer for what they mentioned and invents nothing.",
+    helps: [
+      {
+        icon: <MessageSquareReply />,
+        title: "A reply for every review",
+        text: "Drafted from your facts: opening hours, seating, what you bake. Facts are only mentioned when the customer raised the topic.",
+      },
+      {
+        icon: <Sparkles />,
+        title: "A weekly update, drafted",
+        text: "One short Google update a week about what's fresh. You post it, change it or skip it.",
+      },
+      {
+        icon: <CalendarClock />,
+        title: "Special hours",
+        text: "Holiday closures and early openings posted to Google for the dates you choose.",
+      },
+      {
+        icon: <ShieldCheck />,
+        title: "Listing Shield",
+        text: "An email with before and after if your phone, hours or address change on Google.",
+      },
+    ],
+    placements: [
+      "By the coffee machine or the pastry counter.",
+      "At the till, next to the card reader.",
+      "Printed QR on the takeaway cup sleeve or the bread bag.",
+    ],
+    care: {
+      title: "Ask every customer the same way",
+      text: "Offer the card to everyone, and never give a free coffee or pastry for a review. Google doesn't allow it and can remove those reviews.",
+    },
+    guide: { slug: "google-review-link-and-qr-code", title: "Your Google review link and QR code" },
+    faqs: [
+      {
+        q: "Can Kabsi reply in Arabic?",
+        a: "Yes. Each draft is written in the language of the review, including Arabic, English, Spanish and French. You read it before anything is posted.",
+      },
+      {
+        q: "Can Kabsi post our daily specials?",
+        a: "Kabsi drafts one short update a week from what you tell it. You approve each one; nothing is posted on a schedule without you.",
+      },
+      {
+        q: "We open at 6am. Can Kabsi check our hours?",
+        a: "Listing Shield emails you if your hours change on Google, and you can set special hours for holidays from Kabsi.",
+      },
+    ],
+  },
+  {
     slug: "clinics-and-dentists",
     name: "clinics and dentists",
     label: "Clinics and dentists",
     icon: <Stethoscope />,
     hero: "dentist",
-    title: "Kabsi for dental and medical clinics | Careful Google review replies",
+    title: "Kabsi for clinics and dentists | Careful review replies",
     description:
-      "Calm, careful reply drafts for every Google review of your clinic, never posted without your approval. Keep your hours and phone accurate on Google.",
+      "Calm, careful reply drafts for every Google review of your clinic, never posted without your approval. Keep your hours and phone right on Google.",
     h1: "Your clinic's Google profile, taken care of.",
     sub: "Patients read reviews before they book. Kabsi drafts a calm, professional reply to each one and waits for your approval. Replies never make medical claims.",
+    summary:
+      "Kabsi emails a clinic every new Google review with a calm, general reply drafted for it. Drafts make no medical claims, share no personal details and can be told never to confirm that someone is a patient. It also keeps your hours right and alerts you when your listing changes.",
+    headings: {
+      pains: "Patients read your reviews before they book.",
+      example: "Calm replies that protect patient privacy.",
+      helps: "What Kabsi handles for your clinic.",
+      card: "A card at reception.",
+    },
     pains: [
       {
         icon: <HeartPulse />,
@@ -250,11 +375,19 @@ export const VERTICALS: Vertical[] = [
     label: "Salons and barbers",
     icon: <Scissors />,
     hero: "salon",
-    title: "Kabsi for hair salons and barbers | Google review replies you approve",
+    title: "Kabsi for salons and barbers | Review replies you approve",
     description:
-      "Reply drafts for every Google review of your salon, photos of your work checked before they go up, and a card at every station. Nothing is posted until you approve it.",
+      "Reply drafts for every Google review of your salon, photos of your work checked before they go up, and a card at every station. You approve every post.",
     h1: "Your salon's Google profile, taken care of.",
     sub: "Clients choose a salon by its reviews and photos. Kabsi drafts a reply to every review, checks your photos and keeps your hours right. You approve each one.",
+    summary:
+      "Kabsi emails a salon or barber every new Google review with a reply drafted in the client's language, thanking the stylist by name when the client mentions them. It checks photos of your work before you post them and keeps your special hours right on Google.",
+    headings: {
+      pains: "Your hands are busy. Your reviews still need answers.",
+      example: "Thank the right stylist, by name.",
+      helps: "What Kabsi handles for your salon.",
+      card: "A card at every station.",
+    },
     pains: [
       {
         icon: <Clock3 />,
@@ -341,11 +474,19 @@ export const VERTICALS: Vertical[] = [
     label: "Hotels and B&Bs",
     icon: <BedDouble />,
     hero: "hotel",
-    title: "Kabsi for hotels, guesthouses and B&Bs | Google replies in every language",
+    title: "Kabsi for hotels and B&Bs | Review replies in every language",
     description:
       "Guests review in many languages. Kabsi drafts a reply in each guest's language for every Google review, and you approve it before it's posted.",
     h1: "Your hotel's Google profile, taken care of.",
     sub: "Guests arrive from everywhere and review in their own language. Kabsi drafts a warm reply in that language for each review and waits for your approval.",
+    summary:
+      "Kabsi emails a hotel, guesthouse or B&B every new Google review with a warm reply drafted in the guest's own language, from English and Spanish to Arabic and French. It watches your phone, address and website on Google and sends a short report every Monday.",
+    headings: {
+      pains: "Guests from everywhere, reviews in every language.",
+      example: "A warm reply in the guest's own language.",
+      helps: "What Kabsi handles for your hotel.",
+      card: "A card at check-out.",
+    },
     pains: [
       {
         icon: <Globe2 />,
@@ -432,11 +573,19 @@ export const VERTICALS: Vertical[] = [
     label: "Garages and repairs",
     icon: <Car />,
     hero: "garage",
-    title: "Kabsi for garages and auto repair shops | Calm Google review replies",
+    title: "Kabsi for garages and auto repair | Calm review replies",
     description:
-      "A calm reply draft for every Google review of your garage, hours and phone watched on Google, and a card at the counter. Nothing is posted until you approve it.",
+      "A calm reply draft for every Google review of your garage, your hours and phone watched on Google, and a card at the counter. You approve every post.",
     h1: "Your garage's Google profile, taken care of.",
     sub: "Drivers pick a garage they can trust. Kabsi drafts a calm reply to every review, watches your phone and hours on Google, and waits for your approval.",
+    summary:
+      "Kabsi emails a garage or auto repair shop every new Google review with a calm reply drafted for it. Drafts never argue, admit fault or promise money in public. Kabsi also alerts you when your phone number or hours change on Google.",
+    headings: {
+      pains: "Trust is everything for a garage.",
+      example: "Calm replies, even when the bill is disputed.",
+      helps: "What Kabsi handles for your garage.",
+      card: "A card where customers collect their keys.",
+    },
     pains: [
       {
         icon: <Wrench />,
@@ -526,12 +675,19 @@ export const VERTICALS: Vertical[] = [
     label: "Shops and boutiques",
     icon: <ShoppingBag />,
     hero: "boutique",
-    side: "florist",
-    title: "Kabsi for shops, boutiques and florists | Google review replies you approve",
+    title: "Kabsi for shops and boutiques | Review replies you approve",
     description:
       "Reply drafts for every Google review of your shop, weekly updates for new arrivals, holiday hours and a card at the till. You approve everything.",
     h1: "Your shop's Google profile, taken care of.",
     sub: "Shoppers check Google before they visit. Kabsi drafts a reply to every review, drafts a short weekly update and keeps your holiday hours right. You approve each one.",
+    summary:
+      "Kabsi emails a shop or boutique every new Google review with a reply drafted in the customer's language, and drafts one short Google update a week about what's new. It sets holiday hours and alerts you when your listing changes.",
+    headings: {
+      pains: "Shoppers check Google before they visit.",
+      example: "A friendly reply for every shopper.",
+      helps: "What Kabsi handles for your shop.",
+      card: "A card at the till.",
+    },
     pains: [
       {
         icon: <Clock3 />,
@@ -557,11 +713,11 @@ export const VERTICALS: Vertical[] = [
     example: {
       label: "Example review and draft",
       lang: "English",
-      name: "Priya",
+      name: "Daniel",
       rating: 5,
-      review: "Beautiful bouquet for my mum's birthday, and they wrapped it so nicely.",
+      review: "Found the perfect jacket, and the staff took the time to help me find my size.",
       reply:
-        "Thank you, Priya! We're so glad the bouquet was right for your mum's birthday. We hope to see you again soon.\n\nAnna, Bloom & Stem",
+        "Thank you, Daniel! We're so glad you found the right jacket, and we'll tell the team you appreciated their help. See you again soon.\n\nLena, The Linen Rail",
     },
     exampleNote:
       "Fictional example. The draft reflects what the customer said and adds nothing new.",
@@ -589,7 +745,7 @@ export const VERTICALS: Vertical[] = [
     ],
     placements: [
       "At the till, next to the card reader.",
-      "Printed QR on the receipt or the gift tag.",
+      "Printed QR on the receipt or the shopping bag.",
       "Your review link in order confirmations if you sell online too.",
     ],
     care: {
@@ -612,19 +768,125 @@ export const VERTICALS: Vertical[] = [
       },
     ],
   },
+  {
+    slug: "florists",
+    name: "florists",
+    label: "Florists",
+    icon: <Flower2 />,
+    hero: "florist",
+    title: "Kabsi for florists | Google review replies you approve",
+    description:
+      "Reply drafts for every Google review of your flower shop, holiday hours for busy seasons, arrangement photos checked and a card with every bouquet.",
+    h1: "Your flower shop's Google profile, taken care of.",
+    sub: "Customers order for birthdays, weddings and hard days. Kabsi drafts a kind reply to every review, keeps your phone and seasonal hours right, and waits for your approval.",
+    summary:
+      "Kabsi emails a florist every new Google review with a kind reply drafted in the customer's language. It sets special hours for busy seasons, checks photos of your arrangements before they go up and alerts you if your phone number changes on Google.",
+    headings: {
+      pains: "Busy seasons, lots of orders, one phone.",
+      example: "A thank-you for every bouquet review.",
+      helps: "What Kabsi handles for your flower shop.",
+      card: "A card with every bouquet.",
+    },
+    pains: [
+      {
+        icon: <Gift />,
+        title: "Peak days are packed",
+        text: "Valentine's and Mother's Day leave no time. Drafts wait in your email until the orders are out.",
+      },
+      {
+        icon: <Phone />,
+        title: "Orders come by phone",
+        text: "A wrong number on Google means lost orders. Listing Shield emails you when it changes.",
+      },
+      {
+        icon: <Camera />,
+        title: "Your arrangements sell",
+        text: "Photos of bouquets and events show your style. Kabsi checks each one before you post it.",
+      },
+      {
+        icon: <CalendarClock />,
+        title: "Seasonal hours",
+        text: "Open late before a holiday, closed after. Special hours posted to Google in a minute.",
+      },
+    ],
+    example: {
+      label: "Example review and draft",
+      lang: "English",
+      name: "Priya",
+      rating: 5,
+      review: "Beautiful bouquet for my mum's birthday, and they wrapped it so nicely.",
+      reply:
+        "Thank you, Priya! We're so glad the bouquet was right for your mum's birthday. We hope to see you again soon.\n\nAnna, Bloom & Stem",
+    },
+    exampleNote:
+      "Fictional example. The draft thanks the customer for the occasion they mentioned and adds nothing new.",
+    helps: [
+      {
+        icon: <MessageSquareReply />,
+        title: "Kind reply drafts",
+        text: "Warm for celebrations, gentle for sympathy orders, and never mentioning details the customer didn't share.",
+      },
+      {
+        icon: <Camera />,
+        title: "Arrangement photos, checked",
+        text: "Clear, well-lit photos go up; blurry shots and screenshots are flagged first.",
+      },
+      {
+        icon: <CalendarClock />,
+        title: "Special hours",
+        text: "Holiday openings and closures posted to Google for the dates you choose.",
+      },
+      {
+        icon: <ShieldCheck />,
+        title: "Listing Shield",
+        text: "An email with before and after if your phone, hours or address change on Google.",
+      },
+    ],
+    placements: [
+      "A small card tucked into each bouquet or delivery.",
+      "At the counter where customers collect orders.",
+      "Your review link in the delivery confirmation message.",
+    ],
+    care: {
+      title: "Ask every customer the same way",
+      text: "Include the card with every order, and never offer a discount or free flowers for a review. Google doesn't allow it and can remove those reviews.",
+    },
+    guide: {
+      slug: "how-to-reply-to-google-reviews",
+      title: "How to reply to Google reviews",
+    },
+    faqs: [
+      {
+        q: "Can replies be gentle for sympathy orders?",
+        a: "Yes. Drafts follow the tone of the review, and you can edit any draft before posting. Kabsi never adds details the customer didn't share.",
+      },
+      {
+        q: "Can I post photos of my arrangements?",
+        a: "Yes. Add a photo from your phone; Kabsi checks it's clear and fits Google's photo rules, and you post it with one tap.",
+      },
+      {
+        q: "Do I need the NFC card?",
+        a: "No. Every business gets a review link and a printable QR code. The card is optional.",
+      },
+    ],
+  },
 ];
 
 export const verticalBySlug = (slug: string) => VERTICALS.find((v) => v.slug === slug);
 
-/** Business-type tile → the industry page it links to. */
+/** Business-type tile → the industry page it links to (one page per tile, no duplicates). */
 export const VERTICAL_FOR_PHOTO: Partial<Record<PhotoId, string>> = {
-  bakery: "restaurants-and-cafes",
-  restaurant: "restaurants-and-cafes",
-  cafe: "restaurants-and-cafes",
+  bakery: "cafes-and-bakeries",
+  restaurant: "restaurants",
   dentist: "clinics-and-dentists",
   salon: "salons-and-barbers",
-  hotel: "hotels-and-guesthouses",
+  florist: "florists",
   garage: "garages-and-auto-repair",
   boutique: "shops-and-boutiques",
-  florist: "shops-and-boutiques",
+  hotel: "hotels-and-guesthouses",
+};
+
+/** Old slugs that moved (D259). */
+export const VERTICAL_REDIRECTS: Record<string, string> = {
+  "restaurants-and-cafes": "restaurants",
 };

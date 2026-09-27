@@ -1,0 +1,50 @@
+# Kabsi
+
+> Kabsi is a Google Business Profile assistant for local businesses in any country. Every new Google review arrives by email with a reply already drafted in the reviewer's language; the owner taps Post, Edit or Skip. Nothing is written to Google until the owner approves it. Kabsi is independent and not affiliated with Google.
+
+Key facts:
+
+- How it connects: the owner adds hello@kabsi.co as a Manager on their Google Business Profile. The owner keeps full ownership and can remove Kabsi at any time.
+- Reviews: each new review gets a draft reply in the reviewer's language (for example English, Spanish, Arabic or French). Drafts only use facts the owner gave Kabsi, make no promises of money, and are checked before they reach the owner. Hard reviews get a calm draft with no one-tap Post button.
+- Also drafts: one short Google update a week (optional), photo checks before posting, special and holiday hours. All of it waits for the owner's approval; nothing is posted on a schedule.
+- Listing Shield: watches the listing's name, phone, address, hours, website and category, and emails the owner when one changes on Google, with a one-tap way to put the owner's version back. It cannot lock a listing.
+- Weekly report: every Monday, the public Google rating, new reviews, how many got a reply, and card and link opens. Facts only.
+- Review card and link: an optional NFC and QR card, plus a free review link and QR code, open the business's own Google review form for every customer. There is no filtering of unhappy customers and no rewards for reviews. Taps are counted as opens, not reviews.
+- What Kabsi does not do: it does not promise more reviews, higher ratings or better rankings, it cannot remove reviews, and it does not post anything without approval.
+- Prices (USD, every country): card $20 one-time; Kabsi Pro $75 for 6 months or $120 for 12 months, paid once, refundable within 14 days. No monthly bills. Partners (card sellers and agencies): $8 per active business per month.
+- Google data: review text and reviewer names are kept at most 30 days after Google last returned them.
+- Contact: hello@kabsi.co
+
+## Main pages
+
+- [Home](https://kabsi-app.lovable.app/): what Kabsi does, with an example review and draft
+- [How it works](https://kabsi-app.lovable.app/how-it-works): access, drafts, email approval, the rest of the profile
+- [Pricing](https://kabsi-app.lovable.app/pricing): card, Pro plans, payment methods, refunds
+- [FAQ](https://kabsi-app.lovable.app/faq): approvals, languages, access, Listing Shield, cards, payment
+- [Partners](https://kabsi-app.lovable.app/partners): wholesale for card sellers and agencies
+- [Free Google review link and QR code](https://kabsi-app.lovable.app/google-review-link): no sign-up tool
+
+## For each kind of business
+
+- [All businesses](https://kabsi-app.lovable.app/for)
+- [Restaurants](https://kabsi-app.lovable.app/for/restaurants)
+- [Cafés and bakeries](https://kabsi-app.lovable.app/for/cafes-and-bakeries)
+- [Clinics and dentists](https://kabsi-app.lovable.app/for/clinics-and-dentists)
+- [Salons and barbers](https://kabsi-app.lovable.app/for/salons-and-barbers)
+- [Hotels and B&Bs](https://kabsi-app.lovable.app/for/hotels-and-guesthouses)
+- [Garages and auto repair](https://kabsi-app.lovable.app/for/garages-and-auto-repair)
+- [Shops and boutiques](https://kabsi-app.lovable.app/for/shops-and-boutiques)
+- [Florists](https://kabsi-app.lovable.app/for/florists)
+
+## Guides
+
+- [How to reply to Google reviews](https://kabsi-app.lovable.app/guides/how-to-reply-to-google-reviews)
+- [How to respond to a negative Google review](https://kabsi-app.lovable.app/guides/how-to-respond-to-negative-google-reviews)
+- [Can you remove a Google review?](https://kabsi-app.lovable.app/guides/can-you-remove-a-google-review)
+- [How to add a manager to your Google Business Profile](https://kabsi-app.lovable.app/guides/add-manager-google-business-profile)
+- [How to get your Google review link and QR code](https://kabsi-app.lovable.app/guides/google-review-link-and-qr-code)
+
+## Optional
+
+- [Privacy policy](https://kabsi-app.lovable.app/privacy)
+- [Terms of service](https://kabsi-app.lovable.app/terms)

@@ -6,10 +6,11 @@ import { CONTACT_EMAIL, CONTACT_PHONE, PRICES, pageHead } from "@/lib/site";
 export const Route = createFileRoute("/terms")({
   head: () =>
     pageHead({
-      title: "Terms | Kabsi",
+      title: "Terms of service | Kabsi",
       description:
         "Kabsi's terms in plain words: the service, your approval, Google access, prices, refunds, fair use, liability and law.",
       path: "/terms",
+      crumbs: [{ name: "Terms of service", path: "/terms" }],
     }),
   component: Page,
 });

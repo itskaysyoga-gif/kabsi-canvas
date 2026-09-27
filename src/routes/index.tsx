@@ -32,7 +32,7 @@ export const Route = createFileRoute("/")({
     pageHead({
       title: "Kabsi | Your Google Business Profile, taken care of",
       description:
-        "Kabsi drafts a reply to every Google review in your customer's language, keeps your profile fresh and tells you when your details change. Nothing goes on Google until you approve it.",
+        "Every Google review gets a reply drafted in your customer's language. Kabsi keeps your profile fresh and flags changes. Nothing is posted until you approve.",
       path: "/",
       jsonLd: [ORG_LD, WEBSITE_LD, PRODUCT_LD],
     }),
@@ -110,6 +110,15 @@ function HomePage() {
           </p>
         </div>
         <BusinessGrid className="mt-10" />
+        <p className="mt-6 text-[15px]">
+          <Link
+            to="/for"
+            className="inline-flex items-center gap-2 font-bold underline underline-offset-4"
+          >
+            What Kabsi does for each kind of business{" "}
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </p>
       </Section>
 
       {/* 1. Reviews */}

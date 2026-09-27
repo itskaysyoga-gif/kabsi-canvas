@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BookOpen, Mail, MessageCircle } from "lucide-react";
+import { IndustryLinks } from "@/components/marketing/business-grid";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import {
   CtaBand,
@@ -16,10 +17,11 @@ import { FAQ, faqJsonLd } from "@/lib/faq";
 export const Route = createFileRoute("/faq")({
   head: () =>
     pageHead({
-      title: "Questions | Kabsi",
+      title: "Kabsi FAQ | Google review replies, access, cards and pricing",
       description:
         "Straight answers about Kabsi: approvals, languages, Google access, Listing Shield, the card, payment and refunds.",
       path: "/faq",
+      crumbs: [{ name: "FAQ", path: "/faq" }],
       jsonLd: [faqJsonLd()],
     }),
   component: Page,
@@ -36,7 +38,10 @@ function Page() {
         photo="heroFaq"
       />
       <Section className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <FaqList items={FAQ} />
+        <div className="min-w-0">
+          <FaqList items={FAQ} />
+          <IndustryLinks className="mt-10" title="Answers for your kind of business" />
+        </div>
         <aside className="lg:sticky lg:top-28 lg:self-start">
           <div className="overflow-hidden rounded-large bg-kb-sand">
             <Photo id="hotel" sizes="320px" className="aspect-[4/3] rounded-none" />

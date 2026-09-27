@@ -11,9 +11,10 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/pricing")({
   head: () =>
     pageHead({
-      title: "Pricing | Kabsi",
+      title: "Kabsi pricing | Card $20, Pro from $75, no monthly bills",
       description: `Kabsi Pro: $${PRICES.pro6} for 6 months or $${PRICES.pro12} for 12 months, card included. Card only: $${PRICES.card}. Paid once, refundable within 14 days.`,
       path: "/pricing",
+      crumbs: [{ name: "Pricing", path: "/pricing" }],
       jsonLd: [PRODUCT_LD],
     }),
   component: Page,

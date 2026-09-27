@@ -58,8 +58,9 @@ export const Route = createFileRoute("/google-review-link")({
     pageHead({
       title: "Free Google review link and QR code generator | Kabsi",
       description:
-        "Find your business, copy your Google review link and download a QR code to print. Free, no sign-up.",
+        "Find your business, copy your Google review link and download a QR code to print. Free, no sign-up, works for any business on Google Maps.",
       path: "/google-review-link",
+      crumbs: [{ name: "Free review link and QR code", path: "/google-review-link" }],
       jsonLd: [
         {
           "@context": "https://schema.org",

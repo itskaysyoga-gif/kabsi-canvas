@@ -16,16 +16,16 @@ import {
 import type { PhotoId } from "@/lib/site-photos";
 import { SiteImg } from "@/components/marketing/site-img";
 import { cn } from "@/lib/utils";
-import { VERTICAL_FOR_PHOTO } from "@/lib/verticals";
+import { VERTICALS, VERTICAL_FOR_PHOTO } from "@/lib/verticals";
 
 const TYPES: { id: PhotoId; label: string; icon: ReactNode }[] = [
-  { id: "bakery", label: "Bakeries and cafés", icon: <Croissant /> },
+  { id: "bakery", label: "Cafés and bakeries", icon: <Croissant /> },
   { id: "restaurant", label: "Restaurants", icon: <UtensilsCrossed /> },
   { id: "dentist", label: "Clinics and dentists", icon: <Stethoscope /> },
   { id: "salon", label: "Salons and barbers", icon: <Scissors /> },
-  { id: "florist", label: "Florists and shops", icon: <Flower2 /> },
+  { id: "florist", label: "Florists", icon: <Flower2 /> },
   { id: "garage", label: "Garages and repairs", icon: <Car /> },
-  { id: "boutique", label: "Boutiques", icon: <Shirt /> },
+  { id: "boutique", label: "Shops and boutiques", icon: <Shirt /> },
   { id: "hotel", label: "Hotels and B&Bs", icon: <BedDouble /> },
 ];
 
@@ -83,5 +83,42 @@ export function BusinessGrid({ className }: { className?: string }) {
         );
       })}
     </ul>
+  );
+}
+
+/** Compact links to every industry page (internal linking from guides, FAQ and how it works). */
+export function IndustryLinks({
+  title = "Kabsi for your business",
+  className,
+}: {
+  title?: string;
+  className?: string;
+}) {
+  return (
+    <nav aria-label={title} className={className}>
+      <p className="text-xs font-bold uppercase tracking-wider text-kb-stone">{title}</p>
+      <ul className="mt-3 flex flex-wrap gap-2">
+        {VERTICALS.map((v) => (
+          <li key={v.slug}>
+            <Link
+              to="/for/$slug"
+              params={{ slug: v.slug }}
+              className="inline-flex items-center gap-2 rounded-pill border border-kb-hairline bg-kb-white px-3.5 py-2 text-sm font-bold hover:border-kb-black [&_svg]:size-4"
+            >
+              {v.icon}
+              {v.label}
+            </Link>
+          </li>
+        ))}
+        <li>
+          <Link
+            to="/for"
+            className="inline-flex items-center gap-1.5 rounded-pill px-3.5 py-2 text-sm font-bold underline underline-offset-4"
+          >
+            All businesses <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </li>
+      </ul>
+    </nav>
   );
 }

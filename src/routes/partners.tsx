@@ -16,9 +16,10 @@ import { PRICES, pageHead } from "@/lib/site";
 export const Route = createFileRoute("/partners")({
   head: () =>
     pageHead({
-      title: "Kabsi for partners | Google profile care your clients can buy from you",
+      title: "Kabsi for partners | Google profile care for your clients",
       description: `Offer Kabsi to the businesses you already help. $${PRICES.partnerRate} per active business per month, billed monthly in USDT. You set the price and keep the margin.`,
       path: "/partners",
+      crumbs: [{ name: "Partners", path: "/partners" }],
     }),
   component: Page,
 });

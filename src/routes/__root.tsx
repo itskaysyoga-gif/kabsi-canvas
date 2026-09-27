@@ -9,7 +9,7 @@ import { GlobalErrorBoundary } from "@/components/shared/error-boundary";
 import { Button } from "@/components/ui/button";
 
 function NotFoundComponent() {
-  return <main className="grid min-h-screen place-items-center bg-kb-sand px-5"><div className="text-center"><p className="font-display text-8xl leading-none">404</p><h1 className="mt-3 font-display text-4xl">Page not found</h1><p className="mt-3 text-kb-stone">The page you requested is not here.</p><Button asChild className="mt-7"><Link to="/">Go home</Link></Button></div></main>;
+  return <main className="grid min-h-screen place-items-center bg-kb-sand px-5"><title>Page not found | Kabsi</title><meta name="robots" content="noindex" /><div className="text-center"><p className="font-display text-8xl leading-none">404</p><h1 className="mt-3 font-display text-4xl">Page not found</h1><p className="mt-3 text-kb-stone">The page you requested is not here.</p><div className="mt-7 flex flex-wrap justify-center gap-3"><Button asChild><Link to="/">Go home</Link></Button><Button asChild variant="outline"><Link to="/guides">Read the guides</Link></Button></div></div></main>;
 }
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();

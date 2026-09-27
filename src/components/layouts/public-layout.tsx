@@ -118,6 +118,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                   {v.label}
                 </Link>
               ))}
+              <Link to="/for" className="font-bold">
+                All businesses
+              </Link>
             </nav>
             <a className="text-sm font-medium" href="mailto:hello@kabsi.co">
               hello@kabsi.co

@@ -5,7 +5,7 @@ import { CtaBand, IconBadge, PageHero, Section } from "@/components/marketing/pa
 import { GUIDE_ICONS, GuidesVisual } from "@/components/marketing/visuals";
 import { GUIDES, type Guide } from "@/lib/guides";
 import { SiteImg } from "@/components/marketing/site-img";
-import { pageHead } from "@/lib/site";
+import { SITE_URL, pageHead } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 // Guides index (D253, D256).
@@ -16,6 +16,24 @@ export const Route = createFileRoute("/guides/")({
       description:
         "Short, practical guides: replying to Google reviews, handling negative reviews, reporting reviews, adding a manager, and getting your review link.",
       path: "/guides",
+      crumbs: [{ name: "Guides", path: "/guides" }],
+      jsonLd: [
+        {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Guides for Google Business Profile owners",
+          url: `${SITE_URL}/guides`,
+          mainEntity: {
+            "@type": "ItemList",
+            itemListElement: GUIDES.map((g, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: g.title,
+              url: `${SITE_URL}/guides/${g.slug}`,
+            })),
+          },
+        },
+      ],
     }),
   component: Page,
 });

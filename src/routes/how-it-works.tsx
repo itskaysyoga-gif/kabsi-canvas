@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { IndustryLinks } from "@/components/marketing/business-grid";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import {
   CalendarClock,
@@ -34,6 +35,35 @@ export const Route = createFileRoute("/how-it-works")({
       description:
         "Add Kabsi as a Manager on your Google profile. Every new review reaches you with a drafted reply. You tap Post, Edit or Skip. Nothing is posted without you.",
       path: "/how-it-works",
+      crumbs: [{ name: "How it works", path: "/how-it-works" }],
+      jsonLd: [
+        {
+          "@context": "https://schema.org",
+          "@type": "HowTo",
+          name: "How to set up Kabsi for your Google Business Profile",
+          description:
+            "Give Kabsi Manager access, tell it about your business, then approve each drafted reply from your email.",
+          step: [
+            [
+              "Give Kabsi access",
+              "Add hello@kabsi.co as a Manager on your Google Business Profile.",
+            ],
+            [
+              "Tell Kabsi about your business",
+              "Hours, services and anything Kabsi should never say. Drafts only use these facts.",
+            ],
+            [
+              "A reply is drafted for every new review",
+              "Written in the reviewer's language and checked before it reaches you.",
+            ],
+            [
+              "It reaches you by email",
+              "Each new review arrives with its draft, or in a daily digest for 4 and 5 star reviews.",
+            ],
+            ["You tap Post, Edit or Skip", "Nothing is written to Google until you approve it."],
+          ].map(([name, text], i) => ({ "@type": "HowToStep", position: i + 1, name, text })),
+        },
+      ],
     }),
   component: Page,
 });
@@ -179,6 +209,10 @@ function Page() {
             className="w-full max-w-sm rounded-large shadow-kb"
           />
         </div>
+      </Section>
+
+      <Section tone="sand" className="py-10 sm:py-14">
+        <IndustryLinks title="See it for your kind of business" />
       </Section>
 
       <CtaBand />

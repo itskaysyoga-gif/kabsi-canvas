@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Nfc, Plus } from "lucide-react";
+import { ArrowRight, ChevronRight, Nfc, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KabsiMark } from "@/components/shared/kabsi-logo";
 import { cn } from "@/lib/utils";
@@ -61,6 +61,59 @@ export function H2({ children, className }: { children: ReactNode; className?: s
   );
 }
 
+export type CrumbLink = { name: string; to?: string };
+
+/** Visible breadcrumb trail (Home first, the last item is the current page). Matches the BreadcrumbList
+ *  JSON-LD from pageHead. `to` is an internal path. */
+export function Breadcrumbs({
+  items,
+  tone = "light",
+  className,
+}: {
+  items: CrumbLink[];
+  tone?: "light" | "dark";
+  className?: string;
+}) {
+  const all: CrumbLink[] = [{ name: "Home", to: "/" }, ...items];
+  return (
+    <nav aria-label="Breadcrumb" className={className}>
+      <ol
+        className={cn(
+          "flex flex-wrap items-center gap-1.5 text-sm",
+          tone === "dark" ? "text-kb-stone-on-dark" : "text-kb-stone",
+        )}
+      >
+        {all.map((c, i) => {
+          const last = i === all.length - 1;
+          return (
+            <li key={c.name} className="flex items-center gap-1.5">
+              {c.to && !last ? (
+                <Link
+                  to={c.to as "/"}
+                  className={cn(
+                    "font-medium underline-offset-4 hover:underline",
+                    tone === "dark" ? "hover:text-kb-white" : "hover:text-kb-black",
+                  )}
+                >
+                  {c.name}
+                </Link>
+              ) : (
+                <span
+                  aria-current="page"
+                  className={tone === "dark" ? "text-kb-white" : "text-kb-ink"}
+                >
+                  {c.name}
+                </span>
+              )}
+              {!last ? <ChevronRight className="size-3.5 opacity-60" aria-hidden="true" /> : null}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
+
 export function PageHero({
   eyebrow,
   title,
@@ -69,6 +122,7 @@ export function PageHero({
   visual,
   visualClassName,
   photo,
+  crumbs,
 }: {
   eyebrow: string;
   title: string;
@@ -79,6 +133,8 @@ export function PageHero({
   visualClassName?: string;
   /** A hero photo behind the section: dark on the left for the headline, subject on the right. */
   photo?: PhotoId;
+  /** Breadcrumb trail after Home, shown above the eyebrow. */
+  crumbs?: CrumbLink[];
 }) {
   return (
     <section className="relative isolate overflow-hidden bg-kb-carbon text-kb-white">
@@ -91,6 +147,7 @@ export function PageHero({
         )}
       >
         <div>
+          {crumbs ? <Breadcrumbs items={crumbs} tone="dark" className="mb-5" /> : null}
           <p className="flex items-center gap-3 text-sm font-bold uppercase tracking-wider text-kb-stone-on-dark">
             <span className="h-1 w-8 rounded-pill bg-kb-yellow" />
             {eyebrow}

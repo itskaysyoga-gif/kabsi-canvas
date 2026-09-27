@@ -7,10 +7,11 @@ import { CONTACT_EMAIL, CONTACT_PHONE, pageHead } from "@/lib/site";
 export const Route = createFileRoute("/privacy")({
   head: () =>
     pageHead({
-      title: "Privacy | Kabsi",
+      title: "Privacy policy | Kabsi",
       description:
         "What Kabsi collects, why, who processes it, how long it's kept, how Google data is used, and how to delete it.",
       path: "/privacy",
+      crumbs: [{ name: "Privacy policy", path: "/privacy" }],
     }),
   component: Page,
 });

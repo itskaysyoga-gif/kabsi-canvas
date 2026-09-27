@@ -19,12 +19,31 @@ export const PRICES = {
 type Meta = { title?: string; name?: string; property?: string; content?: string };
 
 // Per-route <head>: title, description, canonical, Open Graph, optional JSON-LD blocks.
+export type Crumb = { name: string; path: string };
+
+/** BreadcrumbList for a page: Home, then each crumb (the last one is the page itself). */
+export function breadcrumbLd(crumbs: Crumb[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [{ name: "Home", path: "/" }, ...crumbs].map((c, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: c.name,
+      item: `${SITE_URL}${c.path === "/" ? "" : c.path}`,
+    })),
+  };
+}
+
 export function pageHead(o: {
   title: string;
   description: string;
   path: string;
   jsonLd?: Record<string, unknown>[];
   noindex?: boolean;
+  /** Breadcrumb trail after Home; adds BreadcrumbList JSON-LD. */
+  crumbs?: Crumb[];
+  type?: "website" | "article";
 }) {
   // Share image: one designed 1200x630 PNG, because some link previews (LinkedIn, older WhatsApp) skip WebP.
   // Page photos are WebP and reach search through the image sitemap and Article JSON-LD instead.
@@ -35,7 +54,7 @@ export function pageHead(o: {
     { name: "description", content: o.description },
     { property: "og:title", content: o.title },
     { property: "og:description", content: o.description },
-    { property: "og:type", content: "website" },
+    { property: "og:type", content: o.type ?? "website" },
     { property: "og:url", content: url },
     { property: "og:site_name", content: "Kabsi" },
     { property: "og:image", content: og },
@@ -46,7 +65,10 @@ export function pageHead(o: {
       property: "og:image:alt",
       content: "Kabsi: Every Google review, answered. You just tap Post.",
     },
+    { property: "og:locale", content: "en_US" },
     { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: o.title },
+    { name: "twitter:description", content: o.description },
     { name: "twitter:image", content: og },
     {
       name: "twitter:image:alt",
@@ -57,7 +79,7 @@ export function pageHead(o: {
   return {
     meta,
     links: [{ rel: "canonical", href: url }],
-    scripts: (o.jsonLd ?? []).map((data) => ({
+    scripts: [...(o.jsonLd ?? []), ...(o.crumbs ? [breadcrumbLd(o.crumbs)] : [])].map((data) => ({
       type: "application/ld+json",
       children: JSON.stringify(data),
     })),
@@ -68,16 +90,22 @@ export function pageHead(o: {
 export const ORG_LD = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": `${SITE_URL}/#organization`,
   name: "Kabsi",
   url: SITE_URL,
+  description:
+    "Kabsi is a Google Business Profile assistant for local businesses. Every new Google review arrives by email with a reply drafted in the reviewer's language, and nothing is posted until the owner approves it.",
   logo: `${SITE_URL}/kabsi-mark.svg`,
   email: CONTACT_EMAIL,
 };
 export const WEBSITE_LD = {
   "@context": "https://schema.org",
   "@type": "WebSite",
+  "@id": `${SITE_URL}/#website`,
   name: "Kabsi",
   url: SITE_URL,
+  inLanguage: "en",
+  publisher: { "@id": `${SITE_URL}/#organization` },
 };
 export const PRODUCT_LD = {
   "@context": "https://schema.org",
