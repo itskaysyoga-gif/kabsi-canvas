@@ -64,7 +64,8 @@ function ReportPage() {
       <div className="mt-5">
         <PageIcon icon={<PageGlyph />} />
       </div>
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">Weekly report</h1>
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Your week</p>
+      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Weekly report</h1>
       <p className="mt-2 text-kb-stone">
         Every Monday morning, a short summary of your week on Google. Facts only.
       </p>

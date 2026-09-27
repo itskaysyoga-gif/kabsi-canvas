@@ -3,7 +3,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, CalendarRange, Check, Globe, MapPin, Nfc, Sparkles } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
-import { CtaBand, Eyebrow, H2, IconBadge, PageHero, Section } from "@/components/marketing/parts";
+import {
+  CardShippingNote,
+  CtaBand,
+  Eyebrow,
+  H2,
+  IconBadge,
+  PageHero,
+  Section,
+} from "@/components/marketing/parts";
 import { PricingVisual } from "@/components/marketing/visuals";
 import { CONTACT_PHONE, PRICES, PRODUCT_LD, pageHead } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -12,7 +20,7 @@ export const Route = createFileRoute("/pricing")({
   head: () =>
     pageHead({
       title: "Kabsi pricing | Card $20, Pro from $75, no monthly bills",
-      description: `Kabsi Pro: $${PRICES.pro6} for 6 months or $${PRICES.pro12} for 12 months, card included. Card only: $${PRICES.card}. Paid once, refundable within 14 days.`,
+      description: `Kabsi Pro: $${PRICES.pro6} for 6 months or $${PRICES.pro12} for 12 months, paid once, refundable within 14 days. NFC cards ship in Lebanon only.`,
       path: "/pricing",
       crumbs: [{ name: "Pricing", path: "/pricing" }],
       jsonLd: [PRODUCT_LD],
@@ -27,7 +35,8 @@ const PRO = [
   "Listing Shield: change alerts and one-tap revert",
   "Photos checked and special hours set in a minute",
   "Profile health on your dashboard and a Monday report",
-  "Review link and printable QR code, plus one NFC card",
+  "Review link and printable QR code, anywhere",
+  "One NFC card included in Lebanon",
 ];
 
 function Page() {
@@ -68,12 +77,14 @@ function Page() {
               "Opens your Google review page in one tap",
               "Same page for every customer, no filtering",
               "Keeps working for good",
+              "Shipped in Lebanon only",
             ]}
           />
         </div>
         <p className="mt-6 text-kb-stone">
-          Extra cards: ${PRICES.extraCard} each, or ${PRICES.fiveCards} for five.
+          Extra cards in Lebanon: ${PRICES.extraCard} each, or ${PRICES.fiveCards} for five.
         </p>
+        <CardShippingNote className="mt-4 max-w-3xl bg-kb-white" />
       </Section>
 
       <Section className="grid gap-10 md:grid-cols-2">
@@ -124,6 +135,8 @@ function Page() {
             <Fact>One plan covers one Google profile.</Fact>
             <Fact>
               The NFC card is optional. You can use Kabsi fully with a review link and QR code.
+              Outside Lebanon, Kabsi Pro is the same price and works the same way; only the card
+              comes from a partner or from any NFC card you buy online.
             </Fact>
           </ul>
         </div>

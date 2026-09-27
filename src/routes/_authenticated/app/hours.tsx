@@ -62,7 +62,8 @@ function HoursPage() {
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">Hours</h1>
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Google profile</p>
+      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Special hours</h1>
       <p className="mt-2 text-kb-stone">
         Closed for a holiday or open late? Set special hours so Google shows the right times.
       </p>
@@ -77,7 +78,14 @@ function HoursPage() {
           onDone={() => queryClient.invalidateQueries({ queryKey: ["hours"] })}
         />
       ) : loc ? (
-        <p className="mt-6 text-kb-stone">Hours can be set once your business is active.</p>
+        <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
+          <p className="font-bold">
+            Special hours can be set once Kabsi can reach your Google profile.
+          </p>
+          <Button asChild size="compact" className="mt-4">
+            <Link to="/start">Continue setup</Link>
+          </Button>
+        </div>
       ) : null}
       {rows.data?.length ? (
         <div className="mt-10">
@@ -95,12 +103,20 @@ function HoursPage() {
                     {r.reason ? ` · ${r.reason}` : ""}
                   </p>
                 </div>
-                <span className="text-xs font-bold uppercase text-kb-stone">
-                  {r.state === "posted"
+                <span
+                  className={
+                    r.state === "failed"
+                      ? "rounded-pill bg-kb-red/10 px-2.5 py-1 text-xs font-bold text-kb-red"
+                      : "rounded-pill bg-kb-sand px-2.5 py-1 text-xs font-bold text-kb-stone"
+                  }
+                >
+                  {r.state === "posted" || r.state === "live"
                     ? "On Google"
                     : r.state === "failed"
                       ? "Not saved"
-                      : r.state}
+                      : r.state === "in_review"
+                        ? "Google is reviewing"
+                        : "Sending"}
                 </span>
               </div>
             ))}
@@ -112,7 +128,9 @@ function HoursPage() {
 }
 
 function HoursForm({ locationId, onDone }: { locationId: string; onDone: () => unknown }) {
-  const today = new Date().toISOString().slice(0, 10);
+  // Local date, not UTC: in the evening in the Americas UTC is already tomorrow.
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const [start, setStart] = useState(today);
   const [end, setEnd] = useState(today);
   const [closed, setClosed] = useState(true);
@@ -136,7 +154,9 @@ function HoursForm({ locationId, onDone }: { locationId: string; onDone: () => u
     setErr("");
     setMsg("");
     if (!closed && close <= open && close !== "00:00")
-      return setErr("Closing time must be after opening time.");
+      return setErr(
+        "Closing time must be after opening time. For hours past midnight, close at 00:00.",
+      );
     setConfirming(true);
   }
   async function confirm() {

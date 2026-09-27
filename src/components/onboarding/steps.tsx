@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ErrorNote, StepTitle } from "@/components/onboarding/onboarding-shell";
+import { KnowledgeForm } from "@/components/app/knowledge-form";
 import {
   CONSENT_TEXT,
   choosePlan,
@@ -280,213 +281,31 @@ export function AccessStep({ location, onChanged }: StepProps) {
   );
 }
 
-// ── Step 3: the facts drafts may use
-type Faq = { q: string; a: string };
-
+// ── Step 3: the facts drafts may use (full form lives in Settings, About your business)
 export function KnowledgeStep({
   location,
   onChanged,
   mode = "onboarding",
 }: StepProps & { mode?: "onboarding" | "settings" }) {
-  const card = location?.knowledge_card ?? {};
-  const [signature, setSignature] = useState(card.signature ?? "");
-  const [tone, setTone] = useState<"warm" | "formal" | "short">(card.tone ?? "warm");
-  const [phone, setPhone] = useState(card.contact_phone ?? "");
-  const [hours, setHours] = useState(card.hours_note ?? "");
-  const [mention, setMention] = useState(card.mention ?? "");
-  const [staff, setStaff] = useState((card.staff_names ?? []).join(", "));
-  const [avoid, setAvoid] = useState(card.avoid ?? "");
-  const [faqs, setFaqs] = useState<Faq[]>(() =>
-    ((card["faqs"] as Faq[] | undefined) ?? []).filter((f) => f && (f.q || f.a)),
-  );
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [saved, setSaved] = useState(false);
   if (!location) return null;
-
-  async function save(event: FormEvent) {
-    event.preventDefault();
-    setBusy(true);
-    setError("");
-    setSaved(false);
-    try {
-      await saveKnowledge(location!.id, {
-        ...card,
-        signature: signature.trim(),
-        tone,
-        contact_phone: phone.trim(),
-        hours_note: hours.trim(),
-        mention: mention.trim(),
-        staff_names: staff
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .slice(0, 20),
-        avoid: avoid.trim(),
-        faqs: faqs
-          .map((f) => ({ q: f.q.trim(), a: f.a.trim() }))
-          .filter((f) => f.q && f.a)
-          .slice(0, 8),
-      });
-      if (mode === "onboarding") await setStep(location!.id, "plan");
-      await onChanged();
-      setSaved(true);
-    } catch (e) {
-      setError(friendlyError(e));
-    }
-    setBusy(false);
-  }
-
-  const field = "mt-2 h-[52px] rounded-card px-4 text-base";
   return (
-    <form onSubmit={save}>
-      <StepTitle
-        title="About your business"
-        sub="Replies only use what you write here. If something isn't here, it's left out, never made up."
-      />
-      <Label htmlFor="sig">How you sign replies</Label>
-      <Input
-        id="sig"
-        required
-        value={signature}
-        onChange={(e) => setSignature(e.target.value)}
-        placeholder={`e.g. Luca, ${location.name}`}
-        className={field}
-        maxLength={80}
-      />
-      <fieldset className="mt-5">
-        <legend className="text-sm font-medium">Tone</legend>
-        <div className="mt-2 grid grid-cols-3 gap-2">
-          {(["warm", "formal", "short"] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => setTone(t)}
-              aria-pressed={tone === t}
-              className={cn(
-                "h-11 rounded-card border-2 text-sm font-bold",
-                tone === t ? "border-kb-black bg-kb-sand" : "border-kb-hairline",
-              )}
-            >
-              {t === "warm" ? "Warm" : t === "formal" ? "Formal" : "Short & friendly"}
-            </button>
-          ))}
-        </div>
-      </fieldset>
-      <Label htmlFor="phone" className="mt-5 block">
-        Phone to give unhappy customers <span className="text-kb-stone">(optional)</span>
-      </Label>
-      <Input
-        id="phone"
-        type="tel"
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-        className={field}
-        maxLength={30}
-      />
-      <Label htmlFor="hours" className="mt-5 block">
-        Opening hours note <span className="text-kb-stone">(optional)</span>
-      </Label>
-      <Input
-        id="hours"
-        value={hours}
-        onChange={(e) => setHours(e.target.value)}
-        placeholder="e.g. Open daily 8am to midnight"
-        className={field}
-        maxLength={160}
-      />
-      <Label htmlFor="mention" className="mt-5 block">
-        Anything you'd like mentioned <span className="text-kb-stone">(optional)</span>
-      </Label>
-      <Textarea
-        id="mention"
-        value={mention}
-        onChange={(e) => setMention(e.target.value)}
-        placeholder="e.g. We deliver within 3 miles. Free parking behind the shop."
-        className="mt-2 min-h-24 rounded-card px-4 py-3 text-base"
-        maxLength={600}
-      />
-      <Label htmlFor="staff" className="mt-5 block">
-        Staff names that may appear in replies{" "}
-        <span className="text-kb-stone">(optional, comma-separated)</span>
-      </Label>
-      <Input
-        id="staff"
-        value={staff}
-        onChange={(e) => setStaff(e.target.value)}
-        className={field}
-        maxLength={300}
-      />
-      <Label htmlFor="avoid" className="mt-5 block">
-        Anything Kabsi should never say or promise <span className="text-kb-stone">(optional)</span>
-      </Label>
-      <Textarea
-        id="avoid"
-        value={avoid}
-        onChange={(e) => setAvoid(e.target.value)}
-        placeholder="e.g. Don't promise same-day delivery. Don't mention the old location."
-        className="mt-2 min-h-20 rounded-card px-4 py-3 text-base"
-        maxLength={400}
-      />
-      {mode === "settings" ? (
-        <fieldset className="mt-6">
-          <legend className="font-medium">Questions customers ask</legend>
-          <p className="mt-1 text-sm text-kb-stone">
-            Replies and posts can use these answers, and nothing beyond them. Up to 8.
-          </p>
-          {faqs.map((f, i) => (
-            <div key={i} className="mt-3 rounded-card border border-kb-hairline p-3">
-              <Input
-                aria-label={`Question ${i + 1}`}
-                value={f.q}
-                onChange={(e) =>
-                  setFaqs(faqs.map((x, j) => (j === i ? { ...x, q: e.target.value } : x)))
-                }
-                placeholder="e.g. Do you have vegan options?"
-                maxLength={160}
-              />
-              <Textarea
-                aria-label={`Answer ${i + 1}`}
-                value={f.a}
-                onChange={(e) =>
-                  setFaqs(faqs.map((x, j) => (j === i ? { ...x, a: e.target.value } : x)))
-                }
-                placeholder="e.g. Yes, three vegan dishes every day."
-                className="mt-2 min-h-16"
-                maxLength={400}
-              />
-              <button
-                type="button"
-                className="mt-1 text-sm text-kb-stone underline"
-                onClick={() => setFaqs(faqs.filter((_, j) => j !== i))}
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-          {faqs.length < 8 ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="compact"
-              className="mt-3"
-              onClick={() => setFaqs([...faqs, { q: "", a: "" }])}
-            >
-              Add a question
-            </Button>
-          ) : null}
-        </fieldset>
+    <>
+      {mode === "onboarding" ? (
+        <StepTitle
+          title="About your business"
+          sub="Replies only use what you write here. If something isn't here, it's left out, never made up."
+        />
       ) : null}
-      <ErrorNote message={error} />
-      <Button type="submit" className="mt-6 w-full" disabled={busy}>
-        {busy ? "Saving…" : mode === "onboarding" ? "Save and continue" : "Save"}
-      </Button>
-      {saved && mode === "settings" ? (
-        <p className="mt-3 text-sm text-kb-green" role="status">
-          Saved. New drafts use this from now on.
-        </p>
-      ) : null}
-    </form>
+      <KnowledgeForm
+        location={location}
+        mode={mode}
+        submitLabel={mode === "onboarding" ? "Save and continue" : "Save"}
+        onSaved={async () => {
+          if (mode === "onboarding") await setStep(location.id, "plan");
+          await onChanged();
+        }}
+      />
+    </>
   );
 }
 
@@ -526,8 +345,13 @@ export function PlanStep({ location, onChanged }: StepProps) {
     );
   }
   const plans = [
-    { key: "pro_12m" as const, price: "$120", period: "12 months", note: "Card included" },
-    { key: "pro_6m" as const, price: "$75", period: "6 months", note: "Card included" },
+    {
+      key: "pro_12m" as const,
+      price: "$120",
+      period: "12 months",
+      note: "Card included in Lebanon",
+    },
+    { key: "pro_6m" as const, price: "$75", period: "6 months", note: "Card included in Lebanon" },
   ];
   return (
     <>

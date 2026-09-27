@@ -59,7 +59,8 @@ function Page() {
           </Point>
           <Point icon={<Nfc />} title="Supply the cards">
             Kabsi issues card codes for your stock, so the NFC cards you sell open each client's
-            Google review page.
+            Google review page. Kabsi only ships cards inside Lebanon, so in your area the cards
+            come from you.
           </Point>
         </div>
       </Section>

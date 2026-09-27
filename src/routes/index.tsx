@@ -20,7 +20,15 @@ import {
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
 import { InboxDemo } from "@/components/marketing/inbox-demo";
-import { CtaBand, Eyebrow, FaqList, H2, HeroBackdrop, Section } from "@/components/marketing/parts";
+import {
+  CardShippingNote,
+  CtaBand,
+  Eyebrow,
+  FaqList,
+  H2,
+  HeroBackdrop,
+  Section,
+} from "@/components/marketing/parts";
 import { BusinessGrid } from "@/components/marketing/business-grid";
 import { FAQ } from "@/lib/faq";
 import { ORG_LD, PRICES, PRODUCT_LD, WEBSITE_LD, pageHead } from "@/lib/site";
@@ -249,10 +257,11 @@ function HomePage() {
               100% digitally with your own review link and printable QR code
             </li>
             <li className="flex gap-3">
-              <Check className="mt-0.5 size-5 shrink-0" aria-hidden="true" /> ${PRICES.card} on its
-              own, included with Kabsi Pro, and keeps working if your plan ends
+              <Check className="mt-0.5 size-5 shrink-0" aria-hidden="true" /> Keeps working if your
+              plan ends
             </li>
           </ul>
+          <CardShippingNote className="mt-6 max-w-xl" />
         </div>
       </Section>
 
@@ -283,19 +292,15 @@ function HomePage() {
           <Price
             amount={PRICES.pro12}
             name="Kabsi Pro, 12 months"
-            line="$10 a month · NFC card included"
+            line="$10 a month · card included in Lebanon"
             highlight
           />
           <Price
             amount={PRICES.pro6}
             name="Kabsi Pro, 6 months"
-            line="$12.50 a month · NFC card included"
+            line="$12.50 a month · card included in Lebanon"
           />
-          <Price
-            amount={PRICES.card}
-            name="NFC card only"
-            line="One tap to your Google review page"
-          />
+          <Price amount={PRICES.card} name="NFC card only" line="Shipped in Lebanon only" />
         </div>
         <p className="mt-6 text-kb-stone">
           Pro is refundable within 14 days.{" "}

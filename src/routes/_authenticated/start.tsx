@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
@@ -77,6 +77,15 @@ function StartPage() {
   }, [code, location]);
 
   const refresh = () => query.refetch();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  // After "Add another business" creates the new one, leave ?new so the stepper follows it,
+  // and refresh the header's business switcher.
+  const created = async () => {
+    await qc.invalidateQueries();
+    if (startNew) await navigate({ to: "/start", search: {} });
+    await query.refetch();
+  };
 
   if (query.isLoading)
     return (
@@ -98,7 +107,7 @@ function StartPage() {
           {cardNote}
         </p>
       ) : null}
-      {step === "business" && <BusinessStep partnerHandle={p} inviteId={i} onCreated={refresh} />}
+      {step === "business" && <BusinessStep partnerHandle={p} inviteId={i} onCreated={created} />}
       {step === "access" && <AccessStep location={location} onChanged={refresh} />}
       {step === "knowledge" && <KnowledgeStep location={location} onChanged={refresh} />}
       {step === "plan" && <PlanStep location={location} onChanged={refresh} />}

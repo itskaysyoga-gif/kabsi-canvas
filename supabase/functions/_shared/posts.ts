@@ -2,6 +2,7 @@
 // Every post is a draft until the owner clicks Post on the exact text (D202).
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
 import { fenceReview, message, noDashes, parseJson, UNTRUSTED } from "./ai.ts";
+import { businessFacts, hasPostFacts } from "./facts.ts";
 import { googleMode, placeCategory, searchKeywords } from "./google.ts";
 
 const DRAFT_MODEL = "claude-sonnet-5";
@@ -33,19 +34,10 @@ export async function ensureCategory(db: SupabaseClient, loc: PostLoc) {
   return { ...loc, ...next };
 }
 
-// Grounded facts only: the knowledge card as the owner wrote it.
-function cardFacts(card: Record<string, unknown>) {
-  const facts: string[] = [];
-  const add = (label: string, v: unknown) => { if (typeof v === "string" && v.trim()) facts.push(`${label}: ${v.trim()}`); };
-  add("Opening hours", card.hours_note);
-  add("What the owner wants mentioned", card.mention);
-  add("Parking", card.parking);
-  add("Wi-Fi", card.wifi);
-  if (card.delivery === true) facts.push("Delivery: yes");
-  for (const f of (card.faqs as { q?: string; a?: string }[] | undefined) ?? []) if (f?.q && f?.a) facts.push(`Q: ${f.q} A: ${f.a}`);
-  return facts;
-}
-export const hasFacts = (card: Record<string, unknown>) => cardFacts(card).length > 0;
+// Grounded facts only: the knowledge card as the owner wrote it (shared builder, D260). Posts never carry the
+// phone number or staff names.
+const cardFacts = (card: Record<string, unknown>) => businessFacts(card, "post");
+export const hasFacts = (card: Record<string, unknown>) => hasPostFacts(card);
 
 // Phrases customers use in good reviews (Haiku), e.g. "croissants", "fast delivery". Topics, never quotes.
 async function reviewPhrases(db: SupabaseClient, locId: string) {
@@ -97,8 +89,8 @@ Output only the post text.`;
 async function checkPost(loc: PostLoc, user: string, post: string) {
   const out = await message(CHECK_MODEL,
     `You check a drafted Google Business Profile post before the owner sees it. Reply with JSON only: {"ok": true|false, "issues": ["<short issue>"]}
-Set ok=false if the post states anything not supported by the owner's note or the allowed facts: added days ("every day", "7 days a week"), prices, offers, dates, awards, numbers, services or promises; or if it mentions reviews, ratings, rankings or SEO; or contains a phone number, link or URL; or uses hashtags or emojis. Friendly wording is fine.`,
-    `Allowed facts:\n${cardFacts(loc.knowledge_card ?? {}).join("\n") || "(none)"}\n\nOwner's note and instructions:\n${user}\n\nPost:\n${post}`, 200);
+Set ok=false if the post states anything not supported by the owner's note or the allowed facts: added days ("every day", "7 days a week"), prices, offers, dates, awards, numbers, services or promises; or if it mentions reviews, ratings, rankings or SEO; or contains a phone number, link or URL; or uses hashtags or emojis; or mentions anything the owner asked never to mention. Friendly wording is fine.`,
+    `Allowed facts:\n${cardFacts(loc.knowledge_card ?? {}).join("\n") || "(none)"}\n${typeof loc.knowledge_card?.avoid === "string" && loc.knowledge_card.avoid.trim() ? `\nThe owner asked never to mention or promise: ${loc.knowledge_card.avoid.trim()}\n` : ""}\nOwner's note and instructions:\n${user}\n\nPost:\n${post}`, 200);
   const j = parseJson<{ ok?: boolean; issues?: string[] }>(out);
   return { ok: j.ok === true, issues: (j.issues ?? []).map(String).slice(0, 5) };
 }

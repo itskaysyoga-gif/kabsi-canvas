@@ -152,10 +152,14 @@ function Page() {
         <h2>8. Prices and payment</h2>
         <ul>
           <li>
-            Kabsi Pro is ${PRICES.pro6} for 6 months or ${PRICES.pro12} for 12 months, each
-            including one NFC card. A card on its own is ${PRICES.card}. Extra cards are $
-            {PRICES.extraCard} each or ${PRICES.fiveCards} for five. Prices are in US dollars, paid
-            upfront, and the same in every country.
+            Kabsi Pro is ${PRICES.pro6} for 6 months or ${PRICES.pro12} for 12 months. Prices are in
+            US dollars, paid upfront, and the same in every country.
+          </li>
+          <li>
+            Kabsi ships NFC cards only to addresses in Lebanon. There, each Pro plan includes one
+            card, a card on its own is ${PRICES.card}, and extra cards are ${PRICES.extraCard} each
+            or ${PRICES.fiveCards} for five. Outside Lebanon, Kabsi Pro doesn't include a card: you
+            can get one from a Kabsi partner or use any NFC card with your Kabsi review link.
           </li>
           <li>
             You can pay in USDT (TRC20 or Binance Pay) from anywhere, and in Lebanon also by Whish,

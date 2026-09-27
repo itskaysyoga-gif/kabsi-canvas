@@ -16,6 +16,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import {
+  CardShippingNote,
   CtaBand,
   Eyebrow,
   FeatureCard,
@@ -123,8 +124,8 @@ function Page() {
             <ul>
               <li>Reviews of 3 stars or less: one email each, as they arrive.</li>
               <li>
-                4 and 5 star reviews: one email a day at the hour you choose, with <b>Post all</b>{" "}
-                or <b>Review each</b>.
+                4 and 5 star reviews: gathered into one email a day at the hour you choose, each
+                with its own <b>Post</b>, <b>Edit</b> and <b>Skip</b>.
               </li>
               <li>
                 Hard reviews (1 or 2 stars, or anything about health, safety, staff or legal
@@ -197,6 +198,7 @@ function Page() {
             dashboard gives you a review link and a printable QR code that do the same. Kabsi counts
             taps (never who tapped) and shows them in your report.
           </p>
+          <CardShippingNote className="mt-6" />
         </div>
         <div className="flex justify-center">
           <img

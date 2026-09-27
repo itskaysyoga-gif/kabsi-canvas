@@ -81,6 +81,11 @@ export async function skipReview(reviewId: string) {
   if (error) throw new Error(error.message);
 }
 
+export async function handleOffline(reviewId: string) {
+  const { error } = await supabase.rpc("handle_review_offline", { p_review: reviewId });
+  if (error) throw new Error(error.message);
+}
+
 // ── Email action links (/a/:token): the token is the credential, no login needed
 export type ActionView = {
   status: "ok" | "used" | "expired" | "invalid";

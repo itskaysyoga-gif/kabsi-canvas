@@ -139,7 +139,8 @@ function PlanPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">Plan</h1>
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Settings</p>
+      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Plan</h1>
       {loc ? <p className="mt-2 text-kb-stone">{loc.name}</p> : null}
       {location.isLoading || data.isLoading ? <p className="mt-6 text-kb-stone">Loading…</p> : null}
       {!location.isLoading && !loc ? (
@@ -363,7 +364,7 @@ function Pay({
             <span className="mt-2 block font-bold">Kabsi Pro, {o.period}</span>
             <span className="block text-sm text-kb-stone">
               {o.perMonth}
-              {renew ? "" : " · card included"}
+              {renew ? "" : " · card included in Lebanon"}
             </span>
           </button>
         ))}

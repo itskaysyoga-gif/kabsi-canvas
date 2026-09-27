@@ -9,9 +9,10 @@ Key facts:
 - Also drafts: one short Google update a week (optional), photo checks before posting, special and holiday hours. All of it waits for the owner's approval; nothing is posted on a schedule.
 - Listing Shield: watches the listing's name, phone, address, hours, website and category, and emails the owner when one changes on Google, with a one-tap way to put the owner's version back. It cannot lock a listing.
 - Weekly report: every Monday, the public Google rating, new reviews, how many got a reply, and card and link opens. Facts only.
+- Where cards come from: Kabsi ships NFC cards only in Lebanon. Businesses anywhere else get a card from a Kabsi partner in their area, or buy any blank NFC card online and write their Kabsi review link on it. The review link and QR code work in every country.
 - Review card and link: an optional NFC and QR card, plus a free review link and QR code, open the business's own Google review form for every customer. There is no filtering of unhappy customers and no rewards for reviews. Taps are counted as opens, not reviews.
 - What Kabsi does not do: it does not promise more reviews, higher ratings or better rankings, it cannot remove reviews, and it does not post anything without approval.
-- Prices (USD, every country): card $20 one-time; Kabsi Pro $75 for 6 months or $120 for 12 months, paid once, refundable within 14 days. No monthly bills. Partners (card sellers and agencies): $8 per active business per month.
+- Prices (USD, every country): Kabsi Pro $75 for 6 months or $120 for 12 months, paid once, refundable within 14 days. In Lebanon one NFC card is included with Pro, and a card on its own is $20. No monthly bills. Partners (card sellers and agencies): $8 per active business per month.
 - Google data: review text and reviewer names are kept at most 30 days after Google last returned them.
 - Contact: hello@kabsi.co
 
@@ -43,6 +44,10 @@ Key facts:
 - [Can you remove a Google review?](https://kabsi-app.lovable.app/guides/can-you-remove-a-google-review)
 - [How to add a manager to your Google Business Profile](https://kabsi-app.lovable.app/guides/add-manager-google-business-profile)
 - [How to get your Google review link and QR code](https://kabsi-app.lovable.app/guides/google-review-link-and-qr-code)
+
+## Full facts
+
+- [Everything about Kabsi in one file](https://kabsi-app.lovable.app/llms-full.txt): product, setup, prices, cards, partners, policies, troubleshooting and FAQ
 
 ## Optional
 

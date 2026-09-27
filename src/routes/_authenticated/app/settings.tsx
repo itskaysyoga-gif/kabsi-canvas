@@ -47,7 +47,8 @@ function SettingsPage() {
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">Emails</h1>
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Settings</p>
+      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Emails</h1>
       {loc ? <p className="mt-2 text-kb-stone">{loc.name}</p> : null}
       {location.isLoading || settings.isLoading ? (
         <p className="mt-6 text-kb-stone">Loading…</p>

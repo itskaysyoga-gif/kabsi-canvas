@@ -79,14 +79,16 @@ function HomePage() {
         <>
           <p className="text-sm font-medium text-kb-stone">{greeting()}</p>
           <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">{loc.name}</h1>
-          {loc.status !== "active" ? (
+          {loc.status === "paused" || loc.status === "disabled" ? (
+            <Paused loc={loc} />
+          ) : loc.status !== "active" ? (
             <Setup loc={loc} />
           ) : dash.isError ? (
             <p className="mt-6 text-kb-red">We couldn't load your summary. Refresh the page.</p>
           ) : !dash.data ? (
             <Skeleton />
           ) : (
-            <Active d={dash.data} locationId={loc.id} />
+            <Active d={dash.data} locationId={loc.id} card={loc.knowledge_card ?? {}} />
           )}
         </>
       ) : null}
@@ -135,6 +137,25 @@ async function hasPaidPlan(locationId: string) {
   return (count ?? 0) > 0;
 }
 
+function Paused({ loc }: { loc: Location }) {
+  return (
+    <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb sm:p-9">
+      <h2 className="text-2xl font-bold">
+        {loc.status === "paused"
+          ? "Kabsi is paused for this business"
+          : "This business is switched off"}
+      </h2>
+      <p className="mt-2 max-w-xl leading-7 text-kb-stone">
+        No drafts or emails are sent while it's {loc.status}. Your card and review link keep
+        working. Email hello@kabsi.co and we'll help you start again.
+      </p>
+      <Button asChild className="mt-6">
+        <a href="mailto:hello@kabsi.co">Email Kabsi</a>
+      </Button>
+    </div>
+  );
+}
+
 function Setup({ loc }: { loc: Location }) {
   const paid = useQuery({ queryKey: ["paid-plan", loc.id], queryFn: () => hasPaidPlan(loc.id) });
   const knowledgeDone = loc.onboarding_step === "plan" || loc.onboarding_step === "done";
@@ -158,6 +179,18 @@ function Setup({ loc }: { loc: Location }) {
   const doneCount = steps.filter((s) => s.done).length;
   return (
     <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb sm:p-9">
+      {loc.access_lost_at && !loc.access_granted_at ? (
+        <div
+          className="mb-6 flex gap-3 rounded-card bg-kb-red/10 p-4 text-sm leading-6"
+          role="alert"
+        >
+          <ShieldAlert className="mt-0.5 size-5 shrink-0 text-kb-red" aria-hidden="true" />
+          <p>
+            <b>Kabsi can't reach your Google profile any more.</b> Someone may have removed
+            hello@kabsi.co as a Manager. Add it again and Kabsi picks up where it left off.
+          </p>
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold">Finish setting up</h2>
@@ -210,7 +243,15 @@ function Setup({ loc }: { loc: Location }) {
 }
 
 // ── Active business
-function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
+function Active({
+  d,
+  locationId,
+  card,
+}: {
+  d: Dashboard;
+  locationId: string;
+  card: Record<string, unknown>;
+}) {
   const daysLeft = daysUntil(d.planPaidUntil);
   const extras: { key: string; icon: ReactNode; text: string; to: string; tone?: "alert" }[] = [];
   if (d.openChanges)
@@ -317,7 +358,7 @@ function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
 
       {/* This week */}
       <h2 className="mt-10 text-sm font-bold uppercase tracking-wider text-kb-stone">
-        Last 7 days
+        At a glance
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <Tile
@@ -350,7 +391,7 @@ function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
         />
       </div>
 
-      <ProfileHealth d={d} />
+      <ProfileHealth d={d} card={card} />
 
       <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         {/* Latest reviews */}
@@ -390,9 +431,17 @@ function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
                   ? `Active until ${shortDate(d.planPaidUntil)}${daysLeft !== null ? ` · ${daysLeft} days left` : ""}`
                   : d.pendingClaim
                     ? "Payment sent. We're confirming it."
-                    : "Active"
+                    : d.plan
+                      ? "Active"
+                      : "No active plan"
             }
-            dot="ok"
+            dot={
+              d.plan?.kind === "partner" || d.planPaidUntil || d.plan
+                ? daysLeft !== null && daysLeft <= 7
+                  ? "alert"
+                  : "ok"
+                : "alert"
+            }
           />
           <StatusCard
             icon={<FileText />}
@@ -473,7 +522,26 @@ function ReplyStack() {
   );
 }
 
-function ProfileHealth({ d }: { d: Dashboard }) {
+const FACT_KEYS = [
+  "about",
+  "services",
+  "price_notes",
+  "booking",
+  "payment_methods",
+  "hours_note",
+  "service_area",
+  "delivery",
+  "parking",
+  "accessibility",
+  "languages",
+  "policies",
+  "mention",
+  "contact_phone",
+];
+function ProfileHealth({ d, card }: { d: Dashboard; card: Record<string, unknown> }) {
+  const facts =
+    FACT_KEYS.filter((k) => typeof card[k] === "string" && (card[k] as string).trim()).length +
+    (Array.isArray(card["faqs"]) && (card["faqs"] as unknown[]).length ? 1 : 0);
   const rate = d.reviews90d ? Math.round((d.answered90d / d.reviews90d) * 100) : null;
   const postDays = daysSince(d.lastPostAt);
   const rows: {
@@ -505,7 +573,7 @@ function ProfileHealth({ d }: { d: Dashboard }) {
       note:
         postDays != null && postDays <= 7
           ? "Your profile looks active"
-          : "A post a week keeps it fresh",
+          : "No Google post in the last 7 days",
       ok: postDays != null && postDays <= 7,
       to: "/app/posts",
     },
@@ -521,21 +589,23 @@ function ProfileHealth({ d }: { d: Dashboard }) {
       to: "/app/shield",
     },
     {
-      key: "taps",
-      icon: <CreditCard />,
-      label: "Review page opens",
-      value: String(d.taps7d),
-      note: `Last 7 days · ${d.taps30d} in 30 days · not reviews`,
-      ok: true,
-      to: "/app/cards",
+      key: "facts",
+      icon: <FileText />,
+      label: "About your business",
+      value: `${facts} of ${FACT_KEYS.length + 1}`,
+      note:
+        facts >= 6
+          ? "Plenty of facts for replies and posts"
+          : "Replies and posts only use these facts",
+      ok: facts >= 6,
+      to: "/app/knowledge",
     },
   ];
   return (
     <section className="mt-8 rounded-large bg-kb-white p-6 shadow-kb">
       <h2 className="text-lg font-bold">Profile health</h2>
       <p className="mt-1 text-sm text-kb-stone">
-        Google advises keeping your details complete and accurate and answering reviews. Regular
-        posts show customers you're active.
+        The parts of your profile you control, as they stand today.
       </p>
       <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         {rows.map((r) => (

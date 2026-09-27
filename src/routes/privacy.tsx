@@ -45,6 +45,13 @@ function Page() {
       <section>
         <h2>2. What we collect</h2>
         <p>
+          <b>If you chat with the Kabsi Assistant</b> (the AI helper on our pages): your messages,
+          the page you asked from, and any contact details you choose to give (name, email, business
+          name, phone, city), so we can answer, follow up and, only if you say yes, send you
+          occasional Kabsi news. The assistant is an AI model run by Anthropic on our behalf; if it
+          passes your question to a person, we email you from hello@kabsi.co.
+        </p>
+        <p>
           <b>If you use Kabsi for your business:</b>
         </p>
         <ul>
@@ -243,6 +250,11 @@ function Page() {
             Public rating history, the quotes in weekly reports and the before and after values of
             listing changes are also removed after 30 days. Your business category and area, read
             from Google, are refreshed at least every 30 days.
+          </li>
+          <li>
+            Assistant conversations: 12 months after the last message. Contact details you gave the
+            assistant: until you ask us to remove them, and news emails stop the moment you
+            unsubscribe.
           </li>
           <li>
             Google data after access is removed: deleted automatically after 30 days, unless access

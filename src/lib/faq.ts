@@ -28,6 +28,10 @@ export const FAQ: { q: string; a: string }[] = [
     a: "No. The card is optional. Every business gets a review link (go.kabsi.co/…) and a printable QR code in the dashboard, so you can use Kabsi 100% digitally.",
   },
   {
+    q: "Can you ship an NFC card to my country?",
+    a: "Kabsi ships NFC cards only in Lebanon. Anywhere else, get a card from a Kabsi partner in your area, or buy any blank NFC card or sticker online and write your Kabsi review link on it with a free NFC app. Your review link and QR code work in every country.",
+  },
+  {
     q: "Is Kabsi part of Google?",
     a: "No. Kabsi is an independent company and is not affiliated with Google. It works through Google's official Business Profile access, the same way a staff member you add as a Manager would.",
   },
@@ -53,7 +57,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "How do I pay?",
-    a: `In USDT (TRC20 or Binance Pay) from anywhere. In Lebanon you can also pay with Whish, OMT or cash. Kabsi Pro is $${PRICES.pro6} for 6 months or $${PRICES.pro12} for 12 months, card included.`,
+    a: `In USDT (TRC20 or Binance Pay) from anywhere. In Lebanon you can also pay with Whish, OMT or cash. Kabsi Pro is $${PRICES.pro6} for 6 months or $${PRICES.pro12} for 12 months. In Lebanon one NFC card is included.`,
   },
   {
     q: "What happens when my plan ends?",

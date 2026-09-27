@@ -131,7 +131,7 @@ async function emailFrom() {
 
 export async function sendEmail(o: {
   kind: string; to: string; subject: string; html: string; text: string; dedupeKey: string;
-  locationId?: string | null; partnerId?: string | null;
+  locationId?: string | null; partnerId?: string | null; replyTo?: string;
 }) {
   const db = admin();
   const { data: row, error } = await db.from("emails").insert({
@@ -154,7 +154,7 @@ export async function sendEmail(o: {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { authorization: `Bearer ${key}`, "content-type": "application/json", "idempotency-key": o.dedupeKey.slice(0, 256) },
-    body: JSON.stringify({ from: await emailFrom(), reply_to: "hello@kabsi.co", to: [o.to], subject: o.subject, html: o.html, text: o.text }),
+    body: JSON.stringify({ from: await emailFrom(), reply_to: o.replyTo ?? "hello@kabsi.co", to: [o.to], subject: o.subject, html: o.html, text: o.text }),
   });
   const payload = await res.json().catch(() => ({}));
   if (!res.ok) {

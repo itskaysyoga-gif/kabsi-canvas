@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/lib/supabase";
 import {
   createPartner,
   decideClaim,
@@ -87,7 +88,100 @@ export function PartnersPanel() {
           ))}
         </div>
       </section>
+
+      <AssistantContacts />
     </div>
+  );
+}
+
+type Contact = {
+  id: string;
+  email: string;
+  name: string | null;
+  business_name: string | null;
+  phone: string | null;
+  country: string | null;
+  city: string | null;
+  business_type: string | null;
+  interest: string | null;
+  marketing_consent: boolean;
+  source: string;
+  created_at: string;
+};
+
+// Contacts the Kabsi Assistant collected (D261): the mailing list. CSV for the email tool.
+function AssistantContacts() {
+  const q = useQuery({
+    queryKey: ["staff-contacts"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("staff_contacts", { p_limit: 500 });
+      if (error) throw new Error(error.message);
+      return (data ?? []) as Contact[];
+    },
+  });
+  function csv() {
+    const cols = [
+      "email",
+      "name",
+      "business_name",
+      "phone",
+      "country",
+      "city",
+      "business_type",
+      "interest",
+      "marketing_consent",
+      "source",
+      "created_at",
+    ] as const;
+    const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const body = [
+      cols.join(","),
+      ...(q.data ?? []).map((c) => cols.map((k) => esc(c[k])).join(",")),
+    ].join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([body], { type: "text/csv" }));
+    a.download = "kabsi-contacts.csv";
+    a.click();
+  }
+  return (
+    <section>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-bold">Assistant contacts</h2>
+          <p className="mt-1 text-sm text-kb-stone">
+            People who gave their details to the Kabsi Assistant. Email news only to those marked
+            "yes to news".
+          </p>
+        </div>
+        {q.data?.length ? (
+          <Button size="compact" variant="outline" onClick={csv}>
+            Download CSV
+          </Button>
+        ) : null}
+      </div>
+      {q.isError ? <p className="mt-3 text-kb-red">{String(q.error.message)}</p> : null}
+      <div className="mt-4 space-y-3">
+        {q.data && q.data.length === 0 ? <p className="text-kb-stone">No contacts yet.</p> : null}
+        {q.data?.map((c) => (
+          <div key={c.id} className="rounded-large bg-kb-white p-5 text-sm shadow-kb">
+            <p className="font-bold">
+              {c.name ?? c.email}
+              {c.business_name ? (
+                <span className="font-normal text-kb-stone"> · {c.business_name}</span>
+              ) : null}
+            </p>
+            <p className="text-kb-stone">
+              {c.email}
+              {c.phone ? ` · ${c.phone}` : ""}
+              {c.city || c.country ? ` · ${[c.city, c.country].filter(Boolean).join(", ")}` : ""}
+              {c.business_type ? ` · ${c.business_type}` : ""} · {shortDate(c.created_at)} ·{" "}
+              {c.marketing_consent ? "yes to news" : "no news"}
+            </p>
+            {c.interest ? <p className="mt-1">{c.interest}</p> : null}
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 

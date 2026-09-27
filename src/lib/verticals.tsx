@@ -464,7 +464,7 @@ export const VERTICALS: Vertical[] = [
       },
       {
         q: "Do I need the NFC card?",
-        a: "No. Every business gets a review link and a printable QR code. The card is optional.",
+        a: "No. Every business gets a review link and a printable QR code. The card is optional; Kabsi ships cards in Lebanon, and elsewhere you can use a partner's card or any NFC card you buy online.",
       },
     ],
   },
@@ -866,7 +866,7 @@ export const VERTICALS: Vertical[] = [
       },
       {
         q: "Do I need the NFC card?",
-        a: "No. Every business gets a review link and a printable QR code. The card is optional.",
+        a: "No. Every business gets a review link and a printable QR code. The card is optional; Kabsi ships cards in Lebanon, and elsewhere you can use a partner's card or any NFC card you buy online.",
       },
     ],
   },

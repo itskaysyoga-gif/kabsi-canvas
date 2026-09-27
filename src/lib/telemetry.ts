@@ -55,10 +55,16 @@ const bootScript = `
   var h = location.hostname;
   var env = /lovable\\.(app|dev)$/.test(h) ? "preview" : (h === "localhost" || h === "127.0.0.1") ? "local" : "production";
   window.__kabsiEnv = env;
+  // Email action links carry a one-time credential in the path (/a/<token>): never send it anywhere.
+  var scrub = function(u){ return typeof u === "string" ? u.replace(/\\/a\\/[^\\/?#]+/g, "/a/:token").replace(/([?&](?:t|token)=)[^&#]+/g, "$1redacted") : u; };
   window.sentryOnLoad = function(){
     Sentry.init({ environment: env, sendDefaultPii: false, tracesSampleRate: 0,
       beforeSend: function(event){ if (event.user) { event.user = event.user.id ? { id: event.user.id } : undefined; }
-        if (event.request && event.request.headers) { delete event.request.headers["X-Forwarded-For"]; delete event.request.cookies; } return event; },
+        if (event.request && event.request.headers) { delete event.request.headers["X-Forwarded-For"]; delete event.request.cookies; }
+        if (event.request) { event.request.url = scrub(event.request.url); if (event.request.headers) event.request.headers.Referer = scrub(event.request.headers.Referer); }
+        if (event.transaction) event.transaction = scrub(event.transaction);
+        if (event.breadcrumbs) event.breadcrumbs.forEach(function(b){ if (b.data) { b.data.url = scrub(b.data.url); b.data.from = scrub(b.data.from); b.data.to = scrub(b.data.to); } });
+        return event; },
       ignoreErrors: ["ResizeObserver loop limit exceeded", "ResizeObserver loop completed with undelivered notifications"] });
   };
   if (env === "local") return;
@@ -75,7 +81,8 @@ const bootScript = `
     mask_all_text: false,
     session_recording: { maskAllInputs: true },
     property_denylist: ["$el_text"],
-    disable_surveys: true
+    disable_surveys: true,
+    before_send: function(e){ if (e && e.properties) { ["$current_url","$pathname","$referrer","$initial_current_url","$initial_pathname"].forEach(function(k){ if (k in e.properties) e.properties[k] = scrub(e.properties[k]); }); } return e; }
   });
   };
 })();`;

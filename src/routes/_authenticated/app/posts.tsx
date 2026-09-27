@@ -60,28 +60,32 @@ function PostsPage() {
     queryFn: () => loadPosts(loc!.id),
     enabled: !!loc,
   });
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ["posts"] });
+  const refresh = () =>
+    Promise.all(
+      [["posts"], ["dashboard"], ["activity"]].map((queryKey) =>
+        queryClient.invalidateQueries({ queryKey }),
+      ),
+    );
   const drafts = (posts.data ?? []).filter((p) => p.state === "draft");
   const done = (posts.data ?? []).filter((p) => p.state !== "draft");
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">Google Maps keyword posts</h1>
-      <p className="mt-2 text-kb-stone">
-        Regular posts keep your profile fresh. Tell Kabsi what's new in a sentence, or let it draft
-        one each week from your facts. Nothing is posted until you press Post.
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Google profile</p>
+      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Posts</h1>
+      <p className="mt-2 max-w-xl text-kb-stone">
+        Short updates that show on your Google profile. Tell Kabsi what's new in a sentence, or let
+        it draft one each week from your facts. Nothing is posted until you tap Post to Google.
       </p>
       {!location.isLoading && !loc ? (
         <Button asChild className="mt-6">
           <Link to="/start">Add your business</Link>
         </Button>
       ) : null}
-      {loc && loc.status !== "active" ? (
-        <p className="mt-6 text-kb-stone">Posts start once your business is active.</p>
-      ) : null}
+      {loc && loc.status !== "active" ? <NotYet /> : null}
       {loc && loc.status === "active" ? (
         <>
-          <WeeklyToggle locationId={loc.id} />
+          <WeeklyToggle locationId={loc.id} hasFacts={hasFacts(loc.knowledge_card ?? {})} />
           <NewPost locationId={loc.id} onCreated={refresh} />
         </>
       ) : null}
@@ -153,7 +157,7 @@ function NewPost({ locationId, onCreated }: { locationId: string; onCreated: () 
     setErr("");
     setBusy(true);
     try {
-      await contentCall({
+      const r = await contentCall<{ grounded?: boolean }>({
         do: "post_draft",
         location_id: locationId,
         owner_input: input,
@@ -165,6 +169,10 @@ function NewPost({ locationId, onCreated }: { locationId: string; onCreated: () 
         cta_url: url || null,
       });
       track("draft_generated", { channel: "dashboard", source: "post" });
+      if (r.grounded === false)
+        setErr(
+          "Draft ready below. Kabsi's check wasn't sure every detail came from your note, so read it closely before posting.",
+        );
       setInput("");
       onCreated();
     } catch (x) {
@@ -366,7 +374,13 @@ function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }
         <Button disabled={!!busy || text.trim().length < 10} onClick={() => void run("publish")}>
           {busy === "publish" ? "Posting…" : "Post to Google"}
         </Button>
-        <Button variant="ghost" disabled={!!busy} onClick={() => void run("skip")}>
+        <Button
+          variant="ghost"
+          disabled={!!busy}
+          onClick={() => {
+            if (window.confirm("Discard this draft? It won't be posted.")) void run("skip");
+          }}
+        >
           Discard
         </Button>
       </div>
@@ -375,7 +389,7 @@ function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }
 }
 
 // Weekly draft switch (set_auto_posts RPC, members only). The draft still waits for the owner.
-function WeeklyToggle({ locationId }: { locationId: string }) {
+function WeeklyToggle({ locationId, hasFacts }: { locationId: string; hasFacts: boolean }) {
   const queryClient = useQueryClient();
   const setting = useQuery({
     queryKey: ["auto-posts", locationId],
@@ -397,7 +411,8 @@ function WeeklyToggle({ locationId }: { locationId: string }) {
       p_location: locationId,
       p_enabled: !on,
     });
-    if (!error) await queryClient.invalidateQueries({ queryKey: ["auto-posts", locationId] });
+    if (error) window.alert("Couldn't change the weekly draft setting. Try again.");
+    else await queryClient.invalidateQueries({ queryKey: ["auto-posts", locationId] });
     setBusy(false);
   }
   return (
@@ -409,6 +424,14 @@ function WeeklyToggle({ locationId }: { locationId: string }) {
             ? "Kabsi drafts one post a week from your facts and emails it to you to approve."
             : "Off. Kabsi only writes posts when you ask."}
         </p>
+        {on && !hasFacts ? (
+          <p className="mt-1 text-sm text-kb-red">
+            Weekly drafts need at least one fact.{" "}
+            <Link to="/app/knowledge" className="font-bold underline underline-offset-4">
+              Add some in About your business
+            </Link>
+          </p>
+        ) : null}
       </div>
       <Button
         variant={on ? "outline" : "default"}
@@ -420,5 +443,44 @@ function WeeklyToggle({ locationId }: { locationId: string }) {
         {on ? "Turn off" : "Turn on"}
       </Button>
     </div>
+  );
+}
+
+function NotYet() {
+  return (
+    <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
+      <p className="font-bold">Posts start once Kabsi can reach your Google profile.</p>
+      <p className="mt-1 text-sm leading-6 text-kb-stone">
+        Finish setup and this page fills up with drafts to approve.
+      </p>
+      <Button asChild size="compact" className="mt-4">
+        <Link to="/start">Continue setup</Link>
+      </Button>
+    </div>
+  );
+}
+
+const FACT_KEYS = [
+  "about",
+  "services",
+  "price_notes",
+  "booking",
+  "payment_methods",
+  "hours_note",
+  "service_area",
+  "delivery",
+  "parking",
+  "accessibility",
+  "wifi",
+  "languages",
+  "policies",
+  "mention",
+];
+function hasFacts(card: Record<string, unknown>) {
+  return (
+    FACT_KEYS.some(
+      (k) => (typeof card[k] === "string" && (card[k] as string).trim()) || card[k] === true,
+    ) ||
+    (Array.isArray(card["faqs"]) && (card["faqs"] as unknown[]).length > 0)
   );
 }

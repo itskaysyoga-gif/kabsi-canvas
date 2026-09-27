@@ -117,7 +117,7 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
       .select("id", head)
       .eq("location_id", locationId)
       .gte("review_created_at", since7)
-      .eq("state", "posted"),
+      .or("state.eq.posted,state.eq.handled_offline,existing_reply.not.is.null"),
     supabase
       .from("rating_snapshots")
       .select("taken_on, rating, review_count")
@@ -284,7 +284,7 @@ const FIELD_LABEL: Record<string, string> = {
 export async function loadActivity(locationId: string): Promise<Activity[]> {
   const since30 = new Date(Date.now() - 30 * DAY).toISOString();
   const since7 = new Date(Date.now() - 7 * DAY).toISOString();
-  const [pubs, drafts, loc, reports] = await Promise.all([
+  const [pubs, drafts, lastDraft, loc, reports] = await Promise.all([
     supabase
       .from("publications")
       .select("id, target_type, status, payload, created_at")
@@ -298,6 +298,13 @@ export async function loadActivity(locationId: string): Promise<Activity[]> {
       .select("id, reviews!inner(location_id)", { count: "exact", head: true })
       .eq("reviews.location_id", locationId)
       .gte("created_at", since7),
+    supabase
+      .from("reply_drafts")
+      .select("created_at, reviews!inner(location_id)")
+      .eq("reviews.location_id", locationId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
     supabase.from("locations").select("shield_checked_at").eq("id", locationId).maybeSingle(),
     supabase
       .from("weekly_reports")
@@ -348,7 +355,7 @@ export async function loadActivity(locationId: string): Promise<Activity[]> {
       key: "drafts",
       kind: "drafts",
       text: `Drafted ${drafted} ${drafted === 1 ? "reply" : "replies"} for you this week`,
-      at: new Date().toISOString(),
+      at: (lastDraft.data as { created_at: string } | null)?.created_at ?? new Date().toISOString(),
     });
   const checked = (loc.data as { shield_checked_at: string | null } | null)?.shield_checked_at;
   if (checked)

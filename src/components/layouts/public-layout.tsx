@@ -13,6 +13,7 @@ import {
 import { KabsiLogo } from "@/components/shared/kabsi-logo";
 import { useSectionRise } from "@/components/marketing/motion";
 import { VERTICALS } from "@/lib/verticals";
+import { AssistantWidget } from "@/components/assistant/assistant-widget";
 
 const links = [
   ["How it works", "/how-it-works"],
@@ -131,6 +132,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </p>
         </div>
       </footer>
+      <AssistantWidget surface="site" />
     </div>
   );
 }

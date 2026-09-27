@@ -1,8 +1,10 @@
+import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   BookOpen,
   ChevronDown,
   LifeBuoy,
+  LogOut,
   Mail,
   CreditCard,
   Home,
@@ -280,13 +282,13 @@ export function AppLayout({
 
   async function handleSignOut() {
     setSignOutError("");
-    await queryClient.cancelQueries();
-    queryClient.clear();
     try {
       await signOut();
-      await navigate({ to: "/login", replace: true });
-    } catch (error) {
-      setSignOutError(error instanceof Error ? error.message : "Unable to sign out.");
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      await navigate({ to: "/", replace: true });
+    } catch {
+      setSignOutError("Couldn't sign out. Check your connection and try again.");
     }
   }
 
@@ -336,6 +338,13 @@ export function AppLayout({
               <Mail className="size-4" aria-hidden="true" /> hello@kabsi.co
             </a>
           </div>
+          <button
+            type="button"
+            onClick={() => void handleSignOut()}
+            className="mt-3 flex min-h-10 w-full items-center gap-2 rounded-card px-3 text-sm font-medium text-kb-stone hover:bg-kb-sand hover:text-kb-black"
+          >
+            <LogOut className="size-4" aria-hidden="true" /> Sign out
+          </button>
         </div>
       </aside>
       <div className="min-w-0 pb-22 lg:pb-0">
@@ -381,16 +390,22 @@ export function AppLayout({
               >
                 Sign out
               </DropdownMenuItem>
-              {signOutError ? (
-                <p className="px-2 py-1 text-sm text-kb-red">{signOutError}</p>
-              ) : null}
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
+        {signOutError ? (
+          <p
+            role="alert"
+            className="bg-kb-red px-5 py-2 text-center text-sm font-bold text-kb-white"
+          >
+            {signOutError}
+          </p>
+        ) : null}
         <TestModeBanner />
         {area === "app" && current ? <SubNav section={current} path={location.pathname} /> : null}
         <main>{children}</main>
       </div>
+      {area === "app" ? <AssistantWidget surface="app" /> : null}
       {area === "app" ? (
         <nav
           className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-kb-hairline bg-kb-white px-1 pb-[env(safe-area-inset-bottom)] lg:hidden"

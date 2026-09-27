@@ -14,7 +14,9 @@ import { PageIcon } from "@/components/shared/page-icon";
 // Listing Shield (D218): Kabsi watches the listing and alerts you when something changes. It can't stop
 // Google or the public from editing, but it can put your version back with one tap.
 export const Route = createFileRoute("/_authenticated/app/shield")({
-  head: () => ({ meta: [{ title: "Shield | Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Listing Shield | Kabsi" }, { name: "robots", content: "noindex" }],
+  }),
   component: ShieldPage,
 });
 
@@ -71,15 +73,18 @@ function ShieldPage() {
     enabled: !!loc,
     refetchInterval: 60_000,
   });
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ["shield"] });
+  const refresh = () =>
+    Promise.all(
+      [["shield"], ["dashboard"], ["activity"]].map((queryKey) =>
+        queryClient.invalidateQueries({ queryKey }),
+      ),
+    );
   const open = (data.data?.changes ?? []).filter((c) => c.state === "open");
   const past = (data.data?.changes ?? []).filter((c) => c.state !== "open");
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
-        Profile guard · change alerts · one-tap revert
-      </p>
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Google profile</p>
       <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Listing Shield</h1>
       <p className="mt-2 max-w-2xl text-kb-stone">
         Kabsi watches your Google listing and emails you when something changes. Google sometimes
@@ -91,7 +96,21 @@ function ShieldPage() {
           <Link to="/start">Add your business</Link>
         </Button>
       ) : null}
-      {loc && !data.isLoading && !data.data?.base ? (
+      {data.error ? (
+        <p className="mt-6 text-kb-red" role="alert">
+          Couldn't load your listing. Refresh the page.
+        </p>
+      ) : null}
+      {loc && loc.status !== "active" ? (
+        <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
+          <p className="font-bold">
+            Listing Shield starts once Kabsi can reach your Google profile.
+          </p>
+          <Button asChild size="compact" className="mt-4">
+            <Link to="/start">Continue setup</Link>
+          </Button>
+        </div>
+      ) : loc && !data.isLoading && !data.error && !data.data?.base ? (
         <p className="mt-6 text-kb-stone">
           Kabsi takes a first snapshot of your listing within a few minutes of going active.
         </p>
@@ -105,13 +124,15 @@ function ShieldPage() {
         <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
           <div className="flex items-center gap-2">
             <ShieldCheck className="size-5 text-kb-green" aria-hidden="true" />
-            <h2 className="font-bold">{open.length ? "Watching" : "No changes waiting"}</h2>
+            <h2 className="font-bold">
+              {open.length ? "Your saved version" : "Watching. No changes waiting."}
+            </h2>
           </div>
           <dl className="mt-4 divide-y divide-kb-hairline">
             {Object.entries(LABEL).map(([k, label]) => (
               <div key={k} className="flex justify-between gap-4 py-2.5 text-sm">
                 <dt className="text-kb-stone">{label}</dt>
-                <dd dir="auto" className="text-right font-medium">
+                <dd dir="auto" className="min-w-0 break-words text-right font-medium">
                   {data.data!.base!.fields[k]?.display || "-"}
                 </dd>
               </div>
@@ -183,7 +204,17 @@ function OpenChange({ change, onDone }: { change: Change; onDone: () => unknown 
         </p>
       ) : null}
       <div className="mt-5 flex flex-wrap gap-2">
-        <Button disabled={!!busy} onClick={() => void decide("revert")}>
+        <Button
+          disabled={!!busy}
+          onClick={() => {
+            if (
+              window.confirm(
+                `Put your ${(LABEL[change.field] ?? change.field).toLowerCase()} back on Google?\n\nGoogle will show: ${change.old_value?.display ?? "your saved version"}`,
+              )
+            )
+              void decide("revert");
+          }}
+        >
           {busy === "revert" ? "Putting back…" : "Put mine back"}
         </Button>
         <Button variant="ghost" disabled={!!busy} onClick={() => void decide("keep")}>

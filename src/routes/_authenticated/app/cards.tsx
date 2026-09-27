@@ -121,6 +121,12 @@ function CardsPage() {
               Got a Kabsi NFC card? Add it below with the code printed under the QR. You don't need
               one to use Kabsi.
             </p>
+            <p className="mt-3 text-sm leading-6 text-kb-stone">
+              <b className="text-kb-ink">Outside Lebanon?</b> Kabsi ships cards only in Lebanon. Get
+              one from a Kabsi partner, or buy any blank NFC card or sticker online (NTAG213 or
+              NTAG215), open a free NFC writer app, choose "write a URL" and paste your review link
+              from above. Taps are counted the same way.
+            </p>
           </div>
         ) : null}
       </div>

@@ -92,19 +92,19 @@ Deno.serve(async (req) => {
         const cta = CTAS.includes(String(b.cta_type)) ? String(b.cta_type) : null;
         const ctaUrl = cta && cta !== "CALL" ? String(b.cta_url ?? "").trim() : null;
         if (cta && cta !== "CALL" && !/^https:\/\/[^\s]+\.[^\s]+/.test(ctaUrl ?? "")) return fail("bad_input", "The button needs a link that starts with https://");
-        const { text: body } = await writePost(loc, keywords, `Owner's note:\n${input}`);
+        const { text: body, ok: grounded, issues } = await writePost(loc, keywords, `Owner's note:\n${input}`);
         const { data, error } = await db.from("gbp_posts").insert({ location_id: loc.id, owner_input: input, body, cta_type: cta, cta_url: ctaUrl, keywords, source: "owner" }).select("id, body").single();
         if (error) throw error;
-        return json({ ok: true, post: data });
+        return json({ ok: true, post: data, grounded, issues });
       }
       case "post_redraft": {
         if (!post || post.state !== "draft") return fail("bad_input", "This post can't be changed.");
         const instruction = String(b.instruction ?? "").trim().slice(0, 300);
         if (!instruction) return fail("bad_input", "Tell Kabsi what to change.");
         if (!(await rateLimit(`post_draft:${loc.id}`, 15, 86400))) return fail("rate_limited", "That's enough drafts for today.", 429);
-        const { text: body } = await writePost(loc, post.keywords ?? [], `Owner's note:\n${post.owner_input}\n\nCurrent post:\n${post.body}\n\nOwner's instruction for the new version: ${instruction}`);
+        const { text: body, ok: grounded, issues } = await writePost(loc, post.keywords ?? [], `Owner's note:\n${post.owner_input}\n\nCurrent post:\n${post.body}\n\nOwner's instruction for the new version: ${instruction}`);
         await db.from("gbp_posts").update({ body }).eq("id", post.id);
-        return json({ ok: true, post: { id: post.id, body } });
+        return json({ ok: true, post: { id: post.id, body }, grounded, issues });
       }
       case "keyword_suggest": {
         if (!(await rateLimit(`keyword_suggest:${loc.id}`, 10, 86400))) return fail("rate_limited", "Try again tomorrow.", 429);
@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
         }).select("id").single();
         if (error) throw error;
         try {
-          const r = await createLocalPost(loc.google_account_id!, loc.google_location_id, { summary: text, languageCode: "en", ctaType: post.cta_type, ctaUrl: post.cta_url });
+          const r = await createLocalPost(loc.google_account_id!, loc.google_location_id, { summary: text, languageCode: postLanguage(text), ctaType: post.cta_type, ctaUrl: post.cta_url });
           await db.from("publications").update({ status: r.state, google_response: r.response }).eq("id", pub.id);
           await db.from("gbp_posts").update({ body: text, state: r.state === "rejected" ? "failed" : "posted" }).eq("id", post.id);
           return json({ ok: true, state: r.state });
@@ -223,3 +223,12 @@ Deno.serve(async (req) => {
     return fail("internal", "Something went wrong. Nothing was posted.", 500);
   }
 });
+
+// Google wants the post's language: a light guess from the text (Arabic script, then common Spanish or French
+// words), English otherwise.
+function postLanguage(text: string) {
+  if (/[\u0600-\u06FF]/.test(text)) return "ar";
+  if (/[ñ¿¡]|\b(el|los|las|nuestro|nuestra|para|con)\b/i.test(text)) return "es";
+  if (/[àâçéèêëîïôûùœ]|\b(le|les|des|notre|nos|pour|avec)\b/i.test(text)) return "fr";
+  return "en";
+}

@@ -134,6 +134,7 @@ export const PRODUCT_LD = {
       name: "Kabsi card",
       price: PRICES.card,
       priceCurrency: "USD",
+      eligibleRegion: { "@type": "Country", name: "Lebanon" },
       url: `${SITE_URL}/pricing`,
     },
   ],
