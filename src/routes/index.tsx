@@ -109,7 +109,7 @@ function HomePage() {
               and tap Post.
             </p>
           </div>
-          <ul className="grid gap-4 self-center">
+          <ul data-stagger="" className="grid gap-4 self-center">
             <Point icon={<Languages />} title="Arabic, English, French and more">
               Replies match the reviewer's language. Hard reviews get a calm, careful draft.
             </Point>
@@ -133,7 +133,7 @@ function HomePage() {
           connected, the searches that found you. The strongest phrase goes in the first line, where
           Google shows it.
         </p>
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div data-stagger="" className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Feature icon={<Search />} title="Search phrases built in">
             Like "bakery in Hamra", written as normal speech, never keyword lists.
           </Feature>
@@ -234,7 +234,7 @@ function HomePage() {
       <Section>
         <Eyebrow>How it works</Eyebrow>
         <H2>Set up in minutes. The last step is always yours.</H2>
-        <ol className="mt-12 grid gap-5 md:grid-cols-3">
+        <ol data-stagger="" className="mt-12 grid gap-5 md:grid-cols-3">
           <Step n={1} icon={<UserPlus />} title="Add Kabsi to your Google profile">
             Invite hello@kabsi.co as a Manager, like you'd add a staff member. You can remove it any
             time.
@@ -252,7 +252,7 @@ function HomePage() {
       <Section tone="sand">
         <Eyebrow>Upfront pricing</Eyebrow>
         <H2>Paid once, upfront. No monthly bills.</H2>
-        <div className="mt-12 grid gap-4 md:grid-cols-3">
+        <div data-stagger="" className="mt-12 grid gap-4 md:grid-cols-3">
           <Price
             amount={PRICES.pro12}
             name="Kabsi Pro, 12 months"
@@ -313,7 +313,7 @@ function HomePage() {
 
 function Point({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <li className="flex gap-4 rounded-large border-2 border-kb-hairline p-5">
+    <li className="kb-lift flex gap-4 rounded-large border-2 border-kb-hairline bg-kb-white p-5">
       <span className="grid size-11 shrink-0 place-items-center rounded-full bg-kb-yellow text-kb-black [&_svg]:size-5">
         {icon}
       </span>
@@ -337,7 +337,7 @@ function Step({
   children: ReactNode;
 }) {
   return (
-    <li className="rounded-large border-2 border-kb-hairline p-6">
+    <li className="kb-lift rounded-large border-2 border-kb-hairline bg-kb-white p-6">
       <div className="flex items-center justify-between">
         <span className="grid size-11 place-items-center rounded-full bg-kb-yellow text-kb-black [&_svg]:size-5">
           {icon}
@@ -360,8 +360,8 @@ function Feature({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-large bg-kb-white p-6 shadow-kb">
-      <span className="grid size-11 place-items-center rounded-card bg-kb-sand [&_svg]:size-5">
+    <div className="kb-lift rounded-large bg-kb-white p-6 shadow-kb">
+      <span className="grid size-11 place-items-center rounded-full bg-kb-yellow text-kb-black [&_svg]:size-5">
         {icon}
       </span>
       <h3 className="mt-5 text-lg font-bold">{title}</h3>

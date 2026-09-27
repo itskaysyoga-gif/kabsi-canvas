@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, CalendarRange, Check, Globe, MapPin, Nfc, Sparkles } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
-import { CtaBand, Eyebrow, H2, PageHero, Section } from "@/components/marketing/parts";
+import { CtaBand, Eyebrow, H2, IconBadge, PageHero, Section } from "@/components/marketing/parts";
+import { PricingVisual } from "@/components/marketing/visuals";
 import { CONTACT_PHONE, PRICES, PRODUCT_LD, pageHead } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -35,12 +36,14 @@ function Page() {
         eyebrow="Pricing"
         title="Paid once, upfront. No monthly bills."
         sub="Same price in every country. Your plan starts when payment is confirmed and Kabsi's access to your Google profile works, so waiting for access costs you nothing."
+        visual={<PricingVisual />}
       />
 
       <Section tone="sand">
-        <div className="grid gap-5 lg:grid-cols-3">
+        <div data-stagger="" className="grid gap-5 lg:grid-cols-3">
           <Plan
             name="Kabsi Pro, 12 months"
+            icon={<Sparkles />}
             price={PRICES.pro12}
             per="$10 a month"
             features={PRO}
@@ -48,12 +51,14 @@ function Page() {
           />
           <Plan
             name="Kabsi Pro, 6 months"
+            icon={<CalendarRange />}
             price={PRICES.pro6}
             per="$12.50 a month"
             features={PRO}
           />
           <Plan
             name="NFC card only"
+            icon={<Nfc />}
             price={PRICES.card}
             per="One-time"
             features={[
@@ -74,15 +79,31 @@ function Page() {
           <Eyebrow>Paying</Eyebrow>
           <H2>How to pay</H2>
           <div className="mt-6 space-y-4 text-lg leading-8 text-kb-stone">
-            <p>
-              <b className="text-kb-ink">Anywhere:</b> USDT, on TRC20 or with Binance Pay. After
-              paying, paste the transaction ID in Kabsi and we confirm it.
-            </p>
-            <p>
-              <b className="text-kb-ink">In Lebanon:</b> also Whish, OMT or cash. Message{" "}
-              {CONTACT_PHONE} or hello@kabsi.co and we'll arrange it.
-            </p>
+            <div className="flex gap-4">
+              <IconBadge icon={<Globe />} tone="sand" />
+              <p>
+                <b className="text-kb-ink">Anywhere:</b> USDT, on TRC20 or with Binance Pay. After
+                paying, paste the transaction ID in Kabsi and we confirm it.
+              </p>
+            </div>
+            <div className="flex gap-4">
+              <IconBadge icon={<MapPin />} tone="sand" />
+              <p>
+                <b className="text-kb-ink">In Lebanon:</b> also Whish, OMT or cash. Message{" "}
+                {CONTACT_PHONE} or hello@kabsi.co and we'll arrange it.
+              </p>
+            </div>
           </div>
+          <img
+            src="/images/nfc-cards.webp"
+            alt="Two acrylic NFC review cards, one black and one blue, each with tap and QR code areas"
+            width={900}
+            height={776}
+            loading="lazy"
+            decoding="async"
+            className="mt-10 w-full max-w-md rounded-large shadow-kb"
+          />
+          <p className="mt-2 text-xs text-kb-stone">Current card designs.</p>
         </div>
         <div>
           <Eyebrow>Good to know</Eyebrow>
@@ -132,12 +153,14 @@ function Page() {
 
 function Plan({
   name,
+  icon,
   price,
   per,
   features,
   highlight = false,
 }: {
   name: string;
+  icon: ReactNode;
   price: number;
   per: string;
   features: string[];
@@ -146,12 +169,15 @@ function Plan({
   return (
     <div
       className={cn(
-        "flex flex-col rounded-large bg-kb-white p-7 shadow-kb",
+        "kb-lift flex flex-col rounded-large bg-kb-white p-7 shadow-kb",
         highlight && "ring-2 ring-kb-black",
       )}
     >
-      <p className="font-bold">{name}</p>
-      <p className="mt-4 font-display text-6xl leading-none">${price}</p>
+      <div className="flex items-center gap-3">
+        <IconBadge icon={icon} tone={highlight ? "yellow" : "sand"} className="size-10" />
+        <p className="font-bold">{name}</p>
+      </div>
+      <p className="mt-5 font-display text-6xl leading-none">${price}</p>
       <p className="mt-2 text-sm text-kb-stone">{per}</p>
       <ul className="mt-6 flex-1 space-y-3">
         {features.map((f) => (

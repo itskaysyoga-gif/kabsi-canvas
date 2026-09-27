@@ -79,3 +79,44 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+/* Motion (KABSI-BRAND "Allowed motion"): a one-time 8 px rise per section, a one-time tap ripple on the
+   card, pressed states. No loops, no parallax, no counters. Only armed once JS runs (html.kb-motion),
+   so content is always visible without JS, and never with prefers-reduced-motion. */
+[data-rise], [data-stagger] > * {
+  transition: opacity 520ms cubic-bezier(.2,.6,.3,1), transform 520ms cubic-bezier(.2,.6,.3,1);
+}
+html.kb-motion [data-rise]:not(.kb-in),
+html.kb-motion [data-stagger]:not(.kb-in) > * { opacity: 0; transform: translateY(8px); }
+[data-stagger] > *:nth-child(2) { transition-delay: 70ms; }
+[data-stagger] > *:nth-child(3) { transition-delay: 140ms; }
+[data-stagger] > *:nth-child(4) { transition-delay: 210ms; }
+[data-stagger] > *:nth-child(5) { transition-delay: 280ms; }
+[data-stagger] > *:nth-child(n+6) { transition-delay: 350ms; }
+
+@keyframes kb-rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.kb-hero-visual { animation: kb-rise-in 420ms cubic-bezier(.2,.6,.3,1) both; }
+
+/* One-time tap ripple: two rings leave the NFC spot once, when the card scrolls into view. */
+@keyframes kb-ripple { from { transform: scale(.7); opacity: .6; } to { transform: scale(2.6); opacity: 0; } }
+.kb-ripple { position: relative; }
+.kb-ripple::before, .kb-ripple::after {
+  content: ""; position: absolute; inset: 0; border-radius: 999px; border: 2px solid var(--kb-yellow);
+  opacity: 0; pointer-events: none;
+}
+.kb-in .kb-ripple::before, .kb-ripple.kb-in::before { animation: kb-ripple 900ms cubic-bezier(.2,.6,.3,1) 350ms 1 both; }
+.kb-in .kb-ripple::after, .kb-ripple.kb-in::after { animation: kb-ripple 900ms cubic-bezier(.2,.6,.3,1) 600ms 1 both; }
+.kb-hero-visual .kb-ripple::before { animation: kb-ripple 900ms cubic-bezier(.2,.6,.3,1) 800ms 1 both; }
+.kb-hero-visual .kb-ripple::after { animation: kb-ripple 900ms cubic-bezier(.2,.6,.3,1) 1050ms 1 both; }
+
+/* Cards lift a little on hover and press down on tap. */
+.kb-lift { transition: transform 200ms cubic-bezier(.2,.6,.3,1), box-shadow 200ms cubic-bezier(.2,.6,.3,1), border-color 160ms; }
+@media (hover: hover) { .kb-lift:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(0,0,0,.09); } }
+.kb-lift:active { transform: translateY(0) scale(.99); transition-duration: 80ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  html.kb-motion [data-rise]:not(.kb-in), html.kb-motion [data-stagger]:not(.kb-in) > * { opacity: 1; transform: none; }
+  .kb-hero-visual { animation: none; }
+  .kb-ripple::before, .kb-ripple::after { display: none; }
+  .kb-lift:hover { transform: none; }
+}

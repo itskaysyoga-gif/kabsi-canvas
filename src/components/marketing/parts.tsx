@@ -1,20 +1,23 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Nfc } from "lucide-react";
+import { ArrowRight, Nfc, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KabsiMark } from "@/components/shared/kabsi-logo";
 import { cn } from "@/lib/utils";
+import { PHOTOS, photoSrc, type PhotoId } from "@/lib/site-photos";
 
 export function Section({
   children,
   tone = "white",
   className,
   id,
+  rise = true,
 }: {
   children: ReactNode;
   tone?: "white" | "sand" | "carbon";
   className?: string;
   id?: string;
+  rise?: boolean;
 }) {
   return (
     <section
@@ -25,7 +28,10 @@ export function Section({
         tone === "white" && "bg-kb-white",
       )}
     >
-      <div className={cn("mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-24", className)}>
+      <div
+        data-rise={rise ? "" : undefined}
+        className={cn("mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-24", className)}
+      >
         {children}
       </div>
     </section>
@@ -59,26 +65,96 @@ export function PageHero({
   title,
   sub,
   children,
+  visual,
+  visualClassName,
 }: {
   eyebrow: string;
   title: string;
   sub: string;
   children?: ReactNode;
+  /** A drawn HTML visual or photo shown beside the text (below it on phones). */
+  visual?: ReactNode;
+  visualClassName?: string;
 }) {
   return (
-    <section className="bg-kb-carbon text-kb-white">
-      <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-        <p className="flex items-center gap-3 text-sm font-bold uppercase tracking-wider text-kb-stone-on-dark">
-          <span className="h-1 w-8 rounded-pill bg-kb-yellow" />
-          {eyebrow}
-        </p>
-        <h1 className="mt-5 max-w-4xl font-display text-[clamp(2.6rem,6.5vw,4.6rem)] leading-[0.98]">
-          {title}
-        </h1>
-        <p className="mt-6 max-w-2xl text-lg leading-8 text-kb-stone-on-dark">{sub}</p>
-        {children}
+    <section className="relative overflow-hidden bg-kb-carbon text-kb-white">
+      <div
+        className={cn(
+          "relative mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24",
+          visual && "grid items-center gap-12 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]",
+        )}
+      >
+        <div>
+          <p className="flex items-center gap-3 text-sm font-bold uppercase tracking-wider text-kb-stone-on-dark">
+            <span className="h-1 w-8 rounded-pill bg-kb-yellow" />
+            {eyebrow}
+          </p>
+          <h1
+            className={cn(
+              "mt-5 max-w-4xl font-display text-balance",
+              visual ? "text-[clamp(2.6rem,5vw,3.9rem)]" : "text-[clamp(2.6rem,6.5vw,4.6rem)]",
+              "leading-[0.98]",
+            )}
+          >
+            {title}
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-kb-stone-on-dark">{sub}</p>
+          {children}
+        </div>
+        {visual && (
+          <div className={cn("kb-hero-visual flex justify-center md:justify-end", visualClassName)}>
+            {visual}
+          </div>
+        )}
       </div>
     </section>
+  );
+}
+
+/** Lucide icon in the brand badge: black 2 px stroke on a yellow circle (KABSI-BRAND "Icons"). */
+export function IconBadge({
+  icon,
+  className,
+  tone = "yellow",
+}: {
+  icon: ReactNode;
+  className?: string;
+  tone?: "yellow" | "sand" | "dark";
+}) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "grid size-11 shrink-0 place-items-center rounded-full [&_svg]:size-5 [&_svg]:stroke-[2]",
+        tone === "yellow" && "bg-kb-yellow text-kb-black",
+        tone === "sand" && "bg-kb-sand text-kb-black ring-1 ring-kb-hairline",
+        tone === "dark" && "bg-kb-white/10 text-kb-yellow ring-1 ring-kb-white/15",
+        className,
+      )}
+    >
+      {icon}
+    </span>
+  );
+}
+
+/** White card with an icon badge, title and text. Lifts slightly on hover. */
+export function FeatureCard({
+  icon,
+  title,
+  children,
+  className,
+}: {
+  icon: ReactNode;
+  title: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("kb-lift h-full rounded-large bg-kb-white p-6 shadow-kb", className)}>
+      <IconBadge icon={icon} />
+      <h3 className="mt-5 text-lg font-bold">{title}</h3>
+      <div className="mt-2 leading-7 text-kb-stone [&_b]:text-kb-ink">{children}</div>
+    </div>
   );
 }
 
@@ -111,10 +187,9 @@ export function CtaBand({
   );
 }
 
-// A drawn card (not a photo): instruction first, mark small, code DEMO24 only (KABSI-STICKER-SPEC).
-export function CardRender({ className }: { className?: string }) {
-  // Decorative QR-like pattern, deterministic, not scannable.
-  const cells = Array.from({ length: 21 * 21 }, (_, n) => {
+// Decorative QR-like pattern, deterministic, not scannable.
+export function demoQrCells() {
+  return Array.from({ length: 21 * 21 }, (_, n) => {
     const x = n % 21;
     const y = Math.floor(n / 21);
     const finder = (a: number, b: number) => x >= a && x < a + 7 && y >= b && y < b + 7;
@@ -127,10 +202,26 @@ export function CardRender({ className }: { className?: string }) {
     }
     return (x * 7 + y * 13 + x * y) % 5 < 2;
   });
+}
+
+/** The decorative QR pattern as one SVG path (one element instead of 441, cheaper to hydrate). */
+export function DemoQr({ className }: { className?: string }) {
+  const d = demoQrCells()
+    .map((on, n) => (on ? `M${n % 21} ${Math.floor(n / 21)}h1v1h-1z` : ""))
+    .join("");
+  return (
+    <svg viewBox="0 0 21 21" className={className} shapeRendering="crispEdges" aria-hidden="true">
+      <path d={d} fill="#000" />
+    </svg>
+  );
+}
+
+// A drawn card (not a photo): instruction first, mark small, code DEMO24 only (KABSI-STICKER-SPEC).
+export function CardRender({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "relative aspect-square w-full max-w-[340px] rounded-large bg-kb-sand p-6 shadow-[0_18px_40px_rgba(0,0,0,.18)] ring-1 ring-kb-hairline",
+        "relative aspect-square w-full max-w-[340px] rounded-large bg-kb-sand p-6 text-kb-ink shadow-[0_18px_40px_rgba(0,0,0,.18)] ring-1 ring-kb-hairline",
         className,
       )}
       aria-label="Example Kabsi card"
@@ -142,7 +233,7 @@ export function CardRender({ className }: { className?: string }) {
       <div className="mt-4 grid grid-cols-[1fr_auto] items-end gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="grid size-12 place-items-center rounded-full bg-kb-white ring-1 ring-kb-hairline">
+            <span className="kb-ripple grid size-12 place-items-center rounded-full bg-kb-white ring-1 ring-kb-hairline">
               <Nfc className="size-6" />
             </span>
             <KabsiMark className="size-6" />
@@ -151,11 +242,7 @@ export function CardRender({ className }: { className?: string }) {
           <p className="text-xs text-kb-stone">or scan the QR code</p>
         </div>
         <div className="rounded-lg bg-kb-white p-2">
-          <div className="grid size-24 grid-cols-[repeat(21,1fr)]">
-            {cells.map((on, n) => (
-              <span key={n} className={on ? "bg-kb-black" : ""} />
-            ))}
-          </div>
+          <DemoQr className="size-24" />
           <p className="mt-1 text-center font-mono text-[10px] tracking-widest">DEMO24</p>
         </div>
       </div>
@@ -173,13 +260,39 @@ export function FaqList({ items }: { items: { q: string; a: string }[] }) {
         <details key={f.q} className="group py-5">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-bold [&::-webkit-details-marker]:hidden">
             {f.q}
-            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-kb-sand text-xl leading-none transition-transform group-open:rotate-45">
-              +
+            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-kb-sand transition-[transform,background-color] group-open:rotate-45 group-open:bg-kb-yellow">
+              <Plus className="size-4" aria-hidden="true" />
             </span>
           </summary>
           <p className="mt-3 max-w-3xl leading-7 text-kb-stone">{f.a}</p>
         </details>
       ))}
     </div>
+  );
+}
+
+/** A place photo (no people, no brands), lazy-loaded at 800 or 1600 px wide. */
+export function Photo({
+  id,
+  className,
+  sizes = "(min-width: 768px) 50vw, 100vw",
+}: {
+  id: PhotoId;
+  className?: string;
+  sizes?: string;
+}) {
+  const p = PHOTOS[id];
+  return (
+    <img
+      src={photoSrc(id, 800)}
+      srcSet={`${photoSrc(id, 800)} 800w, ${photoSrc(id, 1600)} 1600w`}
+      sizes={sizes}
+      alt={p.alt}
+      width={p.ratio[0]}
+      height={p.ratio[1]}
+      loading="lazy"
+      decoding="async"
+      className={cn("block h-auto w-full rounded-large bg-kb-sand object-cover", className)}
+    />
   );
 }

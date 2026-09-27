@@ -1,10 +1,31 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Check, Copy, Download, MapPin, Printer, Search } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  Copy,
+  Download,
+  MapPin,
+  MessageCircle,
+  Printer,
+  Receipt,
+  Search,
+  Store,
+} from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CtaBand, Eyebrow, FaqList, H2, PageHero, Section } from "@/components/marketing/parts";
+import {
+  CtaBand,
+  Eyebrow,
+  FaqList,
+  IconBadge,
+  H2,
+  PageHero,
+  Photo,
+  Section,
+} from "@/components/marketing/parts";
+import { ReviewLinkVisual } from "@/components/marketing/visuals";
 import { supabaseUrl } from "@/lib/supabase";
 import { qrSvg } from "@/lib/qr";
 import { track } from "@/lib/telemetry";
@@ -64,6 +85,8 @@ function Page() {
         eyebrow="Free tool"
         title="Get your Google review link and QR code."
         sub="Search your business, copy the link that opens your Google review form, and download a QR code to print. Free, no sign-up."
+        visual={<ReviewLinkVisual />}
+        visualClassName="hidden md:flex"
       >
         <div className="mt-9 max-w-2xl">
           <Finder onPick={setPicked} />
@@ -72,24 +95,34 @@ function Page() {
 
       {picked ? <Result place={picked} /> : null}
 
-      <Section tone={picked ? "sand" : "white"}>
-        <Eyebrow>Where to use it</Eyebrow>
-        <H2>Ask every customer, the same way.</H2>
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          <Tip title="On the counter and tables">
-            Print the QR code on a small card. Customers scan it with their phone camera.
-          </Tip>
-          <Tip title="In WhatsApp and Instagram">
-            Paste the link in your thank-you message or your bio. It opens the review form directly.
-          </Tip>
-          <Tip title="On receipts and menus">
-            A QR code at the bottom of a receipt or menu reaches people when the visit is fresh.
-          </Tip>
+      <Section
+        tone={picked ? "sand" : "white"}
+        className="grid items-center gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
+      >
+        <div className="grid grid-cols-2 gap-3">
+          <Photo id="receipt" sizes="(min-width: 1024px) 25vw, 50vw" className="aspect-[3/4]" />
+          <Photo id="cafe" sizes="(min-width: 1024px) 25vw, 50vw" className="mt-10 aspect-[3/4]" />
         </div>
-        <p className="mt-6 max-w-3xl text-sm leading-6 text-kb-stone">
-          Share it with everyone. Google's policies don't allow asking only happy customers or
-          giving rewards for reviews, and neither do we.
-        </p>
+        <div>
+          <Eyebrow>Where to use it</Eyebrow>
+          <H2>Ask every customer, the same way.</H2>
+          <div data-stagger="" className="mt-8 grid gap-3">
+            <Tip icon={<Store />} title="On the counter and tables">
+              Print the QR code on a small card. Customers scan it with their phone camera.
+            </Tip>
+            <Tip icon={<MessageCircle />} title="In WhatsApp and Instagram">
+              Paste the link in your thank-you message or your bio. It opens the review form
+              directly.
+            </Tip>
+            <Tip icon={<Receipt />} title="On receipts and menus">
+              A QR code at the bottom of a receipt or menu reaches people when the visit is fresh.
+            </Tip>
+          </div>
+          <p className="mt-6 max-w-3xl text-sm leading-6 text-kb-stone">
+            Share it with everyone. Google's policies don't allow asking only happy customers or
+            giving rewards for reviews, and neither do we.
+          </p>
+        </div>
       </Section>
 
       <Section>
@@ -289,11 +322,14 @@ function Result({ place }: { place: Place }) {
   );
 }
 
-function Tip({ title, children }: { title: string; children: ReactNode }) {
+function Tip({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <div className="rounded-large bg-kb-white p-6 shadow-kb">
-      <h3 className="text-lg font-bold">{title}</h3>
-      <p className="mt-2 leading-7 text-kb-stone">{children}</p>
+    <div className="kb-lift flex gap-4 rounded-large border-2 border-kb-hairline bg-kb-white p-5">
+      <IconBadge icon={icon} />
+      <div>
+        <h3 className="font-bold">{title}</h3>
+        <p className="mt-1 leading-7 text-kb-stone">{children}</p>
+      </div>
     </div>
   );
 }

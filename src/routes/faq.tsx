@@ -1,6 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { BookOpen, Mail, MessageCircle } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
-import { CtaBand, FaqList, PageHero, Section } from "@/components/marketing/parts";
+import {
+  CtaBand,
+  FaqList,
+  IconBadge,
+  PageHero,
+  Photo,
+  Section,
+} from "@/components/marketing/parts";
+import { AnswerVisual } from "@/components/marketing/visuals";
 import { CONTACT_EMAIL, CONTACT_PHONE, pageHead } from "@/lib/site";
 import { FAQ, faqJsonLd } from "@/lib/faq";
 
@@ -23,16 +32,48 @@ function Page() {
         eyebrow="Questions"
         title="Straight answers."
         sub="If yours isn't here, write to us. A person replies."
+        visual={<AnswerVisual />}
       />
-      <Section>
+      <Section className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px]">
         <FaqList items={FAQ} />
-        <p className="mt-10 text-kb-stone">
-          Something else? Email{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="font-bold text-kb-ink underline">
-            {CONTACT_EMAIL}
-          </a>{" "}
-          or message {CONTACT_PHONE}.
-        </p>
+        <aside className="lg:sticky lg:top-28 lg:self-start">
+          <div className="overflow-hidden rounded-large bg-kb-sand">
+            <Photo id="bakery" sizes="320px" className="aspect-[4/3] rounded-none" />
+            <div className="p-6">
+              <h2 className="text-lg font-bold">Something else?</h2>
+              <p className="mt-1 leading-7 text-kb-stone">A person reads every message.</p>
+              <ul className="mt-5 space-y-3 text-[15px]">
+                <li className="flex items-center gap-3">
+                  <IconBadge icon={<Mail />} className="size-9 [&_svg]:size-4" />
+                  <a
+                    href={`mailto:${CONTACT_EMAIL}`}
+                    className="font-bold underline underline-offset-4"
+                  >
+                    {CONTACT_EMAIL}
+                  </a>
+                </li>
+                <li className="flex items-center gap-3">
+                  <IconBadge
+                    icon={<MessageCircle />}
+                    tone="sand"
+                    className="size-9 bg-kb-white [&_svg]:size-4"
+                  />
+                  <span className="font-bold">{CONTACT_PHONE}</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <IconBadge
+                    icon={<BookOpen />}
+                    tone="sand"
+                    className="size-9 bg-kb-white [&_svg]:size-4"
+                  />
+                  <Link to="/guides" className="font-bold underline underline-offset-4">
+                    Read the guides
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </aside>
       </Section>
       <CtaBand />
     </PublicLayout>

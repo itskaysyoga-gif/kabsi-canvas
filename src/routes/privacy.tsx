@@ -19,7 +19,7 @@ const UPDATED = "26 September 2026";
 
 function Page() {
   return (
-    <LegalPage title="Privacy" updated={UPDATED}>
+    <LegalPage kind="privacy" title="Privacy" updated={UPDATED}>
       <section>
         <p>
           This policy explains what Kabsi collects, why, who helps us process it, how long we keep

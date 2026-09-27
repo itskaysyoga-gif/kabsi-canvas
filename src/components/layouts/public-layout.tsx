@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { KabsiLogo } from "@/components/shared/kabsi-logo";
+import { useSectionRise } from "@/components/marketing/motion";
 
 const links = [
   ["How it works", "/how-it-works"],
@@ -20,6 +21,8 @@ const links = [
 ] as const;
 
 export function PublicLayout({ children }: { children: ReactNode }) {
+  const pathname = useLocation({ select: (l) => l.pathname });
+  useSectionRise(pathname);
   return (
     <div className="min-h-screen bg-kb-white text-kb-ink">
       <header className="sticky top-0 z-40 border-b border-kb-hairline bg-kb-white/95 backdrop-blur">

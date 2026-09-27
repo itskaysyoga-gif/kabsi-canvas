@@ -2,11 +2,12 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { BadgeDollarSign, Eye, LayoutGrid, Nfc, Send, Wallet } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
+import { WorkspaceVisual } from "@/components/marketing/visuals";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Eyebrow, H2, PageHero, Section } from "@/components/marketing/parts";
+import { Eyebrow, H2, PageHero, Photo, Section } from "@/components/marketing/parts";
 import { supabaseUrl } from "@/lib/supabase";
 import { track } from "@/lib/telemetry";
 import { PRICES, pageHead } from "@/lib/site";
@@ -28,12 +29,13 @@ function Page() {
         eyebrow="Partners and agencies"
         title="Add a high-margin AI local SEO engine to your agency."
         sub="Bring your clients grounded review replies, weekly keyword posts and a listing guard, with NFC cards if you sell them. You set the retail price and keep everything above a small wholesale rate per live business."
+        visual={<WorkspaceVisual />}
       />
 
       <Section>
         <Eyebrow>What you get</Eyebrow>
         <H2>One workspace for all your clients.</H2>
-        <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div data-stagger="" className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Point icon={<BadgeDollarSign />} title="Wholesale seats">
             Pay only for businesses that are live. Setting up, waiting for access or paused costs
             you nothing.
@@ -56,6 +58,11 @@ function Page() {
             Kabsi issues card codes for your stock, so the NFC cards you sell open each client's
             Google review page.
           </Point>
+        </div>
+        <div className="mt-10 grid grid-cols-3 gap-3">
+          <Photo id="grocery" sizes="33vw" className="aspect-square sm:aspect-[4/3]" />
+          <Photo id="clinic" sizes="33vw" className="aspect-square sm:aspect-[4/3]" />
+          <Photo id="cafe" sizes="33vw" className="aspect-square sm:aspect-[4/3]" />
         </div>
       </Section>
 
@@ -125,7 +132,7 @@ function Page() {
 
 function Point({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <div className="rounded-large border-2 border-kb-hairline p-6">
+    <div className="kb-lift h-full rounded-large border-2 border-kb-hairline bg-kb-white p-6">
       <span className="grid size-11 place-items-center rounded-full bg-kb-yellow text-kb-black [&_svg]:size-5">
         {icon}
       </span>

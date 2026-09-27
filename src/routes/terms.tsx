@@ -18,7 +18,7 @@ const UPDATED = "26 September 2026";
 
 function Page() {
   return (
-    <LegalPage title="Terms" updated={UPDATED}>
+    <LegalPage kind="terms" title="Terms" updated={UPDATED}>
       <section>
         <p>
           These terms are the agreement between you and Kabsi, an independent business based in

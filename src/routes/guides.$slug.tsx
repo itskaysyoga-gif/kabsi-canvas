@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
-import { CtaBand, Section } from "@/components/marketing/parts";
+import { CtaBand, IconBadge, Section } from "@/components/marketing/parts";
+import { GUIDE_ICONS } from "@/components/marketing/visuals";
 import { GUIDES, guideBySlug } from "@/lib/guides";
 import { ORG_LD, SITE_URL, pageHead } from "@/lib/site";
 
@@ -50,7 +51,8 @@ function Page() {
         >
           <ArrowLeft className="size-4" /> All guides
         </Link>
-        <h1 className="mt-6 font-display text-[clamp(2.2rem,5.5vw,3.6rem)] leading-[1.02]">
+        <IconBadge icon={GUIDE_ICONS[g.slug]} className="mt-8 size-14 [&_svg]:size-6" />
+        <h1 className="mt-5 font-display text-[clamp(2.2rem,5.5vw,3.6rem)] leading-[1.02]">
           {g.title}
         </h1>
         <p className="mt-4 text-sm text-kb-stone">
@@ -85,15 +87,17 @@ function Page() {
         </aside>
         <div className="mt-12">
           <p className="font-bold">More guides</p>
-          <ul className="mt-3 space-y-2">
+          <ul data-stagger="" className="mt-4 grid gap-3">
             {more.map((m) => (
               <li key={m.slug}>
                 <Link
                   to="/guides/$slug"
                   params={{ slug: m.slug }}
-                  className="underline underline-offset-4"
+                  className="kb-lift group flex items-center gap-4 rounded-large border-2 border-kb-hairline bg-kb-white p-4 hover:border-kb-black"
                 >
-                  {m.title}
+                  <IconBadge icon={GUIDE_ICONS[m.slug]} tone="sand" />
+                  <span className="flex-1 font-bold">{m.title}</span>
+                  <ArrowRight className="size-4 shrink-0 transition-transform group-hover:translate-x-1" />
                 </Link>
               </li>
             ))}
