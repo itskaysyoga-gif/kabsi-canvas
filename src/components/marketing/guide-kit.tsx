@@ -268,7 +268,7 @@ export function Example({
             <MessageSquareReply className="size-4" aria-hidden="true" />
             Reply from the business
           </p>
-          <p dir={dir} className="mt-2 text-[16px] leading-7 text-kb-ink">
+          <p dir={dir} className="mt-2 whitespace-pre-line text-[16px] leading-7 text-kb-ink">
             {reply}
           </p>
         </div>

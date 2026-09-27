@@ -84,4 +84,30 @@
     <loc>https://kabsi-app.lovable.app/guides/google-review-link-and-qr-code</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/guide-link-1600.webp</image:loc></image:image>
   </url>
+  <url>
+    <loc>https://kabsi-app.lovable.app/for/restaurants-and-cafes</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-restaurant-1200.webp</image:loc></image:image>
+    <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-cafe-1200.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://kabsi-app.lovable.app/for/clinics-and-dentists</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-dentist-1200.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://kabsi-app.lovable.app/for/salons-and-barbers</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-salon-1200.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://kabsi-app.lovable.app/for/hotels-and-guesthouses</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-hotel-1200.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://kabsi-app.lovable.app/for/garages-and-auto-repair</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-garage-1200.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://kabsi-app.lovable.app/for/shops-and-boutiques</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-boutique-1200.webp</image:loc></image:image>
+    <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-florist-1200.webp</image:loc></image:image>
+  </url>
 </urlset>

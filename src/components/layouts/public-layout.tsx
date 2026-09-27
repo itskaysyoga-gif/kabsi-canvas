@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { KabsiLogo } from "@/components/shared/kabsi-logo";
 import { useSectionRise } from "@/components/marketing/motion";
+import { VERTICALS } from "@/lib/verticals";
 
 const links = [
   ["How it works", "/how-it-works"],
@@ -90,7 +91,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       <main>{children}</main>
       <footer className="bg-kb-carbon text-kb-white">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16">
-          <div className="grid gap-10 border-b border-kb-white/15 pb-10 md:grid-cols-[1fr_auto_auto]">
+          <div className="grid gap-10 border-b border-kb-white/15 pb-10 md:grid-cols-[1fr_auto_auto_auto]">
             <div>
               <KabsiLogo dark />
               <p className="mt-4 text-kb-stone-on-dark">Tap. Review. Reply.</p>
@@ -107,6 +108,16 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <Link to="/guides">Guides</Link>
               <Link to="/privacy">Privacy</Link>
               <Link to="/terms">Terms</Link>
+            </nav>
+            <nav className="grid gap-y-3 text-sm" aria-label="Kabsi for your business">
+              <p className="text-xs font-bold uppercase tracking-wider text-kb-stone-on-dark">
+                For your business
+              </p>
+              {VERTICALS.map((v) => (
+                <Link key={v.slug} to="/for/$slug" params={{ slug: v.slug }}>
+                  {v.label}
+                </Link>
+              ))}
             </nav>
             <a className="text-sm font-medium" href="mailto:hello@kabsi.co">
               hello@kabsi.co

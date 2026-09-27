@@ -1,7 +1,9 @@
 // "Who it's for": labelled photos of the kinds of local businesses that live on Google Maps (D256).
 // Plain places, no faces, no real businesses; never presented as customers.
 import type { ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 import {
+  ArrowRight,
   BedDouble,
   Car,
   Croissant,
@@ -14,6 +16,7 @@ import {
 import type { PhotoId } from "@/lib/site-photos";
 import { SiteImg } from "@/components/marketing/site-img";
 import { cn } from "@/lib/utils";
+import { VERTICAL_FOR_PHOTO } from "@/lib/verticals";
 
 const TYPES: { id: PhotoId; label: string; icon: ReactNode }[] = [
   { id: "bakery", label: "Bakeries and cafés", icon: <Croissant /> },
@@ -30,11 +33,9 @@ export function BusinessGrid({ className }: { className?: string }) {
   return (
     <ul data-stagger="" className={cn("grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4", className)}>
       {TYPES.map((t) => {
-        return (
-          <li
-            key={t.id}
-            className="group relative aspect-[4/5] overflow-hidden rounded-large bg-kb-carbon"
-          >
+        const slug = VERTICAL_FOR_PHOTO[t.id];
+        const inner = (
+          <>
             <SiteImg
               id={t.id}
               min={480}
@@ -53,7 +54,31 @@ export function BusinessGrid({ className }: { className?: string }) {
                 {t.icon}
               </span>
               {t.label}
+              {slug ? (
+                <ArrowRight
+                  aria-hidden="true"
+                  className="ml-auto size-4 shrink-0 opacity-70 transition-transform group-hover:translate-x-0.5"
+                />
+              ) : null}
             </p>
+          </>
+        );
+        return (
+          <li
+            key={t.id}
+            className="group relative aspect-[4/5] overflow-hidden rounded-large bg-kb-carbon"
+          >
+            {slug ? (
+              <Link
+                to="/for/$slug"
+                params={{ slug }}
+                className="absolute inset-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-kb-yellow focus-visible:ring-inset"
+              >
+                {inner}
+              </Link>
+            ) : (
+              inner
+            )}
           </li>
         );
       })}

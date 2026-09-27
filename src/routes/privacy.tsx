@@ -15,7 +15,7 @@ export const Route = createFileRoute("/privacy")({
   component: Page,
 });
 
-const UPDATED = "26 September 2026";
+const UPDATED = "27 September 2026";
 
 function Page() {
   return (
@@ -235,6 +235,13 @@ function Page() {
           <li>
             Your business data: while you use Kabsi. If you ask us to delete a business (Settings,
             or by email), everything is deleted 7 days later.
+          </li>
+          <li>
+            Review text and reviewer names from Google: at most 30 days after Google last sent them
+            to us, as Google's rules require. The star rating, dates and your own replies stay.
+            Public rating history, the quotes in weekly reports and the before and after values of
+            listing changes are also removed after 30 days. Your business category and area, read
+            from Google, are refreshed at least every 30 days.
           </li>
           <li>
             Google data after access is removed: deleted automatically after 30 days, unless access

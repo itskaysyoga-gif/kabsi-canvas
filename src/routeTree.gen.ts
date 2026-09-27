@@ -25,6 +25,7 @@ import { Route as AuthenticatedStaffRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedStartRouteImport } from './routes/_authenticated/start'
 import { Route as ATokenRouteImport } from './routes/a.$token'
 import { Route as ActivateCodeRouteImport } from './routes/activate.$code'
+import { Route as ForSlugRouteImport } from './routes/for.$slug'
 import { Route as GuidesIndexRouteImport } from './routes/guides.index'
 import { Route as GuidesSlugRouteImport } from './routes/guides.$slug'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app/index'
@@ -119,6 +120,11 @@ const ActivateCodeRoute = ActivateCodeRouteImport.update({
   path: '/activate/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForSlugRoute = ForSlugRouteImport.update({
+  id: '/for/$slug',
+  path: '/for/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GuidesIndexRoute = GuidesIndexRouteImport.update({
   id: '/guides/',
   path: '/guides/',
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
+  '/for/$slug': typeof ForSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/guides/': typeof GuidesIndexRoute
   '/app/cards': typeof AuthenticatedAppCardsRoute
@@ -238,6 +245,7 @@ export interface FileRoutesByTo {
   '/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
+  '/for/$slug': typeof ForSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/guides': typeof GuidesIndexRoute
   '/app/cards': typeof AuthenticatedAppCardsRoute
@@ -271,6 +279,7 @@ export interface FileRoutesById {
   '/_authenticated/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
+  '/for/$slug': typeof ForSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/guides/': typeof GuidesIndexRoute
   '/_authenticated/app/cards': typeof AuthenticatedAppCardsRoute
@@ -304,6 +313,7 @@ export interface FileRouteTypes {
     | '/start'
     | '/a/$token'
     | '/activate/$code'
+    | '/for/$slug'
     | '/guides/$slug'
     | '/guides/'
     | '/app/cards'
@@ -334,6 +344,7 @@ export interface FileRouteTypes {
     | '/start'
     | '/a/$token'
     | '/activate/$code'
+    | '/for/$slug'
     | '/guides/$slug'
     | '/guides'
     | '/app/cards'
@@ -366,6 +377,7 @@ export interface FileRouteTypes {
     | '/_authenticated/start'
     | '/a/$token'
     | '/activate/$code'
+    | '/for/$slug'
     | '/guides/$slug'
     | '/guides/'
     | '/_authenticated/app/cards'
@@ -395,6 +407,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   ATokenRoute: typeof ATokenRoute
   ActivateCodeRoute: typeof ActivateCodeRoute
+  ForSlugRoute: typeof ForSlugRoute
   GuidesSlugRoute: typeof GuidesSlugRoute
   GuidesIndexRoute: typeof GuidesIndexRoute
 }
@@ -511,6 +524,13 @@ declare module '@tanstack/react-router' {
       path: '/activate/$code'
       fullPath: '/activate/$code'
       preLoaderRoute: typeof ActivateCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for/$slug': {
+      id: '/for/$slug'
+      path: '/for/$slug'
+      fullPath: '/for/$slug'
+      preLoaderRoute: typeof ForSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guides/': {
@@ -679,6 +699,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   ATokenRoute: ATokenRoute,
   ActivateCodeRoute: ActivateCodeRoute,
+  ForSlugRoute: ForSlugRoute,
   GuidesSlugRoute: GuidesSlugRoute,
   GuidesIndexRoute: GuidesIndexRoute,
 }
