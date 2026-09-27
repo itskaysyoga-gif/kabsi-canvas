@@ -19,7 +19,7 @@ export function OnboardingShell({ step, children }: { step: OnboardingStep; chil
           <KabsiLogo />
           <a
             href="mailto:hello@kabsi.co"
-            className="text-sm font-medium text-kb-stone underline-offset-4 hover:underline"
+            className="-mr-2 inline-flex min-h-10 items-center rounded-card px-2 text-sm font-medium text-kb-stone underline-offset-4 hover:underline"
           >
             Need help?
           </a>

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { fmtDateTime } from "@/lib/format";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, Printer, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -53,8 +54,7 @@ type Order = {
 type Place = { id: string; name: string };
 
 const ORDER_STATES = ["requested", "paid", "encoding", "shipped", "installed", "cancelled"];
-const when = (iso: string | null) =>
-  iso ? new Date(iso).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" }) : "-";
+const when = (iso: string | null) => (iso ? fmtDateTime(iso) : "-");
 const cardUrl = (code: string) => `https://go.kabsi.co/${code}`;
 
 async function loadHealth(): Promise<Health> {

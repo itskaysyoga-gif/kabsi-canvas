@@ -136,16 +136,39 @@ function PhotosPage() {
         <p className="mt-6 text-kb-stone">Photos can be added once your business is active.</p>
       ) : null}
       {msg ? <p className="mt-3 text-sm text-kb-stone">{msg}</p> : null}
-      <div className="mt-7 grid gap-5 sm:grid-cols-2">
-        {data.data?.photos.map((p) => (
-          <PhotoCard
-            key={p.id}
-            photo={p}
-            url={data.data!.urls[p.storage_path]}
-            onChanged={refresh}
-          />
-        ))}
-      </div>
+      {data.isError ? (
+        <p className="mt-6 text-sm text-kb-red" role="alert">
+          Couldn't load your photos. Refresh the page to try again.
+        </p>
+      ) : null}
+      {(
+        [
+          ["Waiting for you", (p: Photo) => p.state === "draft" || p.state === "checking"],
+          ["On Google", (p: Photo) => p.state === "posted"],
+          ["Couldn't post", (p: Photo) => p.state === "failed"],
+        ] as const
+      ).map(([title, match]) => {
+        const list = (data.data?.photos ?? []).filter(match);
+        // Photos can only be posted while Kabsi can reach the Google profile.
+        if (!list.length || (title === "Waiting for you" && loc?.status !== "active")) return null;
+        return (
+          <section key={title} className="mt-8">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-kb-stone">
+              {title} · {list.length}
+            </h2>
+            <div className="mt-3 grid gap-5 sm:grid-cols-2">
+              {list.map((p) => (
+                <PhotoCard
+                  key={p.id}
+                  photo={p}
+                  url={data.data!.urls[p.storage_path]}
+                  onChanged={refresh}
+                />
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }
@@ -230,8 +253,17 @@ function PhotoCard({
               </select>
             </label>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button size="compact" disabled={!!busy} onClick={() => void run("publish")}>
-                {busy === "publish" ? "Posting…" : "Post to Google"}
+              <Button
+                size="compact"
+                variant={photo.suitable ? "default" : "outline"}
+                disabled={!!busy}
+                onClick={() => void run("publish")}
+              >
+                {busy === "publish"
+                  ? "Posting…"
+                  : photo.suitable
+                    ? "Post to Google"
+                    : "Post anyway"}
               </Button>
               <Button
                 size="compact"

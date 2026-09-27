@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { fmtDate } from "@/lib/format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,8 @@ type Row = {
   reply_state: string | null;
   review_created_at: string | null;
   content_purged_at: string | null;
+  /** The reply the owner approved through Kabsi (exact text sent to Google). */
+  my_reply?: string | null;
 };
 const STATE: Record<string, string> = {
   new: "Drafting",
@@ -52,7 +55,21 @@ async function loadReviews(locationId: string): Promise<Row[]> {
     .order("review_created_at", { ascending: false })
     .limit(200);
   if (error) throw new Error(error.message);
-  return (data ?? []) as Row[];
+  const rows = (data ?? []) as Row[];
+  // The owner's own approved replies (their words, kept regardless of Google's 30-day rule).
+  const { data: pubs } = await supabase
+    .from("publications")
+    .select("target_id, payload, created_at")
+    .eq("location_id", locationId)
+    .eq("target_type", "review_reply")
+    .in("status", ["live", "in_review", "sent"])
+    .order("created_at", { ascending: false })
+    .limit(400);
+  const mine = new Map<string, string>();
+  for (const p of (pubs ?? []) as { target_id: string; payload: { text?: string } | null }[]) {
+    if (!mine.has(p.target_id) && p.payload?.text) mine.set(p.target_id, p.payload.text);
+  }
+  return rows.map((r) => ({ ...r, my_reply: mine.get(r.id) ?? null }));
 }
 
 function ReviewsPage() {
@@ -197,15 +214,7 @@ function ReviewsPage() {
                       />
                     ))}
                   </span>
-                  {r.review_created_at ? (
-                    <span>
-                      {new Date(r.review_created_at).toLocaleDateString(undefined, {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </span>
-                  ) : null}
+                  {r.review_created_at ? <span>{fmtDate(r.review_created_at)}</span> : null}
                 </div>
               </div>
             </div>
@@ -220,13 +229,15 @@ function ReviewsPage() {
                   <span className="text-kb-stone">No written review, just a rating.</span>
                 ))}
             </p>
-            {r.existing_reply ? (
-              <p
-                dir="auto"
-                className="mt-3 whitespace-pre-wrap rounded-card border-l-4 border-kb-yellow bg-kb-sand p-3 text-sm leading-6"
-              >
-                {r.existing_reply}
-              </p>
+            {r.my_reply || r.existing_reply ? (
+              <div className="mt-3 rounded-card border-l-4 border-kb-yellow bg-kb-sand p-3">
+                <p className="text-xs font-bold uppercase tracking-wider text-kb-stone">
+                  Your reply
+                </p>
+                <p dir="auto" className="mt-1 whitespace-pre-wrap text-sm leading-6">
+                  {r.my_reply || r.existing_reply}
+                </p>
+              </div>
             ) : null}
             {["drafted", "blocked"].includes(r.state) ? (
               <Button asChild size="compact" className="mt-4">

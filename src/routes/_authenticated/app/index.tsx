@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { fmtDate } from "@/lib/format";
+import { knowledgeProgress } from "@/components/app/knowledge-form";
 import { createFileRoute, isRedirect, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -364,19 +366,23 @@ function Active({
         <Tile
           label="Google rating"
           value={d.rating != null ? d.rating.toFixed(1) : "-"}
-          icon={<Star className="fill-kb-yellow text-kb-yellow" />}
+          icon={<Star className="fill-kb-black text-kb-black" />}
           sub={
             d.rating == null
               ? "Appears after the first daily check"
               : d.ratingChange == null
                 ? `${d.ratingCount ?? 0} ${d.ratingCount === 1 ? "review" : "reviews"} on Google`
-                : d.ratingChange === 0
-                  ? "Same as last week"
-                  : `${d.ratingChange > 0 ? "+" : ""}${d.ratingChange.toFixed(1)} since last week`
+                : `${d.ratingChange === 0 ? "Same as last week" : `${d.ratingChange > 0 ? "+" : ""}${d.ratingChange.toFixed(1)} since last week`}${d.ratingCount ? ` · ${d.ratingCount} reviews` : ""}`
           }
           subTone={d.ratingChange != null && d.ratingChange <= -0.1 ? "down" : undefined}
+          chart={d.ratingTrend.length >= 3 ? <RatingLine points={d.ratingTrend} /> : undefined}
         />
-        <Tile label="New reviews" value={String(d.newReviews7d)} icon={<MessageSquareText />} />
+        <Tile
+          label="New reviews"
+          value={String(d.newReviews7d)}
+          icon={<MessageSquareText />}
+          sub="In the last 7 days"
+        />
         <Tile
           label="Replied"
           value={d.newReviews7d ? `${d.replied7d} of ${d.newReviews7d}` : "-"}
@@ -400,7 +406,7 @@ function Active({
             <h2 className="text-lg font-bold">Latest reviews</h2>
             <Link
               to="/app/reviews"
-              className="text-sm font-medium underline-offset-4 hover:underline"
+              className="-mr-2 inline-flex min-h-10 items-center rounded-card px-2 text-sm font-medium underline-offset-4 hover:underline"
             >
               See all
             </Link>
@@ -522,26 +528,8 @@ function ReplyStack() {
   );
 }
 
-const FACT_KEYS = [
-  "about",
-  "services",
-  "price_notes",
-  "booking",
-  "payment_methods",
-  "hours_note",
-  "service_area",
-  "delivery",
-  "parking",
-  "accessibility",
-  "languages",
-  "policies",
-  "mention",
-  "contact_phone",
-];
 function ProfileHealth({ d, card }: { d: Dashboard; card: Record<string, unknown> }) {
-  const facts =
-    FACT_KEYS.filter((k) => typeof card[k] === "string" && (card[k] as string).trim()).length +
-    (Array.isArray(card["faqs"]) && (card["faqs"] as unknown[]).length ? 1 : 0);
+  const { filled: facts, total: factsTotal } = knowledgeProgress(card);
   const rate = d.reviews90d ? Math.round((d.answered90d / d.reviews90d) * 100) : null;
   const postDays = daysSince(d.lastPostAt);
   const rows: {
@@ -583,7 +571,7 @@ function ProfileHealth({ d, card }: { d: Dashboard; card: Record<string, unknown
       label: "Profile guard",
       value: d.openChanges ? "Needs you" : d.shieldWatching ? "Watching" : "Starting",
       note: d.openChanges
-        ? "A change to your listing is waiting for your decision"
+        ? "A listing change is waiting for you"
         : "Name, phone, address, hours, website, category",
       ok: !d.openChanges,
       to: "/app/shield",
@@ -592,12 +580,12 @@ function ProfileHealth({ d, card }: { d: Dashboard; card: Record<string, unknown
       key: "facts",
       icon: <FileText />,
       label: "About your business",
-      value: `${facts} of ${FACT_KEYS.length + 1}`,
+      value: `${facts} of ${factsTotal}`,
       note:
-        facts >= 6
+        facts >= 8
           ? "Plenty of facts for replies and posts"
           : "Replies and posts only use these facts",
-      ok: facts >= 6,
+      ok: facts >= 8,
       to: "/app/knowledge",
     },
   ];
@@ -616,8 +604,8 @@ function ProfileHealth({ d, card }: { d: Dashboard; card: Record<string, unknown
             >
               <span className={r.ok ? "text-kb-stone" : "text-kb-black"}>{r.icon}</span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-medium text-kb-stone">{r.label}</span>
-                <span className="block truncate text-xs text-kb-stone">{r.note}</span>
+                <span className="block text-sm font-bold">{r.label}</span>
+                <span className="mt-0.5 block text-xs leading-snug text-kb-stone">{r.note}</span>
               </span>
               <span className="flex shrink-0 items-center gap-2 whitespace-nowrap text-right font-bold">
                 {r.value}
@@ -640,12 +628,14 @@ function Tile({
   icon,
   sub,
   subTone,
+  chart,
 }: {
   label: string;
   value: string;
   icon: ReactNode;
   sub?: string | undefined;
   subTone?: "down" | undefined;
+  chart?: ReactNode | undefined;
 }) {
   return (
     <div className="rounded-large bg-kb-white p-4 shadow-kb sm:p-5">
@@ -664,7 +654,77 @@ function Tile({
           {sub}
         </p>
       ) : null}
+      {chart}
     </div>
+  );
+}
+
+// 30-day public rating as one thin line (facts only, no score). Hover or focus shows the day's value;
+// the text summary is what screen readers get.
+function RatingLine({ points }: { points: { day: string; rating: number }[] }) {
+  const [hover, setHover] = useState<number | null>(null);
+  const W = 200;
+  const H = 36;
+  const values = points.map((p) => p.rating);
+  const lo = Math.min(...values);
+  const hi = Math.max(...values);
+  // Keep at least 0.4 stars of vertical room so tiny changes don't look dramatic.
+  const pad = Math.max(0, 0.4 - (hi - lo)) / 2;
+  const min = lo - pad;
+  const max = hi + pad;
+  const x = (i: number) => (points.length === 1 ? W / 2 : (i / (points.length - 1)) * (W - 4) + 2);
+  const y = (v: number) => H - 3 - ((v - min) / (max - min || 1)) * (H - 6);
+  const path = points
+    .map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.rating).toFixed(1)}`)
+    .join(" ");
+  const first = points[0]!;
+  const last = points[points.length - 1]!;
+  const fmt = (d: string) => fmtDate(d, false);
+  const shown = hover != null ? points[hover] : null;
+  return (
+    <figure className="mt-3">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="h-9 w-full overflow-visible text-kb-black"
+        role="img"
+        aria-label={`Google rating over the last ${points.length} days: ${first.rating.toFixed(1)} on ${fmt(first.day)}, ${last.rating.toFixed(1)} on ${fmt(last.day)}.`}
+        onMouseLeave={() => setHover(null)}
+        preserveAspectRatio="none"
+      >
+        <path
+          d={path}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
+        {points.map((p, i) => (
+          <rect
+            key={p.day}
+            x={x(i) - W / points.length / 2}
+            y={0}
+            width={W / points.length}
+            height={H}
+            fill="transparent"
+            onMouseEnter={() => setHover(i)}
+          />
+        ))}
+      </svg>
+      <figcaption className="mt-1 flex justify-between text-[11px] leading-4 text-kb-stone">
+        {shown ? (
+          <span className="font-medium text-kb-black">
+            {fmt(shown.day)}: {shown.rating.toFixed(1)}
+          </span>
+        ) : (
+          <>
+            <span>{fmt(first.day)}</span>
+            <span>Last {points.length} days</span>
+          </>
+        )}
+      </figcaption>
+    </figure>
   );
 }
 
@@ -679,8 +739,11 @@ const REVIEW_STATE: Record<string, { label: string; cls: string }> = {
 };
 
 function ReviewLine({ r }: { r: RecentReview }) {
-  const st = REVIEW_STATE[r.state] ?? { label: r.state, cls: "bg-kb-sand" };
   const open = r.state === "drafted" || r.state === "blocked" || r.state === "new";
+  const st =
+    open && r.urgency === "urgent"
+      ? { label: "Needs care", cls: "bg-kb-red text-kb-white" }
+      : (REVIEW_STATE[r.state] ?? { label: r.state, cls: "bg-kb-sand" });
   return (
     <li className="py-4 first:pt-0 last:pb-0">
       <Link to={open ? "/app/inbox" : "/app/reviews"} className="block">
@@ -692,7 +755,7 @@ function ReviewLine({ r }: { r: RecentReview }) {
                   key={i}
                   className={cn(
                     "size-4",
-                    i <= r.star_rating ? "fill-kb-yellow text-kb-yellow" : "text-kb-hairline",
+                    i <= r.star_rating ? "fill-kb-black text-kb-black" : "text-kb-stone/40",
                   )}
                 />
               ))}

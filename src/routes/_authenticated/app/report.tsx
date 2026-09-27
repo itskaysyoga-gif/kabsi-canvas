@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
-import { FileBarChart as PageGlyph } from "lucide-react";
+import { ChevronDown, FileBarChart as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
 
 // Weekly reports (D222): the same facts as the Monday email. Read through RLS (members only).
@@ -58,7 +58,10 @@ function ReportPage() {
   });
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-      <Link to="/app" className="text-sm font-medium text-kb-stone hover:text-kb-black">
+      <Link
+        to="/app"
+        className="-ml-2 inline-flex min-h-10 items-center rounded-card px-2 text-sm font-medium text-kb-stone hover:text-kb-black"
+      >
         ← Home
       </Link>
       <div className="mt-5">
@@ -82,70 +85,98 @@ function ReportPage() {
         </div>
       ) : null}
       <div className="mt-7 space-y-5">
-        {reports.data?.map(({ id, data: r }) => (
-          <article key={id} className="rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
-            <p className="text-sm font-medium text-kb-stone">
-              {r.period.from} to {r.period.to}
-            </p>
-            {r.rating_drop && r.rating_change != null ? (
-              <p className="mt-3 rounded-card border-2 border-kb-black p-3 text-sm">
-                Your Google rating went down {Math.abs(r.rating_change).toFixed(1)} this week.
+        {reports.data?.map(({ id, data: r }, i) =>
+          i === 0 ? (
+            <article key={id} className="rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
+                Latest · {r.period.from} to {r.period.to}
               </p>
-            ) : null}
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Stat
-                label="Google rating"
-                value={r.rating == null ? "-" : r.rating.toFixed(1)}
-                sub={
-                  r.rating_change == null
-                    ? r.rating_count != null
-                      ? `${r.rating_count} reviews`
-                      : undefined
-                    : r.rating_change === 0
-                      ? "no change"
-                      : `${r.rating_change > 0 ? "+" : ""}${r.rating_change.toFixed(1)} this week`
-                }
-              />
-              <Stat
-                label="New reviews"
-                value={String(r.new_reviews)}
-                sub={r.new_avg != null ? `average ${r.new_avg.toFixed(1)}` : undefined}
-              />
-              <Stat label="Replied" value={`${r.replied} of ${r.new_reviews}`} />
-              <Stat
-                label="Card and link opens"
-                value={String(r.taps.total)}
-                sub={r.taps.total ? `${r.taps.nfc} tap · ${r.taps.qr} QR` : undefined}
-              />
-            </div>
-            <p className="mt-3 text-xs leading-5 text-kb-stone">
-              Opens count how often your review page was opened, not how many reviews were written.
-            </p>
-            {r.quotes.length ? (
-              <div className="mt-5">
-                <p className="text-sm font-bold">What customers wrote</p>
-                {r.quotes.map((q, i) => (
-                  <p
-                    key={i}
-                    dir="auto"
-                    className="mt-2 rounded-card bg-kb-sand px-4 py-2.5 text-sm leading-6"
-                  >
-                    “{q}”
-                  </p>
-                ))}
+              <ReportBody r={r} latest />
+            </article>
+          ) : (
+            <details key={id} className="group rounded-large bg-kb-white shadow-kb">
+              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-6 py-4 sm:px-7">
+                <span className="font-medium">
+                  {r.period.from} to {r.period.to}
+                </span>
+                <span className="flex items-center gap-3 text-sm text-kb-stone">
+                  {r.rating != null ? `${r.rating.toFixed(1)} ★` : ""} · {r.new_reviews} new
+                  <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+                </span>
+              </summary>
+              <div className="px-6 pb-6 sm:px-7">
+                <ReportBody r={r} latest={false} />
               </div>
-            ) : null}
-            {r.waiting ? (
-              <p className="mt-4 text-sm">
-                {r.waiting} {r.waiting === 1 ? "review is" : "reviews are"} waiting for your reply.{" "}
-                <Link to="/app/inbox" className="font-bold underline">
-                  Open inbox
-                </Link>
-              </p>
-            ) : null}
-          </article>
-        ))}
+            </details>
+          ),
+        )}
       </div>
     </div>
+  );
+}
+
+function ReportBody({ r, latest }: { r: ReportData; latest: boolean }) {
+  return (
+    <>
+      {r.rating_drop && r.rating_change != null ? (
+        <p className="mt-3 rounded-card border-2 border-kb-black p-3 text-sm">
+          Your Google rating went down {Math.abs(r.rating_change).toFixed(1)} this week.
+        </p>
+      ) : null}
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat
+          label="Google rating"
+          value={r.rating == null ? "-" : r.rating.toFixed(1)}
+          sub={
+            r.rating_change == null
+              ? r.rating_count != null
+                ? `${r.rating_count} reviews`
+                : undefined
+              : r.rating_change === 0
+                ? "no change"
+                : `${r.rating_change > 0 ? "+" : ""}${r.rating_change.toFixed(1)} this week`
+          }
+        />
+        <Stat
+          label="New reviews"
+          value={String(r.new_reviews)}
+          sub={r.new_avg != null ? `average ${r.new_avg.toFixed(1)}` : undefined}
+        />
+        <Stat label="Replied" value={`${r.replied} of ${r.new_reviews}`} />
+        <Stat
+          label="Card and link opens"
+          value={String(r.taps.total)}
+          sub={r.taps.total ? `${r.taps.nfc} tap · ${r.taps.qr} QR` : undefined}
+        />
+      </div>
+      <p className="mt-3 text-xs leading-5 text-kb-stone">
+        Opens count how often your review page was opened, not how many reviews were written.
+      </p>
+      {r.quotes.length ? (
+        <div className="mt-5">
+          <p className="text-sm font-bold">What customers wrote</p>
+          {r.quotes.map((q, i) => (
+            <p
+              key={i}
+              dir="auto"
+              className="mt-2 rounded-card bg-kb-sand px-4 py-2.5 text-sm leading-6"
+            >
+              “{q}”
+            </p>
+          ))}
+        </div>
+      ) : null}
+      {latest && r.waiting ? (
+        <p className="mt-4 text-sm">
+          {r.waiting} {r.waiting === 1 ? "review is" : "reviews are"} waiting for your reply.{" "}
+          <Link
+            to="/app/inbox"
+            className="inline-flex min-h-10 items-center font-bold underline underline-offset-4"
+          >
+            Reply now
+          </Link>
+        </p>
+      ) : null}
+    </>
   );
 }

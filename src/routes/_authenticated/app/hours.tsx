@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { fmtDay } from "@/lib/format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -39,16 +40,20 @@ async function loadHours(locationId: string): Promise<Row[]> {
   if (error) throw new Error(error.message);
   return (data ?? []) as Row[];
 }
-const fmt = (d: string) =>
-  new Date(`${d}T12:00:00`).toLocaleDateString(undefined, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
+const fmt = (d: string) => fmtDay(d);
 const range = (r: { start_date: string; end_date: string }) =>
   r.start_date === r.end_date ? fmt(r.start_date) : `${fmt(r.start_date)} to ${fmt(r.end_date)}`;
+// "18:00" → "6:00 PM" or "18:00", following the owner's own device settings.
+const clock = (t: string | null) => {
+  if (!t) return "";
+  const [h, m] = t.split(":").map(Number);
+  return new Date(2000, 0, 1, h ?? 0, m ?? 0).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+};
 const times = (r: { closed: boolean; open_time: string | null; close_time: string | null }) =>
-  r.closed ? "Closed" : `${r.open_time?.slice(0, 5)} to ${r.close_time?.slice(0, 5)}`;
+  r.closed ? "Closed" : `${clock(r.open_time)} to ${clock(r.close_time)}`;
 
 function HoursPage() {
   const queryClient = useQueryClient();
@@ -106,8 +111,10 @@ function HoursPage() {
                 <span
                   className={
                     r.state === "failed"
-                      ? "rounded-pill bg-kb-red/10 px-2.5 py-1 text-xs font-bold text-kb-red"
-                      : "rounded-pill bg-kb-sand px-2.5 py-1 text-xs font-bold text-kb-stone"
+                      ? "shrink-0 rounded-pill bg-kb-red/10 px-2.5 py-1 text-xs font-bold text-kb-red"
+                      : r.state === "posted" || r.state === "live"
+                        ? "shrink-0 rounded-pill bg-kb-green/10 px-2.5 py-1 text-xs font-bold text-kb-green"
+                        : "shrink-0 rounded-pill bg-kb-sand px-2.5 py-1 text-xs font-bold text-kb-stone"
                   }
                 >
                   {r.state === "posted" || r.state === "live"

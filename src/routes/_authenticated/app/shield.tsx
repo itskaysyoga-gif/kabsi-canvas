@@ -1,9 +1,20 @@
 import { useState } from "react";
+import { fmtDate, fmtDateTime } from "@/lib/format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { amStaff, contentCall } from "@/lib/reviews";
@@ -150,9 +161,9 @@ function ShieldPage() {
                   {LABEL[c.field] ?? c.field} · {STATE[c.state] ?? c.state}
                 </p>
                 <p className="text-kb-stone">
-                  {new Date(c.created_at).toLocaleDateString()} ·{" "}
+                  {fmtDate(c.created_at)} ·{" "}
                   {c.new_value
-                    ? `“${c.new_value.display}”`
+                    ? `Google showed “${c.new_value.display || "(empty)"}”`
                     : "Details removed after 30 days (Google's rule)"}
                 </p>
               </div>
@@ -167,6 +178,7 @@ function ShieldPage() {
 
 function OpenChange({ change, onDone }: { change: Change; onDone: () => unknown }) {
   const [busy, setBusy] = useState("");
+  const [confirm, setConfirm] = useState(false);
   const [err, setErr] = useState("");
   async function decide(decision: "revert" | "keep") {
     setBusy(decision);
@@ -183,7 +195,7 @@ function OpenChange({ change, onDone }: { change: Change; onDone: () => unknown 
   return (
     <article className="rounded-large border-2 border-kb-black bg-kb-white p-6">
       <p className="font-bold">{LABEL[change.field] ?? change.field} changed on Google</p>
-      <p className="mt-1 text-sm text-kb-stone">{new Date(change.created_at).toLocaleString()}</p>
+      <p className="mt-1 text-sm text-kb-stone">{fmtDateTime(change.created_at)}</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-card bg-kb-sand p-3">
           <p className="text-xs font-bold uppercase text-kb-stone">Before</p>
@@ -204,23 +216,31 @@ function OpenChange({ change, onDone }: { change: Change; onDone: () => unknown 
         </p>
       ) : null}
       <div className="mt-5 flex flex-wrap gap-2">
-        <Button
-          disabled={!!busy}
-          onClick={() => {
-            if (
-              window.confirm(
-                `Put your ${(LABEL[change.field] ?? change.field).toLowerCase()} back on Google?\n\nGoogle will show: ${change.old_value?.display ?? "your saved version"}`,
-              )
-            )
-              void decide("revert");
-          }}
-        >
+        <Button className="w-full sm:w-auto" disabled={!!busy} onClick={() => setConfirm(true)}>
           {busy === "revert" ? "Putting back…" : "Put mine back"}
         </Button>
         <Button variant="ghost" disabled={!!busy} onClick={() => void decide("keep")}>
-          Keep the new one
+          {busy === "keep" ? "Saving…" : "Keep the new one"}
         </Button>
       </div>
+      <AlertDialog open={confirm} onOpenChange={setConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Put your {(LABEL[change.field] ?? change.field).toLowerCase()} back on Google?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Google will show: {change.old_value?.display || "your saved version"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Not now</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void decide("revert")}>
+              Put mine back
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </article>
   );
 }

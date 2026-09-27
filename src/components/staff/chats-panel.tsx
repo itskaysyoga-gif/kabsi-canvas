@@ -1,6 +1,7 @@
 // Staff: every conversation with Nora (D261), labelled by country, topic, intent and lead temperature,
 // with filters, counts and a CSV export. Reads through the staff-only staff_chats / staff_chat_stats RPCs.
 import { useState } from "react";
+import { fmtDateTime } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
@@ -247,9 +248,7 @@ export function ChatsPanel() {
                     needs a person
                   </span>
                 ) : null}
-                <span className="ml-auto text-xs text-kb-stone">
-                  {new Date(c.updated_at).toLocaleString()}
-                </span>
+                <span className="ml-auto text-xs text-kb-stone">{fmtDateTime(c.updated_at)}</span>
               </div>
               <p className="mt-1 text-kb-stone">
                 {[c.country, nice(c.category), nice(c.intent), c.business_type, c.device]

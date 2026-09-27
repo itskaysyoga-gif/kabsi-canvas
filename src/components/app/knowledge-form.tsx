@@ -2,6 +2,7 @@
 // it in a few minutes; every field is optional except the sign-off. Saved through the whitelisted
 // update_knowledge_card RPC (unknown keys and over-long text are refused there too).
 import { useState, type FormEvent, type ReactNode } from "react";
+import { useAutosize } from "@/lib/use-autosize";
 import {
   BookOpenCheck,
   CircleHelp,
@@ -229,6 +230,14 @@ const GROUPS: Group[] = [
 
 const ONBOARDING_KEYS: TextKey[] = ["signature", "contact_phone", "hours_note", "mention", "avoid"];
 const ALL_KEYS = GROUPS.flatMap((g) => g.fields.map((f) => f.key));
+
+/** Same count everywhere (this form's bar and Home's Profile health): text fields filled, plus FAQs. */
+export function knowledgeProgress(card: Record<string, unknown>) {
+  const filled =
+    ALL_KEYS.filter((k) => typeof card[k] === "string" && (card[k] as string).trim()).length +
+    (Array.isArray(card["faqs"]) && (card["faqs"] as unknown[]).length ? 1 : 0);
+  return { filled, total: ALL_KEYS.length + 1 };
+}
 type Faq = { q: string; a: string };
 
 const initialText = (card: KnowledgeCard) =>
@@ -525,6 +534,7 @@ function FieldRow({
   onChange: (v: string) => void;
 }) {
   const id = `kf-${f.key}`;
+  const areaRef = useAutosize(value, 320);
   return (
     <div>
       <Label htmlFor={id} className="font-bold">
@@ -535,12 +545,14 @@ function FieldRow({
       {f.long ? (
         <Textarea
           id={id}
+          ref={areaRef}
           dir="auto"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={f.placeholder}
           maxLength={f.max}
-          className="mt-2 min-h-20 rounded-card px-4 py-3 text-base"
+          rows={2}
+          className="mt-2 min-h-20 resize-none rounded-card px-4 py-3 text-base md:text-base"
         />
       ) : (
         <Input

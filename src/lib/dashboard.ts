@@ -30,6 +30,8 @@ export type Dashboard = {
   rating: number | null;
   ratingCount: number | null;
   ratingChange: number | null;
+  /** Daily public rating for up to 30 days, oldest first (snapshots are kept 30 days, D257). */
+  ratingTrend: { day: string; rating: number }[];
   taps7d: number;
   taps30d: number;
   activeCards: number;
@@ -123,7 +125,7 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
       .select("taken_on, rating, review_count")
       .eq("location_id", locationId)
       .order("taken_on", { ascending: false })
-      .limit(8),
+      .limit(31),
     supabase
       .from("taps")
       .select("id", head)
@@ -233,6 +235,10 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
     rating: latest?.rating != null ? Number(latest.rating) : null,
     ratingCount: latest?.review_count ?? null,
     ratingChange,
+    ratingTrend: s
+      .filter((x) => x.rating != null)
+      .map((x) => ({ day: x.taken_on, rating: Number(x.rating) }))
+      .reverse(),
     taps7d: count(taps7),
     taps30d: count(taps30),
     activeCards: count(cards),

@@ -1,10 +1,31 @@
 import { useState, type FormEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, Download, HandHeart, Link2, MousePointerClick, Nfc, Printer } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Download,
+  HandHeart,
+  Link2,
+  MousePointerClick,
+  Nfc,
+  Power,
+  Printer,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { activateCard, friendlyError, myLatestLocation } from "@/lib/onboarding";
 import { track } from "@/lib/telemetry";
@@ -103,9 +124,18 @@ function CardsPage() {
         />
       ) : null}
       <h2 className="mt-10 text-lg font-bold">NFC cards</h2>
+      {loc && loc.country !== "LB" ? (
+        <p className="mt-2 rounded-card bg-kb-white p-4 text-sm leading-6 text-kb-stone shadow-kb">
+          <b className="text-kb-ink">Outside Lebanon?</b> Kabsi ships cards only in Lebanon. Get one
+          from a Kabsi partner, or buy any blank NFC card or sticker online (NTAG213 or NTAG215),
+          open a free NFC writer app, choose "write a URL" and paste your review link from above.
+          Taps are counted the same way.
+        </p>
+      ) : null}
       <div className="mt-3 space-y-4">
         {data.data?.cards
           .filter((c) => c.kind !== "link")
+          .sort((a, b) => Number(b.status === "active") - Number(a.status === "active"))
           .map((c) => (
             <CardRow
               key={c.code}
@@ -115,23 +145,96 @@ function CardsPage() {
             />
           ))}
         {data.data && !data.data.cards.some((c) => c.kind !== "link") ? (
-          <div className="rounded-large bg-kb-white p-7 shadow-kb">
+          <div className="rounded-large bg-kb-white p-6 shadow-kb">
             <p className="font-bold">No cards yet.</p>
             <p className="mt-1 text-sm text-kb-stone">
               Got a Kabsi NFC card? Add it below with the code printed under the QR. You don't need
               one to use Kabsi.
-            </p>
-            <p className="mt-3 text-sm leading-6 text-kb-stone">
-              <b className="text-kb-ink">Outside Lebanon?</b> Kabsi ships cards only in Lebanon. Get
-              one from a Kabsi partner, or buy any blank NFC card or sticker online (NTAG213 or
-              NTAG215), open a free NFC writer app, choose "write a URL" and paste your review link
-              from above. Taps are counted the same way.
             </p>
           </div>
         ) : null}
       </div>
       {loc ? <AddCard locationId={loc.id} onAdded={refresh} /> : null}
     </div>
+  );
+}
+
+// The short link with a real, labelled copy button (44 px tall, easy to hit on a phone).
+function CopyField({ url, label }: { url: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="mt-4 flex items-center gap-2 rounded-card bg-kb-sand py-1.5 pl-4 pr-1.5 text-sm">
+      <span className="min-w-0 flex-1 truncate font-mono">{url.replace(/^https:\/\//, "")}</span>
+      <button
+        type="button"
+        aria-label={label}
+        className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-pill bg-kb-white px-3 text-sm font-bold shadow-kb transition-colors hover:bg-kb-hairline/40"
+        onClick={() =>
+          void navigator.clipboard?.writeText(url).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          })
+        }
+      >
+        {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+        {copied ? "Copied" : "Copy"}
+      </button>
+    </div>
+  );
+}
+
+function OnOff({ active }: { active: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex rounded-pill px-2 py-0.5 text-xs font-bold",
+        active ? "bg-kb-green/10 text-kb-green" : "bg-kb-sand text-kb-stone",
+      )}
+    >
+      {active ? "On" : "Off"}
+    </span>
+  );
+}
+
+// Switching off needs a confirm (customers tapping it stop reaching the review page); switching on doesn't.
+function SwitchButton({
+  active,
+  what,
+  busy,
+  onToggle,
+}: {
+  active: boolean;
+  what: string;
+  busy?: boolean;
+  onToggle: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button
+        variant="ghost"
+        size="compact"
+        disabled={busy}
+        onClick={() => (active ? setOpen(true) : onToggle())}
+      >
+        <Power /> {active ? "Switch off" : "Switch on"}
+      </Button>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Switch off {what}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              People who tap or scan it will see a "not active" page instead of your Google review
+              page. You can switch it back on any time.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep it on</AlertDialogCancel>
+            <AlertDialogAction onClick={onToggle}>Switch off</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
@@ -142,15 +245,18 @@ function CardRow({ card, taps, onChanged }: { card: Card; taps: Tap[]; onChanged
   const url = `https://go.kabsi.co/${card.code}`;
   const week = taps.filter((t) => Date.parse(t.created_at) > Date.now() - 7 * DAY);
   const active = card.status === "active";
+  const dirty = label.trim() !== (card.label ?? "").trim();
 
-  async function rename() {
+  async function rename(e?: FormEvent) {
+    e?.preventDefault();
+    if (!dirty) return;
     setBusy(true);
     const { error } = await supabase.rpc("rename_card", {
       p_code: card.code,
       p_label: label.trim(),
     });
     setBusy(false);
-    setMsg(error ? "Couldn't save the name." : "Saved.");
+    setMsg(error ? "Couldn't save the name." : "Name saved.");
     if (!error) onChanged();
   }
   async function toggle() {
@@ -171,42 +277,40 @@ function CardRow({ card, taps, onChanged }: { card: Card; taps: Tap[]; onChanged
   }
 
   return (
-    <article className="rounded-large bg-kb-white p-6 shadow-kb">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="grid size-11 place-items-center rounded-full bg-kb-yellow">
+    <article
+      className={cn("rounded-large bg-kb-white p-5 shadow-kb sm:p-6", !active && "opacity-80")}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <div
+            className={cn(
+              "grid size-11 shrink-0 place-items-center rounded-full",
+              active ? "bg-kb-yellow" : "bg-kb-sand",
+            )}
+          >
             <Nfc className="size-5" aria-hidden="true" />
           </div>
-          <div>
-            <p className="font-mono text-lg font-bold">{card.code}</p>
-            <p className="text-sm text-kb-stone">{active ? "On" : "Off"}</p>
+          <div className="min-w-0">
+            <p className="truncate font-bold">{card.label || "NFC card"}</p>
+            <p className="flex items-center gap-2 text-sm text-kb-stone">
+              <span className="font-mono">{card.code}</span>
+              <OnOff active={active} />
+            </p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4 text-right">
+        <div className="grid shrink-0 grid-cols-2 gap-4 text-right">
           <div>
-            <p className="text-2xl font-bold">{week.length}</p>
-            <p className="text-xs text-kb-stone">last 7 days</p>
+            <p className="text-2xl font-bold leading-none">{week.length}</p>
+            <p className="mt-1 text-xs text-kb-stone">7 days</p>
           </div>
           <div>
-            <p className="text-2xl font-bold">{taps.length}</p>
-            <p className="text-xs text-kb-stone">last 30 days</p>
+            <p className="text-2xl font-bold leading-none">{taps.length}</p>
+            <p className="mt-1 text-xs text-kb-stone">30 days</p>
           </div>
         </div>
       </div>
-      <div className="mt-4 flex items-center gap-2 rounded-card bg-kb-sand px-4 py-2.5 text-sm">
-        <span className="min-w-0 flex-1 truncate font-mono">{url}</span>
-        <button
-          type="button"
-          className="shrink-0"
-          aria-label="Copy card link"
-          onClick={() =>
-            void navigator.clipboard?.writeText(url).then(() => setMsg("Link copied."))
-          }
-        >
-          <Copy className="size-4" />
-        </button>
-      </div>
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+      <CopyField url={url} label="Copy card link" />
+      <form onSubmit={(e) => void rename(e)} className="mt-3 flex gap-2">
         <Label htmlFor={`label-${card.code}`} className="sr-only">
           Card name
         </Label>
@@ -217,14 +321,27 @@ function CardRow({ card, taps, onChanged }: { card: Card; taps: Tap[]; onChanged
           maxLength={60}
           placeholder="Name it, e.g. Counter, Table 4"
         />
-        <Button variant="outline" size="compact" disabled={busy} onClick={() => void rename()}>
-          Save name
-        </Button>
-        <Button variant="ghost" size="compact" disabled={busy} onClick={() => void toggle()}>
-          {active ? "Switch off" : "Switch on"}
-        </Button>
+        {dirty ? (
+          <Button type="submit" variant="outline" size="compact" disabled={busy}>
+            Save
+          </Button>
+        ) : null}
+      </form>
+      <div className="mt-2 flex items-center justify-between gap-3">
+        {msg ? (
+          <p className="text-sm text-kb-stone" role="status">
+            {msg}
+          </p>
+        ) : (
+          <span />
+        )}
+        <SwitchButton
+          active={active}
+          what={`card ${card.code}`}
+          busy={busy}
+          onToggle={() => void toggle()}
+        />
       </div>
-      {msg ? <p className="mt-3 text-sm text-kb-stone">{msg}</p> : null}
     </article>
   );
 }
@@ -251,18 +368,24 @@ function AddCard({ locationId, onAdded }: { locationId: string; onAdded: () => u
     setBusy(false);
   }
   return (
-    <form onSubmit={add} className="mt-8 rounded-large border border-dashed border-kb-hairline p-6">
+    <form
+      onSubmit={add}
+      className="mt-8 rounded-large border border-dashed border-kb-hairline p-5 sm:p-6"
+    >
       <Label htmlFor="new-card" className="font-bold">
-        Add a card
+        Add a Kabsi card
       </Label>
+      <p className="mt-1 text-sm text-kb-stone">The 6-character code printed under the QR.</p>
       <div className="mt-3 flex gap-2">
         <Input
           id="new-card"
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          placeholder="Code under the QR, e.g. KQA234"
+          placeholder="e.g. KQA234"
           maxLength={8}
-          className="font-mono uppercase"
+          autoCapitalize="characters"
+          autoComplete="off"
+          className="font-mono uppercase placeholder:normal-case"
         />
         <Button type="submit" size="compact" disabled={busy}>
           {busy ? "Adding…" : "Add"}
@@ -273,7 +396,6 @@ function AddCard({ locationId, onAdded }: { locationId: string; onAdded: () => u
   );
 }
 
-// Review links: the digital touchpoint. Share the link anywhere, or print the QR for a counter or menu.
 function ReviewLinks({
   locationId,
   links,
@@ -383,28 +505,19 @@ function LinkRow({ link, taps, onChanged }: { link: Card; taps: Tap[]; onChanged
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="font-bold">{link.label || "Review link"}</p>
-            <p className="text-sm text-kb-stone">{active ? "On" : "Off"}</p>
+          <div className="min-w-0">
+            <p className="truncate font-bold">{link.label || "Review link"}</p>
+            <p className="mt-0.5 flex items-center gap-2 text-sm text-kb-stone">
+              <span className="font-mono">{link.code}</span>
+              <OnOff active={active} />
+            </p>
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold">{week}</p>
             <p className="text-xs text-kb-stone">opens, 7 days</p>
           </div>
         </div>
-        <div className="mt-4 flex items-center gap-2 rounded-card bg-kb-sand px-4 py-2.5 text-sm">
-          <span className="min-w-0 flex-1 truncate font-mono">{url}</span>
-          <button
-            type="button"
-            className="shrink-0"
-            aria-label="Copy review link"
-            onClick={() =>
-              void navigator.clipboard?.writeText(url).then(() => setMsg("Link copied."))
-            }
-          >
-            <Copy className="size-4" />
-          </button>
-        </div>
+        <CopyField url={url} label="Copy review link" />
         <div className="mt-3 flex flex-wrap gap-2">
           <Button variant="outline" size="compact" onClick={download}>
             <Download /> Download QR
@@ -412,9 +525,7 @@ function LinkRow({ link, taps, onChanged }: { link: Card; taps: Tap[]; onChanged
           <Button variant="ghost" size="compact" onClick={print}>
             <Printer /> Print
           </Button>
-          <Button variant="ghost" size="compact" onClick={() => void toggle()}>
-            {active ? "Switch off" : "Switch on"}
-          </Button>
+          <SwitchButton active={active} what="this review link" onToggle={() => void toggle()} />
         </div>
         {msg ? <p className="mt-2 text-sm text-kb-stone">{msg}</p> : null}
       </div>

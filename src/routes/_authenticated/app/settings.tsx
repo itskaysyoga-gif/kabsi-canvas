@@ -1,6 +1,9 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { fmtDate } from "@/lib/format";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { LogOut } from "lucide-react";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,6 +68,7 @@ function SettingsPage() {
           onSaved={() => settings.refetch()}
         />
       ) : null}
+      <AccountCard />
       {loc && settings.data ? (
         <DeleteBusiness
           locationId={loc.id}
@@ -78,6 +82,43 @@ function SettingsPage() {
 }
 
 // Owner-requested deletion (migration 019): 7 days to change your mind, then everything is deleted.
+// Who is signed in, and a sign-out that's easy to find on a phone too.
+function AccountCard() {
+  const { user, signOut } = useAuth();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [err, setErr] = useState("");
+  async function out() {
+    setErr("");
+    try {
+      await signOut();
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      await navigate({ to: "/", replace: true });
+    } catch {
+      setErr("Couldn't sign out. Check your connection and try again.");
+    }
+  }
+  return (
+    <section className="mt-8 rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
+      <h2 className="text-xl font-bold">Your account</h2>
+      <p className="mt-2 text-sm text-kb-stone">Signed in as</p>
+      <p className="break-all font-medium">{user?.email ?? "-"}</p>
+      <p className="mt-2 text-sm leading-6 text-kb-stone">
+        You sign in with a 6-digit code sent to this email. There's no password to remember.
+      </p>
+      <Button variant="outline" size="compact" className="mt-4" onClick={() => void out()}>
+        <LogOut /> Sign out
+      </Button>
+      {err ? (
+        <p className="mt-2 text-sm text-kb-red" role="alert">
+          {err}
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
 function DeleteBusiness({
   locationId,
   name,
@@ -92,9 +133,7 @@ function DeleteBusiness({
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const due = requestedAt
-    ? new Date(Date.parse(requestedAt) + 7 * 86_400_000).toLocaleDateString()
-    : null;
+  const due = requestedAt ? fmtDate(Date.parse(requestedAt) + 7 * 86_400_000) : null;
   async function run(kind: "request" | "cancel") {
     setBusy(true);
     setErr("");
@@ -298,7 +337,7 @@ function SettingsForm({
         <h2 className="text-xl font-bold">Pause emails</h2>
         <p className="mt-1 text-sm leading-6 text-kb-stone">
           {paused
-            ? `Paused until ${new Date(initial.emails_paused_until!).toLocaleDateString()}. Reviews still arrive in your inbox.`
+            ? `Paused until ${fmtDate(initial.emails_paused_until)}. Reviews still arrive in your inbox.`
             : "Going on holiday? Pause review emails for a week. Reviews still arrive in your Kabsi inbox."}
         </p>
         <Button

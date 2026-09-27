@@ -1,10 +1,22 @@
 import { useState, type FormEvent } from "react";
+import { fmtDate } from "@/lib/format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useAutosize } from "@/lib/use-autosize";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { contentCall } from "@/lib/reviews";
@@ -28,6 +40,7 @@ type Post = {
   source: string;
   keywords: string[] | null;
   created_at: string;
+  updated_at: string;
 };
 // Buttons Google accepts on a post. "Call" uses the phone number on the profile.
 const CTA_LABEL: Record<string, string> = {
@@ -43,7 +56,7 @@ type Keyword = { keyword: string; source: "search" | "category" | "reviews" };
 async function loadPosts(locationId: string): Promise<Post[]> {
   const { data, error } = await supabase
     .from("gbp_posts")
-    .select("id, owner_input, body, cta_type, state, source, keywords, created_at")
+    .select("id, owner_input, body, cta_type, state, source, keywords, created_at, updated_at")
     .eq("location_id", locationId)
     .order("created_at", { ascending: false })
     .limit(30);
@@ -83,17 +96,30 @@ function PostsPage() {
         </Button>
       ) : null}
       {loc && loc.status !== "active" ? <NotYet /> : null}
+      {/* A draft waiting for the owner comes first: it's the one thing to act on. */}
+      {loc?.status === "active" && drafts.length ? (
+        <section className="mt-7">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-kb-stone">
+            Waiting for you
+          </h2>
+          <div className="mt-3 space-y-5">
+            {drafts.map((p) => (
+              <DraftCard key={p.id} post={p} onChanged={refresh} />
+            ))}
+          </div>
+        </section>
+      ) : null}
       {loc && loc.status === "active" ? (
         <>
+          {drafts.length ? (
+            <h2 className="mt-10 text-sm font-bold uppercase tracking-wider text-kb-stone">
+              Write another post
+            </h2>
+          ) : null}
           <WeeklyToggle locationId={loc.id} hasFacts={hasFacts(loc.knowledge_card ?? {})} />
           <NewPost locationId={loc.id} onCreated={refresh} />
         </>
       ) : null}
-      <div className="mt-7 space-y-5">
-        {drafts.map((p) => (
-          <DraftCard key={p.id} post={p} onChanged={refresh} />
-        ))}
-      </div>
       {done.length ? (
         <div className="mt-10">
           <h2 className="text-lg font-bold">Earlier</h2>
@@ -106,7 +132,7 @@ function PostsPage() {
                     : p.state === "skipped"
                       ? "Skipped"
                       : "Not posted"}{" "}
-                  · {new Date(p.created_at).toLocaleDateString()}
+                  · {fmtDate(p.state === "posted" ? p.updated_at : p.created_at)}
                   {p.source === "auto" ? " · weekly draft" : ""}
                 </p>
                 <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-6">
@@ -294,6 +320,8 @@ function NewPost({ locationId, onCreated }: { locationId: string; onCreated: () 
 
 function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }) {
   const [text, setText] = useState(post.body ?? "");
+  const textRef = useAutosize(text);
+  const [discarding, setDiscarding] = useState(false);
   const [instruction, setInstruction] = useState("");
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
@@ -341,11 +369,12 @@ function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }
       <Textarea
         id={`post-${post.id}`}
         dir="auto"
+        ref={textRef}
         value={text}
         onChange={(e) => setText(e.target.value)}
-        rows={7}
+        rows={4}
         maxLength={1500}
-        className="mt-3 text-base leading-7"
+        className="mt-3 resize-none rounded-card border-l-4 border-l-kb-yellow bg-kb-sand/60 text-base leading-7 md:text-base"
       />
       <p className="mt-1 text-right text-xs text-kb-stone">{text.length} / 1500</p>
       <div className="mt-2 flex flex-col gap-2 sm:flex-row">
@@ -370,20 +399,32 @@ function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }
           {err}
         </p>
       ) : null}
-      <div className="mt-5 flex flex-wrap gap-2">
-        <Button disabled={!!busy || text.trim().length < 10} onClick={() => void run("publish")}>
+      <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <Button
+          className="w-full sm:w-auto"
+          disabled={!!busy || text.trim().length < 10}
+          onClick={() => void run("publish")}
+        >
           {busy === "publish" ? "Posting…" : "Post to Google"}
         </Button>
-        <Button
-          variant="ghost"
-          disabled={!!busy}
-          onClick={() => {
-            if (window.confirm("Discard this draft? It won't be posted.")) void run("skip");
-          }}
-        >
-          Discard
+        <Button variant="ghost" disabled={!!busy} onClick={() => setDiscarding(true)}>
+          {busy === "skip" ? "Discarding…" : "Discard"}
         </Button>
       </div>
+      <AlertDialog open={discarding} onOpenChange={setDiscarding}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard this draft?</AlertDialogTitle>
+            <AlertDialogDescription>
+              It won't be posted. You can always write a new one.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep it</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void run("skip")}>Discard</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </article>
   );
 }

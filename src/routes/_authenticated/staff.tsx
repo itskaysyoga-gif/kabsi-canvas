@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { fmtDate } from "@/lib/format";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layouts/app-layout";
@@ -120,7 +121,7 @@ function LocationRow({ row }: { row: Row }) {
           <p className="truncate font-bold">{row.name}</p>
           <p className="text-sm text-kb-stone">
             {row.status.replace(/_/g, " ")} · step {row.onboarding_step} · {row.country ?? "-"} ·{" "}
-            {new Date(row.created_at).toLocaleDateString()}
+            {fmtDate(row.created_at)}
             {row.access_granted_at ? " · Google access ✓" : ""}
           </p>
         </div>

@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
+import { fmtDate } from "@/lib/format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useAutosize } from "@/lib/use-autosize";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -282,10 +284,10 @@ function Stars({ n, className }: { n: number; className?: string }) {
 
 function ReviewHead({ review }: { review: InboxReview }) {
   const date = review.review_created_at
-    ? new Date(review.review_created_at).toLocaleDateString(undefined, {
-        day: "numeric",
-        month: "short",
-      })
+    ? fmtDate(
+        review.review_created_at,
+        new Date(review.review_created_at).getFullYear() !== new Date().getFullYear(),
+      )
     : "";
   const lang =
     review.language && review.language !== "none" ? (LANG[review.language] ?? null) : null;
@@ -331,10 +333,14 @@ function ReviewHead({ review }: { review: InboxReview }) {
   );
 }
 
+const SECONDARY =
+  "h-auto min-h-14 flex-col gap-1 whitespace-normal rounded-card px-1 py-2 text-center text-[13px] leading-tight sm:h-[52px] sm:min-h-0 sm:flex-row sm:gap-2 sm:rounded-pill sm:px-5 sm:py-0 sm:text-base";
+
 function ReviewCard({ review }: { review: InboxReview }) {
   const queryClient = useQueryClient();
   const safeDraft = review.draft?.safety_ok ? review.draft.body : "";
   const [text, setText] = useState(safeDraft);
+  const replyRef = useAutosize(text);
   const [instruction, setInstruction] = useState("");
   const [showRedraft, setShowRedraft] = useState(false);
   const [confirm, setConfirm] = useState(false);
@@ -448,9 +454,11 @@ function ReviewCard({ review }: { review: InboxReview }) {
             dir="auto"
             id={`reply-${review.id}`}
             value={text}
+            ref={replyRef}
             onChange={(e) => setText(e.target.value)}
-            rows={6}
-            className="mt-3 rounded-card border-l-4 border-l-kb-yellow bg-kb-sand/60 text-base leading-7"
+            rows={4}
+            placeholder={safeDraft ? undefined : "Write a short, calm reply in your own words."}
+            className="mt-3 resize-none rounded-card border-l-4 border-l-kb-yellow bg-kb-sand/60 text-base leading-7 md:text-base"
           />
           {showRedraft ? (
             <div className="mt-3 rounded-card border border-kb-hairline p-3">
@@ -500,7 +508,7 @@ function ReviewCard({ review }: { review: InboxReview }) {
               {note}
             </p>
           ) : null}
-          <div className="mt-5 grid gap-2 sm:flex sm:flex-wrap">
+          <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <Button
               className="w-full sm:w-auto"
               disabled={!!busy || !text.trim() || text.trim().length > MAX}
@@ -508,17 +516,40 @@ function ReviewCard({ review }: { review: InboxReview }) {
             >
               {busy === "post" ? "Posting…" : "Post reply"}
             </Button>
-            {!showRedraft ? (
-              <Button variant="ghost" disabled={!!busy} onClick={() => setShowRedraft(true)}>
-                <Wand2 /> Ask for changes
+            {/* Secondary actions: one tidy row of three on phones, inline on larger screens. */}
+            <div
+              className={cn(
+                "grid gap-1 sm:flex sm:gap-2",
+                showRedraft ? "grid-cols-2" : "grid-cols-3",
+              )}
+            >
+              {!showRedraft ? (
+                <Button
+                  variant="ghost"
+                  className={SECONDARY}
+                  disabled={!!busy}
+                  onClick={() => setShowRedraft(true)}
+                >
+                  <Wand2 /> Ask for changes
+                </Button>
+              ) : null}
+              <Button
+                variant="ghost"
+                className={SECONDARY}
+                disabled={!!busy}
+                onClick={() => void run("mine")}
+              >
+                <Hand /> {busy === "mine" ? "Saving…" : "I'll handle it"}
               </Button>
-            ) : null}
-            <Button variant="ghost" disabled={!!busy} onClick={() => void run("mine")}>
-              <Hand /> {busy === "mine" ? "Saving…" : "I'll handle it"}
-            </Button>
-            <Button variant="ghost" disabled={!!busy} onClick={() => void run("skip")}>
-              <SkipForward /> {busy === "skip" ? "Skipping…" : "Skip"}
-            </Button>
+              <Button
+                variant="ghost"
+                className={SECONDARY}
+                disabled={!!busy}
+                onClick={() => void run("skip")}
+              >
+                <SkipForward /> {busy === "skip" ? "Skipping…" : "Skip"}
+              </Button>
+            </div>
           </div>
         </>
       )}
