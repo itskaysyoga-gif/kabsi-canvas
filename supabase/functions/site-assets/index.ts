@@ -1,12 +1,13 @@
-// site-assets: internal only (x-cron-secret). Imports one marketing photo into the public `site`
-// Storage bucket at a web size, and runs a Haiku vision check so nothing with readable text, logos
-// or people reaches the site (KABSI-BRAND "Imagery": plain places, no people, no real brands).
-//   POST { name: "cafe-counter", url: "https://…png", widths: [1600, 800] }
-//   → { name, files: [{ path, width, height, bytes }], check: { text, logos, people, artifacts, ok, description } }
+// site-assets: internal only (x-cron-secret). Imports one marketing image into the public `site`
+// Storage bucket as WebP at web sizes, and runs a vision review so nothing with readable text, logos,
+// faces or AI artifacts reaches the site (D255, D256).
+//   POST { name: "hero-home", url: "https://…png", widths: [1600, 800], quality?: 72, brief?: "…" }
+//   → { name, files: [{ path, width, height, bytes }], check: { text, logos, faces, artifacts, ok, description, composition } }
+// Self-contained on purpose (no _shared import), so this one-off tool deploys as a single file.
 import { Image } from "https://deno.land/x/imagescript@1.3.0/mod.ts";
+import encodeWebp, { init as initWebp } from "npm:@jsquash/webp@1.4.0/encode.js";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
-// Self-contained on purpose (no _shared import), so this one-off tool deploys as a single file.
 const admin = () =>
   createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
     auth: { persistSession: false },
@@ -25,58 +26,76 @@ async function isInternal(req: Request) {
   return diff === 0;
 }
 
-const CHECK_MODEL = "claude-haiku-4-5-20251001";
+const CHECK_MODEL = "claude-sonnet-5";
 const BUCKET = "site";
+const WEBP_WASM = "https://cdn.jsdelivr.net/npm/@jsquash/webp@1.4.0/codec/enc/webp_enc.wasm";
+let webpReady: Promise<void> | null = null;
+function ensureWebp() {
+  webpReady ??= (async () => {
+    const mod = await WebAssembly.compile(await (await fetch(WEBP_WASM)).arrayBuffer());
+    await initWebp(mod);
+  })();
+  return webpReady;
+}
 
-async function visionCheck(jpeg: Uint8Array) {
+function b64(bytes: Uint8Array) {
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+
+async function visionCheck(jpeg: Uint8Array, brief: string) {
   const key = Deno.env.get("ANTHROPIC_API_KEY") ?? Deno.env.get("Anthropic_Api");
   if (!key) return { ok: false, description: "anthropic_not_configured" };
-  let bin = "";
-  for (let i = 0; i < jpeg.length; i += 0x8000) bin += String.fromCharCode(...jpeg.subarray(i, i + 0x8000));
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({
       model: CHECK_MODEL,
-      max_tokens: 400,
-      system: `You review a photo for a website. Look closely. Reply with JSON only:
-{"text": true|false, "logos": true|false, "people": true|false, "artifacts": true|false, "description": "<two sentences: what is shown, and anything odd>"}
-text: any readable letters, words or numbers, including garbled pseudo-text. logos: any brand mark. people: any person, face, hand or body part. artifacts: warped objects, melted shapes, impossible geometry or other obvious AI errors.`,
+      max_tokens: 600,
+      system: `You are a strict art director reviewing a photo for a small-business website. Look closely. Reply with JSON only:
+{"text": bool, "logos": bool, "faces": bool, "artifacts": bool, "matches_brief": bool, "description": "<what is shown, two sentences>", "composition": "<where the main subject sits (left/centre/right), where the empty or dark space is, overall brightness>", "problems": "<anything odd, or empty>"}
+text: any readable letters, words or numbers, including garbled pseudo-text on signs, labels, screens or paper. logos: any brand mark. faces: any human face (hands alone are fine). artifacts: warped objects, extra fingers, melted shapes, impossible geometry or other obvious AI errors. matches_brief: the photo fits the brief.`,
       messages: [{ role: "user", content: [
-        { type: "image", source: { type: "base64", media_type: "image/jpeg", data: btoa(bin) } },
-        { type: "text", text: "Review this photo." },
+        { type: "image", source: { type: "base64", media_type: "image/jpeg", data: b64(jpeg) } },
+        { type: "text", text: `Brief: ${brief || "a plain photo of a local business, no people"}\nReview this photo.` },
       ] }],
     }),
   });
   const data = await res.json();
-  if (!res.ok) return { ok: false, description: `anthropic ${res.status}` };
+  if (!res.ok) return { ok: false, description: `anthropic ${res.status}: ${JSON.stringify(data).slice(0, 200)}` };
   const t = (data.content ?? []).filter((b: { type: string }) => b.type === "text").map((b: { text: string }) => b.text).join("");
   const j = JSON.parse(t.slice(t.indexOf("{"), t.lastIndexOf("}") + 1));
-  return { ...j, ok: !j.text && !j.logos && !j.people && !j.artifacts };
+  return { ...j, ok: !j.text && !j.logos && !j.faces && !j.artifacts && j.matches_brief !== false };
 }
 
 Deno.serve(async (req) => {
   if (!(await isInternal(req))) return fail("forbidden", "Internal only.", 403);
-  const body = await req.json().catch(() => ({})) as { name?: string; url?: string; widths?: number[] };
+  const body = await req.json().catch(() => ({})) as {
+    name?: string; url?: string; widths?: number[]; quality?: number; brief?: string; skip_check?: boolean;
+  };
   const name = String(body.name ?? "");
   if (!/^[a-z0-9-]{2,40}$/.test(name) || !body.url?.startsWith("https://")) return fail("bad_request", "name and https url required");
   const src = await fetch(body.url);
   if (!src.ok) return fail("fetch_failed", `source ${src.status}`, 502);
   const original = await Image.decode(new Uint8Array(await src.arrayBuffer()));
   const widths = (body.widths ?? [1600, 800]).filter((w) => w >= 200 && w <= 2400);
+  const quality = Math.min(90, Math.max(50, body.quality ?? 72));
+  await ensureWebp();
   const files = [];
   let checkJpeg: Uint8Array | null = null;
   for (const w of widths) {
     const img = original.clone().resize(Math.min(w, original.width), Image.RESIZE_AUTO);
-    const jpeg = await img.encodeJPEG(78);
-    const path = `photos/${name}-${w}.jpg`;
-    const { error } = await admin().storage.from(BUCKET).upload(path, jpeg, {
-      contentType: "image/jpeg", cacheControl: "31536000", upsert: true,
+    const rgba = { data: new Uint8ClampedArray(img.bitmap), width: img.width, height: img.height, colorSpace: "srgb" } as ImageData;
+    const webp = new Uint8Array(await encodeWebp(rgba, { quality, method: 4 }));
+    const path = `v2/${name}-${w}.webp`;
+    const { error } = await admin().storage.from(BUCKET).upload(path, webp, {
+      contentType: "image/webp", cacheControl: "31536000", upsert: true,
     });
     if (error) return fail("upload_failed", error.message, 500);
-    files.push({ path, width: img.width, height: img.height, bytes: jpeg.length });
-    if (w <= 1000) checkJpeg = jpeg;
+    files.push({ path, width: img.width, height: img.height, bytes: webp.length });
+    if (!checkJpeg && w <= 1000) checkJpeg = await img.encodeJPEG(80);
   }
-  const check = checkJpeg ? await visionCheck(checkJpeg) : null;
+  const check = body.skip_check || !checkJpeg ? null : await visionCheck(checkJpeg, body.brief ?? "");
   return json({ name, files, check });
 });

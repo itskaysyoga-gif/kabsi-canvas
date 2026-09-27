@@ -113,7 +113,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             </a>
           </div>
           <p className="pt-6 text-sm leading-6 text-kb-stone-on-dark">
-            © Kabsi, Beirut. Kabsi is independent and not affiliated with Google.
+            © Kabsi. Kabsi is independent and not affiliated with Google.
           </p>
         </div>
       </footer>

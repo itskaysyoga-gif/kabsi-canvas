@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Eyebrow, H2, PageHero, Photo, Section } from "@/components/marketing/parts";
+import { Eyebrow, H2, PageHero, Section } from "@/components/marketing/parts";
+import { BusinessGrid } from "@/components/marketing/business-grid";
 import { supabaseUrl } from "@/lib/supabase";
 import { track } from "@/lib/telemetry";
 import { PRICES, pageHead } from "@/lib/site";
@@ -30,6 +31,7 @@ function Page() {
         title="Add a high-margin AI local SEO engine to your agency."
         sub="Bring your clients grounded review replies, weekly keyword posts and a listing guard, with NFC cards if you sell them. You set the retail price and keep everything above a small wholesale rate per live business."
         visual={<WorkspaceVisual />}
+        photo="heroPartners"
       />
 
       <Section>
@@ -59,14 +61,23 @@ function Page() {
             Google review page.
           </Point>
         </div>
-        <div className="mt-10 grid grid-cols-3 gap-3">
-          <Photo id="grocery" sizes="33vw" className="aspect-square sm:aspect-[4/3]" />
-          <Photo id="clinic" sizes="33vw" className="aspect-square sm:aspect-[4/3]" />
-          <Photo id="cafe" sizes="33vw" className="aspect-square sm:aspect-[4/3]" />
-        </div>
       </Section>
 
-      <Section tone="sand" className="grid items-center gap-12 md:grid-cols-2">
+      <Section tone="sand">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <Eyebrow>Your clients</Eyebrow>
+            <H2>Every business with a Google profile, in any country.</H2>
+          </div>
+          <p className="max-w-sm leading-7 text-kb-stone md:text-right">
+            Replies are drafted in each reviewer's language: English, Spanish, Arabic, French and
+            many more.
+          </p>
+        </div>
+        <BusinessGrid className="mt-10" />
+      </Section>
+
+      <Section className="grid items-center gap-12 md:grid-cols-2">
         <img
           src="/images/nfc-card-closeup.webp"
           alt="An acrylic NFC review card with a tap area and a QR code, held in a hand"
@@ -89,7 +100,7 @@ function Page() {
         </div>
       </Section>
 
-      <Section>
+      <Section tone="sand">
         <div className="grid gap-10 md:grid-cols-2">
           <div>
             <Eyebrow>Partner pricing</Eyebrow>
@@ -115,7 +126,7 @@ function Page() {
         </div>
       </Section>
 
-      <Section tone="sand" className="grid gap-12 md:grid-cols-[1fr_1.1fr]">
+      <Section className="grid gap-12 md:grid-cols-[1fr_1.1fr]">
         <div>
           <Eyebrow>Apply</Eyebrow>
           <H2>Tell us about you.</H2>
@@ -191,7 +202,7 @@ function LeadForm() {
   return (
     <form
       onSubmit={submit}
-      className="grid gap-4 rounded-large bg-kb-white p-6 shadow-kb sm:grid-cols-2 sm:p-8"
+      className="grid gap-4 rounded-large bg-kb-sand p-6 sm:grid-cols-2 sm:p-8"
     >
       <Field label="Your name" id="l-name">
         <Input

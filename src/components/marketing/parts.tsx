@@ -4,7 +4,7 @@ import { ArrowRight, Nfc, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KabsiMark } from "@/components/shared/kabsi-logo";
 import { cn } from "@/lib/utils";
-import { PHOTOS, photoSrc, type PhotoId } from "@/lib/site-photos";
+import { PHOTOS, photoFallback, photoSrcSet, type PhotoId } from "@/lib/site-photos";
 
 export function Section({
   children,
@@ -67,21 +67,25 @@ export function PageHero({
   children,
   visual,
   visualClassName,
+  photo,
 }: {
   eyebrow: string;
   title: string;
   sub: string;
   children?: ReactNode;
-  /** A drawn HTML visual or photo shown beside the text (below it on phones). */
+  /** A drawn HTML visual shown beside the text (below it on phones). */
   visual?: ReactNode;
   visualClassName?: string;
+  /** A hero photo behind the section: dark on the left for the headline, subject on the right. */
+  photo?: PhotoId;
 }) {
   return (
-    <section className="relative overflow-hidden bg-kb-carbon text-kb-white">
+    <section className="relative isolate overflow-hidden bg-kb-carbon text-kb-white">
+      {photo ? <HeroBackdrop photo={photo} /> : null}
       <div
         className={cn(
-          "relative mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24",
-          visual && "grid items-center gap-12 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]",
+          "relative mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24 lg:py-28",
+          visual && "grid items-center gap-12 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]",
         )}
       >
         <div>
@@ -108,6 +112,35 @@ export function PageHero({
         )}
       </div>
     </section>
+  );
+}
+
+/** Full-bleed hero photo. Desktop: the photo fills the right side and fades into Carbon on the left.
+ *  Phones: the whole photo sits under a dark wash so white text stays readable. */
+export function HeroBackdrop({ photo }: { photo: PhotoId }) {
+  const p = PHOTOS[photo];
+  return (
+    <div className="pointer-events-none absolute inset-0 -z-10">
+      <img
+        src={photoFallback(photo, 800)}
+        srcSet={photoSrcSet(photo)}
+        sizes="(min-width: 768px) 80vw, 100vw"
+        alt={p.alt}
+        width={p.w}
+        height={p.h}
+        fetchPriority="high"
+        decoding="async"
+        className="absolute inset-0 h-full w-full object-cover object-[72%_center] md:left-auto md:right-0 md:w-[80%] md:object-right"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,11,11,.92)_0%,rgba(11,11,11,.8)_50%,rgba(11,11,11,.6)_100%)] md:bg-[linear-gradient(90deg,#0b0b0b_0%,#0b0b0b_22%,rgba(11,11,11,.78)_42%,rgba(11,11,11,.3)_70%,rgba(11,11,11,.15)_100%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-kb-carbon to-transparent"
+      />
+    </div>
   );
 }
 
@@ -246,9 +279,7 @@ export function CardRender({ className }: { className?: string }) {
           <p className="mt-1 text-center font-mono text-[10px] tracking-widest">DEMO24</p>
         </div>
       </div>
-      <p className="absolute inset-x-6 bottom-4 text-[10px] text-kb-stone">
-        Powered by kabsi.co · Beirut, Lebanon
-      </p>
+      <p className="absolute inset-x-6 bottom-4 text-[10px] text-kb-stone">Powered by kabsi.co</p>
     </div>
   );
 }
@@ -271,26 +302,29 @@ export function FaqList({ items }: { items: { q: string; a: string }[] }) {
   );
 }
 
-/** A place photo (no people, no brands), lazy-loaded at 800 or 1600 px wide. */
+/** A marketing photo (no faces, no brands), WebP at several widths, lazy unless `priority`. */
 export function Photo({
   id,
   className,
   sizes = "(min-width: 768px) 50vw, 100vw",
+  priority = false,
 }: {
   id: PhotoId;
   className?: string;
   sizes?: string;
+  priority?: boolean;
 }) {
   const p = PHOTOS[id];
   return (
     <img
-      src={photoSrc(id, 800)}
-      srcSet={`${photoSrc(id, 800)} 800w, ${photoSrc(id, 1600)} 1600w`}
+      src={photoFallback(id, 800)}
+      srcSet={photoSrcSet(id)}
       sizes={sizes}
       alt={p.alt}
-      width={p.ratio[0]}
-      height={p.ratio[1]}
-      loading="lazy"
+      width={p.w}
+      height={p.h}
+      loading={priority ? "eager" : "lazy"}
+      fetchPriority={priority ? "high" : "auto"}
       decoding="async"
       className={cn("block h-auto w-full rounded-large bg-kb-sand object-cover", className)}
     />

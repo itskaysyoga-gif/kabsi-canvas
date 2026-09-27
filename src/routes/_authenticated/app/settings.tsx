@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
+import { Mail as PageGlyph } from "lucide-react";
+import { PageIcon } from "@/components/shared/page-icon";
 
 // Email settings: extra alert addresses, daily digest hour, time zone, pause (D220).
 // Saved through the membership-checked update_notification_settings RPC.
@@ -44,6 +46,7 @@ function SettingsPage() {
   });
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
+      <PageIcon icon={<PageGlyph />} />
       <h1 className="font-display text-4xl leading-none sm:text-5xl">Emails</h1>
       {loc ? <p className="mt-2 text-kb-stone">{loc.name}</p> : null}
       {location.isLoading || settings.isLoading ? (

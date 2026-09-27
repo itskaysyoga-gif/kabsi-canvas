@@ -85,7 +85,7 @@ export function BusinessStep({
           id="biz"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="e.g. Café Ward, Hamra"
+          placeholder="Business name and city"
           className="h-[52px] rounded-card px-4 text-base"
           autoComplete="organization"
           required
@@ -400,7 +400,7 @@ export function KnowledgeStep({
         id="mention"
         value={mention}
         onChange={(e) => setMention(e.target.value)}
-        placeholder="e.g. We deliver in Hamra and Verdun. Free parking behind the shop."
+        placeholder="e.g. We deliver within 3 miles. Free parking behind the shop."
         className="mt-2 min-h-24 rounded-card px-4 py-3 text-base"
         maxLength={600}
       />
@@ -438,7 +438,7 @@ export function KnowledgeStep({
                 onChange={(e) =>
                   setFaqs(faqs.map((x, j) => (j === i ? { ...x, a: e.target.value } : x)))
                 }
-                placeholder="e.g. Yes, three vegan manakish every day."
+                placeholder="e.g. Yes, three vegan dishes every day."
                 className="mt-2 min-h-16"
                 maxLength={400}
               />

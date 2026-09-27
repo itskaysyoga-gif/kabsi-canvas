@@ -23,6 +23,8 @@ import {
 } from "@/lib/partner";
 import { track } from "@/lib/telemetry";
 import { cn } from "@/lib/utils";
+import { Handshake as PageGlyph } from "lucide-react";
+import { PageIcon } from "@/components/shared/page-icon";
 
 // Partner workspace (Phase 9, D210): invite businesses, see status and tap counts (never review text),
 // cards, monthly invoices paid in USDT.
@@ -50,6 +52,7 @@ function PartnerPage() {
 function NotAPartner() {
   return (
     <>
+      <PageIcon icon={<PageGlyph />} />
       <h1 className="font-display text-4xl leading-none sm:text-5xl">Partner</h1>
       <p className="mt-4 max-w-xl leading-7 text-kb-stone">
         This page is for Kabsi partners. If you sell NFC cards or look after Google profiles for
@@ -79,6 +82,7 @@ function Workspace({ partner }: { partner: Partner }) {
   const pendingInvites = w?.invites.filter((i) => !i.accepted_at) ?? [];
   return (
     <>
+      <PageIcon icon={<PageGlyph />} />
       <h1 className="font-display text-4xl leading-none sm:text-5xl">{partner.name}</h1>
       <p className="mt-2 text-kb-stone">{rateLine(partner)}</p>
 

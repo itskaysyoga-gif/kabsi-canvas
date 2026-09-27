@@ -1,5 +1,30 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import {
+  BadgeCheck,
+  Clock3,
+  Megaphone,
+  MessageCircle,
+  MessageSquareText,
+  PenLine,
+  Receipt,
+  Store,
+  Target,
+} from "lucide-react";
+import {
+  CalmFlow,
+  Callout,
+  Compare,
+  DoDont,
+  Example,
+  IconGrid,
+  LinkSketch,
+  ManagerSketch,
+  ReplySketch,
+  ReportSketch,
+  Steps,
+} from "@/components/marketing/guide-kit";
+import type { PhotoId } from "@/lib/site-photos";
 
 // Guides (D253): short, practical how-tos for business owners. Every step is checked against Google's own
 // help pages (listed as sources at the end of each guide). Facts only (§3): no promises of reviews, ratings
@@ -11,6 +36,10 @@ export type Guide = {
   description: string;
   updated: string; // ISO date
   minutes: number;
+  /** Cover photo (site-photos). */
+  photo: PhotoId;
+  /** Three or four plain-language takeaways shown at the top. */
+  summary: string[];
   body: ReactNode;
   sources: { label: string; href: string }[];
 };
@@ -38,44 +67,6 @@ const G = {
   },
 };
 
-function Steps({ items }: { items: ReactNode[] }) {
-  return (
-    <ol className="list-decimal space-y-2 pl-6">
-      {items.map((it, i) => (
-        <li key={i}>{it}</li>
-      ))}
-    </ol>
-  );
-}
-
-function Example({
-  label,
-  review,
-  reply,
-  dir = "ltr",
-}: {
-  label: string;
-  review: string;
-  reply: string;
-  dir?: "ltr" | "rtl";
-}) {
-  return (
-    <figure className="rounded-large bg-kb-sand p-5">
-      <figcaption className="text-xs font-bold uppercase tracking-wider text-kb-stone">
-        {label}
-      </figcaption>
-      <p className="mt-3 text-sm font-bold text-kb-stone">Review</p>
-      <p dir={dir} className="text-kb-stone">
-        {review}
-      </p>
-      <p className="mt-3 text-sm font-bold text-kb-stone">Reply</p>
-      <p dir={dir} className="text-kb-ink">
-        {reply}
-      </p>
-    </figure>
-  );
-}
-
 const Tool = () => (
   <Link to="/google-review-link" className="font-bold text-kb-ink underline underline-offset-4">
     free review link and QR tool
@@ -87,9 +78,16 @@ export const GUIDES: Guide[] = [
     slug: "how-to-reply-to-google-reviews",
     title: "How to reply to Google reviews (with examples)",
     description:
-      "The exact steps to reply to a Google review, what a good reply looks like, and short examples in English, Arabic and French.",
-    updated: "2026-09-26",
+      "The exact steps to reply to a Google review, what a good reply looks like, and short examples in English, Spanish, Arabic and French.",
+    updated: "2026-09-27",
     minutes: 4,
+    photo: "guideReply",
+    summary: [
+      "Reply from your Business Profile: Read reviews, then Reply.",
+      "Keep it to two to four sentences, in the customer's language.",
+      "Mention one thing they said, and sign as the business.",
+      "Google checks each reply before it appears, usually within 10 minutes.",
+    ],
     sources: [G.reply, G.tips],
     body: (
       <>
@@ -113,6 +111,7 @@ export const GUIDES: Guide[] = [
             </>,
           ]}
         />
+        <ReplySketch />
         <p>
           Google checks every reply against its content policies before it appears. This usually
           takes up to 10 minutes, and sometimes longer. The reply shows under the review with your
@@ -120,39 +119,82 @@ export const GUIDES: Guide[] = [
           delete it later.
         </p>
         <h2>What a good reply looks like</h2>
-        <ul>
-          <li>Short: two to four sentences.</li>
-          <li>Polite and professional, in the language the customer wrote in.</li>
-          <li>Specific: mention one thing they said, so it doesn't read like a template.</li>
-          <li>No advertising, no discount codes, no asking them to change the review.</li>
-          <li>Signed as the business, the same way every time.</li>
-        </ul>
+        <IconGrid
+          items={[
+            { icon: <Clock3 />, title: "Short", text: "Two to four sentences is plenty." },
+            {
+              icon: <MessageSquareText />,
+              title: "In their language",
+              text: "Polite and professional, in the language the customer wrote in.",
+            },
+            {
+              icon: <Target />,
+              title: "Specific",
+              text: "Mention one thing they said, so it doesn't read like a template.",
+            },
+            {
+              icon: <Megaphone />,
+              title: "No selling",
+              text: "No advertising, no discount codes, no asking them to change the review.",
+            },
+            {
+              icon: <PenLine />,
+              title: "Signed as the business",
+              text: "The same sign-off every time, like your business name.",
+            },
+            {
+              icon: <BadgeCheck />,
+              title: "Honest",
+              text: "Don't promise anything you won't do.",
+            },
+          ]}
+        />
         <h2>Examples</h2>
         <div className="not-prose grid gap-4">
           <Example
-            label="5 stars, English"
+            label="5 stars"
+            lang="English"
+            name="Emma"
+            rating={5}
             review="Lovely spot, great coffee, and they remembered my order."
-            reply="Thank you, Nadine! We're glad you enjoyed the coffee, and the team will be happy to hear it. See you again soon. Rami, Café Hamra"
+            reply="Thank you, Emma! We're glad you enjoyed the coffee, and the team will be happy to hear it. See you again soon. Luca, owner"
           />
           <Example
-            label="4 stars, Arabic"
+            label="4 stars"
+            lang="Español"
+            name="Lucía"
+            rating={4}
+            review="Muy buen ambiente y el café riquísimo. Solo tardaron un poco en atendernos."
+            reply="¡Muchas gracias, Lucía! Nos alegra que te gustaran el ambiente y el café, y sentimos la espera. ¡Te esperamos pronto! Luca, dueño"
+          />
+          <Example
+            label="4 stars"
+            lang="العربية"
+            name="Karim"
+            rating={4}
             dir="rtl"
-            review="الأكل كتير طيب بس الخدمة كانت بطيئة شوي."
-            reply="شكراً كتير على تقييمك! مبسوطين إنو عجبك الأكل، ومنعتذر عن التأخير بالخدمة. منتمنى نشوفك قريباً."
+            review="الطعام لذيذ جداً، لكن الخدمة كانت بطيئة قليلاً."
+            reply="شكراً جزيلاً على تقييمك! سعداء أن الطعام أعجبك، ونعتذر عن تأخر الخدمة. نتطلع لرؤيتك قريباً."
           />
           <Example
-            label="2 stars, French"
+            label="2 stars"
+            lang="Français"
+            name="Sophie"
+            rating={2}
             review="Commande arrivée froide et en retard."
-            reply="Merci pour votre retour. Nous sommes désolés que votre commande soit arrivée froide et en retard. Appelez-nous au 01 234 567 pour qu'on en parle directement."
+            reply="Merci pour votre retour. Nous sommes désolés que votre commande soit arrivée froide et en retard. Appelez-nous au 555 0199 pour qu'on en parle directement."
           />
         </div>
         <h2>How fast should you reply?</h2>
         <p>
           Google's advice for negative reviews is to respond in a timely manner. In practice,
           replying within a day or two is easy to keep up if new reviews reach you by email with a
-          reply ready. That's what <Link to="/">Kabsi</Link> does: every new review arrives with a
-          draft in the reviewer's language, and nothing is posted until you tap Post.
+          reply ready.
         </p>
+        <Callout title="Let Kabsi draft them for you">
+          Every new review arrives by email with a draft in the reviewer's language. Nothing is
+          posted until you tap Post. <Link to="/how-it-works">See how it works</Link>.
+        </Callout>
       </>
     ),
   },
@@ -161,8 +203,15 @@ export const GUIDES: Guide[] = [
     title: "How to respond to a negative Google review",
     description:
       "A calm, five-step way to answer a bad Google review, what never to write, and example replies you can adapt.",
-    updated: "2026-09-26",
+    updated: "2026-09-27",
     minutes: 4,
+    photo: "guideNegative",
+    summary: [
+      "Wait until you're calm, then reply briefly and politely.",
+      "Name the problem once, and offer a direct way to talk.",
+      "Never argue, share details or offer anything for a changed review.",
+      "Report a review only if it breaks Google's rules.",
+    ],
     sources: [G.tips, G.reply, G.report],
     body: (
       <>
@@ -170,6 +219,7 @@ export const GUIDES: Guide[] = [
           A bad review stings, and the first reply you want to write is rarely the one to post.
           People reading your profile look at how you answer as much as at the complaint itself.
         </p>
+        <CalmFlow />
         <h2>Five steps</h2>
         <Steps
           items={[
@@ -180,29 +230,39 @@ export const GUIDES: Guide[] = [
             "Keep it short and sign it as the business.",
           ]}
         />
-        <h2>Never write</h2>
-        <ul>
-          <li>Arguments about who is right, or the customer's personal details.</li>
-          <li>
-            Offers of discounts or refunds in exchange for changing or removing the review. Google
-            treats that as fake engagement.
-          </li>
-          <li>
-            Accusations that the reviewer is lying. If a review breaks Google's rules, report it
-            instead (see below).
-          </li>
-        </ul>
+        <h2>What to write, and what never to write</h2>
+        <DoDont
+          yesTitle="Do"
+          noTitle="Never"
+          yes={[
+            "Thank them for the feedback.",
+            "Name the problem in one sentence.",
+            "Give a phone number or email to talk.",
+            "Sign it as the business.",
+          ]}
+          no={[
+            "Argue about who is right, or share the customer's personal details.",
+            "Offer discounts or refunds for changing or removing the review. Google treats that as fake engagement.",
+            "Accuse the reviewer of lying. Report the review instead if it breaks the rules.",
+          ]}
+        />
         <h2>Examples</h2>
         <div className="not-prose grid gap-4">
           <Example
             label="Slow service"
+            lang="English"
+            name="Daniel"
+            rating={1}
             review="Waited 40 minutes for two sandwiches. Never again."
-            reply="Thank you for telling us, and we're sorry about the wait. That's not the service we want to give. Please call us on 01 234 567 so we can hear what happened. Rami, Café Hamra"
+            reply="Thank you for telling us, and we're sorry about the wait. That's not the service we want to give. Please call us on 555 0199 so we can hear what happened. Luca, owner"
           />
           <Example
-            label="Complaint you can't identify"
+            label="A complaint you can't identify"
+            lang="English"
+            name="Alex"
+            rating={2}
             review="Rude staff and dirty tables."
-            reply="We're sorry to read this, and we take it seriously. We'd like to understand what happened. Please email us at hello@cafehamra.com with the day of your visit. Rami, Café Hamra"
+            reply="We're sorry to read this, and we take it seriously. We'd like to understand what happened. Please call us on 555 0199 with the day of your visit. Luca, owner"
           />
         </div>
         <h2>When a review breaks the rules</h2>
@@ -214,10 +274,10 @@ export const GUIDES: Guide[] = [
           </Link>{" "}
           for the exact steps.
         </p>
-        <p>
+        <Callout title="How Kabsi handles hard reviews">
           Kabsi flags hard reviews (1 or 2 stars, or anything about health, safety, staff or legal
           matters) and prepares a calm draft with no quick Post button, so you read it first.
-        </p>
+        </Callout>
       </>
     ),
   },
@@ -226,8 +286,15 @@ export const GUIDES: Guide[] = [
     title: "Can you remove a Google review?",
     description:
       "What Google removes and what it doesn't, how to report a review that breaks the rules, and how to appeal.",
-    updated: "2026-09-26",
+    updated: "2026-09-27",
     minutes: 3,
+    photo: "guideRemove",
+    summary: [
+      "You can't remove a genuine review, even a negative one.",
+      "You can report a review that breaks Google's content policies.",
+      "Google decides, usually within several days, and you can appeal once.",
+      "Nobody outside Google can remove a review, whatever they charge.",
+    ],
     sources: [G.report],
     body: (
       <>
@@ -236,6 +303,17 @@ export const GUIDES: Guide[] = [
           review that breaks Google's content policies, and Google decides. Google's own help says
           not to report a review just because you disagree with it or dislike it.
         </p>
+        <DoDont
+          yesTitle="Google can remove"
+          noTitle="Google won't remove"
+          yes={[
+            "Spam and fake engagement",
+            "Profanity, harassment or hate speech",
+            "Off-topic content",
+            "Personal information",
+          ]}
+          no={["A genuine negative review", "A review you simply disagree with"]}
+        />
         <h2>Report a review from your profile</h2>
         <Steps
           items={[
@@ -252,6 +330,7 @@ export const GUIDES: Guide[] = [
             </>,
           ]}
         />
+        <ReportSketch />
         <h2>Or use the Reviews Management Tool</h2>
         <Steps
           items={[
@@ -279,10 +358,10 @@ export const GUIDES: Guide[] = [
           </Link>
           .
         </p>
-        <p>
+        <Callout kind="warn" title="Beware of paid removal offers">
           Anyone offering to remove reviews for a fee can't do anything you can't. Nobody outside
           Google can remove a review.
-        </p>
+        </Callout>
       </>
     ),
   },
@@ -291,8 +370,15 @@ export const GUIDES: Guide[] = [
     title: "How to add a manager to your Google Business Profile",
     description:
       "Give a staff member or a service access to your Google Business Profile without sharing your password, and remove it any time.",
-    updated: "2026-09-26",
+    updated: "2026-09-27",
     minutes: 3,
+    photo: "guideManager",
+    summary: [
+      "Never share your Google password: add people as managers instead.",
+      "Business Profile settings, then People and access, then Add.",
+      "Managers can reply and edit; only owners can add or remove people.",
+      "You can remove anyone at any time from the same screen.",
+    ],
     sources: [G.users],
     body: (
       <>
@@ -320,19 +406,25 @@ export const GUIDES: Guide[] = [
             </>,
           ]}
         />
+        <ManagerSketch />
         <p>
           They get an email and accept the invitation. After that, the profile appears in their
           account.
         </p>
         <h2>Owner or manager?</h2>
+        <Compare
+          cols={["Owner", "Manager"]}
+          rows={[
+            { label: "Edit business information", a: true, b: true },
+            { label: "Reply to reviews", a: true, b: true },
+            { label: "Add posts and photos", a: true, b: true },
+            { label: "Add or remove people", a: true, b: false },
+            { label: "Remove the profile", a: true, b: false },
+          ]}
+        />
         <p>
-          Managers have mostly the same access as owners: they can edit business information, reply
-          to reviews, add posts and photos. They can't add or remove users, and they can't remove
-          the profile. Give owner access only to people who should control the profile itself.
-        </p>
-        <p>
-          New owners and managers wait 7 days before they can use some features, such as removing
-          other users.
+          Give owner access only to people who should control the profile itself. New owners and
+          managers wait 7 days before they can use some features, such as removing other users.
         </p>
         <h2>Remove someone</h2>
         <Steps
@@ -346,10 +438,10 @@ export const GUIDES: Guide[] = [
           ]}
         />
         <p>Only owners can remove users.</p>
-        <p>
-          Using Kabsi? You add <b>hello@kabsi.co</b> as a Manager in exactly this way. You can
-          remove it the same way any time, without asking us.
-        </p>
+        <Callout title="Using Kabsi?">
+          You add <b>hello@kabsi.co</b> as a Manager in exactly this way. You can remove it the same
+          way any time, without asking us.
+        </Callout>
       </>
     ),
   },
@@ -358,8 +450,15 @@ export const GUIDES: Guide[] = [
     title: "How to get your Google review link and QR code",
     description:
       "Two ways to get the link that opens your Google review form, a QR code to print, and where to use them without breaking Google's rules.",
-    updated: "2026-09-26",
+    updated: "2026-09-27",
     minutes: 3,
+    photo: "guideLink",
+    summary: [
+      "Get the link from your profile: Read reviews, then Get more reviews.",
+      "Or use Kabsi's free tool, from any phone, without signing in.",
+      "Put the QR code on the counter, tables, receipts and menus.",
+      "Ask every customer the same way, with no rewards.",
+    ],
     sources: [G.link, G.tips],
     body: (
       <>
@@ -380,6 +479,7 @@ export const GUIDES: Guide[] = [
             </>,
           ]}
         />
+        <LinkSketch />
         <p>Google notes that the QR code is only available on a computer browser.</p>
         <h2>Option 2: without signing in</h2>
         <p>
@@ -387,17 +487,30 @@ export const GUIDES: Guide[] = [
           image or a printable counter card. It works from any phone.
         </p>
         <h2>Where to put it</h2>
-        <ul>
-          <li>A small card on the counter or tables, with the QR code.</li>
-          <li>Your WhatsApp thank-you message and Instagram bio.</li>
-          <li>The bottom of receipts and menus.</li>
-        </ul>
-        <h2>The rules</h2>
-        <p>
+        <IconGrid
+          items={[
+            {
+              icon: <Store />,
+              title: "Counter and tables",
+              text: "A small card with the QR code, where people wait or pay.",
+            },
+            {
+              icon: <MessageCircle />,
+              title: "Messages and social",
+              text: "Your WhatsApp thank-you message and Instagram bio.",
+            },
+            {
+              icon: <Receipt />,
+              title: "Receipts and menus",
+              text: "The bottom of receipts and menus, when the visit is fresh.",
+            },
+          ]}
+        />
+        <Callout kind="warn" title="The rules">
           Ask everyone the same way. Google prohibits offering incentives, like free or discounted
           goods or services, in exchange for reviews, and asking only customers you expect to be
           happy isn't allowed either. An honest mix of reviews is also more convincing to readers.
-        </p>
+        </Callout>
       </>
     ),
   },

@@ -86,6 +86,7 @@ function Page() {
         title="Get your Google review link and QR code."
         sub="Search your business, copy the link that opens your Google review form, and download a QR code to print. Free, no sign-up."
         visual={<ReviewLinkVisual />}
+        photo="heroTool"
         visualClassName="hidden md:flex"
       >
         <div className="mt-9 max-w-2xl">
@@ -100,7 +101,7 @@ function Page() {
         className="grid items-center gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
       >
         <div className="grid grid-cols-2 gap-3">
-          <Photo id="receipt" sizes="(min-width: 1024px) 25vw, 50vw" className="aspect-[3/4]" />
+          <Photo id="guideLink" sizes="(min-width: 1024px) 25vw, 50vw" className="aspect-[3/4]" />
           <Photo id="cafe" sizes="(min-width: 1024px) 25vw, 50vw" className="mt-10 aspect-[3/4]" />
         </div>
         <div>
@@ -175,7 +176,7 @@ function Finder({ onPick }: { onPick: (p: Place) => void }) {
           id="biz"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Business name and city, e.g. Cafe Younes Hamra"
+          placeholder="Your business name and city"
           maxLength={120}
           className="h-[52px] bg-kb-white text-base text-kb-ink"
         />

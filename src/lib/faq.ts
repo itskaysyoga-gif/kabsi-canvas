@@ -13,7 +13,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Which languages does it reply in?",
-    a: "The reviewer's language: Arabic, English, French and others. Reviews in Franco-Arabic get a simple English reply, because written Franco reads badly in public.",
+    a: "The reviewer's language: English, Spanish, Arabic, French and many others. Arabic written in Latin letters (Franco-Arabic) gets a simple English reply, because it reads badly in public.",
   },
   {
     q: "Can Kabsi remove bad reviews?",
@@ -29,7 +29,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Is Kabsi part of Google?",
-    a: "No. Kabsi is an independent business in Beirut and is not affiliated with Google. It works through Google's official Business Profile access, the same way a staff member you add as a Manager would.",
+    a: "No. Kabsi is an independent company and is not affiliated with Google. It works through Google's official Business Profile access, the same way a staff member you add as a Manager would.",
   },
   {
     q: "Can I remove Kabsi's access?",

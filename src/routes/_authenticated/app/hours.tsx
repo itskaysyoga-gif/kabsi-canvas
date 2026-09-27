@@ -8,6 +8,8 @@ import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { contentCall } from "@/lib/reviews";
 import { track } from "@/lib/telemetry";
+import { CalendarClock as PageGlyph } from "lucide-react";
+import { PageIcon } from "@/components/shared/page-icon";
 
 // Special hours: holidays, closures, late nights. The owner confirms the exact dates and times before
 // anything changes on Google (D202). Regular weekly hours are not changed here.
@@ -59,6 +61,7 @@ function HoursPage() {
   });
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
+      <PageIcon icon={<PageGlyph />} />
       <h1 className="font-display text-4xl leading-none sm:text-5xl">Hours</h1>
       <p className="mt-2 text-kb-stone">
         Closed for a holiday or open late? Set special hours so Google shows the right times.

@@ -241,13 +241,14 @@ function Active({ d }: { d: Dashboard }) {
     <>
       {/* What needs you */}
       <section className="mt-7 overflow-hidden rounded-large bg-kb-carbon text-kb-white">
-        <div className="p-6 sm:p-9">
+        <div className="relative p-6 sm:p-9">
+          {d.waiting > 0 ? <ReplyStack /> : null}
           {d.waiting > 0 ? (
-            <>
-              <p className="font-display text-5xl leading-none text-kb-yellow sm:text-6xl">
-                {d.waiting}
-              </p>
-              <h2 className="mt-3 text-2xl font-bold sm:text-3xl">
+            <div className="relative max-w-xl">
+              <h2 className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-2xl font-bold sm:text-3xl">
+                <span className="font-display text-5xl leading-none text-kb-yellow sm:text-7xl">
+                  {d.waiting}
+                </span>
                 {d.waiting === 1 ? "reply is ready for you" : "replies are ready for you"}
               </h2>
               <p className="mt-2 max-w-xl leading-7 text-kb-stone-on-dark">
@@ -260,7 +261,7 @@ function Active({ d }: { d: Dashboard }) {
                   Review replies <ArrowRight />
                 </Link>
               </Button>
-            </>
+            </div>
           ) : (
             <div className="flex items-start gap-4">
               <span className="grid size-12 shrink-0 place-items-center rounded-full bg-kb-yellow text-kb-black">
@@ -308,7 +309,7 @@ function Active({ d }: { d: Dashboard }) {
             d.rating == null
               ? "Appears after the first daily check"
               : d.ratingChange == null
-                ? `${d.ratingCount ?? 0} reviews on Google`
+                ? `${d.ratingCount ?? 0} ${d.ratingCount === 1 ? "review" : "reviews"} on Google`
                 : d.ratingChange === 0
                   ? "Same as last week"
                   : `${d.ratingChange > 0 ? "+" : ""}${d.ratingChange.toFixed(1)} since last week`
@@ -417,6 +418,41 @@ function Active({ d }: { d: Dashboard }) {
 
 // Local SEO health: the facts Google's own guidance points to (answer reviews, keep the profile
 // current and accurate). Plain facts with a next step, no made-up score (D240).
+// Decorative: a drafted reply waiting for the owner's tap (desktop only).
+function ReplyStack() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute right-9 top-1/2 hidden w-64 -translate-y-1/2 xl:block"
+    >
+      <div className="ml-8 rotate-3 rounded-card bg-white/10 p-4 ring-1 ring-white/10">
+        <span className="block h-2 w-3/4 rounded-pill bg-white/20" />
+        <span className="mt-2 block h-2 w-1/2 rounded-pill bg-white/20" />
+      </div>
+      <div className="-mt-6 -rotate-2 rounded-card bg-kb-white p-4 text-kb-ink shadow-[0_18px_40px_rgba(0,0,0,.45)]">
+        <div className="flex items-center gap-2">
+          <span className="grid size-7 place-items-center rounded-full bg-kb-carbon text-[11px] font-bold text-kb-white">
+            E
+          </span>
+          <span className="flex gap-0.5">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Star key={n} className="size-3 fill-kb-black" />
+            ))}
+          </span>
+        </div>
+        <span className="mt-3 block h-2 w-full rounded-pill bg-kb-hairline" />
+        <span className="mt-1.5 block h-2 w-2/3 rounded-pill bg-kb-hairline" />
+        <div className="mt-3 flex gap-2">
+          <span className="rounded-pill bg-kb-yellow px-4 py-1 text-xs font-bold">Post</span>
+          <span className="rounded-pill px-3 py-1 text-xs font-bold ring-2 ring-kb-black">
+            Edit
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ProfileHealth({ d }: { d: Dashboard }) {
   const rate = d.reviews90d ? Math.round((d.answered90d / d.reviews90d) * 100) : null;
   const postDays = daysSince(d.lastPostAt);
@@ -481,9 +517,9 @@ function ProfileHealth({ d }: { d: Dashboard }) {
         Google advises keeping your details complete and accurate and answering reviews. Regular
         posts show customers you're active.
       </p>
-      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+      <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         {rows.map((r) => (
-          <li key={r.key}>
+          <li key={r.key} className="min-w-0">
             <Link
               to={r.to}
               className="flex items-center gap-3 rounded-card border border-kb-hairline p-4 transition-colors hover:bg-kb-sand/50 [&_svg]:size-5 [&_svg]:shrink-0"
@@ -493,7 +529,7 @@ function ProfileHealth({ d }: { d: Dashboard }) {
                 <span className="block text-sm font-medium text-kb-stone">{r.label}</span>
                 <span className="block truncate text-xs text-kb-stone">{r.note}</span>
               </span>
-              <span className="flex items-center gap-2 text-right font-bold">
+              <span className="flex shrink-0 items-center gap-2 whitespace-nowrap text-right font-bold">
                 {r.value}
                 <span
                   aria-hidden

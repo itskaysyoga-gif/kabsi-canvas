@@ -11,6 +11,8 @@ import { daysUntil } from "@/lib/dashboard";
 import { BINANCE_PAY_ID, USDT_TRC20, money, shortDate } from "@/lib/partner";
 import { track } from "@/lib/telemetry";
 import { cn } from "@/lib/utils";
+import { Wallet as PageGlyph } from "lucide-react";
+import { PageIcon } from "@/components/shared/page-icon";
 
 // Plan: what the owner has, until when, and how to pay or renew (USDT anywhere; Whish / OMT / cash in
 // Lebanon through the team, D211). A USDT payment is a claim that staff confirm; confirming starts or
@@ -136,6 +138,7 @@ function PlanPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
+      <PageIcon icon={<PageGlyph />} />
       <h1 className="font-display text-4xl leading-none sm:text-5xl">Plan</h1>
       {loc ? <p className="mt-2 text-kb-stone">{loc.name}</p> : null}
       {location.isLoading || data.isLoading ? <p className="mt-6 text-kb-stone">Loading…</p> : null}

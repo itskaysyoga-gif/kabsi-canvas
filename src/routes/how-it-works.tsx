@@ -46,6 +46,7 @@ function Page() {
         title="Kabsi prepares. You approve."
         sub="Here is everything Kabsi does, and the one thing it never does: post anything you haven't approved."
         visual={<FlowVisual />}
+        photo="heroHow"
       />
 
       <Section className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -74,8 +75,8 @@ function Page() {
           <Block n="3" icon={<PenLine />} title="A reply is drafted for every new review">
             <ul>
               <li>
-                <b>In the reviewer's language:</b> Arabic (Lebanese when the review is), English,
-                French and others. Franco-Arabic reviews get a simple English reply.
+                <b>In the reviewer's language:</b> English, Spanish, Arabic, French and many more,
+                matched to the way the customer wrote.
               </li>
               <li>
                 <b>Short and warm:</b> two to four sentences, no emojis, no promises you didn't
@@ -112,7 +113,7 @@ function Page() {
         <aside className="hidden lg:block">
           <div className="sticky top-28 space-y-4">
             <Photo id="cafe" sizes="300px" className="aspect-[4/5]" />
-            <Photo id="clinic" sizes="300px" className="aspect-[4/3]" />
+            <Photo id="dentist" sizes="300px" className="aspect-[4/3]" />
             <p className="text-sm leading-6 text-kb-stone">
               Made for cafés, bakeries, clinics and shops. Kabsi works from your email and your
               phone's browser, with nothing to install.

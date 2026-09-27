@@ -21,6 +21,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [{ charSet: "utf-8" }, { name: "viewport", content: "width=device-width, initial-scale=1" }, { name: "author", content: "Kabsi" }],
     links: [
       { rel: "stylesheet", href: appCss },
+      // Marketing photos are served from Supabase Storage (D256).
+      { rel: "preconnect", href: "https://ynjdqjlmdwjgbfezevxy.supabase.co" },
       { rel: "preload", href: "/fonts/lalezar-latin-400.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
       { rel: "preload", href: "/fonts/readex-pro-latin-400.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
       { rel: "icon", href: "/kabsi-mark.svg", type: "image/svg+xml" },

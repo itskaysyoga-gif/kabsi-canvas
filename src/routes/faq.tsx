@@ -33,12 +33,13 @@ function Page() {
         title="Straight answers."
         sub="If yours isn't here, write to us. A person replies."
         visual={<AnswerVisual />}
+        photo="heroFaq"
       />
       <Section className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px]">
         <FaqList items={FAQ} />
         <aside className="lg:sticky lg:top-28 lg:self-start">
           <div className="overflow-hidden rounded-large bg-kb-sand">
-            <Photo id="bakery" sizes="320px" className="aspect-[4/3] rounded-none" />
+            <Photo id="hotel" sizes="320px" className="aspect-[4/3] rounded-none" />
             <div className="p-6">
               <h2 className="text-lg font-bold">Something else?</h2>
               <p className="mt-1 leading-7 text-kb-stone">A person reads every message.</p>

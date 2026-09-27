@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { cn } from "@/lib/utils";
+import { MessageSquareText as PageGlyph } from "lucide-react";
+import { PageIcon } from "@/components/shared/page-icon";
 
 // Every review Kabsi has seen for this business, newest first, with its reply status. Replying happens in the Inbox.
 export const Route = createFileRoute("/_authenticated/app/reviews")({
@@ -72,6 +74,7 @@ function ReviewsPage() {
     : null;
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
+      <PageIcon icon={<PageGlyph />} />
       <h1 className="font-display text-4xl leading-none sm:text-5xl">All reviews</h1>
       <p className="mt-2 text-kb-stone">
         {count

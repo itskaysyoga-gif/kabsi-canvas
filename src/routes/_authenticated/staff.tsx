@@ -8,6 +8,8 @@ import { supabase } from "@/lib/supabase";
 import { amStaff } from "@/lib/reviews";
 import { PartnersPanel } from "@/components/staff/partners-panel";
 import { OpsPanel } from "@/components/staff/ops-panel";
+import { ClipboardCheck as PageGlyph } from "lucide-react";
+import { PageIcon } from "@/components/shared/page-icon";
 
 // Staff workspace: USDT payments to check, partners, leads, job health, card codes and orders, every business
 // and offline payments (cash / Whish / OMT / USDT).
@@ -53,6 +55,7 @@ function StaffPage() {
   return (
     <AppLayout area="staff">
       <div className="mx-auto w-full max-w-4xl px-5 py-8 sm:px-8 sm:py-12">
+        <PageIcon icon={<PageGlyph />} />
         <h1 className="font-display text-4xl leading-none sm:text-5xl">Staff</h1>
         {staff.isLoading ? <p className="mt-6 text-kb-stone">Loading…</p> : null}
         {staff.data === false ? (

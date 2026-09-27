@@ -66,9 +66,9 @@ export function FlowVisual() {
           <ExampleTag />
         </div>
         <p className="mt-3 rounded-card bg-kb-sand p-3 text-sm leading-6">
-          <b>Karim</b>
+          <b>Emma</b>
           <br />
-          Friendly staff and the best manakish on the street.
+          Friendly staff and the best croissants on the street.
         </p>
       </div>
       <Connector />
@@ -78,7 +78,7 @@ export function FlowVisual() {
           <p className="text-sm font-bold">Reply drafted for you</p>
         </div>
         <p className="mt-3 rounded-card border border-kb-hairline p-3 text-sm leading-6 text-kb-stone">
-          Thank you, Karim! We're so glad you enjoyed the manakish. See you again soon.
+          Thank you, Emma! We're so glad you enjoyed the croissants. See you again soon.
         </p>
       </div>
       <Connector />
@@ -108,9 +108,9 @@ export function PricingVisual() {
 }
 
 const CLIENTS = [
-  { name: "Bakery, Hamra", on: true },
-  { name: "Clinic, Achrafieh", on: false },
-  { name: "Café, Mar Mikhael", on: true },
+  { name: "Bakery", city: "Brooklyn, NY", on: true },
+  { name: "Dental clinic", city: "Lyon, France", on: false },
+  { name: "Café", city: "Madrid, Spain", on: true },
 ];
 
 /** Partners: one workspace, every client's status side by side. */
@@ -128,15 +128,18 @@ export function WorkspaceVisual() {
         {CLIENTS.map((c) => (
           <li key={c.name} className="flex items-center gap-3 p-3">
             <IconBadge icon={<Store />} tone="sand" className="size-9 [&_svg]:size-4" />
-            <span className="flex-1 text-sm font-bold">{c.name}</span>
+            <span className="min-w-0 flex-1 leading-tight">
+              <span className="block text-sm font-bold">{c.name}</span>
+              <span className="block text-xs text-kb-stone">{c.city}</span>
+            </span>
             <span
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-bold",
+                "inline-flex shrink-0 items-center gap-1.5 rounded-pill px-2.5 py-1 text-[11px] font-bold sm:text-xs",
                 c.on ? "bg-kb-green/10 text-kb-ink" : "bg-kb-sand text-kb-stone",
               )}
             >
               <span className={cn("size-1.5 rounded-full", c.on ? "bg-kb-green" : "bg-kb-stone")} />
-              {c.on ? "Connected" : "Waiting for access"}
+              {c.on ? "Connected" : "Awaiting access"}
             </span>
           </li>
         ))}

@@ -20,7 +20,8 @@ import {
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
 import { InboxDemo } from "@/components/marketing/inbox-demo";
-import { CtaBand, Eyebrow, FaqList, H2, Section } from "@/components/marketing/parts";
+import { CtaBand, Eyebrow, FaqList, H2, HeroBackdrop, Section } from "@/components/marketing/parts";
+import { BusinessGrid } from "@/components/marketing/business-grid";
 import { FAQ } from "@/lib/faq";
 import { ORG_LD, PRICES, PRODUCT_LD, WEBSITE_LD, pageHead } from "@/lib/site";
 
@@ -52,8 +53,9 @@ function HomePage() {
       ) : null}
 
       {/* Hero */}
-      <section className="bg-kb-carbon text-kb-white">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:py-24">
+      <section className="relative isolate overflow-hidden bg-kb-carbon text-kb-white">
+        <HeroBackdrop photo="heroHome" />
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:py-28">
           <div>
             <p className="inline-flex items-center gap-2 rounded-pill border border-white/15 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-kb-yellow">
               <Sparkles className="size-4" aria-hidden="true" />
@@ -97,6 +99,20 @@ function HomePage() {
         </div>
       </section>
 
+      {/* Who it's for */}
+      <Section tone="sand">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <Eyebrow>Made for local businesses</Eyebrow>
+            <H2>If customers find you on Google Maps, Kabsi is for you.</H2>
+          </div>
+          <p className="max-w-sm leading-7 text-kb-stone md:text-right">
+            Cafés, clinics, salons, garages and hotels, in any country and any language.
+          </p>
+        </div>
+        <BusinessGrid className="mt-10" />
+      </Section>
+
       {/* 1. Review command center */}
       <Section>
         <div className="grid gap-12 lg:grid-cols-2">
@@ -110,7 +126,7 @@ function HomePage() {
             </p>
           </div>
           <ul data-stagger="" className="grid gap-4 self-center">
-            <Point icon={<Languages />} title="Arabic, English, French and more">
+            <Point icon={<Languages />} title="English, Spanish, Arabic, French and more">
               Replies match the reviewer's language. Hard reviews get a calm, careful draft.
             </Point>
             <Point icon={<FileText />} title="Grounded in your facts">
@@ -135,7 +151,7 @@ function HomePage() {
         </p>
         <div data-stagger="" className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Feature icon={<Search />} title="Search phrases built in">
-            Like "bakery in Hamra", written as normal speech, never keyword lists.
+            Like "bakery in Brooklyn", written as normal speech, never keyword lists.
           </Feature>
           <Feature icon={<Newspaper />} title="Action buttons">
             Call, Book, Order online, Shop, Learn more or Sign up, on every post you choose.

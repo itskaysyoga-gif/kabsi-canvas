@@ -7,6 +7,8 @@ import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { contentCall } from "@/lib/reviews";
 import { track } from "@/lib/telemetry";
+import { ImagePlus as PageGlyph } from "lucide-react";
+import { PageIcon } from "@/components/shared/page-icon";
 
 // Photos: the owner uploads, Kabsi checks the photo, the owner picks a category and posts it (D202).
 export const Route = createFileRoute("/_authenticated/app/photos")({
@@ -101,6 +103,7 @@ function PhotosPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
+      <PageIcon icon={<PageGlyph />} />
       <h1 className="font-display text-4xl leading-none sm:text-5xl">Photos</h1>
       <p className="mt-2 text-kb-stone">
         Add real photos of your place, products and team. Kabsi checks each one before you post it.

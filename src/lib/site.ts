@@ -25,6 +25,8 @@ export function pageHead(o: {
   path: string;
   jsonLd?: Record<string, unknown>[];
   noindex?: boolean;
+  /** Absolute URL of a page-specific share image; defaults to og.png. */
+  image?: string;
 }) {
   const url = `${SITE_URL}${o.path === "/" ? "" : o.path}`;
   const meta: Meta[] = [
@@ -35,9 +37,9 @@ export function pageHead(o: {
     { property: "og:type", content: "website" },
     { property: "og:url", content: url },
     { property: "og:site_name", content: "Kabsi" },
-    { property: "og:image", content: `${SITE_URL}/og.png` },
+    { property: "og:image", content: o.image ?? `${SITE_URL}/og.png` },
     { name: "twitter:card", content: "summary_large_image" },
-    { name: "twitter:image", content: `${SITE_URL}/og.png` },
+    { name: "twitter:image", content: o.image ?? `${SITE_URL}/og.png` },
   ];
   if (o.noindex) meta.push({ name: "robots", content: "noindex" });
   return {
@@ -58,7 +60,6 @@ export const ORG_LD = {
   url: SITE_URL,
   logo: `${SITE_URL}/kabsi-mark.svg`,
   email: CONTACT_EMAIL,
-  address: { "@type": "PostalAddress", addressLocality: "Beirut", addressCountry: "LB" },
 };
 export const WEBSITE_LD = {
   "@context": "https://schema.org",

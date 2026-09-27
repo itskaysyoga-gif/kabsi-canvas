@@ -17,6 +17,8 @@ import {
 } from "@/lib/reviews";
 import { track } from "@/lib/telemetry";
 import { cn } from "@/lib/utils";
+import { MessageSquareReply as PageGlyph } from "lucide-react";
+import { PageIcon } from "@/components/shared/page-icon";
 
 export const Route = createFileRoute("/_authenticated/app/inbox")({
   head: () => ({ meta: [{ title: "Inbox | Kabsi" }, { name: "robots", content: "noindex" }] }),
@@ -104,6 +106,7 @@ function InboxPage() {
 function Shell({ sub, children }: { sub?: string; children: ReactNode }) {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
+      <PageIcon icon={<PageGlyph />} />
       <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
         Grounded AI drafts · one-tap approval
       </p>

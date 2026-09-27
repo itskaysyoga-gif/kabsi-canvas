@@ -10,11 +10,21 @@ const EXAMPLES = [
     key: "en",
     tab: "English",
     dir: "ltr" as const,
-    reviewer: "Nadine",
+    reviewer: "Emma",
     rating: 5,
     review: "Lovely spot, great coffee, and they remembered my order from last week.",
     draft:
-      "Thank you so much, Nadine! We're really glad you enjoyed the coffee, and the team will be happy to hear it. See you again soon.",
+      "Thank you so much, Emma! We're really glad you enjoyed the coffee, and the team will be happy to hear it. See you again soon.",
+  },
+  {
+    key: "es",
+    tab: "Español",
+    dir: "ltr" as const,
+    reviewer: "Lucía",
+    rating: 4,
+    review: "Muy buen ambiente y el café riquísimo. Solo tardaron un poco en atendernos.",
+    draft:
+      "¡Muchas gracias, Lucía! Nos alegra mucho que te gustaran el ambiente y el café. Sentimos la espera. ¡Te esperamos pronto!",
   },
   {
     key: "ar",
@@ -22,9 +32,9 @@ const EXAMPLES = [
     dir: "rtl" as const,
     reviewer: "Karim",
     rating: 4,
-    review: "الأكل كتير طيب بس الخدمة كانت بطيئة شوي وقت الغدا.",
+    review: "الطعام لذيذ جداً، لكن الخدمة كانت بطيئة قليلاً وقت الغداء.",
     draft:
-      "شكراً كتير على تقييمك يا كريم! مبسوطين إنو عجبك الأكل، وآسفين إنو الخدمة تأخرت عليك وقت الغدا. نتمنى نشوفك قريباً.",
+      "شكراً جزيلاً على تقييمك يا كريم! سعداء أن الطعام أعجبك، ونعتذر عن تأخر الخدمة وقت الغداء. نتطلع لرؤيتك قريباً.",
   },
   {
     key: "fr",
@@ -60,7 +70,7 @@ export function InboxDemo() {
         </span>
       </div>
 
-      <div className="mt-4 flex gap-1.5" role="tablist" aria-label="Example reviews">
+      <div className="mt-4 flex flex-wrap gap-1.5" role="tablist" aria-label="Example reviews">
         {EXAMPLES.map((e, n) => (
           <button
             key={e.key}

@@ -37,6 +37,7 @@ function Page() {
         title="Paid once, upfront. No monthly bills."
         sub="Same price in every country. Your plan starts when payment is confirmed and Kabsi's access to your Google profile works, so waiting for access costs you nothing."
         visual={<PricingVisual />}
+        photo="heroPricing"
       />
 
       <Section tone="sand">

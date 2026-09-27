@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { KnowledgeStep } from "@/components/onboarding/steps";
 import { myLatestLocation } from "@/lib/onboarding";
+import { NotebookPen } from "lucide-react";
+import { PageIcon } from "@/components/shared/page-icon";
 
 // The knowledge card: the only facts reply drafts may use (D223). Same form as onboarding step 3.
 export const Route = createFileRoute("/_authenticated/app/knowledge")({
@@ -23,6 +25,7 @@ function KnowledgePage() {
           </Button>
         </>
       ) : null}
+      {location.data ? <PageIcon icon={<NotebookPen />} /> : null}
       {location.data ? (
         <div className="rounded-large bg-kb-white p-6 shadow-kb sm:p-8">
           <KnowledgeStep

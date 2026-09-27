@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
+import { FileBarChart as PageGlyph } from "lucide-react";
+import { PageIcon } from "@/components/shared/page-icon";
 
 // Weekly reports (D222): the same facts as the Monday email. Read through RLS (members only).
 export const Route = createFileRoute("/_authenticated/app/report")({
@@ -59,7 +61,10 @@ function ReportPage() {
       <Link to="/app" className="text-sm font-medium text-kb-stone hover:text-kb-black">
         ← Home
       </Link>
-      <h1 className="mt-3 font-display text-4xl leading-none sm:text-5xl">Weekly report</h1>
+      <div className="mt-5">
+        <PageIcon icon={<PageGlyph />} />
+      </div>
+      <h1 className="font-display text-4xl leading-none sm:text-5xl">Weekly report</h1>
       <p className="mt-2 text-kb-stone">
         Every Monday morning, a short summary of your week on Google. Facts only.
       </p>

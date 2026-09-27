@@ -9,6 +9,8 @@ import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { contentCall } from "@/lib/reviews";
 import { track } from "@/lib/telemetry";
+import { Megaphone as PageGlyph } from "lucide-react";
+import { PageIcon } from "@/components/shared/page-icon";
 
 // Google posts (D217): the owner says what's new, Kabsi drafts, the owner edits and posts. Nothing
 // goes to Google without the Post click, and it posts exactly the text in the box (D202).
@@ -63,6 +65,7 @@ function PostsPage() {
   const done = (posts.data ?? []).filter((p) => p.state !== "draft");
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
+      <PageIcon icon={<PageGlyph />} />
       <h1 className="font-display text-4xl leading-none sm:text-5xl">Google Maps keyword posts</h1>
       <p className="mt-2 text-kb-stone">
         Regular posts keep your profile fresh. Tell Kabsi what's new in a sentence, or let it draft
@@ -182,7 +185,7 @@ function NewPost({ locationId, onCreated }: { locationId: string; onCreated: () 
         rows={3}
         maxLength={1000}
         className="mt-2 text-base"
-        placeholder="e.g. New this week: zaatar croissants, from Tuesday."
+        placeholder="e.g. New this week: pistachio croissants, from Tuesday."
       />
       <Label htmlFor="kw" className="mt-4 block text-sm">
         Words customers search for{" "}
@@ -192,7 +195,7 @@ function NewPost({ locationId, onCreated }: { locationId: string; onCreated: () 
         id="kw"
         value={keywords}
         onChange={(e) => setKeywords(e.target.value)}
-        placeholder="e.g. bakery in Hamra, sourdough"
+        placeholder="e.g. bakery in Brooklyn, sourdough"
         className="mt-2"
       />
       <p className="mt-2 text-xs text-kb-stone">

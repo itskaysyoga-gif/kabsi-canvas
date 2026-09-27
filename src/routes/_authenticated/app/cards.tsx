@@ -9,6 +9,8 @@ import { supabase } from "@/lib/supabase";
 import { activateCard, friendlyError, myLatestLocation } from "@/lib/onboarding";
 import { track } from "@/lib/telemetry";
 import { qrSvg } from "@/lib/qr";
+import { CreditCard as PageGlyph } from "lucide-react";
+import { PageIcon } from "@/components/shared/page-icon";
 
 // Cards and review links: each opens the business's Google review page for every customer, no filtering
 // (D212). A physical card is optional: a review link (go.kabsi.co/CODE) and its printable QR do the same job
@@ -61,6 +63,7 @@ function CardsPage() {
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["cards"] });
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
+      <PageIcon icon={<PageGlyph />} />
       <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
         Physical and digital touchpoints
       </p>

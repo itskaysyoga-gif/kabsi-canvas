@@ -1,6 +1,9 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
+  BookOpen,
   ChevronDown,
+  LifeBuoy,
+  Mail,
   CreditCard,
   Home,
   MessageSquareText,
@@ -289,33 +292,51 @@ export function AppLayout({
 
   return (
     <div className="min-h-screen bg-kb-sand text-kb-ink lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
-      <aside className="hidden min-h-screen border-r border-kb-hairline bg-kb-white p-5 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
-        <KabsiLogo />
-        <div className="mt-8 flex-1 overflow-y-auto">
-          {area === "app" ? (
-            <nav className="space-y-1" aria-label="Business navigation">
-              {SECTIONS.map((sec) => (
-                <NavLink
-                  key={sec.to}
-                  section={sec}
-                  active={current === sec}
-                  badge={badgeFor(sec)}
-                />
-              ))}
-            </nav>
-          ) : (
-            <nav className="space-y-1">
-              <Link
-                to={area === "partner" ? "/partner" : "/staff"}
-                className="flex items-center gap-3 rounded-card bg-kb-sand px-3 py-2.5 text-sm font-medium"
-              >
-                <Users className="size-5" />
-                {areaTitle}
-              </Link>
-            </nav>
-          )}
+      <aside className="hidden border-r border-kb-hairline bg-kb-white lg:block">
+        <div className="sticky top-0 flex h-screen flex-col p-5">
+          <KabsiLogo />
+          <div className="mt-8 flex-1 overflow-y-auto">
+            {area === "app" ? (
+              <nav className="space-y-1" aria-label="Business navigation">
+                {SECTIONS.map((sec) => (
+                  <NavLink
+                    key={sec.to}
+                    section={sec}
+                    active={current === sec}
+                    badge={badgeFor(sec)}
+                  />
+                ))}
+              </nav>
+            ) : (
+              <nav className="space-y-1">
+                <Link
+                  to={area === "partner" ? "/partner" : "/staff"}
+                  className="flex items-center gap-3 rounded-card bg-kb-sand px-3 py-2.5 text-sm font-medium"
+                >
+                  <Users className="size-5" />
+                  {areaTitle}
+                </Link>
+              </nav>
+            )}
+          </div>
+          <div className="rounded-card bg-kb-sand p-4 text-sm">
+            <p className="flex items-center gap-2 font-bold">
+              <LifeBuoy className="size-4" aria-hidden="true" /> Need a hand?
+            </p>
+            <Link
+              to="/guides"
+              className="mt-2 flex items-center gap-2 text-kb-stone hover:text-kb-black"
+            >
+              <BookOpen className="size-4" aria-hidden="true" /> Guides
+            </Link>
+            <a
+              href="mailto:hello@kabsi.co"
+              className="mt-1.5 flex items-center gap-2 text-kb-stone hover:text-kb-black"
+            >
+              <Mail className="size-4" aria-hidden="true" /> hello@kabsi.co
+            </a>
+          </div>
         </div>
-        <p className="pt-5 text-xs text-kb-stone">Kabsi</p>
       </aside>
       <div className="min-w-0 pb-22 lg:pb-0">
         <header className="sticky top-0 z-30 grid h-18 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-kb-hairline bg-kb-white px-4 sm:px-7">

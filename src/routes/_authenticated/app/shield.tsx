@@ -8,6 +8,8 @@ import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { amStaff, contentCall } from "@/lib/reviews";
 import { track } from "@/lib/telemetry";
+import { ShieldCheck as PageGlyph } from "lucide-react";
+import { PageIcon } from "@/components/shared/page-icon";
 
 // Listing Shield (D218): Kabsi watches the listing and alerts you when something changes. It can't stop
 // Google or the public from editing, but it can put your version back with one tap.
@@ -74,6 +76,7 @@ function ShieldPage() {
   const past = (data.data?.changes ?? []).filter((c) => c.state !== "open");
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
+      <PageIcon icon={<PageGlyph />} />
       <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
         Profile guard · change alerts · one-tap revert
       </p>

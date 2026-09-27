@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Clock3 } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
-import { CtaBand, IconBadge, PageHero, Photo, Section } from "@/components/marketing/parts";
+import { CtaBand, IconBadge, PageHero, Section } from "@/components/marketing/parts";
 import { GUIDE_ICONS, GuidesVisual } from "@/components/marketing/visuals";
-import { GUIDES } from "@/lib/guides";
+import { GUIDES, type Guide } from "@/lib/guides";
+import { PHOTOS, photoFallback, photoSrcSet } from "@/lib/site-photos";
 import { pageHead } from "@/lib/site";
+import { cn } from "@/lib/utils";
 
-// Guides index (D253).
+// Guides index (D253, D256).
 export const Route = createFileRoute("/guides/")({
   head: () =>
     pageHead({
@@ -19,46 +21,85 @@ export const Route = createFileRoute("/guides/")({
 });
 
 function Page() {
+  const [first, ...rest] = GUIDES;
   return (
     <PublicLayout>
       <PageHero
         eyebrow="Guides"
         title="Look after your Google profile."
-        sub="Short, practical how-tos, checked against Google's own help pages."
+        sub="Short, practical how-tos with pictures, checked against Google's own help pages."
         visual={<GuidesVisual />}
+        photo="heroGuides"
       />
       <Section>
-        <Photo
-          id="street"
-          sizes="(min-width: 1152px) 1088px, 100vw"
-          className="mb-10 aspect-[21/9]"
-        />
-        <ul data-stagger="" className="grid gap-4 md:grid-cols-2">
-          {GUIDES.map((g) => (
-            <li key={g.slug}>
-              <Link
-                to="/guides/$slug"
-                params={{ slug: g.slug }}
-                className="kb-lift group flex h-full flex-col rounded-large border-2 border-kb-hairline bg-kb-white p-6 hover:border-kb-black"
-              >
-                <span className="flex items-center justify-between">
-                  <IconBadge icon={GUIDE_ICONS[g.slug]} />
-                  <span className="text-xs font-bold uppercase tracking-wider text-kb-stone">
-                    {g.minutes} min read
-                  </span>
-                </span>
-                <span className="mt-5 text-xl font-bold">{g.title}</span>
-                <span className="mt-2 flex-1 leading-7 text-kb-stone">{g.description}</span>
-                <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold">
-                  Read{" "}
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                </span>
-              </Link>
-            </li>
+        <ul data-stagger="" className="grid gap-5 md:grid-cols-2">
+          {first ? <GuideCard g={first} featured /> : null}
+          {rest.map((g) => (
+            <GuideCard key={g.slug} g={g} />
           ))}
         </ul>
       </Section>
       <CtaBand />
     </PublicLayout>
+  );
+}
+
+function GuideCard({ g, featured = false }: { g: Guide; featured?: boolean }) {
+  const p = PHOTOS[g.photo];
+  return (
+    <li className={cn(featured && "md:col-span-2")}>
+      <Link
+        to="/guides/$slug"
+        params={{ slug: g.slug }}
+        className={cn(
+          "kb-lift group flex h-full flex-col overflow-hidden rounded-large border border-kb-hairline bg-kb-white hover:border-kb-black",
+          featured && "md:grid md:grid-cols-[1.15fr_1fr]",
+        )}
+      >
+        <div
+          className={cn(
+            "relative overflow-hidden bg-kb-sand",
+            featured ? "aspect-[16/9] md:aspect-auto md:h-full" : "aspect-[16/9]",
+          )}
+        >
+          <img
+            src={photoFallback(g.photo, 800)}
+            srcSet={photoSrcSet(g.photo)}
+            sizes={featured ? "(min-width: 768px) 600px, 100vw" : "(min-width: 768px) 540px, 100vw"}
+            alt={p.alt}
+            width={p.w}
+            height={p.h}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+          <IconBadge
+            icon={GUIDE_ICONS[g.slug]}
+            className="absolute bottom-4 left-4 size-12 shadow-[0_8px_20px_rgba(0,0,0,.25)] [&_svg]:size-6"
+          />
+        </div>
+        <div className={cn("flex flex-1 flex-col p-6", featured && "md:justify-center md:p-9")}>
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-kb-stone">
+            <Clock3 className="size-3.5" aria-hidden="true" />
+            {g.minutes} min read
+          </span>
+          <span
+            className={cn(
+              "mt-2 font-bold leading-snug",
+              featured
+                ? "font-display text-[clamp(1.8rem,3vw,2.4rem)] font-normal leading-[1.05]"
+                : "text-xl",
+            )}
+          >
+            {g.title}
+          </span>
+          <span className="mt-3 flex-1 leading-7 text-kb-stone">{g.description}</span>
+          <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold">
+            Read the guide
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+          </span>
+        </div>
+      </Link>
+    </li>
   );
 }
