@@ -86,6 +86,7 @@ export function PageHero({
       <div
         className={cn(
           "relative mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24 lg:py-28",
+          photo && "max-md:-mt-6 max-md:pt-0",
           visual && "grid items-center gap-12 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]",
         )}
       >
@@ -116,24 +117,25 @@ export function PageHero({
   );
 }
 
-/** Full-bleed hero photo. Desktop: the photo fills the right side and fades into Carbon on the left.
- *  Phones: the whole photo sits under a dark wash so white text stays readable. */
+/** Hero photo. Desktop: fills the right side behind the text and fades into Carbon on the left.
+ *  Phones: a clear photo band above the headline that fades into Carbon at the bottom
+ *  (behind the text it was too dark to see). One <img>, so the photo downloads once. */
 export function HeroBackdrop({ photo }: { photo: PhotoId }) {
   return (
-    <div className="pointer-events-none absolute inset-0 -z-10">
+    <div className="pointer-events-none relative h-[clamp(220px,62vw,360px)] md:absolute md:inset-0 md:-z-10 md:h-auto">
       <SiteImg
         id={photo}
         priority
         sizes="(min-width: 768px) 80vw, 100vw"
-        className="absolute inset-0 h-full w-full object-cover object-[72%_center] md:left-auto md:right-0 md:w-[80%] md:object-right"
+        className="absolute inset-0 h-full w-full object-cover object-[65%_center] md:left-auto md:right-0 md:w-[80%] md:object-right"
       />
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,11,11,.92)_0%,rgba(11,11,11,.8)_50%,rgba(11,11,11,.6)_100%)] md:bg-[linear-gradient(90deg,#0b0b0b_0%,#0b0b0b_22%,rgba(11,11,11,.78)_42%,rgba(11,11,11,.3)_70%,rgba(11,11,11,.15)_100%)]"
+        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,11,11,.35)_0%,rgba(11,11,11,0)_30%,rgba(11,11,11,0)_55%,#0b0b0b_100%)] md:bg-[linear-gradient(90deg,#0b0b0b_0%,#0b0b0b_22%,rgba(11,11,11,.78)_42%,rgba(11,11,11,.3)_70%,rgba(11,11,11,.15)_100%)]"
       />
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-kb-carbon to-transparent"
+        className="absolute inset-x-0 bottom-0 hidden h-24 bg-gradient-to-t from-kb-carbon to-transparent md:block"
       />
     </div>
   );

@@ -55,7 +55,7 @@ function HomePage() {
       {/* Hero */}
       <section className="relative isolate overflow-hidden bg-kb-carbon text-kb-white">
         <HeroBackdrop photo="heroHome" />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:py-28">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 py-14 max-md:-mt-6 max-md:pt-0 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:py-28">
           <div>
             <p className="inline-flex items-center gap-2 rounded-pill border border-white/15 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-kb-yellow">
               <MapPin className="size-4" aria-hidden="true" />
