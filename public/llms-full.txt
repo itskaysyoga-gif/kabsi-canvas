@@ -14,7 +14,7 @@ The reference for the Kabsi team and the grounding for Kabsi's sales and support
 
 ### 1.1 Who you are
 
-You are Kabsi's assistant. You help owners, partners and visitors understand Kabsi, set it up and fix common problems, answering only from this knowledge base. Quote prices, steps, screen and button names exactly as written here. Be warm, calm and brief: short plain sentences, no em dashes. If the honest answer is "no" or "we can't promise that", say so, then say what Kabsi does do.
+You are Nora, Kabsi's assistant. You help owners, partners and visitors understand Kabsi, set it up and fix common problems, answering only from this knowledge base. Quote prices, steps, screen and button names exactly as written here. Be warm, calm and brief: short plain sentences, no em dashes. If the honest answer is "no" or "we can't promise that", say so, then say what Kabsi does do.
 
 ### 1.2 What you must never say or do
 
@@ -558,6 +558,7 @@ Kabsi is an independent business based in Beirut, Lebanon. Kabsi is not affiliat
 - **Owners:** email and extra alert addresses; business name, address, country, time zone and Google identifiers; About your business facts; Google reviews (public name, rating, text, dates), drafts and replies; posts, photos, special hours; listing details for Listing Shield; plan and payments (including USDT transaction IDs); the authorisation you gave; the introducing partner, if any; a log of emails sent.
 - **People who tap a card or open a link:** code, time, country, Android or iPhone, chip or QR, and a crawler flag. Never who they are or their IP address.
 - **Free tool users:** the search text goes to Google's Places API; a one-way salted hash of the IP is kept one hour to stop abuse.
+- **People who chat with Nora (the assistant):** their messages, the page they asked from, browser time zone and language, device type, the site that sent them, the country from the network (never the IP address), and any contact details they choose to give. Each chat is labelled (topic, intent, country) and a short report goes to the Kabsi team so a person can follow up. News emails only with a yes.
 - **Forms:** what you enter. **Partners:** contact details, invited businesses, invoices, payment claims. **Visitors:** anonymous statistics and error reports.
 
 ### 9.3 How it's used
@@ -586,6 +587,8 @@ Sign-in storage, the last business you opened (in your browser), and PostHog's a
 | Review text and reviewer names | At most 30 days after Google last sent them |
 | Rating history, report quotes, decided Shield before/after values | 30 days |
 | Google data after access is removed | Deleted after 30 days unless access returns |
+| Assistant chats | 12 months after the last message |
+| Contact details given to the assistant | Until you ask us to remove them |
 | Email log | 12 months |
 | Internal job logs | 90 days |
 | Email action links | Expire after 7 days, removed 30 days later |

@@ -149,8 +149,8 @@ function AssistantContacts() {
         <div>
           <h2 className="text-xl font-bold">Assistant contacts</h2>
           <p className="mt-1 text-sm text-kb-stone">
-            People who gave their details to the Kabsi Assistant. Email news only to those marked
-            "yes to news".
+            People who gave their details to Nora, the Kabsi assistant. Email news only to those
+            marked "yes to news".
           </p>
         </div>
         {q.data?.length ? (

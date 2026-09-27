@@ -1,4 +1,4 @@
-// Kabsi Assistant (D261): the AI helper on every public page and in the app. Answers only from the
+// Nora, the Kabsi assistant (D261): the AI helper on every public page and in the app. Answers only from the
 // knowledge base, saves contact details the visitor offers, and hands off to a person by email.
 // Phones: a full-screen sheet. Desktop: a panel above the launcher. The conversation survives a reload
 // (visitor and conversation ids in localStorage, messages fetched back from the server).
@@ -36,6 +36,21 @@ function store(key: string, value?: string | null) {
   }
   return null;
 }
+// Helps the team see where chats come from (country from the time zone, device, referrer). No IP, no fingerprint.
+function visitorMeta() {
+  try {
+    const w = window.innerWidth;
+    return {
+      tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      lang: navigator.language,
+      device: w < 640 ? "mobile" : w < 1024 ? "tablet" : "desktop",
+      ref: document.referrer ? new URL(document.referrer).hostname : "",
+    };
+  } catch {
+    return {};
+  }
+}
+
 function visitorId() {
   let id = store(VISITOR_KEY);
   if (!id || !/^[a-z0-9-]{16,64}$/i.test(id)) {
@@ -125,6 +140,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
           message,
           page: path,
           surface,
+          meta: visitorMeta(),
         }),
       });
       const body = (await res.json().catch(() => ({}))) as {
@@ -171,7 +187,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
           ref={launcherRef}
           type="button"
           onClick={() => setOpen(true)}
-          aria-label="Ask Kabsi, open the assistant"
+          aria-label="Chat with Nora, Kabsi's assistant"
           className={cn(
             "fixed right-4 z-40 flex h-14 items-center gap-2 rounded-pill bg-kb-black text-sm font-bold text-kb-white shadow-[0_12px_32px_rgba(0,0,0,.28)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-kb-yellow sm:right-6",
             surface === "app"
@@ -182,7 +198,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
           <span className="grid size-8 place-items-center rounded-full bg-kb-yellow text-kb-black">
             <MessageCircle className="size-4" aria-hidden="true" />
           </span>
-          <span className={surface === "app" ? "sr-only" : undefined}>Ask Kabsi</span>
+          <span className={surface === "app" ? "sr-only" : undefined}>Chat with Nora</span>
         </button>
       ) : null}
 
@@ -199,10 +215,10 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
             </span>
             <div className="min-w-0 flex-1">
               <p id="kabsi-assistant-title" className="font-bold leading-tight">
-                Kabsi Assistant
+                Nora from Kabsi
               </p>
               <p className="text-xs text-kb-stone-on-dark">
-                AI assistant · a person steps in when needed
+                AI assistant · a real person is one message away
               </p>
             </div>
             {messages.length ? (
@@ -220,7 +236,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
               type="button"
               onClick={close}
               className="grid size-10 place-items-center rounded-full hover:bg-white/10"
-              aria-label="Close the assistant"
+              aria-label="Close the chat"
             >
               <X className="size-5" aria-hidden="true" />
             </button>
@@ -233,8 +249,8 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
           >
             <Bubble role="assistant">
               {surface === "app"
-                ? "Hi! I'm Kabsi's AI assistant. Ask me about replies, setup, your plan or cards. If I can't help, I'll pass you to a person."
-                : "Hi! I'm Kabsi's AI assistant. Ask me anything about answering your Google reviews, setup, pricing or review cards. If I can't answer, I'll pass you to a person."}
+                ? "Hi, I'm Nora! Stuck on something? Ask me about replies, setup, your plan or cards, and if I can't sort it, I'll get a person from the team for you."
+                : "Hi, I'm Nora! I help business owners with their Google reviews. Ask me anything about Kabsi, how it works, pricing or review cards. And if you'd rather talk to a person, just say so."}
             </Bubble>
             {messages.map((m, i) => (
               <Bubble key={i} role={m.role}>

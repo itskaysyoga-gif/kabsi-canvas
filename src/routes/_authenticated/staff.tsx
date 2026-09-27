@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { amStaff } from "@/lib/reviews";
 import { PartnersPanel } from "@/components/staff/partners-panel";
 import { OpsPanel } from "@/components/staff/ops-panel";
+import { ChatsPanel } from "@/components/staff/chats-panel";
 import { ClipboardCheck as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
 
@@ -63,6 +64,7 @@ function StaffPage() {
         ) : null}
         {staff.data ? (
           <>
+            <ChatsPanel />
             <PartnersPanel />
             <OpsPanel />
             <h2 className="mt-10 text-xl font-bold">Businesses</h2>

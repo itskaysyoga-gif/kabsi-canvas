@@ -45,11 +45,13 @@ function Page() {
       <section>
         <h2>2. What we collect</h2>
         <p>
-          <b>If you chat with the Kabsi Assistant</b> (the AI helper on our pages): your messages,
-          the page you asked from, and any contact details you choose to give (name, email, business
-          name, phone, city), so we can answer, follow up and, only if you say yes, send you
-          occasional Kabsi news. The assistant is an AI model run by Anthropic on our behalf; if it
-          passes your question to a person, we email you from hello@kabsi.co.
+          <b>If you chat with Nora</b> (the AI assistant on our pages): your messages, the page you
+          asked from, the country your connection comes from, your browser's time zone and language,
+          the kind of device and the site that sent you (never your IP address), and any contact
+          details you choose to give (name, email, business name, phone, city). We use them to
+          answer, to send the Kabsi team a short report of each chat, to follow up and, only if you
+          say yes, to send you occasional Kabsi news. Nora is an AI model run by Anthropic on our
+          behalf; if she passes your question to a person, we reply from hello@kabsi.co.
         </p>
         <p>
           <b>If you use Kabsi for your business:</b>
