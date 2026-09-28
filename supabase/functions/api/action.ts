@@ -36,7 +36,8 @@ async function view(tok: Token) {
 export async function action(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   const ip = req.headers.get("cf-connecting-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  if (!(await rateLimit(`action:${await sha256Hex(ip + new Date().toISOString().slice(0, 10))}`, 60, 600))) return fail("rate_limited", "Too many tries.", 429);
+  // D266: this is the token-guessing surface (public, unauthenticated GET/POST) — fail closed if the limiter breaks.
+  if (!(await rateLimit(`action:${await sha256Hex(ip + new Date().toISOString().slice(0, 10))}`, 60, 600, { failClosed: true }))) return fail("rate_limited", "Too many tries.", 429);
 
   try {
     if (req.method === "GET") {

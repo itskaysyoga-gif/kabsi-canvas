@@ -308,9 +308,10 @@ Deno.serve(async (req) => {
 
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
   const net = (await sha256Hex(`${Deno.env.get("SUPABASE_URL")}:${new Date().toISOString().slice(0, 10)}:${ip}`)).slice(0, 24);
-  if (!(await rateLimit(`assistant:v:${visitor}`, 40, 3600)) || !(await rateLimit(`assistant:n:${net}`, 80, 3600)))
+  // D266: every assistant turn calls Anthropic — fail closed if the limiter breaks.
+  if (!(await rateLimit(`assistant:v:${visitor}`, 40, 3600, { failClosed: true })) || !(await rateLimit(`assistant:n:${net}`, 80, 3600, { failClosed: true })))
     return fail("rate_limited", "That's a lot of messages. Please try again in a little while, or email hello@kabsi.co.", 429);
-  if (!(await rateLimit("assistant:all", 3000, 86400)))
+  if (!(await rateLimit("assistant:all", 3000, 86400, { failClosed: true })))
     return fail("busy", "The assistant is very busy today. Please email hello@kabsi.co and a person will reply.", 429);
 
   try {

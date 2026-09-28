@@ -26,7 +26,8 @@ export async function approve(req: Request): Promise<Response> {
     if (b.do === "redraft") {
       const instruction = (b.instruction ?? "").trim().slice(0, 500);
       if (!instruction) return fail("bad_input", "Tell Kabsi what to change.");
-      if (!(await rateLimit(`redraft:${rv.id}`, 3, 86400))) return fail("rate_limited", "Three new versions a day per review. Edit the text yourself instead.", 429);
+      // D266: AI cost + Google-adjacent — fail closed if the limiter breaks.
+      if (!(await rateLimit(`redraft:${rv.id}`, 3, 86400, { failClosed: true }))) return fail("rate_limited", "Three new versions a day per review. Edit the text yourself instead.", 429);
       const d = await draftReview(rv.id, instruction);
       return json({ ok: true, draft: d.ok ? d.body : null, issues: d.issues });
     }

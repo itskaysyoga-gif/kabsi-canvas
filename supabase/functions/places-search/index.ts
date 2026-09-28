@@ -9,7 +9,8 @@ Deno.serve(async (req) => {
 
   const user = await currentUser(req);
   if (!user) return fail("not_signed_in", "Please log in first.", 401);
-  if (!(await rateLimit(`places:${user.id}`, 30, 600))) return fail("rate_limited", "Too many searches. Try again in a few minutes.", 429);
+  // D266: paid Google Places lookup — fail closed if the limiter breaks instead of removing the cap.
+  if (!(await rateLimit(`places:${user.id}`, 30, 600, { failClosed: true }))) return fail("rate_limited", "Too many searches. Try again in a few minutes.", 429);
 
   const key = Deno.env.get("PLACES_API_KEY");
   if (!key) return fail("not_configured", "Business search isn't set up yet.", 503);

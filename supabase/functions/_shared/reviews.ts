@@ -1,5 +1,5 @@
 // Phase 4 pipeline: sync → classify → draft → safety check → owner email → approve → publish.
-import { admin, APP_URL, captureError, emailLayout, esc, sendEmail, sha256Hex } from "./kabsi.ts";
+import { admin, APP_URL, captureError, emailLayout, esc, isDefiniteGoogleRejection, sendEmail, sha256Hex } from "./kabsi.ts";
 import { listReviews, putReply } from "./google.ts";
 import { checkDraft, classify, draftReply, MODELS, type Card } from "./ai.ts";
 
@@ -253,14 +253,21 @@ export async function publishReply(o: { reviewId: string; text: string; approved
     .select("id, state, google_review_id, location_id, locations(status, google_account_id, google_location_id)").eq("id", o.reviewId).single();
   if (error) throw error;
   const loc = rv.locations as unknown as { status: string; google_account_id: string | null; google_location_id: string | null };
-  if (rv.state === "posted") throw new Error("already_posted");
   if (loc.status !== "active" || !loc.google_location_id) throw new Error("location_not_active");
+
+  // D266: atomic claim. Two approvals racing for the same review (dashboard click + email-link click, or a
+  // double click) can no longer both reach Google — only the request that flips drafted/blocked -> publishing
+  // proceeds; the loser sees "already_posted" instead of posting a duplicate reply.
+  const { data: claimed, error: claimErr } = await db.from("reviews").update({ state: "publishing" })
+    .eq("id", rv.id).in("state", ["drafted", "blocked"]).select("id").maybeSingle();
+  if (claimErr) throw claimErr;
+  if (!claimed) throw new Error("already_posted");
 
   const { data: pub, error: pubErr } = await db.from("publications").insert({
     location_id: rv.location_id, target_type: "review_reply", target_id: rv.id, payload: { text },
     approved_by: o.approvedBy, channel: o.channel, status: "queued",
   }).select("id").single();
-  if (pubErr) throw pubErr;
+  if (pubErr) { await db.from("reviews").update({ state: rv.state }).eq("id", rv.id); throw pubErr; }
   try {
     const result = await putReply(loc.google_account_id!, loc.google_location_id, rv.google_review_id, text);
     await db.from("publications").update({ status: result.state, google_response: result.response }).eq("id", pub.id);
@@ -268,6 +275,11 @@ export async function publishReply(o: { reviewId: string; text: string; approved
     return { publication: pub.id, state: result.state };
   } catch (e) {
     await db.from("publications").update({ status: "failed", error: String(e).slice(0, 500) }).eq("id", pub.id);
+    if (isDefiniteGoogleRejection(e)) {
+      await db.from("reviews").update({ state: rv.state }).eq("id", rv.id);
+    } else {
+      await captureError("publish_stuck", e, { review: rv.id, publication: pub.id, note: "left in publishing — verify against Google before retrying" });
+    }
     throw e;
   }
 }

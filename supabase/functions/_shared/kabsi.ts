@@ -59,18 +59,42 @@ export async function sha256Hex(text: string) {
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export async function rateLimit(key: string, max: number, windowSeconds: number) {
+// D266: sensitive/expensive routes (Google writes, AI calls, action-link execution, paid lookups) pass
+// failClosed so a limiter outage blocks them instead of removing the limit; cheap public routes (leads,
+// review-link redirects) keep the old fail-open default so a DB blip never turns away a real customer.
+export async function rateLimit(key: string, max: number, windowSeconds: number, opts: { failClosed?: boolean } = {}) {
   const { data, error } = await admin().rpc("hit_rate_limit", { p_key: key, p_max: max, p_window_seconds: windowSeconds });
-  return error ? true : Boolean(data); // fail open on limiter errors, never block real users because of it
+  if (error) {
+    log("rate_limit", { ok: false, key, failClosed: !!opts.failClosed, err: error.message });
+    return !opts.failClosed;
+  }
+  return Boolean(data);
 }
 
 // ─── logging + Sentry (minimal envelope client, no SDK)
 export function log(fn: string, fields: Record<string, unknown>) {
   console.log(JSON.stringify({ fn, ...fields }));
 }
+// D266: review text, reviewer names, emails and tokens must never reach Sentry or jobs_log — this is the
+// one choke point every captureError call goes through, so scrubbing here covers every call site at once.
+const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.-]+/g;
+const SENSITIVE_KEYS = new Set([
+  "comment", "reviewer_name", "body", "instruction", "text", "payload", "email", "to", "token", "authorization",
+]);
+function scrub(value: unknown, depth = 0): unknown {
+  if (typeof value === "string") return value.replace(EMAIL_RE, "[email]").slice(0, 300);
+  if (depth >= 3 || value === null || typeof value !== "object") return value;
+  if (Array.isArray(value)) return value.slice(0, 20).map((v) => scrub(v, depth + 1));
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    out[k] = SENSITIVE_KEYS.has(k.toLowerCase()) ? "[redacted]" : scrub(v, depth + 1);
+  }
+  return out;
+}
 export async function captureError(fn: string, error: unknown, extra: Record<string, unknown> = {}) {
   const err = error instanceof Error ? error : new Error(String(error));
-  log(fn, { ok: false, err: err.message });
+  const safeMessage = String(err.message ?? "").replace(EMAIL_RE, "[email]").slice(0, 300);
+  log(fn, { ok: false, err: safeMessage });
   try {
     const m = SENTRY_DSN.match(/^https:\/\/([^@]+)@([^/]+)\/(\d+)$/);
     if (!m) return;
@@ -79,8 +103,8 @@ export async function captureError(fn: string, error: unknown, extra: Record<str
     const event = {
       event_id: eventId, timestamp: Date.now() / 1000, platform: "javascript", level: "error",
       environment: Deno.env.get("KABSI_ENV") ?? "production", server_name: fn, tags: { function: fn },
-      exception: { values: [{ type: err.name, value: err.message, stacktrace: { frames: parseStack(err.stack) } }] },
-      extra,
+      exception: { values: [{ type: err.name, value: safeMessage, stacktrace: { frames: parseStack(err.stack) } }] },
+      extra: scrub(extra),
     };
     const body = `${JSON.stringify({ event_id: eventId, sent_at: new Date().toISOString() })}\n${JSON.stringify({ type: "event" })}\n${JSON.stringify(event)}`;
     await fetch(`https://${host}/api/${project}/envelope/`, {
@@ -94,7 +118,15 @@ function parseStack(stack?: string) {
   return (stack ?? "").split("\n").slice(1, 20).reverse().map((line) => ({ function: line.trim() }));
 }
 export async function jobLog(job: string, ok: boolean, detail: Record<string, unknown> = {}) {
-  await admin().from("jobs_log").insert({ job, ok, detail });
+  await admin().from("jobs_log").insert({ job, ok, detail: scrub(detail) });
+}
+
+// D266: shared by every publish path (reviews, posts, photos). Google's own 400/401/403/404 mean the
+// request was rejected before anything was written, so it's safe to hand the item back to the owner.
+// Anything else (timeout, network, 5xx) is uncertain — the write may already be live on Google even though
+// we never saw a clean response — so it must NOT auto-revert; that would let a retry create a duplicate.
+export function isDefiniteGoogleRejection(e: unknown) {
+  return /^Error: google (400|401|403|404) /.test(String(e));
 }
 
 // ─── email (Resend). Same look as emails/build.py.
