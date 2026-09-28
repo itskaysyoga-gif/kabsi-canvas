@@ -27,7 +27,7 @@ const cut = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` 
 async function api<T = Record<string, unknown>>(method: string, body: Record<string, unknown>): Promise<T & { ok: boolean; error?: string }> {
   const res = await fetch(`https://slack.com/api/${method}`, {
     method: "POST",
-    headers: { "content-type": "application/json; charset=utf-8", authorization: `Bearer ${token()}` },
+    headers: { "content-type": "application/json; charset=utf-8", authorization: `Bearer ${token().trim()}` },
     body: JSON.stringify(body),
   });
   if (res.status === 429) return { ok: false, error: "ratelimited" } as T & { ok: boolean; error?: string };
@@ -75,6 +75,10 @@ function render(ev: Ev): { text: string; blocks: Block[] } {
 // ── /flush: send queued events in order. Replies and updates find their parent message by thread_key.
 async function flush() {
   if (!token()) return json({ ok: true, skipped: "SLACK_BOT_TOKEN not set; events wait in the queue" });
+  // A wrong value (not a bot token) would burn every event's retries; wait instead until it's fixed.
+  if (!/^xoxb-[A-Za-z0-9-]+$/.test(token().trim())) {
+    return json({ ok: true, skipped: "SLACK_BOT_TOKEN is not a bot token (it must start with xoxb-); events wait in the queue" });
+  }
   const db = admin();
   const channels = await setting<Record<string, string>>("slack_channels", {});
   let sent = 0;
