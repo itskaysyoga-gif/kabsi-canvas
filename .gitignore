@@ -31,3 +31,7 @@ dist-ssr
 *.sln
 *.sw?
 .bundles/
+
+# Lovable generates its own lockfile on its side; committing ours causes
+# spurious merge conflicts with Lovable's syncs (see KABSI-STATE.md notes).
+package-lock.json
