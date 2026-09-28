@@ -12,6 +12,7 @@ import {
   shortDate,
   staffPartnerData,
   type StaffClaim,
+  type StaffPartner,
 } from "@/lib/partner";
 
 // Staff: USDT payments to confirm, partners (create + list), partner leads from /partners.
@@ -63,6 +64,7 @@ export function PartnersPanel() {
                   ? `${p.partner_members.length} signed in`
                   : "hasn't signed in yet"}
               </p>
+              <PartnerContact partner={p} />
             </div>
           ))}
         </div>
@@ -240,6 +242,86 @@ function ClaimRow({ claim }: { claim: StaffClaim }) {
       </div>
       {msg ? <p className="mt-2 text-sm text-kb-red">{msg}</p> : null}
     </div>
+  );
+}
+
+const CHANNELS = [
+  ["whatsapp", "WhatsApp"],
+  ["email", "Email"],
+  ["slack", "Slack"],
+  ["instagram", "Instagram"],
+] as const;
+
+// How this partner likes to be reached. Slack alerts about them carry a one-tap WhatsApp button with the
+// message already written (partner emails keep going out as usual).
+function PartnerContact({ partner }: { partner: StaffPartner }) {
+  const queryClient = useQueryClient();
+  const [whatsapp, setWhatsapp] = useState(partner.whatsapp ?? "");
+  const [preferred, setPreferred] = useState(partner.preferred_channel ?? "email");
+  const [msg, setMsg] = useState("");
+  const dirty =
+    whatsapp.trim() !== (partner.whatsapp ?? "") || preferred !== partner.preferred_channel;
+  async function save(e: FormEvent) {
+    e.preventDefault();
+    setMsg("");
+    const { error } = await supabase.rpc("staff_update_partner_contact", {
+      p_partner: partner.id,
+      p_whatsapp: whatsapp.trim() || null,
+      p_preferred: preferred,
+    });
+    if (error) {
+      setMsg(
+        error.message.includes("whatsapp")
+          ? "Use digits with the country code, e.g. +961 3 123 456."
+          : "Couldn't save.",
+      );
+      return;
+    }
+    setMsg("Saved.");
+    await queryClient.invalidateQueries({ queryKey: ["staff-partners"] });
+  }
+  const wa = whatsapp.replace(/\D/g, "");
+  return (
+    <form onSubmit={(e) => void save(e)} className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+      <label className="flex items-center gap-2">
+        <span className="text-kb-stone">Prefers</span>
+        <select
+          value={preferred}
+          onChange={(e) => setPreferred(e.target.value as StaffPartner["preferred_channel"])}
+          className="h-10 rounded-card border border-kb-hairline bg-kb-white px-2"
+        >
+          {CHANNELS.map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
+        </select>
+      </label>
+      <Input
+        value={whatsapp}
+        onChange={(e) => setWhatsapp(e.target.value)}
+        placeholder="WhatsApp, e.g. +961 3 123 456"
+        aria-label="WhatsApp number"
+        className="h-10 w-56"
+        inputMode="tel"
+      />
+      {dirty ? (
+        <Button type="submit" size="compact" variant="outline">
+          Save
+        </Button>
+      ) : null}
+      {wa.length >= 7 ? (
+        <a
+          href={`https://wa.me/${wa}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-10 items-center font-bold underline underline-offset-4"
+        >
+          Open WhatsApp
+        </a>
+      ) : null}
+      {msg ? <span className="text-kb-stone">{msg}</span> : null}
+    </form>
   );
 }
 

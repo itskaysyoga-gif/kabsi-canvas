@@ -181,6 +181,8 @@ export type StaffPartner = Partner & {
   contact_email: string | null;
   instagram: string | null;
   country: string | null;
+  whatsapp: string | null;
+  preferred_channel: "email" | "whatsapp" | "slack" | "instagram";
   created_at: string;
   partner_members: { user_id: string }[];
 };
@@ -206,7 +208,7 @@ export async function staffPartnerData() {
     supabase
       .from("partners")
       .select(
-        "id, name, handle, status, rate_usd, founding, price_locked_until, contact_email, instagram, country, created_at, partner_members(user_id)",
+        "id, name, handle, status, rate_usd, founding, price_locked_until, contact_email, instagram, country, whatsapp, preferred_channel, created_at, partner_members(user_id)",
       )
       .order("created_at", { ascending: false }),
     supabase
