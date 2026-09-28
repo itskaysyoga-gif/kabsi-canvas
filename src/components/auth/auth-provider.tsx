@@ -2,6 +2,7 @@ import type { Session, User } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { clearAssistantChat } from "@/lib/assistant-storage";
 import { identify } from "@/lib/telemetry";
 
 type AuthContextValue = {
@@ -29,8 +30,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data } = supabase.auth.onAuthStateChange((event, nextSession) => {
       // A different person on this device must never see the previous person's data.
       const nextUser = nextSession?.user.id ?? null;
-      if (event === "SIGNED_OUT" || (lastUser && nextUser && nextUser !== lastUser))
+      if (event === "SIGNED_OUT" || (lastUser && nextUser && nextUser !== lastUser)) {
         queryClient.clear();
+        clearAssistantChat();
+      }
       lastUser = nextUser;
       setSession(nextSession);
       setLoading(false);

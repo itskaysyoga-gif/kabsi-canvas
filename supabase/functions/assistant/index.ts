@@ -272,13 +272,19 @@ Deno.serve(async (req) => {
     return json({ ok: true, reported: await runReports() });
   }
 
-  // Resume: the last messages of this visitor's conversation.
+  // Resume: the last messages of this visitor's conversation. A conversation once linked to a
+  // signed-in user (D265) must never resume for anyone else, even if their browser somehow carries
+  // the same visitor/conversation ids (a shared device that didn't clear localStorage on sign-out).
   if (req.method === "GET") {
     const visitor = url.searchParams.get("visitor") ?? "";
     const conv = url.searchParams.get("conversation") ?? "";
     if (!/^[a-z0-9-]{16,64}$/i.test(visitor) || !/^[0-9a-f-]{36}$/i.test(conv)) return json({ messages: [] });
-    const { data: c } = await db.from("chat_conversations").select("id, status").eq("id", conv).eq("visitor_id", visitor).maybeSingle();
+    const { data: c } = await db.from("chat_conversations").select("id, status, user_id").eq("id", conv).eq("visitor_id", visitor).maybeSingle();
     if (!c) return json({ messages: [] });
+    if (c.user_id) {
+      const user = await currentUser(req);
+      if (!user || user.id !== c.user_id) return json({ messages: [] });
+    }
     const { data: rows } = await db.from("chat_messages").select("role, content").eq("conversation_id", c.id).order("id", { ascending: false }).limit(HISTORY);
     return json({ conversation_id: c.id, handoff: c.status === "handoff", messages: (rows ?? []).reverse() });
   }
@@ -315,7 +321,10 @@ Deno.serve(async (req) => {
     const convId = clip(b.conversation, 36);
     if (/^[0-9a-f-]{36}$/i.test(convId)) {
       const { data } = await db.from("chat_conversations").select("id, visitor_id, user_id, contact_id, status, message_count, tokens_in, tokens_out, cache_read").eq("id", convId).eq("visitor_id", visitor).maybeSingle();
-      conv = data as Conv | null;
+      const found = data as Conv | null;
+      // Same rule as the GET resume (D265): once a conversation is tied to a signed-in user, only
+      // that user can continue it. Anyone else (or a different account on the same device) starts fresh.
+      conv = found && found.user_id && found.user_id !== (user?.id ?? null) ? null : found;
     }
     if (!conv) {
       const { data, error } = await db.from("chat_conversations").insert({

@@ -6,12 +6,13 @@ import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNod
 import { Link, useLocation } from "@tanstack/react-router";
 import { ArrowUp, Loader2, MessageCircle, RotateCcw, Sparkles, X } from "lucide-react";
 import { supabase, supabaseUrl } from "@/lib/supabase";
+import { ASSISTANT_CONVERSATION_KEY, ASSISTANT_VISITOR_KEY } from "@/lib/assistant-storage";
 import { cn } from "@/lib/utils";
 
 type Msg = { role: "user" | "assistant"; content: string };
 const ENDPOINT = `${supabaseUrl}/functions/v1/assistant`;
-const VISITOR_KEY = "kabsi.assistant.visitor";
-const CONV_KEY = "kabsi.assistant.conversation";
+const VISITOR_KEY = ASSISTANT_VISITOR_KEY;
+const CONV_KEY = ASSISTANT_CONVERSATION_KEY;
 
 const SITE_STARTERS = [
   "How does Kabsi work?",
@@ -81,9 +82,17 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
     const conv = store(CONV_KEY);
     if (!conv) return;
     conversation.current = conv;
-    fetch(
-      `${ENDPOINT}?visitor=${encodeURIComponent(visitorId())}&conversation=${encodeURIComponent(conv)}`,
-    )
+    void supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        const headers: Record<string, string> = {};
+        if (data.session?.access_token)
+          headers["authorization"] = `Bearer ${data.session.access_token}`;
+        return fetch(
+          `${ENDPOINT}?visitor=${encodeURIComponent(visitorId())}&conversation=${encodeURIComponent(conv)}`,
+          { headers },
+        );
+      })
       .then((r) => r.json())
       .then((d: { messages?: Msg[]; handoff?: boolean }) => {
         if (d.messages?.length) setMessages(d.messages);
