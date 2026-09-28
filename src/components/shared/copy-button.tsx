@@ -1,23 +1,24 @@
 import { useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { copyText } from "@/lib/clipboard";
 
 export function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
-  const [done, setDone] = useState(false);
+  const [state, setState] = useState<"idle" | "done" | "failed">("idle");
   return (
     <Button
       type="button"
       size="compact"
       variant="outline"
       onClick={() => {
-        void navigator.clipboard?.writeText(text).then(() => {
-          setDone(true);
-          setTimeout(() => setDone(false), 1800);
+        void copyText(text).then((ok) => {
+          setState(ok ? "done" : "failed");
+          setTimeout(() => setState("idle"), 1800);
         });
       }}
     >
-      {done ? <Check /> : <Copy />}
-      {done ? "Copied" : label}
+      {state === "done" ? <Check /> : state === "failed" ? <TriangleAlert /> : <Copy />}
+      {state === "done" ? "Copied" : state === "failed" ? "Couldn't copy" : label}
     </Button>
   );
 }

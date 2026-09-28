@@ -245,10 +245,14 @@ function ClaimRow({ claim }: { claim: StaffClaim }) {
   );
 }
 
+// Email and Instagram are set when the partner is created (shown on the row above) and aren't editable
+// here. Slack is Rasheed's own ops tool, not a way to reach a partner, so it was never a real option and
+// is left out. WhatsApp is the only channel this form actually collects a number for, so it's the only
+// one with an input: the field used to show for every choice, which is why a WhatsApp number ended up
+// saved even when Email or Instagram was picked.
 const CHANNELS = [
   ["whatsapp", "WhatsApp"],
   ["email", "Email"],
-  ["slack", "Slack"],
   ["instagram", "Instagram"],
 ] as const;
 
@@ -297,14 +301,22 @@ function PartnerContact({ partner }: { partner: StaffPartner }) {
           ))}
         </select>
       </label>
-      <Input
-        value={whatsapp}
-        onChange={(e) => setWhatsapp(e.target.value)}
-        placeholder="WhatsApp, e.g. +961 3 123 456"
-        aria-label="WhatsApp number"
-        className="h-10 w-56"
-        inputMode="tel"
-      />
+      {preferred === "whatsapp" ? (
+        <Input
+          value={whatsapp}
+          onChange={(e) => setWhatsapp(e.target.value)}
+          placeholder="WhatsApp, e.g. +961 3 123 456"
+          aria-label="WhatsApp number"
+          className="h-10 w-56"
+          inputMode="tel"
+        />
+      ) : (
+        <span className="text-kb-stone">
+          {preferred === "email"
+            ? (partner.contact_email ?? "no email on file")
+            : (partner.instagram ?? "no Instagram on file")}
+        </span>
+      )}
       {dirty ? (
         <Button type="submit" size="compact" variant="outline">
           Save

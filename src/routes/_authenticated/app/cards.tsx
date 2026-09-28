@@ -11,7 +11,9 @@ import {
   Nfc,
   Power,
   Printer,
+  TriangleAlert,
 } from "lucide-react";
+import { copyText } from "@/lib/clipboard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -160,8 +162,11 @@ function CardsPage() {
 }
 
 // The short link with a real, labelled copy button (44 px tall, easy to hit on a phone).
+// copyText() always resolves (it falls back off the Clipboard API), so a failed copy shows a real
+// "couldn't copy" state instead of the button silently doing nothing on a second tap (iOS Safari can
+// reject navigator.clipboard.writeText, e.g. after the tab lost focus).
 function CopyField({ url, label }: { url: string; label: string }) {
-  const [copied, setCopied] = useState(false);
+  const [state, setState] = useState<"idle" | "done" | "failed">("idle");
   return (
     <div className="mt-4 flex items-center gap-2 rounded-card bg-kb-sand py-1.5 pl-4 pr-1.5 text-sm">
       <span className="min-w-0 flex-1 truncate font-mono">{url.replace(/^https:\/\//, "")}</span>
@@ -170,14 +175,20 @@ function CopyField({ url, label }: { url: string; label: string }) {
         aria-label={label}
         className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-pill bg-kb-white px-3 text-sm font-bold shadow-kb transition-colors hover:bg-kb-hairline/40"
         onClick={() =>
-          void navigator.clipboard?.writeText(url).then(() => {
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
+          void copyText(url).then((ok) => {
+            setState(ok ? "done" : "failed");
+            setTimeout(() => setState("idle"), 2000);
           })
         }
       >
-        {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-        {copied ? "Copied" : "Copy"}
+        {state === "done" ? (
+          <Check className="size-4" />
+        ) : state === "failed" ? (
+          <TriangleAlert className="size-4" />
+        ) : (
+          <Copy className="size-4" />
+        )}
+        {state === "done" ? "Copied" : state === "failed" ? "Couldn't copy" : "Copy"}
       </button>
     </div>
   );
