@@ -14,6 +14,7 @@ import { KabsiLogo } from "@/components/shared/kabsi-logo";
 import { useSectionRise } from "@/components/marketing/motion";
 import { VERTICALS } from "@/lib/verticals";
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
+import { useAuth } from "@/components/auth/auth-provider";
 
 const links = [
   ["How it works", "/how-it-works"],
@@ -25,6 +26,9 @@ const links = [
 export function PublicLayout({ children }: { children: ReactNode }) {
   const pathname = useLocation({ select: (l) => l.pathname });
   useSectionRise(pathname);
+  // D265: signed-in owners hitting the marketing site (a bookmark, a shared link) saw "Log
+  // in" / "Get set up" as if they had no account — send them back to their dashboard instead.
+  const { user, loading } = useAuth();
   return (
     <div className="min-h-screen bg-kb-white text-kb-ink">
       <header className="sticky top-0 z-40 border-b border-kb-hairline bg-kb-white/95 backdrop-blur">
@@ -40,12 +44,20 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                 {label}
               </Link>
             ))}
-            <Link to="/login" className="text-sm font-bold text-kb-black">
-              Log in
-            </Link>
-            <Button asChild size="compact">
-              <Link to="/start">Get set up</Link>
-            </Button>
+            {loading ? null : user ? (
+              <Button asChild size="compact">
+                <Link to="/app">Dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Link to="/login" className="text-sm font-bold text-kb-black">
+                  Log in
+                </Link>
+                <Button asChild size="compact">
+                  <Link to="/start">Get set up</Link>
+                </Button>
+              </>
+            )}
           </nav>
           <Sheet>
             <SheetTrigger asChild>
@@ -73,17 +85,29 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                     </Link>
                   </SheetClose>
                 ))}
-                <SheetClose asChild>
-                  <Link
-                    to="/login"
-                    className="rounded-card px-3 py-3 text-lg font-medium hover:bg-kb-sand"
-                  >
-                    Log in
-                  </Link>
-                </SheetClose>
-                <Button asChild className="mt-5 w-full">
-                  <Link to="/start">Get set up</Link>
-                </Button>
+                {loading ? null : user ? (
+                  <SheetClose asChild>
+                    <Button asChild className="mt-5 w-full">
+                      <Link to="/app">Dashboard</Link>
+                    </Button>
+                  </SheetClose>
+                ) : (
+                  <>
+                    <SheetClose asChild>
+                      <Link
+                        to="/login"
+                        className="rounded-card px-3 py-3 text-lg font-medium hover:bg-kb-sand"
+                      >
+                        Log in
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Button asChild className="mt-5 w-full">
+                        <Link to="/start">Get set up</Link>
+                      </Button>
+                    </SheetClose>
+                  </>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
