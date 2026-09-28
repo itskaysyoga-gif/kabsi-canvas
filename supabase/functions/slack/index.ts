@@ -1,6 +1,7 @@
 // slack (D263): Kabsi's operations hub in Slack.
 //   POST /slack/flush     internal (cron secret)   → posts queued ops_events (new message, thread reply, or update)
 //   POST /slack/digest    internal (cron secret)   → queues the daily summary for #kabsi-daily
+//   POST /slack/sentry    internal (cron secret)   → polls Sentry for new unresolved issues, D265
 //   POST /slack/interact  Slack (signed)           → "I'm on it" / "Done" buttons
 //   POST /slack/command   Slack (signed)           → /kabsi [today|week|pending|find <text>|help]
 // Needs two secrets set in Supabase (never in code or chat): SLACK_BOT_TOKEN (xoxb-…) and SLACK_SIGNING_SECRET.
@@ -193,6 +194,53 @@ async function digest() {
   return json({ ok: true });
 }
 
+// ── /sentry: no Sentry-Slack integration without the Team plan (D265), so poll the API every 10 min
+// instead. Each Sentry issue alerts once ever (dedupe_key = sentry:<issue id>); if it recurs after being
+// resolved in Sentry, Rasheed sees that in Sentry itself, not a second Slack ping.
+const SENTRY_ORG = "google-nfc-card-dl";
+const SENTRY_HOST = "de.sentry.io";
+const SENTRY_PROJECTS = ["kabsi-web", "kabsi-edge", "kabsi-go"];
+type SentryIssue = {
+  id: string; shortId: string; title: string; culprit: string | null; permalink: string;
+  level: string; status: string; count: string; userCount: number; firstSeen: string; lastSeen: string;
+};
+
+async function sentry() {
+  const token = Deno.env.get("SENTRY_AUTH_TOKEN") ?? "";
+  if (!token) return json({ ok: true, skipped: "SENTRY_AUTH_TOKEN not set" });
+  const db = admin();
+  let queued = 0;
+  for (const project of SENTRY_PROJECTS) {
+    try {
+      const res = await fetch(
+        `https://${SENTRY_HOST}/api/0/projects/${SENTRY_ORG}/${project}/issues/?query=is:unresolved&sort=new&limit=25`,
+        { headers: { authorization: `Bearer ${token}` } },
+      );
+      if (!res.ok) throw new Error(`sentry ${res.status}: ${(await res.text()).slice(0, 200)}`);
+      const issues = (await res.json()) as SentryIssue[];
+      for (const issue of issues) {
+        const { error } = await db.rpc("ops_emit", {
+          p_kind: "sentry_issue", p_channel: "alerts",
+          p_title: `:rotating_light: Sentry (${project}): ${issue.shortId}`,
+          p_body: cut(issue.culprit ? `${issue.title}\n${issue.culprit}` : issue.title, 500),
+          p_fields: [
+            { l: "Level", v: issue.level }, { l: "Events", v: String(issue.count) },
+            { l: "Users affected", v: String(issue.userCount) }, { l: "First seen", v: issue.firstSeen },
+          ],
+          p_buttons: [{ t: "Open in Sentry", u: issue.permalink }],
+          p_dedupe: `sentry:${issue.id}`,
+        });
+        if (error) throw error;
+        queued++;
+      }
+    } catch (e) {
+      await captureError(FN, e, { step: "sentry", project });
+    }
+  }
+  log(FN, { ok: true, route: "sentry", queued });
+  return json({ ok: true, queued });
+}
+
 // ── Slack request signing (https://api.slack.com/authentication/verifying-requests-from-slack)
 async function verified(req: Request): Promise<string | null> {
   const secret = signingSecret();
@@ -309,6 +357,7 @@ Deno.serve(async (req) => {
     if (!(await isInternal(req))) return fail("forbidden", "Not allowed.", 403);
     if (path.endsWith("/flush")) return await flush();
     if (path.endsWith("/digest")) return await digest();
+    if (path.endsWith("/sentry")) return await sentry();
     return fail("not_found", "Unknown route.", 404);
   } catch (e) {
     await captureError(FN, e, { path });
