@@ -5,6 +5,7 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { useAutosize } from "@/lib/use-autosize";
 import {
   BookOpenCheck,
+  ChevronDown,
   CircleHelp,
   Info,
   MapPinned,
@@ -231,6 +232,13 @@ const GROUPS: Group[] = [
 const ONBOARDING_KEYS: TextKey[] = ["signature", "contact_phone", "hours_note", "mention", "avoid"];
 const ALL_KEYS = GROUPS.flatMap((g) => g.fields.map((f) => f.key));
 
+// Every field stays optional (D260), but showing all six groups open at once reads as "a lot to fill"
+// even to a business that needs almost none of it (Rasheed, 28 Sep). Not every business has a reliable
+// category yet (Places often returns none in mock mode), so this doesn't try to guess which groups apply;
+// it just starts the ones most businesses skip collapsed, and opens any group that already has an
+// answer, so nobody's existing data is ever hidden by default.
+const ALWAYS_OPEN = new Set(["voice", "offer", "basics"]);
+
 /** Same count everywhere (this form's bar and Home's Profile health): text fields filled, plus FAQs. */
 export function knowledgeProgress(card: Record<string, unknown>) {
   const filled =
@@ -271,6 +279,16 @@ export function KnowledgeForm({
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const [dirty, setDirty] = useState(false);
+  // A group starts open if it's always-open, or already has an answer in it (so returning owners see
+  // their own data immediately); otherwise it starts collapsed. Toggling never loses anything typed.
+  const groupHasData = (g: Group) => {
+    if (g.fields.some((f) => text[f.key]?.trim())) return true;
+    if (g.id === "care") return staff.trim().length > 0;
+    return false;
+  };
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(GROUPS.map((g) => [g.id, ALWAYS_OPEN.has(g.id) || groupHasData(g)])),
+  );
 
   const set = (k: TextKey, v: string) => {
     setText((t) => ({ ...t, [k]: v }));
@@ -354,12 +372,10 @@ export function KnowledgeForm({
         </div>
       ) : null}
 
-      {groups.map((g) => (
-        <section
-          key={g.id}
-          className={cn(mode === "settings" && "rounded-large bg-kb-white p-5 shadow-kb sm:p-7")}
-          aria-labelledby={`kg-${g.id}`}
-        >
+      {groups.map((g) => {
+        const collapsible = mode === "settings" && !ALWAYS_OPEN.has(g.id);
+        const open = !collapsible || openGroups[g.id];
+        const header = (
           <div className="flex items-start gap-3">
             <span
               aria-hidden="true"
@@ -367,65 +383,98 @@ export function KnowledgeForm({
             >
               {g.icon}
             </span>
-            <div>
+            <div className="min-w-0 flex-1 text-left">
               <h2 id={`kg-${g.id}`} className="text-lg font-bold leading-tight">
                 {g.title}
               </h2>
               <p className="mt-0.5 text-sm leading-6 text-kb-stone">{g.sub}</p>
             </div>
+            {collapsible ? (
+              <ChevronDown
+                aria-hidden="true"
+                className={cn(
+                  "mt-2 size-5 shrink-0 text-kb-stone transition-transform",
+                  open && "rotate-180",
+                )}
+              />
+            ) : null}
           </div>
-          <div className="mt-5 space-y-5">
-            {g.fields.map((f) => (
-              <FieldRow key={f.key} f={f} value={text[f.key]} onChange={(v) => set(f.key, v)} />
-            ))}
-            {g.id === "voice" || g.id === "basics" ? (
-              <fieldset>
-                <legend className="text-sm font-bold">Tone</legend>
-                <div className="mt-2 grid grid-cols-3 gap-2">
-                  {(["warm", "formal", "short"] as const).map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => {
-                        setTone(t);
+        );
+        return (
+          <section
+            key={g.id}
+            className={cn(mode === "settings" && "rounded-large bg-kb-white p-5 shadow-kb sm:p-7")}
+            aria-labelledby={`kg-${g.id}`}
+          >
+            {collapsible ? (
+              <button
+                type="button"
+                className="w-full"
+                aria-expanded={open}
+                aria-controls={`kg-panel-${g.id}`}
+                onClick={() => setOpenGroups((o) => ({ ...o, [g.id]: !o[g.id] }))}
+              >
+                {header}
+              </button>
+            ) : (
+              header
+            )}
+            {open ? (
+              <div id={`kg-panel-${g.id}`} className="mt-5 space-y-5">
+                {g.fields.map((f) => (
+                  <FieldRow key={f.key} f={f} value={text[f.key]} onChange={(v) => set(f.key, v)} />
+                ))}
+                {g.id === "voice" || g.id === "basics" ? (
+                  <fieldset>
+                    <legend className="text-sm font-bold">Tone</legend>
+                    <div className="mt-2 grid grid-cols-3 gap-2">
+                      {(["warm", "formal", "short"] as const).map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => {
+                            setTone(t);
+                            setDirty(true);
+                          }}
+                          aria-pressed={tone === t}
+                          className={cn(
+                            "min-h-11 rounded-card border-2 px-2 text-sm font-bold",
+                            tone === t ? "border-kb-black bg-kb-sand" : "border-kb-hairline",
+                          )}
+                        >
+                          {t === "warm" ? "Warm" : t === "formal" ? "Formal" : "Short & friendly"}
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+                ) : null}
+                {g.id === "care" ? (
+                  <div>
+                    <Label htmlFor="kf-staff" className="font-bold">
+                      Staff names that may appear in replies
+                    </Label>
+                    <p className="mt-0.5 text-sm text-kb-stone">
+                      Comma-separated. Kabsi only uses a name when the customer mentions that
+                      person.
+                    </p>
+                    <Input
+                      id="kf-staff"
+                      value={staff}
+                      onChange={(e) => {
+                        setStaff(e.target.value);
                         setDirty(true);
                       }}
-                      aria-pressed={tone === t}
-                      className={cn(
-                        "min-h-11 rounded-card border-2 px-2 text-sm font-bold",
-                        tone === t ? "border-kb-black bg-kb-sand" : "border-kb-hairline",
-                      )}
-                    >
-                      {t === "warm" ? "Warm" : t === "formal" ? "Formal" : "Short & friendly"}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-            ) : null}
-            {g.id === "care" ? (
-              <div>
-                <Label htmlFor="kf-staff" className="font-bold">
-                  Staff names that may appear in replies
-                </Label>
-                <p className="mt-0.5 text-sm text-kb-stone">
-                  Comma-separated. Kabsi only uses a name when the customer mentions that person.
-                </p>
-                <Input
-                  id="kf-staff"
-                  value={staff}
-                  onChange={(e) => {
-                    setStaff(e.target.value);
-                    setDirty(true);
-                  }}
-                  placeholder="e.g. Sam, Maria, Omar"
-                  className="mt-2 h-12 rounded-card px-4 text-base"
-                  maxLength={300}
-                />
+                      placeholder="e.g. Sam, Maria, Omar"
+                      className="mt-2 h-12 rounded-card px-4 text-base"
+                      maxLength={300}
+                    />
+                  </div>
+                ) : null}
               </div>
             ) : null}
-          </div>
-        </section>
-      ))}
+          </section>
+        );
+      })}
 
       {mode === "settings" ? (
         <section
