@@ -1,10 +1,17 @@
 import { admin } from "./kabsi.ts";
 import { matchInvitation, type PendingBusiness } from "./invitations.ts";
+import { isConciergeLocationId } from "./concierge.ts";
 
 // Google Business Profile access as hello@kabsi.co (one central Manager account, SPEC D203).
 // GOOGLE_MODE=mock (default until the GBP API grant) simulates Google so every flow is testable.
 // GOOGLE_MODE=live uses GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN.
 // Live mode is written against the documented APIs but is unverified until access is granted.
+
+// A concierge business has no Google location: a person does the Google steps by hand (Q07). Any call that would
+// reach Google, or the mock, for one of those ids is a bug, so it fails loudly before touching anything.
+function assertNotConcierge(locationId: string | null | undefined) {
+  if (isConciergeLocationId(locationId)) throw new Error("concierge_location");
+}
 
 export const googleMode = () => (Deno.env.get("GOOGLE_MODE") === "live" ? "live" : "mock");
 
@@ -100,6 +107,7 @@ const RATING: Record<string, number> = { ONE: 1, TWO: 2, THREE: 3, FOUR: 4, FIVE
 const V4 = "https://mybusiness.googleapis.com/v4";
 
 export async function listReviews(accountId: string, locationId: string, max = 50): Promise<GoogleReview[]> {
+  assertNotConcierge(locationId);
   if (googleMode() === "mock") {
     const { data, error } = await admin().from("mock_google_reviews").select("*")
       .eq("google_location_id", locationId).order("create_time", { ascending: false }).limit(max);
@@ -127,6 +135,7 @@ export async function listReviews(accountId: string, locationId: string, max = 5
 
 // Writes the exact approved text, then reads it back. Only ever called by publish() after approval (D202).
 export async function putReply(accountId: string, locationId: string, reviewId: string, text: string) {
+  assertNotConcierge(locationId);
   if (googleMode() === "mock") {
     const { error } = await admin().from("mock_google_reviews")
       .update({ reply_comment: text, reply_update_time: new Date().toISOString() }).eq("review_id", reviewId);
@@ -145,6 +154,7 @@ export async function putReply(accountId: string, locationId: string, reviewId: 
 export type PostInput = { summary: string; languageCode: string; ctaType?: string | null; ctaUrl?: string | null };
 
 export async function createLocalPost(accountId: string, locationId: string, p: PostInput) {
+  assertNotConcierge(locationId);
   if (googleMode() === "mock") return { state: "live" as const, response: { mock: true } };
   const body: Record<string, unknown> = { languageCode: p.languageCode, summary: p.summary, topicType: "STANDARD" };
   if (p.ctaType) body.callToAction = p.ctaType === "CALL" ? { actionType: "CALL" } : { actionType: p.ctaType, url: p.ctaUrl };
@@ -159,6 +169,7 @@ const hm = (t: string) => { const [hours, minutes] = t.split(":").map(Number); r
 
 // Adds one special-hours period, keeping the periods already on the profile (PATCH replaces the whole list).
 export async function addSpecialHours(locationId: string, s: SpecialDay) {
+  assertNotConcierge(locationId);
   if (googleMode() === "mock") return { state: "live" as const, response: { mock: true } };
   const current = await g(`${BI}/${locationId}?readMask=specialHours`);
   const periods = [...(current.specialHours?.specialHourPeriods ?? [])];
@@ -180,6 +191,7 @@ const t2 = (t?: { hours?: number; minutes?: number }) => `${String(t?.hours ?? 0
 
 type MockSeed = { name: string; address: string | null; phone?: string; hours?: string };
 export async function getListing(locationId: string, seed: MockSeed): Promise<Listing> {
+  assertNotConcierge(locationId);
   if (googleMode() === "mock") {
     const db = admin();
     let { data } = await db.from("mock_listings").select("fields").eq("google_location_id", locationId).maybeSingle();
@@ -206,6 +218,7 @@ export async function getListing(locationId: string, seed: MockSeed): Promise<Li
 
 const MASK: Record<ShieldField, string> = { title: "title", phone: "phoneNumbers", address: "storefrontAddress", website: "websiteUri", hours: "regularHours", categories: "categories" };
 export async function patchListing(locationId: string, field: ShieldField, raw: unknown) {
+  assertNotConcierge(locationId);
   if (googleMode() === "mock") {
     const db = admin();
     const { data } = await db.from("mock_listings").select("fields").eq("google_location_id", locationId).single();
@@ -220,6 +233,7 @@ export async function patchListing(locationId: string, field: ShieldField, raw: 
 
 // ─── Photos (Phase 6b). sourceUrl is a short-lived signed Storage URL. Only after owner approval (D202).
 export async function createMedia(accountId: string, locationId: string, sourceUrl: string, category: string) {
+  assertNotConcierge(locationId);
   if (googleMode() === "mock") return { state: "live" as const, response: { mock: true } };
   const created = await g(`${V4}/${accountId}/${locationId}/media`, {
     method: "POST", body: JSON.stringify({ mediaFormat: "PHOTO", locationAssociation: { category }, sourceUrl }),
@@ -230,6 +244,7 @@ export async function createMedia(accountId: string, locationId: string, sourceU
 // ─── Keyword sources for posts (read-only).
 // Search terms people used to find the profile (Business Profile Performance API). Live only: mock has none.
 export async function searchKeywords(locationId: string): Promise<{ keyword: string; count: number }[]> {
+  assertNotConcierge(locationId);
   if (googleMode() === "mock") return [];
   const end = new Date(), start = new Date(end.getFullYear(), end.getMonth() - 3, 1);
   const m = (d: Date, k: string) => `monthlyRange.${k}.year=${d.getFullYear()}&monthlyRange.${k}.month=${d.getMonth() + 1}`;

@@ -9,6 +9,7 @@
 //   POST { do: "photo_check", photo_id } · { do: "photo_publish", photo_id, category } · { do: "photo_skip", photo_id }
 //   POST { do: "shield_decide", change_id, decision: "revert" | "keep" }                  → Listing Shield (D218)
 import { MODELS } from "../_shared/models.ts";
+import { CONCIERGE_COPY } from "../_shared/concierge.ts";
 import { admin, captureError, CORS, currentUser, fail, isDefiniteGoogleRejection, json, rateLimit } from "../_shared/kabsi.ts";
 import { addSpecialHours, createLocalPost, createMedia } from "../_shared/google.ts";
 import { decideChange } from "../_shared/shield.ts";
@@ -83,6 +84,10 @@ Deno.serve(async (req) => {
     const ctx = await member(req, locationId);
     if ("error" in ctx) return ctx.error!;
     const { user, loc } = ctx;
+    // Early access (D267): a person handles replies by hand; profile work starts once Kabsi connects to Google.
+    if (loc.concierge && /^(post_|photo_|hours_|keyword_|shield_)/.test(String(b.do))) {
+      return fail("early_access", CONCIERGE_COPY.profile, 409);
+    }
 
     switch (b.do) {
       case "post_draft": {

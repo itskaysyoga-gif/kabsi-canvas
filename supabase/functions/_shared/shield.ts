@@ -41,7 +41,7 @@ async function alertOwner(loc: Loc, changeId: string, field: ShieldField, before
 export async function shieldCheck() {
   const db = admin();
   const { data } = await db.from("locations").select("id, name, address, google_location_id, knowledge_card, shield_checked_at")
-    .eq("status", "active").not("google_location_id", "is", null);
+    .eq("status", "active").eq("concierge", false).not("google_location_id", "is", null);
   let alerts = 0;
   for (const loc of (data ?? []) as Loc[]) {
     if (googleMode() === "live" && loc.shield_checked_at && Date.parse(loc.shield_checked_at) > Date.now() - 55 * 60_000) continue;

@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({})) as { force_location?: string; dry_run?: boolean };
   const db = admin();
   const weekAgo = new Date(Date.now() - 6 * 86400_000).toISOString();
-  let q = db.from("locations").select(POST_LOC_COLUMNS).eq("status", "active").eq("auto_posts", true).limit(200);
+  let q = db.from("locations").select(POST_LOC_COLUMNS).eq("status", "active").eq("concierge", false).eq("auto_posts", true).limit(200);
   if (!body.dry_run) q = q.or(`last_auto_post_at.is.null,last_auto_post_at.lt."${weekAgo}"`);
   if (body.force_location) q = q.eq("id", body.force_location); // manual test run (dry_run: no insert, no email)
   const { data: locs, error } = await q;
