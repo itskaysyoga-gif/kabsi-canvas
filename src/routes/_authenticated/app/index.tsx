@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { CONCIERGE_COPY } from "@/lib/concierge-copy";
 import { fmtDate } from "@/lib/format";
 import { knowledgeProgress } from "@/components/app/knowledge-form";
 import { createFileRoute, isRedirect, Link, redirect } from "@tanstack/react-router";
@@ -174,7 +175,12 @@ function Setup({ loc }: { loc: Location }) {
     {
       label: "Add Kabsi as a Manager on your Google profile",
       done: !!loc.access_granted_at,
-      note: loc.consent_at && !loc.access_granted_at ? "Waiting for Google access" : "",
+      note:
+        loc.consent_at && !loc.access_granted_at
+          ? loc.concierge
+            ? CONCIERGE_COPY.setup
+            : "Waiting for Google access"
+          : "",
     },
     { label: "Tell Kabsi about your business", done: knowledgeDone, note: "" },
     {

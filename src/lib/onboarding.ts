@@ -26,6 +26,9 @@ export type Location = {
   partner_id: string | null;
   consent_at: string | null;
   access_granted_at: string | null;
+  /** Early access (D267): a person on the team does the Google steps by hand. */
+  concierge?: boolean;
+  concierge_first_post_at?: string | null;
   /** Set when Kabsi's Manager access stopped working (D250). */
   access_lost_at?: string | null;
   knowledge_card: KnowledgeCard;
@@ -65,7 +68,7 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
 // businesses the signed-in user is a member of count. Staff can read every business through RLS, but the
 // owner app must never treat someone else's business as theirs (writes would be refused anyway).
 const LOCATION_COLUMNS =
-  "id, name, address, country, status, onboarding_step, partner_id, consent_at, access_granted_at, access_lost_at, knowledge_card, created_at";
+  "id, name, address, country, status, onboarding_step, partner_id, consent_at, access_granted_at, access_lost_at, concierge, concierge_first_post_at, knowledge_card, created_at";
 const CHOSEN_KEY = "kabsi.location";
 
 export async function myLocations(): Promise<Location[]> {

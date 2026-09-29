@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { fmtDate, fmtDateTime } from "@/lib/format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -112,7 +113,8 @@ function ShieldPage() {
           Couldn't load your listing. Refresh the page.
         </p>
       ) : null}
-      {loc && loc.status !== "active" ? (
+      {loc?.concierge ? <EarlyAccessNotice what="Listing Shield" /> : null}
+      {loc && !loc.concierge && loc.status !== "active" ? (
         <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
           <p className="font-bold">
             Listing Shield starts once Kabsi can reach your Google profile.

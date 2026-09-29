@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { CONCIERGE_COPY } from "@/lib/concierge-copy";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
@@ -177,7 +178,18 @@ function PlanPage() {
           <section className="mt-7 overflow-hidden rounded-large bg-kb-white shadow-kb">
             <div className="p-6 sm:p-8">
               <p className="text-sm font-medium text-kb-stone">Your plan</p>
-              {sum.tier === "trial" && sum.plan ? (
+              {sum.tier === "early_access" ? (
+                <>
+                  <div className="mt-1 flex flex-wrap items-center gap-3">
+                    <p className="text-2xl font-bold">Early access</p>
+                    <span className="rounded-pill bg-kb-green/10 px-2.5 py-1 text-xs font-bold text-kb-green">
+                      Active
+                    </span>
+                  </div>
+                  <p className="mt-2 leading-7 text-kb-stone">{CONCIERGE_COPY.plan}</p>
+                  <p className="mt-2 text-sm leading-6 text-kb-stone">{CONCIERGE_COPY.banner}</p>
+                </>
+              ) : sum.tier === "trial" && sum.plan ? (
                 <>
                   <div className="mt-1 flex flex-wrap items-center gap-3">
                     <p className="text-2xl font-bold">Free trial</p>

@@ -52,7 +52,7 @@ Every task below fits one Claude Code cloud session and one pull request. Take t
 - Secrets: `NOWPAYMENTS_API_KEY` and `NOWPAYMENTS_IPN_SECRET`, in Supabase secrets only.
 - Done when: a real $1 invoice marks a test plan paid on its own, and replaying the same webhook changes nothing.
 
-### [ ] Q07 · Concierge mode for early access (D267) · L · Opus to plan
+### [x] Q07 · Concierge mode for early access (D267) · L · Opus to plan
 - Files: the staff area, a new migration, owner-facing access copy
 - Do: a per-business `concierge` flag, capped at 30 businesses. Staff can enter a new review by hand (stars, text, author, date) and mark an approved reply "Posted" after posting it in Google. Owners see: "A person on our team posts what you approve, within one working day." Listing Shield stays off while concierge is on. The ledger records which staff member posted.
 - Done when: a concierge business runs review, draft, owner approval, staff "Posted", with a complete ledger.

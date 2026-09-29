@@ -3,7 +3,14 @@
 import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
 
 export type ReviewState =
-  "new" | "drafted" | "blocked" | "posted" | "skipped" | "handled_offline" | "archived";
+  | "new"
+  | "drafted"
+  | "blocked"
+  | "publishing"
+  | "posted"
+  | "skipped"
+  | "handled_offline"
+  | "archived";
 export type InboxReview = {
   id: string;
   location_id: string;
@@ -34,7 +41,9 @@ export async function inboxReviews(
   tab: "todo" | "done",
 ): Promise<InboxReview[]> {
   const states: ReviewState[] =
-    tab === "todo" ? ["new", "drafted", "blocked"] : ["posted", "skipped", "handled_offline"];
+    tab === "todo"
+      ? ["new", "drafted", "blocked"]
+      : ["publishing", "posted", "skipped", "handled_offline"];
   const { data, error } = await supabase
     .from("reviews")
     .select(
@@ -101,6 +110,8 @@ export type ActionView = {
     reply: string | null;
   } | null;
   draft?: string | null;
+  /** Early access (D267): a person posts approved replies by hand. */
+  concierge?: boolean;
   change?: { id: string; field: string; before: string; after: string; state: string } | null;
 };
 export async function loadAction(token: string): Promise<ActionView> {

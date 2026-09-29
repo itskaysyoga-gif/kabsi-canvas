@@ -407,7 +407,7 @@ export function AppLayout({
             {signOutError}
           </p>
         ) : null}
-        <TestModeBanner />
+        <TestModeBanner concierge={area === "app" && myLoc.data?.concierge === true} />
         {area === "app" && current ? <SubNav section={current} path={location.pathname} /> : null}
         <main>{children}</main>
       </div>

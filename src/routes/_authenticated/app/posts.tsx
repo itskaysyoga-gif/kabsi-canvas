@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { fmtDate } from "@/lib/format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -95,9 +96,10 @@ function PostsPage() {
           <Link to="/start">Add your business</Link>
         </Button>
       ) : null}
-      {loc && loc.status !== "active" ? <NotYet /> : null}
+      {loc?.concierge ? <EarlyAccessNotice what="Posts" /> : null}
+      {loc && !loc.concierge && loc.status !== "active" ? <NotYet /> : null}
       {/* A draft waiting for the owner comes first: it's the one thing to act on. */}
-      {loc?.status === "active" && drafts.length ? (
+      {loc?.status === "active" && !loc.concierge && drafts.length ? (
         <section className="mt-7">
           <h2 className="text-sm font-bold uppercase tracking-wider text-kb-stone">
             Waiting for you
@@ -109,7 +111,7 @@ function PostsPage() {
           </div>
         </section>
       ) : null}
-      {loc && loc.status === "active" ? (
+      {loc && loc.status === "active" && !loc.concierge ? (
         <>
           {drafts.length ? (
             <h2 className="mt-10 text-sm font-bold uppercase tracking-wider text-kb-stone">

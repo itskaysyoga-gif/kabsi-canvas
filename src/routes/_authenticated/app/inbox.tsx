@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
+import { CONCIERGE_COPY } from "@/lib/concierge-copy";
 import { fmtDate } from "@/lib/format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -363,9 +364,13 @@ function ReviewCard({ review }: { review: InboxReview }) {
     setBusy(kind);
     try {
       if (kind === "post") {
-        await postReply(review.id, text.trim());
+        const posted = await postReply(review.id, text.trim());
         track("reply_published", { channel: "dashboard" });
-        setDone("Posted. It shows on Google within a few minutes.");
+        setDone(
+          posted.state === "manual_queued"
+            ? `${CONCIERGE_COPY.posted} ${CONCIERGE_COPY.waiting}`
+            : "Posted. It shows on Google within a few minutes.",
+        );
         await refresh();
       } else if (kind === "skip") {
         await skipReview(review.id);
