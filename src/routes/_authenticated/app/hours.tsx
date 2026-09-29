@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { fmtDay } from "@/lib/format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -146,6 +146,8 @@ function HoursForm({ locationId, onDone }: { locationId: string; onDone: () => u
   const [reason, setReason] = useState("");
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
+  // Set synchronously so a fast double click cannot start two saves before the button re-renders as disabled.
+  const sending = useRef(false);
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const summary = {
@@ -167,6 +169,8 @@ function HoursForm({ locationId, onDone }: { locationId: string; onDone: () => u
     setConfirming(true);
   }
   async function confirm() {
+    if (sending.current) return;
+    sending.current = true;
     setBusy(true);
     setErr("");
     try {
@@ -179,6 +183,7 @@ function HoursForm({ locationId, onDone }: { locationId: string; onDone: () => u
     } catch (x) {
       setErr(x instanceof Error ? x.message : "Couldn't save. Nothing changed on Google.");
     }
+    sending.current = false;
     setBusy(false);
   }
 
