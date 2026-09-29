@@ -1,6 +1,6 @@
 // Run: deno test supabase/functions/_shared/plans.test.ts
 import assert from "node:assert/strict";
-import { dueTrialEmail, paidWindow, trialDays, trialEligible, trialEnd } from "./plans.ts";
+import { dueRenewalEmail, dueTrialEmail, paidWindow, trialDays, trialEligible, trialEnd } from "./plans.ts";
 
 const iso = (d: Date) => d.toISOString().replace(".000", "");
 
@@ -62,4 +62,19 @@ Deno.test("trialEligible fails each rule on its own", () => {
   assert.equal(trialEligible({ ...ok, clockReady: false }), false);
   assert.equal(trialEligible({ ...ok, flagOn: false }), false);
   assert.equal(trialEligible({ ...ok, flagOn: false, testOwner: true }), true);
+});
+
+Deno.test("dueRenewalEmail: 5 days and 1 day before the last day, one stage at a time", () => {
+  const last = "2026-11-10";
+  const t = (d: string, h: number, sent: ("r5" | "r1")[] = [], continues = false) => dueRenewalEmail(last, d, h, sent, continues);
+  assert.equal(t("2026-11-04", 12), null);
+  assert.equal(t("2026-11-05", 8), null);
+  assert.equal(t("2026-11-05", 9), "r5");
+  assert.equal(t("2026-11-05", 9, ["r5"]), null);
+  assert.equal(t("2026-11-07", 10), "r5"); // catch-up
+  assert.equal(t("2026-11-09", 9), "r1");
+  assert.equal(t("2026-11-09", 9, ["r5"]), "r1");
+  assert.equal(t("2026-11-10", 12), "r1"); // last day, r1 not sent yet
+  assert.equal(t("2026-11-11", 9), null);
+  assert.equal(t("2026-11-05", 9, [], true), null);
 });

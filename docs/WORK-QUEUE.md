@@ -46,7 +46,7 @@ Every task below fits one Claude Code cloud session and one pull request. Take t
 - Do: plan kinds free, trial, pro_monthly, pro_yearly and lebanon_yearly. The trial starts when Google access starts (keep D241): 14 days, or 30 when `signup_source` is a partner. Emails 7 days and 1 day before the end, and on the day it ends. At the end the business drops to Free: drafting stops, the review link keeps working.
 - Done when: a test business moves from trial to Free on expiry, and a payment extends the plan correctly.
 
-### [ ] Q06 · Crypto billing through NOWPayments (D269) · L · Opus to plan
+### [x] Q06 · Crypto billing through NOWPayments (D269) · L · Opus to plan
 - Files: new `supabase/functions/billing/index.ts`, `supabase/functions/_shared/nowpayments.ts`, a migration for payment provider fields, the Plan page buttons
 - Do: create an invoice through the NOWPayments API (priced in USD, paid in USDT on TRC20 or BEP20, `order_id` = the plan purchase). The IPN webhook verifies `x-nowpayments-sig` (HMAC-SHA512 over the key-sorted JSON body with the IPN secret), ignores repeats of the same `payment_id`, and only `finished` activates a plan. Write `payments`, start or renew the plan, post to #kabsi-money. Whish, OMT, cash and the manual USDT claim stay as fallbacks.
 - Secrets: `NOWPAYMENTS_API_KEY` and `NOWPAYMENTS_IPN_SECRET`, in Supabase secrets only.

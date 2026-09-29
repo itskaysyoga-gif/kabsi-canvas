@@ -126,6 +126,7 @@ export type KabsiEvent =
   | "consent_given"
   | "access_granted"
   | "plan_selected"
+  | "checkout_started"
   | "payment_recorded"
   | "draft_generated"
   | "draft_edited"

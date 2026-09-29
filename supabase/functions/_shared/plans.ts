@@ -92,3 +92,16 @@ export function trialEligible(o: {
 }): boolean {
   return o.clockReady && !o.partnerCovered && !o.trialUsed && !o.paidOrWaiting && (o.flagOn || o.testOwner);
 }
+
+export type RenewalStage = "r5" | "r1";
+/**
+ * Renewal reminder for a paid monthly or yearly plan: 5 days and 1 day before the last day, from 09:00 local.
+ * Only the latest due stage is sent, never after the last day, and nothing when a payment already continues it.
+ * The email links to the Plan page; invoices are never created from cron (they expire).
+ */
+export function dueRenewalEmail(lastDay: string, localDate: string, localHour: number, sent: RenewalStage[], continues: boolean): RenewalStage | null {
+  if (continues || localDate > lastDay) return null;
+  const at = (ymd: string) => localDate > ymd || (localDate === ymd && localHour >= 9);
+  const stage: RenewalStage | null = at(addDays(lastDay, -1)) ? "r1" : at(addDays(lastDay, -5)) ? "r5" : null;
+  return stage && !sent.includes(stage) ? stage : null;
+}
