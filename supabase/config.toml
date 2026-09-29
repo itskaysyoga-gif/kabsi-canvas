@@ -1,41 +1,40 @@
-# Per-function JWT settings (D295). A redeploy without this file defaults verify_jwt to true, which made
-# pg_cron, pg_net and Worker calls (no user JWT) return 401 for 24 hours.
-# false = the function checks its own credential in code (x-cron-secret, x-kabsi-secret, Slack signature,
-# action token, or rate-limited public access). true = a signed-in user's JWT is required.
+# Per-function JWT settings (D295). A redeploy without this file defaults verify_jwt to true.
+# false = the caller cannot send a Supabase JWT, and the function checks its own credential in code
+# (Worker secret, Slack signature, or a public asset). true = the gateway requires a JWT; pg_cron and pg_net
+# calls (call_internal) and browser calls send the anon or user JWT, and the functions still check
+# x-cron-secret, the user or a rate limit in code.
 project_id = "ynjdqjlmdwjgbfezevxy"
 
-# Requested list (D295): no JWT.
-[functions.tap]
+# No JWT.
+[functions.tap]              # called by the go.kabsi.co Worker with x-kabsi-secret
 verify_jwt = false
-[functions.brand]
+[functions.brand]            # public mark.png used by emails
 verify_jwt = false
-[functions.health]
+[functions.health]           # x-cron-secret
 verify_jwt = false
-[functions.site-assets]
+[functions.site-assets]      # x-cron-secret
 verify_jwt = false
-
-# Also no JWT, because their callers send none. Each one authenticates in code.
-[functions.kv-sync]          # DB trigger and backfill via call_internal (x-cron-secret)
-verify_jwt = false
-[functions.posts-weekly]     # pg_cron via call_internal (x-cron-secret)
-verify_jwt = false
-[functions.slack]            # pg_cron flush, Slack-signed /interact and /command, Sentry poll
-verify_jwt = false
-[functions.api]              # cron-tick (x-cron-secret) and email links (action token); approve checks the user in code
-verify_jwt = false
-[functions.assistant]        # public chat widget, plus the internal /report route
-verify_jwt = false
-[functions.partner]          # user routes check the JWT in code; /billing is cron only
-verify_jwt = false
-[functions.lead]             # public form, rate-limited and honeypot
-verify_jwt = false
-[functions.review-link]      # public free tool, rate-limited
-verify_jwt = false
-[functions.places-search]    # public onboarding search, rate-limited fail-closed
+[functions.slack]            # Slack signs /interact and /command; Slack sends no Supabase JWT
 verify_jwt = false
 
 # JWT required.
-[functions.content]          # signed-in members only (currentUser in code as well)
+[functions.api]
+verify_jwt = true
+[functions.assistant]
+verify_jwt = true
+[functions.content]
 verify_jwt = true
 [functions.cron-tick]        # retired 410 stub
+verify_jwt = true
+[functions.kv-sync]
+verify_jwt = true
+[functions.lead]
+verify_jwt = true
+[functions.partner]
+verify_jwt = true
+[functions.places-search]
+verify_jwt = true
+[functions.posts-weekly]
+verify_jwt = true
+[functions.review-link]
 verify_jwt = true
