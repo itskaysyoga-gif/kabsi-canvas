@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { CONCIERGE_COPY } from "@/lib/concierge-copy";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,10 +9,13 @@ import { CopyButton } from "@/components/shared/copy-button";
 import { supabase, supabaseUrl } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import {
+  createInvoice,
+  invoiceStatus,
   loadPlanSummary,
   planOptions,
   PLAN_NAMES,
   type PaidKind,
+  type PayNetwork,
   type PlanSummary,
 } from "@/lib/plans";
 import { daysUntil } from "@/lib/dashboard";
@@ -27,6 +30,19 @@ import { PageIcon } from "@/components/shared/page-icon";
 // extends the plan (migration 20260926052531). Partner-tagged businesses never see a price (D224).
 export const Route = createFileRoute("/_authenticated/app/plan")({
   head: () => ({ meta: [{ title: "Plan | Kabsi" }, { name: "robots", content: "noindex" }] }),
+  // ?paid=<invoice id> is where NOWPayments sends the owner back; ?pay=<plan kind> comes from a reminder email.
+  validateSearch: (
+    s: Record<string, unknown>,
+  ): { paid?: string; cancelled?: boolean; pay?: string } => {
+    const paid = s["paid"];
+    const pay = s["pay"];
+    const cancelled = s["cancelled"];
+    return {
+      ...(typeof paid === "string" && /^[0-9a-f-]{36}$/.test(paid) ? { paid } : {}),
+      ...(cancelled === "1" || cancelled === 1 || cancelled === true ? { cancelled: true } : {}),
+      ...(typeof pay === "string" ? { pay } : {}),
+    };
+  },
   component: PlanPage,
 });
 
@@ -125,7 +141,13 @@ const ITEM_NAME: Record<string, string> = {
   cards_5: "5 cards",
   extra_card: "Extra card",
 };
-const METHOD: Record<string, string> = { cash: "Cash", whish: "Whish", omt: "OMT", usdt: "USDT" };
+const METHOD: Record<string, string> = {
+  cash: "Cash",
+  whish: "Whish",
+  omt: "OMT",
+  usdt: "USDT",
+  nowpayments: "USDT (invoice)",
+};
 
 function PlanPage() {
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
@@ -140,6 +162,7 @@ function PlanPage() {
     queryFn: () => loadPlanSummary(loc!.id),
     enabled: !!loc,
   });
+  const search = Route.useSearch();
   const d = data.data;
   const sum = summaryQ.data;
   const left = daysUntil(d?.paidUntil ?? null);
@@ -150,6 +173,20 @@ function PlanPage() {
       <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Settings</p>
       <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Plan</h1>
       {loc ? <p className="mt-2 text-kb-stone">{loc.name}</p> : null}
+      {search.paid ? (
+        <PaymentReturn
+          invoiceId={search.paid}
+          onPaid={() => {
+            void data.refetch();
+            void summaryQ.refetch();
+          }}
+        />
+      ) : null}
+      {search.cancelled ? (
+        <p className="mt-6 rounded-card bg-kb-sand px-4 py-3 text-sm text-kb-stone">
+          You left the payment page, so nothing was charged. You can choose a plan again below.
+        </p>
+      ) : null}
       {location.isLoading || data.isLoading || summaryQ.isLoading ? (
         <p className="mt-6 text-kb-stone">Loading…</p>
       ) : null}
@@ -287,6 +324,7 @@ function PlanPage() {
               [d.pending?.kind, d.current?.kind].find((k) => sum.offer.includes(k as Item)) as
                 Item | undefined
             }
+            preselect={search.pay}
             claim={d.claims[0] ?? null}
             onDone={() => data.refetch()}
           />
@@ -347,6 +385,7 @@ function Pay({
   renew,
   summary,
   defaultItem,
+  preselect,
   claim,
   onDone,
 }: {
@@ -354,12 +393,19 @@ function Pay({
   renew: boolean;
   summary: PlanSummary;
   defaultItem: Item | undefined;
+  preselect: string | undefined;
   claim: Claim | null;
   onDone: () => unknown;
 }) {
   const queryClient = useQueryClient();
   const options = planOptions(summary);
-  const [item, setItem] = useState<Item>(defaultItem ?? options[0]?.key ?? "lebanon_yearly");
+  const wanted = options.find((o) => o.key === preselect)?.key;
+  const [item, setItem] = useState<Item>(
+    wanted ?? defaultItem ?? options[0]?.key ?? "lebanon_yearly",
+  );
+  const [payNet, setPayNet] = useState<PayNetwork>("usdttrc20");
+  const [invoiceBusy, setInvoiceBusy] = useState(false);
+  const [invoiceError, setInvoiceError] = useState("");
   const [network, setNetwork] = useState<"trc20" | "binance_pay">("trc20");
   const [tx, setTx] = useState("");
   const [busy, setBusy] = useState(false);
@@ -436,56 +482,198 @@ function Pay({
         ))}
       </div>
 
-      <div className="mt-6 space-y-3 border-t border-kb-hairline pt-6 text-sm">
-        <p className="font-bold">
-          Pay {money(chosen.price)} in USDT, then paste the transaction ID.
-        </p>
-        <div className="flex flex-col gap-2 rounded-card bg-kb-sand p-4 sm:flex-row sm:items-center sm:justify-between">
-          <span className="min-w-0 break-all">
-            <span className="block text-xs text-kb-stone">USDT on TRC20</span>
-            <span className="font-mono">{USDT_TRC20}</span>
-          </span>
-          <CopyButton text={USDT_TRC20} />
+      {summary.nowpayments ? (
+        <div className="mt-6 space-y-3 border-t border-kb-hairline pt-6 text-sm">
+          <p className="font-bold">
+            Pay {money(chosen.price)} in USDT. Your plan starts by itself once the payment is
+            confirmed.
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <select
+              aria-label="Network"
+              value={payNet}
+              onChange={(e) => setPayNet(e.target.value as PayNetwork)}
+              className="h-11 rounded-card border border-kb-hairline bg-kb-white px-3"
+            >
+              <option value="usdttrc20">USDT on TRON (TRC20)</option>
+              <option value="usdtbsc">USDT on BNB Chain (BEP20)</option>
+            </select>
+            <Button
+              disabled={invoiceBusy}
+              onClick={async () => {
+                setInvoiceBusy(true);
+                setInvoiceError("");
+                try {
+                  const inv = await createInvoice(locationId, item, payNet);
+                  track("checkout_started", { plan: item, channel: "nowpayments" });
+                  window.location.assign(inv.invoice_url);
+                } catch (e) {
+                  setInvoiceError(e instanceof Error ? e.message : String(e));
+                  setInvoiceBusy(false);
+                }
+              }}
+            >
+              {invoiceBusy ? "Opening…" : "Pay with USDT"}
+            </Button>
+          </div>
+          {invoiceError ? <p className="text-kb-red">{invoiceError}</p> : null}
         </div>
-        <div className="flex flex-col gap-2 rounded-card bg-kb-sand p-4 sm:flex-row sm:items-center sm:justify-between">
-          <span>
-            <span className="block text-xs text-kb-stone">Binance Pay ID</span>
-            <span className="font-mono">{BINANCE_PAY_ID}</span>
-          </span>
-          <CopyButton text={BINANCE_PAY_ID} />
-        </div>
-        <form
-          onSubmit={submit}
-          className="grid gap-3 pt-1 sm:grid-cols-[auto_1fr_auto] sm:items-end"
-        >
-          <select
-            aria-label="How you paid"
-            value={network}
-            onChange={(e) => setNetwork(e.target.value as "trc20" | "binance_pay")}
-            className="h-11 rounded-card border border-kb-hairline bg-kb-white px-3"
+      ) : null}
+      {summary.nowpayments ? (
+        <details className="mt-6 border-t border-kb-hairline pt-4">
+          <summary className="cursor-pointer text-sm font-bold">Other ways to pay</summary>
+          <div className="mt-4 space-y-3 text-sm">
+            <p className="font-bold">
+              Pay {money(chosen.price)} in USDT, then paste the transaction ID.
+            </p>
+            <div className="flex flex-col gap-2 rounded-card bg-kb-sand p-4 sm:flex-row sm:items-center sm:justify-between">
+              <span className="min-w-0 break-all">
+                <span className="block text-xs text-kb-stone">USDT on TRC20</span>
+                <span className="font-mono">{USDT_TRC20}</span>
+              </span>
+              <CopyButton text={USDT_TRC20} />
+            </div>
+            <div className="flex flex-col gap-2 rounded-card bg-kb-sand p-4 sm:flex-row sm:items-center sm:justify-between">
+              <span>
+                <span className="block text-xs text-kb-stone">Binance Pay ID</span>
+                <span className="font-mono">{BINANCE_PAY_ID}</span>
+              </span>
+              <CopyButton text={BINANCE_PAY_ID} />
+            </div>
+            <form
+              onSubmit={submit}
+              className="grid gap-3 pt-1 sm:grid-cols-[auto_1fr_auto] sm:items-end"
+            >
+              <select
+                aria-label="How you paid"
+                value={network}
+                onChange={(e) => setNetwork(e.target.value as "trc20" | "binance_pay")}
+                className="h-11 rounded-card border border-kb-hairline bg-kb-white px-3"
+              >
+                <option value="trc20">USDT TRC20</option>
+                <option value="binance_pay">Binance Pay</option>
+              </select>
+              <Input
+                aria-label="Transaction ID"
+                placeholder={network === "trc20" ? "Transaction hash" : "Binance Pay order ID"}
+                value={tx}
+                onChange={(e) => setTx(e.target.value)}
+              />
+              <Button type="submit" size="compact" disabled={busy || tx.trim().length < 6}>
+                {busy ? "Sending…" : "I've paid"}
+              </Button>
+            </form>
+            {error ? <p className="text-kb-red">{error}</p> : null}
+            <p className="pt-2 text-kb-stone">
+              In Lebanon you can also pay with Whish, OMT or cash: message us on +961 3 956 917 or{" "}
+              <a className="font-medium text-kb-ink underline" href="mailto:hello@kabsi.co">
+                hello@kabsi.co
+              </a>
+              .
+            </p>
+          </div>
+        </details>
+      ) : (
+        <div className="mt-6 space-y-3 border-t border-kb-hairline pt-6 text-sm">
+          <p className="font-bold">
+            Pay {money(chosen.price)} in USDT, then paste the transaction ID.
+          </p>
+          <div className="flex flex-col gap-2 rounded-card bg-kb-sand p-4 sm:flex-row sm:items-center sm:justify-between">
+            <span className="min-w-0 break-all">
+              <span className="block text-xs text-kb-stone">USDT on TRC20</span>
+              <span className="font-mono">{USDT_TRC20}</span>
+            </span>
+            <CopyButton text={USDT_TRC20} />
+          </div>
+          <div className="flex flex-col gap-2 rounded-card bg-kb-sand p-4 sm:flex-row sm:items-center sm:justify-between">
+            <span>
+              <span className="block text-xs text-kb-stone">Binance Pay ID</span>
+              <span className="font-mono">{BINANCE_PAY_ID}</span>
+            </span>
+            <CopyButton text={BINANCE_PAY_ID} />
+          </div>
+          <form
+            onSubmit={submit}
+            className="grid gap-3 pt-1 sm:grid-cols-[auto_1fr_auto] sm:items-end"
           >
-            <option value="trc20">USDT TRC20</option>
-            <option value="binance_pay">Binance Pay</option>
-          </select>
-          <Input
-            aria-label="Transaction ID"
-            placeholder={network === "trc20" ? "Transaction hash" : "Binance Pay order ID"}
-            value={tx}
-            onChange={(e) => setTx(e.target.value)}
-          />
-          <Button type="submit" size="compact" disabled={busy || tx.trim().length < 6}>
-            {busy ? "Sending…" : "I've paid"}
-          </Button>
-        </form>
-        {error ? <p className="text-kb-red">{error}</p> : null}
-        <p className="pt-2 text-kb-stone">
-          In Lebanon you can also pay with Whish, OMT or cash: message us on +961 3 956 917 or{" "}
-          <a className="font-medium text-kb-ink underline" href="mailto:hello@kabsi.co">
-            hello@kabsi.co
-          </a>
-          .
-        </p>
-      </div>
+            <select
+              aria-label="How you paid"
+              value={network}
+              onChange={(e) => setNetwork(e.target.value as "trc20" | "binance_pay")}
+              className="h-11 rounded-card border border-kb-hairline bg-kb-white px-3"
+            >
+              <option value="trc20">USDT TRC20</option>
+              <option value="binance_pay">Binance Pay</option>
+            </select>
+            <Input
+              aria-label="Transaction ID"
+              placeholder={network === "trc20" ? "Transaction hash" : "Binance Pay order ID"}
+              value={tx}
+              onChange={(e) => setTx(e.target.value)}
+            />
+            <Button type="submit" size="compact" disabled={busy || tx.trim().length < 6}>
+              {busy ? "Sending…" : "I've paid"}
+            </Button>
+          </form>
+          {error ? <p className="text-kb-red">{error}</p> : null}
+          <p className="pt-2 text-kb-stone">
+            In Lebanon you can also pay with Whish, OMT or cash: message us on +961 3 956 917 or{" "}
+            <a className="font-medium text-kb-ink underline" href="mailto:hello@kabsi.co">
+              hello@kabsi.co
+            </a>
+            .
+          </p>
+        </div>
+      )}
     </section>
+  );
+}
+
+// Where NOWPayments sends the owner back. The plan starts when the payment is confirmed on the network and the
+// webhook arrives, which can take a few minutes, so this page checks every 5 seconds for up to 10 minutes.
+function PaymentReturn({ invoiceId, onPaid }: { invoiceId: string; onPaid: () => void }) {
+  const started = useState(() => Date.now())[0];
+  const [paidSeen, setPaidSeen] = useState(false);
+  const q = useQuery({
+    queryKey: ["invoice-status", invoiceId],
+    queryFn: () => invoiceStatus(invoiceId),
+    refetchInterval: (query) =>
+      query.state.data?.status === "paid" || Date.now() - started > 10 * 60_000 ? false : 5000,
+  });
+  const st = q.data;
+  useEffect(() => {
+    if (st?.status === "paid" && !paidSeen) {
+      setPaidSeen(true);
+      onPaid();
+    }
+  }, [st?.status, paidSeen, onPaid]);
+  if (!st) return null;
+  const box = "mt-6 rounded-card px-4 py-3 text-sm leading-6";
+  if (st.status === "paid") {
+    return (
+      <p className={cn(box, "bg-kb-green/10 text-kb-ink")}>
+        Payment received. Thank you. Your plan is set up below.
+      </p>
+    );
+  }
+  if (st.last_payment_status === "partially_paid") {
+    return (
+      <p className={cn(box, "bg-kb-red/10 text-kb-red")}>
+        We received less than the plan price. We'll be in touch at your email.
+      </p>
+    );
+  }
+  if (st.status === "expired") {
+    return (
+      <p className={cn(box, "bg-kb-sand text-kb-stone")}>
+        That payment link expired without a payment. You can start again below.
+      </p>
+    );
+  }
+  return (
+    <p className={cn(box, "bg-kb-sand text-kb-stone")}>
+      We're waiting for the network to confirm your payment. This can take a few minutes. We'll
+      email you when it's done.
+    </p>
   );
 }

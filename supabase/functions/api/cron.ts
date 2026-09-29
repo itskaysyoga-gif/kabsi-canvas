@@ -1,7 +1,7 @@
 // cron-tick: internal, every 5 minutes (pg_cron → public.call_internal('cron-tick')).
 // Each job decides what is due by looking at data, never at the clock alone, and is safe to run twice.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
-import { dueTrialEmail, localDateHour, type TrialStage } from "../_shared/plans.ts";
+import { dueRenewalEmail, dueTrialEmail, localDateHour, PLAN_LABEL, type RenewalStage, type TrialStage } from "../_shared/plans.ts";
 import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google.ts";
 import { activeLocations, draftPending, notifyLocation, syncableLocations, syncLocation } from "../_shared/reviews.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
@@ -273,9 +273,43 @@ async function trialsJob() {
   return { reminders };
 }
 
+// Job: renewal reminders for paid monthly and yearly plans (Q06), 5 days and 1 day before the last day, from 09:00
+// local. The link opens the Plan page: invoices are created there, never from cron, because they expire.
+const RENEW_COPY: Record<RenewalStage, string> = { r5: "in a few days", r1: "tomorrow" };
+async function renewalsJob() {
+  const db = admin();
+  const { data, error } = await db.rpc("renewal_reminder_candidates");
+  if (error) throw error;
+  let reminders = 0;
+  for (const c of (data ?? []) as { plan_id: string; location_id: string; name: string; time_zone: string; kind: string; last_day: string; continues: boolean }[]) {
+    const now = localDateHour(new Date(), c.time_zone);
+    const { data: done } = await db.from("emails").select("kind").eq("location_id", c.location_id).like("dedupe_key", `renew_%:${c.plan_id}:%`);
+    const sent = (done ?? []).map((r) => String(r.kind).replace("renew_", "")) as RenewalStage[];
+    const stage = dueRenewalEmail(c.last_day, now.date, now.hour, sent, c.continues);
+    if (!stage) continue;
+    const day = formatDay(c.last_day);
+    const label = PLAN_LABEL[c.kind] ?? "Kabsi Pro";
+    const plain = `Your ${label} plan for ${c.name} ends ${RENEW_COPY[stage]}, on ${day}. To keep Replies, Profile Care, Listing Shield and the Monday Report going, pay before then. Paying early adds the new period after this one, so you lose no days. Your Review Link and Card keep working either way.`;
+    for (const to of await ownerEmails(c.location_id)) {
+      await sendEmail({
+        kind: `renew_${stage}`, to, locationId: c.location_id, dedupeKey: `renew_${stage}:${c.plan_id}:${to}`,
+        subject: stage === "r1" ? "Your Kabsi plan ends tomorrow" : `Your Kabsi plan ends on ${day}`,
+        html: emailLayout({
+          preheader: "Pay before it ends and you lose no days.", title: "Your plan is ending",
+          bodyHtml: `<p style="margin:0 0 16px 0;">${esc(plain)}</p>`,
+          button: { label: "Renew your plan", url: `${APP_URL}/app/plan?pay=${encodeURIComponent(c.kind)}` },
+        }),
+        text: `${plain}\n\nRenew your plan: ${APP_URL}/app/plan?pay=${encodeURIComponent(c.kind)}`,
+      }).catch((e) => captureError("cron-tick", e, { job: "renewals", location: c.location_id }));
+    }
+    reminders++;
+  }
+  return { renewals: reminders };
+}
+
 const JOBS: Record<string, () => Promise<Record<string, unknown>>> = {
   access: accessJob, sync: syncJob, draft: draftJob, notify: notifyJob, ratings: ratingsJob, weekly: weeklyJob, shield: shieldJob,
-  deletions: deletionsJob, trials: trialsJob,
+  deletions: deletionsJob, trials: trialsJob, renewals: renewalsJob,
 };
 
 export async function cronTick(req: Request): Promise<Response> {

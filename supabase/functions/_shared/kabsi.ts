@@ -80,6 +80,7 @@ export function log(fn: string, fields: Record<string, unknown>) {
 const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.-]+/g;
 const SENSITIVE_KEYS = new Set([
   "comment", "reviewer_name", "body", "instruction", "text", "payload", "email", "to", "token", "authorization",
+  "sig", "signature", "x-nowpayments-sig", "pay_address", "api_key", "x-api-key",
 ]);
 function scrub(value: unknown, depth = 0): unknown {
   if (typeof value === "string") return value.replace(EMAIL_RE, "[email]").slice(0, 300);
