@@ -122,3 +122,4 @@ About your business: grouped form with a progress bar; four groups start collaps
 ## Log
 
 - 29 Sep 2026: added CLAUDE.md, docs/KABSI-SPEC.md, docs/KABSI-STATE.md, docs/WORK-QUEUE.md (exported from the Claude.ai project). Next: Q01.
+- 29 Sep 2026: Q01 code: kv-sync writes cards to KV with no expiry plus `{"backfill":true}`; Worker has no cache TTL and dedupes taps per visitor per card for 10 minutes (daily-salted hash). Not deployed. Next: deploy kv-sync and the Worker, call the backfill once, then Q02.

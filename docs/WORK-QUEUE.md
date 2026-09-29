@@ -19,7 +19,7 @@ Every task below fits one Claude Code cloud session and one pull request. Take t
 
 ## Foundations
 
-### [ ] Q01 · Card taps never depend on the database (D271) · S · Sonnet
+### [x] Q01 · Card taps never depend on the database (D271) · S · Sonnet (code done 29 Sep; deploy kv-sync and the Worker, then run the backfill)
 - Files: `supabase/functions/kv-sync/index.ts`, `workers/kabsi-go/src/index.js`
 - Do: kv-sync writes the card's JSON to KV with no expiry instead of deleting it. The Worker stops setting `expirationTtl` on cache writes. Add a one-off backfill that writes every active card. Count one tap per card per 10 minutes using a KV key made from a daily-salted hash, never the raw IP.
 - Done when: an edited card reaches KV within a minute, a tap still redirects with Supabase unreachable, and repeat taps within 10 minutes count once.
