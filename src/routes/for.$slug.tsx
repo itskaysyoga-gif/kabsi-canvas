@@ -188,15 +188,24 @@ function Page() {
       </Section>
 
       <Section tone="sand">
-        <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:gap-14">
+        <div
+          className={
+            isLebanon
+              ? "grid items-center gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:gap-14"
+              : undefined
+          }
+        >
           <div>
-            <Eyebrow>The review card</Eyebrow>
-            <H2>{v.headings.card}</H2>
+            <Eyebrow>Getting reviews</Eyebrow>
+            <H2>Where to put your review link</H2>
             <p className="mt-5 max-w-xl text-lg leading-8 text-kb-stone">
-              An optional NFC and QR card. Customers tap their phone or scan the code, and Google's
-              own review form opens. Where it works best:
+              {isLebanon
+                ? "Your review link and QR code are free, and an optional NFC card works with them: customers tap the card or scan the code, and Google's own review form opens. Put it where customers already are:"
+                : "Your review link and QR code are free in every country. Put it where customers already are:"}{" "}
+              on the counter, on receipts, on a table tent, or in a follow-up message.
             </p>
-            <ul className="mt-6 space-y-3">
+            <p className="mt-4 max-w-xl text-[15px] text-kb-stone">What works for {v.name}:</p>
+            <ul className="mt-4 space-y-3">
               {v.placements.map((p) => (
                 <li key={p} className="flex gap-3 text-[17px] leading-7">
                   <IconBadge icon={<Check />} className="mt-0.5 size-7 [&_svg]:size-4" />
@@ -216,17 +225,21 @@ function Page() {
               >
                 <QrCode className="size-4" aria-hidden="true" /> Free review link and QR code
               </Link>
-              <Link
-                to="/pricing"
-                className="inline-flex items-center gap-2 font-bold underline underline-offset-4"
-              >
-                <Receipt className="size-4" aria-hidden="true" /> Card prices
-              </Link>
+              {isLebanon ? (
+                <Link
+                  to="/pricing"
+                  className="inline-flex items-center gap-2 font-bold underline underline-offset-4"
+                >
+                  <Receipt className="size-4" aria-hidden="true" /> Card prices
+                </Link>
+              ) : null}
             </div>
           </div>
-          <div className="flex justify-center md:justify-end">
-            <CardRender />
-          </div>
+          {isLebanon ? (
+            <div className="flex justify-center md:justify-end">
+              <CardRender />
+            </div>
+          ) : null}
         </div>
       </Section>
 
