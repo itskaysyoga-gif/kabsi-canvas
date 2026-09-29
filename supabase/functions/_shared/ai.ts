@@ -1,8 +1,15 @@
-// Anthropic calls (SPEC D207): claude-sonnet-5 drafts, claude-haiku-4-5-20251001 classifies and checks.
+// Anthropic calls (SPEC D207). Model ids live in models.ts: a Sonnet model drafts, Haiku classifies and checks.
 import { factsBlock } from "./facts.ts";
+import { MODELS, shouldFallBack } from "./models.ts";
 
-const DRAFT_MODEL = "claude-sonnet-5";
-const CHECK_MODEL = "claude-haiku-4-5-20251001";
+export { MODELS };
+const CHECK_MODEL = MODELS.check;
+
+export class AnthropicError extends Error {
+  constructor(public status: number, detail: string) {
+    super(`anthropic ${status}: ${detail}`);
+  }
+}
 
 function apiKey() {
   // The key was saved as "Anthropic_Api" in the dashboard; accept both names.
@@ -18,10 +25,22 @@ export async function message(model: string, system: string, user: string, maxTo
     body: JSON.stringify({ model, max_tokens: maxTokens, system, messages: [{ role: "user", content: user }] }),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(`anthropic ${res.status}: ${JSON.stringify(data).slice(0, 300)}`);
+  if (!res.ok) throw new AnthropicError(res.status, JSON.stringify(data).slice(0, 300));
   const text = (data.content ?? []).filter((b: { type: string }) => b.type === "text").map((b: { text: string }) => b.text).join("").trim();
   if (!text) throw new Error(`anthropic empty reply (${model}, stop_reason=${data.stop_reason})`);
   return text;
+}
+
+// Drafting call: the configured draft model first, the fallback only if that model is unavailable (Q09).
+// Returns the model that actually wrote the text so the draft row records the truth.
+export async function draftMessage(system: string, user: string, maxTokens: number): Promise<{ text: string; model: string }> {
+  try {
+    return { text: await message(MODELS.draft, system, user, maxTokens), model: MODELS.draft };
+  } catch (e) {
+    if (!(e instanceof AnthropicError) || !shouldFallBack(e.status) || MODELS.fallback === MODELS.draft) throw e;
+    console.log(JSON.stringify({ fn: "ai", ok: false, draft_model_failed: MODELS.draft, status: e.status, fallback: MODELS.fallback }));
+    return { text: await message(MODELS.fallback, system, user, maxTokens), model: MODELS.fallback };
+  }
 }
 
 export function parseJson<T>(text: string): T {
@@ -81,7 +100,7 @@ function languageRule(language: string) {
   return "Reply in the same language as the review.";
 }
 
-// Grounded draft (D223). Returns the reply text only.
+// Grounded draft (D223). Returns the reply text and the model that wrote it.
 export async function draftReply(o: { review: ReviewInput; business: string; card: Card; language: string; urgent: boolean; instruction?: string; previous?: string }) {
   const tone = (o.card.tone === "formal" ? "formal and courteous" : o.card.tone === "short" ? "short and friendly" : "warm and personal")
     + (typeof o.card.tone_notes === "string" && o.card.tone_notes.trim() ? `. Owner's note on voice: ${o.card.tone_notes.trim().slice(0, 200)}` : "");
@@ -110,7 +129,8 @@ Output only the reply text.`;
   const user = o.instruction && o.previous
     ? `${fenceReview(o.review)}\n\nCurrent draft:\n${o.previous}\n\nOwner's instruction for the new version: ${o.instruction}`
     : fenceReview(o.review);
-  return noDashes((await message(DRAFT_MODEL, system, user, 400)).replace(/^["“]|["”]$/g, "").trim());
+  const out = await draftMessage(system, user, 400);
+  return { text: noDashes(out.text.replace(/^["“]|["”]$/g, "").trim()), model: out.model };
 }
 
 // House rule: no em dashes in anything Kabsi writes (they read as machine-written). En dashes used as
@@ -156,4 +176,3 @@ Set ok=false if the draft: states a fact about the business not in the allowed f
   return { ok: j.ok === true, issues: (j.issues ?? []).slice(0, 6), model: CHECK_MODEL };
 }
 
-export const MODELS = { draft: DRAFT_MODEL, check: CHECK_MODEL };

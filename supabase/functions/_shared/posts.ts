@@ -1,12 +1,12 @@
 // Post drafting shared by `content` (owner asks) and `posts-weekly` (Kabsi drafts once a week).
 // Every post is a draft until the owner clicks Post on the exact text (D202).
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
-import { fenceReview, message, noDashes, parseJson, UNTRUSTED } from "./ai.ts";
+import { draftMessage, fenceReview, message, noDashes, parseJson, UNTRUSTED } from "./ai.ts";
+import { MODELS } from "./models.ts";
 import { businessFacts, hasPostFacts } from "./facts.ts";
 import { googleMode, placeCategory, searchKeywords } from "./google.ts";
 
-const DRAFT_MODEL = "claude-sonnet-5";
-const CHECK_MODEL = "claude-haiku-4-5-20251001";
+const CHECK_MODEL = MODELS.check;
 
 // Buttons Google's localPosts API accepts. CALL uses the phone on the profile; the others need a link.
 export const CTAS = ["CALL", "BOOK", "ORDER", "SHOP", "LEARN_MORE", "SIGN_UP"];
@@ -98,7 +98,7 @@ Set ok=false if the post states anything not supported by the owner's note or th
 // Draft, check, and redraft once if the check finds invented facts. `ok` false means the second try failed too.
 export async function writePost(loc: PostLoc, keywords: string[], user: string) {
   const draft = async (u: string) =>
-    noDashes((await message(DRAFT_MODEL, postSystem(loc, keywords), u, 700)).replace(/^["“]|["”]$/g, "").trim()).slice(0, 1500);
+    noDashes((await draftMessage(postSystem(loc, keywords), u, 700)).text.replace(/^["“]|["”]$/g, "").trim()).slice(0, 1500);
   let text = await draft(user);
   let check = await checkPost(loc, user, text).catch(() => ({ ok: true, issues: [] as string[] }));
   if (!check.ok) {
