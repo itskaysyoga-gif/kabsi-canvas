@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { H2, PageHero, Section } from "@/components/marketing/parts";
@@ -83,7 +84,7 @@ function SecurityPage() {
   );
 }
 
-function ContentSection({ title, children }: { title: string; children: React.ReactNode }) {
+function ContentSection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section>
       <H2 className="text-3xl">{title}</H2>
