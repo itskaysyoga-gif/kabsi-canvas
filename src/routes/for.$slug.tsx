@@ -17,6 +17,7 @@ import { Callout, Example, IconGrid } from "@/components/marketing/guide-kit";
 import { Button } from "@/components/ui/button";
 import { VERTICALS, VERTICAL_REDIRECTS, verticalBySlug } from "@/lib/verticals";
 import { faqJsonLd } from "@/lib/faq";
+import { useIsLebanon } from "@/lib/region";
 import { photoSrc } from "@/lib/site-photos";
 import { PRICES, SITE_URL, pageHead } from "@/lib/site";
 
@@ -82,6 +83,7 @@ export const Route = createFileRoute("/for/$slug")({
 function Page() {
   const { slug } = Route.useLoaderData();
   const v = verticalBySlug(slug)!;
+  const isLebanon = useIsLebanon();
   const others = VERTICALS.filter((x) => x.slug !== v.slug);
   return (
     <PublicLayout>
