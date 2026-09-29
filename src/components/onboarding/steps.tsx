@@ -246,10 +246,14 @@ export function AccessStep({ location, onChanged }: StepProps) {
             Access received
           </p>
         ) : location.consent_at ? (
-          <p className="text-kb-stone">
-            Waiting for your invite… This updates by itself, usually a few minutes after you send
-            it.
-          </p>
+          <div>
+            <span className="inline-flex rounded-pill border border-kb-hairline px-2.5 py-1 text-xs font-bold text-kb-stone">
+              Early access
+            </span>
+            <p className="mt-3 text-kb-stone">
+              We will email you as soon as access works. You can close this page.
+            </p>
+          </div>
         ) : (
           <p className="text-kb-stone">Tick the box above, then send the invite.</p>
         )}
@@ -388,27 +392,28 @@ export function DoneStep({ location }: { location: Location | null }) {
   const active = location.status === "active";
   const lebanon = location.country === "LB";
   const needsPayment = !location.partner_id && !active;
+  const hasAccess = Boolean(location.access_granted_at);
+  const hasPlan = !needsPayment;
+  const setupComplete = hasAccess && hasPlan;
   return (
     <>
       <StepTitle
-        title="You're set"
+        title={setupComplete ? "You're set" : "Almost there"}
         sub={
-          active
+          setupComplete
             ? "Kabsi is watching your reviews. When the next one arrives you'll get an email with a reply ready."
             : "When your next Google review arrives, you'll get an email with a reply ready, as soon as the steps below are done."
         }
       />
       <ul className="space-y-3">
         <li className="flex items-center gap-3">
-          <StatusDot done={Boolean(location.access_granted_at)} />
-          Google access {location.access_granted_at ? "received" : "waiting for your invite"}
+          <StatusDot done={hasAccess} />
+          Access from Google
         </li>
-        {!location.partner_id ? (
-          <li className="flex items-center gap-3">
-            <StatusDot done={!needsPayment} />
-            Plan {needsPayment ? "waiting for payment" : "active"}
-          </li>
-        ) : null}
+        <li className="flex items-center gap-3">
+          <StatusDot done={hasPlan} />
+          Your plan
+        </li>
       </ul>
       {needsPayment ? (
         <div className="mt-6 rounded-card bg-kb-sand p-5 text-sm leading-6">

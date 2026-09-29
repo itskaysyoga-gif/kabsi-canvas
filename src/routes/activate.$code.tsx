@@ -30,8 +30,8 @@ function ActivatePage() {
       <div className="mt-7 rounded-card bg-kb-sand p-5">
         <p className="font-bold">Is this your card?</p>
         <p className="mt-1 text-sm leading-6 text-kb-stone">
-          Link it to your business in a few minutes. After that, every tap opens your Google review
-          page.
+          Link it to your business, then invite Kabsi as a Manager. We accept your invite and email
+          you as soon as we do. After that, every tap opens your Google review page.
         </p>
         <Button asChild className="mt-4 w-full">
           <Link to="/start" search={{ code: clean }}>
