@@ -213,6 +213,7 @@ export async function cronTick(req: Request): Promise<Response> {
     return json({ ok: true, reports: await weeklyReports(await reportLocations(), { forceLocation: body.weekly_now }) });
   }
   const results: Record<string, unknown> = {};
+  let failed = 0;
   for (const [name, job] of Object.entries(JOBS)) {
     const started = Date.now();
     try {
@@ -221,9 +222,12 @@ export async function cronTick(req: Request): Promise<Response> {
       if (Object.values(detail).some((v) => typeof v === "number" && v > 0)) await jobLog(name, true, { ...detail, ms: Date.now() - started });
     } catch (e) {
       results[name] = { error: String(e) };
+      failed++;
       await jobLog(name, false, { error: String(e).slice(0, 500) });
       await captureError("cron-tick", e, { job: name });
     }
   }
+  // Heartbeat: quiet ticks log nothing above, so health could not tell "idle" from "not running" (D295).
+  if (!failed) await jobLog("cron-tick", true, { heartbeat: true });
   return json({ ok: true, results });
 }

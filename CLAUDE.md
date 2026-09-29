@@ -8,6 +8,8 @@ Kabsi takes care of a local business's Google Business Profile: reply drafts for
 2. `docs/KABSI-STATE.md`: what is live, what is broken, what is next.
 3. `docs/WORK-QUEUE.md`: take the top unchecked task unless the prompt names another.
 
+Queue order: Q02, Q03, Q16, Q10, Q04, then stop and report. Q05 to Q07 need an Opus plan first. Do not start Q17 or Q18.
+
 Read only the files the task lists. Use `grep` before opening large files. Never read `bun.lock`, `src/routeTree.gen.ts`, `public/llms-full.txt` or old migrations unless the task needs them.
 
 ## Rules that never bend
@@ -16,6 +18,7 @@ Read only the files the task lists. Use `grep` before opening large files. Never
 - Honesty (spec §3): never promise more reviews, higher ratings or rankings; no fake reviews, no review gating, no rewards for reviews. Demo content is labelled "Example".
 - Copy: no em dashes, no en dashes, no exclamation marks, plain words. Module names exactly: Replies, Profile Care, Listing Shield, Review Link and Card, Monday Report. Plans: Free, Pro, Partner.
 - Lebanon-only card wording goes through `src/lib/region.ts`; Manager-invite steps live only in `ManagerAccessInstructions` (see `AGENTS.md`).
+- The Kabsi Google group ID lives in one constant, `KABSI_GROUP_ID` in `src/lib/site.ts`. Owners invite the group, not hello@kabsi.co (D293).
 - Secrets never appear in code, commits, logs, PR text or screenshots. They live in Supabase secrets and GitHub Actions secrets.
 
 ## Git and Lovable
@@ -33,7 +36,7 @@ Read only the files the task lists. Use `grep` before opening large files. Never
 
 ## Deploys
 
-Cloud sessions do not deploy. Rashid reviews and merges; Lovable publishes the site; Edge Functions and migrations deploy the way they do today until the CI deploy workflow (queue item Q16) exists.
+Claude Code cloud sessions do not deploy. Rashid reviews and merges; Lovable publishes the site. Edge Functions and migrations are deployed from the Claude.ai project session, so say "ask Rashid to have Claude.ai deploy" and name the function or migration; never claim something is live before that. This holds until the CI deploy workflow (queue item Q16) exists. `supabase/config.toml` holds each function's `verify_jwt`; keep it in step when a function is added (a redeploy without it defaults to true and breaks cron and Worker calls, D295).
 
 ## End of every session
 

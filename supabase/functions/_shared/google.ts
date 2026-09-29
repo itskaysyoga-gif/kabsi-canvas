@@ -1,4 +1,5 @@
 import { admin } from "./kabsi.ts";
+import { matchInvitation, type PendingBusiness } from "./invitations.ts";
 
 // Google Business Profile access as hello@kabsi.co (one central Manager account, SPEC D203).
 // GOOGLE_MODE=mock (default until the GBP API grant) simulates Google so every flow is testable.
@@ -50,18 +51,16 @@ const BI = "https://mybusinessbusinessinformation.googleapis.com/v1";
 
 export type ManagedLocation = { accountId: string; locationId: string; placeId: string | null; title: string };
 
-// D270 vetting. Google's invitation only carries the listing's name and address (no place ID), so an
-// invitation is accepted only when (1) it is a Manager invitation for a location, and (2) its name matches
-// a business that has consented and is waiting for access. Anything else is left pending and reported.
-const norm = (v: string) => v.toLowerCase().normalize("NFKD").replace(/[^\p{L}\p{N}]+/g, " ").trim();
-export type PendingBusiness = { name: string; address?: string | null };
+// D270 vetting: see _shared/invitations.ts. An invitation is accepted only when it is a Manager invitation for a
+// location and exactly one consented business matches its name and address or city. Anything else is left
+// pending and reported.
+export type { PendingBusiness };
 export type SkippedInvitation = { invitation: string; reason: string; location: string };
 
 // Owners invite Kabsi's business group (D293). Invitations show up under every account this login can see
 // (the organization, the business group, the personal account), so all of them are listed.
 export async function acceptInvitationsAndListLocations(pending: PendingBusiness[] = []): Promise<{ accepted: number; skipped: SkippedInvitation[]; locations: ManagedLocation[] }> {
   const { accounts = [] } = await g(`${AM}/accounts`);
-  const wanted = pending.map((p) => norm(p.name)).filter(Boolean);
   let accepted = 0;
   const skipped: SkippedInvitation[] = [];
   for (const acct of accounts) {
@@ -70,8 +69,8 @@ export async function acceptInvitationsAndListLocations(pending: PendingBusiness
       const locName: string = inv.targetLocation?.locationName ?? "";
       if (inv.targetType && inv.targetType !== "LOCATIONS_ONLY" && !inv.targetLocation) { skipped.push({ invitation: inv.name, reason: "not a location invitation", location: locName }); continue; }
       if (inv.role && inv.role !== "MANAGER") { skipped.push({ invitation: inv.name, reason: `role ${inv.role}, not MANAGER`, location: locName }); continue; }
-      const n = norm(locName);
-      if (!n || !wanted.some((w) => w === n || w.includes(n) || n.includes(w))) { skipped.push({ invitation: inv.name, reason: "no consented business with this name", location: locName }); continue; }
+      const match = matchInvitation(locName, inv.targetLocation?.address, pending);
+      if (!match.ok) { skipped.push({ invitation: inv.name, reason: match.reason, location: locName }); continue; }
       await g(`${AM}/${inv.name}:accept`, { method: "POST", body: "{}" });
       accepted++;
     }

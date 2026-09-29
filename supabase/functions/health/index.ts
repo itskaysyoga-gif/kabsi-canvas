@@ -13,6 +13,35 @@ async function isInternal(req: Request) {
   return res.ok && given === (await res.json());
 }
 
+// D295: a redeploy once reset verify_jwt and every cron call got 401 for a day while pg_cron still showed
+// "succeeded". The only proof the jobs really run is a successful jobs_log row (api cron-tick writes a
+// heartbeat every tick). None in 30 minutes raises one alert in #kabsi-alerts per half hour.
+const STALE_MINUTES = 30;
+async function rest(path: string, init: RequestInit = {}) {
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  return await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/${path}`, {
+    ...init,
+    headers: { "content-type": "application/json", apikey: key, authorization: `Bearer ${key}`, ...(init.headers ?? {}) },
+  });
+}
+async function jobsFreshness(): Promise<string> {
+  const since = new Date(Date.now() - STALE_MINUTES * 60_000).toISOString();
+  const r = await rest(`jobs_log?ok=eq.true&created_at=gte.${encodeURIComponent(since)}&select=id&limit=1`);
+  if (!r.ok) return `check failed (${r.status})`;
+  if ((await r.json()).length) return "ok";
+  const bucket = Math.floor(Date.now() / (STALE_MINUTES * 60_000));
+  await rest("rpc/ops_emit", {
+    method: "POST",
+    body: JSON.stringify({
+      p_kind: "jobs_silent", p_channel: "alerts",
+      p_title: `:rotating_light: No successful job in ${STALE_MINUTES} minutes`,
+      p_body: "jobs_log has no successful row. Scheduled functions may be returning 401 or 5xx (check verify_jwt in supabase/config.toml and the function logs).",
+      p_dedupe: `jobs_silent:${bucket}`,
+    }),
+  });
+  return `STALE: no successful jobs_log row in ${STALE_MINUTES} minutes (alert sent)`;
+}
+
 const SECRETS = [
   "RESEND_API_KEY", "PLACES_API_KEY", "TAP_SECRET", "CF_API_TOKEN", "CF_ACCOUNT_ID",
   "ANTHROPIC_API_KEY", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_REFRESH_TOKEN", "GOOGLE_MODE", "APP_URL",
@@ -20,6 +49,8 @@ const SECRETS = [
 
 Deno.serve(async (req) => {
   if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
+  const body = await req.json().catch(() => ({})) as { only?: string };
+  if (body.only === "jobs") return json({ checks: { jobs_recent: await jobsFreshness() } });
   const all = Object.keys(Deno.env.toObject());
   const set: Record<string, boolean> = {};
   for (const name of SECRETS) set[name] = Boolean(Deno.env.get(name));
@@ -73,6 +104,7 @@ Deno.serve(async (req) => {
         : `${a.status}: ${String(aj.error?.message ?? "").slice(0, 160)}`;
     }
   } else checks.google_token = "not configured (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN)";
+  checks.jobs_recent = await jobsFreshness();
   checks.google_mode = Deno.env.get("GOOGLE_MODE") === "live" ? "live" : "mock";
   return json({ set, nearMisses, checks });
 });

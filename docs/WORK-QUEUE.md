@@ -24,7 +24,7 @@ Every task below fits one Claude Code cloud session and one pull request. Take t
 - Do: kv-sync writes the card's JSON to KV with no expiry instead of deleting it. The Worker stops setting `expirationTtl` on cache writes. Add a one-off backfill that writes every active card. Count one tap per card per 10 minutes using a KV key made from a daily-salted hash, never the raw IP.
 - Done when: an edited card reaches KV within a minute, a tap still redirects with Supabase unreachable, and repeat taps within 10 minutes count once.
 
-### [ ] Q02 · Tighter invitation vetting (D270) · S · Sonnet
+### [x] Q02 · Tighter invitation vetting (D270) · S · Sonnet
 - Files: `supabase/functions/_shared/google.ts`, `supabase/functions/api/cron.ts`
 - Do: replace the substring name match (`includes`) with an exact normalized name plus an address or city match. If the Invitation resource now returns a place ID, match on it first. Never accept when two consented businesses match. Add tests with look-alike names ("Cafe" and "Cafe Younes").
 - Done when: tests pass and skipped invitations still reach Sentry and #kabsi-alerts.
