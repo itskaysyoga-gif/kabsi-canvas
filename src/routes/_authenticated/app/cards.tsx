@@ -14,6 +14,8 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { copyText } from "@/lib/clipboard";
+import { CopyButton } from "@/components/shared/copy-button";
+import { useIsLebanon } from "@/lib/region";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
