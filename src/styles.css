@@ -70,7 +70,7 @@
 
 @layer base {
   * { border-color: var(--kb-hairline); }
-  html { min-width: 320px; overflow-x: hidden; }
+  html { min-width: 320px; overflow-x: hidden; scroll-behavior: smooth; }
   body { min-width: 320px; overflow-x: hidden; background: var(--background); color: var(--foreground); font-family: var(--font-sans); font-size: 16px; letter-spacing: 0; }
   button, a, input { transition-duration: 160ms; }
   :focus-visible { outline: 2px solid var(--kb-black); outline-offset: 2px; }
