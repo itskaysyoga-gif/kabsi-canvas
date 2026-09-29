@@ -14,6 +14,8 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { copyText } from "@/lib/clipboard";
+import { CopyButton } from "@/components/shared/copy-button";
+import { useIsLebanon } from "@/lib/region";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -84,6 +86,9 @@ function CardsPage() {
     enabled: !!loc,
   });
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["cards"] });
+  const links = data.data?.cards.filter((c) => c.kind === "link") ?? [];
+  const shareLink = links.find((l) => l.status === "active") ?? links[0];
+  const isLeb = useIsLebanon(loc?.country);
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
@@ -120,18 +125,20 @@ function CardsPage() {
       {loc ? (
         <ReviewLinks
           locationId={loc.id}
-          links={data.data?.cards.filter((c) => c.kind === "link") ?? []}
+          links={links}
           taps={data.data?.taps ?? []}
           onChanged={refresh}
         />
       ) : null}
-      <h2 className="mt-10 text-lg font-bold">NFC cards</h2>
-      {loc && loc.country !== "LB" ? (
+      {loc && shareLink ? (
+        <ShareKit name={loc.name} link={`https://go.kabsi.co/${shareLink.code}`} />
+      ) : null}
+      <h2 className="mt-10 text-lg font-bold">Cards</h2>
+      {loc && !isLeb ? (
         <p className="mt-2 rounded-card bg-kb-white p-4 text-sm leading-6 text-kb-stone shadow-kb">
-          <b className="text-kb-ink">Outside Lebanon?</b> Kabsi ships cards only in Lebanon. Get one
-          from a Kabsi partner, or buy any blank NFC card or sticker online (NTAG213 or NTAG215),
-          open a free NFC writer app, choose "write a URL" and paste your review link from above.
-          Taps are counted the same way.
+          <b className="text-kb-ink">NFC cards ship only in Lebanon.</b> You can write your review
+          link on any NTAG213 or NTAG215 tag you buy online. Open a free NFC writer app, choose
+          "write a URL" and paste your review link from above. Taps are counted the same way.
         </p>
       ) : null}
       <div className="mt-3 space-y-4">
@@ -407,6 +414,53 @@ function AddCard({ locationId, onAdded }: { locationId: string; onAdded: () => u
   );
 }
 
+// Ready-to-copy share texts built from the business name and the short review link (D212: one page
+// for every customer, no filtering). Copy-only, nothing is sent for the owner.
+function ShareKit({ name, link }: { name: string; link: string }) {
+  const whatsapp = `Thank you for visiting ${name}. If you have a minute, we would love a Google review: ${link}`;
+  const sms = `Thank you for visiting ${name}. We would love a Google review: ${link}`;
+  const emailSubject = `Thank you from ${name}`;
+  const emailBody = `Thank you for visiting ${name}. If you would like to leave a Google review, here is the link: ${link}`;
+  const items: { title: string; text: string; copy: string; subject?: string }[] = [
+    { title: "WhatsApp", text: whatsapp, copy: whatsapp },
+    { title: "SMS", text: sms, copy: sms },
+    {
+      title: "Email to a customer",
+      subject: emailSubject,
+      text: emailBody,
+      copy: `Subject: ${emailSubject}\n\n${emailBody}`,
+    },
+    { title: "Email signature line", text: `Leave ${name} a Google review: ${link}`, copy: `Leave ${name} a Google review: ${link}` },
+    { title: "Receipt line", text: `Review us on Google: ${link}`, copy: `Review us on Google: ${link}` },
+  ];
+  return (
+    <section className="mt-10">
+      <h2 className="text-lg font-bold">Share it</h2>
+      <p className="mt-1 text-sm text-kb-stone">
+        Ready-to-copy texts with your link already in them.
+      </p>
+      <div className="mt-3 space-y-3">
+        {items.map((it) => (
+          <div key={it.title} className="rounded-card bg-kb-white p-4 shadow-kb sm:p-5">
+            <div className="flex items-center justify-between gap-3">
+              <p className="font-bold">{it.title}</p>
+              <CopyButton text={it.copy} label="Copy" />
+            </div>
+            {it.subject ? (
+              <p className="mt-2 text-sm font-bold">Subject: {it.subject}</p>
+            ) : null}
+            <p className="mt-1 text-sm leading-6 text-kb-stone">{it.text}</p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-sm leading-6 text-kb-stone">
+        Share the link with every customer. Do not offer rewards or ask only happy customers, Google
+        does not allow it.
+      </p>
+    </section>
+  );
+}
+
 function ReviewLinks({
   locationId,
   links,
@@ -440,8 +494,8 @@ function ReviewLinks({
     onChanged();
   }
   return (
-    <section className="mt-8">
-      <h2 className="text-lg font-bold">Review links</h2>
+    <section className="mt-10">
+      <h2 className="text-lg font-bold">Your review link and QR</h2>
       <p className="mt-1 text-sm text-kb-stone">
         Put it in WhatsApp replies, your Instagram bio or receipts, or print the QR code.
       </p>
