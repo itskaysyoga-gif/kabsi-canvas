@@ -189,6 +189,9 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
 
   const starters = surface === "app" ? APP_STARTERS : SITE_STARTERS;
 
+  // No launcher on the login and setup screens.
+  if (path === "/login" || path === "/start") return null;
+
   return (
     <>
       {!open ? (
@@ -198,16 +201,18 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
           onClick={() => setOpen(true)}
           aria-label="Chat with Nora, Kabsi's assistant"
           className={cn(
-            "fixed right-4 z-40 flex h-14 items-center gap-2 rounded-pill bg-kb-black text-sm font-bold text-kb-white shadow-[0_12px_32px_rgba(0,0,0,.28)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-kb-yellow sm:right-6",
+            "fixed bottom-4 right-4 z-40 flex size-12 items-center justify-center gap-2 rounded-full bg-kb-black text-sm font-bold text-kb-white shadow-[0_12px_32px_rgba(0,0,0,.28)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-kb-yellow sm:right-6",
             surface === "app"
-              ? "bottom-24 w-14 justify-center lg:bottom-6"
-              : "bottom-4 pl-4 pr-5 sm:bottom-6",
+              ? "bottom-24 lg:bottom-6 lg:size-14"
+              : "sm:bottom-6 sm:h-14 sm:w-auto sm:pl-4 sm:pr-5",
           )}
         >
           <span className="grid size-8 place-items-center rounded-full bg-kb-yellow text-kb-black">
             <MessageCircle className="size-4" aria-hidden="true" />
           </span>
-          <span className={surface === "app" ? "sr-only" : undefined}>Chat with Nora</span>
+          <span className={surface === "app" ? "sr-only" : "hidden sm:inline"}>
+            Chat with Nora
+          </span>
         </button>
       ) : null}
 
