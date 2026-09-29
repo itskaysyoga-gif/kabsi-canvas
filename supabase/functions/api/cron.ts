@@ -6,11 +6,11 @@ import { activeLocations, draftPending, notifyLocation, syncLocation } from "../
 import { snapshotRatings, weeklyReports } from "../_shared/report.ts";
 import { shieldCheck } from "../_shared/shield.ts";
 
-// Job: Google access. Owner added hello@kabsi.co as Manager → mark access granted, refresh status, email the owner.
+// Job: Google access. Owner invited the Kabsi business group as Manager → mark access granted, refresh status, email the owner.
 async function accessJob() {
   const db = admin();
   const { data: pending } = await db.from("locations")
-    .select("id, name, place_id, consent_at")
+    .select("id, name, address, place_id, consent_at")
     .eq("status", "access_pending").is("access_granted_at", null);
   if (!pending?.length) return { pending: 0, granted: 0 };
 
@@ -28,8 +28,9 @@ async function accessJob() {
       if (testOwner) matches.push({ id: l.id, accountId: "accounts/mock", locationId: `locations/mock-${l.id.slice(0, 8)}` });
     }
   } else {
-    const result = await acceptInvitationsAndListLocations();
+    const result = await acceptInvitationsAndListLocations(pending.filter((l) => l.consent_at).map((l) => ({ name: l.name, address: l.address })));
     accepted = result.accepted;
+    if (result.skipped.length) await captureError("cron-tick", new Error("Google invitations left pending (D270)"), { job: "access", skipped: result.skipped.slice(0, 10) });
     const byPlace = new Map(result.locations.filter((l) => l.placeId).map((l) => [l.placeId!, l]));
     matches = pending.flatMap((l) => {
       const m = l.place_id ? byPlace.get(l.place_id) : undefined;
