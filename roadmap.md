@@ -1,3 +1,3 @@
 - [x] Add hydration-safe Lebanon detection.
 - [x] Gate Lebanon-only card pricing and included-card wording in the requested pages.
-- [ ] Verify copy coverage, type-checking, and responsive rendering.
+- [x] Verify copy coverage, type-checking, and responsive rendering.
