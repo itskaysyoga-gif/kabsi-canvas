@@ -60,7 +60,10 @@ function ManagerStepsPage() {
             <ManagerAccessInstructions mode="computer" />
           </TabsContent>
           <TabsContent value="phone" className="mt-8">
-            <ManagerAccessInstructions mode="phone" businessName={b} />
+            <ManagerAccessInstructions
+              mode="phone"
+              {...(b ? { businessName: b } : {})}
+            />
           </TabsContent>
         </Tabs>
 
