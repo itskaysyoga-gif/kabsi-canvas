@@ -1,12 +1,21 @@
 import { useState, type FormEvent } from "react";
-import { Check, Copy, MapPin, Search } from "lucide-react";
+import { Check, Copy, MapPin, Search, Share2, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ErrorNote, StepTitle } from "@/components/onboarding/onboarding-shell";
+import { ManagerAccessInstructions } from "@/components/onboarding/manager-access-instructions";
 import { KnowledgeForm } from "@/components/app/knowledge-form";
+import { copyText } from "@/lib/clipboard";
 import {
   CONSENT_TEXT,
   choosePlan,
@@ -23,6 +32,7 @@ import {
 } from "@/lib/onboarding";
 import { track } from "@/lib/telemetry";
 import { useIsLebanon } from "@/lib/region";
+import { SITE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 type StepProps = { location: Location | null; onChanged: () => Promise<unknown> };
@@ -139,7 +149,8 @@ export function BusinessStep({
 // ── Step 2: consent + add hello@kabsi.co as Manager
 export function AccessStep({ location, onChanged }: StepProps) {
   const [agreed, setAgreed] = useState(Boolean(location?.consent_at));
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<"idle" | "done" | "failed">("idle");
+  const [shareState, setShareState] = useState<"idle" | "done" | "failed">("idle");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   if (!location) return null;
@@ -170,13 +181,23 @@ export function AccessStep({ location, onChanged }: StepProps) {
     setBusy(false);
   }
   async function copyEmail() {
-    try {
-      await navigator.clipboard.writeText("hello@kabsi.co");
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      /* ignore */
+    const ok = await copyText("hello@kabsi.co");
+    setCopyState(ok ? "done" : "failed");
+    window.setTimeout(() => setCopyState("idle"), 2000);
+  }
+  async function shareSteps() {
+    const url = `${SITE_URL}/manager-steps?b=${encodeURIComponent(location!.name)}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Add Kabsi as a Manager", url });
+        return;
+      } catch (shareError) {
+        if (shareError instanceof DOMException && shareError.name === "AbortError") return;
+      }
     }
+    const ok = await copyText(url);
+    setShareState(ok ? "done" : "failed");
+    window.setTimeout(() => setShareState("idle"), 2000);
   }
 
   return (
@@ -195,44 +216,77 @@ export function AccessStep({ location, onChanged }: StepProps) {
         <span className="text-sm leading-6">{CONSENT_TEXT}</span>
       </label>
 
-      <ol className="mt-6 space-y-4">
-        {[
-          <>
-            Open <strong>Google Maps</strong>, tap your profile picture, then{" "}
-            <strong>Your business profiles</strong>.
-          </>,
-          <>
-            Choose <strong>{location.name}</strong>, then <strong>⋮</strong> or{" "}
-            <strong>Profile settings</strong>, then <strong>People and access</strong>.
-          </>,
-          <>
-            Tap <strong>Add</strong>, enter the email below, choose <strong>Manager</strong>, then{" "}
-            <strong>Invite</strong>.
-          </>,
-        ].map((text, i) => (
-          <li key={i} className="flex gap-3">
-            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-kb-yellow text-sm font-bold">
-              {i + 1}
-            </span>
-            <span className="leading-7">{text}</span>
-          </li>
-        ))}
-      </ol>
-      <button
+      <Tabs defaultValue="phone" className="mt-6">
+        <TabsList className="grid h-12 w-full grid-cols-2 rounded-card bg-kb-sand p-1">
+          <TabsTrigger value="phone" className="h-10 rounded-[10px] text-base">
+            On your phone
+          </TabsTrigger>
+          <TabsTrigger value="computer" className="h-10 rounded-[10px] text-base">
+            On a computer
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="phone" className="mt-6">
+          <ManagerAccessInstructions mode="phone" businessName={location.name} />
+        </TabsContent>
+        <TabsContent value="computer" className="mt-6">
+          <ManagerAccessInstructions mode="computer" />
+        </TabsContent>
+      </Tabs>
+      <Button
         type="button"
         onClick={copyEmail}
-        className="mt-4 flex w-full items-center justify-between rounded-card bg-kb-sand px-4 py-3 font-bold"
+        variant="ghost"
+        className="mt-5 w-full justify-between rounded-card bg-kb-sand px-4"
       >
         hello@kabsi.co{" "}
-        {copied ? (
+        {copyState === "done" ? (
           <span className="flex items-center gap-1 text-sm text-kb-green">
             <Check className="size-4" />
             Copied
           </span>
+        ) : copyState === "failed" ? (
+          <span className="flex items-center gap-1 text-sm text-kb-red">
+            <TriangleAlert className="size-4" />
+            Couldn't copy
+          </span>
         ) : (
           <Copy className="size-4" aria-label="Copy email" />
         )}
-      </button>
+      </Button>
+
+      <Accordion type="multiple" className="mt-5 border-t border-kb-hairline">
+        <AccordionItem value="people-access" className="border-kb-hairline">
+          <AccordionTrigger className="min-h-11 text-base">
+            Can't find People and access?
+          </AccordionTrigger>
+          <AccordionContent className="leading-6 text-kb-stone">
+            That menu only shows for the profile's owner. Ask whoever verified the profile to add
+            us, or send them these steps with the button below.
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="no-access" className="border-kb-hairline">
+          <AccordionTrigger className="min-h-11 text-base">
+            We don't have access to our profile
+          </AccordionTrigger>
+          <AccordionContent className="leading-6 text-kb-stone">
+            Write to hello@kabsi.co and we will help you work out how to request access from Google.
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+      <Button type="button" variant="outline" className="mt-5 w-full" onClick={shareSteps}>
+        {shareState === "done" ? (
+          <Check />
+        ) : shareState === "failed" ? (
+          <TriangleAlert />
+        ) : (
+          <Share2 />
+        )}
+        {shareState === "done"
+          ? "Link copied"
+          : shareState === "failed"
+            ? "Couldn't copy link"
+            : "Send these steps to whoever manages our profile"}
+      </Button>
 
       <div
         className={cn(
@@ -259,15 +313,6 @@ export function AccessStep({ location, onChanged }: StepProps) {
           <p className="text-kb-stone">Tick the box above, then send the invite.</p>
         )}
       </div>
-      <details className="mt-4 text-sm text-kb-stone">
-        <summary className="cursor-pointer font-medium text-kb-ink">
-          Can't find "People and access"?
-        </summary>
-        <p className="mt-2 leading-6">
-          Your listing may need to be verified or claimed on Google first. You can finish the other
-          steps now; Kabsi starts as soon as access works. Stuck? Email hello@kabsi.co.
-        </p>
-      </details>
       <ErrorNote message={error} />
       <Button className="mt-6 w-full" onClick={next} disabled={busy || !location.consent_at}>
         {granted ? "Continue" : "I've sent the invite, continue"}
