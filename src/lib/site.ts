@@ -10,14 +10,20 @@ export const KABSI_GROUP_NAME = "Kabsi Clients";
 export const CONTACT_PHONE = "+961 3 956 917";
 
 export const PRICES = {
+  proMonthly: 19,
+  proYearly: 190,
+  extraLocationMonthly: 15,
+  extraLocationYearly: 150,
+  lebanonBundle: 120,
   card: 20,
-  pro6: 75,
-  pro12: 120,
   extraCard: 10,
   fiveCards: 40,
   partnerRate: 8,
   foundingRate: 6,
 } as const;
+
+/** The trial line, worded once (D281). 30 days through partner links and inserts. */
+export const TRIAL_LINE = "14-day free trial, no card";
 
 type Meta = { title?: string; name?: string; property?: string; content?: string };
 
@@ -126,16 +132,24 @@ export const PRODUCT_LD = {
   offers: [
     {
       "@type": "Offer",
-      name: "Kabsi Pro, 6 months",
-      price: PRICES.pro6,
+      name: "Kabsi Pro, monthly",
+      price: PRICES.proMonthly,
       priceCurrency: "USD",
       url: `${SITE_URL}/pricing`,
     },
     {
       "@type": "Offer",
-      name: "Kabsi Pro, 12 months",
-      price: PRICES.pro12,
+      name: "Kabsi Pro, yearly",
+      price: PRICES.proYearly,
       priceCurrency: "USD",
+      url: `${SITE_URL}/pricing`,
+    },
+    {
+      "@type": "Offer",
+      name: "Kabsi Lebanon bundle, 12 months, with an NFC card and setup",
+      price: PRICES.lebanonBundle,
+      priceCurrency: "USD",
+      eligibleRegion: { "@type": "Country", name: "Lebanon" },
       url: `${SITE_URL}/pricing`,
     },
     {

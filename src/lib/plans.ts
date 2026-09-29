@@ -66,6 +66,6 @@ export const PLAN_NAMES: Record<string, string> = {
   pro_monthly: "Kabsi Pro · monthly",
   pro_yearly: "Kabsi Pro · yearly",
   lebanon_yearly: "Kabsi Pro · 12 months",
-  pro_6m: "Kabsi Pro · 6 months",
+  pro_6m: "Kabsi Pro (earlier plan)",
   partner: "Kabsi Pro · through your partner",
 };

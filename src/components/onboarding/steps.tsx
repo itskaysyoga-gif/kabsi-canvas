@@ -458,7 +458,7 @@ export function PlanStep({ location, onChanged }: StepProps) {
         sub={
           trialOffered
             ? "Start free, or choose a plan now. Refundable within 14 days."
-            : "Paid once, upfront. Refundable within 14 days."
+            : "Yearly plans are refundable within 14 days."
         }
       />
       <div className="grid gap-3 sm:grid-cols-2">
