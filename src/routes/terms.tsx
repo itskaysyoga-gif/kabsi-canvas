@@ -21,6 +21,10 @@ function Page() {
   return (
     <LegalPage kind="terms" title="Terms" updated={UPDATED}>
       <section>
+        <p>Kabsi is operated by Rashid Abou Hamzy, Dubai, United Arab Emirates.</p>
+      </section>
+
+      <section>
         <p>
           These terms are the agreement between you and Kabsi, an independent business based in
           Beirut, Lebanon. By creating an account, paying for a plan or activating a card, you

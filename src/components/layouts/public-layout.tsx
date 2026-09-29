@@ -227,6 +227,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             </a>
           </div>
           <p className="pt-6 text-sm leading-6 text-kb-stone-on-dark">
+            Kabsi is operated by Rashid Abou Hamzy, Dubai, United Arab Emirates. hello@kabsi.co
+          </p>
+          <p className="pt-2 text-sm leading-6 text-kb-stone-on-dark">
             © Kabsi. Kabsi is independent and not affiliated with Google.
           </p>
         </div>
