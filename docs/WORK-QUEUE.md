@@ -59,7 +59,7 @@ Every task below fits one Claude Code cloud session and one pull request. Take t
 
 ## Product and growth
 
-### [ ] Q08 · Nora's knowledge base (D285) · S · Sonnet
+### [x] Q08 · Nora's knowledge base (D285) · S · Sonnet
 - Files: `docs/KNOWLEDGE-BASE.md`, the script that builds `public/llms-full.txt`
 - Do: rewrite for the new prices, both trials, payment methods, early access, the five module names, the partner program, the ranking line, "How is this different from Google's own AI replies?", security answers and the free setup call. Put a "Facts that change" block at the top.
 - Done when: the rebuilt `llms-full.txt` holds the new facts and none of the old prices.
