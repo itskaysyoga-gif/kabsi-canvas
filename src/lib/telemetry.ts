@@ -77,6 +77,7 @@ const bootScript = `
     api_host: ${JSON.stringify(POSTHOG_HOST)},
     defaults: "2025-05-24",
     person_profiles: "identified_only",
+    persistence: "memory",
     disable_session_recording: true,
     mask_all_text: false,
     session_recording: { maskAllInputs: true },
