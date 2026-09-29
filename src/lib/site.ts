@@ -97,6 +97,7 @@ export const ORG_LD = {
     "Kabsi is a Google Business Profile assistant for local businesses. Every new Google review arrives by email with a reply drafted in the reviewer's language, and nothing is posted until the owner approves it.",
   logo: `${SITE_URL}/kabsi-mark.svg`,
   email: CONTACT_EMAIL,
+  address: { "@type": "PostalAddress", addressLocality: "Dubai", addressCountry: "AE" },
 };
 export const WEBSITE_LD = {
   "@context": "https://schema.org",

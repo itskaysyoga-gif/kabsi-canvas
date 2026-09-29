@@ -30,6 +30,14 @@ function Page() {
       </section>
 
       <section>
+        <h2>Who is responsible</h2>
+        <p>
+          The data controller is Rashid Abou Hamzy, Dubai, United Arab Emirates. Contact:{" "}
+          {CONTACT_EMAIL}.
+        </p>
+      </section>
+
+      <section>
         <h2>1. Who we are</h2>
         <p>
           Kabsi is an independent business based in Beirut, Lebanon, and is responsible for the
