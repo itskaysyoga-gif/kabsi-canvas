@@ -9,6 +9,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
+import { clearAssistantChat } from "@/lib/assistant-storage";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Mail as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
 
@@ -88,6 +99,8 @@ function AccountCard() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [err, setErr] = useState("");
+  const [allOpen, setAllOpen] = useState(false);
+  const [allBusy, setAllBusy] = useState(false);
   async function out() {
     setErr("");
     try {
@@ -99,6 +112,20 @@ function AccountCard() {
       setErr("Couldn't sign out. Check your connection and try again.");
     }
   }
+  async function outEverywhere() {
+    setErr("");
+    setAllBusy(true);
+    try {
+      await supabase.auth.signOut({ scope: "global" });
+      clearAssistantChat();
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      await navigate({ to: "/login", replace: true });
+    } catch {
+      setAllBusy(false);
+      setErr("Couldn't sign out. Check your connection and try again.");
+    }
+  }
   return (
     <section className="mt-8 rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
       <h2 className="text-xl font-bold">Your account</h2>
@@ -107,9 +134,30 @@ function AccountCard() {
       <p className="mt-2 text-sm leading-6 text-kb-stone">
         You sign in with a 6-digit code sent to this email. There's no password to remember.
       </p>
-      <Button variant="outline" size="compact" className="mt-4" onClick={() => void out()}>
-        <LogOut /> Sign out
-      </Button>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button variant="outline" size="compact" onClick={() => void out()}>
+          <LogOut /> Sign out
+        </Button>
+        <Button variant="outline" size="compact" onClick={() => setAllOpen(true)}>
+          Sign out of all devices
+        </Button>
+      </div>
+      <AlertDialog open={allOpen} onOpenChange={setAllOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sign out of all devices?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This signs you out everywhere. You can log in again with a code.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Stay signed in</AlertDialogCancel>
+            <AlertDialogAction disabled={allBusy} onClick={() => void outEverywhere()}>
+              {allBusy ? "Signing out…" : "Sign out everywhere"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {err ? (
         <p className="mt-2 text-sm text-kb-red" role="alert">
           {err}

@@ -40,7 +40,7 @@ import { PageIcon } from "@/components/shared/page-icon";
 // digitally. Reads via RLS; create / activate / rename / switch off go through membership-checked RPCs.
 export const Route = createFileRoute("/_authenticated/app/cards")({
   head: () => ({
-    meta: [{ title: "Cards and links | Kabsi" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Get reviews | Kabsi" }, { name: "robots", content: "noindex" }],
   }),
   component: CardsPage,
 });
@@ -90,7 +90,7 @@ function CardsPage() {
       <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
         Make reviewing easy
       </p>
-      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Cards and links</h1>
+      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Get reviews</h1>
       <p className="mt-2 text-kb-stone">
         Each tap, scan or click opens your Google review page. Every customer sees the same page. A
         card is optional: a review link and its QR code work without one.
