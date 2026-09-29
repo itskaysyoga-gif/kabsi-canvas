@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep visitor-region display logic in `src/lib/region.ts` so hydration-safe detection stays consistent across public and signed-in pages.

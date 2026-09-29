@@ -22,6 +22,7 @@ import {
   type PlaceResult,
 } from "@/lib/onboarding";
 import { track } from "@/lib/telemetry";
+import { useIsLebanon } from "@/lib/region";
 import { cn } from "@/lib/utils";
 
 type StepProps = { location: Location | null; onChanged: () => Promise<unknown> };
@@ -318,6 +319,7 @@ export function PlanStep({ location, onChanged }: StepProps) {
   const [kind, setKind] = useState<"pro_6m" | "pro_12m">("pro_12m");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const isLebanon = useIsLebanon(location?.country);
   if (!location) return null;
   const viaPartner = Boolean(location.partner_id);
 
@@ -353,9 +355,14 @@ export function PlanStep({ location, onChanged }: StepProps) {
       key: "pro_12m" as const,
       price: "$120",
       period: "12 months",
-      note: "Card included in Lebanon",
+      note: isLebanon ? "Card included in Lebanon" : "",
     },
-    { key: "pro_6m" as const, price: "$75", period: "6 months", note: "Card included in Lebanon" },
+    {
+      key: "pro_6m" as const,
+      price: "$75",
+      period: "6 months",
+      note: isLebanon ? "Card included in Lebanon" : "",
+    },
   ];
   return (
     <>
@@ -378,6 +385,11 @@ export function PlanStep({ location, onChanged }: StepProps) {
           </button>
         ))}
       </div>
+      {!isLebanon ? (
+        <p className="mt-4 text-sm text-kb-stone">
+          Your review link and QR code are free in every country.
+        </p>
+      ) : null}
       <ErrorNote message={error} />
       <Button className="mt-6 w-full" onClick={finish} disabled={busy}>
         {busy ? "Saving…" : "Continue to payment"}

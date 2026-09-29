@@ -12,6 +12,7 @@ import { BusinessGrid } from "@/components/marketing/business-grid";
 import { supabaseUrl } from "@/lib/supabase";
 import { track } from "@/lib/telemetry";
 import { PRICES, pageHead } from "@/lib/site";
+import { useIsLebanon } from "@/lib/region";
 
 export const Route = createFileRoute("/partners")({
   head: () =>
@@ -25,6 +26,8 @@ export const Route = createFileRoute("/partners")({
 });
 
 function Page() {
+  const isLebanon = useIsLebanon();
+
   return (
     <PublicLayout>
       <PageHero
@@ -58,9 +61,9 @@ function Page() {
             approve everything themselves, which keeps you and them safe.
           </Point>
           <Point icon={<Nfc />} title="Supply the cards">
-            Kabsi issues card codes for your stock, so the NFC cards you sell open each client's
-            Google review page. Kabsi only ships cards inside Lebanon, so in your area the cards
-            come from you.
+            {isLebanon
+              ? "Kabsi issues card codes for your stock, so the NFC cards you sell open each client's Google review page. Kabsi only ships cards inside Lebanon, so in your area the cards come from you."
+              : "Your review link and QR code are free in every country."}
           </Point>
         </div>
       </Section>

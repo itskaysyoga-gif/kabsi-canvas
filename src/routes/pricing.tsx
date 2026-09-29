@@ -14,12 +14,13 @@ import {
 } from "@/components/marketing/parts";
 import { PricingVisual } from "@/components/marketing/visuals";
 import { CONTACT_PHONE, PRICES, PRODUCT_LD, pageHead } from "@/lib/site";
+import { useIsLebanon } from "@/lib/region";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/pricing")({
   head: () =>
     pageHead({
-      title: "Kabsi pricing | Card $20, Pro from $75, no monthly bills",
+      title: "Kabsi pricing | Pro from $75, no monthly bills",
       description: `Kabsi Pro: $${PRICES.pro6} for 6 months or $${PRICES.pro12} for 12 months, paid once, refundable within 14 days. NFC cards ship in Lebanon only.`,
       path: "/pricing",
       crumbs: [{ name: "Pricing", path: "/pricing" }],
@@ -40,6 +41,9 @@ const PRO = [
 ];
 
 function Page() {
+  const isLebanon = useIsLebanon();
+  const proFeatures = isLebanon ? PRO : PRO.filter((feature) => !feature.includes("NFC card"));
+
   return (
     <PublicLayout>
       <PageHero
@@ -51,13 +55,16 @@ function Page() {
       />
 
       <Section tone="sand">
-        <div data-stagger="" className="grid gap-5 lg:grid-cols-3">
+        <div
+          data-stagger=""
+          className={cn("grid gap-5", isLebanon ? "lg:grid-cols-3" : "lg:grid-cols-2")}
+        >
           <Plan
             name="Kabsi Pro, 12 months"
             icon={<Sparkles />}
             price={PRICES.pro12}
             per="$10 a month"
-            features={PRO}
+            features={proFeatures}
             highlight
           />
           <Plan
@@ -65,26 +72,33 @@ function Page() {
             icon={<CalendarRange />}
             price={PRICES.pro6}
             per="$12.50 a month"
-            features={PRO}
+            features={proFeatures}
           />
-          <Plan
-            name="NFC card only"
-            icon={<Nfc />}
-            price={PRICES.card}
-            per="One-time"
-            features={[
-              "Acrylic card with NFC chip and QR code",
-              "Opens your Google review page in one tap",
-              "Same page for every customer, no filtering",
-              "Keeps working for good",
-              "Shipped in Lebanon only",
-            ]}
-          />
+          {isLebanon ? (
+            <Plan
+              name="NFC card only"
+              icon={<Nfc />}
+              price={PRICES.card}
+              per="One-time"
+              features={[
+                "Acrylic card with NFC chip and QR code",
+                "Opens your Google review page in one tap",
+                "Same page for every customer, no filtering",
+                "Keeps working for good",
+                "Shipped in Lebanon only",
+              ]}
+            />
+          ) : null}
         </div>
-        <p className="mt-6 text-kb-stone">
-          Extra cards in Lebanon: ${PRICES.extraCard} each, or ${PRICES.fiveCards} for five.
-        </p>
-        <CardShippingNote className="mt-4 max-w-3xl bg-kb-white" />
+        {isLebanon ? (
+          <p className="mt-6 text-kb-stone">
+            Extra cards in Lebanon: ${PRICES.extraCard} each, or ${PRICES.fiveCards} for five.
+          </p>
+        ) : null}
+        <CardShippingNote
+          className="mt-4 max-w-3xl bg-kb-white"
+          isLebanon={isLebanon}
+        />
       </Section>
 
       <Section className="grid gap-10 md:grid-cols-2">
