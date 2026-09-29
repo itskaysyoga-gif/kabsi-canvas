@@ -20,17 +20,10 @@ import {
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
 import { InboxDemo } from "@/components/marketing/inbox-demo";
-import {
-  CardShippingNote,
-  CtaBand,
-  Eyebrow,
-  FaqList,
-  H2,
-  HeroBackdrop,
-  Section,
-} from "@/components/marketing/parts";
+import { CtaBand, Eyebrow, FaqList, H2, HeroBackdrop, Section } from "@/components/marketing/parts";
 import { BusinessGrid } from "@/components/marketing/business-grid";
 import { FAQ } from "@/lib/faq";
+import { ELIGIBLE, GUIDELINES_URL, NOT_ELIGIBLE } from "@/lib/eligibility";
 import { ORG_LD, PRICES, PRODUCT_LD, TRIAL_LINE, WEBSITE_LD, pageHead } from "@/lib/site";
 import { useIsLebanon } from "@/lib/region";
 
@@ -41,7 +34,7 @@ export const Route = createFileRoute("/")({
     pageHead({
       title: "Kabsi | Your Google Business Profile, taken care of",
       description:
-        "Every Google review gets a reply drafted in your customer's language. Kabsi keeps your profile fresh and flags changes. Nothing is posted until you approve.",
+        "Kabsi keeps your Google Business Profile complete and current: review replies, weekly posts, photos, hours and a Profile Score. You approve every change.",
       path: "/",
       jsonLd: [ORG_LD, WEBSITE_LD, PRODUCT_LD],
     }),
@@ -75,8 +68,9 @@ function HomePage() {
               Your Google Business Profile, taken care of.
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-8 text-kb-stone-on-dark">
-              Kabsi drafts a reply to every new Google review in the reviewer's language. You read
-              it, tap Post, and it goes out. Nothing is posted without your approval.
+              Kabsi keeps your profile complete and current by following Google's own guidance:
+              replies to every review, a weekly post, photos, hours and a Profile Score with a short
+              list of what to do next. You approve every change.
             </p>
             <div className="mt-9 grid gap-3 sm:flex">
               <Button asChild className="w-full sm:w-auto">
@@ -93,7 +87,7 @@ function HomePage() {
               </Button>
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm text-kb-stone-on-dark">
-              {["You approve everything", "We email you when access works", "Any language"].map(
+              {["You approve everything", "Follows Google's guidelines", "Any language"].map(
                 (t) => (
                   <li key={t} className="flex items-center gap-2">
                     <Check className="size-4 text-kb-yellow" aria-hidden="true" />
@@ -225,46 +219,62 @@ function HomePage() {
         </div>
       </Section>
 
-      {/* 4. Optional physical touchpoints */}
+      {/* 4. Reviews link */}
       <Section tone="sand" className="grid items-center gap-12 md:grid-cols-2">
-        <div className="order-2 md:order-1">
-          <img
-            src="/images/nfc-cards.webp"
-            alt="Two acrylic NFC review cards, one black and one blue, each with tap and QR code areas"
-            width={900}
-            height={776}
-            loading="lazy"
-            decoding="async"
-            className="w-full rounded-large shadow-kb"
-          />
-          <p className="mt-3 text-xs text-kb-stone">
-            Current card designs. Kabsi-branded cards are on the way.
-          </p>
-        </div>
-        <div className="order-1 md:order-2">
+        <div>
           <Eyebrow>Make reviewing easy</Eyebrow>
-          <H2>One tap opens your Google review page.</H2>
+          <H2>Your own review link and QR code.</H2>
           <p className="mt-5 max-w-xl text-lg leading-8 text-kb-stone">
-            Put an acrylic NFC card on your counter, door or table. Customers tap it with their
-            phone or scan the QR code. Every customer sees the same Google review page: there's no
-            rating screen and no filtering. Ask everyone the same way, and never offer a reward for
-            a review: Google doesn't allow it.
+            Kabsi makes the link that opens your Google review page, and a QR code to print. Already
+            have an NFC tag or sticker? Write the same link on it. Every customer sees the same
+            Google review page: there's no rating screen and no filtering. Ask everyone the same
+            way, and never offer a reward for a review: Google doesn't allow it.
           </p>
           <ul className="mt-6 space-y-3 text-kb-ink">
             <li className="flex gap-3">
-              <QrCode className="mt-0.5 size-5 shrink-0" aria-hidden="true" /> Works with iPhone and
-              Android, by tap or by scan
+              <QrCode className="mt-0.5 size-5 shrink-0" aria-hidden="true" /> Free in every
+              country, by link or by scan
             </li>
             <li className="flex gap-3">
-              <Link2 className="mt-0.5 size-5 shrink-0" aria-hidden="true" /> No card? Use Kabsi
-              100% digitally with your own review link and printable QR code
+              <Link2 className="mt-0.5 size-5 shrink-0" aria-hidden="true" /> Use it on a printed
+              table card, a receipt or your own NFC tag
             </li>
             <li className="flex gap-3">
               <Check className="mt-0.5 size-5 shrink-0" aria-hidden="true" /> Keeps working if your
               plan ends
             </li>
           </ul>
-          <CardShippingNote className="mt-6 max-w-xl" isLebanon={isLebanon} />
+          {isLebanon ? (
+            <p className="mt-6 max-w-xl text-[15px]">
+              In Lebanon we also supply ready NFC cards.{" "}
+              <Link to="/lebanon" className="font-bold underline underline-offset-4">
+                See the Lebanon offer
+              </Link>
+            </p>
+          ) : null}
+        </div>
+        <div className="rounded-large bg-kb-white p-6 shadow-kb">
+          <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
+            Who Kabsi is for
+          </p>
+          <ul className="mt-4 space-y-3 leading-7">
+            {ELIGIBLE.map((t) => (
+              <li key={t} className="flex gap-3">
+                <Check className="mt-1 size-4 shrink-0" aria-hidden="true" /> {t}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-5 text-sm leading-6 text-kb-stone">
+            Not eligible on Google: {NOT_ELIGIBLE.join(" ").toLowerCase()}{" "}
+            <a
+              href={GUIDELINES_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-kb-ink underline underline-offset-4"
+            >
+              Google's guidelines
+            </a>
+          </p>
         </div>
       </Section>
 
@@ -292,10 +302,7 @@ function HomePage() {
         <Eyebrow>Pricing</Eyebrow>
         <H2>Start free. Pay when it is worth it.</H2>
         <p className="mt-3 text-lg text-kb-stone">{TRIAL_LINE}.</p>
-        <div
-          data-stagger=""
-          className={`mt-10 grid gap-4 ${isLebanon ? "md:grid-cols-3" : "md:grid-cols-2"}`}
-        >
+        <div data-stagger="" className="mt-10 grid gap-4 md:grid-cols-2">
           <Price amount={0} name="Free" line="Review link, QR code and a printable table card" />
           <Price
             amount={PRICES.proMonthly}
@@ -303,19 +310,10 @@ function HomePage() {
             line={`a month, or $${PRICES.proYearly} a year`}
             highlight
           />
-          {isLebanon ? (
-            <Price
-              amount={PRICES.lebanonBundle}
-              name="Lebanon bundle"
-              line="a year, with an NFC card and setup"
-            />
-          ) : null}
         </div>
-        {!isLebanon ? (
-          <p className="mt-6 text-kb-stone">
-            Your review link and QR code are free in every country.
-          </p>
-        ) : null}
+        <p className="mt-6 text-kb-stone">
+          Your review link and QR code are free in every country.
+        </p>
         <p className="mt-6 text-kb-stone">
           Yearly plans are refundable within 14 days.{" "}
           <Link to="/pricing" className="font-bold text-kb-ink underline underline-offset-4">

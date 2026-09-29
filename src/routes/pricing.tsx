@@ -1,17 +1,9 @@
 import { useState, type ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Check, Gift, Globe, MapPin, Package, Sparkles } from "lucide-react";
+import { ArrowRight, Check, Gift, Globe, MapPin, Sparkles } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
-import {
-  CardShippingNote,
-  CtaBand,
-  Eyebrow,
-  H2,
-  IconBadge,
-  PageHero,
-  Section,
-} from "@/components/marketing/parts";
+import { CtaBand, Eyebrow, H2, IconBadge, PageHero, Section } from "@/components/marketing/parts";
 import { PricingVisual } from "@/components/marketing/visuals";
 import { CONTACT_PHONE, PRICES, PRODUCT_LD, TRIAL_LINE, pageHead } from "@/lib/site";
 import { useIsLebanon } from "@/lib/region";
@@ -21,7 +13,7 @@ export const Route = createFileRoute("/pricing")({
   head: () =>
     pageHead({
       title: "Kabsi pricing | Pro from $19 a month",
-      description: `Kabsi Pro is $${PRICES.proMonthly} a month or $${PRICES.proYearly} a year. Start with a 14-day free trial, no card. NFC cards ship in Lebanon only.`,
+      description: `Kabsi Pro is $${PRICES.proMonthly} a month or $${PRICES.proYearly} a year. Start with a 14-day free trial, no card.`,
       path: "/pricing",
       crumbs: [{ name: "Pricing", path: "/pricing" }],
       jsonLd: [PRODUCT_LD],
@@ -42,15 +34,9 @@ const PRO = [
   "A weekly Google update drafted for you, with an action button",
   "Listing Shield: change alerts and one-tap revert",
   "Photos checked and special hours set in a minute",
-  "Profile health on your dashboard and a Monday report",
+  "A Profile Score and a Do now list of what to improve next",
+  "A Monday report",
   "Review link and printable QR code, anywhere",
-];
-
-const BUNDLE = [
-  "Kabsi Pro for 12 months, with everything in Pro",
-  "One NFC card with your review link on it",
-  "In-person setup by our team in Lebanon",
-  "Pay in cash, Whish, OMT or USDT",
 ];
 
 function Page() {
@@ -68,10 +54,7 @@ function Page() {
       />
 
       <Section tone="sand">
-        <div
-          data-stagger=""
-          className={cn("grid gap-5", isLebanon ? "lg:grid-cols-3" : "lg:grid-cols-2")}
-        >
+        <div data-stagger="" className={"grid gap-5 lg:grid-cols-2"}>
           <Plan
             name="Free"
             icon={<Gift />}
@@ -112,24 +95,15 @@ function Page() {
               </div>
             }
           />
-          {isLebanon ? (
-            <Plan
-              name="Lebanon bundle"
-              icon={<Package />}
-              price={PRICES.lebanonBundle}
-              per="a year, sold by our team in Lebanon"
-              features={BUNDLE}
-              cta="Get the bundle"
-            />
-          ) : null}
         </div>
         {isLebanon ? (
           <p className="mt-6 text-kb-stone">
-            A card on its own is ${PRICES.card}. Extra cards in Lebanon: ${PRICES.extraCard} each,
-            or ${PRICES.fiveCards} for five.
+            In Lebanon we also sell a bundle with an NFC card and setup.{" "}
+            <Link to="/lebanon" className="font-bold text-kb-ink underline underline-offset-4">
+              See the Lebanon offer
+            </Link>
           </p>
         ) : null}
-        <CardShippingNote className="mt-4 max-w-3xl bg-kb-white" isLebanon={isLebanon} />
       </Section>
 
       <Section className="grid gap-10 md:grid-cols-2">
@@ -152,16 +126,6 @@ function Page() {
               </p>
             </div>
           </div>
-          <img
-            src="/images/nfc-cards.webp"
-            alt="Two acrylic NFC review cards, one black and one blue, each with tap and QR code areas"
-            width={900}
-            height={776}
-            loading="lazy"
-            decoding="async"
-            className="mt-10 w-full max-w-md rounded-large shadow-kb"
-          />
-          <p className="mt-2 text-xs text-kb-stone">Current card designs.</p>
         </div>
         <div>
           <Eyebrow>Good to know</Eyebrow>
@@ -187,9 +151,8 @@ function Page() {
               a month or ${PRICES.extraLocationYearly} a year.
             </Fact>
             <Fact>
-              The NFC card is optional. You can use Kabsi fully with a review link and QR code.
-              Outside Lebanon, Kabsi Pro is the same price and works the same way; only the card
-              comes from a partner or from any NFC card you buy online.
+              Kabsi works with a verified Google Business Profile for a business that meets
+              customers in person or travels to them.
             </Fact>
           </ul>
         </div>

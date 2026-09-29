@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { IndustryLinks } from "@/components/marketing/business-grid";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import {
@@ -16,7 +16,6 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import {
-  CardShippingNote,
   CtaBand,
   Eyebrow,
   FeatureCard,
@@ -191,28 +190,23 @@ function Page() {
         </div>
       </Section>
 
-      <Section className="grid items-center gap-12 md:grid-cols-2">
-        <div>
-          <Eyebrow>Cards and links</Eyebrow>
-          <H2>One tap to your Google review page.</H2>
+      <Section>
+        <div className="max-w-3xl">
+          <Eyebrow>Review link and QR code</Eyebrow>
+          <H2>One tap or scan to your Google review page.</H2>
           <p className="mt-5 text-lg leading-8 text-kb-stone">
-            The optional NFC card has a chip and a QR code. Tap or scan, and your Google review page
-            opens. It's the same page for every customer: no rating screen, no filter. No card? Your
-            dashboard gives you a review link and a printable QR code that do the same. Kabsi counts
-            taps (never who tapped) and shows them in your report.
+            Your dashboard gives you a review link and a printable QR code. Put them on a table
+            card, a receipt or your own NFC tag. It's the same page for every customer: no rating
+            screen, no filter. Kabsi counts opens (never who opened) and shows them in your report.
           </p>
-          <CardShippingNote className="mt-6" isLebanon={isLebanon} />
-        </div>
-        <div className="flex justify-center">
-          <img
-            src="/images/nfc-card-closeup.webp"
-            alt="An acrylic NFC review card with a tap area and a QR code"
-            width={640}
-            height={640}
-            loading="lazy"
-            decoding="async"
-            className="w-full max-w-sm rounded-large shadow-kb"
-          />
+          {isLebanon ? (
+            <p className="mt-4 text-[15px]">
+              In Lebanon we also supply ready NFC cards.{" "}
+              <Link to="/lebanon" className="font-bold underline underline-offset-4">
+                See the Lebanon offer
+              </Link>
+            </p>
+          ) : null}
         </div>
       </Section>
 

@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, LogOut, Menu, UserRound } from "lucide-react";
+import { ChevronDown, LayoutDashboard, LogOut, Menu, UserRound } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -187,26 +187,21 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       <main>{children}</main>
       <footer className="bg-kb-carbon text-kb-white">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16">
-          <div className="grid gap-10 border-b border-kb-white/15 pb-10 md:grid-cols-[1fr_auto_auto_auto_auto]">
+          <div className="grid gap-8 border-b border-kb-white/15 pb-10 md:grid-cols-[1.3fr_1fr_1fr_1fr_1fr]">
             <div>
               <KabsiLogo dark />
-              <p className="mt-4 text-kb-stone-on-dark">Tap. Review. Reply.</p>
+              <p className="mt-4 max-w-xs text-kb-stone-on-dark">
+                Your Google Business Profile, taken care of.
+              </p>
             </div>
-            <nav
-              className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm"
-              aria-label="Footer navigation"
-            >
+            <FooterCol title="Product">
               <Link to="/how-it-works">How it works</Link>
               <Link to="/pricing">Pricing</Link>
-              <Link to="/partners">Partners</Link>
-              <Link to="/faq">FAQ</Link>
               <Link to="/google-review-link">Free review link and QR</Link>
               <Link to="/guides">Guides</Link>
-            </nav>
-            <nav className="grid gap-y-3 text-sm" aria-label="Kabsi for your business">
-              <p className="text-xs font-bold uppercase tracking-wider text-kb-stone-on-dark">
-                For your business
-              </p>
+              <Link to="/faq">FAQ</Link>
+            </FooterCol>
+            <FooterCol title="For your business">
               {VERTICALS.map((v) => (
                 <Link key={v.slug} to="/for/$slug" params={{ slug: v.slug }}>
                   {v.label}
@@ -215,19 +210,18 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <Link to="/for" className="font-bold">
                 All businesses
               </Link>
-            </nav>
-            <nav className="grid content-start gap-y-3 text-sm" aria-label="Company">
-              <p className="text-xs font-bold uppercase tracking-wider text-kb-stone-on-dark">
-                Company
-              </p>
+            </FooterCol>
+            <FooterCol title="Company">
               <Link to="/about">About</Link>
+              <Link to="/partners">Partners</Link>
+              <Link to="/lebanon">Kabsi in Lebanon</Link>
               <Link to="/security">Security</Link>
+            </FooterCol>
+            <FooterCol title="Legal and contact">
               <Link to="/privacy">Privacy</Link>
               <Link to="/terms">Terms</Link>
-            </nav>
-            <a className="text-sm font-medium" href="mailto:hello@kabsi.co">
-              hello@kabsi.co
-            </a>
+              <a href="mailto:hello@kabsi.co">hello@kabsi.co</a>
+            </FooterCol>
           </div>
           <p className="pt-6 text-sm leading-6 text-kb-stone-on-dark">
             Kabsi is operated by Rashid Abou Hamzy, Spring 19, Villa 9, Dubai, United Arab Emirates.
@@ -239,6 +233,33 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         </div>
       </footer>
       <AssistantWidget surface="site" />
+    </div>
+  );
+}
+
+// Four link columns on desktop; on phones each one is an accordion.
+function FooterCol({ title, children }: { title: string; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-b border-kb-white/15 md:border-0">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        className="flex min-h-12 w-full items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-kb-stone-on-dark md:pointer-events-none md:min-h-0"
+      >
+        {title}
+        <ChevronDown
+          className={`size-4 transition-transform md:hidden ${open ? "rotate-180" : ""}`}
+          aria-hidden="true"
+        />
+      </button>
+      <nav
+        aria-label={title}
+        className={`gap-y-3 pb-4 text-sm md:mt-4 md:grid md:pb-0 ${open ? "grid" : "hidden"}`}
+      >
+        {children}
+      </nav>
     </div>
   );
 }
