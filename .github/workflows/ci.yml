@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  app:
+    name: App (typecheck, lint, anon JWT guard, tests, build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # bun.lock points at Lovable's private registry cache, so CI installs from npm like the local setup
+      # (package-lock.json is gitignored, D265).
+      - name: Install
+        run: npm install --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund
+      - name: Type-check
+        run: npm run typecheck
+      - name: Lint changed files
+        run: npm run lint:changed
+        env:
+          BASE_REF: origin/${{ github.base_ref }}
+      - name: Anon JWT guard (D295)
+        run: npm run check:anon
+      - name: Tests
+        run: npm test
+      - name: Build
+        run: npm run build
+
+  functions:
+    name: Edge Functions and Worker (deno check, Deno tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Deno check and tests
+        run: bash scripts/deno-check.sh
+      - name: Worker syntax
+        run: node --check workers/kabsi-go/src/index.js

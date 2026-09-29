@@ -29,7 +29,7 @@ Every task below fits one Claude Code cloud session and one pull request. Take t
 - Do: replace the substring name match (`includes`) with an exact normalized name plus an address or city match. If the Invitation resource now returns a place ID, match on it first. Never accept when two consented businesses match. Add tests with look-alike names ("Cafe" and "Cafe Younes").
 - Done when: tests pass and skipped invitations still reach Sentry and #kabsi-alerts.
 
-### [ ] Q03 · CI checks on every pull request (D278) · S · Sonnet
+### [x] Q03 · CI checks on every pull request (D278) · S · Sonnet
 - Files: `.github/workflows/ci.yml`, `package.json`, a Vitest setup
 - Do: on each PR run install, type-check (`tsc --noEmit`, add a `typecheck` script), lint, build and `deno check` on `supabase/functions`. Add Vitest with first tests for `src/lib/region.ts`, the invitation matching from Q02, and the price constants.
 - Done when: a PR shows green checks and a type error turns them red. Rashid then turns on branch protection for `main`.
