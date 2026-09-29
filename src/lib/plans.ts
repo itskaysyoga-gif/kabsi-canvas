@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 export type PaidKind = "pro_monthly" | "pro_yearly" | "lebanon_yearly";
 /** What choose_plan accepts: a paid kind, the trial intent, or "partner" for partner-covered businesses. */
 export type PlanKind = PaidKind | "trial" | "partner";
-export type Tier = "none" | "trial" | "pro" | "free" | "partner";
+export type Tier = "none" | "trial" | "pro" | "free" | "partner" | "early_access";
 
 export type PlanWindow = { kind: string; starts_at: string; ends_at: string; last_day: string };
 export type PlanSummary = {

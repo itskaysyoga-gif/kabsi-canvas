@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent } from "react";
+import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ImagePlus } from "lucide-react";
@@ -119,7 +120,8 @@ function PhotosPage() {
           <Link to="/start">Add your business</Link>
         </Button>
       ) : null}
-      {loc && loc.status === "active" ? (
+      {loc?.concierge ? <EarlyAccessNotice what="Photos" /> : null}
+      {loc && loc.status === "active" && !loc.concierge ? (
         <label className="mt-7 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-large border-2 border-dashed border-kb-hairline bg-kb-white p-8 text-center hover:border-kb-black">
           <ImagePlus className="size-8" aria-hidden="true" />
           <span className="font-bold">{busy ? "Working…" : "Add a photo"}</span>
@@ -150,7 +152,11 @@ function PhotosPage() {
       ).map(([title, match]) => {
         const list = (data.data?.photos ?? []).filter(match);
         // Photos can only be posted while Kabsi can reach the Google profile.
-        if (!list.length || (title === "Waiting for you" && loc?.status !== "active")) return null;
+        if (
+          !list.length ||
+          (title === "Waiting for you" && (loc?.status !== "active" || loc.concierge))
+        )
+          return null;
         return (
           <section key={title} className="mt-8">
             <h2 className="text-sm font-bold uppercase tracking-wider text-kb-stone">

@@ -1,4 +1,5 @@
 import { useRef, useState, type FormEvent } from "react";
+import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { fmtDay } from "@/lib/format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -77,7 +78,8 @@ function HoursPage() {
           <Link to="/start">Add your business</Link>
         </Button>
       ) : null}
-      {loc && loc.status === "active" ? (
+      {loc?.concierge ? <EarlyAccessNotice what="Special hours" /> : null}
+      {loc && loc.status === "active" && !loc.concierge ? (
         <HoursForm
           locationId={loc.id}
           onDone={() => queryClient.invalidateQueries({ queryKey: ["hours"] })}

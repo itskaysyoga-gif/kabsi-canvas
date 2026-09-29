@@ -290,7 +290,7 @@ export async function loadActivity(locationId: string): Promise<Activity[]> {
   const [pubs, drafts, lastDraft, loc, reports] = await Promise.all([
     supabase
       .from("publications")
-      .select("id, target_type, status, payload, created_at")
+      .select("id, target_type, status, payload, created_at, route")
       .eq("location_id", locationId)
       .in("status", ["live", "in_review", "sent"])
       .gte("created_at", since30)
@@ -325,11 +325,14 @@ export async function loadActivity(locationId: string): Promise<Activity[]> {
     status: string;
     payload: Record<string, unknown> | null;
     created_at: string;
+    route?: string;
   }[]) {
     const review = p.status === "in_review" ? " (Google is reviewing it)" : "";
     const text =
       p.target_type === "review_reply"
-        ? "Posted a review reply you approved"
+        ? p.route === "concierge"
+          ? "Our team posted a review reply you approved"
+          : "Posted a review reply you approved"
         : p.target_type === "local_post"
           ? "Posted your Google update"
           : p.target_type === "photo"

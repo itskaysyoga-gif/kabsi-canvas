@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CONCIERGE_COPY } from "@/lib/concierge-copy";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CheckCircle2 } from "lucide-react";
 import { ConfirmLayout } from "@/components/layouts/confirm-layout";
@@ -19,6 +20,8 @@ export const Route = createFileRoute("/a/$token")({
 
 const DONE: Record<string, string> = {
   posted: "Posted. Your reply is on Google.",
+  queued_manual: `${CONCIERGE_COPY.posted} ${CONCIERGE_COPY.waiting}`,
+  publishing: `${CONCIERGE_COPY.posted} ${CONCIERGE_COPY.waiting}`,
   skipped: "Skipped. Nothing was posted.",
   handled_offline: "Noted. Kabsi won't post anything for this review.",
   in_review: "Sent. Google is checking your reply before it appears.",
@@ -177,7 +180,7 @@ function ActionPage() {
 
   if (closed || view.status === "used") {
     return (
-      <ConfirmLayout>
+      <ConfirmLayout concierge={view.concierge === true}>
         {header}
         <div className="mt-6">{reviewCard}</div>
         <p className="mt-5 leading-7">{closed ? DONE[r.state] : "This link was already used."}</p>
@@ -197,7 +200,7 @@ function ActionPage() {
   if (view.action === "skip" || view.action === "handle_myself") {
     const skip = view.action === "skip";
     return (
-      <ConfirmLayout>
+      <ConfirmLayout concierge={view.concierge === true}>
         {header}
         <div className="mt-6">{reviewCard}</div>
         <p className="mt-5 leading-7">
@@ -225,7 +228,7 @@ function ActionPage() {
   // post / edit / see_draft: the owner sees and can change the exact text before posting
   const tooLong = text.trim().length > 4000;
   return (
-    <ConfirmLayout>
+    <ConfirmLayout concierge={view.concierge === true}>
       {header}
       <div className="mt-6">{reviewCard}</div>
       {r.urgent ? (
