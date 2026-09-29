@@ -50,6 +50,12 @@
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-hotel-1200.webp</image:loc></image:image>
   </url>
   <url>
+    <loc>https://kabsi-app.lovable.app/about</loc><lastmod>2026-09-29</lastmod><changefreq>yearly</changefreq><priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://kabsi-app.lovable.app/security</loc><lastmod>2026-09-29</lastmod><changefreq>yearly</changefreq><priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://kabsi-app.lovable.app/privacy</loc><lastmod>2026-09-27</lastmod><changefreq>yearly</changefreq><priority>0.3</priority>
   </url>
   <url>

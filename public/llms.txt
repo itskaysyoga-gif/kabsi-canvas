@@ -24,6 +24,8 @@ Key facts:
 - [FAQ](https://kabsi-app.lovable.app/faq): approvals, languages, access, Listing Shield, cards, payment
 - [Partners](https://kabsi-app.lovable.app/partners): wholesale for card sellers and agencies
 - [Free Google review link and QR code](https://kabsi-app.lovable.app/google-review-link): no sign-up tool
+- [About](https://kabsi-app.lovable.app/about): who built Kabsi and why it has its name
+- [Security](https://kabsi-app.lovable.app/security): Manager access, approvals, removal and Google data retention
 
 ## For each kind of business
 
