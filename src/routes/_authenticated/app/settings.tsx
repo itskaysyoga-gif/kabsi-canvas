@@ -217,8 +217,8 @@ function DeleteBusiness({
           <p className="mt-2 text-sm leading-6 text-kb-stone">
             After 7 days we delete its reviews, drafts, posts, photos, reports and settings, and
             your NFC cards stop opening your review page. Payment records are kept where the law
-            requires. To stop Kabsi reaching your Google profile, also remove hello@kabsi.co under
-            People and access.
+            requires. To stop Kabsi reaching your Google profile, also remove the Kabsi group (ID
+            5481006796) under People and access.
           </p>
           <Label htmlFor="confirm-delete" className="mt-4 block text-sm">
             Type the business name to confirm

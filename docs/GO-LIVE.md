@@ -50,7 +50,7 @@ Also delete the test data listed in KABSI-STATE.md.
 
 | Step | Expected | Check |
 |---|---|---|
-| Rasheed adds hello@kabsi.co as Manager | access job accepts within 5 min | `access_granted_at` set, real `locations/…` id, "Access received" email |
+| Rasheed invites group ID 5481006796 as Manager | access job accepts within 5 min | `access_granted_at` set, real `locations/…` id, "Access received" email |
 | First sync | up to 20 unanswered reviews drafted, one summary email | `reviews` rows with real ids, `reply_drafts`, `emails` kind backlog |
 | Rasheed posts one reply from the email | reply live on Google | `publications.status = live`, reply visible on Maps |
 | Post: Rasheed approves one post | post live or in review | `publications` row, post visible on the profile |

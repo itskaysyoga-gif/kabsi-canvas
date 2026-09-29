@@ -1,8 +1,0 @@
-- [x] Add hydration-safe Lebanon detection.
-- [x] Gate Lebanon-only card pricing and included-card wording in the requested pages.
-- [x] Verify copy coverage, type-checking, and responsive rendering.
-- [x] Add phone and computer Manager access instructions to onboarding.
-- [x] Add access troubleshooting and a business-specific share action.
-- [x] Add and verify the public noindex Manager steps page.
-- [x] Add public About and Security pages with metadata and breadcrumbs.
-- [x] Add Company footer links and update the sitemap and AI-readable listing.

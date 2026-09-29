@@ -9,7 +9,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "What does Kabsi need from me?",
-    a: "Add hello@kabsi.co as a Manager on your Google Business Profile, then tell Kabsi a few facts about your business: how you sign off, your phone number, anything you want mentioned. Drafts only use the facts you give.",
+    a: "Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile, then tell Kabsi a few facts about your business: how you sign off, your phone number, anything you want mentioned. Drafts only use the facts you give.",
   },
   {
     q: "Which languages does it reply in?",

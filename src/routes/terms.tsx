@@ -21,7 +21,9 @@ function Page() {
   return (
     <LegalPage kind="terms" title="Terms" updated={UPDATED}>
       <section>
-        <p>Kabsi is operated by Rashid Abou Hamzy, Dubai, United Arab Emirates.</p>
+        <p>
+          Kabsi is operated by Rashid Abou Hamzy, Spring 19, Villa 9, Dubai, United Arab Emirates.
+        </p>
       </section>
 
       <section>
@@ -87,9 +89,9 @@ function Page() {
         <h2>4. Google access</h2>
         <ul>
           <li>
-            You give access by adding hello@kabsi.co as a Manager. You can remove it at any time
-            from your profile under People and access, without asking us. The service stops for that
-            business until access is back.
+            You give access by inviting the Kabsi business group (ID 5481006796) as a Manager. You
+            can remove it at any time from your profile under People and access, without asking us.
+            The service stops for that business until access is back.
           </li>
           <li>
             Kabsi is not part of Google and is not affiliated with, endorsed or sponsored by Google.

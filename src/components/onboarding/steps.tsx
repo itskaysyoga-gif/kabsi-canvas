@@ -32,7 +32,7 @@ import {
 } from "@/lib/onboarding";
 import { track } from "@/lib/telemetry";
 import { useIsLebanon } from "@/lib/region";
-import { SITE_URL } from "@/lib/site";
+import { KABSI_GROUP_ID, SITE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 type StepProps = { location: Location | null; onChanged: () => Promise<unknown> };
@@ -146,7 +146,7 @@ export function BusinessStep({
   );
 }
 
-// ── Step 2: consent + add hello@kabsi.co as Manager
+// ── Step 2: consent + invite the Kabsi business group as Manager
 export function AccessStep({ location, onChanged }: StepProps) {
   const [agreed, setAgreed] = useState(Boolean(location?.consent_at));
   const [copyState, setCopyState] = useState<"idle" | "done" | "failed">("idle");
@@ -180,8 +180,8 @@ export function AccessStep({ location, onChanged }: StepProps) {
     }
     setBusy(false);
   }
-  async function copyEmail() {
-    const ok = await copyText("hello@kabsi.co");
+  async function copyGroupId() {
+    const ok = await copyText(KABSI_GROUP_ID);
     setCopyState(ok ? "done" : "failed");
     window.setTimeout(() => setCopyState("idle"), 2000);
   }
@@ -234,11 +234,11 @@ export function AccessStep({ location, onChanged }: StepProps) {
       </Tabs>
       <Button
         type="button"
-        onClick={copyEmail}
+        onClick={copyGroupId}
         variant="ghost"
         className="mt-5 w-full justify-between rounded-card bg-kb-sand px-4"
       >
-        hello@kabsi.co{" "}
+        Kabsi group ID: {KABSI_GROUP_ID}{" "}
         {copyState === "done" ? (
           <span className="flex items-center gap-1 text-sm text-kb-green">
             <Check className="size-4" />
@@ -250,7 +250,7 @@ export function AccessStep({ location, onChanged }: StepProps) {
             Couldn't copy
           </span>
         ) : (
-          <Copy className="size-4" aria-label="Copy email" />
+          <Copy className="size-4" aria-label="Copy group ID" />
         )}
       </Button>
 

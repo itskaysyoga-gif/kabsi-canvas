@@ -4,7 +4,7 @@
 
 Key facts:
 
-- How it connects: the owner adds hello@kabsi.co as a Manager on their Google Business Profile. The owner keeps full ownership and can remove Kabsi at any time.
+- How it connects: the owner invites the Kabsi group ID 5481006796 as a Manager on their Google Business Profile. The owner keeps full ownership and can remove Kabsi at any time.
 - Reviews: each new review gets a draft reply in the reviewer's language (for example English, Spanish, Arabic or French). Drafts only use facts the owner gave Kabsi, make no promises of money, and are checked before they reach the owner. Hard reviews get a calm draft with no one-tap Post button.
 - Also drafts: one short Google update a week (optional), photo checks before posting, special and holiday hours. All of it waits for the owner's approval; nothing is posted on a schedule.
 - Listing Shield: watches the listing's name, phone, address, hours, website and category, and emails the owner when one changes on Google, with a one-tap way to put the owner's version back. It cannot lock a listing.

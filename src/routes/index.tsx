@@ -93,12 +93,14 @@ function HomePage() {
               </Button>
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm text-kb-stone-on-dark">
-              {["You approve everything", "We email you when access works", "Any language"].map((t) => (
-                <li key={t} className="flex items-center gap-2">
-                  <Check className="size-4 text-kb-yellow" aria-hidden="true" />
-                  {t}
-                </li>
-              ))}
+              {["You approve everything", "We email you when access works", "Any language"].map(
+                (t) => (
+                  <li key={t} className="flex items-center gap-2">
+                    <Check className="size-4 text-kb-yellow" aria-hidden="true" />
+                    {t}
+                  </li>
+                ),
+              )}
             </ul>
           </div>
           <div id="demo" className="flex scroll-mt-24 justify-center lg:justify-end">
@@ -272,8 +274,8 @@ function HomePage() {
         <H2>Invite Kabsi, then approve every reply.</H2>
         <ol data-stagger="" className="mt-12 grid gap-5 md:grid-cols-3">
           <Step n={1} icon={<UserPlus />} title="Add Kabsi to your Google profile">
-            Invite hello@kabsi.co as a Manager, like you'd add a staff member. You can remove it any
-            time. We accept your invite and email you as soon as we do.
+            Invite the Kabsi group ID 5481006796 as a Manager, like you'd add a staff member. You
+            can remove it any time. We accept your invite and email you as soon as we do.
           </Step>
           <Step n={2} icon={<FileText />} title="Tell Kabsi your facts">
             How you sign off, your hours, what you want mentioned. Replies and posts only use these.

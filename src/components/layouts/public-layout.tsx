@@ -83,7 +83,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                       {user.email}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-kb-hairline" />
-                    <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2.5 text-base">
+                    <DropdownMenuItem
+                      asChild
+                      className="cursor-pointer rounded-lg py-2.5 text-base"
+                    >
                       <Link to="/app">
                         <LayoutDashboard aria-hidden="true" /> Dashboard
                       </Link>
@@ -227,7 +230,8 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             </a>
           </div>
           <p className="pt-6 text-sm leading-6 text-kb-stone-on-dark">
-            Kabsi is operated by Rashid Abou Hamzy, Dubai, United Arab Emirates. hello@kabsi.co
+            Kabsi is operated by Rashid Abou Hamzy, Spring 19, Villa 9, Dubai, United Arab Emirates.
+            hello@kabsi.co
           </p>
           <p className="pt-2 text-sm leading-6 text-kb-stone-on-dark">
             © Kabsi. Kabsi is independent and not affiliated with Google.

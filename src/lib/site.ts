@@ -4,6 +4,9 @@
 // Canonical origin. Moves to https://kabsi.co at the domain switch (D215).
 export const SITE_URL = "https://kabsi-app.lovable.app";
 export const CONTACT_EMAIL = "hello@kabsi.co";
+// Kabsi's Google business group (D293). Owners invite this ID as a Manager. It is an identifier, not a secret.
+export const KABSI_GROUP_ID = "5481006796";
+export const KABSI_GROUP_NAME = "Kabsi Clients";
 export const CONTACT_PHONE = "+961 3 956 917";
 
 export const PRICES = {
@@ -97,7 +100,12 @@ export const ORG_LD = {
     "Kabsi is a Google Business Profile assistant for local businesses. Every new Google review arrives by email with a reply drafted in the reviewer's language, and nothing is posted until the owner approves it.",
   logo: `${SITE_URL}/kabsi-mark.svg`,
   email: CONTACT_EMAIL,
-  address: { "@type": "PostalAddress", addressLocality: "Dubai", addressCountry: "AE" },
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Spring 19, Villa 9",
+    addressLocality: "Dubai",
+    addressCountry: "AE",
+  },
 };
 export const WEBSITE_LD = {
   "@context": "https://schema.org",

@@ -439,8 +439,8 @@ export const GUIDES: Guide[] = [
         />
         <p>Only owners can remove users.</p>
         <Callout title="Using Kabsi?">
-          You add <b>hello@kabsi.co</b> as a Manager in exactly this way. You can remove it the same
-          way any time, without asking us.
+          You add the <b>Kabsi group ID 5481006796</b> as a Manager in exactly this way. You can
+          remove it the same way any time, without asking us.
         </Callout>
       </>
     ),

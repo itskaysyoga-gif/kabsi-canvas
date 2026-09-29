@@ -50,8 +50,9 @@ function SecurityPage() {
 
         <ContentSection title="Remove Kabsi in three taps">
           <p>
-            Open <strong>Business Profile settings</strong>, choose <strong>People and access</strong>,
-            then remove <strong>hello@kabsi.co</strong>. Kabsi loses access at once.
+            Open <strong>Business Profile settings</strong>, choose{" "}
+            <strong>People and access</strong>, then remove <strong>Kabsi Clients</strong> (group ID
+            5481006796). Kabsi loses access to that profile at once.
           </p>
         </ContentSection>
 

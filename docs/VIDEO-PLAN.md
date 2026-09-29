@@ -325,7 +325,7 @@ Shot list:
 |---|---|---|
 | 1 | `kling3_0`, `std`, `sound: off`, `duration: 6` | "Hands holding a phone, thumb hovering over the screen, focused calm expression implied by posture only, no face visible, plain desk background, no logos" |
 
-Real screen recording (the bulk of this video): the actual Google Business Profile app/website flow of adding `hello@kabsi.co` as a Manager, step by step, captured live (this is Google's own UI, screen-recorded, not generated or redrawn) plus Kabsi's own "waiting for access" status screen.
+Real screen recording (the bulk of this video): the actual Google Business Profile app/website flow of inviting Kabsi business group ID `5481006796` as a Manager, step by step, captured live (this is Google's own UI, screen-recorded, not generated or redrawn) plus Kabsi's own "waiting for access" status screen.
 
 VO/caption script: "Open your Google Business Profile, go to Managers, and add hello at kabsi dot co. We'll email you the moment access is granted, usually within a day."
 

@@ -51,7 +51,7 @@ How to hand off: "I'll pass this to the Kabsi team. Please email hello@kabsi.co 
 
 ### 2.1 Kabsi in one paragraph
 
-Kabsi is a Google Business Profile assistant for local businesses in any country. The owner adds hello@kabsi.co as a Manager on their Google Business Profile. From then on, every new Google review arrives by email with a reply already drafted in the reviewer's language, and the owner taps Post, Edit or Skip. Kabsi also drafts Google posts (one a week if the owner wants), checks photos before they go up, sets special hours for holidays, watches the listing for changes (Listing Shield) and sends a factual report every Monday. Nothing is ever written to Google without the owner's explicit approval. Every business also gets a free review link and a QR code that open its Google review page. In Lebanon, Kabsi also supplies an optional NFC card that does the same with one tap.
+Kabsi is a Google Business Profile assistant for local businesses in any country. The owner invites the Kabsi group ID 5481006796 as a Manager on their Google Business Profile. From then on, every new Google review arrives by email with a reply already drafted in the reviewer's language, and the owner taps Post, Edit or Skip. Kabsi also drafts Google posts (one a week if the owner wants), checks photos before they go up, sets special hours for holidays, watches the listing for changes (Listing Shield) and sends a factual report every Monday. Nothing is ever written to Google without the owner's explicit approval. Every business also gets a free review link and a QR code that open its Google review page. In Lebanon, Kabsi also supplies an optional NFC card that does the same with one tap.
 
 Main line: "Your Google Business Profile, taken care of."
 
@@ -236,7 +236,7 @@ Search the name and city as on Google Maps (or name plus street or area), pick t
 **Step 2: Give Kabsi access**
 
 1. Tick the box: "I authorise Kabsi to manage review replies and profile updates for this business on Google, and to publish only what I approve."
-2. Add hello@kabsi.co as a Manager. In the Google Maps app: tap your profile picture, then **Your business profiles**; choose the business, then **⋮** or **Profile settings**, then **People and access**; tap **Add**, enter hello@kabsi.co, choose **Manager**, then **Invite**. On a computer: open your Business Profile, then **More** (or **Menu**), **Business Profile settings**, **People and access**, **Add**, enter the email, choose **Manager**, **Invite**.
+2. Add the Kabsi group ID 5481006796 as a Manager. In the Google Maps app: tap your profile picture, then **Your business profiles**; choose the business, then **⋮** or **Profile settings**, then **People and access**; tap **Add**, paste the group ID 5481006796, choose **Manager**, then **Invite**. On a computer: open your Business Profile, then **More** (or **Menu**), **Business Profile settings**, **People and access**, **Add**, enter the email, choose **Manager**, **Invite**.
 3. The status box shows "Waiting for your invite…" and updates by itself, usually a few minutes after the invite once Kabsi is live on Google (see 2.2). Then it shows "Access received" and you get "Kabsi is connected to {business}".
 4. Tap **I've sent the invite, continue**, or **Do this later** and finish the other steps first.
 
@@ -539,7 +539,7 @@ Never: argue about who is right, share the customer's details, accuse them of ly
 
 - Never share your Google password; add people as Managers. Kabsi is a Manager, and you stay the owner.
 - New owners and managers wait 7 days before they can use some features, such as removing other users (Google's rule).
-- **To remove Kabsi:** on your Business Profile open **Menu** (or **More**), then **Business Profile settings**, then **People and access**, select hello@kabsi.co and choose **Remove person**. Only owners can remove users. Kabsi stops reading and posting at once.
+- **To remove Kabsi:** on your Business Profile open **Menu** (or **More**), then **Business Profile settings**, then **People and access**, select Kabsi Clients (group ID 5481006796) and choose **Remove person**. Only owners can remove users. Kabsi stops reading and posting at once.
 
 ### 8.7 Google content rules Kabsi follows
 
@@ -600,7 +600,7 @@ Sign-in storage, the last business you opened (in your browser), and PostHog's a
 
 - You can ask to see, correct, delete, get a copy of, or object to the use of your data. Most of it works in the app; otherwise email hello@kabsi.co from your account address, and Kabsi replies within 30 days. You can also complain to your local data protection authority.
 - **Delete a business:** Settings, Emails page, **Delete this business from Kabsi**, type the business name, **Delete in 7 days**. You get an email notice. Until the date, everything keeps working and you can tap **Cancel deletion**. Then Kabsi deletes reviews, drafts, posts, photos, reports and settings, deletes review links, unlinks NFC cards (they stop opening your page), and emails a confirmation. Payment records are kept where the law requires.
-- Also remove hello@kabsi.co from People and access. To delete your login too, or if you can't sign in, email hello@kabsi.co.
+- Also remove the Kabsi Clients group (ID 5481006796) from People and access. To delete your login too, or if you can't sign in, email hello@kabsi.co.
 - A reviewer asking about their review: hand off.
 
 ### 9.9 Security
@@ -618,10 +618,10 @@ Check spam, check the address, tap **Resend code**. Still stuck: hand off.
 The listing may need to be verified or claimed on Google first. Only owners can add people. You can finish the other setup steps now.
 
 **I sent the invite but it still says "Waiting for your invite".**
-**[TIME-SENSITIVE]** While Kabsi is in test mode (2.2), real businesses stay at "Waiting for Google access". This is expected. Once live, the status updates by itself, usually a few minutes after the invite. Check that you invited hello@kabsi.co exactly, with the Manager role, on the right business.
+**[TIME-SENSITIVE]** While Kabsi is in test mode (2.2), real businesses stay at "Waiting for Google access". This is expected. Once live, the status updates by itself, usually a few minutes after the invite. Check that you invited group ID 5481006796 exactly, with the Manager role, on the right business.
 
 **I got "Kabsi can't reach {business} on Google".**
-Google stopped letting Kabsi read the reviews, usually because hello@kabsi.co was removed as a Manager. Add it again as a Manager under People and access. Kabsi reconnects by itself within a few minutes. Until then no replies are drafted and nothing is posted. If you removed Kabsi on purpose, do nothing.
+Google stopped letting Kabsi read the reviews, usually because the Kabsi group was removed as a Manager. Add it again as a Manager under People and access. Kabsi reconnects by itself within a few minutes. Until then no replies are drafted and nothing is posted. If you removed Kabsi on purpose, do nothing.
 
 **My business isn't found in the search.**
 Use the exact Google Maps name plus city, or name plus street. It must have a Google Business Profile on Maps.
@@ -710,10 +710,10 @@ Yes. The home page has an interactive example inbox in English, Spanish, Arabic 
 No. Kabsi drafts a reply and emails it to you. Nothing goes on your Google profile until you tap Post, and you see the exact text first.
 
 **What does Kabsi need from me?**
-Add hello@kabsi.co as a Manager on your Google Business Profile, then tell Kabsi a few facts in About your business. Drafts only use the facts you give.
+Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile, then tell Kabsi a few facts in About your business. Drafts only use the facts you give.
 
 **How long does setup take?**
-A few minutes: find your business, add hello@kabsi.co as a Manager, fill in About your business, choose a plan.
+A few minutes: find your business, add the Kabsi group ID 5481006796 as a Manager, fill in About your business, choose a plan.
 
 **How fast do new reviews reach me?**
 Kabsi checks every few minutes. Reviews of 3 stars or less and sensitive reviews are emailed right away; 4 and 5 star reviews come together once a day at the hour you choose.
@@ -827,13 +827,13 @@ We don't publish testimonials or numbers we can't back up. Kabsi is new, and we'
 ### Access and control
 
 **Do I have to give you my Google password?**
-Never. You add hello@kabsi.co as a Manager. Kabsi never asks for your password.
+Never. You add the Kabsi group ID 5481006796 as a Manager. Kabsi never asks for your password.
 
 **Why Manager and not Owner?**
 A Manager can reply, post and edit details, which is all Kabsi needs. Only owners can add or remove people or remove the profile, so you stay in control.
 
 **Can I remove Kabsi's access?**
-Yes, any time: Business Profile settings, People and access, select hello@kabsi.co, Remove person. You don't need to ask us.
+Yes, any time: Business Profile settings, People and access, select Kabsi Clients (group ID 5481006796), Remove person. You don't need to ask us.
 
 **What happens if I remove Kabsi?**
 Kabsi stops reading and posting at once and emails you once a day with the steps to reconnect. If access stays removed for 30 days, your Google data is deleted automatically.
@@ -1054,7 +1054,7 @@ No. A partner sees your business name, country, status and tap counts only.
 No. Screen recordings happen only on public web pages, never inside the app.
 
 **How do I delete my data?**
-Settings, Delete this business, type the name, Delete in 7 days. Or email hello@kabsi.co from your account email. Also remove hello@kabsi.co from People and access.
+Settings, Delete this business, type the name, Delete in 7 days. Or email hello@kabsi.co from your account email. Also remove the Kabsi Clients group (ID 5481006796) from People and access.
 
 **What happens to my cards if I delete my business?**
 Review links stop working and Kabsi NFC cards are unlinked from your business.
@@ -1080,7 +1080,7 @@ Delete your business in Settings, and ask by email to delete your login too.
 - **Google Business Profile:** your business's listing on Google Search and Maps.
 - **Manager / Owner:** Google profile roles. A Manager can reply, post and edit details; only an Owner can add or remove people or remove the profile. Kabsi is a Manager.
 - **People and access:** the Google screen where owners add or remove Managers.
-- **hello@kabsi.co:** Kabsi's Google Manager account and support email.
+- **hello@kabsi.co:** Kabsi's support email. **5481006796:** Kabsi's Google business group ID (Kabsi Clients), invited as Manager.
 - **To reply / All reviews:** reviews waiting for a decision / every review with its state.
 - **Needs care:** a 1 or 2 star review or one about a sensitive topic. Its email has no Post button.
 - **Handled by you:** a review you chose to handle yourself. Kabsi posts nothing.

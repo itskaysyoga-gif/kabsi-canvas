@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { KABSI_GROUP_ID } from "@/lib/site";
 
 const phoneSteps: ReactNode[] = [
   <>
@@ -10,8 +11,8 @@ const phoneSteps: ReactNode[] = [
     <strong>People and access</strong>.
   </>,
   <>
-    Tap <strong>Add</strong>, enter <strong>hello@kabsi.co</strong>, choose{" "}
-    <strong>Manager</strong>, then <strong>Invite</strong>.
+    Tap <strong>Add</strong>, paste the Kabsi group ID <strong>{KABSI_GROUP_ID}</strong> (copy it
+    below), choose <strong>Manager</strong>, then <strong>Invite</strong>.
   </>,
 ];
 
@@ -27,8 +28,8 @@ const computerSteps: ReactNode[] = [
     Click <strong>Add</strong>.
   </>,
   <>
-    Enter <strong>hello@kabsi.co</strong>, choose <strong>Manager</strong>, and click{" "}
-    <strong>Invite</strong>.
+    Paste the Kabsi group ID <strong>{KABSI_GROUP_ID}</strong> (copy it below), choose{" "}
+    <strong>Manager</strong>, and click <strong>Invite</strong>.
   </>,
 ];
 

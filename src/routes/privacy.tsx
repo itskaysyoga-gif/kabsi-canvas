@@ -32,8 +32,8 @@ function Page() {
       <section>
         <h2>Who is responsible</h2>
         <p>
-          The data controller is Rashid Abou Hamzy, Dubai, United Arab Emirates. Contact:{" "}
-          {CONTACT_EMAIL}.
+          The data controller is Rashid Abou Hamzy, Spring 19, Villa 9, Dubai, United Arab Emirates.
+          Contact: {CONTACT_EMAIL}.
         </p>
       </section>
 
@@ -145,10 +145,10 @@ function Page() {
         <h2>4. Google data</h2>
         <ul>
           <li>
-            You give Kabsi access by adding hello@kabsi.co as a Manager on your Business Profile.
-            Kabsi uses Google's official Business Profile APIs to read your reviews and profile
-            information and to publish only what you approve. We also use the Places API for public
-            details such as your category, area and public rating.
+            You give Kabsi access by inviting the Kabsi business group (ID 5481006796) as a Manager
+            on your Business Profile. Kabsi uses Google's official Business Profile APIs to read
+            your reviews and profile information and to publish only what you approve. We also use
+            the Places API for public details such as your category, area and public rating.
           </li>
           <li>
             We use Google data only to provide and improve the Kabsi features you use. We never
@@ -304,8 +304,8 @@ function Page() {
           In Settings, choose <b>Delete this business</b> (you have 7 days to change your mind), or
           email {CONTACT_EMAIL} from your account email. We delete the business's reviews, drafts,
           posts, photos, reports and settings, and confirm by email. To stop Kabsi reaching your
-          Google profile, also remove hello@kabsi.co as described in section 4. To delete your login
-          as well, say so in your email.
+          Google profile, also remove the Kabsi group as described in section 4. To delete your
+          login as well, say so in your email.
         </p>
       </section>
 

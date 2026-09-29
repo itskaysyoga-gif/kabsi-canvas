@@ -48,7 +48,7 @@ export const Route = createFileRoute("/how-it-works")({
           step: [
             [
               "Give Kabsi access",
-              "Add hello@kabsi.co as a Manager on your Google Business Profile.",
+              "Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile.",
             ],
             [
               "Tell Kabsi about your business",
@@ -87,8 +87,8 @@ function Page() {
         <div>
           <Block n="1" icon={<KeyRound />} title="Give Kabsi access to your Google profile">
             <p>
-              On your Google Business Profile, open <b>People and access</b> and add{" "}
-              <b>hello@kabsi.co</b> as a <b>Manager</b>. That's the same access you'd give a staff
+              On your Google Business Profile, open <b>People and access</b> and add the Kabsi group
+              ID <b>5481006796</b> as a <b>Manager</b>. That's the same access you'd give a staff
               member. Kabsi accepts the invite and tells you by email when it's connected.
             </p>
             <p>

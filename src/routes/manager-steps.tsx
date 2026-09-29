@@ -4,7 +4,7 @@ import { PublicLayout } from "@/components/layouts/public-layout";
 import { ManagerAccessInstructions } from "@/components/onboarding/manager-access-instructions";
 import { CopyButton } from "@/components/shared/copy-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { pageHead } from "@/lib/site";
+import { KABSI_GROUP_ID, pageHead } from "@/lib/site";
 
 const searchSchema = z.object({
   b: z
@@ -60,16 +60,13 @@ function ManagerStepsPage() {
             <ManagerAccessInstructions mode="computer" />
           </TabsContent>
           <TabsContent value="phone" className="mt-8">
-            <ManagerAccessInstructions
-              mode="phone"
-              {...(b ? { businessName: b } : {})}
-            />
+            <ManagerAccessInstructions mode="phone" {...(b ? { businessName: b } : {})} />
           </TabsContent>
         </Tabs>
 
         <div className="mt-8 flex flex-col gap-3 rounded-card bg-kb-sand p-5 sm:flex-row sm:items-center sm:justify-between">
-          <span className="font-bold">hello@kabsi.co</span>
-          <CopyButton text="hello@kabsi.co" label="Copy email" />
+          <span className="font-bold">Kabsi group ID: {KABSI_GROUP_ID}</span>
+          <CopyButton text={KABSI_GROUP_ID} label="Copy group ID" />
         </div>
 
         <p className="mt-8 border-l-4 border-kb-yellow pl-4 leading-7">

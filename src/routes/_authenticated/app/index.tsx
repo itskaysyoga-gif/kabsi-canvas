@@ -188,8 +188,9 @@ function Setup({ loc }: { loc: Location }) {
         >
           <ShieldAlert className="mt-0.5 size-5 shrink-0 text-kb-red" aria-hidden="true" />
           <p>
-            <b>Kabsi can't reach your Google profile any more.</b> Someone may have removed
-            hello@kabsi.co as a Manager. Add it again and Kabsi picks up where it left off.
+            <b>Kabsi can't reach your Google profile any more.</b> Someone may have removed Kabsi as
+            a Manager. Invite the Kabsi group ID 5481006796 again and Kabsi picks up where it left
+            off.
           </p>
         </div>
       ) : null}
