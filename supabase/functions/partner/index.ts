@@ -6,6 +6,7 @@
 //   POST /partner/decide   staff           { claim_id, confirm, note? }        → invoice paid / plan started + "payment received" email
 //   POST /partner/billing  internal (x-cron-secret, pg_cron daily 06:10 UTC)  → last month's invoices + emails
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
+import { PLAN_LABEL } from "../_shared/plans.ts";
 import { admin, APP_URL, captureError, CORS, emailLayout, esc, fail, isInternal, jobLog, json, log, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 
 const FN = "partner";
@@ -25,7 +26,7 @@ const FRIENDLY: Record<string, string> = {
   already_decided: "This payment was already confirmed or rejected.",
   unknown_claim: "Payment not found.",
   plan_through_partner: "Your plan comes through your Kabsi partner, so there's nothing to pay here.",
-  bad_plan: "Choose 6 or 12 months.",
+  bad_plan: "Choose one of the plans shown.",
 };
 
 // Runs RPCs as the caller, so auth.uid() and every membership check apply exactly as in the browser.
@@ -117,7 +118,6 @@ async function claim(req: Request) {
 }
 
 // ── owner says they paid Kabsi Pro in USDT
-const PLAN_LABEL: Record<string, string> = { pro_6m: "Kabsi Pro, 6 months", pro_12m: "Kabsi Pro, 12 months" };
 async function planClaim(req: Request) {
   const b = await req.json().catch(() => ({})) as { location_id?: string; item?: string; network?: string; tx_ref?: string };
   const tx = (b.tx_ref ?? "").trim();
@@ -161,7 +161,7 @@ async function decide(req: Request) {
       const { data: plan } = await admin().from("plans").select("starts_at, ends_at")
         .eq("location_id", c.location_id).eq("status", "active").order("ends_at", { ascending: false }).limit(1).maybeSingle();
       const until = plan?.ends_at ? new Date(plan.ends_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : null;
-      const line = `We received your payment of ${money(c.amount_usd ?? 0)} for ${PLAN_LABEL[c.item ?? ""] ?? "Kabsi Pro"}.${until ? ` Your plan runs until ${until}.` : ""} Thank you.`;
+      const line = `We received your payment of ${money(c.amount_usd ?? 0)} for ${PLAN_LABEL[c.item ?? ""] ?? "Kabsi Pro"}.${until ? ` Your plan runs until ${until}.` : " Your plan starts as soon as Kabsi's access to your Google profile is working."} Thank you.`;
       for (const to of await ownerEmails(c.location_id)) {
         await sendEmail({
           kind: "payment_received", to, locationId: c.location_id, dedupeKey: `payment_received:${b.claim_id}:${to}`,

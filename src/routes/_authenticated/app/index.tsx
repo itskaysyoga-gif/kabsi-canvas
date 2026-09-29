@@ -129,14 +129,22 @@ function Skeleton() {
 }
 
 // ── Setup not finished: one checklist, one button.
-// Paid = a Pro payment is recorded (the plan itself starts once Google access works, D224).
+// Done = a Pro payment is recorded (the plan itself starts once Google access works, D224) or a free trial
+// has started (Q05).
 async function hasPaidPlan(locationId: string) {
-  const { count } = await supabase
-    .from("payments")
-    .select("id", { count: "exact", head: true })
-    .eq("location_id", locationId)
-    .in("item", ["pro_6m", "pro_12m"]);
-  return (count ?? 0) > 0;
+  const [pay, trial] = await Promise.all([
+    supabase
+      .from("payments")
+      .select("id", { count: "exact", head: true })
+      .eq("location_id", locationId)
+      .in("item", ["pro_monthly", "pro_yearly", "lebanon_yearly", "pro_6m"]),
+    supabase
+      .from("plans")
+      .select("id", { count: "exact", head: true })
+      .eq("location_id", locationId)
+      .eq("kind", "trial"),
+  ]);
+  return (pay.count ?? 0) + (trial.count ?? 0) > 0;
 }
 
 function Paused({ loc }: { loc: Location }) {
@@ -434,13 +442,15 @@ function Active({
             line={
               d.plan?.kind === "partner"
                 ? "Your plan comes through your Kabsi partner."
-                : d.planPaidUntil
-                  ? `Active until ${shortDate(d.planPaidUntil)}${daysLeft !== null ? ` · ${daysLeft} days left` : ""}`
-                  : d.pendingClaim
-                    ? "Payment sent. We're confirming it."
-                    : d.plan
-                      ? "Active"
-                      : "No active plan"
+                : d.plan?.kind === "trial" && d.planPaidUntil
+                  ? `Free trial until ${shortDate(d.planPaidUntil)}${daysLeft !== null ? ` · ${daysLeft} days left` : ""}. Choose a plan to keep going.`
+                  : d.planPaidUntil
+                    ? `Active until ${shortDate(d.planPaidUntil)}${daysLeft !== null ? ` · ${daysLeft} days left` : ""}`
+                    : d.pendingClaim
+                      ? "Payment sent. We're confirming it."
+                      : d.plan
+                        ? "Active"
+                        : "No active plan"
             }
             dot={
               d.plan?.kind === "partner" || d.planPaidUntil || d.plan

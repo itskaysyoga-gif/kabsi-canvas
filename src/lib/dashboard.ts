@@ -1,6 +1,7 @@
 // Home dashboard data: one round of RLS reads for the signed-in owner's business. Facts only (D222):
 // counts come straight from the tables, the rating from the daily public-rating snapshot.
 import { supabase } from "@/lib/supabase";
+import { PLAN_NAMES } from "@/lib/plans";
 
 const DAY = 86_400_000;
 
@@ -256,11 +257,7 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
   };
 }
 
-export const PLAN_NAME: Record<string, string> = {
-  pro_6m: "Kabsi Pro · 6 months",
-  pro_12m: "Kabsi Pro · 12 months",
-  partner: "Kabsi Pro · through your partner",
-};
+export const PLAN_NAME: Record<string, string> = PLAN_NAMES;
 
 export function daysSince(iso: string | null) {
   if (!iso) return null;

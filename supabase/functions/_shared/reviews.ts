@@ -59,10 +59,12 @@ export async function syncLocation(loc: Loc) {
 export async function draftReview(reviewId: string, instruction?: string) {
   const db = admin();
   const { data: rv, error } = await db.from("reviews")
-    .select("id, location_id, reviewer_name, star_rating, comment, draft_attempts, language, urgency, locations(name, knowledge_card)")
+    .select("id, location_id, reviewer_name, star_rating, comment, draft_attempts, language, urgency, locations(name, knowledge_card, status)")
     .eq("id", reviewId).single();
   if (error) throw error;
-  const loc = rv.locations as unknown as { name: string; knowledge_card: Card };
+  const loc = rv.locations as unknown as { name: string; knowledge_card: Card; status: string };
+  // Drafting is part of an active trial or plan (Q05): a Free business gets no new drafts, from any caller.
+  if (loc.status !== "active") throw new Error("location_not_active");
   const review = { reviewer: rv.reviewer_name ?? "A customer", rating: rv.star_rating, comment: rv.comment };
 
   let language = rv.language as string | null;

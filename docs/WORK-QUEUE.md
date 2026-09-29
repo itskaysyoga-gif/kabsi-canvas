@@ -41,7 +41,7 @@ Every task below fits one Claude Code cloud session and one pull request. Take t
 - Do: PRICES become Pro $19 a month or $190 a year, extra locations $15 or $150, the Lebanon bundle $120 a year, extra cards $10 or $40 for five; partner rates stay $8 and $6. Remove the 6-month plan. Plan cards: Free, Pro with a monthly or yearly switch, and the Lebanon bundle for Lebanese visitors only (through `region.ts`). Add "14-day free trial, no card".
 - Done when: no "$75", "6 months" or `pro6` remains in `src`, `public` or `docs`, and pricing reads right at 390 and 1440 px in both regions.
 
-### [ ] Q05 · Plans and the free trial (D281) · M · Opus to plan
+### [x] Q05 · Plans and the free trial (D281) · M · Opus to plan
 - Files: a new migration, plan logic in the Edge Functions, `src/routes/_authenticated/app/plan.tsx`
 - Do: plan kinds free, trial, pro_monthly, pro_yearly and lebanon_yearly. The trial starts when Google access starts (keep D241): 14 days, or 30 when `signup_source` is a partner. Emails 7 days and 1 day before the end, and on the day it ends. At the end the business drops to Free: drafting stops, the review link keeps working.
 - Done when: a test business moves from trial to Free on expiry, and a payment extends the plan correctly.

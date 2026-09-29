@@ -2,6 +2,7 @@
 // Function (migrations 20260925060903 / places-search). The browser never writes tables directly.
 import { supabase } from "@/lib/supabase";
 import { callFunction } from "@/lib/api";
+import type { PlanKind } from "@/lib/plans";
 
 export type OnboardingStep = "business" | "access" | "knowledge" | "plan" | "done";
 export type KnowledgeCard = {
@@ -125,7 +126,7 @@ export const setStep = (locationId: string, step: OnboardingStep) =>
   rpc<void>("set_onboarding_step", { p_location: locationId, p_step: step });
 export const saveKnowledge = (locationId: string, card: KnowledgeCard) =>
   rpc<void>("update_knowledge_card", { p_location: locationId, p_card: card });
-export const choosePlan = (locationId: string, kind: "pro_6m" | "pro_12m" | "partner") =>
+export const choosePlan = (locationId: string, kind: PlanKind) =>
   rpc<string>("choose_plan", { p_location: locationId, p_kind: kind });
 export const activateCard = (code: string, locationId: string, label?: string) =>
   rpc<string>("activate_card", { p_code: code, p_location: locationId, p_label: label ?? null });
