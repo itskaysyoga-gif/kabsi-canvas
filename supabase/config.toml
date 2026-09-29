@@ -16,6 +16,8 @@ verify_jwt = false
 verify_jwt = false
 [functions.slack]            # Slack signs /interact and /command; Slack sends no Supabase JWT
 verify_jwt = false
+[functions.billing]          # NOWPayments IPN sends no JWT; /nowpayments checks the HMAC signature, /invoice checks the user (Q06)
+verify_jwt = false
 
 # JWT required.
 [functions.api]

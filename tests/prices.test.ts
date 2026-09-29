@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { PRICES } from "../src/lib/site";
 
-// Constants that D274, D281 and the spec fix; Q04 changes the rest (Pro monthly and yearly, no 6-month plan).
+// Constants that D274, D281 and the spec fix; Q04 added Pro monthly and yearly and removed the 6-month plan.
 describe("PRICES", () => {
   it("keeps the Lebanon bundle and partner rates from the spec", () => {
-    expect(PRICES.pro12).toBe(120);
+    expect(PRICES.lebanonBundle).toBe(120);
     expect(PRICES.partnerRate).toBe(8);
     expect(PRICES.foundingRate).toBe(6);
   });
