@@ -14,7 +14,7 @@ const EXAMPLES = [
     rating: 5,
     review: "Lovely spot, great coffee, and they remembered my order from last week.",
     draft:
-      "Thank you so much, Emma! We're really glad you enjoyed the coffee, and the team will be happy to hear it. See you again soon.",
+      "Thank you so much, Emma. We're really glad you enjoyed the coffee, and the team will be happy to hear it. See you again soon.",
   },
   {
     key: "es",
@@ -24,7 +24,7 @@ const EXAMPLES = [
     rating: 4,
     review: "Muy buen ambiente y el café riquísimo. Solo tardaron un poco en atendernos.",
     draft:
-      "¡Muchas gracias, Lucía! Nos alegra mucho que te gustaran el ambiente y el café. Sentimos la espera. ¡Te esperamos pronto!",
+      "Muchas gracias, Lucía. Nos alegra mucho que te gustaran el ambiente y el café. Sentimos la espera. Te esperamos pronto.",
   },
   {
     key: "ar",

@@ -4,16 +4,32 @@ import { PRICES } from "@/lib/site";
 
 export const FAQ: { q: string; a: string }[] = [
   {
-    q: "Does Kabsi post replies by itself?",
-    a: "No. Kabsi drafts a reply and emails it to you. Nothing goes on your Google profile until you tap Post, and you see the exact text before it goes.",
+    q: "What does Kabsi do for my Google Business Profile?",
+    a: "Kabsi keeps your profile complete and current by following Google's own published guidance, and you approve every change. It shows a Profile Score and a short Do now list of things to improve, each with a ready draft. It also drafts a reply to every review in the reviewer's language, drafts a weekly post, checks your photos, sets special hours, and watches your listing for changes you did not make.",
   },
   {
-    q: "What does Kabsi need from me?",
-    a: "Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile, then tell Kabsi a few facts about your business: how you sign off, your phone number, anything you want mentioned. Drafts only use the facts you give.",
+    q: "Does Kabsi post or change anything by itself?",
+    a: "No. Kabsi drafts and you approve. Nothing goes on your Google profile until you tap Post or Approve, and you see the exact text before it goes.",
   },
   {
     q: "Which businesses can use Kabsi?",
-    a: "Any business with a verified Google Business Profile that you own or manage. If your profile is not verified yet, verify it on Google first (it is free and done at business.google.com), then come back and set up Kabsi. If someone else manages the profile, ask them to set up Kabsi or to add you as a Manager.",
+    a: "Kabsi works with a verified Google Business Profile that you own or manage, for a business that meets customers in person during stated hours, or that travels to them in a service area, such as a plumber or a cleaner. It does not work for online-only businesses, rental or for-sale properties, PO boxes or virtual offices used as an address, or other cases Google lists as not eligible in its Business Profile guidelines. If your profile is not verified yet, verify it on Google first (it is free and done at business.google.com), then come back and set up Kabsi.",
+  },
+  {
+    q: "What does Kabsi need from me?",
+    a: "Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile, then tell Kabsi a few facts about your business: your services, how you sign off, your phone number, anything you want mentioned or avoided. Drafts only use the facts you give.",
+  },
+  {
+    q: "Will Kabsi get me more reviews, a better rating or a higher ranking?",
+    a: "We don't promise that, and nobody honest can. Google decides local results by relevance, distance and prominence. Kabsi does the parts you control: every review gets a reply, your details stay accurate and complete, your profile stays up to date, and leaving a review is easy for every customer. Google doesn't say that replies or posts raise your ranking.",
+  },
+  {
+    q: "What is the Profile Score?",
+    a: "A checklist score out of 100 that Kabsi works out from things it can see: how many recent reviews are answered, how many key facts you have given, whether your review link is shared, whether you posted this week, how many photos you have added, whether your phone, website, category and hours are set, and whether Kabsi is watching your listing. It is Kabsi's own checklist. It is not a Google score and it does not predict how you rank.",
+  },
+  {
+    q: "What is the Do now list?",
+    a: "The few things worth doing next, biggest first, each with a short reason and a ready draft where Kabsi can write one. You can do it, put it off for 3 days, or skip it for 30 days. Nothing is sent to Google until you approve it.",
   },
   {
     q: "Which languages does it reply in?",
@@ -24,16 +40,12 @@ export const FAQ: { q: string; a: string }[] = [
     a: "No. Nobody outside Google can remove a review. Kabsi helps you answer every review calmly, including the hard ones. For 1 and 2 star reviews it emails you a careful draft and no quick Post button, so you read it first.",
   },
   {
-    q: "Will Kabsi get me more reviews, a better rating or a higher ranking?",
-    a: "We don't promise that, and nobody honest can. Google decides local results by relevance, distance and prominence. Kabsi does the parts you control: every review gets a reply, your details stay accurate, your profile stays up to date, and leaving a review is one tap for every customer. Replies and posts help customers; Google doesn't say they raise your ranking.",
+    q: "How do I make it easy for customers to leave a review?",
+    a: "Every business gets a review link and a printable QR code in the dashboard, free in every country. Share the same link with every customer. If you already own an NFC tag, you can write the same link on it with a free phone app. Kabsi never asks only happy customers and never offers rewards for reviews.",
   },
   {
-    q: "Do I need an NFC card?",
-    a: "No. The card is optional. Every business gets a review link (go.kabsi.co/…) and a printable QR code in the dashboard, so you can use Kabsi 100% digitally.",
-  },
-  {
-    q: "Can you ship an NFC card to my country?",
-    a: "Kabsi ships NFC cards only in Lebanon. Anywhere else, get a card from a Kabsi partner in your area, or buy any blank NFC card or sticker online and write your Kabsi review link on it with a free NFC app. Your review link and QR code work in every country.",
+    q: "Does Kabsi sell NFC cards?",
+    a: "Not on this site. Kabsi's team in Lebanon offers a card and setup bundle, described on the Lebanon page. Everywhere else, the review link and QR code do the same job, and any NFC tag you own can carry the link.",
   },
   {
     q: "Is Kabsi part of Google?",
@@ -41,7 +53,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Can I remove Kabsi's access?",
-    a: "Yes, at any time, from your Google profile under People and access. You don't need to ask us.",
+    a: "Yes, at any time, from your Google profile under People and access: remove the Kabsi Clients group. You don't need to ask us.",
   },
   {
     q: "What are the weekly posts?",
@@ -56,16 +68,12 @@ export const FAQ: { q: string; a: string }[] = [
     a: "Kabsi watches your listing's name, phone, address, hours, website and categories. If something changes that you didn't approve, you get an email and can put yours back with one tap. It can't lock your listing or stop people from suggesting edits to Google.",
   },
   {
-    q: "Does the card ask only happy customers?",
-    a: "No. Every tap and scan opens your Google review page, the same for every customer. There's no rating screen before it.",
-  },
-  {
     q: "How do I pay?",
-    a: `In USDT (TRC20 or Binance Pay) from anywhere. In Lebanon you can also pay with Whish, OMT or cash. Kabsi Pro is $${PRICES.proMonthly} a month or $${PRICES.proYearly} a year, and you can start with a 14-day free trial, no card. Our team in Lebanon also sells a $${PRICES.lebanonBundle} a year bundle with an NFC card and setup.`,
+    a: `Kabsi Pro is $${PRICES.proMonthly} a month or $${PRICES.proYearly} a year, and you can start with a 14-day free trial, no card. You pay in USDT (TRC20 or Binance Pay) from anywhere. In Lebanon you can also pay with Whish, OMT or cash, and our team there sells a $${PRICES.lebanonBundle} a year bundle with an NFC card and setup.`,
   },
   {
     q: "What happens when my plan ends?",
-    a: "Reply drafts, weekly posts, Listing Shield and the weekly report stop. Your card and review link keep working and still open your Google review page.",
+    a: "Reply drafts, weekly posts, Listing Shield and the weekly report stop. Your review link and any card keep working and still open your Google review page.",
   },
   {
     q: "Can I get a refund?",
@@ -77,7 +85,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "How is this different from Google's own AI replies?",
-    a: "Google may offer its own reply suggestions inside Business Profile. Kabsi drafts in the reviewer's language from facts you wrote about your business, checks each draft against your rules, and never posts until you approve the exact text.",
+    a: "Google may offer its own reply suggestions inside Business Profile. A reply is one part of Kabsi. Kabsi also shows what to improve on your profile, drafts in the reviewer's language from facts you wrote about your business, checks each draft against your rules, comes to your inbox, watches your listing, and never posts until you approve the exact text.",
   },
   {
     q: "What can Kabsi do on my profile as a Manager?",

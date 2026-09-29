@@ -137,8 +137,8 @@ function Page() {
       </Section>
 
       <CtaBand
-        title="More reviews means more replies to write."
-        sub="Kabsi drafts a reply to every new Google review in your customer's language. You approve it with one tap."
+        title="Every review deserves a reply."
+        sub="Kabsi drafts a reply to every new Google review in your customer's language and shows what else to complete on your profile. You approve everything."
       />
     </PublicLayout>
   );

@@ -373,7 +373,7 @@ export function ReplySketch() {
           </span>
         </div>
         <div className="rounded-card border-2 border-kb-ink p-3 text-xs leading-5 text-kb-ink">
-          Thank you, Emma! We're glad you enjoyed the coffee. See you again soon.
+          Thank you, Emma. We're glad you enjoyed the coffee. See you again soon.
         </div>
         <div className="mt-3 flex justify-end">
           <span className="rounded-pill bg-kb-carbon px-4 py-1.5 text-xs font-bold text-kb-white">

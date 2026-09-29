@@ -72,13 +72,13 @@ export const VERTICALS: Vertical[] = [
     label: "Restaurants",
     icon: <UtensilsCrossed />,
     hero: "restaurant",
-    title: "Kabsi for restaurants | Google review replies you approve",
+    title: "Kabsi for restaurants | Google profile care you approve",
     description:
-      "Every Google review of your restaurant gets a reply drafted in the guest's language. Holiday hours, dish photos and a card on every table. You approve it all.",
+      "Kabsi keeps your restaurant's Google profile complete and current: a Profile Score, a Do now list, a reply to every review in the guest's language, holiday hours and dish photos. You approve everything.",
     h1: "Your restaurant's Google profile, taken care of.",
-    sub: "Reviews arrive during service. Kabsi drafts a reply in the guest's language and emails it to you, so you can post it later with one tap. Nothing goes on Google until you approve it.",
+    sub: "Service comes first. Kabsi shows what to fix on your Google profile, drafts each change and drafts a reply to every review in the guest's language. Nothing goes on Google until you approve it.",
     summary:
-      "Kabsi emails a restaurant owner every new Google review with a reply already drafted in the guest's language. It also sets holiday hours, checks dish photos before they go up and alerts you when your phone or hours change on Google.",
+      "Kabsi keeps a restaurant's Google Business Profile complete and current by following Google's own guidance. It shows a Profile Score and a Do now list, drafts a reply to every review in the guest's language, sets holiday hours, checks dish photos before they go up and alerts you when your phone or hours change on Google.",
     headings: {
       pains: "Service comes first. Google comes later.",
       example: "A reply for every guest, in their language.",
@@ -119,6 +119,11 @@ export const VERTICALS: Vertical[] = [
     exampleNote:
       "Fictional example. The draft thanks the guest, answers the one point they raised and invents nothing.",
     helps: [
+      {
+        icon: <ClipboardList />,
+        title: "Profile Score and Do now",
+        text: "A Profile Score and a short Do now list: missing hours, phone or website, too few dish photos, no post this week. Each item comes with a ready draft where Kabsi can write one.",
+      },
       {
         icon: <MessageSquareReply />,
         title: "A reply for every review",
@@ -175,13 +180,13 @@ export const VERTICALS: Vertical[] = [
     icon: <Coffee />,
     hero: "bakery",
     side: "cafe",
-    title: "Kabsi for cafés and bakeries | Review replies you approve",
+    title: "Kabsi for cafés and bakeries | Google profile care you approve",
     description:
-      "Reply drafts for every Google review of your café or bakery, in the customer's language. Weekly updates, early-morning hours and a card by the till.",
+      "Kabsi keeps your café or bakery's Google profile complete and current: a Profile Score, a Do now list, a weekly post draft, early-morning hours and a reply to every review. You approve everything.",
     h1: "Your café's Google profile, taken care of.",
-    sub: "Your mornings are for coffee and bread, not for Google. Kabsi drafts a reply to every review and emails it to you, so you can post it after the rush. Nothing goes on Google until you approve it.",
+    sub: "Your mornings are for coffee and bread, not for Google. Kabsi shows what to improve on your profile, drafts a weekly update and a reply to every review, and waits for your approval.",
     summary:
-      "Kabsi emails a café or bakery every new Google review with a reply drafted in the customer's language. It drafts a short weekly update about what's fresh, keeps your opening hours right for holidays and alerts you when your listing changes on Google.",
+      "Kabsi keeps a café or bakery's Google Business Profile complete and current by following Google's own guidance. It shows a Profile Score and a Do now list, drafts a short weekly update about what's fresh, replies to every review in the customer's language, keeps opening hours right for holidays and alerts you when your listing changes.",
     headings: {
       pains: "Busy mornings, no time for Google.",
       example: "Regulars write in many languages.",
@@ -216,12 +221,17 @@ export const VERTICALS: Vertical[] = [
       rating: 5,
       review: "قهوة رائعة وكرواسون طازج كل صباح. المكان هادئ ومريح للعمل.",
       reply:
-        "شكراً جزيلاً على كلماتك الجميلة! يسعدنا أن القهوة والكرواسون نالا إعجابك، وننتظرك دائماً في الصباح.\n\nفريق مخبز الزيتونة",
+        "شكراً جزيلاً على كلماتك الجميلة. يسعدنا أن القهوة والكرواسون نالا إعجابك، وننتظرك دائماً في الصباح.\n\nفريق مخبز الزيتونة",
       dir: "rtl",
     },
     exampleNote:
       "Fictional example. The review is in Arabic, so the draft is too. It thanks the customer for what they mentioned and invents nothing.",
     helps: [
+      {
+        icon: <ClipboardList />,
+        title: "Profile Score and Do now",
+        text: "A Profile Score and a short Do now list: opening hours, phone, photos of the counter and the bake, this week's post. Each item comes with a ready draft where Kabsi can write one.",
+      },
       {
         icon: <MessageSquareReply />,
         title: "A reply for every review",
@@ -274,13 +284,13 @@ export const VERTICALS: Vertical[] = [
     label: "Clinics and dentists",
     icon: <Stethoscope />,
     hero: "dentist",
-    title: "Kabsi for clinics and dentists | Careful review replies",
+    title: "Kabsi for clinics and dentists | Careful Google profile care",
     description:
-      "Calm, careful reply drafts for every Google review of your clinic, never posted without your approval. Keep your hours and phone right on Google.",
+      "Kabsi keeps your clinic's Google profile complete and current, with calm reply drafts that make no medical claims. A Profile Score, a Do now list, and nothing posted without your approval.",
     h1: "Your clinic's Google profile, taken care of.",
-    sub: "Patients read reviews before they book. Kabsi drafts a calm, professional reply to each one and waits for your approval. Replies never make medical claims.",
+    sub: "Patients read your profile before they book. Kabsi shows what to complete on it and drafts a calm, professional reply to each review. Replies never make medical claims, and nothing is posted until you approve it.",
     summary:
-      "Kabsi emails a clinic every new Google review with a calm, general reply drafted for it. Drafts make no medical claims, share no personal details and can be told never to confirm that someone is a patient. It also keeps your hours right and alerts you when your listing changes.",
+      "Kabsi keeps a clinic's Google Business Profile complete and current by following Google's own guidance. It shows a Profile Score and a Do now list, and drafts calm, general replies to every review. Drafts make no medical claims, share no personal details and can be told never to confirm that someone is a patient. It also keeps your hours right and alerts you when your listing changes.",
     headings: {
       pains: "Patients read your reviews before they book.",
       example: "Calm replies that protect patient privacy.",
@@ -320,6 +330,11 @@ export const VERTICALS: Vertical[] = [
     exampleNote:
       "Fictional example. The draft apologises for the wait, doesn't confirm any treatment and moves the conversation to a private call.",
     helps: [
+      {
+        icon: <ClipboardList />,
+        title: "Profile Score and Do now",
+        text: "A Profile Score and a short Do now list: hours, phone, website, categories, photos of the reception and the building. Each item comes with a ready draft where Kabsi can write one.",
+      },
       {
         icon: <MessageSquareReply />,
         title: "Careful reply drafts",
@@ -372,13 +387,13 @@ export const VERTICALS: Vertical[] = [
     label: "Salons and barbers",
     icon: <Scissors />,
     hero: "salon",
-    title: "Kabsi for salons and barbers | Review replies you approve",
+    title: "Kabsi for salons and barbers | Google profile care you approve",
     description:
-      "Reply drafts for every Google review of your salon, photos of your work checked before they go up, and a card at every station. You approve every post.",
+      "Kabsi keeps your salon's Google profile complete and current: a Profile Score, a Do now list, photos of your work checked before they go up, and a reply to every review. You approve every post.",
     h1: "Your salon's Google profile, taken care of.",
-    sub: "Clients choose a salon by its reviews and photos. Kabsi drafts a reply to every review, checks your photos and keeps your hours right. You approve each one.",
+    sub: "Clients choose a salon by its profile and photos. Kabsi shows what to improve, checks your photos, drafts a reply to every review and keeps your hours right. You approve each one.",
     summary:
-      "Kabsi emails a salon or barber every new Google review with a reply drafted in the client's language, thanking the stylist by name when the client mentions them. It checks photos of your work before you post them and keeps your special hours right on Google.",
+      "Kabsi keeps a salon or barber's Google Business Profile complete and current by following Google's own guidance. It shows a Profile Score and a Do now list, replies to every review in the client's language and thanks the stylist by name when the client mentions them, checks photos of your work before you post them and keeps your special hours right.",
     headings: {
       pains: "Your hands are busy. Your reviews still need answers.",
       example: "Thank the right stylist, by name.",
@@ -411,13 +426,18 @@ export const VERTICALS: Vertical[] = [
       lang: "English",
       name: "Jordan",
       rating: 5,
-      review: "Sam did an amazing job with my colour, exactly what I asked for. Will be back!",
+      review: "Sam did an amazing job with my colour, exactly what I asked for. Will be back.",
       reply:
-        "Thank you, Jordan! We're so happy you love your colour, and we'll pass your kind words on to Sam. See you next time.\n\nThe team at Studio Nine",
+        "Thank you, Jordan. We're so happy you love your colour, and we'll pass your kind words on to Sam. See you next time.\n\nThe team at Studio Nine",
     },
     exampleNote:
       "Fictional example. The stylist's name is used because it's on the salon's staff list.",
     helps: [
+      {
+        icon: <ClipboardList />,
+        title: "Profile Score and Do now",
+        text: "A Profile Score and a short Do now list: hours, phone, booking website, a set of photos of your work, this week's post. Each item comes with a ready draft where Kabsi can write one.",
+      },
       {
         icon: <MessageSquareReply />,
         title: "A reply for every review",
@@ -459,8 +479,8 @@ export const VERTICALS: Vertical[] = [
         a: "Clear photos of your salon and your work. Kabsi's check flags blurry photos, screenshots, text-heavy images and photos where a face is the main subject.",
       },
       {
-        q: "Do I need the NFC card?",
-        a: "No. Every business gets a review link and a printable QR code. The card is optional; Kabsi ships cards in Lebanon, and elsewhere you can use a partner's card or any NFC card you buy online.",
+        q: "How do customers leave a review?",
+        a: "Every business gets a review link and a printable QR code, free. Share the same link with every customer, on a table card, a receipt or a message. If you already own an NFC tag, you can write the same link on it.",
       },
     ],
   },
@@ -470,13 +490,13 @@ export const VERTICALS: Vertical[] = [
     label: "Hotels and B&Bs",
     icon: <BedDouble />,
     hero: "hotel",
-    title: "Kabsi for hotels and B&Bs | Review replies in every language",
+    title: "Kabsi for hotels and B&Bs | Google profile care in every language",
     description:
-      "Guests review in many languages. Kabsi drafts a reply in each guest's language for every Google review, and you approve it before it's posted.",
+      "Kabsi keeps your hotel or guesthouse's Google profile complete and current and drafts a reply in each guest's language. A Profile Score, a Do now list, and nothing posted without your approval.",
     h1: "Your hotel's Google profile, taken care of.",
-    sub: "Guests arrive from everywhere and review in their own language. Kabsi drafts a warm reply in that language for each review and waits for your approval.",
+    sub: "Guests arrive from everywhere and review in their own language. Kabsi shows what to complete on your profile and drafts a warm reply in each guest's language. You approve everything.",
     summary:
-      "Kabsi emails a hotel, guesthouse or B&B every new Google review with a warm reply drafted in the guest's own language, from English and Spanish to Arabic and French. It watches your phone, address and website on Google and sends a short report every Monday.",
+      "Kabsi keeps a hotel, guesthouse or B&B's Google Business Profile complete and current by following Google's own guidance. It shows a Profile Score and a Do now list, drafts a warm reply to every review in the guest's own language, from English and Spanish to Arabic and French, watches your phone, address and website on Google and sends a short report every Monday.",
     headings: {
       pains: "Guests from everywhere, reviews in every language.",
       example: "A warm reply in the guest's own language.",
@@ -516,6 +536,11 @@ export const VERTICALS: Vertical[] = [
     },
     exampleNote: "Fictional example. The reply is written in the guest's language, French.",
     helps: [
+      {
+        icon: <ClipboardList />,
+        title: "Profile Score and Do now",
+        text: "A Profile Score and a short Do now list: phone, website, categories, room and exterior photos, this week's post. Each item comes with a ready draft where Kabsi can write one.",
+      },
       {
         icon: <Languages />,
         title: "Replies in the guest's language",
@@ -557,8 +582,8 @@ export const VERTICALS: Vertical[] = [
         a: "No. Kabsi works with your Google Business Profile only: Google reviews, posts, photos, hours and listing details.",
       },
       {
-        q: "Can I use Kabsi without an NFC card?",
-        a: "Yes. Your review link and QR code work on their own, for example in the email you send after checkout.",
+        q: "Do I need anything besides the review link?",
+        a: "No. Your review link and QR code work on their own, for example in the email you send after checkout.",
       },
     ],
   },
@@ -568,13 +593,13 @@ export const VERTICALS: Vertical[] = [
     label: "Garages and repairs",
     icon: <Car />,
     hero: "garage",
-    title: "Kabsi for garages and auto repair | Calm review replies",
+    title: "Kabsi for garages and auto repair | Calm Google profile care",
     description:
-      "A calm reply draft for every Google review of your garage, your hours and phone watched on Google, and a card at the counter. You approve every post.",
+      "Kabsi keeps your garage's Google profile complete and current, with a calm reply draft for every review. A Profile Score, a Do now list, and nothing posted without your approval.",
     h1: "Your garage's Google profile, taken care of.",
-    sub: "Drivers pick a garage they can trust. Kabsi drafts a calm reply to every review, watches your phone and hours on Google, and waits for your approval.",
+    sub: "Drivers pick a garage they can trust. Kabsi shows what to complete on your Google profile, drafts a calm reply to every review, watches your phone and hours and waits for your approval.",
     summary:
-      "Kabsi emails a garage or auto repair shop every new Google review with a calm reply drafted for it. Drafts never argue, admit fault or promise money in public. Kabsi also alerts you when your phone number or hours change on Google.",
+      "Kabsi keeps a garage or auto repair shop's Google Business Profile complete and current by following Google's own guidance. It shows a Profile Score and a Do now list, and drafts a calm reply to every review. Drafts never argue, admit fault or promise money in public. Kabsi also alerts you when your phone number or hours change on Google.",
     headings: {
       pains: "Trust is everything for a garage.",
       example: "Calm replies, even when the bill is disputed.",
@@ -614,6 +639,11 @@ export const VERTICALS: Vertical[] = [
     exampleNote:
       "Fictional example. The draft doesn't argue, admit fault or offer money. It moves the talk to a phone call.",
     helps: [
+      {
+        icon: <ClipboardList />,
+        title: "Profile Score and Do now",
+        text: "A Profile Score and a short Do now list: hours, phone, services, photos of the workshop, this week's post. Each item comes with a ready draft where Kabsi can write one.",
+      },
       {
         icon: <MessageSquareReply />,
         title: "Calm reply drafts",
@@ -669,13 +699,13 @@ export const VERTICALS: Vertical[] = [
     label: "Shops and boutiques",
     icon: <ShoppingBag />,
     hero: "boutique",
-    title: "Kabsi for shops and boutiques | Review replies you approve",
+    title: "Kabsi for shops and boutiques | Google profile care you approve",
     description:
-      "Reply drafts for every Google review of your shop, weekly updates for new arrivals, holiday hours and a card at the till. You approve everything.",
+      "Kabsi keeps your shop's Google profile complete and current: a Profile Score, a Do now list, weekly updates for new arrivals, holiday hours and a reply to every review. You approve everything.",
     h1: "Your shop's Google profile, taken care of.",
-    sub: "Shoppers check Google before they visit. Kabsi drafts a reply to every review, drafts a short weekly update and keeps your holiday hours right. You approve each one.",
+    sub: "Shoppers check Google before they visit. Kabsi shows what to improve on your profile, drafts a short weekly update and a reply to every review, and keeps your holiday hours right. You approve each one.",
     summary:
-      "Kabsi emails a shop or boutique every new Google review with a reply drafted in the customer's language, and drafts one short Google update a week about what's new. It sets holiday hours and alerts you when your listing changes.",
+      "Kabsi keeps a shop or boutique's Google Business Profile complete and current by following Google's own guidance. It shows a Profile Score and a Do now list, replies to every review in the customer's language, drafts one short Google update a week about what's new, sets holiday hours and alerts you when your listing changes.",
     headings: {
       pains: "Shoppers check Google before they visit.",
       example: "A friendly reply for every shopper.",
@@ -710,11 +740,16 @@ export const VERTICALS: Vertical[] = [
       rating: 5,
       review: "Found the perfect jacket, and the staff took the time to help me find my size.",
       reply:
-        "Thank you, Daniel! We're so glad you found the right jacket, and we'll tell the team you appreciated their help. See you again soon.\n\nLena, The Linen Rail",
+        "Thank you, Daniel. We're so glad you found the right jacket, and we'll tell the team you appreciated their help. See you again soon.\n\nLena, The Linen Rail",
     },
     exampleNote:
       "Fictional example. The draft reflects what the customer said and adds nothing new.",
     helps: [
+      {
+        icon: <ClipboardList />,
+        title: "Profile Score and Do now",
+        text: "A Profile Score and a short Do now list: hours, phone, website, photos of the shop and new arrivals, this week's post. Each item comes with a ready draft where Kabsi can write one.",
+      },
       {
         icon: <MessageSquareReply />,
         title: "A reply for every review",
@@ -767,13 +802,13 @@ export const VERTICALS: Vertical[] = [
     label: "Florists",
     icon: <Flower2 />,
     hero: "florist",
-    title: "Kabsi for florists | Google review replies you approve",
+    title: "Kabsi for florists | Google profile care you approve",
     description:
-      "Reply drafts for every Google review of your flower shop, holiday hours for busy seasons, arrangement photos checked and a card with every bouquet.",
+      "Kabsi keeps your flower shop's Google profile complete and current: a Profile Score, a Do now list, holiday hours for busy seasons, arrangement photos checked and a reply to every review.",
     h1: "Your flower shop's Google profile, taken care of.",
-    sub: "Customers order for birthdays, weddings and hard days. Kabsi drafts a kind reply to every review, keeps your phone and seasonal hours right, and waits for your approval.",
+    sub: "Customers order for birthdays, weddings and hard days. Kabsi shows what to complete on your profile, drafts a kind reply to every review, keeps your phone and seasonal hours right, and waits for your approval.",
     summary:
-      "Kabsi emails a florist every new Google review with a kind reply drafted in the customer's language. It sets special hours for busy seasons, checks photos of your arrangements before they go up and alerts you if your phone number changes on Google.",
+      "Kabsi keeps a florist's Google Business Profile complete and current by following Google's own guidance. It shows a Profile Score and a Do now list, drafts a kind reply to every review in the customer's language, sets special hours for busy seasons, checks photos of your arrangements before they go up and alerts you if your phone number changes on Google.",
     headings: {
       pains: "Busy seasons, lots of orders, one phone.",
       example: "A thank-you for every bouquet review.",
@@ -808,11 +843,16 @@ export const VERTICALS: Vertical[] = [
       rating: 5,
       review: "Beautiful bouquet for my mum's birthday, and they wrapped it so nicely.",
       reply:
-        "Thank you, Priya! We're so glad the bouquet was right for your mum's birthday. We hope to see you again soon.\n\nAnna, Bloom & Stem",
+        "Thank you, Priya. We're so glad the bouquet was right for your mum's birthday. We hope to see you again soon.\n\nAnna, Bloom & Stem",
     },
     exampleNote:
       "Fictional example. The draft thanks the customer for the occasion they mentioned and adds nothing new.",
     helps: [
+      {
+        icon: <ClipboardList />,
+        title: "Profile Score and Do now",
+        text: "A Profile Score and a short Do now list: seasonal hours, phone, website, photos of your arrangements, this week's post. Each item comes with a ready draft where Kabsi can write one.",
+      },
       {
         icon: <MessageSquareReply />,
         title: "Kind reply drafts",
@@ -857,8 +897,8 @@ export const VERTICALS: Vertical[] = [
         a: "Yes. Add a photo from your phone; Kabsi checks it's clear and fits Google's photo rules, and you post it with one tap.",
       },
       {
-        q: "Do I need the NFC card?",
-        a: "No. Every business gets a review link and a printable QR code. The card is optional; Kabsi ships cards in Lebanon, and elsewhere you can use a partner's card or any NFC card you buy online.",
+        q: "How do customers leave a review?",
+        a: "Every business gets a review link and a printable QR code, free. Share the same link with every customer, on a table card, a receipt or a message. If you already own an NFC tag, you can write the same link on it.",
       },
     ],
   },

@@ -171,7 +171,7 @@ function Page() {
           <div
             data-stagger=""
             className={
-              v.side ? "grid gap-4 sm:grid-cols-2" : "grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+              v.side ? "grid gap-4 sm:grid-cols-2" : "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
             }
           >
             {v.helps.map((h) => (

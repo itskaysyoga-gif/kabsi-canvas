@@ -246,7 +246,7 @@ export function FeatureCard({
 }
 
 export function CtaBand({
-  title = "Every Google review, answered. You just tap Post.",
+  title = "Your Google profile, looked after. You approve every change.",
   sub,
 }: {
   title?: string;

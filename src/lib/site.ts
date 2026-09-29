@@ -74,7 +74,7 @@ export function pageHead(o: {
     { property: "og:image:height", content: "630" },
     {
       property: "og:image:alt",
-      content: "Kabsi: Every Google review, answered. You just tap Post.",
+      content: "Kabsi: Your Google profile, looked after. You approve every change.",
     },
     { property: "og:locale", content: "en_US" },
     { name: "twitter:card", content: "summary_large_image" },
@@ -83,7 +83,7 @@ export function pageHead(o: {
     { name: "twitter:image", content: og },
     {
       name: "twitter:image:alt",
-      content: "Kabsi: Every Google review, answered. You just tap Post.",
+      content: "Kabsi: Your Google profile, looked after. You approve every change.",
     },
   ];
   if (o.noindex) meta.push({ name: "robots", content: "noindex" });

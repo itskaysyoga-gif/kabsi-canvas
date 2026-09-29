@@ -157,7 +157,7 @@ export const GUIDES: Guide[] = [
             name="Emma"
             rating={5}
             review="Lovely spot, great coffee, and they remembered my order."
-            reply="Thank you, Emma! We're glad you enjoyed the coffee, and the team will be happy to hear it. See you again soon. Luca, owner"
+            reply="Thank you, Emma. We're glad you enjoyed the coffee, and the team will be happy to hear it. See you again soon. Luca, owner"
           />
           <Example
             label="4 stars"
@@ -165,7 +165,7 @@ export const GUIDES: Guide[] = [
             name="Lucía"
             rating={4}
             review="Muy buen ambiente y el café riquísimo. Solo tardaron un poco en atendernos."
-            reply="¡Muchas gracias, Lucía! Nos alegra que te gustaran el ambiente y el café, y sentimos la espera. ¡Te esperamos pronto! Luca, dueño"
+            reply="Muchas gracias, Lucía. Nos alegra que te gustaran el ambiente y el café, y sentimos la espera. Te esperamos pronto. Luca, dueño"
           />
           <Example
             label="4 stars"
@@ -192,8 +192,9 @@ export const GUIDES: Guide[] = [
           reply ready.
         </p>
         <Callout title="Let Kabsi draft them for you">
-          Every new review arrives by email with a draft in the reviewer's language. Nothing is
-          posted until you tap Post. <Link to="/how-it-works">See how it works</Link>.
+          Every new review arrives by email with a draft in the reviewer's language, and Kabsi also
+          shows what else to complete on your profile. Nothing is posted until you approve it.{" "}
+          <Link to="/how-it-works">See how it works</Link>.
         </Callout>
       </>
     ),
@@ -463,8 +464,8 @@ export const GUIDES: Guide[] = [
     body: (
       <>
         <p>
-          The easiest way to get more reviews is to make leaving one easy: a link people can tap, or
-          a QR code they can scan.
+          Leaving a review is easiest when there is nothing to search for: a link people can tap, or
+          a QR code they can scan. Google's own help page describes both.
         </p>
         <h2>Option 1: from your Business Profile</h2>
         <Steps

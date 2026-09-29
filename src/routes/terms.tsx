@@ -15,7 +15,7 @@ export const Route = createFileRoute("/terms")({
   component: Page,
 });
 
-const UPDATED = "26 September 2026";
+const UPDATED = "29 September 2026";
 
 function Page() {
   return (
@@ -39,6 +39,12 @@ function Page() {
         <h2>1. What Kabsi does</h2>
         <ul>
           <li>
+            Helps you keep your Google Business Profile complete and current by following Google's
+            published guidance: a Profile Score and a Do now list of suggested improvements, each
+            with a ready draft where Kabsi can write one. The score is Kabsi's own checklist, not a
+            Google score.
+          </li>
+          <li>
             Emails you each new Google review with a reply drafted in the reviewer's language, and
             lets you post, edit or skip it from email or the app.
           </li>
@@ -49,8 +55,12 @@ function Page() {
           </li>
           <li>Sends a weekly report and shows your profile's facts in the app.</li>
           <li>
-            Provides a review link, QR code and optional NFC card that open your Google review page
-            for every customer.
+            Provides a review link and a QR code that open your Google review page for every
+            customer, and in Lebanon an optional NFC card.
+          </li>
+          <li>
+            Answers questions and helps you fill in your business facts through Nora, an AI
+            assistant.
           </li>
         </ul>
       </section>
@@ -59,8 +69,9 @@ function Page() {
         <h2>2. Your approval is always required</h2>
         <ul>
           <li>
-            Nothing is published to your Google Business Profile unless you approve that exact
-            content. There is no automatic mode, including for weekly post drafts.
+            Nothing is published to or changed on your Google Business Profile unless you approve
+            that exact content. There is no automatic mode, including for weekly post drafts and Do
+            now suggestions.
           </li>
           <li>You are responsible for what you approve, as if you had written it yourself.</li>
           <li>
@@ -74,8 +85,16 @@ function Page() {
         <h2>3. Who can use Kabsi</h2>
         <ul>
           <li>
-            You must be at least 18 and act for a business with a Google Business Profile you're
-            allowed to manage.
+            You must be at least 18 and act for a business with a verified Google Business Profile
+            you're allowed to manage.
+          </li>
+          <li>
+            The business must be eligible for a Google Business Profile under Google's guidelines:
+            it makes in-person contact with customers during stated hours, or it is a service-area
+            business that travels to customers. Online-only businesses, rental or for-sale
+            properties, PO boxes and virtual offices used as an address, and other cases Google
+            lists as not eligible can't use Kabsi. If Google's guidelines say a profile is not
+            allowed, we may pause the service for it.
           </li>
           <li>
             You confirm you have the right to give Kabsi Manager access to that profile, and that
@@ -107,9 +126,10 @@ function Page() {
       <section>
         <h2>5. AI drafts</h2>
         <p>
-          Replies and posts are drafted with AI from your business facts and are checked before they
-          reach you, but they can still be wrong or unsuitable. Read each draft before you approve
-          it. Keep your business facts in Settings accurate: drafts use only what you write there.
+          Replies, posts, photo notes, suggested improvements and Nora's answers are written with AI
+          from your business facts and are checked before they reach you, but they can still be
+          wrong or unsuitable. Read each draft before you approve it. Keep your business facts in
+          Settings accurate: drafts use only what you write there.
         </p>
       </section>
 

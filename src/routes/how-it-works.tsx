@@ -1,12 +1,14 @@
 import type { ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { IndustryLinks } from "@/components/marketing/business-grid";
+import { EligibilityBlock } from "@/components/marketing/eligibility-block";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import {
   CalendarClock,
   Camera,
   FileBarChart,
   KeyRound,
+  ListChecks,
   LayoutDashboard,
   Mail,
   Megaphone,
@@ -32,9 +34,9 @@ import { useIsLebanon } from "@/lib/region";
 export const Route = createFileRoute("/how-it-works")({
   head: () =>
     pageHead({
-      title: "How Kabsi works | Reply drafts you approve",
+      title: "How Kabsi works | Profile care you approve",
       description:
-        "Add Kabsi as a Manager on your Google profile. Every new review reaches you with a drafted reply. You tap Post, Edit or Skip. Nothing is posted without you.",
+        "Add Kabsi as a Manager on your Google profile. Kabsi shows what to improve, drafts each change, and replies to every review. You approve everything. Nothing is posted without you.",
       path: "/how-it-works",
       crumbs: [{ name: "How it works", path: "/how-it-works" }],
       jsonLd: [
@@ -43,7 +45,7 @@ export const Route = createFileRoute("/how-it-works")({
           "@type": "HowTo",
           name: "How to set up Kabsi for your Google Business Profile",
           description:
-            "Give Kabsi Manager access, tell it about your business, then approve each drafted reply from your email.",
+            "Give Kabsi Manager access, tell it about your business, then approve each drafted change and reply.",
           step: [
             [
               "Give Kabsi access",
@@ -52,6 +54,10 @@ export const Route = createFileRoute("/how-it-works")({
             [
               "Tell Kabsi about your business",
               "Hours, services and anything Kabsi should never say. Drafts only use these facts.",
+            ],
+            [
+              "See your Profile Score and Do now list",
+              "Kabsi lists the next improvements for your profile, each with a ready draft where it can write one.",
             ],
             [
               "A reply is drafted for every new review",
@@ -77,7 +83,7 @@ function Page() {
       <PageHero
         eyebrow="How it works"
         title="Kabsi prepares. You approve."
-        sub="Here is everything Kabsi does, and the one thing it never does: post anything you haven't approved."
+        sub="Kabsi keeps your Google Business Profile complete and current by following Google's own guidance. Here is everything it does, and the one thing it never does: change anything you haven't approved."
         visual={<FlowVisual />}
         photo="heroHow"
       />
@@ -105,7 +111,21 @@ function Page() {
             </p>
           </Block>
 
-          <Block n="3" icon={<PenLine />} title="A reply is drafted for every new review">
+          <Block n="3" icon={<ListChecks />} title="See what to improve, with a draft for each">
+            <p>
+              Your dashboard opens with a <b>Profile Score</b> and a short <b>Do now</b> list: the
+              next things worth doing on your Google profile, biggest first, following Google's own
+              guidance. Each item says why it matters and comes with a ready draft where Kabsi can
+              write one. You do it, put it off for 3 days, or skip it for 30 days.
+            </p>
+            <p>
+              The score is Kabsi's own checklist (answered reviews, key facts, review link, weekly
+              post, photos, profile basics, listing watch). It is not a Google score and it does not
+              predict how you rank.
+            </p>
+          </Block>
+
+          <Block n="4" icon={<PenLine />} title="A reply is drafted for every new review">
             <ul>
               <li>
                 <b>In the reviewer's language:</b> English, Spanish, Arabic, French and many more,
@@ -122,7 +142,7 @@ function Page() {
             </ul>
           </Block>
 
-          <Block n="4" icon={<Mail />} title="It reaches you by email">
+          <Block n="5" icon={<Mail />} title="It reaches you by email">
             <ul>
               <li>Reviews of 3 stars or less: one email each, as they arrive.</li>
               <li>
@@ -136,10 +156,11 @@ function Page() {
             </ul>
           </Block>
 
-          <Block n="5" icon={<MousePointerClick />} title="You tap Post, Edit or Skip">
+          <Block n="6" icon={<MousePointerClick />} title="You approve, edit or skip">
             <p>
-              Before anything is posted you see the exact words that will go on Google. After you
-              post, Kabsi checks with Google and tells you if the reply is live or held for review.
+              Before anything goes to Google you see the exact words. After you approve, Kabsi
+              checks with Google and tells you if the reply is live or held for review. Kabsi never
+              posts or changes anything by itself.
             </p>
           </Block>
         </div>
@@ -156,8 +177,8 @@ function Page() {
       </Section>
 
       <Section tone="sand">
-        <Eyebrow>Beyond replies</Eyebrow>
-        <H2>The rest of your profile, same rule.</H2>
+        <Eyebrow>The rest of your profile</Eyebrow>
+        <H2>Five modules, one rule: you approve.</H2>
         <div data-stagger="" className="mt-10 grid gap-4 md:grid-cols-2">
           <Card icon={<ShieldCheck />} title="Listing Shield">
             Kabsi watches your business name, phone, address, hours, website and categories. If
@@ -184,20 +205,36 @@ function Page() {
             reply, and card taps. Facts only, no advice, nothing estimated.
           </Card>
           <Card icon={<LayoutDashboard />} title="Your dashboard">
-            Everything in one place: replies waiting, your week, and profile health (reviews
-            answered, when you last posted, your listing guard and review link taps).
+            Everything in one place: your Profile Score, the Do now list, replies waiting and your
+            week. Nora, Kabsi's assistant, is there to answer questions and help fill in your
+            business facts.
           </Card>
         </div>
       </Section>
 
       <Section>
         <div className="max-w-3xl">
+          <Eyebrow>Who can use Kabsi</Eyebrow>
+          <H2>A verified profile for a business people can visit or that visits them.</H2>
+          <p className="mt-5 text-lg leading-8 text-kb-stone">
+            Kabsi follows Google's Business Profile guidelines, so it works only where Google does.
+            If your profile is not verified yet, verify it on Google first. It is free.
+          </p>
+        </div>
+        <div className="mt-8">
+          <EligibilityBlock />
+        </div>
+      </Section>
+
+      <Section tone="sand">
+        <div className="max-w-3xl">
           <Eyebrow>Review link and QR code</Eyebrow>
           <H2>One tap or scan to your Google review page.</H2>
           <p className="mt-5 text-lg leading-8 text-kb-stone">
             Your dashboard gives you a review link and a printable QR code. Put them on a table
-            card, a receipt or your own NFC tag. It's the same page for every customer: no rating
-            screen, no filter. Kabsi counts opens (never who opened) and shows them in your report.
+            card, a receipt or any NFC tag you already own. It's the same page for every customer:
+            no rating screen, no filter. Kabsi counts opens (never who opened) and shows them in
+            your report.
           </p>
           {isLebanon ? (
             <p className="mt-4 text-[15px]">
@@ -210,7 +247,7 @@ function Page() {
         </div>
       </Section>
 
-      <Section tone="sand" className="py-10 sm:py-14">
+      <Section className="py-10 sm:py-14">
         <IndustryLinks title="See it for your kind of business" />
       </Section>
 

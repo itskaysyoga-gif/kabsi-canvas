@@ -278,8 +278,8 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
           >
             <Bubble role="assistant">
               {surface === "app"
-                ? "Hi, I'm Nora! Stuck on something? Ask me about replies, setup, your plan or cards, and if I can't sort it, I'll get a person from the team for you."
-                : "Hi, I'm Nora! I help business owners with their Google reviews. Ask me anything about Kabsi, how it works, pricing or review cards. And if you'd rather talk to a person, just say so."}
+                ? "Hi, I'm Nora. Stuck on something? Ask me about replies, setup or your plan, and if I can't sort it, I'll get a person from the team for you."
+                : "Hi, I'm Nora. I help business owners keep their Google Business Profile complete and current. Ask me anything about Kabsi, how it works or pricing. And if you'd rather talk to a person, just say so."}
             </Bubble>
             {messages.map((m, i) => (
               <Bubble key={i} role={m.role}>

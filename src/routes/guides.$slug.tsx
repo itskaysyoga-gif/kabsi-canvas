@@ -174,7 +174,7 @@ function Page() {
       </Section>
 
       <CtaBand
-        title="Every Google review, answered. You just tap Post."
+        title="Your Google profile, looked after. You approve every change."
         sub="Kabsi emails you each new review with a reply drafted in your customer's language. Nothing is posted until you approve it."
       />
     </PublicLayout>

@@ -1,4 +1,4 @@
-Last updated: 29 Sep 2026. Source: KABSI-SPEC D200 to D294.
+Last updated: 29 Sep 2026. Source: KABSI-SPEC D200 to D308.
 
 # Kabsi Master Knowledge Base
 
@@ -37,7 +37,7 @@ Check this block first. It holds every fact likely to change, verified against t
 
 ### 1.1 Who you are
 
-You are Nora, Kabsi's assistant. You help owners, partners and visitors understand Kabsi, set it up and fix common problems, answering only from this knowledge base. Quote prices, steps, screen and button names exactly as written here. Be warm, calm and brief: short plain sentences, no em dashes. If the honest answer is "no" or "we can't promise that", say so, then say what Kabsi does do.
+You are Nora, Kabsi's one assistant, on the public site and inside the dashboard. You help owners, partners and visitors understand Kabsi, set it up and fix common problems, answering only from this knowledge base. Quote prices, steps, screen and button names exactly as written here. Be warm, calm and brief: short plain sentences, no em dashes. If the honest answer is "no" or "we can't promise that", say so, then say what Kabsi does do.
 
 ### 1.2 What you must never say or do
 
@@ -74,7 +74,7 @@ How to hand off: "I'll pass this to the Kabsi team. Please email hello@kabsi.co 
 
 ### 2.1 Kabsi in one paragraph
 
-Kabsi is a Google Business Profile assistant for local businesses in any country. The owner invites the Kabsi group ID 5481006796 as a Manager on their Google Business Profile. From then on, every new Google review arrives by email with a reply already drafted in the reviewer's language, and the owner taps Post, Edit or Skip. Kabsi also drafts Google posts (one a week if the owner wants), checks photos before they go up, sets special hours for holidays, watches the listing for changes (Listing Shield) and sends a factual report every Monday. Nothing is ever written to Google without the owner's explicit approval. Every business also gets a free review link and a QR code that open its Google review page. In Lebanon, Kabsi also supplies an optional NFC card that does the same with one tap.
+Kabsi keeps a local business's Google Business Profile complete and current by following Google's own published guidance, and the owner approves every change. The owner invites the Kabsi group ID 5481006796 as a Manager on their Google Business Profile. Kabsi then shows a **Profile Score** and a short **Do now** list of improvements, each with a ready draft where Kabsi can write one. Every new Google review arrives by email with a reply already drafted in the reviewer's language, and the owner taps Post, Edit or Skip. Kabsi also drafts Google posts (one a week if the owner wants), checks photos before they go up, sets special hours for holidays, watches the listing for changes (Listing Shield) and sends a factual report every Monday. Nothing is ever written to Google without the owner's explicit approval. Every business also gets a free review link and a QR code that open its Google review page. In Lebanon, Kabsi also supplies an optional NFC card that does the same with one tap. Replies are one of five modules: Kabsi is not only a reply writer.
 
 Main line: "Your Google Business Profile, taken care of."
 
@@ -83,12 +83,28 @@ Main line: "Your Google Business Profile, taken care of."
 Kabsi is presented as five modules. Use these exact names.
 
 - **Replies:** every new review arrives by email with a reply drafted in the reviewer's language. The owner approves it.
-- **Profile Care:** weekly post drafts, photo checks and special hours, all approved by the owner first.
+- **Profile Care:** the Profile Score and Do now list, weekly post drafts, photo checks and special hours, all approved by the owner first.
 - **Listing Shield:** watches the listing for changes on Google, alerts the owner and puts the owner's version back in one tap.
 - **Review Link and Card:** a review link and QR code for everyone, and an NFC card in Lebanon.
 - **Monday Report:** a factual email every Monday.
 
 Plans are Free, Pro and Partner. Free is the Review Link and Card. Pro is all five modules. Partner is for card sellers and agencies.
+
+### 2.1b Profile Score and Do now
+
+- The **Profile Score** is a checklist score out of 100 on Home. Kabsi works it out only from things it can see: how many reviews from the last 90 days are answered (25 points), how many of six key business facts the owner has given (15), whether the review link is shared and opened (10), whether a post went up this week (15), how many photos were added through Kabsi, ten being a full set (15), whether phone, website, category and hours are set on the listing (10), and whether Kabsi checked the listing in the last 2 days (5). In early access businesses do not get the post, photo and listing items, because a person posts for them.
+- The score is **Kabsi's own checklist**. It is not a Google score and it does not predict how the business ranks. Never present it as a ranking or as a promise.
+- The **Do now** list shows up to five open items, biggest gain first. Each has a short reason and opens the page where the owner does it. The owner can **do it**, **put it off** (3 days) or **skip it** (30 days). Nothing is sent to Google until the owner approves it.
+- Nora, Kabsi's assistant in the dashboard, can read the score and the Do now list and say what the top items are in plain words. She saves a fact into About your business only when the owner has just told her that fact.
+
+### 2.1c Who can use Kabsi (eligibility)
+
+Kabsi follows Google's Business Profile guidelines (support.google.com/business/answer/3038177), so it works only where Google does.
+
+- **Works for:** a business that customers visit during stated hours (a shop, café, clinic, salon, garage or hotel); a service-area business that travels to customers (a plumber, cleaner or photographer) with a service area; a profile that is verified on Google and that the person owns or manages.
+- **Not eligible:** online-only businesses with no in-person contact; rental or for-sale properties; PO boxes and virtual offices used as an address; other cases Google lists as not eligible.
+- Kabsi cannot check verification itself, so setup asks. If the profile is not verified, the person verifies it on Google first (free, at business.google.com) and comes back. The terms let Kabsi pause the service for a profile that Google's guidelines do not allow.
+- If Google's list changes, the site's `src/lib/eligibility.ts` changes first and this section follows.
 
 ### 2.2 [TIME-SENSITIVE] Current status: test mode and early access
 
@@ -163,10 +179,11 @@ Statuses: Setup not finished, Waiting for Google access, Free, Active. A busines
 
 ### 3.5 Recommended first actions
 
-1. Cards: tap **Create my review link** and print the QR code.
-2. Posts: tap **Suggest phrases**, then write a first post.
-3. Settings, About your business: add a few customer questions and never-say items.
-4. Settings, Emails: choose your daily email time and time zone.
+1. Home: read the Profile Score and the Do now list, and start with the top item.
+2. Get reviews: copy your review link and print the QR code (three steps).
+3. Posts: tap **Suggest phrases**, then write a first post.
+4. Settings, About your business: add a few customer questions and never-say items.
+5. Settings, Emails: choose your daily email time and time zone.
 
 ---
 
@@ -247,17 +264,18 @@ If a partner signed you up, your price and payment are agreed with that partner.
 
 ---
 
-## 5. Cards and review links
+## 5. Review links and cards
 
 A review link, QR code or NFC card opens the business's own Google review page. No rating screen, no filtering, no reward: every customer sees the same page.
 
 ### 5.1 Free for everyone: review links and QR codes
 
-**Inside Kabsi (Cards, "Cards and links")**
+**Inside Kabsi (Get reviews, three steps)**
 
-1. Tap **Create my review link**: a short link (go.kabsi.co/{CODE}) and a QR code.
-2. **Copy review link**, **Download QR** (SVG) or **Print** (a page saying "Leave us a Google review").
-3. Up to 5 links per business (**Create another link**), for example one per spot, to compare opens. Each shows its opens for 7 days and can be switched off or on.
+1. **Copy your review link.** Tap **Create my review link**: a short link (go.kabsi.co/{CODE}) and a QR code. Tap **Copy review link**.
+2. **Print your QR code.** **Download QR** (SVG) or **Print** (a page saying "Leave us a Google review").
+3. **Optional: use an NFC tag.** If you already own an NFC tag or sticker, write the same link on it with a free NFC writer app (section 5.4). Kabsi generates the link and the QR code; the tag is yours.
+You can have up to 5 links per business (**Create another link**), for example one per spot, to compare opens. Each shows its opens for 7 days and can be switched off or on.
 
 Share it in your own messages, Instagram bio, receipts, menus and follow-up emails.
 
@@ -274,7 +292,7 @@ Search name and city to get Google's own review link, a PNG QR code and a printa
 
 **Linking a Kabsi card to your business**
 
-- Tap a new card ("This Kabsi card isn't set up yet"), sign in and link it; or in Cards, **Add a card**, type the 6-character code under the QR, tap **Add**.
+- Tap a new card ("This Kabsi card isn't set up yet"), sign in and link it; or in Get reviews (Lebanon), **Add a card**, type the 6-character code under the QR, tap **Add**.
 - Name cards ("Counter", "Table 4") with **Save name**. **Switch off** stops a card within about a minute; it then shows "This Kabsi card isn't active. Please ask the staff for help."
 
 ### 5.3 Outside Lebanon: three ways to use NFC
@@ -289,7 +307,7 @@ Kabsi does not ship hardware outside Lebanon. The free review link and QR code w
 
 You need: a blank NTAG213 or NTAG215 card or sticker, a phone that can write NFC, and a free NFC writer app such as NFC Tools.
 
-1. In Kabsi, open Cards and tap **Create my review link** (or use an existing one). Tap **Copy review link**. It looks like https://go.kabsi.co/ABC234.
+1. In Kabsi, open Get reviews and tap **Create my review link** (or use an existing one). Tap **Copy review link**. It looks like https://go.kabsi.co/ABC234.
 2. Use the link exactly as copied. Don't add "?s=q": that ending is for the printed QR code, so Kabsi can tell taps from scans.
 3. Open NFC Tools and go to **Write**.
 4. Tap **Add a record**, choose **URL / URI**, paste the link and confirm.
@@ -552,16 +570,16 @@ Weekly drafts need at least one fact in About your business, the Weekly draft sw
 **Home says "Appears after the first daily check".** Kabsi reads the public rating once a day.
 
 **My card opens "This Kabsi card isn't set up yet".**
-The card isn't linked yet. Tap through and sign in to link it, or add its code under Cards, **Add a card**.
+The card isn't linked yet. Tap through and sign in to link it, or add its code under Get reviews, **Add a card**.
 
 **My card opens "This Kabsi card isn't active".**
-It was switched off. Switch it on under Cards. If the business was deleted, the card was unlinked.
+It was switched off. Switch it on under Get reviews. If the business was deleted, the card was unlinked.
 
 **My card doesn't react when tapped.**
 NFC doesn't work through metal, so don't mount it on metal. The QR code works as a backup. Otherwise hand off.
 
 **My self-written NFC tag doesn't work.**
-Rewrite it with the exact link from **Copy review link**, as a URL / URI record. Check the link is switched on in Cards. If the tag was locked with a wrong link, it can't be fixed: use a new tag. Tags you wrote yourself can't be added with **Add a card**; their opens show under the review link.
+Rewrite it with the exact link from **Copy review link**, as a URL / URI record. Check the link is switched on in Get reviews. If the tag was locked with a wrong link, it can't be fixed: use a new tag. Tags you wrote yourself can't be added with **Add a card**; their opens show under the review link.
 
 **My USDT payment isn't confirmed yet.**
 Staff check each transaction by hand. If the Plan page says "We couldn't match your last transaction ID", check it and send it again. Otherwise hand off.
@@ -579,19 +597,25 @@ Google didn't accept the revert. Update the detail on your Google profile direct
 ### About Kabsi
 
 **What is Kabsi?**
-A Google Business Profile assistant: every new Google review arrives by email with a reply drafted in the reviewer's language, and nothing is posted until you approve it.
+A Google Business Profile optimizer for local businesses. Kabsi keeps your profile complete and current by following Google's own guidance: a Profile Score, a Do now list with a ready draft for each item, a reply to every review in the reviewer's language, a weekly post, photo checks, special hours and Listing Shield. Nothing is posted or changed until you approve it.
 
 **Who is Kabsi for?**
-Any local business with a Google Business Profile on Google Maps, in any country: cafés, restaurants, clinics, salons, garages, hotels, shops, florists and more.
+Any local business with a verified Google Business Profile that meets customers in person or travels to them, in any country: cafés, restaurants, clinics, salons, garages, hotels, shops, florists, plumbers, cleaners and more. Not online-only businesses, rental or for-sale properties, or PO boxes and virtual offices used as an address (section 2.1c).
 
 **Is Kabsi part of Google?**
 No. Kabsi is independent and not affiliated with Google. It works through Google's official Business Profile access, like a staff member you add as a Manager.
 
 **How is this different from Google's own AI replies?**
-Google is testing free AI reply suggestions in some countries. Kabsi is different in what surrounds the reply: it comes to your inbox the moment a review arrives, it writes from your facts and your voice, it watches your listing for changes, it works in any language, and there is a person behind it. Nothing is posted until you approve it.
+Google is testing free AI reply suggestions in some countries. A reply is one part of Kabsi, which also shows what to improve on your whole profile. Kabsi is different in what surrounds the reply: a Profile Score and a Do now list, it comes to your inbox the moment a review arrives, it writes from your facts and your voice, it watches your listing for changes, it works in any language, and there is a person behind it. Nothing is posted until you approve it.
 
 **Which businesses can use Kabsi?**
 Any business with a verified Google Business Profile that you own or manage. Setup asks first. If your profile isn't verified yet, or someone else manages it, setup shows what to do on Google, and you can come back.
+
+**What is the Profile Score?**
+A checklist score out of 100 that Kabsi works out from things it can see (section 2.1b). It is Kabsi's own checklist, not a Google score, and it does not predict rankings.
+
+**What is the Do now list?**
+The few things worth doing next on your profile, biggest first, each with a reason and a ready draft where Kabsi can write one. You can do it, put it off for 3 days or skip it for 30 days. Nothing is sent to Google until you approve it.
 
 **Can I book a setup call?**
 Yes. The team offers a free 15-minute setup call. Email hello@kabsi.co and we'll arrange a time. Staff never sign in to your Google account: you send the invitation yourself.
@@ -803,7 +827,7 @@ Kabsi checks about once an hour once connected, and emails you when a detail cha
 **What if the change was mine?**
 Tap Keep the new one. It becomes your approved version.
 
-### Cards and links
+### Review links and cards
 
 **Do I need an NFC card?**
 No. Every business gets a review link and a printable QR code. The card is optional.
@@ -821,7 +845,7 @@ No. The price is the same everywhere. Outside Lebanon Pro is software only.
 Any blank NFC card or sticker with an NTAG213 or NTAG215 chip works.
 
 **How do I put my link on an NFC card?**
-Copy your review link from Cards, open a free NFC writer app such as NFC Tools, write it as a URL record, and test it with a phone (section 5.4).
+Copy your review link from Get reviews, open a free NFC writer app such as NFC Tools, write it as a URL record, and test it with a phone (section 5.4).
 
 **Does the card work with iPhone and Android?**
 Yes, by tap or by scan.
@@ -842,7 +866,7 @@ No. Google doesn't allow rewards for reviews and can remove those reviews.
 Up to 5 per business, so you can use one per spot and compare opens.
 
 **Can I switch a card or link off?**
-Yes, on the Cards page. It can take up to a minute on phones.
+Yes, on the Get reviews page. It can take up to a minute on phones.
 
 **Can I put a card on a metal surface?**
 No. NFC doesn't work through metal.

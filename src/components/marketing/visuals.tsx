@@ -78,7 +78,7 @@ export function FlowVisual() {
           <p className="text-sm font-bold">Reply drafted for you</p>
         </div>
         <p className="mt-3 rounded-card border border-kb-hairline p-3 text-sm leading-6 text-kb-stone">
-          Thank you, Emma! We're so glad you enjoyed the croissants. See you again soon.
+          Thank you, Emma. We're so glad you enjoyed the croissants. See you again soon.
         </p>
       </div>
       <Connector />
