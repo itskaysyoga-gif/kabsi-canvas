@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep visitor-region display logic in `src/lib/region.ts` so hydration-safe detection stays consistent across public and signed-in pages.
+- Keep shared Manager invite instructions in `ManagerAccessInstructions` so onboarding and the public handoff page stay aligned.
