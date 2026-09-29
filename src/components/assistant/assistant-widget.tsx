@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { ArrowUp, Loader2, MessageCircle, RotateCcw, Sparkles, X } from "lucide-react";
-import { supabase, supabaseUrl } from "@/lib/supabase";
+import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
 import { ASSISTANT_CONVERSATION_KEY, ASSISTANT_VISITOR_KEY } from "@/lib/assistant-storage";
 import { cn } from "@/lib/utils";
 
@@ -85,7 +85,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
     void supabase.auth
       .getSession()
       .then(({ data }) => {
-        const headers: Record<string, string> = {};
+        const headers: Record<string, string> = { ...anonHeaders };
         if (data.session?.access_token)
           headers["authorization"] = `Bearer ${data.session.access_token}`;
         return fetch(
@@ -137,7 +137,10 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
     setBusy(true);
     try {
       const { data } = await supabase.auth.getSession();
-      const headers: Record<string, string> = { "content-type": "application/json" };
+      const headers: Record<string, string> = {
+        "content-type": "application/json",
+        ...anonHeaders,
+      };
       if (data.session?.access_token)
         headers["authorization"] = `Bearer ${data.session.access_token}`;
       const res = await fetch(ENDPOINT, {
@@ -210,9 +213,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
           <span className="grid size-8 place-items-center rounded-full bg-kb-yellow text-kb-black">
             <MessageCircle className="size-4" aria-hidden="true" />
           </span>
-          <span className={surface === "app" ? "sr-only" : "hidden sm:inline"}>
-            Chat with Nora
-          </span>
+          <span className={surface === "app" ? "sr-only" : "hidden sm:inline"}>Chat with Nora</span>
         </button>
       ) : null}
 

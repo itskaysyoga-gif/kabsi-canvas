@@ -104,13 +104,13 @@ async function emailAccessLost(locationId: string, name: string) {
       kind: "access_lost", to, locationId, dedupeKey: `access_lost:${locationId}:${day}:${to}`,
       subject: `Kabsi can't reach ${name} on Google`,
       html: emailLayout({
-        preheader: "Add hello@kabsi.co as a Manager again to continue.", title: "Kabsi lost access to your Google profile",
-        bodyHtml: `<p style="margin:0 0 16px 0;">Google stopped letting Kabsi read <strong>${esc(name)}</strong>'s reviews. This usually means hello@kabsi.co was removed from the profile's managers.</p>
-<p style="margin:0 0 16px 0;">To continue: on your Business Profile open <strong>Menu</strong>, then <strong>Business Profile settings</strong>, then <strong>People and access</strong>, and add <strong>hello@kabsi.co</strong> as a <strong>Manager</strong>. Kabsi reconnects on its own within a few minutes.</p>
+        preheader: "Invite the Kabsi group again to continue.", title: "Kabsi lost access to your Google profile",
+        bodyHtml: `<p style="margin:0 0 16px 0;">Google stopped letting Kabsi read <strong>${esc(name)}</strong>'s reviews. This usually means the Kabsi group was removed from the profile's managers.</p>
+<p style="margin:0 0 16px 0;">To continue: on your Business Profile open <strong>Menu</strong>, then <strong>Business Profile settings</strong>, then <strong>People and access</strong>, and invite the <strong>Kabsi group ID 5481006796</strong> as a <strong>Manager</strong>. Kabsi reconnects on its own within a few minutes.</p>
 <p style="margin:0 0 20px 0;">Until then no replies are drafted and nothing is posted. If you removed Kabsi on purpose, you don't need to do anything.</p>`,
         button: { label: "Open Kabsi", url: `${APP_URL}/app` },
       }),
-      text: `Google stopped letting Kabsi read ${name}'s reviews, usually because hello@kabsi.co was removed as a Manager.\n\nTo continue, add hello@kabsi.co as a Manager again under People and access on your Business Profile. Kabsi reconnects within a few minutes.\n\nOpen Kabsi: ${APP_URL}/app`,
+      text: `Google stopped letting Kabsi read ${name}'s reviews, usually because the Kabsi group was removed as a Manager.\n\nTo continue, invite the Kabsi group ID 5481006796 as a Manager again under People and access on your Business Profile. Kabsi reconnects within a few minutes.\n\nOpen Kabsi: ${APP_URL}/app`,
     }).catch((e) => captureError("cron-tick", e, { job: "access_lost", location: locationId }));
   }
 }
@@ -169,7 +169,7 @@ async function deletionsJob() {
           subject: `${l.name} will be deleted from Kabsi on ${dueText}`,
           html: emailLayout({
             preheader: "You can cancel until then.", title: "Deletion scheduled",
-            bodyHtml: `<p style="margin:0 0 16px 0;">You asked Kabsi to delete <strong>${esc(l.name)}</strong>. On <strong>${dueText}</strong> we delete its reviews, drafts, posts, photos, reports and settings. Payment records are kept where the law requires.</p><p style="margin:0 0 20px 0;">Changed your mind? Cancel it in Settings before then. To stop Kabsi reaching your Google profile, also remove hello@kabsi.co under People and access.</p>`,
+            bodyHtml: `<p style="margin:0 0 16px 0;">You asked Kabsi to delete <strong>${esc(l.name)}</strong>. On <strong>${dueText}</strong> we delete its reviews, drafts, posts, photos, reports and settings. Payment records are kept where the law requires.</p><p style="margin:0 0 20px 0;">Changed your mind? Cancel it in Settings before then. To stop Kabsi reaching your Google profile, also remove the Kabsi Clients group (ID 5481006796) under People and access.</p>`,
             button: { label: "Open Settings", url: `${APP_URL}/app/settings` },
           }),
           text: `You asked Kabsi to delete ${l.name}. On ${dueText} we delete its reviews, drafts, posts, photos, reports and settings. Cancel in Settings before then: ${APP_URL}/app/settings`,
@@ -190,9 +190,9 @@ async function deletionsJob() {
         subject: `${l.name} was deleted from Kabsi`,
         html: emailLayout({
           preheader: "Your business data is deleted.", title: "Deleted",
-          bodyHtml: `<p style="margin:0 0 16px 0;">We deleted <strong>${esc(l.name)}</strong> and its data from Kabsi. Your NFC cards no longer open your review page. If Kabsi is still a Manager on your Google profile, remove hello@kabsi.co under People and access.</p>`,
+          bodyHtml: `<p style="margin:0 0 16px 0;">We deleted <strong>${esc(l.name)}</strong> and its data from Kabsi. Your NFC cards no longer open your review page. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID 5481006796) under People and access.</p>`,
         }),
-        text: `We deleted ${l.name} and its data from Kabsi. If Kabsi is still a Manager on your Google profile, remove hello@kabsi.co under People and access.`,
+        text: `We deleted ${l.name} and its data from Kabsi. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID 5481006796) under People and access.`,
       }).catch((e) => captureError("cron-tick", e, { job: "deletions", location: l.id }));
     }
   }

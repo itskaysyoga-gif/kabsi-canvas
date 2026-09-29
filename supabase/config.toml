@@ -19,9 +19,9 @@ verify_jwt = false
 
 # JWT required.
 [functions.api]
-verify_jwt = false
+verify_jwt = true
 [functions.assistant]
-verify_jwt = false
+verify_jwt = true
 [functions.content]
 verify_jwt = true
 [functions.cron-tick]        # retired 410 stub
@@ -29,7 +29,7 @@ verify_jwt = true
 [functions.kv-sync]
 verify_jwt = true
 [functions.lead]
-verify_jwt = false
+verify_jwt = true
 [functions.partner]
 verify_jwt = true
 [functions.places-search]
@@ -37,8 +37,8 @@ verify_jwt = true
 [functions.posts-weekly]
 verify_jwt = true
 [functions.review-link]
-verify_jwt = false
+verify_jwt = true
 
-# 29 Sep (approved by Rasheed): the browser calls api/action (email Post/Skip links), assistant (Nora), lead and
-# review-link without any JWT (raw fetch, publishable key only), so these four must stay false. Each authenticates
-# or rate-limits in code.
+# 29 Sep: api, assistant, lead and review-link stay true. Browser calls without a session send the public anon JWT
+# (src/lib/supabase.ts anonHeaders), so no function has to skip verification for them. Only callers that cannot send
+# a JWT at all (tap from the Worker, Slack, health, brand, site-assets) are false.

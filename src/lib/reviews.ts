@@ -1,6 +1,6 @@
 // Reviews data layer: inbox reads go through RLS; every write goes through the `api` Edge Function
 // (posting is the only path to Google, D202) or a membership-checked RPC.
-import { supabase, supabaseUrl } from "@/lib/supabase";
+import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
 
 export type ReviewState =
   "new" | "drafted" | "blocked" | "posted" | "skipped" | "handled_offline" | "archived";
@@ -104,7 +104,9 @@ export type ActionView = {
   change?: { id: string; field: string; before: string; after: string; state: string } | null;
 };
 export async function loadAction(token: string): Promise<ActionView> {
-  const res = await fetch(`${supabaseUrl}/functions/v1/api/action?t=${encodeURIComponent(token)}`);
+  const res = await fetch(`${supabaseUrl}/functions/v1/api/action?t=${encodeURIComponent(token)}`, {
+    headers: { ...anonHeaders },
+  });
   if (res.status === 404) return { status: "invalid" };
   return readJson<ActionView>(res);
 }
@@ -115,7 +117,7 @@ export async function runAction(
 ) {
   const res = await fetch(`${supabaseUrl}/functions/v1/api/action`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...anonHeaders },
     body: JSON.stringify({ t: token, do: doWhat, text }),
   });
   return readJson<{ ok: true; done: string; state?: string }>(res);

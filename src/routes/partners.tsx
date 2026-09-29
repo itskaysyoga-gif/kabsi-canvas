@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Eyebrow, H2, PageHero, Section } from "@/components/marketing/parts";
 import { BusinessGrid } from "@/components/marketing/business-grid";
-import { supabaseUrl } from "@/lib/supabase";
+import { anonHeaders, supabaseUrl } from "@/lib/supabase";
 import { track } from "@/lib/telemetry";
 import { PRICES, pageHead } from "@/lib/site";
 import { useIsLebanon } from "@/lib/region";
@@ -182,7 +182,7 @@ function LeadForm() {
     try {
       const res = await fetch(`${supabaseUrl}/functions/v1/lead`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", ...anonHeaders },
         body: JSON.stringify({ kind: "partner", ...f }),
       });
       const json = (await res.json().catch(() => ({}))) as { message?: string };

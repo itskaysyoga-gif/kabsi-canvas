@@ -26,7 +26,7 @@ import {
   Section,
 } from "@/components/marketing/parts";
 import { ReviewLinkVisual } from "@/components/marketing/visuals";
-import { supabaseUrl } from "@/lib/supabase";
+import { anonHeaders, supabaseUrl } from "@/lib/supabase";
 import { qrSvg } from "@/lib/qr";
 import { track } from "@/lib/telemetry";
 import { faqJsonLd } from "@/lib/faq";
@@ -155,7 +155,7 @@ function Finder({ onPick }: { onPick: (p: Place) => void }) {
     try {
       const res = await fetch(`${supabaseUrl}/functions/v1/review-link`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", ...anonHeaders },
         body: JSON.stringify({ query: q }),
       });
       const j = (await res.json().catch(() => ({}))) as { places?: Place[]; message?: string };
