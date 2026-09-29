@@ -7,6 +7,7 @@
 // 3,000 a day in total. The knowledge base is the public /llms-full.txt (same facts the site shows),
 // cached here; the rules below and the knowledge base are sent as a cached prompt prefix (prompt caching),
 // so each turn only pays full price for the new messages.
+import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 import {
   admin, APP_URL, captureError, CORS, currentUser, emailLayout, esc, fail, isInternal, jobLog, json, log, rateLimit, sendEmail, sha256Hex,
 } from "../_shared/kabsi.ts";
@@ -85,7 +86,12 @@ Handing off to a person
 - Hand off when: the knowledge base doesn't answer it after one honest try, billing disputes or refunds, account access problems you can't solve, legal or privacy requests, a bug, custom partner deals, anything in the knowledge base's hand-off list, the visitor asks for a person, or the visitor is upset after one calm reply.
 - To hand off you need an email address to reply to. If the <context> shows a signed-in email, use it. Otherwise ask for it first.
 - Then call hand_off_to_human with a clear summary. Tell them a person will reply by email, usually within one working day, and that they can also write to hello@kabsi.co.
-- Never claim you handed off unless the tool returned ok.`;
+- Never claim you handed off unless the tool returned ok.
+
+## Signed-in owners (only when the tools get_profile_score and save_fact are available)
+- You can read the Profile Score and the Do now list with get_profile_score. Say what the top items are in plain words and point to the page in the app (for example [Posts](/app/posts)). Never promise that a higher score brings more customers, reviews or a better ranking.
+- When the owner tells you a lasting fact about their business (services, hours note, phone, what to mention or avoid), repeat it back in one line and call save_fact. Never save a guess. Tell them it now appears in About your business.
+- You cannot change anything on Google. If they ask for a change (a post, hours, a reply), say Kabsi drafts it and they approve it on the right page, and link that page.`;
 
 const TOOLS = [
   {
@@ -122,16 +128,45 @@ const TOOLS = [
   },
 ] as const;
 
+// Tools for a signed-in owner inside the app (D299). Neither one writes to Google: the score is read-only and
+// save_fact only stores a fact the owner just told Nora in "About your business".
+const OWNER_TOOLS = [
+  {
+    name: "get_profile_score",
+    description: "Read the owner's Profile Score (0 to 100), what it is made of, and the open Do now tasks. Use it when they ask how their profile is doing or what to do next.",
+    input_schema: { type: "object", properties: {} },
+  },
+  {
+    name: "save_fact",
+    description: "Save one fact the owner just told you into About your business, so replies and posts can use it. Only after the owner stated it in this chat. Never invent or infer a fact.",
+    input_schema: {
+      type: "object",
+      properties: {
+        key: { type: "string", enum: ["about", "services", "hours_note", "contact_phone", "signature", "mention", "avoid", "parking", "accessibility", "wifi", "languages", "booking", "payment_methods", "service_area", "policies", "price_notes"] },
+        value: { type: "string", description: "The fact in the owner's words, short and plain" },
+      },
+      required: ["key", "value"],
+    },
+  },
+] as const;
+
 type Msg = { role: "user" | "assistant"; content: unknown };
 type Conv = { id: string; visitor_id: string; user_id: string | null; contact_id: string | null; status: string; message_count: number; tokens_in: number; tokens_out: number; cache_read: number };
+// Runs RPCs as the signed-in owner, so every membership check applies exactly as in the browser.
+function asUser(req: Request) {
+  return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY") ?? "sb_publishable_eF-s_uWvQzj1MngyU1to6Q_aJNQZh2R", {
+    global: { headers: { authorization: req.headers.get("authorization") ?? "" } },
+    auth: { persistSession: false },
+  });
+}
 const EMAIL = /^[^\s@<>()]+@[^\s@<>()]+\.[a-z]{2,}$/i;
 const clip = (v: unknown, n: number) => (typeof v === "string" ? v.trim().slice(0, n) : "");
 
-async function claude(system: unknown[], messages: Msg[]) {
+async function claude(system: unknown[], messages: Msg[], tools: readonly unknown[] = TOOLS) {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": apiKey(), "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({ model: MODEL, max_tokens: 700, system, tools: TOOLS, messages }),
+    body: JSON.stringify({ model: MODEL, max_tokens: 700, system, tools, messages }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(`anthropic ${res.status}: ${JSON.stringify(data).slice(0, 300)}`);
@@ -349,6 +384,7 @@ Deno.serve(async (req) => {
 
     // What the assistant may know about this person (never review text or payments detail beyond status).
     const ctx: string[] = [...(tz ? [`Visitor's time zone: ${tz}`] : []), `Page: ${page}`, `Where: ${surface === "app" ? "inside the Kabsi app (signed in)" : "the public website"}`, `Today: ${new Date().toISOString().slice(0, 10)}`];
+    let ownerLoc: string | null = null;
     if (user?.email) {
       ctx.push(`Signed-in email: ${user.email}`);
       const { data: locs } = await db.from("location_members").select("locations(id, name, country, status, onboarding_step, access_granted_at, partner_id)").eq("user_id", user.id).limit(5);
@@ -357,6 +393,7 @@ Deno.serve(async (req) => {
         if (!l) continue;
         const { data: plan } = await db.from("plans").select("kind, status, ends_at").eq("location_id", l.id as string).in("status", ["active", "pending"]).order("created_at", { ascending: false }).limit(1).maybeSingle();
         ctx.push(`Business: ${l.name} (${l.country ?? "country unknown"}); status ${l.status}; setup step ${l.onboarding_step}; Google access ${l.access_granted_at ? "working" : "not yet"}; ${l.partner_id ? "set up through a partner" : "self-serve"}; plan ${plan ? `${plan.kind} ${plan.status}${plan.ends_at ? ` until ${String(plan.ends_at).slice(0, 10)}` : ""}` : "none"}`);
+        if (!ownerLoc && surface === "app" && l.id && l.status === "active") ownerLoc = l.id as string;
         if (l.id) await db.from("chat_conversations").update({ location_id: l.id }).eq("id", conv.id).is("location_id", null);
       }
     }
@@ -392,7 +429,7 @@ Deno.serve(async (req) => {
           ? { role: m.role, content: [{ type: "text", text: m.content as string, cache_control: { type: "ephemeral" } }] }
           : m,
       );
-      const out = await claude(system, withCache);
+      const out = await claude(system, withCache, ownerLoc ? [...TOOLS, ...OWNER_TOOLS] : TOOLS);
       tin += out.usage.input_tokens + (out.usage.cache_creation_input_tokens ?? 0);
       tout += out.usage.output_tokens;
       tcache += out.usage.cache_read_input_tokens ?? 0;
@@ -458,6 +495,19 @@ Deno.serve(async (req) => {
             }).catch(() => null);
             handoff = true;
             result = { ok: true, reply_by: "email", email };
+          }
+        } else if (u.name === "get_profile_score" && ownerLoc) {
+          const { data, error } = await asUser(req).rpc("profile_tasks_list", { p_location: ownerLoc });
+          result = error ? { ok: false, error: "Could not read the score." } : { ok: true, ...(data as Record<string, unknown>) };
+        } else if (u.name === "save_fact" && ownerLoc) {
+          const key = clip(input.key, 40);
+          const value = clip(input.value, 600);
+          if (!value) result = { ok: false, error: "Empty value." };
+          else {
+            const { data: cur } = await db.from("locations").select("knowledge_card").eq("id", ownerLoc).maybeSingle();
+            const card = { ...((cur?.knowledge_card as Record<string, unknown> | null) ?? {}), [key]: value };
+            const { error } = await asUser(req).rpc("update_knowledge_card", { p_location: ownerLoc, p_card: card });
+            result = error ? { ok: false, error: error.message } : { ok: true, saved: key };
           }
         }
         results.push({ type: "tool_result", tool_use_id: u.id, content: JSON.stringify(result) });
