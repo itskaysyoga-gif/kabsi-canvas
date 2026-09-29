@@ -69,7 +69,7 @@ Every task below fits one Claude Code cloud session and one pull request. Take t
 - Do: move the model id into one constant or app setting. Switch drafting to `claude-sonnet-5-5` (same price as Sonnet 5) with `claude-sonnet-5` as fallback. Run the reply checks on 30 saved example reviews on both models.
 - Done when: one setting controls the model and the PR shows the comparison.
 
-### [ ] Q10 · Turnstile on public forms · S · Sonnet
+### [x] Q10 · Turnstile on public forms · S · Sonnet
 - Files: the lead form, the review link tool, Nora's widget, `places-search`, `assistant`
 - Do: add Cloudflare Turnstile to each form and verify the token server-side in the Edge Function it calls.
 - Done when: a request without a valid token is refused with a friendly message.
@@ -94,7 +94,7 @@ Every task below fits one Claude Code cloud session and one pull request. Take t
 - Do: tools `check_profile`, `draft_reply`, `book_setup_call` (Cal.com link) and `start_trial`; `account_status` in the app; first chips that depend on the page; WhatsApp hand-off for Lebanese visitors. Add `docs/nora-evals.csv` with 60 questions and a script that runs them against the live function.
 - Done when: the evaluation runs and reports accuracy and honesty failures.
 
-### [ ] Q16 · Deploy workflow and tap monitor (D278) · S · Sonnet
+### [x] Q16 · Deploy workflow and tap monitor (D278) · S · Sonnet
 - Do: a GitHub Action that deploys Edge Functions and migrations with the Supabase CLI on merge to `main`, using GitHub secrets. A synthetic tap check on go.kabsi.co every 5 minutes that alerts #kabsi-alerts.
 - Done when: a merged change to one function deploys without anyone touching it.
 
