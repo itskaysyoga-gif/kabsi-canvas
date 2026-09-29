@@ -1,8 +1,35 @@
-Last updated: 27 Sep 2026. Source: KABSI-SPEC D200–D259.
+Last updated: 29 Sep 2026. Source: KABSI-SPEC D200 to D294.
 
 # Kabsi Master Knowledge Base
 
 The reference for the Kabsi team and the grounding for Kabsi's sales and support assistant. Everything here is true of the system as built on the date above. If something is not here, the assistant doesn't know it and hands off (section 13). Items marked **[TIME-SENSITIVE]** will change; check them before quoting after that date.
+
+---
+
+## Facts that change
+
+Check this block first. It holds every fact likely to change, verified against the spec on 29 Sep 2026. If a later section disagrees with this block, this block wins. Items marked **[TIME-SENSITIVE]** need a re-check before quoting after that date.
+
+| Topic | Fact |
+|---|---|
+| Plans | **Free**, **Pro** and **Partner**. |
+| Free | Review link, QR code, printable table card and a message to share. Works on any plan, and keeps working when a trial or plan ends. |
+| Pro price | **$19 a month** or **$190 a year** (two months free). Same price in every country, in US dollars. |
+| Extra locations | **$15 a month** or **$150 a year** for each extra Google profile. |
+| Lebanon bundle | **$120 a year**: Pro for 12 months, one NFC card and in-person setup. **Lebanon only**, sold by the team in Lebanon (cash, Whish, OMT or USDT). |
+| NFC cards | Shipped **only in Lebanon**. A card on its own is $20; extra cards are $10 each or $40 for five. |
+| Free trial | **14 days, no card.** **30 days** if a partner link or insert brought you. It starts when Kabsi's access to your Google profile works, and there is one trial per Google business. |
+| When a trial or plan ends | The business moves to Free. Replies drafts, Profile Care, Listing Shield and the Monday Report stop. The Review Link and Card keep working. |
+| Cancelling and refunds | Monthly plans cancel any time. Yearly plans are refundable in full within 14 days of starting. |
+| Ways to pay | USDT (TRC20 or Binance Pay) from anywhere. In Lebanon also Whish, OMT and cash. Card checkout is not offered yet. |
+| Partners | $8 per active business per month, billed monthly in USDT; first 10 partners $6, locked for 12 months (section 6). |
+| Who can use Kabsi | A **verified** Google Business Profile that the person **owns or manages**. Kabsi cannot check verification itself, so setup asks. |
+| How access works | The owner invites the Kabsi business group **Kabsi Clients, ID 5481006796**, as a **Manager** (People and access, Add, paste the ID, Manager, Invite). Kabsi accepts within minutes once connected. Never the email address hello@kabsi.co. |
+| **[TIME-SENSITIVE]** Google connection | Kabsi's Google API access is under Google's review, with no date. Until then Kabsi runs in test mode and businesses can start in early access (below). |
+| **[TIME-SENSITIVE]** Early access | A person on the Kabsi team does the Google steps by hand: accepts your invitation and posts what you approve, within one working day. You still approve every word. Listing Shield is off until Kabsi connects to Google. Early access is limited to 30 businesses. |
+| **[TIME-SENSITIVE]** Address | The app is at kabsi-app.lovable.app and moves to kabsi.co. |
+| Free setup call | A free 15-minute setup call with the team. Ask at hello@kabsi.co. |
+| Contact | hello@kabsi.co for everyone. +961 3 956 917 only in Lebanon, for Whish, OMT, cash and cards. |
 
 ---
 
@@ -51,163 +78,26 @@ Kabsi is a Google Business Profile assistant for local businesses in any country
 
 Main line: "Your Google Business Profile, taken care of."
 
-### 2.2 [TIME-SENSITIVE] Current status: test mode
+### 2.1a The five modules
 
-- Kabsi's Google Business Profile API access is still under Google's review. Until approved, Kabsi runs in **test mode**: nothing is sent to Google.
-- Every app page shows a black banner: "Test mode: Kabsi isn't connected to Google yet. Nothing you post or save is sent to Google."
-- Real businesses can sign up and finish setup now; they stay at "Waiting for Google access" until the connection is live. A paid plan doesn't start until then (section 4).
-- The app currently lives at kabsi-app.lovable.app. It moves to kabsi.co after Google's approval.
-- The assistant must not give a date for Google's approval. If asked: "We're waiting on Google's review and can't give a date. Your plan won't start until access works."
+Kabsi is presented as five modules. Use these exact names.
 
-### 2.3 Who it's for
+- **Replies:** every new review arrives by email with a reply drafted in the reviewer's language. The owner approves it.
+- **Profile Care:** weekly post drafts, photo checks and special hours, all approved by the owner first.
+- **Listing Shield:** watches the listing for changes on Google, alerts the owner and puts the owner's version back in one tap.
+- **Review Link and Card:** a review link and QR code for everyone, and an NFC card in Lebanon.
+- **Monday Report:** a factual email every Monday.
 
-Any local business with a Google Business Profile on Google Maps, in any country. It works from email and a phone's browser, with nothing to install. The app and site are in English; reply drafts are in the reviewer's language.
+Plans are Free, Pro and Partner. Free is the Review Link and Card. Pro is all five modules. Partner is for card sellers and agencies.
 
-### 2.4 The golden rule: owner approval
+### 2.2 [TIME-SENSITIVE] Current status: test mode and early access
 
-- Every reply, post, photo, special-hours change and Listing Shield revert needs the owner to approve that exact content, and Kabsi posts exactly that.
-- No automatic mode, no autopilot, no scheduled posting. Kabsi may draft on a schedule (the weekly post); it never posts on one.
-- Extra email recipients and partners can't post or approve.
-
-### 2.5 Reviews
-
-**How a review becomes a reply**
-
-1. Kabsi checks for new reviews every few minutes, detects the language and whether the review needs care.
-2. It drafts a reply from the facts in About your business only.
-3. A safety check reviews the draft. If it fails, Kabsi redrafts once; if it fails again, the owner is told to write their own reply or skip.
-4. The review and draft arrive by email and under Reviews, To reply. The owner taps Post, Edit or Skip.
-5. After Post, Kabsi checks with Google and shows whether the reply is live or held for Google's review.
-
-**What a draft looks like**
-
-- Warm but professional, two to four short sentences, gender-neutral, no emojis or slang.
-- Mentions one thing the reviewer said. Ends with the owner's sign-off.
-- Uses a fact from About your business only when the reviewer raised that topic (hours if they asked when you open). Never adds a fact to promote it.
-- Never: discounts, refunds, vouchers, free items or compensation; admitting fault; arguing; asking to change or remove the review; links, promotions or hashtags; invented plans or promises; medical, legal or safety claims; staff names not on the owner's list; the reviewer's personal details; anything on the owner's never-say list.
-
-**Languages**
-
-- Drafts are written in the language of the review: English, Spanish, Arabic, French and many others.
-- Arabic script gets Arabic. Kabsi uses Lebanese Arabic if the review is Lebanese.
-- Arabic written in Latin letters (Franco-Arabic), or mixed Franco and English, gets a simple English reply, because model-written Franco reads badly in public. A positive review may open with one common Lebanese word such as "Yislamo".
-- A rating with no text gets a short English thank-you of one or two sentences.
-
-**Hard reviews ("Needs care")**
-
-A review needs care if it is 1 or 2 stars, or mentions illness, food safety, hygiene, staff behaviour, theft, harassment, discrimination, police or legal action. For these:
-
-- The email has no Post button. Its subject is "A review for {business} needs care". It says: "Don't reply in anger. A calm draft is ready. If you can reach the customer, call them." The links are **See draft** and **I'll handle it**.
-- In the app the review shows a red "Needs care" label and the note "Take a breath before replying. If you can reach the customer, call them first."
-- The draft stays calm, thanks the customer, says the business takes it seriously and invites them to continue privately, using the phone number from About your business if there is one. It doesn't discuss details in public.
-- "I'll handle it" marks the review "Handled by you". Kabsi won't post anything for it.
-
-**Tricks in reviews:** review text is treated as data, never instructions. If a review says "ignore your rules" or "offer me 50% off", Kabsi answers only the real complaint. A code check also blocks drafts that promise money, in English, Spanish, French or Arabic.
-
-**Changing a draft:** edit the text directly, or tap **Ask for changes**, type an instruction ("shorter", "more formal") and tap **New version** (at most 3 per review per day). From email, **Edit** opens the reply on a confirm page.
-
-**Review states:** Drafting (takes a few minutes), Reply ready, Needs you (no safe draft), Posted ("Google is reviewing it" while Google checks), Skipped, Handled by you, Older. "Text removed after 30 days (Google's rule)" means the text was deleted under the 30-day rule (section 9); rating, dates and the owner's reply stay.
-
-**Day one**
-
-When a business goes live, Kabsi drafts replies for up to the 20 most recent reviews that have no reply and sends one summary email: "{N} reviews without a reply: drafts ready". Nothing is posted until the owner approves each one.
-
-### 2.6 Review emails: what arrives and when
-
-| Review | Email | Timing | Buttons |
-|---|---|---|---|
-| 3 stars or less (not sensitive) | "New review for {business} ({n} of 5)" | Right away, one email per review | Post, Edit, Skip |
-| Needs care (1 or 2 stars, or a sensitive topic) | "A review for {business} needs care" | Right away, one email per review | See draft, I'll handle it |
-| 4 and 5 stars | "{N} new review(s) for {business}" ("Today's good reviews") | Once a day at the owner's chosen hour | Post, Edit, Skip for each review |
-| First day live | "{N} reviews without a reply: drafts ready" | Once | Open Kabsi |
-| No safe draft | Shown inside the review email | With the review | Open in Kabsi |
-
-Rules for email links:
-
-- A link never acts by itself. It opens a confirm page with the exact text, and the owner confirms there ("Post reply to Google", "Skip this review", "I'll handle it myself").
-- Each link works once and expires after 7 days ("This link has expired", "This link was already used"). After that, use the app.
-- Extra email recipients get the review text only, without action links.
-- Replies to Kabsi emails go to hello@kabsi.co.
-
-### 2.7 All other emails
-
-| Email | When |
-|---|---|
-| Login code (6 digits) | When you sign in |
-| "Kabsi is connected to {business}" | When Kabsi's Manager access starts working |
-| "Your post for this week is ready, {business}" | When the weekly draft is ready |
-| "Your {detail} changed on Google: {business}" | When Listing Shield sees a change (Put mine back, Keep the new one) |
-| "Your week on Google: {business}" | Every Monday morning |
-| "Kabsi can't reach {business} on Google" | If access fails for 30 minutes; at most one a day, with re-add steps |
-| "{business} will be deleted from Kabsi on {date}" | After you ask to delete a business |
-| "{business} was deleted from Kabsi" | When the deletion is done |
-| "Payment received" | When staff confirm your USDT payment |
-| Partner: "{partner} invited you to Kabsi" | When a partner invites an owner |
-| Partner: "Kabsi invoice for {month}: ${amount}" | Monthly, for partners |
-| Partner: "Payment received: {month}" | When staff confirm a partner's payment |
-
-### 2.8 Posts
-
-Found under Google profile, Posts.
-
-**Writing a post on demand**
-
-1. Under **What's new?**, write a sentence (for example "New this week: pistachio croissants, from Tuesday.").
-2. Optional: **Words customers search for**, comma-separated, up to 5. Tap **Suggest phrases** for ideas. Suggestions come from your category and area (for example "bakery in Brooklyn"), from product and service words customers use in your 4 and 5 star reviews, and, once Kabsi is connected to Google, from the search terms Google reports for your profile. Suggestions grow as reviews come in.
-3. Optional: **Button**: No button, Call now, Book, Order online, Shop, Learn more or Sign up. These are exactly the buttons Google offers. "Call now" uses the phone number on your profile; every other button needs a link.
-4. Tap **Write my post**. Kabsi drafts it.
-5. Read the draft under **Your post**. Edit it freely, or type a change and tap **New version**. Posts are up to 1,500 characters.
-6. Tap **Post to Google**, or **Discard**.
-
-**How Kabsi writes posts:** only from your facts and what you typed; a check rejects invented facts (for example an added "every day") and redoes the draft once. The best search phrase goes in the first 80 characters, as normal speech. No web addresses or phone numbers in the text. Google doesn't say posts change ranking, and Kabsi doesn't either.
-
-**The weekly draft:** if **Weekly draft** is on, Kabsi drafts one post a week and emails it to you. Shops and restaurants get it Thursday around 09:00 local time (Friday if needed); clinics, offices and other professional services Tuesday around 08:30 (Wednesday if needed). Kabsi skips a week if a draft is already waiting, if About your business has no facts, or if the fact check fails twice. Tap **Turn off** on the Posts page to stop it. Posts start once the business is active.
-
-### 2.9 Photos
-
-Google profile, Photos (once active): **Add a photo** (JPG, PNG or WebP, up to 5 MB), **Check photo**, pick a category (Food & drink, Product, Inside, Outside, Team at work, Other), then **Post to Google** or **Remove**. The check says "Looks good for Google" or "Probably not a good fit" with a note. It flags blurry or dark photos, screenshots, flyers or text-heavy images, stock-looking or AI-generated images, a logo alone, faces as the main subject, and anything offensive.
-
-### 2.10 Special hours
-
-Google profile, Hours (once active): choose **From** and **To** dates, **Closed** or **Open, different hours** (with **Opens** and **Closes**), an optional private note, then **Review** ("Google will show: ...") and **Confirm and save to Google**. Special hours only; change regular weekly hours on your Google profile.
-
-### 2.11 Listing Shield
-
-Found under Google profile, Listing Shield.
-
-**What it watches:** business name, phone, address, website, opening hours and main category.
-
-**How it works**
-
-1. When the business goes active, Kabsi snapshots these details within a few minutes. That is your approved version.
-2. Kabsi checks about once an hour once connected to Google.
-3. If a detail changes, you get one email showing before and after, with **Put mine back** and **Keep the new one**. It also shows on the Listing Shield page and Home.
-4. **Put mine back** asks Google to restore your version (your approval). **Keep the new one** makes the new value your approved version.
-5. Past decisions show as "Put back", "Kept the new one" or "Couldn't put back".
-
-It can't lock a listing (nobody can), can't stop public edit suggestions or Google accepting them, and changes nothing unless you say so.
-
-### 2.12 Weekly report
-
-Every Monday morning (around 09:00 local), "Your week on Google: {business}", also kept under Home. It shows the public Google rating and its 7-day change, total and new reviews, how many got a reply, card and link opens (taps and scans, bots excluded), a flag if the rating fell 0.1 or more, and up to three short quotes copied word for word (only when three or more reviews had text). Facts only: no advice, scores, estimates or claims that taps caused reviews.
-
-### 2.13 The dashboard (what the owner sees)
-
-Navigation: **Home · Reviews (To reply, All reviews) · Google profile (Posts, Photos, Hours, Listing Shield) · Cards · Settings (About your business, Plan, Emails)**, a bottom bar on phones. A header switcher moves between businesses. The sidebar has a "Need a hand?" box (Guides, hello@kabsi.co).
-
-**Home, before the business is active:** a four-step setup checklist (find your business, add Kabsi as Manager, tell Kabsi about your business, choose your plan).
-
-**Home, once active:**
-
-- "N things need your attention" or "You're all caught up": replies ready (urgent first), an open Listing Shield change, drafted posts or photos, a plan ending within 30 days.
-- Last 7 days: Google rating and change, new reviews, replied X of Y, card and link opens ("not reviews").
-- Latest 3 reviews; status cards for Listing Shield, Plan and Weekly report; quick actions (Write a post, Add a photo, Special hours).
-- Profile health, four facts and no score: Reviews answered (last 90 days), Last Google post, Profile guard ("Watching", "Needs you" or "Starting"), Review page opens.
-- "What Kabsi did": what you approved and posted, replies drafted this week, the last Google check, the last report.
-
-### 2.14 What Kabsi never does
-
-Posts without approval; runs on autopilot; removes or hides reviews; filters customers or shows a rating screen; suggests rewards for reviews; promises reviews, ratings or rankings; invents facts; puts reviewer details in replies; sells Google data or uses it to train AI; asks for your Google password; offers Google Q&A (Google removed Q&A from Business Profiles in November 2025; put common questions in About your business instead).
+- Kabsi's Google Business Profile API access is still under Google's review. Until approved, Kabsi runs in **test mode**: nothing is sent to Google automatically.
+- Every app page shows a black banner: "Test mode: Kabsi isn't connected to Google yet. Nothing you post or save is sent to Google." Businesses in early access see an early-access note instead.
+- **Early access:** a business can start before the approval. A person on the Kabsi team accepts your Google invitation and posts what you approve, within one working day. Drafting, the safety checks and your approval work as normal, and you still approve every word. Listing Shield stays off until Kabsi connects to Google. Early access is limited to 30 businesses.
+- Real businesses can sign up and finish setup now. A free trial or a paid plan starts when Google access works (section 4).
+- The app currently lives at kabsi-app.lovable.app. It moves to kabsi.co.
+- The assistant must not give a date for Google's approval. If asked: "We're waiting on Google's review and can't give a date. Your trial or plan starts when access works."
 
 ---
 
@@ -215,7 +105,7 @@ Posts without approval; runs on autopilot; removes or hides reviews; filters cus
 
 ### 3.1 Before you start
 
-- A Google Business Profile on Google Maps, and owner access so you can add a Manager. If "People and access" is missing, the listing may need to be verified or claimed first.
+- A **verified** Google Business Profile on Google Maps that you **own or manage**, so you can add a Manager. Kabsi cannot check verification itself, so setup asks you. If "People and access" is missing, the listing may need to be verified or claimed first.
 - An email address you check (sign-in is by emailed code, no password).
 - A few minutes.
 
@@ -229,10 +119,16 @@ Enter your email, tap **Send code**, then type the 6-digit code from the email (
 
 Search the name and city as on Google Maps (or name plus street or area), pick the result and tap **Yes, this is {business}**.
 
+Then **One quick check**: "Kabsi works with a verified Google Business Profile that you own or manage. Is {business} yours on Google?"
+
+- **Yes, I manage it and it's verified:** setup continues.
+- **I'm not sure:** a 30-second check at business.google.com shows how to tell.
+- **No, it isn't verified yet, or someone else manages it:** setup shows how to verify or ask for access on Google, and waits until then. Nothing is saved before you answer yes.
+
 **Step 2: Give Kabsi access**
 
 1. Tick the box: "I authorise Kabsi to manage review replies and profile updates for this business on Google, and to publish only what I approve."
-2. Add the Kabsi group ID 5481006796 as a Manager. In the Google Maps app: tap your profile picture, then **Your business profiles**; choose the business, then **⋮** or **Profile settings**, then **People and access**; tap **Add**, paste the group ID 5481006796, choose **Manager**, then **Invite**. On a computer: open your Business Profile, then **More** (or **Menu**), **Business Profile settings**, **People and access**, **Add**, enter the email, choose **Manager**, **Invite**.
+2. Add the Kabsi group ID 5481006796 as a Manager. In the Google Maps app: tap your profile picture, then **Your business profiles**; choose the business, then **⋮** or **Profile settings**, then **People and access**; tap **Add**, paste the group ID 5481006796, choose **Manager**, then **Invite**. On a computer: open your Business Profile, then **More** (or **Menu**), **Business Profile settings**, **People and access**, **Add**, paste the group ID 5481006796, choose **Manager**, **Invite**. Invite the group, never the email address hello@kabsi.co.
 3. The status box shows "Waiting for your invite…" and updates by itself, usually a few minutes after the invite once Kabsi is live on Google (see 2.2). Then it shows "Access received" and you get "Kabsi is connected to {business}".
 4. Tap **I've sent the invite, continue**, or **Do this later** and finish the other steps first.
 
@@ -259,11 +155,11 @@ Never-say examples: "Don't confirm the reviewer is a patient or mention any trea
 
 **Step 4: Your plan**
 
-Self-serve owners choose 12 months ($120) or 6 months ($75) and tap **Continue to payment** (section 4). Partner-set-up businesses see "There's nothing to pay here" and tap **Finish setup**. The last screen, **You're set**, shows access and plan status and how to pay.
+Self-serve owners start with the **14-day free trial** (no card; it begins when Google access works) or choose a paid plan and tap **Continue to payment** (section 4). Partner-set-up businesses see "There's nothing to pay here" and tap **Finish setup**. The last screen, **You're set**, shows access and plan status and how to pay.
 
 ### 3.4 After setup
 
-Statuses: Setup not finished, Waiting for Google access, Waiting for payment, Active. A business goes active when Google access works and a paid plan is confirmed (partner-set-up businesses need access only). Kabsi then drafts up to 20 backlog replies, takes the Listing Shield snapshot and starts the weekly cycle.
+Statuses: Setup not finished, Waiting for Google access, Free, Active. A business goes active when Google access works and a free trial or paid plan is running (partner-set-up businesses need access only). It is Free when access works and no trial or plan is running. Kabsi then drafts up to 20 backlog replies, takes the Listing Shield snapshot and starts the weekly cycle.
 
 ### 3.5 Recommended first actions
 
@@ -280,24 +176,29 @@ Statuses: Setup not finished, Waiting for Google access, Waiting for payment, Ac
 
 | Item | Price | Notes |
 |---|---|---|
-| Kabsi Pro, 12 months | $120 | Works out to $10 a month. Paid once, upfront |
-| Kabsi Pro, 6 months | $75 | Works out to $12.50 a month. Paid once, upfront |
+| Free | $0 | Review link, QR code, printable table card and a message to share. Never expires |
+| Kabsi Pro, monthly | $19 a month | All five modules. Cancel any time |
+| Kabsi Pro, yearly | $190 a year | Two months free |
+| Extra location | $15 a month or $150 a year | One plan covers one Google profile; each extra profile is added on top |
+| Lebanon bundle (Lebanon only) | $120 a year | Pro for 12 months, one NFC card and in-person setup. Sold by the team in Lebanon |
 | NFC card only (Lebanon only) | $20 one-time | Keeps working for good |
 | Extra cards (Lebanon only) | $10 each, or $40 for five | |
 | Partner wholesale | $8 per active business per month | See section 6 |
 | Founding partner (first 10 partners) | $6 per active business per month, locked 12 months | See section 6 |
 
-- No monthly bills for owners, no automatic renewal, one plan per Google Business Profile.
-- **Cards and Pro by country:** in Lebanon, each Kabsi Pro plan includes one NFC card. Outside Lebanon, Kabsi Pro is software only, at the same price, because Kabsi ships cards only in Lebanon. Every business everywhere gets a free review link and QR code (section 5).
-- Pro includes everything in section 2: reply drafts, one-tap approval, weekly post drafts, Listing Shield, photo checks, special hours, the dashboard, the Monday report, review links and QR codes (plus one NFC card in Lebanon).
+- **Free trial: 14 days, no card.** It is 30 days if a partner link or insert brought you. It starts when Kabsi's access to your Google profile works, so waiting for access costs you nothing. There is one trial per Google business.
+- **Cards and Pro by country:** outside Lebanon, Kabsi Pro is software only, at the same price, because Kabsi ships cards only in Lebanon. Every business everywhere gets a free review link and QR code (section 5).
+- Pro includes everything in section 2: Replies, Profile Care, Listing Shield, the Review Link and Card and the Monday Report.
+- Monthly plans can be cancelled at any time. Yearly plans are refundable within 14 days. Crypto payments do not renew by themselves (section 4.4).
 - Kabsi may change prices for future purchases. A plan already paid for keeps its price.
+- **[TIME-SENSITIVE]** The assistant may describe these prices once the pricing page shows them. If the pricing page still shows different prices, say so and hand off.
 
 ### 4.2 How to pay
 
 **Anywhere: USDT**
 
 1. Go to Settings, **Plan**.
-2. Choose 12 months or 6 months.
+2. Choose a plan.
 3. Send the exact amount in USDT, either on the TRC20 network to the address shown, or with Binance Pay to the Binance Pay ID shown. Both have a copy button.
    - USDT (TRC20) address: TMbdkH9hY14RGgz9N99DCXu3LXGDZBDqMe
    - Binance Pay ID: User-2ad9b
@@ -312,29 +213,33 @@ Any bank, exchange or network fees are the payer's.
 
 Message +961 3 956 917 or email hello@kabsi.co and the team arranges it. The setup screen says Kabsi confirms within one working day. Staff record the payment, and it shows under Payments on the Plan page.
 
-**Not available:** credit or debit card checkout, bank transfer checkout and PayPal are not offered. Anything else: hand off.
+**Not available:** credit or debit card checkout, bank transfer checkout and PayPal are not offered yet. Anything else: hand off.
 
-### 4.3 When the plan starts
+### 4.3 When the trial and the plan start
 
-- A plan starts when payment is confirmed **and** Kabsi's access to your Google profile works. Time spent waiting for access doesn't count.
+- A **free trial** starts when Kabsi's access to your Google profile works. It is 14 days, or 30 with a partner. The Plan page shows the last day and how many days are left.
+- A **paid plan** starts when payment is confirmed **and** Kabsi's access works. Time spent waiting for access doesn't count.
+- If you pay during your trial, your paid plan starts the day the trial ends. You keep every trial day.
 - If you pay before access works, the Plan page shows your plan as "Paid" and says: "Your plan starts the day Kabsi's access to your Google profile works, so you don't lose any days while you wait."
-- **[TIME-SENSITIVE]** While Kabsi is in test mode (2.2), a paid plan waits. It starts when Google access is live for your business.
+- **[TIME-SENSITIVE]** While Kabsi is in test mode (2.2), a trial or paid plan waits for Google access. In early access, it starts when the team has connected your business.
 
-### 4.4 Renewals
+### 4.4 Renewals and reminders
 
-No automatic renewal; Kabsi never charges on its own. Home shows a reminder when a plan ends within 30 days. Use **Renew ahead** on the Plan page and pay the same way: "A renewal starts the day your current plan ends, so you never lose days."
+Crypto plans don't renew by themselves; Kabsi never charges on its own. Home shows a reminder when a plan ends within 30 days. Use **Renew ahead** on the Plan page and pay the same way: "A renewal starts the day your current plan ends, so you never lose days."
+
+During a trial, Kabsi emails you 7 days before it ends, 1 day before, and on the last day, unless a paid plan is already lined up.
 
 ### 4.5 Refunds
 
-- Kabsi Pro is refundable in full within 14 days of the plan starting. Email hello@kabsi.co. Kabsi refunds by the method you paid with where possible.
+- Yearly plans are refundable in full within 14 days of the plan starting. Email hello@kabsi.co. Kabsi refunds by the method you paid with where possible.
 - Cards aren't refunded once delivered. A card that's faulty on arrival is replaced free if you tell Kabsi within 14 days.
 - The unused part is refunded if a paid feature stops for good because Google changed its APIs, if Kabsi stops the service without you breaking the terms, or if the terms change in a way that matters and you don't agree.
 - Nothing in the terms limits a refund you're entitled to by law.
 - The assistant explains the policy but never approves or promises a specific refund. Hand off every refund request.
 
-### 4.6 When a plan ends
+### 4.6 When a trial or plan ends
 
-Reply drafts, weekly posts, Listing Shield and the weekly report stop. Cards and review links keep working, for as long as Kabsi operates. Pay again on the Plan page to restart.
+The business moves to **Free**. Replies drafts, Profile Care, Listing Shield and the Monday Report stop. The Review Link and Card keep working, for as long as Kabsi operates. Choose a plan on the Plan page to turn everything back on.
 
 ### 4.7 Partner-set-up businesses
 
@@ -364,7 +269,7 @@ Search name and city to get Google's own review link, a PNG QR code and a printa
 
 - Kabsi ships NFC cards **only in Lebanon**, paid by cash, Whish, OMT or USDT.
 - An acrylic card with an NFC chip and a QR code; works by tap or scan on iPhone and Android.
-- $20 on its own, one included with Pro in Lebanon, extra cards $10 each or $40 for five. Keeps working if the plan ends.
+- $20 on its own. The $120 Lebanon bundle includes Pro for 12 months, one card and in-person setup. Extra cards are $10 each or $40 for five. Keeps working if the plan ends.
 - Order: +961 3 956 917 or hello@kabsi.co. Delivery details: hand off. Kabsi-branded designs are on the way (no date).
 
 **Linking a Kabsi card to your business**
@@ -547,7 +452,7 @@ Kabsi keeps Google content for at most 30 days, as Google's policy requires (det
 
 ### 9.1 Who is responsible
 
-Kabsi is an independent business based in Beirut, Lebanon. Kabsi is not affiliated with, endorsed or sponsored by Google. Contact: hello@kabsi.co.
+Kabsi is an independent business operated from Dubai, United Arab Emirates, with a team in Lebanon. Kabsi is not affiliated with, endorsed or sponsored by Google. Contact: hello@kabsi.co.
 
 ### 9.2 What Kabsi collects
 
@@ -611,10 +516,10 @@ Sign-in by one-time email code, no passwords. Each business's data is separated 
 Check spam, check the address, tap **Resend code**. Still stuck: hand off.
 
 **I can't find "People and access" on my Google profile.**
-The listing may need to be verified or claimed on Google first. Only owners can add people. You can finish the other setup steps now.
+Kabsi works with a verified profile that you own or manage. The listing may need to be verified or claimed on Google first, and only owners can add people. You can finish the other setup steps now.
 
 **I sent the invite but it still says "Waiting for your invite".**
-**[TIME-SENSITIVE]** While Kabsi is in test mode (2.2), real businesses stay at "Waiting for Google access". This is expected. Once live, the status updates by itself, usually a few minutes after the invite. Check that you invited group ID 5481006796 exactly, with the Manager role, on the right business.
+**[TIME-SENSITIVE]** While Kabsi is in test mode (2.2), real businesses stay at "Waiting for Google access" until the team accepts the invitation (early access, within one working day) or Kabsi connects to Google. Check that you invited group ID 5481006796 exactly, with the Manager role, on the right business, and that you did not invite the email address hello@kabsi.co.
 
 **I got "Kabsi can't reach {business} on Google".**
 Google stopped letting Kabsi read the reviews, usually because the Kabsi group was removed as a Manager. Add it again as a Manager under People and access. Kabsi reconnects by itself within a few minutes. Until then no replies are drafted and nothing is posted. If you removed Kabsi on purpose, do nothing.
@@ -682,17 +587,29 @@ Any local business with a Google Business Profile on Google Maps, in any country
 **Is Kabsi part of Google?**
 No. Kabsi is independent and not affiliated with Google. It works through Google's official Business Profile access, like a staff member you add as a Manager.
 
+**How is this different from Google's own AI replies?**
+Google is testing free AI reply suggestions in some countries. Kabsi is different in what surrounds the reply: it comes to your inbox the moment a review arrives, it writes from your facts and your voice, it watches your listing for changes, it works in any language, and there is a person behind it. Nothing is posted until you approve it.
+
+**Which businesses can use Kabsi?**
+Any business with a verified Google Business Profile that you own or manage. Setup asks first. If your profile isn't verified yet, or someone else manages it, setup shows what to do on Google, and you can come back.
+
+**Can I book a setup call?**
+Yes. The team offers a free 15-minute setup call. Email hello@kabsi.co and we'll arrange a time. Staff never sign in to your Google account: you send the invitation yourself.
+
+**How does Kabsi protect my Google profile?**
+You invite the Kabsi Clients group (ID 5481006796) as a Manager, not as an owner, and you can remove it at any time from People and access. Kabsi only accepts an invitation that matches a business you have set up and only for the Manager role. Kabsi's Google account uses Google's Advanced Protection. Nothing is written to Google without your approval, and each approval is recorded with the exact text.
+
 **Where is Kabsi based?**
-Kabsi is an independent business based in Beirut, Lebanon, serving businesses in any country.
+Kabsi is an independent business operated by Rashid Abou Hamzy from Dubai, United Arab Emirates, with a team in Lebanon, serving businesses in any country.
 
 **Who runs Kabsi?**
-Kabsi was founded by Rasheed, who runs it from Beirut with a small team. You can reach the team, and Rasheed, at hello@kabsi.co.
+Kabsi was founded by Rasheed, who runs it with a small team. You can reach the team, and Rasheed, at hello@kabsi.co.
 
 **Do I need to install anything?**
 No. Kabsi works from your email and your phone's web browser.
 
 **Is Kabsi connected to Google right now?**
-[TIME-SENSITIVE] Not yet. Kabsi's Google API access is under Google's review, so Kabsi runs in test mode and nothing is sent to Google. You can sign up and set up now, and your plan won't start until access works.
+[TIME-SENSITIVE] Not through Google's API yet. Kabsi's API access is under Google's review, so Kabsi runs in test mode. You can sign up and set up now. In early access a person on our team does the Google steps by hand, within one working day, and you still approve every word. Your trial or plan starts when access works.
 
 **When will Kabsi be live on Google?**
 We're waiting on Google's review and can't give a date. We'll email you when your business is connected.
@@ -794,7 +711,7 @@ We don't promise that, and nobody honest can. Kabsi makes leaving a review one t
 No one can promise a rating. Kabsi helps you answer every review calmly and keep your details accurate.
 
 **Will Kabsi improve my Google ranking?**
-We don't promise rankings. Google ranks by relevance, distance and prominence. Kabsi does the parts you control; Google doesn't say replies or posts raise ranking, so we don't either.
+Every job Kabsi does is on Google's own list of ways to improve local ranking. Nobody can promise a ranking, and we don't. Google ranks by relevance, distance and prominence, and Kabsi does the parts you control.
 
 **Is this local SEO?**
 Kabsi takes care of the parts of your profile you control: accurate details, answered reviews, regular posts, correct hours. It doesn't promise search results.
@@ -805,8 +722,8 @@ You can. Kabsi saves the writing, drafts in the customer's language, catches eve
 **Is this allowed by Google?**
 Adding a Manager is Google's own way to give a service access, and Kabsi uses Google's official Business Profile APIs. It posts only what you approve and never filters or rewards reviewers.
 
-**Isn't $75 a lot?**
-It's $12.50 a month for 6 months, or $10 a month on the 12-month plan, paid once with no monthly bills. It's refundable in full within 14 days of the plan starting.
+**Isn't Pro expensive?**
+It's $19 a month, or $190 a year, and you can cancel a monthly plan any time. You can also start with a 14-day free trial with no card, so you see the drafts before you pay.
 
 **What if I pay and Google access takes time?**
 Your plan starts only when access works, so waiting costs you nothing.
@@ -933,13 +850,19 @@ No. NFC doesn't work through metal.
 ### Pricing and payment
 
 **How much is Kabsi?**
-Kabsi Pro is $75 for 6 months or $120 for 12 months, paid once. In Lebanon a card on its own is $20.
+Kabsi Pro is $19 a month or $190 a year, with a 14-day free trial and no card. Extra locations are $15 a month or $150 a year. There is also a free plan with your review link and QR code. In Lebanon our team sells a $120 a year bundle with Pro, an NFC card and setup.
+
+**Is there a free trial?**
+Yes. 14 days, no card, or 30 days if a partner brought you. It starts when Kabsi's access to your Google profile works.
+
+**Is there a free plan?**
+Yes. Free is your review link, a QR code, a printable table card and a message to share. It keeps working for as long as Kabsi operates.
 
 **Are prices the same in every country?**
 Yes, in US dollars.
 
 **Is there a monthly plan?**
-No monthly bills for owners. Pro is paid once for 6 or 12 months. Partners are billed monthly.
+Yes. Kabsi Pro is $19 a month, and you can cancel any time. The yearly plan is $190 a year, two months free.
 
 **How do I pay?**
 In USDT (TRC20 or Binance Pay) from anywhere, on the Plan page. In Lebanon also Whish, OMT or cash.
@@ -957,7 +880,7 @@ Staff check each USDT payment by hand. In Lebanon, Kabsi confirms Whish, OMT and
 The payer. Any bank, exchange or network fees are yours.
 
 **Does my plan renew automatically?**
-No. Plans never renew on their own. Renew ahead from the Plan page when you're ready.
+Not when you pay in USDT: Kabsi never charges on its own, and you renew ahead from the Plan page when you're ready. Monthly plans can be cancelled at any time.
 
 **If I renew early, do I lose days?**
 No. A renewal starts the day your current plan ends.
@@ -1094,7 +1017,11 @@ Delete your business in Settings, and ask by email to delete your login too.
 - **NFC Tools:** a free app for writing a link onto an NFC tag.
 - **Tap / open:** one opening of your review page. Not a review.
 - **Card code:** the 6-character code under a Kabsi card's QR.
-- **Test mode:** [TIME-SENSITIVE] Kabsi's state until Google approves its API access. Nothing is sent to Google.
+- **Test mode:** [TIME-SENSITIVE] Kabsi's state until Google approves its API access. Nothing is sent to Google automatically.
+- **Early access:** [TIME-SENSITIVE] a person on the Kabsi team does the Google steps by hand and posts what the owner approves, within one working day.
+- **Free:** the plan with the review link, QR code and table card. Also what a business is on after a trial or plan ends.
+- **Free trial:** 14 days, no card (30 through a partner), starting when Google access works.
+- **Kabsi Clients (5481006796):** Kabsi's Google business group. Owners invite it as a Manager.
 - **Waiting for Google access:** Kabsi's Manager access doesn't work yet for that business.
 - **USDT, TRC20, Binance Pay:** the US dollar stablecoin Kabsi accepts, and the two ways to send it.
 - **Transaction ID / hash:** the reference of a USDT payment, pasted on the Plan page.
