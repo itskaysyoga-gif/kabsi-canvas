@@ -14,10 +14,39 @@ function slugify(text: string): string {
 
 type TocItem = { id: string; text: string };
 
-// Builds a table of contents from the rendered H2 headings: each H2 gets an id
-// (slug of its text) and the list links to it. Smooth scrolling comes from the
-// global CSS, which prefers-reduced-motion already overrides to instant.
-function LegalToc({ contentRef }: { contentRef: React.RefObject<HTMLDivElement | null> }) {
+function TocList({ items }: { items: TocItem[] }) {
+  return (
+    <ul className="space-y-1.5">
+      {items.map((item) => (
+        <li key={item.id}>
+          <a
+            href={`#${item.id}`}
+            className="text-sm font-medium text-kb-stone underline-offset-4 hover:text-kb-ink hover:underline"
+          >
+            {item.text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// Plain, readable legal pages (KABSI-LEGAL-COPY.md, corrected to the system as built on 26 Sep 2026).
+// The table of contents is built from the rendered H2 headings: each H2 gets an id (slug of its
+// text) and the list links to it. Smooth scrolling comes from the global CSS, which
+// prefers-reduced-motion already overrides to instant; scroll-mt-24 clears the sticky header.
+export function LegalPage({
+  title,
+  updated,
+  kind = "other",
+  children,
+}: {
+  title: string;
+  updated: string;
+  kind?: keyof typeof ICONS;
+  children: ReactNode;
+}) {
+  const contentRef = useRef<HTMLDivElement>(null);
   const [items, setItems] = useState<TocItem[]>([]);
 
   useEffect(() => {
@@ -36,61 +65,7 @@ function LegalToc({ contentRef }: { contentRef: React.RefObject<HTMLDivElement |
       next.push({ id, text });
     }
     setItems(next);
-  }, [contentRef]);
-
-  if (items.length === 0) return null;
-
-  const list = (
-    <ul className="space-y-1.5">
-      {items.map((item) => (
-        <li key={item.id}>
-          <a
-            href={`#${item.id}`}
-            className="text-sm font-medium text-kb-stone underline-offset-4 hover:text-kb-ink hover:underline"
-          >
-            {item.text}
-          </a>
-        </li>
-      ))}
-    </ul>
-  );
-
-  return (
-    <>
-      {/* Phones: collapsed panel at the top */}
-      <details className="mb-10 rounded-[14px] border border-kb-hairline bg-kb-sand p-5 lg:hidden">
-        <summary className="cursor-pointer text-sm font-bold text-kb-ink">On this page</summary>
-        <nav aria-label="Table of contents" className="mt-4">
-          {list}
-        </nav>
-      </details>
-      {/* Desktop: sticky sidebar next to the text */}
-      <aside className="hidden lg:block">
-        <nav
-          aria-label="Table of contents"
-          className="sticky top-24 rounded-[14px] border border-kb-hairline bg-kb-sand p-5"
-        >
-          <p className="mb-3 text-sm font-bold text-kb-ink">On this page</p>
-          {list}
-        </nav>
-      </aside>
-    </>
-  );
-}
-
-// Plain, readable legal pages (KABSI-LEGAL-COPY.md, corrected to the system as built on 26 Sep 2026).
-export function LegalPage({
-  title,
-  updated,
-  kind = "other",
-  children,
-}: {
-  title: string;
-  updated: string;
-  kind?: keyof typeof ICONS;
-  children: ReactNode;
-}) {
-  const contentRef = useRef<HTMLDivElement>(null);
+  }, []);
 
   return (
     <PublicLayout>
@@ -102,7 +77,14 @@ export function LegalPage({
         </div>
       </header>
       <div className="mx-auto max-w-5xl px-5 py-14 sm:px-8 sm:py-16">
-        <LegalToc contentRef={contentRef} />
+        {items.length > 0 && (
+          <details className="mb-10 rounded-[14px] border border-kb-hairline bg-kb-sand p-5 lg:hidden">
+            <summary className="cursor-pointer text-sm font-bold text-kb-ink">On this page</summary>
+            <nav aria-label="Table of contents" className="mt-4">
+              <TocList items={items} />
+            </nav>
+          </details>
+        )}
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_16rem] lg:gap-12">
           <div
             ref={contentRef}
@@ -110,16 +92,19 @@ export function LegalPage({
           >
             {children}
           </div>
-          <div className="hidden lg:block">
-            <LegalTocSidebar contentRef={contentRef} />
-          </div>
+          {items.length > 0 && (
+            <aside className="hidden lg:block">
+              <nav
+                aria-label="Table of contents"
+                className="sticky top-24 rounded-[14px] border border-kb-hairline bg-kb-sand p-5"
+              >
+                <p className="mb-3 text-sm font-bold text-kb-ink">On this page</p>
+                <TocList items={items} />
+              </nav>
+            </aside>
+          )}
         </div>
       </div>
     </PublicLayout>
   );
-}
-
-// Desktop sidebar variant, kept separate so the mobile panel can render before the text.
-function LegalTocSidebar({ contentRef }: { contentRef: React.RefObject<HTMLDivElement | null> }) {
-  return <LegalToc contentRef={contentRef} />;
 }
