@@ -25,6 +25,32 @@ function friendlyAuthError(message: string) {
   if (m.includes("email") && m.includes("valid")) return "That email address doesn't look right.";
   return "Something went wrong. Please try again.";
 }
+// Common domain typos → the intended domain. Shown as a hint only, never applied automatically.
+const DOMAIN_TYPOS: Record<string, string> = {
+  "gmail.co": "gmail.com",
+  "gmial.com": "gmail.com",
+  "gamil.com": "gmail.com",
+  "gmai.com": "gmail.com",
+  "hotmial.com": "hotmail.com",
+  "hotmal.com": "hotmail.com",
+  "outlok.com": "outlook.com",
+  "outlook.co": "outlook.com",
+  "icloud.co": "icloud.com",
+};
+function emailTypoSuggestion(value: string): string | null {
+  const at = value.lastIndexOf("@");
+  if (at < 1) return null;
+  const fixed = DOMAIN_TYPOS[value.slice(at + 1).toLowerCase()];
+  return fixed ? `${value.slice(0, at)}@${fixed}` : null;
+}
+// Webmail shortcuts for the "check your email" screen.
+function webmailLink(domain: string): { label: string; href: string } | null {
+  if (domain === "gmail.com" || domain === "googlemail.com")
+    return { label: "Open Gmail", href: "https://mail.google.com/" };
+  if (domain === "outlook.com" || domain === "hotmail.com" || domain === "live.com")
+    return { label: "Open Outlook", href: "https://outlook.live.com/mail/" };
+  return null;
+}
 export const Route = createFileRoute("/login")({
   validateSearch: searchSchema,
   head: () => ({
@@ -135,6 +161,21 @@ function LoginPage() {
                 placeholder="you@example.com"
                 required
               />
+              {(() => {
+                const suggestion = emailTypoSuggestion(email.trim());
+                return suggestion ? (
+                  <p className="mt-2 text-sm text-kb-stone">
+                    Did you mean {suggestion}?{" "}
+                    <button
+                      type="button"
+                      className="font-bold underline-offset-4 hover:underline"
+                      onClick={() => setEmail(suggestion)}
+                    >
+                      Use it
+                    </button>
+                  </p>
+                ) : null;
+              })()}
               <Button className="mt-4 w-full" disabled={busy}>
                 {busy ? "Sending…" : "Send code"}
               </Button>
@@ -176,8 +217,18 @@ function LoginPage() {
                 {busy ? "Checking…" : "Log in"}
               </Button>
               <p className="mt-3 text-sm text-kb-stone">
-                Can't find it? Check spam or promotions. The email comes from hello@kabsi.co.
+                Can't see it? Check your spam folder. The email comes from hello@kabsi.co.
               </p>
+              {(() => {
+                const link = webmailLink(email.slice(email.lastIndexOf("@") + 1));
+                return link ? (
+                  <Button asChild variant="outline" className="mt-3 w-full">
+                    <a href={link.href} target="_blank" rel="noopener noreferrer">
+                      {link.label}
+                    </a>
+                  </Button>
+                ) : null;
+              })()}
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm">
                 <button
                   type="button"
@@ -210,6 +261,9 @@ function LoginPage() {
             </p>
           ) : null}
         </div>
+        <p className="mx-auto mt-5 max-w-md text-center text-sm text-kb-stone">
+          We only send you a code. There is no password to remember.
+        </p>
       </section>
     </PublicLayout>
   );
