@@ -125,18 +125,20 @@ function CardsPage() {
       {loc ? (
         <ReviewLinks
           locationId={loc.id}
-          links={data.data?.cards.filter((c) => c.kind === "link") ?? []}
+          links={links}
           taps={data.data?.taps ?? []}
           onChanged={refresh}
         />
       ) : null}
-      <h2 className="mt-10 text-lg font-bold">NFC cards</h2>
-      {loc && loc.country !== "LB" ? (
+      {loc && shareLink ? (
+        <ShareKit name={loc.name} link={`https://go.kabsi.co/${shareLink.code}`} />
+      ) : null}
+      <h2 className="mt-10 text-lg font-bold">Cards</h2>
+      {loc && !isLeb ? (
         <p className="mt-2 rounded-card bg-kb-white p-4 text-sm leading-6 text-kb-stone shadow-kb">
-          <b className="text-kb-ink">Outside Lebanon?</b> Kabsi ships cards only in Lebanon. Get one
-          from a Kabsi partner, or buy any blank NFC card or sticker online (NTAG213 or NTAG215),
-          open a free NFC writer app, choose "write a URL" and paste your review link from above.
-          Taps are counted the same way.
+          <b className="text-kb-ink">NFC cards ship only in Lebanon.</b> You can write your review
+          link on any NTAG213 or NTAG215 tag you buy online. Open a free NFC writer app, choose
+          "write a URL" and paste your review link from above. Taps are counted the same way.
         </p>
       ) : null}
       <div className="mt-3 space-y-4">
