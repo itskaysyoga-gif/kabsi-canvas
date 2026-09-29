@@ -447,8 +447,8 @@ function ReviewLinks({
     onChanged();
   }
   return (
-    <section className="mt-8">
-      <h2 className="text-lg font-bold">Review links</h2>
+    <section className="mt-10">
+      <h2 className="text-lg font-bold">Your review link and QR</h2>
       <p className="mt-1 text-sm text-kb-stone">
         Put it in WhatsApp replies, your Instagram bio or receipts, or print the QR code.
       </p>
