@@ -5,9 +5,7 @@ import {
   Check,
   Copy,
   Download,
-  HandHeart,
   Link2,
-  MousePointerClick,
   Nfc,
   Power,
   Printer,
@@ -97,25 +95,10 @@ function CardsPage() {
       </p>
       <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Get reviews</h1>
       <p className="mt-2 text-kb-stone">
-        Each tap, scan or click opens your Google review page. Every customer sees the same page. A
-        card is optional: a review link and its QR code work without one.
+        Three steps to make it easy for customers to leave a Google review. Everyone sees the same
+        page, and you ask every customer the same way. Never offer a reward for a review: Google can
+        remove those reviews.
       </p>
-      <ul className="mt-5 grid gap-3 rounded-large border-2 border-kb-hairline bg-kb-white p-5 text-sm leading-6 sm:grid-cols-2">
-        <li className="flex gap-3">
-          <MousePointerClick className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
-          <span>
-            Taps and scans count how often your review page was opened. They don't show whether a
-            review was written.
-          </span>
-        </li>
-        <li className="flex gap-3">
-          <HandHeart className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
-          <span>
-            Ask every customer the same way. Never offer a discount, gift or prize for a review:
-            Google can remove those reviews.
-          </span>
-        </li>
-      </ul>
       {!location.isLoading && !loc ? (
         <Button asChild className="mt-6">
           <Link to="/start">Add your business</Link>
@@ -133,14 +116,12 @@ function CardsPage() {
       {loc && shareLink ? (
         <ShareKit name={loc.name} link={`https://go.kabsi.co/${shareLink.code}`} />
       ) : null}
-      <h2 className="mt-10 text-lg font-bold">Cards</h2>
-      {loc && !isLeb ? (
-        <p className="mt-2 rounded-card bg-kb-white p-4 text-sm leading-6 text-kb-stone shadow-kb">
-          <b className="text-kb-ink">NFC cards ship only in Lebanon.</b> You can write your review
-          link on any NTAG213 or NTAG215 tag you buy online. Open a free NFC writer app, choose
-          "write a URL" and paste your review link from above. Taps are counted the same way.
-        </p>
-      ) : null}
+      <h2 className="mt-10 text-lg font-bold">3. Optional: use an NFC tag</h2>
+      <p className="mt-2 rounded-card bg-kb-white p-4 text-sm leading-6 text-kb-stone shadow-kb">
+        Already have an NFC tag or sticker? Use a free NFC writer app on your phone, choose "write a
+        URL" and paste your review link from step 1. Taps are counted the same way.
+        {loc && isLeb ? " In Lebanon you can also get a ready Kabsi card from our team." : ""}
+      </p>
       <div className="mt-3 space-y-4">
         {data.data?.cards
           .filter((c) => c.kind !== "link")
@@ -155,10 +136,9 @@ function CardsPage() {
           ))}
         {data.data && !data.data.cards.some((c) => c.kind !== "link") ? (
           <div className="rounded-large bg-kb-white p-6 shadow-kb">
-            <p className="font-bold">No cards yet.</p>
+            <p className="font-bold">No Kabsi cards added.</p>
             <p className="mt-1 text-sm text-kb-stone">
-              Got a Kabsi NFC card? Add it below with the code printed under the QR. You don't need
-              one to use Kabsi.
+              Got a Kabsi card? Add it below with the code printed under the QR.
             </p>
           </div>
         ) : null}
@@ -430,14 +410,23 @@ function ShareKit({ name, link }: { name: string; link: string }) {
       text: emailBody,
       copy: `Subject: ${emailSubject}\n\n${emailBody}`,
     },
-    { title: "Email signature line", text: `Leave ${name} a Google review: ${link}`, copy: `Leave ${name} a Google review: ${link}` },
-    { title: "Receipt line", text: `Review us on Google: ${link}`, copy: `Review us on Google: ${link}` },
+    {
+      title: "Email signature line",
+      text: `Leave ${name} a Google review: ${link}`,
+      copy: `Leave ${name} a Google review: ${link}`,
+    },
+    {
+      title: "Receipt line",
+      text: `Review us on Google: ${link}`,
+      copy: `Review us on Google: ${link}`,
+    },
   ];
   return (
     <section className="mt-10">
-      <h2 className="text-lg font-bold">Share it</h2>
+      <h2 className="text-lg font-bold">2. Share it or print the QR code</h2>
       <p className="mt-1 text-sm text-kb-stone">
-        Ready-to-copy texts with your link already in them.
+        Ready-to-copy texts with your link already in them. Taps and scans count how often your page
+        was opened, not whether a review was written.
       </p>
       <div className="mt-3 space-y-3">
         {items.map((it) => (
@@ -446,9 +435,7 @@ function ShareKit({ name, link }: { name: string; link: string }) {
               <p className="font-bold">{it.title}</p>
               <CopyButton text={it.copy} label="Copy" />
             </div>
-            {it.subject ? (
-              <p className="mt-2 text-sm font-bold">Subject: {it.subject}</p>
-            ) : null}
+            {it.subject ? <p className="mt-2 text-sm font-bold">Subject: {it.subject}</p> : null}
             <p className="mt-1 text-sm leading-6 text-kb-stone">{it.text}</p>
           </div>
         ))}
@@ -495,9 +482,9 @@ function ReviewLinks({
   }
   return (
     <section className="mt-10">
-      <h2 className="text-lg font-bold">Your review link and QR</h2>
+      <h2 className="text-lg font-bold">1. Copy your review link</h2>
       <p className="mt-1 text-sm text-kb-stone">
-        Put it in WhatsApp replies, your Instagram bio or receipts, or print the QR code.
+        Your link opens your Google review page. Its QR code is below the link, ready to print.
       </p>
       <div className="mt-3 space-y-4">
         {links.map((l) => (
