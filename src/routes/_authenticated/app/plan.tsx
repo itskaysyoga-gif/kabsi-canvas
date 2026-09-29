@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { CopyButton } from "@/components/shared/copy-button";
 import { supabase, supabaseUrl } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
+import { useIsLebanon } from "@/lib/region";
 import { daysUntil } from "@/lib/dashboard";
 import { BINANCE_PAY_ID, USDT_TRC20, money, shortDate } from "@/lib/partner";
 import { track } from "@/lib/telemetry";
@@ -128,6 +129,7 @@ const METHOD: Record<string, string> = { cash: "Cash", whish: "Whish", omt: "OMT
 function PlanPage() {
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   const loc = location.data;
+  const isLebanon = useIsLebanon(loc?.country);
   const data = useQuery({
     queryKey: ["plan", loc?.id],
     queryFn: () => loadPlan(loc!.id),
@@ -220,6 +222,7 @@ function PlanPage() {
 
           <Pay
             locationId={loc.id}
+            isLebanon={isLebanon}
             renew={!!d.current || !!d.paidWaiting}
             defaultItem={
               (d.pending?.kind as Item | undefined) ??
@@ -279,12 +282,14 @@ function Progress({ start, end }: { start: string; end: string }) {
 
 function Pay({
   locationId,
+  isLebanon,
   renew,
   defaultItem,
   claim,
   onDone,
 }: {
   locationId: string;
+  isLebanon: boolean;
   renew: boolean;
   defaultItem: Item;
   claim: Claim | null;
@@ -364,11 +369,16 @@ function Pay({
             <span className="mt-2 block font-bold">Kabsi Pro, {o.period}</span>
             <span className="block text-sm text-kb-stone">
               {o.perMonth}
-              {renew ? "" : " · card included in Lebanon"}
+              {!renew && isLebanon ? " · card included in Lebanon" : ""}
             </span>
           </button>
         ))}
       </div>
+      {!isLebanon ? (
+        <p className="mt-4 text-sm text-kb-stone">
+          Your review link and QR code are free in every country.
+        </p>
+      ) : null}
 
       <div className="mt-6 space-y-3 border-t border-kb-hairline pt-6 text-sm">
         <p className="font-bold">

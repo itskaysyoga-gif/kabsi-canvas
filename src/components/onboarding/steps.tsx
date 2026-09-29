@@ -319,8 +319,8 @@ export function PlanStep({ location, onChanged }: StepProps) {
   const [kind, setKind] = useState<"pro_6m" | "pro_12m">("pro_12m");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const isLebanon = useIsLebanon(location?.country);
   if (!location) return null;
-  const isLebanon = useIsLebanon(location.country);
   const viaPartner = Boolean(location.partner_id);
 
   async function finish() {
