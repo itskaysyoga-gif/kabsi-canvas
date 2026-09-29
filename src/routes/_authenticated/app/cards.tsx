@@ -86,6 +86,9 @@ function CardsPage() {
     enabled: !!loc,
   });
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["cards"] });
+  const links = data.data?.cards.filter((c) => c.kind === "link") ?? [];
+  const shareLink = links.find((l) => l.status === "active") ?? links[0];
+  const isLeb = useIsLebanon(loc?.country);
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
