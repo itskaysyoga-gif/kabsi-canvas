@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { clearAssistantChat } from "@/lib/assistant-storage";
 import { identify } from "@/lib/telemetry";
+import { clearSeen, isIdle, lastSeen, OWNER_IDLE_MS, STAFF_IDLE_MS, touch } from "@/lib/idle";
 
 type AuthContextValue = {
   session: Session | null;
@@ -48,6 +49,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!loading) identify(userId);
   }, [loading, userId]);
+
+  // Idle sign-out: staff after 12 hours, owners after 30 days (D301).
+  useEffect(() => {
+    if (!userId) {
+      clearSeen();
+      return;
+    }
+    let limit = OWNER_IDLE_MS;
+    let stopped = false;
+    const seenAtStart = lastSeen();
+    const check = () => {
+      if (!stopped && isIdle(limit)) void supabase.auth.signOut({ scope: "local" });
+    };
+    void supabase.rpc("is_staff").then(({ data }) => {
+      if (data === true) {
+        limit = STAFF_IDLE_MS;
+        // Judge by the stamp from before this page load touched it.
+        if (seenAtStart !== null && Date.now() - seenAtStart > limit && !stopped)
+          void supabase.auth.signOut({ scope: "local" });
+      }
+      check();
+    });
+    check();
+    let last = 0;
+    const mark = () => {
+      const now = Date.now();
+      if (now - last > 60_000) {
+        last = now;
+        touch();
+      }
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        check();
+        mark();
+      }
+    };
+    mark();
+    window.addEventListener("click", mark);
+    window.addEventListener("keydown", mark);
+    document.addEventListener("visibilitychange", onVisible);
+    const timer = window.setInterval(check, 300_000);
+    return () => {
+      stopped = true;
+      window.removeEventListener("click", mark);
+      window.removeEventListener("keydown", mark);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.clearInterval(timer);
+    };
+  }, [userId]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
