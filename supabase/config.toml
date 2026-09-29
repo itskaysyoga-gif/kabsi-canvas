@@ -19,9 +19,9 @@ verify_jwt = false
 
 # JWT required.
 [functions.api]
-verify_jwt = true
+verify_jwt = false
 [functions.assistant]
-verify_jwt = true
+verify_jwt = false
 [functions.content]
 verify_jwt = true
 [functions.cron-tick]        # retired 410 stub
@@ -29,7 +29,7 @@ verify_jwt = true
 [functions.kv-sync]
 verify_jwt = true
 [functions.lead]
-verify_jwt = true
+verify_jwt = false
 [functions.partner]
 verify_jwt = true
 [functions.places-search]
@@ -37,4 +37,8 @@ verify_jwt = true
 [functions.posts-weekly]
 verify_jwt = true
 [functions.review-link]
-verify_jwt = true
+verify_jwt = false
+
+# 29 Sep (approved by Rasheed): the browser calls api/action (email Post/Skip links), assistant (Nora), lead and
+# review-link without any JWT (raw fetch, publishable key only), so these four must stay false. Each authenticates
+# or rate-limits in code.
