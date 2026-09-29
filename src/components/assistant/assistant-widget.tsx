@@ -123,6 +123,18 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
     };
   });
 
+  // Other parts of the app can open Nora with a first message (the Do now list).
+  const sendRef = useRef<(t: string) => void>(() => undefined);
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      setOpen(true);
+      const prompt = (e as CustomEvent<{ prompt?: string }>).detail?.prompt;
+      if (prompt) window.setTimeout(() => sendRef.current(prompt), 150);
+    };
+    window.addEventListener("kabsi:open-nora", onOpen);
+    return () => window.removeEventListener("kabsi:open-nora", onOpen);
+  }, []);
+
   const close = useCallback(() => {
     setOpen(false);
     window.setTimeout(() => launcherRef.current?.focus(), 0);
@@ -177,6 +189,8 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
     }
     setBusy(false);
   }
+
+  sendRef.current = (t) => void send(t);
 
   function submit(e: FormEvent) {
     e.preventDefault();

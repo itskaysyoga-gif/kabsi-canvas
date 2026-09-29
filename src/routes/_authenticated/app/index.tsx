@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { CONCIERGE_COPY } from "@/lib/concierge-copy";
 import { fmtDate } from "@/lib/format";
-import { knowledgeProgress } from "@/components/app/knowledge-form";
 import { createFileRoute, isRedirect, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -21,10 +20,10 @@ import {
   Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DoNow } from "@/components/app/do-now";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation, type Location } from "@/lib/onboarding";
 import {
-  daysSince,
   daysUntil,
   loadActivity,
   loadDashboard,
@@ -91,7 +90,7 @@ function HomePage() {
           ) : !dash.data ? (
             <Skeleton />
           ) : (
-            <Active d={dash.data} locationId={loc.id} card={loc.knowledge_card ?? {}} />
+            <Active d={dash.data} locationId={loc.id} />
           )}
         </>
       ) : null}
@@ -260,15 +259,7 @@ function Setup({ loc }: { loc: Location }) {
 }
 
 // ── Active business
-function Active({
-  d,
-  locationId,
-  card,
-}: {
-  d: Dashboard;
-  locationId: string;
-  card: Record<string, unknown>;
-}) {
+function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
   const daysLeft = daysUntil(d.planPaidUntil);
   const extras: { key: string; icon: ReactNode; text: string; to: string; tone?: "alert" }[] = [];
   if (d.openChanges)
@@ -412,7 +403,7 @@ function Active({
         />
       </div>
 
-      <ProfileHealth d={d} card={card} />
+      <DoNow locationId={locationId} />
 
       <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         {/* Latest reviews */}
@@ -542,100 +533,6 @@ function ReplyStack() {
         </div>
       </div>
     </div>
-  );
-}
-
-function ProfileHealth({ d, card }: { d: Dashboard; card: Record<string, unknown> }) {
-  const { filled: facts, total: factsTotal } = knowledgeProgress(card);
-  const rate = d.reviews90d ? Math.round((d.answered90d / d.reviews90d) * 100) : null;
-  const postDays = daysSince(d.lastPostAt);
-  const rows: {
-    key: string;
-    icon: ReactNode;
-    label: string;
-    value: string;
-    note: string;
-    ok: boolean;
-    to: string;
-  }[] = [
-    {
-      key: "replies",
-      icon: <MessageSquareText />,
-      label: "Reviews answered",
-      value: rate == null ? "-" : `${rate}%`,
-      note:
-        rate == null
-          ? "No reviews in the last 90 days"
-          : `${d.answered90d} of ${d.reviews90d} in the last 90 days`,
-      ok: rate == null || rate >= 90,
-      to: "/app/inbox",
-    },
-    {
-      key: "posts",
-      icon: <Newspaper />,
-      label: "Last Google post",
-      value: postDays == null ? "None yet" : postDays === 0 ? "Today" : `${postDays}d ago`,
-      note:
-        postDays != null && postDays <= 7
-          ? "Your profile looks active"
-          : "No Google post in the last 7 days",
-      ok: postDays != null && postDays <= 7,
-      to: "/app/posts",
-    },
-    {
-      key: "shield",
-      icon: d.openChanges ? <ShieldAlert /> : <ShieldCheck />,
-      label: "Profile guard",
-      value: d.openChanges ? "Needs you" : d.shieldWatching ? "Watching" : "Starting",
-      note: d.openChanges
-        ? "A listing change is waiting for you"
-        : "Name, phone, address, hours, website, category",
-      ok: !d.openChanges,
-      to: "/app/shield",
-    },
-    {
-      key: "facts",
-      icon: <FileText />,
-      label: "About your business",
-      value: `${facts} of ${factsTotal}`,
-      note:
-        facts >= 8
-          ? "Plenty of facts for replies and posts"
-          : "Replies and posts only use these facts",
-      ok: facts >= 8,
-      to: "/app/knowledge",
-    },
-  ];
-  return (
-    <section className="mt-8 rounded-large bg-kb-white p-6 shadow-kb">
-      <h2 className="text-lg font-bold">Profile health</h2>
-      <p className="mt-1 text-sm text-kb-stone">
-        The parts of your profile you control, as they stand today.
-      </p>
-      <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {rows.map((r) => (
-          <li key={r.key} className="min-w-0">
-            <Link
-              to={r.to}
-              className="flex items-center gap-3 rounded-card border border-kb-hairline p-4 transition-colors hover:bg-kb-sand/50 [&_svg]:size-5 [&_svg]:shrink-0"
-            >
-              <span className={r.ok ? "text-kb-stone" : "text-kb-black"}>{r.icon}</span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold">{r.label}</span>
-                <span className="mt-0.5 block text-xs leading-snug text-kb-stone">{r.note}</span>
-              </span>
-              <span className="flex shrink-0 items-center gap-2 whitespace-nowrap text-right font-bold">
-                {r.value}
-                <span
-                  aria-hidden
-                  className={cn("size-2 rounded-full", r.ok ? "bg-kb-green" : "bg-kb-yellow")}
-                />
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </section>
   );
 }
 
