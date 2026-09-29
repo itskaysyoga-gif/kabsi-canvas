@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { CONCIERGE_COPY } from "@/lib/concierge-copy";
 import { fmtDate } from "@/lib/format";
 import { knowledgeProgress } from "@/components/app/knowledge-form";
 import { createFileRoute, isRedirect, Link, redirect } from "@tanstack/react-router";
@@ -129,14 +130,22 @@ function Skeleton() {
 }
 
 // ── Setup not finished: one checklist, one button.
-// Paid = a Pro payment is recorded (the plan itself starts once Google access works, D224).
+// Done = a Pro payment is recorded (the plan itself starts once Google access works, D224) or a free trial
+// has started (Q05).
 async function hasPaidPlan(locationId: string) {
-  const { count } = await supabase
-    .from("payments")
-    .select("id", { count: "exact", head: true })
-    .eq("location_id", locationId)
-    .in("item", ["pro_6m", "pro_12m"]);
-  return (count ?? 0) > 0;
+  const [pay, trial] = await Promise.all([
+    supabase
+      .from("payments")
+      .select("id", { count: "exact", head: true })
+      .eq("location_id", locationId)
+      .not("item", "in", "(card,cards_5,extra_card)"),
+    supabase
+      .from("plans")
+      .select("id", { count: "exact", head: true })
+      .eq("location_id", locationId)
+      .eq("kind", "trial"),
+  ]);
+  return (pay.count ?? 0) + (trial.count ?? 0) > 0;
 }
 
 function Paused({ loc }: { loc: Location }) {
@@ -166,7 +175,12 @@ function Setup({ loc }: { loc: Location }) {
     {
       label: "Add Kabsi as a Manager on your Google profile",
       done: !!loc.access_granted_at,
-      note: loc.consent_at && !loc.access_granted_at ? "Waiting for Google access" : "",
+      note:
+        loc.consent_at && !loc.access_granted_at
+          ? loc.concierge
+            ? CONCIERGE_COPY.setup
+            : "Waiting for Google access"
+          : "",
     },
     { label: "Tell Kabsi about your business", done: knowledgeDone, note: "" },
     {
@@ -434,13 +448,15 @@ function Active({
             line={
               d.plan?.kind === "partner"
                 ? "Your plan comes through your Kabsi partner."
-                : d.planPaidUntil
-                  ? `Active until ${shortDate(d.planPaidUntil)}${daysLeft !== null ? ` · ${daysLeft} days left` : ""}`
-                  : d.pendingClaim
-                    ? "Payment sent. We're confirming it."
-                    : d.plan
-                      ? "Active"
-                      : "No active plan"
+                : d.plan?.kind === "trial" && d.planPaidUntil
+                  ? `Free trial until ${shortDate(d.planPaidUntil)}${daysLeft !== null ? ` · ${daysLeft} days left` : ""}. Choose a plan to keep going.`
+                  : d.planPaidUntil
+                    ? `Active until ${shortDate(d.planPaidUntil)}${daysLeft !== null ? ` · ${daysLeft} days left` : ""}`
+                    : d.pendingClaim
+                      ? "Payment sent. We're confirming it."
+                      : d.plan
+                        ? "Active"
+                        : "No active plan"
             }
             dot={
               d.plan?.kind === "partner" || d.planPaidUntil || d.plan

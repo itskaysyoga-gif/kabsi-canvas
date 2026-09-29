@@ -33,6 +33,7 @@ const STATE: Record<string, string> = {
   new: "Drafting",
   drafted: "Waiting for you",
   blocked: "Waiting for you",
+  publishing: "Approved, our team posts it within one working day",
   posted: "Replied",
   skipped: "Skipped",
   handled_offline: "Handled by you",

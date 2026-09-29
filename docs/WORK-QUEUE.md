@@ -36,30 +36,30 @@ Every task below fits one Claude Code cloud session and one pull request. Take t
 
 ## Revenue
 
-### [ ] Q04 · New prices on the site (D281) · M · Sonnet
+### [x] Q04 · New prices on the site (D281) · M · Sonnet
 - Files: `src/lib/site.ts` (PRICES and JSON-LD offers), `src/routes/pricing.tsx`, the pricing block in `src/routes/index.tsx`, `src/lib/faq.ts`, onboarding plan copy, `public/llms.txt`, `docs/KNOWLEDGE-BASE.md` price lines
 - Do: PRICES become Pro $19 a month or $190 a year, extra locations $15 or $150, the Lebanon bundle $120 a year, extra cards $10 or $40 for five; partner rates stay $8 and $6. Remove the 6-month plan. Plan cards: Free, Pro with a monthly or yearly switch, and the Lebanon bundle for Lebanese visitors only (through `region.ts`). Add "14-day free trial, no card".
 - Done when: no "$75", "6 months" or `pro6` remains in `src`, `public` or `docs`, and pricing reads right at 390 and 1440 px in both regions.
 
-### [ ] Q05 · Plans and the free trial (D281) · M · Opus to plan
+### [x] Q05 · Plans and the free trial (D281) · M · Opus to plan
 - Files: a new migration, plan logic in the Edge Functions, `src/routes/_authenticated/app/plan.tsx`
 - Do: plan kinds free, trial, pro_monthly, pro_yearly and lebanon_yearly. The trial starts when Google access starts (keep D241): 14 days, or 30 when `signup_source` is a partner. Emails 7 days and 1 day before the end, and on the day it ends. At the end the business drops to Free: drafting stops, the review link keeps working.
 - Done when: a test business moves from trial to Free on expiry, and a payment extends the plan correctly.
 
-### [ ] Q06 · Crypto billing through NOWPayments (D269) · L · Opus to plan
+### [x] Q06 · Crypto billing through NOWPayments (D269) · L · Opus to plan
 - Files: new `supabase/functions/billing/index.ts`, `supabase/functions/_shared/nowpayments.ts`, a migration for payment provider fields, the Plan page buttons
 - Do: create an invoice through the NOWPayments API (priced in USD, paid in USDT on TRC20 or BEP20, `order_id` = the plan purchase). The IPN webhook verifies `x-nowpayments-sig` (HMAC-SHA512 over the key-sorted JSON body with the IPN secret), ignores repeats of the same `payment_id`, and only `finished` activates a plan. Write `payments`, start or renew the plan, post to #kabsi-money. Whish, OMT, cash and the manual USDT claim stay as fallbacks.
 - Secrets: `NOWPAYMENTS_API_KEY` and `NOWPAYMENTS_IPN_SECRET`, in Supabase secrets only.
 - Done when: a real $1 invoice marks a test plan paid on its own, and replaying the same webhook changes nothing.
 
-### [ ] Q07 · Concierge mode for early access (D267) · L · Opus to plan
+### [x] Q07 · Concierge mode for early access (D267) · L · Opus to plan
 - Files: the staff area, a new migration, owner-facing access copy
 - Do: a per-business `concierge` flag, capped at 30 businesses. Staff can enter a new review by hand (stars, text, author, date) and mark an approved reply "Posted" after posting it in Google. Owners see: "A person on our team posts what you approve, within one working day." Listing Shield stays off while concierge is on. The ledger records which staff member posted.
 - Done when: a concierge business runs review, draft, owner approval, staff "Posted", with a complete ledger.
 
 ## Product and growth
 
-### [ ] Q08 · Nora's knowledge base (D285) · S · Sonnet
+### [x] Q08 · Nora's knowledge base (D285) · S · Sonnet
 - Files: `docs/KNOWLEDGE-BASE.md`, the script that builds `public/llms-full.txt`
 - Do: rewrite for the new prices, both trials, payment methods, early access, the five module names, the partner program, the ranking line, "How is this different from Google's own AI replies?", security answers and the free setup call. Put a "Facts that change" block at the top.
 - Done when: the rebuilt `llms-full.txt` holds the new facts and none of the old prices.

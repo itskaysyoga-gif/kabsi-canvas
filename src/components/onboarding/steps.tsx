@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Check, Copy, MapPin, Search, Share2, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +34,7 @@ import {
 } from "@/lib/onboarding";
 import { track } from "@/lib/telemetry";
 import { useIsLebanon } from "@/lib/region";
+import { loadPlanSummary, planOptions, type PlanKind } from "@/lib/plans";
 import { KABSI_GROUP_ID, SITE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -382,18 +384,33 @@ export function KnowledgeStep({
 
 // ── Step 4: plan (partner-tagged locations never see a price)
 export function PlanStep({ location, onChanged }: StepProps) {
-  const [kind, setKind] = useState<"pro_6m" | "pro_12m">("pro_12m");
+  const [picked, setPicked] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const isLebanon = useIsLebanon(location?.country);
+  const summary = useQuery({
+    queryKey: ["plan-summary", location?.id],
+    queryFn: () => loadPlanSummary(location!.id),
+    enabled: !!location,
+  });
   if (!location) return null;
-  const viaPartner = Boolean(location.partner_id);
+  const s = summary.data;
+  if (!s) {
+    return summary.isError ? (
+      <ErrorNote message="Couldn't load your plan options. Refresh the page." />
+    ) : null;
+  }
+  const viaPartner = s.partner_covered;
+  const options = planOptions(s);
+  // The free trial is offered once the new plans are live (staff can grant one earlier, and test owners get one).
+  const trialOffered = s.v2 && !s.trial_used;
+  const kind = picked ?? (trialOffered ? "trial" : (options[0]?.key ?? "lebanon_yearly"));
 
   async function finish() {
     setBusy(true);
     setError("");
     try {
-      await choosePlan(location!.id, viaPartner ? "partner" : kind);
+      await choosePlan(location!.id, viaPartner ? "partner" : (kind as PlanKind));
       track("plan_selected", { plan: viaPartner ? "partner" : kind, location_id: location!.id });
       await onChanged();
     } catch (e) {
@@ -416,29 +433,40 @@ export function PlanStep({ location, onChanged }: StepProps) {
       </>
     );
   }
-  const plans = [
-    {
-      key: "pro_12m" as const,
-      price: "$120",
-      period: "12 months",
-      note: isLebanon ? "Card included in Lebanon" : "",
-    },
-    {
-      key: "pro_6m" as const,
-      price: "$75",
-      period: "6 months",
-      note: isLebanon ? "Card included in Lebanon" : "",
-    },
+  const cards = [
+    ...(trialOffered
+      ? [
+          {
+            key: "trial",
+            price: "Free",
+            title: `${s.trial_days} day free trial`,
+            note: "No card. It starts when Kabsi's access to your Google profile works.",
+          },
+        ]
+      : []),
+    ...options.map((o) => ({
+      key: o.key as string,
+      price: `$${o.price}`,
+      title: o.title,
+      note: o.note,
+    })),
   ];
   return (
     <>
-      <StepTitle title="Choose your plan" sub="Paid once, upfront. Full refund within 14 days." />
+      <StepTitle
+        title="Choose your plan"
+        sub={
+          trialOffered
+            ? "Start free, or choose a plan now. Refundable within 14 days."
+            : "Yearly plans are refundable within 14 days."
+        }
+      />
       <div className="grid gap-3 sm:grid-cols-2">
-        {plans.map((p) => (
+        {cards.map((p) => (
           <button
             key={p.key}
             type="button"
-            onClick={() => setKind(p.key)}
+            onClick={() => setPicked(p.key)}
             aria-pressed={kind === p.key}
             className={cn(
               "rounded-card border-2 p-5 text-left",
@@ -446,7 +474,7 @@ export function PlanStep({ location, onChanged }: StepProps) {
             )}
           >
             <span className="block font-display text-4xl leading-none">{p.price}</span>
-            <span className="mt-2 block font-bold">Kabsi Pro, {p.period}</span>
+            <span className="mt-2 block font-bold">{p.title}</span>
             <span className="block text-sm text-kb-stone">{p.note}</span>
           </button>
         ))}
@@ -458,7 +486,7 @@ export function PlanStep({ location, onChanged }: StepProps) {
       ) : null}
       <ErrorNote message={error} />
       <Button className="mt-6 w-full" onClick={finish} disabled={busy}>
-        {busy ? "Saving…" : "Continue to payment"}
+        {busy ? "Saving…" : kind === "trial" ? "Start free trial" : "Continue to payment"}
       </Button>
     </>
   );

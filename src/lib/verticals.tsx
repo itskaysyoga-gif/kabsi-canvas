@@ -659,7 +659,7 @@ export const VERTICALS: Vertical[] = [
       },
       {
         q: "How do I pay?",
-        a: "Kabsi Pro is paid once, upfront, for 6 or 12 months. See the pricing page for payment methods.",
+        a: "Kabsi Pro is $19 a month or $190 a year, and you can start with a 14-day free trial, no card. See the pricing page for payment methods.",
       },
     ],
   },

@@ -2,6 +2,7 @@
 import { admin, APP_URL, captureError, emailLayout, esc, isDefiniteGoogleRejection, sendEmail, sha256Hex } from "./kabsi.ts";
 import { listReviews, putReply } from "./google.ts";
 import { checkDraft, classify, draftReply, MODELS, type Card } from "./ai.ts";
+import { isConciergeLocationId, matchConciergeReview, type ConciergeCandidate } from "./concierge.ts";
 
 const BACKLOG_LIMIT = 20; // D221
 
@@ -9,13 +10,20 @@ type Loc = {
   id: string; name: string; status: string; google_account_id: string | null; google_location_id: string | null;
   knowledge_card: Card; time_zone: string; digest_hour: number; reviews_synced_at: string | null;
   backlog_emailed_at: string | null; emails_paused_until: string | null; alert_emails: string[]; access_error_since?: string | null;
+  concierge?: boolean; concierge_converted_at?: string | null;
 };
-const LOC_COLS = "id, name, status, google_account_id, google_location_id, knowledge_card, time_zone, digest_hour, reviews_synced_at, backlog_emailed_at, emails_paused_until, alert_emails, access_error_since";
+const LOC_COLS = "id, name, status, google_account_id, google_location_id, knowledge_card, time_zone, digest_hour, reviews_synced_at, backlog_emailed_at, emails_paused_until, alert_emails, access_error_since, concierge, concierge_converted_at";
 
 export async function activeLocations(): Promise<Loc[]> {
   const { data, error } = await admin().from("locations").select(LOC_COLS).eq("status", "active").not("google_location_id", "is", null);
   if (error) throw error;
   return (data ?? []) as Loc[];
+}
+
+// Locations whose reviews are read from Google. Concierge businesses are excluded: their reviews are typed in by
+// staff, and asking Google about a made-up location id would fail and eventually mark access lost (Q07, D267).
+export async function syncableLocations(): Promise<Loc[]> {
+  return (await activeLocations()).filter((l) => !l.concierge && !isConciergeLocationId(l.google_location_id));
 }
 
 // ─── 1. Sync reviews from Google (or the mock)
@@ -27,6 +35,14 @@ export async function syncLocation(loc: Loc) {
   const knownIds = new Set((known ?? []).map((r) => r.google_review_id));
   let added = 0;
   let backlogOpen = 0;
+  // After a concierge business gets real access, reviews staff typed in are matched to the Google originals once,
+  // so the first real sync does not duplicate them (only a single clear match counts).
+  let manual: ConciergeCandidate[] = [];
+  if (loc.concierge_converted_at) {
+    const { data: rows } = await db.from("reviews").select("id, reviewer_name, star_rating, review_created_at")
+      .eq("location_id", loc.id).eq("source", "concierge");
+    manual = (rows ?? []).map((m) => ({ id: m.id, reviewer: m.reviewer_name, rating: m.star_rating, createdAt: m.review_created_at }));
+  }
   for (const r of reviews) { // newest first
     if (knownIds.has(r.reviewId)) {
       // Refresh the cached text too: Google content is kept at most 30 days after Google last returned it (D257).
@@ -40,6 +56,13 @@ export async function syncLocation(loc: Loc) {
           .eq("location_id", loc.id).eq("google_review_id", r.reviewId).in("state", ["new", "drafted", "blocked"]);
       }
       continue;
+    }
+    if (manual.length) {
+      const hit = matchConciergeReview({ reviewer: r.reviewer, rating: r.rating, createTime: r.createTime }, manual);
+      if (hit) {
+        const { error: upErr } = await db.from("reviews").update({ google_review_id: r.reviewId, source: "google" }).eq("id", hit.id);
+        if (!upErr) { manual = manual.filter((m) => m.id !== hit.id); continue; }
+      }
     }
     let state = r.reply ? "handled_offline" : "new";
     if (firstSync && state === "new") state = ++backlogOpen <= BACKLOG_LIMIT ? "new" : "archived";
@@ -59,10 +82,12 @@ export async function syncLocation(loc: Loc) {
 export async function draftReview(reviewId: string, instruction?: string) {
   const db = admin();
   const { data: rv, error } = await db.from("reviews")
-    .select("id, location_id, reviewer_name, star_rating, comment, draft_attempts, language, urgency, locations(name, knowledge_card)")
+    .select("id, location_id, reviewer_name, star_rating, comment, draft_attempts, language, urgency, locations(name, knowledge_card, status)")
     .eq("id", reviewId).single();
   if (error) throw error;
-  const loc = rv.locations as unknown as { name: string; knowledge_card: Card };
+  const loc = rv.locations as unknown as { name: string; knowledge_card: Card; status: string };
+  // Drafting is part of an active trial or plan (Q05): a Free business gets no new drafts, from any caller.
+  if (loc.status !== "active") throw new Error("location_not_active");
   const review = { reviewer: rv.reviewer_name ?? "A customer", rating: rv.star_rating, comment: rv.comment };
 
   let language = rv.language as string | null;
@@ -253,10 +278,24 @@ export async function publishReply(o: { reviewId: string; text: string; approved
   const text = o.text.trim();
   if (!text || text.length > 4000) throw new Error("bad_reply_text");
   const { data: rv, error } = await db.from("reviews")
-    .select("id, state, google_review_id, location_id, locations(status, google_account_id, google_location_id)").eq("id", o.reviewId).single();
+    .select("id, state, google_review_id, location_id, locations(status, concierge, google_account_id, google_location_id)").eq("id", o.reviewId).single();
   if (error) throw error;
-  const loc = rv.locations as unknown as { status: string; google_account_id: string | null; google_location_id: string | null };
+  const loc = rv.locations as unknown as { status: string; concierge: boolean; google_account_id: string | null; google_location_id: string | null };
   if (loc.status !== "active" || !loc.google_location_id) throw new Error("location_not_active");
+
+  // Concierge (D267): the owner's approval is recorded exactly as usual (D202), but a person posts it on Google by
+  // hand. One SQL function does the D266 claim, the publication and the task in one transaction; only staff
+  // "Mark posted" makes it live. No Google call, no retry.
+  if (loc.concierge) {
+    const { data: pubId, error: cErr } = await db.rpc("concierge_queue_reply", {
+      p_review: rv.id, p_text: text, p_approved_by: o.approvedBy, p_channel: o.channel,
+    });
+    if (cErr) {
+      if (String(cErr.message).includes("already_posted")) throw new Error("already_posted");
+      throw cErr;
+    }
+    return { publication: pubId as string, state: "manual_queued" };
+  }
 
   // D266: atomic claim. Two approvals racing for the same review (dashboard click + email-link click, or a
   // double click) can no longer both reach Google — only the request that flips drafted/blocked -> publishing

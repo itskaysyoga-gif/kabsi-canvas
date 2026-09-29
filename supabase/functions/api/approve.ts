@@ -35,7 +35,7 @@ export async function approve(req: Request): Promise<Response> {
   } catch (e) {
     const msg = String(e);
     if (msg.includes("already_posted")) return fail("already_posted", "A reply is already posted for this review.", 409);
-    if (msg.includes("location_not_active")) return fail("not_active", "This business isn't active yet.", 409);
+    if (msg.includes("location_not_active")) return fail("not_active", "Replies work while a free trial or a Pro plan is active. Choose a plan to continue.", 409);
     if (msg.includes("bad_reply_text")) return fail("bad_text", "The reply is empty or too long.", 400);
     await captureError("approve", e);
     return fail("internal", "Something went wrong. Nothing was posted.", 500);
