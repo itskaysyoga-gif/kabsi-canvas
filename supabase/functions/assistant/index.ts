@@ -10,10 +10,11 @@
 import {
   admin, APP_URL, captureError, CORS, currentUser, emailLayout, esc, fail, isInternal, jobLog, json, log, rateLimit, sendEmail, sha256Hex,
 } from "../_shared/kabsi.ts";
+import { MODELS } from "../_shared/models.ts";
 import { countryFromTimezone } from "../_shared/tz-country.ts";
 
-const MODEL = "claude-sonnet-5";
-const CLASSIFY_MODEL = "claude-haiku-4-5-20251001";
+const MODEL = MODELS.chat;
+const CLASSIFY_MODEL = MODELS.check;
 const MAX_TURNS = 4; // model calls per visitor message (tool use loops)
 const HISTORY = 30; // earlier messages sent with each turn
 const KB_URL = `${APP_URL}/llms-full.txt`;

@@ -72,15 +72,18 @@ export async function draftReview(reviewId: string, instruction?: string) {
 
   const { data: last } = await db.from("reply_drafts").select("version, body").eq("review_id", rv.id).order("version", { ascending: false }).limit(1).maybeSingle();
   let body = "";
+  let draftModel: string = MODELS.draft;
   let check = { ok: false, issues: [] as string[] };
   for (let attempt = 0; attempt < 2; attempt++) {
     // Second attempt: rewrite the failed draft, telling the model what the check flagged.
     const fix = attempt > 0 && body && check.issues.length ? `Fix these problems: ${check.issues.join("; ")}` : undefined;
     try {
-      body = await draftReply({
+      const drafted = await draftReply({
         review, business: loc.name, card: loc.knowledge_card ?? {}, language: language!, urgent,
         instruction: [instruction, fix].filter(Boolean).join(". ") || undefined, previous: fix ? body : last?.body,
       });
+      body = drafted.text;
+      draftModel = drafted.model;
     } catch (e) {
       if (!String(e).includes("empty reply")) throw e;
       body = "";
@@ -92,7 +95,7 @@ export async function draftReview(reviewId: string, instruction?: string) {
   }
   await db.from("reply_drafts").insert({
     review_id: rv.id, version: (last?.version ?? 0) + 1, body, source: instruction ? "ai_edit" : "ai", instruction: instruction ?? null,
-    safety_ok: check.ok, safety_notes: check.issues, model: MODELS.draft,
+    safety_ok: check.ok, safety_notes: check.issues, model: draftModel,
   });
   await db.from("reviews").update({
     language, urgency: urgent ? "urgent" : "normal", ...(reasons.length ? { urgency_reasons: reasons } : {}),

@@ -8,12 +8,13 @@
 //   POST { do: "hours_publish", location_id, start_date, end_date, closed, open_time?, close_time?, reason? }
 //   POST { do: "photo_check", photo_id } · { do: "photo_publish", photo_id, category } · { do: "photo_skip", photo_id }
 //   POST { do: "shield_decide", change_id, decision: "revert" | "keep" }                  → Listing Shield (D218)
+import { MODELS } from "../_shared/models.ts";
 import { admin, captureError, CORS, currentUser, fail, isDefiniteGoogleRejection, json, rateLimit } from "../_shared/kabsi.ts";
 import { addSpecialHours, createLocalPost, createMedia } from "../_shared/google.ts";
 import { decideChange } from "../_shared/shield.ts";
 import { CTAS, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, writePost } from "../_shared/posts.ts";
 
-const CHECK_MODEL = "claude-haiku-4-5-20251001";
+const CHECK_MODEL = MODELS.check;
 const PHOTO_CATEGORIES = ["EXTERIOR", "INTERIOR", "PRODUCT", "FOOD_AND_DRINK", "TEAMS", "ADDITIONAL"];
 
 // Photo check (Haiku vision): is it a real, clear photo of the business that fits Google's photo rules?

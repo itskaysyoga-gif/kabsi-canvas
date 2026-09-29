@@ -64,7 +64,7 @@ Every task below fits one Claude Code cloud session and one pull request. Take t
 - Do: rewrite for the new prices, both trials, payment methods, early access, the five module names, the partner program, the ranking line, "How is this different from Google's own AI replies?", security answers and the free setup call. Put a "Facts that change" block at the top.
 - Done when: the rebuilt `llms-full.txt` holds the new facts and none of the old prices.
 
-### [ ] Q09 · One model setting; drafts on Sonnet 5.5 · S · Sonnet
+### [x] Q09 · One model setting; drafts on Sonnet 5.5 · S · Sonnet
 - Files: the five places in `supabase/functions` that name `claude-sonnet-5`
 - Do: move the model id into one constant or app setting. Switch drafting to `claude-sonnet-5-5` (same price as Sonnet 5) with `claude-sonnet-5` as fallback. Run the reply checks on 30 saved example reviews on both models.
 - Done when: one setting controls the model and the PR shows the comparison.
