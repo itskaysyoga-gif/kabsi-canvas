@@ -184,7 +184,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       <main>{children}</main>
       <footer className="bg-kb-carbon text-kb-white">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16">
-          <div className="grid gap-10 border-b border-kb-white/15 pb-10 md:grid-cols-[1fr_auto_auto_auto]">
+          <div className="grid gap-10 border-b border-kb-white/15 pb-10 md:grid-cols-[1fr_auto_auto_auto_auto]">
             <div>
               <KabsiLogo dark />
               <p className="mt-4 text-kb-stone-on-dark">Tap. Review. Reply.</p>
@@ -199,8 +199,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <Link to="/faq">FAQ</Link>
               <Link to="/google-review-link">Free review link and QR</Link>
               <Link to="/guides">Guides</Link>
-              <Link to="/privacy">Privacy</Link>
-              <Link to="/terms">Terms</Link>
             </nav>
             <nav className="grid gap-y-3 text-sm" aria-label="Kabsi for your business">
               <p className="text-xs font-bold uppercase tracking-wider text-kb-stone-on-dark">
@@ -214,6 +212,15 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <Link to="/for" className="font-bold">
                 All businesses
               </Link>
+            </nav>
+            <nav className="grid content-start gap-y-3 text-sm" aria-label="Company">
+              <p className="text-xs font-bold uppercase tracking-wider text-kb-stone-on-dark">
+                Company
+              </p>
+              <Link to="/about">About</Link>
+              <Link to="/security">Security</Link>
+              <Link to="/privacy">Privacy</Link>
+              <Link to="/terms">Terms</Link>
             </nav>
             <a className="text-sm font-medium" href="mailto:hello@kabsi.co">
               hello@kabsi.co

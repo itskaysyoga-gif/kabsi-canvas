@@ -4,3 +4,5 @@
 - [x] Add phone and computer Manager access instructions to onboarding.
 - [x] Add access troubleshooting and a business-specific share action.
 - [x] Add and verify the public noindex Manager steps page.
+- [x] Add public About and Security pages with metadata and breadcrumbs.
+- [x] Add Company footer links and update the sitemap and AI-readable listing.
