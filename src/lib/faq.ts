@@ -12,6 +12,10 @@ export const FAQ: { q: string; a: string }[] = [
     a: "Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile, then tell Kabsi a few facts about your business: how you sign off, your phone number, anything you want mentioned. Drafts only use the facts you give.",
   },
   {
+    q: "Which businesses can use Kabsi?",
+    a: "Any business with a verified Google Business Profile that you own or manage. If your profile is not verified yet, verify it on Google first (it is free and done at business.google.com), then come back and set up Kabsi. If someone else manages the profile, ask them to set up Kabsi or to add you as a Manager.",
+  },
+  {
     q: "Which languages does it reply in?",
     a: "The reviewer's language: English, Spanish, Arabic, French and many others. Arabic written in Latin letters (Franco-Arabic) gets a simple English reply, because it reads badly in public.",
   },

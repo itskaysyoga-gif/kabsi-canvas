@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ErrorNote, StepTitle } from "@/components/onboarding/onboarding-shell";
 import { ManagerAccessInstructions } from "@/components/onboarding/manager-access-instructions";
+import { EligibilityCheck, type Eligibility } from "@/components/onboarding/eligibility";
 import { KnowledgeForm } from "@/components/app/knowledge-form";
 import { copyText } from "@/lib/clipboard";
 import {
@@ -50,6 +51,7 @@ export function BusinessStep({
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PlaceResult[] | null>(null);
   const [picked, setPicked] = useState<PlaceResult | null>(null);
+  const [eligible, setEligible] = useState<Eligibility>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -57,6 +59,7 @@ export function BusinessStep({
     event.preventDefault();
     setError("");
     setPicked(null);
+    setEligible(null);
     setBusy(true);
     try {
       setResults(await searchPlaces(query));
@@ -87,7 +90,7 @@ export function BusinessStep({
     <>
       <StepTitle
         title="Find your business"
-        sub="Search for it the way it appears on Google Maps."
+        sub="Four short steps, about five minutes. Nothing is posted to Google without your approval. Start by searching for your business the way it appears on Google Maps."
       />
       <form onSubmit={search} className="flex flex-col gap-3 sm:flex-row">
         <Label htmlFor="biz" className="sr-only">
@@ -117,7 +120,10 @@ export function BusinessStep({
             <li key={place.place_id}>
               <button
                 type="button"
-                onClick={() => setPicked(place)}
+                onClick={() => {
+                  setPicked(place);
+                  setEligible(null);
+                }}
                 aria-pressed={picked?.place_id === place.place_id}
                 className={cn(
                   "flex w-full items-start gap-3 rounded-card border-2 p-4 text-left",
@@ -138,6 +144,16 @@ export function BusinessStep({
       ) : null}
       <ErrorNote message={error} />
       {picked ? (
+        <EligibilityCheck
+          businessName={picked.name}
+          value={eligible}
+          onChange={(v) => {
+            setEligible(v);
+            if (v) track("eligibility_answered", { answer: v });
+          }}
+        />
+      ) : null}
+      {picked && eligible === "yes" ? (
         <Button className="mt-6 w-full" onClick={confirm} disabled={busy}>
           {busy ? "Saving…" : `Yes, this is ${picked.name}`}
         </Button>

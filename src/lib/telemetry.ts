@@ -122,6 +122,7 @@ export function reportError(error: unknown, context: Record<string, unknown> = {
 export type KabsiEvent =
   | "signup_started"
   | "business_selected"
+  | "eligibility_answered"
   | "consent_given"
   | "access_granted"
   | "plan_selected"
@@ -144,7 +145,10 @@ export type KabsiEvent =
   | "free_tool_used";
 
 type SafeProps = Partial<
-  Record<"location_id" | "partner_id" | "country" | "source" | "plan" | "channel", string>
+  Record<
+    "location_id" | "partner_id" | "country" | "source" | "plan" | "channel" | "answer",
+    string
+  >
 >;
 
 export function track(event: KabsiEvent, properties: SafeProps = {}) {
