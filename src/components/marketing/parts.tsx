@@ -385,9 +385,11 @@ export const CARD_SHIPPING_TEXT =
 export function CardShippingNote({
   className,
   tone = "light",
+  isLebanon = true,
 }: {
   className?: string;
   tone?: "light" | "dark";
+  isLebanon?: boolean;
 }) {
   return (
     <p
@@ -400,17 +402,21 @@ export function CardShippingNote({
       )}
     >
       <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-      <span>
-        <b className={tone === "dark" ? "text-kb-white" : "text-kb-ink"}>
-          Cards ship in Lebanon only.
-        </b>{" "}
-        Elsewhere, get one from a{" "}
-        <Link to="/partners" className="font-bold underline underline-offset-4">
-          Kabsi partner
-        </Link>{" "}
-        near you, or buy any blank NFC card online and write your Kabsi review link on it. The
-        review link and QR code work everywhere.
-      </span>
+      {isLebanon ? (
+        <span>
+          <b className={tone === "dark" ? "text-kb-white" : "text-kb-ink"}>
+            Cards ship in Lebanon only.
+          </b>{" "}
+          Elsewhere, get one from a{" "}
+          <Link to="/partners" className="font-bold underline underline-offset-4">
+            Kabsi partner
+          </Link>{" "}
+          near you, or buy any blank NFC card online and write your Kabsi review link on it. The
+          review link and QR code work everywhere.
+        </span>
+      ) : (
+        <span>Your review link and QR code are free in every country.</span>
+      )}
     </p>
   );
 }

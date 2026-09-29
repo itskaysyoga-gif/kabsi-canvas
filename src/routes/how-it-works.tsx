@@ -28,6 +28,7 @@ import {
 } from "@/components/marketing/parts";
 import { FlowVisual } from "@/components/marketing/visuals";
 import { pageHead } from "@/lib/site";
+import { useIsLebanon } from "@/lib/region";
 
 export const Route = createFileRoute("/how-it-works")({
   head: () =>
@@ -70,6 +71,8 @@ export const Route = createFileRoute("/how-it-works")({
 });
 
 function Page() {
+  const isLebanon = useIsLebanon();
+
   return (
     <PublicLayout>
       <PageHero
@@ -198,7 +201,7 @@ function Page() {
             dashboard gives you a review link and a printable QR code that do the same. Kabsi counts
             taps (never who tapped) and shows them in your report.
           </p>
-          <CardShippingNote className="mt-6" />
+          <CardShippingNote className="mt-6" isLebanon={isLebanon} />
         </div>
         <div className="flex justify-center">
           <img

@@ -32,6 +32,7 @@ import {
 import { BusinessGrid } from "@/components/marketing/business-grid";
 import { FAQ } from "@/lib/faq";
 import { ORG_LD, PRICES, PRODUCT_LD, WEBSITE_LD, pageHead } from "@/lib/site";
+import { useIsLebanon } from "@/lib/region";
 
 export const Route = createFileRoute("/")({
   // go.kabsi.co sends switched-off cards here with ?sticker=disabled
@@ -49,6 +50,7 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { sticker } = Route.useSearch();
+  const isLebanon = useIsLebanon();
   return (
     <PublicLayout>
       {sticker === "disabled" ? (
@@ -261,7 +263,7 @@ function HomePage() {
               plan ends
             </li>
           </ul>
-          <CardShippingNote className="mt-6 max-w-xl" />
+          <CardShippingNote className="mt-6 max-w-xl" isLebanon={isLebanon} />
         </div>
       </Section>
 
@@ -292,16 +294,23 @@ function HomePage() {
           <Price
             amount={PRICES.pro12}
             name="Kabsi Pro, 12 months"
-            line="$10 a month · card included in Lebanon"
+            line={isLebanon ? "$10 a month · card included in Lebanon" : "$10 a month"}
             highlight
           />
           <Price
             amount={PRICES.pro6}
             name="Kabsi Pro, 6 months"
-            line="$12.50 a month · card included in Lebanon"
+            line={isLebanon ? "$12.50 a month · card included in Lebanon" : "$12.50 a month"}
           />
-          <Price amount={PRICES.card} name="NFC card only" line="Shipped in Lebanon only" />
+          {isLebanon ? (
+            <Price amount={PRICES.card} name="NFC card only" line="Shipped in Lebanon only" />
+          ) : null}
         </div>
+        {!isLebanon ? (
+          <p className="mt-6 text-kb-stone">
+            Your review link and QR code are free in every country.
+          </p>
+        ) : null}
         <p className="mt-6 text-kb-stone">
           Pro is refundable within 14 days.{" "}
           <Link to="/pricing" className="font-bold text-kb-ink underline underline-offset-4">
