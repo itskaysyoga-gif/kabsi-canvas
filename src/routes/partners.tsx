@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Eyebrow, H2, PageHero, Section } from "@/components/marketing/parts";
 import { BusinessGrid } from "@/components/marketing/business-grid";
 import { anonHeaders, supabaseUrl } from "@/lib/supabase";
+import { Turnstile } from "@/components/turnstile";
 import { track } from "@/lib/telemetry";
 import { PRICES, pageHead } from "@/lib/site";
 import { useIsLebanon } from "@/lib/region";
@@ -172,6 +173,8 @@ function LeadForm() {
   });
   const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
   const [error, setError] = useState("");
+  const [token, setToken] = useState("");
+  const [round, setRound] = useState(0);
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) =>
     setF({ ...f, [k]: e.target.value });
 
@@ -183,7 +186,7 @@ function LeadForm() {
       const res = await fetch(`${supabaseUrl}/functions/v1/lead`, {
         method: "POST",
         headers: { "content-type": "application/json", ...anonHeaders },
-        body: JSON.stringify({ kind: "partner", ...f }),
+        body: JSON.stringify({ kind: "partner", ...f, turnstile: token }),
       });
       const json = (await res.json().catch(() => ({}))) as { message?: string };
       if (!res.ok)
@@ -192,6 +195,8 @@ function LeadForm() {
       setState("sent");
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
+      setToken("");
+      setRound((n) => n + 1);
       setState("idle");
     }
   }
@@ -282,7 +287,14 @@ function LeadForm() {
         aria-hidden="true"
       />
       {error ? <p className="text-sm text-kb-red sm:col-span-2">{error}</p> : null}
-      <Button type="submit" className="w-full sm:col-span-2" disabled={state === "sending"}>
+      <div className="sm:col-span-2">
+        <Turnstile key={round} onToken={setToken} />
+      </div>
+      <Button
+        type="submit"
+        className="w-full sm:col-span-2"
+        disabled={state === "sending" || !token}
+      >
         {state === "sending" ? "Sending…" : "Send"}
       </Button>
     </form>

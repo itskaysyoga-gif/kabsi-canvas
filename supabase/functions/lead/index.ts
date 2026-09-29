@@ -1,7 +1,7 @@
 // lead: public form on /partners (and later a business contact form).
 // POST { kind?, name, email, instagram?, country?, volume?, message?, website? }
 // `website` is a honeypot: humans never fill it. Rate limit uses a daily-salted hash, never the raw IP.
-import { admin, captureError, CORS, emailLayout, esc, fail, json, rateLimit, sendEmail, sha256Hex } from "../_shared/kabsi.ts";
+import { admin, captureError, CORS, emailLayout, esc, fail, json, rateLimit, sendEmail, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 
@@ -17,6 +17,8 @@ Deno.serve(async (req) => {
   if (!(await rateLimit(`lead:${await sha256Hex(`${ip}|${day}`)}`, 5, 3600))) {
     return fail("rate_limited", "Too many requests. Try again later.", 429);
   }
+
+  if (!(await verifyTurnstile(b.turnstile, ip))) return fail("challenge_failed", "Please complete the check and try again.", 400);
 
   const name = (b.name ?? "").trim().slice(0, 120);
   const email = (b.email ?? "").trim().toLowerCase().slice(0, 254);

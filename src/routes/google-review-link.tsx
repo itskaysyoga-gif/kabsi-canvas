@@ -27,6 +27,7 @@ import {
 } from "@/components/marketing/parts";
 import { ReviewLinkVisual } from "@/components/marketing/visuals";
 import { anonHeaders, supabaseUrl } from "@/lib/supabase";
+import { Turnstile } from "@/components/turnstile";
 import { qrSvg } from "@/lib/qr";
 import { track } from "@/lib/telemetry";
 import { faqJsonLd } from "@/lib/faq";
@@ -148,6 +149,8 @@ function Finder({ onPick }: { onPick: (p: Place) => void }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [results, setResults] = useState<Place[] | null>(null);
+  const [token, setToken] = useState("");
+  const [round, setRound] = useState(0);
   async function search(e: FormEvent) {
     e.preventDefault();
     setErr("");
@@ -156,7 +159,7 @@ function Finder({ onPick }: { onPick: (p: Place) => void }) {
       const res = await fetch(`${supabaseUrl}/functions/v1/review-link`, {
         method: "POST",
         headers: { "content-type": "application/json", ...anonHeaders },
-        body: JSON.stringify({ query: q }),
+        body: JSON.stringify({ query: q, turnstile: token }),
       });
       const j = (await res.json().catch(() => ({}))) as { places?: Place[]; message?: string };
       if (!res.ok) throw new Error(j.message || "Search didn't work. Try again.");
@@ -165,6 +168,8 @@ function Finder({ onPick }: { onPick: (p: Place) => void }) {
     } catch (x) {
       setErr(x instanceof Error ? x.message : "Search didn't work. Try again.");
     }
+    setToken("");
+    setRound((n) => n + 1);
     setBusy(false);
   }
   return (
@@ -181,10 +186,17 @@ function Finder({ onPick }: { onPick: (p: Place) => void }) {
           maxLength={120}
           className="h-[52px] bg-kb-white text-base text-kb-ink"
         />
-        <Button type="submit" className="h-[52px] shrink-0" disabled={busy || q.trim().length < 2}>
+        <Button
+          type="submit"
+          className="h-[52px] shrink-0"
+          disabled={busy || q.trim().length < 2 || !token}
+        >
           <Search /> {busy ? "Searching…" : "Find my business"}
         </Button>
       </form>
+      <div className="mt-3">
+        <Turnstile key={round} onToken={setToken} />
+      </div>
       {err ? (
         <p className="mt-3 text-sm text-kb-yellow" role="alert">
           {err}

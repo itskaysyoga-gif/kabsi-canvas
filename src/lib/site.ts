@@ -2,6 +2,8 @@
 // must pass §3 (no promises of reviews, ratings or rankings; no invented numbers; no Google affiliation).
 
 // Canonical origin. Moves to https://kabsi.co at the domain switch (D215).
+// Public Cloudflare Turnstile site key (safe in the browser). The secret lives in Supabase secrets.
+export const TURNSTILE_SITE_KEY = "0x4AAAAAAFHvWh4ra3THq5g0";
 export const SITE_URL = "https://kabsi-app.lovable.app";
 export const CONTACT_EMAIL = "hello@kabsi.co";
 // Kabsi's Google business group (D293). Owners invite this ID as a Manager. It is an identifier, not a secret.

@@ -2,7 +2,7 @@
 // POST { query } → up to 5 businesses with their Google review link. The Places key never reaches the browser.
 // Abuse limits: 20 searches per visitor per hour (keyed by a salted hash of the IP, kept 1 hour, never the IP
 // itself) and 400 searches a day in total, so the Places bill stays inside the free monthly credit.
-import { captureError, CORS, fail, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
+import { captureError, CORS, fail, json, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -20,7 +20,8 @@ Deno.serve(async (req) => {
 
   const key = Deno.env.get("PLACES_API_KEY");
   if (!key) return fail("not_configured", "Search isn't available right now.", 503);
-  const { query } = (await req.json().catch(() => ({}))) as { query?: string };
+  const { query, turnstile } = (await req.json().catch(() => ({}))) as { query?: string; turnstile?: string };
+  if (!(await verifyTurnstile(turnstile, ip))) return fail("challenge_failed", "Please complete the check and try again.", 400);
   const q = (query ?? "").trim();
   if (q.length < 2 || q.length > 120) return fail("bad_query", "Type your business name and city.");
 

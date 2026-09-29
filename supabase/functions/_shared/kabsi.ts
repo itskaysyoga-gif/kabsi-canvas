@@ -203,3 +203,22 @@ export async function ownerEmails(locationId: string): Promise<string[]> {
   if (error) throw error;
   return (data as string[] | null) ?? [];
 }
+
+// Cloudflare Turnstile (Q10). The secret lives in Supabase secrets as TURNSTILE_SECRET_KEY.
+// Until the secret is set the check passes, so a missing secret never takes a public form down;
+// once it is set, a missing or bad token is refused.
+export async function verifyTurnstile(token: string | undefined, ip?: string): Promise<boolean> {
+  const secret = Deno.env.get("TURNSTILE_SECRET_KEY");
+  if (!secret) return true;
+  if (!token) return false;
+  try {
+    const body = new URLSearchParams({ secret, response: token });
+    if (ip && ip !== "unknown") body.set("remoteip", ip);
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body });
+    const j = (await res.json()) as { success?: boolean };
+    return j.success === true;
+  } catch (e) {
+    log("turnstile", { ok: false, err: String(e) });
+    return false;
+  }
+}
