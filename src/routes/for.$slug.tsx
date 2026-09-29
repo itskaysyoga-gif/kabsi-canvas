@@ -67,8 +67,8 @@ export const Route = createFileRoute("/for/$slug")({
           provider: { "@id": `${SITE_URL}/#organization`, "@type": "Organization", name: "Kabsi" },
           offers: {
             "@type": "Offer",
-            name: "Kabsi Pro, 6 months",
-            price: PRICES.pro6,
+            name: "Kabsi Pro, monthly",
+            price: PRICES.proMonthly,
             priceCurrency: "USD",
             url: `${SITE_URL}/pricing`,
           },
@@ -117,7 +117,8 @@ function Page() {
             {v.summary} Nothing is posted to Google until you approve it.
           </p>
           <p className="mt-3 text-[15px] leading-7 text-kb-stone">
-            Kabsi Pro is ${PRICES.pro6} for 6 months or ${PRICES.pro12} for 12 months, paid once.{" "}
+            Kabsi Pro is ${PRICES.proMonthly} a month or ${PRICES.proYearly} a year, with a 14-day
+            free trial and no card.{" "}
             <Link to="/pricing" className="font-bold text-kb-ink underline underline-offset-4">
               See pricing
             </Link>

@@ -12,7 +12,7 @@ Key facts:
 - Where cards come from: Kabsi ships NFC cards only in Lebanon. Businesses anywhere else get a card from a Kabsi partner in their area, or buy any blank NFC card online and write their Kabsi review link on it. The review link and QR code work in every country.
 - Review card and link: an optional NFC and QR card, plus a free review link and QR code, open the business's own Google review form for every customer. There is no filtering of unhappy customers and no rewards for reviews. Taps are counted as opens, not reviews.
 - What Kabsi does not do: it does not promise more reviews, higher ratings or better rankings, it cannot remove reviews, and it does not post anything without approval.
-- Prices (USD, every country): Kabsi Pro $75 for 6 months or $120 for 12 months, paid once, refundable within 14 days. In Lebanon one NFC card is included with Pro, and a card on its own is $20. No monthly bills. Partners (card sellers and agencies): $8 per active business per month.
+- Prices (USD, every country): Kabsi Pro $19 a month or $190 a year, extra locations $15 a month or $150 a year, with a 14-day free trial and no card (30 days through a partner). Free: review link, QR code and a printable table card. Monthly plans cancel any time; yearly plans are refundable within 14 days. In Lebanon only: a $120 a year bundle with Pro, an NFC card and setup, and a card on its own is $20. Partners (card sellers and agencies): $8 per active business per month.
 - Google data: review text and reviewer names are kept at most 30 days after Google last returned them.
 - Contact: hello@kabsi.co
 

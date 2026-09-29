@@ -31,7 +31,7 @@ import {
 } from "@/components/marketing/parts";
 import { BusinessGrid } from "@/components/marketing/business-grid";
 import { FAQ } from "@/lib/faq";
-import { ORG_LD, PRICES, PRODUCT_LD, WEBSITE_LD, pageHead } from "@/lib/site";
+import { ORG_LD, PRICES, PRODUCT_LD, TRIAL_LINE, WEBSITE_LD, pageHead } from "@/lib/site";
 import { useIsLebanon } from "@/lib/region";
 
 export const Route = createFileRoute("/")({
@@ -289,22 +289,26 @@ function HomePage() {
 
       {/* Pricing summary */}
       <Section tone="sand">
-        <Eyebrow>Upfront pricing</Eyebrow>
-        <H2>Paid once, upfront. No monthly bills.</H2>
-        <div data-stagger="" className="mt-12 grid gap-4 md:grid-cols-3">
+        <Eyebrow>Pricing</Eyebrow>
+        <H2>Start free. Pay when it is worth it.</H2>
+        <p className="mt-3 text-lg text-kb-stone">{TRIAL_LINE}.</p>
+        <div
+          data-stagger=""
+          className={`mt-10 grid gap-4 ${isLebanon ? "md:grid-cols-3" : "md:grid-cols-2"}`}
+        >
+          <Price amount={0} name="Free" line="Review link, QR code and a printable table card" />
           <Price
-            amount={PRICES.pro12}
-            name="Kabsi Pro, 12 months"
-            line={isLebanon ? "$10 a month · card included in Lebanon" : "$10 a month"}
+            amount={PRICES.proMonthly}
+            name="Kabsi Pro"
+            line={`a month, or $${PRICES.proYearly} a year`}
             highlight
           />
-          <Price
-            amount={PRICES.pro6}
-            name="Kabsi Pro, 6 months"
-            line={isLebanon ? "$12.50 a month · card included in Lebanon" : "$12.50 a month"}
-          />
           {isLebanon ? (
-            <Price amount={PRICES.card} name="NFC card only" line="Shipped in Lebanon only" />
+            <Price
+              amount={PRICES.lebanonBundle}
+              name="Lebanon bundle"
+              line="a year, with an NFC card and setup"
+            />
           ) : null}
         </div>
         {!isLebanon ? (
@@ -313,7 +317,7 @@ function HomePage() {
           </p>
         ) : null}
         <p className="mt-6 text-kb-stone">
-          Pro is refundable within 14 days.{" "}
+          Yearly plans are refundable within 14 days.{" "}
           <Link to="/pricing" className="font-bold text-kb-ink underline underline-offset-4">
             See pricing and payment
           </Link>

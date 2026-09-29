@@ -36,7 +36,7 @@ Every task below fits one Claude Code cloud session and one pull request. Take t
 
 ## Revenue
 
-### [ ] Q04 · New prices on the site (D281) · M · Sonnet
+### [x] Q04 · New prices on the site (D281) · M · Sonnet
 - Files: `src/lib/site.ts` (PRICES and JSON-LD offers), `src/routes/pricing.tsx`, the pricing block in `src/routes/index.tsx`, `src/lib/faq.ts`, onboarding plan copy, `public/llms.txt`, `docs/KNOWLEDGE-BASE.md` price lines
 - Do: PRICES become Pro $19 a month or $190 a year, extra locations $15 or $150, the Lebanon bundle $120 a year, extra cards $10 or $40 for five; partner rates stay $8 and $6. Remove the 6-month plan. Plan cards: Free, Pro with a monthly or yearly switch, and the Lebanon bundle for Lebanese visitors only (through `region.ts`). Add "14-day free trial, no card".
 - Done when: no "$75", "6 months" or `pro6` remains in `src`, `public` or `docs`, and pricing reads right at 390 and 1440 px in both regions.

@@ -61,7 +61,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "How do I pay?",
-    a: `In USDT (TRC20 or Binance Pay) from anywhere. In Lebanon you can also pay with Whish, OMT or cash. Kabsi Pro is $${PRICES.pro6} for 6 months or $${PRICES.pro12} for 12 months. In Lebanon one NFC card is included.`,
+    a: `In USDT (TRC20 or Binance Pay) from anywhere. In Lebanon you can also pay with Whish, OMT or cash. Kabsi Pro is $${PRICES.proMonthly} a month or $${PRICES.proYearly} a year, and you can start with a 14-day free trial, no card. Our team in Lebanon also sells a $${PRICES.lebanonBundle} a year bundle with an NFC card and setup.`,
   },
   {
     q: "What happens when my plan ends?",

@@ -137,7 +137,7 @@ async function hasPaidPlan(locationId: string) {
       .from("payments")
       .select("id", { count: "exact", head: true })
       .eq("location_id", locationId)
-      .in("item", ["pro_monthly", "pro_yearly", "lebanon_yearly", "pro_6m"]),
+      .not("item", "in", "(card,cards_5,extra_card)"),
     supabase
       .from("plans")
       .select("id", { count: "exact", head: true })

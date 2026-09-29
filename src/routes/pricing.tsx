@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, CalendarRange, Check, Globe, MapPin, Nfc, Sparkles } from "lucide-react";
+import { ArrowRight, Check, Gift, Globe, MapPin, Package, Sparkles } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,21 +13,28 @@ import {
   Section,
 } from "@/components/marketing/parts";
 import { PricingVisual } from "@/components/marketing/visuals";
-import { CONTACT_PHONE, PRICES, PRODUCT_LD, pageHead } from "@/lib/site";
+import { CONTACT_PHONE, PRICES, PRODUCT_LD, TRIAL_LINE, pageHead } from "@/lib/site";
 import { useIsLebanon } from "@/lib/region";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/pricing")({
   head: () =>
     pageHead({
-      title: "Kabsi pricing | Pro from $75, no monthly bills",
-      description: `Kabsi Pro: $${PRICES.pro6} for 6 months or $${PRICES.pro12} for 12 months, paid once, refundable within 14 days. NFC cards ship in Lebanon only.`,
+      title: "Kabsi pricing | Pro from $19 a month",
+      description: `Kabsi Pro is $${PRICES.proMonthly} a month or $${PRICES.proYearly} a year. Start with a 14-day free trial, no card. NFC cards ship in Lebanon only.`,
       path: "/pricing",
       crumbs: [{ name: "Pricing", path: "/pricing" }],
       jsonLd: [PRODUCT_LD],
     }),
   component: Page,
 });
+
+const FREE = [
+  "Review link for your Google review page",
+  "QR code you can download and print",
+  "Printable table card and a message to share",
+  "Keeps working whatever plan you are on",
+];
 
 const PRO = [
   "A reply drafted for every new Google review, in the reviewer's language",
@@ -37,19 +44,25 @@ const PRO = [
   "Photos checked and special hours set in a minute",
   "Profile health on your dashboard and a Monday report",
   "Review link and printable QR code, anywhere",
-  "One NFC card included in Lebanon",
+];
+
+const BUNDLE = [
+  "Kabsi Pro for 12 months, with everything in Pro",
+  "One NFC card with your review link on it",
+  "In-person setup by our team in Lebanon",
+  "Pay in cash, Whish, OMT or USDT",
 ];
 
 function Page() {
   const isLebanon = useIsLebanon();
-  const proFeatures = isLebanon ? PRO : PRO.filter((feature) => !feature.includes("NFC card"));
+  const [yearly, setYearly] = useState(false);
 
   return (
     <PublicLayout>
       <PageHero
         eyebrow="Pricing"
-        title="Paid once, upfront. No monthly bills."
-        sub="Same price in every country. Your plan starts when payment is confirmed and Kabsi's access to your Google profile works, so waiting for access costs you nothing."
+        title="Start free. Pay when it is worth it."
+        sub={`${TRIAL_LINE}. Same price in every country. Your trial and your plan start when Kabsi's access to your Google profile works, so waiting for access costs you nothing.`}
         visual={<PricingVisual />}
         photo="heroPricing"
       />
@@ -60,45 +73,63 @@ function Page() {
           className={cn("grid gap-5", isLebanon ? "lg:grid-cols-3" : "lg:grid-cols-2")}
         >
           <Plan
-            name="Kabsi Pro, 12 months"
-            icon={<Sparkles />}
-            price={PRICES.pro12}
-            per="$10 a month"
-            features={proFeatures}
-            highlight
+            name="Free"
+            icon={<Gift />}
+            price={0}
+            per="Review Link and Card"
+            features={FREE}
+            cta="Start free"
           />
           <Plan
-            name="Kabsi Pro, 6 months"
-            icon={<CalendarRange />}
-            price={PRICES.pro6}
-            per="$12.50 a month"
-            features={proFeatures}
+            name="Kabsi Pro"
+            icon={<Sparkles />}
+            price={yearly ? PRICES.proYearly : PRICES.proMonthly}
+            per={yearly ? "a year · two months free" : "a month · cancel any time"}
+            features={PRO}
+            highlight
+            cta="Start free trial"
+            note={`${TRIAL_LINE}. Extra locations: $${PRICES.extraLocationMonthly} a month or $${PRICES.extraLocationYearly} a year.`}
+            toggle={
+              <div
+                role="group"
+                aria-label="Billing period"
+                className="mt-5 inline-flex rounded-pill bg-kb-sand p-1 text-sm font-bold"
+              >
+                {[false, true].map((y) => (
+                  <button
+                    key={String(y)}
+                    type="button"
+                    aria-pressed={yearly === y}
+                    onClick={() => setYearly(y)}
+                    className={cn(
+                      "min-h-9 rounded-pill px-4",
+                      yearly === y ? "bg-kb-black text-kb-white" : "text-kb-stone",
+                    )}
+                  >
+                    {y ? "Yearly" : "Monthly"}
+                  </button>
+                ))}
+              </div>
+            }
           />
           {isLebanon ? (
             <Plan
-              name="NFC card only"
-              icon={<Nfc />}
-              price={PRICES.card}
-              per="One-time"
-              features={[
-                "Acrylic card with NFC chip and QR code",
-                "Opens your Google review page in one tap",
-                "Same page for every customer, no filtering",
-                "Keeps working for good",
-                "Shipped in Lebanon only",
-              ]}
+              name="Lebanon bundle"
+              icon={<Package />}
+              price={PRICES.lebanonBundle}
+              per="a year, sold by our team in Lebanon"
+              features={BUNDLE}
+              cta="Get the bundle"
             />
           ) : null}
         </div>
         {isLebanon ? (
           <p className="mt-6 text-kb-stone">
-            Extra cards in Lebanon: ${PRICES.extraCard} each, or ${PRICES.fiveCards} for five.
+            A card on its own is ${PRICES.card}. Extra cards in Lebanon: ${PRICES.extraCard} each,
+            or ${PRICES.fiveCards} for five.
           </p>
         ) : null}
-        <CardShippingNote
-          className="mt-4 max-w-3xl bg-kb-white"
-          isLebanon={isLebanon}
-        />
+        <CardShippingNote className="mt-4 max-w-3xl bg-kb-white" isLebanon={isLebanon} />
       </Section>
 
       <Section className="grid gap-10 md:grid-cols-2">
@@ -137,16 +168,24 @@ function Page() {
           <H2>The small print, in plain words</H2>
           <ul className="mt-6 space-y-3 text-lg leading-8 text-kb-stone">
             <Fact>
-              Kabsi Pro is refundable in full within 14 days of the plan starting. Cards aren't.
+              The trial is 14 days and needs no card (30 days if a partner sent you). It starts when
+              Kabsi's access to your Google profile works.
             </Fact>
             <Fact>
-              When a plan ends, reply drafts, weekly posts, Listing Shield and reports stop. Your
-              card and review link keep working.
+              Monthly plans can be cancelled at any time. Yearly plans are refundable in full within
+              14 days of the plan starting. Cards aren't.
             </Fact>
             <Fact>
-              Renewing early adds the new period after the current one. You don't lose days.
+              When a trial or plan ends, Replies drafts, Profile Care, Listing Shield and the Monday
+              Report stop. Your Review Link and Card keep working.
             </Fact>
-            <Fact>One plan covers one Google profile.</Fact>
+            <Fact>
+              Paying early adds the new period after the current one. You don't lose days.
+            </Fact>
+            <Fact>
+              One plan covers one Google profile. Extra locations are ${PRICES.extraLocationMonthly}{" "}
+              a month or ${PRICES.extraLocationYearly} a year.
+            </Fact>
             <Fact>
               The NFC card is optional. You can use Kabsi fully with a review link and QR code.
               Outside Lebanon, Kabsi Pro is the same price and works the same way; only the card
@@ -187,6 +226,9 @@ function Plan({
   per,
   features,
   highlight = false,
+  cta,
+  note,
+  toggle,
 }: {
   name: string;
   icon: ReactNode;
@@ -194,6 +236,9 @@ function Plan({
   per: string;
   features: string[];
   highlight?: boolean;
+  cta: string;
+  note?: string;
+  toggle?: ReactNode;
 }) {
   return (
     <div
@@ -208,6 +253,8 @@ function Plan({
       </div>
       <p className="mt-5 font-display text-6xl leading-none">${price}</p>
       <p className="mt-2 text-sm text-kb-stone">{per}</p>
+      {toggle}
+      {note ? <p className="mt-3 text-sm font-medium text-kb-ink">{note}</p> : null}
       <ul className="mt-6 flex-1 space-y-3">
         {features.map((f) => (
           <li key={f} className="flex gap-3 text-[15px] leading-6">
@@ -217,7 +264,7 @@ function Plan({
         ))}
       </ul>
       <Button asChild className="mt-8 w-full" variant={highlight ? "default" : "outline"}>
-        <Link to="/start">Get early access</Link>
+        <Link to="/start">{cta}</Link>
       </Button>
     </div>
   );
