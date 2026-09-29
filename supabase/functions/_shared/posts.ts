@@ -15,9 +15,10 @@ export type PostLoc = {
   id: string; name: string; status: string; place_id: string | null; time_zone: string;
   google_account_id: string | null; google_location_id: string | null; knowledge_card: Record<string, unknown>;
   category: string | null; category_label: string | null; area: string | null; post_slot: string | null;
+  concierge?: boolean;
 };
 export const POST_LOC_COLUMNS =
-  "id, name, status, place_id, time_zone, google_account_id, google_location_id, knowledge_card, category, category_label, area, post_slot";
+  "id, name, status, place_id, time_zone, google_account_id, google_location_id, knowledge_card, category, category_label, area, post_slot, concierge";
 
 // Professional services post early in the week, shops and dining before the weekend.
 const PRO = /(doctor|dentist|dental|clinic|hospital|medical|physio|chiropract|lawyer|legal|attorney|notary|account|insurance|real_estate|consult|agency|corporate|office|school|university|bank|financ|veterinar|therap|psycholog|architect|engineer|laborator)/;

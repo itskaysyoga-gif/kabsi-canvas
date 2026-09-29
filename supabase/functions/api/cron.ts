@@ -3,17 +3,45 @@
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 import { dueTrialEmail, localDateHour, type TrialStage } from "../_shared/plans.ts";
 import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google.ts";
-import { activeLocations, draftPending, notifyLocation, syncLocation } from "../_shared/reviews.ts";
+import { activeLocations, draftPending, notifyLocation, syncableLocations, syncLocation } from "../_shared/reviews.ts";
+import { CONCIERGE_COPY } from "../_shared/concierge.ts";
 import { snapshotRatings, weeklyReports } from "../_shared/report.ts";
 import { shieldCheck } from "../_shared/shield.ts";
+
+// Early access (D267): staff accepted the invitation by hand and stamped access, so tell the owner. The dedupe key
+// is the same as the normal "access granted" email, so nobody gets both.
+async function conciergeAccessEmails() {
+  const db = admin();
+  const { data } = await db.from("locations").select("id, name").eq("concierge", true)
+    .gt("access_granted_at", new Date(Date.now() - 2 * 86_400_000).toISOString());
+  let n = 0;
+  for (const l of data ?? []) {
+    for (const to of await ownerEmails(l.id)) {
+      const r = await sendEmail({
+        kind: "access_granted", to, locationId: l.id, dedupeKey: `access_granted:${l.id}:${to}`,
+        subject: `Kabsi is connected to ${l.name}`,
+        html: emailLayout({
+          preheader: "Early access is on.", title: "You're connected",
+          bodyHtml: `<p style="margin:0 0 16px 0;">Our team accepted your invitation for <strong>${esc(l.name)}</strong>.</p><p style="margin:0 0 20px 0;">${esc(CONCIERGE_COPY.banner)} When a new review arrives you'll get an email with a reply ready. You approve every word.</p>`,
+          button: { label: "Open Kabsi", url: `${APP_URL}/app` },
+          note: "You can remove Kabsi at any time from your Google profile under People and access.",
+        }),
+        text: `Our team accepted your invitation for ${l.name}.\n\n${CONCIERGE_COPY.banner} When a new review arrives you'll get an email with a reply ready. You approve every word.\n\nOpen Kabsi: ${APP_URL}/app`,
+      }).catch((e) => captureError("cron-tick", e, { job: "access", location: l.id }));
+      if (r && "sent" in r) n++;
+    }
+  }
+  return n;
+}
 
 // Job: Google access. Owner invited the Kabsi business group as Manager → mark access granted, refresh status, email the owner.
 async function accessJob() {
   const db = admin();
   const { data: pending } = await db.from("locations")
     .select("id, name, address, place_id, consent_at")
-    .eq("status", "access_pending").is("access_granted_at", null);
-  if (!pending?.length) return { pending: 0, granted: 0 };
+    .eq("status", "access_pending").is("access_granted_at", null).eq("concierge", false);
+  const told = await conciergeAccessEmails();
+  if (!pending?.length) return { pending: 0, granted: 0, concierge_told: told };
 
   let matches: { id: string; accountId: string; locationId: string }[] = [];
   let accepted = 0;
@@ -81,7 +109,7 @@ async function syncJob() {
   const db = admin();
   let added = 0, lost = 0;
   const failed: string[] = [];
-  for (const loc of await activeLocations()) {
+  for (const loc of await syncableLocations()) {
     try {
       added += await syncLocation(loc);
       if (loc.access_error_since) await db.from("locations").update({ access_error_since: null }).eq("id", loc.id);

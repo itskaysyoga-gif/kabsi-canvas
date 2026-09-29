@@ -24,10 +24,11 @@ async function view(tok: Token) {
       change: ch && { id: ch.id, field: ch.field, before: (ch.old_value as { display?: string })?.display ?? "", after: (ch.new_value as { display?: string })?.display ?? "", state: ch.state },
     };
   }
-  const { data: rv } = await db.from("reviews").select("id, reviewer_name, star_rating, comment, state, urgency, existing_reply, locations(name)").eq("id", tok.target_id).single();
+  const { data: rv } = await db.from("reviews").select("id, reviewer_name, star_rating, comment, state, urgency, existing_reply, locations(name, concierge)").eq("id", tok.target_id).single();
   const { data: draft } = await db.from("reply_drafts").select("body, safety_ok").eq("review_id", tok.target_id).order("version", { ascending: false }).limit(1).maybeSingle();
   return {
     action: tok.action, business: (rv?.locations as unknown as { name: string } | null)?.name ?? "",
+    concierge: (rv?.locations as unknown as { concierge: boolean } | null)?.concierge === true,
     review: rv && { id: rv.id, reviewer: rv.reviewer_name, rating: rv.star_rating, comment: rv.comment, state: rv.state, urgent: rv.urgency === "urgent", reply: rv.existing_reply },
     draft: draft?.safety_ok ? draft.body : null,
   };
@@ -68,7 +69,7 @@ export async function action(req: Request): Promise<Response> {
     }
     if (body.do === "post") {
       const result = await publishReply({ reviewId: tok.target_id, text: body.text ?? "", approvedBy: tok.user_id, channel: "email_link" });
-      return json({ ok: true, done: "posted", state: result.state });
+      return json({ ok: true, done: result.state === "manual_queued" ? "queued_manual" : "posted", state: result.state });
     }
     const newState = body.do === "skip" ? "skipped" : "handled_offline";
     await admin().from("reviews").update({ state: newState }).eq("id", tok.target_id).in("state", ["new", "drafted", "blocked"]);
