@@ -217,7 +217,7 @@ function Plan({
         ))}
       </ul>
       <Button asChild className="mt-8 w-full" variant={highlight ? "default" : "outline"}>
-        <Link to="/start">Get set up</Link>
+        <Link to="/start">Get early access</Link>
       </Button>
     </div>
   );

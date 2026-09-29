@@ -123,7 +123,7 @@ function Page() {
                 </p>
                 <Button asChild className="mt-5 w-full">
                   <Link to="/start">
-                    Get set up <ArrowRight />
+                    Get early access <ArrowRight />
                   </Link>
                 </Button>
               </div>
