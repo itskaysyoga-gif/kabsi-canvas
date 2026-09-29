@@ -7,6 +7,13 @@ import { Input } from "@/components/ui/input";
 import { CopyButton } from "@/components/shared/copy-button";
 import { supabase, supabaseUrl } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
+import {
+  loadPlanSummary,
+  planOptions,
+  PLAN_NAMES,
+  type PaidKind,
+  type PlanSummary,
+} from "@/lib/plans";
 import { daysUntil } from "@/lib/dashboard";
 import { BINANCE_PAY_ID, USDT_TRC20, money, shortDate } from "@/lib/partner";
 import { track } from "@/lib/telemetry";
@@ -22,11 +29,7 @@ export const Route = createFileRoute("/_authenticated/app/plan")({
   component: PlanPage,
 });
 
-type Item = "pro_6m" | "pro_12m";
-const OPTIONS: { key: Item; price: number; period: string; perMonth: string }[] = [
-  { key: "pro_6m", price: 75, period: "6 months", perMonth: "$12.50 a month" },
-  { key: "pro_12m", price: 120, period: "12 months", perMonth: "$10 a month" },
-];
+type Item = PaidKind;
 type PlanRow = {
   id: string;
   kind: string;
@@ -116,12 +119,10 @@ async function sendClaim(locationId: string, item: Item, network: string, txRef:
 }
 
 const ITEM_NAME: Record<string, string> = {
-  pro_6m: "Kabsi Pro · 6 months",
-  pro_12m: "Kabsi Pro · 12 months",
+  ...PLAN_NAMES,
   card: "Card",
   cards_5: "5 cards",
   extra_card: "Extra card",
-  partner: "Kabsi Pro · through your partner",
 };
 const METHOD: Record<string, string> = { cash: "Cash", whish: "Whish", omt: "OMT", usdt: "USDT" };
 
@@ -133,7 +134,13 @@ function PlanPage() {
     queryFn: () => loadPlan(loc!.id),
     enabled: !!loc,
   });
+  const summaryQ = useQuery({
+    queryKey: ["plan-summary", loc?.id],
+    queryFn: () => loadPlanSummary(loc!.id),
+    enabled: !!loc,
+  });
   const d = data.data;
+  const sum = summaryQ.data;
   const left = daysUntil(d?.paidUntil ?? null);
 
   return (
@@ -142,17 +149,19 @@ function PlanPage() {
       <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Settings</p>
       <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Plan</h1>
       {loc ? <p className="mt-2 text-kb-stone">{loc.name}</p> : null}
-      {location.isLoading || data.isLoading ? <p className="mt-6 text-kb-stone">Loading…</p> : null}
+      {location.isLoading || data.isLoading || summaryQ.isLoading ? (
+        <p className="mt-6 text-kb-stone">Loading…</p>
+      ) : null}
       {!location.isLoading && !loc ? (
         <Button asChild className="mt-6">
           <Link to="/start">Add your business</Link>
         </Button>
       ) : null}
-      {data.isError ? (
+      {data.isError || summaryQ.isError ? (
         <p className="mt-6 text-kb-red">Couldn't load your plan. Refresh the page.</p>
       ) : null}
 
-      {loc?.partner_id ? (
+      {sum?.partner_covered ? (
         <section className="mt-7 rounded-large bg-kb-white p-6 shadow-kb sm:p-8">
           <p className="text-sm font-medium text-kb-stone">Your plan</p>
           <p className="mt-1 text-2xl font-bold">Kabsi Pro through your partner</p>
@@ -162,13 +171,53 @@ function PlanPage() {
         </section>
       ) : null}
 
-      {loc && !loc.partner_id && d ? (
+      {loc && sum && !sum.partner_covered && d ? (
         <>
           {/* Current plan */}
           <section className="mt-7 overflow-hidden rounded-large bg-kb-white shadow-kb">
             <div className="p-6 sm:p-8">
               <p className="text-sm font-medium text-kb-stone">Your plan</p>
-              {d.current ? (
+              {sum.tier === "trial" && sum.plan ? (
+                <>
+                  <div className="mt-1 flex flex-wrap items-center gap-3">
+                    <p className="text-2xl font-bold">Free trial</p>
+                    <span className="rounded-pill bg-kb-green/10 px-2.5 py-1 text-xs font-bold text-kb-green">
+                      Active
+                    </span>
+                  </div>
+                  <p className="mt-2 text-kb-stone">
+                    Your trial runs until{" "}
+                    <span className="font-bold text-kb-ink">{shortDate(sum.plan.last_day)}</span>
+                    {trialDaysLeft(sum) !== null ? ` · ${trialDaysLeft(sum)} days left` : ""}
+                  </p>
+                  {sum.queued.length ? (
+                    <p className="mt-3 text-sm text-kb-stone">
+                      Already paid: {sum.queued.map((q) => ITEM_NAME[q.kind]).join(", ")}, starts{" "}
+                      {shortDate(sum.queued[0]!.starts_at)}. Nothing stops when the trial ends.
+                    </p>
+                  ) : (
+                    <p className="mt-3 text-sm leading-6 text-kb-stone">
+                      Choose a plan below before then so nothing stops. If you don't, your business
+                      moves to Free: Replies drafts, Profile Care, Listing Shield and the Monday
+                      Report pause, and your Review Link and Card keep working.
+                    </p>
+                  )}
+                </>
+              ) : sum.tier === "free" && !d.paidWaiting ? (
+                <>
+                  <div className="mt-1 flex flex-wrap items-center gap-3">
+                    <p className="text-2xl font-bold">Free</p>
+                    <span className="rounded-pill bg-kb-sand px-2.5 py-1 text-xs font-bold text-kb-stone">
+                      Active
+                    </span>
+                  </div>
+                  <p className="mt-2 leading-7 text-kb-stone">
+                    Your Review Link and Card keep working. Replies drafts, Profile Care, Listing
+                    Shield and the Monday Report are paused. Choose a plan below to turn them back
+                    on.
+                  </p>
+                </>
+              ) : d.current ? (
                 <>
                   <div className="mt-1 flex flex-wrap items-center gap-3">
                     <p className="text-2xl font-bold">{ITEM_NAME[d.current.kind] ?? "Kabsi Pro"}</p>
@@ -220,11 +269,11 @@ function PlanPage() {
 
           <Pay
             locationId={loc.id}
-            renew={!!d.current || !!d.paidWaiting}
+            renew={sum.tier === "pro" || sum.tier === "trial" || !!d.paidWaiting}
+            summary={sum}
             defaultItem={
-              (d.pending?.kind as Item | undefined) ??
-              (d.current?.kind as Item | undefined) ??
-              "pro_12m"
+              [d.pending?.kind, d.current?.kind].find((k) => sum.offer.includes(k as Item)) as
+                Item | undefined
             }
             claim={d.claims[0] ?? null}
             onDone={() => data.refetch()}
@@ -260,6 +309,10 @@ function PlanPage() {
   );
 }
 
+function trialDaysLeft(s: PlanSummary): number | null {
+  return s.plan ? daysUntil(s.plan.ends_at) : null;
+}
+
 function Progress({ start, end }: { start: string; end: string }) {
   const s = Date.parse(start);
   const e = Date.parse(end);
@@ -280,23 +333,26 @@ function Progress({ start, end }: { start: string; end: string }) {
 function Pay({
   locationId,
   renew,
+  summary,
   defaultItem,
   claim,
   onDone,
 }: {
   locationId: string;
   renew: boolean;
-  defaultItem: Item;
+  summary: PlanSummary;
+  defaultItem: Item | undefined;
   claim: Claim | null;
   onDone: () => unknown;
 }) {
   const queryClient = useQueryClient();
-  const [item, setItem] = useState<Item>(defaultItem === "pro_6m" ? "pro_6m" : "pro_12m");
+  const options = planOptions(summary);
+  const [item, setItem] = useState<Item>(defaultItem ?? options[0]?.key ?? "lebanon_yearly");
   const [network, setNetwork] = useState<"trc20" | "binance_pay">("trc20");
   const [tx, setTx] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const chosen = OPTIONS.find((o) => o.key === item)!;
+  const chosen = options.find((o) => o.key === item) ?? options[0]!;
 
   if (claim?.status === "pending") {
     return (
@@ -319,6 +375,7 @@ function Pay({
       track("payment_recorded", { location_id: locationId, plan: item, channel: "usdt_claim" });
       setTx("");
       await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      await queryClient.invalidateQueries({ queryKey: ["plan-summary"] });
       await onDone();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -342,7 +399,7 @@ function Pay({
       ) : null}
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        {OPTIONS.map((o) => (
+        {options.map((o) => (
           <button
             key={o.key}
             type="button"
@@ -361,11 +418,8 @@ function Pay({
               </span>
             ) : null}
             <span className="block font-display text-4xl leading-none">${o.price}</span>
-            <span className="mt-2 block font-bold">Kabsi Pro, {o.period}</span>
-            <span className="block text-sm text-kb-stone">
-              {o.perMonth}
-              {renew ? "" : " · card included in Lebanon"}
-            </span>
+            <span className="mt-2 block font-bold">{o.title}</span>
+            <span className="block text-sm text-kb-stone">{o.note}</span>
           </button>
         ))}
       </div>

@@ -1,6 +1,7 @@
 // cron-tick: internal, every 5 minutes (pg_cron → public.call_internal('cron-tick')).
 // Each job decides what is due by looking at data, never at the clock alone, and is safe to run twice.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
+import { dueTrialEmail, localDateHour, type TrialStage } from "../_shared/plans.ts";
 import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google.ts";
 import { activeLocations, draftPending, notifyLocation, syncLocation } from "../_shared/reviews.ts";
 import { snapshotRatings, weeklyReports } from "../_shared/report.ts";
@@ -46,10 +47,13 @@ async function accessJob() {
     if (!updated) continue;
     granted++;
     const { data: status } = await db.rpc("refresh_location_status", { p_location: m.id });
+    // A free trial starts with access (Q05): say when it ends, in the business's own time zone.
+    const { data: trial } = await db.from("plans").select("ends_at, locations(time_zone)").eq("location_id", m.id).eq("kind", "trial").eq("status", "active").maybeSingle();
+    const trialLine = trial ? ` Your free trial runs until ${formatDay(localDateHour(new Date(new Date(trial.ends_at).getTime() - 1000), (trial.locations as unknown as { time_zone: string | null } | null)?.time_zone ?? "UTC").date)}.` : "";
     for (const to of await ownerEmails(m.id)) {
       const name = esc(updated.name);
       const next = status === "active"
-        ? "Kabsi is now watching your reviews. When the next one arrives you'll get an email with a reply ready."
+        ? `Kabsi is now watching your reviews. When the next one arrives you'll get an email with a reply ready.${trialLine}`
         : "One step left: your plan. As soon as it's confirmed, Kabsi starts drafting replies to your reviews.";
       await sendEmail({
         kind: "access_granted", to, locationId: m.id, dedupeKey: `access_granted:${m.id}:${to}`,
@@ -199,9 +203,51 @@ async function deletionsJob() {
   return { notices, deleted };
 }
 
+const formatDay = (ymd: string) => new Date(`${ymd}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+
+// Job: free trial reminders, 7 days, 1 day and the last day (Q05). Sent from 09:00 local time; one per stage per
+// address (the emails table's dedupe_key makes re-runs safe). This is a billing notice, so a pause on other emails
+// does not stop it. Nothing is sent when a paid plan or a partner already continues the business.
+const TRIAL_COPY: Record<TrialStage, { subject: (d: string) => string; lead: (name: string, d: string) => string }> = {
+  d7: { subject: (d) => `Your Kabsi free trial ends on ${d}`, lead: (n, d) => `Your free trial for <strong>${n}</strong> runs until ${d}.` },
+  d1: { subject: () => "Your Kabsi free trial ends tomorrow", lead: (n, d) => `Your free trial for <strong>${n}</strong> ends tomorrow, ${d}.` },
+  d0: { subject: () => "Your Kabsi free trial ends today", lead: (n) => `Today is the last day of your free trial for <strong>${n}</strong>.` },
+};
+async function trialsJob() {
+  const db = admin();
+  const { data, error } = await db.rpc("trial_reminder_candidates");
+  if (error) throw error;
+  let reminders = 0;
+  for (const c of (data ?? []) as { plan_id: string; location_id: string; name: string; time_zone: string; last_day: string; continues: boolean }[]) {
+    const now = localDateHour(new Date(), c.time_zone);
+    const { data: done } = await db.from("emails").select("kind").eq("location_id", c.location_id).like("dedupe_key", `trial_%:${c.plan_id}:%`);
+    const sent = (done ?? []).map((r) => String(r.kind).replace("trial_", "")) as TrialStage[];
+    const stage = dueTrialEmail(c.last_day, now.date, now.hour, sent, c.continues);
+    if (!stage) continue;
+    const day = formatDay(c.last_day);
+    const copy = TRIAL_COPY[stage];
+    const body = `${copy.lead(esc(c.name), day)} After that the business moves to Free: Replies drafts, Profile Care, Listing Shield and the Monday Report stop. Your Review Link and Card keep working.`;
+    const plain = `${copy.lead(c.name, day).replace(/<\/?strong>/g, "")} After that the business moves to Free: Replies drafts, Profile Care, Listing Shield and the Monday Report stop. Your Review Link and Card keep working.`;
+    for (const to of await ownerEmails(c.location_id)) {
+      await sendEmail({
+        kind: `trial_${stage}`, to, locationId: c.location_id, dedupeKey: `trial_${stage}:${c.plan_id}:${to}`,
+        subject: copy.subject(day),
+        html: emailLayout({
+          preheader: "Choose a plan to keep everything going.", title: "Your free trial",
+          bodyHtml: `<p style="margin:0 0 16px 0;">${body}</p><p style="margin:0 0 20px 0;">To keep everything going, choose a plan before the trial ends.</p>`,
+          button: { label: "Choose a plan", url: `${APP_URL}/app/plan` },
+        }),
+        text: `${plain}\n\nTo keep everything going, choose a plan before the trial ends.\n\nChoose a plan: ${APP_URL}/app/plan`,
+      }).catch((e) => captureError("cron-tick", e, { job: "trials", location: c.location_id }));
+    }
+    reminders++;
+  }
+  return { reminders };
+}
+
 const JOBS: Record<string, () => Promise<Record<string, unknown>>> = {
   access: accessJob, sync: syncJob, draft: draftJob, notify: notifyJob, ratings: ratingsJob, weekly: weeklyJob, shield: shieldJob,
-  deletions: deletionsJob,
+  deletions: deletionsJob, trials: trialsJob,
 };
 
 export async function cronTick(req: Request): Promise<Response> {

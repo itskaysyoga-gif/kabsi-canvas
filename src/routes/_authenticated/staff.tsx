@@ -31,8 +31,9 @@ type Row = {
   access_granted_at: string | null;
 };
 const ITEMS = [
-  { value: "pro_6m", label: "Pro 6 months", price: 75 },
-  { value: "pro_12m", label: "Pro 12 months", price: 120 },
+  { value: "lebanon_yearly", label: "Lebanon bundle, 12 months", price: 120 },
+  { value: "pro_yearly", label: "Pro yearly", price: 190 },
+  { value: "pro_monthly", label: "Pro monthly", price: 19 },
   { value: "card", label: "Card", price: 20 },
 ] as const;
 const METHODS = ["cash", "whish", "omt", "usdt"] as const;
@@ -89,8 +90,8 @@ function StaffPage() {
 function LocationRow({ row }: { row: Row }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [item, setItem] = useState<(typeof ITEMS)[number]["value"]>("pro_6m");
-  const [amount, setAmount] = useState("75");
+  const [item, setItem] = useState<(typeof ITEMS)[number]["value"]>("lebanon_yearly");
+  const [amount, setAmount] = useState("120");
   const [method, setMethod] = useState<(typeof METHODS)[number]>("cash");
   const [reference, setReference] = useState("");
   const [busy, setBusy] = useState(false);
@@ -114,6 +115,17 @@ function LocationRow({ row }: { row: Row }) {
     await queryClient.invalidateQueries({ queryKey: ["my-location"] });
   }
 
+  async function grantTrial() {
+    setBusy(true);
+    setMsg("");
+    const { error } = await supabase.rpc("staff_grant_trial", { p_location: row.id });
+    setBusy(false);
+    if (error) return setMsg(`No trial given: ${error.message}`);
+    setMsg("Free trial started.");
+    await queryClient.invalidateQueries({ queryKey: ["staff-locations"] });
+    await queryClient.invalidateQueries({ queryKey: ["my-location"] });
+  }
+
   return (
     <div className="rounded-large bg-kb-white p-5 shadow-kb">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -125,9 +137,21 @@ function LocationRow({ row }: { row: Row }) {
             {row.access_granted_at ? " · Google access ✓" : ""}
           </p>
         </div>
-        <Button size="compact" variant="outline" onClick={() => setOpen(!open)}>
-          Record payment
-        </Button>
+        <div className="flex gap-2">
+          {row.access_granted_at ? (
+            <Button
+              size="compact"
+              variant="outline"
+              disabled={busy}
+              onClick={() => void grantTrial()}
+            >
+              Give free trial
+            </Button>
+          ) : null}
+          <Button size="compact" variant="outline" onClick={() => setOpen(!open)}>
+            Record payment
+          </Button>
+        </div>
       </div>
       {open ? (
         <div className="mt-4 grid gap-3 sm:grid-cols-4">
