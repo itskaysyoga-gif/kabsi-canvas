@@ -46,7 +46,7 @@ export type Vertical = {
   /** One plain answer to "what does Kabsi do for this kind of business" (read by people and AI search). */
   summary: string;
   /** Section headings, unique per page. */
-  headings: { pains: string; example: string; helps: string; card: string };
+  headings: { pains: string; example: string; helps: string };
   pains: { icon: ReactNode; title: string; text: string }[];
   example: {
     label: string;
@@ -83,7 +83,6 @@ export const VERTICALS: Vertical[] = [
       pains: "Service comes first. Google comes later.",
       example: "A reply for every guest, in their language.",
       helps: "What Kabsi handles for your restaurant.",
-      card: "A card on every table.",
     },
     pains: [
       {
@@ -148,7 +147,7 @@ export const VERTICALS: Vertical[] = [
     ],
     care: {
       title: "Ask every guest the same way",
-      text: "Offer the card to everyone, not only happy tables, and never offer a free dessert or discount for a review. Google doesn't allow it and can remove those reviews.",
+      text: "Share the link with every table, not only the happy ones, and never offer a free dessert or discount for a review. Google doesn't allow it and can remove those reviews.",
     },
     guide: {
       slug: "how-to-respond-to-negative-google-reviews",
@@ -187,7 +186,6 @@ export const VERTICALS: Vertical[] = [
       pains: "Busy mornings, no time for Google.",
       example: "Regulars write in many languages.",
       helps: "What Kabsi handles for your café or bakery.",
-      card: "A card by the coffee machine.",
     },
     pains: [
       {
@@ -252,7 +250,7 @@ export const VERTICALS: Vertical[] = [
     ],
     care: {
       title: "Ask every customer the same way",
-      text: "Offer the card to everyone, and never give a free coffee or pastry for a review. Google doesn't allow it and can remove those reviews.",
+      text: "Share the link with every customer, and never give a free coffee or pastry for a review. Google doesn't allow it and can remove those reviews.",
     },
     guide: { slug: "google-review-link-and-qr-code", title: "Your Google review link and QR code" },
     faqs: [
@@ -287,7 +285,6 @@ export const VERTICALS: Vertical[] = [
       pains: "Patients read your reviews before they book.",
       example: "Calm replies that protect patient privacy.",
       helps: "What Kabsi handles for your clinic.",
-      card: "A card at reception.",
     },
     pains: [
       {
@@ -386,7 +383,6 @@ export const VERTICALS: Vertical[] = [
       pains: "Your hands are busy. Your reviews still need answers.",
       example: "Thank the right stylist, by name.",
       helps: "What Kabsi handles for your salon.",
-      card: "A card at every station.",
     },
     pains: [
       {
@@ -450,7 +446,7 @@ export const VERTICALS: Vertical[] = [
     ],
     care: {
       title: "Ask every client the same way",
-      text: "Offer the card to everyone, and never trade a discount or a free treatment for a review. Google doesn't allow it and can remove those reviews.",
+      text: "Share the link with every client, and never trade a discount or a free treatment for a review. Google doesn't allow it and can remove those reviews.",
     },
     guide: { slug: "google-review-link-and-qr-code", title: "Your Google review link and QR code" },
     faqs: [
@@ -485,7 +481,6 @@ export const VERTICALS: Vertical[] = [
       pains: "Guests from everywhere, reviews in every language.",
       example: "A warm reply in the guest's own language.",
       helps: "What Kabsi handles for your hotel.",
-      card: "A card at check-out.",
     },
     pains: [
       {
@@ -584,7 +579,6 @@ export const VERTICALS: Vertical[] = [
       pains: "Trust is everything for a garage.",
       example: "Calm replies, even when the bill is disputed.",
       helps: "What Kabsi handles for your garage.",
-      card: "A card where customers collect their keys.",
     },
     pains: [
       {
@@ -648,7 +642,7 @@ export const VERTICALS: Vertical[] = [
     ],
     care: {
       title: "Ask every customer the same way",
-      text: "Offer the card to everyone who collects a car, and never trade a discount for a review. Google doesn't allow it and can remove those reviews.",
+      text: "Share the link with every customer who collects a car, and never trade a discount for a review. Google doesn't allow it and can remove those reviews.",
     },
     guide: {
       slug: "how-to-respond-to-negative-google-reviews",
@@ -686,7 +680,6 @@ export const VERTICALS: Vertical[] = [
       pains: "Shoppers check Google before they visit.",
       example: "A friendly reply for every shopper.",
       helps: "What Kabsi handles for your shop.",
-      card: "A card at the till.",
     },
     pains: [
       {
@@ -750,7 +743,7 @@ export const VERTICALS: Vertical[] = [
     ],
     care: {
       title: "Ask every customer the same way",
-      text: "Offer the card at every checkout, and never trade a discount or a gift for a review. Google doesn't allow it and can remove those reviews.",
+      text: "Share the link at every checkout, and never trade a discount or a gift for a review. Google doesn't allow it and can remove those reviews.",
     },
     guide: { slug: "google-review-link-and-qr-code", title: "Your Google review link and QR code" },
     faqs: [
@@ -785,7 +778,6 @@ export const VERTICALS: Vertical[] = [
       pains: "Busy seasons, lots of orders, one phone.",
       example: "A thank-you for every bouquet review.",
       helps: "What Kabsi handles for your flower shop.",
-      card: "A card with every bouquet.",
     },
     pains: [
       {
@@ -849,7 +841,7 @@ export const VERTICALS: Vertical[] = [
     ],
     care: {
       title: "Ask every customer the same way",
-      text: "Include the card with every order, and never offer a discount or free flowers for a review. Google doesn't allow it and can remove those reviews.",
+      text: "Include the link with every order, and never offer a discount or free flowers for a review. Google doesn't allow it and can remove those reviews.",
     },
     guide: {
       slug: "how-to-reply-to-google-reviews",
