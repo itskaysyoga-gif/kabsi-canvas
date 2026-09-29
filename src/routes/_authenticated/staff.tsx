@@ -10,6 +10,8 @@ import { amStaff } from "@/lib/reviews";
 import { PartnersPanel } from "@/components/staff/partners-panel";
 import { OpsPanel } from "@/components/staff/ops-panel";
 import { ChatsPanel } from "@/components/staff/chats-panel";
+import { ConciergePanel } from "@/components/staff/concierge-panel";
+import { convertConcierge, setConcierge } from "@/lib/concierge";
 import { ClipboardCheck as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
 
@@ -29,6 +31,7 @@ type Row = {
   country: string | null;
   created_at: string;
   access_granted_at: string | null;
+  concierge: boolean;
 };
 const ITEMS = [
   { value: "lebanon_yearly", label: "Lebanon bundle, 12 months", price: 120 },
@@ -41,7 +44,7 @@ const METHODS = ["cash", "whish", "omt", "usdt"] as const;
 async function allLocations(): Promise<Row[]> {
   const { data, error } = await supabase
     .from("locations")
-    .select("id, name, status, onboarding_step, country, created_at, access_granted_at")
+    .select("id, name, status, onboarding_step, country, created_at, access_granted_at, concierge")
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) throw new Error(error.message);
@@ -66,6 +69,7 @@ function StaffPage() {
         ) : null}
         {staff.data ? (
           <>
+            <ConciergePanel />
             <ChatsPanel />
             <PartnersPanel />
             <OpsPanel />
@@ -115,6 +119,37 @@ function LocationRow({ row }: { row: Row }) {
     await queryClient.invalidateQueries({ queryKey: ["my-location"] });
   }
 
+  async function conciergeToggle(on: boolean) {
+    setBusy(true);
+    setMsg("");
+    try {
+      await setConcierge(row.id, on);
+      setMsg(
+        on
+          ? "Early access is on. Accept the invitation from the Concierge list."
+          : "Early access is off.",
+      );
+      await queryClient.invalidateQueries({ queryKey: ["staff-locations"] });
+      await queryClient.invalidateQueries({ queryKey: ["concierge-queue"] });
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : String(e));
+    }
+    setBusy(false);
+  }
+  async function convert() {
+    setBusy(true);
+    setMsg("");
+    try {
+      await convertConcierge(row.id);
+      setMsg("Converted. Kabsi will look for the real Google invitation.");
+      await queryClient.invalidateQueries({ queryKey: ["staff-locations"] });
+      await queryClient.invalidateQueries({ queryKey: ["concierge-queue"] });
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : String(e));
+    }
+    setBusy(false);
+  }
+
   async function grantTrial() {
     setBusy(true);
     setMsg("");
@@ -137,8 +172,21 @@ function LocationRow({ row }: { row: Row }) {
             {row.access_granted_at ? " · Google access ✓" : ""}
           </p>
         </div>
-        <div className="flex gap-2">
-          {row.access_granted_at ? (
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="compact"
+            variant="outline"
+            disabled={busy}
+            onClick={() => void conciergeToggle(!row.concierge)}
+          >
+            {row.concierge ? "Concierge off" : "Concierge on"}
+          </Button>
+          {row.concierge ? (
+            <Button size="compact" variant="outline" disabled={busy} onClick={() => void convert()}>
+              Convert to Google access
+            </Button>
+          ) : null}
+          {row.access_granted_at && !row.concierge ? (
             <Button
               size="compact"
               variant="outline"
