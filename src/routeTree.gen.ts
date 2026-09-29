@@ -15,6 +15,7 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as GoogleReviewLinkRouteImport } from './routes/google-review-link'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ManagerStepsRouteImport } from './routes/manager-steps'
 import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -69,6 +70,11 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManagerStepsRoute = ManagerStepsRouteImport.update({
+  id: '/manager-steps',
+  path: '/manager-steps',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartnersRoute = PartnersRouteImport.update({
@@ -210,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/manager-steps': typeof ManagerStepsRoute
   '/partners': typeof PartnersRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -243,6 +250,7 @@ export interface FileRoutesByTo {
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/manager-steps': typeof ManagerStepsRoute
   '/partners': typeof PartnersRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -277,6 +285,7 @@ export interface FileRoutesById {
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/manager-steps': typeof ManagerStepsRoute
   '/partners': typeof PartnersRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -312,6 +321,7 @@ export interface FileRouteTypes {
     | '/google-review-link'
     | '/how-it-works'
     | '/login'
+    | '/manager-steps'
     | '/partners'
     | '/pricing'
     | '/privacy'
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/google-review-link'
     | '/how-it-works'
     | '/login'
+    | '/manager-steps'
     | '/partners'
     | '/pricing'
     | '/privacy'
@@ -378,6 +389,7 @@ export interface FileRouteTypes {
     | '/google-review-link'
     | '/how-it-works'
     | '/login'
+    | '/manager-steps'
     | '/partners'
     | '/pricing'
     | '/privacy'
@@ -413,6 +425,7 @@ export interface RootRouteChildren {
   GoogleReviewLinkRoute: typeof GoogleReviewLinkRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
+  ManagerStepsRoute: typeof ManagerStepsRoute
   PartnersRoute: typeof PartnersRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -467,6 +480,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manager-steps': {
+      id: '/manager-steps'
+      path: '/manager-steps'
+      fullPath: '/manager-steps'
+      preLoaderRoute: typeof ManagerStepsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/partners': {
@@ -713,6 +733,7 @@ const rootRouteChildren: RootRouteChildren = {
   GoogleReviewLinkRoute: GoogleReviewLinkRoute,
   HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
+  ManagerStepsRoute: ManagerStepsRoute,
   PartnersRoute: PartnersRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,

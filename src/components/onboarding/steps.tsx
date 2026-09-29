@@ -273,7 +273,12 @@ export function AccessStep({ location, onChanged }: StepProps) {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-      <Button type="button" variant="outline" className="mt-5 w-full" onClick={shareSteps}>
+      <Button
+        type="button"
+        variant="outline"
+        className="mt-5 min-h-[52px] h-auto w-full whitespace-normal py-3 text-center"
+        onClick={shareSteps}
+      >
         {shareState === "done" ? (
           <Check />
         ) : shareState === "failed" ? (

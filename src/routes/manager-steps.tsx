@@ -72,9 +72,6 @@ function ManagerStepsPage() {
         <p className="mt-8 border-l-4 border-kb-yellow pl-4 leading-7">
           You can remove Kabsi at any time in People and access.
         </p>
-        <p className="mt-10 border-t border-kb-hairline pt-6 text-sm leading-6 text-kb-stone">
-          © Kabsi. Kabsi is independent and not affiliated with Google.
-        </p>
       </section>
     </PublicLayout>
   );
