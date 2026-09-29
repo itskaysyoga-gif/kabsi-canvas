@@ -159,6 +159,8 @@ Deno.serve(async (req) => {
         if (loc.status !== "active" || !loc.google_location_id) return fail("not_active", "This business isn't active yet.", 409);
         const reason = String(b.reason ?? "").trim().slice(0, 120) || null;
         const { data: row, error } = await db.from("special_hours").insert({ location_id: loc.id, start_date: s, end_date: e, closed, open_time: open, close_time: close, reason }).select("id").single();
+        // 23505: the unique index on (location, dates) caught a double click or a repeat of dates already saved.
+        if (error?.code === "23505") return fail("already_saved", "You already saved special hours for these dates. Choose different dates, or change them on Google.", 409);
         if (error) throw error;
         const payload = { start_date: s, end_date: e, closed, open_time: open, close_time: close };
         const { data: pub, error: pe } = await db.from("publications").insert({
