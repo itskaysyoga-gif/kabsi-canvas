@@ -67,6 +67,22 @@ export const FAQ: { q: string; a: string }[] = [
     q: "Can I get a refund?",
     a: "Kabsi Pro is refundable in full within 14 days of the plan starting. Cards aren't refunded.",
   },
+  {
+    q: "Will replying help me show up on Google?",
+    a: "Google's own guidance lists complete and accurate details, up-to-date opening hours, replying to reviews and adding photos among the ways to improve local ranking. Kabsi helps with those jobs. Nobody can promise a ranking, and we don't.",
+  },
+  {
+    q: "How is this different from Google's own AI replies?",
+    a: "Google may offer its own reply suggestions inside Business Profile. Kabsi drafts in the reviewer's language from facts you wrote about your business, checks each draft against your rules, and never posts until you approve the exact text.",
+  },
+  {
+    q: "What can Kabsi do on my profile as a Manager?",
+    a: "Kabsi uses Manager access to read your reviews, post the replies and posts you approve, and watch your listing for unwanted changes. It writes nothing you have not approved. You can remove Kabsi in People and access at any time.",
+  },
+  {
+    q: "Who is behind Kabsi?",
+    a: "Kabsi is an independent product run by Rashid Abou Hamzy. It is not affiliated with Google. You can write to hello@kabsi.co.",
+  },
 ];
 
 export const faqJsonLd = (items = FAQ) => ({

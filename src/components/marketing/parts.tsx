@@ -266,7 +266,7 @@ export function CtaBand({
         </div>
         <Button asChild className="w-full shrink-0 md:w-auto">
           <Link to="/start">
-            Get set up <ArrowRight />
+            Get early access <ArrowRight />
           </Link>
         </Button>
       </div>

@@ -75,14 +75,13 @@ function HomePage() {
               Your Google Business Profile, taken care of.
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-8 text-kb-stone-on-dark">
-              Kabsi drafts a reply to every Google review in your customer's language, keeps your
-              profile fresh, and tells you when your details change. Nothing goes on Google until
-              you tap approve.
+              Kabsi drafts a reply to every new Google review in the reviewer's language. You read
+              it, tap Post, and it goes out. Nothing is posted without your approval.
             </p>
             <div className="mt-9 grid gap-3 sm:flex">
               <Button asChild className="w-full sm:w-auto">
                 <Link to="/start">
-                  Get started <ArrowRight />
+                  Get early access <ArrowRight />
                 </Link>
               </Button>
               <Button

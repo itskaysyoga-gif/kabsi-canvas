@@ -103,7 +103,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                   Log in
                 </Link>
                 <Button asChild size="compact">
-                  <Link to="/start">Get set up</Link>
+                  <Link to="/start">Get early access</Link>
                 </Button>
               </>
             )}
@@ -166,7 +166,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                     </SheetClose>
                     <SheetClose asChild>
                       <Button asChild className="mt-5 w-full">
-                        <Link to="/start">Get set up</Link>
+                        <Link to="/start">Get early access</Link>
                       </Button>
                     </SheetClose>
                   </>

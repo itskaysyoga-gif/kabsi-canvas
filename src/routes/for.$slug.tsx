@@ -95,7 +95,7 @@ function Page() {
         <div className="mt-9 grid gap-3 sm:flex">
           <Button asChild className="w-full sm:w-auto">
             <Link to="/start">
-              Get set up <ArrowRight />
+              Get early access <ArrowRight />
             </Link>
           </Button>
           <Button
