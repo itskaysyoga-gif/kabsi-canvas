@@ -92,7 +92,7 @@ function HomePage() {
               </Button>
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm text-kb-stone-on-dark">
-              {["You approve everything", "Set up in minutes", "Any language"].map((t) => (
+              {["You approve everything", "We email you when access works", "Any language"].map((t) => (
                 <li key={t} className="flex items-center gap-2">
                   <Check className="size-4 text-kb-yellow" aria-hidden="true" />
                   {t}
@@ -268,11 +268,11 @@ function HomePage() {
       {/* How it works */}
       <Section>
         <Eyebrow>How it works</Eyebrow>
-        <H2>Set up in minutes. The last step is always yours.</H2>
+        <H2>Invite Kabsi, then approve every reply.</H2>
         <ol data-stagger="" className="mt-12 grid gap-5 md:grid-cols-3">
           <Step n={1} icon={<UserPlus />} title="Add Kabsi to your Google profile">
             Invite hello@kabsi.co as a Manager, like you'd add a staff member. You can remove it any
-            time.
+            time. We accept your invite and email you as soon as we do.
           </Step>
           <Step n={2} icon={<FileText />} title="Tell Kabsi your facts">
             How you sign off, your hours, what you want mentioned. Replies and posts only use these.

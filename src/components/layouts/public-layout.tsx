@@ -1,6 +1,6 @@
-import { Link, useLocation } from "@tanstack/react-router";
-import { Menu } from "lucide-react";
-import type { ReactNode } from "react";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { LayoutDashboard, LogOut, Menu, UserRound } from "lucide-react";
+import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -15,6 +15,14 @@ import { useSectionRise } from "@/components/marketing/motion";
 import { VERTICALS } from "@/lib/verticals";
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { useAuth } from "@/components/auth/auth-provider";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const links = [
   ["How it works", "/how-it-works"],
@@ -28,7 +36,19 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   useSectionRise(pathname);
   // D265: signed-in owners hitting the marketing site (a bookmark, a shared link) saw "Log
   // in" / "Get set up" as if they had no account — send them back to their dashboard instead.
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [signOutError, setSignOutError] = useState("");
+
+  async function handleSignOut() {
+    setSignOutError("");
+    try {
+      await signOut();
+      await navigate({ to: "/", replace: true });
+    } catch {
+      setSignOutError("Couldn't sign out. Check your connection and try again.");
+    }
+  }
   return (
     <div className="min-h-screen bg-kb-white text-kb-ink">
       <header className="sticky top-0 z-40 border-b border-kb-hairline bg-kb-white/95 backdrop-blur">
@@ -45,9 +65,38 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               </Link>
             ))}
             {loading ? null : user ? (
-              <Button asChild size="compact">
-                <Link to="/app">Dashboard</Link>
-              </Button>
+              <>
+                <Button asChild size="compact">
+                  <Link to="/app">Dashboard</Link>
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="icon" size="icon" aria-label="Open account menu">
+                      <UserRound aria-hidden="true" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-64 rounded-card border-kb-hairline bg-kb-white p-2 shadow-kb"
+                  >
+                    <DropdownMenuLabel className="truncate text-sm font-medium">
+                      {user.email}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-kb-hairline" />
+                    <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2.5 text-base">
+                      <Link to="/app">
+                        <LayoutDashboard aria-hidden="true" /> Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onSelect={() => void handleSignOut()}
+                      className="cursor-pointer rounded-lg py-2.5 text-base"
+                    >
+                      <LogOut aria-hidden="true" /> Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <>
                 <Link to="/login" className="text-sm font-bold text-kb-black">
@@ -86,11 +135,25 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                   </SheetClose>
                 ))}
                 {loading ? null : user ? (
-                  <SheetClose asChild>
-                    <Button asChild className="mt-5 w-full">
-                      <Link to="/app">Dashboard</Link>
-                    </Button>
-                  </SheetClose>
+                  <div className="mt-5 border-t border-kb-hairline pt-5">
+                    <p className="truncate px-3 text-sm font-medium text-kb-stone">{user.email}</p>
+                    <SheetClose asChild>
+                      <Button asChild className="mt-4 w-full">
+                        <Link to="/app">
+                          <LayoutDashboard aria-hidden="true" /> Dashboard
+                        </Link>
+                      </Button>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Button
+                        variant="outline"
+                        className="mt-3 w-full"
+                        onClick={() => void handleSignOut()}
+                      >
+                        <LogOut aria-hidden="true" /> Sign out
+                      </Button>
+                    </SheetClose>
+                  </div>
                 ) : (
                   <>
                     <SheetClose asChild>
@@ -113,6 +176,11 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </Sheet>
         </div>
       </header>
+      {signOutError ? (
+        <p role="alert" className="bg-kb-red px-5 py-2 text-center text-sm font-bold text-kb-white">
+          {signOutError}
+        </p>
+      ) : null}
       <main>{children}</main>
       <footer className="bg-kb-carbon text-kb-white">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16">
