@@ -95,7 +95,7 @@ function ShieldPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Google profile</p>
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Profile</p>
       <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Listing Shield</h1>
       <p className="mt-2 max-w-2xl text-kb-stone">
         Kabsi watches your Google listing and emails you when something changes. Google sometimes

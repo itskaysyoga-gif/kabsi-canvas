@@ -100,7 +100,7 @@ function ReviewsPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Reviews</p>
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Replies</p>
       <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">All reviews</h1>
       <p className="mt-2 text-kb-stone">
         {count
