@@ -79,7 +79,7 @@ const FRIENDLY: Record<string, string> = {
   bad_email: "Enter a valid email.",
   name_required: "Enter the partner's name.",
   already_decided: "This payment was already confirmed or rejected.",
-  partners_handle_check: "Handle: 3–30 lowercase letters, numbers or dashes.",
+  partners_handle_check: "Handle: 3 to 30 lowercase letters, numbers or dashes.",
 };
 export function partnerError(error: unknown) {
   const message = error instanceof Error ? error.message : String(error);

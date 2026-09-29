@@ -40,8 +40,8 @@ const STATE: Record<string, string> = {
 };
 const FILTERS = [
   { key: "all", label: "All" },
-  { key: "low", label: "1–3 stars" },
-  { key: "high", label: "4–5 stars" },
+  { key: "low", label: "1 to 3 stars" },
+  { key: "high", label: "4 to 5 stars" },
   { key: "open", label: "Not replied" },
 ] as const;
 

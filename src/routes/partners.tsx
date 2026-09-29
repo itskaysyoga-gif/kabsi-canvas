@@ -158,7 +158,7 @@ function Point({ icon, title, children }: { icon: ReactNode; title: string; chil
   );
 }
 
-const VOLUMES = ["Just starting", "1–10 businesses", "10–50 businesses", "50+ businesses"];
+const VOLUMES = ["Just starting", "1 to 10 businesses", "10 to 50 businesses", "50+ businesses"];
 
 function LeadForm() {
   const [f, setF] = useState({
