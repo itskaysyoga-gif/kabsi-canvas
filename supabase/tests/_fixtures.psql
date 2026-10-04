@@ -65,8 +65,8 @@ insert into public.publications (location_id, target_type, target_id, payload, a
 values ('00000000-0000-4000-8000-0000000000c1', 'review_reply', '00000000-0000-4000-8000-0000000000e1', '{}', '00000000-0000-4000-8000-0000000000a1', 'dashboard');
 insert into public.rating_snapshots (location_id, taken_on) values ('00000000-0000-4000-8000-0000000000c1', current_date);
 insert into public.special_hours (location_id, start_date, end_date, closed) values ('00000000-0000-4000-8000-0000000000c1', '2026-12-24', '2026-12-24', true);
-insert into public.usdt_claims (id, kind, location_id, item, network, tx_ref)
-values ('00000000-0000-4000-8000-0000000000f5', 'plan', '00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 'trc20', 'victimtx01');
+insert into public.usdt_claims (id, kind, location_id, item, amount_usd, network, tx_ref)
+values ('00000000-0000-4000-8000-0000000000f5', 'plan', '00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 10, 'trc20', 'victimtx01');
 insert into public.weekly_reports (location_id, week_of, data) values ('00000000-0000-4000-8000-0000000000c1', '2026-09-28', '{}');
 insert into public.billing_invoices (id, location_id, item, amount_usd, pay_currency, order_id)
 values ('00000000-0000-4000-8000-0000000000f6', '00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 10, 'usdttrc20', 'victim-order');
