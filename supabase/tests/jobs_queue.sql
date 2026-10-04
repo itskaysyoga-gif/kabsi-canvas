@@ -62,12 +62,14 @@ begin
   perform public.finish_job(p_id, 'worker-1', false, 'google 500 again');
   return (select next_run_at - now() from public.jobs where id = p_id);
 end $$;
-select ok(pg_temp.fail_again((select id from ids where name = 'a')) between interval '48 seconds' and interval '72 seconds',
+-- One call per try, kept in a table (BETWEEN would evaluate the call twice).
+create temp table waits (try integer primary key, wait interval);
+insert into waits select t, pg_temp.fail_again((select id from ids where name = 'a')) from generate_series(2, 5) t order by t;
+select ok((select wait between interval '48 seconds' and interval '72 seconds' from waits where try = 2),
   'the second retry waits about a minute');
-select ok(pg_temp.fail_again((select id from ids where name = 'a')) between interval '96 seconds' and interval '144 seconds',
+select ok((select wait between interval '96 seconds' and interval '144 seconds' from waits where try = 3),
   'the third retry waits about two minutes');
-select ok(pg_temp.fail_again((select id from ids where name = 'a')) > interval '3 minutes', 'the fourth retry waits longer still');
-select pg_temp.fail_again((select id from ids where name = 'a'));
+select ok((select wait > interval '3 minutes' from waits where try = 4), 'the fourth retry waits longer still');
 select is((select row(state, attempts, finished_at is not null)::text from public.jobs where id = (select id from ids where name = 'a')),
   row('dead', 5, true)::text, 'after 5 failed tries the job is dead');
 select is((select count(*) from public.claim_jobs(10, 'worker-3') c where c.id = (select id from ids where name = 'a')), 0::bigint,
@@ -75,6 +77,7 @@ select is((select count(*) from public.claim_jobs(10, 'worker-3') c where c.id =
 select is((select count(*) from public.ops_events where kind = 'job_dead' and dedupe_key = 'job_stopped:' || (select id from ids where name = 'a')),
   1::bigint, 'a dead job raises one alert');
 select isnt(public.enqueue_job('test_job', null, 'test:a'), null, 'the same work can be offered again once the job is dead');
+delete from public.jobs where dedupe_key = 'test:a' and state = 'pending';
 
 -- A handler that rules out a retry, and a worker that stopped mid-job.
 update public.jobs set next_run_at = now() where id = (select id from ids where name = 'later');
