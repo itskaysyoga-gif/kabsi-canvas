@@ -164,5 +164,17 @@ select private.dispatch_tick();
 select is((select count(*) from net.http_request_queue where url like '%/functions/v1/api/dispatch') , 1::bigint,
   'a step at its slot wakes the dispatcher');
 
+-- The watchdog watches the job queue, not kabsi_cron_tick.
+delete from public.ops_events where kind = 'tick_stalled';
+update public.jobs set state = 'succeeded', finished_at = now() - interval '2 minutes' where kind = 'deletions';
+select private.ops_watchdog();
+select is((select count(*) from public.ops_events where kind = 'tick_stalled'), 0::bigint,
+  'a job finished 2 minutes ago: no stall alert, with kabsi_cron_tick gone');
+delete from public.jobs where state = 'succeeded';
+insert into public.jobs (kind, dedupe_key, state, finished_at) values ('test_job', null, 'succeeded', now() - interval '25 minutes');
+select private.ops_watchdog();
+select is((select title from public.ops_events where kind = 'tick_stalled'), ':rotating_light: No job has finished for 20 minutes',
+  'no job finished in 20 minutes raises the stall alert');
+
 select * from finish();
 rollback;

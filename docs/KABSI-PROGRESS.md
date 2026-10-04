@@ -8,7 +8,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25). P0.1-V1 and P0.1-V2 done (31, 32). P0.1-07 (database test suite) done (PR 33). P0.1-08 (database API hardening) merged (PR 35); its After-merge checks partly passed, see Evidence. P0.1-09 (tenant model) merged (PR 36); its After-merge calls checked through RLS as the Yawmiyati owner, the browser smoke still open. P0.1-10 (audit log) merged (PR 37) on Hussein's "merge"; the whole migration is live (table, triggers and feed through the connector, `run_retention` by Hussein in the SQL editor), see Evidence. P0.1-11 done: part A (PR 38) and part B (PR 39) merged, After-merge checks passed. P0.1-10 done (dashboard approval and publication events checked live). P0.1-12a (job queue and dispatcher) merged (PR 40) on Hussein's "merge"; migration fully live (`dispatch_tick` and `kabsi_dispatch` run by Hussein in the SQL editor); After-merge checks passed except the end-to-end mock review and the browser look, see Evidence.
+- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25). P0.1-V1 and P0.1-V2 done (31, 32). P0.1-07 (database test suite) done (PR 33). P0.1-08 (database API hardening) merged (PR 35); its After-merge checks partly passed, see Evidence. P0.1-09 (tenant model) merged (PR 36); its After-merge calls checked through RLS as the Yawmiyati owner, the browser smoke still open. P0.1-10 (audit log) merged (PR 37) on Hussein's "merge"; the whole migration is live (table, triggers and feed through the connector, `run_retention` by Hussein in the SQL editor), see Evidence. P0.1-11 done: part A (PR 38) and part B (PR 39) merged, After-merge checks passed. P0.1-10 done (dashboard approval and publication events checked live). P0.1-12a (job queue and dispatcher) merged (PR 40) on Hussein's "merge"; migration fully live (`dispatch_tick` and `kabsi_dispatch` run by Hussein in the SQL editor); After-merge checks passed except the end-to-end mock review and the browser look, see Evidence. Later the mock review passed, and Hussein checked the Home line in a browser (4 Oct); only the staff Job health look is still open (Rashid). P0.1-12b (rate limiter, circuit breaker, rest of the cron as jobs) is PR 43, open.
 
 ## Rashid's decisions and inputs (plan section 5)
 
@@ -57,8 +57,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-09 | Tenant model: organisations, connections, subscriptions | Opus | merged (36); After-merge calls checked through RLS, browser smoke still open, see Evidence | 36 | 4 Oct 2026 |
 | P0.1-10 | Append-only audit log and the "What Kabsi did" feed source | Opus | done (merged 37; approval and publication events checked live at the start of the P0.1-12a chat; the next `kabsi_retention` run still to read, see After merge) | 37 | 4 Oct 2026 |
 | P0.1-11 | One Google service layer | Opus | done (part A merged 38, part B merged 39; After-merge checks passed) | 38, 39 | 4 Oct 2026 |
-| P0.1-12a | Job queue and dispatcher, review jobs first | Opus | merged (40); migration fully live; After-merge passed (deploy, dispatcher, sync status, no duplicates, mock review end to end); browser look still open, see Evidence | 40, 41 | 4 Oct 2026 |
-| P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | todo | | |
+| P0.1-12a | Job queue and dispatcher, review jobs first | Opus | merged (40); migration fully live; After-merge passed (deploy, dispatcher, sync status, no duplicates, mock review end to end, Home line checked in a browser by Hussein); staff Job health look still open (Rashid), see Evidence | 40, 41 | 4 Oct 2026 |
+| P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | PR open (migration 1 waits for CI and Hussein's "apply"; migration 2 after merge) | 43 | 4 Oct 2026 |
 | P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | todo | | |
 | P0.1-13b | One publication pipeline: posts, photos, hours, profile changes | Opus | todo | | |
 | P0.2-01 | Retention table | Opus | todo | | |
@@ -144,8 +144,14 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-After the P0.1-12a pull request (40) was merged: deploy, `kabsi_dispatch`, sync status, cron-tick hand-over, the no-duplicates check and the mock review end to end passed (see Evidence). Still open:
-- Signed in as the Yawmiyati owner (390 px and 1440 px, a person with a browser): Home shows "Google profile checked ... ago" under the business name; staff `/staff` Job health shows the "Job queue" line.
+After the P0.1-12b pull request (43) is merged (Deploy publishes `api`):
+- Every Edge Function `updated_at` is after the merge; `kabsi_dispatch` keeps finishing `sync_reviews` jobs (`jobs` rows after the deploy, none `dead` or `failed`).
+- Then, on Hussein's "apply" and his go for the unschedule: migration `20261004200100_cron_to_jobs.sql` live. Read back: `cron.job` has `kabsi_dispatch` and no `kabsi_cron_tick`; within 5 minutes `jobs` shows `access_check`, `ratings_snapshot`, `weekly_reports`, `deletions`, `trial_reminders`, `renewal_reminders` and one `protection_check` per business succeeded; `google_connections.next_protection_at` set for every business the sync reads; no `tick_stalled` event after the apply; `jobs_log` still gets `dispatch` rows (the health check's freshness).
+- Live mock Protection check (Hussein's "apply"): `staff_mock_listing_edit` on Yawmiyati changes the phone; within 5 minutes one `listing_changes` row and one `shield_alert` email, from a `protection_check` job. Then put the phone back.
+- `google_gate` is not called in mock mode (mock calls do not reach `gbp`): `select count(*) from google_rate` stays 0 until Gate A. The limiter is proven by the tests and the load run.
+
+After the P0.1-12a pull request (40) was merged: deploy, `kabsi_dispatch`, sync status, cron-tick hand-over, the no-duplicates check and the mock review end to end passed (see Evidence). Hussein checked the Home line in a browser (4 Oct). Still open:
+- Signed in as staff (Rashid, a person with a browser): `/staff` Job health shows the "Job queue" line.
 
 P0.1-11 (PRs 38 and 39) and P0.1-10's approval and publication events: passed at the start of the P0.1-12a chat (see Evidence).
 
@@ -200,6 +206,19 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### P0.1-12b (branch claude/h-p0-1-12b, PR 43, 4 Oct 2026, Hussein's session)
+- Start of chat: Hussein checked the Home line in a browser: "Google profile checked just now" shows under the business name, with the Demo data tag and the test-mode banner. P0.1-12a's Home check passed; the staff Job health look stays open for Rashid.
+- Start of chat, After-merge snapshot (18:49 UTC, read only): 20 cron jobs, none failed; `jobs` 26 succeeded, 0 dead or failed; every syncing business `sync_status` ok with a last success between 18:44 and 18:48; `ops_events` since 18:30: 0; `ai_usage` today: Yawmiyati 3 generations (6,091 in, 984 out tokens, last 18:34:07, the mock review's draft) and Harbour Lane Coffee 2; `ops_events` naming Harbour Lane or Juniper: 0; no email row for a demo business. Still waiting: the night jobs (`kabsi_retention` 02:53, `kabsi_chat_retention` 03:41, `kabsi_concierge_daily` Mon to Fri 05:00) have not run since the P0.1-08 and P0.1-10 changes. The other open checks need a browser or a database write.
+- Migration 1 `20261004200000_google_limits.sql` (applied before merge): `google_rate` (sliding windows: `project` 4 a second, `profile:locations/<id>` 5 writes a minute), `circuit_breaker` (20 failures inside a minute open it for 5 minutes, with `circuit_open` and `circuit_closed` #kabsi-alerts events), `google_gate(profile)`, `google_failure()`, `postpone_job(...)` for the service role only, `private.google_circuit` and `private.rate_take` for nobody.
+- Migration 2 `20261004200100_cron_to_jobs.sql` (after the deploy): `google_connections.next_protection_at`; `private.offer_every`; `produce_jobs` also offers `protection_check` per business (5 minutes on the mock and for demo businesses, an hour on live Google, at its own offset) and the six whole-system steps every 5 minutes at their own minute; `dispatch_tick` clears rate buckets unused for a day; `ops_watchdog` alerts when no job has finished in 20 minutes instead of watching `kabsi_cron_tick`; `kabsi_cron_tick` unscheduled.
+- Code: `gbp()` asks the gate before every try, waits up to 65 s, or throws `GoogleBusy` without sending (`_shared/google/client.ts`); 429, 5xx and network errors count for the breaker, 4xx do not; a job meeting `GoogleBusy` is postponed, not counted (`_shared/jobs.ts` `RetryLater`, `postpone_job`); `shield.ts` split into a per-business `protectionCheck`; the dispatcher runs each batch of 5 side by side and has handlers for the seven new kinds (`api/jobs.ts`); `api/cron.ts` exports its steps.
+- Done-when "a sixth edit in a minute for one profile waits": `supabase/tests/google_limits.sql` ("a sixth edit in the same minute waits a minute", "the waiting edit takes no place for the profile") and `_shared/google/limits.test.ts` ("a sixth edit in a minute for one profile waits for its place, then goes"). Locally on Postgres 16 with stubs: every line of `google_limits.sql` ok; Deno 2.9.6 `deno test --no-check _shared/` 87 passed.
+- Done-when "the breaker opens and closes": `google_limits.sql` (19 failures closed; failures older than a minute reset; 20th opens for 5 minutes with one alert; the gate refuses reads and writes while open; closes after 5 minutes with one message). Locally all ok.
+- Done-when "the load script finishes all syncs inside one simulated hour with no function timeout": `scripts/load/mock-500.ts`, run by the `Load` workflow on the PR. Result below once CI has run.
+- Done-when "`kabsi_cron_tick` is unscheduled and `cron.job` shows the dispatcher": migration 2, after merge (After merge).
+- App checks: `npm run typecheck`, `check:anon`, `check:tokens`, `check:google`, `npm test` (21 passed), `npm run build` pass; `lint:changed` "No lintable files changed". `deno check` every function except `site-assets` (cannot fetch deno.land from the sandbox; CI runs it).
+- `knowledge/kabsi-facts.md`: one line on Google's limits and the 5-minute pause; `public/llms-full.txt` rebuilt.
 
 ### P0.1-12a After-merge checks (4 Oct 2026, 18:11 to 18:26 UTC, Hussein's session)
 - SQL editor snippet (Hussein, 18:10): `private.dispatch_tick` read back with the same md5 as the file (`300fac3f...`), security definer, no execute for anon, authenticated or service_role; `kabsi_dispatch` job 22, `* * * * *`, `select private.dispatch_tick()`, first run 18:11:00 succeeded. 20 cron jobs, none of the old ones changed.
@@ -487,9 +506,15 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Found, not done
 
+- P0.1-12b: until P0.1-13a moves publishing onto the queue, a live reply, post or listing change that cannot get its place under the limiter within 65 s (or meets an open breaker) fails with `GoogleBusy` and is left "publishing" for staff to verify (D266 treats it as uncertain, because a read-back after a successful write can also meet it). Mock mode is unaffected. P0.1-13a's publish job should postpone instead.
+- P0.1-12b: `/api/cron-tick` and `shieldCheck()` stay after `kabsi_cron_tick` is unscheduled (the `weekly_now` test hook uses the route). A later contract step removes them.
+- P0.1-12b: `ratings_snapshot` and `weekly_reports` still loop over every business inside one job. Once a day (ratings) and Mondays (reports) that is up to 500 Places calls or report builds in one run; a run cut off by the function limit is picked up by the next one (each step decides from data). One job per business belongs with P0.5-04 (reports) or P0.2-06 (Places cost guard).
+- P0.1-12b: Places API calls (`places()`), the health check's `listAccountsOnce` and the token refresh do not pass the limiter: Places has its own quota (P0.2-06), the other two are single calls.
+- P0.1-12b: K-36 and the audit's failure table say Home shows "Google is not responding. Your information is safe. We'll try again." while the breaker is open. Not built (screen work); P0.3-07.
+
 - P0.1-12a merge: `deploy.yml` installed Supabase CLI "latest", and the first Deploy after the merge failed on GitHub's API rate limit (re-run passed). Fixed on Hussein's request by branch claude/h-deploy-pin-cli: `deploy.yml` pins 2.119.0 like `ci.yml`.
 
-- P0.1-12a: `private.ops_watchdog` still alerts "Reviews job hasn't run for 20 minutes ... New reviews aren't being drafted" from `kabsi_cron_tick`; after this task drafting runs on `kabsi_dispatch`. P0.1-12b (which retires `kabsi_cron_tick`) should point the watchdog at the dispatcher.
+- P0.1-12a: `private.ops_watchdog` still alerts "Reviews job hasn't run for 20 minutes ... New reviews aren't being drafted" from `kabsi_cron_tick`; after this task drafting runs on `kabsi_dispatch`. P0.1-12b (which retires `kabsi_cron_tick`) should point the watchdog at the dispatcher. Done by P0.1-12b (migration 2 step 4).
 - P0.1-12a: Home's Google Protection line still reads "Keep it or put yours back" (`src/routes/_authenticated/app/index.tsx`), close to the retired "Put mine back". For P0.3-07.
 
 - P0.1-11: Google documents `Invitation.targetLocation.address` as a plain string, while `_shared/invitations.ts` reads it as a postal address (`addressLines`, `locality`). If Google sends a string, no invitation would ever match on address and every invite would stay pending. Not changed (behaviour must not change in this task); check against a captured invitation on Gate A day (P0.7-01) and fix in `invitations.ts`.
@@ -524,6 +549,11 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Decisions to confirm
 
 (Build chats add decisions the plan did not cover here, one line each with the reason. The planning chat folds confirmed ones into the plan.)
+- P0.1-12b: the limiter and breaker guard live Google calls only (`gbp`); mock calls never reach Google's quota, so they are not limited. The load test therefore measures the queue and the dispatcher, and the limiter is proven by its own tests.
+- P0.1-12b: the per-profile limit counts every write to a profile (replies, posts, photos, listing edits), not only listing edits, so publishing stays under Google's 10 a minute whatever the mix.
+- P0.1-12b: the breaker counts each failed try (429, 5xx, no answer); 4xx answers about one business do not count. While it is open, jobs are postponed to the end of the pause without counting a try.
+- P0.1-12b: the task is two migrations: limiter first (before merge), the producers and the unschedule after the deploy, because the deployed dispatcher must know the new job kinds before they are offered.
+- P0.1-12b: the dispatcher runs each batch of 5 jobs side by side (it ran them one by one), so 500 businesses (about 200 jobs a minute on the mock) fit inside one 40-second run.
 - P0.1-12a: `claim_jobs`, `finish_job`, `enqueue_job` and `record_sync_result` are in `public` with execute for the service role only (the plan says `private.claim_jobs`): the dispatcher calls them through PostgREST, which serves only `public` (P0.1-08 rule). The producers and the tick are in `private`.
 - P0.1-12a: the review sync stays every 5 minutes per business (the old cron rate), each business at a fixed offset inside the 5 minutes, so calls spread evenly; incremental sync by update time (K-35) is not part of this task.
 - P0.1-12a: a draft that fails is retried by the job with backoff and counted on `reviews.draft_attempts` as before; at 3 the job ends `failed` and the review stays in the owner's inbox. An exhausted AI budget ends the job without a failure and the producer offers the review again (as the old loop did).
@@ -597,6 +627,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 4 Oct 2026 (Hussein's session): recorded Hussein's browser check of the Home line (P0.1-12a). After-merge snapshot read only; nothing else could run (night jobs not yet run; the rest needs a browser or a write). P0.1-12b on branch claude/h-p0-1-12b, PR 43: rate limiter, circuit breaker, Protection and the remaining cron steps as jobs, watchdog moved to the queue, load test. Next: CI, then migration 1 on Hussein's "apply"; migration 2 after merge. Next task after this one: P0.1-13a.
 
 - 4 Oct 2026 (Hussein's session): PR 41 (P0.1-12a After-merge evidence) merged on Hussein's "merge". Mock review on Yawmiyati (Hussein's "apply") went sync, draft, notify through jobs in about 9 s with one draft and one email; P0.1-12a After-merge checks all passed except the browser look. Deploy pin on branch claude/h-deploy-pin-cli, PR 42.
 

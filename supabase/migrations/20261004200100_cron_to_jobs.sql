@@ -9,12 +9,15 @@
 --    (D222), deletions, trial_reminders (Q05), renewal_reminders (Q06). Each is the same code the cron ran.
 -- 3. private.produce_jobs() offers them with the review work; private.dispatch_tick() also clears rate buckets
 --    nobody used for a day.
--- 4. kabsi_cron_tick is unscheduled: the dispatcher (kabsi_dispatch, every minute) does all of its work.
+-- 4. The ops watchdog's "Reviews job hasn't run" alarm watched kabsi_cron_tick; it now watches the job queue: no job
+--    finished in 20 minutes (access_check alone finishes one every 5) raises the alert. The rest is unchanged.
+-- 5. kabsi_cron_tick is unscheduled: the dispatcher (kabsi_dispatch, every minute) does all of its work.
 --
 -- Apply only after the code in the same pull request is deployed: the deployed dispatcher must know the new job
--- kinds before they are offered. Additive except step 4; to undo step 4, schedule kabsi_cron_tick again
--- (select cron.schedule('kabsi_cron_tick', '*/5 * * * *', $$select public.call_internal('api/cron-tick')$$)) and run
--- the previous produce_jobs from 20261004190000_jobs_queue.sql.
+-- kinds before they are offered. Additive except steps 4 and 5. To undo: schedule kabsi_cron_tick again
+-- (select cron.schedule('kabsi_cron_tick', '*/5 * * * *', $$select public.call_internal('api/cron-tick')$$)), and run
+-- the previous produce_jobs and dispatch_tick (20261004190000_jobs_queue.sql) and ops_watchdog
+-- (20260927210000_slack_ops.sql, now in schema private) again. No data is moved or deleted.
 
 -- 1. Protection schedule per business --------------------------------------------------------------------------------
 
@@ -154,6 +157,36 @@ end $$;
 revoke all on function private.offer_every(text, interval, interval), private.produce_jobs(), private.dispatch_tick()
   from public, anon, authenticated, service_role;
 
--- 4. Retire the 5 minute cron ----------------------------------------------------------------------------------------
+-- 4. The watchdog watches the job queue -------------------------------------------------------------------------------
+
+create or replace function private.ops_watchdog() returns void
+language plpgsql security definer set search_path = '' as $$
+declare r record; v_last timestamptz; v_5xx int; v_hour text := to_char(now() at time zone 'UTC', 'YYYYMMDDHH24');
+begin
+  for r in
+    select j.jobname, count(*) n, max(d.return_message) msg
+      from cron.job_run_details d join cron.job j on j.jobid = d.jobid
+     where j.jobname like 'kabsi_%' and d.status = 'failed' and d.start_time > now() - interval '15 minutes'
+     group by j.jobname
+  loop
+    perform public.ops_emit('cron_failed', 'alerts', ':red_circle: Scheduled job failing: ' || r.jobname, left(r.msg, 800),
+      public.ops_f('Failures, 15 min', r.n::text), public.ops_staff_btn('Job health'), 'cron:' || r.jobname || ':' || v_hour);
+  end loop;
+  -- pg_cron reports success even when the dispatcher route answers 401 or 5xx (D295), so the proof is a finished job.
+  select max(finished_at) into v_last from public.jobs where state = 'succeeded';
+  if v_last is null or v_last < now() - interval '20 minutes' then
+    perform public.ops_emit('tick_stalled', 'alerts', ':rotating_light: No job has finished for 20 minutes',
+      'The job queue has no job finished since ' || coalesce(to_char(v_last at time zone 'UTC', 'DD Mon HH24:MI') || ' UTC', 'ever')
+        || '. Review syncs, drafts, owner emails and Google Protection are not running. Check kabsi_dispatch and the api function logs.',
+      '[]', public.ops_staff_btn('Job health'), 'tick:' || v_hour);
+  end if;
+  select count(*) into v_5xx from net._http_response where created > now() - interval '15 minutes' and (status_code >= 500 or error_msg is not null);
+  if v_5xx >= 5 then
+    perform public.ops_emit('http_errors', 'alerts', ':red_circle: ' || v_5xx || ' failed internal calls in 15 minutes',
+      'Edge Functions returned errors or timed out. Check Sentry (kabsi-edge) and the function logs.', '[]', public.ops_staff_btn('Job health'), 'http5xx:' || v_hour);
+  end if;
+end $$;
+
+-- 5. Retire the 5 minute cron ----------------------------------------------------------------------------------------
 
 select cron.unschedule('kabsi_cron_tick') where exists (select 1 from cron.job where jobname = 'kabsi_cron_tick');

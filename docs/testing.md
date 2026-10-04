@@ -52,7 +52,8 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   refuses every request, and after the 5 minutes it closes with a second message; a postponed job goes back to the
   queue without counting the try; Protection is one job per business (every 5 minutes on the mock, hourly on live
   Google, none for concierge businesses); access, ratings, weekly reports, deletions, trial and renewal reminders are
-  one job each, offered every 5 minutes at their own minute; the tick clears rate buckets unused for a day.
+  one job each, offered every 5 minutes at their own minute; the tick clears rate buckets unused for a day; the
+  ops watchdog alerts when no job has finished in 20 minutes (it no longer watches `kabsi_cron_tick`).
 
 When you add a table or a browser-callable function, add its fixture row or its test in the same pull request.
 
