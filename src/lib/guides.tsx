@@ -174,7 +174,7 @@ export const GUIDES: Guide[] = [
             rating={4}
             dir="rtl"
             review="الطعام لذيذ جداً، لكن الخدمة كانت بطيئة قليلاً."
-            reply="شكراً جزيلاً على تقييمك! سعداء أن الطعام أعجبك، ونعتذر عن تأخر الخدمة. نتطلع لرؤيتك قريباً."
+            reply="شكراً جزيلاً على تقييمك. سعداء أن الطعام أعجبك، ونعتذر عن تأخر الخدمة. نتطلع لرؤيتك قريباً."
           />
           <Example
             label="2 stars"
@@ -277,7 +277,7 @@ export const GUIDES: Guide[] = [
         </p>
         <Callout title="How Kabsi handles hard reviews">
           Kabsi flags hard reviews (1 or 2 stars, or anything about health, safety, staff or legal
-          matters) and prepares a calm draft with no quick Post button, so you read it first.
+          matters) and prepares a calm draft with no quick Approve button, so you read it first.
         </Callout>
       </>
     ),
@@ -458,7 +458,7 @@ export const GUIDES: Guide[] = [
       "Get the link from your profile: Read reviews, then Get more reviews.",
       "Or use Kabsi's free tool, from any phone, without signing in.",
       "Put the QR code on the counter, tables, receipts and menus.",
-      "Ask every customer the same way, with no rewards.",
+      "Ask every customer the same way, as they visit. Never offer a reward.",
     ],
     sources: [G.link, G.tips],
     body: (
