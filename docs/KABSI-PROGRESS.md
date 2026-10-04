@@ -487,7 +487,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Found, not done
 
-- P0.1-12a merge: `deploy.yml` still installs Supabase CLI "latest", and the first Deploy after the merge failed on GitHub's API rate limit (re-run passed). CI pins 2.119.0; pinning the same version in `deploy.yml` would stop this. Not changed (outside the task).
+- P0.1-12a merge: `deploy.yml` installed Supabase CLI "latest", and the first Deploy after the merge failed on GitHub's API rate limit (re-run passed). Fixed on Hussein's request by branch claude/h-deploy-pin-cli: `deploy.yml` pins 2.119.0 like `ci.yml`.
 
 - P0.1-12a: `private.ops_watchdog` still alerts "Reviews job hasn't run for 20 minutes ... New reviews aren't being drafted" from `kabsi_cron_tick`; after this task drafting runs on `kabsi_dispatch`. P0.1-12b (which retires `kabsi_cron_tick`) should point the watchdog at the dispatcher.
 - P0.1-12a: Home's Google Protection line still reads "Keep it or put yours back" (`src/routes/_authenticated/app/index.tsx`), close to the retired "Put mine back". For P0.3-07.
