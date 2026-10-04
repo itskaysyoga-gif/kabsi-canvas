@@ -145,7 +145,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 ## After merge
 
 After the P0.1-08 pull request (35) is merged (Deploy publishes `api`):
-- `cron.job_run_details` shows one successful run after the change for each of the six moved jobs (`kabsi_retention` 02:53, `kabsi_chat_retention` 03:41, `kabsi_ops_watchdog`, `kabsi_plans_expiry`, `kabsi_concierge_daily` 05:00 Mon to Fri, `kabsi_concierge_overdue` :17) and for every other job: `select j.jobname, max(d.end_time) filter (where d.status = 'succeeded') from cron.job j left join cron.job_run_details d using (jobid) group by 1`.
+- `cron.job_run_details` shows one successful run after the change for the four moved jobs not yet seen (`kabsi_retention` 02:53, `kabsi_chat_retention` 03:41, `kabsi_concierge_daily` 05:00 Mon to Fri, `kabsi_concierge_overdue` :17; `kabsi_ops_watchdog` and `kabsi_plans_expiry` already succeeded at 14:50 on 4 Oct) and for every other job: `select j.jobname, max(d.end_time) filter (where d.status = 'succeeded') from cron.job j left join cron.job_run_details d using (jobid) group by 1`.
 - `get_advisors` security: no `anon_security_definer_function_executable`; leaked-password protection on once Rashid's step 10 is done.
 - An email link (`/a/...`) opened signed out in mock mode still shows the Test mode banner (`GET /functions/v1/api/action?t=...` returns `"mode":"mock"`).
 - Signed in, the app header still shows the Test mode banner (the browser still calls `google_mode()` as authenticated).
@@ -210,6 +210,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Migration applied on Hussein's "apply" at 14:46 UTC with `apply_migration` (live version `20261004144629 private_schema_api_hardening`; the repo file is `20261004150000_...`, same SQL). Read back: the six cron commands now read `select private.<fn>()`, 0 commands still name `public.` for them; schema `private` holds the six functions; anon and authenticated have no usage on `private`; SECURITY DEFINER functions in public executable by anon 0, by authenticated 53.
 - Done-when 1: `get_advisors` security at 14:46 UTC shows no `anon_security_definer_function_executable` (was 1). Still listed: `authenticated_security_definer_function_executable` 53 (the browser list above, by design), `rls_enabled_no_policy` INFO 11 (service-only tables, unchanged), `auth_leaked_password_protection` (Rashid's step 10; no tool here can set Auth settings).
 - Done-when 2: the authenticated list is the 53 above, each with its caller.
+- Done-when 3, part 1: `cron.job_run_details` after the apply: `kabsi_ops_watchdog` succeeded 14:50:00 ("1 row"), `kabsi_plans_expiry` succeeded 14:50:00 ("1 row"), both now `select private.<fn>()`; no job of any kind failed between 14:46 and 14:51. The other four moved jobs run later (02:53, 03:41, 05:00 Mon to Fri, :17 each hour): After merge.
 - Done-when 4: the database suite passes including the google_mode test (CI run above).
 - Between this apply and the merge of PR 35, the live `/a/...` page still asks `google_mode()` as anon, gets refused and hides the Test mode banner for signed-out visitors; the merge restores it through `api/action`.
 
