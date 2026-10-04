@@ -45,14 +45,36 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   real sessions: 100 committed jobs, dispatcher w1 claims 60 and holds its transaction 2 seconds, w2 asks 0.3 s later
   and must get the other 40 at once; every job is claimed exactly once and w2 never waits (it fails if SKIP LOCKED is
   removed).
+- `google_limits.sql` (P0.1-12b): the rate limiter, circuit breaker and postponed jobs are closed to anon and
+  authenticated; four Google requests in one second go and the fifth waits a second; five edits to one profile in a
+  minute go and a sixth waits until the oldest is a minute old, without taking a place; a read is not held by the edit
+  limit; 20 failures inside a minute open the breaker for 5 minutes with one #kabsi-alerts message, the gate then
+  refuses every request, and after the 5 minutes it closes with a second message; a postponed job goes back to the
+  queue without counting the try; Protection is one job per business (every 5 minutes on the mock, hourly on live
+  Google, none for concierge businesses); access, ratings, weekly reports, deletions, trial and renewal reminders are
+  one job each, offered every 5 minutes at their own minute; the tick clears rate buckets unused for a day.
 
 When you add a table or a browser-callable function, add its fixture row or its test in the same pull request.
 
-## Job queue (P0.1-12a)
+## Job queue (P0.1-12a, P0.1-12b)
 
 `supabase/functions/_shared/jobs.test.ts` (Deno) checks how one claimed job ends: success, a thrown error retried, a
-`PermanentJobError` or an unknown kind not retried. The handlers and the `/api/dispatch` route are in
-`supabase/functions/api/jobs.ts`.
+`PermanentJobError` or an unknown kind not retried, `RetryLater` (Google paused or no place under the rate limit)
+postponed without a failed try. The handlers and the `/api/dispatch` route are in `supabase/functions/api/jobs.ts`.
+
+`supabase/functions/_shared/google/limits.test.ts` (Deno) checks what `gbp()` does with the gate's answers: a sixth
+edit in a minute to one profile waits for its place and then goes; a wait over 65 seconds or an open breaker sends
+nothing and throws `GoogleBusy`; every try passes the gate; 429, 5xx and no answer count as failures for the breaker,
+a 403 does not.
+
+Load test (`scripts/load/mock-500.ts`, workflow `.github/workflows/load.yml`): after `scripts/db-test.sh`, it seeds
+500 mock businesses with three answered reviews each and runs one simulated hour: each loop runs the real producer and
+the real dispatcher route (imported into the script, mock Google, limiter in the local database), then moves every
+schedule back by what is left of the minute. It fails unless every business synced every 5 minutes after its first,
+no job died or failed, nothing was due at the end and no dispatcher run came near the function time limit. CI adds
+20 ms to every database call (`LOAD_LATENCY_MS`) to stand in for the network in production. Locally:
+`bash scripts/db-test.sh`, then `eval "$(supabase status -o env)"; export API_URL SERVICE_ROLE_KEY DB_URL;
+deno run -A scripts/load/mock-500.ts`.
 
 ## App and functions
 

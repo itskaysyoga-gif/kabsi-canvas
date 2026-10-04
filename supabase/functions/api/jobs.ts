@@ -1,13 +1,18 @@
-// /api/dispatch: the job dispatcher (K-35, R-06, P0.1-12a). pg_cron runs private.dispatch_tick() every minute; it
-// offers the work (review syncs spread through the hour, drafts, owner emails) and calls this route only when a job
-// is due. Each run claims a few jobs at a time (claim_jobs, FOR UPDATE SKIP LOCKED) until about 40 seconds have
-// passed, so a second run started meanwhile takes other jobs, never the same ones.
+// /api/dispatch: the job dispatcher (K-35, R-06, P0.1-12a, P0.1-12b). pg_cron runs private.dispatch_tick() every
+// minute; it offers the work and calls this route only when a job is due. Each run claims a few jobs at a time
+// (claim_jobs, FOR UPDATE SKIP LOCKED) and runs them side by side until about 40 seconds have passed, so a second run
+// started meanwhile takes other jobs, never the same ones. Google calls inside the jobs pass the shared rate limiter
+// and circuit breaker (_shared/google/client.ts); a job that meets a paused Google is postponed, not failed.
 // Review jobs: sync_reviews reads one business's reviews and offers a draft for each new one; draft_reply drafts one
 // review and offers the owner email run; notify_owner sends that business's due emails (the rules in reviews.ts).
+// protection_check compares one business's listing with its baseline (shield.ts). The whole-system steps the 5 minute
+// cron ran (cron.ts) are one job each, offered every 5 minutes.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 import { type Job, type JobHandler, type JobState, PermanentJobError, runJob } from "../_shared/jobs.ts";
 import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation } from "../_shared/reviews.ts";
 import { AiBudgetError } from "../_shared/ai-budget.ts";
+import { protectionCheck } from "../_shared/shield.ts";
+import { accessJob, deletionsJob, ratingsJob, renewalsJob, trialsJob, weeklyJob } from "./cron.ts";
 
 // Offer a job. Returns its id, or null when the same dedupe key is already pending, running or retrying.
 async function enqueueJob(kind: string, locationId: string | null, dedupeKey: string, payload: Record<string, unknown> = {}) {
@@ -32,7 +37,17 @@ async function finishJob(job: Job, worker: string, ok: boolean, error?: string, 
   return data as JobState | null;
 }
 
-const BATCH = 3;
+async function postponeJob(job: Job, worker: string, until: Date, reason: string) {
+  const { data, error } = await admin().rpc("postpone_job", {
+    p_id: job.id, p_worker: worker, p_until: until.toISOString(), p_reason: reason,
+  });
+  if (error) throw error;
+  return data as JobState | null;
+}
+
+// Jobs claimed and run side by side per round. Five keeps one run inside its 40 seconds with 500 businesses (the
+// load test, scripts/load/mock-500.ts); Google's own pace is set by the limiter, not by this number.
+const BATCH = 5;
 const RUN_MS = 40_000;
 
 // Google answering 403/404 for one business means Kabsi's Manager access was removed (or the listing is gone).
@@ -99,10 +114,29 @@ async function notifyOwner(job: Job) {
   if (loc) await notifyLocation(loc);
 }
 
+async function protection(job: Job) {
+  const alerts = await protectionCheck(job.location_id!);
+  if (alerts) await jobLog("shield", true, { alerts, location: job.location_id });
+}
+
+// A whole-system step, logged under the name the cron used when it did something (staff job health lists these).
+const step = (name: string, run: () => Promise<Record<string, unknown>>): JobHandler => async () => {
+  const started = Date.now();
+  const detail = await run();
+  if (Object.values(detail).some((v) => typeof v === "number" && v > 0)) await jobLog(name, true, { ...detail, ms: Date.now() - started });
+};
+
 const HANDLERS: Record<string, JobHandler> = {
   sync_reviews: syncReviews,
   draft_reply: draftReplyJob,
   notify_owner: notifyOwner,
+  protection_check: protection,
+  access_check: step("access", accessJob),
+  ratings_snapshot: step("ratings", ratingsJob),
+  weekly_reports: step("weekly", weeklyJob),
+  deletions: step("deletions", deletionsJob),
+  trial_reminders: step("trials", trialsJob),
+  renewal_reminders: step("renewals", renewalsJob),
 };
 
 export async function dispatch(req: Request): Promise<Response> {
@@ -112,16 +146,19 @@ export async function dispatch(req: Request): Promise<Response> {
   const counts: Record<string, number> = {};
   const deps = {
     finish: (j: Job, ok: boolean, error?: string, retry?: boolean) => finishJob(j, worker, ok, error, retry),
+    postpone: (j: Job, until: Date, reason: string) => postponeJob(j, worker, until, reason),
     report: (j: Job, e: unknown) => captureError("dispatch", e, { job: j.kind, id: j.id, location: j.location_id }),
   };
   try {
     while (Date.now() - started < RUN_MS) {
       const jobs = await claimJobs(BATCH, worker);
       if (!jobs.length) break;
-      for (const job of jobs) {
-        const key = `${job.kind}:${(await runJob(job, HANDLERS, deps)) ?? "handed_on"}`;
+      // Different businesses or different steps: safe side by side (the dedupe key keeps one job per piece of work).
+      const states = await Promise.all(jobs.map((job) => runJob(job, HANDLERS, deps)));
+      jobs.forEach((job, i) => {
+        const key = `${job.kind}:${states[i] ?? "handed_on"}`;
         counts[key] = (counts[key] ?? 0) + 1;
-      }
+      });
     }
   } catch (e) {
     await captureError("dispatch", e, { worker });
