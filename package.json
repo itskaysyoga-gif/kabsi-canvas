@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "check:anon": "node scripts/check-anon-headers.mjs",
+    "check:tokens": "node scripts/check-tokens.mjs",
     "check:deno": "bash scripts/deno-check.sh",
     "format": "prettier --write ."
   },

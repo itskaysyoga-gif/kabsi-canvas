@@ -1,0 +1,3 @@
+export const Bad = () => (
+  <div className="bg-[#123456] font-[Inter] text-[rgb(1,2,3)]">not allowed</div>
+);

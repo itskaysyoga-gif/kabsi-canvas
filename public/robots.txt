@@ -4,6 +4,7 @@ Disallow: /app
 Disallow: /partner$
 Disallow: /partner/
 Disallow: /staff
+Disallow: /design
 Disallow: /start
 Disallow: /login
 Disallow: /a/

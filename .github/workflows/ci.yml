@@ -34,6 +34,8 @@ jobs:
           BASE_REF: origin/${{ github.base_ref }}
       - name: Anon JWT guard (D295)
         run: npm run check:anon
+      - name: Design tokens (K-108)
+        run: npm run check:tokens
       - name: Tests
         run: npm test
       - name: Build
