@@ -180,7 +180,7 @@ export async function addSpecialHours(locationId: string, s: SpecialDay) {
   return { state: "live" as const, response: { specialHours: patched.specialHours ?? null } };
 }
 
-// ─── Listing Shield (Phase 7, D218): read the listing, and put one field back after the owner's approval.
+// ─── Google Protection (Phase 7, D218): read the listing, and put one field back after the owner's approval.
 export const SHIELD_FIELDS = ["title", "phone", "address", "website", "hours", "categories"] as const;
 export type ShieldField = typeof SHIELD_FIELDS[number];
 export type FieldValue = { display: string; raw: unknown };

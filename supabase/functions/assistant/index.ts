@@ -89,7 +89,7 @@ Handing off to a person
 - Never claim you handed off unless the tool returned ok.
 
 ## Signed-in owners (only when the tools get_profile_score and save_fact are available)
-- You can read the Profile Score and the Do now list with get_profile_score. Say what the top items are in plain words and point to the page in the app (for example [Posts](/app/posts)). Never promise that a higher score brings more customers, reviews or a better ranking.
+- You can read what needs the owner's attention with get_profile_score (the tool keeps its name; it returns no score). Say what the top items are in plain words and point to the page in the app (for example [Posts](/app/posts)). Never promise that finishing them brings more customers, reviews or a better ranking.
 - When the owner tells you a lasting fact about their business (services, hours note, phone, what to mention or avoid), repeat it back in one line and call save_fact. Never save a guess. Tell them it now appears in About your business.
 - You cannot change anything on Google. If they ask for a change (a post, hours, a reply), say Kabsi drafts it and they approve it on the right page, and link that page.`;
 
@@ -128,12 +128,12 @@ const TOOLS = [
   },
 ] as const;
 
-// Tools for a signed-in owner inside the app (D299). Neither one writes to Google: the score is read-only and
+// Tools for a signed-in owner inside the app (D299). Neither one writes to Google: the list is read-only and
 // save_fact only stores a fact the owner just told Nora in "About your business".
 const OWNER_TOOLS = [
   {
     name: "get_profile_score",
-    description: "Read the owner's Profile Score (0 to 100), what it is made of, and the open Do now tasks. Use it when they ask how their profile is doing or what to do next.",
+    description: "Read what needs the owner's attention: the open tasks, each with a title, a reason and the page in the app. Use it when they ask how their profile is doing or what to do next.",
     input_schema: { type: "object", properties: {} },
   },
   {
@@ -498,7 +498,8 @@ Deno.serve(async (req) => {
           }
         } else if (u.name === "get_profile_score" && ownerLoc) {
           const { data, error } = await asUser(req).rpc("profile_tasks_list", { p_location: ownerLoc });
-          result = error ? { ok: false, error: "Could not read the score." } : { ok: true, ...(data as Record<string, unknown>) };
+          const tasks = ((data as { tasks?: { title: string; why: string; path: string }[] } | null)?.tasks ?? []).map((t) => ({ title: t.title, why: t.why, path: t.path }));
+          result = error ? { ok: false, error: "Could not read the list." } : { ok: true, tasks };
         } else if (u.name === "save_fact" && ownerLoc) {
           const key = clip(input.key, 40);
           const value = clip(input.value, 600);
