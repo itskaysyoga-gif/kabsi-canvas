@@ -1,6 +1,6 @@
 // Weekly report (D222): Monday from 09:00 local time, one email per active location. Facts only:
-// Google rating and its change, reviews received, replies posted, card taps (bots excluded),
-// up to three short quotes copied word for word. No advice, no claims about causes.
+// Google rating and its change, reviews received, replies posted, card taps (bots excluded).
+// No review text and no quotes (K-113.3, R-19). No advice, no claims about causes.
 import { admin, APP_URL, emailLayout, esc, ownerEmails, sendEmail } from "./kabsi.ts";
 
 type Loc = { id: string; name: string; place_id: string | null; time_zone: string; emails_paused_until: string | null };
@@ -43,13 +43,6 @@ export async function snapshotRatings(locs: Loc[]) {
   return taken;
 }
 
-// Short verbatim quote: first sentence, cut at a word boundary. Never reworded.
-function quoteOf(text: string) {
-  const first = text.trim().split(/(?<=[.!?؟])\s/)[0] ?? text;
-  if (first.length <= 90) return first;
-  return first.slice(0, 90).replace(/\s+\S*$/, "") + "…";
-}
-
 export async function buildReport(loc: Loc, now = new Date()) {
   const db = admin();
   const since = new Date(now.getTime() - 7 * DAY).toISOString();
@@ -62,13 +55,11 @@ export async function buildReport(loc: Loc, now = new Date()) {
   const previous = (snaps ?? []).find((s) => s.taken_on <= weekAgo) ?? null;
   const change = current?.rating != null && previous?.rating != null ? Math.round((current.rating - previous.rating) * 10) / 10 : null;
 
-  const { data: reviews } = await db.from("reviews").select("star_rating, comment, state, existing_reply, review_created_at")
+  const { data: reviews } = await db.from("reviews").select("star_rating, state, existing_reply, review_created_at")
     .eq("location_id", loc.id).gte("review_created_at", since).order("review_created_at", { ascending: false });
   const list = reviews ?? [];
   const replied = list.filter((r) => r.state === "posted" || r.existing_reply).length;
   const avgNew = list.length ? Math.round((list.reduce((s, r) => s + r.star_rating, 0) / list.length) * 10) / 10 : null;
-  const withText = list.filter((r) => r.comment && r.comment.trim().length >= 8);
-  const quotes = withText.length >= 3 ? withText.slice(0, 3).map((r) => quoteOf(r.comment!)) : [];
 
   const { count: waiting } = await db.from("reviews").select("id", { count: "exact", head: true })
     .eq("location_id", loc.id).in("state", ["drafted", "blocked"]);
@@ -81,7 +72,7 @@ export async function buildReport(loc: Loc, now = new Date()) {
     rating: current?.rating ?? null, rating_count: current?.review_count ?? null, rating_change: change,
     rating_drop: change != null && change <= -0.1,
     new_reviews: list.length, new_avg: avgNew, replied, waiting: waiting ?? 0,
-    taps: { total: nfc + qr, nfc, qr }, quotes,
+    taps: { total: nfc + qr, nfc, qr },
   };
 }
 export type Report = Awaited<ReturnType<typeof buildReport>>;
@@ -102,17 +93,13 @@ export function renderReport(loc: Loc, r: Report) {
   // Honest about what a tap is (D257): an open of the review page, not a review.
   const tapNote = `<p style="margin:10px 0 0 0;color:#5E5B55;font-size:14px;">Opens count how often your card or link opened your Google review page. They don't show whether a review was written.</p>`;
   const drop = r.rating_drop ? `<p style="margin:0 0 16px 0;padding:12px 14px;border:2px solid #111111;border-radius:14px;">Your Google rating went down ${Math.abs(r.rating_change!).toFixed(1)} this week.</p>` : "";
-  const quotes = r.quotes.length
-    ? `<p style="margin:22px 0 8px 0;font-weight:700;">What customers wrote</p>` + r.quotes.map((q) => `<p style="margin:0 0 8px 0;padding:10px 14px;background:#F6F4EF;border-radius:14px;" dir="auto">“${esc(q)}”</p>`).join("")
-    : "";
   const waiting = r.waiting ? `<p style="margin:18px 0 0 0;">${r.waiting} ${r.waiting === 1 ? "review is" : "reviews are"} waiting for your reply.</p>` : "";
   const html = `<p style="margin:0 0 16px 0;color:#5E5B55;">${esc(loc.name)} · ${esc(r.period.from)} to ${esc(r.period.to)}</p>${drop}
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:16px;">${rows}</table>${tapNote}${quotes}${waiting}`;
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:16px;">${rows}</table>${tapNote}${waiting}`;
   const text = [
     `${loc.name}, ${r.period.from} to ${r.period.to}`,
     `Google rating: ${ratingText}`,
     `New reviews: ${r.new_reviews}`, `Replied: ${r.replied} of ${r.new_reviews}`, `Card and link opens: ${r.taps.total} (opens of your review page, not reviews)`,
-    ...r.quotes.map((q) => `"${q}"`),
     r.waiting ? `${r.waiting} waiting for your reply.` : "",
   ].filter(Boolean).join("\n");
   return { html, text };

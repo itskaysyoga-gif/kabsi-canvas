@@ -23,7 +23,7 @@ type ReportData = {
   replied: number;
   waiting: number;
   taps: { total: number; nfc: number; qr: number };
-  quotes: string[];
+  quotes?: string[]; // older reports only; no longer shown (K-113.3, R-19)
 };
 type Row = { id: string; week_of: string; data: ReportData };
 
@@ -152,20 +152,6 @@ function ReportBody({ r, latest }: { r: ReportData; latest: boolean }) {
       <p className="mt-3 text-xs leading-5 text-kb-stone">
         Opens count how often your review page was opened, not how many reviews were written.
       </p>
-      {r.quotes.length ? (
-        <div className="mt-5">
-          <p className="text-sm font-bold">What customers wrote</p>
-          {r.quotes.map((q, i) => (
-            <p
-              key={i}
-              dir="auto"
-              className="mt-2 rounded-card bg-kb-sand px-4 py-2.5 text-sm leading-6"
-            >
-              “{q}”
-            </p>
-          ))}
-        </div>
-      ) : null}
       {latest && r.waiting ? (
         <p className="mt-4 text-sm">
           {r.waiting} {r.waiting === 1 ? "review is" : "reviews are"} waiting for your reply.{" "}

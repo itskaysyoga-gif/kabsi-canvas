@@ -8,7 +8,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. Next task: P0.1-03 (needs Rashid's steps 1 and 2).
+- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two, part A in review (branch claude/h-p0-1-04), part B (daily AI budget) next.
 
 ## Rashid's decisions and inputs (plan section 5)
 
@@ -43,7 +43,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | merged (17, 18); live After-merge checks not run, see Evidence | 17, 18 | 4 Oct 2026 |
 | P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | merged in two parts (19, 20); mock-review check passed; live app check and auth template paste still open | 19, 20 | 4 Oct 2026 |
 | P0.1-03 | Move kabsi.co to the new build | Sonnet | todo | | |
-| P0.1-04 | AI and Google-rules fixes in drafting | Opus | todo | | |
+| P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | PR open (branch claude/h-p0-1-04) | | 4 Oct 2026 |
+| P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | todo (depends on P0.1-04a) | | |
 | P0.1-05 | Design tokens and shared components | Sonnet | todo | | |
 | P0.1-06 | Demo workspace with fictional businesses | Opus | todo | | |
 | P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet | todo | | |
@@ -143,7 +144,13 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 After the P0.1-02b part B pull request (20) was merged: Deploy passed and the mock-review check passed (see Evidence). Still open:
 - Paste the four `emails/auth/*.html` files into the Supabase Auth email templates (dashboard step for Rashid or Hussein); the dashboard copies still carry the old footer.
-- Read the "New review for Yawmiyati (3 of 5)" email in rashid.hamzy@gmail.com and confirm the button reads "Review reply" and the footer has no address (the sent body is not stored in the database).
+- Done 4 Oct: Hussein confirmed the "New review for Yawmiyati (3 of 5)" test email from screenshots on desktop and phone: the button reads "Review reply", the new footer shows, and there is no address.
+
+After the P0.1-04a pull request is merged (Deploy publishes `api`, `content`, `posts-weekly`) and Lovable has deployed `main`:
+- Edge Function versions for `api`, `content` and `posts-weekly` are newer than the merge time (`list_edge_functions`).
+- Live mock check on Yawmiyati: one mock review that asks for the business's number, drafted after the deploy; paste the draft body here and confirm it has no phone number, email, link, handle or hashtag, and that an unhappy reviewer gets "please contact us through the details on our profile".
+- `select count(*) from weekly_reports where created_at > '<merge time>' and data::text ~ '"quotes"'` is 0 after the next Monday reports (the plan's Done-when says `body`; the column is `data`).
+- In the app: the Posts page suggestions carry no "Customers mention this in reviews" chip; the Report page shows no "What customers wrote" block; About your business shows "Business phone" with the hint that Kabsi never writes a phone number in a public reply.
 
 After the P0.1-02b part A pull request is merged and Lovable has deployed `main`:
 - In the signed-in app at 390 px and 1440 px: navigation reads Home, Reviews, Google Profile, Get Reviews, Settings; Home shows "What needs your attention" with no score and no points; the reply button says "Approve reply"; the Google Protection page is titled that and its button reads "Keep my information"; Get Reviews shows "link activity" and the sentence "Activity is not the same as reviews. Google decides which reviews appear."
@@ -158,6 +165,14 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### P0.1-04a (branch claude/h-p0-1-04, 4 Oct 2026, Hussein's session)
+- Split: the full task changes 15 code files, over the 10 in plan section 2.5. Part A (this pull request) is the drafting rules, no database change; part B is the `ai_usage` migration and the daily budget.
+- Tests written first in `supabase/functions/_shared/drafting.test.ts`; the first run failed (`Module not found ... contact.ts`), then 8 of 8 passed after the change. Done-when tests: "a review that asks for the number gets a draft with no run of 7 or more digits" (a stub model that repeats any phone it is given; the prompt no longer carries `contact_phone`), "a post draft with 'call 555 0100' fails the check", "a 10,000-character review is fenced at 4,096 characters", "keyword suggestions never come from reviews". Also: the code check blocks phone, email, link, handle, hashtag and unlisted price before any model call; dates, times, years and "#1" pass.
+- `deno test --no-check _shared/`: 37 passed, 0 failed. `deno check` passes for every function except `site-assets`, which fails here only because the sandbox cannot reach deno.land (its import is unchanged); CI runs it.
+- `npm run typecheck` clean, `npm test` 15 passed, `npm run build` ok, eslint and prettier clean on the three changed screens (one existing warning in `knowledge-form.tsx` line 244, not from this change).
+- Before this change, live: 3 of 3 `weekly_reports` rows carry `"quotes"` (read-only SQL, 4 Oct).
+- Screens not checked in a browser at 390 px or 1440 px in this session (wording-only changes and one removed block).
 
 ### Deploy workflow fix and P0.1-02b part B After-merge checks (4 Oct 2026, Hussein's session)
 - Deploy run 5 (37185310050, merge of PR 20, commit 2a204f9): Edge Functions job success, Worker kabsi-go job failure. Log line: "Missing entry-point: The entry-point should be specified via the command line ... or the `main` config field." The four runs on 29 Sep had the same shape (Edge Functions success, Worker failure).
@@ -228,6 +243,10 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - The live hero shows "Your Google Business Profile, taken care of." (Google's name in the slogan, against K-112), "Profile Score" and a "Post" button. Fixed by P0.1-02a and P0.1-02b.
 - Drafting code allows phone numbers in replies (`_shared/ai.ts`), weekly posts use phrases from review text (D245) and reports quote reviews (D233). Fixed by P0.1-04.
 - Review text sent to the model has no length cap. Fixed by P0.1-04.
+- P0.1-04a: `knowledge/kabsi-facts.md` not updated in this pull request: reading it was blocked by the session's permission check. It still needs: replies never carry a phone number and send unhappy customers to the details on the profile; post suggestions come from category, area, the owner's services and (after go-live) Google's search terms, never reviews; the Weekly Care Report has no customer quotes.
+- P0.1-04a: the three existing `weekly_reports` rows still hold quotes in `data`; the app no longer shows them. Deleting them is a retention question (P0.2-01).
+- P0.1-04a: `src/routes/privacy.tsx` line 260 mentions "the quotes in weekly reports". True for the old rows; P0.2-07 should reword it.
+- P0.1-04a: a reply or post the owner edits by hand is not checked for contact details at publish (only drafts are). Kabsi drafts are blocked in code; whether to warn on owner-typed text is open (P0.3-02 or P0.1-13a).
 
 ## Decisions to confirm
 
@@ -237,6 +256,9 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - P0.1-02a: the Gemini question replaces the older "How is this different from Google's own AI replies?" question, so the FAQ does not carry two answers on the same topic.
 - P0.1-02a: four of the six Pro lines on `/pricing` carry an "Early access" pill (Know when Google changes your details, Photos and updates prepared for you, Holiday hours reminders, Weekly Care Report) because they are not live yet.
 - P0.1-02a: `TRIAL_LINE` and the "Start free. Pay when it is worth it." headline were left as they are; the plan's list did not change them.
+- P0.1-04a: "posts: except the owner's own domain in the button only" is read as: post text never carries a link; the button is the only link. Kabsi has no reliable record of the owner's domain yet (Business Knowledge, P0.2-03), so the button link is not matched to a domain.
+- P0.1-04a: keyword suggestions use up to three items from the owner's "Products and services" field (source "owner") in place of review phrases, as the plan's "owner input".
+- P0.1-04a: the `contact_phone` field stays (the mock listing uses it) but is relabelled "Business phone" with the hint that Kabsi never writes a phone number in a public reply.
 
 ## Found, not done by P0.1-02a
 
@@ -257,6 +279,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 4 Oct 2026 (Hussein's session): recorded Hussein's confirmation of the P0.1-02b test email (desktop and phone screenshots). P0.1-04 split into 04a and 04b (15 code files); 04a on branch claude/h-p0-1-04. Next: P0.1-04b (needs Hussein's "apply" for the `ai_usage` migration).
 
 - 4 Oct 2026 (Hussein's session): Deploy fixed (PR 21, Wrangler pinned) and passing; P0.1-02b mock-review After-merge check passed; plan correction recorded (the `emails` table has no body). Next: P0.1-03 once Rashid has done steps 1 and 2.
 
