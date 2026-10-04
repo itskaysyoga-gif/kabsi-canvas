@@ -220,6 +220,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Done-when "Deno tests run each mock module against its fixture shape" and "the mock mode switch": unchanged from part A (still pass, above).
 - Behaviour kept: same URLs, field masks, request bodies, error messages and response shapes. Two small differences, both internal: a Places reply that is not JSON now reads as an empty result instead of an exception (the layer's `read` tolerates it), and the health check's Places failure text shows the JSON body instead of the raw text. No wording an owner sees changed, so `knowledge/kabsi-facts.md` is unchanged. No migration.
 - App checks: `npm run typecheck` pass, `npm run lint:changed` pass on the two new files (the first CI run caught two Prettier line breaks in `check-google-calls.mjs` that the local run missed because the files were not yet committed; fixed), `npm run check:tokens` pass, `npm run check:anon` ok, `npm test` 21 passed (6 files), `npm run build` pass.
+- CI on PR 39 (run https://github.com/rashidhamzy-hue/kabsi-canvas/actions/runs/37219932701, commit 91ab15b): App (with the new "Google calls only in the Google layer (K-34)" step), Edge Functions and Database all success.
 
 ### After-merge checks run at the start of the P0.1-11 chat (4 Oct 2026, 16:47 UTC, Hussein's session)
 - P0.1-10, Done-when 3 live: `activity_feed('9803ee99...')` as the Yawmiyati owner (read-only transaction with that user's claims) returns one line, "Checked your Google profile", times 3, 16:45 UTC. Passed.
