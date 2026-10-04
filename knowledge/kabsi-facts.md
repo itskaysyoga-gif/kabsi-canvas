@@ -80,7 +80,7 @@ Kabsi keeps a local business's Google Business Profile complete and current by f
 
 Main line: "Your reviews and listing. Taken care of." The line under it: "Kabsi looks after your business on Google: a reply ready for every new review, your hours and details kept right, and fresh posts. You just approve." Google's name never appears in Kabsi's own slogan, name or handles. The older line "Your Google Business Profile, taken care of." is retired.
 
-Names in the app and on the website (K-02): Reviews, Google Profile, Google Protection, Get Reviews, Weekly Care Report, Settings. The app and the website no longer show a Profile Score, a Do now list or a points value, and the email button for a new review reads "Review reply". An owner who still says "Replies", "Profile Care", "Listing Shield", "Review Link and Card" or "Monday Report" means Reviews, Google Profile, Google Protection, Get Reviews and the Weekly Care Report.
+Names in the app and on the website (K-02): Reviews, Google Profile, Google Protection, Get Reviews, Weekly Care Report, Settings. The app and the website no longer show a Profile Score, a Do now list or a points value, and the email button for a new review reads "Review reply"; Edit, Skip and Open Kabsi sit under it as plain links. Every Kabsi email has one yellow button at most. An owner who still says "Replies", "Profile Care", "Listing Shield", "Review Link and Card" or "Monday Report" means Reviews, Google Profile, Google Protection, Get Reviews and the Weekly Care Report.
 
 ### 2.1a The five modules
 

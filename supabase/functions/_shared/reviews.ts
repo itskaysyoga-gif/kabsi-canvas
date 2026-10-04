@@ -1,5 +1,5 @@
 // Phase 4 pipeline: sync → classify → draft → safety check → owner email → approve → publish.
-import { admin, APP_URL, captureError, emailLayout, esc, isDefiniteGoogleRejection, sendEmail, sha256Hex } from "./kabsi.ts";
+import { admin, APP_URL, captureError, emailButton, emailLayout, emailLink, esc, isDefiniteGoogleRejection, sendEmail, sha256Hex } from "./kabsi.ts";
 import { listReviews, putReply } from "./google.ts";
 import { checkDraft, classify, draftReply, MODELS, newMeter, type Card } from "./ai.ts";
 import { AiBudgetError, recordAiUsage, takeAiBudget } from "./ai-budget.ts";
@@ -188,8 +188,12 @@ async function latestDraft(reviewId: string) {
   return data;
 }
 const quote = (s: string) => `<div style="margin:0 0 16px 0;padding:14px 16px;background:#F6F4EF;border-radius:14px;white-space:pre-wrap;">${esc(s)}</div>`;
-const link = (url: string, label: string) => `<a href="${esc(url)}" style="color:#111111;font-weight:700;">${esc(label)}</a>`;
+const link = (url: string, label: string) => emailLink(label, url);
 
+// `withPost` is the daily digest, where several reviews share one email. A digest block carries text links only,
+// so the email keeps exactly one yellow button (the layout's "Open Kabsi"). A single review email carries its own
+// yellow "Review reply" and the layout button is left out (ownButton), with "Open Kabsi" as a text link beside
+// Edit and Skip, on a line that wraps on a phone.
 async function reviewBlock(loc: Loc, r: PendingReview, userId: string | null, withPost: boolean) {
   const draft = await latestDraft(r.id);
   const head = `<p style="margin:0 0 8px 0;"><strong>${esc(r.reviewer_name ?? "A customer")}</strong> · Rating ${r.star_rating} of 5</p>`;
@@ -199,26 +203,34 @@ async function reviewBlock(loc: Loc, r: PendingReview, userId: string | null, wi
   if (r.state === "blocked" || !draft?.safety_ok) {
     const open = await mk("open");
     return {
-      html: head + reviewText + `<p style="margin:0 0 16px 0;">A reply couldn't be safely drafted for this one. Write your own reply in Kabsi, or ask us.</p><p style="margin:0;">${link(open, "Open in Kabsi")}</p>`,
+      html: head + reviewText + `<p style="margin:0 0 16px 0;">A reply couldn't be safely drafted for this one. Write your own reply in Kabsi, or ask us.</p><div style="margin:0;">${link(open, "Open in Kabsi")}</div>`,
       text: `${r.star_rating}/5: no safe draft. Open: ${open}`,
     };
   }
   if (r.urgency === "urgent" && !withPost) {
     const [see, mine] = await Promise.all([mk("see_draft"), mk("handle_myself")]);
     return {
-      html: head + reviewText + `<p style="margin:0 0 16px 0;">Don't reply in anger. A calm draft is ready. If you can reach the customer, call them.</p><p style="margin:0;">${link(see, "See draft")} &nbsp;·&nbsp; ${link(mine, "I'll handle it")}</p>`,
+      html: head + reviewText + `<p style="margin:0 0 16px 0;">Don't reply in anger. A calm draft is ready. If you can reach the customer, call them.</p><div style="margin:0;">${link(see, "See draft")}${link(mine, "I'll handle it")}</div>`,
       text: `Needs care. See draft: ${see}\nI'll handle it: ${mine}`,
     };
   }
   const [post, edit, skip] = await Promise.all([mk("post"), mk("edit"), mk("skip")]);
+  const inbox = `${APP_URL}/app/inbox`;
+  const drafted = head + reviewText + `<p style="margin:0 0 6px 0;font-size:14px;color:#5E5B55;">Drafted reply</p>` + quote(draft.body);
+  if (withPost) {
+    return {
+      html: drafted + `<div style="margin:0;">${link(post, "Review reply")}${link(edit, "Edit")}${link(skip, "Skip")}</div>`,
+      text: `Draft:\n${draft.body}\n\nReview reply: ${post}\nEdit: ${edit}\nSkip: ${skip}`,
+    };
+  }
   return {
-    html: head + reviewText + `<p style="margin:0 0 6px 0;font-size:14px;color:#5E5B55;">Drafted reply</p>` + quote(draft.body) +
-      `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:#FFD60A;border-radius:14px;"><a href="${esc(post)}" style="display:inline-block;padding:13px 24px;font-weight:700;color:#000000;text-decoration:none;">Review reply</a></td><td style="padding-left:18px;">${link(edit, "Edit")}</td><td style="padding-left:18px;">${link(skip, "Skip")}</td></tr></table>`,
-    text: `Draft:\n${draft.body}\n\nReview reply: ${post}\nEdit: ${edit}\nSkip: ${skip}`,
+    html: drafted + emailButton("Review reply", post) + `<div style="margin:8px 0 0 0;">${link(edit, "Edit")}${link(skip, "Skip")}${link(inbox, "Open Kabsi")}</div>`,
+    text: `Draft:\n${draft.body}\n\nReview reply: ${post}\nEdit: ${edit}\nSkip: ${skip}\nOpen Kabsi: ${inbox}`,
+    ownButton: true,
   };
 }
 
-async function sendToLocation(loc: Loc, o: { kind: string; key: string; subject: string; title: string; preheader: string; build: (userId: string | null) => Promise<{ html: string; text: string }> }) {
+async function sendToLocation(loc: Loc, o: { kind: string; key: string; subject: string; title: string; preheader: string; build: (userId: string | null) => Promise<{ html: string; text: string; ownButton?: boolean }> }) {
   const { data: members } = await admin().rpc("location_member_recipients", { p_location: loc.id });
   const recipients = new Map<string, string | null>();
   for (const m of (members ?? []) as { user_id: string; email: string }[]) recipients.set(m.email, m.user_id);
@@ -227,8 +239,8 @@ async function sendToLocation(loc: Loc, o: { kind: string; key: string; subject:
     const body = await o.build(userId);
     await sendEmail({
       kind: o.kind, to, locationId: loc.id, dedupeKey: `${o.key}:${to}`, subject: o.subject,
-      html: emailLayout({ preheader: o.preheader, title: o.title, bodyHtml: body.html, button: { label: "Open Kabsi", url: `${APP_URL}/app/inbox` } }),
-      text: `${body.text}\n\nOpen Kabsi: ${APP_URL}/app/inbox`,
+      html: emailLayout({ preheader: o.preheader, title: o.title, bodyHtml: body.html, button: body.ownButton ? undefined : { label: "Open Kabsi", url: `${APP_URL}/app/inbox` } }),
+      text: body.ownButton ? body.text : `${body.text}\n\nOpen Kabsi: ${APP_URL}/app/inbox`,
     });
   }
 }
