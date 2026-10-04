@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck: index-heavy vendored algorithm; every index is in range by construction. Verified by
-// decoding the output with OpenCV for versions 1 to 8 (see KABSI-STATE.md, 26 Sep 2026).
+// decoding the output with OpenCV for versions 1 to 8 (checked 26 Sep 2026).
 // Tiny QR encoder for short links (byte mode, error correction M, versions 1 to 10).
 // Follows the structure of Project Nayuki's QR Code generator (MIT). No dependencies.
 

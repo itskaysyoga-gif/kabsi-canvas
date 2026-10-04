@@ -1,12 +1,12 @@
-// Public-site facts and SEO helpers. Every number here comes from KABSI-SPEC §1; every sentence
-// must pass §3 (no promises of reviews, ratings or rankings; no invented numbers; no Google affiliation).
+// Public-site facts and SEO helpers. Every number here comes from knowledge/kabsi-facts.md; every sentence
+// must pass docs/KABSI-PLAN.md section 2.2 (no promises of reviews, ratings or rankings; no invented numbers; no Google affiliation).
 
-// Canonical origin. Moves to https://kabsi.co at the domain switch (D215).
+// Canonical origin. Moves to https://kabsi.co at the domain switch (task P0.1-03).
 // Public Cloudflare Turnstile site key (safe in the browser). The secret lives in Supabase secrets.
 export const TURNSTILE_SITE_KEY = "0x4AAAAAAFHvWh4ra3THq5g0";
 export const SITE_URL = "https://kabsi-app.lovable.app";
 export const CONTACT_EMAIL = "hello@kabsi.co";
-// Kabsi's Google business group (D293). Owners invite this ID as a Manager. It is an identifier, not a secret.
+// Kabsi's Google business group (plan Appendix B). Owners invite this ID as a Manager. It is an identifier, not a secret.
 export const KABSI_GROUP_ID = "5481006796";
 export const KABSI_GROUP_NAME = "Kabsi Clients";
 export const CONTACT_PHONE = "+961 3 956 917";
@@ -24,7 +24,7 @@ export const PRICES = {
   foundingRate: 6,
 } as const;
 
-/** The trial line, worded once (D281). 30 days through partner links and inserts. */
+/** The trial line, worded once. 30 days through partner links and inserts. */
 export const TRIAL_LINE = "14-day free trial, no card";
 
 type Meta = { title?: string; name?: string; property?: string; content?: string };

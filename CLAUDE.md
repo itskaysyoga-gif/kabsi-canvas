@@ -17,7 +17,7 @@ One task per chat. The task ID comes from the prompt. Nothing else is in scope.
 - No em dashes, en dashes or exclamation marks anywhere. Product names from K-02 only; never Profile Score, Do now, Listing Shield or Put mine back.
 - Only the design tokens (K-108). Phone first at 390 px.
 - Secrets never appear in code, commits, logs, pull requests or screenshots.
-- Every change that alters behaviour, price or wording updates `knowledge/kabsi-facts.md` (until task P0.1-01 moves it: `docs/KNOWLEDGE-BASE.md`).
+- Every change that alters behaviour, price or wording updates `knowledge/kabsi-facts.md`.
 - The Kabsi Google group ID lives only in `KABSI_GROUP_ID` in `src/lib/site.ts`; Lebanon-only wording only through `src/lib/region.ts`.
 
 ## Git, Lovable and deploys

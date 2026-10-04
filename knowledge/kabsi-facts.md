@@ -1,4 +1,4 @@
-Last updated: 29 Sep 2026. Source: KABSI-SPEC D200 to D308.
+Last updated: 4 Oct 2026. Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md.
 
 # Kabsi Master Knowledge Base
 
