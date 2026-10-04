@@ -46,7 +46,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | merged (23); After-merge checks partly run, see Evidence | 23 | 4 Oct 2026 |
 | P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | merged (24); After-merge checks partly run, see Evidence | 24 | 4 Oct 2026 |
 | P0.1-05 | Design tokens and shared components | Sonnet | merged (25); `/design` not yet looked at as staff | 25 | 4 Oct 2026 |
-| P0.1-06 | Demo workspace with fictional businesses | Opus | part A merged (28, squash 197c64e); part B (Demo data tag, PostHog off) PR open; After-merge mock-review email check still open | 28, B: see Log | 4 Oct 2026 |
+| P0.1-06 | Demo workspace with fictional businesses | Opus | part A merged (28, squash 197c64e); part B (Demo data tag, PostHog off) PR open; After-merge mock-review email check still open | 28, 29 | 4 Oct 2026 |
 | P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet | todo | | |
 | P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | todo | | |
 | P0.1-V3 | Setup-call and partner-call booking links | Sonnet | todo | | |
@@ -358,7 +358,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
-- 4 Oct 2026 (Hussein's session): PR 28 (P0.1-06 part A) merged on Hussein's "merge"; demo sign-in checked by Hussein; functions redeployed 12:21 UTC. P0.1-06 part B on branch claude/h-p0-1-06b. Next: part B After-merge checks, the open part A mock-review email check, then P0.1-V1.
+- 4 Oct 2026 (Hussein's session): PR 28 (P0.1-06 part A) merged on Hussein's "merge"; demo sign-in checked by Hussein; functions redeployed 12:21 UTC. P0.1-06 part B on branch claude/h-p0-1-06b, PR 29, CI green on 793fde7. Next: part B After-merge checks, the open part A mock-review email check, then P0.1-V1.
 - 4 Oct 2026 (Hussein's session): After-merge checks: Deploy run 9 (PR 27) success, all functions updated 08:58 UTC; live site still blocked from the sandbox. PR 27 email confirmed by Hussein; its test data deleted. P0.1-06 part A on branch claude/h-p0-1-06, PR 28, CI green (both migrations applied; demo login and seed waiting). Next: demo login, seed, then P0.1-06 part B.
 - 4 Oct 2026 (Hussein's session): PR 26 merged (progress notes only). Email button and phone-layout fix on branch claude/h-email-buttons. Next: P0.1-V1.
 - 4 Oct 2026 (Hussein's session): PR 25 (P0.1-05) merged on Hussein's "merge". Live mock-review check for 04a and 04b passed; cap test and screen checks still open. Next: P0.1-V1.
