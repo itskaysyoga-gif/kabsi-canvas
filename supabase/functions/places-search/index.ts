@@ -1,6 +1,7 @@
 // places-search: onboarding step "Find your business". Signed-in users only.
 // POST { query } → { places: [{ place_id, name, address, country }] }  (max 5)
 // The Places API key never reaches the browser.
+import { searchText } from "../_shared/google/index.ts";
 import { captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
 
 Deno.serve(async (req) => {
@@ -20,20 +21,10 @@ Deno.serve(async (req) => {
   if (q.length < 2 || q.length > 120) return fail("bad_query", "Type your business name and area.");
 
   try {
-    const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-goog-api-key": key,
-        "x-goog-fieldmask": "places.id,places.displayName,places.formattedAddress,places.addressComponents",
-      },
-      body: JSON.stringify({ textQuery: q, maxResultCount: 5 }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(`places ${res.status}: ${JSON.stringify(data).slice(0, 300)}`);
-    type Comp = { shortText?: string; types?: string[] };
-    const places = (data.places ?? []).map((p: { id: string; displayName?: { text?: string }; formattedAddress?: string; addressComponents?: Comp[] }) => ({
-      place_id: p.id,
+    const { ok, status, data } = await searchText(key, q, 5, "places.id,places.displayName,places.formattedAddress,places.addressComponents");
+    if (!ok) throw new Error(`places ${status}: ${JSON.stringify(data).slice(0, 300)}`);
+    const places = (data.places ?? []).map((p) => ({
+      place_id: p.id as string,
       name: p.displayName?.text ?? "",
       address: p.formattedAddress ?? "",
       country: p.addressComponents?.find((c) => c.types?.includes("country"))?.shortText ?? null,

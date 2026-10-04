@@ -22,7 +22,8 @@ import type {
   SpecialHourPeriod, TimeOfDay, WriteResult,
 } from "./types.ts";
 
-export { googleMode } from "./client.ts";
+export { googleMode, refreshToken } from "./client.ts";
+export { listAccountsOnce } from "./accounts/live.ts";
 export { SHIELD_FIELDS } from "./types.ts";
 export type { FieldValue, GoogleReview, Listing, ManagedLocation, PendingBusiness, PostInput, ShieldField, SkippedInvitation, SpecialDay };
 

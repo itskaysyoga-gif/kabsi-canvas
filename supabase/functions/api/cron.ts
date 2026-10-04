@@ -2,7 +2,7 @@
 // Each job decides what is due by looking at data, never at the clock alone, and is safe to run twice.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 import { dueRenewalEmail, dueTrialEmail, localDateHour, PLAN_LABEL, type RenewalStage, type TrialStage } from "../_shared/plans.ts";
-import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google.ts";
+import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google/index.ts";
 import { activeLocations, draftPending, notifyLocation, syncableLocations, syncLocation } from "../_shared/reviews.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
 import { snapshotRatings, weeklyReports } from "../_shared/report.ts";

@@ -7,7 +7,7 @@ import { businessFacts, hasPostFacts } from "./facts.ts";
 import { contactIssues } from "./contact.ts";
 import { buildKeywords } from "./keywords.ts";
 import { recordAiUsage, takeAiBudget } from "./ai-budget.ts";
-import { googleMode, placeCategory, searchKeywords } from "./google.ts";
+import { googleMode, placeCategory, searchKeywords } from "./google/index.ts";
 
 const CHECK_MODEL = MODELS.check;
 

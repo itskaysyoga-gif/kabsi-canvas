@@ -11,7 +11,7 @@
 import { MODELS } from "../_shared/models.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
 import { admin, captureError, CORS, currentUser, fail, isDefiniteGoogleRejection, json, rateLimit } from "../_shared/kabsi.ts";
-import { addSpecialHours, createLocalPost, createMedia } from "../_shared/google.ts";
+import { addSpecialHours, createLocalPost, createMedia } from "../_shared/google/index.ts";
 import { decideChange } from "../_shared/shield.ts";
 import { CTAS, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, writePost } from "../_shared/posts.ts";
 import { AI_BUDGET_MESSAGE, AiBudgetError } from "../_shared/ai-budget.ts";

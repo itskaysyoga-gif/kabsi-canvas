@@ -3,8 +3,9 @@
 - `migrations/` — every migration already applied to production, named with the exact version
   Supabase recorded (`list_migrations`). Never edit an applied file; add a new one.
 - `functions/` — Edge Functions, deployed by Claude (Supabase MCP) and kept here as the source of truth.
-  `_shared/kabsi.ts` (clients, auth, rate limit, Sentry, branded email) and `_shared/google.ts`
-  (hello@kabsi.co access, `GOOGLE_MODE=mock|live`) are bundled into each function at deploy time.
+  `_shared/kabsi.ts` (clients, auth, rate limit, Sentry, branded email) and `_shared/google/` (the only
+  place that calls Google: hello@kabsi.co access, Places, `GOOGLE_MODE=mock|live`; import `_shared/google/index.ts`)
+  are bundled into each function at deploy time.
 - There is deliberately **no `config.toml`** here: pushing one through the GitHub integration could
   overwrite live Auth settings (SMTP, templates, redirect URLs) that were set in the dashboard.
 - Lovable must never create files in this folder (Lovable Cloud stays disabled).

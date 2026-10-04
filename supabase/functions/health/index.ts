@@ -1,6 +1,8 @@
 // health: internal (cron secret). Reports which secrets are set (true/false only, never values)
 // and whether each external service answers. Used by Claude to verify setup without seeing secrets.
-// Self-contained (no shared imports) so it stays tiny.
+// Self-contained apart from the Google layer (K-34), so it stays tiny.
+import { googleMode, listAccountsOnce, refreshToken, searchText } from "../_shared/google/index.ts";
+
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { "content-type": "application/json" } });
 async function isInternal(req: Request) {
   const given = req.headers.get("x-cron-secret");
@@ -70,12 +72,8 @@ Deno.serve(async (req) => {
   }
   const places = Deno.env.get("PLACES_API_KEY");
   if (places) {
-    const r = await fetch("https://places.googleapis.com/v1/places:searchText", {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-goog-api-key": places, "x-goog-fieldmask": "places.id" },
-      body: JSON.stringify({ textQuery: "Yawmiyati Beirut", maxResultCount: 1 }),
-    });
-    checks.places = r.ok ? "search works" : `search failed (${r.status}): ${(await r.text()).slice(0, 160)}`;
+    const r = await searchText(places, "Yawmiyati Beirut", 1, "places.id");
+    checks.places = r.ok ? "search works" : `search failed (${r.status}): ${JSON.stringify(r.data).slice(0, 160)}`;
   }
   // The key was saved as "Anthropic_Api"; the functions accept both names.
   const anthropic = Deno.env.get("ANTHROPIC_API_KEY") ?? Deno.env.get("Anthropic_Api");
@@ -88,23 +86,18 @@ Deno.serve(async (req) => {
   // API answer? Before the API grant, Google replies 429 with a zero quota; that is expected.
   const gid = Deno.env.get("GOOGLE_CLIENT_ID"), gsecret = Deno.env.get("GOOGLE_CLIENT_SECRET"), grefresh = Deno.env.get("GOOGLE_REFRESH_TOKEN");
   if (gid && gsecret && grefresh) {
-    const t = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ client_id: gid, client_secret: gsecret, refresh_token: grefresh, grant_type: "refresh_token" }),
-    });
-    const tj = await t.json().catch(() => ({}));
+    const t = await refreshToken();
+    const tj = t.body;
     if (!t.ok) checks.google_token = `refresh failed (${t.status}): ${tj.error ?? ""}`;
     else {
       checks.google_token = `ok, scope ${String(tj.scope ?? "").includes("business.manage") ? "business.manage" : `MISSING business.manage (${tj.scope})`}`;
-      const a = await fetch("https://mybusinessaccountmanagement.googleapis.com/v1/accounts", { headers: { authorization: `Bearer ${tj.access_token}` } });
-      const aj = await a.json().catch(() => ({}));
+      const a = await listAccountsOnce(String(tj.access_token));
       checks.google_accounts = a.ok
-        ? `ok, ${(aj.accounts ?? []).length} account(s)`
-        : `${a.status}: ${String(aj.error?.message ?? "").slice(0, 160)}`;
+        ? `ok, ${(a.body.accounts ?? []).length} account(s)`
+        : `${a.status}: ${String(a.body.error?.message ?? "").slice(0, 160)}`;
     }
   } else checks.google_token = "not configured (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN)";
   checks.jobs_recent = await jobsFreshness();
-  checks.google_mode = Deno.env.get("GOOGLE_MODE") === "live" ? "live" : "mock";
+  checks.google_mode = googleMode();
   return json({ set, nearMisses, checks });
 });

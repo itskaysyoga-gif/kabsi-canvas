@@ -14,6 +14,7 @@
     "test": "vitest run",
     "check:anon": "node scripts/check-anon-headers.mjs",
     "check:tokens": "node scripts/check-tokens.mjs",
+    "check:google": "node scripts/check-google-calls.mjs",
     "check:deno": "bash scripts/deno-check.sh",
     "format": "prettier --write ."
   },

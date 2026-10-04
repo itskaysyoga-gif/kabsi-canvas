@@ -2,6 +2,7 @@
 // POST { query } → up to 5 businesses with their Google review link. The Places key never reaches the browser.
 // Abuse limits: 20 searches per visitor per hour (keyed by a salted hash of the IP, kept 1 hour, never the IP
 // itself) and 400 searches a day in total, so the Places bill stays inside the free monthly credit.
+import { searchText } from "../_shared/google/index.ts";
 import { captureError, CORS, fail, json, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 
 Deno.serve(async (req) => {
@@ -26,23 +27,13 @@ Deno.serve(async (req) => {
   if (q.length < 2 || q.length > 120) return fail("bad_query", "Type your business name and city.");
 
   try {
-    const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-goog-api-key": key,
-        "x-goog-fieldmask": "places.id,places.displayName,places.formattedAddress",
-      },
-      body: JSON.stringify({ textQuery: q, maxResultCount: 5 }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(`places ${res.status}: ${JSON.stringify(data).slice(0, 300)}`);
-    type P = { id: string; displayName?: { text?: string }; formattedAddress?: string };
-    const places = ((data.places ?? []) as P[]).map((p) => ({
-      place_id: p.id,
+    const { ok, status, data } = await searchText(key, q, 5, "places.id,places.displayName,places.formattedAddress");
+    if (!ok) throw new Error(`places ${status}: ${JSON.stringify(data).slice(0, 300)}`);
+    const places = (data.places ?? []).map((p) => ({
+      place_id: p.id as string,
       name: p.displayName?.text ?? "",
       address: p.formattedAddress ?? "",
-      review_url: `https://search.google.com/local/writereview?placeid=${encodeURIComponent(p.id)}`,
+      review_url: `https://search.google.com/local/writereview?placeid=${encodeURIComponent(p.id as string)}`,
     }));
     return json({ places });
   } catch (e) {
