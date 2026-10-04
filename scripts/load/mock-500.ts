@@ -24,7 +24,10 @@ const MINUTES = Number(env("LOAD_MINUTES", "60"));
 const LATENCY = Number(env("LOAD_LATENCY_MS", "0"));
 const API_URL = env("API_URL");
 const DB_URL = env("DB_URL");
-if (!/^https?:\/\/(127\.0\.0\.1|localhost)[:/]/.test(API_URL) || !/@(127\.0\.0\.1|localhost)[:/]/.test(DB_URL)) {
+if (
+  !/^https?:\/\/(127\.0\.0\.1|localhost)[:/]/.test(API_URL) ||
+  !/@(127\.0\.0\.1|localhost)[:/]/.test(DB_URL)
+) {
   throw new Error("the load test runs only against a local stack");
 }
 // The function code reads these at import: point it at the local stack, keep it in mock mode, and keep error reports
@@ -40,7 +43,8 @@ Deno.env.delete("ANTHROPIC_API_KEY");
 const realFetch = globalThis.fetch;
 if (LATENCY > 0) {
   globalThis.fetch = async (input, init) => {
-    if (String(input instanceof Request ? input.url : input).startsWith(API_URL)) await new Promise((r) => setTimeout(r, LATENCY));
+    if (String(input instanceof Request ? input.url : input).startsWith(API_URL))
+      await new Promise((r) => setTimeout(r, LATENCY));
     return realFetch(input, init);
   };
 }
@@ -71,7 +75,8 @@ async function seed() {
   await sql`delete from public.jobs`;
   await sql`notify pgrst, 'reload schema'`;
   await new Promise((r) => setTimeout(r, 2000));
-  const [{ c }] = await sql`select count(*)::int c from public.google_connections g join public.locations l on l.id = g.location_id
+  const [{ c }] =
+    await sql`select count(*)::int c from public.google_connections g join public.locations l on l.id = g.location_id
                             where l.name like 'Load test business %' and l.status = 'active'`;
   if (c !== N) throw new Error(`expected ${N} google_connections, found ${c}`);
 }
@@ -87,7 +92,8 @@ async function advance(ms: number) {
 }
 
 async function due() {
-  const [{ c }] = await sql`select count(*)::int c from public.jobs where state in ('pending', 'retrying') and next_run_at <= now()`;
+  const [{ c }] =
+    await sql`select count(*)::int c from public.jobs where state in ('pending', 'retrying') and next_run_at <= now()`;
   return c as number;
 }
 
@@ -100,19 +106,27 @@ async function main() {
     const t0 = Date.now();
     const [{ r }] = await sql`select private.produce_jobs() r`;
     const offered = Object.values(r as Record<string, number>).reduce((a, b) => a + Number(b), 0);
-    let ms = 0, done = 0;
+    let ms = 0,
+      done = 0;
     if (await due()) {
       const t = Date.now();
-      const res = await dispatch(new Request("http://local/api/dispatch", { method: "POST", headers: { "x-cron-secret": SECRET } }));
+      const res = await dispatch(
+        new Request("http://local/api/dispatch", {
+          method: "POST",
+          headers: { "x-cron-secret": SECRET },
+        }),
+      );
       ms = Date.now() - t;
-      const body = await res.json() as { counts?: Record<string, number>; error?: string };
+      const body = (await res.json()) as { counts?: Record<string, number>; error?: string };
       if (!res.ok) throw new Error(`dispatch ${res.status}: ${JSON.stringify(body)}`);
       done = Object.values(body.counts ?? {}).reduce((a, b) => a + b, 0);
     }
     const leftDue = await due();
     runs.push({ minute, offered, ms, done, leftDue });
     if (minute % 10 === 0 || minute <= 2) {
-      console.log(`minute ${minute}: offered ${offered}, dispatcher ${done} jobs in ${ms} ms, still due ${leftDue}`);
+      console.log(
+        `minute ${minute}: offered ${offered}, dispatcher ${done} jobs in ${ms} ms, still due ${leftDue}`,
+      );
     }
     await advance(60_000 - (Date.now() - t0));
   }
@@ -127,7 +141,8 @@ async function main() {
       from (select l.id, count(j.id) n from public.locations l
               left join public.jobs j on j.location_id = l.id and j.kind = 'protection_check' and j.state = 'succeeded'
              where l.name like 'Load test business %' group by l.id) s`;
-  const states = await sql`select kind, state, count(*)::int n from public.jobs group by 1, 2 order by 1, 2`;
+  const states =
+    await sql`select kind, state, count(*)::int n from public.jobs group by 1, 2 order by 1, 2`;
   const [status] = await sql`
     select count(*) filter (where g.sync_status = 'ok')::int ok, count(*) filter (where g.last_successful_sync_at is null)::int never
       from public.google_connections g join public.locations l on l.id = g.location_id where l.name like 'Load test business %'`;
@@ -135,18 +150,30 @@ async function main() {
   const maxMs = Math.max(...runs.map((x) => x.ms));
   const slowest = runs.reduce((a, b) => (b.ms > a.ms ? b : a));
   const maxLeft = Math.max(...runs.map((x) => x.leftDue));
-  const stopped = states.filter((s) => s.state === "dead" || s.state === "failed").reduce((a, s) => a + s.n, 0);
+  const stopped = states
+    .filter((s) => s.state === "dead" || s.state === "failed")
+    .reduce((a, s) => a + s.n, 0);
   const endDue = runs[runs.length - 1].leftDue;
   // After its first sync (at its own offset inside the first 5 minutes) each business is due every 5 minutes.
   const expectMin = Math.floor((MINUTES - 5) / 5);
 
   console.log("\nResult");
-  console.log(`  businesses ${syncs.businesses}, simulated minutes ${MINUTES}, database latency added ${LATENCY} ms, real time ${Math.round((Date.now() - started) / 1000)} s`);
-  console.log(`  review syncs succeeded: ${syncs.total} (per business min ${syncs.min_syncs}, max ${syncs.max_syncs}; at least ${expectMin} expected)`);
+  console.log(
+    `  businesses ${syncs.businesses}, simulated minutes ${MINUTES}, database latency added ${LATENCY} ms, real time ${Math.round((Date.now() - started) / 1000)} s`,
+  );
+  console.log(
+    `  review syncs succeeded: ${syncs.total} (per business min ${syncs.min_syncs}, max ${syncs.max_syncs}; at least ${expectMin} expected)`,
+  );
   console.log(`  Protection checks succeeded: ${prot.total} (per business min ${prot.min_checks})`);
-  console.log(`  google_connections: sync_status ok ${status.ok} of ${N}, never synced ${status.never}`);
-  console.log(`  dispatcher: longest run ${maxMs} ms (minute ${slowest.minute}, ${slowest.done} jobs); most left due after a run ${maxLeft}; due at the end ${endDue}`);
-  console.log(`  jobs by kind and state: ${states.map((s) => `${s.kind} ${s.state} ${s.n}`).join(", ")}`);
+  console.log(
+    `  google_connections: sync_status ok ${status.ok} of ${N}, never synced ${status.never}`,
+  );
+  console.log(
+    `  dispatcher: longest run ${maxMs} ms (minute ${slowest.minute}, ${slowest.done} jobs); most left due after a run ${maxLeft}; due at the end ${endDue}`,
+  );
+  console.log(
+    `  jobs by kind and state: ${states.map((s) => `${s.kind} ${s.state} ${s.n}`).join(", ")}`,
+  );
   console.log(`  circuit breaker: ${breaker.state}`);
 
   const problems = [
@@ -155,7 +182,8 @@ async function main() {
     status.ok !== N && `${N - status.ok} businesses not ok`,
     stopped > 0 && `${stopped} jobs dead or failed`,
     endDue > 0 && `${endDue} jobs still due at the end`,
-    maxMs > 50_000 && `a dispatcher run took ${maxMs} ms (the function limit is 150 s; a run should stop at about 40 s)`,
+    maxMs > 50_000 &&
+      `a dispatcher run took ${maxMs} ms (the function limit is 150 s; a run should stop at about 40 s)`,
     breaker.state !== "closed" && "the circuit breaker opened",
   ].filter(Boolean);
   await sql.end();
@@ -163,7 +191,9 @@ async function main() {
     console.error(`\nFAILED: ${problems.join("; ")}`);
     Deno.exit(1);
   }
-  console.log("\nPASSED: every business synced on schedule for the whole hour, no function came near its time limit.");
+  console.log(
+    "\nPASSED: every business synced on schedule for the whole hour, no function came near its time limit.",
+  );
 }
 
 await main();
