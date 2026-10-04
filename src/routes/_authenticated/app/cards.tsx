@@ -1,16 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Check,
-  Copy,
-  Download,
-  Link2,
-  Nfc,
-  Power,
-  Printer,
-  TriangleAlert,
-} from "lucide-react";
+import { Check, Copy, Download, Link2, Nfc, Power, Printer, TriangleAlert } from "lucide-react";
 import { copyText } from "@/lib/clipboard";
 import { CopyButton } from "@/components/shared/copy-button";
 import { useIsLebanon } from "@/lib/region";
@@ -97,7 +88,8 @@ function CardsPage() {
       <p className="mt-2 text-kb-stone">
         Three steps to make it easy for customers to leave a Google review. Everyone sees the same
         page, and you ask every customer the same way. Never offer a reward for a review: Google can
-        remove those reviews.
+        remove those reviews. Activity is not the same as reviews. Google decides which reviews
+        appear.
       </p>
       {!location.isLoading && !loc ? (
         <Button asChild className="mt-6">
@@ -119,7 +111,7 @@ function CardsPage() {
       <h2 className="mt-10 text-lg font-bold">3. Optional: use an NFC tag</h2>
       <p className="mt-2 rounded-card bg-kb-white p-4 text-sm leading-6 text-kb-stone shadow-kb">
         Already have an NFC tag or sticker? Use a free NFC writer app on your phone, choose "write a
-        URL" and paste your review link from step 1. Taps are counted the same way.
+        URL" and paste your review link from step 1. Activity is counted the same way.
         {loc && isLeb ? " In Lebanon you can also get a ready Kabsi card from our team." : ""}
       </p>
       <div className="mt-3 space-y-4">
@@ -299,11 +291,11 @@ function CardRow({ card, taps, onChanged }: { card: Card; taps: Tap[]; onChanged
         <div className="grid shrink-0 grid-cols-2 gap-4 text-right">
           <div>
             <p className="text-2xl font-bold leading-none">{week.length}</p>
-            <p className="mt-1 text-xs text-kb-stone">7 days</p>
+            <p className="mt-1 text-xs text-kb-stone">link activity, 7 days</p>
           </div>
           <div>
             <p className="text-2xl font-bold leading-none">{taps.length}</p>
-            <p className="mt-1 text-xs text-kb-stone">30 days</p>
+            <p className="mt-1 text-xs text-kb-stone">link activity, 30 days</p>
           </div>
         </div>
       </div>
@@ -425,7 +417,7 @@ function ShareKit({ name, link }: { name: string; link: string }) {
     <section className="mt-10">
       <h2 className="text-lg font-bold">2. Share it or print the QR code</h2>
       <p className="mt-1 text-sm text-kb-stone">
-        Ready-to-copy texts with your link already in them. Taps and scans count how often your page
+        Ready-to-copy texts with your link already in them. Link activity counts how often your page
         was opened, not whether a review was written.
       </p>
       <div className="mt-3 space-y-3">
@@ -566,7 +558,7 @@ function LinkRow({ link, taps, onChanged }: { link: Card; taps: Tap[]; onChanged
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold">{week}</p>
-            <p className="text-xs text-kb-stone">opens, 7 days</p>
+            <p className="text-xs text-kb-stone">link activity, 7 days</p>
           </div>
         </div>
         <CopyField url={url} label="Copy review link" />

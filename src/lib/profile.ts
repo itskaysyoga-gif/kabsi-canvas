@@ -1,4 +1,5 @@
-// Profile Score and the "Do now" list (D296, D299). Computed in the database from facts Kabsi holds.
+// The "What needs your attention" list. Computed in the database from facts Kabsi holds. The score and points the RPC
+// still returns are not shown to owners.
 import { supabase } from "@/lib/supabase";
 
 export type ScoreItem = {

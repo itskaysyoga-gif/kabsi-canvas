@@ -10,7 +10,7 @@ import { loadAction, runAction, type ActionView } from "@/lib/reviews";
 import { track } from "@/lib/telemetry";
 
 // Email action links. Opening this page never does anything by itself (mail scanners open links);
-// the owner always presses a button, and "Post" sends exactly the text in the box (D202).
+// the owner always presses a button, and "Approve" sends exactly the text in the box (D202).
 export const Route = createFileRoute("/a/$token")({
   head: () => ({
     meta: [{ title: "Your review reply | Kabsi" }, { name: "robots", content: "noindex" }],
@@ -126,7 +126,7 @@ function ActionPage() {
               </p>
             ) : null}
             <Button className="mt-6 w-full" disabled={busy} onClick={() => void run("revert")}>
-              {busy ? "Working…" : "Put mine back"}
+              {busy ? "Working…" : "Keep my information"}
             </Button>
             <Button
               variant="ghost"
@@ -268,7 +268,7 @@ function ActionPage() {
         disabled={busy || !text.trim() || tooLong}
         onClick={() => void run("post")}
       >
-        {busy ? "Posting…" : "Post reply to Google"}
+        {busy ? "Approving…" : "Approve reply"}
       </Button>
       <Button
         variant="ghost"

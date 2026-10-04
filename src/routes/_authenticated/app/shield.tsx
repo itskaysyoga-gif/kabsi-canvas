@@ -23,11 +23,11 @@ import { track } from "@/lib/telemetry";
 import { ShieldCheck as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
 
-// Listing Shield (D218): Kabsi watches the listing and alerts you when something changes. It can't stop
+// Google Protection (D218): Kabsi watches the listing and alerts you when something changes. It can't stop
 // Google or the public from editing, but it can put your version back with one tap.
 export const Route = createFileRoute("/_authenticated/app/shield")({
   head: () => ({
-    meta: [{ title: "Listing Shield | Kabsi" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Google Protection | Kabsi" }, { name: "robots", content: "noindex" }],
   }),
   component: ShieldPage,
 });
@@ -97,7 +97,7 @@ function ShieldPage() {
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
       <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Profile</p>
-      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Listing Shield</h1>
+      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Google Protection</h1>
       <p className="mt-2 max-w-2xl text-kb-stone">
         Kabsi watches your Google listing and emails you when something changes. Google sometimes
         accepts edits from the public. Kabsi can't stop that, but it can put your version back in
@@ -113,11 +113,11 @@ function ShieldPage() {
           Couldn't load your listing. Refresh the page.
         </p>
       ) : null}
-      {loc?.concierge ? <EarlyAccessNotice what="Listing Shield" /> : null}
+      {loc?.concierge ? <EarlyAccessNotice what="Google Protection" /> : null}
       {loc && !loc.concierge && loc.status !== "active" ? (
         <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
           <p className="font-bold">
-            Listing Shield starts once Kabsi can reach your Google profile.
+            Google Protection starts once Kabsi can reach your Google profile.
           </p>
           <Button asChild size="compact" className="mt-4">
             <Link to="/start">Continue setup</Link>
@@ -219,7 +219,7 @@ function OpenChange({ change, onDone }: { change: Change; onDone: () => unknown 
       ) : null}
       <div className="mt-5 flex flex-wrap gap-2">
         <Button className="w-full sm:w-auto" disabled={!!busy} onClick={() => setConfirm(true)}>
-          {busy === "revert" ? "Putting back…" : "Put mine back"}
+          {busy === "revert" ? "Saving…" : "Keep my information"}
         </Button>
         <Button variant="ghost" disabled={!!busy} onClick={() => void decide("keep")}>
           {busy === "keep" ? "Saving…" : "Keep the new one"}
@@ -229,7 +229,7 @@ function OpenChange({ change, onDone }: { change: Change; onDone: () => unknown 
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Put your {(LABEL[change.field] ?? change.field).toLowerCase()} back on Google?
+              Keep your {(LABEL[change.field] ?? change.field).toLowerCase()} on Google?
             </AlertDialogTitle>
             <AlertDialogDescription>
               Google will show: {change.old_value?.display || "your saved version"}
@@ -238,7 +238,7 @@ function OpenChange({ change, onDone }: { change: Change; onDone: () => unknown 
           <AlertDialogFooter>
             <AlertDialogCancel>Not now</AlertDialogCancel>
             <AlertDialogAction onClick={() => void decide("revert")}>
-              Put mine back
+              Keep my information
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -396,10 +396,10 @@ function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
           sub={d.newReviews7d ? "new reviews this week" : "No new reviews this week"}
         />
         <Tile
-          label="Card and link opens"
+          label="Link activity"
           value={String(d.taps7d)}
           icon={<CreditCard />}
-          sub={`${d.taps30d} in 30 days. Opens, not reviews.`}
+          sub={`${d.taps30d} in 30 days. Activity is not reviews.`}
         />
       </div>
 
@@ -526,7 +526,7 @@ function ReplyStack() {
         <span className="mt-3 block h-2 w-full rounded-pill bg-kb-hairline" />
         <span className="mt-1.5 block h-2 w-2/3 rounded-pill bg-kb-hairline" />
         <div className="mt-3 flex gap-2">
-          <span className="rounded-pill bg-kb-yellow px-4 py-1 text-xs font-bold">Post</span>
+          <span className="rounded-pill bg-kb-yellow px-4 py-1 text-xs font-bold">Approve</span>
           <span className="rounded-pill px-3 py-1 text-xs font-bold ring-2 ring-kb-black">
             Edit
           </span>

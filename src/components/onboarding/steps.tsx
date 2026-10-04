@@ -486,7 +486,7 @@ export function PlanStep({ location, onChanged }: StepProps) {
       ) : null}
       <ErrorNote message={error} />
       <Button className="mt-6 w-full" onClick={finish} disabled={busy}>
-        {busy ? "Saving…" : kind === "trial" ? "Start free trial" : "Continue to payment"}
+        {busy ? "Saving…" : kind === "trial" ? "Start trial" : "Continue to payment"}
       </Button>
     </>
   );
