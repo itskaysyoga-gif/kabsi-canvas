@@ -265,21 +265,21 @@ async function runReports() {
         reported_at: new Date().toISOString(), report_count: Number(c.report_count ?? 0) + 1,
       }).eq("id", c.id as string);
 
-      const row = (label: string, value: unknown) => value ? `<tr><td style="padding:4px 12px 4px 0;color:#5E5B55;white-space:nowrap;vertical-align:top;">${esc(label)}</td><td style="padding:4px 0;">${esc(String(value))}</td></tr>` : "";
+      const row = (label: string, value: unknown) => value ? `<p style="margin:0 0 8px 0;"><span style="color:#5E5B55;">${esc(label)}:</span> ${esc(String(value))}</p>` : "";
       const who = k?.name || k?.email || signedIn || "Anonymous visitor";
       const temp = LABEL[r.lead_temperature] ?? r.lead_temperature;
       const update = Number(c.report_count ?? 0) > 0 ? " (update)" : "";
       const bodyHtml = `<p style="margin:0 0 16px 0;">${esc(r.summary)}</p>
 <p style="margin:0 0 16px 0;"><b>Suggested next step:</b> ${esc(r.next_step || "No action needed")}</p>
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="font-size:14px;margin:0 0 16px 0;">
+<div style="margin:0 0 16px 0;">
 ${row("Visitor", who)}${row("Email", k?.email ?? signedIn)}${row("Business", k?.business_name)}${row("Phone", k?.phone)}${row("City", k?.city)}
 ${row("Country", country)}${row("Language", r.language)}${row("Device", c.device)}${row("Time zone", c.timezone)}
 ${row("Topic", LABEL[r.category])}${row("Intent", LABEL[r.intent])}${row("Lead", temp)}${row("Mood", r.sentiment)}${row("Business type", r.business_type)}
 ${row("Started on", c.first_page)}${row("Came from", c.referrer)}${row("Signed in as", signedIn)}${row("News emails", k ? (k.marketing_consent ? "Yes" : "No") : "")}
 ${row("Passed to a person", c.status === "handoff" ? `Yes (${c.handoff_reason ?? "other"})` : "No")}${row("Messages", c.message_count)}
-</table>
+</div>
 <p style="margin:0 0 8px 0;"><b>Conversation</b></p>
-<pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;line-height:1.55;background:#F6F4EF;padding:14px;border-radius:12px;margin:0;">${esc(transcript.slice(-12000))}</pre>`;
+<pre style="white-space:pre-wrap;font-family:inherit;font-size:16px;line-height:1.55;background:#F6F4EF;padding:14px;border-radius:12px;margin:0;">${esc(transcript.slice(-12000))}</pre>`;
       for (const addr of to) {
         await sendEmail({
           kind: "assistant_report", to: addr, replyTo: k?.email || signedIn || undefined,

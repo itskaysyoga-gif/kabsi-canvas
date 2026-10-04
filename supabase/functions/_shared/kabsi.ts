@@ -2,7 +2,6 @@
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
 
 export const APP_URL = Deno.env.get("APP_URL") ?? "https://kabsi-app.lovable.app";
-const LOGO = "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/brand/mark.png";
 const SENTRY_DSN = Deno.env.get("SENTRY_DSN_EDGE") ??
   "https://59fbe71e08e8d7db4f7c5e477acb2fb5@o4512003528720384.ingest.de.sentry.io/4512145412456528";
 
@@ -130,28 +129,8 @@ export function isDefiniteGoogleRejection(e: unknown) {
   return /^Error: google (400|401|403|404) /.test(String(e));
 }
 
-// ─── email (Resend). Same look as emails/build.py.
-const FONT = "'Readex Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
-export function esc(s: string) {
-  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
-}
-export function emailLayout(o: { preheader: string; title: string; bodyHtml: string; button?: { label: string; url: string }; note?: string }) {
-  const button = o.button
-    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 0 0;"><tr><td style="background:#FFD60A;border-radius:14px;"><a href="${esc(o.button.url)}" style="display:inline-block;padding:15px 26px;font-family:${FONT};font-size:17px;font-weight:700;color:#000000;text-decoration:none;">${esc(o.button.label)}</a></td></tr></table>`
-    : "";
-  const note = o.note ? `<p style="margin:20px 0 0 0;font-size:14px;line-height:1.6;color:#5E5B55;">${o.note}</p>` : "";
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><title>${esc(o.title)}</title></head>
-<body style="margin:0;padding:0;background:#F6F4EF;"><div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(o.preheader)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F6F4EF;"><tr><td align="center" style="padding:32px 16px;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
-<tr><td style="padding:0 4px 20px 4px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-<td style="vertical-align:middle;"><img src="${LOGO}" width="32" height="32" alt="Kabsi" style="display:block;border:0;width:32px;height:32px;"></td>
-<td style="vertical-align:middle;padding-left:10px;font-family:${FONT};font-size:22px;font-weight:700;color:#000000;">kabsi</td></tr></table></td></tr>
-<tr><td style="background:#FFFFFF;border-radius:14px;padding:36px 32px;font-family:${FONT};color:#111111;font-size:16px;line-height:1.6;">
-<h1 style="margin:0 0 12px 0;font-size:24px;line-height:1.3;font-weight:700;">${esc(o.title)}</h1>${o.bodyHtml}${button}${note}</td></tr>
-<tr><td style="padding:20px 4px 0 4px;font-family:${FONT};font-size:13px;line-height:1.6;color:#5E5B55;">Nothing is published until you approve it.<br>Questions? Reply to this email or write to <a href="mailto:hello@kabsi.co" style="color:#111111;">hello@kabsi.co</a>.<br>Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.<br>Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co</td></tr>
-</table></td></tr></table></body></html>`;
-}
+// ─── email (Resend). Layout and buttons live in email-layout.ts (no environment access, so Deno tests can import it).
+export { emailButton, emailLayout, emailLink, esc } from "./email-layout.ts";
 
 // The From address lives in app_settings.email_from (migration 016), so switching sender is one SQL update.
 let fromCache: { value: string; at: number } | null = null;

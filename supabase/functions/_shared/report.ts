@@ -77,8 +77,9 @@ export async function buildReport(loc: Loc, now = new Date()) {
 }
 export type Report = Awaited<ReturnType<typeof buildReport>>;
 
+// One column on every screen: the label sits above its value instead of beside it, so nothing squeezes on a phone.
 function row(label: string, value: string) {
-  return `<tr><td style="padding:10px 0;border-bottom:1px solid #E4E0D7;color:#5E5B55;">${esc(label)}</td><td style="padding:10px 0;border-bottom:1px solid #E4E0D7;text-align:right;font-weight:700;">${value}</td></tr>`;
+  return `<div style="padding:12px 0;border-bottom:1px solid #E4E0D7;"><div style="color:#5E5B55;font-size:16px;line-height:1.4;">${esc(label)}</div><div style="font-weight:700;font-size:16px;line-height:1.5;">${value}</div></div>`;
 }
 
 export function renderReport(loc: Loc, r: Report) {
@@ -95,7 +96,7 @@ export function renderReport(loc: Loc, r: Report) {
   const drop = r.rating_drop ? `<p style="margin:0 0 16px 0;padding:12px 14px;border:2px solid #111111;border-radius:14px;">Your Google rating went down ${Math.abs(r.rating_change!).toFixed(1)} this week.</p>` : "";
   const waiting = r.waiting ? `<p style="margin:18px 0 0 0;">${r.waiting} ${r.waiting === 1 ? "review is" : "reviews are"} waiting for your reply.</p>` : "";
   const html = `<p style="margin:0 0 16px 0;color:#5E5B55;">${esc(loc.name)} · ${esc(r.period.from)} to ${esc(r.period.to)}</p>${drop}
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:16px;">${rows}</table>${tapNote}${waiting}`;
+<div style="font-size:16px;">${rows}</div>${tapNote}${waiting}`;
   const text = [
     `${loc.name}, ${r.period.from} to ${r.period.to}`,
     `Google rating: ${ratingText}`,

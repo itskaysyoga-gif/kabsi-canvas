@@ -170,6 +170,14 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 (One block per finished task: the Done-when lines with their proof.)
 
+### Email buttons and phone layout (branch claude/h-email-buttons, 4 Oct 2026, Hussein's request, not a plan task)
+- Review email: one yellow "Review reply"; "Open Kabsi" is now a text link on the same wrapping line as Edit and Skip. Daily digest (several reviews in one email): each review has text links only (Review reply, Edit, Skip) and the layout's yellow "Open Kabsi" is the one button. Urgent and "no safe draft" emails keep text links plus the layout's yellow "Open Kabsi". Every other template already had one layout button and no other yellow; the layout is shared, so they all got the new button size.
+- Phone and desktop rules now in `_shared/email-layout.ts` (moved out of `kabsi.ts`, re-exported, so Deno tests can import it without env access): one column, 16 px body, card padding 32 and 24, button full width up to 320 px, height 52 px, text links 44 px tall and wrapping. Weekly Care Report rows (label beside value) and the staff Nora chat email (label cell beside value, 14 px) are now one column at 16 px.
+- Tests: `_shared/email-layout.test.ts`, 6 tests (one yellow, own button plus links still one yellow, 44 px, 16 px and viewport, button width). `deno test --no-check _shared/`: 43 passed. `deno check` passes for every function except `site-assets` (deno.land unreachable from this sandbox, import unchanged).
+- Rendered the single review, digest and Google Protection emails in Chromium at 390 px and 1440 px: no horizontal scroll, body 16 px, "Review reply" 52 px tall and 310 px (390) or 320 px (1440) wide, Edit, Skip and Open Kabsi 44 px tall on one line. Screenshots were not committed.
+- Not checked: the email in real mail apps (Gmail, Apple Mail, Outlook). Hussein checks the test email on phone and laptop after merge.
+- `knowledge/kabsi-facts.md` line 83 updated; `public/llms-full.txt` rebuilt.
+
 ### P0.1-05 (branch claude/h-p0-1-05, PR 25, 4 Oct 2026, Hussein's session)
 - `src/styles.css`: one `@theme` block (fonts, 14 colours incl. new `kb-amber` #B45309 and `kb-amber-soft` #FEF3C7, type scale `text-kb-hero` to `text-kb-caption`, spacing `kb-section`, `kb-section-sm`, `kb-gutter`, container `kb`, radii, `shadow-kb`, `shadow-kb-lift`). Existing colour values unchanged. The old `--kb-*` variables were only used in styles.css and are gone. Built CSS contains `--color-kb-amber-soft:#fef3c7` and `.text-kb-hero`.
 - Components in `src/components/ui/`: Button (`primary`, `secondary` black outline, `tertiary` link; the unused black-filled `secondary` was replaced, `default` and `outline` kept), `status-pill.tsx`, `example-badge.tsx`, `kabsi-card.tsx`, `step-list.tsx`, `banner.tsx`. No existing screen changed.
@@ -259,7 +267,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Found, not done
 
-- The new-review email has two yellow buttons: "Review reply" (in `_shared/reviews.ts`, `reviewBlock`) and "Open Kabsi" (the `button` passed to `emailLayout` in `sendToLocation`). K-102 says one yellow button with black text. "Open Kabsi" should become a text link in the row beside Edit and Skip. Found by Hussein reading the P0.1-02b mock-review email, 4 Oct 2026; not fixed, no task owns it yet (P0.4-08, "One email template and the email set", is the likely place).
+- Email buttons: fixed by branch claude/h-email-buttons (see Evidence). The Supabase Auth emails have no button; their yellow box is the one-time code display, left as it is (K-102 says one yellow button; Rashid to confirm the code box is fine).
 - `scripts/build-kb.mjs` header retired names: fixed by P0.1-02a (pull request 18).
 - `scripts/build-kb.mjs` D261 and D244 citations: fixed by P0.1-02a (pull request 18).
 - Old-spec D-numbers remain in other code comments outside P0.1-01b's touch list (for example `grep -rn "\bD[0-9]\{3\}\b" src supabase scripts`). They do not match the Done-when grep. Not touched.
@@ -306,6 +314,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 4 Oct 2026 (Hussein's session): PR 26 merged. Email button and phone-layout fix on branch claude/h-email-buttons. Next: P0.1-V1.
 - 4 Oct 2026 (Hussein's session): PRs 23 and 24 merged. After-merge read-only checks for 04a and 04b run (Deploy green, function versions newer); the database-writing and screen checks are still open. P0.1-05 on branch claude/h-p0-1-05, PR 25. Next: P0.1-V1, or the open After-merge checks.
 - 4 Oct 2026 (Hussein's session): PR 23 (P0.1-04a) merged on Hussein's "merge". P0.1-04b on branch claude/h-p0-1-04b, PR 24; `ai_usage` migration applied after Hussein's "apply". Next: P0.1-04a and 04b After-merge checks, then P0.1-05.
 - 4 Oct 2026 (Hussein's session): recorded Hussein's confirmation of the P0.1-02b test email (desktop and phone screenshots). P0.1-04 split into 04a and 04b (15 code files); 04a on branch claude/h-p0-1-04. Next: P0.1-04b (needs Hussein's "apply" for the `ai_usage` migration).
