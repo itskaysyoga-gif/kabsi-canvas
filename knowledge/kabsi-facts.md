@@ -601,7 +601,7 @@ Google didn't accept the revert. Update the detail on your Google profile direct
 ### About Kabsi
 
 **What is Kabsi?**
-A Google Business Profile optimizer for local businesses. Kabsi keeps your profile complete and current by following Google's own guidance: a Profile Score, a Do now list with a ready draft for each item, a reply to every review in the reviewer's language, a weekly post, photo checks, special hours and Listing Shield. Nothing is posted or changed until you approve it.
+Kabsi looks after your business on Google: a reply is drafted for every new review in the reviewer's language, your hours and details are kept right, and fresh posts are prepared. It also shows what needs attention on your profile and watches your listing for changes you did not make (Google Protection). Nothing is posted or changed until you approve it.
 
 **Who is Kabsi for?**
 Any local business with a verified Google Business Profile that meets customers in person or travels to them, in any country: cafés, restaurants, clinics, salons, garages, hotels, shops, florists, plumbers, cleaners and more. Not online-only businesses, rental or for-sale properties, or PO boxes and virtual offices used as an address (section 2.1c).
@@ -609,17 +609,11 @@ Any local business with a verified Google Business Profile that meets customers 
 **Is Kabsi part of Google?**
 No. Kabsi is independent and not affiliated with Google. It works through Google's official Business Profile access, like a staff member you add as a Manager.
 
-**How is this different from Google's own AI replies?**
-Google is testing free AI reply suggestions in some countries. A reply is one part of Kabsi, which also shows what to improve on your whole profile. Kabsi is different in what surrounds the reply: a Profile Score and a Do now list, it comes to your inbox the moment a review arrives, it writes from your facts and your voice, it watches your listing for changes, it works in any language, and there is a person behind it. Nothing is posted until you approve it.
+**How is this different from Gemini in Business Profile?**
+Gemini is Google's free assistant for one verified profile that you open and ask. Kabsi comes to you with a reply already prepared, tells you when Google changes your listing, writes only from facts you confirmed, and has a person behind it. Source: https://support.google.com/business/answer/17142585
 
 **Which businesses can use Kabsi?**
 Any business with a verified Google Business Profile that you own or manage. Setup asks first. If your profile isn't verified yet, or someone else manages it, setup shows what to do on Google, and you can come back.
-
-**What is the Profile Score?**
-A checklist score out of 100 that Kabsi works out from things it can see (section 2.1b). It is Kabsi's own checklist, not a Google score, and it does not predict rankings.
-
-**What is the Do now list?**
-The few things worth doing next on your profile, biggest first, each with a reason and a ready draft where Kabsi can write one. You can do it, put it off for 3 days or skip it for 30 days. Nothing is sent to Google until you approve it.
 
 **Can I book a setup call?**
 Yes. The team offers a free 15-minute setup call. Email hello@kabsi.co and we'll arrange a time. Staff never sign in to your Google account: you send the invitation yourself.
@@ -787,8 +781,8 @@ No. Kabsi sets special hours for holidays and closures. Change regular hours on 
 
 ### Posts, photos and hours
 
-**What are the weekly posts?**
-Once a week Kabsi drafts a short Google post from your facts, with a button like Call or Book, and emails it to you. Nothing is posted until you approve it.
+**What are Kabsi's posts?**
+Kabsi drafts short Google posts from your facts, with a button like Call or Book, and emails them to you. Nothing is posted until you approve it, and you can switch drafts off.
 
 **When does the weekly draft arrive?**
 Shops and restaurants on Thursday morning, clinics and offices on Tuesday morning, local time.
@@ -817,12 +811,12 @@ Clear, real photos of your place, products, food, drinks or team at work. The ch
 **Can I set holiday hours?**
 Yes. On Hours, choose the dates, Closed or different hours, review what Google will show, and tap Confirm and save to Google.
 
-### Listing Shield
+### Google Protection
 
-**What is Listing Shield?**
-Kabsi watches your name, phone, address, hours, website and main category. If something changes, you get an email with before and after and can put yours back with one tap.
+**What is Google Protection?**
+Kabsi watches your name, phone, address, hours, website and main category. If something changes that you did not approve, you get one email with the before and after and two buttons: Keep my information and Google is right. Nothing changes unless you say so.
 
-**Can Listing Shield lock my listing?**
+**Can Google Protection lock my listing?**
 No. Nobody can lock a Google listing or stop people suggesting edits. Kabsi tells you fast and puts your version back only if you say so.
 
 **How fast will I hear about a change?**
@@ -917,7 +911,7 @@ No. A renewal starts the day your current plan ends.
 When payment is confirmed and Kabsi's Google access works. Waiting for access doesn't count.
 
 **What happens when my plan ends?**
-Reply drafts, weekly posts, Listing Shield and the weekly report stop. Your card and review link keep working.
+Reviews, Google Profile, Google Protection and the Weekly Care Report stop. Get Reviews keeps working: your card and review link still open your Google review page.
 
 **Can I get a refund?**
 Kabsi Pro is refundable in full within 14 days of the plan starting. Cards aren't refunded once delivered.

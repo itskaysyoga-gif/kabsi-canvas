@@ -1,30 +1,33 @@
 # Kabsi
 
-> Kabsi keeps a local business's Google Business Profile complete and current by following Google's own published guidance, and the owner approves every change. It shows a Profile Score and a short Do now list of improvements with a ready draft for each, drafts a reply to every review in the reviewer's language, drafts a weekly post, checks photos, sets special hours and watches the listing for changes the owner did not make. Nothing is written to Google until the owner approves it. Kabsi is independent and not affiliated with Google.
+Your reviews and listing. Taken care of.
+
+> Kabsi looks after a local business on Google: a reply ready for every new review, your hours and details kept right, and fresh posts. The owner approves every change, and nothing is published until the owner approves it. Kabsi is independent and not affiliated with Google.
 
 Key facts:
 
-- What it is: a Google Business Profile optimizer for local businesses in any country. Five modules: Replies, Profile Care, Listing Shield, Review Link and Card, Monday Report.
-- Profile Score and Do now: a checklist score out of 100 that Kabsi works out from things it can see (answered reviews, key business facts given, review link shared, weekly post, photos added, phone, website, category and hours set, listing watched), and a short list of the next improvements, biggest first, each with a reason and a ready draft where Kabsi can write one. The score is Kabsi's own checklist. It is not a Google score and it does not predict rankings.
+- What it is: a service that looks after the Google Business Profile of a local business, in any country. Names: Reviews, Google Profile, Google Protection, Get Reviews, Weekly Care Report.
+- What needs attention: a short list of the next improvements, marked Urgent, Recommended or Nice to have, each with a reason and a ready draft where Kabsi can write one. Kabsi gives no score and does not predict rankings.
 - Who can use it: a verified Google Business Profile that the owner owns or manages, for a business that meets customers in person during stated hours, or a service-area business that travels to customers. Not eligible under Google's guidelines: online-only businesses, rental or for-sale properties, PO boxes and virtual offices used as an address, and other cases Google lists.
 - How it connects: the owner adds the Kabsi group ID 5481006796 as a Manager on their Google Business Profile. The owner keeps full ownership and can remove Kabsi at any time.
-- Reviews: each new review gets a draft reply in the reviewer's language (for example English, Spanish, Arabic or French). Drafts only use facts the owner gave Kabsi, make no promises of money, and are checked before they reach the owner. Hard reviews get a calm draft with no one-tap Post button.
-- Profile Care: one short Google post a week (optional), photo checks before posting, special and holiday hours. All of it waits for the owner's approval; nothing is posted on a schedule.
-- Listing Shield: watches the listing's name, phone, address, hours, website and category, and emails the owner when one changes on Google, with a one-tap way to put the owner's version back. It cannot lock a listing.
-- Monday report: every Monday, the public Google rating, new reviews, how many got a reply, and review link opens. Facts only.
+- Reviews: each new review gets a draft reply in the reviewer's language (for example English, Spanish, Arabic or French). Drafts only use facts the owner gave Kabsi, make no promises of money, and are checked before they reach the owner. Hard reviews get a calm draft with no one-tap Approve button.
+- Google Profile: post drafts (optional), photo checks before publishing, special and holiday hours. All of it waits for the owner's approval; nothing is published on a schedule.
+- Google Protection: watches the listing's name, phone, address, hours, website and category, and emails the owner when one changes on Google. The owner chooses: Google is right, or Keep my information. Nothing changes unless the owner says so. It cannot lock a listing.
+- Weekly Care Report: every Monday, the public Google rating, new reviews, how many got a reply, and review link opens. Facts only.
 - Nora: Kabsi's assistant. She answers questions on the site and in the dashboard, and helps owners fill in their business facts. She is an AI and says so when asked.
-- Review link and QR code: free in every country. They open the business's own Google review form for every customer. There is no filtering of unhappy customers and no rewards for reviews. Opens are counted as opens, not reviews. An owner who already has an NFC tag can write the same link on it. Kabsi sells an NFC card and setup bundle only in Lebanon.
-- What Kabsi does not do: it does not promise more reviews, higher ratings or better rankings, it cannot remove reviews, and it does not post or change anything without approval.
+- Get Reviews (review link and QR code): free in every country. They open the business's own Google review form for every customer. There is no filtering of unhappy customers. Ask every customer the same way, as they visit. Never offer a reward. Opens are counted as opens, not reviews. An owner who already has an NFC tag can write the same link on it. Kabsi sells an NFC card and setup bundle only in Lebanon.
+- What Kabsi does not do: it does not promise more reviews, higher ratings or better rankings, it cannot remove reviews, and it does not publish or change anything without approval.
 - Prices (USD, every country): Kabsi Pro $19 a month or $190 a year, extra locations $15 a month or $150 a year, with a 14-day free trial and no card (30 days through a partner). Free: review link, QR code and a printable table card. Monthly plans cancel any time; yearly plans are refundable within 14 days. In Lebanon only: a $120 a year bundle with Pro, an NFC card and setup. Partners (card sellers and agencies): $8 per active business per month.
 - Google data: review text and reviewer names are kept at most 30 days after Google last returned them.
-- Contact: hello@kabsi.co
+- Compared with Gemini in Business Profile: Gemini is Google's free assistant for one verified profile that the owner opens and asks. Kabsi comes to the owner with a reply already prepared, tells the owner when Google changes the listing, writes only from facts the owner confirmed, and has a person behind it. Source: https://support.google.com/business/answer/17142585
+- Operator and contact: Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co
 
 ## Main pages
 
-- [Home](https://kabsi-app.lovable.app/): your Google Business Profile, taken care of, with an example review and draft
-- [How it works](https://kabsi-app.lovable.app/how-it-works): access, Profile Score and Do now, drafts, approval, who can use Kabsi
+- [Home](https://kabsi-app.lovable.app/): a reply ready for every new review, with an example review and draft
+- [How it works](https://kabsi-app.lovable.app/how-it-works): access, drafts, approval, who can use Kabsi
 - [Pricing](https://kabsi-app.lovable.app/pricing): Free and Pro plans, trial, payment methods, refunds
-- [FAQ](https://kabsi-app.lovable.app/faq): what Kabsi does, eligibility, Profile Score, approvals, languages, access, Listing Shield, payment
+- [FAQ](https://kabsi-app.lovable.app/faq): what Kabsi does, eligibility, approvals, languages, access, Google Protection, Gemini, payment
 - [Lebanon](https://kabsi-app.lovable.app/lebanon): the NFC card and setup bundle, Lebanon only
 - [Partners](https://kabsi-app.lovable.app/partners): wholesale for card sellers and agencies
 - [Free Google review link and QR code](https://kabsi-app.lovable.app/google-review-link): no sign-up tool
@@ -53,7 +56,7 @@ Key facts:
 
 ## Full facts
 
-- [Everything about Kabsi in one file](https://kabsi-app.lovable.app/llms-full.txt): product, eligibility, Profile Score, setup, prices, partners, policies, troubleshooting and FAQ
+- [Everything about Kabsi in one file](https://kabsi-app.lovable.app/llms-full.txt): product, eligibility, setup, prices, partners, policies, troubleshooting and FAQ
 
 ## Optional
 

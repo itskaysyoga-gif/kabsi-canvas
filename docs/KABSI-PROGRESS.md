@@ -206,7 +206,6 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - `knowledge/kabsi-facts.md` still describes the app with the retired names in many places (sections 2.1 to 2.1c, 6, 9 trade notes and runbook lines, for example "Listing Shield", "Profile Score", "Do now", "weekly draft", "Monday Report", "no quick Post button"). It is Nora's source and follows the app, so it changes with P0.1-02b.
 - `src/components/onboarding/steps.tsx` button "Start free trial" and the app pages named above: P0.1-02b.
 - The facts file says weekly post drafts arrive on set days ("When does the weekly draft arrive?"). The public site no longer says "weekly"; confirm with Rashid whether post cadence is still a feature (P0.1-02b or later).
-- `build-kb.mjs` fails prettier (long header line) and was not reformatted, to keep the diff small.
 
 ## Test data to delete at go-live (P0.7-04)
 
