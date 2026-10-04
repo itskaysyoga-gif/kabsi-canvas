@@ -52,3 +52,8 @@ business is always mock, R-17) and maps Google's responses to the app's shapes.
 `_shared/google/mocks.test.ts` (run by `scripts/deno-check.sh`) checks that every field a mock returns exists in the
 fixture with the same type. On Gate A day (P0.7-01) the fixtures are replaced with captured real responses and the
 same test then holds the mocks to Google's real behaviour.
+
+`scripts/check-google-calls.mjs` (`npm run check:google`, a step in CI's App job) fails when a Google API host appears
+in code outside `_shared/google/` (src, supabase, workers, scripts). `tests/check-google-calls.test.ts` proves it fails
+on `tests/fixtures/rogue-google-call.txt` and passes on the repo. Functions import the layer from
+`_shared/google/index.ts`.

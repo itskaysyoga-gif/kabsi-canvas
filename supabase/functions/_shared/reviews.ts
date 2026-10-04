@@ -1,6 +1,6 @@
 // Phase 4 pipeline: sync → classify → draft → safety check → owner email → approve → publish.
 import { admin, APP_URL, captureError, emailButton, emailLayout, emailLink, esc, isDefiniteGoogleRejection, sendEmail, sha256Hex } from "./kabsi.ts";
-import { listReviews, putReply } from "./google.ts";
+import { listReviews, putReply } from "./google/index.ts";
 import { checkDraft, classify, draftReply, MODELS, newMeter, type Card } from "./ai.ts";
 import { AiBudgetError, recordAiUsage, takeAiBudget } from "./ai-budget.ts";
 import { isConciergeLocationId, matchConciergeReview, type ConciergeCandidate } from "./concierge.ts";

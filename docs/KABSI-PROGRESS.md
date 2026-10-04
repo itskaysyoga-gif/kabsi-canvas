@@ -8,7 +8,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25). P0.1-V1 and P0.1-V2 done (31, 32). P0.1-07 (database test suite) done (PR 33). P0.1-08 (database API hardening) merged (PR 35); its After-merge checks partly passed, see Evidence. P0.1-09 (tenant model) merged (PR 36); its After-merge calls checked through RLS as the Yawmiyati owner, the browser smoke still open. P0.1-10 (audit log) merged (PR 37) on Hussein's "merge"; the whole migration is live (table, triggers and feed through the connector, `run_retention` by Hussein in the SQL editor), see Evidence. P0.1-11 split in two; part A (Google layer, mocks and fixtures) is PR 38; part B moves the remaining call sites.
+- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25). P0.1-V1 and P0.1-V2 done (31, 32). P0.1-07 (database test suite) done (PR 33). P0.1-08 (database API hardening) merged (PR 35); its After-merge checks partly passed, see Evidence. P0.1-09 (tenant model) merged (PR 36); its After-merge calls checked through RLS as the Yawmiyati owner, the browser smoke still open. P0.1-10 (audit log) merged (PR 37) on Hussein's "merge"; the whole migration is live (table, triggers and feed through the connector, `run_retention` by Hussein in the SQL editor), see Evidence. P0.1-11 split in two; part A (Google layer, mocks and fixtures) merged (PR 38) and its After-merge checks passed; part B (call-site moves and the CI check) is PR 39.
 
 ## Rashid's decisions and inputs (plan section 5)
 
@@ -56,7 +56,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-08 | Security hardening of the database API | Opus | merged (35); After-merge checks partly run, see Evidence | 35 | 4 Oct 2026 |
 | P0.1-09 | Tenant model: organisations, connections, subscriptions | Opus | merged (36); After-merge calls checked through RLS, browser smoke still open, see Evidence | 36 | 4 Oct 2026 |
 | P0.1-10 | Append-only audit log and the "What Kabsi did" feed source | Opus | merged (37); migration fully live; After-merge checks open, see Evidence | 37 | 4 Oct 2026 |
-| P0.1-11 | One Google service layer | Opus | split in two: part A (layer, mocks, fixtures, tests) PR open; part B (call-site moves, `check-google-calls.mjs` in CI) todo | 38 | 4 Oct 2026 |
+| P0.1-11 | One Google service layer | Opus | split in two: part A (layer, mocks, fixtures, tests) merged (38), After-merge passed; part B (call-site moves, `check-google-calls.mjs` in CI) PR open | 38, 39 | 4 Oct 2026 |
 | P0.1-12a | Job queue and dispatcher, review jobs first | Opus | todo | | |
 | P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | todo | | |
 | P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | todo | | |
@@ -144,11 +144,13 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-After the P0.1-11 part A pull request (38) is merged (Deploy publishes every function):
-- `list_edge_functions`: `api`, `content` and `posts-weekly` versions newer than the merge time.
-- The next hourly sync after the deploy succeeds for Yawmiyati in mock mode: `select action, result, created_at from audit_events where location_id = '9803ee99-fee8-4c6a-abb4-1a830fcbb438' and action = 'google_check' order by id desc limit 1` is after the deploy, and no `jobs_log` or `ops_events` error names `google` after it.
+After the P0.1-11 part B pull request (39) is merged (Deploy publishes every function, `_shared/google.ts` is gone):
+- `list_edge_functions`: `api`, `content`, `posts-weekly`, `health`, `places-search` and `review-link` versions newer than the merge time.
+- The next sync after the deploy succeeds for Yawmiyati in mock mode: the latest `google_check` row in `audit_events` for `9803ee99-fee8-4c6a-abb4-1a830fcbb438` is after the deploy with result `checked`, every `jobs_log` row after it has `ok = true`, and no `ops_events` row after it names `google`.
+- `health` (x-cron-secret) still returns `checks.places` "search works", `checks.google_token` and `checks.google_accounts` as before, and `checks.google_mode` "mock". Needs the cron secret, so run it from pg_net (`net.http_post` with the secret read by `internal_secret`) or by Hussein.
+- Optional, a person in a browser: the free review-link tool on `/google-review-link` and onboarding "Find your business" still list businesses.
 
-After the next hourly sync (17:00 UTC): `select * from activity_feed('9803ee99-fee8-4c6a-abb4-1a830fcbb438')` as staff returns "Checked your Google profile" for Yawmiyati (Done-when 3, live).
+P0.1-11 part A (PR 38): After-merge checks passed at the start of the part B chat (see Evidence).
 
 After the P0.1-10 pull request is merged (Deploy publishes `api`):
 - `list_edge_functions`: `api` version newer than the merge time.
@@ -203,6 +205,22 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### After-merge checks run at the start of the P0.1-11 part B chat (4 Oct 2026, 17:10 UTC, Hussein's session)
+- P0.1-11 part A deploy: PR 38 merged 17:06:42 UTC; every Edge Function `updated_at` 17:07:10 UTC (`api` 44, `content` 37, `posts-weekly` 33). Passed.
+- Sync after the deploy: latest Yawmiyati `google_check` 17:10:05 UTC, result `checked`; `jobs_log` after 17:07:10: `access` and `cron-tick`, both `ok = true`, none naming google with an error; `ops_events` after 17:07:10: 0. Passed.
+- `activity_feed('9803ee99...')` as staff (read-only transaction with a staff user's claims): one line, "Checked your Google profile", times 8, 17:10 UTC. Passed. P0.1-11 part A is done once part B lands (the card's Done-when lines span both parts).
+- Still open from earlier tasks: P0.1-10 approval and publication events (`audit_events` for Yawmiyati holds 0 `approval` or `publication` rows; needs a dashboard approval); night jobs `kabsi_retention` (last 02:53), `kabsi_chat_retention` (03:41) and `kabsi_concierge_daily` (2 Oct) have not run since the P0.1-08 and P0.1-10 changes; no cron job failed in the last 3 hours; `ops_events` with Harbour Lane or Juniper since 12:15: 0; browser checks still blocked from the sandbox.
+
+### P0.1-11 part B (branch claude/h-p0-1-11b, PR 39, 4 Oct 2026, Hussein's session)
+- Moved into the layer: `review-link` and `places-search` (Places text search through `searchText`), `_shared/report.ts` (place rating through `getPlace`), `health` (Places check through `searchText`, token through `refreshToken`, accounts through the new `listAccountsOnce` in `accounts/live.ts`, one call with no retry so a pre-grant 429 is reported at once as before; mode through `googleMode()`). The five imports of `_shared/google.ts` (`api/cron.ts`, `content/index.ts`, `_shared/shield.ts`, `_shared/reviews.ts`, `_shared/posts.ts`) now import `_shared/google/index.ts`, and `_shared/google.ts` is deleted.
+- New: `scripts/check-google-calls.mjs` (`npm run check:google`, CI App job step "Google calls only in the Google layer (K-34)"): fails on a Google API host in `src`, `supabase`, `workers` or `scripts` outside `supabase/functions/_shared/google/`. `tests/check-google-calls.test.ts` with fixture `tests/fixtures/rogue-google-call.txt`.
+- Done-when "the CI check passes on the repo and fails on a fixture": local `npm run check:google` exit 0; on the fixture exit 1 with both lines named (`rogue-google-call.txt:2`, `:3`); run against `main`'s code before the moves it exits 1 (the four old call sites). Vitest `check-google-calls` 2 passed.
+- Done-when "every function type-checks": `deno check` (Deno 2.9.7) passed for api, assistant, billing, brand, content, cron-tick, health, kv-sync, lead, partner, places-search, posts-weekly, review-link, slack and tap; `site-assets` could not fetch `deno.land` from the sandbox (unchanged; CI runs it). `deno test --no-check _shared/` 75 passed, 0 failed.
+- Done-when "Deno tests run each mock module against its fixture shape" and "the mock mode switch": unchanged from part A (still pass, above).
+- Behaviour kept: same URLs, field masks, request bodies, error messages and response shapes. Two small differences, both internal: a Places reply that is not JSON now reads as an empty result instead of an exception (the layer's `read` tolerates it), and the health check's Places failure text shows the JSON body instead of the raw text. No wording an owner sees changed, so `knowledge/kabsi-facts.md` is unchanged. No migration.
+- App checks: `npm run typecheck` pass, `npm run lint:changed` pass on the two new files (the first CI run caught two Prettier line breaks in `check-google-calls.mjs` that the local run missed because the files were not yet committed; fixed), `npm run check:tokens` pass, `npm run check:anon` ok, `npm test` 21 passed (6 files), `npm run build` pass.
+- CI on PR 39 (run https://github.com/rashidhamzy-hue/kabsi-canvas/actions/runs/37219932701, commit 91ab15b): App (with the new "Google calls only in the Google layer (K-34)" step), Edge Functions and Database all success.
 
 ### After-merge checks run at the start of the P0.1-11 chat (4 Oct 2026, 16:47 UTC, Hussein's session)
 - P0.1-10, Done-when 3 live: `activity_feed('9803ee99...')` as the Yawmiyati owner (read-only transaction with that user's claims) returns one line, "Checked your Google profile", times 3, 16:45 UTC. Passed.
@@ -538,6 +556,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 4 Oct 2026 (Hussein's session): After-merge checks for P0.1-11 part A passed (deploy 17:07, sync 17:10 `checked`, feed line). P0.1-11 part B on branch claude/h-p0-1-11b, PR 39: call sites in `review-link`, `places-search`, `health`, `_shared/report.ts` moved into `_shared/google/`, the five imports repointed, `_shared/google.ts` deleted, `scripts/check-google-calls.mjs` in CI with a fixture test. Next: P0.1-12a (depends on P0.1-11).
 
 - 4 Oct 2026 (Hussein's session): After-merge checks for P0.1-10 run (feed line and deploy passed; approval events and night jobs still open). P0.1-11 split in two; part A on branch claude/h-p0-1-11, PR 38: Google layer with 13 areas, live and mock modules, 22 documented fixtures and shape tests. Next: P0.1-11 part B (call-site moves and the CI check).
 - 4 Oct 2026 (Hussein's session): P0.1-09 After-merge calls checked through RLS as the Yawmiyati owner (browser smoke still open). P0.1-10 on branch claude/h-p0-1-10, PR 37: audit log migration, triggers, `activity_feed`, request context from `approve` and `action`; 341 database tests pass locally and in CI. Applied on Hussein's "apply" in three connector parts plus `run_retention` by Hussein in the SQL editor (the connector stalls on SQL with `delete`); read back identical. Merged on Hussein's "merge". Next: P0.1-11 or P0.1-12a (both depend on P0.1-09 only).

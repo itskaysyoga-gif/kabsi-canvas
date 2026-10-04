@@ -1,7 +1,7 @@
 // Google Protection (D218): watch the Google listing and alert the owner when a field changes. The email says what
 // changed and links to the app, where the owner chooses. Kabsi cannot stop Google or the public from editing.
 import { admin, APP_URL, captureError, emailLayout, esc, sendEmail } from "./kabsi.ts";
-import { getListing, googleMode, patchListing, SHIELD_FIELDS, type FieldValue, type Listing, type ShieldField } from "./google.ts";
+import { getListing, googleMode, patchListing, SHIELD_FIELDS, type FieldValue, type Listing, type ShieldField } from "./google/index.ts";
 
 const LABEL: Record<ShieldField, string> = { title: "business name", phone: "phone number", address: "address", website: "website", hours: "opening hours", categories: "main category" };
 type Loc = { id: string; name: string; address: string | null; google_location_id: string | null; knowledge_card: Record<string, unknown>; shield_checked_at: string | null };

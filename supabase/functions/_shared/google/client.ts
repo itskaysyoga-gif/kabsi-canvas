@@ -1,5 +1,5 @@
 // The one place Kabsi talks to Google (K-34, guardrail 9). Every Google URL lives in this folder; nothing else in
-// the repo may call googleapis.com (scripts/check-google-calls.mjs, P0.1-11 part B).
+// the repo may call googleapis.com (scripts/check-google-calls.mjs in CI).
 // Google Business Profile runs as hello@kabsi.co (one central Manager account). GOOGLE_MODE=mock (the default
 // until the Business Profile API grant) answers from the mock modules; GOOGLE_MODE=live uses GOOGLE_CLIENT_ID,
 // GOOGLE_CLIENT_SECRET and GOOGLE_REFRESH_TOKEN. A demo business is always mock (R-17). The browser banner reads

@@ -36,6 +36,8 @@ jobs:
         run: npm run check:anon
       - name: Design tokens (K-108)
         run: npm run check:tokens
+      - name: Google calls only in the Google layer (K-34)
+        run: npm run check:google
       - name: Tests
         run: npm test
       - name: Build

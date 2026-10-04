@@ -1,6 +1,7 @@
 // Weekly report (D222): Monday from 09:00 local time, one email per active location. Facts only:
 // Google rating and its change, reviews received, replies posted, card taps (bots excluded).
 // No review text and no quotes (K-113.3, R-19). No advice, no claims about causes.
+import { getPlace } from "./google/index.ts";
 import { admin, APP_URL, emailLayout, esc, ownerEmails, sendEmail } from "./kabsi.ts";
 
 type Loc = { id: string; name: string; place_id: string | null; time_zone: string; emails_paused_until: string | null };
@@ -18,11 +19,8 @@ const fmtDay = (d: Date, tz: string) => new Intl.DateTimeFormat("en-US", { timeZ
 async function placesRating(placeId: string) {
   const key = Deno.env.get("PLACES_API_KEY");
   if (!key) return null;
-  const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
-    headers: { "x-goog-api-key": key, "x-goog-fieldmask": "rating,userRatingCount" },
-  });
-  if (!res.ok) throw new Error(`places details ${res.status}`);
-  const d = await res.json();
+  const { ok, status, data: d } = await getPlace(key, placeId, "rating,userRatingCount");
+  if (!ok) throw new Error(`places details ${status}`);
   return { rating: typeof d.rating === "number" ? Math.round(d.rating * 10) / 10 : null, count: d.userRatingCount ?? null };
 }
 
