@@ -8,7 +8,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25). P0.1-V1 and P0.1-V2 done (31, 32). P0.1-07 (database test suite) done (PR 33). P0.1-08 (database API hardening) PR 35 open; its migration waits for Hussein's "apply".
+- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25). P0.1-V1 and P0.1-V2 done (31, 32). P0.1-07 (database test suite) done (PR 33). P0.1-08 (database API hardening) PR 35 open, CI green; migration applied 4 Oct 14:46 UTC on Hussein's "apply".
 
 ## Rashid's decisions and inputs (plan section 5)
 
@@ -53,7 +53,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | done (merged 32 on Hussein's "merge"; docs only, no After-merge checks) | 32 | 4 Oct 2026 |
 | P0.1-V3 | Setup-call and partner-call booking links | Sonnet | todo | | |
 | P0.1-07 | Database test suite in CI | Opus | done (merged 33; no After-merge checks) | 33 | 4 Oct 2026 |
-| P0.1-08 | Security hardening of the database API | Opus | PR open; migration not yet applied (waits for Hussein's "apply"), see Evidence | 35 | 4 Oct 2026 |
+| P0.1-08 | Security hardening of the database API | Opus | PR open, CI green; migration applied (Hussein's "apply"), see Evidence | 35 | 4 Oct 2026 |
 | P0.1-09 | Tenant model: organisations, connections, subscriptions | Opus | todo | | |
 | P0.1-10 | Append-only audit log and the "What Kabsi did" feed source | Opus | todo | | |
 | P0.1-11 | One Google service layer | Opus | todo | | |
@@ -206,7 +206,12 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
   - RLS helpers that policies call as the signed-in user (they answer only about the caller): `is_member`, `is_partner_member`, `is_staff` (the app also calls `is_staff`).
 - Membership checks: the P0.1-07 suite calls every function on this list as a signed-in stranger against another business and partner; each refuses (42501, `already_on_kabsi`, empty or false). It now also fails if a function on the list loses its grant.
 - App checks in the sandbox: `npm run typecheck` pass, `npm run lint:changed` pass (4 files), `npm test` 19 passed, `npm run build` pass. `deno` is not installed in the session; the CI Edge Functions job runs `scripts/deno-check.sh`.
-- Not yet: the migration on production (waits for Hussein's "apply"), `get_advisors` after it, the cron runs after it. Leaked-password protection: no tool here can set Auth settings; Rashid's step 10.
+- CI on PR 35 (run https://github.com/rashidhamzy-hue/kabsi-canvas/actions/runs/37209719504): App, Edge Functions (deno check and tests) and Database all success; `Files=2, Tests=237 ... Result: PASS`, "Database suite finished in 113 s". The google_mode test is no longer a TODO.
+- Migration applied on Hussein's "apply" at 14:46 UTC with `apply_migration` (live version `20261004144629 private_schema_api_hardening`; the repo file is `20261004150000_...`, same SQL). Read back: the six cron commands now read `select private.<fn>()`, 0 commands still name `public.` for them; schema `private` holds the six functions; anon and authenticated have no usage on `private`; SECURITY DEFINER functions in public executable by anon 0, by authenticated 53.
+- Done-when 1: `get_advisors` security at 14:46 UTC shows no `anon_security_definer_function_executable` (was 1). Still listed: `authenticated_security_definer_function_executable` 53 (the browser list above, by design), `rls_enabled_no_policy` INFO 11 (service-only tables, unchanged), `auth_leaked_password_protection` (Rashid's step 10; no tool here can set Auth settings).
+- Done-when 2: the authenticated list is the 53 above, each with its caller.
+- Done-when 4: the database suite passes including the google_mode test (CI run above).
+- Between this apply and the merge of PR 35, the live `/a/...` page still asks `google_mode()` as anon, gets refused and hides the Test mode banner for signed-out visitors; the merge restores it through `api/action`.
 
 ### P0.1-07 (branch claude/h-p0-1-07, PR 33, 4 Oct 2026, Hussein's session)
 - Start of chat: P0.1-V2 left no After-merge checks (docs only); marked done. Read-only re-run: `ops_events` since 12:15 UTC with Harbour Lane or Juniper 0, demo `emails` rows 0; `list_edge_functions` all updated 2026-10-04 13:22 UTC.
