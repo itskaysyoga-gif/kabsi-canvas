@@ -52,7 +52,7 @@ const CTA_LABEL: Record<string, string> = {
   LEARN_MORE: "Learn more",
   SIGN_UP: "Sign up",
 };
-type Keyword = { keyword: string; source: "search" | "category" | "reviews" };
+type Keyword = { keyword: string; source: "search" | "category" | "owner" };
 
 async function loadPosts(locationId: string): Promise<Post[]> {
   const { data, error } = await supabase
@@ -259,8 +259,8 @@ function NewPost({ locationId, onCreated }: { locationId: string; onCreated: () 
               title={
                 k.source === "search"
                   ? "People searched this and found you on Google"
-                  : k.source === "reviews"
-                    ? "Customers mention this in reviews"
+                  : k.source === "owner"
+                    ? "From the services you told Kabsi about"
                     : "Your category and area"
               }
               className="rounded-full border border-kb-hairline bg-kb-sand px-3 py-1 text-sm disabled:opacity-40"
@@ -271,7 +271,7 @@ function NewPost({ locationId, onCreated }: { locationId: string; onCreated: () 
         </div>
       ) : (
         <p className="mt-2 text-sm text-kb-stone">
-          No suggestions yet. They grow as reviews come in.
+          No suggestions yet. Add your services under About your business to get some.
         </p>
       )}
       <div className="mt-4 grid gap-3 sm:grid-cols-2">

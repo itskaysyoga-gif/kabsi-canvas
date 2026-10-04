@@ -193,12 +193,13 @@ const GROUPS: Group[] = [
   {
     id: "care",
     title: "Unhappy customers",
-    sub: "How hard reviews move to a private conversation.",
+    sub: "Replies ask unhappy customers to contact you through the details on your Google profile.",
     icon: <PhoneCall />,
     fields: [
       {
         key: "contact_phone",
-        label: "Phone to give unhappy customers",
+        label: "Business phone",
+        hint: "Kabsi never writes a phone number in a public reply. Google can reject replies that do.",
         placeholder: "e.g. +1 (555) 010-0100",
         max: 30,
         type: "tel",

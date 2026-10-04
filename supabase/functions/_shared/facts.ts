@@ -11,8 +11,8 @@ export type KnowledgeCard = Record<string, unknown> & {
 
 const str = (v: unknown) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim() : "");
 
-/** Facts as "Label: value" lines. `use` decides what is allowed where: replies may use the phone number and staff
- *  names; posts never carry phone numbers (the button does) or staff names. */
+/** Facts as "Label: value" lines. `use` decides what is allowed where: replies may use staff names; neither replies
+ *  nor posts ever carry the phone number (K-113.4, K-14, K-116.3): the profile and the post button do. */
 export function businessFacts(card: KnowledgeCard, use: "reply" | "post"): string[] {
   const out: string[] = [];
   const add = (label: string, v: unknown) => { const s = str(v); if (s) out.push(`${label}: ${s}`); };
@@ -32,7 +32,6 @@ export function businessFacts(card: KnowledgeCard, use: "reply" | "post"): strin
   add("Policies (returns, bookings, cancellations, pets, children)", card.policies);
   add("Things the owner wants mentioned when relevant", card.mention);
   if (use === "reply") {
-    add("Phone for customers who need to talk", card.contact_phone);
     const staff = (card.staff_names ?? []).map(str).filter(Boolean);
     if (staff.length) out.push(`Staff names that may be used: ${staff.join(", ")}`);
   }
