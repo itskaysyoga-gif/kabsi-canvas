@@ -57,7 +57,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-09 | Tenant model: organisations, connections, subscriptions | Opus | merged (36); After-merge calls checked through RLS, browser smoke still open, see Evidence | 36 | 4 Oct 2026 |
 | P0.1-10 | Append-only audit log and the "What Kabsi did" feed source | Opus | done (merged 37; approval and publication events checked live at the start of the P0.1-12a chat; the next `kabsi_retention` run still to read, see After merge) | 37 | 4 Oct 2026 |
 | P0.1-11 | One Google service layer | Opus | done (part A merged 38, part B merged 39; After-merge checks passed) | 38, 39 | 4 Oct 2026 |
-| P0.1-12a | Job queue and dispatcher, review jobs first | Opus | merged (40); migration fully live; After-merge: deploy, dispatcher, sync status and no-duplicates passed; mock review end to end and browser look still open, see Evidence | 40 | 4 Oct 2026 |
+| P0.1-12a | Job queue and dispatcher, review jobs first | Opus | merged (40); migration fully live; After-merge passed (deploy, dispatcher, sync status, no duplicates, mock review end to end); browser look still open, see Evidence | 40, 41 | 4 Oct 2026 |
 | P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | todo | | |
 | P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | todo | | |
 | P0.1-13b | One publication pipeline: posts, photos, hours, profile changes | Opus | todo | | |
@@ -144,8 +144,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-After the P0.1-12a pull request (40) was merged: deploy, `kabsi_dispatch`, sync status, cron-tick hand-over and the no-duplicates check passed (see Evidence). Still open:
-- A mock review on Yawmiyati (`mock_google_reviews`, google_location_id `locations/mock-9803ee99`, Hussein's "apply") goes sync, draft, notify through jobs: `select id, kind, state, attempts, created_at, finished_at from jobs where location_id = '9803ee99-fee8-4c6a-abb4-1a830fcbb438' order by id desc limit 6` shows `sync_reviews`, `draft_reply` and `notify_owner` succeeded in that order; the review row is `drafted`, then `notified_at` is set (a 3 star or lower review is emailed at once); one `reply_drafts` row version 1 and one `emails` row for it. Paste the rows here. No new review has arrived since the merge, so the draft and notify jobs have not run live yet.
+After the P0.1-12a pull request (40) was merged: deploy, `kabsi_dispatch`, sync status, cron-tick hand-over, the no-duplicates check and the mock review end to end passed (see Evidence). Still open:
 - Signed in as the Yawmiyati owner (390 px and 1440 px, a person with a browser): Home shows "Google profile checked ... ago" under the business name; staff `/staff` Job health shows the "Job queue" line.
 
 P0.1-11 (PRs 38 and 39) and P0.1-10's approval and publication events: passed at the start of the P0.1-12a chat (see Evidence).
@@ -211,7 +210,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - `google_connections` for all four: `sync_status` `ok`, `last_error` null, `last_successful_sync_at` 18:21 to 18:23, `next_sync_at` 5 minutes later (Yawmiyati: last ok 18:23:02, next 18:28:00).
 - cron-tick hand-over: `kabsi_cron_tick` ran at 18:15, 18:20 and 18:25, all succeeded; `jobs_log` since the baseline has only `access` and `cron-tick` heartbeat rows from it, no `sync`, `draft` or `notify` row.
 - No duplicates between the old cron and the dispatcher, checked at 18:25:34: still 30 emails, 0 sent after the baseline; 0 duplicate email `dedupe_key`s; 0 duplicate (review, version) draft pairs; 0 reviews with two or more automatic (`ai`) drafts after the baseline; 0 reviews `new`; 0 drafted or blocked reviews waiting for an email. The 2 drafts after the baseline are versions 2 and 3 of the Harbour Lane Coffee demo review, source `ai_edit` with an instruction (an owner rewrite from the dashboard at 18:13 and 18:15), not automatic drafts. Three emails with the same subject "New review for Yawmiyati (3 of 5)" (07:30, 08:40, 09:00) are three different reviews with three dedupe keys, all before the merge.
-- Not yet shown live: a review going through `draft_reply` and `notify_owner` jobs (no new review arrived; needs a mock review, Hussein's "apply"), and the Home and Job health screens in a browser.
+- Mock review end to end (Hussein's "apply", 4 Oct): `mock_google_reviews` row `mock-c48dbe7d352c4542964ed4666238e63e` on `locations/mock-9803ee99`, 3 stars, inserted 18:30:15. Jobs for Yawmiyati: 18 `sync_reviews` created 18:34:00.03, succeeded 18:34:02.10, attempt 1; 19 `draft_reply` created 18:34:02.00 (offered by the sync handler), succeeded 18:34:07.90, attempt 1; 20 `notify_owner` created 18:34:07.82 (offered by the draft handler), succeeded 18:34:08.97, attempt 1. Review 66b3474d-e373-4110-9791-742960d0cdd1: created 18:34:01, `drafted`, language en, urgency normal, `draft_attempts` 1, `notified_at` 18:34:08.85. Exactly one `reply_drafts` row (version 1, source `ai`, safety ok, model claude-sonnet-5-5, 18:34:07.61) and exactly one `emails` row (`review_new`, sent 18:34:08.49, dedupe key `review:66b3474d...:<owner>`, "New review for Yawmiyati (3 of 5)"). `jobs_log` `dispatch` 18:34:09: "draft_reply:succeeded 1, notify_owner:succeeded 1, sync_reviews:succeeded 2", 8.7 s. `google_connections` for Yawmiyati: `ok`, last success 18:34:01, next 18:39:00. From the review arriving on the mock Google to the owner's email: about 9 seconds after the sync came due.
+- Not checked: the Home and Job health screens in a browser.
 
 ### After-merge checks run at the start of the P0.1-12a chat (4 Oct 2026, 17:30 UTC, Hussein's session)
 - P0.1-11 part B: PR 39 merged 17:26:48 UTC; every Edge Function `updated_at` 17:27:14 UTC (`api` 45, `content` 38, `posts-weekly` 34, `health` 30, `places-search` 35, `review-link` 29). Passed.
@@ -487,7 +487,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Found, not done
 
-- P0.1-12a merge: `deploy.yml` still installs Supabase CLI "latest", and the first Deploy after the merge failed on GitHub's API rate limit (re-run passed). CI pins 2.119.0; pinning the same version in `deploy.yml` would stop this. Not changed (outside the task).
+- P0.1-12a merge: `deploy.yml` installed Supabase CLI "latest", and the first Deploy after the merge failed on GitHub's API rate limit (re-run passed). Fixed on Hussein's request by branch claude/h-deploy-pin-cli: `deploy.yml` pins 2.119.0 like `ci.yml`.
 
 - P0.1-12a: `private.ops_watchdog` still alerts "Reviews job hasn't run for 20 minutes ... New reviews aren't being drafted" from `kabsi_cron_tick`; after this task drafting runs on `kabsi_dispatch`. P0.1-12b (which retires `kabsi_cron_tick`) should point the watchdog at the dispatcher.
 - P0.1-12a: Home's Google Protection line still reads "Keep it or put yours back" (`src/routes/_authenticated/app/index.tsx`), close to the retired "Put mine back". For P0.3-07.
@@ -586,6 +586,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Test data to delete at go-live (P0.7-04)
 
+- Yawmiyati: the P0.1-12a mock review `mock-c48dbe7d352c4542964ed4666238e63e` (mock_google_reviews), its review 66b3474d-e373-4110-9791-742960d0cdd1, draft, email and action tokens (4 Oct).
 - Yawmiyati: the email row 1cb757d9-ba6b-4e7e-a023-d5852f3e19f0 (4 Oct, 04a and 04b check) and the email row 84558298-d9f7-4d72-8f19-02b99d59f869 (created 4 Oct by the P0.1-02b After-merge check). The mock review, its draft and its action tokens were already deleted on 4 Oct.
 
 - QA account qa-owner@test.local and "QA Bakery"; "QA Partner" (qa-partner) with Rashid's account as member; the "Test by rashid" partner invite and acceptance.
@@ -596,6 +597,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 4 Oct 2026 (Hussein's session): PR 41 (P0.1-12a After-merge evidence) merged on Hussein's "merge". Mock review on Yawmiyati (Hussein's "apply") went sync, draft, notify through jobs in about 9 s with one draft and one email; P0.1-12a After-merge checks all passed except the browser look. Deploy pin on branch claude/h-deploy-pin-cli, PR 42.
 
 - 4 Oct 2026 (Hussein's session): `dispatch_tick` and `kabsi_dispatch` run by Hussein in the SQL editor and read back. PR 40 (P0.1-12a) merged on Hussein's "merge"; Deploy passed on re-run (first attempt hit the setup-cli rate limit). After-merge: dispatcher syncs all four businesses every 5 minutes, sync status `ok`, cron-tick no longer syncs, drafts or emails, no duplicate drafts or emails. Open: mock review end to end, browser look. Next: P0.1-12b.
 
