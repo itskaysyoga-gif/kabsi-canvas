@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { LegalPage } from "@/components/marketing/legal";
-import { CONTACT_EMAIL, CONTACT_PHONE, PRICES, pageHead } from "@/lib/site";
+import { CONTACT_EMAIL, CONTACT_PHONE, OPERATOR_LINE, PRICES, pageHead } from "@/lib/site";
 
 // Terms of service, written to match the system as built (D254). Plain words, no em dashes.
 export const Route = createFileRoute("/terms")({
@@ -15,15 +15,13 @@ export const Route = createFileRoute("/terms")({
   component: Page,
 });
 
-const UPDATED = "29 September 2026";
+const UPDATED = "4 October 2026";
 
 function Page() {
   return (
     <LegalPage kind="terms" title="Terms" updated={UPDATED}>
       <section>
-        <p>
-          Kabsi is operated by Rashid Abou Hamzy, Spring 19, Villa 9, Dubai, United Arab Emirates.
-        </p>
+        <p>{OPERATOR_LINE}</p>
       </section>
 
       <section>
@@ -39,21 +37,20 @@ function Page() {
         <h2>1. What Kabsi does</h2>
         <ul>
           <li>
-            Helps you keep your Google Business Profile complete and current by following Google's
-            published guidance: a Profile Score and a Do now list of suggested improvements, each
-            with a ready draft where Kabsi can write one. The score is Kabsi's own checklist, not a
-            Google score.
+            Helps you keep your information on Google accurate and complete, with a short list of
+            suggested improvements marked Urgent, Recommended or Nice to have, each with a ready
+            draft where Kabsi can write one. Kabsi does not give your profile a score.
           </li>
           <li>
             Emails you each new Google review with a reply drafted in the reviewer's language, and
-            lets you post, edit or skip it from email or the app.
+            lets you approve, edit or skip it from email or the app.
           </li>
           <li>
-            Drafts Google posts (including an optional weekly draft), checks photos, prepares
-            special hours, and watches your listing for changes (Listing Shield) with a one-tap way
-            to put your details back.
+            Drafts Google posts, checks photos, prepares special hours, and watches your listing for
+            changes (Google Protection). When something changes, you choose: Google is right, or
+            Keep my information.
           </li>
-          <li>Sends a weekly report and shows your profile's facts in the app.</li>
+          <li>Sends the Weekly Care Report and shows your profile's facts in the app.</li>
           <li>
             Provides a review link and a QR code that open your Google review page for every
             customer, and in Lebanon an optional NFC card.
@@ -70,8 +67,8 @@ function Page() {
         <ul>
           <li>
             Nothing is published to or changed on your Google Business Profile unless you approve
-            that exact content. There is no automatic mode, including for weekly post drafts and Do
-            now suggestions.
+            that exact content. There is no automatic mode, including for post drafts and suggested
+            improvements.
           </li>
           <li>You are responsible for what you approve, as if you had written it yourself.</li>
           <li>
@@ -144,8 +141,8 @@ function Page() {
             We can't remove or hide reviews. Only Google can remove reviews that break its policies.
           </li>
           <li>
-            Listing Shield alerts you and lets you put your details back. It can't lock your listing
-            or stop people suggesting edits to Google.
+            Google Protection alerts you and lets you keep your information if you choose. It can't
+            lock your listing or stop people suggesting edits to Google.
           </li>
         </ul>
       </section>
@@ -221,8 +218,8 @@ function Page() {
             renew automatically.
           </li>
           <li>
-            When a plan ends, reply drafts, posts, Listing Shield and reports stop. Your card and
-            review link keep working.
+            When a plan ends, reply drafts, posts, Google Protection and the Weekly Care Report
+            stop. Your card and review link keep working.
           </li>
         </ul>
       </section>

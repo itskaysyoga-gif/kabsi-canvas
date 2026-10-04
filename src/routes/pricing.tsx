@@ -5,7 +5,7 @@ import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
 import { CtaBand, Eyebrow, H2, IconBadge, PageHero, Section } from "@/components/marketing/parts";
 import { PricingVisual } from "@/components/marketing/visuals";
-import { CONTACT_PHONE, PRICES, PRODUCT_LD, TRIAL_LINE, pageHead } from "@/lib/site";
+import { CONTACT_PHONE, CTA_PRIMARY, PRICES, PRODUCT_LD, TRIAL_LINE, pageHead } from "@/lib/site";
 import { useIsLebanon } from "@/lib/region";
 import { cn } from "@/lib/utils";
 
@@ -21,22 +21,23 @@ export const Route = createFileRoute("/pricing")({
   component: Page,
 });
 
-const FREE = [
-  "Review link for your Google review page",
-  "QR code you can download and print",
-  "Printable table card and a message to share",
-  "Keeps working whatever plan you are on",
+type Feature = { text: string; early?: boolean };
+
+const FREE: Feature[] = [
+  { text: "Review link for your Google review page" },
+  { text: "QR code you can download and print" },
+  { text: "Printable table card and a message to share" },
+  { text: "Keeps working whatever plan you are on" },
 ];
 
-const PRO = [
-  "A reply drafted for every new Google review, in the reviewer's language",
-  "One-tap approval from your email or dashboard",
-  "A weekly Google update drafted for you, with an action button",
-  "Listing Shield: change alerts and one-tap revert",
-  "Photos checked and special hours set in a minute",
-  "A Profile Score and a Do now list of what to improve next",
-  "A Monday report",
-  "Review link and printable QR code, anywhere",
+// Plain outcomes (design review, "Pricing page"). A feature that is not live yet carries "Early access".
+const PRO: Feature[] = [
+  { text: "A reply ready for every new review" },
+  { text: "Know when Google changes your details", early: true },
+  { text: "Photos and updates prepared for you", early: true },
+  { text: "Holiday hours reminders", early: true },
+  { text: "Weekly Care Report", early: true },
+  { text: "A person to talk to" },
 ];
 
 function Page() {
@@ -59,9 +60,9 @@ function Page() {
             name="Free"
             icon={<Gift />}
             price={0}
-            per="Review Link and Card"
+            per="Get Reviews"
             features={FREE}
-            cta="Start free"
+            cta={CTA_PRIMARY}
           />
           <Plan
             name="Kabsi Pro"
@@ -70,7 +71,7 @@ function Page() {
             per={yearly ? "a year · two months free" : "a month · cancel any time"}
             features={PRO}
             highlight
-            cta="Start free trial"
+            cta={CTA_PRIMARY}
             note={`${TRIAL_LINE}. Extra locations: $${PRICES.extraLocationMonthly} a month or $${PRICES.extraLocationYearly} a year.`}
             toggle={
               <div
@@ -140,8 +141,8 @@ function Page() {
               14 days of the plan starting. Cards aren't.
             </Fact>
             <Fact>
-              When a trial or plan ends, Replies drafts, Profile Care, Listing Shield and the Monday
-              Report stop. Your Review Link and Card keep working.
+              When a trial or plan ends, Reviews, Google Profile, Google Protection and the Weekly
+              Care Report stop. Get Reviews keeps working.
             </Fact>
             <Fact>
               Paying early adds the new period after the current one. You don't lose days.
@@ -197,7 +198,7 @@ function Plan({
   icon: ReactNode;
   price: number;
   per: string;
-  features: string[];
+  features: Feature[];
   highlight?: boolean;
   cta: string;
   note?: string;
@@ -220,9 +221,16 @@ function Plan({
       {note ? <p className="mt-3 text-sm font-medium text-kb-ink">{note}</p> : null}
       <ul className="mt-6 flex-1 space-y-3">
         {features.map((f) => (
-          <li key={f} className="flex gap-3 text-[15px] leading-6">
+          <li key={f.text} className="flex gap-3 text-[15px] leading-6">
             <Check className="mt-0.5 size-5 shrink-0 text-kb-green" />
-            {f}
+            <span>
+              {f.text}
+              {f.early ? (
+                <span className="ml-2 rounded-pill bg-kb-sand px-2 py-0.5 text-xs font-bold">
+                  Early access
+                </span>
+              ) : null}
+            </span>
           </li>
         ))}
       </ul>

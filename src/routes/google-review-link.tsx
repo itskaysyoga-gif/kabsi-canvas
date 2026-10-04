@@ -122,8 +122,7 @@ function Page() {
             </Tip>
           </div>
           <p className="mt-6 max-w-3xl text-sm leading-6 text-kb-stone">
-            Share it with everyone. Google's policies don't allow asking only happy customers or
-            giving rewards for reviews, and neither do we.
+            Ask every customer the same way, as they visit. Never offer a reward.
           </p>
         </div>
       </Section>
@@ -136,10 +135,7 @@ function Page() {
         </div>
       </Section>
 
-      <CtaBand
-        title="Every review deserves a reply."
-        sub="Kabsi drafts a reply to every new Google review in your customer's language and shows what else to complete on your profile. You approve everything."
-      />
+      <CtaBand />
     </PublicLayout>
   );
 }

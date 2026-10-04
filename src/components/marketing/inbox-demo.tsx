@@ -3,8 +3,8 @@ import { Check, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Homepage centrepiece (KABSI-BRAND "Public site"): a real, clickable review → draft → Post · Edit · Skip.
-// Everything in it is invented and labelled "Example"; tapping Post only changes this card.
+// Homepage centrepiece (KABSI-BRAND "Public site"): a real, clickable review → draft → Approve · Edit · Skip.
+// Everything in it is invented and labelled "Example"; tapping Approve only changes this card.
 const EXAMPLES = [
   {
     key: "en",
@@ -136,7 +136,7 @@ export function InboxDemo() {
               <span className="grid size-6 place-items-center rounded-full bg-kb-green text-kb-white">
                 <Check className="size-4" />
               </span>
-              Posted on Google
+              Approved
             </p>
             <button
               type="button"
@@ -148,7 +148,7 @@ export function InboxDemo() {
           </div>
         ) : stage === "skipped" ? (
           <div className="flex items-center justify-between gap-3">
-            <p className="text-sm text-kb-stone">Skipped. Nothing was posted.</p>
+            <p className="text-sm text-kb-stone">Skipped. Nothing was published.</p>
             <button
               type="button"
               onClick={() => setStage("draft")}
@@ -160,7 +160,7 @@ export function InboxDemo() {
         ) : (
           <div className="flex items-center gap-2">
             <Button className="flex-1" onClick={() => setStage("posted")}>
-              Post
+              Approve
             </Button>
             <Button
               variant="outline"
@@ -175,9 +175,7 @@ export function InboxDemo() {
           </div>
         )}
       </div>
-      <p className="mt-3 text-xs text-kb-stone">
-        This is an example. On Kabsi, nothing is posted until you tap Post.
-      </p>
+      <p className="mt-3 text-xs text-kb-stone">Nothing is published until you approve it.</p>
     </div>
   );
 }

@@ -24,7 +24,18 @@ import { CtaBand, Eyebrow, FaqList, H2, HeroBackdrop, Section } from "@/componen
 import { BusinessGrid } from "@/components/marketing/business-grid";
 import { FAQ } from "@/lib/faq";
 import { ELIGIBLE, GUIDELINES_URL, NOT_ELIGIBLE } from "@/lib/eligibility";
-import { ORG_LD, PRICES, PRODUCT_LD, TRIAL_LINE, WEBSITE_LD, pageHead } from "@/lib/site";
+import {
+  BRAND_EXPLAINER,
+  BRAND_LINE,
+  CTA_PRIMARY,
+  CTA_SECONDARY,
+  ORG_LD,
+  PRICES,
+  PRODUCT_LD,
+  TRIAL_LINE,
+  WEBSITE_LD,
+  pageHead,
+} from "@/lib/site";
 import { useIsLebanon } from "@/lib/region";
 
 export const Route = createFileRoute("/")({
@@ -32,9 +43,8 @@ export const Route = createFileRoute("/")({
   validateSearch: z.object({ sticker: z.enum(["disabled"]).optional().catch(undefined) }),
   head: () =>
     pageHead({
-      title: "Kabsi | Your Google Business Profile, taken care of",
-      description:
-        "Kabsi keeps your Google Business Profile complete and current: review replies, weekly posts, photos, hours and a Profile Score. You approve every change.",
+      title: `Kabsi | ${BRAND_LINE}`,
+      description: BRAND_EXPLAINER,
       path: "/",
       jsonLd: [ORG_LD, WEBSITE_LD, PRODUCT_LD],
     }),
@@ -65,17 +75,15 @@ function HomePage() {
               For local businesses on Google Maps
             </p>
             <h1 className="mt-6 font-display text-[clamp(2.7rem,6.6vw,5.2rem)] leading-[0.95]">
-              Your Google Business Profile, taken care of.
+              {BRAND_LINE}
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-8 text-kb-stone-on-dark">
-              Kabsi keeps your profile complete and current by following Google's own guidance:
-              replies to every review, a weekly post, photos, hours and a Profile Score with a short
-              list of what to do next. You approve every change.
+              {BRAND_EXPLAINER}
             </p>
             <div className="mt-9 grid gap-3 sm:flex">
               <Button asChild className="w-full sm:w-auto">
                 <Link to="/start">
-                  Get early access <ArrowRight />
+                  {CTA_PRIMARY} <ArrowRight />
                 </Link>
               </Button>
               <Button
@@ -83,18 +91,20 @@ function HomePage() {
                 variant="outline"
                 className="w-full border-kb-white text-kb-white hover:bg-kb-white/10 sm:w-auto"
               >
-                <a href="#demo">Try the demo</a>
+                <a href="#demo">{CTA_SECONDARY}</a>
               </Button>
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm text-kb-stone-on-dark">
-              {["You approve everything", "Follows Google's guidelines", "Any language"].map(
-                (t) => (
-                  <li key={t} className="flex items-center gap-2">
-                    <Check className="size-4 text-kb-yellow" aria-hidden="true" />
-                    {t}
-                  </li>
-                ),
-              )}
+              {[
+                "You approve everything",
+                "Replies in your customer's language",
+                "Remove Kabsi any time",
+              ].map((t) => (
+                <li key={t} className="flex items-center gap-2">
+                  <Check className="size-4 text-kb-yellow" aria-hidden="true" />
+                  {t}
+                </li>
+              ))}
             </ul>
           </div>
           <div id="demo" className="flex scroll-mt-24 justify-center lg:justify-end">
@@ -135,7 +145,7 @@ function HomePage() {
             <p className="mt-5 max-w-xl text-lg leading-8 text-kb-stone">
               Each new Google review reaches your email with a reply already drafted. Drafts only
               use the facts you gave Kabsi, so nothing is made up. Read it, change it if you like,
-              and tap Post.
+              and approve it.
             </p>
           </div>
           <ul data-stagger="" className="grid gap-4 self-center">
@@ -146,7 +156,7 @@ function HomePage() {
               Hours, phone, what you want mentioned, your answers to common questions. Nothing else.
             </Point>
             <Point icon={<MailCheck />} title="One-tap approval">
-              Nothing goes on Google until you tap Post. Urgent reviews reach you straight away.
+              Nothing is published until you approve it. Urgent reviews reach you straight away.
             </Point>
           </ul>
         </div>
@@ -157,9 +167,9 @@ function HomePage() {
         <Eyebrow>Keep your profile fresh</Eyebrow>
         <H2>Updates, photos and hours, ready for your OK.</H2>
         <p className="mt-5 max-w-2xl text-lg leading-8 text-kb-stone">
-          Kabsi drafts one short Google update a week from what you told it, in the words customers
-          use for businesses like yours. Add a photo from your phone and Kabsi checks it first. Set
-          holiday hours in a minute. You don't have to write any of it yourself.
+          Kabsi prepares fresh posts from what you told it, in the words customers use for
+          businesses like yours. Add a photo from your phone and Kabsi checks it first. Set holiday
+          hours in a minute. You don't have to write any of it yourself.
         </p>
         <div data-stagger="" className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Feature icon={<Newspaper />} title="Written like a person">
@@ -182,10 +192,10 @@ function HomePage() {
         </p>
       </Section>
 
-      {/* 3. Listing Shield */}
+      {/* 3. Google Protection */}
       <Section className="grid items-center gap-12 md:grid-cols-2">
         <div>
-          <Eyebrow>Listing Shield</Eyebrow>
+          <Eyebrow>Google Protection</Eyebrow>
           <H2>Know when something changes on Google.</H2>
           <p className="mt-5 max-w-xl text-lg leading-8 text-kb-stone">
             Google sometimes accepts edits from the public. Kabsi quietly watches your name, phone,
@@ -212,9 +222,9 @@ function HomePage() {
           </div>
           <div className="mt-5 flex flex-wrap items-center gap-4">
             <span className="rounded-card bg-kb-yellow px-4 py-2.5 text-sm font-bold text-kb-black">
-              Put mine back
+              Keep my information
             </span>
-            <span className="text-sm font-bold underline underline-offset-4">Keep the new one</span>
+            <span className="text-sm font-bold underline underline-offset-4">Google is right</span>
           </div>
         </div>
       </Section>
@@ -227,8 +237,8 @@ function HomePage() {
           <p className="mt-5 max-w-xl text-lg leading-8 text-kb-stone">
             Kabsi makes the link that opens your Google review page, and a QR code to print. Already
             have an NFC tag or sticker? Write the same link on it. Every customer sees the same
-            Google review page: there's no rating screen and no filtering. Ask everyone the same
-            way, and never offer a reward for a review: Google doesn't allow it.
+            Google review page: there's no rating screen and no filtering. Ask every customer the
+            same way, as they visit. Never offer a reward.
           </p>
           <ul className="mt-6 space-y-3 text-kb-ink">
             <li className="flex gap-3">
@@ -291,8 +301,8 @@ function HomePage() {
             How you sign off, your hours, what you want mentioned. Replies and posts only use these.
           </Step>
           <Step n={3} icon={<MailCheck />} title="Approve with one tap">
-            Replies and updates arrive ready. Edit, skip or post. Every Monday, a short email shows
-            your week.
+            Replies and updates arrive ready. Edit, skip or approve. Every Monday, a short email
+            shows your week.
           </Step>
         </ol>
       </Section>

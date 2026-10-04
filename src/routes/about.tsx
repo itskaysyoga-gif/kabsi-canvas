@@ -51,6 +51,10 @@ function AboutPage() {
             .
           </p>
         </section>
+
+        <p className="border-t border-kb-hairline pt-8 font-bold">
+          We watch your listing. You run your business.
+        </p>
       </Section>
     </PublicLayout>
   );

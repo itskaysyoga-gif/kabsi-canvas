@@ -34,9 +34,9 @@ import { useIsLebanon } from "@/lib/region";
 export const Route = createFileRoute("/how-it-works")({
   head: () =>
     pageHead({
-      title: "How Kabsi works | Profile care you approve",
+      title: "How Kabsi works | You approve every change",
       description:
-        "Add Kabsi as a Manager on your Google profile. Kabsi shows what to improve, drafts each change, and replies to every review. You approve everything. Nothing is posted without you.",
+        "Add Kabsi as a Manager on your Google profile. Kabsi drafts a reply for every review and prepares each update from facts you gave it. You approve everything. Nothing is published without you.",
       path: "/how-it-works",
       crumbs: [{ name: "How it works", path: "/how-it-works" }],
       jsonLd: [
@@ -56,8 +56,8 @@ export const Route = createFileRoute("/how-it-works")({
               "Hours, services and anything Kabsi should never say. Drafts only use these facts.",
             ],
             [
-              "See your Profile Score and Do now list",
-              "Kabsi lists the next improvements for your profile, each with a ready draft where it can write one.",
+              "See what needs attention",
+              "Kabsi lists the next improvements for your profile as Urgent, Recommended or Nice to have, each with a ready draft where it can write one.",
             ],
             [
               "A reply is drafted for every new review",
@@ -67,7 +67,7 @@ export const Route = createFileRoute("/how-it-works")({
               "It reaches you by email",
               "Each new review arrives with its draft, or in a daily digest for 4 and 5 star reviews.",
             ],
-            ["You tap Post, Edit or Skip", "Nothing is written to Google until you approve it."],
+            ["You approve, edit or skip", "Nothing is written to Google until you approve it."],
           ].map(([name, text], i) => ({ "@type": "HowToStep", position: i + 1, name, text })),
         },
       ],
@@ -83,7 +83,7 @@ function Page() {
       <PageHero
         eyebrow="How it works"
         title="Kabsi prepares. You approve."
-        sub="Kabsi keeps your Google Business Profile complete and current by following Google's own guidance. Here is everything it does, and the one thing it never does: change anything you haven't approved."
+        sub="Kabsi looks after your business on Google and prepares every change. Here is everything it does, and the one thing it never does: change anything you haven't approved."
         visual={<FlowVisual />}
         photo="heroHow"
       />
@@ -113,15 +113,14 @@ function Page() {
 
           <Block n="3" icon={<ListChecks />} title="See what to improve, with a draft for each">
             <p>
-              Your dashboard opens with a <b>Profile Score</b> and a short <b>Do now</b> list: the
-              next things worth doing on your Google profile, biggest first, following Google's own
-              guidance. Each item says why it matters and comes with a ready draft where Kabsi can
-              write one. You do it, put it off for 3 days, or skip it for 30 days.
+              Your dashboard opens with a short list of what needs attention on your Google profile,
+              marked <b>Urgent</b>, <b>Recommended</b> or <b>Nice to have</b>. Each item says why it
+              matters and comes with a ready draft where Kabsi can write one. You do it, put it off
+              for 3 days, or skip it for 30 days.
             </p>
             <p>
-              The score is Kabsi's own checklist (answered reviews, key facts, review link, weekly
-              post, photos, profile basics, listing watch). It is not a Google score and it does not
-              predict how you rank.
+              Kabsi does not give your profile a score and does not predict how you rank. Nobody
+              honest can.
             </p>
           </Block>
 
@@ -147,11 +146,11 @@ function Page() {
               <li>Reviews of 3 stars or less: one email each, as they arrive.</li>
               <li>
                 4 and 5 star reviews: gathered into one email a day at the hour you choose, each
-                with its own <b>Post</b>, <b>Edit</b> and <b>Skip</b>.
+                with its own <b>Approve</b>, <b>Edit</b> and <b>Skip</b>.
               </li>
               <li>
                 Hard reviews (1 or 2 stars, or anything about health, safety, staff or legal
-                matters): a calm draft and no quick Post button. You open it and read it first.
+                matters): a calm draft and no quick Approve button. You open it and read it first.
               </li>
             </ul>
           </Block>
@@ -160,7 +159,7 @@ function Page() {
             <p>
               Before anything goes to Google you see the exact words. After you approve, Kabsi
               checks with Google and tells you if the reply is live or held for review. Kabsi never
-              posts or changes anything by itself.
+              publishes or changes anything by itself.
             </p>
           </Block>
         </div>
@@ -178,36 +177,36 @@ function Page() {
 
       <Section tone="sand">
         <Eyebrow>The rest of your profile</Eyebrow>
-        <H2>Five modules, one rule: you approve.</H2>
+        <H2>One rule: you approve.</H2>
         <div data-stagger="" className="mt-10 grid gap-4 md:grid-cols-2">
-          <Card icon={<ShieldCheck />} title="Listing Shield">
+          <Card icon={<ShieldCheck />} title="Google Protection">
             Kabsi watches your business name, phone, address, hours, website and categories. If
-            something changes that you didn't approve, you get one email with <b>Put mine back</b>{" "}
-            and <b>Keep the new one</b>. It can't lock your listing or stop people suggesting edits
-            to Google, and we won't pretend it can.
+            something changes that you didn't approve, you get one email with the before and after
+            and two buttons: <b>Keep my information</b> and <b>Google is right</b>. Nothing changes
+            unless you say so. It can't lock your listing or stop people suggesting edits to Google,
+            and we won't pretend it can.
           </Card>
-          <Card icon={<Megaphone />} title="A weekly update, drafted for you">
-            Once a week Kabsi drafts a short Google update from your facts, in the words customers
-            use for businesses like yours, with a button like Call or Book. It arrives by email:
-            shops and restaurants on Thursday morning, clinics and offices on Tuesday. You can also
-            say what's new in a sentence any day. You post it, change it, or skip it. Weekly drafts
-            can be switched off.
+          <Card icon={<Megaphone />} title="Fresh posts, drafted for you">
+            Kabsi drafts short Google posts from your facts, in the words customers use for
+            businesses like yours, with a button like Call or Book. They arrive by email. You can
+            also say what's new in a sentence any day. You approve a post, change it, or skip it.
+            Drafts can be switched off.
           </Card>
           <Card icon={<Camera />} title="Photos">
             Upload a photo from your phone. Kabsi checks that it's clear and fits Google's photo
-            rules, suggests where it belongs, and waits for you to post it.
+            rules, suggests where it belongs, and waits for your approval.
           </Card>
           <Card icon={<CalendarClock />} title="Special hours">
-            Closed for a holiday or open late? Set the dates once and post them to Google.
+            Closed for a holiday or open late? Set the dates once, approve them, and they go to
+            Google.
           </Card>
-          <Card icon={<FileBarChart />} title="Monday report">
+          <Card icon={<FileBarChart />} title="Weekly Care Report">
             Every Monday morning: your Google rating and its change, new reviews, how many got a
-            reply, and card taps. Facts only, no advice, nothing estimated.
+            reply, and review link activity. Facts only, no advice, nothing estimated.
           </Card>
           <Card icon={<LayoutDashboard />} title="Your dashboard">
-            Everything in one place: your Profile Score, the Do now list, replies waiting and your
-            week. Nora, Kabsi's assistant, is there to answer questions and help fill in your
-            business facts.
+            Everything in one place: what needs attention, replies waiting and your week. Nora,
+            Kabsi's assistant, is there to answer questions and help fill in your business facts.
           </Card>
         </div>
       </Section>
@@ -228,13 +227,13 @@ function Page() {
 
       <Section tone="sand">
         <div className="max-w-3xl">
-          <Eyebrow>Review link and QR code</Eyebrow>
+          <Eyebrow>Get Reviews</Eyebrow>
           <H2>One tap or scan to your Google review page.</H2>
           <p className="mt-5 text-lg leading-8 text-kb-stone">
             Your dashboard gives you a review link and a printable QR code. Put them on a table
             card, a receipt or any NFC tag you already own. It's the same page for every customer:
-            no rating screen, no filter. Kabsi counts opens (never who opened) and shows them in
-            your report.
+            no rating screen, no filter. Ask every customer the same way, as they visit. Never offer
+            a reward. Kabsi counts opens (never who opened) and shows them in your report.
           </p>
           {isLebanon ? (
             <p className="mt-4 text-[15px]">

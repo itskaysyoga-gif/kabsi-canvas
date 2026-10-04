@@ -4,6 +4,7 @@ import { ArrowRight, ChevronRight, MapPin, Nfc, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KabsiMark } from "@/components/shared/kabsi-logo";
 import { cn } from "@/lib/utils";
+import { BRAND_EXPLAINER, BRAND_LINE, CTA_PRIMARY } from "@/lib/site";
 import type { PhotoId } from "@/lib/site-photos";
 import { SiteImg } from "@/components/marketing/site-img";
 
@@ -245,13 +246,7 @@ export function FeatureCard({
   );
 }
 
-export function CtaBand({
-  title = "Your Google profile, looked after. You approve every change.",
-  sub,
-}: {
-  title?: string;
-  sub?: string;
-}) {
+export function CtaBand({ title = BRAND_LINE, sub }: { title?: string; sub?: string }) {
   return (
     <section className="bg-kb-carbon text-kb-white">
       <div className="mx-auto flex max-w-6xl flex-col items-start gap-7 px-5 py-16 sm:px-8 sm:py-20 md:flex-row md:items-center md:justify-between">
@@ -259,14 +254,11 @@ export function CtaBand({
           <h2 className="max-w-2xl font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05]">
             {title}
           </h2>
-          <p className="mt-3 max-w-xl text-kb-stone-on-dark">
-            {sub ??
-              "Set up takes two steps: find your business, then add Kabsi as a Manager on your Google profile."}
-          </p>
+          <p className="mt-3 max-w-xl text-kb-stone-on-dark">{sub ?? BRAND_EXPLAINER}</p>
         </div>
         <Button asChild className="w-full shrink-0 md:w-auto">
           <Link to="/start">
-            Get early access <ArrowRight />
+            {CTA_PRIMARY} <ArrowRight />
           </Link>
         </Button>
       </div>

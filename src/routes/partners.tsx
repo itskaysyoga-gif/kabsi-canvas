@@ -19,7 +19,7 @@ export const Route = createFileRoute("/partners")({
   head: () =>
     pageHead({
       title: "Kabsi for partners | Google profile care for your clients",
-      description: `Offer Kabsi to the businesses you already help. $${PRICES.partnerRate} per active business per month, billed monthly in USDT. You set the price and keep the margin.`,
+      description: `Offer Kabsi to the businesses you already help. $${PRICES.partnerRate} per active business per month. You set the price and keep the margin.`,
       path: "/partners",
       crumbs: [{ name: "Partners", path: "/partners" }],
     }),
@@ -54,12 +54,12 @@ function Page() {
             Send an invite from your workspace, or share your own signup link. Clients who join
             through you are linked to you.
           </Point>
-          <Point icon={<Wallet />} title="Settle in USDT">
-            One invoice on the 1st for the month before. Pay in USDT and paste the transaction ID.
+          <Point icon={<Wallet />} title="One invoice a month">
+            One invoice on the 1st for the month before, for the live businesses only.
           </Point>
-          <Point icon={<Eye />} title="Client data stays with the client">
-            You never see review text, drafts or replies, and you can't post for them. Owners
-            approve everything themselves, which keeps you and them safe.
+          <Point icon={<Eye />} title="Your clients stay in control">
+            Your clients stay the owners of their Google profiles, and nothing is published without
+            an approval.
           </Point>
           <Point icon={<Nfc />} title="Supply the cards">
             {isLebanon
@@ -98,7 +98,7 @@ function Page() {
           <H2>Sell more than a card.</H2>
           <p className="mt-5 text-lg leading-8 text-kb-stone">
             A card gets a customer to the review page. Kabsi makes sure every review gets a
-            thoughtful reply, the profile gets a fresh post each week, and the owner hears about
+            thoughtful reply, the profile stays fresh with new posts, and the owner hears about
             listing changes. Clients can also use Kabsi fully digitally, with a review link and QR
             code instead of a card.
           </p>

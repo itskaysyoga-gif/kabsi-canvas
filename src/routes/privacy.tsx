@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalPage } from "@/components/marketing/legal";
-import { CONTACT_EMAIL, CONTACT_PHONE, pageHead } from "@/lib/site";
+import { CONTACT_EMAIL, CONTACT_PHONE, OPERATOR_LINE, pageHead } from "@/lib/site";
 
 // Privacy policy, written to match the system as built. Every retention period and processor here
 // is implemented: see migrations 019 (deletion), 020 (retention) and docs/KABSI-PLAN.md Appendix A. No em dashes.
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/privacy")({
   component: Page,
 });
 
-const UPDATED = "27 September 2026";
+const UPDATED = "4 October 2026";
 
 function Page() {
   return (
@@ -32,8 +32,8 @@ function Page() {
       <section>
         <h2>Who is responsible</h2>
         <p>
-          The data controller is Rashid Abou Hamzy, Spring 19, Villa 9, Dubai, United Arab Emirates.
-          Contact: {CONTACT_EMAIL}.
+          {OPERATOR_LINE}. The operator is also the data controller for the personal data described
+          here.
         </p>
       </section>
 
