@@ -8,7 +8,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25). P0.1-V1 and P0.1-V2 done (31, 32). P0.1-07 (database test suite) done (PR 33). P0.1-08 (database API hardening) merged (PR 35); its After-merge checks partly passed, see Evidence. P0.1-09 (tenant model) merged (PR 36); its After-merge calls checked through RLS as the Yawmiyati owner, the browser smoke still open. P0.1-10 (audit log) merged (PR 37) on Hussein's "merge"; the whole migration is live (table, triggers and feed through the connector, `run_retention` by Hussein in the SQL editor), see Evidence. P0.1-11 split in two; part A (Google layer, mocks and fixtures) merged (PR 38) and its After-merge checks passed; part B (call-site moves and the CI check) is PR 39.
+- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25). P0.1-V1 and P0.1-V2 done (31, 32). P0.1-07 (database test suite) done (PR 33). P0.1-08 (database API hardening) merged (PR 35); its After-merge checks partly passed, see Evidence. P0.1-09 (tenant model) merged (PR 36); its After-merge calls checked through RLS as the Yawmiyati owner, the browser smoke still open. P0.1-10 (audit log) merged (PR 37) on Hussein's "merge"; the whole migration is live (table, triggers and feed through the connector, `run_retention` by Hussein in the SQL editor), see Evidence. P0.1-11 done: part A (PR 38) and part B (PR 39) merged, After-merge checks passed. P0.1-10 done (dashboard approval and publication events checked live). P0.1-12a (job queue and dispatcher) is PR 40; on Hussein's "apply" its table, functions and staff view are live; `private.dispatch_tick` and the `kabsi_dispatch` schedule wait for Hussein in the SQL editor (the connector stalls on SQL with `delete`).
 
 ## Rashid's decisions and inputs (plan section 5)
 
@@ -55,9 +55,9 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-07 | Database test suite in CI | Opus | done (merged 33; no After-merge checks) | 33 | 4 Oct 2026 |
 | P0.1-08 | Security hardening of the database API | Opus | merged (35); After-merge checks partly run, see Evidence | 35 | 4 Oct 2026 |
 | P0.1-09 | Tenant model: organisations, connections, subscriptions | Opus | merged (36); After-merge calls checked through RLS, browser smoke still open, see Evidence | 36 | 4 Oct 2026 |
-| P0.1-10 | Append-only audit log and the "What Kabsi did" feed source | Opus | merged (37); migration fully live; After-merge checks open, see Evidence | 37 | 4 Oct 2026 |
-| P0.1-11 | One Google service layer | Opus | split in two: part A (layer, mocks, fixtures, tests) merged (38), After-merge passed; part B (call-site moves, `check-google-calls.mjs` in CI) PR open | 38, 39 | 4 Oct 2026 |
-| P0.1-12a | Job queue and dispatcher, review jobs first | Opus | todo | | |
+| P0.1-10 | Append-only audit log and the "What Kabsi did" feed source | Opus | done (merged 37; approval and publication events checked live at the start of the P0.1-12a chat; the next `kabsi_retention` run still to read, see After merge) | 37 | 4 Oct 2026 |
+| P0.1-11 | One Google service layer | Opus | done (part A merged 38, part B merged 39; After-merge checks passed) | 38, 39 | 4 Oct 2026 |
+| P0.1-12a | Job queue and dispatcher, review jobs first | Opus | PR open; migration live except `dispatch_tick` and `kabsi_dispatch` (Hussein, SQL editor) | 40 | 4 Oct 2026 |
 | P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | todo | | |
 | P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | todo | | |
 | P0.1-13b | One publication pipeline: posts, photos, hours, profile changes | Opus | todo | | |
@@ -144,17 +144,17 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-After the P0.1-11 part B pull request (39) is merged (Deploy publishes every function, `_shared/google.ts` is gone):
-- `list_edge_functions`: `api`, `content`, `posts-weekly`, `health`, `places-search` and `review-link` versions newer than the merge time.
-- The next sync after the deploy succeeds for Yawmiyati in mock mode: the latest `google_check` row in `audit_events` for `9803ee99-fee8-4c6a-abb4-1a830fcbb438` is after the deploy with result `checked`, every `jobs_log` row after it has `ok = true`, and no `ops_events` row after it names `google`.
-- `health` (x-cron-secret) still returns `checks.places` "search works", `checks.google_token` and `checks.google_accounts` as before, and `checks.google_mode` "mock". Needs the cron secret, so run it from pg_net (`net.http_post` with the secret read by `internal_secret`) or by Hussein.
-- Optional, a person in a browser: the free review-link tool on `/google-review-link` and onboarding "Find your business" still list businesses.
-
-P0.1-11 part A (PR 38): After-merge checks passed at the start of the part B chat (see Evidence).
-
-After the P0.1-10 pull request is merged (Deploy publishes `api`):
+After the P0.1-12a pull request (40) is merged (Deploy publishes `api` with `/api/dispatch`) and its migration is live:
 - `list_edge_functions`: `api` version newer than the merge time.
-- Approve a mock reply for Yawmiyati from the dashboard (and one from an email link when a mock review email arrives): `select action, actor_type, channel, result, ip_country, user_agent is not null, request_id is not null from audit_events where location_id = '9803ee99-fee8-4c6a-abb4-1a830fcbb438' and action in ('approval', 'publication') order by id desc limit 4` shows an `approval` and a `publication` with the channel, and a request id and user agent on the approval. Whether `ip_country` is filled depends on the country header Supabase passes to Edge Functions; record what it shows.
+- `cron.job` shows `kabsi_dispatch` (`* * * * *`, `select private.dispatch_tick()`) next to the unchanged `kabsi_cron_tick`; `cron.job_run_details` for `kabsi_dispatch` has only `succeeded` runs.
+- A mock review on Yawmiyati (`mock_google_reviews`, google_location_id `locations/mock-9803ee99`, Hussein's "apply") goes sync, draft, notify through jobs: `select id, kind, state, attempts, created_at, finished_at from jobs where location_id = '9803ee99-fee8-4c6a-abb4-1a830fcbb438' order by id desc limit 6` shows `sync_reviews`, `draft_reply` and `notify_owner` succeeded in that order; the review row is `drafted`, then `notified_at` is set (a 3 star or lower review is emailed at once). Paste the rows here.
+- `google_connections` for Yawmiyati: `sync_status` `ok`, `last_successful_sync_at` within the last 5 minutes, `next_sync_at` in the next 5 minutes.
+- `jobs_log` rows named `sync`, `draft` or `notify` stop after the deploy (cron-tick no longer runs them); `dispatch` rows appear instead; no job is `dead` or `failed` (`select state, count(*) from jobs group by 1`).
+- Signed in as the Yawmiyati owner (390 px and 1440 px, a person with a browser): Home shows "Google profile checked ... ago" under the business name; staff `/staff` Job health shows the "Job queue" line.
+
+P0.1-11 (PRs 38 and 39) and P0.1-10's approval and publication events: passed at the start of the P0.1-12a chat (see Evidence).
+
+Still open from P0.1-10:
 - After the next `kabsi_retention` run (02:53 UTC): the job succeeded and its `jobs_log` detail (if any) carries `audit_redacted` and `audit_deleted`.
 
 After the P0.1-09 pull request (36) was merged: the calls were checked through RLS as the Yawmiyati owner (see Evidence). Still open:
@@ -205,6 +205,28 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### After-merge checks run at the start of the P0.1-12a chat (4 Oct 2026, 17:30 UTC, Hussein's session)
+- P0.1-11 part B: PR 39 merged 17:26:48 UTC; every Edge Function `updated_at` 17:27:14 UTC (`api` 45, `content` 38, `posts-weekly` 34, `health` 30, `places-search` 35, `review-link` 29). Passed.
+- Sync after the deploy: Yawmiyati `google_check` 17:30:06 UTC, result `checked`; `jobs_log` after 17:27:14: `access` and `cron-tick`, both `ok = true`; `ops_events` after 17:27:14: 0; no cron job failed in the last 3 hours. Passed.
+- `health` through pg_net with the cron secret (request 7211): HTTP 200, `checks.places` "search works", `checks.google_mode` "mock", `checks.google_token` "not configured (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN)", no `google_accounts` (only reported when the token is set, the same as before the move). Passed. P0.1-11 done.
+- P0.1-10: Hussein approved a demo reply from the dashboard. `audit_events` 53 `approval` (actor `user`, channel `dashboard`, result `approved`, request id and user agent present) and 54 `publication` (actor `system`, channel `dashboard`, result `live`) for Harbour Lane Coffee at 17:29:36 UTC; also 25 to 28 for Juniper Hair Studio at 16:57. `ip_country` is null: Supabase does not pass a country header to Edge Functions. Passed. The email-link approval was not tried (no mock review email); the `audit_log.sql` tests cover that channel.
+- Night jobs still not run since the P0.1-08 and P0.1-10 changes: `kabsi_retention` last 02:53, `kabsi_chat_retention` 03:41, `kabsi_concierge_daily` 2 Oct 05:00.
+
+### P0.1-12a (branch claude/h-p0-1-12a, PR 40, 4 Oct 2026, Hussein's session)
+- Migration `20261004190000_jobs_queue.sql`: `jobs` with every column on the card (id is a bigint identity), dedupe key unique while pending, running or retrying; `claim_jobs(n, worker)` with `for update skip locked`; `finish_job` (backoff 30 s doubling with 20 percent jitter, dead after `max_attempts` 5, `failed` when the handler rules a retry out, an alert on either); a job left running 10 minutes is handed on as a failed try; `enqueue_job`; `record_sync_result`; `private.produce_jobs` and `private.dispatch_tick`; one new pg_cron job `kabsi_dispatch` every minute; `staff_job_health` gains `queue` and `stopped_jobs`.
+- Done-when "a job is claimed once by two concurrent dispatchers": `supabase/tests/jobs_claim_concurrency.sh` (run by `scripts/db-test.sh`): locally on Postgres 16 with the migration and stub tables, "w1 60, w2 40, total 100, distinct 100, running once 100, 2348 ms"; with SKIP LOCKED removed it fails ("w2 waited for w1's locks (4050 ms)"). CI result below.
+- Done-when "retries with backoff, and lands in dead after 5 failures": `jobs_queue.sql` (first retry about 30 s, then about 1 and 2 minutes, dead after 5 with one `job_dead` ops event, never claimed again). Locally: waits 27 s, 49 s, 1 min 47 s, 3 min 47 s, then dead.
+- Done-when "a mock review on Yawmiyati goes sync, draft, notify through jobs": needs the merged code live; After merge.
+- Done-when "Home's last check reads `google_connections.last_successful_sync_at`": `src/lib/dashboard.ts` reads it, `LastCheck` on Home shows "Google profile checked 14 min ago", amber "Google profile last checked ..." after 6 hours (K-06). Not checked in a browser (no access to the signed-in app from the sandbox).
+- Per-business sync status: `sync_reviews` writes `last_attempted_sync_at`, `last_successful_sync_at`, `sync_status`, `last_error` through `record_sync_result`; the producer writes `next_sync_at`.
+- Staff job health: queue counts and the stopped (dead or failed) jobs of the last 7 days.
+- `kabsi_cron_tick` keeps access, ratings, weekly, shield, deletions, trials and renewals; sync, draft and notify are gone from `api/cron.ts`. Nothing unscheduled.
+- App checks: `npm run typecheck`, `lint:changed` (3 files), `check:tokens`, `check:anon`, `check:google` pass; `npm test` 21 passed; `npm run build` pass. Deno 2.9.6: `deno check` api, cron-tick, content, posts-weekly, health pass; `deno test --no-check _shared/` 79 passed (4 new in `jobs.test.ts`). `site-assets` cannot fetch deno.land from the sandbox (CI runs it).
+- `knowledge/kabsi-facts.md` (Home line and a help entry) and `public/llms-full.txt` (rebuilt) updated.
+- Live apply on Hussein's "apply" (4 Oct, about 18:05 UTC). The whole file through `apply_migration` timed out after 60 s and applied nothing (checked: no table, no function, no migration row). Applied in parts: `jobs_queue_part1_table_functions` (table, indexes, RLS, grants, enqueue, backoff, stopped alert, claim, finish, record_sync_result, local_hour, produce_jobs), `jobs_queue_part1b_exact_bodies` (claim_jobs and produce_jobs again with the file's in-body comments), `jobs_queue_part3_staff_job_health`. Part 2 (`dispatch_tick`, which contains `delete`) timed out and applied nothing, as in P0.1-10. Read back: `jobs` RLS on, 0 rows, privileges only `service_role:SELECT`, 6 indexes; the four service functions execute for service_role only, the private ones for nobody; all nine function bodies have the same md5 as the file applied to a local Postgres 16. No `kabsi_dispatch` yet (19 cron jobs, unchanged). Security advisor: only new line is INFO "RLS enabled, no policy" on `jobs` (intended, server only); no new function callable by authenticated.
+- Still to run, by Hussein in the Supabase SQL editor: `private.dispatch_tick()` with its revoke, then `select cron.schedule('kabsi_dispatch', '* * * * *', $$select private.dispatch_tick()$$);` (the snippet in the chat, copied from the file). Until the PR is merged the dispatcher route answers 404 and the old cron keeps the work.
+- CI on PR 40 (run https://github.com/rashidhamzy-hue/kabsi-canvas/actions/runs/37221958571, commit 635f697): App, Edge Functions and Database all success. Database: 392 pgTAP tests pass on a fresh local stack (47 in `jobs_queue.sql`), then "jobs claim concurrency: w1 60, w2 40, total 100, distinct 100, running once 100, 2347 ms ... ok". The first run (commit 3338a6a) failed 3 tests from two mistakes in the test file (BETWEEN called the retry helper twice; a re-offered job was claimed before the stuck one); fixed in 635f697.
 
 ### After-merge checks run at the start of the P0.1-11 part B chat (4 Oct 2026, 17:10 UTC, Hussein's session)
 - P0.1-11 part A deploy: PR 38 merged 17:06:42 UTC; every Edge Function `updated_at` 17:07:10 UTC (`api` 44, `content` 37, `posts-weekly` 33). Passed.
@@ -458,6 +480,9 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Found, not done
 
+- P0.1-12a: `private.ops_watchdog` still alerts "Reviews job hasn't run for 20 minutes ... New reviews aren't being drafted" from `kabsi_cron_tick`; after this task drafting runs on `kabsi_dispatch`. P0.1-12b (which retires `kabsi_cron_tick`) should point the watchdog at the dispatcher.
+- P0.1-12a: Home's Google Protection line still reads "Keep it or put yours back" (`src/routes/_authenticated/app/index.tsx`), close to the retired "Put mine back". For P0.3-07.
+
 - P0.1-11: Google documents `Invitation.targetLocation.address` as a plain string, while `_shared/invitations.ts` reads it as a postal address (`addressLines`, `locality`). If Google sends a string, no invitation would ever match on address and every invite would stay pending. Not changed (behaviour must not change in this task); check against a captured invitation on Gate A day (P0.7-01) and fix in `invitations.ts`.
 - P0.1-11: the live `mock_listings` rows for Yawmiyati (`locations/mock-9803ee99`) and QA Bakery (`locations/mock-qac00000`) still hold the invented category "Restaurant" and the phone "+961 1 000 000". The code no longer invents them for new rows; clearing the two rows is a data change for Hussein's "apply" (or P0.7-04 at go-live).
 - P0.1-09: when a business is deleted (`delete_location_now`), its organisation and the owner's organisation membership stay, empty. Retention of empty organisations belongs to P0.2-01 or P0.2-02.
@@ -490,6 +515,12 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Decisions to confirm
 
 (Build chats add decisions the plan did not cover here, one line each with the reason. The planning chat folds confirmed ones into the plan.)
+- P0.1-12a: `claim_jobs`, `finish_job`, `enqueue_job` and `record_sync_result` are in `public` with execute for the service role only (the plan says `private.claim_jobs`): the dispatcher calls them through PostgREST, which serves only `public` (P0.1-08 rule). The producers and the tick are in `private`.
+- P0.1-12a: the review sync stays every 5 minutes per business (the old cron rate), each business at a fixed offset inside the 5 minutes, so calls spread evenly; incremental sync by update time (K-35) is not part of this task.
+- P0.1-12a: a draft that fails is retried by the job with backoff and counted on `reviews.draft_attempts` as before; at 3 the job ends `failed` and the review stays in the owner's inbox. An exhausted AI budget ends the job without a failure and the producer offers the review again (as the old loop did).
+- P0.1-12a: Google refusing access (403 or 404) is not retried by the job; the old 30-minute grace and the access-lost email are kept, and the next sync 5 minutes later is the retry.
+- P0.1-12a: finished jobs are cleared by the tick: succeeded after 7 days, failed and dead after 30 days (jobs hold no review text).
+- P0.1-12a: Home shows the last check line only once a check has happened (concierge businesses are not read from Google). The full K-06 header strip is P0.3-07.
 - P0.1-11: live and mock modules return Google's wire types and `index.ts` maps them, except the Google Protection listing in mock mode, which keeps its display strings in `mock_listings` (the staff mock edit screen writes them) and is read and put back as before.
 - P0.1-11: the Places mock is used by tests only; Places has no mode switch at run time (it needs only `PLACES_API_KEY`), and demo businesses have no place id.
 - P0.1-11: the verifications module is read only (Voice of Merchant state and the list); Kabsi never starts a verification (Google reality check).
@@ -556,6 +587,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 4 Oct 2026 (Hussein's session): After-merge checks for P0.1-11 part B (deploy, sync, health) and P0.1-10 (dashboard approval and publication events) passed; both marked done. P0.1-12a on branch claude/h-p0-1-12a, PR 40: jobs table, claim and finish, review producers, `kabsi_dispatch`, `/api/dispatch` with sync, draft and notify handlers, Home last check, staff stopped jobs. Migration waits for CI and Hussein's "apply". Next: P0.1-12b (depends on P0.1-12a).
 
 - 4 Oct 2026 (Hussein's session): After-merge checks for P0.1-11 part A passed (deploy 17:07, sync 17:10 `checked`, feed line). P0.1-11 part B on branch claude/h-p0-1-11b, PR 39: call sites in `review-link`, `places-search`, `health`, `_shared/report.ts` moved into `_shared/google/`, the five imports repointed, `_shared/google.ts` deleted, `scripts/check-google-calls.mjs` in CI with a fixture test. Next: P0.1-12a (depends on P0.1-11).
 
