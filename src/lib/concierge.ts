@@ -45,7 +45,7 @@ async function call<T>(fn: string, args: Record<string, unknown> = {}): Promise<
 }
 
 const MESSAGES: Record<string, string> = {
-  concierge_full: "Early access is full (30 businesses).",
+  concierge_full: "Early access is full (20 businesses).",
   has_google_access: "This business already has real Google access.",
   open_reply_tasks: "Post or cancel the waiting replies first.",
   already_done: "Someone already did this one.",

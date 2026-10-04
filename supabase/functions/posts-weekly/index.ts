@@ -2,6 +2,7 @@
 // business that has weekly drafts on, at its local slot: shops and dining Thursday 09:00 (Friday if missed),
 // professional services Tuesday 08:30 (Wednesday if missed). The draft waits for the owner (D202):
 // nothing is posted until they click Post. Businesses with no facts to write from are skipped, not padded.
+// Demo businesses (P0.1-06) never get weekly drafts: their post idea is seeded.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 import { ensureCategory, hasFacts, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, writePost } from "../_shared/posts.ts";
 import { AiBudgetError } from "../_shared/ai-budget.ts";
@@ -31,7 +32,7 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({})) as { force_location?: string; dry_run?: boolean };
   const db = admin();
   const weekAgo = new Date(Date.now() - 6 * 86400_000).toISOString();
-  let q = db.from("locations").select(POST_LOC_COLUMNS).eq("status", "active").eq("concierge", false).eq("auto_posts", true).limit(200);
+  let q = db.from("locations").select(POST_LOC_COLUMNS).eq("status", "active").eq("concierge", false).eq("is_demo", false).eq("auto_posts", true).limit(200);
   if (!body.dry_run) q = q.or(`last_auto_post_at.is.null,last_auto_post_at.lt."${weekAgo}"`);
   if (body.force_location) q = q.eq("id", body.force_location); // manual test run (dry_run: no insert, no email)
   const { data: locs, error } = await q;

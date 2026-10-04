@@ -146,6 +146,12 @@ export async function sendEmail(o: {
   locationId?: string | null; partnerId?: string | null; replyTo?: string;
 }) {
   const db = admin();
+  // Demo workspace (P0.1-06, R-17): a demo business only ever emails the demo login. Nothing else is written or sent.
+  if (o.locationId) {
+    const { data: allowed, error: ae } = await db.rpc("email_allowed_for_location", { p_location: o.locationId, p_to: o.to });
+    if (ae) throw ae;
+    if (allowed === false) return { skipped: "demo" };
+  }
   const { data: row, error } = await db.from("emails").insert({
     kind: o.kind, to_address: o.to, subject: o.subject, dedupe_key: o.dedupeKey,
     location_id: o.locationId ?? null, partner_id: o.partnerId ?? null,
