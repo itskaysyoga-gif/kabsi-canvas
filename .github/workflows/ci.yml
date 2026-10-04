@@ -56,3 +56,16 @@ jobs:
         run: bash scripts/deno-check.sh
       - name: Worker syntax
         run: node --check workers/kabsi-go/src/index.js
+
+  database:
+    name: Database (pgTAP on a local Supabase stack)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      # Pinned: "latest" asks the GitHub API and fails on its rate limit.
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.119.0
+      - name: Migrations and pgTAP suite (K-54, P0.1-07)
+        run: bash scripts/db-test.sh
