@@ -14,13 +14,15 @@ import {
   Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { chooseLocation, myLatestLocation, myLocations } from "@/lib/onboarding";
 import { amStaff } from "@/lib/reviews";
 import { myPartner } from "@/lib/partner";
 import { waitingCount } from "@/lib/dashboard";
 import { Button } from "@/components/ui/button";
+import { ExampleBadge } from "@/components/ui/example-badge";
+import { setAnalyticsPaused } from "@/lib/telemetry";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -202,6 +204,7 @@ function LocationMenu() {
           <span className="truncate">
             {location.isLoading ? "…" : (loc?.name ?? "Add your business")}
           </span>
+          {loc?.is_demo ? <ExampleBadge className="shrink-0">Demo data</ExampleBadge> : null}
           <ChevronDown className="size-4 shrink-0" />
         </button>
       </DropdownMenuTrigger>
@@ -281,6 +284,9 @@ export function AppLayout({
     enabled: area === "app" && myLoc.data?.status === "active",
     refetchInterval: 60_000,
   });
+  // Demo workspace (P0.1-06): no analytics while a demo business is open.
+  const isDemo = area === "app" && myLoc.data?.is_demo === true;
+  useEffect(() => setAnalyticsPaused(isDemo), [isDemo]);
   const current = sectionFor(location.pathname);
   const badgeFor = (sec: Section) =>
     sec.label === "Reviews" && waiting.data ? waiting.data : undefined;

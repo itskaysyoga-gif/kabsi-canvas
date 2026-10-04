@@ -31,6 +31,8 @@ export type Location = {
   concierge_first_post_at?: string | null;
   /** Set when Kabsi's Manager access stopped working (D250). */
   access_lost_at?: string | null;
+  /** Demo workspace (P0.1-06): an invented business for recordings; every screen shows "Demo data". */
+  is_demo?: boolean;
   knowledge_card: KnowledgeCard;
   created_at: string;
 };
@@ -68,7 +70,7 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
 // businesses the signed-in user is a member of count. Staff can read every business through RLS, but the
 // owner app must never treat someone else's business as theirs (writes would be refused anyway).
 const LOCATION_COLUMNS =
-  "id, name, address, country, status, onboarding_step, partner_id, consent_at, access_granted_at, access_lost_at, concierge, concierge_first_post_at, knowledge_card, created_at";
+  "id, name, address, country, status, onboarding_step, partner_id, consent_at, access_granted_at, access_lost_at, concierge, concierge_first_post_at, is_demo, knowledge_card, created_at";
 const CHOSEN_KEY = "kabsi.location";
 
 export async function myLocations(): Promise<Location[]> {

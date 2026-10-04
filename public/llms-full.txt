@@ -640,7 +640,7 @@ No. Kabsi works from your email and your phone's web browser.
 We're waiting on Google's review and can't give a date. We'll email you when your business is connected.
 
 **Is there a demo?**
-Yes. The home page has an interactive example inbox in English, Spanish, Arabic and French, labelled "Example".
+Yes. The home page has an interactive example inbox in English, Spanish, Arabic and French, labelled "Example". Kabsi's product videos are recorded in a demo workspace with two invented businesses, Harbour Lane Coffee and Juniper Hair Studio; every screen there carries a "Demo data" tag, and none of their reviews, names or numbers are real.
 
 ### How it works
 

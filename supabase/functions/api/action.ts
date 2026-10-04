@@ -18,17 +18,19 @@ async function loadToken(t: string | null | undefined) {
 async function view(tok: Token) {
   const db = admin();
   if (tok.target_type === "listing_change") {
-    const { data: ch } = await db.from("listing_changes").select("id, field, old_value, new_value, state, locations(name)").eq("id", tok.target_id).single();
+    const { data: ch } = await db.from("listing_changes").select("id, field, old_value, new_value, state, locations(name, is_demo)").eq("id", tok.target_id).single();
     return {
       action: tok.action, business: (ch?.locations as unknown as { name: string } | null)?.name ?? "",
+      demo: (ch?.locations as unknown as { is_demo: boolean } | null)?.is_demo === true,
       change: ch && { id: ch.id, field: ch.field, before: (ch.old_value as { display?: string })?.display ?? "", after: (ch.new_value as { display?: string })?.display ?? "", state: ch.state },
     };
   }
-  const { data: rv } = await db.from("reviews").select("id, reviewer_name, star_rating, comment, state, urgency, existing_reply, locations(name, concierge)").eq("id", tok.target_id).single();
+  const { data: rv } = await db.from("reviews").select("id, reviewer_name, star_rating, comment, state, urgency, existing_reply, locations(name, concierge, is_demo)").eq("id", tok.target_id).single();
   const { data: draft } = await db.from("reply_drafts").select("body, safety_ok").eq("review_id", tok.target_id).order("version", { ascending: false }).limit(1).maybeSingle();
   return {
     action: tok.action, business: (rv?.locations as unknown as { name: string } | null)?.name ?? "",
     concierge: (rv?.locations as unknown as { concierge: boolean } | null)?.concierge === true,
+    demo: (rv?.locations as unknown as { is_demo: boolean } | null)?.is_demo === true,
     review: rv && { id: rv.id, reviewer: rv.reviewer_name, rating: rv.star_rating, comment: rv.comment, state: rv.state, urgent: rv.urgency === "urgent", reply: rv.existing_reply },
     draft: draft?.safety_ok ? draft.body : null,
   };

@@ -46,7 +46,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | merged (23); After-merge checks partly run, see Evidence | 23 | 4 Oct 2026 |
 | P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | merged (24); After-merge checks partly run, see Evidence | 24 | 4 Oct 2026 |
 | P0.1-05 | Design tokens and shared components | Sonnet | merged (25); `/design` not yet looked at as staff | 25 | 4 Oct 2026 |
-| P0.1-06 | Demo workspace with fictional businesses | Opus | split in two: part A (database, seed, isolation) PR open; part B (Demo data tag, PostHog off) todo | A: 28 | 4 Oct 2026 |
+| P0.1-06 | Demo workspace with fictional businesses | Opus | part A merged (28, squash 197c64e); part B (Demo data tag, PostHog off) PR open; After-merge mock-review email check still open | 28, 29 | 4 Oct 2026 |
 | P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet | todo | | |
 | P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | todo | | |
 | P0.1-V3 | Setup-call and partner-call booking links | Sonnet | todo | | |
@@ -142,10 +142,15 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-After the P0.1-06 part A pull request is merged (Deploy publishes every function):
-- `list_edge_functions`: `api`, `content`, `posts-weekly`, `partner` newer than the merge time.
+After the P0.1-06 part A pull request (28) is merged: the function versions are done (see Evidence). Still open:
 - A mock review added to a demo business (`mock_google_reviews`, google_location_id `locations/demo-harbour-lane-coffee`) is synced and drafted, and its email goes only to the demo login: `select to_address from emails where location_id in (select id from locations where is_demo)` returns only that address. Then the mock review, its review row, draft and action tokens are deleted (Hussein's "apply").
 - `select count(*) from ops_events where created_at > '<seed time>' and (title ilike '%Harbour Lane%' or title ilike '%Juniper%')` is 0.
+
+After the P0.1-06 part B pull request is merged and Lovable has deployed `main`:
+- Signed in as the demo login at 390 px and 1440 px: the header shows the business name with a "Demo data" tag on Home, Reviews, Google Profile, Get Reviews and Settings, for both businesses.
+- An email-link page (/a/...) for a demo review shows "Demo data" beside the logo; a link for a real business does not.
+- In the browser's network tab on a demo screen: no requests to us.i.posthog.com after the page loads (Rashid or Hussein, any browser).
+- Rashid records S01, S03, S05 and the review card on his phone and confirms in the chat (Done-when line 3).
 
 After the P0.1-02b part B pull request (20) was merged: Deploy passed and the mock-review check passed (see Evidence). Still open:
 - Paste the four `emails/auth/*.html` files into the Supabase Auth email templates (dashboard step for Rashid or Hussein); the dashboard copies still carry the old footer.
@@ -175,6 +180,14 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 (One block per finished task: the Done-when lines with their proof.)
 
+### P0.1-06 part B (branch claude/h-p0-1-06b, 4 Oct 2026, Hussein's session)
+- "Demo data" tag: the shared `ExampleBadge` (guardrail 23 label) with the text "Demo data". In the app it sits beside the business name in the sticky header (`app-layout.tsx` LocationMenu), so every app screen shows it; on the email-link page it sits beside the logo (`ConfirmLayout` gets `demo`, `/a/$token` passes it from the action API, which now returns `demo` from `locations.is_demo` for review and listing-change links). `src/lib/onboarding.ts` reads `is_demo` with the other location columns.
+- PostHog: `setAnalyticsPaused` in `src/lib/telemetry.ts` (opt out of capturing and drop `track` calls) is switched on by the app layout while a demo business is open and by the email-link page for a demo link; a real business turns it back on. Test `tests/telemetry-demo.test.ts` written first: 2 failed before the change, 2 passed after.
+- Checks: `npm run typecheck` clean (after one fix: the loading screen keeps a plain `ConfirmLayout`); eslint on the 7 changed files 0 problems; prettier clean; `npm test` 19 passed; `check:tokens` ok; `check:anon` ok; `npm run build` ok; `deno check api/index.ts` (repo script settings) passes.
+- `knowledge/kabsi-facts.md` "Is there a demo?" names the demo workspace, its two invented businesses and the "Demo data" tag; `public/llms-full.txt` rebuilt (13249 words).
+- Not checked: the screens in a browser. The Supabase host is blocked from the sandbox, so the signed-in app and the action API cannot load here; listed under After merge.
+- Known limit: the auth provider identifies the user to PostHog at sign-in, before the business (and so `is_demo`) is known; the demo login can send that one identify call. Everything after the business loads is paused. Listed under Decisions to confirm.
+
 ### P0.1-06 part A (branch claude/h-p0-1-06, 4 Oct 2026, Hussein's session)
 - Demo login: Hussein chose rashid.hamzy+kabsidemo@gmail.com (sign-in codes reach Rashid's inbox, no manual step; can move to demo@kabsi.co later). The address is kept out of the repository: it lives in `app_settings.demo_login_email`, read by `public.demo_login_email()` (service role only).
 - Migration `20261004120000_demo_workspace.sql` shown to Hussein and applied after his "apply" (4 Oct). First attempt failed and rolled back as a whole (`cannot remove parameter defaults` on `ops_digest`; read back: no `is_demo` column, cap still 30); the file now keeps `p_hours integer default 24` and the second apply succeeded. Read back: `concierge_cap` 20, 9 ops triggers carry a WHEN condition, `ops_digest` keeps `DEFAULT 24`, `authenticated` cannot run `demo_login_email()` or `email_allowed_for_location()`.
@@ -187,7 +200,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Demo login created by Hussein in the Supabase dashboard (4 Oct, 12:11 UTC; email confirmed; the dashboard required a password, nobody keeps it; the login uses email codes). One Slack "New account" message (ops_events 1238, #customers) went out at 12:11 because `demo_login_email` was not set yet when the user was created; already sent, nothing to undo; later demo signups are filtered.
 - `app_settings.demo_login_email` set, then `supabase/seed/demo.sql` run after Hussein's "apply" (4 Oct). First run failed and rolled back whole (`urgency_reasons` is not null in the live table; read back: 0 demo rows); the seed now writes `'{}'` there and `'[]'::jsonb` for `reply_drafts.safety_notes`, checked against every not-null column of the 12 tables; second run after Hussein's second "apply" succeeded.
 - Read back after the seed: Harbour Lane Coffee and Juniper Hair Studio active, 2 memberships, 24 reviews (9 waiting, 9 drafts), 24 mock reviews, 1 open hours change, 2 weekly reports, special hours 2026-11-26 Thanksgiving and 2026-12-24 Christmas Eve, 1 post idea, 2 review links; `emails` 0 and `plans` 0 for demo businesses; no `ops_events` row from the seed (only 1238 above in that window); `refresh_location_status` on the café returns active; `ops_digest` businesses_active_total 2 (same as before the seed: the demo businesses are not counted).
-- NOT run: the sign-in code request. The sandbox proxy refuses ynjdqjlmdwjgbfezevxy.supabase.co (CONNECT 403), so no request was sent. To check: sign in at /login with the demo address (Rashid's inbox gets the code), or allow that host in the environment's network settings and rerun from a new session.
+- Sign-in check: the sandbox proxy refuses ynjdqjlmdwjgbfezevxy.supabase.co (CONNECT 403), so it could not run from the build chat. Hussein checked it by hand on 4 Oct: the code arrived in Rashid's inbox, he signed in and saw both demo businesses. Database read-back: the demo login's `last_sign_in_at` 2026-10-04 12:41:45 UTC; no `ops_events` row after 1238, no `emails` row and no chat for the demo businesses.
+- PR 28 merged by Hussein's "merge" (squash 197c64e, 12:20 UTC). `list_edge_functions` after the Deploy: every function updated 2026-10-04 12:21:17 UTC (`api` 38, `content` 31, `posts-weekly` 27, `partner` 24), after the merge.
 
 ### Email buttons and phone layout (branch claude/h-email-buttons, 4 Oct 2026, Hussein's request, not a plan task)
 - Review email: one yellow "Review reply"; "Open Kabsi" is now a text link on the same wrapping line as Edit and Skip. Daily digest (several reviews in one email): each review has text links only (Review reply, Edit, Skip) and the layout's yellow "Open Kabsi" is the one button. Urgent and "no safe draft" emails keep text links plus the layout's yellow "Open Kabsi". Every other template already had one layout button and no other yellow; the layout is shared, so they all got the new button size.
@@ -312,6 +326,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - P0.1-06: a demo business is active without any plan (`refresh_location_status` returns early), so no trial, payment or plan row exists for it; partner billing cannot count it (check: no partner).
 - P0.1-06: "one holiday-hours reminder" is seeded as a drafted special-hours entry (Thanksgiving for the café, Christmas Eve for the salon); the holiday calendar itself is P0.5-03.
 - P0.1-06: the review links of the demo businesses open https://kabsi.co, never a Google page, because the businesses are invented.
+- P0.1-06: the demo login can still send one PostHog identify call at sign-in (the auth provider identifies before the business loads); everything after is paused. Closing it fully means knowing demo-ness at sign-in (a claim or a lookup); left for P0.6-02, which reworks product events.
+- P0.1-06: the "Demo data" tag reuses `ExampleBadge` (grey outline pill) instead of a new component; a demo business is an example under guardrail 23.
 - P0.1-06: the task changes 13 code files, so it is split: part A database, seed and backend isolation; part B the "Demo data" tag (app header and the email reply page) and PostHog off for demo businesses.
 - P0.1-02a: every trade page headline (`verticals.tsx` h1) is now the brand line, because the plan gave no per-trade headline and the old ones used the retired slogans.
 - P0.1-02a: the Gemini question replaces the older "How is this different from Google's own AI replies?" question, so the FAQ does not carry two answers on the same topic.
@@ -342,6 +358,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 4 Oct 2026 (Hussein's session): PR 28 (P0.1-06 part A) merged on Hussein's "merge"; demo sign-in checked by Hussein; functions redeployed 12:21 UTC. P0.1-06 part B on branch claude/h-p0-1-06b, PR 29, CI green on 793fde7. Next: part B After-merge checks, the open part A mock-review email check, then P0.1-V1.
 - 4 Oct 2026 (Hussein's session): After-merge checks: Deploy run 9 (PR 27) success, all functions updated 08:58 UTC; live site still blocked from the sandbox. PR 27 email confirmed by Hussein; its test data deleted. P0.1-06 part A on branch claude/h-p0-1-06, PR 28, CI green (both migrations applied; demo login and seed waiting). Next: demo login, seed, then P0.1-06 part B.
 - 4 Oct 2026 (Hussein's session): PR 26 merged (progress notes only). Email button and phone-layout fix on branch claude/h-email-buttons. Next: P0.1-V1.
 - 4 Oct 2026 (Hussein's session): PR 25 (P0.1-05) merged on Hussein's "merge". Live mock-review check for 04a and 04b passed; cap test and screen checks still open. Next: P0.1-V1.
