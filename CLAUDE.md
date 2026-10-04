@@ -24,4 +24,4 @@ One task per chat. The task ID comes from the prompt. Nothing else is in scope.
 
 - `main` syncs with Lovable and deploys every Edge Function and the Worker on push. Keep `main` working; never force-push, rebase, amend or squash pushed commits; never hand-edit `src/routeTree.gen.ts`.
 - One branch and one pull request per task (`claude/<task-id>`). Migrations are new files, applied with the Supabase connector before merging, additive first.
-- Run the checks in plan section 2.4, merge when CI is green and the task's "Done when" checks are proven, then update `docs/KABSI-PROGRESS.md` with the evidence.
+- Run the checks in plan section 2.4, open the pull request, make sure CI is green, update `docs/KABSI-PROGRESS.md` on the branch, then stop and give Rashid the PR link and a 3-line summary. Never merge: Rashid merges every pull request himself on GitHub.
