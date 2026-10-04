@@ -54,13 +54,14 @@ Set up once on higgsfield.ai before the first video (VIDEO Part 4 "Brand kit"). 
 
 ## End cards (make once in the Higgsfield editor, save as assets)
 
-All three: 2 seconds, black background, the Kabsi mark centred, the main line under it in Lalezar, kabsi.co under that in Readex Pro.
+All four: 2 seconds, black background, the Kabsi mark centred, the main line under it in Lalezar, kabsi.co under that in Readex Pro.
 
 | Asset name              | Button (yellow, black text) | Use                                                  |
 | ----------------------- | --------------------------- | ---------------------------------------------------- |
 | End card, early access  | Join early access           | Every video until the Profile Check is live          |
 | End card, Profile Check | Free Profile Check          | From P0.4-01 until the launch gate                   |
 | End card, start free    | Start free                  | After the launch gate (P0.7-07) and in every paid ad |
+| End card, partner       | Apply as a partner          | V13 and W5 only (partner campaign and Partners page) |
 
 ## Voice
 

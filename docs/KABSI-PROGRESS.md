@@ -49,7 +49,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-05 | Design tokens and shared components | Sonnet | merged (25); `/design` not yet looked at as staff | 25 | 4 Oct 2026 |
 | P0.1-06 | Demo workspace with fictional businesses | Opus | merged (28, 29); After-merge: Deploy and ops_events checks passed; mock-review email check and browser checks still open, see Evidence | 28, 29 | 4 Oct 2026 |
 | P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet (run on Opus in Hussein's session) | done (merged 31 on Hussein's "merge"; docs only, no After-merge checks) | 31 | 4 Oct 2026 |
-| P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | PR open (docs only) | 32 | 4 Oct 2026 |
+| P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | PR open (docs only); Hussein said merge 4 Oct | 32 | 4 Oct 2026 |
 | P0.1-V3 | Setup-call and partner-call booking links | Sonnet | todo | | |
 | P0.1-07 | Database test suite in CI | Opus | todo | | |
 | P0.1-08 | Security hardening of the database API | Opus | todo | | |
@@ -364,7 +364,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 (Build chats add decisions the plan did not cover here, one line each with the reason. The planning chat folds confirmed ones into the plan.)
 
-- P0.1-V2: V13 and W5 need a fourth end card, "End card, partner" (yellow button "Apply as a partner"), because the brand kit has only three. Add it to `brand-kit.md` if Rashid agrees.
+- Confirmed by Hussein 4 Oct (P0.1-V2): the sheets keep the app's wording ("Keep my information", "Posted"); the partner end card is approved and added to `brand-kit.md`; V10 and V14 move later in the calendar until P0.5-03 and P0.3-03 have merged. (Original note: V13 and W5 need a fourth end card, "End card, partner" (yellow button "Apply as a partner"), because the brand kit had only three.)
 - P0.1-V2: W4 keeps the "AI presenter" tag on screen for the whole video, not only the first 3 s (a trust video; the cost is nothing).
 - P0.1-V2: W1 and V09 each get a "version now" built from S01, S05 and today's QR page, as V03 did (R-10), so something can be recorded before the later screens exist. W3 is split the same way (manual route first, one-tap after P1-18).
 - P0.1-V2: V12 hook C and the on-screen "Replies drafted. Profile watched. Weekly report." are held until P0.2-04, P0.5-02 and P0.5-04 are live, even though the plan lists V12 as an early ad.
