@@ -48,5 +48,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # The action's default Wrangler (3.90.0) does not read wrangler.jsonc and fails with "Missing entry-point".
+          wranglerVersion: "3.114.17"
           workingDirectory: workers/kabsi-go
           command: deploy
