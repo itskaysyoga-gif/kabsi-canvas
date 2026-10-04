@@ -153,7 +153,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - `docs/WORK-QUEUE.md` is gone.
 - No em dashes, en dashes or exclamation marks in the added lines (checked on the diff).
 - Checks run locally: `npm run typecheck` exit 0; `npm run lint:changed` linted the 4 changed source files, exit 0; `npm test` 3 files, 15 tests passed; `npm run build` completed. Deno check not run: no Edge Function changed.
-- CI on the pull request: see the Log line for the result at merge.
+- CI on pull request 15 at the commit before this line: App (typecheck, lint, anon JWT guard, tests, build) success; Edge Functions and Worker (deno check, Deno tests) success; Supabase Preview skipped.
 
 ### P0.1-01 (done, pull request 13, branch claude/p0-1-01, commit 2ead48c)
 
