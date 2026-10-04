@@ -1,0 +1,19 @@
+{
+  "_doc": "https://developers.google.com/my-business/reference/rest/v4/accounts.locations.reviews/list",
+  "_note": "Response body of accounts.locations.reviews.list (ListReviewsResponse with Review objects). Built from the documented schema; replace with a captured response on Gate A day (P0.7-01).",
+  "reviews": [
+    {
+      "name": "accounts/112233445566778899000/locations/1234567890123456789/reviews/AbFvOqk1",
+      "reviewId": "AbFvOqk1",
+      "reviewer": { "profilePhotoUrl": "https://lh3.googleusercontent.com/a/example", "displayName": "Sam", "isAnonymous": false },
+      "starRating": "FIVE",
+      "comment": "Lovely bread and friendly staff.",
+      "createTime": "2026-09-30T10:15:00.000Z",
+      "updateTime": "2026-09-30T12:00:00.000Z",
+      "reviewReply": { "comment": "Thank you, Sam.", "updateTime": "2026-09-30T12:00:00.000Z" }
+    }
+  ],
+  "averageRating": 4.7,
+  "totalReviewCount": 120,
+  "nextPageToken": "token"
+}

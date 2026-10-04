@@ -1,0 +1,17 @@
+{
+  "_doc": "https://developers.google.com/my-business/reference/placeactions/rest/v1/locations.placeActionLinks/list",
+  "_note": "Response body of placeActionLinks.list. Built from the documented schema; replace with a captured response on Gate A day (P0.7-01).",
+  "placeActionLinks": [
+    {
+      "name": "locations/1234567890123456789/placeActionLinks/444",
+      "providerType": "MERCHANT",
+      "isEditable": true,
+      "uri": "https://example.com/book",
+      "placeActionType": "APPOINTMENT",
+      "isPreferred": true,
+      "createTime": "2026-01-01T00:00:00Z",
+      "updateTime": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "nextPageToken": "token"
+}

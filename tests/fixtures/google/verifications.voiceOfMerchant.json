@@ -1,0 +1,8 @@
+{
+  "_doc": "https://developers.google.com/my-business/reference/verifications/rest/v1/locations/getVoiceOfMerchantState",
+  "_note": "A VoiceOfMerchantState. Only one of the action fields is set when the location lacks Voice of Merchant. Built from the documented schema; replace with a captured response on Gate A day (P0.7-01).",
+  "hasVoiceOfMerchant": true,
+  "hasBusinessAuthority": true,
+  "verify": { "hasPendingVerification": false },
+  "complyWithGuidelines": { "recommendationReason": "BUSINESS_LOCATION_SUSPENDED" }
+}

@@ -1,0 +1,13 @@
+{
+  "_doc": "https://developers.google.com/my-business/reference/rest/v4/accounts.locations.localPosts#LocalPost",
+  "_note": "A LocalPost resource returned by localPosts.create. Built from the documented schema; replace with a captured response on Gate A day (P0.7-01).",
+  "name": "accounts/112233445566778899000/locations/1234567890123456789/localPosts/1234567890123456789",
+  "languageCode": "en",
+  "summary": "Fresh sourdough every Saturday.",
+  "callToAction": { "actionType": "LEARN_MORE", "url": "https://example.com" },
+  "createTime": "2026-09-30T10:15:00.000Z",
+  "updateTime": "2026-09-30T10:15:00.000Z",
+  "state": "LIVE",
+  "topicType": "STANDARD",
+  "searchUrl": "https://local.google.com/place?id=1&use=posts&lpsid=1"
+}

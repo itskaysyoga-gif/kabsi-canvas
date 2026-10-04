@@ -1,0 +1,9 @@
+{
+  "_doc": "https://developers.google.com/my-business/reference/performance/rest/v1/locations.searchkeywords.impressions.monthly/list",
+  "_note": "Response body of searchkeywords.impressions.monthly.list. A low count comes as a threshold instead of a value. Built from the documented schema; replace with a captured response on Gate A day (P0.7-01).",
+  "searchKeywordsCounts": [
+    { "searchKeyword": "bakery near me", "insightsValue": { "value": "120" } },
+    { "searchKeyword": "sourdough", "insightsValue": { "threshold": "15" } }
+  ],
+  "nextPageToken": "token"
+}
