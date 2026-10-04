@@ -8,7 +8,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25). P0.1-V1 and P0.1-V2 done (31, 32). P0.1-07 (database test suite) PR 33 open, CI green.
+- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25). P0.1-V1 and P0.1-V2 done (31, 32). P0.1-07 (database test suite) done (PR 33). P0.1-08 (database API hardening) PR 35 open; its migration waits for Hussein's "apply".
 
 ## Rashid's decisions and inputs (plan section 5)
 
@@ -32,6 +32,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | 5 | Supabase Auth Google provider with the OAuth client | P0.4-02 | Todo |
 | 6 | Meta Business Settings items (P0.6-09 file) | P0.6-03 | Todo |
 | 7 | Creem account (Hussein Slim) and keys in Supabase secrets | P0.4-07 | Todo |
+| 10 | Supabase Auth: turn on leaked-password protection (Authentication, Sign In / Providers, Email, "Prevent use of leaked passwords"); leave the email OTP length at 6 | P0.1-08 done | Todo (no tool in the build session can change Auth settings) |
 | 9 | Paste the four `emails/auth/*.html` files into the Supabase Auth email templates (the login-code email still shows the old Beirut footer) | P0.1-02b done | Todo (Rashid, manual dashboard step; recorded 4 Oct at Hussein's request) |
 | 8 | Hussein agrees to be named as seller | R-20 seller line, P0.4-07, P0.6-09 | Done 4 Oct (no written agreement, Rashid's decision) |
 
@@ -51,8 +52,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet (run on Opus in Hussein's session) | done (merged 31 on Hussein's "merge"; docs only, no After-merge checks) | 31 | 4 Oct 2026 |
 | P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | done (merged 32 on Hussein's "merge"; docs only, no After-merge checks) | 32 | 4 Oct 2026 |
 | P0.1-V3 | Setup-call and partner-call booking links | Sonnet | todo | | |
-| P0.1-07 | Database test suite in CI | Opus | PR open, CI green (231 tests); bad-policy run failed as intended (Evidence) | 33 | 4 Oct 2026 |
-| P0.1-08 | Security hardening of the database API | Opus | todo | | |
+| P0.1-07 | Database test suite in CI | Opus | done (merged 33; no After-merge checks) | 33 | 4 Oct 2026 |
+| P0.1-08 | Security hardening of the database API | Opus | PR open; migration not yet applied (waits for Hussein's "apply"), see Evidence | 35 | 4 Oct 2026 |
 | P0.1-09 | Tenant model: organisations, connections, subscriptions | Opus | todo | | |
 | P0.1-10 | Append-only audit log and the "What Kabsi did" feed source | Opus | todo | | |
 | P0.1-11 | One Google service layer | Opus | todo | | |
@@ -143,7 +144,13 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-After the P0.1-07 pull request (33) is merged: nothing live to check (CI only, no database change). The next pull request that touches anything runs the `database` job; if it fails there and not here, compare the two runs.
+After the P0.1-08 pull request (35) is merged (Deploy publishes `api`):
+- `cron.job_run_details` shows one successful run after the change for each of the six moved jobs (`kabsi_retention` 02:53, `kabsi_chat_retention` 03:41, `kabsi_ops_watchdog`, `kabsi_plans_expiry`, `kabsi_concierge_daily` 05:00 Mon to Fri, `kabsi_concierge_overdue` :17) and for every other job: `select j.jobname, max(d.end_time) filter (where d.status = 'succeeded') from cron.job j left join cron.job_run_details d using (jobid) group by 1`.
+- `get_advisors` security: no `anon_security_definer_function_executable`; leaked-password protection on once Rashid's step 10 is done.
+- An email link (`/a/...`) opened signed out in mock mode still shows the Test mode banner (`GET /functions/v1/api/action?t=...` returns `"mode":"mock"`).
+- Signed in, the app header still shows the Test mode banner (the browser still calls `google_mode()` as authenticated).
+
+P0.1-07 (PR 33) was merged with no After-merge checks; marked done at the start of the P0.1-08 chat.
 
 After the P0.1-06 part A pull request (28) is merged: the function versions are done (see Evidence). Still open:
 - A mock review added to a demo business (`mock_google_reviews`, google_location_id `locations/demo-harbour-lane-coffee`) is synced and drafted, and its email goes only to the demo login: `select to_address from emails where location_id in (select id from locations where is_demo)` returns only that address. Then the mock review, its review row, draft and action tokens are deleted (Hussein's "apply").
@@ -182,6 +189,24 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### P0.1-08 (branch claude/h-p0-1-08, PR 35, 4 Oct 2026, Hussein's session)
+- Start of chat: P0.1-07 merged (1019bbd) with no After-merge checks; marked done.
+- Before the change (live, `get_advisors` security, 14:27 UTC): `anon_security_definer_function_executable` 1 (`google_mode`), `authenticated_security_definer_function_executable` 57, `auth_leaked_password_protection` 1. Every other SECURITY DEFINER function in public already had no execute for anon or authenticated.
+- Callers, from `grep -rnw` over `src` and `supabase/functions`, `pg_policies`, function bodies (`pg_proc.prosrc`) and `cron.job`:
+  - Cron only, nothing else names them, all `search_path ''`: `run_retention`, `purge_old_chats`, `ops_watchdog`, `end_expired_plans`, `concierge_daily_tasks`, `concierge_overdue_alerts`. Moved to `private`; their cron commands rewritten in the same migration.
+  - Service role only (Edge Functions through `admin()` or other functions by name), no browser caller, already closed to anon and authenticated, left in public: `call_internal` (cron and `ops_emit`), `ops_emit`, `ops_claim`, `ops_digest`, `internal_secret`, `hit_rate_limit`, `ai_budget_take`, `ai_usage_add`, `billing_apply_ipn`, `billing_attach_invoice`, `billing_mark_create_failed`, `partner_billing_run`, `partner_recipients`, `concierge_queue_reply`, `delete_location_now`, `mark_access_lost`, `email_allowed_for_location`, `location_member_recipients`, `location_owner_emails`, `grant_trial_if_eligible`, `refresh_location_status`, `renewal_reminder_candidates`, `trial_reminder_candidates`, and the helpers used only inside other functions (`start_paid_plans`, `record_plan_payment`, `partner_covered`, `partner_rate`, `plan_clock_ready`, `plans_v2_on`, `owner_plan_kinds`, `billing_enabled_for`, `concierge_unbilled`, `demo_login_email`, `is_demo_login`, `ops_app_url`, `cards_kv_sync`, `clean_ai_text`, `clear_access_lost`, `concierge_cap_guard`, the `ops_on_*` triggers).
+  - Revoked from authenticated: `is_demo_location`, `is_demo_user` (only trigger WHEN conditions; no anon or authenticated write policy exists on any public table, checked with `pg_policies`, so they only run as postgres or service_role), `profile_score` (only inside `profile_tasks_list`, SECURITY DEFINER), `staff_concierge_edit_review` (no caller).
+  - `google_mode()` revoked from anon. The only signed-out caller was the Test mode banner on `/a/$token`; `api/action` now returns `mode` and the page passes it to the banner. `/activate/$code` (card not set up yet) no longer shows the banner to signed-out visitors.
+- The `authenticated` list after the change (53), each with its caller:
+  - Owner, from the app: `activate_card`, `add_photo`, `billing_invoice_status`, `cancel_location_deletion`, `choose_plan`, `claim_partner_membership`, `create_review_link`, `handle_review_offline`, `plan_summary`, `profile_task_action`, `profile_tasks_list`, `rename_card`, `request_location_deletion`, `save_consent`, `set_auto_posts`, `set_card_active`, `set_onboarding_step`, `skip_review`, `start_location`, `update_knowledge_card`, `update_notification_settings`, `google_mode`.
+  - Owner or partner, through an Edge Function with the user's token (`asUser`): `billing_prepare_invoice` (billing), `owner_submit_claim`, `partner_create_invite`, `partner_submit_claim` (partner); `profile_tasks_list` and `update_knowledge_card` also from assistant.
+  - Partner, from the app: `partner_invoice_calc`, `partner_locations`.
+  - Staff, from the app: `generate_card_codes`, `staff_chat_stats`, `staff_chats`, `staff_concierge_add_review`, `staff_concierge_cancel_task`, `staff_concierge_claim_task`, `staff_concierge_convert`, `staff_concierge_mark_posted`, `staff_concierge_queue`, `staff_concierge_task_done`, `staff_contacts`, `staff_create_card_order`, `staff_create_partner`, `staff_grant_trial`, `staff_job_health`, `staff_mock_listing_edit`, `staff_mock_review`, `staff_record_payment`, `staff_set_card_order_status`, `staff_set_concierge`, `staff_update_partner_contact`; `staff_decide_claim` through the partner function (`asUser`).
+  - RLS helpers that policies call as the signed-in user (they answer only about the caller): `is_member`, `is_partner_member`, `is_staff` (the app also calls `is_staff`).
+- Membership checks: the P0.1-07 suite calls every function on this list as a signed-in stranger against another business and partner; each refuses (42501, `already_on_kabsi`, empty or false). It now also fails if a function on the list loses its grant.
+- App checks in the sandbox: `npm run typecheck` pass, `npm run lint:changed` pass (4 files), `npm test` 19 passed, `npm run build` pass. `deno` is not installed in the session; the CI Edge Functions job runs `scripts/deno-check.sh`.
+- Not yet: the migration on production (waits for Hussein's "apply"), `get_advisors` after it, the cron runs after it. Leaked-password protection: no tool here can set Auth settings; Rashid's step 10.
 
 ### P0.1-07 (branch claude/h-p0-1-07, PR 33, 4 Oct 2026, Hussein's session)
 - Start of chat: P0.1-V2 left no After-merge checks (docs only); marked done. Read-only re-run: `ops_events` since 12:15 UTC with Harbour Lane or Juniper 0, demo `emails` rows 0; `list_edge_functions` all updated 2026-10-04 13:22 UTC.
@@ -378,6 +403,9 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Decisions to confirm
 
 (Build chats add decisions the plan did not cover here, one line each with the reason. The planning chat folds confirmed ones into the plan.)
+- P0.1-08: only the six cron-only functions moved to `private`. The plan's list also names `call_internal`, `partner_billing_run`, `partner_recipients`, `start_paid_plans`, `ops_emit` and the mock helpers, but Edge Functions call those through the service role over the API (which serves only public) or other functions call them by name; they stay in public with no execute for anon or authenticated, which the advisor and the suite accept. The mock helpers (`staff_mock_review`, `staff_mock_listing_edit`) are staff screens and stay browser-callable. `plan_price` no longer exists.
+- P0.1-08: `is_member`, `is_partner_member` and `is_staff` stay executable by authenticated because RLS policies call them as the signed-in user; the advisor will keep listing them, and the other 50 browser RPCs, as WARN by design.
+- P0.1-08: a later migration that does `create or replace function public.run_retention()` (P0.2-01) must target `private.run_retention()` instead, or it recreates a public copy; the suite's "no copy left in public" test catches it.
 - P0.1-07: the CI job applies the migrations itself in one transaction instead of letting `supabase start` apply them, so pg_cron jobs never exist long enough to call the production function URL from CI.
 - P0.1-07: SECURITY DEFINER functions are tested as a signed-in stranger only; table reads are tested as all four personas. Every function checks membership before anything else, so the other personas would hit the same line.
 
@@ -428,6 +456,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 4 Oct 2026 (Hussein's session): P0.1-07 marked done (PR 33 merged, no After-merge checks). P0.1-08 on branch claude/h-p0-1-08, PR 35: schema `private` for the six cron-only functions, anon off `google_mode`, four helpers off the authenticated list, email-link banner reads the mode from `api/action`. Migration waits for Hussein's "apply". Next: P0.1-09 (depends on P0.1-08 merged).
 - 4 Oct 2026 (Hussein's session): P0.1-V2 marked done (PR 32 merged, docs only). P0.1-07 on branch claude/h-p0-1-07, PR 33: database test suite in CI, 231 pgTAP tests, CI green, bad-policy proof on throwaway PR 34 (failed as intended, closed; branch deletion left to Hussein). Next: P0.1-08 (depends on P0.1-07 merged).
 - 4 Oct 2026 (Hussein's session): P0.1-V2 on branch claude/h-p0-1-v2, PR 32: shot sheets V09 to V16 and W1 to W5 (docs only). After-merge read-only checks re-run (0 demo ops events, functions 13:22 UTC); demo email and browser checks still open. Next: P0.1-V3 needs Rashid's hours first; otherwise P0.1-07.
 - 4 Oct 2026 (Hussein's session): PR 30 (approve copy) and PR 31 (P0.1-V1) merged on Hussein's "merge". Open: P0.1-06 demo email check (needs a mock review, Hussein's "apply"), browser checks, Supabase auth template paste (Rashid). Next: P0.1-V2.
