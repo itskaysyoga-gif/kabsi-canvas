@@ -21,6 +21,8 @@ type PostHogLike = {
   capture?: (event: string, properties?: Record<string, unknown>) => void;
   identify?: (id: string) => void;
   reset?: () => void;
+  opt_out_capturing?: () => void;
+  opt_in_capturing?: () => void;
   startSessionRecording?: () => void;
   stopSessionRecording?: () => void;
 };
@@ -152,8 +154,22 @@ type SafeProps = Partial<
   >
 >;
 
+// Demo workspace (P0.1-06, R-17): nothing from a demo business reaches PostHog. The app and the email-link page
+// pause analytics while a demo business is on screen; a real business turns it back on.
+let paused = false;
+export function setAnalyticsPaused(pause: boolean) {
+  if (typeof window === "undefined" || pause === paused) return;
+  paused = pause;
+  try {
+    if (pause) window.posthog?.opt_out_capturing?.();
+    else window.posthog?.opt_in_capturing?.();
+  } catch {
+    /* ignore */
+  }
+}
+
 export function track(event: KabsiEvent, properties: SafeProps = {}) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || paused) return;
   try {
     window.posthog?.capture?.(event, properties);
   } catch {

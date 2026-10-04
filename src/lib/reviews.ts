@@ -112,6 +112,8 @@ export type ActionView = {
   draft?: string | null;
   /** Early access (D267): a person posts approved replies by hand. */
   concierge?: boolean;
+  /** Demo workspace (P0.1-06): an invented business; the page shows "Demo data". */
+  demo?: boolean;
   change?: { id: string; field: string; before: string; after: string; state: string } | null;
 };
 export async function loadAction(token: string): Promise<ActionView> {

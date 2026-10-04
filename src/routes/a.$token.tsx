@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { loadAction, runAction, type ActionView } from "@/lib/reviews";
-import { track } from "@/lib/telemetry";
+import { setAnalyticsPaused, track } from "@/lib/telemetry";
 
 // Email action links. Opening this page never does anything by itself (mail scanners open links);
 // the owner always presses a button, and "Approve" sends exactly the text in the box (D202).
@@ -43,6 +43,7 @@ function ActionPage() {
       .then((v) => {
         if (v.status === "ok" && v.action === "open")
           return void navigate({ to: "/app/inbox", replace: true });
+        setAnalyticsPaused(v.demo === true);
         setView(v);
         setText(v.draft ?? "");
       })
@@ -78,7 +79,7 @@ function ActionPage() {
   );
   if (done) {
     return (
-      <ConfirmLayout>
+      <ConfirmLayout demo={view?.demo === true}>
         <CheckCircle2 className="size-10 text-kb-green" aria-hidden="true" />
         <h1 className="mt-4 font-display text-3xl leading-tight">{DONE[done] ?? "Done."}</h1>
         {inbox}
@@ -97,7 +98,7 @@ function ActionPage() {
     };
     const decided = c.state !== "open" || view.status === "used";
     return (
-      <ConfirmLayout>
+      <ConfirmLayout demo={view?.demo === true}>
         <p className="text-sm font-medium text-kb-stone">{view.business}</p>
         <h1 className="mt-1 font-display text-3xl leading-tight">
           Your {LABELS[c.field] ?? c.field} changed on Google
@@ -144,7 +145,7 @@ function ActionPage() {
   }
   if (view.status === "invalid" || view.status === "expired" || !view.review) {
     return (
-      <ConfirmLayout>
+      <ConfirmLayout demo={view?.demo === true}>
         <h1 className="font-display text-3xl leading-tight">
           {view.status === "expired" ? "This link has expired" : "This link isn't valid"}
         </h1>
@@ -180,7 +181,7 @@ function ActionPage() {
 
   if (closed || view.status === "used") {
     return (
-      <ConfirmLayout concierge={view.concierge === true}>
+      <ConfirmLayout demo={view?.demo === true} concierge={view.concierge === true}>
         {header}
         <div className="mt-6">{reviewCard}</div>
         <p className="mt-5 leading-7">{closed ? DONE[r.state] : "This link was already used."}</p>
@@ -200,7 +201,7 @@ function ActionPage() {
   if (view.action === "skip" || view.action === "handle_myself") {
     const skip = view.action === "skip";
     return (
-      <ConfirmLayout concierge={view.concierge === true}>
+      <ConfirmLayout demo={view?.demo === true} concierge={view.concierge === true}>
         {header}
         <div className="mt-6">{reviewCard}</div>
         <p className="mt-5 leading-7">
@@ -228,7 +229,7 @@ function ActionPage() {
   // post / edit / see_draft: the owner sees and can change the exact text before posting
   const tooLong = text.trim().length > 4000;
   return (
-    <ConfirmLayout concierge={view.concierge === true}>
+    <ConfirmLayout demo={view?.demo === true} concierge={view.concierge === true}>
       {header}
       <div className="mt-6">{reviewCard}</div>
       {r.urgent ? (
