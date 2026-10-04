@@ -10,7 +10,7 @@ select * from no_plan();
 create temp table tested (sig text primary key);
 grant select on tested to authenticated;
 insert into tested values
-  ('activate_card(text,uuid,text)'), ('add_photo(uuid,text)'), ('billing_invoice_status(uuid)'),
+  ('activate_card(text,uuid,text)'), ('activity_feed(uuid,integer)'), ('add_photo(uuid,text)'), ('billing_invoice_status(uuid)'),
   ('billing_prepare_invoice(uuid,text,text,boolean)'), ('cancel_location_deletion(uuid)'), ('choose_plan(uuid,text)'),
   ('claim_partner_membership()'), ('create_review_link(uuid,text)'), ('generate_card_codes(integer,uuid)'),
   ('google_mode()'), ('handle_review_offline(uuid)'),
@@ -100,6 +100,7 @@ select tests.act_as('00000000-0000-4000-8000-0000000000b1');
 
 -- Owner RPCs on the victim's business.
 select throws_ok($$ select public.activate_card('VCTM22', '00000000-0000-4000-8000-0000000000c1', 'x') $$, '42501', null, 'activate_card refuses a non-member');
+select throws_ok($$ select * from public.activity_feed('00000000-0000-4000-8000-0000000000c1', 7) $$, '42501', null, 'activity_feed refuses a non-member');
 select throws_ok($$ select public.add_photo('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000c1/victim.jpg') $$, '42501', null, 'add_photo refuses a non-member');
 select throws_ok($$ select public.billing_invoice_status('00000000-0000-4000-8000-0000000000f6') $$, '42501', null, 'billing_invoice_status refuses a non-member');
 select throws_ok($$ select * from public.billing_prepare_invoice('00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 'usdttrc20', false) $$, '42501', null, 'billing_prepare_invoice refuses a non-member');

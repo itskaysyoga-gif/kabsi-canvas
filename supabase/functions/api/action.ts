@@ -5,6 +5,7 @@
 import { admin, captureError, CORS, fail, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
 import { publishReply } from "../_shared/reviews.ts";
 import { decideChange } from "../_shared/shield.ts";
+import { auditedAdmin, auditHeaders } from "../_shared/audit.ts";
 
 type Token = { id: string; location_id: string; user_id: string | null; action: string; target_type: string; target_id: string; expires_at: string; used_at: string | null };
 
@@ -76,11 +77,11 @@ export async function action(req: Request): Promise<Response> {
       return json({ ok: true, done: r.state });
     }
     if (body.do === "post") {
-      const result = await publishReply({ reviewId: tok.target_id, text: body.text ?? "", approvedBy: tok.user_id, channel: "email_link" });
+      const result = await publishReply({ reviewId: tok.target_id, text: body.text ?? "", approvedBy: tok.user_id, channel: "email_link", audit: auditHeaders(req, tok.user_id) });
       return json({ ok: true, done: result.state === "manual_queued" ? "queued_manual" : "posted", state: result.state });
     }
     const newState = body.do === "skip" ? "skipped" : "handled_offline";
-    await admin().from("reviews").update({ state: newState }).eq("id", tok.target_id).in("state", ["new", "drafted", "blocked"]);
+    await auditedAdmin(auditHeaders(req, tok.user_id)).from("reviews").update({ state: newState }).eq("id", tok.target_id).in("state", ["new", "drafted", "blocked"]);
     return json({ ok: true, done: newState });
   } catch (e) {
     const msg = String(e);

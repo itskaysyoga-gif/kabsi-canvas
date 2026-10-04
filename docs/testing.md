@@ -27,6 +27,12 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   `locations` flow into `google_connections` and `partner_clients`; demo businesses get a demo organisation; the
   approval policy accepts only known kinds and needs consent to delegate; only org owners and admins read
   `subscriptions`; the API roles cannot write the new tables.
+- `audit_log.sql` (P0.1-10): `audit_events` takes inserts only through `private.audit`; UPDATE, DELETE and TRUNCATE
+  fail for the table owner and the service role outside `private.run_retention`, and inside it only redaction and
+  rows older than 24 months are allowed; approvals, publications, drafts, skips, knowledge edits, onboarding steps,
+  role changes and concierge tasks write events, with the request context from the `x-kabsi-*` headers (service role
+  only) or the browser's own headers; no review text or reviewer name is copied in; owners read only their own
+  businesses' events; `activity_feed` returns plain lines with routine checks collapsed into one a day.
 
 When you add a table or a browser-callable function, add its fixture row or its test in the same pull request.
 
