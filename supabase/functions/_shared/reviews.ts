@@ -2,7 +2,7 @@
 import { admin, APP_URL, captureError, emailButton, emailLayout, emailLink, esc, isDefiniteGoogleRejection, sendEmail, sha256Hex } from "./kabsi.ts";
 import { listReviews, putReply } from "./google/index.ts";
 import { checkDraft, classify, draftReply, MODELS, newMeter, type Card } from "./ai.ts";
-import { AiBudgetError, recordAiUsage, takeAiBudget } from "./ai-budget.ts";
+import { recordAiUsage, takeAiBudget } from "./ai-budget.ts";
 import { isConciergeLocationId, matchConciergeReview, type ConciergeCandidate } from "./concierge.ts";
 import { auditedAdmin } from "./audit.ts";
 
@@ -16,17 +16,17 @@ type Loc = {
 };
 const LOC_COLS = "id, name, status, google_account_id, google_location_id, knowledge_card, time_zone, digest_hour, reviews_synced_at, backlog_emailed_at, emails_paused_until, alert_emails, access_error_since, concierge, concierge_converted_at";
 
-export async function activeLocations(): Promise<Loc[]> {
-  const { data, error } = await admin().from("locations").select(LOC_COLS).eq("status", "active").not("google_location_id", "is", null);
+// One active business with a Google location, or null (a job for it may outlive a pause or a deletion).
+export async function activeLocation(id: string): Promise<Loc | null> {
+  const { data, error } = await admin().from("locations").select(LOC_COLS).eq("id", id).eq("status", "active")
+    .not("google_location_id", "is", null).maybeSingle();
   if (error) throw error;
-  return (data ?? []) as Loc[];
+  return (data as Loc | null) ?? null;
 }
 
-// Locations whose reviews are read from Google. Concierge businesses are excluded: their reviews are typed in by
-// staff, and asking Google about a made-up location id would fail and eventually mark access lost (Q07, D267).
-export async function syncableLocations(): Promise<Loc[]> {
-  return (await activeLocations()).filter((l) => !l.concierge && !isConciergeLocationId(l.google_location_id));
-}
+// Whether a business's reviews are read from Google. Concierge businesses are excluded: their reviews are typed in
+// by staff, and asking Google about a made-up location id would fail and eventually mark access lost (Q07, D267).
+export const isSyncable = (l: Loc) => !l.concierge && !isConciergeLocationId(l.google_location_id);
 
 // ─── 1. Sync reviews from Google (or the mock)
 export async function syncLocation(loc: Loc) {
@@ -143,24 +143,6 @@ async function draftWithChecks(rv: DraftRow, loc: { name: string; knowledge_card
     ...(instruction ? {} : { notified_at: null }),
   }).eq("id", rv.id);
   return { ok: check.ok, body, issues: check.issues };
-}
-
-export async function draftPending(limit = 10) {
-  const { data } = await admin().from("reviews").select("id, locations!inner(status)")
-    .eq("state", "new").lt("draft_attempts", 3).eq("locations.status", "active")
-    .order("review_created_at", { ascending: false }).limit(limit);
-  let drafted = 0;
-  for (const r of data ?? []) {
-    try { await draftReview(r.id); drafted++; } catch (e) {
-      // The daily AI budget is used up: stop for now without counting a failed attempt; the next run picks up.
-      if (e instanceof AiBudgetError) break;
-      // One bad review must not stop the others; after 3 failed attempts it stays 'new' and shows in the inbox.
-      const { data: cur } = await admin().from("reviews").select("draft_attempts").eq("id", r.id).single();
-      await admin().from("reviews").update({ draft_attempts: (cur?.draft_attempts ?? 0) + 1 }).eq("id", r.id);
-      await captureError("draft", e, { review: r.id });
-    }
-  }
-  return drafted;
 }
 
 // ─── 3. Signed action links (D103): 32 random bytes, only the SHA-256 is stored, single use, 7 days

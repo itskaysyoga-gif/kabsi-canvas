@@ -1,9 +1,10 @@
 // cron-tick: internal, every 5 minutes (pg_cron → public.call_internal('cron-tick')).
 // Each job decides what is due by looking at data, never at the clock alone, and is safe to run twice.
+// Review sync, drafting and owner emails run as jobs since P0.1-12a (api/jobs.ts); what is left here moves to jobs
+// in P0.1-12b.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 import { dueRenewalEmail, dueTrialEmail, localDateHour, PLAN_LABEL, type RenewalStage, type TrialStage } from "../_shared/plans.ts";
 import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google/index.ts";
-import { activeLocations, draftPending, notifyLocation, syncableLocations, syncLocation } from "../_shared/reviews.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
 import { snapshotRatings, weeklyReports } from "../_shared/report.ts";
 import { shieldCheck } from "../_shared/shield.ts";
@@ -97,68 +98,6 @@ async function accessJob() {
     }
   }
   return { mode: googleMode(), pending: pending.length, accepted, granted };
-}
-
-// Job: pull new reviews for every active location (Pub/Sub will trigger this sooner once live).
-// Google answering 403/404 for one business means Kabsi's Manager access was removed (or the listing is gone).
-// After 30 minutes of that, access is marked lost (migration 017) and the owner is told how to fix it.
-const ACCESS_GRACE_MS = 30 * 60_000;
-const accessRefused = (e: unknown) => /^Error: google (403|404) /.test(String(e));
-
-async function syncJob() {
-  const db = admin();
-  let added = 0, lost = 0;
-  const failed: string[] = [];
-  for (const loc of await syncableLocations()) {
-    try {
-      added += await syncLocation(loc);
-      if (loc.access_error_since) await db.from("locations").update({ access_error_since: null }).eq("id", loc.id);
-    } catch (e) {
-      failed.push(loc.id);
-      if (!accessRefused(e)) { await captureError("cron-tick", e, { job: "sync", location: loc.id }); continue; }
-      if (!loc.access_error_since) {
-        await db.from("locations").update({ access_error_since: new Date().toISOString() }).eq("id", loc.id);
-        await captureError("cron-tick", e, { job: "sync", location: loc.id, note: "Google refused access; lost after 30 min" });
-      } else if (Date.now() - Date.parse(loc.access_error_since) > ACCESS_GRACE_MS) {
-        await db.rpc("mark_access_lost", { p_location: loc.id });
-        await emailAccessLost(loc.id, loc.name);
-        lost++;
-      }
-    }
-  }
-  return { added, failed: failed.length, lost };
-}
-
-async function emailAccessLost(locationId: string, name: string) {
-  const day = new Date().toISOString().slice(0, 10);
-  for (const to of await ownerEmails(locationId)) {
-    await sendEmail({
-      kind: "access_lost", to, locationId, dedupeKey: `access_lost:${locationId}:${day}:${to}`,
-      subject: `Kabsi can't reach ${name} on Google`,
-      html: emailLayout({
-        preheader: "Invite the Kabsi group again to continue.", title: "Kabsi lost access to your Google profile",
-        bodyHtml: `<p style="margin:0 0 16px 0;">Google stopped letting Kabsi read <strong>${esc(name)}</strong>'s reviews. This usually means the Kabsi group was removed from the profile's managers.</p>
-<p style="margin:0 0 16px 0;">To continue: on your Business Profile open <strong>Menu</strong>, then <strong>Business Profile settings</strong>, then <strong>People and access</strong>, and invite the <strong>Kabsi group ID 5481006796</strong> as a <strong>Manager</strong>. Kabsi reconnects on its own within a few minutes.</p>
-<p style="margin:0 0 20px 0;">Until then no replies are drafted and nothing is posted. If you removed Kabsi on purpose, you don't need to do anything.</p>`,
-        button: { label: "Open Kabsi", url: `${APP_URL}/app` },
-      }),
-      text: `Google stopped letting Kabsi read ${name}'s reviews, usually because the Kabsi group was removed as a Manager.\n\nTo continue, invite the Kabsi group ID 5481006796 as a Manager again under People and access on your Business Profile. Kabsi reconnects within a few minutes.\n\nOpen Kabsi: ${APP_URL}/app`,
-    }).catch((e) => captureError("cron-tick", e, { job: "access_lost", location: locationId }));
-  }
-}
-
-// Job: draft replies for new reviews (at most 10 per tick to bound AI cost and run time).
-async function draftJob() {
-  return { drafted: await draftPending(10) };
-}
-
-// Job: owner emails: urgent and ≤3★ right away, 4–5★ in the daily digest, one backlog summary.
-async function notifyJob() {
-  let emails = 0;
-  for (const loc of await activeLocations()) {
-    try { emails += await notifyLocation(loc); } catch (e) { await captureError("cron-tick", e, { job: "notify", location: loc.id }); }
-  }
-  return { emails };
 }
 
 async function reportLocations() {
@@ -308,8 +247,7 @@ async function renewalsJob() {
 }
 
 const JOBS: Record<string, () => Promise<Record<string, unknown>>> = {
-  access: accessJob, sync: syncJob, draft: draftJob, notify: notifyJob, ratings: ratingsJob, weekly: weeklyJob, shield: shieldJob,
-  deletions: deletionsJob, trials: trialsJob, renewals: renewalsJob,
+  access: accessJob, ratings: ratingsJob, weekly: weeklyJob, shield: shieldJob, deletions: deletionsJob, trials: trialsJob, renewals: renewalsJob,
 };
 
 export async function cronTick(req: Request): Promise<Response> {

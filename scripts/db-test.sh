@@ -30,4 +30,6 @@ db_url="$(supabase status -o env | sed -n 's/^DB_URL="\(.*\)"$/\1/p')"
 echo "Applied $(ls supabase/migrations/*.sql | wc -l) migrations; cron jobs left: $(psql "$db_url" -tAX -c 'select count(*) from cron.job'), queued requests: $(psql "$db_url" -tAX -c 'select count(*) from net.http_request_queue')"
 
 supabase test db
+# Two real sessions at once (P0.1-12a): not expressible inside one pgTAP transaction.
+bash supabase/tests/jobs_claim_concurrency.sh "$db_url"
 echo "Database suite finished in $(( $(date +%s) - started )) s"

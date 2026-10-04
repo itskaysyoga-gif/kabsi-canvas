@@ -101,6 +101,7 @@ Plans are Free, Pro and Partner. Free is Get Reviews (the review link and card).
 ### 2.1b What needs your attention
 
 - Home shows a list called **What needs your attention**: up to five open items in a set order. There is no score and no points value. Each item has a short reason and opens the page where the owner does it.
+- Under the business name, Home shows when Kabsi last checked the Google profile successfully, for example "Google profile checked 14 min ago". Kabsi checks every few minutes. If the last successful check is more than 6 hours old, the line turns amber and reads "Google profile last checked ...", so Home never looks healthy when checks are failing. Businesses in early access (a person posts what you approve) do not show the line, because Kabsi does not read their profile from Google yet.
 - The owner can **do it**, **put it off** (3 days) or **skip it** (30 days). Nothing is sent to Google until the owner approves it. Never present the list as a ranking or as a promise of more customers or reviews.
 - Nora, Kabsi's assistant in the dashboard, can read the list and say what the top items are in plain words. She never mentions a score. She saves a fact into About your business only when the owner has just told her that fact.
 
@@ -576,6 +577,8 @@ Weekly drafts need at least one fact in About your business, the Weekly draft sw
 **My photo won't upload.** Use JPG, PNG or WebP up to 5 MB.
 
 **Home says "Appears after the first daily check".** Kabsi reads the public rating once a day.
+
+**Home says "Google profile last checked" in amber.** Kabsi has not managed to read the Google profile for more than 6 hours. The team is alerted when checks keep failing. If you removed the Kabsi group from People and access, add it again as a Manager.
 
 **My card opens "This Kabsi card isn't set up yet".**
 The card isn't linked yet. Tap through and sign in to link it, or add its code under Get reviews, **Add a card**.

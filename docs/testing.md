@@ -34,7 +34,25 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   only) or the browser's own headers; no review text or reviewer name is copied in; owners read only their own
   businesses' events; `activity_feed` returns plain lines with routine checks collapsed into one a day.
 
+- `jobs_queue.sql` (P0.1-12a): `jobs` is closed to anon and authenticated and written only through `enqueue_job`,
+  `claim_jobs` and `finish_job` (service role); a dedupe key is taken while a job is pending, running or retrying; a
+  claimed job is not claimed again; failed tries wait about 30 s, 1, 2 and 4 minutes, and the fifth failure makes
+  the job dead with one #kabsi-alerts event; a handler can rule out a retry (failed); a job left running for 10
+  minutes is handed on; the producers offer one review sync per business every 5 minutes (concierge businesses
+  excluded), one draft per new review and one owner email run when an email is due; the tick calls the dispatcher
+  only when a job is due; `record_sync_result` fills `google_connections`; staff job health lists stopped jobs.
+- `jobs_claim_concurrency.sh` (P0.1-12a), run by `scripts/db-test.sh` after the pgTAP suite because it needs two
+  real sessions: 100 committed jobs, dispatcher w1 claims 60 and holds its transaction 2 seconds, w2 asks 0.3 s later
+  and must get the other 40 at once; every job is claimed exactly once and w2 never waits (it fails if SKIP LOCKED is
+  removed).
+
 When you add a table or a browser-callable function, add its fixture row or its test in the same pull request.
+
+## Job queue (P0.1-12a)
+
+`supabase/functions/_shared/jobs.test.ts` (Deno) checks how one claimed job ends: success, a thrown error retried, a
+`PermanentJobError` or an unknown kind not retried. The handlers and the `/api/dispatch` route are in
+`supabase/functions/api/jobs.ts`.
 
 ## App and functions
 

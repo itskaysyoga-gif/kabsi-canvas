@@ -48,6 +48,8 @@ export type Dashboard = {
   reviews90d: number;
   answered90d: number;
   lastPostAt: string | null;
+  /** Last successful Google check for this business (google_connections, K-06, K-35). */
+  lastCheckAt: string | null;
 };
 
 const count = (r: { count: number | null; error: { message: string } | null }) => {
@@ -90,6 +92,7 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
     reviews90,
     answered90,
     lastPost,
+    connection,
   ] = await Promise.all([
     supabase
       .from("reviews")
@@ -199,6 +202,11 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
       .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from("google_connections")
+      .select("last_successful_sync_at")
+      .eq("location_id", locationId)
+      .maybeSingle(),
   ]);
   if (recent.error) throw new Error(recent.error.message);
 
@@ -254,6 +262,9 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
     reviews90d: count(reviews90),
     answered90d: count(answered90),
     lastPostAt: (lastPost.data as { updated_at: string } | null)?.updated_at ?? null,
+    lastCheckAt:
+      (connection.data as { last_successful_sync_at: string | null } | null)
+        ?.last_successful_sync_at ?? null,
   };
 }
 

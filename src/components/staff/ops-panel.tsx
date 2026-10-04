@@ -30,6 +30,24 @@ type Health = {
     last_fail_at: string | null;
   }[];
   recent_failures: { job: string; at: string; detail: unknown }[];
+  /** The job queue (P0.1-12a): open work and the jobs that stopped in the last 7 days. */
+  queue?: {
+    pending: number;
+    running: number;
+    retrying: number;
+    due_late: number;
+    dead_7d: number;
+    failed_7d: number;
+  };
+  stopped_jobs?: {
+    id: number;
+    kind: string;
+    state: string;
+    business: string | null;
+    attempts: number;
+    last_error: string | null;
+    at: string;
+  }[];
   http_errors_24h: number;
   http_calls_24h: number;
   emails_failed_24h: number;
@@ -170,6 +188,31 @@ function JobHealth() {
                   .join(" · ")
               : "nothing yet"}
           </p>
+          {h.queue ? (
+            <p className="mt-2 text-sm text-kb-stone">
+              Job queue: {h.queue.pending} waiting · {h.queue.running} running · {h.queue.retrying}{" "}
+              retrying · <span className={bad(h.queue.due_late)}>{h.queue.due_late} late</span> ·{" "}
+              <span className={bad(h.queue.dead_7d + h.queue.failed_7d)}>
+                {h.queue.dead_7d} dead and {h.queue.failed_7d} failed in 7 days
+              </span>
+            </p>
+          ) : null}
+          {h.stopped_jobs?.length ? (
+            <details className="mt-2 text-sm" open>
+              <summary className="cursor-pointer font-bold text-kb-red">
+                {h.stopped_jobs.length} stopped {h.stopped_jobs.length === 1 ? "job" : "jobs"}
+              </summary>
+              <ul className="mt-2 space-y-1 font-mono text-xs">
+                {h.stopped_jobs.map((j) => (
+                  <li key={j.id}>
+                    {when(j.at)} {j.kind} {j.state} after {j.attempts}{" "}
+                    {j.attempts === 1 ? "try" : "tries"}
+                    {j.business ? ` (${j.business})` : ""}: {j.last_error ?? ""}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : null}
           {h.recent_failures.length ? (
             <details className="mt-2 text-sm">
               <summary className="cursor-pointer font-bold text-kb-red">

@@ -258,6 +258,28 @@ function Setup({ loc }: { loc: Location }) {
   );
 }
 
+// ── Last successful Google check (K-06): one line, amber when older than 6 hours so Home never looks healthy
+// while sync is failing. Hidden until the first check (concierge businesses are not read from Google).
+const CHECK_STALE_MS = 6 * 3_600_000;
+function LastCheck({ at }: { at: string | null }) {
+  if (!at) return null;
+  const ago = timeAgo(at);
+  const when = ago.charAt(0).toLowerCase() + ago.slice(1);
+  const stale = Date.now() - Date.parse(at) > CHECK_STALE_MS;
+  return (
+    <p
+      className={cn(
+        "mt-3 text-sm",
+        stale
+          ? "inline-block rounded-card bg-kb-amber-soft px-3 py-1 text-kb-amber"
+          : "text-kb-stone",
+      )}
+    >
+      {stale ? `Google profile last checked ${when}` : `Google profile checked ${when}`}
+    </p>
+  );
+}
+
 // ── Active business
 function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
   const daysLeft = daysUntil(d.planPaidUntil);
@@ -294,6 +316,7 @@ function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
 
   return (
     <>
+      <LastCheck at={d.lastCheckAt} />
       {/* What needs you */}
       <section className="mt-7 overflow-hidden rounded-large bg-kb-carbon text-kb-white">
         <div className="relative p-6 sm:p-9">
