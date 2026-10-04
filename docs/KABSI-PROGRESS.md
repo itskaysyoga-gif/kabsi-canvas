@@ -173,6 +173,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - `npm run typecheck` clean, `npm test` 15 passed, `npm run build` ok, eslint and prettier clean on the three changed screens (one existing warning in `knowledge-form.tsx` line 244, not from this change).
 - Before this change, live: 3 of 3 `weekly_reports` rows carry `"quotes"` (read-only SQL, 4 Oct).
 - Screens not checked in a browser at 390 px or 1440 px in this session (wording-only changes and one removed block).
+- `knowledge/kabsi-facts.md` updated (after Hussein allowed it): the About your business phone row, the clinic and garage notes, the negative-review advice (no phone, email or link in a reply), a new FAQ "Will a reply include my phone number, email or website?", the weekly report answer (no customer quotes), the retention row and the Search phrases glossary entry (never from reviews). `node scripts/build-kb.mjs` rebuilt `public/llms-full.txt` (13,108 words).
 
 ### Deploy workflow fix and P0.1-02b part B After-merge checks (4 Oct 2026, Hussein's session)
 - Deploy run 5 (37185310050, merge of PR 20, commit 2a204f9): Edge Functions job success, Worker kabsi-go job failure. Log line: "Missing entry-point: The entry-point should be specified via the command line ... or the `main` config field." The four runs on 29 Sep had the same shape (Edge Functions success, Worker failure).
@@ -243,7 +244,6 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - The live hero shows "Your Google Business Profile, taken care of." (Google's name in the slogan, against K-112), "Profile Score" and a "Post" button. Fixed by P0.1-02a and P0.1-02b.
 - Drafting code allows phone numbers in replies (`_shared/ai.ts`), weekly posts use phrases from review text (D245) and reports quote reviews (D233). Fixed by P0.1-04.
 - Review text sent to the model has no length cap. Fixed by P0.1-04.
-- P0.1-04a: `knowledge/kabsi-facts.md` not updated in this pull request: reading it was blocked by the session's permission check. It still needs: replies never carry a phone number and send unhappy customers to the details on the profile; post suggestions come from category, area, the owner's services and (after go-live) Google's search terms, never reviews; the Weekly Care Report has no customer quotes.
 - P0.1-04a: the three existing `weekly_reports` rows still hold quotes in `data`; the app no longer shows them. Deleting them is a retention question (P0.2-01).
 - P0.1-04a: `src/routes/privacy.tsx` line 260 mentions "the quotes in weekly reports". True for the old rows; P0.2-07 should reword it.
 - P0.1-04a: a reply or post the owner edits by hand is not checked for contact details at publish (only drafts are). Kabsi drafts are blocked in code; whether to warn on owner-typed text is open (P0.3-02 or P0.1-13a).

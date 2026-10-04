@@ -165,7 +165,7 @@ A Manager can do everything Kabsi needs; only owners can add or remove people. Y
 |---|---|---|
 | How you sign replies (for example "Luca, Trattoria Verde") | Required | Every reply ends with it |
 | Tone: Warm, Formal, or Short & friendly | Choose one | Sets the voice of drafts |
-| Phone to give unhappy customers | Optional | Used in careful replies to invite a private call |
+| Business phone | Optional | Never written in a public reply. Unhappy customers are asked to contact you through the details on your Google profile, because Google can reject replies that contain phone numbers |
 | Opening hours note (for example "Open daily 8am to midnight") | Optional | Used when a reviewer asks about hours |
 | Anything you'd like mentioned (for example delivery area, parking) | Optional | Used only when a reviewer raises that topic |
 | Staff names that may appear in replies (comma-separated, up to 20) | Optional | Lets replies thank the right person. Names not on the list are never used |
@@ -395,7 +395,7 @@ Reviews land during service; drafts wait in email. Guests write in many language
 Post drafts after the morning rush. The weekly draft suits what's fresh (a seasonal pastry, a new blend). Early opening hours must be exact; set special hours for holidays. Arabic reviews get Arabic replies. Card: by the coffee machine or pastry counter, at the till, QR on cup sleeves or bread bags.
 
 ### 7.3 Clinics and dentists (patient privacy)
-Drafts stay calm and general: no medical claims, no personal details, no admissions of fault, and they move the talk to a private call. In many countries health privacy rules (HIPAA in the US, for example) mean a public reply shouldn't confirm someone is a patient or mention their care. Add "Don't confirm the reviewer is a patient or mention any treatment" under **Anything Kabsi should never say or promise**; drafts and the safety check follow it. Weekly drafts arrive on Tuesday. Card: at reception, QR on appointment cards or aftercare sheets, link in follow-up emails. This is not legal advice; privacy law questions go to a person.
+Drafts stay calm and general: no medical claims, no personal details, no admissions of fault, and they ask the reviewer to get in touch through the details on the profile. In many countries health privacy rules (HIPAA in the US, for example) mean a public reply shouldn't confirm someone is a patient or mention their care. Add "Don't confirm the reviewer is a patient or mention any treatment" under **Anything Kabsi should never say or promise**; drafts and the safety check follow it. Weekly drafts arrive on Tuesday. Card: at reception, QR on appointment cards or aftercare sheets, link in follow-up emails. This is not legal advice; privacy law questions go to a person.
 
 ### 7.4 Salons and barbers
 Add team names so replies can thank the right stylist; names not on the list are never used. Photos of the work are checked; photos where a face is the main subject are flagged, so share the work, not the person. Card: at each station by the mirror, at reception, link in booking confirmations.
@@ -404,7 +404,7 @@ Add team names so replies can thank the right stylist; names not on the list are
 Guests review in many languages; each draft matches. Check-in times, parking and breakfast hours come from About your business. Google Protection watches phone, address, website and hours; room photos are checked. Kabsi works with Google only, not booking sites. Card: at reception at check-out, in the room next to the Wi-Fi details, link in the thank-you email after the stay.
 
 ### 7.6 Garages and auto repair
-Price disputes get a calm draft that invites a call, with no quick Post button. Drafts never argue, admit fault or promise refunds or discounts. Google Protection matters for the phone number. Card: where customers pay and collect keys, QR on the invoice, link in the "your car is ready" message.
+Price disputes get a calm draft that asks the customer to get in touch through the details on the profile, with no quick Post button. Drafts never argue, admit fault or promise refunds or discounts. Google Protection matters for the phone number. Card: where customers pay and collect keys, QR on the invoice, link in the "your car is ready" message.
 
 ### 7.7 Shops and boutiques
 Weekly drafts for new arrivals, with a Shop or Call button; never invented prices, offers or dates. Special hours for holiday openings. Each shop is its own business in Kabsi with its own plan. Card: at the till, QR on receipts or bags, link in order confirmations.
@@ -435,7 +435,7 @@ A good reply: two to four sentences, in the customer's language, mentions one th
 1. Wait until you're calm.
 2. Thank them for telling you.
 3. Name the problem in one sentence, without arguing in public.
-4. Offer a direct way to talk: a phone number or email.
+4. Ask them to get in touch through the details on your profile. Don't write a phone number, email or link in the reply: Google can reject replies that contain them.
 5. Keep it short and sign as the business.
 
 Never: argue about who is right, share the customer's details, accuse them of lying, or offer discounts or refunds for changing or removing the review (Google treats that as fake engagement). Replying promptly is Google's advice.
@@ -511,7 +511,7 @@ Sign-in storage, the last business you opened (in your browser), and PostHog's a
 |---|---|
 | Business data | While you use Kabsi; deleted 7 days after a deletion request |
 | Review text and reviewer names | At most 30 days after Google last sent them |
-| Rating history, report quotes, decided Shield before/after values | 30 days |
+| Rating history, quotes in reports sent before 4 October 2026 (newer reports carry none), decided Shield before/after values | 30 days |
 | Google data after access is removed | Deleted after 30 days unless access returns |
 | Assistant chats | 12 months after the last message |
 | Contact details given to the assistant | Until you ask us to remove them |
@@ -684,12 +684,15 @@ Yes. Add up to 3 extra addresses in Settings, Emails. They see new reviews, but 
 Yes. Settings, Emails, Pause for 7 days. Reviews still arrive in your Kabsi inbox.
 
 **What is the weekly report?**
-Every Monday morning: your public Google rating and change, new reviews, how many got a reply, and card and link opens. Facts only.
+Every Monday morning: your public Google rating and change, new reviews, how many got a reply, and card and link opens. Facts only, with no quotes from customers' reviews.
 
 ### Replies and AI
 
 **Who writes the replies?**
 Kabsi's AI drafts them from your facts. You read, edit and approve each one.
+
+**Will a reply include my phone number, email or website?**
+No. Google can reject replies that contain phone numbers, emails, links, social media handles or hashtags, so Kabsi's drafts never include them, and a draft that does is stopped before you see it as ready. Prices appear only if you wrote them in About your business. An unhappy customer is asked to get in touch through the details on your profile. Posts follow the same rule: a post's button carries the link or the call.
 
 **What if the AI makes a mistake?**
 You see the exact text before anything is posted and can edit or skip it. Drafts use only your facts and pass a safety check first.
@@ -1033,7 +1036,7 @@ Delete your business in Settings, and ask by email to delete your login too.
 - **Never-say list:** "Anything Kabsi should never say or promise".
 - **Safety check:** the automatic check of each draft against Kabsi's rules and your never-say list.
 - **Weekly draft:** the optional post Kabsi drafts once a week for approval.
-- **Search phrases:** words customers use for businesses like yours, worked into a post's first line.
+- **Search phrases:** words people use to search for a business like yours, worked into a post's first line. They come from your category, your area and the services you listed in About your business, and, once Kabsi is connected to Google live, from Google's own search terms. Never from your reviews.
 - **Special hours:** hours for specific dates, like holidays.
 - **Google Protection:** watches key listing details, alerts you and lets you choose in the app whether to keep your information.
 - **Profile health:** four facts on Home, no score.
