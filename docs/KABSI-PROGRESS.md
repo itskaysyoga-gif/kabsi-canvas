@@ -8,7 +8,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two, part A in review (branch claude/h-p0-1-04), part B (daily AI budget) next.
+- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) in review (PR 24, migration applied 4 Oct).
 
 ## Rashid's decisions and inputs (plan section 5)
 
@@ -43,8 +43,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | merged (17, 18); live After-merge checks not run, see Evidence | 17, 18 | 4 Oct 2026 |
 | P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | merged in two parts (19, 20); mock-review check passed; live app check and auth template paste still open | 19, 20 | 4 Oct 2026 |
 | P0.1-03 | Move kabsi.co to the new build | Sonnet | todo | | |
-| P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | PR open (branch claude/h-p0-1-04) | 23 | 4 Oct 2026 |
-| P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | todo (depends on P0.1-04a) | | |
+| P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | merged (23); After-merge checks open | 23 | 4 Oct 2026 |
+| P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | PR open (branch claude/h-p0-1-04b), migration applied | 24 | 4 Oct 2026 |
 | P0.1-05 | Design tokens and shared components | Sonnet | todo | | |
 | P0.1-06 | Demo workspace with fictional businesses | Opus | todo | | |
 | P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet | todo | | |
@@ -146,6 +146,10 @@ After the P0.1-02b part B pull request (20) was merged: Deploy passed and the mo
 - Paste the four `emails/auth/*.html` files into the Supabase Auth email templates (dashboard step for Rashid or Hussein); the dashboard copies still carry the old footer.
 - Done 4 Oct: Hussein confirmed the "New review for Yawmiyati (3 of 5)" test email from screenshots on desktop and phone: the button reads "Review reply", the new footer shows, and there is no address.
 
+After the P0.1-04b pull request (24) is merged (Deploy publishes `api`, `content`, `posts-weekly`):
+- `select * from ai_usage where day = current_date` shows a row for Yawmiyati after the next mock review is drafted, with generations 1 or more and tokens above 0.
+- An owner redraft beyond the business cap returns "Kabsi has written as many drafts as it can for this business today. New drafts start again tomorrow." (test by lowering `ai_daily_cap_business` for a minute, then setting it back to 60).
+
 After the P0.1-04a pull request is merged (Deploy publishes `api`, `content`, `posts-weekly`) and Lovable has deployed `main`:
 - Edge Function versions for `api`, `content` and `posts-weekly` are newer than the merge time (`list_edge_functions`).
 - Live mock check on Yawmiyati: one mock review that asks for the business's number, drafted after the deploy; paste the draft body here and confirm it has no phone number, email, link, handle or hashtag, and that an unhappy reviewer gets "please contact us through the details on our profile".
@@ -165,6 +169,12 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### P0.1-04b (branch claude/h-p0-1-04b, PR 24, 4 Oct 2026, Hussein's session)
+- Migration `20261004090000_ai_usage.sql` shown to Hussein part by part; applied with `apply_migration` after his "apply" (success). Additive only: table `ai_usage`, index, settings `ai_daily_cap_business` 60 and `ai_daily_cap_global` 3000, functions `ai_budget_take` and `ai_usage_add` (service role only).
+- Security advisors after the migration: nothing new for `ai_usage` or the two functions (the listed items all predate this change).
+- Rolled-back proof on Yawmiyati (one DO block ending in an exception): `first take=ok, row=1/1200/150, at business cap=business, generations still=1, at global cap=global, again=global, alerts queued=1, anon can run=false, authenticated can run=false, authenticated can add=false, service_role can run=true, authenticated can insert=false`. Afterwards: 0 `ai_usage` rows, caps back at 60 and 3000, 0 `ai_global_cap` events.
+- `deno check` api, content, posts-weekly pass; `deno test --no-check _shared/` 37 passed. CI run 24 green before the PROGRESS commit.
 
 ### P0.1-04a (branch claude/h-p0-1-04, 4 Oct 2026, Hussein's session)
 - Split: the full task changes 15 code files, over the 10 in plan section 2.5. Part A (this pull request) is the drafting rules, no database change; part B is the `ai_usage` migration and the daily budget.
@@ -258,6 +268,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - P0.1-02a: `TRIAL_LINE` and the "Start free. Pay when it is worth it." headline were left as they are; the plan's list did not change them.
 - P0.1-04a: "posts: except the owner's own domain in the button only" is read as: post text never carries a link; the button is the only link. Kabsi has no reliable record of the owner's domain yet (Business Knowledge, P0.2-03), so the button link is not matched to a domain.
 - P0.1-04a: keyword suggestions use up to three items from the owner's "Products and services" field (source "owner") in place of review phrases, as the plan's "owner input".
+- P0.1-04b: daily caps start at 60 drafting jobs per business and 3,000 across Kabsi (a first-day backlog of 20 reviews fits); a job is one reply or post draft with its checks. Change them in `app_settings`.
 - P0.1-04a: the `contact_phone` field stays (the mock listing uses it) but is relabelled "Business phone" with the hint that Kabsi never writes a phone number in a public reply.
 
 ## Found, not done by P0.1-02a
@@ -280,6 +291,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 4 Oct 2026 (Hussein's session): PR 23 (P0.1-04a) merged on Hussein's "merge". P0.1-04b on branch claude/h-p0-1-04b, PR 24; `ai_usage` migration applied after Hussein's "apply". Next: P0.1-04a and 04b After-merge checks, then P0.1-05.
 - 4 Oct 2026 (Hussein's session): recorded Hussein's confirmation of the P0.1-02b test email (desktop and phone screenshots). P0.1-04 split into 04a and 04b (15 code files); 04a on branch claude/h-p0-1-04. Next: P0.1-04b (needs Hussein's "apply" for the `ai_usage` migration).
 
 - 4 Oct 2026 (Hussein's session): Deploy fixed (PR 21, Wrangler pinned) and passing; P0.1-02b mock-review After-merge check passed; plan correction recorded (the `emails` table has no body). Next: P0.1-03 once Rashid has done steps 1 and 2.

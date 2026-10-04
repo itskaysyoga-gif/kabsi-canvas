@@ -4,6 +4,7 @@
 // nothing is posted until they click Post. Businesses with no facts to write from are skipped, not padded.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 import { ensureCategory, hasFacts, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, writePost } from "../_shared/posts.ts";
+import { AiBudgetError } from "../_shared/ai-budget.ts";
 
 // A weekly angle so drafts don't repeat; each uses only the owner's facts.
 const ANGLES = [
@@ -73,6 +74,8 @@ Deno.serve(async (req) => {
       }
       done[loc.id] = "drafted";
     } catch (e) {
+      // Daily AI budget used up (K-100): skip this week's draft quietly; the global cap already alerted Slack.
+      if (e instanceof AiBudgetError) { done[raw.id] = `ai_budget_${e.scope}`; continue; }
       done[raw.id] = "error";
       await captureError("posts-weekly", e, { location_id: raw.id });
     }
