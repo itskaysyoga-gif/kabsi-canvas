@@ -224,6 +224,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - `kabsi_cron_tick` keeps access, ratings, weekly, shield, deletions, trials and renewals; sync, draft and notify are gone from `api/cron.ts`. Nothing unscheduled.
 - App checks: `npm run typecheck`, `lint:changed` (3 files), `check:tokens`, `check:anon`, `check:google` pass; `npm test` 21 passed; `npm run build` pass. Deno 2.9.6: `deno check` api, cron-tick, content, posts-weekly, health pass; `deno test --no-check _shared/` 79 passed (4 new in `jobs.test.ts`). `site-assets` cannot fetch deno.land from the sandbox (CI runs it).
 - `knowledge/kabsi-facts.md` (Home line and a help entry) and `public/llms-full.txt` (rebuilt) updated.
+- CI on PR 40 (run https://github.com/rashidhamzy-hue/kabsi-canvas/actions/runs/37221958571, commit 635f697): App, Edge Functions and Database all success. Database: 392 pgTAP tests pass on a fresh local stack (47 in `jobs_queue.sql`), then "jobs claim concurrency: w1 60, w2 40, total 100, distinct 100, running once 100, 2347 ms ... ok". The first run (commit 3338a6a) failed 3 tests from two mistakes in the test file (BETWEEN called the retry helper twice; a re-offered job was claimed before the stuck one); fixed in 635f697.
 
 ### After-merge checks run at the start of the P0.1-11 part B chat (4 Oct 2026, 17:10 UTC, Hussein's session)
 - P0.1-11 part A deploy: PR 38 merged 17:06:42 UTC; every Edge Function `updated_at` 17:07:10 UTC (`api` 44, `content` 37, `posts-weekly` 33). Passed.
