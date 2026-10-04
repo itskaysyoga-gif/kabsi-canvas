@@ -79,6 +79,10 @@ insert into public.mock_google_reviews (google_location_id, reviewer_name, star_
 insert into public.trial_grants (place_id, location_id) values ('victim-place', '00000000-0000-4000-8000-0000000000c1');
 insert into public.rate_limits (key) values ('victim');
 insert into public.billing_events (provider, event_key) values ('nowpayments', 'victim-event');
+-- P0.1-09: the victim's organisation, its membership, google_connections and partner_clients rows come from the
+-- triggers on locations, location_members, partners and partner_members above. subscriptions starts empty.
+insert into public.subscriptions (organization_id, plan, state)
+select organization_id, 'pro', 'active' from public.locations where id = '00000000-0000-4000-8000-0000000000c1';
 
 -- Every row that exists now belongs to the victim side (rows seeded by migrations included: no persona may read
 -- them either). Physical row ids are stable inside this transaction because nothing below updates them.

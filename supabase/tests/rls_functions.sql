@@ -14,7 +14,7 @@ insert into tested values
   ('billing_prepare_invoice(uuid,text,text,boolean)'), ('cancel_location_deletion(uuid)'), ('choose_plan(uuid,text)'),
   ('claim_partner_membership()'), ('create_review_link(uuid,text)'), ('generate_card_codes(integer,uuid)'),
   ('google_mode()'), ('handle_review_offline(uuid)'),
-  ('is_member(uuid)'), ('is_partner_member(uuid)'), ('is_staff()'), ('owner_submit_claim(uuid,text,text,text)'),
+  ('has_location_role(uuid,text[])'), ('is_member(uuid)'), ('is_org_member(uuid,text[])'), ('is_partner_member(uuid)'), ('is_staff()'), ('owner_submit_claim(uuid,text,text,text)'),
   ('partner_create_invite(uuid,text,text)'), ('partner_invoice_calc(uuid,date)'), ('partner_locations(uuid)'),
   ('partner_submit_claim(uuid,text,text)'), ('plan_summary(uuid)'),
   ('profile_task_action(uuid,text)'), ('profile_tasks_list(uuid)'), ('rename_card(text,text)'),
@@ -88,6 +88,13 @@ create temp table victim_before as
          (select md5(r::text) from public.reviews r where r.id = '00000000-0000-4000-8000-0000000000e1') as review,
          (select md5(c::text) from public.cards c where c.code = 'VCTM22') as card;
 
+-- P0.1-09: the victim's organisation ids, read before switching persona (the stranger cannot read them).
+create temp table victim_orgs as
+  select (select organization_id from public.locations where id = '00000000-0000-4000-8000-0000000000c1') as owner_org,
+         (select id from public.organizations where partner_id = '00000000-0000-4000-8000-0000000000d1') as partner_org;
+grant select on victim_orgs to authenticated;
+select ok((select owner_org is not null and partner_org is not null from victim_orgs), 'the victim has an owner and a partner organisation');
+
 -- As a signed-in stranger: S has no business, no partner and no staff row.
 select tests.act_as('00000000-0000-4000-8000-0000000000b1');
 
@@ -126,6 +133,9 @@ select is(public.claim_partner_membership(), null, 'claim_partner_membership giv
 select is(public.is_member('00000000-0000-4000-8000-0000000000c1'), false, 'is_member is false for a non-member');
 select is(public.is_partner_member('00000000-0000-4000-8000-0000000000d1'), false, 'is_partner_member is false for a non-member');
 select is(public.is_staff(), false, 'is_staff is false for a non-member');
+select is(public.is_org_member((select owner_org from victim_orgs)), false, 'is_org_member is false for a non-member');
+select is(public.is_org_member((select partner_org from victim_orgs), null), false, 'is_org_member is false for a non-member of a partner organisation');
+select is(public.has_location_role('00000000-0000-4000-8000-0000000000c1', array['owner', 'manager', 'staff']), false, 'has_location_role is false for a non-member');
 select is(public.google_mode(), 'mock', 'google_mode returns only the mode, no business data');
 
 -- Staff RPCs: forbidden for anyone without a staff row.
