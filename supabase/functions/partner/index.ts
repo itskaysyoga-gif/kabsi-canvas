@@ -76,13 +76,13 @@ async function invite(req: Request) {
       preheader: "Reply to every Google review, with your approval.",
       title: "You're invited to Kabsi",
       bodyHtml: p(`<strong>${who}</strong> invited you to use Kabsi${biz}.`) +
-        p("When a new Google review arrives, Kabsi emails you a reply already drafted in the reviewer's language. Nothing is posted until you tap Post.") +
+        p("When a new Google review arrives, Kabsi emails you a reply already drafted in the reviewer's language. Nothing goes on Google until you approve it.") +
         p("Setup has two steps: find your business, then add Kabsi as a Manager on your Google profile.") +
         p(`There's nothing to pay Kabsi: your plan comes through ${who}.`),
       button: { label: "Set up Kabsi", url: link },
       note: "If you weren't expecting this, you can ignore this email.",
     }),
-    text: `${partner!.name} invited you to use Kabsi${bizText}.\n\nWhen a new Google review arrives, Kabsi emails you a reply already drafted in the reviewer's language. Nothing is posted until you tap Post.\n\nSet up Kabsi: ${link}\n\nThere's nothing to pay Kabsi: your plan comes through ${partner!.name}.`,
+    text: `${partner!.name} invited you to use Kabsi${bizText}.\n\nWhen a new Google review arrives, Kabsi emails you a reply already drafted in the reviewer's language. Nothing goes on Google until you approve it.\n\nSet up Kabsi: ${link}\n\nThere's nothing to pay Kabsi: your plan comes through ${partner!.name}.`,
   }).catch(async (e) => { await captureError(FN, e, { route: "invite" }); return { failed: true }; });
   log(FN, { ok: true, route: "invite", emailed: !("failed" in sent) });
   return json({ ok: true, invite_id: inviteId, link, emailed: !("failed" in sent) && !("skipped" in sent) });

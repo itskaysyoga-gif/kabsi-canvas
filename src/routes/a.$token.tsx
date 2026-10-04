@@ -247,7 +247,7 @@ function ActionPage() {
         </p>
       ) : (
         <p className="mt-1 text-sm text-kb-stone">
-          Change anything you like. Kabsi posts exactly this text.
+          Change anything you like. Kabsi publishes exactly this text after you approve.
         </p>
       )}
       <Textarea
