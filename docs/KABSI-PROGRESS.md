@@ -8,7 +8,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25). P0.1-V1 and P0.1-V2 done (31, 32). P0.1-07 (database test suite) done (PR 33). P0.1-08 (database API hardening) PR 35 open, CI green; migration applied 4 Oct 14:46 UTC on Hussein's "apply".
+- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25). P0.1-V1 and P0.1-V2 done (31, 32). P0.1-07 (database test suite) done (PR 33). P0.1-08 (database API hardening) merged (PR 35); its After-merge checks partly passed, see Evidence. P0.1-09 (tenant model) PR 36 open, CI green; migration waits for Hussein's "apply".
 
 ## Rashid's decisions and inputs (plan section 5)
 
@@ -53,8 +53,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | done (merged 32 on Hussein's "merge"; docs only, no After-merge checks) | 32 | 4 Oct 2026 |
 | P0.1-V3 | Setup-call and partner-call booking links | Sonnet | todo | | |
 | P0.1-07 | Database test suite in CI | Opus | done (merged 33; no After-merge checks) | 33 | 4 Oct 2026 |
-| P0.1-08 | Security hardening of the database API | Opus | PR open, CI green; migration applied (Hussein's "apply"), see Evidence | 35 | 4 Oct 2026 |
-| P0.1-09 | Tenant model: organisations, connections, subscriptions | Opus | todo | | |
+| P0.1-08 | Security hardening of the database API | Opus | merged (35); After-merge checks partly run, see Evidence | 35 | 4 Oct 2026 |
+| P0.1-09 | Tenant model: organisations, connections, subscriptions | Opus | PR open, CI green; migration not yet applied (waits for Hussein's "apply") | 36 | 4 Oct 2026 |
 | P0.1-10 | Append-only audit log and the "What Kabsi did" feed source | Opus | todo | | |
 | P0.1-11 | One Google service layer | Opus | todo | | |
 | P0.1-12a | Job queue and dispatcher, review jobs first | Opus | todo | | |
@@ -144,9 +144,15 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-After the P0.1-08 pull request (35) is merged (Deploy publishes `api`):
-- `cron.job_run_details` shows one successful run after the change for the four moved jobs not yet seen (`kabsi_retention` 02:53, `kabsi_chat_retention` 03:41, `kabsi_concierge_daily` 05:00 Mon to Fri, `kabsi_concierge_overdue` :17; `kabsi_ops_watchdog` and `kabsi_plans_expiry` already succeeded at 14:50 on 4 Oct) and for every other job: `select j.jobname, max(d.end_time) filter (where d.status = 'succeeded') from cron.job j left join cron.job_run_details d using (jobid) group by 1`.
-- `get_advisors` security: no `anon_security_definer_function_executable`; leaked-password protection on once Rashid's step 10 is done.
+Before the P0.1-09 pull request (36) is merged: the migration is applied live on Hussein's "apply", then read back:
+- `select count(*) from locations where organization_id is null` is 0 and every location has a `google_connections` row; expected live: 5 organisations (4 owner, 1 partner), 5 connections, 1 partner_clients row (Safa Chicken, QA Partner, onboarding), 0 subscriptions; the demo login's two businesses share one demo organisation.
+- `get_advisors` security: nothing new beyond the two new helpers on the authenticated list (by design).
+After it is merged (Lovable deploys `main`; no Edge Function changes):
+- Smoke as the Yawmiyati owner and the partner login: Home, Reviews and the partner page load with data. The calls they make (`locations` with `location_members`, `reviews`, `plan_summary`, `profile_tasks_list`, `partner_locations`) are unchanged by this task; record what was checked.
+
+After the P0.1-08 pull request (35) is merged (Deploy publishes `api`): Deploy and `kabsi_concierge_overdue`, `kabsi_ops_watchdog`, `kabsi_plans_expiry` passed (see Evidence). Still open:
+- `kabsi_retention` (02:53), `kabsi_chat_retention` (03:41) and `kabsi_concierge_daily` (05:00 Mon to Fri) show a successful run after 14:46 UTC on 4 Oct: `select j.jobname, max(d.end_time) filter (where d.status = 'succeeded') from cron.job j left join cron.job_run_details d using (jobid) group by 1`.
+- Leaked-password protection on once Rashid's step 10 is done.
 - An email link (`/a/...`) opened signed out in mock mode still shows the Test mode banner (`GET /functions/v1/api/action?t=...` returns `"mode":"mock"`).
 - Signed in, the app header still shows the Test mode banner (the browser still calls `google_mode()` as authenticated).
 
@@ -189,6 +195,14 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### P0.1-09 (branch claude/h-p0-1-09, PR 36, 4 Oct 2026, Hussein's session)
+- Start of chat, P0.1-08 After-merge checks (15:46 UTC): PR 35 merged 15:02 UTC; every Edge Function updated 15:02:43 UTC (`api` version 42). `get_advisors` security: no `anon_security_definer_function_executable`; `authenticated_security_definer_function_executable` 53 (the browser list); `rls_enabled_no_policy` INFO 11; `auth_leaked_password_protection` still on (Rashid's step 10). Cron: `kabsi_concierge_overdue` succeeded 15:17, `kabsi_ops_watchdog` 15:40, `kabsi_plans_expiry` 15:45, each running `private.<fn>()`; no job has a failed run. Not yet run since the change: `kabsi_retention`, `kabsi_chat_retention` (last 02:53 and 03:41 on 4 Oct, before the apply) and `kabsi_concierge_daily` (Mon to Fri; 4 Oct is a Sunday). The `/a/...` mode check and the signed-in banner check could not run: the Supabase host and the live site are blocked from the sandbox (proxy 403).
+- Files: `supabase/migrations/20261004170000_tenant_model.sql`, `supabase/tests/tenant_model.sql` (new), `supabase/tests/_fixtures.psql`, `supabase/tests/rls_tables.sql`, `supabase/tests/rls_functions.sql`, `docs/testing.md`. No app or Edge Function code changed; nothing reads the new tables yet, so every screen keeps the same calls.
+- What the migration does: tables `organizations`, `organization_members`, `partner_clients`, `google_connections`, `subscriptions` (empty); `locations.organization_id` (not null after the backfill); `location_members.role` allows staff; helpers `is_org_member(uuid, text[])` and `has_location_role(uuid, text[])` for policies (authenticated only, answer about the caller); triggers in `private` keep the new tables in step with `locations`, `location_members`, `partners` and `partner_members`. Read-only RLS; only org owners and admins read `subscriptions`. During the backfill `locations_updated` and `ops_location` are paused, so `locations.updated_at` is not touched and no Slack event fires.
+- Done-when 2, the database suite covers the new tables and passes: CI run https://github.com/rashidhamzy-hue/kabsi-canvas/actions/runs/37214646193 (App, Edge Functions and Database all success): `Files=3, Tests=301 ... Result: PASS`, "Database suite finished in 90 s". The four personas read 0 victim rows of every new table; controls show the victim owner reads their organisation, membership, connection, partner link and subscription, and the partner member reads the partner organisation and client link but not the subscription or connection.
+- App checks in the sandbox: `npm run typecheck` pass, `npm run lint:changed` "No lintable files changed", `npm test` 19 passed, `npm run build` pass.
+- Done-when 1 (every location has an organisation and a connection row, SQL) and the live read-back: after Hussein's "apply". Done-when 3 (app smoke for the Yawmiyati owner and the partner login): After merge. Done-when 4 (nothing dropped): the migration has no drop except replacing the `location_members_role_check` constraint with a wider one.
 
 ### P0.1-08 (branch claude/h-p0-1-08, PR 35, 4 Oct 2026, Hussein's session)
 - Start of chat: P0.1-07 merged (1019bbd) with no After-merge checks; marked done.
@@ -381,6 +395,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Found, not done
 
+- P0.1-09: when a business is deleted (`delete_location_now`), its organisation and the owner's organisation membership stay, empty. Retention of empty organisations belongs to P0.2-01 or P0.2-02.
+- P0.1-09: `api/approve.ts` and `content/index.ts` check only that the user is a member of the business, not the role; once staff members exist they could approve. P0.3-06 (roles and approval policies) must switch them to `has_location_role`. No staff member can be added yet (no RPC writes that role).
 - P0.1-07: the repository is missing live migration `20260929084233_call_internal_send_anon_jwt` (it sets the anon JWT header in `call_internal`). The local stack therefore has the older `call_internal`; no test depends on it. Adding the file (copied from `supabase_migrations.schema_migrations`) was blocked in this session because it contains the public anon key; Rashid or Hussein can add it, or a later task can.
 - P0.1-07: repo migration versions differ from the live ones for files after 26 Sep (for example `20260929120000_jobs_heartbeat_check` is `20260929151116` live and applied after billing). The local replay order differs from production for that file; the suite passes either way. `deploy.yml` still asks for Supabase CLI "latest", which can hit the same GitHub API rate limit the CI job did.
 - P0.1-V2: Nora has no "suggested action" button (K-111, VIDEO #15), so the V15 line "and the button to do it" is cut until one exists. No task in the plan names it. Planning chat to decide where it belongs (P0.6-06 or P0.4-11).
@@ -409,6 +425,11 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Decisions to confirm
 
 (Build chats add decisions the plan did not cover here, one line each with the reason. The planning chat folds confirmed ones into the plan.)
+- P0.1-09: the new tables are kept in step with the old columns by triggers (schema `private`) until later tasks move the writers, so nothing reads stale data at any step; the triggers go in the contract step.
+- P0.1-09: a business joins its creator's oldest owner organisation of the same kind (demo or real); a demo business never joins a real organisation. Location managers and staff are not organisation members; only owners are.
+- P0.1-09: `organizations.partner_id` links a partner organisation to its old `partners` row until P1-01 moves the agency details; `partner_clients.status` is derived from the business status (active, paused, disabled to ended, everything else onboarding) while `locations.partner_id` is the source.
+- P0.1-09: `google_connections.access_state` is none, pending, granted, error or lost, derived from the old columns; `kabsi_account`, `last_attempted_sync_at`, `next_sync_at`, `sync_status` and `last_error` stay empty until P0.1-11 and P0.1-12a write them.
+- P0.1-09: `partner_clients.approval_policy` accepts only the five K-16 kinds (review_reply, post, photo, profile_change, hours) with owner or partner, and any partner delegation needs consent text and date (database check).
 - P0.1-08: only the six cron-only functions moved to `private`. The plan's list also names `call_internal`, `partner_billing_run`, `partner_recipients`, `start_paid_plans`, `ops_emit` and the mock helpers, but Edge Functions call those through the service role over the API (which serves only public) or other functions call them by name; they stay in public with no execute for anon or authenticated, which the advisor and the suite accept. The mock helpers (`staff_mock_review`, `staff_mock_listing_edit`) are staff screens and stay browser-callable. `plan_price` is not SECURITY DEFINER and already has no execute for anon or authenticated; left in public.
 - P0.1-08: `is_member`, `is_partner_member` and `is_staff` stay executable by authenticated because RLS policies call them as the signed-in user; the advisor will keep listing them, and the other 50 browser RPCs, as WARN by design.
 - P0.1-08: a later migration that does `create or replace function public.run_retention()` (P0.2-01) must target `private.run_retention()` instead, or it recreates a public copy; the suite's "no copy left in public" test catches it.
@@ -462,6 +483,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 4 Oct 2026 (Hussein's session): P0.1-08 After-merge checks run (Deploy and three moved jobs passed; three night jobs and the browser checks still open). P0.1-09 on branch claude/h-p0-1-09, PR 36: tenant model migration and tests, CI green (301 tests). Migration waits for Hussein's "apply". Next: P0.1-10 (depends on P0.1-09 merged).
 - 4 Oct 2026 (Hussein's session): P0.1-07 marked done (PR 33 merged, no After-merge checks). P0.1-08 on branch claude/h-p0-1-08, PR 35: schema `private` for the six cron-only functions, anon off `google_mode`, four helpers off the authenticated list, email-link banner reads the mode from `api/action`. Migration waits for Hussein's "apply". Next: P0.1-09 (depends on P0.1-08 merged).
 - 4 Oct 2026 (Hussein's session): P0.1-V2 marked done (PR 32 merged, docs only). P0.1-07 on branch claude/h-p0-1-07, PR 33: database test suite in CI, 231 pgTAP tests, CI green, bad-policy proof on throwaway PR 34 (failed as intended, closed; branch deletion left to Hussein). Next: P0.1-08 (depends on P0.1-07 merged).
 - 4 Oct 2026 (Hussein's session): P0.1-V2 on branch claude/h-p0-1-v2, PR 32: shot sheets V09 to V16 and W1 to W5 (docs only). After-merge read-only checks re-run (0 demo ops events, functions 13:22 UTC); demo email and browser checks still open. Next: P0.1-V3 needs Rashid's hours first; otherwise P0.1-07.
