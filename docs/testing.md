@@ -21,6 +21,12 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   use are closed to authenticated, and that schema `private` (cron-only functions) is out of reach of anon and
   authenticated. A function the browser does not call belongs in `private`, or in public with no execute for anon
   and authenticated when an Edge Function calls it through the service role.
+- `tenant_model.sql` (P0.1-09): every business has an organisation and a `google_connections` row; signing up puts a
+  second business in the same organisation; owners of a business are owners of its organisation, managers and staff
+  are not; partner members are mirrored into the partner organisation; the Google columns and `partner_id` on
+  `locations` flow into `google_connections` and `partner_clients`; demo businesses get a demo organisation; the
+  approval policy accepts only known kinds and needs consent to delegate; only org owners and admins read
+  `subscriptions`; the API roles cannot write the new tables.
 
 When you add a table or a browser-callable function, add its fixture row or its test in the same pull request.
 

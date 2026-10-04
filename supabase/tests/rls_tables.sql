@@ -60,9 +60,18 @@ select tests.act_as('00000000-0000-4000-8000-0000000000a1');
 select ok(tests.visible_victim_rows('locations') = 1 and tests.visible_victim_rows('reviews') = 1,
   'control: the victim owner sees their own business and review');
 reset role;
+select tests.act_as('00000000-0000-4000-8000-0000000000a1');
+select ok(tests.visible_victim_rows('organizations') = 1 and tests.visible_victim_rows('organization_members') = 1
+  and tests.visible_victim_rows('google_connections') = 1 and tests.visible_victim_rows('partner_clients') = 1
+  and tests.visible_victim_rows('subscriptions') = 1,
+  'control: the victim owner sees their organisation, membership, Google connection, partner link and subscription');
+reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000a2');
 select ok(tests.visible_victim_rows('partners') = 1 and tests.visible_victim_rows('partner_invoices') = 1,
   'control: the victim partner member sees their own partner and invoice');
+select ok(tests.visible_victim_rows('organizations') = 1 and tests.visible_victim_rows('partner_clients') = 1
+  and tests.visible_victim_rows('subscriptions') = 0 and tests.visible_victim_rows('google_connections') = 0,
+  'control: the victim partner member sees their partner organisation and client link, not the client''s billing or connection');
 reset role;
 
 select * from finish();
