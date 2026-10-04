@@ -641,7 +641,7 @@ Yes. The home page has an interactive example inbox in English, Spanish, Arabic 
 ### How it works
 
 **Does Kabsi post replies by itself?**
-No. Kabsi drafts a reply and emails it to you. Nothing goes on your Google profile until you tap Post, and you see the exact text first.
+No. Kabsi drafts a reply and emails it to you. Nothing goes on your Google profile until you tap Approve reply, and you see the exact text first.
 
 **What does Kabsi need from me?**
 Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile, then tell Kabsi a few facts in About your business. Drafts only use the facts you give.
@@ -656,7 +656,7 @@ Kabsi checks every few minutes. Reviews of 3 stars or less and sensitive reviews
 Yes. Tap Review reply, Edit or Skip in the email, confirm on the page that opens, or use the app in your phone's browser.
 
 **Can I edit a draft before posting?**
-Yes. Change anything you like. Kabsi posts exactly the text you approve.
+Yes. Change anything you like. Kabsi publishes exactly the text you approve.
 
 **Can I ask Kabsi to rewrite a draft?**
 Yes. Tap Ask for changes, type what to change (for example "shorter" or "more formal") and tap New version. Up to 3 new versions per review per day.
