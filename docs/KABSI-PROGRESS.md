@@ -8,7 +8,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) in review (PR 24, migration applied 4 Oct).
+- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) in review (PR 25).
 
 ## Rashid's decisions and inputs (plan section 5)
 
@@ -43,9 +43,9 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | merged (17, 18); live After-merge checks not run, see Evidence | 17, 18 | 4 Oct 2026 |
 | P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | merged in two parts (19, 20); mock-review check passed; live app check and auth template paste still open | 19, 20 | 4 Oct 2026 |
 | P0.1-03 | Move kabsi.co to the new build | Sonnet | todo | | |
-| P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | merged (23); After-merge checks open | 23 | 4 Oct 2026 |
-| P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | PR open (branch claude/h-p0-1-04b), migration applied | 24 | 4 Oct 2026 |
-| P0.1-05 | Design tokens and shared components | Sonnet | todo | | |
+| P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | merged (23); After-merge checks partly run, see Evidence | 23 | 4 Oct 2026 |
+| P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | merged (24); After-merge checks partly run, see Evidence | 24 | 4 Oct 2026 |
+| P0.1-05 | Design tokens and shared components | Sonnet | PR open (branch claude/h-p0-1-05) | 25 | 4 Oct 2026 |
 | P0.1-06 | Demo workspace with fictional businesses | Opus | todo | | |
 | P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet | todo | | |
 | P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | todo | | |
@@ -170,6 +170,21 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 (One block per finished task: the Done-when lines with their proof.)
 
+### P0.1-05 (branch claude/h-p0-1-05, PR 25, 4 Oct 2026, Hussein's session)
+- `src/styles.css`: one `@theme` block (fonts, 14 colours incl. new `kb-amber` #B45309 and `kb-amber-soft` #FEF3C7, type scale `text-kb-hero` to `text-kb-caption`, spacing `kb-section`, `kb-section-sm`, `kb-gutter`, container `kb`, radii, `shadow-kb`, `shadow-kb-lift`). Existing colour values unchanged. The old `--kb-*` variables were only used in styles.css and are gone. Built CSS contains `--color-kb-amber-soft:#fef3c7` and `.text-kb-hero`.
+- Components in `src/components/ui/`: Button (`primary`, `secondary` black outline, `tertiary` link; the unused black-filled `secondary` was replaced, `default` and `outline` kept), `status-pill.tsx`, `example-badge.tsx`, `kabsi-card.tsx`, `step-list.tsx`, `banner.tsx`. No existing screen changed.
+- `node scripts/check-tokens.mjs` on the repo: `Design tokens ok (154 files).` exit 0. On `tests/fixtures/bad-tokens.txt`: exit 1 with arbitrary hex colour, colour function and font lines. Test `tests/check-tokens.test.ts` (2 tests) passes. CI step "Design tokens (K-108)" added to `.github/workflows/ci.yml`; `npm run check:tokens` added.
+- `/design`: `src/routes/_authenticated/design.tsx`, noindex head, `Disallow: /design` in `public/robots.txt`, non-staff get `<Navigate to="/app">` (same `amStaff` check as `/staff`). Not run in a browser: no staff login in this session.
+- Yellow in `components/ui` (grep `kb-yellow`): `button.tsx` primary and default, `banner.tsx` needsYou, `kabsi-card.tsx` needsYou. Nothing else.
+- Checks: `npm run typecheck` clean; `npm test` 17 passed; `npm run build` ok (regenerated `routeTree.gen.ts`, 21 added lines for `/design`); eslint on changed files 0 errors, 3 fast-refresh warnings; prettier clean. Deno check not run (no Edge Function changed). `knowledge/kabsi-facts.md` not changed: no owner-facing behaviour or wording changed.
+- Not checked: `/design` at 390 px and 1440 px.
+
+### After-merge checks for P0.1-04a and P0.1-04b (run at the start of the P0.1-05 chat, 4 Oct 2026)
+- Deploy runs 7 (819f1f2) and 8 (09c2a0e) both success. `list_edge_functions`: `api` 36, `content` 29, `posts-weekly` 25, all updated 2026-10-04 08:20:51 UTC, after both merges.
+- `weekly_reports` rows created after 08:11 UTC with `"quotes"` in `data`: 0 (no report has run since the merge, so this is not conclusive until the next Monday reports).
+- `ai_usage`: 0 rows, caps `ai_daily_cap_business` 60 and `ai_daily_cap_global` 3000.
+- NOT run yet: the live mock review on Yawmiyati (draft without contact details, `ai_usage` row), the cap test, and the app-screen checks (need a signed-in browser). The first two write to the database and wait for Hussein's "apply". Tasks 04a and 04b stay "merged" until these pass.
+
 ### P0.1-04b (branch claude/h-p0-1-04b, PR 24, 4 Oct 2026, Hussein's session)
 - Migration `20261004090000_ai_usage.sql` shown to Hussein part by part; applied with `apply_migration` after his "apply" (success). Additive only: table `ai_usage`, index, settings `ai_daily_cap_business` 60 and `ai_daily_cap_global` 3000, functions `ai_budget_take` and `ai_usage_add` (service role only).
 - Security advisors after the migration: nothing new for `ai_usage` or the two functions (the listed items all predate this change).
@@ -291,6 +306,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 4 Oct 2026 (Hussein's session): PRs 23 and 24 merged. After-merge read-only checks for 04a and 04b run (Deploy green, function versions newer); the database-writing and screen checks are still open. P0.1-05 on branch claude/h-p0-1-05, PR 25. Next: P0.1-V1, or the open After-merge checks.
 - 4 Oct 2026 (Hussein's session): PR 23 (P0.1-04a) merged on Hussein's "merge". P0.1-04b on branch claude/h-p0-1-04b, PR 24; `ai_usage` migration applied after Hussein's "apply". Next: P0.1-04a and 04b After-merge checks, then P0.1-05.
 - 4 Oct 2026 (Hussein's session): recorded Hussein's confirmation of the P0.1-02b test email (desktop and phone screenshots). P0.1-04 split into 04a and 04b (15 code files); 04a on branch claude/h-p0-1-04. Next: P0.1-04b (needs Hussein's "apply" for the `ai_usage` migration).
 
