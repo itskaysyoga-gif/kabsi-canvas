@@ -8,7 +8,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a has two pull requests open (17, then 18). Next task: P0.1-02b.
+- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. Next task: P0.1-03 (needs Rashid's steps 1 and 2).
 
 ## Rashid's decisions and inputs (plan section 5)
 
@@ -41,7 +41,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-01 | Retire the old docs and move Nora's facts file | Sonnet | done (its leftover grep lines cleared by P0.1-01b) | 13 | 4 Oct 2026 |
 | P0.1-01b | Remove leftover references to the retired docs | Sonnet | done | 15 | 4 Oct 2026 |
 | P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | merged (17, 18); live After-merge checks not run, see Evidence | 17, 18 | 4 Oct 2026 |
-| P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | part A merged (PR 19); part B PR open on branch claude/h-p0-1-02b-b | 19, B below | 4 Oct 2026 |
+| P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | merged in two parts (19, 20); mock-review check passed; live app check and auth template paste still open | 19, 20 | 4 Oct 2026 |
 | P0.1-03 | Move kabsi.co to the new build | Sonnet | todo | | |
 | P0.1-04 | AI and Google-rules fixes in drafting | Opus | todo | | |
 | P0.1-05 | Design tokens and shared components | Sonnet | todo | | |
@@ -141,10 +141,9 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-After the P0.1-02b part B pull request is merged and the Deploy workflow has run (its last runs on main, 29 Sep, failed; check it first):
-- Edge Function versions (`list_edge_functions`) for `api`, `content`, `assistant` are newer than the merge time.
-- Trigger one mock review on Yawmiyati with `staff_mock_review` through the Supabase connector. The new `emails` row body has the button "Review reply" and the new footer (non-affiliation notice, operator line, "Nothing is published until you approve it."), and no address.
-- Paste the four `emails/auth/*.html` files into the Supabase Auth templates (dashboard step for Rashid or Hussein).
+After the P0.1-02b part B pull request (20) was merged: Deploy passed and the mock-review check passed (see Evidence). Still open:
+- Paste the four `emails/auth/*.html` files into the Supabase Auth email templates (dashboard step for Rashid or Hussein); the dashboard copies still carry the old footer.
+- Read the "New review for Yawmiyati (3 of 5)" email in rashid.hamzy@gmail.com and confirm the button reads "Review reply" and the footer has no address (the sent body is not stored in the database).
 
 After the P0.1-02b part A pull request is merged and Lovable has deployed `main`:
 - In the signed-in app at 390 px and 1440 px: navigation reads Home, Reviews, Google Profile, Get Reviews, Settings; Home shows "What needs your attention" with no score and no points; the reply button says "Approve reply"; the Google Protection page is titled that and its button reads "Keep my information"; Get Reviews shows "link activity" and the sentence "Activity is not the same as reviews. Google decides which reviews appear."
@@ -159,6 +158,16 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### Deploy workflow fix and P0.1-02b part B After-merge checks (4 Oct 2026, Hussein's session)
+- Deploy run 5 (37185310050, merge of PR 20, commit 2a204f9): Edge Functions job success, Worker kabsi-go job failure. Log line: "Missing entry-point: The entry-point should be specified via the command line ... or the `main` config field." The four runs on 29 Sep had the same shape (Edge Functions success, Worker failure).
+- Cause: `cloudflare/wrangler-action@v3` installs Wrangler 3.90.0 by default, which does not read `workers/kabsi-go/wrangler.jsonc`. Reproduced with `wrangler deploy --dry-run` on a clean copy of the folder: 3.90.0 fails with the same error; 3.114.17 bundles the Worker (3.41 KiB) and lists the STICKERS binding and vars.
+- Fix: PR 21 pins `wranglerVersion: "3.114.17"` in `.github/workflows/deploy.yml` (merged as 7b82144). Deploy run 6 (37185695836) on 7b82144: both jobs success. This was the first Worker deploy from CI, so the Worker code on main is now live on go.kabsi.co; the TAP_SECRET set in the Cloudflare dashboard is untouched by `wrangler deploy`.
+- Edge Function versions after run 6 (`list_edge_functions`): `api` 34, `content` 27, `assistant` 21, all updated 2026-10-04 about 07:25 UTC, after the PR 20 merge.
+- Mock-review check on Yawmiyati (location 9803ee99-fee8-4c6a-abb4-1a830fcbb438, mock mode): `staff_mock_review` needs a staff login that the Supabase connector does not have, so the same row it writes was inserted into `mock_google_reviews` (review id mock-eafac0a35ce9446684800827a9285d6e, 3 stars, reviewer "Deploy check", 07:27:37 UTC). The cron synced it at 07:30:03 (reviews row e3852d23-d5ff-4253-829c-001e0f61df61, state drafted, one reply draft) and sent the email at 07:30:08: `emails` row 84558298-d9f7-4d72-8f19-02b99d59f869, kind review_new, status sent, subject "New review for Yawmiyati (3 of 5)", to rashid.hamzy@gmail.com, resend_id 01a105d1-f845-7ee8-b09d-3a13d23eb9db.
+- Wording in the deployed code (`get_edge_function` for `api`, searched for strings): "Review reply" 2 hits, "Nothing is published until you approve it." 1, "trademarks of Google LLC" 1, "Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates" 1; "Beirut, Lebanon", "only posts what you approve", "Put mine back" and ">Post<" 0 hits.
+- Plan correction: the `emails` table has no body column (columns: id, location_id, partner_id, kind, to_address, subject, resend_id, status, error, dedupe_key, created_at). The plan's "check the `emails` row body" (P0.1-02b Done when, and the standard prompt) cannot be done. The check is the sent email (row exists with status sent, then read the inbox) plus the wording in the deployed function code.
+- Test data left behind: the mock review, its review row and its draft, on the internal test business Yawmiyati. Add to the go-live clean-up list if not deleted earlier.
 
 ### P0.1-02a After-merge checks (run at the start of the P0.1-02b chat, 4 Oct 2026)
 - Live checks on https://kabsi-app.lovable.app NOT run: the build sandbox's egress proxy refuses that host (CONNECT 403). Hussein or the next chat with web access should run the three After-merge bullets above against the live site.
@@ -237,6 +246,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Test data to delete at go-live (P0.7-04)
 
+- Yawmiyati: mock review mock-eafac0a35ce9446684800827a9285d6e (reviewer "Deploy check"), its reviews row e3852d23-d5ff-4253-829c-001e0f61df61 and reply draft, and the email row 84558298-d9f7-4d72-8f19-02b99d59f869 (created 4 Oct by the P0.1-02b After-merge check).
+
 - QA account qa-owner@test.local and "QA Bakery"; "QA Partner" (qa-partner) with Rashid's account as member; the "Test by rashid" partner invite and acceptance.
 - Yawmiyati's three overlapping pro_6m plans, the pending pro_12m and three payments rows from 25 Sep tests; its test photos.
 - Nora test chats from 27 Sep (visitor ids starting qa-, chats with contact "Kay").
@@ -245,6 +256,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 4 Oct 2026 (Hussein's session): Deploy fixed (PR 21, Wrangler pinned) and passing; P0.1-02b mock-review After-merge check passed; plan correction recorded (the `emails` table has no body). Next: P0.1-03 once Rashid has done steps 1 and 2.
 
 - 4 Oct 2026 (Hussein's session): the Deploy run for the P0.1-02b part B merge (run 37185310050) passed the Edge Functions job and failed the Worker job: wrangler-action installs Wrangler 3.90.0, which does not read `wrangler.jsonc`, so it reports "Missing entry-point". Same failure as the four runs on 29 Sep. Fix: pin `wranglerVersion: "3.114.17"` in `.github/workflows/deploy.yml` (branch claude/h-deploy-wrangler). Verified with `wrangler deploy --dry-run` on a clean copy of `workers/kabsi-go`: 3.90.0 fails with the same error, 3.114.17 bundles it and shows the STICKERS binding and vars. The first successful Worker deploy from CI will publish the Worker code now on main to go.kabsi.co.
 
