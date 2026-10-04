@@ -8,7 +8,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) in review (PR 25).
+- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25).
 
 ## Rashid's decisions and inputs (plan section 5)
 
@@ -45,7 +45,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-03 | Move kabsi.co to the new build | Sonnet | todo | | |
 | P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | merged (23); After-merge checks partly run, see Evidence | 23 | 4 Oct 2026 |
 | P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | merged (24); After-merge checks partly run, see Evidence | 24 | 4 Oct 2026 |
-| P0.1-05 | Design tokens and shared components | Sonnet | PR open (branch claude/h-p0-1-05) | 25 | 4 Oct 2026 |
+| P0.1-05 | Design tokens and shared components | Sonnet | merged (25); `/design` not yet looked at as staff | 25 | 4 Oct 2026 |
 | P0.1-06 | Demo workspace with fictional businesses | Opus | todo | | |
 | P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet | todo | | |
 | P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | todo | | |
@@ -183,7 +183,9 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Deploy runs 7 (819f1f2) and 8 (09c2a0e) both success. `list_edge_functions`: `api` 36, `content` 29, `posts-weekly` 25, all updated 2026-10-04 08:20:51 UTC, after both merges.
 - `weekly_reports` rows created after 08:11 UTC with `"quotes"` in `data`: 0 (no report has run since the merge, so this is not conclusive until the next Monday reports).
 - `ai_usage`: 0 rows, caps `ai_daily_cap_business` 60 and `ai_daily_cap_global` 3000.
-- NOT run yet: the live mock review on Yawmiyati (draft without contact details, `ai_usage` row), the cap test, and the app-screen checks (need a signed-in browser). The first two write to the database and wait for Hussein's "apply". Tasks 04a and 04b stay "merged" until these pass.
+- Live mock check run 4 Oct after Hussein's "apply": mock review (3 stars, asks for phone and email) inserted into `mock_google_reviews` for Yawmiyati at 08:35:29 UTC; cron synced it and drafted at 08:40:07. Draft body: "Thank you for sharing your feedback. We understand that waiting without an answer is frustrating. Please contact us through the details on our profile so we can hear more about what happened. Yawmiyati Team" (regex for 7 or more digits, @, link, www, # matches nothing). `ai_usage` row for Yawmiyati: generations 1, input tokens 2032, output tokens 409. Email row 1cb757d9-ba6b-4e7e-a023-d5852f3e19f0 (review_new, sent) kept as the record. Test data deleted after the check: 3 `action_tokens`, the `reviews` row (draft cascaded), the mock row. The `ai_usage` row for today stays (harmless).
+- STILL OPEN: the cap test (an owner redraft past the cap returns the "Kabsi has written as many drafts as it can..." message) needs a signed-in owner session; not run. Also open: the app-screen checks for 04a and 04b, and `/design` as staff at 390 and 1440 px.
+- (Superseded by the two lines above.) NOT run yet: the live mock review on Yawmiyati (draft without contact details, `ai_usage` row), the cap test, and the app-screen checks (need a signed-in browser). The first two write to the database and wait for Hussein's "apply". Tasks 04a and 04b stay "merged" until these pass.
 
 ### P0.1-04b (branch claude/h-p0-1-04b, PR 24, 4 Oct 2026, Hussein's session)
 - Migration `20261004090000_ai_usage.sql` shown to Hussein part by part; applied with `apply_migration` after his "apply" (success). Additive only: table `ai_usage`, index, settings `ai_daily_cap_business` 60 and `ai_daily_cap_global` 3000, functions `ai_budget_take` and `ai_usage_add` (service role only).
@@ -295,7 +297,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Test data to delete at go-live (P0.7-04)
 
-- Yawmiyati: the email row 84558298-d9f7-4d72-8f19-02b99d59f869 (created 4 Oct by the P0.1-02b After-merge check). The mock review, its draft and its action tokens were already deleted on 4 Oct.
+- Yawmiyati: the email row 1cb757d9-ba6b-4e7e-a023-d5852f3e19f0 (4 Oct, 04a and 04b check) and the email row 84558298-d9f7-4d72-8f19-02b99d59f869 (created 4 Oct by the P0.1-02b After-merge check). The mock review, its draft and its action tokens were already deleted on 4 Oct.
 
 - QA account qa-owner@test.local and "QA Bakery"; "QA Partner" (qa-partner) with Rashid's account as member; the "Test by rashid" partner invite and acceptance.
 - Yawmiyati's three overlapping pro_6m plans, the pending pro_12m and three payments rows from 25 Sep tests; its test photos.
@@ -306,6 +308,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 4 Oct 2026 (Hussein's session): PR 25 (P0.1-05) merged on Hussein's "merge". Live mock-review check for 04a and 04b passed; cap test and screen checks still open. Next: P0.1-V1.
 - 4 Oct 2026 (Hussein's session): PRs 23 and 24 merged. After-merge read-only checks for 04a and 04b run (Deploy green, function versions newer); the database-writing and screen checks are still open. P0.1-05 on branch claude/h-p0-1-05, PR 25. Next: P0.1-V1, or the open After-merge checks.
 - 4 Oct 2026 (Hussein's session): PR 23 (P0.1-04a) merged on Hussein's "merge". P0.1-04b on branch claude/h-p0-1-04b, PR 24; `ai_usage` migration applied after Hussein's "apply". Next: P0.1-04a and 04b After-merge checks, then P0.1-05.
 - 4 Oct 2026 (Hussein's session): recorded Hussein's confirmation of the P0.1-02b test email (desktop and phone screenshots). P0.1-04 split into 04a and 04b (15 code files); 04a on branch claude/h-p0-1-04. Next: P0.1-04b (needs Hussein's "apply" for the `ai_usage` migration).
