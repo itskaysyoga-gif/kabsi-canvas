@@ -1,45 +1,27 @@
-# Kabsi: instructions for Claude Code
+# Kabsi: instructions for Claude
 
-Kabsi takes care of a local business's Google Business Profile: reply drafts for every review, profile care, Listing Shield, a review link and card, and a Monday report. Stack: TanStack Start on Lovable, Supabase (Postgres, Auth, Edge Functions), a Cloudflare Worker for card taps (`workers/kabsi-go`), Sentry, PostHog, Slack.
+Kabsi looks after a local business's Google Business Profile: a reply ready for every new review, the listing watched and kept right, photos and posts prepared, a Weekly Care Report, and nothing published without the owner's approval. Brand line: "Your reviews and listing. Taken care of."
 
 ## Read first, in this order
 
-1. `docs/KABSI-SPEC.md`: the decision log (D-entries). It wins over everything else in the repo.
-2. `docs/KABSI-STATE.md`: what is live, what is broken, what is next.
-3. `docs/WORK-QUEUE.md`: take the top unchecked task unless the prompt names another.
+1. `docs/KABSI-PLAN.md` sections 1 (guardrails) and 2 (rules for every build chat), then the section for your task.
+2. `docs/KABSI-PROGRESS.md`.
+3. Only the decisions your task names, in `docs/source/` (KABSI-AUDIT K-01 to K-121, KABSI-GROWTH G-01 to G-47, KABSI-DESIGN, KABSI-VIDEO).
 
-Queue order: Q02, Q03, Q16, Q10, Q04, then stop and report. Q05 to Q07 need an Opus plan first. Do not start Q17 or Q18.
-
-Read only the files the task lists. Use `grep` before opening large files. Never read `bun.lock`, `src/routeTree.gen.ts`, `public/llms-full.txt` or old migrations unless the task needs them.
+One task per chat. The task ID comes from the prompt. Nothing else is in scope.
 
 ## Rules that never bend
 
-- Nothing reaches Google without an owner's approval, or a named delegated approver's; the publications ledger records who approved it (D202).
-- Honesty (spec §3): never promise more reviews, higher ratings or rankings; no fake reviews, no review gating, no rewards for reviews. Demo content is labelled "Example".
-- Copy: no em dashes, no en dashes, no exclamation marks, plain words. Module names exactly: Replies, Profile Care, Listing Shield, Review Link and Card, Monday Report. Plans: Free, Pro, Partner.
-- Lebanon-only card wording goes through `src/lib/region.ts`; Manager-invite steps live only in `ManagerAccessInstructions` (see `AGENTS.md`).
-- The Kabsi Google group ID lives in one constant, `KABSI_GROUP_ID` in `src/lib/site.ts`. Owners invite the group, not hello@kabsi.co (D293).
-- Secrets never appear in code, commits, logs, PR text or screenshots. They live in Supabase secrets and GitHub Actions secrets.
+- Google's API policies, terms, brand rules and Gate A; Google's review rules (no gating, no incentives, no fake reviews, no per-staff quotas, owner consent before anything is published); the law and the privacy and security of customers' data. Until Gate A every Google call runs in mock mode.
+- Every Google write goes through the one publication pipeline with the owner's approval. Never store an owner's Google token; never ask for a Google password or verification code.
+- No em dashes, en dashes or exclamation marks anywhere. Product names from K-02 only; never Profile Score, Do now, Listing Shield or Put mine back.
+- Only the design tokens (K-108). Phone first at 390 px.
+- Secrets never appear in code, commits, logs, pull requests or screenshots.
+- Every change that alters behaviour, price or wording updates `knowledge/kabsi-facts.md` (until task P0.1-01 moves it: `docs/KNOWLEDGE-BASE.md`).
+- The Kabsi Google group ID lives only in `KABSI_GROUP_ID` in `src/lib/site.ts`; Lebanon-only wording only through `src/lib/region.ts`.
 
-## Git and Lovable
+## Git, Lovable and deploys
 
-- `main` is connected to Lovable: every push to `main` shows up in Lovable's editor. Keep `main` working.
-- Never force-push, rebase, amend or squash commits that are already pushed.
-- One task, one branch (`claude/<task-id>`), one pull request. Keep diffs small; if a task needs more than about 10 files, stop and propose a split in the PR.
-- Never hand-edit `src/routeTree.gen.ts`. New database changes are new timestamped files in `supabase/migrations`; never edit an existing migration.
-
-## Before opening a pull request
-
-- `bun install`, then `bunx tsc --noEmit`, `bun run lint` and `bun run build` (npm works if bun is missing).
-- For changed Edge Functions, run `deno check` on them when Deno is available.
-- The PR body says what changed, how to test it, and any "Proposed D-entry" for a new decision.
-
-## Deploys
-
-Claude Code cloud sessions do not deploy. Rashid reviews and merges; Lovable publishes the site. Edge Functions and migrations are deployed from the Claude.ai project session, so say "ask Rashid to have Claude.ai deploy" and name the function or migration; never claim something is live before that. This holds until the CI deploy workflow (queue item Q16) exists. `supabase/config.toml` holds each function's `verify_jwt`; keep it in step when a function is added (a redeploy without it defaults to true and breaks cron and Worker calls, D295).
-
-## End of every session
-
-1. Add at most five lines to `docs/KABSI-STATE.md` under "Log": date, task, what changed, what is next.
-2. Tick the task in `docs/WORK-QUEUE.md`.
-3. Never write a new decision straight into `docs/KABSI-SPEC.md`; propose it in the PR. Rashid accepts it in the Claude.ai project, then a later session records it.
+- `main` syncs with Lovable and deploys every Edge Function and the Worker on push. Keep `main` working; never force-push, rebase, amend or squash pushed commits; never hand-edit `src/routeTree.gen.ts`.
+- One branch and one pull request per task (`claude/<task-id>`). Migrations are new files, applied with the Supabase connector before merging, additive first.
+- Run the checks in plan section 2.4, merge when CI is green and the task's "Done when" checks are proven, then update `docs/KABSI-PROGRESS.md` with the evidence.
