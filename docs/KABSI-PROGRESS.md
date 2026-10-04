@@ -48,7 +48,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | merged (24); After-merge checks partly run, see Evidence | 24 | 4 Oct 2026 |
 | P0.1-05 | Design tokens and shared components | Sonnet | merged (25); `/design` not yet looked at as staff | 25 | 4 Oct 2026 |
 | P0.1-06 | Demo workspace with fictional businesses | Opus | merged (28, 29); After-merge: Deploy and ops_events checks passed; mock-review email check and browser checks still open, see Evidence | 28, 29 | 4 Oct 2026 |
-| P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet | todo | | |
+| P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet (run on Opus in Hussein's session) | done (merged 31 on Hussein's "merge"; docs only, no After-merge checks) | 31 | 4 Oct 2026 |
 | P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | todo | | |
 | P0.1-V3 | Setup-call and partner-call booking links | Sonnet | todo | | |
 | P0.1-07 | Database test suite in CI | Opus | todo | | |
@@ -180,6 +180,14 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### P0.1-V1 (branch claude/h-p0-1-v1, PR 31, 4 Oct 2026, Hussein's session)
+- Ten files exist: `docs/marketing/brand-kit.md`, `docs/marketing/feature-truth.md`, `docs/marketing/shot-sheets/V01.md` to `V08.md`. No code changed.
+- Each shot sheet has: status, hooks A, B, C, scene list with times, Gemini prompts with the style line, Higgsfield model and motion prompts, voice lines one sentence per line with numbers as words, on-screen text, post caption, CTA before and after the launch gate, the product screen codes with the exact demo flow (business, reviewer, taps), file names, and a claims check.
+- "Record after task X" (R-10 and plan section 16): V02 after P0.2-04; V03 full version after P0.3-07, P0.2-04, P0.5-04 and P0.1-V3 (a short version with S01 and S05 only can be recorded now); V08 after P0.5-04, P0.3-07 and P0.2-04. V01, V04, V05, V06 and V07 can be recorded now; V01, V05 and V07 carry the "Early access" tag because real owners get team posting until P0.7-04.
+- Claims: `grep -rniE "automatically|real-time|24/7|rank higher|one tap|in seconds|guarantee|best|easiest" docs/marketing` matches only the "never say" column of the claims table and one "no automatically" note. No em dash, en dash or exclamation mark in the ten files (checked with a Python scan). "Google Protection" appears only in instructions to Rashid, never in a voice line, caption or on-screen text.
+- Screen facts checked against the code: reply button "Approve reply" (`inbox.tsx`, `a.$token.tsx`), "Posted. It shows on Google within a few minutes." for the demo (mock), the early-access text for real owners (`concierge-copy.ts`), "You're all caught up." (`inbox.tsx`), demo reviewers and drafts (`supabase/seed/demo.sql`), demo review link HBRDM2 opening kabsi.co, logo `public/kabsi-mark.svg`, colours from `src/styles.css`.
+- `npx prettier --write docs/marketing` run. No app checks needed (docs only).
 
 ### "Approve" copy on the Reviews screens (branch claude/h-approve-copy, 4 Oct 2026, Hussein's request, not a plan task)
 - The reply button reads "Approve reply" since P0.1-02b; the text around it still said "Post". Changed: Reviews header "Nothing goes on Google until you approve it."; draft heading "Your reply, ready to approve"; draft hint "Change anything you like. Kabsi publishes exactly this text after you approve." (Reviews and the email-link page `/a/...`); Home "Nothing goes on Google until you approve it." and "...change it if you like, and approve it."; the partner invite email (`partner` function, HTML and text) "Nothing goes on Google until you approve it."; `knowledge/kabsi-facts.md` two FAQ answers; `public/llms-full.txt` rebuilt (13250 words).
@@ -316,6 +324,9 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Found, not done
 
+- P0.1-V1: the VIDEO cards say green "Published" after approval; the app says "Posted. It shows on Google within a few minutes." (dashboard) and "Posted. Your reply is on Google." (email page). The shot sheets use the app's text. Whether the app should say "Published" is a wording question for P0.1-13a.
+- P0.1-V1: recording uses up demo reviews (each approval posts one). Re-takes after the spares are gone need a demo reset (a database write that waits for Hussein's "apply"), and V07 needs a new mock review on a demo business each take. A reset script would help the video work; not built.
+- P0.1-V1: no designed A6 table card file exists in the repo; Get Reviews prints a plain QR page. The VIDEO plan's G16 expects the designed card (P1-11).
 - For P0.4-08 (Hussein, 4 Oct): the review email subject should be "<Business>: new <n>-star review, reply ready" with a preview line, instead of "New review for <Business> (3 of 5)".
 - After-merge check for the email-buttons change (PR 27): Hussein checked the test email on phone and laptop on 4 Oct: OK.
 - Email buttons: fixed by branch claude/h-email-buttons (see Evidence). The Supabase Auth emails have no button; their yellow box is the one-time code display, left as it is (K-102 says one yellow button; Rashid to confirm the code box is fine).
@@ -335,6 +346,12 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Decisions to confirm
 
 (Build chats add decisions the plan did not cover here, one line each with the reason. The planning chat folds confirmed ones into the plan.)
+
+- P0.1-V1: V05 voice step three says "point them to the contact details on your profile" instead of "give a way to reach you directly", because Kabsi drafts never carry contact details (K-113) and the draft on screen says exactly that.
+- P0.1-V1: until P0.4-01 is live every video ends with "Join early access at kabsi.co" (R-10); the brand kit has three end cards (early access, Profile Check, start free) instead of VIDEO's two.
+- P0.1-V1: V03 is split into a short version recordable now (Leah plus S01 and S05, no profile-change, report or setup-call lines) and the full VIDEO script after its features ship, following R-10's "unless Leah's cutaways use only S01 and S05".
+- P0.1-V1: V06 uses today's Get Reviews QR (Download QR or Print) as the card in G16, because no designed A6 table card file exists yet (P1-11); G16 is made again after P1-11.
+- P0.1-V1: V07 records the email in the phone's own Mail app, not the Gmail app, so no Google screen appears, and the demo login address is cropped.
 
 - P0.1-06: demo businesses stay in the `api` cron (sync, drafts, emails, Google Protection, weekly report) because recordings S05 and S06 need a real new-review email and a Weekly Care Report email; isolation comes from the email guard (demo login only), the per-business mock and the Slack and metrics exclusions, not from skipping the cron. Trials and renewals never apply (no plan), ratings need a place_id (none).
 - P0.1-06: a demo business is active without any plan (`refresh_location_status` returns early), so no trial, payment or plan row exists for it; partner billing cannot count it (check: no partner).
@@ -372,6 +389,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 4 Oct 2026 (Hussein's session): PR 30 (approve copy) and PR 31 (P0.1-V1) merged on Hussein's "merge". Open: P0.1-06 demo email check (needs a mock review, Hussein's "apply"), browser checks, Supabase auth template paste (Rashid). Next: P0.1-V2.
+- 4 Oct 2026 (Hussein's session): P0.1-V1 on branch claude/h-p0-1-v1: brand kit, feature-truth and shot sheets V01 to V08 (docs only). Next: P0.1-V2.
 - 4 Oct 2026 (Hussein's session): P0.1-06 After-merge read-only checks passed (Deploy 11, functions 12:51 UTC, 0 demo ops events); demo email and browser checks still open. Supabase Auth template paste recorded as Rashid's step 9. Copy fix on branch claude/h-approve-copy (Reviews and Home say approve, not tap Post).
 
 - 4 Oct 2026 (Hussein's session): PR 28 (P0.1-06 part A) merged on Hussein's "merge"; demo sign-in checked by Hussein; functions redeployed 12:21 UTC. P0.1-06 part B on branch claude/h-p0-1-06b, PR 29, CI green on 793fde7. Next: part B After-merge checks, the open part A mock-review email check, then P0.1-V1.
