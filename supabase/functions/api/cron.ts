@@ -172,7 +172,7 @@ async function ratingsJob() {
   return { snapshots: await snapshotRatings(await reportLocations()) };
 }
 
-// Job: Listing Shield (D218): detect listing changes and alert the owner.
+// Job: Google Protection (D218): detect listing changes and alert the owner.
 async function shieldJob() {
   return { alerts: await shieldCheck() };
 }
@@ -254,8 +254,8 @@ async function trialsJob() {
     if (!stage) continue;
     const day = formatDay(c.last_day);
     const copy = TRIAL_COPY[stage];
-    const body = `${copy.lead(esc(c.name), day)} After that the business moves to Free: Replies drafts, Profile Care, Listing Shield and the Monday Report stop. Your Review Link and Card keep working.`;
-    const plain = `${copy.lead(c.name, day).replace(/<\/?strong>/g, "")} After that the business moves to Free: Replies drafts, Profile Care, Listing Shield and the Monday Report stop. Your Review Link and Card keep working.`;
+    const body = `${copy.lead(esc(c.name), day)} After that the business moves to Free: reply drafts, Google Protection and the Weekly Care Report stop. Your Review Link and Card keep working.`;
+    const plain = `${copy.lead(c.name, day).replace(/<\/?strong>/g, "")} After that the business moves to Free: reply drafts, Google Protection and the Weekly Care Report stop. Your Review Link and Card keep working.`;
     for (const to of await ownerEmails(c.location_id)) {
       await sendEmail({
         kind: `trial_${stage}`, to, locationId: c.location_id, dedupeKey: `trial_${stage}:${c.plan_id}:${to}`,
@@ -289,7 +289,7 @@ async function renewalsJob() {
     if (!stage) continue;
     const day = formatDay(c.last_day);
     const label = PLAN_LABEL[c.kind] ?? "Kabsi Pro";
-    const plain = `Your ${label} plan for ${c.name} ends ${RENEW_COPY[stage]}, on ${day}. To keep Replies, Profile Care, Listing Shield and the Monday Report going, pay before then. Paying early adds the new period after this one, so you lose no days. Your Review Link and Card keep working either way.`;
+    const plain = `Your ${label} plan for ${c.name} ends ${RENEW_COPY[stage]}, on ${day}. To keep reply drafts, Google Protection and the Weekly Care Report going, pay before then. Paying early adds the new period after this one, so you lose no days. Your Review Link and Card keep working either way.`;
     for (const to of await ownerEmails(c.location_id)) {
       await sendEmail({
         kind: `renew_${stage}`, to, locationId: c.location_id, dedupeKey: `renew_${stage}:${c.plan_id}:${to}`,

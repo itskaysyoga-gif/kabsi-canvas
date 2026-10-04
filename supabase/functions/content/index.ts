@@ -7,7 +7,7 @@
 //   POST { do: "keyword_suggest", location_id }                                       → search phrases for posts
 //   POST { do: "hours_publish", location_id, start_date, end_date, closed, open_time?, close_time?, reason? }
 //   POST { do: "photo_check", photo_id } · { do: "photo_publish", photo_id, category } · { do: "photo_skip", photo_id }
-//   POST { do: "shield_decide", change_id, decision: "revert" | "keep" }                  → Listing Shield (D218)
+//   POST { do: "shield_decide", change_id, decision: "revert" | "keep" }                  → Google Protection (D218)
 import { MODELS } from "../_shared/models.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
 import { admin, captureError, CORS, currentUser, fail, isDefiniteGoogleRejection, json, rateLimit } from "../_shared/kabsi.ts";
@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
 
     switch (b.do) {
       case "post_draft": {
-        if (loc.status !== "active") return fail("not_active", "Profile Care works while a free trial or a Pro plan is active. Choose a plan to continue.", 409);
+        if (loc.status !== "active") return fail("not_active", "Posts, photos and hours work while a free trial or a Pro plan is active. Choose a plan to continue.", 409);
         const input = String(b.owner_input ?? "").trim().slice(0, 1000);
         if (input.length < 5) return fail("bad_input", "Tell us what's new first.");
         if (!(await rateLimit(`post_draft:${loc.id}`, 15, 86400, { failClosed: true }))) return fail("rate_limited", "That's enough drafts for today. Try again tomorrow.", 429);
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
         return json({ ok: true, post: data, grounded, issues });
       }
       case "post_redraft": {
-        if (loc.status !== "active") return fail("not_active", "Profile Care works while a free trial or a Pro plan is active. Choose a plan to continue.", 409);
+        if (loc.status !== "active") return fail("not_active", "Posts, photos and hours work while a free trial or a Pro plan is active. Choose a plan to continue.", 409);
         if (!post || post.state !== "draft") return fail("bad_input", "This post can't be changed.");
         const instruction = String(b.instruction ?? "").trim().slice(0, 300);
         if (!instruction) return fail("bad_input", "Tell Kabsi what to change.");

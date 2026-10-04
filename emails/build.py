@@ -35,9 +35,10 @@ def layout(preheader, title, intro, code_label, after, note):
 <p style="margin:16px 0 0 0;font-size:14px;line-height:1.6;color:#5E5B55;">{note}</p>
 </td></tr>
 <tr><td style="padding:20px 4px 0 4px;font-family:{FONT};font-size:13px;line-height:1.6;color:#5E5B55;">
-Kabsi only posts what you approve.<br>
+Nothing is published until you approve it.<br>
 Questions? Reply to this email or write to <a href="mailto:hello@kabsi.co" style="color:#111111;">hello@kabsi.co</a>.<br>
-Kabsi, Beirut, Lebanon. Kabsi is independent and not affiliated with Google.
+Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.<br>
+Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co
 </td></tr>
 </table>
 </td></tr>

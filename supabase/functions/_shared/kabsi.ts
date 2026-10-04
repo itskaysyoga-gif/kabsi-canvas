@@ -149,7 +149,7 @@ export function emailLayout(o: { preheader: string; title: string; bodyHtml: str
 <td style="vertical-align:middle;padding-left:10px;font-family:${FONT};font-size:22px;font-weight:700;color:#000000;">kabsi</td></tr></table></td></tr>
 <tr><td style="background:#FFFFFF;border-radius:14px;padding:36px 32px;font-family:${FONT};color:#111111;font-size:16px;line-height:1.6;">
 <h1 style="margin:0 0 12px 0;font-size:24px;line-height:1.3;font-weight:700;">${esc(o.title)}</h1>${o.bodyHtml}${button}${note}</td></tr>
-<tr><td style="padding:20px 4px 0 4px;font-family:${FONT};font-size:13px;line-height:1.6;color:#5E5B55;">Kabsi only posts what you approve.<br>Questions? Reply to this email or write to <a href="mailto:hello@kabsi.co" style="color:#111111;">hello@kabsi.co</a>.<br>Kabsi, Beirut, Lebanon. Kabsi is independent and not affiliated with Google.</td></tr>
+<tr><td style="padding:20px 4px 0 4px;font-family:${FONT};font-size:13px;line-height:1.6;color:#5E5B55;">Nothing is published until you approve it.<br>Questions? Reply to this email or write to <a href="mailto:hello@kabsi.co" style="color:#111111;">hello@kabsi.co</a>.<br>Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.<br>Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co</td></tr>
 </table></td></tr></table></body></html>`;
 }
 

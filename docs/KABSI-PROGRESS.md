@@ -41,7 +41,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-01 | Retire the old docs and move Nora's facts file | Sonnet | done (its leftover grep lines cleared by P0.1-01b) | 13 | 4 Oct 2026 |
 | P0.1-01b | Remove leftover references to the retired docs | Sonnet | done | 15 | 4 Oct 2026 |
 | P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | merged (17, 18); live After-merge checks not run, see Evidence | 17, 18 | 4 Oct 2026 |
-| P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | split: part A (app screens) PR open on branch claude/h-p0-1-02b; part B (emails, Edge Function copy, Nora, facts file) todo | PR number below | 4 Oct 2026 |
+| P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | part A merged (PR 19); part B PR open on branch claude/h-p0-1-02b-b | 19, B below | 4 Oct 2026 |
 | P0.1-03 | Move kabsi.co to the new build | Sonnet | todo | | |
 | P0.1-04 | AI and Google-rules fixes in drafting | Opus | todo | | |
 | P0.1-05 | Design tokens and shared components | Sonnet | todo | | |
@@ -141,6 +141,11 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
+After the P0.1-02b part B pull request is merged and the Deploy workflow has run (its last runs on main, 29 Sep, failed; check it first):
+- Edge Function versions (`list_edge_functions`) for `api`, `content`, `assistant` are newer than the merge time.
+- Trigger one mock review on Yawmiyati with `staff_mock_review` through the Supabase connector. The new `emails` row body has the button "Review reply" and the new footer (non-affiliation notice, operator line, "Nothing is published until you approve it."), and no address.
+- Paste the four `emails/auth/*.html` files into the Supabase Auth templates (dashboard step for Rashid or Hussein).
+
 After the P0.1-02b part A pull request is merged and Lovable has deployed `main`:
 - In the signed-in app at 390 px and 1440 px: navigation reads Home, Reviews, Google Profile, Get Reviews, Settings; Home shows "What needs your attention" with no score and no points; the reply button says "Approve reply"; the Google Protection page is titled that and its button reads "Keep my information"; Get Reviews shows "link activity" and the sentence "Activity is not the same as reviews. Google decides which reviews appear."
 
@@ -160,6 +165,12 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Run instead on `main` at e6fe7cb (source only, not the deployed site): `src/lib/site.ts:28` holds the footer notice, `site.ts:17` builds the operator line from `LEGAL_SELLER` and `CONTACT_EMAIL`, `site.ts:20` and `:24` hold the brand line and "Join early access", `pricing.tsx:230` has the "Early access" pill. The retired-name grep over the public routes, `faq.ts`, `verticals.tsx`, `guides.tsx` and `public/llms.txt` (profile score, do now, listing shield, get early access, spring 19) returns nothing.
 - Not checked: the pricing page at 390 and 1440 px.
 
+### P0.1-02b part B (branch claude/h-p0-1-02b-b, 4 Oct 2026)
+- Changed: `_shared/kabsi.ts` (footer: "Nothing is published until you approve it.", the full non-affiliation notice, the operator line; the Beirut address is gone), `_shared/reviews.ts` (email button "Review reply"), `_shared/shield.ts` (no "Put mine back" link; the email says what changed and has the button "Open Google Protection" to the app, no action tokens are created), `api/cron.ts` (trial and renewal emails use reply drafts, Google Protection, Weekly Care Report), `content/index.ts` (message and comment), `_shared/google.ts` (comment), `assistant/index.ts` (prompt and tool text; `get_profile_score` keeps its name and now returns only task title, reason and path, no score or points), `emails/auth/*.html` and `emails/build.py` (same footer; `python3 emails/build.py` output is identical to the committed html), `knowledge/kabsi-facts.md` and regenerated `public/llms-full.txt` (12919 words).
+- Retired-name grep over `src supabase/functions emails public/llms.txt`, excluding the `get_profile_score` tool name, `lib/verticals.tsx` and `profile_tasks` identifiers, returns nothing. The facts file names the old terms once (line 83) so Nora can map an owner's old words to the new names.
+- Checks: `npm run typecheck` exit 0; `npm test` 15 pass; `deno test --allow-env supabase/functions/_shared/` 29 pass; no em dash, en dash or exclamation mark in added copy (the two `!==` hits are code operators). NOT run locally: `bash scripts/deno-check.sh` (deno.land and the npm cache are unreachable from this sandbox), so the Deno type check is left to CI. No browser check (no screens in part B).
+- Not changed: the Supabase Auth email templates are pasted into the Supabase dashboard by hand (see `emails/auth/README.md`); the four files here are the source, the dashboard copies still carry the old footer until someone pastes them.
+
 ### P0.1-02b part A (branch claude/h-p0-1-02b, 4 Oct 2026)
 - Changed (12 files, copy and labels only, no schema, no URL change): `components/app/do-now.tsx`, `lib/profile.ts` (comment), `components/layouts/app-layout.tsx`, `routes/_authenticated/app/{index,inbox,reviews,shield,plan,cards}.tsx`, `routes/a.$token.tsx`, `components/assistant/assistant-widget.tsx` (comment), `components/onboarding/steps.tsx` ("Start free trial" became "Start trial", which P0.1-02a left for this task).
 - Home: Profile Score number and points removed; list titled "What needs your attention"; order unchanged. Navigation: Reviews, Google Profile, Google Protection, Get Reviews. Reply buttons: "Approve reply" (inbox, email-link page, confirm dialog); the demo chip on the signed-in Home reads "Approve". Google Protection screen and email-link page: "Keep my information" replaces "Put mine back"; it still needs a tap. Plan page: retired module names replaced by "reply drafts, Google Protection and the Weekly Care Report". Get Reviews: "link activity" labels and the sentence from the task.
@@ -167,9 +178,6 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Checks: `npm run typecheck` exit 0; `npm test` 3 files, 15 tests pass; `npm run build` completes; eslint and prettier on the 12 changed files clean (prettier also joined one pre-existing multi-line import in `cards.tsx`). No em dash, en dash or exclamation mark in the added lines. Deno check not run: no Edge Function changed in part A.
 - Not checked: any screen in a browser at 390 or 1440 px (no signed-in session in this chat).
 
-## Part B of P0.1-02b still to do
-
-Email copy in `supabase/functions/api/cron.ts` (trial and renewal emails still say Replies drafts, Profile Care, Listing Shield, Monday Report), `_shared/shield.ts` ("Put mine back" link and button), `_shared/reviews.ts` and `api/action.ts` ("Review reply" button, footer), `_shared/kabsi.ts` footer, `assistant/index.ts` (Profile Score in tool text), `emails/auth/*.html` and `emails/build.py`, `knowledge/kabsi-facts.md` then `node scripts/build-kb.mjs`; After-merge: one `staff_mock_review` on Yawmiyati and the resulting `emails` row.
 
 ### P0.1-02a (pull requests 17 and 18, 4 Oct 2026)
 - Checks on both branches: typecheck exit 0; vitest 3 files, 15 tests pass; build completes; eslint on changed files 0 errors; CI on #17 green (App and Edge Functions jobs). CI on #18 runs on open.
@@ -237,6 +245,8 @@ Email copy in `supabase/functions/api/cron.ts` (trial and renewal emails still s
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 4 Oct 2026 (Hussein's session): P0.1-02b part B on branch claude/h-p0-1-02b-b (emails, Edge Function copy, Nora, facts file). Next: P0.1-03 needs Rashid's steps 1 and 2 first.
 
 - 4 Oct 2026 (Hussein's session): PRs 17 and 18 found merged on main; live After-merge checks could not run (sandbox proxy). P0.1-02b split in two; part A (app screens) on branch claude/h-p0-1-02b. Next: part B, then P0.1-03.
 

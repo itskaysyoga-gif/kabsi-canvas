@@ -197,8 +197,8 @@ async function reviewBlock(loc: Loc, r: PendingReview, userId: string | null, wi
   const [post, edit, skip] = await Promise.all([mk("post"), mk("edit"), mk("skip")]);
   return {
     html: head + reviewText + `<p style="margin:0 0 6px 0;font-size:14px;color:#5E5B55;">Drafted reply</p>` + quote(draft.body) +
-      `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:#FFD60A;border-radius:14px;"><a href="${esc(post)}" style="display:inline-block;padding:13px 24px;font-weight:700;color:#000000;text-decoration:none;">Post</a></td><td style="padding-left:18px;">${link(edit, "Edit")}</td><td style="padding-left:18px;">${link(skip, "Skip")}</td></tr></table>`,
-    text: `Draft:\n${draft.body}\n\nPost: ${post}\nEdit: ${edit}\nSkip: ${skip}`,
+      `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:#FFD60A;border-radius:14px;"><a href="${esc(post)}" style="display:inline-block;padding:13px 24px;font-weight:700;color:#000000;text-decoration:none;">Review reply</a></td><td style="padding-left:18px;">${link(edit, "Edit")}</td><td style="padding-left:18px;">${link(skip, "Skip")}</td></tr></table>`,
+    text: `Draft:\n${draft.body}\n\nReview reply: ${post}\nEdit: ${edit}\nSkip: ${skip}`,
   };
 }
 
