@@ -40,8 +40,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 |---|---|---|---|---|---|
 | P0.1-01 | Retire the old docs and move Nora's facts file | Sonnet | done (its leftover grep lines cleared by P0.1-01b) | 13 | 4 Oct 2026 |
 | P0.1-01b | Remove leftover references to the retired docs | Sonnet | done | 15 | 4 Oct 2026 |
-| P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | PR open (two parts) | 17, 18 | 4 Oct 2026 |
-| P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | todo | | |
+| P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | merged (17, 18); live After-merge checks not run, see Evidence | 17, 18 | 4 Oct 2026 |
+| P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | split: part A (app screens) PR open on branch claude/h-p0-1-02b; part B (emails, Edge Function copy, Nora, facts file) todo | PR number below | 4 Oct 2026 |
 | P0.1-03 | Move kabsi.co to the new build | Sonnet | todo | | |
 | P0.1-04 | AI and Google-rules fixes in drafting | Opus | todo | | |
 | P0.1-05 | Design tokens and shared components | Sonnet | todo | | |
@@ -141,6 +141,9 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
+After the P0.1-02b part A pull request is merged and Lovable has deployed `main`:
+- In the signed-in app at 390 px and 1440 px: navigation reads Home, Reviews, Google Profile, Get Reviews, Settings; Home shows "What needs your attention" with no score and no points; the reply button says "Approve reply"; the Google Protection page is titled that and its button reads "Keep my information"; Get Reviews shows "link activity" and the sentence "Activity is not the same as reviews. Google decides which reviews appear."
+
 Checks that need a task's merged code live. The next build chat runs them first (plan section 2.5), records the evidence under Evidence and marks the task done.
 
 After pull requests 17 and 18 are merged and Lovable has deployed `main`:
@@ -151,6 +154,22 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### P0.1-02a After-merge checks (run at the start of the P0.1-02b chat, 4 Oct 2026)
+- Live checks on https://kabsi-app.lovable.app NOT run: the build sandbox's egress proxy refuses that host (CONNECT 403). Hussein or the next chat with web access should run the three After-merge bullets above against the live site.
+- Run instead on `main` at e6fe7cb (source only, not the deployed site): `src/lib/site.ts:28` holds the footer notice, `site.ts:17` builds the operator line from `LEGAL_SELLER` and `CONTACT_EMAIL`, `site.ts:20` and `:24` hold the brand line and "Join early access", `pricing.tsx:230` has the "Early access" pill. The retired-name grep over the public routes, `faq.ts`, `verticals.tsx`, `guides.tsx` and `public/llms.txt` (profile score, do now, listing shield, get early access, spring 19) returns nothing.
+- Not checked: the pricing page at 390 and 1440 px.
+
+### P0.1-02b part A (branch claude/h-p0-1-02b, 4 Oct 2026)
+- Changed (12 files, copy and labels only, no schema, no URL change): `components/app/do-now.tsx`, `lib/profile.ts` (comment), `components/layouts/app-layout.tsx`, `routes/_authenticated/app/{index,inbox,reviews,shield,plan,cards}.tsx`, `routes/a.$token.tsx`, `components/assistant/assistant-widget.tsx` (comment), `components/onboarding/steps.tsx` ("Start free trial" became "Start trial", which P0.1-02a left for this task).
+- Home: Profile Score number and points removed; list titled "What needs your attention"; order unchanged. Navigation: Reviews, Google Profile, Google Protection, Get Reviews. Reply buttons: "Approve reply" (inbox, email-link page, confirm dialog); the demo chip on the signed-in Home reads "Approve". Google Protection screen and email-link page: "Keep my information" replaces "Put mine back"; it still needs a tap. Plan page: retired module names replaced by "reply drafts, Google Protection and the Weekly Care Report". Get Reviews: "link activity" labels and the sentence from the task.
+- `grep -rniE "profile score|do now|listing shield|put mine back|get early access|start free trial|monday report" src` leaves only `lib/verticals.tsx:562` and `:665` ("A Monday report", a 02a file, see Found, not done).
+- Checks: `npm run typecheck` exit 0; `npm test` 3 files, 15 tests pass; `npm run build` completes; eslint and prettier on the 12 changed files clean (prettier also joined one pre-existing multi-line import in `cards.tsx`). No em dash, en dash or exclamation mark in the added lines. Deno check not run: no Edge Function changed in part A.
+- Not checked: any screen in a browser at 390 or 1440 px (no signed-in session in this chat).
+
+## Part B of P0.1-02b still to do
+
+Email copy in `supabase/functions/api/cron.ts` (trial and renewal emails still say Replies drafts, Profile Care, Listing Shield, Monday Report), `_shared/shield.ts` ("Put mine back" link and button), `_shared/reviews.ts` and `api/action.ts` ("Review reply" button, footer), `_shared/kabsi.ts` footer, `assistant/index.ts` (Profile Score in tool text), `emails/auth/*.html` and `emails/build.py`, `knowledge/kabsi-facts.md` then `node scripts/build-kb.mjs`; After-merge: one `staff_mock_review` on Yawmiyati and the resulting `emails` row.
 
 ### P0.1-02a (pull requests 17 and 18, 4 Oct 2026)
 - Checks on both branches: typecheck exit 0; vitest 3 files, 15 tests pass; build completes; eslint on changed files 0 errors; CI on #17 green (App and Edge Functions jobs). CI on #18 runs on open.
@@ -204,7 +223,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Found, not done by P0.1-02a
 
 - `knowledge/kabsi-facts.md` still describes the app with the retired names in many places (sections 2.1 to 2.1c, 6, 9 trade notes and runbook lines, for example "Listing Shield", "Profile Score", "Do now", "weekly draft", "Monday Report", "no quick Post button"). It is Nora's source and follows the app, so it changes with P0.1-02b.
-- `src/components/onboarding/steps.tsx` button "Start free trial" and the app pages named above: P0.1-02b.
+- `src/components/onboarding/steps.tsx` button "Start free trial": done in P0.1-02b part A. The app pages named above: part A done, emails and functions in part B.
+- `src/lib/verticals.tsx:562` and `:665` still have a card titled "A Monday report" (retired name, K-02). Not touched in part A.
 - The facts file says weekly post drafts arrive on set days ("When does the weekly draft arrive?"). The public site no longer says "weekly"; confirm with Rashid whether post cadence is still a feature (P0.1-02b or later).
 
 ## Test data to delete at go-live (P0.7-04)
@@ -217,6 +237,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 4 Oct 2026 (Hussein's session): PRs 17 and 18 found merged on main; live After-merge checks could not run (sandbox proxy). P0.1-02b split in two; part A (app screens) on branch claude/h-p0-1-02b. Next: part B, then P0.1-03.
 
 - 4 Oct 2026: P0.1-02a done as two pull requests, 17 (routes, components, site constants, footer notice) and 18 (FAQ, trade pages, guides, llms.txt, facts). Open for Rashid to merge, 17 first. Next: P0.1-02b.
 - 4 Oct 2026 (planning chat): build chats no longer merge. They open the pull request, get CI green, update PROGRESS on the branch and stop with the PR link and a 3-line summary; Rashid merges on GitHub (plan section 2.5). After-merge checks are run by the next build chat.

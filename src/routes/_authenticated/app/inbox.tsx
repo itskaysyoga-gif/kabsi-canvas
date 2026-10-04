@@ -197,7 +197,7 @@ function Shell({ sub, children }: { sub?: string; children: ReactNode }) {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Replies</p>
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Reviews</p>
       <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">To reply</h1>
       {sub ? <p className="mt-2 text-kb-stone">{sub}</p> : null}
       <p className="mt-3 max-w-xl text-sm leading-6 text-kb-stone">
@@ -519,7 +519,7 @@ function ReviewCard({ review }: { review: InboxReview }) {
               disabled={!!busy || !text.trim() || text.trim().length > MAX}
               onClick={() => (sensitive ? setConfirm(true) : void run("post"))}
             >
-              {busy === "post" ? "Posting…" : "Post reply"}
+              {busy === "post" ? "Approving…" : "Approve reply"}
             </Button>
             {/* Secondary actions: one tidy row of three on phones, inline on larger screens. */}
             <div
@@ -574,7 +574,7 @@ function ReviewCard({ review }: { review: InboxReview }) {
           </p>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep editing</AlertDialogCancel>
-            <AlertDialogAction onClick={() => void run("post")}>Post reply</AlertDialogAction>
+            <AlertDialogAction onClick={() => void run("post")}>Approve reply</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

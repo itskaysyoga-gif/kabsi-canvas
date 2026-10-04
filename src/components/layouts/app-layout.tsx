@@ -46,8 +46,8 @@ type Section = {
 const SECTIONS: Section[] = [
   { label: "Home", short: "Home", to: "/app", icon: Home, paths: ["/app", "/app/report"] },
   {
-    label: "Replies",
-    short: "Replies",
+    label: "Reviews",
+    short: "Reviews",
     to: "/app/inbox",
     icon: MessageSquareText,
     paths: ["/app/inbox", "/app/reviews"],
@@ -57,7 +57,7 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    label: "Profile",
+    label: "Google Profile",
     short: "Profile",
     to: "/app/posts",
     icon: Store,
@@ -66,12 +66,12 @@ const SECTIONS: Section[] = [
       ["Posts", "/app/posts"],
       ["Photos", "/app/photos"],
       ["Hours", "/app/hours"],
-      ["Listing Shield", "/app/shield"],
+      ["Google Protection", "/app/shield"],
     ],
   },
   {
-    label: "Get reviews",
-    short: "Get reviews",
+    label: "Get Reviews",
+    short: "Get Reviews",
     to: "/app/cards",
     icon: CreditCard,
     paths: ["/app/cards"],
@@ -283,7 +283,7 @@ export function AppLayout({
   });
   const current = sectionFor(location.pathname);
   const badgeFor = (sec: Section) =>
-    sec.label === "Replies" && waiting.data ? waiting.data : undefined;
+    sec.label === "Reviews" && waiting.data ? waiting.data : undefined;
   const areaTitle = area === "partner" ? "Partner" : area === "staff" ? "Staff" : "Business";
 
   async function handleSignOut() {
