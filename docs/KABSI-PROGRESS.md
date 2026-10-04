@@ -49,7 +49,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-05 | Design tokens and shared components | Sonnet | merged (25); `/design` not yet looked at as staff | 25 | 4 Oct 2026 |
 | P0.1-06 | Demo workspace with fictional businesses | Opus | merged (28, 29); After-merge: Deploy and ops_events checks passed; mock-review email check and browser checks still open, see Evidence | 28, 29 | 4 Oct 2026 |
 | P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet (run on Opus in Hussein's session) | done (merged 31 on Hussein's "merge"; docs only, no After-merge checks) | 31 | 4 Oct 2026 |
-| P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | todo | | |
+| P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | PR open (docs only) | 32 | 4 Oct 2026 |
 | P0.1-V3 | Setup-call and partner-call booking links | Sonnet | todo | | |
 | P0.1-07 | Database test suite in CI | Opus | todo | | |
 | P0.1-08 | Security hardening of the database API | Opus | todo | | |
@@ -180,6 +180,19 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### After-merge checks run at the start of the P0.1-V2 chat (4 Oct 2026, Hussein's session)
+- `ops_events` since 12:15 UTC with Harbour Lane or Juniper in the title: 0 (read-only SQL). Demo `emails` rows: 0, demo `mock_google_reviews` rows: 24. The demo email check ("only the demo login") still has nothing to read: it needs a new mock review on a demo business, a database write that waits for Hussein's "apply".
+- `list_edge_functions`: every function updated 2026-10-04 13:22 UTC, after the PR 31 merge.
+- NOT run: the browser checks for P0.1-06 part B ("Demo data" tag at 390 and 1440 px, the `/a/...` tag, no PostHog requests) and Rashid's phone recordings; the sandbox cannot reach the live site. The Supabase Auth template paste (step 9) is still open.
+
+### P0.1-V2 (branch claude/h-p0-1-v2, PR 32, 4 Oct 2026, Hussein's session)
+- Thirteen files exist in `docs/marketing/shot-sheets/`: `V09.md` to `V16.md`, `W1.md` to `W5.md`. `docs/marketing/feature-truth.md` has a new table, "Videos 9 to 16 and website videos W1 to W5". No code changed, no database change.
+- Format as V01: status, hooks, scenes, stills with the style line, Higgsfield clips, voice one sentence per line, caption, CTA before and after the gate, screen code with the demo flow, files, claims check. W1 to W5 add the website rules (click to play, poster, VTT, "Kabsi is not affiliated with Google."; W2 loops MP4 and WebM under 1.5 MB at 720 px).
+- Done-when lines: V09, V03 (V1) and W4 carry the "AI presenter" tag and "Presenter is AI-generated"; V12, V13, V14 and W5 carry them too. V13 and W5 say "after the partner workspace (P1-01)". V16 is a guide with an eight-item consent checklist, the three-question email and the rules for a customer's claims.
+- Checks: Python scan of the new files for em dash, en dash and exclamation mark, 0 hits. `grep -niE "automatically|real-time|24/7|rank higher|one tap|in seconds|guarantee|best|easiest|google protection|profile score"` matches only "never say" and "no ..." lines. `npx prettier --write docs/marketing` run. No app checks needed (docs only).
+- Where the sheets differ from the VIDEO plan, on purpose, and why: button text "Keep my information" (not "Keep my hours") and "Posted" (not green "Published"), because the app says so; V10 "before the holidays" (not "every public holiday"), because P0.5-03 has a country table; V15 drops "and the button to do it", because Nora has no action button (checked `assistant-widget.tsx` and the tool list in `assistant/index.ts`); V09 "Reviews come in, and details can change" (not "pile up ... change"), because the rules forbid generalisations about the viewer's business; V14 adds "Google decides whether a reported review is removed" and a source line; V13 and W5 take the commission and resale numbers from the Partners page terms, not from the sheet.
+- Not checked: Google's help page titles (the sandbox cannot reach Google); the real timing of the Kabsi voice on each script (Rashid generates and times it, V09 has a trim rule).
 
 ### P0.1-V1 (branch claude/h-p0-1-v1, PR 31, 4 Oct 2026, Hussein's session)
 - Ten files exist: `docs/marketing/brand-kit.md`, `docs/marketing/feature-truth.md`, `docs/marketing/shot-sheets/V01.md` to `V08.md`. No code changed.
@@ -324,6 +337,10 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Found, not done
 
+- P0.1-V2: Nora has no "suggested action" button (K-111, VIDEO #15), so the V15 line "and the button to do it" is cut until one exists. No task in the plan names it. Planning chat to decide where it belongs (P0.6-06 or P0.4-11).
+- P0.1-V2: VIDEO says the profile alert button is "Keep my hours" and the reply confirmation is green "Published". The app says "Keep my information" and "Posted". Same wording question as the V1 note for P0.1-13a.
+- P0.1-V2: the VIDEO plan's S13 is used by "#17" and W3, but there is no video 17 in the plan. Not touched.
+- P0.1-V2: calendar clash. V10 is slotted for 2 Nov (week 5) but needs P0.5-03, and V14 for 2 Nov needs P0.3-03. Both are late waves. If they have not merged, the slots move or become winner re-cuts (VIDEO Part 2).
 - P0.1-V1: the VIDEO cards say green "Published" after approval; the app says "Posted. It shows on Google within a few minutes." (dashboard) and "Posted. Your reply is on Google." (email page). The shot sheets use the app's text. Whether the app should say "Published" is a wording question for P0.1-13a.
 - P0.1-V1: recording uses up demo reviews (each approval posts one). Re-takes after the spares are gone need a demo reset (a database write that waits for Hussein's "apply"), and V07 needs a new mock review on a demo business each take. A reset script would help the video work; not built.
 - P0.1-V1: no designed A6 table card file exists in the repo; Get Reviews prints a plain QR page. The VIDEO plan's G16 expects the designed card (P1-11).
@@ -347,6 +364,11 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 (Build chats add decisions the plan did not cover here, one line each with the reason. The planning chat folds confirmed ones into the plan.)
 
+- P0.1-V2: V13 and W5 need a fourth end card, "End card, partner" (yellow button "Apply as a partner"), because the brand kit has only three. Add it to `brand-kit.md` if Rashid agrees.
+- P0.1-V2: W4 keeps the "AI presenter" tag on screen for the whole video, not only the first 3 s (a trust video; the cost is nothing).
+- P0.1-V2: W1 and V09 each get a "version now" built from S01, S05 and today's QR page, as V03 did (R-10), so something can be recorded before the later screens exist. W3 is split the same way (manual route first, one-tap after P1-18).
+- P0.1-V2: V12 hook C and the on-screen "Replies drafted. Profile watched. Weekly report." are held until P0.2-04, P0.5-02 and P0.5-04 are live, even though the plan lists V12 as an early ad.
+- P0.1-V2: V16 gives a consent checklist, not legal wording. Rashid or a lawyer approves the release text before the first use.
 - P0.1-V1: V05 voice step three says "point them to the contact details on your profile" instead of "give a way to reach you directly", because Kabsi drafts never carry contact details (K-113) and the draft on screen says exactly that.
 - P0.1-V1: until P0.4-01 is live every video ends with "Join early access at kabsi.co" (R-10); the brand kit has three end cards (early access, Profile Check, start free) instead of VIDEO's two.
 - P0.1-V1: V03 is split into a short version recordable now (Leah plus S01 and S05, no profile-change, report or setup-call lines) and the full VIDEO script after its features ship, following R-10's "unless Leah's cutaways use only S01 and S05".
@@ -389,6 +411,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 4 Oct 2026 (Hussein's session): P0.1-V2 on branch claude/h-p0-1-v2, PR 32: shot sheets V09 to V16 and W1 to W5 (docs only). After-merge read-only checks re-run (0 demo ops events, functions 13:22 UTC); demo email and browser checks still open. Next: P0.1-V3 needs Rashid's hours first; otherwise P0.1-07.
 - 4 Oct 2026 (Hussein's session): PR 30 (approve copy) and PR 31 (P0.1-V1) merged on Hussein's "merge". Open: P0.1-06 demo email check (needs a mock review, Hussein's "apply"), browser checks, Supabase auth template paste (Rashid). Next: P0.1-V2.
 - 4 Oct 2026 (Hussein's session): P0.1-V1 on branch claude/h-p0-1-v1: brand kit, feature-truth and shot sheets V01 to V08 (docs only). Next: P0.1-V2.
 - 4 Oct 2026 (Hussein's session): P0.1-06 After-merge read-only checks passed (Deploy 11, functions 12:51 UTC, 0 demo ops events); demo email and browser checks still open. Supabase Auth template paste recorded as Rashid's step 9. Copy fix on branch claude/h-approve-copy (Reviews and Home say approve, not tap Post).
