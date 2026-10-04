@@ -47,7 +47,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | merged (24); After-merge checks partly run, see Evidence | 24 | 4 Oct 2026 |
 | P0.1-05 | Design tokens and shared components | Sonnet | merged (25); `/design` not yet looked at as staff | 25 | 4 Oct 2026 |
 | P0.1-06 | Demo workspace with fictional businesses | Opus | part A merged (28, squash 197c64e); part B (Demo data tag, PostHog off) PR open; After-merge mock-review email check still open | 28, 29 | 4 Oct 2026 |
-| P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet (run on Opus in Hussein's session) | PR open | | 4 Oct 2026 |
+| P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet (run on Opus in Hussein's session) | PR open | 31 | 4 Oct 2026 |
 | P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | todo | | |
 | P0.1-V3 | Setup-call and partner-call booking links | Sonnet | todo | | |
 | P0.1-07 | Database test suite in CI | Opus | todo | | |
@@ -180,7 +180,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 (One block per finished task: the Done-when lines with their proof.)
 
-### P0.1-V1 (branch claude/h-p0-1-v1, 4 Oct 2026, Hussein's session)
+### P0.1-V1 (branch claude/h-p0-1-v1, PR 31, 4 Oct 2026, Hussein's session)
 - Ten files exist: `docs/marketing/brand-kit.md`, `docs/marketing/feature-truth.md`, `docs/marketing/shot-sheets/V01.md` to `V08.md`. No code changed.
 - Each shot sheet has: status, hooks A, B, C, scene list with times, Gemini prompts with the style line, Higgsfield model and motion prompts, voice lines one sentence per line with numbers as words, on-screen text, post caption, CTA before and after the launch gate, the product screen codes with the exact demo flow (business, reviewer, taps), file names, and a claims check.
 - "Record after task X" (R-10 and plan section 16): V02 after P0.2-04; V03 full version after P0.3-07, P0.2-04, P0.5-04 and P0.1-V3 (a short version with S01 and S05 only can be recorded now); V08 after P0.5-04, P0.3-07 and P0.2-04. V01, V04, V05, V06 and V07 can be recorded now; V01, V05 and V07 carry the "Early access" tag because real owners get team posting until P0.7-04.
