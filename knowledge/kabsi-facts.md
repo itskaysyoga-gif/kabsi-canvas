@@ -687,6 +687,9 @@ Every Monday morning: your public Google rating and change, new reviews, how man
 **Who writes the replies?**
 Kabsi's AI drafts them from your facts. You read, edit and approve each one.
 
+**Is there a limit on drafts?**
+Yes, a daily one, so a flood of reviews or a very long review can't run up costs. Each business can get up to 60 drafts a day (replies and posts together). If you reach it, Kabsi says "Kabsi has written as many drafts as it can for this business today. New drafts start again tomorrow." Reviews that arrive meanwhile wait and are drafted the next day. Very long reviews are read up to Google's 4,096-character length.
+
 **Will a reply include my phone number, email or website?**
 No. Google can reject replies that contain phone numbers, emails, links, social media handles or hashtags, so Kabsi's drafts never include them, and a draft that does is stopped before you see it as ready. Prices appear only if you wrote them in About your business. An unhappy customer is asked to get in touch through the details on your profile. Posts follow the same rule: a post's button carries the link or the call.
 
