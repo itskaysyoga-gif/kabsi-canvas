@@ -16,7 +16,11 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   and every readable table has a victim row. A new table fails until it gets a fixture row.
 - `rls_functions.sql`: every SECURITY DEFINER function in `public` that authenticated can execute is called by a
   signed-in stranger against the victim and must refuse. The list is checked against `pg_proc`, so a new function
-  fails until it has a test. `google_mode()` executable by anon is a TODO until P0.1-08.
+  fails until it has a test, and every function on the list must still be callable (nothing revoked by mistake).
+  Since P0.1-08 it also checks that anon can run no SECURITY DEFINER function at all, that the helpers only triggers
+  use are closed to authenticated, and that schema `private` (cron-only functions) is out of reach of anon and
+  authenticated. A function the browser does not call belongs in `private`, or in public with no execute for anon
+  and authenticated when an Edge Function calls it through the service role.
 
 When you add a table or a browser-callable function, add its fixture row or its test in the same pull request.
 

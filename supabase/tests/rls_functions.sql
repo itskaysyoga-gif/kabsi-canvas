@@ -13,17 +13,17 @@ insert into tested values
   ('activate_card(text,uuid,text)'), ('add_photo(uuid,text)'), ('billing_invoice_status(uuid)'),
   ('billing_prepare_invoice(uuid,text,text,boolean)'), ('cancel_location_deletion(uuid)'), ('choose_plan(uuid,text)'),
   ('claim_partner_membership()'), ('create_review_link(uuid,text)'), ('generate_card_codes(integer,uuid)'),
-  ('google_mode()'), ('handle_review_offline(uuid)'), ('is_demo_location(uuid)'), ('is_demo_user(uuid)'),
+  ('google_mode()'), ('handle_review_offline(uuid)'),
   ('is_member(uuid)'), ('is_partner_member(uuid)'), ('is_staff()'), ('owner_submit_claim(uuid,text,text,text)'),
   ('partner_create_invite(uuid,text,text)'), ('partner_invoice_calc(uuid,date)'), ('partner_locations(uuid)'),
-  ('partner_submit_claim(uuid,text,text)'), ('plan_summary(uuid)'), ('profile_score(uuid)'),
+  ('partner_submit_claim(uuid,text,text)'), ('plan_summary(uuid)'),
   ('profile_task_action(uuid,text)'), ('profile_tasks_list(uuid)'), ('rename_card(text,text)'),
   ('request_location_deletion(uuid)'), ('save_consent(uuid,text)'), ('set_auto_posts(uuid,boolean)'),
   ('set_card_active(text,boolean)'), ('set_onboarding_step(uuid,text)'), ('skip_review(uuid)'),
   ('staff_chat_stats(integer)'), ('staff_chats(text,text,text,text,integer,integer)'),
   ('staff_concierge_add_review(uuid,integer,text,text,date,boolean)'), ('staff_concierge_cancel_task(uuid,text,text)'),
   ('staff_concierge_claim_task(uuid)'), ('staff_concierge_convert(uuid)'),
-  ('staff_concierge_edit_review(uuid,integer,text,text)'), ('staff_concierge_mark_posted(uuid)'),
+  ('staff_concierge_mark_posted(uuid)'),
   ('staff_concierge_queue()'), ('staff_concierge_task_done(uuid,text)'), ('staff_contacts(integer)'),
   ('staff_create_card_order(uuid,uuid,integer,text)'), ('staff_create_partner(text,text,text,text,text)'),
   ('staff_decide_claim(uuid,boolean,text)'), ('staff_grant_trial(uuid,integer)'), ('staff_job_health()'),
@@ -41,15 +41,47 @@ select is(
   '{}'::text[],
   'every SECURITY DEFINER function authenticated can run has a non-member test in rls_functions.sql');
 
+-- P0.1-08: the list above is exactly what authenticated can run, nothing on it was revoked by mistake.
+select is(
+  (select coalesce(array_agg(sig order by 1), '{}') from tested
+   where not has_function_privilege('authenticated', ('public.' || sig)::regprocedure, 'execute')),
+  '{}'::text[],
+  'every function on the browser list is still callable by authenticated');
+
 select is(
   (select coalesce(array_agg(p.oid::regprocedure::text order by 1), '{}') from pg_proc p
    where p.pronamespace = 'public'::regnamespace and p.prosecdef
-     and has_function_privilege('anon', p.oid, 'execute') and p.proname <> 'google_mode'),
+     and has_function_privilege('anon', p.oid, 'execute')),
   '{}'::text[],
-  'anon can run no SECURITY DEFINER function in public (google_mode aside, see the TODO below)');
+  'anon can run no SECURITY DEFINER function in public');
 
-select todo('P0.1-08 revokes execute on google_mode() from anon', 1);
 select ok(not has_function_privilege('anon', 'public.google_mode()', 'execute'), 'anon cannot run google_mode()');
+
+-- P0.1-08: helpers that only triggers and other SECURITY DEFINER functions call are closed to the browser.
+select ok(not has_function_privilege('authenticated', 'public.is_demo_location(uuid)', 'execute'), 'authenticated cannot run is_demo_location()');
+select ok(not has_function_privilege('authenticated', 'public.is_demo_user(uuid)', 'execute'), 'authenticated cannot run is_demo_user()');
+select ok(not has_function_privilege('authenticated', 'public.profile_score(uuid)', 'execute'), 'authenticated cannot run profile_score()');
+select ok(not has_function_privilege('authenticated', 'public.staff_concierge_edit_review(uuid,integer,text,text)', 'execute'), 'authenticated cannot run staff_concierge_edit_review()');
+
+-- P0.1-08: the private schema is out of reach of the API roles, and holds the cron-only functions.
+select ok(not has_schema_privilege('anon', 'private', 'usage'), 'anon has no usage on schema private');
+select ok(not has_schema_privilege('authenticated', 'private', 'usage'), 'authenticated has no usage on schema private');
+select is(
+  (select coalesce(array_agg(p.proname::text order by 1), '{}') from pg_proc p
+   where p.pronamespace = 'private'::regnamespace
+     and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute'))),
+  '{}'::text[],
+  'no function in private is executable by anon or authenticated');
+select is(
+  (select array_agg(p.proname::text order by 1) from pg_proc p where p.pronamespace = 'private'::regnamespace
+     and p.proname in ('concierge_daily_tasks', 'concierge_overdue_alerts', 'end_expired_plans', 'ops_watchdog', 'purge_old_chats', 'run_retention')),
+  array['concierge_daily_tasks', 'concierge_overdue_alerts', 'end_expired_plans', 'ops_watchdog', 'purge_old_chats', 'run_retention'],
+  'the six cron-only functions live in private');
+select is(
+  (select count(*)::int from pg_proc p where p.pronamespace = 'public'::regnamespace
+     and p.proname in ('concierge_daily_tasks', 'concierge_overdue_alerts', 'end_expired_plans', 'ops_watchdog', 'purge_old_chats', 'run_retention')),
+  0,
+  'no copy of them is left in public');
 
 create temp table victim_before as
   select (select md5(l::text) from public.locations l where l.id = '00000000-0000-4000-8000-0000000000c1') as loc,
@@ -70,7 +102,6 @@ select throws_ok($$ select public.create_review_link('00000000-0000-4000-8000-00
 select throws_ok($$ select public.handle_review_offline('00000000-0000-4000-8000-0000000000e1') $$, '42501', null, 'handle_review_offline refuses a non-member');
 select throws_ok($$ select public.owner_submit_claim('00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 'trc20', 'strangertx1') $$, '42501', null, 'owner_submit_claim refuses a non-member');
 select throws_ok($$ select public.plan_summary('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'plan_summary refuses a non-member');
-select throws_ok($$ select public.profile_score('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'profile_score refuses a non-member');
 select throws_ok($$ select public.profile_task_action('00000000-0000-4000-8000-0000000000f4', 'later') $$, '42501', null, 'profile_task_action refuses a non-member');
 select throws_ok($$ select public.profile_tasks_list('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'profile_tasks_list refuses a non-member');
 select throws_ok($$ select public.rename_card('VCTM22', 'x') $$, '42501', null, 'rename_card refuses a non-member');
@@ -95,8 +126,6 @@ select is(public.claim_partner_membership(), null, 'claim_partner_membership giv
 select is(public.is_member('00000000-0000-4000-8000-0000000000c1'), false, 'is_member is false for a non-member');
 select is(public.is_partner_member('00000000-0000-4000-8000-0000000000d1'), false, 'is_partner_member is false for a non-member');
 select is(public.is_staff(), false, 'is_staff is false for a non-member');
-select is(public.is_demo_location('00000000-0000-4000-8000-0000000000c1'), false, 'is_demo_location says nothing more than false for a real business');
-select is(public.is_demo_user('00000000-0000-4000-8000-0000000000a1'), false, 'is_demo_user says nothing more than false for a real user');
 select is(public.google_mode(), 'mock', 'google_mode returns only the mode, no business data');
 
 -- Staff RPCs: forbidden for anyone without a staff row.
@@ -107,7 +136,6 @@ select throws_ok($$ select public.staff_concierge_add_review('00000000-0000-4000
 select throws_ok($$ select public.staff_concierge_cancel_task('00000000-0000-4000-8000-0000000000f2', 'redo', 'x') $$, '42501', null, 'staff_concierge_cancel_task refuses a non-staff user');
 select throws_ok($$ select public.staff_concierge_claim_task('00000000-0000-4000-8000-0000000000f2') $$, '42501', null, 'staff_concierge_claim_task refuses a non-staff user');
 select throws_ok($$ select public.staff_concierge_convert('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'staff_concierge_convert refuses a non-staff user');
-select throws_ok($$ select public.staff_concierge_edit_review('00000000-0000-4000-8000-0000000000e1', 5, 'n', 'c') $$, '42501', null, 'staff_concierge_edit_review refuses a non-staff user');
 select throws_ok($$ select public.staff_concierge_mark_posted('00000000-0000-4000-8000-0000000000f2') $$, '42501', null, 'staff_concierge_mark_posted refuses a non-staff user');
 select throws_ok($$ select public.staff_concierge_queue() $$, '42501', null, 'staff_concierge_queue refuses a non-staff user');
 select throws_ok($$ select public.staff_concierge_task_done('00000000-0000-4000-8000-0000000000f2', 'x') $$, '42501', null, 'staff_concierge_task_done refuses a non-staff user');

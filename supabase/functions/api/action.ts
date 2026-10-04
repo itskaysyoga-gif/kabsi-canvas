@@ -15,6 +15,12 @@ async function loadToken(t: string | null | undefined) {
   return (data as Token | null) ?? null;
 }
 
+// P0.1-08: anon can no longer run google_mode(), so the signed-out confirm page gets the Test mode flag from here.
+async function mode(): Promise<"mock" | "live"> {
+  const { data } = await admin().rpc("google_mode");
+  return data === "live" ? "live" : "mock";
+}
+
 async function view(tok: Token) {
   const db = admin();
   if (tok.target_type === "listing_change") {
@@ -46,9 +52,9 @@ export async function action(req: Request): Promise<Response> {
     if (req.method === "GET") {
       const tok = await loadToken(new URL(req.url).searchParams.get("t"));
       if (!tok) return json({ status: "invalid" }, 404);
-      if (tok.used_at) return json({ status: "used", ...(await view(tok)) });
-      if (Date.parse(tok.expires_at) < Date.now()) return json({ status: "expired" });
-      return json({ status: "ok", ...(await view(tok)) });
+      if (tok.used_at) return json({ status: "used", mode: await mode(), ...(await view(tok)) });
+      if (Date.parse(tok.expires_at) < Date.now()) return json({ status: "expired", mode: await mode() });
+      return json({ status: "ok", mode: await mode(), ...(await view(tok)) });
     }
     if (req.method !== "POST") return fail("method_not_allowed", "Use GET or POST.", 405);
 
