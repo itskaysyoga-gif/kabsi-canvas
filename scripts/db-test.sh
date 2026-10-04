@@ -25,9 +25,9 @@ db_url="$(supabase status -o env | sed -n 's/^DB_URL="\(.*\)"$/\1/p')"
     cat "$f"
     printf '\n;\n'
   done
-  printf 'delete from cron.job;\ndelete from net.http_request_queue;\n'
+  printf 'select count(cron.unschedule(jobid)) as unscheduled from cron.job;\ndelete from net.http_request_queue;\n'
 } | psql "$db_url" -v ON_ERROR_STOP=1 --single-transaction -q -X
-echo "Applied $(ls supabase/migrations/*.sql | wc -l) migrations; cron jobs left: $(psql "$db_url" -tAX -c 'select count(*) from cron.job')"
+echo "Applied $(ls supabase/migrations/*.sql | wc -l) migrations; cron jobs left: $(psql "$db_url" -tAX -c 'select count(*) from cron.job'), queued requests: $(psql "$db_url" -tAX -c 'select count(*) from net.http_request_queue')"
 
 supabase test db
 echo "Database suite finished in $(( $(date +%s) - started )) s"
