@@ -8,7 +8,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 and P0.1-01b done (pull requests 13 and 15). Next task: P0.1-02a.
+- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a has two pull requests open (17, then 18). Next task: P0.1-02b.
 
 ## Rashid's decisions and inputs (plan section 5)
 
@@ -40,7 +40,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 |---|---|---|---|---|---|
 | P0.1-01 | Retire the old docs and move Nora's facts file | Sonnet | done (its leftover grep lines cleared by P0.1-01b) | 13 | 4 Oct 2026 |
 | P0.1-01b | Remove leftover references to the retired docs | Sonnet | done | 15 | 4 Oct 2026 |
-| P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | todo | | |
+| P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | PR open (two parts) | 17, 18 | 4 Oct 2026 |
 | P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | todo | | |
 | P0.1-03 | Move kabsi.co to the new build | Sonnet | todo | | |
 | P0.1-04 | AI and Google-rules fixes in drafting | Opus | todo | | |
@@ -143,11 +143,20 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 Checks that need a task's merged code live. The next build chat runs them first (plan section 2.5), records the evidence under Evidence and marks the task done.
 
-(None open.)
+After pull requests 17 and 18 are merged and Lovable has deployed `main`:
+- On https://kabsi-app.lovable.app, `/`, `/pricing` and `/faq` each show the footer notice "Google and Google Business Profile are trademarks of Google LLC..." and the operator line "Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co".
+- The hero reads "Your reviews and listing. Taken care of." with the button "Join early access", and none of Profile Score, Do now, Listing Shield, "Get early access" or "Spring 19" appears on the public pages.
+- Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### P0.1-02a (pull requests 17 and 18, 4 Oct 2026)
+- Checks on both branches: typecheck exit 0; vitest 3 files, 15 tests pass; build completes; eslint on changed files 0 errors; CI on #17 green (App and Edge Functions jobs). CI on #18 runs on open.
+- Rendered `/`, `/pricing`, `/faq` with `vite dev`: each has the footer notice, the operator line and "Join early access"; no "Spring 19", "Get early access", Profile Score, Do now or Listing Shield. `/faq` has the Gemini question.
+- Done-when grep over `src public/llms.txt` leaves only the brand line plus app files that belong to P0.1-02b: `components/app/do-now.tsx`, `routes/_authenticated/app/{index,plan,shield}.tsx`, `components/assistant/assistant-widget.tsx`, `components/layouts/app-layout.tsx`, `lib/profile.ts`, `routes/a.$token.tsx` ("Put mine back"). The line "Start free trial" remains in `components/onboarding/steps.tsx` (app, 02b).
+- Not checked: the pages in a real browser at 390 and 1440 px (no browser pass in this chat).
 
 ### P0.1-01b (pull request 15, branch claude/p0-1-01b, commit 26f8930)
 
@@ -173,8 +182,8 @@ Checks that need a task's merged code live. The next build chat runs them first 
 
 ## Found, not done
 
-- `scripts/build-kb.mjs` still writes the retired names (Profile Score, Do now, Listing Shield) into the `llms-full.txt` header. Fixed by P0.1-02a.
-- `scripts/build-kb.mjs` line 2 still cites the old spec number D261 and line 7 D244 (not in P0.1-01b's touch list). Fold into P0.1-02a, which edits that script.
+- `scripts/build-kb.mjs` header retired names: fixed by P0.1-02a (pull request 18).
+- `scripts/build-kb.mjs` D261 and D244 citations: fixed by P0.1-02a (pull request 18).
 - Old-spec D-numbers remain in other code comments outside P0.1-01b's touch list (for example `grep -rn "\bD[0-9]\{3\}\b" src supabase scripts`). They do not match the Done-when grep. Not touched.
 - Abou Hamze Auto Center: Kabsi Clients is Manager and hello@kabsi.co accepted the invitation by hand (4 Oct). Kabsi's database does not know this business yet; it is connected in Kabsi during P0.7-05. (Planning chat, 4 Oct.)
 
@@ -187,6 +196,18 @@ Checks that need a task's merged code live. The next build chat runs them first 
 
 (Build chats add decisions the plan did not cover here, one line each with the reason. The planning chat folds confirmed ones into the plan.)
 
+- P0.1-02a: every trade page headline (`verticals.tsx` h1) is now the brand line, because the plan gave no per-trade headline and the old ones used the retired slogans.
+- P0.1-02a: the Gemini question replaces the older "How is this different from Google's own AI replies?" question, so the FAQ does not carry two answers on the same topic.
+- P0.1-02a: four of the six Pro lines on `/pricing` carry an "Early access" pill (Know when Google changes your details, Photos and updates prepared for you, Holiday hours reminders, Weekly Care Report) because they are not live yet.
+- P0.1-02a: `TRIAL_LINE` and the "Start free. Pay when it is worth it." headline were left as they are; the plan's list did not change them.
+
+## Found, not done by P0.1-02a
+
+- `knowledge/kabsi-facts.md` still describes the app with the retired names in many places (sections 2.1 to 2.1c, 6, 9 trade notes and runbook lines, for example "Listing Shield", "Profile Score", "Do now", "weekly draft", "Monday Report", "no quick Post button"). It is Nora's source and follows the app, so it changes with P0.1-02b.
+- `src/components/onboarding/steps.tsx` button "Start free trial" and the app pages named above: P0.1-02b.
+- The facts file says weekly post drafts arrive on set days ("When does the weekly draft arrive?"). The public site no longer says "weekly"; confirm with Rashid whether post cadence is still a feature (P0.1-02b or later).
+- `build-kb.mjs` fails prettier (long header line) and was not reformatted, to keep the diff small.
+
 ## Test data to delete at go-live (P0.7-04)
 
 - QA account qa-owner@test.local and "QA Bakery"; "QA Partner" (qa-partner) with Rashid's account as member; the "Test by rashid" partner invite and acceptance.
@@ -198,6 +219,7 @@ Checks that need a task's merged code live. The next build chat runs them first 
 
 ## Log
 
+- 4 Oct 2026: P0.1-02a done as two pull requests, 17 (routes, components, site constants, footer notice) and 18 (FAQ, trade pages, guides, llms.txt, facts). Open for Rashid to merge, 17 first. Next: P0.1-02b.
 - 4 Oct 2026 (planning chat): build chats no longer merge. They open the pull request, get CI green, update PROGRESS on the branch and stop with the PR link and a 3-line summary; Rashid merges on GitHub (plan section 2.5). After-merge checks are run by the next build chat.
 
 - 4 Oct 2026: P0.1-01b done on branch claude/p0-1-01b, pull request 15. Leftover references to the retired docs removed, `llms-full.txt` regenerated, `docs/WORK-QUEUE.md` deleted, P0.1-01 marked done. Next: P0.1-02a.
