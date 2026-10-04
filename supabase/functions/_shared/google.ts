@@ -1,6 +1,7 @@
 import { admin } from "./kabsi.ts";
 import { matchInvitation, type PendingBusiness } from "./invitations.ts";
 import { isConciergeLocationId } from "./concierge.ts";
+import { googleModeFor } from "./demo.ts";
 
 // Google Business Profile access as hello@kabsi.co (one central Manager account, SPEC D203).
 // GOOGLE_MODE=mock (default until the GBP API grant) simulates Google so every flow is testable.
@@ -14,6 +15,8 @@ function assertNotConcierge(locationId: string | null | undefined) {
 }
 
 export const googleMode = () => (Deno.env.get("GOOGLE_MODE") === "live" ? "live" : "mock");
+// Per business: a demo business ("locations/demo-...") is always mock (R-17).
+const modeFor = (locationId: string) => googleModeFor(locationId, googleMode());
 
 let cached: { token: string; exp: number } | null = null;
 async function accessToken() {
@@ -108,7 +111,7 @@ const V4 = "https://mybusiness.googleapis.com/v4";
 
 export async function listReviews(accountId: string, locationId: string, max = 50): Promise<GoogleReview[]> {
   assertNotConcierge(locationId);
-  if (googleMode() === "mock") {
+  if (modeFor(locationId) === "mock") {
     const { data, error } = await admin().from("mock_google_reviews").select("*")
       .eq("google_location_id", locationId).order("create_time", { ascending: false }).limit(max);
     if (error) throw error;
@@ -136,7 +139,7 @@ export async function listReviews(accountId: string, locationId: string, max = 5
 // Writes the exact approved text, then reads it back. Only ever called by publish() after approval (D202).
 export async function putReply(accountId: string, locationId: string, reviewId: string, text: string) {
   assertNotConcierge(locationId);
-  if (googleMode() === "mock") {
+  if (modeFor(locationId) === "mock") {
     const { error } = await admin().from("mock_google_reviews")
       .update({ reply_comment: text, reply_update_time: new Date().toISOString() }).eq("review_id", reviewId);
     if (error) throw error;
@@ -155,7 +158,7 @@ export type PostInput = { summary: string; languageCode: string; ctaType?: strin
 
 export async function createLocalPost(accountId: string, locationId: string, p: PostInput) {
   assertNotConcierge(locationId);
-  if (googleMode() === "mock") return { state: "live" as const, response: { mock: true } };
+  if (modeFor(locationId) === "mock") return { state: "live" as const, response: { mock: true } };
   const body: Record<string, unknown> = { languageCode: p.languageCode, summary: p.summary, topicType: "STANDARD" };
   if (p.ctaType) body.callToAction = p.ctaType === "CALL" ? { actionType: "CALL" } : { actionType: p.ctaType, url: p.ctaUrl };
   const created = await g(`${V4}/${accountId}/${locationId}/localPosts`, { method: "POST", body: JSON.stringify(body) });
@@ -170,7 +173,7 @@ const hm = (t: string) => { const [hours, minutes] = t.split(":").map(Number); r
 // Adds one special-hours period, keeping the periods already on the profile (PATCH replaces the whole list).
 export async function addSpecialHours(locationId: string, s: SpecialDay) {
   assertNotConcierge(locationId);
-  if (googleMode() === "mock") return { state: "live" as const, response: { mock: true } };
+  if (modeFor(locationId) === "mock") return { state: "live" as const, response: { mock: true } };
   const current = await g(`${BI}/${locationId}?readMask=specialHours`);
   const periods = [...(current.specialHours?.specialHourPeriods ?? [])];
   periods.push(s.closed
@@ -192,7 +195,7 @@ const t2 = (t?: { hours?: number; minutes?: number }) => `${String(t?.hours ?? 0
 type MockSeed = { name: string; address: string | null; phone?: string; hours?: string };
 export async function getListing(locationId: string, seed: MockSeed): Promise<Listing> {
   assertNotConcierge(locationId);
-  if (googleMode() === "mock") {
+  if (modeFor(locationId) === "mock") {
     const db = admin();
     let { data } = await db.from("mock_listings").select("fields").eq("google_location_id", locationId).maybeSingle();
     if (!data) {
@@ -219,7 +222,7 @@ export async function getListing(locationId: string, seed: MockSeed): Promise<Li
 const MASK: Record<ShieldField, string> = { title: "title", phone: "phoneNumbers", address: "storefrontAddress", website: "websiteUri", hours: "regularHours", categories: "categories" };
 export async function patchListing(locationId: string, field: ShieldField, raw: unknown) {
   assertNotConcierge(locationId);
-  if (googleMode() === "mock") {
+  if (modeFor(locationId) === "mock") {
     const db = admin();
     const { data } = await db.from("mock_listings").select("fields").eq("google_location_id", locationId).single();
     const fields = { ...(data!.fields as Record<string, unknown>), [field]: raw };
@@ -234,7 +237,7 @@ export async function patchListing(locationId: string, field: ShieldField, raw: 
 // ─── Photos (Phase 6b). sourceUrl is a short-lived signed Storage URL. Only after owner approval (D202).
 export async function createMedia(accountId: string, locationId: string, sourceUrl: string, category: string) {
   assertNotConcierge(locationId);
-  if (googleMode() === "mock") return { state: "live" as const, response: { mock: true } };
+  if (modeFor(locationId) === "mock") return { state: "live" as const, response: { mock: true } };
   const created = await g(`${V4}/${accountId}/${locationId}/media`, {
     method: "POST", body: JSON.stringify({ mediaFormat: "PHOTO", locationAssociation: { category }, sourceUrl }),
   });
@@ -245,7 +248,7 @@ export async function createMedia(accountId: string, locationId: string, sourceU
 // Search terms people used to find the profile (Business Profile Performance API). Live only: mock has none.
 export async function searchKeywords(locationId: string): Promise<{ keyword: string; count: number }[]> {
   assertNotConcierge(locationId);
-  if (googleMode() === "mock") return [];
+  if (modeFor(locationId) === "mock") return [];
   const end = new Date(), start = new Date(end.getFullYear(), end.getMonth() - 3, 1);
   const m = (d: Date, k: string) => `monthlyRange.${k}.year=${d.getFullYear()}&monthlyRange.${k}.month=${d.getMonth() + 1}`;
   const data = await g(`https://businessprofileperformance.googleapis.com/v1/${locationId}/searchkeywords/impressions/monthly?${m(start, "startMonth")}&${m(end, "endMonth")}&pageSize=50`);
