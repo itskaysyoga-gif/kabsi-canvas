@@ -15,6 +15,8 @@ Check this block first. It holds every fact likely to change, verified against t
 | Plans | **Free**, **Pro** and **Partner**. |
 | Free | Review link, QR code, printable table card and a message to share. Works on any plan, and keeps working when a trial or plan ends. |
 | Pro price | **$19 a month** or **$190 a year** (two months free). Same price in every country, in US dollars. |
+| Pro features, as the pricing page lists them | A reply ready for every new review; Know when Google changes your details; Photos and updates prepared for you; Holiday hours reminders; Weekly Care Report; A person to talk to. The four that are not live yet carry an **Early access** label on the site: change alerts, photos and updates, holiday hours reminders and the Weekly Care Report. |
+| Calls to action | Primary button **Join early access**, secondary **See it work** (opens the demo on the homepage). "Start free" replaces them only after the launch gate (plan R-02). |
 | Extra locations | **$15 a month** or **$150 a year** for each extra Google profile. |
 | Lebanon bundle | **$120 a year**: Pro for 12 months, one NFC card and in-person setup. **Lebanon only**, sold by the team in Lebanon (cash, Whish, OMT or USDT). |
 | NFC cards | Shipped **only in Lebanon**. A card on its own is $20; extra cards are $10 each or $40 for five. |
@@ -76,7 +78,9 @@ How to hand off: "I'll pass this to the Kabsi team. Please email hello@kabsi.co 
 
 Kabsi keeps a local business's Google Business Profile complete and current by following Google's own published guidance, and the owner approves every change. The owner invites the Kabsi group ID 5481006796 as a Manager on their Google Business Profile. Kabsi then shows a **Profile Score** and a short **Do now** list of improvements, each with a ready draft where Kabsi can write one. Every new Google review arrives by email with a reply already drafted in the reviewer's language, and the owner taps Post, Edit or Skip. Kabsi also drafts Google posts (one a week if the owner wants), checks photos before they go up, sets special hours for holidays, watches the listing for changes (Listing Shield) and sends a factual report every Monday. Nothing is ever written to Google without the owner's explicit approval. Every business also gets a free review link and a QR code that open its Google review page. In Lebanon, Kabsi also supplies an optional NFC card that does the same with one tap. Replies are one of five modules: Kabsi is not only a reply writer.
 
-Main line: "Your Google Business Profile, taken care of."
+Main line: "Your reviews and listing. Taken care of." The line under it: "Kabsi looks after your business on Google: a reply ready for every new review, your hours and details kept right, and fresh posts. You just approve." Google's name never appears in Kabsi's own slogan, name or handles. The older line "Your Google Business Profile, taken care of." is retired.
+
+Names on the public website (K-02): Reviews, Google Profile, Google Protection, Get Reviews and Weekly Care Report. The website no longer mentions a Profile Score, a Do now list, "Put mine back" or a weekly post. The app still shows the older names until task P0.1-02b changes them, so an owner who says "Replies", "Profile Care", "Listing Shield", "Review Link and Card" or "Monday Report" means Reviews, Google Profile, Google Protection, Get Reviews and Weekly Care Report.
 
 ### 2.1a The five modules
 
@@ -266,7 +270,7 @@ If a partner signed you up, your price and payment are agreed with that partner.
 
 ## 5. Review links and cards
 
-A review link, QR code or NFC card opens the business's own Google review page. No rating screen, no filtering, no reward: every customer sees the same page.
+A review link, QR code or NFC card opens the business's own Google review page. No rating screen, no filtering, no reward: every customer sees the same page. The public wording is: "Ask every customer the same way, as they visit. Never offer a reward."
 
 ### 5.1 Free for everyone: review links and QR codes
 
@@ -470,7 +474,7 @@ Kabsi keeps Google content for at most 30 days, as Google's policy requires (det
 
 ### 9.1 Who is responsible
 
-Kabsi is an independent business operated from Dubai, United Arab Emirates, with a team in Lebanon. Kabsi is not affiliated with, endorsed or sponsored by Google. Contact: hello@kabsi.co.
+Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co. The site gives a city only, never a street address. The footer of every public page says: "Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google."
 
 ### 9.2 What Kabsi collects
 
@@ -624,7 +628,7 @@ Yes. The team offers a free 15-minute setup call. Email hello@kabsi.co and we'll
 You invite the Kabsi Clients group (ID 5481006796) as a Manager, not as an owner, and you can remove it at any time from People and access. Kabsi only accepts an invitation that matches a business you have set up and only for the Manager role. Kabsi's Google account uses Google's Advanced Protection. Nothing is written to Google without your approval, and each approval is recorded with the exact text.
 
 **Where is Kabsi based?**
-Kabsi is an independent business operated by Rashid Abou Hamzy from Dubai, United Arab Emirates, with a team in Lebanon, serving businesses in any country.
+Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. The team is in Lebanon, and Kabsi serves businesses in any country.
 
 **Who runs Kabsi?**
 Kabsi was founded by Rasheed, who runs it with a small team. You can reach the team, and Rasheed, at hello@kabsi.co.

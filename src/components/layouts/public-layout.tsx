@@ -13,6 +13,7 @@ import {
 import { KabsiLogo } from "@/components/shared/kabsi-logo";
 import { useSectionRise } from "@/components/marketing/motion";
 import { VERTICALS } from "@/lib/verticals";
+import { BRAND_LINE, CTA_PRIMARY, GOOGLE_NOTICE, OPERATOR_LINE } from "@/lib/site";
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { useAuth } from "@/components/auth/auth-provider";
 import {
@@ -106,7 +107,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                   Log in
                 </Link>
                 <Button asChild size="compact">
-                  <Link to="/start">Get early access</Link>
+                  <Link to="/start">{CTA_PRIMARY}</Link>
                 </Button>
               </>
             )}
@@ -169,7 +170,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                     </SheetClose>
                     <SheetClose asChild>
                       <Button asChild className="mt-5 w-full">
-                        <Link to="/start">Get early access</Link>
+                        <Link to="/start">{CTA_PRIMARY}</Link>
                       </Button>
                     </SheetClose>
                   </>
@@ -190,9 +191,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           <div className="grid gap-8 border-b border-kb-white/15 pb-10 md:grid-cols-[1.3fr_1fr_1fr_1fr_1fr]">
             <div>
               <KabsiLogo dark />
-              <p className="mt-4 max-w-xs text-kb-stone-on-dark">
-                Your Google Business Profile, taken care of.
-              </p>
+              <p className="mt-4 max-w-xs text-kb-stone-on-dark">{BRAND_LINE}</p>
             </div>
             <FooterCol title="Product">
               <Link to="/how-it-works">How it works</Link>
@@ -223,13 +222,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <a href="mailto:hello@kabsi.co">hello@kabsi.co</a>
             </FooterCol>
           </div>
-          <p className="pt-6 text-sm leading-6 text-kb-stone-on-dark">
-            Kabsi is operated by Rashid Abou Hamzy, Spring 19, Villa 9, Dubai, United Arab Emirates.
-            hello@kabsi.co
-          </p>
-          <p className="pt-2 text-sm leading-6 text-kb-stone-on-dark">
-            © Kabsi. Kabsi is independent and not affiliated with Google.
-          </p>
+          <p className="pt-6 text-sm leading-6 text-kb-stone-on-dark">{OPERATOR_LINE}</p>
+          <p className="pt-2 text-sm leading-6 text-kb-stone-on-dark">{GOOGLE_NOTICE}</p>
+          <p className="pt-2 text-sm leading-6 text-kb-stone-on-dark">© Kabsi</p>
         </div>
       </footer>
       <AssistantWidget surface="site" />

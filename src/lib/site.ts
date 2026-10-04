@@ -11,6 +11,22 @@ export const KABSI_GROUP_ID = "5481006796";
 export const KABSI_GROUP_NAME = "Kabsi Clients";
 export const CONTACT_PHONE = "+961 3 956 917";
 
+/** The legal seller (plan section 5, D1; R-20). City only, never a street address. Change it here and nowhere else. */
+export const LEGAL_SELLER = "Hussein Slim, Dubai, United Arab Emirates";
+/** The operator line for the footer, terms and emails (R-20). */
+export const OPERATOR_LINE = `Kabsi is operated by ${LEGAL_SELLER}. Contact: ${CONTACT_EMAIL}`;
+
+/** The brand line and the line under it (K-112, K-110). Google's name never appears in the slogan. */
+export const BRAND_LINE = "Your reviews and listing. Taken care of.";
+export const BRAND_EXPLAINER =
+  "Kabsi looks after your business on Google: a reply ready for every new review, your hours and details kept right, and fresh posts. You just approve.";
+/** The calls to action, worded once (R-02). */
+export const CTA_PRIMARY = "Join early access";
+export const CTA_SECONDARY = "See it work";
+/** The full non-affiliation notice, shown in every public footer (K-112). */
+export const GOOGLE_NOTICE =
+  "Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.";
+
 export const PRICES = {
   proMonthly: 19,
   proYearly: 190,
@@ -74,7 +90,7 @@ export function pageHead(o: {
     { property: "og:image:height", content: "630" },
     {
       property: "og:image:alt",
-      content: "Kabsi: Your Google profile, looked after. You approve every change.",
+      content: `Kabsi: ${BRAND_LINE} You approve every change.`,
     },
     { property: "og:locale", content: "en_US" },
     { name: "twitter:card", content: "summary_large_image" },
@@ -83,7 +99,7 @@ export function pageHead(o: {
     { name: "twitter:image", content: og },
     {
       name: "twitter:image:alt",
-      content: "Kabsi: Your Google profile, looked after. You approve every change.",
+      content: `Kabsi: ${BRAND_LINE} You approve every change.`,
     },
   ];
   if (o.noindex) meta.push({ name: "robots", content: "noindex" });
@@ -105,12 +121,11 @@ export const ORG_LD = {
   name: "Kabsi",
   url: SITE_URL,
   description:
-    "Kabsi is a Google Business Profile assistant for local businesses. Every new Google review arrives by email with a reply drafted in the reviewer's language, and nothing is posted until the owner approves it.",
+    "Kabsi looks after a local business on Google: a reply ready for every new review, hours and details kept right, and fresh posts. Nothing is published until the owner approves it.",
   logo: `${SITE_URL}/kabsi-mark.svg`,
   email: CONTACT_EMAIL,
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Spring 19, Villa 9",
     addressLocality: "Dubai",
     addressCountry: "AE",
   },
@@ -129,7 +144,7 @@ export const PRODUCT_LD = {
   "@type": "Product",
   name: "Kabsi Pro",
   description:
-    "A Google Business Profile assistant. Every new Google review arrives by email with a reply drafted in the reviewer's language; nothing is posted until the owner approves it.",
+    "Kabsi looks after a local business on Google: a reply ready for every new review, hours and details kept right, and fresh posts. Nothing is published until the owner approves it.",
   brand: { "@type": "Brand", name: "Kabsi" },
   offers: [
     {

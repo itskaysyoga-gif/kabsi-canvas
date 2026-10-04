@@ -58,7 +58,7 @@ function Page() {
             </Li>
             <Li>
               Every customer sees the same Google review page. There is no rating screen and no
-              filtering, and you never offer a reward for a review.
+              filtering. Ask every customer the same way, as they visit. Never offer a reward.
             </Li>
             <Li>The card keeps working if your plan ends.</Li>
             <Li>

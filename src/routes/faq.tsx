@@ -19,7 +19,7 @@ export const Route = createFileRoute("/faq")({
     pageHead({
       title: "Kabsi FAQ | Google review replies, access, cards and pricing",
       description:
-        "Straight answers about Kabsi: approvals, languages, Google access, Listing Shield, the card, payment and refunds.",
+        "Straight answers about Kabsi: approvals, languages, Google access, Google Protection, Get Reviews, payment and refunds.",
       path: "/faq",
       crumbs: [{ name: "FAQ", path: "/faq" }],
       jsonLd: [faqJsonLd()],

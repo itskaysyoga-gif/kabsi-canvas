@@ -53,7 +53,7 @@ function Connector() {
   );
 }
 
-/** How it works: review arrives, a draft is written, you tap Post. */
+/** How it works: review arrives, a draft is written, you approve it. */
 export function FlowVisual() {
   return (
     <div aria-hidden="true" className="w-full max-w-[400px] text-kb-ink">
@@ -84,7 +84,7 @@ export function FlowVisual() {
       <Connector />
       <div className="flex items-center gap-2 rounded-large bg-kb-white p-3 shadow-[0_18px_40px_rgba(0,0,0,.55)]">
         <span className="kb-ripple flex h-11 flex-1 items-center justify-center rounded-pill bg-kb-yellow text-sm font-bold text-kb-black">
-          Post
+          Approve
         </span>
         <span className="flex h-11 items-center rounded-pill border-2 border-kb-black px-5 text-sm font-bold">
           Edit
@@ -92,7 +92,7 @@ export function FlowVisual() {
         <span className="px-3 text-sm font-bold">Skip</span>
       </div>
       <p className="mt-3 text-center text-xs text-kb-stone-on-dark">
-        Nothing is posted until you tap Post.
+        Nothing is published until you approve it.
       </p>
     </div>
   );
@@ -158,7 +158,7 @@ export function AnswerVisual() {
       <div className="mr-10 flex items-start gap-3 rounded-large rounded-tl-md bg-kb-white/8 p-4 ring-1 ring-kb-white/15">
         <IconBadge icon={<MessageSquare />} tone="dark" className="size-9 [&_svg]:size-4" />
         <p className="pt-1.5 text-[15px] font-bold leading-6 text-kb-white">
-          Does Kabsi post replies by itself?
+          Does Kabsi publish replies by itself?
         </p>
       </div>
       <div className="ml-10 rounded-large rounded-tr-md bg-kb-white p-4 text-kb-ink shadow-[0_18px_40px_rgba(0,0,0,.55)]">
@@ -167,8 +167,8 @@ export function AnswerVisual() {
           <p className="text-sm font-bold">Kabsi</p>
         </div>
         <p className="mt-2 text-[15px] leading-6 text-kb-stone">
-          No. Nothing goes on your Google profile until you tap <b className="text-kb-ink">Post</b>,
-          and you see the exact text first.
+          No. Nothing is published until you <b className="text-kb-ink">approve it</b>, and you see
+          the exact text first.
         </p>
       </div>
       <div className="mr-10 flex items-center gap-3 rounded-large rounded-tl-md bg-kb-white/8 p-4 ring-1 ring-kb-white/15">

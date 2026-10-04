@@ -19,7 +19,7 @@ import { VERTICALS, VERTICAL_REDIRECTS, verticalBySlug } from "@/lib/verticals";
 import { faqJsonLd } from "@/lib/faq";
 import { useIsLebanon } from "@/lib/region";
 import { photoSrc } from "@/lib/site-photos";
-import { PRICES, SITE_URL, pageHead } from "@/lib/site";
+import { CTA_PRIMARY, PRICES, SITE_URL, pageHead } from "@/lib/site";
 
 // Industry pages (D258, D259). Content lives in src/lib/verticals.tsx; every example is fictional and
 // labelled. Each page has its own headings, example and FAQ so no two pages repeat each other.
@@ -97,7 +97,7 @@ function Page() {
         <div className="mt-9 grid gap-3 sm:flex">
           <Button asChild className="w-full sm:w-auto">
             <Link to="/start">
-              Get early access <ArrowRight />
+              {CTA_PRIMARY} <ArrowRight />
             </Link>
           </Button>
           <Button

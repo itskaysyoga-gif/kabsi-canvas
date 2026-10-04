@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { GUIDES, guideBySlug } from "@/lib/guides";
 import { photoSrc } from "@/lib/site-photos";
 import { SiteImg } from "@/components/marketing/site-img";
-import { ORG_LD, SITE_URL, pageHead } from "@/lib/site";
+import { BRAND_EXPLAINER, BRAND_LINE, CTA_PRIMARY, ORG_LD, SITE_URL, pageHead } from "@/lib/site";
 
 // One guide (D253, D256). Content lives in src/lib/guides.tsx, building blocks in guide-kit.tsx.
 export const Route = createFileRoute("/guides/$slug")({
@@ -114,16 +114,11 @@ function Page() {
             <div className="overflow-hidden rounded-large bg-kb-carbon text-kb-white">
               <div className="p-6">
                 <KabsiMark className="size-9" />
-                <p className="mt-4 text-xl font-bold leading-snug">
-                  Every Google review answered, in the customer's language.
-                </p>
-                <p className="mt-2 text-sm leading-6 text-kb-stone-on-dark">
-                  Kabsi emails you each new review with a reply ready. Nothing is posted until you
-                  tap Post.
-                </p>
+                <p className="mt-4 text-xl font-bold leading-snug">{BRAND_LINE}</p>
+                <p className="mt-2 text-sm leading-6 text-kb-stone-on-dark">{BRAND_EXPLAINER}</p>
                 <Button asChild className="mt-5 w-full">
                   <Link to="/start">
-                    Get early access <ArrowRight />
+                    {CTA_PRIMARY} <ArrowRight />
                   </Link>
                 </Button>
               </div>
@@ -173,10 +168,7 @@ function Page() {
         </ul>
       </Section>
 
-      <CtaBand
-        title="Your Google profile, looked after. You approve every change."
-        sub="Kabsi emails you each new review with a reply drafted in your customer's language. Nothing is posted until you approve it."
-      />
+      <CtaBand />
     </PublicLayout>
   );
 }
