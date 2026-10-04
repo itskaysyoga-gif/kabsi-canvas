@@ -3,8 +3,8 @@
 -- invented; "Larkhaven" is not a real town and +1 (555) 010-01xx numbers are reserved for fiction.
 --
 -- Before running: app_settings.demo_login_email must hold the demo login (set separately, so no personal address
--- is written in the repository), and that account must exist, created with the Supabase Auth admin API (email
--- confirmed, no password). The demo login signs in with an email code like any owner.
+-- is written in the repository), and that account must exist, created in Supabase Auth (dashboard or admin API,
+-- email confirmed). The demo login signs in with an email code like any owner.
 --
 -- Safe to run twice: fixed ids and "on conflict do nothing". It never updates or deletes anything; to reset the
 -- demo after a recording, delete the two demo businesses first (only with the owner's explicit go).
@@ -22,11 +22,11 @@ begin
     raise exception 'Set app_settings.demo_login_email before running the demo seed';
   end if;
 
-  -- The demo login is created first with the Supabase Auth admin API (email confirmed, no password); the seed only
-  -- links it. It never writes to the auth schema.
+  -- The demo login is created first in Supabase Auth (email confirmed); the seed only links it. It never writes to the
+  -- auth schema.
   select id into v_user from auth.users where lower(email) = v_email;
   if v_user is null then
-    raise exception 'Create the demo login with the Auth admin API before running the demo seed';
+    raise exception 'Create the demo login in Supabase Auth before running the demo seed';
   end if;
 
   -- Two fictional businesses, active, always on mock Google ('locations/demo-' ids), no plan and no partner.
@@ -181,12 +181,12 @@ begin
       insert into public.reviews (id, location_id, google_review_id, reviewer_name, star_rating, comment, language, urgency,
         urgency_reasons, state, existing_reply, review_created_at, is_backlog, notified_at, reply_state, fetched_at, source)
       values (v_rid, r.loc, v_gid, r.who, r.stars, r.comment, r.lang, r.urgency,
-        case when r.urgency = 'urgent' then array['health or safety'] end, r.state, r.reply, v_at, false, now(),
+        case when r.urgency = 'urgent' then array['health or safety'] else '{}'::text[] end, r.state, r.reply, v_at, false, now(),
         case when r.state = 'posted' then 'live' end, now(), 'google')
       on conflict (id) do nothing;
       if r.draft is not null then
         insert into public.reply_drafts (review_id, version, body, source, safety_ok, safety_notes, model)
-        values (v_rid, 1, r.draft, 'ai', true, '{}', 'demo-seed')
+        values (v_rid, 1, r.draft, 'ai', true, '[]'::jsonb, 'demo-seed')
         on conflict (review_id, version) do nothing;
       end if;
     end;
