@@ -139,6 +139,12 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P1-19 | Speed and caching | Sonnet | todo | | |
 | P1-20 | Pricing page rebuild | Sonnet | todo | | |
 
+## After merge
+
+Checks that need a task's merged code live. The next build chat runs them first (plan section 2.5), records the evidence under Evidence and marks the task done.
+
+(None open.)
+
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
@@ -191,6 +197,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 4 Oct 2026 (planning chat): build chats no longer merge. They open the pull request, get CI green, update PROGRESS on the branch and stop with the PR link and a 3-line summary; Rashid merges on GitHub (plan section 2.5). After-merge checks are run by the next build chat.
 
 - 4 Oct 2026: P0.1-01b done on branch claude/p0-1-01b, pull request 15. Leftover references to the retired docs removed, `llms-full.txt` regenerated, `docs/WORK-QUEUE.md` deleted, P0.1-01 marked done. Next: P0.1-02a.
 

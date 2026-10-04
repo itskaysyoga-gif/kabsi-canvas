@@ -332,13 +332,13 @@ If an old implementation conflicts with the latest approved decisions, stop and 
 
 - Every schema change is a new timestamped file in `supabase/migrations/`. Never edit an existing migration.
 - Migrations are additive first (expand, then contract in a later task), so code on `main` keeps working at every step.
-- Apply the migration with the Supabase connector (`apply_migration`, project `ynjdqjlmdwjgbfezevxy`) before merging the code that needs it, then run `get_advisors` (security) and fix anything new.
-- Pushing to `main` deploys every Edge Function and the Worker (`.github/workflows/deploy.yml`). Merging is deploying.
+- Apply the migration with the Supabase connector (`apply_migration`, project `ynjdqjlmdwjgbfezevxy`) before opening the pull request, then run `get_advisors` (security) and fix anything new. Because migrations are additive, `main` keeps working while the pull request waits for Rashid. A contract step (dropping something) is applied only after Rashid has merged the code that stopped using it; the task section says so.
+- Pushing to `main` deploys every Edge Function and the Worker (`.github/workflows/deploy.yml`). Rashid's merge is the deploy.
 - `supabase/config.toml` holds `verify_jwt` for every function. A new function gets its line in the same pull request (D295).
 - Google calls only through `supabase/functions/_shared/google/` once task P0.1-11 lands (before that, `_shared/google.ts`).
 - Browser code never writes tables directly. Reads go through RLS, writes through membership-checked RPCs or Edge Functions (D206, D226).
 
-### 2.4 Checks before merging
+### 2.4 Checks before opening the pull request
 
 Run what applies and paste the result in the pull request:
 
@@ -348,20 +348,28 @@ Run what applies and paste the result in the pull request:
 - For screens: check 390 px and 1440 px. If no browser is available in the session, say so in PROGRESS; never claim a visual check you did not do.
 - If a check cannot run in your environment, say so. Never claim it passed.
 
-### 2.5 Git and merging
+### 2.5 Git and the pull request (Rashid merges)
 
 - Branch `claude/<task-id>` (for example `claude/p0-1-03`). One pull request per task, at most about 10 changed files of code; if you need more, split the task in PROGRESS and do the first half.
 - Never force-push, rebase, amend or squash pushed commits (Lovable syncs `main`).
-- Merge the pull request yourself when CI is green and every "Done when" check is proven. Rashid does not want to be asked to merge or deploy.
-- Exception: tasks marked "Ask Rashid before" in their section need his yes in the chat before the step named.
+- Never merge. The build chat:
+  1. opens the pull request;
+  2. makes sure CI is green (fixes real failures, never suppresses them);
+  3. updates `docs/KABSI-PROGRESS.md` on the same branch (task status "PR open", the evidence so far, and the "After merge" checks still to run);
+  4. stops, and gives Rashid the pull request link and a 3-line summary: what changed, how it was checked, what to look at or do after merging.
+- Rashid merges every pull request himself on GitHub.
+- "Done when" checks that need the merged code live (deployed function versions, the live site, a live email) are listed in PROGRESS under "After merge" for that task. The next build chat runs them first, records the evidence, and marks the task done; if one fails, it stops and reports before starting its own task.
+- Tasks marked "Ask Rashid before" in their section need his yes in the chat before the step named.
 
 ### 2.6 Proof
 
-A build chat saying "done" is not proof. For every "Done when" line, PROGRESS records the evidence: a SQL result, an HTTP response, a test name and its output, a function version number, a file path and line, or a screenshot path. If something could not be verified, the task stays "in review" with the reason.
+A build chat saying "done" is not proof. For every "Done when" line, PROGRESS records the evidence: a SQL result, an HTTP response, a test name and its output, a function version number, a file path and line, or a screenshot path. If something could not be verified, the task stays "PR open" or "in review" with the reason. A task is "done" only after Rashid has merged it and its After-merge checks have passed.
 
-### 2.7 End of the chat
+### 2.7 Start and end of the chat
 
-1. Update `docs/KABSI-PROGRESS.md`: the task row (status, date, PR number), the evidence, anything found but not done, and the next task.
+Start of the chat, before anything else: if PROGRESS lists After-merge checks for a merged task, run them, record the evidence and mark that task done (section 2.5).
+
+1. Update `docs/KABSI-PROGRESS.md` on the task branch, before opening or finishing the pull request: the task row (status "PR open", date, PR number), the evidence, the After-merge checks, anything found but not done, and the next task.
 2. If you made a decision the plan did not cover, add it to PROGRESS under "Decisions to confirm" with one line of reason. Do not edit this plan; the planning chat folds confirmed decisions in.
 3. If the change alters behaviour, price or wording, confirm `knowledge/kabsi-facts.md` is updated.
 
@@ -373,7 +381,7 @@ Each task names its model. Opus is used for anything touching security and acces
 
 Every task below has a ready prompt. They all start with the same opening, shown once here and written out in full in each prompt:
 
-> You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task <ID>, then docs/KABSI-PROGRESS.md. Do only task <ID>. Follow section 2 for checks, merging, proof and the PROGRESS update.
+> You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task <ID>, then docs/KABSI-PROGRESS.md. Do only task <ID>. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 
 ## 3. Sources and precedence
 
@@ -622,7 +630,7 @@ Done when (wave): kabsi.co serves the new build with K-112 wording; no file in t
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-01, then docs/KABSI-PROGRESS.md. Do only task P0.1-01. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-01, then docs/KABSI-PROGRESS.md. Do only task P0.1-01. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Delete the retired docs listed in the task, move docs/KNOWLEDGE-BASE.md to knowledge/kabsi-facts.md with git mv and point scripts/build-kb.mjs at it. Update AGENTS.md. Then update the Lovable project knowledge with set_project_knowledge: keep every existing rule, replace the copy rules with section 2.2 of the plan, and add "use only the design tokens". Do not change any other file.
 ```
 
@@ -637,7 +645,7 @@ Delete the retired docs listed in the task, move docs/KNOWLEDGE-BASE.md to knowl
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-01b, then docs/KABSI-PROGRESS.md. Do only task P0.1-01b. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-01b, then docs/KABSI-PROGRESS.md. Do only task P0.1-01b. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Comment and doc changes only. Replace each old-spec reference as described, regenerate public/llms-full.txt with node scripts/build-kb.mjs, delete docs/WORK-QUEUE.md, run the grep in Done when and paste its output in PROGRESS. Also mark P0.1-01 done in PROGRESS (its leftover grep lines are this task).
 ```
 
@@ -665,7 +673,7 @@ Comment and doc changes only. Replace each old-spec reference as described, rege
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-02a, then docs/KABSI-PROGRESS.md. Do only task P0.1-02a. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-02a, then docs/KABSI-PROGRESS.md. Do only task P0.1-02a. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 This is a copy task on the public site only. Make exactly the changes listed under "What changes", using the wording given there word for word. Do not redesign layouts. Keep the existing demo and photos. Update knowledge/kabsi-facts.md where a fact or wording changed, then rebuild llms-full.txt with node scripts/build-kb.mjs.
 ```
 
@@ -685,12 +693,12 @@ This is a copy task on the public site only. Make exactly the changes listed und
 - Done when:
   - The grep from P0.1-02a, run on `src supabase/functions emails`, returns nothing.
   - A mock review email (staff_mock_review on Yawmiyati) arrives with the button "Review reply" and the new footer (check the `emails` row body).
-  - typecheck, lint, tests, build and `bash scripts/deno-check.sh` pass; functions deploy on merge (check versions with list_edge_functions).
+  - typecheck, lint, tests, build and `bash scripts/deno-check.sh` pass. After merge: functions deployed (versions from list_edge_functions).
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-02b, then docs/KABSI-PROGRESS.md. Do only task P0.1-02b. Follow section 2 for checks, merging, proof and the PROGRESS update.
-Copy and label changes in the signed-in app, the email templates and Nora's tool text, exactly as listed. No schema change. Keep URLs. After merging, trigger one mock review on Yawmiyati with staff_mock_review through the Supabase connector and paste the resulting emails row as proof.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-02b, then docs/KABSI-PROGRESS.md. Do only task P0.1-02b. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
+Copy and label changes in the signed-in app, the email templates and Nora's tool text, exactly as listed. No schema change. Keep URLs. List as After-merge checks in PROGRESS: trigger one mock review on Yawmiyati with staff_mock_review through the Supabase connector and paste the resulting emails row.
 ```
 
 ### P0.1-03 Move kabsi.co to the new build
@@ -712,7 +720,7 @@ Copy and label changes in the signed-in app, the email templates and Nora's tool
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-03, then docs/KABSI-PROGRESS.md. Do only task P0.1-03. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-03, then docs/KABSI-PROGRESS.md. Do only task P0.1-03. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 First record the current DNS for kabsi.co (dig A, AAAA, MX, TXT) in PROGRESS. Then give Rashid steps 1 and 2 from section 5 in plain words and wait for his "done". Then change every place that names kabsi-app.lovable.app to https://kabsi.co, add the canonical query-stripping and the noindex list, update APP_URL and app_settings.app_url, and run every Done-when check with curl and dig.
 ```
 
@@ -735,8 +743,8 @@ First record the current DNS for kabsi.co (dig A, AAAA, MX, TXT) in PROGRESS. Th
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-04, then docs/KABSI-PROGRESS.md. Do only task P0.1-04. Follow section 2 for checks, merging, proof and the PROGRESS update.
-Read K-14, K-100 and K-113 in docs/source/KABSI-AUDIT.md first. Write the Deno tests first, see them fail, then change the code. Apply the ai_usage migration with the Supabase connector before merging. Keep the existing injection fence and safety check; add, do not loosen.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-04, then docs/KABSI-PROGRESS.md. Do only task P0.1-04. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
+Read K-14, K-100 and K-113 in docs/source/KABSI-AUDIT.md first. Write the Deno tests first, see them fail, then change the code. Apply the ai_usage migration with the Supabase connector before opening the pull request. Keep the existing injection fence and safety check; add, do not loosen.
 ```
 
 ### P0.1-05 Design tokens and shared components
@@ -752,7 +760,7 @@ Read K-14, K-100 and K-113 in docs/source/KABSI-AUDIT.md first. Write the Deno t
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-05, then docs/KABSI-PROGRESS.md. Do only task P0.1-05. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-05, then docs/KABSI-PROGRESS.md. Do only task P0.1-05. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-108 in docs/source/KABSI-AUDIT.md and the "Visual system" section of docs/source/KABSI-DESIGN.md. Consolidate the existing --kb-* tokens into one block; do not change existing colour values except adding amber. Build the components once; do not migrate existing screens in this task (later tasks use them).
 ```
 
@@ -770,7 +778,7 @@ Read K-108 in docs/source/KABSI-AUDIT.md and the "Visual system" section of docs
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-06, then docs/KABSI-PROGRESS.md. Do only task P0.1-06. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-06, then docs/KABSI-PROGRESS.md. Do only task P0.1-06. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Ask Rashid one question first: may the demo login be demo@kabsi.co (he creates the Zoho alias) or should it be a @test.local address. Then add is_demo, the exclusions, the Demo data tag and the seed. Every name, review and number in the seed is invented and international (US-style). Prove isolation with SQL.
 ```
 
@@ -785,7 +793,7 @@ Ask Rashid one question first: may the demo login be demo@kabsi.co (he creates t
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-V1, then docs/KABSI-PROGRESS.md. Do only task P0.1-V1. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-V1, then docs/KABSI-PROGRESS.md. Do only task P0.1-V1. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read docs/source/KABSI-VIDEO.md Parts 2, 4, 5 and the rules section in full. Write the brand kit text, feature-truth.md and shot sheets V01 to V08 as described. No code changes.
 ```
 
@@ -799,7 +807,7 @@ Read docs/source/KABSI-VIDEO.md Parts 2, 4, 5 and the rules section in full. Wri
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-V2, then docs/KABSI-PROGRESS.md. Do only task P0.1-V2. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-V2, then docs/KABSI-PROGRESS.md. Do only task P0.1-V2. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Use the same format as docs/marketing/shot-sheets/V01.md. Read docs/source/KABSI-VIDEO.md Parts 2 and 3 and the rules section. No code changes.
 ```
 
@@ -813,7 +821,7 @@ Use the same format as docs/marketing/shot-sheets/V01.md. Read docs/source/KABSI
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-V3, then docs/KABSI-PROGRESS.md. Do only task P0.1-V3. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-V3, then docs/KABSI-PROGRESS.md. Do only task P0.1-V3. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Ask Rashid one question: which hours (Beirut time) he takes calls, and which days. Then create the Calendly event type through the Calendly connector, and add the page and links listed. The booking page stays on Calendly's default look (free plan).
 ```
 
@@ -828,7 +836,7 @@ Ask Rashid one question: which hours (Beirut time) he takes calls, and which day
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-07, then docs/KABSI-PROGRESS.md. Do only task P0.1-07. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-07, then docs/KABSI-PROGRESS.md. Do only task P0.1-07. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Build the local-stack database job and the pgTAP suite described. Generate the per-table and per-function tests from the catalog so new tables and functions are covered by default. Prove the suite catches a bad policy with a throwaway branch, then delete that branch.
 ```
 
@@ -842,7 +850,7 @@ Build the local-stack database job and the pgTAP suite described. Generate the p
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-08, then docs/KABSI-PROGRESS.md. Do only task P0.1-08. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-08, then docs/KABSI-PROGRESS.md. Do only task P0.1-08. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 List every SECURITY DEFINER function with its callers (grep src and supabase/functions, and cron.job) before moving anything. Move only functions with no browser caller. Update cron commands in the same migration. If leaked-password protection cannot be set through the tools you have, give Rashid the one dashboard step and record it.
 ```
 
@@ -856,7 +864,7 @@ List every SECURITY DEFINER function with its callers (grep src and supabase/fun
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-09, then docs/KABSI-PROGRESS.md. Do only task P0.1-09. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-09, then docs/KABSI-PROGRESS.md. Do only task P0.1-09. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-16, K-33 and K-48 in docs/source/KABSI-AUDIT.md. Expand only: add tables, columns and backfill; keep old columns (partner_id, plans) working. Write the RLS tests for each new table in the same pull request. Regenerate src/types/db.ts if the project uses generated types.
 ```
 
@@ -870,7 +878,7 @@ Read K-16, K-33 and K-48 in docs/source/KABSI-AUDIT.md. Expand only: add tables,
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-10, then docs/KABSI-PROGRESS.md. Do only task P0.1-10. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-10, then docs/KABSI-PROGRESS.md. Do only task P0.1-10. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-09, K-40 and K-43 in docs/source/KABSI-AUDIT.md. Build the table, the single insert function, the immutability trigger and the feed RPC, then wire the existing approval and publish paths to it. Tests first.
 ```
 
@@ -884,7 +892,7 @@ Read K-09, K-40 and K-43 in docs/source/KABSI-AUDIT.md. Build the table, the sin
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-11, then docs/KABSI-PROGRESS.md. Do only task P0.1-11. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-11, then docs/KABSI-PROGRESS.md. Do only task P0.1-11. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-34 and the "Google reality check" section of docs/source/KABSI-AUDIT.md. Build mocks from Google's documented response shapes (cite the doc URL in each fixture), not from the current hand-written mock. Behaviour of existing features must not change; this is a move plus better mocks. Split into two pull requests if it passes 10 files: layer and fixtures first, call-site moves second.
 ```
 
@@ -898,7 +906,7 @@ Read K-34 and the "Google reality check" section of docs/source/KABSI-AUDIT.md. 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-12a, then docs/KABSI-PROGRESS.md. Do only task P0.1-12a. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-12a, then docs/KABSI-PROGRESS.md. Do only task P0.1-12a. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-35 in docs/source/KABSI-AUDIT.md. Build the jobs table, claim function and dispatcher, then port review sync, draft and notify from api/cron.ts. Leave access acceptance and Protection on the old cron until P0.1-12b.
 ```
 
@@ -912,7 +920,7 @@ Read K-35 in docs/source/KABSI-AUDIT.md. Build the jobs table, claim function an
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-12b, then docs/KABSI-PROGRESS.md. Do only task P0.1-12b. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-12b, then docs/KABSI-PROGRESS.md. Do only task P0.1-12b. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-36. Add the limiter and breaker inside the Google layer only, port the remaining cron steps to jobs, run the 500-business load test on the local stack and record the numbers.
 ```
 
@@ -926,7 +934,7 @@ Read K-36. Add the limiter and breaker inside the Google layer only, port the re
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-13a, then docs/KABSI-PROGRESS.md. Do only task P0.1-13a. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-13a, then docs/KABSI-PROGRESS.md. Do only task P0.1-13a. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-38, K-70 and K-116.1 in docs/source/KABSI-AUDIT.md, and R-05 in the plan. Tests first. Never retry a write after an ambiguous failure; reconcile by reading Google. Port only review replies in this task.
 ```
 
@@ -940,7 +948,7 @@ Read K-38, K-70 and K-116.1 in docs/source/KABSI-AUDIT.md, and R-05 in the plan.
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-13b, then docs/KABSI-PROGRESS.md. Do only task P0.1-13b. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-13b, then docs/KABSI-PROGRESS.md. Do only task P0.1-13b. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Port posts, photos, special hours and listing changes onto the pipeline built in P0.1-13a, with the same tests per type, then remove the old per-type claim logic.
 ```
 
@@ -960,7 +968,7 @@ Done when (wave): an owner can disconnect in 3 taps and the access-change email 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-01, then docs/KABSI-PROGRESS.md. Do only task P0.2-01. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-01, then docs/KABSI-PROGRESS.md. Do only task P0.2-01. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-40 in docs/source/KABSI-AUDIT.md. Make the policy table the single source the retention job reads. Tests first, with rows on both sides of every limit.
 ```
 
@@ -974,7 +982,7 @@ Read K-40 in docs/source/KABSI-AUDIT.md. Make the policy table the single source
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-02, then docs/KABSI-PROGRESS.md. Do only task P0.2-02. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-02, then docs/KABSI-PROGRESS.md. Do only task P0.2-02. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-41 and K-113 points 1 and 2 in docs/source/KABSI-AUDIT.md. Build the screen, the RPC, the disconnect job, the follow-up and the two emails. Use the admins module in _shared/google; it is mock until Gate A.
 ```
 
@@ -988,7 +996,7 @@ Read K-41 and K-113 points 1 and 2 in docs/source/KABSI-AUDIT.md. Build the scre
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-03, then docs/KABSI-PROGRESS.md. Do only task P0.2-03. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-03, then docs/KABSI-PROGRESS.md. Do only task P0.2-03. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-10, K-11, K-18 and K-20 in docs/source/KABSI-AUDIT.md. Expand only: add the two tables, migrate data, keep knowledge_card readable until P0.3-01 switches readers. Tests first.
 ```
 
@@ -1002,7 +1010,7 @@ Read K-10, K-11, K-18 and K-20 in docs/source/KABSI-AUDIT.md. Expand only: add t
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-04, then docs/KABSI-PROGRESS.md. Do only task P0.2-04. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-04, then docs/KABSI-PROGRESS.md. Do only task P0.2-04. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-18 to K-20, K-77 and K-116 point 2 in docs/source/KABSI-AUDIT.md and guardrail 7. Never revert anything automatically. Build detection, explanation, the two decisions through the pipeline and the guards; the full Google Profile screen comes in P0.3-11, so keep the UI to the change card and the Home status line.
 ```
 
@@ -1016,7 +1024,7 @@ Read K-18 to K-20, K-77 and K-116 point 2 in docs/source/KABSI-AUDIT.md and guar
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-05, then docs/KABSI-PROGRESS.md. Do only task P0.2-05. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-05, then docs/KABSI-PROGRESS.md. Do only task P0.2-05. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-17 in docs/source/KABSI-AUDIT.md. Keep the scanner-safe design (GET shows, POST performs). Tests first.
 ```
 
@@ -1030,7 +1038,7 @@ Read K-17 in docs/source/KABSI-AUDIT.md. Keep the scanner-safe design (GET shows
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-06, then docs/KABSI-PROGRESS.md. Do only task P0.2-06. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-06, then docs/KABSI-PROGRESS.md. Do only task P0.2-06. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-100 in docs/source/KABSI-AUDIT.md. Add masks, session tokens, the cache and the kill switch. Then give Rashid step 3 from section 5 of the plan in plain words and record his confirmation.
 ```
 
@@ -1045,7 +1053,7 @@ Read K-100 in docs/source/KABSI-AUDIT.md. Add masks, session tokens, the cache a
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-07, then docs/KABSI-PROGRESS.md. Do only task P0.2-07. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-07, then docs/KABSI-PROGRESS.md. Do only task P0.2-07. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-40, K-41, K-112 and K-113 in docs/source/KABSI-AUDIT.md. Every sentence must be true of the system as built today; mark nothing as coming. Use the LEGAL_SELLER constant for the seller line. Add a note in PROGRESS that a lawyer should read both pages before launch.
 ```
 
@@ -1065,7 +1073,7 @@ Done when (wave): a new mock review becomes a task, a draft, an approval and a p
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-01, then docs/KABSI-PROGRESS.md. Do only task P0.3-01. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-01, then docs/KABSI-PROGRESS.md. Do only task P0.3-01. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-10, K-11 and K-120 in docs/source/KABSI-AUDIT.md and guardrail 4. Switch every reader to knowledge_facts, rebuild the About your business screen with the shared components from P0.1-05, then retire knowledge_card writes.
 ```
 
@@ -1079,7 +1087,7 @@ Read K-10, K-11 and K-120 in docs/source/KABSI-AUDIT.md and guardrail 4. Switch 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-02, then docs/KABSI-PROGRESS.md. Do only task P0.3-02. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-02, then docs/KABSI-PROGRESS.md. Do only task P0.3-02. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-14, K-39, K-116 point 4 and K-120 in docs/source/KABSI-AUDIT.md. Keep the existing fence and injection defences. Code decides the flow; the model only writes text inside it. Tests first.
 ```
 
@@ -1093,7 +1101,7 @@ Read K-14, K-39, K-116 point 4 and K-120 in docs/source/KABSI-AUDIT.md. Keep the
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-03, then docs/KABSI-PROGRESS.md. Do only task P0.3-03. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-03, then docs/KABSI-PROGRESS.md. Do only task P0.3-03. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-13 in docs/source/KABSI-AUDIT.md. Replace the urgent flag with the three levels everywhere it is read (emails, Home, review screen) and test every trigger.
 ```
 
@@ -1107,7 +1115,7 @@ Read K-13 in docs/source/KABSI-AUDIT.md. Replace the urgent flag with the three 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-04, then docs/KABSI-PROGRESS.md. Do only task P0.3-04. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-04, then docs/KABSI-PROGRESS.md. Do only task P0.3-04. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-39 in docs/source/KABSI-AUDIT.md. Every case is invented; no real reviews. Check whether the ANTHROPIC_API_KEY GitHub secret exists; if not, ask Rashid to add it and wait.
 ```
 
@@ -1121,7 +1129,7 @@ Read K-39 in docs/source/KABSI-AUDIT.md. Every case is invented; no real reviews
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-05, then docs/KABSI-PROGRESS.md. Do only task P0.3-05. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-05, then docs/KABSI-PROGRESS.md. Do only task P0.3-05. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-07 and K-08 in docs/source/KABSI-AUDIT.md and R-05 in the plan. Tasks are created only by server-side detectors, never by the browser. Migrate, then retire profile_tasks and the score. Tests first.
 ```
 
@@ -1135,7 +1143,7 @@ Read K-07 and K-08 in docs/source/KABSI-AUDIT.md and R-05 in the plan. Tasks are
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-06, then docs/KABSI-PROGRESS.md. Do only task P0.3-06. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-06, then docs/KABSI-PROGRESS.md. Do only task P0.3-06. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-16 in docs/source/KABSI-AUDIT.md. Enforce roles in the database (RLS and RPC checks), not only in the UI. Tests per role per action.
 ```
 
@@ -1149,7 +1157,7 @@ Read K-16 in docs/source/KABSI-AUDIT.md. Enforce roles in the database (RLS and 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-07, then docs/KABSI-PROGRESS.md. Do only task P0.3-07. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-07, then docs/KABSI-PROGRESS.md. Do only task P0.3-07. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-06 and K-09 in docs/source/KABSI-AUDIT.md and the "Owner dashboard" section of docs/source/KABSI-DESIGN.md. Use only the shared components and tokens. Phone first.
 ```
 
@@ -1163,7 +1171,7 @@ Read K-06 and K-09 in docs/source/KABSI-AUDIT.md and the "Owner dashboard" secti
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-08, then docs/KABSI-PROGRESS.md. Do only task P0.3-08. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-08, then docs/KABSI-PROGRESS.md. Do only task P0.3-08. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-02 and K-03. Change navigation and page titles only; keep every old URL working with redirects.
 ```
 
@@ -1177,7 +1185,7 @@ Read K-02 and K-03. Change navigation and page titles only; keep every old URL w
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-09, then docs/KABSI-PROGRESS.md. Do only task P0.3-09. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-09, then docs/KABSI-PROGRESS.md. Do only task P0.3-09. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-15 and K-70 in docs/source/KABSI-AUDIT.md and the Reviews row in docs/source/KABSI-DESIGN.md. Use the pipeline's undo RPC. Phone first.
 ```
 
@@ -1191,7 +1199,7 @@ Read K-15 and K-70 in docs/source/KABSI-AUDIT.md and the Reviews row in docs/sou
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-10, then docs/KABSI-PROGRESS.md. Do only task P0.3-10. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-10, then docs/KABSI-PROGRESS.md. Do only task P0.3-10. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-66 and K-101 in docs/source/KABSI-AUDIT.md. The owner's consent covers exactly the list shown; record that list in the approval.
 ```
 
@@ -1205,7 +1213,7 @@ Read K-66 and K-101 in docs/source/KABSI-AUDIT.md. The owner's consent covers ex
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-11, then docs/KABSI-PROGRESS.md. Do only task P0.3-11. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-11, then docs/KABSI-PROGRESS.md. Do only task P0.3-11. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-18 and K-19 and the Google Profile row in docs/source/KABSI-DESIGN.md. Read data only from knowledge_facts, profile_changes, tasks and google_connections.
 ```
 
@@ -1227,7 +1235,7 @@ Run order in this wave: P0.4-09, P0.4-01, P0.4-02, P0.4-03, P0.4-04, P0.4-05, P0
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-01, then docs/KABSI-PROGRESS.md. Do only task P0.4-01. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-01, then docs/KABSI-PROGRESS.md. Do only task P0.4-01. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-91, K-100 and G-27, and the "Free tools" and "Signup, login and onboarding" sections of docs/source/KABSI-DESIGN.md. Public data only. Add the new function to supabase/config.toml.
 ```
 
@@ -1241,7 +1249,7 @@ Read K-91, K-100 and G-27, and the "Free tools" and "Signup, login and onboardin
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-02, then docs/KABSI-PROGRESS.md. Do only task P0.4-02. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-02, then docs/KABSI-PROGRESS.md. Do only task P0.4-02. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-91 and K-100. Give Rashid step 5 from section 5 and wait for his "done" before testing Google sign-in. Sign-in asks for basic scopes only.
 ```
 
@@ -1255,7 +1263,7 @@ Read K-91 and K-100. Give Rashid step 5 from section 5 and wait for his "done" b
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-03, then docs/KABSI-PROGRESS.md. Do only task P0.4-03. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-03, then docs/KABSI-PROGRESS.md. Do only task P0.4-03. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-93 and the manual guide section of docs/source/KABSI-DESIGN.md. Keep the group ID in KABSI_GROUP_ID only. Never ask for a password or a code.
 ```
 
@@ -1269,7 +1277,7 @@ Read K-93 and the manual guide section of docs/source/KABSI-DESIGN.md. Keep the 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-04, then docs/KABSI-PROGRESS.md. Do only task P0.4-04. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-04, then docs/KABSI-PROGRESS.md. Do only task P0.4-04. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-61 and K-94 to K-98 in docs/source/KABSI-AUDIT.md and the scenario screens in docs/source/KABSI-DESIGN.md. No Google jargon on any screen. Link each scenario to its guide only when that guide exists.
 ```
 
@@ -1283,7 +1291,7 @@ Read K-61 and K-94 to K-98 in docs/source/KABSI-AUDIT.md and the scenario screen
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-05, then docs/KABSI-PROGRESS.md. Do only task P0.4-05. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-05, then docs/KABSI-PROGRESS.md. Do only task P0.4-05. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-18 and K-45. Use the facts RPCs from P0.3-01; do not write knowledge any other way.
 ```
 
@@ -1297,7 +1305,7 @@ Read K-18 and K-45. Use the facts RPCs from P0.3-01; do not write knowledge any 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-06, then docs/KABSI-PROGRESS.md. Do only task P0.4-06. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-06, then docs/KABSI-PROGRESS.md. Do only task P0.4-06. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-48, K-94 and K-101 in docs/source/KABSI-AUDIT.md. One entitlements function decides access; billing state never touches google_connections. Tests first.
 ```
 
@@ -1311,7 +1319,7 @@ Read K-48, K-94 and K-101 in docs/source/KABSI-AUDIT.md. One entitlements functi
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-07, then docs/KABSI-PROGRESS.md. Do only task P0.4-07. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-07, then docs/KABSI-PROGRESS.md. Do only task P0.4-07. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Check PROGRESS for Rashid step 7 (Creem keys in Supabase secrets). If it is missing, stop and ask. Read K-48, K-106 and K-107. Work in Creem's test mode first; the webhook is the only writer of paid state.
 ```
 
@@ -1325,7 +1333,7 @@ Check PROGRESS for Rashid step 7 (Creem keys in Supabase secrets). If it is miss
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-08, then docs/KABSI-PROGRESS.md. Do only task P0.4-08. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-08, then docs/KABSI-PROGRESS.md. Do only task P0.4-08. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-102 and K-118 in docs/source/KABSI-AUDIT.md and the Emails section of docs/source/KABSI-DESIGN.md. One template for every email; move existing emails onto it without changing what triggers them.
 ```
 
@@ -1339,7 +1347,7 @@ Read K-102 and K-118 in docs/source/KABSI-AUDIT.md and the Emails section of doc
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-09, then docs/KABSI-PROGRESS.md. Do only task P0.4-09. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-09, then docs/KABSI-PROGRESS.md. Do only task P0.4-09. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-46 and K-57. Every send goes through one outbox; no channel bypasses approvals.
 ```
 
@@ -1353,7 +1361,7 @@ Read K-46 and K-57. Every send goes through one outbox; no channel bypasses appr
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-10, then docs/KABSI-PROGRESS.md. Do only task P0.4-10. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-10, then docs/KABSI-PROGRESS.md. Do only task P0.4-10. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read G-24, G-25 and G-30 in docs/source/KABSI-GROWTH.md and K-101. Counts come only from the audit log. No end-of-trial discount.
 ```
 
@@ -1367,7 +1375,7 @@ Read G-24, G-25 and G-30 in docs/source/KABSI-GROWTH.md and K-101. Counts come o
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-11, then docs/KABSI-PROGRESS.md. Do only task P0.4-11. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-11, then docs/KABSI-PROGRESS.md. Do only task P0.4-11. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-111 and the help section in docs/source/KABSI-DESIGN.md. Nora never asks for a password or code and answers only from the facts file and live state.
 ```
 
@@ -1387,7 +1395,7 @@ Done when (wave): a photo goes from a phone to Google (mock) with metadata strip
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-01, then docs/KABSI-PROGRESS.md. Do only task P0.5-01. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-01, then docs/KABSI-PROGRESS.md. Do only task P0.5-01. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-23, K-78 and K-116 point 6 in docs/source/KABSI-AUDIT.md. Never generate or edit a photo beyond orientation and basic exposure. Processing runs in a job, never in the request. Split into two pull requests if needed: pipeline and storage first, screen second.
 ```
 
@@ -1401,7 +1409,7 @@ Read K-23, K-78 and K-116 point 6 in docs/source/KABSI-AUDIT.md. Never generate 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-02, then docs/KABSI-PROGRESS.md. Do only task P0.5-02. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-02, then docs/KABSI-PROGRESS.md. Do only task P0.5-02. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-24, K-80 and K-116 points 3, 5 and 12. Never invent an offer, price, event, service, policy, staff member or hours. Do not market scheduling as a feature.
 ```
 
@@ -1415,7 +1423,7 @@ Read K-24, K-80 and K-116 points 3, 5 and 12. Never invent an offer, price, even
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-03, then docs/KABSI-PROGRESS.md. Do only task P0.5-03. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-03, then docs/KABSI-PROGRESS.md. Do only task P0.5-03. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-21 in docs/source/KABSI-AUDIT.md. Holiday dates come from a maintained table checked against an official source for each country, with the source noted per row.
 ```
 
@@ -1429,7 +1437,7 @@ Read K-21 in docs/source/KABSI-AUDIT.md. Holiday dates come from a maintained ta
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-04, then docs/KABSI-PROGRESS.md. Do only task P0.5-04. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-04, then docs/KABSI-PROGRESS.md. Do only task P0.5-04. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-28 and K-72. Every number Kabsi claims as its own work comes from the audit log; nothing is estimated except the labelled time-saved line.
 ```
 
@@ -1443,7 +1451,7 @@ Read K-28 and K-72. Every number Kabsi claims as its own work comes from the aud
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-05, then docs/KABSI-PROGRESS.md. Do only task P0.5-05. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-05, then docs/KABSI-PROGRESS.md. Do only task P0.5-05. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-26 in docs/source/KABSI-AUDIT.md. Never claim a cause for a change. Use the dataviz rules: one simple chart style, readable on a phone.
 ```
 
@@ -1463,7 +1471,7 @@ Done when (wave): the consent banner works by country with stored proof; PageVie
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-01, then docs/KABSI-PROGRESS.md. Do only task P0.6-01. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-01, then docs/KABSI-PROGRESS.md. Do only task P0.6-01. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read G-18 to G-21 in docs/source/KABSI-GROWTH.md and R-04. Build the banner and the records table; no third-party consent tool. English only at launch.
 ```
 
@@ -1477,7 +1485,7 @@ Read G-18 to G-21 in docs/source/KABSI-GROWTH.md and R-04. Build the banner and 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-02, then docs/KABSI-PROGRESS.md. Do only task P0.6-02. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-02, then docs/KABSI-PROGRESS.md. Do only task P0.6-02. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read G-28, G-31, G-32 and G-44 in docs/source/KABSI-GROWTH.md. One name per action; the Meta names come in P0.6-03 from the G-47 table. Use the PostHog connector to confirm events arrive.
 ```
 
@@ -1491,7 +1499,7 @@ Read G-28, G-31, G-32 and G-44 in docs/source/KABSI-GROWTH.md. One name per acti
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-03, then docs/KABSI-PROGRESS.md. Do only task P0.6-03. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-03, then docs/KABSI-PROGRESS.md. Do only task P0.6-03. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read G-19 and G-47 in docs/source/KABSI-GROWTH.md and Part 7 of docs/source/KABSI-VIDEO.md. Check PROGRESS that Rashid created the Kabsi dataset and the "Kabsi CAPI" system user and put the token in Supabase secrets; if not, stop and ask. Use Meta's Test Events code for every check.
 ```
 
@@ -1505,7 +1513,7 @@ Read G-19 and G-47 in docs/source/KABSI-GROWTH.md and Part 7 of docs/source/KABS
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-04, then docs/KABSI-PROGRESS.md. Do only task P0.6-04. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-04, then docs/KABSI-PROGRESS.md. Do only task P0.6-04. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read G-26 and the "Meta landing page" bullet in docs/source/KABSI-DESIGN.md. No 3D, no carousel, no autoplay. Use the shared components and tokens.
 ```
 
@@ -1519,7 +1527,7 @@ Read G-26 and the "Meta landing page" bullet in docs/source/KABSI-DESIGN.md. No 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-05, then docs/KABSI-PROGRESS.md. Do only task P0.6-05. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-05, then docs/KABSI-PROGRESS.md. Do only task P0.6-05. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read G-15 and G-16 in docs/source/KABSI-GROWTH.md. First find out whether Lovable hosting lets you set headers on kabsi.co; if not, write the Cloudflare rules and give Rashid the exact steps. Start the CSP in report-only mode.
 ```
 
@@ -1533,7 +1541,7 @@ Read G-15 and G-16 in docs/source/KABSI-GROWTH.md. First find out whether Lovabl
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-06, then docs/KABSI-PROGRESS.md. Do only task P0.6-06. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-06, then docs/KABSI-PROGRESS.md. Do only task P0.6-06. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-58, K-104 and K-111 in docs/source/KABSI-AUDIT.md. Every fact in the file must be true of the system on main today; anything not live is written as not available yet. Nora never asks for a password or a code.
 ```
 
@@ -1548,7 +1556,7 @@ Read K-58, K-104 and K-111 in docs/source/KABSI-AUDIT.md. Every fact in the file
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-07, then docs/KABSI-PROGRESS.md. Do only task P0.6-07. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-07, then docs/KABSI-PROGRESS.md. Do only task P0.6-07. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Ask Rashid one question: photo on the founder note, yes or no. Then write the pages from the design review's guidance, true today, no invented proof.
 ```
 
@@ -1562,7 +1570,7 @@ Ask Rashid one question: photo on the founder note, yes or no. Then write the pa
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-08, then docs/KABSI-PROGRESS.md. Do only task P0.6-08. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-08, then docs/KABSI-PROGRESS.md. Do only task P0.6-08. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-87 and K-118 in docs/source/KABSI-AUDIT.md. Use the Resend, Sentry, PostHog, UptimeRobot and Slack connectors to check and fix what they allow; list exact steps for Rashid for the rest. Never write a secret value anywhere.
 ```
 
@@ -1576,7 +1584,7 @@ Read K-87 and K-118 in docs/source/KABSI-AUDIT.md. Use the Resend, Sentry, PostH
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-09, then docs/KABSI-PROGRESS.md. Do only task P0.6-09. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-09, then docs/KABSI-PROGRESS.md. Do only task P0.6-09. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read Part 7 of docs/source/KABSI-VIDEO.md. Write the step list for Rashid in plain words, one action per line, then verify each step he reports done with the tools you have. Business info and verification use Hussein Slim's details (R-25).
 ```
 
@@ -1590,7 +1598,7 @@ Read Part 7 of docs/source/KABSI-VIDEO.md. Write the step list for Rashid in pla
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-10, then docs/KABSI-PROGRESS.md. Do only task P0.6-10. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-10, then docs/KABSI-PROGRESS.md. Do only task P0.6-10. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Use one WHATSAPP_NUMBER constant set to the I1 placeholder (+961 3 956 917) so the US number is a one-line swap later. Keep the Lebanese number on /lebanon. WhatsApp here is people-answered only; it approves nothing.
 ```
 
@@ -1604,7 +1612,7 @@ Use one WHATSAPP_NUMBER constant set to the I1 placeholder (+961 3 956 917) so t
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-11, then docs/KABSI-PROGRESS.md. Do only task P0.6-11. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-11, then docs/KABSI-PROGRESS.md. Do only task P0.6-11. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-44 in docs/source/KABSI-AUDIT.md. Staff only; owners see plain messages, never this page.
 ```
 
@@ -1627,7 +1635,7 @@ If Google refuses or says nothing by 31 October 2026: K-86 applies. Reapply with
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-01, then docs/KABSI-PROGRESS.md. Do only task P0.7-01. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-01, then docs/KABSI-PROGRESS.md. Do only task P0.7-01. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read-only: no write call of any kind. Ask Rashid to confirm the quota reads 300 and which profiles to read. Strip reviewer names, review text and phone numbers from fixtures before committing.
 ```
 
@@ -1641,7 +1649,7 @@ Read-only: no write call of any kind. Ask Rashid to confirm the quota reads 300 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-02, then docs/KABSI-PROGRESS.md. Do only task P0.7-02. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-02, then docs/KABSI-PROGRESS.md. Do only task P0.7-02. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-92 and K-113 point 6. Write the package and the step list for Rashid; confirm kabsi.co/privacy carries the Limited Use sentence word for word before he submits.
 ```
 
@@ -1655,7 +1663,7 @@ Read K-92 and K-113 point 6. Write the package and the step list for Rashid; con
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-03, then docs/KABSI-PROGRESS.md. Do only task P0.7-03. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-03, then docs/KABSI-PROGRESS.md. Do only task P0.7-03. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-37. Events only enqueue jobs. Give Rashid the console steps for the topic and subscription if you cannot create them, then verify with a real event.
 ```
 
@@ -1670,7 +1678,7 @@ Read K-37. Events only enqueue jobs. Give Rashid the console steps for the topic
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-04, then docs/KABSI-PROGRESS.md. Do only task P0.7-04. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-04, then docs/KABSI-PROGRESS.md. Do only task P0.7-04. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-56 and K-87. Build the deletion list with row counts and show it to Rashid; delete nothing until he says yes. Then flip to live and run the checks.
 ```
 
@@ -1684,7 +1692,7 @@ Read K-56 and K-87. Build the deletion list with row counts and show it to Rashi
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-05, then docs/KABSI-PROGRESS.md. Do only task P0.7-05. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-05, then docs/KABSI-PROGRESS.md. Do only task P0.7-05. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read K-67, K-85 and K-117. Every write to Google needs Rashid's own approval in the app, as for any owner. If a detector misses an expected result, record it as a blocker; detectors are not ready until they pass.
 ```
 
@@ -1698,7 +1706,7 @@ Read K-67, K-85 and K-117. Every write to Google needs Rashid's own approval in 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-06, then docs/KABSI-PROGRESS.md. Do only task P0.7-06. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-06, then docs/KABSI-PROGRESS.md. Do only task P0.7-06. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read guardrails 21, 24 and 25. Record every finding; fix only copy and layout issues in this task and open new PROGRESS items for anything else.
 ```
 
@@ -1713,7 +1721,7 @@ Read guardrails 21, 24 and 25. Record every finding; fix only copy and layout is
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-07, then docs/KABSI-PROGRESS.md. Do only task P0.7-07. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-07, then docs/KABSI-PROGRESS.md. Do only task P0.7-07. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Check PROGRESS that Creem is live. Walk guardrail 22 with real Google responses, record evidence per step, then the G-39 tier 1 list. Ask Rashid before changing the call to action.
 ```
 
@@ -1755,7 +1763,7 @@ P1 starts when Wave P0.3 is done and never delays a P0 task (guardrail 20). The 
 Prompt for any P1 task:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the row for task <ID> in section 14, then docs/KABSI-PROGRESS.md. Do only task <ID>. Follow section 2 for checks, merging, proof and the PROGRESS update.
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the row for task <ID> in section 14, then docs/KABSI-PROGRESS.md. Do only task <ID>. Follow section 2: open the pull request, make sure CI is green, update PROGRESS on the branch, then stop and give Rashid the PR link and a 3-line summary. Do not merge.
 Read the decisions the row names in docs/source/ in full before starting. If the row's "Depends on" is not done in PROGRESS, stop and report.
 ```
 
