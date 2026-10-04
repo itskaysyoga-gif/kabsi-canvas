@@ -7,18 +7,19 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Plan version 1 written on 4 Oct 2026 (pull request claude/plan-v2). Nothing in it has been built yet.
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
-- Next task: P0.1-01, after Rashid confirms the clean-up.
+- Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
+- Next task: P0.1-01.
 
 ## Rashid's decisions and inputs (plan section 5)
 
 | # | Item | Status |
 |---|---|---|
-| D1 | Legal seller | Waiting |
-| D2 | First real live customer | Waiting |
-| D3 | NFC shipping outside Lebanon | Waiting |
-| I1 | US WhatsApp number | Waiting |
-| I2 | Real screenshots of Google's People and access steps | Waiting |
-| I3 | Referral reward ($10 credit or one free month) | Waiting |
+| D1 | Legal seller | Decided 4 Oct: Hussein Slim (Dubai) holds the Creem account and is the seller; Meta business details and verification under the same name (R-25) |
+| D2 | First real live customer | Decided 4 Oct: Abou Hamze Auto Center (Bakaata); written consent from the business owner still to collect |
+| D3 | NFC shipping outside Lebanon | Decided 4 Oct: none |
+| I1 | US WhatsApp number | Later; placeholder +961 3 956 917 in one constant meanwhile |
+| I2 | Real screenshots of Google's People and access steps | Desktop done 4 Oct (`public/help/manager-steps/desktop/`, blurred); phone still to come |
+| I3 | Referral reward | Decided 4 Oct: one free month |
 
 ## Steps only Rashid can do (plan section 5)
 
@@ -30,7 +31,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | 4 | Google Cloud and Search Console contacts and owners on kabsi.co addresses (K-99.3) | Any time in P0.1 | Todo |
 | 5 | Supabase Auth Google provider with the OAuth client | P0.4-02 | Todo |
 | 6 | Meta Business Settings items (P0.6-09 file) | P0.6-03 | Todo |
-| 7 | Creem account and keys in Supabase secrets (after D1) | P0.4-07 | Todo |
+| 7 | Creem account (Hussein Slim) and keys in Supabase secrets | P0.4-07 | Todo |
+| 8 | Hussein agrees to be named as seller and signs the short revenue agreement with Rashid (K-106) | R-20 seller line, P0.4-07, P0.6-09 | Todo |
 
 ## Tasks
 
@@ -142,6 +144,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## Found, not done
 
+- Abou Hamze Auto Center: Rashid was adding the "Kabsi Clients" group as Manager on 4 Oct. If he pressed Add, hello@kabsi.co accepts it by hand under Manage invitations in Business Profile Manager (mock mode means the access job does not accept it yet). This gives a real Manager connection for P0.7-01 on Gate A day. (Planning chat, 4 Oct.)
+
 - Yawmiyati is the listing behind the Gate A application, and K-98 says an online media business is not eligible for a Business Profile. Nothing to change now; if Google questions it, answer with the real business's in-person activity or move the application to an eligible profile. (Planning review, 4 Oct.)
 - The live hero shows "Your Google Business Profile, taken care of." (Google's name in the slogan, against K-112), "Profile Score" and a "Post" button. Fixed by P0.1-02a and P0.1-02b.
 - Drafting code allows phone numbers in replies (`_shared/ai.ts`), weekly posts use phrases from review text (D245) and reports quote reviews (D233). Fixed by P0.1-04.
@@ -161,5 +165,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 4 Oct 2026: Clean-up done (19 retired project files deleted after a backup was sent to Rashid; six source documents added). Decisions recorded: D1 seller Hussein Slim, D2 Abou Hamze Auto Center, D3 no NFC outside Lebanon, I1 placeholder number, I3 one free month; desktop Manager screenshots added (blurred). Plan merged. Next: P0.1-01.
 
 - 4 Oct 2026: Plan v1 written by the planning chat (Opus) from the six source documents, checked against main 42e7994, the live database and functions. Next: Rashid confirms the clean-up, merges the plan pull request, then P0.1-01.
