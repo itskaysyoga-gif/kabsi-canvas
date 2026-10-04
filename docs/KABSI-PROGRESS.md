@@ -32,6 +32,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | 5 | Supabase Auth Google provider with the OAuth client | P0.4-02 | Todo |
 | 6 | Meta Business Settings items (P0.6-09 file) | P0.6-03 | Todo |
 | 7 | Creem account (Hussein Slim) and keys in Supabase secrets | P0.4-07 | Todo |
+| 9 | Paste the four `emails/auth/*.html` files into the Supabase Auth email templates (the login-code email still shows the old Beirut footer) | P0.1-02b done | Todo (Rashid, manual dashboard step; recorded 4 Oct at Hussein's request) |
 | 8 | Hussein agrees to be named as seller | R-20 seller line, P0.4-07, P0.6-09 | Done 4 Oct (no written agreement, Rashid's decision) |
 
 ## Tasks
@@ -46,7 +47,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | merged (23); After-merge checks partly run, see Evidence | 23 | 4 Oct 2026 |
 | P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | merged (24); After-merge checks partly run, see Evidence | 24 | 4 Oct 2026 |
 | P0.1-05 | Design tokens and shared components | Sonnet | merged (25); `/design` not yet looked at as staff | 25 | 4 Oct 2026 |
-| P0.1-06 | Demo workspace with fictional businesses | Opus | part A merged (28, squash 197c64e); part B (Demo data tag, PostHog off) PR open; After-merge mock-review email check still open | 28, 29 | 4 Oct 2026 |
+| P0.1-06 | Demo workspace with fictional businesses | Opus | merged (28, 29); After-merge: Deploy and ops_events checks passed; mock-review email check and browser checks still open, see Evidence | 28, 29 | 4 Oct 2026 |
 | P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet | todo | | |
 | P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | todo | | |
 | P0.1-V3 | Setup-call and partner-call booking links | Sonnet | todo | | |
@@ -179,6 +180,19 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### "Approve" copy on the Reviews screens (branch claude/h-approve-copy, 4 Oct 2026, Hussein's request, not a plan task)
+- The reply button reads "Approve reply" since P0.1-02b; the text around it still said "Post". Changed: Reviews header "Nothing goes on Google until you approve it."; draft heading "Your reply, ready to approve"; draft hint "Change anything you like. Kabsi publishes exactly this text after you approve." (Reviews and the email-link page `/a/...`); Home "Nothing goes on Google until you approve it." and "...change it if you like, and approve it."; the partner invite email (`partner` function, HTML and text) "Nothing goes on Google until you approve it."; `knowledge/kabsi-facts.md` two FAQ answers; `public/llms-full.txt` rebuilt (13250 words).
+- Kept on purpose: Posts and Photos say "tap Post to Google", which is the real button on those screens.
+- `grep -rn "tap Post" src supabase/functions knowledge` leaves only the Posts line ("tap Post to Google").
+- Checks: typecheck clean; eslint on the 3 changed screens 0 problems; prettier clean on them (`partner/index.ts` was already not prettier-formatted before this change; CI does not check it); `npm test` 19 passed; `check:tokens` ok; build ok. `deno check` not run here (deno is not installed in this sandbox); CI runs it.
+- Not checked in a browser: the Supabase host and the live site are blocked from the sandbox.
+
+### P0.1-06 After-merge checks (run 4 Oct 2026, 12:56 UTC, Hussein's session)
+- Deploy run 11 (7dcb18f, PR 29) success; `list_edge_functions` shows every function updated 2026-10-04 12:51:35 UTC (`api` 39, `content` 32, `partner` 25).
+- `select count(*) from ops_events where created_at > '2026-10-04 12:15 UTC' and (title ilike '%Harbour Lane%' or title ilike '%Juniper%')` = 0. Demo businesses 2; demo mock reviews 24.
+- Demo emails: `emails` has no row for a demo business yet (no new demo review since the seed), so the "only the demo login" check has nothing to read. It needs a new mock review on a demo business (a database write, waits for Hussein's "apply").
+- NOT run: the part B browser checks ("Demo data" tag at 390 and 1440 px, `/a/...` tag, no PostHog requests) and Rashid's phone recordings. `kabsi-app.lovable.app` is blocked from the sandbox (curl status 000).
 
 ### P0.1-06 part B (branch claude/h-p0-1-06b, 4 Oct 2026, Hussein's session)
 - "Demo data" tag: the shared `ExampleBadge` (guardrail 23 label) with the text "Demo data". In the app it sits beside the business name in the sticky header (`app-layout.tsx` LocationMenu), so every app screen shows it; on the email-link page it sits beside the logo (`ConfirmLayout` gets `demo`, `/a/$token` passes it from the action API, which now returns `demo` from `locations.is_demo` for review and listing-change links). `src/lib/onboarding.ts` reads `is_demo` with the other location columns.
@@ -357,6 +371,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 4 Oct 2026 (Hussein's session): P0.1-06 After-merge read-only checks passed (Deploy 11, functions 12:51 UTC, 0 demo ops events); demo email and browser checks still open. Supabase Auth template paste recorded as Rashid's step 9. Copy fix on branch claude/h-approve-copy (Reviews and Home say approve, not tap Post).
 
 - 4 Oct 2026 (Hussein's session): PR 28 (P0.1-06 part A) merged on Hussein's "merge"; demo sign-in checked by Hussein; functions redeployed 12:21 UTC. P0.1-06 part B on branch claude/h-p0-1-06b, PR 29, CI green on 793fde7. Next: part B After-merge checks, the open part A mock-review email check, then P0.1-V1.
 - 4 Oct 2026 (Hussein's session): After-merge checks: Deploy run 9 (PR 27) success, all functions updated 08:58 UTC; live site still blocked from the sandbox. PR 27 email confirmed by Hussein; its test data deleted. P0.1-06 part A on branch claude/h-p0-1-06, PR 28, CI green (both migrations applied; demo login and seed waiting). Next: demo login, seed, then P0.1-06 part B.

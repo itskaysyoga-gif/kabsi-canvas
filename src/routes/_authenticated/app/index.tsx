@@ -104,7 +104,7 @@ function NoBusiness() {
       <h1 className="font-display text-4xl leading-none sm:text-5xl">Welcome to Kabsi</h1>
       <p className="mt-4 max-w-lg leading-7 text-kb-stone-on-dark">
         Add your business to start. Every new Google review will reach you by email with a reply
-        already drafted. Nothing is posted until you tap Post.
+        already drafted. Nothing goes on Google until you approve it.
       </p>
       <Button asChild className="mt-7">
         <Link to="/start">
@@ -308,8 +308,8 @@ function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
               </h2>
               <p className="mt-2 max-w-xl leading-7 text-kb-stone-on-dark">
                 {d.urgent > 0
-                  ? `${d.urgent} ${d.urgent === 1 ? "needs" : "need"} extra care. Read the draft, change it if you like, and tap Post.`
-                  : "Read each draft, change it if you like, and tap Post. Nothing goes on Google without you."}
+                  ? `${d.urgent} ${d.urgent === 1 ? "needs" : "need"} extra care. Read the draft, change it if you like, and approve it.`
+                  : "Read each draft, change it if you like, and approve it. Nothing goes on Google without you."}
               </p>
               <Button asChild className="mt-6">
                 <Link to="/app/inbox">

@@ -202,7 +202,7 @@ function Shell({ sub, children }: { sub?: string; children: ReactNode }) {
       {sub ? <p className="mt-2 text-kb-stone">{sub}</p> : null}
       <p className="mt-3 max-w-xl text-sm leading-6 text-kb-stone">
         Every reply is drafted in the reviewer's language from your facts. Nothing goes on Google
-        until you tap Post.
+        until you approve it.
       </p>
       <div className="mt-7">{children}</div>
     </div>
@@ -441,7 +441,7 @@ function ReviewCard({ review }: { review: InboxReview }) {
           <div className="mt-6 flex items-end justify-between gap-3">
             <Label htmlFor={`reply-${review.id}`} className="flex items-center gap-2 font-bold">
               <Sparkles className="size-4" aria-hidden="true" />
-              {safeDraft ? "Your reply, ready to post" : "Write your reply"}
+              {safeDraft ? "Your reply, ready to approve" : "Write your reply"}
             </Label>
             <span
               className={cn("text-xs", text.length > MAX ? "text-kb-red" : "text-kb-stone")}
@@ -452,7 +452,7 @@ function ReviewCard({ review }: { review: InboxReview }) {
           </div>
           <p className="mt-1 text-sm text-kb-stone">
             {safeDraft
-              ? "Change anything you like. Kabsi posts exactly this text."
+              ? "Change anything you like. Kabsi publishes exactly this text after you approve."
               : "Kabsi couldn't safely draft this one. Write your own reply, ask for a new version, or skip it."}
           </p>
           <Textarea
