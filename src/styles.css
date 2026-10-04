@@ -11,9 +11,70 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
+/* K-108: every design value lives in this one block. Tailwind reads it, nothing else defines colours, type,
+   spacing, radii or shadows. Existing colour values are unchanged; amber is new (design review, Visual system):
+   amber text on soft amber marks "needs your attention", so yellow stays for the action and the "needs you" highlight. */
+@theme {
   --font-sans: "Readex Pro", sans-serif;
   --font-display: "Lalezar", sans-serif;
+
+  --color-kb-yellow: #ffd60a;
+  --color-kb-yellow-pressed: #e8c309;
+  --color-kb-black: #000000;
+  --color-kb-carbon: #0b0b0b;
+  --color-kb-ink: #111111;
+  --color-kb-white: #ffffff;
+  --color-kb-sand: #f6f4ef;
+  --color-kb-stone: #5e5b55;
+  --color-kb-stone-on-dark: #c9c5bc;
+  --color-kb-hairline: #e4e0d7;
+  --color-kb-red: #d93025;
+  --color-kb-green: #1f8a5b;
+  --color-kb-amber: #b45309;
+  --color-kb-amber-soft: #fef3c7;
+
+  /* Type: Lalezar for H1 and H2 only, two sizes; Readex Pro for everything else, never below 13 px. */
+  --text-kb-hero: clamp(3.5rem, 2.4rem + 4.6vw, 5rem);
+  --text-kb-hero--line-height: 1;
+  --text-kb-section: clamp(2.25rem, 1.9rem + 1.4vw, 2.75rem);
+  --text-kb-section--line-height: 1.05;
+  --text-kb-lead: 1.125rem;
+  --text-kb-lead--line-height: 1.6;
+  --text-kb-body: 1rem;
+  --text-kb-body--line-height: 1.6;
+  --text-kb-small: 0.875rem;
+  --text-kb-small--line-height: 1.5;
+  --text-kb-caption: 0.8125rem;
+  --text-kb-caption--line-height: 1.4;
+
+  /* Spacing and layout: sections 96 px apart on desktop and 64 px on phones, one 1200 px container, 24 px gutters. */
+  --spacing-kb-section: 6rem;
+  --spacing-kb-section-sm: 4rem;
+  --spacing-kb-gutter: 1.5rem;
+  --container-kb: 75rem;
+
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-card: 14px;
+  --radius-large: 24px;
+  --radius-pill: 999px;
+
+  --shadow-kb: 0 6px 18px rgba(0, 0, 0, 0.06);
+  --shadow-kb-lift: 0 14px 30px rgba(0, 0, 0, 0.09);
+}
+
+/* shadcn semantic names point at the brand tokens above. */
+:root {
+  --background: var(--color-kb-white); --foreground: var(--color-kb-ink); --card: var(--color-kb-white);
+  --card-foreground: var(--color-kb-ink); --popover: var(--color-kb-white); --popover-foreground: var(--color-kb-ink);
+  --primary: var(--color-kb-yellow); --primary-foreground: var(--color-kb-black); --secondary: var(--color-kb-sand);
+  --secondary-foreground: var(--color-kb-ink); --muted: var(--color-kb-sand); --muted-foreground: var(--color-kb-stone);
+  --accent: var(--color-kb-sand); --accent-foreground: var(--color-kb-black); --destructive: var(--color-kb-red);
+  --destructive-foreground: var(--color-kb-white); --border: var(--color-kb-hairline); --input: var(--color-kb-hairline); --ring: var(--color-kb-black);
+}
+@theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -33,47 +94,14 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-kb-yellow: var(--kb-yellow);
-  --color-kb-yellow-pressed: var(--kb-yellow-pressed);
-  --color-kb-black: var(--kb-black);
-  --color-kb-carbon: var(--kb-carbon);
-  --color-kb-ink: var(--kb-ink);
-  --color-kb-white: var(--kb-white);
-  --color-kb-sand: var(--kb-sand);
-  --color-kb-stone: var(--kb-stone);
-  --color-kb-stone-on-dark: var(--kb-stone-on-dark);
-  --color-kb-hairline: var(--kb-hairline);
-  --color-kb-red: var(--kb-red);
-  --color-kb-green: var(--kb-green);
-  --radius-sm: 8px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
-  --radius-card: 14px;
-  --radius-large: 24px;
-  --radius-pill: 999px;
-  --shadow-kb: 0 6px 18px rgba(0, 0, 0, 0.06);
-}
-
-:root {
-  --kb-yellow: #ffd60a; --kb-yellow-pressed: #e8c309; --kb-black: #000000;
-  --kb-carbon: #0b0b0b; --kb-ink: #111111; --kb-white: #ffffff;
-  --kb-sand: #f6f4ef; --kb-stone: #5e5b55; --kb-stone-on-dark: #c9c5bc;
-  --kb-hairline: #e4e0d7; --kb-red: #d93025; --kb-green: #1f8a5b;
-  --background: var(--kb-white); --foreground: var(--kb-ink); --card: var(--kb-white);
-  --card-foreground: var(--kb-ink); --popover: var(--kb-white); --popover-foreground: var(--kb-ink);
-  --primary: var(--kb-yellow); --primary-foreground: var(--kb-black); --secondary: var(--kb-sand);
-  --secondary-foreground: var(--kb-ink); --muted: var(--kb-sand); --muted-foreground: var(--kb-stone);
-  --accent: var(--kb-sand); --accent-foreground: var(--kb-black); --destructive: var(--kb-red);
-  --destructive-foreground: var(--kb-white); --border: var(--kb-hairline); --input: var(--kb-hairline); --ring: var(--kb-black);
 }
 
 @layer base {
-  * { border-color: var(--kb-hairline); }
+  * { border-color: var(--color-kb-hairline); }
   html { min-width: 320px; overflow-x: hidden; scroll-behavior: smooth; }
   body { min-width: 320px; overflow-x: hidden; background: var(--background); color: var(--foreground); font-family: var(--font-sans); font-size: 16px; letter-spacing: 0; }
   button, a, input { transition-duration: 160ms; }
-  :focus-visible { outline: 2px solid var(--kb-black); outline-offset: 2px; }
+  :focus-visible { outline: 2px solid var(--color-kb-black); outline-offset: 2px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -101,7 +129,7 @@ html.kb-motion [data-stagger]:not(.kb-in) > * { opacity: 0; transform: translate
 @keyframes kb-ripple { from { transform: scale(.7); opacity: .6; } to { transform: scale(2.6); opacity: 0; } }
 .kb-ripple { position: relative; }
 .kb-ripple::before, .kb-ripple::after {
-  content: ""; position: absolute; inset: 0; border-radius: 999px; border: 2px solid var(--kb-yellow);
+  content: ""; position: absolute; inset: 0; border-radius: 999px; border: 2px solid var(--color-kb-yellow);
   opacity: 0; pointer-events: none;
 }
 .kb-in .kb-ripple::before, .kb-ripple.kb-in::before { animation: kb-ripple 900ms cubic-bezier(.2,.6,.3,1) 350ms 1 both; }
@@ -111,7 +139,7 @@ html.kb-motion [data-stagger]:not(.kb-in) > * { opacity: 0; transform: translate
 
 /* Cards lift a little on hover and press down on tap. */
 .kb-lift { transition: transform 200ms cubic-bezier(.2,.6,.3,1), box-shadow 200ms cubic-bezier(.2,.6,.3,1), border-color 160ms; }
-@media (hover: hover) { .kb-lift:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(0,0,0,.09); } }
+@media (hover: hover) { .kb-lift:hover { transform: translateY(-3px); box-shadow: var(--shadow-kb-lift); } }
 .kb-lift:active { transform: translateY(0) scale(.99); transition-duration: 80ms; }
 
 @media (prefers-reduced-motion: reduce) {

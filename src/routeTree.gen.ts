@@ -24,6 +24,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SecurityRouteImport } from './routes/security'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
+import { Route as AuthenticatedDesignRouteImport } from './routes/_authenticated/design'
 import { Route as AuthenticatedPartnerRouteImport } from './routes/_authenticated/partner'
 import { Route as AuthenticatedStaffRouteImport } from './routes/_authenticated/staff'
 import { Route as AuthenticatedStartRouteImport } from './routes/_authenticated/start'
@@ -118,6 +119,11 @@ const TermsRoute = TermsRouteImport.update({
 const AuthenticatedAppRouteRoute = AuthenticatedAppRouteRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDesignRoute = AuthenticatedDesignRouteImport.update({
+  id: '/design',
+  path: '/design',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPartnerRoute = AuthenticatedPartnerRouteImport.update({
@@ -243,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/security': typeof SecurityRoute
   '/terms': typeof TermsRoute
   '/app': typeof AuthenticatedAppRouteRouteWithChildren
+  '/design': typeof AuthenticatedDesignRoute
   '/partner': typeof AuthenticatedPartnerRoute
   '/staff': typeof AuthenticatedStaffRoute
   '/start': typeof AuthenticatedStartRoute
@@ -279,6 +286,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/security': typeof SecurityRoute
   '/terms': typeof TermsRoute
+  '/design': typeof AuthenticatedDesignRoute
   '/partner': typeof AuthenticatedPartnerRoute
   '/staff': typeof AuthenticatedStaffRoute
   '/start': typeof AuthenticatedStartRoute
@@ -318,6 +326,7 @@ export interface FileRoutesById {
   '/security': typeof SecurityRoute
   '/terms': typeof TermsRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteRouteWithChildren
+  '/_authenticated/design': typeof AuthenticatedDesignRoute
   '/_authenticated/partner': typeof AuthenticatedPartnerRoute
   '/_authenticated/staff': typeof AuthenticatedStaffRoute
   '/_authenticated/start': typeof AuthenticatedStartRoute
@@ -357,6 +366,7 @@ export interface FileRouteTypes {
     | '/security'
     | '/terms'
     | '/app'
+    | '/design'
     | '/partner'
     | '/staff'
     | '/start'
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/security'
     | '/terms'
+    | '/design'
     | '/partner'
     | '/staff'
     | '/start'
@@ -431,6 +442,7 @@ export interface FileRouteTypes {
     | '/security'
     | '/terms'
     | '/_authenticated/app'
+    | '/_authenticated/design'
     | '/_authenticated/partner'
     | '/_authenticated/staff'
     | '/_authenticated/start'
@@ -582,6 +594,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AuthenticatedAppRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/design': {
+      id: '/_authenticated/design'
+      path: '/design'
+      fullPath: '/design'
+      preLoaderRoute: typeof AuthenticatedDesignRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/partner': {
@@ -771,6 +790,7 @@ const AuthenticatedAppRouteRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRouteRoute: typeof AuthenticatedAppRouteRouteWithChildren
+  AuthenticatedDesignRoute: typeof AuthenticatedDesignRoute
   AuthenticatedPartnerRoute: typeof AuthenticatedPartnerRoute
   AuthenticatedStaffRoute: typeof AuthenticatedStaffRoute
   AuthenticatedStartRoute: typeof AuthenticatedStartRoute
@@ -778,6 +798,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRouteRoute: AuthenticatedAppRouteRouteWithChildren,
+  AuthenticatedDesignRoute: AuthenticatedDesignRoute,
   AuthenticatedPartnerRoute: AuthenticatedPartnerRoute,
   AuthenticatedStaffRoute: AuthenticatedStaffRoute,
   AuthenticatedStartRoute: AuthenticatedStartRoute,
