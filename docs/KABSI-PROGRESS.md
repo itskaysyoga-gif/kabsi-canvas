@@ -167,7 +167,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Mock-review check on Yawmiyati (location 9803ee99-fee8-4c6a-abb4-1a830fcbb438, mock mode): `staff_mock_review` needs a staff login that the Supabase connector does not have, so the same row it writes was inserted into `mock_google_reviews` (review id mock-eafac0a35ce9446684800827a9285d6e, 3 stars, reviewer "Deploy check", 07:27:37 UTC). The cron synced it at 07:30:03 (reviews row e3852d23-d5ff-4253-829c-001e0f61df61, state drafted, one reply draft) and sent the email at 07:30:08: `emails` row 84558298-d9f7-4d72-8f19-02b99d59f869, kind review_new, status sent, subject "New review for Yawmiyati (3 of 5)", to rashid.hamzy@gmail.com, resend_id 01a105d1-f845-7ee8-b09d-3a13d23eb9db.
 - Wording in the deployed code (`get_edge_function` for `api`, searched for strings): "Review reply" 2 hits, "Nothing is published until you approve it." 1, "trademarks of Google LLC" 1, "Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates" 1; "Beirut, Lebanon", "only posts what you approve", "Put mine back" and ">Post<" 0 hits.
 - Plan correction: the `emails` table has no body column (columns: id, location_id, partner_id, kind, to_address, subject, resend_id, status, error, dedupe_key, created_at). The plan's "check the `emails` row body" (P0.1-02b Done when, and the standard prompt) cannot be done. The check is the sent email (row exists with status sent, then read the inbox) plus the wording in the deployed function code.
-- Test data left behind: the mock review, its review row and its draft, on the internal test business Yawmiyati. Add to the go-live clean-up list if not deleted earlier.
+- Test data clean-up (applied on Hussein's "apply", 4 Oct 2026, one statement): deleted 3 `action_tokens` rows for the review, the `reviews` row e3852d23-d5ff-4253-829c-001e0f61df61 (its one `reply_drafts` row went with it, `on delete cascade`) and the `mock_google_reviews` row mock-eafac0a35ce9446684800827a9285d6e; the statement returned 3, 1 and 1 deleted rows. A read-back shows 0 rows in `mock_google_reviews`, `reviews`, `reply_drafts` and `action_tokens` for those ids. The `emails` row 84558298-d9f7-4d72-8f19-02b99d59f869 is kept as the record of the send.
 
 ### P0.1-02a After-merge checks (run at the start of the P0.1-02b chat, 4 Oct 2026)
 - Live checks on https://kabsi-app.lovable.app NOT run: the build sandbox's egress proxy refuses that host (CONNECT 403). Hussein or the next chat with web access should run the three After-merge bullets above against the live site.
@@ -218,6 +218,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Found, not done
 
+- The new-review email has two yellow buttons: "Review reply" (in `_shared/reviews.ts`, `reviewBlock`) and "Open Kabsi" (the `button` passed to `emailLayout` in `sendToLocation`). K-102 says one yellow button with black text. "Open Kabsi" should become a text link in the row beside Edit and Skip. Found by Hussein reading the P0.1-02b mock-review email, 4 Oct 2026; not fixed, no task owns it yet (P0.4-08, "One email template and the email set", is the likely place).
 - `scripts/build-kb.mjs` header retired names: fixed by P0.1-02a (pull request 18).
 - `scripts/build-kb.mjs` D261 and D244 citations: fixed by P0.1-02a (pull request 18).
 - Old-spec D-numbers remain in other code comments outside P0.1-01b's touch list (for example `grep -rn "\bD[0-9]\{3\}\b" src supabase scripts`). They do not match the Done-when grep. Not touched.
@@ -246,7 +247,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Test data to delete at go-live (P0.7-04)
 
-- Yawmiyati: mock review mock-eafac0a35ce9446684800827a9285d6e (reviewer "Deploy check"), its reviews row e3852d23-d5ff-4253-829c-001e0f61df61 and reply draft, and the email row 84558298-d9f7-4d72-8f19-02b99d59f869 (created 4 Oct by the P0.1-02b After-merge check).
+- Yawmiyati: the email row 84558298-d9f7-4d72-8f19-02b99d59f869 (created 4 Oct by the P0.1-02b After-merge check). The mock review, its draft and its action tokens were already deleted on 4 Oct.
 
 - QA account qa-owner@test.local and "QA Bakery"; "QA Partner" (qa-partner) with Rashid's account as member; the "Test by rashid" partner invite and acceptance.
 - Yawmiyati's three overlapping pro_6m plans, the pending pro_12m and three payments rows from 25 Sep tests; its test photos.
