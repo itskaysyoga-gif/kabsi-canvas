@@ -79,7 +79,7 @@ function ActionPage() {
   );
   if (done) {
     return (
-      <ConfirmLayout demo={view?.demo === true}>
+      <ConfirmLayout demo={view?.demo === true} mode={view?.mode}>
         <CheckCircle2 className="size-10 text-kb-green" aria-hidden="true" />
         <h1 className="mt-4 font-display text-3xl leading-tight">{DONE[done] ?? "Done."}</h1>
         {inbox}
@@ -98,7 +98,7 @@ function ActionPage() {
     };
     const decided = c.state !== "open" || view.status === "used";
     return (
-      <ConfirmLayout demo={view?.demo === true}>
+      <ConfirmLayout demo={view?.demo === true} mode={view?.mode}>
         <p className="text-sm font-medium text-kb-stone">{view.business}</p>
         <h1 className="mt-1 font-display text-3xl leading-tight">
           Your {LABELS[c.field] ?? c.field} changed on Google
@@ -145,7 +145,7 @@ function ActionPage() {
   }
   if (view.status === "invalid" || view.status === "expired" || !view.review) {
     return (
-      <ConfirmLayout demo={view?.demo === true}>
+      <ConfirmLayout demo={view?.demo === true} mode={view?.mode}>
         <h1 className="font-display text-3xl leading-tight">
           {view.status === "expired" ? "This link has expired" : "This link isn't valid"}
         </h1>
@@ -181,7 +181,11 @@ function ActionPage() {
 
   if (closed || view.status === "used") {
     return (
-      <ConfirmLayout demo={view?.demo === true} concierge={view.concierge === true}>
+      <ConfirmLayout
+        demo={view?.demo === true}
+        mode={view?.mode}
+        concierge={view.concierge === true}
+      >
         {header}
         <div className="mt-6">{reviewCard}</div>
         <p className="mt-5 leading-7">{closed ? DONE[r.state] : "This link was already used."}</p>
@@ -201,7 +205,11 @@ function ActionPage() {
   if (view.action === "skip" || view.action === "handle_myself") {
     const skip = view.action === "skip";
     return (
-      <ConfirmLayout demo={view?.demo === true} concierge={view.concierge === true}>
+      <ConfirmLayout
+        demo={view?.demo === true}
+        mode={view?.mode}
+        concierge={view.concierge === true}
+      >
         {header}
         <div className="mt-6">{reviewCard}</div>
         <p className="mt-5 leading-7">
@@ -229,7 +237,7 @@ function ActionPage() {
   // post / edit / see_draft: the owner sees and can change the exact text before posting
   const tooLong = text.trim().length > 4000;
   return (
-    <ConfirmLayout demo={view?.demo === true} concierge={view.concierge === true}>
+    <ConfirmLayout demo={view?.demo === true} mode={view?.mode} concierge={view.concierge === true}>
       {header}
       <div className="mt-6">{reviewCard}</div>
       {r.urgent ? (
