@@ -1,7 +1,7 @@
 // Error tracking (Sentry) and product analytics (PostHog), loaded from their CDNs so the app
 // bundle and lockfile stay untouched. Both keys below are public by design.
 //
-// Rules (KABSI-SPEC D219):
+// Rules (docs/KABSI-PLAN.md section 2.2):
 // - Session replay only on public marketing pages. Never on /app, /partner, /staff, /start,
 //   /login, /a/*, /activate/*: those can show review text, names or emails.
 // - Event properties carry ids, country, source, plan or channel only. Never review text,
@@ -118,7 +118,7 @@ export function reportError(error: unknown, context: Record<string, unknown> = {
   }
 }
 
-// Event names and allowed properties come from KABSI-SPEC §8.
+// Event names and allowed properties come from docs/KABSI-PLAN.md and the G-47 event map.
 export type KabsiEvent =
   | "signup_started"
   | "business_selected"

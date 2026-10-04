@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Type-checks every Edge Function and runs the Deno tests. Copies supabase/functions to a scratch folder with
-# nodeModulesDir set, because the functions import npm packages (see docs/KABSI-STATE.md, Notes).
+# nodeModulesDir set, because the functions import npm packages (see docs/KABSI-PLAN.md Appendix A, working notes).
 set -euo pipefail
 scratch="$(mktemp -d)"
 cp -r supabase/functions/. "$scratch/"

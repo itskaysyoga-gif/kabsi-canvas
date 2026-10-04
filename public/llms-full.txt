@@ -2,7 +2,7 @@
 
 > Kabsi keeps a local business's Google Business Profile complete and current by following Google's own published guidance, and the owner approves every change: a Profile Score, a Do now list with a ready draft for each item, a reply to every review in the reviewer's language, a weekly post, photo checks, special hours and Listing Shield. Nothing is posted until the owner approves it. Kabsi is independent and not affiliated with Google. Short version: https://kabsi-app.lovable.app/llms.txt
 
-Last updated: 29 Sep 2026. Source: KABSI-SPEC D200 to D308.
+Last updated: 4 Oct 2026. Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md.
 
 # Kabsi Master Knowledge Base
 

@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LegalPage } from "@/components/marketing/legal";
 import { CONTACT_EMAIL, CONTACT_PHONE, pageHead } from "@/lib/site";
 
-// Privacy policy, written to match the system as built (D254). Every retention period and processor here
-// is implemented: see migrations 019 (deletion), 020 (retention) and KABSI-STATE.md. No em dashes.
+// Privacy policy, written to match the system as built. Every retention period and processor here
+// is implemented: see migrations 019 (deletion), 020 (retention) and docs/KABSI-PLAN.md Appendix A. No em dashes.
 export const Route = createFileRoute("/privacy")({
   head: () =>
     pageHead({
