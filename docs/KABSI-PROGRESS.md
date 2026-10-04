@@ -8,7 +8,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25).
+- P0.1-01 and P0.1-01b done (pull requests 13 and 15). P0.1-02a merged (17, 18). P0.1-02b merged in two parts (19, 20). The Deploy workflow now passes (fixed by PR 21). Still open before those can be marked done: the live-site and signed-in-app checks under After merge (the build sandbox cannot reach the site), and pasting the auth email templates into Supabase. The P0.1-02b test email was confirmed by Hussein on 4 Oct. P0.1-03 waits on Rashid's steps 1 and 2; P0.1-04 split in two: part A merged (PR 23), part B (daily AI budget) merged (PR 24). P0.1-05 (design tokens) merged (PR 25). P0.1-V1 and P0.1-V2 done (31, 32). P0.1-07 (database test suite) PR 33 open, CI green.
 
 ## Rashid's decisions and inputs (plan section 5)
 
@@ -49,9 +49,9 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-05 | Design tokens and shared components | Sonnet | merged (25); `/design` not yet looked at as staff | 25 | 4 Oct 2026 |
 | P0.1-06 | Demo workspace with fictional businesses | Opus | merged (28, 29); After-merge: Deploy and ops_events checks passed; mock-review email check and browser checks still open, see Evidence | 28, 29 | 4 Oct 2026 |
 | P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet (run on Opus in Hussein's session) | done (merged 31 on Hussein's "merge"; docs only, no After-merge checks) | 31 | 4 Oct 2026 |
-| P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | PR open (docs only); Hussein said merge 4 Oct | 32 | 4 Oct 2026 |
+| P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | done (merged 32 on Hussein's "merge"; docs only, no After-merge checks) | 32 | 4 Oct 2026 |
 | P0.1-V3 | Setup-call and partner-call booking links | Sonnet | todo | | |
-| P0.1-07 | Database test suite in CI | Opus | todo | | |
+| P0.1-07 | Database test suite in CI | Opus | PR open, CI green (231 tests); bad-policy proof in Evidence | 33 | 4 Oct 2026 |
 | P0.1-08 | Security hardening of the database API | Opus | todo | | |
 | P0.1-09 | Tenant model: organisations, connections, subscriptions | Opus | todo | | |
 | P0.1-10 | Append-only audit log and the "What Kabsi did" feed source | Opus | todo | | |
@@ -143,6 +143,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
+After the P0.1-07 pull request (33) is merged: nothing live to check (CI only, no database change). The next pull request that touches anything runs the `database` job; if it fails there and not here, compare the two runs.
+
 After the P0.1-06 part A pull request (28) is merged: the function versions are done (see Evidence). Still open:
 - A mock review added to a demo business (`mock_google_reviews`, google_location_id `locations/demo-harbour-lane-coffee`) is synced and drafted, and its email goes only to the demo login: `select to_address from emails where location_id in (select id from locations where is_demo)` returns only that address. Then the mock review, its review row, draft and action tokens are deleted (Hussein's "apply").
 - `select count(*) from ops_events where created_at > '<seed time>' and (title ilike '%Harbour Lane%' or title ilike '%Juniper%')` is 0.
@@ -180,6 +182,17 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### P0.1-07 (branch claude/h-p0-1-07, PR 33, 4 Oct 2026, Hussein's session)
+- Start of chat: P0.1-V2 left no After-merge checks (docs only); marked done. Read-only re-run: `ops_events` since 12:15 UTC with Harbour Lane or Juniper 0, demo `emails` rows 0; `list_edge_functions` all updated 2026-10-04 13:22 UTC.
+- Files: `.github/workflows/ci.yml` (job `database`), `scripts/db-test.sh`, `supabase/tests/_fixtures.psql`, `supabase/tests/rls_tables.sql`, `supabase/tests/rls_functions.sql`, `supabase/config.toml` (`[db] major_version = 17`, local stack only), `docs/testing.md`. No database change, no app code change.
+- How it runs: `supabase start` (realtime, studio, imgproxy, mailpit, edge-runtime, logflare, vector, supavisor, postgres-meta excluded) with `supabase/migrations` parked, then all 38 migrations in one transaction through psql, `cron.unschedule` on every job and `delete from net.http_request_queue` before commit (the migrations schedule jobs that call the production function URL through `call_internal`), then `supabase test db`. CLI pinned to 2.119.0 (the first run failed on "latest": GitHub API rate limit).
+- Done-when 1, the job runs on a pull request and passes: run https://github.com/rashidhamzy-hue/kabsi-canvas/actions/runs/37207946245 (job "Database (pgTAP on a local Supabase stack)", success): `Files=2, Tests=231 ... Result: PASS`, `# Failed (TODO) test 3: "anon cannot run google_mode()"` (expected until P0.1-08).
+- Done-when 2, a bad policy makes it fail: throwaway branch claude/h-p0-1-07-badpolicy (PR 34) adds `create policy p on locations for select using (true)`. Run https://github.com/rashidhamzy-hue/kabsi-canvas/actions/runs/37208177900 was still running when this line was written; the result follows in the next commit.
+- Done-when 3, under 10 minutes: "Database suite finished in 77 s" (job step 1 min 17 s, whole job 1 min 28 s).
+- What the suite checks: RLS on for every table in public; no anon or authenticated policy is `using (true)`; no readable view bypasses RLS; every table anon or authenticated can read has a victim fixture row; for each of the 41 tables and each persona (anon, stranger, owner of another business, member of another partner) the count of the victim's rows is 0; two control tests show the victim's own owner and partner member do see their rows; all 57 SECURITY DEFINER functions authenticated can run refuse a signed-in stranger (forbidden 42501, `already_on_kabsi`, an empty result or false), the list is compared with `pg_proc`; anon can run no SECURITY DEFINER function except `google_mode()` (TODO P0.1-08); the victim business, review and card are unchanged afterwards.
+- App checks in the sandbox: `npm run typecheck` passes, `npm run lint:changed` "No lintable files changed", `npm test` 19 passed. No screens changed.
+- Not run in the sandbox: the local stack. Docker image pulls for the Supabase auth and realtime images were refused (403 and 429), and a local replay on the raw Postgres image was blocked by the session's permission check; the suite was developed and proved on GitHub Actions only.
 
 ### After-merge checks run at the start of the P0.1-V2 chat (4 Oct 2026, Hussein's session)
 - `ops_events` since 12:15 UTC with Harbour Lane or Juniper in the title: 0 (read-only SQL). Demo `emails` rows: 0, demo `mock_google_reviews` rows: 24. The demo email check ("only the demo login") still has nothing to read: it needs a new mock review on a demo business, a database write that waits for Hussein's "apply".
@@ -337,6 +350,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Found, not done
 
+- P0.1-07: the repository is missing live migration `20260929084233_call_internal_send_anon_jwt` (it sets the anon JWT header in `call_internal`). The local stack therefore has the older `call_internal`; no test depends on it. Adding the file (copied from `supabase_migrations.schema_migrations`) was blocked in this session because it contains the public anon key; Rashid or Hussein can add it, or a later task can.
+- P0.1-07: repo migration versions differ from the live ones for files after 26 Sep (for example `20260929120000_jobs_heartbeat_check` is `20260929151116` live and applied after billing). The local replay order differs from production for that file; the suite passes either way. `deploy.yml` still asks for Supabase CLI "latest", which can hit the same GitHub API rate limit the CI job did.
 - P0.1-V2: Nora has no "suggested action" button (K-111, VIDEO #15), so the V15 line "and the button to do it" is cut until one exists. No task in the plan names it. Planning chat to decide where it belongs (P0.6-06 or P0.4-11).
 - P0.1-V2: VIDEO says the profile alert button is "Keep my hours" and the reply confirmation is green "Published". The app says "Keep my information" and "Posted". Same wording question as the V1 note for P0.1-13a.
 - P0.1-V2: the VIDEO plan's S13 is used by "#17" and W3, but there is no video 17 in the plan. Not touched.
@@ -363,6 +378,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Decisions to confirm
 
 (Build chats add decisions the plan did not cover here, one line each with the reason. The planning chat folds confirmed ones into the plan.)
+- P0.1-07: the CI job applies the migrations itself in one transaction instead of letting `supabase start` apply them, so pg_cron jobs never exist long enough to call the production function URL from CI.
+- P0.1-07: SECURITY DEFINER functions are tested as a signed-in stranger only; table reads are tested as all four personas. Every function checks membership before anything else, so the other personas would hit the same line.
 
 - Confirmed by Hussein 4 Oct (P0.1-V2): the sheets keep the app's wording ("Keep my information", "Posted"); the partner end card is approved and added to `brand-kit.md`; V10 and V14 move later in the calendar until P0.5-03 and P0.3-03 have merged. (Original note: V13 and W5 need a fourth end card, "End card, partner" (yellow button "Apply as a partner"), because the brand kit had only three.)
 - P0.1-V2: W4 keeps the "AI presenter" tag on screen for the whole video, not only the first 3 s (a trust video; the cost is nothing).
@@ -411,6 +428,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 4 Oct 2026 (Hussein's session): P0.1-V2 marked done (PR 32 merged, docs only). P0.1-07 on branch claude/h-p0-1-07, PR 33: database test suite in CI, 231 pgTAP tests, CI green, bad-policy proof on throwaway PR 34. Next: P0.1-08 (depends on P0.1-07 merged).
 - 4 Oct 2026 (Hussein's session): P0.1-V2 on branch claude/h-p0-1-v2, PR 32: shot sheets V09 to V16 and W1 to W5 (docs only). After-merge read-only checks re-run (0 demo ops events, functions 13:22 UTC); demo email and browser checks still open. Next: P0.1-V3 needs Rashid's hours first; otherwise P0.1-07.
 - 4 Oct 2026 (Hussein's session): PR 30 (approve copy) and PR 31 (P0.1-V1) merged on Hussein's "merge". Open: P0.1-06 demo email check (needs a mock review, Hussein's "apply"), browser checks, Supabase auth template paste (Rashid). Next: P0.1-V2.
 - 4 Oct 2026 (Hussein's session): P0.1-V1 on branch claude/h-p0-1-v1: brand kit, feature-truth and shot sheets V01 to V08 (docs only). Next: P0.1-V2.
