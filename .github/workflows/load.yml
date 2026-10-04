@@ -43,4 +43,4 @@ jobs:
         run: |
           eval "$(supabase status -o env)"
           export API_URL SERVICE_ROLE_KEY DB_URL
-          LOAD_LATENCY_MS=20 deno run -A scripts/load/mock-500.ts
+          LOAD_LATENCY_MS=20 deno run -A --node-modules-dir=auto --no-lock scripts/load/mock-500.ts

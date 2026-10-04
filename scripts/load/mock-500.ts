@@ -5,7 +5,7 @@
 // running time included.
 //
 // Run after `bash scripts/db-test.sh` (local stack up, migrations applied):
-//   eval "$(supabase status -o env)"; deno run -A scripts/load/mock-500.ts
+//   eval "$(supabase status -o env)"; deno run -A --node-modules-dir=auto --no-lock scripts/load/mock-500.ts
 // Env: API_URL, SERVICE_ROLE_KEY, DB_URL (from `supabase status -o env`); LOAD_BUSINESSES (500); LOAD_MINUTES (60);
 // LOAD_LATENCY_MS (0): added to every database call from the dispatcher, to stand in for the network between an Edge
 // Function and the database in production.

@@ -75,7 +75,7 @@ schedule back by what is left of the minute. It fails unless every business sync
 no job died or failed, nothing was due at the end and no dispatcher run came near the function time limit. CI adds
 20 ms to every database call (`LOAD_LATENCY_MS`) to stand in for the network in production. Locally:
 `bash scripts/db-test.sh`, then `eval "$(supabase status -o env)"; export API_URL SERVICE_ROLE_KEY DB_URL;
-deno run -A scripts/load/mock-500.ts`.
+deno run -A --node-modules-dir=auto --no-lock scripts/load/mock-500.ts`.
 
 ## App and functions
 
