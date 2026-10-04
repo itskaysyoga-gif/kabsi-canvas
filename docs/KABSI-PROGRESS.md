@@ -246,6 +246,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 4 Oct 2026 (Hussein's session): the Deploy run for the P0.1-02b part B merge (run 37185310050) passed the Edge Functions job and failed the Worker job: wrangler-action installs Wrangler 3.90.0, which does not read `wrangler.jsonc`, so it reports "Missing entry-point". Same failure as the four runs on 29 Sep. Fix: pin `wranglerVersion: "3.114.17"` in `.github/workflows/deploy.yml` (branch claude/h-deploy-wrangler). Verified with `wrangler deploy --dry-run` on a clean copy of `workers/kabsi-go`: 3.90.0 fails with the same error, 3.114.17 bundles it and shows the STICKERS binding and vars. The first successful Worker deploy from CI will publish the Worker code now on main to go.kabsi.co.
+
 - 4 Oct 2026 (Hussein's session): P0.1-02b part B on branch claude/h-p0-1-02b-b (emails, Edge Function copy, Nora, facts file). Next: P0.1-03 needs Rashid's steps 1 and 2 first.
 
 - 4 Oct 2026 (Hussein's session): PRs 17 and 18 found merged on main; live After-merge checks could not run (sandbox proxy). P0.1-02b split in two; part A (app screens) on branch claude/h-p0-1-02b. Next: part B, then P0.1-03.
