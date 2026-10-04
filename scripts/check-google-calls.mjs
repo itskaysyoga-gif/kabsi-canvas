@@ -46,10 +46,14 @@ let bad = 0;
 for (const file of files) {
   for (const f of checkSource(readFileSync(file, "utf8"))) {
     bad++;
-    console.error(`${relative(root, file)}:${f.line}: Google API call outside supabase/functions/_shared/google/: ${f.text}`);
+    console.error(
+      `${relative(root, file)}:${f.line}: Google API call outside supabase/functions/_shared/google/: ${f.text}`,
+    );
   }
 }
 if (bad) {
-  console.error(`\n${bad} Google API call(s) outside the Google layer. Add the call to supabase/functions/_shared/google/ and import it from there (K-34).`);
+  console.error(
+    `\n${bad} Google API call(s) outside the Google layer. Add the call to supabase/functions/_shared/google/ and import it from there (K-34).`,
+  );
   process.exit(1);
 }
