@@ -46,7 +46,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | merged (23); After-merge checks partly run, see Evidence | 23 | 4 Oct 2026 |
 | P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | merged (24); After-merge checks partly run, see Evidence | 24 | 4 Oct 2026 |
 | P0.1-05 | Design tokens and shared components | Sonnet | merged (25); `/design` not yet looked at as staff | 25 | 4 Oct 2026 |
-| P0.1-06 | Demo workspace with fictional businesses | Opus | todo | | |
+| P0.1-06 | Demo workspace with fictional businesses | Opus | split in two: part A (database, seed, isolation) PR open; part B (Demo data tag, PostHog off) todo | A: see Log | 4 Oct 2026 |
 | P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet | todo | | |
 | P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | todo | | |
 | P0.1-V3 | Setup-call and partner-call booking links | Sonnet | todo | | |
@@ -142,6 +142,11 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
+After the P0.1-06 part A pull request is merged (Deploy publishes every function):
+- `list_edge_functions`: `api`, `content`, `posts-weekly`, `partner` newer than the merge time.
+- A mock review added to a demo business (`mock_google_reviews`, google_location_id `locations/demo-harbour-lane-coffee`) is synced and drafted, and its email goes only to the demo login: `select to_address from emails where location_id in (select id from locations where is_demo)` returns only that address. Then the mock review, its review row, draft and action tokens are deleted (Hussein's "apply").
+- `select count(*) from ops_events where created_at > '<seed time>' and (title ilike '%Harbour Lane%' or title ilike '%Juniper%')` is 0.
+
 After the P0.1-02b part B pull request (20) was merged: Deploy passed and the mock-review check passed (see Evidence). Still open:
 - Paste the four `emails/auth/*.html` files into the Supabase Auth email templates (dashboard step for Rashid or Hussein); the dashboard copies still carry the old footer.
 - Done 4 Oct: Hussein confirmed the "New review for Yawmiyati (3 of 5)" test email from screenshots on desktop and phone: the button reads "Review reply", the new footer shows, and there is no address.
@@ -169,6 +174,17 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### P0.1-06 part A (branch claude/h-p0-1-06, 4 Oct 2026, Hussein's session)
+- Demo login: Hussein chose rashid.hamzy+kabsidemo@gmail.com (sign-in codes reach Rashid's inbox, no manual step; can move to demo@kabsi.co later). The address is kept out of the repository: it lives in `app_settings.demo_login_email`, read by `public.demo_login_email()` (service role only).
+- Migration `20261004120000_demo_workspace.sql` shown to Hussein and applied after his "apply" (4 Oct). First attempt failed and rolled back as a whole (`cannot remove parameter defaults` on `ops_digest`; read back: no `is_demo` column, cap still 30); the file now keeps `p_hours integer default 24` and the second apply succeeded. Read back: `concierge_cap` 20, 9 ops triggers carry a WHEN condition, `ops_digest` keeps `DEFAULT 24`, `authenticated` cannot run `demo_login_email()` or `email_allowed_for_location()`.
+- Security advisors after it: three new warnings, `is_demo_location`, `is_demo_login`, `is_demo_user` executable by anon and authenticated. Fix in `20261004121000_demo_login_grants.sql` (anon loses all three, `is_demo_login` only for supabase_auth_admin and service_role); waiting for Hussein's "apply".
+- Local proof on a throwaway Postgres 16 with a stub of the live tables and triggers: migration and seed apply; the seed runs twice without error or duplicates (2 demo businesses, 24 reviews, 9 drafts, 1 open hours change, Thanksgiving 26 Nov and Christmas Eve drafts); demo email, demo chat (by location and by the demo user), demo plan and demo location update give 0 ops events, while a real signup and a real business give 2; a demo business with a partner is refused (check `demo_has_no_partner`); `email_allowed_for_location` false for another address, true for the demo login (any case) and for a non-demo business.
+- Code: `_shared/demo.ts` (`locations/demo-` ids, `googleModeFor`), `_shared/google.ts` (all 8 mock checks per business: a demo business is mock even when GOOGLE_MODE is live), `_shared/kabsi.ts` (`sendEmail` asks `email_allowed_for_location` before writing a row; a refused address writes nothing and sends nothing), `posts-weekly` (skips `is_demo`). Test `_shared/demo.test.ts` written first; it failed (module not found), then 2 passed.
+- `deno check` passes for 15 of 16 functions; `site-assets` not checked here (deno.land unreachable from the sandbox, import unchanged; CI checks it). `deno test --no-check _shared/`: 45 passed.
+- R-09: `concierge_cap` 30 to 20; `knowledge/kabsi-facts.md` (two lines) and `src/lib/concierge.ts` say 20 businesses; `public/llms-full.txt` rebuilt (13211 words).
+- PR 27 test data deleted on Hussein's "apply" (4 Oct): 3 `action_tokens`, 1 `reply_drafts`, review 9c758bf2-d99d-4b7d-b03a-e0455bd5f999, mock row mock-4d80969db7fc4cf6ad8c9efac5d9dde8. Kept: email row 87c67339-587a-4c0e-a5bc-bf56140e8690 and today's `ai_usage` row.
+- NOT done yet: the demo login and the seed. Hussein asked for the login to be created with the Auth admin API (email confirmed, no password), not by SQL into `auth`; this session has no service role key, so the login is created outside the session first, then the seed runs (after Hussein's "apply") and a sign-in code request is tested.
 
 ### Email buttons and phone layout (branch claude/h-email-buttons, 4 Oct 2026, Hussein's request, not a plan task)
 - Review email: one yellow "Review reply"; "Open Kabsi" is now a text link on the same wrapping line as Edit and Skip. Daily digest (several reviews in one email): each review has text links only (Review reply, Edit, Skip) and the layout's yellow "Open Kabsi" is the one button. Urgent and "no safe draft" emails keep text links plus the layout's yellow "Open Kabsi". Every other template already had one layout button and no other yellow; the layout is shared, so they all got the new button size.
@@ -269,6 +285,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Found, not done
 
+- For P0.4-08 (Hussein, 4 Oct): the review email subject should be "<Business>: new <n>-star review, reply ready" with a preview line, instead of "New review for <Business> (3 of 5)".
+- After-merge check for the email-buttons change (PR 27): Hussein checked the test email on phone and laptop on 4 Oct: OK.
 - Email buttons: fixed by branch claude/h-email-buttons (see Evidence). The Supabase Auth emails have no button; their yellow box is the one-time code display, left as it is (K-102 says one yellow button; Rashid to confirm the code box is fine).
 - `scripts/build-kb.mjs` header retired names: fixed by P0.1-02a (pull request 18).
 - `scripts/build-kb.mjs` D261 and D244 citations: fixed by P0.1-02a (pull request 18).
@@ -287,6 +305,11 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 (Build chats add decisions the plan did not cover here, one line each with the reason. The planning chat folds confirmed ones into the plan.)
 
+- P0.1-06: demo businesses stay in the `api` cron (sync, drafts, emails, Google Protection, weekly report) because recordings S05 and S06 need a real new-review email and a Weekly Care Report email; isolation comes from the email guard (demo login only), the per-business mock and the Slack and metrics exclusions, not from skipping the cron. Trials and renewals never apply (no plan), ratings need a place_id (none).
+- P0.1-06: a demo business is active without any plan (`refresh_location_status` returns early), so no trial, payment or plan row exists for it; partner billing cannot count it (check: no partner).
+- P0.1-06: "one holiday-hours reminder" is seeded as a drafted special-hours entry (Thanksgiving for the café, Christmas Eve for the salon); the holiday calendar itself is P0.5-03.
+- P0.1-06: the review links of the demo businesses open https://kabsi.co, never a Google page, because the businesses are invented.
+- P0.1-06: the task changes 13 code files, so it is split: part A database, seed and backend isolation; part B the "Demo data" tag (app header and the email reply page) and PostHog off for demo businesses.
 - P0.1-02a: every trade page headline (`verticals.tsx` h1) is now the brand line, because the plan gave no per-trade headline and the old ones used the retired slogans.
 - P0.1-02a: the Gemini question replaces the older "How is this different from Google's own AI replies?" question, so the FAQ does not carry two answers on the same topic.
 - P0.1-02a: four of the six Pro lines on `/pricing` carry an "Early access" pill (Know when Google changes your details, Photos and updates prepared for you, Holiday hours reminders, Weekly Care Report) because they are not live yet.
@@ -316,6 +339,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 4 Oct 2026 (Hussein's session): After-merge checks: Deploy run 9 (PR 27) success, all functions updated 08:58 UTC; live site still blocked from the sandbox. PR 27 email confirmed by Hussein; its test data deleted. P0.1-06 part A on branch claude/h-p0-1-06 (migration applied, grants fix and seed waiting). Next: demo login, seed, then P0.1-06 part B.
 - 4 Oct 2026 (Hussein's session): PR 26 merged (progress notes only). Email button and phone-layout fix on branch claude/h-email-buttons. Next: P0.1-V1.
 - 4 Oct 2026 (Hussein's session): PR 25 (P0.1-05) merged on Hussein's "merge". Live mock-review check for 04a and 04b passed; cap test and screen checks still open. Next: P0.1-V1.
 - 4 Oct 2026 (Hussein's session): PRs 23 and 24 merged. After-merge read-only checks for 04a and 04b run (Deploy green, function versions newer); the database-writing and screen checks are still open. P0.1-05 on branch claude/h-p0-1-05, PR 25. Next: P0.1-V1, or the open After-merge checks.

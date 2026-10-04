@@ -92,7 +92,7 @@ begin
 end $$;
 
 -- Metrics: the Slack daily digest leaves demo businesses and the demo login out of every count.
-create or replace function public.ops_digest(p_hours integer) returns jsonb
+create or replace function public.ops_digest(p_hours integer default 24) returns jsonb
 language sql stable security definer set search_path = '' as $$
   with w as (select now() - make_interval(hours => p_hours) as since),
   d as (select id from public.locations where is_demo)
@@ -105,10 +105,10 @@ language sql stable security definer set search_path = '' as $$
     'businesses_active_total', (select count(*) from public.locations where status = 'active' and not is_demo),
     'waiting_for_access', (select count(*) from public.locations where status = 'access_pending' and not is_demo),
     'reviews_new', (select count(*) from public.reviews, w where created_at > since and location_id not in (select id from d)),
-    'replies_posted', (select count(*) from public.publications, w where target_type = 'review_reply' and status in ('live','in_review') and created_at > since and location_id not in (select id from d)),
+    'replies_posted', (select count(*) from public.publications, w where target_type = 'review_reply' and status in ('live','in_review') and created_at > since and (location_id is null or location_id not in (select id from d))),
     'drafts_waiting', (select count(*) from public.reviews where state in ('drafted','blocked') and location_id not in (select id from d)),
     'urgent_waiting', (select count(*) from public.reviews where state in ('drafted','blocked') and urgency = 'urgent' and location_id not in (select id from d)),
-    'posts_published', (select count(*) from public.publications, w where target_type = 'local_post' and status in ('live','in_review') and created_at > since and location_id not in (select id from d)),
+    'posts_published', (select count(*) from public.publications, w where target_type = 'local_post' and status in ('live','in_review') and created_at > since and (location_id is null or location_id not in (select id from d))),
     'shield_changes', (select count(*) from public.listing_changes, w where created_at > since and location_id not in (select id from d)),
     'taps', (select count(*) from public.taps, w where created_at > since and not is_bot and (location_id is null or location_id not in (select id from d))),
     'chats', (select count(*) from public.chat_conversations, w where created_at > since and message_count > 0 and (location_id is null or location_id not in (select id from d))),
@@ -124,7 +124,7 @@ language sql stable security definer set search_path = '' as $$
     'emails_sent', (select count(*) from public.emails, w where created_at > since and status in ('sent','delivered') and (location_id is null or location_id not in (select id from d))),
     'emails_failed', (select count(*) from public.emails, w where created_at > since and status in ('failed','bounced') and coalesce(error,'') not like 'test address%'),
     'jobs_failed', (select count(*) from public.jobs_log, w where created_at > since and not ok),
-    'publications_failed', (select count(*) from public.publications, w where updated_at > since and status = 'failed' and location_id not in (select id from d)),
+    'publications_failed', (select count(*) from public.publications, w where updated_at > since and status = 'failed' and (location_id is null or location_id not in (select id from d))),
     'google_mode', (select value from public.app_settings where key = 'google_mode'),
     'slack_queue', (select count(*) from public.ops_events where sent_at is null)
   )

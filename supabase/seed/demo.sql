@@ -3,7 +3,8 @@
 -- invented; "Larkhaven" is not a real town and +1 (555) 010-01xx numbers are reserved for fiction.
 --
 -- Before running: app_settings.demo_login_email must hold the demo login (set separately, so no personal address
--- is written in the repository). The demo login signs in with an email code like any owner.
+-- is written in the repository), and that account must exist, created with the Supabase Auth admin API (email
+-- confirmed, no password). The demo login signs in with an email code like any owner.
 --
 -- Safe to run twice: fixed ids and "on conflict do nothing". It never updates or deletes anything; to reset the
 -- demo after a recording, delete the two demo businesses first (only with the owner's explicit go).
@@ -21,18 +22,11 @@ begin
     raise exception 'Set app_settings.demo_login_email before running the demo seed';
   end if;
 
-  -- The demo login: an ordinary email-code account (no password).
+  -- The demo login is created first with the Supabase Auth admin API (email confirmed, no password); the seed only
+  -- links it. It never writes to the auth schema.
   select id into v_user from auth.users where lower(email) = v_email;
   if v_user is null then
-    v_user := gen_random_uuid();
-    insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
-      raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
-      confirmation_token, recovery_token, email_change_token_new, email_change)
-    values ('00000000-0000-0000-0000-000000000000', v_user, 'authenticated', 'authenticated', v_email, '', now(),
-      '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', '', '', '');
-    insert into auth.identities (provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
-    values (v_user::text, v_user, jsonb_build_object('sub', v_user::text, 'email', v_email, 'email_verified', true),
-      'email', now(), now(), now());
+    raise exception 'Create the demo login with the Auth admin API before running the demo seed';
   end if;
 
   -- Two fictional businesses, active, always on mock Google ('locations/demo-' ids), no plan and no partner.
