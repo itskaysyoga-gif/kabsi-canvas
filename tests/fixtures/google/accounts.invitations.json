@@ -1,0 +1,20 @@
+{
+  "_doc": "https://developers.google.com/my-business/reference/accountmanagement/rest/v1/accounts.invitations/list",
+  "_note": "Response body of accounts.invitations.list (Invitation objects with targetLocation). Built from the documented schema; replace with a captured response on Gate A day (P0.7-01).",
+  "invitations": [
+    {
+      "name": "accounts/112233445566778899000/invitations/998877665544332211",
+      "role": "MANAGER",
+      "targetType": "LOCATIONS_ONLY",
+      "targetLocation": {
+        "locationName": "Example Bakery",
+        "address": "1 Main Street, Example Town, CA 00000"
+      },
+      "targetAccount": {
+        "name": "accounts/556677889900112233",
+        "accountName": "Example Owner",
+        "type": "PERSONAL"
+      }
+    }
+  ]
+}

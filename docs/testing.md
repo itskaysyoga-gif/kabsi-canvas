@@ -40,3 +40,15 @@ When you add a table or a browser-callable function, add its fixture row or its 
 
 `npm run typecheck`, `npm run lint:changed`, `npm test`, `npm run build`, and `bash scripts/deno-check.sh` for Edge
 Functions (plan section 2.4).
+
+## Google layer (P0.1-11)
+
+Every Google call goes through `supabase/functions/_shared/google/` (K-34). Each area (accounts, locations, reviews,
+posts, media, performance, attributes, notifications, updates, admins, verifications, placeActions, places) has a
+`live.ts` and a `mock.ts` that return the same wire types (`types.ts`); `index.ts` picks one per business (a demo
+business is always mock, R-17) and maps Google's responses to the app's shapes.
+
+`tests/fixtures/google/*.json` hold one documented Google response per call, with the documentation page in `_doc`.
+`_shared/google/mocks.test.ts` (run by `scripts/deno-check.sh`) checks that every field a mock returns exists in the
+fixture with the same type. On Gate A day (P0.7-01) the fixtures are replaced with captured real responses and the
+same test then holds the mocks to Google's real behaviour.

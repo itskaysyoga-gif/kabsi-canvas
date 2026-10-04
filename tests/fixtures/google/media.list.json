@@ -1,0 +1,15 @@
+{
+  "_doc": "https://developers.google.com/my-business/reference/rest/v4/accounts.locations.media/list",
+  "_note": "Response body of media.list. Built from the documented schema; replace with a captured response on Gate A day (P0.7-01).",
+  "mediaItems": [
+    {
+      "name": "accounts/112233445566778899000/locations/1234567890123456789/media/AF1QipExample",
+      "mediaFormat": "PHOTO",
+      "locationAssociation": { "category": "EXTERIOR" },
+      "googleUrl": "https://lh3.googleusercontent.com/p/example",
+      "createTime": "2026-09-30T10:15:00.000Z"
+    }
+  ],
+  "totalMediaItemCount": 1,
+  "nextPageToken": "token"
+}

@@ -1,0 +1,34 @@
+{
+  "_doc": "https://developers.google.com/my-business/reference/businessinformation/rest/v1/locations/get",
+  "_note": "A Location resource with readMask=title,phoneNumbers,storefrontAddress,websiteUri,regularHours,specialHours,categories. Built from the documented schema; replace with a captured response on Gate A day (P0.7-01).",
+  "name": "locations/1234567890123456789",
+  "title": "Example Bakery",
+  "languageCode": "en",
+  "storeCode": "store-1",
+  "phoneNumbers": { "primaryPhone": "(555) 555-0100", "additionalPhones": ["(555) 555-0101"] },
+  "categories": {
+    "primaryCategory": { "name": "categories/gcid:bakery", "displayName": "Bakery" },
+    "additionalCategories": [{ "name": "categories/gcid:cafe", "displayName": "Cafe" }]
+  },
+  "storefrontAddress": {
+    "regionCode": "US",
+    "languageCode": "en",
+    "postalCode": "00000",
+    "administrativeArea": "CA",
+    "locality": "Example Town",
+    "addressLines": ["1 Main Street"]
+  },
+  "websiteUri": "https://example.com",
+  "regularHours": {
+    "periods": [
+      { "openDay": "MONDAY", "openTime": { "hours": 9, "minutes": 0 }, "closeDay": "MONDAY", "closeTime": { "hours": 17, "minutes": 0 } }
+    ]
+  },
+  "specialHours": {
+    "specialHourPeriods": [
+      { "startDate": { "year": 2026, "month": 12, "day": 25 }, "endDate": { "year": 2026, "month": 12, "day": 25 }, "openTime": { "hours": 10, "minutes": 0 }, "closeTime": { "hours": 14, "minutes": 0 }, "closed": false }
+    ]
+  },
+  "metadata": { "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4", "hasGoogleUpdated": false, "hasVoiceOfMerchant": true, "canDelete": true },
+  "profile": { "description": "Fresh bread every morning." }
+}

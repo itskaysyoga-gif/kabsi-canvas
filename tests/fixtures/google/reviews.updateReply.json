@@ -1,0 +1,6 @@
+{
+  "_doc": "https://developers.google.com/my-business/reference/rest/v4/accounts.locations.reviews/updateReply",
+  "_note": "A ReviewReply resource returned by updateReply. Built from the documented schema; replace with a captured response on Gate A day (P0.7-01).",
+  "comment": "Thank you, Sam.",
+  "updateTime": "2026-09-30T12:00:00.000Z"
+}

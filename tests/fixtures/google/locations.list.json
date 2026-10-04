@@ -1,0 +1,20 @@
+{
+  "_doc": "https://developers.google.com/my-business/reference/businessinformation/rest/v1/accounts.locations/list",
+  "_note": "Response body of accounts.locations.list with readMask=name,title,metadata. Built from the documented schema; replace with a captured response on Gate A day (P0.7-01).",
+  "locations": [
+    {
+      "name": "locations/1234567890123456789",
+      "title": "Example Bakery",
+      "metadata": {
+        "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4",
+        "mapsUri": "https://maps.google.com/maps?cid=1",
+        "newReviewUri": "https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4",
+        "hasGoogleUpdated": false,
+        "hasVoiceOfMerchant": true,
+        "canDelete": true
+      }
+    }
+  ],
+  "nextPageToken": "token",
+  "totalSize": 1
+}

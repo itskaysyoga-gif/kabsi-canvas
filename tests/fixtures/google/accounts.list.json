@@ -1,0 +1,17 @@
+{
+  "_doc": "https://developers.google.com/my-business/reference/accountmanagement/rest/v1/accounts/list",
+  "_note": "Response body of accounts.list (ListAccountsResponse with Account objects). Built from the documented schema; replace with a captured response on Gate A day (P0.7-01).",
+  "accounts": [
+    {
+      "name": "accounts/112233445566778899000",
+      "accountName": "Kabsi Clients",
+      "type": "LOCATION_GROUP",
+      "role": "OWNER",
+      "verificationState": "UNVERIFIED",
+      "vettedState": "NOT_VETTED",
+      "accountNumber": "1234567890",
+      "permissionLevel": "OWNER_LEVEL"
+    }
+  ],
+  "nextPageToken": "token"
+}

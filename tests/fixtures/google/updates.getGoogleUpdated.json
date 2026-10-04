@@ -1,0 +1,7 @@
+{
+  "_doc": "https://developers.google.com/my-business/reference/businessinformation/rest/v1/locations/getGoogleUpdated",
+  "_note": "A GoogleUpdatedLocation. Built from the documented schema; replace with a captured response on Gate A day (P0.7-01).",
+  "location": { "name": "locations/1234567890123456789", "title": "Example Bakery", "websiteUri": "https://example.com" },
+  "diffMask": "websiteUri",
+  "pendingMask": ""
+}
