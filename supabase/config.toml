@@ -44,3 +44,8 @@ verify_jwt = true
 # 29 Sep: api, assistant, lead and review-link stay true. Browser calls without a session send the public anon JWT
 # (src/lib/supabase.ts anonHeaders), so no function has to skip verification for them. Only callers that cannot send
 # a JWT at all (tap from the Worker, Slack, health, brand, site-assets) are false.
+
+# Local stack only (P0.1-07, scripts/db-test.sh): the database test job runs the same Postgres major version as
+# production. `supabase functions deploy` does not read this section.
+[db]
+major_version = 17

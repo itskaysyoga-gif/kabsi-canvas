@@ -1,0 +1,128 @@
+-- Shared fixtures for the database suite (P0.1-07). Included with \ir by each test file, inside its transaction, so
+-- everything here is rolled back. Not a test file: pg_prove runs *.sql only.
+--
+-- The victim: owner A of business LA, partner P with member PA, and one row in every table that signed-in users can
+-- read. The personas: anon, stranger S (no memberships), owner B of business LB, member QA of partner Q.
+-- A new table that anon or authenticated can read needs a victim row here, or rls_tables.sql fails.
+--
+-- Fixed ids (all invented):
+--   users     A ..a1, PA ..a2, staff X ..a3, S ..b1, B ..b2, QA ..b3
+--   LA ..c1, LB ..c2, P ..d1, Q ..d2, review ..e1, other victim rows ..f*
+
+create schema if not exists tests;
+grant usage on schema tests to anon, authenticated;
+
+insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+select '00000000-0000-0000-0000-000000000000', u.id, 'authenticated', 'authenticated', u.email, now(), '{}', '{}', now(), now()
+from (values
+  ('00000000-0000-4000-8000-0000000000a1'::uuid, 'victim-owner@example.test'),
+  ('00000000-0000-4000-8000-0000000000a2'::uuid, 'victim-partner@example.test'),
+  ('00000000-0000-4000-8000-0000000000a3'::uuid, 'victim-staff@example.test'),
+  ('00000000-0000-4000-8000-0000000000b1'::uuid, 'stranger@example.test'),
+  ('00000000-0000-4000-8000-0000000000b2'::uuid, 'other-owner@example.test'),
+  ('00000000-0000-4000-8000-0000000000b3'::uuid, 'other-partner@example.test')
+) as u(id, email);
+
+-- Victim world.
+insert into public.partners (id, name, handle, status, contact_email)
+values ('00000000-0000-4000-8000-0000000000d1', 'Victim Partner', 'victim-partner', 'active', 'victim-partner@example.test');
+insert into public.partner_members (partner_id, user_id, role)
+values ('00000000-0000-4000-8000-0000000000d1', '00000000-0000-4000-8000-0000000000a2', 'owner');
+insert into public.locations (id, name, place_id, partner_id)
+values ('00000000-0000-4000-8000-0000000000c1', 'Victim Bakery', 'victim-place', '00000000-0000-4000-8000-0000000000d1');
+insert into public.location_members (location_id, user_id, role)
+values ('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000a1', 'owner');
+insert into public.staff (user_id, name) values ('00000000-0000-4000-8000-0000000000a3', 'Victim Staff');
+
+insert into public.reviews (id, location_id, google_review_id, star_rating, review_created_at)
+values ('00000000-0000-4000-8000-0000000000e1', '00000000-0000-4000-8000-0000000000c1', 'victim-review', 5, now());
+insert into public.reply_drafts (review_id, version, body, source, safety_ok)
+values ('00000000-0000-4000-8000-0000000000e1', 1, 'Thank you for visiting.', 'ai', true);
+insert into public.cards (code, location_id, partner_id) values ('VCTM22', '00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000d1');
+insert into public.card_orders (id, location_id, partner_id, quantity)
+values ('00000000-0000-4000-8000-0000000000f1', '00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000d1', 1);
+insert into public.taps (code, location_id, source) values ('VCTM22', '00000000-0000-4000-8000-0000000000c1', 'qr');
+insert into public.action_tokens (token_hash, location_id, user_id, action, target_type, target_id, expires_at)
+values ('victim-token', '00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000a1', 'open', 'inbox', 'victim', now() + interval '1 day');
+insert into public.ai_usage (location_id) values ('00000000-0000-4000-8000-0000000000c1');
+insert into public.concierge_tasks (id, location_id, kind) values ('00000000-0000-4000-8000-0000000000f2', '00000000-0000-4000-8000-0000000000c1', 'invite');
+insert into public.emails (location_id, partner_id, kind, to_address, subject)
+values ('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000d1', 'test', 'victim-owner@example.test', 'Victim email');
+insert into public.gbp_posts (location_id, owner_input) values ('00000000-0000-4000-8000-0000000000c1', 'Victim post');
+insert into public.jobs_log (job, ok) values ('victim-job', true);
+insert into public.leads (name, email) values ('Victim Lead', 'victim-lead@example.test');
+insert into public.listing_baselines (location_id, fields) values ('00000000-0000-4000-8000-0000000000c1', '{}');
+insert into public.listing_changes (location_id, field, detected_by) values ('00000000-0000-4000-8000-0000000000c1', 'phone', 'scheduled_check');
+insert into public.partner_invites (partner_id, business_email) values ('00000000-0000-4000-8000-0000000000d1', 'invitee@example.test');
+insert into public.partner_invoices (id, partner_id, month, active_count, rate_usd, amount_usd)
+values ('00000000-0000-4000-8000-0000000000f3', '00000000-0000-4000-8000-0000000000d1', '2026-09-01', 1, 10, 10);
+insert into public.payments (location_id, item, amount_usd, method) values ('00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 10, 'cash');
+insert into public.photos (location_id, storage_path) values ('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000c1/victim.jpg');
+insert into public.plans (location_id, kind) values ('00000000-0000-4000-8000-0000000000c1', 'trial');
+insert into public.profile_tasks (id, location_id, key, title, why, path, points)
+values ('00000000-0000-4000-8000-0000000000f4', '00000000-0000-4000-8000-0000000000c1', 'victim', 'Victim task', 'Because', '/app', 1);
+insert into public.publications (location_id, target_type, target_id, payload, approved_by, channel)
+values ('00000000-0000-4000-8000-0000000000c1', 'review_reply', '00000000-0000-4000-8000-0000000000e1', '{}', '00000000-0000-4000-8000-0000000000a1', 'dashboard');
+insert into public.rating_snapshots (location_id, taken_on) values ('00000000-0000-4000-8000-0000000000c1', current_date);
+insert into public.special_hours (location_id, start_date, end_date, closed) values ('00000000-0000-4000-8000-0000000000c1', '2026-12-24', '2026-12-24', true);
+insert into public.usdt_claims (id, kind, location_id, item, network, tx_ref)
+values ('00000000-0000-4000-8000-0000000000f5', 'plan', '00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 'trc20', 'victimtx01');
+insert into public.weekly_reports (location_id, week_of, data) values ('00000000-0000-4000-8000-0000000000c1', '2026-09-28', '{}');
+insert into public.billing_invoices (id, location_id, item, amount_usd, pay_currency, order_id)
+values ('00000000-0000-4000-8000-0000000000f6', '00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 10, 'usdttrc20', 'victim-order');
+insert into public.chat_conversations (id, visitor_id, user_id, location_id)
+values ('00000000-0000-4000-8000-0000000000f7', 'victim-visitor', '00000000-0000-4000-8000-0000000000a1', '00000000-0000-4000-8000-0000000000c1');
+insert into public.chat_messages (conversation_id, role, content) values ('00000000-0000-4000-8000-0000000000f7', 'user', 'Hello');
+insert into public.contacts (email) values ('victim-contact@example.test');
+insert into public.mock_listings (google_location_id, fields) values ('locations/mock-victim', '{}');
+insert into public.mock_google_reviews (google_location_id, reviewer_name, star_rating) values ('locations/mock-victim', 'Victim Reviewer', 5);
+insert into public.trial_grants (place_id, location_id) values ('victim-place', '00000000-0000-4000-8000-0000000000c1');
+insert into public.rate_limits (key) values ('victim');
+insert into public.billing_events (provider, event_key) values ('nowpayments', 'victim-event');
+
+-- Every row that exists now belongs to the victim side (rows seeded by migrations included: no persona may read
+-- them either). Physical row ids are stable inside this transaction because nothing below updates them.
+create table tests.victim_rows (tbl text primary key, ctids tid[] not null);
+do $$
+declare t text; arr tid[];
+begin
+  for t in select c.relname from pg_class c where c.relnamespace = 'public'::regnamespace and c.relkind in ('r', 'p') loop
+    execute format('select coalesce(array_agg(ctid), ''{}'') from public.%I', t) into arr;
+    insert into tests.victim_rows values (t, arr);
+  end loop;
+end $$;
+grant select on tests.victim_rows to anon, authenticated;
+
+-- Rows of the victim side that the current role can see. No privilege on the table counts as seeing nothing.
+create function tests.visible_victim_rows(p_table text) returns bigint language plpgsql as $$
+declare n bigint;
+begin
+  execute format('select count(*) from public.%I where ctid = any ($1)', p_table)
+    into n using (select ctids from tests.victim_rows where tbl = p_table);
+  return n;
+exception when insufficient_privilege then
+  return 0;
+end $$;
+grant execute on function tests.visible_victim_rows(text) to anon, authenticated;
+
+-- Persona world.
+insert into public.locations (id, name, place_id)
+values ('00000000-0000-4000-8000-0000000000c2', 'Other Barber', 'other-place');
+insert into public.location_members (location_id, user_id, role)
+values ('00000000-0000-4000-8000-0000000000c2', '00000000-0000-4000-8000-0000000000b2', 'owner');
+insert into public.partners (id, name, handle, status, contact_email)
+values ('00000000-0000-4000-8000-0000000000d2', 'Other Partner', 'other-partner', 'active', 'other-partner@example.test');
+insert into public.partner_members (partner_id, user_id, role)
+values ('00000000-0000-4000-8000-0000000000d2', '00000000-0000-4000-8000-0000000000b3', 'owner');
+
+-- Switch persona: select tests.act_as('anon') or tests.act_as('<user uuid>'), then reset role.
+create function tests.act_as(p_who text) returns void language plpgsql as $$
+begin
+  if p_who = 'anon' then
+    perform set_config('request.jwt.claims', '{"role":"anon"}', true);
+    perform set_config('role', 'anon', true);
+  else
+    perform set_config('request.jwt.claims', json_build_object('sub', p_who, 'role', 'authenticated')::text, true);
+    perform set_config('role', 'authenticated', true);
+  end if;
+end $$;

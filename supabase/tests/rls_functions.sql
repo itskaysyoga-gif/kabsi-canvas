@@ -1,0 +1,138 @@
+-- P0.1-07: every SECURITY DEFINER function in public that authenticated can execute refuses a non-member (K-42, G-17).
+-- One test per function, run as a signed-in stranger against the victim's business, partner and rows. The coverage
+-- test reads pg_proc, so a new browser-callable function fails the suite until it has a line here.
+begin;
+create extension if not exists pgtap with schema extensions;
+select * from no_plan();
+
+\ir _fixtures.psql
+
+create temp table tested (sig text primary key);
+grant select on tested to authenticated;
+insert into tested values
+  ('activate_card(text,uuid,text)'), ('add_photo(uuid,text)'), ('billing_invoice_status(uuid)'),
+  ('billing_prepare_invoice(uuid,text,text,boolean)'), ('cancel_location_deletion(uuid)'), ('choose_plan(uuid,text)'),
+  ('claim_partner_membership()'), ('create_review_link(uuid,text)'), ('generate_card_codes(integer,uuid)'),
+  ('google_mode()'), ('handle_review_offline(uuid)'), ('is_demo_location(uuid)'), ('is_demo_user(uuid)'),
+  ('is_member(uuid)'), ('is_partner_member(uuid)'), ('is_staff()'), ('owner_submit_claim(uuid,text,text,text)'),
+  ('partner_create_invite(uuid,text,text)'), ('partner_invoice_calc(uuid,date)'), ('partner_locations(uuid)'),
+  ('partner_submit_claim(uuid,text,text)'), ('plan_summary(uuid)'), ('profile_score(uuid)'),
+  ('profile_task_action(uuid,text)'), ('profile_tasks_list(uuid)'), ('rename_card(text,text)'),
+  ('request_location_deletion(uuid)'), ('save_consent(uuid,text)'), ('set_auto_posts(uuid,boolean)'),
+  ('set_card_active(text,boolean)'), ('set_onboarding_step(uuid,text)'), ('skip_review(uuid)'),
+  ('staff_chat_stats(integer)'), ('staff_chats(text,text,text,text,integer,integer)'),
+  ('staff_concierge_add_review(uuid,integer,text,text,date,boolean)'), ('staff_concierge_cancel_task(uuid,text,text)'),
+  ('staff_concierge_claim_task(uuid)'), ('staff_concierge_convert(uuid)'),
+  ('staff_concierge_edit_review(uuid,integer,text,text)'), ('staff_concierge_mark_posted(uuid)'),
+  ('staff_concierge_queue()'), ('staff_concierge_task_done(uuid,text)'), ('staff_contacts(integer)'),
+  ('staff_create_card_order(uuid,uuid,integer,text)'), ('staff_create_partner(text,text,text,text,text)'),
+  ('staff_decide_claim(uuid,boolean,text)'), ('staff_grant_trial(uuid,integer)'), ('staff_job_health()'),
+  ('staff_mock_listing_edit(uuid,text,text)'), ('staff_mock_review(uuid,integer,text,text)'),
+  ('staff_record_payment(uuid,text,numeric,text,text)'), ('staff_set_card_order_status(uuid,text)'),
+  ('staff_set_concierge(uuid,boolean)'), ('staff_update_partner_contact(uuid,text,text)'),
+  ('start_location(text,text,text,text,text,text,uuid)'), ('update_knowledge_card(uuid,jsonb)'),
+  ('update_notification_settings(uuid,text[],smallint,text,integer)');
+
+select is(
+  (select coalesce(array_agg(p.oid::regprocedure::text order by 1), '{}') from pg_proc p
+   where p.pronamespace = 'public'::regnamespace and p.prosecdef
+     and has_function_privilege('authenticated', p.oid, 'execute')
+     and p.oid::regprocedure::text not in (select sig from tested)),
+  '{}'::text[],
+  'every SECURITY DEFINER function authenticated can run has a non-member test in rls_functions.sql');
+
+select is(
+  (select coalesce(array_agg(p.oid::regprocedure::text order by 1), '{}') from pg_proc p
+   where p.pronamespace = 'public'::regnamespace and p.prosecdef
+     and has_function_privilege('anon', p.oid, 'execute') and p.proname <> 'google_mode'),
+  '{}'::text[],
+  'anon can run no SECURITY DEFINER function in public (google_mode aside, see the TODO below)');
+
+select todo('P0.1-08 revokes execute on google_mode() from anon', 1);
+select ok(not has_function_privilege('anon', 'public.google_mode()', 'execute'), 'anon cannot run google_mode()');
+
+create temp table victim_before as
+  select (select md5(l::text) from public.locations l where l.id = '00000000-0000-4000-8000-0000000000c1') as loc,
+         (select md5(r::text) from public.reviews r where r.id = '00000000-0000-4000-8000-0000000000e1') as review,
+         (select md5(c::text) from public.cards c where c.code = 'VCTM22') as card;
+
+-- As a signed-in stranger: S has no business, no partner and no staff row.
+select tests.act_as('00000000-0000-4000-8000-0000000000b1');
+
+-- Owner RPCs on the victim's business.
+select throws_ok($$ select public.activate_card('VCTM22', '00000000-0000-4000-8000-0000000000c1', 'x') $$, '42501', null, 'activate_card refuses a non-member');
+select throws_ok($$ select public.add_photo('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000c1/victim.jpg') $$, '42501', null, 'add_photo refuses a non-member');
+select throws_ok($$ select public.billing_invoice_status('00000000-0000-4000-8000-0000000000f6') $$, '42501', null, 'billing_invoice_status refuses a non-member');
+select throws_ok($$ select * from public.billing_prepare_invoice('00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 'usdttrc20', false) $$, '42501', null, 'billing_prepare_invoice refuses a non-member');
+select throws_ok($$ select public.cancel_location_deletion('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'cancel_location_deletion refuses a non-member');
+select throws_ok($$ select public.choose_plan('00000000-0000-4000-8000-0000000000c1', 'trial') $$, '42501', null, 'choose_plan refuses a non-member');
+select throws_ok($$ select public.create_review_link('00000000-0000-4000-8000-0000000000c1', 'x') $$, '42501', null, 'create_review_link refuses a non-member');
+select throws_ok($$ select public.handle_review_offline('00000000-0000-4000-8000-0000000000e1') $$, '42501', null, 'handle_review_offline refuses a non-member');
+select throws_ok($$ select public.owner_submit_claim('00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 'trc20', 'strangertx1') $$, '42501', null, 'owner_submit_claim refuses a non-member');
+select throws_ok($$ select public.plan_summary('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'plan_summary refuses a non-member');
+select throws_ok($$ select public.profile_score('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'profile_score refuses a non-member');
+select throws_ok($$ select public.profile_task_action('00000000-0000-4000-8000-0000000000f4', 'later') $$, '42501', null, 'profile_task_action refuses a non-member');
+select throws_ok($$ select public.profile_tasks_list('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'profile_tasks_list refuses a non-member');
+select throws_ok($$ select public.rename_card('VCTM22', 'x') $$, '42501', null, 'rename_card refuses a non-member');
+select throws_ok($$ select public.request_location_deletion('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'request_location_deletion refuses a non-member');
+select throws_ok($$ select public.save_consent('00000000-0000-4000-8000-0000000000c1', 'yes') $$, '42501', null, 'save_consent refuses a non-member');
+select throws_ok($$ select public.set_auto_posts('00000000-0000-4000-8000-0000000000c1', false) $$, '42501', null, 'set_auto_posts refuses a non-member');
+select throws_ok($$ select public.set_card_active('VCTM22', false) $$, '42501', null, 'set_card_active refuses a non-member');
+select throws_ok($$ select public.set_onboarding_step('00000000-0000-4000-8000-0000000000c1', 'done') $$, '42501', null, 'set_onboarding_step refuses a non-member');
+select throws_ok($$ select public.skip_review('00000000-0000-4000-8000-0000000000e1') $$, '42501', null, 'skip_review refuses a non-member');
+select throws_ok($$ select public.update_knowledge_card('00000000-0000-4000-8000-0000000000c1', '{}') $$, '42501', null, 'update_knowledge_card refuses a non-member');
+select throws_ok($$ select public.update_notification_settings('00000000-0000-4000-8000-0000000000c1', null, null, null, null) $$, '42501', null, 'update_notification_settings refuses a non-member');
+select throws_ok($$ select public.start_location('victim-place', 'Hijack', 'x', 'US', 'UTC', null, null) $$, 'P0001', 'already_on_kabsi', 'start_location refuses a business that is already on Kabsi for someone else');
+
+-- Partner RPCs on the victim's partner.
+select throws_ok($$ select public.partner_create_invite('00000000-0000-4000-8000-0000000000d1', 'someone@example.test', 'x') $$, '42501', null, 'partner_create_invite refuses a non-member');
+select throws_ok($$ select * from public.partner_invoice_calc('00000000-0000-4000-8000-0000000000d1', '2026-09-01') $$, '42501', null, 'partner_invoice_calc refuses a non-member');
+select throws_ok($$ select public.partner_submit_claim('00000000-0000-4000-8000-0000000000f3', 'trc20', 'strangertx1') $$, '42501', null, 'partner_submit_claim refuses a non-member');
+select is_empty($$ select * from public.partner_locations('00000000-0000-4000-8000-0000000000d1') $$, 'partner_locations returns nothing to a non-member');
+select is(public.claim_partner_membership(), null, 'claim_partner_membership gives a stranger no partner');
+
+-- Helpers that answer only true or false about the caller.
+select is(public.is_member('00000000-0000-4000-8000-0000000000c1'), false, 'is_member is false for a non-member');
+select is(public.is_partner_member('00000000-0000-4000-8000-0000000000d1'), false, 'is_partner_member is false for a non-member');
+select is(public.is_staff(), false, 'is_staff is false for a non-member');
+select is(public.is_demo_location('00000000-0000-4000-8000-0000000000c1'), false, 'is_demo_location says nothing more than false for a real business');
+select is(public.is_demo_user('00000000-0000-4000-8000-0000000000a1'), false, 'is_demo_user says nothing more than false for a real user');
+select is(public.google_mode(), 'mock', 'google_mode returns only the mode, no business data');
+
+-- Staff RPCs: forbidden for anyone without a staff row.
+select throws_ok($$ select * from public.generate_card_codes(1, '00000000-0000-4000-8000-0000000000d1') $$, '42501', null, 'generate_card_codes refuses a non-staff user');
+select throws_ok($$ select * from public.staff_chat_stats(7) $$, '42501', null, 'staff_chat_stats refuses a non-staff user');
+select throws_ok($$ select * from public.staff_chats(null, null, null, null, 7, 10) $$, '42501', null, 'staff_chats refuses a non-staff user');
+select throws_ok($$ select public.staff_concierge_add_review('00000000-0000-4000-8000-0000000000c1', 5, 'n', 'c', current_date, false) $$, '42501', null, 'staff_concierge_add_review refuses a non-staff user');
+select throws_ok($$ select public.staff_concierge_cancel_task('00000000-0000-4000-8000-0000000000f2', 'redo', 'x') $$, '42501', null, 'staff_concierge_cancel_task refuses a non-staff user');
+select throws_ok($$ select public.staff_concierge_claim_task('00000000-0000-4000-8000-0000000000f2') $$, '42501', null, 'staff_concierge_claim_task refuses a non-staff user');
+select throws_ok($$ select public.staff_concierge_convert('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'staff_concierge_convert refuses a non-staff user');
+select throws_ok($$ select public.staff_concierge_edit_review('00000000-0000-4000-8000-0000000000e1', 5, 'n', 'c') $$, '42501', null, 'staff_concierge_edit_review refuses a non-staff user');
+select throws_ok($$ select public.staff_concierge_mark_posted('00000000-0000-4000-8000-0000000000f2') $$, '42501', null, 'staff_concierge_mark_posted refuses a non-staff user');
+select throws_ok($$ select public.staff_concierge_queue() $$, '42501', null, 'staff_concierge_queue refuses a non-staff user');
+select throws_ok($$ select public.staff_concierge_task_done('00000000-0000-4000-8000-0000000000f2', 'x') $$, '42501', null, 'staff_concierge_task_done refuses a non-staff user');
+select throws_ok($$ select * from public.staff_contacts(10) $$, '42501', null, 'staff_contacts refuses a non-staff user');
+select throws_ok($$ select public.staff_create_card_order('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000d1', 1, 'x') $$, '42501', null, 'staff_create_card_order refuses a non-staff user');
+select throws_ok($$ select public.staff_create_partner('n', 'e@example.test', 'x', 'y', 'z') $$, '42501', null, 'staff_create_partner refuses a non-staff user');
+select throws_ok($$ select public.staff_decide_claim('00000000-0000-4000-8000-0000000000f5', true, 'x') $$, '42501', null, 'staff_decide_claim refuses a non-staff user');
+select throws_ok($$ select public.staff_grant_trial('00000000-0000-4000-8000-0000000000c1', 7) $$, '42501', null, 'staff_grant_trial refuses a non-staff user');
+select throws_ok($$ select public.staff_job_health() $$, '42501', null, 'staff_job_health refuses a non-staff user');
+select throws_ok($$ select public.staff_mock_listing_edit('00000000-0000-4000-8000-0000000000c1', 'phone', '1') $$, '42501', null, 'staff_mock_listing_edit refuses a non-staff user');
+select throws_ok($$ select public.staff_mock_review('00000000-0000-4000-8000-0000000000c1', 5, 'n', 'c') $$, '42501', null, 'staff_mock_review refuses a non-staff user');
+select throws_ok($$ select public.staff_record_payment('00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 10, 'cash', 'r') $$, '42501', null, 'staff_record_payment refuses a non-staff user');
+select throws_ok($$ select public.staff_set_card_order_status('00000000-0000-4000-8000-0000000000f1', 'paid') $$, '42501', null, 'staff_set_card_order_status refuses a non-staff user');
+select throws_ok($$ select public.staff_set_concierge('00000000-0000-4000-8000-0000000000c1', true) $$, '42501', null, 'staff_set_concierge refuses a non-staff user');
+select throws_ok($$ select public.staff_update_partner_contact('00000000-0000-4000-8000-0000000000d1', null, 'email') $$, '42501', null, 'staff_update_partner_contact refuses a non-staff user');
+
+reset role;
+
+select is(
+  (select row(
+     (select md5(l::text) from public.locations l where l.id = '00000000-0000-4000-8000-0000000000c1'),
+     (select md5(r::text) from public.reviews r where r.id = '00000000-0000-4000-8000-0000000000e1'),
+     (select md5(c::text) from public.cards c where c.code = 'VCTM22'))::text),
+  (select row(loc, review, card)::text from victim_before),
+  'the victim business, review and card are unchanged after every call');
+
+select * from finish();
+rollback;
