@@ -4,6 +4,7 @@ import { listReviews, putReply } from "./google.ts";
 import { checkDraft, classify, draftReply, MODELS, newMeter, type Card } from "./ai.ts";
 import { AiBudgetError, recordAiUsage, takeAiBudget } from "./ai-budget.ts";
 import { isConciergeLocationId, matchConciergeReview, type ConciergeCandidate } from "./concierge.ts";
+import { auditedAdmin } from "./audit.ts";
 
 const BACKLOG_LIMIT = 20; // D221
 
@@ -301,8 +302,10 @@ export async function notifyLocation(loc: Loc) {
 }
 
 // ─── 5. Publish: the only path that writes a reply to Google (D202)
-export async function publishReply(o: { reviewId: string; text: string; approvedBy: string; channel: "dashboard" | "email_link" }) {
-  const db = admin();
+// `audit` carries the owner's request into the audit log (P0.1-10, _shared/audit.ts): the approval and publication
+// events are written by triggers on publications, so every write here goes through the client that carries it.
+export async function publishReply(o: { reviewId: string; text: string; approvedBy: string; channel: "dashboard" | "email_link"; audit?: Record<string, string> }) {
+  const db = o.audit ? auditedAdmin(o.audit) : admin();
   const text = o.text.trim();
   if (!text || text.length > 4000) throw new Error("bad_reply_text");
   const { data: rv, error } = await db.from("reviews")

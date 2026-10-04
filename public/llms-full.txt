@@ -481,7 +481,7 @@ Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@k
 
 ### 9.2 What Kabsi collects
 
-- **Owners:** email and extra alert addresses; business name, address, country, time zone and Google identifiers; About your business facts; Google reviews (public name, rating, text, dates), drafts and replies; posts, photos, special hours; listing details for Google Protection; plan and payments (including USDT transaction IDs); the authorisation you gave; the introducing partner, if any; a log of emails sent.
+- **Owners:** email and extra alert addresses; business name, address, country, time zone and Google identifiers; About your business facts; Google reviews (public name, rating, text, dates), drafts and replies; posts, photos, special hours; listing details for Google Protection; plan and payments (including USDT transaction IDs); the authorisation you gave; the introducing partner, if any; a log of emails sent; a record of approvals and changes (who did what and when, from the dashboard or an email link, the country of the connection and the browser, never the IP address and never review text).
 - **People who tap a card or open a link:** code, time, country, Android or iPhone, chip or QR, and a crawler flag. Never who they are or their IP address.
 - **Free tool users:** the search text goes to Google's Places API; a one-way salted hash of the IP is kept one hour to stop abuse.
 - **People who chat with Nora (the assistant):** their messages, the page they asked from, browser time zone and language, device type, the site that sent them, the country from the network (never the IP address), and any contact details they choose to give. Each chat is labelled (topic, intent, country) and a short report goes to the Kabsi team so a person can follow up. News emails only with a yes.
@@ -516,6 +516,7 @@ Sign-in storage, the last business you opened (in your browser), and PostHog's a
 | Assistant chats | 12 months after the last message |
 | Contact details given to the assistant | Until you ask us to remove them |
 | Email log | 12 months |
+| Record of approvals and changes | 24 months; the details of a deleted business are blanked, who did what and when stays |
 | Internal job logs | 90 days |
 | Email action links | Expire after 7 days, removed 30 days later |
 | Payment records | As long as tax and accounting law requires, unlinked from the business when it's deleted |
@@ -622,7 +623,7 @@ Any business with a verified Google Business Profile that you own or manage. Set
 Yes. The team offers a free 15-minute setup call. Email hello@kabsi.co and we'll arrange a time. Staff never sign in to your Google account: you send the invitation yourself.
 
 **How does Kabsi protect my Google profile?**
-You invite the Kabsi Clients group (ID 5481006796) as a Manager, not as an owner, and you can remove it at any time from People and access. Kabsi only accepts an invitation that matches a business you have set up and only for the Manager role. Kabsi's Google account uses Google's Advanced Protection. Nothing is written to Google without your approval, and each approval is recorded with the exact text.
+You invite the Kabsi Clients group (ID 5481006796) as a Manager, not as an owner, and you can remove it at any time from People and access. Kabsi only accepts an invitation that matches a business you have set up and only for the Manager role. Kabsi's Google account uses Google's Advanced Protection. Nothing is written to Google without your approval, and each approval is recorded with the exact text, who approved it, when, and whether it came from the dashboard or an email link.
 
 **Where is Kabsi based?**
 Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. The team is in Lebanon, and Kabsi serves businesses in any country.

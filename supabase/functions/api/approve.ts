@@ -4,6 +4,7 @@
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
 import { draftReview, publishReply } from "../_shared/reviews.ts";
 import { AI_BUDGET_MESSAGE } from "../_shared/ai-budget.ts";
+import { auditHeaders } from "../_shared/audit.ts";
 
 export async function approve(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -21,7 +22,7 @@ export async function approve(req: Request): Promise<Response> {
 
   try {
     if (b.do === "post") {
-      const result = await publishReply({ reviewId: rv.id, text: b.text ?? "", approvedBy: user.id, channel: "dashboard" });
+      const result = await publishReply({ reviewId: rv.id, text: b.text ?? "", approvedBy: user.id, channel: "dashboard", audit: auditHeaders(req, user.id) });
       return json({ ok: true, state: result.state });
     }
     if (b.do === "redraft") {
