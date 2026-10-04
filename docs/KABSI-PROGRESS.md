@@ -8,14 +8,14 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 is in review (pull request 13, not merged: one Done-when line is not met, see Evidence). Next task: P0.1-02a.
+- P0.1-01 merged (pull request 13); its leftover references move to P0.1-01b. Next task: P0.1-01b, then P0.1-02a.
 
 ## Rashid's decisions and inputs (plan section 5)
 
 | # | Item | Status |
 |---|---|---|
-| D1 | Legal seller | Decided 4 Oct: Hussein Slim (Dubai) holds the Creem account and is the seller; Meta business details and verification under the same name (R-25) |
-| D2 | First real live customer | Decided 4 Oct: Abou Hamze Auto Center (Bakaata); written consent from the business owner still to collect |
+| D1 | Legal seller | Decided 4 Oct: Hussein Slim (Dubai) holds the Creem account and is the seller; Meta business details and verification under the same name (R-25). Hussein agreed to be named on Creem, Meta and the site; no written agreement |
+| D2 | First real live customer | Decided 4 Oct: Abou Hamze Auto Center (Bakaata). Owner agreed 4 Oct; Kabsi Clients group added as Manager and hello@kabsi.co accepted (Business Profile Manager shows Abou Hamze Auto Center and Yawmiyati, both Verified) |
 | D3 | NFC shipping outside Lebanon | Decided 4 Oct: none |
 | I1 | US WhatsApp number | Later; placeholder +961 3 956 917 in one constant meanwhile |
 | I2 | Real screenshots of Google's People and access steps | Desktop done 4 Oct (`public/help/manager-steps/desktop/`, blurred); phone still to come |
@@ -32,13 +32,14 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | 5 | Supabase Auth Google provider with the OAuth client | P0.4-02 | Todo |
 | 6 | Meta Business Settings items (P0.6-09 file) | P0.6-03 | Todo |
 | 7 | Creem account (Hussein Slim) and keys in Supabase secrets | P0.4-07 | Todo |
-| 8 | Hussein agrees to be named as seller and signs the short revenue agreement with Rashid (K-106) | R-20 seller line, P0.4-07, P0.6-09 | Todo |
+| 8 | Hussein agrees to be named as seller | R-20 seller line, P0.4-07, P0.6-09 | Done 4 Oct (no written agreement, Rashid's decision) |
 
 ## Tasks
 
 | ID | Task | Model | Status | PR | Date |
 |---|---|---|---|---|---|
-| P0.1-01 | Retire the old docs and move Nora's facts file | Sonnet | in review | 13 | 4 Oct 2026 |
+| P0.1-01 | Retire the old docs and move Nora's facts file | Sonnet | done (leftovers in P0.1-01b) | 13 | 4 Oct 2026 |
+| P0.1-01b | Remove leftover references to the retired docs | Sonnet | todo | | |
 | P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | todo | | |
 | P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | todo | | |
 | P0.1-03 | Move kabsi.co to the new build | Sonnet | todo | | |
@@ -157,7 +158,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - P0.1-01 leftovers for the grep line (comments and one data line, not behaviour): `src/lib/site.ts:1`, `src/lib/qr.ts:3`, `src/lib/telemetry.ts:4` and `:121`, `src/routes/privacy.tsx:6`, `scripts/deno-check.sh:3`, `.gitignore:36`, `CLAUDE.md:20` (still says the facts file is at `docs/KNOWLEDGE-BASE.md` until P0.1-01 moves it), and line 1 of `knowledge/kabsi-facts.md` and `public/llms-full.txt` ("Source: KABSI-SPEC D200 to D308"). Changing the last two means regenerating `llms-full.txt`, which breaks the byte-identical line, so that one belongs to a later wording task.
 - `docs/WORK-QUEUE.md` still exists. It is not in the P0.1-01 delete list, but the grep line names it and KABSI-STATE called it the old work queue.
 - `scripts/build-kb.mjs` still writes the retired names (Profile Score, Do now, Listing Shield) into the `llms-full.txt` header. Fixed by P0.1-02a.
-- Abou Hamze Auto Center: Rashid was adding the "Kabsi Clients" group as Manager on 4 Oct. If he pressed Add, hello@kabsi.co accepts it by hand under Manage invitations in Business Profile Manager (mock mode means the access job does not accept it yet). This gives a real Manager connection for P0.7-01 on Gate A day. (Planning chat, 4 Oct.)
+- Abou Hamze Auto Center: Kabsi Clients is Manager and hello@kabsi.co accepted the invitation by hand (4 Oct). Kabsi's database does not know this business yet; it is connected in Kabsi during P0.7-05. (Planning chat, 4 Oct.)
 
 - Yawmiyati is the listing behind the Gate A application, and K-98 says an online media business is not eligible for a Business Profile. Nothing to change now; if Google questions it, answer with the real business's in-person activity or move the application to an eligible profile. (Planning review, 4 Oct.)
 - The live hero shows "Your Google Business Profile, taken care of." (Google's name in the slogan, against K-112), "Profile Score" and a "Post" button. Fixed by P0.1-02a and P0.1-02b.
@@ -178,6 +179,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 4 Oct 2026 (planning chat): P0.1-01 merged (PR 13). Added P0.1-01b for leftover references. Recorded: Hussein agreed to be named as seller, no written agreement; Abou Hamze Auto Center owner agreed, Kabsi Clients is Manager and the invitation was accepted. Next: P0.1-01b.
 
 - 4 Oct 2026: P0.1-01 done on branch claude/p0-1-01, pull request 13, in review (grep Done-when line not met, see Evidence). Lovable project knowledge updated. Next: P0.1-02a.
 

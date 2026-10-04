@@ -423,7 +423,7 @@ Each one either settles something the documents left open, fixes a contradiction
 | R-17 | The demo workspace is an organisation flagged `is_demo` with two fictional businesses, Harbour Lane Coffee and Juniper Hair Studio. It always runs on mock Google whatever `google_mode` says, never sends email except to the demo login, never fires PostHog or Meta events, never counts in metrics, billing or Slack, and every screen in it shows a small "Demo data" tag. It doubles as the permanent demo account Google may ask for (K-56). | Implements the video setup and K-56 | One isolated workspace serves recordings and Google's reviewer, and cannot leak into real data. |
 | R-18 | Features that need real Google data are built against the mock in P0 and switched on in P0.7: K-66 full backlog, K-67 "sounds like you" from past replies, K-26 performance numbers, K-117 search terms. | Placement | They cannot be verified before Gate A. |
 | R-19 | Remove now, as compliance fixes in P0.1: post keywords taken from review text (D245 "phrases customers use in 4 to 5 star reviews"), the reply rule that lets drafts include a phone number (`_shared/ai.ts`), and verbatim review quotes in the weekly report (D233). | Old D245, D233, D260 | K-113.3 forbids content derived from reviews; K-113.4 and K-14 block contact details in replies; K-28's report does not include quotes. |
-| R-20 | The current footer, terms, privacy page and JSON-LD publish a private home address. Remove it in P0.1. The legal seller is Hussein Slim (D1, decided 4 Oct). The operator line, from one `LEGAL_SELLER` constant, is "Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co": city only, never a street address. It goes live once Rashid confirms Hussein has signed the short agreement (section 5); until then the line is "Kabsi. Contact: hello@kabsi.co". | K-110 fix 2 | Never publish a private home address; the seller named on the site must match the Creem account holder (K-106). |
+| R-20 | The current footer, terms, privacy page and JSON-LD publish a private home address. Remove it in P0.1. The legal seller is Hussein Slim (D1, decided 4 Oct). The operator line, from one `LEGAL_SELLER` constant, is "Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co": city only, never a street address. Hussein agreed on 4 Oct to be named on Creem, Meta and the site (no written agreement), so the line goes live with P0.1-02a. | K-110 fix 2 | Never publish a private home address; the seller named on the site must match the Creem account holder (K-106). |
 | R-21 | Review text sent to the AI is capped at 4,096 characters (today there is no cap at all, not 1,000 as K-99 assumed), with a per-business and a global daily AI budget. | K-99.5 premise | The code has no cap, which is a cost risk rather than a quality one. |
 | R-22 | Roles are the four in K-16 (owner, manager, staff, partner member). The guardrails' test list (owner, manager, reviewer, viewer, partner) maps to them: "reviewer" and "viewer" are not separate roles. | Guardrail 25 wording | The audit wins over the guardrails. |
 | R-23 | `kabsi_partner_billing` (monthly wholesale invoices in USDT) stays switched on but bills nothing while there are no live partner clients; it is replaced by Creem-based commission in P1 (K-32, K-106). | Old D239 | Nothing to bill today; the replacement needs Creem. |
@@ -436,8 +436,8 @@ The planning chat and build chats plan around these and ask before any task that
 
 | # | Decision or input | Tasks that wait for it | What happens meanwhile |
 |---|---|---|---|
-| D1 | Legal seller. **Decided 4 Oct: Hussein Slim (Dubai), who holds the Creem account; Meta business details and verification under the same name (R-25).** | P0.4-07, P0.4-08, P0.2-07, P0.6-09 | Built with one `LEGAL_SELLER` constant. Before his name goes live: Hussein agrees to be named and signs a short written agreement with Rashid on who owns the revenue (K-106) (step 8 below). |
-| D2 | First real live customer. **Decided 4 Oct: Abou Hamze Auto Center (auto parts store, Bakaata), Rashid's cousin's business; Rashid is a primary owner of its Business Profile through rashid.abouhamzy@yawmiyati.com.** | P0.7-01, P0.7-05, P0.7-07 | Written consent from the business owner before any public use; any public mention says it is connected to Kabsi's team (K-117). Yawmiyati stays internal (K-99.6). |
+| D1 | Legal seller. **Decided 4 Oct: Hussein Slim (Dubai), who holds the Creem account; Meta business details and verification under the same name (R-25). Hussein agreed to be named on Creem, Meta and the site; Rashid decided no written agreement is needed.** | P0.4-07, P0.4-08, P0.2-07, P0.6-09 | One `LEGAL_SELLER` constant, live from P0.1-02a. |
+| D2 | First real live customer. **Decided 4 Oct: Abou Hamze Auto Center (auto parts store, Bakaata), Rashid's cousin's business. The owner agreed on 4 Oct; the "Kabsi Clients" group is Manager and hello@kabsi.co accepted the invitation (both businesses show Verified in the group).** | P0.7-01, P0.7-05, P0.7-07 | Any public mention says it is connected to Kabsi's team (K-117). Yawmiyati stays internal (K-99.6). |
 | D3 | NFC outside Lebanon. **Decided 4 Oct: no NFC shipping outside Lebanon.** | None | Outside Lebanon the printable QR card only; NFC appears only on `/lebanon` (D297 stands). |
 | I1 | US WhatsApp number (K-121). **4 Oct: comes later; build now with a placeholder.** | P0.6-10 | One `WHATSAPP_NUMBER` constant set to the current +961 3 956 917 until the US number arrives; swapping it is a one-line change plus the facts file. |
 | I2 | Real screenshots of Google's "People and access" steps. **4 Oct: desktop done**, six images in `public/help/manager-steps/desktop/` (personal details blurred, browser bar cropped). Phone screenshots still to come. | P0.4-03 | Desktop guide uses them; phone cards use text steps until phone screenshots arrive. |
@@ -452,7 +452,7 @@ The planning chat and build chats plan around these and ask before any task that
 5. Supabase dashboard: Authentication, Providers, Google: paste the OAuth client ID and secret (basic scopes). Task P0.4-02.
 6. Meta Business Settings items in VIDEO Part 7 that need his login (payment method, second admin, business info after D1, domain verification TXT record in Cloudflare). Task P0.6-09 writes the exact clicks.
 7. Creem account (Hussein Slim) and API keys into Supabase secrets. Task P0.4-07.
-8. Hussein Slim agrees to be named as the seller on the site and signs a short written agreement with Rashid on who owns Kabsi's revenue (K-106); Rashid confirms in the chat. Before the R-20 seller line goes live and before P0.4-07.
+8. Done 4 Oct: Hussein Slim agreed to be named as the seller on Creem, Meta and the site. No written agreement (Rashid's decision; K-106's agreement is waived).
 
 ## 6. Classification (guardrail 20)
 
@@ -626,6 +626,21 @@ You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas
 Delete the retired docs listed in the task, move docs/KNOWLEDGE-BASE.md to knowledge/kabsi-facts.md with git mv and point scripts/build-kb.mjs at it. Update AGENTS.md. Then update the Lovable project knowledge with set_project_knowledge: keep every existing rule, replace the copy rules with section 2.2 of the plan, and add "use only the design tokens". Do not change any other file.
 ```
 
+### P0.1-01b Remove leftover references to the retired docs
+
+- Decisions: guardrail 24, K-104, section 3.
+- Touches: comments in `src/lib/site.ts`, `src/lib/qr.ts`, `src/lib/telemetry.ts`, `src/routes/privacy.tsx`, `scripts/deno-check.sh`, `.gitignore`; the facts-file line in `CLAUDE.md`; the source line at the top of `knowledge/kabsi-facts.md`; `public/llms-full.txt` (regenerated); delete `docs/WORK-QUEUE.md`.
+- Depends on: P0.1-01.
+- Model: Sonnet.
+- What changes: each comment that cites KABSI-SPEC, KABSI-STATE or a D-number from the old spec cites the plan or the source decision instead (for example "KABSI-SPEC D219" becomes "plan Appendix B and G-14"; "see KABSI-STATE.md notes" becomes "see docs/KABSI-PLAN.md Appendix A, working notes"), or is shortened to the rule itself; `CLAUDE.md` names only `knowledge/kabsi-facts.md`; the facts file's first line reads "Last updated: <date>. Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md." Comments only: no code behaviour changes.
+- Done when: `grep -rn "KABSI-SPEC\|KABSI-STATE\|WORK-QUEUE\|KNOWLEDGE-BASE\|GO-LIVE\|VIDEO-PLAN" --exclude-dir=node_modules --exclude-dir=.git .` returns lines only in `docs/source/`, `docs/KABSI-PLAN.md` and `docs/KABSI-PROGRESS.md`; `node scripts/build-kb.mjs` regenerates `public/llms-full.txt` and its first lines match the facts file; `docs/WORK-QUEUE.md` is gone; typecheck, lint, tests and build pass.
+- Prompt:
+
+```
+You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-01b, then docs/KABSI-PROGRESS.md. Do only task P0.1-01b. Follow section 2 for checks, merging, proof and the PROGRESS update.
+Comment and doc changes only. Replace each old-spec reference as described, regenerate public/llms-full.txt with node scripts/build-kb.mjs, delete docs/WORK-QUEUE.md, run the grep in Done when and paste its output in PROGRESS. Also mark P0.1-01 done in PROGRESS (its leftover grep lines are this task).
+```
+
 ### P0.1-02a Public site: wording that breaks Google's rules or describes removed features
 
 - Decisions: K-112, K-110 (fixes 2 and 3 and the final wording), K-53, K-02, K-50, K-25, K-116.7, R-02, R-14, R-20, D297.
@@ -638,7 +653,7 @@ Delete the retired docs listed in the task, move docs/KNOWLEDGE-BASE.md to knowl
   - Remove "Profile Score", "Do now", "Listing Shield", "Put mine back", "weekly post", "by following Google's own guidance", "Follows Google's guidelines" as a tick, and the five module names. Use K-02 names and the outcome wording from the design review (pricing feature list: "A reply ready for every new review", "Know when Google changes your details", "Photos and updates prepared for you", "Holiday hours reminders", "Weekly Care Report", "A person to talk to"). Features not yet live carry "Early access" and never "Coming soon" where the feature exists.
   - Demo card button says "Approve", not "Post"; the note under it says "Nothing is published until you approve it."
   - Footer: the full notice "Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google." Sign-off "We watch your listing. You run your business." only on About.
-  - Remove the private home address from the footer, terms, privacy and the JSON-LD `streetAddress`; operator line per R-20.
+  - Remove the private home address from the footer, terms, privacy and the JSON-LD `streetAddress`. Add `LEGAL_SELLER` to `src/lib/site.ts` and use it for the operator line: "Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co" (R-20); privacy names him as the operator with hello@kabsi.co as the contact.
   - Partners page: remove "they never see review text" and "can't post for them" promises and "Settle in USDT" as a headline benefit; keep the lead form. Full rewrite is P1-01.
   - Get Reviews copy on public pages: "Ask every customer the same way, as they visit. Never offer a reward."
   - FAQ adds "How is this different from Gemini in Business Profile?" with the two-sentence K-50 answer, sourced to Google's help page.
@@ -1025,7 +1040,7 @@ Read K-100 in docs/source/KABSI-AUDIT.md. Add masks, session tokens, the cache a
 - Touches: `src/routes/privacy.tsx`, `terms.tsx`, `security.tsx`, `knowledge/kabsi-facts.md`.
 - Depends on: P0.2-01, P0.2-02, P0.1-03.
 - Model: Sonnet.
-- Seller: the pages read the seller from the `LEGAL_SELLER` constant in `src/lib/site.ts` (R-20: Hussein Slim, Dubai, once Rashid step 8 is confirmed; the neutral line before that); governing law is listed for the lawyer read.
+- Seller: the pages read the seller from the `LEGAL_SELLER` constant in `src/lib/site.ts` (R-20: Hussein Slim, Dubai); governing law is listed for the lawyer read.
 - Done when: `curl -s https://kabsi.co/privacy` contains "Kabsi's use and transfer to any other app of information received from Google APIs will adhere to the Google API Services User Data Policy, including the Limited Use requirements."; the retention table on the page matches `retention_policies`; processors listed match reality (Supabase EU, Resend, Anthropic, Sentry EU, PostHog US, Cloudflare, Lovable, Calendly, Creem once live); no "Replit"; disconnect described as built.
 - Prompt:
 
@@ -1290,14 +1305,14 @@ Read K-48, K-94 and K-101 in docs/source/KABSI-AUDIT.md. One entitlements functi
 
 - Decisions: K-106, K-107, K-48, G-29 (cancel question and pause), G-30, R-24, G-47 (Purchase event hook point).
 - Touches: Creem products (Monthly $19, Annual $190, Extra location $15 a month or $150 a year, Lebanon bundle $120 a year, Partner resale $8 per business a month, quantity-based); function `billing-creem` (create checkout with the organisation ID in metadata; webhook verifying Creem's signature, storing each event ID once, updating `subscriptions`; failed payment: 7-day grace, then Free, data and access kept, drafting and publishing pause); "Manage billing" opens Creem's customer portal; cancel flow with one question and a pause of one or two months; prices shown as "$19 a month, plus tax where it applies"; Creem branding with Kabsi's logo and colours; NOWPayments kept for annual crypto on request only, writing to the same `subscriptions`.
-- Depends on: Rashid steps 7 and 8, P0.4-06. D1 is decided: the Creem account holder is Hussein Slim.
+- Depends on: Rashid step 7, P0.4-06. D1 is decided: the Creem account holder is Hussein Slim.
 - Model: Opus (payments and webhooks).
 - Done when: a test-mode checkout on a phone ends in an active subscription written only by the webhook; replaying the same webhook changes nothing; a bad signature is refused; a test failed payment starts the grace; the portal opens; each target country is checked against Creem's tax coverage list (recorded with the date).
 - Prompt:
 
 ```
 You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-07, then docs/KABSI-PROGRESS.md. Do only task P0.4-07. Follow section 2 for checks, merging, proof and the PROGRESS update.
-Check PROGRESS for Rashid steps 7 (Creem keys in Supabase secrets) and 8 (Hussein's agreement). If either is missing, stop and ask. Read K-48, K-106 and K-107. Work in Creem's test mode first; the webhook is the only writer of paid state.
+Check PROGRESS for Rashid step 7 (Creem keys in Supabase secrets). If it is missing, stop and ask. Read K-48, K-106 and K-107. Work in Creem's test mode first; the webhook is the only writer of paid state.
 ```
 
 ### P0.4-08 One email template and the email set
@@ -1555,14 +1570,14 @@ Read K-87 and K-118 in docs/source/KABSI-AUDIT.md. Use the Resend, Sentry, PostH
 
 - Decisions: VIDEO Part 7 "Meta account: current state and fixes" and "Before the first dollar", K-87 (second admin), G-47.
 - Touches: `docs/marketing/meta-setup.md` with the exact clicks for each fix: confirm the contact email; business info and Business Verification after D1; second admin with two-factor; payment method, billing address and an account spending limit equal to the month's budget (keep USD and Beirut time); connect the Page and Instagram to the ad account and check Instagram is linked to the Page; create the "Kabsi Website" dataset and connect it to the ad account; move the Revelo and Cedar Spark datasets out (or stop using them in this portfolio); add kabsi.co under Domains and verify with a DNS TXT record in Cloudflare; create the "Kabsi" asset group and assign people to it; create the least-access system user "Kabsi CAPI" with access only to the dataset (and the ad account if needed), generate its token and store it as the Supabase secret `META_CAPI_TOKEN`, and the dataset ID as `META_DATASET_ID`; the custom audiences in Part 7 (created once events flow); Instagram and Facebook bios (K-112 wording: "Reviews and listing care for local businesses. Works with Google Business Profile."); the URL template for ads.
-- Depends on: P0.1-03 (domain). Business info and verification use Hussein Slim's details (D1, R-25) once Rashid step 8 is confirmed.
+- Depends on: P0.1-03 (domain). Business info and verification use Hussein Slim's details (D1, R-25).
 - Model: Sonnet.
 - Done when: the setup file exists; Rashid ticks each step; the chat verifies what it can (the TXT record with `dig`, the secrets' presence by name through the Supabase connector, events in Test Events once P0.6-03 runs).
 - Prompt:
 
 ```
 You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-09, then docs/KABSI-PROGRESS.md. Do only task P0.6-09. Follow section 2 for checks, merging, proof and the PROGRESS update.
-Read Part 7 of docs/source/KABSI-VIDEO.md. Write the step list for Rashid in plain words, one action per line, then verify each step he reports done with the tools you have. Business info and verification use Hussein Slim's details (R-25); mark them waiting until Rashid step 8 is confirmed.
+Read Part 7 of docs/source/KABSI-VIDEO.md. Write the step list for Rashid in plain words, one action per line, then verify each step he reports done with the tools you have. Business info and verification use Hussein Slim's details (R-25).
 ```
 
 ### P0.6-10 WhatsApp click-to-chat on the US number
@@ -1691,7 +1706,7 @@ Read guardrails 21, 24 and 25. Record every finding; fix only copy and layout is
 
 - Decisions: guardrail 22, guardrail 27, G-39 tier 1, VIDEO "Read first" gates, R-02, D2.
 - Touches: with the first real customer (D2, written consent): business discovery, snapshot, sign-up, Google access, knowledge, first value, review draft, owner approval, publication, verification, audit event, notification, weekly report, billing (Creem checkout on a phone), disconnect including Manager access removal; success and failure paths (a rejected reply, a failed publication, a revoked access) with real Google responses; then the G-39 tier 1 checklist; then switch the CTA from "Join early access" to "Start free" with "14 days free. No card." everywhere (one constant) and remove "Early access" tags.
-- Depends on: P0.7-06, P0.4-07, P0.6 done. D2 is decided: Abou Hamze Auto Center, with the owner's written consent.
+- Depends on: P0.7-06, P0.4-07, P0.6 done. D2 is decided: Abou Hamze Auto Center; the owner agreed and Kabsi is Manager.
 - Ask Rashid before: contacting the customer, and before switching the CTA.
 - Model: Opus.
 - Done when: every step of guardrail 22 has evidence from the real run; every G-39 tier 1 line is ticked or explicitly waived by Rashid; the four VIDEO gates are clear; only then the CTA changes and PROGRESS records "Paid ads may start".
@@ -1699,7 +1714,7 @@ Read guardrails 21, 24 and 25. Record every finding; fix only copy and layout is
 
 ```
 You are a Kabsi build chat. Work in the GitHub repo rashidhamzy-hue/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-07, then docs/KABSI-PROGRESS.md. Do only task P0.7-07. Follow section 2 for checks, merging, proof and the PROGRESS update.
-Check PROGRESS for the written consent from Abou Hamze Auto Center and Creem being live. Walk guardrail 22 with real Google responses, record evidence per step, then the G-39 tier 1 list. Ask Rashid before changing the call to action.
+Check PROGRESS that Creem is live. Walk guardrail 22 with real Google responses, record evidence per step, then the G-39 tier 1 list. Ask Rashid before changing the call to action.
 ```
 
 ## 14. P1 tasks
