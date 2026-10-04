@@ -1,7 +1,8 @@
 // Phase 4 pipeline: sync → classify → draft → safety check → owner email → approve → publish.
 import { admin, APP_URL, captureError, emailLayout, esc, isDefiniteGoogleRejection, sendEmail, sha256Hex } from "./kabsi.ts";
 import { listReviews, putReply } from "./google.ts";
-import { checkDraft, classify, draftReply, MODELS, type Card } from "./ai.ts";
+import { checkDraft, classify, draftReply, MODELS, newMeter, type Card } from "./ai.ts";
+import { AiBudgetError, recordAiUsage, takeAiBudget } from "./ai-budget.ts";
 import { isConciergeLocationId, matchConciergeReview, type ConciergeCandidate } from "./concierge.ts";
 
 const BACKLOG_LIMIT = 20; // D221
@@ -88,12 +89,25 @@ export async function draftReview(reviewId: string, instruction?: string) {
   const loc = rv.locations as unknown as { name: string; knowledge_card: Card; status: string };
   // Drafting is part of an active trial or plan (Q05): a Free business gets no new drafts, from any caller.
   if (loc.status !== "active") throw new Error("location_not_active");
+  // One generation from the business and global daily AI budget (K-100); throws "ai_budget_*" when used up.
+  await takeAiBudget(rv.location_id);
+  const meter = newMeter();
+  try {
+    return await draftWithChecks(rv, loc, meter, instruction);
+  } finally {
+    await recordAiUsage(rv.location_id, meter);
+  }
+}
+
+type DraftRow = { id: string; reviewer_name: string | null; star_rating: number; comment: string | null; draft_attempts: number; language: string | null; urgency: string | null };
+async function draftWithChecks(rv: DraftRow, loc: { name: string; knowledge_card: Card }, meter: ReturnType<typeof newMeter>, instruction?: string) {
+  const db = admin();
   const review = { reviewer: rv.reviewer_name ?? "A customer", rating: rv.star_rating, comment: rv.comment };
 
   let language = rv.language as string | null;
   let urgent = rv.urgency === "urgent";
   let reasons: string[] = [];
-  if (!language) ({ language, urgent, reasons } = await classify(review));
+  if (!language) ({ language, urgent, reasons } = await classify(review, meter));
 
   const { data: last } = await db.from("reply_drafts").select("version, body").eq("review_id", rv.id).order("version", { ascending: false }).limit(1).maybeSingle();
   let body = "";
@@ -104,7 +118,7 @@ export async function draftReview(reviewId: string, instruction?: string) {
     const fix = attempt > 0 && body && check.issues.length ? `Fix these problems: ${check.issues.join("; ")}` : undefined;
     try {
       const drafted = await draftReply({
-        review, business: loc.name, card: loc.knowledge_card ?? {}, language: language!, urgent,
+        review, business: loc.name, card: loc.knowledge_card ?? {}, language: language!, urgent, meter,
         instruction: [instruction, fix].filter(Boolean).join(". ") || undefined, previous: fix ? body : last?.body,
       });
       body = drafted.text;
@@ -115,7 +129,7 @@ export async function draftReview(reviewId: string, instruction?: string) {
       check = { ok: false, issues: ["the model returned an empty draft"] };
       continue;
     }
-    check = await checkDraft({ review, draft: body, card: loc.knowledge_card ?? {} });
+    check = await checkDraft({ review, draft: body, card: loc.knowledge_card ?? {}, meter });
     if (check.ok) break;
   }
   await db.from("reply_drafts").insert({
@@ -137,6 +151,8 @@ export async function draftPending(limit = 10) {
   let drafted = 0;
   for (const r of data ?? []) {
     try { await draftReview(r.id); drafted++; } catch (e) {
+      // The daily AI budget is used up: stop for now without counting a failed attempt; the next run picks up.
+      if (e instanceof AiBudgetError) break;
       // One bad review must not stop the others; after 3 failed attempts it stays 'new' and shows in the inbox.
       const { data: cur } = await admin().from("reviews").select("draft_attempts").eq("id", r.id).single();
       await admin().from("reviews").update({ draft_attempts: (cur?.draft_attempts ?? 0) + 1 }).eq("id", r.id);

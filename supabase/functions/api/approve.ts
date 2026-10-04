@@ -3,6 +3,7 @@
 //   POST { review_id, do: "redraft", instruction }  → new AI version following the owner's instruction
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
 import { draftReview, publishReply } from "../_shared/reviews.ts";
+import { AI_BUDGET_MESSAGE } from "../_shared/ai-budget.ts";
 
 export async function approve(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -36,6 +37,8 @@ export async function approve(req: Request): Promise<Response> {
     const msg = String(e);
     if (msg.includes("already_posted")) return fail("already_posted", "A reply is already posted for this review.", 409);
     if (msg.includes("location_not_active")) return fail("not_active", "Replies work while a free trial or a Pro plan is active. Choose a plan to continue.", 409);
+    if (msg.includes("ai_budget_business")) return fail("ai_budget", AI_BUDGET_MESSAGE.business, 429);
+    if (msg.includes("ai_budget_global")) return fail("ai_budget", AI_BUDGET_MESSAGE.global, 429);
     if (msg.includes("bad_reply_text")) return fail("bad_text", "The reply is empty or too long.", 400);
     await captureError("approve", e);
     return fail("internal", "Something went wrong. Nothing was posted.", 500);

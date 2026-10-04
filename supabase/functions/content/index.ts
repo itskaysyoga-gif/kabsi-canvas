@@ -14,6 +14,7 @@ import { admin, captureError, CORS, currentUser, fail, isDefiniteGoogleRejection
 import { addSpecialHours, createLocalPost, createMedia } from "../_shared/google.ts";
 import { decideChange } from "../_shared/shield.ts";
 import { CTAS, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, writePost } from "../_shared/posts.ts";
+import { AI_BUDGET_MESSAGE, AiBudgetError } from "../_shared/ai-budget.ts";
 
 const CHECK_MODEL = MODELS.check;
 const PHOTO_CATEGORIES = ["EXTERIOR", "INTERIOR", "PRODUCT", "FOOD_AND_DRINK", "TEAMS", "ADDITIONAL"];
@@ -247,6 +248,8 @@ Deno.serve(async (req) => {
         return fail("bad_input", "Unknown action.");
     }
   } catch (e) {
+    // The daily AI budget is used up (K-100): a clear message, not an error report.
+    if (e instanceof AiBudgetError) return fail("ai_budget", AI_BUDGET_MESSAGE[e.scope], 429);
     await captureError("content", e);
     return fail("internal", "Something went wrong. Nothing was posted.", 500);
   }
