@@ -8,7 +8,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
 - Clean-up confirmed by Rashid on 4 Oct; project knowledge now holds the six source documents (folder `source/`) and KABSI-STICKER-SPEC.md only.
-- P0.1-01 merged (pull request 13); its leftover references move to P0.1-01b. Next task: P0.1-01b, then P0.1-02a.
+- P0.1-01 and P0.1-01b done (pull requests 13 and 15). Next task: P0.1-02a.
 
 ## Rashid's decisions and inputs (plan section 5)
 
@@ -38,8 +38,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 | ID | Task | Model | Status | PR | Date |
 |---|---|---|---|---|---|
-| P0.1-01 | Retire the old docs and move Nora's facts file | Sonnet | done (leftovers in P0.1-01b) | 13 | 4 Oct 2026 |
-| P0.1-01b | Remove leftover references to the retired docs | Sonnet | todo | | |
+| P0.1-01 | Retire the old docs and move Nora's facts file | Sonnet | done (its leftover grep lines cleared by P0.1-01b) | 13 | 4 Oct 2026 |
+| P0.1-01b | Remove leftover references to the retired docs | Sonnet | done | 15 | 4 Oct 2026 |
 | P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | todo | | |
 | P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | todo | | |
 | P0.1-03 | Move kabsi.co to the new build | Sonnet | todo | | |
@@ -143,21 +143,33 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 (One block per finished task: the Done-when lines with their proof.)
 
-### P0.1-01 (in review, pull request 13, branch claude/p0-1-01, commit 2ead48c)
+### P0.1-01b (pull request 15, branch claude/p0-1-01b, commit 26f8930)
+
+- Comments and docs only. Changed files: `.gitignore`, `CLAUDE.md`, `knowledge/kabsi-facts.md`, `public/llms-full.txt`, `scripts/deno-check.sh`, `src/lib/qr.ts`, `src/lib/site.ts`, `src/lib/telemetry.ts`, `src/routes/privacy.tsx`; `docs/WORK-QUEUE.md` deleted (`git status` showed D).
+- Old-spec citations now cite the plan: `site.ts:1-2` (facts file and plan section 2.2), `site.ts:4` (task P0.1-03), `site.ts:9` (plan Appendix B), `site.ts:27` (D-number dropped), `qr.ts:3`, `telemetry.ts:4` (plan section 2.2) and `:121` (plan and G-47), `privacy.tsx:5-6` (plan Appendix A), `deno-check.sh:3` and `.gitignore:36` (plan Appendix A, working notes). `CLAUDE.md:20` names only `knowledge/kabsi-facts.md`.
+- `knowledge/kabsi-facts.md` line 1: "Last updated: 4 Oct 2026. Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md."
+- `node scripts/build-kb.mjs` ran (12832 words). `public/llms-full.txt` line 5 matches the facts file line 1; `git diff` on that file is that one line only.
+- Done-when grep, run after the edits: `grep -rn "KABSI-SPEC\|KABSI-STATE\|WORK-QUEUE\|KNOWLEDGE-BASE\|GO-LIVE\|VIDEO-PLAN" --exclude-dir=node_modules --exclude-dir=.git .` filtered to exclude `docs/source/`, `docs/KABSI-PLAN.md` and `docs/KABSI-PROGRESS.md` printed no lines (count of lines outside those three paths: 0). Unfiltered, the only hits are inside those three paths.
+- `docs/WORK-QUEUE.md` is gone.
+- No em dashes, en dashes or exclamation marks in the added lines (checked on the diff).
+- Checks run locally: `npm run typecheck` exit 0; `npm run lint:changed` linted the 4 changed source files, exit 0; `npm test` 3 files, 15 tests passed; `npm run build` completed. Deno check not run: no Edge Function changed.
+- CI on the pull request: see the Log line for the result at merge.
+
+### P0.1-01 (done, pull request 13, branch claude/p0-1-01, commit 2ead48c)
 
 - Retired docs deleted: `docs/KABSI-SPEC.md`, `docs/KABSI-STATE.md`, `docs/VIDEO-PLAN.md`, `docs/GO-LIVE.md`, `docs/screenshots/q04/` (8 jpg). `git status` showed them as D; `docs/` now holds KABSI-PLAN.md, KABSI-PROGRESS.md, WORK-QUEUE.md, slack-app-manifest.yml, source/.
 - Facts file moved with `git mv` to `knowledge/kabsi-facts.md` (git shows R). `scripts/build-kb.mjs` lines 1 and 6 now read `knowledge/kabsi-facts.md`.
 - `node scripts/build-kb.mjs` ran (12829 words). `public/llms-full.txt` md5 is 05d23c458006b14ace2e2d01dd87066e before and after: byte-identical, and git reports no change to that file.
 - `AGENTS.md`: Lovable block and both existing rules kept; one paragraph added pointing to `docs/KABSI-PLAN.md`, `docs/KABSI-PROGRESS.md` and `knowledge/kabsi-facts.md`, plus "Use only the design tokens".
 - Lovable project knowledge (project 2f215f56-0677-42e1-b0d5-838eb32e1c1c): `set_project_knowledge` then read back with `get_project_knowledge`. It keeps every existing rule except the old "Copy:" line, which section 2.2 replaces; adds all nine section 2.2 rules, the line "Use only the design tokens", and the facts-file rule. The first set call failed on a wrong parameter name and saved nothing; the second call saved and the read back matches.
-- NOT MET: the grep line. `grep -rn "KABSI-SPEC\|KABSI-STATE\|WORK-QUEUE\|KNOWLEDGE-BASE.md" --exclude-dir=node_modules --exclude-dir=.git .` still returns lines outside `docs/source/` and `docs/KABSI-PLAN.md` (list under Found, not done). Clearing them needs edits to files the task says not to change, and the `llms-full.txt` line must stay byte-identical, so the two Done-when lines cannot both hold. Left as is.
+- Grep line was NOT MET at the time; the leftovers were cleared by P0.1-01b (pull request 15), which is the task that owns that line. Original note: the grep line. `grep -rn "KABSI-SPEC\|KABSI-STATE\|WORK-QUEUE\|KNOWLEDGE-BASE.md" --exclude-dir=node_modules --exclude-dir=.git .` still returns lines outside `docs/source/` and `docs/KABSI-PLAN.md` (list under Found, not done). Clearing them needs edits to files the task says not to change, and the `llms-full.txt` line must stay byte-identical, so the two Done-when lines cannot both hold. Left as is.
 - Checks: typecheck, lint, tests and build not run (no source code changed). CI on the pull request is the check; result not yet read.
 
 ## Found, not done
 
-- P0.1-01 leftovers for the grep line (comments and one data line, not behaviour): `src/lib/site.ts:1`, `src/lib/qr.ts:3`, `src/lib/telemetry.ts:4` and `:121`, `src/routes/privacy.tsx:6`, `scripts/deno-check.sh:3`, `.gitignore:36`, `CLAUDE.md:20` (still says the facts file is at `docs/KNOWLEDGE-BASE.md` until P0.1-01 moves it), and line 1 of `knowledge/kabsi-facts.md` and `public/llms-full.txt` ("Source: KABSI-SPEC D200 to D308"). Changing the last two means regenerating `llms-full.txt`, which breaks the byte-identical line, so that one belongs to a later wording task.
-- `docs/WORK-QUEUE.md` still exists. It is not in the P0.1-01 delete list, but the grep line names it and KABSI-STATE called it the old work queue.
 - `scripts/build-kb.mjs` still writes the retired names (Profile Score, Do now, Listing Shield) into the `llms-full.txt` header. Fixed by P0.1-02a.
+- `scripts/build-kb.mjs` line 2 still cites the old spec number D261 and line 7 D244 (not in P0.1-01b's touch list). Fold into P0.1-02a, which edits that script.
+- Old-spec D-numbers remain in other code comments outside P0.1-01b's touch list (for example `grep -rn "\bD[0-9]\{3\}\b" src supabase scripts`). They do not match the Done-when grep. Not touched.
 - Abou Hamze Auto Center: Kabsi Clients is Manager and hello@kabsi.co accepted the invitation by hand (4 Oct). Kabsi's database does not know this business yet; it is connected in Kabsi during P0.7-05. (Planning chat, 4 Oct.)
 
 - Yawmiyati is the listing behind the Gate A application, and K-98 says an online media business is not eligible for a Business Profile. Nothing to change now; if Google questions it, answer with the real business's in-person activity or move the application to an eligible profile. (Planning review, 4 Oct.)
@@ -179,6 +191,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 4 Oct 2026: P0.1-01b done on branch claude/p0-1-01b, pull request 15. Leftover references to the retired docs removed, `llms-full.txt` regenerated, `docs/WORK-QUEUE.md` deleted, P0.1-01 marked done. Next: P0.1-02a.
 
 - 4 Oct 2026 (planning chat): P0.1-01 merged (PR 13). Added P0.1-01b for leftover references. Recorded: Hussein agreed to be named as seller, no written agreement; Abou Hamze Auto Center owner agreed, Kabsi Clients is Manager and the invitation was accepted. Next: P0.1-01b.
 
