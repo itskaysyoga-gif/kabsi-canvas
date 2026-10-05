@@ -58,7 +58,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-10 | Append-only audit log and the "What Kabsi did" feed source | Opus | done (merged 37; approval and publication events checked live at the start of the P0.1-12a chat; the next `kabsi_retention` run still to read, see After merge) | 37 | 4 Oct 2026 |
 | P0.1-11 | One Google service layer | Opus | done (part A merged 38, part B merged 39; After-merge checks passed) | 38, 39 | 4 Oct 2026 |
 | P0.1-12a | Job queue and dispatcher, review jobs first | Opus | merged (40); migration fully live; After-merge passed (deploy, dispatcher, sync status, no duplicates, mock review end to end, Home line checked in a browser by Hussein); staff Job health look still open (Rashid), see Evidence | 40, 41 | 4 Oct 2026 |
-| P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | PR open, CI green, load test passed (migration 1 waits for Hussein's "apply"; migration 2 after merge) | 43 | 4 Oct 2026 |
+| P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | PR open, CI green, load test passed, migration 1 live (5 Oct); migration 2 after merge | 43 | 4 Oct 2026 |
 | P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | todo | | |
 | P0.1-13b | One publication pipeline: posts, photos, hours, profile changes | Opus | todo | | |
 | P0.2-01 | Retention table | Opus | todo | | |
@@ -155,14 +155,13 @@ After the P0.1-12a pull request (40) was merged: deploy, `kabsi_dispatch`, sync 
 
 P0.1-11 (PRs 38 and 39) and P0.1-10's approval and publication events: passed at the start of the P0.1-12a chat (see Evidence).
 
-Still open from P0.1-10:
-- After the next `kabsi_retention` run (02:53 UTC): the job succeeded and its `jobs_log` detail (if any) carries `audit_redacted` and `audit_deleted`.
+P0.1-10 `kabsi_retention`: passed 5 Oct (see Evidence, P0.1-12b block).
 
 After the P0.1-09 pull request (36) was merged: the calls were checked through RLS as the Yawmiyati owner (see Evidence). Still open:
 - Smoke in a browser as the Yawmiyati owner and the partner login: Home, Reviews and the partner page load with data (the sandbox cannot reach the live site).
 
 After the P0.1-08 pull request (35) is merged (Deploy publishes `api`): Deploy and `kabsi_concierge_overdue`, `kabsi_ops_watchdog`, `kabsi_plans_expiry` passed (see Evidence). Still open:
-- `kabsi_retention` (02:53), `kabsi_chat_retention` (03:41) and `kabsi_concierge_daily` (05:00 Mon to Fri) show a successful run after 14:46 UTC on 4 Oct: `select j.jobname, max(d.end_time) filter (where d.status = 'succeeded') from cron.job j left join cron.job_run_details d using (jobid) group by 1`.
+- `kabsi_retention` passed (5 Oct 02:53, see Evidence). Still to read: `kabsi_chat_retention` (03:41) and `kabsi_concierge_daily` (05:00 Mon to Fri) show a successful run after 14:46 UTC on 4 Oct: `select j.jobname, max(d.end_time) filter (where d.status = 'succeeded') from cron.job j left join cron.job_run_details d using (jobid) group by 1`.
 - Leaked-password protection on once Rashid's step 10 is done.
 - An email link (`/a/...`) opened signed out in mock mode still shows the Test mode banner (`GET /functions/v1/api/action?t=...` returns `"mode":"mock"`).
 - Signed in, the app header still shows the Test mode banner (the browser still calls `google_mode()` as authenticated).
@@ -209,6 +208,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ### P0.1-12b (branch claude/h-p0-1-12b, PR 43, 4 Oct 2026, Hussein's session)
 - Start of chat: Hussein checked the Home line in a browser: "Google profile checked just now" shows under the business name, with the Demo data tag and the test-mode banner. P0.1-12a's Home check passed; the staff Job health look stays open for Rashid.
+- Night job, 5 Oct: `kabsi_retention` (`select private.run_retention()`) succeeded at 02:53:00 in 0.1 s, the first run since the P0.1-08 and P0.1-10 changes; `run_retention` writes no `jobs_log` row, so there is no detail to read; `audit_events` 472 rows, oldest 4 Oct 16:35 (nothing old enough to redact or delete yet), 16 written since the run (inserts still work). P0.1-10's last After-merge check passed. `kabsi_chat_retention` (03:41) and `kabsi_concierge_daily` (Monday 05:00) had not run yet at 03:15.
 - Start of chat, After-merge snapshot (18:49 UTC, read only): 20 cron jobs, none failed; `jobs` 26 succeeded, 0 dead or failed; every syncing business `sync_status` ok with a last success between 18:44 and 18:48; `ops_events` since 18:30: 0; `ai_usage` today: Yawmiyati 3 generations (6,091 in, 984 out tokens, last 18:34:07, the mock review's draft) and Harbour Lane Coffee 2; `ops_events` naming Harbour Lane or Juniper: 0; no email row for a demo business. Still waiting: the night jobs (`kabsi_retention` 02:53, `kabsi_chat_retention` 03:41, `kabsi_concierge_daily` Mon to Fri 05:00) have not run since the P0.1-08 and P0.1-10 changes. The other open checks need a browser or a database write.
 - Migration 1 `20261004200000_google_limits.sql` (applied before merge): `google_rate` (sliding windows: `project` 4 a second, `profile:locations/<id>` 5 writes a minute), `circuit_breaker` (20 failures inside a minute open it for 5 minutes, with `circuit_open` and `circuit_closed` #kabsi-alerts events), `google_gate(profile)`, `google_failure()`, `postpone_job(...)` for the service role only, `private.google_circuit` and `private.rate_take` for nobody.
 - Migration 2 `20261004200100_cron_to_jobs.sql` (after the deploy): `google_connections.next_protection_at`; `private.offer_every`; `produce_jobs` also offers `protection_check` per business (5 minutes on the mock and for demo businesses, an hour on live Google, at its own offset) and the six whole-system steps every 5 minutes at their own minute; `dispatch_tick` clears rate buckets unused for a day; `ops_watchdog` alerts when no job has finished in 20 minutes instead of watching `kabsi_cron_tick`; `kabsi_cron_tick` unscheduled.
@@ -217,6 +217,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Done-when "the breaker opens and closes": `google_limits.sql` (19 failures closed; failures older than a minute reset; 20th opens for 5 minutes with one alert; the gate refuses reads and writes while open; closes after 5 minutes with one message). Locally all ok.
 - Done-when "the load script finishes all syncs inside one simulated hour with no function timeout": `scripts/load/mock-500.ts`, `Load` workflow run 37227146712 on commit c7bf402, 20 ms added to every database call: 500 businesses, 60 simulated minutes (607 s real); 5,905 review syncs succeeded (per business min 11, max 12, 11 expected) and 5,875 Protection checks (min 11); `google_connections` ok for 500 of 500, none never synced; about 160 jobs a minute, each minute's dispatcher run 8 to 8.5 s, the longest 12.3 s (229 jobs in the first busy minute), nothing left due after any run or at the end; 0 jobs dead or failed; each whole-system step ran 17 to 18 times; circuit breaker stayed closed. PASSED. (The first two Load runs failed before the test: Prettier on the script, then Deno not finding `npm:postgres`; fixed in 3cb33e0 and c7bf402.)
 - CI on PR 43, commit c7bf402: App, Edge Functions, Database (450 pgTAP tests in 6 files, `google_limits.sql` ok, claim concurrency ok) and Load all success.
+- Migration 1 live on Hussein's "apply" (5 Oct, 03:14 UTC): `apply_migration` `google_limits`, success, recorded as version 20261005031442. Read back: `google_rate` and `circuit_breaker` with RLS on, only service_role SELECT on either; `circuit_breaker` one row `google`, closed, 0 failures; `google_rate` 0 rows; `google_gate`, `google_failure`, `postpone_job` execute for service_role only, `private.google_circuit` and `private.rate_take` for nobody; all five function bodies have the same md5 as the file (1b966eb5, 20318ed9, 50ba015b, 0961a5d3, 4cd61065). 20 cron jobs, unchanged. Security advisor: the only new lines are INFO "RLS enabled, no policy" for `google_rate` and `circuit_breaker` (intended, server only); no new function callable by authenticated.
 - Done-when "`kabsi_cron_tick` is unscheduled and `cron.job` shows the dispatcher": migration 2, after merge (After merge).
 - App checks: `npm run typecheck`, `check:anon`, `check:tokens`, `check:google`, `npm test` (21 passed), `npm run build` pass; `lint:changed` "No lintable files changed". `deno check` every function except `site-assets` (cannot fetch deno.land from the sandbox; CI runs it).
 - `knowledge/kabsi-facts.md`: one line on Google's limits and the 5-minute pause; `public/llms-full.txt` rebuilt.
@@ -628,6 +629,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 5 Oct 2026 (Hussein's session): P0.1-12b CI green (load test passed, 500 businesses in one simulated hour); migration 1 (`google_limits`) live on Hussein's "apply" and read back. `kabsi_retention` ran at 02:53 after the P0.1-10 change: P0.1-10's last check passed. Next: Hussein's "merge" on PR 43, then migration 2 on his "apply" and go for the unschedule.
 
 - 4 Oct 2026 (Hussein's session): recorded Hussein's browser check of the Home line (P0.1-12a). After-merge snapshot read only; nothing else could run (night jobs not yet run; the rest needs a browser or a write). P0.1-12b on branch claude/h-p0-1-12b, PR 43: rate limiter, circuit breaker, Protection and the remaining cron steps as jobs, watchdog moved to the queue, load test. Next: CI, then migration 1 on Hussein's "apply"; migration 2 after merge. Next task after this one: P0.1-13a.
 
