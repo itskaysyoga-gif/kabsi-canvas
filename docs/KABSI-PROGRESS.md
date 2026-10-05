@@ -58,7 +58,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-10 | Append-only audit log and the "What Kabsi did" feed source | Opus | done (merged 37; approval and publication events checked live at the start of the P0.1-12a chat; the next `kabsi_retention` run still to read, see After merge) | 37 | 4 Oct 2026 |
 | P0.1-11 | One Google service layer | Opus | done (part A merged 38, part B merged 39; After-merge checks passed) | 38, 39 | 4 Oct 2026 |
 | P0.1-12a | Job queue and dispatcher, review jobs first | Opus | merged (40); migration fully live; After-merge passed (deploy, dispatcher, sync status, no duplicates, mock review end to end, Home line checked in a browser by Hussein); staff Job health look still open (Rashid), see Evidence | 40, 41 | 4 Oct 2026 |
-| P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | PR open, CI green, load test passed, migration 1 live (5 Oct); migration 2 after merge | 43 | 4 Oct 2026 |
+| P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | merged (43); both migrations live, `kabsi_cron_tick` unscheduled, After-merge passed; `dispatch_tick` body (SQL editor) and the mock Protection alert still open, see Evidence | 43, 44 | 5 Oct 2026 |
 | P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | todo | | |
 | P0.1-13b | One publication pipeline: posts, photos, hours, profile changes | Opus | todo | | |
 | P0.2-01 | Retention table | Opus | todo | | |
@@ -144,11 +144,10 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-After the P0.1-12b pull request (43) is merged (Deploy publishes `api`):
-- Every Edge Function `updated_at` is after the merge; `kabsi_dispatch` keeps finishing `sync_reviews` jobs (`jobs` rows after the deploy, none `dead` or `failed`).
-- Then, on Hussein's "apply" and his go for the unschedule: migration `20261004200100_cron_to_jobs.sql` live. Read back: `cron.job` has `kabsi_dispatch` and no `kabsi_cron_tick`; within 5 minutes `jobs` shows `access_check`, `ratings_snapshot`, `weekly_reports`, `deletions`, `trial_reminders`, `renewal_reminders` and one `protection_check` per business succeeded; `google_connections.next_protection_at` set for every business the sync reads; no `tick_stalled` event after the apply; `jobs_log` still gets `dispatch` rows (the health check's freshness).
-- Live mock Protection check (Hussein's "apply"): `staff_mock_listing_edit` on Yawmiyati changes the phone; within 5 minutes one `listing_changes` row and one `shield_alert` email, from a `protection_check` job. Then put the phone back.
-- `google_gate` is not called in mock mode (mock calls do not reach `gbp`): `select count(*) from google_rate` stays 0 until Gate A. The limiter is proven by the tests and the load run.
+After the P0.1-12b pull request (43) was merged: deploy, migration 2, the six steps and Protection as jobs, the unschedule and a quiet watchdog passed (see Evidence). Still open:
+- Hussein in the Supabase SQL editor: the new `private.dispatch_tick` (the snippet in the chat, the same as the file; the connector times out on it). Until then the rate buckets are not cleared, which matters only after Gate A. Read back: its md5 is `94ea83b8...`.
+- Live mock Protection alert (Hussein's "apply"): `staff_mock_listing_edit` on Yawmiyati changes the phone; within 5 minutes one `listing_changes` row and one `shield_alert` email from a `protection_check` job; then put the phone back.
+- `google_rate` stays empty in mock mode (mock calls do not reach `gbp`) until Gate A.
 
 After the P0.1-12a pull request (40) was merged: deploy, `kabsi_dispatch`, sync status, cron-tick hand-over, the no-duplicates check and the mock review end to end passed (see Evidence). Hussein checked the Home line in a browser (4 Oct). Still open:
 - Signed in as staff (Rashid, a person with a browser): `/staff` Job health shows the "Job queue" line.
@@ -205,6 +204,15 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### P0.1-12b After-merge checks (5 Oct 2026, 03:31 to 04:01 UTC, Hussein's session)
+- PR 43 squash-merged 03:31:21 on Hussein's "merge" (5b72e69). Deploy run 37259771242 passed (Edge Functions and Worker); every Edge Function `updated_at` 03:31:47, `api` version 51.
+- First dispatch on the new code, 03:35: 4 `sync_reviews` succeeded on the first try, side by side, 4.7 s in all; no stopped job, no ops event, no failed internal call after the deploy.
+- Migration 2 on Hussein's "apply" and his go for the unschedule. The whole file through `apply_migration` timed out after 60 s and applied nothing (checked: no column, no `offer_every`, `produce_jobs` unchanged, `kabsi_cron_tick` still there, no migration row). Applied in parts with the file's SQL: `cron_to_jobs_part1_producers` (column, `offer_every`, `produce_jobs`, revoke) 03:44:24, `cron_to_jobs_part2_watchdog` 03:44:33, `cron_to_jobs_part4_unschedule_cron_tick` 03:51:33 (after the steps were seen running). `cron_to_jobs_part3_dispatch_tick` (contains `delete`) timed out and applied nothing, as in P0.1-12a; it waits for the SQL editor (After merge). Read back: `offer_every` 95941a8d, `produce_jobs` d051f292, `ops_watchdog` 0f5db6b4, the same md5 as the file; `dispatch_tick` still 300fac3f (12a's body, which already calls the new `produce_jobs`). `offer_every` and `produce_jobs` execute for nobody; `ops_watchdog` keeps its earlier grants (create or replace).
+- Each moved step ran as a job at its slot, first try: `ratings_snapshot` 03:46:00, `weekly_reports` 03:47:00, `deletions` 03:48:00, `trial_reminders` and `renewal_reminders` 03:49:00, `access_check` 03:50:02; again 5 minutes later (`ratings_snapshot` 03:51:00 and 04:01:00, `access_check` 04:00:02, the others pending for 04:02 to 04:04).
+- Google Protection as one job per business, first try each: QA Bakery 03:46:00, 03:51:00, 03:57:01, 04:01:01; Yawmiyati 03:49:01, 03:55:01, 04:01:01; Harbour Lane Coffee and Juniper Hair Studio 03:50:02, 03:55:01, 04:01:01 (every 5 to 6 minutes, mock mode).
+- `kabsi_cron_tick` unscheduled: `cron.job` 19 jobs, `kabsi_dispatch` `* * * * *` `select private.dispatch_tick()`, no `kabsi_cron_tick`; its last run 03:50:00; no `cron-tick` `jobs_log` row after 03:51:33. Between 03:51:33 and 04:00:51: 8 `sync_reviews`, 4 `protection_check`, 2 `access_check`, 2 `deletions`, 2 `trial_reminders`, 2 `renewal_reminders`, 2 `weekly_reports`, 1 `ratings_snapshot` succeeded; 0 jobs dead, failed or retrying.
+- Watchdog quiet: `kabsi_ops_watchdog` ran at 03:50 and 04:00, both succeeded; 0 `ops_events` after 03:44 (no `tick_stalled`); last finished job 04:00:02; 0 failed internal calls after 03:44.
 
 ### P0.1-12b (branch claude/h-p0-1-12b, PR 43, 4 Oct 2026, Hussein's session)
 - Start of chat: Hussein checked the Home line in a browser: "Google profile checked just now" shows under the business name, with the Demo data tag and the test-mode banner. P0.1-12a's Home check passed; the staff Job health look stays open for Rashid.
@@ -508,6 +516,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Found, not done
 
+- P0.1-12b: the per-business schedules (`next_sync_at`, `next_protection_at`) are set to "now plus 5 minutes" at the start of the minute the job is offered, and pg_cron's next tick often starts a few milliseconds earlier, so a business is offered every 5 or 6 minutes (seen live: 03:30, 03:35, 03:41). Harmless; rounding the next time down to the minute would make it exactly 5.
+
 - P0.1-12b: until P0.1-13a moves publishing onto the queue, a live reply, post or listing change that cannot get its place under the limiter within 65 s (or meets an open breaker) fails with `GoogleBusy` and is left "publishing" for staff to verify (D266 treats it as uncertain, because a read-back after a successful write can also meet it). Mock mode is unaffected. P0.1-13a's publish job should postpone instead.
 - P0.1-12b: `/api/cron-tick` and `shieldCheck()` stay after `kabsi_cron_tick` is unscheduled (the `weekly_now` test hook uses the route). A later contract step removes them.
 - P0.1-12b: `ratings_snapshot` and `weekly_reports` still loop over every business inside one job. Once a day (ratings) and Mondays (reports) that is up to 500 Places calls or report builds in one run; a run cut off by the function limit is picked up by the next one (each step decides from data). One job per business belongs with P0.5-04 (reports) or P0.2-06 (Places cost guard).
@@ -629,6 +639,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 5 Oct 2026 (Hussein's session): PR 43 (P0.1-12b) merged on Hussein's "merge"; deploy passed; migration 2 applied in parts on his "apply" and his go for the unschedule; `kabsi_cron_tick` unscheduled after the six steps and Protection were seen running as jobs; watchdog quiet. Still open: `dispatch_tick` body in the SQL editor (Hussein) and the live mock Protection alert. Next task: P0.1-13a (Opus).
 
 - 5 Oct 2026 (Hussein's session): P0.1-12b CI green (load test passed, 500 businesses in one simulated hour); migration 1 (`google_limits`) live on Hussein's "apply" and read back. `kabsi_retention` ran at 02:53 after the P0.1-10 change: P0.1-10's last check passed. Next: Hussein's "merge" on PR 43, then migration 2 on his "apply" and go for the unschedule.
 
