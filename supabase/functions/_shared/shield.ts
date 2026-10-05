@@ -25,33 +25,50 @@ async function alertOwner(loc: Loc, changeId: string, field: ShieldField, before
   }
 }
 
-// Cron job. Mock: every tick. Live: at most once an hour per location (Pub/Sub will make it faster later).
+const LOC_COLS = "id, name, address, google_location_id, knowledge_card, shield_checked_at";
+
+// Cron job (until kabsi_cron_tick is retired, P0.1-12b). Mock: every tick. Live: at most once an hour per location.
 export async function shieldCheck() {
   const db = admin();
-  const { data } = await db.from("locations").select("id, name, address, google_location_id, knowledge_card, shield_checked_at")
+  const { data } = await db.from("locations").select(LOC_COLS)
     .eq("status", "active").eq("concierge", false).not("google_location_id", "is", null);
   let alerts = 0;
   for (const loc of (data ?? []) as Loc[]) {
     if (googleMode() === "live" && loc.shield_checked_at && Date.parse(loc.shield_checked_at) > Date.now() - 55 * 60_000) continue;
-    const card = loc.knowledge_card ?? {};
     // One business Google refuses (e.g. access removed) must not stop the check for the others.
-    const now = await getListing(loc.google_location_id!, { name: loc.name, address: loc.address, phone: card.contact_phone as string | undefined, hours: card.hours_note as string | undefined })
-      .catch(async (e) => { await captureError("shield", e, { location: loc.id }); return null; });
-    if (!now) continue;
-    await db.from("locations").update({ shield_checked_at: new Date().toISOString() }).eq("id", loc.id);
-    const { data: base } = await db.from("listing_baselines").select("fields").eq("location_id", loc.id).maybeSingle();
-    if (!base) { await db.from("listing_baselines").insert({ location_id: loc.id, fields: now }); continue; }
-    const before = base.fields as Listing;
-    for (const f of SHIELD_FIELDS) {
-      if (!before[f] || before[f].display === now[f].display) continue;
-      const { data: open } = await db.from("listing_changes").select("id, new_value").eq("location_id", loc.id).eq("field", f).eq("state", "open").maybeSingle();
-      if (open && (open.new_value as FieldValue)?.display === now[f].display) continue; // already alerted about this value
-      if (open) await db.from("listing_changes").update({ state: "kept", decided_at: new Date().toISOString() }).eq("id", open.id); // superseded
-      const { data: ch, error } = await db.from("listing_changes").insert({ location_id: loc.id, field: f, old_value: before[f], new_value: now[f], detected_by: "scheduled_check" }).select("id").single();
-      if (error) throw error;
-      await alertOwner(loc, ch.id, f, before[f], now[f]);
-      alerts++;
-    }
+    alerts += await checkListing(loc).catch(async (e) => { await captureError("shield", e, { location: loc.id }); return 0; });
+  }
+  return alerts;
+}
+
+// Job protection_check (P0.1-12b): one business, offered every 5 minutes on the mock and once an hour on live
+// Google. A Google error is thrown, so the job retries with backoff.
+export async function protectionCheck(locationId: string) {
+  const { data, error } = await admin().from("locations").select(LOC_COLS).eq("id", locationId)
+    .eq("status", "active").eq("concierge", false).not("google_location_id", "is", null).maybeSingle();
+  if (error) throw error;
+  return data ? await checkListing(data as Loc) : 0; // paused, removed or concierge since the job was offered
+}
+
+// Read the listing, compare it with the baseline and alert the owner once per new value.
+async function checkListing(loc: Loc) {
+  const db = admin();
+  const card = loc.knowledge_card ?? {};
+  const now = await getListing(loc.google_location_id!, { name: loc.name, address: loc.address, phone: card.contact_phone as string | undefined, hours: card.hours_note as string | undefined });
+  await db.from("locations").update({ shield_checked_at: new Date().toISOString() }).eq("id", loc.id);
+  const { data: base } = await db.from("listing_baselines").select("fields").eq("location_id", loc.id).maybeSingle();
+  if (!base) { await db.from("listing_baselines").insert({ location_id: loc.id, fields: now }); return 0; }
+  const before = base.fields as Listing;
+  let alerts = 0;
+  for (const f of SHIELD_FIELDS) {
+    if (!before[f] || before[f].display === now[f].display) continue;
+    const { data: open } = await db.from("listing_changes").select("id, new_value").eq("location_id", loc.id).eq("field", f).eq("state", "open").maybeSingle();
+    if (open && (open.new_value as FieldValue)?.display === now[f].display) continue; // already alerted about this value
+    if (open) await db.from("listing_changes").update({ state: "kept", decided_at: new Date().toISOString() }).eq("id", open.id); // superseded
+    const { data: ch, error } = await db.from("listing_changes").insert({ location_id: loc.id, field: f, old_value: before[f], new_value: now[f], detected_by: "scheduled_check" }).select("id").single();
+    if (error) throw error;
+    await alertOwner(loc, ch.id, f, before[f], now[f]);
+    alerts++;
   }
   return alerts;
 }

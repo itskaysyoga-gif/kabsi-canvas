@@ -98,6 +98,7 @@ Plans are Free, Pro and Partner. Free is Get Reviews (the review link and card).
 
 - Home shows a list called **What needs your attention**: up to five open items in a set order. There is no score and no points value. Each item has a short reason and opens the page where the owner does it.
 - Under the business name, Home shows when Kabsi last checked the Google profile successfully, for example "Google profile checked 14 min ago". Kabsi checks every few minutes. If the last successful check is more than 6 hours old, the line turns amber and reads "Google profile last checked ...", so Home never looks healthy when checks are failing. Businesses in early access (a person posts what you approve) do not show the line, because Kabsi does not read their profile from Google yet.
+- Kabsi keeps to Google's limits: at most 5 changes a minute to one profile (Google allows 10). If Google stops answering, Kabsi pauses its Google calls for 5 minutes and then carries on; the checks that were due wait their turn, and nothing is sent twice.
 - The owner can **do it**, **put it off** (3 days) or **skip it** (30 days). Nothing is sent to Google until the owner approves it. Never present the list as a ranking or as a promise of more customers or reviews.
 - Nora, Kabsi's assistant in the dashboard, can read the list and say what the top items are in plain words. She never mentions a score. She saves a fact into About your business only when the owner has just told her that fact.
 

@@ -1,7 +1,8 @@
-// cron-tick: internal, every 5 minutes (pg_cron → public.call_internal('cron-tick')).
-// Each job decides what is due by looking at data, never at the clock alone, and is safe to run twice.
-// Review sync, drafting and owner emails run as jobs since P0.1-12a (api/jobs.ts); what is left here moves to jobs
-// in P0.1-12b.
+// The whole-system steps: access, ratings, weekly reports, deletions, trial and renewal reminders.
+// Each decides what is due by looking at data, never at the clock alone, and is safe to run twice.
+// Since P0.1-12b each runs as its own job from the dispatcher (api/jobs.ts), offered every 5 minutes; Protection is
+// one job per business (shield.ts). /api/cron-tick still runs them all in one go for the weekly_now test hook and
+// until the migration that unschedules kabsi_cron_tick (20261004200100_cron_to_jobs.sql) is applied.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 import { dueRenewalEmail, dueTrialEmail, localDateHour, PLAN_LABEL, type RenewalStage, type TrialStage } from "../_shared/plans.ts";
 import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google/index.ts";
@@ -36,7 +37,7 @@ async function conciergeAccessEmails() {
 }
 
 // Job: Google access. Owner invited the Kabsi business group as Manager → mark access granted, refresh status, email the owner.
-async function accessJob() {
+export async function accessJob() {
   const db = admin();
   const { data: pending } = await db.from("locations")
     .select("id, name, address, place_id, consent_at")
@@ -107,7 +108,7 @@ async function reportLocations() {
 }
 
 // Job: one public-rating snapshot per location per day (feeds the weekly change).
-async function ratingsJob() {
+export async function ratingsJob() {
   return { snapshots: await snapshotRatings(await reportLocations()) };
 }
 
@@ -117,13 +118,13 @@ async function shieldJob() {
 }
 
 // Job: weekly report, Monday from 09:00 local (D222).
-async function weeklyJob() {
+export async function weeklyJob() {
   return { reports: await weeklyReports(await reportLocations()) };
 }
 
 // Job: owner-requested deletion (migration 019). Notice email when requested; after 7 days remove stored
 // photos, email the confirmation, then delete_location_now (cards unassigned, business data deleted).
-async function deletionsJob() {
+export async function deletionsJob() {
   const db = admin();
   const { data: rows, error } = await db.from("locations")
     .select("id, name, deletion_requested_at, deletion_notice_at").not("deletion_requested_at", "is", null);
@@ -180,7 +181,7 @@ const TRIAL_COPY: Record<TrialStage, { subject: (d: string) => string; lead: (na
   d1: { subject: () => "Your Kabsi free trial ends tomorrow", lead: (n, d) => `Your free trial for <strong>${n}</strong> ends tomorrow, ${d}.` },
   d0: { subject: () => "Your Kabsi free trial ends today", lead: (n) => `Today is the last day of your free trial for <strong>${n}</strong>.` },
 };
-async function trialsJob() {
+export async function trialsJob() {
   const db = admin();
   const { data, error } = await db.rpc("trial_reminder_candidates");
   if (error) throw error;
@@ -215,7 +216,7 @@ async function trialsJob() {
 // Job: renewal reminders for paid monthly and yearly plans (Q06), 5 days and 1 day before the last day, from 09:00
 // local. The link opens the Plan page: invoices are created there, never from cron, because they expire.
 const RENEW_COPY: Record<RenewalStage, string> = { r5: "in a few days", r1: "tomorrow" };
-async function renewalsJob() {
+export async function renewalsJob() {
   const db = admin();
   const { data, error } = await db.rpc("renewal_reminder_candidates");
   if (error) throw error;

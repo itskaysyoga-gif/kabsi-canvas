@@ -1,0 +1,46 @@
+name: Load
+
+# P0.1-12b: 500 mock businesses, one simulated hour of dispatch on a local Supabase stack (scripts/load/mock-500.ts).
+# Runs when the job queue, the Google layer, the review sync, the migrations or the script change, and on demand.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "supabase/migrations/**"
+      - "supabase/functions/api/**"
+      - "supabase/functions/_shared/jobs.ts"
+      - "supabase/functions/_shared/reviews.ts"
+      - "supabase/functions/_shared/shield.ts"
+      - "supabase/functions/_shared/google/**"
+      - "scripts/load/**"
+      - ".github/workflows/load.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: load-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mock-500:
+    name: Load (500 mock businesses, one simulated hour)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      # Pinned: "latest" asks the GitHub API and fails on its rate limit.
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.119.0
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Local stack and migrations (the database suite runs too)
+        run: bash scripts/db-test.sh
+      - name: 500 businesses, 60 simulated minutes, 20 ms added to every database call
+        run: |
+          eval "$(supabase status -o env)"
+          export API_URL SERVICE_ROLE_KEY DB_URL
+          LOAD_LATENCY_MS=20 deno run -A --node-modules-dir=auto --no-lock scripts/load/mock-500.ts
