@@ -134,3 +134,14 @@ Deno.test("mock performance values are zero, never invented", async () => {
   assert.equal(values.length, 2);
   assert.ok(values.every((v) => v.value === "0"));
 });
+
+Deno.test("special hours read back match whatever the key order of the stored dates (P0.1-13b)", async () => {
+  const { showsSpecialHours } = await import("./index.ts");
+  // As the database returns a stored period: keys in its own order.
+  const stored = [{ closed: true, endDate: { day: 25, year: 2026, month: 12 }, startDate: { day: 25, year: 2026, month: 12 } }];
+  assert.equal(showsSpecialHours(stored, { startDate: "2026-12-25", endDate: "2026-12-25", closed: true }), true);
+  assert.equal(showsSpecialHours(stored, { startDate: "2026-12-24", endDate: "2026-12-24", closed: true }), false);
+  const open = [{ startDate: { year: 2026, month: 12, day: 24 }, openTime: { hours: 9 }, closeTime: { minutes: 30, hours: 13 } }];
+  assert.equal(showsSpecialHours(open, { startDate: "2026-12-24", endDate: "2026-12-24", closed: false, openTime: "09:00", closeTime: "13:30" }), true);
+  assert.equal(showsSpecialHours(open, { startDate: "2026-12-24", endDate: "2026-12-24", closed: true }), false);
+});

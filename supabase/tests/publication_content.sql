@@ -219,5 +219,15 @@ select is((select payload from public.publications where target_id = '00000000-0
 select throws_ok($$ select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000301', 'text',
   '00000000-0000-4000-8000-0000000000a1', 'dashboard') $$, 'P0001', 'unsupported_target', 'the reply form approves replies only');
 
+-- The mock listing takes one field at a time (P0.1-13b fix): two writes side by side never undo each other.
+insert into public.mock_listings (google_location_id, fields) values ('locations/mock-victim', '{"phone": "1", "title": "Victim Bakery"}');
+select public.mock_listing_set('locations/mock-victim', 'phone', '"2"');
+select public.mock_listing_set('locations/mock-victim', 'specialHours', '[{"closed": true}]');
+select is((select fields from public.mock_listings where google_location_id = 'locations/mock-victim'),
+  '{"phone": "2", "title": "Victim Bakery", "specialHours": [{"closed": true}]}'::jsonb, 'each write sets its own field and keeps the others');
+select is(public.mock_listing_set('locations/mock-none', 'phone', '"3"'), null::jsonb, 'no mock listing: nothing written');
+select ok(not has_function_privilege('authenticated', 'public.mock_listing_set(text,text,jsonb)', 'execute')
+  and has_function_privilege('service_role', 'public.mock_listing_set(text,text,jsonb)', 'execute'), 'mock_listing_set runs for the service role only');
+
 select * from finish();
 rollback;
