@@ -45,6 +45,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | 11 | Vercel account connected to GitHub, Supabase and Claude | P0.1-03 | Done 7 Oct (the six remaining steps are in the P0.1-03 section of the plan) |
 | 12 | Kapso account and the number's WhatsApp profile (+1 201-483-5474); keys into Supabase secrets | P0.6-10 | Todo |
 | 13 | Google Cloud (project 856347937978): enable the reviews and posts API if a session cannot; submit the `business.manage` package | P0.7-01a, P0.7-02 | Enabling done 7 Oct 2026 by Hussein: the Google My Business API (reviews and posts) is now enabled in project 856347937978. Reading its quota and writing `docs/google/api-access.md` stays with P0.7-01a. Submitting the `business.manage` package is still todo |
+| 15 | GitHub repo secret `SUPABASE_ACCESS_TOKEN`: replace it with a Supabase personal access token from Hussein's own account (owner of the organisation that now holds `kabsi-prod`), then re-run the failed Deploy run 37675383844 | P0.1-13a After merge (every Edge Function deploy) | Todo (7 Oct: Deploy failed with 403 "Missing required permission(s): edge_functions_write" on every function) |
 | 14 | Supabase Pro with point-in-time recovery in Hussein's own organisation | P0.7-07 (before the first real customer) | Todo |
 
 ## Tasks
@@ -71,7 +72,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-11 | One Google service layer | Opus | done (part A merged 38, part B merged 39; After-merge checks passed) | 38, 39 | 4 Oct 2026 |
 | P0.1-12a | Job queue and dispatcher, review jobs first | Opus | merged (40); migration fully live; After-merge passed (deploy, dispatcher, sync status, no duplicates, mock review end to end, Home line checked in a browser by Hussein); staff Job health look still open (Rashid), see Evidence | 40, 41 | 4 Oct 2026 |
 | P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | done (merged 43; `dispatch_tick` re-applied by Hussein in the SQL editor and read back `94ea83b8` on 7 Oct; mock Protection alert passed 7 Oct) | 43, 44 | 7 Oct 2026 |
-| P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | PR open (47); migration live and read back; CI green; After-merge checks listed | 47 | 7 Oct 2026 |
+| P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | merged (47); migration live; Deploy blocked by the Supabase token (Hussein's step 15), After-merge checks wait for it | 47 | 7 Oct 2026 |
 | P0.1-13b | One publication pipeline: posts, photos, hours, profile changes | Opus | todo | | |
 | P0.7-01a | Wave P0.G: enable the reviews and posts API and confirm access | Sonnet | todo, can start now | | |
 | P0.7-01 | Wave P0.G: capture real Google responses (read-only) | Opus | todo, can start now (after P0.7-01a) | | |
@@ -162,8 +163,9 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-After the P0.1-13a pull request (47) is merged (Deploy publishes `api` with the publish and reconcile jobs):
-- Deploy workflow passed and `api` has a new version.
+After the P0.1-13a pull request (47) was merged (7 Oct 19:33 UTC, merge commit 74665ca):
+- Deploy run 37675383844 FAILED: the Edge Functions job got 403 "Missing required permission(s): edge_functions_write" for every function (the Worker job passed). The token in the `SUPABASE_ACCESS_TOKEN` secret can no longer deploy to `kabsi-prod` since the project moved to Hussein's organisation. Code is not the cause. Hussein's step 15. Until it is re-run, the old `api` runs against the new schema, which is safe: old-path rows get `state` from `status` through the trigger, no `publish` job is offered for them (no `publish_after`), and at 19:38 UTC there were 0 failed or dead jobs and 0 failed cron runs since the migration.
+- Then: Deploy passes and `api` has a new version.
 - Mock end to end on Yawmiyati: a staff mock review is synced and drafted; approving it in the app makes one `publications` row (state `approved`, `publish_after` 10 s later) and one `publish` job; within about a minute the row is `verified`, the review `posted` with `reply_state` `live`, `mock_google_reviews.reply_calls` is 1, and `audit_events` has the `approval` and the `publication` (`live`) lines.
 - Moderation path: the same with `reply_mode = 'pending'` on the mock row ends in `checking` ("Google is checking your reply" on Reviews); after copying `pending_reply_comment` to `reply_comment`, the `reconcile_publication` job 10 minutes later marks it `verified`.
 - Signed in at 390 px (Hussein, a browser): Reviews shows "Google is checking your reply" for the pending one, and the inbox success line reads "Approved. Kabsi sends it to Google within a few minutes."
@@ -694,6 +696,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 7 Oct 2026 (Hussein's session): PR 47 (P0.1-13a) merged at 19:33 UTC as 74665ca. Deploy failed on the Supabase token (403 edge_functions_write), not the code; new step 15 for Hussein. Live system checked safe on the old `api`.
 
 - 7 Oct 2026 (Hussein's session): `dispatch_tick` read back `94ea83b8`; P0.1-12b done. P0.1-13a on branch claude/h-p0-1-13a, PR 47: one publication pipeline for review replies (approval, claim, undo window, publish and reconcile jobs, mock modes). CI green (first run had one test-file mistake, fixed); migration applied live in one go and read back. Next: merge, Deploy, the After-merge mock end to end; then P0.1-13b (Opus).
 
