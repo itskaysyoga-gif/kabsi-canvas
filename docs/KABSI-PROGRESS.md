@@ -4,6 +4,12 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## Where things stand
 
+- **7 Oct 2026, plan update (planning chat, Hussein's request, R-26 to R-32).** Rashid has stopped working on the project; Hussein runs everything. The repo is `itskaysyoga-gif/kabsi-canvas` (Hussein's GitHub account); `kabsi-prod` is in Hussein's own Supabase organisation (free plan, same project and keys). Every manual step of Rashid's is Hussein's. Build chats now apply database changes and merge their own pull requests once CI is green, without asking, and stop only before dropping tables or columns or deleting real data (plan sections 2.3, 2.5, 2.9 and every ready prompt, CLAUDE.md).
+- **Gate A approved on 5 Oct 2026** (Google Cloud project 856347937978, 300 queries per minute). The Gate A tasks moved to the new Wave P0.G (plan section 7A) right after Wave P0.1. **Can start now:** P0.7-01a (enable the reviews and posts API, confirm quota) and P0.7-01 (capture real responses, read-only), then P0.7-01b. P0.7-02 can be written now and submitted once P0.1-03 and P0.2-07 are live. P0.7-04 and P0.7-05 wait for P0.7-01b, P0.1-13a and P0.1-13b. Google stays in mock mode until P0.7-04 switches it.
+- **Hosting moves from Lovable to Vercel** (account created and connected to GitHub, Supabase and Claude). P0.1-03 is now "Move hosting to Vercel and switch kabsi.co". After-merge visual checks use the Vercel preview or live URL.
+- **WhatsApp through Kapso** (K-122, number +1 201-483-5474): P0.6-10 (click-to-chat), P0.6-12 (privacy text and Nora's facts), P1-21 (owner alerts), P1-22 (Nora on WhatsApp).
+- **Next up in Wave P0.1:** P0.1-13a, P0.1-13b, P0.1-03 (Vercel), P0.1-V3, P0.1-06c (demo login to a kabsi.co address). Then Wave P0.G.
+- Where the notes below say "Rashid" for a step, question or input, read Hussein. Older log lines keep the name of who acted at the time.
 - Plan version 1 written on 4 Oct 2026 (pull request claude/plan-v2). Nothing in it has been built yet.
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
 - Live site: https://kabsi-app.lovable.app (new build, still with retired wording); kabsi.co still serves the old product until P0.1-03.
@@ -17,7 +23,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | D1 | Legal seller | Decided 4 Oct: Hussein Slim (Dubai) holds the Creem account and is the seller; Meta business details and verification under the same name (R-25). Hussein agreed to be named on Creem, Meta and the site; no written agreement |
 | D2 | First real live customer | Decided 4 Oct: Abou Hamze Auto Center (Bakaata). Owner agreed 4 Oct; Kabsi Clients group added as Manager and hello@kabsi.co accepted (Business Profile Manager shows Abou Hamze Auto Center and Yawmiyati, both Verified) |
 | D3 | NFC shipping outside Lebanon | Decided 4 Oct: none |
-| I1 | US WhatsApp number | Later; placeholder +961 3 956 917 in one constant meanwhile |
+| I1 | US WhatsApp number | Settled 7 Oct by K-122: Kapso number +1 201-483-5474; set in P0.6-10 (placeholder +961 3 956 917 until then) |
 | I2 | Real screenshots of Google's People and access steps | Desktop done 4 Oct (`public/help/manager-steps/desktop/`, blurred); phone still to come |
 | I3 | Referral reward | Decided 4 Oct: one free month |
 
@@ -25,16 +31,20 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 | # | Step | Needed by | Status |
 |---|---|---|---|
-| 1 | Connect kabsi.co in Lovable and add the DNS records in Cloudflare | P0.1-03 | Todo |
-| 2 | Supabase Auth URL settings for kabsi.co | P0.1-03 | Todo |
+| 1 | Superseded by Vercel (7 Oct): add the DNS records Vercel shows for kabsi.co and www in Cloudflare | P0.1-03 | Todo |
+| 2 | Supabase Auth URL settings for kabsi.co and the Vercel preview pattern (Hussein's own organisation) | P0.1-03 | Todo |
 | 3 | Google Cloud: Places quotas 100 a day, budget alerts, disable places-backend | P0.2-06 | Todo |
-| 4 | Google Cloud and Search Console contacts and owners on kabsi.co addresses (K-99.3) | Any time in P0.1 | Todo |
+| 4 | Google Cloud and Search Console contacts and owners on kabsi.co addresses only, no personal address left (K-99.3, R-32) | Any time in P0.1 | Todo |
 | 5 | Supabase Auth Google provider with the OAuth client | P0.4-02 | Todo |
 | 6 | Meta Business Settings items (P0.6-09 file) | P0.6-03 | Todo |
 | 7 | Creem account (Hussein Slim) and keys in Supabase secrets | P0.4-07 | Todo |
 | 10 | Supabase Auth: turn on leaked-password protection (Authentication, Sign In / Providers, Email, "Prevent use of leaked passwords"); leave the email OTP length at 6 | P0.1-08 done | Todo (no tool in the build session can change Auth settings) |
 | 9 | Paste the four `emails/auth/*.html` files into the Supabase Auth email templates (the login-code email still shows the old Beirut footer) | P0.1-02b done | Todo (Rashid, manual dashboard step; recorded 4 Oct at Hussein's request) |
 | 8 | Hussein agrees to be named as seller | R-20 seller line, P0.4-07, P0.6-09 | Done 4 Oct (no written agreement, Rashid's decision) |
+| 11 | Vercel account connected to GitHub, Supabase and Claude | P0.1-03 | Done 7 Oct (the six remaining steps are in the P0.1-03 section of the plan) |
+| 12 | Kapso account and the number's WhatsApp profile (+1 201-483-5474); keys into Supabase secrets | P0.6-10 | Todo |
+| 13 | Google Cloud (project 856347937978): enable the reviews and posts API if a session cannot; submit the `business.manage` package | P0.7-01a, P0.7-02 | Todo |
+| 14 | Supabase Pro with point-in-time recovery in Hussein's own organisation | P0.7-07 (before the first real customer) | Todo |
 
 ## Tasks
 
@@ -44,11 +54,12 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-01b | Remove leftover references to the retired docs | Sonnet | done | 15 | 4 Oct 2026 |
 | P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | merged (17, 18); live After-merge checks not run, see Evidence | 17, 18 | 4 Oct 2026 |
 | P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | merged in two parts (19, 20); mock-review check passed; live app check and auth template paste still open | 19, 20 | 4 Oct 2026 |
-| P0.1-03 | Move kabsi.co to the new build | Sonnet | todo | | |
+| P0.1-03 | Move hosting to Vercel and switch kabsi.co (replaces "Move kabsi.co to the new build") | Sonnet | todo | | |
 | P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | merged (23); After-merge checks partly run, see Evidence | 23 | 4 Oct 2026 |
 | P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | merged (24); After-merge checks partly run, see Evidence | 24 | 4 Oct 2026 |
 | P0.1-05 | Design tokens and shared components | Sonnet | merged (25); `/design` not yet looked at as staff | 25 | 4 Oct 2026 |
 | P0.1-06 | Demo workspace with fictional businesses | Opus | merged (28, 29); After-merge: Deploy and ops_events checks passed; mock-review email check and browser checks still open, see Evidence | 28, 29 | 4 Oct 2026 |
+| P0.1-06c | Move the demo login to a kabsi.co address | Opus | todo | | |
 | P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet (run on Opus in Hussein's session) | done (merged 31 on Hussein's "merge"; docs only, no After-merge checks) | 31 | 4 Oct 2026 |
 | P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | done (merged 32 on Hussein's "merge"; docs only, no After-merge checks) | 32 | 4 Oct 2026 |
 | P0.1-V3 | Setup-call and partner-call booking links | Sonnet | todo | | |
@@ -61,6 +72,12 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | merged (43); both migrations live, `kabsi_cron_tick` unscheduled, After-merge passed; `dispatch_tick` body (SQL editor) and the mock Protection alert still open, see Evidence | 43, 44 | 5 Oct 2026 |
 | P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | todo | | |
 | P0.1-13b | One publication pipeline: posts, photos, hours, profile changes | Opus | todo | | |
+| P0.7-01a | Wave P0.G: enable the reviews and posts API and confirm access | Sonnet | todo, can start now | | |
+| P0.7-01 | Wave P0.G: capture real Google responses (read-only) | Opus | todo, can start now (after P0.7-01a) | | |
+| P0.7-01b | Wave P0.G: compare real responses with the mocks and fix the mocks | Opus | todo | | |
+| P0.7-02 | Wave P0.G: business.manage verification package | Opus | todo, writing can start now; submit after P0.1-03 and P0.2-07 | | |
+| P0.7-04 | Wave P0.G: the switch to live | Opus | todo | | |
+| P0.7-05 | Wave P0.G: internal live test on Kabsi's own profiles | Opus | todo | | |
 | P0.2-01 | Retention table | Opus | todo | | |
 | P0.2-02 | Disconnect Kabsi and access-change notices | Opus | todo | | |
 | P0.2-03 | Business Knowledge table and the owner-approved baseline | Opus | todo | | |
@@ -104,13 +121,11 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.6-07 | Honest proof pages: founder note, About, Security | Sonnet | todo | | |
 | P0.6-08 | Supporting platforms checked against K-118 | Sonnet | todo | | |
 | P0.6-09 | Meta account fixes (VIDEO Part 7) | Sonnet | todo | | |
-| P0.6-10 | WhatsApp click-to-chat on the US number | Sonnet | todo | | |
+| P0.6-10 | WhatsApp click-to-chat on the Kapso US number | Sonnet | todo | | |
 | P0.6-11 | Staff system health page | Sonnet | todo | | |
-| P0.7-01 | Gate A day: capture real responses | Opus | todo | | |
-| P0.7-02 | business.manage verification package | Opus | todo | | |
+| P0.6-12 | WhatsApp privacy and processors (Kapso and Meta) | Sonnet | todo | | |
 | P0.7-03 | Google notifications through Pub/Sub | Opus | todo | | |
-| P0.7-04 | The switch to live | Opus | todo | | |
-| P0.7-05 | Internal live test on Kabsi's own profiles | Opus | todo | | |
+| P0.7-05b | Live test of the features built after Wave P0.G | Opus | todo | | |
 | P0.7-06 | Page-by-page audit, contradiction sweep and the test matrix | Sonnet | todo | | |
 | P0.7-07 | First real customer end to end, and the launch gate | Opus | todo | | |
 | P1-01 | Partner organisation, client onboarding and approval policies; Partners page rewrite for agencies | Opus | todo | | |
@@ -141,6 +156,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P1-18 | "Connect with Google" route | Opus | todo | | |
 | P1-19 | Speed and caching | Sonnet | todo | | |
 | P1-20 | Pricing page rebuild | Sonnet | todo | | |
+| P1-21 | WhatsApp owner alerts through Kapso | Opus | todo | | |
+| P1-22 | Nora on WhatsApp | Opus | todo | | |
 
 ## After merge
 
@@ -561,6 +578,14 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Decisions to confirm
 
 (Build chats add decisions the plan did not cover here, one line each with the reason. The planning chat folds confirmed ones into the plan.)
+- 7 Oct plan update, for Hussein to confirm or change: the plan text still says "Rashid" in about 50 places in tasks, prompts and the section 5 headings. The plan carries a note at the top of section 5 that every such step is Hussein's (R-26), but the lines themselves were not rewritten (see the log entry of 7 Oct). A mechanical rename in a follow-up pull request is the proposed fix; the facts about the past (D1, D2, 4 Oct decisions) would keep Rashid's name.
+- 7 Oct: public copy that names Rashid ("Talk to Rashid" on /partners, "For agencies: talk to Rashid" in the footer, K-105 "Rashid by name and role", the founder note in P0.6-07, the Calendly event text in P0.1-V3) was not changed. Who is named as the founder and who takes calls is Hussein's call.
+- 7 Oct: P0.7-04 (the switch to live) now runs before P0.2 to P0.5, as asked. To keep that safe the plan limits it to Kabsi's own two profiles and keeps "Join early access" until P0.7-07. The Supabase Pro upgrade and the first restore test moved from P0.7-04 to P0.7-07 (before the first real customer connects). Confirm both.
+- 7 Oct: the `business.manage` package (P0.7-02) cannot be submitted until kabsi.co carries the privacy page with the Limited Use sentence, which needs P0.1-03 (Vercel) and P0.2-07 (privacy text). The planning chat recommends running P0.2-07 straight after P0.1-03.
+- 7 Oct: the plan treats `856347937978` as the Google Cloud project number of `smiling-chess-505915-b7`. P0.7-01a confirms it in the console; if they differ, Appendix A is corrected first.
+- 7 Oct: the demo login moves to `hello+demo@kabsi.co` (P0.1-06c), which reaches the hello@kabsi.co mailbox without a new Zoho alias. Say if you prefer a separate address.
+- 7 Oct: K-122 owner alerts on WhatsApp carry the business name and "a reply is ready for your approval" only, no star rating, review text or reviewer name, so Google data stays out of Kapso and Meta (K-113). Say if star ratings may be included.
+- 7 Oct: step 4 now removes both of Rashid's addresses from Google Cloud and Search Console once the kabsi.co owners are confirmed (R-32: no personal address as owner or recovery contact).
 - P0.1-12b: the limiter and breaker guard live Google calls only (`gbp`); mock calls never reach Google's quota, so they are not limited. The load test therefore measures the queue and the dispatcher, and the limiter is proven by its own tests.
 - P0.1-12b: the per-profile limit counts every write to a profile (replies, posts, photos, listing edits), not only listing edits, so publishing stays under Google's 10 a minute whatever the mix.
 - P0.1-12b: the breaker counts each failed try (429, 5xx, no answer); 4xx answers about one business do not count. While it is open, jobs are postponed to the end of the pause without counting a try.
@@ -639,6 +664,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 7 Oct 2026 (planning chat, Hussein's request, branch claude/intelligent-ptolemy-7w2ins, docs only, no code): recorded R-26 to R-32 in the plan. Ownership (Hussein runs everything; repo and Supabase organisation are Hussein's); sessions apply database changes and merge their own pull requests once CI is green, stopping only before dropping tables or columns or deleting real data (plan 2.3, 2.5, 2.9, every ready prompt; CLAUDE.md git lines); Gate A approved 5 Oct and the Gate A tasks moved to the new Wave P0.G (section 7A) with a "can start now" table; hosting moves to Vercel (P0.1-03 rewritten with the six parts and Hussein's plain-word manual steps; headers in `vercel.json`); K-122 added to `docs/source/KABSI-AUDIT.md` (K-121's Numero points replaced) with tasks P0.6-10, P0.6-12, P1-21, P1-22; demo login task P0.1-06c; decisions on the email button and subject, Calendly, the seller and Hussein's personal email. Not done: the mechanical "Rashid" to "Hussein" rename across about 50 plan lines was attempted as a single scripted pass and the permission system denied it, so it was left alone rather than repeated another way; see Decisions to confirm.
 
 - 5 Oct 2026 (Hussein's session): PR 43 (P0.1-12b) merged on Hussein's "merge"; deploy passed; migration 2 applied in parts on his "apply" and his go for the unschedule; `kabsi_cron_tick` unscheduled after the six steps and Protection were seen running as jobs; watchdog quiet. Still open: `dispatch_tick` body in the SQL editor (Hussein) and the live mock Protection alert. Next task: P0.1-13a (Opus).
 
