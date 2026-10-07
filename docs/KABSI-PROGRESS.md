@@ -43,7 +43,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | 8 | Hussein agrees to be named as seller | R-20 seller line, P0.4-07, P0.6-09 | Done 4 Oct (no written agreement, Rashid's decision) |
 | 11 | Vercel account connected to GitHub, Supabase and Claude | P0.1-03 | Done 7 Oct (the six remaining steps are in the P0.1-03 section of the plan) |
 | 12 | Kapso account and the number's WhatsApp profile (+1 201-483-5474); keys into Supabase secrets | P0.6-10 | Todo |
-| 13 | Google Cloud (project 856347937978): enable the reviews and posts API if a session cannot; submit the `business.manage` package | P0.7-01a, P0.7-02 | Todo |
+| 13 | Google Cloud (project 856347937978): enable the reviews and posts API if a session cannot; submit the `business.manage` package | P0.7-01a, P0.7-02 | Enabling done 7 Oct 2026 by Hussein: the Google My Business API (reviews and posts) is now enabled in project 856347937978. Reading its quota and writing `docs/google/api-access.md` stays with P0.7-01a. Submitting the `business.manage` package is still todo |
 | 14 | Supabase Pro with point-in-time recovery in Hussein's own organisation | P0.7-07 (before the first real customer) | Todo |
 
 ## Tasks
