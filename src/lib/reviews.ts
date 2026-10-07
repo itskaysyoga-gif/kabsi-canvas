@@ -22,6 +22,8 @@ export type InboxReview = {
   state: ReviewState;
   existing_reply: string | null;
   reply_state: string | null;
+  /** Why Google did not take the last approved reply, or that Google is checking it (P0.1-13a). */
+  reply_state_reason: string | null;
   review_created_at: string | null;
   is_backlog: boolean;
   draft: { body: string; safety_ok: boolean; version: number } | null;
@@ -47,7 +49,7 @@ export async function inboxReviews(
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, location_id, reviewer_name, star_rating, comment, language, urgency, state, existing_reply, reply_state, review_created_at, is_backlog, reply_drafts(body, safety_ok, version)",
+      "id, location_id, reviewer_name, star_rating, comment, language, urgency, state, existing_reply, reply_state, reply_state_reason, review_created_at, is_backlog, reply_drafts(body, safety_ok, version)",
     )
     .eq("location_id", locationId)
     .in("state", states)
@@ -75,8 +77,9 @@ async function authed(path: string, body: Record<string, unknown>) {
   });
 }
 
+// Approves the reply; it goes to Google after a 10 second undo window (P0.1-13a, K-70).
 export async function postReply(reviewId: string, text: string) {
-  return readJson<{ ok: true; state: string }>(
+  return readJson<{ ok: true; state: string; publication?: string; publish_after?: string | null }>(
     await authed("api/approve", { review_id: reviewId, do: "post", text }),
   );
 }

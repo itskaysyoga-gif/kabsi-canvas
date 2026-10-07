@@ -1,6 +1,6 @@
 // Phase 4 pipeline: sync → classify → draft → safety check → owner email → approve → publish.
-import { admin, APP_URL, captureError, emailButton, emailLayout, emailLink, esc, isDefiniteGoogleRejection, sendEmail, sha256Hex } from "./kabsi.ts";
-import { listReviews, putReply } from "./google/index.ts";
+import { admin, APP_URL, emailButton, emailLayout, emailLink, esc, sendEmail, sha256Hex } from "./kabsi.ts";
+import { listReviews } from "./google/index.ts";
 import { checkDraft, classify, draftReply, MODELS, newMeter, type Card } from "./ai.ts";
 import { recordAiUsage, takeAiBudget } from "./ai-budget.ts";
 import { isConciergeLocationId, matchConciergeReview, type ConciergeCandidate } from "./concierge.ts";
@@ -283,58 +283,37 @@ export async function notifyLocation(loc: Loc) {
   return sent;
 }
 
-// ─── 5. Publish: the only path that writes a reply to Google (D202)
-// `audit` carries the owner's request into the audit log (P0.1-10, _shared/audit.ts): the approval and publication
-// events are written by triggers on publications, so every write here goes through the client that carries it.
-export async function publishReply(o: { reviewId: string; text: string; approvedBy: string; channel: "dashboard" | "email_link"; audit?: Record<string, string> }) {
+// ─── 5. Approve a reply: the one publication pipeline (P0.1-13a, _shared/publish.ts, D202)
+// approve_publication records the owner's approval with the exact text, claims the review and offers the publish
+// job 10 seconds later (the undo window, K-70). A second approval of the same reply, from either channel, gets the
+// same publication back (K-38). The publish job makes the one Google call, or the concierge task for a business in
+// early access (D267). `audit` carries the owner's request into the audit log (P0.1-10, _shared/audit.ts).
+export type Approval = { publication: string; state: string; publishAfter: string | null; created: boolean };
+
+export async function publishReply(o: { reviewId: string; text: string; approvedBy: string; channel: "dashboard" | "email_link"; audit?: Record<string, string> }): Promise<Approval> {
   const db = o.audit ? auditedAdmin(o.audit) : admin();
   const text = o.text.trim();
   if (!text || text.length > 4000) throw new Error("bad_reply_text");
-  const { data: rv, error } = await db.from("reviews")
-    .select("id, state, google_review_id, location_id, locations(status, concierge, google_account_id, google_location_id)").eq("id", o.reviewId).single();
-  if (error) throw error;
-  const loc = rv.locations as unknown as { status: string; concierge: boolean; google_account_id: string | null; google_location_id: string | null };
-  if (loc.status !== "active" || !loc.google_location_id) throw new Error("location_not_active");
-
-  // Concierge (D267): the owner's approval is recorded exactly as usual (D202), but a person posts it on Google by
-  // hand. One SQL function does the D266 claim, the publication and the task in one transaction; only staff
-  // "Mark posted" makes it live. No Google call, no retry.
-  if (loc.concierge) {
-    const { data: pubId, error: cErr } = await db.rpc("concierge_queue_reply", {
-      p_review: rv.id, p_text: text, p_approved_by: o.approvedBy, p_channel: o.channel,
-    });
-    if (cErr) {
-      if (String(cErr.message).includes("already_posted")) throw new Error("already_posted");
-      throw cErr;
+  const { data, error } = await db.rpc("approve_publication", {
+    p_target_type: "review_reply", p_target_id: o.reviewId, p_text: text, p_approved_by: o.approvedBy, p_channel: o.channel,
+  });
+  if (error) {
+    for (const known of ["already_posted", "location_not_active", "bad_reply_text", "approver_not_member", "unknown_review"]) {
+      if (String(error.message).includes(known)) throw new Error(known);
     }
-    return { publication: pubId as string, state: "manual_queued" };
+    throw error;
   }
+  const r = data as { publication_id: string; state: string; route: string; publish_after: string | null; created: boolean };
+  // Concierge keeps its own word for the screens ("a person posts it").
+  return { publication: r.publication_id, state: r.route === "concierge" ? "manual_queued" : r.state, publishAfter: r.publish_after, created: r.created };
+}
 
-  // D266: atomic claim. Two approvals racing for the same review (dashboard click + email-link click, or a
-  // double click) can no longer both reach Google — only the request that flips drafted/blocked -> publishing
-  // proceeds; the loser sees "already_posted" instead of posting a duplicate reply.
-  const { data: claimed, error: claimErr } = await db.from("reviews").update({ state: "publishing" })
-    .eq("id", rv.id).in("state", ["drafted", "blocked"]).select("id").maybeSingle();
-  if (claimErr) throw claimErr;
-  if (!claimed) throw new Error("already_posted");
-
-  const { data: pub, error: pubErr } = await db.from("publications").insert({
-    location_id: rv.location_id, target_type: "review_reply", target_id: rv.id, payload: { text },
-    approved_by: o.approvedBy, channel: o.channel, status: "queued",
-  }).select("id").single();
-  if (pubErr) { await db.from("reviews").update({ state: rv.state }).eq("id", rv.id); throw pubErr; }
-  try {
-    const result = await putReply(loc.google_account_id!, loc.google_location_id, rv.google_review_id, text);
-    await db.from("publications").update({ status: result.state, google_response: result.response }).eq("id", pub.id);
-    await db.from("reviews").update({ state: "posted", existing_reply: text, reply_state: result.state }).eq("id", rv.id);
-    return { publication: pub.id, state: result.state };
-  } catch (e) {
-    await db.from("publications").update({ status: "failed", error: String(e).slice(0, 500) }).eq("id", pub.id);
-    if (isDefiniteGoogleRejection(e)) {
-      await db.from("reviews").update({ state: rv.state }).eq("id", rv.id);
-    } else {
-      await captureError("publish_stuck", e, { review: rv.id, publication: pub.id, note: "left in publishing — verify against Google before retrying" });
-    }
-    throw e;
+// Undo inside the 10 seconds (K-70). Throws "too_late" once the publish job may have started.
+export async function undoReply(o: { publicationId: string; userId: string; audit?: Record<string, string> }) {
+  const db = o.audit ? auditedAdmin(o.audit) : admin();
+  const { error } = await db.rpc("undo_publication", { p_publication: o.publicationId, p_user: o.userId });
+  if (error) {
+    for (const known of ["too_late", "not_member", "unknown_publication"]) if (String(error.message).includes(known)) throw new Error(known);
+    throw error;
   }
 }

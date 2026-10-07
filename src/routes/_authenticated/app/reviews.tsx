@@ -196,10 +196,12 @@ function ReviewsPage() {
                     )}
                   >
                     {r.state === "posted" && r.reply_state === "in_review"
-                      ? "Replied · Google reviewing"
-                      : r.state === "posted" && r.reply_state === "rejected"
+                      ? "Google is checking your reply"
+                      : r.reply_state === "rejected"
                         ? "Reply not accepted by Google"
-                        : (STATE[r.state] ?? r.state)}
+                        : r.state === "publishing" && !loc?.concierge
+                          ? "Approved, going to Google"
+                          : (STATE[r.state] ?? r.state)}
                   </span>
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 text-sm text-kb-stone">

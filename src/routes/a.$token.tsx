@@ -20,11 +20,13 @@ export const Route = createFileRoute("/a/$token")({
 
 const DONE: Record<string, string> = {
   posted: "Posted. Your reply is on Google.",
+  approved: "Approved. Kabsi sends your reply to Google within a few minutes.",
   queued_manual: `${CONCIERGE_COPY.posted} ${CONCIERGE_COPY.waiting}`,
   publishing: `${CONCIERGE_COPY.posted} ${CONCIERGE_COPY.waiting}`,
   skipped: "Skipped. Nothing was posted.",
   handled_offline: "Noted. Kabsi won't post anything for this review.",
   in_review: "Sent. Google is checking your reply before it appears.",
+  undone: "Undone. Nothing was sent to Google.",
   reverted: "Done. Your version is back on Google.",
   kept: "Noted. Kabsi will keep the new version as yours.",
 };

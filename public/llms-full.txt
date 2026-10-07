@@ -562,7 +562,7 @@ The draft failed the safety check twice. Write your own reply in the box, or tap
 Links work once and last 7 days. Open Kabsi and use Reviews, To reply.
 
 **I posted but the reply isn't on Google.**
-Google checks every reply before it appears, usually within 10 minutes, sometimes longer. All reviews shows "Google is reviewing it" while it waits. If Google rejects it, Kabsi shows it. **[TIME-SENSITIVE]** In test mode nothing is sent to Google at all.
+After you approve, Kabsi waits 10 seconds, then sends the reply to Google, usually within a minute or two. Google checks every reply before it appears, usually within 10 minutes, sometimes longer. All reviews shows "Google is checking your reply" while it waits. Kabsi checks again after 10 minutes and then less often, and never posts the same reply twice. If Google does not accept the reply, the review comes back to To reply with the reason, so you can edit it and approve again. If Google still does not show it after 7 days, Kabsi treats it the same way. Approving the same reply twice (for example in the app and from the email) sends it once. **[TIME-SENSITIVE]** In test mode nothing is sent to Google at all.
 
 **I'm not getting review emails.**
 Check spam, and Settings, Emails: emails may be paused (**Turn emails back on**), or the daily time and time zone may be off. 4 and 5 star reviews arrive once a day. Reviews always appear in the app too.
