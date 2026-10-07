@@ -1,8 +1,9 @@
 // approve: dashboard actions on a review. Signed-in members only.
-//   POST { review_id, do: "post", text }            → publishes exactly `text` (D202)
+//   POST { review_id, do: "post", text }            → approves exactly `text` (D202); it goes to Google after 10 s
+//   POST { review_id, do: "undo", publication_id }  → cancels that approval inside the 10 s (K-70)
 //   POST { review_id, do: "redraft", instruction }  → new AI version following the owner's instruction
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
-import { draftReview, publishReply } from "../_shared/reviews.ts";
+import { draftReview, publishReply, undoReply } from "../_shared/reviews.ts";
 import { AI_BUDGET_MESSAGE } from "../_shared/ai-budget.ts";
 import { auditHeaders } from "../_shared/audit.ts";
 
@@ -12,7 +13,7 @@ export async function approve(req: Request): Promise<Response> {
   const user = await currentUser(req);
   if (!user) return fail("not_signed_in", "Please log in.", 401);
 
-  const b = await req.json().catch(() => ({})) as { review_id?: string; do?: string; text?: string; instruction?: string };
+  const b = await req.json().catch(() => ({})) as { review_id?: string; do?: string; text?: string; instruction?: string; publication_id?: string };
   if (!b.review_id) return fail("bad_input", "Missing review.");
   const db = admin();
   const { data: rv } = await db.from("reviews").select("id, location_id, state").eq("id", b.review_id).maybeSingle();
@@ -23,7 +24,12 @@ export async function approve(req: Request): Promise<Response> {
   try {
     if (b.do === "post") {
       const result = await publishReply({ reviewId: rv.id, text: b.text ?? "", approvedBy: user.id, channel: "dashboard", audit: auditHeaders(req, user.id) });
-      return json({ ok: true, state: result.state });
+      return json({ ok: true, state: result.state, publication: result.publication, publish_after: result.publishAfter });
+    }
+    if (b.do === "undo") {
+      if (!b.publication_id) return fail("bad_input", "Missing approval.");
+      await undoReply({ publicationId: b.publication_id, userId: user.id, audit: auditHeaders(req, user.id) });
+      return json({ ok: true, state: "cancelled" });
     }
     if (b.do === "redraft") {
       const instruction = (b.instruction ?? "").trim().slice(0, 500);
@@ -41,6 +47,8 @@ export async function approve(req: Request): Promise<Response> {
     if (msg.includes("ai_budget_business")) return fail("ai_budget", AI_BUDGET_MESSAGE.business, 429);
     if (msg.includes("ai_budget_global")) return fail("ai_budget", AI_BUDGET_MESSAGE.global, 429);
     if (msg.includes("bad_reply_text")) return fail("bad_text", "The reply is empty or too long.", 400);
+    if (msg.includes("too_late")) return fail("too_late", "It is already on its way to Google.", 409);
+    if (msg.includes("not_member") || msg.includes("unknown_publication")) return fail("not_found", "Approval not found.", 404);
     await captureError("approve", e);
     return fail("internal", "Something went wrong. Nothing was posted.", 500);
   }

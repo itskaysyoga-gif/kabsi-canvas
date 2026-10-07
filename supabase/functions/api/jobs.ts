@@ -7,11 +7,15 @@
 // review and offers the owner email run; notify_owner sends that business's due emails (the rules in reviews.ts).
 // protection_check compares one business's listing with its baseline (shield.ts). The whole-system steps the 5 minute
 // cron ran (cron.ts) are one job each, offered every 5 minutes.
+// Publications (P0.1-13a, _shared/publish.ts): publish sends one approved reply once its undo window has passed;
+// reconcile_publication reads Google for a reply whose outcome is not known yet. Neither ever sends a write twice.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 import { type Job, type JobHandler, type JobState, PermanentJobError, runJob } from "../_shared/jobs.ts";
 import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation } from "../_shared/reviews.ts";
 import { AiBudgetError } from "../_shared/ai-budget.ts";
 import { protectionCheck } from "../_shared/shield.ts";
+import { readReply, sendReply } from "../_shared/google/index.ts";
+import { type CheckClaim, type Claim, type Outcome, type PublishDeps, publishOne, reconcileOne } from "../_shared/publish.ts";
 import { accessJob, deletionsJob, ratingsJob, renewalsJob, trialsJob, weeklyJob } from "./cron.ts";
 
 // Offer a job. Returns its id, or null when the same dedupe key is already pending, running or retrying.
@@ -119,6 +123,29 @@ async function protection(job: Job) {
   if (alerts) await jobLog("shield", true, { alerts, location: job.location_id });
 }
 
+async function rpcJson<T>(fn: string, args: Record<string, unknown>): Promise<T> {
+  const { data, error } = await admin().rpc(fn, args);
+  if (error) throw error;
+  return data as T;
+}
+
+const PUBLISH: PublishDeps = {
+  claim: (id) => rpcJson<Claim>("claim_publication", { p_publication: id }),
+  claimCheck: (id) => rpcJson<CheckClaim>("claim_publication_check", { p_publication: id }),
+  record: (id, o: Outcome) => rpcJson<string>("record_publication", {
+    p_publication: id, p_state: o.state, p_reason: o.reason ?? null, p_error: o.error ?? null, p_google_ref: o.googleRef ?? null,
+    p_moderation: o.moderation ?? null, p_response: o.response ?? null,
+  }),
+  sendReply,
+  readReply,
+};
+
+const publicationId = (job: Job) => {
+  const id = String(job.payload.publication_id ?? "");
+  if (!id) throw new PermanentJobError("no publication_id in the job");
+  return id;
+};
+
 // A whole-system step, logged under the name the cron used when it did something (staff job health lists these).
 const step = (name: string, run: () => Promise<Record<string, unknown>>): JobHandler => async () => {
   const started = Date.now();
@@ -131,6 +158,8 @@ const HANDLERS: Record<string, JobHandler> = {
   draft_reply: draftReplyJob,
   notify_owner: notifyOwner,
   protection_check: protection,
+  publish: async (job) => void await publishOne(publicationId(job), PUBLISH),
+  reconcile_publication: async (job) => void await reconcileOne(publicationId(job), PUBLISH),
   access_check: step("access", accessJob),
   ratings_snapshot: step("ratings", ratingsJob),
   weekly_reports: step("weekly", weeklyJob),

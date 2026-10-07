@@ -93,19 +93,22 @@ export async function listReviews(accountId: string, locationId: string, max = 5
   return out;
 }
 
-// Writes the exact approved text, then reads it back. Only ever called by publish() after approval (D202).
-export async function putReply(accountId: string, locationId: string, reviewId: string, text: string): Promise<WriteResult> {
+// Writes the exact approved text (D202). Only ever called by the publish job after claim_publication (P0.1-13a);
+// what Google shows afterwards is read with readReply, never assumed.
+export async function sendReply(accountId: string, locationId: string, reviewId: string, text: string): Promise<{ ref: string; response: unknown }> {
   assertNotConcierge(locationId);
   const name = `${accountId}/${locationId}/reviews/${reviewId}`;
-  if (modeFor(locationId) === "mock") {
-    await reviewsMock.updateReply(name, text);
-    return { state: "live", response: { mock: true } };
-  }
-  const put = await reviewsLive.updateReply(name, text);
-  // Read back: Google may hold a reply for moderation or reject it.
-  const back = await reviewsLive.getReview(name);
-  const state = back.reviewReply?.comment === text ? "live" : "in_review";
-  return { state, response: { put, reply: back.reviewReply ?? null } };
+  const mode = modeFor(locationId);
+  const reply = await by(mode, reviewsLive, reviewsMock).updateReply(name, text);
+  return { ref: name, response: mode === "mock" ? { mock: true, reply } : { reply } };
+}
+
+// The reply Google shows now for one review, or null (none yet, or still held while Google checks it, K-116.1).
+export async function readReply(accountId: string, locationId: string, reviewId: string): Promise<string | null> {
+  assertNotConcierge(locationId);
+  const name = `${accountId}/${locationId}/reviews/${reviewId}`;
+  const review = await by(modeFor(locationId), reviewsLive, reviewsMock).getReview(name);
+  return review.reviewReply?.comment ?? null;
 }
 
 // ─── Local posts. Only called after the owner's approval (D202).

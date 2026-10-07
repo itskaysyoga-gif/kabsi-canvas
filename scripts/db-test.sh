@@ -32,4 +32,5 @@ echo "Applied $(ls supabase/migrations/*.sql | wc -l) migrations; cron jobs left
 supabase test db
 # Two real sessions at once (P0.1-12a): not expressible inside one pgTAP transaction.
 bash supabase/tests/jobs_claim_concurrency.sh "$db_url"
+bash supabase/tests/publication_concurrency.sh "$db_url"
 echo "Database suite finished in $(( $(date +%s) - started )) s"

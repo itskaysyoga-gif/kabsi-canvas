@@ -39,10 +39,20 @@ export async function getReview(review: string): Promise<Review> {
 
 export const replyNow = (comment: string): ReviewReply => ({ comment, updateTime: new Date().toISOString() });
 
+// The reply goes through mock_google_reply (P0.1-13a), which counts every call and plays the test modes set on the
+// row: pending (Google holds it for checking), timeout (stored, but no answer), reject (a 400 like Google's).
 export async function updateReply(review: string, comment: string): Promise<ReviewReply> {
-  const id = review.split("/").pop()!;
-  const { updateTime } = replyNow(comment);
-  const { error } = await (await mockDb()).from("mock_google_reviews").update({ reply_comment: comment, reply_update_time: updateTime }).eq("review_id", id);
+  const { data, error } = await (await mockDb()).rpc("mock_google_reply", { p_review_id: review.split("/").pop()!, p_comment: comment });
   if (error) throw error;
-  return { comment, updateTime };
+  return mockReplyOutcome(review, comment, String(data));
+}
+
+// Turns the mock's outcome into what the live layer would return or throw (the same error text as client.ts gbp).
+export function mockReplyOutcome(review: string, comment: string, outcome: string): ReviewReply {
+  if (outcome === "not_found") throw new Error(`google 404 mock/${review}/reply: {"error":{"code":404,"status":"NOT_FOUND"}}`);
+  if (outcome === "reject") {
+    throw new Error(`google 400 mock/${review}/reply: {"error":{"code":400,"message":"Mock: the reply was not accepted.","status":"INVALID_ARGUMENT"}}`);
+  }
+  if (outcome === "timeout") throw new Error("mock timeout: Google did not answer");
+  return replyNow(comment);
 }

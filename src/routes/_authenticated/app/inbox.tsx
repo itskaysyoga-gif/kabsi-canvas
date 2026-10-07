@@ -369,7 +369,7 @@ function ReviewCard({ review }: { review: InboxReview }) {
         setDone(
           posted.state === "manual_queued"
             ? `${CONCIERGE_COPY.posted} ${CONCIERGE_COPY.waiting}`
-            : "Posted. It shows on Google within a few minutes.",
+            : "Approved. Kabsi sends it to Google within a few minutes.",
         );
         await refresh();
       } else if (kind === "skip") {
@@ -429,6 +429,11 @@ function ReviewCard({ review }: { review: InboxReview }) {
           <Hand className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           Take a breath before replying. If you can reach the customer, call them first. The draft
           stays calm and moves the talk to a private conversation.
+        </p>
+      ) : null}
+      {review.reply_state === "rejected" && review.reply_state_reason ? (
+        <p className="mt-4 rounded-card bg-kb-sand p-4 text-sm leading-6" role="status">
+          {review.reply_state_reason}
         </p>
       ) : null}
       {waiting ? (

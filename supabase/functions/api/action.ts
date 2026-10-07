@@ -1,9 +1,11 @@
 // action: the email links (/a/:token). Public: the token is the credential.
 //   GET  ?t=TOKEN         → what the link does + the review and draft to show (never performs anything)
 //   POST { t, do, text? } → performs it once. do: "post" | "skip" | "handle_myself"
-// "post" publishes exactly the text shown (and possibly edited) on the confirm page (D202).
+//   POST { t, do: "undo", publication } → cancels that link's approval inside its 10 seconds (K-70)
+// "post" approves exactly the text shown (and possibly edited) on the confirm page (D202); it goes to Google through
+// the publication pipeline after the 10 second undo window (P0.1-13a).
 import { admin, captureError, CORS, fail, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
-import { publishReply } from "../_shared/reviews.ts";
+import { publishReply, undoReply } from "../_shared/reviews.ts";
 import { decideChange } from "../_shared/shield.ts";
 import { auditedAdmin, auditHeaders } from "../_shared/audit.ts";
 
@@ -59,10 +61,19 @@ export async function action(req: Request): Promise<Response> {
     }
     if (req.method !== "POST") return fail("method_not_allowed", "Use GET or POST.", 405);
 
-    const body = await req.json().catch(() => ({})) as { t?: string; do?: string; text?: string };
+    const body = await req.json().catch(() => ({})) as { t?: string; do?: string; text?: string; publication?: string };
     const tok = await loadToken(body.t);
     if (!tok) return fail("invalid", "This link isn't valid.", 404);
     if (Date.parse(tok.expires_at) < Date.now()) return fail("expired", "This link has expired. Open your Kabsi inbox instead.", 410);
+    // Undo comes after the link was used to approve: only that link's person, only for its review.
+    if (body.do === "undo") {
+      if (!tok.used_at || !tok.user_id || tok.target_type !== "review" || !body.publication) return fail("not_allowed", "This link can't do that.", 400);
+      const { data: pub } = await admin().from("publications").select("id").eq("id", body.publication)
+        .eq("target_id", tok.target_id).eq("approved_by", tok.user_id).maybeSingle();
+      if (!pub) return fail("not_allowed", "This link can't do that.", 400);
+      await undoReply({ publicationId: pub.id, userId: tok.user_id, audit: auditHeaders(req, tok.user_id) });
+      return json({ ok: true, done: "undone" });
+    }
     const allowed: Record<string, string[]> = { post: ["post", "skip"], see_draft: ["post", "handle_myself"], skip: ["skip"], handle_myself: ["handle_myself"], edit: ["post", "skip"], open: [], revert: ["revert", "keep"], keep: ["keep", "revert"] };
     if (!body.do || !(allowed[tok.action] ?? []).includes(body.do)) return fail("not_allowed", "This link can't do that.", 400);
     if (!tok.user_id) return fail("not_allowed", "Open Kabsi to do this.", 400);
@@ -78,7 +89,7 @@ export async function action(req: Request): Promise<Response> {
     }
     if (body.do === "post") {
       const result = await publishReply({ reviewId: tok.target_id, text: body.text ?? "", approvedBy: tok.user_id, channel: "email_link", audit: auditHeaders(req, tok.user_id) });
-      return json({ ok: true, done: result.state === "manual_queued" ? "queued_manual" : "posted", state: result.state });
+      return json({ ok: true, done: result.state === "manual_queued" ? "queued_manual" : "approved", state: result.state, publication: result.publication, publish_after: result.publishAfter });
     }
     const newState = body.do === "skip" ? "skipped" : "handled_offline";
     await auditedAdmin(auditHeaders(req, tok.user_id)).from("reviews").update({ state: newState }).eq("id", tok.target_id).in("state", ["new", "drafted", "blocked"]);
@@ -88,6 +99,7 @@ export async function action(req: Request): Promise<Response> {
     if (msg.includes("already_decided")) return fail("already_decided", "This change was already handled.", 409);
     if (msg.includes("already_posted")) return fail("already_posted", "A reply is already posted for this review.", 409);
     if (msg.includes("bad_reply_text")) return fail("bad_text", "The reply is empty or too long.", 400);
+    if (msg.includes("too_late")) return fail("too_late", "It is already on its way to Google.", 409);
     await captureError("action", e);
     return fail("internal", "Something went wrong. Nothing was posted. Try again from your Kabsi inbox.", 500);
   }
