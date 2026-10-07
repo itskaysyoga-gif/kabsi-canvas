@@ -137,8 +137,9 @@ select is(public.record_publication((select id from pub where name = 'r'), 'reje
 select is((select state || '/' || reply_state || '/' || reply_state_reason from public.reviews where id = '00000000-0000-4000-8000-000000000103'),
   'drafted/rejected/Google did not accept this reply. Edit it and approve again.', 'the owner gets the review back with the reason');
 select is((select status from public.publications p join pub on pub.id = p.id where pub.name = 'r'), 'rejected', 'status follows: rejected');
-select is(pg_temp.approve('r2', '00000000-0000-4000-8000-000000000103', '00000000-0000-4000-8000-0000000000a1', 'dashboard') ->> 'created',
-  'true', 'a rejected reply can be approved again');
+insert into pub select 'r2', (r ->> 'publication_id')::uuid, r from (select pg_temp.approve('r2',
+  '00000000-0000-4000-8000-000000000103', '00000000-0000-4000-8000-0000000000a1', 'dashboard') r) x;
+select is((select r ->> 'created' from pub where name = 'r2'), 'true', 'a rejected reply can be approved again');
 
 -- Checking (Google moderation or an ambiguous failure) and the reconcile schedule.
 insert into pub select 'c', (r ->> 'publication_id')::uuid, r from (select pg_temp.approve('c',
