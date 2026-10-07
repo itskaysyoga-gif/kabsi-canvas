@@ -26,8 +26,8 @@ insert into public.photos (id, location_id, storage_path, category, state)
 values ('00000000-0000-4000-8000-000000000202', '00000000-0000-4000-8000-0000000000c1', 'c1/front.jpg', 'EXTERIOR', 'draft'),
        ('00000000-0000-4000-8000-000000000302', '00000000-0000-4000-8000-0000000000c1', 'c1/inside.jpg', null, 'draft');
 insert into public.special_hours (id, location_id, start_date, end_date, closed, open_time, close_time)
-values ('00000000-0000-4000-8000-000000000203', '00000000-0000-4000-8000-0000000000c1', '2026-12-24', '2026-12-24', false, '09:00', '13:30'),
-       ('00000000-0000-4000-8000-000000000303', '00000000-0000-4000-8000-0000000000c1', '2026-12-31', '2027-01-01', true, null, null);
+values ('00000000-0000-4000-8000-000000000203', '00000000-0000-4000-8000-0000000000c1', '2027-03-10', '2027-03-10', false, '09:00', '13:30'),
+       ('00000000-0000-4000-8000-000000000303', '00000000-0000-4000-8000-0000000000c1', '2027-04-01', '2027-04-02', true, null, null);
 insert into public.listing_changes (id, location_id, field, old_value, new_value, detected_by)
 values ('00000000-0000-4000-8000-000000000204', '00000000-0000-4000-8000-0000000000c1', 'phone',
         '{"display": "+961 1 000 000", "raw": "+961 1 000 000"}', '{"display": "+961 1 999 999", "raw": "+961 1 999 999"}', 'scheduled_check'),
@@ -104,7 +104,7 @@ select is((select body from public.gbp_posts where id = '00000000-0000-4000-8000
 select is((select payload from public.publications where id = pg_temp.pid('photo', 2)),
   '{"storage_path": "c1/front.jpg", "category": "INTERIOR"}'::jsonb, 'photo: the stored file and the chosen category');
 select is((select payload from public.publications where id = pg_temp.pid('special_hours', 2)),
-  '{"start_date": "2026-12-24", "end_date": "2026-12-24", "closed": false, "open_time": "09:00", "close_time": "13:30"}'::jsonb,
+  '{"start_date": "2027-03-10", "end_date": "2027-03-10", "closed": false, "open_time": "09:00", "close_time": "13:30"}'::jsonb,
   'special hours: the stored dates and times');
 select is((select payload from public.publications where id = pg_temp.pid('listing_revert', 2)),
   '{"field": "phone", "value": "+961 1 000 000", "raw": "+961 1 000 000"}'::jsonb,
@@ -113,17 +113,17 @@ select is((select payload from public.publications where id = pg_temp.pid('listi
 -- Refusals.
 select throws_ok($$ select pg_temp.approve('local_post', 3, '00000000-0000-4000-8000-0000000000b2') $$,
   'P0001', 'approver_not_member', 'someone outside the business cannot approve a post');
-select throws_ok($$ select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000301', '{"summary": "Too short"}',
+select throws_ok($$ select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000301', '{"summary": "Too short"}'::jsonb,
   '00000000-0000-4000-8000-0000000000a1', 'dashboard') $$, 'P0001', 'bad_post_text', 'a post under 10 characters is refused');
-select throws_ok($$ select public.approve_publication('photo', '00000000-0000-4000-8000-000000000302', '{"category": "SELFIE"}',
+select throws_ok($$ select public.approve_publication('photo', '00000000-0000-4000-8000-000000000302', '{"category": "SELFIE"}'::jsonb,
   '00000000-0000-4000-8000-0000000000a1', 'dashboard') $$, 'P0001', 'bad_category', 'an unknown photo category is refused');
-select throws_ok($$ select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000391', '{"summary": "Concierge post text."}',
+select throws_ok($$ select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000391', '{"summary": "Concierge post text."}'::jsonb,
   '00000000-0000-4000-8000-0000000000b2', 'dashboard') $$, 'P0001', 'concierge_profile',
   'a concierge business has no Google profile work yet');
-select throws_ok($$ select public.approve_publication('listing_edit', '00000000-0000-4000-8000-000000000304', '{}',
+select throws_ok($$ select public.approve_publication('listing_edit', '00000000-0000-4000-8000-000000000304', '{}'::jsonb,
   '00000000-0000-4000-8000-0000000000a1', 'dashboard') $$, 'P0001', 'unsupported_target', 'an unknown kind is refused');
 select throws_like($$ insert into public.special_hours (location_id, start_date, end_date, closed)
-  values ('00000000-0000-4000-8000-0000000000c1', '2026-12-24', '2026-12-24', true) $$,
+  values ('00000000-0000-4000-8000-0000000000c1', '2027-03-10', '2027-03-10', true) $$,
   '%special_hours_dates_unique%', 'the same dates cannot be saved again while they are on their way');
 
 -- Claim: not before publish_after, once, with everything the publish job needs.
@@ -199,7 +199,7 @@ select is(pg_temp.item('listing_revert', 3), 'revert_failed', 'and the change sh
 -- A business that became concierge after the approval: stopped, nothing sent.
 insert into public.gbp_posts (id, location_id, owner_input, body)
 values ('00000000-0000-4000-8000-000000000401', '00000000-0000-4000-8000-0000000000c1', 'Late post', 'Draft text');
-select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000401', '{"summary": "A post approved before the switch."}',
+select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000401', '{"summary": "A post approved before the switch."}'::jsonb,
   '00000000-0000-4000-8000-0000000000a1', 'dashboard') ->> 'publication_id' as late_id \gset
 update public.locations set concierge = true where id = '00000000-0000-4000-8000-0000000000c1';
 select pg_temp.due(:'late_id');
