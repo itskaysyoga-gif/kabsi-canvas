@@ -48,25 +48,24 @@ export async function getListing(location: string, seed: MockSeed): Promise<List
   return Object.fromEntries(SHIELD_FIELDS.map((k) => [k, { display: String(f[k] ?? ""), raw: String(f[k] ?? "") }])) as Listing;
 }
 
-export async function patchListing(location: string, field: ShieldField, raw: unknown) {
-  const db = await mockDb();
-  const { data } = await db.from("mock_listings").select("fields").eq("google_location_id", location).single();
-  const fields = { ...(data!.fields as Record<string, unknown>), [field]: raw };
-  await db.from("mock_listings").update({ fields, updated_at: new Date().toISOString() }).eq("google_location_id", location);
-}
-
-// PATCH with updateMask specialHours, as Google: the list is replaced as a whole. A business with no mock listing yet
-// answers 404 like Google; the listing row is made by Google Protection's first read, from the business's own details.
-export async function patchLocation(location: string, updateMask: string, body: Partial<Location>): Promise<Location> {
-  if (updateMask !== "specialHours") throw new Error(`mock patchLocation: ${updateMask} is not modelled`);
-  const db = await mockDb();
-  const { data, error } = await db.from("mock_listings").select("fields").eq("google_location_id", location).maybeSingle();
+// One field at a time under the row lock (mock_listing_set), as Google's updateMask does, so two writes to the same
+// business side by side never undo each other. A business with no mock listing answers 404 like Google.
+async function setField(location: string, key: string, value: unknown): Promise<Fields> {
+  const { data, error } = await (await mockDb()).rpc("mock_listing_set", { p_location: location, p_key: key, p_value: value ?? null });
   if (error) throw error;
   if (!data) throw new Error(`google 404 mock/${location}: {"error":{"code":404,"status":"NOT_FOUND"}}`);
-  const fields = { ...(data.fields as Fields), specialHours: body.specialHours?.specialHourPeriods ?? [] };
-  const { error: e2 } = await db.from("mock_listings").update({ fields, updated_at: new Date().toISOString() }).eq("google_location_id", location);
-  if (e2) throw e2;
-  return locationFromFields(location, fields);
+  return data as Fields;
+}
+
+export async function patchListing(location: string, field: ShieldField, raw: unknown) {
+  await setField(location, field, raw);
+}
+
+// PATCH with updateMask specialHours, as Google: the list is replaced as a whole. The listing row is made by Google
+// Protection's first read, from the business's own details.
+export async function patchLocation(location: string, updateMask: string, body: Partial<Location>): Promise<Location> {
+  if (updateMask !== "specialHours") throw new Error(`mock patchLocation: ${updateMask} is not modelled`);
+  return locationFromFields(location, await setField(location, "specialHours", body.specialHours?.specialHourPeriods ?? []));
 }
 
 // The display string Google Protection keeps for one field, or null when the mock has no listing for the business.

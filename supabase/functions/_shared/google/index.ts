@@ -19,7 +19,7 @@ import * as performanceLive from "./performance/live.ts";
 import * as performanceMock from "./performance/mock.ts";
 import * as placesLive from "./places/live.ts";
 import type {
-  FieldValue, GoogleReview, Listing, LocalPost, ManagedLocation, MockSeed, PostInput, ShieldField, SkippedInvitation, SpecialDay,
+  FieldValue, GDate, GoogleReview, Listing, LocalPost, ManagedLocation, MockSeed, PostInput, ShieldField, SkippedInvitation, SpecialDay,
   SpecialHourPeriod, TimeOfDay, WriteResult,
 } from "./types.ts";
 
@@ -165,14 +165,17 @@ const specialPeriod = (s: SpecialDay): SpecialHourPeriod => s.closed
 export async function hasSpecialHours(locationId: string, s: SpecialDay): Promise<boolean> {
   assertNotConcierge(locationId);
   const current = await by(modeFor(locationId), locationsLive, locationsMock).getLocation(locationId, "specialHours");
-  const want = JSON.stringify(normalPeriod(specialPeriod(s)));
-  return (current.specialHours?.specialHourPeriods ?? []).some((p) => JSON.stringify(normalPeriod(p)) === want);
+  return showsSpecialHours(current.specialHours?.specialHourPeriods ?? [], s);
 }
-const tod = (t?: TimeOfDay) => (t ? { hours: t.hours ?? 0, minutes: t.minutes ?? 0 } : null);
-const normalPeriod = (p: SpecialHourPeriod) => ({
-  start: p.startDate, end: p.endDate ?? p.startDate, closed: p.closed === true,
-  open: p.closed ? null : tod(p.openTime), close: p.closed ? null : tod(p.closeTime),
-});
+
+// Compared as plain strings ("2026-12-25 closed", "2026-12-24 09:00-13:30"): Google and the database may return the
+// date and time fields in any key order.
+const day = (d?: GDate) => (d ? `${d.year}-${String(d.month).padStart(2, "0")}-${String(d.day).padStart(2, "0")}` : "");
+const clock = (t?: TimeOfDay) => `${String(t?.hours ?? 0).padStart(2, "0")}:${String(t?.minutes ?? 0).padStart(2, "0")}`;
+const periodKey = (p: SpecialHourPeriod) =>
+  `${day(p.startDate)} ${day(p.endDate ?? p.startDate)} ${p.closed ? "closed" : `${clock(p.openTime)}-${clock(p.closeTime)}`}`;
+export const showsSpecialHours = (periods: SpecialHourPeriod[], s: SpecialDay) =>
+  periods.some((p) => periodKey(p) === periodKey(specialPeriod(s)));
 
 // ─── Google Protection (D218): read the listing, and put one field back after the owner's approval.
 const DAYS: Record<string, string> = { MONDAY: "Mon", TUESDAY: "Tue", WEDNESDAY: "Wed", THURSDAY: "Thu", FRIDAY: "Fri", SATURDAY: "Sat", SUNDAY: "Sun" };

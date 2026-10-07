@@ -74,7 +74,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-12a | Job queue and dispatcher, review jobs first | Opus | merged (40); migration fully live; After-merge passed (deploy, dispatcher, sync status, no duplicates, mock review end to end, Home line checked in a browser by Hussein); staff Job health look still open (Rashid), see Evidence | 40, 41 | 4 Oct 2026 |
 | P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | done (merged 43; `dispatch_tick` re-applied by Hussein in the SQL editor and read back `94ea83b8` on 7 Oct; mock Protection alert passed 7 Oct) | 43, 44 | 7 Oct 2026 |
 | P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | done (merged 47; Deploy passed after step 15; mock end to end and moderation path passed 7 Oct); Hussein's 390 px browser look still open, see After merge | 47 | 7 Oct 2026 |
-| P0.1-13b | One publication pipeline: posts, photos, hours, profile changes | Opus | split: part A (the four paths on the pipeline) PR 49 open, CI green, functions live, waits for Hussein's SQL editor step (part 1 of the migration) before merging; part B (`status` readers to `state`, then drop `status`, its sync trigger and `concierge_queue_reply`, asks Hussein before the drop) todo | 49 | 7 Oct 2026 |
+| P0.1-13b | One publication pipeline: posts, photos, hours, profile changes | Opus | split: part A (the four paths on the pipeline) merged (49, 7 Oct 20:40 UTC), Deploy passed, mock post verified; the special hours read-back and a mock-only lost write found After merge are fixed in PR 50; part B (`status` readers to `state`, then drop `status`, its sync trigger and `concierge_queue_reply`, asks Hussein before the drop) todo | 49, 50 | 7 Oct 2026 |
 | P0.7-01a | Wave P0.G: enable the reviews and posts API and confirm access | Sonnet | todo, can start now | | |
 | P0.7-01 | Wave P0.G: capture real Google responses (read-only) | Opus | todo, can start now (after P0.7-01a) | | |
 | P0.7-01b | Wave P0.G: compare real responses with the mocks and fix the mocks | Opus | todo | | |
@@ -164,12 +164,9 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-Before the P0.1-13b part A pull request (49) is merged:
-- Hussein runs part 1 of `20261007210000_publication_pipeline_content.sql` (lines 26 to 49) in the Supabase SQL editor, then the read-back query (both in the session's summary). Expected read-back: `special_hours_state_check` lists draft, publishing, posted, skipped, failed; `listing_changes_state_check` lists open, reverting, reverted, kept, revert_failed; one `special_hours_dates_unique` index whose WHERE lists draft, publishing, posted. Part 2 is already live.
-
-After the P0.1-13b part A pull request (49) is merged (Deploy publishes `api` and `content`):
-- Deploy passes; `api` and `content` have new versions.
-- Mock post end to end on Yawmiyati: a post approved through `approve_publication` makes one publication (`approved`, `publish_after` 10 s later) and one `publish` job; within about a minute the publication is `verified`, the post `posted`, and `audit_events` has the `approval` and the `publication` (`live`) lines. The same for one special hours period (read back from `mock_listings.fields.specialHours`) and one Google Protection put-back.
+After the P0.1-13b fix pull request (50) is merged (Deploy publishes `api`; migration `20261007220000_mock_listing_set.sql` applied before the merge):
+- The two publications left in `checking` by the first check (special hours 758a9abf, put-back 954b559a) are read again by `reconcile_publication` at their next check (30 minutes, then 1 hour after the first): special hours `verified` and the row `posted`. The put-back's write was lost in the mock (the bug), so it stays `checking` until the mock shows the old phone; set it back with `select public.mock_listing_set('locations/mock-9803ee99', 'phone', '"+961 1 000 000"')` (Google applying the change), then the next check marks it `verified` and the change `reverted`.
+- A fresh special hours period and a fresh put-back approved at the same moment on Yawmiyati both end `verified` within about a minute, and the mock listing keeps both fields.
 - Signed in at 390 px (Hussein, a browser): approving a post shows it under Earlier as "Sending to Google", then "Posted"; Hours says "Approved. Kabsi sends it to Google within a few minutes."; a Protection "Keep my information" shows "Being put back", then "Put back".
 
 P0.1-13a (PR 47): done 7 Oct (see Evidence). Still open:
@@ -232,6 +229,15 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### P0.1-13b part A After merge (7 Oct 2026, 20:40 to 20:44 UTC, Hussein's session) and the fix (branch claude/h-p0-1-13b-after, PR 50)
+- Hussein ran part 1 (lines 26 to 49) in the SQL editor; read back 20:40:20 UTC through the connector: `special_hours_state_check` draft, publishing, posted, skipped, failed; `listing_changes_state_check` open, reverting, reverted, kept, revert_failed; one `special_hours_dates_unique` with WHERE draft, publishing, posted; rows unchanged (hours 1 posted, 2 draft; changes 2 open, 1 reverted). The whole migration is live.
+- PR 49 marked ready and merged 20:40:37 UTC as merge commit 063014e (ci.yml green on head 1ff7b35: App, Edge Functions and Worker, Database). Deploy run 37683832270 passed (20:40:39 to 20:42:07); every Edge Function `updated_at` 20:41:02 UTC, `api` version 53, `content` version 46.
+- Mock checks on Yawmiyati, approved 20:42:36 as the owner with `approve_publication(..., p_payload, ..., 'dashboard')` (the call `content` and `decideChange` make; the session cannot sign in to call the routes): a new post, a new special hours period (25 Dec 2026, closed) and a put-back of the open test change b847e7da (mock phone first set to `+961 1 999 999`). Audit `approval` lines 3252 to 3254. Publish jobs 29296 to 29298 each succeeded on the first try at 20:43:01.
+- Post: publication 2234d0ec `verified`/`live`, `google_ref` `accounts/mock/locations/mock-9803ee99/localPosts/072932ab52a94de8b26`, the post `posted` with the approved text, audit `publication` `live` (3255). Passed.
+- Special hours: publication 758a9abf `checking` ("Google is checking your change to your hours"), although the mock stored the period. Bug: the read-back compared the dates as JSON, and the stored date's keys come back in another order. Fixed in PR 50 (dates and times compared as plain strings; Deno test).
+- Put-back: publication 954b559a `checking` ("Google is checking your change"), change `reverting`, mock phone still `+961 1 999 999`. Bug in the mock only: the hours job and the put-back job ran side by side and each wrote the whole mock listing back, so the hours write undid the phone. Live Google patches each field with its own updateMask. Fixed in PR 50: `public.mock_listing_set` merges one field under the row lock (migration `20261007220000_mock_listing_set.sql`, additive, service role only; pgTAP test).
+- Neither item was sent twice (attempts 1 each); 0 jobs failed or dead since the deploy.
 
 ### P0.1-13b part A (branch claude/h-p0-1-13b, PR 49, 7 Oct 2026, Hussein's session)
 - Split (plan 2.5, more than 10 code files and a contract step that must wait): part A moves posts, photos, special hours and Google Protection put-backs onto the pipeline; part B moves the remaining `publications.status` readers to `state` and then drops `status` (asks Hussein first).
@@ -583,6 +589,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Found, not done
 
 - 7 Oct (P0.1-13b chat), follow-up: migration history and repo files disagree (Evidence, P0.1-13a After-merge block): 22 same-name files with different versions, 3 files applied in parts under other names (two with a SQL-editor step that has no row), and `call_internal_send_anon_jwt` live with no file. A fresh `supabase db push` or `migration repair` against `kabsi-prod` would treat these as not applied. Fix in a dedicated task: `supabase migration repair` (mark the repo versions applied and the part rows reverted), or rename files to the live versions; add the missing file without the anon key. Not changed here, as asked.
+- P0.1-13b part A, test data on Yawmiyati (7 Oct): post 2234d0ec's `gbp_posts` row ("P0.1-13b after-merge check"), the 25 Dec 2026 special hours row, publications 2234d0ec, 758a9abf, 954b559a; the mock listing phone and `specialHours`. Listed under Test data to delete.
 - P0.1-13b part A: Google Protection "keep" now refuses while a put-back is on its way (`reverting`); the owner must wait for it or undo it in 10 seconds. There is no Undo button for posts, photos, hours or put-backs yet (K-70 places the Undo button in P0.3, and the content routes have no `undo` action yet); the database undo works for every kind.
 - P0.1-13a: if the owner replies on Google directly during the 10 to 70 seconds between approval and the publish job, Kabsi's reply replaces theirs (the sync does not touch a review in `publishing`). Same exposure as before the pipeline, now with a slightly longer window; a read of Google just before the write would close it (P0.1-13b or P0.7-01b).
 - P0.1-13a: `concierge_queue_reply` is no longer called by any code (the claim makes the concierge task now); drop it in P0.1-13b's contract step.
@@ -718,6 +725,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Test data to delete at go-live (P0.7-04)
 
+- Yawmiyati, 7 Oct (P0.1-13b After-merge check): the `gbp_posts` row with owner input "P0.1-13b after-merge check", the special hours row for 25 Dec 2026 (reason "P0.1-13b after-merge check"), publications 2234d0ec-d873-4795-9d06-01c634f3f5c5, 758a9abf-007b-4f5b-b88c-bc4970eb3e86 and 954b559a-8a96-40e6-bd52-986dd5f035c7, and `mock_listings.fields.specialHours` for `locations/mock-9803ee99`.
+
 - Yawmiyati, 7 Oct (P0.1-13a After-merge check): `mock_google_reviews` `mock-00abd2e02b4f47aba490b45ce57152f6` and `mock-b40a1253de894ca7860cd01edf1ff549`, reviews 345df350-a4a2-44b6-9d97-b9ccd0d2701f and 8e115912-b17a-47e0-b3c9-9076b822c737, their drafts, the owner email of 19:54:11 and publications fb0ba68a-80da-4231-9d1a-ac9506e56508 and 9bfe5b48-3fcc-47aa-aa6a-d85e54c3966e.
 
 - Yawmiyati: the P0.1-12a mock review `mock-c48dbe7d352c4542964ed4666238e63e` (mock_google_reviews), its review 66b3474d-e373-4110-9791-742960d0cdd1, draft, email and action tokens (4 Oct).
@@ -732,6 +741,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 7 Oct 2026 (Hussein's session): PR 49 (P0.1-13b part A) merged 20:40 UTC as 063014e after Hussein ran the constraint part in the SQL editor; Deploy passed (`api` 53). Mock post verified; special hours read-back bug and a mock-only lost write found and fixed in PR 50.
 - 7 Oct 2026 (Hussein's session): step 15 done (Deploy passed, `api` 52). P0.1-13a After-merge checks passed on Yawmiyati (mock end to end, moderation path reconciled after 10 minutes, one Google call each); P0.1-13a done except the browser look. Migration history compared with the repo: mismatches recorded as a follow-up, history unchanged. P0.1-13b split; part A on branch claude/h-p0-1-13b, PR 49.
 - 7 Oct 2026 (Hussein's session): PR 47 (P0.1-13a) merged at 19:33 UTC as 74665ca. Deploy failed on the Supabase token (403 edge_functions_write), not the code; new step 15 for Hussein. Live system checked safe on the old `api`.
 
