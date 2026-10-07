@@ -8,7 +8,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 - **Gate A approved on 5 Oct 2026** (Google Cloud project 856347937978, 300 queries per minute). The Gate A tasks moved to the new Wave P0.G (plan section 7A) right after Wave P0.1. **Can start now:** P0.7-01a (enable the reviews and posts API, confirm quota) and P0.7-01 (capture real responses, read-only), then P0.7-01b. P0.7-02 can be written now and submitted once P0.1-03 and P0.2-07 are live. P0.7-04 and P0.7-05 wait for P0.7-01b, P0.1-13a and P0.1-13b. Google stays in mock mode until P0.7-04 switches it.
 - **Hosting moves from Lovable to Vercel** (account created and connected to GitHub, Supabase and Claude). P0.1-03 is now "Move hosting to Vercel and switch kabsi.co". After-merge visual checks use the Vercel preview or live URL.
 - **WhatsApp through Kapso** (K-122, number +1 201-483-5474): P0.6-10 (click-to-chat), P0.6-12 (privacy text and Nora's facts), P1-21 (owner alerts), P1-22 (Nora on WhatsApp).
-- **Next up in Wave P0.1:** P0.1-13a, P0.1-13b, P0.1-03 (Vercel), P0.1-V3, P0.1-06c (demo login to a kabsi.co address). Then Wave P0.G.
+- **7 Oct 2026, P0.1-13a (Hussein's session):** P0.1-12b done (`dispatch_tick` read back `94ea83b8`). P0.1-13a, one publication pipeline for review replies, is PR 47: migration live and read back, CI green.
+- **Next up in Wave P0.1:** P0.1-13b, P0.1-03 (Vercel), P0.1-V3, P0.1-06c (demo login to a kabsi.co address). Then Wave P0.G.
 - Where the notes below say "Rashid" for a step, question or input, read Hussein. Older log lines keep the name of who acted at the time.
 - Plan version 1 written on 4 Oct 2026 (pull request claude/plan-v2). Nothing in it has been built yet.
 - Google: Gate A pending (case 1-4624000041157). Everything Google runs in mock mode.
@@ -69,8 +70,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-10 | Append-only audit log and the "What Kabsi did" feed source | Opus | done (merged 37; approval and publication events checked live at the start of the P0.1-12a chat; the next `kabsi_retention` run still to read, see After merge) | 37 | 4 Oct 2026 |
 | P0.1-11 | One Google service layer | Opus | done (part A merged 38, part B merged 39; After-merge checks passed) | 38, 39 | 4 Oct 2026 |
 | P0.1-12a | Job queue and dispatcher, review jobs first | Opus | merged (40); migration fully live; After-merge passed (deploy, dispatcher, sync status, no duplicates, mock review end to end, Home line checked in a browser by Hussein); staff Job health look still open (Rashid), see Evidence | 40, 41 | 4 Oct 2026 |
-| P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | merged (43); both migrations live, `kabsi_cron_tick` unscheduled, After-merge passed; `dispatch_tick` body (SQL editor) and the mock Protection alert still open, see Evidence | 43, 44 | 5 Oct 2026 |
-| P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | todo | | |
+| P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | done (merged 43; `dispatch_tick` re-applied by Hussein in the SQL editor and read back `94ea83b8` on 7 Oct; mock Protection alert passed 7 Oct) | 43, 44 | 7 Oct 2026 |
+| P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | PR open (47); migration live and read back; CI green; After-merge checks listed | 47 | 7 Oct 2026 |
 | P0.1-13b | One publication pipeline: posts, photos, hours, profile changes | Opus | todo | | |
 | P0.7-01a | Wave P0.G: enable the reviews and posts API and confirm access | Sonnet | todo, can start now | | |
 | P0.7-01 | Wave P0.G: capture real Google responses (read-only) | Opus | todo, can start now (after P0.7-01a) | | |
@@ -161,10 +162,13 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-After the P0.1-12b pull request (43) was merged: deploy, migration 2, the six steps and Protection as jobs, the unschedule and a quiet watchdog passed (see Evidence). Still open:
-- Hussein in the Supabase SQL editor: the new `private.dispatch_tick` (the snippet in the chat, the same as the file; the connector times out on it). Until then the rate buckets are not cleared, which matters only after Gate A. Read back: its md5 is `94ea83b8...`.
-- Live mock Protection alert: passed 7 Oct (see Evidence, 7 Oct block). Still open: `dispatch_tick` read back still shows `300fac3f` on 7 Oct 15:56 UTC (the old body); Hussein runs the file's `create or replace function private.dispatch_tick()` in the SQL editor.
-- `google_rate` stays empty in mock mode (mock calls do not reach `gbp`) until Gate A.
+After the P0.1-13a pull request (47) is merged (Deploy publishes `api` with the publish and reconcile jobs):
+- Deploy workflow passed and `api` has a new version.
+- Mock end to end on Yawmiyati: a staff mock review is synced and drafted; approving it in the app makes one `publications` row (state `approved`, `publish_after` 10 s later) and one `publish` job; within about a minute the row is `verified`, the review `posted` with `reply_state` `live`, `mock_google_reviews.reply_calls` is 1, and `audit_events` has the `approval` and the `publication` (`live`) lines.
+- Moderation path: the same with `reply_mode = 'pending'` on the mock row ends in `checking` ("Google is checking your reply" on Reviews); after copying `pending_reply_comment` to `reply_comment`, the `reconcile_publication` job 10 minutes later marks it `verified`.
+- Signed in at 390 px (Hussein, a browser): Reviews shows "Google is checking your reply" for the pending one, and the inbox success line reads "Approved. Kabsi sends it to Google within a few minutes."
+
+P0.1-12b: done on 7 Oct (see Evidence, 7 Oct P0.1-13a block). `google_rate` stays empty in mock mode until Gate A, which is expected, not a check.
 
 After the P0.1-12a pull request (40) was merged: deploy, `kabsi_dispatch`, sync status, cron-tick hand-over, the no-duplicates check and the mock review end to end passed (see Evidence). Hussein checked the Home line in a browser (4 Oct). Still open:
 - Signed in as staff (Rashid, a person with a browser): `/staff` Job health shows the "Job queue" line.
@@ -221,6 +225,20 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### P0.1-13a (branch claude/h-p0-1-13a, PR 47, 7 Oct 2026, Hussein's session)
+- Start of chat: `select left(md5(prosrc),8) from pg_proc where proname='dispatch_tick'` returned `94ea83b8` at 18:53:57 UTC (Hussein re-applied it in the SQL editor): P0.1-12b's last open line passed and it is marked done. Same read: `kabsi_dispatch` last succeeded 18:53:00; no failed run on any of the 19 cron jobs; in the last 3 hours 124 `sync_reviews`, 124 `protection_check` and the six steps about 35 times each succeeded, 0 dead or failed. `kabsi_chat_retention` (7 Oct 03:41) and `kabsi_concierge_daily` (7 Oct 05:00) have succeeded since the P0.1-08 change.
+- Migration `20261007190000_publication_pipeline.sql` (additive, no `delete`): `publications.state` and the pipeline columns, state and status kept in step by a trigger, `approve_publication`, `undo_publication`, `claim_publication`, `record_publication`, `claim_publication_check`, `produce_jobs` with publish, reconcile and stuck-write handling, `mock_google_reply`. Code: `_shared/publish.ts` (publish and reconcile jobs), `publishReply` a thin call, `undo` on `api/approve` and `api/action`, `sendReply` and `readReply` in the Google layer, mock modes.
+- Done-when "a dashboard approval and an email approval of the same reply at the same moment create one publication and one Google call": CI two-session test (`publication_concurrency.sh`, run 37672367362): "publication approval race: dashboard [f5a73f38... true], email [f5a73f38... false], publications 1, publish jobs 1"; "publication claim race: w1 claimed, w2 not_approved, attempts 1". Deno `publish.test.ts`: two publish runs at once make 1 Google call (mock counter).
+- Done-when "undo inside 10 seconds cancels with no Google call": pgTAP (undo cancels, the review goes back to drafted, `claim_publication` then returns `not_approved`, undo after the window raises `too_late`, the undo is an audit line); Deno test: 0 Google calls.
+- Done-when "a mock timeout leaves checking and reconcile marks verified after the mock shows the reply": Deno test (timeout ends in `checking`, a second run sends nothing, reconcile before due waits, after due `verified`, still 1 call); pgTAP (checking at 10 minutes, then 30 minutes, 1, 3, 6, 12, 24 hours; `verifying` claimed once; failed after 7 days).
+- Done-when "a mock 400 marks rejected and returns the item to the owner with the reason": pgTAP (review `drafted`, `reply_state` `rejected`, reason saved; can be approved again with key `:2`); Deno test (reason "Google did not accept this reply (Mock: the reply was not accepted.). Edit it and approve again."). The inbox shows the reason above the reply box.
+- Done-when "Google moderation pending shows as Google is checking your reply": pgTAP (`reply_state_reason` "Google is checking your reply"); Reviews page label for `posted` + `in_review` is now that sentence.
+- Concierge: pgTAP (claim makes one `post_reply` concierge task, status `queued`, staff Mark posted makes it `verified`).
+- CI on PR 47 head c03cb44: App, Edge Functions and Worker, Database (534 pgTAP tests, 84 in `publication_pipeline.sql`, both race tests ok, 90 s) and Load (500 businesses) all success. The first run (019c13c) failed 1 test from a mistake in the test file (the re-approval's id was not kept); fixed in c03cb44. Vercel red as expected until P0.1-03.
+- Local: `npm run typecheck`, eslint on the 4 changed src files, `check:tokens`, `check:google`, `check:anon` pass; `npm test` 21 passed; `npm run build` pass. Deno 2.5.6: `deno check` api, content, cron-tick, health, posts-weekly, slack, partner pass; `deno test --no-check _shared/` 95 passed. `site-assets` cannot fetch deno.land from the sandbox (CI ran it).
+- Live apply after CI was green, 7 Oct 19:23:32 UTC, the whole file through `apply_migration` in one go (migration row `20261007192332 publication_pipeline`). Read back: all 11 function bodies have the same md5 as the file (`approve_publication` 2eea0806, `undo_publication` 7a093092, `claim_publication` 309a4d75, `record_publication` 7019e8d6, `claim_publication_check` 3b14324f, `produce_jobs` 20265bbf, `mock_google_reply` 29c2a64e, `publication_status_of` 6374f440, `publication_state_of` b650738c, `publication_sync_state` e190d105, `publication_check_delay` 177ae63b); the 11 existing publications read `verified`/`live`; triggers `publications_state`, `publications_audit` and `ops_publication` on `status, state`; the six public functions execute for service_role only. `dispatch_tick` still `94ea83b8`. Security advisor: nothing new (the authenticated list is the existing browser list; INFO rls lines unchanged).
+- `knowledge/kabsi-facts.md` ("I posted but the reply isn't on Google") and `public/llms-full.txt` updated.
 
 ### P0.1-12b open After-merge checks, read on 7 Oct 2026 (15:56 to 16:01 UTC, Hussein's session, connector)
 - Mock Protection alert passed. The staff RPC needs a signed-in staff user, so the same edit was made on `mock_listings` for `locations/mock-9803ee99` (Yawmiyati): phone `+961 1 000 000` to `+961 1 999 999` at 15:57:14. The next `protection_check` job (27194, created 16:00:00, succeeded) wrote one `listing_changes` row (b847e7da, field phone, state open, `detected_by` scheduled_check, old `+961 1 000 000`, new `+961 1 999 999`, 16:00:04) and one `shield_alert` email (dd891d66, "Your phone number changed on Google: Yawmiyati", status sent, 16:00:04) to the owner address. Mock phone put back to `+961 1 000 000` at 16:01:13. The open change row was left as is; a second alert may follow from the put-back.
@@ -538,6 +556,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Found, not done
 
+- P0.1-13a: if the owner replies on Google directly during the 10 to 70 seconds between approval and the publish job, Kabsi's reply replaces theirs (the sync does not touch a review in `publishing`). Same exposure as before the pipeline, now with a slightly longer window; a read of Google just before the write would close it (P0.1-13b or P0.7-01b).
+- P0.1-13a: `concierge_queue_reply` is no longer called by any code (the claim makes the concierge task now); drop it in P0.1-13b's contract step.
 - P0.1-12b: the per-business schedules (`next_sync_at`, `next_protection_at`) are set to "now plus 5 minutes" at the start of the minute the job is offered, and pg_cron's next tick often starts a few milliseconds earlier, so a business is offered every 5 or 6 minutes (seen live: 03:30, 03:35, 03:41). Harmless; rounding the next time down to the minute would make it exactly 5.
 
 - P0.1-12b: until P0.1-13a moves publishing onto the queue, a live reply, post or listing change that cannot get its place under the limiter within 65 s (or meets an open breaker) fails with `GoogleBusy` and is left "publishing" for staff to verify (D266 treats it as uncertain, because a read-back after a successful write can also meet it). Mock mode is unaffected. P0.1-13a's publish job should postpone instead.
@@ -583,6 +603,11 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Decisions to confirm
 
 (Build chats add decisions the plan did not cover here, one line each with the reason. The planning chat folds confirmed ones into the plan.)
+- P0.1-13a: `publications.status` stays and follows `state` through a trigger (both ways), so the post, photo, hours and Protection paths and the concierge staff functions work unchanged until P0.1-13b; the contract step drops `status` once nothing reads it.
+- P0.1-13a: the pipeline functions are in `public` with execute for the service role only (the Edge Functions call them through PostgREST, as with `claim_jobs`); undo goes through `api/approve` and `api/action` (the email link that approved may undo for 10 seconds), not a browser RPC.
+- P0.1-13a: the Undo button itself is not built (K-70 places it in P0.3); this task builds the 10 second window, the RPC and the routes. Until then a reply reaches Google 10 to 70 seconds after approval (the dispatcher runs every minute).
+- P0.1-13a: the reconcile schedule is 10 minutes, then 30 minutes, 1, 3, 6, 12 and 24 hours, then daily; a reply Google still does not show 7 days after approval is failed and goes back to the owner (K-116.1 says only "widening").
+- P0.1-13a: when reconcile finds a different reply on Google (the owner replied there directly), the publication is failed with "Google shows a different reply for this review. Kabsi did not post again."; the next sync marks the review handled by the owner.
 - 7 Oct plan update, for Hussein to confirm or change: the plan text still says "Rashid" in about 50 places in tasks, prompts and the section 5 headings. The plan carries a note at the top of section 5 that every such step is Hussein's (R-26), but the lines themselves were not rewritten (see the log entry of 7 Oct). A mechanical rename in a follow-up pull request is the proposed fix; the facts about the past (D1, D2, 4 Oct decisions) would keep Rashid's name.
 - 7 Oct: public copy that names Rashid ("Talk to Rashid" on /partners, "For agencies: talk to Rashid" in the footer, K-105 "Rashid by name and role", the founder note in P0.6-07, the Calendly event text in P0.1-V3) was not changed. Who is named as the founder and who takes calls is Hussein's call.
 - 7 Oct, CONFIRMED by Hussein: the live switch is limited to Kabsi's two own profiles, "Join early access" stays until P0.7-07, and the Supabase Pro upgrade and restore test move to P0.7-07.
@@ -669,6 +694,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 7 Oct 2026 (Hussein's session): `dispatch_tick` read back `94ea83b8`; P0.1-12b done. P0.1-13a on branch claude/h-p0-1-13a, PR 47: one publication pipeline for review replies (approval, claim, undo window, publish and reconcile jobs, mock modes). CI green (first run had one test-file mistake, fixed); migration applied live in one go and read back. Next: merge, Deploy, the After-merge mock end to end; then P0.1-13b (Opus).
 
 - 7 Oct 2026 (planning chat, Hussein's answers): confirmed the live-switch limits, the project number, and star ratings in WhatsApp alerts (see Decisions to confirm). **P0.7-01a evidence, from Hussein's dashboard check:** project 856347937978 is `smiling-chess-505915-b7`; "Requests per minute" reads 300 on Account Management, Business Information, Notifications, Place Actions, Q&A and Verifications. **Still open on P0.7-01a:** the Google My Business API (reviews, posts) is not enabled yet, pending on Hussein; its quota is to be read after enabling. PR 45 CI: App, Edge Functions and Worker, and Database jobs all green; the Vercel check is red for the expected Lovable-config reason and does not block this docs PR.
 
