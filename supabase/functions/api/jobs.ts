@@ -7,15 +7,21 @@
 // review and offers the owner email run; notify_owner sends that business's due emails (the rules in reviews.ts).
 // protection_check compares one business's listing with its baseline (shield.ts). The whole-system steps the 5 minute
 // cron ran (cron.ts) are one job each, offered every 5 minutes.
-// Publications (P0.1-13a, _shared/publish.ts): publish sends one approved reply once its undo window has passed;
-// reconcile_publication reads Google for a reply whose outcome is not known yet. Neither ever sends a write twice.
+// Publications (P0.1-13a and P0.1-13b, _shared/publish.ts): publish sends one approved reply, post, photo, special
+// hours period or Google Protection put-back once its undo window has passed; reconcile_publication reads Google for
+// one whose outcome is not known yet. Neither ever sends a write twice. These are the only Google writes in Kabsi.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 import { type Job, type JobHandler, type JobState, PermanentJobError, runJob } from "../_shared/jobs.ts";
 import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation } from "../_shared/reviews.ts";
 import { AiBudgetError } from "../_shared/ai-budget.ts";
 import { protectionCheck } from "../_shared/shield.ts";
-import { readReply, sendReply } from "../_shared/google/index.ts";
-import { type CheckClaim, type Claim, type Outcome, type PublishDeps, publishOne, reconcileOne } from "../_shared/publish.ts";
+import {
+  addSpecialHours, createLocalPost, createMedia, hasSpecialHours, listingField, localPostState, mediaExists, patchListing,
+  readReply, sendReply, type ShieldField, type SpecialDay,
+} from "../_shared/google/index.ts";
+import {
+  type CheckClaim, type Claim, type Item, NotSent, type Outcome, type PublishDeps, publishOne, reconcileOne, replySeen, type Seen, type Sent,
+} from "../_shared/publish.ts";
 import { accessJob, deletionsJob, ratingsJob, renewalsJob, trialsJob, weeklyJob } from "./cron.ts";
 
 // Offer a job. Returns its id, or null when the same dedupe key is already pending, running or retrying.
@@ -129,6 +135,66 @@ async function rpcJson<T>(fn: string, args: Record<string, unknown>): Promise<T>
   return data as T;
 }
 
+const POST_SEEN: Record<string, Seen> = { live: "shown", in_review: "pending", rejected: "rejected" };
+const str = (v: unknown) => (v == null ? "" : String(v));
+const hoursOf = (p: Record<string, unknown>): SpecialDay => ({
+  startDate: str(p.start_date), endDate: str(p.end_date || p.start_date), closed: p.closed === true,
+  openTime: p.open_time ? str(p.open_time) : null, closeTime: p.close_time ? str(p.close_time) : null,
+});
+
+// The one write for each kind, with exactly what the owner approved (the publication's payload).
+async function send(i: Item): Promise<Sent> {
+  const account = i.google_account_id ?? "", location = i.google_location_id, p = i.payload;
+  switch (i.target_type) {
+    case "review_reply":
+      return await sendReply(account, location, i.google_review_id ?? "", i.text ?? "");
+    case "local_post": {
+      const r = await createLocalPost(account, location, {
+        summary: str(p.summary), languageCode: str(p.language) || "en", ctaType: p.cta_type ? str(p.cta_type) : null,
+        ctaUrl: p.cta_url ? str(p.cta_url) : null,
+      });
+      return { ref: r.ref, response: r.response, seen: POST_SEEN[r.state] };
+    }
+    case "photo": {
+      // Google fetches the photo from a short-lived signed link made now, not at approval.
+      const { data, error } = await admin().storage.from("owner-photos").createSignedUrl(str(p.storage_path), 3600);
+      if (error || !data) throw new NotSent(`photo file not available: ${error?.message ?? "sign_failed"}`);
+      const r = await createMedia(account, location, data.signedUrl, str(p.category) || "ADDITIONAL");
+      return { ref: r.ref, response: r.response, seen: r.ref ? "shown" : undefined };
+    }
+    case "special_hours": {
+      const r = await addSpecialHours(location, hoursOf(p));
+      return { ref: null, response: r.response };
+    }
+    case "listing_revert": {
+      const r = await patchListing(location, str(p.field) as ShieldField, p.raw);
+      return { ref: null, response: r.response };
+    }
+  }
+}
+
+// What Google shows for each kind now.
+async function read(i: Item): Promise<Seen> {
+  const account = i.google_account_id ?? "", location = i.google_location_id, p = i.payload;
+  switch (i.target_type) {
+    case "review_reply":
+      return replySeen(await readReply(account, location, i.google_review_id ?? ""), i.text ?? "");
+    case "local_post": {
+      const state = await localPostState(account, location, i.google_ref ?? null, str(p.summary));
+      return state ? POST_SEEN[state] : "absent";
+    }
+    case "photo":
+      return i.google_ref && (await mediaExists(location, i.google_ref)) ? "shown" : "absent";
+    case "special_hours":
+      return (await hasSpecialHours(location, hoursOf(p))) ? "shown" : "absent";
+    case "listing_revert": {
+      // Google may hold an owner's edit for review before it shows: not shown yet is "pending", not a failure.
+      const now = await listingField(location, str(p.field) as ShieldField);
+      return now !== null && now === str(p.value) ? "shown" : "pending";
+    }
+  }
+}
+
 const PUBLISH: PublishDeps = {
   claim: (id) => rpcJson<Claim>("claim_publication", { p_publication: id }),
   claimCheck: (id) => rpcJson<CheckClaim>("claim_publication_check", { p_publication: id }),
@@ -136,8 +202,8 @@ const PUBLISH: PublishDeps = {
     p_publication: id, p_state: o.state, p_reason: o.reason ?? null, p_error: o.error ?? null, p_google_ref: o.googleRef ?? null,
     p_moderation: o.moderation ?? null, p_response: o.response ?? null,
   }),
-  sendReply,
-  readReply,
+  send,
+  read,
 };
 
 const publicationId = (job: Job) => {

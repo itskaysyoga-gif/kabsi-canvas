@@ -1,8 +1,10 @@
-// content: Posts and special hours (Phase 6). Signed-in members only; every Google write needs the
-// owner's click on the exact text or hours shown (D202) and goes through a `publications` row.
+// content: Posts, photos, special hours and Google Protection decisions (Phase 6). Signed-in members only. Nothing
+// here calls Google: posting a post or a photo, setting special hours and putting a Protection field back are the
+// owner's approval of the exact text, photo, hours or value shown (D202), through approve_publication; the publish
+// job sends it after the 10 second undo window (P0.1-13b, the one publication pipeline).
 //   POST { do: "post_draft", location_id, owner_input, keywords?, cta_type?, cta_url? } → new draft
 //   POST { do: "post_redraft", post_id, instruction }                                  → new version
-//   POST { do: "post_publish", post_id, body }                                          → posts exactly `body`
+//   POST { do: "post_publish", post_id, body }                                          → approves exactly `body`
 //   POST { do: "post_skip", post_id }
 //   POST { do: "keyword_suggest", location_id }                                       → search phrases for posts
 //   POST { do: "hours_publish", location_id, start_date, end_date, closed, open_time?, close_time?, reason? }
@@ -10,9 +12,9 @@
 //   POST { do: "shield_decide", change_id, decision: "revert" | "keep" }                  → Google Protection (D218)
 import { MODELS } from "../_shared/models.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
-import { admin, captureError, CORS, currentUser, fail, isDefiniteGoogleRejection, json, rateLimit } from "../_shared/kabsi.ts";
-import { addSpecialHours, createLocalPost, createMedia } from "../_shared/google/index.ts";
+import { admin, captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
 import { decideChange } from "../_shared/shield.ts";
+import { auditedAdmin, auditHeaders } from "../_shared/audit.ts";
 import { CTAS, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, writePost } from "../_shared/posts.ts";
 import { AI_BUDGET_MESSAGE, AiBudgetError } from "../_shared/ai-budget.ts";
 
@@ -43,6 +45,17 @@ Not suitable: blurry or very dark; a screenshot, flyer, poster or mostly text; a
   return { suitable: j.suitable === true, note: String(j.note ?? "").slice(0, 200), category: PHOTO_CATEGORIES.includes(String(j.category)) ? String(j.category) : "ADDITIONAL" };
 }
 type Loc = PostLoc;
+
+// The owner's approval of one post, photo or special hours period (the one approval path, K-38, P0.1-13b). The
+// publish job sends it to Google after the 10 second undo window; a second click gets the same publication back.
+async function approveChange(req: Request, userId: string, targetType: "local_post" | "photo" | "special_hours", targetId: string, payload: Record<string, unknown>) {
+  const { data, error } = await auditedAdmin(auditHeaders(req, userId)).rpc("approve_publication", {
+    p_target_type: targetType, p_target_id: targetId, p_payload: payload, p_approved_by: userId, p_channel: "dashboard",
+  });
+  if (error) throw new Error(error.message);
+  const r = data as { publication_id: string; state: string; publish_after: string | null; created: boolean };
+  return { state: r.state, publication: r.publication_id, publish_after: r.publish_after, created: r.created };
+}
 
 async function member(req: Request, locationId: string) {
   const user = await currentUser(req);
@@ -130,30 +143,9 @@ Deno.serve(async (req) => {
         const text = String(b.body ?? "").trim();
         if (text.length < 10 || text.length > 1500) return fail("bad_text", "Posts must be between 10 and 1,500 characters.");
         if (loc.status !== "active" || !loc.google_location_id) return fail("not_active", "This business isn't active yet.", 409);
-        // D266: atomic claim — a double click or two tabs must not both reach Google.
-        const { data: claimed } = await db.from("gbp_posts").update({ state: "publishing" }).eq("id", post.id).eq("state", "draft").select("id").maybeSingle();
-        if (!claimed) return fail("bad_input", "This post was already handled.");
-        const payload = { summary: text, cta_type: post.cta_type, cta_url: post.cta_url };
-        const { data: pub, error } = await db.from("publications").insert({
-          location_id: loc.id, target_type: "local_post", target_id: post.id, payload, approved_by: user.id, channel: "dashboard", status: "queued",
-        }).select("id").single();
-        if (error) { await db.from("gbp_posts").update({ state: "draft" }).eq("id", post.id); throw error; }
-        try {
-          const r = await createLocalPost(loc.google_account_id!, loc.google_location_id, { summary: text, languageCode: postLanguage(text), ctaType: post.cta_type, ctaUrl: post.cta_url });
-          await db.from("publications").update({ status: r.state, google_response: r.response }).eq("id", pub.id);
-          await db.from("gbp_posts").update({ body: text, state: r.state === "rejected" ? "failed" : "posted" }).eq("id", post.id);
-          return json({ ok: true, state: r.state });
-        } catch (e) {
-          await db.from("publications").update({ status: "failed", error: String(e).slice(0, 500) }).eq("id", pub.id);
-          // D266: a definite rejection is safe to mark failed (Google told us it never landed); an uncertain
-          // failure (timeout/network/5xx) stays 'publishing' instead — Google may already have it.
-          if (isDefiniteGoogleRejection(e)) {
-            await db.from("gbp_posts").update({ state: "failed" }).eq("id", post.id);
-          } else {
-            await captureError("content_stuck", e, { post: post.id, publication: pub.id, note: "left in publishing — verify against Google before retrying" });
-          }
-          throw e;
-        }
+        // One approval (K-38): a double click or two tabs get the same publication back, never a second post.
+        const r = await approveChange(req, user.id, "local_post", post.id, { summary: text, language: postLanguage(text) });
+        return json({ ok: true, ...r });
       }
       case "hours_publish": {
         const s = String(b.start_date ?? ""), e = String(b.end_date ?? s);
@@ -170,19 +162,12 @@ Deno.serve(async (req) => {
         // 23505: the unique index on (location, dates) caught a double click or a repeat of dates already saved.
         if (error?.code === "23505") return fail("already_saved", "You already saved special hours for these dates. Choose different dates, or change them on Google.", 409);
         if (error) throw error;
-        const payload = { start_date: s, end_date: e, closed, open_time: open, close_time: close };
-        const { data: pub, error: pe } = await db.from("publications").insert({
-          location_id: loc.id, target_type: "special_hours", target_id: row.id, payload, approved_by: user.id, channel: "dashboard", status: "queued",
-        }).select("id").single();
-        if (pe) throw pe;
         try {
-          const r = await addSpecialHours(loc.google_location_id, { startDate: s, endDate: e, closed, openTime: open, closeTime: close });
-          await db.from("publications").update({ status: r.state, google_response: r.response }).eq("id", pub.id);
-          await db.from("special_hours").update({ state: "posted" }).eq("id", row.id);
-          return json({ ok: true, state: r.state });
+          const r = await approveChange(req, user.id, "special_hours", row.id, {});
+          return json({ ok: true, ...r });
         } catch (err) {
-          await db.from("publications").update({ status: "failed", error: String(err).slice(0, 500) }).eq("id", pub.id);
-          await db.from("special_hours").update({ state: "failed" }).eq("id", row.id);
+          // Not approved: the saved dates must not block a new try.
+          await db.from("special_hours").update({ state: "skipped" }).eq("id", row.id).eq("state", "draft");
           throw err;
         }
       }
@@ -206,39 +191,16 @@ Deno.serve(async (req) => {
         if (!photo || photo.state !== "draft") return fail("bad_input", "This photo was already handled.");
         const category = PHOTO_CATEGORIES.includes(String(b.category)) ? String(b.category) : (photo.category ?? "ADDITIONAL");
         if (loc.status !== "active" || !loc.google_location_id) return fail("not_active", "This business isn't active yet.", 409);
-        // D266: atomic claim — a double click or two tabs must not both reach Google.
-        const { data: claimed } = await db.from("photos").update({ state: "publishing" }).eq("id", photo.id).eq("state", "draft").select("id").maybeSingle();
-        if (!claimed) return fail("bad_input", "This photo was already handled.");
-        const { data: signed, error: se } = await db.storage.from("owner-photos").createSignedUrl(photo.storage_path, 3600);
-        if (se || !signed) { await db.from("photos").update({ state: "draft" }).eq("id", photo.id); throw se ?? new Error("sign_failed"); }
-        const { data: pub, error } = await db.from("publications").insert({
-          location_id: loc.id, target_type: "photo", target_id: photo.id, payload: { storage_path: photo.storage_path, category },
-          approved_by: user.id, channel: "dashboard", status: "queued",
-        }).select("id").single();
-        if (error) { await db.from("photos").update({ state: "draft" }).eq("id", photo.id); throw error; }
-        try {
-          const r = await createMedia(loc.google_account_id!, loc.google_location_id, signed.signedUrl, category);
-          await db.from("publications").update({ status: r.state, google_response: r.response }).eq("id", pub.id);
-          await db.from("photos").update({ state: "posted", category }).eq("id", photo.id);
-          return json({ ok: true, state: r.state });
-        } catch (e) {
-          await db.from("publications").update({ status: "failed", error: String(e).slice(0, 500) }).eq("id", pub.id);
-          // D266: a definite rejection is safe to mark failed; an uncertain failure (timeout/network/5xx)
-          // stays 'publishing' instead — Google may already have accepted the photo.
-          if (isDefiniteGoogleRejection(e)) {
-            await db.from("photos").update({ state: "failed" }).eq("id", photo.id);
-          } else {
-            await captureError("content_stuck", e, { photo: photo.id, publication: pub.id, note: "left in publishing — verify against Google before retrying" });
-          }
-          throw e;
-        }
+        // One approval (K-38): the publish job signs a fresh link to the photo when it sends it.
+        const r = await approveChange(req, user.id, "photo", photo.id, { category });
+        return json({ ok: true, ...r });
       }
       case "shield_decide": {
         const decision = b.decision === "revert" ? "revert" : b.decision === "keep" ? "keep" : null;
         if (!decision) return fail("bad_input", "Choose revert or keep.");
         try {
-          const r = await decideChange(String(b.change_id), decision, user.id, "dashboard");
-          return json({ ok: true, state: r.state });
+          const r = await decideChange(String(b.change_id), decision, user.id, "dashboard", auditHeaders(req, user.id));
+          return json({ ok: true, ...r });
         } catch (e) {
           if (String(e).includes("already_decided")) return fail("already_decided", "This change was already handled.", 409);
           throw e;
@@ -250,6 +212,11 @@ Deno.serve(async (req) => {
   } catch (e) {
     // The daily AI budget is used up (K-100): a clear message, not an error report.
     if (e instanceof AiBudgetError) return fail("ai_budget", AI_BUDGET_MESSAGE[e.scope], 429);
+    const msg = String(e);
+    if (msg.includes("already_handled")) return fail("bad_input", "This was already handled.", 409);
+    if (msg.includes("location_not_active")) return fail("not_active", "This business isn't active yet.", 409);
+    if (msg.includes("concierge_profile")) return fail("early_access", CONCIERGE_COPY.profile, 409);
+    if (msg.includes("bad_post_text")) return fail("bad_text", "Posts must be between 10 and 1,500 characters.");
     await captureError("content", e);
     return fail("internal", "Something went wrong. Nothing was posted.", 500);
   }

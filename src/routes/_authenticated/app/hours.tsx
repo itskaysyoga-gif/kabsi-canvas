@@ -178,7 +178,7 @@ function HoursForm({ locationId, onDone }: { locationId: string; onDone: () => u
     try {
       await contentCall({ do: "hours_publish", location_id: locationId, ...summary, reason });
       track("special_hours_approved", { channel: "dashboard" });
-      setMsg("Saved on your Google profile.");
+      setMsg("Approved. Kabsi sends it to Google within a few minutes.");
       setConfirming(false);
       setReason("");
       onDone();

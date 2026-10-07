@@ -560,6 +560,9 @@ Links work once and last 7 days. Open Kabsi and use Reviews, To reply.
 **I posted but the reply isn't on Google.**
 After you approve, Kabsi waits 10 seconds, then sends the reply to Google, usually within a minute or two. Google checks every reply before it appears, usually within 10 minutes, sometimes longer. All reviews shows "Google is checking your reply" while it waits. Kabsi checks again after 10 minutes and then less often, and never posts the same reply twice. If Google does not accept the reply, the review comes back to To reply with the reason, so you can edit it and approve again. If Google still does not show it after 7 days, Kabsi treats it the same way. Approving the same reply twice (for example in the app and from the email) sends it once. **[TIME-SENSITIVE]** In test mode nothing is sent to Google at all.
 
+**I approved a post, photo, holiday hours or "Keep my information" and it isn't on Google yet.**
+Posts, photos, special hours and putting a detail back with Google Protection go to Google the same way as replies: Kabsi waits 10 seconds after you approve, then sends it, usually within a minute or two. Until then the post or photo shows "Sending to Google", the hours show "Sending" and the change shows "Being put back". Approving twice (two taps, two tabs, the app and the email) sends it once. If Google does not answer, Kabsi checks your profile instead of sending again. A post Google is still checking shows once Google allows it. If Google refuses it or still does not show it after 7 days, it shows "Not posted", "Couldn't post", "Not saved" or "Couldn't put back", and nothing is sent twice. **[TIME-SENSITIVE]** In test mode nothing is sent to Google at all.
+
 **I'm not getting review emails.**
 Check spam, and Settings, Emails: emails may be paused (**Turn emails back on**), or the daily time and time zone may be off. 4 and 5 star reviews arrive once a day. Reviews always appear in the app too.
 
@@ -596,7 +599,7 @@ Staff check each transaction by hand. If the Plan page says "We couldn't match y
 Correct: a plan starts when Google access works (section 4.3).
 
 **Google Protection says "Couldn't put back".**
-Google didn't accept the revert. Update the detail on your Google profile directly, or hand off.
+Google didn't accept the revert, or still did not show your version 7 days later. Update the detail on your Google profile directly, or hand off.
 
 ---
 
@@ -819,7 +822,7 @@ It suggests words customers use for businesses like yours: your category and are
 Clear, real photos of your place, products, food, drinks or team at work. The check flags blurry shots, screenshots, text-heavy images, logos alone, AI-looking images and photos where a face is the main subject.
 
 **Can I set holiday hours?**
-Yes. On Hours, choose the dates, Closed or different hours, review what Google will show, and tap Confirm and save to Google.
+Yes. On Hours, choose the dates, Closed or different hours, review what Google will show, and tap Confirm and save to Google. Kabsi sends them to Google within a few minutes.
 
 ### Google Protection
 

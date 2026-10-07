@@ -10,3 +10,5 @@ export function createLocalPost(account: string, location: string, body: LocalPo
   });
 }
 export const listLocalPosts = (_account: string, _location: string): Promise<ListLocalPostsResponse> => Promise.resolve({});
+// The mock keeps no posts: a post it created reads back LIVE.
+export const getLocalPost = (post: string): Promise<LocalPost> => Promise.resolve({ name: post, state: "LIVE" });

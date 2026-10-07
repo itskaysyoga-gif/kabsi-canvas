@@ -50,6 +50,7 @@ const LABEL: Record<string, string> = {
   categories: "Main category",
 };
 const STATE: Record<string, string> = {
+  reverting: "Being put back",
   reverted: "Put back",
   kept: "Kept the new one",
   revert_failed: "Couldn't put back",

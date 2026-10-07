@@ -1,7 +1,8 @@
 // Google Protection (D218): watch the Google listing and alert the owner when a field changes. The email says what
 // changed and links to the app, where the owner chooses. Kabsi cannot stop Google or the public from editing.
 import { admin, APP_URL, captureError, emailLayout, esc, sendEmail } from "./kabsi.ts";
-import { getListing, googleMode, patchListing, SHIELD_FIELDS, type FieldValue, type Listing, type ShieldField } from "./google/index.ts";
+import { getListing, googleMode, SHIELD_FIELDS, type FieldValue, type Listing, type ShieldField } from "./google/index.ts";
+import { auditedAdmin } from "./audit.ts";
 
 const LABEL: Record<ShieldField, string> = { title: "business name", phone: "phone number", address: "address", website: "website", hours: "opening hours", categories: "main category" };
 type Loc = { id: string; name: string; address: string | null; google_location_id: string | null; knowledge_card: Record<string, unknown>; shield_checked_at: string | null };
@@ -73,34 +74,31 @@ async function checkListing(loc: Loc) {
   return alerts;
 }
 
-// Owner decision (email link or dashboard). Revert writes the old value back to Google (D202: userId approved it).
-export async function decideChange(changeId: string, decision: "revert" | "keep", userId: string, channel: "dashboard" | "email_link") {
+// Owner decision (email link or dashboard). "keep" makes Google's value the new baseline. "revert" is the owner's
+// approval to put the old value back (D202): it goes through the one publication pipeline (P0.1-13b), which sends it
+// after the 10 second undo window and marks the change reverted once Google shows it.
+export async function decideChange(changeId: string, decision: "revert" | "keep", userId: string, channel: "dashboard" | "email_link", audit?: Record<string, string>) {
   const db = admin();
-  const { data: ch } = await db.from("listing_changes").select("id, location_id, field, old_value, new_value, state, locations(google_location_id)").eq("id", changeId).single();
+  const { data: ch } = await db.from("listing_changes").select("id, location_id, field, new_value, state").eq("id", changeId).single();
   if (!ch) throw new Error("not_found");
   if (ch.state !== "open") throw new Error("already_decided");
   const field = ch.field as ShieldField;
-  const gl = (ch.locations as unknown as { google_location_id: string }).google_location_id;
   if (decision === "keep") {
+    // Only an open change can be kept: a put-back on its way (reverting) is not overtaken.
+    const { data: kept } = await db.from("listing_changes").update({ state: "kept", decided_at: new Date().toISOString() })
+      .eq("id", ch.id).eq("state", "open").select("id").maybeSingle();
+    if (!kept) throw new Error("already_decided");
     const { data: base } = await db.from("listing_baselines").select("fields").eq("location_id", ch.location_id).single();
     await db.from("listing_baselines").update({ fields: { ...(base!.fields as Listing), [field]: ch.new_value }, updated_by: "owner", updated_at: new Date().toISOString() }).eq("location_id", ch.location_id);
-    await db.from("listing_changes").update({ state: "kept", decided_at: new Date().toISOString() }).eq("id", ch.id);
     return { state: "kept" };
   }
-  const old = ch.old_value as FieldValue;
-  const { data: pub, error } = await db.from("publications").insert({
-    location_id: ch.location_id, target_type: "listing_revert", target_id: ch.id, payload: { field, value: old.display },
-    approved_by: userId, channel, status: "queued",
-  }).select("id").single();
-  if (error) throw error;
-  try {
-    const r = await patchListing(gl, field, old.raw);
-    await db.from("publications").update({ status: r.state, google_response: r.response }).eq("id", pub.id);
-    await db.from("listing_changes").update({ state: "reverted", decided_at: new Date().toISOString() }).eq("id", ch.id);
-    return { state: "reverted" };
-  } catch (e) {
-    await db.from("publications").update({ status: "failed", error: String(e).slice(0, 500) }).eq("id", pub.id);
-    await db.from("listing_changes").update({ state: "revert_failed", decided_at: new Date().toISOString() }).eq("id", ch.id);
-    throw e;
+  const { data, error } = await (audit ? auditedAdmin(audit) : db).rpc("approve_publication", {
+    p_target_type: "listing_revert", p_target_id: ch.id, p_payload: {}, p_approved_by: userId, p_channel: channel,
+  });
+  if (error) {
+    if (String(error.message).includes("already_decided")) throw new Error("already_decided");
+    throw new Error(error.message);
   }
+  const r = data as { publication_id: string; publish_after: string | null };
+  return { state: "reverting", publication: r.publication_id, publish_after: r.publish_after };
 }
