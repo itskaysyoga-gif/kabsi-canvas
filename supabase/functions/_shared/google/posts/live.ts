@@ -7,3 +7,5 @@ export const createLocalPost = (account: string, location: string, body: LocalPo
   gbp(`${V4}/${account}/${location}/localPosts`, { method: "POST", body: JSON.stringify(body) });
 export const listLocalPosts = (account: string, location: string): Promise<ListLocalPostsResponse> =>
   gbp(`${V4}/${account}/${location}/localPosts?pageSize=100`);
+// post is "accounts/{a}/locations/{l}/localPosts/{id}".
+export const getLocalPost = (post: string): Promise<LocalPost> => gbp(`${V4}/${post}`);

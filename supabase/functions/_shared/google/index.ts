@@ -1,7 +1,8 @@
 // The Google layer's front door (K-34). Edge Functions import from here only. Each area has a live and a mock module
 // with the same wire types; this file picks one per business (a demo business is always mock, R-17) and turns
-// Google's responses into the shapes the app uses. Every write here is only ever called after the owner's
-// approval, from the publication paths (guardrail 6).
+// Google's responses into the shapes the app uses. Every write here (sendReply, createLocalPost, createMedia,
+// addSpecialHours, patchListing) is only ever called by the publish job in api/jobs.ts, after the owner's approval
+// and claim_publication (guardrail 6, P0.1-13a and P0.1-13b).
 import { type InvitationAddress, matchInvitation, type PendingBusiness } from "../invitations.ts";
 import { assertNotConcierge, googleMode, modeFor, type Mode } from "./client.ts";
 import * as accountsLive from "./accounts/live.ts";
@@ -111,15 +112,34 @@ export async function readReply(accountId: string, locationId: string, reviewId:
   return review.reviewReply?.comment ?? null;
 }
 
-// ─── Local posts. Only called after the owner's approval (D202).
-export async function createLocalPost(accountId: string, locationId: string, p: PostInput): Promise<WriteResult> {
+// ─── Local posts. Only called by the publish job after the owner's approval (D202, P0.1-13b). The reference is the
+// post's name, which the reconcile job reads back.
+const POST_STATE: Record<string, WriteResult["state"]> = { LIVE: "live", REJECTED: "rejected" };
+export async function createLocalPost(accountId: string, locationId: string, p: PostInput): Promise<WriteResult & { ref: string | null }> {
   assertNotConcierge(locationId);
-  if (modeFor(locationId) === "mock") return { state: "live", response: { mock: true } };
   const body: LocalPost = { languageCode: p.languageCode, summary: p.summary, topicType: "STANDARD" };
   if (p.ctaType) body.callToAction = p.ctaType === "CALL" ? { actionType: "CALL" } : { actionType: p.ctaType, url: p.ctaUrl ?? undefined };
-  const created = await postsLive.createLocalPost(accountId, locationId, body);
-  const state = created.state === "LIVE" ? "live" : created.state === "REJECTED" ? "rejected" : "in_review";
-  return { state, response: created };
+  const mode = modeFor(locationId);
+  const created = await by(mode, postsLive, postsMock).createLocalPost(accountId, locationId, body);
+  return { state: POST_STATE[created.state ?? ""] ?? "in_review", ref: created.name ?? null, response: mode === "mock" ? { mock: true, post: created } : created };
+}
+
+// Google's state for one post Kabsi created: live, in_review (Google is still checking it), rejected, or null when
+// Google has no such post. Without a reference (the write got no answer), the business's posts are searched for the
+// same text.
+export async function localPostState(accountId: string, locationId: string, ref: string | null, summary: string): Promise<WriteResult["state"] | null> {
+  assertNotConcierge(locationId);
+  const api = by(modeFor(locationId), postsLive, postsMock);
+  let post: LocalPost | undefined;
+  if (ref) {
+    post = await api.getLocalPost(ref).catch((e) => {
+      if (/^Error: google 404 /.test(String(e))) return undefined;
+      throw e;
+    });
+  } else {
+    post = ((await api.listLocalPosts(accountId, locationId)).localPosts ?? []).find((x) => (x.summary ?? "").trim() === summary.trim());
+  }
+  return post ? (POST_STATE[post.state ?? ""] ?? "in_review") : null;
 }
 
 // ─── Special hours: adds one period, keeping the periods already on the profile (PATCH replaces the whole list).
@@ -128,15 +148,31 @@ const hm = (t: string) => { const [hours, minutes] = t.split(":").map(Number); r
 
 export async function addSpecialHours(locationId: string, s: SpecialDay): Promise<WriteResult> {
   assertNotConcierge(locationId);
-  if (modeFor(locationId) === "mock") return { state: "live", response: { mock: true } };
-  const current = await locationsLive.getLocation(locationId, "specialHours");
+  const mode = modeFor(locationId);
+  const api = by(mode, locationsLive, locationsMock);
+  const current = await api.getLocation(locationId, "specialHours");
   const periods: SpecialHourPeriod[] = [...(current.specialHours?.specialHourPeriods ?? [])];
-  periods.push(s.closed
-    ? { startDate: ymd(s.startDate), endDate: ymd(s.endDate), closed: true }
-    : { startDate: ymd(s.startDate), endDate: ymd(s.endDate), openTime: hm(s.openTime!), closeTime: hm(s.closeTime!) });
-  const patched = await locationsLive.patchLocation(locationId, "specialHours", { specialHours: { specialHourPeriods: periods } });
-  return { state: "live", response: { specialHours: patched.specialHours ?? null } };
+  periods.push(specialPeriod(s));
+  const patched = await api.patchLocation(locationId, "specialHours", { specialHours: { specialHourPeriods: periods } });
+  return { state: "live", response: { mock: mode === "mock" || undefined, specialHours: patched.specialHours ?? null } };
 }
+
+const specialPeriod = (s: SpecialDay): SpecialHourPeriod => s.closed
+  ? { startDate: ymd(s.startDate), endDate: ymd(s.endDate), closed: true }
+  : { startDate: ymd(s.startDate), endDate: ymd(s.endDate), openTime: hm(s.openTime!), closeTime: hm(s.closeTime!) };
+
+// Whether the profile shows this period now (read back after the write, and by the reconcile job).
+export async function hasSpecialHours(locationId: string, s: SpecialDay): Promise<boolean> {
+  assertNotConcierge(locationId);
+  const current = await by(modeFor(locationId), locationsLive, locationsMock).getLocation(locationId, "specialHours");
+  const want = JSON.stringify(normalPeriod(specialPeriod(s)));
+  return (current.specialHours?.specialHourPeriods ?? []).some((p) => JSON.stringify(normalPeriod(p)) === want);
+}
+const tod = (t?: TimeOfDay) => (t ? { hours: t.hours ?? 0, minutes: t.minutes ?? 0 } : null);
+const normalPeriod = (p: SpecialHourPeriod) => ({
+  start: p.startDate, end: p.endDate ?? p.startDate, closed: p.closed === true,
+  open: p.closed ? null : tod(p.openTime), close: p.closed ? null : tod(p.closeTime),
+});
 
 // ─── Google Protection (D218): read the listing, and put one field back after the owner's approval.
 const DAYS: Record<string, string> = { MONDAY: "Mon", TUESDAY: "Tue", WEDNESDAY: "Wed", THURSDAY: "Thu", FRIDAY: "Fri", SATURDAY: "Sat", SUNDAY: "Sun" };
@@ -145,6 +181,10 @@ const t2 = (t?: TimeOfDay) => `${String(t?.hours ?? 0).padStart(2, "0")}:${Strin
 export async function getListing(locationId: string, seed: MockSeed): Promise<Listing> {
   assertNotConcierge(locationId);
   if (modeFor(locationId) === "mock") return locationsMock.getListing(locationId, seed);
+  return await liveListing(locationId);
+}
+
+async function liveListing(locationId: string): Promise<Listing> {
   const l = await locationsLive.getLocation(locationId, "title,phoneNumbers,storefrontAddress,websiteUri,regularHours,categories");
   const addr = l.storefrontAddress ?? null;
   const hours = (l.regularHours?.periods ?? []).map((p) => `${DAYS[p.openDay] ?? p.openDay} ${t2(p.openTime)} to ${t2(p.closeTime)}`).join(", ");
@@ -156,6 +196,13 @@ export async function getListing(locationId: string, seed: MockSeed): Promise<Li
     hours: { display: hours, raw: l.regularHours ?? null },
     categories: { display: l.categories?.primaryCategory?.displayName ?? "", raw: l.categories ?? null },
   };
+}
+
+// What one Protection field shows on Google now, as Google Protection displays it (null: the mock has no listing).
+export async function listingField(locationId: string, field: ShieldField): Promise<string | null> {
+  assertNotConcierge(locationId);
+  if (modeFor(locationId) === "mock") return await locationsMock.fieldDisplay(locationId, field);
+  return (await liveListing(locationId))[field].display;
 }
 
 const MASK: Record<ShieldField, string> = { title: "title", phone: "phoneNumbers", address: "storefrontAddress", website: "websiteUri", hours: "regularHours", categories: "categories" };
@@ -170,12 +217,24 @@ export async function patchListing(locationId: string, field: ShieldField, raw: 
   return { state: "live", response: { [mask]: (patched as Record<string, unknown>)[mask] ?? null } };
 }
 
-// ─── Photos. sourceUrl is a short-lived signed Storage URL. Only after owner approval (D202).
-export async function createMedia(accountId: string, locationId: string, sourceUrl: string, category: string): Promise<WriteResult> {
+// ─── Photos. sourceUrl is a short-lived signed Storage URL. Only called by the publish job after the owner's approval
+// (D202, P0.1-13b); the reference is the media item's name.
+export async function createMedia(accountId: string, locationId: string, sourceUrl: string, category: string): Promise<WriteResult & { ref: string | null }> {
   assertNotConcierge(locationId);
-  if (modeFor(locationId) === "mock") return { state: "live", response: { mock: true } };
-  const created = await mediaLive.createMedia(accountId, locationId, { mediaFormat: "PHOTO", locationAssociation: { category }, sourceUrl });
-  return { state: "live", response: { name: created.name ?? null, googleUrl: created.googleUrl ?? null } };
+  const mode = modeFor(locationId);
+  const created = await by(mode, mediaLive, mediaMock).createMedia(accountId, locationId, { mediaFormat: "PHOTO", locationAssociation: { category }, sourceUrl });
+  return { state: "live", ref: created.name ?? null, response: { mock: mode === "mock" || undefined, name: created.name ?? null, googleUrl: created.googleUrl ?? null } };
+}
+
+// Whether Google has the photo Kabsi added (read by name; Google answers 404 when it does not).
+export async function mediaExists(locationId: string, ref: string): Promise<boolean> {
+  assertNotConcierge(locationId);
+  try {
+    return !!(await by(modeFor(locationId), mediaLive, mediaMock).getMedia(ref)).name;
+  } catch (e) {
+    if (/^Error: google 404 /.test(String(e))) return false;
+    throw e;
+  }
 }
 
 // ─── Search terms people used to find the profile, for post keywords (read only). The mock has none.

@@ -7,3 +7,5 @@ export const createMedia = (account: string, location: string, body: MediaItem):
   gbp(`${V4}/${account}/${location}/media`, { method: "POST", body: JSON.stringify(body) });
 export const listMedia = (account: string, location: string): Promise<ListMediaItemsResponse> =>
   gbp(`${V4}/${account}/${location}/media?pageSize=100`);
+// item is "accounts/{a}/locations/{l}/media/{id}".
+export const getMedia = (item: string): Promise<MediaItem> => gbp(`${V4}/${item}`);

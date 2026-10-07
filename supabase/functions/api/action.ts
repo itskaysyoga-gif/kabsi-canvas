@@ -84,7 +84,7 @@ export async function action(req: Request): Promise<Response> {
     if (!claimed) return fail("used", "This link was already used.", 409);
 
     if (tok.target_type === "listing_change") {
-      const r = await decideChange(tok.target_id, body.do as "revert" | "keep", tok.user_id, "email_link");
+      const r = await decideChange(tok.target_id, body.do as "revert" | "keep", tok.user_id, "email_link", auditHeaders(req, tok.user_id));
       return json({ ok: true, done: r.state });
     }
     if (body.do === "post") {

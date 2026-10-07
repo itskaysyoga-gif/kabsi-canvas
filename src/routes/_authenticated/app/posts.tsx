@@ -131,9 +131,11 @@ function PostsPage() {
                 <p className="text-xs font-bold uppercase text-kb-stone">
                   {p.state === "posted"
                     ? "Posted"
-                    : p.state === "skipped"
-                      ? "Skipped"
-                      : "Not posted"}{" "}
+                    : p.state === "publishing"
+                      ? "Sending to Google"
+                      : p.state === "skipped"
+                        ? "Skipped"
+                        : "Not posted"}{" "}
                   · {fmtDate(p.state === "posted" ? p.updated_at : p.created_at)}
                   {p.source === "auto" ? " · weekly draft" : ""}
                 </p>

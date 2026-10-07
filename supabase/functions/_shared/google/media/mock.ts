@@ -9,3 +9,4 @@ export function createMedia(account: string, location: string, body: MediaItem):
   });
 }
 export const listMedia = (_account: string, _location: string): Promise<ListMediaItemsResponse> => Promise.resolve({ totalMediaItemCount: 0 });
+export const getMedia = (item: string): Promise<MediaItem> => Promise.resolve({ name: item, mediaFormat: "PHOTO" });

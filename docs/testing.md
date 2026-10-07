@@ -54,6 +54,13 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   Google, none for concierge businesses); access, ratings, weekly reports, deletions, trial and renewal reminders are
   one job each, offered every 5 minutes at their own minute; the tick clears rate buckets unused for a day; the
   ops watchdog alerts when no job has finished in 20 minutes (it no longer watches `kabsi_cron_tick`).
+- `publication_pipeline.sql` (P0.1-13a) and `publication_content.sql` (P0.1-13b): the one publication pipeline for
+  replies, posts, photos, special hours and Google Protection put-backs. Per kind: one publication however many times
+  or from whichever channel it is approved, the item moves to "on its way" and back on undo inside 10 seconds, one
+  claim after the undo window, Google's answer moves the item (posted, reverted, failed, revert_failed), something
+  not shown after 7 days is failed, and a concierge business gets no Google profile work.
+  `publication_concurrency.sh`, run after the pgTAP suite, races a dashboard and an email approval, then two claims,
+  in two real sessions for every kind: one publication, one publish job, one claim.
 
 When you add a table or a browser-callable function, add its fixture row or its test in the same pull request.
 

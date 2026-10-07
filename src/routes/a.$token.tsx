@@ -28,6 +28,7 @@ const DONE: Record<string, string> = {
   in_review: "Sent. Google is checking your reply before it appears.",
   undone: "Undone. Nothing was sent to Google.",
   reverted: "Done. Your version is back on Google.",
+  reverting: "Approved. Kabsi puts your version back on Google within a few minutes.",
   kept: "Noted. Kabsi will keep the new version as yours.",
 };
 

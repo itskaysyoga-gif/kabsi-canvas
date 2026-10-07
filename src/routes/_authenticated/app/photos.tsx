@@ -146,6 +146,7 @@ function PhotosPage() {
       {(
         [
           ["Waiting for you", (p: Photo) => p.state === "draft" || p.state === "checking"],
+          ["Sending to Google", (p: Photo) => p.state === "publishing"],
           ["On Google", (p: Photo) => p.state === "posted"],
           ["Couldn't post", (p: Photo) => p.state === "failed"],
         ] as const
@@ -285,6 +286,11 @@ function PhotoCard({
         {photo.state === "posted" ? (
           <p className="text-sm font-bold">
             On Google · {CATEGORIES[photo.category ?? "ADDITIONAL"]}
+          </p>
+        ) : null}
+        {photo.state === "publishing" ? (
+          <p className="text-sm font-bold">
+            Approved. Kabsi sends it to Google within a few minutes.
           </p>
         ) : null}
         {photo.state === "failed" ? (
