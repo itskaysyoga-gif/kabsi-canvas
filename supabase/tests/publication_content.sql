@@ -201,11 +201,13 @@ insert into public.gbp_posts (id, location_id, owner_input, body)
 values ('00000000-0000-4000-8000-000000000401', '00000000-0000-4000-8000-0000000000c1', 'Late post', 'Draft text');
 select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000401', '{"summary": "A post approved before the switch."}'::jsonb,
   '00000000-0000-4000-8000-0000000000a1', 'dashboard') ->> 'publication_id' as late_id \gset
-update public.locations set concierge = true where id = '00000000-0000-4000-8000-0000000000c1';
+update public.locations set concierge = true, google_location_id = 'locations/concierge-victim'
+ where id = '00000000-0000-4000-8000-0000000000c1';
 select pg_temp.due(:'late_id');
 select is(public.claim_publication(:'late_id') ->> 'result', 'stopped', 'a concierge business stops a post at the claim');
 select is((select state from public.gbp_posts where id = '00000000-0000-4000-8000-000000000401'), 'failed', 'and the post shows it');
-update public.locations set concierge = false where id = '00000000-0000-4000-8000-0000000000c1';
+update public.locations set concierge = false, google_location_id = 'locations/mock-victim'
+ where id = '00000000-0000-4000-8000-0000000000c1';
 
 -- The reply form still works and is the same approval.
 insert into public.reviews (id, location_id, google_review_id, star_rating, review_created_at, state)
