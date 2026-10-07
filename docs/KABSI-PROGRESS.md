@@ -43,7 +43,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | 8 | Hussein agrees to be named as seller | R-20 seller line, P0.4-07, P0.6-09 | Done 4 Oct (no written agreement, Rashid's decision) |
 | 11 | Vercel account connected to GitHub, Supabase and Claude | P0.1-03 | Done 7 Oct (the six remaining steps are in the P0.1-03 section of the plan) |
 | 12 | Kapso account and the number's WhatsApp profile (+1 201-483-5474); keys into Supabase secrets | P0.6-10 | Todo |
-| 13 | Google Cloud (project 856347937978): enable the reviews and posts API if a session cannot; submit the `business.manage` package | P0.7-01a, P0.7-02 | Todo |
+| 13 | Google Cloud (project 856347937978): enable the reviews and posts API if a session cannot; submit the `business.manage` package | P0.7-01a, P0.7-02 | Enabling done 7 Oct 2026 by Hussein: the Google My Business API (reviews and posts) is now enabled in project 856347937978. Reading its quota and writing `docs/google/api-access.md` stays with P0.7-01a. Submitting the `business.manage` package is still todo |
 | 14 | Supabase Pro with point-in-time recovery in Hussein's own organisation | P0.7-07 (before the first real customer) | Todo |
 
 ## Tasks
@@ -163,7 +163,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 After the P0.1-12b pull request (43) was merged: deploy, migration 2, the six steps and Protection as jobs, the unschedule and a quiet watchdog passed (see Evidence). Still open:
 - Hussein in the Supabase SQL editor: the new `private.dispatch_tick` (the snippet in the chat, the same as the file; the connector times out on it). Until then the rate buckets are not cleared, which matters only after Gate A. Read back: its md5 is `94ea83b8...`.
-- Live mock Protection alert (Hussein's "apply"): `staff_mock_listing_edit` on Yawmiyati changes the phone; within 5 minutes one `listing_changes` row and one `shield_alert` email from a `protection_check` job; then put the phone back.
+- Live mock Protection alert: passed 7 Oct (see Evidence, 7 Oct block). Still open: `dispatch_tick` read back still shows `300fac3f` on 7 Oct 15:56 UTC (the old body); Hussein runs the file's `create or replace function private.dispatch_tick()` in the SQL editor.
 - `google_rate` stays empty in mock mode (mock calls do not reach `gbp`) until Gate A.
 
 After the P0.1-12a pull request (40) was merged: deploy, `kabsi_dispatch`, sync status, cron-tick hand-over, the no-duplicates check and the mock review end to end passed (see Evidence). Hussein checked the Home line in a browser (4 Oct). Still open:
@@ -221,6 +221,11 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ## Evidence
 
 (One block per finished task: the Done-when lines with their proof.)
+
+### P0.1-12b open After-merge checks, read on 7 Oct 2026 (15:56 to 16:01 UTC, Hussein's session, connector)
+- Mock Protection alert passed. The staff RPC needs a signed-in staff user, so the same edit was made on `mock_listings` for `locations/mock-9803ee99` (Yawmiyati): phone `+961 1 000 000` to `+961 1 999 999` at 15:57:14. The next `protection_check` job (27194, created 16:00:00, succeeded) wrote one `listing_changes` row (b847e7da, field phone, state open, `detected_by` scheduled_check, old `+961 1 000 000`, new `+961 1 999 999`, 16:00:04) and one `shield_alert` email (dd891d66, "Your phone number changed on Google: Yawmiyati", status sent, 16:00:04) to the owner address. Mock phone put back to `+961 1 000 000` at 16:01:13. The open change row was left as is; a second alert may follow from the put-back.
+- `kabsi_chat_retention` last succeeded 7 Oct 03:41 and `kabsi_concierge_daily` 7 Oct 05:00 (the P0.1-08 After-merge line is met). `kabsi_cron_tick` no longer in `cron.job`; `kabsi_dispatch` last ran 15:56:00. 3,763 jobs succeeded in the last day, 5 pending, none dead or failed; `circuit_breaker` closed; `google_rate` 0 rows (mock mode, as expected); the only `ops_events` row in the last day is the 05:53 daily digest.
+- `private.dispatch_tick` body md5 `300fac3f`, not `94ea83b8`: the SQL editor step has not been done. Not run through the connector (the body contains `delete`).
 
 ### P0.1-12b After-merge checks (5 Oct 2026, 03:31 to 04:01 UTC, Hussein's session)
 - PR 43 squash-merged 03:31:21 on Hussein's "merge" (5b72e69). Deploy run 37259771242 passed (Edge Functions and Worker); every Edge Function `updated_at` 03:31:47, `api` version 51.
