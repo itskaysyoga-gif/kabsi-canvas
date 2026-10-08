@@ -188,9 +188,9 @@ select is((select fields::text from public.listing_baselines where location_id =
   'the owner-approved baseline stays');
 
 -- Uploaded photos
-select is((select array_agg(right(storage_path, 12) order by storage_path) from public.photos
+select is((select array_agg(split_part(storage_path, '/', 2) order by storage_path) from public.photos
             where file_due_at is not null and file_deleted_at is null),
-  array['/posted31.jpg', '/skipped.jpg'], 'a photo 31 days on Google and a skipped photo are due for removal, the others are not');
+  array['posted31.jpg', 'skipped.jpg'], 'a photo 31 days on Google and a skipped photo are due for removal, the others are not');
 select is((select count(*)::int from public.jobs where kind = 'photo_files' and state = 'pending' and dedupe_key = 'photo_files'), 1,
   'one photo_files job is offered');
 select is((select row(id, state, category)::text from public.photos where id = '00000000-0000-4000-8000-0000000000d5'),
