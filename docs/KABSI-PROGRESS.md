@@ -59,7 +59,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | merged (17, 18); live After-merge checks not run, see Evidence | 17, 18 | 4 Oct 2026 |
 | P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | merged in two parts (19, 20); mock-review check passed; live app check and auth template paste still open | 19, 20 | 4 Oct 2026 |
 | P0.1-03 | Move hosting to Vercel and switch kabsi.co (replaces "Move kabsi.co to the new build") | Sonnet | todo | | |
-| H-TANSTACK-XSS | Security hotfix: TanStack Start 1.168.32 to 1.168.60 (CVE-2026-102989) | Opus | PR open; merge, Deploy and Lovable Publish in After merge | | 8 Oct 2026 |
+| H-TANSTACK-XSS | Security hotfix: TanStack Start 1.168.32 to 1.168.60 (CVE-2026-102989) | Opus | merged (52, 70c1188); Vercel production build passes; live on kabsi-app.lovable.app only after Hussein's Lovable sync and Publish, see After merge | 52 | 8 Oct 2026 |
 | P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | merged (23); After-merge checks partly run, see Evidence | 23 | 4 Oct 2026 |
 | P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | merged (24); After-merge checks partly run, see Evidence | 24 | 4 Oct 2026 |
 | P0.1-05 | Design tokens and shared components | Sonnet | merged (25); `/design` not yet looked at as staff | 25 | 4 Oct 2026 |
@@ -166,10 +166,9 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-After the H-TANSTACK-XSS pull request is merged:
-- Lovable (Hussein, by hand): press Publish, then Update, in the Lovable project so kabsi-app.lovable.app serves the 1.168.60 build. The repo's Deploy workflow does not publish the website (it deploys Edge Functions and the `kabsi-go` Worker only, and only when their paths change).
-- After the Publish, a browser look at https://kabsi-app.lovable.app: home, `/pricing` and `/login` load and sign-in with an email code works (the build sandbox cannot reach the live site).
-- The Vercel build on the merge commit no longer stops on CVE-2026-102989; any other failure stays with P0.1-03.
+After the H-TANSTACK-XSS pull request (52) was merged (8 Oct, 03:04 UTC, 70c1188): the Vercel build passes (see Evidence). Still open, for Hussein:
+- Lovable reads `latest_commit_sha` 030577c (5 Oct, PR 44) for the "Kabsi Canvas" project, 23 commits behind `main`: its GitHub sync looks stopped since the repo moved to `itskaysyoga-gif` (to confirm in the Lovable project's GitHub settings). The live site keeps 1.168.32 until Lovable has `main` at 70c1188 or later and Hussein presses Publish, then Update. The repo's Deploy workflow does not publish the website.
+- After that, a browser look at https://kabsi-app.lovable.app: home, `/pricing` and `/login` load and sign-in with an email code works (the build sandbox cannot reach the live site).
 
 After the P0.1-13b Protection pull request (51) is merged (Deploy publishes `api`):
 - Deploy passes; `api` has a new version. While a put-back is `reverting`, the next `protection_check` for that business writes no new `listing_changes` row and sends no `shield_alert` (check: approve a put-back on Yawmiyati with the mock still showing the changed value, wait one Protection run, count rows and emails for the field).
@@ -243,6 +242,9 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Breaking change fixed: the router's `ErrorComponentProps.error` is now `unknown`; `src/routes/__root.tsx` uses that type (both reporters already take `unknown`). The file was formatted with Prettier because `lint:changed` lints every touched file; no other code changed.
 - Checks: `npm run typecheck` 0 errors; eslint on `__root.tsx` clean; `check:anon`, `check:tokens`, `check:google` ok; `npm test` 21 of 21 passed; `npm run build` passed. The built Worker run locally with `wrangler dev`: `/` 200 (title "Kabsi | Your reviews and listing. Taken care of."), `/pricing` 200, `/privacy` 200, `/login` 200, an unknown path 404, a JS asset 200.
 - `npm audit` after the upgrade: 1 critical, 4 high, all build or dev tooling, none in the served bundle; not fixed here (see Found, not done).
+- PR 52 CI on a539b2c: App, Edge Functions and Worker, Database all success; Vercel preview dpl_BJbsE28cKNtYVmnsFGnRbm5P5iEd Ready (`/pricing` 200, `x-robots-tag: noindex`). Merged 03:04 UTC as merge commit 70c1188.
+- After merge: the Deploy workflow did not run for 70c1188, as designed (its `paths` cover only `supabase/functions/**`, `supabase/config.toml`, `workers/kabsi-go/**` and the workflow; none changed). Vercel production deployment dpl_DLD6VyX9wwq3gNUYpRfZ1NA6TKTZ for 70c1188 is READY on kabsi-canvas.vercel.app (unknown path 404 with the Kabsi not-found page); the CVE stop is gone. Vercel is not yet serving kabsi.co (P0.1-03).
+- How the site is published today: kabsi-app.lovable.app is Lovable hosting of the "Kabsi Canvas" project (Lovable builds for Cloudflare Workers but publishes only on Publish in Lovable); kabsi.co still serves the old Lovable project "Kabsi". The Cloudflare Worker `kabsi-go` serves only go.kabsi.co.
 
 ### P0.1-13b fix After merge (7 Oct 2026, 21:00 to 21:05 UTC, Hussein's session) and the Protection fix (branch claude/h-p0-1-13b-shield, PR 51)
 - Migration `20261007220000_mock_listing_set.sql` applied through the connector after CI was green (row `20261007210024 mock_listing_set`); read back: body md5 2872a6ad, the same as the file; execute for service_role only. CI on PR 50 head c1b1210: App, Edge Functions and Worker, Database and Load all success (the first run failed on the new test only: the fixtures already hold a mock listing for the victim; fixed in c1b1210).
@@ -765,7 +767,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
-- 8 Oct 2026 (Hussein's session): security hotfix H-TANSTACK-XSS, CVE-2026-102989: TanStack Start 1.168.32 to 1.168.60 (router 1.170.41, router plugin 1.168.42), one type fix in `__root.tsx`. Checks passed locally. Live only after Hussein's Lovable Publish.
+- 8 Oct 2026 (Hussein's session): security hotfix H-TANSTACK-XSS, CVE-2026-102989: TanStack Start 1.168.32 to 1.168.60 (router 1.170.41, router plugin 1.168.42), one type fix in `__root.tsx`. Merged as PR 52 (70c1188); Vercel production build passes. Live only after Lovable syncs `main` and Hussein presses Publish.
 - 7 Oct 2026 (Hussein's session): PR 50 (P0.1-13b fix) merged 21:00 UTC as f657630, Deploy passed (`api` 54); special hours and put-backs verified on Yawmiyati, both at once. A repeat Protection alert during a put-back found and fixed in PR 51. Next: P0.1-13b part B (status readers to `state`, then the drop, asks Hussein first).
 - 7 Oct 2026 (Hussein's session): PR 49 (P0.1-13b part A) merged 20:40 UTC as 063014e after Hussein ran the constraint part in the SQL editor; Deploy passed (`api` 53). Mock post verified; special hours read-back bug and a mock-only lost write found and fixed in PR 50.
 - 7 Oct 2026 (Hussein's session): step 15 done (Deploy passed, `api` 52). P0.1-13a After-merge checks passed on Yawmiyati (mock end to end, moderation path reconciled after 10 minutes, one Google call each); P0.1-13a done except the browser look. Migration history compared with the repo: mismatches recorded as a follow-up, history unchanged. P0.1-13b split; part A on branch claude/h-p0-1-13b, PR 49.
