@@ -20,9 +20,9 @@ One task per chat. The task ID comes from the prompt. Nothing else is in scope.
 - Every change that alters behaviour, price or wording updates `knowledge/kabsi-facts.md`.
 - The Kabsi Google group ID lives only in `KABSI_GROUP_ID` in `src/lib/site.ts`; Lebanon-only wording only through `src/lib/region.ts`.
 
-## Git, Lovable and deploys
+## Git and deploys
 
-- `main` syncs with Lovable and deploys every Edge Function and the Worker on push. Keep `main` working; never force-push, rebase, amend or squash pushed commits; never hand-edit `src/routeTree.gen.ts`.
+- `main` deploys the website on Vercel and every Edge Function and the Worker on push. Keep `main` working; never force-push, rebase, amend or squash pushed commits; never hand-edit `src/routeTree.gen.ts`.
 - One branch and one pull request per task (`claude/<task-id>`). Migrations are new files, additive first; apply them yourself with the Supabase connector before merging, without asking.
 - Run the checks in plan section 2.4, open the pull request, make sure CI is green, update `docs/KABSI-PROGRESS.md` on the branch, merge the pull request yourself (merge commit, never on red CI), run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Hussein runs the project (plan R-26).
 - Stop and ask only before dropping tables or columns or deleting real data, before a step the task marks "Ask Hussein before", or when a task needs a manual step of Hussein's that PROGRESS does not record as done.

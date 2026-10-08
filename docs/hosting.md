@@ -25,7 +25,7 @@ Pull request previews use the same Supabase project. Preview and `*.vercel.app` 
 
 ## Old address
 
-`kabsi-app.lovable.app` stays published on Lovable only to forward old email links to the same path on kabsi.co (`src/lib/legacy-host.ts`, switched on). It must stay published at least 7 days after `APP_URL` moves to kabsi.co, and 90 days to be safe, then check Lovable visitor analytics before removing it.
+The Lovable project Kabsi Canvas (GitHub disconnected on 8 Oct 2026) stays published only so `kabsi-app.lovable.app` forwards old email links to the same path on kabsi.co (`src/lib/legacy-host.ts`, switched on). It must stay published at least 7 days after `APP_URL` moves to kabsi.co, and 90 days to be safe, then check Lovable visitor analytics before removing it.
 
 ## Redirects and indexing (`vercel.json`)
 

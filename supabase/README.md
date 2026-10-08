@@ -8,7 +8,7 @@
   are bundled into each function at deploy time.
 - There is deliberately **no `config.toml`** here: pushing one through the GitHub integration could
   overwrite live Auth settings (SMTP, templates, redirect URLs) that were set in the dashboard.
-- Lovable must never create files in this folder (Lovable Cloud stays disabled).
+- Nothing generates files in this folder automatically: every change is a reviewed pull request.
 
 ## Functions
 

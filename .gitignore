@@ -32,6 +32,8 @@ dist-ssr
 *.sw?
 .bundles/
 
-# Lovable generates its own lockfile on its side; committing ours causes
-# spurious merge conflicts with Lovable's syncs (see docs/KABSI-PLAN.md Appendix A, working notes).
+# No lockfile is committed: CI and Vercel install with npm from the registry (docs/KABSI-PLAN.md Appendix A, D265).
 package-lock.json
+
+# Vercel build output and local project link
+.vercel

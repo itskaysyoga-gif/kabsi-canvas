@@ -1953,8 +1953,8 @@ Ads start only after P0.7-07 records "Paid ads may start" (the four VIDEO gates 
 | Supabase | project `kabsi-prod`, ref `ynjdqjlmdwjgbfezevxy`, eu-central-1, in Hussein's own Supabase organisation (moved 5 Oct 2026, same project and keys), free plan (Pro with point-in-time recovery before the first real customer other than Kabsi's own profiles, K-87, P0.7-07) |
 | Supabase URL | `https://ynjdqjlmdwjgbfezevxy.supabase.co` |
 | Vercel | hosting for the website and app (R-28), team and project created 7 Oct 2026 and connected to GitHub, Supabase and Claude; previews for every pull request; kabsi.co and www from P0.1-03 |
-| Lovable | project `2f215f56-0677-42e1-b0d5-838eb32e1c1c`, frontend only, never Lovable Cloud; published at `https://kabsi-app.lovable.app` until P0.1-03, which redirects it to kabsi.co and removes Lovable-only code; Hussein disconnects GitHub from it at the end of that task |
-| GitHub | `itskaysyoga-gif/kabsi-canvas` (Hussein's account; moved from `rashidhamzy-hue`), branch `main` synced with Lovable until P0.1-03; pushes to `main` deploy every Edge Function and the Worker (`.github/workflows/deploy.yml`) and, after P0.1-03, the website on Vercel; CI on pull requests (`ci.yml`); build chats merge their own pull requests (section 2.5) |
+| Lovable (retired) | project `2f215f56-0677-42e1-b0d5-838eb32e1c1c` stays published only to forward `https://kabsi-app.lovable.app` to kabsi.co (`src/lib/legacy-host.ts`); GitHub disconnected 8 Oct 2026; remove after the old address stops getting visits (docs/hosting.md) |
+| GitHub | `itskaysyoga-gif/kabsi-canvas` (Hussein's account; moved from `rashidhamzy-hue`), branch `main` (no longer synced with Lovable since P0.1-03); pushes to `main` deploy every Edge Function and the Worker (`.github/workflows/deploy.yml`) and, after P0.1-03, the website on Vercel; CI on pull requests (`ci.yml`); build chats merge their own pull requests (section 2.5) |
 | Cloudflare | zone `kabsi.co` (DNS; Zoho mail records for hello@kabsi.co must never change except merging SPF); Worker `kabsi-go` on `go.kabsi.co` (code in `workers/kabsi-go/`, deployed by the workflow, never connected to app builds); Turnstile site key in `src/lib/site.ts` |
 | Google Cloud | project `smiling-chess-505915-b7`; Business Profile API case 1-4624000041157 (Gate A approved 5 Oct 2026; project number 856347937978 confirmed as `smiling-chess-505915-b7` on 7 Oct; quota 300 requests per minute confirmed on Account Management, Business Information, Notifications, Place Actions, Q&A and Verifications; the Google My Business API for reviews and posts still to enable, P0.7-01a); OAuth consent screen External, in production, basic scopes; enabled APIs: mybusinessaccountmanagement, mybusinessbusinessinformation, mybusinessnotifications, mybusinessplaceactions, businessprofileperformance, places, places-backend (to disable: section 5, step 3), pubsub, vision |
 | Kabsi Google account | `hello@kabsi.co`, Organization account `kabsi.co`, Advanced Protection on; business group "Kabsi Clients", ID `5481006796` (constant `KABSI_GROUP_ID` in `src/lib/site.ts`) |
@@ -2001,7 +2001,7 @@ Supabase: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN, GOOGLE_M
 
 ### Working notes that still hold
 
-- Local install: `npm install --registry=https://registry.npmjs.org --legacy-peer-deps` (`bun.lock` points at Lovable's private registry; `package-lock.json` is gitignored).
+- Local install: `npm install --registry=https://registry.npmjs.org --legacy-peer-deps` (`package-lock.json` is gitignored; the old `bun.lock` is stale and unused).
 - Edge Function type-check: `bash scripts/deno-check.sh`. Large functions (assistant) deploy from an esbuild bundle (`scripts/bundle-functions.sh`).
 - Repo migration file stamps differ from the stamps applied in the database for the last four migrations; that is expected (the database keeps its own).
 - Places: Google replaced the $200 monthly credit with per-product free caps in March 2025; every snapshot costs money past the free tier (K-100).
@@ -2013,7 +2013,7 @@ These older decisions are not contradicted by the six documents and still hold. 
 
 | Old | Still true |
 |---|---|
-| D201, D205 | Stack: Lovable React frontend only, Supabase (Postgres, Auth, Edge Functions, pg_cron, Storage), Cloudflare Worker, Resend, Anthropic, Sentry, PostHog, GitHub. Lovable Cloud is never enabled. |
+| D201, D205 | Stack: React frontend (TanStack Start, hosted on Vercel; built in Lovable until P0.1-03), Supabase (Postgres, Auth, Edge Functions, pg_cron, Storage), Cloudflare Worker, Resend, Anthropic, Sentry, PostHog, GitHub. Lovable Cloud was never enabled. |
 | D202 | Every Google write needs an approval record in `publications`; no autopilot (now inside R-05's pipeline). |
 | D203 (as amended by K-92, K-113) | One central Kabsi Google credential in secrets; no per-owner tokens, ever. |
 | D206, D226 | The browser never writes tables directly; database-only steps are membership-checked RPCs, tested; Edge Functions are for external APIs and schedules. |
