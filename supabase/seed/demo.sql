@@ -2,9 +2,10 @@
 -- connector after migration 20261004120000_demo_workspace.sql. Every business, person, review and number here is
 -- invented; "Larkhaven" is not a real town and +1 (555) 010-01xx numbers are reserved for fiction.
 --
--- Before running: app_settings.demo_login_email must hold the demo login (set separately, so no personal address
--- is written in the repository), and that account must exist, created in Supabase Auth (dashboard or admin API,
--- email confirmed). The demo login signs in with an email code like any owner.
+-- Before running: app_settings.demo_login_email must hold the demo login, hello+demo@kabsi.co since P0.1-06c (migration
+-- 20261008120000_demo_login_kabsi_address.sql sets it; the code lands in the hello@kabsi.co mailbox), and that account
+-- must exist, created in Supabase Auth (dashboard or admin API, email confirmed). The demo login signs in with an email
+-- code like any owner.
 --
 -- Safe to run twice: fixed ids and "on conflict do nothing". It never updates or deletes anything; to reset the
 -- demo after a recording, delete the two demo businesses first (only with the owner's explicit go).
