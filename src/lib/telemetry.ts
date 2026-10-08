@@ -55,7 +55,7 @@ export function isPrivatePath(path: string) {
 const bootScript = `
 (function(){
   var h = location.hostname;
-  var env = /lovable\\.(app|dev)$/.test(h) ? "preview" : (h === "localhost" || h === "127.0.0.1") ? "local" : "production";
+  var env = /\\.vercel\\.app$/.test(h) ? "preview" : (h === "localhost" || h === "127.0.0.1") ? "local" : "production";
   window.__kabsiEnv = env;
   // Email action links carry a one-time credential in the path (/a/<token>): never send it anywhere.
   var scrub = function(u){ return typeof u === "string" ? u.replace(/\\/a\\/[^\\/?#]+/g, "/a/:token").replace(/([?&](?:t|token)=)[^&#]+/g, "$1redacted") : u; };

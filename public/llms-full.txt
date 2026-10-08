@@ -499,7 +499,7 @@ Review text, business facts and photos go to Anthropic's API for drafts and chec
 
 ### 9.5 Processors and regions
 
-Supabase (database, sign-in, storage; Frankfurt, Germany), Cloudflare (go.kabsi.co links), Lovable (hosting), Resend (email; EU, Ireland), Anthropic (drafts and photo checks), Google (Business Profile and Places APIs), Sentry (error reports; EU, without IPs or review content), PostHog (anonymous statistics; United States).
+Supabase (database, sign-in, storage; Frankfurt, Germany), Cloudflare (go.kabsi.co links), Vercel (hosting), Resend (email; EU, Ireland), Anthropic (drafts and photo checks), Google (Business Profile and Places APIs), Sentry (error reports; EU, without IPs or review content), PostHog (anonymous statistics; United States).
 
 Some providers are outside Lebanon and the EU. They process data only on Kabsi's instructions and under their data protection terms, including standard contractual clauses where required.
 
