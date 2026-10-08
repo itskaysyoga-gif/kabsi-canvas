@@ -206,7 +206,7 @@ function Page() {
         <ul>
           <li>Supabase: database, sign-in and file storage, in Frankfurt, Germany.</li>
           <li>Cloudflare: card and review links (go.kabsi.co).</li>
-          <li>Lovable: hosting the website and app.</li>
+          <li>Vercel: hosting the website and app.</li>
           <li>Resend: sending email, through Amazon's EU (Ireland) region.</li>
           <li>Anthropic: drafting replies and posts, checking photos.</li>
           <li>Google: Business Profile and Places APIs.</li>
