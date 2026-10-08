@@ -1,0 +1,221 @@
+{
+  "_source": "Live read-only call by P0.7-01 through google-capture (hello@kabsi.co, Kabsi Clients group).",
+  "_doc": "https://developers.google.com/my-business/reference/businessinformation/rest/v1/attributes/list",
+  "_captured_at": "2026-10-08T15:43:58Z",
+  "_url": "https://mybusinessbusinessinformation.googleapis.com/v1/attributes",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {
+    "attributeMetadata": [
+      {
+        "parent": "attributes/has_delivery",
+        "valueType": "BOOL",
+        "displayName": "Delivery",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Delivery"
+          },
+          {
+            "value": false,
+            "displayName": "No delivery"
+          }
+        ],
+        "groupDisplayName": "Service options"
+      },
+      {
+        "parent": "attributes/has_in_store_pickup",
+        "valueType": "BOOL",
+        "displayName": "In-store pickup",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "In-store pickup"
+          }
+        ],
+        "groupDisplayName": "Service options"
+      },
+      {
+        "parent": "attributes/has_in_store_shopping",
+        "valueType": "BOOL",
+        "displayName": "In-store shopping",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "In-store shopping"
+          },
+          {
+            "value": false,
+            "displayName": "No in-store shopping"
+          }
+        ],
+        "groupDisplayName": "Service options"
+      },
+      {
+        "parent": "attributes/has_oil_change",
+        "valueType": "BOOL",
+        "displayName": "Oil change",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Oil change"
+          }
+        ],
+        "groupDisplayName": "Offerings"
+      },
+      {
+        "parent": "attributes/wi_fi",
+        "valueType": "ENUM",
+        "displayName": "Wi-Fi",
+        "valueMetadata": [
+          {
+            "value": "free_wi_fi",
+            "displayName": "Free"
+          },
+          {
+            "value": "paid_wi_fi",
+            "displayName": "Paid"
+          }
+        ],
+        "groupDisplayName": "Amenities"
+      },
+      {
+        "parent": "attributes/has_recycling_batteries",
+        "valueType": "BOOL",
+        "displayName": "Batteries",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Batteries"
+          }
+        ],
+        "groupDisplayName": "Recycling"
+      },
+      {
+        "parent": "attributes/has_recycling_electronics",
+        "valueType": "BOOL",
+        "displayName": "Electronics",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Electronics"
+          }
+        ],
+        "groupDisplayName": "Recycling"
+      },
+      {
+        "parent": "attributes/requires_cash_only",
+        "valueType": "BOOL",
+        "displayName": "Cash-only",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Cash-only"
+          }
+        ],
+        "groupDisplayName": "Payments"
+      },
+      {
+        "parent": "attributes/pay_check",
+        "valueType": "BOOL",
+        "displayName": "Checks",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Checks"
+          }
+        ],
+        "groupDisplayName": "Payments"
+      },
+      {
+        "parent": "attributes/pay_credit_card",
+        "valueType": "BOOL",
+        "displayName": "Credit cards",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Credit cards"
+          }
+        ],
+        "groupDisplayName": "Payments"
+      },
+      {
+        "parent": "attributes/pay_credit_card_types_accepted",
+        "valueType": "REPEATED_ENUM",
+        "repeatable": true,
+        "displayName": "Credit cards",
+        "valueMetadata": [
+          {
+            "value": "american_express",
+            "displayName": "American Express"
+          },
+          {
+            "value": "china_union_pay",
+            "displayName": "China Union Pay"
+          },
+          {
+            "value": "diners_club",
+            "displayName": "Diners Club"
+          },
+          {
+            "value": "discover",
+            "displayName": "Discover"
+          },
+          {
+            "value": "jcb",
+            "displayName": "JCB"
+          },
+          {
+            "value": "mastercard",
+            "displayName": "MasterCard"
+          },
+          {
+            "value": "visa",
+            "displayName": "VISA"
+          }
+        ],
+        "groupDisplayName": "Payments"
+      },
+      {
+        "parent": "attributes/pay_debit_card",
+        "valueType": "BOOL",
+        "displayName": "Debit cards",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Debit cards"
+          }
+        ],
+        "groupDisplayName": "Payments"
+      },
+      {
+        "parent": "attributes/pay_mobile_nfc",
+        "valueType": "BOOL",
+        "displayName": "NFC mobile payments",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "NFC mobile payments"
+          }
+        ],
+        "groupDisplayName": "Payments"
+      },
+      {
+        "parent": "attributes/url_inventory_search",
+        "valueType": "URL",
+        "deprecated": true,
+        "repeatable": true,
+        "displayName": "Inventory search URL",
+        "groupDisplayName": "Place page URLs"
+      },
+      {
+        "parent": "attributes/url_shop_online",
+        "valueType": "URL",
+        "repeatable": true,
+        "displayName": "Place an order link",
+        "groupDisplayName": "Place page URLs"
+      }
+    ]
+  },
+  "_note": "parent=locations/1850906632456176734, one page. Only the 15 attributes NOT in attributes.metadata.yawmiyati.json are kept here (category auto_parts_store); the rest of the list is the same as Yawmiyati's except offers_online_appointments, which this category does not get. Note url_inventory_search is deprecated."
+}

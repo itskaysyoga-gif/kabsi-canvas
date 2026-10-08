@@ -4,6 +4,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## Where things stand
 
+- **8 Oct 2026, P0.7-01 part 1 (Hussein's session, branch claude/h-p0-7-01, PR 67):** first real Google calls, read-only, as hello@kabsi.co (Hussein set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`; `GOOGLE_MODE` not set; `google_mode()` stays `mock`). The token has `business.manage` and sees 3 accounts; Kabsi Clients (`accounts/113746201522792609010`) holds Yawmiyati and Abou Hamze Auto Center as MANAGER. 30 v1 reads, all 200, saved redacted in `tests/fixtures/google/live/`; findings in `docs/google/live-findings.md`. **Reviews, posts and media are blocked on Google:** `mybusiness.googleapis.com` is not enabled (Hussein's enable fails PERMISSION_DENIED `servicemanagement.services.bind`; the reviews list call returns 403 SERVICE_DISABLED); case 1-4624000041157. P0.7-01 stays open for those three; P0.7-01b can start on the v1 modules; P0.7-04 waits.
+- **Correction, 8 Oct 2026 (P0.7-01):** the P0.7-01a line below and step 13 said the Google My Business API (reviews, posts, media) was enabled on 7 Oct with a quota of 300. That was wrong: it is not enabled and has no quota (see the P0.7-01 line above and `docs/google/api-access.md`).
 - **8 Oct 2026, P0.7-01a (Hussein's session, branch claude/h-p0-7-01a):** `docs/google/api-access.md` written: which Google API serves which module, base URL, enabled state and quota. Hussein's steps are recorded as done: project number 856347937978 confirmed for smiling-chess-505915-b7 and 300 requests per minute on Account Management, Business Information, Notifications, Place Actions, Q&A and Verifications (7 Oct); the Google My Business API (reviews, posts, media) enabled (7 Oct); its quota reads 300 requests per minute (8 Oct). No Google call was made; Google is still in mock mode (`google_mode()` read `mock` on 8 Oct). The card's live-call line (one read-only 200 each for reviews, posts, media) moves to P0.7-01. Next in Wave P0.G: P0.7-01 (Opus, asks Hussein before its first live call).
 - **8 Oct 2026, P0.1-06c merged (PR 63, edd2581; production dpl_8gMSrZ2Z34e2vuBt6RHL2V3ewiK5 READY):** the demo login moves to `hello+demo@kabsi.co` (lands in the hello@kabsi.co Zoho mailbox, Hussein tested 8 Oct). On Hussein's instruction the demo user is kept and only its address changes (same user id, so the memberships and every demo row stay); nothing is removed. Migration `20261008120000_demo_login_kabsi_address.sql` sets `app_settings.demo_login_email` first, then the user's address, then rewrites the five log rows that carried the old address. Hussein's one sign-in to confirm the code arrives is under After merge.
 - **8 Oct 2026, P0.1-03 merged in three parts (PRs 56, 58, 61; production dpl_36T1vWk5RPkHLrmPfUoJpo4HQcmk, 99234fe, READY on kabsi.co).** The website is on Vercel, the Lovable wrapper and leftovers are gone, the old address forwards, Hussein's DNS, Supabase and Google consent steps are done. Next in Wave P0.1: P0.1-V3, P0.1-06c. P0.2-07 (privacy text) can follow, as the plan recommends. Open: see "P0.1-03 After merge" below.
@@ -53,9 +55,10 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | 8 | Hussein agrees to be named as seller | R-20 seller line, P0.4-07, P0.6-09 | Done 4 Oct (no written agreement, Rashid's decision) |
 | 11 | Vercel account connected to GitHub, Supabase and Claude | P0.1-03 | Done 7 Oct (the six remaining steps are in the P0.1-03 section of the plan) |
 | 12 | Kapso account and the number's WhatsApp profile (+1 201-483-5474); keys into Supabase secrets | P0.6-10 | Todo |
-| 13 | Google Cloud (project 856347937978): enable the reviews and posts API if a session cannot; submit the `business.manage` package | P0.7-01a, P0.7-02 | Enabling done 7 Oct 2026 by Hussein: the Google My Business API (reviews, posts, media) is enabled in project 856347937978, and its quota reads 300 requests per minute (Hussein, 8 Oct). `docs/google/api-access.md` written by P0.7-01a. Submitting the `business.manage` package is still todo |
+| 13 | Google Cloud (project 856347937978): enable the reviews and posts API if a session cannot; submit the `business.manage` package | P0.7-01a, P0.7-02 | Not done (corrected 8 Oct by P0.7-01; the earlier "enabled 7 Oct, quota 300" was wrong): enabling the Google My Business API (`mybusiness.googleapis.com`, reviews, posts, media) fails with PERMISSION_DENIED `servicemanagement.services.bind` and the live call returns 403 SERVICE_DISABLED. Blocked on Google: Hussein asks on case 1-4624000041157 (or the Business Profile API contact form) for the API to be made available to project 856347937978 (step 16). `docs/google/api-access.md` written by P0.7-01a. Submitting the `business.manage` package is still todo |
 | 15 | GitHub repo secret `SUPABASE_ACCESS_TOKEN`: replace it with a Supabase personal access token from Hussein's own account (owner of the organisation that now holds `kabsi-prod`), then re-run the failed Deploy run 37675383844 | P0.1-13a After merge (every Edge Function deploy) | Done 7 Oct: Hussein replaced the token and re-ran the run; attempt 2 passed (19:48:28 to 19:49:09 UTC), every Edge Function `updated_at` 19:49:03 UTC, `api` version 52 |
 | 14 | Supabase Pro with point-in-time recovery in Hussein's own organisation | P0.7-07 (before the first real customer) | Todo |
+| 16 | Google: ask on case 1-4624000041157 (or the Business Profile API contact form) for the Google My Business API, `mybusiness.googleapis.com`, to be made available to project 856347937978; then enable it and read its quota. Also confirm Hussein's role on the project is Owner | P0.7-01 (reviews, posts, media), P0.7-04 | Todo (8 Oct: enable fails PERMISSION_DENIED `servicemanagement.services.bind`, Library page does not load) |
 
 ## Tasks
 
@@ -85,7 +88,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | done (merged 47; Deploy passed after step 15; mock end to end and moderation path passed 7 Oct); Hussein's 390 px browser look still open, see After merge | 47 | 7 Oct 2026 |
 | P0.1-13b | One publication pipeline: posts, photos, hours, profile changes | Opus | split: part A (the four paths on the pipeline) merged (49, 7 Oct 20:40 UTC) and its fix merged (50, 21:00 UTC); After-merge mock post, special hours and put-backs verified on Yawmiyati; a repeat Protection alert during a put-back fixed in PR 51; part B (`status` readers to `state`, then drop `status`, its sync trigger and `concierge_queue_reply`) merged (54) and the drop live 8 Oct 04:05 UTC, read back; done except Hussein's 390 px look of Home and Reviews | 49, 50, 51, 54, 55 | 8 Oct 2026 |
 | P0.7-01a | Wave P0.G: enable the reviews and posts API and confirm access | Sonnet | merged (65, 84bab5d, 8 Oct 11:59 UTC; CI run 37773346652 App, Edge Functions and Database passed, Vercel success); docs only, no Deploy needed. Done except the card's read-only 200 calls and the `gcloud` or screenshot proof, moved to P0.7-01 (Hussein: no live Google call), see Evidence | 65 | 8 Oct 2026 |
-| P0.7-01 | Wave P0.G: capture real Google responses (read-only) | Opus | todo, can start now (after P0.7-01a) | | |
+| P0.7-01 | Wave P0.G: capture real Google responses (read-only) | Opus | part 1 merged (67): every v1 module captured live (accounts, admins, locations, updates, attributes, performance, place actions, verifications, notifications), findings written; **open:** reviews, posts and media, blocked on Google (`mybusiness.googleapis.com` SERVICE_DISABLED, step 16, case 1-4624000041157); the reply moderation question waits on it. See Evidence and After merge | 67 | 8 Oct 2026 |
 | P0.7-01b | Wave P0.G: compare real responses with the mocks and fix the mocks | Opus | todo | | |
 | P0.7-02 | Wave P0.G: business.manage verification package | Opus | todo, writing can start now; submit after P0.1-03 and P0.2-07 | | |
 | P0.7-04 | Wave P0.G: the switch to live | Opus | todo | | |
@@ -172,6 +175,10 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P1-22 | Nora on WhatsApp | Opus | todo | | |
 
 ## After merge
+
+P0.7-01 part 1 (PR 67):
+- Session: Deploy workflow passes and `google-capture` has a version above 3 (the repo files replace the trimmed connector copies); `health` still reports `google_token` ok with `business.manage` and `google_mode` `mock`.
+- Hussein: step 16 (Google opens `mybusiness.googleapis.com` to the project). Then a session reruns `google-capture` for reviews, posts and media on both profiles, saves the fixtures and answers the moderation question; then P0.7-01 is done.
 
 P0.1-06c (PR 63):
 - Hussein, once: on https://kabsi.co/login ask for an email code for `hello+demo@kabsi.co`; the code arrives in the hello@kabsi.co mailbox; sign in; Harbour Lane Coffee and Juniper Hair Studio both show with the "Demo data" tag. Then tell the session, which reads back `last_sign_in_at` for the demo user and that `ops_events` gained no row for it.
@@ -275,6 +282,18 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.7-01 part 1 (branch claude/h-p0-7-01, PR 67, 8 Oct 2026, Hussein's session)
+- Model check: `claude-opus-5-5` (session model and last served model).
+- Open After-merge checks at the start (read-only SQL): `google_mode()` `mock`; 0 failed pg_cron runs in 24 hours; demo `last_sign_in_at` 11:44:44 UTC, `ops_events` demo rows since the move 0; `health` (request 14693) 200, Places, Resend, Anthropic, Cloudflare ok, `jobs_recent` ok, the three Google secrets and `GOOGLE_MODE` not set. Not runnable here: browser looks, Lovable dates, Search Console.
+- Hussein's steps (stated in the chat, 8 Oct): OAuth client and refresh token for hello@kabsi.co with `business.manage`, saved straight into Supabase secrets (never in the chat); `GOOGLE_MODE` not set; `gcloud services list --enabled` lists `businessprofileperformance`, `mybusinessaccountmanagement`, `mybusinessbusinessinformation`, `mybusinessnotifications`, `mybusinessplaceactions`, `mybusinessqanda`, `mybusinessverifications`, all 300 requests per minute; `mybusiness.googleapis.com` could not be enabled (PERMISSION_DENIED, `servicemanagement.services.bind`); Kabsi Clients is Manager on both profiles; written consent on file for both owners.
+- `health` (request 14937, 15:22 UTC): three Google secrets set, `GOOGLE_MODE` not set, `google_token` "ok, scope business.manage", `google_accounts` "ok, 3 account(s)", `google_mode` "mock".
+- Inventory (request 14940, 15:24 UTC, `google-capture` v1): personal account 0 locations; Kabsi Clients `accounts/113746201522792609010` (LOCATION_GROUP) 2 locations, Abou Hamze Auto Center `locations/1850906632456176734` and Yawmiyati `locations/4825254240697973899`; organisation kabsi.co 0.
+- Reviews list on Yawmiyati (request 14941, 15:24:45 UTC): HTTP 403 PERMISSION_DENIED, reason SERVICE_DISABLED, service `mybusiness.googleapis.com`, consumer `projects/856347937978` (`tests/fixtures/google/live/reviews.list.error.json`).
+- v1 capture (`google-capture` v3, requests 14972 and 14973, 15:43:50 to 15:44:02 UTC): 15 calls per profile, all 200; fixtures in `tests/fixtures/google/live/` (22 files). Every module of the Google layer except reviews, posts and media now has a real fixture.
+- Nothing was written to Google: `capture.ts` refuses any host outside the Business Profile APIs and sends `method: "GET"` only; no POST, PATCH, PUT or DELETE exists in the function.
+- Checks: see the PR (typecheck, lint, tests, build, deno check, `check:google`).
+- `knowledge/kabsi-facts.md`: not changed (no behaviour, price or wording an owner sees).
 
 ### P0.7-01a (branch claude/h-p0-7-01a, 8 Oct 2026, Hussein's session)
 - Model check: the session was told it runs Sonnet 5.5 (`claude-sonnet-5-5`), which matches the card.
@@ -754,6 +773,11 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Found, not done
 
+- 8 Oct 2026, P0.7-01: The mock modules and fixtures model things Google does not send: empty lists are `{}` not `[]`, unset fields are left out, daily metric values are strings with no `value` on empty days. For P0.7-01b (listed in `docs/google/live-findings.md`).
+- 8 Oct 2026, P0.7-01: Yawmiyati's `locations.google_location_id` is still `locations/mock-9803ee99` and `google_account_id` `accounts/mock`; the real names are `locations/4825254240697973899` under `accounts/113746201522792609010`. Abou Hamze Auto Center (`locations/1850906632456176734`) has no `locations` row. For P0.7-04, which re-reads both businesses.
+- 8 Oct 2026, P0.7-01: Abou Hamze's live description carries a phone number and a superlative, and Google shows a different website (`https://autoabouhamze.com/`) and pin from the owner's (getGoogleUpdated `diffMask` `latlng,websiteUri`). Owner-facing, for P0.7-05 or the owner; nothing changed.
+- 8 Oct 2026, P0.7-01: six `net._http_response` rows of the capture (14940 to 14973) could not be deleted through the connector (two timeouts); two carry Abou Hamze's public business number from its description. pg_net clears them after its time to live.
+
 - 8 Oct 2026, P0.1-03 part C: `bun.lock` is stale (it still lists `@lovable.dev/*` and Lovable's private registry cache) and nothing installs from it; CI and Vercel use npm without a lockfile (D265). Delete it, or generate a real lockfile for reproducible installs, in a task Hussein chooses.
 - 8 Oct 2026, P0.1-03 part C: Vercel Web Analytics is switched on in the dashboard (by mistake, Hussein's note). No package is added, so it records nothing; switch it off under the project's Analytics tab.
 - 8 Oct 2026, P0.1-03 part C: Lovable still serves the redirect. Keep project Kabsi Canvas published and its workspace open for the periods in After merge, then read its visitor analytics before removing it; then delete `src/lib/legacy-host.ts`, its hook in `src/server.ts` and its test.
@@ -810,6 +834,10 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - P0.1-04a: a reply or post the owner edits by hand is not checked for contact details at publish (only drafts are). Kabsi drafts are blocked in code; whether to warn on owner-typed text is open (P0.3-02 or P0.1-13a).
 
 ## Decisions to confirm
+
+- 8 Oct 2026, P0.7-01: the live capture runs in a new internal function, `google-capture` (cron secret, verify_jwt false like `health`), not inside `health`, so `health` stays tiny. It sends GETs only to Business Profile hosts, reads only the two Kabsi-owned profiles, removes personal data before returning, and runs whatever `GOOGLE_MODE` says because it never writes. It stays deployed for the blocked v4 part of P0.7-01 and for P0.7-01b; remove it (and `config.toml`'s line) when Wave P0.G is done.
+- 8 Oct 2026, P0.7-01: before merge it was deployed through the connector (versions 1 to 3) with trimmed copies of `_shared/kabsi.ts`, `concierge.ts`, `jobs.ts` (only what `client.ts` uses); the merge's Deploy run replaces them with the repo files.
+- 8 Oct 2026, P0.7-01: fixtures keep the first 3 days of each daily metric series (Google sent 31) and, for Abou Hamze's attribute metadata, only the attributes not in Yawmiyati's list, to keep the files small; the notes in each file say so.
 
 - 8 Oct 2026, P0.1-06c: the card says create a new demo user, move the memberships and delete the old user; Hussein's prompt says keep the demo user and change its address only. Done Hussein's way: same user id, so no membership moves and nothing is deleted. "The old demo user is gone" holds in the sense that no account has the old address.
 - 8 Oct 2026, P0.1-06c: the log rows that carried the old address (two 5 Oct demo weekly emails: recipient and dedupe key; two chat report subjects to hello@kabsi.co; Slack ops event 1238's title) now carry the new address in its place, so no table holds the personal address. The two weekly emails were in fact delivered to the old mailbox; this line is the record of that. The move lives in `private.move_demo_login(text)` (no API role can run it) so the database suite tests the same path.
@@ -925,6 +953,8 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Keep Yawmiyati (internal test only) and the demo workspace.
 
 ## Log
+
+- 8 Oct 2026 (Hussein's session): P0.7-01 part 1, PR 67. Health with Hussein's new secrets: token `business.manage`, 3 accounts. Inventory: Kabsi Clients holds both profiles. Reviews list on Yawmiyati: 403 SERVICE_DISABLED (`mybusiness.googleapis.com` not enabled; blocked on Google). 30 read-only v1 calls 200, fixtures and `docs/google/live-findings.md`; `docs/google/api-access.md` and the 7 Oct note corrected. Nothing written to Google; `google_mode()` still `mock`.
 
 - 8 Oct 2026 (Hussein's session): P0.1-06c merged (PR 63, edd2581), production READY, Deploy not needed; only Hussein's sign-in check is open. Branch claude/h-p0-1-06c: demo login moved to `hello+demo@kabsi.co` by changing the address of the same user (Hussein's instruction), the old address removed from PROGRESS and from every database row. Open After-merge checks of P0.1-08, P0.1-04a, P0.1-04b and P0.1-06 (demo emails) passed at the start, see Evidence.
 - 8 Oct 2026 (Hussein's session): PR 54 (P0.1-13b part B) merged 03:58 UTC as fe2ecf7 on Hussein's "merge first"; Hussein ran the drop in the SQL editor at 04:05; read back: `publications.status` gone, 18 rows in the backup, 0 mismatches, every publications function compiles, jobs and cron running. P0.1-13b done except Hussein's 390 px look. Wave P0.1 still needs P0.1-03 (Vercel) and P0.1-V3; P0.1-06c also open.

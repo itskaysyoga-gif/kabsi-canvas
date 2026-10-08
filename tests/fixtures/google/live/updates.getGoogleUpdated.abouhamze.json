@@ -1,0 +1,186 @@
+{
+  "_source": "Live read-only call by P0.7-01 through google-capture (hello@kabsi.co, Kabsi Clients group).",
+  "_doc": "https://developers.google.com/my-business/reference/businessinformation/rest/v1/locations/getGoogleUpdated",
+  "_captured_at": "2026-10-08T15:43:58Z",
+  "_url": "https://mybusinessbusinessinformation.googleapis.com/v1/locations/1850906632456176734:getGoogleUpdated",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {
+    "location": {
+      "name": "locations/1850906632456176734",
+      "title": "Abou Hamze Auto Center - أبو حمزة أوتو سنتر",
+      "latlng": {
+        "latitude": 33.6689975,
+        "longitude": 35.6023812
+      },
+      "profile": {
+        "description": "Your best place for all your spare parts need. Visit Abou Hamze Auto Center in Bakaata Al Shouf, Ain Wzien Road, Facing Coop. Call us or whatsapp on [phone removed]"
+      },
+      "metadata": {
+        "mapsUri": "https://maps.google.com/maps?cid=2030032073090672028",
+        "placeId": "ChIJeaz8F0khHxURnCU4N2ofLBw",
+        "canDelete": true,
+        "newReviewUri": "https://search.google.com/local/writereview?placeid=ChIJeaz8F0khHxURnCU4N2ofLBw",
+        "hasVoiceOfMerchant": true,
+        "canModifyServiceList": true
+      },
+      "openInfo": {
+        "status": "OPEN",
+        "canReopen": true
+      },
+      "categories": {
+        "primaryCategory": {
+          "name": "categories/gcid:auto_parts_store",
+          "displayName": "Auto parts store",
+          "moreHoursTypes": [
+            {
+              "displayName": "Access",
+              "hoursTypeId": "ACCESS",
+              "localizedDisplayName": "Access"
+            },
+            {
+              "displayName": "Breakfast",
+              "hoursTypeId": "BREAKFAST",
+              "localizedDisplayName": "Breakfast"
+            },
+            {
+              "displayName": "Brunch",
+              "hoursTypeId": "BRUNCH",
+              "localizedDisplayName": "Brunch"
+            },
+            {
+              "displayName": "Delivery",
+              "hoursTypeId": "DELIVERY",
+              "localizedDisplayName": "Delivery"
+            },
+            {
+              "displayName": "Dinner",
+              "hoursTypeId": "DINNER",
+              "localizedDisplayName": "Dinner"
+            },
+            {
+              "displayName": "Drive through",
+              "hoursTypeId": "DRIVE_THROUGH",
+              "localizedDisplayName": "Drive through"
+            },
+            {
+              "displayName": "Happy hours",
+              "hoursTypeId": "HAPPY_HOUR",
+              "localizedDisplayName": "Happy hours"
+            },
+            {
+              "displayName": "Kitchen",
+              "hoursTypeId": "KITCHEN",
+              "localizedDisplayName": "Kitchen"
+            },
+            {
+              "displayName": "Lunch",
+              "hoursTypeId": "LUNCH",
+              "localizedDisplayName": "Lunch"
+            },
+            {
+              "displayName": "Online service hours",
+              "hoursTypeId": "ONLINE_SERVICE_HOURS",
+              "localizedDisplayName": "Online service hours"
+            },
+            {
+              "displayName": "Pickup",
+              "hoursTypeId": "PICKUP",
+              "localizedDisplayName": "Pickup"
+            },
+            {
+              "displayName": "Takeout",
+              "hoursTypeId": "TAKEOUT",
+              "localizedDisplayName": "Takeout"
+            },
+            {
+              "displayName": "Senior hours",
+              "hoursTypeId": "SENIOR_HOURS",
+              "localizedDisplayName": "Senior hours"
+            }
+          ]
+        }
+      },
+      "websiteUri": "https://autoabouhamze.com/",
+      "languageCode": "en",
+      "phoneNumbers": "[removed]",
+      "regularHours": {
+        "periods": [
+          {
+            "openDay": "MONDAY",
+            "closeDay": "MONDAY",
+            "openTime": {
+              "hours": 8
+            },
+            "closeTime": {
+              "hours": 19
+            }
+          },
+          {
+            "openDay": "TUESDAY",
+            "closeDay": "TUESDAY",
+            "openTime": {
+              "hours": 8
+            },
+            "closeTime": {
+              "hours": 19
+            }
+          },
+          {
+            "openDay": "WEDNESDAY",
+            "closeDay": "WEDNESDAY",
+            "openTime": {
+              "hours": 8
+            },
+            "closeTime": {
+              "hours": 19
+            }
+          },
+          {
+            "openDay": "THURSDAY",
+            "closeDay": "THURSDAY",
+            "openTime": {
+              "hours": 8
+            },
+            "closeTime": {
+              "hours": 19
+            }
+          },
+          {
+            "openDay": "FRIDAY",
+            "closeDay": "FRIDAY",
+            "openTime": {
+              "hours": 8
+            },
+            "closeTime": {
+              "hours": 19
+            }
+          },
+          {
+            "openDay": "SATURDAY",
+            "closeDay": "SATURDAY",
+            "openTime": {
+              "hours": 8
+            },
+            "closeTime": {
+              "hours": 19,
+              "minutes": 30
+            }
+          }
+        ]
+      },
+      "storefrontAddress": {
+        "locality": "Bakaata",
+        "regionCode": "LB",
+        "addressLines": [
+          "Ain Wzien Road - Facing Coop"
+        ]
+      },
+      "adWordsLocationExtensions": {
+        "adPhone": "[phone removed]"
+      }
+    },
+    "diffMask": "latlng,websiteUri"
+  },
+  "_note": "Google shows different values to the public for latlng and websiteUri (diffMask). No pendingMask key. The location here carries Google's values; metadata in this response has no hasGoogleUpdated key."
+}

@@ -1,0 +1,12 @@
+{
+  "_source": "Live read-only call by P0.7-01 through google-capture (hello@kabsi.co, Kabsi Clients group).",
+  "_doc": "https://developers.google.com/my-business/reference/verifications/rest/v1/locations/getVoiceOfMerchantState",
+  "_captured_at": "2026-10-08T15:44:02Z",
+  "_url": "https://mybusinessverifications.googleapis.com/v1/locations/4825254240697973899/VoiceOfMerchantState",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {
+    "hasVoiceOfMerchant": true,
+    "hasBusinessAuthority": true
+  }
+}

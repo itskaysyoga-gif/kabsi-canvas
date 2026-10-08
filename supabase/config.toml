@@ -12,6 +12,8 @@ verify_jwt = false
 verify_jwt = false
 [functions.health]           # x-cron-secret
 verify_jwt = false
+[functions.google-capture]   # x-cron-secret; read-only Google capture (P0.7-01)
+verify_jwt = false
 [functions.site-assets]      # x-cron-secret
 verify_jwt = false
 [functions.slack]            # Slack signs /interact and /command; Slack sends no Supabase JWT

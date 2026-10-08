@@ -1,0 +1,44 @@
+{
+  "_source": "Live read-only call by P0.7-01 through google-capture (hello@kabsi.co, Kabsi Clients group).",
+  "_doc": "https://developers.google.com/my-business/reference/rest/v4/accounts.locations.reviews/list",
+  "_captured_at": "2026-10-08T15:24:45Z",
+  "_url": "https://mybusiness.googleapis.com/v4/accounts/113746201522792609010/locations/4825254240697973899/reviews",
+  "_status": 403,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {
+    "error": {
+      "code": 403,
+      "message": "Google My Business API has not been used in project 856347937978 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/mybusiness.googleapis.com/overview?project=856347937978 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.",
+      "status": "PERMISSION_DENIED",
+      "details": [
+        {
+          "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+          "reason": "SERVICE_DISABLED",
+          "domain": "googleapis.com",
+          "metadata": {
+            "activationUrl": "https://console.developers.google.com/apis/api/mybusiness.googleapis.com/overview?project=856347937978",
+            "containerInfo": "856347937978",
+            "service": "mybusiness.googleapis.com",
+            "consumer": "projects/856347937978",
+            "serviceTitle": "Google My Business API"
+          }
+        },
+        {
+          "@type": "type.googleapis.com/google.rpc.LocalizedMessage",
+          "locale": "en-US",
+          "message": "Google My Business API has not been used in project 856347937978 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/mybusiness.googleapis.com/overview?project=856347937978 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."
+        },
+        {
+          "@type": "type.googleapis.com/google.rpc.Help",
+          "links": [
+            {
+              "description": "Google developers console API activation",
+              "url": "https://console.developers.google.com/apis/api/mybusiness.googleapis.com/overview?project=856347937978"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "_note": "The real error while mybusiness.googleapis.com is not enabled for the project (case 1-4624000041157). The project number in the two message strings was blanked by the first version of the filter and is restored here from the consumer and activation URL fields of the same response. Posts and media sit on the same service and fail the same way."
+}

@@ -1,0 +1,12 @@
+{
+  "_source": "Live read-only call by P0.7-01 through google-capture (hello@kabsi.co, Kabsi Clients group).",
+  "_doc": "https://developers.google.com/my-business/reference/notifications/rest/v1/accounts/getNotificationSetting",
+  "_captured_at": "2026-10-08T15:44:02Z",
+  "_url": "https://mybusinessnotifications.googleapis.com/v1/accounts/113746201522792609010/notificationSetting",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {
+    "name": "accounts/113746201522792609010/notificationSetting"
+  },
+  "_note": "No Pub/Sub topic set for the Kabsi Clients group yet: only the name comes back (no pubsubTopic, no notificationTypes). Setting one is P0.7-03 and is a write."
+}

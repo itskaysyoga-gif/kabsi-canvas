@@ -1,0 +1,331 @@
+{
+  "_source": "Live read-only call by P0.7-01 through google-capture (hello@kabsi.co, Kabsi Clients group).",
+  "_doc": "https://developers.google.com/my-business/reference/performance/rest/v1/locations/fetchMultiDailyMetricsTimeSeries",
+  "_captured_at": "2026-10-08T15:44:02Z",
+  "_url": "https://businessprofileperformance.googleapis.com/v1/locations/4825254240697973899:fetchMultiDailyMetricsTimeSeries",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {
+    "multiDailyMetricTimeSeries": [
+      {
+        "dailyMetricTimeSeries": [
+          {
+            "timeSeries": {
+              "datedValues": [
+                {
+                  "date": {
+                    "day": 7,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 8,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 9,
+                    "year": 2026,
+                    "month": 9
+                  }
+                }
+              ]
+            },
+            "dailyMetric": "BUSINESS_BOOKINGS"
+          },
+          {
+            "timeSeries": {
+              "datedValues": [
+                {
+                  "date": {
+                    "day": 7,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 8,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 9,
+                    "year": 2026,
+                    "month": 9
+                  }
+                }
+              ]
+            },
+            "dailyMetric": "BUSINESS_FOOD_MENU_CLICKS"
+          },
+          {
+            "timeSeries": {
+              "datedValues": [
+                {
+                  "date": {
+                    "day": 7,
+                    "year": 2026,
+                    "month": 9
+                  },
+                  "value": "2"
+                },
+                {
+                  "date": {
+                    "day": 8,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 9,
+                    "year": 2026,
+                    "month": 9
+                  }
+                }
+              ]
+            },
+            "dailyMetric": "BUSINESS_IMPRESSIONS_MOBILE_SEARCH"
+          },
+          {
+            "timeSeries": {
+              "datedValues": [
+                {
+                  "date": {
+                    "day": 7,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 8,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 9,
+                    "year": 2026,
+                    "month": 9
+                  }
+                }
+              ]
+            },
+            "dailyMetric": "BUSINESS_FOOD_ORDERS"
+          },
+          {
+            "timeSeries": {
+              "datedValues": [
+                {
+                  "date": {
+                    "day": 7,
+                    "year": 2026,
+                    "month": 9
+                  },
+                  "value": "2"
+                },
+                {
+                  "date": {
+                    "day": 8,
+                    "year": 2026,
+                    "month": 9
+                  },
+                  "value": "1"
+                },
+                {
+                  "date": {
+                    "day": 9,
+                    "year": 2026,
+                    "month": 9
+                  }
+                }
+              ]
+            },
+            "dailyMetric": "BUSINESS_IMPRESSIONS_DESKTOP_SEARCH"
+          },
+          {
+            "timeSeries": {
+              "datedValues": [
+                {
+                  "date": {
+                    "day": 7,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 8,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 9,
+                    "year": 2026,
+                    "month": 9
+                  }
+                }
+              ]
+            },
+            "dailyMetric": "BUSINESS_IMPRESSIONS_MOBILE_MAPS"
+          },
+          {
+            "timeSeries": {
+              "datedValues": [
+                {
+                  "date": {
+                    "day": 7,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 8,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 9,
+                    "year": 2026,
+                    "month": 9
+                  }
+                }
+              ]
+            },
+            "dailyMetric": "BUSINESS_CONVERSATIONS"
+          },
+          {
+            "timeSeries": {
+              "datedValues": [
+                {
+                  "date": {
+                    "day": 7,
+                    "year": 2026,
+                    "month": 9
+                  },
+                  "value": "1"
+                },
+                {
+                  "date": {
+                    "day": 8,
+                    "year": 2026,
+                    "month": 9
+                  },
+                  "value": "1"
+                },
+                {
+                  "date": {
+                    "day": 9,
+                    "year": 2026,
+                    "month": 9
+                  }
+                }
+              ]
+            },
+            "dailyMetric": "BUSINESS_IMPRESSIONS_DESKTOP_MAPS"
+          },
+          {
+            "timeSeries": {
+              "datedValues": [
+                {
+                  "date": {
+                    "day": 7,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 8,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 9,
+                    "year": 2026,
+                    "month": 9
+                  },
+                  "value": "2"
+                }
+              ]
+            },
+            "dailyMetric": "BUSINESS_DIRECTION_REQUESTS"
+          },
+          {
+            "timeSeries": {
+              "datedValues": [
+                {
+                  "date": {
+                    "day": 7,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 8,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 9,
+                    "year": 2026,
+                    "month": 9
+                  }
+                }
+              ]
+            },
+            "dailyMetric": "WEBSITE_CLICKS"
+          },
+          {
+            "timeSeries": {
+              "datedValues": [
+                {
+                  "date": {
+                    "day": 7,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 8,
+                    "year": 2026,
+                    "month": 9
+                  }
+                },
+                {
+                  "date": {
+                    "day": 9,
+                    "year": 2026,
+                    "month": 9
+                  }
+                }
+              ]
+            },
+            "dailyMetric": "CALL_CLICKS"
+          }
+        ]
+      }
+    ]
+  },
+  "_note": "Range 7 Sep to 7 Oct 2026, 11 metrics. Trimmed to the first 3 datedValues of each series (Google sent 31 per series). A day with nothing has a date and no value key; values are strings. Order of series is not the order asked. 31-day sums: DIRECTION_REQUESTS 55, IMPRESSIONS_DESKTOP_SEARCH 21, IMPRESSIONS_MOBILE_SEARCH 14, IMPRESSIONS_MOBILE_MAPS 14, IMPRESSIONS_DESKTOP_MAPS 8, every other metric 0."
+}

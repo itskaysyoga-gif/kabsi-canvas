@@ -1,0 +1,10 @@
+{
+  "_source": "Live read-only call by P0.7-01 through google-capture (hello@kabsi.co, Kabsi Clients group).",
+  "_doc": "https://developers.google.com/my-business/reference/accountmanagement/rest/v1/accounts.invitations/list",
+  "_captured_at": "2026-10-08T15:44:02Z",
+  "_url": "https://mybusinessaccountmanagement.googleapis.com/v1/accounts/113746201522792609010/invitations",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {},
+  "_note": "Empty: no pending invitation for the Kabsi Clients group (both profiles were already accepted). Google returns {} with no invitations key, not an empty array."
+}

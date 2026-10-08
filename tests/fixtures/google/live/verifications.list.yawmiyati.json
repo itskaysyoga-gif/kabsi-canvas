@@ -1,0 +1,18 @@
+{
+  "_source": "Live read-only call by P0.7-01 through google-capture (hello@kabsi.co, Kabsi Clients group).",
+  "_doc": "https://developers.google.com/my-business/reference/verifications/rest/v1/locations.verifications/list",
+  "_captured_at": "2026-10-08T15:44:02Z",
+  "_url": "https://mybusinessverifications.googleapis.com/v1/locations/4825254240697973899/verifications",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {
+    "verifications": [
+      {
+        "name": "locations/4825254240697973899/verifications/5T1517223538086",
+        "state": "COMPLETED",
+        "method": "AUTO",
+        "createTime": "2018-01-29T10:58:58.086Z"
+      }
+    ]
+  }
+}

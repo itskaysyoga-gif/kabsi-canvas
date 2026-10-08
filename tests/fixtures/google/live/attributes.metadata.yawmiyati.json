@@ -1,0 +1,384 @@
+{
+  "_source": "Live read-only call by P0.7-01 through google-capture (hello@kabsi.co, Kabsi Clients group).",
+  "_doc": "https://developers.google.com/my-business/reference/businessinformation/rest/v1/attributes/list",
+  "_captured_at": "2026-10-08T15:44:02Z",
+  "_url": "https://mybusinessbusinessinformation.googleapis.com/v1/attributes",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {
+    "attributeMetadata": [
+      {
+        "parent": "attributes/is_owned_by_women",
+        "valueType": "BOOL",
+        "displayName": "Identifies as women-owned",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Identifies as women-owned"
+          }
+        ],
+        "groupDisplayName": "From the business"
+      },
+      {
+        "parent": "attributes/offers_online_appointments",
+        "valueType": "BOOL",
+        "displayName": "Online appointments",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Online appointments"
+          },
+          {
+            "value": false,
+            "displayName": "No online appointments"
+          }
+        ],
+        "groupDisplayName": "Service options"
+      },
+      {
+        "parent": "attributes/has_onsite_services",
+        "valueType": "BOOL",
+        "displayName": "Onsite services",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Onsite services"
+          },
+          {
+            "value": false,
+            "displayName": "Onsite services not available"
+          }
+        ],
+        "groupDisplayName": "Service options"
+      },
+      {
+        "parent": "attributes/has_assisted_listening_devices",
+        "valueType": "BOOL",
+        "displayName": "Assisted listening devices",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Assisted listening devices"
+          }
+        ],
+        "groupDisplayName": "Accessibility"
+      },
+      {
+        "parent": "attributes/has_hearing_loop",
+        "valueType": "BOOL",
+        "displayName": "Assistive hearing loop",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Assistive hearing loop"
+          },
+          {
+            "value": false,
+            "displayName": " Does not have assistive hearing loop"
+          }
+        ],
+        "groupDisplayName": "Accessibility"
+      },
+      {
+        "parent": "attributes/has_wheelchair_accessible_entrance",
+        "valueType": "BOOL",
+        "displayName": "Wheelchair accessible entrance",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Wheelchair accessible entrance"
+          },
+          {
+            "value": false,
+            "displayName": "No wheelchair accessible entrance"
+          }
+        ],
+        "groupDisplayName": "Accessibility"
+      },
+      {
+        "parent": "attributes/has_wheelchair_accessible_parking",
+        "valueType": "BOOL",
+        "displayName": "Wheelchair accessible parking lot",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Wheelchair accessible parking lot"
+          },
+          {
+            "value": false,
+            "displayName": "No wheelchair accessible parking lot"
+          }
+        ],
+        "groupDisplayName": "Accessibility"
+      },
+      {
+        "parent": "attributes/has_wheelchair_accessible_restroom",
+        "valueType": "BOOL",
+        "displayName": "Wheelchair accessible restroom",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Wheelchair accessible restroom"
+          },
+          {
+            "value": false,
+            "displayName": "No wheelchair accessible restroom"
+          }
+        ],
+        "groupDisplayName": "Accessibility"
+      },
+      {
+        "parent": "attributes/has_wheelchair_accessible_seating",
+        "valueType": "BOOL",
+        "displayName": "Wheelchair accessible seating",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Wheelchair accessible seating"
+          },
+          {
+            "value": false,
+            "displayName": "No wheelchair accessible seating"
+          }
+        ],
+        "groupDisplayName": "Accessibility"
+      },
+      {
+        "parent": "attributes/has_restroom_unisex",
+        "valueType": "BOOL",
+        "displayName": "Gender-neutral restroom",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Gender-neutral restroom"
+          }
+        ],
+        "groupDisplayName": "Amenities"
+      },
+      {
+        "parent": "attributes/is_transgender_safespace",
+        "valueType": "BOOL",
+        "displayName": "Transgender safespace",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Transgender safespace"
+          }
+        ],
+        "groupDisplayName": "Crowd"
+      },
+      {
+        "parent": "attributes/requires_appointments",
+        "valueType": "BOOL",
+        "displayName": "Appointment required",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Appointment required"
+          }
+        ],
+        "groupDisplayName": "Planning"
+      },
+      {
+        "parent": "attributes/has_changing_tables",
+        "valueType": "BOOL",
+        "displayName": "Has changing table(s)",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Has changing table(s)"
+          }
+        ],
+        "groupDisplayName": "Children"
+      },
+      {
+        "parent": "attributes/has_lactation_space",
+        "valueType": "BOOL",
+        "displayName": "Nursing room",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Nursing room"
+          }
+        ],
+        "groupDisplayName": "Children"
+      },
+      {
+        "parent": "attributes/has_parking_garage_free",
+        "valueType": "BOOL",
+        "displayName": "Free parking garage",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Free parking garage"
+          }
+        ],
+        "groupDisplayName": "Parking"
+      },
+      {
+        "parent": "attributes/has_parking_lot_free",
+        "valueType": "BOOL",
+        "displayName": "Free parking lot",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Free parking lot"
+          }
+        ],
+        "groupDisplayName": "Parking"
+      },
+      {
+        "parent": "attributes/has_parking_street_free",
+        "valueType": "BOOL",
+        "displayName": "Free street parking",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Free street parking"
+          }
+        ],
+        "groupDisplayName": "Parking"
+      },
+      {
+        "parent": "attributes/has_onsite_parking",
+        "valueType": "BOOL",
+        "displayName": "On-site parking",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "On-site parking"
+          }
+        ],
+        "groupDisplayName": "Parking"
+      },
+      {
+        "parent": "attributes/has_parking_garage_paid",
+        "valueType": "BOOL",
+        "displayName": "Paid parking garage",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Paid parking garage"
+          }
+        ],
+        "groupDisplayName": "Parking"
+      },
+      {
+        "parent": "attributes/has_parking_lot_paid",
+        "valueType": "BOOL",
+        "displayName": "Paid parking lot",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Paid parking lot"
+          }
+        ],
+        "groupDisplayName": "Parking"
+      },
+      {
+        "parent": "attributes/has_parking_street_paid",
+        "valueType": "BOOL",
+        "displayName": "Paid street parking",
+        "valueMetadata": [
+          {
+            "value": true,
+            "displayName": "Paid street parking"
+          }
+        ],
+        "groupDisplayName": "Parking"
+      },
+      {
+        "parent": "attributes/url_appointment",
+        "valueType": "URL",
+        "repeatable": true,
+        "displayName": "Appointment links",
+        "groupDisplayName": "Place page URLs"
+      },
+      {
+        "parent": "attributes/url_facebook",
+        "valueType": "URL",
+        "displayName": "Facebook",
+        "groupDisplayName": "Place page URLs"
+      },
+      {
+        "parent": "attributes/url_facebook_messenger",
+        "valueType": "URL",
+        "displayName": "Facebook Messenger",
+        "groupDisplayName": "Place page URLs"
+      },
+      {
+        "parent": "attributes/url_instagram",
+        "valueType": "URL",
+        "displayName": "Instagram",
+        "groupDisplayName": "Place page URLs"
+      },
+      {
+        "parent": "attributes/url_linkedin",
+        "valueType": "URL",
+        "displayName": "Linkedin",
+        "groupDisplayName": "Place page URLs"
+      },
+      {
+        "parent": "attributes/url_pinterest",
+        "valueType": "URL",
+        "displayName": "Pinterest",
+        "groupDisplayName": "Place page URLs"
+      },
+      {
+        "parent": "attributes/url_text_messaging",
+        "valueType": "URL",
+        "displayName": "Texting number",
+        "groupDisplayName": "Place page URLs"
+      },
+      {
+        "parent": "attributes/url_tiktok",
+        "valueType": "URL",
+        "displayName": "Tiktok",
+        "groupDisplayName": "Place page URLs"
+      },
+      {
+        "parent": "attributes/url_whatsapp",
+        "valueType": "URL",
+        "displayName": "WhatsApp",
+        "groupDisplayName": "Place page URLs"
+      },
+      {
+        "parent": "attributes/url_twitter",
+        "valueType": "URL",
+        "displayName": "X (Twitter)",
+        "groupDisplayName": "Place page URLs"
+      },
+      {
+        "parent": "attributes/url_youtube",
+        "valueType": "URL",
+        "displayName": "Youtube",
+        "groupDisplayName": "Place page URLs"
+      },
+      {
+        "parent": "attributes/preferred_messaging_service",
+        "valueType": "ENUM",
+        "displayName": "Primary chat",
+        "valueMetadata": [
+          {
+            "value": "facebook_messenger",
+            "displayName": "Facebook Messenger"
+          },
+          {
+            "value": "rcs_for_business",
+            "displayName": "RCS for Business"
+          },
+          {
+            "value": "text_messaging",
+            "displayName": "Text message"
+          },
+          {
+            "value": "whatsapp",
+            "displayName": "WhatsApp"
+          }
+        ],
+        "groupDisplayName": "Place page attributes"
+      }
+    ]
+  },
+  "_note": "parent=locations/4825254240697973899, pageSize 200 (one page, no nextPageToken). Category media_company, country LB."
+}

@@ -1,0 +1,31 @@
+{
+  "_source": "Live read-only call by P0.7-01 through google-capture (hello@kabsi.co, Kabsi Clients group).",
+  "_doc": "https://developers.google.com/my-business/reference/accountmanagement/rest/v1/locations.admins/list",
+  "_captured_at": "2026-10-08T15:43:58Z",
+  "_url": "https://mybusinessaccountmanagement.googleapis.com/v1/locations/1850906632456176734/admins",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {
+    "admins": [
+      {
+        "name": "locations/1850906632456176734/admins/101135340701545542652",
+        "role": "PRIMARY_OWNER",
+        "admin": "[removed]",
+        "account": "accounts/101135340701545542652"
+      },
+      {
+        "name": "locations/1850906632456176734/admins/105728505151956001961",
+        "role": "OWNER",
+        "admin": "[removed]",
+        "account": "accounts/105728505151956001961"
+      },
+      {
+        "name": "locations/1850906632456176734/admins/113746201522792609010",
+        "role": "MANAGER",
+        "admin": "[removed]",
+        "account": "accounts/113746201522792609010"
+      }
+    ]
+  },
+  "_note": "Three admins: PRIMARY_OWNER, OWNER, and Kabsi Clients as MANAGER."
+}
