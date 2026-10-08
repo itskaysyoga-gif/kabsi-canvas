@@ -1,0 +1,44 @@
+{
+  "_source": "Live read-only call by P0.7-01 through google-capture (hello@kabsi.co, Kabsi Clients group).",
+  "_doc": "https://developers.google.com/my-business/reference/accountmanagement/rest/v1/accounts/list",
+  "_captured_at": "2026-10-08T15:43:58Z",
+  "_url": "https://mybusinessaccountmanagement.googleapis.com/v1/accounts",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {
+    "accounts": [
+      {
+        "name": "accounts/110991556142757565923",
+        "type": "PERSONAL",
+        "accountName": "[removed]",
+        "vettedState": "NOT_VETTED",
+        "verificationState": "UNVERIFIED"
+      },
+      {
+        "name": "accounts/113746201522792609010",
+        "role": "PRIMARY_OWNER",
+        "type": "LOCATION_GROUP",
+        "accountName": "Kabsi Clients",
+        "vettedState": "NOT_VETTED",
+        "accountNumber": "5481006796",
+        "permissionLevel": "OWNER_LEVEL",
+        "verificationState": "UNVERIFIED"
+      },
+      {
+        "name": "accounts/107921626329560662984",
+        "role": "PRIMARY_OWNER",
+        "type": "ORGANIZATION",
+        "accountName": "kabsi.co",
+        "vettedState": "NOT_VETTED",
+        "accountNumber": "5109572526",
+        "permissionLevel": "OWNER_LEVEL",
+        "organizationInfo": {
+          "address": "[removed]",
+          "phoneNumber": "[removed]",
+          "registeredDomain": "kabsi.co"
+        },
+        "verificationState": "UNVERIFIED"
+      }
+    ]
+  }
+}

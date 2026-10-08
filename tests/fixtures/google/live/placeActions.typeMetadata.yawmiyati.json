@@ -1,0 +1,17 @@
+{
+  "_source": "Live read-only call by P0.7-01 through google-capture (hello@kabsi.co, Kabsi Clients group).",
+  "_doc": "https://developers.google.com/my-business/reference/placeactions/rest/v1/placeActionTypeMetadata/list",
+  "_captured_at": "2026-10-08T15:44:02Z",
+  "_url": "https://mybusinessplaceactions.googleapis.com/v1/placeActionTypeMetadata",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {
+    "placeActionTypeMetadata": [
+      {
+        "displayName": "Appointment links",
+        "placeActionType": "APPOINTMENT"
+      }
+    ]
+  },
+  "_note": "filter location=locations/4825254240697973899, languageCode en: the action types this category allows."
+}

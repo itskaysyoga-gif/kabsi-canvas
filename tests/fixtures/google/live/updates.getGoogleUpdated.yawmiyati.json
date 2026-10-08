@@ -1,0 +1,240 @@
+{
+  "_source": "Live read-only call by P0.7-01 through google-capture (hello@kabsi.co, Kabsi Clients group).",
+  "_doc": "https://developers.google.com/my-business/reference/businessinformation/rest/v1/locations/getGoogleUpdated",
+  "_captured_at": "2026-10-08T15:44:02Z",
+  "_url": "https://mybusinessbusinessinformation.googleapis.com/v1/locations/4825254240697973899:getGoogleUpdated",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {
+    "location": {
+      "name": "locations/4825254240697973899",
+      "title": "Yawmiyati",
+      "latlng": {
+        "latitude": 33.8845673,
+        "longitude": 35.5461495
+      },
+      "metadata": {
+        "mapsUri": "https://maps.google.com/maps?cid=14469239004530145122",
+        "placeId": "ChIJaXHRjL4XHxURYvc-mzYQzcg",
+        "canDelete": true,
+        "newReviewUri": "https://search.google.com/local/writereview?placeid=ChIJaXHRjL4XHxURYvc-mzYQzcg",
+        "hasVoiceOfMerchant": true
+      },
+      "openInfo": {
+        "status": "OPEN",
+        "canReopen": true
+      },
+      "categories": {
+        "primaryCategory": {
+          "name": "categories/gcid:media_company",
+          "displayName": "Media company",
+          "moreHoursTypes": [
+            {
+              "displayName": "Access",
+              "hoursTypeId": "ACCESS",
+              "localizedDisplayName": "Access"
+            },
+            {
+              "displayName": "Breakfast",
+              "hoursTypeId": "BREAKFAST",
+              "localizedDisplayName": "Breakfast"
+            },
+            {
+              "displayName": "Brunch",
+              "hoursTypeId": "BRUNCH",
+              "localizedDisplayName": "Brunch"
+            },
+            {
+              "displayName": "Delivery",
+              "hoursTypeId": "DELIVERY",
+              "localizedDisplayName": "Delivery"
+            },
+            {
+              "displayName": "Dinner",
+              "hoursTypeId": "DINNER",
+              "localizedDisplayName": "Dinner"
+            },
+            {
+              "displayName": "Drive through",
+              "hoursTypeId": "DRIVE_THROUGH",
+              "localizedDisplayName": "Drive through"
+            },
+            {
+              "displayName": "Happy hours",
+              "hoursTypeId": "HAPPY_HOUR",
+              "localizedDisplayName": "Happy hours"
+            },
+            {
+              "displayName": "Kitchen",
+              "hoursTypeId": "KITCHEN",
+              "localizedDisplayName": "Kitchen"
+            },
+            {
+              "displayName": "Lunch",
+              "hoursTypeId": "LUNCH",
+              "localizedDisplayName": "Lunch"
+            },
+            {
+              "displayName": "Online service hours",
+              "hoursTypeId": "ONLINE_SERVICE_HOURS",
+              "localizedDisplayName": "Online service hours"
+            },
+            {
+              "displayName": "Pickup",
+              "hoursTypeId": "PICKUP",
+              "localizedDisplayName": "Pickup"
+            },
+            {
+              "displayName": "Takeout",
+              "hoursTypeId": "TAKEOUT",
+              "localizedDisplayName": "Takeout"
+            },
+            {
+              "displayName": "Senior hours",
+              "hoursTypeId": "SENIOR_HOURS",
+              "localizedDisplayName": "Senior hours"
+            }
+          ]
+        },
+        "additionalCategories": [
+          {
+            "name": "categories/gcid:publisher",
+            "displayName": "Publisher",
+            "moreHoursTypes": [
+              {
+                "displayName": "Access",
+                "hoursTypeId": "ACCESS",
+                "localizedDisplayName": "Access"
+              },
+              {
+                "displayName": "Breakfast",
+                "hoursTypeId": "BREAKFAST",
+                "localizedDisplayName": "Breakfast"
+              },
+              {
+                "displayName": "Brunch",
+                "hoursTypeId": "BRUNCH",
+                "localizedDisplayName": "Brunch"
+              },
+              {
+                "displayName": "Delivery",
+                "hoursTypeId": "DELIVERY",
+                "localizedDisplayName": "Delivery"
+              },
+              {
+                "displayName": "Dinner",
+                "hoursTypeId": "DINNER",
+                "localizedDisplayName": "Dinner"
+              },
+              {
+                "displayName": "Drive through",
+                "hoursTypeId": "DRIVE_THROUGH",
+                "localizedDisplayName": "Drive through"
+              },
+              {
+                "displayName": "Happy hours",
+                "hoursTypeId": "HAPPY_HOUR",
+                "localizedDisplayName": "Happy hours"
+              },
+              {
+                "displayName": "Kitchen",
+                "hoursTypeId": "KITCHEN",
+                "localizedDisplayName": "Kitchen"
+              },
+              {
+                "displayName": "Lunch",
+                "hoursTypeId": "LUNCH",
+                "localizedDisplayName": "Lunch"
+              },
+              {
+                "displayName": "Online service hours",
+                "hoursTypeId": "ONLINE_SERVICE_HOURS",
+                "localizedDisplayName": "Online service hours"
+              },
+              {
+                "displayName": "Pickup",
+                "hoursTypeId": "PICKUP",
+                "localizedDisplayName": "Pickup"
+              },
+              {
+                "displayName": "Takeout",
+                "hoursTypeId": "TAKEOUT",
+                "localizedDisplayName": "Takeout"
+              },
+              {
+                "displayName": "Senior hours",
+                "hoursTypeId": "SENIOR_HOURS",
+                "localizedDisplayName": "Senior hours"
+              }
+            ]
+          }
+        ]
+      },
+      "websiteUri": "http://yawmiyati.com/",
+      "languageCode": "en",
+      "phoneNumbers": "[removed]",
+      "regularHours": {
+        "periods": [
+          {
+            "openDay": "MONDAY",
+            "closeDay": "MONDAY",
+            "openTime": {
+              "hours": 9
+            },
+            "closeTime": {
+              "hours": 17
+            }
+          },
+          {
+            "openDay": "TUESDAY",
+            "closeDay": "TUESDAY",
+            "openTime": {
+              "hours": 9
+            },
+            "closeTime": {
+              "hours": 17
+            }
+          },
+          {
+            "openDay": "WEDNESDAY",
+            "closeDay": "WEDNESDAY",
+            "openTime": {
+              "hours": 9
+            },
+            "closeTime": {
+              "hours": 17
+            }
+          },
+          {
+            "openDay": "THURSDAY",
+            "closeDay": "THURSDAY",
+            "openTime": {
+              "hours": 9
+            },
+            "closeTime": {
+              "hours": 17
+            }
+          },
+          {
+            "openDay": "FRIDAY",
+            "closeDay": "FRIDAY",
+            "openTime": {
+              "hours": 9
+            },
+            "closeTime": {
+              "hours": 17
+            }
+          }
+        ]
+      },
+      "storefrontAddress": {
+        "regionCode": "LB",
+        "addressLines": [
+          "Mirna Chalouhi"
+        ],
+        "languageCode": "en"
+      }
+    }
+  },
+  "_note": "No Google-side change pending: the response is only {location}, identical to locations.get; diffMask and pendingMask are absent (not empty strings)."
+}

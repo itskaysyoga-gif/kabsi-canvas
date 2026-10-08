@@ -23,23 +23,30 @@ export async function get(url: string): Promise<Raw> {
 
 // deno-lint-ignore no-explicit-any
 type Json = any;
-// A phone number has a leading + or a separator inside it; a bare run of digits (a project number, an id) is kept.
-const PHONE = /\+\d[\d\s().-]{6,}\d|\b\d{2,4}[\s().-]+\d[\d\s().-]{4,}\d/g;
+// A phone number has a leading + or a separator inside it, or is a bare run of 7 to 11 digits inside free text
+// (an owner's "call us on 70123456"). A 12-digit project number and ids in resource names are kept.
+const PHONE = /\+\d[\d\s().-]{6,}\d|\b\d{2,4}[\s().-]+\d[\d\s().-]{4,}\d|\b\d{7,11}\b/g;
 const EMAIL = /[\w.+-]+@[\w-]+\.[\w.-]+/g;
 // Resource names ("accounts/123/locations/456"), addresses of Google's own pages and timestamps are not phone
 // numbers, though they are runs of digits.
 const keep = (s: string) => !/\s/.test(s) && !s.includes("@") && (s.includes("/") || /^\d{4}-\d{2}-\d{2}(T|$)/.test(s));
-const PERSONAL_KEYS = new Set(["displayName", "profilePhotoUrl", "comment", "phoneNumbers", "primaryPhone", "additionalPhones"]);
+// Always personal: review and reply text, photo addresses, phone numbers, and "admin" (in an admins list, the
+// person's name or email address).
+const PERSONAL_KEYS = new Set(["comment", "profilePhotoUrl", "phoneNumbers", "primaryPhone", "additionalPhones", "phoneNumber", "admin"]);
+// Personal only inside these objects: a reviewer's or a person's displayName (a category's or an attribute's
+// displayName is Google's own label and is kept), and an organisation's postal address (may be a home address).
+const PERSONAL_IN: Record<string, Set<string>> = { reviewer: new Set(["displayName"]), organizationInfo: new Set(["address"]) };
 
 // Removes personal data from any Google response: reviewer and person names, review and reply text, phone numbers
 // and email addresses anywhere in a string.
-export function redact(v: Json): Json {
-  if (Array.isArray(v)) return v.map(redact);
+export function redact(v: Json, parent = ""): Json {
+  if (Array.isArray(v)) return v.map((x) => redact(x, parent));
   if (v && typeof v === "object") {
     const out: Json = {};
+    const personalAccount = (v as Json).type === "PERSONAL";
     for (const [k, x] of Object.entries(v)) {
-      if (PERSONAL_KEYS.has(k)) out[k] = typeof x === "string" ? "[removed]" : x && typeof x === "object" ? "[removed]" : x;
-      else out[k] = redact(x);
+      const personal = PERSONAL_KEYS.has(k) || PERSONAL_IN[parent]?.has(k) || (k === "accountName" && personalAccount);
+      out[k] = personal ? (x && typeof x === "object" ? "[removed]" : typeof x === "string" ? "[removed]" : x) : redact(x, k);
     }
     return out;
   }
@@ -94,4 +101,55 @@ export async function reviews(profile: string) {
   if (!p) return { error: "profile not found under any account" };
   const r = await get(`${V4}/${p.account}/${p.location}/reviews?pageSize=50`);
   return { account: p.account, location: p.location, status: r.status, url: r.url, body: redact(r.body) };
+}
+
+// Every field the Business Information API returns for a location (Location resource, v1).
+export const LOCATION_MASK = [
+  "name", "languageCode", "storeCode", "title", "phoneNumbers", "categories", "storefrontAddress", "websiteUri",
+  "regularHours", "specialHours", "serviceArea", "labels", "adWordsLocationExtensions", "latlng", "openInfo", "metadata",
+  "profile", "relationshipData", "moreHours", "serviceItems",
+].join(",");
+
+const ymd = (d: Date) => ({ year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate() });
+const DAILY = [
+  "BUSINESS_IMPRESSIONS_DESKTOP_MAPS", "BUSINESS_IMPRESSIONS_DESKTOP_SEARCH", "BUSINESS_IMPRESSIONS_MOBILE_MAPS",
+  "BUSINESS_IMPRESSIONS_MOBILE_SEARCH", "BUSINESS_CONVERSATIONS", "BUSINESS_DIRECTION_REQUESTS", "CALL_CLICKS",
+  "WEBSITE_CLICKS", "BUSINESS_BOOKINGS", "BUSINESS_FOOD_ORDERS", "BUSINESS_FOOD_MENU_CLICKS",
+];
+
+// The read-only v1 set for one Kabsi-owned profile (P0.7-01). Reviews, posts and media (v4) are left out while
+// mybusiness.googleapis.com is not enabled for the project. Each entry is Google's response, redacted.
+export async function capture(profile: string) {
+  const p = await findProfile(profile);
+  if (!p) return { error: "profile not found under any account" };
+  const { account, location } = p;
+  const end = new Date(Date.now() - 86_400_000), start = new Date(Date.now() - 31 * 86_400_000);
+  const e = ymd(end), s = ymd(start);
+  const day = (k: string, d: { year: number; month: number; day: number }) =>
+    `dailyRange.${k}.year=${d.year}&dailyRange.${k}.month=${d.month}&dailyRange.${k}.day=${d.day}`;
+  const kwStart = new Date(Date.UTC(e.year, e.month - 4, 1)), kwEnd = new Date(Date.UTC(e.year, e.month - 2, 1));
+  const month = (k: string, d: Date) => `monthlyRange.${k}.year=${d.getUTCFullYear()}&monthlyRange.${k}.month=${d.getUTCMonth() + 1}`;
+  const urls: Record<string, string> = {
+    "accounts.list": `${AM}/accounts`,
+    "accounts.invitations": `${AM}/${account}/invitations`,
+    "accounts.admins": `${AM}/${account}/admins`,
+    "admins.list": `${AM}/${location}/admins`,
+    "locations.get": `${BI}/${location}?readMask=${LOCATION_MASK}`,
+    "updates.getGoogleUpdated": `${BI}/${location}:getGoogleUpdated?readMask=${LOCATION_MASK}`,
+    "attributes.get": `${BI}/${location}/attributes`,
+    "attributes.metadata": `${BI}/attributes?parent=${location}&pageSize=200`,
+    "performance.dailyMetrics": `${PERF}/${location}:fetchMultiDailyMetricsTimeSeries?${DAILY.map((m) => `dailyMetrics=${m}`).join("&")}&${day("startDate", s)}&${day("endDate", e)}`,
+    "performance.searchKeywords": `${PERF}/${location}/searchkeywords/impressions/monthly?${month("startMonth", kwStart)}&${month("endMonth", kwEnd)}&pageSize=50`,
+    "placeActions.list": `${PLACE_ACTIONS}/${location}/placeActionLinks`,
+    "placeActions.typeMetadata": `${PLACE_ACTIONS}/placeActionTypeMetadata?languageCode=en&filter=${encodeURIComponent(`location=${location}`)}`,
+    "verifications.list": `${VERIF}/${location}/verifications`,
+    "verifications.voiceOfMerchant": `${VERIF}/${location}/VoiceOfMerchantState`,
+    "notifications.get": `${NOTIF}/${account}/notificationSetting`,
+  };
+  const out: Record<string, { status: number; url: string; body: unknown }> = {};
+  for (const [key, url] of Object.entries(urls)) {
+    const r = await get(url);
+    out[key] = { status: r.status, url: r.url, body: redact(r.body) };
+  }
+  return { profile, account, location, captured_at: new Date().toISOString(), calls: out };
 }

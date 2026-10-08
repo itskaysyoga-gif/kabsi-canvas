@@ -1,0 +1,19 @@
+{
+  "_source": "Live read-only call by P0.7-01 through google-capture (hello@kabsi.co, Kabsi Clients group).",
+  "_doc": "https://developers.google.com/my-business/reference/performance/rest/v1/locations.searchkeywords.impressions.monthly/list",
+  "_captured_at": "2026-10-08T15:44:02Z",
+  "_url": "https://businessprofileperformance.googleapis.com/v1/locations/4825254240697973899/searchkeywords/impressions/monthly",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {
+    "searchKeywordsCounts": [
+      {
+        "insightsValue": {
+          "threshold": "15"
+        },
+        "searchKeyword": "yawmiyati"
+      }
+    ]
+  },
+  "_note": "Range July to September 2026. A low count comes back as insightsValue.threshold (a string, here under 15), not insightsValue.value."
+}
