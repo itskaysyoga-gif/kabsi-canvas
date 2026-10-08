@@ -4,6 +4,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## Where things stand
 
+- **8 Oct 2026, P0.7-01a (Hussein's session, branch claude/h-p0-7-01a):** `docs/google/api-access.md` written: which Google API serves which module, base URL, enabled state and quota. Hussein's steps are recorded as done: project number 856347937978 confirmed for smiling-chess-505915-b7 and 300 requests per minute on Account Management, Business Information, Notifications, Place Actions, Q&A and Verifications (7 Oct); the Google My Business API (reviews, posts, media) enabled (7 Oct); its quota reads 300 requests per minute (8 Oct). No Google call was made; Google is still in mock mode (`google_mode()` read `mock` on 8 Oct). The card's live-call line (one read-only 200 each for reviews, posts, media) moves to P0.7-01. Next in Wave P0.G: P0.7-01 (Opus, asks Hussein before its first live call).
 - **8 Oct 2026, P0.1-06c merged (PR 63, edd2581; production dpl_8gMSrZ2Z34e2vuBt6RHL2V3ewiK5 READY):** the demo login moves to `hello+demo@kabsi.co` (lands in the hello@kabsi.co Zoho mailbox, Hussein tested 8 Oct). On Hussein's instruction the demo user is kept and only its address changes (same user id, so the memberships and every demo row stay); nothing is removed. Migration `20261008120000_demo_login_kabsi_address.sql` sets `app_settings.demo_login_email` first, then the user's address, then rewrites the five log rows that carried the old address. Hussein's one sign-in to confirm the code arrives is under After merge.
 - **8 Oct 2026, P0.1-03 merged in three parts (PRs 56, 58, 61; production dpl_36T1vWk5RPkHLrmPfUoJpo4HQcmk, 99234fe, READY on kabsi.co).** The website is on Vercel, the Lovable wrapper and leftovers are gone, the old address forwards, Hussein's DNS, Supabase and Google consent steps are done. Next in Wave P0.1: P0.1-V3, P0.1-06c. P0.2-07 (privacy text) can follow, as the plan recommends. Open: see "P0.1-03 After merge" below.
 - **8 Oct 2026, P0.1-03 part C (Hussein's session, branch claude/h-p0-1-03d):** Hussein confirmed the address checks (301 from kabsi-app.lovable.app, `/product` 308, `/r/SEVEN1` 302, `/r/ZZZZ9` 302, the test email's button starts `https://kabsi.co/a/`), kept `/product` to `/lebanon`, and disconnected GitHub in Lovable. Part C removes the Lovable wrapper and every other Lovable leftover (the grep in the card, now only the redirect host check), and `vite.config.ts` uses the TanStack Start, Tailwind, React and Nitro plugins directly. Hussein switched Vercel Web Analytics on by mistake; the package is deliberately not added.
@@ -52,7 +53,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | 8 | Hussein agrees to be named as seller | R-20 seller line, P0.4-07, P0.6-09 | Done 4 Oct (no written agreement, Rashid's decision) |
 | 11 | Vercel account connected to GitHub, Supabase and Claude | P0.1-03 | Done 7 Oct (the six remaining steps are in the P0.1-03 section of the plan) |
 | 12 | Kapso account and the number's WhatsApp profile (+1 201-483-5474); keys into Supabase secrets | P0.6-10 | Todo |
-| 13 | Google Cloud (project 856347937978): enable the reviews and posts API if a session cannot; submit the `business.manage` package | P0.7-01a, P0.7-02 | Enabling done 7 Oct 2026 by Hussein: the Google My Business API (reviews and posts) is now enabled in project 856347937978. Reading its quota and writing `docs/google/api-access.md` stays with P0.7-01a. Submitting the `business.manage` package is still todo |
+| 13 | Google Cloud (project 856347937978): enable the reviews and posts API if a session cannot; submit the `business.manage` package | P0.7-01a, P0.7-02 | Enabling done 7 Oct 2026 by Hussein: the Google My Business API (reviews, posts, media) is enabled in project 856347937978, and its quota reads 300 requests per minute (Hussein, 8 Oct). `docs/google/api-access.md` written by P0.7-01a. Submitting the `business.manage` package is still todo |
 | 15 | GitHub repo secret `SUPABASE_ACCESS_TOKEN`: replace it with a Supabase personal access token from Hussein's own account (owner of the organisation that now holds `kabsi-prod`), then re-run the failed Deploy run 37675383844 | P0.1-13a After merge (every Edge Function deploy) | Done 7 Oct: Hussein replaced the token and re-ran the run; attempt 2 passed (19:48:28 to 19:49:09 UTC), every Edge Function `updated_at` 19:49:03 UTC, `api` version 52 |
 | 14 | Supabase Pro with point-in-time recovery in Hussein's own organisation | P0.7-07 (before the first real customer) | Todo |
 
@@ -83,7 +84,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-12b | Rate limiter, circuit breaker and the rest of the cron | Opus | done (merged 43; `dispatch_tick` re-applied by Hussein in the SQL editor and read back `94ea83b8` on 7 Oct; mock Protection alert passed 7 Oct) | 43, 44 | 7 Oct 2026 |
 | P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | done (merged 47; Deploy passed after step 15; mock end to end and moderation path passed 7 Oct); Hussein's 390 px browser look still open, see After merge | 47 | 7 Oct 2026 |
 | P0.1-13b | One publication pipeline: posts, photos, hours, profile changes | Opus | split: part A (the four paths on the pipeline) merged (49, 7 Oct 20:40 UTC) and its fix merged (50, 21:00 UTC); After-merge mock post, special hours and put-backs verified on Yawmiyati; a repeat Protection alert during a put-back fixed in PR 51; part B (`status` readers to `state`, then drop `status`, its sync trigger and `concierge_queue_reply`) merged (54) and the drop live 8 Oct 04:05 UTC, read back; done except Hussein's 390 px look of Home and Reviews | 49, 50, 51, 54, 55 | 8 Oct 2026 |
-| P0.7-01a | Wave P0.G: enable the reviews and posts API and confirm access | Sonnet | todo, can start now | | |
+| P0.7-01a | Wave P0.G: enable the reviews and posts API and confirm access | Sonnet | PR open; docs only; API enabled and quota 300 on Hussein's statement; the live-call line deferred to P0.7-01, see Evidence | 65 | 8 Oct 2026 |
 | P0.7-01 | Wave P0.G: capture real Google responses (read-only) | Opus | todo, can start now (after P0.7-01a) | | |
 | P0.7-01b | Wave P0.G: compare real responses with the mocks and fix the mocks | Opus | todo | | |
 | P0.7-02 | Wave P0.G: business.manage verification package | Opus | todo, writing can start now; submit after P0.1-03 and P0.2-07 | | |
@@ -175,6 +176,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 P0.1-06c (PR 63):
 - Hussein, once: on https://kabsi.co/login ask for an email code for `hello+demo@kabsi.co`; the code arrives in the hello@kabsi.co mailbox; sign in; Harbour Lane Coffee and Juniper Hair Studio both show with the "Demo data" tag. Then tell the session, which reads back `last_sign_in_at` for the demo user and that `ops_events` gained no row for it.
 - Session: passed 8 Oct, see Evidence (Deploy not triggered by design; Vercel production READY).
+- Session, read 8 Oct (P0.7-01a chat): `last_sign_in_at` for the demo user is 8 Oct 11:44:44 UTC (after the move at 09:37) and `ops_events` gained no demo row since the move. Still for Hussein to confirm by eye: both demo businesses show the "Demo data" tag.
 
 P0.1-03, what is still open after the merge of part C (everything else passed, see Evidence):
 - A person with a browser, signed in to Vercel (previews are protected), at 390 px and 1440 px: `https://kabsi.co` home, `/pricing`, `/login`, `/faq`; and an email-code sign-in on a preview address (the Supabase redirect pattern is set).
@@ -273,6 +275,14 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.7-01a (branch claude/h-p0-7-01a, 8 Oct 2026, Hussein's session)
+- Model check: the session was told it runs Sonnet 5.5 (`claude-sonnet-5-5`), which matches the card.
+- Open After-merge checks run at the start (read-only SQL, 8 Oct): P0.1-06c demo `last_sign_in_at` 11:44:44 UTC, `ops_events` demo rows since the move 0, `google_mode()` = `mock`. Not runnable here: every browser look, the Lovable retirement dates, Search Console.
+- Hussein's manual steps, recorded as he stated them: 7 Oct, project number 856347937978 confirmed for smiling-chess-505915-b7, 300 requests per minute on Account Management, Business Information, Notifications, Place Actions, Q&A and Verifications; 7 Oct, the Google My Business API (reviews, posts, media) enabled; 8 Oct, its quota reads 300 requests per minute.
+- `docs/google/api-access.md` exists (module to API map from `supabase/functions/_shared/google/client.ts`; no code change needed, the map there already names every service).
+- Not proved, and said plainly: no `gcloud services list --enabled` output and no screenshot path are in the repo (the enabled state rests on Hussein's statement); the Performance API quota is not recorded; no read-only call to reviews, posts or media was made (Hussein: no live Google call). Those go to P0.7-01.
+- `knowledge/kabsi-facts.md`: not changed (no behaviour, price or wording change).
 
 ### P0.1-06c After merge (8 Oct 2026, 09:51 to 09:55 UTC, Hussein's session)
 - PR 63 merged 09:51 UTC as edd2581 (merge commit) after CI run 37758054927 (App, Edge Functions, Database) and Load run 37758054940 passed on head cad71f0, and the Vercel status was success.
