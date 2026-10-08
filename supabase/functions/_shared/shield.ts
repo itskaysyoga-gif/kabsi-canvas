@@ -63,6 +63,12 @@ async function checkListing(loc: Loc) {
   let alerts = 0;
   for (const f of SHIELD_FIELDS) {
     if (!before[f] || before[f].display === now[f].display) continue;
+    // The owner already chose to put this field back and it is on its way (P0.1-13b): Google may show the new value
+    // until the put-back lands or while it holds the edit for review. The publication pipeline checks it; no new alert.
+    const { count: reverting, error: re } = await db.from("listing_changes").select("id", { count: "exact", head: true })
+      .eq("location_id", loc.id).eq("field", f).eq("state", "reverting");
+    if (re) throw re;
+    if (reverting) continue;
     const { data: open } = await db.from("listing_changes").select("id, new_value").eq("location_id", loc.id).eq("field", f).eq("state", "open").maybeSingle();
     if (open && (open.new_value as FieldValue)?.display === now[f].display) continue; // already alerted about this value
     if (open) await db.from("listing_changes").update({ state: "kept", decided_at: new Date().toISOString() }).eq("id", open.id); // superseded
