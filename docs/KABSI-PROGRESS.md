@@ -4,6 +4,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## Where things stand
 
+- **8 Oct 2026, P0.1-03 merged in three parts (PRs 56, 58, 61; production dpl_36T1vWk5RPkHLrmPfUoJpo4HQcmk, 99234fe, READY on kabsi.co).** The website is on Vercel, the Lovable wrapper and leftovers are gone, the old address forwards, Hussein's DNS, Supabase and Google consent steps are done. Next in Wave P0.1: P0.1-V3, P0.1-06c. P0.2-07 (privacy text) can follow, as the plan recommends. Open: see "P0.1-03 After merge" below.
 - **8 Oct 2026, P0.1-03 part C (Hussein's session, branch claude/h-p0-1-03d):** Hussein confirmed the address checks (301 from kabsi-app.lovable.app, `/product` 308, `/r/SEVEN1` 302, `/r/ZZZZ9` 302, the test email's button starts `https://kabsi.co/a/`), kept `/product` to `/lebanon`, and disconnected GitHub in Lovable. Part C removes the Lovable wrapper and every other Lovable leftover (the grep in the card, now only the redirect host check), and `vite.config.ts` uses the TanStack Start, Tailwind, React and Nitro plugins directly. Hussein switched Vercel Web Analytics on by mistake; the package is deliberately not added.
 - **8 Oct 2026, P0.1-03 part B (Hussein's session, branch claude/h-p0-1-03b):** Hussein did DNS (kabsi.co serves Vercel over HTTPS, certificate 06:05 UTC; www redirects; mail and go.kabsi.co work), the Supabase Auth URLs (login on kabsi.co works) and the Google consent URLs (no new warning). Part B moves the address in the repo (`SITE_URL`, sitemap, robots, llms files, facts, Worker `APP_ORIGIN`, Edge Function fallback), adds permanent redirects for the old site's pages and the old `/r/<code>` cards, makes only kabsi.co indexable, and switches the Lovable redirect on. Still Hussein's: the Supabase secret `APP_URL`, the Lovable Publish, Search Console. See After merge.
 - **8 Oct 2026, P0.1-03 part A (Hussein's session, branch claude/h-p0-1-03):** hosting prepared on Vercel; kabsi.co, DNS and the address switch are NOT done and wait on Hussein (steps under After merge). This pull request adds `vercel.json`, the two public variables the app reads, the build guard `scripts/check-env.mjs`, `docs/hosting.md`, the dormant redirect for the old Lovable address, and removes the Lovable error reporter. Deliberately kept for now: the `@lovable.dev/vite-tanstack-config` wrapper, because Lovable must still be able to publish the redirect (Decisions to confirm). The canonical, sitemap, APP_URL and redirect switch is part B, after DNS.
@@ -38,8 +39,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 | # | Step | Needed by | Status |
 |---|---|---|---|
-| 1 | Superseded by Vercel (7 Oct): add the DNS records Vercel shows for kabsi.co and www in Cloudflare | P0.1-03 | Todo |
-| 2 | Supabase Auth URL settings for kabsi.co and the Vercel preview pattern (Hussein's own organisation) | P0.1-03 | Todo |
+| 1 | Superseded by Vercel (7 Oct): add the DNS records Vercel shows for kabsi.co and www in Cloudflare | P0.1-03 | Done 8 Oct (Hussein: kabsi.co serves Vercel over HTTPS, certificate 06:05 UTC; www redirects; email and go.kabsi.co work) |
+| 2 | Supabase Auth URL settings for kabsi.co and the Vercel preview pattern (Hussein's own organisation) | P0.1-03 | Done 8 Oct (Hussein: Site URL and redirect URLs set, login on kabsi.co works) |
 | 3 | Google Cloud: Places quotas 100 a day, budget alerts, disable places-backend | P0.2-06 | Todo |
 | 4 | Google Cloud and Search Console contacts and owners on kabsi.co addresses only, no personal address left (K-99.3, R-32) | Any time in P0.1 | Todo |
 | 5 | Supabase Auth Google provider with the OAuth client | P0.4-02 | Todo |
@@ -62,7 +63,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-01b | Remove leftover references to the retired docs | Sonnet | done | 15 | 4 Oct 2026 |
 | P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | merged (17, 18); live After-merge checks not run, see Evidence | 17, 18 | 4 Oct 2026 |
 | P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | merged in two parts (19, 20); mock-review check passed; live app check and auth template paste still open | 19, 20 | 4 Oct 2026 |
-| P0.1-03 | Move hosting to Vercel and switch kabsi.co (replaces "Move kabsi.co to the new build") | Sonnet | parts A (56) and B (58) merged; part C (Lovable removal) PR open; after it merges P0.1-03 is done once its After-merge checks pass | 56, 58, 61 | 8 Oct 2026 |
+| P0.1-03 | Move hosting to Vercel and switch kabsi.co (replaces "Move kabsi.co to the new build") | Sonnet | merged in three parts (56, 58, 61); After-merge passed except the 390 px look, a preview email-code sign-in, and a before and after `dig` comparison of the Zoho records (see Evidence); then done | 56, 58, 61 | 8 Oct 2026 |
 | H-TANSTACK-XSS | Security hotfix: TanStack Start 1.168.32 to 1.168.60 (CVE-2026-102989) | Opus | merged (52, 70c1188); Vercel production build passes; live on kabsi-app.lovable.app only after Hussein's Lovable sync and Publish, see After merge | 52 | 8 Oct 2026 |
 | P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | merged (23); After-merge checks partly run, see Evidence | 23 | 4 Oct 2026 |
 | P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | merged (24); After-merge checks partly run, see Evidence | 24 | 4 Oct 2026 |
@@ -170,6 +171,12 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
+P0.1-03, what is still open after the merge of part C (everything else passed, see Evidence):
+- A person with a browser, signed in to Vercel (previews are protected), at 390 px and 1440 px: `https://kabsi.co` home, `/pricing`, `/login`, `/faq`; and an email-code sign-in on a preview address (the Supabase redirect pattern is set).
+- Zoho records: the before-change `dig` was never taken (this sandbox cannot resolve names and Hussein's Cloudflare export is not in the notes); mail to and from hello@kabsi.co works (Hussein, 8 Oct). If a record comparison is wanted, paste `dig +short MX kabsi.co` and `dig +short TXT kabsi.co` against the Cloudflare export.
+- Keep the Lovable project Kabsi Canvas published and its workspace open: 7 days at least after `APP_URL` moved (8 Oct, so until 15 Oct), 90 days to be safe (until 6 Jan 2027), then read its visitor analytics for `kabsi-app.lovable.app` and remove it only when visits are near zero; then delete `src/lib/legacy-host.ts`, its hook in `src/server.ts` and its test. The old project Kabsi (`0044d32e-ce4e-435c-b431-d785d0265c79`) can be unpublished once kabsi.co is removed from its custom domains.
+- Search Console: in 2 to 4 weeks the Pages report should show the old pages as "Page with redirect"; read it for errors.
+
 P0.1-03 part B (this pull request). In order:
 
 1. Session, right after the merge: Deploy workflow passes (it deploys the Edge Functions and the `kabsi-go` Worker, both changed); Vercel production deploy READY; then the Done-when curls on kabsi.co (sitemap, robots, canonical, redirects); then `app_settings.app_url` set to `https://kabsi.co`.
@@ -261,6 +268,13 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.1-03 part C After merge and close-out (8 Oct 2026, 08:08 to 08:12 UTC, Hussein's session)
+- PR 61 merged, 99234fe, after CI run 37747551057 passed on head 64a016f. Its preview (dpl_GcRxdSD3YF8kPEbqtDLAgm48Rwqn, built with the new `vite.config.ts` and `"framework": "tanstack-start"`) was READY and served `/activate/ZZZZ99` (200, server-rendered, `x-robots-tag: noindex`) and `/r/SEVEN1` (302 to the Google address).
+- Production deployment dpl_36T1vWk5RPkHLrmPfUoJpo4HQcmk for 99234fe: READY, aliases include `kabsi.co` and `www.kabsi.co`. `https://kabsi.co/activate/ZZZZ99` through the connector: 200, `server: Vercel`, `x-vercel-id` present, same assets as the preview build, `x-robots-tag: noindex` (the `/activate/` private-path rule). The project's framework setting was changed from `tanstack-start-lovable` to `tanstack-start` through the connector (read back: `tanstack-start`).
+- Deploy workflow: not triggered by PR 61, by design (no path it watches changed); last run 37738419880 (PR 58) success.
+- Done-when lines, with who proved each: `x-vercel-id` on kabsi.co (connector); www redirect, go.kabsi.co (Hussein); 301 from `kabsi-app.lovable.app/pricing` to `https://kabsi.co/pricing` (Hussein, advisor chat); sitemap lists only kabsi.co URLs, robots names it, canonical on `/pricing?utm_source=x` is `https://kabsi.co/pricing` (connector, part B); email sign-in on kabsi.co (Hussein) and an email action link on kabsi.co (the test email button starts `https://kabsi.co/a/`, Hussein); the grep in the card returns only `src/lib/legacy-host.ts`; `docs/hosting.md` lists the two names and Vercel has exactly those two for Production, Preview and Development (connector, Hussein's read-back); the sitemap resubmit and the OAuth consent URLs are Hussein's 8 Oct statements (the sitemap showing 26 pages is for him to read in Search Console).
+- Test rows deleted on Hussein's instruction: for review 663c5d8c (the 3-star address-check review on Yawmiyati) the statement removed 1 `action_tokens` row, 1 `reviews` row (its `reply_drafts` row went with it) and 1 `mock_google_reviews` row; the read-back counts for both address-check reviews (drafts, reviews, mock rows, tokens) are 0. The `emails` row of the test email stays as the send log.
 
 ### P0.1-03 part C (branch claude/h-p0-1-03d, 8 Oct 2026, Hussein's session)
 - Hussein's confirmations (his terminal and the advisor chat): `/product` 308 to `/lebanon`; `/r/SEVEN1` 302 to the Seven Burgers Google review address; `/r/ZZZZ9` 302 to `/`; `kabsi-app.lovable.app/pricing` forwards to `https://kabsi.co/pricing`; the test email's Open Kabsi button starts `https://kabsi.co/a/`; Lovable GitHub disconnected; `/product` keeps going to `/lebanon`.
