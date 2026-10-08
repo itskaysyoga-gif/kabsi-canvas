@@ -6,10 +6,10 @@ The website and app run on Vercel (team itskaysyoga-5542s-projects, project kabs
 
 Only two names, both public by design, set in Vercel for Production, Preview and Development. Values are never written in the repository, in logs or in pull requests.
 
-| Name | Where the value comes from | Read by |
-|---|---|---|
-| `VITE_SUPABASE_URL` | Supabase project `ynjdqjlmdwjgbfezevxy`, Project Settings, API | `src/lib/supabase.ts` |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Same page, the publishable key (starts `sb_publishable_`) | `src/lib/supabase.ts` |
+| Name                            | Where the value comes from                                     | Read by               |
+| ------------------------------- | -------------------------------------------------------------- | --------------------- |
+| `VITE_SUPABASE_URL`             | Supabase project `ynjdqjlmdwjgbfezevxy`, Project Settings, API | `src/lib/supabase.ts` |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Same page, the publishable key (starts `sb_publishable_`)      | `src/lib/supabase.ts` |
 
 `vercel.json` runs `scripts/check-env.mjs` before the build. It fails the build when either name is missing or empty, and when a `VITE_` name looks like a server secret.
 
