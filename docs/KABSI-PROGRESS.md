@@ -88,7 +88,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-13a | One publication pipeline: schema, claim, replies and undo | Opus | done (merged 47; Deploy passed after step 15; mock end to end and moderation path passed 7 Oct); Hussein's 390 px browser look still open, see After merge | 47 | 7 Oct 2026 |
 | P0.1-13b | One publication pipeline: posts, photos, hours, profile changes | Opus | split: part A (the four paths on the pipeline) merged (49, 7 Oct 20:40 UTC) and its fix merged (50, 21:00 UTC); After-merge mock post, special hours and put-backs verified on Yawmiyati; a repeat Protection alert during a put-back fixed in PR 51; part B (`status` readers to `state`, then drop `status`, its sync trigger and `concierge_queue_reply`) merged (54) and the drop live 8 Oct 04:05 UTC, read back; done except Hussein's 390 px look of Home and Reviews | 49, 50, 51, 54, 55 | 8 Oct 2026 |
 | P0.7-01a | Wave P0.G: enable the reviews and posts API and confirm access | Sonnet | merged (65, 84bab5d, 8 Oct 11:59 UTC; CI run 37773346652 App, Edge Functions and Database passed, Vercel success); docs only, no Deploy needed. Done except the card's read-only 200 calls and the `gcloud` or screenshot proof, moved to P0.7-01 (Hussein: no live Google call), see Evidence | 65 | 8 Oct 2026 |
-| P0.7-01 | Wave P0.G: capture real Google responses (read-only) | Opus | part 1 merged (67): every v1 module captured live (accounts, admins, locations, updates, attributes, performance, place actions, verifications, notifications), findings written; **open:** reviews, posts and media, blocked on Google (`mybusiness.googleapis.com` SERVICE_DISABLED, step 16, case 1-4624000041157); the reply moderation question waits on it. See Evidence and After merge | 67 | 8 Oct 2026 |
+| P0.7-01 | Wave P0.G: capture real Google responses (read-only) | Opus | part 1 merged (67, a48160f, 8 Oct 16:07 UTC; After-merge passed): every v1 module captured live (accounts, admins, locations, updates, attributes, performance, place actions, verifications, notifications), findings written; **open:** reviews, posts and media, blocked on Google (`mybusiness.googleapis.com` SERVICE_DISABLED, step 16, case 1-4624000041157); the reply moderation question waits on it. See Evidence and After merge | 67 | 8 Oct 2026 |
 | P0.7-01b | Wave P0.G: compare real responses with the mocks and fix the mocks | Opus | todo | | |
 | P0.7-02 | Wave P0.G: business.manage verification package | Opus | todo, writing can start now; submit after P0.1-03 and P0.2-07 | | |
 | P0.7-04 | Wave P0.G: the switch to live | Opus | todo | | |
@@ -177,7 +177,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 ## After merge
 
 P0.7-01 part 1 (PR 67):
-- Session: Deploy workflow passes and `google-capture` has a version above 3 (the repo files replace the trimmed connector copies); `health` still reports `google_token` ok with `business.manage` and `google_mode` `mock`.
+- Session: passed 8 Oct, see Evidence (Deploy run 37806335182 success, `google-capture` version 4 from the repo, `health` token ok with `business.manage`, 3 accounts, `google_mode` `mock`).
 - Hussein: step 16 (Google opens `mybusiness.googleapis.com` to the project). Then a session reruns `google-capture` for reviews, posts and media on both profiles, saves the fixtures and answers the moderation question; then P0.7-01 is done.
 
 P0.1-06c (PR 63):
@@ -282,6 +282,12 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.7-01 part 1 After merge (8 Oct 2026, 16:07 to 16:11 UTC, Hussein's session)
+- PR 67 merged 16:07 UTC as a48160f (merge commit) after CI run 37804628192 (App, Edge Functions and Worker, Database) and Load run 37804628104 passed on head 26a1738, and the Vercel status was success.
+- Deploy run 37806335182: success (16:07:38 to 16:09:06 UTC). Every Edge Function `updated_at` 16:08:03 UTC; `google-capture` version 4 (the repo files, replacing connector versions 1 to 3), `health` 48, `api` 63.
+- `health` (request 15014, 16:10:23 UTC): 200, `google_token` "ok, scope business.manage", `google_accounts` "ok, 3 account(s)", `google_mode` "mock", `jobs_recent` ok. `google_mode()` reads `mock`.
+- P0.7-01 stays open for reviews, posts and media (step 16).
 
 ### P0.7-01 part 1 (branch claude/h-p0-7-01, PR 67, 8 Oct 2026, Hussein's session)
 - Model check: `claude-opus-5-5` (session model and last served model).
