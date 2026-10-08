@@ -60,7 +60,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-01b | Remove leftover references to the retired docs | Sonnet | done | 15 | 4 Oct 2026 |
 | P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | merged (17, 18); live After-merge checks not run, see Evidence | 17, 18 | 4 Oct 2026 |
 | P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | merged in two parts (19, 20); mock-review check passed; live app check and auth template paste still open | 19, 20 | 4 Oct 2026 |
-| P0.1-03 | Move hosting to Vercel and switch kabsi.co (replaces "Move kabsi.co to the new build") | Sonnet | part A PR open (Vercel config, variables, previews, dormant redirect); part B (DNS, address switch, Lovable redirect, Lovable removal) waits on Hussein | 56 | 8 Oct 2026 |
+| P0.1-03 | Move hosting to Vercel and switch kabsi.co (replaces "Move kabsi.co to the new build") | Sonnet | part A merged (56, 8f28a96; Vercel config, variables, previews, dormant redirect); part B (DNS, address switch, Lovable redirect, Lovable removal) waits on Hussein | 56 | 8 Oct 2026 |
 | H-TANSTACK-XSS | Security hotfix: TanStack Start 1.168.32 to 1.168.60 (CVE-2026-102989) | Opus | merged (52, 70c1188); Vercel production build passes; live on kabsi-app.lovable.app only after Hussein's Lovable sync and Publish, see After merge | 52 | 8 Oct 2026 |
 | P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | merged (23); After-merge checks partly run, see Evidence | 23 | 4 Oct 2026 |
 | P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | merged (24); After-merge checks partly run, see Evidence | 24 | 4 Oct 2026 |
@@ -250,6 +250,14 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.1-03 part A After merge (8 Oct 2026, 04:25 to 04:28 UTC, Hussein's session)
+- PR 56 merged with a merge commit, 8f28a96, after CI run 37727127151 passed on head 460f8e3 (App, Edge Functions and Worker, Database all success; the Vercel preview deployment dpl_WGwuaGuYeRVbpDssC2dudRMDVsGY READY, its build ran `check-env` and passed).
+- Vercel production deployment dpl_HY6mvaJwPLhzFJzAyTDFmMWJWm4R for 8f28a96: READY, aliases kabsi-canvas.vercel.app and two others.
+- Deploy workflow: not triggered, by design. PR 56 changes nothing under `supabase/functions/**`, `supabase/config.toml`, `workers/kabsi-go/**` or `deploy.yml`, the only paths the workflow watches. Last Deploy run stays 37705975682 (success); `api` stays version 55.
+- Pages on the production Vercel URL, fetched through the connector: `/login` 200 and `/sitemap.xml` 200, `server: Vercel`, `x-vercel-id` present, `x-robots-tag: noindex`; the inline boot script now labels `*.vercel.app` as "preview". `/pricing` and `/robots.txt` 200 on the preview of the same code. The sitemap, robots and canonical still name kabsi-app.lovable.app: part B, as planned.
+- 390 px: NOT checked. The connector returns HTML only, this sandbox cannot open the vercel.app address in a browser (proxy 403, and Vercel Authentication), and no screen changed in this part. A person with a browser opens https://kabsi-canvas.vercel.app (signed in to Vercel) at 390 px and looks at `/`, `/pricing`, `/login`, `/faq`.
+- Still open for Hussein: After merge steps 1 to 4 of the P0.1-03 block above (delete the 16 old variables and disconnect the integration, Cloudflare DNS, Supabase Auth URLs, Google OAuth consent screen). The domains are not yet added to the Vercel project; the session adds them and gives the exact records when Hussein says go.
 
 ### P0.1-03 part A (branch claude/h-p0-1-03, 8 Oct 2026, Hussein's session)
 - Model: this session is served by claude-sonnet-5-5 (get_session `last_served_model`), the model the card names.
