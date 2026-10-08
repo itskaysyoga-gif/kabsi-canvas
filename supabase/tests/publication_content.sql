@@ -146,8 +146,8 @@ select is(pg_temp.item(kind, 2), case when kind = 'listing_revert' then 'reverti
 select is(public.record_publication(pg_temp.pid(kind, 2), 'verified'), 'verified', kind || ': verified') from k where n = 2;
 select is(pg_temp.item(kind, 2), case when kind = 'listing_revert' then 'reverted' else 'posted' end, kind || ': the item is done')
   from k where n = 2;
-select is((select state || '/' || status from public.publications where id = pg_temp.pid(kind, 2)), 'verified/live',
-  kind || ': status follows: live') from k where n = 2;
+select is((select state from public.publications where id = pg_temp.pid(kind, 2)), 'verified',
+  kind || ': the publication is verified') from k where n = 2;
 select is((select count(*) from public.audit_events e where e.action = 'publication' and e.result = 'live'
             and e.object_id = k.target::text), 1::bigint, kind || ': the publication is in the audit log') from k where n = 2;
 select is(pg_temp.approve(kind, 2) ->> 'created', 'false', kind || ': approving a finished item again creates nothing')

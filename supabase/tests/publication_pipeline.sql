@@ -44,21 +44,24 @@ select ok(
                        'public.claim_publication_check(uuid)', 'public.mock_google_reply(text,text)']) f),
   'the pipeline functions run for the service role only (the browser goes through api/approve and api/action)');
 
--- State and status stay in step both ways.
+-- P0.1-13b part B: state is the only state column; status, its sync trigger and the old concierge path are gone.
+select hasnt_column('public', 'publications', 'status', 'publications.status is dropped');
+select hasnt_trigger('public', 'publications', 'publications_state', 'the state and status sync trigger is dropped');
+select hasnt_function('public', 'concierge_queue_reply', 'concierge_queue_reply is dropped');
+select hasnt_function('private', 'publication_state_of', 'publication_state_of is dropped');
+select has_column('private', 'publications_status_backup_20261008', 'status', 'the backup of status is kept in private');
+select ok(not has_table_privilege('authenticated', 'private.publications_status_backup_20261008', 'select')
+          and not has_table_privilege('anon', 'private.publications_status_backup_20261008', 'select'),
+  'the browser cannot read the backup');
 select is((select state from public.publications where target_id = '00000000-0000-4000-8000-0000000000e1'), 'approved',
-  'a row written the old way (status queued) reads as approved');
-insert into public.publications (location_id, target_type, target_id, payload, approved_by, channel, status)
-values ('00000000-0000-4000-8000-0000000000c1', 'local_post', gen_random_uuid(), '{}', '00000000-0000-4000-8000-0000000000a1', 'dashboard', 'queued')
-returning id as old_id \gset
-update public.publications set status = 'live' where id = :'old_id';
-select is((select state from public.publications where id = :'old_id'), 'verified', 'status live written by an old path reads as verified');
+  'a row inserted without a state reads as approved');
 
 -- Approve: one publication, whatever channel or how many times.
 insert into pub select 'a', (r ->> 'publication_id')::uuid, r from (select pg_temp.approve('a',
   '00000000-0000-4000-8000-000000000101', '00000000-0000-4000-8000-0000000000a1', 'dashboard') r) x;
 select is((select r ->> 'created' from pub where name = 'a'), 'true', 'the first approval creates the publication');
-select is((select state || '/' || status || '/' || route || '/' || channel from public.publications p join pub on pub.id = p.id where pub.name = 'a'),
-  'approved/queued/api/dashboard', 'it starts approved, with the channel');
+select is((select state || '/' || route || '/' || channel from public.publications p join pub on pub.id = p.id where pub.name = 'a'),
+  'approved/api/dashboard', 'it starts approved, with the channel');
 select is((select publish_after - approved_at from public.publications p join pub on pub.id = p.id where pub.name = 'a'),
   interval '10 seconds', 'it goes to Google 10 seconds after the approval (K-70)');
 select is((select idempotency_key from public.publications p join pub on pub.id = p.id where pub.name = 'a'),
@@ -91,8 +94,8 @@ select is(public.claim_publication((select id from pub where name = 'a')) ->> 'r
 select pg_temp.due((select id from pub where name = 'a'));
 select is(public.claim_publication((select id from pub where name = 'a')) ->> 'result', 'claimed', 'claimed once due');
 select is(public.claim_publication((select id from pub where name = 'a')) ->> 'result', 'not_approved', 'a second claim gets nothing');
-select is((select state || '/' || status || '/' || attempts from public.publications p join pub on pub.id = p.id where pub.name = 'a'),
-  'publishing/sent/1', 'publishing, one attempt');
+select is((select state || '/' || attempts from public.publications p join pub on pub.id = p.id where pub.name = 'a'),
+  'publishing/1', 'publishing, one attempt');
 
 -- Google answered: published, then verified.
 select is(public.record_publication((select id from pub where name = 'a'), 'published', p_google_ref => 'accounts/test/locations/mock-victim/reviews/pipe-review-1'),
@@ -100,7 +103,7 @@ select is(public.record_publication((select id from pub where name = 'a'), 'publ
 select is((select state || '/' || reply_state || '/' || existing_reply from public.reviews where id = '00000000-0000-4000-8000-000000000101'),
   'posted/in_review/Thank you for coming.', 'the review shows the reply as sent');
 select is(public.record_publication((select id from pub where name = 'a'), 'verified'), 'verified', 'verified');
-select is((select status from public.publications p join pub on pub.id = p.id where pub.name = 'a'), 'live', 'status follows: live');
+select is((select state from public.publications p join pub on pub.id = p.id where pub.name = 'a'), 'verified', 'the publication is verified');
 select is((select reply_state from public.reviews where id = '00000000-0000-4000-8000-000000000101'), 'live', 'the review shows it live');
 select is((select count(*) from public.audit_events where action = 'publication' and result = 'live'
             and object_id = '00000000-0000-4000-8000-000000000101'), 1::bigint, 'the publication is in the audit log');
@@ -136,7 +139,7 @@ select is(public.record_publication((select id from pub where name = 'r'), 'reje
   'google 400 mock'), 'rejected', 'rejected');
 select is((select state || '/' || reply_state || '/' || reply_state_reason from public.reviews where id = '00000000-0000-4000-8000-000000000103'),
   'drafted/rejected/Google did not accept this reply. Edit it and approve again.', 'the owner gets the review back with the reason');
-select is((select status from public.publications p join pub on pub.id = p.id where pub.name = 'r'), 'rejected', 'status follows: rejected');
+select is((select state from public.publications p join pub on pub.id = p.id where pub.name = 'r'), 'rejected', 'the publication is rejected');
 insert into pub select 'r2', (r ->> 'publication_id')::uuid, r from (select pg_temp.approve('r2',
   '00000000-0000-4000-8000-000000000103', '00000000-0000-4000-8000-0000000000a1', 'dashboard') r) x;
 select is((select r ->> 'created' from pub where name = 'r2'), 'true', 'a rejected reply can be approved again');
@@ -209,11 +212,19 @@ select pg_temp.due((select id from pub where name = 'k'));
 select is(public.claim_publication((select id from pub where name = 'k')) ->> 'result', 'concierge', 'the claim hands it to a person');
 select is((select count(*) from public.concierge_tasks where kind = 'post_reply' and publication_id = (select id from pub where name = 'k')),
   1::bigint, 'one concierge task');
-select is((select state || '/' || status from public.publications p join pub on pub.id = p.id where pub.name = 'k'),
-  'publishing/queued', 'queued for the person (status queued, as staff Mark posted expects)');
-update public.publications set status = 'live', posted_manually_by = '00000000-0000-4000-8000-0000000000a3', posted_manually_at = now()
- where id = (select id from pub where name = 'k') and status = 'queued';
-select is((select state from public.publications p join pub on pub.id = p.id where pub.name = 'k'), 'verified', 'posted by hand reads as verified');
+select is((select state || '/' || route from public.publications p join pub on pub.id = p.id where pub.name = 'k'),
+  'publishing/concierge', 'waiting for the person');
+select throws_ok($$ update public.publications set state = 'verified' where id = (select id from pub where name = 'k') $$,
+  '23514', null, 'a concierge reply cannot be verified without the person who posted it');
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-8000-0000000000a3","role":"authenticated"}', true);
+select is(public.staff_concierge_mark_posted((select id from public.concierge_tasks where publication_id = (select id from pub where name = 'k'))) ->> 'ok',
+  'true', 'staff Mark posted');
+select set_config('request.jwt.claims', '', true);
+select is((select state || '/' || (posted_manually_by is not null)::text from public.publications p join pub on pub.id = p.id where pub.name = 'k'),
+  'verified/true', 'posted by hand reads as verified, with the person');
+select is((select row(actor_type, result, before ->> 'status', after ->> 'state')::text from public.audit_events
+            where action = 'publication' and after ->> 'publication_id' = (select id::text from pub where name = 'k')),
+  row('staff', 'live', 'queued', 'verified')::text, 'the audit line keeps its words, mapped from state');
 
 -- The mock reviews API: counts calls and plays the test modes.
 insert into public.mock_google_reviews (review_id, google_location_id, reviewer_name, star_rating, reply_mode)

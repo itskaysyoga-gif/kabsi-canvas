@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
+import { SENT_STATES } from "@/lib/dashboard";
 import { cn } from "@/lib/utils";
 import { MessageSquareText as PageGlyph, Search, Star } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -63,7 +64,7 @@ async function loadReviews(locationId: string): Promise<Row[]> {
     .select("target_id, payload, created_at")
     .eq("location_id", locationId)
     .eq("target_type", "review_reply")
-    .in("status", ["live", "in_review", "sent"])
+    .in("state", SENT_STATES)
     .order("created_at", { ascending: false })
     .limit(400);
   const mine = new Map<string, string>();
