@@ -295,15 +295,18 @@ const FIELD_LABEL: Record<string, string> = {
   categories: "main category",
 };
 
+// A publication Google has answered for: sent, being checked, or seen on the profile.
+export const SENT_STATES = ["published", "verifying", "checking", "verified"];
+
 export async function loadActivity(locationId: string): Promise<Activity[]> {
   const since30 = new Date(Date.now() - 30 * DAY).toISOString();
   const since7 = new Date(Date.now() - 7 * DAY).toISOString();
   const [pubs, drafts, lastDraft, loc, reports] = await Promise.all([
     supabase
       .from("publications")
-      .select("id, target_type, status, payload, created_at, route")
+      .select("id, target_type, state, payload, created_at, route")
       .eq("location_id", locationId)
-      .in("status", ["live", "in_review", "sent"])
+      .in("state", SENT_STATES)
       .gte("created_at", since30)
       .order("created_at", { ascending: false })
       .limit(8),
@@ -333,12 +336,13 @@ export async function loadActivity(locationId: string): Promise<Activity[]> {
   for (const p of (pubs.data ?? []) as {
     id: string;
     target_type: string;
-    status: string;
+    state: string;
     payload: Record<string, unknown> | null;
     created_at: string;
     route?: string;
   }[]) {
-    const review = p.status === "in_review" ? " (Google is reviewing it)" : "";
+    const review =
+      p.state === "checking" || p.state === "verifying" ? " (Google is reviewing it)" : "";
     const text =
       p.target_type === "review_reply"
         ? p.route === "concierge"

@@ -58,7 +58,7 @@ update public.reviews set state = 'drafted', reviewer_name = 'Sam Lee' where id 
 insert into public.publications (id, location_id, target_type, target_id, payload, approved_by, channel)
 values ('00000000-0000-4000-8000-0000000000f8', '00000000-0000-4000-8000-0000000000c1', 'review_reply',
   '00000000-0000-4000-8000-0000000000e1', '{"text": "Thanks Sam"}', '00000000-0000-4000-8000-0000000000a1', 'email_link');
-update public.publications set status = 'live' where id = '00000000-0000-4000-8000-0000000000f8';
+update public.publications set state = 'verified' where id = '00000000-0000-4000-8000-0000000000f8';
 
 select is((select row(actor_type, actor_id, channel, result, request_id, ip_country, user_agent)::text from public.audit_events
   where action = 'approval' and after ->> 'publication_id' = '00000000-0000-4000-8000-0000000000f8'),
