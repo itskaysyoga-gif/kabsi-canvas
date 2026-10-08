@@ -1,7 +1,7 @@
 // Shared helpers for every Kabsi Edge Function.
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
 
-export const APP_URL = Deno.env.get("APP_URL") ?? "https://kabsi-app.lovable.app";
+export const APP_URL = Deno.env.get("APP_URL") ?? "https://kabsi.co";
 const SENTRY_DSN = Deno.env.get("SENTRY_DSN_EDGE") ??
   "https://59fbe71e08e8d7db4f7c5e477acb2fb5@o4512003528720384.ingest.de.sentry.io/4512145412456528";
 

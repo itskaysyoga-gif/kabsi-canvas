@@ -13,7 +13,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 const searchSchema = z.object({ next: z.string().optional().catch(undefined) });
 // Only same-site paths: "/x", never "//host" or "/\\host" (browsers treat both as another site).
 function safeNext(next?: string) {
-  return next && /^\/(?![\/\\])/.test(next) && !next.includes("\\") ? next : "/app";
+  return next && /^\/(?![/\\])/.test(next) && !next.includes("\\") ? next : "/app";
 }
 // Plain words for the errors Supabase Auth returns.
 function friendlyAuthError(message: string) {
@@ -56,6 +56,7 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Log in | Kabsi" },
+      { name: "robots", content: "noindex" },
       { name: "description", content: "Log in to Kabsi with a secure email code." },
       { property: "og:title", content: "Log in | Kabsi" },
       { property: "og:description", content: "Log in to Kabsi with a secure email code." },

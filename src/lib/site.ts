@@ -1,10 +1,10 @@
 // Public-site facts and SEO helpers. Every number here comes from knowledge/kabsi-facts.md; every sentence
 // must pass docs/KABSI-PLAN.md section 2.2 (no promises of reviews, ratings or rankings; no invented numbers; no Google affiliation).
 
-// Canonical origin. Moves to https://kabsi.co at the domain switch (task P0.1-03).
+// Canonical origin (P0.1-03: kabsi.co is served by Vercel). Canonical links are built from the route path only, so a query string never reaches them.
 // Public Cloudflare Turnstile site key (safe in the browser). The secret lives in Supabase secrets.
 export const TURNSTILE_SITE_KEY = "0x4AAAAAAFHvWh4ra3THq5g0";
-export const SITE_URL = "https://kabsi-app.lovable.app";
+export const SITE_URL = "https://kabsi.co";
 export const CONTACT_EMAIL = "hello@kabsi.co";
 // Kabsi's Google business group (plan Appendix B). Owners invite this ID as a Manager. It is an identifier, not a secret.
 export const KABSI_GROUP_ID = "5481006796";

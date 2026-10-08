@@ -29,7 +29,7 @@ Check this block first. It holds every fact likely to change, verified against t
 | How access works | The owner invites the Kabsi business group **Kabsi Clients, ID 5481006796**, as a **Manager** (People and access, Add, paste the ID, Manager, Invite). Kabsi accepts within minutes once connected. Never the email address hello@kabsi.co. |
 | **[TIME-SENSITIVE]** Google connection | Kabsi's Google API access is under Google's review, with no date. Until then Kabsi runs in test mode and businesses can start in early access (below). |
 | **[TIME-SENSITIVE]** Early access | A person on the Kabsi team does the Google steps by hand: accepts your invitation and posts what you approve, within one working day. You still approve every word. Google Protection is off until Kabsi connects to Google. Early access is limited to 20 businesses. |
-| **[TIME-SENSITIVE]** Address | The app is at kabsi-app.lovable.app and moves to kabsi.co. |
+| Address | The website and the app are at kabsi.co. Older links to kabsi-app.lovable.app forward to the same page on kabsi.co. |
 | Free setup call | A free 15-minute setup call with the team. Ask at hello@kabsi.co. |
 | Contact | hello@kabsi.co for everyone. +961 3 956 917 only in Lebanon, for Whish, OMT, cash and cards. |
 
@@ -117,7 +117,7 @@ Kabsi follows Google's Business Profile guidelines (support.google.com/business/
 - Every app page shows a black banner: "Test mode: Kabsi isn't connected to Google yet. Nothing you post or save is sent to Google." Businesses in early access see an early-access note instead.
 - **Early access:** a business can start before the approval. A person on the Kabsi team accepts your Google invitation and posts what you approve, within one working day. Drafting, the safety checks and your approval work as normal, and you still approve every word. Google Protection stays off until Kabsi connects to Google. Early access is limited to 20 businesses.
 - Real businesses can sign up and finish setup now. A free trial or a paid plan starts when Google access works (section 4).
-- The app currently lives at kabsi-app.lovable.app. It moves to kabsi.co.
+- The website and the app live at kabsi.co. Links sent earlier that use kabsi-app.lovable.app forward to the same page on kabsi.co.
 - The assistant must not give a date for Google's approval. If asked: "We're waiting on Google's review and can't give a date. Your trial or plan starts when access works."
 
 ---

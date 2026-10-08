@@ -4,9 +4,9 @@
 export const LEGACY_HOST = "kabsi-app.lovable.app";
 export const LEGACY_REDIRECT_ORIGIN = "https://kabsi.co";
 
-// Stays false until kabsi.co is served by Vercel (DNS done and checked). Turning it on earlier would send email links
-// to the old product. The DNS follow-up pull request switches it on.
-export const LEGACY_REDIRECT_ENABLED = false;
+// On since kabsi.co is served by Vercel (DNS checked 8 Oct 2026). It only does anything on the Lovable host, after the
+// last Publish of this code in Lovable.
+export const LEGACY_REDIRECT_ENABLED = true;
 
 /** Where a request for the legacy host should go, or null when it should be served as normal. */
 export function legacyRedirectTarget(requestUrl: string, enabled = LEGACY_REDIRECT_ENABLED) {

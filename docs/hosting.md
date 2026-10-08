@@ -25,4 +25,10 @@ Pull request previews use the same Supabase project. Preview and `*.vercel.app` 
 
 ## Old address
 
-`kabsi-app.lovable.app` stays published on Lovable only to redirect old email links to kabsi.co (`src/lib/legacy-host.ts`). The redirect is switched on after kabsi.co is served by Vercel. See the P0.1-03 entry in `docs/KABSI-PROGRESS.md` for the steps and how long Lovable must stay published.
+`kabsi-app.lovable.app` stays published on Lovable only to forward old email links to the same path on kabsi.co (`src/lib/legacy-host.ts`, switched on). It must stay published at least 7 days after `APP_URL` moves to kabsi.co, and 90 days to be safe, then check Lovable visitor analytics before removing it.
+
+## Redirects and indexing (`vercel.json`)
+
+- Old kabsi.co pages with no twin on the new site, permanent: `/product` to `/lebanon`, `/contact` to `/faq`, `/report` to `/how-it-works`, `/admin` and `/auth/...` to `/login`, `/r-not-found` to `/`. `/`, `/how-it-works`, `/pricing`, `/faq`, `/privacy`, `/terms`, `/login` and `/app` exist on the new site.
+- Old review cards: `/r/SEVEN1` redirects (302) to that business's Google review page; any other `/r/<code>` goes to `/` (302). New cards use go.kabsi.co.
+- Only kabsi.co is indexable: `*.vercel.app` (previews and the Vercel address) sends `X-Robots-Tag: noindex`; so do the private paths (`/app`, `/partner`, `/staff`, `/start`, `/login`, `/a/`, `/activate/`).

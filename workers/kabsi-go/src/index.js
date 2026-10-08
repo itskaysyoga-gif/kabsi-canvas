@@ -13,7 +13,7 @@ const DEDUPE_TTL = 600; // D271: one tap per visitor per card per 10 minutes
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const app = (env.APP_ORIGIN || "https://kabsi-app.lovable.app").replace(/\/$/, "");
+    const app = (env.APP_ORIGIN || "https://kabsi.co").replace(/\/$/, "");
     const path = url.pathname.replace(/^\/+|\/+$/g, "");
     if (!path) return Response.redirect("https://kabsi.co", 302);
 
