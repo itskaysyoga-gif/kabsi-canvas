@@ -4,7 +4,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## Where things stand
 
-- **8 Oct 2026, P0.1-06c (Hussein's session, branch claude/h-p0-1-06c):** the demo login moves to `hello+demo@kabsi.co` (lands in the hello@kabsi.co Zoho mailbox, Hussein tested 8 Oct). On Hussein's instruction the demo user is kept and only its address changes (same user id, so the memberships and every demo row stay); nothing is removed. Migration `20261008120000_demo_login_kabsi_address.sql` sets `app_settings.demo_login_email` first, then the user's address, then rewrites the five log rows that carried the old address. Hussein's one sign-in to confirm the code arrives is under After merge.
+- **8 Oct 2026, P0.1-06c merged (PR 63, edd2581; production dpl_8gMSrZ2Z34e2vuBt6RHL2V3ewiK5 READY):** the demo login moves to `hello+demo@kabsi.co` (lands in the hello@kabsi.co Zoho mailbox, Hussein tested 8 Oct). On Hussein's instruction the demo user is kept and only its address changes (same user id, so the memberships and every demo row stay); nothing is removed. Migration `20261008120000_demo_login_kabsi_address.sql` sets `app_settings.demo_login_email` first, then the user's address, then rewrites the five log rows that carried the old address. Hussein's one sign-in to confirm the code arrives is under After merge.
 - **8 Oct 2026, P0.1-03 merged in three parts (PRs 56, 58, 61; production dpl_36T1vWk5RPkHLrmPfUoJpo4HQcmk, 99234fe, READY on kabsi.co).** The website is on Vercel, the Lovable wrapper and leftovers are gone, the old address forwards, Hussein's DNS, Supabase and Google consent steps are done. Next in Wave P0.1: P0.1-V3, P0.1-06c. P0.2-07 (privacy text) can follow, as the plan recommends. Open: see "P0.1-03 After merge" below.
 - **8 Oct 2026, P0.1-03 part C (Hussein's session, branch claude/h-p0-1-03d):** Hussein confirmed the address checks (301 from kabsi-app.lovable.app, `/product` 308, `/r/SEVEN1` 302, `/r/ZZZZ9` 302, the test email's button starts `https://kabsi.co/a/`), kept `/product` to `/lebanon`, and disconnected GitHub in Lovable. Part C removes the Lovable wrapper and every other Lovable leftover (the grep in the card, now only the redirect host check), and `vite.config.ts` uses the TanStack Start, Tailwind, React and Nitro plugins directly. Hussein switched Vercel Web Analytics on by mistake; the package is deliberately not added.
 - **8 Oct 2026, P0.1-03 part B (Hussein's session, branch claude/h-p0-1-03b):** Hussein did DNS (kabsi.co serves Vercel over HTTPS, certificate 06:05 UTC; www redirects; mail and go.kabsi.co work), the Supabase Auth URLs (login on kabsi.co works) and the Google consent URLs (no new warning). Part B moves the address in the repo (`SITE_URL`, sitemap, robots, llms files, facts, Worker `APP_ORIGIN`, Edge Function fallback), adds permanent redirects for the old site's pages and the old `/r/<code>` cards, makes only kabsi.co indexable, and switches the Lovable redirect on. Still Hussein's: the Supabase secret `APP_URL`, the Lovable Publish, Search Console. See After merge.
@@ -174,7 +174,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 P0.1-06c (PR 63):
 - Hussein, once: on https://kabsi.co/login ask for an email code for `hello+demo@kabsi.co`; the code arrives in the hello@kabsi.co mailbox; sign in; Harbour Lane Coffee and Juniper Hair Studio both show with the "Demo data" tag. Then tell the session, which reads back `last_sign_in_at` for the demo user and that `ops_events` gained no row for it.
-- Session: the Deploy workflow is not triggered (no function, Worker or config change); Vercel production deploy READY for the merge commit.
+- Session: passed 8 Oct, see Evidence (Deploy not triggered by design; Vercel production READY).
 
 P0.1-03, what is still open after the merge of part C (everything else passed, see Evidence):
 - A person with a browser, signed in to Vercel (previews are protected), at 390 px and 1440 px: `https://kabsi.co` home, `/pricing`, `/login`, `/faq`; and an email-code sign-in on a preview address (the Supabase redirect pattern is set).
@@ -273,6 +273,12 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.1-06c After merge (8 Oct 2026, 09:51 to 09:55 UTC, Hussein's session)
+- PR 63 merged 09:51 UTC as edd2581 (merge commit) after CI run 37758054927 (App, Edge Functions, Database) and Load run 37758054940 passed on head cad71f0, and the Vercel status was success.
+- Vercel production deployment dpl_8gMSrZ2Z34e2vuBt6RHL2V3ewiK5 for edd2581: READY, aliases `kabsi.co` and `www.kabsi.co`.
+- Deploy workflow: not triggered, by design (the merge changes none of `supabase/functions/**`, `supabase/config.toml`, `workers/kabsi-go/**`, `deploy.yml`); migrations are applied through the connector, as this one was before the merge. Last Deploy run stays 37738419880 (success).
+- Still open: Hussein's one sign-in as `hello+demo@kabsi.co` (After merge).
 
 ### P0.1-06c (branch claude/h-p0-1-06c, 8 Oct 2026, Hussein's session)
 - Model check: the session reported `claude-opus-5-5` (session model and last served model).
@@ -910,7 +916,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
-- 8 Oct 2026 (Hussein's session): P0.1-06c on branch claude/h-p0-1-06c: demo login moved to `hello+demo@kabsi.co` by changing the address of the same user (Hussein's instruction), the old address removed from PROGRESS and from every database row. Open After-merge checks of P0.1-08, P0.1-04a, P0.1-04b and P0.1-06 (demo emails) passed at the start, see Evidence.
+- 8 Oct 2026 (Hussein's session): P0.1-06c merged (PR 63, edd2581), production READY, Deploy not needed; only Hussein's sign-in check is open. Branch claude/h-p0-1-06c: demo login moved to `hello+demo@kabsi.co` by changing the address of the same user (Hussein's instruction), the old address removed from PROGRESS and from every database row. Open After-merge checks of P0.1-08, P0.1-04a, P0.1-04b and P0.1-06 (demo emails) passed at the start, see Evidence.
 - 8 Oct 2026 (Hussein's session): PR 54 (P0.1-13b part B) merged 03:58 UTC as fe2ecf7 on Hussein's "merge first"; Hussein ran the drop in the SQL editor at 04:05; read back: `publications.status` gone, 18 rows in the backup, 0 mismatches, every publications function compiles, jobs and cron running. P0.1-13b done except Hussein's 390 px look. Wave P0.1 still needs P0.1-03 (Vercel) and P0.1-V3; P0.1-06c also open.
 - 8 Oct 2026 (Hussein's session): P0.1-13b part B on branch claude/h-p0-1-13b-drop-status, PR 54: `publications.status` readers moved to `state` and the column dropped, with a backup and an agreement guard. Database suite passed locally on a fresh stack (674 tests); migration rehearsed on seeded rows. CI green on 931df7e (674 tests on a fresh test database). Hussein chose "merge first": merged before the drop; the SQL editor run waits for the Lovable publish.
 - 8 Oct 2026 (Hussein's session): security hotfix H-TANSTACK-XSS, CVE-2026-102989: TanStack Start 1.168.32 to 1.168.60 (router 1.170.41, router plugin 1.168.42), one type fix in `__root.tsx`. Merged as PR 52 (70c1188); Vercel production build passes. Live only after Lovable syncs `main` and Hussein presses Publish.
