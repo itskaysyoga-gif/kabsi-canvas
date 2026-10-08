@@ -6,7 +6,8 @@
 // Review jobs: sync_reviews reads one business's reviews and offers a draft for each new one; draft_reply drafts one
 // review and offers the owner email run; notify_owner sends that business's due emails (the rules in reviews.ts).
 // protection_check compares one business's listing with its baseline (shield.ts). The whole-system steps the 5 minute
-// cron ran (cron.ts) are one job each, offered every 5 minutes.
+// cron ran (cron.ts) are one job each, offered every 5 minutes. photo_files, offered by the daily retention run, removes
+// the uploaded photo files past their K-40 limit (P0.2-01, _shared/retention.ts).
 // Publications (P0.1-13a and P0.1-13b, _shared/publish.ts): publish sends one approved reply, post, photo, special
 // hours period or Google Protection put-back once its undo window has passed; reconcile_publication reads Google for
 // one whose outcome is not known yet. Neither ever sends a write twice. These are the only Google writes in Kabsi.
@@ -23,6 +24,7 @@ import {
   type CheckClaim, type Claim, type Item, NotSent, type Outcome, type PublishDeps, publishOne, reconcileOne, replySeen, type Seen, type Sent,
 } from "../_shared/publish.ts";
 import { accessJob, deletionsJob, ratingsJob, renewalsJob, trialsJob, weeklyJob } from "./cron.ts";
+import { photoFileStore, removeDuePhotoFiles } from "../_shared/retention.ts";
 
 // Offer a job. Returns its id, or null when the same dedupe key is already pending, running or retrying.
 async function enqueueJob(kind: string, locationId: string | null, dedupeKey: string, payload: Record<string, unknown> = {}) {
@@ -232,6 +234,7 @@ const HANDLERS: Record<string, JobHandler> = {
   deletions: step("deletions", deletionsJob),
   trial_reminders: step("trials", trialsJob),
   renewal_reminders: step("renewals", renewalsJob),
+  photo_files: step("photo_files", () => removeDuePhotoFiles(photoFileStore(admin()))),
 };
 
 export async function dispatch(req: Request): Promise<Response> {

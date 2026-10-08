@@ -471,7 +471,7 @@ Never: argue about who is right, share the customer's details, accuse them of ly
 
 ### 8.7 Google content rules Kabsi follows
 
-Kabsi keeps Google content for at most 30 days, as Google's policy requires (details in 9.7), and follows the Google API Services User Data Policy, including the Limited Use requirements. Google Protection limits are in 2.11; Google Q&A is covered in 2.14.
+Kabsi keeps Google content for at most 30 days, as Google's policy requires (details in 9.7; one retention table sets every limit and the daily retention job reads it), and follows the Google API Services User Data Policy, including the Limited Use requirements. Google Protection limits are in 2.11; Google Q&A is covered in 2.14.
 
 ---
 
@@ -513,7 +513,11 @@ Sign-in storage, the last business you opened (in your browser), and PostHog's a
 |---|---|
 | Business data | While you use Kabsi; deleted 7 days after a deletion request |
 | Review text and reviewer names | At most 30 days after Google last sent them |
-| Rating history, quotes in reports sent before 4 October 2026 (newer reports carry none), decided Shield before/after values | 30 days |
+| Rating history, quotes in reports sent before 4 October 2026 (newer reports carry none), decided Google Protection before/after values | 30 days |
+| Other Google profile details Kabsi reads (category and area, Google's answer to a change Kabsi sent) | 30 days |
+| Review ids, star ratings, dates, reply state and your own replies | While you use Kabsi |
+| Your own facts and approved values (About your business, the details you told Google Protection to keep, approved posts and hours) | While you use Kabsi; deleted with the business |
+| Photos you upload | The file is deleted 30 days after the photo is on Google, or soon after you skip it; it then leaves the Photos list (it stays on Google) |
 | Google data after access is removed | Deleted after 30 days unless access returns |
 | Assistant chats | 12 months after the last message |
 | Contact details given to the assistant | Until you ask us to remove them |

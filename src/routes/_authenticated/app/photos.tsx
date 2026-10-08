@@ -42,6 +42,7 @@ async function loadPhotos(locationId: string) {
     .select("id, storage_path, category, suitable, suitability_note, state, created_at")
     .eq("location_id", locationId)
     .neq("state", "skipped")
+    .is("file_deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(40);
   if (error) throw new Error(error.message);

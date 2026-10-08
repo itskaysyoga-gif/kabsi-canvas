@@ -54,6 +54,14 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   Google, none for concierge businesses); access, ratings, weekly reports, deletions, trial and renewal reminders are
   one job each, offered every 5 minutes at their own minute; the tick clears rate buckets unused for a day; the
   ops watchdog alerts when no job has finished in 20 minutes (it no longer watches `kabsi_cron_tick`).
+- `retention.sql` (P0.2-01): `retention_policies` holds the eleven K-40 rows word for word, is closed to anon and
+  authenticated, refuses more than 30 days for a Google class, and a missing class stops the job. Rows are seeded on
+  both sides of every limit (31 and 29 days, 367 and 365, 732 and 729) and `run_retention()` must clear exactly the
+  past ones: review text and names, report quotes, rating snapshots, decided Protection values, Places details,
+  Google's raw responses, drafts and reply payloads of purged reviews, emails, chats, audit entries and the content of
+  old Protection change events. Ids, ratings, dates, the owner's reply, knowledge, baseline and approved payloads stay.
+  Photos 30 days on Google and skipped photos are marked and one `photo_files` job is offered; changing a limit in
+  the table changes what the job clears. The Storage removal itself is `_shared/retention.test.ts` (Deno).
 - `publication_pipeline.sql` (P0.1-13a) and `publication_content.sql` (P0.1-13b): the one publication pipeline for
   replies, posts, photos, special hours and Google Protection put-backs. Per kind: one publication however many times
   or from whichever channel it is approved, the item moves to "on its way" and back on undo inside 10 seconds, one
