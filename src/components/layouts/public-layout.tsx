@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { BookingLink } from "@/components/shared/booking-link";
 import { ChevronDown, LayoutDashboard, LogOut, Menu, UserRound } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -215,6 +216,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <Link to="/partners">Partners</Link>
               <Link to="/lebanon">Kabsi in Lebanon</Link>
               <Link to="/security">Security</Link>
+              <Link to="/setup-call">Book a free setup call</Link>
+              <BookingLink kind="partner" className="font-normal no-underline">
+                For agencies: talk to Rashid
+              </BookingLink>
             </FooterCol>
             <FooterCol title="Legal and contact">
               <Link to="/privacy">Privacy</Link>

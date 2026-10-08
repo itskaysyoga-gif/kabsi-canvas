@@ -11,6 +11,36 @@ export const KABSI_GROUP_ID = "5481006796";
 export const KABSI_GROUP_NAME = "Kabsi Clients";
 export const CONTACT_PHONE = "+961 3 956 917";
 
+/**
+ * The one booking link (P0.1-V3, R-31): a single Calendly event type, "Call with Kabsi", 20 minutes, with one required
+ * question, "What's the call about?". Replace the placeholder with the event's public URL and nothing else changes.
+ * Until it is replaced every booking link falls back to an email to the team, so no page points at a dead address.
+ */
+export const BOOKING_URL = "https://calendly.com/BOOKING_URL_PLACEHOLDER/call-with-kabsi";
+export const BOOKING_READY = !BOOKING_URL.includes("PLACEHOLDER");
+export const SETUP_CALL_MINUTES = 20;
+/** The three answers to the required question. Each placement preselects one through Calendly's `a1` parameter. */
+export const BOOKING_ANSWERS = {
+  setup: "Setting up my Google profile",
+  partner: "Partner or agency",
+  other: "Something else",
+} as const;
+export type BookingKind = keyof typeof BOOKING_ANSWERS;
+
+/** The booking URL for one placement, with its answer preselected. `embed` adds the inline-widget parameters. */
+export function bookingUrl(kind: BookingKind, embed = false): string {
+  const q = [`a1=${encodeURIComponent(BOOKING_ANSWERS[kind])}`];
+  if (embed) q.push("embed_domain=kabsi.co", "embed_type=Inline", "hide_gdpr_banner=1");
+  return `${BOOKING_URL}?${q.join("&")}`;
+}
+
+/** Where a booking link goes: Calendly once the link is set, otherwise an email that asks for a time. */
+export function bookingHref(kind: BookingKind): string {
+  if (BOOKING_READY) return bookingUrl(kind);
+  const subject = `Call with Kabsi: ${BOOKING_ANSWERS[kind]}`;
+  return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}`;
+}
+
 /** The legal seller (plan section 5, D1; R-20). City only, never a street address. Change it here and nowhere else. */
 export const LEGAL_SELLER = "Hussein Slim, Dubai, United Arab Emirates";
 /** The operator line for the footer, terms and emails (R-20). */

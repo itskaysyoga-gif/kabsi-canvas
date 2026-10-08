@@ -22,6 +22,7 @@ import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SecurityRouteImport } from './routes/security'
+import { Route as SetupCallRouteImport } from './routes/setup-call'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
 import { Route as AuthenticatedDesignRouteImport } from './routes/_authenticated/design'
@@ -109,6 +110,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const SecurityRoute = SecurityRouteImport.update({
   id: '/security',
   path: '/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetupCallRoute = SetupCallRouteImport.update({
+  id: '/setup-call',
+  path: '/setup-call',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -247,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/security': typeof SecurityRoute
+  '/setup-call': typeof SetupCallRoute
   '/terms': typeof TermsRoute
   '/app': typeof AuthenticatedAppRouteRouteWithChildren
   '/design': typeof AuthenticatedDesignRoute
@@ -285,6 +292,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/security': typeof SecurityRoute
+  '/setup-call': typeof SetupCallRoute
   '/terms': typeof TermsRoute
   '/design': typeof AuthenticatedDesignRoute
   '/partner': typeof AuthenticatedPartnerRoute
@@ -324,6 +332,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/security': typeof SecurityRoute
+  '/setup-call': typeof SetupCallRoute
   '/terms': typeof TermsRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteRouteWithChildren
   '/_authenticated/design': typeof AuthenticatedDesignRoute
@@ -364,6 +373,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/security'
+    | '/setup-call'
     | '/terms'
     | '/app'
     | '/design'
@@ -402,6 +412,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/security'
+    | '/setup-call'
     | '/terms'
     | '/design'
     | '/partner'
@@ -440,6 +451,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/security'
+    | '/setup-call'
     | '/terms'
     | '/_authenticated/app'
     | '/_authenticated/design'
@@ -480,6 +492,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   SecurityRoute: typeof SecurityRoute
+  SetupCallRoute: typeof SetupCallRoute
   TermsRoute: typeof TermsRoute
   ATokenRoute: typeof ATokenRoute
   ActivateCodeRoute: typeof ActivateCodeRoute
@@ -580,6 +593,13 @@ declare module '@tanstack/react-router' {
       path: '/security'
       fullPath: '/security'
       preLoaderRoute: typeof SecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setup-call': {
+      id: '/setup-call'
+      path: '/setup-call'
+      fullPath: '/setup-call'
+      preLoaderRoute: typeof SetupCallRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -821,6 +841,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   SecurityRoute: SecurityRoute,
+  SetupCallRoute: SetupCallRoute,
   TermsRoute: TermsRoute,
   ATokenRoute: ATokenRoute,
   ActivateCodeRoute: ActivateCodeRoute,

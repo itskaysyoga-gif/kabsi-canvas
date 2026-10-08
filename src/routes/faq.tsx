@@ -11,6 +11,7 @@ import {
   Section,
 } from "@/components/marketing/parts";
 import { AnswerVisual } from "@/components/marketing/visuals";
+import { BookingLink } from "@/components/shared/booking-link";
 import { CONTACT_EMAIL, CONTACT_PHONE, pageHead } from "@/lib/site";
 import { FAQ, faqJsonLd } from "@/lib/faq";
 
@@ -77,6 +78,11 @@ function Page() {
                   </Link>
                 </li>
               </ul>
+              <div className="mt-5 flex flex-col gap-3">
+                <BookingLink kind="other" button>
+                  Talk to Rashid
+                </BookingLink>
+              </div>
             </div>
           </div>
         </aside>

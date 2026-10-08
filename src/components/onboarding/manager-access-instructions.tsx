@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { KABSI_GROUP_ID } from "@/lib/site";
+import { BookingLink } from "@/components/shared/booking-link";
+import { KABSI_GROUP_ID, SETUP_CALL_MINUTES } from "@/lib/site";
 
 const phoneSteps: ReactNode[] = [
   <>
@@ -43,24 +44,33 @@ export function ManagerAccessInstructions({
   const steps = mode === "phone" ? phoneSteps : computerSteps;
 
   return (
-    <ol className="space-y-4">
-      {steps.map((text, index) => (
-        <li key={index} className="flex gap-3">
-          <span className="grid size-7 shrink-0 place-items-center rounded-full bg-kb-yellow text-sm font-bold">
-            {index + 1}
-          </span>
-          <span className="leading-7">
-            {mode === "phone" && index === 1 && businessName ? (
-              <>
-                Choose <strong>{businessName}</strong>, then <strong>⋮</strong> or{" "}
-                <strong>Profile settings</strong>, then <strong>People and access</strong>.
-              </>
-            ) : (
-              text
-            )}
-          </span>
-        </li>
-      ))}
-    </ol>
+    <>
+      <ol className="space-y-4">
+        {steps.map((text, index) => (
+          <li key={index} className="flex gap-3">
+            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-kb-yellow text-sm font-bold">
+              {index + 1}
+            </span>
+            <span className="leading-7">
+              {mode === "phone" && index === 1 && businessName ? (
+                <>
+                  Choose <strong>{businessName}</strong>, then <strong>⋮</strong> or{" "}
+                  <strong>Profile settings</strong>, then <strong>People and access</strong>.
+                </>
+              ) : (
+                text
+              )}
+            </span>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-6 leading-7 text-kb-stone">
+        Stuck?{" "}
+        <BookingLink kind="setup" className="text-kb-ink">
+          Book a free {SETUP_CALL_MINUTES}-minute setup call
+        </BookingLink>
+        .
+      </p>
+    </>
   );
 }

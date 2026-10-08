@@ -1,6 +1,6 @@
 // Questions shown on /faq (all) and the homepage (the first five). Every answer must stay true of the
 // system as built (§3). Used for the FAQPage JSON-LD too, so answers are plain text.
-import { LEGAL_SELLER, PRICES } from "@/lib/site";
+import { LEGAL_SELLER, PRICES, SETUP_CALL_MINUTES } from "@/lib/site";
 
 export const FAQ: { q: string; a: string }[] = [
   {
@@ -18,6 +18,10 @@ export const FAQ: { q: string; a: string }[] = [
   {
     q: "What does Kabsi need from me?",
     a: "Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile, then tell Kabsi a few facts about your business: your services, how you sign off, your phone number, anything you want mentioned or avoided. Drafts only use the facts you give.",
+  },
+  {
+    q: "Can I book a setup call?",
+    a: `Yes. The team offers a free ${SETUP_CALL_MINUTES}-minute setup call at /setup-call, Monday to Friday, 8am to 6pm Beirut time. We guide you, you click, and we never ask for your Google password.`,
   },
   {
     q: "Will Kabsi get me more reviews, a better rating or a higher ranking?",

@@ -4,6 +4,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## Where things stand
 
+- **8 Oct 2026, P0.1-V3 (Hussein's session, branch claude/h-p0-1-v3):** the `/setup-call` page, `BOOKING_URL` with its three prefilled variants (`src/lib/site.ts`) and every placement are built and merged-ready, but **no Calendly connector is installed in the session, so the event type was not created or read back and the real link is not set.** `BOOKING_URL` holds a placeholder; until Hussein replaces it every booking link opens an email to hello@kabsi.co, so no page points at a dead address. The task stays "built, waiting on Calendly" until the three steps under After merge are done.
 - **8 Oct 2026, P0.7-01 part 1 (Hussein's session, branch claude/h-p0-7-01, PR 67):** first real Google calls, read-only, as hello@kabsi.co (Hussein set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`; `GOOGLE_MODE` not set; `google_mode()` stays `mock`). The token has `business.manage` and sees 3 accounts; Kabsi Clients (`accounts/113746201522792609010`) holds Yawmiyati and Abou Hamze Auto Center as MANAGER. 30 v1 reads, all 200, saved redacted in `tests/fixtures/google/live/`; findings in `docs/google/live-findings.md`. **Reviews, posts and media are blocked on Google:** `mybusiness.googleapis.com` is not enabled (Hussein's enable fails PERMISSION_DENIED `servicemanagement.services.bind`; the reviews list call returns 403 SERVICE_DISABLED); case 1-4624000041157. P0.7-01 stays open for those three; P0.7-01b can start on the v1 modules; P0.7-04 waits.
 - **Correction, 8 Oct 2026 (P0.7-01):** the P0.7-01a line below and step 13 said the Google My Business API (reviews, posts, media) was enabled on 7 Oct with a quota of 300. That was wrong: it is not enabled and has no quota (see the P0.7-01 line above and `docs/google/api-access.md`).
 - **8 Oct 2026, P0.7-01a (Hussein's session, branch claude/h-p0-7-01a):** `docs/google/api-access.md` written: which Google API serves which module, base URL, enabled state and quota. Hussein's steps are recorded as done: project number 856347937978 confirmed for smiling-chess-505915-b7 and 300 requests per minute on Account Management, Business Information, Notifications, Place Actions, Q&A and Verifications (7 Oct); the Google My Business API (reviews, posts, media) enabled (7 Oct); its quota reads 300 requests per minute (8 Oct). No Google call was made; Google is still in mock mode (`google_mode()` read `mock` on 8 Oct). The card's live-call line (one read-only 200 each for reviews, posts, media) moves to P0.7-01. Next in Wave P0.G: P0.7-01 (Opus, asks Hussein before its first live call).
@@ -77,7 +78,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-06c | Move the demo login to a kabsi.co address | Opus | merged (63); migration live and read back; Hussein's one sign-in check under After merge, then done | 63 | 8 Oct 2026 |
 | P0.1-V1 | Brand kit text and shot sheets for videos 1 to 8 | Sonnet (run on Opus in Hussein's session) | done (merged 31 on Hussein's "merge"; docs only, no After-merge checks) | 31 | 4 Oct 2026 |
 | P0.1-V2 | Shot sheets for videos 9 to 16 and website videos W1 to W5 | Sonnet | done (merged 32 on Hussein's "merge"; docs only, no After-merge checks) | 32 | 4 Oct 2026 |
-| P0.1-V3 | Setup-call and partner-call booking links | Sonnet | todo | | |
+| P0.1-V3 | Setup-call and partner-call booking links | Sonnet | page, helpers and placements built; Calendly event and real `BOOKING_URL` still to do by hand (no connector), see After merge | see Evidence | 8 Oct 2026 |
 | P0.1-07 | Database test suite in CI | Opus | done (merged 33; no After-merge checks) | 33 | 4 Oct 2026 |
 | P0.1-08 | Security hardening of the database API | Opus | merged (35); After-merge checks partly run, see Evidence | 35 | 4 Oct 2026 |
 | P0.1-09 | Tenant model: organisations, connections, subscriptions | Opus | merged (36); After-merge calls checked through RLS, browser smoke still open, see Evidence | 36 | 4 Oct 2026 |
@@ -175,6 +176,12 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P1-22 | Nora on WhatsApp | Opus | todo | | |
 
 ## After merge
+
+P0.1-V3 (setup-call and partner-call links). Hussein, by hand, because the session has no Calendly connector:
+1. Calendly (free plan, R-31): exactly one event type named "Call with Kabsi", 20 minutes, one required question "What's the call about?" as a dropdown or radio with exactly three answers: Setting up my Google profile, Partner or agency, Something else (spelled exactly so; the site preselects them by text). Availability Monday to Friday, 8am to 6pm Asia/Beirut, which already covers US East Coast mornings. Calendly's default look.
+2. Account email: R-32 says Calendly must use a kabsi.co address, never a personal one, and plan section 5 step 4 lists rashid.hamzy@gmail.com for removal. The account named for this task is that Gmail address. See Decisions to confirm.
+3. Replace `BOOKING_URL` in `src/lib/site.ts` with the event's public URL (form `https://calendly.com/<account-name>/call-with-kabsi`) and nothing else; then a session curls the three variants for 200: `bookingUrl("setup")`, `bookingUrl("partner")`, `bookingUrl("other")`, and checks each opens with its answer selected. Until then the feature-truth rows for the booking link stay "Not live".
+4. Session, once the link is real: read the event back through the Calendly connector if one is then installed, and mark P0.1-V3 done.
 
 P0.7-01 part 1 (PR 67):
 - Session: passed 8 Oct, see Evidence (Deploy run 37806335182 success, `google-capture` version 4 from the repo, `health` token ok with `business.manage`, 3 accounts, `google_mode` `mock`).
@@ -282,6 +289,13 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.1-V3 (branch claude/h-p0-1-v3, 8 Oct 2026, Hussein's session)
+
+- Open After-merge checks run at the start: the cron list was read through the connector (all 19 jobs succeeded on 8 Oct, newest 18:21 UTC; `kabsi_cleanup_jobs_log` last 4 Oct is its own schedule). The curl checks on kabsi.co and the Lovable address cannot run here (proxy answers 403), so they stay open for a terminal and browser, as listed above.
+- Calendly: `ListConnectors` returns none; the registry lists Calendly as not installed. No event type was created or read back.
+- Built: `BOOKING_URL`, `BOOKING_ANSWERS`, `bookingUrl()`, `bookingHref()` in `src/lib/site.ts`; `src/components/shared/booking-link.tsx`; route `src/routes/setup-call.tsx` (inline widget iframe when the link is real, email card otherwise; `?topic=setup|partner|other`); placements: footer Company column ("Book a free setup call", "For agencies: talk to Rashid"), pricing small print and the FAQ list (setup call question), FAQ page side card ("Talk to Rashid", answer "Something else"), Partners hero ("Talk to Rashid", answer "Partner or agency"), and "Stuck? Book a free 20-minute setup call" under the steps in `manager-access-instructions.tsx`, which is shared by `/manager-steps` and the onboarding access step. `knowledge/kabsi-facts.md` and `public/llms-full.txt` updated. `src/routeTree.gen.ts` regenerated by the build, not by hand.
+- Checks: `npm run typecheck` clean, `npm run lint:changed` exit 0, `npm test` 32 passed (new `tests/booking.test.ts`: three answers, `a1` preselect per variant, embed parameters, no dead link while the placeholder is set), `npm run build` succeeds. 390 px and 1440 px looks not done (no browser pass in this session).
 
 ### P0.7-01 part 1 After merge (8 Oct 2026, 16:07 to 16:11 UTC, Hussein's session)
 - PR 67 merged 16:07 UTC as a48160f (merge commit) after CI run 37804628192 (App, Edge Functions and Worker, Database) and Load run 37804628104 passed on head 26a1738, and the Vercel status was success.
@@ -841,6 +855,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Decisions to confirm
 
+- P0.1-V3 (8 Oct): (a) The Calendly account named in the task is rashid.hamzy@gmail.com, a personal address; R-32 and plan section 2.2 forbid a personal email in Calendly and list that address for removal (section 5 step 4). Nothing in the repo contains it. Move the account to a kabsi.co address or confirm the exception. (b) The event is 20 minutes on Hussein's instruction; the card and older copy said 15 minutes, so the site and facts now say 20. (c) Until the real link is set, booking links fall back to an email to hello@kabsi.co instead of a placeholder Calendly address. (d) The page and the facts name "Monday to Friday, 8am to 6pm Beirut time".
 - 8 Oct 2026, P0.7-01: the live capture runs in a new internal function, `google-capture` (cron secret, verify_jwt false like `health`), not inside `health`, so `health` stays tiny. It sends GETs only to Business Profile hosts, reads only the two Kabsi-owned profiles, removes personal data before returning, and runs whatever `GOOGLE_MODE` says because it never writes. It stays deployed for the blocked v4 part of P0.7-01 and for P0.7-01b; remove it (and `config.toml`'s line) when Wave P0.G is done.
 - 8 Oct 2026, P0.7-01: before merge it was deployed through the connector (versions 1 to 3) with trimmed copies of `_shared/kabsi.ts`, `concierge.ts`, `jobs.ts` (only what `client.ts` uses); the merge's Deploy run replaces them with the repo files.
 - 8 Oct 2026, P0.7-01: fixtures keep the first 3 days of each daily metric series (Google sent 31) and, for Abou Hamze's attribute metadata, only the attributes not in Yawmiyati's list, to keep the files small; the notes in each file say so.
