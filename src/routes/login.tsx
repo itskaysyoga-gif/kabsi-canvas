@@ -56,6 +56,7 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Log in | Kabsi" },
+      { name: "robots", content: "noindex" },
       { name: "description", content: "Log in to Kabsi with a secure email code." },
       { property: "og:title", content: "Log in | Kabsi" },
       { property: "og:description", content: "Log in to Kabsi with a secure email code." },

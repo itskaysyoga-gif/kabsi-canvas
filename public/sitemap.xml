@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
-    <loc>https://kabsi-app.lovable.app</loc><lastmod>2026-09-27</lastmod><changefreq>weekly</changefreq><priority>1.0</priority>
+    <loc>https://kabsi.co</loc><lastmod>2026-09-27</lastmod><changefreq>weekly</changefreq><priority>1.0</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/hero-home-1600.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-bakery-1200.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-restaurant-1200.webp</image:loc></image:image>
@@ -13,22 +13,22 @@
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-hotel-1200.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/how-it-works</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <loc>https://kabsi.co/how-it-works</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/hero-how-1600.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-cafe-1200.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-dentist-1200.webp</image:loc></image:image>
-    <image:image><image:loc>https://kabsi-app.lovable.app/images/nfc-card-closeup.webp</image:loc></image:image>
+    <image:image><image:loc>https://kabsi.co/images/nfc-card-closeup.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/lebanon</loc><lastmod>2026-09-29</lastmod><changefreq>monthly</changefreq><priority>0.5</priority>
+    <loc>https://kabsi.co/lebanon</loc><lastmod>2026-09-29</lastmod><changefreq>monthly</changefreq><priority>0.5</priority>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/pricing</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.9</priority>
+    <loc>https://kabsi.co/pricing</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.9</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/hero-pricing-1600.webp</image:loc></image:image>
-    <image:image><image:loc>https://kabsi-app.lovable.app/images/nfc-cards.webp</image:loc></image:image>
+    <image:image><image:loc>https://kabsi.co/images/nfc-cards.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/partners</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
+    <loc>https://kabsi.co/partners</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/hero-partners-1600.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-bakery-1200.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-restaurant-1200.webp</image:loc></image:image>
@@ -38,33 +38,33 @@
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-garage-1200.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-boutique-1200.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-hotel-1200.webp</image:loc></image:image>
-    <image:image><image:loc>https://kabsi-app.lovable.app/images/nfc-card-closeup.webp</image:loc></image:image>
+    <image:image><image:loc>https://kabsi.co/images/nfc-card-closeup.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/google-review-link</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <loc>https://kabsi.co/google-review-link</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/hero-tool-1600.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/guide-link-1600.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-cafe-1200.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/faq</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.6</priority>
+    <loc>https://kabsi.co/faq</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.6</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/hero-faq-1600.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-hotel-1200.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/about</loc><lastmod>2026-09-29</lastmod><changefreq>yearly</changefreq><priority>0.4</priority>
+    <loc>https://kabsi.co/about</loc><lastmod>2026-09-29</lastmod><changefreq>yearly</changefreq><priority>0.4</priority>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/security</loc><lastmod>2026-09-29</lastmod><changefreq>yearly</changefreq><priority>0.5</priority>
+    <loc>https://kabsi.co/security</loc><lastmod>2026-09-29</lastmod><changefreq>yearly</changefreq><priority>0.5</priority>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/privacy</loc><lastmod>2026-09-27</lastmod><changefreq>yearly</changefreq><priority>0.3</priority>
+    <loc>https://kabsi.co/privacy</loc><lastmod>2026-09-27</lastmod><changefreq>yearly</changefreq><priority>0.3</priority>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/terms</loc><lastmod>2026-09-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority>
+    <loc>https://kabsi.co/terms</loc><lastmod>2026-09-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/guides</loc><lastmod>2026-09-27</lastmod><changefreq>weekly</changefreq><priority>0.7</priority>
+    <loc>https://kabsi.co/guides</loc><lastmod>2026-09-27</lastmod><changefreq>weekly</changefreq><priority>0.7</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/hero-guides-1600.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/guide-reply-1600.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/guide-negative-1600.webp</image:loc></image:image>
@@ -73,27 +73,27 @@
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/guide-link-1600.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/guides/how-to-reply-to-google-reviews</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
+    <loc>https://kabsi.co/guides/how-to-reply-to-google-reviews</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/guide-reply-1600.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/guides/how-to-respond-to-negative-google-reviews</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
+    <loc>https://kabsi.co/guides/how-to-respond-to-negative-google-reviews</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/guide-negative-1600.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/guides/can-you-remove-a-google-review</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
+    <loc>https://kabsi.co/guides/can-you-remove-a-google-review</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/guide-remove-1600.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/guides/add-manager-google-business-profile</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
+    <loc>https://kabsi.co/guides/add-manager-google-business-profile</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/guide-manager-1600.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/guides/google-review-link-and-qr-code</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
+    <loc>https://kabsi.co/guides/google-review-link-and-qr-code</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/guide-link-1600.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/for</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <loc>https://kabsi.co/for</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-restaurant-1200.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-bakery-1200.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-dentist-1200.webp</image:loc></image:image>
@@ -104,36 +104,36 @@
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-florist-1200.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/for/restaurants</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <loc>https://kabsi.co/for/restaurants</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-restaurant-1200.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/for/cafes-and-bakeries</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <loc>https://kabsi.co/for/cafes-and-bakeries</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-bakery-1200.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-cafe-1200.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/for/clinics-and-dentists</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <loc>https://kabsi.co/for/clinics-and-dentists</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-dentist-1200.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/for/salons-and-barbers</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <loc>https://kabsi.co/for/salons-and-barbers</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-salon-1200.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/for/hotels-and-guesthouses</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <loc>https://kabsi.co/for/hotels-and-guesthouses</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-hotel-1200.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/for/garages-and-auto-repair</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <loc>https://kabsi.co/for/garages-and-auto-repair</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-garage-1200.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/for/shops-and-boutiques</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <loc>https://kabsi.co/for/shops-and-boutiques</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-boutique-1200.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi-app.lovable.app/for/florists</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <loc>https://kabsi.co/for/florists</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-florist-1200.webp</image:loc></image:image>
   </url>
 </urlset>

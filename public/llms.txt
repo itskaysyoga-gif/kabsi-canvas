@@ -24,41 +24,41 @@ Key facts:
 
 ## Main pages
 
-- [Home](https://kabsi-app.lovable.app/): a reply ready for every new review, with an example review and draft
-- [How it works](https://kabsi-app.lovable.app/how-it-works): access, drafts, approval, who can use Kabsi
-- [Pricing](https://kabsi-app.lovable.app/pricing): Free and Pro plans, trial, payment methods, refunds
-- [FAQ](https://kabsi-app.lovable.app/faq): what Kabsi does, eligibility, approvals, languages, access, Google Protection, Gemini, payment
-- [Lebanon](https://kabsi-app.lovable.app/lebanon): the NFC card and setup bundle, Lebanon only
-- [Partners](https://kabsi-app.lovable.app/partners): wholesale for card sellers and agencies
-- [Free Google review link and QR code](https://kabsi-app.lovable.app/google-review-link): no sign-up tool
-- [About](https://kabsi-app.lovable.app/about): who built Kabsi and why it has its name
-- [Security](https://kabsi-app.lovable.app/security): Manager access, approvals, removal and Google data retention
+- [Home](https://kabsi.co/): a reply ready for every new review, with an example review and draft
+- [How it works](https://kabsi.co/how-it-works): access, drafts, approval, who can use Kabsi
+- [Pricing](https://kabsi.co/pricing): Free and Pro plans, trial, payment methods, refunds
+- [FAQ](https://kabsi.co/faq): what Kabsi does, eligibility, approvals, languages, access, Google Protection, Gemini, payment
+- [Lebanon](https://kabsi.co/lebanon): the NFC card and setup bundle, Lebanon only
+- [Partners](https://kabsi.co/partners): wholesale for card sellers and agencies
+- [Free Google review link and QR code](https://kabsi.co/google-review-link): no sign-up tool
+- [About](https://kabsi.co/about): who built Kabsi and why it has its name
+- [Security](https://kabsi.co/security): Manager access, approvals, removal and Google data retention
 
 ## For each kind of business
 
-- [All businesses](https://kabsi-app.lovable.app/for)
-- [Restaurants](https://kabsi-app.lovable.app/for/restaurants)
-- [Cafés and bakeries](https://kabsi-app.lovable.app/for/cafes-and-bakeries)
-- [Clinics and dentists](https://kabsi-app.lovable.app/for/clinics-and-dentists)
-- [Salons and barbers](https://kabsi-app.lovable.app/for/salons-and-barbers)
-- [Hotels and B&Bs](https://kabsi-app.lovable.app/for/hotels-and-guesthouses)
-- [Garages and auto repair](https://kabsi-app.lovable.app/for/garages-and-auto-repair)
-- [Shops and boutiques](https://kabsi-app.lovable.app/for/shops-and-boutiques)
-- [Florists](https://kabsi-app.lovable.app/for/florists)
+- [All businesses](https://kabsi.co/for)
+- [Restaurants](https://kabsi.co/for/restaurants)
+- [Cafés and bakeries](https://kabsi.co/for/cafes-and-bakeries)
+- [Clinics and dentists](https://kabsi.co/for/clinics-and-dentists)
+- [Salons and barbers](https://kabsi.co/for/salons-and-barbers)
+- [Hotels and B&Bs](https://kabsi.co/for/hotels-and-guesthouses)
+- [Garages and auto repair](https://kabsi.co/for/garages-and-auto-repair)
+- [Shops and boutiques](https://kabsi.co/for/shops-and-boutiques)
+- [Florists](https://kabsi.co/for/florists)
 
 ## Guides
 
-- [How to reply to Google reviews](https://kabsi-app.lovable.app/guides/how-to-reply-to-google-reviews)
-- [How to respond to a negative Google review](https://kabsi-app.lovable.app/guides/how-to-respond-to-negative-google-reviews)
-- [Can you remove a Google review?](https://kabsi-app.lovable.app/guides/can-you-remove-a-google-review)
-- [How to add a manager to your Google Business Profile](https://kabsi-app.lovable.app/guides/add-manager-google-business-profile)
-- [How to get your Google review link and QR code](https://kabsi-app.lovable.app/guides/google-review-link-and-qr-code)
+- [How to reply to Google reviews](https://kabsi.co/guides/how-to-reply-to-google-reviews)
+- [How to respond to a negative Google review](https://kabsi.co/guides/how-to-respond-to-negative-google-reviews)
+- [Can you remove a Google review?](https://kabsi.co/guides/can-you-remove-a-google-review)
+- [How to add a manager to your Google Business Profile](https://kabsi.co/guides/add-manager-google-business-profile)
+- [How to get your Google review link and QR code](https://kabsi.co/guides/google-review-link-and-qr-code)
 
 ## Full facts
 
-- [Everything about Kabsi in one file](https://kabsi-app.lovable.app/llms-full.txt): product, eligibility, setup, prices, partners, policies, troubleshooting and FAQ
+- [Everything about Kabsi in one file](https://kabsi.co/llms-full.txt): product, eligibility, setup, prices, partners, policies, troubleshooting and FAQ
 
 ## Optional
 
-- [Privacy policy](https://kabsi-app.lovable.app/privacy)
-- [Terms of service](https://kabsi-app.lovable.app/terms)
+- [Privacy policy](https://kabsi.co/privacy)
+- [Terms of service](https://kabsi.co/terms)

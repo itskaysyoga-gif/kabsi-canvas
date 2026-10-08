@@ -2,9 +2,15 @@ import { describe, expect, it } from "vitest";
 import { LEGACY_REDIRECT_ENABLED, legacyRedirectTarget } from "../src/lib/legacy-host";
 
 describe("legacyRedirectTarget", () => {
-  it("is switched off until kabsi.co is on Vercel", () => {
-    expect(LEGACY_REDIRECT_ENABLED).toBe(false);
-    expect(legacyRedirectTarget("https://kabsi-app.lovable.app/pricing")).toBeNull();
+  it("is switched on now that kabsi.co is on Vercel", () => {
+    expect(LEGACY_REDIRECT_ENABLED).toBe(true);
+    expect(legacyRedirectTarget("https://kabsi-app.lovable.app/pricing")).toBe(
+      "https://kabsi.co/pricing",
+    );
+  });
+
+  it("can be switched off", () => {
+    expect(legacyRedirectTarget("https://kabsi-app.lovable.app/pricing", false)).toBeNull();
   });
 
   it("keeps the path and query of an old email link when on", () => {

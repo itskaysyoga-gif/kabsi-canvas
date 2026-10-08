@@ -2,11 +2,139 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "npm install --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund",
   "buildCommand": "node scripts/check-env.mjs && npm run build",
+  "redirects": [
+    {
+      "source": "/r/:code(SEVEN1|seven1)",
+      "destination": "https://search.google.com/local/writereview?placeid=ChIJJ8-7quchHxURgn5sxhONNLI",
+      "statusCode": 302
+    },
+    {
+      "source": "/r/:path*",
+      "destination": "/",
+      "statusCode": 302
+    },
+    {
+      "source": "/r-not-found",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/product/:path*",
+      "destination": "/lebanon",
+      "permanent": true
+    },
+    {
+      "source": "/contact/:path*",
+      "destination": "/faq",
+      "permanent": true
+    },
+    {
+      "source": "/report/:path*",
+      "destination": "/how-it-works",
+      "permanent": true
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "/login",
+      "permanent": true
+    },
+    {
+      "source": "/auth/:path*",
+      "destination": "/login",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
-      "has": [{ "type": "host", "value": "(.*)\\.vercel\\.app" }],
-      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
+      "has": [
+        {
+          "type": "host",
+          "value": "(.*)\\.vercel\\.app"
+        }
+      ],
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/r/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        }
+      ]
+    },
+    {
+      "source": "/app/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/partner/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/staff/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/start/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/login",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/a/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/activate/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
     }
   ]
 }
