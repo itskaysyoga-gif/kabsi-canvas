@@ -22,8 +22,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      # bun.lock points at Lovable's private registry cache, so CI installs from npm like the local setup
-      # (package-lock.json is gitignored, D265).
+      # CI installs from npm like the local setup and Vercel (package-lock.json is gitignored, D265).
       - name: Install
         run: npm install --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund
       - name: Type-check
