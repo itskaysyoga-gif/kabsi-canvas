@@ -61,7 +61,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-01b | Remove leftover references to the retired docs | Sonnet | done | 15 | 4 Oct 2026 |
 | P0.1-02a | Public site: wording that breaks Google's rules or describes removed features | Sonnet | merged (17, 18); live After-merge checks not run, see Evidence | 17, 18 | 4 Oct 2026 |
 | P0.1-02b | App, emails and Nora: the same wording fixes | Sonnet | merged in two parts (19, 20); mock-review check passed; live app check and auth template paste still open | 19, 20 | 4 Oct 2026 |
-| P0.1-03 | Move hosting to Vercel and switch kabsi.co (replaces "Move kabsi.co to the new build") | Sonnet | part A merged (56); part B PR open (address switch, old-page and old-card redirects, indexing, Lovable redirect on); Lovable removal is part C after the 301 is verified | 56, 58 | 8 Oct 2026 |
+| P0.1-03 | Move hosting to Vercel and switch kabsi.co (replaces "Move kabsi.co to the new build") | Sonnet | part A merged (56); part B merged (58, 5d76414: address switch, old-page and old-card redirects, indexing, Lovable redirect on); still open: Supabase secret `APP_URL`, the Lovable Publish and its 301 check, Search Console, then part C (Lovable removal) | 56, 58 | 8 Oct 2026 |
 | H-TANSTACK-XSS | Security hotfix: TanStack Start 1.168.32 to 1.168.60 (CVE-2026-102989) | Opus | merged (52, 70c1188); Vercel production build passes; live on kabsi-app.lovable.app only after Hussein's Lovable sync and Publish, see After merge | 52 | 8 Oct 2026 |
 | P0.1-04a | AI and Google-rules fixes in drafting, part A: replies and posts without contact details, no review-derived keywords, no report quotes, review cap | Opus | merged (23); After-merge checks partly run, see Evidence | 23 | 4 Oct 2026 |
 | P0.1-04b | AI and Google-rules fixes in drafting, part B: `ai_usage` migration, per-business and global daily AI budget, owner message, #kabsi-alerts | Opus | merged (24); After-merge checks partly run, see Evidence | 24 | 4 Oct 2026 |
@@ -260,6 +260,14 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.1-03 part B After merge (8 Oct 2026, 06:35 to 06:40 UTC, Hussein's session)
+- PR 58 merged, 5d76414, after CI run 37738079655 passed on head 8654d0b. An earlier CI run failed on `lint:changed` (a redundant `\/` in `src/routes/login.tsx` line 16, an old warning surfaced because the file was edited); fixed with no change in behaviour (the same four paths accepted or refused) and CI went green.
+- Deploy workflow run 37738419880 on 5d76414: success (06:35:09 to 06:37:08 UTC). Edge Functions all redeployed at 06:35:33 UTC (`api` version 56, `content` 49, `tap` 47, `slack` 42); the `kabsi-go` Worker deployed in the same run with `APP_ORIGIN` `https://kabsi.co`.
+- Vercel production deployment dpl_GmyNKxfD3aCj19iyFaEfAefKMcJR for 5d76414: READY.
+- On the real domain, through the Vercel connector: `https://kabsi.co/robots.txt` 200, `server: Vercel`, no `x-robots-tag`, the new text with `Sitemap: https://kabsi.co/sitemap.xml` and the four explicit bot groups; `https://kabsi.co/pricing?utm_source=x` 200, no `x-robots-tag`, canonical and og:url `https://kabsi.co/pricing`, JSON-LD urls on kabsi.co, `x-vercel-id` present. Not run from here: the sitemap body (it is the file in the repo, 26 kabsi.co URLs) and www redirect (Hussein checked it); curl to kabsi.co is refused by the sandbox egress policy.
+- `app_settings.app_url` set to `https://kabsi.co` (UPDATE read back: key `app_url`, value `https://kabsi.co`; one row, no data deleted).
+- Not yet checked: which address a new review email carries (needs the Supabase secret `APP_URL`, Hussein's step 2); `kabsi-app.lovable.app` answering 301 (needs Hussein's Lovable Publish, step 3); the real-domain curls for the redirects (step 3b); Search Console (step 4). 390 px: no screen changed in this part.
 
 ### P0.1-03 part B (branch claude/h-p0-1-03b, 8 Oct 2026, Hussein's session)
 - Read from the old project through the connector (project 0044d32e, `HEAD`): routes `/`, `/product`, `/how-it-works`, `/pricing`, `/faq`, `/contact`, `/report`, `/privacy`, `/terms`, `/login`, `/app`, `/admin`, `/auth/callback`, `/r/$code` (and `/r-not-found`); its sitemap was `https://kabsi.co/sitemap.xml` (9 URLs); its `/r/$code` resolved a tag in the old database and 302ed to the Google review page with no-store and no-referrer headers, logging taps.
