@@ -5,7 +5,16 @@ import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
 import { CtaBand, Eyebrow, H2, IconBadge, PageHero, Section } from "@/components/marketing/parts";
 import { PricingVisual } from "@/components/marketing/visuals";
-import { CONTACT_PHONE, CTA_PRIMARY, PRICES, PRODUCT_LD, TRIAL_LINE, pageHead } from "@/lib/site";
+import { BookingLink } from "@/components/shared/booking-link";
+import {
+  CONTACT_PHONE,
+  CTA_PRIMARY,
+  PRICES,
+  PRODUCT_LD,
+  SETUP_CALL_MINUTES,
+  TRIAL_LINE,
+  pageHead,
+} from "@/lib/site";
 import { useIsLebanon } from "@/lib/region";
 import { cn } from "@/lib/utils";
 
@@ -154,6 +163,13 @@ function Page() {
             <Fact>
               Kabsi works with a verified Google Business Profile for a business that meets
               customers in person or travels to them.
+            </Fact>
+            <Fact>
+              Setting up and not sure? Book a free {SETUP_CALL_MINUTES}-minute setup call and we
+              guide you, you click.{" "}
+              <BookingLink kind="setup" className="text-kb-ink">
+                Book a free setup call
+              </BookingLink>
             </Fact>
           </ul>
         </div>

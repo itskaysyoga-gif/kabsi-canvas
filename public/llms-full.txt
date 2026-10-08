@@ -34,7 +34,7 @@ Check this block first. It holds every fact likely to change, verified against t
 | **[TIME-SENSITIVE]** Google connection | Kabsi's Google API access is under Google's review, with no date. Until then Kabsi runs in test mode and businesses can start in early access (below). |
 | **[TIME-SENSITIVE]** Early access | A person on the Kabsi team does the Google steps by hand: accepts your invitation and posts what you approve, within one working day. You still approve every word. Google Protection is off until Kabsi connects to Google. Early access is limited to 20 businesses. |
 | Address | The website and the app are at kabsi.co. Older links to kabsi-app.lovable.app forward to the same page on kabsi.co. |
-| Free setup call | A free 15-minute setup call with the team. Ask at hello@kabsi.co. |
+| Free setup call | A free 20-minute call with the team ("Call with Kabsi"), Monday to Friday, 8am to 6pm Beirut time, booked at kabsi.co/setup-call. One Calendly event with one required question, "What's the call about?", and three answers: Setting up my Google profile, Partner or agency, Something else. Each link on the site preselects its own answer: the footer, FAQ, pricing and Manager steps links use "Setting up my Google profile"; "For agencies: talk to Rashid" (footer) and "Talk to Rashid" (Partners) use "Partner or agency"; "Talk to Rashid" on the FAQ page uses "Something else". Until the Calendly link is live, every booking link opens an email to hello@kabsi.co. We guide, you click; we never ask for your Google password. |
 | Contact | hello@kabsi.co for everyone. +961 3 956 917 only in Lebanon, for Whish, OMT, cash and cards. |
 
 ---
@@ -627,7 +627,7 @@ Gemini is Google's free assistant for one verified profile that you open and ask
 Any business with a verified Google Business Profile that you own or manage. Setup asks first. If your profile isn't verified yet, or someone else manages it, setup shows what to do on Google, and you can come back.
 
 **Can I book a setup call?**
-Yes. The team offers a free 15-minute setup call. Email hello@kabsi.co and we'll arrange a time. Staff never sign in to your Google account: you send the invitation yourself.
+Yes. The team offers a free 20-minute setup call, Monday to Friday, 8am to 6pm Beirut time. Book it at kabsi.co/setup-call, or email hello@kabsi.co and we'll arrange a time. Staff never sign in to your Google account: you send the invitation yourself.
 
 **How does Kabsi protect my Google profile?**
 You invite the Kabsi Clients group (ID 5481006796) as a Manager, not as an owner, and you can remove it at any time from People and access. Kabsi only accepts an invitation that matches a business you have set up and only for the Manager role. Kabsi's Google account uses Google's Advanced Protection. Nothing is written to Google without your approval, and each approval is recorded with the exact text, who approved it, when, and whether it came from the dashboard or an email link.

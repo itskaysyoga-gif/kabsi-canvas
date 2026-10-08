@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BadgeDollarSign, Eye, LayoutGrid, Nfc, Send, Wallet } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { WorkspaceVisual } from "@/components/marketing/visuals";
+import { BookingLink } from "@/components/shared/booking-link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,7 +38,11 @@ function Page() {
         sub="Offer the businesses you already help review replies they approve, a fresh profile and change alerts, with NFC cards if you sell them. You set the retail price and keep everything above a small wholesale rate per live business."
         visual={<WorkspaceVisual />}
         photo="heroPartners"
-      />
+      >
+        <BookingLink kind="partner" button>
+          Talk to Rashid
+        </BookingLink>
+      </PageHero>
 
       <Section>
         <Eyebrow>What you get</Eyebrow>
