@@ -45,11 +45,11 @@ insert into expected values ('about', 1), ('services', 1), ('price_notes', 1), (
   ('signature', 1), ('signature_ar', 1), ('contact_phone', 1), ('hours_note', 1), ('wifi', 1), ('delivery', 1),
   ('mention', 1), ('avoid', 1), ('staff_names', 2), ('custom_rules', 1);
 select is(
-  (select coalesce(array_agg(substr(f.source_ref, 16) || '=' || f.n order by 1), '{}') from (
+  (select coalesce(array_agg(substr(f.source_ref, 16) || '=' || f.n order by f.source_ref), '{}') from (
      select source_ref, count(*) n from public.knowledge_facts
       where location_id = '00000000-0000-4000-8000-0000000000c1' and slot like 'card.%' and superseded_by is null
         and status = 'verified' group by 1) f),
-  (select array_agg(card_key || '=' || n order by 1) from expected),
+  (select array_agg(card_key || '=' || n order by card_key) from expected),
   'every card value is one current fact (lists: one per distinct item; empty values none)');
 select is((select count(*)::int from public.knowledge_facts where location_id = '00000000-0000-4000-8000-0000000000c1'
             and slot like 'card.%' and superseded_by is null and (status <> 'verified' or source <> 'owner')), 0,
@@ -104,8 +104,8 @@ select is((select array_agg(key || ':' || status || ':' || source order by key) 
 select throws_ok($$ insert into public.knowledge_facts (location_id, slot, key, value, status, source, confirmed_at)
                     values ('00000000-0000-4000-8000-0000000000c1', 'card.x', 'faq', '{}', 'verified', 'ai_suggestion', now()) $$,
   '23514', null, 'an AI suggestion cannot be verified without a person (K-11)');
-select throws_ok($$ insert into public.knowledge_facts (location_id, slot, key, value, status, source)
-                    values ('00000000-0000-4000-8000-0000000000c1', 'card.about', 'description', '{}', 'verified', 'owner') $$,
+select throws_ok($$ insert into public.knowledge_facts (location_id, slot, key, value, status, source, confirmed_at)
+                    values ('00000000-0000-4000-8000-0000000000c1', 'card.about', 'description', '{}', 'verified', 'owner', now()) $$,
   '23505', null, 'one current fact per slot');
 
 -- K-18: confirm your details -----------------------------------------------------------------------------------------
@@ -192,7 +192,7 @@ reset role;
 
 -- K-20 and A5: profile changes ---------------------------------------------------------------------------------------
 
-select is((select row(field, status, severity, source)::text from public.profile_changes c
+select is((select row(c.field, c.status, c.severity, c.source)::text from public.profile_changes c
             join public.listing_changes l on l.id = c.listing_change_id
            where l.location_id = '00000000-0000-4000-8000-0000000000c1' and l.field = 'phone' and l.state = 'open'),
   row('phone', 'awaiting_review', 'urgent', 'scheduled_check')::text, 'every change the detector writes is mirrored');
