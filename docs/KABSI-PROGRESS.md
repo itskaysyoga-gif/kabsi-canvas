@@ -97,7 +97,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.7-04 | Wave P0.G: the switch to live | Opus | todo | | |
 | P0.7-05 | Wave P0.G: internal live test on Kabsi's own profiles | Opus | todo | | |
 | P0.2-01 | Retention table | Opus | merged (70, aa49b0c, 9 Oct 03:19 UTC); migration live and read back, dry run of the new job on live data 0 everywhere; Deploy passed (`api` 64 with `photo_files`); open: the first real run on 10 Oct 02:53 UTC and the Storage removal on a real photo (due about 26 Oct), see After merge | 70 | 9 Oct 2026 |
-| P0.2-02 | Disconnect Kabsi and access-change notices | Opus | PR open (72); migration live and read back; CI green; mock end to end on QA Bakery under After merge | 72 | 9 Oct 2026 |
+| P0.2-02 | Disconnect Kabsi and access-change notices | Opus | merged (72, 0ccf4e8, 9 Oct 05:40 UTC); Deploy passed (`api` 65); mock end to end on QA Bakery passed (forced failure, follow-up, retry, both notices); open: the invitation notice on the next mock acceptance and Hussein's 390 px look, see After merge | 72, 73 | 9 Oct 2026 |
 | P0.2-03 | Business Knowledge table and the owner-approved baseline | Opus | todo | | |
 | P0.2-04 | Google Protection on Google's update flow | Opus | todo | | |
 | P0.2-05 | Email approvals tightened | Opus | todo | | |
@@ -180,8 +180,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 ## After merge
 
 P0.2-02 (PR 72):
-1. Session, right after the merge: Deploy workflow passes; `api` has a new version (it carries the `disconnect` job handler and the new access email).
-2. Session, mock end to end on QA Bakery (`00000000-0000-4000-8000-0000000000c2`, owner qa-owner@test.local, emails recorded but not sent): set `mock_listings.admin_removal = 'refuse'` for `locations/mock-qac00000`; call `request_disconnect` as the owner (request.jwt.claims sub = the owner); after the next dispatcher run: `staff_followups` has one open row due 7 business days after the request, `emails` has the `access_change` "removing" row, `audit_events` has `disconnect_requested` and `google_access_removal_failed`, no job for the business other than `disconnect` is pending, and the cards are unchanged. Then clear `admin_removal`, close the follow-up with `staff_complete_followup` as staff (or let a retry succeed) and check the "removed" email row and `google_connections.access_state = 'removed'`. Then put QA Bakery back (clear the three disconnect columns, `access_granted_at = now()`, `status = 'active'`) so later QA keeps working.
+1. Passed 9 Oct, see Evidence (Deploy run 37889677867 success, `api` version 65).
+2. Passed 9 Oct 05:42 to 05:46 UTC, see Evidence. Was: session, mock end to end on QA Bakery (`00000000-0000-4000-8000-0000000000c2`, owner qa-owner@test.local, emails recorded but not sent): set `mock_listings.admin_removal = 'refuse'` for `locations/mock-qac00000`; call `request_disconnect` as the owner (request.jwt.claims sub = the owner); after the next dispatcher run: `staff_followups` has one open row due 7 business days after the request, `emails` has the `access_change` "removing" row, `audit_events` has `disconnect_requested` and `google_access_removal_failed`, no job for the business other than `disconnect` is pending, and the cards are unchanged. Then clear `admin_removal`, close the follow-up with `staff_complete_followup` as staff (or let a retry succeed) and check the "removed" email row and `google_connections.access_state = 'removed'`. Then put QA Bakery back (clear the three disconnect columns, `access_granted_at = now()`, `status = 'active'`) so later QA keeps working.
 3. Session: accepting a mock invitation sends the access notice in the same run (the next QA business that goes from consent to access, or a new test@test.local business): an `emails` row of kind `access_granted` with subject "Kabsi is now a Manager of <business> on Google" in the same minute as `access_granted_at`.
 4. Hussein, a browser at 390 px on kabsi.co: Settings shows "Disconnect Kabsi from Google" above "Delete this business"; do not press Disconnect on a real business. (The session ran the 3 taps at 390 px against a local stack with Playwright, see Evidence.)
 
@@ -304,6 +304,12 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.2-02 After merge (9 Oct 2026, 05:40 to 05:46 UTC, Hussein's session)
+- PR 72 merged 05:40 UTC as merge commit 0ccf4e8 (ci.yml green on head 8afd2a5: App, Edge Functions and Worker, Database; Load green; Vercel preview READY).
+- Deploy run 37889677867 (run 28) passed, 05:40:12 to 05:41:16 UTC. `list_edge_functions`: every function redeployed 05:40:37 UTC; `api` version 65 (was 64), bundle hash `8a0bc372` to `2334b7f8`.
+- Mock end to end on QA Bakery (`00000000-0000-4000-8000-0000000000c2`, mock mode, owner qa-owner@test.local): `mock_listings.admin_removal = 'refuse'`, then `request_disconnect` as the owner at 05:42:13 UTC returned `{"state":"removing","created":true}`. The first `disconnect` job try (05:43) failed with the mock 403: one `staff_followups` row due 2026-10-20 05:42:13 UTC (Friday plus 7 business days), audit `google_access_removal_failed` (system, google), ops `access_removal_followup`, an `access_change` email "Kabsi is disconnecting from QA Bakery" recorded (`failed`, "test address, not sent", as designed for test addresses). Then `admin_removal` cleared; the retry at 05:44:01 succeeded: `access_state = 'removed'`, `access_removed_at` and `access_lost_at` 05:44:01, `access_granted_at` null, mock `kabsi_removed_at` set, the follow-up closed ("Kabsi removed its access on a later try"), audit `google_access_lost` and `google_access_removed` (system, google), email "Kabsi is disconnected from QA Bakery" recorded, `jobs_log` disconnect `{"outcome":"removed"}`. Jobs: the only job for QA Bakery after 05:42 is the `disconnect` job (succeeded, 2 tries); the sync and Protection jobs that ran every 6 minutes before stopped. Slack: only `disconnect_requested` and `access_removal_followup`, no generic `access_lost` or `business_paused` line. QA Bakery has no cards, so the review-link check rests on the database test.
+- QA Bakery put back at 05:47 UTC (updates only: the three disconnect columns and `access_lost_at` cleared, `access_granted_at = now()`, `status = 'active'`, mock `kabsi_removed_at` cleared); read back `active`, `granted`. The test rows it produced (two `emails`, the closed `staff_followups` row, audit events) stay; they are test data under "Test data to delete at go-live".
 
 ### P0.2-02 (branch claude/h-p0-2-02, PR 72, 9 Oct 2026, Hussein's session)
 - Model checked first: `get_session` reads `claude-opus-5-5` for the session model and the last served model.
@@ -1017,6 +1023,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Test data to delete at go-live (P0.7-04)
 
+- QA Bakery, 9 Oct (P0.2-02 After-merge check): the two `access_change` `emails` rows of 05:43 and 05:44 UTC, the closed `staff_followups` row due 2026-10-20, and the `disconnect_requested` (05:42) row in `ops_events`; the audit events stay with the audit log's own 24-month rule.
 - Yawmiyati, 7 Oct (P0.1-13b fix check): the special hours row for 31 Dec 2026 (reason "P0.1-13b after-merge check 2"), listing changes bc13891c (title) and 171638e7 (phone, the repeat alert) and its `shield_alert` email of 20:48, publications d134a107-9208-4dc5-8bca-15b65038200d and 8f3e46c0-a566-452d-a5e1-54a64390ad77.
 - Yawmiyati, 7 Oct (P0.1-13b After-merge check): the `gbp_posts` row with owner input "P0.1-13b after-merge check", the special hours row for 25 Dec 2026 (reason "P0.1-13b after-merge check"), publications 2234d0ec-d873-4795-9d06-01c634f3f5c5, 758a9abf-007b-4f5b-b88c-bc4970eb3e86 and 954b559a-8a96-40e6-bd52-986dd5f035c7, and `mock_listings.fields.specialHours` for `locations/mock-9803ee99`.
 
@@ -1034,6 +1041,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 9 Oct 2026 (Hussein's session): PR 72 (P0.2-02) merged as 0ccf4e8; Deploy passed (`api` 65); mock end to end on QA Bakery passed. Open: the invitation notice on the next mock acceptance, Hussein's 390 px look.
 - 9 Oct 2026 (Hussein's session): P0.2-02, PR 72. Disconnect in Settings (3 taps), `request_disconnect`, the `disconnect` job through the admins module (mock), staff follow-ups on /staff, the access-change notice on accepting the invitation. Migration live and read back 05:22 UTC; CI green. Hussein confirmed P0.2-01 decisions (a) to (c) and P0.2-02 decision (e).
 - 9 Oct 2026 (Hussein's session): PR 70 (P0.2-01) merged as aa49b0c; Deploy passed (`api` 64), Vercel production READY. Open: the 10 Oct retention run and the first real photo file removal (about 26 Oct).
 - 9 Oct 2026 (Hussein's session): P0.2-01, PR 70. `retention_policies` (11 K-40 rows) is the one source of `run_retention` and `purge_old_chats`; Places details, Google responses and Protection change audit content cleared after 30 days; uploaded photo files removed through a `photo_files` job. CI green (740 database tests). Hussein ran the migration in the SQL editor; read back and dry-run by the session; history row added. Calendly read back for P0.1-V3: slug and question still to fix.
