@@ -7,6 +7,8 @@ import { type InvitationAddress, matchInvitation, type PendingBusiness } from ".
 import { assertNotConcierge, googleMode, modeFor, type Mode } from "./client.ts";
 import * as accountsLive from "./accounts/live.ts";
 import * as accountsMock from "./accounts/mock.ts";
+import * as adminsLive from "./admins/live.ts";
+import * as adminsMock from "./admins/mock.ts";
 import * as locationsLive from "./locations/live.ts";
 import * as locationsMock from "./locations/mock.ts";
 import * as reviewsLive from "./reviews/live.ts";
@@ -67,6 +69,40 @@ export async function acceptInvitationsAndListLocations(pending: PendingBusiness
     } while (pageToken);
   }
   return { accepted, skipped, locations: managed };
+}
+
+// ─── Disconnect (K-41, K-113.2, P0.2-02): remove Kabsi's own Manager entry from one location. Kabsi's entries are the
+// admins whose account is one of the accounts this login manages (the Kabsi Clients group); the owner's entries are
+// never touched. Called only by the disconnect job, after the signed-in owner asked for it in Settings. The result is
+// read back: "removed" only when Google no longer lists Kabsi. Google answering 403 or 404 to the list means Kabsi
+// already has no access ("already_removed"). Anything else throws, and the job hands the removal to staff.
+export async function removeKabsiAccess(locationId: string | null): Promise<"removed" | "already_removed"> {
+  if (!locationId) return "already_removed";
+  assertNotConcierge(locationId);
+  const mode = modeFor(locationId);
+  return await removeKabsiEntries({ ...by(mode, accountsLive, accountsMock), ...by(mode, adminsLive, adminsMock) }, locationId);
+}
+
+type AdminsApi = Pick<typeof accountsLive, "listAccounts"> & Pick<typeof adminsLive, "listLocationAdmins" | "deleteLocationAdmin">;
+export async function removeKabsiEntries(api: AdminsApi, locationId: string): Promise<"removed" | "already_removed"> {
+  const { accounts = [] } = await api.listAccounts();
+  const mine = new Set(accounts.map((a) => a.name).filter(Boolean));
+  const kabsiEntries = async () => {
+    try {
+      return ((await api.listLocationAdmins(locationId)).admins ?? []).filter((a) => a.account && mine.has(a.account));
+    } catch (e) {
+      if (/^Error: google (403|404) /.test(String(e))) return null;
+      throw e;
+    }
+  };
+  const before = await kabsiEntries();
+  if (!before?.length) return "already_removed";
+  const owner = before.find((a) => a.role !== "MANAGER" && a.role !== "SITE_MANAGER");
+  if (owner) throw new Error(`kabsi_not_manager: Kabsi's entry is ${owner.role}; a person must hand the profile back`);
+  for (const a of before) await api.deleteLocationAdmin(a.name!);
+  const after = await kabsiEntries();
+  if (after?.length) throw new Error("kabsi_still_listed: Google still lists Kabsi after the delete");
+  return "removed";
 }
 
 // ─── Reviews

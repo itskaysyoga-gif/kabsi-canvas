@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Mail as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
+import { KABSI_GROUP_ID } from "@/lib/site";
 
 // Email settings: extra alert addresses, daily digest hour, time zone, pause (D220).
 // Saved through the membership-checked update_notification_settings RPC.
@@ -36,6 +37,9 @@ type Settings = {
   time_zone: string;
   emails_paused_until: string | null;
   deletion_requested_at: string | null;
+  disconnect_requested_at: string | null;
+  access_removed_at: string | null;
+  is_demo: boolean;
 };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const hourLabel = (h: number) => `${h % 12 === 0 ? 12 : h % 12}:00 ${h < 12 ? "am" : "pm"}`;
@@ -43,7 +47,9 @@ const hourLabel = (h: number) => `${h % 12 === 0 ? 12 : h % 12}:00 ${h < 12 ? "a
 async function loadSettings(id: string): Promise<Settings> {
   const { data, error } = await supabase
     .from("locations")
-    .select("alert_emails, digest_hour, time_zone, emails_paused_until, deletion_requested_at")
+    .select(
+      "alert_emails, digest_hour, time_zone, emails_paused_until, deletion_requested_at, disconnect_requested_at, access_removed_at, is_demo",
+    )
     .eq("id", id)
     .single();
   if (error) throw new Error(error.message);
@@ -81,6 +87,13 @@ function SettingsPage() {
       ) : null}
       <AccountCard />
       {loc && settings.data ? (
+        <DisconnectGoogle
+          locationId={loc.id}
+          settings={settings.data}
+          onChanged={() => settings.refetch()}
+        />
+      ) : null}
+      {loc && settings.data ? (
         <DeleteBusiness
           locationId={loc.id}
           name={loc.name}
@@ -92,7 +105,6 @@ function SettingsPage() {
   );
 }
 
-// Owner-requested deletion (migration 019): 7 days to change your mind, then everything is deleted.
 // Who is signed in, and a sign-out that's easy to find on a phone too.
 function AccountCard() {
   const { user, signOut } = useAuth();
@@ -167,6 +179,110 @@ function AccountCard() {
   );
 }
 
+// Disconnect Kabsi from Google (K-41, P0.2-02): visible, three taps (Settings, Disconnect Kabsi, Disconnect). The
+// owner-only request_disconnect RPC stops everything at once; the disconnect job removes Kabsi's Manager access and
+// emails the owner.
+function DisconnectGoogle({
+  locationId,
+  settings,
+  onChanged,
+}: {
+  locationId: string;
+  settings: Settings;
+  onChanged: () => unknown;
+}) {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  async function disconnect() {
+    setBusy(true);
+    setErr("");
+    const { error } = await supabase.rpc("request_disconnect", { p_location: locationId });
+    setBusy(false);
+    setOpen(false);
+    if (error) {
+      return setErr(
+        error.code === "42501"
+          ? "Only the owner of this business can disconnect Kabsi."
+          : "Something went wrong. Email hello@kabsi.co and we'll do it for you.",
+      );
+    }
+    await queryClient.invalidateQueries({ queryKey: ["my-location"] });
+    onChanged();
+  }
+  const steps = (
+    <>
+      on your Business Profile open <b className="text-kb-ink">Menu</b>, then{" "}
+      <b className="text-kb-ink">Business Profile settings</b>, then{" "}
+      <b className="text-kb-ink">People and access</b>
+    </>
+  );
+  return (
+    <section className="mt-8 rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
+      <h2 className="text-xl font-bold">Disconnect Kabsi from Google</h2>
+      {settings.access_removed_at ? (
+        <p className="mt-2 text-sm leading-6 text-kb-stone">
+          Kabsi removed its Manager access on{" "}
+          <b className="text-kb-ink">{fmtDate(settings.access_removed_at)}</b>. To check: {steps}.
+          Kabsi Clients is no longer listed. Your review link and cards keep working until your plan
+          ends.
+        </p>
+      ) : settings.disconnect_requested_at ? (
+        <p className="mt-2 text-sm leading-6 text-kb-stone" role="status">
+          Kabsi has stopped and is removing its Manager access. We email you when it's done, at the
+          latest 7 business days after {fmtDate(settings.disconnect_requested_at)}. You can also
+          remove it yourself now: {steps}, and remove Kabsi Clients (group ID {KABSI_GROUP_ID}).
+        </p>
+      ) : (
+        <>
+          <p className="mt-2 text-sm leading-6 text-kb-stone">
+            Kabsi stops at once: no new drafts, no review emails, and nothing more goes to Google.
+            Approvals still waiting are cancelled, and Kabsi removes its Manager access to your
+            Google profile. You stay the owner. Your review link and cards keep working until your
+            plan ends.
+          </p>
+          {settings.is_demo ? (
+            <p className="mt-3 text-sm text-kb-stone">Demo businesses stay connected.</p>
+          ) : (
+            <Button
+              variant="outline"
+              className="mt-4 border-kb-red text-kb-red"
+              onClick={() => setOpen(true)}
+            >
+              Disconnect Kabsi
+            </Button>
+          )}
+        </>
+      )}
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect Kabsi from Google?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Kabsi stops now and removes its Manager access to your Google profile. Approvals still
+              waiting are cancelled. Your profile, your reviews on Google and your review link are
+              not affected.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Kabsi</AlertDialogCancel>
+            <AlertDialogAction disabled={busy} onClick={() => void disconnect()}>
+              {busy ? "Disconnecting…" : "Disconnect"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      {err ? (
+        <p className="mt-3 text-sm text-kb-red" role="alert">
+          {err}
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
+// Owner-requested deletion (migration 019): 7 days to change your mind, then everything is deleted.
 function DeleteBusiness({
   locationId,
   name,
@@ -217,8 +333,8 @@ function DeleteBusiness({
           <p className="mt-2 text-sm leading-6 text-kb-stone">
             After 7 days we delete its reviews, drafts, posts, photos, reports and settings, and
             your NFC cards stop opening your review page. Payment records are kept where the law
-            requires. To stop Kabsi reaching your Google profile, also remove the Kabsi group (ID
-            5481006796) under People and access.
+            requires. To stop Kabsi reaching your Google profile, also remove the Kabsi group (ID{" "}
+            {KABSI_GROUP_ID}) under People and access.
           </p>
           <Label htmlFor="confirm-delete" className="mt-4 block text-sm">
             Type the business name to confirm

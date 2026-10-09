@@ -150,10 +150,10 @@ Then **One quick check**: "Kabsi works with a verified Google Business Profile t
 
 1. Tick the box: "I authorise Kabsi to manage review replies and profile updates for this business on Google, and to publish only what I approve."
 2. Add the Kabsi group ID 5481006796 as a Manager. In the Google Maps app: tap your profile picture, then **Your business profiles**; choose the business, then **⋮** or **Profile settings**, then **People and access**; tap **Add**, paste the group ID 5481006796, choose **Manager**, then **Invite**. On a computer: open your Business Profile, then **More** (or **Menu**), **Business Profile settings**, **People and access**, **Add**, paste the group ID 5481006796, choose **Manager**, **Invite**. Invite the group, never the email address hello@kabsi.co.
-3. The status box shows "Waiting for your invite…" and updates by itself, usually a few minutes after the invite once Kabsi is live on Google (see 2.2). Then it shows "Access received" and you get "Kabsi is connected to {business}".
+3. The status box shows "Waiting for your invite…" and updates by itself, usually a few minutes after the invite once Kabsi is live on Google (see 2.2). Then it shows "Access received" and you get Kabsi's own access notice, "Kabsi is now a Manager of {business} on Google": what changed, what Kabsi can do, and how to remove Kabsi (Settings, **Disconnect Kabsi from Google**, or People and access). Kabsi sends this notice for every change it makes to its access to your profile, within 48 hours and separate from Google's own emails.
 4. Tap **I've sent the invite, continue**, or **Do this later** and finish the other steps first.
 
-A Manager can do everything Kabsi needs; only owners can add or remove people. You stay the owner and can remove Kabsi any time, without asking us.
+A Manager can do everything Kabsi needs; only owners can add or remove people. You stay the owner and can remove Kabsi any time, without asking us: in Kabsi (Settings, **Disconnect Kabsi from Google**) or on Google (People and access).
 
 **Step 3: About your business**
 
@@ -785,7 +785,10 @@ Never. You add the Kabsi group ID 5481006796 as a Manager. Kabsi never asks for 
 A Manager can reply, post and edit details, which is all Kabsi needs. Only owners can add or remove people or remove the profile, so you stay in control.
 
 **Can I remove Kabsi's access?**
-Yes, any time: Business Profile settings, People and access, select Kabsi Clients (group ID 5481006796), Remove person. You don't need to ask us.
+Yes, any time, without asking us. In Kabsi: **Settings**, **Disconnect Kabsi**, then **Disconnect** to confirm. Or on Google: Business Profile settings, People and access, select Kabsi Clients (group ID 5481006796), Remove person.
+
+**What happens when I disconnect Kabsi in Settings?**
+Only the owner can do it, signed in. Kabsi stops at once: no new drafts, no review emails, nothing more sent to Google. Approvals still waiting are cancelled, open review tasks are closed, and email links stop working. Kabsi then removes its own Manager access from your Google profile and emails you a confirmation with how to check it under People and access. If Google does not let Kabsi remove itself, Kabsi emails you that a person on the team removes it by a date at most 7 business days after your request, and you can also remove it yourself under People and access. Your ownership of the profile, your reviews on Google and your review link and cards are not affected; the cards keep working until your plan ends. The Google data Kabsi kept is deleted 30 days after access ends. To use Kabsi again afterwards, email hello@kabsi.co. Demo businesses cannot be disconnected.
 
 **What happens if I remove Kabsi?**
 Kabsi stops reading and posting at once and emails you once a day with the steps to reconnect. If access stays removed for 30 days, your Google data is deleted automatically.

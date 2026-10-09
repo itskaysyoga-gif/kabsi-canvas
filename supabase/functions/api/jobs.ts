@@ -10,7 +10,9 @@
 // the uploaded photo files past their K-40 limit (P0.2-01, _shared/retention.ts).
 // Publications (P0.1-13a and P0.1-13b, _shared/publish.ts): publish sends one approved reply, post, photo, special
 // hours period or Google Protection put-back once its undo window has passed; reconcile_publication reads Google for
-// one whose outcome is not known yet. Neither ever sends a write twice. These are the only Google writes in Kabsi.
+// one whose outcome is not known yet. Neither ever sends a write twice. These are the only Google writes in Kabsi,
+// apart from disconnect (P0.2-02, _shared/disconnect.ts), which removes Kabsi's own Manager entry after the signed-in
+// owner asked for it in Settings, and never touches the profile itself.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 import { type Job, type JobHandler, type JobState, PermanentJobError, runJob } from "../_shared/jobs.ts";
 import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation } from "../_shared/reviews.ts";
@@ -18,8 +20,9 @@ import { AiBudgetError } from "../_shared/ai-budget.ts";
 import { protectionCheck } from "../_shared/shield.ts";
 import {
   addSpecialHours, createLocalPost, createMedia, hasSpecialHours, listingField, localPostState, mediaExists, patchListing,
-  readReply, sendReply, type ShieldField, type SpecialDay,
+  readReply, removeKabsiAccess, sendReply, type ShieldField, type SpecialDay,
 } from "../_shared/google/index.ts";
+import { accessChangeEmail, type DisconnectDeps, runDisconnect } from "../_shared/disconnect.ts";
 import {
   type CheckClaim, type Claim, type Item, NotSent, type Outcome, type PublishDeps, publishOne, reconcileOne, replySeen, type Seen, type Sent,
 } from "../_shared/publish.ts";
@@ -214,6 +217,45 @@ const publicationId = (job: Job) => {
   return id;
 };
 
+// Disconnect (K-41, P0.2-02): remove Kabsi's Manager entry, record it, and email the owner what changed.
+const DISCONNECT: DisconnectDeps = {
+  async load(locationId) {
+    const db = admin();
+    const { data: l, error } = await db.from("locations")
+      .select("id, name, google_location_id, concierge, disconnect_requested_at, access_removed_at").eq("id", locationId).maybeSingle();
+    if (error) throw error;
+    if (!l) return null;
+    const { data: f, error: fe } = await db.from("staff_followups").select("due_at")
+      .eq("location_id", locationId).eq("kind", "google_access_removal").is("done_at", null).maybeSingle();
+    if (fe) throw fe;
+    return {
+      locationId, name: l.name, googleLocationId: l.google_location_id, concierge: l.concierge,
+      requestedAt: l.disconnect_requested_at, removedAt: l.access_removed_at, followupDueAt: f?.due_at ?? null,
+    };
+  },
+  remove: (googleLocationId) => removeKabsiAccess(googleLocationId),
+  async record(locationId, ok, error) {
+    const r = await rpcJson<{ removed_at: string | null; due_at: string | null }>("record_disconnect_result", {
+      p_location: locationId, p_ok: ok, p_error: error,
+    });
+    return { removedAt: r.removed_at, dueAt: r.due_at };
+  },
+  async notify(locationId, notice, dedupe) {
+    const m = accessChangeEmail(notice, APP_URL);
+    for (const to of await ownerEmails(locationId)) {
+      await sendEmail({
+        kind: "access_change", to, locationId, dedupeKey: `${dedupe}:${to}`, subject: m.subject,
+        html: emailLayout({ preheader: m.preheader, title: m.title, bodyHtml: m.bodyHtml, button: m.button, note: m.note }), text: m.text,
+      });
+    }
+  },
+};
+
+async function disconnectJob(job: Job) {
+  const outcome = await runDisconnect(job.location_id!, DISCONNECT);
+  await jobLog("disconnect", true, { location: job.location_id, outcome });
+}
+
 // A whole-system step, logged under the name the cron used when it did something (staff job health lists these).
 const step = (name: string, run: () => Promise<Record<string, unknown>>): JobHandler => async () => {
   const started = Date.now();
@@ -235,6 +277,7 @@ const HANDLERS: Record<string, JobHandler> = {
   trial_reminders: step("trials", trialsJob),
   renewal_reminders: step("renewals", renewalsJob),
   photo_files: step("photo_files", () => removeDuePhotoFiles(photoFileStore(admin()))),
+  disconnect: disconnectJob,
 };
 
 export async function dispatch(req: Request): Promise<Response> {

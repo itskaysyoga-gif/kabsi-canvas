@@ -11,6 +11,7 @@ import { PartnersPanel } from "@/components/staff/partners-panel";
 import { OpsPanel } from "@/components/staff/ops-panel";
 import { ChatsPanel } from "@/components/staff/chats-panel";
 import { ConciergePanel } from "@/components/staff/concierge-panel";
+import { FollowupsPanel } from "@/components/staff/followups-panel";
 import { convertConcierge, setConcierge } from "@/lib/concierge";
 import { ClipboardCheck as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
@@ -69,6 +70,7 @@ function StaffPage() {
         ) : null}
         {staff.data ? (
           <>
+            <FollowupsPanel />
             <ConciergePanel />
             <ChatsPanel />
             <PartnersPanel />

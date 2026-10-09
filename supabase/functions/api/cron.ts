@@ -7,6 +7,7 @@ import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, jso
 import { dueRenewalEmail, dueTrialEmail, localDateHour, PLAN_LABEL, type RenewalStage, type TrialStage } from "../_shared/plans.ts";
 import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google/index.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
+import { accessChangeEmail } from "../_shared/disconnect.ts";
 import { snapshotRatings, weeklyReports } from "../_shared/report.ts";
 import { shieldCheck } from "../_shared/shield.ts";
 
@@ -19,21 +20,21 @@ async function conciergeAccessEmails() {
   let n = 0;
   for (const l of data ?? []) {
     for (const to of await ownerEmails(l.id)) {
-      const r = await sendEmail({
-        kind: "access_granted", to, locationId: l.id, dedupeKey: `access_granted:${l.id}:${to}`,
-        subject: `Kabsi is connected to ${l.name}`,
-        html: emailLayout({
-          preheader: "Early access is on.", title: "You're connected",
-          bodyHtml: `<p style="margin:0 0 16px 0;">Our team accepted your invitation for <strong>${esc(l.name)}</strong>.</p><p style="margin:0 0 20px 0;">${esc(CONCIERGE_COPY.banner)} When a new review arrives you'll get an email with a reply ready. You approve every word.</p>`,
-          button: { label: "Open Kabsi", url: `${APP_URL}/app` },
-          note: "You can remove Kabsi at any time from your Google profile under People and access.",
-        }),
-        text: `Our team accepted your invitation for ${l.name}.\n\n${CONCIERGE_COPY.banner} When a new review arrives you'll get an email with a reply ready. You approve every word.\n\nOpen Kabsi: ${APP_URL}/app`,
-      }).catch((e) => captureError("cron-tick", e, { job: "access", location: l.id }));
+      const r = await sendAccessNotice(l.id, l.name, to, `${CONCIERGE_COPY.banner} When a new review arrives you'll get an email with a reply ready. You approve every word.`);
       if (r && "sent" in r) n++;
     }
   }
   return n;
+}
+
+// The access-change notice (K-113.1, P0.2-02): sent in the same run that accepts the Manager invitation, saying what
+// changed and how to remove Kabsi. Same kind and dedupe key as before, so nobody who already had it gets it again.
+function sendAccessNotice(locationId: string, name: string, to: string, nextStep: string) {
+  const m = accessChangeEmail({ change: "granted", name, at: new Date().toISOString(), nextStep }, APP_URL);
+  return sendEmail({
+    kind: "access_granted", to, locationId, dedupeKey: `access_granted:${locationId}:${to}`, subject: m.subject,
+    html: emailLayout({ preheader: m.preheader, title: m.title, bodyHtml: m.bodyHtml, button: m.button, note: m.note }), text: m.text,
+  }).catch((e) => captureError("cron-tick", e, { job: "access", location: locationId }));
 }
 
 // Job: Google access. Owner invited the Kabsi business group as Manager → mark access granted, refresh status, email the owner.
@@ -81,21 +82,10 @@ export async function accessJob() {
     const { data: trial } = await db.from("plans").select("ends_at, locations(time_zone)").eq("location_id", m.id).eq("kind", "trial").eq("status", "active").maybeSingle();
     const trialLine = trial ? ` Your free trial runs until ${formatDay(localDateHour(new Date(new Date(trial.ends_at).getTime() - 1000), (trial.locations as unknown as { time_zone: string | null } | null)?.time_zone ?? "UTC").date)}.` : "";
     for (const to of await ownerEmails(m.id)) {
-      const name = esc(updated.name);
       const next = status === "active"
         ? `Kabsi is now watching your reviews. When the next one arrives you'll get an email with a reply ready.${trialLine}`
         : "One step left: your plan. As soon as it's confirmed, Kabsi starts drafting replies to your reviews.";
-      await sendEmail({
-        kind: "access_granted", to, locationId: m.id, dedupeKey: `access_granted:${m.id}:${to}`,
-        subject: `Kabsi is connected to ${updated.name}`,
-        html: emailLayout({
-          preheader: "Google access received.", title: "Access received",
-          bodyHtml: `<p style="margin:0 0 16px 0;">Kabsi is now a Manager on <strong>${name}</strong>'s Google profile.</p><p style="margin:0 0 20px 0;">${next}</p>`,
-          button: { label: "Open Kabsi", url: `${APP_URL}/app` },
-          note: "You can remove Kabsi at any time from your Google profile under People and access.",
-        }),
-        text: `Kabsi is now a Manager on ${updated.name}'s Google profile.\n\n${next}\n\nOpen Kabsi: ${APP_URL}/app`,
-      }).catch((e) => captureError("cron-tick", e, { job: "access", location: m.id }));
+      await sendAccessNotice(m.id, updated.name, to, next);
     }
   }
   return { mode: googleMode(), pending: pending.length, accepted, granted };

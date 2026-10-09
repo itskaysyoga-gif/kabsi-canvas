@@ -84,7 +84,10 @@ const cases: [string, () => Promise<unknown>, unknown][] = [
   ["attributes.getAttributes", () => attributes.getAttributes(L), fxAttributes],
   ["notifications.getNotificationSetting", () => notifications.getNotificationSetting(A), fxNotif],
   ["updates.getGoogleUpdated", () => updates.getGoogleUpdated(L, "title,websiteUri"), fxUpdated],
-  ["admins.listLocationAdmins", () => admins.listLocationAdmins(L), fxAdmins],
+  ["admins.listLocationAdmins", () => {
+    admins.useAdminStore({ read: () => Promise.resolve({ removed: false, refuse: false }), remove: () => Promise.resolve() });
+    return admins.listLocationAdmins(L);
+  }, fxAdmins],
   ["verifications.getVoiceOfMerchantState", () => verifications.getVoiceOfMerchantState(L), fxVom],
   ["verifications.listVerifications", () => verifications.listVerifications(L), fxVerifs],
   ["placeActions.listPlaceActionLinks", () => placeActions.listPlaceActionLinks(L), fxActions],
