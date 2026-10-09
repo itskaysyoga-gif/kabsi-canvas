@@ -95,7 +95,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.7-02 | Wave P0.G: business.manage verification package | Opus | todo, writing can start now; submit after P0.1-03 and P0.2-07 | | |
 | P0.7-04 | Wave P0.G: the switch to live | Opus | todo | | |
 | P0.7-05 | Wave P0.G: internal live test on Kabsi's own profiles | Opus | todo | | |
-| P0.2-01 | Retention table | Opus | merged (70); migration live and read back, dry run of the new job on live data 0 everywhere; After merge: Deploy (`api` with `photo_files`), then the first real run on 10 Oct 02:53 UTC and the Storage removal on a real photo (due about 26 Oct), see After merge | 70 | 9 Oct 2026 |
+| P0.2-01 | Retention table | Opus | merged (70, aa49b0c, 9 Oct 03:19 UTC); migration live and read back, dry run of the new job on live data 0 everywhere; Deploy passed (`api` 64 with `photo_files`); open: the first real run on 10 Oct 02:53 UTC and the Storage removal on a real photo (due about 26 Oct), see After merge | 70 | 9 Oct 2026 |
 | P0.2-02 | Disconnect Kabsi and access-change notices | Opus | todo | | |
 | P0.2-03 | Business Knowledge table and the owner-approved baseline | Opus | todo | | |
 | P0.2-04 | Google Protection on Google's update flow | Opus | todo | | |
@@ -179,7 +179,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 ## After merge
 
 P0.2-01 (PR 70):
-1. Session, right after the merge: Deploy workflow passes and `api` has a new version (it carries the `photo_files` handler). Vercel production READY.
+1. Passed 9 Oct, see Evidence (Deploy run 37878724487 success, `api` version 64, Vercel production READY).
 2. Session, after 10 Oct 02:53 UTC: `kabsi_retention` succeeded and, if it logged a line, `jobs_log` detail carries the new keys (`place_details`, `google_responses`, `photo_files_due`): `select created_at, detail from jobs_log where job = 'retention' order by created_at desc limit 1`.
 3. Session, from about 26 Oct (the two live photos posted 26 and 28 Sep reach 30 days on Google): the next run marks them (`file_due_at`), one `photo_files` job succeeds, `file_deleted_at` is set on both, and `storage.objects` in `owner-photos` no longer has their paths: `select p.id, p.file_due_at, p.file_deleted_at, exists (select 1 from storage.objects o where o.bucket_id = 'owner-photos' and o.name = p.storage_path) as file_left from photos p`. This is the live Storage proof; the logic is proven by the Deno test, not yet on a real object (no local Storage in the build session). Then P0.2-01 is done.
 4. Hussein, any browser, once (3) has passed: the Photos page of their business no longer lists those two photos (they stay on Google).
@@ -297,6 +297,12 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.2-01 After merge (9 Oct 2026, 03:19 to 03:23 UTC, Hussein's session)
+- PR 70 merged 03:19 UTC as merge commit aa49b0c (ci.yml green on head 9f7f850: App, Edge Functions and Worker, Database 740 tests, Load; Vercel success).
+- Deploy run 37878724487 (run 27) passed, 03:19:14 to 03:20:27 UTC. `list_edge_functions`: every function `updated_at` 03:19:42 UTC; `api` version 64 (was 63) and the only function whose bundle hash changed (`134f2610` to `8a0bc372`), so the `photo_files` handler is live. Since the deploy: 10 jobs succeeded, 0 failed or dead.
+- Vercel production `dpl_BLgDLtRXJunXRB8AznDTfG94AHpq` for aa49b0c READY.
+- Still open (After merge 2 to 4): the first real nightly run with the new function (10 Oct 02:53 UTC) and the Storage removal on the two live photos (due about 26 Oct).
 
 ### P0.2-01 (branch claude/h-p0-2-01, PR 70, 8 to 9 Oct 2026, Hussein's session)
 - Model checked first: `get_session` reads `claude-opus-5-5` for the session model and the last served model.
@@ -1003,6 +1009,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 
 ## Log
 
+- 9 Oct 2026 (Hussein's session): PR 70 (P0.2-01) merged as aa49b0c; Deploy passed (`api` 64), Vercel production READY. Open: the 10 Oct retention run and the first real photo file removal (about 26 Oct).
 - 9 Oct 2026 (Hussein's session): P0.2-01, PR 70. `retention_policies` (11 K-40 rows) is the one source of `run_retention` and `purge_old_chats`; Places details, Google responses and Protection change audit content cleared after 30 days; uploaded photo files removed through a `photo_files` job. CI green (740 database tests). Hussein ran the migration in the SQL editor; read back and dry-run by the session; history row added. Calendly read back for P0.1-V3: slug and question still to fix.
 
 - 8 Oct 2026 (Hussein's session): P0.7-01 part 1, PR 67. Health with Hussein's new secrets: token `business.manage`, 3 accounts. Inventory: Kabsi Clients holds both profiles. Reviews list on Yawmiyati: 403 SERVICE_DISABLED (`mybusiness.googleapis.com` not enabled; blocked on Google). 30 read-only v1 calls 200, fixtures and `docs/google/live-findings.md`; `docs/google/api-access.md` and the 7 Oct note corrected. Nothing written to Google; `google_mode()` still `mock`.
