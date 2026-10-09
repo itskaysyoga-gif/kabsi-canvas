@@ -18,9 +18,9 @@ insert into tested values
   ('partner_create_invite(uuid,text,text)'), ('partner_invoice_calc(uuid,date)'), ('partner_locations(uuid)'),
   ('partner_submit_claim(uuid,text,text)'), ('plan_summary(uuid)'),
   ('profile_task_action(uuid,text)'), ('profile_tasks_list(uuid)'), ('rename_card(text,text)'),
-  ('request_location_deletion(uuid)'), ('save_consent(uuid,text)'), ('set_auto_posts(uuid,boolean)'),
+  ('request_disconnect(uuid)'), ('request_location_deletion(uuid)'), ('save_consent(uuid,text)'), ('set_auto_posts(uuid,boolean)'),
   ('set_card_active(text,boolean)'), ('set_onboarding_step(uuid,text)'), ('skip_review(uuid)'),
-  ('staff_chat_stats(integer)'), ('staff_chats(text,text,text,text,integer,integer)'),
+  ('staff_chat_stats(integer)'), ('staff_complete_followup(uuid,text)'), ('staff_chats(text,text,text,text,integer,integer)'),
   ('staff_concierge_add_review(uuid,integer,text,text,date,boolean)'), ('staff_concierge_cancel_task(uuid,text,text)'),
   ('staff_concierge_claim_task(uuid)'), ('staff_concierge_convert(uuid)'),
   ('staff_concierge_mark_posted(uuid)'),
@@ -113,6 +113,7 @@ select throws_ok($$ select public.plan_summary('00000000-0000-4000-8000-00000000
 select throws_ok($$ select public.profile_task_action('00000000-0000-4000-8000-0000000000f4', 'later') $$, '42501', null, 'profile_task_action refuses a non-member');
 select throws_ok($$ select public.profile_tasks_list('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'profile_tasks_list refuses a non-member');
 select throws_ok($$ select public.rename_card('VCTM22', 'x') $$, '42501', null, 'rename_card refuses a non-member');
+select throws_ok($$ select public.request_disconnect('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'request_disconnect refuses a non-member');
 select throws_ok($$ select public.request_location_deletion('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'request_location_deletion refuses a non-member');
 select throws_ok($$ select public.save_consent('00000000-0000-4000-8000-0000000000c1', 'yes') $$, '42501', null, 'save_consent refuses a non-member');
 select throws_ok($$ select public.set_auto_posts('00000000-0000-4000-8000-0000000000c1', false) $$, '42501', null, 'set_auto_posts refuses a non-member');
@@ -156,6 +157,7 @@ select throws_ok($$ select public.staff_create_partner('n', 'e@example.test', 'x
 select throws_ok($$ select public.staff_decide_claim('00000000-0000-4000-8000-0000000000f5', true, 'x') $$, '42501', null, 'staff_decide_claim refuses a non-staff user');
 select throws_ok($$ select public.staff_grant_trial('00000000-0000-4000-8000-0000000000c1', 7) $$, '42501', null, 'staff_grant_trial refuses a non-staff user');
 select throws_ok($$ select public.staff_job_health() $$, '42501', null, 'staff_job_health refuses a non-staff user');
+select throws_ok($$ select public.staff_complete_followup(gen_random_uuid(), 'x') $$, '42501', null, 'staff_complete_followup refuses a non-staff user');
 select throws_ok($$ select public.staff_mock_listing_edit('00000000-0000-4000-8000-0000000000c1', 'phone', '1') $$, '42501', null, 'staff_mock_listing_edit refuses a non-staff user');
 select throws_ok($$ select public.staff_mock_review('00000000-0000-4000-8000-0000000000c1', 5, 'n', 'c') $$, '42501', null, 'staff_mock_review refuses a non-staff user');
 select throws_ok($$ select public.staff_record_payment('00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 10, 'cash', 'r') $$, '42501', null, 'staff_record_payment refuses a non-staff user');

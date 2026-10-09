@@ -148,6 +148,7 @@ async function hasPaidPlan(locationId: string) {
 }
 
 function Paused({ loc }: { loc: Location }) {
+  if (loc.disconnect_requested_at) return <Disconnected loc={loc} />;
   return (
     <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb sm:p-9">
       <h2 className="text-2xl font-bold">
@@ -161,6 +162,25 @@ function Paused({ loc }: { loc: Location }) {
       </p>
       <Button asChild className="mt-6">
         <a href="mailto:hello@kabsi.co">Email Kabsi</a>
+      </Button>
+    </div>
+  );
+}
+
+// The owner disconnected Kabsi in Settings (K-41, P0.2-02).
+function Disconnected({ loc }: { loc: Location }) {
+  return (
+    <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb sm:p-9">
+      <h2 className="text-2xl font-bold">
+        {loc.access_removed_at ? "Kabsi is disconnected from Google" : "Kabsi has stopped"}
+      </h2>
+      <p className="mt-2 max-w-xl leading-7 text-kb-stone">
+        {loc.access_removed_at
+          ? "Kabsi no longer reads or changes anything on your Google profile. Your card and review link keep working until your plan ends."
+          : "No drafts or emails are sent, and nothing goes to Google. Kabsi is removing its Manager access now. Your card and review link keep working."}
+      </p>
+      <Button asChild variant="outline" className="mt-6">
+        <Link to="/app/settings">See the details in Settings</Link>
       </Button>
     </div>
   );
