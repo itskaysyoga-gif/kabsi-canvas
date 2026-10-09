@@ -69,9 +69,12 @@ async function checkListing(loc: Loc) {
       .eq("location_id", loc.id).eq("field", f).eq("state", "reverting");
     if (re) throw re;
     if (reverting) continue;
-    const { data: open } = await db.from("listing_changes").select("id, new_value").eq("location_id", loc.id).eq("field", f).eq("state", "open").maybeSingle();
-    if (open && (open.new_value as FieldValue)?.display === now[f].display) continue; // already alerted about this value
-    if (open) await db.from("listing_changes").update({ state: "kept", decided_at: new Date().toISOString() }).eq("id", open.id); // superseded
+    // Already alerted about this value: still open, or expired after 14 days without an answer (K-20, raised again in
+    // the weekly report, not by a new alert). A newer value supersedes the open change in the database (P0.2-03, A5).
+    const { data: last, error: le } = await db.from("listing_changes").select("new_value").eq("location_id", loc.id).eq("field", f)
+      .in("state", ["open", "expired"]).order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (le) throw le;
+    if (last && (last.new_value as FieldValue)?.display === now[f].display) continue;
     const { data: ch, error } = await db.from("listing_changes").insert({ location_id: loc.id, field: f, old_value: before[f], new_value: now[f], detected_by: "scheduled_check" }).select("id").single();
     if (error) throw error;
     await alertOwner(loc, ch.id, f, before[f], now[f]);
@@ -91,7 +94,7 @@ export async function decideChange(changeId: string, decision: "revert" | "keep"
   const field = ch.field as ShieldField;
   if (decision === "keep") {
     // Only an open change can be kept: a put-back on its way (reverting) is not overtaken.
-    const { data: kept } = await db.from("listing_changes").update({ state: "kept", decided_at: new Date().toISOString() })
+    const { data: kept } = await db.from("listing_changes").update({ state: "kept", decided_at: new Date().toISOString(), decided_by: userId })
       .eq("id", ch.id).eq("state", "open").select("id").maybeSingle();
     if (!kept) throw new Error("already_decided");
     const { data: base } = await db.from("listing_baselines").select("fields").eq("location_id", ch.location_id).single();

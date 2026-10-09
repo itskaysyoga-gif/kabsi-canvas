@@ -512,7 +512,8 @@ Sign-in storage, the last business you opened (in your browser), and PostHog's a
 | Rating history, quotes in reports sent before 4 October 2026 (newer reports carry none), decided Google Protection before/after values | 30 days |
 | Other Google profile details Kabsi reads (category and area, Google's answer to a change Kabsi sent) | 30 days |
 | Review ids, star ratings, dates, reply state and your own replies | While you use Kabsi |
-| Your own facts and approved values (About your business, the details you told Google Protection to keep, approved posts and hours) | While you use Kabsi; deleted with the business |
+| Your own facts and approved values (About your business, the details you confirmed or told Google Protection to keep, approved posts and hours; earlier versions are kept as a history) | While you use Kabsi; deleted with the business |
+| Google's values of your details that you have not confirmed, and Google's side of a Google Protection change | 30 days after Kabsi read them; a change still waiting for your answer keeps them until it is answered or closed |
 | Photos you upload | The file is deleted 30 days after the photo is on Google, or soon after you skip it; it then leaves the Photos list (it stays on Google) |
 | Google data after access is removed | Deleted after 30 days unless access returns |
 | Assistant chats | 12 months after the last message |
@@ -844,6 +845,12 @@ Kabsi checks about once an hour once connected, and emails you when a detail cha
 
 **What if the change was mine?**
 Tap Keep the new one. It becomes your approved version.
+
+**What does "Replaced by a newer change" or "No answer in 14 days" mean?**
+"Replaced by a newer change": Google changed the same detail again before you chose, so Kabsi shows you the newest change instead; nothing was decided for you. "No answer in 14 days": nobody chose within 14 days, so the change is closed without a decision and Kabsi does not email about that same value again. Nothing was put back or kept for you in either case.
+
+**Which details count as approved by me?**
+Only details you confirmed yourself in Kabsi. Values Kabsi first read from Google are "Not yet confirmed by you" until you confirm them, and Kabsi never offers to put an unconfirmed value back. Everything you saved in About your business counts as confirmed by you.
 
 ### Review links and cards
 

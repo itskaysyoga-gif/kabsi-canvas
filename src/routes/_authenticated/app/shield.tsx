@@ -54,6 +54,8 @@ const STATE: Record<string, string> = {
   reverted: "Put back",
   kept: "Kept the new one",
   revert_failed: "Couldn't put back",
+  superseded: "Replaced by a newer change",
+  expired: "No answer in 14 days",
 };
 
 async function loadShield(locationId: string) {

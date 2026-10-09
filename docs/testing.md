@@ -62,6 +62,16 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   old Protection change events. Ids, ratings, dates, the owner's reply, knowledge, baseline and approved payloads stay.
   Photos 30 days on Google and skipped photos are marked and one `photo_files` job is offered; changing a limit in
   the table changes what the job clears. The Storage removal itself is `_shared/retention.test.ts` (Deno).
+- `business_knowledge.sql` (P0.2-03): the card becomes one verified owner fact per value (lists one per distinct item,
+  empty values none; counts per card key), with the K-10 keys, ask-again dates and uses (the contact phone has none);
+  a later card edit is a new version and the old one stays, a removed value is outdated, a reorder is no change;
+  baseline values arrive as needs_confirmation, source google; `confirm_business_details` refuses a signed-out caller,
+  a manager, the partner and another owner, checks each detail, writes verified owner facts as new versions and one
+  audit event, and only re-dates a value already confirmed; members read, nobody writes from the browser; every
+  `listing_changes` row is mirrored into `profile_changes`; a newer change supersedes the open one (never kept, A5);
+  keep is accepted with who decided, a put-back is rejected with its publication, then failed or back with the owner;
+  `profile_daily()` expires changes older than 14 days (not on a demo business) and clears Google's values after 30
+  days and 30 days after access is lost, keeping the owner's.
 - `publication_pipeline.sql` (P0.1-13a) and `publication_content.sql` (P0.1-13b): the one publication pipeline for
   replies, posts, photos, special hours and Google Protection put-backs. Per kind: one publication however many times
   or from whichever channel it is approved, the item moves to "on its way" and back on undo inside 10 seconds, one
