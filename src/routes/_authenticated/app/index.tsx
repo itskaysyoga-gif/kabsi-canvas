@@ -300,6 +300,22 @@ function LastCheck({ at }: { at: string | null }) {
   );
 }
 
+// ── Google Protection (K-19): a status line on Home, not a separate product. "Google Protection: on, last check
+// 09:14" in the owner's own time; the date instead when the last check was not today. Hidden until the first check.
+function ProtectionLine({ at }: { at: string | null }) {
+  if (!at) return null;
+  const when = new Date(at);
+  const today = when.toDateString() === new Date().toDateString();
+  const time = today
+    ? when.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })
+    : fmtDate(at, false);
+  return (
+    <Link to="/app/shield" className="mt-1 block text-sm text-kb-stone hover:underline">
+      Google Protection: on, last check {time}
+    </Link>
+  );
+}
+
 // ── Active business
 function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
   const daysLeft = daysUntil(d.planPaidUntil);
@@ -308,7 +324,7 @@ function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
     extras.push({
       key: "shield",
       icon: <ShieldAlert />,
-      text: `Someone changed your Google listing. Keep it or put yours back.`,
+      text: `Something changed on your Google profile. See what changed and choose.`,
       to: "/app/shield",
       tone: "alert",
     });
@@ -337,6 +353,7 @@ function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
   return (
     <>
       <LastCheck at={d.lastCheckAt} />
+      <ProtectionLine at={d.protectionCheckedAt} />
       {/* What needs you */}
       <section className="mt-7 overflow-hidden rounded-large bg-kb-carbon text-kb-white">
         <div className="relative p-6 sm:p-9">

@@ -5,8 +5,9 @@
 // and circuit breaker (_shared/google/client.ts); a job that meets a paused Google is postponed, not failed.
 // Review jobs: sync_reviews reads one business's reviews and offers a draft for each new one; draft_reply drafts one
 // review and offers the owner email run; notify_owner sends that business's due emails (the rules in reviews.ts).
-// protection_check compares one business's listing with its baseline (shield.ts). The whole-system steps the 5 minute
-// cron ran (cron.ts) are one job each, offered every 5 minutes. photo_files, offered by the daily retention run, removes
+// protection_check compares one business's Google profile with its Business Knowledge (protection.ts). The
+// whole-system steps the 5 minute cron ran (cron.ts) are one job each, offered every 5 minutes. photo_files, offered
+// by the daily retention run, removes
 // the uploaded photo files past their K-40 limit (P0.2-01, _shared/retention.ts).
 // Publications (P0.1-13a and P0.1-13b, _shared/publish.ts): publish sends one approved reply, post, photo, special
 // hours period or Google Protection put-back once its undo window has passed; reconcile_publication reads Google for
@@ -17,10 +18,10 @@ import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, jso
 import { type Job, type JobHandler, type JobState, PermanentJobError, runJob } from "../_shared/jobs.ts";
 import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation } from "../_shared/reviews.ts";
 import { AiBudgetError } from "../_shared/ai-budget.ts";
-import { protectionCheck } from "../_shared/shield.ts";
+import { protectionCheck } from "../_shared/protection.ts";
 import {
-  addSpecialHours, createLocalPost, createMedia, hasSpecialHours, listingField, localPostState, mediaExists, patchListing,
-  readReply, removeKabsiAccess, sendReply, type ShieldField, type SpecialDay,
+  addSpecialHours, createLocalPost, createMedia, hasSpecialHours, localPostState, mediaExists, patchListing, protectionShown,
+  readReply, removeKabsiAccess, sendReply, type SpecialDay,
 } from "../_shared/google/index.ts";
 import { accessChangeEmail, type DisconnectDeps, runDisconnect } from "../_shared/disconnect.ts";
 import {
@@ -172,7 +173,7 @@ async function send(i: Item): Promise<Sent> {
       return { ref: null, response: r.response };
     }
     case "listing_revert": {
-      const r = await patchListing(location, str(p.field) as ShieldField, p.raw);
+      const r = await patchListing(location, str(p.field), p.raw ?? null, str(p.value));
       return { ref: null, response: r.response };
     }
   }
@@ -193,9 +194,9 @@ async function read(i: Item): Promise<Seen> {
     case "special_hours":
       return (await hasSpecialHours(location, hoursOf(p))) ? "shown" : "absent";
     case "listing_revert": {
-      // Google may hold an owner's edit for review before it shows: not shown yet is "pending", not a failure.
-      const now = await listingField(location, str(p.field) as ShieldField);
-      return now !== null && now === str(p.value) ? "shown" : "pending";
+      // Google may hold an owner's edit for review before it shows: not shown yet is "pending", not a failure. Shown
+      // means the approved value is back and Google no longer marks the field as its own update (K-19).
+      return (await protectionShown(location, str(p.field), str(p.value))) ? "shown" : "pending";
     }
   }
 }

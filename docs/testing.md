@@ -72,6 +72,17 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   keep is accepted with who decided, a put-back is rejected with its publication, then failed or back with the owner;
   `profile_daily()` expires changes older than 14 days (not on a demo business) and clears Google's values after 30
   days and 30 days after access is lost, keeping the owner's.
+- `protection.sql` (P0.2-04): Google Protection on Business Knowledge. The detector, the decision and the mock send run
+  for the service role only; a Google update to the hours is one change with its source, severity and explanation,
+  raised once per value, superseded by a newer value, and skipped while a put-back is on its way; a value the owner
+  never confirmed is watched, labelled and never offered for restore; a first value is noted, not raised; "Google is
+  right" makes Google's value the approved fact and sends nothing; "Keep my information" makes one publication with
+  the approved value, undo puts it back with the owner, verified is corrected; the high-risk fields (name, address,
+  main category, open status, map pin) refuse an email link and a manager, and a second high-risk put-back inside 7
+  days; a third put-back of a field in 30 days becomes a google_support staff follow-up and sends nothing; checks never
+  create a publication; a disconnect hands an approved put-back back to the owner; a listing_changes id still resolves;
+  the retired tables lose Google's values after 30 days while the owner's kept baselines stay; every change and
+  decision is in the audit log without Google's values.
 - `publication_pipeline.sql` (P0.1-13a) and `publication_content.sql` (P0.1-13b): the one publication pipeline for
   replies, posts, photos, special hours and Google Protection put-backs. Per kind: one publication however many times
   or from whichever channel it is approved, the item moves to "on its way" and back on undo inside 10 seconds, one

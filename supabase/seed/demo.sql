@@ -62,33 +62,45 @@ begin
   values (v_cafe, v_user, 'owner'), (v_salon, v_user, 'owner')
   on conflict do nothing;
 
-  -- What "Google" shows today (mock) and the owner-approved baseline. Harbour Lane's Saturday changed to Closed.
+  -- What "Google" shows today (mock), the business's own values (merchant: what it sent Google) and the fictional
+  -- owner's approved details in Business Knowledge (K-18, P0.2-04). Google changed Harbour Lane's Saturday to Closed.
   insert into public.mock_listings (google_location_id, fields) values
     ('locations/demo-harbour-lane-coffee', jsonb_build_object('title', 'Harbour Lane Coffee', 'phone', '+1 (555) 010-0142',
-      'address', '18 Harbour Lane, Larkhaven, USA', 'website', '', 'categories', 'Coffee shop',
-      'hours', 'Mon to Fri 07:00 to 18:00, Sat Closed, Sun 08:00 to 15:00')),
+      'address', '18 Harbour Lane, Larkhaven, USA', 'website', '', 'categories', 'Coffee shop', 'open_status', 'OPEN', 'map_pin', '',
+      'hours', 'Mon to Fri 07:00 to 18:00, Sat Closed, Sun 08:00 to 15:00',
+      'merchant', jsonb_build_object('title', 'Harbour Lane Coffee', 'phone', '+1 (555) 010-0142',
+        'address', '18 Harbour Lane, Larkhaven, USA', 'website', '', 'categories', 'Coffee shop', 'open_status', 'OPEN', 'map_pin', '',
+        'hours', 'Mon to Fri 07:00 to 18:00, Sat 08:00 to 16:00, Sun 08:00 to 15:00'))),
     ('locations/demo-juniper-hair-studio', jsonb_build_object('title', 'Juniper Hair Studio', 'phone', '+1 (555) 010-0187',
-      'address', '305 Juniper Row, Larkhaven, USA', 'website', '', 'categories', 'Hair salon',
-      'hours', 'Tue to Sat 09:00 to 19:00'))
+      'address', '305 Juniper Row, Larkhaven, USA', 'website', '', 'categories', 'Hair salon', 'open_status', 'OPEN', 'map_pin', '',
+      'hours', 'Tue to Sat 09:00 to 19:00',
+      'merchant', jsonb_build_object('title', 'Juniper Hair Studio', 'phone', '+1 (555) 010-0187',
+        'address', '305 Juniper Row, Larkhaven, USA', 'website', '', 'categories', 'Hair salon', 'open_status', 'OPEN', 'map_pin', '',
+        'hours', 'Tue to Sat 09:00 to 19:00')))
   on conflict (google_location_id) do nothing;
 
-  insert into public.listing_baselines (location_id, fields, updated_by)
-  select l.id, (select jsonb_object_agg(k, jsonb_build_object('display', v, 'raw', v))
-                from jsonb_each_text(m.fields || case when l.id = v_cafe
-                  then jsonb_build_object('hours', 'Mon to Fri 07:00 to 18:00, Sat 08:00 to 16:00, Sun 08:00 to 15:00')
-                  else '{}'::jsonb end) as e(k, v)), 'owner'
+  insert into public.knowledge_facts (location_id, slot, key, value, status, source, source_ref, confirmed_at, uses)
+  select l.id, 'profile.' || k.key, k.key,
+         jsonb_build_object('display', case when k.key = 'open_status' then 'Open' else m.fields -> 'merchant' ->> k.mock end,
+                            'raw', m.fields -> 'merchant' ->> k.mock),
+         'verified', 'owner', 'demo_seed', now(), '{profile}'
   from public.locations l join public.mock_listings m on m.google_location_id = l.google_location_id
-  where l.id in (v_cafe, v_salon)
-  on conflict (location_id) do nothing;
+  cross join (values ('name', 'title'), ('phone', 'phone'), ('address', 'address'), ('regular_hours', 'hours'),
+                     ('main_category', 'categories'), ('open_status', 'open_status')) as k(key, mock)
+  where l.id in (v_cafe, v_salon) and coalesce(m.fields -> 'merchant' ->> k.mock, '') <> ''
+    and not exists (select 1 from public.knowledge_facts f where f.location_id = l.id and f.slot = 'profile.' || k.key
+                      and f.superseded_by is null);
 
-  -- The profile change alert: "Google changed your Saturday hours to Closed".
-  insert into public.listing_changes (id, location_id, field, old_value, new_value, detected_by, state, created_at)
-  values ('de300000-0000-4000-8000-000000000301', v_cafe, 'hours',
-    jsonb_build_object('display', 'Mon to Fri 07:00 to 18:00, Sat 08:00 to 16:00, Sun 08:00 to 15:00',
-                       'raw', 'Mon to Fri 07:00 to 18:00, Sat 08:00 to 16:00, Sun 08:00 to 15:00'),
+  -- The Google Protection change: "Google shows Saturday closed. You approved 08:00 to 16:00."
+  insert into public.profile_changes (id, location_id, field, previous_value, previous_fact_id, google_value, source,
+    detected_at, severity, status, explanation)
+  select 'de300000-0000-4000-8000-000000000301', v_cafe, 'regular_hours', f.value, f.id,
     jsonb_build_object('display', 'Mon to Fri 07:00 to 18:00, Sat Closed, Sun 08:00 to 15:00',
                        'raw', 'Mon to Fri 07:00 to 18:00, Sat Closed, Sun 08:00 to 15:00'),
-    'scheduled_check', 'open', now() - interval '2 hours')
+    'google_update', now() - interval '2 hours', 'urgent', 'awaiting_review',
+    'Google shows Saturday closed. You approved 08:00 to 16:00.'
+  from public.knowledge_facts f
+  where f.location_id = v_cafe and f.slot = 'profile.regular_hours' and f.superseded_by is null
   on conflict (id) do nothing;
 
   -- 12 invented reviews per business. state: drafted (waiting for the owner, with a draft) or posted (replied).

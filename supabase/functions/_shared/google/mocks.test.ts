@@ -83,7 +83,7 @@ const cases: [string, () => Promise<unknown>, unknown][] = [
   ["performance.dailyMetrics", () => performance.dailyMetrics(L, ["CALL_CLICKS", "WEBSITE_CLICKS"], { year: 2026, month: 9, day: 29 }, { year: 2026, month: 10, day: 1 }), fxDaily],
   ["attributes.getAttributes", () => attributes.getAttributes(L), fxAttributes],
   ["notifications.getNotificationSetting", () => notifications.getNotificationSetting(A), fxNotif],
-  ["updates.getGoogleUpdated", () => updates.getGoogleUpdated(L, "title,websiteUri"), fxUpdated],
+  ["updates.getGoogleUpdated", () => Promise.resolve(updates.googleUpdatedFromFields(L, { title: "Harbour Lane Coffee", website: "https://kabsi.co", merchant: { title: "Harbour Lane Coffee", website: "https://example.com" } })), fxUpdated],
   ["admins.listLocationAdmins", () => {
     admins.useAdminStore({ read: () => Promise.resolve({ removed: false, refuse: false }), remove: () => Promise.resolve() });
     return admins.listLocationAdmins(L);
@@ -129,6 +129,19 @@ Deno.test("a new mock listing invents no phone and no category (K-99, A13)", () 
   assert.equal(f.categories, "");
   assert.equal(f.title, "Juniper Hair Studio");
   assert.equal(locations.seedFields({ name: "X", address: null, phone: "+44 20 0000 0000" }).phone, "+44 20 0000 0000");
+});
+
+Deno.test("the mock getGoogleUpdated names the fields Google shows differently from the business's own values", () => {
+  const same = updates.googleUpdatedFromFields(L, { title: "Harbour Lane Coffee", merchant: { title: "Harbour Lane Coffee" } });
+  assert.deepEqual(same, { location: { name: L } });
+  const moved = updates.googleUpdatedFromFields(L, {
+    title: "Harbour Lane", hours: "Mon to Sun 09:00 to 17:00", open_status: "CLOSED_PERMANENTLY", map_pin: "33.1, 35.2",
+    merchant: { title: "Harbour Lane Coffee", hours: "Mon to Sun 09:00 to 17:00", open_status: "OPEN" },
+  });
+  // map_pin has no value of the business's own (made before the merchant values existed): not Google's update.
+  assert.equal(moved.diffMask, "title,openInfo");
+  assert.deepEqual(moved.location.openInfo, { status: "CLOSED_PERMANENTLY" });
+  assert.deepEqual(moved.location.latlng, { latitude: 33.1, longitude: 35.2 });
 });
 
 Deno.test("mock performance values are zero, never invented", async () => {

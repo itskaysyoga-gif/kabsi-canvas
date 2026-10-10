@@ -6,7 +6,7 @@
 // the publication pipeline after the 10 second undo window (P0.1-13a).
 import { admin, captureError, CORS, fail, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
 import { publishReply, undoReply } from "../_shared/reviews.ts";
-import { decideChange } from "../_shared/shield.ts";
+import { decideChange, decisionRefusal } from "../_shared/protection.ts";
 import { auditedAdmin, auditHeaders } from "../_shared/audit.ts";
 
 type Token = { id: string; location_id: string; user_id: string | null; action: string; target_type: string; target_id: string; expires_at: string; used_at: string | null };
@@ -27,11 +27,15 @@ async function mode(): Promise<"mock" | "live"> {
 async function view(tok: Token) {
   const db = admin();
   if (tok.target_type === "listing_change") {
-    const { data: ch } = await db.from("listing_changes").select("id, field, old_value, new_value, state, locations(name, is_demo)").eq("id", tok.target_id).single();
+    // A Google Protection change (profile_changes, P0.2-04). No email carries such a link today; the page stays safe.
+    const { data: ch } = await db.from("profile_changes").select("id, field, previous_value, google_value, status, locations(name, is_demo)").eq("id", tok.target_id).single();
     return {
       action: tok.action, business: (ch?.locations as unknown as { name: string } | null)?.name ?? "",
       demo: (ch?.locations as unknown as { is_demo: boolean } | null)?.is_demo === true,
-      change: ch && { id: ch.id, field: ch.field, before: (ch.old_value as { display?: string })?.display ?? "", after: (ch.new_value as { display?: string })?.display ?? "", state: ch.state },
+      change: ch && {
+        id: ch.id, field: String(ch.field).replace(/_/g, " "), before: (ch.previous_value as { display?: string })?.display ?? "",
+        after: (ch.google_value as { display?: string })?.display ?? "", state: ["detected", "awaiting_review"].includes(ch.status) ? "open" : ch.status,
+      },
     };
   }
   const { data: rv } = await db.from("reviews").select("id, reviewer_name, star_rating, comment, state, urgency, existing_reply, locations(name, concierge, is_demo)").eq("id", tok.target_id).single();
@@ -84,8 +88,9 @@ export async function action(req: Request): Promise<Response> {
     if (!claimed) return fail("used", "This link was already used.", 409);
 
     if (tok.target_type === "listing_change") {
-      const r = await decideChange(tok.target_id, body.do as "revert" | "keep", tok.user_id, "email_link", auditHeaders(req, tok.user_id));
-      return json({ ok: true, done: r.state });
+      // "revert" is "Keep my information" (reject Google's value), "keep" is "Google is right" (accept it).
+      const r = await decideChange(tok.target_id, body.do === "revert" ? "reject" : "accept", tok.user_id, "email_link", auditHeaders(req, tok.user_id));
+      return json({ ok: true, done: r.state === "rejected" ? "reverted" : r.state });
     }
     if (body.do === "post") {
       const result = await publishReply({ reviewId: tok.target_id, text: body.text ?? "", approvedBy: tok.user_id, channel: "email_link", audit: auditHeaders(req, tok.user_id) });
@@ -96,7 +101,8 @@ export async function action(req: Request): Promise<Response> {
     return json({ ok: true, done: newState });
   } catch (e) {
     const msg = String(e);
-    if (msg.includes("already_decided")) return fail("already_decided", "This change was already handled.", 409);
+    const refusal = decisionRefusal(msg);
+    if (refusal) return fail(refusal.code, refusal.text, refusal.status);
     if (msg.includes("already_posted")) return fail("already_posted", "A reply is already posted for this review.", 409);
     if (msg.includes("bad_reply_text")) return fail("bad_text", "The reply is empty or too long.", 400);
     if (msg.includes("too_late")) return fail("too_late", "It is already on its way to Google.", 409);

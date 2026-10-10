@@ -260,8 +260,8 @@ select is(private.profile_daily() ->> 'expired', '2', 'the daily job expires the
 select is((select array_agg(l.field || ':' || l.state || ':' || c.status order by l.field) from public.listing_changes l
             join public.profile_changes c on c.listing_change_id = l.id
            where l.id in ('00000000-0000-4000-8000-0000000007e1', '00000000-0000-4000-8000-0000000007e2', '00000000-0000-4000-8000-0000000007e3')),
-  array['address:open:awaiting_review', 'hours:open:awaiting_review', 'website:expired:expired'],
-  '15 days expired, 13 days still waiting, a demo change stays for recordings');
+  array['address:open:awaiting_review', 'hours:open:awaiting_review', 'website:open:expired'],
+  '15 days expired, 13 days still waiting, a demo change stays for recordings (since P0.2-04 in profile_changes only; listing_changes is retired)');
 select is((select row(status, decided_at)::text from public.profile_changes where id = '00000000-0000-4000-8000-0000000007e4'),
   row('expired', null::timestamptz)::text, 'a change written directly to profile_changes expires too, with no decision');
 
@@ -273,8 +273,8 @@ update public.knowledge_facts set created_at = now() - interval '29 days'
  where location_id = '00000000-0000-4000-8000-0000000000c1' and slot = 'profile.regular_hours';
 update public.profile_changes set detected_at = now() - interval '31 days'
  where listing_change_id in ('00000000-0000-4000-8000-0000000007c1', '00000000-0000-4000-8000-0000000007c2', '00000000-0000-4000-8000-0000000007c3');
-update public.profile_changes set detected_at = now() - interval '31 days' where listing_change_id = (
-  select id from public.listing_changes where location_id = '00000000-0000-4000-8000-0000000000c1' and field = 'address' and state = 'open');
+-- Since P0.2-04 an unanswered change expires after 14 days, so only a demo change (never expired) still waits at 31.
+update public.profile_changes set detected_at = now() - interval '31 days' where listing_change_id = '00000000-0000-4000-8000-0000000007e3';
 select private.profile_daily();
 select is((select array_agg(slot || ':' || status || ':' || (value is null) order by slot, version) from public.knowledge_facts
             where location_id = '00000000-0000-4000-8000-0000000000c1' and slot in ('profile.name', 'profile.phone', 'profile.regular_hours', 'card.about')),
@@ -287,8 +287,8 @@ select is((select row(google_value, previous_value is not null, values_cleared_a
 select is((select row(google_value, previous_value)::text from public.profile_changes
             where listing_change_id = '00000000-0000-4000-8000-0000000007c3'), row(null::jsonb, null::jsonb)::text,
   'an unconfirmed previous value was Google''s, so it goes too');
-select ok((select google_value is not null from public.profile_changes c join public.listing_changes l on l.id = c.listing_change_id
-            where l.location_id = '00000000-0000-4000-8000-0000000000c1' and l.field = 'address' and l.state = 'open'),
+select ok((select status = 'awaiting_review' and google_value is not null from public.profile_changes
+            where listing_change_id = '00000000-0000-4000-8000-0000000007e3'),
   'a change still waiting for the owner keeps its values');
 
 -- Access lost 30 days ago: every Google value of the business goes.

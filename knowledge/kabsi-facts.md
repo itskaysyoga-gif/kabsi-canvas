@@ -88,7 +88,7 @@ Kabsi is presented as five modules. Use these exact names.
 
 - **Reviews:** every new review arrives by email with a reply drafted in the reviewer's language. The owner approves it with the button "Approve reply".
 - **Google Profile:** posts, photo checks and special hours, all approved by the owner first. Home has a list called "What needs your attention" with the next open items.
-- **Google Protection:** watches the listing for changes on Google and alerts the owner. The email says what changed and links to the app, where the owner taps "Keep my information" to choose.
+- **Google Protection:** compares the Google profile with the details the owner confirmed and alerts the owner when they differ. The email explains the difference ("Google shows Sunday closing at 18:00. You approved 22:00.") and links to the app, where the owner chooses "Google is right" or "Keep my information". Home shows a status line: "Google Protection: on, last check 09:14".
 - **Get Reviews:** a review link and QR code for everyone, and an NFC card in Lebanon. The page shows "link activity", which is not the same as reviews: Google decides which reviews appear.
 - **Weekly Care Report:** a factual email once a week.
 
@@ -467,7 +467,7 @@ Never: argue about who is right, share the customer's details, accuse them of ly
 
 ### 8.7 Google content rules Kabsi follows
 
-Kabsi keeps Google content for at most 30 days, as Google's policy requires (details in 9.7; one retention table sets every limit and the daily retention job reads it), and follows the Google API Services User Data Policy, including the Limited Use requirements. Google Protection limits are in 2.11; Google Q&A is covered in 2.14.
+Kabsi keeps Google content for at most 30 days, as Google's policy requires (details in 9.7; one retention table sets every limit and the daily retention job reads it), and follows the Google API Services User Data Policy, including the Limited Use requirements. Google Protection is covered in the FAQ (section 11); Google Q&A is covered in 2.14.
 
 ---
 
@@ -566,7 +566,7 @@ Links work once and last 7 days. Open Kabsi and use Reviews, To reply.
 After you approve, Kabsi waits 10 seconds, then sends the reply to Google, usually within a minute or two. Google checks every reply before it appears, usually within 10 minutes, sometimes longer. All reviews shows "Google is checking your reply" while it waits. Kabsi checks again after 10 minutes and then less often, and never posts the same reply twice. If Google does not accept the reply, the review comes back to To reply with the reason, so you can edit it and approve again. If Google still does not show it after 7 days, Kabsi treats it the same way. Approving the same reply twice (for example in the app and from the email) sends it once. **[TIME-SENSITIVE]** In test mode nothing is sent to Google at all.
 
 **I approved a post, photo, holiday hours or "Keep my information" and it isn't on Google yet.**
-Posts, photos, special hours and putting a detail back with Google Protection go to Google the same way as replies: Kabsi waits 10 seconds after you approve, then sends it, usually within a minute or two. Until then the post or photo shows "Sending to Google", the hours show "Sending" and the change shows "Being put back". Approving twice (two taps, two tabs, the app and the email) sends it once. If Google does not answer, Kabsi checks your profile instead of sending again. A post Google is still checking shows once Google allows it. If Google refuses it or still does not show it after 7 days, it shows "Not posted", "Couldn't post", "Not saved" or "Couldn't put back", and nothing is sent twice. **[TIME-SENSITIVE]** In test mode nothing is sent to Google at all.
+Posts, photos, special hours and putting a detail back with Google Protection go to Google the same way as replies: Kabsi waits 10 seconds after you approve, then sends it, usually within a minute or two. Until then the post or photo shows "Sending to Google", the hours show "Sending" and the change shows "Your information is on its way to Google". Kabsi then reads your profile again and marks it "Your information is back on Google" once Google shows it and no longer lists it as its own change. Approving twice (two taps, two tabs, the app and the email) sends it once. If Google does not answer, Kabsi checks your profile instead of sending again. A post Google is still checking shows once Google allows it. If Google refuses it or still does not show it after 7 days, it shows "Not posted", "Couldn't post", "Not saved" or "Google did not take your information", and nothing is sent twice. **[TIME-SENSITIVE]** In test mode nothing is sent to Google at all.
 
 **I'm not getting review emails.**
 Check spam, and Settings, Emails: emails may be paused (**Turn emails back on**), or the daily time and time zone may be off. 4 and 5 star reviews arrive once a day. Reviews always appear in the app too.
@@ -603,8 +603,11 @@ Staff check each transaction by hand. If the Plan page says "We couldn't match y
 **My plan shows "Paid" but hasn't started.**
 Correct: a plan starts when Google access works (section 4.3).
 
-**Google Protection says "Couldn't put back".**
-Google didn't accept the revert, or still did not show your version 7 days later. Update the detail on your Google profile directly, or hand off.
+**Google Protection says "Google did not take your information".**
+Google didn't accept the change, or still did not show your version 7 days later. Update the detail on your Google profile directly, or hand off.
+
+**Google Protection says "Kabsi's team is asking Google support".**
+Google changed the same detail again after Kabsi put your approved value back twice in 30 days. Kabsi does not send it a third time; a person on the Kabsi team contacts Google Business Profile support for you.
 
 ---
 
@@ -835,7 +838,7 @@ Yes. On Hours, choose the dates, Closed or different hours, review what Google w
 ### Google Protection
 
 **What is Google Protection?**
-Kabsi watches your name, phone, address, hours, website and main category. If something changes that you did not approve, you get one email with the before and after and two buttons: Keep my information and Google is right. Nothing changes unless you say so.
+Kabsi watches your business name, phone, website, address, opening hours, main category, open status (open, temporarily closed, permanently closed) and map pin, and compares them with the details you confirmed. When Google shows something different, you get one email that explains it, for example "Google shows Sunday closing at 18:00. You approved 22:00.", and says whether Google made the change itself or Kabsi does not know who did. In the app you choose: "Google is right" (Google's value becomes your approved detail and nothing is sent to Google) or "Keep my information" (Kabsi sends your approved value back to Google, then checks Google shows it). Nothing changes on Google unless you say so, and Kabsi never puts anything back by itself. Home shows "Google Protection: on, last check" with the time of the last check.
 
 **Can Google Protection lock my listing?**
 No. Nobody can lock a Google listing or stop people suggesting edits. Kabsi tells you fast and puts your version back only if you say so.
@@ -844,13 +847,22 @@ No. Nobody can lock a Google listing or stop people suggesting edits. Kabsi tell
 Kabsi checks about once an hour once connected, and emails you when a detail changes.
 
 **What if the change was mine?**
-Tap Keep the new one. It becomes your approved version.
+Tap "Google is right". Google's value becomes your approved version.
+
+**Why does Kabsi sometimes recommend "Google is right"?**
+Google removes things from business names that break its naming rules: a web address, a city or area, a slogan or extra keywords. When that is what Google removed (for example "Yawmiyati.com" to "Yawmiyati"), Kabsi recommends "Google is right" and says why: business names on Google can't include them, and putting them back can lead to a suspension. "Keep my information" is still there, with that warning.
+
+**Why do I have to sign in for some changes?**
+Your business name, address, main category, open status and map pin can make Google ask you to verify your business again when they change. Kabsi asks you to sign in to the app to choose for these (an email link is not enough), only the owner can choose, and the app says "Changing this can make Google ask you to verify your business again." Kabsi also sends at most one of these details back to Google at a time, at least 7 days apart; a second one inside the 7 days waits, and the app says the date it can go.
+
+**What if Google keeps changing the same detail?**
+Kabsi puts the same detail back at most twice in 30 days. If Google changes it a third time, Kabsi does not send it again: a person on the Kabsi team contacts Google Business Profile support for you, with an explanation ready.
 
 **What does "Replaced by a newer change" or "No answer in 14 days" mean?**
 "Replaced by a newer change": Google changed the same detail again before you chose, so Kabsi shows you the newest change instead; nothing was decided for you. "No answer in 14 days": nobody chose within 14 days, so the change is closed without a decision and Kabsi does not email about that same value again. Nothing was put back or kept for you in either case.
 
 **Which details count as approved by me?**
-Only details you confirmed yourself in Kabsi. Values Kabsi first read from Google are "Not yet confirmed by you" until you confirm them, and Kabsi never offers to put an unconfirmed value back. Everything you saved in About your business counts as confirmed by you.
+Only details you confirmed yourself in Kabsi, or where you chose "Google is right". Values Kabsi read from Google are "Not yet confirmed by you" until you confirm them: Kabsi still watches them and tells you when they change, but never offers to put an unconfirmed value back. Everything you saved in About your business counts as confirmed by you.
 
 ### Review links and cards
 
@@ -1101,7 +1113,7 @@ The assistant must not answer these. Say you'll pass it to the Kabsi team and gi
 **Google**
 - Any date for Google's API approval or go-live.
 - Specific review removal cases, suspected fake review campaigns, Google policy disputes.
-- Google Protection "Couldn't put back" that the owner can't fix on Google.
+- Google Protection "Google did not take your information" that the owner can't fix on Google.
 
 **Cards and hardware**
 - Card delivery times, shipping costs and addresses in Lebanon.

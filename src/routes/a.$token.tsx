@@ -138,7 +138,7 @@ function ActionPage() {
               disabled={busy}
               onClick={() => void run("keep")}
             >
-              Keep the new one
+              Google is right
             </Button>
           </>
         )}
