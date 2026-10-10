@@ -284,13 +284,19 @@ export type ActivityKind =
   "reply" | "post" | "photo" | "hours" | "revert" | "drafts" | "check" | "report";
 export type Activity = { key: string; kind: ActivityKind; text: string; at: string };
 
+// Google Protection fields: the K-18 names since P0.2-04, and the older names of earlier put-backs.
 const FIELD_LABEL: Record<string, string> = {
+  name: "business name",
   title: "business name",
   phone: "phone number",
   address: "address",
   website: "website",
+  regular_hours: "opening hours",
   hours: "opening hours",
+  main_category: "main category",
   categories: "main category",
+  open_status: "open status",
+  map_pin: "map pin",
 };
 
 // A publication Google has answered for: sent, being checked, or seen on the profile.
