@@ -28,11 +28,21 @@ values ('00000000-0000-4000-8000-000000000202', '00000000-0000-4000-8000-0000000
 insert into public.special_hours (id, location_id, start_date, end_date, closed, open_time, close_time)
 values ('00000000-0000-4000-8000-000000000203', '00000000-0000-4000-8000-0000000000c1', '2027-03-10', '2027-03-10', false, '09:00', '13:30'),
        ('00000000-0000-4000-8000-000000000303', '00000000-0000-4000-8000-0000000000c1', '2027-04-01', '2027-04-02', true, null, null);
-insert into public.listing_changes (id, location_id, field, old_value, new_value, detected_by)
+-- Google Protection changes (P0.2-04: profile_changes) against the owner's confirmed phone and website. The fixtures'
+-- own phone change is closed first (one open change per field).
+update public.profile_changes set status = 'expired' where location_id = '00000000-0000-4000-8000-0000000000c1';
+insert into public.knowledge_facts (id, location_id, slot, key, value, status, source, confirmed_at, uses) values
+  ('00000000-0000-4000-8000-000000000214', '00000000-0000-4000-8000-0000000000c1', 'profile.phone', 'phone',
+   '{"display": "+961 1 000 000", "raw": "+961 1 000 000"}', 'verified', 'owner', now(), '{profile}'),
+  ('00000000-0000-4000-8000-000000000314', '00000000-0000-4000-8000-0000000000c1', 'profile.website', 'website',
+   '{"display": "https://old.example.test", "raw": "https://old.example.test"}', 'verified', 'owner', now(), '{profile}');
+insert into public.profile_changes (id, location_id, field, previous_value, previous_fact_id, google_value, source, severity, status)
 values ('00000000-0000-4000-8000-000000000204', '00000000-0000-4000-8000-0000000000c1', 'phone',
-        '{"display": "+961 1 000 000", "raw": "+961 1 000 000"}', '{"display": "+961 1 999 999", "raw": "+961 1 999 999"}', 'scheduled_check'),
+        '{"display": "+961 1 000 000", "raw": "+961 1 000 000"}', '00000000-0000-4000-8000-000000000214',
+        '{"display": "+961 1 999 999", "raw": "+961 1 999 999"}', 'scheduled_check', 'urgent', 'awaiting_review'),
        ('00000000-0000-4000-8000-000000000304', '00000000-0000-4000-8000-0000000000c1', 'website',
-        '{"display": "https://old.example.test", "raw": "https://old.example.test"}', '{"display": "https://new.example.test", "raw": "https://new.example.test"}', 'scheduled_check');
+        '{"display": "https://old.example.test", "raw": "https://old.example.test"}', '00000000-0000-4000-8000-000000000314',
+        '{"display": "https://new.example.test", "raw": "https://new.example.test"}', 'scheduled_check', 'recommended', 'awaiting_review');
 
 create temp table k (kind text, n int, target uuid, payload jsonb, primary key (kind, n));
 insert into k values
@@ -63,7 +73,7 @@ create function pg_temp.item(p_kind text, p_n int) returns text language sql as 
     when 'local_post' then (select state from public.gbp_posts where id = (select target from k where kind = p_kind and n = p_n))
     when 'photo' then (select state from public.photos where id = (select target from k where kind = p_kind and n = p_n))
     when 'special_hours' then (select state from public.special_hours where id = (select target from k where kind = p_kind and n = p_n))
-    else (select state from public.listing_changes where id = (select target from k where kind = p_kind and n = p_n)) end
+    else (select status from public.profile_changes where id = (select target from k where kind = p_kind and n = p_n)) end
 $$;
 
 -- Shape and privileges.
@@ -90,7 +100,7 @@ select is((select idempotency_key from public.publications where id = pg_temp.pi
   kind || ': the idempotency key names the item and the attempt') from k where n = 2;
 select is((select publish_after - approved_at from public.publications where id = pg_temp.pid(kind, 2)), interval '10 seconds',
   kind || ': sent 10 seconds after the approval') from k where n = 2;
-select is(pg_temp.item(kind, 2), case when kind = 'listing_revert' then 'reverting' else 'publishing' end,
+select is(pg_temp.item(kind, 2), case when kind = 'listing_revert' then 'rejected' else 'publishing' end,
   kind || ': the item is on its way') from k where n = 2;
 select is((select count(*) from public.audit_events e where e.action = 'approval' and e.object_type = k.kind
             and e.object_id = k.target::text), 1::bigint, kind || ': the approval is in the audit log') from k where n = 2;
@@ -107,8 +117,8 @@ select is((select payload from public.publications where id = pg_temp.pid('speci
   '{"start_date": "2027-03-10", "end_date": "2027-03-10", "closed": false, "open_time": "09:00", "close_time": "13:30"}'::jsonb,
   'special hours: the stored dates and times');
 select is((select payload from public.publications where id = pg_temp.pid('listing_revert', 2)),
-  '{"field": "phone", "value": "+961 1 000 000", "raw": "+961 1 000 000"}'::jsonb,
-  'put-back: the stored "before" value, never one from the screen');
+  '{"field": "phone", "value": "+961 1 000 000", "raw": "+961 1 000 000", "fact_id": "00000000-0000-4000-8000-000000000214"}'::jsonb,
+  'put-back: the owner''s approved value from Business Knowledge, never one from the screen');
 
 -- Refusals.
 select throws_ok($$ select pg_temp.approve('local_post', 3, '00000000-0000-4000-8000-0000000000b2') $$,
@@ -141,10 +151,10 @@ select is(public.claim_publication(pg_temp.pid(kind, 2)) ->> 'result', 'not_appr
 -- Google answered: published, then verified; the item follows.
 select is(public.record_publication(pg_temp.pid(kind, 2), 'published', p_google_ref => 'ref-' || kind), 'published', kind || ': published')
   from k where n = 2;
-select is(pg_temp.item(kind, 2), case when kind = 'listing_revert' then 'reverting' else 'publishing' end,
+select is(pg_temp.item(kind, 2), case when kind = 'listing_revert' then 'rejected' else 'publishing' end,
   kind || ': still on its way until Google shows it') from k where n = 2;
 select is(public.record_publication(pg_temp.pid(kind, 2), 'verified'), 'verified', kind || ': verified') from k where n = 2;
-select is(pg_temp.item(kind, 2), case when kind = 'listing_revert' then 'reverted' else 'posted' end, kind || ': the item is done')
+select is(pg_temp.item(kind, 2), case when kind = 'listing_revert' then 'corrected' else 'posted' end, kind || ': the item is done')
   from k where n = 2;
 select is((select state from public.publications where id = pg_temp.pid(kind, 2)), 'verified',
   kind || ': the publication is verified') from k where n = 2;
@@ -159,7 +169,7 @@ select throws_ok(format('select public.undo_publication(%L, %L)', pg_temp.pid('p
   'P0001', 'not_member', 'someone outside the business cannot undo');
 select is(public.undo_publication(pg_temp.pid(kind, 3), '00000000-0000-4000-8000-0000000000a1') ->> 'state', 'cancelled',
   kind || ': undo inside the 10 seconds cancels') from k where n = 3;
-select is(pg_temp.item(kind, 3), case when kind = 'listing_revert' then 'open' else 'draft' end, kind || ': the item is back with the owner')
+select is(pg_temp.item(kind, 3), case when kind = 'listing_revert' then 'awaiting_review' else 'draft' end, kind || ': the item is back with the owner')
   from k where n = 3;
 select pg_temp.due(pg_temp.pid(kind, 3)) from k where n = 3;
 select is(public.claim_publication(pg_temp.pid(kind, 3)) ->> 'result', 'not_approved', kind || ': an undone approval is never claimed')
@@ -182,19 +192,20 @@ select is(public.record_publication(pg_temp.pid('special_hours', 3), 'rejected',
   'google 400 mock'), 'rejected', 'special hours: rejected');
 select is(public.record_publication(pg_temp.pid('listing_revert', 3), 'checking', p_moderation => 'pending'), 'checking',
   'put-back: Google has not applied it yet');
-select is(pg_temp.item(kind, 3), case kind when 'listing_revert' then 'reverting' else 'failed' end,
+select is(pg_temp.item(kind, 3), case kind when 'listing_revert' then 'rejected' else 'failed' end,
   kind || ': the item shows what happened') from k where n = 3;
 select is((select error from public.publications where id = pg_temp.pid('local_post', 3)), 'google 400 mock', 'the technical error is kept for staff');
 
 -- Seven days without it on Google: failed, never sent again.
 update public.publications set approved_at = now() - interval '8 days', next_check_at = now() - interval '1 second'
  where id = pg_temp.pid('listing_revert', 3);
-select is(public.claim_publication_check(pg_temp.pid('listing_revert', 3)) ->> 'payload',
-  '{"raw": "https://old.example.test", "field": "website", "value": "https://old.example.test"}', 'the reconcile claim carries the payload');
+select is(public.claim_publication_check(pg_temp.pid('listing_revert', 3)) -> 'payload',
+  '{"raw": "https://old.example.test", "field": "website", "value": "https://old.example.test", "fact_id": "00000000-0000-4000-8000-000000000314"}'::jsonb,
+  'the reconcile claim carries the payload');
 select is(public.record_publication(pg_temp.pid('listing_revert', 3), 'checking'), 'failed', 'after 7 days a put-back not shown is failed');
 select is((select error from public.publications where id = pg_temp.pid('listing_revert', 3)),
   'Google has not shown this change after 7 days. Kabsi did not send it again.', 'with the reason');
-select is(pg_temp.item('listing_revert', 3), 'revert_failed', 'and the change shows it could not be put back');
+select is(pg_temp.item('listing_revert', 3), 'failed', 'and the change shows it could not be put back');
 
 -- A business that became concierge after the approval: stopped, nothing sent.
 insert into public.gbp_posts (id, location_id, owner_input, body)

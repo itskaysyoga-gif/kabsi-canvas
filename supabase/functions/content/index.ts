@@ -13,7 +13,7 @@
 import { MODELS } from "../_shared/models.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
-import { decideChange } from "../_shared/shield.ts";
+import { decideChange, decisionRefusal } from "../_shared/protection.ts";
 import { auditedAdmin, auditHeaders } from "../_shared/audit.ts";
 import { CTAS, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, writePost } from "../_shared/posts.ts";
 import { AI_BUDGET_MESSAGE, AiBudgetError } from "../_shared/ai-budget.ts";
@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
       locationId = data.location_id;
     }
     if (typeof b.change_id === "string") {
-      const { data } = await db.from("listing_changes").select("location_id").eq("id", b.change_id).maybeSingle();
+      const { data } = await db.from("profile_changes").select("location_id").eq("id", b.change_id).maybeSingle();
       if (!data) return fail("not_found", "Change not found.", 404);
       locationId = data.location_id;
     }
@@ -196,13 +196,16 @@ Deno.serve(async (req) => {
         return json({ ok: true, ...r });
       }
       case "shield_decide": {
-        const decision = b.decision === "revert" ? "revert" : b.decision === "keep" ? "keep" : null;
-        if (!decision) return fail("bad_input", "Choose revert or keep.");
+        // "accept" is "Google is right", "reject" is "Keep my information" (K-19). The older names still work.
+        const decision = b.decision === "accept" || b.decision === "keep" ? "accept"
+          : b.decision === "reject" || b.decision === "revert" ? "reject" : null;
+        if (!decision) return fail("bad_input", "Choose Google is right or Keep my information.");
         try {
           const r = await decideChange(String(b.change_id), decision, user.id, "dashboard", auditHeaders(req, user.id));
           return json({ ok: true, ...r });
         } catch (e) {
-          if (String(e).includes("already_decided")) return fail("already_decided", "This change was already handled.", 409);
+          const refusal = decisionRefusal(String(e));
+          if (refusal) return fail(refusal.code, refusal.text, refusal.status);
           throw e;
         }
       }

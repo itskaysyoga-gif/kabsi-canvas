@@ -37,7 +37,8 @@ export type Dashboard = {
   taps30d: number;
   activeCards: number;
   openChanges: number;
-  shieldWatching: boolean;
+  /** Google Protection's last check of the profile (K-19: "Google Protection: on, last check 09:14"). */
+  protectionCheckedAt: string | null;
   postDrafts: number;
   photoDrafts: number;
   plan: ActivePlan | null;
@@ -83,7 +84,7 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
     taps30,
     cards,
     changes,
-    baseline,
+    protection,
     posts,
     photos,
     plans,
@@ -148,15 +149,11 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
       .eq("location_id", locationId)
       .eq("status", "active"),
     supabase
-      .from("listing_changes")
+      .from("profile_changes")
       .select("id", head)
       .eq("location_id", locationId)
-      .eq("state", "open"),
-    supabase
-      .from("listing_baselines")
-      .select("location_id")
-      .eq("location_id", locationId)
-      .maybeSingle(),
+      .in("status", ["detected", "awaiting_review"]),
+    supabase.from("locations").select("shield_checked_at").eq("id", locationId).maybeSingle(),
     supabase
       .from("gbp_posts")
       .select("id", head)
@@ -252,7 +249,8 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
     taps30d: count(taps30),
     activeCards: count(cards),
     openChanges: count(changes),
-    shieldWatching: !!baseline.data,
+    protectionCheckedAt:
+      (protection.data as { shield_checked_at: string | null } | null)?.shield_checked_at ?? null,
     postDrafts: count(posts),
     photoDrafts: count(photos),
     plan: current,
@@ -286,13 +284,19 @@ export type ActivityKind =
   "reply" | "post" | "photo" | "hours" | "revert" | "drafts" | "check" | "report";
 export type Activity = { key: string; kind: ActivityKind; text: string; at: string };
 
+// Google Protection fields: the K-18 names since P0.2-04, and the older names of earlier put-backs.
 const FIELD_LABEL: Record<string, string> = {
+  name: "business name",
   title: "business name",
   phone: "phone number",
   address: "address",
   website: "website",
+  regular_hours: "opening hours",
   hours: "opening hours",
+  main_category: "main category",
   categories: "main category",
+  open_status: "open status",
+  map_pin: "map pin",
 };
 
 // A publication Google has answered for: sent, being checked, or seen on the profile.

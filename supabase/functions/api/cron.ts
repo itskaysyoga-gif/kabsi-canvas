@@ -1,7 +1,7 @@
 // The whole-system steps: access, ratings, weekly reports, deletions, trial and renewal reminders.
 // Each decides what is due by looking at data, never at the clock alone, and is safe to run twice.
 // Since P0.1-12b each runs as its own job from the dispatcher (api/jobs.ts), offered every 5 minutes; Protection is
-// one job per business (shield.ts). /api/cron-tick still runs them all in one go for the weekly_now test hook and
+// one job per business (protection.ts). /api/cron-tick still runs them all in one go for the weekly_now test hook and
 // until the migration that unschedules kabsi_cron_tick (20261004200100_cron_to_jobs.sql) is applied.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
 import { dueRenewalEmail, dueTrialEmail, localDateHour, PLAN_LABEL, type RenewalStage, type TrialStage } from "../_shared/plans.ts";
@@ -9,7 +9,7 @@ import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
 import { accessChangeEmail } from "../_shared/disconnect.ts";
 import { snapshotRatings, weeklyReports } from "../_shared/report.ts";
-import { shieldCheck } from "../_shared/shield.ts";
+import { shieldCheck } from "../_shared/protection.ts";
 
 // Early access (D267): staff accepted the invitation by hand and stamped access, so tell the owner. The dedupe key
 // is the same as the normal "access granted" email, so nobody gets both.

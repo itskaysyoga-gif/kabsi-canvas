@@ -66,8 +66,11 @@ echo "publication claim race: w1 $c1, w2 $c2, attempts $attempts"
 q -c "insert into public.gbp_posts (id, location_id, owner_input, body) values ('00000000-0000-4000-8000-00000000ccd1', '$loc', 'Race post', 'Draft')" \
   -c "insert into public.photos (id, location_id, storage_path, state) values ('00000000-0000-4000-8000-00000000ccd2', '$loc', 'race/p.jpg', 'draft')" \
   -c "insert into public.special_hours (id, location_id, start_date, end_date, closed) values ('00000000-0000-4000-8000-00000000ccd3', '$loc', '2026-12-25', '2026-12-25', true)" \
-  -c "insert into public.listing_changes (id, location_id, field, old_value, new_value, detected_by)
-      values ('00000000-0000-4000-8000-00000000ccd4', '$loc', 'phone', '{\"display\": \"1\", \"raw\": \"1\"}', '{\"display\": \"2\", \"raw\": \"2\"}', 'scheduled_check')" >/dev/null
+  -c "insert into public.knowledge_facts (location_id, slot, key, value, status, source, confirmed_at, uses)
+      values ('$loc', 'profile.phone', 'phone', '{\"display\": \"1\", \"raw\": \"1\"}', 'verified', 'owner', now(), '{profile}')" \
+  -c "insert into public.profile_changes (id, location_id, field, previous_value, previous_fact_id, google_value, source, severity, status)
+      select '00000000-0000-4000-8000-00000000ccd4', '$loc', 'phone', value, id, '{\"display\": \"2\", \"raw\": \"2\"}', 'scheduled_check', 'urgent', 'awaiting_review'
+        from public.knowledge_facts where location_id = '$loc' and slot = 'profile.phone' and superseded_by is null" >/dev/null
 
 race() { # kind target payload
   approve_kind() {

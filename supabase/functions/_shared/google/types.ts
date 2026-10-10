@@ -26,6 +26,8 @@ export type Location = {
   storefrontAddress?: PostalAddress; websiteUri?: string;
   regularHours?: { periods?: TimePeriod[] };
   specialHours?: { specialHourPeriods?: SpecialHourPeriod[] };
+  openInfo?: { status?: string; canReopen?: boolean };
+  latlng?: { latitude?: number; longitude?: number };
   metadata?: { placeId?: string; mapsUri?: string; newReviewUri?: string; hasGoogleUpdated?: boolean; hasVoiceOfMerchant?: boolean; canDelete?: boolean };
   profile?: { description?: string };
 };
@@ -106,9 +108,12 @@ export type GoogleReview = {
 };
 export type PostInput = { summary: string; languageCode: string; ctaType?: string | null; ctaUrl?: string | null };
 export type SpecialDay = { startDate: string; endDate: string; closed: boolean; openTime?: string | null; closeTime?: string | null };
-export const SHIELD_FIELDS = ["title", "phone", "address", "website", "hours", "categories"] as const;
-export type ShieldField = typeof SHIELD_FIELDS[number];
+// The fields Google Protection watches (K-19 with open status, K-117 map pin), named as the K-18 facts.
+export const PROTECTION_FIELDS = ["name", "phone", "website", "address", "regular_hours", "main_category", "open_status", "map_pin"] as const;
+export type ProtectionField = typeof PROTECTION_FIELDS[number];
 export type FieldValue = { display: string; raw: unknown };
-export type Listing = Record<ShieldField, FieldValue>;
+export type Listing = Record<ProtectionField, FieldValue>;
+// What customers see on Google now, and the fields Google marks as its own update (getGoogleUpdated diffMask).
+export type ProtectionRead = { listing: Listing; googleUpdated: ProtectionField[] };
 export type MockSeed = { name: string; address: string | null; phone?: string; hours?: string };
 export type WriteResult = { state: "live" | "in_review" | "rejected"; response: unknown };

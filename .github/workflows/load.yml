@@ -10,7 +10,7 @@ on:
       - "supabase/functions/api/**"
       - "supabase/functions/_shared/jobs.ts"
       - "supabase/functions/_shared/reviews.ts"
-      - "supabase/functions/_shared/shield.ts"
+      - "supabase/functions/_shared/protection.ts"
       - "supabase/functions/_shared/google/**"
       - "scripts/load/**"
       - ".github/workflows/load.yml"

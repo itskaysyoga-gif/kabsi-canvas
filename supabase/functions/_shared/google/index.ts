@@ -11,6 +11,9 @@ import * as adminsLive from "./admins/live.ts";
 import * as adminsMock from "./admins/mock.ts";
 import * as locationsLive from "./locations/live.ts";
 import * as locationsMock from "./locations/mock.ts";
+import { GOOGLE_FIELD, OPEN_LABEL } from "./locations/mock.ts";
+import * as updatesLive from "./updates/live.ts";
+import * as updatesMock from "./updates/mock.ts";
 import * as reviewsLive from "./reviews/live.ts";
 import * as reviewsMock from "./reviews/mock.ts";
 import * as postsLive from "./posts/live.ts";
@@ -20,15 +23,18 @@ import * as mediaMock from "./media/mock.ts";
 import * as performanceLive from "./performance/live.ts";
 import * as performanceMock from "./performance/mock.ts";
 import * as placesLive from "./places/live.ts";
-import type {
-  FieldValue, GDate, GoogleReview, Listing, LocalPost, ManagedLocation, MockSeed, PostInput, ShieldField, SkippedInvitation, SpecialDay,
-  SpecialHourPeriod, TimeOfDay, WriteResult,
+import {
+  type FieldValue, type GDate, type GoogleReview, type Listing, type LocalPost, type Location, type ManagedLocation, type MockSeed,
+  type PostInput, PROTECTION_FIELDS, type ProtectionField, type ProtectionRead, type SkippedInvitation, type SpecialDay,
+  type SpecialHourPeriod, type TimeOfDay, type WriteResult,
 } from "./types.ts";
 
 export { googleMode, refreshToken } from "./client.ts";
 export { listAccountsOnce } from "./accounts/live.ts";
-export { SHIELD_FIELDS } from "./types.ts";
-export type { FieldValue, GoogleReview, Listing, ManagedLocation, PendingBusiness, PostInput, ShieldField, SkippedInvitation, SpecialDay };
+export { PROTECTION_FIELDS } from "./types.ts";
+export type {
+  FieldValue, GoogleReview, Listing, ManagedLocation, PendingBusiness, PostInput, ProtectionField, ProtectionRead, SkippedInvitation, SpecialDay,
+};
 
 const by = <L, M>(mode: Mode, live: L, mock: M): L | M => (mode === "mock" ? mock : live);
 
@@ -213,46 +219,85 @@ const periodKey = (p: SpecialHourPeriod) =>
 export const showsSpecialHours = (periods: SpecialHourPeriod[], s: SpecialDay) =>
   periods.some((p) => periodKey(p) === periodKey(specialPeriod(s)));
 
-// ─── Google Protection (D218): read the listing, and put one field back after the owner's approval.
+// ─── Google Protection (K-19, P0.2-04): what customers see for each watched field, and which fields Google marks as
+// its own update (hasGoogleUpdated, then getGoogleUpdated's diffMask). Read-only; put-backs go through patchListing,
+// only from the publish job after the owner chose "Keep my information".
 const DAYS: Record<string, string> = { MONDAY: "Mon", TUESDAY: "Tue", WEDNESDAY: "Wed", THURSDAY: "Thu", FRIDAY: "Fri", SATURDAY: "Sat", SUNDAY: "Sun" };
 const t2 = (t?: TimeOfDay) => `${String(t?.hours ?? 0).padStart(2, "0")}:${String(t?.minutes ?? 0).padStart(2, "0")}`;
+const READ_MASK = PROTECTION_FIELDS.map((f) => GOOGLE_FIELD[f]).join(",");
 
-export async function getListing(locationId: string, seed: MockSeed): Promise<Listing> {
-  assertNotConcierge(locationId);
-  if (modeFor(locationId) === "mock") return locationsMock.getListing(locationId, seed);
-  return await liveListing(locationId);
+// The Protection field for a Google field name or path ("latlng", "regularHours.periods"); the names publications
+// stored before P0.2-04 (title, hours, categories) map too.
+const OLD_NAME: Record<string, ProtectionField> = { title: "name", hours: "regular_hours", categories: "main_category" };
+export function protectionField(name: string): ProtectionField | null {
+  const top = name.trim().split(".")[0];
+  const byGoogle = PROTECTION_FIELDS.find((f) => GOOGLE_FIELD[f] === top);
+  if (byGoogle) return byGoogle;
+  if (OLD_NAME[top]) return OLD_NAME[top];
+  return (PROTECTION_FIELDS as readonly string[]).includes(top) ? top as ProtectionField : null;
 }
+const fieldsOfMask = (mask?: string) =>
+  [...new Set((mask ?? "").split(",").map(protectionField).filter((f): f is ProtectionField => !!f))];
 
-async function liveListing(locationId: string): Promise<Listing> {
-  const l = await locationsLive.getLocation(locationId, "title,phoneNumbers,storefrontAddress,websiteUri,regularHours,categories");
+function listingOf(l: Location): Listing {
   const addr = l.storefrontAddress ?? null;
   const hours = (l.regularHours?.periods ?? []).map((p) => `${DAYS[p.openDay] ?? p.openDay} ${t2(p.openTime)} to ${t2(p.closeTime)}`).join(", ");
+  const status = l.openInfo?.status ?? "";
+  const pin = l.latlng?.latitude != null && l.latlng?.longitude != null
+    ? `${l.latlng.latitude.toFixed(5)}, ${l.latlng.longitude.toFixed(5)}` : "";
   return {
-    title: { display: l.title ?? "", raw: l.title ?? "" },
+    name: { display: l.title ?? "", raw: l.title ?? "" },
     phone: { display: l.phoneNumbers?.primaryPhone ?? "", raw: l.phoneNumbers ?? null },
     address: { display: addr ? [...(addr.addressLines ?? []), addr.locality].filter(Boolean).join(", ") : "", raw: addr },
     website: { display: l.websiteUri ?? "", raw: l.websiteUri ?? "" },
-    hours: { display: hours, raw: l.regularHours ?? null },
-    categories: { display: l.categories?.primaryCategory?.displayName ?? "", raw: l.categories ?? null },
+    regular_hours: { display: hours, raw: l.regularHours ?? null },
+    main_category: { display: l.categories?.primaryCategory?.displayName ?? "", raw: l.categories ?? null },
+    open_status: { display: OPEN_LABEL[status] ?? status, raw: l.openInfo ?? null },
+    map_pin: { display: pin, raw: l.latlng ?? null },
   };
 }
 
-// What one Protection field shows on Google now, as Google Protection displays it (null: the mock has no listing).
-export async function listingField(locationId: string, field: ShieldField): Promise<string | null> {
-  assertNotConcierge(locationId);
-  if (modeFor(locationId) === "mock") return await locationsMock.fieldDisplay(locationId, field);
-  return (await liveListing(locationId))[field].display;
-}
-
-const MASK: Record<ShieldField, string> = { title: "title", phone: "phoneNumbers", address: "storefrontAddress", website: "websiteUri", hours: "regularHours", categories: "categories" };
-export async function patchListing(locationId: string, field: ShieldField, raw: unknown): Promise<WriteResult> {
+export async function readProtection(locationId: string, seed: MockSeed): Promise<ProtectionRead> {
   assertNotConcierge(locationId);
   if (modeFor(locationId) === "mock") {
-    await locationsMock.patchListing(locationId, field, raw);
+    const listing = await locationsMock.getListing(locationId, seed);
+    const updated = await updatesMock.getGoogleUpdated(locationId, READ_MASK);
+    return { listing, googleUpdated: fieldsOfMask(updated.diffMask) };
+  }
+  const l = await locationsLive.getLocation(locationId, `${READ_MASK},metadata`);
+  if (!l.metadata?.hasGoogleUpdated) return { listing: listingOf(l), googleUpdated: [] };
+  // Google shows its own value for the fields in diffMask: that is what customers see.
+  const updated = await updatesLive.getGoogleUpdated(locationId, READ_MASK);
+  const googleUpdated = fieldsOfMask(updated.diffMask);
+  const shown: Record<string, unknown> = { ...l };
+  for (const f of googleUpdated) shown[GOOGLE_FIELD[f]] = (updated.location as unknown as Record<string, unknown>)[GOOGLE_FIELD[f]];
+  return { listing: listingOf(shown as Location), googleUpdated };
+}
+
+// Whether Google shows the approved value again and no longer marks the field as its own update (K-19: after a
+// put-back Kabsi reads getGoogleUpdated again). Read by the publish and reconcile jobs.
+export async function protectionShown(locationId: string, field: string, value: string): Promise<boolean> {
+  const f = protectionField(field);
+  if (!f) throw new Error(`unknown Protection field ${field}`);
+  if (modeFor(locationId) === "mock" && !(await locationsMock.readFields(locationId))) return false;
+  const now = await readProtection(locationId, { name: "", address: null });
+  return now.listing[f].display === value && !now.googleUpdated.includes(f);
+}
+
+// A put-back of the owner's approved value. raw is Google's own shape kept with the fact; a value the owner typed
+// (no raw) is sent only for the fields whose shape is the text itself.
+export async function patchListing(locationId: string, field: string, raw: unknown, display: string): Promise<WriteResult> {
+  assertNotConcierge(locationId);
+  const f = protectionField(field);
+  if (!f) throw new Error(`unknown Protection field ${field}`);
+  if (modeFor(locationId) === "mock") {
+    await locationsMock.patchListing(locationId, f, raw ?? display);
     return { state: "live", response: { mock: true } };
   }
-  const mask = MASK[field];
-  const patched = await locationsLive.patchLocation(locationId, mask, { [mask]: raw });
+  const value = raw ?? (f === "name" || f === "website" ? display : f === "phone" ? { primaryPhone: display } : null);
+  if (value == null) throw new Error(`no_google_value: the approved ${f} has no Google form to send`);
+  const mask = GOOGLE_FIELD[f];
+  const patched = await locationsLive.patchLocation(locationId, mask, { [mask]: value });
   return { state: "live", response: { [mask]: (patched as Record<string, unknown>)[mask] ?? null } };
 }
 

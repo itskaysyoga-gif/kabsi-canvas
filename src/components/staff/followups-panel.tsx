@@ -6,9 +6,11 @@ import { fmtDate } from "@/lib/format";
 import { supabase } from "@/lib/supabase";
 import { KABSI_GROUP_ID } from "@/lib/site";
 
-// Staff follow-ups (K-41, P0.2-02): an owner disconnected Kabsi and Google did not let Kabsi remove its own Manager
-// access, or the business is handled by hand. Google's limit is 7 business days from the request; the due date says
-// when. Closing one marks access removed and emails the owner (staff_complete_followup).
+// Staff follow-ups. google_access_removal (K-41, P0.2-02): an owner disconnected Kabsi and Google did not let Kabsi
+// remove its own Manager access, or the business is handled by hand. Google's limit is 7 business days from the
+// request; the due date says when. Closing one marks access removed and emails the owner (staff_complete_followup).
+// google_support (K-19, P0.2-04): Google changed a detail again after Kabsi put the owner's approved value back twice
+// in 30 days; a person contacts Google Business Profile support. The detail says what to tell Google.
 type Followup = {
   id: string;
   kind: string;
@@ -59,6 +61,7 @@ function FollowupCard({ f }: { f: Followup }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const late = Date.parse(f.due_at) < Date.now();
+  const support = f.kind === "google_support";
   async function done() {
     setBusy(true);
     setErr("");
@@ -69,14 +72,30 @@ function FollowupCard({ f }: { f: Followup }) {
   }
   return (
     <div className="rounded-large bg-kb-white p-5 shadow-kb">
-      <p className="font-bold">Remove Kabsi from {f.location_name}</p>
-      <p className={late ? "mt-1 text-sm font-bold text-kb-red" : "mt-1 text-sm text-kb-stone"}>
-        Due {fmtDate(f.due_at)} (Google allows 7 business days). Asked {fmtDate(f.created_at)}.
-      </p>
-      <p className="mt-2 text-sm leading-6 text-kb-stone">
-        In Business Profile Manager open the business, then People and access, and remove Kabsi
-        Clients (group ID {KABSI_GROUP_ID}). Or ask the owner to remove it there.
-      </p>
+      {support ? (
+        <>
+          <p className="font-bold">Contact Google support for {f.location_name}</p>
+          <p className={late ? "mt-1 text-sm font-bold text-kb-red" : "mt-1 text-sm text-kb-stone"}>
+            Due {fmtDate(f.due_at)}. Asked {fmtDate(f.created_at)}.
+          </p>
+          <p className="mt-2 text-sm leading-6 text-kb-stone">
+            Google keeps replacing a detail the owner approved. Open a case with Google Business
+            Profile support and ask Google to keep the owner&apos;s value. The values are on the
+            change in Google Protection.
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="font-bold">Remove Kabsi from {f.location_name}</p>
+          <p className={late ? "mt-1 text-sm font-bold text-kb-red" : "mt-1 text-sm text-kb-stone"}>
+            Due {fmtDate(f.due_at)} (Google allows 7 business days). Asked {fmtDate(f.created_at)}.
+          </p>
+          <p className="mt-2 text-sm leading-6 text-kb-stone">
+            In Business Profile Manager open the business, then People and access, and remove Kabsi
+            Clients (group ID {KABSI_GROUP_ID}). Or ask the owner to remove it there.
+          </p>
+        </>
+      )}
       {f.detail ? (
         <p className="mt-2 break-words text-xs text-kb-stone">Why it is here: {f.detail}</p>
       ) : null}
@@ -94,7 +113,7 @@ function FollowupCard({ f }: { f: Followup }) {
         disabled={busy || !note.trim()}
         onClick={() => void done()}
       >
-        {busy ? "Saving…" : "Done, Kabsi is removed"}
+        {busy ? "Saving…" : support ? "Done, Google support contacted" : "Done, Kabsi is removed"}
       </Button>
       {err ? (
         <p className="mt-2 text-sm text-kb-red" role="alert">
