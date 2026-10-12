@@ -42,3 +42,10 @@ Deno.test("one column, 16 px body text, no side-by-side cells in the card", () =
 Deno.test("button width never exceeds the phone content width", () => {
   assert.match(emailButton("Open Google Protection", "https://x.test/"), /width="100%"[^>]*max-width:320px/);
 });
+
+Deno.test("every email footer carries the WhatsApp click-to-chat link and the number", () => {
+  const html = emailLayout({ preheader: "p", title: "t", bodyHtml: "<p>Hello</p>" });
+  assert.equal(html.includes("https://wa.me/12014835474?text=Hello%20Kabsi"), true);
+  assert.equal(html.includes("WhatsApp +1 201-483-5474"), true);
+  assert.equal(yellow(html), 0);
+});

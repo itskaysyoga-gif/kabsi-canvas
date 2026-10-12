@@ -3,11 +3,11 @@ import { LegalPage } from "@/components/marketing/legal";
 import { RETENTION_ROWS } from "@/lib/retention";
 import {
   CONTACT_EMAIL,
-  CONTACT_PHONE,
   KABSI_GROUP_ID,
   KABSI_GROUP_NAME,
   LEGAL_SELLER,
   OPERATOR_LINE,
+  WHATSAPP_NUMBER,
   pageHead,
 } from "@/lib/site";
 
@@ -55,7 +55,7 @@ function Page() {
         <h2>1. Who we are</h2>
         <p>
           Kabsi is run by {LEGAL_SELLER}, who is responsible for the personal data described here.
-          Contact: {CONTACT_EMAIL}, or {CONTACT_PHONE} (phone or WhatsApp).
+          Contact: {CONTACT_EMAIL}, or WhatsApp on {WHATSAPP_NUMBER}.
         </p>
         <p>
           Kabsi is independent. It is not affiliated with, endorsed by or sponsored by Google, and

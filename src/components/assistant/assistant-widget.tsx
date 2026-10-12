@@ -8,6 +8,8 @@ import { ArrowUp, Loader2, MessageCircle, RotateCcw, Sparkles, X } from "lucide-
 import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
 import { ASSISTANT_CONVERSATION_KEY, ASSISTANT_VISITOR_KEY } from "@/lib/assistant-storage";
 import { cn } from "@/lib/utils";
+import { WhatsappLink } from "@/components/shared/whatsapp-link";
+import { WHATSAPP_NUMBER } from "@/lib/site";
 
 type Msg = { role: "user" | "assistant"; content: string };
 const ENDPOINT = `${supabaseUrl}/functions/v1/assistant`;
@@ -311,7 +313,12 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
             ) : null}
             {handoff ? (
               <p className="rounded-card bg-kb-white p-3 text-xs leading-5 text-kb-stone ring-1 ring-kb-hairline">
-                A person from Kabsi has this conversation and will reply by email.
+                A person from Kabsi has this conversation and will reply by email. You can also
+                message us on{" "}
+                <WhatsappLink kind="handover" className="font-bold">
+                  WhatsApp {WHATSAPP_NUMBER}
+                </WhatsappLink>
+                .
               </p>
             ) : null}
             {error ? (

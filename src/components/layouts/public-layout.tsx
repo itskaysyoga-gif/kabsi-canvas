@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { BookingLink } from "@/components/shared/booking-link";
+import { WhatsappLink } from "@/components/shared/whatsapp-link";
 import { ChevronDown, LayoutDashboard, LogOut, Menu, UserRound } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import {
 import { KabsiLogo } from "@/components/shared/kabsi-logo";
 import { useSectionRise } from "@/components/marketing/motion";
 import { VERTICALS } from "@/lib/verticals";
-import { BRAND_LINE, CTA_PRIMARY, GOOGLE_NOTICE, OPERATOR_LINE } from "@/lib/site";
+import { BRAND_LINE, CTA_PRIMARY, GOOGLE_NOTICE, OPERATOR_LINE, WHATSAPP_NUMBER } from "@/lib/site";
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { useAuth } from "@/components/auth/auth-provider";
 import {
@@ -218,13 +219,16 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <Link to="/security">Security</Link>
               <Link to="/setup-call">Book a free setup call</Link>
               <BookingLink kind="partner" className="font-normal no-underline">
-                For agencies: talk to Rashid
+                For agencies: talk to Hussein
               </BookingLink>
             </FooterCol>
             <FooterCol title="Legal and contact">
               <Link to="/privacy">Privacy</Link>
               <Link to="/terms">Terms</Link>
               <a href="mailto:hello@kabsi.co">hello@kabsi.co</a>
+              <WhatsappLink kind="general" className="font-normal no-underline">
+                WhatsApp {WHATSAPP_NUMBER}
+              </WhatsappLink>
             </FooterCol>
           </div>
           <p className="pt-6 text-sm leading-6 text-kb-stone-on-dark">{OPERATOR_LINE}</p>

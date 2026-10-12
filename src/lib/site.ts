@@ -9,7 +9,39 @@ export const CONTACT_EMAIL = "hello@kabsi.co";
 // Kabsi's Google business group (plan Appendix B). Owners invite this ID as a Manager. It is an identifier, not a secret.
 export const KABSI_GROUP_ID = "5481006796";
 export const KABSI_GROUP_NAME = "Kabsi Clients";
-export const CONTACT_PHONE = "+961 3 956 917";
+/** The Lebanese field contact. Shown only on /lebanon (K-122); every other placement uses WHATSAPP_NUMBER. */
+export const LEBANON_PHONE = "+961 3 956 917";
+
+/**
+ * Kabsi's one WhatsApp number (K-122): the Kapso-provided US number. Answered by a person; it approves nothing and
+ * sends no alerts. Change it here and in `supabase/functions/_shared/email-layout.ts` (a test keeps them equal).
+ */
+export const WHATSAPP_NUMBER = "+1 201-483-5474";
+export const WHATSAPP_DIGITS = WHATSAPP_NUMBER.replace(/\D/g, "");
+
+/**
+ * The short prefilled message for each placement. Plain text only: no business name, email, review text or any
+ * private detail travels in a wa.me link (K-58). The visitor presses send themselves.
+ */
+export const WHATSAPP_MESSAGES = {
+  general: "Hello Kabsi, I have a question.",
+  setup: "Hello Kabsi, I would like help setting up my Google Business Profile.",
+  partner: "Hello Kabsi, I am an agency and would like to talk about partnering.",
+  handover:
+    "Hello Kabsi, I was chatting with the assistant on kabsi.co and would like to talk to a person.",
+  email: "Hello Kabsi, I have a question about an email I got from Kabsi.",
+  payment: "Hello Kabsi, I would like to pay by Whish, OMT or cash.",
+  lebanon: "Hello Kabsi, I am in Lebanon and would like to know about the Lebanon bundle.",
+} as const;
+export type WhatsappKind = keyof typeof WHATSAPP_MESSAGES;
+
+/** The click-to-chat link for one placement: opens WhatsApp with the short message filled in. */
+export function whatsappHref(
+  kind: WhatsappKind = "general",
+  digits: string = WHATSAPP_DIGITS,
+): string {
+  return `https://wa.me/${digits}?text=${encodeURIComponent(WHATSAPP_MESSAGES[kind])}`;
+}
 
 /**
  * The one booking link (P0.1-V3, R-31): a single Calendly event type, "Call with Kabsi", 20 minutes, with one required

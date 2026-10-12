@@ -4,6 +4,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## Where things stand
 
+- **12 Oct 2026, P0.6-10 (branch claude/h-p0-6-10, PR 86, Hussein's session): WhatsApp click-to-chat on the Kapso number is built. Waiting on Hussein: Kapso step 12 (the Kapso inbox set up from `docs/marketing/whatsapp-setup.md`); PROGRESS does not record it as done and the session has no Kapso login, so it could not check that +1 201-483-5474 is connected or answering.** `WHATSAPP_NUMBER` in `src/lib/site.ts`; a `wa.me` link with a short prefilled message on the FAQ contact card, the footer, `/setup-call`, the assistant hand-off note and the footer of every Kabsi email; the Lebanese number is `LEBANON_PHONE`, shown only on `/lebanon`. People-answered only: nothing is approved and no alert is sent over WhatsApp. Same PR: the footer, Partners and FAQ links say Hussein, not Rashid (R-26). Google stays in mock mode; no Google, Places or Anthropic call was made.
 - **12 Oct 2026, P0.2-07 merged (PR 82, 92a4bfb; CI green; Vercel production READY): privacy, terms and security pages rewritten to the system as built. A lawyer should read /privacy and /terms before launch (see Decisions to confirm for what to ask).** /privacy carries the Limited Use sentence word for word, the K-40 retention table in plain words (from `src/lib/retention.ts`, held equal to `retention_policies` by a test), disconnect as built, the 48 hour notice, the 72 hour email links and the processor list as it is today. /terms and /security say the same things and read the seller from `LEGAL_SELLER` and the group from `KABSI_GROUP_ID`. Calendly and Creem are not listed yet because neither is live. Google stays in mock mode. Next in Wave P0.3.
 - **12 Oct 2026, P0.2-06 merged (PR 80, 9d1aced; Deploy passed). Waiting on Hussein: Google Cloud step 3 (quotas, budget alerts, disable places-backend).** Every Places request goes through the guard in `_shared/google/places/live.ts`: Text Search and Place Details carry a field mask (never the reviews field), Place Details are cached 24 hours by place ID and mask (a hit makes no request and takes nothing from the cap), and `places_take` counts each request per day and kind against `app_settings.places_daily_cap` (100). Past the cap nothing is sent and the tools say "Back soon" (`places-search`, `review-link`; the rating snapshot and the post category skip until tomorrow). Slack alerts in #kabsi-alerts at 80 percent and at the cap. Autocomplete with a session token (and the same token on the Place Details call) is in the layer; no screen calls it yet. Migration `20261012100000_places_cost_guard.sql` applied by the session and read back. Google stays in mock mode. Next in Wave P0.2: P0.2-07.
 - **12 Oct 2026, P0.2-05 merged (PR 78, 5aae112; Deploy passed, `api` 68; live end to end on QA Bakery passed). Open: Hussein's 390 px look. Hussein: the Anthropic credit balance is empty, so no review is drafted until it is topped up (see Found, not done).** Branch claude/h-p0-2-05, email approvals tightened. Email links last 72 hours (a database trigger caps every link), work once and belong to one item and one recipient; a second POST gets the first result (`action_tokens.result`). Opening a link reads only `public.action_link_view`, which is STABLE, so Postgres refuses any write in it. `public.use_action_link` does the link's own action: review replies and skips from the link alone (K-17); profile changes, hours and urgent reviews only for the recipient signed in on the page, which asks to sign in and comes back; another account's session is refused. After Approve the page shows "Publishing in 10 seconds" with Undo, which cancels that link's publication. Every use writes an `email_link_used` audit event with the user, IP country and user agent, and skips and Protection decisions made through a link now carry the channel `email_link`. CI green (1022 database tests on a fresh stack); migration applied by the session after CI and read back (10 function bodies match). Google stays in mock mode. Next in Wave P0.2: P0.2-06.
@@ -62,7 +63,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | 9 | Paste the four `emails/auth/*.html` files into the Supabase Auth email templates (the login-code email still shows the old Beirut footer) | P0.1-02b done | Todo (Rashid, manual dashboard step; recorded 4 Oct at Hussein's request) |
 | 8 | Hussein agrees to be named as seller | R-20 seller line, P0.4-07, P0.6-09 | Done 4 Oct (no written agreement, Rashid's decision) |
 | 11 | Vercel account connected to GitHub, Supabase and Claude | P0.1-03 | Done 7 Oct (the six remaining steps are in the P0.1-03 section of the plan) |
-| 12 | Kapso account and the number's WhatsApp profile (+1 201-483-5474); keys into Supabase secrets | P0.6-10 | Todo |
+| 12 | Kapso account and the number's WhatsApp profile (+1 201-483-5474); keys into Supabase secrets | P0.6-10 | Todo (12 Oct: the click-to-chat links are in the code; Hussein sets up the Kapso inbox with the nine clicks in `docs/marketing/whatsapp-setup.md`. API keys are not needed until P1-21) |
 | 13 | Google Cloud (project 856347937978): enable the reviews and posts API if a session cannot; submit the `business.manage` package | P0.7-01a, P0.7-02 | Not done (corrected 8 Oct by P0.7-01; the earlier "enabled 7 Oct, quota 300" was wrong): enabling the Google My Business API (`mybusiness.googleapis.com`, reviews, posts, media) fails with PERMISSION_DENIED `servicemanagement.services.bind` and the live call returns 403 SERVICE_DISABLED. Blocked on Google: Hussein asks on case 1-4624000041157 (or the Business Profile API contact form) for the API to be made available to project 856347937978 (step 16). `docs/google/api-access.md` written by P0.7-01a. Submitting the `business.manage` package is still todo |
 | 15 | GitHub repo secret `SUPABASE_ACCESS_TOKEN`: replace it with a Supabase personal access token from Hussein's own account (owner of the organisation that now holds `kabsi-prod`), then re-run the failed Deploy run 37675383844 | P0.1-13a After merge (every Edge Function deploy) | Done 7 Oct: Hussein replaced the token and re-ran the run; attempt 2 passed (19:48:28 to 19:49:09 UTC), every Edge Function `updated_at` 19:49:03 UTC, `api` version 52 |
 | 14 | Supabase Pro with point-in-time recovery in Hussein's own organisation | P0.7-07 (before the first real customer) | Todo |
@@ -144,7 +145,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.6-07 | Honest proof pages: founder note, About, Security | Sonnet | merged (84, 64adfad, 12 Oct); CI green; live /about serves the new page (fetched 12 Oct 06:25 UTC); 390 px checked by script, no horizontal scroll; open: Hussein's look and the photo question | 12 Oct | |
 | P0.6-08 | Supporting platforms checked against K-118 | Sonnet | todo | | |
 | P0.6-09 | Meta account fixes (VIDEO Part 7) | Sonnet | todo | | |
-| P0.6-10 | WhatsApp click-to-chat on the Kapso US number | Sonnet | todo | | |
+| P0.6-10 | WhatsApp click-to-chat on the Kapso US number | Sonnet | PR open (86); CI result and live checks under Evidence; open: Kapso step 12 | 86 | 12 Oct |
 | P0.6-11 | Staff system health page | Sonnet | todo | | |
 | P0.6-12 | WhatsApp privacy and processors (Kapso and Meta) | Sonnet | todo | | |
 | P0.7-03 | Google notifications through Pub/Sub | Opus | todo | | |
@@ -183,6 +184,12 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P1-22 | Nora on WhatsApp | Opus | todo | | |
 
 ## After merge
+
+P0.6-10 (PR 86):
+1. Session, after the deploy: fetch `/faq`, `/setup-call`, `/` and `/lebanon` on kabsi.co and confirm the `wa.me/12014835474?text=` links and that the old number appears only on `/lebanon`; see Evidence for the result.
+2. Hussein, Kapso (about 15 minutes): follow `docs/marketing/whatsapp-setup.md` one step at a time (profile, greeting, away message, nine quick replies, labels), then send the test link and reply from the inbox. Tell the next chat which items Kapso did not offer so the file is corrected. Until then a visitor who presses send reaches whatever Kapso does with the number, not necessarily a person.
+3. Hussein: look at /faq, /setup-call and the footer on a phone (390 px). The session checked 390 px and 1440 px in a browser against the built pages.
+4. P0.6-12 should follow soon: `/privacy` and `/terms` do not yet name Kapso and Meta as processors of WhatsApp messages (the facts file says they are, and says the privacy page does not list them yet).
 
 P0.2-07:
 1. Passed 12 Oct 06:00 UTC (fetched through the Vercel connector, because the build sandbox cannot reach kabsi.co): `/privacy`, `/terms` and `/security` return 200 on dpl_4HCDRS9gCFGB1VbSsWHgKBNJAHqr (main 92a4bfb); `/privacy` contains the Limited Use sentence exactly, the 11 row retention table, no "Replit".
@@ -339,6 +346,26 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.6-10 (branch claude/h-p0-6-10, PR 86, 12 Oct 2026, Hussein's session)
+
+Kapso step 12 check: not recorded as done in PROGRESS, no Kapso login in the session, and `wa.me` is blocked from the build sandbox, so whether +1 201-483-5474 is connected to WhatsApp and to the Kapso inbox is not known. Missing: the inbox setup (profile text, greeting, away message, quick replies, labels) that `docs/marketing/whatsapp-setup.md` lists. Nothing in the code needs Kapso or an API key.
+
+Built (Sonnet):
+- `src/lib/site.ts`: `WHATSAPP_NUMBER` ("+1 201-483-5474"), `WHATSAPP_DIGITS`, `WHATSAPP_MESSAGES` (seven short prefilled texts, plain, no business name, email or review text, K-58), `whatsappHref(kind)`; `CONTACT_PHONE` is now `LEBANON_PHONE`. New `src/components/shared/whatsapp-link.tsx`.
+- Placements: FAQ contact card (there is no separate contact page), footer "Legal and contact", `/setup-call` (text matches the topic), the assistant hand-off note, Nora's hand-off prompt (number and "a person answers, nothing approved there"), and the footer of every email built by `_shared/email-layout.ts` (which includes the hand-off acknowledgement). `emails/auth/*.html` not changed on purpose: it would add a manual paste.
+- Old number: `/lebanon` only. Privacy, terms, pricing, plan and onboarding now give the WhatsApp number; Whish, OMT and cash for Lebanon go through it.
+- `docs/marketing/whatsapp-setup.md`, `knowledge/kabsi-facts.md` (contact row, new "WhatsApp messages" row, assistant rules 1.2 and 1.4, payment and card lines, hand-off list, processors line) and `public/llms-full.txt` (regenerated by `scripts/build-kb.mjs`; it also picked up older facts edits it had not yet received).
+- R-26 fix: footer "For agencies: talk to Hussein", Partners hero and FAQ card "Talk to Hussein". They are still the booking links: an email to hello@kabsi.co until Calendly is live, then the Calendly event with "Partner or agency" or "Something else" chosen.
+- P0.6-07 pages: /about body now lines up with its hero (it was a narrower centred column), the homepage founder note uses the token radius, and the Partners hero button is white on the dark hero (it was black on near black).
+
+Checks run in the session: `npm run typecheck` pass; eslint on the changed src and tests files pass; `npm test` 44 passed, including `tests/whatsapp.test.ts` (number, wa.me URL and text for every placement, email footer link equal to the site constant, old number only on `/lebanon`, no "Rashid" in the three files); `check:tokens` and `check:google` pass; `npm run build` pass; Deno: `deno check assistant/index.ts` pass, `email-layout` and `email-links` tests 14 passed. `bash scripts/deno-check.sh` stops at `site-assets` because the sandbox cannot reach deno.land; CI runs it.
+
+Browser check (Playwright, Chromium, built pages served locally, 390 px and 1440 px, 130 checks, all passed): on /faq, /setup-call, /setup-call?topic=partner, /, /partners, /pricing, /about, /privacy, /terms the only wa.me link target is 12014835474, the prefilled text is the expected one, the footer link reads "WhatsApp +1 201-483-5474" and opens in a new tab with noopener; the old number is not in the page text; no em dash, en dash or "Rashid"; no horizontal scroll. /lebanon links to the Lebanese number with the Lebanon text and also carries the footer link. The assistant hand-off note was shown with the chat request answered by a local stub (no Edge Function or Anthropic call) and carries the hand-over link. Email footer rendered to HTML and loaded: wa.me href and text correct, still one yellow button at most. Screenshots read: faq, setup-call, about, home founder note, partners and lebanon at both widths, the hand-off note at 390 px, and the email at 390 px. The hero photos are served from Supabase storage, which the sandbox cannot reach, so they appear blank or as alt text in the sandbox screenshots only.
+
+Seen and fixed while looking: the number wrapped in the middle at 390 px (now one line), the Partners hero button, the About alignment, the founder note radius.
+
+Decisions to confirm: (1) "Talk to Hussein" as the wording for the agency, Partners and FAQ links, since R-26 says read Hussein; (2) the FAQ page's "Something else?" card counts as the contact page; (3) "talk to a person" on WhatsApp is promised only as "a person answers", with the hours in the setup file (Monday to Friday, 8am to 6pm Beirut time, reply within one working day).
 
 ### P0.6-07 (branch claude/h-p0-6-07, 12 Oct 2026, Hussein's session)
 
@@ -982,6 +1009,9 @@ By hand: confirm Advanced Protection is still on for hello@kabsi.co (last checke
 
 ## Found, not done
 
+- 12 Oct, P0.6-10: `/privacy` and `/terms` do not name Kapso and Meta as processors of WhatsApp messages, and the site now links to WhatsApp. P0.6-12 owns that text; run it next.
+- 12 Oct, P0.6-10: the /setup-call body is a narrower centred column under a left-aligned hero (the same misalignment fixed on /about); other pages that pass `max-w-3xl` to `Section` do the same.
+- 12 Oct, P0.6-10: the About "How to reach a person" section lists the email and the setup call but not WhatsApp; the footer carries it.
 - 12 Oct, P0.2-07: `docs/KABSI-PLAN.md` and the audit list the K-101 trial caps (3 profile fixes, 10 backlog replies); they are not built (P0.4-06), so /terms does not mention them. Add them to /terms in P0.4-06.
 - 12 Oct, P0.2-07: the footer link "For agencies: talk to Rashid" still names Rashid, who has stopped working on the project (R-26); not touched here.
 - 12 Oct, P0.2-07: the footer and other marketing copy still say "Join early access"; not touched here.
