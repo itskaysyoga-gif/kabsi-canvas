@@ -32,7 +32,7 @@ Check this block first. It holds every fact likely to change, verified against t
 | Address | The website and the app are at kabsi.co. Older links to kabsi-app.lovable.app forward to the same page on kabsi.co. |
 | Free setup call | A free 20-minute call with the team ("Call with Kabsi"), Monday to Friday, 8am to 6pm Beirut time, booked at kabsi.co/setup-call. One Calendly event with one required question, "What's the call about?", and three answers: Setting up my Google profile, Partner or agency, Something else. Each link on the site preselects its own answer: the footer, FAQ, pricing and Manager steps links use "Setting up my Google profile"; "For agencies: talk to Hussein" (footer) and "Talk to Hussein" (Partners) use "Partner or agency"; "Talk to Hussein" on the FAQ page uses "Something else". Until the Calendly link is live, every booking link opens an email to hello@kabsi.co. We guide, you click; we never ask for your Google password. |
 | Contact | hello@kabsi.co for everyone. WhatsApp **+1 201-483-5474** for questions, sales and support: a person answers, it is not an automatic bot, and nothing is approved over it. Customers start the chat from a "WhatsApp" link on the FAQ page, in the footer, on the setup call page, in the assistant's hand-off note and in the footer of Kabsi emails. The Lebanese number +961 3 956 917 appears only on the Kabsi in Lebanon page. |
-| WhatsApp messages | Sent and received through Kapso, with Meta (WhatsApp) carrying them. They are processors of WhatsApp messages. Kabsi sees only what the person writes. Nothing is approved, published or changed over WhatsApp: Kabsi never asks for a Google password or codes there, and approvals happen only on kabsi.co. Alerts and the assistant on WhatsApp are not available yet. |
+| WhatsApp messages | Sent and received through Kapso (the inbox where the team reads and answers), with Meta (WhatsApp) carrying them. Kapso and Meta are processors of WhatsApp messages and are named on the privacy page (section 14) and the terms (section 16). Kabsi receives the person's phone number and WhatsApp name, what they write, any photo or file they attach, and the time. Nothing is approved, published or changed over WhatsApp: Kabsi never asks for a Google password or codes there, and approvals happen only on kabsi.co. Alerts and the assistant on WhatsApp are not available yet; see section 9.5b. |
 
 ---
 
@@ -486,6 +486,7 @@ Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates, who is the selle
 - **People who tap a card or open a link:** code, time, country, Android or iPhone, chip or QR, and a crawler flag. Never who they are or their IP address.
 - **Free tool users:** the search text goes to Google's Places API; a one-way salted hash of the IP is kept one hour to stop abuse.
 - **People who chat with Nora (the assistant):** their messages, the page they asked from, browser time zone and language, device type, the site that sent them, the country from the network (never the IP address), and any contact details they choose to give. Each chat is labelled (topic, intent, country) and a short report goes to the Kabsi team so a person can follow up. News emails only with a yes.
+- **People who write on WhatsApp:** their phone number and WhatsApp name as WhatsApp shows them, their messages, any photo or file they attach, and the time (see section 9.5b). Kabsi does not copy the chat into its own database.
 - **Forms:** what you enter. **Partners:** contact details, invited businesses, invoices, payment claims. **Visitors:** anonymous statistics and error reports.
 
 ### 9.3 How it's used
@@ -498,9 +499,23 @@ Review text, business facts and photos go to Anthropic's API for drafts and chec
 
 ### 9.5 Processors and regions
 
-Supabase (database, sign-in, storage; Frankfurt, Germany), Cloudflare (go.kabsi.co links and the bot check on forms), Vercel (hosting), Resend (email; EU, Ireland), Anthropic (drafts and photo checks), Google (Business Profile and Places APIs), Sentry (error reports; EU, without IPs or review content), PostHog (anonymous statistics; United States), Zoho (the hello@kabsi.co mailbox). Kapso and Meta carry WhatsApp messages sent to the Kabsi WhatsApp number; the privacy page does not list them yet. Calendly and Creem are added to the list on the privacy page when they go live.
+Supabase (database, sign-in, storage; Frankfurt, Germany), Cloudflare (go.kabsi.co links and the bot check on forms), Vercel (hosting), Resend (email; EU, Ireland), Anthropic (drafts and photo checks), Google (Business Profile and Places APIs), Sentry (error reports; EU, without IPs or review content), PostHog (anonymous statistics; United States), Zoho (the hello@kabsi.co mailbox). Kapso (the inbox for the Kabsi WhatsApp number) and Meta (WhatsApp, which carries the messages) process WhatsApp messages sent to the Kabsi WhatsApp number; both are listed on the privacy page. Calendly and Creem are added to the list on the privacy page when they go live.
 
 Some providers are outside Lebanon and the EU. They process data only on Kabsi's instructions and under their data protection terms, including standard contractual clauses where required.
+
+### 9.5b WhatsApp: privacy (privacy page section 14, terms section 16)
+
+How it works today: the Kabsi WhatsApp number +1 201-483-5474 is for questions, sales and support. The visitor starts the chat from a link that opens WhatsApp with a short fixed message and nothing about them. A person at Kabsi reads and answers it; it is not an automatic bot. Nothing is approved, published or changed over WhatsApp. Approvals happen only on kabsi.co. Kabsi never asks for a Google password or a code Google sends, on WhatsApp or anywhere else. People should not send review text, passwords or codes.
+
+What is sent: the person's phone number and WhatsApp name as WhatsApp shows them, what they write, any photo or file they attach, and the time. Kabsi puts no Google data and no review text into WhatsApp. The assistant (Nora) does not read WhatsApp messages. Kabsi does not copy WhatsApp chats into its own database today.
+
+Who handles it: Kapso (the inbox where the team reads and replies, and where the chat is held) and Meta (runs WhatsApp and carries the messages). They process the messages to deliver them. Kabsi uses the chat only to answer the person: not for advertising, not sold, not used to train AI models. WhatsApp's own terms and privacy policy cover the person's use of WhatsApp. Kabsi does not use the Kabsi WhatsApp number for marketing messages.
+
+How long it is kept: no automatic deletion date is set for WhatsApp chats today. They stay in the Kapso inbox until the person asks Kabsi to delete them (email hello@kabsi.co from the account address, or say so in the chat); Kabsi deletes the chat on its side and tells them when it is done. Kapso and Meta may keep messages under their own terms, and the chat stays on the person's own phone until they delete it there.
+
+Not live yet (P1-21 and P1-22; say "not available yet", never give a date): alerts and the assistant on WhatsApp. If they are added: alerts only after the owner opts in (the time, the phone number and the wording shown are recorded); only Meta-approved message templates, each with one button that opens kabsi.co where the owner approves; a message names the business and says what is waiting, may show a star rating, and never carries review text, a reviewer's name or Business Knowledge; the owner can reply STOP (or a similar word such as UNSUBSCRIBE) at any time and Kabsi stops at once and records it. The privacy page and terms are updated, and account holders emailed, before any of it is switched on.
+
+Likely questions and the answers: "Who answers WhatsApp?" A person at Kabsi, not a bot. "Do you ask for my Google password or code on WhatsApp?" Never. "Can I approve a reply or post on WhatsApp?" No; approve on kabsi.co. "Who sees my WhatsApp messages?" The Kabsi team, through Kapso, with Meta carrying them as WhatsApp. "How long do you keep the chat?" No automatic deletion date is set today; they stay in the inbox until the person asks Kabsi to delete them. "Will Kabsi send me alerts on WhatsApp?" Not yet; email is the only alert channel today, and WhatsApp alerts would need the owner's opt-in and could be stopped with STOP.
 
 ### 9.6 Cookies
 
@@ -525,6 +540,7 @@ The privacy page shows the 11 rows of the retention table (`retention_policies`,
 | Contact details given to the assistant | Until you ask us to remove them |
 | Email log | 12 months |
 | Record of approvals and changes | 24 months; the details of a deleted business are blanked, who did what and when stays |
+| WhatsApp chats with the Kabsi number | No automatic deletion date is set today; they stay in the Kapso inbox until the person asks Kabsi to delete them |
 | Internal job logs | 90 days |
 | Email action links | Expire after 72 hours, removed 30 days later |
 | Payment records | As long as tax and accounting law requires, unlinked from the business when it's deleted |
