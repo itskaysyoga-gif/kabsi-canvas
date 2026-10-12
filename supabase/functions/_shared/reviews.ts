@@ -145,13 +145,14 @@ async function draftWithChecks(rv: DraftRow, loc: { name: string; knowledge_card
   return { ok: check.ok, body, issues: check.issues };
 }
 
-// ─── 3. Signed action links (D103): 32 random bytes, only the SHA-256 is stored, single use, 7 days
+// ─── 3. Signed action links (D103, K-17): 32 random bytes, only the SHA-256 is stored, single use, 72 hours (the database
+// caps it there too, P0.2-05)
 export async function actionLink(o: { locationId: string; userId: string; action: string; reviewId: string }) {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   const token = btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   const { error } = await admin().from("action_tokens").insert({
     token_hash: await sha256Hex(token), location_id: o.locationId, user_id: o.userId, action: o.action,
-    target_type: "review", target_id: o.reviewId, expires_at: new Date(Date.now() + 7 * 86400_000).toISOString(),
+    target_type: "review", target_id: o.reviewId, expires_at: new Date(Date.now() + 72 * 3600_000).toISOString(),
   });
   if (error) throw error;
   return `${APP_URL}/a/${token}`;

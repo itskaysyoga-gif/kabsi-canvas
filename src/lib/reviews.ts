@@ -120,11 +120,37 @@ export type ActionView = {
   /** Demo workspace (P0.1-06): an invented business; the page shows "Demo data". */
   demo?: boolean;
   change?: { id: string; field: string; before: string; after: string; state: string } | null;
+  /** K-17 (P0.2-05): this link changes what customers see, so its recipient must be signed in on the page. */
+  sign_in?: boolean;
+  /** The recipient is signed in in this browser. */
+  signed_in?: boolean;
+  /** Another account is signed in in this browser; the page shows nothing of the item. */
+  other_account?: boolean;
+  /** What the link already did, for a used link. */
+  result?: { done: string } | null;
 };
-export async function loadAction(token: string): Promise<ActionView> {
-  const res = await fetch(`${supabaseUrl}/functions/v1/api/action?t=${encodeURIComponent(token)}`, {
-    headers: { ...anonHeaders },
+export type ActionResult = {
+  ok: true;
+  done: string;
+  state?: string;
+  publication?: string;
+  publish_after?: string | null;
+  repeat?: boolean;
+};
+
+// The email page sends the signed-in session when there is one (K-17: profile changes, hours and urgent reviews need
+// the link's recipient signed in); otherwise the anon key (D295), and the link alone is the credential.
+async function linkFetch(query: string, body?: Record<string, unknown>) {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  const auth = token ? { authorization: `Bearer ${token}` } : {};
+  return fetch(`${supabaseUrl}/functions/v1/api/action${query}`, {
+    ...(body ? { method: "POST", body: JSON.stringify(body) } : {}),
+    headers: { "content-type": "application/json", ...anonHeaders, ...auth },
   });
+}
+export async function loadAction(token: string): Promise<ActionView> {
+  const res = await linkFetch(`?t=${encodeURIComponent(token)}`);
   if (res.status === 404) return { status: "invalid" };
   return readJson<ActionView>(res);
 }
@@ -133,12 +159,11 @@ export async function runAction(
   doWhat: "post" | "skip" | "handle_myself" | "revert" | "keep",
   text?: string,
 ) {
-  const res = await fetch(`${supabaseUrl}/functions/v1/api/action`, {
-    method: "POST",
-    headers: { "content-type": "application/json", ...anonHeaders },
-    body: JSON.stringify({ t: token, do: doWhat, text }),
-  });
-  return readJson<{ ok: true; done: string; state?: string }>(res);
+  return readJson<ActionResult>(await linkFetch("", { t: token, do: doWhat, text }));
+}
+// Undo inside the 10 seconds (K-70), for the publication this link made.
+export async function undoAction(token: string, publication: string) {
+  return readJson<ActionResult>(await linkFetch("", { t: token, do: "undo", publication }));
 }
 
 // ── Staff test tool (mock Google only): adds a review to the simulated Google profile
