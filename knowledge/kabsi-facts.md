@@ -254,6 +254,7 @@ During a trial, Kabsi emails you 7 days before it ends, 1 day before, and on the
 ### 4.5 Refunds
 
 - Yearly plans are refundable in full within 14 days of the plan starting. Email hello@kabsi.co. Kabsi refunds by the method you paid with where possible.
+- A monthly plan runs to the end of the month paid for and is not refunded for that month. Cancelling a plan never removes Kabsi's Google access; disconnecting is a separate step the owner chooses (section 8.6).
 - Cards aren't refunded once delivered. A card that's faulty on arrival is replaced free if you tell Kabsi within 14 days.
 - The unused part is refunded if a paid feature stops for good because Google changed its APIs, if Kabsi stops the service without you breaking the terms, or if the terms change in a way that matters and you don't agree.
 - Nothing in the terms limits a refund you're entitled to by law.
@@ -475,7 +476,7 @@ Kabsi keeps Google content for at most 30 days, as Google's policy requires (det
 
 ### 9.1 Who is responsible
 
-Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co. The site gives a city only, never a street address. The footer of every public page says: "Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google."
+Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates, who is the seller and the data controller. The privacy page and the terms read the seller from the one `LEGAL_SELLER` constant and say Kabsi is not partnered with Google. Contact: hello@kabsi.co. The site gives a city only, never a street address. The footer of every public page says: "Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google."
 
 ### 9.2 What Kabsi collects
 
@@ -495,7 +496,7 @@ Review text, business facts and photos go to Anthropic's API for drafts and chec
 
 ### 9.5 Processors and regions
 
-Supabase (database, sign-in, storage; Frankfurt, Germany), Cloudflare (go.kabsi.co links), Vercel (hosting), Resend (email; EU, Ireland), Anthropic (drafts and photo checks), Google (Business Profile and Places APIs), Sentry (error reports; EU, without IPs or review content), PostHog (anonymous statistics; United States).
+Supabase (database, sign-in, storage; Frankfurt, Germany), Cloudflare (go.kabsi.co links and the bot check on forms), Vercel (hosting), Resend (email; EU, Ireland), Anthropic (drafts and photo checks), Google (Business Profile and Places APIs), Sentry (error reports; EU, without IPs or review content), PostHog (anonymous statistics; United States), Zoho (the hello@kabsi.co mailbox). Calendly and Creem are added to the list on the privacy page when they go live.
 
 Some providers are outside Lebanon and the EU. They process data only on Kabsi's instructions and under their data protection terms, including standard contractual clauses where required.
 
@@ -504,6 +505,8 @@ Some providers are outside Lebanon and the EU. They process data only on Kabsi's
 Sign-in storage, the last business you opened (in your browser), and PostHog's anonymous statistics identifier. Screen recordings only on public pages, never inside the app. No advertising cookies or cross-site tracking.
 
 ### 9.7 Retention
+
+The privacy page shows the 11 rows of the retention table (`retention_policies`, K-40) in plain words from `src/lib/retention.ts`; a test holds the page equal to the table. The table below adds the rows that follow other rules.
 
 | Data | Kept |
 |---|---|
@@ -534,6 +537,8 @@ Sign-in storage, the last business you opened (in your browser), and PostHog's a
 - A reviewer asking about their review: hand off.
 
 ### 9.9 Security
+
+The security page says: what a Manager can do; that every reply, post, photo and change waits for your tap; that Kabsi gives no one else, partners included, a way to read or write your Google data; how to disconnect (Settings, **Disconnect Kabsi from Google**, or remove Kabsi Clients on Google; team removal within 7 business days if Google refuses); the written notice within 48 hours of any access change; sign-in by email code with no passwords; that Kabsi never asks for a Google password or code and stores no Google token of yours; email links (once, 72 hours, owner only); data in Frankfurt; Google data never sold, used for ads or used to train AI, read by people at Kabsi only with consent, for security or as the law requires.
 
 Sign-in by one-time email code, no passwords. Each business's data is separated at the database level; only its members, and Kabsi staff when helping, can read it. Email action links work once, expire after 72 hours, belong to the person they were sent to, are stored only as a hash and never act on opening. Profile changes, hours and reviews that need care also need that person signed in. Kabsi's Google access stays on Kabsi's servers. Data is encrypted in transit. Kabsi is for businesses and not meant for anyone under 18.
 
@@ -778,7 +783,7 @@ It's $19 a month, or $190 a year, and you can cancel a monthly plan any time. Yo
 Your plan starts only when access works, so waiting costs you nothing.
 
 **Is there a free trial?**
-No trial is listed. The review link tool is free, and Pro is refundable in full within 14 days of the plan starting.
+Yes. 14 days, no card (30 days through a partner link). It starts when Kabsi's access to your Google profile works, and there is one trial per Google business. The review link tool is free, and a yearly plan is refundable in full within 14 days of the plan starting.
 
 **Can I try it before paying?**
 You can try the example inbox on the home page and finish setup before paying. Your plan starts only when payment is confirmed and Google access works.
