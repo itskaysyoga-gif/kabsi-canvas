@@ -143,11 +143,15 @@ export async function gbp(url: string, init: RequestInit = {}): Promise<any> {
   }
 }
 
-// Places API (New) request with a field mask (always required by Google). Returns the raw response so callers keep
-// their own error handling.
-export function places(path: string, key: string, fieldMask: string, init: RequestInit = {}) {
+// Places API (New) request with a field mask (always required by Google, and by K-100: never the reviews field).
+// Autocomplete is the one Places call that takes no field mask (its answer is only place IDs and text), so it passes
+// null. Returns the raw response so callers keep their own error handling.
+export function places(path: string, key: string, fieldMask: string | null, init: RequestInit = {}) {
   return fetch(`${PLACES}${path}`, {
     ...init,
-    headers: { "content-type": "application/json", "x-goog-api-key": key, "x-goog-fieldmask": fieldMask, ...(init.headers ?? {}) },
+    headers: {
+      "content-type": "application/json", "x-goog-api-key": key, ...(fieldMask ? { "x-goog-fieldmask": fieldMask } : {}),
+      ...(init.headers ?? {}),
+    },
   });
 }

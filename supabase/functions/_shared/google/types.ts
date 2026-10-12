@@ -98,6 +98,11 @@ export type Place = {
   primaryType?: string; primaryTypeDisplayName?: LocalizedText; types?: string[]; rating?: number; userRatingCount?: number;
 };
 export type SearchTextResponse = { places?: Place[] };
+export type PlacePrediction = {
+  placeId?: string; place?: string; text?: LocalizedText;
+  structuredFormat?: { mainText?: LocalizedText; secondaryText?: LocalizedText };
+};
+export type AutocompleteResponse = { suggestions?: { placePrediction?: PlacePrediction }[] };
 
 // ─── app types (unchanged from _shared/google.ts)
 export type ManagedLocation = { accountId: string; locationId: string; placeId: string | null; title: string };

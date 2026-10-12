@@ -19,7 +19,8 @@ const fmtDay = (d: Date, tz: string) => new Intl.DateTimeFormat("en-US", { timeZ
 async function placesRating(placeId: string) {
   const key = Deno.env.get("PLACES_API_KEY");
   if (!key) return null;
-  const { ok, status, data: d } = await getPlace(key, placeId, "rating,userRatingCount");
+  const { ok, status, data: d, backSoon } = await getPlace(key, placeId, "rating,userRatingCount");
+  if (backSoon) return null; // today's Places cap is reached; tomorrow's run takes the snapshot
   if (!ok) throw new Error(`places details ${status}`);
   return { rating: typeof d.rating === "number" ? Math.round(d.rating * 10) / 10 : null, count: d.userRatingCount ?? null };
 }
