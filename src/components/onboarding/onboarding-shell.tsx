@@ -10,8 +10,26 @@ const STEPS: { key: OnboardingStep; label: string }[] = [
   { key: "plan", label: "Plan" },
 ];
 
-export function OnboardingShell({ step, children }: { step: OnboardingStep; children: ReactNode }) {
-  const index = step === "done" ? STEPS.length : STEPS.findIndex((s) => s.key === step);
+// The five steps of the new flow (design review, "Signup, login and onboarding"). Steps 1 and 2 come before sign-up
+// (P0.4-01); the screens for 3 to 5 arrive in P0.4-03 to P0.4-05.
+const FLOW: { key: string; label: string }[] = [
+  { key: "find", label: "Find" },
+  { key: "snapshot", label: "Check" },
+  { key: "connect", label: "Connect" },
+  { key: "questions", label: "About" },
+  { key: "confirm", label: "Confirm" },
+];
+
+export function OnboardingShell({
+  step,
+  children,
+}: {
+  step: OnboardingStep | "find" | "snapshot";
+  children: ReactNode;
+}) {
+  const steps: { key: string; label: string }[] =
+    step === "find" || step === "snapshot" ? FLOW : STEPS;
+  const index = step === "done" ? steps.length : steps.findIndex((s) => s.key === step);
   return (
     <main className="min-h-screen bg-kb-sand">
       <header className="border-b border-kb-hairline bg-kb-white">
@@ -27,8 +45,11 @@ export function OnboardingShell({ step, children }: { step: OnboardingStep; chil
       </header>
       <div className="mx-auto max-w-2xl px-5 pb-16 pt-6 sm:pt-10">
         {step !== "done" ? (
-          <ol className="mb-6 grid grid-cols-4 gap-2" aria-label="Setup progress">
-            {STEPS.map((s, i) => (
+          <ol
+            className={cn("mb-6 grid gap-2", steps.length === 5 ? "grid-cols-5" : "grid-cols-4")}
+            aria-label="Setup progress"
+          >
+            {steps.map((s, i) => (
               <li key={s.key} className="min-w-0">
                 <div
                   className={cn(

@@ -295,6 +295,10 @@ Share it in your own messages, Instagram bio, receipts, menus and follow-up emai
 
 Search name and city to get Google's own review link, a PNG QR code and a printable counter card. Free, no sign-up, up to 20 searches per visitor per hour. Kabsi doesn't count opens of this Google link. Not found? Try the exact Maps name plus city. Kabsi limits how many business searches it runs a day, so Google's search costs stay small. If the limit is reached, the tool and the business search in setup say "Back soon" and work again the next day (UTC); nothing the owner has set up is affected.
 
+**Without signing in: the free Google Profile Check (/google-profile-check)**
+
+Search a business by name and city and see what customers see on Google, from public information only: rating, number of reviews, opening hours and whether it is open now, phone, website, category and whether the profile has photos. It does not use the owner's Google profile and changes nothing. Three to five findings are listed in plain words, each labelled **Urgent**, **Recommended** or **Nice to have**. There is no score, no ranking and no comparison with other businesses. Public information does not include review replies, the description, posts or photo dates, so the check says so and Kabsi looks at them only after the owner connects. The button is **Join early access** ("Kabsi can take care of these. You approve each one."). **Email me this check** sends the result to the address given; a box, unticked, says "Send me tips on managing my Google profile" and tips are sent only if it is ticked (Kabsi keeps the address, the business's Google Place ID, the choice, those words, the page and the time as proof). Free, no sign-up, 3 checks a day per visitor (the fourth is refused: "You have used your 3 free checks for today. Please come back tomorrow."), up to 10 requests a minute, and a bot check. Google's public details for a business are kept 24 hours, so a second check of the same business in a day does not ask Google again. When the daily limit on Google lookups is reached, or the check is paused, the page says **Back soon**. It also runs as the first two screens of setup (/get-started): "Which business is yours?" and "Here's what customers see", before any sign-up. Business details come from Google Maps. Kabsi is not partnered with Google.
+
 ### 5.2 NFC cards: Lebanon only
 
 - Kabsi ships NFC cards **only in Lebanon**, paid by cash, Whish, OMT or USDT.
@@ -489,6 +493,7 @@ Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates, who is the selle
 - **Owners:** email and extra alert addresses; business name, address, country, time zone and Google identifiers; About your business facts; Google reviews (public name, rating, text, dates), drafts and replies; posts, photos, special hours; listing details for Google Protection; plan and payments (including USDT transaction IDs); the authorisation you gave; the introducing partner, if any; a log of emails sent; a record of approvals and changes (who did what and when, from the dashboard or an email link, the country of the connection and the browser, never the IP address and never review text).
 - **People who tap a card or open a link:** code, time, country, Android or iPhone, chip or QR, and a crawler flag. Never who they are or their IP address.
 - **Free tool users:** the search text goes to Google's Places API; a one-way salted hash of the IP is kept one hour to stop abuse.
+- **Free Google Profile Check users:** the search text goes to Google's Places API; what Google shows publicly about the business they pick is kept up to 24 hours; a one-way salted hash of the IP is kept one day to enforce 3 checks a day. If they ask for the check by email: the address, the business's Google Place ID, whether they ticked the tips box, the words next to it, the page and the time (proof of their choice).
 - **People who chat with Nora (the assistant):** their messages, the page they asked from, browser time zone and language, device type, the site that sent them, the country from the network (never the IP address), and any contact details they choose to give. Each chat is labelled (topic, intent, country) and a short report goes to the Kabsi team so a person can follow up. News emails only with a yes.
 - **People who write on WhatsApp:** their phone number and WhatsApp name as WhatsApp shows them, their messages, any photo or file they attach, and the time (see section 9.5b). Kabsi does not copy the chat into its own database.
 - **Forms:** what you enter. **Partners:** contact details, invited businesses, invoices, payment claims. **Visitors:** anonymous statistics and error reports.
@@ -550,6 +555,8 @@ The privacy page shows the 11 rows of the retention table (`retention_policies`,
 | Payment records | As long as tax and accounting law requires, unlinked from the business when it's deleted |
 | Card and link taps | Kept without personal data, for counts |
 | Free tool abuse limits | 1 hour |
+| Google's public details for a business checked in the free Profile Check | 24 hours |
+| Email request for the free Profile Check, with the tips choice | Until you ask us to remove it |
 
 ### 9.8 Your rights and deleting data
 

@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as GetStartedRouteImport } from './routes/get-started'
+import { Route as GoogleProfileCheckRouteImport } from './routes/google-profile-check'
 import { Route as GoogleReviewLinkRouteImport } from './routes/google-review-link'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as LebanonRouteImport } from './routes/lebanon'
@@ -65,6 +67,16 @@ const AboutRoute = AboutRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GetStartedRoute = GetStartedRouteImport.update({
+  id: '/get-started',
+  path: '/get-started',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GoogleProfileCheckRoute = GoogleProfileCheckRouteImport.update({
+  id: '/google-profile-check',
+  path: '/google-profile-check',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GoogleReviewLinkRoute = GoogleReviewLinkRouteImport.update({
@@ -244,6 +256,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/faq': typeof FaqRoute
+  '/get-started': typeof GetStartedRoute
+  '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lebanon': typeof LebanonRoute
@@ -283,6 +297,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/faq': typeof FaqRoute
+  '/get-started': typeof GetStartedRoute
+  '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lebanon': typeof LebanonRoute
@@ -323,6 +339,8 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/faq': typeof FaqRoute
+  '/get-started': typeof GetStartedRoute
+  '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lebanon': typeof LebanonRoute
@@ -364,6 +382,8 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/faq'
+    | '/get-started'
+    | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
     | '/lebanon'
@@ -403,6 +423,8 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/faq'
+    | '/get-started'
+    | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
     | '/lebanon'
@@ -442,6 +464,8 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/about'
     | '/faq'
+    | '/get-started'
+    | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
     | '/lebanon'
@@ -483,6 +507,8 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   FaqRoute: typeof FaqRoute
+  GetStartedRoute: typeof GetStartedRoute
+  GoogleProfileCheckRoute: typeof GoogleProfileCheckRoute
   GoogleReviewLinkRoute: typeof GoogleReviewLinkRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LebanonRoute: typeof LebanonRoute
@@ -530,6 +556,20 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/get-started': {
+      id: '/get-started'
+      path: '/get-started'
+      fullPath: '/get-started'
+      preLoaderRoute: typeof GetStartedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/google-profile-check': {
+      id: '/google-profile-check'
+      path: '/google-profile-check'
+      fullPath: '/google-profile-check'
+      preLoaderRoute: typeof GoogleProfileCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/google-review-link': {
@@ -832,6 +872,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   FaqRoute: FaqRoute,
+  GetStartedRoute: GetStartedRoute,
+  GoogleProfileCheckRoute: GoogleProfileCheckRoute,
   GoogleReviewLinkRoute: GoogleReviewLinkRoute,
   HowItWorksRoute: HowItWorksRoute,
   LebanonRoute: LebanonRoute,

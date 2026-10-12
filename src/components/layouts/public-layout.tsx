@@ -199,6 +199,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <Link to="/how-it-works">How it works</Link>
               <Link to="/pricing">Pricing</Link>
               <Link to="/google-review-link">Free review link and QR</Link>
+              <Link to="/google-profile-check">Free Google Profile Check</Link>
               <Link to="/guides">Guides</Link>
               <Link to="/faq">FAQ</Link>
             </FooterCol>

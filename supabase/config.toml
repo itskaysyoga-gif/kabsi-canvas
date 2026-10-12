@@ -42,6 +42,8 @@ verify_jwt = true
 verify_jwt = true
 [functions.review-link]
 verify_jwt = true
+[functions.profile-snapshot]  # public free check (P0.4-01): browser calls send the anon JWT; Turnstile, rate limits and the Places guard run in code
+verify_jwt = true
 
 # 29 Sep: api, assistant, lead and review-link stay true. Browser calls without a session send the public anon JWT
 # (src/lib/supabase.ts anonHeaders), so no function has to skip verification for them. Only callers that cannot send

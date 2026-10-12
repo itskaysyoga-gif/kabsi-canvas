@@ -63,3 +63,17 @@ export async function getPlace(key: string, placeId: string, fieldMask: string, 
   if (result.ok) await guard.cachePut(placeId, fieldMask, result.data).catch(() => {});
   return result;
 }
+
+// The free Profile Check (P0.4-01, K-100): the one field mask the snapshot ever sends. Rating, review count, hours,
+// open status, phone, website, category and photo presence, plus the name and address to show. The reviews field is
+// never in it (it moves the whole call to the 30 dollar per 1,000 tier); tests hold that.
+export const SNAPSHOT_FIELD_MASK =
+  "id,displayName,formattedAddress,primaryTypeDisplayName,businessStatus,rating,userRatingCount,regularOpeningHours,currentOpeningHours,nationalPhoneNumber,websiteUri,photos";
+
+export const getSnapshotPlace = (key: string, placeId: string): Promise<PlacesResult<Place>> =>
+  getPlace(key, placeId, SNAPSHOT_FIELD_MASK);
+
+// The snapshot from the 24 hour cache only: never a Places request and nothing taken from the cap.
+export async function getCachedSnapshot(placeId: string): Promise<Place | null> {
+  return await guard.cacheGet(placeId, SNAPSHOT_FIELD_MASK);
+}
