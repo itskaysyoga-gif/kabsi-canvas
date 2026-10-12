@@ -1,7 +1,7 @@
 // Mock of Places API (New) for the Deno tests: Places has no mock switch at run time (it needs only
 // PLACES_API_KEY), and demo businesses have no place id, so no live path reaches this module.
 import type { PlacesResult } from "./live.ts";
-import type { Place, SearchTextResponse } from "../types.ts";
+import type { AutocompleteResponse, Place, SearchTextResponse } from "../types.ts";
 
 const MOCK_PLACE: Place = {
   id: "ChIJmockPlace0000000000000", name: "places/ChIJmockPlace0000000000000",
@@ -24,5 +24,10 @@ export const searchText = (_key: string, _textQuery: string, maxResultCount: num
   const fields = fieldMask.split(",").map((f) => f.trim().replace(/^places\./, ""));
   return Promise.resolve({ ok: true, status: 200, data: { places: [pick(MOCK_PLACE, fields)].slice(0, maxResultCount) } });
 };
-export const getPlace = (_key: string, _placeId: string, fieldMask: string): Promise<PlacesResult<Place>> =>
+export const getPlace = (_key: string, _placeId: string, fieldMask: string, _sessionToken?: string): Promise<PlacesResult<Place>> =>
   Promise.resolve({ ok: true, status: 200, data: pick(MOCK_PLACE, fieldMask.split(",").map((f) => f.trim())) });
+export const autocomplete = (_key: string, _input: string, _sessionToken: string): Promise<PlacesResult<AutocompleteResponse>> =>
+  Promise.resolve({
+    ok: true, status: 200,
+    data: { suggestions: [{ placePrediction: { placeId: MOCK_PLACE.id, text: { text: "Harbour Lane Coffee, 12 Harbour Lane, Example Town" } } }] },
+  });

@@ -335,13 +335,14 @@ export async function searchKeywords(locationId: string): Promise<{ keyword: str
 }
 
 // ─── Places API (New), on PLACES_API_KEY (works before the Business Profile grant).
-export { getPlace, searchText, type PlacesResult } from "./places/live.ts";
+export { autocomplete, getPlace, searchText, type PlacesResult } from "./places/live.ts";
 
 // Category and area of a place.
 export async function placeCategory(placeId: string) {
   const key = Deno.env.get("PLACES_API_KEY");
   if (!key) return null;
-  const { ok, status, data } = await placesLive.getPlace(key, placeId, "primaryType,primaryTypeDisplayName,types,addressComponents");
+  const { ok, status, data, backSoon } = await placesLive.getPlace(key, placeId, "primaryType,primaryTypeDisplayName,types,addressComponents");
+  if (backSoon) return null; // today's Places cap is reached; the next draft asks again
   if (!ok) throw new Error(`places ${status}: ${JSON.stringify(data).slice(0, 200)}`);
   const comps = data.addressComponents ?? [];
   const pick = (t: string) => comps.find((c) => c.types?.includes(t))?.longText ?? null;

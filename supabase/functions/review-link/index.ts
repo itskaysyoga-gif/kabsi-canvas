@@ -27,7 +27,8 @@ Deno.serve(async (req) => {
   if (q.length < 2 || q.length > 120) return fail("bad_query", "Type your business name and city.");
 
   try {
-    const { ok, status, data } = await searchText(key, q, 5, "places.id,places.displayName,places.formattedAddress");
+    const { ok, status, data, backSoon } = await searchText(key, q, 5, "places.id,places.displayName,places.formattedAddress");
+    if (backSoon) return fail("back_soon", "Back soon. The tool is paused for today. Please try again tomorrow.", 503);
     if (!ok) throw new Error(`places ${status}: ${JSON.stringify(data).slice(0, 300)}`);
     const places = (data.places ?? []).map((p) => ({
       place_id: p.id as string,

@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
 
   const user = await currentUser(req);
   if (!user) return fail("not_signed_in", "Please log in first.", 401);
-  // D266: paid Google Places lookup — fail closed if the limiter breaks instead of removing the cap.
+  // D266: paid Google Places lookup: fail closed if the limiter breaks instead of removing the cap.
   if (!(await rateLimit(`places:${user.id}`, 30, 600, { failClosed: true }))) return fail("rate_limited", "Too many searches. Try again in a few minutes.", 429);
 
   const key = Deno.env.get("PLACES_API_KEY");
@@ -21,7 +21,8 @@ Deno.serve(async (req) => {
   if (q.length < 2 || q.length > 120) return fail("bad_query", "Type your business name and area.");
 
   try {
-    const { ok, status, data } = await searchText(key, q, 5, "places.id,places.displayName,places.formattedAddress,places.addressComponents");
+    const { ok, status, data, backSoon } = await searchText(key, q, 5, "places.id,places.displayName,places.formattedAddress,places.addressComponents");
+    if (backSoon) return fail("back_soon", "Back soon. Business search is paused for today. Try again tomorrow.", 503);
     if (!ok) throw new Error(`places ${status}: ${JSON.stringify(data).slice(0, 300)}`);
     const places = (data.places ?? []).map((p) => ({
       place_id: p.id as string,

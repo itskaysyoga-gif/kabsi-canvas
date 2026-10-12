@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
   const places = Deno.env.get("PLACES_API_KEY");
   if (places) {
     const r = await searchText(places, "Yawmiyati Beirut", 1, "places.id");
-    checks.places = r.ok ? "search works" : `search failed (${r.status}): ${JSON.stringify(r.data).slice(0, 160)}`;
+    checks.places = r.backSoon ? "paused: today's Places cap is reached" : r.ok ? "search works" : `search failed (${r.status}): ${JSON.stringify(r.data).slice(0, 160)}`;
   }
   // The key was saved as "Anthropic_Api"; the functions accept both names.
   const anthropic = Deno.env.get("ANTHROPIC_API_KEY") ?? Deno.env.get("Anthropic_Api");

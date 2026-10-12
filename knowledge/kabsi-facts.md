@@ -286,7 +286,7 @@ Share it in your own messages, Instagram bio, receipts, menus and follow-up emai
 
 **Without signing in: the free tool (/google-review-link)**
 
-Search name and city to get Google's own review link, a PNG QR code and a printable counter card. Free, no sign-up, up to 20 searches per visitor per hour. Kabsi doesn't count opens of this Google link. Not found? Try the exact Maps name plus city.
+Search name and city to get Google's own review link, a PNG QR code and a printable counter card. Free, no sign-up, up to 20 searches per visitor per hour. Kabsi doesn't count opens of this Google link. Not found? Try the exact Maps name plus city. Kabsi limits how many business searches it runs a day, so Google's search costs stay small. If the limit is reached, the tool and the business search in setup say "Back soon" and work again the next day (UTC); nothing the owner has set up is affected.
 
 ### 5.2 NFC cards: Lebanon only
 
