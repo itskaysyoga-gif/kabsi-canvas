@@ -536,9 +536,13 @@ The privacy page shows the 11 rows of the retention table (`retention_policies`,
 - Also remove the Kabsi Clients group (ID 5481006796) from People and access. To delete your login too, or if you can't sign in, email hello@kabsi.co.
 - A reviewer asking about their review: hand off.
 
+### 9.8b About page and founder note
+
+The About page says who runs Kabsi (Hussein Slim, from Dubai, who is also the seller and the person responsible for data; Kabsi serves businesses in any country), why Kabsi exists, the meaning of the name, how to reach a person (hello@kabsi.co, or the free setup call), and that Kabsi is independent and not affiliated with, sponsored by or endorsed by Google. The homepage carries a short founder note signed Hussein Slim, with Kabsi's mark and no photo. There are no customer quotes, logos or counts on these pages; Kabsi has no published case study yet. The W4 video has its place on About and shows nothing until it exists.
+
 ### 9.9 Security
 
-The security page says: what a Manager can do; that every reply, post, photo and change waits for your tap; that Kabsi gives no one else, partners included, a way to read or write your Google data; how to disconnect (Settings, **Disconnect Kabsi from Google**, or remove Kabsi Clients on Google; team removal within 7 business days if Google refuses); the written notice within 48 hours of any access change; sign-in by email code with no passwords; that Kabsi never asks for a Google password or code and stores no Google token of yours; email links (once, 72 hours, owner only); data in Frankfurt; Google data never sold, used for ads or used to train AI, read by people at Kabsi only with consent, for security or as the law requires.
+The security page opens with three facts (no password, ever; access you can remove; nothing posted without you), then says: what a Manager can do; that every reply, post, photo and change waits for your tap; that Kabsi gives no one else, partners included, a way to read or write your Google data; how to disconnect (Settings, **Disconnect Kabsi from Google**, or remove Kabsi Clients on Google; team removal within 7 business days if Google refuses); the written notice within 48 hours of any access change; sign-in by email code with no passwords; that Kabsi never asks for a Google password or code and stores no Google token of yours; email links (once, 72 hours, owner only); data in Frankfurt; that Kabsi's own Google account is protected with Google's Advanced Protection Program; Google data never sold, used for ads or used to train AI, read by people at Kabsi only with consent, for security or as the law requires.
 
 Sign-in by one-time email code, no passwords. Each business's data is separated at the database level; only its members, and Kabsi staff when helping, can read it. Email action links work once, expire after 72 hours, belong to the person they were sent to, are stored only as a hash and never act on opening. Profile changes, hours and reviews that need care also need that person signed in. Kabsi's Google access stays on Kabsi's servers. Data is encrypted in transit. Kabsi is for businesses and not meant for anyone under 18.
 
@@ -651,7 +655,7 @@ You invite the Kabsi Clients group (ID 5481006796) as a Manager, not as an owner
 Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. The team is in Lebanon, and Kabsi serves businesses in any country.
 
 **Who runs Kabsi?**
-Kabsi was founded by Rasheed, who runs it with a small team. You can reach the team, and Rasheed, at hello@kabsi.co.
+Kabsi is run by Hussein Slim, from Dubai. A person answers at hello@kabsi.co.
 
 **Do I need to install anything?**
 No. Kabsi works from your email and your phone's web browser.

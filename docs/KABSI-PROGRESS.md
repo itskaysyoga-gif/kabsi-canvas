@@ -141,7 +141,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.6-04 | The /meta landing page | Sonnet | todo | | |
 | P0.6-05 | Security headers, Turnstile everywhere, rate limits | Opus | todo | | |
 | P0.6-06 | Nora in sync: facts file, handover and evaluation | Opus | todo | | |
-| P0.6-07 | Honest proof pages: founder note, About, Security | Sonnet | todo | | |
+| P0.6-07 | Honest proof pages: founder note, About, Security | Sonnet | PR open (branch claude/h-p0-6-07); checked at 390 px by script, no horizontal scroll; open: Hussein's look and the photo question | 12 Oct | |
 | P0.6-08 | Supporting platforms checked against K-118 | Sonnet | todo | | |
 | P0.6-09 | Meta account fixes (VIDEO Part 7) | Sonnet | todo | | |
 | P0.6-10 | WhatsApp click-to-chat on the Kapso US number | Sonnet | todo | | |
@@ -339,6 +339,19 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.6-07 (branch claude/h-p0-6-07, 12 Oct 2026, Hussein's session)
+
+Built on P0.2-07's /security; nothing duplicated. typecheck, lint:changed, `npm test` (38) and `npm run build` pass. 390 px: scrollWidth equals 390 on /about, /security and /; /security screenshot read. No Google, Places or Anthropic call made.
+
+Claims checked against `knowledge/kabsi-facts.md` (section 9.8b, 9.9 and the FAQ lines):
+- About: run by Hussein Slim from Dubai, seller and data controller (facts, `LEGAL_SELLER`); serves businesses in any country (facts); the name means "press" (existing copy, kept); reach a person at hello@kabsi.co or the setup call (facts); independent, not affiliated, sponsored or endorsed by Google (facts, K-112). It no longer says Rashid built it (R-26).
+- Security lead: no password or Google code ever, Manager access removable, nothing posted without approval (existing sections of the same page). Advanced Protection on Kabsi's Google account (facts FAQ, plan appendix).
+- Founder note on the homepage: signed Hussein Slim, Kabsi mark, no photo; same three promises.
+- No testimonial, logo, count or case study anywhere. The old facts answer "founded by Rasheed" was replaced.
+
+Decisions to confirm: photo question not answered, so the note has no photo (K-105 safe default); say yes and one image goes in the note. The W4 video slot on About is a code comment only, because the video does not exist. The note names Hussein as the person who runs Kabsi (the design review said Rashid; R-26).
+By hand: confirm Advanced Protection is still on for hello@kabsi.co (last checked 4 Oct); look at the pages on a phone.
 
 ### P0.2-07 (branch claude/h-p0-2-07, 12 Oct 2026, Hussein's session)
 - Files: `src/routes/privacy.tsx`, `terms.tsx`, `security.tsx`, `src/lib/retention.ts`, `tests/retention-page.test.ts`, `knowledge/kabsi-facts.md`. No migration, no database change.

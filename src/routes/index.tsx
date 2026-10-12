@@ -21,6 +21,7 @@ import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
 import { InboxDemo } from "@/components/marketing/inbox-demo";
 import { CtaBand, Eyebrow, FaqList, H2, HeroBackdrop, Section } from "@/components/marketing/parts";
+import { KabsiMark } from "@/components/shared/kabsi-logo";
 import { BusinessGrid } from "@/components/marketing/business-grid";
 import { FAQ } from "@/lib/faq";
 import { ELIGIBLE, GUIDELINES_URL, NOT_ELIGIBLE } from "@/lib/eligibility";
@@ -28,7 +29,9 @@ import {
   BRAND_EXPLAINER,
   BRAND_LINE,
   CTA_PRIMARY,
+  CONTACT_EMAIL,
   CTA_SECONDARY,
+  FOUNDER_NAME,
   ORG_LD,
   PRICES,
   PRODUCT_LD,
@@ -305,6 +308,29 @@ function HomePage() {
             shows your week.
           </Step>
         </ol>
+        <div className="mt-12 max-w-3xl rounded-lg border border-kb-hairline bg-kb-sand p-6 sm:p-8">
+          <div className="flex items-center gap-3">
+            <KabsiMark className="size-8" />
+            <p className="font-bold text-kb-ink">A note from the person who runs Kabsi</p>
+          </div>
+          <p className="mt-4 text-lg leading-8 text-kb-stone">
+            I run Kabsi from Dubai. Nothing goes on your Google profile until you approve it, and
+            you can remove Kabsi at any time. If you want to talk to a person, write to{" "}
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="font-bold text-kb-ink underline underline-offset-4"
+            >
+              {CONTACT_EMAIL}
+            </a>
+            .
+          </p>
+          <p className="mt-4 font-bold text-kb-ink">
+            {FOUNDER_NAME}.{" "}
+            <Link to="/about" className="underline underline-offset-4">
+              About Kabsi
+            </Link>
+          </p>
+        </div>
       </Section>
 
       {/* Pricing summary */}

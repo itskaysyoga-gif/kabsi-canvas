@@ -1,14 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { H2, PageHero, Section } from "@/components/marketing/parts";
-import { pageHead } from "@/lib/site";
+import { CONTACT_EMAIL, FOUNDER_NAME, pageHead } from "@/lib/site";
 
 export const Route = createFileRoute("/about")({
   head: () =>
     pageHead({
       title: "About Kabsi",
-      description:
-        "Kabsi is an independent product built by Rashid to help local businesses answer Google reviews and look after their Google profile.",
+      description: `Kabsi is run by ${FOUNDER_NAME} from Dubai. It helps local businesses answer reviews and look after their listing, and a person answers when you write.`,
       path: "/about",
       crumbs: [{ name: "About", path: "/about" }],
     }),
@@ -20,17 +19,27 @@ function AboutPage() {
     <PublicLayout>
       <PageHero
         eyebrow="About"
-        title="About Kabsi"
-        sub="A small independent product for local businesses."
+        title="Who runs Kabsi"
+        sub="A small independent product for local businesses, run by a person you can write to."
         crumbs={[{ name: "About" }]}
       />
 
       <Section className="max-w-3xl space-y-10 text-[17px] leading-8">
         <section>
-          <H2 className="text-3xl">Built for local businesses</H2>
+          <H2 className="text-3xl">Who runs it</H2>
           <p className="mt-4 text-kb-stone">
-            Kabsi is a small independent product that helps local businesses answer Google reviews
-            and look after their Google profile. It is built and run by Rashid.
+            Kabsi is run by {FOUNDER_NAME}, from Dubai. {FOUNDER_NAME} is the seller and the person
+            responsible for your data. Kabsi serves businesses in any country.
+          </p>
+        </section>
+
+        <section>
+          <H2 className="text-3xl">Why it exists</H2>
+          <p className="mt-4 text-kb-stone">
+            A business that customers find on Google Maps needs its reviews answered and its listing
+            kept right: the hours, the phone number, the photos. For an owner who is busy serving
+            customers, that is easy to leave for later. Kabsi prepares the replies and the updates,
+            watches the listing, and waits for your approval before anything is published.
           </p>
         </section>
 
@@ -41,14 +50,27 @@ function AboutPage() {
           </p>
         </section>
 
+        {/* W4 video slot (KABSI-VIDEO): add it here once the video exists. Nothing is shown until then. */}
+
         <section>
-          <H2 className="text-3xl">Independent and available</H2>
+          <H2 className="text-3xl">How to reach a person</H2>
           <p className="mt-4 text-kb-stone">
-            Kabsi is independent and not affiliated with Google. Contact{" "}
-            <a href="mailto:hello@kabsi.co" className="font-bold underline underline-offset-4">
-              hello@kabsi.co
-            </a>
+            Write to{" "}
+            <a href={`mailto:${CONTACT_EMAIL}`} className="font-bold underline underline-offset-4">
+              {CONTACT_EMAIL}
+            </a>{" "}
+            and a person replies. You can also{" "}
+            <Link to="/setup-call" className="font-bold underline underline-offset-4">
+              book a free setup call
+            </Link>
             .
+          </p>
+        </section>
+
+        <section>
+          <H2 className="text-3xl">Independent</H2>
+          <p className="mt-4 text-kb-stone">
+            Kabsi is independent. It is not affiliated with, sponsored by or endorsed by Google.
           </p>
         </section>
 

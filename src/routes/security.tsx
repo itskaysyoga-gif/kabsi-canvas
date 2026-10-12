@@ -16,6 +16,21 @@ export const Route = createFileRoute("/security")({
   component: SecurityPage,
 });
 
+const THREE_FACTS = [
+  {
+    title: "No password, ever",
+    line: "Kabsi never asks for your Google password or a Google verification code.",
+  },
+  {
+    title: "Access you can remove",
+    line: "Kabsi is a Manager on your profile. You can remove it at any time.",
+  },
+  {
+    title: "Nothing posted without you",
+    line: "Every reply, post, photo and change waits for your approval.",
+  },
+];
+
 function SecurityPage() {
   return (
     <PublicLayout>
@@ -27,6 +42,15 @@ function SecurityPage() {
       />
 
       <Section className="max-w-3xl space-y-12 text-[17px] leading-8">
+        <ul className="grid gap-4 sm:grid-cols-3">
+          {THREE_FACTS.map((fact) => (
+            <li key={fact.title} className="rounded-lg border border-kb-hairline bg-kb-sand p-5">
+              <p className="font-bold text-kb-ink">{fact.title}</p>
+              <p className="mt-2 text-base leading-7 text-kb-stone">{fact.line}</p>
+            </li>
+          ))}
+        </ul>
+
         <ContentSection title="What a Manager can do">
           <p>
             Google gives a Manager access to help run a profile. You can read about the{" "}
@@ -93,7 +117,8 @@ function SecurityPage() {
             Your data is stored in the EU, in Frankfurt, and encrypted in transit. Each business's
             data is separated at the database level, so only its members, and Kabsi staff when
             helping you, can read it. Review text and reviewer names that come from Google are
-            removed 30 days after Google last returned them. We never sell Google data, use it for
+            removed 30 days after Google last returned them. Kabsi's own Google account is protected
+            with Google's Advanced Protection Program. We never sell Google data, use it for
             advertising or use it to train AI models. People at Kabsi read it only with your
             consent, to keep Kabsi secure, or when the law requires it. Read the{" "}
             <Link to="/privacy" className="font-bold underline underline-offset-4">
