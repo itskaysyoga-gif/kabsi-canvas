@@ -141,7 +141,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.6-04 | The /meta landing page | Sonnet | todo | | |
 | P0.6-05 | Security headers, Turnstile everywhere, rate limits | Opus | todo | | |
 | P0.6-06 | Nora in sync: facts file, handover and evaluation | Opus | todo | | |
-| P0.6-07 | Honest proof pages: founder note, About, Security | Sonnet | PR open (branch claude/h-p0-6-07); checked at 390 px by script, no horizontal scroll; open: Hussein's look and the photo question | 12 Oct | |
+| P0.6-07 | Honest proof pages: founder note, About, Security | Sonnet | merged (84, 64adfad, 12 Oct); CI green; live /about serves the new page (fetched 12 Oct 06:25 UTC); 390 px checked by script, no horizontal scroll; open: Hussein's look and the photo question | 12 Oct | |
 | P0.6-08 | Supporting platforms checked against K-118 | Sonnet | todo | | |
 | P0.6-09 | Meta account fixes (VIDEO Part 7) | Sonnet | todo | | |
 | P0.6-10 | WhatsApp click-to-chat on the Kapso US number | Sonnet | todo | | |
