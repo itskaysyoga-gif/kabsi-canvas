@@ -408,10 +408,10 @@ function Page() {
         </p>
         <p>
           <b>What is sent.</b> The links on our site open WhatsApp with a short fixed message and
-          nothing about you. Once you send a message, we receive your phone number and WhatsApp
-          name as WhatsApp shows them, what you write, any photo or file you attach, and the time.
-          Please do not send review text, passwords or codes. Kabsi puts no Google data and no
-          review text into WhatsApp, and the assistant (Nora) does not read your WhatsApp messages.
+          nothing about you. Once you send a message, we receive your phone number and WhatsApp name
+          as WhatsApp shows them, what you write, any photo or file you attach, and the time. Please
+          do not send review text, passwords or codes. Kabsi puts no Google data and no review text
+          into WhatsApp, and the assistant (Nora) does not read your WhatsApp messages.
         </p>
         <p>
           <b>Who handles it.</b> Kapso provides the inbox where our team reads and replies. Meta
@@ -431,12 +431,12 @@ function Page() {
           <b>Not available yet: alerts and the assistant on WhatsApp.</b> Kabsi sends no alerts on
           WhatsApp and Nora is not on WhatsApp. If we add them, the rules will be these. We send an
           alert only after you opt in, and we record the time, your phone number and the wording you
-          saw. We use only message templates that Meta has approved, and each carries one button that
-          opens kabsi.co, where you approve. A message names your business and says what is waiting,
-          and may show a star rating, but never carries review text, a reviewer's name or your
-          business facts. Reply STOP at any time (or a similar word such as UNSUBSCRIBE) and we stop
-          at once and record it. We will update this page and email account holders before any of
-          this is switched on.
+          saw. We use only message templates that Meta has approved, and each carries one button
+          that opens kabsi.co, where you approve. A message names your business and says what is
+          waiting, and may show a star rating, but never carries review text, a reviewer's name or
+          your business facts. Reply STOP at any time (or a similar word such as UNSUBSCRIBE) and we
+          stop at once and record it. We will update this page and email account holders before any
+          of this is switched on.
         </p>
       </section>
 

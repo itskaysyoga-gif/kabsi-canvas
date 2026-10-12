@@ -362,14 +362,12 @@ function Page() {
             password or a code Google sends you.
           </li>
           <li>
-            Kapso provides the inbox where we read and answer your messages, and Meta runs
-            WhatsApp, which carries them. WhatsApp's own terms apply to your use of WhatsApp. What
-            we collect and how long we keep it is in section 14 of our{" "}
+            Kapso provides the inbox where we read and answer your messages, and Meta runs WhatsApp,
+            which carries them. WhatsApp's own terms apply to your use of WhatsApp. What we collect
+            and how long we keep it is in section 14 of our{" "}
             <Link to="/privacy">privacy policy</Link>.
           </li>
-          <li>
-            We do not use the Kabsi WhatsApp number for marketing messages.
-          </li>
+          <li>We do not use the Kabsi WhatsApp number for marketing messages.</li>
           <li>
             Alerts and the assistant on WhatsApp are not available yet. If we add them, you will
             have to opt in, you can reply STOP at any time to stop them at once, and approval will

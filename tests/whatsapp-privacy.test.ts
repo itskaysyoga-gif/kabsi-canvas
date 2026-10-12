@@ -76,8 +76,16 @@ describe("WhatsApp processors and privacy text (P0.6-12)", () => {
 // Offline stand-in for the Nora test question: the assistant answers only from the file it fetches
 // (public/llms-full.txt), so the answers must be found in it. A plain word-overlap search over its lines
 // must put the answer in the top results.
-const stop = new Set("the a an is are do does did can i my me you your to of on in for and or it that this with how what who will be at by".split(" "));
-const words = (s: string) => s.toLowerCase().match(/[a-z0-9+]+/g)?.filter((w) => !stop.has(w)) ?? [];
+const stop = new Set(
+  "the a an is are do does did can i my me you your to of on in for and or it that this with how what who will be at by".split(
+    " ",
+  ),
+);
+const words = (s: string) =>
+  s
+    .toLowerCase()
+    .match(/[a-z0-9+]+/g)
+    ?.filter((w) => !stop.has(w)) ?? [];
 function top(question: string, n = 5) {
   const q = new Set(words(question));
   return llms
@@ -95,12 +103,26 @@ function top(question: string, n = 5) {
 
 describe("Nora's source answers WhatsApp questions without calling an AI model", () => {
   const cases: [string, RegExp[]][] = [
-    ["Who answers my WhatsApp messages, a person or a bot?", [/person at Kabsi|A person answers/, /not an automatic bot/]],
-    ["Do you ask for my Google password or a code on WhatsApp?", [/never asks for a Google password or a code Google sends, on WhatsApp|password or code on WhatsApp\?" Never/i]],
-    ["Can I approve a reply or a post on WhatsApp?", [/approved, published or changed over WhatsApp|approve on kabsi\.co/]],
+    [
+      "Who answers my WhatsApp messages, a person or a bot?",
+      [/person at Kabsi|A person answers/, /not an automatic bot/],
+    ],
+    [
+      "Do you ask for my Google password or a code on WhatsApp?",
+      [
+        /never asks for a Google password or a code Google sends, on WhatsApp|password or code on WhatsApp\?" Never/i,
+      ],
+    ],
+    [
+      "Can I approve a reply or a post on WhatsApp?",
+      [/approved, published or changed over WhatsApp|approve on kabsi\.co/],
+    ],
     ["Who are the processors of my WhatsApp messages, Kapso and Meta?", [/Kapso/, /Meta/]],
     ["How long do you keep my WhatsApp chat?", [/no automatic deletion date/i]],
-    ["Will Kabsi send me alerts on WhatsApp? How do I stop them, STOP?", [/not available yet/i, /STOP/]],
+    [
+      "Will Kabsi send me alerts on WhatsApp? How do I stop them, STOP?",
+      [/not available yet/i, /STOP/],
+    ],
   ];
   for (const [question, patterns] of cases) {
     it(question, () => {
