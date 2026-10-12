@@ -308,7 +308,7 @@ function HomePage() {
             shows your week.
           </Step>
         </ol>
-        <div className="mt-12 max-w-3xl rounded-lg border border-kb-hairline bg-kb-sand p-6 sm:p-8">
+        <div className="mt-12 max-w-3xl rounded-large border border-kb-hairline bg-kb-sand p-6 sm:p-8">
           <div className="flex items-center gap-3">
             <KabsiMark className="size-8" />
             <p className="font-bold text-kb-ink">A note from the person who runs Kabsi</p>

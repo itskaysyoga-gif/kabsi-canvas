@@ -12,7 +12,8 @@ import {
 } from "@/components/marketing/parts";
 import { AnswerVisual } from "@/components/marketing/visuals";
 import { BookingLink } from "@/components/shared/booking-link";
-import { CONTACT_EMAIL, CONTACT_PHONE, pageHead } from "@/lib/site";
+import { WhatsappLink } from "@/components/shared/whatsapp-link";
+import { CONTACT_EMAIL, WHATSAPP_NUMBER, pageHead } from "@/lib/site";
 import { FAQ, faqJsonLd } from "@/lib/faq";
 
 export const Route = createFileRoute("/faq")({
@@ -65,7 +66,7 @@ function Page() {
                     tone="sand"
                     className="size-9 bg-kb-white [&_svg]:size-4"
                   />
-                  <span className="font-bold">{CONTACT_PHONE}</span>
+                  <WhatsappLink kind="general">WhatsApp {WHATSAPP_NUMBER}</WhatsappLink>
                 </li>
                 <li className="flex items-center gap-3">
                   <IconBadge
@@ -80,7 +81,7 @@ function Page() {
               </ul>
               <div className="mt-5 flex flex-col gap-3">
                 <BookingLink kind="other" button>
-                  Talk to Rashid
+                  Talk to Hussein
                 </BookingLink>
               </div>
             </div>

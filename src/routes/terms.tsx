@@ -2,12 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { LegalPage } from "@/components/marketing/legal";
 import {
   CONTACT_EMAIL,
-  CONTACT_PHONE,
   KABSI_GROUP_ID,
   KABSI_GROUP_NAME,
   LEGAL_SELLER,
   OPERATOR_LINE,
   PRICES,
+  WHATSAPP_NUMBER,
   pageHead,
 } from "@/lib/site";
 
@@ -366,8 +366,8 @@ function Page() {
         <p>
           These terms are governed by the laws of Lebanon, and the courts of Beirut have
           jurisdiction, without taking away any protection the law of your country gives you.
-          Questions or complaints: {CONTACT_EMAIL} or {CONTACT_PHONE}. A person replies, and we try
-          to settle any problem with you directly first.
+          Questions or complaints: {CONTACT_EMAIL} or WhatsApp {WHATSAPP_NUMBER}. A person replies,
+          and we try to settle any problem with you directly first.
         </p>
       </section>
     </LegalPage>

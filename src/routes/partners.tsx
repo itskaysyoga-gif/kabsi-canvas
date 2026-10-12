@@ -39,8 +39,12 @@ function Page() {
         visual={<WorkspaceVisual />}
         photo="heroPartners"
       >
-        <BookingLink kind="partner" button>
-          Talk to Rashid
+        <BookingLink
+          kind="partner"
+          button
+          className="border-kb-white text-kb-white hover:bg-kb-white/10"
+        >
+          Talk to Hussein
         </BookingLink>
       </PageHero>
 

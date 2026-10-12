@@ -4,7 +4,7 @@ import { ArrowRight, Check, MapPin, Package } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
 import { CtaBand, Eyebrow, H2, PageHero, Section } from "@/components/marketing/parts";
-import { CONTACT_PHONE, PRICES, pageHead } from "@/lib/site";
+import { LEBANON_PHONE, PRICES, WHATSAPP_MESSAGES, pageHead } from "@/lib/site";
 
 export const Route = createFileRoute("/lebanon")({
   head: () =>
@@ -45,7 +45,11 @@ function Page() {
             ))}
           </ul>
           <Button asChild className="mt-8 w-full">
-            <a href={`https://wa.me/${CONTACT_PHONE.replace(/\D/g, "")}`}>Message us on WhatsApp</a>
+            <a
+              href={`https://wa.me/${LEBANON_PHONE.replace(/\D/g, "")}?text=${encodeURIComponent(WHATSAPP_MESSAGES.lebanon)}`}
+            >
+              Message us on WhatsApp
+            </a>
           </Button>
         </div>
         <div>

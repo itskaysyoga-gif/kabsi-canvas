@@ -35,7 +35,8 @@ import {
 import { track } from "@/lib/telemetry";
 import { useIsLebanon } from "@/lib/region";
 import { loadPlanSummary, planOptions, type PlanKind } from "@/lib/plans";
-import { KABSI_GROUP_ID, SITE_URL } from "@/lib/site";
+import { WhatsappLink } from "@/components/shared/whatsapp-link";
+import { KABSI_GROUP_ID, SITE_URL, WHATSAPP_NUMBER } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 type StepProps = { location: Location | null; onChanged: () => Promise<unknown> };
@@ -526,8 +527,9 @@ export function DoneStep({ location }: { location: Location | null }) {
           <p className="font-bold">How to pay</p>
           {lebanon ? (
             <p className="mt-2">
-              Pay by Whish, OMT or cash. Message us on +961 3 956 917 or hello@kabsi.co and we'll
-              confirm within one working day.
+              Pay by Whish, OMT or cash. Message us on{" "}
+              <WhatsappLink kind="payment">WhatsApp {WHATSAPP_NUMBER}</WhatsappLink> or
+              hello@kabsi.co and we'll confirm within one working day.
             </p>
           ) : null}
           <p className="mt-2">

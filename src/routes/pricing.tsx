@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { CtaBand, Eyebrow, H2, IconBadge, PageHero, Section } from "@/components/marketing/parts";
 import { PricingVisual } from "@/components/marketing/visuals";
 import { BookingLink } from "@/components/shared/booking-link";
+import { WhatsappLink } from "@/components/shared/whatsapp-link";
 import {
-  CONTACT_PHONE,
   CTA_PRIMARY,
   PRICES,
   PRODUCT_LD,
   SETUP_CALL_MINUTES,
   TRIAL_LINE,
+  WHATSAPP_NUMBER,
   pageHead,
 } from "@/lib/site";
 import { useIsLebanon } from "@/lib/region";
@@ -132,7 +133,8 @@ function Page() {
               <IconBadge icon={<MapPin />} tone="sand" />
               <p>
                 <b className="text-kb-ink">In Lebanon:</b> also Whish, OMT or cash. Message{" "}
-                {CONTACT_PHONE} or hello@kabsi.co and we'll arrange it.
+                <WhatsappLink kind="payment">WhatsApp {WHATSAPP_NUMBER}</WhatsappLink> or
+                hello@kabsi.co and we'll arrange it.
               </p>
             </div>
           </div>

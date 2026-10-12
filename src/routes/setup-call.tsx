@@ -2,11 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { H2, PageHero, Section } from "@/components/marketing/parts";
 import { BookingLink } from "@/components/shared/booking-link";
+import { WhatsappLink } from "@/components/shared/whatsapp-link";
 import {
   BOOKING_ANSWERS,
   BOOKING_READY,
   CONTACT_EMAIL,
   SETUP_CALL_MINUTES,
+  WHATSAPP_NUMBER,
   bookingUrl,
   pageHead,
 } from "@/lib/site";
@@ -79,6 +81,15 @@ function SetupCallPage() {
             {CONTACT_EMAIL}
           </a>
           .
+        </p>
+        <p className="text-sm text-kb-stone">
+          Prefer to type? Message us on{" "}
+          <WhatsappLink
+            kind={kind === "setup" ? "setup" : kind === "partner" ? "partner" : "general"}
+          >
+            WhatsApp {WHATSAPP_NUMBER}
+          </WhatsappLink>
+          . A person replies. We never ask for your Google password or codes there either.
         </p>
       </Section>
     </PublicLayout>

@@ -21,6 +21,8 @@ import {
 import { daysUntil } from "@/lib/dashboard";
 import { BINANCE_PAY_ID, USDT_TRC20, money, shortDate } from "@/lib/partner";
 import { track } from "@/lib/telemetry";
+import { WhatsappLink } from "@/components/shared/whatsapp-link";
+import { WHATSAPP_NUMBER } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { Wallet as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
@@ -564,7 +566,8 @@ function Pay({
             </form>
             {error ? <p className="text-kb-red">{error}</p> : null}
             <p className="pt-2 text-kb-stone">
-              In Lebanon you can also pay with Whish, OMT or cash: message us on +961 3 956 917 or{" "}
+              In Lebanon you can also pay with Whish, OMT or cash: message us on{" "}
+              <WhatsappLink kind="payment">WhatsApp {WHATSAPP_NUMBER}</WhatsappLink> or{" "}
               <a className="font-medium text-kb-ink underline" href="mailto:hello@kabsi.co">
                 hello@kabsi.co
               </a>
@@ -616,7 +619,8 @@ function Pay({
           </form>
           {error ? <p className="text-kb-red">{error}</p> : null}
           <p className="pt-2 text-kb-stone">
-            In Lebanon you can also pay with Whish, OMT or cash: message us on +961 3 956 917 or{" "}
+            In Lebanon you can also pay with Whish, OMT or cash: message us on{" "}
+            <WhatsappLink kind="payment">WhatsApp {WHATSAPP_NUMBER}</WhatsappLink> or{" "}
             <a className="font-medium text-kb-ink underline" href="mailto:hello@kabsi.co">
               hello@kabsi.co
             </a>
