@@ -2,7 +2,7 @@
 
 > Kabsi looks after your business on Google: a reply ready for every new review, your hours and details kept right, a Weekly Care Report and fresh posts. The owner approves every change and nothing is published without it. Kabsi is independent and not affiliated with Google. Short version: https://kabsi.co/llms.txt
 
-Last updated: 4 Oct 2026. Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md.
+Last updated: 12 Oct 2026. Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md.
 
 # Kabsi Master Knowledge Base
 
@@ -525,7 +525,7 @@ Sign-in storage, the last business you opened (in your browser), and PostHog's a
 | Email log | 12 months |
 | Record of approvals and changes | 24 months; the details of a deleted business are blanked, who did what and when stays |
 | Internal job logs | 90 days |
-| Email action links | Expire after 7 days, removed 30 days later |
+| Email action links | Expire after 72 hours, removed 30 days later |
 | Payment records | As long as tax and accounting law requires, unlinked from the business when it's deleted |
 | Card and link taps | Kept without personal data, for counts |
 | Free tool abuse limits | 1 hour |
@@ -539,7 +539,7 @@ Sign-in storage, the last business you opened (in your browser), and PostHog's a
 
 ### 9.9 Security
 
-Sign-in by one-time email code, no passwords. Each business's data is separated at the database level; only its members, and Kabsi staff when helping, can read it. Email action links are single-use, expire in 7 days, are stored only as a hash and never act on opening. Kabsi's Google access stays on Kabsi's servers. Data is encrypted in transit. Kabsi is for businesses and not meant for anyone under 18.
+Sign-in by one-time email code, no passwords. Each business's data is separated at the database level; only its members, and Kabsi staff when helping, can read it. Email action links work once, expire after 72 hours, belong to the person they were sent to, are stored only as a hash and never act on opening. Profile changes, hours and reviews that need care also need that person signed in. Kabsi's Google access stays on Kabsi's servers. Data is encrypted in transit. Kabsi is for businesses and not meant for anyone under 18.
 
 ---
 
@@ -564,7 +564,13 @@ Use the exact Google Maps name plus city, or name plus street. It must have a Go
 The draft failed the safety check twice. Write your own reply in the box, or tap Skip.
 
 **The email link says it has expired or was already used.**
-Links work once and last 7 days. Open Kabsi and use Reviews, To reply.
+Links work once and last 72 hours (3 days). Open Kabsi and use Reviews, To reply. Tapping Approve a second time, or opening the link again, does nothing new: the page shows what already happened.
+
+**The email page asks me to sign in.**
+For a review that needs care, a change to your opening hours and any change to your profile details, the page asks the person the email was sent to to sign in with their email code first, then brings them back to the same page. Normal review replies and skips work from the link alone. If someone else is signed in on that phone or computer, the page says the link was sent to someone else: sign out, then sign in with the address the email went to.
+
+**Can I undo an approval from the email page?**
+Yes. After you tap Approve, the page shows "Publishing in 10 seconds" with Undo. Undo inside the 10 seconds and nothing is sent to Google; the reply goes back to To reply.
 
 **I posted but the reply isn't on Google.**
 After you approve, Kabsi waits 10 seconds, then sends the reply to Google, usually within a minute or two. Google checks every reply before it appears, usually within 10 minutes, sometimes longer. All reviews shows "Google is checking your reply" while it waits. Kabsi checks again after 10 minutes and then less often, and never posts the same reply twice. If Google does not accept the reply, the review comes back to To reply with the reason, so you can edit it and approve again. If Google still does not show it after 7 days, Kabsi treats it the same way. Approving the same reply twice (for example in the app and from the email) sends it once. **[TIME-SENSITIVE]** In test mode nothing is sent to Google at all.
@@ -673,7 +679,7 @@ A few minutes: find your business, add the Kabsi group ID 5481006796 as a Manage
 Kabsi checks every few minutes. Reviews of 3 stars or less and sensitive reviews are emailed right away; 4 and 5 star reviews come together once a day at the hour you choose.
 
 **Can I reply from my phone?**
-Yes. Tap Review reply, Edit or Skip in the email, confirm on the page that opens, or use the app in your phone's browser.
+Yes. Tap Review reply, Edit or Skip in the email, confirm on the page that opens, or use the app in your phone's browser. A review that needs care asks you to sign in on that page first.
 
 **Can I edit a draft before posting?**
 Yes. Change anything you like. Kabsi publishes exactly the text you approve.
@@ -857,7 +863,7 @@ Tap "Google is right". Google's value becomes your approved version.
 Google removes things from business names that break its naming rules: a web address, a city or area, a slogan or extra keywords. When that is what Google removed (for example "Yawmiyati.com" to "Yawmiyati"), Kabsi recommends "Google is right" and says why: business names on Google can't include them, and putting them back can lead to a suspension. "Keep my information" is still there, with that warning.
 
 **Why do I have to sign in for some changes?**
-Your business name, address, main category, open status and map pin can make Google ask you to verify your business again when they change. Kabsi asks you to sign in to the app to choose for these (an email link is not enough), only the owner can choose, and the app says "Changing this can make Google ask you to verify your business again." Kabsi also sends at most one of these details back to Google at a time, at least 7 days apart; a second one inside the 7 days waits, and the app says the date it can go.
+Your business name, address, main category, open status and map pin can make Google ask you to verify your business again when they change. Kabsi asks you to sign in to choose these (an email link alone is not enough; the email page asks you to sign in and brings you back), only the owner can choose, and the app says "Changing this can make Google ask you to verify your business again." Kabsi also sends at most one of these details back to Google at a time, at least 7 days apart; a second one inside the 7 days waits, and the app says the date it can go.
 
 **What if Google keeps changing the same detail?**
 Kabsi puts the same detail back at most twice in 30 days. If Google changes it a third time, Kabsi does not send it again: a person on the Kabsi team contacts Google Business Profile support for you, with an explanation ready.

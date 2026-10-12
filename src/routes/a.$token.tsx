@@ -6,11 +6,20 @@ import { ConfirmLayout } from "@/components/layouts/confirm-layout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { loadAction, runAction, type ActionView } from "@/lib/reviews";
+import {
+  loadAction,
+  runAction,
+  undoAction,
+  type ActionResult,
+  type ActionView,
+} from "@/lib/reviews";
+import { supabase } from "@/lib/supabase";
 import { setAnalyticsPaused, track } from "@/lib/telemetry";
 
 // Email action links. Opening this page never does anything by itself (mail scanners open links);
 // the owner always presses a button, and "Approve" sends exactly the text in the box (D202).
+// P0.2-05 (K-17, K-70): links last 72 hours and work once; profile changes, hours and urgent reviews ask the
+// link's recipient to sign in first and come back here; after Approve the page counts down 10 seconds with Undo.
 export const Route = createFileRoute("/a/$token")({
   head: () => ({
     meta: [{ title: "Your review reply | Kabsi" }, { name: "robots", content: "noindex" }],
@@ -30,7 +39,10 @@ const DONE: Record<string, string> = {
   reverted: "Done. Your version is back on Google.",
   reverting: "Approved. Kabsi puts your version back on Google within a few minutes.",
   kept: "Noted. Kabsi will keep the new version as yours.",
+  support:
+    "Google keeps changing this. A person at Kabsi will contact Google support for you. Nothing more is sent to Google for now.",
 };
+const UNDO_SECONDS = 10;
 
 function ActionPage() {
   const { token } = Route.useParams();
@@ -40,6 +52,7 @@ function ActionPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState("");
+  const [pending, setPending] = useState<{ result: ActionResult; seconds: number } | null>(null);
 
   useEffect(() => {
     loadAction(token)
@@ -58,14 +71,53 @@ function ActionPage() {
     setBusy(true);
     try {
       const result = await runAction(token, what, what === "post" ? text : undefined);
-      if (what === "revert" || what === "keep")
-        track(what === "revert" ? "shield_reverted" : "shield_kept", { channel: "email_link" });
-      else track(what === "post" ? "reply_published" : "reply_skipped", { channel: "email_link" });
-      setDone(result.state === "in_review" ? "in_review" : result.done);
+      if (!result.repeat) {
+        if (what === "revert" || what === "keep")
+          track(what === "revert" ? "shield_reverted" : "shield_kept", { channel: "email_link" });
+        else
+          track(what === "post" ? "reply_published" : "reply_skipped", { channel: "email_link" });
+      }
+      // K-70: a new approval waits 10 seconds before it goes to Google; Undo stays open until then.
+      if (result.publication && !result.repeat && result.state === "approved")
+        setPending({ result, seconds: UNDO_SECONDS });
+      else setDone(result.state === "in_review" ? "in_review" : result.done);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong. Nothing was posted.");
     }
     setBusy(false);
+  }
+
+  useEffect(() => {
+    if (!pending) return;
+    if (pending.seconds <= 0) {
+      setDone(pending.result.done);
+      setPending(null);
+      return;
+    }
+    const id = setTimeout(
+      () => setPending((p) => (p ? { ...p, seconds: p.seconds - 1 } : p)),
+      1000,
+    );
+    return () => clearTimeout(id);
+  }, [pending]);
+
+  async function undo() {
+    if (!pending?.result.publication) return;
+    setError("");
+    setBusy(true);
+    try {
+      await undoAction(token, pending.result.publication);
+      setPending(null);
+      setDone("undone");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
+    }
+    setBusy(false);
+  }
+
+  async function switchAccount() {
+    await supabase.auth.signOut();
+    void navigate({ to: "/login", search: { next: `/a/${token}` } });
   }
 
   if (!view)
@@ -79,6 +131,56 @@ function ActionPage() {
     <Button asChild variant="outline" className="mt-6 w-full">
       <Link to="/app/inbox">Open your Kabsi inbox</Link>
     </Button>
+  );
+  if (pending) {
+    return (
+      <ConfirmLayout
+        demo={view?.demo === true}
+        mode={view?.mode}
+        concierge={view.concierge === true}
+      >
+        <p className="text-sm font-medium text-kb-stone">{view.business}</p>
+        <h1 className="mt-1 font-display text-3xl leading-tight" aria-live="polite">
+          Publishing in {pending.seconds} {pending.seconds === 1 ? "second" : "seconds"}
+        </h1>
+        <p className="mt-3 leading-7 text-kb-stone">Nothing is sent to Google until then.</p>
+        {error ? (
+          <p className="mt-3 text-sm text-kb-red" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <Button className="mt-6 w-full" disabled={busy} onClick={() => void undo()}>
+          {busy ? "Undoing…" : "Undo"}
+        </Button>
+      </ConfirmLayout>
+    );
+  }
+  if (!done && view.sign_in && view.other_account && view.status === "ok") {
+    return (
+      <ConfirmLayout demo={view?.demo === true} mode={view?.mode}>
+        <h1 className="font-display text-3xl leading-tight">This link was sent to someone else</h1>
+        <p className="mt-3 leading-7 text-kb-stone">
+          You are signed in to Kabsi with a different email address. Sign out, then sign in with the
+          address this email was sent to.
+        </p>
+        <Button className="mt-6 w-full" onClick={() => void switchAccount()}>
+          Sign out and sign in again
+        </Button>
+        {inbox}
+      </ConfirmLayout>
+    );
+  }
+  // K-17: profile changes, hours and urgent reviews: the person the link was sent to signs in first.
+  const needsSignIn = view.sign_in === true && view.signed_in !== true && view.status === "ok";
+  const signIn = (label: string, why: string) => (
+    <>
+      <p className="mt-5 text-sm leading-6 text-kb-stone">{why} You come back to this page.</p>
+      <Button asChild className="mt-4 w-full">
+        <Link to="/login" search={{ next: `/a/${token}` }}>
+          {label}
+        </Link>
+      </Button>
+    </>
   );
   if (done) {
     return (
@@ -121,7 +223,14 @@ function ActionPage() {
           </div>
         </div>
         {decided ? (
-          <p className="mt-5 leading-7">This change was already handled.</p>
+          <p className="mt-5 leading-7">
+            {(view.result && DONE[view.result.done]) || "This change was already handled."}
+          </p>
+        ) : needsSignIn ? (
+          signIn(
+            "Sign in to choose",
+            "This changes what every customer sees on Google, so Kabsi asks you to sign in first.",
+          )
         ) : (
           <>
             {error ? (
@@ -153,7 +262,7 @@ function ActionPage() {
           {view.status === "expired" ? "This link has expired" : "This link isn't valid"}
         </h1>
         <p className="mt-3 leading-7 text-kb-stone">
-          Email links work for 7 days. Your reviews and drafts are always in your Kabsi inbox.
+          Email links work once, for 3 days. Your reviews and drafts are always in your Kabsi inbox.
         </p>
         {inbox}
       </ConfirmLayout>
@@ -191,7 +300,11 @@ function ActionPage() {
       >
         {header}
         <div className="mt-6">{reviewCard}</div>
-        <p className="mt-5 leading-7">{closed ? DONE[r.state] : "This link was already used."}</p>
+        <p className="mt-5 leading-7">
+          {closed
+            ? DONE[r.state]
+            : (view.result && DONE[view.result.done]) || "This link was already used."}
+        </p>
         {r.state === "posted" && r.reply ? (
           <p
             dir="auto"
@@ -266,8 +379,9 @@ function ActionPage() {
         id="reply"
         value={text}
         onChange={(e) => setText(e.target.value)}
+        readOnly={needsSignIn}
         rows={7}
-        autoFocus={view.action === "edit"}
+        autoFocus={view.action === "edit" && !needsSignIn}
         className="mt-3 text-base leading-7"
       />
       {error ? (
@@ -275,13 +389,20 @@ function ActionPage() {
           {error}
         </p>
       ) : null}
-      <Button
-        className="mt-5 w-full"
-        disabled={busy || !text.trim() || tooLong}
-        onClick={() => void run("post")}
-      >
-        {busy ? "Approving…" : "Approve reply"}
-      </Button>
+      {needsSignIn ? (
+        signIn(
+          "Sign in to approve",
+          "This review needs care, so Kabsi asks you to sign in before a reply goes to Google.",
+        )
+      ) : (
+        <Button
+          className="mt-5 w-full"
+          disabled={busy || !text.trim() || tooLong}
+          onClick={() => void run("post")}
+        >
+          {busy ? "Approving…" : "Approve reply"}
+        </Button>
+      )}
       <Button
         variant="ghost"
         className="mt-2 w-full"

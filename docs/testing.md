@@ -83,6 +83,17 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   create a publication; a disconnect hands an approved put-back back to the owner; a listing_changes id still resolves;
   the retired tables lose Google's values after 30 days while the owner's kept baselines stay; every change and
   decision is in the audit log without Google's values.
+- `email_approvals.sql` (P0.2-05): email approvals tightened (K-17, K-38, K-70). The two link functions run for the
+  service role only and the GET one is STABLE; a link asked for 7 days is stored with 72 hours and cannot be
+  lengthened; opening a link changes nothing (no use, no audit event, no publication, no job); the first POST makes one
+  publication with the channel email_link and an email_link_used audit event with the user, IP country and user agent;
+  a second POST, whatever it asks, returns the first result; undo from the page cancels only that link's publication;
+  expired, used, unknown, wrong-verb, recipient-less and non-member links are refused; a skip through a link is audited
+  as email_link; urgent reviews, hours and profile changes refuse a signed-out POST and another recipient's session,
+  and work for the recipient signed in, the name (high risk) included; the sign-in flag and the channel do not outlive
+  the call; the kabsi_cleanup_action_tokens statement still removes links expired 30 days ago. The Edge Function side
+  (GET never calls use_action_link, the session and the recipient are passed through, refusal words) is in
+  `supabase/functions/_shared/email-links.test.ts`.
 - `publication_pipeline.sql` (P0.1-13a) and `publication_content.sql` (P0.1-13b): the one publication pipeline for
   replies, posts, photos, special hours and Google Protection put-backs. Per kind: one publication however many times
   or from whichever channel it is approved, the item moves to "on its way" and back on undo inside 10 seconds, one
