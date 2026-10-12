@@ -16,6 +16,11 @@ const SITES = [
     file: "src/routes/google-review-link.tsx",
     target: /functions\/v1\/review-link/,
   },
+  {
+    fn: "profile-snapshot",
+    file: "src/lib/profile-check.ts",
+    target: /functions\/v1\/profile-snapshot/,
+  },
 ];
 const WINDOW = 10; // lines before and after a fetch( that may carry the headers
 

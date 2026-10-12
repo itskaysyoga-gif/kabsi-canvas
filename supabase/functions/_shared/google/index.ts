@@ -335,7 +335,7 @@ export async function searchKeywords(locationId: string): Promise<{ keyword: str
 }
 
 // ─── Places API (New), on PLACES_API_KEY (works before the Business Profile grant).
-export { autocomplete, getPlace, searchText, type PlacesResult } from "./places/live.ts";
+export { autocomplete, getCachedSnapshot, getPlace, getSnapshotPlace, searchText, type PlacesResult } from "./places/live.ts";
 
 // Category and area of a place.
 export async function placeCategory(placeId: string) {

@@ -47,6 +47,6 @@ describe("Places field masks (P0.2-06)", () => {
         seen++;
       }
     }
-    expect(seen).toBe(4);
+    expect(seen).toBe(5);
   });
 });

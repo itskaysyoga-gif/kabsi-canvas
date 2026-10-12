@@ -96,6 +96,9 @@ export type AddressComponent = { longText?: string; shortText?: string; types?: 
 export type Place = {
   id?: string; name?: string; displayName?: LocalizedText; formattedAddress?: string; addressComponents?: AddressComponent[];
   primaryType?: string; primaryTypeDisplayName?: LocalizedText; types?: string[]; rating?: number; userRatingCount?: number;
+  // The free Profile Check fields (P0.4-01): public data only.
+  businessStatus?: string; nationalPhoneNumber?: string; websiteUri?: string; photos?: { name?: string }[];
+  regularOpeningHours?: { weekdayDescriptions?: string[] }; currentOpeningHours?: { openNow?: boolean };
 };
 export type SearchTextResponse = { places?: Place[] };
 export type PlacePrediction = {
