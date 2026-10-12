@@ -1,9 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { LegalPage } from "@/components/marketing/legal";
-import { CONTACT_EMAIL, CONTACT_PHONE, OPERATOR_LINE, pageHead } from "@/lib/site";
+import { RETENTION_ROWS } from "@/lib/retention";
+import {
+  CONTACT_EMAIL,
+  CONTACT_PHONE,
+  KABSI_GROUP_ID,
+  KABSI_GROUP_NAME,
+  LEGAL_SELLER,
+  OPERATOR_LINE,
+  pageHead,
+} from "@/lib/site";
 
-// Privacy policy, written to match the system as built. Every retention period and processor here
-// is implemented: see migrations 019 (deletion), 020 (retention) and docs/KABSI-PLAN.md Appendix A. No em dashes.
+// Privacy policy, written to match the system as built (P0.2-07). Every retention period, processor and
+// control named here exists today; nothing is announced ahead of time. The retention table comes from
+// src/lib/retention.ts, which tests/retention-page.test.ts holds equal to `retention_policies`. No em dashes.
 export const Route = createFileRoute("/privacy")({
   head: () =>
     pageHead({
@@ -16,7 +26,11 @@ export const Route = createFileRoute("/privacy")({
   component: Page,
 });
 
-const UPDATED = "4 October 2026";
+const UPDATED = "12 October 2026";
+
+// K-113.6, word for word. Set as raw HTML so the apostrophe stays a plain ' in the page source.
+const LIMITED_USE =
+  "Kabsi's use and transfer to any other app of information received from Google APIs will adhere to the Google API Services User Data Policy, including the Limited Use requirements.";
 
 function Page() {
   return (
@@ -40,13 +54,13 @@ function Page() {
       <section>
         <h2>1. Who we are</h2>
         <p>
-          Kabsi is an independent business based in Beirut, Lebanon, and is responsible for the
-          personal data described here. Contact: {CONTACT_EMAIL}, or {CONTACT_PHONE} (phone or
-          WhatsApp).
+          Kabsi is run by {LEGAL_SELLER}, who is responsible for the personal data described here.
+          Contact: {CONTACT_EMAIL}, or {CONTACT_PHONE} (phone or WhatsApp).
         </p>
         <p>
-          Kabsi is not affiliated with, endorsed by or sponsored by Google. Google and Google
-          Business Profile are trademarks of Google LLC.
+          Kabsi is independent. It is not affiliated with, endorsed by or sponsored by Google, and
+          Google does not partner with Kabsi. Google and Google Business Profile are trademarks of
+          Google LLC.
         </p>
       </section>
 
@@ -71,11 +85,13 @@ function Page() {
           </li>
           <li>
             Your business name, address, country, time zone and Google identifiers (Place ID and
-            Business Profile location).
+            Business Profile location). Kabsi first reads the name and address from Google and keeps
+            them for as long as your account exists, because they say which business is yours.
           </li>
           <li>
-            The facts you give Kabsi for drafting: sign-off, tone, phone number, hours note, what to
-            mention, staff names and answers to customer questions.
+            The facts you give Kabsi for drafting and for watching your listing: sign-off, tone,
+            phone number, hours, what to mention, staff names and answers to customer questions.
+            Earlier versions of a fact are kept as a history.
           </li>
           <li>
             Your Google reviews (reviewer's public name, rating, text and dates), the replies we
@@ -90,6 +106,11 @@ function Page() {
             you, if any.
           </li>
           <li>A log of the emails we send you (address, subject, time and delivery status).</li>
+          <li>
+            A record of what you approve and change: who did what and when, from the app or an email
+            link, with the country of the connection and the browser, never your IP address and
+            never review text.
+          </li>
         </ul>
         <p>
           <b>If you tap or scan a Kabsi card or open a Kabsi review link:</b> the card code, the
@@ -145,18 +166,22 @@ function Page() {
         <h2>4. Google data</h2>
         <ul>
           <li>
-            You give Kabsi access by inviting the Kabsi business group (ID 5481006796) as a Manager
-            on your Business Profile. Kabsi uses Google's official Business Profile APIs to read
-            your reviews and profile information and to publish only what you approve. We also use
-            the Places API for public details such as your category, area and public rating.
+            You give Kabsi access by inviting the Kabsi business group ({KABSI_GROUP_NAME}, ID{" "}
+            {KABSI_GROUP_ID}) as a Manager on your Business Profile. Kabsi uses Google's official
+            Business Profile APIs to read your reviews and profile information and to publish only
+            what you approve. We also use the Places API for public details such as your category,
+            area and public rating. When Kabsi accepts the invitation we email you within 48 hours
+            to say what changed and how to remove Kabsi.
           </li>
           <li>
             We use Google data only to provide and improve the Kabsi features you use. We never
-            sell, rent or share it with third parties except the service providers in section 6 that
-            help us run Kabsi, and never use it for advertising or to train AI models.
+            sell, rent or transfer it, never use it for advertising or retargeting, and never use it
+            to train AI models. People at Kabsi read it only with your consent, to keep Kabsi
+            secure, or when the law requires it. The only others who receive it are the service
+            providers in section 6 that help us run Kabsi.
           </li>
           <li>
-            Kabsi's use of information received from Google APIs adheres to the{" "}
+            <span dangerouslySetInnerHTML={{ __html: LIMITED_USE }} /> Read the{" "}
             <a
               href="https://developers.google.com/terms/api-services-user-data-policy"
               target="_blank"
@@ -164,18 +189,31 @@ function Page() {
             >
               Google API Services User Data Policy
             </a>
-            , including the Limited Use requirements.
+            .
           </li>
           <li>
             Kabsi's access to Google is held on our servers only. It never reaches your browser or
-            anyone else's.
+            anyone else's, and Kabsi does not store a Google token of yours. We never ask for your
+            Google password or a verification code.
           </li>
           <li>
-            To remove our access, on your Business Profile open <b>Menu</b> (or <b>More</b>), then{" "}
-            <b>Business Profile settings</b>, then <b>People and access</b>, select{" "}
-            <b>hello@kabsi.co</b> and choose <b>Remove person</b>. Kabsi stops reading and posting
-            at once. If access stays removed for 30 days, we delete your reviews, drafts and listing
-            history automatically.
+            To disconnect Kabsi from Google, open <b>Settings</b> in Kabsi and choose{" "}
+            <b>Disconnect Kabsi from Google</b>; only the signed-in owner can do it. Kabsi stops at
+            once: no new drafts, no review emails and nothing more sent to Google. Approvals still
+            waiting are cancelled, open review tasks are closed and email links stop working. Kabsi
+            then removes its own Manager access and emails you a confirmation with how to check it
+            under People and access. If Google does not let Kabsi remove itself, our team removes it
+            within 7 business days of your request and we tell you the date.
+          </li>
+          <li>
+            You can also remove Kabsi yourself, without asking us. On your Business Profile open{" "}
+            <b>Menu</b> (or <b>More</b>), then <b>Business Profile settings</b>, then{" "}
+            <b>People and access</b>, select <b>{KABSI_GROUP_NAME}</b> and choose{" "}
+            <b>Remove person</b>. Kabsi stops reading and posting at once.
+          </li>
+          <li>
+            Disconnecting does not change your ownership of the profile or your reviews on Google.
+            Google data Kabsi kept is deleted 30 days after access ends, unless access comes back.
           </li>
         </ul>
       </section>
@@ -205,18 +243,25 @@ function Page() {
         <h2>6. Who helps us (processors)</h2>
         <ul>
           <li>Supabase: database, sign-in and file storage, in Frankfurt, Germany.</li>
-          <li>Cloudflare: card and review links (go.kabsi.co).</li>
+          <li>Cloudflare: card and review links (go.kabsi.co) and the bot check on our forms.</li>
           <li>Vercel: hosting the website and app.</li>
           <li>Resend: sending email, through Amazon's EU (Ireland) region.</li>
-          <li>Anthropic: drafting replies and posts, checking photos.</li>
-          <li>Google: Business Profile and Places APIs.</li>
-          <li>Sentry: error reports, EU region, without IP addresses or review content.</li>
+          <li>
+            Anthropic: drafting replies and posts and checking photos. Review text and your business
+            facts reach Anthropic only for this.
+          </li>
+          <li>Google: the Business Profile and Places APIs.</li>
+          <li>
+            Sentry: error reports, EU region, without IP addresses, review content or Google data.
+          </li>
           <li>PostHog: anonymous usage statistics, in the United States.</li>
+          <li>Zoho: the mailbox for {CONTACT_EMAIL}, which holds the messages you send us.</li>
         </ul>
         <p>
-          Some of these providers are outside Lebanon and the European Union, for example in the
-          United States. They process data only on our instructions and under their data protection
-          terms, including standard contractual clauses where the law requires them.
+          Some of these providers are outside Lebanon, the United Arab Emirates and the European
+          Union, for example in the United States. They process data only on our instructions and
+          under their data protection terms, including standard contractual clauses where the law
+          requires them.
         </p>
       </section>
 
@@ -249,30 +294,39 @@ function Page() {
 
       <section>
         <h2>9. How long we keep it</h2>
+        <p>
+          One table sets these limits, and a job that runs every day applies it. Google's own
+          content is never kept for more than 30 days.
+        </p>
+        <dl className="my-4 divide-y divide-kb-hairline border-y border-kb-hairline">
+          {RETENTION_ROWS.map((row) => (
+            <div key={row.dataClass} className="py-3">
+              <dt className="font-bold">{row.data}</dt>
+              <dd className="mt-1">{row.kept}</dd>
+              <dd className="mt-1 text-sm text-kb-stone">Why: {row.why}</dd>
+            </div>
+          ))}
+        </dl>
+        <p>Also:</p>
         <ul>
           <li>
             Your business data: while you use Kabsi. If you ask us to delete a business (Settings,
-            or by email), everything is deleted 7 days later.
+            or by email), everything is deleted 7 days later, and you can cancel before then.
           </li>
           <li>
-            Review text and reviewer names from Google: at most 30 days after Google last sent them
-            to us, as Google's rules require. The star rating, dates and your own replies stay.
-            Public rating history, the quotes in weekly reports and the before and after values of
-            listing changes are also removed after 30 days. Your business category and area, read
-            from Google, are refreshed at least every 30 days.
+            Quotes in weekly reports sent before 4 October 2026 are removed after 30 days. Newer
+            reports carry no review quotes. Your business category and area, read from Google, are
+            refreshed at least every 30 days. Your business name and address are kept while your
+            account exists (section 2).
           </li>
           <li>
-            Assistant conversations: 12 months after the last message. Contact details you gave the
-            assistant: until you ask us to remove them, and news emails stop the moment you
-            unsubscribe.
+            Contact details you gave Nora: until you ask us to remove them. News emails stop the
+            moment you unsubscribe.
           </li>
+          <li>Internal job logs: 90 days.</li>
           <li>
-            Google data after access is removed: deleted automatically after 30 days, unless access
-            comes back.
-          </li>
-          <li>
-            The email log: 12 months. Internal job logs: 90 days. Email action links: expire after 7
-            days and are removed 30 days later.
+            Email action links: they work once, expire after 72 hours and are removed 30 days after
+            that.
           </li>
           <li>
             Payment records: as long as tax and accounting law requires, with the business link
@@ -304,8 +358,8 @@ function Page() {
           In Settings, choose <b>Delete this business</b> (you have 7 days to change your mind), or
           email {CONTACT_EMAIL} from your account email. We delete the business's reviews, drafts,
           posts, photos, reports and settings, and confirm by email. To stop Kabsi reaching your
-          Google profile, also remove the Kabsi group as described in section 4. To delete your
-          login as well, say so in your email.
+          Google profile, disconnect Kabsi as described in section 4. To delete your login as well,
+          say so in your email.
         </p>
       </section>
 
@@ -313,9 +367,11 @@ function Page() {
         <h2>12. Security</h2>
         <p>
           Data is encrypted in transit. Each business's data is separated at the database level so
-          only its members, and Kabsi staff when helping you, can read it. Email action links are
-          single-use and stored only as a hash. Access to Google and to our providers is held on our
-          servers and limited to what Kabsi needs.
+          only its members, and Kabsi staff when helping you, can read it. Email action links work
+          once, expire after 72 hours, belong to the person they were sent to and are stored only as
+          a hash. Profile changes and reviews that need care also need that person signed in. More
+          detail is on the <Link to="/security">security page</Link>. Access to Google and to our
+          providers is held on our servers and limited to what Kabsi needs.
         </p>
       </section>
 

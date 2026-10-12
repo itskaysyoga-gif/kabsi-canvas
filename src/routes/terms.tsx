@@ -1,6 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { LegalPage } from "@/components/marketing/legal";
-import { CONTACT_EMAIL, CONTACT_PHONE, OPERATOR_LINE, PRICES, pageHead } from "@/lib/site";
+import {
+  CONTACT_EMAIL,
+  CONTACT_PHONE,
+  KABSI_GROUP_ID,
+  KABSI_GROUP_NAME,
+  LEGAL_SELLER,
+  OPERATOR_LINE,
+  PRICES,
+  pageHead,
+} from "@/lib/site";
 
 // Terms of service, written to match the system as built (D254). Plain words, no em dashes.
 export const Route = createFileRoute("/terms")({
@@ -15,7 +24,7 @@ export const Route = createFileRoute("/terms")({
   component: Page,
 });
 
-const UPDATED = "4 October 2026";
+const UPDATED = "12 October 2026";
 
 function Page() {
   return (
@@ -26,10 +35,10 @@ function Page() {
 
       <section>
         <p>
-          These terms are the agreement between you and Kabsi, an independent business based in
-          Beirut, Lebanon. By creating an account, paying for a plan or activating a card, you
-          accept them on behalf of your business. Our <Link to="/privacy">privacy policy</Link>{" "}
-          explains how we handle data.
+          These terms are the agreement between you and Kabsi, an independent business run by{" "}
+          {LEGAL_SELLER}, who is the seller. By creating an account, paying for a plan or activating
+          a card, you accept them on behalf of your business. Our{" "}
+          <Link to="/privacy">privacy policy</Link> explains how we handle data.
         </p>
       </section>
 
@@ -105,12 +114,22 @@ function Page() {
         <h2>4. Google access</h2>
         <ul>
           <li>
-            You give access by inviting the Kabsi business group (ID 5481006796) as a Manager. You
-            can remove it at any time from your profile under People and access, without asking us.
-            The service stops for that business until access is back.
+            You give access by inviting the Kabsi business group ({KABSI_GROUP_NAME}, ID{" "}
+            {KABSI_GROUP_ID}) as a Manager. When Kabsi accepts, we email you within 48 hours to say
+            what changed and how to remove Kabsi.
           </li>
           <li>
-            Kabsi is not part of Google and is not affiliated with, endorsed or sponsored by Google.
+            You can disconnect Kabsi at any time, without asking us: in Kabsi under Settings, choose{" "}
+            <b>Disconnect Kabsi from Google</b>, or remove the group from your profile under People
+            and access. Kabsi then removes its own Manager access and emails you a confirmation; if
+            Google does not let it, our team removes it within 7 business days of your request. The
+            service stops for that business until access is back. Disconnecting does not change your
+            ownership of the profile, and cancelling a plan does not remove Kabsi's access by
+            itself: disconnecting is a separate step you choose.
+          </li>
+          <li>
+            Kabsi is not part of Google. It is not affiliated with, endorsed or sponsored by Google,
+            and Google does not partner with Kabsi.
           </li>
           <li>
             Kabsi depends on Google's APIs. If Google changes, limits or withdraws them, parts of
@@ -179,7 +198,8 @@ function Page() {
             location is ${PRICES.extraLocationMonthly} a month or ${PRICES.extraLocationYearly} a
             year. Prices are in US dollars and the same in every country. You can start with a
             14-day free trial, no card (30 days through a partner link). Monthly plans can be
-            cancelled at any time, and yearly plans are refundable within 14 days.
+            cancelled at any time and run to the end of the month you paid for. Yearly plans are
+            refundable within 14 days (section 10).
           </li>
           <li>
             Kabsi ships NFC cards only to addresses in Lebanon. There, the ${PRICES.lebanonBundle}a
@@ -206,12 +226,18 @@ function Page() {
       </section>
 
       <section>
-        <h2>9. When your plan runs</h2>
+        <h2>9. Trial and when your plan runs</h2>
         <ul>
           <li>
-            It starts when your payment is confirmed (or your partner has you on an active plan) and
-            Kabsi's access to your Google profile works. Time spent waiting for access doesn't
-            count.
+            The free trial lasts 14 days (30 through a partner link) and needs no card. It starts
+            when Kabsi's access to your Google profile works, so waiting for access costs you
+            nothing. There is one trial per Google business. If you pay during your trial, your paid
+            plan starts the day the trial ends.
+          </li>
+          <li>
+            A paid plan starts when your payment is confirmed (or your partner has you on an active
+            plan) and Kabsi's access to your Google profile works. Time spent waiting for access
+            doesn't count.
           </li>
           <li>
             Paying again before a plan ends adds the new period after the current one. Plans don't
@@ -228,8 +254,17 @@ function Page() {
         <h2>10. Refunds</h2>
         <ul>
           <li>
-            Kabsi Pro is refundable in full within 14 days of the plan starting. Email{" "}
+            Yearly plans are refundable in full within 14 days of the plan starting. Email{" "}
             {CONTACT_EMAIL}; we refund by the method you paid with where possible.
+          </li>
+          <li>
+            Monthly plans are not refunded for a month already paid; cancel and the plan runs to the
+            end of that month.
+          </li>
+          <li>
+            We refund the unused part of your plan if a paid feature stops for good because Google
+            changed its APIs, if we stop the service without you breaking these terms, or if we
+            change these terms in a way that matters and you don't agree.
           </li>
           <li>
             Cards aren't refunded once delivered. A card that's faulty on arrival is replaced free
@@ -261,8 +296,9 @@ function Page() {
         <h2>12. Stopping, pausing and deleting</h2>
         <ul>
           <li>
-            You can stop at any time: remove Kabsi's Google access, and delete your business in
-            Settings if you want your data gone.
+            You can stop at any time: disconnect Kabsi from Google (section 4), and delete your
+            business in Settings if you want your data gone. Deleting takes effect 7 days after you
+            ask, and you can cancel before then.
           </li>
           <li>
             We may pause or stop the service for a business that breaks section 7, puts others at
