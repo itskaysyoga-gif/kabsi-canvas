@@ -129,6 +129,11 @@ function Page() {
           Instagram handle, country and message).
         </p>
         <p>
+          <b>If you write to us on WhatsApp:</b> your phone number and WhatsApp name as WhatsApp
+          shows them to us, the messages, photos or files you send, and the time. Kabsi does not
+          copy the chat into its own database. See section 14.
+        </p>
+        <p>
           <b>If you're a partner:</b> your contact details, the businesses you invite (owner email
           and business name), your invoices and payment claims.
         </p>
@@ -256,6 +261,14 @@ function Page() {
           </li>
           <li>PostHog: anonymous usage statistics, in the United States.</li>
           <li>Zoho: the mailbox for {CONTACT_EMAIL}, which holds the messages you send us.</li>
+          <li>
+            Kapso: the messaging service that holds the chat for {WHATSAPP_NUMBER}, where our team
+            reads and answers your WhatsApp messages (section 14).
+          </li>
+          <li>
+            Meta: runs WhatsApp, which carries the messages between you and the Kabsi WhatsApp
+            number (section 14).
+          </li>
         </ul>
         <p>
           Some of these providers are outside Lebanon, the United Arab Emirates and the European
@@ -323,6 +336,10 @@ function Page() {
             Contact details you gave Nora: until you ask us to remove them. News emails stop the
             moment you unsubscribe.
           </li>
+          <li>
+            WhatsApp chats with the Kabsi number: no automatic deletion date is set today. They stay
+            in the Kapso inbox until you ask us to delete them (section 14).
+          </li>
           <li>Internal job logs: 90 days.</li>
           <li>
             Email action links: they work once, expire after 72 hours and are removed 30 days after
@@ -381,7 +398,50 @@ function Page() {
       </section>
 
       <section>
-        <h2>14. Changes</h2>
+        <h2>14. WhatsApp</h2>
+        <p>
+          <b>How it works today.</b> The Kabsi WhatsApp number, {WHATSAPP_NUMBER}, is for questions,
+          sales and support. You start the chat. A person at Kabsi reads it and answers, and it is
+          not an automatic bot. Nothing is approved, published or changed over WhatsApp: you approve
+          only on kabsi.co. We never ask for your Google password or a code Google sends you, on
+          WhatsApp or anywhere else.
+        </p>
+        <p>
+          <b>What is sent.</b> The links on our site open WhatsApp with a short fixed message and
+          nothing about you. Once you send a message, we receive your phone number and WhatsApp name
+          as WhatsApp shows them, what you write, any photo or file you attach, and the time. Please
+          do not send review text, passwords or codes. Kabsi puts no Google data and no review text
+          into WhatsApp, and the assistant (Nora) does not read your WhatsApp messages.
+        </p>
+        <p>
+          <b>Who handles it.</b> Kapso provides the inbox where our team reads and replies. Meta
+          runs WhatsApp and carries the messages. Both process the messages to deliver them, and
+          Kapso also holds the chat for us. We use the chat only to answer you, and we do not use it
+          for advertising, sell it, or use it to train AI models. Your use of WhatsApp is also
+          covered by WhatsApp's own terms and privacy policy.
+        </p>
+        <p>
+          <b>How long it is kept.</b> No automatic deletion date is set for WhatsApp chats today.
+          They stay in the Kapso inbox until you ask us to delete them: email {CONTACT_EMAIL} from
+          the address on your account, or say so in the chat, and we delete the chat on our side and
+          tell you when it is done. Kapso and Meta may keep messages under their own terms, and the
+          chat stays on your own phone until you delete it there.
+        </p>
+        <p>
+          <b>Not available yet: alerts and the assistant on WhatsApp.</b> Kabsi sends no alerts on
+          WhatsApp and Nora is not on WhatsApp. If we add them, the rules will be these. We send an
+          alert only after you opt in, and we record the time, your phone number and the wording you
+          saw. We use only message templates that Meta has approved, and each carries one button
+          that opens kabsi.co, where you approve. A message names your business and says what is
+          waiting, and may show a star rating, but never carries review text, a reviewer's name or
+          your business facts. Reply STOP at any time (or a similar word such as UNSUBSCRIBE) and we
+          stop at once and record it. We will update this page and email account holders before any
+          of this is switched on.
+        </p>
+      </section>
+
+      <section>
+        <h2>15. Changes</h2>
         <p>
           If we change this policy in a way that matters, we email account holders before the change
           applies. The date at the top shows the latest version.

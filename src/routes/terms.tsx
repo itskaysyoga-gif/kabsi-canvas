@@ -353,7 +353,32 @@ function Page() {
       </section>
 
       <section>
-        <h2>16. Changes to these terms</h2>
+        <h2>16. WhatsApp</h2>
+        <ul>
+          <li>
+            The Kabsi WhatsApp number, {WHATSAPP_NUMBER}, is for questions, sales and support. A
+            person answers it, and it is not an automatic bot. Nothing is approved, published or
+            changed over WhatsApp: you approve only on kabsi.co, and we never ask for your Google
+            password or a code Google sends you.
+          </li>
+          <li>
+            Kapso provides the inbox where we read and answer your messages, and Meta runs WhatsApp,
+            which carries them. WhatsApp's own terms apply to your use of WhatsApp. What we collect
+            and how long we keep it is in section 14 of our{" "}
+            <Link to="/privacy">privacy policy</Link>.
+          </li>
+          <li>We do not use the Kabsi WhatsApp number for marketing messages.</li>
+          <li>
+            Alerts and the assistant on WhatsApp are not available yet. If we add them, you will
+            have to opt in, you can reply STOP at any time to stop them at once, and approval will
+            still happen only on kabsi.co. We will update these terms and email account holders
+            before they start.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>17. Changes to these terms</h2>
         <p>
           If we change these terms in a way that matters, we email account holders at least 14 days
           before the change applies. If you don't agree, you can stop and ask for a refund of the
@@ -362,7 +387,7 @@ function Page() {
       </section>
 
       <section>
-        <h2>17. Law and contact</h2>
+        <h2>18. Law and contact</h2>
         <p>
           These terms are governed by the laws of Lebanon, and the courts of Beirut have
           jurisdiction, without taking away any protection the law of your country gives you.

@@ -4,6 +4,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## Where things stand
 
+- **12 Oct 2026, P0.6-12 (PR 88, branch claude/h-p0-6-12): `/privacy` and `/terms` now name Kapso and Meta as processors of WhatsApp messages. A lawyer should still read /privacy and /terms before launch (the new WhatsApp wording adds to the P0.2-07 list below).** `/privacy` section 6 lists Kapso and Meta; new section 14 "WhatsApp" says how it works today (a person answers, nothing approved, no Google password or codes), what is sent (phone number, WhatsApp name, messages, attachments, time), who handles it, how long it is kept (no automatic deletion date; kept in the Kapso inbox until the person asks Kabsi to delete it) and, marked "not available yet", the opt-in and STOP rules for later alerts and Nora on WhatsApp. `/terms` section 16 says the same in short. `knowledge/kabsi-facts.md` (9.5b, 9.5, 9.2, 9.7 and the WhatsApp row) and `public/llms-full.txt` carry the same words. `tests/whatsapp-privacy.test.ts` holds page, facts and llms file together and runs an offline search over the file Nora reads (no Anthropic call). No Google, Places or Anthropic call was made; the Places cap was not touched.
 - **12 Oct 2026, P0.6-10 merged (PR 86, 00d3515; CI green; Deploy run 38214541839 passed; production dpl_EWXVUz4PYvnn3viTFbBMKuy24KLx READY on kabsi.co; live pages checked): WhatsApp click-to-chat on the Kapso number is built. Waiting on Hussein: Kapso step 12 (the Kapso inbox set up from `docs/marketing/whatsapp-setup.md`); PROGRESS does not record it as done and the session has no Kapso login, so it could not check that +1 201-483-5474 is connected or answering.** `WHATSAPP_NUMBER` in `src/lib/site.ts`; a `wa.me` link with a short prefilled message on the FAQ contact card, the footer, `/setup-call`, the assistant hand-off note and the footer of every Kabsi email; the Lebanese number is `LEBANON_PHONE`, shown only on `/lebanon`. People-answered only: nothing is approved and no alert is sent over WhatsApp. Same PR: the footer, Partners and FAQ links say Hussein, not Rashid (R-26). Google stays in mock mode; no Google, Places or Anthropic call was made.
 - **12 Oct 2026, P0.2-07 merged (PR 82, 92a4bfb; CI green; Vercel production READY): privacy, terms and security pages rewritten to the system as built. A lawyer should read /privacy and /terms before launch (see Decisions to confirm for what to ask).** /privacy carries the Limited Use sentence word for word, the K-40 retention table in plain words (from `src/lib/retention.ts`, held equal to `retention_policies` by a test), disconnect as built, the 48 hour notice, the 72 hour email links and the processor list as it is today. /terms and /security say the same things and read the seller from `LEGAL_SELLER` and the group from `KABSI_GROUP_ID`. Calendly and Creem are not listed yet because neither is live. Google stays in mock mode. Next in Wave P0.3.
 - **12 Oct 2026, P0.2-06 merged (PR 80, 9d1aced; Deploy passed). Waiting on Hussein: Google Cloud step 3 (quotas, budget alerts, disable places-backend).** Every Places request goes through the guard in `_shared/google/places/live.ts`: Text Search and Place Details carry a field mask (never the reviews field), Place Details are cached 24 hours by place ID and mask (a hit makes no request and takes nothing from the cap), and `places_take` counts each request per day and kind against `app_settings.places_daily_cap` (100). Past the cap nothing is sent and the tools say "Back soon" (`places-search`, `review-link`; the rating snapshot and the post category skip until tomorrow). Slack alerts in #kabsi-alerts at 80 percent and at the cap. Autocomplete with a session token (and the same token on the Place Details call) is in the layer; no screen calls it yet. Migration `20261012100000_places_cost_guard.sql` applied by the session and read back. Google stays in mock mode. Next in Wave P0.2: P0.2-07.
@@ -147,7 +148,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.6-09 | Meta account fixes (VIDEO Part 7) | Sonnet | todo | | |
 | P0.6-10 | WhatsApp click-to-chat on the Kapso US number | Sonnet | merged (86, 00d3515, 12 Oct); CI green; Deploy passed; live pages checked (Evidence); open: Kapso step 12 (the inbox setup) and Hussein's 390 px look | 86 | 12 Oct |
 | P0.6-11 | Staff system health page | Sonnet | todo | | |
-| P0.6-12 | WhatsApp privacy and processors (Kapso and Meta) | Sonnet | todo | | |
+| P0.6-12 | WhatsApp privacy and processors (Kapso and Meta) | Sonnet | PR open (88, 12 Oct); CI and live checks recorded under After merge and Evidence | 88 | 12 Oct |
 | P0.7-03 | Google notifications through Pub/Sub | Opus | todo | | |
 | P0.7-05b | Live test of the features built after Wave P0.G | Opus | todo | | |
 | P0.7-06 | Page-by-page audit, contradiction sweep and the test matrix | Sonnet | todo | | |
@@ -184,6 +185,12 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P1-22 | Nora on WhatsApp | Opus | todo | | |
 
 ## After merge
+
+P0.6-12 (PR 88):
+1. Session, after the merge: fetch https://kabsi.co/privacy and /terms and check Kapso and Meta are named and the wording matches the facts file; check 390 px and 1440 px for horizontal scroll (result in Evidence once run).
+2. Hussein: look at /privacy section 14 and /terms section 16 on your phone (390 px).
+3. Hussein: confirm in Kapso that a chat can be deleted from the inbox (the pages promise deletion on request) and whether Kapso keeps messages on its side for a set time; if it does, tell the next chat so section 14 names the period.
+4. A lawyer reads the new WhatsApp wording together with /privacy and /terms (see Decisions to confirm).
 
 P0.6-10 (PR 86):
 1. Passed 12 Oct 06:52 to 06:53 UTC, see Evidence ("After merge").
@@ -1016,6 +1023,8 @@ By hand: confirm Advanced Protection is still on for hello@kabsi.co (last checke
 
 ## Found, not done
 
+- 12 Oct, P0.6-12: the Slack alert buttons for staff ("Tell them on WhatsApp", "Welcome on WhatsApp", "Remind on WhatsApp", the lead "WhatsApp" button in `20260927210000_slack_ops.sql` and `20261009090000_disconnect_kabsi.sql`) open `wa.me` links to partners and leads. The pages say Kabsi does not use the Kabsi WhatsApp number for marketing; check those buttons send from the Kabsi number and only to people who have written first (G-36). Not changed here.
+- 12 Oct, P0.6-12: the plan says P0.2-07's privacy list should match "the live set". Calendly (P0.1-V3) and Creem (P0.4-07) are still not live and are still not listed.
 - 12 Oct, P0.6-10: `/privacy` and `/terms` do not name Kapso and Meta as processors of WhatsApp messages, and the site now links to WhatsApp. P0.6-12 owns that text; run it next.
 - 12 Oct, P0.6-10: the /setup-call body is a narrower centred column under a left-aligned hero (the same misalignment fixed on /about); other pages that pass `max-w-3xl` to `Section` do the same.
 - 12 Oct, P0.6-10: the About "How to reach a person" section lists the email and the setup call but not WhatsApp; the footer carries it.
@@ -1114,6 +1123,7 @@ By hand: confirm Advanced Protection is still on for hello@kabsi.co (last checke
 
 ## Decisions to confirm
 
+- 12 Oct, P0.6-12: (1) Retention of WhatsApp chats: Kabsi has no code that copies a chat into its own database (P1-21 is not built), so the chat lives in the Kapso inbox and on phones. The session had no Kapso login and no Kapso document, so the pages say only "no automatic deletion date is set today; kept until the person asks Kabsi to delete it, and Kapso and Meta may keep messages under their own terms". If you want a fixed period (for example 12 months, like assistant chats), tell the next chat and it changes the pages, the facts file and the retention row together. (2) The pages say "we delete the chat on our side and tell you when it is done", which assumes Kapso lets you delete a conversation; see After merge step 3. (3) The alerts opt-in and STOP wording is written as rules for later, under "not available yet"; P1-21 must build exactly that, or change the pages first. (4) For the lawyer: whether Kapso and Meta are processors or independent controllers for WhatsApp messages, and the wording of the Meta line in section 6.
 - 12 Oct, P0.2-07: (1) Governing law is unchanged (Lebanon, courts of Beirut) while the seller is in Dubai; for the lawyer read, decide whether it should be UAE law. (2) /terms said Pro was refundable in full within 14 days; K-48, D281 and the facts file say yearly plans only, and a monthly plan runs to the end of the paid month. The page now follows K-48. If you want the wider refund back, say so. (3) Calendly and Creem are left off the processors list until they are live, because the page may say nothing that is not true today (the card lists them "once live"). (4) Zoho is listed because hello@kabsi.co lands in a Zoho mailbox.
 - 12 Oct, P0.2-07: the card says "mark nothing as coming", so the pages describe only what exists. A lawyer should read both pages before launch.
 
