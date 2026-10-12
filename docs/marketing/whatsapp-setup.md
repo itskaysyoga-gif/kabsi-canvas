@@ -6,6 +6,10 @@ The number is **+1 201-483-5474** (Kapso). A person answers it. It is not an aut
 
 This file was written without a Kapso login, so the screen names below may differ a little from what you see. Use whatever the Kapso inbox offers for each item. If it offers none of a kind (for example no labels), skip that item and tell the next build chat.
 
+## Status (12 Oct 2026)
+
+The greeting (first message of a conversation only) and the away message (Monday to Friday, 8am to 6pm Beirut) are live in Kapso. Quick replies and labels are not exposed in the Kapso project UI, so the nine texts in section 4 stay here for staff to paste by hand. They are not automated workflows and must not be turned into any. Open: ask Kapso support to enable Quick Replies and Labels, and send one real greeting test before launch.
+
 ## What you do in Kapso, one click at a time
 
 Do these in order. Nothing here needs an API key, and you never paste a key into a chat. Kapso's API keys are only needed later (P1-21) and go straight into Supabase secrets.
