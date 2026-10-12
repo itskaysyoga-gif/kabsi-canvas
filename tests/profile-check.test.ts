@@ -94,7 +94,7 @@ describe("Free Profile Check (P0.4-01)", () => {
       "src/routes/get-started.tsx",
     ]) {
       const text = read(f);
-      expect(text, f).not.toMatch(/[–—]/);
+      expect(text, f).not.toMatch(/[\u2013\u2014]/);
       expect(text, f).not.toMatch(/\b(profile score|do now|listing shield|put mine back)\b/i);
     }
   });
@@ -110,7 +110,7 @@ describe("Free Profile Check (P0.4-01)", () => {
       "src/routes/get-started.tsx",
     ]) {
       const text = read(f);
-      expect(text, f).not.toMatch(/[–—]/);
+      expect(text, f).not.toMatch(/[\u2013\u2014]/);
       // JavaScript's not operator and non-null assertion are fine; an exclamation mark after a word or a full stop is copy.
       expect(text.match(/[A-Za-z0-9"'.?]!(?=[\s"'`<]|$)/g) ?? [], f).toEqual([]);
     }
