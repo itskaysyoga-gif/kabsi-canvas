@@ -23,12 +23,10 @@ import {
   choosePlan,
   friendlyError,
   saveConsent,
-  saveKnowledge,
   searchPlaces,
   setStep,
   startLocation,
   chooseLocation,
-  type KnowledgeCard,
   type Location,
   type PlaceResult,
 } from "@/lib/onboarding";

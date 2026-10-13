@@ -172,11 +172,19 @@ A Manager can do everything Kabsi needs; only owners can add or remove people. Y
 | Business phone | Optional | Never written in a public reply. Unhappy customers are asked to contact you through the details on your Google profile, because Google can reject replies that contain phone numbers |
 | Opening hours note (for example "Open daily 8am to midnight") | Optional | Used when a reviewer asks about hours |
 | Anything you'd like mentioned (for example delivery area, parking) | Optional | Used only when a reviewer raises that topic |
-| Staff names that may appear in replies (comma-separated, up to 20) | Optional | Lets replies thank the right person. Names not on the list are never used |
+| Staff names that may appear in replies (one at a time, up to 20, in Settings) | Optional | Lets replies thank the right person. Names not on the list are never used |
 | Anything Kabsi should never say or promise (for example "Don't promise same-day delivery") | Optional | Drafts, posts and the safety check all follow it |
 | Questions customers ask (up to 8 question and answer pairs) | Optional, in Settings only | Replies and posts can use these answers and nothing beyond them |
 
-Tap **Save and continue**. Later changes in Settings, About your business apply to new drafts: "Saved. New drafts use this from now on."
+Tap **Save and continue**. Later changes in Settings, About your business apply to new drafts.
+
+**Settings, About your business** (each fact on its own line, with its status):
+
+- **Verified**: you gave it or confirmed it. Only Verified facts are used in replies and posts.
+- **Needs your OK**: a fact Kabsi did not get from you (a suggestion, or something read from your website once that is possible). Replies and posts leave it out until you tap **Confirm**. **Not right** turns it down and Kabsi does not suggest that value again.
+- **Out of date**: Kabsi asks you to check it again. Prices are asked again after 90 days, staff names after 180 days, opening hours notes after 60 days. Until you tap **Confirm**, replies and posts leave it out.
+- **Edit** saves a new version (the earlier one is kept as history). **Delete** removes the fact and every earlier version for good, and Kabsi stops using it.
+- When two sources give different answers about something customers see (hours, phone, services, prices), Kabsi asks "Kabsi found two different answers. Which is right?" and leaves that fact out of replies and posts until you choose. It never picks one for you.
 
 Never-say examples: "Don't confirm the reviewer is a patient or mention any treatment." "Don't promise same-day delivery." "Don't mention the old location."
 
@@ -541,7 +549,7 @@ The privacy page shows the 11 rows of the retention table (`retention_policies`,
 | Rating history, quotes in reports sent before 4 October 2026 (newer reports carry none), decided Google Protection before/after values | 30 days |
 | Other Google profile details Kabsi reads (category and area, Google's answer to a change Kabsi sent) | 30 days |
 | Review ids, star ratings, dates, reply state and your own replies | While you use Kabsi |
-| Your own facts and approved values (About your business, the details you confirmed or told Google Protection to keep, approved posts and hours; earlier versions are kept as a history) | While you use Kabsi; deleted with the business |
+| Your own facts and approved values (About your business, the details you confirmed or told Google Protection to keep, approved posts and hours; earlier versions are kept as a history) | While you use Kabsi; deleted with the business. Deleting a fact in About your business removes it and its earlier versions at once |
 | Google's values of your details that you have not confirmed, and Google's side of a Google Protection change | 30 days after Kabsi read them; a change still waiting for your answer keeps them until it is answered or closed |
 | Photos you upload | The file is deleted 30 days after the photo is on Google, or soon after you skip it; it then leaves the Photos list (it stays on Google) |
 | Google data after access is removed | Deleted after 30 days unless access returns |
@@ -619,7 +627,7 @@ Check spam, and Settings, Emails: emails may be paused (**Turn emails back on**)
 That's by design. Extra addresses (up to 3) see new reviews only. Only the business's own members can post.
 
 **The weekly post didn't come.**
-Weekly drafts need at least one fact in About your business, the Weekly draft switch on, an active business, and no other draft waiting. Kabsi also skips a week if the draft fails the fact check twice.
+Weekly drafts need at least one Verified fact in About your business, the Weekly draft switch on, an active business, and no other draft waiting. Kabsi also skips a week if the draft fails the fact check twice.
 
 **Suggest phrases shows nothing.** Suggestions grow as reviews come in; type your own meanwhile.
 
@@ -760,7 +768,7 @@ You see the exact text before anything is posted and can edit or skip it. Drafts
 Drafts are two to four short sentences, mention something the customer actually said, and use your sign-off and tone (Warm, Formal or Short & friendly).
 
 **Can replies make things up?**
-Drafts use only facts in About your business. A missing fact is left out, never guessed.
+Drafts use only the Verified facts in About your business. A missing fact is left out, never guessed. A suggestion you have not confirmed, a fact that is out of date, or a fact with two different answers is left out too.
 
 **Will a reply offer discounts or refunds?**
 No. Drafts never offer discounts, refunds, vouchers, free items or compensation, and a code check blocks drafts that do.

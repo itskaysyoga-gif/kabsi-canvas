@@ -30,7 +30,9 @@ insert into tested values
   ('staff_mock_listing_edit(uuid,text,text)'), ('staff_mock_review(uuid,integer,text,text)'),
   ('staff_record_payment(uuid,text,numeric,text,text)'), ('staff_set_card_order_status(uuid,text)'),
   ('staff_set_concierge(uuid,boolean)'), ('staff_update_partner_contact(uuid,text,text)'),
-  ('start_location(text,text,text,text,text,text,uuid)'), ('update_knowledge_card(uuid,jsonb)'),
+  ('start_location(text,text,text,text,text,text,uuid)'),
+  ('save_fact(uuid,text,jsonb,uuid)'), ('confirm_fact(uuid)'), ('reject_fact(uuid)'), ('remove_fact(uuid)'),
+  ('answer_knowledge_confirm(uuid,text)'),
   ('update_notification_settings(uuid,text[],smallint,text,integer)');
 
 select is(
@@ -95,6 +97,11 @@ create temp table victim_orgs as
 grant select on victim_orgs to authenticated;
 select ok((select owner_org is not null and partner_org is not null from victim_orgs), 'the victim has an owner and a partner organisation');
 
+-- One About your business fact of the victim's (P0.3-01), for the fact RPCs below.
+insert into public.knowledge_facts (id, location_id, slot, key, value, status, source)
+values ('00000000-0000-4000-8000-0000000000fd', '00000000-0000-4000-8000-0000000000c1', 'card.parking', 'parking',
+        '{"text": "Victim parking"}', 'needs_confirmation', 'website');
+
 -- As a signed-in stranger: S has no business, no partner and no staff row.
 select tests.act_as('00000000-0000-4000-8000-0000000000b1');
 
@@ -122,7 +129,12 @@ select throws_ok($$ select public.set_auto_posts('00000000-0000-4000-8000-000000
 select throws_ok($$ select public.set_card_active('VCTM22', false) $$, '42501', null, 'set_card_active refuses a non-member');
 select throws_ok($$ select public.set_onboarding_step('00000000-0000-4000-8000-0000000000c1', 'done') $$, '42501', null, 'set_onboarding_step refuses a non-member');
 select throws_ok($$ select public.skip_review('00000000-0000-4000-8000-0000000000e1') $$, '42501', null, 'skip_review refuses a non-member');
-select throws_ok($$ select public.update_knowledge_card('00000000-0000-4000-8000-0000000000c1', '{}') $$, '42501', null, 'update_knowledge_card refuses a non-member');
+-- P0.3-01: Business Knowledge, fact by fact. The card's writer is retired and nobody may run it.
+select throws_ok($$ select public.save_fact('00000000-0000-4000-8000-0000000000c1', 'about', '"Hijacked"') $$, '42501', null, 'save_fact refuses a non-member');
+select throws_ok($$ select public.confirm_fact('00000000-0000-4000-8000-0000000000fd') $$, '42501', null, 'confirm_fact refuses a non-member');
+select throws_ok($$ select public.reject_fact('00000000-0000-4000-8000-0000000000fd') $$, '42501', null, 'reject_fact refuses a non-member');
+select throws_ok($$ select public.remove_fact('00000000-0000-4000-8000-0000000000fd') $$, '42501', null, 'remove_fact refuses a non-member');
+select throws_ok($$ select public.answer_knowledge_confirm('00000000-0000-4000-8000-0000000000fe', 'proposed') $$, '42501', null, 'answer_knowledge_confirm refuses a non-member');
 select throws_ok($$ select public.update_notification_settings('00000000-0000-4000-8000-0000000000c1', null, null, null, null) $$, '42501', null, 'update_notification_settings refuses a non-member');
 select throws_ok($$ select public.start_location('victim-place', 'Hijack', 'x', 'US', 'UTC', null, null) $$, 'P0001', 'already_on_kabsi', 'start_location refuses a business that is already on Kabsi for someone else');
 

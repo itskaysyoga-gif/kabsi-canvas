@@ -20,6 +20,7 @@ import {
 import { useAutosize } from "@/lib/use-autosize";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
+import { hasPostFacts, loadKnowledge } from "@/lib/knowledge";
 import { contentCall } from "@/lib/reviews";
 import { track } from "@/lib/telemetry";
 import { Megaphone as PageGlyph } from "lucide-react";
@@ -118,7 +119,7 @@ function PostsPage() {
               Write another post
             </h2>
           ) : null}
-          <WeeklyToggle locationId={loc.id} hasFacts={hasFacts(loc.knowledge_card ?? {})} />
+          <WeeklyToggle locationId={loc.id} />
           <NewPost locationId={loc.id} onCreated={refresh} />
         </>
       ) : null}
@@ -434,7 +435,13 @@ function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }
 }
 
 // Weekly draft switch (set_auto_posts RPC, members only). The draft still waits for the owner.
-function WeeklyToggle({ locationId, hasFacts }: { locationId: string; hasFacts: boolean }) {
+function WeeklyToggle({ locationId }: { locationId: string }) {
+  // Weekly drafts need at least one verified fact (P0.3-01): the same facts the drafts may use.
+  const knowledge = useQuery({
+    queryKey: ["knowledge", locationId],
+    queryFn: () => loadKnowledge(locationId),
+  });
+  const hasFacts = knowledge.data ? hasPostFacts(knowledge.data.facts) : true;
   const queryClient = useQueryClient();
   const setting = useQuery({
     queryKey: ["auto-posts", locationId],
@@ -502,30 +509,5 @@ function NotYet() {
         <Link to="/start">Continue setup</Link>
       </Button>
     </div>
-  );
-}
-
-const FACT_KEYS = [
-  "about",
-  "services",
-  "price_notes",
-  "booking",
-  "payment_methods",
-  "hours_note",
-  "service_area",
-  "delivery",
-  "parking",
-  "accessibility",
-  "wifi",
-  "languages",
-  "policies",
-  "mention",
-];
-function hasFacts(card: Record<string, unknown>) {
-  return (
-    FACT_KEYS.some(
-      (k) => (typeof card[k] === "string" && (card[k] as string).trim()) || card[k] === true,
-    ) ||
-    (Array.isArray(card["faqs"]) && (card["faqs"] as unknown[]).length > 0)
   );
 }

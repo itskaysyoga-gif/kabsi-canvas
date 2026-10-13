@@ -505,9 +505,8 @@ Deno.serve(async (req) => {
           const value = clip(input.value, 600);
           if (!value) result = { ok: false, error: "Empty value." };
           else {
-            const { data: cur } = await db.from("locations").select("knowledge_card").eq("id", ownerLoc).maybeSingle();
-            const card = { ...((cur?.knowledge_card as Record<string, unknown> | null) ?? {}), [key]: value };
-            const { error } = await asUser(req).rpc("update_knowledge_card", { p_location: ownerLoc, p_card: card });
+            // One verified owner fact, as the owner just stated it (P0.3-01): the same RPC as About your business.
+            const { error } = await asUser(req).rpc("save_fact", { p_location: ownerLoc, p_field: key, p_value: value });
             result = error ? { ok: false, error: error.message } : { ok: true, saved: key };
           }
         }

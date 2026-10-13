@@ -1,12 +1,14 @@
-// One list of the owner's business facts ("About your business", the knowledge card) for every prompt,
-// so replies, posts and their checks can't drift apart (D260). The owner wrote these; they are still passed
-// to models inside <business_facts> as data, and only ever used when relevant.
+// One list of the owner's business facts ("About your business") for every prompt, so replies, posts and their
+// checks can't drift apart (D260). Since P0.3-01 they come only from Business Knowledge (knowledge_facts, K-10):
+// public.draft_facts returns the verified, current facts for one use, and cardFromFacts filters again, so an AI
+// suggestion, an unconfirmed website fact or a fact past its ask-again date never reaches a prompt (K-11, K-120).
+// They are still passed to models inside <business_facts> as data, and only ever used when relevant.
 export type KnowledgeCard = Record<string, unknown> & {
   signature?: string; signature_ar?: string; tone?: string; tone_notes?: string; contact_phone?: string;
   about?: string; services?: string; price_notes?: string; booking?: string; payment_methods?: string;
   hours_note?: string; service_area?: string; delivery?: string | boolean; parking?: string; accessibility?: string;
   wifi?: string; languages?: string; policies?: string; mention?: string; staff_names?: string[]; avoid?: string;
-  faqs?: { q?: string; a?: string }[];
+  faqs?: { q?: string; a?: string }[]; custom_rules?: string[];
 };
 
 const str = (v: unknown) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim() : "");
@@ -46,3 +48,51 @@ export function factsBlock(card: KnowledgeCard, use: "reply" | "post") {
 
 /** Weekly post drafts need at least one real fact beyond the sign-off. */
 export const hasPostFacts = (card: KnowledgeCard) => businessFacts(card, "post").length > 0;
+
+// ─── Business Knowledge (P0.3-01) ────────────────────────────────────────────────────────────────────────────────
+
+/** One row of public.draft_facts (a current knowledge_facts version). */
+export type FactRow = {
+  id: string; slot: string; key: string; value: Record<string, unknown> | null; status: string;
+  review_after: string | null; superseded_by?: string | null;
+};
+export type FactUse = "replies" | "posts";
+
+/** The facts a draft may use, in the shape the prompts read. Only verified, current facts that are not past their
+ *  ask-again date count; anything else is dropped here too, whatever the caller passed. The slot names the field of
+ *  About your business (card.<field>[:<item>]); profile details (profile.*) are Google Protection's, not drafts'. */
+export function cardFromFacts(rows: FactRow[], now = Date.now()): KnowledgeCard {
+  const card: KnowledgeCard = {};
+  for (const f of rows) {
+    if (f.status !== "verified" || f.superseded_by || !f.value) continue;
+    if (f.review_after && Date.parse(f.review_after) <= now) continue;
+    const m = /^card\.([a-z_]+)(?::.+)?$/.exec(f.slot);
+    if (!m) continue;
+    const field = m[1];
+    const v = f.value;
+    if (field === "staff_names") {
+      const name = str(v.name);
+      if (name) (card.staff_names ??= []).push(name);
+    } else if (field === "faqs") {
+      const item = (v.item ?? {}) as { q?: string; a?: string };
+      if (str(item.q) && str(item.a)) (card.faqs ??= []).push({ q: str(item.q), a: str(item.a) });
+    } else if (field === "custom_rules") {
+      const text = str(v.text);
+      if (text) (card.custom_rules ??= []).push(text);
+    } else if (field === "delivery") {
+      card.delivery = typeof v.offered === "boolean" ? v.offered : str(v.text);
+    } else if (str(v.text)) {
+      card[field] = str(v.text);
+    }
+  }
+  return card;
+}
+
+type Rpc = { rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: unknown; error: unknown }> };
+
+/** The trusted facts of one business for one use (null: every use, Google Protection's mock seed). */
+export async function loadCard(db: Rpc, locationId: string, use: FactUse | null): Promise<KnowledgeCard> {
+  const { data, error } = await db.rpc("draft_facts", { p_location: locationId, p_use: use });
+  if (error) throw error;
+  return cardFromFacts((data ?? []) as FactRow[]);
+}

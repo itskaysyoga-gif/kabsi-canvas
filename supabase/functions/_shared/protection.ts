@@ -4,6 +4,7 @@
 // owner's confirmed facts (K-18). A field the owner never confirmed is still watched, and its change says "Not yet
 // confirmed by you" and is never offered for restore.
 import { PROTECTION_FIELDS, type ProtectionField, type ProtectionRead, readProtection } from "./google/index.ts";
+import { loadCard } from "./facts.ts";
 
 // Loaded on first use, so the rules below can be tested without the function's secrets.
 const kabsi = () => import("./kabsi.ts");
@@ -138,8 +139,8 @@ export function buildReads(now: ProtectionRead, facts: Fact[]): Read[] {
   });
 }
 
-type Loc = { id: string; name: string; address: string | null; google_location_id: string | null; knowledge_card: Record<string, unknown> };
-const LOC_COLS = "id, name, address, google_location_id, knowledge_card";
+type Loc = { id: string; name: string; address: string | null; google_location_id: string | null };
+const LOC_COLS = "id, name, address, google_location_id";
 
 // Job protection_check (P0.1-12b): one business, offered every 5 minutes on the mock and once an hour on live
 // Google. A Google error is thrown, so the job retries with backoff.
@@ -165,7 +166,8 @@ export async function shieldCheck() {
 
 async function checkProfile(loc: Loc) {
   const db = await admin();
-  const card = loc.knowledge_card ?? {};
+  // The mock listing starts from the owner's verified facts (P0.3-01); live Google ignores the seed.
+  const card = await loadCard(db, loc.id, null);
   const now = await readProtection(loc.google_location_id!, {
     name: loc.name, address: loc.address, phone: card.contact_phone as string | undefined, hours: card.hours_note as string | undefined,
   });
