@@ -115,7 +115,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.2-06 | Places cost guard | Sonnet | merged (80, 9d1aced, 12 Oct 05:22 UTC); migration live and read back; Deploy passed; open: Hussein's Google Cloud step 3 (quotas, budget alerts, places-backend), see After merge | 80 | 12 Oct 2026 |
 | P0.2-07 | Privacy, terms and security pages that match the system | Sonnet | merged (82, 92a4bfb, 12 Oct 05:58 UTC); CI green; production READY (dpl_4HCDRS9gCFGB1VbSsWHgKBNJAHqr); live pages checked; a lawyer should read /privacy and /terms before launch; open: Hussein's 390 px look | 12 Oct | |
 | P0.3-01 | Business Knowledge as the source for every draft | Opus | merged (92, 5c01dc8, 13 Oct 06:23 UTC); Deploy passed; migration 1 live; open: migration 2 (`remove_fact`, Hussein's SQL editor run), the real-model draft (credit) and Hussein's 390 px look, see After merge | 92, 93 | 13 Oct 2026 |
-| P0.3-02 | Per-business memory and the grounded reply pipeline | Opus | merging (94); migration 1 applied and read back; migration 2 (three cascade foreign keys) waits on Hussein's SQL editor run; real-model checks pending until credit is back, see After merge | 94 | 13 Oct 2026 |
+| P0.3-02 | Per-business memory and the grounded reply pipeline | Opus | merged (94, 88ef7e0, 13 Oct 06:52 UTC); Deploy passed; migration 1 live; open: migration 2 (Hussein's SQL editor run), the real-model checks (credit) and Hussein's 390 px look, see After merge | 94, 95 | 13 Oct 2026 |
 | P0.3-03 | Three review risk levels | Opus | todo | | |
 | P0.3-04 | Evaluation set and the prompt gate | Opus | todo | | |
 | P0.3-05 | One task engine | Opus | todo | | |
@@ -191,6 +191,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 ## After merge
 
 P0.3-02 (PR 94):
+- Passed 13 Oct 06:53 to 07:05 UTC: step 1, see Evidence ("P0.3-02 After merge").
 0. **Hussein, Supabase SQL editor (project ynjdqjlmdwjgbfezevxy): run the whole file `supabase/migrations/20261013120100_grounded_replies_links.sql`** (three foreign keys so `ai_runs`, `style_edits` and `style_offers` go with their business; it removes no data when run). Read-back: `select conname, confdeltype from pg_constraint where conname in ('ai_runs_location_id_fkey', 'style_edits_location_id_fkey', 'style_offers_location_id_fkey') order by 1;` expect three rows, each `c`.
 1. Deploy workflow passes; `api`, `content`, `posts-weekly`, `assistant` get new versions.
 2. **Pending until Anthropic credit is back (no model call allowed now):** (a) one mock review on QA Bakery drafted end to end: a `reply_drafts` row with `prompt_version = 'reply.v1'` and `facts_used`, and an `ai_runs` row with `prompt_version = 'reply.v1'` for it (`select prompt_version, ok, checks from ai_runs order by created_at desc limit 3`); (b) a mock review "Is Maria still working there?" gets a reply that does not confirm Maria; (c) `scripts/eval/run-replies.ts` run once on the draft model (it now uses the grounded pipeline). Until then these are proven with stub model calls only (Evidence).
@@ -381,6 +382,13 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.3-02 After merge (13 Oct 2026, 06:52 to 07:05 UTC, Hussein's session)
+- PR 94 merged 06:52 UTC as merge commit 88ef7e0 (ci.yml green on head 8b68b42). Load run 38359046096 on the PR passed (500 mock businesses, one simulated hour, 13 min); the P0.3-01 Load run 38356243749 passed too (12 min).
+- Deploy run 38359228798 passed (Edge Functions 30 s, Worker kabsi-go 1 min 7 s). `list_edge_functions`: `api` 73, `content` 66, `posts-weekly` 62, `assistant` 60, every function updated together.
+- Vercel production `dpl_5NxiS2F7r8ZTitoEZyNB2AQJeXBd` for 88ef7e0 READY; live `https://kabsi.co/app/inbox` fetched through the Vercel connector: 200, the app shell.
+- Jobs offered after 06:53:30 and finished by 07:04 UTC: 8 `protection_check`, 8 `sync_reviews`, 2 `deletions`, 2 `renewal_reminders`, 2 `trial_reminders`, `access_check`, `ratings_snapshot`, `weekly_reports` all succeeded, none failed. No draft job ran (no new review; no model call is allowed now).
+- Read 07:05 UTC: neither Hussein file is run yet (`remove_fact` absent, 0 of the 4 cascade foreign keys), as expected.
 
 ### P0.3-02 (branch claude/h-p0-3-02, PR 94, 13 Oct 2026, Hussein's session 1 of the bundled plan)
 - No Google, Places or Anthropic call in code, tests or browser checks: every model call in the tests is a stub (`send` and `checkCall`), the browser checks stub every Supabase and function response. `places_daily_cap` unchanged (0).
