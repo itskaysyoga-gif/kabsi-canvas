@@ -82,8 +82,10 @@ select is((select array_agg(kind || ':' || state || ':' || (fact_id is not null)
 select is((select count(*)::int from public.audit_events where action = 'style_offer_answered'
             and location_id = '00000000-0000-4000-8000-0000000000c1' and after::text not like '%Sundays%'), 2, 'each answer is audited without the text');
 
--- A no is final.
+-- A no is final (two more name edits make three).
 select public.record_draft_edit('00000000-0000-4000-8000-0000000000c1', null, array['adds_name'], '{"adds_name": "Thank the reviewer by their first name."}', '{}');
+select is((select jsonb_agg(o ->> 'kind') from jsonb_array_elements(public.record_draft_edit('00000000-0000-4000-8000-0000000000c1', null,
+  array['adds_name'], '{"adds_name": "Thank the reviewer by their first name."}', '{}')) o), '["adds_name"]'::jsonb, 'the third name edit offers the rule');
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
 select is(public.answer_style_offer((select id from public.style_offers where kind = 'adds_name'), false), null, 'no to the name rule');
 reset role;
