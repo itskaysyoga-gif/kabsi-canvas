@@ -87,14 +87,16 @@ update public.locations set reviews_synced_at = now() where id = '00000000-0000-
 -- A browser call: its own user agent and CF-IPCountry count, x-kabsi headers from a browser are ignored.
 select set_config('request.headers', '{"x-kabsi-ip-country":"FR","x-kabsi-user-agent":"Forged","cf-ipcountry":"AE","user-agent":"Safari"}', true);
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
-select public.update_knowledge_card('00000000-0000-4000-8000-0000000000c1', '{"tone": "warm", "about": "Fresh bread"}');
-select public.update_knowledge_card('00000000-0000-4000-8000-0000000000c1', '{"tone": "formal", "about": "Fresh bread"}');
+-- P0.3-01: About your business is saved fact by fact; the event names the fact, never its value (K-120.5).
+select public.save_fact('00000000-0000-4000-8000-0000000000c1', 'about', '"Fresh bread"');
+select public.save_fact('00000000-0000-4000-8000-0000000000c1', 'tone', '"formal"');
 select public.set_onboarding_step('00000000-0000-4000-8000-0000000000c1', 'done');
 reset role;
-select is((select row(actor_type, actor_id, channel, ip_country, user_agent, before::text, after::text)::text
-  from public.audit_events where action = 'knowledge_edit' and after ->> 'tone' = 'formal'),
-  row('user', '00000000-0000-4000-8000-0000000000a1'::uuid, 'dashboard', 'AE', 'Safari', '{"tone": "warm"}', '{"tone": "formal"}')::text,
-  'a knowledge edit records the owner, the browser''s own headers and only the fields that changed');
+select is((select row(actor_type, actor_id, channel, ip_country, user_agent, before::text, after ->> 'key',
+                      after::text like '%formal%')::text
+  from public.audit_events where action = 'knowledge_edit' and object_type = 'knowledge_facts' and after ->> 'key' = 'voice'),
+  row('user', '00000000-0000-4000-8000-0000000000a1'::uuid, 'dashboard', 'AE', 'Safari', null::text, 'voice', false)::text,
+  'a knowledge edit records the owner, the browser''s own headers and the fact, not its value');
 select is((select after ->> 'step' from public.audit_events where action = 'onboarding_step'
   and location_id = '00000000-0000-4000-8000-0000000000c1'), 'done', 'an onboarding step is recorded');
 

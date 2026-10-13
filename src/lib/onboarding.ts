@@ -5,17 +5,6 @@ import { callFunction } from "@/lib/api";
 import type { PlanKind } from "@/lib/plans";
 
 export type OnboardingStep = "business" | "access" | "knowledge" | "plan" | "done";
-export type KnowledgeCard = {
-  signature?: string;
-  /** Things the owner never wants said or promised in replies and posts (D257). */
-  avoid?: string;
-  tone?: "warm" | "formal" | "short";
-  contact_phone?: string;
-  hours_note?: string;
-  mention?: string;
-  staff_names?: string[];
-  [key: string]: unknown;
-};
 export type Location = {
   id: string;
   name: string;
@@ -36,7 +25,6 @@ export type Location = {
   access_removed_at?: string | null;
   /** Demo workspace (P0.1-06): an invented business for recordings; every screen shows "Demo data". */
   is_demo?: boolean;
-  knowledge_card: KnowledgeCard;
   created_at: string;
 };
 export type PlaceResult = {
@@ -73,7 +61,7 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
 // businesses the signed-in user is a member of count. Staff can read every business through RLS, but the
 // owner app must never treat someone else's business as theirs (writes would be refused anyway).
 const LOCATION_COLUMNS =
-  "id, name, address, country, status, onboarding_step, partner_id, consent_at, access_granted_at, access_lost_at, disconnect_requested_at, access_removed_at, concierge, concierge_first_post_at, is_demo, knowledge_card, created_at";
+  "id, name, address, country, status, onboarding_step, partner_id, consent_at, access_granted_at, access_lost_at, disconnect_requested_at, access_removed_at, concierge, concierge_first_post_at, is_demo, created_at";
 const CHOSEN_KEY = "kabsi.location";
 
 export async function myLocations(): Promise<Location[]> {
@@ -132,8 +120,6 @@ export const saveConsent = (locationId: string) =>
   rpc<string>("save_consent", { p_location: locationId, p_text: CONSENT_TEXT });
 export const setStep = (locationId: string, step: OnboardingStep) =>
   rpc<void>("set_onboarding_step", { p_location: locationId, p_step: step });
-export const saveKnowledge = (locationId: string, card: KnowledgeCard) =>
-  rpc<void>("update_knowledge_card", { p_location: locationId, p_card: card });
 export const choosePlan = (locationId: string, kind: PlanKind) =>
   rpc<string>("choose_plan", { p_location: locationId, p_kind: kind });
 export const activateCard = (code: string, locationId: string, label?: string) =>

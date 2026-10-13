@@ -2,6 +2,7 @@
 import { admin, APP_URL, emailButton, emailLayout, emailLink, esc, sendEmail, sha256Hex } from "./kabsi.ts";
 import { listReviews } from "./google/index.ts";
 import { checkDraft, classify, draftReply, MODELS, newMeter, type Card } from "./ai.ts";
+import { loadCard } from "./facts.ts";
 import { recordAiUsage, takeAiBudget } from "./ai-budget.ts";
 import { isConciergeLocationId, matchConciergeReview, type ConciergeCandidate } from "./concierge.ts";
 import { auditedAdmin } from "./audit.ts";
@@ -10,11 +11,11 @@ const BACKLOG_LIMIT = 20; // D221
 
 type Loc = {
   id: string; name: string; status: string; google_account_id: string | null; google_location_id: string | null;
-  knowledge_card: Card; time_zone: string; digest_hour: number; reviews_synced_at: string | null;
+  time_zone: string; digest_hour: number; reviews_synced_at: string | null;
   backlog_emailed_at: string | null; emails_paused_until: string | null; alert_emails: string[]; access_error_since?: string | null;
   concierge?: boolean; concierge_converted_at?: string | null;
 };
-const LOC_COLS = "id, name, status, google_account_id, google_location_id, knowledge_card, time_zone, digest_hour, reviews_synced_at, backlog_emailed_at, emails_paused_until, alert_emails, access_error_since, concierge, concierge_converted_at";
+const LOC_COLS = "id, name, status, google_account_id, google_location_id, time_zone, digest_hour, reviews_synced_at, backlog_emailed_at, emails_paused_until, alert_emails, access_error_since, concierge, concierge_converted_at";
 
 // One active business with a Google location, or null (a job for it may outlive a pause or a deletion).
 export async function activeLocation(id: string): Promise<Loc | null> {
@@ -84,24 +85,26 @@ export async function syncLocation(loc: Loc) {
 export async function draftReview(reviewId: string, instruction?: string) {
   const db = admin();
   const { data: rv, error } = await db.from("reviews")
-    .select("id, location_id, reviewer_name, star_rating, comment, draft_attempts, language, urgency, locations(name, knowledge_card, status)")
+    .select("id, location_id, reviewer_name, star_rating, comment, draft_attempts, language, urgency, locations(name, status)")
     .eq("id", reviewId).single();
   if (error) throw error;
-  const loc = rv.locations as unknown as { name: string; knowledge_card: Card; status: string };
+  const loc = rv.locations as unknown as { name: string; status: string };
   // Drafting is part of an active trial or plan (Q05): a Free business gets no new drafts, from any caller.
   if (loc.status !== "active") throw new Error("location_not_active");
   // One generation from the business and global daily AI budget (K-100); throws "ai_budget_*" when used up.
   await takeAiBudget(rv.location_id);
+  // Only verified Business Knowledge meant for replies (P0.3-01, K-10, K-11).
+  const card = await loadCard(db, rv.location_id, "replies");
   const meter = newMeter();
   try {
-    return await draftWithChecks(rv, loc, meter, instruction);
+    return await draftWithChecks(rv, { name: loc.name, card }, meter, instruction);
   } finally {
     await recordAiUsage(rv.location_id, meter);
   }
 }
 
 type DraftRow = { id: string; reviewer_name: string | null; star_rating: number; comment: string | null; draft_attempts: number; language: string | null; urgency: string | null };
-async function draftWithChecks(rv: DraftRow, loc: { name: string; knowledge_card: Card }, meter: ReturnType<typeof newMeter>, instruction?: string) {
+async function draftWithChecks(rv: DraftRow, loc: { name: string; card: Card }, meter: ReturnType<typeof newMeter>, instruction?: string) {
   const db = admin();
   const review = { reviewer: rv.reviewer_name ?? "A customer", rating: rv.star_rating, comment: rv.comment };
 
@@ -119,7 +122,7 @@ async function draftWithChecks(rv: DraftRow, loc: { name: string; knowledge_card
     const fix = attempt > 0 && body && check.issues.length ? `Fix these problems: ${check.issues.join("; ")}` : undefined;
     try {
       const drafted = await draftReply({
-        review, business: loc.name, card: loc.knowledge_card ?? {}, language: language!, urgent, meter,
+        review, business: loc.name, card: loc.card, language: language!, urgent, meter,
         instruction: [instruction, fix].filter(Boolean).join(". ") || undefined, previous: fix ? body : last?.body,
       });
       body = drafted.text;
@@ -130,7 +133,7 @@ async function draftWithChecks(rv: DraftRow, loc: { name: string; knowledge_card
       check = { ok: false, issues: ["the model returned an empty draft"] };
       continue;
     }
-    check = await checkDraft({ review, draft: body, card: loc.knowledge_card ?? {}, meter });
+    check = await checkDraft({ review, draft: body, card: loc.card, meter });
     if (check.ok) break;
   }
   await db.from("reply_drafts").insert({

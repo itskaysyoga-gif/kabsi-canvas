@@ -15,7 +15,7 @@ import { CONCIERGE_COPY } from "../_shared/concierge.ts";
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
 import { decideChange, decisionRefusal } from "../_shared/protection.ts";
 import { auditedAdmin, auditHeaders } from "../_shared/audit.ts";
-import { CTAS, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, writePost } from "../_shared/posts.ts";
+import { CTAS, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, withFacts, writePost } from "../_shared/posts.ts";
 import { AI_BUDGET_MESSAGE, AiBudgetError } from "../_shared/ai-budget.ts";
 
 const CHECK_MODEL = MODELS.check;
@@ -64,7 +64,7 @@ async function member(req: Request, locationId: string) {
   const { data: m } = await db.from("location_members").select("user_id").eq("location_id", locationId).eq("user_id", user.id).maybeSingle();
   if (!m) return { error: fail("forbidden", "You don't have access to this business.", 403) };
   const { data: loc } = await db.from("locations").select(POST_LOC_COLUMNS).eq("id", locationId).single();
-  return { user, loc: loc as unknown as Loc };
+  return { user, loc: await withFacts(db, loc as unknown as Loc) };
 }
 
 Deno.serve(async (req) => {

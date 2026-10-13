@@ -94,6 +94,16 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   the call; the kabsi_cleanup_action_tokens statement still removes links expired 30 days ago. The Edge Function side
   (GET never calls use_action_link, the session and the recipient are passed through, refusal words) is in
   `supabase/functions/_shared/email-links.test.ts`.
+- `knowledge_source.sql` (P0.3-01): Business Knowledge is the source for every draft. `draft_facts` (service role
+  only) returns the verified, current facts for one use; an AI suggestion, an unconfirmed website fact, a rejected
+  fact and a fact past its ask-again date (prices 90 days, staff 180, hours notes 60) are in no draft, and confirming
+  brings them in; a higher source replaces an unconfirmed lower one, a lower one never overrides; a website value that
+  disagrees with the owner's hours makes one open question (however often it repeats), changes nothing and takes the
+  hours out of the drafts until the owner or a manager answers; the owner's own edit answers it; `save_fact` writes a
+  new verified version (the same value is no new version, list items keep their history, caps and lengths hold);
+  `remove_fact` removes the row, every version and any question about it; every action is audited without the value;
+  `update_knowledge_card` is retired (nobody may run it, no function calls it). The prompt side is
+  `supabase/functions/_shared/facts.test.ts` (Deno, stub model calls only).
 - `publication_pipeline.sql` (P0.1-13a) and `publication_content.sql` (P0.1-13b): the one publication pipeline for
   replies, posts, photos, special hours and Google Protection put-backs. Per kind: one publication however many times
   or from whichever channel it is approved, the item moves to "on its way" and back on undo inside 10 seconds, one

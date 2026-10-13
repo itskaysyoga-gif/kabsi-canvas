@@ -67,12 +67,13 @@ select is((select count(*)::int from public.knowledge_facts where location_id = 
 select ok((select review_after::date = (now() + interval '60 days')::date from public.knowledge_facts
             where location_id = '00000000-0000-4000-8000-0000000000c1' and slot = 'card.hours_note'), 'hours notes after 60 days');
 
--- A later edit is a new version; the old one stays for the audit trail; a removed value is outdated.
-select tests.act_as('00000000-0000-4000-8000-0000000000a1');
-select public.update_knowledge_card('00000000-0000-4000-8000-0000000000c1',
-  (select knowledge_card || '{"about": "Family bakery since 1985", "tone_notes": "", "staff_names": ["Lina", "Rami"]}'::jsonb
-     from public.locations where id = '00000000-0000-4000-8000-0000000000c1'));
-reset role;
+-- A later edit of the card is a new version; the old one stays for the audit trail; a removed value is outdated.
+-- (P0.3-01 retired the card's writer, update_knowledge_card; the copy rule is shown on a direct edit by the owner.)
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-0000000000a1", "role": "authenticated"}', true);
+update public.locations
+   set knowledge_card = knowledge_card || '{"about": "Family bakery since 1985", "tone_notes": "", "staff_names": ["Lina", "Rami"]}'::jsonb
+ where id = '00000000-0000-4000-8000-0000000000c1';
+select set_config('request.jwt.claims', '', true);
 select is((select array_agg(version || ':' || (value ->> 'text') || ':' || (superseded_by is null) order by version)
              from public.knowledge_facts where location_id = '00000000-0000-4000-8000-0000000000c1' and slot = 'card.about'),
   array['1:Family bakery since 1990:false', '2:Family bakery since 1985:true'], 'a changed value is version 2, version 1 is kept');

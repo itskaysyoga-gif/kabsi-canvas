@@ -81,6 +81,8 @@ insert into public.rate_limits (key) values ('victim');
 insert into public.billing_events (provider, event_key) values ('nowpayments', 'victim-event');
 insert into public.staff_followups (kind, location_id, location_name, due_at, done_at, done_note)
 values ('google_access_removal', '00000000-0000-4000-8000-0000000000c1', 'Victim Bakery', now(), now(), 'Victim follow-up');
+insert into public.knowledge_confirms (id, location_id, slot, key, proposed_value, proposed_source)
+values ('00000000-0000-4000-8000-0000000000fe', '00000000-0000-4000-8000-0000000000c1', 'card.victim_question', 'faq', '{"text": "Victim answer"}', 'website');
 -- P0.1-09: the victim's organisation, its membership, google_connections and partner_clients rows come from the
 -- triggers on locations, location_members, partners and partner_members above. subscriptions starts empty.
 insert into public.subscriptions (organization_id, plan, state)

@@ -4,7 +4,7 @@
 // nothing is posted until they click Post. Businesses with no facts to write from are skipped, not padded.
 // Demo businesses (P0.1-06) never get weekly drafts: their post idea is seeded.
 import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
-import { ensureCategory, hasFacts, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, writePost } from "../_shared/posts.ts";
+import { ensureCategory, hasFacts, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, withFacts, writePost } from "../_shared/posts.ts";
 import { AiBudgetError } from "../_shared/ai-budget.ts";
 
 // A weekly angle so drafts don't repeat; each uses only the owner's facts.
@@ -40,11 +40,11 @@ Deno.serve(async (req) => {
   const done: Record<string, string> = {};
   for (const raw of (locs ?? []) as unknown as PostLoc[]) {
     try {
-      const loc = await ensureCategory(db, raw);
+      const loc = await withFacts(db, await ensureCategory(db, raw));
       if (!body.force_location && !inSlot(loc.post_slot ?? "retail", loc.time_zone || "Asia/Beirut")) continue;
       const { count } = body.dry_run ? { count: 0 } : await db.from("gbp_posts").select("id", { count: "exact", head: true }).eq("location_id", loc.id).eq("state", "draft");
       if ((count ?? 0) > 0) { done[loc.id] = "draft_waiting"; await db.from("locations").update({ last_auto_post_at: new Date().toISOString() }).eq("id", loc.id); continue; }
-      if (!hasFacts(loc.knowledge_card ?? {})) { done[loc.id] = "no_facts"; continue; }
+      if (!hasFacts(loc.card)) { done[loc.id] = "no_facts"; continue; }
       const { keywords } = await suggestKeywords(db, loc);
       const kw = keywords.slice(0, 3).map((k) => k.keyword);
       const week = Math.floor(Date.now() / (7 * 86400_000));
