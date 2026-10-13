@@ -113,7 +113,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.2-05 | Email approvals tightened | Opus | merged (78, 5aae112, 12 Oct 04:36 UTC); migration live and read back; Deploy passed (`api` 68); live end to end through the deployed `/api/action` on QA Bakery passed; open: Hussein's 390 px look, see After merge | 78, 79 | 12 Oct 2026 |
 | P0.2-06 | Places cost guard | Sonnet | merged (80, 9d1aced, 12 Oct 05:22 UTC); migration live and read back; Deploy passed; open: Hussein's Google Cloud step 3 (quotas, budget alerts, places-backend), see After merge | 80 | 12 Oct 2026 |
 | P0.2-07 | Privacy, terms and security pages that match the system | Sonnet | merged (82, 92a4bfb, 12 Oct 05:58 UTC); CI green; production READY (dpl_4HCDRS9gCFGB1VbSsWHgKBNJAHqr); live pages checked; a lawyer should read /privacy and /terms before launch; open: Hussein's 390 px look | 12 Oct | |
-| P0.3-01 | Business Knowledge as the source for every draft | Opus | merging (92); migration 1 applied and read back; migration 2 (`remove_fact`, holds a DELETE) waits on Hussein's SQL editor run, see After merge | 92 | 13 Oct 2026 |
+| P0.3-01 | Business Knowledge as the source for every draft | Opus | merged (92, 5c01dc8, 13 Oct 06:23 UTC); Deploy passed; migration 1 live; open: migration 2 (`remove_fact`, Hussein's SQL editor run), the real-model draft (credit) and Hussein's 390 px look, see After merge | 92, 93 | 13 Oct 2026 |
 | P0.3-02 | Per-business memory and the grounded reply pipeline | Opus | todo | | |
 | P0.3-03 | Three review risk levels | Opus | todo | | |
 | P0.3-04 | Evaluation set and the prompt gate | Opus | todo | | |
@@ -190,6 +190,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 ## After merge
 
 P0.3-01 (PR 92):
+- Passed 13 Oct 06:24 to 06:28 UTC: steps 1 and 2, see Evidence ("P0.3-01 After merge").
 0. **Hussein, Supabase SQL editor (project ynjdqjlmdwjgbfezevxy): run the whole file `supabase/migrations/20261013090100_knowledge_fact_removal.sql`** (it adds the cascade from `knowledge_confirms` to `locations` and the `remove_fact` RPC; it removes no data when run). Read-back: `select (select confdeltype from pg_constraint where conname = 'knowledge_confirms_location_id_fkey') as cascade, has_function_privilege('authenticated', 'public.remove_fact(uuid)', 'execute') as owners_can_remove, has_function_privilege('anon', 'public.remove_fact(uuid)', 'execute') as anon_can_remove;` expect `c`, `true`, `false`. Then tell the session "done"; it reads back the function body.
 1. Deploy workflow passes; `api`, `content`, `posts-weekly`, `assistant` get new versions.
 2. Live `/app/knowledge` loads on kabsi.co (signed out it goes to the login page).
@@ -373,6 +374,12 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.3-01 After merge (13 Oct 2026, 06:23 to 06:28 UTC, Hussein's session)
+- PR 92 merged 06:23 UTC as merge commit 5c01dc8 (ci.yml green on head bdbcf09: App, Edge Functions and Worker, Database).
+- Deploy run 38356454569 passed (Edge Functions 29 s, Worker kabsi-go 1 min 20 s). `list_edge_functions`: `api` 72, `content` 65, `posts-weekly` 61, `assistant` 59, every function updated at the same time.
+- Vercel production `dpl_8Ush4y8wapwMVbE4rKy3eG3qDHwX` for 5c01dc8 READY; live `https://kabsi.co/app/knowledge` fetched through the Vercel connector: 200, the app shell (the route renders in the browser after sign-in). The session's own browser cannot reach kabsi.co (proxy), so the signed-in look stays with Hussein (step 4).
+- Jobs on the new code (offered after 06:24:30): 4 `protection_check` (which now seeds the mock from `draft_facts`) and 4 `sync_reviews` succeeded by 06:27:04, none failed. No draft job ran (the Anthropic credit is empty, and no model call is allowed now).
 
 ### P0.3-01 (branch claude/h-p0-3-01, PR 92, 13 Oct 2026, Hussein's session 1 of the bundled plan)
 - Model checked first: `get_session` reads `claude-opus-5-5` for the session model and the last served model.
