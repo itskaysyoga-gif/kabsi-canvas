@@ -82,15 +82,16 @@ export function factText(value: FactValue | null | undefined): string {
   return "";
 }
 
-const SOURCE_LABEL: Record<string, string> = {
-  owner: "You",
-  staff: "The Kabsi team",
-  google: "Your Google profile",
-  website: "Your website",
-  partner: "Your partner",
-  ai_suggestion: "A suggestion from Kabsi",
+const FROM: Record<string, string> = {
+  owner: "From you",
+  staff: "From the Kabsi team",
+  google: "From your Google profile",
+  website: "From your website",
+  partner: "From your partner",
+  ai_suggestion: "Suggested by Kabsi",
 };
-export const sourceLabel = (s: string) => SOURCE_LABEL[s] ?? "Another source";
+/** Where a fact came from, as a short line: "From your website", "Suggested by Kabsi". */
+export const fromLine = (source: string) => FROM[source] ?? "From another source";
 
 export async function loadKnowledge(
   locationId: string,

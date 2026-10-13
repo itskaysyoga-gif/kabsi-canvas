@@ -33,7 +33,7 @@ import {
   rejectFact,
   removeFact,
   saveFact,
-  sourceLabel,
+  fromLine,
   verifiedValues,
   type ConfirmQuestion,
   type Fact,
@@ -467,7 +467,9 @@ function FactsScreen({ location }: { location: Location }) {
         </p>
         <p className="mt-3 text-sm text-kb-stone-on-dark">
           {counts.verified} verified
-          {counts.needs_ok ? `, ${counts.needs_ok} need your OK` : ""}
+          {counts.needs_ok
+            ? `, ${counts.needs_ok} ${counts.needs_ok === 1 ? "needs" : "need"} your OK`
+            : ""}
           {counts.out_of_date ? `, ${counts.out_of_date} out of date` : ""}
         </p>
       </div>
@@ -601,13 +603,13 @@ function Question({
       <div className="mt-4 space-y-3">
         {current ? (
           <Answer
-            from={sourceLabel(current.source)}
+            from={fromLine(current.source)}
             text={factText(current.value)}
             onPick={() => run(() => answerQuestion(q.id, "current"), "Saved. Kabsi uses this one.")}
           />
         ) : null}
         <Answer
-          from={sourceLabel(q.proposed_source)}
+          from={fromLine(q.proposed_source)}
           text={factText(q.proposed_value)}
           onPick={() => run(() => answerQuestion(q.id, "proposed"), "Saved. Kabsi uses this one.")}
         />
@@ -619,7 +621,7 @@ function Question({
 function Answer({ from, text, onPick }: { from: string; text: string; onPick: () => void }) {
   return (
     <div className="rounded-card border border-kb-hairline p-4">
-      <p className="text-sm text-kb-stone">From {from.toLowerCase()}</p>
+      <p className="text-sm text-kb-stone">{from}</p>
       <p className="mt-1 whitespace-pre-line break-words" dir="auto">
         {text}
       </p>
@@ -772,7 +774,7 @@ function FactLine({ fact, ctx, onEdit }: { fact: Fact; ctx: RowContext; onEdit: 
       {state !== "verified" ? (
         <p className="mt-1 text-sm text-kb-stone">
           {state === "needs_ok"
-            ? `From ${sourceLabel(fact.source).toLowerCase()}. Replies and posts leave it out until you confirm it.`
+            ? `${fromLine(fact.source)}. Replies and posts leave it out until you confirm it.`
             : "Kabsi asks you to check this again. Replies and posts leave it out until you confirm it."}
         </p>
       ) : null}
