@@ -1,42 +1,62 @@
 // Run: deno test supabase/functions/_shared/drafting.test.ts
 // P0.1-04: Google's rules for replies and posts (K-113.4, K-14, K-116.3, K-116.4), no review-derived keywords
-// (K-113.3) and the review length cap (K-99.5, R-21).
+// (K-113.3) and the review length cap (K-99.5, R-21). Since P0.3-02 replies go through the contract runner; every
+// model call here is a stub.
 import assert from "node:assert/strict";
-import { checkDraft, draftReply, fenceReview, REVIEW_MAX, replySystem } from "./ai.ts";
+import { buildMemory, draftGrounded, fenceReview, REVIEW_MAX, replySystem, type System } from "./ai.ts";
 import { contactIssues } from "./contact.ts";
 import { buildKeywords } from "./keywords.ts";
+import type { FactRow } from "./facts.ts";
 
 const SEVEN_DIGITS = /(?:\p{Nd}[\s().\/-]*){7,}/u;
-const card = { contact_phone: "+961 3 956 917", signature: "Yawmiyati team", about: "A bakery in Beirut." };
+const row = (slot: string, key: string, value: Record<string, unknown>, uses = ["replies", "posts"]): FactRow =>
+  ({ id: crypto.randomUUID(), slot, key, value, status: "verified", review_after: null, uses } as FactRow);
+// The contact phone is a fact with no public use, so draft_facts never returns it for replies; it is passed here anyway.
+const FACTS = [
+  row("card.contact_phone", "contact", { kind: "phone", text: "+961 3 956 917" }, []),
+  row("card.signature", "signature", { text: "Yawmiyati team" }, ["replies"]),
+  row("card.about", "description", { text: "A bakery in Beirut." }),
+];
 const askNumber = { reviewer: "Maya", rating: 2, comment: "Bread was stale. What's your number? I want to talk to someone." };
+const flat = (s: System) => (typeof s === "string" ? s : s.map((p) => p.text).join("\n"));
+const noCheck = () => Promise.resolve(JSON.stringify({ ok: true, issues: [] }));
 
 Deno.test("a review that asks for the number gets a draft with no run of 7 or more digits", async () => {
+  const memory = await buildMemory({ business: "Yawmiyati", facts: FACTS, approvedReplies: [], openQuestions: [] });
   // The stub answers the way a model would: with any phone number it was given.
   const seen: string[] = [];
-  const send = (system: string, user: string) => {
-    seen.push(system + user);
-    const phone = (system + user).match(/\+?\d[\d ]{6,}\d/)?.[0];
-    return Promise.resolve({ text: phone ? `Sorry Maya, please call us on ${phone}.` : "Sorry to hear this, Maya. Please contact us through the details on our profile.\nYawmiyati team", model: "stub" });
+  const send = (system: System, user: string) => {
+    seen.push(flat(system) + user);
+    const phone = (flat(system) + user).match(/\+?\d[\d ]{6,}\d/)?.[0];
+    const reply = phone ? `Sorry Maya, please call us on ${phone}.` : "Sorry to hear this, Maya. Please contact us through the details on our profile.\nYawmiyati team";
+    return Promise.resolve({ text: JSON.stringify({ reply, facts_used: [], language: "en", topics: ["bread"] }), model: "stub" });
   };
-  const out = await draftReply({ review: askNumber, business: "Yawmiyati", card, language: "en", urgent: true }, send);
-  assert.ok(!SEVEN_DIGITS.test(out.text), out.text);
+  const out = await draftGrounded({ review: askNumber, memory, language: "en", urgent: true, recentReplies: [] }, send, { checkCall: noCheck });
+  assert.ok(out.ok, out.problems.join("; "));
+  assert.ok(!SEVEN_DIGITS.test(out.output!.reply), out.output!.reply);
   assert.ok(!seen.join("").includes("956 917"), "the phone number never reaches the model");
 });
 
-Deno.test("an unhappy reviewer is pointed to the details on the profile", () => {
-  const system = replySystem({ review: askNumber, business: "Yawmiyati", card, language: "en", urgent: true });
+Deno.test("an unhappy reviewer is pointed to the details on the profile", async () => {
+  const memory = await buildMemory({ business: "Yawmiyati", facts: FACTS, approvedReplies: [], openQuestions: [] });
+  const system = flat(replySystem(memory));
   assert.match(system, /please contact us through the details on our profile/i);
-  assert.ok(!/may use the phone|Phone for customers/i.test(system));
+  assert.ok(!/may use the phone|Phone for customers|956 917/i.test(system));
 });
 
-Deno.test("the code check blocks a reply with contact details before any model call", async () => {
-  for (const draft of [
+Deno.test("the code checks block a reply with contact details before any model call", async () => {
+  const memory = await buildMemory({ business: "Yawmiyati", facts: FACTS, approvedReplies: [], openQuestions: [] });
+  for (const reply of [
     "Sorry Maya, call us on 03 956 917.", "Write to us at hello@yawmiyati.com.", "See www.yawmiyati.com for more.",
     "Follow us @yawmiyati.", "Thanks Maya #bakery", "Our loaf is $4 now.",
   ]) {
-    const r = await checkDraft({ review: askNumber, draft, card });
-    assert.equal(r.ok, false, draft);
-    assert.equal(r.model, "code", draft);
+    let asked = false;
+    const send = () => Promise.resolve({ text: JSON.stringify({ reply, facts_used: [], language: "en", topics: [] }), model: "stub" });
+    const r = await draftGrounded({ review: askNumber, memory, language: "en", urgent: false, recentReplies: [] }, send,
+      { checkCall: () => { asked = true; return noCheck(); } });
+    assert.equal(r.ok, false, reply);
+    assert.equal(asked, false, `the model check was not asked for: ${reply}`);
+    assert.ok(r.problems.length > 0, reply);
   }
 });
 

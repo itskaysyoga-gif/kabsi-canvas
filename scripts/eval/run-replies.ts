@@ -1,5 +1,5 @@
-// Reply evaluation (Q09). Drafts a reply for each example review with one model, then runs Kabsi's real safety
-// checks (code checks plus the Haiku check) on it. Run once per model, then compare:
+// Reply evaluation (Q09). Drafts a reply for each example review through the real grounded pipeline (P0.3-02: memory,
+// structured output, code checks, the Haiku check). Run once per model, then compare:
 //
 //   ANTHROPIC_API_KEY=... DRAFT_MODEL=claude-sonnet-5-5 deno run -A scripts/eval/run-replies.ts > eval-55.json
 //   ANTHROPIC_API_KEY=... DRAFT_MODEL=claude-sonnet-5   deno run -A scripts/eval/run-replies.ts > eval-5.json
@@ -7,29 +7,118 @@
 //
 // Needs the functions copied next to a deno.json with nodeModulesDir (scripts/deno-check.sh shows how), or run it
 // from that scratch copy. Reviews are fictional. Nothing is stored.
-import { checkDraft, classify, draftReply, MODELS } from "../../supabase/functions/_shared/ai.ts";
+import {
+  buildMemory,
+  classify,
+  draftGrounded,
+  draftMessage,
+  MODELS,
+} from "../../supabase/functions/_shared/ai.ts";
+import type { FactRow } from "../../supabase/functions/_shared/facts.ts";
 import fixtures from "./reviews.json" with { type: "json" };
 
 type Row = {
-  id: number; rating: number; language: string; urgent: boolean; model_used: string; draft: string; words: number;
-  safety_ok: boolean; issues: string[]; checked_by: string; dashes: number; exclamations: number; error?: string;
+  id: number;
+  rating: number;
+  language: string;
+  urgent: boolean;
+  model_used: string;
+  draft: string;
+  words: number;
+  safety_ok: boolean;
+  issues: string[];
+  checked_by: string;
+  dashes: number;
+  exclamations: number;
+  error?: string;
 };
+
+// The fixture card as verified facts (P0.3-02: drafts read Business Knowledge, never a card).
+function factsOf(card: Record<string, unknown>): FactRow[] {
+  const keyOf: Record<string, string> = {
+    signature: "signature",
+    tone: "voice",
+    about: "description",
+    hours_note: "hours_note",
+    delivery: "delivery",
+    parking: "parking",
+    contact_phone: "contact",
+    avoid: "phrase_avoid",
+  };
+  const rows: FactRow[] = [];
+  for (const [k, v] of Object.entries(card)) {
+    if (k === "staff_names") {
+      for (const n of v as string[])
+        rows.push({
+          id: crypto.randomUUID(),
+          slot: `card.staff_names:${n}`,
+          key: "staff_member",
+          value: { name: n },
+          status: "verified",
+          review_after: null,
+        });
+    } else if (keyOf[k]) {
+      rows.push({
+        id: crypto.randomUUID(),
+        slot: `card.${k}`,
+        key: keyOf[k],
+        value: { text: String(v) },
+        status: "verified",
+        review_after: null,
+      });
+    }
+  }
+  return rows;
+}
 
 async function run() {
   const rows: Row[] = [];
+  const memory = await buildMemory({
+    business: fixtures.business,
+    facts: factsOf(fixtures.card),
+    approvedReplies: [],
+    openQuestions: [],
+  });
   for (const r of fixtures.reviews) {
     try {
       const review = { reviewer: r.reviewer, rating: r.rating, comment: r.comment };
       const c = await classify(review);
-      const d = await draftReply({ review, business: fixtures.business, card: fixtures.card, language: c.language, urgent: c.urgent });
-      const check = await checkDraft({ review, draft: d.text, card: fixtures.card });
+      const d = await draftGrounded(
+        { review, memory, language: c.language, urgent: c.urgent, recentReplies: [] },
+        (s, u, m) => draftMessage(s, u, m),
+      );
+      const text = d.output?.reply ?? "";
+      const failedCheck = d.checks.find((x) => !x.ok);
       rows.push({
-        id: r.id, rating: r.rating, language: c.language, urgent: c.urgent, model_used: d.model, draft: d.text,
-        words: d.text.split(/\s+/).filter(Boolean).length, safety_ok: check.ok, issues: check.issues, checked_by: check.model,
-        dashes: (d.text.match(/[—–]/g) ?? []).length, exclamations: (d.text.match(/!/g) ?? []).length,
+        id: r.id,
+        rating: r.rating,
+        language: c.language,
+        urgent: c.urgent,
+        model_used: d.model,
+        draft: text,
+        words: text.split(/\s+/).filter(Boolean).length,
+        safety_ok: d.ok,
+        issues: d.problems,
+        checked_by: failedCheck?.name === "model_check" || d.ok ? (d.checkModel ?? "code") : "code",
+        dashes: (text.match(/[—–]/g) ?? []).length,
+        exclamations: (text.match(/!/g) ?? []).length,
       });
     } catch (e) {
-      rows.push({ id: r.id, rating: r.rating, language: "", urgent: false, model_used: "", draft: "", words: 0, safety_ok: false, issues: [], checked_by: "", dashes: 0, exclamations: 0, error: String(e).slice(0, 200) });
+      rows.push({
+        id: r.id,
+        rating: r.rating,
+        language: "",
+        urgent: false,
+        model_used: "",
+        draft: "",
+        words: 0,
+        safety_ok: false,
+        issues: [],
+        checked_by: "",
+        dashes: 0,
+        exclamations: 0,
+        error: String(e).slice(0, 200),
+      });
     }
   }
   console.log(JSON.stringify({ requested: MODELS.draft, rows }, null, 2));
@@ -54,13 +143,17 @@ function summarize(name: string, o: { requested: string; rows: Row[] }) {
 }
 
 if (Deno.args[0] === "--compare") {
-  const [a, b] = await Promise.all(Deno.args.slice(1, 3).map(async (f) => JSON.parse(await Deno.readTextFile(f))));
+  const [a, b] = await Promise.all(
+    Deno.args.slice(1, 3).map(async (f) => JSON.parse(await Deno.readTextFile(f))),
+  );
   console.table([summarize(a.requested, a), summarize(b.requested, b)]);
   console.log("\nReviews where the two models differ on the safety check:");
   for (const ra of a.rows as Row[]) {
     const rb = (b.rows as Row[]).find((x) => x.id === ra.id)!;
     if (ra.safety_ok !== rb.safety_ok) {
-      console.log(`#${ra.id} (${ra.rating} stars): ${a.requested} ${ra.safety_ok ? "pass" : "FAIL " + ra.issues.join("; ")} | ${b.requested} ${rb.safety_ok ? "pass" : "FAIL " + rb.issues.join("; ")}`);
+      console.log(
+        `#${ra.id} (${ra.rating} stars): ${a.requested} ${ra.safety_ok ? "pass" : "FAIL " + ra.issues.join("; ")} | ${b.requested} ${rb.safety_ok ? "pass" : "FAIL " + rb.issues.join("; ")}`,
+      );
     }
   }
 } else {

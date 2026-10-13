@@ -6,7 +6,7 @@
 // machine.
 import assert from "node:assert/strict";
 import { businessFacts, cardFromFacts, type FactRow, loadCard } from "./facts.ts";
-import { draftReply, replySystem } from "./ai.ts";
+import { buildMemory, draftGrounded, replySystem, type System } from "./ai.ts";
 
 const DAY = 86_400_000;
 const future = new Date(Date.now() + 30 * DAY).toISOString();
@@ -61,18 +61,22 @@ Deno.test("loadCard asks the database for the trusted facts of one business and 
 });
 
 Deno.test("an unconfirmed AI suggestion never appears in a reply prompt or anything sent to the model", async () => {
-  // Even if the database handed back every row, the prompt is built only from the trusted ones.
-  const db = { rpc: () => Promise.resolve({ data: ROWS, error: null }) };
-  const card = await loadCard(db, "loc-1", "replies");
+  // Even if the database handed back every row, the memory and the prompt are built only from the trusted ones.
+  const memory = await buildMemory({ business: "Hamra Bakery", facts: ROWS, approvedReplies: [], openQuestions: [] });
   const review = { reviewer: "Maya", rating: 5, comment: "Is there parking? And can I book online?" };
-  const system = replySystem({ review, business: "Hamra Bakery", card, language: "en", urgent: false });
+  const flat = (s: System) => (typeof s === "string" ? s : s.map((p) => p.text).join("\n"));
+  const system = flat(replySystem(memory));
   assert.match(system, /A family bakery in Hamra\./);
   for (const s of UNTRUSTED) assert.ok(!system.includes(s), `prompt holds "${s}"`);
 
   const sent: string[] = [];
-  const send = (s: string, u: string) => { sent.push(s, u); return Promise.resolve({ text: "Thank you Maya.\nRami and the team", model: "stub" }); };
-  await draftReply({ review, business: "Hamra Bakery", card, language: "en", urgent: false }, send);
-  assert.equal(sent.length, 2);
+  const send = (s: System, u: string) => {
+    sent.push(flat(s), u);
+    return Promise.resolve({ text: JSON.stringify({ reply: "Thank you Maya.\nRami and the team", facts_used: [], language: "en", topics: [] }), model: "stub" });
+  };
+  await draftGrounded({ review, memory, language: "en", urgent: false, recentReplies: [] }, send,
+    { checkCall: (_m, s, u) => { sent.push(String(s), u); return Promise.resolve(JSON.stringify({ ok: true, issues: [] })); } });
+  assert.equal(sent.length, 4, "one draft call and one check call");
   for (const s of UNTRUSTED) assert.ok(!sent.join("\n").includes(s), `model call holds "${s}"`);
 });
 
@@ -86,7 +90,8 @@ Deno.test("a post's facts (what postSystem and the post check list) hold the sam
   assert.ok(!lines.includes("Lina") && !lines.includes("Rami"));
 });
 
-Deno.test("with no trusted facts the prompt says so and invents nothing", () => {
-  const system = replySystem({ review: { reviewer: "Sam", rating: 4, comment: "Nice" }, business: "Hamra Bakery", card: cardFromFacts([]), language: "en", urgent: false });
-  assert.match(system, /<business_facts>\n\(no extra facts\)\n<\/business_facts>/);
+Deno.test("with no trusted facts the memory says so and invents nothing", async () => {
+  const memory = await buildMemory({ business: "Hamra Bakery", facts: [], approvedReplies: [], openQuestions: [] });
+  assert.match(memory.text, /\(no facts yet\)/);
+  assert.deepEqual(memory.refs, {});
 });

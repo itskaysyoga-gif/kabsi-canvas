@@ -24,7 +24,8 @@ export async function approve(req: Request): Promise<Response> {
   try {
     if (b.do === "post") {
       const result = await publishReply({ reviewId: rv.id, text: b.text ?? "", approvedBy: user.id, channel: "dashboard", audit: auditHeaders(req, user.id) });
-      return json({ ok: true, state: result.state, publication: result.publication, publish_after: result.publishAfter });
+      // offers: "Save this as a rule?" or "Save this as a fact?" when the owner's edit taught Kabsi something (K-120.2).
+      return json({ ok: true, state: result.state, publication: result.publication, publish_after: result.publishAfter, offers: result.offers ?? [] });
     }
     if (b.do === "undo") {
       if (!b.publication_id) return fail("bad_input", "Missing approval.");

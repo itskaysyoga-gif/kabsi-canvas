@@ -598,8 +598,8 @@ Google stopped letting Kabsi read the reviews, usually because the Kabsi group w
 **My business isn't found in the search.**
 Use the exact Google Maps name plus city, or name plus street. It must have a Google Business Profile on Maps.
 
-**It says "Kabsi couldn't safely draft this one".**
-The draft failed the safety check twice. Write your own reply in the box, or tap Skip.
+**It says "Not ready: Kabsi couldn't safely verify this draft".**
+The draft failed a check twice, for example it named someone who is not in your facts, gave a price or opening time you never gave, or read like a reply you already posted. Kabsi shows the draft with the problems listed, never as ready. Tap **Fix it myself** to start from it, write your own reply, ask for changes, or tap Skip.
 
 **The email link says it has expired or was already used.**
 Links work once and last 72 hours (3 days). Open Kabsi and use Reviews, To reply. Tapping Approve a second time, or opening the link again, does nothing new: the page shows what already happened.
@@ -760,11 +760,14 @@ No. Google can reject replies that contain phone numbers, emails, links, social 
 **What if the AI makes a mistake?**
 You see the exact text before anything is posted and can edit or skip it. Drafts use only your facts and pass a safety check first.
 
+**Does Kabsi learn from my edits?**
+Only when you say so. When you change a draft the same way three times (for example making it shorter), Kabsi asks once "Save this as a rule?". When you add a fact to a reply (for example "We now open on Sundays"), it asks once "Save this as a fact?". **Save** adds it to About your business as a verified fact; **No thanks** and Kabsi never asks about it again. Reviews are never used as facts.
+
 **Will replies sound robotic?**
-Drafts are two to four short sentences, mention something the customer actually said, and use your sign-off and tone (Warm, Formal or Short & friendly).
+Drafts are two to four short sentences, mention something the customer actually said, and use your sign-off and tone (Warm, Formal or Short & friendly). Kabsi also looks at your last five approved replies to match how you write, and stops a draft that uses stock phrases such as "thrilled to hear" or that is too close to a reply you already posted. Drafts have no exclamation marks.
 
 **Can replies make things up?**
-Drafts use only the Verified facts in About your business. A missing fact is left out, never guessed. A suggestion you have not confirmed, a fact that is out of date, or a fact with two different answers is left out too.
+Drafts use only the Verified facts in About your business. A missing fact is left out, never guessed. A suggestion you have not confirmed, a fact that is out of date, or a fact with two different answers is left out too. If a reviewer asks about a person who is not in your facts (for example "Is Maria still working there?"), the draft does not say either way. Kabsi checks every name, price, opening time and service in a draft against your facts before you see it.
 
 **Will a reply offer discounts or refunds?**
 No. Drafts never offer discounts, refunds, vouchers, free items or compensation, and a code check blocks drafts that do.

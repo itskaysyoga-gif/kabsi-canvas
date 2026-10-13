@@ -1,8 +1,8 @@
 // Phase 4 pipeline: sync → classify → draft → safety check → owner email → approve → publish.
 import { admin, APP_URL, emailButton, emailLayout, emailLink, esc, sendEmail, sha256Hex } from "./kabsi.ts";
 import { listReviews } from "./google/index.ts";
-import { checkDraft, classify, draftReply, MODELS, newMeter, type Card } from "./ai.ts";
-import { loadCard } from "./facts.ts";
+import { buildMemory, classify, draftGrounded, draftMessage, editKinds, factAdditions, type Meter, MODELS, newMeter, RULE_TEXT, runRecord } from "./ai.ts";
+import type { FactRow } from "./facts.ts";
 import { recordAiUsage, takeAiBudget } from "./ai-budget.ts";
 import { isConciergeLocationId, matchConciergeReview, type ConciergeCandidate } from "./concierge.ts";
 import { auditedAdmin } from "./audit.ts";
@@ -81,7 +81,8 @@ export async function syncLocation(loc: Loc) {
   return added;
 }
 
-// ─── 2. Draft (classify + draft + safety; one retry, then blocked)
+// ─── 2. Draft: the grounded reply pipeline (P0.3-02, K-14, K-39, K-120). One retry, then the draft is kept with its
+// problems marked (state "blocked", never offered as ready).
 export async function draftReview(reviewId: string, instruction?: string) {
   const db = admin();
   const { data: rv, error } = await db.from("reviews")
@@ -93,18 +94,35 @@ export async function draftReview(reviewId: string, instruction?: string) {
   if (loc.status !== "active") throw new Error("location_not_active");
   // One generation from the business and global daily AI budget (K-100); throws "ai_budget_*" when used up.
   await takeAiBudget(rv.location_id);
-  // Only verified Business Knowledge meant for replies (P0.3-01, K-10, K-11).
-  const card = await loadCard(db, rv.location_id, "replies");
   const meter = newMeter();
   try {
-    return await draftWithChecks(rv, { name: loc.name, card }, meter, instruction);
+    return await draftWithChecks(rv, loc.name, meter, instruction);
   } finally {
     await recordAiUsage(rv.location_id, meter);
   }
 }
 
-type DraftRow = { id: string; reviewer_name: string | null; star_rating: number; comment: string | null; draft_attempts: number; language: string | null; urgency: string | null };
-async function draftWithChecks(rv: DraftRow, loc: { name: string; card: Card }, meter: ReturnType<typeof newMeter>, instruction?: string) {
+/** What a draft may draw on (K-120): verified facts for replies, open questions, and the owner's own recent replies
+ *  (the last 5 as style examples, the last 20 for the repeat check). Never review text. */
+export async function memoryInputs(db: ReturnType<typeof admin>, locationId: string) {
+  const [facts, questions, pubs] = await Promise.all([
+    db.rpc("draft_facts", { p_location: locationId, p_use: "replies" }),
+    db.from("knowledge_confirms").select("key").eq("location_id", locationId).eq("state", "open"),
+    db.from("publications").select("payload").eq("location_id", locationId).eq("target_type", "review_reply")
+      .is("payload_redacted_at", null).in("state", ["approved", "publishing", "published", "checking", "verifying", "verified"])
+      .order("created_at", { ascending: false }).limit(20),
+  ]);
+  for (const r of [facts, questions, pubs]) if (r.error) throw r.error;
+  const replies = ((pubs.data ?? []) as { payload: { text?: string } }[]).map((p) => p.payload?.text ?? "").filter(Boolean);
+  return {
+    facts: (facts.data ?? []) as FactRow[],
+    openQuestions: ((questions.data ?? []) as { key: string }[]).map((q) => q.key),
+    replies,
+  };
+}
+
+type DraftRow = { id: string; location_id: string; reviewer_name: string | null; star_rating: number; comment: string | null; draft_attempts: number; language: string | null; urgency: string | null };
+async function draftWithChecks(rv: DraftRow, business: string, meter: Meter, instruction?: string) {
   const db = admin();
   const review = { reviewer: rv.reviewer_name ?? "A customer", rating: rv.star_rating, comment: rv.comment };
 
@@ -113,39 +131,38 @@ async function draftWithChecks(rv: DraftRow, loc: { name: string; card: Card }, 
   let reasons: string[] = [];
   if (!language) ({ language, urgent, reasons } = await classify(review, meter));
 
+  const inputs = await memoryInputs(db, rv.location_id);
+  const memory = await buildMemory({ business, facts: inputs.facts, approvedReplies: inputs.replies.slice(0, 5), openQuestions: inputs.openQuestions, language: language! });
   const { data: last } = await db.from("reply_drafts").select("version, body").eq("review_id", rv.id).order("version", { ascending: false }).limit(1).maybeSingle();
-  let body = "";
-  let draftModel: string = MODELS.draft;
-  let check = { ok: false, issues: [] as string[] };
-  for (let attempt = 0; attempt < 2; attempt++) {
-    // Second attempt: rewrite the failed draft, telling the model what the check flagged.
-    const fix = attempt > 0 && body && check.issues.length ? `Fix these problems: ${check.issues.join("; ")}` : undefined;
-    try {
-      const drafted = await draftReply({
-        review, business: loc.name, card: loc.card, language: language!, urgent, meter,
-        instruction: [instruction, fix].filter(Boolean).join(". ") || undefined, previous: fix ? body : last?.body,
-      });
-      body = drafted.text;
-      draftModel = drafted.model;
-    } catch (e) {
-      if (!String(e).includes("empty reply")) throw e;
-      body = "";
-      check = { ok: false, issues: ["the model returned an empty draft"] };
-      continue;
-    }
-    check = await checkDraft({ review, draft: body, card: loc.card, meter });
-    if (check.ok) break;
+  // An empty answer counts as an answer that does not parse: the draft is kept back, never retried blindly.
+  const send = (system: Parameters<typeof draftMessage>[0], user: string, max: number) =>
+    draftMessage(system, user, max, meter).catch((e) => {
+      if (String(e).includes("empty reply")) return { text: "", model: MODELS.draft };
+      throw e;
+    });
+
+  let result = await draftGrounded({ review, memory, language: language!, urgent, recentReplies: inputs.replies, instruction, previous: instruction ? last?.body : undefined }, send, { meter });
+  await db.from("ai_runs").insert(runRecord(result, { locationId: rv.location_id, reviewId: rv.id, workflow: "review_reply", memoryVersion: memory.version }));
+  if (!result.ok && result.output) {
+    // Second attempt: rewrite the failed draft, telling the model what the checks flagged.
+    const fix = `Fix these problems: ${result.problems.join("; ")}`;
+    result = await draftGrounded({ review, memory, language: language!, urgent, recentReplies: inputs.replies, instruction: [instruction, fix].filter(Boolean).join(". "), previous: result.output.reply }, send, { meter });
+    await db.from("ai_runs").insert(runRecord(result, { locationId: rv.location_id, reviewId: rv.id, workflow: "review_reply", memoryVersion: memory.version }));
   }
-  await db.from("reply_drafts").insert({
+  const body = result.output?.reply ?? "";
+  const factIds = (result.output?.facts_used ?? []).filter((r) => r in memory.refs).map((r) => memory.refs[r]);
+  const { data: draft, error: de } = await db.from("reply_drafts").insert({
     review_id: rv.id, version: (last?.version ?? 0) + 1, body, source: instruction ? "ai_edit" : "ai", instruction: instruction ?? null,
-    safety_ok: check.ok, safety_notes: check.issues, model: draftModel,
-  });
+    safety_ok: result.ok, safety_notes: result.problems, model: result.model, prompt_version: result.promptVersion, facts_used: factIds,
+  }).select("id").single();
+  if (de) throw de;
+  await db.from("ai_runs").update({ draft_id: draft.id }).eq("review_id", rv.id).is("draft_id", null);
   await db.from("reviews").update({
     language, urgency: urgent ? "urgent" : "normal", ...(reasons.length ? { urgency_reasons: reasons } : {}),
-    state: check.ok ? "drafted" : "blocked", draft_attempts: rv.draft_attempts + 1,
+    state: result.ok ? "drafted" : "blocked", draft_attempts: rv.draft_attempts + 1,
     ...(instruction ? {} : { notified_at: null }),
   }).eq("id", rv.id);
-  return { ok: check.ok, body, issues: check.issues };
+  return { ok: result.ok, body, issues: result.problems };
 }
 
 // ─── 3. Signed action links (D103, K-17): 32 random bytes, only the SHA-256 is stored, single use, 72 hours (the database
@@ -292,7 +309,7 @@ export async function notifyLocation(loc: Loc) {
 // job 10 seconds later (the undo window, K-70). A second approval of the same reply, from either channel, gets the
 // same publication back (K-38). The publish job makes the one Google call, or the concierge task for a business in
 // early access (D267). `audit` carries the owner's request into the audit log (P0.1-10, _shared/audit.ts).
-export type Approval = { publication: string; state: string; publishAfter: string | null; created: boolean };
+export type Approval = { publication: string; state: string; publishAfter: string | null; created: boolean; offers?: StyleOffer[] };
 
 export async function publishReply(o: { reviewId: string; text: string; approvedBy: string; channel: "dashboard" | "email_link"; audit?: Record<string, string> }): Promise<Approval> {
   const db = o.audit ? auditedAdmin(o.audit) : admin();
@@ -308,8 +325,40 @@ export async function publishReply(o: { reviewId: string; text: string; approved
     throw error;
   }
   const r = data as { publication_id: string; state: string; route: string; publish_after: string | null; created: boolean };
+  const offers = r.created ? await learnFromApproval(o.reviewId, text, o.approvedBy) : [];
   // Concierge keeps its own word for the screens ("a person posts it").
-  return { publication: r.publication_id, state: r.route === "concierge" ? "manual_queued" : r.state, publishAfter: r.publish_after, created: r.created };
+  return { publication: r.publication_id, state: r.route === "concierge" ? "manual_queued" : r.state, publishAfter: r.publish_after, created: r.created, offers };
+}
+
+export type StyleOffer = { id: string; kind: string; text: string };
+
+// After an approval (K-39 record, K-120.2): the approver goes on the draft's AI runs, and if the owner changed Kabsi's
+// draft, the kind of change is noted. Three alike, or a fact the owner added, come back as offers the owner answers;
+// nothing is saved without them. A failure here never undoes the approval.
+async function learnFromApproval(reviewId: string, text: string, approvedBy: string): Promise<StyleOffer[]> {
+  const db = admin();
+  try {
+    await db.from("ai_runs").update({ approved_by: approvedBy, approved_at: new Date().toISOString() })
+      .eq("review_id", reviewId).is("approved_by", null);
+    const { data: rv } = await db.from("reviews").select("location_id, reviewer_name").eq("id", reviewId).single();
+    const { data: draft } = await db.from("reply_drafts").select("body, source").eq("review_id", reviewId)
+      .order("version", { ascending: false }).limit(1).maybeSingle();
+    if (!rv || !draft?.body || draft.source === "owner" || draft.body.trim() === text.trim()) return [];
+    const kinds = editKinds(draft.body, text, rv.reviewer_name ?? "");
+    const { data: facts } = await db.rpc("draft_facts", { p_location: rv.location_id, p_use: null });
+    const known = ((facts ?? []) as { value: Record<string, unknown> }[]).map((f) => JSON.stringify(f.value)).join("\n");
+    const additions = factAdditions(draft.body, text, known);
+    if (!kinds.length && !additions.length) return [];
+    const { data, error } = await db.rpc("record_draft_edit", {
+      p_location: rv.location_id, p_review: reviewId, p_kinds: kinds,
+      p_rules: Object.fromEntries(kinds.map((k) => [k, RULE_TEXT[k]])), p_additions: additions,
+    });
+    if (error) throw error;
+    return (data ?? []) as StyleOffer[];
+  } catch (e) {
+    console.log(JSON.stringify({ fn: "reviews", ok: false, learn_from_approval: String(e).slice(0, 200) }));
+    return [];
+  }
 }
 
 // Undo inside the 10 seconds (K-70). Throws "too_late" once the publish job may have started.
