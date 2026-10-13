@@ -93,7 +93,7 @@ select is((select array_agg(key || '=' || coalesce((review_after::date - now()::
 
 select is(pg_temp.draft(), array['card.about=Family bakery in Hamra', 'card.hours_note=Open 9 to 18, closed Sundays',
   'card.price_notes=Cakes from $20', 'card.signature=The Hamra team', 'card.staff_names:' || md5('"Rami"') || '=Rami',
-  'card.wifi=Free for customers'], 'the reply facts are the verified ones');
+  'card.tone=warm', 'card.wifi=Free for customers'], 'the reply facts are the verified ones (the tone came with the business)');
 select ok(not ('card.signature=The Hamra team' = any (pg_temp.draft('posts'))) and not exists (
   select 1 from unnest(pg_temp.draft('posts')) s where s like 'card.staff_names%'), 'posts get neither the sign-off nor staff names');
 
