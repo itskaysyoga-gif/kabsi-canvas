@@ -61,15 +61,20 @@ export type FactUse = "replies" | "posts";
 /** The facts a draft may use, in the shape the prompts read. Only verified, current facts that are not past their
  *  ask-again date count; anything else is dropped here too, whatever the caller passed. The slot names the field of
  *  About your business (card.<field>[:<item>]); profile details (profile.*) are Google Protection's, not drafts'. */
+/** Whether a draft may use this fact: verified, current, within its ask-again date. */
+export const isTrusted = (f: FactRow, now = Date.now()) =>
+  f.status === "verified" && !f.superseded_by && !!f.value && !(f.review_after && Date.parse(f.review_after) <= now);
+/** The field of About your business a fact belongs to (card.<field>[:<item>]), or null for a profile detail. */
+export const fieldOfSlot = (slot: string) => /^card\.([a-z_]+)(?::.+)?$/.exec(slot)?.[1] ?? null;
+
 export function cardFromFacts(rows: FactRow[], now = Date.now()): KnowledgeCard {
   const card: KnowledgeCard = {};
   for (const f of rows) {
-    if (f.status !== "verified" || f.superseded_by || !f.value) continue;
-    if (f.review_after && Date.parse(f.review_after) <= now) continue;
+    if (!isTrusted(f, now)) continue;
     const m = /^card\.([a-z_]+)(?::.+)?$/.exec(f.slot);
     if (!m) continue;
     const field = m[1];
-    const v = f.value;
+    const v = f.value!;
     if (field === "staff_names") {
       const name = str(v.name);
       if (name) (card.staff_names ??= []).push(name);

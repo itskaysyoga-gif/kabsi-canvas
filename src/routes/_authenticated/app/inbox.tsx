@@ -35,12 +35,14 @@ import { myLatestLocation } from "@/lib/onboarding";
 import {
   addTestReview,
   amStaff,
+  answerStyleOffer,
   handleOffline,
   inboxReviews,
   postReply,
   redraftReply,
   skipReview,
   type InboxReview,
+  type StyleOffer,
 } from "@/lib/reviews";
 import { track } from "@/lib/telemetry";
 import { cn } from "@/lib/utils";
@@ -349,6 +351,10 @@ function ReviewCard({ review }: { review: InboxReview }) {
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
   const [done, setDone] = useState("");
+  const [offers, setOffers] = useState<StyleOffer[]>([]);
+  // A draft that failed a check is shown with its problems, never as ready (K-14 step 6).
+  const flagged =
+    review.draft && !review.draft.safety_ok && review.draft.body ? review.draft : null;
   const refresh = () =>
     Promise.all(
       [["inbox"], ["waiting-count"], ["dashboard"], ["activity"], ["all-reviews"]].map((queryKey) =>
@@ -366,6 +372,7 @@ function ReviewCard({ review }: { review: InboxReview }) {
       if (kind === "post") {
         const posted = await postReply(review.id, text.trim());
         track("reply_published", { channel: "dashboard" });
+        setOffers(posted.offers ?? []);
         setDone(
           posted.state === "manual_queued"
             ? `${CONCIERGE_COPY.posted} ${CONCIERGE_COPY.waiting}`
@@ -405,14 +412,16 @@ function ReviewCard({ review }: { review: InboxReview }) {
 
   if (done)
     return (
-      <div
-        className="flex items-center gap-3 rounded-large bg-kb-white p-5 text-sm shadow-kb"
-        role="status"
-      >
-        <CheckCircle2 className="size-5 text-kb-green" aria-hidden="true" />
-        <span>
-          <b>{review.reviewer_name ?? "A customer"}:</b> {done}
-        </span>
+      <div className="rounded-large bg-kb-white p-5 text-sm shadow-kb">
+        <div className="flex items-center gap-3" role="status">
+          <CheckCircle2 className="size-5 text-kb-green" aria-hidden="true" />
+          <span>
+            <b>{review.reviewer_name ?? "A customer"}:</b> {done}
+          </span>
+        </div>
+        {offers.map((o) => (
+          <OfferCard key={o.id} offer={o} />
+        ))}
       </div>
     );
 
@@ -460,6 +469,32 @@ function ReviewCard({ review }: { review: InboxReview }) {
               ? "Change anything you like. Kabsi publishes exactly this text after you approve."
               : "Kabsi couldn't safely draft this one. Write your own reply, ask for a new version, or skip it."}
           </p>
+          {flagged ? (
+            <div className="mt-3 rounded-card border border-kb-amber/30 bg-kb-amber-soft p-4 text-sm">
+              <p className="font-bold text-kb-amber">
+                Not ready: Kabsi couldn't safely verify this draft
+              </p>
+              <ul className="mt-1 list-disc space-y-1 pl-5 text-kb-ink">
+                {(flagged.safety_notes ?? []).slice(0, 4).map((n) => (
+                  <li key={n}>{n}</li>
+                ))}
+              </ul>
+              <p
+                dir="auto"
+                className="mt-3 whitespace-pre-wrap rounded-card bg-kb-white p-3 leading-6"
+              >
+                {flagged.body}
+              </p>
+              <Button
+                variant="secondary"
+                size="compact"
+                className="mt-3"
+                onClick={() => setText(flagged.body)}
+              >
+                Fix it myself
+              </Button>
+            </div>
+          ) : null}
           <Textarea
             dir="auto"
             id={`reply-${review.id}`}
@@ -646,5 +681,65 @@ function StaffTestTool({ locationId }: { locationId: string }) {
         {msg ? <p className="text-sm text-kb-stone">{msg}</p> : null}
       </div>
     </details>
+  );
+}
+
+// "Save this as a rule?" or "Save this as a fact?" (K-120.2). Kabsi never learns silently: only Save keeps it, as a
+// verified fact in About your business.
+function OfferCard({ offer }: { offer: StyleOffer }) {
+  const [state, setState] = useState<"open" | "busy" | "saved" | "declined" | "error">("open");
+  const isFact = offer.kind === "fact";
+  async function answer(save: boolean) {
+    setState("busy");
+    try {
+      await answerStyleOffer(offer.id, save);
+      setState(save ? "saved" : "declined");
+    } catch {
+      setState("error");
+    }
+  }
+  if (state === "saved" || state === "declined")
+    return (
+      <p className="mt-3 text-sm text-kb-stone" role="status">
+        {state === "saved"
+          ? "Saved in About your business. New drafts follow it."
+          : "OK, Kabsi won't ask about this again."}
+      </p>
+    );
+  return (
+    <div className="mt-4 rounded-card border border-kb-hairline p-4">
+      <p className="font-bold">{isFact ? "Save this as a fact?" : "Save this as a rule?"}</p>
+      <p className="mt-1 text-kb-stone">
+        {isFact
+          ? "You added this to the reply. Kabsi can use it in later drafts."
+          : "You made this change to three drafts."}
+      </p>
+      <p dir="auto" className="mt-2 rounded-card bg-kb-sand p-3">
+        {offer.text}
+      </p>
+      {state === "error" ? (
+        <p className="mt-2 text-kb-red" role="alert">
+          Couldn't save it. Add it in About your business instead.
+        </p>
+      ) : null}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button
+          variant="secondary"
+          size="compact"
+          disabled={state === "busy"}
+          onClick={() => void answer(true)}
+        >
+          {isFact ? "Save as a fact" : "Save as a rule"}
+        </Button>
+        <Button
+          variant="ghost"
+          size="compact"
+          disabled={state === "busy"}
+          onClick={() => void answer(false)}
+        >
+          No thanks
+        </Button>
+      </div>
+    </div>
   );
 }

@@ -26,8 +26,11 @@ export type InboxReview = {
   reply_state_reason: string | null;
   review_created_at: string | null;
   is_backlog: boolean;
-  draft: { body: string; safety_ok: boolean; version: number } | null;
+  /** The latest draft. safety_notes: what the checks flagged when safety_ok is false (shown, never as ready). */
+  draft: { body: string; safety_ok: boolean; version: number; safety_notes?: string[] } | null;
 };
+/** "Save this as a rule?" or "Save this as a fact?" after an edit (P0.3-02, K-120.2). */
+export type StyleOffer = { id: string; kind: string; text: string };
 
 type ApiError = { error?: string; message?: string };
 async function readJson<T>(res: Response): Promise<T> {
@@ -49,7 +52,7 @@ export async function inboxReviews(
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, location_id, reviewer_name, star_rating, comment, language, urgency, state, existing_reply, reply_state, reply_state_reason, review_created_at, is_backlog, reply_drafts(body, safety_ok, version)",
+      "id, location_id, reviewer_name, star_rating, comment, language, urgency, state, existing_reply, reply_state, reply_state_reason, review_created_at, is_backlog, reply_drafts(body, safety_ok, version, safety_notes)",
     )
     .eq("location_id", locationId)
     .in("state", states)
@@ -79,9 +82,17 @@ async function authed(path: string, body: Record<string, unknown>) {
 
 // Approves the reply; it goes to Google after a 10 second undo window (P0.1-13a, K-70).
 export async function postReply(reviewId: string, text: string) {
-  return readJson<{ ok: true; state: string; publication?: string; publish_after?: string | null }>(
-    await authed("api/approve", { review_id: reviewId, do: "post", text }),
-  );
+  return readJson<{
+    ok: true;
+    state: string;
+    publication?: string;
+    publish_after?: string | null;
+    offers?: StyleOffer[];
+  }>(await authed("api/approve", { review_id: reviewId, do: "post", text }));
+}
+export async function answerStyleOffer(offerId: string, save: boolean) {
+  const { error } = await supabase.rpc("answer_style_offer", { p_offer: offerId, p_save: save });
+  if (error) throw new Error(error.message);
 }
 export async function redraftReply(reviewId: string, instruction: string) {
   return readJson<{ ok: true; draft: string | null; issues: string[] }>(

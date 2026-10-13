@@ -104,6 +104,16 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   `remove_fact` removes the row, every version and any question about it; every action is audited without the value;
   `update_knowledge_card` is retired (nobody may run it, no function calls it). The prompt side is
   `supabase/functions/_shared/facts.test.ts` (Deno, stub model calls only).
+- `grounded_replies.sql` (P0.3-02): `ai_runs` and `style_edits` are closed to the browser, `style_offers` is read-only
+  for members; a run is recorded with a prompt version like `reply.v1` and a hashed input (text is refused); a draft
+  records its prompt version and the facts it used; three edits of one kind make one "Save this as a rule?" offer and a
+  fourth does not ask again; an added fact makes one "Save this as a fact?" offer, asked once; only the owner or a
+  manager answers; yes saves a verified owner rule or adds the sentence to what to mention, both through `save_fact`;
+  no saves nothing and is never asked again; every answer is audited without the text. The pipeline itself is
+  `supabase/functions/_shared/ai/ai.test.ts` (Deno, stub model calls only): the memory summary (ids, voice, rules,
+  open questions, versioned, style examples apart), every code check, the contract runner (structured output, a fact id
+  outside the trusted set, the "Is Maria still working there?" case, the model check, the `ai_runs` record), and edit
+  learning.
 - `publication_pipeline.sql` (P0.1-13a) and `publication_content.sql` (P0.1-13b): the one publication pipeline for
   replies, posts, photos, special hours and Google Protection put-backs. Per kind: one publication however many times
   or from whichever channel it is approved, the item moves to "on its way" and back on undo inside 10 seconds, one
