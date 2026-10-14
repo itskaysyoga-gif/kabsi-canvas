@@ -84,7 +84,15 @@ async function run() {
       const review = { reviewer: r.reviewer, rating: r.rating, comment: r.comment };
       const c = await classify(review);
       const d = await draftGrounded(
-        { review, memory, language: c.language ?? "unknown", risk: c.risk, reasons: c.reasons, holding: c.risk === "high", recentReplies: [] },
+        {
+          review,
+          memory,
+          language: c.language ?? "unknown",
+          risk: c.risk,
+          reasons: c.reasons,
+          holding: c.risk === "high",
+          recentReplies: [],
+        },
         (s, u, m) => draftMessage(s, u, m),
       );
       const text = d.output?.reply ?? "";
