@@ -1,6 +1,6 @@
 -- P0.2-05: email approvals tightened (K-17, K-38, K-70, A16). Opening a link (GET) never changes anything; a link
 -- does its one action once and a second POST gets the first result; links last 72 hours and are bound to one item
--- and one recipient; profile changes, hours and urgent reviews need the recipient signed in, and another account's
+-- and one recipient; profile changes, hours and high-risk reviews need the recipient signed in, and another account's
 -- session is refused; undo from the email page cancels; every use is in the audit log with the channel email_link,
 -- the user, the IP country and the user agent; kabsi_cleanup_action_tokens keeps working.
 begin;
@@ -14,10 +14,10 @@ update public.locations set consent_at = now(), access_granted_at = now(), googl
   google_location_id = 'locations/mock-victim', status = 'active'
  where id = '00000000-0000-4000-8000-0000000000c1';
 update public.profile_changes set status = 'expired' where location_id = '00000000-0000-4000-8000-0000000000c1';
-insert into public.reviews (id, location_id, google_review_id, star_rating, review_created_at, state, urgency)
-values ('00000000-0000-4000-8000-000000000501', '00000000-0000-4000-8000-0000000000c1', 'mail-review-1', 5, now(), 'drafted', 'normal'),
-       ('00000000-0000-4000-8000-000000000502', '00000000-0000-4000-8000-0000000000c1', 'mail-review-2', 4, now(), 'drafted', 'normal'),
-       ('00000000-0000-4000-8000-000000000503', '00000000-0000-4000-8000-0000000000c1', 'mail-review-3', 1, now(), 'drafted', 'urgent');
+insert into public.reviews (id, location_id, google_review_id, star_rating, review_created_at, state, risk)
+values ('00000000-0000-4000-8000-000000000501', '00000000-0000-4000-8000-0000000000c1', 'mail-review-1', 5, now(), 'drafted', 'low'),
+       ('00000000-0000-4000-8000-000000000502', '00000000-0000-4000-8000-0000000000c1', 'mail-review-2', 4, now(), 'drafted', 'low'),
+       ('00000000-0000-4000-8000-000000000503', '00000000-0000-4000-8000-0000000000c1', 'mail-review-3', 1, now(), 'drafted', 'high');
 
 create function pg_temp.token(p_hash text, p_action text, p_type text, p_target text,
   p_expires interval default interval '72 hours', p_user text default '00000000-0000-4000-8000-0000000000a1') returns void
@@ -142,10 +142,10 @@ select is((select row(actor_type, actor_id, channel)::text from public.audit_eve
 select is((select row(actor_type, channel)::text from public.audit_events where action = 'review_skipped' and channel = 'dashboard'
             and object_id = '00000000-0000-4000-8000-000000000502'), null, 'not dashboard');
 
--- Sign-in for urgent reviews, hours and profile changes (K-17) -------------------------------------------------------------
+-- Sign-in for high-risk reviews, hours and profile changes (K-17) -------------------------------------------------------------
 
 select pg_temp.token('mail-urgent', 'see_draft', 'review', '00000000-0000-4000-8000-000000000503');
-select is(pg_temp.view('mail-urgent') -> 'sign_in', 'true'::jsonb, 'an urgent review asks to sign in');
+select is(pg_temp.view('mail-urgent') -> 'sign_in', 'true'::jsonb, 'a high-risk review asks to sign in');
 select is((select row(v -> 'signed_in', v -> 'other_account')::text from (select pg_temp.view('mail-urgent', '00000000-0000-4000-8000-0000000000b2') v) x),
   row('false'::jsonb, 'true'::jsonb)::text, 'the page knows another account is signed in');
 select throws_ok($$ select pg_temp.use('mail-urgent', 'post') $$, 'P0001', 'sign_in_required', 'approving it signed out is refused');

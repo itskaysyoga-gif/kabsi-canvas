@@ -1,7 +1,8 @@
 // Phase 4 pipeline: sync → classify → draft → safety check → owner email → approve → publish.
 import { admin, APP_URL, emailButton, emailLayout, emailLink, esc, sendEmail, sha256Hex } from "./kabsi.ts";
 import { listReviews } from "./google/index.ts";
-import { buildMemory, classify, draftGrounded, draftMessage, editKinds, factAdditions, type Meter, MODELS, newMeter, RULE_TEXT, runRecord } from "./ai.ts";
+import { buildMemory, classify, draftGrounded, draftMessage, editKinds, factAdditions, HIGH_RISK_TITLE, industryOf, issueLines, type Meter, MODELS, newMeter, type Risk, RULE_TEXT, runRecord } from "./ai.ts";
+import { highRiskBlock, instantEmail, riskPlan } from "./review-risk.ts";
 import type { FactRow } from "./facts.ts";
 import { recordAiUsage, takeAiBudget } from "./ai-budget.ts";
 import { isConciergeLocationId, matchConciergeReview, type ConciergeCandidate } from "./concierge.ts";
@@ -83,20 +84,26 @@ export async function syncLocation(loc: Loc) {
 
 // ─── 2. Draft: the grounded reply pipeline (P0.3-02, K-14, K-39, K-120). One retry, then the draft is kept with its
 // problems marked (state "blocked", never offered as ready).
-export async function draftReview(reviewId: string, instruction?: string) {
+// Risk first (K-13, P0.3-03): a high-risk review gets no draft. It waits as "blocked" with its reasons and the owner
+// gets the checklist; a neutral holding reply is written only when the owner asks (`holding`), never before.
+export async function draftReview(reviewId: string, instruction?: string, o: { holding?: boolean } = {}) {
   const db = admin();
   const { data: rv, error } = await db.from("reviews")
-    .select("id, location_id, reviewer_name, star_rating, comment, draft_attempts, language, urgency, locations(name, status)")
+    .select("id, location_id, reviewer_name, star_rating, comment, draft_attempts, language, risk, risk_reasons, locations(name, status, category, category_label)")
     .eq("id", reviewId).single();
   if (error) throw error;
-  const loc = rv.locations as unknown as { name: string; status: string };
+  const loc = rv.locations as unknown as { name: string; status: string; category: string | null; category_label: string | null };
   // Drafting is part of an active trial or plan (Q05): a Free business gets no new drafts, from any caller.
   if (loc.status !== "active") throw new Error("location_not_active");
   // One generation from the business and global daily AI budget (K-100); throws "ai_budget_*" when used up.
   await takeAiBudget(rv.location_id);
   const meter = newMeter();
   try {
-    return await draftWithChecks(rv, loc.name, meter, instruction);
+    const { data: cat } = await db.from("knowledge_facts").select("value").eq("location_id", rv.location_id)
+      .eq("key", "main_category").order("version", { ascending: false }).limit(1).maybeSingle();
+    const main = (cat?.value ?? {}) as { display?: string; raw?: string };
+    const industry = industryOf([loc.category, loc.category_label, main.display, main.raw]);
+    return await draftWithChecks(rv, loc.name, meter, { instruction, holding: o.holding === true, industry });
   } finally {
     await recordAiUsage(rv.location_id, meter);
   }
@@ -121,19 +128,30 @@ export async function memoryInputs(db: ReturnType<typeof admin>, locationId: str
   };
 }
 
-type DraftRow = { id: string; location_id: string; reviewer_name: string | null; star_rating: number; comment: string | null; draft_attempts: number; language: string | null; urgency: string | null };
-async function draftWithChecks(rv: DraftRow, business: string, meter: Meter, instruction?: string) {
+type DraftRow = { id: string; location_id: string; reviewer_name: string | null; star_rating: number; comment: string | null; draft_attempts: number; language: string | null; risk: string | null; risk_reasons: string[] | null };
+async function draftWithChecks(rv: DraftRow, business: string, meter: Meter, o: { instruction?: string; holding: boolean; industry: ReturnType<typeof industryOf> }) {
   const db = admin();
+  const { instruction, industry } = o;
   const review = { reviewer: rv.reviewer_name ?? "A customer", rating: rv.star_rating, comment: rv.comment };
 
+  // Classified once, when the review is first drafted; later versions keep that level. A review the code rules mark
+  // high is not sent to a model, so it may have no language: the holding reply then answers in the review's language.
   let language = rv.language as string | null;
-  let urgent = rv.urgency === "urgent";
-  let reasons: string[] = [];
-  if (!language) ({ language, urgent, reasons } = await classify(review, meter));
+  let risk = (rv.risk ?? "low") as Risk;
+  let reasons: string[] = rv.risk_reasons ?? [];
+  if (!language && risk !== "high") ({ language, risk, reasons } = await classify(review, { industry, meter }));
+  const { data: last } = await db.from("reply_drafts").select("version, body").eq("review_id", rv.id).order("version", { ascending: false }).limit(1).maybeSingle();
+  const plan = riskPlan({ risk, holding: o.holding, hasDraft: !!last, instruction });
+  if (plan === "no_draft") {
+    await db.from("reviews").update({
+      language, risk, risk_reasons: reasons, state: "blocked", draft_attempts: rv.draft_attempts + 1, notified_at: null,
+    }).eq("id", rv.id);
+    return { ok: false, body: "", issues: [] as string[], risk };
+  }
+  const holding = plan === "holding";
 
   const inputs = await memoryInputs(db, rv.location_id);
-  const memory = await buildMemory({ business, facts: inputs.facts, approvedReplies: inputs.replies.slice(0, 5), openQuestions: inputs.openQuestions, language: language! });
-  const { data: last } = await db.from("reply_drafts").select("version, body").eq("review_id", rv.id).order("version", { ascending: false }).limit(1).maybeSingle();
+  const memory = await buildMemory({ business, facts: inputs.facts, approvedReplies: inputs.replies.slice(0, 5), openQuestions: inputs.openQuestions, language: language ?? "unknown" });
   // An empty answer counts as an answer that does not parse: the draft is kept back, never retried blindly.
   const send = (system: Parameters<typeof draftMessage>[0], user: string, max: number) =>
     draftMessage(system, user, max, meter).catch((e) => {
@@ -141,28 +159,31 @@ async function draftWithChecks(rv: DraftRow, business: string, meter: Meter, ins
       throw e;
     });
 
-  let result = await draftGrounded({ review, memory, language: language!, urgent, recentReplies: inputs.replies, instruction, previous: instruction ? last?.body : undefined }, send, { meter });
+  const base = { review, memory, language: language ?? "unknown", risk, reasons, industry, holding, recentReplies: inputs.replies };
+  let result = await draftGrounded({ ...base, instruction, previous: instruction ? last?.body : undefined }, send, { meter });
   await db.from("ai_runs").insert(runRecord(result, { locationId: rv.location_id, reviewId: rv.id, workflow: "review_reply", memoryVersion: memory.version }));
   if (!result.ok && result.output) {
     // Second attempt: rewrite the failed draft, telling the model what the checks flagged.
     const fix = `Fix these problems: ${result.problems.join("; ")}`;
-    result = await draftGrounded({ review, memory, language: language!, urgent, recentReplies: inputs.replies, instruction: [instruction, fix].filter(Boolean).join(". "), previous: result.output.reply }, send, { meter });
+    result = await draftGrounded({ ...base, instruction: [instruction, fix].filter(Boolean).join(". "), previous: result.output.reply }, send, { meter });
     await db.from("ai_runs").insert(runRecord(result, { locationId: rv.location_id, reviewId: rv.id, workflow: "review_reply", memoryVersion: memory.version }));
   }
   const body = result.output?.reply ?? "";
   const factIds = (result.output?.facts_used ?? []).filter((r) => r in memory.refs).map((r) => memory.refs[r]);
   const { data: draft, error: de } = await db.from("reply_drafts").insert({
-    review_id: rv.id, version: (last?.version ?? 0) + 1, body, source: instruction ? "ai_edit" : "ai", instruction: instruction ?? null,
+    review_id: rv.id, version: (last?.version ?? 0) + 1, body, source: instruction ? "ai_edit" : "ai",
+    instruction: instruction ?? (o.holding ? "Neutral holding reply" : null),
     safety_ok: result.ok, safety_notes: result.problems, model: result.model, prompt_version: result.promptVersion, facts_used: factIds,
   }).select("id").single();
   if (de) throw de;
   await db.from("ai_runs").update({ draft_id: draft.id }).eq("review_id", rv.id).is("draft_id", null);
   await db.from("reviews").update({
-    language, urgency: urgent ? "urgent" : "normal", ...(reasons.length ? { urgency_reasons: reasons } : {}),
+    language, risk, risk_reasons: reasons,
     state: result.ok ? "drafted" : "blocked", draft_attempts: rv.draft_attempts + 1,
-    ...(instruction ? {} : { notified_at: null }),
+    // A version the owner asked for (an instruction, or the holding reply) sends no new email.
+    ...(instruction || o.holding ? {} : { notified_at: null }),
   }).eq("id", rv.id);
-  return { ok: result.ok, body, issues: result.problems };
+  return { ok: result.ok, body, issues: result.problems, risk };
 }
 
 // ─── 3. Signed action links (D103, K-17): 32 random bytes, only the SHA-256 is stored, single use, 72 hours (the database
@@ -179,7 +200,7 @@ export async function actionLink(o: { locationId: string; userId: string; action
 }
 
 // ─── 4. Owner emails
-type PendingReview = { id: string; reviewer_name: string | null; star_rating: number; comment: string | null; urgency: string; state: string; is_backlog: boolean };
+type PendingReview = { id: string; reviewer_name: string | null; star_rating: number; comment: string | null; risk: string; risk_reasons: string[] | null; state: string; is_backlog: boolean };
 
 function localHour(tz: string) {
   return Number(new Intl.DateTimeFormat("en-GB", { hour: "numeric", hour12: false, timeZone: tz }).format(new Date()));
@@ -199,10 +220,13 @@ const link = (url: string, label: string) => emailLink(label, url);
 // yellow "Review reply" and the layout button is left out (ownButton), with "Open Kabsi" as a text link beside
 // Edit and Skip, on a line that wraps on a phone.
 async function reviewBlock(loc: Loc, r: PendingReview, userId: string | null, withPost: boolean) {
-  const draft = await latestDraft(r.id);
+  const draft = r.risk === "high" ? null : await latestDraft(r.id);
   const head = `<p style="margin:0 0 8px 0;"><strong>${esc(r.reviewer_name ?? "A customer")}</strong> · Rating ${r.star_rating} of 5</p>`;
   const reviewText = r.comment ? quote(r.comment) : `<p style="margin:0 0 16px 0;color:#5E5B55;">No written review, just a rating.</p>`;
   if (!userId) return { html: head + reviewText, text: `${r.reviewer_name}: ${r.star_rating}/5\n${r.comment ?? ""}` };
+  // K-13: a high-risk review has no draft and no approve link; the email is the checklist (the layout's one button
+  // opens Kabsi). A holding reply the owner asked for is approved in Kabsi, signed in.
+  if (r.risk === "high") return highRiskBlock(r, head + reviewText);
   const mk = (action: string) => actionLink({ locationId: loc.id, userId, action, reviewId: r.id });
   if (r.state === "blocked" || !draft?.safety_ok) {
     const open = await mk("open");
@@ -211,25 +235,22 @@ async function reviewBlock(loc: Loc, r: PendingReview, userId: string | null, wi
       text: `${r.star_rating}/5: no safe draft. Open: ${open}`,
     };
   }
-  if (r.urgency === "urgent" && !withPost) {
-    const [see, mine] = await Promise.all([mk("see_draft"), mk("handle_myself")]);
-    return {
-      html: head + reviewText + `<p style="margin:0 0 16px 0;">Don't reply in anger. A calm draft is ready. If you can reach the customer, call them.</p><div style="margin:0;">${link(see, "See draft")}${link(mine, "I'll handle it")}</div>`,
-      text: `Needs care. See draft: ${see}\nI'll handle it: ${mine}`,
-    };
-  }
+  // K-13: a medium review shows its issue on top of the draft.
+  const issues = r.risk === "medium" ? issueLines(r.risk_reasons ?? []) : [];
+  const issueHtml = issues.length ? `<p style="margin:0 0 16px 0;padding:12px 14px;border:1px solid #E4E0D7;border-radius:14px;">${issues.map(esc).join("<br>")}</p>` : "";
+  const issueText = issues.length ? `${issues.join("\n")}\n\n` : "";
   const [post, edit, skip] = await Promise.all([mk("post"), mk("edit"), mk("skip")]);
   const inbox = `${APP_URL}/app/inbox`;
-  const drafted = head + reviewText + `<p style="margin:0 0 6px 0;font-size:14px;color:#5E5B55;">Drafted reply</p>` + quote(draft.body);
+  const drafted = head + reviewText + issueHtml + `<p style="margin:0 0 6px 0;font-size:14px;color:#5E5B55;">Drafted reply</p>` + quote(draft.body);
   if (withPost) {
     return {
       html: drafted + `<div style="margin:0;">${link(post, "Review reply")}${link(edit, "Edit")}${link(skip, "Skip")}</div>`,
-      text: `Draft:\n${draft.body}\n\nReview reply: ${post}\nEdit: ${edit}\nSkip: ${skip}`,
+      text: `${issueText}Draft:\n${draft.body}\n\nReview reply: ${post}\nEdit: ${edit}\nSkip: ${skip}`,
     };
   }
   return {
     html: drafted + emailButton("Review reply", post) + `<div style="margin:8px 0 0 0;">${link(edit, "Edit")}${link(skip, "Skip")}${link(inbox, "Open Kabsi")}</div>`,
-    text: `Draft:\n${draft.body}\n\nReview reply: ${post}\nEdit: ${edit}\nSkip: ${skip}\nOpen Kabsi: ${inbox}`,
+    text: `${issueText}Draft:\n${draft.body}\n\nReview reply: ${post}\nEdit: ${edit}\nSkip: ${skip}\nOpen Kabsi: ${inbox}`,
     ownButton: true,
   };
 }
@@ -252,7 +273,7 @@ async function sendToLocation(loc: Loc, o: { kind: string; key: string; subject:
 export async function notifyLocation(loc: Loc) {
   if (loc.emails_paused_until && Date.parse(loc.emails_paused_until) > Date.now()) return 0;
   const db = admin();
-  const { data } = await db.from("reviews").select("id, reviewer_name, star_rating, comment, urgency, state, is_backlog")
+  const { data } = await db.from("reviews").select("id, reviewer_name, star_rating, comment, risk, risk_reasons, state, is_backlog")
     .eq("location_id", loc.id).in("state", ["drafted", "blocked"]).is("notified_at", null).order("review_created_at");
   const pending = (data ?? []) as PendingReview[];
   let sent = 0;
@@ -271,22 +292,22 @@ export async function notifyLocation(loc: Loc) {
   }
   if (backlog.length) await mark(backlog.map((r) => r.id));
 
-  // New reviews: ≤3★ or urgent → one email each, right away (D220)
+  // New reviews: medium or high risk (every rating of 1 to 3 is at least medium) → one email each, right away (D220, K-13)
   const fresh = pending.filter((r) => !r.is_backlog);
-  for (const r of fresh.filter((x) => x.star_rating <= 3 || x.urgency === "urgent")) {
-    const urgent = r.urgency === "urgent";
+  for (const r of fresh.filter(instantEmail)) {
+    const high = r.risk === "high";
     await sendToLocation(loc, {
-      kind: urgent ? "review_urgent" : "review_new", key: `review:${r.id}`,
-      subject: urgent ? `A review for ${loc.name} needs care` : `New review for ${loc.name} (${r.star_rating} of 5)`,
-      title: urgent ? "This review needs care" : "New review", preheader: (r.comment ?? "").slice(0, 90),
+      kind: high ? "review_high_risk" : "review_new", key: `review:${r.id}`,
+      subject: high ? `A review for ${loc.name} needs a little more care` : `New review for ${loc.name} (${r.star_rating} of 5)`,
+      title: high ? HIGH_RISK_TITLE.replace(/\.$/, "") : "New review", preheader: (r.comment ?? "").slice(0, 90),
       build: (userId) => reviewBlock(loc, r, userId, false),
     });
     await mark([r.id]);
     sent++;
   }
 
-  // 4–5★ → one daily digest at the owner's digest hour (D220)
-  const good = fresh.filter((x) => x.star_rating >= 4 && x.urgency !== "urgent");
+  // Low risk → one daily digest at the owner's digest hour (D220)
+  const good = fresh.filter((x) => !instantEmail(x));
   if (good.length && localHour(loc.time_zone) >= loc.digest_hour) {
     await sendToLocation(loc, {
       kind: "review_digest", key: `digest:${loc.id}:${localDate(loc.time_zone)}:${good.map((r) => r.id).join(",").slice(0, 60)}`,

@@ -11,7 +11,7 @@ export type RecentReview = {
   star_rating: number;
   comment: string | null;
   state: string;
-  urgency: string | null;
+  risk: string | null;
   review_created_at: string | null;
   /** Set when Google's text and name were removed after 30 days (D257). */
   content_purged_at: string | null;
@@ -24,7 +24,8 @@ export type ActivePlan = {
 };
 export type Dashboard = {
   waiting: number;
-  urgent: number;
+  /** K-13: reviews waiting that are high risk (no draft, a checklist). */
+  highRisk: number;
   recent: RecentReview[];
   newReviews7d: number;
   replied7d: number;
@@ -75,7 +76,7 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
   const head = { count: "exact" as const, head: true };
   const [
     waiting,
-    urgent,
+    highRisk,
     recent,
     new7,
     replied7,
@@ -105,11 +106,11 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
       .select("id", head)
       .eq("location_id", locationId)
       .in("state", ["drafted", "blocked"])
-      .eq("urgency", "urgent"),
+      .eq("risk", "high"),
     supabase
       .from("reviews")
       .select(
-        "id, reviewer_name, star_rating, comment, state, urgency, review_created_at, content_purged_at",
+        "id, reviewer_name, star_rating, comment, state, risk, review_created_at, content_purged_at",
       )
       .eq("location_id", locationId)
       .order("review_created_at", { ascending: false })
@@ -234,7 +235,7 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
 
   return {
     waiting: count(waiting),
-    urgent: count(urgent),
+    highRisk: count(highRisk),
     recent: (recent.data ?? []) as RecentReview[],
     newReviews7d: count(new7),
     replied7d: count(replied7),

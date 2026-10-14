@@ -31,7 +31,7 @@ Deno.test("a review that asks for the number gets a draft with no run of 7 or mo
     const reply = phone ? `Sorry Maya, please call us on ${phone}.` : "Sorry to hear this, Maya. Please contact us through the details on our profile.\nYawmiyati team";
     return Promise.resolve({ text: JSON.stringify({ reply, facts_used: [], language: "en", topics: ["bread"] }), model: "stub" });
   };
-  const out = await draftGrounded({ review: askNumber, memory, language: "en", urgent: true, recentReplies: [] }, send, { checkCall: noCheck });
+  const out = await draftGrounded({ review: askNumber, memory, language: "en", risk: "medium", recentReplies: [] }, send, { checkCall: noCheck });
   assert.ok(out.ok, out.problems.join("; "));
   assert.ok(!SEVEN_DIGITS.test(out.output!.reply), out.output!.reply);
   assert.ok(!seen.join("").includes("956 917"), "the phone number never reaches the model");
@@ -52,7 +52,7 @@ Deno.test("the code checks block a reply with contact details before any model c
   ]) {
     let asked = false;
     const send = () => Promise.resolve({ text: JSON.stringify({ reply, facts_used: [], language: "en", topics: [] }), model: "stub" });
-    const r = await draftGrounded({ review: askNumber, memory, language: "en", urgent: false, recentReplies: [] }, send,
+    const r = await draftGrounded({ review: askNumber, memory, language: "en", risk: "low", recentReplies: [] }, send,
       { checkCall: () => { asked = true; return noCheck(); } });
     assert.equal(r.ok, false, reply);
     assert.equal(asked, false, `the model check was not asked for: ${reply}`);

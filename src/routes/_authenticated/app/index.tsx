@@ -367,8 +367,8 @@ function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
                 {d.waiting === 1 ? "reply is ready for you" : "replies are ready for you"}
               </h2>
               <p className="mt-2 max-w-xl leading-7 text-kb-stone-on-dark">
-                {d.urgent > 0
-                  ? `${d.urgent} ${d.urgent === 1 ? "needs" : "need"} extra care. Read the draft, change it if you like, and approve it.`
+                {d.highRisk > 0
+                  ? `${d.highRisk} ${d.highRisk === 1 ? "needs" : "need"} a little more care. Kabsi did not draft those; open each one to see what to check first.`
                   : "Read each draft, change it if you like, and approve it. Nothing goes on Google without you."}
               </p>
               <Button asChild className="mt-6">
@@ -715,8 +715,8 @@ const REVIEW_STATE: Record<string, { label: string; cls: string }> = {
 function ReviewLine({ r }: { r: RecentReview }) {
   const open = r.state === "drafted" || r.state === "blocked" || r.state === "new";
   const st =
-    open && r.urgency === "urgent"
-      ? { label: "Needs care", cls: "bg-kb-red text-kb-white" }
+    open && r.risk === "high"
+      ? { label: "High risk", cls: "bg-kb-red text-kb-white" }
       : (REVIEW_STATE[r.state] ?? { label: r.state, cls: "bg-kb-sand" });
   return (
     <li className="py-4 first:pt-0 last:pb-0">

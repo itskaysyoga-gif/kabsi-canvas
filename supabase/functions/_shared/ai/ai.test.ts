@@ -9,7 +9,7 @@ import { runContract, runRecord, type Send } from "./contract.ts";
 import { draftGrounded, parseReply, replyWorkflow } from "./reply.ts";
 import { editKinds, factAdditions, RULE_TEXT } from "./edits.ts";
 import { houseStyle } from "./fence.ts";
-import { REPLY_V1 } from "./prompts/reply.v1.ts";
+import { REPLY_V2 } from "./prompts/reply.v2.ts";
 
 const DAY = 86_400_000;
 const row = (slot: string, key: string, value: Record<string, unknown>, extra: Partial<FactRow> = {}): FactRow =>
@@ -140,7 +140,7 @@ const review = { reviewer: "Maya", rating: 5, comment: "Lovely cakes. Is Maria s
 Deno.test("runner: an answer that is not the structured output is discarded, never shown", async () => {
   const m = await mem();
   for (const text of ["Sure, here is a reply: Thank you", JSON.stringify({ reply: "", facts_used: [] }), JSON.stringify({ reply: "Hi", facts_used: "F1" })]) {
-    const r = await draftGrounded({ review, memory: m, language: "en", urgent: false, recentReplies: [] }, send(text), { checkCall: checkOk });
+    const r = await draftGrounded({ review, memory: m, language: "en", risk: "low", recentReplies: [] }, send(text), { checkCall: checkOk });
     assert.equal(r.output, null, text);
     assert.equal(r.ok, false);
     assert.deepEqual(r.checks.map((c) => c.name), ["structured_output"]);
@@ -150,7 +150,7 @@ Deno.test("runner: an answer that is not the structured output is discarded, nev
 Deno.test("runner: a draft citing a fact id outside the trusted set is rejected and the model check is not asked", async () => {
   const m = await mem();
   let asked = 0;
-  const r = await draftGrounded({ review, memory: m, language: "en", urgent: false, recentReplies: [] },
+  const r = await draftGrounded({ review, memory: m, language: "en", risk: "low", recentReplies: [] },
     send({ reply: "Thank you Maya.", facts_used: ["F42"] }), { checkCall: () => { asked++; return checkOk(); } });
   assert.equal(r.ok, false);
   assert.equal(asked, 0);
@@ -160,12 +160,12 @@ Deno.test("runner: a draft citing a fact id outside the trusted set is rejected 
 
 Deno.test("runner: the Maria review gets a ready draft only when the reply does not confirm Maria", async () => {
   const m = await mem();
-  const bad = await draftGrounded({ review, memory: m, language: "en", urgent: false, recentReplies: [] },
+  const bad = await draftGrounded({ review, memory: m, language: "en", risk: "low", recentReplies: [] },
     send({ reply: "Thank you Maya. Maria is still here and sends her best.\nRami and the team" }), { checkCall: checkOk });
   assert.equal(bad.ok, false);
   assert.match(bad.problems.join(" "), /names a person or place that is not in your facts/);
   assert.ok(!bad.problems.join(" ").includes("Maria"), "the stored problem never quotes the review");
-  const good = await draftGrounded({ review, memory: m, language: "en", urgent: false, recentReplies: [] },
+  const good = await draftGrounded({ review, memory: m, language: "en", risk: "low", recentReplies: [] },
     send({ reply: "Thank you Maya, we are glad you loved the cakes.\nRami and the team" }), { checkCall: checkOk });
   assert.equal(good.ok, true, good.problems.join("; "));
   assert.ok(!/maria/i.test(good.output!.reply));
@@ -178,7 +178,7 @@ Deno.test("runner: the prompt says unknown people are neither confirmed nor deni
     seen.push({ system: typeof system === "string" ? system : system.map((p) => p.text).join("\n"), user });
     return send({})(system, user, 500);
   };
-  await draftGrounded({ review, memory: m, language: "en", urgent: false, recentReplies: [] }, capture, { checkCall: checkOk });
+  await draftGrounded({ review, memory: m, language: "en", risk: "low", recentReplies: [] }, capture, { checkCall: checkOk });
   assert.match(seen[0].system, /If the reviewer asks about a person, do not say whether they work there\./);
   assert.match(seen[0].system, /<business_memory>/);
   assert.match(seen[0].user, /<customer_review rating="5" reviewer="Maya">\nLovely cakes\. Is Maria still working there\?\n<\/customer_review>/);
@@ -187,7 +187,7 @@ Deno.test("runner: the prompt says unknown people are neither confirmed nor deni
 
 Deno.test("runner: the model check's verdict marks the draft, with its problem", async () => {
   const m = await mem();
-  const r = await draftGrounded({ review, memory: m, language: "en", urgent: false, recentReplies: [] }, send({}),
+  const r = await draftGrounded({ review, memory: m, language: "en", risk: "low", recentReplies: [] }, send({}),
     { checkCall: () => Promise.resolve(JSON.stringify({ ok: false, issues: ["assumes the reviewer's gender"] })) });
   assert.equal(r.ok, false);
   assert.equal(r.checkModel, "claude-haiku-4-5-20251001");
@@ -196,9 +196,9 @@ Deno.test("runner: the model check's verdict marks the draft, with its problem",
 
 Deno.test("runner: the ai_runs record has the prompt version, models, hashes, memory version and named checks, no text", async () => {
   const m = await mem();
-  const r = await draftGrounded({ review, memory: m, language: "en", urgent: false, recentReplies: [] }, send({}), { checkCall: checkOk });
+  const r = await draftGrounded({ review, memory: m, language: "en", risk: "low", recentReplies: [] }, send({}), { checkCall: checkOk });
   const rec = runRecord(r, { locationId: "loc-1", reviewId: "rv-1", workflow: "review_reply", memoryVersion: m.version });
-  assert.equal(rec.prompt_version, REPLY_V1);
+  assert.equal(rec.prompt_version, REPLY_V2);
   assert.equal(rec.model, "stub-draft");
   assert.match(rec.input_hash, /^[0-9a-f]{64}$/);
   assert.match(rec.output_hash!, /^[0-9a-f]{64}$/);
@@ -212,9 +212,9 @@ Deno.test("runner: the ai_runs record has the prompt version, models, hashes, me
 Deno.test("runner: the same input hashes the same; another review hashes differently", async () => {
   const m = await mem();
   const wf = replyWorkflow({ checkCall: checkOk });
-  const a = await runContract(wf, { review, memory: m, language: "en", urgent: false, recentReplies: [] }, send({}));
-  const b = await runContract(wf, { review, memory: m, language: "en", urgent: false, recentReplies: [] }, send({}));
-  const c = await runContract(wf, { review: { ...review, comment: "Other" }, memory: m, language: "en", urgent: false, recentReplies: [] }, send({}));
+  const a = await runContract(wf, { review, memory: m, language: "en", risk: "low", recentReplies: [] }, send({}));
+  const b = await runContract(wf, { review, memory: m, language: "en", risk: "low", recentReplies: [] }, send({}));
+  const c = await runContract(wf, { review: { ...review, comment: "Other" }, memory: m, language: "en", risk: "low", recentReplies: [] }, send({}));
   assert.equal(a.inputHash, b.inputHash);
   assert.notEqual(a.inputHash, c.inputHash);
 });

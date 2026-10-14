@@ -114,6 +114,15 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   open questions, versioned, style examples apart), every code check, the contract runner (structured output, a fact id
   outside the trusted set, the "Is Maria still working there?" case, the model check, the `ai_runs` record), and edit
   learning.
+- `review_risk.sql` (P0.3-03): `reviews.risk` takes only low, medium or high (new reviews start low); from an email
+  link only the high-risk class needs the recipient signed in to approve; the ops digest counts high-risk reviews
+  waiting; no database function reads the retired `urgency` flag. `jobs_queue.sql` checks that medium and high are
+  emailed at once whatever the rating. The classifier is `supabase/functions/_shared/review-risk.test.ts` (Deno, stub
+  model calls only): every trigger of the K-13 table in English, Spanish, French and Arabic, ordinary words that only
+  look risky, the higher-wins merge with a stubbed Haiku (the model never lowers the code result, unknown answers are
+  ignored, no model call when the rules already say high), no draft for high and the holding reply only on request, the
+  guidance email, and the clinic rule (a reply that mentions treatment or confirms a visit is never ready).
+  `tests/review-risk.test.ts` holds the words equal on the screens and in the emails.
 - `publication_pipeline.sql` (P0.1-13a) and `publication_content.sql` (P0.1-13b): the one publication pipeline for
   replies, posts, photos, special hours and Google Protection put-backs. Per kind: one publication however many times
   or from whichever channel it is approved, the item moves to "on its way" and back on undo inside 10 seconds, one
