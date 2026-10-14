@@ -118,7 +118,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.2-07 | Privacy, terms and security pages that match the system | Sonnet | merged (82, 92a4bfb, 12 Oct 05:58 UTC); CI green; production READY (dpl_4HCDRS9gCFGB1VbSsWHgKBNJAHqr); live pages checked; a lawyer should read /privacy and /terms before launch; open: Hussein's 390 px look | 12 Oct | |
 | P0.3-01 | Business Knowledge as the source for every draft | Opus | merged (92, 5c01dc8, 13 Oct 06:23 UTC); Deploy passed; migrations 1 and 2 live (2 run by Hussein, read back 14 Oct); open: the real-model draft (credit) and Hussein's 390 px look, see After merge | 92, 93 | 13 Oct 2026 |
 | P0.3-02 | Per-business memory and the grounded reply pipeline | Opus | merged (94, 88ef7e0, 13 Oct 06:52 UTC); Deploy passed; migrations 1 and 2 live (2 run by Hussein, read back 14 Oct); open: the real-model checks (credit) and Hussein's 390 px look, see After merge | 94, 95 | 13 Oct 2026 |
-| P0.3-03 | Three review risk levels | Opus | PR open (96); ci.yml green (run 38507948860: App, Edge Functions, Database 1217 tests); migration applied after CI and read back; next: merge and After merge | 96 | 14 Oct 2026 |
+| P0.3-03 | Three review risk levels | Opus | merged (96, f11ef00, 14 Oct 03:53 UTC); migration live and read back; Deploy passed (`api` 74, `slack` 60); live high-risk mock review on QA Bakery passed (no draft, no model call, the guidance email); open: the medium and holding-reply real-model checks (credit) and Hussein's 390 px look, see After merge | 96, 97 | 14 Oct 2026 |
 | P0.3-04 | Evaluation set and the prompt gate | Opus | PR open (97); gate proved with stubs; real run pending (Anthropic credit), see After merge | 97, 98 (throwaway, closed) | 14 Oct 2026 |
 | P0.3-05 | One task engine | Opus | todo | | |
 | P0.3-06 | Roles and approval policies | Opus | todo | | |
@@ -197,6 +197,7 @@ P0.3-04 (PR 97):
 2. Until `EVAL_LIVE` is on, every pull request that changes a file under `supabase/functions/_shared/ai/prompts/` fails ci.yml by design.
 
 P0.3-03 (PR 96):
+- Passed 14 Oct 03:53 to 04:00 UTC: steps 1 and 2, see Evidence ("P0.3-03 After merge").
 1. Deploy workflow passes; `api`, `slack` and the other functions get new versions; live `/app/inbox` loads; the jobs keep succeeding.
 2. A high-risk mock review on QA Bakery (text that the code rules mark high, so no model call is needed): synced, then the draft job leaves it `blocked` with `risk = 'high'`, no `reply_drafts` row and no `ai_runs` row, and one `review_high_risk` email row.
 3. **Pending until Anthropic credit is back (no model call allowed now):** a medium mock review drafted end to end (`reply_drafts.prompt_version = 'reply.v2'`, the issue line on the review screen), and one holding reply asked for on the high-risk review from step 2.
@@ -403,6 +404,13 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Gate logic: `--stub pass` exit 0 (gate passed); `--stub fail` exit 1 (invented facts 6, followed injections 27, compensation offers 175, health rule breaks 19, routing 22 of 33); `--live` without a key exit 2, nothing run; a model that throws counts as errors and blocks. `eval.test.ts` 9 Deno tests pass (also checks the set: 200 unique ids, the six group sizes, English first, injections in Spanish, French, Arabic and Arabizi and in names, no Kabsi customer's name).
 - Local: `npm run typecheck`, `npm run lint:changed`, `npm test` (68) pass; `deno check scripts/eval/*.ts` ok.
 - No database change. No owner-facing behaviour or wording changed, so `knowledge/kabsi-facts.md` is unchanged (K-104 concerns Nora's facts; this is a release check).
+
+### P0.3-03 After merge (14 Oct 2026, 03:53 to 04:00 UTC, Hussein's session 2)
+- PR 96 merged 03:53 UTC as merge commit f11ef00 (ci.yml green on head 812af56: App, Edge Functions and Worker, Database).
+- Deploy run 38508552886 passed (Edge Functions 03:53:42, Worker kabsi-go 03:54:14). `list_edge_functions`: `api` 74, `slack` 60, every function updated together.
+- Vercel production `dpl_649mv6JNpkMo1Ufa4sdLRyCKBtag` for f11ef00 READY; live `https://kabsi.co/app/inbox` fetched through the Vercel connector: 200, the app shell.
+- Live mock run on QA Bakery (inserted 03:54:20 UTC into `mock_google_reviews`, reviewer "P0.3-03 test", 1 star, a food-poisoning and health-department text): synced, then the `draft_reply` job succeeded and left review 37f4ba1a-4e72-45f3-a21e-7c1425aaf0c6 `blocked`, `risk = 'high'`, reasons `health_safety, regulator, low_rating`, language null (the rules said high, so no model was asked), 0 `reply_drafts` rows, 0 `ai_runs` rows, `ai_usage` 0 input tokens. `notify_owner` made one email row at 03:58:04, kind `review_high_risk`, subject "A review for QA Bakery needs a little more care"; it is marked "test address, not sent" because QA Bakery's owner is a test.local address, as designed. The review and its mock row stay on the test business (no delete).
+- Jobs offered after the deploy: `sync_reviews` 4, `protection_check` 4, `draft_reply` 1, `notify_owner` 1, `access_check`, `deletions`, `trial_reminders`, `renewal_reminders` succeeded; none failed.
 
 ### P0.3-03 (branch claude/h-p0-3-03, PR 96, 14 Oct 2026, Hussein's session 2 of the bundled plan)
 - Model: the session reads as `claude-opus-5-5` (environment).
@@ -1424,7 +1432,7 @@ By hand: confirm Advanced Protection is still on for hello@kabsi.co (last checke
 
 ## Log
 
-- 14 Oct 2026 (Hussein's session 2): P0.3-04 built, PR 97 opened: 200-case evaluation set, runner, ci.yml prompt gate (fails closed while live evaluation is off), stub proofs; throwaway PR 98 showed a prompt change triggers and blocks. Real run pending Anthropic credit.
+- 14 Oct 2026 (Hussein's session 2): PR 96 (P0.3-03) merged as f11ef00; Deploy passed; live high-risk mock review on QA Bakery: no draft, no model call, the guidance email row. P0.3-04 built, PR 97 opened: 200-case evaluation set, runner, ci.yml prompt gate (fails closed while live evaluation is off), stub proofs; throwaway PR 98 showed a prompt change triggers and blocks. Real run pending Anthropic credit.
 
 - 14 Oct 2026 (Hussein's session 2): read back session 1's two SQL files (both applied). P0.3-03 built, PR 96 opened: three review risk levels, classifier with code rules and a stubbed Haiku, no draft and a checklist for high, the clinic rule. Next: CI, apply the migration, merge, After-merge checks, then P0.3-04.
 
