@@ -18,7 +18,9 @@ export type InboxReview = {
   star_rating: number;
   comment: string | null;
   language: string | null;
-  urgency: string | null;
+  /** K-13 risk level (P0.3-03) and its reason keys (src/lib/review-risk.ts). */
+  risk: "low" | "medium" | "high";
+  risk_reasons: string[];
   state: ReviewState;
   existing_reply: string | null;
   reply_state: string | null;
@@ -52,7 +54,7 @@ export async function inboxReviews(
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, location_id, reviewer_name, star_rating, comment, language, urgency, state, existing_reply, reply_state, reply_state_reason, review_created_at, is_backlog, reply_drafts(body, safety_ok, version, safety_notes)",
+      "id, location_id, reviewer_name, star_rating, comment, language, risk, risk_reasons, state, existing_reply, reply_state, reply_state_reason, review_created_at, is_backlog, reply_drafts(body, safety_ok, version, safety_notes)",
     )
     .eq("location_id", locationId)
     .in("state", states)
@@ -99,6 +101,12 @@ export async function redraftReply(reviewId: string, instruction: string) {
     await authed("api/approve", { review_id: reviewId, do: "redraft", instruction }),
   );
 }
+/** K-13: a neutral holding reply for a high-risk review, written only because the owner asked. */
+export async function holdingReply(reviewId: string) {
+  return readJson<{ ok: true; draft: string | null; issues: string[] }>(
+    await authed("api/approve", { review_id: reviewId, do: "holding" }),
+  );
+}
 export async function skipReview(reviewId: string) {
   const { error } = await supabase.rpc("skip_review", { p_review: reviewId });
   if (error) throw new Error(error.message);
@@ -120,7 +128,8 @@ export type ActionView = {
     rating: number;
     comment: string | null;
     state: ReviewState;
-    urgent: boolean;
+    risk: "low" | "medium" | "high";
+    risk_reasons: string[];
     reply: string | null;
   } | null;
   draft?: string | null;
@@ -149,7 +158,7 @@ export type ActionResult = {
   repeat?: boolean;
 };
 
-// The email page sends the signed-in session when there is one (K-17: profile changes, hours and urgent reviews need
+// The email page sends the signed-in session when there is one (K-17: profile changes, hours and high-risk reviews need
 // the link's recipient signed in); otherwise the anon key (D295), and the link alone is the credential.
 async function linkFetch(query: string, body?: Record<string, unknown>) {
   const { data } = await supabase.auth.getSession();

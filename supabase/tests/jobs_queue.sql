@@ -128,7 +128,7 @@ delete from public.jobs where kind = 'draft_reply';
 update public.reviews set draft_attempts = 3 where id = '00000000-0000-4000-8000-0000000000e1';
 select is(private.produce_jobs() ->> 'draft_reply', '0', 'a review that failed 3 drafts is left for the owner');
 
-update public.reviews set state = 'drafted', notified_at = null, is_backlog = false, star_rating = 5, urgency = 'normal'
+update public.reviews set state = 'drafted', notified_at = null, is_backlog = false, star_rating = 5, risk = 'low'
  where id = '00000000-0000-4000-8000-0000000000e1';
 -- Digest at 23:00 in a zone where it is not yet 23:00.
 update public.locations set digest_hour = 23,
@@ -137,6 +137,13 @@ update public.locations set digest_hour = 23,
 select is(private.produce_jobs() ->> 'notify_owner', '0', 'a 5 star draft waits for the digest hour');
 update public.reviews set star_rating = 2 where id = '00000000-0000-4000-8000-0000000000e1';
 select is(private.produce_jobs() ->> 'notify_owner', '1', 'a 2 star draft is emailed at once');
+-- P0.3-03 (K-13, D220 adapted): medium and high risk are emailed at once whatever the rating.
+delete from public.jobs where kind = 'notify_owner';
+update public.reviews set star_rating = 5, risk = 'medium' where id = '00000000-0000-4000-8000-0000000000e1';
+select is(private.produce_jobs() ->> 'notify_owner', '1', 'a 5 star medium-risk draft is emailed at once');
+delete from public.jobs where kind = 'notify_owner';
+update public.reviews set state = 'blocked', risk = 'high' where id = '00000000-0000-4000-8000-0000000000e1';
+select is(private.produce_jobs() ->> 'notify_owner', '1', 'a high-risk review with no draft is emailed at once');
 delete from public.jobs where kind = 'notify_owner';
 update public.locations set emails_paused_until = now() + interval '1 day' where id = '00000000-0000-4000-8000-0000000000c1';
 select is(private.produce_jobs() ->> 'notify_owner', '0', 'no owner email run while emails are paused');

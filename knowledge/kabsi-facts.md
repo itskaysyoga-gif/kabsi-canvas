@@ -1,4 +1,4 @@
-Last updated: 12 Oct 2026. Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md.
+Last updated: 14 Oct 2026. Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md.
 
 # Kabsi Master Knowledge Base
 
@@ -605,7 +605,7 @@ The draft failed a check twice, for example it named someone who is not in your 
 Links work once and last 72 hours (3 days). Open Kabsi and use Reviews, To reply. Tapping Approve a second time, or opening the link again, does nothing new: the page shows what already happened.
 
 **The email page asks me to sign in.**
-For a review that needs care, a change to your opening hours and any change to your profile details, the page asks the person the email was sent to to sign in with their email code first, then brings them back to the same page. Normal review replies and skips work from the link alone. If someone else is signed in on that phone or computer, the page says the link was sent to someone else: sign out, then sign in with the address the email went to.
+For a high-risk review, a change to your opening hours and any change to your profile details, the page asks the person the email was sent to to sign in with their email code first, then brings them back to the same page. Normal review replies and skips work from the link alone. If someone else is signed in on that phone or computer, the page says the link was sent to someone else: sign out, then sign in with the address the email went to.
 
 **Can I undo an approval from the email page?**
 Yes. After you tap Approve, the page shows "Publishing in 10 seconds" with Undo. Undo inside the 10 seconds and nothing is sent to Google; the reply goes back to To reply.
@@ -714,10 +714,10 @@ Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile, 
 A few minutes: find your business, add the Kabsi group ID 5481006796 as a Manager, fill in About your business, choose a plan.
 
 **How fast do new reviews reach me?**
-Kabsi checks every few minutes. Reviews of 3 stars or less and sensitive reviews are emailed right away; 4 and 5 star reviews come together once a day at the hour you choose.
+Kabsi checks every few minutes. Reviews of 3 stars or less, and any review Kabsi marks medium or high risk, are emailed right away; other 4 and 5 star reviews come together once a day at the hour you choose.
 
 **Can I reply from my phone?**
-Yes. Tap Review reply, Edit or Skip in the email, confirm on the page that opens, or use the app in your phone's browser. A review that needs care asks you to sign in on that page first.
+Yes. Tap Review reply, Edit or Skip in the email, confirm on the page that opens, or use the app in your phone's browser. A high-risk review asks you to sign in on that page first.
 
 **Can I edit a draft before posting?**
 Yes. Change anything you like. Kabsi publishes exactly the text you approve.
@@ -726,7 +726,13 @@ Yes. Change anything you like. Kabsi publishes exactly the text you approve.
 Yes. Tap Ask for changes, type what to change (for example "shorter" or "more formal") and tap New version. Up to 3 new versions per review per day.
 
 **What happens with hard reviews?**
-1 and 2 star reviews and sensitive topics get a calm draft and an email with no Post button, so you read it first. You can post it from the app, or choose "I'll handle it".
+Kabsi gives every review one of three risk levels. Rules in code look first, then a small AI model, and the higher level wins.
+- Low (normal praise or mild feedback): a draft as usual.
+- Medium (a complaint, a refund request, a complaint about staff, something said about your business that may be wrong, any rating of 1 to 3, and every review of a medical, dental, legal or financial business): a careful draft, with the issue shown above it, for example "They mention a refund. Kabsi didn't promise one."
+- High (a legal threat, discrimination, illness, injury, an allergy or another safety problem, a threat, harassment, privacy or personal data, a regulator or an inspection, an accusation of a crime): no draft. The review is marked "This review needs a little more care" with a short checklist, and the email has the checklist and no approve button. If you want, Kabsi writes a short, neutral holding reply, only when you ask for it. You can also write your own, choose "I'll handle it" or skip it.
+
+**Does Kabsi treat clinics, law firms and financial businesses differently?**
+Yes. For a health, dental, legal or financial business (from your Google category), every review is at least medium risk, and a reply never says the reviewer was a patient or client and never mentions a visit, an appointment or a treatment. Kabsi checks each draft for this before you see it.
 
 **What does "I'll handle it" do?**
 It marks the review "Handled by you", and Kabsi won't post anything for it.
@@ -1113,7 +1119,7 @@ Delete your business in Settings, and ask by email to delete your login too.
 - **People and access:** the Google screen where owners add or remove Managers.
 - **hello@kabsi.co:** Kabsi's support email. **5481006796:** Kabsi's Google business group ID (Kabsi Clients), invited as Manager.
 - **To reply / All reviews:** reviews waiting for a decision / every review with its state.
-- **Needs care:** a 1 or 2 star review or one about a sensitive topic. Its email has no Post button.
+- **Risk level:** low, medium or high, set for each review. Medium shows the issue above the draft. High risk: no draft, a short checklist, and a neutral holding reply only if the owner asks for one.
 - **Handled by you:** a review you chose to handle yourself. Kabsi posts nothing.
 - **Daily email:** one email a day with your 4 and 5 star reviews and their drafts.
 - **About your business:** the facts Kabsi may use in drafts.

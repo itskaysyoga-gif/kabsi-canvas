@@ -21,7 +21,7 @@ type Row = {
   id: number;
   rating: number;
   language: string;
-  urgent: boolean;
+  risk: string;
   model_used: string;
   draft: string;
   words: number;
@@ -84,7 +84,15 @@ async function run() {
       const review = { reviewer: r.reviewer, rating: r.rating, comment: r.comment };
       const c = await classify(review);
       const d = await draftGrounded(
-        { review, memory, language: c.language, urgent: c.urgent, recentReplies: [] },
+        {
+          review,
+          memory,
+          language: c.language ?? "unknown",
+          risk: c.risk,
+          reasons: c.reasons,
+          holding: c.risk === "high",
+          recentReplies: [],
+        },
         (s, u, m) => draftMessage(s, u, m),
       );
       const text = d.output?.reply ?? "";
@@ -92,8 +100,8 @@ async function run() {
       rows.push({
         id: r.id,
         rating: r.rating,
-        language: c.language,
-        urgent: c.urgent,
+        language: c.language ?? "",
+        risk: c.risk,
         model_used: d.model,
         draft: text,
         words: text.split(/\s+/).filter(Boolean).length,
@@ -108,7 +116,7 @@ async function run() {
         id: r.id,
         rating: r.rating,
         language: "",
-        urgent: false,
+        risk: "",
         model_used: "",
         draft: "",
         words: 0,

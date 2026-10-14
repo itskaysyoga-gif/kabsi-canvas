@@ -37,6 +37,7 @@ import {
   amStaff,
   answerStyleOffer,
   handleOffline,
+  holdingReply,
   inboxReviews,
   postReply,
   redraftReply,
@@ -44,6 +45,7 @@ import {
   type InboxReview,
   type StyleOffer,
 } from "@/lib/reviews";
+import { HIGH_RISK_CHECKLIST, HIGH_RISK_TITLE, issueLines, riskRank } from "@/lib/review-risk";
 import { track } from "@/lib/telemetry";
 import { cn } from "@/lib/utils";
 import { PageIcon } from "@/components/shared/page-icon";
@@ -81,21 +83,21 @@ function InboxPage() {
   });
   const [filter, setFilter] = useState<Filter>("all");
 
-  // Needs-care reviews first, then newest first.
+  // High risk first, then medium, then newest first (K-13).
   const sorted = useMemo(
     () =>
       [...(reviews.data ?? [])].sort(
         (a, b) =>
-          Number(b.urgency === "urgent") - Number(a.urgency === "urgent") ||
+          riskRank(b.risk) - riskRank(a.risk) ||
           String(b.review_created_at ?? "").localeCompare(String(a.review_created_at ?? "")),
       ),
     [reviews.data],
   );
-  const care = sorted.filter((r) => r.urgency === "urgent").length;
+  const care = sorted.filter((r) => r.risk === "high").length;
   const ready = sorted.filter((r) => r.state !== "new").length;
   const list =
     filter === "care"
-      ? sorted.filter((r) => r.urgency === "urgent")
+      ? sorted.filter((r) => r.risk === "high")
       : filter === "ready"
         ? sorted.filter((r) => r.state !== "new")
         : sorted;
@@ -148,7 +150,7 @@ function InboxPage() {
           </Chip>
           {care ? (
             <Chip active={filter === "care"} onClick={() => setFilter("care")} tone="red">
-              Needs care {care}
+              High risk {care}
             </Chip>
           ) : null}
           <Chip active={filter === "ready"} onClick={() => setFilter("ready")}>
@@ -307,9 +309,13 @@ function ReviewHead({ review }: { review: InboxReview }) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <p className="font-bold">{name}</p>
-            {review.urgency === "urgent" ? (
+            {review.risk === "high" ? (
               <span className="inline-flex items-center gap-1 rounded-pill bg-kb-red px-2.5 py-0.5 text-xs font-bold text-kb-white">
-                <AlertTriangle className="size-3.5" aria-hidden="true" /> Needs care
+                <AlertTriangle className="size-3.5" aria-hidden="true" /> High risk
+              </span>
+            ) : review.risk === "medium" ? (
+              <span className="rounded-pill bg-kb-amber-soft px-2.5 py-0.5 text-xs font-bold text-kb-amber">
+                Medium risk
               </span>
             ) : null}
             {review.is_backlog ? (
@@ -347,7 +353,9 @@ function ReviewCard({ review }: { review: InboxReview }) {
   const [instruction, setInstruction] = useState("");
   const [showRedraft, setShowRedraft] = useState(false);
   const [confirm, setConfirm] = useState(false);
-  const [busy, setBusy] = useState<"" | "post" | "skip" | "redraft" | "mine">("");
+  const [busy, setBusy] = useState<"" | "post" | "skip" | "redraft" | "mine" | "holding">("");
+  // K-13: a high-risk review has no draft. The reply box opens empty only when the owner chooses to write.
+  const [writeOwn, setWriteOwn] = useState(false);
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
   const [done, setDone] = useState("");
@@ -362,9 +370,11 @@ function ReviewCard({ review }: { review: InboxReview }) {
       ),
     );
   const waiting = review.state === "new";
-  const sensitive = review.urgency === "urgent" || review.star_rating <= 2;
+  const sensitive = review.risk !== "low";
+  const highNoDraft = review.risk === "high" && !review.draft && !writeOwn;
+  const issues = issueLines(review.risk_reasons);
 
-  async function run(kind: "post" | "skip" | "redraft" | "mine", ins?: string) {
+  async function run(kind: "post" | "skip" | "redraft" | "mine" | "holding", ins?: string) {
     setError("");
     setNote("");
     setBusy(kind);
@@ -389,6 +399,17 @@ function ReviewCard({ review }: { review: InboxReview }) {
         track("reply_skipped", { channel: "dashboard_handled" });
         setDone("Marked as handled by you.");
         await refresh();
+      } else if (kind === "holding") {
+        const result = await holdingReply(review.id);
+        track("draft_generated", { channel: "dashboard_holding" });
+        if (result.draft) {
+          setText(result.draft);
+          setWriteOwn(true);
+          setNote("Holding reply ready. Read it, change it if you like, then approve.");
+        } else
+          setNote(
+            "Kabsi couldn't make a safe holding reply. Write your own, or leave this one for now.",
+          );
       } else {
         const result = await redraftReply(review.id, ins ?? instruction);
         track("draft_generated", { channel: "dashboard" });
@@ -429,16 +450,33 @@ function ReviewCard({ review }: { review: InboxReview }) {
     <article
       className={cn(
         "rounded-large bg-kb-white p-5 shadow-kb sm:p-7",
-        review.urgency === "urgent" && "ring-2 ring-kb-red/40",
+        review.risk === "high" && "ring-2 ring-kb-red/40",
       )}
     >
       <ReviewHead review={review} />
-      {review.urgency === "urgent" ? (
-        <p className="mt-4 flex gap-2 rounded-card bg-kb-sand p-4 text-sm leading-6">
-          <Hand className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          Take a breath before replying. If you can reach the customer, call them first. The draft
-          stays calm and moves the talk to a private conversation.
-        </p>
+      {review.risk === "high" ? (
+        <div className="mt-4 rounded-card bg-kb-sand p-4 text-sm leading-6">
+          <p className="flex gap-2 font-bold">
+            <Hand className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            {HIGH_RISK_TITLE}
+          </p>
+          {issues.map((i) => (
+            <p key={i} className="mt-1">
+              {i}
+            </p>
+          ))}
+          <ol className="mt-2 list-decimal space-y-1 pl-5">
+            {HIGH_RISK_CHECKLIST.map((c) => (
+              <li key={c}>{c}</li>
+            ))}
+          </ol>
+        </div>
+      ) : review.risk === "medium" && issues.length ? (
+        <div className="mt-4 rounded-card border border-kb-amber/30 bg-kb-amber-soft p-4 text-sm leading-6">
+          {issues.map((i) => (
+            <p key={i}>{i}</p>
+          ))}
+        </div>
       ) : null}
       {review.reply_state === "rejected" && review.reply_state_reason ? (
         <p className="mt-4 rounded-card bg-kb-sand p-4 text-sm leading-6" role="status">
@@ -450,6 +488,58 @@ function ReviewCard({ review }: { review: InboxReview }) {
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           Kabsi is drafting a reply. This takes a minute or two.
         </p>
+      ) : highNoDraft ? (
+        <>
+          <p className="mt-5 text-sm text-kb-stone">
+            Kabsi did not draft a reply. Nothing is posted unless you write or approve one.
+          </p>
+          {error ? (
+            <p className="mt-3 text-sm text-kb-red" role="alert">
+              {error}
+            </p>
+          ) : null}
+          {note ? (
+            <p className="mt-3 text-sm text-kb-stone" role="status">
+              {note}
+            </p>
+          ) : null}
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <Button
+              variant="secondary"
+              className="w-full sm:w-auto"
+              disabled={!!busy}
+              onClick={() => void run("holding")}
+            >
+              {busy === "holding" ? "Writing…" : "Ask for a neutral holding reply"}
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              disabled={!!busy}
+              onClick={() => setWriteOwn(true)}
+            >
+              Write my own reply
+            </Button>
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-1 sm:flex sm:gap-2">
+            <Button
+              variant="ghost"
+              className={SECONDARY}
+              disabled={!!busy}
+              onClick={() => void run("mine")}
+            >
+              <Hand /> {busy === "mine" ? "Saving…" : "I'll handle it"}
+            </Button>
+            <Button
+              variant="ghost"
+              className={SECONDARY}
+              disabled={!!busy}
+              onClick={() => void run("skip")}
+            >
+              <SkipForward /> {busy === "skip" ? "Skipping…" : "Skip"}
+            </Button>
+          </div>
+        </>
       ) : (
         <>
           <div className="mt-6 flex items-end justify-between gap-3">
@@ -467,7 +557,9 @@ function ReviewCard({ review }: { review: InboxReview }) {
           <p className="mt-1 text-sm text-kb-stone">
             {safeDraft
               ? "Change anything you like. Kabsi publishes exactly this text after you approve."
-              : "Kabsi couldn't safely draft this one. Write your own reply, ask for a new version, or skip it."}
+              : review.risk === "high"
+                ? "Write a short, calm reply in your own words. Nothing is posted until you approve it."
+                : "Kabsi couldn't safely draft this one. Write your own reply, ask for a new version, or skip it."}
           </p>
           {flagged ? (
             <div className="mt-3 rounded-card border border-kb-amber/30 bg-kb-amber-soft p-4 text-sm">
@@ -565,10 +657,12 @@ function ReviewCard({ review }: { review: InboxReview }) {
             <div
               className={cn(
                 "grid gap-1 sm:flex sm:gap-2",
-                showRedraft ? "grid-cols-2" : "grid-cols-3",
+                showRedraft || (review.risk === "high" && !review.draft)
+                  ? "grid-cols-2"
+                  : "grid-cols-3",
               )}
             >
-              {!showRedraft ? (
+              {!showRedraft && !(review.risk === "high" && !review.draft) ? (
                 <Button
                   variant="ghost"
                   className={SECONDARY}

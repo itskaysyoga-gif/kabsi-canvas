@@ -3,6 +3,7 @@ import { CONCIERGE_COPY } from "@/lib/concierge-copy";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CheckCircle2 } from "lucide-react";
 import { ConfirmLayout } from "@/components/layouts/confirm-layout";
+import { HIGH_RISK_CHECKLIST, issueLines } from "@/lib/review-risk";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -18,7 +19,7 @@ import { setAnalyticsPaused, track } from "@/lib/telemetry";
 
 // Email action links. Opening this page never does anything by itself (mail scanners open links);
 // the owner always presses a button, and "Approve" sends exactly the text in the box (D202).
-// P0.2-05 (K-17, K-70): links last 72 hours and work once; profile changes, hours and urgent reviews ask the
+// P0.2-05 (K-17, K-70): links last 72 hours and work once; profile changes, hours and high-risk reviews ask the
 // link's recipient to sign in first and come back here; after Approve the page counts down 10 seconds with Undo.
 export const Route = createFileRoute("/a/$token")({
   head: () => ({
@@ -170,7 +171,7 @@ function ActionPage() {
       </ConfirmLayout>
     );
   }
-  // K-17: profile changes, hours and urgent reviews: the person the link was sent to signs in first.
+  // K-17: profile changes, hours and high-risk reviews: the person the link was sent to signs in first.
   const needsSignIn = view.sign_in === true && view.signed_in !== true && view.status === "ok";
   const signIn = (label: string, why: string) => (
     <>
@@ -286,7 +287,7 @@ function ActionPage() {
     <>
       <p className="text-sm font-medium text-kb-stone">{view.business}</p>
       <h1 className="mt-1 font-display text-3xl leading-tight">
-        {r.urgent ? "This review needs care" : "Reply to this review"}
+        {r.risk === "high" ? "This review needs a little more care" : "Reply to this review"}
       </h1>
     </>
   );
@@ -356,18 +357,32 @@ function ActionPage() {
     <ConfirmLayout demo={view?.demo === true} mode={view?.mode} concierge={view.concierge === true}>
       {header}
       <div className="mt-6">{reviewCard}</div>
-      {r.urgent ? (
-        <p className="mt-5 rounded-card border-2 border-kb-black p-4 text-sm leading-6">
-          Take a breath before replying. If you can reach the customer, call them first. A calm,
-          short public reply is usually best.
-        </p>
+      {r.risk === "high" ? (
+        <div className="mt-5 rounded-card border-2 border-kb-black p-4 text-sm leading-6">
+          {issueLines(r.risk_reasons).map((i) => (
+            <p key={i}>{i}</p>
+          ))}
+          <ol className="mt-2 list-decimal space-y-1 pl-5">
+            {HIGH_RISK_CHECKLIST.map((c) => (
+              <li key={c}>{c}</li>
+            ))}
+          </ol>
+        </div>
+      ) : r.risk === "medium" && issueLines(r.risk_reasons).length ? (
+        <div className="mt-5 rounded-card border border-kb-amber/30 bg-kb-amber-soft p-4 text-sm leading-6">
+          {issueLines(r.risk_reasons).map((i) => (
+            <p key={i}>{i}</p>
+          ))}
+        </div>
       ) : null}
       <Label htmlFor="reply" className="mt-6 block font-bold">
         Your reply
       </Label>
       {!view.draft ? (
         <p className="mt-1 text-sm text-kb-stone">
-          Kabsi couldn't safely draft this one. Write your own reply, or skip it.
+          {r.risk === "high"
+            ? "Kabsi did not draft a reply for this one. Write your own when you are ready, or skip it."
+            : "Kabsi couldn't safely draft this one. Write your own reply, or skip it."}
         </p>
       ) : (
         <p className="mt-1 text-sm text-kb-stone">
@@ -392,7 +407,7 @@ function ActionPage() {
       {needsSignIn ? (
         signIn(
           "Sign in to approve",
-          "This review needs care, so Kabsi asks you to sign in before a reply goes to Google.",
+          "This review needs a little more care, so Kabsi asks you to sign in before a reply goes to Google.",
         )
       ) : (
         <Button

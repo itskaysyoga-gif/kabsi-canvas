@@ -28,13 +28,13 @@ async function details(v: LinkView) {
       },
     };
   }
-  const { data: rv } = await db.from("reviews").select("id, reviewer_name, star_rating, comment, state, urgency, existing_reply, locations(name, concierge, is_demo)").eq("id", v.target_id).single();
+  const { data: rv } = await db.from("reviews").select("id, reviewer_name, star_rating, comment, state, risk, risk_reasons, existing_reply, locations(name, concierge, is_demo)").eq("id", v.target_id).single();
   const { data: draft } = await db.from("reply_drafts").select("body, safety_ok").eq("review_id", v.target_id).order("version", { ascending: false }).limit(1).maybeSingle();
   return {
     action: v.action, business: (rv?.locations as unknown as { name: string } | null)?.name ?? "",
     concierge: (rv?.locations as unknown as { concierge: boolean } | null)?.concierge === true,
     demo: (rv?.locations as unknown as { is_demo: boolean } | null)?.is_demo === true,
-    review: rv && { id: rv.id, reviewer: rv.reviewer_name, rating: rv.star_rating, comment: rv.comment, state: rv.state, urgent: rv.urgency === "urgent", reply: rv.existing_reply },
+    review: rv && { id: rv.id, reviewer: rv.reviewer_name, rating: rv.star_rating, comment: rv.comment, state: rv.state, risk: rv.risk, risk_reasons: rv.risk_reasons ?? [], reply: rv.existing_reply },
     draft: draft?.safety_ok ? draft.body : null,
   };
 }

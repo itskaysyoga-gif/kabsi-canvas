@@ -3,6 +3,7 @@
 // says: a draft that fails any of them is never offered as ready.
 import { contactIssues } from "../contact.ts";
 import type { Memory } from "./memory.ts";
+import type { Industry } from "./risk.ts";
 
 export type Check = { name: string; ok: boolean; problem?: string };
 export type ReplyOutput = { reply: string; facts_used: string[]; language: string; topics: string[] };
@@ -11,6 +12,9 @@ const MONEY = /(\d+\s?%\s?off|\bdiscount|\brefund|\bvoucher|\bcoupon|reimburs|co
 const FAULT = /\b(our (fault|mistake|error)|it was our (fault|mistake|error)|we (made|make) (a|an) (mistake|error)|we messed up|we were wrong|we (are|were|'re) (responsible|liable|at fault)|we take full responsibility|we admit)\b/i;
 const LEAK = /(system prompt|my instructions|these instructions|as an ai\b|language model|business_memory|style_examples|<\/?customer_review)/i;
 const PERSONAL = /\b(order|booking|reservation|invoice|account|table|ticket)\s*(number|no\.?|#)\s*\S+|\b(as (our|a) (patient|client))\b|\byour (appointment|treatment|prescription|diagnosis|visit on|order on|booking on)\b/i;
+// K-13: a health, legal or financial business never confirms the reviewer was a patient or client, never mentions a
+// treatment, a visit, a case or an account. English, Spanish, French and Arabic.
+const RELATIONSHIP = /\b(patients?|clients?|treatments?|treated|appointments?|procedures?|diagnos\w*|prescri\w*|therapy|surgery|consultations?|your (visit|stay|case|matter|account|file|policy|loan|session|results?)|you (visited|came in|came to see us|were seen|were treated)|(visiting|choosing|trusting) us|pacientes?|tratamientos?|citas?|consultas?|traitements?|rendez-vous|dossier)\b|مريض|مرضى|علاج|موعد|زيارتك|عميل|موكل/i;
 const CLAIM = /\b(we (offer|serve|sell|deliver|provide|accept|stock|open|close)|we(?:'re| are) open|our (menu|prices?|policy|policies|hours|delivery|opening))\b/i;
 const HOURS = /\b\d{1,2}(:\d{2})?\s?(am|pm)\b|\b\d{1,2}:\d{2}\b|\b(open|close[sd]?|opening|closing)\s+(at|until|till|from|on|every)\b/i;
 const TIME = /\b\d{1,2}(?::\d{2})?\s?(?:am|pm)?\b/gi;
@@ -66,6 +70,7 @@ export function nameCandidates(reply: string, review: string): string[] {
 
 export type CheckInput = {
   out: ReplyOutput; memory: Memory; reviewer: string; reviewText: string; recentReplies: string[];
+  industry?: Industry | null;
 };
 
 /** Every code check, in order. A failed check carries the sentence the owner sees. The sentences never quote the
@@ -98,6 +103,9 @@ export function replyChecks(i: CheckInput): Check[] {
   add("no_compensation", !MONEY.test(reply), "The draft offers a discount, refund, voucher or compensation.");
   add("no_admission_of_fault", !FAULT.test(reply), "The draft admits fault.");
   add("no_personal_data", !PERSONAL.test(reply), "The draft mentions personal details about the customer.");
+  if (i.industry) {
+    add("no_patient_or_client", !RELATIONSHIP.test(reply), "The draft confirms they were a patient or client, or mentions a visit or treatment. A health, legal or financial business never does that in public.");
+  }
   add("no_emoji", !/\p{Extended_Pictographic}|<3/u.test(reply), "The draft contains an emoji or heart.");
   const noTimes = reply.replace(/\b\d{1,2}(:\d{2})?\s?(am|pm)\b/gi, "");
   add("no_arabizi", !/[a-z][2379][a-z]|(^|[\s,.!?])[2379][a-z]{2,}/i.test(noTimes), "The draft writes Arabic with numbers for letters.");

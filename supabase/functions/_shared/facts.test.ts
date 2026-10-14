@@ -74,7 +74,7 @@ Deno.test("an unconfirmed AI suggestion never appears in a reply prompt or anyth
     sent.push(flat(s), u);
     return Promise.resolve({ text: JSON.stringify({ reply: "Thank you Maya.\nRami and the team", facts_used: [], language: "en", topics: [] }), model: "stub" });
   };
-  await draftGrounded({ review, memory, language: "en", urgent: false, recentReplies: [] }, send,
+  await draftGrounded({ review, memory, language: "en", risk: "low", recentReplies: [] }, send,
     { checkCall: (_m, s, u) => { sent.push(String(s), u); return Promise.resolve(JSON.stringify({ ok: true, issues: [] })); } });
   assert.equal(sent.length, 4, "one draft call and one check call");
   for (const s of UNTRUSTED) assert.ok(!sent.join("\n").includes(s), `model call holds "${s}"`);

@@ -7,7 +7,7 @@
 //                                       handle_myself | revert | keep. A second POST gets the first result.
 //   POST { t, do: "undo", publication } cancels the publication this link made, inside its 10 seconds (K-70).
 //
-// Links last 72 hours and belong to one item and one recipient. Profile changes, hours and urgent reviews need that
+// Links last 72 hours and belong to one item and one recipient. Profile changes, hours and high-risk reviews need that
 // recipient signed in on the page (the page asks and comes back); any other account's session is refused. The token
 // stays the credential for review replies, skips and photos. Every use is recorded with the channel email_link, the
 // user, the IP country and the user agent (the audited client in api/action.ts forwards them).

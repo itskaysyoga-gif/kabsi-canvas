@@ -9,22 +9,23 @@ import { fenceReview, houseStyle, type ReviewInput, UNTRUSTED } from "./fence.ts
 import { type Memory, memoryParts } from "./memory.ts";
 import { type ReplyOutput, replyChecks } from "./checks.ts";
 import { runContract, type Send, type Workflow } from "./contract.ts";
-import { REPLY_RULES, REPLY_V1, replyTask } from "./prompts/reply.v1.ts";
+import { REPLY_RULES, REPLY_V2, replyTask } from "./prompts/reply.v2.ts";
 import { CHECK_RULES } from "./prompts/check.v1.ts";
-import { CLASSIFY_RULES } from "./prompts/classify.v1.ts";
+import { CLASSIFY_RULES } from "./prompts/classify.v2.ts";
+import { type Industry, mergeRisk, type Risk, riskByRules, type RiskReason } from "./risk.ts";
 
-export { CONTACT_LINE } from "./prompts/reply.v1.ts";
+export { CONTACT_LINE } from "./prompts/reply.v2.ts";
 
-const URGENT_WORDS = /(sick|food poison|poison|ill\b|vomit|hospital|police|lawyer|lawsuit|court|sue\b|theft|stole|harass|racis|discriminat|rat\b|cockroach|insect|تسمم|مريض|شرطة|محامي|سرقة|تحرش|صرصور|empoison|malade|police|avocat|vol\b|harcèlement)/i;
-
-// Language and urgency (D220). Urgent if rating ≤ 2, the keyword list matches, or the model says so.
-export async function classify(r: ReviewInput, meter?: Meter, call = message) {
-  const keywordUrgent = r.rating <= 2 || URGENT_WORDS.test(r.comment ?? "");
-  if (!r.comment?.trim()) return { language: "none", urgent: keywordUrgent, reasons: keywordUrgent ? ["low rating"] : [] };
-  const out = await call(MODELS.check, CLASSIFY_RULES, fenceReview(r), 200, meter);
-  const j = parseJson<{ language?: string; urgent?: boolean; reasons?: string[] }>(out);
-  const reasons = [...(r.rating <= 2 ? ["low rating"] : []), ...(j.reasons ?? [])].slice(0, 5);
-  return { language: (j.language ?? "unknown").slice(0, 12), urgent: keywordUrgent || j.urgent === true, reasons };
+// Language and risk level (K-13, P0.3-03): code rules first, then the small model; the higher level wins. A review
+// with no text is not sent to a model, and neither is one the code rules already mark high: nothing can lower it and
+// it gets no draft, so its language is left unknown (null) until the owner asks for a holding reply.
+export async function classify(r: ReviewInput, o: { industry?: Industry | null; meter?: Meter; call?: typeof message } = {}): Promise<{ language: string | null; risk: Risk; reasons: RiskReason[] }> {
+  const code = riskByRules(r, o.industry ?? null);
+  if (!r.comment?.trim()) return { language: "none", ...code };
+  if (code.risk === "high") return { language: null, ...code };
+  const out = await (o.call ?? message)(MODELS.check, CLASSIFY_RULES, fenceReview(r), 200, o.meter);
+  const j = parseJson<{ language?: string; risk?: unknown; reasons?: unknown }>(out);
+  return { language: String(j.language ?? "unknown").slice(0, 12), ...mergeRisk(code, j) };
 }
 
 // Which language the reply is written in (D232, K-119). Franco gets English.
@@ -36,14 +37,20 @@ export function languageRule(language: string) {
 }
 
 export type ReplyInput = {
-  review: ReviewInput; memory: Memory; language: string; urgent: boolean;
+  review: ReviewInput; memory: Memory; language: string; risk: Risk;
+  /** risk.ts reason keys: the careful lines for a medium review. */
+  reasons?: readonly string[];
+  /** Health, legal or financial (from the Google category): replies never confirm a patient or client. */
+  industry?: Industry | null;
+  /** The neutral holding reply a high-risk review gets only when the owner asks for it (K-13). */
+  holding?: boolean;
   /** The last 20 replies of this business, for the repeat check. */
   recentReplies: string[];
   instruction?: string; previous?: string;
 };
 
 export const replySystem = (memory: Memory): System => [{ text: REPLY_RULES, cache: true }, ...memoryParts(memory)];
-export const replyUser = (i: ReplyInput) => `${fenceReview(i.review)}\n\n${replyTask({ languageRule: languageRule(i.language), urgent: i.urgent, instruction: i.instruction, previous: i.previous })}`;
+export const replyUser = (i: ReplyInput) => `${fenceReview(i.review)}\n\n${replyTask({ languageRule: languageRule(i.language), risk: i.risk, reasons: i.reasons, industry: i.industry, holding: i.holding, instruction: i.instruction, previous: i.previous })}`;
 
 /** Structured output (K-39): anything that does not fit is thrown away. */
 export function parseReply(text: string): ReplyOutput {
@@ -59,12 +66,12 @@ export function parseReply(text: string): ReplyOutput {
 export function replyWorkflow(o: { checkCall?: typeof message; meter?: Meter } = {}): Workflow<ReplyInput, ReplyOutput> {
   const call = o.checkCall ?? message;
   return {
-    promptVersion: REPLY_V1,
+    promptVersion: REPLY_V2,
     system: (i) => replySystem(i.memory),
     user: replyUser,
     maxTokens: 500,
     parse: (text) => parseReply(text),
-    codeChecks: (out, i) => replyChecks({ out, memory: i.memory, reviewer: i.review.reviewer, reviewText: i.review.comment ?? "", recentReplies: i.recentReplies }),
+    codeChecks: (out, i) => replyChecks({ out, memory: i.memory, reviewer: i.review.reviewer, reviewText: i.review.comment ?? "", recentReplies: i.recentReplies, industry: i.industry ?? null }),
     modelCheck: async (out, i) => {
       const facts = Object.entries(i.memory.factText).map(([r, t]) => `[${r}] ${t}`).join("\n") || "(none)";
       const avoid = typeof i.memory.card.avoid === "string" && i.memory.card.avoid.trim() ? `\nThe owner asked never to mention or promise (set ok=false if the draft does): ${i.memory.card.avoid.trim()}\n` : "";

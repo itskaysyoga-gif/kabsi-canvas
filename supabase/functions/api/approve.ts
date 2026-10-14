@@ -2,6 +2,8 @@
 //   POST { review_id, do: "post", text }            → approves exactly `text` (D202); it goes to Google after 10 s
 //   POST { review_id, do: "undo", publication_id }  → cancels that approval inside the 10 s (K-70)
 //   POST { review_id, do: "redraft", instruction }  → new AI version following the owner's instruction
+//   POST { review_id, do: "holding" }               → a neutral holding reply for a high-risk review, only on the
+//                                                      owner's request (K-13); never written before it
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
 import { draftReview, publishReply, undoReply } from "../_shared/reviews.ts";
 import { AI_BUDGET_MESSAGE } from "../_shared/ai-budget.ts";
@@ -16,7 +18,7 @@ export async function approve(req: Request): Promise<Response> {
   const b = await req.json().catch(() => ({})) as { review_id?: string; do?: string; text?: string; instruction?: string; publication_id?: string };
   if (!b.review_id) return fail("bad_input", "Missing review.");
   const db = admin();
-  const { data: rv } = await db.from("reviews").select("id, location_id, state").eq("id", b.review_id).maybeSingle();
+  const { data: rv } = await db.from("reviews").select("id, location_id, state, risk").eq("id", b.review_id).maybeSingle();
   if (!rv) return fail("not_found", "Review not found.", 404);
   const { data: member } = await db.from("location_members").select("user_id").eq("location_id", rv.location_id).eq("user_id", user.id).maybeSingle();
   if (!member) return fail("forbidden", "You don't have access to this business.", 403);
@@ -40,6 +42,12 @@ export async function approve(req: Request): Promise<Response> {
       const d = await draftReview(rv.id, instruction);
       return json({ ok: true, draft: d.ok ? d.body : null, issues: d.issues });
     }
+    if (b.do === "holding") {
+      if (rv.risk !== "high") return fail("bad_input", "This review already gets a normal draft.");
+      if (!(await rateLimit(`redraft:${rv.id}`, 3, 86400, { failClosed: true }))) return fail("rate_limited", "Three new versions a day per review. Edit the text yourself instead.", 429);
+      const d = await draftReview(rv.id, undefined, { holding: true });
+      return json({ ok: true, draft: d.ok ? d.body : null, issues: d.issues });
+    }
     return fail("bad_input", "Unknown action.");
   } catch (e) {
     const msg = String(e);
@@ -48,6 +56,7 @@ export async function approve(req: Request): Promise<Response> {
     if (msg.includes("ai_budget_business")) return fail("ai_budget", AI_BUDGET_MESSAGE.business, 429);
     if (msg.includes("ai_budget_global")) return fail("ai_budget", AI_BUDGET_MESSAGE.global, 429);
     if (msg.includes("bad_reply_text")) return fail("bad_text", "The reply is empty or too long.", 400);
+    if (msg.includes("high_risk_no_draft")) return fail("high_risk", "This review needs a little more care, so Kabsi did not draft a reply. Ask for a neutral holding reply or write your own.", 409);
     if (msg.includes("too_late")) return fail("too_late", "It is already on its way to Google.", 409);
     if (msg.includes("not_member") || msg.includes("unknown_publication")) return fail("not_found", "Approval not found.", 404);
     await captureError("approve", e);

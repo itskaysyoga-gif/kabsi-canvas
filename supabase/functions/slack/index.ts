@@ -155,7 +155,7 @@ function digestText(d: Digest, w: Digest) {
     "*Reviews and profiles*",
     line("New reviews", d.reviews_new, w.reviews_new),
     line("Replies posted", d.replies_posted, w.replies_posted),
-    `• Drafts waiting for owners: *${n(d.drafts_waiting)}*${n(d.urgent_waiting) ? ` (${n(d.urgent_waiting)} need care)` : ""}`,
+    `• Drafts waiting for owners: *${n(d.drafts_waiting)}*${n(d.high_risk_waiting) ? ` (${n(d.high_risk_waiting)} high risk)` : ""}`,
     line("Google posts published", d.posts_published, w.posts_published),
     line("Listing changes caught", d.shield_changes, w.shield_changes),
     line("Card and link opens", d.taps, w.taps),
@@ -305,7 +305,7 @@ async function command(req: Request) {
         db.from("usdt_claims").select("amount_usd, network, created_at, kind").eq("status", "pending").order("created_at").limit(10),
         db.from("chat_conversations").select("id, updated_at, summary, contact_id").eq("status", "handoff").gt("updated_at", new Date(Date.now() - 14 * 864e5).toISOString()).order("updated_at", { ascending: false }).limit(10),
         db.from("locations").select("name, created_at").eq("status", "access_pending").order("created_at").limit(15),
-        db.from("reviews").select("id", { count: "exact", head: true }).in("state", ["drafted", "blocked"]).eq("urgency", "urgent"),
+        db.from("reviews").select("id", { count: "exact", head: true }).in("state", ["drafted", "blocked"]).eq("risk", "high"),
       ]);
       const lines = [
         `*USDT payments to check:* ${claims.data?.length ?? 0}`,
@@ -314,7 +314,7 @@ async function command(req: Request) {
         ...(handoffs.data ?? []).map((h) => `• ${cut(String(h.summary ?? "Not summarised yet"), 140)}`),
         `*Businesses waiting for Google access:* ${waiting.data?.length ?? 0}`,
         ...(waiting.data ?? []).map((l) => `• ${x(l.name)}`),
-        `*Urgent reviews waiting for owners:* ${drafts.count ?? 0}`,
+        `*High-risk reviews waiting for owners:* ${drafts.count ?? 0}`,
         `<${APP_URL}/staff|Open the staff page>`,
       ];
       return reply(lines.join("\n"));
