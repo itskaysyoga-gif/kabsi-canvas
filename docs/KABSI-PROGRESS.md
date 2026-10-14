@@ -119,7 +119,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.3-01 | Business Knowledge as the source for every draft | Opus | merged (92, 5c01dc8, 13 Oct 06:23 UTC); Deploy passed; migrations 1 and 2 live (2 run by Hussein, read back 14 Oct); open: the real-model draft (credit) and Hussein's 390 px look, see After merge | 92, 93 | 13 Oct 2026 |
 | P0.3-02 | Per-business memory and the grounded reply pipeline | Opus | merged (94, 88ef7e0, 13 Oct 06:52 UTC); Deploy passed; migrations 1 and 2 live (2 run by Hussein, read back 14 Oct); open: the real-model checks (credit) and Hussein's 390 px look, see After merge | 94, 95 | 13 Oct 2026 |
 | P0.3-03 | Three review risk levels | Opus | merged (96, f11ef00, 14 Oct 03:53 UTC); migration live and read back; Deploy passed (`api` 74, `slack` 60); live high-risk mock review on QA Bakery passed (no draft, no model call, the guidance email); open: the medium and holding-reply real-model checks (credit) and Hussein's 390 px look, see After merge | 96, 97 | 14 Oct 2026 |
-| P0.3-04 | Evaluation set and the prompt gate | Opus | merged (97) on green ci.yml (run 38509173689: App, Edge Functions with the 9 eval tests, Database, Prompt gate passing at once with no prompt change); no database or function change to deploy; open: the real evaluation run (credit), see After merge | 97, 98 (throwaway, closed) | 14 Oct 2026 |
+| P0.3-04 | Evaluation set and the prompt gate | Opus | merged (97, 404d5e5, 14 Oct 04:06 UTC); After-merge checks passed (production READY, live site 200, jobs green) on green ci.yml (run 38509173689: App, Edge Functions with the 9 eval tests, Database, Prompt gate passing at once with no prompt change); no database or function change to deploy; open: the real evaluation run (credit), see After merge | 97, 98 (throwaway, closed) | 14 Oct 2026 |
 | P0.3-05 | One task engine | Opus | todo | | |
 | P0.3-06 | Roles and approval policies | Opus | todo | | |
 | P0.3-07 | Home is the Action Center | Sonnet | todo | | |
@@ -395,6 +395,13 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.3-04 After merge (14 Oct 2026, 04:06 to 04:09 UTC, Hussein's session 2)
+- PR 97 merged 04:06 UTC as merge commit 404d5e5 (ci.yml green on head 0dad805: App, Edge Functions and Worker with the 9 eval tests, Database, Prompt gate).
+- No Deploy run, as designed: P0.3-04 changed no path under `supabase/functions`, `workers` or `deploy.yml`.
+- Vercel production `dpl_Eep6i8c3mKeZgaxWC6ZxiihTtfPT` for 404d5e5 READY; live `https://kabsi.co/` fetched through the Vercel connector: 200.
+- Jobs since the P0.3-03 deploy (03:53:42 UTC): 30 succeeded, 5 pending (next runs), none failed.
+- Still pending: the real evaluation run (After merge step 1, Anthropic credit).
 
 ### P0.3-04 (branch claude/h-p0-3-04, PR 97, 14 Oct 2026, Hussein's session 2 of the bundled plan)
 - No Anthropic, Google or Places call: every model in the tests and the CLI runs is a stub; the CI job never ran the live step (EVAL_LIVE unset).
