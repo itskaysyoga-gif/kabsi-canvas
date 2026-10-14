@@ -58,6 +58,48 @@ jobs:
       - name: Worker syntax
         run: node --check workers/kabsi-go/src/index.js
 
+  # P0.3-04 (K-39, K-104): a change to a prompt file must pass the evaluation set before it merges. With no prompt
+  # change the job passes at once. With one, it runs the 200 cases on the real models only when the repository
+  # variable EVAL_LIVE is "true" (and the ANTHROPIC_API_KEY secret is set); otherwise it fails, so the change cannot
+  # merge, and nothing is sent to Anthropic. The gate logic itself is tested with stub models in the functions job.
+  prompt_gate:
+    name: Prompt gate (evaluation set)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Did a prompt change?
+        id: changed
+        run: |
+          if git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep -q '^supabase/functions/_shared/ai/prompts/'; then
+            echo "prompts=true" >> "$GITHUB_OUTPUT"
+            git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep '^supabase/functions/_shared/ai/prompts/'
+          else
+            echo "No prompt file changed; the evaluation does not need to run."
+          fi
+      - name: Live evaluation is off
+        if: steps.changed.outputs.prompts == 'true' && vars.EVAL_LIVE != 'true'
+        run: |
+          echo "::error::A prompt changed, so the evaluation set must pass before this merges. Live evaluation is off (repository variable EVAL_LIVE is not true). Nothing was sent to Anthropic."
+          exit 1
+      - uses: denoland/setup-deno@v2
+        if: steps.changed.outputs.prompts == 'true' && vars.EVAL_LIVE == 'true'
+        with:
+          deno-version: v2.x
+      - name: Run the evaluation set (200 cases, real models)
+        if: steps.changed.outputs.prompts == 'true' && vars.EVAL_LIVE == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: bash scripts/eval/gate.sh
+      - name: Keep the results
+        if: always() && steps.changed.outputs.prompts == 'true' && vars.EVAL_LIVE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-result
+          path: eval-result.json
+          if-no-files-found: ignore
+
   database:
     name: Database (pgTAP on a local Supabase stack)
     runs-on: ubuntu-latest
