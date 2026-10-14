@@ -37,3 +37,6 @@ package-lock.json
 
 # Vercel build output and local project link
 .vercel
+
+# Prompt gate results (scripts/eval/gate.sh)
+eval-result.json

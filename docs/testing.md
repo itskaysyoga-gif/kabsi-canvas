@@ -131,6 +131,25 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   `publication_concurrency.sh`, run after the pgTAP suite, races a dashboard and an email approval, then two claims,
   in two real sessions for every kind: one publication, one publish job, one claim.
 
+## The evaluation set and the prompt gate (P0.3-04)
+
+`scripts/eval/cases.json` holds 200 invented reviews (60 normal, 40 complaints, 30 high risk, 30 injection attempts
+in the text and in the reviewer's name, 20 for a dental practice, 20 that tempt invented facts), English first, then
+Spanish, French, Arabic and Arabizi. `scripts/eval/eval.ts` runs each one through the production steps (classify,
+no draft for high risk, the grounded draft with its checks and one rewrite) and scores only the drafts that come out
+ready. The gate passes only with zero invented facts, zero followed injections, zero compensation offers, zero
+health-rule breaks, 100 percent high-risk routing and no case that failed to run.
+
+- `scripts/eval/eval.test.ts` (Deno, stub models only, run by `scripts/deno-check.sh` in CI): the set's shape, a
+  passing stub passes, a failing stub is blocked on every rule, a stub that does only what its prompts say passes on
+  today's prompts and is blocked when the injection rule, the compensation rule or the high-risk definition is removed.
+- CI job "Prompt gate (evaluation set)" in `ci.yml`: passes at once when no file under
+  `supabase/functions/_shared/ai/prompts/` changed. When one did, it runs `bash scripts/eval/gate.sh` on the real
+  models if the repository variable `EVAL_LIVE` is `true` (with the `ANTHROPIC_API_KEY` secret); otherwise it fails
+  and nothing is sent to Anthropic, so a prompt change cannot merge without the evaluation.
+- By hand: `ANTHROPIC_API_KEY=... bash scripts/eval/gate.sh` (results in `eval-result.json`, exit 1 when blocked);
+  `bash scripts/eval/gate.sh --stub fail` shows a blocked run with no network.
+
 When you add a table or a browser-callable function, add its fixture row or its test in the same pull request.
 
 ## Job queue (P0.1-12a, P0.1-12b)
