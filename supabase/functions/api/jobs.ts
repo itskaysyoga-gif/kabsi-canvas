@@ -31,6 +31,7 @@ import {
 import { accessJob, deletionsJob, ratingsJob, renewalsJob, trialsJob, weeklyJob } from "./cron.ts";
 import { photoFileStore, removeDuePhotoFiles } from "../_shared/retention.ts";
 import { detectTasks } from "../_shared/tasks.ts";
+import { sendTeamInvite, type TeamInvite, teamInviteEmail } from "../_shared/team.ts";
 
 // Offer a job. Returns its id, or null when the same dedupe key is already pending, running or retrying.
 async function enqueueJob(kind: string, locationId: string | null, dedupeKey: string, payload: Record<string, unknown> = {}) {
@@ -282,6 +283,22 @@ const HANDLERS: Record<string, JobHandler> = {
   photo_files: step("photo_files", () => removeDuePhotoFiles(photoFileStore(admin()))),
   disconnect: disconnectJob,
   // P0.3-05: the task detectors for one business (K-08); they also run at once in the database when a source changes.
+  // P0.3-06: the invitation email for one team invite (Settings, Team); sent only while the invite is open.
+  team_invite_email: async (job) => {
+    const inviteId = String(job.payload.invite_id ?? "");
+    if (!inviteId) throw new PermanentJobError("team_invite_email needs an invite");
+    await sendTeamInvite(inviteId, {
+      read: (id) => rpcJson<TeamInvite | null>("team_invite_for_email", { p_invite: id }),
+      async send(i) {
+        const m = teamInviteEmail(i, APP_URL);
+        await sendEmail({
+          kind: "team_invite", to: i.email, locationId: job.location_id ?? undefined, dedupeKey: `team_invite:${inviteId}`,
+          subject: m.subject, text: m.text,
+          html: emailLayout({ preheader: m.preheader, title: m.title, bodyHtml: m.bodyHtml, button: m.button, note: m.note }),
+        });
+      },
+    });
+  },
   detect_tasks: async (job) => {
     const made = await detectTasks(job.location_id, (id) => rpcJson<Record<string, number> | null>("run_task_detectors", { p_location: id }));
     if (Object.values(made).some((n) => n > 0)) await jobLog("detect_tasks", true, { location: job.location_id, ...made });

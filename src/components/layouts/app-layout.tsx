@@ -20,6 +20,7 @@ import { chooseLocation, myLatestLocation, myLocations } from "@/lib/onboarding"
 import { amStaff } from "@/lib/reviews";
 import { myPartner } from "@/lib/partner";
 import { waitingReplies } from "@/lib/tasks";
+import { myAccess } from "@/lib/team";
 import { Button } from "@/components/ui/button";
 import { ExampleBadge } from "@/components/ui/example-badge";
 import { setAnalyticsPaused } from "@/lib/telemetry";
@@ -83,16 +84,29 @@ const SECTIONS: Section[] = [
     short: "Settings",
     to: "/app/knowledge",
     icon: Settings,
-    paths: ["/app/knowledge", "/app/plan", "/app/settings"],
+    paths: ["/app/knowledge", "/app/plan", "/app/settings", "/app/team"],
     sub: [
       ["About your business", "/app/knowledge"],
       ["Plan", "/app/plan"],
       ["Emails", "/app/settings"],
+      ["Team", "/app/team"],
     ],
   },
 ];
+// K-16 (P0.3-06): staff see photos and the review link only. The database refuses the rest; the menu matches it.
+const STAFF_SECTIONS: Section[] = [
+  {
+    label: "Photos",
+    short: "Photos",
+    to: "/app/photos",
+    icon: Store,
+    paths: ["/app", "/app/photos"],
+  },
+  SECTIONS.find((s) => s.label === "Get Reviews")!,
+];
 const clean = (p: string) => (p.length > 1 ? p.replace(/\/+$/, "") : p);
-const sectionFor = (path: string) => SECTIONS.find((s) => s.paths.includes(clean(path)));
+const sectionFor = (path: string, sections: Section[] = SECTIONS) =>
+  sections.find((s) => s.paths.includes(clean(path)));
 
 function NavLink({
   section,
@@ -278,16 +292,23 @@ export function AppLayout({
     queryFn: myLatestLocation,
     enabled: area === "app",
   });
+  const access = useQuery({
+    queryKey: ["access", myLoc.data?.id],
+    queryFn: () => myAccess(myLoc.data!.id),
+    enabled: area === "app" && !!myLoc.data,
+  });
+  const staffRole = access.data?.role === "staff";
+  const sections = staffRole ? STAFF_SECTIONS : SECTIONS;
   const waiting = useQuery({
     queryKey: ["waiting-count", myLoc.data?.id],
     queryFn: () => waitingReplies(myLoc.data!.id),
-    enabled: area === "app" && myLoc.data?.status === "active",
+    enabled: area === "app" && myLoc.data?.status === "active" && !!access.data && !staffRole,
     refetchInterval: 60_000,
   });
   // Demo workspace (P0.1-06): no analytics while a demo business is open.
   const isDemo = area === "app" && myLoc.data?.is_demo === true;
   useEffect(() => setAnalyticsPaused(isDemo), [isDemo]);
-  const current = sectionFor(location.pathname);
+  const current = sectionFor(location.pathname, sections);
   const badgeFor = (sec: Section) =>
     sec.label === "Reviews" && waiting.data ? waiting.data : undefined;
   const areaTitle = area === "partner" ? "Partner" : area === "staff" ? "Staff" : "Business";
@@ -312,7 +333,7 @@ export function AppLayout({
           <div className="mt-8 flex-1 overflow-y-auto">
             {area === "app" ? (
               <nav className="space-y-1" aria-label="Business navigation">
-                {SECTIONS.map((sec) => (
+                {sections.map((sec) => (
                   <NavLink
                     key={sec.to}
                     section={sec}
@@ -423,7 +444,7 @@ export function AppLayout({
           className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-kb-hairline bg-kb-white px-1 pb-[env(safe-area-inset-bottom)] lg:hidden"
           aria-label="Business navigation"
         >
-          {SECTIONS.map((sec) => (
+          {sections.map((sec) => (
             <NavLink
               key={sec.to}
               section={sec}

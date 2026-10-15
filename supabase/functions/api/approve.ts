@@ -1,4 +1,5 @@
-// approve: dashboard actions on a review. Signed-in members only.
+// approve: dashboard actions on a review. Signed-in owners and managers (K-16); staff never. Whether this person may
+// approve this review is decided in the database by the business's approval policy (approve_publication, P0.3-06).
 //   POST { review_id, do: "post", text }            → approves exactly `text` (D202); it goes to Google after 10 s
 //   POST { review_id, do: "undo", publication_id }  → cancels that approval inside the 10 s (K-70)
 //   POST { review_id, do: "redraft", instruction }  → new AI version following the owner's instruction
@@ -8,6 +9,9 @@ import { admin, captureError, CORS, currentUser, fail, json, rateLimit } from ".
 import { draftReview, publishReply, undoReply } from "../_shared/reviews.ts";
 import { AI_BUDGET_MESSAGE } from "../_shared/ai-budget.ts";
 import { auditHeaders } from "../_shared/audit.ts";
+
+export const STAFF_MESSAGE = "Staff can add photos and share the review link. The owner approves replies.";
+export const OWNER_APPROVES_MESSAGE = "The owner approves this one. They can let managers approve replies in Settings, Team.";
 
 export async function approve(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -20,8 +24,9 @@ export async function approve(req: Request): Promise<Response> {
   const db = admin();
   const { data: rv } = await db.from("reviews").select("id, location_id, state, risk").eq("id", b.review_id).maybeSingle();
   if (!rv) return fail("not_found", "Review not found.", 404);
-  const { data: member } = await db.from("location_members").select("user_id").eq("location_id", rv.location_id).eq("user_id", user.id).maybeSingle();
+  const { data: member } = await db.from("location_members").select("role").eq("location_id", rv.location_id).eq("user_id", user.id).maybeSingle();
   if (!member) return fail("forbidden", "You don't have access to this business.", 403);
+  if (member.role === "staff") return fail("forbidden", STAFF_MESSAGE, 403);
 
   try {
     if (b.do === "post") {
@@ -58,6 +63,7 @@ export async function approve(req: Request): Promise<Response> {
     if (msg.includes("bad_reply_text")) return fail("bad_text", "The reply is empty or too long.", 400);
     if (msg.includes("high_risk_no_draft")) return fail("high_risk", "This review needs a little more care, so Kabsi did not draft a reply. Ask for a neutral holding reply or write your own.", 409);
     if (msg.includes("too_late")) return fail("too_late", "It is already on its way to Google.", 409);
+    if (msg.includes("not_allowed_to_approve")) return fail("owner_approves", OWNER_APPROVES_MESSAGE, 403);
     if (msg.includes("not_member") || msg.includes("unknown_publication")) return fail("not_found", "Approval not found.", 404);
     await captureError("approve", e);
     return fail("internal", "Something went wrong. Nothing was posted.", 500);

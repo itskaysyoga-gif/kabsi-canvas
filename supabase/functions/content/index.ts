@@ -57,12 +57,17 @@ async function approveChange(req: Request, userId: string, targetType: "local_po
   return { state: r.state, publication: r.publication_id, publish_after: r.publish_after, created: r.created };
 }
 
-async function member(req: Request, locationId: string) {
+// K-16 (P0.3-06): staff may only check a photo they are adding; everything else here is for owners and managers.
+// Approvals (post_publish, photo_publish, hours_publish, shield_decide) are decided again in the database by the policy.
+async function member(req: Request, locationId: string, op: unknown) {
   const user = await currentUser(req);
   if (!user) return { error: fail("not_signed_in", "Please log in.", 401) };
   const db = admin();
-  const { data: m } = await db.from("location_members").select("user_id").eq("location_id", locationId).eq("user_id", user.id).maybeSingle();
+  const { data: m } = await db.from("location_members").select("role").eq("location_id", locationId).eq("user_id", user.id).maybeSingle();
   if (!m) return { error: fail("forbidden", "You don't have access to this business.", 403) };
+  if (m.role === "staff" && op !== "photo_check") {
+    return { error: fail("forbidden", "Staff can add photos and share the review link. The owner does the rest.", 403) };
+  }
   const { data: loc } = await db.from("locations").select(POST_LOC_COLUMNS).eq("id", locationId).single();
   return { user, loc: await withFacts(db, loc as unknown as Loc) };
 }
@@ -95,7 +100,7 @@ Deno.serve(async (req) => {
       locationId = data.location_id;
     }
     if (!locationId) return fail("bad_input", "Missing business.");
-    const ctx = await member(req, locationId);
+    const ctx = await member(req, locationId, b.do);
     if ("error" in ctx) return ctx.error!;
     const { user, loc } = ctx;
     // Early access (D267): a person handles replies by hand; profile work starts once Kabsi connects to Google.
@@ -217,6 +222,9 @@ Deno.serve(async (req) => {
     if (e instanceof AiBudgetError) return fail("ai_budget", AI_BUDGET_MESSAGE[e.scope], 429);
     const msg = String(e);
     if (msg.includes("already_handled")) return fail("bad_input", "This was already handled.", 409);
+    if (msg.includes("not_allowed_to_approve") || msg.includes("owner_only")) {
+      return fail("owner_approves", "The owner approves this one. They can let managers approve it in Settings, Team.", 403);
+    }
     if (msg.includes("location_not_active")) return fail("not_active", "This business isn't active yet.", 409);
     if (msg.includes("concierge_profile")) return fail("early_access", CONCIERGE_COPY.profile, 409);
     if (msg.includes("bad_post_text")) return fail("bad_text", "Posts must be between 10 and 1,500 characters.");
