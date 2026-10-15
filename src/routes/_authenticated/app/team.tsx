@@ -79,10 +79,8 @@ function TeamManager({ locationId }: { locationId: string }) {
   const refresh = () => qc.invalidateQueries({ queryKey: ["team", locationId] });
   const act = useMutation({
     mutationFn: (fn: () => Promise<unknown>) => fn(),
-    onSuccess: () => {
-      setMessage("");
-      return refresh();
-    },
+    onMutate: () => setMessage(""),
+    onSuccess: () => refresh(),
     onError: (e: Error) => setMessage(e.message),
   });
 
@@ -162,9 +160,11 @@ function TeamManager({ locationId }: { locationId: string }) {
                   aria-label={`Role of ${m.email}`}
                   value={m.role}
                   disabled={act.isPending}
-                  onChange={(e) =>
-                    act.mutate(() => setMemberRole(locationId, m.user_id, e.target.value as Role))
-                  }
+                  onChange={(e) => {
+                    // Read the choice now: the select is controlled, so React puts the old value back.
+                    const next = e.target.value as Role;
+                    act.mutate(() => setMemberRole(locationId, m.user_id, next));
+                  }}
                   className="h-11 rounded-card border border-kb-hairline bg-kb-white px-3 text-base"
                 >
                   {(["owner", "manager", "staff"] as Role[]).map((r) => (
