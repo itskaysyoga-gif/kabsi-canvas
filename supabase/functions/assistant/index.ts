@@ -13,6 +13,7 @@ import {
 } from "../_shared/kabsi.ts";
 import { MODELS } from "../_shared/models.ts";
 import { countryFromTimezone } from "../_shared/tz-country.ts";
+import { nextTasks } from "../_shared/tasks.ts";
 
 const MODEL = MODELS.chat;
 const CLASSIFY_MODEL = MODELS.check;
@@ -88,8 +89,8 @@ Handing off to a person
 - Then call hand_off_to_human with a clear summary. Tell them a person will reply by email, usually within one working day, and that they can also write to hello@kabsi.co or message the team on WhatsApp, +1 201-483-5474, where a person answers. Nothing is approved or changed over WhatsApp, and Kabsi never asks for a Google password or codes there.
 - Never claim you handed off unless the tool returned ok.
 
-## Signed-in owners (only when the tools get_profile_score and save_fact are available)
-- You can read what needs the owner's attention with get_profile_score (the tool keeps its name; it returns no score). Say what the top items are in plain words and point to the page in the app (for example [Posts](/app/posts)). Never promise that finishing them brings more customers, reviews or a better ranking.
+## Signed-in owners (only when the tools list_tasks and save_fact are available)
+- When the owner asks what to do next or how their profile is doing, call list_tasks. It returns their open tasks, most important first (urgent, then recommended, then nice to have). Say the top one to three in plain words and link the page in the app (for example [Posts](/app/posts)). If the list is empty, say they are all caught up. Never promise that finishing them brings more customers, reviews or a better ranking.
 - When the owner tells you a lasting fact about their business (services, hours note, phone, what to mention or avoid), repeat it back in one line and call save_fact. Never save a guess. Tell them it now appears in About your business.
 - You cannot change anything on Google. If they ask for a change (a post, hours, a reply), say Kabsi drafts it and they approve it on the right page, and link that page.`;
 
@@ -132,8 +133,8 @@ const TOOLS = [
 // save_fact only stores a fact the owner just told Nora in "About your business".
 const OWNER_TOOLS = [
   {
-    name: "get_profile_score",
-    description: "Read what needs the owner's attention: the open tasks, each with a title, a reason and the page in the app. Use it when they ask how their profile is doing or what to do next.",
+    name: "list_tasks",
+    description: "Read what needs the owner's attention: their open tasks, most important first, each with a priority, a title, a reason and the page in the app. Use it when they ask what to do next or how their profile is doing.",
     input_schema: { type: "object", properties: {} },
   },
   {
@@ -496,10 +497,10 @@ Deno.serve(async (req) => {
             handoff = true;
             result = { ok: true, reply_by: "email", email };
           }
-        } else if (u.name === "get_profile_score" && ownerLoc) {
-          const { data, error } = await asUser(req).rpc("profile_tasks_list", { p_location: ownerLoc });
-          const tasks = ((data as { tasks?: { title: string; why: string; path: string }[] } | null)?.tasks ?? []).map((t) => ({ title: t.title, why: t.why, path: t.path }));
-          result = error ? { ok: false, error: "Could not read the list." } : { ok: true, tasks };
+        } else if (u.name === "list_tasks" && ownerLoc) {
+          // The one task queue (K-08), read as the owner (RLS and the membership check apply).
+          const { data, error } = await asUser(req).rpc("list_tasks", { p_location: ownerLoc });
+          result = error ? { ok: false, error: "Could not read the list." } : { ok: true, ...nextTasks(data) };
         } else if (u.name === "save_fact" && ownerLoc) {
           const key = clip(input.key, 40);
           const value = clip(input.value, 600);

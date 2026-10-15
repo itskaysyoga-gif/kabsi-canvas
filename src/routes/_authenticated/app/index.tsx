@@ -10,6 +10,7 @@ import {
   CreditCard,
   FileText,
   ImagePlus,
+  KeyRound,
   MessageSquareReply,
   MessageSquareText,
   Newspaper,
@@ -20,7 +21,8 @@ import {
   Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DoNow } from "@/components/app/do-now";
+import { ProfileGaps } from "@/components/app/profile-gaps";
+import { groupTasks, loadTasks, type TaskKind } from "@/lib/tasks";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation, type Location } from "@/lib/onboarding";
 import {
@@ -317,38 +319,33 @@ function ProtectionLine({ at }: { at: string | null }) {
 }
 
 // ── Active business
+const TASK_ICON: Partial<Record<TaskKind, ReactNode>> = {
+  profile_change: <ShieldAlert />,
+  post: <Newspaper />,
+  photo_batch: <ImagePlus />,
+  hours_confirm: <Clock3 />,
+  knowledge_confirm: <FileText />,
+  reconnect: <KeyRound />,
+  billing: <CreditCard />,
+};
+
 function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
   const daysLeft = daysUntil(d.planPaidUntil);
-  const extras: { key: string; icon: ReactNode; text: string; to: string; tone?: "alert" }[] = [];
-  if (d.openChanges)
-    extras.push({
-      key: "shield",
-      icon: <ShieldAlert />,
-      text: `Something changed on your Google profile. See what changed and choose.`,
-      to: "/app/shield",
-      tone: "alert",
-    });
-  if (d.postDrafts)
-    extras.push({
-      key: "posts",
-      icon: <Newspaper />,
-      text: `${d.postDrafts} Google ${d.postDrafts === 1 ? "post is" : "posts are"} drafted and waiting for you.`,
-      to: "/app/posts",
-    });
-  if (d.photoDrafts)
-    extras.push({
-      key: "photos",
-      icon: <ImagePlus />,
-      text: `${d.photoDrafts} ${d.photoDrafts === 1 ? "photo is" : "photos are"} checked and ready to post.`,
-      to: "/app/photos",
-    });
-  if (d.plan?.kind !== "partner" && daysLeft !== null && daysLeft <= 30)
-    extras.push({
-      key: "plan",
-      icon: <CreditCard />,
-      text: `Your plan ends in ${daysLeft} ${daysLeft === 1 ? "day" : "days"}. Renew to keep replies coming.`,
-      to: "/app/plan",
-    });
+  // Everything the owner can act on comes from the one task queue (K-08); Home only groups it.
+  const list = useQuery({
+    queryKey: ["tasks", locationId],
+    queryFn: () => loadTasks(locationId),
+    refetchInterval: 60_000,
+  });
+  const { replies, highRisk, attention, gaps } = groupTasks(list.data?.tasks ?? []);
+  const waiting = replies.length;
+  const extras = attention.map((t) => ({
+    key: t.id,
+    icon: TASK_ICON[t.kind] ?? <ArrowRight />,
+    text: t.title,
+    to: t.path,
+    tone: t.priority === "urgent" ? ("alert" as const) : undefined,
+  }));
 
   return (
     <>
@@ -357,18 +354,18 @@ function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
       {/* What needs you */}
       <section className="mt-7 overflow-hidden rounded-large bg-kb-carbon text-kb-white">
         <div className="relative p-6 sm:p-9">
-          {d.waiting > 0 ? <ReplyStack /> : null}
-          {d.waiting > 0 ? (
+          {waiting > 0 ? <ReplyStack /> : null}
+          {waiting > 0 ? (
             <div className="relative max-w-xl">
               <h2 className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-2xl font-bold sm:text-3xl">
                 <span className="font-display text-5xl leading-none text-kb-yellow sm:text-7xl">
-                  {d.waiting}
+                  {waiting}
                 </span>
-                {d.waiting === 1 ? "reply is ready for you" : "replies are ready for you"}
+                {waiting === 1 ? "reply is ready for you" : "replies are ready for you"}
               </h2>
               <p className="mt-2 max-w-xl leading-7 text-kb-stone-on-dark">
-                {d.highRisk > 0
-                  ? `${d.highRisk} ${d.highRisk === 1 ? "needs" : "need"} a little more care. Kabsi did not draft those; open each one to see what to check first.`
+                {highRisk > 0
+                  ? `${highRisk} ${highRisk === 1 ? "needs" : "need"} a little more care. Kabsi did not draft those; open each one to see what to check first.`
                   : "Read each draft, change it if you like, and approve it. Nothing goes on Google without you."}
               </p>
               <Button asChild className="mt-6">
@@ -463,7 +460,7 @@ function Active({ d, locationId }: { d: Dashboard; locationId: string }) {
         />
       </div>
 
-      <DoNow locationId={locationId} />
+      {list.data ? <ProfileGaps locationId={locationId} gaps={gaps} /> : null}
 
       <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         {/* Latest reviews */}

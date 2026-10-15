@@ -17,7 +17,8 @@ insert into tested values
   ('has_location_role(uuid,text[])'), ('is_member(uuid)'), ('is_org_member(uuid,text[])'), ('is_partner_member(uuid)'), ('is_staff()'), ('owner_submit_claim(uuid,text,text,text)'),
   ('partner_create_invite(uuid,text,text)'), ('partner_invoice_calc(uuid,date)'), ('partner_locations(uuid)'),
   ('partner_submit_claim(uuid,text,text)'), ('plan_summary(uuid)'),
-  ('profile_task_action(uuid,text)'), ('profile_tasks_list(uuid)'), ('rename_card(text,text)'),
+  ('rename_card(text,text)'),
+  ('list_tasks(uuid)'), ('task_action(uuid,text)'),
   ('request_disconnect(uuid)'), ('request_location_deletion(uuid)'), ('save_consent(uuid,text)'), ('set_auto_posts(uuid,boolean)'),
   ('set_card_active(text,boolean)'), ('set_onboarding_step(uuid,text)'), ('skip_review(uuid)'),
   ('staff_chat_stats(integer)'), ('staff_complete_followup(uuid,text)'), ('staff_chats(text,text,text,text,integer,integer)'),
@@ -62,7 +63,7 @@ select ok(not has_function_privilege('anon', 'public.google_mode()', 'execute'),
 -- P0.1-08: helpers that only triggers and other SECURITY DEFINER functions call are closed to the browser.
 select ok(not has_function_privilege('authenticated', 'public.is_demo_location(uuid)', 'execute'), 'authenticated cannot run is_demo_location()');
 select ok(not has_function_privilege('authenticated', 'public.is_demo_user(uuid)', 'execute'), 'authenticated cannot run is_demo_user()');
-select ok(not has_function_privilege('authenticated', 'public.profile_score(uuid)', 'execute'), 'authenticated cannot run profile_score()');
+select ok(not has_function_privilege('authenticated', 'public.run_task_detectors(uuid)', 'execute'), 'authenticated cannot run run_task_detectors()');
 select ok(not has_function_privilege('authenticated', 'public.staff_concierge_edit_review(uuid,integer,text,text)', 'execute'), 'authenticated cannot run staff_concierge_edit_review()');
 
 -- P0.1-08: the private schema is out of reach of the API roles, and holds the cron-only functions.
@@ -117,8 +118,8 @@ select throws_ok($$ select public.create_review_link('00000000-0000-4000-8000-00
 select throws_ok($$ select public.handle_review_offline('00000000-0000-4000-8000-0000000000e1') $$, '42501', null, 'handle_review_offline refuses a non-member');
 select throws_ok($$ select public.owner_submit_claim('00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 'trc20', 'strangertx1') $$, '42501', null, 'owner_submit_claim refuses a non-member');
 select throws_ok($$ select public.plan_summary('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'plan_summary refuses a non-member');
-select throws_ok($$ select public.profile_task_action('00000000-0000-4000-8000-0000000000f4', 'later') $$, '42501', null, 'profile_task_action refuses a non-member');
-select throws_ok($$ select public.profile_tasks_list('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'profile_tasks_list refuses a non-member');
+select throws_ok($$ select public.list_tasks('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'list_tasks refuses a non-member');
+select throws_ok($$ select public.task_action('00000000-0000-4000-8000-0000000000f8', 'later') $$, '42501', null, 'task_action refuses a non-member');
 select throws_ok($$ select public.rename_card('VCTM22', 'x') $$, '42501', null, 'rename_card refuses a non-member');
 select throws_ok($$ select public.request_disconnect('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'request_disconnect refuses a non-member');
 select throws_ok($$ select public.confirm_business_details('00000000-0000-4000-8000-0000000000c1', '{"phone": {"display": "+961 1 000 000"}}') $$, '42501', null,

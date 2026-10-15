@@ -22,10 +22,8 @@ export type ActivePlan = {
   starts_at: string | null;
   ends_at: string | null;
 };
+// What the owner can act on is not here: it comes from the one task queue (src/lib/tasks.ts, K-08).
 export type Dashboard = {
-  waiting: number;
-  /** K-13: reviews waiting that are high risk (no draft, a checklist). */
-  highRisk: number;
   recent: RecentReview[];
   newReviews7d: number;
   replied7d: number;
@@ -37,11 +35,8 @@ export type Dashboard = {
   taps7d: number;
   taps30d: number;
   activeCards: number;
-  openChanges: number;
   /** Google Protection's last check of the profile (K-19: "Google Protection: on, last check 09:14"). */
   protectionCheckedAt: string | null;
-  postDrafts: number;
-  photoDrafts: number;
   plan: ActivePlan | null;
   planPaidUntil: string | null;
   pendingClaim: boolean;
@@ -59,24 +54,12 @@ const count = (r: { count: number | null; error: { message: string } | null }) =
   return r.count ?? 0;
 };
 
-export async function waitingCount(locationId: string) {
-  return count(
-    await supabase
-      .from("reviews")
-      .select("id", { count: "exact", head: true })
-      .eq("location_id", locationId)
-      .in("state", ["drafted", "blocked"]),
-  );
-}
-
 export async function loadDashboard(locationId: string): Promise<Dashboard> {
   const since7 = new Date(Date.now() - 7 * DAY).toISOString();
   const since30 = new Date(Date.now() - 30 * DAY).toISOString();
   const since90 = new Date(Date.now() - 90 * DAY).toISOString();
   const head = { count: "exact" as const, head: true };
   const [
-    waiting,
-    highRisk,
     recent,
     new7,
     replied7,
@@ -84,10 +67,7 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
     taps7,
     taps30,
     cards,
-    changes,
     protection,
-    posts,
-    photos,
     plans,
     claims,
     report,
@@ -96,17 +76,6 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
     lastPost,
     connection,
   ] = await Promise.all([
-    supabase
-      .from("reviews")
-      .select("id", head)
-      .eq("location_id", locationId)
-      .in("state", ["drafted", "blocked"]),
-    supabase
-      .from("reviews")
-      .select("id", head)
-      .eq("location_id", locationId)
-      .in("state", ["drafted", "blocked"])
-      .eq("risk", "high"),
     supabase
       .from("reviews")
       .select(
@@ -149,18 +118,7 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
       .select("code", head)
       .eq("location_id", locationId)
       .eq("status", "active"),
-    supabase
-      .from("profile_changes")
-      .select("id", head)
-      .eq("location_id", locationId)
-      .in("status", ["detected", "awaiting_review"]),
     supabase.from("locations").select("shield_checked_at").eq("id", locationId).maybeSingle(),
-    supabase
-      .from("gbp_posts")
-      .select("id", head)
-      .eq("location_id", locationId)
-      .eq("state", "draft"),
-    supabase.from("photos").select("id", head).eq("location_id", locationId).eq("state", "draft"),
     supabase
       .from("plans")
       .select("kind, status, starts_at, ends_at")
@@ -234,8 +192,6 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
   );
 
   return {
-    waiting: count(waiting),
-    highRisk: count(highRisk),
     recent: (recent.data ?? []) as RecentReview[],
     newReviews7d: count(new7),
     replied7d: count(replied7),
@@ -249,11 +205,8 @@ export async function loadDashboard(locationId: string): Promise<Dashboard> {
     taps7d: count(taps7),
     taps30d: count(taps30),
     activeCards: count(cards),
-    openChanges: count(changes),
     protectionCheckedAt:
       (protection.data as { shield_checked_at: string | null } | null)?.shield_checked_at ?? null,
-    postDrafts: count(posts),
-    photoDrafts: count(photos),
     plan: current,
     planPaidUntil: paidUntil,
     pendingClaim: count(claims) > 0,
