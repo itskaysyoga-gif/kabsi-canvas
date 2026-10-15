@@ -89,6 +89,12 @@ values ('00000000-0000-4000-8000-0000000000fe', '00000000-0000-4000-8000-0000000
 insert into public.tasks (id, location_id, kind, source_type, source_id, priority, title, why, dedupe_key)
 values ('00000000-0000-4000-8000-0000000000f8', '00000000-0000-4000-8000-0000000000c1', 'profile_gap', 'profile_gap', 'victim',
         'nice', 'Victim task', 'Because', 'profile_gap:victim');
+-- P0.3-06: an approval policy and an open team invite of the victim's.
+insert into public.approval_policies (location_id, kind, policy, set_by)
+values ('00000000-0000-4000-8000-0000000000c1', 'hours', 'owner_and_managers', '00000000-0000-4000-8000-0000000000a1');
+insert into public.team_invites (id, location_id, email, role, invited_by)
+values ('00000000-0000-4000-8000-0000000000f9', '00000000-0000-4000-8000-0000000000c1', 'victim-invitee@example.test', 'staff',
+        '00000000-0000-4000-8000-0000000000a1');
 -- P0.1-09: the victim's organisation, its membership, google_connections and partner_clients rows come from the
 -- triggers on locations, location_members, partners and partner_members above. subscriptions starts empty.
 insert into public.subscriptions (organization_id, plan, state)

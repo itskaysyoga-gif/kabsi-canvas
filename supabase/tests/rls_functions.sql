@@ -19,6 +19,8 @@ insert into tested values
   ('partner_submit_claim(uuid,text,text)'), ('plan_summary(uuid)'),
   ('rename_card(text,text)'),
   ('list_tasks(uuid)'), ('task_action(uuid,text)'),
+  ('can_see(uuid,text)'), ('my_access(uuid)'), ('set_approval_policy(uuid,text,text,text)'), ('invite_team_member(uuid,text,text)'),
+  ('cancel_team_invite(uuid)'), ('claim_team_invites()'), ('set_member_role(uuid,uuid,text)'), ('list_team(uuid)'), ('remove_member(uuid,uuid)'),
   ('request_disconnect(uuid)'), ('request_location_deletion(uuid)'), ('save_consent(uuid,text)'), ('set_auto_posts(uuid,boolean)'),
   ('set_card_active(text,boolean)'), ('set_onboarding_step(uuid,text)'), ('skip_review(uuid)'),
   ('staff_chat_stats(integer)'), ('staff_complete_followup(uuid,text)'), ('staff_chats(text,text,text,text,integer,integer)'),
@@ -64,6 +66,7 @@ select ok(not has_function_privilege('anon', 'public.google_mode()', 'execute'),
 select ok(not has_function_privilege('authenticated', 'public.is_demo_location(uuid)', 'execute'), 'authenticated cannot run is_demo_location()');
 select ok(not has_function_privilege('authenticated', 'public.is_demo_user(uuid)', 'execute'), 'authenticated cannot run is_demo_user()');
 select ok(not has_function_privilege('authenticated', 'public.run_task_detectors(uuid)', 'execute'), 'authenticated cannot run run_task_detectors()');
+select ok(not has_function_privilege('authenticated', 'public.team_invite_for_email(uuid)', 'execute'), 'authenticated cannot read invite emails');
 select ok(not has_function_privilege('authenticated', 'public.staff_concierge_edit_review(uuid,integer,text,text)', 'execute'), 'authenticated cannot run staff_concierge_edit_review()');
 
 -- P0.1-08: the private schema is out of reach of the API roles, and holds the cron-only functions.
@@ -120,6 +123,16 @@ select throws_ok($$ select public.owner_submit_claim('00000000-0000-4000-8000-00
 select throws_ok($$ select public.plan_summary('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'plan_summary refuses a non-member');
 select throws_ok($$ select public.list_tasks('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'list_tasks refuses a non-member');
 select throws_ok($$ select public.task_action('00000000-0000-4000-8000-0000000000f8', 'later') $$, '42501', null, 'task_action refuses a non-member');
+select is(public.can_see('00000000-0000-4000-8000-0000000000c1', 'all'), false, 'can_see is false for a non-member');
+select is(public.can_see('00000000-0000-4000-8000-0000000000c1', 'photos'), false, 'can_see photos is false for a non-member');
+select throws_ok($$ select public.my_access('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'my_access refuses a non-member');
+select throws_ok($$ select public.set_approval_policy('00000000-0000-4000-8000-0000000000c1', 'review_reply', 'owner_and_managers') $$, '42501', null, 'set_approval_policy refuses a non-member');
+select throws_ok($$ select public.invite_team_member('00000000-0000-4000-8000-0000000000c1', 'x@example.test', 'staff') $$, '42501', null, 'invite_team_member refuses a non-member');
+select throws_ok($$ select public.cancel_team_invite('00000000-0000-4000-8000-0000000000f9') $$, '42501', null, 'cancel_team_invite refuses a non-member');
+select is(public.claim_team_invites(), 0, 'claim_team_invites gives a stranger nothing');
+select throws_ok($$ select public.set_member_role('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000a1', 'staff') $$, '42501', null, 'set_member_role refuses a non-member');
+select throws_ok($$ select public.list_team('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'list_team refuses a non-member');
+select throws_ok($$ select public.remove_member('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000a1') $$, '42501', null, 'remove_member refuses a non-member');
 select throws_ok($$ select public.rename_card('VCTM22', 'x') $$, '42501', null, 'rename_card refuses a non-member');
 select throws_ok($$ select public.request_disconnect('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'request_disconnect refuses a non-member');
 select throws_ok($$ select public.confirm_business_details('00000000-0000-4000-8000-0000000000c1', '{"phone": {"display": "+961 1 000 000"}}') $$, '42501', null,

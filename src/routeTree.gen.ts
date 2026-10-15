@@ -49,6 +49,7 @@ import { Route as AuthenticatedAppReportRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppReviewsRouteImport } from './routes/_authenticated/app/reviews'
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app/settings'
 import { Route as AuthenticatedAppShieldRouteImport } from './routes/_authenticated/app/shield'
+import { Route as AuthenticatedAppTeamRouteImport } from './routes/_authenticated/app/team'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -251,6 +252,11 @@ const AuthenticatedAppShieldRoute = AuthenticatedAppShieldRouteImport.update({
   path: '/shield',
   getParentRoute: () => AuthenticatedAppRouteRoute,
 } as any)
+const AuthenticatedAppTeamRoute = AuthenticatedAppTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -291,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/app/reviews': typeof AuthenticatedAppReviewsRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/shield': typeof AuthenticatedAppShieldRoute
+  '/app/team': typeof AuthenticatedAppTeamRoute
   '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -331,6 +338,7 @@ export interface FileRoutesByTo {
   '/app/reviews': typeof AuthenticatedAppReviewsRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/shield': typeof AuthenticatedAppShieldRoute
+  '/app/team': typeof AuthenticatedAppTeamRoute
   '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
@@ -374,6 +382,7 @@ export interface FileRoutesById {
   '/_authenticated/app/reviews': typeof AuthenticatedAppReviewsRoute
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
   '/_authenticated/app/shield': typeof AuthenticatedAppShieldRoute
+  '/_authenticated/app/team': typeof AuthenticatedAppTeamRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
@@ -417,6 +426,7 @@ export interface FileRouteTypes {
     | '/app/reviews'
     | '/app/settings'
     | '/app/shield'
+    | '/app/team'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -457,6 +467,7 @@ export interface FileRouteTypes {
     | '/app/reviews'
     | '/app/settings'
     | '/app/shield'
+    | '/app/team'
     | '/app'
   id:
     | '__root__'
@@ -499,6 +510,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/reviews'
     | '/_authenticated/app/settings'
     | '/_authenticated/app/shield'
+    | '/_authenticated/app/team'
     | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
 }
@@ -810,6 +822,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppShieldRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/app/team': {
+      id: '/_authenticated/app/team'
+      path: '/team'
+      fullPath: '/app/team'
+      preLoaderRoute: typeof AuthenticatedAppTeamRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
   }
 }
 
@@ -825,6 +844,7 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppReviewsRoute: typeof AuthenticatedAppReviewsRoute
   AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
   AuthenticatedAppShieldRoute: typeof AuthenticatedAppShieldRoute
+  AuthenticatedAppTeamRoute: typeof AuthenticatedAppTeamRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
@@ -840,6 +860,7 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppReviewsRoute: AuthenticatedAppReviewsRoute,
   AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
   AuthenticatedAppShieldRoute: AuthenticatedAppShieldRoute,
+  AuthenticatedAppTeamRoute: AuthenticatedAppTeamRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 

@@ -16,6 +16,9 @@ values ('00000000-0000-0000-0000-000000000000', '00000000-0000-4000-8000-0000000
         'victim-manager@example.test', now(), '{}', '{}', now(), now());
 insert into public.location_members (location_id, user_id, role)
 values ('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000b4', 'manager');
+-- P0.3-06 (K-16): the owner lets managers decide profile changes (by default only the owner may).
+insert into public.approval_policies (location_id, kind, policy, set_by)
+values ('00000000-0000-4000-8000-0000000000c1', 'profile_change', 'owner_and_managers', '00000000-0000-4000-8000-0000000000a1');
 update public.locations set consent_at = now(), access_granted_at = now(), google_account_id = 'accounts/test',
   google_location_id = 'locations/mock-victim', status = 'active'
  where id = '00000000-0000-4000-8000-0000000000c1';

@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ProfileGaps } from "@/components/app/profile-gaps";
 import { groupTasks, loadTasks, type TaskKind } from "@/lib/tasks";
+import { myAccess } from "@/lib/team";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation, type Location } from "@/lib/onboarding";
 import {
@@ -43,6 +44,8 @@ export const Route = createFileRoute("/_authenticated/app/")({
   // A partner with no business of their own goes to the partner workspace instead.
   beforeLoad: async () => {
     try {
+      // K-16 (P0.3-06): an invitation to someone's team becomes a membership when its address signs in.
+      await supabase.rpc("claim_team_invites");
       const { data: loc } = await supabase.from("locations").select("id").limit(1).maybeSingle();
       if (!loc) {
         const { data: partnerId } = await supabase.rpc("claim_partner_membership");
@@ -68,10 +71,12 @@ function greeting() {
 function HomePage() {
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   const loc = location.data;
+  const access = useQuery({ queryKey: ["access", loc?.id], queryFn: () => myAccess(loc!.id), enabled: !!loc });
+  const staffRole = access.data?.role === "staff";
   const dash = useQuery({
     queryKey: ["dashboard", loc?.id],
     queryFn: () => loadDashboard(loc!.id),
-    enabled: !!loc,
+    enabled: !!loc && !!access.data && !staffRole,
     refetchInterval: 60_000,
   });
 
@@ -83,7 +88,9 @@ function HomePage() {
         <>
           <p className="text-sm font-medium text-kb-stone">{greeting()}</p>
           <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">{loc.name}</h1>
-          {loc.status === "paused" || loc.status === "disabled" ? (
+          {staffRole ? (
+            <StaffHome />
+          ) : loc.status === "paused" || loc.status === "disabled" ? (
             <Paused loc={loc} />
           ) : loc.status !== "active" ? (
             <Setup loc={loc} />
@@ -97,6 +104,29 @@ function HomePage() {
         </>
       ) : null}
     </div>
+  );
+}
+
+// K-16: staff add photos and share the review link; everything else is the owner's and the managers'.
+function StaffHome() {
+  return (
+    <section className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
+      <h2 className="text-2xl font-bold">You're on the team</h2>
+      <p className="mt-2 max-w-xl leading-7 text-kb-stone">
+        You can add photos of the business and share the review link. The owner approves everything that goes on
+        Google.
+      </p>
+      <div className="mt-5 flex flex-wrap gap-3">
+        <Button asChild>
+          <Link to="/app/photos">
+            Add photos <ArrowRight />
+          </Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link to="/app/cards">Share the review link</Link>
+        </Button>
+      </div>
+    </section>
   );
 }
 
