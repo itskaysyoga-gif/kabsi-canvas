@@ -121,7 +121,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.3-02 | Per-business memory and the grounded reply pipeline | Opus | merged (94, 88ef7e0, 13 Oct 06:52 UTC); Deploy passed; migrations 1 and 2 live (2 run by Hussein, read back 14 Oct); open: the real-model checks (credit) and Hussein's 390 px look, see After merge | 94, 95 | 13 Oct 2026 |
 | P0.3-03 | Three review risk levels | Opus | merged (96, f11ef00, 14 Oct 03:53 UTC); migration live and read back; Deploy passed (`api` 74, `slack` 60); live high-risk mock review on QA Bakery passed (no draft, no model call, the guidance email); open: the medium and holding-reply real-model checks (credit) and Hussein's 390 px look, see After merge | 96, 97 | 14 Oct 2026 |
 | P0.3-04 | Evaluation set and the prompt gate | Opus | merged (97, 404d5e5, 14 Oct 04:06 UTC); After-merge checks passed (production READY, live site 200, jobs green) on green ci.yml (run 38509173689: App, Edge Functions with the 9 eval tests, Database, Prompt gate passing at once with no prompt change); no database or function change to deploy; open: the real evaluation run (credit), see After merge | 97, 98 (throwaway, closed) | 14 Oct 2026 |
-| P0.3-05 | One task engine | Opus | PR open (100); ci.yml green; migration 1 live and read back; After merge steps below | 100 | 15 Oct 2026 |
+| P0.3-05 | One task engine | Opus | merged (100, a855c30, 15 Oct 04:46 UTC); migration live and read back; Vercel production READY; **Edge Function deploy failed (401, the `SUPABASE_ACCESS_TOKEN` secret, Hussein)**; open: the deploy re-run, then the switch, Hussein's two SQL files, the profile_tasks drop question and the real Nora turn (credit), see After merge | 100 | 15 Oct 2026 |
 | P0.3-06 | Roles and approval policies | Opus | todo | | |
 | P0.3-07 | Home is the Action Center | Sonnet | todo | | |
 | P0.3-08 | App navigation and product names | Sonnet | todo | | |
@@ -193,7 +193,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-P0.3-05 (PR 100):
+P0.3-05 (PR 100), merged 15 Oct 04:46 UTC as a855c30:
+0. **Hussein, blocking: the Edge Function deploy failed.** Deploy run 38683212631, job "Edge Functions": `unexpected deploy status 401: {"message":"Invalid access token"}` for every function; the GitHub Actions secret `SUPABASE_ACCESS_TOKEN` no longer works (it worked on 14 Oct). Make a new personal access token in Supabase (Account, Access Tokens), paste it into GitHub (repo Settings, Secrets and variables, Actions, `SUPABASE_ACCESS_TOKEN`; never in a chat), then re-run Deploy run 38683212631 ("Re-run failed jobs"). Until then `api` and `assistant` run the code from before PR 100: Nora still calls `profile_tasks_list` (so step 3 must wait) and the `detect_tasks` job kind is unknown to the live dispatcher (so step 1 waits). Tasks are still made and closed at once by the database triggers; Home on kabsi.co already reads them.
 1. Session, after the Deploy run: `update public.app_settings set value = 'on' where key = 'task_detectors';`, then check that `detect_tasks` jobs run and succeed for every live business, and that the dispatcher knows the kind.
 2. **Hussein, Supabase SQL editor (project ynjdqjlmdwjgbfezevxy): run the whole file `supabase/migrations/20261015090010_task_engine_links.sql`** (the two foreign keys of `tasks`; it holds cascade clauses, removes no data). Read-back: `select conname, confdeltype from pg_constraint where conname in ('tasks_location_id_fkey', 'tasks_publication_id_fkey') order by 1;` expect `tasks_location_id_fkey c` and `tasks_publication_id_fkey n`.
 3. **Hussein, SQL editor, once PR 100 is merged and Deploy has passed: run the whole file `supabase/migrations/20261015090100_retire_profile_score.sql`** (drops `profile_score`, `profile_tasks_list`, `profile_task_action`; nothing calls them after the merge). Read-back: `select count(*) from pg_proc where proname in ('profile_score', 'profile_tasks_list', 'profile_task_action');` expect 0.
@@ -403,6 +404,14 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.3-05 After merge (15 Oct 2026, 04:46 to 04:55 UTC, Hussein's session 3)
+- PR 100 merged 04:46 UTC as merge commit a855c30 (ci.yml green on head fbb7402: App, Edge Functions and Worker, Database, Prompt gate; Load passed on fbb7402, run 38681830597: 500 businesses synced on schedule with the new triggers).
+- Deploy run 38683212631: Worker kabsi-go deployed; **Edge Functions failed: 401 Invalid access token** (After merge step 0, Hussein).
+- Vercel production `dpl_6Et2cV1x2QR5m8ccifd81L2cGoh4` for a855c30 READY; live `https://kabsi.co/app` fetched: 200.
+- Jobs since the migration (04:29 UTC): 50 succeeded, 5 pending (next runs), 0 failed or dead.
+- `list_tasks` read back on production as a real owner (rolled back): the Yawmiyati owner gets 8 open tasks, urgent first ("Your phone number changed on Google"), each with its page; an ordinary owner who is not Kabsi staff reads only their own 6 tasks and 0 of any other business (the Yawmiyati account is Kabsi staff, which reads every business by design, as on reviews).
+- `task_detectors` stays `off` until the Deploy re-run (step 1).
 
 ### P0.3-05 (branch claude/h-p0-3-05, PR 100, 15 Oct 2026, Hussein's session 3 of the bundled plan)
 - No Google, Places or Anthropic call, in tests, scripts or the browser checks. `places_daily_cap` 0, `google_mode()` mock. No prompt file changed (the Prompt gate passes at once).
