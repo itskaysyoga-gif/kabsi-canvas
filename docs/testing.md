@@ -41,6 +41,15 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   minutes is handed on; the producers offer one review sync per business every 5 minutes (concierge businesses
   excluded), one draft per new review and one owner email run when an email is due; the tick calls the dispatcher
   only when a job is due; `record_sync_result` fills `google_connections`; staff job health lists stopped jobs.
+- `task_engine.sql` (P0.3-05): `tasks` is the one owner queue, read by members and staff, written by nobody from the
+  browser. One test per detector (new review, profile difference, two answers for one fact, post and photo drafts,
+  failed publish, missing field and missing knowledge, lost access, expiring plan, the holiday stub): each makes its
+  task, running it again makes nothing new, and the task closes with the right state when its source moves on (an
+  approval follows the publication). No review text, reviewer name or Google value is copied into a task. A full run
+  of every detector twice adds no row and no key is live twice. `list_tasks` puts urgent first and returns no points or
+  score; `task_action` puts a task off (owner or manager, audited) and the detector keeps it off until its date; the
+  `detect_tasks` job is offered every 5 minutes per business once `app_settings.task_detectors` is on, never for a
+  disconnected one; the profile_tasks rows move once; `profile_score` and the old queue's functions are gone.
 - `jobs_claim_concurrency.sh` (P0.1-12a), run by `scripts/db-test.sh` after the pgTAP suite because it needs two
   real sessions: 100 committed jobs, dispatcher w1 claims 60 and holds its transaction 2 seconds, w2 asks 0.3 s later
   and must get the other 40 at once; every job is claimed exactly once and w2 never waits (it fails if SKIP LOCKED is

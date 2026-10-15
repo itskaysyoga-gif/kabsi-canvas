@@ -19,7 +19,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { chooseLocation, myLatestLocation, myLocations } from "@/lib/onboarding";
 import { amStaff } from "@/lib/reviews";
 import { myPartner } from "@/lib/partner";
-import { waitingCount } from "@/lib/dashboard";
+import { waitingReplies } from "@/lib/tasks";
 import { Button } from "@/components/ui/button";
 import { ExampleBadge } from "@/components/ui/example-badge";
 import { setAnalyticsPaused } from "@/lib/telemetry";
@@ -280,7 +280,7 @@ export function AppLayout({
   });
   const waiting = useQuery({
     queryKey: ["waiting-count", myLoc.data?.id],
-    queryFn: () => waitingCount(myLoc.data!.id),
+    queryFn: () => waitingReplies(myLoc.data!.id),
     enabled: area === "app" && myLoc.data?.status === "active",
     refetchInterval: 60_000,
   });

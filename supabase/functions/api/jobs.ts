@@ -8,7 +8,8 @@
 // protection_check compares one business's Google profile with its Business Knowledge (protection.ts). The
 // whole-system steps the 5 minute cron ran (cron.ts) are one job each, offered every 5 minutes. photo_files, offered
 // by the daily retention run, removes
-// the uploaded photo files past their K-40 limit (P0.2-01, _shared/retention.ts).
+// the uploaded photo files past their K-40 limit (P0.2-01, _shared/retention.ts). detect_tasks runs the task
+// detectors for one business every 5 minutes (P0.3-05, _shared/tasks.ts).
 // Publications (P0.1-13a and P0.1-13b, _shared/publish.ts): publish sends one approved reply, post, photo, special
 // hours period or Google Protection put-back once its undo window has passed; reconcile_publication reads Google for
 // one whose outcome is not known yet. Neither ever sends a write twice. These are the only Google writes in Kabsi,
@@ -29,6 +30,7 @@ import {
 } from "../_shared/publish.ts";
 import { accessJob, deletionsJob, ratingsJob, renewalsJob, trialsJob, weeklyJob } from "./cron.ts";
 import { photoFileStore, removeDuePhotoFiles } from "../_shared/retention.ts";
+import { detectTasks } from "../_shared/tasks.ts";
 
 // Offer a job. Returns its id, or null when the same dedupe key is already pending, running or retrying.
 async function enqueueJob(kind: string, locationId: string | null, dedupeKey: string, payload: Record<string, unknown> = {}) {
@@ -279,6 +281,11 @@ const HANDLERS: Record<string, JobHandler> = {
   renewal_reminders: step("renewals", renewalsJob),
   photo_files: step("photo_files", () => removeDuePhotoFiles(photoFileStore(admin()))),
   disconnect: disconnectJob,
+  // P0.3-05: the task detectors for one business (K-08); they also run at once in the database when a source changes.
+  detect_tasks: async (job) => {
+    const made = await detectTasks(job.location_id, (id) => rpcJson<Record<string, number> | null>("run_task_detectors", { p_location: id }));
+    if (Object.values(made).some((n) => n > 0)) await jobLog("detect_tasks", true, { location: job.location_id, ...made });
+  },
 };
 
 export async function dispatch(req: Request): Promise<Response> {

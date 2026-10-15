@@ -85,6 +85,10 @@ insert into public.style_offers (id, location_id, kind, text, text_hash)
 values ('00000000-0000-4000-8000-0000000000fc', '00000000-0000-4000-8000-0000000000c1', 'fact', 'Victim offer text', 'victim');
 insert into public.knowledge_confirms (id, location_id, slot, key, proposed_value, proposed_source)
 values ('00000000-0000-4000-8000-0000000000fe', '00000000-0000-4000-8000-0000000000c1', 'card.victim_question', 'faq', '{"text": "Victim answer"}', 'website');
+-- P0.3-05: one task of the victim's (the detectors above may have made others from the victim rows).
+insert into public.tasks (id, location_id, kind, source_type, source_id, priority, title, why, dedupe_key)
+values ('00000000-0000-4000-8000-0000000000f8', '00000000-0000-4000-8000-0000000000c1', 'profile_gap', 'profile_gap', 'victim',
+        'nice', 'Victim task', 'Because', 'profile_gap:victim');
 -- P0.1-09: the victim's organisation, its membership, google_connections and partner_clients rows come from the
 -- triggers on locations, location_members, partners and partner_members above. subscriptions starts empty.
 insert into public.subscriptions (organization_id, plan, state)
