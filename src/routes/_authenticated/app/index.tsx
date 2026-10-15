@@ -71,7 +71,11 @@ function greeting() {
 function HomePage() {
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   const loc = location.data;
-  const access = useQuery({ queryKey: ["access", loc?.id], queryFn: () => myAccess(loc!.id), enabled: !!loc });
+  const access = useQuery({
+    queryKey: ["access", loc?.id],
+    queryFn: () => myAccess(loc!.id),
+    enabled: !!loc,
+  });
   const staffRole = access.data?.role === "staff";
   const dash = useQuery({
     queryKey: ["dashboard", loc?.id],
@@ -113,8 +117,8 @@ function StaffHome() {
     <section className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
       <h2 className="text-2xl font-bold">You're on the team</h2>
       <p className="mt-2 max-w-xl leading-7 text-kb-stone">
-        You can add photos of the business and share the review link. The owner approves everything that goes on
-        Google.
+        You can add photos of the business and share the review link. The owner approves everything
+        that goes on Google.
       </p>
       <div className="mt-5 flex flex-wrap gap-3">
         <Button asChild>

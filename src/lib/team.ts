@@ -6,11 +6,25 @@ export type Role = "owner" | "manager" | "staff";
 export type ApprovalKind = "review_reply" | "post" | "photo" | "profile_change" | "hours";
 export type Policy = "owner" | "owner_and_managers" | "partner" | "partner_prepares";
 export type Member = { user_id: string; email: string; role: Role; you: boolean };
-export type Invite = { id: string; email: string; role: Exclude<Role, "owner">; created_at: string; expires_at: string };
+export type Invite = {
+  id: string;
+  email: string;
+  role: Exclude<Role, "owner">;
+  created_at: string;
+  expires_at: string;
+};
 export type Team = { members: Member[]; invites: Invite[]; policies: Record<ApprovalKind, Policy> };
-export type Access = { role: Role; approve: Record<ApprovalKind, boolean>; approve_high_risk: boolean };
+export type Access = {
+  role: Role;
+  approve: Record<ApprovalKind, boolean>;
+  approve_high_risk: boolean;
+};
 
-export const ROLE_LABEL: Record<Role, string> = { owner: "Owner", manager: "Manager", staff: "Staff" };
+export const ROLE_LABEL: Record<Role, string> = {
+  owner: "Owner",
+  manager: "Manager",
+  staff: "Staff",
+};
 export const ROLE_HINT: Record<Role, string> = {
   owner: "Sees everything, approves everything, manages the team, billing and Google access.",
   manager: "Sees everything except billing. Approves only what you allow below.",
@@ -40,11 +54,13 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-export const myAccess = (locationId: string) => rpc<Access>("my_access", { p_location: locationId });
+export const myAccess = (locationId: string) =>
+  rpc<Access>("my_access", { p_location: locationId });
 export const loadTeam = (locationId: string) => rpc<Team>("list_team", { p_location: locationId });
 export const inviteMember = (locationId: string, email: string, role: Exclude<Role, "owner">) =>
   rpc<string>("invite_team_member", { p_location: locationId, p_email: email, p_role: role });
-export const cancelInvite = (inviteId: string) => rpc<null>("cancel_team_invite", { p_invite: inviteId });
+export const cancelInvite = (inviteId: string) =>
+  rpc<null>("cancel_team_invite", { p_invite: inviteId });
 export const setMemberRole = (locationId: string, userId: string, role: Role) =>
   rpc<null>("set_member_role", { p_location: locationId, p_user: userId, p_role: role });
 export const removeMember = (locationId: string, userId: string) =>

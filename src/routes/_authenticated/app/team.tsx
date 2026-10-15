@@ -32,12 +32,17 @@ export const Route = createFileRoute("/_authenticated/app/team")({
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const KINDS: ApprovalKind[] = ["review_reply", "post", "photo", "hours", "profile_change"];
-const selectClass = "h-[52px] w-full rounded-card border border-kb-hairline bg-kb-white px-4 text-base";
+const selectClass =
+  "h-[52px] w-full rounded-card border border-kb-hairline bg-kb-white px-4 text-base";
 
 function TeamPage() {
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   const loc = location.data;
-  const access = useQuery({ queryKey: ["access", loc?.id], queryFn: () => myAccess(loc!.id), enabled: !!loc });
+  const access = useQuery({
+    queryKey: ["access", loc?.id],
+    queryFn: () => myAccess(loc!.id),
+    enabled: !!loc,
+  });
   const isOwner = access.data?.role === "owner";
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
@@ -45,11 +50,14 @@ function TeamPage() {
       <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Settings</p>
       <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Team</h1>
       {loc ? <p className="mt-2 text-kb-stone">{loc.name}</p> : null}
-      {location.isLoading || access.isLoading ? <p className="mt-6 text-kb-stone">Loading…</p> : null}
+      {location.isLoading || access.isLoading ? (
+        <p className="mt-6 text-kb-stone">Loading…</p>
+      ) : null}
       {loc && access.data && !isOwner ? (
         <p className="mt-6 leading-7 text-kb-stone">
-          Only the owner can manage the team. You are {access.data.role === "manager" ? "a manager" : "a staff member"}{" "}
-          of this business: {ROLE_HINT[access.data.role].toLowerCase()}
+          Only the owner can manage the team. You are{" "}
+          {access.data.role === "manager" ? "a manager" : "a staff member"} of this business:{" "}
+          {ROLE_HINT[access.data.role].toLowerCase()}
         </p>
       ) : null}
       {loc && isOwner ? <TeamManager locationId={loc.id} /> : null}
@@ -89,7 +97,8 @@ function TeamManager({ locationId }: { locationId: string }) {
     });
   }
 
-  if (team.isError) return <p className="mt-6 text-kb-red">We couldn't load your team. Refresh the page.</p>;
+  if (team.isError)
+    return <p className="mt-6 text-kb-red">We couldn't load your team. Refresh the page.</p>;
   if (!team.data) return <p className="mt-6 text-kb-stone">Loading…</p>;
   const t = team.data;
   return (
@@ -153,7 +162,9 @@ function TeamManager({ locationId }: { locationId: string }) {
                   aria-label={`Role of ${m.email}`}
                   value={m.role}
                   disabled={act.isPending}
-                  onChange={(e) => act.mutate(() => setMemberRole(locationId, m.user_id, e.target.value as Role))}
+                  onChange={(e) =>
+                    act.mutate(() => setMemberRole(locationId, m.user_id, e.target.value as Role))
+                  }
                   className="h-11 rounded-card border border-kb-hairline bg-kb-white px-3 text-base"
                 >
                   {(["owner", "manager", "staff"] as Role[]).map((r) => (
@@ -178,7 +189,9 @@ function TeamManager({ locationId }: { locationId: string }) {
           {t.invites.map((i) => (
             <li key={i.id} className="py-4">
               <p className="break-all font-bold">{i.email}</p>
-              <p className="text-sm text-kb-stone">Invited as {ROLE_LABEL[i.role].toLowerCase()}, not joined yet</p>
+              <p className="text-sm text-kb-stone">
+                Invited as {ROLE_LABEL[i.role].toLowerCase()}, not joined yet
+              </p>
               <Button
                 size="compact"
                 variant="ghost"
@@ -198,8 +211,9 @@ function TeamManager({ locationId }: { locationId: string }) {
           Who can approve
         </h2>
         <p className="mt-1 text-sm leading-6 text-kb-stone">
-          You approve everything. Turn one on to let managers approve it too. Changes to your business name, address, main
-          category or open status, and reviews that need more care, always need you.
+          You approve everything. Turn one on to let managers approve it too. Changes to your
+          business name, address, main category or open status, and reviews that need more care,
+          always need you.
         </p>
         <ul className="mt-4 divide-y divide-kb-hairline">
           {KINDS.map((k) => {
@@ -210,7 +224,11 @@ function TeamManager({ locationId }: { locationId: string }) {
                 <Label htmlFor={`policy-${k}`} className="flex-1">
                   {KIND_LABEL[k]}
                   <span className="block text-sm font-normal text-kb-stone">
-                    {partner ? "Set with your agency" : p === "owner_and_managers" ? "You and managers" : "Only you"}
+                    {partner
+                      ? "Set with your agency"
+                      : p === "owner_and_managers"
+                        ? "You and managers"
+                        : "Only you"}
                   </span>
                 </Label>
                 <Switch

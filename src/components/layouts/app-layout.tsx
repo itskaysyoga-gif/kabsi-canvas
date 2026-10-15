@@ -95,7 +95,13 @@ const SECTIONS: Section[] = [
 ];
 // K-16 (P0.3-06): staff see photos and the review link only. The database refuses the rest; the menu matches it.
 const STAFF_SECTIONS: Section[] = [
-  { label: "Photos", short: "Photos", to: "/app/photos", icon: Store, paths: ["/app", "/app/photos"] },
+  {
+    label: "Photos",
+    short: "Photos",
+    to: "/app/photos",
+    icon: Store,
+    paths: ["/app", "/app/photos"],
+  },
   SECTIONS.find((s) => s.label === "Get Reviews")!,
 ];
 const clean = (p: string) => (p.length > 1 ? p.replace(/\/+$/, "") : p);
