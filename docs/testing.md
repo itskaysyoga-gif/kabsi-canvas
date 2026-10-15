@@ -50,6 +50,15 @@ pgTAP tests in `supabase/tests/`, run by the `database` job in `.github/workflow
   score; `task_action` puts a task off (owner or manager, audited) and the detector keeps it off until its date; the
   `detect_tasks` job is offered every 5 minutes per business once `app_settings.task_detectors` is on, never for a
   disconnected one; the profile_tasks rows move once; `profile_score` and the old queue's functions are gone.
+- `roles.sql` (P0.3-06): owner, manager and staff (K-16) each get exactly their rights, through RLS and the RPCs. Reads per
+  role (the owner sees billing; the manager everything but billing; staff only photos, the review link and the business
+  name), every changed RPC per role, and isolation: a manager of business B sees no row of business A in any table, and
+  members of A cannot read, list, skip, invite, set or approve anything of B. Approvals: by default only the owner; a
+  manager only for a kind the owner opened; never a high-risk review or a name, address, main category or open status
+  change; staff never; undo and skip follow the same rule; approval emails go to owners only. Partner modes are stored
+  only with consent text (10 characters at least) and date, enforced by the RPC and the table, and let a member of the
+  business's live partner approve that kind only. Team: invite (lower-cased address, one email job), claim on sign-in
+  once, change role and remove (owner only, never the last owner), each audited.
 - `jobs_claim_concurrency.sh` (P0.1-12a), run by `scripts/db-test.sh` after the pgTAP suite because it needs two
   real sessions: 100 committed jobs, dispatcher w1 claims 60 and holds its transaction 2 seconds, w2 asks 0.3 s later
   and must get the other 40 at once; every job is claimed exactly once and w2 never waits (it fails if SKIP LOCKED is

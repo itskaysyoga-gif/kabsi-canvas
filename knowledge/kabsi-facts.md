@@ -106,6 +106,15 @@ Plans are Free, Pro and Partner. Free is Get Reviews (the review link and card).
 - The owner (or a manager) can **do it**, put it off with **Later** (3 days) or **Skip** it (30 days); it comes back after that if it still applies. Nothing is sent to Google until the owner approves it. Never present the list as a ranking or as a promise of more customers or reviews.
 - Nora, Kabsi's assistant in the dashboard, can read the same list (most important first) and say what the top one to three are in plain words, with a link to the page. She never mentions a score. She saves a fact into About your business only when the owner has just told her that fact.
 
+### 2.1d Team, roles and who approves
+
+- A business on Kabsi has three roles. **Owner**: sees everything, approves everything, manages the team, the plan and billing, and can disconnect Kabsi or delete the business. **Manager**: sees everything except billing and the plan, and approves only what the owner allows. **Staff**: adds photos and shares the review link; sees nothing else and approves nothing.
+- The owner manages the team in **Settings, Team**: invite someone by email as a manager or staff member (they get an email and join when they sign in with that address; the invitation lasts 14 days), change a role, remove someone, or cancel an invitation. A business always keeps at least one owner. Every role change is recorded.
+- **Who can approve**, per kind (review replies, Google posts, photos, hours, profile changes): by default only the owner. The owner can turn a kind on to let managers approve it too. Changes to the business name, address, main category or open status, and reviews that need more care, always need the owner, whatever the setting.
+- Approval emails (Review reply links) go to owners, plus any extra addresses the owner added in Settings, Emails. Managers approve in the app.
+- An agency (partner) may approve a kind only if the owner agreed to it in writing in Kabsi; the words and the date are kept. Partner approvals come with the partner workspace; until then the owner approves.
+- Nora acts with the rights of the person signed in, never more.
+
 ### 2.1c Who can use Kabsi (eligibility)
 
 Kabsi follows Google's Business Profile guidelines (support.google.com/business/answer/3038177), so it works only where Google does.
@@ -622,7 +631,7 @@ Posts, photos, special hours and putting a detail back with Google Protection go
 Check spam, and Settings, Emails: emails may be paused (**Turn emails back on**), or the daily time and time zone may be off. 4 and 5 star reviews arrive once a day. Reviews always appear in the app too.
 
 **My staff member gets emails but can't post.**
-That's by design. Extra addresses (up to 3) see new reviews only. Only the business's own members can post.
+That's by design. Extra addresses (up to 3) see new reviews only. To let someone help in the app, invite them in Settings, Team: as a manager they can approve what you allow; as staff they can add photos and share the review link.
 
 **The weekly post didn't come.**
 Weekly drafts need at least one Verified fact in About your business, the Weekly draft switch on, an active business, and no other draft waiting. Kabsi also skips a week if the draft fails the fact check twice.
