@@ -30,13 +30,15 @@
 --    them). profile_tasks_list, profile_task_action and profile_score stop being called by this change; they are
 --    dropped by the contract file after the code is live, and the profile_tasks table only with Hussein's yes.
 --
--- Additive: a new table, new functions, triggers and one app_settings row. Nothing is dropped, no row is deleted.
+-- Additive: a new table, new functions, triggers and one app_settings row. Nothing is dropped and no row is removed.
+-- The table's two foreign keys (to locations and publications) are in 20261015090010_task_engine_links.sql, which
+-- Hussein runs in the SQL editor (it holds the cascade clauses).
 
 -- 1. The table -------------------------------------------------------------------------------------------------------
 
 create table public.tasks (
   id uuid primary key default gen_random_uuid(),
-  location_id uuid not null references public.locations(id) on delete cascade,
+  location_id uuid not null,
   kind text not null check (kind in ('review_reply', 'profile_change', 'photo_batch', 'post', 'hours_confirm',
                                      'knowledge_confirm', 'profile_gap', 'reconnect', 'billing')),
   source_type text not null check (source_type ~ '^[a-z][a-z_]{1,40}$'),
@@ -57,7 +59,7 @@ create table public.tasks (
   resolved_at timestamptz,
   resolved_by uuid,
   dedupe_key text not null check (length(dedupe_key) between 3 and 200),
-  publication_id uuid references public.publications(id) on delete set null,
+  publication_id uuid,
   constraint snoozed_has_date check (state <> 'snoozed' or snooze_until is not null),
   constraint resolved_has_time check ((state in ('done', 'rejected', 'expired', 'failed')) = (resolved_at is not null))
 );

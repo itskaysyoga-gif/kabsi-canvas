@@ -24,6 +24,8 @@ select ok((select relrowsecurity from pg_class where oid = 'public.tasks'::regcl
 select columns_are('public', 'tasks', array['id', 'location_id', 'kind', 'source_type', 'source_id', 'priority', 'title',
   'why', 'recommendation', 'evidence', 'proposed_action', 'approval_policy', 'state', 'due_at', 'snooze_until',
   'created_at', 'updated_at', 'resolved_at', 'resolved_by', 'dedupe_key', 'publication_id'], 'tasks has the K-08 fields and the publication');
+select is((select confdeltype::text from pg_constraint where conname = 'tasks_location_id_fkey'), 'c', 'a business''s tasks go with it');
+select is((select confdeltype::text from pg_constraint where conname = 'tasks_publication_id_fkey'), 'n', 'a cleared publication leaves the task');
 select throws_ok($$ insert into public.tasks (location_id, kind, source_type, source_id, priority, title, why, dedupe_key)
   values ('00000000-0000-4000-8000-0000000000c1', 'profile_gap', 'x_y', 'a', 'high', 'T', 'W', 'zz:a') $$, '23514', null,
   'priority is urgent, recommended or nice (no points, K-07)');
