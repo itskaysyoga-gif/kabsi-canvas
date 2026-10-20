@@ -59,7 +59,7 @@ function ActionPage() {
     loadAction(token)
       .then((v) => {
         if (v.status === "ok" && v.action === "open")
-          return void navigate({ to: "/app/inbox", replace: true });
+          return void navigate({ to: "/app/reviews", search: { f: "needs" }, replace: true });
         setAnalyticsPaused(v.demo === true);
         setView(v);
         setText(v.draft ?? "");
@@ -130,7 +130,7 @@ function ActionPage() {
 
   const inbox = (
     <Button asChild variant="outline" className="mt-6 w-full">
-      <Link to="/app/inbox">Open your Kabsi inbox</Link>
+      <Link to="/app/reviews" search={{ f: "needs" }}>Open your Kabsi reviews</Link>
     </Button>
   );
   if (pending) {

@@ -437,14 +437,14 @@ export function AppLayout({
               <DropdownMenuSeparator className="bg-kb-hairline" />
               {partner.data ? (
                 <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2.5 text-base">
-                  <Link to={area === "partner" ? "/app/inbox" : "/partner"}>
+                  <Link to={area === "partner" ? "/app/reviews" : "/partner"}>
                     {area === "partner" ? "Business app" : "Partner"}
                   </Link>
                 </DropdownMenuItem>
               ) : null}
               {isStaff.data ? (
                 <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2.5 text-base">
-                  <Link to={area === "staff" ? "/app/inbox" : "/staff"}>
+                  <Link to={area === "staff" ? "/app/reviews" : "/staff"}>
                     {area === "staff" ? "Business app" : "Staff"}
                   </Link>
                 </DropdownMenuItem>

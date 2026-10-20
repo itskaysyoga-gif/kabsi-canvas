@@ -621,16 +621,16 @@ Use the exact Google Maps name plus city, or name plus street. It must have a Go
 The draft failed a check twice, for example it named someone who is not in your facts, gave a price or opening time you never gave, or read like a reply you already posted. Kabsi shows the draft with the problems listed, never as ready. Tap **Fix it myself** to start from it, write your own reply, ask for changes, or tap Skip.
 
 **The email link says it has expired or was already used.**
-Links work once and last 72 hours (3 days). Open Kabsi and use Reviews, To reply. Tapping Approve a second time, or opening the link again, does nothing new: the page shows what already happened.
+Links work once and last 72 hours (3 days). Open Kabsi and use Reviews, Needs reply. Tapping Approve a second time, or opening the link again, does nothing new: the page shows what already happened.
 
 **The email page asks me to sign in.**
 For a high-risk review, a change to your opening hours and any change to your profile details, the page asks the person the email was sent to to sign in with their email code first, then brings them back to the same page. Normal review replies and skips work from the link alone. If someone else is signed in on that phone or computer, the page says the link was sent to someone else: sign out, then sign in with the address the email went to.
 
 **Can I undo an approval from the email page?**
-Yes. After you tap Approve, the page shows "Publishing in 10 seconds" with Undo. Undo inside the 10 seconds and nothing is sent to Google; the reply goes back to To reply.
+Yes, on the email page and in the app. After you tap Approve, the screen shows "Publishing in 10 seconds" with Undo. Undo inside the 10 seconds and nothing is sent to Google; the reply goes back to Needs reply. After the 10 seconds it says "Approved. On its way to Google." and it is too late to undo.
 
 **I posted but the reply isn't on Google.**
-After you approve, Kabsi waits 10 seconds, then sends the reply to Google, usually within a minute or two. Google checks every reply before it appears, usually within 10 minutes, sometimes longer. All reviews shows "Google is checking your reply" while it waits. Kabsi checks again after 10 minutes and then less often, and never posts the same reply twice. If Google does not accept the reply, the review comes back to To reply with the reason, so you can edit it and approve again. If Google still does not show it after 7 days, Kabsi treats it the same way. Approving the same reply twice (for example in the app and from the email) sends it once. **[TIME-SENSITIVE]** In test mode nothing is sent to Google at all.
+After you approve, Kabsi waits 10 seconds, then sends the reply to Google, usually within a minute or two. Google checks every reply before it appears, usually within 10 minutes, sometimes longer. Reviews shows "Google is checking your reply" while it waits. Kabsi checks again after 10 minutes and then less often, and never posts the same reply twice. If Google does not accept the reply, the review comes back to Needs reply with the reason, so you can edit it and approve again. If Google still does not show it after 7 days, Kabsi treats it the same way. Approving the same reply twice (for example in the app and from the email) sends it once. **[TIME-SENSITIVE]** In test mode nothing is sent to Google at all.
 
 **I approved a post, photo, holiday hours or "Keep my information" and it isn't on Google yet.**
 Posts, photos, special hours and putting a detail back with Google Protection go to Google the same way as replies: Kabsi waits 10 seconds after you approve, then sends it, usually within a minute or two. Until then the post or photo shows "Sending to Google", the hours show "Sending" and the change shows "Your information is on its way to Google". Kabsi then reads your profile again and marks it "Your information is back on Google" once Google shows it and no longer lists it as its own change. Approving twice (two taps, two tabs, the app and the email) sends it once. If Google does not answer, Kabsi checks your profile instead of sending again. A post Google is still checking shows once Google allows it. If Google refuses it or still does not show it after 7 days, it shows "Not posted", "Couldn't post", "Not saved" or "Google did not take your information", and nothing is sent twice. **[TIME-SENSITIVE]** In test mode nothing is sent to Google at all.
@@ -740,19 +740,19 @@ Yes. Tap Review reply, Edit or Skip in the email, confirm on the page that opens
 Yes. Change anything you like. Kabsi publishes exactly the text you approve.
 
 **Can I ask Kabsi to rewrite a draft?**
-Yes. Tap Ask for changes, type what to change (for example "shorter" or "more formal") and tap New version. Up to 3 new versions per review per day.
+Yes. Tap Other options, then choose Shorter, More formal, Warmer, Say sorry more clearly or Regenerate, or type what to change and tap New version. Up to 3 new versions per review per day.
 
 **What happens with hard reviews?**
 Kabsi gives every review one of three risk levels. Rules in code look first, then a small AI model, and the higher level wins.
 - Low (normal praise or mild feedback): a draft as usual.
 - Medium (a complaint, a refund request, a complaint about staff, something said about your business that may be wrong, any rating of 1 to 3, and every review of a medical, dental, legal or financial business): a careful draft, with the issue shown above it, for example "They mention a refund. Kabsi didn't promise one."
-- High (a legal threat, discrimination, illness, injury, an allergy or another safety problem, a threat, harassment, privacy or personal data, a regulator or an inspection, an accusation of a crime): no draft. The review is marked "This review needs a little more care" with a short checklist, and the email has the checklist and no approve button. If you want, Kabsi writes a short, neutral holding reply, only when you ask for it. You can also write your own, choose "I'll handle it" or skip it.
+- High (a legal threat, discrimination, illness, injury, an allergy or another safety problem, a threat, harassment, privacy or personal data, a regulator or an inspection, an accusation of a crime): no draft. The review is marked "This review needs a little more care" with a short checklist, and the email has the checklist and no approve button. If you want, Kabsi writes a short, neutral holding reply, only when you ask for it. You can also write your own, choose "I'll reply myself" or skip it.
 
 **Does Kabsi treat clinics, law firms and financial businesses differently?**
 Yes. For a health, dental, legal or financial business (from your Google category), every review is at least medium risk, and a reply never says the reviewer was a patient or client and never mentions a visit, an appointment or a treatment. Kabsi checks each draft for this before you see it.
 
-**What does "I'll handle it" do?**
-It marks the review "Handled by you", and Kabsi won't post anything for it.
+**What does "I'll reply myself" do?**
+It marks the review "You replied yourself", and Kabsi won't post anything for it. It is under Other options, next to Skip ("You chose not to reply").
 
 **What about my old reviews?**
 When you go live, Kabsi drafts replies for up to the 20 most recent reviews without a reply. Nothing is posted until you approve each one.
@@ -1135,9 +1135,9 @@ Delete your business in Settings, and ask by email to delete your login too.
 - **Manager / Owner:** Google profile roles. A Manager can reply, post and edit details; only an Owner can add or remove people or remove the profile. Kabsi is a Manager.
 - **People and access:** the Google screen where owners add or remove Managers.
 - **hello@kabsi.co:** Kabsi's support email. **5481006796:** Kabsi's Google business group ID (Kabsi Clients), invited as Manager.
-- **To reply / All reviews:** reviews waiting for a decision / every review with its state.
+- **Reviews:** one screen for every review. Filters: Needs reply, All, Replied, Positive (4 and 5 stars), Neutral (3), Negative (1 and 2) and High risk. Each review shows its stars, text, date, name, risk and one status: Draft ready, Waiting for you, Published, Google is checking your reply, Rejected by Google, or You chose not to reply. On a phone one review fills the screen with **Approve reply** as the large button, then **Edit** and **Other options** (Shorter, More formal, Warmer, Regenerate, I'll reply myself, Skip). An owner can approve; a manager only for what the owner turned on; staff do not see reviews. The older address for "To reply" opens Reviews, Needs reply.
 - **Risk level:** low, medium or high, set for each review. Medium shows the issue above the draft. High risk: no draft, a short checklist, and a neutral holding reply only if the owner asks for one.
-- **Handled by you:** a review you chose to handle yourself. Kabsi posts nothing.
+- **You replied yourself:** a review you chose to answer on Google yourself. Kabsi posts nothing.
 - **Daily email:** one email a day with your 4 and 5 star reviews and their drafts.
 - **About your business:** the facts Kabsi may use in drafts.
 - **Never-say list:** "Anything Kabsi should never say or promise".

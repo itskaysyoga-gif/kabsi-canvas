@@ -158,7 +158,8 @@ function ReportBody({ r, latest }: { r: ReportData; latest: boolean }) {
         <p className="mt-4 text-sm">
           {r.waiting} {r.waiting === 1 ? "review is" : "reviews are"} waiting for your reply.{" "}
           <Link
-            to="/app/inbox"
+            to="/app/reviews"
+            search={{ f: "needs" }}
             className="inline-flex min-h-10 items-center font-bold underline underline-offset-4"
           >
             Reply now
