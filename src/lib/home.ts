@@ -2,7 +2,7 @@
 // did" from the audit log. Everything the owner can act on comes from list_tasks (src/lib/tasks.ts); nothing here counts
 // or scores anything. Reads go through RLS; nothing here writes.
 import { supabase } from "@/lib/supabase";
-import { PLAN_NAMES } from "@/lib/plans";
+import { loadEntitlements } from "@/lib/entitlements";
 import type { Task } from "@/lib/tasks";
 import { fieldLabel } from "@/lib/profile-fields";
 import { historyLine } from "@/lib/home-state";
@@ -24,19 +24,13 @@ const daysLeft = (iso: string | null) =>
 /** The few facts the strip and the footer lines need. One round of RLS reads. */
 export async function loadHomeFacts(locationId: string): Promise<HomeFacts> {
   const since30 = new Date(Date.now() - 30 * DAY).toISOString();
-  const [conn, plans, claims, taps, report] = await Promise.all([
+  const [conn, ent, claims, taps, report] = await Promise.all([
     supabase
       .from("google_connections")
       .select("last_successful_sync_at")
       .eq("location_id", locationId)
       .maybeSingle(),
-    supabase
-      .from("plans")
-      .select("kind, ends_at")
-      .eq("location_id", locationId)
-      .eq("status", "active")
-      .gt("ends_at", new Date().toISOString())
-      .order("ends_at", { ascending: false }),
+    loadEntitlements(locationId),
     supabase
       .from("usdt_claims")
       .select("id", { count: "exact", head: true })
@@ -54,28 +48,36 @@ export async function loadHomeFacts(locationId: string): Promise<HomeFacts> {
       .select("week_of", { count: "exact", head: true })
       .eq("location_id", locationId),
   ]);
-  // Rows are optional by role (a manager does not read plans), so a refusal is "no plan line", not an error.
-  const rows = (plans.data ?? []) as { kind: string; ends_at: string | null }[];
-  const top = rows[0] ?? null;
-  const left = daysLeft(top?.ends_at ?? null);
-  const name = top ? (PLAN_NAMES[top.kind] ?? "Kabsi Pro") : "No plan yet";
-  const plan: PlanState = !top
-    ? (claims.count ?? 0) > 0
-      ? { name: "Payment sent", line: "We're confirming it", tone: "amber" }
-      : { name: "No active plan", line: "Choose a plan", tone: "red" }
-    : top.kind === "partner"
-      ? { name, line: "Through your partner", tone: "green" }
-      : top.kind === "trial"
-        ? {
-            name,
-            line: left === null ? "" : `${left} days left`,
-            tone: left !== null && left <= 3 ? "amber" : "green",
-          }
-        : {
-            name,
-            line: left === null ? "Active" : `${left} days left`,
-            tone: left !== null && left <= 7 ? "amber" : "green",
-          };
+  // The plan line comes from the organisation's entitlements (P0.4-06), the one place that decides the plan.
+  const left = daysLeft(ent?.ends_at ?? null);
+  const plan: PlanState =
+    !ent || ent.state === "none" || ent.state === "ended"
+      ? (claims.count ?? 0) > 0
+        ? { name: "Payment sent", line: "We're confirming it", tone: "amber" }
+        : { name: "No active plan", line: "Choose a plan", tone: "red" }
+      : ent.state === "partner"
+        ? { name: "Kabsi Pro", line: "Through your partner", tone: "green" }
+        : ent.state === "concierge"
+          ? { name: "Early access", line: "Active", tone: "green" }
+          : ent.state === "demo"
+            ? { name: "Demo", line: "Example data", tone: "grey" }
+            : ent.state === "grace"
+              ? {
+                  name: "Free trial ended",
+                  line: "Nothing is published until you choose a plan",
+                  tone: "red",
+                }
+              : ent.state === "trial"
+                ? {
+                    name: "Free trial",
+                    line: left === null ? "" : `${left} days left`,
+                    tone: left !== null && left <= 3 ? "amber" : "green",
+                  }
+                : {
+                    name: "Kabsi Pro",
+                    line: left === null ? "Active" : `${left} days left`,
+                    tone: left !== null && left <= 7 ? "amber" : "green",
+                  };
   return {
     lastCheckAt:
       (conn.data as { last_successful_sync_at: string | null } | null)?.last_successful_sync_at ??

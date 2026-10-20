@@ -77,10 +77,18 @@ export async function accessJob() {
       .eq("id", m.id).is("access_granted_at", null).select("id, name").maybeSingle();
     if (!updated) continue;
     granted++;
+    // K-94: Google lets only a verified profile add a Manager, so a location that reached Kabsi's group is verified.
+    // P0.4-04 reads Google's VoiceOfMerchantState for the other scenarios. The trial starts only on a verified profile.
+    await db.from("google_connections").update({ voice_of_merchant: true }).eq("location_id", m.id);
     const { data: status } = await db.rpc("refresh_location_status", { p_location: m.id });
-    // A free trial starts with access (Q05): say when it ends, in the business's own time zone.
-    const { data: trial } = await db.from("plans").select("ends_at, locations(time_zone)").eq("location_id", m.id).eq("kind", "trial").eq("status", "active").maybeSingle();
-    const trialLine = trial ? ` Your free trial runs until ${formatDay(localDateHour(new Date(new Date(trial.ends_at).getTime() - 1000), (trial.locations as unknown as { time_zone: string | null } | null)?.time_zone ?? "UTC").date)}.` : "";
+    // A free trial starts with working access (K-101, P0.4-06): say when it ends, in the business's own time zone.
+    const [{ data: ent }, { data: loc }] = await Promise.all([
+      db.rpc("entitlements", { p_org: null, p_location: m.id }),
+      db.from("locations").select("time_zone").eq("id", m.id).maybeSingle(),
+    ]);
+    const trialEnds = (ent as { state?: string; trial?: { ends_at?: string } | null } | null)?.state === "trial"
+      ? (ent as { trial?: { ends_at?: string } | null }).trial?.ends_at ?? null : null;
+    const trialLine = trialEnds ? ` Your free trial runs until ${formatDay(localDateHour(new Date(Date.parse(trialEnds) - 1000), (loc as { time_zone: string | null } | null)?.time_zone ?? "UTC").date)}.` : "";
     for (const to of await ownerEmails(m.id)) {
       const next = status === "active"
         ? `Kabsi is now watching your reviews. When the next one arrives you'll get an email with a reply ready.${trialLine}`

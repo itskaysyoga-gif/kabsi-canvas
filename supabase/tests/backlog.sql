@@ -27,6 +27,10 @@ create function tests.rid(n integer) returns uuid language sql immutable as $$
 -- A free trial, and 12 backlog reviews: 6 low risk with a safe draft (the sixth gets a newer draft later), 1 medium, 1 high
 -- (no draft), 1 still being drafted, and 3 older ones that wait for a plan.
 delete from public.plans where location_id = '00000000-0000-4000-8000-0000000000c1';
+-- P0.4-06: the trial is the organisation's entitlement, so the victim is neither partner-covered nor paying here.
+update public.partners set billing_track = 'commission' where id = '00000000-0000-4000-8000-0000000000d1';
+update public.subscriptions set state = 'cancelled'
+ where organization_id = (select organization_id from public.locations where id = '00000000-0000-4000-8000-0000000000c1');
 insert into public.plans (location_id, kind, status, starts_at, ends_at)
 values ('00000000-0000-4000-8000-0000000000c1', 'trial', 'active', now() - interval '1 day', now() + interval '13 days');
 insert into public.reviews (id, location_id, google_review_id, reviewer_name, star_rating, comment, review_created_at, state, risk, is_backlog)

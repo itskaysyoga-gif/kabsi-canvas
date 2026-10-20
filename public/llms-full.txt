@@ -24,8 +24,8 @@ Check this block first. It holds every fact likely to change, verified against t
 | Extra locations | **$15 a month** or **$150 a year** for each extra Google profile. |
 | Lebanon bundle | **$120 a year**: Pro for 12 months, one NFC card and in-person setup. **Lebanon only**, sold by the team in Lebanon (cash, Whish, OMT or USDT). |
 | NFC cards | Shipped **only in Lebanon**. A card on its own is $20; extra cards are $10 each or $40 for five. |
-| Free trial | **14 days, no card.** **30 days** if a partner link or insert brought you. It starts when Kabsi's access to your Google profile works, and there is one trial per Google business. |
-| When a trial or plan ends | The business moves to Free. Reply drafts, Google Protection and the Weekly Care Report stop. The Review Link and Card keep working. |
+| Free trial | **14 days, no card.** **30 days** if a partner link or insert brought you. It starts when Kabsi's access to your verified Google profile works, and there is one trial per Google business (place) and per Google account. The full product, with three limits: 3 profile fixes of your choice, up to 10 replies drafted for older unanswered reviews, and a fair-use cap on drafts. |
+| When a trial or plan ends | After a trial: 7 days of grace in which Kabsi keeps watching and drafting but publishes nothing, then (once card payments are live) Kabsi removes its Manager access and tells you. After a paid plan: the business moves to Free. The Review Link and Card keep working. |
 | Cancelling and refunds | Monthly plans cancel any time. Yearly plans are refundable in full within 14 days of starting. |
 | Ways to pay | USDT (TRC20 or Binance Pay) from anywhere. In Lebanon also Whish, OMT and cash. Card checkout is not offered yet. |
 | Partners | $8 per active business per month, billed monthly in USDT; first 10 partners $6, locked for 12 months (section 6). |
@@ -272,7 +272,9 @@ Message WhatsApp +1 201-483-5474 or email hello@kabsi.co and the team arranges i
 
 ### 4.3 When the trial and the plan start
 
-- A **free trial** starts when Kabsi's access to your Google profile works. It is 14 days, or 30 with a partner. The Plan page shows the last day and how many days are left.
+- A **free trial** starts when Kabsi's access to your Google profile works and Google shows the profile as verified. It is 14 days, or 30 with a partner. The Plan page shows the last day and how many days are left. It never starts for an early-access (concierge) business, a business a partner pays for, or a profile that is not verified.
+- **One trial per business and per person:** one per Google listing (place) and one per Google account (the owner's Google sign-in or email; Gmail dots and +tags count as the same address). A business or account that already had a trial goes straight to a paid plan.
+- **During the trial** you get the full product (new review drafts and publishing, Google Protection, the Weekly Care Report, one post a week, the review link, QR code and card, the assistant) with three limits: Kabsi lists every profile fix it finds but applies **3 of your choice** (the rest when you subscribe); it drafts replies for up to **10** older unanswered reviews (the rest when you subscribe); and after **100 drafts** it asks you to choose a plan or book a free setup call.
 - A **paid plan** starts when payment is confirmed **and** Kabsi's access works. Time spent waiting for access doesn't count.
 - If you pay during your trial, your paid plan starts the day the trial ends. You keep every trial day.
 - If you pay before access works, the Plan page shows your plan as "Paid" and says: "Your plan starts the day Kabsi's access to your Google profile works, so you don't lose any days while you wait."
@@ -295,7 +297,9 @@ During a trial, Kabsi emails you 7 days before it ends, 1 day before, and on the
 
 ### 4.6 When a trial or plan ends
 
-The business moves to **Free**. Reply drafts, Google Protection and the Weekly Care Report stop. The Review Link and Card keep working, for as long as Kabsi operates. Choose a plan on the Plan page to turn everything back on.
+- **After a free trial (day 14 to day 21):** 7 days of grace. Kabsi keeps watching your profile and drafting replies, but publishes nothing; Home says what is waiting ("1 reply ready, 1 change caught"). Choose a plan and everything that is waiting can be approved. On day 21 without a plan, Kabsi removes its Manager access and emails you. **[TIME-SENSITIVE]** Until card payments are live, Kabsi does not remove access on day 21; the team gets in touch instead.
+- **After a paid plan:** the business moves to **Free**. Reply drafts, Google Protection and the Weekly Care Report stop. Kabsi's Google access is not removed by a plan ending; disconnecting is your choice (section 8.6).
+- The Review Link and Card keep working, for as long as Kabsi operates. Choose a plan on the Plan page to turn everything back on.
 
 ### 4.7 Partner-set-up businesses
 
