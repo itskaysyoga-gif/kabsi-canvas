@@ -122,8 +122,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.3-02 | Per-business memory and the grounded reply pipeline | Opus | merged (94, 88ef7e0, 13 Oct 06:52 UTC); Deploy passed; migrations 1 and 2 live (2 run by Hussein, read back 14 Oct); open: the real-model checks (credit) and Hussein's 390 px look, see After merge | 94, 95 | 13 Oct 2026 |
 | P0.3-03 | Three review risk levels | Opus | merged (96, f11ef00, 14 Oct 03:53 UTC); migration live and read back; Deploy passed (`api` 74, `slack` 60); live high-risk mock review on QA Bakery passed (no draft, no model call, the guidance email); open: the medium and holding-reply real-model checks (credit) and Hussein's 390 px look, see After merge | 96, 97 | 14 Oct 2026 |
 | P0.3-04 | Evaluation set and the prompt gate | Opus | merged (97, 404d5e5, 14 Oct 04:06 UTC); After-merge checks passed (production READY, live site 200, jobs green) on green ci.yml (run 38509173689: App, Edge Functions with the 9 eval tests, Database, Prompt gate passing at once with no prompt change); no database or function change to deploy; open: the real evaluation run (credit), see After merge | 97, 98 (throwaway, closed) | 14 Oct 2026 |
-| P0.3-05 | One task engine | Opus | merged (100, a855c30, 15 Oct 04:46 UTC); migration live and read back; Vercel production READY; **Edge Function deploy failed (401, the `SUPABASE_ACCESS_TOKEN` secret, Hussein)**; open: the deploy re-run, then the switch, Hussein's two SQL files, the profile_tasks drop question and the real Nora turn (credit), see After merge | 100 | 15 Oct 2026 |
-| P0.3-06 | Roles and approval policies | Opus | Merged (PR 102); Edge deploy and Hussein's links file pending, After merge below | | 15 Oct 2026 |
+| P0.3-05 | One task engine | Opus | done (100, a855c30, 15 Oct); Deploy re-run green (run 38683212631, attempt 2); Hussein's two SQL files and the profile_tasks drop read back on 20 Oct; `task_detectors` on 20 Oct 05:01 UTC and `detect_tasks` jobs succeed; only the real Nora turn waits for Anthropic credit (After merge step 5) | 100 | 20 Oct 2026 |
+| P0.3-06 | Roles and approval policies | Opus | done (102, 487f0c1, 15 Oct); Deploy re-run green (run 38686596016, attempt 2); Hussein's links file read back on 20 Oct (2, true, true) | 102 | 20 Oct 2026 |
 | P0.3-07 | Home is the Action Center | Sonnet | todo | | |
 | P0.3-08 | App navigation and product names | Sonnet | todo | | |
 | P0.3-09 | Review screen built for a phone | Sonnet | todo | | |
@@ -194,18 +194,18 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-P0.3-06 (PR 102), merged 15 Oct 05:24 UTC as 487f0c1:
-0. **Blocked by P0.3-05 step 0 (the access token).** Deploy run 38686596016 failed the same way (`401 Invalid access token` for every function). Until the token is replaced and that run is re-run, the live `api` and `content` still run the code from before P0.3-06: they check membership, not the role, but the database now refuses any approval the policy does not allow (`approve_publication`, `not_allowed_to_approve`), so staff and managers cannot publish through them; their answer is a generic error instead of the role message. The `team_invite_email` job waits for the same deploy (step 2).
-1. **Hussein, Supabase SQL editor: run the whole file `supabase/migrations/20261015120010_roles_links.sql`** (foreign keys of `approval_policies` and `team_invites`; `remove_member`; owner-only `choose_plan` and `owner_submit_claim`; it holds cascade clauses and delete statements inside functions and removes no data when run). Until then the Team page's Remove button answers with an error, and a manager could still start a plan payment. Read-back: `select (select count(*) from pg_constraint where conname in ('approval_policies_location_id_fkey', 'team_invites_location_id_fkey')) as fkeys, has_function_privilege('authenticated', 'public.remove_member(uuid,uuid)', 'execute') as remove_member, (select prosrc ~ 'array\[''owner''\]' from pg_proc where proname = 'choose_plan') as choose_plan_owner_only;` expect `2`, `true`, `true`.
-2. The `team_invite_email` job needs the deployed `api` (blocked by P0.3-05 After merge step 0, the access token). An invite made before that deploy fails its job once (no handler) and is not resent; the owner can cancel and invite again.
-3. Session: a real invite on the demo workspace once the deploy works (the email to a kabsi.co test address, then the claim on sign-in).
+P0.3-06 (PR 102), merged 15 Oct 05:24 UTC as 487f0c1: all done on 20 Oct 2026.
+0. Done: Deploy run 38686596016 re-run (attempt 2) succeeded on 20 Oct, so `api` and `content` run the role checks.
+1. Done: Hussein ran `supabase/migrations/20261015120010_roles_links.sql`; his read-back gave `2`, `true`, `true` (the two foreign keys of `approval_policies` and `team_invites`, `remove_member` executable, `choose_plan` owner only). Session read on 20 Oct: 2 foreign keys present.
+2. Done: the deployed `api` knows the `team_invite_email` job.
+3. Open for a session with a real mailbox: a real invite on the demo workspace (the email to a kabsi.co test address, then the claim on sign-in).
 
-P0.3-05 (PR 100), merged 15 Oct 04:46 UTC as a855c30:
-0. **Hussein, blocking: the Edge Function deploy failed.** Deploy run 38683212631, job "Edge Functions": `unexpected deploy status 401: {"message":"Invalid access token"}` for every function; the GitHub Actions secret `SUPABASE_ACCESS_TOKEN` no longer works (it worked on 14 Oct). Make a new personal access token in Supabase (Account, Access Tokens), paste it into GitHub (repo Settings, Secrets and variables, Actions, `SUPABASE_ACCESS_TOKEN`; never in a chat), then re-run Deploy run 38683212631 ("Re-run failed jobs"). Until then `api` and `assistant` run the code from before PR 100: Nora still calls `profile_tasks_list` (so step 3 must wait) and the `detect_tasks` job kind is unknown to the live dispatcher (so step 1 waits). Tasks are still made and closed at once by the database triggers; Home on kabsi.co already reads them.
-1. Session, after the Deploy run: `update public.app_settings set value = 'on' where key = 'task_detectors';`, then check that `detect_tasks` jobs run and succeed for every live business, and that the dispatcher knows the kind.
-2. **Hussein, Supabase SQL editor (project ynjdqjlmdwjgbfezevxy): run the whole file `supabase/migrations/20261015090010_task_engine_links.sql`** (the two foreign keys of `tasks`; it holds cascade clauses, removes no data). Read-back: `select conname, confdeltype from pg_constraint where conname in ('tasks_location_id_fkey', 'tasks_publication_id_fkey') order by 1;` expect `tasks_location_id_fkey c` and `tasks_publication_id_fkey n`.
-3. **Hussein, SQL editor, once PR 100 is merged and Deploy has passed: run the whole file `supabase/migrations/20261015090100_retire_profile_score.sql`** (drops `profile_score`, `profile_tasks_list`, `profile_task_action`; nothing calls them after the merge). Read-back: `select count(*) from pg_proc where proname in ('profile_score', 'profile_tasks_list', 'profile_task_action');` expect 0.
-4. **Ask Hussein (a drop, plan section 2.3):** may the `profile_tasks` table go? It held 13 rows on 15 Oct (9 live: facts 1, basics 1, review_link 2, posts 2, photos 3; 4 done), all moved into `tasks`. SQL: `drop function private.migrate_profile_tasks(); drop table public.profile_tasks;` Read-back: `select to_regclass('public.profile_tasks');` expect null. A later chat also removes the fixture and test lines that insert into it.
+P0.3-05 (PR 100), merged 15 Oct 04:46 UTC as a855c30: done on 20 Oct 2026 except step 5.
+0. Done: Deploy run 38683212631 re-run (attempt 2) succeeded on 20 Oct (Hussein replaced the access token).
+1. Done: `update public.app_settings set value = 'on' where key = 'task_detectors';` run by the session on 20 Oct at 05:01 UTC. First `detect_tasks` jobs at 05:02 UTC: 4 jobs for the 4 live businesses, all succeeded, none failed or dead in the hour; 27 live tasks as before and no key live twice.
+2. Done: Hussein ran `20261015090010_task_engine_links.sql`; the two foreign keys of `tasks` exist (read 20 Oct).
+3. Done: Hussein ran `20261015090100_retire_profile_score.sql`; his read-back `0` (`profile_score`, `profile_tasks_list`, `profile_task_action` gone).
+4. Done: Hussein's yes to the drop; `profile_tasks` is gone (his read-back `null`). The old fixture row and test lines that insert into it stay in the repo for the database suite (fresh stacks still build the table from the old migrations); a later chat removes them with a contract migration.
 5. **Pending until Anthropic credit is back:** Nora answering "what should I do next" from `list_tasks` on the mock (the tool and its output are tested in `_shared/tasks.test.ts`; the real model turn needs credit).
 
 P0.3-04 (PR 97):
@@ -411,6 +411,11 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.3-05 and P0.3-06 close-out (20 Oct 2026, 05:00 to 05:05 UTC, Hussein's session 4)
+- Deploy: runs 38683212631 (PR 100) and 38686596016 (PR 102), attempt 2, both succeeded (checked through the GitHub API).
+- Hussein's SQL applied; session read-back on production: roles foreign keys 2, task foreign keys 2, `profile_score` and the old list's functions 0, `to_regclass('public.profile_tasks')` null, `places_daily_cap` 0, `google_mode()` mock.
+- `task_detectors` turned `on` at 05:01:02 UTC. Jobs of kind `detect_tasks`: 4 succeeded at 05:02 UTC, one per live business (4), none failed or dead in the last hour; tasks still 27 live and no dedupe key live twice.
 
 ### P0.3-06 After merge (15 Oct 2026, 05:24 to 05:27 UTC, Hussein's session 3)
 - PR 102 merged 05:24 UTC as merge commit 487f0c1 (ci.yml green on head 530a87a: App, Edge Functions and Worker, Database, Prompt gate; Load run 38685212888 passed on 530a87a: 500 businesses, one simulated hour, with the new read policies).
