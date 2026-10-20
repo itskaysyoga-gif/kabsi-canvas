@@ -22,6 +22,8 @@ q -c "insert into auth.users (instance_id, id, aud, role, email, email_confirmed
   -c "insert into public.locations (id, name, place_id, status, consent_at, access_granted_at, google_account_id, google_location_id)
       values ('$loc', 'Race Bakery', 'race-place', 'active', now(), now(), 'accounts/race', 'locations/mock-race')" \
   -c "insert into public.location_members (location_id, user_id, role) values ('$loc', '$user', 'owner')" \
+  -c "insert into public.subscriptions (organization_id, plan, state, provider)
+      select organization_id, 'pro', 'active', 'manual' from public.locations where id = '$loc'" \
   -c "insert into public.reviews (id, location_id, google_review_id, star_rating, review_created_at, state)
       values ('$review', '$loc', 'race-review', 5, now(), 'drafted')" >/dev/null
 

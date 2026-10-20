@@ -204,7 +204,12 @@ update public.locations set disconnect_requested_at = null where id = '00000000-
 update public.google_connections set access_state = 'granted' where location_id = '00000000-0000-4000-8000-0000000000c1';
 
 -- Detector: expiring plan (billing) ------------------------------------------------------------------------------------
-update public.plans set status = 'active', starts_at = now() - interval '25 days', ends_at = now() + interval '10 days'
+-- P0.4-06: the plan comes from the organisation's entitlements; the victim pays through a plan here (no partner cover,
+-- no subscription row), so the plan's end is the one that counts.
+update public.partners set billing_track = 'commission' where id = '00000000-0000-4000-8000-0000000000d1';
+update public.subscriptions set state = 'cancelled'
+ where organization_id = (select organization_id from public.locations where id = '00000000-0000-4000-8000-0000000000c1');
+update public.plans set kind = 'pro_monthly', status = 'active', starts_at = now() - interval '25 days', ends_at = now() + interval '10 days'
  where location_id = '00000000-0000-4000-8000-0000000000c1';
 select is(private.detect_expiring_plan('00000000-0000-4000-8000-0000000000c1'), 0, '10 days left: no task');
 update public.plans set ends_at = now() + interval '5 days' - interval '1 hour' where location_id = '00000000-0000-4000-8000-0000000000c1';

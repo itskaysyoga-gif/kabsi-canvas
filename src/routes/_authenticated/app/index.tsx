@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ActionCenter } from "@/components/home/action-center";
 import { myAccess } from "@/lib/team";
 import { supabase } from "@/lib/supabase";
+import { loadEntitlements } from "@/lib/entitlements";
 import { myLatestLocation, type Location } from "@/lib/onboarding";
 import { cn } from "@/lib/utils";
 
@@ -123,22 +124,18 @@ function Skeleton() {
 }
 
 // ── Setup not finished: one checklist, one button.
-// Done = a Pro payment is recorded (the plan itself starts once Google access works, D224) or a free trial
-// has started (Q05).
+// Done = a Pro payment is recorded (the plan itself starts once Google access works, D224) or the organisation's
+// entitlements show a trial or a plan (P0.4-06).
 async function hasPaidPlan(locationId: string) {
-  const [pay, trial] = await Promise.all([
+  const [pay, ent] = await Promise.all([
     supabase
       .from("payments")
       .select("id", { count: "exact", head: true })
       .eq("location_id", locationId)
       .not("item", "in", "(card,cards_5,extra_card)"),
-    supabase
-      .from("plans")
-      .select("id", { count: "exact", head: true })
-      .eq("location_id", locationId)
-      .eq("kind", "trial"),
+    loadEntitlements(locationId),
   ]);
-  return (pay.count ?? 0) + (trial.count ?? 0) > 0;
+  return (pay.count ?? 0) > 0 || (!!ent && ent.state !== "none");
 }
 
 function Paused({ loc }: { loc: Location }) {

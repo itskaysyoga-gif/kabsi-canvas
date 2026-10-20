@@ -392,8 +392,9 @@ Deno.serve(async (req) => {
       for (const row of (locs ?? []) as unknown as { locations: Record<string, unknown> | null }[]) {
         const l = row.locations;
         if (!l) continue;
-        const { data: plan } = await db.from("plans").select("kind, status, ends_at").eq("location_id", l.id as string).in("status", ["active", "pending"]).order("created_at", { ascending: false }).limit(1).maybeSingle();
-        ctx.push(`Business: ${l.name} (${l.country ?? "country unknown"}); status ${l.status}; setup step ${l.onboarding_step}; Google access ${l.access_granted_at ? "working" : "not yet"}; ${l.partner_id ? "set up through a partner" : "self-serve"}; plan ${plan ? `${plan.kind} ${plan.status}${plan.ends_at ? ` until ${String(plan.ends_at).slice(0, 10)}` : ""}` : "none"}`);
+        const { data: ent } = await db.rpc("entitlements", { p_org: null, p_location: l.id as string });
+        const plan = ent as { state?: string; ends_at?: string | null } | null;
+        ctx.push(`Business: ${l.name} (${l.country ?? "country unknown"}); status ${l.status}; setup step ${l.onboarding_step}; Google access ${l.access_granted_at ? "working" : "not yet"}; ${l.partner_id ? "set up through a partner" : "self-serve"}; plan ${plan?.state && plan.state !== "none" ? `${plan.state}${plan.ends_at ? ` until ${String(plan.ends_at).slice(0, 10)}` : ""}` : "none"}`);
         if (!ownerLoc && surface === "app" && l.id && l.status === "active") ownerLoc = l.id as string;
         if (l.id) await db.from("chat_conversations").update({ location_id: l.id }).eq("id", conv.id).is("location_id", null);
       }

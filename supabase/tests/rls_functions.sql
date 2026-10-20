@@ -12,7 +12,7 @@ grant select on tested to authenticated;
 insert into tested values
   ('activate_card(text,uuid,text)'), ('activity_feed(uuid,integer)'), ('add_photo(uuid,text)'), ('billing_invoice_status(uuid)'),
   ('billing_prepare_invoice(uuid,text,text,boolean)'), ('cancel_location_deletion(uuid)'), ('choose_plan(uuid,text)'),
-  ('claim_partner_membership()'), ('confirm_business_details(uuid,jsonb)'), ('create_review_link(uuid,text)'), ('generate_card_codes(integer,uuid)'),
+  ('claim_partner_membership()'), ('confirm_business_details(uuid,jsonb)'), ('entitlements(uuid,uuid)'), ('create_review_link(uuid,text)'), ('generate_card_codes(integer,uuid)'),
   ('google_mode()'), ('handle_review_offline(uuid)'),
   ('has_location_role(uuid,text[])'), ('is_member(uuid)'), ('is_org_member(uuid,text[])'), ('is_partner_member(uuid)'), ('is_staff()'), ('owner_submit_claim(uuid,text,text,text)'),
   ('partner_create_invite(uuid,text,text)'), ('partner_invoice_calc(uuid,date)'), ('partner_locations(uuid)'),
@@ -121,6 +121,8 @@ select throws_ok($$ select public.create_review_link('00000000-0000-4000-8000-00
 select throws_ok($$ select public.handle_review_offline('00000000-0000-4000-8000-0000000000e1') $$, '42501', null, 'handle_review_offline refuses a non-member');
 select throws_ok($$ select public.owner_submit_claim('00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 'trc20', 'strangertx1') $$, '42501', null, 'owner_submit_claim refuses a non-member');
 select throws_ok($$ select public.plan_summary('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'plan_summary refuses a non-member');
+select throws_ok($$ select public.entitlements(null, '00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'entitlements refuses a non-member');
+select throws_ok($$ select public.entitlements((select owner_org from victim_orgs), null) $$, '42501', null, 'entitlements refuses a non-member by organisation');
 select throws_ok($$ select public.list_tasks('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'list_tasks refuses a non-member');
 select throws_ok($$ select public.task_action('00000000-0000-4000-8000-0000000000f8', 'later') $$, '42501', null, 'task_action refuses a non-member');
 select throws_ok($$ select public.approve_backlog('00000000-0000-4000-8000-0000000000c1', '[]') $$, '42501', null, 'approve_backlog refuses a non-member');

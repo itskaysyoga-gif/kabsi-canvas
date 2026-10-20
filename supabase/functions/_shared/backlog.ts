@@ -26,13 +26,13 @@ export const reopensOnPlan = (p: BacklogPolicy) => !p.trial && p.fullBacklog;
 // deno-lint-ignore no-explicit-any
 type Db = SupabaseClient<any, "public", any>;
 
+// The trial and its backlog cap come from the organisation's entitlements (P0.4-06), never from plan rows.
 export async function backlogPolicy(db: Db, locationId: string): Promise<BacklogPolicy> {
-  const [plans, setting] = await Promise.all([
-    db.from("plans").select("kind, ends_at").eq("location_id", locationId).eq("status", "active"),
+  const [ent, setting] = await Promise.all([
+    db.rpc("entitlements", { p_org: null, p_location: locationId }),
     db.from("app_settings").select("value").eq("key", "full_backlog").maybeSingle(),
   ]);
-  const live = ((plans.data ?? []) as { kind: string; ends_at: string | null }[])
-    .filter((p) => !p.ends_at || Date.parse(p.ends_at) > Date.now());
-  const trial = live.some((p) => p.kind === "trial") && !live.some((p) => p.kind !== "trial");
-  return { trial, fullBacklog: (setting.data as { value: string } | null)?.value === "on" };
+  if (ent.error) throw ent.error;
+  const state = (ent.data as { state?: string } | null)?.state;
+  return { trial: state === "trial" || state === "grace", fullBacklog: (setting.data as { value: string } | null)?.value === "on" };
 }
