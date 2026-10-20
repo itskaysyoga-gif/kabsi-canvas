@@ -130,7 +130,9 @@ function ActionPage() {
 
   const inbox = (
     <Button asChild variant="outline" className="mt-6 w-full">
-      <Link to="/app/reviews" search={{ f: "needs" }}>Open your Kabsi reviews</Link>
+      <Link to="/app/reviews" search={{ f: "needs" }}>
+        Open your Kabsi reviews
+      </Link>
     </Button>
   );
   if (pending) {
