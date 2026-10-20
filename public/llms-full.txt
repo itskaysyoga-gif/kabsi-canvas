@@ -148,12 +148,16 @@ On a computer the left menu has eight places: Home, Reviews, Get Reviews, Google
 ### 3.1 Before you start
 
 - A **verified** Google Business Profile on Google Maps that you **own or manage**, so you can add a Manager. Kabsi cannot check verification itself, so setup asks you. If "People and access" is missing, the listing may need to be verified or claimed first.
-- An email address you check (sign-in is by emailed code, no password).
+- A Google account or an email address you check (sign-in is with Google or an emailed code, no password).
 - A few minutes.
 
 ### 3.2 Signing in
 
-Enter your email, tap **Send code**, then type the 6-digit code from the email (there is no sign-in link). Not there? Check spam, tap **Resend code**, or **Use a different email**.
+Signing up and logging in are the same steps. After the free check on /get-started, tap **Save your snapshot and continue**; the business you checked is kept, so setup starts with it already picked.
+
+- **Continue with Google** (first choice): pick your Google account. Kabsi receives only your name and email address (openid, email and profile). It gives Kabsi no access to your Business Profile; that comes later through the Manager invitation.
+- **Continue with email**: enter your email, pass the quick bot check, tap **Send me a code**, then type the 6-digit code from the email (there is no sign-in link). The code works for 10 minutes. Not there? Check spam, wait for the timer and tap **Send a new code**, or **Use a different email**.
+- Limits that stop inbox flooding: at most 3 codes per email address in 15 minutes and 10 code requests per device or network in an hour. Throwaway email addresses (for example mailinator.com) cannot sign up. There are no passwords.
 
 ### 3.3 The setup steps (/start)
 

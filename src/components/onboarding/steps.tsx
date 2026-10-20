@@ -36,6 +36,7 @@ import { loadPlanSummary, planOptions, type PlanKind } from "@/lib/plans";
 import { WhatsappLink } from "@/components/shared/whatsapp-link";
 import { KABSI_GROUP_ID, SITE_URL, WHATSAPP_NUMBER } from "@/lib/site";
 import { cn } from "@/lib/utils";
+import { forgetSnapshot, keptSnapshot } from "@/lib/signup";
 
 type StepProps = { location: Location | null; onChanged: () => Promise<unknown> };
 
@@ -49,9 +50,14 @@ export function BusinessStep({
   inviteId?: string | undefined;
   onCreated: () => Promise<unknown>;
 }) {
+  // The business from the snapshot the owner saw before signing up (P0.4-02) is picked already.
+  const [kept] = useState<PlaceResult | null>(() => {
+    const k = keptSnapshot();
+    return k ? { ...k, country: null } : null;
+  });
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<PlaceResult[] | null>(null);
-  const [picked, setPicked] = useState<PlaceResult | null>(null);
+  const [results, setResults] = useState<PlaceResult[] | null>(kept ? [kept] : null);
+  const [picked, setPicked] = useState<PlaceResult | null>(kept);
   const [eligible, setEligible] = useState<Eligibility>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -76,6 +82,7 @@ export function BusinessStep({
     setBusy(true);
     try {
       chooseLocation(await startLocation(picked, partnerHandle, inviteId));
+      forgetSnapshot();
       track("business_selected", {
         country: picked.country ?? "",
         source: inviteId ? "partner_invite" : partnerHandle ? "partner_link" : "self",
@@ -91,7 +98,11 @@ export function BusinessStep({
     <>
       <StepTitle
         title="Find your business"
-        sub="Four short steps, about five minutes. Nothing is posted to Google without your approval. Start by searching for your business the way it appears on Google Maps."
+        sub={
+          kept
+            ? "Four short steps, about five minutes. Nothing is posted to Google without your approval. Here is the business from your snapshot. If it is not yours, search again."
+            : "Four short steps, about five minutes. Nothing is posted to Google without your approval. Start by searching for your business the way it appears on Google Maps."
+        }
       />
       <form onSubmit={search} className="flex flex-col gap-3 sm:flex-row">
         <Label htmlFor="biz" className="sr-only">

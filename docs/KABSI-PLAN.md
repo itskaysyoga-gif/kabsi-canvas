@@ -643,7 +643,7 @@ Done when (wave): kabsi.co serves the new build with K-112 wording; no file in t
 
 ### Bundled sessions
 
-Set by Hussein on 13 Oct 2026 (recorded by the P0.3-01 build chat; every card below stays as it is). On 20 Oct 2026 Hussein merged session 5 into session 4, so session 4 now covers P0.3-07 to P0.3-11 and there is no session 5. One build session runs the tasks of one row, in the order written. Rule: one pull request per task, merged (CI green, After-merge checks run) before the next task starts. If a session runs low on context it stops after a merge and reports what is left.
+Set by Hussein on 13 Oct 2026 (recorded by the P0.3-01 build chat; every card below stays as it is). On 20 Oct 2026 Hussein merged session 5 into session 4, so session 4 now covers P0.3-07 to P0.3-11 and there is no session 5. Later on 20 Oct he renumbered the sessions after 4 so they run on from 5 in the same order (the old 6 is now 5, the old 19 is now 18). One build session runs the tasks of one row, in the order written. Rule: one pull request per task, merged (CI green, After-merge checks run) before the next task starts. If a session runs low on context it stops after a merge and reports what is left.
 
 | Session | Model | Tasks |
 |---|---|---|
@@ -651,20 +651,20 @@ Set by Hussein on 13 Oct 2026 (recorded by the P0.3-01 build chat; every card be
 | 2 | Opus | P0.3-03, P0.3-04 |
 | 3 | Opus | P0.3-05, P0.3-06 |
 | 4 | Sonnet | P0.3-07, P0.3-08, P0.3-09, P0.3-10, P0.3-11 |
-| 6 | Opus | P0.4-02, P0.4-06 |
-| 7 | Sonnet | P0.4-09, P0.4-08, P0.4-10 |
-| 8 | Sonnet | P0.4-03, P0.4-04, P0.4-05 |
-| 9 | Opus | P0.5-01, P0.5-02 |
-| 10 | Sonnet | P0.5-03, P0.5-04, P0.5-05 |
-| 11 | Opus | P0.6-01, P0.6-05, P0.7-02 |
-| 12 | Opus | P0.6-02, P0.6-03, P0.6-09 |
-| 13 | Sonnet | P0.6-04, P0.6-08, P0.6-11 |
-| 14 | Opus | P0.6-06, P0.4-11 |
-| 15 | Opus | P0.4-07 |
-| 16 | Opus | P0.7-01 (the rest), P0.7-01b, P0.7-04 |
-| 17 | Opus | P0.7-03, P0.7-05, P0.7-05b |
-| 18 | Sonnet | P0.7-06 |
-| 19 | Opus | P0.7-07 |
+| 5 | Opus | P0.4-02, P0.4-06 |
+| 6 | Sonnet | P0.4-09, P0.4-08, P0.4-10 |
+| 7 | Sonnet | P0.4-03, P0.4-04, P0.4-05 |
+| 8 | Opus | P0.5-01, P0.5-02 |
+| 9 | Sonnet | P0.5-03, P0.5-04, P0.5-05 |
+| 10 | Opus | P0.6-01, P0.6-05, P0.7-02 |
+| 11 | Opus | P0.6-02, P0.6-03, P0.6-09 |
+| 12 | Sonnet | P0.6-04, P0.6-08, P0.6-11 |
+| 13 | Opus | P0.6-06, P0.4-11 |
+| 14 | Opus | P0.4-07 |
+| 15 | Opus | P0.7-01 (the rest), P0.7-01b, P0.7-04 |
+| 16 | Opus | P0.7-03, P0.7-05, P0.7-05b |
+| 17 | Sonnet | P0.7-06 |
+| 18 | Opus | P0.7-07 |
 
 ### P0.1-01 Retire the old docs and move Nora's facts file
 

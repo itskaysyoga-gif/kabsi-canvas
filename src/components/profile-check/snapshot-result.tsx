@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "@tanstack/react-router";
 import { Globe, Image as ImageIcon, Phone, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { StatusPill, type StatusTone } from "@/components/ui/status-pill";
 import { Turnstile } from "@/components/turnstile";
+import { SaveSnapshotButton } from "@/components/auth/signup-sheet";
 import {
   CheckError,
   emailCheck,
@@ -96,9 +96,10 @@ export function SnapshotResult({
           Kabsi can take care of {s.findings.length === 1 ? "this" : `these ${s.findings.length}`}.
           You approve each one.
         </p>
-        <Button asChild className="mt-4 w-full sm:w-auto">
-          <Link to="/start">{CTA_PRIMARY}</Link>
-        </Button>
+        <SaveSnapshotButton
+          snapshot={{ place_id: s.place_id, name: s.name, address: s.address }}
+          label={page === "/get-started" ? "Save your snapshot and continue" : CTA_PRIMARY}
+        />
       </div>
 
       <EmailForm placeId={s.place_id} page={page} />
