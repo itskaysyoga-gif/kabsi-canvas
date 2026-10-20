@@ -1,6 +1,7 @@
 // Reviews data layer: inbox reads go through RLS; every write goes through the `api` Edge Function
 // (posting is the only path to Google, D202) or a membership-checked RPC.
 import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
+import { SENT_STATES } from "@/lib/dashboard";
 
 export type ReviewState =
   | "new"
@@ -42,32 +43,44 @@ async function readJson<T>(res: Response): Promise<T> {
   return data;
 }
 
-// ── Inbox (signed in)
-export async function inboxReviews(
-  locationId: string,
-  tab: "todo" | "done",
-): Promise<InboxReview[]> {
-  const states: ReviewState[] =
-    tab === "todo"
-      ? ["new", "drafted", "blocked"]
-      : ["publishing", "posted", "skipped", "handled_offline"];
+// ── Reviews screen (signed in): every review Kabsi has seen, with its latest draft and the owner's own approved reply.
+export type ReviewRow = InboxReview & {
+  content_purged_at: string | null;
+  /** The reply the owner approved through Kabsi (exact text sent to Google). */
+  my_reply: string | null;
+};
+
+export async function allReviews(locationId: string): Promise<ReviewRow[]> {
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, location_id, reviewer_name, star_rating, comment, language, risk, risk_reasons, state, existing_reply, reply_state, reply_state_reason, review_created_at, is_backlog, reply_drafts(body, safety_ok, version, safety_notes)",
+      "id, location_id, reviewer_name, star_rating, comment, language, risk, risk_reasons, state, existing_reply, reply_state, reply_state_reason, review_created_at, is_backlog, content_purged_at, reply_drafts(body, safety_ok, version, safety_notes)",
     )
     .eq("location_id", locationId)
-    .in("state", states)
     .order("review_created_at", { ascending: false })
-    .limit(100);
+    .limit(200);
   if (error) throw new Error(error.message);
+  // The owner's own approved replies (their words, kept regardless of Google's 30-day rule).
+  const { data: pubs } = await supabase
+    .from("publications")
+    .select("target_id, payload, created_at")
+    .eq("location_id", locationId)
+    .eq("target_type", "review_reply")
+    .in("state", SENT_STATES)
+    .order("created_at", { ascending: false })
+    .limit(400);
+  const mine = new Map<string, string>();
+  for (const p of (pubs ?? []) as { target_id: string; payload: { text?: string } | null }[]) {
+    if (!mine.has(p.target_id) && p.payload?.text) mine.set(p.target_id, p.payload.text);
+  }
   return (data ?? []).map((row) => {
-    const drafts = ((row as { reply_drafts?: InboxReview["draft"][] }).reply_drafts ?? []).filter(
-      Boolean,
-    ) as NonNullable<InboxReview["draft"]>[];
+    const { reply_drafts, ...rest } = row as typeof row & {
+      reply_drafts?: InboxReview["draft"][];
+    };
+    const drafts = (reply_drafts ?? []).filter(Boolean) as NonNullable<InboxReview["draft"]>[];
     const latest = drafts.sort((a, b) => b.version - a.version)[0] ?? null;
-    const { reply_drafts: _ignored, ...rest } = row as typeof row & { reply_drafts?: unknown };
-    return { ...(rest as Omit<InboxReview, "draft">), draft: latest };
+    const r = rest as Omit<ReviewRow, "draft" | "my_reply">;
+    return { ...r, draft: latest, my_reply: mine.get(r.id) ?? null };
   });
 }
 
@@ -91,6 +104,12 @@ export async function postReply(reviewId: string, text: string) {
     publish_after?: string | null;
     offers?: StyleOffer[];
   }>(await authed("api/approve", { review_id: reviewId, do: "post", text }));
+}
+// Undo inside the 10 seconds (K-70): stops the approval before Google has it.
+export async function undoReply(reviewId: string, publicationId: string) {
+  return readJson<{ ok: true; state: string }>(
+    await authed("api/approve", { review_id: reviewId, do: "undo", publication_id: publicationId }),
+  );
 }
 export async function answerStyleOffer(offerId: string, save: boolean) {
   const { error } = await supabase.rpc("answer_style_offer", { p_offer: offerId, p_save: save });

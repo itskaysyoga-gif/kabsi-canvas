@@ -32,6 +32,9 @@ export function ActionCard({
   const risk = cardRisk(task);
   const act = cardAction(task);
   const isReply = task.kind === "review_reply";
+  // A review card opens that review on the Reviews screen.
+  const rid = task.evidence["review_id"];
+  const reviewId = isReply && typeof rid === "string" && /^[0-9a-f-]{36}$/.test(rid) ? rid : null;
   return (
     <KabsiCard
       needsYou={task.priority === "urgent"}
@@ -43,9 +46,15 @@ export function ActionCard({
       actions={
         <>
           <Button asChild variant={lead ? "primary" : "secondary"} size="compact">
-            <Link to={task.path}>
-              {act.primary} <ArrowRight />
-            </Link>
+            {reviewId ? (
+              <Link to="/app/reviews" search={{ f: "needs", r: reviewId }}>
+                {act.primary} <ArrowRight />
+              </Link>
+            ) : (
+              <Link to={task.path}>
+                {act.primary} <ArrowRight />
+              </Link>
+            )}
           </Button>
           <Button variant="tertiary" disabled={busy} onClick={() => onLater(task)} className="px-2">
             {act.secondary}

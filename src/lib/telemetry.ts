@@ -135,6 +135,7 @@ export type KabsiEvent =
   | "reply_approved"
   | "reply_published"
   | "reply_skipped"
+  | "reply_undone"
   | "post_approved"
   | "photo_approved"
   | "special_hours_approved"

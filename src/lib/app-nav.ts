@@ -34,12 +34,9 @@ export const SECTIONS: Record<SectionId, Section> = {
     id: "reviews",
     label: "Reviews",
     short: "Reviews",
-    to: "/app/inbox",
+    to: "/app/reviews",
+    // /app/inbox ("To reply") is now the Needs reply filter of the one Reviews screen and redirects to it.
     paths: ["/app/inbox", "/app/reviews"],
-    tabs: [
-      { label: "To reply", to: "/app/inbox" },
-      { label: "All reviews", to: "/app/reviews" },
-    ],
   },
   "get-reviews": {
     id: "get-reviews",
