@@ -125,7 +125,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.3-04 | Evaluation set and the prompt gate | Opus | merged (97, 404d5e5, 14 Oct 04:06 UTC); After-merge checks passed (production READY, live site 200, jobs green) on green ci.yml (run 38509173689: App, Edge Functions with the 9 eval tests, Database, Prompt gate passing at once with no prompt change); no database or function change to deploy; open: the real evaluation run (credit), see After merge | 97, 98 (throwaway, closed) | 14 Oct 2026 |
 | P0.3-05 | One task engine | Opus | done (100, a855c30, 15 Oct); Deploy re-run green (run 38683212631, attempt 2); Hussein's two SQL files and the profile_tasks drop read back on 20 Oct; `task_detectors` on 20 Oct 05:01 UTC and `detect_tasks` jobs succeed; only the real Nora turn waits for Anthropic credit (After merge step 5) | 100 | 20 Oct 2026 |
 | P0.3-06 | Roles and approval policies | Opus | done (102, 487f0c1, 15 Oct); Deploy re-run green (run 38686596016, attempt 2); Hussein's links file read back on 20 Oct (2, true, true) | 102 | 20 Oct 2026 |
-| P0.3-07 | Home is the Action Center | Sonnet | PR open (105); After merge below | 105 | 20 Oct 2026 |
+| P0.3-07 | Home is the Action Center | Sonnet | done (105, 103099e, 20 Oct); CI green; Vercel production READY; jobs 0 failed | 105 | 20 Oct 2026 |
 | P0.3-08 | App navigation and product names | Sonnet | todo | | |
 | P0.3-09 | Review screen built for a phone | Sonnet | todo | | |
 | P0.3-10 | Clear the backlog on day one | Sonnet | todo | | |
@@ -195,9 +195,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-P0.3-07 (PR 105): to run after the merge.
-1. Deploy workflow green for the merge commit; Vercel production READY; https://kabsi.co/app loads (200); `detect_tasks` and the other jobs of the last hour have no failed or dead rows.
-2. Hussein, when you have a minute: open kabsi.co/app on your phone as an owner and look at Home once (the session read its own 390 px screenshots, built app with stubbed data, not a real account).
+P0.3-07 (PR 105), merged 20 Oct 05:15 UTC as 103099e: checks done (see Evidence). Open for Hussein only: one look at Home on a phone as an owner (optional).
 
 P0.3-06 (PR 102), merged 15 Oct 05:24 UTC as 487f0c1: all done on 20 Oct 2026.
 0. Done: Deploy run 38686596016 re-run (attempt 2) succeeded on 20 Oct, so `api` and `content` run the role checks.

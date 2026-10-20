@@ -31,7 +31,7 @@ import { PageIcon } from "@/components/shared/page-icon";
 // digitally. Reads via RLS; create / activate / rename / switch off go through membership-checked RPCs.
 export const Route = createFileRoute("/_authenticated/app/cards")({
   head: () => ({
-    meta: [{ title: "Get reviews | Kabsi" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Get Reviews | Kabsi" }, { name: "robots", content: "noindex" }],
   }),
   component: CardsPage,
 });

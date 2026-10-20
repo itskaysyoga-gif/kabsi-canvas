@@ -1,14 +1,19 @@
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
+  BarChart3,
   BookOpen,
   ChevronDown,
+  CreditCard,
+  Home,
   LifeBuoy,
   LogOut,
   Mail,
-  CreditCard,
-  Home,
+  MessageCircle,
   MessageSquareText,
+  MoreHorizontal,
+  Newspaper,
+  NotebookText,
   Settings,
   Store,
   Users,
@@ -21,6 +26,25 @@ import { amStaff } from "@/lib/reviews";
 import { myPartner } from "@/lib/partner";
 import { waitingReplies } from "@/lib/tasks";
 import { myAccess } from "@/lib/team";
+import {
+  canOpen,
+  desktopSections,
+  moreSections,
+  phoneBar,
+  sectionFor,
+  tabsFor,
+  type Section,
+  type SectionId,
+  type Tab,
+} from "@/lib/app-nav";
+import { WhatsappLink } from "@/components/shared/whatsapp-link";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ExampleBadge } from "@/components/ui/example-badge";
 import { setAnalyticsPaused } from "@/lib/telemetry";
@@ -37,76 +61,19 @@ import { TestModeBanner } from "@/components/shared/test-mode-banner";
 import { useAuth } from "@/components/auth/auth-provider";
 import { cn } from "@/lib/utils";
 
-// Five places, not eleven tabs. Related pages sit under one section as small tabs at the top.
-type Section = {
-  label: string;
-  short: string;
-  to: string;
-  icon: typeof Home;
-  paths: string[];
-  sub?: [string, string][];
+// The places an owner goes (K-03): eight on a desktop, four named on a phone plus More. The list, the roles and the old
+// addresses are in src/lib/app-nav.ts; this file only draws them.
+const ICON: Record<SectionId, typeof Home> = {
+  home: Home,
+  reviews: MessageSquareText,
+  "get-reviews": CreditCard,
+  "google-profile": Store,
+  content: Newspaper,
+  insights: BarChart3,
+  knowledge: NotebookText,
+  settings: Settings,
+  photos: Store,
 };
-const SECTIONS: Section[] = [
-  { label: "Home", short: "Home", to: "/app", icon: Home, paths: ["/app", "/app/report"] },
-  {
-    label: "Reviews",
-    short: "Reviews",
-    to: "/app/inbox",
-    icon: MessageSquareText,
-    paths: ["/app/inbox", "/app/reviews"],
-    sub: [
-      ["To reply", "/app/inbox"],
-      ["All reviews", "/app/reviews"],
-    ],
-  },
-  {
-    label: "Google Profile",
-    short: "Profile",
-    to: "/app/posts",
-    icon: Store,
-    paths: ["/app/posts", "/app/photos", "/app/hours", "/app/shield"],
-    sub: [
-      ["Posts", "/app/posts"],
-      ["Photos", "/app/photos"],
-      ["Hours", "/app/hours"],
-      ["Google Protection", "/app/shield"],
-    ],
-  },
-  {
-    label: "Get Reviews",
-    short: "Get Reviews",
-    to: "/app/cards",
-    icon: CreditCard,
-    paths: ["/app/cards"],
-  },
-  {
-    label: "Settings",
-    short: "Settings",
-    to: "/app/knowledge",
-    icon: Settings,
-    paths: ["/app/knowledge", "/app/plan", "/app/settings", "/app/team"],
-    sub: [
-      ["About your business", "/app/knowledge"],
-      ["Plan", "/app/plan"],
-      ["Emails", "/app/settings"],
-      ["Team", "/app/team"],
-    ],
-  },
-];
-// K-16 (P0.3-06): staff see photos and the review link only. The database refuses the rest; the menu matches it.
-const STAFF_SECTIONS: Section[] = [
-  {
-    label: "Photos",
-    short: "Photos",
-    to: "/app/photos",
-    icon: Store,
-    paths: ["/app", "/app/photos"],
-  },
-  SECTIONS.find((s) => s.label === "Get Reviews")!,
-];
-const clean = (p: string) => (p.length > 1 ? p.replace(/\/+$/, "") : p);
-const sectionFor = (path: string, sections: Section[] = SECTIONS) =>
-  sections.find((s) => s.paths.includes(clean(path)));
 
 function NavLink({
   section,
@@ -119,7 +86,7 @@ function NavLink({
   badge?: number | undefined;
   mobile?: boolean;
 }) {
-  const Icon = section.icon;
+  const Icon = ICON[section.id];
   return (
     <Link
       to={section.to}
@@ -153,15 +120,15 @@ function NavLink({
   );
 }
 
-function SubNav({ section, path }: { section: Section; path: string }) {
-  if (!section.sub) return null;
+function SubNav({ section, tabs, path }: { section: Section; tabs: Tab[]; path: string }) {
+  if (tabs.length < 2) return null;
   return (
     <nav
       aria-label={`${section.label} pages`}
       className="border-b border-kb-hairline bg-kb-white px-4 sm:px-7"
     >
       <div className="mx-auto flex max-w-5xl gap-1 overflow-x-auto">
-        {section.sub.map(([label, to]) => {
+        {tabs.map(({ label, to }) => {
           const on = clean(path) === to;
           return (
             <Link
@@ -182,6 +149,80 @@ function SubNav({ section, path }: { section: Section; path: string }) {
         })}
       </div>
     </nav>
+  );
+}
+
+const clean = (p: string) => (p.length > 1 ? p.replace(/\/+$/, "") : p);
+
+// "Need a hand?" (K-03): a person on WhatsApp or by email, and the guides. The WhatsApp number answers questions only;
+// it approves nothing (K-122).
+function NeedAHand({ className }: { className?: string }) {
+  return (
+    <div className={cn("rounded-card bg-kb-sand p-4 text-sm", className)}>
+      <p className="flex items-center gap-2 font-bold">
+        <LifeBuoy className="size-4" aria-hidden="true" /> Need a hand?
+      </p>
+      <WhatsappLink
+        kind="general"
+        className="mt-2 flex min-h-10 items-center gap-2 font-normal text-kb-stone no-underline hover:text-kb-black"
+      >
+        <MessageCircle className="size-4" aria-hidden="true" /> WhatsApp
+      </WhatsappLink>
+      <a
+        href="mailto:hello@kabsi.co"
+        className="flex min-h-10 items-center gap-2 text-kb-stone hover:text-kb-black"
+      >
+        <Mail className="size-4" aria-hidden="true" /> hello@kabsi.co
+      </a>
+      <Link
+        to="/guides"
+        className="flex min-h-10 items-center gap-2 text-kb-stone hover:text-kb-black"
+      >
+        <BookOpen className="size-4" aria-hidden="true" /> Guides
+      </Link>
+    </div>
+  );
+}
+
+// The phone's fifth place: Get Reviews, Insights, Business Knowledge and Settings, then help (K-03).
+function MoreSheet({
+  open,
+  onOpenChange,
+  sections,
+  current,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  sections: Section[];
+  current: Section | undefined;
+}) {
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-large">
+        <SheetHeader className="text-left">
+          <SheetTitle>More</SheetTitle>
+          <SheetDescription className="sr-only">Other places in Kabsi</SheetDescription>
+        </SheetHeader>
+        <nav aria-label="More pages" className="mt-3 divide-y divide-kb-hairline">
+          {sections.map((sec) => {
+            const Icon = ICON[sec.id];
+            return (
+              <Link
+                key={sec.id}
+                to={sec.to}
+                onClick={() => onOpenChange(false)}
+                aria-current={current === sec ? "page" : undefined}
+                className="flex min-h-14 items-center gap-3 py-3 font-medium"
+              >
+                <Icon className="size-5 text-kb-stone" aria-hidden="true" />
+                {sec.label}
+              </Link>
+            );
+          })}
+        </nav>
+        <NeedAHand className="mt-4" />
+      </SheetContent>
+    </Sheet>
   );
 }
 
@@ -297,8 +338,12 @@ export function AppLayout({
     queryFn: () => myAccess(myLoc.data!.id),
     enabled: area === "app" && !!myLoc.data,
   });
-  const staffRole = access.data?.role === "staff";
-  const sections = staffRole ? STAFF_SECTIONS : SECTIONS;
+  const role = access.data?.role;
+  const staffRole = role === "staff";
+  const sections = desktopSections(role);
+  const bar = phoneBar(role);
+  const more = moreSections(role);
+  const [moreOpen, setMoreOpen] = useState(false);
   const waiting = useQuery({
     queryKey: ["waiting-count", myLoc.data?.id],
     queryFn: () => waitingReplies(myLoc.data!.id),
@@ -308,9 +353,12 @@ export function AppLayout({
   // Demo workspace (P0.1-06): no analytics while a demo business is open.
   const isDemo = area === "app" && myLoc.data?.is_demo === true;
   useEffect(() => setAnalyticsPaused(isDemo), [isDemo]);
-  const current = sectionFor(location.pathname, sections);
+  const current = sectionFor(location.pathname, role);
+  const moreActive = !!current && more.includes(current);
   const badgeFor = (sec: Section) =>
-    sec.label === "Reviews" && waiting.data ? waiting.data : undefined;
+    sec.id === "reviews" && waiting.data ? waiting.data : undefined;
+  // K-16: a page that is not part of the person's role says so, instead of showing a screen the database would refuse.
+  const blocked = area === "app" && role !== undefined && !canOpen(location.pathname, role);
   const areaTitle = area === "partner" ? "Partner" : area === "staff" ? "Staff" : "Business";
 
   async function handleSignOut() {
@@ -354,23 +402,7 @@ export function AppLayout({
               </nav>
             )}
           </div>
-          <div className="rounded-card bg-kb-sand p-4 text-sm">
-            <p className="flex items-center gap-2 font-bold">
-              <LifeBuoy className="size-4" aria-hidden="true" /> Need a hand?
-            </p>
-            <Link
-              to="/guides"
-              className="mt-2 flex items-center gap-2 text-kb-stone hover:text-kb-black"
-            >
-              <BookOpen className="size-4" aria-hidden="true" /> Guides
-            </Link>
-            <a
-              href="mailto:hello@kabsi.co"
-              className="mt-1.5 flex items-center gap-2 text-kb-stone hover:text-kb-black"
-            >
-              <Mail className="size-4" aria-hidden="true" /> hello@kabsi.co
-            </a>
-          </div>
+          <NeedAHand />
           <button
             type="button"
             onClick={() => void handleSignOut()}
@@ -435,25 +467,67 @@ export function AppLayout({
           </p>
         ) : null}
         <TestModeBanner concierge={area === "app" && myLoc.data?.concierge === true} />
-        {area === "app" && current ? <SubNav section={current} path={location.pathname} /> : null}
-        <main>{children}</main>
+        {area === "app" && current ? (
+          <SubNav section={current} tabs={tabsFor(current, role)} path={location.pathname} />
+        ) : null}
+        <main>
+          {blocked ? (
+            <div className="mx-auto w-full max-w-xl px-5 py-10">
+              <h1 className="text-2xl font-bold">This page is not part of your role</h1>
+              <p className="mt-2 leading-7 text-kb-stone">
+                {role === "staff"
+                  ? "You can add photos and share the review link. The owner looks after the rest."
+                  : "Plan and billing, and the team, are looked after by the owner."}
+              </p>
+              <Button asChild className="mt-6">
+                <Link to="/app">Back to Home</Link>
+              </Button>
+            </div>
+          ) : (
+            children
+          )}
+        </main>
       </div>
       {area === "app" ? <AssistantWidget surface="app" /> : null}
       {area === "app" ? (
         <nav
-          className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-kb-hairline bg-kb-white px-1 pb-[env(safe-area-inset-bottom)] lg:hidden"
+          style={{
+            gridTemplateColumns: `repeat(${bar.length + (more.length ? 1 : 0)}, minmax(0, 1fr))`,
+          }}
+          className="fixed inset-x-0 bottom-0 z-40 grid border-t border-kb-hairline bg-kb-white px-1 pb-[env(safe-area-inset-bottom)] lg:hidden"
           aria-label="Business navigation"
         >
-          {sections.map((sec) => (
+          {bar.map((sec) => (
             <NavLink
-              key={sec.to}
+              key={sec.id}
               section={sec}
               active={current === sec}
               badge={badgeFor(sec)}
               mobile
             />
           ))}
+          {more.length ? (
+            <button
+              type="button"
+              onClick={() => setMoreOpen(true)}
+              aria-haspopup="dialog"
+              aria-current={moreActive ? "page" : undefined}
+              className={cn(
+                "relative flex flex-col items-center gap-1 rounded-card px-1 py-2 text-[11px] font-medium",
+                moreActive ? "text-kb-black" : "text-kb-stone",
+              )}
+            >
+              <MoreHorizontal className={cn("size-5", moreActive ? "stroke-[2.4]" : "stroke-2")} />
+              <span>More</span>
+              {moreActive ? (
+                <span className="absolute inset-x-5 top-0 h-0.5 rounded-pill bg-kb-black" />
+              ) : null}
+            </button>
+          ) : null}
         </nav>
+      ) : null}
+      {area === "app" && more.length ? (
+        <MoreSheet open={moreOpen} onOpenChange={setMoreOpen} sections={more} current={current} />
       ) : null}
     </div>
   );

@@ -250,7 +250,7 @@ function PlanPage() {
                     <p className="mt-3 text-sm leading-6 text-kb-stone">
                       Choose a plan below before then so nothing stops. If you don't, your business
                       moves to Free: reply drafts, Google Protection and the Weekly Care Report
-                      pause, and your Review Link and Card keep working.
+                      pause, and your review link and cards keep working.
                     </p>
                   )}
                 </>
@@ -263,7 +263,7 @@ function PlanPage() {
                     </span>
                   </div>
                   <p className="mt-2 leading-7 text-kb-stone">
-                    Your Review Link and Card keep working. Reply drafts, Google Protection and the
+                    Your review link and cards keep working. Reply drafts, Google Protection and the
                     Weekly Care Report are paused. Choose a plan below to turn them back on.
                   </p>
                 </>
