@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 // K-108 status pill. Green is done or calm, amber needs attention, red is a real problem only, grey is neutral.
 // Yellow is not a pill colour: it is kept for the one action and the "needs you" highlight.
 const statusPillVariants = cva(
-  "inline-flex items-center gap-1.5 rounded-pill px-3 py-1 text-kb-caption font-semibold",
+  "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-pill px-3 py-1 text-kb-caption font-semibold",
   {
     variants: {
       tone: {
