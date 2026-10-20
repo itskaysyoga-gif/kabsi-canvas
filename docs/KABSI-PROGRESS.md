@@ -133,7 +133,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.3-08 | App navigation and product names | Sonnet | done (106, f70ee30, 20 Oct); CI green; Vercel production READY; jobs 0 failed | 106 | 20 Oct 2026 |
 | P0.3-09 | Review screen built for a phone | Sonnet | done (107, 403d294, 20 Oct); CI green; Vercel production READY; jobs 0 failed | 107 | 20 Oct 2026 |
 | P0.3-10 | Clear the backlog on day one | Sonnet | done (108, 1f4f63a, 20 Oct 06:06 UTC); CI and Load green; migration live; Deploy green; Vercel production READY; jobs 0 failed; only the real drafting run waits for Anthropic credit | 108 | 20 Oct 2026 |
-| P0.3-11 | Google Profile screen | Sonnet | PR open (109); After merge below | 109 | 20 Oct 2026 |
+| P0.3-11 | Google Profile screen | Sonnet | done (109, edf84fe, 20 Oct 06:12 UTC); CI green; Vercel production READY; jobs 0 failed | 109 | 20 Oct 2026 |
 | P0.4-01 | Free snapshot and Google Profile Check | Sonnet | merged (90, 77fac57, 12 Oct 17:04 UTC); CI green; Deploy passed; live page checked; built and tested on mocked Places only; the "check a real business" item is pending until Hussein re-enables Places (After merge); the function and page are live behind the cap of 0 ("Back soon") | 90 | 12 Oct 2026 |
 | P0.4-02 | Sign-up sheet: Continue with Google or an email code | Opus | todo | | |
 | P0.4-03 | Manual Manager route with a live status | Sonnet | todo | | |
@@ -199,7 +199,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-P0.3-11 (PR 109): to run after the merge: Vercel production READY, kabsi.co/app loads, jobs not failed. Hussein, optional: open Google Profile on a phone as the Yawmiyati owner and check the rows against the Google profile.
+P0.3-11 (PR 109), merged 20 Oct 06:12 UTC as edf84fe: checks done (see Evidence). Optional for Hussein: open Google Profile on a phone as the Yawmiyati owner and check the rows against the Google profile.
 
 P0.3-10 (PR 108), merged 20 Oct 06:06 UTC as 1f4f63a: checks done (see Evidence). Pending until Anthropic credit is back: drafting a real backlog on a mock business end to end (the drafts need the model). Hussein, later with P0.7-04: `update public.app_settings set value = 'on' where key = 'full_backlog';` switches on the full backlog for paid plans.
 
@@ -435,6 +435,10 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Access rules: a manager the owner has not allowed sees "The owner decides this one." and no buttons (test); the screen is not in staff's menu and the layout refuses the address for staff (P0.3-08).
 - Screens read at 390 px and 1440 px: no horizontal scroll, no dash or exclamation mark, one yellow button per screen (the first card's; the others use the outline button).
 - Local: typecheck, lint on the diff, check:tokens, `npm test`, build pass.
+
+### P0.3-11 After merge (20 Oct 2026, 06:12 to 06:15 UTC, Hussein's session 4)
+- PR 109 merged 06:12 UTC as merge commit edf84fe (ci.yml green on its head: App, Edge Functions and Worker, Database, Prompt gate). No Edge Function changed, so Deploy did not run. Vercel production `dpl_DioEJjZzs14oAwGZaV72cuG1V2RQ` READY.
+- Jobs in the 30 minutes after: 99 succeeded, 0 failed or dead. `task_detectors` on, `places_daily_cap` 0, `google_mode()` mock.
 
 ### P0.3-10 After merge (20 Oct 2026, Hussein's session 4)
 - See the P0.3-10 evidence above for the merge, the migration, the dry run and the read-back.
