@@ -73,7 +73,8 @@ export type HomeState =
  */
 export function homeState(tasks: Task[]): HomeState {
   const gaps = tasks.filter((t) => t.kind === "profile_gap");
-  const needs = tasks.filter((t) => t.kind !== "profile_gap");
+  // The day-one backlog is one card: the reviews' own tasks are folded into it (P0.3-10).
+  const needs = tasks.filter((t) => t.kind !== "profile_gap" && !isBacklogMember(t));
   if (needs.length === 0) return { kind: "clear", total: 0, cards: [], rest: [], gaps };
   return {
     kind: "attention",
@@ -182,4 +183,48 @@ export function historyLine(
     default:
       return action.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
   }
+}
+
+// ── The day-one backlog (K-66, P0.3-10). The detector makes one summary task and marks each old review's own task as
+// backlog; Home shows the summary as one card and folds the others into it.
+export const isBacklogSummary = (t: Task) =>
+  t.kind === "review_reply" && t.evidence["backlog_summary"] === true;
+export const isBacklogMember = (t: Task) =>
+  t.kind === "review_reply" && t.evidence["backlog"] === true;
+
+export type BacklogCounts = {
+  total: number;
+  low: number;
+  other: number;
+  high: number;
+  drafting: number;
+  moreWaiting: number;
+  trial: boolean;
+};
+const num = (v: unknown) => (typeof v === "number" ? v : 0);
+export function backlogCounts(t: Task): BacklogCounts {
+  const e = t.evidence;
+  return {
+    total: num(e["total"]),
+    low: num(e["low"]),
+    other: num(e["other"]),
+    high: num(e["high"]),
+    drafting: num(e["drafting"]),
+    moreWaiting: num(e["more_waiting"]),
+    trial: e["trial"] === true,
+  };
+}
+
+/** "14 of 23 published", and what has not gone yet. */
+export function progressLine(sent: number, total: number) {
+  return sent >= total ? `All ${total} published` : `${sent} of ${total} published`;
+}
+
+/** The counts under the card title: what is ready to approve together, and what is not. */
+export function backlogBreakdown(c: BacklogCounts): string {
+  const parts: string[] = [];
+  if (c.low) parts.push(`${c.low} low risk, ready to approve together`);
+  if (c.other) parts.push(`${c.other} to read one by one`);
+  if (c.high) parts.push(`${c.high} ${c.high === 1 ? "needs" : "need"} care, with no draft`);
+  return parts.join(". ") + (parts.length ? "." : "");
 }

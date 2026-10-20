@@ -7,8 +7,8 @@ import type { FactRow } from "./facts.ts";
 import { recordAiUsage, takeAiBudget } from "./ai-budget.ts";
 import { isConciergeLocationId, matchConciergeReview, type ConciergeCandidate } from "./concierge.ts";
 import { auditedAdmin } from "./audit.ts";
+import { backlogLimit, backlogPolicy, backlogState, reopensOnPlan } from "./backlog.ts";
 
-const BACKLOG_LIMIT = 20; // D221
 
 type Loc = {
   id: string; name: string; status: string; google_account_id: string | null; google_location_id: string | null;
@@ -35,6 +35,9 @@ export async function syncLocation(loc: Loc) {
   const db = admin();
   const reviews = await listReviews(loc.google_account_id!, loc.google_location_id!);
   const firstSync = !loc.reviews_synced_at;
+  // K-66, K-101: how many unanswered reviews are drafted on the first read depends on the plan.
+  const policy = await backlogPolicy(db, loc.id);
+  const limit = backlogLimit(policy);
   const { data: known } = await db.from("reviews").select("google_review_id").eq("location_id", loc.id);
   const knownIds = new Set((known ?? []).map((r) => r.google_review_id));
   let added = 0;
@@ -69,7 +72,7 @@ export async function syncLocation(loc: Loc) {
       }
     }
     let state = r.reply ? "handled_offline" : "new";
-    if (firstSync && state === "new") state = ++backlogOpen <= BACKLOG_LIMIT ? "new" : "archived";
+    if (firstSync && state === "new") state = backlogState(++backlogOpen, limit);
     const { error } = await db.from("reviews").insert({
       location_id: loc.id, google_review_id: r.reviewId, reviewer_name: r.reviewer, star_rating: r.rating,
       comment: r.comment, existing_reply: r.reply, review_created_at: r.createTime, review_updated_at: r.updateTime,
@@ -77,6 +80,11 @@ export async function syncLocation(loc: Loc) {
     });
     if (error && error.code !== "23505") throw error;
     if (!error) added++;
+  }
+  // The reviews that waited for a plan are drafted once the business has one (full backlog on, K-101).
+  if (!firstSync && reopensOnPlan(policy)) {
+    await db.from("reviews").update({ state: "new" })
+      .eq("location_id", loc.id).eq("is_backlog", true).eq("state", "archived").is("existing_reply", null);
   }
   await db.from("locations").update({ reviews_synced_at: new Date().toISOString() }).eq("id", loc.id);
   return added;

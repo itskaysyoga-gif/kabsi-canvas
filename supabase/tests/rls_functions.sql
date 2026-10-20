@@ -18,7 +18,7 @@ insert into tested values
   ('partner_create_invite(uuid,text,text)'), ('partner_invoice_calc(uuid,date)'), ('partner_locations(uuid)'),
   ('partner_submit_claim(uuid,text,text)'), ('plan_summary(uuid)'),
   ('rename_card(text,text)'),
-  ('list_tasks(uuid)'), ('task_action(uuid,text)'),
+  ('list_tasks(uuid)'), ('task_action(uuid,text)'), ('approve_backlog(uuid,jsonb)'),
   ('can_see(uuid,text)'), ('my_access(uuid)'), ('set_approval_policy(uuid,text,text,text)'), ('invite_team_member(uuid,text,text)'),
   ('cancel_team_invite(uuid)'), ('claim_team_invites()'), ('set_member_role(uuid,uuid,text)'), ('list_team(uuid)'), ('remove_member(uuid,uuid)'),
   ('request_disconnect(uuid)'), ('request_location_deletion(uuid)'), ('save_consent(uuid,text)'), ('set_auto_posts(uuid,boolean)'),
@@ -123,6 +123,7 @@ select throws_ok($$ select public.owner_submit_claim('00000000-0000-4000-8000-00
 select throws_ok($$ select public.plan_summary('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'plan_summary refuses a non-member');
 select throws_ok($$ select public.list_tasks('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'list_tasks refuses a non-member');
 select throws_ok($$ select public.task_action('00000000-0000-4000-8000-0000000000f8', 'later') $$, '42501', null, 'task_action refuses a non-member');
+select throws_ok($$ select public.approve_backlog('00000000-0000-4000-8000-0000000000c1', '[]') $$, '42501', null, 'approve_backlog refuses a non-member');
 select is(public.can_see('00000000-0000-4000-8000-0000000000c1', 'all'), false, 'can_see is false for a non-member');
 select is(public.can_see('00000000-0000-4000-8000-0000000000c1', 'photos'), false, 'can_see photos is false for a non-member');
 select throws_ok($$ select public.my_access('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'my_access refuses a non-member');
