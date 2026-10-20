@@ -109,10 +109,16 @@ select ok(exists (select 1 from public.trial_accounts where account_key = 'googl
 
 -- 3. Concierge, demo and partner-covered businesses never start a trial --------------------------------------------------
 select pg_temp.biz(5, '00000000-0000-4000-8000-0000000007a5', 'trial-place-5');
-update public.locations set concierge = true where id = '00000000-0000-4000-8000-0000000007c5';
-select pg_temp.grant_access('00000000-0000-4000-8000-0000000007c5', true);
+-- An early-access business: a person works its profile, its Google id is a concierge one.
+update public.locations set concierge = true, consent_at = now(), access_granted_at = now(),
+  google_location_id = 'locations/concierge-7c5' where id = '00000000-0000-4000-8000-0000000007c5';
+update public.google_connections set access_state = 'granted', voice_of_merchant = true
+ where location_id = '00000000-0000-4000-8000-0000000007c5';
 select is(private.start_trial('00000000-0000-4000-8000-0000000007c5'), null, 'a concierge business never starts a trial');
-update public.locations set concierge = false where id = '00000000-0000-4000-8000-0000000007c5';
+update public.locations set concierge = false, google_location_id = 'locations/mock-7c5'
+ where id = '00000000-0000-4000-8000-0000000007c5';
+update public.google_connections set access_state = 'granted', voice_of_merchant = true
+ where location_id = '00000000-0000-4000-8000-0000000007c5';
 update public.locations set is_demo = true where id = '00000000-0000-4000-8000-0000000007c5';
 select is(private.start_trial('00000000-0000-4000-8000-0000000007c5'), null, 'a demo business never starts a trial');
 update public.locations set is_demo = false where id = '00000000-0000-4000-8000-0000000007c5';
