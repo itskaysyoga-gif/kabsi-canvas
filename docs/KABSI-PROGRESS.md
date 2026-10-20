@@ -141,7 +141,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.4-03 | Manual Manager route with a live status | Sonnet | todo | | |
 | P0.4-04 | Diagnosis, scenario screens and reminders | Sonnet | todo | | |
 | P0.4-05 | Five questions and confirm your details | Sonnet | todo | | |
-| P0.4-06 | The trial | Opus | PR open (112) | 112 | 20 Oct 2026 |
+| P0.4-06 | The trial | Opus | PR open (112); CI green (pgTAP 1672, Load passed); migration applied and read back | 112 | 20 Oct 2026 |
 | P0.4-07 | Creem: checkout, webhook, portal | Opus | todo | | |
 | P0.4-08 | One email template and the email set | Sonnet | todo | | |
 | P0.4-09 | Notification engine | Sonnet | todo | | |
@@ -200,6 +200,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P1-22 | Nora on WhatsApp | Opus | todo | | |
 
 ## After merge
+
+P0.4-06 (PR 112): after merge: Deploy green (api, assistant, content, posts-weekly redeployed); `kabsi_trial_sweep` scheduled in cron; the next access grant in mock mode starts a trial (staff or test owner only). Hussein, with P0.4-07 (Creem live): `update public.app_settings set value = 'on' where key = 'trial_removal';` then read back `select value from public.app_settings where key = 'trial_removal';` (expect `on`).
 
 P0.4-02 (PR 111), merged 20 Oct 15:44 UTC as 8992179: Deploy passed and `auth-code` is version 1; the live function refuses a request without a Turnstile pass; Supabase Auth sends a code (see Evidence). Pending: the live Google sign-in (after step 5 below) and one email sign-in by a person on the live page (a Turnstile pass needs a person; this sandbox cannot reach supabase.co from a browser).
 **Hussein, step 5 (Google sign-in). Never paste the client secret in a chat; you type it into Supabase yourself.**
@@ -438,6 +440,15 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.4-06 (branch claude/h-p0-4-06, PR 112, 20 Oct 2026, Hussein's session 5 of the bundled plan)
+- No Google, Places or Anthropic call. No row removed (the migration has no delete or drop). No prompt file changed. `places_daily_cap` still 0.
+- Done-when "tests cover each cap, the one-trial rules, grace and the day-21 removal": `supabase/tests/trial.sql` (pgTAP, CI run on 6728df0: all 23 files, 1672 tests pass): the trial does not start before access, with consent only, on a profile not known to be verified, on an unverified one or with access in error; it starts on working access to a verified profile (14 days, then 7 of grace, on the organisation, audited); one per organisation; a returning place ID gets none (and `trial_used` is true); the same Gmail account written another way (dots, +tag, googlemail.com) gets none; a Google sign-in is recorded as `google:<sub>`; the 4th profile fix is refused and the same fix counts once; the 100th AI generation is allowed and the next returns `trial`; the backlog cap is 10; grace keeps watching and drafting, refuses an approval with `plan_required` and leaves the reply ready, and Home gets "Your free trial has ended" with "1 reply ready. Kabsi keeps watching and drafting for 6 more days, but nothing is published until you subscribe."; three days before the end the card says "Your free trial ends in 3 days"; during the trial the same approval goes through; after day 21 the state is ended; with `trial_removal` off the sweep expires the trial and keeps access; with it on the sweep pauses the business, queues the disconnect job (which sends the owner the removed notice) and audits `trial_access_removed`; a business that paid in grace keeps its access; an owner reads only their own entitlements and anon none.
+- Done-when "a concierge or not-eligible business never starts a trial": same file (concierge with a concierge Google id, demo, partner-covered, unverified).
+- Done-when "`plans` and `plans_v2` are no longer read by features (grep)": `tests/entitlements-readers.test.ts` (Vitest): only `app/plan.tsx` (plan and payments screen), `_shared/payments.ts` and `partner/index.ts` read `plans`; no code reads `plans_v2`; backlog, the access job, Nora's context, Home and the setup checklist call `entitlements`. In the database, `trial.sql` checks every gated function (status, approve, AI budget, backlog card, plan card, plan_summary, trial_take, trial_sweep) calls `private.entitlements` and none of them, nor `grant_trial_if_eligible`, reads `public.plans` or `plans_v2`. Left on purpose for P0.4-07: `plan_summary`'s payment rows and the offer list's `plans_v2_on`, `start_trial`'s check for an earlier paid plan.
+- Existing suites adjusted to the new rule, not loosened: `backlog.sql` and `task_engine.sql` set the victim to no partner cover and no subscription where they test a trial or a plan end; `publication_concurrency.sh` gives its race business a plan (publishing now asks entitlements); `rls_functions.sql` covers `entitlements` for a stranger.
+- Applied to production with `apply_migration` (`trial_entitlements`) after CI was green; QA Bakery (members: qa-owner@test.local only) got a manual Pro subscription. Read-back of `private.entitlements` for every business: Harbour Lane Coffee and Juniper Hair Studio demo, QA Bakery paid, Safa Chicken partner (its partner pays, as before), Yawmiyati paid until 25 Mar 2027; every status unchanged. Security advisors: only the expected notes (the two new tables have RLS on and no policies, like the other internal tables; `entitlements` callable by signed-in users, membership-checked).
+- Local: typecheck, eslint on the changed files, `npm test` (21 files, 119 tests), build, `deno check` of api, assistant, content, posts-weekly, `deno test _shared/backlog.test.ts`: pass.
 
 ### P0.4-02 After merge (20 Oct 2026, 15:44 to 15:56 UTC, Hussein's session 5)
 - PR 111 merged 15:44 UTC as merge commit 8992179 (ci.yml green on f9dc763: App, Edge Functions and Worker, Database, Prompt gate). Deploy run 39451202675 passed (Edge Functions 15:44:36 to 15:44:58, Worker); `list_edge_functions`: `auth-code` version 1, verify_jwt true.
