@@ -219,9 +219,11 @@ function ProfilePage() {
                   </dl>
                   <p className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-kb-stone">
                     <span>
-                      {data.data?.checkedAt
-                        ? `Last checked ${agoWords(data.data.checkedAt)}`
-                        : "Not checked yet"}
+                      {r.google === null
+                        ? "Kabsi reads this once Google shows it"
+                        : data.data?.checkedAt
+                          ? `Last checked ${agoWords(data.data.checkedAt)}`
+                          : "Not checked yet"}
                     </span>
                     {r.hint ? (
                       <Link to="/app/hours" className="underline underline-offset-4">

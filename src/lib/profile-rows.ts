@@ -108,7 +108,7 @@ export function profileRow(
       ...base,
       google: known,
       approved: NOT_CONFIRMED,
-      status: NOT_CONFIRMED,
+      status: "Needs your OK",
       tone: "amber",
     };
   }

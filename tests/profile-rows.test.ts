@@ -66,7 +66,7 @@ describe("the rows", () => {
     const rows = profileRows(yawmiyati, []);
     for (const k of ["name", "address", "main_category", "phone", "regular_hours"]) {
       expect(row(rows, k).approved, k).toBe(NOT_CONFIRMED);
-      expect(row(rows, k).status, k).toBe(NOT_CONFIRMED);
+      expect(row(rows, k).status, k).toBe("Needs your OK");
       expect(row(rows, k).google, k).not.toBeNull();
     }
     expect(row(rows, "name").google).toBe("Yawmiyati");
