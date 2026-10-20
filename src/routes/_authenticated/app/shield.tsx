@@ -1,59 +1,43 @@
 import { useState } from "react";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
-import { fmtDate, fmtDateTime } from "@/lib/format";
+import { fmtDate } from "@/lib/format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShieldCheck } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { StatusPill } from "@/components/ui/status-pill";
 import { supabase } from "@/lib/supabase";
-import { FIELD_LABEL as LABEL, fieldLabel } from "@/lib/profile-fields";
 import { myLatestLocation } from "@/lib/onboarding";
-import { amStaff, contentCall } from "@/lib/reviews";
-import { track } from "@/lib/telemetry";
+import { amStaff } from "@/lib/reviews";
+import { OpenChange } from "@/components/profile/open-change";
+import { loadTasks, type Task } from "@/lib/tasks";
+import { myAccess, type Access } from "@/lib/team";
+import { agoWords } from "@/lib/home-state";
+import { cn } from "@/lib/utils";
+import {
+  NOT_CONFIRMED,
+  OPEN_STATUSES,
+  profileRows,
+  protectionLine,
+  rowLabel as label,
+  type Change,
+  type Fact,
+} from "@/lib/profile-rows";
 import { ShieldCheck as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
 
-// Google Protection (K-19, P0.2-04): Kabsi compares your Google profile with the details you confirmed and asks you
-// when they differ. Nothing changes on Google until you choose. The full Google Profile screen is P0.3-11; this page
-// keeps to the change cards, what Kabsi watches and the history.
+// Google Profile (K-18, K-19, P0.3-11): one row for every field Google Protection watches, with what Google shows, what you
+// approved, a status and when it was last checked; what needs your attention at the top, with the two decisions for a
+// change; the Protection status line. Nothing changes on Google until you choose. Editors for description, services and
+// attributes are P1 (K-22): this screen lists what needs attention only.
 export const Route = createFileRoute("/_authenticated/app/shield")({
   head: () => ({
     meta: [{ title: "Google Profile | Kabsi" }, { name: "robots", content: "noindex" }],
   }),
-  component: ShieldPage,
+  component: ProfilePage,
 });
 
-type Value = { display?: string } | null;
-type Change = {
-  id: string;
-  field: string;
-  previous_value: Value;
-  previous_fact_id: string | null;
-  google_value: Value;
-  source: string;
-  status: string;
-  explanation: string | null;
-  recommend: string | null;
-  recommend_reason: string | null;
-  support_requested_at: string | null;
-  detected_at: string;
-};
-type Fact = { key: string; value: Value; status: string };
-
-// K-19, K-64, K-116.2, K-117: these need the owner, signed in, and carry the warning.
-const HIGH_RISK = ["name", "address", "main_category", "open_status", "map_pin"];
-const VERIFY_WARNING = "Changing this can make Google ask you to verify your business again.";
 const STATUS: Record<string, string> = {
   accepted: "You said Google is right",
   rejected: "Your information is on its way to Google",
@@ -62,16 +46,12 @@ const STATUS: Record<string, string> = {
   expired: "No answer in 14 days",
   superseded: "Replaced by a newer change",
 };
-const WHO: Record<string, string> = {
-  google_update: "Google changed this itself, or accepted a suggestion from the public.",
-  scheduled_check: "We don't know who changed it.",
-  notification: "Google told Kabsi about this change.",
-};
-const OPEN = ["detected", "awaiting_review"];
-const label = fieldLabel;
+// The tasks that belong on this screen: what is missing or unconfirmed on the profile, and lost access. Changes have their
+// own cards below, with the two decisions.
+const PROFILE_TASKS = ["profile_gap", "knowledge_confirm", "hours_confirm", "reconnect"];
 
-async function loadShield(locationId: string) {
-  const [changes, facts] = await Promise.all([
+async function loadProfile(locationId: string) {
+  const [changes, facts, loc, tasks] = await Promise.all([
     supabase
       .from("profile_changes")
       .select(
@@ -86,42 +66,65 @@ async function loadShield(locationId: string) {
       .eq("location_id", locationId)
       .like("slot", "profile.%")
       .is("superseded_by", null),
+    supabase.from("locations").select("shield_checked_at").eq("id", locationId).maybeSingle(),
+    loadTasks(locationId).catch(() => ({ tasks: [] as Task[], snoozed: 0 })),
   ]);
   if (changes.error) throw new Error(changes.error.message);
   if (facts.error) throw new Error(facts.error.message);
-  return { changes: (changes.data ?? []) as Change[], facts: (facts.data ?? []) as Fact[] };
+  return {
+    changes: (changes.data ?? []) as Change[],
+    facts: (facts.data ?? []) as Fact[],
+    checkedAt: (loc.data as { shield_checked_at: string | null } | null)?.shield_checked_at ?? null,
+    tasks: tasks.tasks.filter((t) => PROFILE_TASKS.includes(t.kind)),
+  };
 }
 
-function ShieldPage() {
+function ProfilePage() {
   const queryClient = useQueryClient();
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   const loc = location.data;
+  const access = useQuery({
+    queryKey: ["access", loc?.id],
+    queryFn: () => myAccess(loc!.id),
+    enabled: !!loc,
+  });
   const data = useQuery({
     queryKey: ["shield", loc?.id],
-    queryFn: () => loadShield(loc!.id),
+    queryFn: () => loadProfile(loc!.id),
     enabled: !!loc,
     refetchInterval: 60_000,
   });
   const refresh = () =>
     Promise.all(
-      [["shield"], ["dashboard"], ["activity"]].map((queryKey) =>
+      [["shield"], ["tasks"], ["feed"], ["home-facts"]].map((queryKey) =>
         queryClient.invalidateQueries({ queryKey }),
       ),
     );
   const changes = data.data?.changes ?? [];
-  const open = changes.filter((c) => OPEN.includes(c.status));
-  const past = changes.filter((c) => !OPEN.includes(c.status));
-  const facts = new Map((data.data?.facts ?? []).map((f) => [f.key, f]));
+  const facts = data.data?.facts ?? [];
+  const rows = profileRows(facts, changes);
+  const open = changes.filter((c) => OPEN_STATUSES.includes(c.status));
+  const past = changes.filter((c) => !OPEN_STATUSES.includes(c.status));
+  const tasks = data.data?.tasks ?? [];
+  const running =
+    !!loc && loc.status === "active" && !(loc.access_lost_at && !loc.access_granted_at);
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Profile</p>
-      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Google Protection</h1>
+      <h1 className="font-display text-4xl leading-none sm:text-5xl">Google Profile</h1>
       <p className="mt-2 max-w-2xl text-kb-stone">
-        Kabsi compares your Google profile with the details you confirmed and asks you when they
-        differ. Google sometimes changes details itself or accepts edits from the public. Nothing
-        changes on Google until you choose.
+        What customers see on Google, next to what you approved. Google sometimes changes details
+        itself or accepts edits from the public. Nothing changes on Google until you choose.
       </p>
+      {loc && !loc.concierge ? (
+        <p className="mt-4 inline-flex items-center gap-2 rounded-pill bg-kb-white px-4 py-2 text-sm font-medium shadow-kb">
+          <ShieldCheck
+            className={running ? "size-4 text-kb-green" : "size-4 text-kb-stone"}
+            aria-hidden="true"
+          />
+          {protectionLine({ running, checkedAt: data.data?.checkedAt ?? null })}
+        </p>
+      ) : null}
       {!location.isLoading && !loc ? (
         <Button asChild className="mt-6">
           <Link to="/start">Add your business</Link>
@@ -142,45 +145,102 @@ function ShieldPage() {
             <Link to="/start">Continue setup</Link>
           </Button>
         </div>
-      ) : loc && !data.isLoading && !data.error && !facts.size ? (
-        <p className="mt-6 text-kb-stone">
-          Kabsi reads your Google profile within a few minutes of going active.
-        </p>
       ) : null}
-      <div className="mt-7 space-y-4">
-        {open.map((c) => (
-          <OpenChange key={c.id} change={c} onDone={refresh} />
-        ))}
-      </div>
-      {facts.size ? (
-        <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="size-5 text-kb-green" aria-hidden="true" />
-            <h2 className="font-bold">
-              {open.length ? "What Kabsi watches" : "Watching. No changes waiting."}
+
+      {loc && loc.status === "active" && data.data ? (
+        <>
+          <section className="mt-8" aria-labelledby="attention">
+            <h2 id="attention" className="text-lg font-bold">
+              What needs attention
             </h2>
-          </div>
-          <dl className="mt-4 divide-y divide-kb-hairline">
-            {Object.keys(LABEL).map((k) => {
-              const f = facts.get(k);
-              const confirmed = f?.status === "verified";
-              return (
-                <div key={k} className="flex justify-between gap-4 py-2.5 text-sm">
-                  <dt className="text-kb-stone">{LABEL[k]}</dt>
-                  <dd dir="auto" className="min-w-0 break-words text-right font-medium">
-                    {f?.value?.display || "-"}
-                    {f?.value && !confirmed ? (
-                      <span className="block text-xs font-normal text-kb-stone">
-                        Not yet confirmed by you
-                      </span>
-                    ) : null}
-                  </dd>
+            {!open.length && !tasks.length ? (
+              <p className="mt-2 text-kb-small text-kb-stone">
+                Nothing needs your attention. Kabsi is watching your profile.
+              </p>
+            ) : null}
+            <div className="mt-3 space-y-4">
+              {open.map((c, i) => (
+                <OpenChange
+                  key={c.id}
+                  change={c}
+                  access={access.data}
+                  lead={i === 0}
+                  onDone={refresh}
+                />
+              ))}
+              {tasks.map((t) => (
+                <div key={t.id} className="rounded-card bg-kb-white p-4 shadow-kb">
+                  <p className="font-bold">{t.title}</p>
+                  {t.why ? <p className="mt-1 text-sm leading-6 text-kb-stone">{t.why}</p> : null}
+                  <Button asChild variant="secondary" size="compact" className="mt-3">
+                    <Link to={t.path}>
+                      Open <ArrowRight />
+                    </Link>
+                  </Button>
                 </div>
-              );
-            })}
-          </dl>
-        </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="mt-9" aria-labelledby="fields">
+            <h2 id="fields" className="text-lg font-bold">
+              What Kabsi watches
+            </h2>
+            <ul className="mt-3 space-y-3">
+              {rows.map((r) => (
+                <li key={r.key} className="rounded-card bg-kb-white p-4 shadow-kb">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="font-bold">{r.label}</p>
+                    <StatusPill tone={r.tone} className="shrink whitespace-normal text-right">
+                      {r.status}
+                    </StatusPill>
+                  </div>
+                  <dl className="mt-3 space-y-2 text-sm">
+                    <div>
+                      <dt className="text-xs font-bold uppercase text-kb-stone">Google shows</dt>
+                      <dd dir="auto" className="break-words">
+                        {r.google ?? (
+                          <span className="text-kb-stone">Kabsi has not read this yet</span>
+                        )}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs font-bold uppercase text-kb-stone">You approved</dt>
+                      <dd dir="auto" className="break-words">
+                        {r.approved === null ? (
+                          <span className="text-kb-stone">Nothing yet</span>
+                        ) : r.approved === NOT_CONFIRMED ? (
+                          <span className="text-kb-amber">{NOT_CONFIRMED}</span>
+                        ) : (
+                          r.approved
+                        )}
+                      </dd>
+                    </div>
+                  </dl>
+                  <p className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-kb-stone">
+                    <span>
+                      {data.data?.checkedAt
+                        ? `Last checked ${agoWords(data.data.checkedAt)}`
+                        : "Not checked yet"}
+                    </span>
+                    {r.hint ? (
+                      <Link to="/app/hours" className="underline underline-offset-4">
+                        {r.hint}
+                      </Link>
+                    ) : null}
+                    {r.approved === NOT_CONFIRMED ? (
+                      <Link to="/app/knowledge" className="underline underline-offset-4">
+                        Confirm it
+                      </Link>
+                    ) : null}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </>
       ) : null}
+
       {past.length ? (
         <div className="mt-8">
           <h2 className="text-lg font-bold">History</h2>
@@ -206,119 +266,6 @@ function ShieldPage() {
       ) : null}
       {loc ? <StaffEdit locationId={loc.id} /> : null}
     </div>
-  );
-}
-
-function OpenChange({ change, onDone }: { change: Change; onDone: () => unknown }) {
-  const [busy, setBusy] = useState("");
-  const [confirm, setConfirm] = useState(false);
-  const [err, setErr] = useState("");
-  const confirmed = !!change.previous_fact_id;
-  const risky = HIGH_RISK.includes(change.field);
-  const googleRight = change.recommend === "accept";
-  async function decide(decision: "accept" | "reject") {
-    setBusy(decision);
-    setErr("");
-    try {
-      // A third conflict in 30 days comes back as "support": the history then says Kabsi's team asks Google.
-      await contentCall({ do: "shield_decide", change_id: change.id, decision });
-      track(decision === "reject" ? "shield_reverted" : "shield_kept", { channel: "dashboard" });
-      onDone();
-    } catch (x) {
-      setErr(x instanceof Error ? x.message : "Something went wrong. Nothing changed.");
-    }
-    setBusy("");
-  }
-  const before = change.previous_value?.display || "(empty)";
-  const now = change.google_value?.display || "(empty)";
-  return (
-    <article className="rounded-large border-2 border-kb-black bg-kb-white p-6">
-      <p className="font-bold">{label(change.field)} changed on Google</p>
-      <p className="mt-1 text-sm text-kb-stone">{fmtDateTime(change.detected_at)}</p>
-      {change.explanation ? <p className="mt-3 leading-7">{change.explanation}</p> : null}
-      <p className="mt-1 text-sm text-kb-stone">{WHO[change.source] ?? WHO["scheduled_check"]}</p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-card bg-kb-sand p-3">
-          <p className="text-xs font-bold uppercase text-kb-stone">
-            {confirmed ? "You approved" : "Not yet confirmed by you"}
-          </p>
-          <p dir="auto" className="mt-1">
-            {before}
-          </p>
-        </div>
-        <div className="rounded-card bg-kb-sand p-3">
-          <p className="text-xs font-bold uppercase text-kb-stone">Google shows now</p>
-          <p dir="auto" className="mt-1">
-            {now}
-          </p>
-        </div>
-      </div>
-      {googleRight && change.recommend_reason ? (
-        <p className="mt-4 rounded-card bg-kb-sand p-3 text-sm">
-          <span className="font-bold">Kabsi recommends “Google is right”.</span>{" "}
-          {change.recommend_reason}
-        </p>
-      ) : null}
-      {risky ? <p className="mt-3 text-sm text-kb-stone">{VERIFY_WARNING}</p> : null}
-      {!confirmed ? (
-        <p className="mt-3 text-sm text-kb-stone">
-          You have not confirmed this detail yet, so Kabsi will not put the old value back.
-        </p>
-      ) : null}
-      {err ? (
-        <p className="mt-3 text-sm text-kb-red" role="alert">
-          {err}
-        </p>
-      ) : null}
-      <div className="mt-5 flex flex-wrap gap-2">
-        {/* One primary button: the recommended choice, or "Keep my information" when Kabsi has no view. */}
-        {confirmed && !googleRight ? (
-          <>
-            <Button className="w-full sm:w-auto" disabled={!!busy} onClick={() => setConfirm(true)}>
-              {busy === "reject" ? "Saving…" : "Keep my information"}
-            </Button>
-            <Button variant="ghost" disabled={!!busy} onClick={() => void decide("accept")}>
-              {busy === "accept" ? "Saving…" : "Google is right"}
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              className="w-full sm:w-auto"
-              disabled={!!busy}
-              onClick={() => void decide("accept")}
-            >
-              {busy === "accept" ? "Saving…" : "Google is right"}
-            </Button>
-            {confirmed ? (
-              <Button variant="ghost" disabled={!!busy} onClick={() => setConfirm(true)}>
-                {busy === "reject" ? "Saving…" : "Keep my information"}
-              </Button>
-            ) : null}
-          </>
-        )}
-      </div>
-      <AlertDialog open={confirm} onOpenChange={setConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Keep your {label(change.field).toLowerCase()} on Google?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Kabsi sends your approved value to Google: {before}.
-              {googleRight && change.recommend_reason ? ` ${change.recommend_reason}` : ""}
-              {risky ? ` ${VERIFY_WARNING}` : ""}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Not now</AlertDialogCancel>
-            <AlertDialogAction onClick={() => void decide("reject")}>
-              Keep my information
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </article>
   );
 }
 
