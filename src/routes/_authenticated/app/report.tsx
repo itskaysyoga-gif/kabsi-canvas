@@ -8,7 +8,9 @@ import { PageIcon } from "@/components/shared/page-icon";
 
 // Weekly reports (D222): the same facts as the Monday email. Read through RLS (members only).
 export const Route = createFileRoute("/_authenticated/app/report")({
-  head: () => ({ meta: [{ title: "Report | Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Weekly Care Report | Kabsi" }, { name: "robots", content: "noindex" }],
+  }),
   component: ReportPage,
 });
 

@@ -29,7 +29,7 @@ import { PageIcon } from "@/components/shared/page-icon";
 // keeps to the change cards, what Kabsi watches and the history.
 export const Route = createFileRoute("/_authenticated/app/shield")({
   head: () => ({
-    meta: [{ title: "Google Protection | Kabsi" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Google Profile | Kabsi" }, { name: "robots", content: "noindex" }],
   }),
   component: ShieldPage,
 });

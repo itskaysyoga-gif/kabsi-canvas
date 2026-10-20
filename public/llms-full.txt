@@ -128,6 +128,10 @@ Kabsi follows Google's Business Profile guidelines (support.google.com/business/
 - Kabsi cannot check verification itself, so setup asks. If the profile is not verified, the person verifies it on Google first (free, at business.google.com) and comes back. The terms let Kabsi pause the service for a profile that Google's guidelines do not allow.
 - If Google's list changes, the site's `src/lib/eligibility.ts` changes first and this section follows.
 
+### 2.1e Where things are in the app
+
+On a computer the left menu has eight places: Home, Reviews, Get Reviews, Google Profile, Content (Posts and Photos), Insights (the Weekly Care Report), Business Knowledge and Settings. On a phone the bottom bar has five: Home, Reviews, Profile, Content and More; More opens Get Reviews, Insights, Business Knowledge and Settings, with help below. The plan is inside Settings, next to Notifications and Team, and the Weekly Care Report is inside Insights. Every older address of an app page still opens the right screen. "Need a hand?" offers WhatsApp (a person answers; it approves nothing), hello@kabsi.co and the guides. What a person sees follows their role: the owner sees everything; a manager sees everything except Plan and Team (billing and the team are the owner's); staff see only Photos and Get Reviews. A page that is not part of someone's role says so and offers Home.
+
 ### 2.2 [TIME-SENSITIVE] Current status: test mode and early access
 
 - Kabsi's Google Business Profile API access is still under Google's review. Until approved, Kabsi runs in **test mode**: nothing is sent to Google automatically.

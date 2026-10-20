@@ -51,7 +51,7 @@ import { cn } from "@/lib/utils";
 import { PageIcon } from "@/components/shared/page-icon";
 
 export const Route = createFileRoute("/_authenticated/app/inbox")({
-  head: () => ({ meta: [{ title: "To reply | Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Reviews | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: InboxPage,
 });
 
