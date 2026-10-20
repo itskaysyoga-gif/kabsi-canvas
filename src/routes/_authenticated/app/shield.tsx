@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/lib/supabase";
+import { FIELD_LABEL as LABEL, fieldLabel } from "@/lib/profile-fields";
 import { myLatestLocation } from "@/lib/onboarding";
 import { amStaff, contentCall } from "@/lib/reviews";
 import { track } from "@/lib/telemetry";
@@ -50,16 +51,6 @@ type Change = {
 };
 type Fact = { key: string; value: Value; status: string };
 
-const LABEL: Record<string, string> = {
-  name: "Business name",
-  phone: "Phone",
-  website: "Website",
-  address: "Address",
-  regular_hours: "Opening hours",
-  main_category: "Main category",
-  open_status: "Open status",
-  map_pin: "Map pin",
-};
 // K-19, K-64, K-116.2, K-117: these need the owner, signed in, and carry the warning.
 const HIGH_RISK = ["name", "address", "main_category", "open_status", "map_pin"];
 const VERIFY_WARNING = "Changing this can make Google ask you to verify your business again.";
@@ -77,7 +68,7 @@ const WHO: Record<string, string> = {
   notification: "Google told Kabsi about this change.",
 };
 const OPEN = ["detected", "awaiting_review"];
-const label = (field: string) => LABEL[field] ?? field.replace(/_/g, " ");
+const label = fieldLabel;
 
 async function loadShield(locationId: string) {
   const [changes, facts] = await Promise.all([

@@ -89,8 +89,8 @@ Names in the app and on the website (K-02): Reviews, Google Profile, Google Prot
 Kabsi is presented as five modules. Use these exact names.
 
 - **Reviews:** every new review arrives by email with a reply drafted in the reviewer's language. The owner approves it with the button "Approve reply".
-- **Google Profile:** posts, photo checks and special hours, all approved by the owner first. Home has a list called "What needs your attention" with the next open items.
-- **Google Protection:** compares the Google profile with the details the owner confirmed and alerts the owner when they differ. The email explains the difference ("Google shows Sunday closing at 18:00. You approved 22:00.") and links to the app, where the owner chooses "Google is right" or "Keep my information". Home shows a status line: "Google Protection: on, last check 09:14".
+- **Google Profile:** posts, photo checks and special hours, all approved by the owner first. Home is where the owner starts: it says "You're all caught up" or "3 things need your attention", with the first items as cards.
+- **Google Protection:** compares the Google profile with the details the owner confirmed and alerts the owner when they differ. The email explains the difference ("Google shows Sunday closing at 18:00. You approved 22:00.") and links to the app, where the owner chooses "Google is right" or "Keep my information". A change waiting for the owner is a card on Home, and Home's "What Kabsi did this week" shows each check.
 - **Get Reviews:** a review link and QR code for everyone, and an NFC card in Lebanon. The page shows "link activity", which is not the same as reviews: Google decides which reviews appear.
 - **Weekly Care Report:** a factual email once a week.
 
@@ -100,8 +100,8 @@ Plans are Free, Pro and Partner. Free is Get Reviews (the review link and card).
 
 - Everything an owner can act on is one list of tasks, made by Kabsi's own checks (never typed in by hand): a reply ready for a new review, a review that needs more care, a reply Google did not show, a change Google Protection found, two different answers for one fact in About your business, a Google post or photos ready to approve, something that did not reach Google, Kabsi losing its Manager access, the plan ending within 7 days, and things missing from the profile (Business Knowledge, phone, website, main category, opening hours, the review link, photos, a recent post).
 - Each task has a priority: **Urgent** (customer-facing information is wrong, a high-risk review, a reply Google refused, something that did not reach Google, lost access, the plan ending within 2 days), **Recommended** or **Nice to have**. There is no score and no points value. Each task has a short reason and opens the page where the owner does it. A task closes by itself when the thing is done (the reply is published, the question answered, the photos posted), usually within seconds.
-- Home shows the replies ready, then the other things to act on, then a section **Make your profile more complete** with the things missing from the profile.
-- Under the business name, Home shows when Kabsi last checked the Google profile successfully, for example "Google profile checked 14 min ago". Kabsi checks every few minutes. If the last successful check is more than 6 hours old, the line turns amber and reads "Google profile last checked ...", so Home never looks healthy when checks are failing. Businesses in early access (a person posts what you approve) do not show the line, because Kabsi does not read their profile from Google yet.
+- Home is the Action Center. It answers one question, "Do I need to do anything?". With nothing waiting it says **You're all caught up. Kabsi is taking care of the rest.** Otherwise it says how many things need the owner ("2 things need your attention") and shows at most 3 cards, urgent first and then oldest first; **See all** shows the rest. Each card says what happened, why it matters, what Kabsi suggests, the evidence (for a changed detail: "Google shows 18:00. You approved 22:00."), a risk label where there is one, what Kabsi prepared, one main button, **Later** (3 days), the time and a **History** link with what happened to that item. A high-risk review card says Kabsi did not draft a reply. Suggestions to make the profile more complete are listed lower on Home and never turn it from "all caught up" to "needs you". Home has no score, no chart and no quick-action tiles. Below the cards: **What Kabsi did this week** (read from Kabsi's activity record, routine checks as one line a day), one line on how many people opened the review link in the last 30 days ("That is activity, not reviews"), and a link to the Weekly Care Report.
+- A strip under the business name always shows the Google connection, the last successful check and the plan. Green: "Google connected, Checked 14 minutes ago". If the last successful check is more than 6 hours old the strip turns amber and reads "Google check is late, Last checked 7 hours ago", so Home never looks healthy when checks are failing. If Kabsi lost access it is red. Businesses in early access (a person posts what you approve) show "Our team looks after your profile" with no check time, because Kabsi does not read their profile from Google yet. The plan part of the strip ("Free trial, 9 days left") is shown to the owner only; a manager does not see billing.
 - Kabsi keeps to Google's limits: at most 5 changes a minute to one profile (Google allows 10). If Google stops answering, Kabsi pauses its Google calls for 5 minutes and then carries on; the checks that were due wait their turn, and nothing is sent twice.
 - The owner (or a manager) can **do it**, put it off with **Later** (3 days) or **Skip** it (30 days); it comes back after that if it still applies. Nothing is sent to Google until the owner approves it. Never present the list as a ranking or as a promise of more customers or reviews.
 - Nora, Kabsi's assistant in the dashboard, can read the same list (most important first) and say what the top one to three are in plain words, with a link to the page. She never mentions a score. She saves a fact into About your business only when the owner has just told her that fact.
@@ -205,7 +205,7 @@ Statuses: Setup not finished, Waiting for Google access, Free, Active. A busines
 
 ### 3.5 Recommended first actions
 
-1. Home: read "What needs your attention", and start with the top item.
+1. Home: read "things need your attention" and start with the first card.
 2. Get reviews: copy your review link and print the QR code (three steps).
 3. Posts: tap **Suggest phrases**, then write a first post.
 4. Settings, About your business: add a few customer questions and never-say items.
@@ -268,7 +268,7 @@ Message WhatsApp +1 201-483-5474 or email hello@kabsi.co and the team arranges i
 
 ### 4.4 Renewals and reminders
 
-Crypto plans don't renew by themselves; Kabsi never charges on its own. Home shows a reminder when a plan ends within 30 days. Use **Renew ahead** on the Plan page and pay the same way: "A renewal starts the day your current plan ends, so you never lose days."
+Crypto plans don't renew by themselves; Kabsi never charges on its own. Home shows the plan and the days left in its top strip, and a card when the plan is about to end. Use **Renew ahead** on the Plan page and pay the same way: "A renewal starts the day your current plan ends, so you never lose days."
 
 During a trial, Kabsi emails you 7 days before it ends, 1 day before, and on the last day, unless a paid plan is already lined up.
 
@@ -640,9 +640,7 @@ Weekly drafts need at least one Verified fact in About your business, the Weekly
 
 **My photo won't upload.** Use JPG, PNG or WebP up to 5 MB.
 
-**Home says "Appears after the first daily check".** Kabsi reads the public rating once a day.
-
-**Home says "Google profile last checked" in amber.** Kabsi has not managed to read the Google profile for more than 6 hours. The team is alerted when checks keep failing. If you removed the Kabsi group from People and access, add it again as a Manager.
+**Home says "Google check is late" in amber.** Kabsi has not managed to read the Google profile for more than 6 hours. The team is alerted when checks keep failing. If you removed the Kabsi group from People and access, add it again as a Manager.
 
 **My card opens "This Kabsi card isn't set up yet".**
 The card isn't linked yet. Tap through and sign in to link it, or add its code under Get reviews, **Add a card**.
@@ -906,7 +904,7 @@ Yes. On Hours, choose the dates, Closed or different hours, review what Google w
 ### Google Protection
 
 **What is Google Protection?**
-Kabsi watches your business name, phone, website, address, opening hours, main category, open status (open, temporarily closed, permanently closed) and map pin, and compares them with the details you confirmed. When Google shows something different, you get one email that explains it, for example "Google shows Sunday closing at 18:00. You approved 22:00.", and says whether Google made the change itself or Kabsi does not know who did. In the app you choose: "Google is right" (Google's value becomes your approved detail and nothing is sent to Google) or "Keep my information" (Kabsi sends your approved value back to Google, then checks Google shows it). Nothing changes on Google unless you say so, and Kabsi never puts anything back by itself. Home shows "Google Protection: on, last check" with the time of the last check.
+Kabsi watches your business name, phone, website, address, opening hours, main category, open status (open, temporarily closed, permanently closed) and map pin, and compares them with the details you confirmed. When Google shows something different, you get one email that explains it, for example "Google shows Sunday closing at 18:00. You approved 22:00.", and says whether Google made the change itself or Kabsi does not know who did. In the app you choose: "Google is right" (Google's value becomes your approved detail and nothing is sent to Google) or "Keep my information" (Kabsi sends your approved value back to Google, then checks Google shows it). Nothing changes on Google unless you say so, and Kabsi never puts anything back by itself. A change waiting for the owner appears as a card on Home.
 
 **Can Google Protection lock my listing?**
 No. Nobody can lock a Google listing or stop people suggesting edits. Kabsi tells you fast and puts your version back only if you say so.
@@ -1140,7 +1138,7 @@ Delete your business in Settings, and ask by email to delete your login too.
 - **Search phrases:** words people use to search for a business like yours, worked into a post's first line. They come from your category, your area and the services you listed in About your business, and, once Kabsi is connected to Google live, from Google's own search terms. Never from your reviews.
 - **Special hours:** hours for specific dates, like holidays.
 - **Google Protection:** watches key listing details, alerts you and lets you choose in the app whether to keep your information.
-- **Profile health:** four facts on Home, no score.
+- **Profile health:** the suggestions list on Home, no score.
 - **Review link:** go.kabsi.co/{CODE}, opens your Google review page. Up to 5 per business.
 - **NTAG213 / NTAG215:** common NFC chip types that work for review links.
 - **NFC Tools:** a free app for writing a link onto an NFC tag.
