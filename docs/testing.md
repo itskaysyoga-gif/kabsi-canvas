@@ -211,3 +211,11 @@ same test then holds the mocks to Google's real behaviour.
 in code outside `_shared/google/` (src, supabase, workers, scripts). `tests/check-google-calls.test.ts` proves it fails
 on `tests/fixtures/rogue-google-call.txt` and passes on the repo. Functions import the layer from
 `_shared/google/index.ts`.
+- `backlog.sql` (P0.3-10): the day-one backlog is one task per business ("We found N unanswered reviews. Replies are
+  ready."), with the counts of low risk, to read one by one, needing care, still being prepared and waiting for a
+  plan, made again as one (dedupe) and folding the reviews' own tasks (marked backlog). `approve_backlog` approves
+  only the low-risk drafts the owner was shown and that have not changed (a newer draft, a medium or high-risk
+  review is left out and reported), through the one publication pipeline with each approval 12 seconds after the
+  last (at most 5 a minute, no 60 second window holds more), records the list in the audit log without any review
+  text, and refuses a stranger, anon, staff, other businesses, and a manager unless the owner allowed replies.
+  The Deno test `_shared/backlog.test.ts` holds the cap: 10 of 23 on a trial, 20 or all on a paid plan.

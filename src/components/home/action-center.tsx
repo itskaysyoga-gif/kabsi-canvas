@@ -4,9 +4,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, Check, FileText, MessageSquareReply, PenLine, ScanSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ActionCard } from "@/components/home/action-card";
+import { BacklogCard } from "@/components/home/backlog-card";
 import { HomeStrip } from "@/components/home/home-strip";
 import { ProfileGaps } from "@/components/app/profile-gaps";
-import { checkStrip, headline, homeState, replyCount, subline } from "@/lib/home-state";
+import {
+  checkStrip,
+  headline,
+  homeState,
+  isBacklogSummary,
+  replyCount,
+  subline,
+} from "@/lib/home-state";
 import { loadCardDetails, loadFeed, loadHomeFacts } from "@/lib/home";
 import { loadTasks, taskAction, type Task } from "@/lib/tasks";
 import { timeAgo } from "@/lib/dashboard";
@@ -94,17 +102,21 @@ export function ActionCenter({ loc, role }: { loc: Location; role: Role }) {
             {subline(state.total, replyCount(shown))}
           </p>
           <div className="mt-4 space-y-4">
-            {state.cards.map((t, i) => (
-              <ActionCard
-                key={t.id}
-                task={t}
-                detail={details.data?.[t.id]}
-                locationId={loc.id}
-                lead={i === 0}
-                busy={later.isPending}
-                onLater={(x) => later.mutate(x)}
-              />
-            ))}
+            {state.cards.map((t, i) =>
+              isBacklogSummary(t) ? (
+                <BacklogCard key={t.id} task={t} locationId={loc.id} lead={i === 0} />
+              ) : (
+                <ActionCard
+                  key={t.id}
+                  task={t}
+                  detail={details.data?.[t.id]}
+                  locationId={loc.id}
+                  lead={i === 0}
+                  busy={later.isPending}
+                  onLater={(x) => later.mutate(x)}
+                />
+              ),
+            )}
           </div>
           {state.rest.length > 0 ? (
             <div className="mt-4">
