@@ -77,7 +77,7 @@ begin
              and not exists (select 1 from public.plans p where p.location_id = p_location and p.kind <> 'trial'
                         and p.status = 'active' and p.ends_at > now());
   if v_total > 0 then
-    v_keep := v_keep || ('review_reply:backlog');
+    v_keep := v_keep || 'review_reply:backlog'::text;
     if private.task_put(p_location, 'review_reply', 'backlog', p_location::text, 'recommended',
       'We found ' || v_total || ' unanswered ' || case when v_total = 1 then 'review' else 'reviews' end
         || '. Replies are ready.',
