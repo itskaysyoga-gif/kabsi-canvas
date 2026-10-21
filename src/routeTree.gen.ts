@@ -42,6 +42,7 @@ import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAppCardsRouteImport } from './routes/_authenticated/app/cards'
 import { Route as AuthenticatedAppHoursRouteImport } from './routes/_authenticated/app/hours'
 import { Route as AuthenticatedAppInboxRouteImport } from './routes/_authenticated/app/inbox'
+import { Route as AuthenticatedAppInsightsRouteImport } from './routes/_authenticated/app/insights'
 import { Route as AuthenticatedAppKnowledgeRouteImport } from './routes/_authenticated/app/knowledge'
 import { Route as AuthenticatedAppPhotosRouteImport } from './routes/_authenticated/app/photos'
 import { Route as AuthenticatedAppPlanRouteImport } from './routes/_authenticated/app/plan'
@@ -216,6 +217,12 @@ const AuthenticatedAppInboxRoute = AuthenticatedAppInboxRouteImport.update({
   path: '/inbox',
   getParentRoute: () => AuthenticatedAppRouteRoute,
 } as any)
+const AuthenticatedAppInsightsRoute =
+  AuthenticatedAppInsightsRouteImport.update({
+    id: '/insights',
+    path: '/insights',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
 const AuthenticatedAppKnowledgeRoute =
   AuthenticatedAppKnowledgeRouteImport.update({
     id: '/knowledge',
@@ -296,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/app/cards': typeof AuthenticatedAppCardsRoute
   '/app/hours': typeof AuthenticatedAppHoursRoute
   '/app/inbox': typeof AuthenticatedAppInboxRoute
+  '/app/insights': typeof AuthenticatedAppInsightsRoute
   '/app/knowledge': typeof AuthenticatedAppKnowledgeRoute
   '/app/photos': typeof AuthenticatedAppPhotosRoute
   '/app/plan': typeof AuthenticatedAppPlanRoute
@@ -338,6 +346,7 @@ export interface FileRoutesByTo {
   '/app/cards': typeof AuthenticatedAppCardsRoute
   '/app/hours': typeof AuthenticatedAppHoursRoute
   '/app/inbox': typeof AuthenticatedAppInboxRoute
+  '/app/insights': typeof AuthenticatedAppInsightsRoute
   '/app/knowledge': typeof AuthenticatedAppKnowledgeRoute
   '/app/photos': typeof AuthenticatedAppPhotosRoute
   '/app/plan': typeof AuthenticatedAppPlanRoute
@@ -383,6 +392,7 @@ export interface FileRoutesById {
   '/_authenticated/app/cards': typeof AuthenticatedAppCardsRoute
   '/_authenticated/app/hours': typeof AuthenticatedAppHoursRoute
   '/_authenticated/app/inbox': typeof AuthenticatedAppInboxRoute
+  '/_authenticated/app/insights': typeof AuthenticatedAppInsightsRoute
   '/_authenticated/app/knowledge': typeof AuthenticatedAppKnowledgeRoute
   '/_authenticated/app/photos': typeof AuthenticatedAppPhotosRoute
   '/_authenticated/app/plan': typeof AuthenticatedAppPlanRoute
@@ -428,6 +438,7 @@ export interface FileRouteTypes {
     | '/app/cards'
     | '/app/hours'
     | '/app/inbox'
+    | '/app/insights'
     | '/app/knowledge'
     | '/app/photos'
     | '/app/plan'
@@ -470,6 +481,7 @@ export interface FileRouteTypes {
     | '/app/cards'
     | '/app/hours'
     | '/app/inbox'
+    | '/app/insights'
     | '/app/knowledge'
     | '/app/photos'
     | '/app/plan'
@@ -514,6 +526,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/cards'
     | '/_authenticated/app/hours'
     | '/_authenticated/app/inbox'
+    | '/_authenticated/app/insights'
     | '/_authenticated/app/knowledge'
     | '/_authenticated/app/photos'
     | '/_authenticated/app/plan'
@@ -787,6 +800,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppInboxRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/app/insights': {
+      id: '/_authenticated/app/insights'
+      path: '/insights'
+      fullPath: '/app/insights'
+      preLoaderRoute: typeof AuthenticatedAppInsightsRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/_authenticated/app/knowledge': {
       id: '/_authenticated/app/knowledge'
       path: '/knowledge'
@@ -857,6 +877,7 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppCardsRoute: typeof AuthenticatedAppCardsRoute
   AuthenticatedAppHoursRoute: typeof AuthenticatedAppHoursRoute
   AuthenticatedAppInboxRoute: typeof AuthenticatedAppInboxRoute
+  AuthenticatedAppInsightsRoute: typeof AuthenticatedAppInsightsRoute
   AuthenticatedAppKnowledgeRoute: typeof AuthenticatedAppKnowledgeRoute
   AuthenticatedAppPhotosRoute: typeof AuthenticatedAppPhotosRoute
   AuthenticatedAppPlanRoute: typeof AuthenticatedAppPlanRoute
@@ -873,6 +894,7 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppCardsRoute: AuthenticatedAppCardsRoute,
   AuthenticatedAppHoursRoute: AuthenticatedAppHoursRoute,
   AuthenticatedAppInboxRoute: AuthenticatedAppInboxRoute,
+  AuthenticatedAppInsightsRoute: AuthenticatedAppInsightsRoute,
   AuthenticatedAppKnowledgeRoute: AuthenticatedAppKnowledgeRoute,
   AuthenticatedAppPhotosRoute: AuthenticatedAppPhotosRoute,
   AuthenticatedAppPlanRoute: AuthenticatedAppPlanRoute,

@@ -71,9 +71,12 @@ export const SECTIONS: Record<SectionId, Section> = {
     id: "insights",
     label: "Insights",
     short: "Insights",
-    to: "/app/report",
-    paths: ["/app/report"],
-    tabs: [{ label: "Weekly Care Report", to: "/app/report" }],
+    to: "/app/insights",
+    paths: ["/app/insights", "/app/report"],
+    tabs: [
+      { label: "Overview", to: "/app/insights" },
+      { label: "Weekly Care Report", to: "/app/report" },
+    ],
   },
   knowledge: {
     id: "knowledge",
@@ -152,6 +155,7 @@ export const OLD_APP_ADDRESSES: Record<string, SectionId> = {
   "/app/hours": "google-profile",
   "/app/posts": "content",
   "/app/photos": "content",
+  "/app/insights": "insights",
   "/app/report": "insights",
   "/app/knowledge": "knowledge",
   "/app/settings": "settings",
