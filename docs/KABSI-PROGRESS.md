@@ -4,6 +4,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## Where things stand
 
+- **21 Oct 2026, session 11 (Opus) started: P0.6-01 consent banner and proof of consent (PR open, branch claude/p0-6-01).** Run in parallel with session 9 (no shared cards, screens or migrations). R-41 to R-44 were on `main` (PR 129) before it started; the `kabsi-build-session` skill is not committed yet, so the session follows CLAUDE.md and plan section 2. A small first-party banner (no consent tool, R-04) asks by country: EU and EEA (and unknown country) opt-in for statistics and advertising; UK, UAE and Saudi Arabia statistics in totals only with an opt-out and advertising opt-in; elsewhere notice with an opt-out. The country comes from kabsi.co itself (`/api/geo`: `cf-ipcountry`, else Vercel's `x-vercel-ip-country`), the browser time zone as fallback. PostHog runs in memory (no cookie, no identifier) until a yes, keeps an identifier and may record public pages only after a yes, and stops after a no. No Meta Pixel code (R-42): `runWhenAdvertisingAllowed` is the only door P0.6-03 may use. Each choice writes one `consent_records` row through the new `consent` Edge Function with the server's own copy of the wording. "Privacy choices" in the footer and on /privacy reopens it.
+
 - **21 Oct 2026, P0.5-05 (session 9, Sonnet), PR 131: Insights and the search terms report.** New `insights` Edge Function (membership, rate limit, Pro check for the terms; no write to the database, no cache), `/app/insights` (one sentence, tiles for calls, website clicks, direction requests and times seen, daily charts and a table under See details, the last full month's search terms on Pro with "fewer than 15", link to the Weekly Care Reports; the Weekly Care Report is the second Insights tab). Google's mock still returns zeros; in mock mode the screen shows labelled Example figures made in `_shared/insights/example.ts`. Retention: the figures are read on open and kept for zero days (K-40 `google_performance` allows 30); `tests/insights-retention.test.ts` fails if anything starts storing them; `/privacy` says so. Checks: typecheck, eslint, check:tokens, check:google, `npm test` 168 passed, `scripts/deno-check.sh` (23 new Deno tests), build; 390 px and 1440 px looked at in Chromium with Supabase mocked. No live Google, Places or Anthropic call; no migration. After merge: Deploy run green and `insights` listed; `POST insights` without a user answers 401; kabsi.co/app/insights loads for a signed-in owner.
 
 - **PR 130 after merge (21 Oct 2026):** merged on green CI (2bb660d). Vercel build of kabsi.co/llms-full.txt checked below.
@@ -180,7 +182,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.5-03 | Hours: one editor and the holiday calendar | Sonnet | todo | | |
 | P0.5-04 | The Weekly Care Report | Sonnet | todo | | |
 | P0.5-05 | Insights: one sentence and four tiles | Sonnet | PR open (131); After merge below | 131 | 21 Oct 2026 |
-| P0.6-01 | Consent banner and proof of consent | Sonnet (R-39) | todo | | |
+| P0.6-01 | Consent banner and proof of consent | Opus (session 11, R-42) | PR open (132); migration applied; checks green; After merge: Deploy (`consent` function), live `/api/geo`, one live record | 132 | 21 Oct 2026 |
 | P0.6-02 | Product events, attribution and onboarding funnel | Sonnet | todo | | |
 | P0.6-03 | Meta Pixel and Conversions API with one event ledger | Sonnet (R-39) | todo | | |
 | P0.6-04 | The /meta landing page | Sonnet | todo | | |
@@ -243,6 +245,11 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P1-22 | Nora on WhatsApp | Opus | todo, depends on P0.8-03 (K-129) | | |
 
 ## After merge
+
+**P0.6-01 (session 11), for the session after the merge (the session runs them itself).**
+1. Deploy run green and `consent` listed as a function (version 1).
+2. `curl -s https://kabsi.co/api/geo` returns `{"country":"<two letters>"}` with `cache-control: no-store` (Vercel's country header; Cloudflare's if kabsi.co is ever proxied).
+3. One real choice on kabsi.co writes one row: `select country, country_source, rule, action, wording_version from public.consent_records order by created_at desc limit 3;`.
 
 **Session 8 (P0.8-05, P0.8-06, P0.8-07, P0.8-11, email fixes round 2), for Hussein.**
 1. **Done 21 Oct 2026 by the lane R chat (R-44); read back: 2 rows.** Was: Supabase SQL editor: run `supabase/migrations/20261021220010_review_reports_links.sql` (two foreign keys with cascade clauses for `review_reports`; it removes no data). Read-back: `select conname from pg_constraint where conname in ('review_reports_location_id_fkey', 'review_reports_review_id_fkey') order by 1;` expect 2 rows. Until then nothing breaks.
@@ -506,6 +513,13 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.6-01 (branch claude/p0-6-01, 21 Oct 2026, Rashid's session 11 of the bundled plan, Opus)
+- Built: `src/lib/consent-rules.ts` (rules by country and the wording, version `2026-10-21`) with its server copy `supabase/functions/_shared/consent.ts`; `src/lib/consent.ts` (state, storage, `/api/geo`, the advertising gate `runWhenAdvertisingAllowed`, `saveChoice`); `src/components/shared/privacy-banner.tsx` (in `__root.tsx`, opens by itself on public pages only, from "Privacy choices" anywhere); `src/routes/api.geo.ts`; the `consent` Edge Function (`verify_jwt = true`, anon JWT or the session; 30 an hour per hashed IP and day, fail-open) with `_shared/consent-row.ts`; `src/lib/telemetry.ts` (capture on unless demo or a no; `memory` persistence until a yes, then `localStorage+cookie`; replay only after a yes and never on private paths; identify only after a yes); footer link; `/privacy` section 7; `knowledge/kabsi-facts.md` 9.6 and `public/llms-full.txt`.
+- Migration `supabase/migrations/20261021231110_consent_records.sql` applied with `apply_migration` (name `consent_records`). Security advisor: the only new line is the INFO "RLS enabled, no policy" on `public.consent_records`, as intended (service key only, like `leads` and `rate_limits`); anon and authenticated have no grant.
+- Tests: `tests/consent.test.ts` (8): rules by country; browser and server copies equal; no dashes or exclamation marks; the stored row uses the server's wording, keeps the path only (no query, `/a/<token>` becomes `/a/:token`), falls back to the time zone; bad version, action, visitor or choices refused; UK: no advertising tag before a yes, it loads once after Accept, statistics cookieless meanwhile, one record posted; UK Decline: no tag, statistics off, one record; US: notice shows and the tag may load. `tests/telemetry-demo.test.ts` still passes.
+- Browser check (Playwright on the production build, `node .output/server/index.mjs`, the consent POST intercepted): GB at 390 px rule `ads_opt_in`, 0 requests to facebook before or after, Decline hides the banner, the next page works, one POST `{action: decline, country: GB, country_source: network, version: 2026-10-21}`; DE at 1440 px `opt_in`, Accept, one POST; US at 390 px `notice`, OK, one POST. No horizontal scroll at 390 px. Screenshots looked at in the session (not committed).
+- Checks: `npm run typecheck`, eslint and prettier on the changed files, `npm test` (29 files, 171 tests), `npm run build`, `deno check` on `consent/index.ts`. The "Pixel loads with a US header" line of Done when is covered by the gate test only: no Pixel code exists until P0.6-03 (R-42).
 
 ### Email fixes round 2 (branch claude/h-email-fixes-2, 21 Oct 2026, Hussein's session 8 of the bundled plan, Sonnet)
 - 1. One set of trial emails. `trial_d7`, `trial_d1` and `trial_d0` (and `copy.trialReminder`, `dueTrialEmail` and their tests) are removed; the lifecycle set (day 2, day 7, day 11, day 14; P0.4-10) is the only trial email set, so no owner gets both. The `trial_reminders` job kind is still offered every 5 minutes by `private.produce_jobs()` (changing that needs a migration that redefines it), so `trialsJob` stays registered and does nothing (`{reminders: 0, retired: true}`, tested); a later migration stops offering it (noted in the P0.4-07 card). The lifecycle emails already say what P0.4-06 says: day 11 and day 14 both say Kabsi keeps watching and drafting for 7 more days and publishes nothing; a Deno test holds it.

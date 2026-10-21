@@ -15,6 +15,7 @@ import { KabsiLogo } from "@/components/shared/kabsi-logo";
 import { useSectionRise } from "@/components/marketing/motion";
 import { VERTICALS } from "@/lib/verticals";
 import { BRAND_LINE, CTA_PRIMARY, GOOGLE_NOTICE, OPERATOR_LINE, WHATSAPP_NUMBER } from "@/lib/site";
+import { openPrivacyChoices } from "@/lib/consent";
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { useAuth } from "@/components/auth/auth-provider";
 import {
@@ -220,6 +221,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             <FooterCol title="Legal and contact">
               <Link to="/privacy">Privacy</Link>
               <Link to="/terms">Terms</Link>
+              <button type="button" className="text-left" onClick={openPrivacyChoices}>
+                Privacy choices
+              </button>
               <a href="mailto:hello@kabsi.co">hello@kabsi.co</a>
               <WhatsappLink kind="general" className="font-normal no-underline">
                 WhatsApp {WHATSAPP_NUMBER}

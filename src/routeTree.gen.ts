@@ -32,6 +32,7 @@ import { Route as AuthenticatedStaffRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedStartRouteImport } from './routes/_authenticated/start'
 import { Route as ATokenRouteImport } from './routes/a.$token'
 import { Route as ActivateCodeRouteImport } from './routes/activate.$code'
+import { Route as ApiGeoRouteImport } from './routes/api.geo'
 import { Route as ForIndexRouteImport } from './routes/for.index'
 import { Route as ForSlugRouteImport } from './routes/for.$slug'
 import { Route as GuidesIndexRouteImport } from './routes/guides.index'
@@ -166,6 +167,11 @@ const ActivateCodeRoute = ActivateCodeRouteImport.update({
   path: '/activate/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGeoRoute = ApiGeoRouteImport.update({
+  id: '/api/geo',
+  path: '/api/geo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForIndexRoute = ForIndexRouteImport.update({
   id: '/for/',
   path: '/for/',
@@ -288,6 +294,7 @@ export interface FileRoutesByFullPath {
   '/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
+  '/api/geo': typeof ApiGeoRoute
   '/for/$slug': typeof ForSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/review/$code': typeof ReviewCodeRoute
@@ -330,6 +337,7 @@ export interface FileRoutesByTo {
   '/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
+  '/api/geo': typeof ApiGeoRoute
   '/for/$slug': typeof ForSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/review/$code': typeof ReviewCodeRoute
@@ -375,6 +383,7 @@ export interface FileRoutesById {
   '/_authenticated/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
+  '/api/geo': typeof ApiGeoRoute
   '/for/$slug': typeof ForSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/review/$code': typeof ReviewCodeRoute
@@ -420,6 +429,7 @@ export interface FileRouteTypes {
     | '/start'
     | '/a/$token'
     | '/activate/$code'
+    | '/api/geo'
     | '/for/$slug'
     | '/guides/$slug'
     | '/review/$code'
@@ -462,6 +472,7 @@ export interface FileRouteTypes {
     | '/start'
     | '/a/$token'
     | '/activate/$code'
+    | '/api/geo'
     | '/for/$slug'
     | '/guides/$slug'
     | '/review/$code'
@@ -506,6 +517,7 @@ export interface FileRouteTypes {
     | '/_authenticated/start'
     | '/a/$token'
     | '/activate/$code'
+    | '/api/geo'
     | '/for/$slug'
     | '/guides/$slug'
     | '/review/$code'
@@ -547,6 +559,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   ATokenRoute: typeof ATokenRoute
   ActivateCodeRoute: typeof ActivateCodeRoute
+  ApiGeoRoute: typeof ApiGeoRoute
   ForSlugRoute: typeof ForSlugRoute
   GuidesSlugRoute: typeof GuidesSlugRoute
   ReviewCodeRoute: typeof ReviewCodeRoute
@@ -715,6 +728,13 @@ declare module '@tanstack/react-router' {
       path: '/activate/$code'
       fullPath: '/activate/$code'
       preLoaderRoute: typeof ActivateCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/geo': {
+      id: '/api/geo'
+      path: '/api/geo'
+      fullPath: '/api/geo'
+      preLoaderRoute: typeof ApiGeoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/for/': {
@@ -929,6 +949,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   ATokenRoute: ATokenRoute,
   ActivateCodeRoute: ActivateCodeRoute,
+  ApiGeoRoute: ApiGeoRoute,
   ForSlugRoute: ForSlugRoute,
   GuidesSlugRoute: GuidesSlugRoute,
   ReviewCodeRoute: ReviewCodeRoute,
