@@ -1,5 +1,6 @@
 // Shared helpers for every Kabsi Edge Function.
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
+import { unsubscribeHeaders } from "./email/unsubscribe.ts";
 
 export const APP_URL = Deno.env.get("APP_URL") ?? "https://kabsi.co";
 const SENTRY_DSN = Deno.env.get("SENTRY_DSN_EDGE") ??
@@ -37,14 +38,19 @@ export async function currentUser(req: Request) {
 
 // ─── internal calls (pg_cron and DB triggers send x-cron-secret)
 let cronSecret: string | null = null;
-export async function isInternal(req: Request) {
-  const given = req.headers.get("x-cron-secret");
-  if (!given) return false;
+// The shared internal secret (also the key that signs one-click unsubscribe links), read once from the database.
+export async function internalSecret(): Promise<string | null> {
   if (!cronSecret) {
     const { data } = await admin().rpc("internal_secret", { p_name: "cron_secret" });
     cronSecret = (data as string | null) ?? null;
   }
-  return !!cronSecret && timingSafeEqual(given, cronSecret);
+  return cronSecret;
+}
+export async function isInternal(req: Request) {
+  const given = req.headers.get("x-cron-secret");
+  if (!given) return false;
+  const secret = await internalSecret();
+  return !!secret && timingSafeEqual(given, secret);
 }
 export function timingSafeEqual(a: string, b: string) {
   if (a.length !== b.length) return false;
@@ -133,12 +139,17 @@ export function isDefiniteGoogleRejection(e: unknown) {
 export { emailButton, emailLink, esc } from "./email-layout.ts";
 
 // The From address lives in app_settings.email_from (migration 016), so switching sender is one SQL update.
-let fromCache: { value: string; at: number } | null = null;
-async function emailFrom() {
-  if (fromCache && Date.now() - fromCache.at < 300_000) return fromCache.value;
-  const { data } = await admin().from("app_settings").select("value").eq("key", "email_from").maybeSingle();
-  fromCache = { value: (data?.value as string | undefined) || "Kabsi <hello@send.kabsi.co>", at: Date.now() };
-  return fromCache.value;
+// Two sending subdomains (G-22, R-03): send.kabsi.co for account and product mail, news.kabsi.co for lifecycle mail.
+const FROM = { send: { key: "email_from", fallback: "Kabsi <hello@send.kabsi.co>" }, news: { key: "email_from_news", fallback: "Kabsi <hello@news.kabsi.co>" } } as const;
+export type Stream = keyof typeof FROM;
+const fromCache = new Map<Stream, { value: string; at: number }>();
+async function emailFrom(stream: Stream) {
+  const hit = fromCache.get(stream);
+  if (hit && Date.now() - hit.at < 300_000) return hit.value;
+  const { data } = await admin().from("app_settings").select("value").eq("key", FROM[stream].key).maybeSingle();
+  const value = (data?.value as string | undefined) || FROM[stream].fallback;
+  fromCache.set(stream, { value, at: Date.now() });
+  return value;
 }
 
 // The outbox: one emails row per email (the delivery log), then Resend. Callers do not use this directly: everything
@@ -146,6 +157,8 @@ async function emailFrom() {
 export async function sendEmail(o: {
   kind: string; to: string; subject: string; html: string; text: string; dedupeKey: string;
   locationId?: string | null; partnerId?: string | null; replyTo?: string; category?: string | null; notificationId?: string | null;
+  /** Mail the owner can switch off: the one-click unsubscribe link, sent as the List-Unsubscribe headers (RFC 8058). */
+  unsubscribeUrl?: string | null; stream?: Stream;
 }) {
   const db = admin();
   // Demo workspace (P0.1-06, R-17): a demo business only ever emails the demo login. Nothing else is written or sent.
@@ -180,7 +193,10 @@ export async function sendEmail(o: {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { authorization: `Bearer ${key}`, "content-type": "application/json", "idempotency-key": o.dedupeKey.slice(0, 256) },
-    body: JSON.stringify({ from: await emailFrom(), reply_to: o.replyTo ?? "hello@kabsi.co", to: [o.to], subject: o.subject, html: o.html, text: o.text }),
+    body: JSON.stringify({
+      from: await emailFrom(o.stream ?? "send"), reply_to: o.replyTo ?? "hello@kabsi.co", to: [o.to], subject: o.subject, html: o.html, text: o.text,
+      ...(o.unsubscribeUrl ? { headers: unsubscribeHeaders(o.unsubscribeUrl) } : {}),
+    }),
   });
   const payload = await res.json().catch(() => ({}));
   if (!res.ok) {

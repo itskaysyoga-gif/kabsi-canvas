@@ -12,8 +12,8 @@ import {
 import {
   WHATSAPP_NUMBER as EMAIL_NUMBER,
   WHATSAPP_URL,
-  emailLayout,
 } from "../supabase/functions/_shared/email-layout";
+import { renderEmail } from "../supabase/functions/_shared/email/template";
 
 const kinds = Object.keys(WHATSAPP_MESSAGES) as WhatsappKind[];
 
@@ -45,7 +45,10 @@ describe("WhatsApp click-to-chat (P0.6-10, K-122)", () => {
     const url = new URL(WHATSAPP_URL);
     expect(url.pathname).toBe(`/${WHATSAPP_DIGITS}`);
     expect(url.searchParams.get("text")).toBe(WHATSAPP_MESSAGES.email);
-    const html = emailLayout({ preheader: "p", title: "t", bodyHtml: "<p>x</p>" });
+    const { html } = renderEmail(
+      { subject: "s", preheader: "p", title: "t", bodyHtml: "<p>x</p>", text: "x" },
+      { appUrl: "https://kabsi.co", defaultWhy: "w" },
+    );
     expect(html).toContain(`href="${WHATSAPP_URL.replace(/&/g, "&amp;")}"`);
     expect(html).toContain(`WhatsApp ${WHATSAPP_NUMBER}`);
     expect(html.match(/background:#FFD60A/gi)).toBeNull();

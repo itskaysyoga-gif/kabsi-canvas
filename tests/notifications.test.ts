@@ -2,10 +2,13 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { CATEGORIES as EDGE_CATEGORIES } from "../supabase/functions/_shared/notify-categories";
-import { KABSI_GROUP_ID as EDGE_GROUP_ID } from "../supabase/functions/_shared/email-layout";
+import {
+  KABSI_GROUP_ID as EDGE_GROUP_ID,
+  LEGAL_SELLER as EDGE_SELLER,
+} from "../supabase/functions/_shared/email-layout";
 import { CATEGORIES, DEFAULT_LINE } from "../src/lib/notification-categories";
 import { choice, emailOptions, groupedCategories, type Pref } from "../src/lib/notifications";
-import { KABSI_GROUP_ID } from "../src/lib/site";
+import { KABSI_GROUP_ID, LEGAL_SELLER } from "../src/lib/site";
 
 // P0.4-09: one notification engine (K-46). The engine itself is tested in supabase/functions/_shared/notify-*.test.ts
 // (Deno); these tests keep the browser's copy of the categories, the database check and the one-outbox rule honest.
@@ -93,14 +96,20 @@ describe("one outbox", () => {
     );
   });
 
-  it("nothing renders an email by itself: the layout is called only by the render step", () => {
+  it("nothing renders an email by itself: the template is called only by the engine", () => {
     const callers = walk(join(__dirname, "..", "supabase", "functions"))
-      .filter((p) => /\bemailLayout\(/.test(readFileSync(p, "utf8")))
+      .filter((p) => /\brenderEmail\(/.test(readFileSync(p, "utf8")))
       .map((p) => p.slice(p.indexOf("supabase/functions/") + "supabase/functions/".length));
-    expect(callers.sort()).toEqual(["_shared/email-layout.ts", "_shared/email-render.ts"]);
+    expect(callers.sort()).toEqual(["_shared/email/template.ts", "_shared/notify-engine.ts"]);
+    expect(
+      walk(join(__dirname, "..", "supabase", "functions")).filter((p) =>
+        /\bemailLayout\b/.test(readFileSync(p, "utf8")),
+      ),
+    ).toEqual([]);
   });
 
-  it("the Kabsi group ID in emails equals the one on the screens", () => {
+  it("the Kabsi group ID and the legal seller in emails equal the ones on the screens", () => {
     expect(EDGE_GROUP_ID).toBe(KABSI_GROUP_ID);
+    expect(EDGE_SELLER).toBe(LEGAL_SELLER);
   });
 });

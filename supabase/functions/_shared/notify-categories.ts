@@ -23,66 +23,68 @@ export type Category = {
   inApp: boolean;
   /** How the digest counts it: "2 new reviews", "1 profile change". */
   noun: [singular: string, plural: string];
+  /** The footer line "Why you got this" when an email does not say more. */
+  why: string;
 };
 
 export const CATEGORIES = [
   {
-    id: "review_high_risk", label: "Reviews that need extra care", group: "Daily work", switchable: true, emailDefault: "instant",
+    id: "review_high_risk", why: "A review for your business needs a careful look.", label: "Reviews that need extra care", group: "Daily work", switchable: true, emailDefault: "instant",
     quietExempt: false, inApp: true, noun: ["review that needs extra care", "reviews that need extra care"],
     description: "A review where a reply needs a careful look. Kabsi tells you at once.",
   },
   {
-    id: "review_new", label: "New reviews", group: "Daily work", switchable: true, emailDefault: "by_hours",
+    id: "review_new", why: "A new review arrived for your business.", label: "New reviews", group: "Daily work", switchable: true, emailDefault: "by_hours",
     quietExempt: false, inApp: true, noun: ["new review", "new reviews"],
     description: "A new review with a reply ready. At once while you are open, in the daily email outside your opening hours.",
   },
   {
-    id: "profile_urgent", label: "Urgent profile changes", group: "Daily work", switchable: false, emailDefault: "instant",
+    id: "profile_urgent", why: "A detail customers rely on changed on your Google profile.", label: "Urgent profile changes", group: "Daily work", switchable: false, emailDefault: "instant",
     quietExempt: true, inApp: true, noun: ["urgent profile change", "urgent profile changes"],
     description: "Your name, address, phone, main category, hours or open status changed on Google. This one always stays on.",
   },
   {
-    id: "profile_issue", label: "Other profile changes", group: "Daily work", switchable: true, emailDefault: "daily_digest",
+    id: "profile_issue", why: "Something changed on your Google profile.", label: "Other profile changes", group: "Daily work", switchable: true, emailDefault: "daily_digest",
     quietExempt: false, inApp: true, noun: ["profile change", "profile changes"],
     description: "A smaller change on Google, a reply Google refused, or a broken link.",
   },
   {
-    id: "approval_needed", label: "Posts and photos to approve", group: "Weekly and monthly", switchable: true, emailDefault: "daily_digest",
+    id: "approval_needed", why: "Kabsi prepared a post or photos for you to approve.", label: "Posts and photos to approve", group: "Weekly and monthly", switchable: true, emailDefault: "daily_digest",
     quietExempt: false, inApp: true, noun: ["post or photo to approve", "posts and photos to approve"],
     description: "A post or photo Kabsi prepared. Nothing goes on Google until you approve it.",
   },
   {
-    id: "weekly_report", label: "Weekly Care Report", group: "Weekly and monthly", switchable: true, emailDefault: "instant",
+    id: "weekly_report", why: "Your Weekly Care Report is sent once a week.", label: "Weekly Care Report", group: "Weekly and monthly", switchable: true, emailDefault: "instant",
     quietExempt: false, inApp: true, noun: ["Weekly Care Report", "Weekly Care Reports"],
     description: "What Kabsi watched, prepared and published, once a week.",
   },
   {
-    id: "access", label: "Google access", group: "Google access", switchable: false, emailDefault: "instant",
+    id: "access", why: "This is Kabsi's own notice of a change to your Google access.", label: "Google access", group: "Google access", switchable: false, emailDefault: "instant",
     quietExempt: false, inApp: true, noun: ["Google access notice", "Google access notices"],
     description: "A change to who can manage your Google profile, and what to do if Kabsi loses access. This one always stays on.",
   },
   {
-    id: "billing", label: "Billing and plan", group: "Trial and billing", switchable: false, emailDefault: "instant",
+    id: "billing", why: "This is about your Kabsi plan or a payment.", label: "Billing and plan", group: "Trial and billing", switchable: false, emailDefault: "instant",
     quietExempt: false, inApp: true, noun: ["billing notice", "billing notices"],
     description: "Payments, plan changes, and what happens when your trial ends. This one always stays on.",
   },
   {
-    id: "trial", label: "Trial tips", group: "Trial and billing", switchable: true, emailDefault: "instant",
+    id: "trial", why: "You are trying Kabsi, and these short emails help you get the most from it.", label: "Trial tips", group: "Trial and billing", switchable: true, emailDefault: "instant",
     quietExempt: false, inApp: false, noun: ["trial tip", "trial tips"],
     description: "A few short emails while you try Kabsi: your first win, your week, the days left.",
   },
   {
-    id: "partner", label: "Partner news", group: "Partners", switchable: true, emailDefault: "daily_digest",
+    id: "partner", why: "You are part of a Kabsi partner account.", label: "Partner news", group: "Partners", switchable: true, emailDefault: "daily_digest",
     quietExempt: false, inApp: true, noun: ["partner update", "partner updates"],
     description: "Applications, clients added and the monthly partner report.",
   },
   {
-    id: "account", label: "Your account", group: "Account and help", switchable: false, emailDefault: "instant",
+    id: "account", why: "This is about your Kabsi account.", label: "Your account", group: "Account and help", switchable: false, emailDefault: "instant",
     quietExempt: false, inApp: false, noun: ["account notice", "account notices"],
     description: "Welcome, team invitations, deleting a business. This one always stays on.",
   },
   {
-    id: "help", label: "Help from a person", group: "Account and help", switchable: false, emailDefault: "instant",
+    id: "help", why: "You asked Kabsi a question and a person replied.", label: "Help from a person", group: "Account and help", switchable: false, emailDefault: "instant",
     quietExempt: false, inApp: false, noun: ["reply from the team", "replies from the team"],
     description: "A reply from the Kabsi team to a question you asked. This one always stays on.",
   },
@@ -98,5 +100,11 @@ export const FREQUENCIES = ["default", "instant", "daily_digest", "off"] as cons
 export type Frequency = (typeof FREQUENCIES)[number];
 export const CHANNELS = ["email", "in_app"] as const;
 export type Channel = (typeof CHANNELS)[number];
+
+/** "Why you got this" for mail that is not a notification to a member. Each email of these says more itself. */
+export const SYSTEM_WHY: Record<SystemCategory, string> = {
+  direct: "You asked for this email.",
+  internal: "This is a notice for the Kabsi team.",
+};
 
 export const categoryOf = (id: string): Category | undefined => (CATEGORIES as readonly Category[]).find((c) => c.id === id);

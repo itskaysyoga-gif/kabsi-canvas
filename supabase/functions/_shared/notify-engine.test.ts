@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import type { Frequency } from "./notify-categories.ts";
 import { type Deps, type EmailState, type NewRow, type NotifyInput, type Outgoing, releaseDue, runNotify, type StoredItem } from "./notify-engine.ts";
-import type { EmailContent } from "./email-render.ts";
+import type { EmailContent } from "./email/template.ts";
 
 const LOC = "00000000-0000-4000-8000-0000000000c1";
 const OWNER = { email: "owner@example.test", userId: "00000000-0000-4000-8000-0000000000a1", role: "owner" };
@@ -11,7 +11,7 @@ const ALERT = { email: "front-desk@example.test", userId: null, role: "alert" };
 type Stored = NewRow & { id: string; email_id: string | null };
 
 // An in-memory outbox: the same contract as the database wiring in notify.ts.
-function fake(opts: { now?: string; prefs?: Record<string, Frequency>; hours?: string | null; paused?: string | null; people?: typeof OWNER[]; failFirstSend?: boolean } = {}) {
+function fake(opts: { now?: string; prefs?: Record<string, Frequency>; hours?: string | null; paused?: string | null; people?: typeof OWNER[]; failFirstSend?: boolean; suppressed?: string[] } = {}) {
   const rows: Stored[] = [];
   const sent: Outgoing[] = [];
   const built: string[] = [];
@@ -48,6 +48,8 @@ function fake(opts: { now?: string; prefs?: Record<string, Frequency>; hours?: s
           email_due_at: r.email_due_at!, email_content: r.email_content!,
         }));
     },
+    suppressed: async (address) => (opts.suppressed ?? []).includes(address),
+    unsubscribeLinks: async (address, _u, _l, category) => ({ page: `https://kabsi.test/unsubscribe?a=${address}&c=${category}`, oneClick: `https://fn.test/email/unsubscribe?a=${address}&c=${category}` }),
     log: () => {},
   };
   return { deps, rows, sent, built, setNow: (iso: string) => { clock = new Date(iso); } };
@@ -204,7 +206,7 @@ Deno.test("system mail goes straight to the outbox with its own dedupe key and n
   assert.equal(r.sent, 1);
   assert.equal(f.rows.length, 0);
   assert.equal(f.sent[0]!.dedupeKey, "profile_check:abc:visitor@example.test");
-  assert.equal(f.sent[0]!.unsubscribe, false);
+  assert.equal(f.sent[0]!.unsubscribeUrl, null);
 });
 
 Deno.test("an unknown category is refused", async () => {
@@ -215,5 +217,61 @@ Deno.test("only mail the owner can switch off carries an unsubscribe", async () 
   const f = fake();
   await runNotify(input({ key: "r:1", to: [OWNER] }), f.deps);
   await runNotify(input({ key: "a:1", category: "access", kind: "access_granted", to: [OWNER] }), f.deps);
-  assert.deepEqual(f.sent.map((s) => [s.category, s.unsubscribe]), [["review_new", true], ["access", false]]);
+  assert.deepEqual(f.sent.map((s) => [s.category, !!s.unsubscribeUrl]), [["review_new", true], ["access", false]]);
+  assert.match(f.sent[0]!.html, /Unsubscribe from these emails/);
+  assert.doesNotMatch(f.sent[1]!.html, /Unsubscribe from these emails/);
+});
+
+Deno.test("a suppressed address is never sent to: not now, not from quiet hours, not in a digest, not system mail", async () => {
+  const f = fake({ suppressed: [OWNER.email, "visitor@example.test"] });
+  const now = await runNotify(input({ key: "s:1", to: [OWNER, MANAGER] }), f.deps);
+  assert.equal(now.sent, 1);
+  assert.deepEqual(f.sent.map((s) => s.to), [MANAGER.email]);
+  assert.deepEqual(states(f.rows), [[OWNER.email, "skipped"], [MANAGER.email, "sent"]]);
+
+  const night = fake({ now: "2026-11-10T21:30:00Z", suppressed: [OWNER.email] });
+  await runNotify(input({ key: "s:2", category: "review_high_risk", to: [OWNER] }), night.deps);
+  night.setNow("2026-11-11T06:05:00Z");
+  await releaseDue(night.deps);
+  assert.equal(night.sent.length, 0);
+
+  const day = fake({ suppressed: [OWNER.email] });
+  await runNotify(input({ key: "s:3", category: "approval_needed", to: [OWNER] }), day.deps);
+  day.setNow("2026-11-10T17:05:00Z");
+  await releaseDue(day.deps);
+  assert.equal(day.sent.length, 0);
+
+  const sys = await runNotify({ category: "direct", kind: "profile_check", key: "pc:1", to: [{ email: "visitor@example.test", userId: null }], content: content("Check") }, f.deps);
+  assert.equal(sys.skipped, 1);
+  assert.equal(f.sent.length, 1);
+});
+
+Deno.test("every email carries why you got this, the settings link, the legal seller and the Google notice", async () => {
+  const f = fake();
+  await runNotify(input({ key: "w:1", to: [OWNER] }), f.deps);
+  await runNotify({ category: "direct", kind: "x", key: "w:2", to: [{ email: "v@example.test", userId: null }], content: content("Direct") }, f.deps);
+  for (const m of f.sent) {
+    assert.match(m.html, /Why you got this:/);
+    assert.match(m.html, /Email settings/);
+    assert.match(m.html, /Hussein Slim, Dubai, United Arab Emirates/);
+    assert.match(m.html, /not affiliated with, sponsored by or endorsed by Google/);
+    assert.match(m.text, /Why you got this:/);
+    assert.match(m.text, /Email settings: https:\/\/kabsi.test\/app\/settings#choices/);
+  }
+  assert.match(f.sent[0]!.html, /A new review arrived for your business\./);
+  assert.match(f.sent[1]!.html, /You asked for this email\./);
+});
+
+Deno.test("mail with no business (a partner, a deleted business) is sent without a notice row and still carries the footer", async () => {
+  const f = fake();
+  const r = await runNotify({
+    category: "partner", kind: "partner_invoice", key: "inv:1", partnerId: "p1", to: [{ email: "partner@example.test", userId: null }], content: content("Invoice"),
+  }, f.deps);
+  assert.equal(r.sent, 1);
+  assert.equal(f.rows.length, 0);
+  assert.match(f.sent[0]!.html, /You are part of a Kabsi partner account\./);
+  const gone = await runNotify({
+    category: "account", kind: "deletion_done", key: "del:1", locationId: null, to: [{ email: "owner@example.test", userId: null }], content: content("Deleted"),
+  }, f.deps);
+  assert.equal(gone.sent, 1);
 });

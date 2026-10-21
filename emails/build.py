@@ -2,10 +2,10 @@
 Run: python3 emails/build.py  → writes emails/auth/*.html
 Paste each file into Supabase → Authentication → Emails → <template> (Source)."""
 import pathlib
-LOGO = "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/brand/mark.png"
+LOGO = "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/brand/mark.png?v=2"
 FONT = "'Readex Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
 
-def layout(preheader, title, intro, code_label, after, note):
+def layout(preheader, title, intro, code_label, after, note, why):
     return f"""<!doctype html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -17,7 +17,7 @@ def layout(preheader, title, intro, code_label, after, note):
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#F6F4EF;">{preheader}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F6F4EF;">
 <tr><td align="center" style="padding:32px 16px;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
 <tr><td style="padding:0 4px 20px 4px;">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
 <td style="vertical-align:middle;"><img src="{LOGO}" width="32" height="32" alt="Kabsi" style="display:block;border:0;width:32px;height:32px;"></td>
@@ -36,7 +36,9 @@ def layout(preheader, title, intro, code_label, after, note):
 </td></tr>
 <tr><td style="padding:20px 4px 0 4px;font-family:{FONT};font-size:13px;line-height:1.6;color:#5E5B55;">
 Nothing is published until you approve it.<br>
-Questions? Reply to this email or write to <a href="mailto:hello@kabsi.co" style="color:#111111;">hello@kabsi.co</a>.<br>
+<strong style="color:#111111;">Why you got this:</strong> {why}<br>
+<a href="https://kabsi.co/app/settings#choices" style="color:#111111;text-decoration:underline;">Email settings</a><br>
+Questions? Reply to this email or write to <a href="mailto:hello@kabsi.co" style="color:#111111;">hello@kabsi.co</a>. You can also message us on <a href="https://wa.me/12014835474?text=Hello%20Kabsi%2C%20I%20have%20a%20question%20about%20an%20email%20I%20got%20from%20Kabsi." style="color:#111111;">WhatsApp +1 201-483-5474</a>.<br>
 Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.<br>
 Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co
 </td></tr>
@@ -52,22 +54,26 @@ T = {
    layout("Your code to log in to Kabsi.", "Your login code",
      "Use this code to log in to Kabsi.", "Login code",
      "The code works once and expires soon.",
-     "If you didn't try to log in, you can ignore this email. Nobody can log in without the code.")),
+     "If you didn't try to log in, you can ignore this email. Nobody can log in without the code.",
+     "you asked to log in to Kabsi. Sign-in codes are not marketing and cannot be switched off.")),
  "confirm-signup.html": ("Confirm signup", "Your Kabsi code",
    layout("Your code to finish creating your Kabsi account.", "Welcome to Kabsi",
      "Enter this code to confirm your email and finish setting up your account.", "Your code",
      "The code works once and expires soon.",
-     "If you didn't sign up for Kabsi, you can ignore this email. No account is created without the code.")),
+     "If you didn't sign up for Kabsi, you can ignore this email. No account is created without the code.",
+     "you asked to create a Kabsi account. Sign-in codes are not marketing and cannot be switched off.")),
  "change-email.html": ("Change email address", "Confirm your new email for Kabsi",
    layout("Confirm your new email address.", "Confirm your new email",
      "Enter this code in Kabsi to confirm <strong>{{ .NewEmail }}</strong> as your new login email.", "Your code",
      "The code works once and expires soon.",
-     "If you didn't ask to change your email, reply to this email and we'll help.")),
+     "If you didn't ask to change your email, reply to this email and we'll help.",
+     "you asked to change the email address of your Kabsi account. Security emails cannot be switched off.")),
  "reauthentication.html": ("Reauthentication", "Your Kabsi confirmation code",
    layout("Confirm it's you.", "Confirm it's you",
      "Enter this code in Kabsi to confirm this change to your account.", "Your code",
      "The code works once and expires soon.",
-     "If you didn't request this, reply to this email and we'll help.")),
+     "If you didn't request this, reply to this email and we'll help.",
+     "Kabsi asked you to confirm a change to your account. Security emails cannot be switched off.")),
 }
 out = pathlib.Path(__file__).parent / "auth"; out.mkdir(exist_ok=True)
 index = ["# Supabase Auth email templates", "", "| Template in Supabase | Subject | File |", "|---|---|---|"]

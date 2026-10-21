@@ -3,6 +3,7 @@
 // `website` is a honeypot: humans never fill it. Rate limit uses a daily-salted hash, never the raw IP.
 import { admin, captureError, CORS, esc, fail, json, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { notify } from "../_shared/notify.ts";
+import * as copy from "../_shared/email/copy.ts";
 
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 
@@ -39,10 +40,7 @@ Deno.serve(async (req) => {
     const lines = Object.entries(row).filter(([, v]) => v).map(([k, v]) => `<p style="margin:0 0 6px 0;"><strong>${esc(k)}:</strong> ${esc(String(v))}</p>`).join("");
     await notify({
       category: "internal", kind: "lead_alert", key: `lead:${data.id}`, to: [{ email: "hello@kabsi.co", userId: null }],
-      content: {
-        subject: `New ${kind} lead: ${name}`, preheader: `New ${kind} lead`, title: `New ${kind} lead`, bodyHtml: lines,
-        text: Object.entries(row).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join("\n"),
-      },
+      content: copy.leadAlert(kind, name, email, lines, Object.entries(row).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join("\n")),
     }).catch((e) => captureError("lead", e));
     return json({ ok: true });
   } catch (e) {

@@ -96,7 +96,7 @@ export function accessChangeEmail(n: Notice, appUrl: string): {
   if (n.change === "granted") {
     const next = n.nextStep ?? "";
     return {
-      subject: `Kabsi is now a Manager of ${n.name} on Google`,
+      subject: `${n.name}: Kabsi is now a Manager on Google`,
       preheader: "A change to who can manage your Google profile.",
       title: "Kabsi now has Manager access",
       bodyHtml: p(`What changed: on ${when} Kabsi accepted your invitation and became a Manager of <strong>${name}</strong>'s Google profile, through the Kabsi Clients group. You stay the owner.`)
@@ -111,20 +111,20 @@ export function accessChangeEmail(n: Notice, appUrl: string): {
   if (n.change === "removing") {
     const due = n.dueAt ? day(n.dueAt) : "within 7 business days";
     return {
-      subject: `Kabsi is disconnecting from ${n.name}`,
+      subject: `${n.name}: Kabsi is disconnecting`,
       preheader: "Kabsi has stopped. Our team removes its Google access.",
       title: "Kabsi has stopped",
       bodyHtml: p(`You asked on ${when} to disconnect Kabsi from <strong>${name}</strong>. Kabsi has stopped: no new drafts, no emails about reviews, and nothing more is sent to Google. Approvals that were waiting were cancelled.`)
-        + p(`What is still to change: Kabsi could not remove its own Manager access automatically, so a person on our team removes it by <strong>${esc(due)}</strong>. We email you again when it is done.`)
+        + p(`What is still to change: Kabsi could not remove its own Manager access this time, so a person on our team removes it by <strong>${esc(due)}</strong>. We email you again when it is done.`)
         + p(`You can also remove it yourself now: ${esc(CHECK_STEPS)} Remove Kabsi Clients there.`)
         + p("You stay the owner of your profile. Your review link and cards keep working until your plan ends."),
-      text: `You asked on ${when} to disconnect Kabsi from ${n.name}. Kabsi has stopped: no new drafts, no emails about reviews, and nothing more is sent to Google. Approvals that were waiting were cancelled.\n\nKabsi could not remove its own Manager access automatically, so a person on our team removes it by ${due}. We email you again when it is done.\n\nYou can also remove it yourself now: ${CHECK_STEPS} Remove Kabsi Clients there.\n\nYou stay the owner of your profile. Your review link and cards keep working until your plan ends.`,
+      text: `You asked on ${when} to disconnect Kabsi from ${n.name}. Kabsi has stopped: no new drafts, no emails about reviews, and nothing more is sent to Google. Approvals that were waiting were cancelled.\n\nKabsi could not remove its own Manager access this time, so a person on our team removes it by ${due}. We email you again when it is done.\n\nYou can also remove it yourself now: ${CHECK_STEPS} Remove Kabsi Clients there.\n\nYou stay the owner of your profile. Your review link and cards keep working until your plan ends.`,
       button: { label: "Open Kabsi", url: `${appUrl}/app/settings` },
       note: "This is Kabsi's own notice of a change to your Google access.",
     };
   }
   return {
-    subject: `Kabsi is disconnected from ${n.name}`,
+    subject: `${n.name}: Kabsi is disconnected`,
     preheader: "Kabsi no longer has access to your Google profile.",
     title: "Kabsi is disconnected",
     bodyHtml: p(`What changed: on ${when} Kabsi removed its Manager access to <strong>${name}</strong>'s Google profile. Kabsi no longer reads or changes anything on it, and approvals that were waiting were cancelled.`)

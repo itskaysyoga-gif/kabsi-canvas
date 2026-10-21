@@ -7,8 +7,9 @@
 //   POST /partner/billing  internal (x-cron-secret, pg_cron daily 06:10 UTC)  → last month's invoices + emails
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 import { PLAN_LABEL } from "../_shared/plans.ts";
-import { admin, APP_URL, captureError, CORS, esc, fail, isInternal, jobLog, json, log } from "../_shared/kabsi.ts";
+import { admin, APP_URL, captureError, CORS, fail, isInternal, jobLog, json, log } from "../_shared/kabsi.ts";
 import { notify } from "../_shared/notify.ts";
+import * as copy from "../_shared/email/copy.ts";
 
 const FN = "partner";
 const TRC20 = "TMbdkH9hY14RGgz9N99DCXu3LXGDZBDqMe";
@@ -47,7 +48,6 @@ function rpcFail(error: { message?: string; code?: string }) {
 }
 const money = (n: number | string) => `$${Number(n).toFixed(2)}`;
 const monthLabel = (d: string) => new Date(`${d.slice(0, 10)}T00:00:00Z`).toLocaleString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
-const p = (html: string) => `<p style="margin:0 0 14px 0;">${html}</p>`;
 
 async function recipients(partnerId: string): Promise<{ email: string; userId: null }[]> {
   const { data, error } = await admin().rpc("partner_recipients", { p_partner: partnerId });
@@ -67,24 +67,10 @@ async function invite(req: Request) {
 
   const { data: partner } = await admin().from("partners").select("name, handle").eq("id", b.partner_id).single();
   const link = `${APP_URL}/start?p=${encodeURIComponent(partner!.handle)}&i=${inviteId}`;
-  const who = esc(partner!.name);
-  const biz = b.name?.trim() ? ` for <strong>${esc(b.name.trim())}</strong>` : "";
-  const bizText = b.name?.trim() ? ` for ${b.name.trim()}` : "";
   // Sent because the partner just invited this person: no choices and no quiet hours (category direct).
   const sent = await notify({
     category: "direct", kind: "partner_invite", key: `partner_invite:${inviteId}`, partnerId: b.partner_id, to: [{ email, userId: null }],
-    content: {
-      subject: `${partner!.name} invited you to Kabsi`,
-      preheader: "Reply to every Google review, with your approval.",
-      title: "You're invited to Kabsi",
-      bodyHtml: p(`<strong>${who}</strong> invited you to use Kabsi${biz}.`) +
-        p("When a new Google review arrives, Kabsi emails you a reply already drafted in the reviewer's language. Nothing goes on Google until you approve it.") +
-        p("Setup has two steps: find your business, then add Kabsi as a Manager on your Google profile.") +
-        p(`There's nothing to pay Kabsi: your plan comes through ${who}.`),
-      button: { label: "Set up Kabsi", url: link },
-      note: "If you weren't expecting this, you can ignore this email.",
-      text: `${partner!.name} invited you to use Kabsi${bizText}.\n\nWhen a new Google review arrives, Kabsi emails you a reply already drafted in the reviewer's language. Nothing goes on Google until you approve it.\n\nSet up Kabsi: ${link}\n\nThere's nothing to pay Kabsi: your plan comes through ${partner!.name}.`,
-    },
+    content: copy.partnerInvite(partner!.name, b.name?.trim() || null, link),
   }).catch(async (e) => { await captureError(FN, e, { route: "invite" }); return null; });
   const emailed = !!sent && sent.sent > 0;
   log(FN, { ok: true, route: "invite", emailed });
@@ -104,17 +90,12 @@ async function claim(req: Request) {
   const { data: inv } = await admin().from("partner_invoices").select("month, amount_usd, partners(name)").eq("id", b.invoice_id).single();
   const partnerName = (inv?.partners as unknown as { name: string } | null)?.name ?? "A partner";
   const net = b.network === "trc20" ? "USDT TRC20" : "Binance Pay";
-  const check = b.network === "trc20" ? ` <a href="https://tronscan.org/#/transaction/${encodeURIComponent(tx)}" style="color:#111111;">Check on Tronscan</a>` : "";
   await notify({
     category: "internal", kind: "usdt_claim_alert", key: `usdt_claim:${claimId}`, to: [{ email: "hello@kabsi.co", userId: null }],
-    content: {
-      subject: `USDT to check: ${partnerName}, ${money(inv!.amount_usd)}`,
-      preheader: "A partner says they paid.", title: "Payment to check",
-      bodyHtml: p(`<strong>${esc(partnerName)}</strong> says they paid the ${monthLabel(inv!.month)} invoice (${money(inv!.amount_usd)}).`) +
-        p(`${net}: <code>${esc(tx)}</code>.${check}`) + p("Confirm it in Staff once the money is in the wallet."),
-      button: { label: "Open Staff", url: `${APP_URL}/staff` },
-      text: `${partnerName} says they paid the ${monthLabel(inv!.month)} invoice (${money(inv!.amount_usd)}).\n${net}: ${tx}\n\nConfirm in Staff: ${APP_URL}/staff`,
-    },
+    content: copy.usdtClaim({
+      who: partnerName, whoLine: `the ${monthLabel(inv!.month)} invoice`, reference: String(claimId), net, tx, tronscan: b.network === "trc20",
+      startsPlan: false, amount: Number(inv!.amount_usd),
+    }, APP_URL),
   }).catch((e) => captureError(FN, e, { route: "claim" }));
   log(FN, { ok: true, route: "claim" });
   return json({ ok: true, claim_id: claimId });
@@ -132,17 +113,12 @@ async function planClaim(req: Request) {
   const { data: loc } = await admin().from("locations").select("name").eq("id", b.location_id).single();
   const { data: c } = await admin().from("usdt_claims").select("amount_usd").eq("id", claimId).single();
   const net = b.network === "trc20" ? "USDT TRC20" : "Binance Pay";
-  const check = b.network === "trc20" ? ` <a href="https://tronscan.org/#/transaction/${encodeURIComponent(tx)}" style="color:#111111;">Check on Tronscan</a>` : "";
   await notify({
     category: "internal", kind: "usdt_claim_alert", key: `usdt_claim:${claimId}`, locationId: b.location_id, to: [{ email: "hello@kabsi.co", userId: null }],
-    content: {
-      subject: `USDT to check: ${loc?.name ?? "a business"}, ${money(c?.amount_usd ?? 0)}`,
-      preheader: "An owner says they paid.", title: "Payment to check",
-      bodyHtml: p(`<strong>${esc(loc?.name ?? "A business")}</strong> says they paid for ${PLAN_LABEL[b.item] ?? b.item} (${money(c?.amount_usd ?? 0)}).`) +
-        p(`${net}: <code>${esc(tx)}</code>.${check}`) + p("Confirm it in Staff once the money is in the wallet. Confirming starts the plan."),
-      button: { label: "Open Staff", url: `${APP_URL}/staff` },
-      text: `${loc?.name ?? "A business"} says they paid for ${PLAN_LABEL[b.item] ?? b.item} (${money(c?.amount_usd ?? 0)}).\n${net}: ${tx}\n\nConfirm in Staff: ${APP_URL}/staff`,
-    },
+    content: copy.usdtClaim({
+      who: loc?.name ?? "A business", whoLine: `for ${PLAN_LABEL[b.item] ?? b.item}`, reference: String(claimId), net, tx, tronscan: b.network === "trc20",
+      startsPlan: true, amount: Number(c?.amount_usd ?? 0),
+    }, APP_URL),
   }).catch((e) => captureError(FN, e, { route: "plan-claim" }));
   log(FN, { ok: true, route: "plan-claim", location_id: b.location_id });
   return json({ ok: true, claim_id: claimId });
@@ -164,23 +140,20 @@ async function decide(req: Request) {
       const { data: plan } = await admin().from("plans").select("starts_at, ends_at")
         .eq("location_id", c.location_id).eq("status", "active").order("ends_at", { ascending: false }).limit(1).maybeSingle();
       const until = plan?.ends_at ? new Date(plan.ends_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : null;
+      const { data: bizRow } = await admin().from("locations").select("name").eq("id", c.location_id).maybeSingle();
+      const bizName = (bizRow?.name as string | undefined) ?? "Your business";
       const line = `We received your payment of ${money(c.amount_usd ?? 0)} for ${PLAN_LABEL[c.item ?? ""] ?? "Kabsi Pro"}.${until ? ` Your plan runs until ${until}.` : " Your plan starts as soon as Kabsi's access to your Google profile is working."} Thank you.`;
       await notify({
         category: "billing", kind: "payment_received", key: `payment_received:${b.claim_id}`, locationId: c.location_id, to: "owners",
         inApp: { title: "Payment received", link: "/app/plan" },
-        content: { subject: "Payment received", preheader: "Thank you.", title: "Payment received", bodyHtml: p(esc(line)), button: { label: "Open Kabsi", url: `${APP_URL}/app` }, text: `${line}\n\n${APP_URL}/app` },
+        content: copy.paymentReceived(bizName, line, APP_URL),
       }).catch((e) => captureError(FN, e, { route: "decide" }));
     }
     const month = (c?.partner_invoices as unknown as { month: string } | null)?.month;
     if (c?.partner_id && month) {
       await notify({
         category: "partner", kind: "payment_received", key: `payment_received:${b.claim_id}`, partnerId: c.partner_id, to: await recipients(c.partner_id),
-        content: {
-          subject: `Payment received: ${monthLabel(month)}`, preheader: "Thank you.", title: "Payment received",
-          bodyHtml: p(`We received your payment of ${money(c.amount_usd ?? 0)} for ${monthLabel(month)}. Thank you.`),
-          button: { label: "Open partner page", url: `${APP_URL}/partner` },
-          text: `We received your payment of ${money(c.amount_usd ?? 0)} for ${monthLabel(month)}. Thank you.\n\n${APP_URL}/partner`,
-        },
+        content: copy.partnerPaid(monthLabel(month), Number(c.amount_usd ?? 0), APP_URL),
       }).catch((e) => captureError(FN, e, { route: "decide" }));
     }
   }
@@ -200,21 +173,12 @@ async function billing(req: Request) {
   let emailed = 0;
   for (const inv of invoices) {
     const label = monthLabel(inv.month);
-    const free = inv.free_count ? p(`Free this month (founding partner, first 30 days): ${inv.free_count}`) : "";
-    const lines = p(`Active locations: <strong>${inv.active_count}</strong>`) + free +
-      p(`Rate: ${money(inv.rate_usd)} per location`) + p(`<strong>Total: ${money(inv.amount_usd)} USDT</strong>`);
-    const pay = inv.status === "unpaid"
-      ? p(`Pay in USDT on TRC20 to <code>${TRC20}</code>, or with Binance Pay to ID <code>${BINANCE_PAY_ID}</code>.`) +
-        p("Then open your partner page and paste the transaction ID so we can match it.")
-      : p("Nothing to pay this month.");
     const r = await notify({
       category: "partner", kind: "partner_invoice", key: `partner_invoice:${inv.id}`, partnerId: inv.partner_id, to: await recipients(inv.partner_id),
-      content: {
-        subject: `Kabsi invoice for ${label}: ${money(inv.amount_usd)}`,
-        preheader: `${inv.active_count} active locations in ${label}.`, title: `Invoice for ${label}`,
-        bodyHtml: lines + pay, button: { label: "Open partner page", url: `${APP_URL}/partner` },
-        text: `Kabsi invoice for ${label}\nActive locations: ${inv.active_count}\n${inv.free_count ? `Free (founding, first 30 days): ${inv.free_count}\n` : ""}Rate: ${money(inv.rate_usd)} per location\nTotal: ${money(inv.amount_usd)} USDT\n\n${inv.status === "unpaid" ? `Pay in USDT on TRC20 to ${TRC20}, or with Binance Pay to ID ${BINANCE_PAY_ID}. Then paste the transaction ID on your partner page: ${APP_URL}/partner` : "Nothing to pay this month."}`,
-      },
+      content: copy.partnerInvoice({
+        label, amount: Number(inv.amount_usd), active: inv.active_count, free: inv.free_count, rate: Number(inv.rate_usd), unpaid: inv.status === "unpaid",
+        trc20: TRC20, binanceId: BINANCE_PAY_ID,
+      }, APP_URL),
     }).catch(async (e) => { await captureError(FN, e, { route: "billing", invoice: inv.id }); return null; });
     if (r) emailed += r.sent;
   }
