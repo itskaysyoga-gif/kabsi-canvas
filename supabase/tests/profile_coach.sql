@@ -105,10 +105,10 @@ select is(pg_temp.items() ->> 'website_tracking', 'done', 'with the tag it is do
 -- When the profile is read -----------------------------------------------------------------------------------------------------------------------------
 update public.coach_profile set read_at = now() - interval '8 days' where location_id = '00000000-0000-4000-8000-0000000000c1';
 select is(public.coach_read_due('00000000-0000-4000-8000-0000000000c1'), true, 'a week later it is due again');
-update public.locations set concierge = true where id = '00000000-0000-4000-8000-0000000000c1';
+update public.locations set concierge = true, google_location_id = 'locations/concierge-coach' where id = '00000000-0000-4000-8000-0000000000c1';
 select is(public.coach_read_due('00000000-0000-4000-8000-0000000000c1'), false, 'a concierge profile is never read');
 select is(private.coach_tasks('00000000-0000-4000-8000-0000000000c1'), '{}'::text[], 'and has no coach tasks');
-update public.locations set concierge = false where id = '00000000-0000-4000-8000-0000000000c1';
+update public.locations set concierge = false, google_location_id = 'locations/mock-coach' where id = '00000000-0000-4000-8000-0000000000c1';
 
 -- Plans: Essentials sees the checklist and no actions; no plan sees nothing (K-126) -----------------------------------------------------------------------------
 update public.subscriptions s set plan = 'essentials' from public.locations l
