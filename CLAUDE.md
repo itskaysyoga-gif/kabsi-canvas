@@ -6,7 +6,7 @@ Kabsi looks after a local business's Google Business Profile: a reply ready for 
 
 1. `docs/KABSI-PLAN.md` sections 1 (guardrails) and 2 (rules for every build chat), then the section for your task.
 2. `docs/KABSI-PROGRESS.md`.
-3. Only the decisions your task names, in `docs/source/` (KABSI-AUDIT K-01 to K-121, KABSI-GROWTH G-01 to G-47, KABSI-DESIGN, KABSI-VIDEO).
+3. Only the decisions your task names, in `docs/source/` (KABSI-AUDIT K-01 to K-146, KABSI-GROWTH G-01 to G-47, KABSI-DESIGN, KABSI-VIDEO).
 
 One task per chat. The task ID comes from the prompt. Nothing else is in scope.
 
@@ -24,5 +24,5 @@ One task per chat. The task ID comes from the prompt. Nothing else is in scope.
 
 - `main` deploys the website on Vercel and every Edge Function and the Worker on push. Keep `main` working; never force-push, rebase, amend or squash pushed commits; never hand-edit `src/routeTree.gen.ts`.
 - One branch and one pull request per task (`claude/<task-id>`). Migrations are new files, additive first; apply them yourself with the Supabase connector before merging, without asking.
-- Run the checks in plan section 2.4, open the pull request, make sure CI is green, update `docs/KABSI-PROGRESS.md` on the branch, merge the pull request yourself (merge commit, never on red CI), run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Hussein runs the project (plan R-26).
+- Run the checks in plan section 2.4, open the pull request, make sure CI is green, update `docs/KABSI-PROGRESS.md` on the branch, merge the pull request yourself (merge commit, never on red CI), run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Rashid runs the project (plan R-41).
 - Stop and ask only before dropping tables or columns or deleting real data, before a step the task marks "Ask Hussein before", or when a task needs a manual step of Hussein's that PROGRESS does not record as done.
