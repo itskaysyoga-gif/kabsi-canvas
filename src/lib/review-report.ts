@@ -2,6 +2,7 @@
 // Google's categories in plain words, an evidence checklist, a link to Google's Reviews Management Tool, and tracks what
 // the owner reports back (reported, Google answered, still showing, removed, one appeal). No model is called, nothing is
 // sent to Google by Kabsi, and Kabsi never says a review will be removed: only Google decides.
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 
 /** Where the category list and the steps below were read, and when (Google's own help pages). */
@@ -232,4 +233,14 @@ export async function startReport(reviewId: string, category: string, evidence: 
 export async function advanceReport(reportId: string, to: ReportState) {
   const { error } = await supabase.rpc("advance_review_report", { p_report: reportId, p_to: to });
   if (error) throw friendly(error.message);
+}
+
+/** The reports of one business, shared by every review's sheet and the reminder card. */
+export function useReports(locationId: string | undefined) {
+  return useQuery({
+    queryKey: ["review-reports", locationId],
+    queryFn: () => loadReports(locationId!),
+    enabled: !!locationId,
+    staleTime: 30_000,
+  });
 }

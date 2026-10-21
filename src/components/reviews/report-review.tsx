@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { ExternalLink, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,13 +19,13 @@ import {
   GOOGLE_CHECKED,
   GOOGLE_POLICY_URL,
   GOOGLE_REPORT_HELP_URL,
-  loadReports,
   nextSteps,
   REPORT_STEPS,
   REVIEWS_TOOL_URL,
   startReport,
   STATE_LABEL,
   type ReportState,
+  useReports,
   type ReviewReport,
 } from "@/lib/review-report";
 import { cn } from "@/lib/utils";
@@ -37,16 +37,6 @@ const STEP_BUTTON: Record<ReportState, string> = {
   removed: "It was removed",
   appealed: "I sent the appeal",
 };
-
-/** The reports of one business, shared by every review's sheet and the reminder card. */
-export function useReports(locationId: string | undefined) {
-  return useQuery({
-    queryKey: ["review-reports", locationId],
-    queryFn: () => loadReports(locationId!),
-    enabled: !!locationId,
-    staleTime: 30_000,
-  });
-}
 
 /**
  * "Report this review" (P0.8-11, K-139). Pro. A guide for the owner: Google's categories in plain words, what to gather,
