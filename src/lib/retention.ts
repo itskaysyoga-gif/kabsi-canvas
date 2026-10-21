@@ -44,7 +44,7 @@ export const RETENTION_ROWS: RetentionRow[] = [
     dataClass: "google_performance",
     keepDays: 30,
     data: "Google's performance figures, such as rating snapshots",
-    kept: "30 days; fetched again when needed",
+    kept: "30 days; fetched again when needed. The calls, clicks, views and search terms in Insights are read when you open the screen and are not stored",
     why: "Google's API policy",
   },
   {
