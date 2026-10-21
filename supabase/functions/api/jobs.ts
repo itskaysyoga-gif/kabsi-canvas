@@ -35,6 +35,8 @@ import {
 import { accessJob, deletionsJob, ratingsJob, renewalsJob, trialsJob, weeklyJob } from "./cron.ts";
 import { photoFileStore, removeDuePhotoFiles } from "../_shared/retention.ts";
 import { detectTasks } from "../_shared/tasks.ts";
+import { type Cadence, careMonth, type Planned } from "../_shared/posts/plan.ts";
+import { checkContext, postMaterial } from "../_shared/posts/context.ts";
 import { type CoachRefreshDeps, refreshCoach } from "../_shared/coach/refresh.ts";
 import { type HolidayAsk, type HolidayAskDeps, sendHolidayAsks } from "../_shared/holiday.ts";
 import { sendTeamInvite, type TeamInvite, teamInviteEmail } from "../_shared/team.ts";
@@ -164,9 +166,21 @@ async function send(i: Item): Promise<Sent> {
     case "review_reply":
       return await sendReply(account, location, i.google_review_id ?? "", i.text ?? "");
     case "local_post": {
+      // P0.5-02: the post's one photo goes as a link Google can fetch for one hour, made now, not at approval
+      // (Google takes a post's photo only by link).
+      let photoUrl: string | null = null;
+      if (p.photo_path) {
+        const { data, error } = await admin().storage.from("owner-photos").createSignedUrl(str(p.photo_path), 3600);
+        if (error || !data) throw new NotSent(`post photo not available: ${error?.message ?? "sign_failed"}`);
+        photoUrl = data.signedUrl;
+      }
+      const opt = (v: unknown) => (v ? str(v) : null);
+      const type = str(p.topic_type);
       const r = await createLocalPost(account, location, {
-        summary: str(p.summary), languageCode: str(p.language) || "en", ctaType: p.cta_type ? str(p.cta_type) : null,
-        ctaUrl: p.cta_url ? str(p.cta_url) : null,
+        summary: str(p.summary), languageCode: str(p.language) || "en", ctaType: opt(p.cta_type), ctaUrl: opt(p.cta_url),
+        topicType: type === "OFFER" || type === "EVENT" ? type : "STANDARD", title: opt(p.event_title), startDate: opt(p.start_date),
+        endDate: opt(p.end_date), startTime: opt(p.start_time), endTime: opt(p.end_time), terms: opt(p.offer_terms),
+        couponCode: opt(p.coupon_code), redeemUrl: opt(p.redeem_url), photoUrl,
       });
       return { ref: r.ref, response: r.response, seen: POST_SEEN[r.state] };
     }
@@ -297,6 +311,35 @@ const COACH_READ: CoachRefreshDeps = {
   },
 };
 
+// The posts care routine's database side. No model writes a post until the AI credit is on (K-146, R-43), so
+// `write` is left out and the routine asks the owner its one question instead.
+async function carePosts(locationId: string) {
+  const db = admin();
+  const { data: l, error } = await db.from("locations").select("id, time_zone, posts_per_month, post_slot, category, status, concierge, auto_posts")
+    .eq("id", locationId).maybeSingle();
+  if (error) throw error;
+  if (!l || l.status !== "active" || l.concierge || !l.auto_posts) return;
+  const tz = l.time_zone || "UTC";
+  const local = (d: Date) => new Intl.DateTimeFormat("sv-SE", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+    .format(d).replace(" ", "T");
+  const nowLocal = local(new Date());
+  const [y, m] = nowLocal.slice(0, 7).split("-").map(Number);
+  const next = m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
+  const slot = l.post_slot === "pro" ? "pro" : "retail";
+  const results = [];
+  for (const month of [nowLocal.slice(0, 7), next]) {
+    results.push(await careMonth(month, (l.posts_per_month ?? 2) as Cadence, slot, nowLocal, {
+      planned: async (mo) => ((await rpcJson<{ publish_local: string; state: string; summary: string }[]>("post_month_plan", { p_location: locationId, p_month: mo })) ?? [])
+        .map((x): Planned => ({ publishLocal: x.publish_local, state: x.state, summary: x.summary })),
+      material: () => postMaterial(db, locationId),
+      context: () => checkContext(db, locationId),
+      prepare: (p) => rpcJson<string>("post_prepare", { p_location: locationId, p_publish_local: p.publishLocal, p_summary: p.summary, p_photo: p.photoId, p_checks: [] }),
+      ask: async (mo, q) => void await rpcJson("post_question", { p_location: locationId, p_month: mo, p_question: q }),
+    }));
+  }
+  if (results.some((r) => r.prepared || r.asked)) await jobLog("care_posts", true, { location: locationId, results });
+}
+
 const HANDLERS: Record<string, JobHandler> = {
   sync_reviews: syncReviews,
   draft_reply: draftReplyJob,
@@ -311,6 +354,9 @@ const HANDLERS: Record<string, JobHandler> = {
   trial_reminders: step("trials", trialsJob),
   renewal_reminders: step("renewals", renewalsJob),
   photo_files: step("photo_files", () => removeDuePhotoFiles(photoFileStore(admin()))),
+  // P0.5-02: the posts care routine for one business, this month and the next (_shared/posts/plan.ts). It prepares
+  // only from something true and asks one question otherwise; it never publishes.
+  care_posts: async (job) => void await carePosts(job.location_id!),
   // P0.5-01: one uploaded photo, processed by the `photos` function (its own call, so a large photo has that
   // function's time to itself and never holds up the other jobs here).
   process_photo: async (job) => {

@@ -1,4 +1,4 @@
-// Post drafting shared by `content` (owner asks) and `posts-weekly` (Kabsi drafts once a week).
+// Post drafting with the model, used by `content` when the owner asks Kabsi to write (posts-weekly retired in P0.5-02).
 // Every post is a draft until the owner clicks Post on the exact text (D202).
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
 import { draftMessage, message, type Meter, newMeter, noDashes, parseJson } from "./ai.ts";

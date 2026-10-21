@@ -6,6 +6,8 @@
 //   POST { do: "post_redraft", post_id, instruction }                                  → new version
 //   POST { do: "post_publish", post_id, body }                                          → approves exactly `body`
 //   POST { do: "post_skip", post_id }
+//   POST { do: "post_save", location_id | post_id, type, summary, ... }                → the owner's own post (P0.5-02)
+//   POST { do: "posts_approve_month", location_id, month: "YYYY-MM" }                 → approves the month's posts
 //   POST { do: "keyword_suggest", location_id }                                       → search phrases for posts
 //   POST { do: "hours_publish", location_id, start_date, end_date, closed, open_time?, close_time?, reason? }
 //   POST { do: "hours_regular", location_id, week: { MONDAY: [{ open, close }], ... } }  → the weekly opening hours (P0.5-03)
@@ -20,6 +22,8 @@ import { decideChange, decisionRefusal } from "../_shared/protection.ts";
 import { auditedAdmin, auditHeaders } from "../_shared/audit.ts";
 import { CTAS, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, withFacts, writePost } from "../_shared/posts.ts";
 import { AI_BUDGET_MESSAGE, AiBudgetError } from "../_shared/ai-budget.ts";
+import { checkPost, type Issue, type PostFields, type PostType, POST_TYPES } from "../_shared/posts/checks.ts";
+import { checkContext } from "../_shared/posts/context.ts";
 
 // Google's photo categories (P0.5-01). COVER and LOGO are the owner's preferred cover photo and logo: Google decides
 // what it shows, so the screen calls them "preferred".
@@ -62,9 +66,9 @@ Deno.serve(async (req) => {
   try {
     // Resolve the location from the post when the call is about an existing post.
     let locationId = typeof b.location_id === "string" ? b.location_id : "";
-    let post: { id: string; location_id: string; owner_input: string; body: string | null; cta_type: string | null; cta_url: string | null; state: string; keywords: string[] } | null = null;
+    let post: PostRow | null = null;
     if (typeof b.post_id === "string") {
-      const { data } = await db.from("gbp_posts").select("id, location_id, owner_input, body, cta_type, cta_url, state, keywords").eq("id", b.post_id).maybeSingle();
+      const { data } = await db.from("gbp_posts").select(POST_ROW).eq("id", b.post_id).maybeSingle();
       if (!data) return fail("not_found", "Post not found.", 404);
       post = data;
       locationId = data.location_id;
@@ -105,10 +109,13 @@ Deno.serve(async (req) => {
         const cta = CTAS.includes(String(b.cta_type)) ? String(b.cta_type) : null;
         const ctaUrl = cta && cta !== "CALL" ? String(b.cta_url ?? "").trim() : null;
         if (cta && cta !== "CALL" && !/^https:\/\/[^\s]+\.[^\s]+/.test(ctaUrl ?? "")) return fail("bad_input", "The button needs a link that starts with https://");
-        const { text: body, ok: grounded, issues } = await writePost(loc, keywords, `Owner's note:\n${input}`);
-        const { data, error } = await db.from("gbp_posts").insert({ location_id: loc.id, owner_input: input, body, cta_type: cta, cta_url: ctaUrl, keywords, source: "owner" }).select("id, body").single();
+        const w = await writePost(loc, keywords, `Owner's note:\n${input}`);
+        // P0.5-02: the code checks on the draft before the owner sees it; what they find is shown with it.
+        const found = checkPost({ type: "STANDARD", summary: w.text, ctaType: cta, ctaUrl }, await checkContext(db, loc.id, input));
+        const issues = [...w.issues, ...found.map((i) => i.text)];
+        const { data, error } = await db.from("gbp_posts").insert({ location_id: loc.id, owner_input: input, body: w.text, cta_type: cta, cta_url: ctaUrl, keywords, source: "owner", checks: found }).select("id, body").single();
         if (error) throw error;
-        return json({ ok: true, post: data, grounded, issues });
+        return json({ ok: true, post: data, grounded: w.ok && !found.length, issues });
       }
       case "post_redraft": {
         if (loc.status !== "active") return fail("not_active", "Posts, photos and hours work while a free trial or a Pro plan is active. Choose a plan to continue.", 409);
@@ -130,11 +137,66 @@ Deno.serve(async (req) => {
         await db.from("gbp_posts").update({ state: "skipped" }).eq("id", post.id).eq("state", "draft");
         return json({ ok: true });
       }
+      case "post_save": {
+        // The owner's own post, typed by the owner (P0.5-02, K-80): an Update, an Offer or an Event. No model is
+        // called; the checks run before it is saved, and again before it is approved.
+        if (loc.status !== "active" || !loc.google_location_id) return fail("not_active", "This business isn't active yet.", 409);
+        if (post && post.state !== "draft") return fail("bad_input", "This post was already handled.");
+        const f = postFields(b);
+        if (!(await rateLimit(`post_save:${loc.id}`, 60, 86400, { failClosed: true }))) return fail("rate_limited", "That is enough changes for today.", 429);
+        const issues = checkPost(f, { ...(await checkContext(db, loc.id, ownerText(f), post?.id)), kabsiDraft: false });
+        if (issues.length) return checksFailed(issues);
+        const photoId = typeof b.photo_id === "string" && b.photo_id ? b.photo_id : null;
+        if (photoId) {
+          const { data: ph } = await db.from("photos").select("id").eq("id", photoId).eq("location_id", loc.id).eq("kind", "photo")
+            .in("state", ["draft", "publishing", "posted"]).is("file_deleted_at", null).maybeSingle();
+          if (!ph) return fail("bad_input", "Choose one of your own checked photos.");
+        }
+        const publishAt = typeof b.publish_at === "string" && !Number.isNaN(Date.parse(b.publish_at)) ? new Date(b.publish_at).toISOString() : null;
+        if (publishAt && Date.parse(publishAt) < Date.now()) return fail("bad_input", "Choose a time that is still to come.");
+        const row = {
+          location_id: loc.id, owner_input: f.summary, body: f.summary, source: "owner", topic_type: f.type,
+          cta_type: f.ctaType ?? null, cta_url: f.ctaType && f.ctaType !== "CALL" ? f.ctaUrl ?? null : null,
+          event_title: f.title ?? null, start_date: f.startDate ?? null, end_date: f.endDate ?? null, start_time: f.startTime ?? null,
+          end_time: f.endTime ?? null, offer_terms: f.terms ?? null, coupon_code: f.couponCode ?? null, redeem_url: f.redeemUrl ?? null,
+          photo_id: photoId, publish_at: publishAt, recurs_monthly: f.type === "STANDARD" && b.recurs_monthly === true, checks: [],
+        };
+        const { data, error } = post
+          ? await db.from("gbp_posts").update(row).eq("id", post.id).eq("state", "draft").select("id").single()
+          : await db.from("gbp_posts").insert(row).select("id").single();
+        if (error) throw error;
+        return json({ ok: true, post: data });
+      }
+      case "posts_approve_month": {
+        // "Approve the month" (K-24): each prepared post of that month is its own approval and publication, and goes
+        // to Google at its own time from Kabsi's queue. A post that fails a check stays for the owner.
+        if (loc.status !== "active" || !loc.google_location_id) return fail("not_active", "This business isn't active yet.", 409);
+        const month = String(b.month ?? "");
+        if (!/^\d{4}-\d{2}$/.test(month)) return fail("bad_input", "Choose a month.");
+        const { data: plan } = await db.rpc("post_month_plan", { p_location: loc.id, p_month: month });
+        const ids = ((plan ?? []) as { id: string; state: string }[]).filter((x) => x.state === "draft").map((x) => x.id);
+        const { data: rows, error } = ids.length ? await db.from("gbp_posts").select(POST_ROW).in("id", ids) : { data: [], error: null };
+        if (error) throw error;
+        const ctx = await checkContext(db, loc.id);
+        const approved = [], held = [];
+        for (const r of (rows ?? []) as PostRow[]) {
+          const f = fieldsOf(r);
+          const issues = checkPost(f, { ...ctx, allowedText: `${ctx.allowedText}\n${ownerText(f)}`, recent: ctx.recent.filter((x) => x !== r.body), kabsiDraft: r.source === "auto" });
+          if (issues.length) { held.push({ post_id: r.id, issues }); continue; }
+          approved.push({ post_id: r.id, ...(await approveChange(req, user.id, "local_post", r.id, { summary: f.summary, language: postLanguage(f.summary) })) });
+        }
+        return json({ ok: true, approved, held });
+      }
       case "post_publish": {
         if (!post || post.state !== "draft") return fail("bad_input", "This post was already handled.");
         const text = String(b.body ?? "").trim();
         if (text.length < 10 || text.length > 1500) return fail("bad_text", "Posts must be between 10 and 1,500 characters.");
         if (loc.status !== "active" || !loc.google_location_id) return fail("not_active", "This business isn't active yet.", 409);
+        // P0.5-02: the checks again on exactly the text being approved.
+        const f = { ...fieldsOf(post), summary: text };
+        const ctx = await checkContext(db, loc.id, `${post.owner_input}\n${ownerText(f)}`, post.id);
+        const issues = checkPost(f, { ...ctx, kabsiDraft: false });
+        if (issues.length) return checksFailed(issues);
         // One approval (K-38): a double click or two tabs get the same publication back, never a second post.
         const r = await approveChange(req, user.id, "local_post", post.id, { summary: text, language: postLanguage(text) });
         return json({ ok: true, ...r });
@@ -261,6 +323,33 @@ Deno.serve(async (req) => {
     return fail("internal", "Something went wrong. Nothing was posted.", 500);
   }
 });
+
+// P0.5-02: a post row and the fields the checks read.
+const POST_ROW = "id, location_id, owner_input, body, cta_type, cta_url, state, keywords, source, topic_type, event_title, start_date, end_date, start_time, end_time, offer_terms, coupon_code, redeem_url, photo_id, publish_at";
+type PostRow = {
+  id: string; location_id: string; owner_input: string; body: string | null; cta_type: string | null; cta_url: string | null; state: string;
+  keywords: string[]; source: string; topic_type: PostType; event_title: string | null; start_date: string | null; end_date: string | null;
+  start_time: string | null; end_time: string | null; offer_terms: string | null; coupon_code: string | null; redeem_url: string | null;
+  photo_id: string | null; publish_at: string | null;
+};
+const opt = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim().slice(0, 1500) : null);
+function postFields(b: Record<string, unknown>): PostFields {
+  const type = POST_TYPES.includes(String(b.type) as PostType) ? String(b.type) as PostType : "STANDARD";
+  return {
+    type, summary: String(b.summary ?? "").trim(), ctaType: opt(b.cta_type), ctaUrl: opt(b.cta_url), title: opt(b.title),
+    startDate: opt(b.start_date), endDate: opt(b.end_date), startTime: opt(b.start_time), endTime: opt(b.end_time), terms: opt(b.terms),
+    couponCode: opt(b.coupon_code), redeemUrl: opt(b.redeem_url),
+  };
+}
+const fieldsOf = (r: PostRow): PostFields => ({
+  type: r.topic_type ?? "STANDARD", summary: r.body ?? "", ctaType: r.cta_type, ctaUrl: r.cta_url, title: r.event_title,
+  startDate: r.start_date, endDate: r.end_date, startTime: r.start_time?.slice(0, 5) ?? null, endTime: r.end_time?.slice(0, 5) ?? null,
+  terms: r.offer_terms, couponCode: r.coupon_code, redeemUrl: r.redeem_url,
+});
+// What the owner typed counts as theirs: an Offer's terms and an Event's title may name the offer or the price.
+const ownerText = (f: PostFields) => [f.summary, f.title, f.terms, f.couponCode].filter(Boolean).join("\n");
+const checksFailed = (issues: Issue[]) =>
+  json({ error: "post_checks", message: issues.map((i) => i.text).join(" "), issues }, 422);
 
 // Google wants the post's language: a light guess from the text (Arabic script, then common Spanish or French
 // words), English otherwise.
