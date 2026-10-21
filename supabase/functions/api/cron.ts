@@ -3,9 +3,9 @@
 // Since P0.1-12b each runs as its own job from the dispatcher (api/jobs.ts), offered every 5 minutes; Protection is
 // one job per business (protection.ts). /api/cron-tick still runs them all in one go for the weekly_now test hook and
 // until the migration that unschedules kabsi_cron_tick (20261004200100_cron_to_jobs.sql) is applied.
-import { admin, APP_URL, captureError, esc, isInternal, jobLog, json } from "../_shared/kabsi.ts";
+import { admin, APP_URL, captureError, isInternal, jobLog, json } from "../_shared/kabsi.ts";
 import { notify } from "../_shared/notify.ts";
-import { KABSI_GROUP_ID } from "../_shared/email-layout.ts";
+import * as copy from "../_shared/email/copy.ts";
 import { dueRenewalEmail, dueTrialEmail, localDateHour, PLAN_LABEL, type RenewalStage, type TrialStage } from "../_shared/plans.ts";
 import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google/index.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
@@ -34,7 +34,7 @@ function sendAccessNotice(locationId: string, name: string, nextStep: string) {
   return notify({
     category: "access", kind: "access_granted", key: `access_granted:${locationId}`, locationId, to: "owners",
     inApp: { title: "Kabsi is now a Manager of your Google profile", link: "/app/settings" },
-    content: { subject: m.subject, preheader: m.preheader, title: m.title, bodyHtml: m.bodyHtml, button: m.button, note: m.note, text: m.text },
+    content: m,
   }).catch((e) => { captureError("cron-tick", e, { job: "access", location: locationId }); return null; });
 }
 
@@ -138,12 +138,7 @@ export async function deletionsJob() {
       await notify({
         category: "account", kind: "deletion_scheduled", key: `deletion_scheduled:${l.id}:${l.deletion_requested_at}`, locationId: l.id, to: recipients,
         inApp: { title: `${l.name} will be deleted on ${dueText}`, link: "/app/settings" },
-        content: {
-          subject: `${l.name} will be deleted from Kabsi on ${dueText}`, preheader: "You can cancel until then.", title: "Deletion scheduled",
-          bodyHtml: `<p style="margin:0 0 16px 0;">You asked Kabsi to delete <strong>${esc(l.name)}</strong>. On <strong>${dueText}</strong> we delete its reviews, drafts, posts, photos, reports and settings. Payment records are kept where the law requires.</p><p style="margin:0 0 20px 0;">Changed your mind? Cancel it in Settings before then. To stop Kabsi reaching your Google profile, also remove the Kabsi Clients group (ID ${KABSI_GROUP_ID}) under People and access.</p>`,
-          button: { label: "Open Settings", url: `${APP_URL}/app/settings` },
-          text: `You asked Kabsi to delete ${l.name}. On ${dueText} we delete its reviews, drafts, posts, photos, reports and settings. Cancel in Settings before then: ${APP_URL}/app/settings`,
-        },
+        content: copy.deletionScheduled(l.name, dueText, APP_URL),
       }).catch((e) => captureError("cron-tick", e, { job: "deletions", location: l.id }));
       await db.from("locations").update({ deletion_notice_at: new Date().toISOString() }).eq("id", l.id);
       notices++;
@@ -156,11 +151,7 @@ export async function deletionsJob() {
     deleted++;
     await notify({
       category: "account", kind: "deletion_done", key: `deletion_done:${l.id}`, locationId: null, to: recipients,
-      content: {
-        subject: `${l.name} was deleted from Kabsi`, preheader: "Your business data is deleted.", title: "Deleted",
-        bodyHtml: `<p style="margin:0 0 16px 0;">We deleted <strong>${esc(l.name)}</strong> and its data from Kabsi. Your NFC cards no longer open your review page. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID ${KABSI_GROUP_ID}) under People and access.</p>`,
-        text: `We deleted ${l.name} and its data from Kabsi. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID ${KABSI_GROUP_ID}) under People and access.`,
-      },
+      content: copy.deletionDone(l.name, APP_URL),
     }).catch((e) => captureError("cron-tick", e, { job: "deletions", location: l.id }));
   }
   return { notices, deleted };
@@ -171,11 +162,6 @@ const formatDay = (ymd: string) => new Date(`${ymd}T12:00:00Z`).toLocaleDateStri
 // Job: free trial reminders, 7 days, 1 day and the last day (Q05). Sent from 09:00 local time; one per stage per
 // address (the emails table's dedupe_key makes re-runs safe). This is a billing notice, so a pause on other emails
 // does not stop it. Nothing is sent when a paid plan or a partner already continues the business.
-const TRIAL_COPY: Record<TrialStage, { subject: (d: string) => string; lead: (name: string, d: string) => string }> = {
-  d7: { subject: (d) => `Your Kabsi free trial ends on ${d}`, lead: (n, d) => `Your free trial for <strong>${n}</strong> runs until ${d}.` },
-  d1: { subject: () => "Your Kabsi free trial ends tomorrow", lead: (n, d) => `Your free trial for <strong>${n}</strong> ends tomorrow, ${d}.` },
-  d0: { subject: () => "Your Kabsi free trial ends today", lead: (n) => `Today is the last day of your free trial for <strong>${n}</strong>.` },
-};
 export async function trialsJob() {
   const db = admin();
   const { data, error } = await db.rpc("trial_reminder_candidates");
@@ -188,18 +174,10 @@ export async function trialsJob() {
     const stage = dueTrialEmail(c.last_day, now.date, now.hour, sent, c.continues);
     if (!stage) continue;
     const day = formatDay(c.last_day);
-    const copy = TRIAL_COPY[stage];
-    const body = `${copy.lead(esc(c.name), day)} After that the business moves to Free: reply drafts, Google Protection and the Weekly Care Report stop. Your Review Link and Card keep working.`;
-    const plain = `${copy.lead(c.name, day).replace(/<\/?strong>/g, "")} After that the business moves to Free: reply drafts, Google Protection and the Weekly Care Report stop. Your Review Link and Card keep working.`;
     await notify({
       category: "billing", kind: `trial_${stage}`, key: `trial_${stage}:${c.plan_id}`, locationId: c.location_id, to: "owners",
-      inApp: { title: copy.subject(day), link: "/app/plan" },
-      content: {
-        subject: copy.subject(day), preheader: "Choose a plan to keep everything going.", title: "Your free trial",
-        bodyHtml: `<p style="margin:0 0 16px 0;">${body}</p><p style="margin:0 0 20px 0;">To keep everything going, choose a plan before the trial ends.</p>`,
-        button: { label: "Choose a plan", url: `${APP_URL}/app/plan` },
-        text: `${plain}\n\nTo keep everything going, choose a plan before the trial ends.\n\nChoose a plan: ${APP_URL}/app/plan`,
-      },
+      inApp: { title: `Your free trial ends ${stage === "d7" ? `on ${day}` : stage === "d1" ? "tomorrow" : "today"}`, link: "/app/plan" },
+      content: copy.trialReminder(stage, c.name, day, APP_URL),
     }).catch((e) => captureError("cron-tick", e, { job: "trials", location: c.location_id }));
     reminders++;
   }
@@ -208,7 +186,6 @@ export async function trialsJob() {
 
 // Job: renewal reminders for paid monthly and yearly plans (Q06), 5 days and 1 day before the last day, from 09:00
 // local. The link opens the Plan page: invoices are created there, never from cron, because they expire.
-const RENEW_COPY: Record<RenewalStage, string> = { r5: "in a few days", r1: "tomorrow" };
 export async function renewalsJob() {
   const db = admin();
   const { data, error } = await db.rpc("renewal_reminder_candidates");
@@ -222,17 +199,10 @@ export async function renewalsJob() {
     if (!stage) continue;
     const day = formatDay(c.last_day);
     const label = PLAN_LABEL[c.kind] ?? "Kabsi Pro";
-    const plain = `Your ${label} plan for ${c.name} ends ${RENEW_COPY[stage]}, on ${day}. To keep reply drafts, Google Protection and the Weekly Care Report going, pay before then. Paying early adds the new period after this one, so you lose no days. Your Review Link and Card keep working either way.`;
     await notify({
       category: "billing", kind: `renew_${stage}`, key: `renew_${stage}:${c.plan_id}`, locationId: c.location_id, to: "owners",
       inApp: { title: stage === "r1" ? "Your Kabsi plan ends tomorrow" : `Your Kabsi plan ends on ${day}`, link: "/app/plan" },
-      content: {
-        subject: stage === "r1" ? "Your Kabsi plan ends tomorrow" : `Your Kabsi plan ends on ${day}`,
-        preheader: "Pay before it ends and you lose no days.", title: "Your plan is ending",
-        bodyHtml: `<p style="margin:0 0 16px 0;">${esc(plain)}</p>`,
-        button: { label: "Renew your plan", url: `${APP_URL}/app/plan?pay=${encodeURIComponent(c.kind)}` },
-        text: `${plain}\n\nRenew your plan: ${APP_URL}/app/plan?pay=${encodeURIComponent(c.kind)}`,
-      },
+      content: copy.renewalReminder(stage, c.name, label, day, c.kind, APP_URL),
     }).catch((e) => captureError("cron-tick", e, { job: "renewals", location: c.location_id }));
     reminders++;
   }

@@ -12,6 +12,7 @@ import {
   admin, APP_URL, captureError, CORS, currentUser, esc, fail, isInternal, jobLog, json, log, rateLimit, sha256Hex,
 } from "../_shared/kabsi.ts";
 import { notify } from "../_shared/notify.ts";
+import * as copy from "../_shared/email/copy.ts";
 import { MODELS } from "../_shared/models.ts";
 import { countryFromTimezone } from "../_shared/tz-country.ts";
 import { nextTasks } from "../_shared/tasks.ts";
@@ -285,11 +286,11 @@ ${row("Passed to a person", c.status === "handoff" ? `Yes (${c.handoff_reason ??
       await notify({
         category: "internal", kind: "assistant_report", key: `assistant_report:${c.id}:${c.message_count}`, to: to.map((email) => ({ email, userId: null })),
         ...(k?.email || signedIn ? { replyTo: (k?.email || signedIn) as string } : {}),
-        content: {
-          subject: `Chat${update}: ${who} · ${LABEL[r.category] ?? r.category} · ${temp}${country ? ` · ${country}` : ""}`,
-          preheader: r.summary.slice(0, 140), title: `New chat with Nora${update}`, bodyHtml,
+        content: copy.noraReport({
+          subject: `Chat${update}: ${who} · ${LABEL[r.category] ?? r.category} · ${temp}${country ? ` · ${country}` : ""}`, summary: r.summary, bodyHtml,
           text: `${r.summary}\n\nNext step: ${r.next_step}\nVisitor: ${who}\nEmail: ${k?.email ?? signedIn}\nCountry: ${country ?? ""}\nTopic: ${r.category}\nIntent: ${r.intent}\nLead: ${r.lead_temperature}\n\n${transcript.slice(-12000)}`,
-        },
+          replyTo: (k?.email || signedIn || null) as string | null,
+        }, APP_URL),
       });
       sent++;
     } catch (e) {
@@ -484,20 +485,16 @@ Deno.serve(async (req) => {
             const n = conv.message_count + 1;
             await notify({
               category: "internal", kind: "assistant_handoff", key: `assistant_handoff:${conv.id}:${n}`, to: [{ email: "hello@kabsi.co", userId: null }], replyTo: email,
-              content: {
-                subject: `Assistant hand-off (${reason}): ${email}`, preheader: summary.slice(0, 120), title: "A visitor needs a person",
+              content: copy.noraHandoff({
+                reason, email, summary,
                 bodyHtml: `<p><b>Reply to:</b> ${esc(email)}<br><b>Reason:</b> ${esc(reason)}<br><b>Page:</b> ${esc(page)}${user?.email ? `<br><b>Signed in as:</b> ${esc(user.email)}` : ""}</p><p><b>Summary</b><br>${esc(summary)}</p><p><b>Conversation</b></p><pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;background:#F6F4EF;padding:12px;border-radius:10px;">${esc(transcript)}</pre>`,
                 text: `Reply to: ${email}\nReason: ${reason}\nPage: ${page}\n\n${summary}\n\n${transcript}`,
-              },
+              }, APP_URL),
             });
             // Sent because the visitor just asked for a person: no choices and no quiet hours (category direct).
             await notify({
               category: "direct", kind: "assistant_handoff_ack", key: `assistant_handoff_ack:${conv.id}`, to: [{ email, userId: null }],
-              content: {
-                subject: "We got your question", preheader: "A person from Kabsi will reply by email.", title: "We got your question",
-                bodyHtml: `<p>Thanks for writing to Kabsi. A person on the team will reply to this address, usually within one working day.</p><p>If you want to add anything, just reply to this email.</p>`,
-                text: "Thanks for writing to Kabsi. A person on the team will reply to this address, usually within one working day. If you want to add anything, just reply to this email.",
-              },
+              content: copy.noraAck(),
             }).catch(() => null);
             handoff = true;
             result = { ok: true, reply_by: "email", email };

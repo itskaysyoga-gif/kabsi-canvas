@@ -4,6 +4,8 @@
 import { getPlace } from "./google/index.ts";
 import { admin, APP_URL, esc } from "./kabsi.ts";
 import { notify } from "./notify.ts";
+import * as copy from "./email/copy.ts";
+import { renderReport } from "./email/report-body.ts";
 
 type Loc = { id: string; name: string; place_id: string | null; time_zone: string; emails_paused_until: string | null };
 const DAY = 86400_000;
@@ -77,35 +79,6 @@ export async function buildReport(loc: Loc, now = new Date()) {
 }
 export type Report = Awaited<ReturnType<typeof buildReport>>;
 
-// One column on every screen: the label sits above its value instead of beside it, so nothing squeezes on a phone.
-function row(label: string, value: string) {
-  return `<div style="padding:12px 0;border-bottom:1px solid #E4E0D7;"><div style="color:#5E5B55;font-size:16px;line-height:1.4;">${esc(label)}</div><div style="font-weight:700;font-size:16px;line-height:1.5;">${value}</div></div>`;
-}
-
-export function renderReport(loc: Loc, r: Report) {
-  const ratingText = r.rating == null ? "Not available"
-    : `${r.rating.toFixed(1)}${r.rating_change == null ? "" : r.rating_change === 0 ? " (no change)" : ` (${r.rating_change > 0 ? "+" : ""}${r.rating_change.toFixed(1)})`}`;
-  const rows = [
-    row("Google rating", esc(ratingText) + (r.rating_count != null ? `<br><span style="font-weight:400;color:#5E5B55;font-size:14px;">${r.rating_count} reviews in total</span>` : "")),
-    row("New reviews", String(r.new_reviews) + (r.new_avg != null ? `<br><span style="font-weight:400;color:#5E5B55;font-size:14px;">average ${r.new_avg.toFixed(1)} of 5</span>` : "")),
-    row("Replied", `${r.replied} of ${r.new_reviews}`),
-    row("Card and link opens", r.taps.total ? `${r.taps.total}<br><span style="font-weight:400;color:#5E5B55;font-size:14px;">${r.taps.nfc} tap · ${r.taps.qr} QR</span>` : "0"),
-  ].join("");
-  // Honest about what a tap is (D257): an open of the review page, not a review.
-  const tapNote = `<p style="margin:10px 0 0 0;color:#5E5B55;font-size:14px;">Opens count how often your card or link opened your Google review page. They don't show whether a review was written.</p>`;
-  const drop = r.rating_drop ? `<p style="margin:0 0 16px 0;padding:12px 14px;border:2px solid #111111;border-radius:14px;">Your Google rating went down ${Math.abs(r.rating_change!).toFixed(1)} this week.</p>` : "";
-  const waiting = r.waiting ? `<p style="margin:18px 0 0 0;">${r.waiting} ${r.waiting === 1 ? "review is" : "reviews are"} waiting for your reply.</p>` : "";
-  const html = `<p style="margin:0 0 16px 0;color:#5E5B55;">${esc(loc.name)} · ${esc(r.period.from)} to ${esc(r.period.to)}</p>${drop}
-<div style="font-size:16px;">${rows}</div>${tapNote}${waiting}`;
-  const text = [
-    `${loc.name}, ${r.period.from} to ${r.period.to}`,
-    `Google rating: ${ratingText}`,
-    `New reviews: ${r.new_reviews}`, `Replied: ${r.replied} of ${r.new_reviews}`, `Card and link opens: ${r.taps.total} (opens of your review page, not reviews)`,
-    r.waiting ? `${r.waiting} waiting for your reply.` : "",
-  ].filter(Boolean).join("\n");
-  return { html, text };
-}
-
 // Cron: every tick, but only acts on Monday from 09:00 local, once per location per week (unique row).
 export async function weeklyReports(locs: Loc[], opts: { forceLocation?: string } = {}) {
   const db = admin();
@@ -123,10 +96,7 @@ export async function weeklyReports(locs: Loc[], opts: { forceLocation?: string 
     await notify({
       category: "weekly_report", kind: "weekly_report", key: `weekly:${loc.id}:${date}`, locationId: loc.id, to: "owners",
       inApp: { title: "Your Weekly Care Report is ready", link: "/app/report" },
-      content: {
-        subject: `Your week on Google: ${loc.name}`, preheader: `${data.new_reviews} new reviews, ${data.replied} replied.`, title: "Your week on Google",
-        bodyHtml: body.html, button: { label: "Open Kabsi", url: `${APP_URL}/app/report` }, text: `${body.text}\n\nOpen Kabsi: ${APP_URL}/app/report`,
-      },
+      content: copy.weeklyReport(loc.name, { newReviews: data.new_reviews, replied: data.replied }, body.html, body.text, APP_URL),
     });
     sent++;
   }

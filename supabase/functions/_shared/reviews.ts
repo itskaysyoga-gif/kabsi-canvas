@@ -1,9 +1,11 @@
 // Phase 4 pipeline: sync → classify → draft → safety check → owner email → approve → publish.
-import { admin, APP_URL, emailButton, emailLink, esc, sha256Hex } from "./kabsi.ts";
+import { admin, APP_URL, sha256Hex } from "./kabsi.ts";
 import { notify } from "./notify.ts";
+import { reviewEmail } from "./email/review.ts";
+import { backlogReady } from "./email/copy.ts";
 import { listReviews } from "./google/index.ts";
-import { buildMemory, classify, draftGrounded, draftMessage, editKinds, factAdditions, HIGH_RISK_TITLE, industryOf, issueLines, type Meter, MODELS, newMeter, type Risk, RULE_TEXT, runRecord } from "./ai.ts";
-import { highRiskBlock, instantEmail, riskPlan } from "./review-risk.ts";
+import { buildMemory, classify, draftGrounded, draftMessage, editKinds, factAdditions, HIGH_RISK_TITLE, industryOf, type Meter, MODELS, newMeter, type Risk, RULE_TEXT, runRecord } from "./ai.ts";
+import { instantEmail, riskPlan } from "./review-risk.ts";
 import type { FactRow } from "./facts.ts";
 import { recordAiUsage, takeAiBudget } from "./ai-budget.ts";
 import { isConciergeLocationId, matchConciergeReview, type ConciergeCandidate } from "./concierge.ts";
@@ -215,47 +217,24 @@ async function latestDraft(reviewId: string) {
   const { data } = await admin().from("reply_drafts").select("body, safety_ok").eq("review_id", reviewId).order("version", { ascending: false }).limit(1).maybeSingle();
   return data;
 }
-const quote = (s: string) => `<div style="margin:0 0 16px 0;padding:14px 16px;background:#F6F4EF;border-radius:14px;white-space:pre-wrap;">${esc(s)}</div>`;
-const link = (url: string, label: string) => emailLink(label, url);
-
-// `withPost` is the daily digest, where several reviews share one email. A digest block carries text links only,
-// so the email keeps exactly one yellow button (the layout's "Open Kabsi"). A single review email carries its own
-// yellow "Review reply" and the layout button is left out (ownButton), with "Open Kabsi" as a text link beside
-// Edit and Skip, on a line that wraps on a phone.
-async function reviewBlock(loc: Loc, r: PendingReview, userId: string | null, withPost: boolean) {
+// What one review looks like in an email is in email/review.ts (pure). This reads the draft and makes the signed
+// approval links for this person (72 hours, one use, K-17), then hands both over.
+async function reviewContent(loc: Loc, r: PendingReview, userId: string | null, mode: "send" | "hold" | "digest") {
   const draft = r.risk === "high" ? null : await latestDraft(r.id);
-  const head = `<p style="margin:0 0 8px 0;"><strong>${esc(r.reviewer_name ?? "A customer")}</strong> · Rating ${r.star_rating} of 5</p>`;
-  const reviewText = r.comment ? quote(r.comment) : `<p style="margin:0 0 16px 0;color:#5E5B55;">No written review, just a rating.</p>`;
-  if (!userId) return { html: head + reviewText, text: `${r.reviewer_name}: ${r.star_rating}/5\n${r.comment ?? ""}` };
-  // K-13: a high-risk review has no draft and no approve link; the email is the checklist (the layout's one button
-  // opens Kabsi). A holding reply the owner asked for is approved in Kabsi, signed in.
-  if (r.risk === "high") return highRiskBlock(r, head + reviewText);
-  const mk = (action: string) => actionLink({ locationId: loc.id, userId, action, reviewId: r.id });
-  if (r.state === "blocked" || !draft?.safety_ok) {
-    const open = await mk("open");
-    return {
-      html: head + reviewText + `<p style="margin:0 0 16px 0;">A reply couldn't be safely drafted for this one. Write your own reply in Kabsi, or ask us.</p><div style="margin:0;">${link(open, "Open in Kabsi")}</div>`,
-      text: `${r.star_rating}/5: no safe draft. Open: ${open}`,
-    };
-  }
-  // K-13: a medium review shows its issue on top of the draft.
-  const issues = r.risk === "medium" ? issueLines(r.risk_reasons ?? []) : [];
-  const issueHtml = issues.length ? `<p style="margin:0 0 16px 0;padding:12px 14px;border:1px solid #E4E0D7;border-radius:14px;">${issues.map(esc).join("<br>")}</p>` : "";
-  const issueText = issues.length ? `${issues.join("\n")}\n\n` : "";
-  const [post, edit, skip] = await Promise.all([mk("post"), mk("edit"), mk("skip")]);
-  const inbox = `${APP_URL}/app/inbox`;
-  const drafted = head + reviewText + issueHtml + `<p style="margin:0 0 6px 0;font-size:14px;color:#5E5B55;">Drafted reply</p>` + quote(draft.body);
-  if (withPost) {
-    return {
-      html: drafted + `<div style="margin:0;">${link(post, "Review reply")}${link(edit, "Edit")}${link(skip, "Skip")}</div>`,
-      text: `${issueText}Draft:\n${draft.body}\n\nReview reply: ${post}\nEdit: ${edit}\nSkip: ${skip}`,
-    };
-  }
-  return {
-    html: drafted + emailButton("Review reply", post) + `<div style="margin:8px 0 0 0;">${link(edit, "Edit")}${link(skip, "Skip")}${link(inbox, "Open Kabsi")}</div>`,
-    text: `${issueText}Draft:\n${draft.body}\n\nReview reply: ${post}\nEdit: ${edit}\nSkip: ${skip}\nOpen Kabsi: ${inbox}`,
-    ownButton: true,
-  };
+  let links: { post: string; edit: string; skip: string; open: string } | null = null;
+  if (userId && r.risk !== "high") {
+    const mk = (action: string) => actionLink({ locationId: loc.id, userId, action, reviewId: r.id });
+    const blocked = r.state === "blocked" || !draft?.safety_ok;
+    if (blocked) links = { post: "", edit: "", skip: "", open: await mk("open") };
+    else {
+      const [post, edit, skip] = await Promise.all([mk("post"), mk("edit"), mk("skip")]);
+      links = { post, edit, skip, open: "" };
+    }
+  } else if (userId) links = { post: "", edit: "", skip: "", open: `${APP_URL}/app/reviews?f=needs` };
+  return reviewEmail({
+    business: loc.name, reviewer: r.reviewer_name, stars: r.star_rating, comment: r.comment, risk: r.risk, riskReasons: r.risk_reasons, state: r.state,
+    draft: draft ? { body: draft.body, safe: draft.safety_ok } : null, links, appUrl: APP_URL,
+  }, mode);
 }
 
 // Hands a business's drafted reviews to the notification engine (notify.ts). The engine decides when each person is
@@ -270,22 +249,15 @@ export async function notifyLocation(loc: Loc) {
   const pending = (data ?? []) as PendingReview[];
   let handed = 0;
   const mark = (ids: string[]) => db.from("reviews").update({ notified_at: new Date().toISOString() }).in("id", ids);
-  const inbox = `${APP_URL}/app/reviews?f=needs`;
 
   // Day-one backlog: one summary email (D221)
   const backlog = pending.filter((r) => r.is_backlog);
   if (backlog.length && !loc.backlog_emailed_at) {
     const n = backlog.length;
-    const text = `${n} reviews without a reply for ${loc.name}. Drafts are ready.`;
     await notify({
       category: "review_new", kind: "backlog_ready", key: `backlog:${loc.id}`, locationId: loc.id, to: "members",
       inApp: { title: `${n} reviews are waiting`, body: "Replies are ready for you to read.", link: "/app/reviews?f=needs" },
-      content: {
-        subject: `${n} reviews without a reply: drafts ready`, title: `${n} reviews are waiting`, preheader: "Drafts are ready in your Kabsi inbox.",
-        bodyHtml: `<p style="margin:0 0 16px 0;"><strong>${esc(loc.name)}</strong> has ${n} Google reviews without a reply. Kabsi drafted a reply for each one. Nothing is posted until you approve it.</p>`,
-        text: `${text}\n\nOpen Kabsi: ${inbox}`, button: { label: "Open Kabsi", url: inbox },
-        digest: { html: `<p style="margin:0 0 16px 0;"><strong>${esc(loc.name)}</strong> has ${n} Google reviews without a reply. Kabsi drafted a reply for each one.</p>`, text },
-      },
+      content: backlogReady(loc.name, n, APP_URL),
     });
     await db.from("locations").update({ backlog_emailed_at: new Date().toISOString() }).eq("id", loc.id);
     handed++;
@@ -299,16 +271,7 @@ export async function notifyLocation(loc: Loc) {
       category: careful ? "review_high_risk" : "review_new", kind: high ? "review_high_risk" : "review_new", key: `review:${r.id}`,
       locationId: loc.id, to: "members",
       inApp: { title: high ? HIGH_RISK_TITLE.replace(/\.$/, "") : `New ${r.star_rating}-star review`, body: high ? "Kabsi did not draft a reply." : "A reply is ready.", link: "/app/reviews?f=needs" },
-      content: async (rec, mode) => {
-        const b = await reviewBlock(loc, r, rec.userId, mode === "digest") as { html: string; text: string; ownButton?: boolean };
-        const subject = high ? `A review for ${loc.name} needs a little more care` : `New review for ${loc.name} (${r.star_rating} of 5)`;
-        return {
-          subject, title: high ? HIGH_RISK_TITLE.replace(/\.$/, "") : "New review", preheader: (r.comment ?? "").slice(0, 90),
-          bodyHtml: b.html, text: b.ownButton ? b.text : `${b.text}\n\nOpen Kabsi: ${inbox}`,
-          ...(b.ownButton ? {} : { button: { label: "Open Kabsi", url: inbox } }),
-          ...(mode === "digest" ? { digest: { html: b.html, text: b.text } } : {}),
-        };
-      },
+      content: (rec, mode) => reviewContent(loc, r, rec.userId, mode),
     });
     await mark([r.id]);
     handed++;

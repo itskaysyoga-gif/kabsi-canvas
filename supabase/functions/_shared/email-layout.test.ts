@@ -1,22 +1,27 @@
 import assert from "node:assert/strict";
-import { emailButton, emailLayout, emailLink } from "./email-layout.ts";
+import { emailButton, emailLink } from "./email-layout.ts";
+import { type EmailContent, renderEmail } from "./email/template.ts";
+
+// The page is the one template (email/template.ts); the pieces are in email-layout.ts.
+const emailLayout = (o: Partial<EmailContent> & { bodyHtml: string }) =>
+  renderEmail({ subject: "s", preheader: "p", title: "t", text: "t", ...o }, { appUrl: "https://kabsi.co", defaultWhy: "Because." }).html;
 
 const yellow = (html: string) => html.match(/background:#FFD60A/gi)?.length ?? 0;
 
 Deno.test("a layout with a button has exactly one yellow button", () => {
-  const html = emailLayout({ preheader: "p", title: "t", bodyHtml: "<p>Hello</p>", button: { label: "Open Kabsi", url: "https://x.test/app" } });
+  const html = emailLayout({ bodyHtml: "<p>Hello</p>", button: { label: "Open Kabsi", url: "https://x.test/app" } });
   assert.equal(yellow(html), 1);
 });
 
 Deno.test("a layout with only text links has no yellow button", () => {
-  const html = emailLayout({ preheader: "p", title: "t", bodyHtml: "<p>Hello</p>", links: [{ label: "Edit", url: "https://x.test/e" }] });
+  const html = emailLayout({ bodyHtml: "<p>Hello</p>", links: [{ label: "Edit", url: "https://x.test/e" }] });
   assert.equal(yellow(html), 0);
 });
 
 Deno.test("single review email: own button, Edit, Skip and Open Kabsi links, still one yellow", () => {
   const body = emailButton("Review reply", "https://x.test/post") +
     `<div>${emailLink("Edit", "https://x.test/edit")}${emailLink("Skip", "https://x.test/skip")}${emailLink("Open Kabsi", "https://x.test/app/inbox")}</div>`;
-  const html = emailLayout({ preheader: "p", title: "New review", bodyHtml: body });
+  const html = emailLayout({ title: "New review", bodyHtml: body });
   assert.equal(yellow(html), 1);
   assert.equal(html.includes("Open Kabsi"), true);
 });
@@ -31,7 +36,7 @@ Deno.test("buttons and links are at least 44 px tall", () => {
 });
 
 Deno.test("one column, 16 px body text, no side-by-side cells in the card", () => {
-  const html = emailLayout({ preheader: "p", title: "t", bodyHtml: "<p>Hello</p>", button: { label: "Go", url: "https://x.test/" } });
+  const html = emailLayout({ bodyHtml: "<p>Hello</p>", button: { label: "Go", url: "https://x.test/" } });
   assert.match(html, /font-size:16px;line-height:1\.6/);
   assert.match(html, /name="viewport" content="width=device-width,initial-scale=1"/);
   const card = html.slice(html.indexOf("<h1"));
@@ -44,7 +49,7 @@ Deno.test("button width never exceeds the phone content width", () => {
 });
 
 Deno.test("every email footer carries the WhatsApp click-to-chat link and the number", () => {
-  const html = emailLayout({ preheader: "p", title: "t", bodyHtml: "<p>Hello</p>" });
+  const html = emailLayout({ bodyHtml: "<p>Hello</p>" });
   assert.equal(html.includes("https://wa.me/12014835474?text=Hello%20Kabsi"), true);
   assert.equal(html.includes("WhatsApp +1 201-483-5474"), true);
   assert.equal(yellow(html), 0);

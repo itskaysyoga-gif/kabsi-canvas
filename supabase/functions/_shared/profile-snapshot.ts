@@ -12,7 +12,7 @@
 // Every Places request carries a field mask and none asks for reviews (tests hold that).
 import type { Place } from "./google/types.ts";
 import type { PlacesResult } from "./google/places/live.ts";
-import type { EmailContent } from "./email-render.ts";
+import type { EmailContent } from "./email/template.ts";
 
 export const TIPS_CONSENT_TEXT = "Send me tips on managing my Google profile";
 export const CHECK_PAGES = ["/google-profile-check", "/get-started"];

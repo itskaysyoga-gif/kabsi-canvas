@@ -5,6 +5,7 @@
 // Demo businesses (P0.1-06) never get weekly drafts: their post idea is seeded.
 import { admin, APP_URL, captureError, esc, isInternal, jobLog, json } from "../_shared/kabsi.ts";
 import { notify } from "../_shared/notify.ts";
+import * as copy from "../_shared/email/copy.ts";
 import { ensureCategory, hasFacts, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, withFacts, writePost } from "../_shared/posts.ts";
 import { AiBudgetError } from "../_shared/ai-budget.ts";
 
@@ -63,15 +64,7 @@ Deno.serve(async (req) => {
       await notify({
         category: "approval_needed", kind: "weekly_post", key: `weekly_post:${post.id}`, locationId: loc.id, to: "owners",
         inApp: { title: "This week's post is ready to review", link: "/app/posts" },
-        content: {
-          subject: `Your post for this week is ready, ${loc.name}`,
-          preheader: "Read it, change anything, then post it or skip it.",
-          title: "This week's post is ready",
-          bodyHtml: `<p style="margin:0 0 16px 0;">Kabsi drafted a Google post for ${esc(loc.name)} from the facts you gave us. Nothing is posted until you approve it.</p><p style="margin:0 0 20px 0;padding:14px 16px;background:#F6F4EF;border-radius:10px;white-space:pre-wrap;">${esc(text)}</p>`,
-          button: { label: "Review the post", url },
-          note: "Don't want weekly drafts? Switch them off on the Posts page.",
-          text: `This week's post for ${loc.name} is ready. Nothing is posted until you approve it.\n\n${text}\n\nReview it: ${url}`,
-        },
+        content: copy.weeklyPost(loc.name, text, APP_URL),
       });
       done[loc.id] = "drafted";
     } catch (e) {

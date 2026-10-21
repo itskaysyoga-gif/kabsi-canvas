@@ -13,9 +13,9 @@
 //
 // This file has no database or network import: api and the job wire it to the database in notify.ts, and the tests
 // wire it to fakes.
-import { type CategoryId, categoryOf, type Frequency, SYSTEM_CATEGORIES } from "./notify-categories.ts";
+import { type CategoryId, categoryOf, type Frequency, SYSTEM_CATEGORIES, SYSTEM_WHY, type SystemCategory } from "./notify-categories.ts";
 import { decideEmail, digestSubject, type DigestItem, groupDigest, localParts } from "./notify-rules.ts";
-import { type EmailContent, renderEmail } from "./email-render.ts";
+import { type EmailContent, renderEmail } from "./email/template.ts";
 import { emailLink, esc } from "./email-layout.ts";
 
 export type Recipient = { email: string; userId: string | null; role?: string };
@@ -58,7 +58,9 @@ export type StoredItem = {
 
 export type Outgoing = {
   kind: string; category: string; to: string; subject: string; html: string; text: string; dedupeKey: string;
-  locationId: string | null; partnerId: string | null; replyTo?: string; notificationId?: string | null; unsubscribe?: boolean;
+  locationId: string | null; partnerId: string | null; replyTo?: string; notificationId?: string | null;
+  /** Mail the owner can switch off carries the one-click unsubscribe address in its List-Unsubscribe headers. */
+  unsubscribeUrl?: string | null;
 };
 export type Delivery = { sent: string } | { skipped: string };
 
@@ -77,6 +79,10 @@ export type Deps = {
   insert(row: NewRow): Promise<{ id: string; fresh: boolean; state: EmailState }>;
   update(id: string, patch: { email_state?: EmailState; email_id?: string | null; email_content?: EmailContent | null; email_due_at?: string | null }): Promise<void>;
   deliver(o: Outgoing): Promise<Delivery>;
+  /** One suppression list (bounces, complaints, unsubscribes): an address on it is never sent to (K-118). */
+  suppressed(address: string, category: string): Promise<boolean>;
+  /** The signed unsubscribe links for this person and category: the page on kabsi.co, and the address a mail client POSTs to. */
+  unsubscribeLinks(address: string, userId: string | null, locationId: string | null, category: string): Promise<{ page: string; oneClick: string }>;
   /** Held and digested emails whose time has come, oldest first. Rows without stored content are not returned. */
   listDue(now: Date, limit: number): Promise<StoredItem[]>;
   log(event: string, fields: Record<string, unknown>): void;
@@ -105,9 +111,10 @@ export async function runNotify(input: NotifyInput, d: Deps): Promise<NotifyResu
     const to = person.email.toLowerCase();
     out.recipients++;
     try {
-      // System mail (asked for just now, or to the team) has no choices and no bell: straight to the outbox.
-      if (!cat) {
-        const r = await d.deliver(outgoing(base, await resolve(input.content, person, "send"), to, `${input.key}:${to}`, null));
+      // System mail (asked for just now, or to the team) and mail with no business to time it against (a partner, a
+      // deleted business) have no choices and no bell: straight to the outbox. The emails table still dedupes it.
+      if (!cat || !locationId) {
+        const r = await send(d, base, await resolve(input.content, person, "send"), to, person.userId, `${input.key}:${to}`, null);
         if ("sent" in r) out.sent++; else out.skipped++;
         continue;
       }
@@ -140,7 +147,7 @@ export async function runNotify(input: NotifyInput, d: Deps): Promise<NotifyResu
         continue;
       }
       try {
-        const r = await d.deliver(outgoing(base, content, to, `${input.key}:${to}`, row.id));
+        const r = await send(d, base, content, to, person.userId, `${input.key}:${to}`, row.id);
         await d.update(row.id, { email_state: "sent" in r ? "sent" : "skipped" });
         if ("sent" in r) out.sent++; else out.skipped++;
       } catch (e) {
@@ -164,12 +171,20 @@ async function resolve(c: NotifyInput["content"], r: Recipient, mode: Mode): Pro
 
 type Base = { kind: string; category: string; locationId: string | null; partnerId: string | null; replyTo?: string | undefined };
 
-function outgoing(b: Base, c: EmailContent, to: string, dedupeKey: string, notificationId: string | null): Outgoing {
-  const { html, text } = renderEmail(c);
-  return {
+/** Renders one email for one address and sends it through the outbox, unless the address is suppressed. */
+async function send(d: Deps, b: Base, c: EmailContent, to: string, userId: string | null, dedupeKey: string, notificationId: string | null): Promise<Delivery> {
+  if (await d.suppressed(to, b.category)) {
+    d.log("suppressed", { category: b.category, kind: b.kind });
+    return { skipped: "suppressed" };
+  }
+  const cat = categoryOf(b.category);
+  const links = cat?.switchable ? await d.unsubscribeLinks(to, userId, b.locationId, b.category) : null;
+  const { html, text } = renderEmail(c, { appUrl: d.appUrl, defaultWhy: cat?.why ?? SYSTEM_WHY[b.category as SystemCategory] ?? "You are a Kabsi customer.", unsubscribePage: links?.page ?? null });
+  const unsubscribeUrl = links?.oneClick ?? null;
+  return await d.deliver({
     kind: b.kind, category: b.category, to, subject: c.subject, html, text, dedupeKey, locationId: b.locationId, partnerId: b.partnerId,
-    replyTo: b.replyTo, notificationId, unsubscribe: !!categoryOf(b.category)?.switchable,
-  };
+    replyTo: b.replyTo, notificationId, unsubscribeUrl,
+  });
 }
 
 // ─── held and digested emails come due ────────────────────────────────────────────────────────────────────────
@@ -184,7 +199,7 @@ export async function releaseDue(d: Deps, limit = 500): Promise<ReleaseResult> {
   for (const item of due.filter((i) => i.email_state === "held")) {
     try {
       const base: Base = { kind: item.kind, category: item.category, locationId: item.location_id, partnerId: null };
-      const r = await d.deliver(outgoing(base, item.email_content, item.to_address, `${item.dedupe_key}:${item.to_address}`, item.id));
+      const r = await send(d, base, item.email_content, item.to_address, item.user_id, `${item.dedupe_key}:${item.to_address}`, item.id);
       await d.update(item.id, { email_state: "sent" in r ? "sent" : "skipped", email_content: null });
       if ("sent" in r) out.held++;
     } catch (e) {
@@ -208,11 +223,7 @@ export async function releaseDue(d: Deps, limit = 500): Promise<ReleaseResult> {
       const mail = digestEmail(biz, items, d.appUrl);
       const stamp = localParts(d.now(), biz.tz).ymd;
       const ids = items.map((i) => i.id).sort().join(",");
-      const r = await d.deliver({
-        kind: "digest", category: first.category, to: first.to_address, subject: mail.subject, ...renderEmail(mail),
-        dedupeKey: `digest:${first.location_id}:${first.to_address}:${stamp}:${shortHash(ids)}`,
-        locationId: first.location_id, partnerId: null, notificationId: first.id, unsubscribe: true,
-      });
+      const r = await sendDigest(d, first, biz, mail, shortHash(ids), stamp);
       for (const i of items) await d.update(i.id, { email_state: "sent" in r ? "sent" : "skipped", email_content: null });
       if ("sent" in r) { out.digests++; out.digestItems += items.length; }
     } catch (e) {
@@ -221,6 +232,11 @@ export async function releaseDue(d: Deps, limit = 500): Promise<ReleaseResult> {
     }
   }
   return out;
+}
+
+async function sendDigest(d: Deps, first: StoredItem, biz: Business, mail: EmailContent, hash: string, stamp: string): Promise<Delivery> {
+  const base: Base = { kind: "digest", category: first.category, locationId: first.location_id, partnerId: null };
+  return await send(d, base, mail, first.to_address, first.user_id, `digest:${first.location_id}:${first.to_address}:${stamp}:${hash}`, first.id);
 }
 
 function shortHash(s: string) {
@@ -249,5 +265,6 @@ export function digestEmail(biz: Business, items: StoredItem[], appUrl: string):
     bodyHtml: `<p style="margin:0 0 8px 0;">Here is what came up for <strong>${esc(biz.name)}</strong> since your last email.</p>${bodyHtml}`,
     text: `Here is what came up for ${biz.name} since your last email.\n\n${text}\n\nOpen Kabsi: ${appUrl}/app`,
     button: { label: "Open Kabsi", url: `${appUrl}/app` },
+    why: "Kabsi groups these notices into one email a day. You can change this in Email settings.",
   };
 }

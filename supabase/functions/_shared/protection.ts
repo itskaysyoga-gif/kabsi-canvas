@@ -196,8 +196,9 @@ export const whoChanged = (source: string) => source === "google_update"
   : "We don't know who changed it. Google sometimes accepts edits suggested by the public.";
 
 async function alertOwner(loc: Loc, changeId: string) {
-  const { admin, APP_URL, esc } = await kabsi();
+  const { admin, APP_URL } = await kabsi();
   const { notify } = await import("./notify.ts");
+  const copy = await import("./email/copy.ts");
   const db = admin();
   const { data: ch, error } = await db.from("profile_changes")
     .select("id, field, previous_value, google_value, previous_fact_id, source, explanation, recommend, recommend_reason")
@@ -210,21 +211,12 @@ async function alertOwner(loc: Loc, changeId: string) {
   if (c.recommend === "accept" && c.recommend_reason) lines.push(`Kabsi recommends "Google is right". ${c.recommend_reason}`);
   if (HIGH_RISK.includes(c.field)) lines.push(`Sign in to Kabsi to choose. ${VERIFY_WARNING}`);
   if (!c.previous_fact_id) lines.push("You have not confirmed this detail yet, so Kabsi will not put the old value back.");
-  const box = (s: string) => `<div style="margin:0 0 12px 0;padding:12px 14px;background:#F6F4EF;border-radius:14px;white-space:pre-wrap;">${esc(s || "(empty)")}</div>`;
   // The urgent ones (the details customers rely on most) go out at once, even at night; the rest wait for the daily
   // email (K-46). Emails go to the owner and the managers; staff never see profile changes (K-16).
   await notify({
     category: URGENT.includes(c.field) ? "profile_urgent" : "profile_issue", kind: "shield_alert", key: `shield:${c.id}`, locationId: loc.id, to: "members",
     inApp: { title: `Your ${label} changed on Google`, body: "Choose in Google Protection what to do.", link: "/app/shield" },
-    content: {
-      subject: `${loc.name}: your ${label} changed on Google`, preheader: lines[0]!, title: `Your ${label} changed on Google`,
-      bodyHtml: lines.map((l) => `<p style="margin:0 0 12px 0;">${esc(l)}</p>`).join("") +
-        `<p style="margin:0 0 6px 0;font-size:14px;color:#5E5B55;">${c.previous_fact_id ? "You approved" : "Kabsi saw before"}</p>${box(before)}` +
-        `<p style="margin:0 0 6px 0;font-size:14px;color:#5E5B55;">Google shows now</p>${box(after)}`,
-      button: { label: "Open Google Protection", url: `${APP_URL}/app/shield` },
-      note: "Nothing changes on Google until you choose in Kabsi.",
-      text: `${lines.join("\n")}\n\nOpen Google Protection: ${APP_URL}/app/shield`,
-    },
+    content: copy.profileChange(loc.name, label, { lines, approvedBefore: !!c.previous_fact_id, before, after }, APP_URL),
   });
 }
 

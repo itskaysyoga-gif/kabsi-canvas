@@ -17,7 +17,7 @@
 // owner asked for it in Settings, and never touches the profile itself.
 import { admin, APP_URL, captureError, isInternal, jobLog, json } from "../_shared/kabsi.ts";
 import { notify, notifyDue } from "../_shared/notify.ts";
-import { esc, KABSI_GROUP_ID } from "../_shared/email-layout.ts";
+import * as copy from "../_shared/email/copy.ts";
 import { type Job, type JobHandler, type JobState, PermanentJobError, runJob } from "../_shared/jobs.ts";
 import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation } from "../_shared/reviews.ts";
 import { AiBudgetError } from "../_shared/ai-budget.ts";
@@ -251,7 +251,7 @@ const DISCONNECT: DisconnectDeps = {
     await notify({
       category: "access", kind: "access_change", key: dedupe, locationId, to: "owners",
       inApp: { title: m.title, link: "/app/settings" },
-      content: { subject: m.subject, preheader: m.preheader, title: m.title, bodyHtml: m.bodyHtml, button: m.button, note: m.note, text: m.text },
+      content: m,
     });
   },
 };
@@ -295,7 +295,7 @@ const HANDLERS: Record<string, JobHandler> = {
         // Sent because the owner just invited this person: no choices and no quiet hours (category direct).
         await notify({
           category: "direct", kind: "team_invite", key: `team_invite:${inviteId}`, locationId: job.location_id ?? null, to: [{ email: i.email, userId: null }],
-          content: { subject: m.subject, text: m.text, preheader: m.preheader, title: m.title, bodyHtml: m.bodyHtml, button: m.button, note: m.note },
+          content: m,
         });
       },
     });
@@ -344,14 +344,6 @@ async function emailAccessLost(locationId: string, name: string) {
   await notify({
     category: "access", kind: "access_lost", key: `access_lost:${locationId}:${day}`, locationId, to: "owners",
     inApp: { title: `Kabsi can't reach ${name} on Google`, body: "Invite the Kabsi group again to continue.", link: "/app/settings" },
-    content: {
-      subject: `Kabsi can't reach ${name} on Google`,
-      preheader: "Invite the Kabsi group again to continue.", title: "Kabsi lost access to your Google profile",
-      bodyHtml: `<p style="margin:0 0 16px 0;">Google stopped letting Kabsi read <strong>${esc(name)}</strong>'s reviews. This usually means the Kabsi group was removed from the profile's managers.</p>
-<p style="margin:0 0 16px 0;">To continue: on your Business Profile open <strong>Menu</strong>, then <strong>Business Profile settings</strong>, then <strong>People and access</strong>, and invite the <strong>Kabsi group ID ${KABSI_GROUP_ID}</strong> as a <strong>Manager</strong>. Kabsi reconnects on its own within a few minutes.</p>
-<p style="margin:0 0 20px 0;">Until then no replies are drafted and nothing is posted. If you removed Kabsi on purpose, you don't need to do anything.</p>`,
-      button: { label: "Open Kabsi", url: `${APP_URL}/app` },
-      text: `Google stopped letting Kabsi read ${name}'s reviews, usually because the Kabsi group was removed as a Manager.\n\nTo continue, invite the Kabsi group ID ${KABSI_GROUP_ID} as a Manager again under People and access on your Business Profile. Kabsi reconnects within a few minutes.\n\nOpen Kabsi: ${APP_URL}/app`,
-    },
+    content: copy.accessLost(name, APP_URL),
   }).catch((e) => captureError("dispatch", e, { job: "access_lost", location: locationId }));
 }

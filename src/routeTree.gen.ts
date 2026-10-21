@@ -26,6 +26,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SecurityRouteImport } from './routes/security'
 import { Route as SetupCallRouteImport } from './routes/setup-call'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
 import { Route as AuthenticatedDesignRouteImport } from './routes/_authenticated/design'
 import { Route as AuthenticatedPartnerRouteImport } from './routes/_authenticated/partner'
@@ -133,6 +134,11 @@ const SetupCallRoute = SetupCallRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppRouteRoute = AuthenticatedAppRouteRouteImport.update({
@@ -275,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/security': typeof SecurityRoute
   '/setup-call': typeof SetupCallRoute
   '/terms': typeof TermsRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/app': typeof AuthenticatedAppRouteRouteWithChildren
   '/design': typeof AuthenticatedDesignRoute
   '/partner': typeof AuthenticatedPartnerRoute
@@ -317,6 +324,7 @@ export interface FileRoutesByTo {
   '/security': typeof SecurityRoute
   '/setup-call': typeof SetupCallRoute
   '/terms': typeof TermsRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/design': typeof AuthenticatedDesignRoute
   '/partner': typeof AuthenticatedPartnerRoute
   '/staff': typeof AuthenticatedStaffRoute
@@ -360,6 +368,7 @@ export interface FileRoutesById {
   '/security': typeof SecurityRoute
   '/setup-call': typeof SetupCallRoute
   '/terms': typeof TermsRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteRouteWithChildren
   '/_authenticated/design': typeof AuthenticatedDesignRoute
   '/_authenticated/partner': typeof AuthenticatedPartnerRoute
@@ -404,6 +413,7 @@ export interface FileRouteTypes {
     | '/security'
     | '/setup-call'
     | '/terms'
+    | '/unsubscribe'
     | '/app'
     | '/design'
     | '/partner'
@@ -446,6 +456,7 @@ export interface FileRouteTypes {
     | '/security'
     | '/setup-call'
     | '/terms'
+    | '/unsubscribe'
     | '/design'
     | '/partner'
     | '/staff'
@@ -488,6 +499,7 @@ export interface FileRouteTypes {
     | '/security'
     | '/setup-call'
     | '/terms'
+    | '/unsubscribe'
     | '/_authenticated/app'
     | '/_authenticated/design'
     | '/_authenticated/partner'
@@ -532,6 +544,7 @@ export interface RootRouteChildren {
   SecurityRoute: typeof SecurityRoute
   SetupCallRoute: typeof SetupCallRoute
   TermsRoute: typeof TermsRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
   ATokenRoute: typeof ATokenRoute
   ActivateCodeRoute: typeof ActivateCodeRoute
   ForSlugRoute: typeof ForSlugRoute
@@ -659,6 +672,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app': {
@@ -906,6 +926,7 @@ const rootRouteChildren: RootRouteChildren = {
   SecurityRoute: SecurityRoute,
   SetupCallRoute: SetupCallRoute,
   TermsRoute: TermsRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
   ATokenRoute: ATokenRoute,
   ActivateCodeRoute: ActivateCodeRoute,
   ForSlugRoute: ForSlugRoute,

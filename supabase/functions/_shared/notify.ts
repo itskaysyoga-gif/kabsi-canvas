@@ -1,10 +1,11 @@
 // The notification engine wired to the database and the outbox (P0.4-09). Everything that tells someone something calls
 // notify(); nothing else sends an email. The rules and the flow are in notify-engine.ts and notify-rules.ts.
-import { admin, APP_URL, log, sendEmail } from "./kabsi.ts";
+import { admin, APP_URL, internalSecret, log, sendEmail } from "./kabsi.ts";
+import { signUnsubscribe } from "./email/unsubscribe.ts";
 import { type Deps, type EmailState, type NewRow, type NotifyInput, type NotifyResult, type Recipient, releaseDue, type ReleaseResult, runNotify, type StoredItem } from "./notify-engine.ts";
 import type { Frequency } from "./notify-categories.ts";
 
-export type { EmailContent } from "./email-render.ts";
+export type { EmailContent } from "./email/template.ts";
 export type { NotifyInput, NotifyResult, Recipient } from "./notify-engine.ts";
 
 export function dbDeps(): Deps {
@@ -57,9 +58,23 @@ export function dbDeps(): Deps {
       const r = await sendEmail({
         kind: o.kind, to: o.to, subject: o.subject, html: o.html, text: o.text, dedupeKey: o.dedupeKey, locationId: o.locationId,
         partnerId: o.partnerId, ...(o.replyTo ? { replyTo: o.replyTo } : {}), category: o.category, notificationId: o.notificationId ?? null,
+        unsubscribeUrl: o.unsubscribeUrl ?? null, stream: o.category === "trial" ? "news" : "send",
       });
       if ("sent" in r && o.notificationId) await db.from("notifications").update({ email_id: (r as { id?: string }).id ?? null }).eq("id", o.notificationId);
       return "sent" in r ? { sent: r.sent as string } : { skipped: r.skipped };
+    },
+
+    async suppressed(address, category) {
+      const { data, error } = await db.from("email_suppressions").select("scope").eq("address", address.toLowerCase()).in("scope", ["*", category]).limit(1);
+      if (error) throw error;
+      return (data ?? []).length > 0;
+    },
+
+    async unsubscribeLinks(address, userId, locationId, category) {
+      const secret = await internalSecret();
+      if (!secret) throw new Error("no signing secret for unsubscribe links");
+      const token = await signUnsubscribe({ a: address.toLowerCase(), u: userId, l: locationId, c: category }, secret);
+      return { page: `${APP_URL}/unsubscribe?t=${token}`, oneClick: `${Deno.env.get("SUPABASE_URL")}/functions/v1/email/unsubscribe?t=${token}` };
     },
 
     async listDue(now, limit): Promise<StoredItem[]> {
