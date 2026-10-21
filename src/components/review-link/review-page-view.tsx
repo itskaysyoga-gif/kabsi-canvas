@@ -10,7 +10,9 @@ import { MANAGER_LINE, managerHref, type ReviewPageData } from "@/lib/review-pag
 export function ReviewPageView({ data }: { data: ReviewPageData }) {
   return (
     <Shell>
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Thank you for visiting</p>
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
+        Thank you for visiting
+      </p>
       <h1 className="mt-2 font-display text-4xl leading-tight">{data.name}</h1>
       <p className="mt-3 leading-7 text-kb-stone">
         If you have a minute, tell other people about your visit on Google.

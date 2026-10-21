@@ -2,7 +2,8 @@
 // Edge Function and the tests share them.
 
 /** The Google review button's destination must be Google's own review form (same check the Worker makes). */
-export const GOOGLE_REVIEW_RE = /^https:\/\/(search\.google\.com|g\.page|www\.google\.com|maps\.google\.com|maps\.app\.goo\.gl)\//;
+export const GOOGLE_REVIEW_RE =
+  /^https:\/\/(search\.google\.com|g\.page|www\.google\.com|maps\.google\.com|maps\.app\.goo\.gl)\//;
 
 /**
  * The digits wa.me needs, from the number the owner saved (a plus sign, the country code and the number; the save
@@ -24,14 +25,31 @@ export type ReviewPageData = {
   whatsapp: string | null;
 };
 
-type CardRow = { status: string; destination: string | null; page_mode: string | null; kind: string | null; location_id: string | null };
+type CardRow = {
+  status: string;
+  destination: string | null;
+  page_mode: string | null;
+  kind: string | null;
+  location_id: string | null;
+};
 
 /**
  * What the page shows, or null when the code is not an active link set to the page. Nothing here reads a rating,
  * an answer or a visitor: the same data goes to everyone.
  */
-export function pageData(card: CardRow | null, name: string | null, whatsappFact: unknown): ReviewPageData | null {
-  if (!card || card.kind !== "link" || card.status !== "active" || card.page_mode !== "page" || !card.location_id) return null;
+export function pageData(
+  card: CardRow | null,
+  name: string | null,
+  whatsappFact: unknown,
+): ReviewPageData | null {
+  if (
+    !card ||
+    card.kind !== "link" ||
+    card.status !== "active" ||
+    card.page_mode !== "page" ||
+    !card.location_id
+  )
+    return null;
   if (!card.destination || !GOOGLE_REVIEW_RE.test(card.destination) || !name) return null;
   return { name, review_url: card.destination, whatsapp: whatsappDigits(whatsappFact) };
 }

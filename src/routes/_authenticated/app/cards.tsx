@@ -522,9 +522,7 @@ function ModeChoice({ link, onChanged }: { link: Card; onChanged: () => unknown 
     });
     setBusy(false);
     setMsg(
-      error
-        ? "Couldn't change it. Try again."
-        : "Saved. It can take up to a minute on phones.",
+      error ? "Couldn't change it. Try again." : "Saved. It can take up to a minute on phones.",
     );
     if (!error) onChanged();
   }

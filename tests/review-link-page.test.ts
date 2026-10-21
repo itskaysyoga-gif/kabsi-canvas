@@ -14,7 +14,8 @@ import { pageData, whatsappDigits } from "../supabase/functions/_shared/review-p
 // opens the same page for every visitor, the Google button first.
 const GOOGLE = "https://search.google.com/local/writereview?placeid=abc";
 const data: ReviewPageData = { name: "Yawmiyati", review_url: GOOGLE, whatsapp: "971501234567" };
-const html = (d: ReviewPageData) => renderToStaticMarkup(createElement(ReviewPageView, { data: d }));
+const html = (d: ReviewPageData) =>
+  renderToStaticMarkup(createElement(ReviewPageView, { data: d }));
 
 describe("the page", () => {
   it("puts the Google button first in the document and the tab order, and the manager line after it", () => {
@@ -47,7 +48,11 @@ describe("the page", () => {
   });
 
   it("asks nothing and shows no rating: no form control, no stars, no question about the visit", () => {
-    for (const out of [html(data), html({ ...data, whatsapp: null }), renderToStaticMarkup(createElement(ReviewPageUnavailable))]) {
+    for (const out of [
+      html(data),
+      html({ ...data, whatsapp: null }),
+      renderToStaticMarkup(createElement(ReviewPageUnavailable)),
+    ]) {
       expect(out).not.toMatch(/<(input|select|textarea|form|button)\b/);
       expect(out).not.toMatch(/star|rating|how was|enjoy|happy|reward|discount|free /i);
       expect(out).not.toMatch(/[—–!]/);
@@ -59,14 +64,22 @@ describe("the page", () => {
       "supabase/functions/review-page/index.ts",
       "supabase/functions/_shared/review-page.ts",
     ]) {
-      const code = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+      const code = readFileSync(file, "utf8")
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/\/\/.*$/gm, "");
       expect(code, file).not.toMatch(/star_rating|sentiment|rating/i);
     }
   });
 });
 
 describe("what the function returns", () => {
-  const card = { status: "active", destination: GOOGLE, page_mode: "page", kind: "link", location_id: "loc" };
+  const card = {
+    status: "active",
+    destination: GOOGLE,
+    page_mode: "page",
+    kind: "link",
+    location_id: "loc",
+  };
 
   it("gives the page data for an active link set to the page", () => {
     expect(pageData(card, "Yawmiyati", "+971 50 123 4567")).toEqual({
@@ -80,7 +93,9 @@ describe("what the function returns", () => {
     expect(pageData({ ...card, page_mode: "direct" }, "Yawmiyati", null)).toBeNull();
     expect(pageData({ ...card, status: "disabled" }, "Yawmiyati", null)).toBeNull();
     expect(pageData({ ...card, kind: "card" }, "Yawmiyati", null)).toBeNull();
-    expect(pageData({ ...card, destination: "https://example.com/x" }, "Yawmiyati", null)).toBeNull();
+    expect(
+      pageData({ ...card, destination: "https://example.com/x" }, "Yawmiyati", null),
+    ).toBeNull();
     expect(pageData(null, "Yawmiyati", null)).toBeNull();
   });
 
@@ -103,7 +118,12 @@ describe("the go.kabsi.co Worker", () => {
     vi.stubGlobal("fetch", fetchMock);
     const res = await worker.fetch(
       new Request("https://go.kabsi.co/KQA234?s=q", { headers: { "user-agent": "iPhone" } }),
-      { STICKERS: kv, APP_ORIGIN: "https://kabsi.co", TAP_FUNCTION_URL: "https://tap.test", TAP_SECRET: "s" },
+      {
+        STICKERS: kv,
+        APP_ORIGIN: "https://kabsi.co",
+        TAP_FUNCTION_URL: "https://tap.test",
+        TAP_SECRET: "s",
+      },
       { waitUntil: (p: Promise<unknown>) => waits.push(p) },
     );
     await Promise.all(waits);

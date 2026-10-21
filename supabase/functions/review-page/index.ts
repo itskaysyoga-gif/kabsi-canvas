@@ -15,7 +15,8 @@ Deno.serve(async (req) => {
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
   const day = new Date().toISOString().slice(0, 10);
   const visitor = (await sha256Hex(`${Deno.env.get("SUPABASE_URL")}:${day}:${ip}`)).slice(0, 24);
-  if (!(await rateLimit(`review-page:${visitor}`, 120, 3600))) return fail("rate_limited", "Try again in a little while.", 429);
+  if (!(await rateLimit(`review-page:${visitor}`, 120, 3600)))
+    return fail("rate_limited", "Try again in a little while.", 429);
 
   const { code: raw } = (await req.json().catch(() => ({}))) as { code?: string };
   const code = String(raw ?? "").toUpperCase();
@@ -23,15 +24,28 @@ Deno.serve(async (req) => {
 
   try {
     const db = admin();
-    const { data: card } = await db.from("cards").select("status, destination, page_mode, kind, location_id")
-      .eq("code", code).maybeSingle();
+    const { data: card } = await db
+      .from("cards")
+      .select("status, destination, page_mode, kind, location_id")
+      .eq("code", code)
+      .maybeSingle();
     if (!card?.location_id) return fail("not_found", "This link is not active.", 404);
     const [{ data: loc }, { data: fact }] = await Promise.all([
       db.from("locations").select("name").eq("id", card.location_id).maybeSingle(),
-      db.from("knowledge_facts").select("value").eq("location_id", card.location_id).eq("slot", "card.manager_whatsapp")
-        .eq("status", "verified").is("superseded_by", null).maybeSingle(),
+      db
+        .from("knowledge_facts")
+        .select("value")
+        .eq("location_id", card.location_id)
+        .eq("slot", "card.manager_whatsapp")
+        .eq("status", "verified")
+        .is("superseded_by", null)
+        .maybeSingle(),
     ]);
-    const data = pageData(card, (loc?.name as string | undefined) ?? null, (fact?.value as { text?: string } | null)?.text);
+    const data = pageData(
+      card,
+      (loc?.name as string | undefined) ?? null,
+      (fact?.value as { text?: string } | null)?.text,
+    );
     if (!data) return fail("not_found", "This link is not active.", 404);
     return json(data, 200, { "cache-control": "no-store" });
   } catch (e) {
