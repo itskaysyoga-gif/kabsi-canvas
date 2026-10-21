@@ -219,3 +219,16 @@ on `tests/fixtures/rogue-google-call.txt` and passes on the repo. Functions impo
   last (at most 5 a minute, no 60 second window holds more), records the list in the audit log without any review
   text, and refuses a stranger, anon, staff, other businesses, and a manager unless the owner allowed replies.
   The Deno test `_shared/backlog.test.ts` holds the cap: 10 of 23 on a trial, 20 or all on a paid plan.
+
+## Review graphics (P0.8-07)
+
+`supabase/functions/_shared/review-graphic/` holds the text rules (`text.ts`), the renderer (`render.ts`, Satori and
+resvg-wasm), the request checks (`handler.ts`) and their Deno tests, which render real PNGs (square and story) and drive
+the handler with stub dependencies: sign-in, owner or manager, Pro through `feature_access`, 4 or 5 stars, words in a
+Latin script. `scripts/deno-check.sh` runs them with `--allow-env` because Satori reads `NODE_ENV` when it loads.
+
+`assets.ts` is generated: the resvg wasm (gzipped) and the three fonts as base64, so the Edge Function needs no network
+or file at run time. Regenerate it only when a font or the renderer changes: in a scratch folder run
+`npm i @resvg/resvg-wasm@2.6.2 @fontsource/readex-pro @fontsource/lalezar`, then base64 the files
+`@resvg/resvg-wasm/index_bg.wasm` (gzip it first), `@fontsource/readex-pro/files/readex-pro-latin-{400,700}-normal.woff`
+and `@fontsource/lalezar/files/lalezar-latin-400-normal.woff` into the four exports.
