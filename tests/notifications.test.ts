@@ -101,7 +101,12 @@ describe("one outbox", () => {
     const callers = walk(join(__dirname, "..", "supabase", "functions"))
       .filter((p) => /\brenderEmail\(/.test(readFileSync(p, "utf8")))
       .map((p) => p.slice(p.indexOf("supabase/functions/") + "supabase/functions/".length));
-    expect(callers.sort()).toEqual(["_shared/email/template.ts", "_shared/notify-engine.ts"]);
+    // P0.8-02: previews.ts renders the catalog to files for reading (docs/email-previews) and sends nothing.
+    expect(callers.sort()).toEqual([
+      "_shared/email/previews.ts",
+      "_shared/email/template.ts",
+      "_shared/notify-engine.ts",
+    ]);
     expect(
       walk(join(__dirname, "..", "supabase", "functions")).filter((p) =>
         /\bemailLayout\b/.test(readFileSync(p, "utf8")),

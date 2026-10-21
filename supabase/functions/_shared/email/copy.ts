@@ -48,7 +48,7 @@ export function accessLost(business: string, appUrl: string): EmailContent {
 
 export function deletionScheduled(business: string, dueText: string, appUrl: string): EmailContent {
   return {
-    subject: `${business}: will be deleted from Kabsi on ${dueText}`, preheader: "You can cancel until then.", title: "Deletion scheduled",
+    subject: `${business}: leaves Kabsi on ${dueText} unless you cancel`, preheader: "You asked to remove this business. You can cancel until then.", title: "Your business leaves Kabsi soon",
     bodyHtml: p(`You asked Kabsi to delete <strong>${esc(business)}</strong>. On <strong>${esc(dueText)}</strong> we delete its reviews, drafts, posts, photos, reports and settings. Payment records are kept where the law requires.`)
       + p(`Changed your mind? Cancel it in Settings before then. To stop Kabsi reaching your Google profile, also remove the Kabsi Clients group (ID ${KABSI_GROUP_ID}) under People and access.`),
     button: { label: "Open Settings", url: `${appUrl}/app/settings` },
@@ -101,7 +101,7 @@ export function renewalReminder(stage: RenewalStage, business: string, planLabel
 
 export function weeklyReport(business: string, o: { newReviews: number; replied: number }, html: string, text: string, appUrl: string): EmailContent {
   return {
-    subject: `${business}: your Weekly Care Report`, preheader: `${o.newReviews} new reviews, ${o.replied} replied.`, title: "Your week on Google",
+    subject: `${business}: your Weekly Care Report`, preheader: `${o.newReviews} new reviews, ${o.replied} replied.`, title: "Your Weekly Care Report",
     bodyHtml: html, button: { label: "Open your week", url: `${appUrl}/app/report` }, text: `${text}\n\nOpen your week: ${appUrl}/app/report`,
   };
 }

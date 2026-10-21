@@ -1,0 +1,15 @@
+Subject: New business lead: Rana
+
+name: Rana
+message: I run three salons.
+
+Reply to the lead: mailto:rana@example.test
+
+--
+Nothing is published until you approve it.
+Why you got this: You asked for this email.
+Email settings: https://kabsi.co/app/settings#choices
+
+Questions? Reply to this email or write to hello@kabsi.co. WhatsApp +1 201-483-5474.
+Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.
+Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co
