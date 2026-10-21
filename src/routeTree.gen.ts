@@ -37,6 +37,7 @@ import { Route as ForIndexRouteImport } from './routes/for.index'
 import { Route as ForSlugRouteImport } from './routes/for.$slug'
 import { Route as GuidesIndexRouteImport } from './routes/guides.index'
 import { Route as GuidesSlugRouteImport } from './routes/guides.$slug'
+import { Route as HTokenRouteImport } from './routes/h.$token'
 import { Route as ReviewCodeRouteImport } from './routes/review.$code'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app/index'
 import { Route as AuthenticatedAppCardsRouteImport } from './routes/_authenticated/app/cards'
@@ -192,6 +193,11 @@ const GuidesSlugRoute = GuidesSlugRouteImport.update({
   path: '/guides/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HTokenRoute = HTokenRouteImport.update({
+  id: '/h/$token',
+  path: '/h/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReviewCodeRoute = ReviewCodeRouteImport.update({
   id: '/review/$code',
   path: '/review/$code',
@@ -297,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/api/geo': typeof ApiGeoRoute
   '/for/$slug': typeof ForSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
+  '/h/$token': typeof HTokenRoute
   '/review/$code': typeof ReviewCodeRoute
   '/for/': typeof ForIndexRoute
   '/guides/': typeof GuidesIndexRoute
@@ -340,6 +347,7 @@ export interface FileRoutesByTo {
   '/api/geo': typeof ApiGeoRoute
   '/for/$slug': typeof ForSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
+  '/h/$token': typeof HTokenRoute
   '/review/$code': typeof ReviewCodeRoute
   '/for': typeof ForIndexRoute
   '/guides': typeof GuidesIndexRoute
@@ -386,6 +394,7 @@ export interface FileRoutesById {
   '/api/geo': typeof ApiGeoRoute
   '/for/$slug': typeof ForSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
+  '/h/$token': typeof HTokenRoute
   '/review/$code': typeof ReviewCodeRoute
   '/for/': typeof ForIndexRoute
   '/guides/': typeof GuidesIndexRoute
@@ -432,6 +441,7 @@ export interface FileRouteTypes {
     | '/api/geo'
     | '/for/$slug'
     | '/guides/$slug'
+    | '/h/$token'
     | '/review/$code'
     | '/for/'
     | '/guides/'
@@ -475,6 +485,7 @@ export interface FileRouteTypes {
     | '/api/geo'
     | '/for/$slug'
     | '/guides/$slug'
+    | '/h/$token'
     | '/review/$code'
     | '/for'
     | '/guides'
@@ -520,6 +531,7 @@ export interface FileRouteTypes {
     | '/api/geo'
     | '/for/$slug'
     | '/guides/$slug'
+    | '/h/$token'
     | '/review/$code'
     | '/for/'
     | '/guides/'
@@ -562,6 +574,7 @@ export interface RootRouteChildren {
   ApiGeoRoute: typeof ApiGeoRoute
   ForSlugRoute: typeof ForSlugRoute
   GuidesSlugRoute: typeof GuidesSlugRoute
+  HTokenRoute: typeof HTokenRoute
   ReviewCodeRoute: typeof ReviewCodeRoute
   ForIndexRoute: typeof ForIndexRoute
   GuidesIndexRoute: typeof GuidesIndexRoute
@@ -765,6 +778,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/h/$token': {
+      id: '/h/$token'
+      path: '/h/$token'
+      fullPath: '/h/$token'
+      preLoaderRoute: typeof HTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/review/$code': {
       id: '/review/$code'
       path: '/review/$code'
@@ -952,6 +972,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiGeoRoute: ApiGeoRoute,
   ForSlugRoute: ForSlugRoute,
   GuidesSlugRoute: GuidesSlugRoute,
+  HTokenRoute: HTokenRoute,
   ReviewCodeRoute: ReviewCodeRoute,
   ForIndexRoute: ForIndexRoute,
   GuidesIndexRoute: GuidesIndexRoute,

@@ -3,10 +3,13 @@ import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { HolidayQuestions } from "@/components/hours/holiday-questions";
 import { HoursCalendar } from "@/components/hours/hours-calendar";
 import { ClosureForm, SpecialHoursForm } from "@/components/hours/special-hours-form";
 import { localToday, range, times } from "@/lib/hours-format";
+import { addDays } from "@/lib/holidays";
 import { WeekEditor } from "@/components/hours/week-editor";
+import { loadHolidayCalendar } from "@/lib/holidays";
 import { emptyWeek, weekFromFact } from "@/lib/hours";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
@@ -57,6 +60,13 @@ async function loadApprovedHours(locationId: string): Promise<Fact> {
   return (data?.value ?? null) as Fact;
 }
 
+/** One calendar entry per day of a holiday, so a run of days is marked on each of them. */
+const holidayDays = (start: string, end: string, name: string) => {
+  const out: { date: string; name: string }[] = [];
+  for (let d = start; d <= end && out.length < 40; d = addDays(d, 1)) out.push({ date: d, name });
+  return out;
+};
+
 const MODES = [
   { id: "regular", label: "Opening hours" },
   { id: "special", label: "Special days" },
@@ -78,12 +88,24 @@ function HoursPage() {
     queryFn: () => loadApprovedHours(loc!.id),
     enabled: !!loc,
   });
+  const holidays = useQuery({
+    queryKey: ["holidays", loc?.id],
+    queryFn: () => loadHolidayCalendar(loc!.id),
+    enabled: !!loc && loc.status === "active" && !loc.concierge,
+    retry: false,
+  });
   const [mode, setMode] = useState<Mode>("regular");
   const refresh = () =>
     Promise.all(
-      [["hours"], ["hours-approved"], ["shield"], ["tasks"], ["feed"], ["home-facts"]].map(
-        (queryKey) => queryClient.invalidateQueries({ queryKey }),
-      ),
+      [
+        ["hours"],
+        ["hours-approved"],
+        ["holidays"],
+        ["shield"],
+        ["tasks"],
+        ["feed"],
+        ["home-facts"],
+      ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
     );
   const live = !!loc && loc.status === "active" && !loc.concierge;
   const today = localToday();
@@ -109,6 +131,14 @@ function HoursPage() {
         </Button>
       ) : null}
       {loc?.concierge ? <EarlyAccessNotice what="Hours" /> : null}
+      {live ? (
+        <HolidayQuestions
+          prompts={holidays.data?.prompts ?? []}
+          today={today}
+          regularHours={typeof approved.data?.display === "string" ? approved.data.display : null}
+          onDone={refresh}
+        />
+      ) : null}
       {live ? (
         <>
           <div className="mt-6 grid grid-cols-3 gap-2" role="group" aria-label="What to change">
@@ -150,7 +180,15 @@ function HoursPage() {
           </Button>
         </div>
       ) : null}
-      {live ? <HoursCalendar entries={entries} holidays={[]} today={today} /> : null}
+      {live ? (
+        <HoursCalendar
+          entries={entries}
+          holidays={(holidays.data?.upcoming ?? []).flatMap((h) =>
+            holidayDays(h.starts_on, h.ends_on, h.name),
+          )}
+          today={today}
+        />
+      ) : null}
       {rows.data?.length ? (
         <div className="mt-10">
           <h2 className="text-lg font-bold">Set with Kabsi</h2>

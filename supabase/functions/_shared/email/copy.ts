@@ -144,3 +144,39 @@ export function leadAlert(kind: string, name: string, email: string, bodyHtml: s
     button: { label: "Reply to the lead", url: `mailto:${email}` }, text,
   };
 }
+
+// ─── holidays ──────────────────────────────────────────────────────────────────────────────────────────────────
+
+export type HolidayAskInput = {
+  business: string;
+  holiday: string;
+  /** "Thursday 25 December" or "8 February to 8 March", already in words. */
+  when: string;
+  estimated: boolean;
+  /** Ramadan has no "closed" answer: the choice is normal hours or different hours for the month. */
+  ramadan: boolean;
+  links: { choose: string; normal: string; closed: string; custom: string };
+};
+
+/** P0.5-03 (K-131): five days before a holiday. One yellow button; the three answers are plain links to the confirm page. */
+export function holidayHoursAsk(o: HolidayAskInput, appUrl: string): EmailContent {
+  const is = o.estimated ? "is expected" : "is";
+  const answers = [
+    { label: "Normal hours", url: o.links.normal },
+    ...(o.ramadan ? [] : [{ label: "Closed", url: o.links.closed }]),
+    { label: o.ramadan ? "Different hours" : "Custom hours", url: o.links.custom },
+  ];
+  const moon = o.estimated ? " The exact day follows the moon, so you can move the days on the next page." : "";
+  const lead = `${o.holiday} ${is} on ${o.when}. Customers check Google for your hours first.`;
+  return {
+    subject: `${o.business}: your hours for ${o.holiday}`, preheader: "Tell Kabsi your hours. Nothing changes on Google until you confirm.", title: `Your hours for ${o.holiday}`,
+    bodyHtml: p(`${esc(lead)}${esc(moon)}`) + p("Kabsi never assumes holiday hours. Choose one, check the hours on the next page and confirm. Nothing changes on Google until you do."),
+    button: { label: "Choose your hours", url: o.links.choose }, links: answers,
+    note: "You can also answer in Kabsi, under Hours.",
+    text: `${lead}${moon}\n\nKabsi never assumes holiday hours. Choose one, check the hours and confirm. Nothing changes on Google until you do.\n\nChoose your hours: ${o.links.choose}\n${answers.map((a) => `${a.label}: ${a.url}`).join("\n")}\n\nYou can also answer in Kabsi, under Hours: ${link(appUrl, "/app/hours")}`,
+    digest: {
+      html: p(`<strong>${esc(o.business)}</strong>: ${esc(lead)} `) + `<div style="margin:0 0 12px 0;">${[{ label: "Choose your hours", url: o.links.choose }, ...answers].map((a) => `<a href="${esc(a.url)}" style="font-weight:700;color:${TOKENS.ink};margin-right:14px;">${esc(a.label)}</a>`).join("")}</div>`,
+      text: `${o.business}: ${lead} Choose your hours: ${o.links.choose}`,
+    },
+  };
+}

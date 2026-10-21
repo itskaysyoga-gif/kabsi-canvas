@@ -9,6 +9,7 @@
 //   POST { do: "keyword_suggest", location_id }                                       → search phrases for posts
 //   POST { do: "hours_publish", location_id, start_date, end_date, closed, open_time?, close_time?, reason? }
 //   POST { do: "hours_regular", location_id, week: { MONDAY: [{ open, close }], ... } }  → the weekly opening hours (P0.5-03)
+//   POST { do: "holiday_answer", prompt_id, answer: "normal" | "closed" | "custom", open?, close?, from?, to? }  → the holiday question
 //   POST { do: "photo_check", photo_id } · { do: "photo_publish", photo_id, category } · { do: "photo_skip", photo_id }
 //   POST { do: "shield_decide", change_id, decision: "revert" | "keep" }                  → Google Protection (D218)
 import { MODELS } from "../_shared/models.ts";
@@ -96,6 +97,11 @@ Deno.serve(async (req) => {
       photo = data;
       locationId = data.location_id;
     }
+    if (typeof b.prompt_id === "string") {
+      const { data } = await db.from("holiday_prompts").select("location_id").eq("id", b.prompt_id).maybeSingle();
+      if (!data) return fail("not_found", "Question not found.", 404);
+      locationId = data.location_id;
+    }
     if (typeof b.change_id === "string") {
       const { data } = await db.from("profile_changes").select("location_id").eq("id", b.change_id).maybeSingle();
       if (!data) return fail("not_found", "Change not found.", 404);
@@ -106,7 +112,7 @@ Deno.serve(async (req) => {
     if ("error" in ctx) return ctx.error!;
     const { user, loc } = ctx;
     // Early access (D267): a person handles replies by hand; profile work starts once Kabsi connects to Google.
-    if (loc.concierge && /^(post_|photo_|hours_|keyword_|shield_)/.test(String(b.do))) {
+    if (loc.concierge && /^(post_|photo_|hours_|holiday_|keyword_|shield_)/.test(String(b.do))) {
       return fail("early_access", CONCIERGE_COPY.profile, 409);
     }
 
@@ -195,6 +201,21 @@ Deno.serve(async (req) => {
         if (r.state === "unchanged") return json({ ok: true, state: "unchanged" });
         return json({ ok: true, state: r.state, publication: r.publication_id ?? null, publish_after: r.publish_after ?? null, created: r.created ?? true });
       }
+      case "holiday_answer": {
+        // The owner's answer to a holiday question (P0.5-03, K-131): the approval. "normal" sends nothing; "closed" and
+        // "custom" make one special hours period and approve it through the pipeline. The database decides.
+        const answer = b.answer === "normal" || b.answer === "closed" || b.answer === "custom" ? b.answer : null;
+        if (!answer || typeof b.prompt_id !== "string") return fail("bad_input", "Choose normal hours, closed or custom hours.");
+        const okTime = (v: unknown) => (typeof v === "string" && /^\d{2}:\d{2}$/.test(v) ? v : null);
+        const okDate = (v: unknown) => (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null);
+        if (!(await rateLimit(`holiday_answer:${loc.id}`, 40, 86400, { failClosed: true }))) return fail("rate_limited", "That is enough changes for today. Try again tomorrow.", 429);
+        const { data, error } = await auditedAdmin(auditHeaders(req, user.id)).rpc("answer_holiday_as", {
+          p_prompt: b.prompt_id, p_user: user.id, p_answer: answer, p_open: okTime(b.open), p_close: okTime(b.close), p_from: okDate(b.from), p_to: okDate(b.to),
+        });
+        if (error) throw new Error(error.message);
+        const r = data as { state: string; answer: string; publication_id?: string; publish_after?: string | null; repeat?: boolean };
+        return json({ ok: true, state: r.state, answer: r.answer, publication: r.publication_id ?? null, publish_after: r.publish_after ?? null, repeat: r.repeat === true });
+      }
       case "photo_check": {
         if (!photo || photo.state !== "checking") return fail("bad_input", "This photo was already checked.");
         if (!(await rateLimit(`photo_check:${loc.id}`, 30, 86400, { failClosed: true }))) return fail("rate_limited", "That's enough photos for today.", 429);
@@ -241,6 +262,11 @@ Deno.serve(async (req) => {
     if (e instanceof AiBudgetError) return fail("ai_budget", AI_BUDGET_MESSAGE[e.scope], 429);
     const msg = String(e);
     if (msg.includes("bad_hours")) return fail("bad_input", "Check the hours.");
+    if (msg.includes("bad_times")) return fail("bad_input", "Closing time must be after opening time. To close at midnight, use 00:00.");
+    if (msg.includes("bad_dates")) return fail("bad_input", "Check the dates. They can move a few days, never into the past.");
+    if (msg.includes("holiday_passed")) return fail("bad_input", "This holiday has passed, so there is nothing to change.", 410);
+    if (msg.includes("already_saved")) return fail("already_saved", "You already saved special hours for these dates. Choose different dates, or change them under Hours.", 409);
+    if (msg.includes("bad_answer")) return fail("bad_input", "That answer does not fit this holiday.");
     if (msg.includes("already_handled")) return fail("bad_input", "This was already handled.", 409);
     if (msg.includes("not_allowed_to_approve") || msg.includes("owner_only")) {
       return fail("owner_approves", "The owner approves this one. They can let managers approve it in Settings, Team.", 403);

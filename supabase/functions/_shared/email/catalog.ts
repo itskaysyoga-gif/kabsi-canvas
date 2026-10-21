@@ -88,6 +88,10 @@ export function catalog(): CatalogEntry[] {
     e("renew_r5", "billing", true, copy.renewalReminder("r5", BIZ, "Kabsi Pro, monthly", "28 October 2026", "pro_monthly", APP)),
     e("renew_r1", "billing", true, copy.renewalReminder("r1", BIZ, "Kabsi Pro, monthly", "28 October 2026", "pro_monthly", APP)),
     e("weekly_report", "weekly_report", true, copy.weeklyReport(BIZ, { newReviews: REPORT.new_reviews, replied: REPORT.replied }, report.html, report.text, APP)),
+    e("holiday_hours", "approval_needed", true, copy.holidayHoursAsk({
+      business: BIZ, holiday: "Christmas Day", when: "Friday 25 December", estimated: false, ramadan: false,
+      links: { choose: `${APP}/h/HOLIDAYTOKEN`, normal: `${APP}/h/HOLIDAYTOKEN?a=normal`, closed: `${APP}/h/HOLIDAYTOKEN?a=closed`, custom: `${APP}/h/HOLIDAYTOKEN?a=custom` },
+    }, APP)),
     e("weekly_post", "approval_needed", true, copy.weeklyPost(BIZ, "Fresh manakish every morning from 7. Come early for the zaatar.", APP)),
     e("shield_alert_urgent", "profile_urgent", true, copy.profileChange(BIZ, "opening hours", { lines: ["Google shows Sunday closing at 18:00. You approved 22:00.", "Google changed this itself, or accepted a suggestion from the public."], approvedBefore: true, before: "Mon to Sun 09:00 to 22:00", after: "Mon to Sat 09:00 to 22:00, Sun 09:00 to 18:00" }, APP)),
     e("team_invite", "direct", true, teamInviteEmail({ email: "manager@example.test", role: "manager", business: BIZ, invited_by: "Rana", open: true, expires_at: "2026-11-04T00:00:00Z" }, APP)),
