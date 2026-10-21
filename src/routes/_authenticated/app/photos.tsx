@@ -10,7 +10,8 @@ import { contentCall } from "@/lib/reviews";
 import { track } from "@/lib/telemetry";
 import { ImagePlus as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
-import { SendReviewLink, usePlaceLink } from "@/components/shared/send-review-link";
+import { SendReviewLink } from "@/components/shared/send-review-link";
+import { usePlaceLink } from "@/lib/place-link";
 import { myAccess } from "@/lib/team";
 
 // Photos: the owner uploads, Kabsi checks the photo, the owner picks a category and posts it (D202).

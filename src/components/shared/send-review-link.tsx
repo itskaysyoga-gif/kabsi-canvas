@@ -1,30 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFeatureAccess } from "@/lib/feature-access";
 import { sendReviewLinkHref } from "@/lib/send-review-link";
-import { supabase } from "@/lib/supabase";
-
-/** The business's place link: its first active review link (go.kabsi.co/CODE), or null when it has none. */
-export function usePlaceLink(locationId: string | undefined) {
-  return useQuery({
-    queryKey: ["place-link", locationId],
-    enabled: !!locationId,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("cards")
-        .select("code")
-        .eq("location_id", locationId!)
-        .eq("kind", "link")
-        .eq("status", "active")
-        .order("activated_at")
-        .limit(1);
-      const code = (data?.[0] as { code: string } | undefined)?.code;
-      return code ? `https://go.kabsi.co/${code}` : null;
-    },
-  });
-}
 
 /**
  * "Send review link" (P0.8-06): opens the staff member's own WhatsApp with the same message for every customer.
@@ -47,8 +25,8 @@ export function SendReviewLink({
       {access.data?.essentials ? (
         <>
           <p className="mt-1 text-sm leading-6 text-kb-stone">
-            Opens your own WhatsApp with a short message and the link. Pick the customer and send.
-            Send it the same way to every customer.
+            Opens your own WhatsApp with a short message and the link. Pick the customer and press
+            send. Offer it to every customer the same way.
           </p>
           <Button asChild variant="outline" className="mt-3 w-full sm:w-auto">
             <a href={sendReviewLinkHref(name, link)} target="_blank" rel="noopener noreferrer">
