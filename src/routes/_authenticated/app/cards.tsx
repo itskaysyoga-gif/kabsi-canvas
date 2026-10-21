@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Copy, Download, Link2, Nfc, Power, Printer, TriangleAlert } from "lucide-react";
 import { copyText } from "@/lib/clipboard";
 import { CopyButton } from "@/components/shared/copy-button";
+import { SendReviewLink } from "@/components/shared/send-review-link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -105,7 +106,11 @@ function CardsPage() {
         />
       ) : null}
       {loc && shareLink ? (
-        <ShareKit name={loc.name} link={`https://go.kabsi.co/${shareLink.code}`} />
+        <ShareKit
+          locationId={loc.id}
+          name={loc.name}
+          link={`https://go.kabsi.co/${shareLink.code}`}
+        />
       ) : null}
       <h2 className="mt-10 text-lg font-bold">3. Optional: use your own NFC card or tag</h2>
       <p className="mt-2 rounded-card bg-kb-white p-4 text-sm leading-6 text-kb-stone shadow-kb">
@@ -386,7 +391,7 @@ function AddCard({ locationId, onAdded }: { locationId: string; onAdded: () => u
 
 // Ready-to-copy share texts built from the business name and the short review link (D212: one page
 // for every customer, no filtering). Copy-only, nothing is sent for the owner.
-function ShareKit({ name, link }: { name: string; link: string }) {
+function ShareKit({ locationId, name, link }: { locationId: string; name: string; link: string }) {
   const whatsapp = `Thank you for visiting ${name}. If you have a minute, we would love a Google review: ${link}`;
   const sms = `Thank you for visiting ${name}. We would love a Google review: ${link}`;
   const emailSubject = `Thank you from ${name}`;
@@ -419,6 +424,7 @@ function ShareKit({ name, link }: { name: string; link: string }) {
         was opened, not whether a review was written.
       </p>
       <div className="mt-3 space-y-3">
+        <SendReviewLink locationId={locationId} name={name} link={link} />
         {items.map((it) => (
           <div key={it.title} className="rounded-card bg-kb-white p-4 shadow-kb sm:p-5">
             <div className="flex items-center justify-between gap-3">

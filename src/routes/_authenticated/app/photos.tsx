@@ -10,6 +10,9 @@ import { contentCall } from "@/lib/reviews";
 import { track } from "@/lib/telemetry";
 import { ImagePlus as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
+import { SendReviewLink } from "@/components/shared/send-review-link";
+import { usePlaceLink } from "@/lib/place-link";
+import { myAccess } from "@/lib/team";
 
 // Photos: the owner uploads, Kabsi checks the photo, the owner picks a category and posts it (D202).
 export const Route = createFileRoute("/_authenticated/app/photos")({
@@ -75,6 +78,13 @@ function PhotosPage() {
     );
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  // Staff see photos and the review link (K-16): the Send review link card sits under the upload for them.
+  const access = useQuery({
+    queryKey: ["my-access", loc?.id],
+    queryFn: () => myAccess(loc!.id),
+    enabled: !!loc,
+  });
+  const placeLink = usePlaceLink(access.data?.role === "staff" ? loc?.id : undefined);
 
   async function onFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -139,6 +149,11 @@ function PhotosPage() {
         <p className="mt-6 text-kb-stone">Photos can be added once your business is active.</p>
       ) : null}
       {msg ? <p className="mt-3 text-sm text-kb-stone">{msg}</p> : null}
+      {loc && access.data?.role === "staff" ? (
+        <div className="mt-6">
+          <SendReviewLink locationId={loc.id} name={loc.name} link={placeLink.data} />
+        </div>
+      ) : null}
       {data.isError ? (
         <p className="mt-6 text-sm text-kb-red" role="alert">
           Couldn't load your photos. Refresh the page to try again.
