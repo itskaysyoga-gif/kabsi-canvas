@@ -37,7 +37,7 @@ The headline decisions:
 | K-33 to K-38 | Tenant model, one Google service layer, job queue, quota limiter, Pub/Sub, exactly-once publishing                                                                       |
 | K-40 to K-43 | Retention table, disconnect flow, security hardening, append-only audit log                                                                                              |
 
-Amendments K-57 to K-65, added on 1 October, set the messaging channels (email first, WhatsApp by link, no SMS yet), Nora's handoff, the website scanner rules, photo prompts, onboarding recovery, growth loops, the unit-economics model and the policy guardrails, and make registering the company a first step. Decisions K-66 to K-76 add the moments that make owners recommend Kabsi: the review backlog cleared on day one, replies that sound like the owner from the first draft, approval from the lock screen, a 10-second undo, daily checks of the links customers tap, honest time-saved figures, a premium print kit, a yearly summary, and Arabic dialect replies as a real strength. Decisions K-77 to K-85, from a live profile review, add Google's name rules, cover photo and logo, videos, all three post types, Google's own completeness checklist, opening date, extra hours, social and WhatsApp chat links, attribute groups with a guardrail on identity attributes, and custom services. Decisions K-86 to K-88 add a plan B if Google refuses or delays API access, backups and recovery (including protecting Kabsi's central Google account), and support limits for a one-person team. K-89 makes a free setup call available to every customer, and K-90 links the video, content and Meta Ads plan. K-91 to K-98 redesign sign-up and Google access: "Continue with Google", a one-click "Connect with Google" that adds Kabsi as Manager automatically, the manual invite as fallback, and a guided path for every profile state (unverified, under review, suspended, owned by someone else, missing). K-99 to K-108 settle the P0.1 architecture check, cost guardrails, the trial, emails, WhatsApp and Nora, partner calls, payments through Creem, taxes and one design system everywhere. K-109 redesigns Get Reviews around a branded print designer. K-110 settles the visual direction, comparison pages and the guides programme, and lists three fixes on the live site. K-111 puts Nora and the setup call into every onboarding step as one helper. K-112 sets a slogan without Google's name; K-113 adds Google API compliance rules from Google's own documentation; K-114 adds four owner-facing features learned from what local SEO agencies teach; K-115 sets Kabsi's care routine by day, week, month and quarter; K-116 adapts the product to how Google Business Profile behaves in 2025 and 2026; K-117 covers search terms, services, booking and order links, products and description rules, from a real profile; K-118 sets up every supporting platform and lists every email Kabsi sends; K-119 makes English the priority language; K-120 defines Kabsi's per-business memory; K-121 sets up the WhatsApp number from day 1, and K-122 moves it to Kapso. What Rashid does first: accept or amend the K-decisions as D309 onward, start the company registration (K-65), then start P0.1 Foundations. That wave changes nothing customers see, and every later wave depends on it.
+Amendments K-57 to K-65, added on 1 October, set the messaging channels (email first, WhatsApp by link, no SMS yet), Nora's handoff, the website scanner rules, photo prompts, onboarding recovery, growth loops, the unit-economics model and the policy guardrails, and make registering the company a first step. Decisions K-66 to K-76 add the moments that make owners recommend Kabsi: the review backlog cleared on day one, replies that sound like the owner from the first draft, approval from the lock screen, a 10-second undo, daily checks of the links customers tap, honest time-saved figures, a premium print kit, a yearly summary, and Arabic dialect replies as a real strength. Decisions K-77 to K-85, from a live profile review, add Google's name rules, cover photo and logo, videos, all three post types, Google's own completeness checklist, opening date, extra hours, social and WhatsApp chat links, attribute groups with a guardrail on identity attributes, and custom services. Decisions K-86 to K-88 add a plan B if Google refuses or delays API access, backups and recovery (including protecting Kabsi's central Google account), and support limits for a one-person team. K-89 makes a free setup call available to every customer, and K-90 links the video, content and Meta Ads plan. K-91 to K-98 redesign sign-up and Google access: "Continue with Google", a one-click "Connect with Google" that adds Kabsi as Manager automatically, the manual invite as fallback, and a guided path for every profile state (unverified, under review, suspended, owned by someone else, missing). K-99 to K-108 settle the P0.1 architecture check, cost guardrails, the trial, emails, WhatsApp and Nora, partner calls, payments through Creem, taxes and one design system everywhere. K-109 redesigns Get Reviews around a branded print designer. K-110 settles the visual direction, comparison pages and the guides programme, and lists three fixes on the live site. K-111 puts Nora and the setup call into every onboarding step as one helper. K-112 sets a slogan without Google's name; K-113 adds Google API compliance rules from Google's own documentation; K-114 adds four owner-facing features learned from what local SEO agencies teach; K-115 sets Kabsi's care routine by day, week, month and quarter; K-116 adapts the product to how Google Business Profile behaves in 2025 and 2026; K-117 covers search terms, services, booking and order links, products and description rules, from a real profile; K-118 sets up every supporting platform and lists every email Kabsi sends; K-119 makes English the priority language; K-120 defines Kabsi's per-business memory; K-121 sets up the WhatsApp number from day 1, and K-122 moves it to Kapso. Decisions K-123 to K-146, approved by Hussein on 21 Oct 2026, make Kabsi international with one payment route (Creem), drop NFC card sales and the Lebanon offer, replace every earlier partner decision with one affiliate program (Kabsi Partners), set two plans (Essentials and Pro), approve on WhatsApp for low and medium risk, add Protection put-back and opt-in auto-fix, the Profile Coach, review tools and a new website, and record what is rejected. They sit just before the open risks and override earlier text where they say so. What Rashid does first: accept or amend the K-decisions as D309 onward, start the company registration (K-65), then start P0.1 Foundations. That wave changes nothing customers see, and every later wave depends on it.
 
 ## How to use this document
 
@@ -345,7 +345,7 @@ After publishing, Kabsi reads the reply back and stores Google's moderation stat
 
 The rule stays absolute: AI prepares, people decide, Kabsi executes. What changes is who may decide, which is now set per business and per kind of action, so agencies can work without breaking the owner's control.
 
-**K-16 Roles and approval policies.** Location roles grow from owner and manager to four:
+**K-16 Roles and approval policies.** *[Amended by K-127 and K-126: three roles, no partner role or partner approval policies; Pro has the team roles (21 Oct 2026).]* Location roles grow from owner and manager to four:
 
 | Role                    | Can see                                  | Can approve                            |
 |-------------------------|------------------------------------------|----------------------------------------|
@@ -390,7 +390,7 @@ The Google Profile section shows every important field with three values side by
 
 Storage follows Google's rule: owner-approved values are the owner's own data and are kept for the life of the account. Values read from Google are kept 30 days at most. Field history keeps the owner's values and decisions forever, and Google's values for 30 days.
 
-**K-19 Google Protection.** How it works:
+**K-19 Google Protection.** *[Amended by K-130: one-tap put-back, and Pro auto-fix for three opted-in fields (21 Oct 2026).]* How it works:
 
 1.  **Watch.** Pub/Sub notifications for Google updates and location state changes (K-37), plus a daily read of every watched field and hasGoogleUpdated.
 
@@ -408,9 +408,9 @@ Nothing is ever reverted automatically, from email or anywhere else. Google Prot
 
 **K-20 Change events.** listing_changes becomes profile_changes with: field, previous approved value, Google's value, source (Google update, notification, scheduled check), detected_at, severity (urgent for open status, phone, hours, address; recommended for others), status (detected, awaiting_review, accepted, rejected, corrected, failed, expired, superseded), decided_by, decided_at, publication id. A change replaced by a newer one becomes "superseded", not "kept" (fixes A5). Changes nobody answers in 14 days become "expired" and are raised again in the weekly report.
 
-**K-21 Hours, the first-class field.** Regular hours, special hours, temporary closure and reopening date all get one editor with a calendar. Kabsi keeps a holiday calendar per country (starting with Lebanon, UAE, Saudi Arabia, United States, United Kingdom, France, Spain) and creates a Recommended task 21 days before each holiday: "Eid al-Adha is on \[date\]. Are your hours different?" with Same as usual, Closed, and Different hours. It never assumes holiday hours. Ramadan gets a month-long hours option for countries that observe it.
+**K-21 Hours, the first-class field.** *[Amended by K-131: holiday hours concierge (21 Oct 2026).]* Regular hours, special hours, temporary closure and reopening date all get one editor with a calendar. Kabsi keeps a holiday calendar per country (starting with Lebanon, UAE, Saudi Arabia, United States, United Kingdom, France, Spain) and creates a Recommended task 21 days before each holiday: "Eid al-Adha is on \[date\]. Are your hours different?" with Same as usual, Closed, and Different hours. It never assumes holiday hours. Ramadan gets a month-long hours option for countries that observe it.
 
-**K-22 Description, services, attributes (P1).** Each is a structured editor fed by Business Knowledge:
+**K-22 Description, services, attributes (P1).** *[Superseded by K-136: Profile Coach (21 Oct 2026).]* Each is a structured editor fed by Business Knowledge:
 
 - Description: Kabsi drafts from verified facts, 750 characters, no phone numbers, links or keyword lists. Approval required.
 
@@ -460,7 +460,7 @@ The calendar shows a month at a glance with prepared, waiting, published and ski
 
 Keep the link, QR code and NFC card exactly as honest as they are now, and bring them in line with Google's April 2026 review policy, which explicitly bans staff review quotas and asking customers to name staff, and treats in-store review devices as manipulation.
 
-**K-25 Get Reviews rules.**
+**K-25 Get Reviews rules.** *[Amended by K-132 and K-133: review link page and staff Send review link (21 Oct 2026).]*
 
 - Every route goes straight to Google's own review form for that business. No Kabsi page in between that asks "How was your visit?", no star pre-selection, no private feedback form. This is the no-gating rule, and it is already how the Worker behaves.
 
@@ -486,7 +486,7 @@ Google's figures are fetched when needed and never kept longer than 30 days. Per
 
 Change detection (P1) flags only large, sustained moves: at least 25% against the previous 4 weeks and at least 20 events. The wording is "This changed", never a cause. "Website clicks dropped 28% compared with the previous 4 weeks" is allowed; "because Google lowered your ranking" is not.
 
-**K-27 Review themes, within Google's storage rule.** Google forbids keeping review content beyond 30 days and forbids aggregating stored content. So themes are computed on request: when the owner opens Insights, Kabsi fetches the last 90 days of reviews from Google, labels topics in memory (staff, waiting time, cleanliness, price, quality, atmosphere, a named service), shows counts, and keeps nothing. Minimum evidence before a theme appears: 5 reviews in the period. Wording: "Over the last 30 days, 8 reviews mentioned waiting time, more than the 30 days before." Never "significant". One practical suggestion per positive theme: "Customers often praise your staff. Want an update about the team?"
+**K-27 Review themes, within Google's storage rule.** *[Replaced by K-135: What customers say (21 Oct 2026).]* Google forbids keeping review content beyond 30 days and forbids aggregating stored content. So themes are computed on request: when the owner opens Insights, Kabsi fetches the last 90 days of reviews from Google, labels topics in memory (staff, waiting time, cleanliness, price, quality, atmosphere, a named service), shows counts, and keeps nothing. Minimum evidence before a theme appears: 5 reviews in the period. Wording: "Over the last 30 days, 8 reviews mentioned waiting time, more than the 30 days before." Never "significant". One practical suggestion per positive theme: "Customers often praise your staff. Want an update about the team?"
 
 Before launch, Rashid asks Google through the [data access form](https://support.google.com/business/contact/dma_data_request) whether on-request theme analysis is acceptable, and keeps the answer on file. Until then this stays P1 and off for partners' portfolio views.
 
@@ -510,7 +510,7 @@ No invented return on investment, no ranking claims, no "thanks to Kabsi" next t
 
 Partners get the same operating system as owners, seen across many clients, with approval rules the client controls. Today's partner portal handles invites, invoices and commission; it becomes a workspace where an agency can run 50 clients without opening 50 Google profiles.
 
-**K-29 Partner workspace and client onboarding.** A partner is an organisation with members (admin, member). A client business links to at most one partner, with a status (invited, onboarding, active, paused, ended) and an approval policy (K-16). Onboarding takes seven steps and the partner types almost nothing:
+**K-29 Partner workspace and client onboarding.** *[Retired by K-127 (21 Oct 2026).]* A partner is an organisation with members (admin, member). A client business links to at most one partner, with a status (invited, onboarding, active, paused, ended) and an approval policy (K-16). Onboarding takes seven steps and the partner types almost nothing:
 
 1.  Partner creates the client by searching Google Places by name.
 
@@ -528,13 +528,13 @@ Partners get the same operating system as owners, seen across many clients, with
 
 Partners should never take ownership of a client's Google profile through Kabsi. If the agency already manages the profile in Google, the client still invites Kabsi, so the client stays the owner of record.
 
-**K-30 Portfolio dashboard.** Top line, counted live: "32 clients. 5 need attention. 12 have approvals waiting. 3 disconnected. 2 have profile issues. 10 are all caught up." Each number filters the list. Each client row shows operational states, not a score: Google connection, profile status, replies (all answered, N waiting, oldest waiting age), profile tasks open, last photo, last post, customer activity trend, plan, onboarding step. Clicking a client opens that client's Kabsi, with a banner naming the client and the partner's permissions. Bulk actions (P1): approve all low-risk replies the partner is allowed to approve, send approval requests to clients, schedule the same holiday-hours question to every client in a country.
+**K-30 Portfolio dashboard.** *[Retired by K-127 (21 Oct 2026).]* Top line, counted live: "32 clients. 5 need attention. 12 have approvals waiting. 3 disconnected. 2 have profile issues. 10 are all caught up." Each number filters the list. Each client row shows operational states, not a score: Google connection, profile status, replies (all answered, N waiting, oldest waiting age), profile tasks open, last photo, last post, customer activity trend, plan, onboarding step. Clicking a client opens that client's Kabsi, with a banner naming the client and the partner's permissions. Bulk actions (P1): approve all low-risk replies the partner is allowed to approve, send approval requests to clients, schedule the same holiday-hours question to every client in a country.
 
 Partner-level review intelligence (unanswered reviews, clients with a run of low ratings, falling review counts) uses only counts and ratings fetched live, never stored review text (K-27).
 
-**K-31 Branding and reports (foundation now, full white label P2).** Add partners.brand (name, logo, colour, reply-to email) now. Client reports and client emails show "Prepared by \[Agency\] with Kabsi". Custom domains and sender identities are P2. Partners can schedule weekly or monthly client reports and choose recipients per client. Reports carry observable data only.
+**K-31 Branding and reports (foundation now, full white label P2).** *[Retired by K-127 (21 Oct 2026).]* Add partners.brand (name, logo, colour, reply-to email) now. Client reports and client emails show "Prepared by \[Agency\] with Kabsi". Custom domains and sender identities are P2. Partners can schedule weekly or monthly client reports and choose recipients per client. Reports carry observable data only.
 
-**K-32 Referrals and commission, server-side.** Attribution is recorded when the account is created, from a signed referral code in the link (first touch, 60 days), and stored on the business, never re-read from the browser later. Commission rows are written by the billing webhook on each successful payment (30% for 12 months, 40% for the first 10 founding partners, per D274), with states pending, approved after the refund window, paid, and reversed. Partners see referred accounts, conversions, active subscriptions, commission earned and payout status. Payouts stay manual in USDT until volume justifies automation.
+**K-32 Referrals and commission, server-side.** *[Retired by K-127: Kabsi Partners replaces it (21 Oct 2026).]* Attribution is recorded when the account is created, from a signed referral code in the link (first touch, 60 days), and stored on the business, never re-read from the browser later. Commission rows are written by the billing webhook on each successful payment (30% for 12 months, 40% for the first 10 founding partners, per D274), with states pending, approved after the refund window, paid, and reversed. Partners see referred accounts, conversions, active subscriptions, commission earned and payout status. Payouts stay manual in USDT until volume justifies automation.
 
 ## Decisions: Architecture
 
@@ -642,7 +642,7 @@ The privacy policy and terms list this table in plain words.
 
 Onboarding must show value inside 4 minutes of signup, billing must never interfere with Google, notifications go through one engine the owner controls, and every owner task must work standing at a counter with a phone.
 
-**K-45 Onboarding in under 4 minutes, with a first-value moment.**
+**K-45 Onboarding in under 4 minutes, with a first-value moment.** *[Reordered by K-141: six steps (21 Oct 2026).]*
 
 1.  Find the business on Google (Places search, exists).
 
@@ -664,7 +664,7 @@ Before Google access arrives, the owner sees the public facts from Places (ratin
 
 **K-47 Mobile and accessibility.** Every owner action is built phone first at 390 px: one primary button per screen, touch targets at least 44 px, no tables on owner screens, before and after shown stacked, not side by side. Accessibility: WCAG 2.2 AA contrast, visible focus states, keyboard reachable, labelled buttons for screen readers, reduced-motion respected, Arabic right-to-left layouts tested. Test devices: iPhone Safari, Android Chrome, desktop Chrome, a slow 3G profile, and the email-to-approval path from Gmail and Outlook apps.
 
-**K-48 Billing.** Keep prices from D281: Free, Pro \$19 a month or \$190 a year, extra locations \$15 or \$150, Lebanon bundle \$120 a year, and partner rates. Add a card processor before any paid acquisition outside Lebanon, because USDT alone will block most owners in the US and Europe (Creem through the UAE route, Dodo Payments as backup, per D269). Billing rules:
+**K-48 Billing.** *[Prices and plans replaced by K-126; payment methods by K-124 (21 Oct 2026).]* Keep prices from D281: Free, Pro \$19 a month or \$190 a year, extra locations \$15 or \$150, Lebanon bundle \$120 a year, and partner rates. Add a card processor before any paid acquisition outside Lebanon, because USDT alone will block most owners in the US and Europe (Creem through the UAE route, Dodo Payments as backup, per D269). Billing rules:
 
 - Subscription state lives on the organisation (K-33), never on Google connection rows.
 
@@ -698,7 +698,7 @@ Focus is a feature. These decisions remove what weakens trust, refuse what Googl
 
 **K-51 Nora stays a support assistant.** Answers questions about Kabsi and helps with setup, hands off to a person. It does not become a general business chatbot or a second way to publish to Google outside the approval engine.
 
-**K-52 Not now:**
+**K-52 Not now:** *[Amended by K-145: grid rank tracking and competitor radar are rejected (21 Oct 2026).]*
 
 | Do not build                                    | Reason                                      | Revisit                         |
 |-------------------------------------------------|---------------------------------------------|---------------------------------|
@@ -744,7 +744,7 @@ The P0 waves run in order; Google access is the gate for go-live, and P2 waits f
 
 These decisions were added after a further review. Where one amends an earlier decision, it names it; the amendment wins. The most important new point is K-65: registering the company is now a dependency for both card payments and any paid messaging.
 
-**K-57 Messaging channels for P0 and P1.** Amends K-46.
+**K-57 Messaging channels for P0 and P1.** *[Amended by K-129: WhatsApp owner channel (21 Oct 2026).]* Amends K-46.
 
 | Channel                                                     | Use                                                                                                   | Status                                                                                                        |
 |-------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
@@ -775,7 +775,7 @@ These decisions were added after a further review. Where one amends an earlier d
 
 - Stop all reminders the moment access is granted or the owner unsubscribes.
 
-**K-62 Growth loops.** Amends K-25, K-30 and K-32.
+**K-62 Growth loops.** *[Partner audit links retired by K-127; owner referral reward I3 stands (21 Oct 2026).]* Amends K-25, K-30 and K-32.
 
 - "Powered by Kabsi" with a referral link on Free plan QR assets and on owner Weekly Care Reports. The referral reward is either a \$10 credit or one free month; Rashid picks one before launch. Owner-to-owner referral rewards are allowed; rewards for customer reviews are never allowed.
 
@@ -1130,7 +1130,7 @@ Sources for K-91 to K-98: [Account Management API (admins, invitations)](https:/
 
 Post drafting rule (seen in the test): lead with one concrete thing (an offer, news, a seasonal note), 150 to 300 characters, one button, one real photo, and never describe services the owner has not confirmed in Business Knowledge.
 
-**K-103 WhatsApp, ManyChat and Nora.** WhatsApp automation is not possible without the WhatsApp Business Platform: ManyChat itself connects only through the WhatsApp Business API, which needs a verified Meta business and a phone number not registered on any WhatsApp app. Unofficial tools that automate a normal WhatsApp account break WhatsApp's terms and get numbers banned. So:
+**K-103 WhatsApp, ManyChat and Nora.** *[Amended by K-129: the WhatsApp Platform route is taken, through Kapso (21 Oct 2026).]* WhatsApp automation is not possible without the WhatsApp Business Platform: ManyChat itself connects only through the WhatsApp Business API, which needs a verified Meta business and a phone number not registered on any WhatsApp app. Unofficial tools that automate a normal WhatsApp account break WhatsApp's terms and get numbers banned. So:
 
 - **Until the company is registered and Meta-verified:** WhatsApp is a click-to-chat link (wa.me) answered by Rashid in the WhatsApp Business app, using its built-in greeting, away messages, quick replies and labels.
 
@@ -1144,9 +1144,9 @@ Post drafting rule (seen in the test): lead with one concrete thing (an offer, n
 
 **Nora hands over to a person.** Nora offers a call whenever someone asks to talk to a person, asks for a call or for help, says they are stuck, sounds upset, or asks something Nora cannot answer from the facts or live state. It gives the Calendly link with the matching answer already chosen (setup for owners connecting Google, partner for agencies, other for anything else), plus the support email, and says plainly that a real person (Rashid) will help. Urgent problems (wrong information published on Google, Google access lost, a payment issue) also get "Write to hello@kabsi.co and we'll reply today" (K-88). Nora never invents availability or promises a time; Calendly shows the real slots. Every handover is recorded with the conversation, so the person picking it up does not ask the owner to repeat themselves, and the evaluation set (K-75) includes these requests in English first and in the other languages owners write in (K-119).
 
-**K-105 A call with Rashid for agencies and partners.** Rashid's free Calendly account has one event type, so both calls use it: "Call with Kabsi" (20 minutes), with one required question, "What's the call about?" (Setting up my Google profile / Partner or agency / Something else), and each page's link pre-selects the answer. A separate "Partner call with Rashid" type comes when calls are frequent enough to justify a paid plan. Partner call placements: the Partners page hero as the secondary button ("Talk to Rashid") and again beside the partner FAQ; the partner application confirmation page; the partner dashboard's help menu; the resale section of the pricing page; the footer ("For agencies: talk to Rashid"); Nora, whenever someone says they manage clients; partner onboarding emails. Rashid appears by name and role, with Kabsi's mark rather than a photo.
+**K-105 A call with Rashid for agencies and partners.** *[Partner-call placements retired by K-127; the owner setup call stays (21 Oct 2026).]* Rashid's free Calendly account has one event type, so both calls use it: "Call with Kabsi" (20 minutes), with one required question, "What's the call about?" (Setting up my Google profile / Partner or agency / Something else), and each page's link pre-selects the answer. A separate "Partner call with Rashid" type comes when calls are frequent enough to justify a paid plan. Partner call placements: the Partners page hero as the secondary button ("Talk to Rashid") and again beside the partner FAQ; the partner application confirmation page; the partner dashboard's help menu; the resale section of the pricing page; the footer ("For agencies: talk to Rashid"); Nora, whenever someone says they manage clients; partner onboarding emails. Rashid appears by name and role, with Kabsi's mark rather than a photo.
 
-**K-106 Payments through Creem; NOWPayments only for crypto requests.**
+**K-106 Payments through Creem; NOWPayments only for crypto requests.** *[Replaced by K-124 (Creem only), K-125 (no cards) and K-126 (plans) (21 Oct 2026).]*
 
 - **Creem as the merchant of record for all card payments.** Creem is the legal seller: it charges the card, issues invoices, handles chargebacks, and calculates, collects and remits VAT, GST and sales tax. Fee: 3.9% plus \$0.40 per successful payment, no monthly fee. On a \$19 month that is about \$1.14 (6%); on \$190 a year about \$7.81 (4%), one more reason to promote annual.
 
@@ -1168,7 +1168,7 @@ Post drafting rule (seen in the test): lead with one concrete thing (an offer, n
 
 - **NOWPayments:** keep it, hidden from the normal checkout, for annual plans paid in crypto by customers who ask (mostly Lebanon, where card payments are hard). For those sales Kabsi, not Creem, is the seller, so keep them few and recorded for the accountant.
 
-**K-107 Taxes: Creem handles sales taxes; prices shown before tax.** As merchant of record Creem collects and remits VAT, GST and US sales tax on Kabsi's subscriptions, so Kabsi does not register for VAT or GST in the US, Canada, UK, Ireland, Australia, New Zealand or Singapore. Show prices in USD as "\$19 a month, plus tax where it applies"; Creem adds the right tax at checkout, and business customers who enter a valid VAT or GST number are charged without it where the law allows. Before launch, check that each target country is in Creem's current tax coverage list (Creem's own pages give different counts). What stays with Kabsi: the owning company's income or corporate tax (in the UAE, corporate tax applies only above the small-business threshold), and any tax on the few NOWPayments sales. This supersedes growth decision G-43.
+**K-107 Taxes: Creem handles sales taxes; prices shown before tax.** *[Amended by K-124: no NOWPayments sales (21 Oct 2026).]* As merchant of record Creem collects and remits VAT, GST and US sales tax on Kabsi's subscriptions, so Kabsi does not register for VAT or GST in the US, Canada, UK, Ireland, Australia, New Zealand or Singapore. Show prices in USD as "\$19 a month, plus tax where it applies"; Creem adds the right tax at checkout, and business customers who enter a valid VAT or GST number are charged without it where the law allows. Before launch, check that each target country is in Creem's current tax coverage list (Creem's own pages give different counts). What stays with Kabsi: the owning company's income or corporate tax (in the UAE, corporate tax applies only above the small-business threshold), and any tax on the few NOWPayments sales. This supersedes growth decision G-43.
 
 **K-108 One design system everywhere.** Every surface Kabsi shows uses the same tokens and components: marketing site, app, onboarding, emails, the Weekly Care Report, Nora's widget, the status page, help pages, booking pages, Creem's checkout and invoices, social templates and video end cards.
 
@@ -1184,7 +1184,7 @@ Post drafting rule (seen in the test): lead with one concrete thing (an offer, n
 
 Sources for K-99 to K-108: [Creem: merchant of record, tax collection and remittance](https://docs.creem.io/getting-started/introduction) · [Creem payouts: identity must match KYC, fee example](https://docs.creem.io/merchant-of-record/finance/payouts) · [Creem pricing: 3.9% + 40¢](https://www.creem.io/pricing) · [Creem tax coverage counts differ between its pages (MoR Finder)](https://www.merchantofrecordfinder.com/providers/creem) · [ManyChat WhatsApp needs the WhatsApp Business API and Meta business verification](https://setsmart.io/blog/manychat-whatsapp)
 
-**K-109 Get Reviews becomes a print designer with three tabs.** The printed QR is the most visible thing Kabsi makes: it sits on a customer's counter for months. A bare QR code looks unfinished, and the current single long page (link, five message boxes, NFC instructions, cards) loses owners who want one thing. Decisions, specified in the design review ("Get Reviews, redesigned"):
+**K-109 Get Reviews becomes a print designer with three tabs.** *[Amended by K-125: no card shop; the print designer and QR stay (21 Oct 2026).]* The printed QR is the most visible thing Kabsi makes: it sits on a customer's counter for months. A bare QR code looks unfinished, and the current single long page (link, five message boxes, NFC instructions, cards) loses owners who want one thing. Decisions, specified in the design review ("Get Reviews, redesigned"):
 
 - **Structure:** a fixed header (link, QR, opens, the one fairness rule) and three tabs: Print (default), Share (one channel picker instead of five boxes), Cards and tags (NFC folded away). First visit is a three-step guide: where customers will see it, make it yours, download.
 
@@ -1287,7 +1287,7 @@ Not built: chat or messaging replies (Google ended Business Profile chat in 2024
 
 12. **Google now lets owners schedule posts and post to several locations natively.** Kabsi's posts keep their value through drafting from verified facts and the weekly rhythm, not scheduling alone; do not market scheduling as a differentiator.
 
-**K-117 Search terms, services, action links, products and descriptions (from a real profile, October 2026).** A review of the full Business Profile of a real Lebanese auto parts store managed by Rashid ("Abou Hamze Auto Center") showed five things Kabsi must handle well. Items marked † are confirmed against real API responses after Gate A.
+**K-117 Search terms, services, action links, products and descriptions (from a real profile, October 2026).** *[Amended by K-136 (description, services, attributes), K-137 (order button) and K-138 (search terms) (21 Oct 2026).]* A review of the full Business Profile of a real Lebanese auto parts store managed by Rashid ("Abou Hamze Auto Center") showed five things Kabsi must handle well. Items marked † are confirmed against real API responses after Gate A.
 
 1.  **Search terms.** Google's Performance screen lists the search terms that showed the profile, by month, with small counts shown as ranges ("\< 15"). Kabsi reads them through the Business Profile Performance API (already enabled; monthly search-keyword impressions) and uses them three ways: the monthly section of the Weekly Care Report ("How people found you this month", shown exactly as Google reports them); wording for service names, descriptions and posts, using only terms the owner confirms describe their business; and spotting confusion (in this profile, searches for other businesses with a similar name in other areas). Never: other businesses' names, places the business does not serve, or stuffing terms into the business name.
 
@@ -1346,7 +1346,7 @@ Every template is tested before it ships in Gmail, Apple Mail and Outlook, on ph
 
 6.  **Same memory for Nora:** Nora answers questions about an owner's own business from the same memory and live state, under the same rules (K-104).
 
-**K-121 WhatsApp from day 1, on a US number.** *Amended by K-122 (7 Oct 2026): the number is no longer bought from the Numero app. Points 1, 2 and 6 below are replaced by K-122; points 3, 4 and 5 stand, with the tools Kapso's inbox offers in place of the WhatsApp Business app.* Original day-1 setup:
+**K-121 WhatsApp from day 1, on a US number.** *[Amended by K-122 and K-129 (21 Oct 2026).]* *Amended by K-122 (7 Oct 2026): the number is no longer bought from the Numero app. Points 1, 2 and 6 below are replaced by K-122; points 3, 4 and 5 stand, with the tools Kapso's inbox offers in place of the WhatsApp Business app.* Original day-1 setup:
 
 1.  **The number:** used only for Kabsi; Numero account under hello@kabsi.co with two-step sign-in, paid yearly with auto-renew, recorded in the secrets inventory (K-87). If a virtual number lapses it can be reassigned, and the WhatsApp account goes with it, so renewal is critical.
 
@@ -1360,7 +1360,7 @@ Every template is tested before it ships in Gmail, Apple Mail and Outlook, on ph
 
 6.  **Later, without changing number:** once the company is registered and Meta-verified (K-103), connect the same number to the WhatsApp Business Platform with Meta's coexistence option, which keeps the WhatsApp Business app working on the number (†, confirm availability then), and route messages to Nora with handover to Rashid. Message templates for alerts and approvals are submitted then.
 
-**K-122 WhatsApp through Kapso (replaces the Numero part of K-121).** Decided 7 Oct 2026, with Hussein running the project. Kabsi's WhatsApp runs through Kapso on a Kapso-provided US number, **+1 201-483-5474**.
+**K-122 WhatsApp through Kapso (replaces the Numero part of K-121).** *[Points 1 and 2 amended by K-129 (approvals on WhatsApp); the Lebanese number sentence by K-123 (21 Oct 2026).]* Decided 7 Oct 2026, with Hussein running the project. Kabsi's WhatsApp runs through Kapso on a Kapso-provided US number, **+1 201-483-5474**.
 
 1.  **People-answered support from day 1.** The number is used for questions, sales and support answered by a person. A click-to-chat link (`wa.me/12014835474` with a short prefilled message) appears on the contact page, the footer, the `/setup-call` page, Nora's handover (K-104) and the support emails. The number lives in one constant (`WHATSAPP_NUMBER` in `src/lib/site.ts`). The Lebanese number stays only on `/lebanon`. Kapso's inbox profile, greeting, away message, quick replies and labels are set up as listed in K-121 point 3. Nothing is approved over WhatsApp at this stage.
 
@@ -1371,6 +1371,133 @@ Every template is tested before it ships in Gmail, Apple Mail and Outlook, on ph
 4.  **Processors.** The privacy policy and Nora's facts list Kapso and Meta as processors of WhatsApp messages, with what is sent and how long conversations are kept.
 
 5.  **Tasks.** P0.6-10 (click-to-chat on the Kapso number), P0.6-12 (privacy text and Nora's facts), P1-21 (owner alerts: opt-in, templates, button, job queue, audit events, STOP, signed webhook receiver), P1-22 (Nora on WhatsApp). Kapso's API keys are Supabase secrets only. Meta business verification (R-25) is needed before P1-21.
+
+## Final product decisions (21 Oct 2026): K-123 to K-146
+
+Hussein approved these on 21 Oct 2026. Each one says what it overrides. Where a decision here conflicts with an earlier K-decision, a guardrail, a review decision (R-) or a card, this section wins; the earlier text carries a pointer to the decision that overrides it. The plan (section 12A) turns each into cards. Features that are not built yet are "coming" in `knowledge/kabsi-facts.md` until the card is merged.
+
+**K-123 Kabsi is international: USD only, nothing Lebanon-specific.** Remove the Lebanon bundle ($120 a year), every Lebanese price, the `/lebanon` page (it answers 301 to `/pricing`; the old `/product` redirect that pointed to it follows), the Lebanese phone number (+961 3 956 917) and all Lebanon sales copy (field team, cash and Whish ordering, Arabic-first Lebanon page, region-only blocks). Businesses in Lebanon can still be customers like any other; they get no separate offer, price, page or payment route. Prices are in US dollars everywhere. `src/lib/region.ts` keeps only what the law or consent needs by country; it no longer carries sales wording.
+*Overrides:* D3 and D297 (NFC and the Lebanon page), input I1 (the Lebanese number stays on `/lebanon`), K-122 point 1 (last sentence), K-106 (Lebanon bundle, methods in Lebanon), design review rows "Lebanon" (Other public pages) and "Lebanon block by region" (Pricing page), the Lebanon holiday row in P0.5-03, guardrail 0.1 wording that implies a Lebanese sales market. Abou Hamze Auto Center stays the first live customer (D2): a customer, not a market.
+
+**K-124 One payment route: Creem, cards only. Terms: governing law UAE.** USDT (TRC20), Binance Pay, Whish, OMT and cash are retired from the product, the pricing page, the terms, the facts file and Nora. NOWPayments (crypto on request) is retired with them. There is no manual payment confirmation on `/staff`. The terms name the seller as Hussein Slim, Dubai, United Arab Emirates, and the governing law as the law of the United Arab Emirates; a lawyer confirms both before launch (kept in "Decisions to confirm").
+*Overrides:* K-106 (NOWPayments for crypto requests; Whish, OMT, USDT; Lebanon bundle; partner resale product), K-107 last sentence (tax on NOWPayments sales), R-24 (NOWPayments stays for annual crypto), guardrail 0.2 (second half), design review rows "How to pay" and "Pricing: USDT and Lebanese methods", the Risks table row "Card payments outside Lebanon", D263 last clause (money confirmed only on `/staff`: now only through the Creem webhook).
+
+**K-125 Kabsi sells no NFC cards, anywhere.** Remove card sales, card prices and card ordering (the $20 card, $10 extra cards, $40 for five, the bundle card, `card_orders`, ordering through WhatsApp or email, card copy on pricing, partners and industry pages). The copy becomes "Works with your own QR codes and NFC cards". Existing `/r/<code>` redirects and `go.kabsi.co` codes keep working and are no longer advertised; an owner who already has a Kabsi card keeps it. Kabsi still generates the review link and the QR code, and explains how to write the link onto the owner's own NFC tag or sticker (facts section 5.4).
+*Overrides:* D3, K-109 (tab "Cards and tags" as a shop; the print designer stays), K-105 (card sellers as the partner audience), K-32 and the old partner "Cards for partners", design review rows "NFC table card" and "Card offer only for Lebanese visitors", D292 (outreach to Instagram accounts that sell NFC cards: now covered by the open partner program, K-127, and the `kabsi-outreach` skill, no scraping), Appendix B rows D212 and D213 only in that card codes are no longer issued for sale.
+
+**K-126 Two plans, Essentials and Pro, and a Pro trial.** Prices in US dollars:
+
+| Plan | Monthly | Yearly |
+|---|---|---|
+| Essentials | $19 | $190 |
+| Pro | $39 | $390 |
+| Extra location | $15 | $150 |
+
+The trial is 14 days of Pro with no card, and 30 days through a partner link (K-127). It starts when Kabsi's access works (K-101 stays). There is no Free plan and no Partner plan. When a trial ends without a plan, or a plan ends, the business has no plan: watching and drafting stop, the review link and QR code keep working, and the free tools stay free.
+
+*Essentials:* review alerts and ready replies; approve in the app or on WhatsApp (K-129); the day-one backlog; profile watch with one-tap put-back (K-130); the review link and QR code (works with the owner's own NFC cards) with the manager-chat page (K-132); staff "Send review link" (K-133); holiday hours reminders (K-131); the Weekly Care Report; Business Knowledge; Nora; and the Profile Coach checklist (K-136).
+*Pro adds:* auto-fix for opted-in fields (K-130); WhatsApp photo drop; weekly posts; review graphics (K-134); the monthly "What customers say" (K-135); the Profile Coach actions (K-136); the own order and booking button (K-137); the search terms report (K-138); the fake review helper (K-139); team roles and approval rules (K-16).
+*Overrides:* K-48 and K-106 prices ($19 Pro, Free, Partner, Lebanon bundle, partner resale at $8), K-101 where it says "full product" (the trial is Pro), design review "Pricing page: three columns Free, Pro, Partner", the pricing feature list in P0.1-02a, R-24 (plans move to `subscriptions`: stands, with the new plan names), D274 (resale), facts sections 4.1 to 4.7.
+
+**K-127 One partner program: Kabsi Partners (affiliates only).** The old partner model is deleted completely: partner resale ($8 per business, $6 founding), partner-covered plans and billing, partner invoices and payments, partner workspaces and dashboards, partner-invited businesses, the approval policies "partner may approve" and "partner prepares, owner approves", partner emails, resale lead flows and the QA Partner test data. Every card and K-decision about them is retired. The new program, on `/partners`:
+
+1. Anyone can apply (creators, agencies, consultants, accountants, web and POS sellers). Hussein approves each application by hand.
+2. A partner earns 30% of every payment for the first 12 months of each referred business, after a 30-day hold, paid monthly, $50 minimum, and no upfront bounty. There is no 40% founding rate.
+3. A referred business gets a 30-day Pro trial (K-126). The link is `kabsi.co/?via=CODE`; attribution is first-party, kept 60 days, saved on the business at sign-up, last referral wins, and disclosed on `/privacy` (K-128).
+4. The partner dashboard shows the link and code, clicks, sign-ups, trials, paying businesses, earned and paid. It shows no client Google data.
+5. A staff screen lets Hussein approve partners, see referrals and mark payouts paid.
+6. Creem affiliates are used if they fit these terms (recurring commission for 12 months, a hold, a monthly payout, our own last-referral attribution); if not, Kabsi keeps its own ledger fed by the Creem webhook. The build chat records the choice and why.
+7. An agency that manages a client's profile is invited by the owner as Manager in Team (K-16). There is no resale, no partner workspace and no partner access to client data.
+8. Live only after live reviews work (P0.7-05 passed); until then the page takes applications only if Hussein switches it on.
+
+*Overrides, completely:* K-16 (the fourth role "partner member" and partner approval policies; roles are owner, manager, staff), K-29, K-30, K-31, K-32 (workspace, portfolio, branding, referral and USDT commission), K-105 (partner-call placements; the "Partner or agency" answer on the Calendly call may stay as a plain question), K-62 (partner audit links), D274 and R-23 (resale, `kabsi_partner_billing`), G-32 partner cookie of 90 days (now 60 days, last referral wins), guardrails 11 and 19 and 21 wording about partner and client separation and the partner role, R-22 (four roles), the "partner" test role in guardrail 25, plan cards P1-01, P1-02, P1-03, P1-04, P1-15 (partner audit links), design review "Public Partners page" and "Partner dashboard", facts section 6.
+
+**K-128 Partner rules and disclosure.** A partner's promotion must carry a paid-partnership label wherever the platform has one; the partner is responsible for any local influencer licence or registration their country requires (Kabsi does not check or hold it); a partner never claims a Google partnership or approval (K-112), never promises rankings, reviews, ratings or the removal of reviews, and never offers a reward for a review. Partners get an approved-claims list and a script kit written from K-53 and the video claims table. A partner who breaks a rule loses the link and unpaid commission is not owed for the period of the breach. `/privacy` states, in plain words, that Kabsi saves the `via` code for 60 days and writes it to the business at sign-up so a referral can be paid.
+*Overrides:* the "Rules we keep" block in the old Partners page design, D274 last clause, and the design review's card-seller language.
+
+**K-129 WhatsApp owner channel (approvals included).** Decided 21 Oct 2026. It runs on the Kapso number (+1 201-483-5474, K-122) and on Kapso's `whatsapp-cloud-api-js` client (github.com/gokapso/whatsapp-cloud-api-js) in Edge Functions. Rules:
+
+1. Opt-in only. "Connect WhatsApp" opens a chat with the Kabsi number and a prefilled one-time code. The owner sends it; that is the free verification and it opens Meta's 24-hour service window. The opt-in is recorded with the time, the number and the wording shown.
+2. A review alert shows the draft and two buttons, "Approve" and "Edit in app". Approve is allowed only for low and medium risk replies and for weekly posts. High-risk reviews and every identity field (business name, address, categories, map pin, phone, open or closed) are never approved on WhatsApp; the button opens the app, where sign-in is required (K-17, K-19).
+3. Approval on WhatsApp goes through the one pipeline (guardrail 6): a server-side 10-second undo through the job queue (K-70), and the job checks that the reply is still a draft before it publishes. The audit event names the channel `whatsapp`.
+4. Kabsi tracks Meta's 24-hour service window per owner; outside it, only approved templates are sent.
+5. The weekly digest is a separate opt-in. Photos the owner sends to the Kabsi number become uploads in the photo engine (K-23; a Pro feature, "WhatsApp photo drop"). Voice notes are P1.
+6. What a message contains is decided under K-113: the business name, the star rating and the draft. Review text and reviewer names stay out of WhatsApp unless the build chat's K-113 check on Kapso and Meta as processors allows a short excerpt and records the answer in PROGRESS.
+7. STOP and its variants stop all sends at once and are recorded. Nora on WhatsApp stays P1 and never approves anything (K-122 point 3 stands for Nora).
+8. `KAPSO_API_KEY` lives only in Supabase secrets. The session installs `gokapso/agent-skills` (integrate-whatsapp, observe-whatsapp). No live send happens until Hussein says so (K-146).
+*Overrides:* K-122 point 1 ("nothing is approved over WhatsApp at this stage") and point 2 (buttons only open the approval page; no review text), guardrail 0.12 second sentence, K-57 (WhatsApp automation is P2), K-103 (WhatsApp approvals not possible: the Platform route is now taken), P1-21, the facts line "Never mention Kabsi notifications by WhatsApp", R-29 scope. K-113 and K-17 stand.
+
+**K-130 Protection: one-tap put-back for every watched field, and Pro auto-fix for three.** Amends K-19 and guardrail 7.
+1. Every watched field has a one-tap "Put it back" (in the app or on WhatsApp for fields WhatsApp may approve, K-129 point 2). It goes through the pipeline with the owner's tap as the approval.
+2. Pro owners may opt in, per field, to auto-fix for regular hours, special hours and website only. Auto-fix is never available for name, address, category, map pin, phone, or open or closed. Auto-fix writes the owner's approved baseline through the pipeline and records "auto-fix, owner opted in" as the approval.
+3. Table `google_revert_log` (`location_id`, `field`, `reverted_at`, `count`). Two reverts of one field in 30 days stop auto-fix for that field, mark it "needs review" and alert the owner. This replaces the "twice in 30 days, third conflict is a support task" rule for auto-fix fields.
+4. Never patch unless `verificationState` is VERIFIED. Never say a competitor made an edit: Kabsi says only what Google shows now and what the owner approved.
+5. Google's rule (K-19): the audit found that Google's policy does not allow the API to revert Google's updates automatically. The build chat re-reads the current policy text before enabling auto-fix on live profiles, pastes the sentence into PROGRESS, and ships auto-fix off if the owner's opt-in does not satisfy it. One-tap put-back needs no such gate.
+*Overrides:* K-19 ("always asks the owner"), guardrail 7 first bullet for the three opted-in fields, P0.2-04 "nothing is ever reverted without a decision" (the opt-in is the decision), K-116.2 for auto-fix fields.
+
+**K-131 Holiday hours concierge.** Amends K-21. For every launch country Kabsi knows the public holidays from the `date-holidays` package, plus Islamic dates. Five days before a holiday Kabsi asks the owner (WhatsApp or email): "Normal hours", "Closed", or "Custom hours". The answer is the approval; Kabsi then publishes `specialHours` through the pipeline. A typed custom time is read back and confirmed before it publishes. Never assume holiday hours. Ramadan month-long hours stay an option.
+*Overrides:* P0.5-03 "task 21 days before" and the hand-kept holiday table with a source per row (the package replaces the table; the build chat spot-checks eight countries against an official source and records it), and "plus Lebanon" in the launch list.
+
+**K-132 Review link page: the Google button first, and a way to reach the manager.** The page behind a review link shows the Google review button first, large, to every visitor, plus a second line: "Need help now? Message the manager", which opens the business's own WhatsApp number. There is no sentiment question, no rating screen, no routing of unhappy visitors: the manager line is shown to everyone. Existing links keep redirecting straight to Google until the owner switches that link to the page (K-125, so no printed QR breaks; this switch is a planning-chat design call that Hussein can change). If the business has no WhatsApp number, the line is hidden.
+*Overrides:* K-25 only where it implies the link never shows a page, D213 for links the owner switches. K-25 and K-116.9 (no gating, no incentives) stand and are the test: the Google button is never second, never hidden, never conditional.
+
+**K-133 Staff "Send review link".** A staff member opens a button that starts a WhatsApp chat from their own WhatsApp (click-to-chat, `wa.me`) with a neutral prefilled message and the review link. It is offered for every customer. There are no per-staff quotas, targets, leaderboards or rewards, no "if you enjoyed" wording, and Kabsi does not record who sent what (K-25: places, not people).
+*Overrides:* nothing; it implements K-25 and K-16 (staff see the review link).
+
+**K-134 Review graphics (Pro).** For 4-star and 5-star reviews the owner can make a square and a story image (Satori and resvg), showing the first name and initial, the stars and the text. Nothing is auto-posted: the owner downloads and shares. Text is sanitised and cut to about 200 characters with an ellipsis. The image is made on request from the stored review (30-day limit, K-113) and is not kept on the server.
+*Overrides:* nothing; K-52 listed social posting as not now, and this stays a download.
+
+**K-135 "What customers say" (Pro).** Replaces review themes (K-27, P1-10). Once a month a Haiku batch reads up to 90 days of reviews (staff, place, products or services) and writes a short summary for the monthly report and WhatsApp. Rules: only when AI credit is on; input capped at about 10,000 tokens, the most recent subset above that; every run counts against the AI budget (K-100); reviews are fetched at run time, nothing is kept beyond the 30-day limit, and no review text is stored in the result, only the short summary and counts. Google's written answer on the data-access question (K-27 open risk) must be on file before this is switched on for real customers.
+*Overrides:* K-27 and P1-10 (the card and its name), the "off for partner portfolios" clause.
+
+**K-136 Profile Coach (replaces the attribute and service optimizer).** Part of the Growth agent (K-143). A weekly completeness check turns gaps into tasks; the owner approves every change. Essentials gets the checklist (what is missing and why); Pro gets the actions:
+1. Description: a draft up to 750 characters, most useful facts first, verified facts only, no links or promotions (AI, only when credit is on).
+2. Categories: additional categories suggested from Google's own list (Business Information `categories.list`) for the business type. A primary-category change is only suggested, never applied without the owner, and flagged as sensitive.
+3. Services and products filled from Business Knowledge.
+4. Attributes: `attributes.metadata` for the category against the profile.
+5. Photos and video: count by type (exterior, interior, team, work, products), a nudge for missing types. Video support is added to the photo engine card.
+6. Service-area businesses: suggest hiding the address and setting up to 20 service areas when customers do not visit. This is a sensitive change and needs the signed-in owner.
+7. Website link tracking: offer `utm_source=google&utm_medium=organic&utm_campaign=gbp` on the website link (owner approves; Protection takes the new link as the approved value).
+8. Schema snippet: a `LocalBusiness` JSON-LD that mirrors the profile, with a copy button for the owner's website.
+9. Website match check: fetch the owner's public website and compare name, phone, address and hours with the profile; list mismatches.
+10. Never suggest keywords in the business name.
+The free Profile Check page also shows the completeness checklist.
+*Overrides:* K-22, K-81 to K-84, K-117.2, K-117.5 where they were P1 (cards P1-06a to P1-06c are folded in; P1-06d keeps hours, social links, action links and products), K-115 quarterly "tracked website link suggestion", the earlier "attribute and service optimizer, replacing Q&A" idea (never built).
+
+**K-137 Own order and booking button (Pro).** Through the Place Actions API Kabsi adds the owner's own order or booking link and marks it preferred, alerts the owner when the preferred link is missing or has changed, and explains that links from aggregators (delivery and booking marketplaces) cannot be removed by Kabsi. If Google answers NOT_FOUND or PERMISSION_DENIED, the feature is hidden for that business and Kabsi never retries in a loop. Writes go through the pipeline with the owner's approval.
+*Overrides:* K-117.3 (action links, P1-06d) for this one field.
+
+**K-138 Search terms report.** Monthly, from the Performance API's search keyword impressions, in Insights and the monthly report. Counts below Google's threshold show "fewer than 15". Nothing is stored beyond 30 days (K-40). Pro.
+*Overrides:* K-117.1 and K-26 placement (P1-09b, P0.7 "at go-live"): it is part of P0.5-05.
+
+**K-139 Report a fake review helper (Pro).** Shows Google's prohibited-content categories, an evidence checklist, a deep link to Google's Reviews Management Tool, outcome tracking (reported, answered, still showing, removed) and one appeal. No AI, no legal language, no promise of removal. It sits beside K-113.8 and the claims rule: Kabsi never says it can remove a review.
+*Overrides:* nothing; the facts file's "Never say Kabsi can remove a review" stands.
+
+**K-140 Website v2.** One card, built after the features and before the launch gate. Keep the Kabsi design system and tokens (K-108): no dark mode, no new palette, no framer-motion; a CSS fade-in that respects reduced motion. Real product mockups only (rendered from the real components, marked "Example" where the data is invented).
+Homepage order: (1) hero: H1 "Your Google reviews and listing. Taken care of.", sub "Kabsi replies to your reviews, watches your Google profile and brings you more customers. You approve on WhatsApp.", yellow "Check my Google profile free", secondary "See how it works", and a WhatsApp phone mockup; (2) how it works in 4 steps; (3) three pillars (Every review answered, Your profile protected, More customers find you) with real screens; (4) a WhatsApp section; (5) the Essentials and Pro feature grid; (6) pricing with the 14-day Pro trial; (7) "You stay in control" (nothing posted without your OK, never your Google password, you stay the owner, disconnect any time, independent and not affiliated with Google); (8) the founder note and real proof only (quotes with written consent, no logos or numbers until real); (9) industry links; (10) FAQ; (11) a final yellow button. One `/for/<industry>` template with honest copy for restaurants, cafes, salons, clinics, dentists and car services. `/pricing`, `/how-it-works` and `/partners` are updated to match. The card uses the frontend-design skill.
+Two points the build chat must keep: the H1 uses Google's name as plain descriptive words, while the slogan and brand line stay "Your reviews and listing. Taken care of." (K-112) and the non-affiliation notice stays in view; and the hero button is the free Profile Check at all times, while any "start your trial" button waits for the launch gate (R-02), then reads "Start free".
+*Overrides:* design review sections "Homepage" (13 sections), "Pricing page", "Other public pages" (industry and Lebanon rows) and "Public Partners page"; K-110 homepage and comparison details (the three-ways comparison without names is dropped); R-02 for the hero button only; P1-14d, P1-14e and P1-20.
+
+**K-141 Onboarding in six steps.** Amends K-45, K-91 to K-98 and K-111 ordering:
+1. Free Profile Check (with the completeness checklist).
+2. Sign-up (Continue with Google, or an email code).
+3. Add Kabsi as Manager, with a live status ("Waiting for your invitation", then "Connected"). The one-tap "Connect with Google" route stays P1-18.
+4. While waiting: the five questions and "Connect WhatsApp" (K-129).
+5. Access confirmed: confirm your details, then the day-one backlog card ("We found 23 unanswered reviews. Replies are ready.").
+6. The Pro trial runs with lifecycle emails, and the plan choice (Essentials or Pro) is offered from day 11.
+The target metric is the first approval within 10 minutes of access being confirmed. It is measured from `google_access_granted` to `reply_approved` (G-31, G-44).
+*Overrides:* the five-step list in the design review and K-45 steps 3 to 5 order; the trial banner moment ("shown after Confirm your details").
+
+**K-142 Go-to-market order.** (1) Finish the build. (2) Run live on Kabsi's own profiles. (3) Win 5 to 10 founding customers from Hussein's network, each with written consent for any quote. (4) Open Kabsi Partners with real proof. (5) Start Meta ads only after onboarding converts (G-01, VIDEO gates). *Overrides:* nothing; it orders G-39 and guardrail 0.13.
+
+**K-143 Five AI agents.** Reply agent (built), Guard agent (Protection, put-back and auto-fix), Growth agent (Profile Coach, weekly posts, photo nudges, holiday hours, search terms; it produces the weekly task plan), Insights agent ("What customers say"), and Nora (app and WhatsApp). All run as jobs in the task engine (K-08, K-35). None publishes to Google without the owner's approval, except the owner's opted-in auto-fix fields (K-130). An agent never has more authority than the human role it acts for (guardrail 11).
+
+**K-144 Claims rule.** Never quote an industry statistic such as "520% more calls" or "16% of ranking" as fact in the product or in marketing. Say what Kabsi does, not what Google's algorithm rewards. Applies to the site, the app, emails, ads, partner scripts, Nora and the facts file; it adds to K-53 and the Nora rule against ranking claims.
+
+**K-145 Rejected, and recorded so no build chat brings them back.** Q&A everywhere (Google discontinued the Q&A API on 3 Nov 2025: no Q&A screens, tasks, prompts or copy); keywords inserted into replies; a geo-grid rank tracker; a competitor radar (so the P2 line "Grid rank tracking and competitor views" is deleted); fake or placeholder social proof; "compliant with Google ToS" or similar badges; ranking promises and autopilot promises; a dark-mode redesign; Lebanon pricing (K-123); NFC card sales (K-125); the partner resale model (K-127).
+
+**K-146 Working rules: cost and skills.** (1) No Anthropic, Google or other paid API call is made, in a build, a test or an evaluation, until Hussein says so in the chat; build against mocks, fixtures, sandbox modes and the session's own model. This includes live WhatsApp sends, live Google calls beyond the read-only ones already approved, and CI evaluation runs (`EVAL_LIVE` stays off). (2) Build sessions use the `kabsi-build-session` skill (it includes the Google guard); changes to reply prompts use `kabsi-reply-lab` (it runs the evaluation cases with the session itself, no API credit) and record the results in PROGRESS; outreach to partners and owners uses `kabsi-outreach`. (3) P1 note: `gokapso/whatsapp-cloud-inbox` is a possible staff inbox with quick replies and labels.
+*Overrides:* the CI prompt-gate assumption that a prompt change is checked on the real models: with (1) in force, `kabsi-reply-lab` results are the evidence, and the gate's live run waits for Hussein's yes.
 
 ## Open risks and what Rashid must verify
 
@@ -1384,7 +1511,7 @@ The largest risk is not technical: Google's API approval is still pending, and e
 | Whether Pub/Sub covers group-held locations                              | K-37 coverage                     | Test on day one; daily reconciliation covers gaps meanwhile   |
 | Gemini expanding to multi-profile owners and proactive alerts            | Weakens K-50                      | Review positioning every quarter                              |
 | Photo size and resolution limits                                         | K-23 normalisation targets        | Read Google's current photo guidelines before building step 3 |
-| Card payments outside Lebanon                                            | Self-serve growth blocked by USDT | Finish the Creem or Dodo setup before paid ads                |
+| Card payments (K-124: Creem is the only route)                          | Self-serve growth blocked until Creem is live | Finish the Creem setup before paid ads (P0.4-07)        |
 | One builder, about 20 weeks of P0 and P1                                 | Schedule slip                     | Hold the wave order; cut P1 before cutting tests              |
 | Legal text (privacy, terms, retention table)                             | Promises must match the system    | Lawyer review before launch, as already planned               |
 

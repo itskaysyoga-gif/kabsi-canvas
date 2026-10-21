@@ -2,6 +2,8 @@
 
 Oct 2, 2026
 
+> **Updated 21 Oct 2026 (audit K-123 to K-146).** Hussein's final decisions replace parts of this review. The sections "Homepage", "Pricing page" and "Public Partners page" and the Lebanon and industry rows of "Other public pages" are superseded by "Website v2" below. "Partner dashboard" is replaced by the Kabsi Partners dashboard. The five onboarding steps in "Signup, login and onboarding" are replaced by six. Nothing here may show Lebanon pricing, NFC card sales, USDT, Binance Pay, Whish, OMT or cash, or the old partner model; plans are Essentials and Pro in US dollars, paid by card through Creem.
+
 ## Summary
 
 Kabsi's site already looks better than most competitors': a confident black and yellow brand, a real product demo in the hero, honest copy and careful accessibility. It converts worse than it looks, for four reasons: it asks for the hardest step (inviting Kabsi on Google) before showing any value, it uses three different calls to action, it has no proof of any kind, and it still describes features the product audit removed (Profile Score, Listing Shield, "Put mine back", a weekly post). The app has the same problem in miniature: Home is a dashboard of competing widgets when it should answer one question.
@@ -147,6 +149,8 @@ The new snapshot step sits right before the Manager invite, so owners invite Kab
 
 ## Homepage
 
+> **Superseded 21 Oct 2026 by "Website v2" (audit K-140).** Kept for the reasoning only. The 13-section order, the "Start free" hero button, the "three ways" comparison and the Lebanese card offer are not used.
+
 The homepage today is well made but explains features one by one (Reviews, posts, Listing Shield, review link, how it works with the group ID). The new page sells one outcome in the first screen, then proves the three jobs, then removes risk. It has 13 short sections, each with one job, one headline and one visual.
 
 **Hero, new copy:**
@@ -189,6 +193,8 @@ The agency price line in row 11 is a market range from public agency price lists
 
 ## Pricing page
 
+> **Superseded 21 Oct 2026 by "Website v2" (audit K-126, K-140).** The columns are now Essentials and Pro; there is no Free, Partner or Lebanon column, and the only way to pay is a card through Creem.
+
 The pricing page is clear and honest, but it sells a card to US visitors, describes the old module names, and asks international buyers to pay in USDT. The new page answers three questions in order: what does it cost, what do I get, what if it doesn't work for me.
 
 | Area             | Today                                                      | Change                                                                                                                                                                                                       |
@@ -203,7 +209,7 @@ The pricing page is clear and honest, but it sells a card to US visitors, descri
 | Comparison       | Missing                                                    | Short table: Kabsi, doing it yourself, Gemini, an agency, Birdeye. Rows: price, who replies, watches your profile, you approve everything, team and agency support. Every competitor fact sourced and dated  |
 | Guarantee        | Refund rule in small print                                 | A visible box: "Try it free for 14 days. Monthly plans cancel any time. Yearly plans refunded in full within 14 days."                                                                                       |
 | FAQ              | Small print list                                           | Accordion: trial start, what happens at the end of the trial, cancelling, leaving Kabsi, VAT and invoices, multiple locations                                                                                |
-| Lebanon          | Mixed into the main page                                   | Separate block shown only to Lebanese visitors via region.ts: "Lebanon bundle: \$120 a year with an NFC card and in-person setup"                                                                            |
+| Lebanon (RETIRED 21 Oct 2026, K-123: 301 to /pricing) | Mixed into the main page                                   | Separate block shown only to Lebanese visitors via region.ts: "Lebanon bundle: \$120 a year with an NFC card and in-person setup"                                                                            |
 
 Price stays at \$19. It sits below every serious competitor and above the free tools, and the yearly plan anchors a lower monthly figure (\$15.83).
 
@@ -214,8 +220,8 @@ The supporting pages are numerous and well written for search, but they repeat o
 | Page                                         | Job                                                        | Changes                                                                                                                                                                                                                                                                                                                        |
 |----------------------------------------------|------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | How it works                                 | Remove fear about access and control                       | Rebuild as the operating loop in plain words: Kabsi watches, prepares, asks, publishes, reports. One illustrated row per step. Add a clear "What Kabsi can and cannot do" box: cannot see your password, cannot post without you, cannot lock your listing, cannot promise rankings                                            |
-| Industry pages (/for/restaurants and 7 more) | Rank for "\[trade\] Google reviews" and convert that trade | Keep the 8 trades. Each page: trade-specific hero ("For clinics: replies that never confirm who your patients are"), 3 example reviews and drafts from that trade, the photos customers look for in that trade, trade FAQ. Add dentists separately from clinics, and add gyms, real estate offices and car rental for the Gulf |
-| Lebanon                                      | Sell the bundle on the ground                              | Keep separate. Arabic version first. WhatsApp button as the main call to action, the field team's faces, cash and Whish payment, the physical card shown in hand                                                                                                                                                               |
+| Industry pages (REPLACED 21 Oct 2026, K-140: one template, six trades) | Rank for "\[trade\] Google reviews" and convert that trade | Keep the 8 trades. Each page: trade-specific hero ("For clinics: replies that never confirm who your patients are"), 3 example reviews and drafts from that trade, the photos customers look for in that trade, trade FAQ. Add dentists separately from clinics, and add gyms, real estate offices and car rental for the Gulf |
+| Lebanon (RETIRED 21 Oct 2026, K-123: 301 to /pricing) | Sell the bundle on the ground                              | Keep separate. Arabic version first. WhatsApp button as the main call to action, the field team's faces, cash and Whish payment, the physical card shown in hand                                                                                                                                                               |
 | Guides                                       | Organic traffic                                            | Keep the three guides. Add: "How to set holiday hours on Google", "Why Google changed my business hours", "Google Business Profile photos: what customers look for", "Gemini vs a Google profile assistant". Each ends with the free tool or Start free                                                                        |
 | FAQ                                          | Answer objections                                          | Group into Access and safety, Replies, Your profile, Pricing, Leaving Kabsi. Add the Gemini question. Remove questions about Listing Shield and Profile Score                                                                                                                                                                  |
 | About                                        | Build trust                                                | Rewrite around the person: who Rashid is, why Kabsi exists, where it operates (Dubai, Beirut), how to reach a human. Photo. No company jargon                                                                                                                                                                                  |
@@ -228,6 +234,8 @@ Global navigation: How it works, Pricing, For your business (dropdown of trades)
 Languages (audit K-119): the site, app, emails and guides launch in English only, for the eight English-speaking markets. Other languages, Arabic included, are P2: an Arabic version (homepage, pricing, How it works, Security, right-to-left checked on a phone) comes only when Gulf or Lebanon marketing starts; Spanish and French follow search data. Kabsi still drafts replies in each reviewer's own language from day 1.
 
 ## Public Partners page
+
+> **Superseded 21 Oct 2026 by "Website v2" and the Kabsi Partners dashboard (audit K-127).** The agency workspace, the resale model and "Settle in USDT" are retired.
 
 The current page speaks to NFC card sellers and promises partners they "never see review text" and "can't post for them". That was true for a card reseller; it is the opposite of what an agency wants, and the audit (K-16, K-29 to K-32) now gives agencies real tools with client-controlled approvals. The page is rewritten for two audiences, with agencies first.
 
@@ -256,6 +264,40 @@ The current page speaks to NFC card sellers and promises partners they "never se
 7.  **Apply:** the existing form, shortened to name, email, company, country, number of clients, and website. Response promise: "We reply within 2 working days."
 
 Remove: the "Cards plus software" section as the lead message (move it to a short block for card sellers), "Settle in USDT" as a headline benefit, and the sentence about partners not seeing reviews.
+
+## Website v2 (final, 21 Oct 2026, audit K-140)
+
+One build card (P0.8-13), made after the features and before the launch gate, with the frontend-design skill. It keeps the Kabsi design system and the tokens (K-108): no dark mode, no new palette and no framer-motion. Motion is a CSS fade-in that stops under `prefers-reduced-motion`. Every picture of the product is a real mockup, rendered from the real app components, with invented data marked "Example". No stock people, no logo wall, no numbers that are not Kabsi's own.
+
+**Homepage, in this order:**
+
+| # | Section | Content |
+|---|---|---|
+| 1 | Hero | H1 "Your Google reviews and listing. Taken care of." Sub: "Kabsi replies to your reviews, watches your Google profile and brings you more customers. You approve on WhatsApp." Yellow button "Check my Google profile free" (the free Profile Check, always). Secondary "See how it works". A WhatsApp phone mockup showing a review alert with the draft and the Approve button |
+| 2 | How it works | Four steps: check your profile, add Kabsi as Manager, approve replies from your phone, Kabsi keeps watching |
+| 3 | Three pillars | "Every review answered", "Your profile protected", "More customers find you", each with a real screen (the review card, the Google Protection card, the Profile Coach checklist) |
+| 4 | WhatsApp | Approve a reply in two taps; what WhatsApp can approve (low and medium risk replies and weekly posts) and what it cannot (high-risk reviews and your business name, address, categories, map pin, phone and open status); a 10-second undo |
+| 5 | Essentials and Pro | A feature grid in two columns, from audit K-126 |
+| 6 | Pricing | Essentials $19 a month or $190 a year; Pro $39 a month or $390 a year; extra location $15 or $150; the 14-day Pro trial, no card; "plus tax where it applies" |
+| 7 | You stay in control | Nothing is posted without your OK. Never your Google password. You stay the owner. Disconnect any time. Independent and not affiliated with Google |
+| 8 | Founder note and proof | The founder note; quotes only with written consent; no customer logos and no numbers until they are real |
+| 9 | Industries | Links to the six trade pages |
+| 10 | FAQ | Do you need my Google password; can Kabsi post without me; can I remove Kabsi; what can WhatsApp approve; how is this different from Gemini; what happens when the trial ends |
+| 11 | Final band | A yellow button |
+
+**Copy rules.** The H1 uses Google's name as plain descriptive words; the brand line (the slogan) is still "Your reviews and listing. Taken care of." and the non-affiliation notice stays in the footer and in section 7 (audit K-112). No industry statistics and no promise about rankings or autopilot (audit K-144, K-145). Before the launch gate every trial button reads "Join early access" and the pricing section says "Early access" (plan R-02); at the gate one constant switches them to "Start free". The hero button never changes.
+
+**Industry pages.** One `/for/<industry>` template with honest copy for restaurants, cafes, salons, clinics, dentists and car services: what customers write about that trade, one example review with a draft marked "Example", the photo types customers look for, the trade's care rules (for clinics and dentists, replies never confirm who a patient is), and the same button. The other old industry pages redirect to `/for`.
+
+**Pricing page.** Two columns, Essentials and Pro, with the monthly and yearly toggle ("2 months free" on the toggle), the extra location calculator, the 14-day Pro trial box ("Try Pro free for 14 days. No card. Monthly plans cancel any time. Yearly plans are refunded in full within 14 days."), the feature list in plain outcomes, an FAQ accordion, and "Pay by card" only. No hero picture of a card, no Lebanon block, no Free or Partner column.
+
+**How it works.** The operating loop in plain words (Kabsi watches, prepares, asks, publishes, reports) and the box "What Kabsi can and cannot do": cannot see your password, cannot post without you (except the hours and website fields you opted in to auto-fix on Pro), cannot lock your listing, cannot promise rankings.
+
+**Partners page** (`/partners`, audit K-127, K-128). The H1 reads "Earn 30% when you introduce Kabsi." Sections: who can apply (creators, agencies, consultants, accountants, web and POS sellers); the terms in plain words (30% of every payment for the first 12 months of each business you refer, paid monthly, $50 minimum, a 30-day hold, no upfront payment, your business gets a 30-day Pro trial); how it works in three steps (apply, get your link, get paid); the rules we keep (paid partnership label, local influencer licences are yours, never claim a Google partnership, never promise rankings or removal of reviews, never offer a reward for reviews); "Agencies that manage a client's profile are invited by the client as Manager"; the approved claims and the script kit after approval; a short application form. "Hussein approves each partner." No income claims. The page shows "opening soon" until Hussein switches the program on.
+
+## Kabsi Partners dashboard (final, 21 Oct 2026, audit K-127)
+
+Replaces the agency workspace. It is one calm page at `/partner`, phone first. It shows the partner's link (`kabsi.co/?via=CODE`) and code with a Copy button, and six counts for the chosen period: clicks, sign-ups, trials, paying businesses, earned and paid. Below them: a plain table of payments (month, amount earned, hold ends, status pending, payable, paid or reversed), the next payout date, and the minimum ("Payouts start at $50"). The partner rules sit in a collapsed block. A partner never sees a business's name, reviews or Google data. The staff view lives in `/staff`: applications to approve or decline, partners, referrals, commission rows and a "Mark payout paid" action.
 
 ## Free tools
 
@@ -290,21 +332,23 @@ Both tools launch in English; versions in other languages come with the language
 
 ## Signup, login and onboarding
 
-Onboarding is where Kabsi wins or loses customers. The new flow shows value before asking for anything, connects Google in one tap where possible, and has a clear screen for every situation an owner can be in (audit K-91 to K-98). Target: connected in under 3 minutes on a phone.
+Onboarding is where Kabsi wins or loses customers. The flow below was reordered on 21 Oct 2026 (audit K-141): six steps, WhatsApp connected while the owner waits, and the first approval within 10 minutes of access as the target. The new flow shows value before asking for anything, connects Google in one tap where possible, and has a clear screen for every situation an owner can be in (audit K-91 to K-98). Target: connected in under 3 minutes on a phone.
 
 **Sign up and log in.** One sheet with two buttons: "Continue with Google" (primary, black with the standard Google mark as Google's branding rules require) and "Continue with email" (sends a 6-digit code, as today). No passwords. Log in uses the same two buttons. The sheet appears after the owner has found their business and seen the snapshot, with the line "Save your snapshot and continue".
 
-**New onboarding, one screen per step, progress bar of 5:**
+**Onboarding in six steps (final, 21 Oct 2026, audit K-141), progress bar of 6.** One screen per step. The target metric is the first approval within 10 minutes of access being confirmed, measured from `google_access_granted` to `reply_approved`.
 
-1.  **"Which business is yours?"** Search by name with Places, pick from results showing name, address and rating. No account yet. "I can't find my business" leads to the eligibility check and the create-a-profile guide (K-98).
+1.  **"Which business is yours?" and the free Profile Check.** Search by name with Places, pick from results showing name, address and rating, then "Here's what customers see": the snapshot, the findings labelled Urgent, Recommended or Nice to have, and the completeness checklist (what is missing on the profile and why). No account yet. "I can't find my business" leads to the eligibility check and the create-a-profile guide (K-98). Button: "Let Kabsi take care of it", which opens the sign-up sheet.
 
-2.  **"Here's what customers see."** The free snapshot (same as the Profile Check). "Kabsi can take care of 4 of these." Button: "Let Kabsi take care of it", which opens the sign-up sheet.
+2.  **Sign-up.** "Continue with Google" or "Continue with email" (a 6-digit code), with the line "Save your snapshot and continue".
 
-3.  **"Connect your Google listing."** One big button, "Connect with Google", with the plain explanation above Google's consent screen (K-92). Below it, a quieter link: "I'd rather add Kabsi myself" (the manual guide). Kabsi then shows the profiles it found, each with a plain status ("Ready", "Needs verifying", "Google is reviewing", "Suspended", "You're a manager, not an owner"), and the owner ticks the ready ones. Anything not ready opens its scenario screen.
+3.  **"Add Kabsi as Manager", with a live status.** The manual guide below, one card per step, the group ID large with Copy, and the pill "Waiting for your invitation. We check every 30 seconds." that turns green, "Invitation received. You're connected". Anything not ready opens its scenario screen. The one-tap "Connect with Google" route stays P1 (after Google verifies the scope).
 
-4.  **"Five quick questions."** How you sign off, tone (three tappable examples, not a dropdown), a contact for unhappy customers, one thing customers love, one thing never to say. Skippable, with defaults. Shown while Kabsi finishes connecting, so no one waits on a spinner.
+4.  **While you wait: five quick questions and "Connect WhatsApp".** The five questions (how you sign off, tone with three tappable examples, a contact for unhappy customers, one thing customers love, one thing never to say), skippable, with defaults. Beside them a card: "Get your reviews on WhatsApp", a button that opens a chat with Kabsi's number and a one-time code to send. Skippable too. Nobody waits on a spinner.
 
-5.  **"Confirm your details."** Shown once access is confirmed: name, phone, hours, website, category, each with "Correct" or "Change". This becomes the protected baseline, and the trial clock starts here.
+5.  **Access confirmed: "Confirm your details", then the day-one backlog card.** Name, phone, hours, website, category and open status, each with "Correct" or "Change"; this becomes the protected baseline. Then Home opens with the card "We found 23 unanswered reviews. Replies are ready." and Approve all for the low-risk ones, the full list shown first. The first approval within 10 minutes is the goal of this screen.
+
+6.  **The Pro trial runs.** A banner: "Your 14-day Pro trial has started. No card needed." (30 days through a partner link). The lifecycle emails run (welcome, first reply approved, day 2, day 7 your week, day 11 three days left); from day 11 the owner chooses Essentials or Pro, monthly or yearly, in the app and in the email. Plan choice never interrupts approving.
 
 **Scenario screens** (one each, same layout: what is happening in one sentence, what to do in at most four numbered steps, a button to Google's exact page, "I've done it", and the setup-call link):
 
@@ -336,7 +380,7 @@ Onboarding is where Kabsi wins or loses customers. The new flow shows value befo
 
 - **Keeping it true:** screenshots carry the date they were taken and are re-checked every month and whenever Google changes the screen; a small "Screens look different?" link opens the setup call. Screenshots come from a Business Profile Kabsi's team manages, with that business's details blurred, are shown unaltered except for the highlight, are used only in onboarding and help, and are never used in ads.
 
-Then the first Home screen with the first prepared items, and a banner: "Your 14-day free trial has started. No card needed." Plan choice moves to the end of the trial.
+Then the first Home screen with the first prepared items (step 5 above) and the trial banner (step 6). Plan choice is offered from day 11 (see step 6).
 
 **While waiting for access** (it can take minutes to a day), Home shows the snapshot, the five questions if skipped, and a calm status: "Waiting for your invitation. We'll email you the moment it arrives." If the profile is being verified, reviewed or reinstated, Home shows that scenario's status instead, with "Your free trial starts when Google is ready, so you don't lose any days." Never an empty dashboard.
 
@@ -374,7 +418,7 @@ Then the first Home screen with the first prepared items, and a banner: "Your 14
 
 **Video on the site (video plan, W1 to W5).** W1 "Kabsi in 60 seconds" under the homepage hero and on the Meta landing page, click to play with a poster image; three silent feature loops in the homepage features section; W3 "Connect your Google profile" on the onboarding access step and in the welcome email, ending on the setup-call link; W4 "How Kabsi works with you" on the About and pricing pages; W5 on the Partners page once the partner workspace exists. No video autoplays with sound or loads before the visitor presses play (speed rules in the growth playbook).
 
-**Partner call with Rashid (audit K-105).** Agencies, freelancers and resellers can book a 20-minute call with Rashid. Place "Talk to Rashid" as the secondary button in the Partners page hero and again beside the partner FAQ, on the partner application confirmation page, in the partner dashboard's help menu, in the resale section of the pricing page and in the footer ("For agencies: talk to Rashid"). Show his name and role with Kabsi's mark, no photo.
+**Partner call with Rashid (audit K-105; RETIRED 21 Oct 2026 by K-127: there is no partner workspace, and the "Partner or agency" answer on the setup call is only a question).** Agencies, freelancers and resellers can book a 20-minute call with Rashid. Place "Talk to Rashid" as the secondary button in the Partners page hero and again beside the partner FAQ, on the partner application confirmation page, in the partner dashboard's help menu, in the resale section of the pricing page and in the footer ("For agencies: talk to Rashid"). Show his name and role with Kabsi's mark, no photo.
 
 **Emails (audit K-102).** Every email uses the current template: sand background, one white card, the Kabsi mark, a heading, the content, one yellow button with black text, the approval promise, the footer. Add: the business name first in the subject, a preview line, the content exactly as it will appear on Google (photo, text, button label, expiry), a secondary "Edit first" link, the legal seller and postal address, "Email settings" with a toggle per type, a plain-text version and a dark-mode-safe logo.
 
@@ -511,22 +555,7 @@ The current page puts everything on one long scroll: the link, a bare QR code, f
 
 ## Partner dashboard
 
-Today /partner is a billing page: a table of businesses with status and card taps, invites, invoices and cards. It becomes the agency's daily workspace, designed for a laptop first because agencies work at desks, and usable on a phone.
-
-**Layout.** Left sidebar: Portfolio, Approvals, Reports, Clients, Earnings, Settings (brand, team, payout). Top bar: agency name and logo, search across clients, "Add client" button in yellow.
-
-| Screen           | Content                                                                                                                                                                                                                                                                                                                                                                          |
-|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Portfolio (home) | A row of count tiles that filter the list below: Need attention, Approvals waiting, Disconnected, Profile issues, All caught up. Client list with one row per business: name, city, Google connection dot, replies waiting and age of the oldest, open profile tasks, last photo, last update, activity trend arrow, plan, onboarding step. Sort by "needs attention" by default |
-| Client view      | The owner's Kabsi, with a banner: "Viewing Café Younes as Agency X. You can: prepare everything, approve replies." Permissions shown in plain words                                                                                                                                                                                                                              |
-| Approvals        | One queue across all clients, filtered by type and client. Bulk approve for items the partner is allowed to approve; "Send to client" for the rest                                                                                                                                                                                                                               |
-| Reports          | Weekly or monthly client reports with the agency logo, schedule per client, preview and send                                                                                                                                                                                                                                                                                     |
-| Clients          | Add client (search Google Places, enter the owner's email or copy a WhatsApp invite), onboarding progress per client with "Nudge" button, approval rules per client                                                                                                                                                                                                              |
-| Earnings         | Referred accounts, trials, paid, monthly commission or resale margin, payout status, invoice download                                                                                                                                                                                                                                                                            |
-
-**Empty state for a new partner:** a three-step checklist (add your brand, add your first client, send the first report) and a sample client so the workspace never looks empty, labelled "Example".
-
-**Visual difference from the owner app:** same components, denser tables, sand background, a small "Partner" label beside the logo so screenshots in sales calls are recognisable.
+> **Replaced 21 Oct 2026 (audit K-127).** The agency workspace described here (portfolio, approvals queue across clients, client reports, partner branding, resale earnings) is retired together with partner resale, partner-covered plans and partner approvals. The partner dashboard is now the Kabsi Partners dashboard described under "Kabsi Partners dashboard" above, and agencies that manage a client's profile are invited by the owner as Manager in Team.
 
 ## Emails
 
@@ -593,4 +622,4 @@ Do the changes that raise conversion and remove contradictions first; leave the 
 | 14    | Arabic site                                                                                                        | Medium | Before Gulf marketing                             |
 | 15    | Email redesign and root-domain sending                                                                             | Medium | With the Weekly Care Report rebuild               |
 
-Items 1 to 5 and 9 should ship before the Meta ads start. Nothing on the site may claim a feature before it works: if Google Protection or the Profile Check are not live, their sections stay off the page or carry "Coming soon".
+Items 1 to 5 and 9 should ship before the Meta ads start. Updated 21 Oct 2026: rows 5, 6, 8, 11, 13 and 14 are replaced by Website v2 (audit K-140), Kabsi Partners (K-127) and the Creem-only payment route (K-124); card payments remain the prerequisite for paid ads. Nothing on the site may claim a feature before it works: if Google Protection or the Profile Check are not live, their sections stay off the page or carry "Coming soon".
