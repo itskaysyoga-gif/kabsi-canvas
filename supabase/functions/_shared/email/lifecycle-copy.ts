@@ -39,7 +39,7 @@ function noAccess(step: "no_access_1h" | "no_access_24h" | "no_access_72h", s: S
     },
   }[step];
   return {
-    subject: v.subject, title: v.title, preheader: v.preheader,
+    subject: v.subject, title: v.title, preheader: v.preheader, why: "You started setting up Kabsi.",
     bodyHtml: p(v.lead) + p("Kabsi never asks for your Google password or a verification code, and nothing is published until you approve it."),
     button: { label: "Add Kabsi as a Manager", url }, links: helpLinks(c),
     text: `${v.plain}\n\nKabsi never asks for your Google password or a verification code, and nothing is published until you approve it.`,

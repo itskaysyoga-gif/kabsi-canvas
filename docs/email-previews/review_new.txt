@@ -6,7 +6,7 @@ Lovely staff and the best man'oushe in town.
 Drafted reply:
 Thank you, Sarah. We are glad you enjoyed your visit and we hope to see you again soon.
 
-Review reply: https://kabsi.co/a/POSTTOKEN
+Approve reply: https://kabsi.co/a/POSTTOKEN
 Edit: https://kabsi.co/a/EDITTOKEN
 Skip: https://kabsi.co/a/SKIPTOKEN
 Open Kabsi: https://kabsi.co/app/reviews?f=needs

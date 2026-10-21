@@ -33,6 +33,8 @@ export type RenderCtx = {
   defaultWhy: string;
   /** Set for mail the owner can switch off: the page on kabsi.co that asks and then unsubscribes, shown in the footer. */
   unsubscribePage?: string | null;
+  /** Mail for the Kabsi team (category "internal"): a plain staff footer, no approval promise, no settings, no unsubscribe. */
+  staff?: boolean;
 };
 
 export const SETTINGS_PATH = "/app/settings#choices";
@@ -42,6 +44,8 @@ export const GOOGLE_NOTICE = "Google and Google Business Profile are trademarks 
 export const operatorLine = () => `Kabsi is operated by ${LEGAL_SELLER}. Contact: hello@kabsi.co`;
 
 export type Rendered = { html: string; text: string };
+
+export const STAFF_FOOTER = "This notice is for the Kabsi team only.";
 
 export function renderEmail(c: EmailContent, ctx: RenderCtx): Rendered {
   const why = c.why ?? ctx.defaultWhy;
@@ -60,12 +64,14 @@ export function renderEmail(c: EmailContent, ctx: RenderCtx): Rendered {
 <td style="vertical-align:middle;padding-left:10px;font-family:${FONT};font-size:22px;font-weight:700;color:${TOKENS.black};">kabsi</td></tr></table></td></tr>
 <tr><td style="background:${TOKENS.white};border-radius:14px;padding:32px 24px;font-family:${FONT};color:${TOKENS.ink};font-size:${SIZES.body}px;line-height:1.6;">
 <h1 style="margin:0 0 12px 0;font-size:24px;line-height:1.3;font-weight:700;">${esc(c.title)}</h1>${c.bodyHtml}${button}${links}${note}</td></tr>
-<tr><td style="padding:20px 4px 0 4px;${foot}">${esc(PROMISE)}<br>
+<tr><td style="padding:20px 4px 0 4px;${foot}">${ctx.staff ? `${esc(STAFF_FOOTER)}<br>
+<strong style="color:${TOKENS.ink};">Why you got this:</strong> ${esc(why)}<br>
+${esc(operatorLine())}` : `${esc(PROMISE)}<br>
 <strong style="color:${TOKENS.ink};">Why you got this:</strong> ${esc(why)}<br>
 ${link("Email settings", settings)}${ctx.unsubscribePage ? ` &nbsp;|&nbsp; ${link("Unsubscribe from these emails", ctx.unsubscribePage)}` : ""}<br>
 ${esc(QUESTIONS)} You can also message us on <a href="${esc(WHATSAPP_URL)}" style="color:${TOKENS.ink};">WhatsApp ${WHATSAPP_NUMBER}</a>.<br>
 ${esc(GOOGLE_NOTICE)}<br>
-${esc(operatorLine())}</td></tr>
+${esc(operatorLine())}`}</td></tr>
 </table></td></tr></table></body></html>`;
   // The button and the links are in the plain text too, unless the text already carries the address.
   const body = c.text.trim();
@@ -74,8 +80,10 @@ ${esc(operatorLine())}</td></tr>
     body,
     ...(extra.length ? [extra.join("\n")] : []),
     ...(c.note ? [c.note] : []),
-    ["--", PROMISE, `Why you got this: ${why}`, `Email settings: ${settings}`, ...(ctx.unsubscribePage ? [`Unsubscribe from these emails: ${ctx.unsubscribePage}`] : [])].join("\n"),
-    [`${QUESTIONS} WhatsApp ${WHATSAPP_NUMBER}.`, GOOGLE_NOTICE, operatorLine()].join("\n"),
+    ctx.staff
+      ? ["--", STAFF_FOOTER, `Why you got this: ${why}`, operatorLine()].join("\n")
+      : ["--", PROMISE, `Why you got this: ${why}`, `Email settings: ${settings}`, ...(ctx.unsubscribePage ? [`Unsubscribe from these emails: ${ctx.unsubscribePage}`] : [])].join("\n"),
+    ...(ctx.staff ? [] : [[`${QUESTIONS} WhatsApp ${WHATSAPP_NUMBER}.`, GOOGLE_NOTICE, operatorLine()].join("\n")]),
   ].join("\n\n");
   return { html, text };
 }

@@ -13,7 +13,7 @@
 //
 // This file has no database or network import: api and the job wire it to the database in notify.ts, and the tests
 // wire it to fakes.
-import { type CategoryId, categoryOf, type Frequency, SYSTEM_CATEGORIES, SYSTEM_WHY, type SystemCategory } from "./notify-categories.ts";
+import { type CategoryId, categoryOf, type Frequency, isStaffCategory, SYSTEM_CATEGORIES, SYSTEM_WHY, type SystemCategory } from "./notify-categories.ts";
 import { decideEmail, digestSubject, type DigestItem, groupDigest, localParts } from "./notify-rules.ts";
 import { type EmailContent, renderEmail } from "./email/template.ts";
 import { emailLink, esc } from "./email-layout.ts";
@@ -178,7 +178,7 @@ async function send(d: Deps, b: Base, c: EmailContent, to: string, userId: strin
   }
   const cat = categoryOf(b.category);
   const links = cat?.switchable ? await d.unsubscribeLinks(to, userId, b.locationId, b.category) : null;
-  const { html, text } = renderEmail(c, { appUrl: d.appUrl, defaultWhy: cat?.why ?? SYSTEM_WHY[b.category as SystemCategory] ?? "You are a Kabsi customer.", unsubscribePage: links?.page ?? null });
+  const { html, text } = renderEmail(c, { appUrl: d.appUrl, defaultWhy: cat?.why ?? SYSTEM_WHY[b.category as SystemCategory] ?? "You are a Kabsi customer.", unsubscribePage: links?.page ?? null, staff: isStaffCategory(b.category) });
   const unsubscribeUrl = links?.oneClick ?? null;
   return await d.deliver({
     kind: b.kind, category: b.category, to, subject: c.subject, html, text, dedupeKey, locationId: b.locationId,

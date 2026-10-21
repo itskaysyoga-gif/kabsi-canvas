@@ -171,7 +171,11 @@ Deno.test("access-change notices say what changed and how to remove Kabsi, withi
   assert.match(removing.text, /by 20 October 2026/);
   assert.match(removing.text, /Remove Kabsi Clients there/);
   assert.match(removed.text, /How to check: .*People and access\. Kabsi Clients is no longer listed/);
-  assert.match(removed.text, /review link and cards keep working/);
+  assert.match(removed.text, /review link and QR code keep working/);
+  assert.match(removing.text, /review link and QR code keep working/);
+  for (const m of all) assert.doesNotMatch(m.text + m.bodyHtml, /\bcards?\b/i, "Kabsi sells no cards");
+  assert.match(granted.text, /Or on your Business Profile open Menu/);
+  assert.doesNotMatch(granted.text + granted.bodyHtml, /Or On /);
   for (const m of all) {
     assert.ok(m.bodyHtml.includes("QA &lt;Bakery&gt;"), "the name is escaped");
     for (const s of [m.subject, m.text, m.bodyHtml, m.note, m.title, m.preheader]) {

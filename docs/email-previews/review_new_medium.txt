@@ -6,9 +6,9 @@ Waited too long and wanted a refund.
 They mention a refund. Kabsi didn't promise one.
 
 Drafted reply:
-Thank you, Sarah. We are glad you enjoyed your visit and we hope to see you again soon.
+Thank you for telling us, Sarah. We are sorry you waited longer than you should have. We would like to understand what happened and look at your refund request properly, so please contact us through the details on our Google profile.
 
-Review reply: https://kabsi.co/a/POSTTOKEN
+Approve reply: https://kabsi.co/a/POSTTOKEN
 Edit: https://kabsi.co/a/EDITTOKEN
 Skip: https://kabsi.co/a/SKIPTOKEN
 Open Kabsi: https://kabsi.co/app/reviews?f=needs

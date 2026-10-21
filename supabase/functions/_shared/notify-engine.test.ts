@@ -175,7 +175,7 @@ Deno.test("paused emails skip the email for what can be switched off, not for wh
   const a = await runNotify(input({ key: "review:8", to: [OWNER] }), f.deps);
   assert.equal(a.skipped, 1);
   assert.equal(f.rows[0]!.in_app, true);
-  const b = await runNotify(input({ key: "billing:1", category: "billing", kind: "trial_d7", to: [OWNER] }), f.deps);
+  const b = await runNotify(input({ key: "billing:1", category: "billing", kind: "renew_r5", to: [OWNER] }), f.deps);
   assert.equal(b.sent, 1);
 });
 

@@ -2,7 +2,7 @@
 // data, as the HTML and the plain text a recipient gets. scripts/render-emails.ts writes them to docs/email-previews/
 // so they can be read in a browser; tests/email-previews.test.ts fails when a file is missing or out of date. Pure: no
 // database, no network, no clock.
-import { categoryOf } from "../notify-categories.ts";
+import { categoryOf, isStaffCategory, SYSTEM_WHY, type SystemCategory } from "../notify-categories.ts";
 import { catalog } from "./catalog.ts";
 import { renderEmail } from "./template.ts";
 
@@ -13,8 +13,9 @@ export function previews(): Preview[] {
     const cat = categoryOf(c.category);
     const { html, text } = renderEmail(c.content, {
       appUrl: "https://kabsi.co",
-      defaultWhy: cat?.why ?? "You asked for this email.",
+      defaultWhy: cat?.why ?? SYSTEM_WHY[c.category as SystemCategory] ?? "You asked for this email.",
       unsubscribePage: cat?.switchable ? "https://kabsi.co/unsubscribe?t=SAMPLE" : null,
+      staff: isStaffCategory(c.category),
     });
     return { kind: c.kind, subject: c.content.subject, html, text: `Subject: ${c.content.subject}\n\n${text}\n` };
   });

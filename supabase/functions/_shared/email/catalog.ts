@@ -30,6 +30,14 @@ const REVIEW: ReviewInput = {
   business: BIZ, reviewer: "Sarah", stars: 5, comment: "Lovely staff and the best man'oushe in town.", risk: "low", riskReasons: [], state: "drafted",
   draft: { body: "Thank you, Sarah. We are glad you enjoyed your visit and we hope to see you again soon.", safe: true }, links: LINKS, appUrl: APP,
 };
+const REVIEW_B: ReviewInput = {
+  ...REVIEW, reviewer: "Omar", stars: 4, comment: "Friendly service and fresh bread. It was busy, so we waited a little for a table.",
+  draft: { body: "Thank you, Omar. We are glad you liked the bread and the service, and we are sorry about the wait for a table. We hope to see you again soon.", safe: true },
+};
+const REVIEW_REFUND: ReviewInput = {
+  ...REVIEW, stars: 2, risk: "medium", riskReasons: ["refund"], comment: "Waited too long and wanted a refund.",
+  draft: { body: "Thank you for telling us, Sarah. We are sorry you waited longer than you should have. We would like to understand what happened and look at your refund request properly, so please contact us through the details on our Google profile.", safe: true },
+};
 const SNAPSHOT: Snapshot = {
   place_id: "ChIJsample0000000", name: BIZ, address: "12 Hamra Street, Beirut", category: "Bakery", rating: 4.6, review_count: 128, business_status: "OPERATIONAL",
   open_now: true, hours: [], phone: null, website: "https://example.com", has_photos: true, photo_count: 12, cached: false,
@@ -40,11 +48,10 @@ const REPORT = {
   taps: { total: 14, nfc: 9, qr: 5 },
 };
 const report = renderReport({ name: BIZ }, REPORT);
-const stored = (category: string, title: string, link: string, content: EmailContent, n = 1) =>
-  Array.from({ length: n }, (_, i) => ({
-    id: `n${i}${category}`, location_id: "loc", user_id: "u", to_address: "owner@example.test", category, kind: category, dedupe_key: `k${i}${category}`, title, link,
-    email_state: "digest" as const, email_due_at: "2026-10-21T16:00:00Z", email_content: content,
-  }));
+const stored = (category: string, title: string, link: string, content: EmailContent, tag = "") => [{
+  id: `n${category}${tag}`, location_id: "loc", user_id: "u", to_address: "owner@example.test", category, kind: category, dedupe_key: `k${category}${tag}`, title, link,
+  email_state: "digest" as const, email_due_at: "2026-10-21T16:00:00Z", email_content: content,
+}];
 
 /** A business in the middle of a trial, for the lifecycle emails. */
 export const LIFE_SAMPLE: LifeSnapshot = {
@@ -62,12 +69,13 @@ export function catalog(): CatalogEntry[] {
   const claimBody = "<p>Sample</p>";
   return [
     e("review_new", "review_new", true, reviewEmail(REVIEW, "send")),
-    e("review_new_medium", "review_high_risk", true, reviewEmail({ ...REVIEW, stars: 2, risk: "medium", riskReasons: ["refund"], comment: "Waited too long and wanted a refund." }, "send")),
+    e("review_new_medium", "review_high_risk", true, reviewEmail(REVIEW_REFUND, "send")),
     e("review_no_safe_draft", "review_new", true, reviewEmail({ ...REVIEW, state: "blocked", draft: null }, "send")),
     e("review_high_risk", "review_high_risk", true, reviewEmail({ ...REVIEW, stars: 1, risk: "high", riskReasons: ["legal"], draft: null, comment: "I will see you in court." }, "send")),
     e("backlog_ready", "review_new", true, copy.backlogReady(BIZ, 23, APP)),
     e("digest", "review_new", true, digestEmail({ name: BIZ, tz: "Asia/Beirut", digestHour: 19, pausedUntil: null }, [
-      ...stored("review_new", "New 4-star review", "/app/reviews?f=needs", reviewEmail(REVIEW, "digest"), 2),
+      ...stored("review_new", "New 5-star review", "/app/reviews?f=needs", reviewEmail(REVIEW, "digest"), "a"),
+      ...stored("review_new", "New 4-star review", "/app/reviews?f=needs", reviewEmail(REVIEW_B, "digest"), "b"),
       ...stored("approval_needed", "This week's post is ready to review", "/app/posts", copy.weeklyPost(BIZ, "Fresh manakish every morning from 7.", APP)),
       ...stored("profile_issue", "Your website changed on Google", "/app/shield", copy.profileChange(BIZ, "website", { lines: ["Google shows a different website."], approvedBefore: true, before: "https://yawmiyati.example", after: "https://other.example" }, APP)),
     ], APP)),
@@ -77,9 +85,6 @@ export function catalog(): CatalogEntry[] {
     e("access_lost", "access", true, copy.accessLost(BIZ, APP)),
     e("deletion_scheduled", "account", true, copy.deletionScheduled(BIZ, "28 October 2026", APP)),
     e("deletion_done", "account", true, copy.deletionDone(BIZ, APP)),
-    e("trial_d7", "billing", true, copy.trialReminder("d7", BIZ, "28 October 2026", APP)),
-    e("trial_d1", "billing", true, copy.trialReminder("d1", BIZ, "28 October 2026", APP)),
-    e("trial_d0", "billing", true, copy.trialReminder("d0", BIZ, "28 October 2026", APP)),
     e("renew_r5", "billing", true, copy.renewalReminder("r5", BIZ, "Kabsi Pro, monthly", "28 October 2026", "pro_monthly", APP)),
     e("renew_r1", "billing", true, copy.renewalReminder("r1", BIZ, "Kabsi Pro, monthly", "28 October 2026", "pro_monthly", APP)),
     e("weekly_report", "weekly_report", true, copy.weeklyReport(BIZ, { newReviews: REPORT.new_reviews, replied: REPORT.replied }, report.html, report.text, APP)),

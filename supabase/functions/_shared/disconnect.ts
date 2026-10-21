@@ -86,6 +86,8 @@ export type AccessChange = "granted" | "removing" | "removed";
 
 const day = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 const CHECK_STEPS = "On your Business Profile open Menu, then Business Profile settings, then People and access.";
+// The same steps in the middle of a sentence ("Or on your Business Profile ...").
+const CHECK_STEPS_INLINE = `o${CHECK_STEPS.slice(1)}`;
 
 export function accessChangeEmail(n: Notice, appUrl: string): {
   subject: string; preheader: string; title: string; bodyHtml: string; text: string; button: { label: string; url: string }; note: string;
@@ -102,8 +104,8 @@ export function accessChangeEmail(n: Notice, appUrl: string): {
       bodyHtml: p(`What changed: on ${when} Kabsi accepted your invitation and became a Manager of <strong>${name}</strong>'s Google profile, through the Kabsi Clients group. You stay the owner.`)
         + p("What it lets Kabsi do: read your reviews and profile, and publish only what you approve.")
         + (next ? p(esc(next)) : "")
-        + p(`How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or ${esc(CHECK_STEPS)} Remove Kabsi Clients there.`),
-      text: `What changed: on ${when} Kabsi accepted your invitation and became a Manager of ${n.name}'s Google profile, through the Kabsi Clients group. You stay the owner.\n\nWhat it lets Kabsi do: read your reviews and profile, and publish only what you approve.\n\n${next ? `${next}\n\n` : ""}How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or ${CHECK_STEPS} Remove Kabsi Clients there.\n\nOpen Kabsi: ${appUrl}/app`,
+        + p(`How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or ${esc(CHECK_STEPS_INLINE)} Remove Kabsi Clients there.`),
+      text: `What changed: on ${when} Kabsi accepted your invitation and became a Manager of ${n.name}'s Google profile, through the Kabsi Clients group. You stay the owner.\n\nWhat it lets Kabsi do: read your reviews and profile, and publish only what you approve.\n\n${next ? `${next}\n\n` : ""}How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or ${CHECK_STEPS_INLINE} Remove Kabsi Clients there.\n\nOpen Kabsi: ${appUrl}/app`,
       button: { label: "Open Kabsi", url: `${appUrl}/app` },
       note: "This is Kabsi's own notice of a change to your Google access. Google may send its own email too.",
     };
@@ -117,8 +119,8 @@ export function accessChangeEmail(n: Notice, appUrl: string): {
       bodyHtml: p(`You asked on ${when} to disconnect Kabsi from <strong>${name}</strong>. Kabsi has stopped: no new drafts, no emails about reviews, and nothing more is sent to Google. Approvals that were waiting were cancelled.`)
         + p(`What is still to change: Kabsi could not remove its own Manager access this time, so a person on our team removes it by <strong>${esc(due)}</strong>. We email you again when it is done.`)
         + p(`You can also remove it yourself now: ${esc(CHECK_STEPS)} Remove Kabsi Clients there.`)
-        + p("You stay the owner of your profile. Your review link and cards keep working until your plan ends."),
-      text: `You asked on ${when} to disconnect Kabsi from ${n.name}. Kabsi has stopped: no new drafts, no emails about reviews, and nothing more is sent to Google. Approvals that were waiting were cancelled.\n\nKabsi could not remove its own Manager access this time, so a person on our team removes it by ${due}. We email you again when it is done.\n\nYou can also remove it yourself now: ${CHECK_STEPS} Remove Kabsi Clients there.\n\nYou stay the owner of your profile. Your review link and cards keep working until your plan ends.`,
+        + p("You stay the owner of your profile. Your review link and QR code keep working."),
+      text: `You asked on ${when} to disconnect Kabsi from ${n.name}. Kabsi has stopped: no new drafts, no emails about reviews, and nothing more is sent to Google. Approvals that were waiting were cancelled.\n\nKabsi could not remove its own Manager access this time, so a person on our team removes it by ${due}. We email you again when it is done.\n\nYou can also remove it yourself now: ${CHECK_STEPS} Remove Kabsi Clients there.\n\nYou stay the owner of your profile. Your review link and QR code keep working.`,
       button: { label: "Open Kabsi", url: `${appUrl}/app/settings` },
       note: "This is Kabsi's own notice of a change to your Google access.",
     };
@@ -129,8 +131,8 @@ export function accessChangeEmail(n: Notice, appUrl: string): {
     title: "Kabsi is disconnected",
     bodyHtml: p(`What changed: on ${when} Kabsi removed its Manager access to <strong>${name}</strong>'s Google profile. Kabsi no longer reads or changes anything on it, and approvals that were waiting were cancelled.`)
       + p(`How to check: ${esc(CHECK_STEPS)} Kabsi Clients is no longer listed. You stay the owner, and nothing else on your profile changed.`)
-      + p("What happens next: the Google data Kabsi kept for you is deleted within 30 days. Your review link and cards keep working until your plan ends. To use Kabsi again, write to hello@kabsi.co."),
-    text: `What changed: on ${when} Kabsi removed its Manager access to ${n.name}'s Google profile. Kabsi no longer reads or changes anything on it, and approvals that were waiting were cancelled.\n\nHow to check: ${CHECK_STEPS} Kabsi Clients is no longer listed. You stay the owner, and nothing else on your profile changed.\n\nWhat happens next: the Google data Kabsi kept for you is deleted within 30 days. Your review link and cards keep working until your plan ends. To use Kabsi again, write to hello@kabsi.co.`,
+      + p("What happens next: the Google data Kabsi kept for you is deleted within 30 days. Your review link and QR code keep working. To use Kabsi again, write to hello@kabsi.co."),
+    text: `What changed: on ${when} Kabsi removed its Manager access to ${n.name}'s Google profile. Kabsi no longer reads or changes anything on it, and approvals that were waiting were cancelled.\n\nHow to check: ${CHECK_STEPS} Kabsi Clients is no longer listed. You stay the owner, and nothing else on your profile changed.\n\nWhat happens next: the Google data Kabsi kept for you is deleted within 30 days. Your review link and QR code keep working. To use Kabsi again, write to hello@kabsi.co.`,
     button: { label: "Open Kabsi", url: `${appUrl}/app` },
     note: "This is Kabsi's own notice of a change to your Google access.",
   };

@@ -208,7 +208,7 @@ Deno.test("high risk: the guidance email has the checklist, no draft and no appr
   for (const c of HIGH_RISK_CHECKLIST) assert.ok(b.text.includes(c), c);
   assert.ok(b.text.includes("They mention a lawyer or legal action."));
   assert.ok(b.text.includes("Kabsi did not draft a reply."));
-  assert.doesNotMatch(b.html, /Review reply|Drafted reply|href=/);
+  assert.doesNotMatch(b.html, /Approve reply|Drafted reply|href=/);
   assert.doesNotMatch(b.html + b.text, /[—–!]/);
 });
 

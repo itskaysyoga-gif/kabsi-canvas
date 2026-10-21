@@ -22,10 +22,10 @@ export function renderReport(loc: { name: string }, r: ReportData) {
     row("Google rating", esc(ratingText) + (r.rating_count != null ? `<br><span style="font-weight:400;color:${TOKENS.stone};font-size:14px;">${r.rating_count} reviews in total</span>` : "")),
     row("New reviews", String(r.new_reviews) + (r.new_avg != null ? `<br><span style="font-weight:400;color:${TOKENS.stone};font-size:14px;">average ${r.new_avg.toFixed(1)} of 5</span>` : "")),
     row("Replied", `${r.replied} of ${r.new_reviews}`),
-    row("Card and link opens", r.taps.total ? `${r.taps.total}<br><span style="font-weight:400;color:${TOKENS.stone};font-size:14px;">${r.taps.nfc} tap · ${r.taps.qr} QR</span>` : "0"),
+    row("Review link and QR code opens", r.taps.total ? `${r.taps.total}<br><span style="font-weight:400;color:${TOKENS.stone};font-size:14px;">${r.taps.nfc} by NFC tag · ${r.taps.qr} by QR code</span>` : "0"),
   ].join("");
   // Honest about what a tap is (D257): an open of the review page, not a review.
-  const tapNote = `<p style="margin:10px 0 0 0;color:${TOKENS.stone};font-size:14px;">Opens count how often your card or link opened your Google review page. They don't show whether a review was written.</p>`;
+  const tapNote = `<p style="margin:10px 0 0 0;color:${TOKENS.stone};font-size:14px;">Opens count how often your review link or QR code opened your Google review page. They don't show whether a review was written.</p>`;
   const drop = r.rating_drop ? `<p style="margin:0 0 16px 0;padding:12px 14px;border:2px solid ${TOKENS.ink};border-radius:14px;">Your Google rating went down ${Math.abs(r.rating_change!).toFixed(1)} this week.</p>` : "";
   const waiting = r.waiting ? `<p style="margin:18px 0 0 0;">${r.waiting} ${r.waiting === 1 ? "review is" : "reviews are"} waiting for your reply.</p>` : "";
   const html = `<p style="margin:0 0 16px 0;color:${TOKENS.stone};">${esc(loc.name)} · ${esc(r.period.from)} to ${esc(r.period.to)}</p>${drop}
@@ -33,7 +33,7 @@ export function renderReport(loc: { name: string }, r: ReportData) {
   const text = [
     `${loc.name}, ${r.period.from} to ${r.period.to}`,
     `Google rating: ${ratingText}`,
-    `New reviews: ${r.new_reviews}`, `Replied: ${r.replied} of ${r.new_reviews}`, `Card and link opens: ${r.taps.total} (opens of your review page, not reviews)`,
+    `New reviews: ${r.new_reviews}`, `Replied: ${r.replied} of ${r.new_reviews}`, `Review link and QR code opens: ${r.taps.total} (opens of your review page, not reviews)`,
     r.waiting ? `${r.waiting} waiting for your reply.` : "",
   ].filter(Boolean).join("\n");
   return { html, text };

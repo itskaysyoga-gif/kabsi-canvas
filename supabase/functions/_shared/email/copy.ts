@@ -67,24 +67,6 @@ export function deletionDone(business: string, appUrl: string): EmailContent {
 
 // ─── trial and plan ──────────────────────────────────────────────────────────────────────────────────
 
-export type TrialStage = "d7" | "d1" | "d0";
-const TRIAL: Record<TrialStage, { subject: (d: string) => string; lead: (name: string, d: string) => string }> = {
-  d7: { subject: (d) => `your free trial ends on ${d}`, lead: (n, d) => `Your free trial for <strong>${n}</strong> runs until ${d}.` },
-  d1: { subject: () => "your free trial ends tomorrow", lead: (n, d) => `Your free trial for <strong>${n}</strong> ends tomorrow, ${d}.` },
-  d0: { subject: () => "your free trial ends today", lead: (n) => `Today is the last day of your free trial for <strong>${n}</strong>.` },
-};
-export function trialReminder(stage: TrialStage, business: string, day: string, appUrl: string): EmailContent {
-  const c = TRIAL[stage];
-  const tail = "After that reply drafts, Google Protection and the Weekly Care Report stop. Your review link and QR code keep working.";
-  const plain = `${c.lead(business, day).replace(/<\/?strong>/g, "")} ${tail}`;
-  return {
-    subject: `${business}: ${c.subject(day)}`, preheader: "Choose a plan to keep everything going.", title: "Your free trial",
-    bodyHtml: p(`${c.lead(esc(business), day)} ${tail}`) + p("To keep everything going, choose a plan before the trial ends."),
-    button: { label: "Choose a plan", url: `${appUrl}/app/plan` },
-    text: `${plain}\n\nTo keep everything going, choose a plan before the trial ends.\n\nChoose a plan: ${appUrl}/app/plan`,
-  };
-}
-
 export type RenewalStage = "r5" | "r1";
 export function renewalReminder(stage: RenewalStage, business: string, planLabel: string, day: string, planKind: string, appUrl: string): EmailContent {
   const when = stage === "r1" ? "tomorrow" : "in a few days";
