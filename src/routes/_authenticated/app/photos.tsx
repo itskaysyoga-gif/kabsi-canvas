@@ -1,86 +1,37 @@
-import { useState, type ChangeEvent } from "react";
+import { useState, type ChangeEvent, type ReactNode } from "react";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ImagePlus } from "lucide-react";
+import { Camera, ImagePlus, Link2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { contentCall } from "@/lib/reviews";
 import { track } from "@/lib/telemetry";
 import { ImagePlus as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
+import { CopyButton } from "@/components/shared/copy-button";
 import { SendReviewLink } from "@/components/shared/send-review-link";
 import { usePlaceLink } from "@/lib/place-link";
 import { myAccess } from "@/lib/team";
+import {
+  ACCEPT,
+  CATEGORIES,
+  createLink,
+  linkStatus,
+  loadPhotos,
+  revokeLink,
+  roleIssue,
+  uploadFiles,
+  type Photo,
+} from "@/lib/photos";
 
-// Photos: the owner uploads, Kabsi checks the photo, the owner picks a category and posts it (D202).
+// Photos (P0.5-01, K-23): add up to 20 from the camera or the gallery; Kabsi's photo engine checks each one in the
+// background and removes its location data; the owner approves them all at once or one by one, and each approved photo
+// goes to Google once through the one pipeline (D202). The preferred cover photo and logo, and a staff upload link.
 export const Route = createFileRoute("/_authenticated/app/photos")({
   head: () => ({ meta: [{ title: "Photos | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: PhotosPage,
 });
-
-type Photo = {
-  id: string;
-  storage_path: string;
-  category: string | null;
-  suitable: boolean | null;
-  suitability_note: string | null;
-  state: string;
-  created_at: string;
-};
-const CATEGORIES: Record<string, string> = {
-  EXTERIOR: "Outside",
-  INTERIOR: "Inside",
-  TEAMS: "Team",
-  AT_WORK: "At work",
-  PRODUCT: "Product",
-  FOOD_AND_DRINK: "Food and drink",
-  MENU: "Menu",
-  ADDITIONAL: "Other",
-};
-const MAX = 20 * 1024 * 1024;
-const EXT_BY_TYPE: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-  "image/heic": "heic",
-  "image/heif": "heic",
-  "video/mp4": "mp4",
-  "video/quicktime": "mov",
-};
-const TYPE_BY_EXT: Record<string, string> = {
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  webp: "image/webp",
-  heic: "image/heic",
-  heif: "image/heif",
-  mp4: "video/mp4",
-  mov: "video/quicktime",
-};
-
-async function loadPhotos(locationId: string) {
-  const { data, error } = await supabase
-    .from("photos")
-    .select("id, storage_path, category, suitable, suitability_note, state, created_at")
-    .eq("location_id", locationId)
-    .neq("state", "skipped")
-    .is("file_deleted_at", null)
-    .order("created_at", { ascending: false })
-    .limit(40);
-  if (error) throw new Error(error.message);
-  const photos = (data ?? []) as Photo[];
-  const urls: Record<string, string> = {};
-  if (photos.length) {
-    const { data: signed } = await supabase.storage.from("owner-photos").createSignedUrls(
-      photos.map((p) => p.storage_path),
-      3600,
-    );
-    for (const s of signed ?? []) if (s.path && s.signedUrl) urls[s.path] = s.signedUrl;
-  }
-  return { photos, urls };
-}
 
 function PhotosPage() {
   const queryClient = useQueryClient();
@@ -90,65 +41,45 @@ function PhotosPage() {
     queryKey: ["photos", loc?.id],
     queryFn: () => loadPhotos(loc!.id),
     enabled: !!loc,
+    // While a photo is being checked, look again every 10 seconds.
+    refetchInterval: (q) =>
+      q.state.data?.photos.some((p) => p.state === "checking") ? 10_000 : false,
   });
   const refresh = () =>
     Promise.all(
-      [["photos"], ["dashboard"], ["activity"]].map((queryKey) =>
+      [["photos"], ["dashboard"], ["activity"], ["tasks"]].map((queryKey) =>
         queryClient.invalidateQueries({ queryKey }),
       ),
     );
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
-  // Staff see photos and the review link (K-16): the Send review link card sits under the upload for them.
   const access = useQuery({
     queryKey: ["my-access", loc?.id],
     queryFn: () => myAccess(loc!.id),
     enabled: !!loc,
   });
-  const placeLink = usePlaceLink(access.data?.role === "staff" ? loc?.id : undefined);
+  const role = access.data?.role;
+  const placeLink = usePlaceLink(role === "staff" ? loc?.id : undefined);
+  const canWork = !!loc && loc.status === "active" && !loc.concierge;
+  const photos = data.data?.photos ?? [];
+  const urls = data.data?.urls ?? {};
+  const ready = photos.filter((p) => p.state === "draft" && p.kind === "photo");
+  const approvesHere = role === "owner" || role === "manager";
 
-  // P0.5-01: up to 20 at a time. The file goes to the business's private folder and Kabsi's photo engine checks it in
-  // the background (its real type, size, location data removed, quality); nothing is checked here.
   async function onFiles(e: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []).slice(0, 20);
+    const files = Array.from(e.target.files ?? []);
     e.target.value = "";
     if (!files.length || !loc) return;
     setMsg("");
     setBusy(true);
-    let added = 0;
-    let note = "";
-    for (const file of files) {
-      if (file.size > MAX) {
-        note = "A file over 20 MB was left out.";
-        continue;
-      }
-      try {
-        const type =
-          file.type || TYPE_BY_EXT[file.name.split(".").pop()?.toLowerCase() ?? ""] || "";
-        const ext = EXT_BY_TYPE[type];
-        if (!ext) {
-          note = "Use JPG, PNG, WebP or HEIC photos.";
-          continue;
-        }
-        const path = `${loc.id}/${crypto.randomUUID()}.${ext}`;
-        const up = await supabase.storage
-          .from("owner-photos")
-          .upload(path, file, { contentType: type });
-        if (up.error) throw new Error("Upload failed. Try again.");
-        const { error } = await supabase.rpc("add_photo", { p_location: loc.id, p_path: path });
-        if (error) throw new Error("Upload failed. Try again.");
-        added++;
-      } catch (x) {
-        note = x instanceof Error ? x.message : "Something went wrong.";
-      }
-    }
+    const r = await uploadFiles(loc.id, files);
     await refresh();
     setMsg(
       [
-        added
-          ? `${added} ${added === 1 ? "photo is" : "photos are"} being checked. This takes a minute.`
+        r.added
+          ? `${r.added} ${r.added === 1 ? "photo is" : "photos are"} being checked. This takes a minute.`
           : "",
-        note,
+        r.note,
       ]
         .filter(Boolean)
         .join(" "),
@@ -159,10 +90,15 @@ function PhotosPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Profile</p>
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Content</p>
       <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Photos</h1>
       <p className="mt-2 text-kb-stone">
-        Add real photos of your place, products and team. Kabsi checks each one before you post it.
+        Add real photos of your place, your team, your work and what you sell. Kabsi checks each one
+        before you approve it.
+      </p>
+      <p className="mt-3 flex items-start gap-2 text-sm">
+        <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+        Kabsi removes location data from every photo before it goes to Google.
       </p>
       {!location.isLoading && !loc ? (
         <Button asChild className="mt-6">
@@ -170,27 +106,36 @@ function PhotosPage() {
         </Button>
       ) : null}
       {loc?.concierge ? <EarlyAccessNotice what="Photos" /> : null}
-      {loc && loc.status === "active" && !loc.concierge ? (
-        <label className="mt-7 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-large border-2 border-dashed border-kb-hairline bg-kb-white p-8 text-center hover:border-kb-black">
-          <ImagePlus className="size-8" aria-hidden="true" />
-          <span className="font-bold">{busy ? "Working…" : "Add photos"}</span>
-          <span className="text-sm text-kb-stone">
-            Up to 20 at a time, 20 MB each. Kabsi removes location data from every photo.
-          </span>
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime"
-            multiple
-            className="sr-only"
-            disabled={busy}
-            onChange={(e) => void onFiles(e)}
+
+      {canWork ? (
+        <div className="mt-7 grid grid-cols-2 gap-3">
+          <UploadButton
+            icon={<Camera className="size-6" aria-hidden="true" />}
+            label="Take a photo"
+            capture
+            busy={busy}
+            onChange={onFiles}
           />
-        </label>
-      ) : loc ? (
+          <UploadButton
+            icon={<ImagePlus className="size-6" aria-hidden="true" />}
+            label="Choose photos"
+            busy={busy}
+            onChange={onFiles}
+          />
+          <p className="col-span-2 text-sm text-kb-stone">
+            Up to 20 at a time, 20 MB each. JPG, PNG, WebP or HEIC. Videos are kept for 30 days;
+            sending videos to Google comes later.
+          </p>
+        </div>
+      ) : loc && !loc.concierge ? (
         <p className="mt-6 text-kb-stone">Photos can be added once your business is active.</p>
       ) : null}
-      {msg ? <p className="mt-3 text-sm text-kb-stone">{msg}</p> : null}
-      {loc && access.data?.role === "staff" ? (
+      {msg ? (
+        <p className="mt-3 text-sm" role="status">
+          {msg}
+        </p>
+      ) : null}
+      {loc && role === "staff" ? (
         <div className="mt-6">
           <SendReviewLink name={loc.name} link={placeLink.data} />
         </div>
@@ -200,47 +145,152 @@ function PhotosPage() {
           Couldn't load your photos. Refresh the page to try again.
         </p>
       ) : null}
-      {(
-        [
-          [
-            "Waiting for you",
-            (p: Photo) => ["draft", "checking", "refused", "held"].includes(p.state),
-          ],
-          ["Sending to Google", (p: Photo) => p.state === "publishing"],
-          ["On Google", (p: Photo) => p.state === "posted"],
-          ["Couldn't post", (p: Photo) => p.state === "failed"],
-        ] as const
-      ).map(([title, match]) => {
-        const list = (data.data?.photos ?? []).filter(match);
-        // Photos can only be posted while Kabsi can reach the Google profile.
-        if (
-          !list.length ||
-          (title === "Waiting for you" && (loc?.status !== "active" || loc.concierge))
-        )
-          return null;
-        return (
-          <section key={title} className="mt-8">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-kb-stone">
-              {title} · {list.length}
-            </h2>
-            <div className="mt-3 grid gap-5 sm:grid-cols-2">
-              {list.map((p) => (
-                <PhotoCard
-                  key={p.id}
-                  photo={p}
-                  url={data.data!.urls[p.storage_path]}
-                  onChanged={refresh}
-                />
-              ))}
-            </div>
-          </section>
-        );
-      })}
+
+      {canWork && loc && ready.length && approvesHere ? (
+        <ReadyBatch locationId={loc.id} ready={ready} urls={urls} onChanged={refresh} />
+      ) : null}
+      {canWork && ready.length && !approvesHere ? (
+        <p className="mt-8 rounded-large bg-kb-white p-5 shadow-kb">
+          {ready.length} {ready.length === 1 ? "photo is" : "photos are"} ready. The owner approves
+          them.
+        </p>
+      ) : null}
+
+      <Checking photos={photos} />
+
+      {canWork ? <CoverAndLogo photos={photos} urls={urls} /> : null}
+
+      <Section title="Sending to Google" list={photos.filter((p) => p.state === "publishing")}>
+        {(p) => <Tile key={p.id} photo={p} url={urls[p.storage_path]} label="Sending to Google" />}
+      </Section>
+      <Section title="On Google" list={photos.filter((p) => p.state === "posted")}>
+        {(p) => (
+          <Tile
+            key={p.id}
+            photo={p}
+            url={urls[p.storage_path]}
+            label={CATEGORIES[p.category ?? "ADDITIONAL"] ?? "Other"}
+          />
+        )}
+      </Section>
+      <Section title="Couldn't post" list={photos.filter((p) => p.state === "failed")}>
+        {(p) => <Tile key={p.id} photo={p} url={urls[p.storage_path]} label="Not on Google" />}
+      </Section>
+
+      {canWork && approvesHere && loc ? <StaffLink locationId={loc.id} /> : null}
     </div>
   );
 }
 
-function PhotoCard({
+function UploadButton({
+  icon,
+  label,
+  capture = false,
+  busy,
+  onChange,
+}: {
+  icon: ReactNode;
+  label: string;
+  capture?: boolean;
+  busy: boolean;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+}) {
+  return (
+    <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-large border-2 border-dashed border-kb-hairline bg-kb-white p-4 text-center font-bold hover:border-kb-black">
+      {icon}
+      {busy ? "Working…" : label}
+      <input
+        type="file"
+        accept={capture ? "image/*" : ACCEPT}
+        multiple={!capture}
+        {...(capture ? { capture: "environment" as const } : {})}
+        className="sr-only"
+        disabled={busy}
+        onChange={onChange}
+      />
+    </label>
+  );
+}
+
+// The batch card (K-23): "3 photos are ready", Approve all, or one by one below it.
+function ReadyBatch({
+  locationId,
+  ready,
+  urls,
+  onChanged,
+}: {
+  locationId: string;
+  ready: Photo[];
+  urls: Record<string, string>;
+  onChanged: () => unknown;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [done, setDone] = useState("");
+  const clean = ready.filter((p) => p.suitable);
+  async function approveAll() {
+    setBusy(true);
+    setErr("");
+    try {
+      const r = await contentCall<{ approved: number }>({
+        do: "photos_approve_all",
+        location_id: locationId,
+      });
+      track("photo_approved", { channel: "dashboard" });
+      setDone(
+        `${r.approved} ${r.approved === 1 ? "photo goes" : "photos go"} to Google in a few minutes.`,
+      );
+      onChanged();
+    } catch (x) {
+      setErr(x instanceof Error ? x.message : "Something went wrong.");
+    }
+    setBusy(false);
+  }
+  return (
+    <section className="mt-8">
+      <div className="rounded-large bg-kb-white p-5 shadow-kb">
+        <h2 className="font-display text-2xl leading-tight">
+          {ready.length} {ready.length === 1 ? "photo is" : "photos are"} ready
+        </h2>
+        <p className="mt-1 text-sm text-kb-stone">
+          {clean.length === ready.length
+            ? "Kabsi checked them and removed the location data."
+            : `Kabsi has a note on ${ready.length - clean.length} of them. Look at those one by one below.`}
+        </p>
+        {clean.length ? (
+          <Button
+            className="mt-4 w-full sm:w-auto"
+            disabled={busy}
+            onClick={() => void approveAll()}
+          >
+            {busy
+              ? "Approving…"
+              : clean.length === ready.length
+                ? "Approve all"
+                : `Approve the ${clean.length} without a note`}
+          </Button>
+        ) : null}
+        {done ? (
+          <p className="mt-3 text-sm" role="status">
+            {done}
+          </p>
+        ) : null}
+        {err ? (
+          <p className="mt-3 text-sm text-kb-red" role="alert">
+            {err}
+          </p>
+        ) : null}
+      </div>
+      <div className="mt-4 grid gap-5 sm:grid-cols-2">
+        {ready.map((p) => (
+          <ReadyCard key={p.id} photo={p} url={urls[p.storage_path]} onChanged={onChanged} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ReadyCard({
   photo,
   url,
   onChanged,
@@ -252,6 +302,10 @@ function PhotoCard({
   const [category, setCategory] = useState(photo.category ?? "ADDITIONAL");
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
+  const advice =
+    (category === "COVER" || category === "LOGO") && photo.width && photo.height
+      ? roleIssue(category, photo.width, photo.height)
+      : null;
   async function run(kind: "publish" | "skip") {
     setBusy(kind);
     setErr("");
@@ -268,85 +322,42 @@ function PhotoCard({
   }
   return (
     <article className="overflow-hidden rounded-large bg-kb-white shadow-kb">
-      {url ? (
-        <img
-          src={url}
-          alt="Your photo"
-          width={800}
-          height={600}
-          loading="lazy"
-          decoding="async"
-          className="aspect-[4/3] w-full object-cover"
-        />
-      ) : (
-        <div className="aspect-[4/3] w-full bg-kb-sand" />
-      )}
+      <PhotoImage url={url} />
       <div className="p-5">
-        {photo.state === "checking" ? (
-          <p className="text-sm text-kb-stone">Kabsi is checking this photo.</p>
+        <p className={`text-sm font-bold ${photo.suitable ? "text-kb-green" : "text-kb-red"}`}>
+          {photo.suitable ? "Looks good for Google" : "Kabsi has a note"}
+        </p>
+        {photo.suitability_note ? (
+          <p className="mt-1 text-sm text-kb-stone">{photo.suitability_note}</p>
         ) : null}
-        {photo.state === "refused" || photo.state === "held" ? (
-          <p className="text-sm text-kb-stone">{photo.suitability_note}</p>
-        ) : null}
-        {photo.state === "draft" ? (
-          <>
-            <p className={`text-sm font-bold ${photo.suitable ? "text-kb-green" : "text-kb-red"}`}>
-              {photo.suitable ? "Looks good for Google" : "Probably not a good fit"}
-            </p>
-            {photo.suitability_note ? (
-              <p className="mt-1 text-sm text-kb-stone">{photo.suitability_note}</p>
-            ) : null}
-            <label className="mt-3 block text-sm">
-              Category
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="mt-1 h-11 w-full rounded-card border border-kb-hairline bg-kb-white px-3"
-              >
-                {Object.entries(CATEGORIES).map(([k, l]) => (
-                  <option key={k} value={k}>
-                    {l}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button
-                size="compact"
-                variant={photo.suitable ? "default" : "outline"}
-                disabled={!!busy}
-                onClick={() => void run("publish")}
-              >
-                {busy === "publish"
-                  ? "Posting…"
-                  : photo.suitable
-                    ? "Post to Google"
-                    : "Post anyway"}
-              </Button>
-              <Button
-                size="compact"
-                variant="ghost"
-                disabled={!!busy}
-                onClick={() => void run("skip")}
-              >
-                Don't post
-              </Button>
-            </div>
-          </>
-        ) : null}
-        {photo.state === "posted" ? (
-          <p className="text-sm font-bold">
-            On Google · {CATEGORIES[photo.category ?? "ADDITIONAL"]}
-          </p>
-        ) : null}
-        {photo.state === "publishing" ? (
-          <p className="text-sm font-bold">
-            Approved. Kabsi sends it to Google within a few minutes.
-          </p>
-        ) : null}
-        {photo.state === "failed" ? (
-          <p className="text-sm font-bold text-kb-red">Couldn't post this one.</p>
-        ) : null}
+        <label className="mt-3 block text-sm">
+          What it shows
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="mt-1 h-11 w-full rounded-card border border-kb-hairline bg-kb-white px-3"
+          >
+            {Object.entries(CATEGORIES).map(([k, l]) => (
+              <option key={k} value={k}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </label>
+        {advice ? <p className="mt-2 text-sm text-kb-stone">{advice}</p> : null}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button
+            size="compact"
+            variant="outline"
+            disabled={!!busy}
+            onClick={() => void run("publish")}
+          >
+            {busy === "publish" ? "Approving…" : photo.suitable ? "Approve" : "Approve anyway"}
+          </Button>
+          <Button size="compact" variant="ghost" disabled={!!busy} onClick={() => void run("skip")}>
+            Don't post
+          </Button>
+        </div>
         {err ? (
           <p className="mt-2 text-sm text-kb-red" role="alert">
             {err}
@@ -354,5 +365,212 @@ function PhotoCard({
         ) : null}
       </div>
     </article>
+  );
+}
+
+// Uploads still being checked, files Kabsi could not use, and kept videos: a short list with the reason.
+function Checking({ photos }: { photos: Photo[] }) {
+  const queryClient = useQueryClient();
+  const checking = photos.filter((p) => p.state === "checking");
+  const notes = photos.filter((p) => p.state === "refused" || p.state === "held");
+  if (!checking.length && !notes.length) return null;
+  async function dismiss(id: string) {
+    await contentCall({ do: "photo_skip", photo_id: id }).catch(() => null);
+    await queryClient.invalidateQueries({ queryKey: ["photos"] });
+  }
+  return (
+    <section className="mt-8">
+      {checking.length ? (
+        <p className="rounded-large bg-kb-white p-5 text-sm shadow-kb" role="status">
+          Kabsi is checking {checking.length} {checking.length === 1 ? "photo" : "photos"}. This
+          takes a minute.
+        </p>
+      ) : null}
+      {notes.length ? (
+        <ul className="mt-3 grid gap-2">
+          {notes.map((p) => (
+            <li
+              key={p.id}
+              className="flex items-start justify-between gap-3 rounded-card bg-kb-white p-4 text-sm shadow-kb"
+            >
+              <span>
+                <span className="font-bold">
+                  {p.kind === "video" ? "Video kept. " : "Not added. "}
+                </span>
+                {p.suitability_note}
+              </span>
+              <Button size="compact" variant="ghost" onClick={() => void dismiss(p.id)}>
+                Remove
+              </Button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
+  );
+}
+
+// The preferred cover photo and logo (K-23). Google decides what it shows, so Kabsi says "preferred".
+function CoverAndLogo({ photos, urls }: { photos: Photo[]; urls: Record<string, string> }) {
+  const latest = (cat: string) =>
+    photos.find((p) => p.category === cat && (p.state === "posted" || p.state === "publishing"));
+  const tiles: [string, string, Photo | undefined][] = [
+    ["COVER", "Your preferred cover photo", latest("COVER")],
+    ["LOGO", "Your logo", latest("LOGO")],
+  ];
+  return (
+    <section className="mt-10">
+      <h2 className="text-sm font-bold uppercase tracking-wider text-kb-stone">Cover and logo</h2>
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        {tiles.map(([cat, title, p]) => {
+          const advice =
+            p?.width && p.height ? roleIssue(cat as "COVER" | "LOGO", p.width, p.height) : null;
+          return (
+            <div key={cat} className="overflow-hidden rounded-large bg-kb-white shadow-kb">
+              <PhotoImage url={p ? urls[p.storage_path] : undefined} square={cat === "LOGO"} />
+              <div className="p-4">
+                <p className="text-sm font-bold">{title}</p>
+                <p className="mt-1 text-sm text-kb-stone">
+                  {p
+                    ? p.state === "publishing"
+                      ? "Sending to Google."
+                      : (advice ?? "On Google.")
+                    : cat === "COVER"
+                      ? "None yet. Choose Preferred cover photo on a ready photo. A wide photo works best."
+                      : "None yet. Choose Logo on a ready photo. A square one works best."}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <p className="mt-2 text-sm text-kb-stone">
+        Google decides which photo it shows first, so Kabsi calls these your preferred ones.
+      </p>
+    </section>
+  );
+}
+
+// The staff upload link (K-23): uploads only, no account, turned off at any time.
+function StaffLink({ locationId }: { locationId: string }) {
+  const queryClient = useQueryClient();
+  const status = useQuery({
+    queryKey: ["photo-link", locationId],
+    queryFn: () => linkStatus(locationId),
+  });
+  const [link, setLink] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  async function run(make: boolean) {
+    setBusy(true);
+    setErr("");
+    try {
+      if (make) setLink(await createLink(locationId));
+      else {
+        await revokeLink(locationId);
+        setLink("");
+      }
+      await queryClient.invalidateQueries({ queryKey: ["photo-link", locationId] });
+    } catch (x) {
+      setErr(x instanceof Error ? x.message : "Something went wrong.");
+    }
+    setBusy(false);
+  }
+  const active = status.data?.active === true;
+  return (
+    <section className="mt-10 rounded-large bg-kb-white p-5 shadow-kb">
+      <h2 className="flex items-center gap-2 font-bold">
+        <Link2 className="size-4" aria-hidden="true" />
+        Staff upload link
+      </h2>
+      <p className="mt-1 text-sm text-kb-stone">
+        Anyone with this link can add photos for you to approve, without an account. It cannot see
+        or change anything else.
+      </p>
+      {link ? (
+        <div className="mt-4">
+          <p className="break-all rounded-card bg-kb-sand p-3 text-sm">{link}</p>
+          <p className="mt-2 text-sm text-kb-stone">
+            Copy it now. Kabsi shows it only once; make a new one if you lose it.
+          </p>
+          <div className="mt-3">
+            <CopyButton text={link} label="Copy link" />
+          </div>
+        </div>
+      ) : active ? (
+        <p className="mt-3 text-sm">
+          A link is on.{" "}
+          {status.data?.uploads
+            ? `${status.data.uploads} ${status.data.uploads === 1 ? "photo" : "photos"} added through it.`
+            : "Nothing added through it yet."}
+        </p>
+      ) : null}
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button size="compact" variant="outline" disabled={busy} onClick={() => void run(true)}>
+          {active || link ? "Make a new link" : "Make a link"}
+        </Button>
+        {active || link ? (
+          <Button size="compact" variant="ghost" disabled={busy} onClick={() => void run(false)}>
+            Turn the link off
+          </Button>
+        ) : null}
+      </div>
+      {err ? (
+        <p className="mt-2 text-sm text-kb-red" role="alert">
+          {err}
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
+function Section({
+  title,
+  list,
+  children,
+}: {
+  title: string;
+  list: Photo[];
+  children: (p: Photo) => ReactNode;
+}) {
+  if (!list.length) return null;
+  return (
+    <section className="mt-10">
+      <h2 className="text-sm font-bold uppercase tracking-wider text-kb-stone">
+        {title} · {list.length}
+      </h2>
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">{list.map(children)}</div>
+    </section>
+  );
+}
+
+function Tile({ photo, url, label }: { photo: Photo; url: string | undefined; label: string }) {
+  return (
+    <figure className="overflow-hidden rounded-card bg-kb-white shadow-kb">
+      <PhotoImage url={url} />
+      <figcaption className="p-3 text-sm font-bold">
+        {label}
+        {photo.source === "staff_link" ? (
+          <span className="block font-normal text-kb-stone">From the staff link</span>
+        ) : null}
+      </figcaption>
+    </figure>
+  );
+}
+
+function PhotoImage({ url, square = false }: { url: string | undefined; square?: boolean }) {
+  const shape = square ? "aspect-square" : "aspect-[4/3]";
+  return url ? (
+    <img
+      src={url}
+      alt="Your photo"
+      width={800}
+      height={square ? 800 : 600}
+      loading="lazy"
+      decoding="async"
+      className={`${shape} w-full object-cover`}
+    />
+  ) : (
+    <div className={`${shape} w-full bg-kb-sand`} />
   );
 }

@@ -39,6 +39,7 @@ import { Route as GuidesIndexRouteImport } from './routes/guides.index'
 import { Route as GuidesSlugRouteImport } from './routes/guides.$slug'
 import { Route as HTokenRouteImport } from './routes/h.$token'
 import { Route as ReviewCodeRouteImport } from './routes/review.$code'
+import { Route as UTokenRouteImport } from './routes/u.$token'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app/index'
 import { Route as AuthenticatedAppCardsRouteImport } from './routes/_authenticated/app/cards'
 import { Route as AuthenticatedAppCoachRouteImport } from './routes/_authenticated/app/coach'
@@ -204,6 +205,11 @@ const ReviewCodeRoute = ReviewCodeRouteImport.update({
   path: '/review/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UTokenRoute = UTokenRouteImport.update({
+  id: '/u/$token',
+  path: '/u/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -311,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
   '/review/$code': typeof ReviewCodeRoute
+  '/u/$token': typeof UTokenRoute
   '/for/': typeof ForIndexRoute
   '/guides/': typeof GuidesIndexRoute
   '/app/cards': typeof AuthenticatedAppCardsRoute
@@ -356,6 +363,7 @@ export interface FileRoutesByTo {
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
   '/review/$code': typeof ReviewCodeRoute
+  '/u/$token': typeof UTokenRoute
   '/for': typeof ForIndexRoute
   '/guides': typeof GuidesIndexRoute
   '/app/cards': typeof AuthenticatedAppCardsRoute
@@ -404,6 +412,7 @@ export interface FileRoutesById {
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
   '/review/$code': typeof ReviewCodeRoute
+  '/u/$token': typeof UTokenRoute
   '/for/': typeof ForIndexRoute
   '/guides/': typeof GuidesIndexRoute
   '/_authenticated/app/cards': typeof AuthenticatedAppCardsRoute
@@ -452,6 +461,7 @@ export interface FileRouteTypes {
     | '/guides/$slug'
     | '/h/$token'
     | '/review/$code'
+    | '/u/$token'
     | '/for/'
     | '/guides/'
     | '/app/cards'
@@ -497,6 +507,7 @@ export interface FileRouteTypes {
     | '/guides/$slug'
     | '/h/$token'
     | '/review/$code'
+    | '/u/$token'
     | '/for'
     | '/guides'
     | '/app/cards'
@@ -544,6 +555,7 @@ export interface FileRouteTypes {
     | '/guides/$slug'
     | '/h/$token'
     | '/review/$code'
+    | '/u/$token'
     | '/for/'
     | '/guides/'
     | '/_authenticated/app/cards'
@@ -588,6 +600,7 @@ export interface RootRouteChildren {
   GuidesSlugRoute: typeof GuidesSlugRoute
   HTokenRoute: typeof HTokenRoute
   ReviewCodeRoute: typeof ReviewCodeRoute
+  UTokenRoute: typeof UTokenRoute
   ForIndexRoute: typeof ForIndexRoute
   GuidesIndexRoute: typeof GuidesIndexRoute
 }
@@ -804,6 +817,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReviewCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/$token': {
+      id: '/u/$token'
+      path: '/u/$token'
+      fullPath: '/u/$token'
+      preLoaderRoute: typeof UTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/app/': {
       id: '/_authenticated/app/'
       path: '/'
@@ -995,6 +1015,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesSlugRoute: GuidesSlugRoute,
   HTokenRoute: HTokenRoute,
   ReviewCodeRoute: ReviewCodeRoute,
+  UTokenRoute: UTokenRoute,
   ForIndexRoute: ForIndexRoute,
   GuidesIndexRoute: GuidesIndexRoute,
 }
