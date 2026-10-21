@@ -225,8 +225,8 @@ values ('00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 'active', now() +
 select private.detect_expiring_plan('00000000-0000-4000-8000-0000000000c1');
 select is((pg_temp.task('billing:00000000-0000-4000-8000-0000000000c1')).state, 'done', 'renewed: done');
 
--- Detector: holiday ahead (stub until P0.5-03) -------------------------------------------------------------------------
-select is(private.detect_holidays('00000000-0000-4000-8000-0000000000c1'), 0, 'the holiday detector is a stub for now');
+-- Detector: holiday ahead (P0.5-03: the questions themselves are tested in holiday_calendar.sql) -------------------------------------------------------------------------
+select is(private.detect_holidays('00000000-0000-4000-8000-0000000000c1'), 0, 'the holiday detector asks nothing for a business with no country (supabase/tests/holiday_calendar.sql holds the rest)');
 
 -- All detectors twice: one task per key -------------------------------------------------------------------------------
 select public.run_task_detectors('00000000-0000-4000-8000-0000000000c1');

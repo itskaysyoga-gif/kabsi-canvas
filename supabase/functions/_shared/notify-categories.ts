@@ -49,9 +49,9 @@ export const CATEGORIES = [
     description: "A smaller change on Google, a reply Google refused, or a broken link.",
   },
   {
-    id: "approval_needed", why: "Kabsi prepared a post or photos for you to approve.", label: "Posts and photos to approve", group: "Weekly and monthly", switchable: true, emailDefault: "daily_digest",
+    id: "approval_needed", why: "Kabsi prepared a post, photos or a question about your hours for you to approve.", label: "Posts, photos and hours to approve", group: "Weekly and monthly", switchable: true, emailDefault: "daily_digest",
     quietExempt: false, inApp: true, noun: ["post or photo to approve", "posts and photos to approve"],
-    description: "A post or photo Kabsi prepared. Nothing goes on Google until you approve it.",
+    description: "A post or photo Kabsi prepared, or a question about your hours before a holiday. Nothing goes on Google until you approve it.",
   },
   {
     id: "weekly_report", why: "Your Weekly Care Report is sent once a week.", label: "Weekly Care Report", group: "Weekly and monthly", switchable: true, emailDefault: "instant",

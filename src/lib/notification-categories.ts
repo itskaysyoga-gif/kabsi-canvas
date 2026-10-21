@@ -62,13 +62,14 @@ export const CATEGORIES: readonly Category[] = [
   },
   {
     id: "approval_needed",
-    label: "Posts and photos to approve",
+    label: "Posts, photos and hours to approve",
     group: "Weekly and monthly",
     switchable: true,
     emailDefault: "daily_digest",
     quietExempt: false,
     inApp: true,
-    description: "A post or photo Kabsi prepared. Nothing goes on Google until you approve it.",
+    description:
+      "A post or photo Kabsi prepared, or a question about your hours before a holiday. Nothing goes on Google until you approve it.",
   },
   {
     id: "weekly_report",
