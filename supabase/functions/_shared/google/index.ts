@@ -166,8 +166,24 @@ export async function readReply(accountId: string, locationId: string, reviewId:
 const POST_STATE: Record<string, WriteResult["state"]> = { LIVE: "live", REJECTED: "rejected" };
 export async function createLocalPost(accountId: string, locationId: string, p: PostInput): Promise<WriteResult & { ref: string | null }> {
   assertNotConcierge(locationId);
-  const body: LocalPost = { languageCode: p.languageCode, summary: p.summary, topicType: "STANDARD" };
+  const body: LocalPost = { languageCode: p.languageCode, summary: p.summary, topicType: p.topicType ?? "STANDARD" };
   if (p.ctaType) body.callToAction = p.ctaType === "CALL" ? { actionType: "CALL" } : { actionType: p.ctaType, url: p.ctaUrl ?? undefined };
+  const gDate = (d: string) => { const [year, month, day] = d.split("-").map(Number); return { year, month, day }; };
+  const gTime = (t: string) => { const [hours, minutes] = t.split(":").map(Number); return { hours, minutes }; };
+  if ((p.topicType === "EVENT" || p.topicType === "OFFER") && p.startDate && p.endDate) {
+    // An Offer is shown on Google as an event with its dates; its title is the offer's (Google requires one).
+    body.event = {
+      title: (p.title ?? p.summary.slice(0, 58)).trim(),
+      schedule: {
+        startDate: gDate(p.startDate), endDate: gDate(p.endDate),
+        ...(p.startTime ? { startTime: gTime(p.startTime) } : {}), ...(p.endTime ? { endTime: gTime(p.endTime) } : {}),
+      },
+    };
+  }
+  if (p.topicType === "OFFER") {
+    body.offer = { termsConditions: p.terms ?? undefined, couponCode: p.couponCode ?? undefined, redeemOnlineUrl: p.redeemUrl ?? undefined };
+  }
+  if (p.photoUrl) body.media = [{ mediaFormat: "PHOTO", sourceUrl: p.photoUrl }];
   const mode = modeFor(locationId);
   const created = await by(mode, postsLive, postsMock).createLocalPost(accountId, locationId, body);
   return { state: POST_STATE[created.state ?? ""] ?? "in_review", ref: created.name ?? null, response: mode === "mock" ? { mock: true, post: created } : created };

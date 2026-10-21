@@ -48,6 +48,9 @@ export type LocalPost = {
   name?: string; languageCode?: string; summary?: string; callToAction?: CallToAction;
   createTime?: string; updateTime?: string; state?: "LOCAL_POST_STATE_UNSPECIFIED" | "REJECTED" | "LIVE" | "PROCESSING";
   topicType?: string; searchUrl?: string;
+  event?: { title?: string; schedule?: { startDate?: GDate; startTime?: TimeOfDay; endDate?: GDate; endTime?: TimeOfDay } };
+  offer?: { couponCode?: string; redeemOnlineUrl?: string; termsConditions?: string };
+  media?: { mediaFormat: "PHOTO"; sourceUrl: string }[];
 };
 export type ListLocalPostsResponse = { localPosts?: LocalPost[]; nextPageToken?: string };
 
@@ -115,7 +118,13 @@ export type GoogleReview = {
   reviewId: string; reviewer: string; rating: number; comment: string | null;
   createTime: string; updateTime: string | null; reply: string | null;
 };
-export type PostInput = { summary: string; languageCode: string; ctaType?: string | null; ctaUrl?: string | null };
+export type PostInput = {
+  summary: string; languageCode: string; ctaType?: string | null; ctaUrl?: string | null;
+  // P0.5-02: Update (STANDARD), Offer or Event; dates YYYY-MM-DD, times HH:MM; one photo by a short-lived link.
+  topicType?: "STANDARD" | "OFFER" | "EVENT"; title?: string | null; startDate?: string | null; endDate?: string | null;
+  startTime?: string | null; endTime?: string | null; terms?: string | null; couponCode?: string | null; redeemUrl?: string | null;
+  photoUrl?: string | null;
+};
 export type SpecialDay = { startDate: string; endDate: string; closed: boolean; openTime?: string | null; closeTime?: string | null };
 // The fields Google Protection watches (K-19 with open status, K-117 map pin), named as the K-18 facts.
 export const PROTECTION_FIELDS = ["name", "phone", "website", "address", "regular_hours", "main_category", "open_status", "map_pin"] as const;

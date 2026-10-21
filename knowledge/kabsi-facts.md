@@ -42,6 +42,8 @@ Hussein approved final product decisions on 21 Oct 2026. Most are not built yet.
 
 **Photos (live from 21 Oct 2026, P0.5-01 part A).** On Photos the owner, a manager or staff adds up to 20 photos at a time from the phone's camera or gallery: JPG, PNG, WebP or HEIC (iPhone), up to 20 MB each. Kabsi checks each file in the background, usually within a minute, never while you wait: it reads what the file really is (a PDF renamed to .jpg is refused), refuses moving images, turns the photo upright, resizes it to Google's limits and saves a new copy with no hidden details at all, so the location (GPS), the phone model and the date taken never reach Google. Kabsi never draws on, generates or edits a photo beyond turning and resizing it. It then checks, in its own code, whether the photo is dark ("This photo is dark."), blurry, smaller than Google's 720 by 720 pixels, or looks like a photo already added. The owner picks Google's category (outside, inside, team, at work, product, food and drink, menu, other); Kabsi does not suggest one or look for faces, screens, flyers or other brands' logos yet, because that needs the AI model, which is off until Kabsi's AI credit is on. When photos are ready, Home and Photos show one card, for example "3 photos are ready", with **Approve all** (the photos Kabsi has no note on) or one by one below it; each approved photo goes to Google once, after the 10 second undo, through the same approval as replies. Kabsi uploads the photo itself to Google; it never gives Google a link to its storage. Videos (MP4 or MOV) are accepted and kept for 30 days; sending videos to Google comes later. Kabsi also suggests photos when something is missing: "Add photos of your business" when there are none, "Add a photo of the inside, your team and what you sell" (the kinds still missing among outside, inside, team, at work and what you sell), and "Add a new photo" when the newest one through Kabsi is 30 days old. The Profile Coach counts the photos added through Kabsi by kind. **Cover and logo (live from 21 Oct 2026, P0.5-01 part B):** on a ready photo the owner can choose "Preferred cover photo" or "Logo" instead of a category; the Cover and logo strip shows the current ones. Kabsi says "preferred" because Google decides which photo it shows first, and it gives advice, not a block: a cover photo works best wide (about 16 by 9, at least 1080 pixels across), a logo square (at least 250 by 250). **Staff upload link (live from 21 Oct 2026):** the owner or a manager makes a link on Photos (shown once, to copy); anyone with it opens kabsi.co/u/..., takes or chooses up to 20 photos and sends them, with no account; the page shows only the business name and can only upload; the photos wait for the owner's approval like any other; up to 60 a day per link; "Turn the link off" stops it at once, and making a new link turns the old one off. Pro's WhatsApp photo drop comes with the WhatsApp owner channel (P0.8-03).
 
+**Post checks (live from 21 Oct 2026, P0.5-02 part A).** Before you see a post, and again when you approve it, Kabsi checks it in its own code: no phone numbers, emails, links or social handles in the text; a button opens only your own website (Call uses the phone on your profile); no prices or offers that are not in your facts or what you typed; no "best", "number one" or similar; your category or town at most twice; no health, safety or results promises; not more than 70 percent like a post of the last 90 days; no medical results for clinics; no Offer posts for hotels and other places to stay; no alcohol promotion in countries where it is not allowed. An Offer needs its dates and terms, an Event its title and dates. A post that fails says why, in plain words. Kabsi's own drafts are 150 to 300 characters and lead with one concrete thing; you may write up to 1,500. A post's photo goes to Google as a private link that works for one hour. Kabsi does not sell posts as scheduling: Google lets owners schedule posts themselves; Kabsi's part is preparing true posts each month.
+
 **[COMING] Features.**
 
 - **WhatsApp for owners:** opt in by sending a one-time code to Kabsi's WhatsApp number; get a review alert with the draft and the buttons "Approve" and "Edit in app". Approval on WhatsApp will work only for low and medium risk replies and weekly posts, never for high-risk reviews or for your business name, address, categories, map pin, phone or open or closed status. After you approve, there is a 10-second undo. Today WhatsApp approves nothing (section 9.5b).
@@ -649,8 +651,8 @@ Check spam, and Settings, Emails: emails may be paused (**Turn emails back on**)
 **My staff member gets emails but can't post.**
 That's by design. Extra addresses (up to 3) see new reviews only. To let someone help in the app, invite them in Settings, Team: as a manager they can approve what you allow; as staff they can add photos and share the review link.
 
-**The weekly post didn't come.**
-Weekly drafts need at least one Verified fact in About your business, the Weekly draft switch on, an active business, and no other draft waiting. Kabsi also skips a week if the draft fails the fact check twice.
+**Kabsi didn't prepare a post this month.**
+Kabsi prepares a post only from something true: a fact you confirmed in About your business in the last 90 days, or a photo you approved in the last 30. Without one it asks "Anything new this month? A dish, a service, an event?" instead. A draft that fails a check never reaches you. Kabsi's posts also need the switch on and an active business.
 
 **Suggest phrases shows nothing.** Suggestions grow as reviews come in; type your own meanwhile.
 
@@ -885,13 +887,13 @@ No. Kabsi sets special hours for holidays and closures. Change regular hours on 
 ### Posts, photos and hours
 
 **What are Kabsi's posts?**
-Kabsi drafts short Google posts from your facts, with a button like Call or Book, and emails them to you. Nothing is posted until you approve it, and you can switch drafts off.
+Short Google posts of three kinds: an Update, an Offer (with its start and end dates and terms, and an optional code and redeem link) or an Event (with its title, dates and times). Each can have one of your own checked photos and one button. Kabsi plans 2 a month by default (you can choose 1 or 4) and prepares them only from what is true: your confirmed facts and photos you approved. Offers and events are only the ones you type in; Kabsi never invents an offer, price, event, service, policy, staff member or hours. When it has nothing true to say, it asks one question instead: "Anything new this month? A dish, a service, an event?" Nothing is posted until you approve it, and you can switch Kabsi's own posts off.
 
-**When does the weekly draft arrive?**
-Shops and restaurants on Thursday morning, clinics and offices on Tuesday morning, local time.
+**When do posts go to Google?**
+Each post has its day and time: shops and restaurants on Thursday at 09:00, clinics and offices on Tuesday at 08:30, local time, in the first and third week (or the first week, or every week). Approve the month or each post; Kabsi keeps the approved post in its own queue and sends it at its time, and you can undo it until then. Kabsi checks once a day what the month still needs. Until Kabsi's AI credit is on, Kabsi does not write the posts itself: it asks you the one question, and you write the post on the Posts page.
 
-**Can I turn off weekly drafts?**
-Yes. On the Posts page, Weekly draft, tap Turn off.
+**Can I turn off Kabsi's posts?**
+Yes. On the Posts page, tap Turn off. Your own posts still work.
 
 **Can I write my own post?**
 Yes. Type what's new, add search words if you like, pick a button, tap Write my post, then edit and post.
@@ -1129,7 +1131,7 @@ Delete your business in Settings, and ask by email to delete your login too.
 - **About your business:** the facts Kabsi may use in drafts.
 - **Never-say list:** "Anything Kabsi should never say or promise".
 - **Safety check:** the automatic check of each draft against Kabsi's rules and your never-say list.
-- **Weekly draft:** the optional post Kabsi drafts once a week for approval.
+- **Kabsi's posts:** the posts Kabsi prepares each month (2 by default, 1 or 4 by choice) for your approval.
 - **Search phrases:** words people use to search for a business like yours, worked into a post's first line. They come from your category, your area and the services you listed in About your business, and, once Kabsi is connected to Google live, from Google's own search terms. Never from your reviews.
 - **Special hours:** hours for specific dates, like holidays.
 - **Google Protection:** watches key listing details, alerts you and lets you choose in the app whether to keep your information.
