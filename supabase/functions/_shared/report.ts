@@ -9,7 +9,7 @@ import { termsMonth } from "./insights/periods.ts";
 import { EXAMPLE_TERMS } from "./insights/example.ts";
 import { normaliseTerms, termCountText } from "./insights/terms.ts";
 import { type Counts, composeCare, exampleWeekSeries, type Inputs, type ReportTerms, type WeekActivity, weekActivity, weekPeriods } from "./care-report/compose.ts";
-import { admin, APP_URL, esc } from "./kabsi.ts";
+import { admin, APP_URL, captureError, esc } from "./kabsi.ts";
 import { notify } from "./notify.ts";
 import * as copy from "./email/copy.ts";
 import { renderReport } from "./email/report-body.ts";
@@ -134,7 +134,14 @@ export async function weeklyReports(locs: Loc[], opts: { forceLocation?: string 
     const { date, weekday, hour } = localParts(loc.time_zone);
     if (!forced && (weekday !== "Mon" || hour < 8)) continue;
     if (!forced && loc.emails_paused_until && Date.parse(loc.emails_paused_until) > Date.now()) continue;
-    const data = await buildReport(loc);
+    // One business whose report cannot be built never stops the others; it is tried again on the next tick.
+    let data: Report;
+    try {
+      data = await buildReport(loc);
+    } catch (e) {
+      await captureError("cron-tick", e, { job: "weekly", location: loc.id });
+      continue;
+    }
     const { error } = await db.from("weekly_reports").insert({ location_id: loc.id, week_of: date, data });
     if (error) { if (error.code === "23505") continue; throw error; } // already sent this week
     const body = renderReport(loc, data);
