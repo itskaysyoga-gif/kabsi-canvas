@@ -13,6 +13,8 @@ import * as accountsMock from "./accounts/mock.ts";
 import * as adminsLive from "./admins/live.ts";
 import * as adminsMock from "./admins/mock.ts";
 import * as attributesLive from "./attributes/live.ts";
+import * as categoriesLive from "./categories/live.ts";
+import * as categoriesMock from "./categories/mock.ts";
 import * as locationsLive from "./locations/live.ts";
 import * as locationsMock from "./locations/mock.ts";
 import { GOOGLE_FIELD, OPEN_LABEL } from "./locations/mock.ts";
@@ -401,4 +403,10 @@ export async function coachRead(locationId: string): Promise<CoachNumbers & { so
   const l = await locationsLive.getLocation(locationId, "profile,categories");
   const attrs = await attributesLive.getAttributes(locationId);
   return { ...coachNumbers(l, attrs), source: "live" };
+}
+
+// One category by its display name, for the suggestions of more categories (read only; the mock list until Gate A).
+export async function findCategory(locationId: string, region: string, displayName: string) {
+  assertNotConcierge(locationId);
+  return by(modeFor(locationId), categoriesLive, categoriesMock).findCategory(region, displayName);
 }

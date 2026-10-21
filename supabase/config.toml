@@ -48,6 +48,8 @@ verify_jwt = true
 verify_jwt = true
 [functions.insights]       # Insights (P0.5-05): the signed-in owner or manager calls it; membership, the rate limit and the Pro check for search terms run in code
 verify_jwt = true
+[functions.coach]          # Profile Coach actions (P0.8-09 part B): the signed-in owner or manager calls it; membership, the Pro check, the rate limits and the website safety checks run in code
+verify_jwt = true
 [functions.review-page]      # the page behind a review link (P0.8-05): browser calls send the anon JWT; rate limit and the active-link check run in code
 verify_jwt = true
 [functions.auth-code]         # sign-in code (P0.4-02): browser calls send the anon JWT; Turnstile, the code limits and the throwaway-domain check run in code

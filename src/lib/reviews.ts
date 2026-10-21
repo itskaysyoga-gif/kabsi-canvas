@@ -229,3 +229,8 @@ export async function addTestReview(
 export async function contentCall<T>(body: Record<string, unknown>) {
   return readJson<T>(await authed("content", body));
 }
+
+/** Any other signed-in Edge Function that answers JSON (the Profile Coach's actions). */
+export async function functionCall<T>(path: string, body: Record<string, unknown>) {
+  return readJson<T>(await authed(path, body));
+}
