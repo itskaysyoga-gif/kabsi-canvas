@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { clearAssistantChat } from "@/lib/assistant-storage";
 import { identify } from "@/lib/telemetry";
+import { saveSignupAttribution } from "@/lib/attribution";
 import { clearSeen, isIdle, lastSeen, OWNER_IDLE_MS, STAFF_IDLE_MS, touch } from "@/lib/idle";
 
 type AuthContextValue = {
@@ -48,6 +49,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const userId = session?.user.id ?? null;
   useEffect(() => {
     if (!loading) identify(userId);
+    // Where a new account came from, saved on the server once (P0.6-02).
+    if (!loading && userId) void saveSignupAttribution(userId);
   }, [loading, userId]);
 
   // Idle sign-out: staff after 12 hours, owners after 30 days (D301).
