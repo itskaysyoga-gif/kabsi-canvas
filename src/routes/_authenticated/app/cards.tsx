@@ -41,6 +41,7 @@ type Card = {
   status: string;
   label: string | null;
   activated_at: string | null;
+  page_mode: "direct" | "page";
 };
 type Tap = { code: string; source: string; created_at: string };
 const DAY = 86400_000;
@@ -50,7 +51,7 @@ async function loadCards(locationId: string) {
   const [cards, taps] = await Promise.all([
     supabase
       .from("cards")
-      .select("code, kind, status, label, activated_at")
+      .select("code, kind, status, label, activated_at, page_mode")
       .eq("location_id", locationId)
       .order("activated_at"),
     supabase
@@ -473,7 +474,12 @@ function ReviewLinks({
     <section className="mt-10">
       <h2 className="text-lg font-bold">1. Copy your review link</h2>
       <p className="mt-1 text-sm text-kb-stone">
-        Your link opens your Google review page. Its QR code is below the link, ready to print.
+        A link goes straight to your Google review page, or opens a short page with the Google
+        button first and a line to message the manager. Everyone sees the same thing, and nobody is
+        asked how their visit went.
+      </p>
+      <p className="mt-2 text-sm text-kb-stone">
+        Works with your own QR codes and NFC cards. The QR code is below the link, ready to print.
       </p>
       <div className="mt-3 space-y-4">
         {links.map((l) => (
@@ -498,6 +504,72 @@ function ReviewLinks({
       ) : null}
       {msg ? <p className="mt-3 text-sm text-kb-red">{msg}</p> : null}
     </section>
+  );
+}
+
+// What the link does when someone opens it (P0.8-05, K-132). Every existing link starts on "Go straight to Google",
+// so printed QR codes never change until the owner chooses the page. The page is the same for every visitor.
+function ModeChoice({ link, onChanged }: { link: Card; onChanged: () => unknown }) {
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  async function choose(mode: "direct" | "page") {
+    if (mode === link.page_mode) return;
+    setBusy(true);
+    setMsg("");
+    const { error } = await supabase.rpc("set_review_link_mode", {
+      p_code: link.code,
+      p_mode: mode,
+    });
+    setBusy(false);
+    setMsg(
+      error
+        ? "Couldn't change it. Try again."
+        : "Saved. It can take up to a minute on phones.",
+    );
+    if (!error) onChanged();
+  }
+  const options = [
+    ["direct", "Go straight to Google"],
+    ["page", "Show the page"],
+  ] as const;
+  return (
+    <fieldset className="mt-3" disabled={busy}>
+      <legend className="text-sm font-bold">When someone opens this link</legend>
+      <div className="mt-1.5 grid gap-2 sm:grid-cols-2">
+        {options.map(([mode, label]) => (
+          <label
+            key={mode}
+            className={cn(
+              "flex min-h-11 cursor-pointer items-center gap-2 rounded-card border-2 px-3 text-sm font-bold",
+              link.page_mode === mode ? "border-kb-black bg-kb-sand" : "border-kb-hairline",
+            )}
+          >
+            <input
+              type="radio"
+              name={`mode-${link.code}`}
+              className="size-4 accent-black"
+              checked={link.page_mode === mode}
+              onChange={() => void choose(mode)}
+            />
+            {label}
+          </label>
+        ))}
+      </div>
+      {link.page_mode === "page" ? (
+        <p className="mt-2 text-sm text-kb-stone">
+          The page shows your Google review button first.{" "}
+          <Link to="/app/knowledge" className="font-bold underline underline-offset-4">
+            Add your WhatsApp number
+          </Link>{" "}
+          to show a line to message the manager.
+        </p>
+      ) : null}
+      {msg ? (
+        <p className="mt-2 text-sm text-kb-stone" role="status">
+          {msg}
+        </p>
+      ) : null}
+    </fieldset>
   );
 }
 
@@ -559,6 +631,7 @@ function LinkRow({ link, taps, onChanged }: { link: Card; taps: Tap[]; onChanged
           </div>
         </div>
         <CopyField url={url} label="Copy review link" />
+        <ModeChoice link={link} onChanged={onChanged} />
         <div className="mt-3 flex flex-wrap gap-2">
           <Button variant="outline" size="compact" onClick={download}>
             <Download /> Download QR

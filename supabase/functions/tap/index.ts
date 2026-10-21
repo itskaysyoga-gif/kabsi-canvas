@@ -16,9 +16,14 @@ Deno.serve(async (req) => {
     if (req.method === "GET") {
       const code = (new URL(req.url).searchParams.get("code") ?? "").toUpperCase();
       if (!CODE_RE.test(code)) return json({ status: "unknown" }, 404);
-      const { data } = await db.from("cards").select("status, destination, location_id").eq("code", code).maybeSingle();
+      const { data } = await db.from("cards").select("status, destination, location_id, page_mode").eq("code", code).maybeSingle();
       if (!data) return json({ status: "unknown" }, 404);
-      return json({ status: data.status, destination: data.destination, business_id: data.location_id });
+      return json({
+        status: data.status,
+        destination: data.destination,
+        business_id: data.location_id,
+        page_mode: data.page_mode,
+      });
     }
 
     if (req.method === "POST") {

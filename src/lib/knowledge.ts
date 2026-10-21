@@ -23,6 +23,7 @@ export type TextField =
   | "languages"
   | "policies"
   | "contact_phone"
+  | "manager_whatsapp"
   | "mention"
   | "avoid";
 export type ListField = "staff_names" | "faqs" | "custom_rules";

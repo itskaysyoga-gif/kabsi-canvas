@@ -215,6 +215,14 @@ const GROUPS: Group[] = [
         max: 30,
         type: "tel",
       },
+      {
+        key: "manager_whatsapp",
+        label: "WhatsApp number for your review link page",
+        hint: "Shown as a line to message the manager when you switch a review link to the page. Include the country code. Leave it out and the line is hidden. Kabsi never writes it in a reply.",
+        placeholder: "e.g. +971 50 123 4567",
+        max: 30,
+        type: "tel",
+      },
     ],
     lists: [
       {

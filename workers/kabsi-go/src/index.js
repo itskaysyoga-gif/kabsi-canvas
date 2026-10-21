@@ -1,9 +1,11 @@
 // kabsi-go: the card Worker on go.kabsi.co (SPEC §7, D212, D213, D227, D231).
 // Deployed on its own (never by the app's GitHub build). Bindings: KV `STICKERS`.
 // Vars: TAP_FUNCTION_URL, APP_ORIGIN. Secret: TAP_SECRET.
-//   GET /{CODE}      NFC tap  → 302 to the business's Google review page
+//   GET /{CODE}      NFC tap  → 302 to the business's Google review page (or its Kabsi page, see below)
 //   GET /{CODE}?s=q  QR scan  → same, logged as source=qr
-// Every visitor goes straight to Google: no rating screen, ever (D212). No IP is stored.
+// A link goes straight to Google (the default, so every printed QR code keeps working) or, when the owner switched
+// that link to the page (P0.8-05, K-132), to https://kabsi.co/review/{CODE}: the same page for every visitor, the
+// Google button first. Either way there is no rating screen and no routing (D212). No IP is stored.
 
 const CODE_RE = /^[2-9A-HJKMNP-Z]{6}$/;
 const BOT_RE = /bot|crawl|spider|slurp|facebookexternalhit|whatsapp|telegram|preview|curl|wget|python|headless/i;
@@ -32,6 +34,7 @@ export default {
       };
       // D213: log with waitUntil so the redirect is never delayed and the log is never dropped.
       ctx.waitUntil(logTap(body, request, env));
+      if (card.m === "page") return Response.redirect(`${app}/review/${code}`, 302);
       return new Response(null, { status: 302, headers: { location: card.d, "cache-control": "no-store" } });
     }
     if (card && card.b) return Response.redirect(`${app}/?sticker=disabled`, 302); // linked to a business but switched off
@@ -82,7 +85,12 @@ async function lookup(code, env, ctx) {
   if (!res.ok) return null;
   const data = await res.json().catch(() => null);
   if (!data) return null;
-  const card = { d: data.destination || null, b: data.business_id || null, a: data.status === "active" };
+  const card = {
+    d: data.destination || null,
+    b: data.business_id || null,
+    a: data.status === "active",
+    m: data.page_mode === "page" ? "page" : "direct",
+  };
   if (env.STICKERS) ctx.waitUntil(env.STICKERS.put(key, JSON.stringify(card)));
   return card;
 }
