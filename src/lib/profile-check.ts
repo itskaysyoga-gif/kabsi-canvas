@@ -1,6 +1,7 @@
 // Client for the free Google Profile Check (P0.4-01): the profile-snapshot Edge Function, which holds the Places key,
 // the limits and the cache. Public data only. Every call sends the public anon JWT (D295) and a Turnstile token.
 import { anonHeaders, supabaseUrl } from "@/lib/supabase";
+import type { CoachRow } from "@/lib/coach";
 
 /** The exact words next to the unticked "Send me tips" box. Keep equal to TIPS_CONSENT_TEXT in
  * supabase/functions/_shared/profile-snapshot.ts (tests/profile-check.test.ts checks it): it is stored as proof (G-21). */
@@ -24,6 +25,8 @@ export type Snapshot = {
   has_photos: boolean;
   photo_count: number;
   findings: Finding[];
+  /** The Profile Coach checklist (the same rows as the app); public data cannot show most of it, and says so. */
+  checklist: CoachRow[];
   cached: boolean;
 };
 
