@@ -4,6 +4,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## Where things stand
 
+- **21 Oct 2026, session 11 finished (Opus): P0.6-01 (PR 132), P0.6-02 (PR 134) and P0.6-05 (PR 136, 327764b) merged on green ci.yml; P0.6-01 and P0.6-05 done, P0.6-02 merged with one person-only check left (a real sign-up). Next: session 12 (P0.5-01, P0.5-02); session 10 (P0.4-06, P0.4-07) is still open.** Rashid: read back the Vercel firewall (Bot Protection on, log), switch on Supabase Auth Captcha (step 5, then send one email code), and look at the banner on a phone. CSP enforcement is due on or after 4 Nov 2026 (14 clean days).
+
 - **21 Oct 2026, session 11 (Opus): P0.6-02 merged (PR 134, d3e4984); P0.6-05 security headers, Turnstile and rate limits PR open (branch claude/p0-6-05).** Headers on every kabsi.co response from `vercel.json` (HSTS, nosniff, Referrer-Policy, Permissions-Policy, the CSP in report-only mode with `frame-ancestors 'none'` and reports to Sentry `kabsi-web`), `no-store` on app, staff, login, email-link and API paths; Turnstile now also guards the start of a Nora chat for a visitor who is not signed in; the review link tool allows 10 requests a minute per IP; Vercel Bot Protection switched on in log mode.
 
 - **21 Oct 2026, session 11 (Opus): P0.6-01 merged (PR 132, 1488219) and done; P0.6-02 product events, attribution and onboarding funnel PR open (branch claude/p0-6-02).** P0.6-01 After merge passed (Evidence). P0.6-02: the database now sends the server events to PostHog from its own records (audit log, new accounts, subscription changes) through `public.product_events` and a one-minute sender (`app_settings.product_events` switched **on** in production by this session; it starts off in a fresh database); the browser sends only landing_viewed, business_found, snapshot_viewed, connect_started and profile_state_seen, through kabsi.co/ingest; first and last touch, fbclid, fbp, fbc and the 60-day `via` code are saved on the account at sign-up (`signup_attribution`) and the via code on the business.
@@ -190,10 +192,10 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.5-04 | The Weekly Care Report | Sonnet | todo | | |
 | P0.5-05 | Insights: one sentence and four tiles | Sonnet | PR open (131); After merge below | 131 | 21 Oct 2026 |
 | P0.6-01 | Consent banner and proof of consent | Opus (session 11, R-42) | done (merged 132, 1488219; Deploy passed; After merge passed 21 Oct 18:58 UTC) | 132 | 21 Oct 2026 |
-| P0.6-02 | Product events, attribution and onboarding funnel | Opus (session 11, R-42) | merged (134, d3e4984); proxy live on kabsi.co; open After merge: PostHog read-back of browser events, one real sign-up | 134 | 21 Oct 2026 |
+| P0.6-02 | Product events, attribution and onboarding funnel | Opus (session 11, R-42) | merged (134, d3e4984); After merge passed except one real sign-up by a person (needs an email code) | 134 | 21 Oct 2026 |
 | P0.6-03 | Meta Pixel and Conversions API with one event ledger | Sonnet (R-39) | todo | | |
 | P0.6-04 | The /meta landing page | Sonnet | todo | | |
-| P0.6-05 | Security headers, Turnstile everywhere, rate limits | Opus (session 11, R-42) | PR open (branch claude/p0-6-05); After merge: headers on kabsi.co, a CSP report in Sentry, review-link burst 429, Nora live; CSP enforcement after 14 clean days (from the merge) | | 21 Oct 2026 |
+| P0.6-05 | Security headers, Turnstile everywhere, rate limits | Opus (session 11, R-42) | done (merged 136, 327764b; Deploy passed; After merge passed 21 Oct 19:25 UTC); follow-up: enforce the CSP after 14 clean days (on or after 4 Nov 2026) | 136 | 21 Oct 2026 |
 | P0.6-06 | Nora in sync: facts file, handover and evaluation | Sonnet (R-39) | todo | | |
 | P0.6-07 | Honest proof pages: founder note, About, Security | Sonnet | merged (84, 64adfad, 12 Oct); CI green; live /about serves the new page (fetched 12 Oct 06:25 UTC); 390 px checked by script, no horizontal scroll; open: Hussein's look and the photo question | 12 Oct | |
 | P0.6-08 | Supporting platforms checked against K-118 | Sonnet | todo | | |
@@ -253,17 +255,14 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## After merge
 
-**P0.6-05 (session 11), for the session after the merge.**
-1. `curl -sI https://kabsi.co` shows Strict-Transport-Security, X-Content-Type-Options, Referrer-Policy, Permissions-Policy and Content-Security-Policy-Report-Only; `curl -sI https://kabsi.co/app` shows `cache-control: no-store`.
-2. A deliberate violation on kabsi.co (an image from a host outside the allow list, from the browser console) shows as a CSP report in Sentry `kabsi-web`.
-3. Burst from one address (pg_net from the database, since this container's outbound address rotates): 15 `review-link` calls in a minute give 10 then 429.
-4. Nora on kabsi.co, not signed in: the Cloudflare check shows, the first message is answered.
-5. **Enforce the CSP after 14 clean days** (from the merge date): switch the header to `Content-Security-Policy` with per-request nonces in place of `'unsafe-inline'` for scripts (G-15). A follow-up card, not part of P0.6-05.
+**P0.6-05 After merge: passed 21 Oct 2026, 19:20 to 19:26 UTC (see Evidence). Still to do: enforce the CSP on or after 4 Nov 2026 (14 clean days): `Content-Security-Policy` with per-request nonces instead of `'unsafe-inline'` for scripts (G-15), as its own follow-up card.**
 
-**P0.6-02 (session 11), for the session after the merge (the session runs them itself).**
-1. Done 21 Oct 19:13 UTC: `https://kabsi.co/ingest/static/array.js` 200 (334623 bytes); a POST to `https://kabsi.co/ingest/e/` answers PostHog's `{"status":"Ok"}` after one 307 (Vercel strips the trailing slash before the rewrite; posthog-js follows it); a real browser on kabsi.co with posthog.com blocked sends `POST /ingest/e/` and `/ingest/flags/` to kabsi.co only. Still open: read the `landing_viewed` with `utm_source=p0602live` back in PostHog (its query service was busy at the time).
-2. With posthog.com blocked in the browser, `landing_viewed` still arrives in PostHog (the proxy test).
-3. The first real sign-up after the merge: `registration_completed` once, then `save_signup_attribution` wrote one `signup_attribution` row (`select user_id is not null, first_touch is not null from public.signup_attribution order by created_at desc limit 1;`).
+**Session 11, for Rashid (dashboard steps only Rashid can read or do).**
+1. Vercel, project kabsi-canvas, Firewall: Bot Protection should read **On, Log**. Set by this session with the connector; reading it back was refused by the session's permission check. Click path: vercel.com, itskaysyoga-5542s-projects, kabsi-canvas, Firewall, Configure, Bot Protection. After a week of logs, move it to Challenge if nothing real is caught (uptime checks and Meta's crawler are verified bots).
+2. Supabase Auth Captcha (step 5 in the steps table): Supabase dashboard, project ynjdqjlmdwjgbfezevxy, Authentication, Attack Protection (or Settings, Bot and Abuse Protection), Enable Captcha protection, provider Turnstile, paste the Turnstile **secret** key (the one already in Edge Function secrets as TURNSTILE_SECRET_KEY), Save. Read back: on kabsi.co/login send yourself one email code; it must arrive. If it fails with a captcha error, switch it off again and tell the next chat (the `auth-code` function already checks Turnstile itself).
+3. On a phone (iOS Safari): kabsi.co/pricing shows the privacy banner at the foot; tap Choose, switch Statistics off, Save choices; "Privacy choices" in the footer reopens it.
+
+**P0.6-02 After merge (session 11, 21 Oct 2026, 19:13 to 19:22 UTC).** 1 and 2 passed: `kabsi.co/ingest/static/array.js` 200; a POST to `kabsi.co/ingest/e/` gets PostHog's `{"status":"Ok"}` after Vercel's one trailing-slash 307; with posthog.com blocked a browser on kabsi.co sends its events to `kabsi.co/ingest` only; PostHog's events table shows `landing_viewed` (page_type home) arriving from kabsi.co and the test events sent through the proxy. Open: 3, the first real sign-up after the merge (`registration_completed` once, then one `signup_attribution` row: `select user_id is not null, first_touch is not null from public.signup_attribution order by created_at desc limit 1;`). It needs a person with an email code; the next chat reads it back.
 
 **P0.6-01 After merge: passed 21 Oct 2026, 18:57 to 18:59 UTC (see Evidence).**
 
@@ -529,6 +528,13 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.6-05 After merge (21 Oct 2026, 19:20 to 19:26 UTC, Rashid's session 11)
+- Deploy run 39660852728 for 327764b: success (`assistant` and `review-link` deployed).
+- `curl -sI https://kabsi.co`: `strict-transport-security: max-age=63072000; includeSubDomains; preload`, `x-content-type-options: nosniff`, `referrer-policy: strict-origin-when-cross-origin`, `permissions-policy: camera=(), microphone=(), geolocation=()`, `content-security-policy-report-only: default-src 'self'; ...`. `curl -sI https://kabsi.co/app`: `cache-control: no-store`. The PR's Vercel preview showed the same headers first.
+- CSP report: an image from example.com added on kabsi.co/about; the browser logged "[Report Only] Refused to load the image" and POSTed to Sentry's security endpoint; Sentry `kabsi-web` shows issue KABSI-WEB-6 "Blocked 'image' from 'example.com'" (culprit `img-src`).
+- `review-link` burst from one address (15 calls through pg_net, no token): 10 x 400 `challenge_failed`, then 5 x 429 `rate_limited`.
+- Nora: a new conversation from a visitor who is not signed in, with no token: 400 `challenge_failed` "Please complete the check below and send your message again." (refused before any model call). No live chat message was sent (Anthropic calls stay off, R-43).
 
 ### P0.6-05 (branch claude/p0-6-05, 21 Oct 2026, Rashid's session 11 of the bundled plan, Opus)
 - `vercel.json`: one `/(.*)` rule with HSTS (max-age 63072000, includeSubDomains, preload), nosniff, `strict-origin-when-cross-origin`, `camera=(), microphone=(), geolocation=()`, and `Content-Security-Policy-Report-Only` (self; scripts from Sentry's CDN, Turnstile and Meta; the Supabase project over https and wss; Sentry ingest; Turnstile frames; `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, `object-src 'none'`; `report-uri` to Sentry project `kabsi-web`, id 4512145411801168, read from the loader script). PostHog needs no entry: it is same-origin through `/ingest`. `'unsafe-inline'` stays for scripts and styles while report-only (the boot script and the hydration data); nonces come with enforcement. `Cache-Control: no-store` on `/app`, `/staff`, `/start`, `/login`, `/a/*`, `/activate/*`, `/api/*`.
