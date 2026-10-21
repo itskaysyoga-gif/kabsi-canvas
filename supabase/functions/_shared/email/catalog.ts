@@ -40,7 +40,7 @@ const REVIEW_REFUND: ReviewInput = {
 };
 const SNAPSHOT: Snapshot = {
   place_id: "ChIJsample0000000", name: BIZ, address: "12 Hamra Street, Beirut", category: "Bakery", rating: 4.6, review_count: 128, business_status: "OPERATIONAL",
-  open_now: true, hours: [], phone: null, website: "https://example.com", has_photos: true, photo_count: 12, cached: false,
+  open_now: true, hours: [], phone: null, website: "https://example.com", has_photos: true, photo_count: 12, cached: false, checklist: [],
   findings: [{ level: "urgent", title: "Your opening hours are missing", detail: "Customers cannot tell when you are open." }, { level: "recommended", title: "No phone number on your listing", detail: "Customers who want to call have nothing to tap." }],
 };
 const REPORT = {

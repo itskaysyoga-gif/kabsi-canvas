@@ -13,6 +13,7 @@
 import type { Place } from "./google/types.ts";
 import type { PlacesResult } from "./google/places/live.ts";
 import type { EmailContent } from "./email/template.ts";
+import { type CoachRow, freeChecklist } from "./coach/catalog.ts";
 
 export const TIPS_CONSENT_TEXT = "Send me tips on managing my Google profile";
 export const CHECK_PAGES = ["/google-profile-check", "/get-started"];
@@ -26,7 +27,7 @@ export type Snapshot = {
   place_id: string; name: string; address: string; category: string | null;
   rating: number | null; review_count: number | null; business_status: string | null;
   open_now: boolean | null; hours: string[]; phone: string | null; website: string | null;
-  has_photos: boolean; photo_count: number; findings: Finding[]; cached: boolean;
+  has_photos: boolean; photo_count: number; findings: Finding[]; checklist: CoachRow[]; cached: boolean;
 };
 
 const ORDER: Record<Level, number> = { urgent: 0, recommended: 1, nice: 2 };
@@ -34,7 +35,7 @@ const ORDER: Record<Level, number> = { urgent: 0, recommended: 1, nice: 2 };
 // Three to five plain findings from public data only. Labels, never a score, never a ranking (design review, "Free tools").
 // Google's public data has no review replies, description, posts or photo dates (K-82), so the items that depend on
 // them say so and promise only what Kabsi does once the owner connects.
-export function findings(s: Omit<Snapshot, "findings" | "cached">): Finding[] {
+export function findings(s: Omit<Snapshot, "findings" | "checklist" | "cached">): Finding[] {
   const out: Finding[] = [];
   if (s.business_status === "CLOSED_PERMANENTLY") {
     out.push({ level: "urgent", title: "Google shows your business as permanently closed", detail: "Customers who see this will not visit. If it is wrong, it needs fixing with Google quickly." });
@@ -85,7 +86,8 @@ export function buildSnapshot(placeId: string, p: Place, cached: boolean): Snaps
     has_photos: (p.photos?.length ?? 0) > 0,
     photo_count: Math.min(p.photos?.length ?? 0, 10),
   };
-  return { ...base, findings: findings(base), cached };
+  // The Profile Coach checklist (P0.8-09): the same rows the owner sees in the app; what public data cannot show says so.
+  return { ...base, findings: findings(base), checklist: freeChecklist(base), cached };
 }
 
 export type Deps = {

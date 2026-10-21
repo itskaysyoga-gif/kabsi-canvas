@@ -24,7 +24,7 @@ import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation }
 import { AiBudgetError } from "../_shared/ai-budget.ts";
 import { protectionCheck } from "../_shared/protection.ts";
 import {
-  addSpecialHours, createLocalPost, createMedia, hasSpecialHours, localPostState, mediaExists, patchListing, protectionShown,
+  addSpecialHours, coachRead, createLocalPost, createMedia, hasSpecialHours, localPostState, mediaExists, patchListing, protectionShown,
   readReply, removeKabsiAccess, sendReply, type SpecialDay,
 } from "../_shared/google/index.ts";
 import { accessChangeEmail, type DisconnectDeps, runDisconnect } from "../_shared/disconnect.ts";
@@ -34,6 +34,7 @@ import {
 import { accessJob, deletionsJob, ratingsJob, renewalsJob, trialsJob, weeklyJob } from "./cron.ts";
 import { photoFileStore, removeDuePhotoFiles } from "../_shared/retention.ts";
 import { detectTasks } from "../_shared/tasks.ts";
+import { type CoachRefreshDeps, refreshCoach } from "../_shared/coach/refresh.ts";
 import { type HolidayAsk, type HolidayAskDeps, sendHolidayAsks } from "../_shared/holiday.ts";
 import { sendTeamInvite, type TeamInvite, teamInviteEmail } from "../_shared/team.ts";
 
@@ -283,6 +284,18 @@ const HOLIDAY_ASKS: HolidayAskDeps = {
   appUrl: APP_URL,
 };
 
+// The Profile Coach's weekly read of the profile (P0.8-09, _shared/coach/refresh.ts): the database says when it is due.
+const COACH_READ: CoachRefreshDeps = {
+  due: async (locationId) => (await rpcJson<boolean>("coach_read_due", { p_location: locationId })) === true,
+  read: coachRead,
+  async save(locationId, n) {
+    await rpcJson("coach_profile_put", {
+      p_location: locationId, p_description_length: n.descriptionLength, p_additional_categories: n.additionalCategories,
+      p_attributes: n.attributes, p_source: n.source,
+    });
+  },
+};
+
 const HANDLERS: Record<string, JobHandler> = {
   sync_reviews: syncReviews,
   draft_reply: draftReplyJob,
@@ -333,6 +346,15 @@ const HANDLERS: Record<string, JobHandler> = {
         if (sent > 0) await jobLog("holiday_asks", true, { location: job.location_id, sent });
       } catch (e) {
         await captureError("dispatch", e, { job: "holiday_asks", location: job.location_id });
+      }
+      // P0.8-09: the Coach reads the profile once a week; when it did, the gaps are looked at again. Never fails the detectors.
+      try {
+        if ((await refreshCoach(job.location_id, COACH_READ)) === "read") {
+          await detectTasks(job.location_id, (id) => rpcJson<Record<string, number> | null>("run_task_detectors", { p_location: id }));
+          await jobLog("coach_read", true, { location: job.location_id });
+        }
+      } catch (e) {
+        await captureError("dispatch", e, { job: "coach_read", location: job.location_id });
       }
     }
   },
