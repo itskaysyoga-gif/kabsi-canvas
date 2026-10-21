@@ -9,7 +9,7 @@ select * from no_plan();
 
 \ir _fixtures.psql
 
--- LA (..c1): owner A (..a1), a manager M (..b4). P (..a2) is the partner, B (..b2) owns another business.
+-- LA (..c1): owner A (..a1), a manager M (..b4). P (..a2) is outside the team, B (..b2) owns another business.
 insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
 values ('00000000-0000-0000-0000-000000000000', '00000000-0000-4000-8000-0000000000b4', 'authenticated', 'authenticated',
         'victim-manager@example.test', now(), '{}', '{}', now(), now());
@@ -54,7 +54,7 @@ select throws_ok($$ select public.save_fact('00000000-0000-4000-8000-0000000000c
   'signed out, nothing is saved (an email link has no user)');
 reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000a2');
-select throws_ok($$ select public.save_fact('00000000-0000-4000-8000-0000000000c1', 'about', '"x"') $$, '42501', null, 'the partner cannot save a fact');
+select throws_ok($$ select public.save_fact('00000000-0000-4000-8000-0000000000c1', 'about', '"x"') $$, '42501', null, 'someone outside the team cannot save a fact');
 reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000b2');
 select throws_ok($$ select public.save_fact('00000000-0000-4000-8000-0000000000c1', 'about', '"x"') $$, '42501', null, 'another owner cannot save a fact');

@@ -161,7 +161,7 @@ const formatDay = (ymd: string) => new Date(`${ymd}T12:00:00Z`).toLocaleDateStri
 
 // Job: free trial reminders, 7 days, 1 day and the last day (Q05). Sent from 09:00 local time; one per stage per
 // address (the emails table's dedupe_key makes re-runs safe). This is a billing notice, so a pause on other emails
-// does not stop it. Nothing is sent when a paid plan or a partner already continues the business.
+// does not stop it. Nothing is sent when a paid plan already continues the business.
 export async function trialsJob() {
   const db = admin();
   const { data, error } = await db.rpc("trial_reminder_candidates");

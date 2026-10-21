@@ -20,7 +20,7 @@ const SITE_STARTERS = [
   "How does Kabsi work?",
   "How much does it cost?",
   "Is this allowed by Google?",
-  "I'm outside Lebanon. How do I get a card?",
+  "Does Kabsi work with my own NFC cards?",
 ];
 const APP_STARTERS = [
   "How do I add Kabsi as a Manager?",

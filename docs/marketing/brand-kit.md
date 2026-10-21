@@ -61,7 +61,7 @@ All four: 2 seconds, black background, the Kabsi mark centred, the main line und
 | End card, early access  | Join early access           | Every video until the Profile Check is live          |
 | End card, Profile Check | Free Profile Check          | From P0.4-01 until the launch gate                   |
 | End card, start free    | Start free                  | After the launch gate (P0.7-07) and in every paid ad |
-| End card, partner       | Apply as a partner          | V13 and W5 only (partner campaign and Partners page) |
+| End card, partner       | Apply as a partner          | The Kabsi Partners explainer only, once the program opens (P0.8-12) |
 
 ## Voice
 

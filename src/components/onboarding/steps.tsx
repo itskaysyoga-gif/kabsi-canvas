@@ -31,25 +31,15 @@ import {
   type PlaceResult,
 } from "@/lib/onboarding";
 import { track } from "@/lib/telemetry";
-import { useIsLebanon } from "@/lib/region";
-import { loadPlanSummary, planOptions, type PlanKind } from "@/lib/plans";
-import { WhatsappLink } from "@/components/shared/whatsapp-link";
-import { KABSI_GROUP_ID, SITE_URL, WHATSAPP_NUMBER } from "@/lib/site";
+import { CARD_PAYMENTS_COMING, loadPlanSummary } from "@/lib/plans";
+import { KABSI_GROUP_ID, SITE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { forgetSnapshot, keptSnapshot } from "@/lib/signup";
 
 type StepProps = { location: Location | null; onChanged: () => Promise<unknown> };
 
 // ── Step 1: find the business on Google Maps
-export function BusinessStep({
-  partnerHandle,
-  inviteId,
-  onCreated,
-}: {
-  partnerHandle?: string | undefined;
-  inviteId?: string | undefined;
-  onCreated: () => Promise<unknown>;
-}) {
+export function BusinessStep({ onCreated }: { onCreated: () => Promise<unknown> }) {
   // The business from the snapshot the owner saw before signing up (P0.4-02) is picked already.
   const [kept] = useState<PlaceResult | null>(() => {
     const k = keptSnapshot();
@@ -81,11 +71,11 @@ export function BusinessStep({
     setError("");
     setBusy(true);
     try {
-      chooseLocation(await startLocation(picked, partnerHandle, inviteId));
+      chooseLocation(await startLocation(picked));
       forgetSnapshot();
       track("business_selected", {
         country: picked.country ?? "",
-        source: inviteId ? "partner_invite" : partnerHandle ? "partner_link" : "self",
+        source: "self",
       });
       await onCreated();
     } catch (e) {
@@ -392,12 +382,11 @@ export function KnowledgeStep({
   );
 }
 
-// ── Step 4: plan (partner-tagged locations never see a price)
+// ── Step 4: plan. Card payments open with Creem (P0.4-07); until then the step offers the trial or says card
+// payments are coming, and never shows another way to pay (K-124).
 export function PlanStep({ location, onChanged }: StepProps) {
-  const [picked, setPicked] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const isLebanon = useIsLebanon(location?.country);
   const summary = useQuery({
     queryKey: ["plan-summary", location?.id],
     queryFn: () => loadPlanSummary(location!.id),
@@ -410,18 +399,15 @@ export function PlanStep({ location, onChanged }: StepProps) {
       <ErrorNote message="Couldn't load your plan options. Refresh the page." />
     ) : null;
   }
-  const viaPartner = s.partner_covered;
-  const options = planOptions(s);
-  // The free trial is offered once the new plans are live (staff can grant one earlier, and test owners get one).
+  // The trial is offered once the new plans are live (staff can grant one earlier, and test owners get one).
   const trialOffered = s.v2 && !s.trial_used;
-  const kind = picked ?? (trialOffered ? "trial" : (options[0]?.key ?? "lebanon_yearly"));
 
   async function finish() {
     setBusy(true);
     setError("");
     try {
-      await choosePlan(location!.id, viaPartner ? "partner" : (kind as PlanKind));
-      track("plan_selected", { plan: viaPartner ? "partner" : kind, location_id: location!.id });
+      await choosePlan(location!.id, "trial");
+      track("plan_selected", { plan: "trial", location_id: location!.id });
       await onChanged();
     } catch (e) {
       setError(friendlyError(e));
@@ -429,87 +415,34 @@ export function PlanStep({ location, onChanged }: StepProps) {
     setBusy(false);
   }
 
-  if (viaPartner) {
-    return (
-      <>
-        <StepTitle
-          title="Your plan"
-          sub="Your Kabsi plan is through the partner who set you up. There's nothing to pay here."
-        />
-        <ErrorNote message={error} />
-        <Button className="w-full" onClick={finish} disabled={busy}>
-          Finish setup
-        </Button>
-      </>
-    );
-  }
-  const cards = [
-    ...(trialOffered
-      ? [
-          {
-            key: "trial",
-            price: "Free",
-            title: `${s.trial_days} day free trial`,
-            note: "No card. It starts when Kabsi's access to your Google profile works.",
-          },
-        ]
-      : []),
-    ...options.map((o) => ({
-      key: o.key as string,
-      price: `$${o.price}`,
-      title: o.title,
-      note: o.note,
-    })),
-  ];
   return (
     <>
       <StepTitle
-        title="Choose your plan"
+        title="Your plan"
         sub={
           trialOffered
-            ? "Start free, or choose a plan now. Refundable within 14 days."
-            : "Yearly plans are refundable within 14 days."
+            ? `Start with a ${s.trial_days} day Pro trial. No card. It starts when Kabsi's access to your Google profile works.`
+            : CARD_PAYMENTS_COMING
         }
       />
-      <div className="grid gap-3 sm:grid-cols-2">
-        {cards.map((p) => (
-          <button
-            key={p.key}
-            type="button"
-            onClick={() => setPicked(p.key)}
-            aria-pressed={kind === p.key}
-            className={cn(
-              "rounded-card border-2 p-5 text-left",
-              kind === p.key ? "border-kb-black bg-kb-sand" : "border-kb-hairline",
-            )}
-          >
-            <span className="block font-display text-4xl leading-none">{p.price}</span>
-            <span className="mt-2 block font-bold">{p.title}</span>
-            <span className="block text-sm text-kb-stone">{p.note}</span>
-          </button>
-        ))}
-      </div>
-      {!isLebanon ? (
-        <p className="mt-4 text-sm text-kb-stone">
-          Your review link and QR code are free in every country.
-        </p>
-      ) : null}
+      <p className="text-sm text-kb-stone">
+        Your review link and QR code are free in every country.
+      </p>
       <ErrorNote message={error} />
       <Button className="mt-6 w-full" onClick={finish} disabled={busy}>
-        {busy ? "Saving…" : kind === "trial" ? "Start trial" : "Continue to payment"}
+        {busy ? "Saving…" : trialOffered ? "Start trial" : "Finish setup"}
       </Button>
     </>
   );
 }
 
-// ── Done: payment instructions + what happens next
+// ── Done: what happens next
 export function DoneStep({ location }: { location: Location | null }) {
   if (!location) return null;
   const active = location.status === "active";
-  const lebanon = location.country === "LB";
-  const needsPayment = !location.partner_id && !active;
+  const needsPlan = !active;
   const hasAccess = Boolean(location.access_granted_at);
-  const hasPlan = !needsPayment;
+  const hasPlan = !needsPlan;
   const setupComplete = hasAccess && hasPlan;
   return (
     <>
@@ -531,29 +464,10 @@ export function DoneStep({ location }: { location: Location | null }) {
           Your plan
         </li>
       </ul>
-      {needsPayment ? (
+      {needsPlan ? (
         <div className="mt-6 rounded-card bg-kb-sand p-5 text-sm leading-6">
           <p className="font-bold">How to pay</p>
-          {lebanon ? (
-            <p className="mt-2">
-              Pay by Whish, OMT or cash. Message us on{" "}
-              <WhatsappLink kind="payment">WhatsApp {WHATSAPP_NUMBER}</WhatsappLink> or
-              hello@kabsi.co and we'll confirm within one working day.
-            </p>
-          ) : null}
-          <p className="mt-2">
-            USDT (TRC20):{" "}
-            <span className="break-all font-mono">TMbdkH9hY14RGgz9N99DCXu3LXGDZBDqMe</span>
-            <br />
-            Binance Pay ID: <span className="font-mono">User-2ad9b</span>
-          </p>
-          <p className="mt-2 text-kb-stone">
-            After paying in USDT, paste the transaction ID on your{" "}
-            <a href="/app/plan" className="font-medium text-kb-ink underline">
-              Plan page
-            </a>
-            .
-          </p>
+          <p className="mt-2">{CARD_PAYMENTS_COMING}</p>
         </div>
       ) : null}
       <Button asChild className="mt-6 w-full">

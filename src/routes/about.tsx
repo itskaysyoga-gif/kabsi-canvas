@@ -48,7 +48,7 @@ function AboutPage() {
           <section>
             <H2 className="text-3xl">The name</H2>
             <p className="mt-4 text-kb-stone">
-              The name is Lebanese for "press": one press is all it takes to approve a reply.
+              The name is Arabic for "press": one press is all it takes to approve a reply.
             </p>
           </section>
 

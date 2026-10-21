@@ -40,8 +40,9 @@ describe("the categories (K-46, K-118)", () => {
   });
 
   it("the database accepts exactly these categories and refuses 'off' for exactly the ones that stay on", () => {
-    const sql = read("supabase/migrations/20261021090000_notification_engine.sql");
-    const fn = sql.slice(sql.indexOf("create function public.set_notification_pref"));
+    // The newest definition counts: P0.8-01 (20261021180000) removed the partner category.
+    const sql = read("supabase/migrations/20261021180000_international_partner_cleanup.sql");
+    const fn = sql.slice(sql.search(/create (or replace )?function public\.set_notification_pref/));
     const lists = [...fn.matchAll(/array\[([^\]]+)\]/g)].map((m) =>
       [...m[1]!.matchAll(/'([a-z_]+)'/g)].map((x) => x[1]),
     );

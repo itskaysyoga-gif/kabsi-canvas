@@ -218,23 +218,18 @@ function TeamManager({ locationId }: { locationId: string }) {
         <ul className="mt-4 divide-y divide-kb-hairline">
           {KINDS.map((k) => {
             const p = t.policies[k];
-            const partner = p === "partner" || p === "partner_prepares";
             return (
               <li key={k} className="flex items-center justify-between gap-4 py-3">
                 <Label htmlFor={`policy-${k}`} className="flex-1">
                   {KIND_LABEL[k]}
                   <span className="block text-sm font-normal text-kb-stone">
-                    {partner
-                      ? "Set with your agency"
-                      : p === "owner_and_managers"
-                        ? "You and managers"
-                        : "Only you"}
+                    {p === "owner_and_managers" ? "You and managers" : "Only you"}
                   </span>
                 </Label>
                 <Switch
                   id={`policy-${k}`}
                   checked={p === "owner_and_managers"}
-                  disabled={partner || act.isPending}
+                  disabled={act.isPending}
                   onCheckedChange={(on) => act.mutate(() => setPolicy(locationId, k, on))}
                 />
               </li>

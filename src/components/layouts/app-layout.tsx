@@ -23,7 +23,6 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { chooseLocation, myLatestLocation, myLocations } from "@/lib/onboarding";
 import { amStaff } from "@/lib/reviews";
-import { myPartner } from "@/lib/partner";
 import { waitingReplies } from "@/lib/tasks";
 import { myAccess } from "@/lib/team";
 import {
@@ -319,7 +318,7 @@ export function AppLayout({
   area = "app",
 }: {
   children: ReactNode;
-  area?: "app" | "partner" | "staff";
+  area?: "app" | "staff";
 }) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -327,7 +326,6 @@ export function AppLayout({
   const location = useLocation();
   const [signOutError, setSignOutError] = useState("");
   const isStaff = useQuery({ queryKey: ["am-staff"], queryFn: amStaff, staleTime: Infinity });
-  const partner = useQuery({ queryKey: ["my-partner"], queryFn: myPartner, staleTime: 60_000 });
   const myLoc = useQuery({
     queryKey: ["my-location"],
     queryFn: myLatestLocation,
@@ -359,7 +357,7 @@ export function AppLayout({
     sec.id === "reviews" && waiting.data ? waiting.data : undefined;
   // K-16: a page that is not part of the person's role says so, instead of showing a screen the database would refuse.
   const blocked = area === "app" && role !== undefined && !canOpen(location.pathname, role);
-  const areaTitle = area === "partner" ? "Partner" : area === "staff" ? "Staff" : "Business";
+  const areaTitle = area === "staff" ? "Staff" : "Business";
 
   async function handleSignOut() {
     setSignOutError("");
@@ -393,7 +391,7 @@ export function AppLayout({
             ) : (
               <nav className="space-y-1">
                 <Link
-                  to={area === "partner" ? "/partner" : "/staff"}
+                  to="/staff"
                   className="flex items-center gap-3 rounded-card bg-kb-sand px-3 py-2.5 text-sm font-medium"
                 >
                   <Users className="size-5" />
@@ -435,13 +433,6 @@ export function AppLayout({
                 {user?.email}
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-kb-hairline" />
-              {partner.data ? (
-                <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2.5 text-base">
-                  <Link to={area === "partner" ? "/app/reviews" : "/partner"}>
-                    {area === "partner" ? "Business app" : "Partner"}
-                  </Link>
-                </DropdownMenuItem>
-              ) : null}
               {isStaff.data ? (
                 <DropdownMenuItem asChild className="cursor-pointer rounded-lg py-2.5 text-base">
                   <Link to={area === "staff" ? "/app/reviews" : "/staff"}>

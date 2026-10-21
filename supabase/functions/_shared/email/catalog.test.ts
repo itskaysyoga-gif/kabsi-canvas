@@ -109,7 +109,18 @@ Deno.test("the digest email is grouped and has one button", () => {
 Deno.test("the catalog covers every kind of email Kabsi sends", () => {
   const kinds = catalog().map((c) => c.kind);
   for (const needed of ["review_new", "review_high_risk", "backlog_ready", "digest", "access_granted", "access_lost", "deletion_scheduled", "trial_d7", "renew_r5",
-    "payment_received", "weekly_report", "weekly_post", "shield_alert_urgent", "team_invite", "profile_check", "partner_invite", "partner_invoice", "usdt_claim_alert",
+    "weekly_report", "weekly_post", "shield_alert_urgent", "team_invite", "profile_check",
     "assistant_report", "assistant_handoff", "assistant_handoff_ack", "lead_alert", "life_welcome", "life_no_access_1h", "life_trial_day7", "life_trial_day14", "life_winback_30"]) assert.ok(kinds.includes(needed), needed);
   assert.equal(new Set(kinds).size, kinds.length);
+});
+
+Deno.test("retired emails stay gone (P0.8-01, K-123 to K-127): no partner, payment-method or Lebanon mail", () => {
+  const kinds = catalog().map((c) => c.kind);
+  for (const gone of ["payment_received", "partner_invite", "partner_invoice", "partner_paid", "usdt_claim_alert"]) assert.ok(!kinds.includes(gone), gone);
+  for (const c of catalog()) {
+    const { html, text } = render(c);
+    const all = `${c.content.subject}\n${text}\n${html.replace(/<[^>]+>/g, " ")}`;
+    assert.doesNotMatch(all, /usdt|binance|whish|\bomt\b|nowpayments|lebanon|lebanese|\+961|resale|partner/i, c.kind);
+    assert.doesNotMatch(all, /\bcash\b|NFC card(s)? (order|price)|order (a|your) card/i, c.kind);
+  }
 });

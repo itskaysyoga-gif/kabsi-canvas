@@ -65,7 +65,7 @@ export function dbDeps(): Deps {
       }
       const r = await sendEmail({
         kind: o.kind, to: o.to, subject: o.subject, html: o.html, text: o.text, dedupeKey: o.dedupeKey, locationId: o.locationId,
-        partnerId: o.partnerId, ...(o.replyTo ? { replyTo: o.replyTo } : {}), category: o.category, notificationId: o.notificationId ?? null,
+        ...(o.replyTo ? { replyTo: o.replyTo } : {}), category: o.category, notificationId: o.notificationId ?? null,
         unsubscribeUrl: o.unsubscribeUrl ?? null, stream: news && !o.kind.startsWith("test_") ? "news" : "send",
       });
       if ("sent" in r && o.notificationId) await db.from("notifications").update({ email_id: (r as { id?: string }).id ?? null }).eq("id", o.notificationId);

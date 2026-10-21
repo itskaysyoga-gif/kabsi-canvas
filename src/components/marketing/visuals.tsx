@@ -107,50 +107,6 @@ export function PricingVisual() {
   );
 }
 
-const CLIENTS = [
-  { name: "Bakery", city: "Brooklyn, NY", on: true },
-  { name: "Dental clinic", city: "Lyon, France", on: false },
-  { name: "Café", city: "Madrid, Spain", on: true },
-];
-
-/** Partners: one workspace, every client's status side by side. */
-export function WorkspaceVisual() {
-  return (
-    <Panel>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <KabsiMark className="size-6" />
-          <p className="font-bold">Your workspace</p>
-        </div>
-        <ExampleTag />
-      </div>
-      <ul className="mt-4 divide-y divide-kb-hairline rounded-card border border-kb-hairline">
-        {CLIENTS.map((c) => (
-          <li key={c.name} className="flex items-center gap-3 p-3">
-            <IconBadge icon={<Store />} tone="sand" className="size-9 [&_svg]:size-4" />
-            <span className="min-w-0 flex-1 leading-tight">
-              <span className="block text-sm font-bold">{c.name}</span>
-              <span className="block text-xs text-kb-stone">{c.city}</span>
-            </span>
-            <span
-              className={cn(
-                "inline-flex shrink-0 items-center gap-1.5 rounded-pill px-2.5 py-1 text-[11px] font-bold sm:text-xs",
-                c.on ? "bg-kb-green/10 text-kb-ink" : "bg-kb-sand text-kb-stone",
-              )}
-            >
-              <span className={cn("size-1.5 rounded-full", c.on ? "bg-kb-green" : "bg-kb-stone")} />
-              {c.on ? "Connected" : "Awaiting access"}
-            </span>
-          </li>
-        ))}
-      </ul>
-      <span className="kb-ripple mt-4 flex h-11 items-center justify-center gap-2 rounded-pill bg-kb-yellow text-sm font-bold text-kb-black">
-        <Send className="size-4" /> Invite a client
-      </span>
-    </Panel>
-  );
-}
-
 /** FAQ: one real question and its answer, as a short exchange. */
 export function AnswerVisual() {
   return (

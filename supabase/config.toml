@@ -20,7 +20,7 @@ verify_jwt = false
 verify_jwt = false
 [functions.email]            # one-click unsubscribe (signed link) and the Resend webhook (Svix signature); /test needs x-cron-secret (P0.4-08)
 verify_jwt = false
-[functions.billing]          # NOWPayments IPN sends no JWT; /nowpayments checks the HMAC signature, /invoice checks the user (Q06)
+[functions.billing]          # retired 410 stub (P0.8-01); the old crypto webhook sends no JWT
 verify_jwt = false
 
 # JWT required.
@@ -36,7 +36,7 @@ verify_jwt = true
 verify_jwt = true
 [functions.lead]
 verify_jwt = true
-[functions.partner]
+[functions.partner]          # retired 410 stub (P0.8-01)
 verify_jwt = true
 [functions.places-search]
 verify_jwt = true

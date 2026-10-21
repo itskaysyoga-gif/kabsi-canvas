@@ -44,7 +44,7 @@ Deno.test("with no readable opening hours a normal review counts as open", () =>
 });
 
 Deno.test("everything else defaults to the daily digest at the digest hour", () => {
-  for (const category of ["profile_issue", "approval_needed", "partner"]) {
+  for (const category of ["profile_issue", "approval_needed"]) {
     const d = decideEmail({ ...base, category, now: at("2026-11-10T10:00:00Z") }); // 12:00 in Beirut
     assert.equal(d.mode, "digest", category);
     if (d.mode === "digest") assert.equal(d.until.toISOString(), "2026-11-10T17:00:00.000Z"); // 19:00 in Beirut

@@ -26,7 +26,7 @@ export const Route = createFileRoute("/privacy")({
   component: Page,
 });
 
-const UPDATED = "12 October 2026";
+const UPDATED = "21 October 2026";
 
 // K-113.6, word for word. Set as raw HTML so the apostrophe stays a plain ' in the page source.
 const LIMITED_USE =
@@ -39,7 +39,7 @@ function Page() {
         <p>
           This policy explains what Kabsi collects, why, who helps us process it, how long we keep
           it and what you can ask us to do. It covers the website, the Kabsi app, emails from Kabsi,
-          the free review link tool and Kabsi cards and review links.
+          the free review link tool, and Kabsi review links, QR codes and cards.
         </p>
       </section>
 
@@ -98,13 +98,8 @@ function Page() {
             draft and the replies you post; posts, photos and special hours you prepare; your
             listing's name, phone, address, hours, website and category, to detect changes.
           </li>
-          <li>
-            Your plan and payments, including the method and any USDT transaction ID you send.
-          </li>
-          <li>
-            The date and wording of the authorisation you gave Kabsi, and which partner introduced
-            you, if any.
-          </li>
+          <li>Your plan and payments: the plan, the amount and the date.</li>
+          <li>The date and wording of the authorisation you gave Kabsi.</li>
           <li>A log of the emails we send you (address, subject, time and delivery status).</li>
           <li>
             A record of what you approve and change: who did what and when, from the app or an email
@@ -143,10 +138,6 @@ function Page() {
           <b>If you write to us on WhatsApp:</b> your phone number and WhatsApp name as WhatsApp
           shows them to us, the messages, photos or files you send, and the time. Kabsi does not
           copy the chat into its own database. See section 14.
-        </p>
-        <p>
-          <b>If you're a partner:</b> your contact details, the businesses you invite (owner email
-          and business name), your invoices and payment claims.
         </p>
         <p>
           <b>When you visit the website or app:</b> anonymous usage statistics and error reports
@@ -282,10 +273,9 @@ function Page() {
           </li>
         </ul>
         <p>
-          Some of these providers are outside Lebanon, the United Arab Emirates and the European
-          Union, for example in the United States. They process data only on our instructions and
-          under their data protection terms, including standard contractual clauses where the law
-          requires them.
+          Some of these providers are outside the United Arab Emirates and the European Union, for
+          example in the United States. They process data only on our instructions and under their
+          data protection terms, including standard contractual clauses where the law requires them.
         </p>
       </section>
 
@@ -308,11 +298,11 @@ function Page() {
       </section>
 
       <section>
-        <h2>8. Partners</h2>
+        <h2>8. Agencies and partners</h2>
         <p>
-          If a partner introduced you, they see your business name, country, whether your service is
-          live, and how many times your card or link was used. They cannot see your reviews, drafts,
-          replies, photos or reports, and they can't approve anything for you.
+          No agency or partner sees your business in Kabsi unless you invite them to your team in
+          Settings, Team. They then see and do only what their role allows. Kabsi has no partner
+          workspaces and no partner who can see your reviews, drafts, replies, photos or reports.
         </p>
       </section>
 

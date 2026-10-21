@@ -4,12 +4,7 @@
 
 export type EmailDefault = "instant" | "daily_digest" | "by_hours";
 export type CategoryGroup =
-  | "Daily work"
-  | "Weekly and monthly"
-  | "Google access"
-  | "Trial and billing"
-  | "Partners"
-  | "Account and help";
+  "Daily work" | "Weekly and monthly" | "Google access" | "Trial and billing" | "Account and help";
 
 export type Category = {
   id: string;
@@ -117,16 +112,6 @@ export const CATEGORIES: readonly Category[] = [
     inApp: false,
     description:
       "A few short emails while you try Kabsi: your first win, your week, the days left.",
-  },
-  {
-    id: "partner",
-    label: "Partner news",
-    group: "Partners",
-    switchable: true,
-    emailDefault: "daily_digest",
-    quietExempt: false,
-    inApp: true,
-    description: "Applications, clients added and the monthly partner report.",
   },
   {
     id: "account",

@@ -9,8 +9,6 @@ export const CONTACT_EMAIL = "hello@kabsi.co";
 // Kabsi's Google business group (plan Appendix B). Owners invite this ID as a Manager. It is an identifier, not a secret.
 export const KABSI_GROUP_ID = "5481006796";
 export const KABSI_GROUP_NAME = "Kabsi Clients";
-/** The Lebanese field contact. Shown only on /lebanon (K-122); every other placement uses WHATSAPP_NUMBER. */
-export const LEBANON_PHONE = "+961 3 956 917";
 
 /**
  * Kabsi's one WhatsApp number (K-122): the Kapso-provided US number. Answered by a person; it approves nothing and
@@ -30,8 +28,6 @@ export const WHATSAPP_MESSAGES = {
   handover:
     "Hello Kabsi, I was chatting with the assistant on kabsi.co and would like to talk to a person.",
   email: "Hello Kabsi, I have a question about an email I got from Kabsi.",
-  payment: "Hello Kabsi, I would like to pay by Whish, OMT or cash.",
-  lebanon: "Hello Kabsi, I am in Lebanon and would like to know about the Lebanon bundle.",
 } as const;
 export type WhatsappKind = keyof typeof WHATSAPP_MESSAGES;
 
@@ -95,15 +91,9 @@ export const PRICES = {
   proYearly: 190,
   extraLocationMonthly: 15,
   extraLocationYearly: 150,
-  lebanonBundle: 120,
-  card: 20,
-  extraCard: 10,
-  fiveCards: 40,
-  partnerRate: 8,
-  foundingRate: 6,
 } as const;
 
-/** The trial line, worded once. 30 days through partner links and inserts. */
+/** The trial line, worded once. */
 export const TRIAL_LINE = "14-day free trial, no card";
 
 type Meta = { title?: string; name?: string; property?: string; content?: string };
@@ -222,22 +212,6 @@ export const PRODUCT_LD = {
       name: "Kabsi Pro, yearly",
       price: PRICES.proYearly,
       priceCurrency: "USD",
-      url: `${SITE_URL}/pricing`,
-    },
-    {
-      "@type": "Offer",
-      name: "Kabsi Lebanon bundle, 12 months, with an NFC card and setup",
-      price: PRICES.lebanonBundle,
-      priceCurrency: "USD",
-      eligibleRegion: { "@type": "Country", name: "Lebanon" },
-      url: `${SITE_URL}/pricing`,
-    },
-    {
-      "@type": "Offer",
-      name: "Kabsi card",
-      price: PRICES.card,
-      priceCurrency: "USD",
-      eligibleRegion: { "@type": "Country", name: "Lebanon" },
       url: `${SITE_URL}/pricing`,
     },
   ],

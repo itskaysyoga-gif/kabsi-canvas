@@ -107,7 +107,7 @@ select pg_temp.grant_access('00000000-0000-4000-8000-0000000007c6', true);
 select isnt(private.start_trial('00000000-0000-4000-8000-0000000007c6'), null, 'a Google sign-in owner gets a trial');
 select ok(exists (select 1 from public.trial_accounts where account_key = 'google:google-sub-6'), 'recorded under the Google account');
 
--- 3. Concierge, demo and partner-covered businesses never start a trial --------------------------------------------------
+-- 3. Concierge, demo and paying businesses never start a trial ----------------------------------------------------------
 select pg_temp.biz(5, '00000000-0000-4000-8000-0000000007a5', 'trial-place-5');
 -- An early-access business: a person works its profile, its Google id is a concierge one.
 update public.locations set concierge = true, consent_at = now(), access_granted_at = now(),
@@ -122,7 +122,7 @@ update public.google_connections set access_state = 'granted', voice_of_merchant
 update public.locations set is_demo = true where id = '00000000-0000-4000-8000-0000000007c5';
 select is(private.start_trial('00000000-0000-4000-8000-0000000007c5'), null, 'a demo business never starts a trial');
 update public.locations set is_demo = false where id = '00000000-0000-4000-8000-0000000007c5';
-select is(private.start_trial('00000000-0000-4000-8000-0000000000c1'), null, 'a partner-covered business never starts a trial');
+select is(private.start_trial('00000000-0000-4000-8000-0000000000c1'), null, 'a business that already pays never starts a trial');
 
 -- 4. The caps ---------------------------------------------------------------------------------------------------------------
 select ok(private.trial_take('00000000-0000-4000-8000-0000000007c1', 'profile_fix', 'fix-1'), 'first profile fix');

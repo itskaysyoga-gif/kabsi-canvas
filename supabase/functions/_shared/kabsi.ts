@@ -85,7 +85,7 @@ export function log(fn: string, fields: Record<string, unknown>) {
 const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.-]+/g;
 const SENSITIVE_KEYS = new Set([
   "comment", "reviewer_name", "body", "instruction", "text", "payload", "email", "to", "token", "authorization",
-  "sig", "signature", "x-nowpayments-sig", "pay_address", "api_key", "x-api-key",
+  "sig", "signature", "api_key", "x-api-key",
 ]);
 function scrub(value: unknown, depth = 0): unknown {
   if (typeof value === "string") return value.replace(EMAIL_RE, "[email]").slice(0, 300);
@@ -156,7 +156,7 @@ async function emailFrom(stream: Stream) {
 // goes through notify() (notify.ts), which applies each person's choices, quiet hours, the digest and dedupe first.
 export async function sendEmail(o: {
   kind: string; to: string; subject: string; html: string; text: string; dedupeKey: string;
-  locationId?: string | null; partnerId?: string | null; replyTo?: string; category?: string | null; notificationId?: string | null;
+  locationId?: string | null; replyTo?: string; category?: string | null; notificationId?: string | null;
   /** Mail the owner can switch off: the one-click unsubscribe link, sent as the List-Unsubscribe headers (RFC 8058). */
   unsubscribeUrl?: string | null; stream?: Stream;
 }) {
@@ -170,7 +170,7 @@ export async function sendEmail(o: {
   let rowId: string;
   const { data: row, error } = await db.from("emails").insert({
     kind: o.kind, to_address: o.to, subject: o.subject, dedupe_key: o.dedupeKey, category: o.category ?? null,
-    notification_id: o.notificationId ?? null, location_id: o.locationId ?? null, partner_id: o.partnerId ?? null,
+    notification_id: o.notificationId ?? null, location_id: o.locationId ?? null,
   }).select("id").single();
   if (error) {
     if (error.code !== "23505") throw error;

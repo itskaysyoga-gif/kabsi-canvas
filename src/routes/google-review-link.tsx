@@ -315,12 +315,8 @@ function Result({ place }: { place: Place }) {
           </Button>
         </div>
         <p className="mt-5 text-sm leading-6 text-kb-stone">
-          Want customers to tap instead of scan? An{" "}
-          <Link to="/pricing" className="font-bold text-kb-ink underline underline-offset-4">
-            NFC card
-          </Link>{" "}
-          opens the same page with one tap. Kabsi ships cards in Lebanon; elsewhere, use a partner's
-          card or any NFC card you buy online.{" "}
+          Want customers to tap instead of scan? Write the same link on your own NFC card or
+          sticker, and one tap opens the same page. It works with your own QR codes and NFC cards.{" "}
           <Link
             to="/"
             className="inline-flex items-center gap-1 font-bold text-kb-ink underline underline-offset-4"

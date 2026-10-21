@@ -4,7 +4,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Copy, Download, Link2, Nfc, Power, Printer, TriangleAlert } from "lucide-react";
 import { copyText } from "@/lib/clipboard";
 import { CopyButton } from "@/components/shared/copy-button";
-import { useIsLebanon } from "@/lib/region";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -77,7 +76,6 @@ function CardsPage() {
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["cards"] });
   const links = data.data?.cards.filter((c) => c.kind === "link") ?? [];
   const shareLink = links.find((l) => l.status === "active") ?? links[0];
-  const isLeb = useIsLebanon(loc?.country);
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
@@ -108,11 +106,10 @@ function CardsPage() {
       {loc && shareLink ? (
         <ShareKit name={loc.name} link={`https://go.kabsi.co/${shareLink.code}`} />
       ) : null}
-      <h2 className="mt-10 text-lg font-bold">3. Optional: use an NFC tag</h2>
+      <h2 className="mt-10 text-lg font-bold">3. Optional: use your own NFC card or tag</h2>
       <p className="mt-2 rounded-card bg-kb-white p-4 text-sm leading-6 text-kb-stone shadow-kb">
         Already have an NFC tag or sticker? Use a free NFC writer app on your phone, choose "write a
         URL" and paste your review link from step 1. Activity is counted the same way.
-        {loc && isLeb ? " In Lebanon you can also get a ready Kabsi card from our team." : ""}
       </p>
       <div className="mt-3 space-y-4">
         {data.data?.cards

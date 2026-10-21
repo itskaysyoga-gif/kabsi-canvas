@@ -69,7 +69,7 @@ Happy to talk it through. Pick a time for a free 20 minute call here: https://ka
 
 **/prices: prices and trial**
 
-Kabsi Pro is $19 a month or $190 a year. The free trial is 14 days with no card, and 30 days if a partner brought you. The trial starts when Kabsi can reach your Google profile. The review link and QR code are free on every plan. Details: https://kabsi.co/pricing
+Kabsi Pro is $19 a month or $190 a year. The free trial is 14 days with no card. The trial starts when Kabsi can reach your Google profile. The review link and QR code are free on every plan. Details: https://kabsi.co/pricing
 
 **/disconnect: how to disconnect**
 
@@ -83,9 +83,9 @@ We never ask for your Google password, and we never ask for a verification code 
 
 Nothing is posted to your Google profile until you approve it. You approve on kabsi.co, not in this chat, so there is nothing to approve here. Open https://kabsi.co/app to see what is waiting.
 
-**/pay-lebanon: Whish, OMT or cash (Lebanon only)**
+**/pay: how to pay**
 
-In Lebanon you can pay by Whish, OMT or cash. Tell us your business name and the plan you want, and we will arrange it and confirm within one working day.
+Kabsi takes card payments only, in US dollars. Card payments are coming; until they open there is nothing to pay, and the trial needs no card.
 
 ## 5. Labels
 
@@ -96,7 +96,7 @@ Use these six, one colour each if Kapso allows:
 - customer
 - partner
 - urgent
-- lebanon
+- agency
 
 ## What the number must never be used for
 

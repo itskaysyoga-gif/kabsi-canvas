@@ -39,7 +39,6 @@ import {
   WEBSITE_LD,
   pageHead,
 } from "@/lib/site";
-import { useIsLebanon } from "@/lib/region";
 
 export const Route = createFileRoute("/")({
   // go.kabsi.co sends switched-off cards here with ?sticker=disabled
@@ -56,7 +55,6 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { sticker } = Route.useSearch();
-  const isLebanon = useIsLebanon();
   return (
     <PublicLayout>
       {sticker === "disabled" ? (
@@ -64,7 +62,7 @@ function HomePage() {
           role="status"
           className="bg-kb-yellow px-5 py-3 text-center text-sm font-bold text-kb-black"
         >
-          This Kabsi card isn't active. Please ask the staff for help.
+          This review link isn't active. Please ask the staff for help.
         </div>
       ) : null}
 
@@ -249,22 +247,14 @@ function HomePage() {
               country, by link or by scan
             </li>
             <li className="flex gap-3">
-              <Link2 className="mt-0.5 size-5 shrink-0" aria-hidden="true" /> Use it on a printed
-              table card, a receipt or your own NFC tag
+              <Link2 className="mt-0.5 size-5 shrink-0" aria-hidden="true" /> Works with your own QR
+              codes and NFC cards, a printed table card or a receipt
             </li>
             <li className="flex gap-3">
               <Check className="mt-0.5 size-5 shrink-0" aria-hidden="true" /> Keeps working if your
               plan ends
             </li>
           </ul>
-          {isLebanon ? (
-            <p className="mt-6 max-w-xl text-[15px]">
-              In Lebanon we also supply ready NFC cards.{" "}
-              <Link to="/lebanon" className="font-bold underline underline-offset-4">
-                See the Lebanon offer
-              </Link>
-            </p>
-          ) : null}
         </div>
         <div className="rounded-large bg-kb-white p-6 shadow-kb">
           <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">

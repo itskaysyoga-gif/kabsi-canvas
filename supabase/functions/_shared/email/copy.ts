@@ -9,7 +9,6 @@ import { TOKENS } from "./tokens.ts";
 
 export const p = (html: string) => `<p style="margin:0 0 16px 0;">${html}</p>`;
 export const box = (s: string) => `<div style="margin:0 0 16px 0;padding:14px 16px;background:${TOKENS.sand};border-radius:14px;white-space:pre-wrap;">${esc(s)}</div>`;
-const money = (n: number | string) => `$${Number(n).toFixed(2)}`;
 const link = (appUrl: string, path: string) => `${appUrl}${path}`;
 
 // ─── reviews ──────────────────────────────────────────────────────────────────────────────────────────────────
@@ -60,13 +59,13 @@ export function deletionScheduled(business: string, dueText: string, appUrl: str
 export function deletionDone(business: string, appUrl: string): EmailContent {
   return {
     subject: `${business}: deleted from Kabsi`, preheader: "Your business data is deleted.", title: "Deleted",
-    bodyHtml: p(`We deleted <strong>${esc(business)}</strong> and its data from Kabsi. Your NFC cards no longer open your review page. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID ${KABSI_GROUP_ID}) under People and access.`),
+    bodyHtml: p(`We deleted <strong>${esc(business)}</strong> and its data from Kabsi. Your Kabsi review link and QR code no longer open your review page, and neither does any NFC card that carries them. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID ${KABSI_GROUP_ID}) under People and access.`),
     button: { label: "Open Kabsi", url: `${appUrl}/app` },
     text: `We deleted ${business} and its data from Kabsi. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID ${KABSI_GROUP_ID}) under People and access.\n\nOpen Kabsi: ${appUrl}/app`,
   };
 }
 
-// ─── trial, plan and payment ──────────────────────────────────────────────────────────────────────────────────
+// ─── trial and plan ──────────────────────────────────────────────────────────────────────────────────
 
 export type TrialStage = "d7" | "d1" | "d0";
 const TRIAL: Record<TrialStage, { subject: (d: string) => string; lead: (name: string, d: string) => string }> = {
@@ -76,7 +75,7 @@ const TRIAL: Record<TrialStage, { subject: (d: string) => string; lead: (name: s
 };
 export function trialReminder(stage: TrialStage, business: string, day: string, appUrl: string): EmailContent {
   const c = TRIAL[stage];
-  const tail = "After that the business moves to Free: reply drafts, Google Protection and the Weekly Care Report stop. Your review link and card keep working.";
+  const tail = "After that reply drafts, Google Protection and the Weekly Care Report stop. Your review link and QR code keep working.";
   const plain = `${c.lead(business, day).replace(/<\/?strong>/g, "")} ${tail}`;
   return {
     subject: `${business}: ${c.subject(day)}`, preheader: "Choose a plan to keep everything going.", title: "Your free trial",
@@ -89,19 +88,12 @@ export function trialReminder(stage: TrialStage, business: string, day: string, 
 export type RenewalStage = "r5" | "r1";
 export function renewalReminder(stage: RenewalStage, business: string, planLabel: string, day: string, planKind: string, appUrl: string): EmailContent {
   const when = stage === "r1" ? "tomorrow" : "in a few days";
-  const plain = `Your ${planLabel} plan for ${business} ends ${when}, on ${day}. To keep reply drafts, Google Protection and the Weekly Care Report going, pay before then. Paying early adds the new period after this one, so you lose no days. Your review link and card keep working either way.`;
+  const plain = `Your ${planLabel} plan for ${business} ends ${when}, on ${day}. To keep reply drafts, Google Protection and the Weekly Care Report going, pay before then. Paying early adds the new period after this one, so you lose no days. Your review link and QR code keep working either way.`;
   const url = `${appUrl}/app/plan?pay=${encodeURIComponent(planKind)}`;
   return {
     subject: stage === "r1" ? `${business}: your plan ends tomorrow` : `${business}: your plan ends on ${day}`,
     preheader: "Pay before it ends and you lose no days.", title: "Your plan is ending",
     bodyHtml: p(esc(plain)), button: { label: "Renew your plan", url }, text: `${plain}\n\nRenew your plan: ${url}`,
-  };
-}
-
-export function paymentReceived(business: string, line: string, appUrl: string): EmailContent {
-  return {
-    subject: `${business}: payment received`, preheader: "Thank you.", title: "Payment received",
-    bodyHtml: p(esc(line)), button: { label: "Open Kabsi", url: `${appUrl}/app` }, text: `${line}\n\n${appUrl}/app`,
   };
 }
 
@@ -136,55 +128,6 @@ export function profileChange(business: string, label: string, o: { lines: strin
       + `<p style="margin:0 0 6px 0;font-size:14px;color:${TOKENS.stone};">Google shows now</p>${box(o.after || "(empty)")}`,
     button: { label: "Open Google Protection", url }, note: "Nothing changes on Google until you choose in Kabsi.",
     text: `${o.lines.join("\n")}\n\nOpen Google Protection: ${url}`,
-  };
-}
-
-// ─── partners ─────────────────────────────────────────────────────────────────────────────────────────────────
-
-export function partnerInvite(partner: string, business: string | null, link: string): EmailContent {
-  const biz = business ? ` for <strong>${esc(business)}</strong>` : "";
-  const bizText = business ? ` for ${business}` : "";
-  return {
-    subject: `${partner} invited you to Kabsi`, preheader: "Reply to every Google review, with your approval.", title: "You're invited to Kabsi",
-    bodyHtml: p(`<strong>${esc(partner)}</strong> invited you to use Kabsi${biz}.`)
-      + p("When a new Google review arrives, Kabsi emails you a reply already drafted in the reviewer's language. Nothing goes on Google until you approve it.")
-      + p("Setup has two steps: find your business, then add Kabsi as a Manager on your Google profile.")
-      + p(`There's nothing to pay Kabsi: your plan comes through ${esc(partner)}.`),
-    button: { label: "Set up Kabsi", url: link }, note: "If you weren't expecting this, you can ignore this email.",
-    text: `${partner} invited you to use Kabsi${bizText}.\n\nWhen a new Google review arrives, Kabsi emails you a reply already drafted in the reviewer's language. Nothing goes on Google until you approve it.\n\nSet up Kabsi: ${link}\n\nThere's nothing to pay Kabsi: your plan comes through ${partner}.`,
-  };
-}
-
-export function partnerInvoice(o: { label: string; amount: number; active: number; free: number; rate: number; unpaid: boolean; trc20: string; binanceId: string }, appUrl: string): EmailContent {
-  const free = o.free ? p(`Free this month (founding partner, first 30 days): ${o.free}`) : "";
-  const lines = p(`Active locations: <strong>${o.active}</strong>`) + free + p(`Rate: ${money(o.rate)} per location`) + p(`<strong>Total: ${money(o.amount)} USDT</strong>`);
-  const pay = o.unpaid
-    ? p(`Pay in USDT on TRC20 to <code>${o.trc20}</code>, or with Binance Pay to ID <code>${o.binanceId}</code>.`) + p("Then open your partner page and paste the transaction ID so we can match it.")
-    : p("Nothing to pay this month.");
-  return {
-    subject: `Kabsi invoice for ${o.label}: ${money(o.amount)}`, preheader: `${o.active} active locations in ${o.label}.`, title: `Invoice for ${o.label}`,
-    bodyHtml: lines + pay, button: { label: "Open partner page", url: `${appUrl}/partner` },
-    text: `Kabsi invoice for ${o.label}\nActive locations: ${o.active}\n${o.free ? `Free (founding, first 30 days): ${o.free}\n` : ""}Rate: ${money(o.rate)} per location\nTotal: ${money(o.amount)} USDT\n\n${o.unpaid ? `Pay in USDT on TRC20 to ${o.trc20}, or with Binance Pay to ID ${o.binanceId}. Then paste the transaction ID on your partner page: ${appUrl}/partner` : "Nothing to pay this month."}`,
-  };
-}
-
-export function partnerPaid(label: string, amount: number, appUrl: string): EmailContent {
-  return {
-    subject: `Payment received: ${label}`, preheader: "Thank you.", title: "Payment received",
-    bodyHtml: p(`We received your payment of ${money(amount)} for ${esc(label)}. Thank you.`), button: { label: "Open partner page", url: `${appUrl}/partner` },
-    text: `We received your payment of ${money(amount)} for ${label}. Thank you.\n\n${appUrl}/partner`,
-  };
-}
-
-/** To the Kabsi team: a partner or an owner says they paid in USDT and the wallet needs checking. */
-export function usdtClaim(o: { who: string; whoLine: string; reference: string; net: string; tx: string; tronscan: boolean; startsPlan: boolean; amount: number }, appUrl: string): EmailContent {
-  const check = o.tronscan ? ` <a href="https://tronscan.org/#/transaction/${encodeURIComponent(o.tx)}" style="color:${TOKENS.ink};">Check on Tronscan</a>` : "";
-  return {
-    subject: `USDT to check: ${o.who}, ${money(o.amount)}`, preheader: "Someone says they paid.", title: "Payment to check",
-    bodyHtml: p(`<strong>${esc(o.who)}</strong> says they paid ${esc(o.whoLine)} (${money(o.amount)}).`) + p(`${esc(o.net)}: <code>${esc(o.tx)}</code>.${check}`)
-      + p(o.startsPlan ? "Confirm it in Staff once the money is in the wallet. Confirming starts the plan." : "Confirm it in Staff once the money is in the wallet."),
-    button: { label: "Open Staff", url: `${appUrl}/staff` },
-    text: `${o.who} says they paid ${o.whoLine} (${money(o.amount)}).\n${o.net}: ${o.tx}\n\nConfirm in Staff: ${appUrl}/staff`,
   };
 }
 

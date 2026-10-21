@@ -16,10 +16,10 @@
 // and what happens next), "backlog drafted" (the day-one email of P0.3-10) and "access removal on day 21" (the
 // disconnect notice of P0.2-02).
 // Trial rules (P0.4-06): trial mail only while the entitlements state is trial (or grace for day 14, ended for the
-// win-back); a concierge, demo or partner-covered business never gets trial mail; a business that pays gets none.
+// win-back); a concierge or demo business never gets trial mail; a business that pays gets none.
 import type { CategoryId } from "./notify-categories.ts";
 
-export type Entitlement = "demo" | "partner" | "concierge" | "paid" | "trial" | "grace" | "ended" | "none";
+export type Entitlement = "demo" | "concierge" | "paid" | "trial" | "grace" | "ended" | "none";
 
 export type Snapshot = {
   locationId: string;

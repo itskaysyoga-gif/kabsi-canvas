@@ -2,8 +2,7 @@
 // every feature checks. The browser only reads it to show the plan line; the server enforces it.
 import { supabase } from "@/lib/supabase";
 
-export type EntitlementState =
-  "demo" | "partner" | "concierge" | "paid" | "trial" | "grace" | "ended" | "none";
+export type EntitlementState = "demo" | "concierge" | "paid" | "trial" | "grace" | "ended" | "none";
 
 export type Entitlements = {
   organization_id: string;

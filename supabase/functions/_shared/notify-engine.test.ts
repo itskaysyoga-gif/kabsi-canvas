@@ -262,16 +262,12 @@ Deno.test("every email carries why you got this, the settings link, the legal se
   assert.match(f.sent[1]!.html, /You asked for this email\./);
 });
 
-Deno.test("mail with no business (a partner, a deleted business) is sent without a notice row and still carries the footer", async () => {
+Deno.test("mail with no business (a deleted business) is sent without a notice row and still carries the footer", async () => {
   const f = fake();
-  const r = await runNotify({
-    category: "partner", kind: "partner_invoice", key: "inv:1", partnerId: "p1", to: [{ email: "partner@example.test", userId: null }], content: content("Invoice"),
-  }, f.deps);
-  assert.equal(r.sent, 1);
-  assert.equal(f.rows.length, 0);
-  assert.match(f.sent[0]!.html, /You are part of a Kabsi partner account\./);
   const gone = await runNotify({
     category: "account", kind: "deletion_done", key: "del:1", locationId: null, to: [{ email: "owner@example.test", userId: null }], content: content("Deleted"),
   }, f.deps);
   assert.equal(gone.sent, 1);
+  assert.equal(f.rows.length, 0);
+  assert.match(f.sent[0]!.html, /This is about your Kabsi account\./);
 });

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { IndustryLinks } from "@/components/marketing/business-grid";
 import { EligibilityBlock } from "@/components/marketing/eligibility-block";
 import { PublicLayout } from "@/components/layouts/public-layout";
@@ -29,7 +29,6 @@ import {
 } from "@/components/marketing/parts";
 import { FlowVisual } from "@/components/marketing/visuals";
 import { pageHead } from "@/lib/site";
-import { useIsLebanon } from "@/lib/region";
 
 export const Route = createFileRoute("/how-it-works")({
   head: () =>
@@ -76,8 +75,6 @@ export const Route = createFileRoute("/how-it-works")({
 });
 
 function Page() {
-  const isLebanon = useIsLebanon();
-
   return (
     <PublicLayout>
       <PageHero
@@ -231,19 +228,12 @@ function Page() {
           <Eyebrow>Get Reviews</Eyebrow>
           <H2>One tap or scan to your Google review page.</H2>
           <p className="mt-5 text-lg leading-8 text-kb-stone">
-            Your dashboard gives you a review link and a printable QR code. Put them on a table
-            card, a receipt or any NFC tag you already own. It's the same page for every customer:
-            no rating screen, no filter. Ask every customer the same way, as they visit. Never offer
-            a reward. Kabsi counts opens (never who opened) and shows them in your report.
+            Your dashboard gives you a review link and a printable QR code. Put them on a table card
+            or a receipt. It works with your own QR codes and NFC cards. It's the same page for
+            every customer: no rating screen, no filter. Ask every customer the same way, as they
+            visit. Never offer a reward. Kabsi counts opens (never who opened) and shows them in
+            your report.
           </p>
-          {isLebanon ? (
-            <p className="mt-4 text-[15px]">
-              In Lebanon we also supply ready NFC cards.{" "}
-              <Link to="/lebanon" className="font-bold underline underline-offset-4">
-                See the Lebanon offer
-              </Link>
-            </p>
-          ) : null}
         </div>
       </Section>
 

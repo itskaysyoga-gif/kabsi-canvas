@@ -481,7 +481,7 @@ export const VERTICALS: Vertical[] = [
       },
       {
         q: "How do customers leave a review?",
-        a: "Every business gets a review link and a printable QR code, free. Share the same link with every customer, on a table card, a receipt or a message. If you already own an NFC tag, you can write the same link on it.",
+        a: "Every business gets a review link and a printable QR code, free. Share the same link with every customer, on a table card, a receipt or a message. It works with your own QR codes and NFC cards.",
       },
     ],
   },
@@ -690,7 +690,7 @@ export const VERTICALS: Vertical[] = [
       },
       {
         q: "How do I pay?",
-        a: "Kabsi Pro is $19 a month or $190 a year, and you can start with a 14-day free trial, no card. See the pricing page for payment methods.",
+        a: "Kabsi Pro is $19 a month or $190 a year, and you can start with a 14-day free trial, no card. Prices are in US dollars and the same in every country.",
       },
     ],
   },
@@ -793,7 +793,7 @@ export const VERTICALS: Vertical[] = [
       },
       {
         q: "Does it work for more than one shop?",
-        a: "Yes. Each shop is its own business in Kabsi, with its own profile, reviews and card.",
+        a: "Yes. Each shop is its own business in Kabsi, with its own profile, reviews and review link.",
       },
     ],
   },
@@ -899,7 +899,7 @@ export const VERTICALS: Vertical[] = [
       },
       {
         q: "How do customers leave a review?",
-        a: "Every business gets a review link and a printable QR code, free. Share the same link with every customer, on a table card, a receipt or a message. If you already own an NFC tag, you can write the same link on it.",
+        a: "Every business gets a review link and a printable QR code, free. Share the same link with every customer, on a table card, a receipt or a message. It works with your own QR codes and NFC cards.",
       },
     ],
   },

@@ -1,5 +1,6 @@
--- P0.1-09: tenant model (K-33, K-16, K-48). The backfill and the triggers keep organizations, organization_members,
--- partner_clients and google_connections complete while the old columns stay the source the app reads.
+-- P0.1-09: tenant model (K-33, K-16, K-48). The backfill and the triggers keep organizations, organization_members
+-- and google_connections complete while the old columns stay the source the app reads. Since P0.8-01 (K-127) there
+-- are owner organisations only: the partner organisations and partner_clients are gone.
 begin;
 create extension if not exists pgtap with schema extensions;
 select * from no_plan();
@@ -26,13 +27,7 @@ select is((select o.type from public.organizations o join public.locations l on 
 select is((select m.role from public.organization_members m join public.locations l on l.organization_id = m.organization_id
   where l.id = '00000000-0000-4000-8000-0000000000c1' and m.user_id = '00000000-0000-4000-8000-0000000000a1'), 'owner',
   'the owner of a business is an owner of its organisation');
-select is((select m.role from public.organization_members m join public.organizations o on o.id = m.organization_id
-  where o.partner_id = '00000000-0000-4000-8000-0000000000d1' and m.user_id = '00000000-0000-4000-8000-0000000000a2'), 'owner',
-  'a partner member is mirrored into the partner organisation');
-select is((select c.status || ':' || (c.partner_organization_id = o.id)::text
-  from public.partner_clients c, public.organizations o
-  where c.location_id = '00000000-0000-4000-8000-0000000000c1' and o.partner_id = '00000000-0000-4000-8000-0000000000d1'),
-  'onboarding:true', 'a business with a partner has a partner_clients row for that partner organisation');
+select is((select count(*)::int from public.organizations where type <> 'owner'), 0, 'every organisation is an owner organisation');
 select is((select access_state from public.google_connections where location_id = '00000000-0000-4000-8000-0000000000c1'),
   'none', 'a business without Google access has access_state none');
 
@@ -40,8 +35,8 @@ select is((select access_state from public.google_connections where location_id 
 create temp table started (id uuid);
 grant select, insert on started to authenticated;
 select tests.act_as('00000000-0000-4000-8000-0000000000b4');
-insert into started select public.start_location('new-place-1', 'New Cafe', 'x', 'US', 'UTC', null, null);
-insert into started select public.start_location('new-place-2', 'New Cafe Two', 'x', 'US', 'UTC', null, null);
+insert into started select public.start_location('new-place-1', 'New Cafe', 'x', 'US', 'UTC');
+insert into started select public.start_location('new-place-2', 'New Cafe Two', 'x', 'US', 'UTC');
 reset role;
 select is((select count(distinct l.organization_id)::int from public.locations l join started s on s.id = l.id), 1,
   'a multi-location owner has one organisation for all their businesses');
@@ -111,41 +106,11 @@ select isnt((select organization_id from public.locations where place_id = 'demo
   (select organization_id from public.locations where place_id = 'new-place-1'),
   'the demo organisation is not the owner''s real organisation');
 
--- Partners: a new partner gets an organisation, its members follow, and a client business is linked to it.
-insert into public.partners (id, name, handle, status) values ('00000000-0000-4000-8000-0000000000d3', 'New Agency', 'new-agency', 'active');
-insert into public.partner_members (partner_id, user_id, role) values ('00000000-0000-4000-8000-0000000000d3', '00000000-0000-4000-8000-0000000000b5', 'staff');
-select is((select m.role from public.organization_members m join public.organizations o on o.id = m.organization_id
-  where o.partner_id = '00000000-0000-4000-8000-0000000000d3'), 'member', 'a partner staff member is a member of the partner organisation');
-update public.locations set partner_id = '00000000-0000-4000-8000-0000000000d3' where place_id = 'new-place-2';
-select is((select o.partner_id from public.partner_clients c join public.organizations o on o.id = c.partner_organization_id
-  join public.locations l on l.id = c.location_id where l.place_id = 'new-place-2'), '00000000-0000-4000-8000-0000000000d3'::uuid,
-  'setting a partner on a business links it to the partner organisation');
-update public.locations set partner_id = null where place_id = 'new-place-2';
-select is((select c.status from public.partner_clients c join public.locations l on l.id = c.location_id
-  where l.place_id = 'new-place-2'), 'ended', 'removing the partner ends the link');
-delete from public.partner_members where partner_id = '00000000-0000-4000-8000-0000000000d3';
-select is((select count(*)::int from public.organization_members m join public.organizations o on o.id = m.organization_id
-  where o.partner_id = '00000000-0000-4000-8000-0000000000d3'), 0, 'removing a partner member removes them from the organisation');
-
--- Approval policy: only known kinds, only owner or partner, and delegation needs the owner's consent.
-select throws_ok($$ update public.partner_clients set approval_policy = '{"review_reply": "partner"}'
-  where location_id = '00000000-0000-4000-8000-0000000000c1' $$, '23514', null, 'delegating to the partner without consent is refused');
-select throws_ok($$ update public.partner_clients set approval_policy = '{"refunds": "owner"}'
-  where location_id = '00000000-0000-4000-8000-0000000000c1' $$, '23514', null, 'an unknown action kind is refused');
-select throws_ok($$ update public.partner_clients set approval_policy = '{"post": "nobody"}'
-  where location_id = '00000000-0000-4000-8000-0000000000c1' $$, '23514', null, 'an approver other than owner or partner is refused');
-select throws_ok($$ update public.partner_clients set approval_policy = '{"post": 1}'
-  where location_id = '00000000-0000-4000-8000-0000000000c1' $$, '23514', null, 'a non-text approver is refused');
-select lives_ok($$ update public.partner_clients set approval_policy = '{"post": "partner", "review_reply": "owner"}',
-  consent_text = 'I let my agency approve posts.', consent_at = now()
-  where location_id = '00000000-0000-4000-8000-0000000000c1' $$, 'delegating with consent is accepted');
-
 -- The API roles cannot write the new tables.
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
 select throws_ok($$ insert into public.subscriptions (organization_id, plan, state)
   select organization_id, 'pro', 'active' from public.locations where id = '00000000-0000-4000-8000-0000000000c1' $$,
   '42501', null, 'an owner cannot write their own subscription');
-select throws_ok($$ update public.partner_clients set approval_policy = '{}' $$, '42501', null, 'an owner cannot write partner_clients directly');
 select throws_ok($$ insert into public.organization_members (organization_id, user_id, role)
   select id, '00000000-0000-4000-8000-0000000000a1', 'owner' from public.organizations $$, '42501', null,
   'an owner cannot add themselves to another organisation');

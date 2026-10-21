@@ -24,19 +24,13 @@ const daysLeft = (iso: string | null) =>
 /** The few facts the strip and the footer lines need. One round of RLS reads. */
 export async function loadHomeFacts(locationId: string): Promise<HomeFacts> {
   const since30 = new Date(Date.now() - 30 * DAY).toISOString();
-  const [conn, ent, claims, taps, report] = await Promise.all([
+  const [conn, ent, taps, report] = await Promise.all([
     supabase
       .from("google_connections")
       .select("last_successful_sync_at")
       .eq("location_id", locationId)
       .maybeSingle(),
     loadEntitlements(locationId),
-    supabase
-      .from("usdt_claims")
-      .select("id", { count: "exact", head: true })
-      .eq("location_id", locationId)
-      .eq("kind", "plan")
-      .eq("status", "pending"),
     supabase
       .from("taps")
       .select("id", { count: "exact", head: true })
@@ -52,32 +46,28 @@ export async function loadHomeFacts(locationId: string): Promise<HomeFacts> {
   const left = daysLeft(ent?.ends_at ?? null);
   const plan: PlanState =
     !ent || ent.state === "none" || ent.state === "ended"
-      ? (claims.count ?? 0) > 0
-        ? { name: "Payment sent", line: "We're confirming it", tone: "amber" }
-        : { name: "No active plan", line: "Choose a plan", tone: "red" }
-      : ent.state === "partner"
-        ? { name: "Kabsi Pro", line: "Through your partner", tone: "green" }
-        : ent.state === "concierge"
-          ? { name: "Early access", line: "Active", tone: "green" }
-          : ent.state === "demo"
-            ? { name: "Demo", line: "Example data", tone: "grey" }
-            : ent.state === "grace"
+      ? { name: "No active plan", line: "Choose a plan", tone: "red" }
+      : ent.state === "concierge"
+        ? { name: "Early access", line: "Active", tone: "green" }
+        : ent.state === "demo"
+          ? { name: "Demo", line: "Example data", tone: "grey" }
+          : ent.state === "grace"
+            ? {
+                name: "Free trial ended",
+                line: "Nothing is published until you choose a plan",
+                tone: "red",
+              }
+            : ent.state === "trial"
               ? {
-                  name: "Free trial ended",
-                  line: "Nothing is published until you choose a plan",
-                  tone: "red",
+                  name: "Free trial",
+                  line: left === null ? "" : `${left} days left`,
+                  tone: left !== null && left <= 3 ? "amber" : "green",
                 }
-              : ent.state === "trial"
-                ? {
-                    name: "Free trial",
-                    line: left === null ? "" : `${left} days left`,
-                    tone: left !== null && left <= 3 ? "amber" : "green",
-                  }
-                : {
-                    name: "Kabsi Pro",
-                    line: left === null ? "Active" : `${left} days left`,
-                    tone: left !== null && left <= 7 ? "amber" : "green",
-                  };
+              : {
+                  name: "Kabsi Pro",
+                  line: left === null ? "Active" : `${left} days left`,
+                  tone: left !== null && left <= 7 ? "amber" : "green",
+                };
   return {
     lastCheckAt:
       (conn.data as { last_successful_sync_at: string | null } | null)?.last_successful_sync_at ??
