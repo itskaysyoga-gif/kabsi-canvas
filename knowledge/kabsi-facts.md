@@ -1,4 +1,4 @@
-Last updated: 21 Oct 2026 (P0.8-06). Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md.
+Last updated: 21 Oct 2026 (P0.8-07). Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md.
 
 # Kabsi Master Knowledge Base
 
@@ -34,12 +34,13 @@ Hussein approved final product decisions on 21 Oct 2026. Most are not built yet.
 
 **Staff "Send review link" (live from 21 Oct 2026, P0.8-06).** On Get reviews, and under the upload on the Photos screen for the staff role, a **Send review link** button opens the staff member's own WhatsApp with this message and the business's review link: "Thanks for visiting {business}. If you would like to leave a review, here is our link: {link}". The staff member picks the customer and presses send. It is the same message for every customer (never only the happy ones), it uses the place link, and Kabsi records nothing: not who sent it, not how many were sent, no targets, no leaderboards. The message never uses the words reward, free, discount, "if you enjoyed", happy or 5 stars; a test fails if it does. The button is part of Essentials and Pro (a business with no plan keeps only its review link and QR code), so a business without a plan sees a line pointing to its plan instead.
 
+**Review graphics (Pro, live from 21 Oct 2026, P0.8-07).** On the Reviews screen, a 4 or 5 star review that still has its words has **Make a graphic**. The owner picks a square (for posts and a website) or a story (for stories), sees the image, and downloads it or shares it from the phone's share sheet. It shows the stars, the review text cut to about 200 characters at a word with an ellipsis, the reviewer's first name and initial, and the business name, in Kabsi's colours and fonts. Links, phone numbers, email addresses, hashtags, handles and emoji are removed from the text; dashes and exclamation marks are softened to match Kabsi's style. A 3 star or lower review gets no graphic. Reviews in Arabic or another non-Latin script are not supported yet and the owner is told so. Kabsi posts nothing and keeps nothing: the image is made when the owner asks and is not stored, and Kabsi keeps review text for 30 days only. It is part of Pro: a business on Essentials, or with no plan, is told it is a Pro feature and nothing is made.
+
 **[COMING] Features.**
 
 - **WhatsApp for owners:** opt in by sending a one-time code to Kabsi's WhatsApp number; get a review alert with the draft and the buttons "Approve" and "Edit in app". Approval on WhatsApp will work only for low and medium risk replies and weekly posts, never for high-risk reviews or for your business name, address, categories, map pin, phone or open or closed status. After you approve, there is a 10-second undo. Today WhatsApp approves nothing (section 9.5b).
 - **Put-back and auto-fix:** a one-tap "Put it back" for every watched detail. On Pro, you can choose to let Kabsi fix regular hours, special hours and the website automatically; never the name, address, category, map pin, phone or open or closed status. If Google changes the same detail twice in 30 days Kabsi stops fixing it by itself and asks you. Kabsi only does this on a verified profile and never says who made a change.
 - **Holiday hours:** Kabsi will ask five days before a public holiday (WhatsApp or email): normal hours, closed, or custom hours, and publish your answer as special hours.
-- **Review graphics (Pro):** a square and a story image for 4-star and 5-star reviews that you download and share yourself. Kabsi posts nothing.
 - **What customers say (Pro):** a monthly summary of what customers mention, such as staff, place and services, only when AI credit is on.
 - **Profile Coach:** a weekly check of what is missing on the profile (description, categories, services, attributes, photo and video types, service area, website link tracking, a website snippet, whether the website matches the profile). You approve every change. A change to the main category is only suggested.
 - **Order and booking button (Pro):** adds your own order or booking link on Google and alerts you if it goes missing or changes. Kabsi cannot remove links from delivery or booking marketplaces.

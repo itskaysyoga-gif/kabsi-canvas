@@ -17,7 +17,8 @@ for dir in */; do
   [ "$fn" = "_shared" ] && continue
   deno check "$fn/index.ts"
 done
-deno test --no-check _shared/
+# --allow-env: satori (the review graphic, P0.8-07) reads NODE_ENV and JEST_WORKER_ID when it loads.
+deno test --no-check --allow-env _shared/
 # P0.3-04: the evaluation set and the prompt gate, with stub models only (no network).
 cd "$scratch"
 deno check scripts/eval/*.ts

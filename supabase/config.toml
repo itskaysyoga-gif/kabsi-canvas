@@ -44,6 +44,8 @@ verify_jwt = true
 verify_jwt = true
 [functions.review-link]
 verify_jwt = true
+[functions.review-graphic]  # Pro review graphic (P0.8-07): the signed-in owner or manager calls it; membership, the Pro check and the rating check run in code
+verify_jwt = true
 [functions.review-page]      # the page behind a review link (P0.8-05): browser calls send the anon JWT; rate limit and the active-link check run in code
 verify_jwt = true
 [functions.auth-code]         # sign-in code (P0.4-02): browser calls send the anon JWT; Turnstile, the code limits and the throwaway-domain check run in code

@@ -9,6 +9,7 @@ import { StatusPill } from "@/components/ui/status-pill";
 import { PageIcon } from "@/components/shared/page-icon";
 import { ReviewCard, ReviewHead } from "@/components/reviews/review-card";
 import { ReviewStatusPill } from "@/components/reviews/review-status";
+import { ReviewGraphic } from "@/components/reviews/review-graphic";
 import { StaffTestTool } from "@/components/reviews/staff-test-tool";
 import { allReviews, type ReviewRow } from "@/lib/reviews";
 import {
@@ -394,6 +395,7 @@ function Detail({ review, concierge }: { review: ReviewRow; concierge: boolean }
       <div className="mt-4">
         <ReviewStatusPill review={review} concierge={concierge} />
       </div>
+      <ReviewGraphic review={review} />
       {review.content_purged_at && !review.comment ? (
         <p className="mt-3 text-sm text-kb-stone">
           Google's rules let Kabsi keep review text for 30 days. Read it on your Google profile.
