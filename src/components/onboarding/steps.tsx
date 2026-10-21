@@ -73,10 +73,7 @@ export function BusinessStep({ onCreated }: { onCreated: () => Promise<unknown> 
     try {
       chooseLocation(await startLocation(picked));
       forgetSnapshot();
-      track("business_selected", {
-        country: picked.country ?? "",
-        source: "self",
-      });
+      track("business_found", { country: picked.country ?? "", source: "start" });
       await onCreated();
     } catch (e) {
       setError(friendlyError(e));
@@ -151,7 +148,8 @@ export function BusinessStep({ onCreated }: { onCreated: () => Promise<unknown> 
           value={eligible}
           onChange={(v) => {
             setEligible(v);
-            if (v) track("eligibility_answered", { answer: v });
+            // G-44: one event per profile situation the owner reports (K-94).
+            if (v) track("profile_state_seen", { state: v });
           }}
         />
       ) : null}
@@ -180,7 +178,8 @@ export function AccessStep({ location, onChanged }: StepProps) {
     setError("");
     try {
       await saveConsent(location!.id);
-      track("consent_given", { location_id: location!.id });
+      // G-44: the owner starts giving Kabsi access. Only the manual Manager invite exists today.
+      track("connect_started", { location_id: location!.id, route: "manual" });
       await onChanged();
     } catch (e) {
       setAgreed(false);

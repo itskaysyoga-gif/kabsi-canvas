@@ -35,7 +35,7 @@ insert into tested values
   ('answer_knowledge_confirm(uuid,text)'), ('answer_style_offer(uuid,boolean)'),
   ('update_notification_settings(uuid,text[],smallint,text,integer)'),
   ('my_notification_prefs(uuid)'), ('set_notification_pref(uuid,text,text,text)'), ('list_my_notifications(uuid,integer)'),
-  ('mark_notifications_read(uuid,uuid[])'), ('holiday_calendar(uuid,integer)');
+  ('mark_notifications_read(uuid,uuid[])'), ('save_signup_attribution(jsonb)'), ('holiday_calendar(uuid,integer)');
 
 select is(
   (select coalesce(array_agg(p.oid::regprocedure::text order by 1), '{}') from pg_proc p
@@ -185,6 +185,10 @@ select throws_ok($$ select public.staff_complete_followup(gen_random_uuid(), 'x'
 select throws_ok($$ select public.staff_mock_listing_edit('00000000-0000-4000-8000-0000000000c1', 'phone', '1') $$, '42501', null, 'staff_mock_listing_edit refuses a non-staff user');
 select throws_ok($$ select public.staff_mock_review('00000000-0000-4000-8000-0000000000c1', 5, 'n', 'c') $$, '42501', null, 'staff_mock_review refuses a non-staff user');
 select throws_ok($$ select public.staff_set_concierge('00000000-0000-4000-8000-0000000000c1', true) $$, '42501', null, 'staff_set_concierge refuses a non-staff user');
+-- P0.6-02: a stranger's attribution and via code go only to the stranger's own record and businesses (the victim
+-- business is checked unchanged at the end).
+select lives_ok($$ select public.save_signup_attribution('{"via":"HIJACK","first":{"utm_source":"x"}}'::jsonb) $$,
+  'save_signup_attribution touches only the caller''s own record');
 
 reset role;
 
