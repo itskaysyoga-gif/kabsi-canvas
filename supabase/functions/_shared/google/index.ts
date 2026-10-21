@@ -4,6 +4,7 @@
 // addSpecialHours, patchListing) is only ever called by the publish job in api/jobs.ts, after the owner's approval
 // and claim_publication (guardrail 6, P0.1-13a and P0.1-13b).
 import { type InvitationAddress, matchInvitation, type PendingBusiness } from "../invitations.ts";
+import { isConciergeLocationId } from "../concierge.ts";
 import { assertNotConcierge, googleMode, modeFor, type Mode } from "./client.ts";
 import * as accountsLive from "./accounts/live.ts";
 import * as accountsMock from "./accounts/mock.ts";
@@ -331,6 +332,41 @@ export async function searchKeywords(locationId: string): Promise<{ keyword: str
     .map((r) => ({ keyword: String(r.searchKeyword ?? "").trim(), count: Number(r.insightsValue?.value ?? r.insightsValue?.threshold ?? 0) }))
     .filter((r) => r.keyword)
     .sort((a, b) => b.count - a.count);
+}
+
+// ─── Insights (read only, P0.5-05): Google's daily performance figures and one month of search terms, read when the
+// owner opens Insights and never stored. "mock" means Google is in mock mode or the business is a demo: the Insights
+// screen then shows labelled examples instead of the mock's zeros.
+export function performanceSource(locationId: string | null | undefined): "live" | "mock" | "none" {
+  if (!locationId || isConciergeLocationId(locationId)) return "none";
+  return modeFor(locationId);
+}
+
+export async function dailyFigures(locationId: string, metrics: string[], start: GDate, end: GDate): Promise<Record<string, Record<string, number>>> {
+  assertNotConcierge(locationId);
+  const api = by(modeFor(locationId), performanceLive, performanceMock);
+  const data = await api.dailyMetrics(locationId, metrics, start, end);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const out: Record<string, Record<string, number>> = {};
+  for (const group of data.multiDailyMetricTimeSeries ?? []) {
+    for (const series of group.dailyMetricTimeSeries ?? []) {
+      const metric = series.dailyMetric;
+      if (!metric) continue;
+      out[metric] ??= {};
+      for (const v of series.timeSeries?.datedValues ?? []) {
+        if (!v.date) continue;
+        out[metric][`${v.date.year}-${pad(v.date.month)}-${pad(v.date.day)}`] = Number(v.value ?? 0) || 0;
+      }
+    }
+  }
+  return out;
+}
+
+export async function searchTermsFor(locationId: string, month: { year: number; month: number }): Promise<{ searchKeyword?: string; insightsValue?: { value?: string; threshold?: string } }[]> {
+  assertNotConcierge(locationId);
+  const api = by(modeFor(locationId), performanceLive, performanceMock);
+  const data = await api.searchKeywordsMonthly(locationId, month, month);
+  return data.searchKeywordsCounts ?? [];
 }
 
 // ─── Places API (New), on PLACES_API_KEY (works before the Business Profile grant).
