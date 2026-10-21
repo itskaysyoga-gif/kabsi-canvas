@@ -27,10 +27,10 @@ export function ReviewPageView({ data }: { data: ReviewPageData }) {
           href={managerHref(data.whatsapp, data.name)}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 text-base font-bold underline underline-offset-4"
+          className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 text-sm font-bold"
         >
-          <MessageCircle className="size-5 shrink-0" aria-hidden="true" />
-          {MANAGER_LINE}
+          <MessageCircle className="size-4 shrink-0" aria-hidden="true" />
+          <span className="underline underline-offset-4">{MANAGER_LINE}</span>
         </a>
       ) : null}
     </Shell>
@@ -62,7 +62,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main className="grid min-h-screen place-items-center bg-kb-sand px-5 py-10">
       <div className="w-full max-w-md">
-        <div className="flex flex-col items-center rounded-large bg-kb-white p-7 text-center shadow-kb sm:p-10">
+        <div className="flex flex-col items-center rounded-large bg-kb-white p-6 text-center shadow-kb sm:p-10">
           {children}
         </div>
         <p className="mt-6 flex items-center justify-center gap-2 text-sm text-kb-stone">
