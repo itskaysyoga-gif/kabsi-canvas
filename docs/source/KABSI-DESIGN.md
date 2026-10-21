@@ -273,9 +273,9 @@ One build card (P0.8-13), made after the features and before the launch gate, wi
 
 | # | Section | Content |
 |---|---|---|
-| 1 | Hero | H1 "Your Google reviews and listing. Taken care of." Sub: "Kabsi replies to your reviews, watches your Google profile and brings you more customers. You approve on WhatsApp." Yellow button "Check my Google profile free" (the free Profile Check, always). Secondary "See how it works". A WhatsApp phone mockup showing a review alert with the draft and the Approve button |
+| 1 | Hero | H1 "Your Google reviews and listing. Taken care of." Sub: "Kabsi replies to your reviews, watches your Google profile and makes it easy for customers to choose you. You approve on WhatsApp." Yellow button "Check my Google profile free" (the free Profile Check, always). Secondary "See how it works". A WhatsApp phone mockup showing a review alert with the draft and the Approve button |
 | 2 | How it works | Four steps: check your profile, add Kabsi as Manager, approve replies from your phone, Kabsi keeps watching |
-| 3 | Three pillars | "Every review answered", "Your profile protected", "More customers find you", each with a real screen (the review card, the Google Protection card, the Profile Coach checklist) |
+| 3 | Three pillars | "Every review answered", "Your profile protected", "Ready to be found", each with a real screen (the review card, the Google Protection card, the Profile Coach checklist) |
 | 4 | WhatsApp | Approve a reply in two taps; what WhatsApp can approve (low and medium risk replies and weekly posts) and what it cannot (high-risk reviews and your business name, address, categories, map pin, phone and open status); a 10-second undo |
 | 5 | Essentials and Pro | A feature grid in two columns, from audit K-126 |
 | 6 | Pricing | Essentials $19 a month or $190 a year; Pro $39 a month or $390 a year; extra location $15 or $150; the 14-day Pro trial, no card; "plus tax where it applies" |
