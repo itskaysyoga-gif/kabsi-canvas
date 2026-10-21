@@ -303,6 +303,24 @@ function Page() {
             anonymised.
           </li>
           <li>
+            Where you came from: your browser keeps the campaign details in the link you arrived by
+            (the utm fields), the first page you saw and the site that sent you, and we save them
+            with your account when you sign up, so we know which campaigns work. A click id from a
+            Meta ad is kept only where your privacy choice allows advertising.
+          </li>
+          <li>
+            Referrals: a Kabsi link with a referral code (via=CODE) sets a first-party cookie,
+            kabsi_via, for 60 days. If you follow another referral link, the newest one counts. When
+            you sign up we save the code with your account and your business. It is not used for
+            ads.
+          </li>
+          <li>
+            Usage events: PostHog receives events such as "reply approved" or "post published" with
+            ids, counts and channels only, never review text, names or email addresses. They pass
+            through kabsi.co, and events about access, publishing and payment are sent from our
+            servers. Nothing is sent for the demo workspace.
+          </li>
+          <li>
             Advertising: we use no advertising cookies today and don't track you on other sites. If
             we add Meta&apos;s ad measurement later, it loads only where your choice allows it:
             after a yes in the UK, the EU and EEA, the UAE and Saudi Arabia, and with notice and an

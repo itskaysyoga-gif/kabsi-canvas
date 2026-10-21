@@ -61,7 +61,10 @@ let pendingFbclid: string | null = null;
 let watching = false;
 
 // Called on every page view from the root component.
-export function captureTouch(href: string = window.location.href, referrer: string = document.referrer) {
+export function captureTouch(
+  href: string = window.location.href,
+  referrer: string = document.referrer,
+) {
   if (typeof window === "undefined") return;
   const url = new URL(href);
   const stored = readStored();
@@ -69,7 +72,11 @@ export function captureTouch(href: string = window.location.href, referrer: stri
   if (touch) {
     stored.first ??= touch;
     stored.last = touch;
-  } else if (!stored.first && url.pathname && !/^\/(app|staff|a|activate)(\/|$)/.test(url.pathname)) {
+  } else if (
+    !stored.first &&
+    url.pathname &&
+    !/^\/(app|staff|a|activate)(\/|$)/.test(url.pathname)
+  ) {
     // A visit with no campaign is the first touch too ("direct" or a referring site), so organic sign-ups are counted.
     stored.first = { landing: url.pathname.slice(0, 200), at: new Date().toISOString() };
     try {
