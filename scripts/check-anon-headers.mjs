@@ -16,6 +16,11 @@ const SITES = [
     target: /functions\/v1\/review-link/,
   },
   {
+    fn: "review-page",
+    file: "src/lib/review-page.ts",
+    target: /functions\/v1\/review-page/,
+  },
+  {
     fn: "profile-snapshot",
     file: "src/lib/profile-check.ts",
     target: /functions\/v1\/profile-snapshot/,

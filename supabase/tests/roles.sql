@@ -23,6 +23,7 @@ insert into public.location_members (location_id, user_id, role) values
 update public.locations set status = 'active', consent_at = now(), access_granted_at = now(),
   google_location_id = 'locations/mock-victim', is_demo = false
  where id = '00000000-0000-4000-8000-0000000000c1';
+update public.cards set kind = 'link' where code = 'VCTM22';
 update public.reviews set state = 'drafted', risk = 'low' where id = '00000000-0000-4000-8000-0000000000e1';
 update public.publications set state = 'cancelled' where target_id = '00000000-0000-4000-8000-0000000000e1';
 -- One row of business B the members of A must never see.
@@ -109,6 +110,7 @@ select lives_ok($$ select public.set_auto_posts('00000000-0000-4000-8000-0000000
 select lives_ok($$ select * from public.activity_feed('00000000-0000-4000-8000-0000000000c1', 7) $$, 'manager: sees the activity feed');
 select lives_ok($$ select public.list_tasks('00000000-0000-4000-8000-0000000000c1') $$, 'manager: lists the tasks');
 select lives_ok($$ select public.rename_card('VCTM22', 'Counter') $$, 'manager: may rename the review link');
+select lives_ok($$ select public.set_review_link_mode('VCTM22', 'page') $$, 'manager: may switch the review link to the page');
 select lives_ok($$ select public.save_fact('00000000-0000-4000-8000-0000000000c1', 'parking', '"Behind the shop"') $$, 'manager: may add a fact');
 select throws_ok($$ select public.list_team('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'manager: cannot see the team list');
 select throws_ok($$ select public.invite_team_member('00000000-0000-4000-8000-0000000000c1', 'x@example.test', 'staff') $$, '42501', null, 'manager: cannot invite');
@@ -126,6 +128,7 @@ select throws_ok($$ select * from public.activity_feed('00000000-0000-4000-8000-
 select throws_ok($$ select public.rename_card('VCTM22', 'Staff') $$, '42501', null, 'staff: cannot rename the review link');
 select throws_ok($$ select public.create_review_link('00000000-0000-4000-8000-0000000000c1', 'x') $$, '42501', null, 'staff: cannot make a review link');
 select throws_ok($$ select public.set_card_active('VCTM22', false) $$, '42501', null, 'staff: cannot switch the link off');
+select throws_ok($$ select public.set_review_link_mode('VCTM22', 'direct') $$, '42501', null, 'staff: cannot change what the link does');
 select throws_ok($$ select public.set_auto_posts('00000000-0000-4000-8000-0000000000c1', true) $$, '42501', null, 'staff: cannot set auto posts');
 select throws_ok($$ select public.update_notification_settings('00000000-0000-4000-8000-0000000000c1', null, null, null, null) $$, '42501', null, 'staff: no email settings');
 select throws_ok($$ select public.save_fact('00000000-0000-4000-8000-0000000000c1', 'parking', '"x"') $$, '42501', null, 'staff: cannot change facts');

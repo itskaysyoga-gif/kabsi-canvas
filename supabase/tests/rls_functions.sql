@@ -16,7 +16,7 @@ insert into tested values
   ('google_mode()'), ('handle_review_offline(uuid)'),
   ('has_location_role(uuid,text[])'), ('is_member(uuid)'), ('is_org_member(uuid,text[])'), ('is_staff()'),
   ('plan_summary(uuid)'),
-  ('rename_card(text,text)'),
+  ('rename_card(text,text)'), ('set_review_link_mode(text,text)'),
   ('list_tasks(uuid)'), ('task_action(uuid,text)'), ('approve_backlog(uuid,jsonb)'),
   ('can_see(uuid,text)'), ('my_access(uuid)'), ('set_approval_policy(uuid,text,text,text)'), ('invite_team_member(uuid,text,text)'),
   ('cancel_team_invite(uuid)'), ('claim_team_invites()'), ('set_member_role(uuid,uuid,text)'), ('list_team(uuid)'), ('remove_member(uuid,uuid)'),
@@ -139,6 +139,7 @@ select throws_ok($$ select public.request_location_deletion('00000000-0000-4000-
 select throws_ok($$ select public.save_consent('00000000-0000-4000-8000-0000000000c1', 'yes') $$, '42501', null, 'save_consent refuses a non-member');
 select throws_ok($$ select public.set_auto_posts('00000000-0000-4000-8000-0000000000c1', false) $$, '42501', null, 'set_auto_posts refuses a non-member');
 select throws_ok($$ select public.set_card_active('VCTM22', false) $$, '42501', null, 'set_card_active refuses a non-member');
+select throws_ok($$ select public.set_review_link_mode('VCTM22', 'page') $$, '42501', null, 'set_review_link_mode refuses a non-member');
 select throws_ok($$ select public.set_onboarding_step('00000000-0000-4000-8000-0000000000c1', 'done') $$, '42501', null, 'set_onboarding_step refuses a non-member');
 select throws_ok($$ select public.skip_review('00000000-0000-4000-8000-0000000000e1') $$, '42501', null, 'skip_review refuses a non-member');
 -- P0.3-01: Business Knowledge, fact by fact. The card's writer is retired and nobody may run it.

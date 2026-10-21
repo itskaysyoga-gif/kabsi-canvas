@@ -9,11 +9,23 @@ const NAMESPACE = Deno.env.get("CF_KV_NAMESPACE_ID") ?? "d897cbaa4ff34c8bab5e692
 const CODE_RE = /^[2-9A-HJKMNP-Z]{6}$/;
 const BULK_SIZE = 1000;
 
-type CardRow = { code: string; status: string; destination: string | null; location_id: string | null };
+type CardRow = {
+  code: string;
+  status: string;
+  destination: string | null;
+  location_id: string | null;
+  page_mode: string | null;
+};
 
-// Same shape the Worker reads: {d: destination, b: location_id, a: active}.
-function cardValue(c: Pick<CardRow, "status" | "destination" | "location_id">) {
-  return JSON.stringify({ d: c.destination ?? null, b: c.location_id ?? null, a: c.status === "active" });
+// Same shape the Worker reads: {d: destination, b: location_id, a: active, m: "direct" | "page"} (m: P0.8-05, K-132;
+// a copy without it is a direct link).
+function cardValue(c: Pick<CardRow, "status" | "destination" | "location_id" | "page_mode">) {
+  return JSON.stringify({
+    d: c.destination ?? null,
+    b: c.location_id ?? null,
+    a: c.status === "active",
+    m: c.page_mode === "page" ? "page" : "direct",
+  });
 }
 
 Deno.serve(async (req) => {
@@ -34,7 +46,7 @@ Deno.serve(async (req) => {
     if (body.backfill === true) {
       let written = 0;
       for (let from = 0; ; from += BULK_SIZE) {
-        const { data, error } = await db.from("cards").select("code, status, destination, location_id")
+        const { data, error } = await db.from("cards").select("code, status, destination, location_id, page_mode")
           .order("code").range(from, from + BULK_SIZE - 1);
         if (error) throw error;
         const rows = (data ?? []) as CardRow[];
@@ -54,7 +66,7 @@ Deno.serve(async (req) => {
 
     const code = body.code;
     if (!code || !CODE_RE.test(code)) return json({ error: "bad_code" }, 400);
-    const { data: card, error } = await db.from("cards").select("code, status, destination, location_id")
+    const { data: card, error } = await db.from("cards").select("code, status, destination, location_id, page_mode")
       .eq("code", code).maybeSingle();
     if (error) throw error;
 

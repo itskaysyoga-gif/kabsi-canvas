@@ -2,7 +2,7 @@
 
 > Kabsi looks after your business on Google: a reply ready for every new review, your hours and details kept right, a Weekly Care Report and fresh posts. The owner approves every change and nothing is published without it. Kabsi is independent and not affiliated with Google. Short version: https://kabsi.co/llms.txt
 
-Last updated: 21 Oct 2026 (P0.8-01). Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md.
+Last updated: 21 Oct 2026 (P0.8-05). Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md.
 
 # Kabsi Master Knowledge Base
 
@@ -34,12 +34,13 @@ Hussein approved final product decisions on 21 Oct 2026. Most are not built yet.
 - **Pro will add:** auto-fix for regular hours, special hours and website if you switch it on; sending photos on WhatsApp; weekly posts; review graphics; a monthly "What customers say" summary; the Profile Coach actions; your own order and booking button on Google; a search terms report; a "Report a fake review" helper; team roles and approval rules.
 - Until the new plans are live, the prices in section 4.1 are what applies. Do not quote Essentials or Pro prices as available.
 
+**Review link page (live from 21 Oct 2026, P0.8-05).** Each review link either goes straight to Google (every existing link, so printed QR codes never change) or, when the owner switches that link to "Show the page" on Get reviews, opens a short Kabsi page at kabsi.co/review/{CODE}. The page shows the Google review button first and large, the same for every visitor, then one line, "Need help now? Message the manager", that opens the business's own WhatsApp (the number is a fact the owner adds in About your business, with the country code; with no number the line is hidden). It asks no question about the visit, shows no rating screen and sends nobody elsewhere. Opens are counted per link the same way as before. A business with no plan keeps its review link and QR code.
+
 **[COMING] Features.**
 
 - **WhatsApp for owners:** opt in by sending a one-time code to Kabsi's WhatsApp number; get a review alert with the draft and the buttons "Approve" and "Edit in app". Approval on WhatsApp will work only for low and medium risk replies and weekly posts, never for high-risk reviews or for your business name, address, categories, map pin, phone or open or closed status. After you approve, there is a 10-second undo. Today WhatsApp approves nothing (section 9.5b).
 - **Put-back and auto-fix:** a one-tap "Put it back" for every watched detail. On Pro, you can choose to let Kabsi fix regular hours, special hours and the website automatically; never the name, address, category, map pin, phone or open or closed status. If Google changes the same detail twice in 30 days Kabsi stops fixing it by itself and asks you. Kabsi only does this on a verified profile and never says who made a change.
 - **Holiday hours:** Kabsi will ask five days before a public holiday (WhatsApp or email): normal hours, closed, or custom hours, and publish your answer as special hours.
-- **Review link page:** the Google review button first and shown to everyone, with "Need help now? Message the manager" opening the business's own WhatsApp. No question about how the visit went, and nobody is sent elsewhere.
 - **Staff "Send review link":** a staff member sends the link to any customer from their own WhatsApp with a plain message. No targets, no rewards.
 - **Review graphics (Pro):** a square and a story image for 4-star and 5-star reviews that you download and share yourself. Kabsi posts nothing.
 - **What customers say (Pro):** a monthly summary of what customers mention, such as staff, place and services, only when AI credit is on.
@@ -351,7 +352,7 @@ A review link, QR code or NFC card opens the business's own Google review page. 
 1. **Copy your review link.** Tap **Create my review link**: a short link (go.kabsi.co/{CODE}) and a QR code. Tap **Copy review link**.
 2. **Print your QR code.** **Download QR** (SVG) or **Print** (a page saying "Leave us a Google review").
 3. **Optional: use your own NFC card or tag.** If you own an NFC card, tag or sticker, write the same link on it with a free NFC writer app (section 5.4). Kabsi generates the link and the QR code; the tag is yours.
-You can have up to 5 links per business (**Create another link**), for example one per spot, to compare opens. Each shows its opens for 7 days and can be switched off or on.
+You can have up to 5 links per business (**Create another link**), for example one per spot, to compare opens. Each shows its opens for 7 days and can be switched off or on. Under each link, **When someone opens this link** lets you choose **Go straight to Google** (the default) or **Show the page** (the Google review button first, plus "Need help now? Message the manager" when you added a WhatsApp number in About your business). Everyone sees the same thing.
 
 Share it in your own messages, Instagram bio, receipts, menus and follow-up emails.
 
@@ -1125,7 +1126,7 @@ Delete your business in Settings, and ask by email to delete your login too.
 - **Special hours:** hours for specific dates, like holidays.
 - **Google Protection:** watches key listing details, alerts you and lets you choose in the app whether to keep your information.
 - **Profile health:** the suggestions list on Home, no score.
-- **Review link:** go.kabsi.co/{CODE}, opens your Google review page. Up to 5 per business.
+- **Review link:** go.kabsi.co/{CODE}, opens your Google review page, or a short Kabsi page with the Google button first if you chose that. Up to 5 per business.
 - **NTAG213 / NTAG215:** common NFC chip types that work for review links.
 - **NFC Tools:** a free app for writing a link onto an NFC tag.
 - **Tap / open:** one opening of your review page. Not a review.
