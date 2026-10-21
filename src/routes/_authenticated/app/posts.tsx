@@ -1,70 +1,45 @@
 import { useState, type FormEvent } from "react";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
-import { fmtDate } from "@/lib/format";
+import { fmtDate, fmtDateTime } from "@/lib/format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useAutosize } from "@/lib/use-autosize";
-import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
-import { hasPostFacts, loadKnowledge } from "@/lib/knowledge";
 import { contentCall } from "@/lib/reviews";
 import { track } from "@/lib/telemetry";
 import { Megaphone as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
+import {
+  approveMonth,
+  CTA_LABEL,
+  loadPosts,
+  loadSettings,
+  monthName,
+  monthOf,
+  nextMonths,
+  postPhotos,
+  savePost,
+  setAutoPosts,
+  setCadence,
+  STATE_LABEL,
+  TYPE_LABEL,
+  type Post,
+  type PostType,
+} from "@/lib/posts";
 
-// Google posts (D217): the owner says what's new, Kabsi drafts, the owner edits and posts. Nothing
-// goes to Google without the Post click, and it posts exactly the text in the box (D202).
+// Posts (P0.5-02, K-24, K-80): the month view. Kabsi prepares posts from what is true (2 a month by default) and asks
+// one question when it has nothing true to say; the owner writes an Update, Offer or Event, approves the month or each
+// post, and Kabsi sends each at its time through the one pipeline. Nothing goes to Google without the approval (D202).
 export const Route = createFileRoute("/_authenticated/app/posts")({
   head: () => ({ meta: [{ title: "Posts | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: PostsPage,
 });
 
-type Post = {
-  id: string;
-  owner_input: string;
-  body: string | null;
-  cta_type: string | null;
-  state: string;
-  source: string;
-  keywords: string[] | null;
-  created_at: string;
-  updated_at: string;
-};
-// Buttons Google accepts on a post. "Call" uses the phone number on the profile.
-const CTA_LABEL: Record<string, string> = {
-  CALL: "Call now",
-  BOOK: "Book",
-  ORDER: "Order online",
-  SHOP: "Shop",
-  LEARN_MORE: "Learn more",
-  SIGN_UP: "Sign up",
-};
-type Keyword = { keyword: string; source: "search" | "category" | "owner" };
-
-async function loadPosts(locationId: string): Promise<Post[]> {
-  const { data, error } = await supabase
-    .from("gbp_posts")
-    .select("id, owner_input, body, cta_type, state, source, keywords, created_at, updated_at")
-    .eq("location_id", locationId)
-    .order("created_at", { ascending: false })
-    .limit(30);
-  if (error) throw new Error(error.message);
-  return (data ?? []) as Post[];
-}
+const QUESTION = "Anything new this month? A dish, a service, an event?";
 
 function PostsPage() {
   const queryClient = useQueryClient();
@@ -75,22 +50,34 @@ function PostsPage() {
     queryFn: () => loadPosts(loc!.id),
     enabled: !!loc,
   });
+  const settings = useQuery({
+    queryKey: ["post-settings", loc?.id],
+    queryFn: () => loadSettings(loc!.id),
+    enabled: !!loc,
+  });
   const refresh = () =>
     Promise.all(
-      [["posts"], ["dashboard"], ["activity"]].map((queryKey) =>
+      [["posts"], ["dashboard"], ["activity"], ["tasks"], ["post-settings"]].map((queryKey) =>
         queryClient.invalidateQueries({ queryKey }),
       ),
     );
-  const drafts = (posts.data ?? []).filter((p) => p.state === "draft");
-  const done = (posts.data ?? []).filter((p) => p.state !== "draft");
+  const months = nextMonths(2);
+  const [month, setMonth] = useState(months[0] ?? "");
+  const all = posts.data ?? [];
+  const inMonth = all.filter((p) => monthOf(p) === month);
+  const prepared = inMonth.filter((p) => p.state === "draft");
+  const planned = inMonth.filter((p) => p.state !== "skipped");
+  const cadence = settings.data?.posts_per_month ?? 2;
+  const ready = loc && loc.status === "active" && !loc.concierge;
+
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Profile</p>
+      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Content</p>
       <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Posts</h1>
       <p className="mt-2 max-w-xl text-kb-stone">
-        Short updates that show on your Google profile. Tell Kabsi what's new in a sentence, or let
-        it draft one each week from your facts. Nothing is posted until you tap Post to Google.
+        Short updates on your Google profile, from what is true about your business. You approve
+        each one; Kabsi sends it on its day.
       </p>
       {!location.isLoading && !loc ? (
         <Button asChild className="mt-6">
@@ -99,402 +86,548 @@ function PostsPage() {
       ) : null}
       {loc?.concierge ? <EarlyAccessNotice what="Posts" /> : null}
       {loc && !loc.concierge && loc.status !== "active" ? <NotYet /> : null}
-      {/* A draft waiting for the owner comes first: it's the one thing to act on. */}
-      {loc?.status === "active" && !loc.concierge && drafts.length ? (
-        <section className="mt-7">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-kb-stone">
-            Waiting for you
-          </h2>
-          <div className="mt-3 space-y-5">
-            {drafts.map((p) => (
-              <DraftCard key={p.id} post={p} onChanged={refresh} />
-            ))}
-          </div>
-        </section>
+      {posts.isError ? (
+        <p className="mt-6 text-sm text-kb-red" role="alert">
+          Couldn't load your posts. Refresh the page to try again.
+        </p>
       ) : null}
-      {loc && loc.status === "active" && !loc.concierge ? (
+
+      {ready ? (
         <>
-          {drafts.length ? (
-            <h2 className="mt-10 text-sm font-bold uppercase tracking-wider text-kb-stone">
-              Write another post
-            </h2>
-          ) : null}
-          <WeeklyToggle locationId={loc.id} />
-          <NewPost locationId={loc.id} onCreated={refresh} />
-        </>
-      ) : null}
-      {done.length ? (
-        <div className="mt-10">
-          <h2 className="text-lg font-bold">Earlier</h2>
-          <div className="mt-3 space-y-3">
-            {done.map((p) => (
-              <div key={p.id} className="rounded-card bg-kb-white p-4 shadow-kb">
-                <p className="text-xs font-bold uppercase text-kb-stone">
-                  {p.state === "posted"
-                    ? "Posted"
-                    : p.state === "publishing"
-                      ? "Sending to Google"
-                      : p.state === "skipped"
-                        ? "Skipped"
-                        : "Not posted"}{" "}
-                  · {fmtDate(p.state === "posted" ? p.updated_at : p.created_at)}
-                  {p.source === "auto" ? " · weekly draft" : ""}
-                </p>
-                <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-6">
-                  {p.body}
-                </p>
-              </div>
+          <div className="mt-7 flex gap-2" role="tablist" aria-label="Month">
+            {months.map((m) => (
+              <button
+                key={m}
+                type="button"
+                role="tab"
+                aria-selected={m === month}
+                onClick={() => setMonth(m)}
+                className={`h-11 rounded-pill border px-4 text-sm font-bold ${m === month ? "border-kb-black bg-kb-black text-kb-white" : "border-kb-hairline bg-kb-white"}`}
+              >
+                {monthName(m)}
+              </button>
             ))}
           </div>
-        </div>
+
+          <MonthView
+            locationId={loc.id}
+            month={month}
+            posts={inMonth}
+            prepared={prepared}
+            missing={Math.max(cadence - planned.length, 0)}
+            onChanged={refresh}
+          />
+
+          <WritePost locationId={loc.id} onSaved={refresh} />
+          <Settings locationId={loc.id} />
+        </>
       ) : null}
     </div>
   );
 }
 
-function NewPost({ locationId, onCreated }: { locationId: string; onCreated: () => unknown }) {
-  const [input, setInput] = useState("");
-  const [keywords, setKeywords] = useState("");
-  const [cta, setCta] = useState("");
-  const [url, setUrl] = useState("");
+function MonthView({
+  locationId,
+  month,
+  posts,
+  prepared,
+  missing,
+  onChanged,
+}: {
+  locationId: string;
+  month: string;
+  posts: Post[];
+  prepared: Post[];
+  missing: number;
+  onChanged: () => unknown;
+}) {
   const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
-  const [ideas, setIdeas] = useState<Keyword[] | null>(null);
-  const [ideasBusy, setIdeasBusy] = useState(false);
-  const chosen = keywords
-    .split(",")
-    .map((k) => k.trim().toLowerCase())
-    .filter(Boolean);
-  async function suggest() {
-    setIdeasBusy(true);
-    setErr("");
-    try {
-      const r = await contentCall<{ keywords: Keyword[] }>({
-        do: "keyword_suggest",
-        location_id: locationId,
-      });
-      setIdeas(r.keywords);
-    } catch (x) {
-      setErr(x instanceof Error ? x.message : "Couldn't load suggestions.");
-    }
-    setIdeasBusy(false);
-  }
-  function addKeyword(k: string) {
-    if (chosen.includes(k.toLowerCase()) || chosen.length >= 5) return;
-    setKeywords(chosen.length ? `${keywords.replace(/,\s*$/, "")}, ${k}` : k);
-  }
-  async function submit(e: FormEvent) {
-    e.preventDefault();
-    setErr("");
+  const [msg, setMsg] = useState("");
+  async function approveAll() {
     setBusy(true);
+    setMsg("");
     try {
-      const r = await contentCall<{ grounded?: boolean }>({
-        do: "post_draft",
-        location_id: locationId,
-        owner_input: input,
-        keywords: keywords
-          .split(",")
-          .map((k) => k.trim())
-          .filter(Boolean),
-        cta_type: cta || null,
-        cta_url: url || null,
-      });
-      track("draft_generated", { channel: "dashboard", source: "post" });
-      if (r.grounded === false)
-        setErr(
-          "Draft ready below. Kabsi's check wasn't sure every detail came from your note, so read it closely before posting.",
-        );
-      setInput("");
-      onCreated();
+      const r = await approveMonth(locationId, month);
+      track("post_approved", { channel: "dashboard" });
+      setMsg(
+        r.held.length
+          ? `${r.approved.length} approved. ${r.held.length} need a change first; open them below.`
+          : `${r.approved.length} approved. Each goes to Google on its day.`,
+      );
+      onChanged();
     } catch (x) {
-      setErr(x instanceof Error ? x.message : "Couldn't write the post. Try again.");
+      setMsg(x instanceof Error ? x.message : "Something went wrong.");
     }
     setBusy(false);
   }
+  const order = [...posts].sort((a, b) =>
+    (a.publish_at ?? a.created_at).localeCompare(b.publish_at ?? b.created_at),
+  );
   return (
-    <form onSubmit={submit} className="mt-7 rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
-      <Label htmlFor="what" className="font-bold">
-        What's new?
-      </Label>
-      <Textarea
-        id="what"
-        dir="auto"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        rows={3}
-        maxLength={1000}
-        className="mt-2 text-base"
-        placeholder="e.g. New this week: pistachio croissants, from Tuesday."
-      />
-      <Label htmlFor="kw" className="mt-4 block text-sm">
-        Words customers search for{" "}
-        <span className="text-kb-stone">(optional, comma-separated)</span>
-      </Label>
-      <Input
-        id="kw"
-        value={keywords}
-        onChange={(e) => setKeywords(e.target.value)}
-        placeholder="e.g. bakery in Brooklyn, sourdough"
-        className="mt-2"
-      />
-      <p className="mt-2 text-xs text-kb-stone">
-        Kabsi works the best fit into the first line of the post, where Google shows it.
-      </p>
-      {ideas === null ? (
-        <Button
-          type="button"
-          variant="ghost"
-          size="compact"
-          className="mt-1 px-0 underline"
-          disabled={ideasBusy}
-          onClick={() => void suggest()}
-        >
-          {ideasBusy ? "Looking…" : "Suggest phrases"}
-        </Button>
-      ) : ideas.length ? (
-        <div className="mt-2 flex flex-wrap gap-2" aria-label="Suggested phrases">
-          {ideas.map((k) => (
-            <button
-              key={k.keyword}
-              type="button"
-              onClick={() => addKeyword(k.keyword)}
-              disabled={chosen.includes(k.keyword.toLowerCase())}
-              title={
-                k.source === "search"
-                  ? "People searched this and found you on Google"
-                  : k.source === "owner"
-                    ? "From the services you told Kabsi about"
-                    : "Your category and area"
-              }
-              className="rounded-full border border-kb-hairline bg-kb-sand px-3 py-1 text-sm disabled:opacity-40"
-            >
-              + {k.keyword}
-            </button>
-          ))}
-        </div>
-      ) : (
-        <p className="mt-2 text-sm text-kb-stone">
-          No suggestions yet. Add your services under About your business to get some.
-        </p>
-      )}
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="cta" className="text-sm">
-            Button <span className="text-kb-stone">(optional)</span>
-          </Label>
-          <select
-            id="cta"
-            value={cta}
-            onChange={(e) => setCta(e.target.value)}
-            className="mt-2 h-11 w-full rounded-card border border-kb-hairline bg-kb-white px-3"
+    <section className="mt-5">
+      {prepared.length ? (
+        <div className="rounded-large bg-kb-white p-5 shadow-kb">
+          <h2 className="font-display text-2xl leading-tight">
+            {prepared.length} {prepared.length === 1 ? "post" : "posts"} for {monthName(month)}{" "}
+            {prepared.length === 1 ? "is" : "are"} ready
+          </h2>
+          <p className="mt-1 text-sm text-kb-stone">
+            Approve the month, or read and approve them one by one below.
+          </p>
+          <Button
+            className="mt-4 w-full sm:w-auto"
+            disabled={busy}
+            onClick={() => void approveAll()}
           >
-            <option value="">No button</option>
-            {Object.entries(CTA_LABEL).map(([v, l]) => (
-              <option key={v} value={v}>
-                {l}
-              </option>
-            ))}
-          </select>
+            {busy ? "Approving…" : "Approve the month"}
+          </Button>
+          {msg ? (
+            <p className="mt-3 text-sm" role="status">
+              {msg}
+            </p>
+          ) : null}
         </div>
-        {cta && cta !== "CALL" ? (
-          <div>
-            <Label htmlFor="url" className="text-sm">
-              Button link
-            </Label>
-            <Input
-              id="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://"
-              className="mt-2"
-            />
-          </div>
-        ) : null}
-      </div>
-      {err ? (
-        <p className="mt-3 text-sm text-kb-red" role="alert">
-          {err}
-        </p>
+      ) : missing > 0 ? (
+        <div className="rounded-large bg-kb-white p-5 shadow-kb">
+          <h2 className="font-display text-2xl leading-tight">{QUESTION}</h2>
+          <p className="mt-1 text-sm text-kb-stone">
+            Kabsi writes posts only from what is true about your business. Tell it below, or add a
+            fact in{" "}
+            <Link to="/app/knowledge" className="font-bold underline underline-offset-4">
+              About your business
+            </Link>
+            .
+          </p>
+        </div>
       ) : null}
-      <Button type="submit" className="mt-5 w-full" disabled={busy || input.trim().length < 5}>
-        {busy ? "Writing…" : "Write my post"}
-      </Button>
-    </form>
+      {order.length ? (
+        <ol className="mt-4 space-y-3">
+          {order.map((p) => (
+            <li key={p.id}>
+              {p.state === "draft" ? (
+                <DraftCard post={p} onChanged={onChanged} />
+              ) : (
+                <div className="rounded-card bg-kb-white p-4 shadow-kb">
+                  <PostMeta post={p} />
+                  <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-6">
+                    {p.body}
+                  </p>
+                </div>
+              )}
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="mt-4 text-sm text-kb-stone">Nothing planned for {monthName(month)} yet.</p>
+      )}
+    </section>
+  );
+}
+
+function PostMeta({ post }: { post: Post }) {
+  return (
+    <p className="text-xs font-bold uppercase tracking-wider text-kb-stone">
+      {STATE_LABEL[post.state]} · {TYPE_LABEL[post.topic_type]}
+      {post.publish_at ? ` · ${fmtDateTime(post.publish_at)}` : ` · ${fmtDate(post.created_at)}`}
+      {post.source === "auto" ? " · prepared by Kabsi" : ""}
+    </p>
   );
 }
 
 function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }) {
-  const [text, setText] = useState(post.body ?? "");
-  const textRef = useAutosize(text);
-  const [discarding, setDiscarding] = useState(false);
-  const [instruction, setInstruction] = useState("");
+  const [body, setBody] = useState(post.body ?? "");
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
-  async function run(kind: "publish" | "skip" | "redraft") {
-    setErr("");
+  const ref = useAutosize(body);
+  async function run(kind: "publish" | "skip") {
     setBusy(kind);
+    setErr("");
     try {
       if (kind === "publish") {
-        await contentCall({ do: "post_publish", post_id: post.id, body: text });
+        await contentCall({ do: "post_publish", post_id: post.id, body });
         track("post_approved", { channel: "dashboard" });
-      } else if (kind === "skip") {
-        await contentCall({ do: "post_skip", post_id: post.id });
-      } else {
-        const r = await contentCall<{ post: { body: string } }>({
-          do: "post_redraft",
-          post_id: post.id,
-          instruction,
-        });
-        setText(r.post.body);
-        setInstruction("");
-      }
-      if (kind !== "redraft") onChanged();
+      } else await contentCall({ do: "post_skip", post_id: post.id });
+      onChanged();
     } catch (x) {
-      setErr(x instanceof Error ? x.message : "Something went wrong. Nothing was posted.");
+      setErr(x instanceof Error ? x.message : "Something went wrong.");
     }
     setBusy("");
   }
   return (
-    <article className="rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
-      <p className="text-sm text-kb-stone">
-        {post.source === "auto"
-          ? "This week's draft, written from your business facts."
-          : `You said: “${post.owner_input}”`}
-      </p>
-      {post.keywords?.length ? (
-        <p className="mt-1 text-xs text-kb-stone">Search phrases: {post.keywords.join(", ")}</p>
+    <article className="rounded-large bg-kb-white p-5 shadow-kb">
+      <PostMeta post={post} />
+      {post.topic_type === "EVENT" && post.event_title ? (
+        <p className="mt-2 font-bold">{post.event_title}</p>
       ) : null}
-      <Label htmlFor={`post-${post.id}`} className="mt-4 block font-bold">
-        Your post
+      {post.topic_type !== "STANDARD" && post.start_date ? (
+        <p className="mt-1 text-sm text-kb-stone">
+          {fmtDate(post.start_date)} to {fmtDate(post.end_date)}
+          {post.offer_terms ? ` · ${post.offer_terms}` : ""}
+        </p>
+      ) : null}
+      <Label htmlFor={`post-${post.id}`} className="sr-only">
+        Post text
       </Label>
-      <p className="mt-1 text-sm text-kb-stone">
-        Change anything you like. Kabsi posts exactly this text
-        {post.cta_type ? ` with a “${CTA_LABEL[post.cta_type] ?? post.cta_type}” button` : ""}.
-      </p>
       <Textarea
         id={`post-${post.id}`}
+        ref={ref}
         dir="auto"
-        ref={textRef}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        rows={4}
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        className="mt-3 min-h-28"
         maxLength={1500}
-        className="mt-3 resize-none rounded-card border-l-4 border-l-kb-yellow bg-kb-sand/60 text-base leading-7 md:text-base"
       />
-      <p className="mt-1 text-right text-xs text-kb-stone">{text.length} / 1500</p>
-      <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-        <Input
-          value={instruction}
-          onChange={(e) => setInstruction(e.target.value)}
-          maxLength={300}
-          placeholder="Ask for changes, e.g. shorter"
-          aria-label="Ask for changes"
-        />
+      <p className="mt-1 text-xs text-kb-stone">
+        {body.length} of 1,500 characters
+        {post.cta_type ? ` · Button: ${CTA_LABEL[post.cta_type] ?? post.cta_type}` : ""}
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
         <Button
-          variant="outline"
           size="compact"
-          disabled={!!busy || !instruction.trim()}
-          onClick={() => void run("redraft")}
+          variant="outline"
+          disabled={!!busy}
+          onClick={() => void run("publish")}
         >
-          {busy === "redraft" ? "Writing…" : "New version"}
+          {busy === "publish" ? "Approving…" : "Approve"}
+        </Button>
+        <Button size="compact" variant="ghost" disabled={!!busy} onClick={() => void run("skip")}>
+          Skip
         </Button>
       </div>
       {err ? (
-        <p className="mt-3 text-sm text-kb-red" role="alert">
+        <p className="mt-2 text-sm text-kb-red" role="alert">
           {err}
         </p>
       ) : null}
-      <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        <Button
-          className="w-full sm:w-auto"
-          disabled={!!busy || text.trim().length < 10}
-          onClick={() => void run("publish")}
-        >
-          {busy === "publish" ? "Posting…" : "Post to Google"}
-        </Button>
-        <Button variant="ghost" disabled={!!busy} onClick={() => setDiscarding(true)}>
-          {busy === "skip" ? "Discarding…" : "Discard"}
-        </Button>
-      </div>
-      <AlertDialog open={discarding} onOpenChange={setDiscarding}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Discard this draft?</AlertDialogTitle>
-            <AlertDialogDescription>
-              It won't be posted. You can always write a new one.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep it</AlertDialogCancel>
-            <AlertDialogAction onClick={() => void run("skip")}>Discard</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </article>
   );
 }
 
-// Weekly draft switch (set_auto_posts RPC, members only). The draft still waits for the owner.
-function WeeklyToggle({ locationId }: { locationId: string }) {
-  // Weekly drafts need at least one verified fact (P0.3-01): the same facts the drafts may use.
-  const knowledge = useQuery({
-    queryKey: ["knowledge", locationId],
-    queryFn: () => loadKnowledge(locationId),
+// The owner's own post: Update, Offer or Event, one photo, one button, a day and time (K-80).
+function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () => unknown }) {
+  const [type, setType] = useState<PostType>("STANDARD");
+  const [summary, setSummary] = useState("");
+  const [title, setTitle] = useState("");
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [terms, setTerms] = useState("");
+  const [code, setCode] = useState("");
+  const [redeem, setRedeem] = useState("");
+  const [cta, setCta] = useState("");
+  const [url, setUrl] = useState("");
+  const [when, setWhen] = useState("");
+  const [photo, setPhoto] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [done, setDone] = useState("");
+  const photos = useQuery({
+    queryKey: ["post-photos", locationId],
+    queryFn: () => postPhotos(locationId),
   });
-  const hasFacts = knowledge.data ? hasPostFacts(knowledge.data.facts) : true;
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setErr("");
+    setDone("");
+    try {
+      await savePost(locationId, {
+        type,
+        summary,
+        title: type === "STANDARD" ? null : title || null,
+        start_date: type === "STANDARD" ? null : start || null,
+        end_date: type === "STANDARD" ? null : end || null,
+        start_time: type === "EVENT" ? startTime || null : null,
+        end_time: type === "EVENT" ? endTime || null : null,
+        terms: type === "OFFER" ? terms : null,
+        coupon_code: type === "OFFER" ? code || null : null,
+        redeem_url: type === "OFFER" ? redeem || null : null,
+        cta_type: cta || null,
+        cta_url: cta && cta !== "CALL" ? url : null,
+        photo_id: photo,
+        publish_at: when ? new Date(when).toISOString() : null,
+      });
+      setSummary("");
+      setTitle("");
+      setTerms("");
+      setCode("");
+      setRedeem("");
+      setDone("Saved. Approve it in its month above.");
+      onSaved();
+    } catch (x) {
+      setErr(x instanceof Error ? x.message : "Something went wrong.");
+    }
+    setBusy(false);
+  }
+  const field = "mt-1 h-11 w-full rounded-card border border-kb-hairline bg-kb-white px-3";
+  return (
+    <section className="mt-10">
+      <h2 className="text-sm font-bold uppercase tracking-wider text-kb-stone">Write a post</h2>
+      <form
+        onSubmit={(e) => void submit(e)}
+        className="mt-3 space-y-4 rounded-large bg-kb-white p-5 shadow-kb"
+      >
+        <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Kind of post">
+          {(["STANDARD", "OFFER", "EVENT"] as PostType[]).map((t) => (
+            <button
+              key={t}
+              type="button"
+              role="radio"
+              aria-checked={type === t}
+              onClick={() => setType(t)}
+              className={`h-11 rounded-card border text-sm font-bold ${type === t ? "border-kb-black bg-kb-black text-kb-white" : "border-kb-hairline"}`}
+            >
+              {TYPE_LABEL[t]}
+            </button>
+          ))}
+        </div>
+        {type !== "STANDARD" ? (
+          <div>
+            <Label htmlFor="post-title">{type === "EVENT" ? "Event title" : "Offer title"}</Label>
+            <Input
+              id="post-title"
+              value={title}
+              maxLength={58}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+        ) : null}
+        <div>
+          <Label htmlFor="post-text">
+            {type === "OFFER"
+              ? "The offer, in your words"
+              : type === "EVENT"
+                ? "About the event"
+                : "What's new"}
+          </Label>
+          <Textarea
+            id="post-text"
+            dir="auto"
+            value={summary}
+            maxLength={1500}
+            onChange={(e) => setSummary(e.target.value)}
+            className="mt-1 min-h-28"
+            placeholder="One concrete thing: a dish, a service, a change, an event."
+          />
+        </div>
+        {type !== "STANDARD" ? (
+          <div className="grid grid-cols-2 gap-3">
+            <label className="text-sm">
+              Starts
+              <input
+                type="date"
+                value={start}
+                onChange={(e) => setStart(e.target.value)}
+                className={field}
+              />
+            </label>
+            <label className="text-sm">
+              Ends
+              <input
+                type="date"
+                value={end}
+                onChange={(e) => setEnd(e.target.value)}
+                className={field}
+              />
+            </label>
+            {type === "EVENT" ? (
+              <>
+                <label className="text-sm">
+                  From
+                  <input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className={field}
+                  />
+                </label>
+                <label className="text-sm">
+                  To
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className={field}
+                  />
+                </label>
+              </>
+            ) : null}
+          </div>
+        ) : null}
+        {type === "OFFER" ? (
+          <>
+            <div>
+              <Label htmlFor="post-terms">Terms</Label>
+              <Input
+                id="post-terms"
+                value={terms}
+                onChange={(e) => setTerms(e.target.value)}
+                placeholder="Weekdays only, one per table"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="post-code">Code (if any)</Label>
+                <Input id="post-code" value={code} onChange={(e) => setCode(e.target.value)} />
+              </div>
+              <div>
+                <Label htmlFor="post-redeem">Redeem link (if any)</Label>
+                <Input
+                  id="post-redeem"
+                  value={redeem}
+                  onChange={(e) => setRedeem(e.target.value)}
+                  placeholder="https://"
+                />
+              </div>
+            </div>
+          </>
+        ) : null}
+        <label className="block text-sm">
+          Button
+          <select value={cta} onChange={(e) => setCta(e.target.value)} className={field}>
+            <option value="">No button</option>
+            {Object.entries(CTA_LABEL).map(([k, l]) => (
+              <option key={k} value={k}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </label>
+        {cta && cta !== "CALL" ? (
+          <div>
+            <Label htmlFor="post-url">Link on your own website</Label>
+            <Input
+              id="post-url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://"
+            />
+          </div>
+        ) : null}
+        {photos.data?.length ? (
+          <fieldset>
+            <legend className="text-sm">One of your photos (if you like)</legend>
+            <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-6">
+              {photos.data.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  aria-pressed={photo === p.id}
+                  onClick={() => setPhoto(photo === p.id ? null : p.id)}
+                  className={`overflow-hidden rounded-card border-2 ${photo === p.id ? "border-kb-black" : "border-transparent"}`}
+                >
+                  {p.url ? (
+                    <img
+                      src={p.url}
+                      alt="Your photo"
+                      className="aspect-square w-full object-cover"
+                    />
+                  ) : (
+                    <span className="block aspect-square w-full bg-kb-sand" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        ) : null}
+        <label className="block text-sm">
+          Send on (leave empty to send it right after you approve)
+          <input
+            type="datetime-local"
+            value={when}
+            onChange={(e) => setWhen(e.target.value)}
+            className={field}
+          />
+        </label>
+        <Button type="submit" variant="outline" disabled={busy || summary.trim().length < 10}>
+          {busy ? "Checking…" : "Save the post"}
+        </Button>
+        {done ? (
+          <p className="text-sm" role="status">
+            {done}
+          </p>
+        ) : null}
+        {err ? (
+          <p className="text-sm text-kb-red" role="alert">
+            {err}
+          </p>
+        ) : null}
+      </form>
+    </section>
+  );
+}
+
+// Kabsi's own posts: on or off, and how many a month (2 by default, 1 or 4).
+function Settings({ locationId }: { locationId: string }) {
   const queryClient = useQueryClient();
-  const setting = useQuery({
-    queryKey: ["auto-posts", locationId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("locations")
-        .select("auto_posts")
-        .eq("id", locationId)
-        .single();
-      if (error) throw new Error(error.message);
-      return (data as { auto_posts: boolean }).auto_posts;
-    },
+  const settings = useQuery({
+    queryKey: ["post-settings", locationId],
+    queryFn: () => loadSettings(locationId),
   });
   const [busy, setBusy] = useState(false);
-  const on = setting.data ?? true;
-  async function toggle() {
+  const [err, setErr] = useState("");
+  const on = settings.data?.auto_posts ?? true;
+  async function change(fn: () => Promise<void>) {
     setBusy(true);
-    const { error } = await supabase.rpc("set_auto_posts", {
-      p_location: locationId,
-      p_enabled: !on,
-    });
-    if (error) window.alert("Couldn't change the weekly draft setting. Try again.");
-    else await queryClient.invalidateQueries({ queryKey: ["auto-posts", locationId] });
+    setErr("");
+    try {
+      await fn();
+      await queryClient.invalidateQueries({ queryKey: ["post-settings", locationId] });
+    } catch (x) {
+      setErr(x instanceof Error ? x.message : "Something went wrong.");
+    }
     setBusy(false);
   }
   return (
-    <div className="mt-7 flex items-center justify-between gap-4 rounded-large bg-kb-white p-5 shadow-kb">
-      <div>
-        <p className="font-bold">Weekly draft</p>
-        <p className="text-sm text-kb-stone">
-          {on
-            ? "Kabsi drafts one post a week from your facts and emails it to you to approve."
-            : "Off. Kabsi only writes posts when you ask."}
-        </p>
-        {on && !hasFacts ? (
-          <p className="mt-1 text-sm text-kb-red">
-            Weekly drafts need at least one fact.{" "}
-            <Link to="/app/knowledge" className="font-bold underline underline-offset-4">
-              Add some in About your business
-            </Link>
+    <section className="mt-10 rounded-large bg-kb-white p-5 shadow-kb">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="font-bold">Kabsi's posts</p>
+          <p className="text-sm text-kb-stone">
+            {on
+              ? "Kabsi plans your posts each month from what is true, and asks when it has nothing to say."
+              : "Off. Your own posts still work."}
           </p>
-        ) : null}
+        </div>
+        <Button
+          size="compact"
+          variant="outline"
+          disabled={busy || settings.isLoading}
+          aria-pressed={on}
+          onClick={() => void change(() => setAutoPosts(locationId, !on))}
+        >
+          {on ? "Turn off" : "Turn on"}
+        </Button>
       </div>
-      <Button
-        variant={on ? "outline" : "default"}
-        size="compact"
-        disabled={busy || setting.isLoading}
-        onClick={() => void toggle()}
-        aria-pressed={on}
-      >
-        {on ? "Turn off" : "Turn on"}
-      </Button>
-    </div>
+      {on ? (
+        <div
+          className="mt-4 flex flex-wrap items-center gap-2"
+          role="radiogroup"
+          aria-label="Posts a month"
+        >
+          <span className="text-sm">Posts a month:</span>
+          {([1, 2, 4] as const).map((n) => (
+            <button
+              key={n}
+              type="button"
+              role="radio"
+              aria-checked={settings.data?.posts_per_month === n}
+              disabled={busy}
+              onClick={() => void change(() => setCadence(locationId, n))}
+              className={`h-11 min-w-11 rounded-pill border px-4 text-sm font-bold ${settings.data?.posts_per_month === n ? "border-kb-black bg-kb-black text-kb-white" : "border-kb-hairline"}`}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      {err ? (
+        <p className="mt-2 text-sm text-kb-red" role="alert">
+          {err}
+        </p>
+      ) : null}
+    </section>
   );
 }
 
@@ -503,7 +636,7 @@ function NotYet() {
     <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
       <p className="font-bold">Posts start once Kabsi can reach your Google profile.</p>
       <p className="mt-1 text-sm leading-6 text-kb-stone">
-        Finish setup and this page fills up with drafts to approve.
+        Finish setup and this page fills up with posts to approve.
       </p>
       <Button asChild size="compact" className="mt-4">
         <Link to="/start">Continue setup</Link>
