@@ -44,6 +44,8 @@ Hussein approved final product decisions on 21 Oct 2026. Most are not built yet.
 
 **Post checks (live from 21 Oct 2026, P0.5-02 part A).** Before you see a post, and again when you approve it, Kabsi checks it in its own code: no phone numbers, emails, links or social handles in the text; a button opens only your own website (Call uses the phone on your profile); no prices or offers that are not in your facts or what you typed; no "best", "number one" or similar; your category or town at most twice; no health, safety or results promises; not more than 70 percent like a post of the last 90 days; no medical results for clinics; no Offer posts for hotels and other places to stay; no alcohol promotion in countries where it is not allowed. An Offer needs its dates and terms, an Event its title and dates. A post that fails says why, in plain words. Kabsi's own drafts are 150 to 300 characters and lead with one concrete thing; you may write up to 1,500. A post's photo goes to Google as a private link that works for one hour. Kabsi does not sell posts as scheduling: Google lets owners schedule posts themselves; Kabsi's part is preparing true posts each month.
 
+**The Posts month view (live from 21 Oct 2026, P0.5-02 part B).** Posts shows this month and next. Each post shows its state (Prepared, Waiting, Published, Skipped, or Not published), its kind (Update, Offer, Event), its day and time, and who made it. When posts are prepared, one card says, for example, "2 posts for November 2026 are ready" with **Approve the month** (each post its own approval, each sent on its day; one that fails a check stays for you) or one by one: change the text, Approve, or Skip. When the month has fewer posts than you chose and none waiting, the page asks "Anything new this month? A dish, a service, an event?". **Write a post**: choose Update, Offer or Event; an Offer has a title, start and end dates, terms, and an optional code and redeem link; an Event has a title, dates and optional times; pick one of your own checked photos, a button (a link only to your own website) and, if you like, the day and time to send it (empty means right after you approve). Kabsi checks it when you save it. **Kabsi's posts**: on or off, and 1, 2 or 4 posts a month.
+
 **[COMING] Features.**
 
 - **WhatsApp for owners:** opt in by sending a one-time code to Kabsi's WhatsApp number; get a review alert with the draft and the buttons "Approve" and "Edit in app". Approval on WhatsApp will work only for low and medium risk replies and weekly posts, never for high-risk reviews or for your business name, address, categories, map pin, phone or open or closed status. After you approve, there is a 10-second undo. Today WhatsApp approves nothing (section 9.5b).
@@ -285,7 +287,7 @@ Statuses: Setup not finished, Waiting for Google access, Free, Active. A busines
 
 1. Home: read "things need your attention" and start with the first card.
 2. Get reviews: copy your review link and print the QR code (three steps).
-3. Posts: tap **Suggest phrases**, then write a first post.
+3. Posts: under **Write a post**, write a first post and save it.
 4. Settings, About your business: add a few customer questions and never-say items.
 5. Settings, Emails: choose your daily email time and time zone, and which notices reach you by email and in the bell.
 
@@ -654,7 +656,7 @@ That's by design. Extra addresses (up to 3) see new reviews only. To let someone
 **Kabsi didn't prepare a post this month.**
 Kabsi prepares a post only from something true: a fact you confirmed in About your business in the last 90 days, or a photo you approved in the last 30. Without one it asks "Anything new this month? A dish, a service, an event?" instead. A draft that fails a check never reaches you. Kabsi's posts also need the switch on and an active business.
 
-**Suggest phrases shows nothing.** Suggestions grow as reviews come in; type your own meanwhile.
+**There is no Suggest phrases button.** Search phrases come back with Kabsi writing posts for you, once Kabsi's AI credit is on. Write your post in your own words meanwhile.
 
 **My photo won't upload.** Use JPG, PNG, WebP or HEIC up to 20 MB, up to 20 at a time. A file that is not really a photo, or a moving image, is refused with the reason on the Photos screen.
 
@@ -893,10 +895,10 @@ Short Google posts of three kinds: an Update, an Offer (with its start and end d
 Each post has its day and time: shops and restaurants on Thursday at 09:00, clinics and offices on Tuesday at 08:30, local time, in the first and third week (or the first week, or every week). Approve the month or each post; Kabsi keeps the approved post in its own queue and sends it at its time, and you can undo it until then. Kabsi checks once a day what the month still needs. Until Kabsi's AI credit is on, Kabsi does not write the posts itself: it asks you the one question, and you write the post on the Posts page.
 
 **Can I turn off Kabsi's posts?**
-Yes. On the Posts page, tap Turn off. Your own posts still work.
+Yes. On the Posts page, under Kabsi's posts, tap Turn off. Your own posts still work. You can also choose 1, 2 or 4 posts a month there.
 
 **Can I write my own post?**
-Yes. Type what's new, add search words if you like, pick a button, tap Write my post, then edit and post.
+Yes. On Posts, under Write a post, choose Update, Offer or Event, write it in your words, add a photo and a button if you like, and tap Save the post. Kabsi checks it, then you approve it in its month.
 
 **Which buttons can a post have?**
 Call now, Book, Order online, Shop, Learn more or Sign up, or no button. These are the buttons Google offers.
@@ -908,7 +910,7 @@ Posts keep customers informed. Google doesn't say they change ranking, so we don
 Only what you tell Kabsi. It never invents prices, offers or dates.
 
 **What does "Suggest phrases" do?**
-It suggests words customers use for businesses like yours: your category and area, phrases from your good reviews, and (once connected) search terms Google reports for your profile.
+It suggests words customers use for businesses like yours: your category and area, the services you listed, and (once connected) search terms Google reports for your profile. The button returns when Kabsi writes posts for you, once its AI credit is on.
 
 **What photos can I post?**
 Clear, real photos of your place, your team, your work and what you sell. Kabsi's check flags dark, blurry and small photos (under 720 by 720 pixels) and photos you already added. Kabsi removes the location data and other hidden details from every photo before it goes to Google.
