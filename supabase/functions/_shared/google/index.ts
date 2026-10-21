@@ -5,6 +5,7 @@
 // and claim_publication (guardrail 6, P0.1-13a and P0.1-13b).
 import { type InvitationAddress, matchInvitation, type PendingBusiness } from "../invitations.ts";
 import { isConciergeLocationId } from "../concierge.ts";
+import { regularHoursDisplay } from "../hours.ts";
 import { assertNotConcierge, googleMode, modeFor, type Mode } from "./client.ts";
 import * as accountsLive from "./accounts/live.ts";
 import * as accountsMock from "./accounts/mock.ts";
@@ -223,8 +224,6 @@ export const showsSpecialHours = (periods: SpecialHourPeriod[], s: SpecialDay) =
 // ─── Google Protection (K-19, P0.2-04): what customers see for each watched field, and which fields Google marks as
 // its own update (hasGoogleUpdated, then getGoogleUpdated's diffMask). Read-only; put-backs go through patchListing,
 // only from the publish job after the owner chose "Keep my information".
-const DAYS: Record<string, string> = { MONDAY: "Mon", TUESDAY: "Tue", WEDNESDAY: "Wed", THURSDAY: "Thu", FRIDAY: "Fri", SATURDAY: "Sat", SUNDAY: "Sun" };
-const t2 = (t?: TimeOfDay) => `${String(t?.hours ?? 0).padStart(2, "0")}:${String(t?.minutes ?? 0).padStart(2, "0")}`;
 const READ_MASK = PROTECTION_FIELDS.map((f) => GOOGLE_FIELD[f]).join(",");
 
 // The Protection field for a Google field name or path ("latlng", "regularHours.periods"); the names publications
@@ -242,7 +241,7 @@ const fieldsOfMask = (mask?: string) =>
 
 function listingOf(l: Location): Listing {
   const addr = l.storefrontAddress ?? null;
-  const hours = (l.regularHours?.periods ?? []).map((p) => `${DAYS[p.openDay] ?? p.openDay} ${t2(p.openTime)} to ${t2(p.closeTime)}`).join(", ");
+  const hours = regularHoursDisplay(l.regularHours);
   const status = l.openInfo?.status ?? "";
   const pin = l.latlng?.latitude != null && l.latlng?.longitude != null
     ? `${l.latlng.latitude.toFixed(5)}, ${l.latlng.longitude.toFixed(5)}` : "";
@@ -292,7 +291,8 @@ export async function patchListing(locationId: string, field: string, raw: unkno
   const f = protectionField(field);
   if (!f) throw new Error(`unknown Protection field ${field}`);
   if (modeFor(locationId) === "mock") {
-    await locationsMock.patchListing(locationId, f, raw ?? display);
+    // The mock keeps display strings. An owner edit of the opening hours carries Google's own shape: use its display.
+    await locationsMock.patchListing(locationId, f, raw != null && typeof raw === "object" ? display : (raw ?? display));
     return { state: "live", response: { mock: true } };
   }
   const value = raw ?? (f === "name" || f === "website" ? display : f === "phone" ? { primaryPhone: display } : null);
