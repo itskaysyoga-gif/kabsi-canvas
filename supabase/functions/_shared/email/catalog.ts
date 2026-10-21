@@ -11,6 +11,8 @@ import { esc } from "../email-layout.ts";
 import * as copy from "./copy.ts";
 import { reviewEmail, type ReviewInput } from "./review.ts";
 import { renderReport } from "./report-body.ts";
+import { lifecycleEmail } from "./lifecycle-copy.ts";
+import { STEPS, type Snapshot as LifeSnapshot, type StepId } from "../lifecycle.ts";
 import type { EmailContent } from "./template.ts";
 
 export type CatalogEntry = {
@@ -43,6 +45,14 @@ const stored = (category: string, title: string, link: string, content: EmailCon
     id: `n${i}${category}`, location_id: "loc", user_id: "u", to_address: "owner@example.test", category, kind: category, dedupe_key: `k${i}${category}`, title, link,
     email_state: "digest" as const, email_due_at: "2026-10-21T16:00:00Z", email_content: content,
   }));
+
+/** A business in the middle of a trial, for the lifecycle emails. */
+export const LIFE_SAMPLE: LifeSnapshot = {
+  locationId: "loc1", name: BIZ, timeZone: "Asia/Beirut", country: "US", status: "active", createdAt: new Date("2026-10-01T09:00:00Z"), consentAt: new Date("2026-10-01T09:10:00Z"),
+  accessGrantedAt: new Date("2026-10-01T10:00:00Z"), entitlement: "trial", trialStartedAt: new Date("2026-10-01T10:00:00Z"), trialEndsAt: new Date("2026-10-15T10:00:00Z"),
+  owners: [{ userId: "u1", email: "owner@example.test" }], marketingConsent: true, waitingReviews: 4, waitingChanges: 1, firstApprovalAt: new Date("2026-10-02T09:00:00Z"),
+  recap: { repliesPrepared: 9, repliesSent: 6, postsSent: 1, changesCaught: 2 },
+};
 
 export function catalog(): CatalogEntry[] {
   const e = (kind: string, category: CatalogEntry["category"], business: boolean, content: EmailContent): CatalogEntry => ({ kind, category, business, content });
@@ -85,6 +95,7 @@ export function catalog(): CatalogEntry[] {
     e("assistant_report", "internal", false, copy.noraReport({ subject: "Chat: Sarah · Sales · Warm", summary: "A visitor asked about pricing.", bodyHtml: claimBody, text: "A visitor asked about pricing.", replyTo: null }, APP)),
     e("assistant_handoff", "internal", false, copy.noraHandoff({ reason: "billing", email: "visitor@example.test", summary: "Needs a person.", bodyHtml: claimBody, text: "Needs a person." }, APP)),
     e("assistant_handoff_ack", "direct", false, copy.noraAck()),
+    ...(Object.keys(STEPS) as StepId[]).map((id) => e(`life_${id}`, STEPS[id].category, true, lifecycleEmail(id, LIFE_SAMPLE, { appUrl: APP, removalOn: true }))),
     e("lead_alert", "internal", false, copy.leadAlert("partner", "Rana", "rana@example.test", "<p><strong>name:</strong> Rana</p><p><strong>message:</strong> I run three salons.</p>", "name: Rana\nmessage: I run three salons.")),
   ];
 }
