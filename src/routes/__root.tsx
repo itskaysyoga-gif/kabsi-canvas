@@ -20,6 +20,7 @@ import {
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { GlobalErrorBoundary } from "@/components/shared/error-boundary";
 import { Button } from "@/components/ui/button";
+import { PrivacyBanner } from "@/components/shared/privacy-banner";
 
 function NotFoundComponent() {
   return (
@@ -125,6 +126,7 @@ function RootComponent() {
       <AuthProvider>
         <GlobalErrorBoundary>
           <Outlet />
+          <PrivacyBanner />
         </GlobalErrorBoundary>
       </AuthProvider>
     </QueryClientProvider>

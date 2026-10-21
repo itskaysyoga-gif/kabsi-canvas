@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { LegalPage } from "@/components/marketing/legal";
 import { RETENTION_ROWS } from "@/lib/retention";
+import { openPrivacyChoices } from "@/lib/consent";
 import {
   CONTACT_EMAIL,
   KABSI_GROUP_ID,
@@ -289,11 +290,31 @@ function Page() {
             Preferences: the app remembers which business you last opened, in your browser only.
           </li>
           <li>
-            Statistics: PostHog stores an anonymous identifier to count visits and see which pages
-            are used. Screen recordings are made only on public pages, never inside the app, and
-            never contain review text, names or email addresses. IP addresses are anonymised.
+            Your privacy choices: your browser remembers the choice you made in the privacy banner,
+            so we don't ask again. We keep a record of each choice (an anonymous id, the country and
+            rule applied, the exact wording, the page and the time) as proof. It holds no IP
+            address, email or name.
           </li>
-          <li>We use no advertising cookies and don't track you on other sites.</li>
+          <li>
+            Statistics: until you choose, PostHog counts visits without cookies and without any
+            identifier. If you say yes, it also stores an anonymous identifier to see which pages
+            are used, and may record screens on public pages, never inside the app and never with
+            review text, names or email addresses. If you say no, it stops. IP addresses are
+            anonymised.
+          </li>
+          <li>
+            Advertising: we use no advertising cookies today and don't track you on other sites. If
+            we add Meta&apos;s ad measurement later, it loads only where your choice allows it:
+            after a yes in the UK, the EU and EEA, the UAE and Saudi Arabia, and with notice and an
+            opt-out elsewhere.
+          </li>
+          <li>
+            You can change your choice any time with{" "}
+            <button type="button" className="font-bold underline" onClick={openPrivacyChoices}>
+              Privacy choices
+            </button>
+            , also at the foot of every page.
+          </li>
         </ul>
       </section>
 

@@ -52,6 +52,8 @@ verify_jwt = true
 verify_jwt = true
 [functions.auth-code]         # sign-in code (P0.4-02): browser calls send the anon JWT; Turnstile, the code limits and the throwaway-domain check run in code
 verify_jwt = true
+[functions.consent]           # privacy banner proof (P0.6-01): browser calls send the anon JWT or the session; validation and a rate limit run in code
+verify_jwt = true
 [functions.profile-snapshot]  # public free check (P0.4-01): browser calls send the anon JWT; Turnstile, rate limits and the Places guard run in code
 verify_jwt = true
 

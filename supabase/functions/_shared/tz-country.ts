@@ -7,7 +7,7 @@ export function countryFromTimezone(tz: string | null | undefined): string | nul
   if (!map) {
     map = new Map();
     for (const part of PACKED.split(";")) {
-      const [cc, list] = part.split(":");
+      const [cc = "", list = ""] = part.split(":");
       for (const z of list.split(",")) map.set(z, cc);
     }
   }

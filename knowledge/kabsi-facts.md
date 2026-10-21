@@ -551,7 +551,7 @@ Likely questions and the answers: "Who answers WhatsApp?" A person at Kabsi, not
 
 ### 9.6 Cookies
 
-Sign-in storage, the last business you opened (in your browser), and PostHog's anonymous statistics identifier. Screen recordings only on public pages, never inside the app. No advertising cookies or cross-site tracking.
+Sign-in storage, the last business you opened (in your browser), and the visitor's privacy choice. A small Kabsi privacy banner (no outside consent tool) asks once, by country: in the EU and EEA (and when the country is unknown) statistics and advertising both wait for a yes; in the UK, the UAE and Saudi Arabia statistics run in totals only with an opt-out and advertising waits for a yes; everywhere else both are on with notice and an opt-out. Until the visitor chooses, PostHog counts visits without cookies or any identifier; after a yes it keeps an anonymous identifier and may record screens on public pages (never inside the app); after a no it stops. Each choice is stored as proof (anonymous id, the signed-in user if any, country and rule, the exact wording and its version, page, time; no IP, email or name). "Privacy choices" at the foot of every page and on /privacy reopens it. The site works the same whatever the visitor picks. No advertising cookies or cross-site tracking today; the Meta Pixel is [COMING] after launch and can load only where the choice allows it. The banner is in English only at launch.
 
 ### 9.7 Retention
 
