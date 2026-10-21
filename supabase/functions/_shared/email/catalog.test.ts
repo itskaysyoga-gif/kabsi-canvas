@@ -110,6 +110,6 @@ Deno.test("the catalog covers every kind of email Kabsi sends", () => {
   const kinds = catalog().map((c) => c.kind);
   for (const needed of ["review_new", "review_high_risk", "backlog_ready", "digest", "access_granted", "access_lost", "deletion_scheduled", "trial_d7", "renew_r5",
     "payment_received", "weekly_report", "weekly_post", "shield_alert_urgent", "team_invite", "profile_check", "partner_invite", "partner_invoice", "usdt_claim_alert",
-    "assistant_report", "assistant_handoff", "assistant_handoff_ack", "lead_alert"]) assert.ok(kinds.includes(needed), needed);
+    "assistant_report", "assistant_handoff", "assistant_handoff_ack", "lead_alert", "life_welcome", "life_no_access_1h", "life_trial_day7", "life_trial_day14", "life_winback_30"]) assert.ok(kinds.includes(needed), needed);
   assert.equal(new Set(kinds).size, kinds.length);
 });

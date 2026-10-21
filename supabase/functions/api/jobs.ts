@@ -17,6 +17,7 @@
 // owner asked for it in Settings, and never touches the profile itself.
 import { admin, APP_URL, captureError, isInternal, jobLog, json } from "../_shared/kabsi.ts";
 import { notify, notifyDue } from "../_shared/notify.ts";
+import { lifecycleJob } from "../_shared/lifecycle-db.ts";
 import * as copy from "../_shared/email/copy.ts";
 import { type Job, type JobHandler, type JobState, PermanentJobError, runJob } from "../_shared/jobs.ts";
 import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation } from "../_shared/reviews.ts";
@@ -301,7 +302,13 @@ const HANDLERS: Record<string, JobHandler> = {
     });
   },
   // P0.4-09: held and digested emails come due (K-46). Offered every 5 minutes once app_settings.notify_due is 'on'.
-  notify_due: step("notify_due", notifyDue),
+  // P0.4-10: the lifecycle emails ride on the same 5 minute clock (they are sent through the same outbox); off until
+  // app_settings.lifecycle_emails is 'on'. A failure there never stops held and digested mail from going out.
+  notify_due: step("notify_due", async () => {
+    const released = await notifyDue();
+    const life = await lifecycleJob().catch(async (e) => { await captureError("dispatch", e, { job: "lifecycle" }); return null; });
+    return { ...released, ...(life ? { life_checked: life.checked, life_due: life.due, life_sent: life.sent, life_failed: life.failed } : {}) };
+  }),
   detect_tasks: async (job) => {
     const made = await detectTasks(job.location_id, (id) => rpcJson<Record<string, number> | null>("run_task_detectors", { p_location: id }));
     if (Object.values(made).some((n) => n > 0)) await jobLog("detect_tasks", true, { location: job.location_id, ...made });

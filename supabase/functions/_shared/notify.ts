@@ -55,10 +55,18 @@ export function dbDeps(): Deps {
     },
 
     async deliver(o) {
+      // Lifecycle tips go from news.kabsi.co (G-22, R-03), never from the account subdomain. Until Hussein has verified that
+      // domain in Resend (app_settings.news_domain_verified = 'on') they are not sent; the lifecycle job is off until then
+      // anyway. A test email to the team (kind test_...) is the one exception: it goes from the account subdomain.
+      const news = o.category === "trial";
+      if (news && !o.kind.startsWith("test_")) {
+        const { data } = await db.from("app_settings").select("value").eq("key", "news_domain_verified").maybeSingle();
+        if (data?.value !== "on") return { skipped: "news_domain_not_verified" };
+      }
       const r = await sendEmail({
         kind: o.kind, to: o.to, subject: o.subject, html: o.html, text: o.text, dedupeKey: o.dedupeKey, locationId: o.locationId,
         partnerId: o.partnerId, ...(o.replyTo ? { replyTo: o.replyTo } : {}), category: o.category, notificationId: o.notificationId ?? null,
-        unsubscribeUrl: o.unsubscribeUrl ?? null, stream: o.category === "trial" ? "news" : "send",
+        unsubscribeUrl: o.unsubscribeUrl ?? null, stream: news && !o.kind.startsWith("test_") ? "news" : "send",
       });
       if ("sent" in r && o.notificationId) await db.from("notifications").update({ email_id: (r as { id?: string }).id ?? null }).eq("id", o.notificationId);
       return "sent" in r ? { sent: r.sent as string } : { skipped: r.skipped };
