@@ -105,17 +105,15 @@ select is(pg_temp.items() ->> 'website_tracking', 'done', 'with the tag it is do
 -- When the profile is read -----------------------------------------------------------------------------------------------------------------------------
 update public.coach_profile set read_at = now() - interval '8 days' where location_id = '00000000-0000-4000-8000-0000000000c1';
 select is(public.coach_read_due('00000000-0000-4000-8000-0000000000c1'), true, 'a week later it is due again');
-update public.locations set concierge = true where id = '00000000-0000-4000-8000-0000000000c1';
+update public.locations set concierge = true, google_location_id = 'locations/concierge-coach' where id = '00000000-0000-4000-8000-0000000000c1';
 select is(public.coach_read_due('00000000-0000-4000-8000-0000000000c1'), false, 'a concierge profile is never read');
 select is(private.coach_tasks('00000000-0000-4000-8000-0000000000c1'), '{}'::text[], 'and has no coach tasks');
-update public.locations set concierge = false where id = '00000000-0000-4000-8000-0000000000c1';
+update public.locations set concierge = false, google_location_id = 'locations/mock-coach' where id = '00000000-0000-4000-8000-0000000000c1';
 
--- Plans: Essentials sees the checklist and no actions; no plan sees nothing (K-126) -----------------------------------------------------------------------------
-update public.subscriptions s set plan = 'essentials' from public.locations l
- where l.id = '00000000-0000-4000-8000-0000000000c1' and s.organization_id = l.organization_id;
-select is(public.coach_checklist('00000000-0000-4000-8000-0000000000c1') ->> 'locked', 'false', 'Essentials sees the checklist');
-select is(public.coach_checklist('00000000-0000-4000-8000-0000000000c1') ->> 'pro', 'false', 'without the Pro actions');
-update public.subscriptions s set state = 'canceled', current_period_end = now() - interval '30 days', trial_ends_at = now() - interval '40 days',
+-- Plans: Pro sees the checklist (the Essentials value cannot be stored until P0.4-07); no plan sees nothing (K-126) ---------------------------------------------------------------------------------------
+select is(public.coach_checklist('00000000-0000-4000-8000-0000000000c1') ->> 'locked', 'false', 'Pro sees the checklist');
+select is(public.coach_checklist('00000000-0000-4000-8000-0000000000c1') ->> 'pro', 'true', 'and the Pro actions are on');
+update public.subscriptions s set state = 'cancelled', current_period_end = now() - interval '30 days', trial_ends_at = now() - interval '40 days',
   grace_ends_at = now() - interval '20 days' from public.locations l
  where l.id = '00000000-0000-4000-8000-0000000000c1' and s.organization_id = l.organization_id;
 select is(public.coach_checklist('00000000-0000-4000-8000-0000000000c1') ->> 'locked', 'true', 'a business without a plan sees no checklist');
