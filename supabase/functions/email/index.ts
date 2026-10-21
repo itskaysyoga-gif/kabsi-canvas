@@ -66,7 +66,8 @@ Deno.serve(async (req) => {
     if (route === "test" && req.method === "POST") {
       if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
       const { sendCatalogTo } = await import("../_shared/email/catalog-send.ts");
-      return json({ ok: true, sent: await sendCatalogTo("hello@kabsi.co") });
+      const body = await req.json().catch(() => ({})) as { only?: unknown };
+      return json({ ok: true, sent: await sendCatalogTo("hello@kabsi.co", typeof body.only === "string" && /^[a-z_]{1,30}$/.test(body.only) ? body.only : undefined) });
     }
     return json({ error: "not_found" }, 404);
   } catch (e) {
