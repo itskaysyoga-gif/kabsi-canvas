@@ -69,7 +69,8 @@ describe("the categories (K-46, K-118)", () => {
   });
 
   it("no copy has an em dash, an en dash or an exclamation mark", () => {
-    for (const c of CATEGORIES) expect(`${c.label} ${c.description}`).not.toMatch(/[\u2013\u2014!]/);
+    for (const c of CATEGORIES)
+      expect(`${c.label} ${c.description}`).not.toMatch(/[\u2013\u2014!]/);
   });
 });
 
