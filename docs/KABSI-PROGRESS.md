@@ -264,7 +264,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 **P0.5-01 part B After merge:** on a phone, kabsi.co/app/photos on the demo business (Take a photo opens the camera); make a staff link, open it signed out, send one photo, turn the link off and see the page say it is off.
 
-**P0.5-01 part A After merge (session 12).**
+**P0.5-01 part A After merge (session 12): 1 and 2 passed 21 Oct 2026, 21:10 to 21:12 UTC (see Evidence); 3 needs a phone.**
 1. Deploy run green, `photos` listed among the functions; `POST photos {"do":"process"}` without the secret answers 403.
 2. A test row: a storage object that does not exist, registered on the demo business, comes back `refused` "The file did not arrive. Send it again." through the job and the function (proves the job reaches the function).
 3. A real JPEG with GPS through the app on a demo business on a phone, then `exiftool` on the cleaned copy (the session cannot upload a file without a browser session; the processing itself is proven on the same fixtures in Deno, see Evidence). HEIC and WebP decode in Deno locally; that the deployed bundle loads libheif and the jsquash codecs is only proven by a real HEIC upload.
@@ -542,6 +542,10 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.5-01 part A After merge (21 Oct 2026, 21:10 to 21:12 UTC, Rashid's session 12)
+- Deploy run 59 (39676469442) for 57e0485: success. `POST photos {"do":"process"}` with the anon JWT and no secret: 403 `{"error":"forbidden","message":"Internal only."}`; `{"do":"link"}` with an unknown token: 410 "This upload link was turned off. Ask the owner for a new one."
+- A test row on the demo business (`aftermerge-check.jpg`, a storage row with no file) through `private.photo_intake` at 21:11:32: the `process_photo` job ran on the dispatcher (1 attempt, succeeded) and the deployed `photos` function recorded `refused` "The file did not arrive. Send it again." at 21:12:03, file due for removal at once (photo `ada39668`, demo test data).
 
 ### P0.5-01 part B (branch claude/great-faraday-lw1av9, 21 Oct 2026, Rashid's session 12, Opus)
 - Chromium (Playwright) with Supabase mocked, `vite dev`: `/app/photos` at 390 by 844 and 1440 by 900 (3 ready photos, one with "This photo is dark.", one being checked, one refused, a posted cover and a team photo, an active staff link): no horizontal scroll at either width; `/u/<token>` at both widths shows the business name and the two upload buttons. Screenshots stayed in the session's scratch folder.
