@@ -2,7 +2,8 @@
 // Public data only, through the Google layer's Places guard (field mask, 24 hour cache, daily cap). The Places key
 // never reaches the browser. The logic and its limits are in _shared/profile-snapshot.ts.
 import { getCachedSnapshot, getSnapshotPlace, searchText } from "../_shared/google/index.ts";
-import { admin, APP_URL, captureError, CORS, emailLayout, esc, rateLimit, sendEmail, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
+import { admin, APP_URL, captureError, CORS, esc, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
+import { notify } from "../_shared/notify.ts";
 import { makeHandler } from "../_shared/profile-snapshot.ts";
 
 Deno.serve(makeHandler({
@@ -22,10 +23,10 @@ Deno.serve(makeHandler({
     const { error } = await admin().from("profile_check_emails").insert(row);
     if (error) throw error;
   },
-  sendEmail,
+  // Sent because the visitor just asked for it: no choices and no quiet hours (category direct).
+  sendEmail: (o) => notify({ category: "direct", kind: o.kind, key: o.dedupeKey, to: [{ email: o.to, userId: null }], content: o.content }),
   captureError,
   appUrl: APP_URL,
   cors: CORS,
-  emailLayout,
   esc,
 }));

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Check, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ActionCenter } from "@/components/home/action-center";
+import { NotificationBell } from "@/components/home/notification-bell";
 import { myAccess } from "@/lib/team";
 import { supabase } from "@/lib/supabase";
 import { loadEntitlements } from "@/lib/entitlements";
@@ -51,8 +52,15 @@ function HomePage() {
       {!location.isLoading && !loc ? <NoBusiness /> : null}
       {loc ? (
         <>
-          <p className="text-sm font-medium text-kb-stone">{greeting()}</p>
-          <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">{loc.name}</h1>
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-kb-stone">{greeting()}</p>
+              <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">{loc.name}</h1>
+            </div>
+            {access.data && access.data.role !== "staff" ? (
+              <NotificationBell locationId={loc.id} />
+            ) : null}
+          </div>
           {staffRole ? (
             <StaffHome />
           ) : loc.status === "paused" || loc.status === "disabled" ? (

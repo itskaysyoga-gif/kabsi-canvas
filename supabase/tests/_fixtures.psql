@@ -95,6 +95,12 @@ values ('00000000-0000-4000-8000-0000000000c1', 'hours', 'owner_and_managers', '
 insert into public.team_invites (id, location_id, email, role, invited_by)
 values ('00000000-0000-4000-8000-0000000000f9', '00000000-0000-4000-8000-0000000000c1', 'victim-invitee@example.test', 'staff',
         '00000000-0000-4000-8000-0000000000a1');
+-- P0.4-09: one notice of the victim's (in the bell) and one choice of the victim owner's.
+insert into public.notifications (id, location_id, user_id, to_address, category, kind, dedupe_key, title, link, in_app, email_state)
+values ('00000000-0000-4000-8000-0000000000fa', '00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000a1',
+        'victim-owner@example.test', 'review_new', 'review_new', 'victim-notice', 'Victim notice', '/app/reviews?f=needs', true, 'sent');
+insert into public.notification_preferences (user_id, location_id, category, channel, frequency)
+values ('00000000-0000-4000-8000-0000000000a1', '00000000-0000-4000-8000-0000000000c1', 'review_new', 'email', 'off');
 -- P0.1-09: the victim's organisation, its membership, google_connections and partner_clients rows come from the
 -- triggers on locations, location_members, partners and partner_members above. subscriptions starts empty.
 insert into public.subscriptions (organization_id, plan, state)

@@ -4,6 +4,8 @@ const FONT = "'Readex Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,He
 // Kabsi's WhatsApp number (K-122), answered by a person. Keep equal to WHATSAPP_NUMBER in src/lib/site.ts (tests/whatsapp.test.ts checks it).
 export const WHATSAPP_NUMBER = "+1 201-483-5474";
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, "")}?text=${encodeURIComponent("Hello Kabsi, I have a question about an email I got from Kabsi.")}`;
+// The Kabsi Clients Google group owners add as Manager. Keep equal to KABSI_GROUP_ID in src/lib/site.ts (tests/notifications.test.ts checks it).
+export const KABSI_GROUP_ID = "5481006796";
 export function esc(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 }

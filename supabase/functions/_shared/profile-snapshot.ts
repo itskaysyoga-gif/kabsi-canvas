@@ -12,6 +12,7 @@
 // Every Places request carries a field mask and none asks for reviews (tests hold that).
 import type { Place } from "./google/types.ts";
 import type { PlacesResult } from "./google/places/live.ts";
+import type { EmailContent } from "./email-render.ts";
 
 export const TIPS_CONSENT_TEXT = "Send me tips on managing my Google profile";
 export const CHECK_PAGES = ["/google-profile-check", "/get-started"];
@@ -99,17 +100,17 @@ export type Deps = {
   getSnapshotPlace: (key: string, placeId: string) => Promise<PlacesResult<Place>>;
   getCachedSnapshot: (placeId: string) => Promise<Place | null>;
   saveEmail: (row: { email: string; place_id: string; tips_opt_in: boolean; consent_text: string; page: string }) => Promise<void>;
-  sendEmail: (o: { kind: string; to: string; subject: string; html: string; text: string; dedupeKey: string }) => Promise<unknown>;
+  /** The notification engine (category direct: the visitor just asked for this email). */
+  sendEmail: (o: { kind: string; to: string; dedupeKey: string; content: EmailContent }) => Promise<unknown>;
   captureError: (fn: string, e: unknown) => Promise<void>;
   appUrl: string;
   cors: Record<string, string>;
-  emailLayout: (o: { preheader: string; title: string; bodyHtml: string; button?: { label: string; url: string }; note?: string }) => string;
   esc: (s: string) => string;
 };
 
 const LABEL: Record<Level, string> = { urgent: "Urgent", recommended: "Recommended", nice: "Nice to have" };
 
-export function checkEmail(d: Pick<Deps, "emailLayout" | "esc" | "appUrl">, s: Snapshot, tips: boolean) {
+export function checkEmail(d: Pick<Deps, "esc" | "appUrl">, s: Snapshot, tips: boolean): EmailContent {
   const rows = s.findings.map((f) =>
     `<p style="margin:0 0 12px 0;"><strong>${d.esc(LABEL[f.level])}: ${d.esc(f.title)}</strong><br>${d.esc(f.detail)}</p>`
   ).join("");
@@ -118,21 +119,21 @@ export function checkEmail(d: Pick<Deps, "emailLayout" | "esc" | "appUrl">, s: S
     s.review_count !== null ? `${s.review_count} reviews` : null,
     s.category,
   ].filter(Boolean).join(" · ");
-  const html = d.emailLayout({
+  const content = {
     preheader: "What customers see on Google, and what Kabsi can take care of.",
     title: "Your Google Profile Check",
     bodyHtml: `<p style="margin:0 0 16px 0;"><strong>${d.esc(s.name)}</strong><br>${d.esc(s.address)}${facts ? `<br>${d.esc(facts)}` : ""}</p>${rows}` +
       `<p style="margin:16px 0 0 0;">Kabsi can take care of these. You approve each one.</p>`,
     button: { label: "Join early access", url: `${d.appUrl}/start` },
     note: `This check uses public information from Google Maps, as it was when you asked. It is not a score.${tips ? " You asked for tips, so we may send a few. Reply stop at any time." : ""}`,
-  });
+  };
   const text = [
     "Your Google Profile Check", "", s.name, s.address, facts, "",
     ...s.findings.map((f) => `${LABEL[f.level]}: ${f.title}\n${f.detail}\n`),
     "Kabsi can take care of these. You approve each one.", `Join early access: ${d.appUrl}/start`, "",
     "This check uses public information from Google Maps, as it was when you asked. It is not a score.",
   ].filter((l) => l !== null).join("\n");
-  return { subject: `${s.name}: your Google Profile Check`, html, text };
+  return { subject: `${s.name}: your Google Profile Check`, ...content, text };
 }
 
 export function makeHandler(d: Deps) {
@@ -219,7 +220,7 @@ export function makeHandler(d: Deps) {
         await d.saveEmail({ email, place_id: placeId, tips_opt_in: b.tips, consent_text: TIPS_CONSENT_TEXT, page });
         const mail = checkEmail(d, buildSnapshot(placeId, place, true), b.tips);
         const dedupeKey = `profile_check:${(await d.sha256Hex(`${email}|${placeId}|${d.today()}`)).slice(0, 40)}`;
-        await d.sendEmail({ kind: "profile_check", to: email, dedupeKey, ...mail });
+        await d.sendEmail({ kind: "profile_check", to: email, dedupeKey, content: mail });
         return reply({ ok: true });
       }
 

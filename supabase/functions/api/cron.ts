@@ -3,7 +3,9 @@
 // Since P0.1-12b each runs as its own job from the dispatcher (api/jobs.ts), offered every 5 minutes; Protection is
 // one job per business (protection.ts). /api/cron-tick still runs them all in one go for the weekly_now test hook and
 // until the migration that unschedules kabsi_cron_tick (20261004200100_cron_to_jobs.sql) is applied.
-import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
+import { admin, APP_URL, captureError, esc, isInternal, jobLog, json } from "../_shared/kabsi.ts";
+import { notify } from "../_shared/notify.ts";
+import { KABSI_GROUP_ID } from "../_shared/email-layout.ts";
 import { dueRenewalEmail, dueTrialEmail, localDateHour, PLAN_LABEL, type RenewalStage, type TrialStage } from "../_shared/plans.ts";
 import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google/index.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
@@ -19,22 +21,21 @@ async function conciergeAccessEmails() {
     .gt("access_granted_at", new Date(Date.now() - 2 * 86_400_000).toISOString());
   let n = 0;
   for (const l of data ?? []) {
-    for (const to of await ownerEmails(l.id)) {
-      const r = await sendAccessNotice(l.id, l.name, to, `${CONCIERGE_COPY.banner} When a new review arrives you'll get an email with a reply ready. You approve every word.`);
-      if (r && "sent" in r) n++;
-    }
+    const r = await sendAccessNotice(l.id, l.name, `${CONCIERGE_COPY.banner} When a new review arrives you'll get an email with a reply ready. You approve every word.`);
+    if (r) n += r.sent;
   }
   return n;
 }
 
 // The access-change notice (K-113.1, P0.2-02): sent in the same run that accepts the Manager invitation, saying what
 // changed and how to remove Kabsi. Same kind and dedupe key as before, so nobody who already had it gets it again.
-function sendAccessNotice(locationId: string, name: string, to: string, nextStep: string) {
+function sendAccessNotice(locationId: string, name: string, nextStep: string) {
   const m = accessChangeEmail({ change: "granted", name, at: new Date().toISOString(), nextStep }, APP_URL);
-  return sendEmail({
-    kind: "access_granted", to, locationId, dedupeKey: `access_granted:${locationId}:${to}`, subject: m.subject,
-    html: emailLayout({ preheader: m.preheader, title: m.title, bodyHtml: m.bodyHtml, button: m.button, note: m.note }), text: m.text,
-  }).catch((e) => captureError("cron-tick", e, { job: "access", location: locationId }));
+  return notify({
+    category: "access", kind: "access_granted", key: `access_granted:${locationId}`, locationId, to: "owners",
+    inApp: { title: "Kabsi is now a Manager of your Google profile", link: "/app/settings" },
+    content: { subject: m.subject, preheader: m.preheader, title: m.title, bodyHtml: m.bodyHtml, button: m.button, note: m.note, text: m.text },
+  }).catch((e) => { captureError("cron-tick", e, { job: "access", location: locationId }); return null; });
 }
 
 // Job: Google access. Owner invited the Kabsi business group as Manager → mark access granted, refresh status, email the owner.
@@ -89,12 +90,10 @@ export async function accessJob() {
     const trialEnds = (ent as { state?: string; trial?: { ends_at?: string } | null } | null)?.state === "trial"
       ? (ent as { trial?: { ends_at?: string } | null }).trial?.ends_at ?? null : null;
     const trialLine = trialEnds ? ` Your free trial runs until ${formatDay(localDateHour(new Date(Date.parse(trialEnds) - 1000), (loc as { time_zone: string | null } | null)?.time_zone ?? "UTC").date)}.` : "";
-    for (const to of await ownerEmails(m.id)) {
-      const next = status === "active"
-        ? `Kabsi is now watching your reviews. When the next one arrives you'll get an email with a reply ready.${trialLine}`
-        : "One step left: your plan. As soon as it's confirmed, Kabsi starts drafting replies to your reviews.";
-      await sendAccessNotice(m.id, updated.name, to, next);
-    }
+    const next = status === "active"
+      ? `Kabsi is now watching your reviews. When the next one arrives you'll get an email with a reply ready.${trialLine}`
+      : "One step left: your plan. As soon as it's confirmed, Kabsi starts drafting replies to your reviews.";
+    await sendAccessNotice(m.id, updated.name, next);
   }
   return { mode: googleMode(), pending: pending.length, accepted, granted };
 }
@@ -131,20 +130,21 @@ export async function deletionsJob() {
   for (const l of rows ?? []) {
     const due = new Date(Date.parse(l.deletion_requested_at!) + 7 * 86400_000);
     const dueText = due.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-    const recipients = await ownerEmails(l.id);
+    // The addresses are read now: once the business is deleted there is nobody left to look up.
+    const { data: who, error: we } = await db.rpc("notification_recipients", { p_location: l.id, p_roles: ["owner"] });
+    if (we) throw we;
+    const recipients = ((who ?? []) as { user_id: string | null; email: string }[]).map((r) => ({ email: r.email, userId: r.user_id }));
     if (!l.deletion_notice_at) {
-      for (const to of recipients) {
-        await sendEmail({
-          kind: "deletion_scheduled", to, locationId: l.id, dedupeKey: `deletion_scheduled:${l.id}:${l.deletion_requested_at}:${to}`,
-          subject: `${l.name} will be deleted from Kabsi on ${dueText}`,
-          html: emailLayout({
-            preheader: "You can cancel until then.", title: "Deletion scheduled",
-            bodyHtml: `<p style="margin:0 0 16px 0;">You asked Kabsi to delete <strong>${esc(l.name)}</strong>. On <strong>${dueText}</strong> we delete its reviews, drafts, posts, photos, reports and settings. Payment records are kept where the law requires.</p><p style="margin:0 0 20px 0;">Changed your mind? Cancel it in Settings before then. To stop Kabsi reaching your Google profile, also remove the Kabsi Clients group (ID 5481006796) under People and access.</p>`,
-            button: { label: "Open Settings", url: `${APP_URL}/app/settings` },
-          }),
+      await notify({
+        category: "account", kind: "deletion_scheduled", key: `deletion_scheduled:${l.id}:${l.deletion_requested_at}`, locationId: l.id, to: recipients,
+        inApp: { title: `${l.name} will be deleted on ${dueText}`, link: "/app/settings" },
+        content: {
+          subject: `${l.name} will be deleted from Kabsi on ${dueText}`, preheader: "You can cancel until then.", title: "Deletion scheduled",
+          bodyHtml: `<p style="margin:0 0 16px 0;">You asked Kabsi to delete <strong>${esc(l.name)}</strong>. On <strong>${dueText}</strong> we delete its reviews, drafts, posts, photos, reports and settings. Payment records are kept where the law requires.</p><p style="margin:0 0 20px 0;">Changed your mind? Cancel it in Settings before then. To stop Kabsi reaching your Google profile, also remove the Kabsi Clients group (ID ${KABSI_GROUP_ID}) under People and access.</p>`,
+          button: { label: "Open Settings", url: `${APP_URL}/app/settings` },
           text: `You asked Kabsi to delete ${l.name}. On ${dueText} we delete its reviews, drafts, posts, photos, reports and settings. Cancel in Settings before then: ${APP_URL}/app/settings`,
-        }).catch((e) => captureError("cron-tick", e, { job: "deletions", location: l.id }));
-      }
+        },
+      }).catch((e) => captureError("cron-tick", e, { job: "deletions", location: l.id }));
       await db.from("locations").update({ deletion_notice_at: new Date().toISOString() }).eq("id", l.id);
       notices++;
     }
@@ -154,17 +154,14 @@ export async function deletionsJob() {
     const { error: de } = await db.rpc("delete_location_now", { p_location: l.id });
     if (de) throw de;
     deleted++;
-    for (const to of recipients) {
-      await sendEmail({
-        kind: "deletion_done", to, locationId: null, dedupeKey: `deletion_done:${l.id}:${to}`,
-        subject: `${l.name} was deleted from Kabsi`,
-        html: emailLayout({
-          preheader: "Your business data is deleted.", title: "Deleted",
-          bodyHtml: `<p style="margin:0 0 16px 0;">We deleted <strong>${esc(l.name)}</strong> and its data from Kabsi. Your NFC cards no longer open your review page. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID 5481006796) under People and access.</p>`,
-        }),
-        text: `We deleted ${l.name} and its data from Kabsi. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID 5481006796) under People and access.`,
-      }).catch((e) => captureError("cron-tick", e, { job: "deletions", location: l.id }));
-    }
+    await notify({
+      category: "account", kind: "deletion_done", key: `deletion_done:${l.id}`, locationId: null, to: recipients,
+      content: {
+        subject: `${l.name} was deleted from Kabsi`, preheader: "Your business data is deleted.", title: "Deleted",
+        bodyHtml: `<p style="margin:0 0 16px 0;">We deleted <strong>${esc(l.name)}</strong> and its data from Kabsi. Your NFC cards no longer open your review page. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID ${KABSI_GROUP_ID}) under People and access.</p>`,
+        text: `We deleted ${l.name} and its data from Kabsi. If Kabsi is still a Manager on your Google profile, remove the Kabsi Clients group (ID ${KABSI_GROUP_ID}) under People and access.`,
+      },
+    }).catch((e) => captureError("cron-tick", e, { job: "deletions", location: l.id }));
   }
   return { notices, deleted };
 }
@@ -194,18 +191,16 @@ export async function trialsJob() {
     const copy = TRIAL_COPY[stage];
     const body = `${copy.lead(esc(c.name), day)} After that the business moves to Free: reply drafts, Google Protection and the Weekly Care Report stop. Your Review Link and Card keep working.`;
     const plain = `${copy.lead(c.name, day).replace(/<\/?strong>/g, "")} After that the business moves to Free: reply drafts, Google Protection and the Weekly Care Report stop. Your Review Link and Card keep working.`;
-    for (const to of await ownerEmails(c.location_id)) {
-      await sendEmail({
-        kind: `trial_${stage}`, to, locationId: c.location_id, dedupeKey: `trial_${stage}:${c.plan_id}:${to}`,
-        subject: copy.subject(day),
-        html: emailLayout({
-          preheader: "Choose a plan to keep everything going.", title: "Your free trial",
-          bodyHtml: `<p style="margin:0 0 16px 0;">${body}</p><p style="margin:0 0 20px 0;">To keep everything going, choose a plan before the trial ends.</p>`,
-          button: { label: "Choose a plan", url: `${APP_URL}/app/plan` },
-        }),
+    await notify({
+      category: "billing", kind: `trial_${stage}`, key: `trial_${stage}:${c.plan_id}`, locationId: c.location_id, to: "owners",
+      inApp: { title: copy.subject(day), link: "/app/plan" },
+      content: {
+        subject: copy.subject(day), preheader: "Choose a plan to keep everything going.", title: "Your free trial",
+        bodyHtml: `<p style="margin:0 0 16px 0;">${body}</p><p style="margin:0 0 20px 0;">To keep everything going, choose a plan before the trial ends.</p>`,
+        button: { label: "Choose a plan", url: `${APP_URL}/app/plan` },
         text: `${plain}\n\nTo keep everything going, choose a plan before the trial ends.\n\nChoose a plan: ${APP_URL}/app/plan`,
-      }).catch((e) => captureError("cron-tick", e, { job: "trials", location: c.location_id }));
-    }
+      },
+    }).catch((e) => captureError("cron-tick", e, { job: "trials", location: c.location_id }));
     reminders++;
   }
   return { reminders };
@@ -228,18 +223,17 @@ export async function renewalsJob() {
     const day = formatDay(c.last_day);
     const label = PLAN_LABEL[c.kind] ?? "Kabsi Pro";
     const plain = `Your ${label} plan for ${c.name} ends ${RENEW_COPY[stage]}, on ${day}. To keep reply drafts, Google Protection and the Weekly Care Report going, pay before then. Paying early adds the new period after this one, so you lose no days. Your Review Link and Card keep working either way.`;
-    for (const to of await ownerEmails(c.location_id)) {
-      await sendEmail({
-        kind: `renew_${stage}`, to, locationId: c.location_id, dedupeKey: `renew_${stage}:${c.plan_id}:${to}`,
+    await notify({
+      category: "billing", kind: `renew_${stage}`, key: `renew_${stage}:${c.plan_id}`, locationId: c.location_id, to: "owners",
+      inApp: { title: stage === "r1" ? "Your Kabsi plan ends tomorrow" : `Your Kabsi plan ends on ${day}`, link: "/app/plan" },
+      content: {
         subject: stage === "r1" ? "Your Kabsi plan ends tomorrow" : `Your Kabsi plan ends on ${day}`,
-        html: emailLayout({
-          preheader: "Pay before it ends and you lose no days.", title: "Your plan is ending",
-          bodyHtml: `<p style="margin:0 0 16px 0;">${esc(plain)}</p>`,
-          button: { label: "Renew your plan", url: `${APP_URL}/app/plan?pay=${encodeURIComponent(c.kind)}` },
-        }),
+        preheader: "Pay before it ends and you lose no days.", title: "Your plan is ending",
+        bodyHtml: `<p style="margin:0 0 16px 0;">${esc(plain)}</p>`,
+        button: { label: "Renew your plan", url: `${APP_URL}/app/plan?pay=${encodeURIComponent(c.kind)}` },
         text: `${plain}\n\nRenew your plan: ${APP_URL}/app/plan?pay=${encodeURIComponent(c.kind)}`,
-      }).catch((e) => captureError("cron-tick", e, { job: "renewals", location: c.location_id }));
-    }
+      },
+    }).catch((e) => captureError("cron-tick", e, { job: "renewals", location: c.location_id }));
     reminders++;
   }
   return { renewals: reminders };
