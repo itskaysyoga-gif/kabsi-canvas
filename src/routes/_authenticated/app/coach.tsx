@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ListChecks as PageGlyph } from "lucide-react";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
+import { CoachActions } from "@/components/coach/coach-actions";
 import { CoachList } from "@/components/coach/coach-list";
 import { PageIcon } from "@/components/shared/page-icon";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/app/coach")({
 });
 
 function CoachPage() {
+  const queryClient = useQueryClient();
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   const loc = location.data;
   const live = !!loc && loc.status === "active" && !loc.concierge;
@@ -29,6 +31,13 @@ function CoachPage() {
   });
   const c = coach.data;
   const rows = c ? coachRows(c) : [];
+  // After an action: the checklist, the tasks on Home and the profile watch all move.
+  const changed = () =>
+    Promise.all(
+      [["coach"], ["tasks"], ["shield"], ["home-facts"]].map((queryKey) =>
+        queryClient.invalidateQueries({ queryKey }),
+      ),
+    );
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
@@ -78,6 +87,23 @@ function CoachPage() {
             </p>
           ) : null}
           <CoachList rows={rows} />
+          {c.pro && loc ? (
+            <CoachActions locationId={loc.id} onChanged={changed} />
+          ) : (
+            <section
+              className="mt-8 rounded-large bg-kb-white p-6 shadow-kb"
+              data-testid="coach-pro-note"
+            >
+              <p className="font-bold">With Pro, Kabsi does these for you</p>
+              <p className="mt-1 text-sm text-kb-stone">
+                Pro prepares the website tag, more categories, a website check and a snippet for
+                your website. You approve each one before anything reaches Google.
+              </p>
+              <Button asChild size="compact" className="mt-4">
+                <Link to="/app/plan">See plans</Link>
+              </Button>
+            </section>
+          )}
         </div>
       ) : null}
     </div>

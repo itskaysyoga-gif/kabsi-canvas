@@ -1,6 +1,7 @@
 // The Profile Coach (P0.8-09, K-136): the checklist of what a complete Google profile has. Essentials sees it (what is
 // missing and why); the changes themselves are Pro and arrive with part B. The titles are the same as the free Profile
 // Check shows (supabase/functions/_shared/coach/catalog.ts; tests/coach.test.ts keeps the two equal).
+import { functionCall } from "@/lib/reviews";
 import { supabase } from "@/lib/supabase";
 
 export type CoachItemId =
@@ -10,7 +11,8 @@ export type CoachItemId =
   | "attributes"
   | "photos"
   | "service_area"
-  | "website_tracking";
+  | "website_tracking"
+  | "website_match";
 export type CoachStatus = "done" | "todo" | "unknown" | "later";
 export type CoachCatalogItem = { id: CoachItemId; title: string; why: string };
 /** What the database adds to an item: a number it read, or what the item waits for. */
@@ -20,6 +22,8 @@ export type CoachDetail = {
   waits?: string;
   question?: boolean;
   example?: boolean;
+  mismatches?: string[];
+  checked_at?: string;
 };
 export type CoachRow = CoachCatalogItem & { status: CoachStatus; detail?: CoachDetail | undefined };
 
@@ -59,6 +63,11 @@ export const COACH_ITEMS: readonly CoachCatalogItem[] = [
     title: "Visits from Google to your website",
     why: "A small tag on your website link shows how many visits come from your Google profile.",
   },
+  {
+    id: "website_match",
+    title: "Website matches your profile",
+    why: "Your website and your Google profile should say the same name, phone number, address and opening times.",
+  },
 ];
 
 export const STATUS_LABEL: Record<CoachStatus, string> = {
@@ -82,6 +91,8 @@ export function detailLine(row: CoachRow): string | null {
     return "Kabsi has no services or products from you yet.";
   if (row.status === "todo" && row.id === "website_tracking")
     return "Your website link has no tag yet.";
+  if (row.status === "todo" && row.id === "website_match" && d.mismatches?.length)
+    return `Your website says something different about: ${d.mismatches.join(", ")}.`;
   if (row.status === "later" && d.waits === "website")
     return "Add a website to your profile first.";
   if (row.status === "later" && d.waits === "photo_engine") return "Coming with photo management.";
@@ -113,3 +124,32 @@ export function coachRows(coach: Coach): CoachRow[] {
     return { ...i, status: got?.status ?? "unknown", detail: got?.detail };
   });
 }
+
+// The Pro actions (part B): the coach Edge function asks for Pro again, so hiding a button is never the only lock.
+export type CoachAction =
+  | "snippet"
+  | "website_tag"
+  | "website_tag_apply"
+  | "categories"
+  | "categories_apply"
+  | "website_check"
+  | "description";
+
+export const coachCall = <T>(
+  locationId: string,
+  action: CoachAction,
+  extra: Record<string, unknown> = {},
+) => functionCall<T>("coach", { do: action, location_id: locationId, ...extra });
+
+export type Verdict = "match" | "mismatch" | "unknown";
+export const VERDICT_LABEL: Record<Verdict, string> = {
+  match: "Matches",
+  mismatch: "Different",
+  unknown: "Not shown on the page",
+};
+export const FIELD_LABEL: Record<"name" | "phone" | "address" | "hours", string> = {
+  name: "Business name",
+  phone: "Phone number",
+  address: "Address",
+  hours: "Opening times",
+};

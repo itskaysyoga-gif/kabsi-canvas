@@ -21,7 +21,7 @@ Deno.test("the numbers are counts, never Google's text", () => {
 Deno.test("the free checklist is the app's list and asserts only what is public", () => {
   const rows = freeChecklist({ website: "https://example.com", photo_count: 3 });
   assertEquals(rows.map((r) => r.id), COACH_ITEMS.map((i) => i.id));
-  assertEquals(rows.filter((r) => r.status === "unknown").map((r) => r.id), ["description", "categories", "services", "attributes", "service_area"]);
+  assertEquals(rows.filter((r) => r.status === "unknown").map((r) => r.id), ["description", "categories", "services", "attributes", "service_area", "website_match"]);
   assertEquals(rows.find((r) => r.id === "website_tracking")?.status, "todo");
 });
 
