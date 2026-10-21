@@ -1,20 +1,21 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useState } from "react";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
-import { fmtDay } from "@/lib/format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { HoursCalendar } from "@/components/hours/hours-calendar";
+import { ClosureForm, SpecialHoursForm } from "@/components/hours/special-hours-form";
+import { localToday, range, times } from "@/lib/hours-format";
+import { WeekEditor } from "@/components/hours/week-editor";
+import { emptyWeek, weekFromFact } from "@/lib/hours";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
-import { contentCall } from "@/lib/reviews";
-import { track } from "@/lib/telemetry";
 import { CalendarClock as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
 
-// Special hours: holidays, closures, late nights. The owner confirms the exact dates and times before
-// anything changes on Google (D202). Regular weekly hours are not changed here.
+// Hours (P0.5-03, K-21): one editor for the weekly hours, special days and a closure with a reopening date, and a
+// calendar of what is set. The owner confirms the exact hours before anything changes on Google (D202); every
+// approval goes through the one publication pipeline.
 export const Route = createFileRoute("/_authenticated/app/hours")({
   head: () => ({ meta: [{ title: "Hours | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: HoursPage,
@@ -37,24 +38,31 @@ async function loadHours(locationId: string): Promise<Row[]> {
     .select("id, start_date, end_date, closed, open_time, close_time, reason, state")
     .eq("location_id", locationId)
     .order("start_date", { ascending: false })
-    .limit(30);
+    .limit(60);
   if (error) throw new Error(error.message);
   return (data ?? []) as Row[];
 }
-const fmt = (d: string) => fmtDay(d);
-const range = (r: { start_date: string; end_date: string }) =>
-  r.start_date === r.end_date ? fmt(r.start_date) : `${fmt(r.start_date)} to ${fmt(r.end_date)}`;
-// "18:00" → "6:00 PM" or "18:00", following the owner's own device settings.
-const clock = (t: string | null) => {
-  if (!t) return "";
-  const [h, m] = t.split(":").map(Number);
-  return new Date(2000, 0, 1, h ?? 0, m ?? 0).toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-};
-const times = (r: { closed: boolean; open_time: string | null; close_time: string | null }) =>
-  r.closed ? "Closed" : `${clock(r.open_time)} to ${clock(r.close_time)}`;
+
+type Fact = { display?: string; raw?: unknown } | null;
+/** The regular hours the owner approved, or what Google showed when they confirmed it (Business Knowledge). */
+async function loadApprovedHours(locationId: string): Promise<Fact> {
+  const { data, error } = await supabase
+    .from("knowledge_facts")
+    .select("value")
+    .eq("location_id", locationId)
+    .eq("slot", "profile.regular_hours")
+    .is("superseded_by", null)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return (data?.value ?? null) as Fact;
+}
+
+const MODES = [
+  { id: "regular", label: "Opening hours" },
+  { id: "special", label: "Special days" },
+  { id: "closure", label: "Closed for a while" },
+] as const;
+type Mode = (typeof MODES)[number]["id"];
 
 function HoursPage() {
   const queryClient = useQueryClient();
@@ -65,35 +73,84 @@ function HoursPage() {
     queryFn: () => loadHours(loc!.id),
     enabled: !!loc,
   });
+  const approved = useQuery({
+    queryKey: ["hours-approved", loc?.id],
+    queryFn: () => loadApprovedHours(loc!.id),
+    enabled: !!loc,
+  });
+  const [mode, setMode] = useState<Mode>("regular");
+  const refresh = () =>
+    Promise.all(
+      [["hours"], ["hours-approved"], ["shield"], ["tasks"], ["feed"], ["home-facts"]].map(
+        (queryKey) => queryClient.invalidateQueries({ queryKey }),
+      ),
+    );
+  const live = !!loc && loc.status === "active" && !loc.concierge;
+  const today = localToday();
+  const entries = (rows.data ?? [])
+    .filter((r) => r.state !== "skipped")
+    .map((r) => ({
+      start: r.start_date,
+      end: r.end_date,
+      label: `${times(r)}${r.reason ? `, ${r.reason}` : ""}`,
+    }));
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
       <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Profile</p>
-      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Special hours</h1>
+      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Hours</h1>
       <p className="mt-2 text-kb-stone">
-        Closed for a holiday or open late? Set special hours so Google shows the right times.
+        Your weekly hours, holidays and closures, so Google shows the right times. Nothing changes
+        on Google until you confirm it.
       </p>
       {!location.isLoading && !loc ? (
         <Button asChild className="mt-6">
           <Link to="/start">Add your business</Link>
         </Button>
       ) : null}
-      {loc?.concierge ? <EarlyAccessNotice what="Special hours" /> : null}
-      {loc && loc.status === "active" && !loc.concierge ? (
-        <HoursForm
-          locationId={loc.id}
-          onDone={() => queryClient.invalidateQueries({ queryKey: ["hours"] })}
-        />
-      ) : loc ? (
+      {loc?.concierge ? <EarlyAccessNotice what="Hours" /> : null}
+      {live ? (
+        <>
+          <div className="mt-6 grid grid-cols-3 gap-2" role="group" aria-label="What to change">
+            {MODES.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                aria-pressed={mode === m.id}
+                onClick={() => setMode(m.id)}
+                className={`min-h-12 rounded-card border-2 px-2 text-sm font-bold ${mode === m.id ? "border-kb-black bg-kb-sand" : "border-kb-hairline"}`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+          {mode === "regular" ? (
+            approved.isLoading ? (
+              <p className="mt-7 text-kb-stone">Loading…</p>
+            ) : (
+              <WeekEditor
+                // A new week arrives after a save: start the editor again from it.
+                key={JSON.stringify(approved.data ?? null)}
+                locationId={loc.id}
+                initial={weekFromFact(approved.data) ?? emptyWeek()}
+                onDone={refresh}
+              />
+            )
+          ) : mode === "special" ? (
+            <SpecialHoursForm locationId={loc.id} onDone={refresh} />
+          ) : (
+            <ClosureForm locationId={loc.id} onDone={refresh} />
+          )}
+        </>
+      ) : loc && !loc.concierge ? (
         <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
-          <p className="font-bold">
-            Special hours can be set once Kabsi can reach your Google profile.
-          </p>
+          <p className="font-bold">Hours can be set once Kabsi can reach your Google profile.</p>
           <Button asChild size="compact" className="mt-4">
             <Link to="/start">Continue setup</Link>
           </Button>
         </div>
       ) : null}
+      {live ? <HoursCalendar entries={entries} holidays={[]} today={today} /> : null}
       {rows.data?.length ? (
         <div className="mt-10">
           <h2 className="text-lg font-bold">Set with Kabsi</h2>
@@ -133,187 +190,5 @@ function HoursPage() {
         </div>
       ) : null}
     </div>
-  );
-}
-
-function HoursForm({ locationId, onDone }: { locationId: string; onDone: () => unknown }) {
-  // Local date, not UTC: in the evening in the Americas UTC is already tomorrow.
-  const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  const [start, setStart] = useState(today);
-  const [end, setEnd] = useState(today);
-  const [closed, setClosed] = useState(true);
-  const [open, setOpen] = useState("09:00");
-  const [close, setClose] = useState("17:00");
-  const [reason, setReason] = useState("");
-  const [confirming, setConfirming] = useState(false);
-  const [busy, setBusy] = useState(false);
-  // Set synchronously so a fast double click cannot start two saves before the button re-renders as disabled.
-  const sending = useRef(false);
-  const [msg, setMsg] = useState("");
-  const [err, setErr] = useState("");
-  const summary = {
-    start_date: start,
-    end_date: end < start ? start : end,
-    closed,
-    open_time: closed ? null : open,
-    close_time: closed ? null : close,
-  };
-
-  function review(e: FormEvent) {
-    e.preventDefault();
-    setErr("");
-    setMsg("");
-    if (!closed && close <= open && close !== "00:00")
-      return setErr(
-        "Closing time must be after opening time. For hours past midnight, close at 00:00.",
-      );
-    setConfirming(true);
-  }
-  async function confirm() {
-    if (sending.current) return;
-    sending.current = true;
-    setBusy(true);
-    setErr("");
-    try {
-      await contentCall({ do: "hours_publish", location_id: locationId, ...summary, reason });
-      track("special_hours_approved", { channel: "dashboard" });
-      setMsg("Approved. Kabsi sends it to Google within a few minutes.");
-      setConfirming(false);
-      setReason("");
-      onDone();
-    } catch (x) {
-      setErr(x instanceof Error ? x.message : "Couldn't save. Nothing changed on Google.");
-    }
-    sending.current = false;
-    setBusy(false);
-  }
-
-  return (
-    <form onSubmit={review} className="mt-7 rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="start">From</Label>
-          <Input
-            id="start"
-            type="date"
-            min={today}
-            value={start}
-            onChange={(e) => {
-              setStart(e.target.value);
-              if (end < e.target.value) setEnd(e.target.value);
-              setConfirming(false);
-            }}
-            className="mt-2"
-          />
-        </div>
-        <div>
-          <Label htmlFor="end">To</Label>
-          <Input
-            id="end"
-            type="date"
-            min={start}
-            value={end}
-            onChange={(e) => {
-              setEnd(e.target.value);
-              setConfirming(false);
-            }}
-            className="mt-2"
-          />
-        </div>
-      </div>
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        {[true, false].map((c) => (
-          <button
-            key={String(c)}
-            type="button"
-            aria-pressed={closed === c}
-            onClick={() => {
-              setClosed(c);
-              setConfirming(false);
-            }}
-            className={`h-11 rounded-card border-2 text-sm font-bold ${closed === c ? "border-kb-black bg-kb-sand" : "border-kb-hairline"}`}
-          >
-            {c ? "Closed" : "Open, different hours"}
-          </button>
-        ))}
-      </div>
-      {!closed ? (
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <div>
-            <Label htmlFor="open">Opens</Label>
-            <Input
-              id="open"
-              type="time"
-              value={open}
-              onChange={(e) => {
-                setOpen(e.target.value);
-                setConfirming(false);
-              }}
-              className="mt-2"
-            />
-          </div>
-          <div>
-            <Label htmlFor="close">Closes</Label>
-            <Input
-              id="close"
-              type="time"
-              value={close}
-              onChange={(e) => {
-                setClose(e.target.value);
-                setConfirming(false);
-              }}
-              className="mt-2"
-            />
-          </div>
-        </div>
-      ) : null}
-      <Label htmlFor="reason" className="mt-4 block text-sm">
-        Note for yourself <span className="text-kb-stone">(optional, not shown on Google)</span>
-      </Label>
-      <Input
-        id="reason"
-        value={reason}
-        onChange={(e) => setReason(e.target.value)}
-        maxLength={120}
-        placeholder="e.g. Independence Day"
-        className="mt-2"
-      />
-      {err ? (
-        <p className="mt-3 text-sm text-kb-red" role="alert">
-          {err}
-        </p>
-      ) : null}
-      {msg ? (
-        <p className="mt-3 text-sm text-kb-green" role="status">
-          {msg}
-        </p>
-      ) : null}
-      {confirming ? (
-        <div className="mt-5 rounded-card border-2 border-kb-black p-4">
-          <p className="text-sm">Google will show:</p>
-          <p className="mt-1 font-bold">
-            {range(summary)}: {times(summary)}
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button type="button" disabled={busy} onClick={() => void confirm()}>
-              {busy ? "Saving…" : "Confirm and save to Google"}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              disabled={busy}
-              onClick={() => setConfirming(false)}
-            >
-              Change
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <Button type="submit" className="mt-5 w-full">
-          Review
-        </Button>
-      )}
-    </form>
   );
 }
