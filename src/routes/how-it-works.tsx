@@ -65,7 +65,7 @@ export const Route = createFileRoute("/how-it-works")({
             ],
             [
               "It reaches you by email",
-              "Each new review arrives with its draft, or in a daily digest for 4 and 5 star reviews.",
+              "Each new review arrives with its draft, at once while you are open and in a daily email after hours.",
             ],
             ["You approve, edit or skip", "Nothing is written to Google until you approve it."],
           ].map(([name, text], i) => ({ "@type": "HowToStep", position: i + 1, name, text })),
@@ -145,8 +145,9 @@ function Page() {
             <ul>
               <li>Reviews of 3 stars or less: one email each, as they arrive.</li>
               <li>
-                4 and 5 star reviews: gathered into one email a day at the hour you choose, each
-                with its own <b>Approve</b>, <b>Edit</b> and <b>Skip</b>.
+                Other reviews: one email each while you are open, and gathered into one email a day
+                at the hour you choose after hours, each with its own <b>Approve</b>, <b>Edit</b>{" "}
+                and <b>Skip</b>. Nothing is emailed between 22:00 and 08:00.
               </li>
               <li>
                 Hard reviews (1 or 2 stars, or anything about health, safety, staff or legal

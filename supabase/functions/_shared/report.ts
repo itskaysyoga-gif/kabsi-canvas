@@ -2,7 +2,8 @@
 // Google rating and its change, reviews received, replies posted, card taps (bots excluded).
 // No review text and no quotes (K-113.3, R-19). No advice, no claims about causes.
 import { getPlace } from "./google/index.ts";
-import { admin, APP_URL, emailLayout, esc, ownerEmails, sendEmail } from "./kabsi.ts";
+import { admin, APP_URL, esc } from "./kabsi.ts";
+import { notify } from "./notify.ts";
 
 type Loc = { id: string; name: string; place_id: string | null; time_zone: string; emails_paused_until: string | null };
 const DAY = 86400_000;
@@ -119,14 +120,14 @@ export async function weeklyReports(locs: Loc[], opts: { forceLocation?: string 
     const { error } = await db.from("weekly_reports").insert({ location_id: loc.id, week_of: date, data });
     if (error) { if (error.code === "23505") continue; throw error; } // already sent this week
     const body = renderReport(loc, data);
-    for (const to of await ownerEmails(loc.id)) {
-      await sendEmail({
-        kind: "weekly_report", to, locationId: loc.id, dedupeKey: `weekly:${loc.id}:${date}:${to}`,
-        subject: `Your week on Google: ${loc.name}`,
-        html: emailLayout({ preheader: `${data.new_reviews} new reviews, ${data.replied} replied.`, title: "Your week on Google", bodyHtml: body.html, button: { label: "Open Kabsi", url: `${APP_URL}/app/report` } }),
-        text: `${body.text}\n\nOpen Kabsi: ${APP_URL}/app/report`,
-      });
-    }
+    await notify({
+      category: "weekly_report", kind: "weekly_report", key: `weekly:${loc.id}:${date}`, locationId: loc.id, to: "owners",
+      inApp: { title: "Your Weekly Care Report is ready", link: "/app/report" },
+      content: {
+        subject: `Your week on Google: ${loc.name}`, preheader: `${data.new_reviews} new reviews, ${data.replied} replied.`, title: "Your week on Google",
+        bodyHtml: body.html, button: { label: "Open Kabsi", url: `${APP_URL}/app/report` }, text: `${body.text}\n\nOpen Kabsi: ${APP_URL}/app/report`,
+      },
+    });
     sent++;
   }
   return sent;

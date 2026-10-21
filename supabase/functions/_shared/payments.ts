@@ -1,5 +1,6 @@
 // "Payment received" email, shared by the partner function (manual USDT claims) and billing (NOWPayments).
-import { admin, APP_URL, emailLayout, esc, ownerEmails, sendEmail } from "./kabsi.ts";
+import { admin, APP_URL, esc } from "./kabsi.ts";
+import { notify } from "./notify.ts";
 import { PLAN_LABEL } from "./plans.ts";
 
 const money = (n: number | string) => `$${Number(n).toFixed(2)}`;
@@ -16,19 +17,13 @@ export async function sendPaymentReceived(o: { locationId: string; item: string;
       : ` Your plan starts on ${day(plan.starts_at!)}, when your current period ends.`
     : " Your plan starts as soon as Kabsi's access to your Google profile is working.";
   const line = `We received your payment of ${money(o.amountUsd)} for ${PLAN_LABEL[o.item] ?? "Kabsi Pro"}.${tail} Thank you.`;
-  let sent = 0;
-  for (const to of await ownerEmails(o.locationId)) {
-    const r = await sendEmail({
-      kind: "payment_received", to, locationId: o.locationId, dedupeKey: `${o.dedupeBase}:${to}`,
-      subject: "Payment received",
-      html: emailLayout({
-        preheader: "Thank you.", title: "Payment received",
-        bodyHtml: `<p style="margin:0 0 14px 0;">${esc(line)}</p>`,
-        button: { label: "Open Kabsi", url: `${APP_URL}/app` },
-      }),
-      text: `${line}\n\n${APP_URL}/app`,
-    });
-    if ("sent" in r) sent++;
-  }
-  return sent;
+  const r = await notify({
+    category: "billing", kind: "payment_received", key: o.dedupeBase, locationId: o.locationId, to: "owners",
+    inApp: { title: "Payment received", body: `${money(o.amountUsd)} for ${PLAN_LABEL[o.item] ?? "Kabsi Pro"}.`, link: "/app/plan" },
+    content: {
+      subject: "Payment received", preheader: "Thank you.", title: "Payment received",
+      bodyHtml: `<p style="margin:0 0 14px 0;">${esc(line)}</p>`, button: { label: "Open Kabsi", url: `${APP_URL}/app` }, text: `${line}\n\n${APP_URL}/app`,
+    },
+  });
+  return r.sent;
 }

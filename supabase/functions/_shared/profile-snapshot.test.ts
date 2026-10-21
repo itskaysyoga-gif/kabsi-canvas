@@ -6,7 +6,8 @@ import assert from "node:assert/strict";
 import { getCachedSnapshot, getSnapshotPlace, guard, SNAPSHOT_FIELD_MASK, searchText } from "./google/places/live.ts";
 import type { Place } from "./google/types.ts";
 import { buildSnapshot, CHECK_PAGES, checkEmail, type Deps, findings, LIMITS, makeHandler, TIPS_CONSENT_TEXT } from "./profile-snapshot.ts";
-import { emailLayout, esc } from "./email-layout.ts";
+import { esc } from "./email-layout.ts";
+import { type EmailContent, renderEmail } from "./email-render.ts";
 
 const real = { ...guard };
 const realFetch = globalThis.fetch;
@@ -51,7 +52,7 @@ function world(opts: { cap?: number; place?: Place; turnstile?: boolean } = {}) 
 
   const hits = new Map<string, number>();
   const saved: Record<string, unknown>[] = [];
-  const sent: { kind: string; to: string; subject: string; html: string; text: string; dedupeKey: string }[] = [];
+  const sent: { kind: string; to: string; subject: string; html: string; text: string; dedupeKey: string; content: EmailContent }[] = [];
   const errors: unknown[] = [];
   const deps: Deps = {
     env: (n) => (n === "PLACES_API_KEY" ? "test-key" : n === "SUPABASE_URL" ? "https://example.supabase.co" : undefined),
@@ -72,11 +73,10 @@ function world(opts: { cap?: number; place?: Place; turnstile?: boolean } = {}) 
     getSnapshotPlace,
     getCachedSnapshot,
     saveEmail: (row) => (saved.push(row), Promise.resolve()),
-    sendEmail: (o) => (sent.push(o), Promise.resolve({ sent: "x" })),
+    sendEmail: (o) => (sent.push({ ...o, subject: o.content.subject, ...renderEmail(o.content) }), Promise.resolve({ sent: "x" })),
     captureError: (_fn, e) => (errors.push(e), Promise.resolve()),
     appUrl: "https://kabsi.co",
     cors: {},
-    emailLayout,
     esc,
   };
   const handler = makeHandler(deps);
@@ -295,7 +295,7 @@ Deno.test("findings: three to five, labelled, ordered, no score, no dashes or ex
     }
   }
   assert.equal(findings({ ...strong, hours: [] }).some((f) => f.title === "Your opening hours are missing"), true);
-  const mail = checkEmail({ emailLayout, esc, appUrl: "https://kabsi.co" }, strong, true);
-  assert.doesNotMatch(mail.html.replace("<!doctype html>", "") + mail.text + mail.subject, /[\u2013\u2014!]/);
+  const mail = checkEmail({ esc, appUrl: "https://kabsi.co" }, strong, true);
+  assert.doesNotMatch(renderEmail(mail).html.replace("<!doctype html>", "") + mail.text + mail.subject, /[\u2013\u2014!]/);
   assert.match(mail.text, /Join early access: https:\/\/kabsi.co\/start/);
 });

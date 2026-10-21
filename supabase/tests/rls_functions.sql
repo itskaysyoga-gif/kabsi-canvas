@@ -36,7 +36,9 @@ insert into tested values
   ('start_location(text,text,text,text,text,text,uuid)'),
   ('save_fact(uuid,text,jsonb,uuid)'), ('confirm_fact(uuid)'), ('reject_fact(uuid)'), ('remove_fact(uuid)'),
   ('answer_knowledge_confirm(uuid,text)'), ('answer_style_offer(uuid,boolean)'),
-  ('update_notification_settings(uuid,text[],smallint,text,integer)');
+  ('update_notification_settings(uuid,text[],smallint,text,integer)'),
+  ('my_notification_prefs(uuid)'), ('set_notification_pref(uuid,text,text,text)'), ('list_my_notifications(uuid,integer)'),
+  ('mark_notifications_read(uuid,uuid[])');
 
 select is(
   (select coalesce(array_agg(p.oid::regprocedure::text order by 1), '{}') from pg_proc p
@@ -154,6 +156,10 @@ select throws_ok($$ select public.remove_fact('00000000-0000-4000-8000-000000000
 select throws_ok($$ select public.answer_knowledge_confirm('00000000-0000-4000-8000-0000000000fe', 'proposed') $$, '42501', null, 'answer_knowledge_confirm refuses a non-member');
 select throws_ok($$ select public.answer_style_offer('00000000-0000-4000-8000-0000000000fc', true) $$, '42501', null, 'answer_style_offer refuses a non-member');
 select throws_ok($$ select public.update_notification_settings('00000000-0000-4000-8000-0000000000c1', null, null, null, null) $$, '42501', null, 'update_notification_settings refuses a non-member');
+select throws_ok($$ select public.my_notification_prefs('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'my_notification_prefs refuses a non-member');
+select throws_ok($$ select public.set_notification_pref('00000000-0000-4000-8000-0000000000c1', 'review_new', 'email', 'off') $$, '42501', null, 'set_notification_pref refuses a non-member');
+select throws_ok($$ select public.list_my_notifications('00000000-0000-4000-8000-0000000000c1', 10) $$, '42501', null, 'list_my_notifications refuses a non-member');
+select throws_ok($$ select public.mark_notifications_read('00000000-0000-4000-8000-0000000000c1', null) $$, '42501', null, 'mark_notifications_read refuses a non-member');
 select throws_ok($$ select public.start_location('victim-place', 'Hijack', 'x', 'US', 'UTC', null, null) $$, 'P0001', 'already_on_kabsi', 'start_location refuses a business that is already on Kabsi for someone else');
 
 -- Partner RPCs on the victim's partner.

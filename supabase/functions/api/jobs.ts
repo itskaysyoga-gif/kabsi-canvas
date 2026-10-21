@@ -15,7 +15,9 @@
 // one whose outcome is not known yet. Neither ever sends a write twice. These are the only Google writes in Kabsi,
 // apart from disconnect (P0.2-02, _shared/disconnect.ts), which removes Kabsi's own Manager entry after the signed-in
 // owner asked for it in Settings, and never touches the profile itself.
-import { admin, APP_URL, captureError, emailLayout, esc, isInternal, jobLog, json, ownerEmails, sendEmail } from "../_shared/kabsi.ts";
+import { admin, APP_URL, captureError, isInternal, jobLog, json } from "../_shared/kabsi.ts";
+import { notify, notifyDue } from "../_shared/notify.ts";
+import { esc, KABSI_GROUP_ID } from "../_shared/email-layout.ts";
 import { type Job, type JobHandler, type JobState, PermanentJobError, runJob } from "../_shared/jobs.ts";
 import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation } from "../_shared/reviews.ts";
 import { AiBudgetError } from "../_shared/ai-budget.ts";
@@ -246,12 +248,11 @@ const DISCONNECT: DisconnectDeps = {
   },
   async notify(locationId, notice, dedupe) {
     const m = accessChangeEmail(notice, APP_URL);
-    for (const to of await ownerEmails(locationId)) {
-      await sendEmail({
-        kind: "access_change", to, locationId, dedupeKey: `${dedupe}:${to}`, subject: m.subject,
-        html: emailLayout({ preheader: m.preheader, title: m.title, bodyHtml: m.bodyHtml, button: m.button, note: m.note }), text: m.text,
-      });
-    }
+    await notify({
+      category: "access", kind: "access_change", key: dedupe, locationId, to: "owners",
+      inApp: { title: m.title, link: "/app/settings" },
+      content: { subject: m.subject, preheader: m.preheader, title: m.title, bodyHtml: m.bodyHtml, button: m.button, note: m.note, text: m.text },
+    });
   },
 };
 
@@ -291,14 +292,16 @@ const HANDLERS: Record<string, JobHandler> = {
       read: (id) => rpcJson<TeamInvite | null>("team_invite_for_email", { p_invite: id }),
       async send(i) {
         const m = teamInviteEmail(i, APP_URL);
-        await sendEmail({
-          kind: "team_invite", to: i.email, locationId: job.location_id ?? undefined, dedupeKey: `team_invite:${inviteId}`,
-          subject: m.subject, text: m.text,
-          html: emailLayout({ preheader: m.preheader, title: m.title, bodyHtml: m.bodyHtml, button: m.button, note: m.note }),
+        // Sent because the owner just invited this person: no choices and no quiet hours (category direct).
+        await notify({
+          category: "direct", kind: "team_invite", key: `team_invite:${inviteId}`, locationId: job.location_id ?? null, to: [{ email: i.email, userId: null }],
+          content: { subject: m.subject, text: m.text, preheader: m.preheader, title: m.title, bodyHtml: m.bodyHtml, button: m.button, note: m.note },
         });
       },
     });
   },
+  // P0.4-09: held and digested emails come due (K-46). Offered every 5 minutes once app_settings.notify_due is 'on'.
+  notify_due: step("notify_due", notifyDue),
   detect_tasks: async (job) => {
     const made = await detectTasks(job.location_id, (id) => rpcJson<Record<string, number> | null>("run_task_detectors", { p_location: id }));
     if (Object.values(made).some((n) => n > 0)) await jobLog("detect_tasks", true, { location: job.location_id, ...made });
@@ -338,18 +341,17 @@ export async function dispatch(req: Request): Promise<Response> {
 
 async function emailAccessLost(locationId: string, name: string) {
   const day = new Date().toISOString().slice(0, 10);
-  for (const to of await ownerEmails(locationId)) {
-    await sendEmail({
-      kind: "access_lost", to, locationId, dedupeKey: `access_lost:${locationId}:${day}:${to}`,
+  await notify({
+    category: "access", kind: "access_lost", key: `access_lost:${locationId}:${day}`, locationId, to: "owners",
+    inApp: { title: `Kabsi can't reach ${name} on Google`, body: "Invite the Kabsi group again to continue.", link: "/app/settings" },
+    content: {
       subject: `Kabsi can't reach ${name} on Google`,
-      html: emailLayout({
-        preheader: "Invite the Kabsi group again to continue.", title: "Kabsi lost access to your Google profile",
-        bodyHtml: `<p style="margin:0 0 16px 0;">Google stopped letting Kabsi read <strong>${esc(name)}</strong>'s reviews. This usually means the Kabsi group was removed from the profile's managers.</p>
-<p style="margin:0 0 16px 0;">To continue: on your Business Profile open <strong>Menu</strong>, then <strong>Business Profile settings</strong>, then <strong>People and access</strong>, and invite the <strong>Kabsi group ID 5481006796</strong> as a <strong>Manager</strong>. Kabsi reconnects on its own within a few minutes.</p>
+      preheader: "Invite the Kabsi group again to continue.", title: "Kabsi lost access to your Google profile",
+      bodyHtml: `<p style="margin:0 0 16px 0;">Google stopped letting Kabsi read <strong>${esc(name)}</strong>'s reviews. This usually means the Kabsi group was removed from the profile's managers.</p>
+<p style="margin:0 0 16px 0;">To continue: on your Business Profile open <strong>Menu</strong>, then <strong>Business Profile settings</strong>, then <strong>People and access</strong>, and invite the <strong>Kabsi group ID ${KABSI_GROUP_ID}</strong> as a <strong>Manager</strong>. Kabsi reconnects on its own within a few minutes.</p>
 <p style="margin:0 0 20px 0;">Until then no replies are drafted and nothing is posted. If you removed Kabsi on purpose, you don't need to do anything.</p>`,
-        button: { label: "Open Kabsi", url: `${APP_URL}/app` },
-      }),
-      text: `Google stopped letting Kabsi read ${name}'s reviews, usually because the Kabsi group was removed as a Manager.\n\nTo continue, invite the Kabsi group ID 5481006796 as a Manager again under People and access on your Business Profile. Kabsi reconnects within a few minutes.\n\nOpen Kabsi: ${APP_URL}/app`,
-    }).catch((e) => captureError("dispatch", e, { job: "access_lost", location: locationId }));
-  }
+      button: { label: "Open Kabsi", url: `${APP_URL}/app` },
+      text: `Google stopped letting Kabsi read ${name}'s reviews, usually because the Kabsi group was removed as a Manager.\n\nTo continue, invite the Kabsi group ID ${KABSI_GROUP_ID} as a Manager again under People and access on your Business Profile. Kabsi reconnects within a few minutes.\n\nOpen Kabsi: ${APP_URL}/app`,
+    },
+  }).catch((e) => captureError("dispatch", e, { job: "access_lost", location: locationId }));
 }

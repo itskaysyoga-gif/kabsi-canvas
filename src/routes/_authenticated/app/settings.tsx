@@ -23,6 +23,7 @@ import {
 import { Mail as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
 import { KABSI_GROUP_ID } from "@/lib/site";
+import { NotificationChoices } from "@/components/app/notification-choices";
 
 // Email settings: extra alert addresses, daily digest hour, time zone, pause (D220).
 // Saved through the membership-checked update_notification_settings RPC.
@@ -85,6 +86,7 @@ function SettingsPage() {
           onSaved={() => settings.refetch()}
         />
       ) : null}
+      {loc && settings.data ? <NotificationChoices locationId={loc.id} /> : null}
       <AccountCard />
       {loc && settings.data ? (
         <DisconnectGoogle
@@ -433,8 +435,9 @@ function SettingsForm({
     >
       <h2 className="text-xl font-bold">Review emails</h2>
       <p className="mt-1 text-sm leading-6 text-kb-stone">
-        Reviews of 3 stars or less, and anything sensitive, are emailed right away. 4 and 5 star
-        reviews come together in one daily email.
+        Reviews that need extra care are emailed right away. Other reviews are emailed at once while
+        you are open and come together in one daily email after hours. Below, you can change this
+        for each kind of notice.
       </p>
 
       <Label htmlFor="hour" className="mt-6 block">

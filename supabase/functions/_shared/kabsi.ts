@@ -130,7 +130,7 @@ export function isDefiniteGoogleRejection(e: unknown) {
 }
 
 // ─── email (Resend). Layout and buttons live in email-layout.ts (no environment access, so Deno tests can import it).
-export { emailButton, emailLayout, emailLink, esc } from "./email-layout.ts";
+export { emailButton, emailLink, esc } from "./email-layout.ts";
 
 // The From address lives in app_settings.email_from (migration 016), so switching sender is one SQL update.
 let fromCache: { value: string; at: number } | null = null;
@@ -141,9 +141,11 @@ async function emailFrom() {
   return fromCache.value;
 }
 
+// The outbox: one emails row per email (the delivery log), then Resend. Callers do not use this directly: everything
+// goes through notify() (notify.ts), which applies each person's choices, quiet hours, the digest and dedupe first.
 export async function sendEmail(o: {
   kind: string; to: string; subject: string; html: string; text: string; dedupeKey: string;
-  locationId?: string | null; partnerId?: string | null; replyTo?: string;
+  locationId?: string | null; partnerId?: string | null; replyTo?: string; category?: string | null; notificationId?: string | null;
 }) {
   const db = admin();
   // Demo workspace (P0.1-06, R-17): a demo business only ever emails the demo login. Nothing else is written or sent.
@@ -152,21 +154,27 @@ export async function sendEmail(o: {
     if (ae) throw ae;
     if (allowed === false) return { skipped: "demo" };
   }
+  let rowId: string;
   const { data: row, error } = await db.from("emails").insert({
-    kind: o.kind, to_address: o.to, subject: o.subject, dedupe_key: o.dedupeKey,
-    location_id: o.locationId ?? null, partner_id: o.partnerId ?? null,
+    kind: o.kind, to_address: o.to, subject: o.subject, dedupe_key: o.dedupeKey, category: o.category ?? null,
+    notification_id: o.notificationId ?? null, location_id: o.locationId ?? null, partner_id: o.partnerId ?? null,
   }).select("id").single();
   if (error) {
-    if (error.code === "23505") return { skipped: "duplicate" }; // already sent: jobs are safe to re-run
-    throw error;
+    if (error.code !== "23505") throw error;
+    // Already sent: jobs are safe to re-run. A send Resend refused (its answer is stored as JSON) is tried once more.
+    const { data: prior } = await db.from("emails").select("id, status, error").eq("dedupe_key", o.dedupeKey).maybeSingle();
+    if (!prior || prior.status !== "failed" || !String(prior.error ?? "").startsWith("{")) return { skipped: "duplicate" };
+    rowId = prior.id as string;
+  } else {
+    rowId = row.id as string;
   }
   if (/@(test\.local|example\.(com|org))$/i.test(o.to)) {
-    await db.from("emails").update({ status: "failed", error: "test address, not sent" }).eq("id", row.id);
+    await db.from("emails").update({ status: "failed", error: "test address, not sent" }).eq("id", rowId);
     return { skipped: "test_address" };
   }
   const key = Deno.env.get("RESEND_API_KEY");
   if (!key) {
-    await db.from("emails").update({ status: "failed", error: "RESEND_API_KEY not set" }).eq("id", row.id);
+    await db.from("emails").update({ status: "failed", error: "RESEND_API_KEY not set" }).eq("id", rowId);
     return { skipped: "no_resend_key" };
   }
   const res = await fetch("https://api.resend.com/emails", {
@@ -176,18 +184,11 @@ export async function sendEmail(o: {
   });
   const payload = await res.json().catch(() => ({}));
   if (!res.ok) {
-    await db.from("emails").update({ status: "failed", error: JSON.stringify(payload).slice(0, 500) }).eq("id", row.id);
+    await db.from("emails").update({ status: "failed", error: JSON.stringify(payload).slice(0, 500) }).eq("id", rowId);
     throw new Error(`resend ${res.status}`);
   }
-  await db.from("emails").update({ status: "sent", resend_id: payload.id ?? null }).eq("id", row.id);
-  return { sent: payload.id };
-}
-
-// Owner addresses for a location: members' login emails plus extra alert emails.
-export async function ownerEmails(locationId: string): Promise<string[]> {
-  const { data, error } = await admin().rpc("location_owner_emails", { p_location: locationId });
-  if (error) throw error;
-  return (data as string[] | null) ?? [];
+  await db.from("emails").update({ status: "sent", resend_id: payload.id ?? null, error: null }).eq("id", rowId);
+  return { sent: payload.id as string, id: rowId };
 }
 
 // Cloudflare Turnstile (Q10). The secret lives in Supabase secrets as TURNSTILE_SECRET_KEY.

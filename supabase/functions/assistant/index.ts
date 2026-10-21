@@ -9,8 +9,9 @@
 // so each turn only pays full price for the new messages.
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 import {
-  admin, APP_URL, captureError, CORS, currentUser, emailLayout, esc, fail, isInternal, jobLog, json, log, rateLimit, sendEmail, sha256Hex,
+  admin, APP_URL, captureError, CORS, currentUser, esc, fail, isInternal, jobLog, json, log, rateLimit, sha256Hex,
 } from "../_shared/kabsi.ts";
+import { notify } from "../_shared/notify.ts";
 import { MODELS } from "../_shared/models.ts";
 import { countryFromTimezone } from "../_shared/tz-country.ts";
 import { nextTasks } from "../_shared/tasks.ts";
@@ -281,15 +282,15 @@ ${row("Passed to a person", c.status === "handoff" ? `Yes (${c.handoff_reason ??
 </div>
 <p style="margin:0 0 8px 0;"><b>Conversation</b></p>
 <pre style="white-space:pre-wrap;font-family:inherit;font-size:16px;line-height:1.55;background:#F6F4EF;padding:14px;border-radius:12px;margin:0;">${esc(transcript.slice(-12000))}</pre>`;
-      for (const addr of to) {
-        await sendEmail({
-          kind: "assistant_report", to: addr, replyTo: k?.email || signedIn || undefined,
-          dedupeKey: `assistant_report:${c.id}:${c.message_count}:${addr}`,
+      await notify({
+        category: "internal", kind: "assistant_report", key: `assistant_report:${c.id}:${c.message_count}`, to: to.map((email) => ({ email, userId: null })),
+        ...(k?.email || signedIn ? { replyTo: (k?.email || signedIn) as string } : {}),
+        content: {
           subject: `Chat${update}: ${who} · ${LABEL[r.category] ?? r.category} · ${temp}${country ? ` · ${country}` : ""}`,
-          html: emailLayout({ preheader: r.summary.slice(0, 140), title: `New chat with Nora${update}`, bodyHtml }),
+          preheader: r.summary.slice(0, 140), title: `New chat with Nora${update}`, bodyHtml,
           text: `${r.summary}\n\nNext step: ${r.next_step}\nVisitor: ${who}\nEmail: ${k?.email ?? signedIn}\nCountry: ${country ?? ""}\nTopic: ${r.category}\nIntent: ${r.intent}\nLead: ${r.lead_temperature}\n\n${transcript.slice(-12000)}`,
-        });
-      }
+        },
+      });
       sent++;
     } catch (e) {
       await captureError("assistant", e, { step: "report", conversation: c.id });
@@ -481,19 +482,22 @@ Deno.serve(async (req) => {
             await db.from("chat_conversations").update({ status: "handoff", handoff_reason: reason }).eq("id", conv.id);
             const transcript = [...messages].slice(-20).map((m) => `${m.role === "user" ? "Visitor" : "Nora"}: ${typeof m.content === "string" ? m.content : ""}`).join("\n\n");
             const n = conv.message_count + 1;
-            await sendEmail({
-              kind: "assistant_handoff", to: "hello@kabsi.co", replyTo: email,
-              subject: `Assistant hand-off (${reason}): ${email}`,
-              dedupeKey: `assistant_handoff:${conv.id}:${n}`,
-              html: emailLayout({ preheader: summary.slice(0, 120), title: "A visitor needs a person", bodyHtml: `<p><b>Reply to:</b> ${esc(email)}<br><b>Reason:</b> ${esc(reason)}<br><b>Page:</b> ${esc(page)}${user?.email ? `<br><b>Signed in as:</b> ${esc(user.email)}` : ""}</p><p><b>Summary</b><br>${esc(summary)}</p><p><b>Conversation</b></p><pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;background:#F6F4EF;padding:12px;border-radius:10px;">${esc(transcript)}</pre>` }),
-              text: `Reply to: ${email}\nReason: ${reason}\nPage: ${page}\n\n${summary}\n\n${transcript}`,
+            await notify({
+              category: "internal", kind: "assistant_handoff", key: `assistant_handoff:${conv.id}:${n}`, to: [{ email: "hello@kabsi.co", userId: null }], replyTo: email,
+              content: {
+                subject: `Assistant hand-off (${reason}): ${email}`, preheader: summary.slice(0, 120), title: "A visitor needs a person",
+                bodyHtml: `<p><b>Reply to:</b> ${esc(email)}<br><b>Reason:</b> ${esc(reason)}<br><b>Page:</b> ${esc(page)}${user?.email ? `<br><b>Signed in as:</b> ${esc(user.email)}` : ""}</p><p><b>Summary</b><br>${esc(summary)}</p><p><b>Conversation</b></p><pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;background:#F6F4EF;padding:12px;border-radius:10px;">${esc(transcript)}</pre>`,
+                text: `Reply to: ${email}\nReason: ${reason}\nPage: ${page}\n\n${summary}\n\n${transcript}`,
+              },
             });
-            await sendEmail({
-              kind: "assistant_handoff_ack", to: email,
-              subject: "We got your question",
-              dedupeKey: `assistant_handoff_ack:${conv.id}`,
-              html: emailLayout({ preheader: "A person from Kabsi will reply by email.", title: "We got your question", bodyHtml: `<p>Thanks for writing to Kabsi. A person on the team will reply to this address, usually within one working day.</p><p>If you want to add anything, just reply to this email.</p>` }),
-              text: "Thanks for writing to Kabsi. A person on the team will reply to this address, usually within one working day. If you want to add anything, just reply to this email.",
+            // Sent because the visitor just asked for a person: no choices and no quiet hours (category direct).
+            await notify({
+              category: "direct", kind: "assistant_handoff_ack", key: `assistant_handoff_ack:${conv.id}`, to: [{ email, userId: null }],
+              content: {
+                subject: "We got your question", preheader: "A person from Kabsi will reply by email.", title: "We got your question",
+                bodyHtml: `<p>Thanks for writing to Kabsi. A person on the team will reply to this address, usually within one working day.</p><p>If you want to add anything, just reply to this email.</p>`,
+                text: "Thanks for writing to Kabsi. A person on the team will reply to this address, usually within one working day. If you want to add anything, just reply to this email.",
+              },
             }).catch(() => null);
             handoff = true;
             result = { ok: true, reply_by: "email", email };
