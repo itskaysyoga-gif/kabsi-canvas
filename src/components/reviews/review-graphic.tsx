@@ -95,11 +95,9 @@ export function ReviewGraphic({
 
   return (
     <>
-      <div className="mt-3">
-        <Button variant="tertiary" className="min-h-11 text-sm" onClick={() => setOpen(true)}>
-          <ImageIcon aria-hidden="true" /> Make a graphic
-        </Button>
-      </div>
+      <Button variant="tertiary" className="min-h-11 text-sm" onClick={() => setOpen(true)}>
+        <ImageIcon aria-hidden="true" /> Make a graphic
+      </Button>
       <Sheet
         open={open}
         onOpenChange={(v) => {

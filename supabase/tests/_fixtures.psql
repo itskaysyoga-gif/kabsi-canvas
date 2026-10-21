@@ -36,6 +36,7 @@ values ('00000000-0000-4000-8000-0000000000e1', '00000000-0000-4000-8000-0000000
 insert into public.reply_drafts (review_id, version, body, source, safety_ok)
 values ('00000000-0000-4000-8000-0000000000e1', 1, 'Thank you for visiting.', 'ai', true);
 insert into public.cards (code, location_id) values ('VCTM22', '00000000-0000-4000-8000-0000000000c1');
+insert into public.review_reports (location_id, review_id, category) values ('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000e1', 'fake_content');
 insert into public.taps (code, location_id, source) values ('VCTM22', '00000000-0000-4000-8000-0000000000c1', 'qr');
 insert into public.action_tokens (token_hash, location_id, user_id, action, target_type, target_id, expires_at)
 values ('victim-token', '00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000a1', 'open', 'inbox', 'victim', now() + interval '1 day');
