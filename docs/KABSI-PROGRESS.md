@@ -4,6 +4,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 
 ## Where things stand
 
+- **21 Oct 2026, planning chat (docs only, no code): Hussein's final product decisions are written into the plan, the audit, the design review and the facts file.** `docs/source/KABSI-AUDIT.md` has K-123 to K-146 (each says what it overrides); `docs/KABSI-PLAN.md` has the new Wave P0.8 (section 12A: P0.8-01 to P0.8-13, the changed and retired cards), R-33 to R-40, go to market and the five AI agents (section 1, items 28 and 29), skills, the claims rule and the cost rule (section 2.10 to 2.12), and the bundled sessions rebuilt (section 7); `docs/source/KABSI-DESIGN.md` has Website v2, the six onboarding steps and the Kabsi Partners dashboard; `knowledge/kabsi-facts.md` marks new prices and features [COMING] and removals [CHANGING] (`public/llms-full.txt` rebuilt). Nothing was built or deployed; no Google, Anthropic or other paid call was made. **Next: session 7 (Opus), P0.8-01 International and partner cleanup, then P0.8-02.** Sessions 1 to 6 stay finished. Hussein's decisions to confirm are at the top of "Decisions to confirm".
+
 - **21 Oct 2026, P0.4-10 merged (session 6 of the bundled plan, PR 116, 30c0186; Deploy passed; session 6 is finished, next is session 7): lifecycle emails driven by events.** Built on the engine and the template, and switched off until Hussein turns it on (`app_settings.lifecycle_emails`, with the moment of switching in `lifecycle_since`: nothing from before it is ever sent). Each email is due by a rule over a snapshot of the business (`public.lifecycle_snapshots`, counts from the audit log only): welcome with the one next step; reminders 1, 24 and 72 hours after access was asked for (they stop at access); a thank-you after the first approved reply; day 2 what Kabsi has done; day 7 your week with the yearly offer ($190 a year, two months free); day 11 three days left with both prices; day 14 trial ended and what continues in grace; a note about what is still waiting 17 and 30 days after the trial ended. Each goes once (the engine's dedupe key `life:<step>:<business>`), is never sent late (each step has a window), and follows the P0.4-06 trial rules (trial mail only while the entitlements state is trial; none for concierge, demo, partner-covered or paying businesses). Win-back is marketing: it needs the owner's own yes in every country today, and always a yes in the UK, EU and EEA, Switzerland, the UAE, Saudi Arabia and wherever the country is unknown. The job rides on the `notify_due` clock. No end-of-trial discount. No Google, Places or Anthropic call.
 - **21 Oct 2026, P0.4-08 merged (session 6 of the bundled plan, PR 115, 7d27f47; Deploy passed; one of each of the 31 email types sent once to hello@kabsi.co): one email template and the email set.** Every Kabsi email is now rendered by one template (`_shared/email/template.ts`, reading the design tokens): sand background, one white card with the mark, the heading, the content, exactly one yellow button, then the footer with the approval promise, "Why you got this", the Email settings link, a one-click unsubscribe on every email the owner can switch off, the questions line, the legal seller and the Google notice, plus a plain-text version. The words of every email moved into one place (`_shared/email/copy.ts`, `review.ts`, `report-body.ts`); subjects put the business name first, and the review email is exactly "<Business>: new <n>-star review, reply ready". A test builds a sample of every email type (`email/catalog.ts`) and checks them all against the house rules. New `email` function (no sign-in, each door proves itself): the signed one-click unsubscribe (opened from kabsi.co/unsubscribe, which asks first) and Resend's bounce and complaint webhook (Svix signature), both feeding one suppression list (`email_suppressions`) that the outbox checks before every send. Headers carry List-Unsubscribe for one-click. Lifecycle mail will use the `news.kabsi.co` sender (`email_from_news`). The mark is now a transparent PNG with a thin light outline. The Supabase Auth templates are rebuilt with the same footer (Hussein pastes them). Also fixed: mail with no business to time against (a partner, a deleted business) went through the engine without a notice row and would have failed in P0.4-09; it is sent straight now. No Google, Places or Anthropic call.
 - **21 Oct 2026, P0.4-09 merged (session 6 of the bundled plan, PR 114, acc378b; Deploy passed; `notify_due` switched on and succeeding every 5 minutes): one notification engine.** Every email Kabsi sends and every in-app notice now goes through `notify()` (`_shared/notify.ts`): one record per event and address (`notifications`, unique on the event key and the address, so a job run twice tells nobody twice), the person's choices (`notification_preferences`: per business, category and channel, default, instant, daily digest or off), then the K-46 rules: high-risk and careful reviews and urgent profile changes at once; a normal review at once while the business is open (the owner-approved opening hours) and in the daily digest outside them; everything else in the daily digest at the business's digest hour; no email between 22:00 and 08:00 local except an urgent profile change (it waits until 08:00); what must stay on (urgent profile changes, access, billing, account, help) ignores "off". The daily digest groups the day's notices by kind in one email. All 12 senders moved onto it (reviews, backlog, access notices, disconnect, deletion, trial and renewal reminders, Weekly Care Report, weekly post, Google Protection, payment received, partner mail, Nora handoff, leads, team invite, the Profile Check email), each keeping its trigger and its dedupe key; the sender in `kabsi.ts` is now only the outbox the engine calls (a test fails if anything else calls it). A failed Resend send is tried again by the next call. The bell on Home lists the notices; Settings has "What Kabsi tells you". The `notify_due` job (held and digested mail) is offered every 5 minutes once `app_settings.notify_due` is `on` (shipped `off`). Migration applied by the session; the links file `20261021090010_notification_engine_links.sql` is Hussein's (cascade clauses). No Google, Places or Anthropic call.
@@ -62,10 +64,13 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 |---|---|---|
 | D1 | Legal seller | Decided 4 Oct: Hussein Slim (Dubai) holds the Creem account and is the seller; Meta business details and verification under the same name (R-25). Hussein agreed to be named on Creem, Meta and the site; no written agreement |
 | D2 | First real live customer | Decided 4 Oct: Abou Hamze Auto Center (Bakaata). Owner agreed 4 Oct; Kabsi Clients group added as Manager and hello@kabsi.co accepted (Business Profile Manager shows Abou Hamze Auto Center and Yawmiyati, both Verified) |
-| D3 | NFC shipping outside Lebanon | Decided 4 Oct: none |
 | I1 | US WhatsApp number | Settled 7 Oct by K-122: Kapso number +1 201-483-5474; set in P0.6-10 (placeholder +961 3 956 917 until then) |
 | I2 | Real screenshots of Google's People and access steps | Desktop done 4 Oct (`public/help/manager-steps/desktop/`, blurred); phone still to come |
-| I3 | Referral reward | Decided 4 Oct: one free month |
+| I3 | Referral reward | Decided 4 Oct: one free month (P1-15 needs re-scoping: no Free plan and no partner audit links, 21 Oct) |
+| D3 | NFC cards | Replaced 21 Oct (K-125): Kabsi sells no NFC cards anywhere |
+| D4 | Governing law and seller wording | Decided 21 Oct: seller Hussein Slim, Dubai; law of the United Arab Emirates; a lawyer confirms before launch |
+| D5 | When paid API calls may start (K-146) | Not given (21 Oct): nothing paid is called |
+| D6 | Opening Kabsi Partners (K-127) | Not before live reviews work and the first founding customers |
 
 ## Steps only Rashid can do (plan section 5)
 
@@ -77,7 +82,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | 4 | Google Cloud and Search Console contacts and owners on kabsi.co addresses only, no personal address left (K-99.3, R-32) | Any time in P0.1 | Todo |
 | 5 | Google Cloud OAuth client (openid, email, profile) and the Supabase Auth Google provider; Email OTP Expiration 600 seconds; Auth captcha on with Turnstile | P0.4-02 | Todo (exact clicks in the P0.4-02 After merge list, 20 Oct) |
 | 6 | Meta Business Settings items (P0.6-09 file) | P0.6-03 | Todo |
-| 7 | Creem account (Hussein Slim) and keys in Supabase secrets | P0.4-07 | Todo |
+| 7 | Creem account (Hussein Slim), products (Essentials and Pro monthly and yearly, extra location) and keys in Supabase secrets; check whether Creem affiliates fit Kabsi Partners | P0.4-07, P0.8-12 | Todo |
 | 10 | Supabase Auth: turn on leaked-password protection (Authentication, Sign In / Providers, Email, "Prevent use of leaked passwords"); leave the email OTP length at 6 | P0.1-08 done | Todo (no tool in the build session can change Auth settings) |
 | 9 | Paste the four `emails/auth/*.html` files into the Supabase Auth email templates (the login-code email still shows the old Beirut footer) | P0.1-02b done | Todo (Rashid, manual dashboard step; recorded 4 Oct at Hussein's request) |
 | 8 | Hussein agrees to be named as seller | R-20 seller line, P0.4-07, P0.6-09 | Done 4 Oct (no written agreement, Rashid's decision) |
@@ -86,6 +91,11 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | 13 | Google Cloud (project 856347937978): enable the reviews and posts API if a session cannot; submit the `business.manage` package | P0.7-01a, P0.7-02 | Not done (corrected 8 Oct by P0.7-01; the earlier "enabled 7 Oct, quota 300" was wrong): enabling the Google My Business API (`mybusiness.googleapis.com`, reviews, posts, media) fails with PERMISSION_DENIED `servicemanagement.services.bind` and the live call returns 403 SERVICE_DISABLED. Blocked on Google: Hussein asks on case 1-4624000041157 (or the Business Profile API contact form) for the API to be made available to project 856347937978 (step 16). `docs/google/api-access.md` written by P0.7-01a. Submitting the `business.manage` package is still todo |
 | 15 | GitHub repo secret `SUPABASE_ACCESS_TOKEN`: replace it with a Supabase personal access token from Hussein's own account (owner of the organisation that now holds `kabsi-prod`), then re-run the failed Deploy run 37675383844 | P0.1-13a After merge (every Edge Function deploy) | Done 7 Oct: Hussein replaced the token and re-ran the run; attempt 2 passed (19:48:28 to 19:49:09 UTC), every Edge Function `updated_at` 19:49:03 UTC, `api` version 52 |
 | 14 | Supabase Pro with point-in-time recovery in Hussein's own organisation | P0.7-07 (before the first real customer) | Todo |
+| 17 | Say in the chat when paid API calls may start (Anthropic credit and real model calls, live WhatsApp sends, live Google writes), K-146 | P0.8-03, P0.8-08, P0.8-09, P0.7-05 | Not given (21 Oct) |
+| 18 | Meta business verification and WhatsApp template approval for the owner channel (K-129); `KAPSO_API_KEY` into Supabase secrets | P0.8-03 | Todo (replaces the P1-21 wait) |
+| 19 | Run the removal SQL files that P0.8-01 writes (drop the retired partner, USDT and card-order tables and columns) | After P0.8-01 | Todo |
+| 20 | A lawyer reads /terms and /privacy (UAE law, seller wording, WhatsApp and partner attribution text) | P0.7-07 | Todo |
+| 21 | Open Kabsi Partners (`app_settings.partners_open`) and approve each applicant | P0.8-12, after P0.7-05 and the first founding customers | Todo |
 | 16 | Google: ask on case 1-4624000041157 (or the Business Profile API contact form) for the Google My Business API, `mybusiness.googleapis.com`, to be made available to project 856347937978; then enable it and read its quota. Also confirm Hussein's role on the project is Owner | P0.7-01 (reviews, posts, media), P0.7-04 | Todo (8 Oct: enable fails PERMISSION_DENIED `servicemanagement.services.bind`, Library page does not load) |
 
 ## Tasks
@@ -117,8 +127,8 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.1-13b | One publication pipeline: posts, photos, hours, profile changes | Opus | split: part A (the four paths on the pipeline) merged (49, 7 Oct 20:40 UTC) and its fix merged (50, 21:00 UTC); After-merge mock post, special hours and put-backs verified on Yawmiyati; a repeat Protection alert during a put-back fixed in PR 51; part B (`status` readers to `state`, then drop `status`, its sync trigger and `concierge_queue_reply`) merged (54) and the drop live 8 Oct 04:05 UTC, read back; done except Hussein's 390 px look of Home and Reviews | 49, 50, 51, 54, 55 | 8 Oct 2026 |
 | P0.7-01a | Wave P0.G: enable the reviews and posts API and confirm access | Sonnet | merged (65, 84bab5d, 8 Oct 11:59 UTC; CI run 37773346652 App, Edge Functions and Database passed, Vercel success); docs only, no Deploy needed. Done except the card's read-only 200 calls and the `gcloud` or screenshot proof, moved to P0.7-01 (Hussein: no live Google call), see Evidence | 65 | 8 Oct 2026 |
 | P0.7-01 | Wave P0.G: capture real Google responses (read-only) | Opus | part 1 merged (67, a48160f, 8 Oct 16:07 UTC; After-merge passed): every v1 module captured live (accounts, admins, locations, updates, attributes, performance, place actions, verifications, notifications), findings written; **open:** reviews, posts and media, blocked on Google (`mybusiness.googleapis.com` SERVICE_DISABLED, step 16, case 1-4624000041157); the reply moderation question waits on it. See Evidence and After merge | 67 | 8 Oct 2026 |
-| P0.7-01b | Wave P0.G: compare real responses with the mocks and fix the mocks | Opus | todo | | |
-| P0.7-02 | Wave P0.G: business.manage verification package | Opus | todo, writing can start now; submit after P0.1-03 and P0.2-07 | | |
+| P0.7-01b | Wave P0.G: compare real responses with the mocks and fix the mocks | Sonnet (R-39) | todo | | |
+| P0.7-02 | Wave P0.G: business.manage verification package | Sonnet (R-39) | todo, writing can start now; submit after P0.1-03 and P0.2-07 | | |
 | P0.7-04 | Wave P0.G: the switch to live | Opus | todo | | |
 | P0.7-05 | Wave P0.G: internal live test on Kabsi's own profiles | Opus | todo | | |
 | P0.2-01 | Retention table | Opus | merged (70, aa49b0c, 9 Oct 03:19 UTC); migration live and read back, dry run of the new job on live data 0 everywhere; Deploy passed (`api` 64 with `photo_files`); open: the first real run on 10 Oct 02:53 UTC and the Storage removal on a real photo (due about 26 Oct), see After merge | 70 | 9 Oct 2026 |
@@ -155,52 +165,66 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.5-03 | Hours: one editor and the holiday calendar | Sonnet | todo | | |
 | P0.5-04 | The Weekly Care Report | Sonnet | todo | | |
 | P0.5-05 | Insights: one sentence and four tiles | Sonnet | todo | | |
-| P0.6-01 | Consent banner and proof of consent | Opus | todo | | |
+| P0.6-01 | Consent banner and proof of consent | Sonnet (R-39) | todo | | |
 | P0.6-02 | Product events, attribution and onboarding funnel | Sonnet | todo | | |
-| P0.6-03 | Meta Pixel and Conversions API with one event ledger | Opus | todo | | |
+| P0.6-03 | Meta Pixel and Conversions API with one event ledger | Sonnet (R-39) | todo | | |
 | P0.6-04 | The /meta landing page | Sonnet | todo | | |
-| P0.6-05 | Security headers, Turnstile everywhere, rate limits | Opus | todo | | |
-| P0.6-06 | Nora in sync: facts file, handover and evaluation | Opus | todo | | |
+| P0.6-05 | Security headers, Turnstile everywhere, rate limits | Sonnet (R-39) | todo | | |
+| P0.6-06 | Nora in sync: facts file, handover and evaluation | Sonnet (R-39) | todo | | |
 | P0.6-07 | Honest proof pages: founder note, About, Security | Sonnet | merged (84, 64adfad, 12 Oct); CI green; live /about serves the new page (fetched 12 Oct 06:25 UTC); 390 px checked by script, no horizontal scroll; open: Hussein's look and the photo question | 12 Oct | |
 | P0.6-08 | Supporting platforms checked against K-118 | Sonnet | todo | | |
 | P0.6-09 | Meta account fixes (VIDEO Part 7) | Sonnet | todo | | |
 | P0.6-10 | WhatsApp click-to-chat on the Kapso US number | Sonnet | merged (86, 00d3515, 12 Oct); CI green; Deploy passed; live pages checked (Evidence); open: Kapso step 12 (the inbox setup) and Hussein's 390 px look | 86 | 12 Oct |
 | P0.6-11 | Staff system health page | Sonnet | todo | | |
 | P0.6-12 | WhatsApp privacy and processors (Kapso and Meta) | Sonnet | merged (88, 1a0631d, 12 Oct); CI green; live /privacy and /terms name Kapso and Meta (Evidence); open: Hussein's Kapso check and 390 px look; lawyer read of the pages | 88 | 12 Oct |
-| P0.7-03 | Google notifications through Pub/Sub | Opus | todo | | |
+| P0.7-03 | Google notifications through Pub/Sub | Sonnet (R-39) | todo | | |
 | P0.7-05b | Live test of the features built after Wave P0.G | Opus | todo | | |
 | P0.7-06 | Page-by-page audit, contradiction sweep and the test matrix | Sonnet | todo | | |
 | P0.7-07 | First real customer end to end, and the launch gate | Opus | todo | | |
-| P1-01 | Partner organisation, client onboarding and approval policies; Partners page rewrite for agencies | Opus | todo | | |
-| P1-02 | Portfolio dashboard | Sonnet | todo | | |
-| P1-03 | Partner branding and client reports | Sonnet | todo | | |
-| P1-04 | Referral attribution and commission from the payment webhook | Opus | todo | | |
+| P0.8-01 | Wave P0.8: International and partner cleanup (session 7) | Opus | todo | | |
+| P0.8-02 | Wave P0.8: Session 6 email fixes and email previews (session 7) | Sonnet (in the Opus session) | todo | | |
+| P0.8-03 | Wave P0.8: WhatsApp owner channel (session 13) | Opus | todo | | |
+| P0.8-04 | Wave P0.8: Protection put-back and Pro auto-fix (session 13) | Opus | todo | | |
+| P0.8-05 | Wave P0.8: Review link page, Google button first (session 8) | Sonnet | todo | | |
+| P0.8-06 | Wave P0.8: Staff Send review link (session 8) | Sonnet | todo | | |
+| P0.8-07 | Wave P0.8: Review graphics, Pro (session 8) | Sonnet | todo | | |
+| P0.8-08 | Wave P0.8: What customers say, Pro (session 15) | Sonnet | todo | | |
+| P0.8-09 | Wave P0.8: Profile Coach (session 9) | Sonnet | todo | | |
+| P0.8-10 | Wave P0.8: Own order and booking button, Pro (session 19) | Opus | todo | | |
+| P0.8-11 | Wave P0.8: Report a fake review helper, Pro (session 8) | Sonnet | todo | | |
+| P0.8-12 | Wave P0.8: Kabsi Partners (session 11) | Sonnet | todo | | |
+| P0.8-13 | Wave P0.8: Website v2 (session 20) | Sonnet | todo | | |
+| P1-23 | Voice notes on the WhatsApp owner channel | Sonnet | todo | | |
+| P1-01 | Partner organisation, client onboarding and approval policies; Partners page rewrite for agencies | Opus | retired 21 Oct 2026 (K-127, replaced by P0.8-12) | | |
+| P1-02 | Portfolio dashboard | Sonnet | retired 21 Oct 2026 (K-127) | | |
+| P1-03 | Partner branding and client reports | Sonnet | retired 21 Oct 2026 (K-127) | | |
+| P1-04 | Referral attribution and commission from the payment webhook | Opus | retired 21 Oct 2026 (K-127, replaced by P0.8-12) | | |
 | P1-05 | Website importer | Opus | todo | | |
-| P1-06a | Description, opening date, Google's checklist mirrored | Sonnet | todo | | |
-| P1-06b | Services by interview, custom services | Sonnet | todo | | |
-| P1-06c | Attributes in Google's groups | Sonnet | todo | | |
+| P1-06a | Description, opening date, Google's checklist mirrored | Sonnet | todo, description draft moves to P0.8-09 (K-136) | | |
+| P1-06b | Services by interview, custom services | Sonnet | todo, filling services moves to P0.8-09 (K-136) | | |
+| P1-06c | Attributes in Google's groups | Sonnet | retired 21 Oct 2026 (K-136, in P0.8-09) | | |
 | P1-06d | More hours, social and chat links, action links, products | Sonnet | todo | | |
 | P1-07 | Installable app and web push | Sonnet | todo | | |
 | P1-08 | Daily check of the links customers tap | Sonnet | todo | | |
 | P1-09a | Monthly and quarterly care routine | Sonnet | todo | | |
-| P1-09b | Search terms, photo prompts from search gaps, change detection | Sonnet | todo | | |
-| P1-10 | Review themes on request | Opus | todo | | |
-| P1-11 | Get Reviews redesign and the print designer | Sonnet | todo | | |
+| P1-09b | Search terms, photo prompts from search gaps, change detection | Sonnet | todo, search terms moved to P0.5-05 (K-138) | | |
+| P1-10 | Review themes on request | Opus | retired 21 Oct 2026 (K-135, replaced by P0.8-08) | | |
+| P1-11 | Get Reviews redesign and the print designer | Sonnet | todo, no card ordering (K-125) | | |
 | P1-12 | Staff two-step sign-in and owner diagnostics | Opus | todo | | |
 | P1-13 | The weekly numbers dashboard | Sonnet | todo | | |
 | P1-14a | Facts page | Sonnet | todo | | |
 | P1-14b | Comparison pages | Sonnet | todo | | |
 | P1-14c | Guides launch set of 10, then one a week | Sonnet | todo | | |
-| P1-14d | Industry pages to the G-06 standard | Sonnet | todo | | |
-| P1-14e | Homepage rebuild | Sonnet | todo | | |
-| P1-15 | Growth loops | Sonnet | todo | | |
+| P1-14d | Industry pages to the G-06 standard | Sonnet | retired 21 Oct 2026 (K-140, replaced by P0.8-13) | | |
+| P1-14e | Homepage rebuild | Sonnet | retired 21 Oct 2026 (K-140, replaced by P0.8-13) | | |
+| P1-15 | Growth loops | Sonnet | todo, needs re-scoping (K-126, K-127) | | |
 | P1-16 | "Your year on Google" | Sonnet | todo | | |
 | P1-17 | Short videos through the photo pipeline | Sonnet | todo | | |
 | P1-18 | "Connect with Google" route | Opus | todo | | |
 | P1-19 | Speed and caching | Sonnet | todo | | |
-| P1-20 | Pricing page rebuild | Sonnet | todo | | |
-| P1-21 | WhatsApp owner alerts through Kapso | Opus | todo | | |
-| P1-22 | Nora on WhatsApp | Opus | todo | | |
+| P1-20 | Pricing page rebuild | Sonnet | retired 21 Oct 2026 (K-140, replaced by P0.8-13) | | |
+| P1-21 | WhatsApp owner alerts through Kapso | Opus | retired 21 Oct 2026 (K-129, replaced by P0.8-03) | | |
+| P1-22 | Nora on WhatsApp | Opus | todo, depends on P0.8-03 (K-129) | | |
 
 ## After merge
 
@@ -1572,6 +1596,8 @@ By hand: confirm Advanced Protection is still on for hello@kabsi.co (last checke
 - P0.1-04a: a reply or post the owner edits by hand is not checked for contact details at publish (only drafts are). Kabsi drafts are blocked in code; whether to warn on owner-typed text is open (P0.3-02 or P0.1-13a).
 
 ## Decisions to confirm
+
+- 21 Oct 2026, planning chat (Hussein to confirm or change; each is a call the planning chat made to make a decision buildable): (1) **K-130 auto-fix versus Google's policy.** The audit found that Google's policy does not allow the API to revert Google's updates automatically (K-19). The new opt-in auto-fix for hours and website ships only after the build chat re-reads the policy and records the sentence; if the owner's opt-in does not satisfy it, auto-fix ships off and one-tap put-back remains. (2) **K-135 "What customers say" reads 90 days of reviews, but Google allows storing review content for 30 days only.** The card fetches at run time, keeps no review text and stays off for real customers until Google's written answer is on file. (3) **K-132 review link page.** Existing links keep redirecting straight to Google until the owner switches a link to the page, so printed QR codes never break. (4) **K-140 H1 uses Google's name** ("Your Google reviews and listing. Taken care of.") as plain words; the slogan stays "Your reviews and listing. Taken care of." (K-112) and the non-affiliation notice stays in view. A Google brand check is worth doing before launch. (5) **K-129 message content.** WhatsApp alerts show the business, the star rating and the draft; review text and reviewer names stay out unless P0.8-03's K-113 check allows a short excerpt. (6) **No Free plan.** A business with no plan keeps its review link and QR code and nothing else runs (K-126). (7) **Models (R-39).** P0.6-01, P0.6-03, P0.6-05, P0.6-06, P0.7-01, P0.7-01b, P0.7-02 and P0.7-03 moved from Opus to Sonnet under "Opus only for Google writes, money, access rules or WhatsApp approvals"; say if any should stay Opus. (8) **Governing law UAE** (D4) is written into the terms by P0.8-01 and still needs a lawyer. (9) **P1-15 owner referral loop** has no Free plan or partner audit links to build on and needs re-scoping.
 
 - 21 Oct 2026, P0.4-10: (a) "Access granted" and "backlog drafted" are not sent a second time: the K-113 access notice (which already says Kabsi is in and what happens next) and the P0.3-10 day-one email are those emails, so the lifecycle does not add duplicates. "Access removal on day 21" is the disconnect notice of P0.2-02. (b) "Day 17 and day 30 after expiry" is read as 17 and 30 days after the trial ended (day 31 and day 44 of the clock), because by day 21 Kabsi has removed its access and "real waiting items" are the prepared replies and changes still waiting; if the plan meant days 17 and 30 of the trial clock, say so. (c) Welcome, the access reminders and the day 14 notice cannot be switched off (K-118 Account, Google access, billing); day 2, day 7, day 11 and the win-back are "trial tips" and can. (d) The day 14 email also carries the grace notice (K-118 lists them apart). (e) Win-back needs an owner's own yes in every country until the signup notice exists; in the UK, EU, EEA, Switzerland, UAE, Saudi Arabia and unknown countries it always does. (f) The lifecycle job rides on the 5 minute `notify_due` clock instead of a new job kind, so the producer function did not change again.
 - 21 Oct 2026, P0.4-08: (a) The review email with no safe draft says "your reply is needed" instead of "reply ready" (R-30 names only the ready case). (b) Subjects of the business emails were reworded to put the business name first (K-102), for example "Yawmiyati: Kabsi is now a Manager on Google". (c) The one-click unsubscribe stops one category for one address and, for a member, sets their own Settings choice to off; sign-in codes, access, billing, account and help mail carry no unsubscribe (K-102, K-118). (d) The unsubscribe page is on kabsi.co (it asks first, then POSTs to the function) because Supabase does not serve HTML pages from a function; the mail client's own Unsubscribe button POSTs straight to the function. (e) Lifecycle tips go from `news.kabsi.co` and are held back (not sent) until `news_domain_verified` is `on`; account and product mail stays on `send.kabsi.co`. (f) Every internal email (Nora, leads, USDT claims) also has one yellow button (Open Staff, Reply to the visitor) so the rule "one button" has no exception. (g) The logo is now a 128 px transparent PNG with a thin light outline; its address has `?v=2` so mail clients fetch the new one.
