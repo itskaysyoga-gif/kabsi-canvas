@@ -1,4 +1,4 @@
-Last updated: 21 Oct 2026 (P0.8-05). Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md.
+Last updated: 21 Oct 2026 (P0.8-06). Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md.
 
 # Kabsi Master Knowledge Base
 
@@ -32,12 +32,13 @@ Hussein approved final product decisions on 21 Oct 2026. Most are not built yet.
 
 **Review link page (live from 21 Oct 2026, P0.8-05).** Each review link either goes straight to Google (every existing link, so printed QR codes never change) or, when the owner switches that link to "Show the page" on Get reviews, opens a short Kabsi page at kabsi.co/review/{CODE}. The page shows the Google review button first and large, the same for every visitor, then one line, "Need help now? Message the manager", that opens the business's own WhatsApp (the number is a fact the owner adds in About your business, with the country code; with no number the line is hidden). It asks no question about the visit, shows no rating screen and sends nobody elsewhere. Opens are counted per link the same way as before. A business with no plan keeps its review link and QR code.
 
+**Staff "Send review link" (live from 21 Oct 2026, P0.8-06).** On Get reviews, and under the upload on the Photos screen for the staff role, a **Send review link** button opens the staff member's own WhatsApp with this message and the business's review link: "Thanks for visiting {business}. If you would like to leave a review, here is our link: {link}". The staff member picks the customer and presses send. It is the same message for every customer (never only the happy ones), it uses the place link, and Kabsi records nothing: not who sent it, not how many were sent, no targets, no leaderboards. The message never uses the words reward, free, discount, "if you enjoyed", happy or 5 stars; a test fails if it does. The button is part of Essentials and Pro (a business with no plan keeps only its review link and QR code), so a business without a plan sees a line pointing to its plan instead.
+
 **[COMING] Features.**
 
 - **WhatsApp for owners:** opt in by sending a one-time code to Kabsi's WhatsApp number; get a review alert with the draft and the buttons "Approve" and "Edit in app". Approval on WhatsApp will work only for low and medium risk replies and weekly posts, never for high-risk reviews or for your business name, address, categories, map pin, phone or open or closed status. After you approve, there is a 10-second undo. Today WhatsApp approves nothing (section 9.5b).
 - **Put-back and auto-fix:** a one-tap "Put it back" for every watched detail. On Pro, you can choose to let Kabsi fix regular hours, special hours and the website automatically; never the name, address, category, map pin, phone or open or closed status. If Google changes the same detail twice in 30 days Kabsi stops fixing it by itself and asks you. Kabsi only does this on a verified profile and never says who made a change.
 - **Holiday hours:** Kabsi will ask five days before a public holiday (WhatsApp or email): normal hours, closed, or custom hours, and publish your answer as special hours.
-- **Staff "Send review link":** a staff member sends the link to any customer from their own WhatsApp with a plain message. No targets, no rewards.
 - **Review graphics (Pro):** a square and a story image for 4-star and 5-star reviews that you download and share yourself. Kabsi posts nothing.
 - **What customers say (Pro):** a monthly summary of what customers mention, such as staff, place and services, only when AI credit is on.
 - **Profile Coach:** a weekly check of what is missing on the profile (description, categories, services, attributes, photo and video types, service area, website link tracking, a website snippet, whether the website matches the profile). You approve every change. A change to the main category is only suggested.

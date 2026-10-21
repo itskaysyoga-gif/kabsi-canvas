@@ -191,7 +191,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.8-03 | Wave P0.8: WhatsApp owner channel (session 13) | Opus | todo | | |
 | P0.8-04 | Wave P0.8: Protection put-back and Pro auto-fix (session 13) | Opus | todo | | |
 | P0.8-05 | Wave P0.8: Review link page, Google button first (session 8) | Sonnet | PR open (see Evidence) | | 21 Oct 2026 |
-| P0.8-06 | Wave P0.8: Staff Send review link (session 8) | Sonnet | todo | | |
+| P0.8-06 | Wave P0.8: Staff Send review link (session 8) | Sonnet | PR open (see Evidence) | | 21 Oct 2026 |
 | P0.8-07 | Wave P0.8: Review graphics, Pro (session 8) | Sonnet | todo | | |
 | P0.8-08 | Wave P0.8: What customers say, Pro (session 15) | Sonnet | todo | | |
 | P0.8-09 | Wave P0.8: Profile Coach (session 9) | Sonnet | todo | | |
@@ -487,6 +487,15 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Look at `/pricing` at 390 px and 1440 px: the "Early access" pill on four Pro lines (not yet checked in a browser).
 
 ## Evidence
+
+### P0.8-06 (branch claude/h-p0-8-06, 21 Oct 2026, Hussein's session 8 of the bundled plan, Sonnet)
+- What it is: a **Send review link** button on Get reviews (above the copy-and-paste texts) and, for the staff role only, under the upload on the Photos screen. It opens `https://wa.me/?text=...` so the staff member's own WhatsApp opens with "Thanks for visiting <business>. If you would like to leave a review, here is our link: <go.kabsi.co/CODE>" and they pick the customer. The same message for every customer; the link is the business's first active review link (the place, K-25). Nothing is recorded (no table, no function call, no telemetry), so there is nothing per person to count.
+- The plan gate (also used by P0.8-07 and P0.8-11): migration `20261021210000_feature_access` (applied by the session, additive): `public.feature_access(location)` returns `{state, plan, essentials, pro}` from `private.entitlements` and the paid subscription. Trial, demo and concierge are Pro; a paid plan is Pro unless its plan is `essentials` (that value arrives with P0.4-07; nothing writes it yet); grace, ended trial and no plan unlock nothing (K-126, K-48). Members of the business, staff and the service key may ask. Live read-back for the five businesses on the database: the two demo businesses and QA Bakery and Yawmiyati (paid) are Pro, Safa Chicken (no plan) is none. The button shows only for `essentials`; otherwise the card says it is part of the plan and links to Plan.
+- Done when: "a test fails on any of the words reward, free, discount, if you enjoyed, happy, 5 stars in the message": `tests/send-review-link.test.ts` (message exact, the word list, no dash or exclamation mark, wa.me with no number and the message in `text`, an ampersand and accents survive encoding). "No table stores a staff member next to a send": the same file fails if the send path calls `.rpc`, `.insert`, `.update`, `.upsert`, `fetch`, `track` or a function, and no migration adds a table. "The staff role sees it and nothing else new": the Photos screen adds only that card for `role === 'staff'`; staff nav is unchanged (`tests/app-nav.test.ts` still passes). "URL tested": the test parses the URL (host wa.me, path `/`, `text` equals the message); opening it in iOS Safari and Android Chrome was not possible in this session, so that stays an After merge check for a person with a phone.
+- Database: `supabase/tests/feature_access.sql` (no plan, trial, grace, ended, paid, lapsed, demo; owner may ask, another business and anon are refused) and `rls_functions.sql` (a non-member is refused; the function is on the browser list).
+- Read at 390 px in Chromium (Playwright, Supabase mocked): Get reviews with the card, Photos as staff. See the screenshots listed in the PR.
+- Google guard: not applicable (no Google call, nothing under `_shared/google/`). No Google, Places or Anthropic call was made.
+- Decisions to confirm: (a) Send review link is gated on Essentials (K-126) although the card does not say so; a business with no plan sees a line pointing to Plan. Say if it should be open to every business until P0.4-07. (b) Concierge businesses count as Pro for these features while the team runs them.
 
 ### P0.8-05 (branch claude/h-p0-8-05, 21 Oct 2026, Hussein's session 8 of the bundled plan, Sonnet)
 - What it is: each review link now has a setting, "When someone opens this link": **Go straight to Google** (the default for every existing link, so printed QR codes and `/r/<code>` and `go.kabsi.co/<code>` are unchanged) or **Show the page**. A link on the page opens `kabsi.co/review/<CODE>` (new public route, not indexed, `src/routes/review.$code.tsx`): the Google review button first and large, then, only when the business saved a WhatsApp number, the line "Need help now? Message the manager" that opens `wa.me` to that number. Same page for every visitor. Opens are still counted at the Worker, per link, as before.
