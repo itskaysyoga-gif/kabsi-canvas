@@ -12,6 +12,10 @@ Deno.serve(async (req) => {
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
   const day = new Date().toISOString().slice(0, 10);
   const visitor = (await sha256Hex(`${Deno.env.get("SUPABASE_URL")}:${day}:${ip}`)).slice(0, 24);
+  // G-16 (P0.6-05): at most 10 requests a minute per IP on a free tool, before anything else runs.
+  if (!(await rateLimit(`review-link:min:${visitor}`, 10, 60))) {
+    return fail("rate_limited", "That's a lot of searches. Try again in a minute.", 429);
+  }
   if (!(await rateLimit(`review-link:${visitor}`, 20, 3600))) {
     return fail("rate_limited", "That's a lot of searches. Try again in an hour.", 429);
   }

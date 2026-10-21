@@ -10,6 +10,8 @@ import { ASSISTANT_CONVERSATION_KEY, ASSISTANT_VISITOR_KEY } from "@/lib/assista
 import { cn } from "@/lib/utils";
 import { WhatsappLink } from "@/components/shared/whatsapp-link";
 import { WHATSAPP_NUMBER } from "@/lib/site";
+import { Turnstile } from "@/components/turnstile";
+import { useAuth } from "@/components/auth/auth-provider";
 
 type Msg = { role: "user" | "assistant"; content: string };
 const ENDPOINT = `${supabaseUrl}/functions/v1/assistant`;
@@ -73,6 +75,12 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
   const [handoff, setHandoff] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const conversation = useRef<string | null>(null);
+  // G-16 (P0.6-05): a visitor who is not signed in passes Turnstile once, to start a conversation.
+  const { user } = useAuth();
+  const [hasConversation, setHasConversation] = useState(false);
+  const [checkToken, setCheckToken] = useState("");
+  const [checkKey, setCheckKey] = useState(0);
+  const needsCheck = !user && !hasConversation;
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
@@ -84,6 +92,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
     const conv = store(CONV_KEY);
     if (!conv) return;
     conversation.current = conv;
+    setHasConversation(true);
     void supabase.auth
       .getSession()
       .then(({ data }) => {
@@ -145,6 +154,10 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
   async function send(text: string) {
     const message = text.trim();
     if (!message || busy) return;
+    if (needsCheck && !checkToken) {
+      setError("Please complete the check below first.");
+      return;
+    }
     setError("");
     setInput("");
     setMessages((m) => [...m, { role: "user", content: message }]);
@@ -167,6 +180,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
           page: path,
           surface,
           meta: visitorMeta(),
+          ...(needsCheck ? { turnstile: checkToken } : {}),
         }),
       });
       const body = (await res.json().catch(() => ({}))) as {
@@ -174,11 +188,23 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
         reply?: string;
         handoff?: boolean;
         message?: string;
+        error?: string;
       };
+      if (needsCheck) {
+        // A token works once: a new check is shown if this one was refused.
+        setCheckToken("");
+        setCheckKey((k) => k + 1);
+      }
+      if (body.error === "challenge_failed") {
+        conversation.current = null;
+        store(CONV_KEY, null);
+        setHasConversation(false);
+      }
       if (!res.ok || !body.reply) throw new Error(body.message || "Something went wrong.");
       if (body.conversation_id) {
         conversation.current = body.conversation_id;
         store(CONV_KEY, body.conversation_id);
+        setHasConversation(true);
       }
       if (body.handoff) setHandoff(true);
       setMessages((m) => [...m, { role: "assistant", content: body.reply! }]);
@@ -201,6 +227,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
   function restart() {
     conversation.current = null;
     store(CONV_KEY, null);
+    setHasConversation(false);
     setMessages([]);
     setHandoff(false);
     setError("");
@@ -320,6 +347,11 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
                 </WhatsappLink>
                 .
               </p>
+            ) : null}
+            {open && needsCheck ? (
+              <div className="flex justify-center" data-testid="nora-check">
+                <Turnstile key={checkKey} onToken={setCheckToken} />
+              </div>
             ) : null}
             {error ? (
               <p className="rounded-card bg-kb-red/10 p-3 text-sm text-kb-red" role="alert">
