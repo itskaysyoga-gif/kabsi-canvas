@@ -63,7 +63,7 @@ describe("the Weekly Care Report", () => {
       const text = [...strip(read(f)).matchAll(/(["'`])((?:\\.|(?!\1).)*?)\1/g)]
         .map((m) => m[2])
         .join(" ");
-      expect(text, f).not.toMatch(/[–—]|!/);
+      expect(text, f).not.toMatch(/[\u2013\u2014]|!/);
     }
   });
 });

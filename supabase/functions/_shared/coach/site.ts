@@ -42,7 +42,7 @@ export function declaredNames(html: string): string[] {
     } catch { /* a page's broken data says nothing */ }
   }
   const title = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1];
-  if (title) out.push(...pageText(title).split(/\s[|\-–—:]\s|[|]/).map((s) => s.trim()).filter(Boolean));
+  if (title) out.push(...pageText(title).split(/\s[|\-\u2013\u2014:]\s|[|]/).map((s) => s.trim()).filter(Boolean));
   return out.map(norm).filter((n) => n.length >= 3);
 }
 

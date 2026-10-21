@@ -64,7 +64,7 @@ select private.detect_profile_gaps('00000000-0000-4000-8000-0000000000c1');
 select is(pg_temp.site_tasks(), 'coach_site_hours,coach_site_phone', 'one task for each, however often it is found');
 select is((select private.task_path(kind, source_id) from public.tasks where dedupe_key = 'profile_gap:coach_site_phone' and location_id = '00000000-0000-4000-8000-0000000000c1'),
   '/app/coach', 'opening the Coach');
-select ok(not exists (select 1 from public.tasks where dedupe_key like 'profile\_gap:coach\_site\_%' and (title ~ '[!]' or why ~ '[!]' or title ~ E'[–—]' or why ~ E'[–—]')),
+select ok(not exists (select 1 from public.tasks where dedupe_key like 'profile\_gap:coach\_site\_%' and (title ~ '[!]' or why ~ '[!]' or title ~ E'[\u2013\u2014]' or why ~ E'[\u2013\u2014]')),
   'in plain words');
 select is((select count(*)::int from public.coach_site_check where location_id = '00000000-0000-4000-8000-0000000000c1'), 1, 'one answer per business');
 select public.coach_site_check_put('00000000-0000-4000-8000-0000000000c1', 'https://coach-shop.example/menu', 3, '{"name": "match", "phone": "match", "address": "unknown", "hours": "match"}');
