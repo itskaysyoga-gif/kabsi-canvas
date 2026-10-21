@@ -49,6 +49,7 @@ describe("the owner's checklist", () => {
     const rows = coachRows(coach);
     expect(rows.map((r) => r.id)).toEqual(COACH_ITEMS.map((i) => i.id));
     expect(rows.find((r) => r.id === "attributes")?.status).toBe("unknown");
+    expect(rows.find((r) => r.id === "website_match")?.status).toBe("unknown");
     expect(rows.find((r) => r.id === "description")?.status).toBe("todo");
   });
 
@@ -77,7 +78,14 @@ describe("the free Profile Check checklist", () => {
   it("asserts nothing public data cannot show", () => {
     const rows = freeChecklist({ website: "https://example.com", photo_count: 4 });
     expect(rows).toHaveLength(COACH_ITEMS.length);
-    for (const id of ["description", "categories", "services", "attributes", "service_area"]) {
+    for (const id of [
+      "description",
+      "categories",
+      "services",
+      "attributes",
+      "service_area",
+      "website_match",
+    ]) {
       expect(rows.find((r) => r.id === id)?.status, id).toBe("unknown");
     }
     expect(rows.find((r) => r.id === "photos")?.status).toBe("later");

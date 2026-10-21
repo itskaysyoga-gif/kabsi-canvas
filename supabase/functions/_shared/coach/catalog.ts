@@ -2,7 +2,7 @@
 // for the app and for the free Profile Check, so both show the same rows. src/lib/coach.ts holds the same titles for the
 // browser; tests/coach.test.ts fails when the two drift. No keywords in the business name is a rule of every item (K-112).
 // Plain words only: no score and no points (K-07).
-export type CoachItemId = "description" | "categories" | "services" | "attributes" | "photos" | "service_area" | "website_tracking";
+export type CoachItemId = "description" | "categories" | "services" | "attributes" | "photos" | "service_area" | "website_tracking" | "website_match";
 // done: nothing to do. todo: missing. unknown: Kabsi has not read it from a live profile yet, so it says nothing.
 // later: waits for something else.
 export type CoachStatus = "done" | "todo" | "unknown" | "later";
@@ -44,6 +44,11 @@ export const COACH_ITEMS: readonly CoachItem[] = [
     title: "Visits from Google to your website",
     why: "A small tag on your website link shows how many visits come from your Google profile.",
   },
+  {
+    id: "website_match",
+    title: "Website matches your profile",
+    why: "Your website and your Google profile should say the same name, phone number, address and opening times.",
+  },
 ];
 
 export type CoachRow = CoachItem & { status: CoachStatus };
@@ -53,6 +58,7 @@ export type CoachRow = CoachItem & { status: CoachStatus };
 export function freeChecklist(s: { website: string | null; photo_count: number }): CoachRow[] {
   return COACH_ITEMS.map((i) => {
     let status: CoachStatus = "unknown";
+    if (i.id === "website_match" && !s.website) status = "later";
     if (i.id === "website_tracking") status = !s.website ? "later" : /utm_source=/i.test(s.website) ? "done" : "todo";
     if (i.id === "photos") status = "later";
     return { ...i, status };
