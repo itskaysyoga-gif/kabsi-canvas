@@ -100,6 +100,7 @@ begin
      and state in ('open', 'snoozed', 'approved', 'publishing');
   return new;
 end $$;
+revoke all on function private.post_answers_question() from public, anon, authenticated;
 drop trigger if exists gbp_posts_answers_question on public.gbp_posts;
 create trigger gbp_posts_answers_question after insert or update of publish_at on public.gbp_posts
   for each row execute function private.post_answers_question();

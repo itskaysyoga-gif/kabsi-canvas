@@ -107,7 +107,9 @@ select is((select count(*) from public.audit_events e where e.action = 'approval
 
 -- The publication carries exactly what was approved, built from the stored item.
 select is((select payload from public.publications where id = pg_temp.pid('local_post', 2)),
-  '{"summary": "Fresh bread every Friday morning.", "language": "en", "cta_type": "LEARN_MORE", "cta_url": "https://example.test"}'::jsonb,
+  '{"summary": "Fresh bread every Friday morning.", "language": "en", "cta_type": "LEARN_MORE", "cta_url": "https://example.test",
+    "topic_type": "STANDARD", "event_title": null, "start_date": null, "end_date": null, "start_time": null, "end_time": null,
+    "offer_terms": null, "coupon_code": null, "redeem_url": null, "photo_path": null}'::jsonb,
   'post: the approved text, its language and the stored button');
 select is((select body from public.gbp_posts where id = '00000000-0000-4000-8000-000000000201'), 'Fresh bread every Friday morning.',
   'post: the stored text is the approved text');

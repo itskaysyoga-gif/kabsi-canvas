@@ -15,8 +15,9 @@ select is((select posts_per_month from public.locations where id = '00000000-000
 select ok(not has_function_privilege('authenticated', 'public.post_prepare(uuid,text,text,uuid,jsonb)', 'execute')
       and not has_function_privilege('authenticated', 'public.post_question(uuid,text,text)', 'execute')
       and not has_function_privilege('authenticated', 'public.post_month_plan(uuid,text)', 'execute'), 'the care routine functions are service role only');
-select ok(not exists (select 1 from cron.job where jobname = 'kabsi_posts_weekly')
-      and exists (select 1 from cron.job where jobname = 'kabsi_care_posts'), 'posts-weekly is replaced by the care routine');
+-- (cron.job only shows the jobs of the role that made them, so the schedule itself is read back on the live project.)
+select ok(not has_function_privilege('authenticated', 'private.offer_care_posts()', 'execute')
+      and not has_function_privilege('authenticated', 'private.post_answers_question()', 'execute'), 'the care routine offer and the trigger are closed');
 
 select throws_ok($$ insert into public.gbp_posts (location_id, owner_input, body, topic_type, offer_terms)
   values ('00000000-0000-4000-8000-0000000000c1', 'x', 'Two croissants for one on Fridays.', 'OFFER', 'Fridays only') $$,
