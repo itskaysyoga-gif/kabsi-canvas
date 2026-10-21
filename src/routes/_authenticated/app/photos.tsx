@@ -151,7 +151,7 @@ function PhotosPage() {
       {msg ? <p className="mt-3 text-sm text-kb-stone">{msg}</p> : null}
       {loc && access.data?.role === "staff" ? (
         <div className="mt-6">
-          <SendReviewLink locationId={loc.id} name={loc.name} link={placeLink.data} />
+          <SendReviewLink name={loc.name} link={placeLink.data} />
         </div>
       ) : null}
       {data.isError ? (
