@@ -46,6 +46,19 @@ const SNAPSHOT: Snapshot = {
 const REPORT = {
   period: { from: "Oct 12", to: "Oct 19" }, rating: 4.6, rating_count: 128, rating_change: 0.1, rating_drop: false, new_reviews: 6, new_avg: 4.7, replied: 5, waiting: 1,
   taps: { total: 14, nfc: 9, qr: 5 },
+  care: {
+    headline: "Kabsi took care of 8 things this week.", things: 8,
+    profile_line: "Checked 2,016 times. 1 change found: 1 put back.",
+    counts: { posts_published: 1, hours_updates: 1, profile_updates: 1, photos_published: 2 },
+  },
+  time_saved: {
+    minutes: 80, words: "About 1 hour 20 minutes",
+    formula: "5 minutes for each reply published, 15 for each update (a post, a change to your hours or a profile detail), 10 for each batch of photos and 10 for each profile check that found something. It is an estimate, counted from what Kabsi did.",
+  },
+  needs: [{ title: "Reply ready for a 2-star review", path: "/app/inbox" }],
+  needs_total: 1,
+  plan: [{ title: "Make your profile description longer", path: "/app/coach" }],
+  activity: { example: true, views: { this: 214, change: "8% more" }, calls: { this: 9 }, website_clicks: { this: 17 }, directions: { this: 12 } },
 };
 const report = renderReport({ name: BIZ }, REPORT);
 const stored = (category: string, title: string, link: string, content: EmailContent, tag = "") => [{
@@ -87,7 +100,7 @@ export function catalog(): CatalogEntry[] {
     e("deletion_done", "account", true, copy.deletionDone(BIZ, APP)),
     e("renew_r5", "billing", true, copy.renewalReminder("r5", BIZ, "Kabsi Pro, monthly", "28 October 2026", "pro_monthly", APP)),
     e("renew_r1", "billing", true, copy.renewalReminder("r1", BIZ, "Kabsi Pro, monthly", "28 October 2026", "pro_monthly", APP)),
-    e("weekly_report", "weekly_report", true, copy.weeklyReport(BIZ, { newReviews: REPORT.new_reviews, replied: REPORT.replied }, report.html, report.text, APP)),
+    e("weekly_report", "weekly_report", true, copy.weeklyReport(BIZ, { newReviews: REPORT.new_reviews, replied: REPORT.replied, headline: REPORT.care.headline }, report.html, report.text, APP)),
     e("holiday_hours", "approval_needed", true, copy.holidayHoursAsk({
       business: BIZ, holiday: "Christmas Day", when: "Friday 25 December", estimated: false, ramadan: false,
       links: { choose: `${APP}/h/HOLIDAYTOKEN`, normal: `${APP}/h/HOLIDAYTOKEN?a=normal`, closed: `${APP}/h/HOLIDAYTOKEN?a=closed`, custom: `${APP}/h/HOLIDAYTOKEN?a=custom` },

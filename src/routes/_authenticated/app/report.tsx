@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { ChevronDown, FileBarChart as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
+import { CareBottom, CareTop, type CareData } from "@/components/report/care-blocks";
 
 // Weekly reports (D222): the same facts as the Monday email. Read through RLS (members only).
 export const Route = createFileRoute("/_authenticated/app/report")({
@@ -26,7 +27,7 @@ type ReportData = {
   waiting: number;
   taps: { total: number; nfc: number; qr: number };
   quotes?: string[]; // older reports only; no longer shown (K-113.3, R-19)
-};
+} & CareData;
 type Row = { id: string; week_of: string; data: ReportData };
 
 async function loadReports(locationId: string): Promise<Row[]> {
@@ -120,6 +121,7 @@ function ReportPage() {
 function ReportBody({ r, latest }: { r: ReportData; latest: boolean }) {
   return (
     <>
+      <CareTop r={r} />
       {r.rating_drop && r.rating_change != null ? (
         <p className="mt-3 rounded-card border-2 border-kb-black p-3 text-sm">
           Your Google rating went down {Math.abs(r.rating_change).toFixed(1)} this week.
@@ -166,6 +168,7 @@ function ReportBody({ r, latest }: { r: ReportData; latest: boolean }) {
           </Link>
         </p>
       ) : null}
+      <CareBottom r={r} latest={latest} />
     </>
   );
 }

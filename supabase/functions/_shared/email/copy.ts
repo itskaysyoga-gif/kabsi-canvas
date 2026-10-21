@@ -81,9 +81,9 @@ export function renewalReminder(stage: RenewalStage, business: string, planLabel
 
 // ─── the week ─────────────────────────────────────────────────────────────────────────────────────────────────
 
-export function weeklyReport(business: string, o: { newReviews: number; replied: number }, html: string, text: string, appUrl: string): EmailContent {
+export function weeklyReport(business: string, o: { newReviews: number; replied: number; headline?: string }, html: string, text: string, appUrl: string): EmailContent {
   return {
-    subject: `${business}: your Weekly Care Report`, preheader: `${o.newReviews} new reviews, ${o.replied} replied.`, title: "Your Weekly Care Report",
+    subject: `${business}: your Weekly Care Report`, preheader: o.headline ?? `${o.newReviews} new reviews, ${o.replied} replied.`, title: "Your Weekly Care Report",
     bodyHtml: html, button: { label: "Open your week", url: `${appUrl}/app/report` }, text: `${text}\n\nOpen your week: ${appUrl}/app/report`,
   };
 }

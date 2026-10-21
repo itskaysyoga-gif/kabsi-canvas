@@ -16,11 +16,11 @@ describe("the checklist catalog", () => {
   it("uses plain words: no dashes, no exclamation marks, no score", () => {
     for (const i of COACH_ITEMS) {
       for (const t of [i.title, i.why]) {
-        expect(t).not.toMatch(/[–—!]/);
+        expect(t).not.toMatch(/[\u2013\u2014!]/);
         expect(t.toLowerCase()).not.toMatch(/\bscore\b|\bpoints\b/);
       }
     }
-    for (const t of Object.values(STATUS_LABEL)) expect(t).not.toMatch(/[–—!]/);
+    for (const t of Object.values(STATUS_LABEL)) expect(t).not.toMatch(/[\u2013\u2014!]/);
   });
 
   it("never offers anything about who the owner is (K-83) or keywords in the name (K-112)", () => {

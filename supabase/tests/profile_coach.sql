@@ -69,7 +69,7 @@ select is((select private.task_path(kind, source_id) from public.tasks where loc
              and dedupe_key = 'profile_gap:coach_categories'), '/app/coach', 'a coach task opens the Coach');
 select is((select private.task_path('profile_gap', 'basics')), '/app/shield', 'the older gaps open where they did');
 select ok(not exists (select 1 from public.tasks where location_id = '00000000-0000-4000-8000-0000000000c1' and dedupe_key like 'profile\_gap:coach\_%'
-                       and (title ~ '[!]' or why ~ '[!]' or title ~ E'[–—]' or why ~ E'[–—]' or lower(why) ~ 'keyword')),
+                       and (title ~ '[!]' or why ~ '[!]' or title ~ E'[\u2013\u2014]' or why ~ E'[\u2013\u2014]' or lower(why) ~ 'keyword')),
   'no exclamation marks, dashes or keywords');
 select lives_ok($$ select pg_temp.put(0, 0, 0, 'live') $$, 'a read replaces the last one');
 select is((select count(*)::int from public.coach_profile where location_id = '00000000-0000-4000-8000-0000000000c1'), 1, 'one row per business');
