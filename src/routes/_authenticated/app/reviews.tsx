@@ -10,6 +10,7 @@ import { PageIcon } from "@/components/shared/page-icon";
 import { ReviewCard, ReviewHead } from "@/components/reviews/review-card";
 import { ReviewStatusPill } from "@/components/reviews/review-status";
 import { ReviewGraphic } from "@/components/reviews/review-graphic";
+import { ReportReminders, ReportReview } from "@/components/reviews/report-review";
 import { StaffTestTool } from "@/components/reviews/staff-test-tool";
 import { allReviews, type ReviewRow } from "@/lib/reviews";
 import {
@@ -112,6 +113,7 @@ function ReviewsPage() {
 
   return (
     <Page wide detail={!!current}>
+      <ReportReminders locationId={loc?.id} onOpen={(id) => open(id)} />
       {all.length ? (
         <div className={cn("mt-6 space-y-3", current && "hidden lg:block")}>
           <div className="relative">
@@ -395,7 +397,10 @@ function Detail({ review, concierge }: { review: ReviewRow; concierge: boolean }
       <div className="mt-4">
         <ReviewStatusPill review={review} concierge={concierge} />
       </div>
-      <ReviewGraphic review={review} />
+      <div className="mt-3 flex flex-wrap gap-x-6">
+        <ReviewGraphic review={review} />
+        <ReportReview review={review} />
+      </div>
       {review.content_purged_at && !review.comment ? (
         <p className="mt-3 text-sm text-kb-stone">
           Google's rules let Kabsi keep review text for 30 days. Read it on your Google profile.

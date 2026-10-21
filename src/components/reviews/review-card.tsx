@@ -39,6 +39,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { ReviewGraphic } from "@/components/reviews/review-graphic";
+import { ReportReview } from "@/components/reviews/report-review";
 import { myAccess } from "@/lib/team";
 import {
   answerStyleOffer,
@@ -366,7 +367,10 @@ export function ReviewCard({ review }: { review: InboxReview }) {
       )}
     >
       <ReviewHead review={review} />
-      <ReviewGraphic review={review} />
+      <div className="mt-3 flex flex-wrap gap-x-6">
+        <ReviewGraphic review={review} />
+        <ReportReview review={review} />
+      </div>
       {review.risk === "high" ? (
         <div className="mt-4 rounded-card bg-kb-sand p-4 text-sm leading-6">
           <p className="flex gap-2 font-bold">
