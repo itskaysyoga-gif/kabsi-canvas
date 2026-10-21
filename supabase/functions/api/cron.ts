@@ -99,7 +99,7 @@ export async function accessJob() {
 }
 
 async function reportLocations() {
-  const { data, error } = await admin().from("locations").select("id, name, place_id, time_zone, emails_paused_until").eq("status", "active");
+  const { data, error } = await admin().from("locations").select("id, name, place_id, time_zone, emails_paused_until, google_location_id").eq("status", "active");
   if (error) throw error;
   return data ?? [];
 }
@@ -114,7 +114,7 @@ async function shieldJob() {
   return { alerts: await shieldCheck() };
 }
 
-// Job: weekly report, Monday from 09:00 local (D222).
+// Job: weekly report, Monday from 08:00 local (D222, K-28).
 export async function weeklyJob() {
   return { reports: await weeklyReports(await reportLocations()) };
 }
