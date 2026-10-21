@@ -1,5 +1,6 @@
-// lead: public form on /partners (and later a business contact form).
-// POST { kind?, name, email, instagram?, country?, volume?, message?, website? }
+// lead: a business enquiry form (no page sends it today). Partner applications are retired (K-127, P0.8-01);
+// Kabsi Partners applications arrive with P0.8-12 as their own rows, not leads.
+// POST { kind: "business", name, email, instagram?, country?, volume?, message?, website? }
 // `website` is a honeypot: humans never fill it. Rate limit uses a daily-salted hash, never the raw IP.
 import { admin, captureError, CORS, esc, fail, json, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { notify } from "../_shared/notify.ts";
@@ -25,7 +26,8 @@ Deno.serve(async (req) => {
   const name = (b.name ?? "").trim().slice(0, 120);
   const email = (b.email ?? "").trim().toLowerCase().slice(0, 254);
   if (!name || !EMAIL_RE.test(email)) return fail("bad_input", "Please enter your name and a valid email.");
-  const kind = b.kind === "business" ? "business" : "partner";
+  if (b.kind !== "business") return fail("bad_input", "Write to hello@kabsi.co instead.");
+  const kind = "business";
   const row = {
     kind, name, email,
     instagram: b.instagram?.trim().slice(0, 80) || null,

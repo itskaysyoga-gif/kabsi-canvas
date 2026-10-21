@@ -1,22 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { PRICES } from "../src/lib/site";
 
-// Constants that D274, D281 and the spec fix; Q04 added Pro monthly and yearly and removed the 6-month plan.
+// Constants that D281 and the spec fix; Q04 added Pro monthly and yearly. K-123 to K-127 removed the Lebanon bundle,
+// the card prices and the partner rates (P0.8-01).
 describe("PRICES", () => {
-  it("keeps the Lebanon bundle and partner rates from the spec", () => {
-    expect(PRICES.lebanonBundle).toBe(120);
-    expect(PRICES.partnerRate).toBe(8);
-    expect(PRICES.foundingRate).toBe(6);
-  });
-
-  it("extra cards cost $10 each or $40 for five", () => {
-    expect(PRICES.extraCard).toBe(10);
-    expect(PRICES.fiveCards).toBe(40);
-    expect(PRICES.fiveCards).toBeLessThan(PRICES.extraCard * 5);
-  });
-
-  it("founding partners pay less than other partners", () => {
-    expect(PRICES.foundingRate).toBeLessThan(PRICES.partnerRate);
+  it("is in US dollars with the plan and extra-location prices only (K-123 to K-127)", () => {
+    expect(PRICES.proMonthly).toBe(19);
+    expect(PRICES.proYearly).toBe(190);
+    expect(PRICES.extraLocationMonthly).toBe(15);
+    expect(PRICES.extraLocationYearly).toBe(150);
+    // No Lebanon bundle, no card prices, no partner or founding rates.
+    expect(Object.keys(PRICES).sort()).toEqual(
+      ["extraLocationMonthly", "extraLocationYearly", "proMonthly", "proYearly"].sort(),
+    );
   });
 
   it("every price is a positive whole number of dollars", () => {

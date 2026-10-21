@@ -1,7 +1,7 @@
 -- P0.3-06: roles and approval policies (K-16, R-22, guardrail 11). Owner, manager and staff each get exactly their read
 -- and approve rights (RLS and the RPCs, not only the screens); a member of business A never reads or changes business
 -- B; staff never approve or publish; a manager approves only what the owner's policy allows and never a high-risk
--- field or review; the partner modes are stored only with the owner's consent text and date; the team is the owner's.
+-- field or review; there are no partner approval modes (K-127); the team is the owner's.
 begin;
 create extension if not exists pgtap with schema extensions;
 select * from no_plan();
@@ -9,7 +9,7 @@ select * from no_plan();
 \ir _fixtures.psql
 
 -- Personas on top of the fixtures: manager MA ..a4 and staff SA ..a5 of the victim business LA (owner A ..a1);
--- manager MB ..b4 of the other business LB (owner B ..b2). PA ..a2 is the member of LA's partner.
+-- manager MB ..b4 of the other business LB (owner B ..b2). PA ..a2 is a signed-in user who is not on LA's team.
 insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
 select '00000000-0000-0000-0000-000000000000', u.id, 'authenticated', 'authenticated', u.email, now(), '{}', '{}', now(), now()
 from (values ('00000000-0000-4000-8000-0000000000a4'::uuid, 'victim-manager@example.test'),
@@ -53,8 +53,6 @@ select ok(pg_temp.sees('00000000-0000-4000-8000-0000000000a4', 'photos', '000000
 select ok(pg_temp.sees('00000000-0000-4000-8000-0000000000a4', 'cards', '00000000-0000-4000-8000-0000000000c1') > 0, 'manager sees the review link');
 select is(pg_temp.sees('00000000-0000-4000-8000-0000000000a4', 'plans', '00000000-0000-4000-8000-0000000000c1'), 0::bigint, 'manager does not see the plan (billing)');
 select is(pg_temp.sees('00000000-0000-4000-8000-0000000000a4', 'payments', '00000000-0000-4000-8000-0000000000c1'), 0::bigint, 'manager does not see payments');
-select is(pg_temp.sees('00000000-0000-4000-8000-0000000000a4', 'usdt_claims', '00000000-0000-4000-8000-0000000000c1'), 0::bigint, 'manager does not see payment claims');
-select is(pg_temp.sees('00000000-0000-4000-8000-0000000000a4', 'card_orders', '00000000-0000-4000-8000-0000000000c1'), 0::bigint, 'manager does not see card orders');
 
 select ok(pg_temp.sees('00000000-0000-4000-8000-0000000000a5', 'photos', '00000000-0000-4000-8000-0000000000c1') > 0, 'staff see photos');
 select ok(pg_temp.sees('00000000-0000-4000-8000-0000000000a5', 'cards', '00000000-0000-4000-8000-0000000000c1') > 0, 'staff see the review link');
@@ -62,7 +60,7 @@ select ok(pg_temp.sees('00000000-0000-4000-8000-0000000000a5', 'taps', '00000000
 select is(
   (select array_agg(t order by t) from unnest(array['reviews', 'publications', 'tasks', 'gbp_posts', 'knowledge_facts',
      'knowledge_confirms', 'profile_changes', 'special_hours', 'weekly_reports', 'rating_snapshots', 'google_connections',
-     'style_offers', 'audit_events', 'plans', 'payments', 'usdt_claims', 'card_orders', 'partner_clients', 'approval_policies',
+     'style_offers', 'audit_events', 'plans', 'payments', 'approval_policies',
      'team_invites']) t
     where pg_temp.sees('00000000-0000-4000-8000-0000000000a5', t, '00000000-0000-4000-8000-0000000000c1') > 0),
   null, 'staff see nothing else of the business');
@@ -100,9 +98,6 @@ select throws_ok($$ select public.approve_publication('review_reply', '00000000-
 select tests.act_as('00000000-0000-4000-8000-0000000000a4');
 select throws_ok($$ select public.plan_summary('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'manager: no plan summary (billing)');
 select throws_ok($$ select public.choose_plan('00000000-0000-4000-8000-0000000000c1', 'trial') $$, '42501', null, 'manager: cannot choose a plan');
-select throws_ok($$ select public.billing_invoice_status('00000000-0000-4000-8000-0000000000f6') $$, '42501', null, 'manager: no invoice');
-select throws_ok($$ select * from public.billing_prepare_invoice('00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 'usdttrc20', false) $$, '42501', null, 'manager: cannot pay');
-select throws_ok($$ select public.owner_submit_claim('00000000-0000-4000-8000-0000000000c1', 'pro_monthly', 'trc20', 'managertx01') $$, '42501', null, 'manager: cannot claim a payment');
 select throws_ok($$ select public.request_location_deletion('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'manager: cannot delete the business');
 select throws_ok($$ select public.cancel_location_deletion('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'manager: cannot cancel a deletion');
 select throws_ok($$ select public.request_disconnect('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'manager: cannot disconnect Google');
@@ -222,34 +217,19 @@ select is(private.may_approve('00000000-0000-4000-8000-0000000000c1', 'review_re
 select is((select array_agg(e order by e) from public.location_owner_emails('00000000-0000-4000-8000-0000000000c1') e),
   array['victim-owner@example.test'], 'approval emails go to the owner, not the manager or staff');
 
--- 5. Partner approval policies: stored only with the owner's consent text and date (used by P1-01) --------------------------
+-- 5. No partner approval modes (K-127, P0.8-01): only "owner" and "owner and managers" exist ----------------------------
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
-select throws_ok($$ select public.set_approval_policy('00000000-0000-4000-8000-0000000000c1', 'post', 'partner') $$, 'P0001', 'consent_required',
-  'the partner mode needs the owner''s consent text');
-select throws_ok($$ select public.set_approval_policy('00000000-0000-4000-8000-0000000000c1', 'post', 'partner_prepares', 'ok') $$, 'P0001', 'consent_required',
-  'a word is not consent');
-select lives_ok($$ select public.set_approval_policy('00000000-0000-4000-8000-0000000000c1', 'post', 'partner',
-  'I let Victim Partner approve and publish Google posts for my business.') $$, 'with consent text, the partner may approve posts');
+select throws_ok($$ select public.set_approval_policy('00000000-0000-4000-8000-0000000000c1', 'post', 'partner',
+  'I let Victim Partner approve and publish Google posts for my business.') $$, 'P0001', 'bad_policy',
+  'the old partner mode is refused, even with consent text');
+select throws_ok($$ select public.set_approval_policy('00000000-0000-4000-8000-0000000000c1', 'post', 'partner_prepares') $$, 'P0001', 'bad_policy',
+  'and so is partner prepares, owner approves');
 reset role;
-select is((select consent_text from public.approval_policies where location_id = '00000000-0000-4000-8000-0000000000c1' and kind = 'post'),
-  'I let Victim Partner approve and publish Google posts for my business.', 'the consent text is stored word for word');
-select isnt((select consent_at from public.approval_policies where location_id = '00000000-0000-4000-8000-0000000000c1' and kind = 'post'),
-  null, 'with its date');
 select throws_ok($$ insert into public.approval_policies (location_id, kind, policy, set_by)
   values ('00000000-0000-4000-8000-0000000000c2', 'post', 'partner', '00000000-0000-4000-8000-0000000000b2') $$, '23514', null,
-  'the table itself refuses a partner mode without consent');
-update public.partner_clients set status = 'active' where location_id = '00000000-0000-4000-8000-0000000000c1';
-select is(private.may_approve('00000000-0000-4000-8000-0000000000c1', 'post', '00000000-0000-4000-8000-0000000000a2', false), true,
-  'a member of the business''s partner may approve posts under that policy');
-select is(private.may_approve('00000000-0000-4000-8000-0000000000c1', 'review_reply', '00000000-0000-4000-8000-0000000000a2', false), false,
-  'but not replies, which stay with the owner');
-select is(private.may_approve('00000000-0000-4000-8000-0000000000c1', 'post', '00000000-0000-4000-8000-0000000000b3', false), false,
-  'a member of another partner may not');
-update public.partner_clients set status = 'ended' where location_id = '00000000-0000-4000-8000-0000000000c1';
+  'the table itself refuses a partner mode');
 select is(private.may_approve('00000000-0000-4000-8000-0000000000c1', 'post', '00000000-0000-4000-8000-0000000000a2', false), false,
-  'nor the partner once the link has ended');
-select is(private.may_approve('00000000-0000-4000-8000-0000000000c1', 'post', '00000000-0000-4000-8000-0000000000a4', false), false,
-  'the partner mode does not open posts to managers');
+  'someone who is not on the team approves nothing');
 
 -- 6. Team: invite, join, change, remove (owner only), audited -------------------------------------------------------------
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');

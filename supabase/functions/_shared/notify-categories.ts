@@ -15,7 +15,7 @@ export type Category = {
   id: string;
   label: string;
   description: string;
-  group: "Daily work" | "Weekly and monthly" | "Google access" | "Trial and billing" | "Partners" | "Account and help";
+  group: "Daily work" | "Weekly and monthly" | "Google access" | "Trial and billing" | "Account and help";
   switchable: boolean;
   emailDefault: EmailDefault;
   quietExempt: boolean;
@@ -72,11 +72,6 @@ export const CATEGORIES = [
     id: "trial", why: "You are trying Kabsi, and these short emails help you get the most from it.", label: "Trial tips", group: "Trial and billing", switchable: true, emailDefault: "instant",
     quietExempt: false, inApp: false, noun: ["trial tip", "trial tips"],
     description: "A few short emails while you try Kabsi: your first win, your week, the days left.",
-  },
-  {
-    id: "partner", why: "You are part of a Kabsi partner account.", label: "Partner news", group: "Partners", switchable: true, emailDefault: "daily_digest",
-    quietExempt: false, inApp: true, noun: ["partner update", "partner updates"],
-    description: "Applications, clients added and the monthly partner report.",
   },
   {
     id: "account", why: "This is about your Kabsi account.", label: "Your account", group: "Account and help", switchable: false, emailDefault: "instant",

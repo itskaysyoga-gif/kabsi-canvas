@@ -4,9 +4,8 @@ import { dueRenewalEmail, dueTrialEmail, paidWindow, trialDays, trialEligible, t
 
 const iso = (d: Date) => d.toISOString().replace(".000", "");
 
-Deno.test("trial length: 30 days for partner signups, 14 otherwise", () => {
-  for (const s of ["self", "staff", null, undefined]) assert.equal(trialDays(s), 14);
-  for (const s of ["partner_link", "partner_invite"]) assert.equal(trialDays(s), 30);
+Deno.test("trial length: 14 days for every signup (K-126; the old partner signups included)", () => {
+  for (const s of ["self", "staff", "partner_link", "partner_invite", null, undefined]) assert.equal(trialDays(s), 14);
 });
 
 Deno.test("trialEnd is the local last day, ending at local midnight after it", () => {
@@ -47,16 +46,15 @@ Deno.test("paidWindow starts after the latest active plan and clamps month ends"
   assert.deepEqual(w("pro_monthly", "2026-10-01T10:00:00Z"), ["2026-10-01T10:00:00Z", "2026-11-01T10:00:00Z"]);
   assert.deepEqual(w("pro_yearly", "2026-10-01T10:00:00Z", ["2026-10-15T21:00:00Z"]), ["2026-10-15T21:00:00Z", "2027-10-15T21:00:00Z"]);
   assert.equal(w("pro_monthly", "2027-01-31T10:00:00Z")[1], "2027-02-28T10:00:00Z");
-  assert.equal(w("lebanon_yearly", "2028-02-29T00:00:00Z")[1], "2029-02-28T00:00:00Z");
+  assert.equal(w("pro_yearly", "2028-02-29T00:00:00Z")[1], "2029-02-28T00:00:00Z");
   assert.deepEqual(w("pro_monthly", "2027-01-01T00:00:00Z", ["2027-05-01T00:00:00Z"]), ["2027-05-01T00:00:00Z", "2027-06-01T00:00:00Z"]);
-  assert.equal(w("lebanon_yearly", "2026-10-01T00:00:00Z", ["2026-09-01T00:00:00Z"])[0], "2026-10-01T00:00:00Z"); // ended plans do not delay
+  assert.equal(w("pro_yearly", "2026-10-01T00:00:00Z", ["2026-09-01T00:00:00Z"])[0], "2026-10-01T00:00:00Z"); // ended plans do not delay
   assert.equal(w("pro_6m", "2026-10-01T00:00:00Z")[1], "2027-04-01T00:00:00Z");
 });
 
 Deno.test("trialEligible fails each rule on its own", () => {
-  const ok = { clockReady: true, partnerCovered: false, trialUsed: false, paidOrWaiting: false, flagOn: true, testOwner: false };
+  const ok = { clockReady: true, trialUsed: false, paidOrWaiting: false, flagOn: true, testOwner: false };
   assert.equal(trialEligible(ok), true);
-  assert.equal(trialEligible({ ...ok, partnerCovered: true }), false);
   assert.equal(trialEligible({ ...ok, trialUsed: true }), false);
   assert.equal(trialEligible({ ...ok, paidOrWaiting: true }), false);
   assert.equal(trialEligible({ ...ok, clockReady: false }), false);

@@ -1,22 +1,19 @@
 import { useState, type ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Check, Gift, Globe, MapPin, Sparkles } from "lucide-react";
+import { Check, CreditCard, Gift, Sparkles } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
 import { CtaBand, Eyebrow, H2, IconBadge, PageHero, Section } from "@/components/marketing/parts";
 import { PricingVisual } from "@/components/marketing/visuals";
 import { BookingLink } from "@/components/shared/booking-link";
-import { WhatsappLink } from "@/components/shared/whatsapp-link";
 import {
   CTA_PRIMARY,
   PRICES,
   PRODUCT_LD,
   SETUP_CALL_MINUTES,
   TRIAL_LINE,
-  WHATSAPP_NUMBER,
   pageHead,
 } from "@/lib/site";
-import { useIsLebanon } from "@/lib/region";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/pricing")({
@@ -51,7 +48,6 @@ const PRO: Feature[] = [
 ];
 
 function Page() {
-  const isLebanon = useIsLebanon();
   const [yearly, setYearly] = useState(false);
 
   return (
@@ -107,14 +103,6 @@ function Page() {
             }
           />
         </div>
-        {isLebanon ? (
-          <p className="mt-6 text-kb-stone">
-            In Lebanon we also sell a bundle with an NFC card and setup.{" "}
-            <Link to="/lebanon" className="font-bold text-kb-ink underline underline-offset-4">
-              See the Lebanon offer
-            </Link>
-          </p>
-        ) : null}
       </Section>
 
       <Section className="grid gap-10 md:grid-cols-2">
@@ -123,18 +111,10 @@ function Page() {
           <H2>How to pay</H2>
           <div className="mt-6 space-y-4 text-lg leading-8 text-kb-stone">
             <div className="flex gap-4">
-              <IconBadge icon={<Globe />} tone="sand" />
+              <IconBadge icon={<CreditCard />} tone="sand" />
               <p>
-                <b className="text-kb-ink">Anywhere:</b> USDT, on TRC20 or with Binance Pay. After
-                paying, paste the transaction ID in Kabsi and we confirm it.
-              </p>
-            </div>
-            <div className="flex gap-4">
-              <IconBadge icon={<MapPin />} tone="sand" />
-              <p>
-                <b className="text-kb-ink">In Lebanon:</b> also Whish, OMT or cash. Message{" "}
-                <WhatsappLink kind="payment">WhatsApp {WHATSAPP_NUMBER}</WhatsappLink> or
-                hello@kabsi.co and we'll arrange it.
+                <b className="text-kb-ink">By card, in US dollars.</b> Card payments are coming.
+                Until they open there is nothing to pay, and the trial needs no card.
               </p>
             </div>
           </div>
@@ -144,12 +124,12 @@ function Page() {
           <H2>The small print, in plain words</H2>
           <ul className="mt-6 space-y-3 text-lg leading-8 text-kb-stone">
             <Fact>
-              The trial is 14 days and needs no card (30 days if a partner sent you). It starts when
-              Kabsi's access to your Google profile works.
+              The trial is 14 days and needs no card. It starts when Kabsi's access to your Google
+              profile works.
             </Fact>
             <Fact>
               Monthly plans can be cancelled at any time. Yearly plans are refundable in full within
-              14 days of the plan starting. Cards aren't.
+              14 days of the plan starting.
             </Fact>
             <Fact>
               When a trial or plan ends, Reviews, Google Profile, Google Protection and the Weekly
@@ -175,25 +155,6 @@ function Page() {
             </Fact>
           </ul>
         </div>
-      </Section>
-
-      <Section
-        tone="sand"
-        className="flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between"
-      >
-        <div>
-          <h2 className="text-2xl font-bold">
-            Sell NFC cards or look after businesses' Google profiles?
-          </h2>
-          <p className="mt-2 text-kb-stone">
-            Partners pay a monthly wholesale rate and set their own price.
-          </p>
-        </div>
-        <Button asChild variant="outline">
-          <Link to="/partners">
-            Partner pricing <ArrowRight />
-          </Link>
-        </Button>
       </Section>
 
       <CtaBand />

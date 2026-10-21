@@ -4,10 +4,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layouts/app-layout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 import { amStaff } from "@/lib/reviews";
-import { PartnersPanel } from "@/components/staff/partners-panel";
 import { OpsPanel } from "@/components/staff/ops-panel";
 import { ChatsPanel } from "@/components/staff/chats-panel";
 import { ConciergePanel } from "@/components/staff/concierge-panel";
@@ -16,9 +14,8 @@ import { convertConcierge, setConcierge } from "@/lib/concierge";
 import { ClipboardCheck as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
 
-// Staff workspace: USDT payments to check, partners, leads, job health, card codes and orders, every business
-// and offline payments (cash / Whish / OMT / USDT).
-// Payments go through the staff_record_payment RPC, which activates the plan and refreshes the status.
+// Staff workspace: follow-ups, concierge, chats, job health, existing card codes, and every business. There is no
+// manual payment confirmation here (K-124, P0.8-01): money is recorded only by the Creem webhook (P0.4-07).
 export const Route = createFileRoute("/_authenticated/staff")({
   head: () => ({ meta: [{ title: "Staff | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: StaffPage,
@@ -34,13 +31,6 @@ type Row = {
   access_granted_at: string | null;
   concierge: boolean;
 };
-const ITEMS = [
-  { value: "lebanon_yearly", label: "Lebanon bundle, 12 months", price: 120 },
-  { value: "pro_yearly", label: "Pro yearly", price: 190 },
-  { value: "pro_monthly", label: "Pro monthly", price: 19 },
-  { value: "card", label: "Card", price: 20 },
-] as const;
-const METHODS = ["cash", "whish", "omt", "usdt"] as const;
 
 async function allLocations(): Promise<Row[]> {
   const { data, error } = await supabase
@@ -73,12 +63,9 @@ function StaffPage() {
             <FollowupsPanel />
             <ConciergePanel />
             <ChatsPanel />
-            <PartnersPanel />
             <OpsPanel />
             <h2 className="mt-10 text-xl font-bold">Businesses</h2>
-            <p className="mt-1 text-sm text-kb-stone">
-              Newest first. Record a payment once the money is received.
-            </p>
+            <p className="mt-1 text-sm text-kb-stone">Newest first.</p>
             <div className="mt-4 space-y-4">
               {rows.isLoading ? <p className="text-kb-stone">Loading businesses…</p> : null}
               {rows.data?.length === 0 ? <p className="text-kb-stone">No businesses yet.</p> : null}
@@ -95,31 +82,8 @@ function StaffPage() {
 
 function LocationRow({ row }: { row: Row }) {
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [item, setItem] = useState<(typeof ITEMS)[number]["value"]>("lebanon_yearly");
-  const [amount, setAmount] = useState("120");
-  const [method, setMethod] = useState<(typeof METHODS)[number]>("cash");
-  const [reference, setReference] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
-
-  async function record() {
-    setBusy(true);
-    setMsg("");
-    const { error } = await supabase.rpc("staff_record_payment", {
-      p_location: row.id,
-      p_item: item,
-      p_amount: Number(amount),
-      p_method: method,
-      p_reference: reference.trim() || null,
-    });
-    setBusy(false);
-    if (error) return setMsg(`Couldn't record it: ${error.message}`);
-    setMsg("Payment recorded.");
-    setOpen(false);
-    await queryClient.invalidateQueries({ queryKey: ["staff-locations"] });
-    await queryClient.invalidateQueries({ queryKey: ["my-location"] });
-  }
 
   async function conciergeToggle(on: boolean) {
     setBusy(true);
@@ -158,7 +122,7 @@ function LocationRow({ row }: { row: Row }) {
     const { error } = await supabase.rpc("staff_grant_trial", { p_location: row.id });
     setBusy(false);
     if (error) return setMsg(`No trial given: ${error.message}`);
-    setMsg("Free trial started.");
+    setMsg("Pro trial started.");
     await queryClient.invalidateQueries({ queryKey: ["staff-locations"] });
     await queryClient.invalidateQueries({ queryKey: ["my-location"] });
   }
@@ -195,65 +159,11 @@ function LocationRow({ row }: { row: Row }) {
               disabled={busy}
               onClick={() => void grantTrial()}
             >
-              Give free trial
+              Give Pro trial
             </Button>
           ) : null}
-          <Button size="compact" variant="outline" onClick={() => setOpen(!open)}>
-            Record payment
-          </Button>
         </div>
       </div>
-      {open ? (
-        <div className="mt-4 grid gap-3 sm:grid-cols-4">
-          <select
-            aria-label="Item"
-            value={item}
-            onChange={(e) => {
-              const next = ITEMS.find((i) => i.value === e.target.value) ?? ITEMS[0];
-              setItem(next.value);
-              setAmount(String(next.price));
-            }}
-            className="h-11 rounded-card border border-kb-hairline bg-kb-white px-3"
-          >
-            {ITEMS.map((i) => (
-              <option key={i.value} value={i.value}>
-                {i.label} (${i.price})
-              </option>
-            ))}
-          </select>
-          <Input
-            aria-label="Amount in USD"
-            inputMode="decimal"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-          <select
-            aria-label="Method"
-            value={method}
-            onChange={(e) => setMethod(e.target.value as (typeof METHODS)[number])}
-            className="h-11 rounded-card border border-kb-hairline bg-kb-white px-3"
-          >
-            {METHODS.map((m) => (
-              <option key={m} value={m}>
-                {m === "omt" ? "OMT" : m === "usdt" ? "USDT" : m[0]!.toUpperCase() + m.slice(1)}
-              </option>
-            ))}
-          </select>
-          <Input
-            aria-label="Reference"
-            placeholder="Reference (optional)"
-            value={reference}
-            onChange={(e) => setReference(e.target.value)}
-          />
-          <Button
-            className="sm:col-span-4"
-            disabled={busy || !(Number(amount) >= 0) || amount === ""}
-            onClick={() => void record()}
-          >
-            {busy ? "Saving…" : "Confirm payment received"}
-          </Button>
-        </div>
-      ) : null}
       {msg ? <p className="mt-3 text-sm text-kb-stone">{msg}</p> : null}
     </div>
   );

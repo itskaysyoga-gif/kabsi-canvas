@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 
 export type Role = "owner" | "manager" | "staff";
 export type ApprovalKind = "review_reply" | "post" | "photo" | "profile_change" | "hours";
-export type Policy = "owner" | "owner_and_managers" | "partner" | "partner_prepares";
+export type Policy = "owner" | "owner_and_managers";
 export type Member = { user_id: string; email: string; role: Role; you: boolean };
 export type Invite = {
   id: string;

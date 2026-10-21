@@ -94,11 +94,11 @@ Deno.test("a missed step is not sent days late", () => {
   assert.deepEqual(dueSteps(journey()(at(5 * D + 2 * D + 2 * D)), at(5 * D + 2 * D + 2 * D), { since: SINCE }), ["trial_day2"]);
 });
 
-Deno.test("trial rules (P0.4-06): trial mail only while on trial; concierge, demo, partner and paying businesses get none", () => {
+Deno.test("trial rules (P0.4-06): trial mail only while on trial; concierge, demo and paying businesses get none", () => {
   const trial = (e: Snapshot["entitlement"]) => ({ ...journey()(at(5 * D + 7 * D)), entitlement: e });
   const now = at(5 * D + 7 * D);
   assert.deepEqual(dueSteps(trial("trial"), now, { since: SINCE }), ["trial_day7"]);
-  for (const e of ["paid", "partner", "concierge", "demo", "none", "ended", "grace"] as const) assert.deepEqual(dueSteps(trial(e), now, { since: SINCE }), [], e);
+  for (const e of ["paid", "concierge", "demo", "none", "ended", "grace"] as const) assert.deepEqual(dueSteps(trial(e), now, { since: SINCE }), [], e);
   // day 14 is for a business whose trial ended and has not paid; a paying one gets nothing
   const end = at(5 * D + 14 * D);
   assert.deepEqual(dueSteps({ ...journey()(end), entitlement: "grace" }, end, { since: SINCE }), ["trial_day14"]);

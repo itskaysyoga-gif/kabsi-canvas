@@ -18,7 +18,7 @@ One task per chat. The task ID comes from the prompt. Nothing else is in scope.
 - Only the design tokens (K-108). Phone first at 390 px.
 - Secrets never appear in code, commits, logs, pull requests or screenshots.
 - Every change that alters behaviour, price or wording updates `knowledge/kabsi-facts.md`.
-- The Kabsi Google group ID lives only in `KABSI_GROUP_ID` in `src/lib/site.ts`; Lebanon-only wording only through `src/lib/region.ts`.
+- The Kabsi Google group ID lives only in `KABSI_GROUP_ID` in `src/lib/site.ts`. There is no Lebanon-only wording (K-123); country rules that the law or consent need go in `src/lib/region.ts` when a task adds them.
 
 ## Git and deploys
 

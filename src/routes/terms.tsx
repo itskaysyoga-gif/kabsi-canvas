@@ -24,7 +24,7 @@ export const Route = createFileRoute("/terms")({
   component: Page,
 });
 
-const UPDATED = "12 October 2026";
+const UPDATED = "21 October 2026";
 
 function Page() {
   return (
@@ -36,9 +36,9 @@ function Page() {
       <section>
         <p>
           These terms are the agreement between you and Kabsi, an independent business run by{" "}
-          {LEGAL_SELLER}, who is the seller. By creating an account, paying for a plan or activating
-          a card, you accept them on behalf of your business. Our{" "}
-          <Link to="/privacy">privacy policy</Link> explains how we handle data.
+          {LEGAL_SELLER}, who is the seller. By creating an account or paying for a plan, you accept
+          them on behalf of your business. Our <Link to="/privacy">privacy policy</Link> explains
+          how we handle data.
         </p>
       </section>
 
@@ -62,7 +62,7 @@ function Page() {
           <li>Sends the Weekly Care Report and shows your profile's facts in the app.</li>
           <li>
             Provides a review link and a QR code that open your Google review page for every
-            customer, and in Lebanon an optional NFC card.
+            customer. They work with your own QR codes and NFC cards. Kabsi sells no cards.
           </li>
           <li>
             Answers questions and helps you fill in your business facts through Nora, an AI
@@ -168,7 +168,7 @@ function Page() {
 
       <section>
         <h2>7. Fair use</h2>
-        <p>Don't use Kabsi, its cards or links to:</p>
+        <p>Don't use Kabsi, its review links or QR codes to:</p>
         <ul>
           <li>
             ask only happy customers for reviews, ask for a particular rating, or offer anything in
@@ -179,10 +179,7 @@ function Page() {
             data;
           </li>
           <li>manage a profile you're not allowed to manage;</li>
-          <li>
-            break, overload, copy or resell Kabsi, except as a Kabsi partner under a partner
-            agreement.
-          </li>
+          <li>break, overload, copy or resell Kabsi.</li>
         </ul>
         <p>
           These practices break Google's policies and can get a listing penalised. If we see them,
@@ -197,31 +194,20 @@ function Page() {
             Kabsi Pro is ${PRICES.proMonthly} a month or ${PRICES.proYearly} a year, and an extra
             location is ${PRICES.extraLocationMonthly} a month or ${PRICES.extraLocationYearly} a
             year. Prices are in US dollars and the same in every country. You can start with a
-            14-day free trial, no card (30 days through a partner link). Monthly plans can be
-            cancelled at any time and run to the end of the month you paid for. Yearly plans are
-            refundable within 14 days (section 10).
+            14-day free trial, no card. Monthly plans can be cancelled at any time and run to the
+            end of the month you paid for. Yearly plans are refundable within 14 days (section 10).
           </li>
           <li>
-            Kabsi ships NFC cards only to addresses in Lebanon. There, the ${PRICES.lebanonBundle}a
-            year bundle includes Pro for 12 months, one card and setup, a card on its own is $
-            {PRICES.card}, and extra cards are ${PRICES.extraCard} each or ${PRICES.fiveCards} for
-            five. Outside Lebanon, Kabsi Pro doesn't include a card: you can get one from a Kabsi
-            partner or use any NFC card with your Kabsi review link.
+            You pay by card, in US dollars. That is the only way to pay Kabsi. Card payments are
+            coming; until they open there is nothing to pay. A payment counts once our payment
+            provider has confirmed it.
           </li>
-          <li>
-            You can pay in USDT (TRC20 or Binance Pay) from anywhere, and in Lebanon also by Whish,
-            OMT or cash. A payment counts once we've confirmed we received it.
-          </li>
-          <li>Any bank, exchange or network fees are yours.</li>
+          <li>Any fees your own bank charges are yours.</li>
           <li>
             We may change prices for future purchases. A plan you've already paid for keeps its
             price.
           </li>
           <li>One plan covers one Google Business Profile.</li>
-          <li>
-            If a partner signed you up, your price and payment are agreed with that partner. These
-            terms still apply to how you use Kabsi.
-          </li>
         </ul>
       </section>
 
@@ -229,15 +215,14 @@ function Page() {
         <h2>9. Trial and when your plan runs</h2>
         <ul>
           <li>
-            The free trial lasts 14 days (30 through a partner link) and needs no card. It starts
-            when Kabsi's access to your Google profile works, so waiting for access costs you
-            nothing. There is one trial per Google business. If you pay during your trial, your paid
-            plan starts the day the trial ends.
+            The free trial lasts 14 days and needs no card. It starts when Kabsi's access to your
+            Google profile works, so waiting for access costs you nothing. There is one trial per
+            Google business. If you pay during your trial, your paid plan starts the day the trial
+            ends.
           </li>
           <li>
-            A paid plan starts when your payment is confirmed (or your partner has you on an active
-            plan) and Kabsi's access to your Google profile works. Time spent waiting for access
-            doesn't count.
+            A paid plan starts when your payment is confirmed and Kabsi's access to your Google
+            profile works. Time spent waiting for access doesn't count.
           </li>
           <li>
             Paying again before a plan ends adds the new period after the current one. Plans don't
@@ -245,7 +230,7 @@ function Page() {
           </li>
           <li>
             When a plan ends, reply drafts, posts, Google Protection and the Weekly Care Report
-            stop. Your card and review link keep working.
+            stop. Your review link and QR code keep working.
           </li>
         </ul>
       </section>
@@ -266,28 +251,25 @@ function Page() {
             changed its APIs, if we stop the service without you breaking these terms, or if we
             change these terms in a way that matters and you don't agree.
           </li>
-          <li>
-            Cards aren't refunded once delivered. A card that's faulty on arrival is replaced free
-            if you tell us within 14 days.
-          </li>
           <li>Nothing in these terms limits a refund you're entitled to by law.</li>
         </ul>
       </section>
 
       <section>
-        <h2>11. Cards and review links</h2>
+        <h2>11. Review links, QR codes and NFC cards</h2>
         <ul>
           <li>
-            A card or link opens your Google review page, the same for every customer. NFC doesn't
-            work through metal.
+            Your review link and QR code open your Google review page, the same for every customer.
+            You can write the link on your own NFC card or tag; a Kabsi card you already have keeps
+            working the same way. NFC doesn't work through metal.
           </li>
           <li>
             They keep working after a plan ends, for as long as Kabsi operates. You can switch any
             of them off in the app.
           </li>
           <li>
-            If you delete your business from Kabsi, its links stop working and its cards are
-            unlinked.
+            If you delete your business from Kabsi, its links and QR codes stop working, and so does
+            any NFC card that carries them.
           </li>
         </ul>
       </section>
@@ -389,8 +371,8 @@ function Page() {
       <section>
         <h2>18. Law and contact</h2>
         <p>
-          These terms are governed by the laws of Lebanon, and the courts of Beirut have
-          jurisdiction, without taking away any protection the law of your country gives you.
+          These terms are governed by the laws of the United Arab Emirates, and the courts of Dubai
+          have jurisdiction, without taking away any protection the law of your country gives you.
           Questions or complaints: {CONTACT_EMAIL} or WhatsApp {WHATSAPP_NUMBER}. A person replies,
           and we try to settle any problem with you directly first.
         </p>

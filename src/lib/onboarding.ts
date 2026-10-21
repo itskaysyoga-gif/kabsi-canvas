@@ -12,7 +12,6 @@ export type Location = {
   country: string | null;
   status: string;
   onboarding_step: OnboardingStep;
-  partner_id: string | null;
   consent_at: string | null;
   access_granted_at: string | null;
   /** Early access (D267): a person on the team does the Google steps by hand. */
@@ -61,7 +60,7 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
 // businesses the signed-in user is a member of count. Staff can read every business through RLS, but the
 // owner app must never treat someone else's business as theirs (writes would be refused anyway).
 const LOCATION_COLUMNS =
-  "id, name, address, country, status, onboarding_step, partner_id, consent_at, access_granted_at, access_lost_at, disconnect_requested_at, access_removed_at, concierge, concierge_first_post_at, is_demo, created_at";
+  "id, name, address, country, status, onboarding_step, consent_at, access_granted_at, access_lost_at, disconnect_requested_at, access_removed_at, concierge, concierge_first_post_at, is_demo, created_at";
 const CHOSEN_KEY = "kabsi.location";
 
 export async function myLocations(): Promise<Location[]> {
@@ -103,15 +102,13 @@ export async function searchPlaces(query: string) {
   return result.places;
 }
 
-export const startLocation = (place: PlaceResult, partnerHandle?: string, inviteId?: string) =>
+export const startLocation = (place: PlaceResult) =>
   rpc<string>("start_location", {
     p_place_id: place.place_id,
     p_name: place.name,
     p_address: place.address,
     p_country: place.country ?? "",
     p_time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    p_partner_handle: partnerHandle ?? null,
-    p_invite: inviteId ?? null,
   });
 
 export const CONSENT_TEXT =

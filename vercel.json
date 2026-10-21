@@ -20,9 +20,29 @@
       "permanent": true
     },
     {
+      "source": "/lebanon",
+      "destination": "/pricing",
+      "statusCode": 301
+    },
+    {
+      "source": "/lebanon/:path*",
+      "destination": "/pricing",
+      "statusCode": 301
+    },
+    {
       "source": "/product/:path*",
-      "destination": "/lebanon",
-      "permanent": true
+      "destination": "/pricing",
+      "statusCode": 301
+    },
+    {
+      "source": "/partner",
+      "destination": "/partners",
+      "statusCode": 301
+    },
+    {
+      "source": "/partner/:path*",
+      "destination": "/partners",
+      "statusCode": 301
     },
     {
       "source": "/contact/:path*",

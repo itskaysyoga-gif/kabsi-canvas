@@ -2,22 +2,19 @@
 // (trial_days_for, trial_end_at, plan_months) mirrors them; _shared/plans.test.ts holds the shared test table.
 // No imports on purpose, so it can be tested and reused anywhere.
 
-export type PaidKind = "pro_monthly" | "pro_yearly" | "lebanon_yearly" | "pro_6m";
+export type PaidKind = "pro_monthly" | "pro_yearly" | "pro_6m";
 export const PLAN_LABEL: Record<string, string> = {
-  trial: "Free trial",
+  trial: "Pro trial",
   pro_monthly: "Kabsi Pro, monthly",
   pro_yearly: "Kabsi Pro, yearly",
-  lebanon_yearly: "Lebanon bundle, 12 months",
   pro_6m: "Kabsi Pro, 6 months",
-  partner: "Partner plan",
 };
 
 export const planMonths = (kind: string): number =>
-  ({ pro_monthly: 1, pro_yearly: 12, lebanon_yearly: 12, pro_6m: 6 } as Record<string, number>)[kind] ?? 0;
+  ({ pro_monthly: 1, pro_yearly: 12, pro_6m: 6 } as Record<string, number>)[kind] ?? 0;
 
-// 30 days for partner signups (D281), 14 for everyone else.
-export const trialDays = (signupSource: string | null | undefined): number =>
-  signupSource === "partner_link" || signupSource === "partner_invite" ? 30 : 14;
+// 14 days for every signup (K-126). The 30-day trial through a Kabsi Partners link arrives with P0.8-12 (K-127).
+export const trialDays = (_signupSource: string | null | undefined): number => 14;
 
 // ─── time zone helpers (no libraries: Intl only)
 function parts(date: Date, tz: string) {
@@ -61,7 +58,7 @@ export type TrialStage = "d7" | "d1" | "d0";
 /**
  * Which reminder is due now, in the business's local time. Sent from 09:00 local on lastDay-7, lastDay-1 and
  * lastDay; only the latest due stage is sent (a late run never sends three at once) and never after lastDay.
- * Nothing is sent when a paid plan, or a partner, already continues the business past the trial.
+ * Nothing is sent when a paid plan already continues the business past the trial.
  */
 export function dueTrialEmail(lastDay: string, localDate: string, localHour: number, sent: TrialStage[], continues: boolean): TrialStage | null {
   if (continues || localDate > lastDay) return null;
@@ -88,9 +85,9 @@ export function paidWindow(kind: string, now: Date, activeEnds: Date[]): { start
 
 /** Whether a business may get a trial (the SQL grant_trial_if_eligible applies the same rules). */
 export function trialEligible(o: {
-  clockReady: boolean; partnerCovered: boolean; trialUsed: boolean; paidOrWaiting: boolean; flagOn: boolean; testOwner: boolean;
+  clockReady: boolean; trialUsed: boolean; paidOrWaiting: boolean; flagOn: boolean; testOwner: boolean;
 }): boolean {
-  return o.clockReady && !o.partnerCovered && !o.trialUsed && !o.paidOrWaiting && (o.flagOn || o.testOwner);
+  return o.clockReady && !o.trialUsed && !o.paidOrWaiting && (o.flagOn || o.testOwner);
 }
 
 export type RenewalStage = "r5" | "r1";

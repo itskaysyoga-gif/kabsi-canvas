@@ -41,7 +41,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Does Kabsi sell NFC cards?",
-    a: "Not on this site. Kabsi's team in Lebanon offers a card and setup bundle, described on the Lebanon page. Everywhere else, the review link and QR code do the same job, and any NFC tag you own can carry the link.",
+    a: "No. Kabsi gives you a review link and a QR code, and they work with your own QR codes and NFC cards: any NFC card, tag or sticker you own can carry the link. If you already have a Kabsi card, it keeps working.",
   },
   {
     q: "Is Kabsi part of Google?",
@@ -65,11 +65,11 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "How do I pay?",
-    a: `Kabsi Pro is $${PRICES.proMonthly} a month or $${PRICES.proYearly} a year, and you can start with a 14-day free trial, no card. You pay in USDT (TRC20 or Binance Pay) from anywhere. In Lebanon you can also pay with Whish, OMT or cash, and our team there sells a $${PRICES.lebanonBundle} a year bundle with an NFC card and setup.`,
+    a: `Kabsi Pro is $${PRICES.proMonthly} a month or $${PRICES.proYearly} a year, and you can start with a 14-day free trial, no card. Prices are in US dollars and the same in every country. You will pay by card; card payments are coming, and until they open there is nothing to pay.`,
   },
   {
     q: "What happens when my plan ends?",
-    a: "Reviews, Google Profile, Google Protection and the Weekly Care Report stop. Get Reviews keeps working. Your review link and any card still open your Google review page.",
+    a: "Reviews, Google Profile, Google Protection and the Weekly Care Report stop. Get Reviews keeps working. Your review link, QR code and any NFC card that carries the link still open your Google review page.",
   },
   {
     q: "Can I get a refund?",

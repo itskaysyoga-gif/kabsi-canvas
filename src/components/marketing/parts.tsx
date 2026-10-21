@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ChevronRight, MapPin, Nfc, Plus } from "lucide-react";
+import { ArrowRight, ChevronRight, Nfc, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KabsiMark } from "@/components/shared/kabsi-logo";
 import { cn } from "@/lib/utils";
@@ -303,7 +303,7 @@ export function CardRender({ className }: { className?: string }) {
         "relative aspect-square w-full max-w-[340px] rounded-large bg-kb-sand p-6 text-kb-ink shadow-[0_18px_40px_rgba(0,0,0,.18)] ring-1 ring-kb-hairline",
         className,
       )}
-      aria-label="Example Kabsi card"
+      aria-label="Example counter card"
       role="img"
     >
       <p className="font-display text-[clamp(1.5rem,6vw,2rem)] leading-[1.05] text-kb-ink">
@@ -367,48 +367,5 @@ export function Photo({
       priority={priority}
       className={cn("block h-auto w-full rounded-large bg-kb-sand object-cover", className)}
     />
-  );
-}
-
-/** Where Kabsi's NFC cards come from (D260). Kabsi ships hardware only in Lebanon. */
-export const CARD_SHIPPING_TEXT =
-  "Kabsi ships NFC cards only in Lebanon. Anywhere else, get a card from a Kabsi partner near you, or buy any blank NFC card online and write your Kabsi review link on it. The review link and QR code work everywhere.";
-
-export function CardShippingNote({
-  className,
-  tone = "light",
-  isLebanon = true,
-}: {
-  className?: string;
-  tone?: "light" | "dark";
-  isLebanon?: boolean;
-}) {
-  return (
-    <p
-      className={cn(
-        "flex gap-2.5 rounded-card p-3.5 text-[14px] leading-6",
-        tone === "dark"
-          ? "bg-kb-white/10 text-kb-stone-on-dark"
-          : "bg-kb-sand text-kb-stone ring-1 ring-kb-hairline",
-        className,
-      )}
-    >
-      <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-      {isLebanon ? (
-        <span>
-          <b className={tone === "dark" ? "text-kb-white" : "text-kb-ink"}>
-            Cards ship in Lebanon only.
-          </b>{" "}
-          Elsewhere, get one from a{" "}
-          <Link to="/partners" className="font-bold underline underline-offset-4">
-            Kabsi partner
-          </Link>{" "}
-          near you, or buy any blank NFC card online and write your Kabsi review link on it. The
-          review link and QR code work everywhere.
-        </span>
-      ) : (
-        <span>Your review link and QR code are free in every country.</span>
-      )}
-    </p>
   );
 }

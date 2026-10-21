@@ -1,4 +1,4 @@
--- P0.1-07: no persona can read another business's or partner's rows, in any table in public (K-42, K-54, G-17).
+-- P0.1-07: no persona can read another business's rows, in any table in public (K-42, K-54, G-17).
 -- Generated from the catalog: a new table is covered by default, and fails until it has a victim fixture or no grant.
 begin;
 create extension if not exists pgtap with schema extensions;
@@ -52,7 +52,7 @@ select is(tests.visible_victim_rows(tbl), 0::bigint, 'the owner of another busin
 reset role;
 
 select tests.act_as('00000000-0000-4000-8000-0000000000b3');
-select is(tests.visible_victim_rows(tbl), 0::bigint, 'a member of another partner sees no rows of ' || tbl) from tests.victim_rows order by tbl;
+select is(tests.visible_victim_rows(tbl), 0::bigint, 'another signed-in user with no business sees no rows of ' || tbl) from tests.victim_rows order by tbl;
 reset role;
 
 -- The fixtures are readable by their own side, so a zero above means the policy refused, not that the data is missing.
@@ -62,17 +62,17 @@ select ok(tests.visible_victim_rows('locations') = 1 and tests.visible_victim_ro
 reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
 select ok(tests.visible_victim_rows('organizations') = 1 and tests.visible_victim_rows('organization_members') = 1
-  and tests.visible_victim_rows('google_connections') = 1 and tests.visible_victim_rows('partner_clients') = 1
+  and tests.visible_victim_rows('google_connections') = 1
   and tests.visible_victim_rows('subscriptions') = 1,
-  'control: the victim owner sees their organisation, membership, Google connection, partner link and subscription');
+  'control: the victim owner sees their organisation, membership, Google connection and subscription');
 reset role;
-select tests.act_as('00000000-0000-4000-8000-0000000000a2');
-select ok(tests.visible_victim_rows('partners') = 1 and tests.visible_victim_rows('partner_invoices') = 1,
-  'control: the victim partner member sees their own partner and invoice');
-select ok(tests.visible_victim_rows('organizations') = 1 and tests.visible_victim_rows('partner_clients') = 1
-  and tests.visible_victim_rows('subscriptions') = 0 and tests.visible_victim_rows('google_connections') = 0,
-  'control: the victim partner member sees their partner organisation and client link, not the client''s billing or connection');
-reset role;
+
+-- P0.8-01 (K-127): the old partner tables are gone, so no partner can see anything of a business.
+select is(
+  (select coalesce(array_agg(c.relname::text order by 1), '{}') from pg_class c
+   where c.relnamespace = 'public'::regnamespace and c.relname in ('partners', 'partner_members', 'partner_invites',
+     'partner_clients', 'partner_invoices', 'usdt_claims', 'card_orders', 'billing_invoices')),
+  '{}'::text[], 'no retired partner, payment-claim or card-order table is left');
 
 select * from finish();
 rollback;

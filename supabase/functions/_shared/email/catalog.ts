@@ -18,7 +18,7 @@ import type { EmailContent } from "./template.ts";
 export type CatalogEntry = {
   kind: string;
   category: CategoryId | SystemCategory;
-  /** The business name leads the subject (K-102). False for mail with no business, like a partner invoice. */
+  /** The business name leads the subject (K-102). False for mail with no business, like a Nora report. */
   business: boolean;
   content: EmailContent;
 };
@@ -82,20 +82,15 @@ export function catalog(): CatalogEntry[] {
     e("trial_d0", "billing", true, copy.trialReminder("d0", BIZ, "28 October 2026", APP)),
     e("renew_r5", "billing", true, copy.renewalReminder("r5", BIZ, "Kabsi Pro, monthly", "28 October 2026", "pro_monthly", APP)),
     e("renew_r1", "billing", true, copy.renewalReminder("r1", BIZ, "Kabsi Pro, monthly", "28 October 2026", "pro_monthly", APP)),
-    e("payment_received", "billing", true, copy.paymentReceived(BIZ, "We received your payment of $19.00 for Kabsi Pro, monthly. Your plan runs until 28 November 2026. Thank you.", APP)),
     e("weekly_report", "weekly_report", true, copy.weeklyReport(BIZ, { newReviews: REPORT.new_reviews, replied: REPORT.replied }, report.html, report.text, APP)),
     e("weekly_post", "approval_needed", true, copy.weeklyPost(BIZ, "Fresh manakish every morning from 7. Come early for the zaatar.", APP)),
     e("shield_alert_urgent", "profile_urgent", true, copy.profileChange(BIZ, "opening hours", { lines: ["Google shows Sunday closing at 18:00. You approved 22:00.", "Google changed this itself, or accepted a suggestion from the public."], approvedBefore: true, before: "Mon to Sun 09:00 to 22:00", after: "Mon to Sat 09:00 to 22:00, Sun 09:00 to 18:00" }, APP)),
     e("team_invite", "direct", true, teamInviteEmail({ email: "manager@example.test", role: "manager", business: BIZ, invited_by: "Rana", open: true, expires_at: "2026-11-04T00:00:00Z" }, APP)),
     e("profile_check", "direct", true, checkEmail({ esc, appUrl: APP }, SNAPSHOT, true)),
-    e("partner_invite", "direct", false, copy.partnerInvite("Beirut Growth Studio", BIZ, `${APP}/start?p=beirut-growth&i=INVITE`)),
-    e("partner_invoice", "partner", false, copy.partnerInvoice({ label: "September 2026", amount: 30, active: 3, free: 0, rate: 10, unpaid: true, trc20: "TSAMPLEADDRESS", binanceId: "User-sample" }, APP)),
-    e("partner_paid", "partner", false, copy.partnerPaid("September 2026", 30, APP)),
-    e("usdt_claim_alert", "internal", false, copy.usdtClaim({ who: BIZ, whoLine: "for Kabsi Pro, monthly", reference: "c1", net: "USDT TRC20", tx: "abc123sample", tronscan: true, startsPlan: true, amount: 19 }, APP)),
     e("assistant_report", "internal", false, copy.noraReport({ subject: "Chat: Sarah · Sales · Warm", summary: "A visitor asked about pricing.", bodyHtml: claimBody, text: "A visitor asked about pricing.", replyTo: null }, APP)),
     e("assistant_handoff", "internal", false, copy.noraHandoff({ reason: "billing", email: "visitor@example.test", summary: "Needs a person.", bodyHtml: claimBody, text: "Needs a person." }, APP)),
     e("assistant_handoff_ack", "direct", false, copy.noraAck()),
     ...(Object.keys(STEPS) as StepId[]).map((id) => e(`life_${id}`, STEPS[id].category, true, lifecycleEmail(id, LIFE_SAMPLE, { appUrl: APP, removalOn: true }))),
-    e("lead_alert", "internal", false, copy.leadAlert("partner", "Rana", "rana@example.test", "<p><strong>name:</strong> Rana</p><p><strong>message:</strong> I run three salons.</p>", "name: Rana\nmessage: I run three salons.")),
+    e("lead_alert", "internal", false, copy.leadAlert("business", "Rana", "rana@example.test", "<p><strong>name:</strong> Rana</p><p><strong>message:</strong> I run three salons.</p>", "name: Rana\nmessage: I run three salons.")),
   ];
 }

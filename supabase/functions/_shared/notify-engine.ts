@@ -27,7 +27,6 @@ export type NotifyInput = {
   /** The emails.kind this is logged under (staff job health groups by it). */
   kind: string;
   locationId?: string | null;
-  partnerId?: string | null;
   /** Who: the owners (and the alert addresses), the owners and managers, or exact addresses. */
   to: "owners" | "members" | Recipient[];
   /** The bell and the digest line. Never review text or a reviewer's name. */
@@ -58,7 +57,7 @@ export type StoredItem = {
 
 export type Outgoing = {
   kind: string; category: string; to: string; subject: string; html: string; text: string; dedupeKey: string;
-  locationId: string | null; partnerId: string | null; replyTo?: string; notificationId?: string | null;
+  locationId: string | null; replyTo?: string; notificationId?: string | null;
   /** Mail the owner can switch off carries the one-click unsubscribe address in its List-Unsubscribe headers. */
   unsubscribeUrl?: string | null;
 };
@@ -104,14 +103,14 @@ export async function runNotify(input: NotifyInput, d: Deps): Promise<NotifyResu
     : locationId ? await d.recipients(locationId, input.to) : [];
   const hours = cat && locationId && cat.emailDefault === "by_hours" ? await d.hours(locationId) : null;
   const paused = !!cat?.switchable && !!biz?.pausedUntil && Date.parse(biz.pausedUntil) > now.getTime();
-  const base = { kind: input.kind, category: input.category, locationId, partnerId: input.partnerId ?? null, replyTo: input.replyTo };
+  const base = { kind: input.kind, category: input.category, locationId, replyTo: input.replyTo };
   let firstError: unknown = null;
 
   for (const person of people) {
     const to = person.email.toLowerCase();
     out.recipients++;
     try {
-      // System mail (asked for just now, or to the team) and mail with no business to time it against (a partner, a
+      // System mail (asked for just now, or to the team) and mail with no business to time it against (a
       // deleted business) have no choices and no bell: straight to the outbox. The emails table still dedupes it.
       if (!cat || !locationId) {
         const r = await send(d, base, await resolve(input.content, person, "send"), to, person.userId, `${input.key}:${to}`, null);
@@ -121,7 +120,7 @@ export async function runNotify(input: NotifyInput, d: Deps): Promise<NotifyResu
       const prefs = person.userId && locationId ? await d.prefs(person.userId, locationId) : new Map<string, Frequency>();
       const emailPref = prefs.get(`${cat.id}:email`) ?? "default";
       const inAppOn = !!person.userId && !!locationId && cat.inApp && (prefs.get(`${cat.id}:in_app`) ?? "default") !== "off";
-      // No business context (a partner, an invitee): nothing to time against, so it goes now unless switched off.
+      // No business context (an invitee): nothing to time against, so it goes now unless switched off.
       const decision = biz
         ? decideEmail({ category: cat.id, pref: emailPref, now, tz: biz.tz, digestHour: biz.digestHour, hours })
         : emailPref === "off" && cat.switchable ? { mode: "off" as const } : { mode: "send" as const };
@@ -169,7 +168,7 @@ async function resolve(c: NotifyInput["content"], r: Recipient, mode: Mode): Pro
   return typeof c === "function" ? await c(r, mode) : c;
 }
 
-type Base = { kind: string; category: string; locationId: string | null; partnerId: string | null; replyTo?: string | undefined };
+type Base = { kind: string; category: string; locationId: string | null; replyTo?: string | undefined };
 
 /** Renders one email for one address and sends it through the outbox, unless the address is suppressed. */
 async function send(d: Deps, b: Base, c: EmailContent, to: string, userId: string | null, dedupeKey: string, notificationId: string | null): Promise<Delivery> {
@@ -182,7 +181,7 @@ async function send(d: Deps, b: Base, c: EmailContent, to: string, userId: strin
   const { html, text } = renderEmail(c, { appUrl: d.appUrl, defaultWhy: cat?.why ?? SYSTEM_WHY[b.category as SystemCategory] ?? "You are a Kabsi customer.", unsubscribePage: links?.page ?? null });
   const unsubscribeUrl = links?.oneClick ?? null;
   return await d.deliver({
-    kind: b.kind, category: b.category, to, subject: c.subject, html, text, dedupeKey, locationId: b.locationId, partnerId: b.partnerId,
+    kind: b.kind, category: b.category, to, subject: c.subject, html, text, dedupeKey, locationId: b.locationId,
     replyTo: b.replyTo, notificationId, unsubscribeUrl,
   });
 }
@@ -198,7 +197,7 @@ export async function releaseDue(d: Deps, limit = 500): Promise<ReleaseResult> {
 
   for (const item of due.filter((i) => i.email_state === "held")) {
     try {
-      const base: Base = { kind: item.kind, category: item.category, locationId: item.location_id, partnerId: null };
+      const base: Base = { kind: item.kind, category: item.category, locationId: item.location_id };
       const r = await send(d, base, item.email_content, item.to_address, item.user_id, `${item.dedupe_key}:${item.to_address}`, item.id);
       await d.update(item.id, { email_state: "sent" in r ? "sent" : "skipped", email_content: null });
       if ("sent" in r) out.held++;
@@ -235,7 +234,7 @@ export async function releaseDue(d: Deps, limit = 500): Promise<ReleaseResult> {
 }
 
 async function sendDigest(d: Deps, first: StoredItem, biz: Business, mail: EmailContent, hash: string, stamp: string): Promise<Delivery> {
-  const base: Base = { kind: "digest", category: first.category, locationId: first.location_id, partnerId: null };
+  const base: Base = { kind: "digest", category: first.category, locationId: first.location_id };
   return await send(d, base, mail, first.to_address, first.user_id, `digest:${first.location_id}:${first.to_address}:${stamp}:${hash}`, first.id);
 }
 

@@ -17,7 +17,6 @@ import { Route as GetStartedRouteImport } from './routes/get-started'
 import { Route as GoogleProfileCheckRouteImport } from './routes/google-profile-check'
 import { Route as GoogleReviewLinkRouteImport } from './routes/google-review-link'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
-import { Route as LebanonRouteImport } from './routes/lebanon'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagerStepsRouteImport } from './routes/manager-steps'
 import { Route as PartnersRouteImport } from './routes/partners'
@@ -29,7 +28,6 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
 import { Route as AuthenticatedDesignRouteImport } from './routes/_authenticated/design'
-import { Route as AuthenticatedPartnerRouteImport } from './routes/_authenticated/partner'
 import { Route as AuthenticatedStaffRouteImport } from './routes/_authenticated/staff'
 import { Route as AuthenticatedStartRouteImport } from './routes/_authenticated/start'
 import { Route as ATokenRouteImport } from './routes/a.$token'
@@ -91,11 +89,6 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
   path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LebanonRoute = LebanonRouteImport.update({
-  id: '/lebanon',
-  path: '/lebanon',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -149,11 +142,6 @@ const AuthenticatedAppRouteRoute = AuthenticatedAppRouteRouteImport.update({
 const AuthenticatedDesignRoute = AuthenticatedDesignRouteImport.update({
   id: '/design',
   path: '/design',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedPartnerRoute = AuthenticatedPartnerRouteImport.update({
-  id: '/partner',
-  path: '/partner',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedStaffRoute = AuthenticatedStaffRouteImport.update({
@@ -272,7 +260,6 @@ export interface FileRoutesByFullPath {
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
-  '/lebanon': typeof LebanonRoute
   '/login': typeof LoginRoute
   '/manager-steps': typeof ManagerStepsRoute
   '/partners': typeof PartnersRoute
@@ -284,7 +271,6 @@ export interface FileRoutesByFullPath {
   '/unsubscribe': typeof UnsubscribeRoute
   '/app': typeof AuthenticatedAppRouteRouteWithChildren
   '/design': typeof AuthenticatedDesignRoute
-  '/partner': typeof AuthenticatedPartnerRoute
   '/staff': typeof AuthenticatedStaffRoute
   '/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
@@ -315,7 +301,6 @@ export interface FileRoutesByTo {
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
-  '/lebanon': typeof LebanonRoute
   '/login': typeof LoginRoute
   '/manager-steps': typeof ManagerStepsRoute
   '/partners': typeof PartnersRoute
@@ -326,7 +311,6 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/design': typeof AuthenticatedDesignRoute
-  '/partner': typeof AuthenticatedPartnerRoute
   '/staff': typeof AuthenticatedStaffRoute
   '/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
@@ -359,7 +343,6 @@ export interface FileRoutesById {
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
-  '/lebanon': typeof LebanonRoute
   '/login': typeof LoginRoute
   '/manager-steps': typeof ManagerStepsRoute
   '/partners': typeof PartnersRoute
@@ -371,7 +354,6 @@ export interface FileRoutesById {
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteRouteWithChildren
   '/_authenticated/design': typeof AuthenticatedDesignRoute
-  '/_authenticated/partner': typeof AuthenticatedPartnerRoute
   '/_authenticated/staff': typeof AuthenticatedStaffRoute
   '/_authenticated/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
@@ -404,7 +386,6 @@ export interface FileRouteTypes {
     | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
-    | '/lebanon'
     | '/login'
     | '/manager-steps'
     | '/partners'
@@ -416,7 +397,6 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/app'
     | '/design'
-    | '/partner'
     | '/staff'
     | '/start'
     | '/a/$token'
@@ -447,7 +427,6 @@ export interface FileRouteTypes {
     | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
-    | '/lebanon'
     | '/login'
     | '/manager-steps'
     | '/partners'
@@ -458,7 +437,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/unsubscribe'
     | '/design'
-    | '/partner'
     | '/staff'
     | '/start'
     | '/a/$token'
@@ -490,7 +468,6 @@ export interface FileRouteTypes {
     | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
-    | '/lebanon'
     | '/login'
     | '/manager-steps'
     | '/partners'
@@ -502,7 +479,6 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/_authenticated/app'
     | '/_authenticated/design'
-    | '/_authenticated/partner'
     | '/_authenticated/staff'
     | '/_authenticated/start'
     | '/a/$token'
@@ -535,7 +511,6 @@ export interface RootRouteChildren {
   GoogleProfileCheckRoute: typeof GoogleProfileCheckRoute
   GoogleReviewLinkRoute: typeof GoogleReviewLinkRoute
   HowItWorksRoute: typeof HowItWorksRoute
-  LebanonRoute: typeof LebanonRoute
   LoginRoute: typeof LoginRoute
   ManagerStepsRoute: typeof ManagerStepsRoute
   PartnersRoute: typeof PartnersRoute
@@ -609,13 +584,6 @@ declare module '@tanstack/react-router' {
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lebanon': {
-      id: '/lebanon'
-      path: '/lebanon'
-      fullPath: '/lebanon'
-      preLoaderRoute: typeof LebanonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -693,13 +661,6 @@ declare module '@tanstack/react-router' {
       path: '/design'
       fullPath: '/design'
       preLoaderRoute: typeof AuthenticatedDesignRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/partner': {
-      id: '/_authenticated/partner'
-      path: '/partner'
-      fullPath: '/partner'
-      preLoaderRoute: typeof AuthenticatedPartnerRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/staff': {
@@ -892,7 +853,6 @@ const AuthenticatedAppRouteRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRouteRoute: typeof AuthenticatedAppRouteRouteWithChildren
   AuthenticatedDesignRoute: typeof AuthenticatedDesignRoute
-  AuthenticatedPartnerRoute: typeof AuthenticatedPartnerRoute
   AuthenticatedStaffRoute: typeof AuthenticatedStaffRoute
   AuthenticatedStartRoute: typeof AuthenticatedStartRoute
 }
@@ -900,7 +860,6 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRouteRoute: AuthenticatedAppRouteRouteWithChildren,
   AuthenticatedDesignRoute: AuthenticatedDesignRoute,
-  AuthenticatedPartnerRoute: AuthenticatedPartnerRoute,
   AuthenticatedStaffRoute: AuthenticatedStaffRoute,
   AuthenticatedStartRoute: AuthenticatedStartRoute,
 }
@@ -917,7 +876,6 @@ const rootRouteChildren: RootRouteChildren = {
   GoogleProfileCheckRoute: GoogleProfileCheckRoute,
   GoogleReviewLinkRoute: GoogleReviewLinkRoute,
   HowItWorksRoute: HowItWorksRoute,
-  LebanonRoute: LebanonRoute,
   LoginRoute: LoginRoute,
   ManagerStepsRoute: ManagerStepsRoute,
   PartnersRoute: PartnersRoute,

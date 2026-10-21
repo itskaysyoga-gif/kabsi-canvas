@@ -160,15 +160,14 @@ function digestText(d: Digest, w: Digest) {
     line("Listing changes caught", d.shield_changes, w.shield_changes),
     line("Card and link opens", d.taps, w.taps),
     "",
-    "*Chats, leads and partners*",
+    "*Chats and leads*",
     line("Chats with Nora", d.chats, w.chats),
     `• Hot leads: *${n(d.chats_hot)}* · passed to a person: *${n(d.handoffs)}* · contacts saved: *${n(d.contacts)}*`,
-    line("Enquiries and partner applications", d.leads, w.leads),
-    `• Partners active: *${n(d.partners_active)}* · invites sent: *${n(d.invites)}*`,
+    line("Business enquiries", d.leads, w.leads),
     "",
     "*Money*",
     `• Payments recorded: *$${n(d.payments_usd).toFixed(2)}*  (7 days: $${n(w.payments_usd).toFixed(2)})`,
-    `• USDT payments waiting for you: *${n(d.claims_pending)}* · plans ending in 14 days: *${n(d.plans_ending_14d)}*`,
+    `• Plans ending in 14 days: *${n(d.plans_ending_14d)}*`,
     "",
     "*Health*",
     `• Emails sent: *${n(d.emails_sent)}* · failed: *${n(d.emails_failed)}*`,
@@ -301,15 +300,12 @@ async function command(req: Request) {
       return reply(`*Kabsi, last ${hours === 24 ? "24 hours" : "7 days"}*\n${digestText(d as Digest, (w ?? {}) as Digest)}`);
     }
     case "pending": {
-      const [claims, handoffs, waiting, drafts] = await Promise.all([
-        db.from("usdt_claims").select("amount_usd, network, created_at, kind").eq("status", "pending").order("created_at").limit(10),
+      const [handoffs, waiting, drafts] = await Promise.all([
         db.from("chat_conversations").select("id, updated_at, summary, contact_id").eq("status", "handoff").gt("updated_at", new Date(Date.now() - 14 * 864e5).toISOString()).order("updated_at", { ascending: false }).limit(10),
         db.from("locations").select("name, created_at").eq("status", "access_pending").order("created_at").limit(15),
         db.from("reviews").select("id", { count: "exact", head: true }).in("state", ["drafted", "blocked"]).eq("risk", "high"),
       ]);
       const lines = [
-        `*USDT payments to check:* ${claims.data?.length ?? 0}`,
-        ...(claims.data ?? []).map((c) => `• $${Number(c.amount_usd).toFixed(2)} ${String(c.network).toUpperCase()} (${c.kind === "plan" ? "owner plan" : "partner invoice"})`),
         `*Chats passed to a person (14 days):* ${handoffs.data?.length ?? 0}`,
         ...(handoffs.data ?? []).map((h) => `• ${cut(String(h.summary ?? "Not summarised yet"), 140)}`),
         `*Businesses waiting for Google access:* ${waiting.data?.length ?? 0}`,
@@ -323,17 +319,15 @@ async function command(req: Request) {
       const q = rest.join(" ").trim();
       if (q.length < 2) return reply("Type at least 2 characters, e.g. `/kabsi find bakery` or `/kabsi find name@email.com`.");
       const like = `%${q.replace(/[%_,()]/g, " ")}%`;
-      const [locs, contacts, partners, leads] = await Promise.all([
+      const [locs, contacts, leads] = await Promise.all([
         db.from("locations").select("name, status, country, created_at").ilike("name", like).limit(5),
         db.from("contacts").select("name, email, business_name, created_at").or(`email.ilike.${like},name.ilike.${like},business_name.ilike.${like}`).limit(5),
-        db.from("partners").select("name, handle, status, contact_email, whatsapp, preferred_channel").or(`name.ilike.${like},handle.ilike.${like},contact_email.ilike.${like}`).limit(5),
         db.from("leads").select("kind, name, email, instagram, created_at").or(`email.ilike.${like},name.ilike.${like},instagram.ilike.${like}`).limit(5),
       ]);
       const out = [`*Results for "${x(q)}"*`];
       for (const l of locs.data ?? []) out.push(`• Business: *${x(l.name)}* · ${l.status} · ${l.country ?? ""}`);
       for (const c of contacts.data ?? []) out.push(`• Nora contact: *${x(c.name ?? c.email)}* ${x(c.email)}${c.business_name ? ` · ${x(c.business_name)}` : ""}`);
-      for (const p of partners.data ?? []) out.push(`• Partner: *${x(p.name)}* (@${p.handle}) · ${p.status} · prefers ${p.preferred_channel}${p.whatsapp ? ` · WhatsApp ${x(p.whatsapp)}` : ""}`);
-      for (const l of leads.data ?? []) out.push(`• ${l.kind === "partner" ? "Partner application" : "Enquiry"}: *${x(l.name ?? l.email)}* ${x(l.email)}`);
+      for (const l of leads.data ?? []) out.push(`• Enquiry: *${x(l.name ?? l.email)}* ${x(l.email)}`);
       if (out.length === 1) out.push("Nothing found.");
       return reply(out.join("\n"));
     }
@@ -342,8 +336,8 @@ async function command(req: Request) {
         "*/kabsi* commands:",
         "• `/kabsi` or `/kabsi today`: the last 24 hours",
         "• `/kabsi week`: the last 7 days",
-        "• `/kabsi pending`: payments to check, chats waiting for a person, businesses waiting for Google access",
-        "• `/kabsi find <text>`: a business, Nora contact, partner or enquiry by name or email",
+        "• `/kabsi pending`: chats waiting for a person, businesses waiting for Google access",
+        "• `/kabsi find <text>`: a business, Nora contact or enquiry by name or email",
       ].join("\n"));
   }
 }

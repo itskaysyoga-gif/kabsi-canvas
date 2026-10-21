@@ -1,5 +1,5 @@
 import { CONCIERGE_COPY } from "@/lib/concierge-copy";
-import { createFileRoute, isRedirect, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Check, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,18 +14,12 @@ import { cn } from "@/lib/utils";
 // Home: one calm page that says what needs the owner now, then how the week looks. Facts only (§3, D222).
 export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({ meta: [{ title: "Home | Kabsi" }, { name: "robots", content: "noindex" }] }),
-  // A partner with no business of their own goes to the partner workspace instead.
   beforeLoad: async () => {
     try {
       // K-16 (P0.3-06): an invitation to someone's team becomes a membership when its address signs in.
       await supabase.rpc("claim_team_invites");
-      const { data: loc } = await supabase.from("locations").select("id").limit(1).maybeSingle();
-      if (!loc) {
-        const { data: partnerId } = await supabase.rpc("claim_partner_membership");
-        if (partnerId) throw redirect({ to: "/partner" });
-      }
-    } catch (e) {
-      if (isRedirect(e)) throw e;
+    } catch {
+      // Home still loads; the invitation is claimed on the next visit.
     }
   },
   component: HomePage,
@@ -202,12 +196,9 @@ function Setup({ loc }: { loc: Location }) {
     },
     { label: "Tell Kabsi about your business", done: knowledgeDone, note: "" },
     {
-      label: loc.partner_id ? "Plan through your partner" : "Choose your plan",
-      done: loc.partner_id ? loc.onboarding_step === "done" : paid.data === true,
-      note:
-        loc.onboarding_step === "done" && !loc.partner_id && paid.data === false
-          ? "Waiting for payment"
-          : "",
+      label: "Choose your plan",
+      done: paid.data === true,
+      note: loc.onboarding_step === "done" && paid.data === false ? "Card payments are coming" : "",
     },
   ];
   const doneCount = steps.filter((s) => s.done).length;
@@ -267,9 +258,9 @@ function Setup({ loc }: { loc: Location }) {
             Continue setup <ArrowRight />
           </Link>
         </Button>
-        {!loc.partner_id && paid.data === false && loc.onboarding_step === "done" ? (
+        {paid.data === false && loc.onboarding_step === "done" ? (
           <Button asChild variant="outline">
-            <Link to="/app/plan">Pay for your plan</Link>
+            <Link to="/app/plan">Your plan</Link>
           </Button>
         ) : null}
       </div>

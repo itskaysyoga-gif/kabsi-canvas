@@ -122,7 +122,7 @@ select throws_ok($$ select public.confirm_business_details('00000000-0000-4000-8
 reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000a2');
 select throws_ok($$ select public.confirm_business_details('00000000-0000-4000-8000-0000000000c1', '{"phone": {"display": "+961 1 222 222"}}') $$,
-  '42501', null, 'the partner cannot confirm');
+  '42501', null, 'someone outside the team cannot confirm');
 reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000b2');
 select throws_ok($$ select public.confirm_business_details('00000000-0000-4000-8000-0000000000c1', '{"phone": {"display": "+961 1 222 222"}}') $$,

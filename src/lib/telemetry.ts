@@ -1,5 +1,5 @@
 // Error tracking (Sentry) and product analytics (PostHog), loaded from their CDNs so the app
-// bundle and lockfile stay untouched. Both keys below are public by design.
+// build and lockfile stay untouched. Both keys below are public by design.
 //
 // Rules (docs/KABSI-PLAN.md section 2.2):
 // - Session replay only on public marketing pages. Never on /app, /partner, /staff, /start,
@@ -143,16 +143,11 @@ export type KabsiEvent =
   | "shield_reverted"
   | "shield_kept"
   | "card_activated"
-  | "partner_invited"
-  | "partner_location_activated"
   | "lead_submitted"
   | "free_tool_used";
 
 type SafeProps = Partial<
-  Record<
-    "location_id" | "partner_id" | "country" | "source" | "plan" | "channel" | "answer",
-    string
-  >
+  Record<"location_id" | "country" | "source" | "plan" | "channel" | "answer", string>
 >;
 
 // Demo workspace (P0.1-06, R-17): nothing from a demo business reaches PostHog. The app and the email-link page

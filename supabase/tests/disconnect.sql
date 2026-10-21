@@ -57,7 +57,7 @@ select tests.act_as('00000000-0000-4000-8000-0000000000b4');
 select throws_ok($$ select public.request_disconnect('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'a manager cannot disconnect');
 reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000a2');
-select throws_ok($$ select public.request_disconnect('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'the partner cannot disconnect');
+select throws_ok($$ select public.request_disconnect('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'someone outside the team cannot disconnect');
 reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');
 select throws_ok($$ select public.request_disconnect('00000000-0000-4000-8000-0000000000c1') $$, '42501', null,

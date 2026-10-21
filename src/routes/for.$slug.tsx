@@ -1,8 +1,7 @@
 import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, Check, QrCode, Receipt } from "lucide-react";
+import { ArrowRight, BookOpen, Check, QrCode } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import {
-  CardRender,
   CtaBand,
   Eyebrow,
   FaqList,
@@ -17,7 +16,6 @@ import { Callout, Example, IconGrid } from "@/components/marketing/guide-kit";
 import { Button } from "@/components/ui/button";
 import { VERTICALS, VERTICAL_REDIRECTS, verticalBySlug } from "@/lib/verticals";
 import { faqJsonLd } from "@/lib/faq";
-import { useIsLebanon } from "@/lib/region";
 import { photoSrc } from "@/lib/site-photos";
 import { CTA_PRIMARY, PRICES, SITE_URL, pageHead } from "@/lib/site";
 
@@ -83,7 +81,6 @@ export const Route = createFileRoute("/for/$slug")({
 function Page() {
   const { slug } = Route.useLoaderData();
   const v = verticalBySlug(slug)!;
-  const isLebanon = useIsLebanon();
   const others = VERTICALS.filter((x) => x.slug !== v.slug);
   return (
     <PublicLayout>
@@ -191,21 +188,14 @@ function Page() {
       </Section>
 
       <Section tone="sand">
-        <div
-          className={
-            isLebanon
-              ? "grid items-center gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:gap-14"
-              : undefined
-          }
-        >
+        <div>
           <div>
             <Eyebrow>Getting reviews</Eyebrow>
             <H2>Where to put your review link</H2>
             <p className="mt-5 max-w-xl text-lg leading-8 text-kb-stone">
-              {isLebanon
-                ? "Your review link and QR code are free, and an optional NFC card works with them: customers tap the card or scan the code, and Google's own review form opens. Put it where customers already are:"
-                : "Your review link and QR code are free in every country. Put it where customers already are:"}{" "}
-              on the counter, on receipts, on a table tent, or in a follow-up message.
+              Your review link and QR code are free in every country, and they work with your own QR
+              codes and NFC cards. Put them where customers already are: on the counter, on
+              receipts, on a table tent, or in a follow-up message.
             </p>
             <p className="mt-4 max-w-xl text-[15px] text-kb-stone">What works for {v.name}:</p>
             <ul className="mt-4 space-y-3">
@@ -228,21 +218,8 @@ function Page() {
               >
                 <QrCode className="size-4" aria-hidden="true" /> Free review link and QR code
               </Link>
-              {isLebanon ? (
-                <Link
-                  to="/pricing"
-                  className="inline-flex items-center gap-2 font-bold underline underline-offset-4"
-                >
-                  <Receipt className="size-4" aria-hidden="true" /> Card prices
-                </Link>
-              ) : null}
             </div>
           </div>
-          {isLebanon ? (
-            <div className="flex justify-center md:justify-end">
-              <CardRender />
-            </div>
-          ) : null}
         </div>
       </Section>
 

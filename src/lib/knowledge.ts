@@ -87,7 +87,6 @@ const FROM: Record<string, string> = {
   staff: "From the Kabsi team",
   google: "From your Google profile",
   website: "From your website",
-  partner: "From your partner",
   ai_suggestion: "Suggested by Kabsi",
 };
 /** Where a fact came from, as a short line: "From your website", "Suggested by Kabsi". */

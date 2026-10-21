@@ -2,7 +2,6 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  LEBANON_PHONE,
   WHATSAPP_DIGITS,
   WHATSAPP_MESSAGES,
   WHATSAPP_NUMBER,
@@ -54,8 +53,7 @@ describe("WhatsApp click-to-chat (P0.6-10, K-122)", () => {
     expect(html.match(/background:#FFD60A/gi)).toBeNull();
   });
 
-  it("shows the Lebanese number only on /lebanon", () => {
-    const digits = LEBANON_PHONE.replace(/\D/g, "");
+  it("shows no Lebanese number anywhere (K-123, P0.8-01)", () => {
     const offenders: string[] = [];
     const walk = (dir: string) => {
       for (const name of readdirSync(dir)) {
@@ -63,14 +61,17 @@ describe("WhatsApp click-to-chat (P0.6-10, K-122)", () => {
         if (statSync(path).isDirectory()) walk(path);
         else if (/\.(tsx?|html|txt)$/.test(name) && !path.endsWith("routeTree.gen.ts")) {
           const text = readFileSync(path, "utf8");
-          if (path.endsWith("src/routes/lebanon.tsx")) continue;
-          if (/LEBANON_PHONE|961 3 956 917/.test(text) || text.replace(/\D/g, "").includes(digits))
+          if (
+            /LEBANON_PHONE|\+961|961 3 956 917/.test(text) ||
+            text.replace(/\D/g, "").includes("9613956917")
+          )
             offenders.push(path);
         }
       }
     };
     walk("src");
-    expect(offenders.filter((p) => !p.endsWith("src/lib/site.ts"))).toEqual([]);
+    walk("public");
+    expect(offenders).toEqual([]);
   });
 
   it("names no personal email and nobody who left (R-26, R-32)", () => {

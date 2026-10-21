@@ -10,7 +10,6 @@ const SITES = [
     file: "src/components/assistant/assistant-widget.tsx",
     target: /\bENDPOINT\b/,
   },
-  { fn: "lead", file: "src/routes/partners.tsx", target: /functions\/v1\/lead/ },
   {
     fn: "review-link",
     file: "src/routes/google-review-link.tsx",
