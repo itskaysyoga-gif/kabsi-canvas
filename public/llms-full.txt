@@ -54,6 +54,8 @@ Hussein approved final product decisions on 21 Oct 2026. Most are not built yet.
 
 - The **Free and Pro** plans and the $19 Pro price are replaced by Essentials and Pro when card payments open.
 
+**Website v2 wording [COMING] (Hussein, 21 Oct 2026).** The homepage subline will read: "Kabsi replies to your Google reviews, watches your Google Business Profile and makes it easy for customers to choose you. You approve on WhatsApp." The three pillars will be "Every review answered", "Your profile protected" and "Ready to be found". It promises no more customers, calls or rankings. Not on the site yet (P0.8-13).
+
 **Removed on 21 Oct 2026 (P0.8-01).** These no longer exist. Never offer them; if someone asks, say they are gone and what Kabsi does instead.
 
 - Removed: the Lebanon bundle ($120 a year), every Lebanon-only price, the Lebanon page (kabsi.co/lebanon now opens the pricing page) and the Lebanese phone number. Kabsi is international and prices are in US dollars everywhere. Businesses in Lebanon are customers like any other.
