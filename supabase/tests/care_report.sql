@@ -31,8 +31,14 @@ select throws_ok($$ select public.care_report_inputs('00000000-0000-4000-8000-00
 
 -- The counts ------------------------------------------------------------------------------------------------------------------------------------
 
-select is(pg_temp.counts(), '{"changes_found": 0, "changes_kept": 0, "hours_updates": 0, "photo_batches": 0, "profile_checks": 0, "posts_published": 0, "profile_updates": 0, "changes_put_back": 0, "photos_published": 0, "replies_prepared": 0, "replies_published": 0}'::jsonb,
-  'a business with no events has every count at zero');
+-- The fixtures already hold one Google change for this business, so changes found is compared with a hand count of the log.
+select is(pg_temp.counts() - 'changes_found', '{"changes_kept": 0, "hours_updates": 0, "photo_batches": 0, "profile_checks": 0, "posts_published": 0, "profile_updates": 0, "changes_put_back": 0, "photos_published": 0, "replies_prepared": 0, "replies_published": 0}'::jsonb,
+  'a business with no events of its own has every count at zero');
+create function pg_temp.found_by_hand() returns integer language sql as $$
+  select count(distinct object_id)::int from public.audit_events where location_id = '00000000-0000-4000-8000-0000000000c1'
+     and action = 'protection_change' and result = 'awaiting_review'
+$$;
+select is((pg_temp.counts() ->> 'changes_found')::int, pg_temp.found_by_hand(), 'and the changes found are the ones in the log');
 
 select pg_temp.audit('reply_drafted', 'review', 'r1', 'drafted'), pg_temp.audit('reply_drafted', 'review', 'r2', 'drafted'), pg_temp.audit('reply_drafted', 'review', 'r3', 'drafted');
 select pg_temp.audit('publication', 'review_reply', 'r1', 'in_review', 'pub-a'), pg_temp.audit('publication', 'review_reply', 'r1', 'live', 'pub-a'), pg_temp.audit('publication', 'review_reply', 'r2', 'live', 'pub-b');
@@ -53,8 +59,10 @@ values ('system', 'reply_drafted', '00000000-0000-4000-8000-0000000000c1', 'revi
 insert into public.audit_events (actor_type, action, location_id, object_type, object_id, result, channel)
 values ('system', 'reply_drafted', '00000000-0000-4000-8000-0000000000c2', 'review', 'other', 'drafted', 'system');
 
-select is(pg_temp.counts(), '{"changes_found": 2, "changes_kept": 1, "hours_updates": 1, "photo_batches": 1, "profile_checks": 5, "posts_published": 1, "profile_updates": 1, "changes_put_back": 1, "photos_published": 2, "replies_prepared": 3, "replies_published": 2}'::jsonb,
-  'real actions only: drafts, each publication once, one batch of photos for the day, changes found and how they ended');
+select is(pg_temp.counts() - 'changes_found', '{"changes_kept": 1, "hours_updates": 1, "photo_batches": 1, "profile_checks": 5, "posts_published": 1, "profile_updates": 1, "changes_put_back": 1, "photos_published": 2, "replies_prepared": 3, "replies_published": 2}'::jsonb,
+  'real actions only: drafts, each publication once, one batch of photos for the day, and how the changes ended');
+select is((pg_temp.counts() ->> 'changes_found')::int, pg_temp.found_by_hand(), 'changes found are counted once each, however often they were logged');
+select is(pg_temp.found_by_hand(), 2 + 1, 'the two added and the one the fixtures already had');
 select is((pg_temp.counts() ->> 'replies_prepared')::int, (select count(*)::int from public.audit_events where location_id = '00000000-0000-4000-8000-0000000000c1'
             and action = 'reply_drafted' and created_at >= now() - interval '1 hour' and created_at < now() + interval '1 hour'),
   'the count is the same as counting the audit log by hand');
