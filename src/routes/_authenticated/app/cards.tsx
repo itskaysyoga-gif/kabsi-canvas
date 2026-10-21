@@ -424,7 +424,7 @@ function ShareKit({ locationId, name, link }: { locationId: string; name: string
         was opened, not whether a review was written.
       </p>
       <div className="mt-3 space-y-3">
-        <SendReviewLink locationId={locationId} name={name} link={link} />
+        <SendReviewLink name={name} link={link} />
         {items.map((it) => (
           <div key={it.title} className="rounded-card bg-kb-white p-4 shadow-kb sm:p-5">
             <div className="flex items-center justify-between gap-3">
