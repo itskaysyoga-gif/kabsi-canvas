@@ -59,3 +59,12 @@ describe("no record of who sent what", () => {
     }
   });
 });
+
+describe("open to every business", () => {
+  it("does not ask the plan, so a business with no plan sees the button too (lane R, 21 Oct 2026)", () => {
+    const code = readFileSync("src/components/shared/send-review-link.tsx", "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/.*$/gm, "");
+    expect(code).not.toMatch(/useFeatureAccess|feature-access|essentials|\/app\/plan/);
+  });
+});
