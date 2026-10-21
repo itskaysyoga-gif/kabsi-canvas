@@ -9,7 +9,7 @@
 // so each turn only pays full price for the new messages.
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 import {
-  admin, APP_URL, captureError, CORS, currentUser, esc, fail, isInternal, jobLog, json, log, rateLimit, sha256Hex,
+  admin, APP_URL, captureError, CORS, currentUser, esc, fail, isInternal, jobLog, json, log, rateLimit, sha256Hex, verifyTurnstile,
 } from "../_shared/kabsi.ts";
 import { notify } from "../_shared/notify.ts";
 import * as copy from "../_shared/email/copy.ts";
@@ -367,6 +367,11 @@ Deno.serve(async (req) => {
       conv = found && found.user_id && found.user_id !== (user?.id ?? null) ? null : found;
     }
     if (!conv) {
+      // G-16 (P0.6-05): a visitor who is not signed in passes Turnstile once, to start a conversation. Every turn
+      // after that is held by the rate limits above.
+      if (!user && !(await verifyTurnstile(typeof b.turnstile === "string" && b.turnstile ? b.turnstile : undefined, ip))) {
+        return fail("challenge_failed", "Please complete the check below and send your message again.", 400);
+      }
       const { data, error } = await db.from("chat_conversations").insert({
         visitor_id: visitor, user_id: user?.id ?? null, surface, first_page: page,
         timezone: tz || null, browser_language: clip(meta.lang, 20) || null, device, referrer: clip(meta.ref, 300) || null,
