@@ -5,6 +5,7 @@
 // and claim_publication (guardrail 6, P0.1-13a and P0.1-13b).
 import { type InvitationAddress, matchInvitation, type PendingBusiness } from "../invitations.ts";
 import { isConciergeLocationId } from "../concierge.ts";
+import { regularHoursDisplay } from "../hours.ts";
 import { assertNotConcierge, googleMode, modeFor, type Mode } from "./client.ts";
 import * as accountsLive from "./accounts/live.ts";
 import * as accountsMock from "./accounts/mock.ts";
