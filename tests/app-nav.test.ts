@@ -78,6 +78,7 @@ describe("roles in navigation", () => {
       "/app/inbox",
       "/app/reviews",
       "/app/shield",
+      "/app/coach",
       "/app/plan",
       "/app/team",
       "/app/report",

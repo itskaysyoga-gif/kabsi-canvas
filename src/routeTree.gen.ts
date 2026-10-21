@@ -41,6 +41,7 @@ import { Route as HTokenRouteImport } from './routes/h.$token'
 import { Route as ReviewCodeRouteImport } from './routes/review.$code'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app/index'
 import { Route as AuthenticatedAppCardsRouteImport } from './routes/_authenticated/app/cards'
+import { Route as AuthenticatedAppCoachRouteImport } from './routes/_authenticated/app/coach'
 import { Route as AuthenticatedAppHoursRouteImport } from './routes/_authenticated/app/hours'
 import { Route as AuthenticatedAppInboxRouteImport } from './routes/_authenticated/app/inbox'
 import { Route as AuthenticatedAppInsightsRouteImport } from './routes/_authenticated/app/insights'
@@ -213,6 +214,11 @@ const AuthenticatedAppCardsRoute = AuthenticatedAppCardsRouteImport.update({
   path: '/cards',
   getParentRoute: () => AuthenticatedAppRouteRoute,
 } as any)
+const AuthenticatedAppCoachRoute = AuthenticatedAppCoachRouteImport.update({
+  id: '/coach',
+  path: '/coach',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
 const AuthenticatedAppHoursRoute = AuthenticatedAppHoursRouteImport.update({
   id: '/hours',
   path: '/hours',
@@ -308,6 +314,7 @@ export interface FileRoutesByFullPath {
   '/for/': typeof ForIndexRoute
   '/guides/': typeof GuidesIndexRoute
   '/app/cards': typeof AuthenticatedAppCardsRoute
+  '/app/coach': typeof AuthenticatedAppCoachRoute
   '/app/hours': typeof AuthenticatedAppHoursRoute
   '/app/inbox': typeof AuthenticatedAppInboxRoute
   '/app/insights': typeof AuthenticatedAppInsightsRoute
@@ -352,6 +359,7 @@ export interface FileRoutesByTo {
   '/for': typeof ForIndexRoute
   '/guides': typeof GuidesIndexRoute
   '/app/cards': typeof AuthenticatedAppCardsRoute
+  '/app/coach': typeof AuthenticatedAppCoachRoute
   '/app/hours': typeof AuthenticatedAppHoursRoute
   '/app/inbox': typeof AuthenticatedAppInboxRoute
   '/app/insights': typeof AuthenticatedAppInsightsRoute
@@ -399,6 +407,7 @@ export interface FileRoutesById {
   '/for/': typeof ForIndexRoute
   '/guides/': typeof GuidesIndexRoute
   '/_authenticated/app/cards': typeof AuthenticatedAppCardsRoute
+  '/_authenticated/app/coach': typeof AuthenticatedAppCoachRoute
   '/_authenticated/app/hours': typeof AuthenticatedAppHoursRoute
   '/_authenticated/app/inbox': typeof AuthenticatedAppInboxRoute
   '/_authenticated/app/insights': typeof AuthenticatedAppInsightsRoute
@@ -446,6 +455,7 @@ export interface FileRouteTypes {
     | '/for/'
     | '/guides/'
     | '/app/cards'
+    | '/app/coach'
     | '/app/hours'
     | '/app/inbox'
     | '/app/insights'
@@ -490,6 +500,7 @@ export interface FileRouteTypes {
     | '/for'
     | '/guides'
     | '/app/cards'
+    | '/app/coach'
     | '/app/hours'
     | '/app/inbox'
     | '/app/insights'
@@ -536,6 +547,7 @@ export interface FileRouteTypes {
     | '/for/'
     | '/guides/'
     | '/_authenticated/app/cards'
+    | '/_authenticated/app/coach'
     | '/_authenticated/app/hours'
     | '/_authenticated/app/inbox'
     | '/_authenticated/app/insights'
@@ -806,6 +818,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppCardsRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/app/coach': {
+      id: '/_authenticated/app/coach'
+      path: '/coach'
+      fullPath: '/app/coach'
+      preLoaderRoute: typeof AuthenticatedAppCoachRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/_authenticated/app/hours': {
       id: '/_authenticated/app/hours'
       path: '/hours'
@@ -895,6 +914,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppCardsRoute: typeof AuthenticatedAppCardsRoute
+  AuthenticatedAppCoachRoute: typeof AuthenticatedAppCoachRoute
   AuthenticatedAppHoursRoute: typeof AuthenticatedAppHoursRoute
   AuthenticatedAppInboxRoute: typeof AuthenticatedAppInboxRoute
   AuthenticatedAppInsightsRoute: typeof AuthenticatedAppInsightsRoute
@@ -912,6 +932,7 @@ interface AuthenticatedAppRouteRouteChildren {
 
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppCardsRoute: AuthenticatedAppCardsRoute,
+  AuthenticatedAppCoachRoute: AuthenticatedAppCoachRoute,
   AuthenticatedAppHoursRoute: AuthenticatedAppHoursRoute,
   AuthenticatedAppInboxRoute: AuthenticatedAppInboxRoute,
   AuthenticatedAppInsightsRoute: AuthenticatedAppInsightsRoute,

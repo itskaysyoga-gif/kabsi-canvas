@@ -7,10 +7,12 @@ import { type InvitationAddress, matchInvitation, type PendingBusiness } from ".
 import { isConciergeLocationId } from "../concierge.ts";
 import { regularHoursDisplay } from "../hours.ts";
 import { assertNotConcierge, googleMode, modeFor, type Mode } from "./client.ts";
+import { type CoachNumbers, coachNumbers, MOCK_COACH } from "../coach/read.ts";
 import * as accountsLive from "./accounts/live.ts";
 import * as accountsMock from "./accounts/mock.ts";
 import * as adminsLive from "./admins/live.ts";
 import * as adminsMock from "./admins/mock.ts";
+import * as attributesLive from "./attributes/live.ts";
 import * as locationsLive from "./locations/live.ts";
 import * as locationsMock from "./locations/mock.ts";
 import { GOOGLE_FIELD, OPEN_LABEL } from "./locations/mock.ts";
@@ -390,4 +392,13 @@ export async function placeCategory(placeId: string) {
     category_label: data.primaryTypeDisplayName?.text ?? (type ? type.replace(/_/g, " ") : null),
     area: pick("neighborhood") ?? pick("sublocality_level_1") ?? pick("sublocality") ?? pick("locality") ?? pick("administrative_area_level_2"),
   };
+}
+
+// ─── The Profile Coach's weekly read (P0.8-09, read only): three numbers about the profile, never Google's text.
+export async function coachRead(locationId: string): Promise<CoachNumbers & { source: "live" | "mock" }> {
+  assertNotConcierge(locationId);
+  if (modeFor(locationId) === "mock") return { ...MOCK_COACH, source: "mock" };
+  const l = await locationsLive.getLocation(locationId, "profile,categories");
+  const attrs = await attributesLive.getAttributes(locationId);
+  return { ...coachNumbers(l, attrs), source: "live" };
 }

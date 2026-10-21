@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { StatusPill, type StatusTone } from "@/components/ui/status-pill";
 import { Turnstile } from "@/components/turnstile";
 import { SaveSnapshotButton } from "@/components/auth/signup-sheet";
+import { CoachList } from "@/components/coach/coach-list";
 import {
   CheckError,
   emailCheck,
@@ -90,6 +91,18 @@ export function SnapshotResult({
           </li>
         ))}
       </ul>
+
+      {s.checklist?.length ? (
+        <>
+          <h3 className="mt-8 font-display text-2xl leading-tight">What a complete profile has</h3>
+          <p className="mt-1 text-sm text-kb-stone">
+            Google does not show the rest to the public. Kabsi checks it once you connect.
+          </p>
+          <div className="mt-4">
+            <CoachList rows={s.checklist} label="Complete profile checklist" />
+          </div>
+        </>
+      ) : null}
 
       <div className="mt-6 rounded-large bg-kb-carbon p-6 text-kb-white">
         <p className="text-lg font-bold">

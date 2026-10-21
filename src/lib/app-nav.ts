@@ -50,10 +50,11 @@ export const SECTIONS: Record<SectionId, Section> = {
     label: "Google Profile",
     short: "Profile",
     to: "/app/shield",
-    paths: ["/app/shield", "/app/hours"],
+    paths: ["/app/shield", "/app/hours", "/app/coach"],
     tabs: [
       { label: "Google Profile", to: "/app/shield" },
       { label: "Hours", to: "/app/hours" },
+      { label: "Profile Coach", to: "/app/coach" },
     ],
   },
   content: {
@@ -153,6 +154,7 @@ export const OLD_APP_ADDRESSES: Record<string, SectionId> = {
   "/app/cards": "get-reviews",
   "/app/shield": "google-profile",
   "/app/hours": "google-profile",
+  "/app/coach": "google-profile",
   "/app/posts": "content",
   "/app/photos": "content",
   "/app/insights": "insights",
