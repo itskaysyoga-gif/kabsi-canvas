@@ -4,6 +4,8 @@ Version 1, 4 Oct 2026. Written by the planning chat (Opus) from the six source d
 
 **Updated 21 Oct 2026 by the planning chat** from Hussein's final product decisions: `docs/source/KABSI-AUDIT.md` K-123 to K-146 (what each overrides is written there), review decisions R-33 to R-40 (section 4), the new Wave P0.8 (section 12A) with the changed and retired cards, the rebuilt bundled sessions (section 7), go to market and the AI agents (section 1, items 28 and 29), and skills, claims and cost rules (section 2.10 to 2.12). Where older text below disagrees, the K-decision, R-decision or card that says it overrides wins.
 
+**Updated 21 Oct 2026 by the lane R chat** (R-41 to R-44, section 4): from 21 Oct 2026 Rashid runs Kabsi and the lane R chat makes every product decision, price and rule; Hussein only holds the Creem account and stays the legal seller. The launch scope is cut (R-42, "After launch" table in section 7), paid calls have a date rule (R-43) and cascade SQL is applied by the session (R-44).
+
 This file replaces `docs/WORK-QUEUE.md`, `docs/KABSI-SPEC.md` and `docs/KABSI-STATE.md` as the place a build chat looks for what to do. Progress lives in `docs/KABSI-PROGRESS.md`.
 
 ## Contents
@@ -11,8 +13,8 @@ This file replaces `docs/WORK-QUEUE.md`, `docs/KABSI-SPEC.md` and `docs/KABSI-ST
 1. Guardrails (copied from `docs/source/KABSI-GUARDRAILS.md`, unchanged)
 2. Rules for every build chat
 3. Sources and precedence
-4. Review decisions (R-01 to R-40): where this plan changes or settles the source documents
-5. Decisions and inputs that belong to Rashid (now Hussein's; see the note at the top of section 5)
+4. Review decisions (R-01 to R-44): where this plan changes or settles the source documents
+5. Decisions and inputs (the lane R chat decides, R-41; see the notes at the top of section 5)
 6. Classification: every decision as P0, P1, P2 or Deferred
 7. Wave P0.1: truth and foundations
 7A. Wave P0.G: Google go-live (Gate A approved 5 Oct 2026; tasks moved up from P0.7)
@@ -364,7 +366,8 @@ Five agents. All run as jobs in the task engine (guardrails 5 and 10). None publ
 - Every schema change is a new timestamped file in `supabase/migrations/`. Never edit an existing migration.
 - Migrations are additive first (expand, then contract in a later task), so code on `main` keeps working at every step.
 - Apply the migration yourself with the Supabase connector (`apply_migration`, project `ynjdqjlmdwjgbfezevxy`, now in Hussein's own Supabase organisation) before opening the pull request, without asking, then run `get_advisors` (security) and fix anything new. Because migrations are additive, `main` keeps working while the pull request is open.
-- The one stop: before dropping a table or a column, or deleting real data (not test or mock rows the task names), stop and ask Hussein in one question with the exact list and row counts. A contract step (dropping something) is applied only after the code that stopped using it is merged and live; the task section says so.
+- Additive SQL with `on delete` clauses (foreign keys with `on delete cascade`, for example) is applied by the session with `execute_sql` and a read-back in the same call (R-44). Only drops and real deletions go to Rashid, each in its own file with a read-back.
+- The one stop: before dropping a table or a column, or deleting real data (not test or mock rows the task names), stop and ask Rashid in one question with the exact list and row counts. A contract step (dropping something) is applied only after the code that stopped using it is merged and live; the task section says so.
 - Pushing to `main` deploys every Edge Function and the Worker (`.github/workflows/deploy.yml`) and the website (Vercel, once P0.1-03 lands). The session's merge is the deploy.
 - `supabase/config.toml` holds `verify_jwt` for every function. A new function gets its line in the same pull request (D295).
 - Google calls only through `supabase/functions/_shared/google/` once task P0.1-11 lands (before that, `_shared/google.ts`).
@@ -437,6 +440,8 @@ Never quote an industry statistic such as "520% more calls" or "16% of ranking" 
 
 No Anthropic, Google or other paid API call is made until Hussein says so in the chat. That covers real model calls in builds, tests and evaluations; live WhatsApp sends; live Google calls beyond the read-only ones already approved; and CI evaluation runs. Build against mocks, fixtures, sandboxes and stubs, and say in the pull request what was not run live. A card that needs a live call stops and asks.
 
+**Changed by R-43 (21 Oct 2026).** "Until Hussein says so" is now a rule: the Anthropic credit turns on the day Google enables `mybusiness.googleapis.com` for project 856347937978 (key under hello@kabsi.co in Supabase secrets only, hard limit 20 US dollars a month), then `EVAL_LIVE` = true. Live WhatsApp sends to Kabsi's own test numbers start from session 13. Until PROGRESS records that paid calls are on, everything above holds. Kill-gate: if reviews are still closed on 30 Nov 2026, the lane R chat re-plans launch (D5).
+
 ## 3. Sources and precedence
 
 The source of truth is the six documents in `docs/source/` (converted from the originals in the Claude project; the two diagrams are not reproduced):
@@ -460,7 +465,7 @@ Order when two things disagree:
 
 Not a source of truth any more: `docs/KABSI-SPEC.md`, `docs/KABSI-STATE.md`, `docs/WORK-QUEUE.md`, `docs/VIDEO-PLAN.md`, `docs/GO-LIVE.md` and every project file they replaced. Their still-true facts are in Appendix A and B.
 
-## 4. Review decisions (R-01 to R-40)
+## 4. Review decisions (R-01 to R-44)
 
 Each one either settles something the documents left open, fixes a contradiction between them, or changes a decision because the code or the live system showed something the documents did not know. Reason in one line.
 
@@ -491,7 +496,7 @@ Each one either settles something the documents left open, fixes a contradiction
 | R-23 (retired by R-34) | `kabsi_partner_billing` (monthly wholesale invoices in USDT) stays switched on but bills nothing while there are no live partner clients; it is replaced by Creem-based commission in P1 (K-32, K-106). | Old D239 | Nothing to bill today; the replacement needs Creem. |
 | R-25 | Meta business details and Business Verification use the same identity as Creem: Hussein Slim. If Meta will not verify an individual without a company, ads still run; verification waits until it is needed for WhatsApp automation (P2). | VIDEO Part 7 ("the same as Creem") | One seller identity across Creem, Meta, terms, privacy and email footer. |
 | R-24 (retired by R-33) | NOWPayments stays for annual crypto payments on request only (K-106). The old `$1 test` and `plans_v2` switch are retired: plans move to `subscriptions` on the organisation in P0.4, with Creem as the card path. | Old D269 and D281 flags | One billing model, as K-33 and K-106 require. |
-| R-26 | **Hussein runs everything; Rashid has stopped working on the project (5 Oct 2026).** The repo belongs to Hussein's GitHub account (`itskaysyoga-gif/kabsi-canvas`). `kabsi-prod` moved to Hussein's own Supabase organisation (free plan, same project and keys). Every manual step of Rashid's in this plan is Hussein's. Build chats apply database changes and merge their own pull requests once CI is green, without asking; they stop only before dropping tables or columns or deleting real data. | Section 2.3, 2.5, 2.9 and every ready prompt; the old "Rashid merges" rule; CLAUDE.md | One person now owns the accounts and the merge button; waiting for a second person to click merge only slows the work. The stop stays where a mistake cannot be undone. |
+| R-26 | **Superseded by R-41 (21 Oct 2026).** **Hussein runs everything; Rashid has stopped working on the project (5 Oct 2026).** The repo belongs to Hussein's GitHub account (`itskaysyoga-gif/kabsi-canvas`). `kabsi-prod` moved to Hussein's own Supabase organisation (free plan, same project and keys). Every manual step of Rashid's in this plan is Hussein's. Build chats apply database changes and merge their own pull requests once CI is green, without asking; they stop only before dropping tables or columns or deleting real data. | Section 2.3, 2.5, 2.9 and every ready prompt; the old "Rashid merges" rule; CLAUDE.md | One person now owns the accounts and the merge button; waiting for a second person to click merge only slows the work. The stop stays where a mistake cannot be undone. |
 | R-27 | **Gate A was approved on 5 Oct 2026** (Google Cloud project 856347937978, 300 queries per minute). The Gate A tasks moved from Wave P0.7 to the new Wave P0.G (section 7A), right after Wave P0.1: enable the reviews and posts API, capture real responses, compare with the mocks, the `business.manage` package, the switch to live, the test on Kabsi's own profiles. The features that need later waves are tested in P0.7-05b. The call to action stays "Join early access" until P0.7-07 (R-02). | Wave P0.7 order; section 2.2 "until Gate A"; K-86 plan B (not needed) | The approval is the longest wait in the plan; real responses should shape the remaining waves, not follow them. |
 | R-28 | **Hosting moves from Lovable to Vercel** (account created and connected to GitHub, Supabase and Claude). One task, P0.1-03 "Move hosting to Vercel and switch kabsi.co", replaces the old kabsi.co task: Vercel config, Lovable-only code and settings removed, environment variables, a preview deployment for every pull request, kabsi.co and www on Vercel with redirects from the Lovable address, Supabase Auth URLs, OAuth consent URLs, canonical and sitemap steps from K-110. After-merge visual checks use the Vercel preview or live URL. | R-01 (host), K-110 fix 1, G-15 and G-16 (headers now in `vercel.json`), Appendix A | Lovable's build targets Cloudflare and its sync gives no preview per pull request; Vercel does both. The Worker `kabsi-go` stays on Cloudflare. |
 | R-29 (scope amended by R-36) | **WhatsApp runs through Kapso** (decision K-122, which replaces the Numero part of K-121). | K-121 items 1, 2 and 6; guardrail 0.12; input I1 | One provider for the number, the inbox and, later, alerts and Nora. |
@@ -506,10 +511,16 @@ Each one either settles something the documents left open, fixes a contradiction
 | R-38 | **The Profile Coach replaces the attribute and service optimizer and takes parts of P1-06.** | P1-06a to P1-06c, K-22 | K-136. One weekly check, one task path, the owner approves each change. |
 | R-39 | **Model rule.** Opus only where a task writes to Google, handles money, changes access rules or approves from WhatsApp. | Section 2.8; the models of P0.6-01, P0.6-03, P0.6-05, P0.6-06, P0.7-01, P0.7-01b, P0.7-02, P0.7-03 (now Sonnet) | Hussein's instruction of 21 Oct 2026. Lower cost; the hard cases stay on Opus. |
 | R-40 | **Sessions rebuilt.** Sessions 1 to 6 are finished; sessions 7 to 21 are in section 7, each 2 to 4 related cards (the launch gate is one by design): cleanup first, then Sonnet work that needs no live Google, WhatsApp and Protection, onboarding, the Google go-live, Website v2 just before the launch gate. | Section 7 "Bundled sessions" | Hussein's instruction of 21 Oct 2026. |
+| R-41 | **Lane R decides.** From 21 Oct 2026 Rashid runs Kabsi and the lane R chat makes every product decision, price and rule. Hussein only holds the Creem account and stays the legal seller. Every "Ask Hussein", "Hussein's OK", "Hussein's call" and "until Hussein says so" in this plan, in PROGRESS, in the cards and in the prompts reads as the lane R chat, and the answer is recorded in PROGRESS. Every dashboard step is Rashid's; Hussein's only step is Creem (section 5, step 7). | R-26 (superseded), the notes in section 5, 2.3, 2.5, 2.9, every ready prompt, CLAUDE.md | Hussein agreed on 21 Oct 2026 that Rashid runs the project; one decision maker and one place where answers are recorded. |
+| R-42 | **Launch scope.** P0.8-12, P0.6-09, P0.6-03, P0.6-04, P0.8-08 and P0.8-10 move to the "After launch" table in section 7 (L1 to L4, each with its gate). Session 11 is Opus: P0.6-01, P0.6-02, P0.6-05. Session 15: P0.6-06, P0.6-08, P0.6-11. Session 17 is empty. Session 19 is P0.7-05b only. P0.8-13 no longer depends on P0.8-12, P0.8-08, P0.8-10 or P0.6-04 (their features show as coming, with no date). P0.7-07 depends on P0.6 done except P0.6-03, P0.6-04 and P0.6-09. | Section 7 bundled sessions; the cards P0.8-12, P0.6-09, P0.6-03, P0.6-04, P0.8-08, P0.8-10, P0.8-13, P0.7-05b, P0.7-07 | Launch needs reviews, Protection, hours, Profile Coach, search terms, the review link and the Weekly Care Report working; partners, Meta tracking, What customers say and the order button each wait for a real signal. |
+| R-43 | **Paid calls (D5).** The Anthropic credit turns on the day Google enables `mybusiness.googleapis.com` for project 856347937978. The key lives under hello@kabsi.co in Supabase secrets only, with a hard limit of 20 US dollars a month; then `EVAL_LIVE` = true. Live WhatsApp sends to Kabsi's own test numbers start from session 13. Kill-gate: if reviews are still closed on 30 Nov 2026, the lane R chat re-plans launch around Protection, hours, Profile Coach, search terms, the review link and the Weekly Care Report, with replies marked coming. | D5 (section 5), 2.12, K-146, the `kabsi-reply-lab` and `kabsi-build-session` skills | Credit spent before reviews can be read buys nothing; the date and the limit are the rule, not a chat message. |
+| R-44 | **Cascade SQL.** Additive SQL with `on delete` clauses (for example foreign keys with `on delete cascade`) is applied by the session with `execute_sql` and a read-back in the same call. Only drops and real deletions go to Rashid, each in its own file with a read-back. | 2.3, R-35 (drops only), the `_links` file pattern | The connector's `apply_migration` refuses the clause but `execute_sql` runs it, and it removes no data; a person running it by hand only slowed the work. |
 
 ## 5. Decisions and inputs that belong to Rashid
 
-**Note (R-26, 5 Oct 2026).** Rashid has stopped working on the project and Hussein runs everything. Wherever this plan or PROGRESS says "Rashid" in a step, a question, an input or an "Ask Rashid before" line, read Hussein. This section is now Hussein's; the repo is on Hussein's GitHub account and `kabsi-prod` is in Hussein's own Supabase organisation (free plan, same project and keys). Facts about the past (D1, D2 and the 4 Oct decisions) keep Rashid's name because that is who decided. Hussein's personal email is never used in Kabsi (R-32).
+**Note (R-41, 21 Oct 2026).** From 21 Oct 2026 Rashid runs Kabsi and the lane R chat makes every product decision, price and rule; Hussein only holds the Creem account and stays the legal seller. Wherever this plan or PROGRESS says "Ask Hussein", "Hussein's OK", "Hussein's call", "until Hussein says so" or names Hussein in a step, a question, an input or an "Ask Hussein before" line, read the lane R chat, and record the answer in PROGRESS. Every dashboard step is Rashid's; Hussein's only step is Creem (step 7 below). Facts about the past and the legal seller keep Hussein's name. R-26 below is superseded.
+
+**Note (R-26, 5 Oct 2026; superseded by R-41).** Rashid has stopped working on the project and Hussein runs everything. Wherever this plan or PROGRESS says "Rashid" in a step, a question, an input or an "Ask Rashid before" line, read Hussein. This section is now Hussein's; the repo is on Hussein's GitHub account and `kabsi-prod` is in Hussein's own Supabase organisation (free plan, same project and keys). Facts about the past (D1, D2 and the 4 Oct decisions) keep Rashid's name because that is who decided. Hussein's personal email is never used in Kabsi (R-32).
 
 The planning chat and build chats plan around these and ask before any task that needs them.
 
@@ -522,7 +533,7 @@ The planning chat and build chats plan around these and ask before any task that
 | I2 | Real screenshots of Google's "People and access" steps. **4 Oct: desktop done**, six images in `public/help/manager-steps/desktop/` (personal details blurred, browser bar cropped). Phone screenshots still to come. | P0.4-03 | Desktop guide uses them; phone cards use text steps until phone screenshots arrive. |
 | I3 | Referral reward (K-62). **Decided 4 Oct: one free month.** | P1-15 (needs re-scoping: there is no Free plan and no partner audit link, K-126, K-127) | Not built. |
 | D4 | Governing law and seller wording in the terms. **Decided 21 Oct: seller Hussein Slim, Dubai; governing law the United Arab Emirates (K-124). A lawyer confirms both before launch.** | P0.8-01 writes it; P0.7-07 waits for the lawyer's read | The pages carry the decided wording. |
-| D5 | When paid API calls may start (K-146): Anthropic credit and real model calls, live WhatsApp sends, live Google writes. **Not yet given (21 Oct).** | P0.8-03 live sends, P0.8-08 and P0.8-09 real runs, P0.3-04 live evaluation, P0.7-05 | Mocks, stubs, sandboxes and `kabsi-reply-lab`. |
+| D5 | When paid API calls may start (K-146): Anthropic credit and real model calls, live WhatsApp sends, live Google writes. **Decided 21 Oct (R-43): the Anthropic credit turns on the day Google enables `mybusiness.googleapis.com` for project 856347937978; key under hello@kabsi.co in Supabase secrets only; hard limit 20 US dollars a month; then `EVAL_LIVE` = true. Live WhatsApp sends to Kabsi's own test numbers from session 13. Kill-gate: if reviews are still closed on 30 Nov 2026, the lane R chat re-plans launch around Protection, hours, Profile Coach, search terms, the review link and the Weekly Care Report, replies marked coming.** | P0.8-03 live sends, P0.8-08 and P0.8-09 real runs, P0.3-04 live evaluation, P0.7-05 | Mocks, stubs, sandboxes and `kabsi-reply-lab`. |
 | D6 | Opening Kabsi Partners and approving each partner (K-127). **Not before live reviews work (P0.7-05) and the first founding customers (guardrail 28).** | P0.8-12 switch `partners_open` | The page shows the holding line. |
 
 **Steps only Rashid can do** (his accounts; each takes minutes; the task that needs it says when):
@@ -730,7 +741,7 @@ Done when (wave): kabsi.co serves the new build with K-112 wording; no file in t
 
 ### Bundled sessions
 
-Set by Hussein on 13 Oct 2026 and **rebuilt on 21 Oct 2026** after his final product decisions (R-39, R-40). Sessions 1 to 6 are finished and unchanged. Sessions 7 to 21 are 2 to 4 related cards each (the launch gate is one card by design), in this order: the international and partner cleanup first; then the Sonnet work that needs no live Google (review link page, staff link, review graphics, fake review helper, the Growth cards with the Profile Coach, Kabsi Partners); then WhatsApp and Protection; onboarding; the Google go-live; and Website v2 just before the launch gate. Opus runs a session only where a card writes to Google, handles money, changes access rules or approves from WhatsApp. One build session runs the tasks of one row, in the order written. Rule: one pull request per task (large cards split as their prompts say), merged (CI green, After-merge checks run) before the next task starts. If a session runs low on context it stops after a merge and reports what is left. Hussein's manual items (section 5) are not sessions. Cards named P0.8-xx are in section 12A.
+Set by Hussein on 13 Oct 2026, **rebuilt on 21 Oct 2026** and **cut on 21 Oct 2026 by the lane R chat (R-42)** after his final product decisions (R-39, R-40). Sessions 1 to 6 are finished and unchanged. Sessions 7 to 21 are 2 to 4 related cards each (the launch gate is one card by design), in this order: the international and partner cleanup first; then the Sonnet work that needs no live Google (review link page, staff link, review graphics, fake review helper, the Growth cards with the Profile Coach, Kabsi Partners); then WhatsApp and Protection; onboarding; the Google go-live; and Website v2 just before the launch gate. Opus runs a session only where a card writes to Google, handles money, changes access rules or approves from WhatsApp. One build session runs the tasks of one row, in the order written. Rule: one pull request per task (large cards split as their prompts say), merged (CI green, After-merge checks run) before the next task starts. If a session runs low on context it stops after a merge and reports what is left. Hussein's manual items (section 5) are not sessions. Cards named P0.8-xx are in section 12A.
 
 | Session | Model | Tasks | Why here |
 |---|---|---|---|
@@ -744,17 +755,28 @@ Set by Hussein on 13 Oct 2026 and **rebuilt on 21 Oct 2026** after his final pro
 | 8 | Sonnet | P0.8-05 (review link page), P0.8-06 (staff Send review link), P0.8-07 (review graphics), P0.8-11 (fake review helper) | Review tools; no live Google |
 | 9 | Sonnet | P0.5-05 (Insights and search terms), P0.5-03 (holiday hours concierge), P0.8-09 (Profile Coach), P0.5-04 (Weekly Care Report) | The Growth agent's cards; no live Google; the report comes last so it carries the Coach and search terms |
 | 10 | Opus | P0.4-06 (entitlements per plan, amended), P0.4-07 (Creem) | Money; needs Hussein's step 7 |
-| 11 | Sonnet | P0.8-12 (Kabsi Partners), P0.6-01 (consent banner), P0.6-02 (events and attribution) | Needs the Creem webhook; the 60-day code and its disclosure sit with consent and events |
+| 11 | Opus | P0.6-01 (consent banner), P0.6-02 (events and attribution), P0.6-05 (security headers, Turnstile, rate limits) | Consent, events and security before onboarding; the 60-day code and its disclosure sit with consent and events (R-42) |
 | 12 | Opus | P0.5-01 (photo engine, video), P0.5-02 (posts) | Google writes and storage access; the WhatsApp photo drop needs it |
 | 13 | Opus | P0.8-03 (WhatsApp owner channel), P0.8-04 (Protection put-back and auto-fix) | WhatsApp approvals and Google writes |
 | 14 | Sonnet | P0.4-03, P0.4-04, P0.4-05, P0.4-11 (onboarding in six steps and the help chip) | Step 4 needs Connect WhatsApp from session 13 |
-| 15 | Sonnet | P0.8-08 (What customers say), P0.6-06 (Nora in sync), P0.6-08 (supporting platforms), P0.6-11 (staff system health) | Needs the monthly report and WhatsApp; Nora learns every new feature last |
+| 15 | Sonnet | P0.6-06 (Nora in sync), P0.6-08 (supporting platforms), P0.6-11 (staff system health) | Nora learns every new feature last (R-42) |
 | 16 | Sonnet | P0.7-01 (the rest, read-only), P0.7-01b (mocks against real responses), P0.7-02 (business.manage package) | Google paperwork; no Google write |
-| 17 | Opus | P0.6-09, P0.6-05, P0.6-03, P0.6-04 (Meta account, headers, Pixel and CAPI, /meta) | Tracking and security after Creem and consent exist; Opus by Hussein's call (21 Oct 2026) |
+| 17 | | (empty) | P0.6-05 moved to session 11; P0.6-09, P0.6-03, P0.6-04 moved to L2 (R-42) |
 | 18 | Opus | P0.7-04 (switch to live), P0.7-05 (internal live test), P0.7-03 (Pub/Sub) | The first Google writes; Hussein approves the deletions |
-| 19 | Opus | P0.8-10 (own order and booking button), P0.7-05b (live test of the later features) | Google writes on real responses |
+| 19 | Opus | P0.7-05b (live test of the later features) | Google writes on real responses; P0.8-10 moved to L4 (R-42) |
 | 20 | Sonnet | P0.8-13 (Website v2), P0.7-06 (page-by-page audit) | Just before the launch gate; the audit covers the new site |
 | 21 | Opus | P0.7-07 (first real customer and the launch gate) | One card by design |
+
+### After launch (R-42)
+
+These cards leave the launch path. Each waits for its gate, then runs as its own session in the order written, under the same rules as the bundled sessions. Until then their features show as coming in the product, on the website and in `knowledge/kabsi-facts.md`, with no date.
+
+| Session | Model | Tasks | Gate |
+|---|---|---|---|
+| L1 | Sonnet | P0.8-12 (Kabsi Partners) | Live reviews work and the first founding customers are in (D6) |
+| L2 | Opus | P0.6-09 (Meta account fixes), P0.6-03 (Meta Pixel and Conversions API), P0.6-04 (/meta landing page) | Onboarding converts |
+| L3 | Sonnet | P0.8-08 (What customers say) | The AI credit is on and Google's written answer is on file (R-37) |
+| L4 | Opus | P0.8-10 (own order and booking button) | Real Place Actions responses |
 
 ### P0.1-01 Retire the old docs and move Nora's facts file
 
@@ -1766,7 +1788,7 @@ Done when (wave): the consent banner works by country with stored proof; PageVie
 - Decisions: G-18, G-21, R-04, G-14 (PostHog without cookies before consent), VIDEO Part 7 consent line.
 - Touches: a small banner component and `consent_records` (anonymous visitor id or user, country, rule applied, choices, exact wording and version, page, time); rules: opt-in before advertising tags in the UK, EU, EEA, UAE and Saudi Arabia; UK analytics allowed first-party and aggregate-only with notice and opt-out; notice and opt-out elsewhere; country from Cloudflare's `cf-ipcountry` on kabsi.co (proxied), browser time zone as fallback; the Meta Pixel never loads before consent where opt-in applies; PostHog runs cookieless until consent; the site works fully when declined; a "Privacy choices" link in the footer to reopen it.
 - Depends on: P0.1-03.
-- Model: Sonnet (R-39; was Opus).
+- Model: Opus (session 11, R-42; was Sonnet under R-39).
 - Done when: with a UK country header, no request to connect.facebook.net happens before accepting (network log or a Playwright test); declining leaves the site working; each choice writes one `consent_records` row with the wording version; with a US header the notice shows and the Pixel loads.
 - Prompt:
 
@@ -1782,7 +1804,7 @@ Read G-18 to G-21 in docs/source/KABSI-GROWTH.md and R-04. Build the banner and 
 - Decisions: G-31, G-32, G-44, G-28, K-55, K-76, K-118 (PostHog row), R-16, D219.
 - Touches: `src/lib/telemetry.ts` and server-side event sender; event names from G-31 and G-44 exactly (landing_viewed, business_found, snapshot_viewed, registration_completed with method, connect_started with route, profile_state_seen, setup_call_booked, google_access_granted with route and minutes since sign-up, details_confirmed, reply_draft_ready, reply_approved with edited, seconds_to_approve and channel, reply_published, backlog_cleared, profile_change_decided, photo_published, post_published, weekly_report_opened, trial_converted, payment_failed, subscription_paused, subscription_cancelled); server-side events for access, publication and payment never inferred from the browser; first-touch and last-touch UTMs, `fbclid`, `fbp` and `fbc` saved on the user at sign-up server-side; partner and referral links set a first-party cookie for 90 days and are written to the business at sign-up; autocapture off inside the app; session replay off in the app; PostHog through a proxy on a Kabsi subdomain (for example `e.kabsi.co`, a Cloudflare Worker route); properties never include review text, names or emails; demo businesses never send events.
 - Depends on: P0.6-01, P0.4-02.
-- Model: Sonnet.
+- Model: Opus (session 11, R-42).
 - Done when: a full mock sign-up to access run shows each event once in PostHog with the right properties (event list from PostHog in PROGRESS); the user row carries both touches and the click IDs; ad-blocker test: events still arrive through the proxy.
 - Prompt:
 
@@ -1793,10 +1815,12 @@ Read G-28, G-31, G-32 and G-44 in docs/source/KABSI-GROWTH.md. One name per acti
 
 ### P0.6-03 Meta Pixel and Conversions API with one event ledger
 
+**Moved 21 Oct 2026 (R-42).** Runs after launch as session L2; gate: onboarding converts. No Pixel or Conversions API call is made before it.
+
 - Decisions: G-19, G-47 (architecture and the name table), G-42, VIDEO Part 7 events list, K-118 (least-access system user), guardrail 0.7.
 - Touches: browser Pixel on public pages only after consent (PageView, ViewContent on `/meta`); `meta_events` ledger keyed by business, event type and source event so retries never mint a new ID; Edge Function `meta-capi` sending CompleteRegistration (browser and server, shared event ID created in the browser and stored with the funnel record), GoogleAccessGranted (server, custom event, when backend confirms working access), Schedule (setup call booked, from the Calendly widget's browser message plus server), Purchase (server, after Creem confirms, value and currency, monthly and yearly distinguished; refunds corrected); payload with hashed email where consent allows, external ID, `fbp`, `fbc`, source URL, action source website; access token and dataset ID only in Supabase secrets (`META_CAPI_TOKEN`, `META_DATASET_ID`); never review text, Google data, tokens or Business Knowledge; demo and internal testers excluded.
 - Depends on: P0.6-02, P0.6-09 (dataset and system user exist), P0.4-07 for Purchase (ship the rest first if Creem waits on D1).
-- Model: Opus (Hussein, 21 Oct 2026: session 17 runs on Opus).
+- Model: Opus (session 11 for P0.6-05; session L2 for P0.6-09, P0.6-03, P0.6-04, R-42).
 - Done when: each event shows in Events Manager Test Events as received, processed and deduplicated (screenshots or the Test Events code run recorded); a retried server send reuses the event ID (test); Event Match Quality noted for CompleteRegistration.
 - Prompt:
 
@@ -1807,10 +1831,12 @@ Read G-19 and G-47 in docs/source/KABSI-GROWTH.md and Part 7 of docs/source/KABS
 
 ### P0.6-04 The /meta landing page
 
+**Moved 21 Oct 2026 (R-42).** Runs after launch as session L2; gate: onboarding converts. Website v2 does not wait for it.
+
 - Decisions: G-26, design review "Meta landing page", K-110, R-02, VIDEO "Make the click convert", G-12 speed target.
 - Touches: route `/meta` (noindex) with five sections and nothing else: hero repeating the Reel's hook by `?angle=` (reviews, profile-changes, approval, or a trade), the K-110 explanation line, the CSS and SVG approval-card animation (under 60 KB, plays twice then rests), the price visible without scrolling, the R-02 button and "14 days free. No card. $19 a month after." only after the launch gate; how it works in 3 steps; four plain cards (Your reviews, Your details, Your posts and photos, Your week); trust (you approve everything, not affiliated with Google, free setup call, cancel any time); five FAQs and the final button; a sticky button bar on phones after the first scroll; W1 poster that loads the player only on tap; no menu, no comparison, no guide links.
 - Depends on: P0.1-05, P0.6-01.
-- Model: Opus (Hussein, 21 Oct 2026: session 17 runs on Opus).
+- Model: Opus (session 11 for P0.6-05; session L2 for P0.6-09, P0.6-03, P0.6-04, R-42).
 - Done when: Lighthouse mobile on `/meta` shows LCP under 2.5 s (report saved); each angle changes only the hero and first proof section; Meta's Sharing Debugger reads the right title and image (Rashid or the chat records it).
 - Prompt:
 
@@ -1824,7 +1850,7 @@ Read G-26 and the "Meta landing page" bullet in docs/source/KABSI-DESIGN.md. No 
 - Decisions: G-15, G-16, K-42, K-100 (email-code limits if not done in P0.4-02), K-118 (Cloudflare row).
 - Touches: response headers on kabsi.co (set in `vercel.json` on Vercel; no Cloudflare rules are needed because Cloudflare only holds DNS): HSTS, nosniff, Referrer-Policy, Permissions-Policy, CSP with `frame-ancestors 'none'` and the allow list (Meta, PostHog proxy, Sentry ingest, Turnstile, the Supabase project including websockets, Kabsi domains) in report-only mode with reports to Sentry; Turnstile with server checks on sign-up, login, both free tools, the partner form, the contact form and Nora's public tools; 10 requests a minute per IP on free-tool endpoints; Cloudflare managed rules and bot protection on; WAF; never cache app pages or API responses.
 - Depends on: P0.1-03, P0.4-01.
-- Model: Opus (Hussein, 21 Oct 2026: session 17 runs on Opus).
+- Model: Opus (session 11 for P0.6-05; session L2 for P0.6-09, P0.6-03, P0.6-04, R-42).
 - Done when: `curl -sI https://kabsi.co` shows each header; CSP reports arrive in Sentry for a deliberate violation; a free-tool call without a token gets 400; a burst of 15 requests in a minute gets 429. Enforcing the CSP is a follow-up after 14 clean days (listed in PROGRESS with the date).
 - Prompt:
 
@@ -1880,10 +1906,12 @@ Read K-87 and K-118 in docs/source/KABSI-AUDIT.md. Use the Resend, Sentry, PostH
 
 ### P0.6-09 Meta account fixes (VIDEO Part 7)
 
+**Moved 21 Oct 2026 (R-42).** Runs after launch as session L2 with P0.6-03 and P0.6-04; gate: onboarding converts. Ads stay off until then.
+
 - Decisions: VIDEO Part 7 "Meta account: current state and fixes" and "Before the first dollar", K-87 (second admin), G-47.
 - Touches: `docs/marketing/meta-setup.md` with the exact clicks for each fix: confirm the contact email; business info and Business Verification after D1; second admin with two-factor; payment method, billing address and an account spending limit equal to the month's budget (keep USD and Beirut time); connect the Page and Instagram to the ad account and check Instagram is linked to the Page; create the "Kabsi Website" dataset and connect it to the ad account; move the Revelo and Cedar Spark datasets out (or stop using them in this portfolio); add kabsi.co under Domains and verify with a DNS TXT record in Cloudflare; create the "Kabsi" asset group and assign people to it; create the least-access system user "Kabsi CAPI" with access only to the dataset (and the ad account if needed), generate its token and store it as the Supabase secret `META_CAPI_TOKEN`, and the dataset ID as `META_DATASET_ID`; the custom audiences in Part 7 (created once events flow); Instagram and Facebook bios (K-112 wording: "Reviews and listing care for local businesses. Works with Google Business Profile."); the URL template for ads.
 - Depends on: P0.1-03 (domain). Business info and verification use Hussein Slim's details (D1, R-25).
-- Model: Opus (Hussein, 21 Oct 2026: session 17 runs on Opus).
+- Model: Opus (session 11 for P0.6-05; session L2 for P0.6-09, P0.6-03, P0.6-04, R-42).
 - Done when: the setup file exists; Rashid ticks each step; the chat verifies what it can (the TXT record with `dig`, the secrets' presence by name through the Supabase connector, events in Test Events once P0.6-03 runs).
 - Prompt:
 
@@ -1942,7 +1970,7 @@ Added by the planning chat on 21 Oct 2026 from Hussein's final product decisions
 
 Goal: Kabsi is international, has one payment route and one partner program, Essentials and Pro are real plans, and the review, profile and WhatsApp features Hussein approved are built on the mock and tested, ready for the live test in P0.7-05b.
 
-Done when (wave): no page, email, RPC or fact mentions Lebanon pricing, NFC card sales, USDT, Binance Pay, Whish, OMT, cash or the old partner model (grep in P0.7-06); each feature below is merged with its tests; the Website v2 card is merged before P0.7-07.
+Done when (wave): no page, email, RPC or fact mentions Lebanon pricing, NFC card sales, USDT, Binance Pay, Whish, OMT, cash or the old partner model (grep in P0.7-06); each feature below is merged with its tests, except the cards in the After launch table (R-42); the Website v2 card is merged before P0.7-07.
 
 ### Cards changed and cards retired on 21 Oct 2026
 
@@ -2100,6 +2128,8 @@ Read K-134 and K-113. Nothing is posted automatically. Use only design tokens (K
 
 ### P0.8-08 What customers say (Pro)
 
+**Moved 21 Oct 2026 (R-42).** Runs after launch as session L3; gate: the AI credit is on and Google's written answer is on file (R-37). The feature shows as coming, with no date.
+
 **Confirmed 21 Oct 2026 (Hussein).** The summary fetches reviews at run time and stores no review text; it stays off for real customers until Google's written answer is on file.
 
 - Decisions: K-135, K-27, K-113, K-100, K-143 (Insights agent), K-146, R-37.
@@ -2141,6 +2171,8 @@ Read K-136, K-83 and K-116 in docs/source/KABSI-AUDIT.md. Every change is a task
 
 ### P0.8-10 Own order and booking button (Pro)
 
+**Moved 21 Oct 2026 (R-42).** Runs after launch as session L4; gate: real Place Actions responses. The feature shows as coming, with no date.
+
 - Decisions: K-137, K-117.3, K-38 (pipeline), K-146.
 - Touches: `_shared/google/placeActions` (live and mock; live fixtures exist from P0.7-01) used by a Guard-agent check and a Pro card in Google Profile: add the owner's direct order or booking link through the Place Actions API and mark it preferred, written through the pipeline with the owner's approval; an alert task when the preferred link is missing or has changed; a plain explanation that links from aggregators cannot be removed by Kabsi; NOT_FOUND and PERMISSION_DENIED hide the feature for that business, are recorded once, and are never retried in a loop; the entitlement check (Pro).
 - Depends on: P0.7-01 (real Place Actions responses), P0.8-04, P0.4-06.
@@ -2169,6 +2201,8 @@ Read K-139. Take the category list and the Reviews Management Tool link from Goo
 
 ### P0.8-12 Kabsi Partners
 
+**Moved 21 Oct 2026 (R-42).** Runs after launch as session L1; gate: live reviews work and the first founding customers are in (D6). The `/partners` holding page stays until then.
+
 - Decisions: K-127, K-128, K-126 (30-day trial), K-124 (Creem), K-144, R-34, G-32.
 - Touches:
   - **Public.** `/partners` (replaces the holding page from P0.8-01): who can apply (creators, agencies, consultants, accountants, web and POS sellers), the terms in plain words (30% of every payment for the first 12 months of each referred business, a 30-day hold, paid monthly, $50 minimum, no upfront bounty; the referred business gets a 30-day Pro trial), the partner rules (K-128), an application form (name, email, who you are, audience or client base, country, website or channel; Turnstile; a stored row, not a sales lead), and the line "Hussein approves each partner". No earnings promises, no income claims.
@@ -2196,7 +2230,7 @@ Read K-127 and K-128. This is the only partner program; the old model was delete
   Homepage order: (1) hero: H1 "Your reviews and listing. Taken care of.", sub "Kabsi replies to your Google reviews, watches your Google Business Profile and makes it easy for customers to choose you. You approve on WhatsApp.", yellow "Check my Google profile free", secondary "See how it works", WhatsApp phone mockup; (2) how it works in 4 steps; (3) three pillars (Every review answered, Your profile protected, Ready to be found), each with a real screen; (4) a WhatsApp section; (5) the Essentials and Pro feature grid; (6) pricing with the 14-day Pro trial; (7) "You stay in control": nothing posted without your OK, never your Google password, you stay the owner, disconnect any time, independent and not affiliated with Google; (8) founder note and real proof only (quotes with written consent, no logos or numbers until real); (9) industry links; (10) FAQ; (11) the final yellow button.
   One `/for/<industry>` template with honest copy for restaurants, cafes, salons, clinics, dentists and car services; the other old industry slugs redirect to `/for` (list in PROGRESS). `/pricing` shows Essentials and Pro (monthly and yearly), the extra location, the trial, "Cards through Creem", no Free, Partner or Lebanon column; `/how-it-works` is the operating loop in plain words with "What Kabsi can and cannot do"; `/partners` follows P0.8-12.
   **Changed 21 Oct 2026 (Hussein):** the H1 is the brand line "Your reviews and listing. Taken care of." and Google's name appears only in the subline, as plain descriptive words; the non-affiliation notice stays in the footer and in the "You stay in control" block. The hero button is the free Profile Check at all times; trial buttons read "Join early access" until P0.7-07, then "Start free", from one constant.
-- Depends on: P0.8-01, P0.8-12, P0.4-06, P0.4-07, P0.8-03 to P0.8-11 (so every feature on the page is real or marked "Early access"), P0.6-04 (`/meta` untouched).
+- Depends on: P0.8-01, P0.4-06, P0.4-07, P0.8-03 to P0.8-07, P0.8-09, P0.8-11 (so every feature on the page is real or marked "Early access"). Changed by R-42: it does not depend on P0.8-12, P0.8-08, P0.8-10 or P0.6-04; Kabsi Partners, What customers say and the order and booking button show as coming, with no date, and `/partners` stays the holding page.
 - Model: Sonnet (frontend-design skill).
 - Done when: the homepage sections are in the order above (test of the heading order); no claim passes the claims rule (grep for "%" and for "ranking", "rank", "autopilot", "automatically"); no Lebanon, card-sale, USDT or partner-resale text; `/for/<industry>` renders for the six trades; Lighthouse mobile performance at least 90 and accessibility 95 (report saved); a reduced-motion check shows no animation; 390 px and 1440 px looked at (or PROGRESS says no browser).
 - Prompt:
@@ -2228,7 +2262,7 @@ Read K-37. Events only enqueue jobs. Give Rashid the console steps for the topic
 
 ### P0.7-05b Live test of the features built after Wave P0.G
 
-**Changed 21 Oct 2026.** Also test live, with Hussein's approval of each write: a WhatsApp Approve of a low-risk reply and its Undo; a put-back; an auto-fix on a test profile if the policy check in P0.8-04 allows it; a holiday answer publishing `specialHours`; the order and booking button (P0.8-10); the review link page; a review graphic; the Coach checklist; and the search terms. It depends also on P0.8-03, P0.8-04, P0.8-09 and P0.8-10.
+**Changed 21 Oct 2026.** Also test live, with Hussein's approval of each write: a WhatsApp Approve of a low-risk reply and its Undo; a put-back; an auto-fix on a test profile if the policy check in P0.8-04 allows it; a holiday answer publishing `specialHours`; the review link page; a review graphic; the Coach checklist; and the search terms. It depends also on P0.8-03, P0.8-04 and P0.8-09. Changed by R-42: the order and booking button (P0.8-10) waits for session L4 and is not tested here.
 
 - Decisions: K-85, K-66, K-67, K-41 (self-removal), K-117.
 - Touches: on Yawmiyati and, with the owner's consent, Abou Hamze Auto Center: full onboarding; expected results: tasks for description, cover photo, opening date, special and extra hours; the recognised Google name update with "Google is right" recommended; video view figures in Insights; "sounds like you" voice rules proposed from past replies read live and only confirmed rules stored; backlog drafted; Business Knowledge baseline confirmed; disconnect and reconnect tested, including Kabsi's Manager access removed through the API (or the staff follow-up).
@@ -2262,7 +2296,7 @@ Read guardrails 21, 24 and 25. Record every finding; fix only copy and layout is
 
 - Decisions: guardrail 22, guardrail 27, G-39 tier 1, VIDEO "Read first" gates, R-02, D2.
 - Touches: with the first real customer (D2, written consent): business discovery, snapshot, sign-up, Google access, knowledge, first value, review draft, owner approval, publication, verification, audit event, notification, weekly report, billing (Creem checkout on a phone), disconnect including Manager access removal; success and failure paths (a rejected reply, a failed publication, a revoked access) with real Google responses; then the G-39 tier 1 checklist; then switch the CTA from "Join early access" to "Start free" with "14 days free. No card." everywhere (one constant) and remove "Early access" tags.
-- Depends on: P0.7-06, P0.4-07, P0.6 done. D2 is decided: Abou Hamze Auto Center; the owner agreed and Kabsi is Manager. Before the first real customer other than the two Kabsi-owned profiles connects, Hussein upgrades `kabsi-prod` from the free plan to Supabase Pro with point-in-time recovery (K-87, $25 a month, in Hussein's own organisation) and the session runs the first restore test into a scratch project (project and time recorded in PROGRESS).
+- Depends on: P0.7-06, P0.4-07, P0.6 done except P0.6-03, P0.6-04 and P0.6-09 (R-42). D2 is decided: Abou Hamze Auto Center; the owner agreed and Kabsi is Manager. Before the first real customer other than the two Kabsi-owned profiles connects, Hussein upgrades `kabsi-prod` from the free plan to Supabase Pro with point-in-time recovery (K-87, $25 a month, in Hussein's own organisation) and the session runs the first restore test into a scratch project (project and time recorded in PROGRESS).
 - Ask Hussein before: contacting the customer, and before switching the CTA.
 - Model: Opus.
 - Done when: the Pro upgrade and the restore test are recorded; every step of guardrail 22 has evidence from the real run; every G-39 tier 1 line is ticked or explicitly waived by Rashid; the four VIDEO gates are clear; only then the CTA changes and PROGRESS records "Paid ads may start".
