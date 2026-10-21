@@ -32,7 +32,7 @@ export const COACH_ITEMS: readonly CoachItem[] = [
   {
     id: "photos",
     title: "Photos of each kind",
-    why: "People look for the outside, the inside, your team, your work and what you sell. Kabsi counts them once photos are managed here.",
+    why: "People look for the outside, the inside, your team, your work and what you sell. Kabsi counts the photos you add through Kabsi.",
   },
   {
     id: "service_area",

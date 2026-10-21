@@ -133,11 +133,11 @@ select is((select count(*) from public.tasks where location_id = '00000000-0000-
             and source_type = 'gbp_post' and state = 'done'), 1::bigint, 'posted: done');
 insert into public.photos (location_id, storage_path, state) values
   ('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000c1/a.jpg', 'draft');
-select is((pg_temp.task('photo_batch:00000000-0000-4000-8000-0000000000c1')).title, '1 photo is checked and ready to post',
+select is((pg_temp.task('photo_batch:00000000-0000-4000-8000-0000000000c1')).title, '1 photo is ready',
   'a photo ready makes one batch task');
 insert into public.photos (location_id, storage_path, state) values
   ('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000c1/b.jpg', 'draft');
-select is((pg_temp.task('photo_batch:00000000-0000-4000-8000-0000000000c1')).title, '2 photos are checked and ready to post',
+select is((pg_temp.task('photo_batch:00000000-0000-4000-8000-0000000000c1')).title, '2 photos are ready',
   'a second photo updates the same task');
 select is(pg_temp.live('photo_batch:00000000-0000-4000-8000-0000000000c1'), 1::bigint, 'one batch task per business');
 update public.photos set state = 'posted' where location_id = '00000000-0000-4000-8000-0000000000c1' and state = 'draft';

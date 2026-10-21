@@ -42,7 +42,7 @@ select ok(not has_function_privilege('authenticated', 'private.coach_status(uuid
 
 select is(public.coach_read_due('00000000-0000-4000-8000-0000000000c1'), true, 'a reachable business on a plan is due its first read');
 select is(pg_temp.items(),
-  '{"description": "unknown", "categories": "unknown", "services": "todo", "attributes": "unknown", "photos": "later", "service_area": "unknown", "website_tracking": "later", "website_match": "later"}'::jsonb,
+  '{"description": "unknown", "categories": "unknown", "services": "todo", "attributes": "unknown", "photos": "todo", "service_area": "unknown", "website_tracking": "later", "website_match": "later"}'::jsonb,
   'nothing is asserted about what Kabsi has not read; the services come from Business Knowledge');
 select is(jsonb_array_length(public.coach_checklist('00000000-0000-4000-8000-0000000000c1') -> 'items'), 8, 'eight items, in a fixed order');
 select is((select string_agg(i ->> 'id', ',') from jsonb_array_elements(public.coach_checklist('00000000-0000-4000-8000-0000000000c1') -> 'items') i),

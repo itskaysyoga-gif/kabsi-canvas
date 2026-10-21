@@ -101,3 +101,21 @@ describe("the free Profile Check checklist", () => {
     expect(status(null)).toBe("later");
   });
 });
+
+describe("the photo item (P0.5-01)", () => {
+  it("names the kinds of photo still missing", () => {
+    const row = { ...COACH_ITEMS.find((i) => i.id === "photos")!, status: "todo" as const };
+    expect(
+      detailLine({
+        ...row,
+        detail: { exterior: 2, interior: 0, team: 1, work: 0, products: 0, total: 3 },
+      }),
+    ).toBe("No photo yet of the inside, your work and what you sell.");
+    expect(
+      detailLine({
+        ...row,
+        detail: { exterior: 1, interior: 1, team: 1, work: 1, products: 0, total: 4 },
+      }),
+    ).toBe("No photo yet of what you sell.");
+  });
+});

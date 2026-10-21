@@ -1,12 +1,13 @@
 // The Google layer's front door (K-34). Edge Functions import from here only. Each area has a live and a mock module
 // with the same wire types; this file picks one per business (a demo business is always mock, R-17) and turns
-// Google's responses into the shapes the app uses. Every write here (sendReply, createLocalPost, createMedia,
+// Google's responses into the shapes the app uses. Every write here (sendReply, createLocalPost, uploadPhoto,
 // addSpecialHours, patchListing) is only ever called by the publish job in api/jobs.ts, after the owner's approval
 // and claim_publication (guardrail 6, P0.1-13a and P0.1-13b).
 import { type InvitationAddress, matchInvitation, type PendingBusiness } from "../invitations.ts";
 import { isConciergeLocationId } from "../concierge.ts";
 import { regularHoursDisplay } from "../hours.ts";
 import { assertNotConcierge, googleMode, modeFor, type Mode } from "./client.ts";
+import { RetryLater } from "../jobs.ts";
 import { type CoachNumbers, coachNumbers, MOCK_COACH } from "../coach/read.ts";
 import * as accountsLive from "./accounts/live.ts";
 import * as accountsMock from "./accounts/mock.ts";
@@ -306,12 +307,24 @@ export async function patchListing(locationId: string, field: string, raw: unkno
   return { state: "live", response: { [mask]: (patched as Record<string, unknown>)[mask] ?? null } };
 }
 
-// ─── Photos. sourceUrl is a short-lived signed Storage URL. Only called by the publish job after the owner's approval
-// (D202, P0.1-13b); the reference is the media item's name.
-export async function createMedia(accountId: string, locationId: string, sourceUrl: string, category: string): Promise<WriteResult & { ref: string | null }> {
+// ─── Photos (P0.5-01). The processed JPEG's bytes go up to Google: startUpload, the upload, then the media item. Only
+// called by the publish job after the owner's approval (D202, P0.1-13b); the reference is the media item's name.
+// Nothing is on the profile until the last call, so a failure before it that is not Google's refusal waits and tries
+// again (RetryLater); a refusal (400 to 404) goes back to the owner; only the create itself can be ambiguous.
+export async function uploadPhoto(accountId: string, locationId: string, bytes: Uint8Array, category: string): Promise<WriteResult & { ref: string | null }> {
   assertNotConcierge(locationId);
   const mode = modeFor(locationId);
-  const created = await by(mode, mediaLive, mediaMock).createMedia(accountId, locationId, { mediaFormat: "PHOTO", locationAssociation: { category }, sourceUrl });
+  const media = by(mode, mediaLive, mediaMock);
+  let ref;
+  try {
+    ref = await media.startUpload(accountId, locationId);
+    if (!ref?.resourceName) throw new Error("google upload: no resourceName");
+    await media.uploadBytes(ref, bytes, "image/jpeg");
+  } catch (e) {
+    if (e instanceof RetryLater || /^Error: google (400|401|403|404) /.test(String(e))) throw e;
+    throw new RetryLater(`photo upload did not finish, nothing was created: ${String(e).slice(0, 200)}`, new Date(Date.now() + 120_000));
+  }
+  const created = await media.createMedia(accountId, locationId, { mediaFormat: "PHOTO", locationAssociation: { category }, dataRef: ref });
   return { state: "live", ref: created.name ?? null, response: { mock: mode === "mock" || undefined, name: created.name ?? null, googleUrl: created.googleUrl ?? null } };
 }
 

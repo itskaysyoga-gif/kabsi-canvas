@@ -12,6 +12,7 @@ import { RetryLater } from "../jobs.ts";
 export const AM = "https://mybusinessaccountmanagement.googleapis.com/v1";
 export const BI = "https://mybusinessbusinessinformation.googleapis.com/v1";
 export const V4 = "https://mybusiness.googleapis.com/v4";
+export const UPLOAD = "https://mybusiness.googleapis.com/upload";
 export const PERF = "https://businessprofileperformance.googleapis.com/v1";
 export const NOTIF = "https://mybusinessnotifications.googleapis.com/v1";
 export const VERIF = "https://mybusinessverifications.googleapis.com/v1";

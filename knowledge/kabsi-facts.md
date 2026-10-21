@@ -40,6 +40,8 @@ Hussein approved final product decisions on 21 Oct 2026. Most are not built yet.
 
 **Holiday hours (live from 21 Oct 2026, P0.5-03).** Five days before a public holiday Kabsi asks the owner by email, and in Kabsi under Hours, what the business will do: **normal hours**, **closed**, or **custom hours**. Kabsi never assumes holiday hours. The email has one button, "Choose your hours", and three plain links, one for each answer. The page shows what Google will show, in words, and **Confirm and save to Google** is the owner's approval: closed and custom hours become special hours for those days and go out through the normal approval, with a 10 second undo, and Kabsi checks that Google shows them. Normal hours records the answer and changes nothing on Google. Custom hours are read back before they are saved. Confirming closed or custom hours needs the owner (or a manager the owner has let approve hours) signed in; normal hours needs only the link. A moon-dependent holiday (Eid, Arafah Day, the Islamic New Year, the Prophet's birthday) says "expected" and the owner can move the days up to three either way. Ramadan is asked once, before the month starts, with two answers: normal hours or different hours for the whole month. The holidays come from each country's own official source, checked on 21 Oct 2026: England and Wales (GOV.UK bank holidays), the United States (the federal holidays), Canada (the general holidays of the Canada Labour Code), New Zealand, Singapore and the United Arab Emirates. **Australia and Ireland are not covered yet**, so Kabsi asks nothing there. WhatsApp quick replies for the same question are coming with the WhatsApp channel; until then it is email and Hours.
 
+**Photos (live from 21 Oct 2026, P0.5-01 part A).** On Photos the owner, a manager or staff adds up to 20 photos at a time from the phone's camera or gallery: JPG, PNG, WebP or HEIC (iPhone), up to 20 MB each. Kabsi checks each file in the background, usually within a minute, never while you wait: it reads what the file really is (a PDF renamed to .jpg is refused), refuses moving images, turns the photo upright, resizes it to Google's limits and saves a new copy with no hidden details at all, so the location (GPS), the phone model and the date taken never reach Google. Kabsi never draws on, generates or edits a photo beyond turning and resizing it. It then checks, in its own code, whether the photo is dark ("This photo is dark."), blurry, smaller than Google's 720 by 720 pixels, or looks like a photo already added. The owner picks Google's category (outside, inside, team, at work, product, food and drink, menu, other); Kabsi does not suggest one or look for faces, screens, flyers or other brands' logos yet, because that needs the AI model, which is off until Kabsi's AI credit is on. When photos are ready, Home shows one card, for example "3 photos are ready"; the owner approves them one by one, and each approved photo goes to Google once, after the 10 second undo, through the same approval as replies. Kabsi uploads the photo itself to Google; it never gives Google a link to its storage. Videos (MP4 or MOV) are accepted and kept for 30 days; sending videos to Google comes later. Kabsi also suggests photos when something is missing: "Add photos of your business" when there are none, "Add a photo of the inside, your team and what you sell" (the kinds still missing among outside, inside, team, at work and what you sell), and "Add a new photo" when the newest one through Kabsi is 30 days old. The Profile Coach counts the photos added through Kabsi by kind. A staff upload link (no account needed, turned off by the owner at any time), the "Cover and logo" strip and Approve all are on the way (part B), and Pro's WhatsApp photo drop comes with the WhatsApp owner channel.
+
 **[COMING] Features.**
 
 - **WhatsApp for owners:** opt in by sending a one-time code to Kabsi's WhatsApp number; get a review alert with the draft and the buttons "Approve" and "Edit in app". Approval on WhatsApp will work only for low and medium risk replies and weekly posts, never for high-risk reviews or for your business name, address, categories, map pin, phone or open or closed status. After you approve, there is a 10-second undo. Today WhatsApp approves nothing (section 9.5b).
@@ -529,11 +531,11 @@ To provide Kabsi, to process public reviews so you can answer them, to keep Kabs
 
 ### 9.4 AI
 
-Review text, business facts and photos go to Anthropic's API for drafts and checks; Anthropic doesn't train on this data. The owner approves every reply, post, photo and listing change. AI drafts can be wrong, so read each one; you're responsible for what you approve.
+Review text and business facts go to Anthropic's API for drafts and checks (photos are checked by Kabsi's own code and are not sent to an AI model); Anthropic doesn't train on this data. The owner approves every reply, post, photo and listing change. AI drafts can be wrong, so read each one; you're responsible for what you approve.
 
 ### 9.5 Processors and regions
 
-Supabase (database, sign-in, storage; Frankfurt, Germany), Cloudflare (go.kabsi.co links and the bot check on forms), Vercel (hosting), Resend (email; EU, Ireland), Anthropic (drafts and photo checks), Google (Business Profile and Places APIs), Sentry (error reports; EU, without IPs or review content), PostHog (anonymous statistics; United States), Zoho (the hello@kabsi.co mailbox). Kapso (the inbox for the Kabsi WhatsApp number) and Meta (WhatsApp, which carries the messages) process WhatsApp messages sent to the Kabsi WhatsApp number; both are listed on the privacy page. Calendly and Creem are added to the list on the privacy page when they go live.
+Supabase (database, sign-in, storage; Frankfurt, Germany), Cloudflare (go.kabsi.co links and the bot check on forms), Vercel (hosting), Resend (email; EU, Ireland), Anthropic (drafts), Google (Business Profile and Places APIs), Sentry (error reports; EU, without IPs or review content), PostHog (anonymous statistics; United States), Zoho (the hello@kabsi.co mailbox). Kapso (the inbox for the Kabsi WhatsApp number) and Meta (WhatsApp, which carries the messages) process WhatsApp messages sent to the Kabsi WhatsApp number; both are listed on the privacy page. Calendly and Creem are added to the list on the privacy page when they go live.
 
 Some providers are outside the United Arab Emirates and the EU. They process data only on Kabsi's instructions and under their data protection terms, including standard contractual clauses where required.
 
@@ -572,7 +574,7 @@ The privacy page shows the 11 rows of the retention table (`retention_policies`,
 | Review ids, star ratings, dates, reply state and your own replies | While you use Kabsi |
 | Your own facts and approved values (About your business, the details you confirmed or told Google Protection to keep, approved posts and hours; earlier versions are kept as a history) | While you use Kabsi; deleted with the business. Deleting a fact in About your business removes it and its earlier versions at once |
 | Google's values of your details that you have not confirmed, and Google's side of a Google Protection change | 30 days after Kabsi read them; a change still waiting for your answer keeps them until it is answered or closed |
-| Photos you upload | The file is deleted 30 days after the photo is on Google, or soon after you skip it; it then leaves the Photos list (it stays on Google) |
+| Photos you upload | The file as you sent it and Kabsi's cleaned copy are deleted 30 days after the photo is on Google, or soon after you skip it or Kabsi refuses the file; it then leaves the Photos list (it stays on Google). A video is deleted 30 days after it arrives |
 | Google data after access is removed | Deleted after 30 days unless access returns |
 | Assistant chats | 12 months after the last message |
 | Contact details given to the assistant | Until you ask us to remove them |
@@ -652,7 +654,7 @@ Weekly drafts need at least one Verified fact in About your business, the Weekly
 
 **Suggest phrases shows nothing.** Suggestions grow as reviews come in; type your own meanwhile.
 
-**My photo won't upload.** Use JPG, PNG or WebP up to 5 MB.
+**My photo won't upload.** Use JPG, PNG, WebP or HEIC up to 20 MB, up to 20 at a time. A file that is not really a photo, or a moving image, is refused with the reason on the Photos screen.
 
 **Home says "Google check is late" in amber.** Kabsi has not managed to read the Google profile for more than 6 hours. The team is alerted when checks keep failing. If you removed the Kabsi group from People and access, add it again as a Manager.
 
@@ -907,7 +909,7 @@ Only what you tell Kabsi. It never invents prices, offers or dates.
 It suggests words customers use for businesses like yours: your category and area, phrases from your good reviews, and (once connected) search terms Google reports for your profile.
 
 **What photos can I post?**
-Clear, real photos of your place, products, food, drinks or team at work. The check flags blurry shots, screenshots, text-heavy images, logos alone, AI-looking images and photos where a face is the main subject.
+Clear, real photos of your place, your team, your work and what you sell. Kabsi's check flags dark, blurry and small photos (under 720 by 720 pixels) and photos you already added. Kabsi removes the location data and other hidden details from every photo before it goes to Google.
 
 **Can I set holiday hours?**
 Yes. On Hours, choose the dates, Closed or different hours, review what Google will show, and tap Confirm and save to Google. Kabsi sends them to Google within a few minutes.
