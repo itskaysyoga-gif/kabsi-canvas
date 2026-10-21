@@ -7,6 +7,10 @@
 // - Event properties carry ids, country, source, plan or channel only. Never review text,
 //   reviewer names or email addresses.
 // - People are identified by their Supabase user id only.
+// - Consent (P0.6-01, src/lib/consent.ts): PostHog runs without cookies until a yes to statistics, stops after a no,
+//   and records sessions only after a yes.
+
+import { analyticsAllowed, analyticsPersistent, onConsentChange } from "@/lib/consent";
 
 const SENTRY_PUBLIC_KEY = "b09a18a8ac370accf6b8e423fff77a8d";
 const POSTHOG_KEY = "phc_rDzVWhoR2wSXyVHVMypztnf8YKHCszd9c9mryMv6W4mW";
@@ -23,6 +27,7 @@ type PostHogLike = {
   reset?: () => void;
   opt_out_capturing?: () => void;
   opt_in_capturing?: () => void;
+  set_config?: (config: Record<string, unknown>) => void;
   startSessionRecording?: () => void;
   stopSessionRecording?: () => void;
 };
@@ -101,11 +106,21 @@ export const telemetryHeadScripts = [
 
 // Called once from the root component after hydration. Replays and the pending user id apply after it.
 let pendingUser: string | null = null;
+let consentWatched = false;
+let lastPath = "/";
 export function startAnalytics() {
   if (typeof window === "undefined") return;
   try {
     window.__kabsiStartAnalytics?.();
-    if (pendingUser) window.posthog?.identify?.(pendingUser);
+    if (!consentWatched) {
+      consentWatched = true;
+      onConsentChange(() => {
+        applyCapture();
+        syncReplayWithPath(lastPath);
+      });
+    }
+    applyCapture();
+    if (pendingUser && analyticsPersistent()) window.posthog?.identify?.(pendingUser);
   } catch {
     /* ignore */
   }
@@ -156,16 +171,36 @@ let paused = false;
 export function setAnalyticsPaused(pause: boolean) {
   if (typeof window === "undefined" || pause === paused) return;
   paused = pause;
+  applyCapture();
+}
+
+// Capture is on unless a demo business is on screen or the visitor said no to statistics. PostHog keeps an
+// identifier (cookie and local storage) only after a yes; before that it stays in memory (P0.6-01).
+let captureOn = true;
+let persistent = false;
+function applyCapture() {
+  if (typeof window === "undefined") return;
+  const want = !paused && analyticsAllowed();
+  const keep = analyticsPersistent();
   try {
-    if (pause) window.posthog?.opt_out_capturing?.();
-    else window.posthog?.opt_in_capturing?.();
+    if (want !== captureOn) {
+      captureOn = want;
+      if (want) window.posthog?.opt_in_capturing?.();
+      else window.posthog?.opt_out_capturing?.();
+    }
+    if (keep !== persistent) {
+      persistent = keep;
+      window.posthog?.set_config?.({ persistence: keep ? "localStorage+cookie" : "memory" });
+      if (keep && pendingUser) window.posthog?.identify?.(pendingUser);
+      if (!keep) window.posthog?.reset?.();
+    }
   } catch {
     /* ignore */
   }
 }
 
 export function track(event: KabsiEvent, properties: SafeProps = {}) {
-  if (typeof window === "undefined" || paused) return;
+  if (typeof window === "undefined" || paused || !analyticsAllowed()) return;
   try {
     window.posthog?.capture?.(event, properties);
   } catch {
@@ -178,7 +213,7 @@ export function identify(userId: string | null) {
   pendingUser = userId;
   try {
     if (userId) {
-      window.posthog?.identify?.(userId);
+      if (analyticsPersistent()) window.posthog?.identify?.(userId);
       window.Sentry?.setUser?.({ id: userId });
     } else {
       window.posthog?.reset?.();
@@ -191,8 +226,9 @@ export function identify(userId: string | null) {
 
 export function syncReplayWithPath(path: string) {
   if (typeof window === "undefined") return;
+  lastPath = path;
   try {
-    if (isPrivatePath(path)) window.posthog?.stopSessionRecording?.();
+    if (isPrivatePath(path) || !analyticsPersistent()) window.posthog?.stopSessionRecording?.();
     else window.posthog?.startSessionRecording?.();
   } catch {
     /* ignore */
