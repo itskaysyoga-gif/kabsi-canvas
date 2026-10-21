@@ -15,6 +15,8 @@ values ('00000000-0000-0000-0000-000000000000', '00000000-0000-4000-8000-0000000
         'holiday-manager@example.test', now(), '{}', '{}', now(), now());
 insert into public.location_members (location_id, user_id, role)
 values ('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000b4', 'manager');
+-- The fixtures let managers approve hours; the default is the owner only, so the test starts from the default (K-16).
+delete from public.approval_policies where location_id = '00000000-0000-4000-8000-0000000000c1' and kind = 'hours';
 update public.locations set consent_at = now(), access_granted_at = now(), google_account_id = 'accounts/test',
   google_location_id = 'locations/mock-holiday', status = 'active', country = 'GB', time_zone = 'Europe/London'
  where id = '00000000-0000-4000-8000-0000000000c1';
@@ -132,13 +134,21 @@ select is(public.holiday_link_view('no-such-hash') ->> 'status', 'invalid', 'an 
 select throws_ok($$ select public.use_holiday_link('hash-linked', 'closed', null, null, null, null, null) $$, 'P0001', 'sign_in_required', 'the link alone cannot approve hours');
 select throws_ok($$ select public.use_holiday_link('hash-linked', 'closed', null, null, null, null, '00000000-0000-4000-8000-0000000000b1') $$, 'P0001', 'not_member', 'another account cannot');
 select throws_ok($$ select public.use_holiday_link('hash-linked', 'closed', null, null, null, null, '00000000-0000-4000-8000-0000000000b4') $$, '42501', 'not_allowed_to_approve', 'a manager cannot, by link either');
+insert into public.approval_policies (location_id, kind, policy, set_by)
+values ('00000000-0000-4000-8000-0000000000c1', 'hours', 'owner_and_managers', '00000000-0000-4000-8000-0000000000a1');
+select is(public.use_holiday_link('hash-linked', 'closed', null, null, null, null, '00000000-0000-4000-8000-0000000000b4') ->> 'answer', 'closed',
+  'once the owner lets managers approve hours, a manager can answer by link');
+select is((select approved_by from public.publications p join public.special_hours s on s.id = p.target_id where s.reason = 'Linked holiday' and p.state <> 'cancelled'),
+  '00000000-0000-4000-8000-0000000000b4'::uuid, 'and the approval is the manager''s');
+select is(public.undo_holiday_link('hash-linked', '00000000-0000-4000-8000-0000000000b4') ->> 'state', 'cancelled', 'who can undo it');
+delete from public.approval_policies where location_id = '00000000-0000-4000-8000-0000000000c1' and kind = 'hours';
 select is(public.use_holiday_link('hash-linked', 'closed', null, null, null, null, '00000000-0000-4000-8000-0000000000a1') ->> 'answer', 'closed', 'the signed-in owner answers by link');
 select is((select channel from public.holiday_prompts where token_hash = 'hash-linked'), 'email_link', 'recorded as the email link');
 select is(public.holiday_link_view('hash-linked') ->> 'status', 'answered', 'the link is used');
 select is(public.undo_holiday_link('hash-linked', '00000000-0000-4000-8000-0000000000a1') ->> 'state', 'cancelled', 'undo inside the 10 seconds cancels the approval');
 select is((select row(state, answer, special_hours_id)::text from public.holiday_prompts where token_hash = 'hash-linked'), row('asked', null, null::uuid)::text,
   'and gives the question back');
-select is((select state from public.special_hours where location_id = '00000000-0000-4000-8000-0000000000c1' and reason = 'Linked holiday'), 'skipped', 'the saved days are free again');
+select is((select bool_and(state = 'skipped') from public.special_hours where location_id = '00000000-0000-4000-8000-0000000000c1' and reason = 'Linked holiday'), true, 'the saved days are free again');
 select is(public.use_holiday_link('hash-linked', 'normal', null, null, null, null, null) ->> 'answer', 'normal', 'normal hours by link alone, signed out');
 update public.holiday_prompts set state = 'asked', answer = null, answered_at = null, channel = null, token_expires_at = now() - interval '1 hour'
  where token_hash = 'hash-linked';
