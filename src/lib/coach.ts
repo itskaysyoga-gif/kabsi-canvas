@@ -24,7 +24,20 @@ export type CoachDetail = {
   example?: boolean;
   mismatches?: string[];
   checked_at?: string;
+  exterior?: number;
+  interior?: number;
+  team?: number;
+  work?: number;
+  products?: number;
+  total?: number;
 };
+const PHOTO_KINDS = [
+  ["exterior", "the outside"],
+  ["interior", "the inside"],
+  ["team", "your team"],
+  ["work", "your work"],
+  ["products", "what you sell"],
+] as const;
 export type CoachRow = CoachCatalogItem & { status: CoachStatus; detail?: CoachDetail | undefined };
 
 export const COACH_ITEMS: readonly CoachCatalogItem[] = [
@@ -51,7 +64,7 @@ export const COACH_ITEMS: readonly CoachCatalogItem[] = [
   {
     id: "photos",
     title: "Photos of each kind",
-    why: "People look for the outside, the inside, your team, your work and what you sell. Kabsi counts them once photos are managed here.",
+    why: "People look for the outside, the inside, your team, your work and what you sell. Kabsi counts the photos you add through Kabsi.",
   },
   {
     id: "service_area",
@@ -96,6 +109,15 @@ export function detailLine(row: CoachRow): string | null {
   if (row.status === "later" && d.waits === "website")
     return "Add a website to your profile first.";
   if (row.status === "later" && d.waits === "photo_engine") return "Coming with photo management.";
+  if (row.status === "todo" && row.id === "photos") {
+    const missing = PHOTO_KINDS.filter(([k]) => !((d[k] ?? 0) > 0)).map(([, label]) => label);
+    if (!missing.length) return null;
+    const list =
+      missing.length === 1
+        ? missing[0]
+        : `${missing.slice(0, -1).join(", ")} and ${missing[missing.length - 1]}`;
+    return `No photo yet of ${list}.`;
+  }
   if (row.status === "unknown" && d.question === true)
     return "Tell Kabsi if customers do not visit you.";
   return null;

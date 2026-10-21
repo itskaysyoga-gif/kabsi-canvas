@@ -8,14 +8,15 @@
 // protection_check compares one business's Google profile with its Business Knowledge (protection.ts). The
 // whole-system steps the 5 minute cron ran (cron.ts) are one job each, offered every 5 minutes. photo_files, offered
 // by the daily retention run, removes
-// the uploaded photo files past their K-40 limit (P0.2-01, _shared/retention.ts). detect_tasks runs the task
+// the uploaded photo files past their K-40 limit (P0.2-01, _shared/retention.ts). process_photo hands one uploaded
+// photo to the `photos` function (P0.5-01). detect_tasks runs the task
 // detectors for one business every 5 minutes (P0.3-05, _shared/tasks.ts).
 // Publications (P0.1-13a and P0.1-13b, _shared/publish.ts): publish sends one approved reply, post, photo, special
 // hours period or Google Protection put-back once its undo window has passed; reconcile_publication reads Google for
 // one whose outcome is not known yet. Neither ever sends a write twice. These are the only Google writes in Kabsi,
 // apart from disconnect (P0.2-02, _shared/disconnect.ts), which removes Kabsi's own Manager entry after the signed-in
 // owner asked for it in Settings, and never touches the profile itself.
-import { admin, APP_URL, captureError, isInternal, jobLog, json, sha256Hex } from "../_shared/kabsi.ts";
+import { admin, APP_URL, captureError, internalSecret, isInternal, jobLog, json, sha256Hex } from "../_shared/kabsi.ts";
 import { notify, notifyDue } from "../_shared/notify.ts";
 import { lifecycleJob } from "../_shared/lifecycle-db.ts";
 import * as copy from "../_shared/email/copy.ts";
@@ -24,8 +25,8 @@ import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation }
 import { AiBudgetError } from "../_shared/ai-budget.ts";
 import { protectionCheck } from "../_shared/protection.ts";
 import {
-  addSpecialHours, coachRead, createLocalPost, createMedia, hasSpecialHours, localPostState, mediaExists, patchListing, protectionShown,
-  readReply, removeKabsiAccess, sendReply, type SpecialDay,
+  addSpecialHours, coachRead, createLocalPost, hasSpecialHours, localPostState, mediaExists, patchListing, protectionShown,
+  readReply, removeKabsiAccess, sendReply, type SpecialDay, uploadPhoto,
 } from "../_shared/google/index.ts";
 import { accessChangeEmail, type DisconnectDeps, runDisconnect } from "../_shared/disconnect.ts";
 import {
@@ -170,10 +171,10 @@ async function send(i: Item): Promise<Sent> {
       return { ref: r.ref, response: r.response, seen: POST_SEEN[r.state] };
     }
     case "photo": {
-      // Google fetches the photo from a short-lived signed link made now, not at approval.
-      const { data, error } = await admin().storage.from("owner-photos").createSignedUrl(str(p.storage_path), 3600);
-      if (error || !data) throw new NotSent(`photo file not available: ${error?.message ?? "sign_failed"}`);
-      const r = await createMedia(account, location, data.signedUrl, str(p.category) || "ADDITIONAL");
+      // The processed JPEG (no metadata, P0.5-01) goes up as bytes; Google never gets a link to Kabsi's storage.
+      const { data, error } = await admin().storage.from("owner-photos").download(str(p.storage_path));
+      if (error || !data) throw new NotSent(`photo file not available: ${error?.message ?? "download_failed"}`);
+      const r = await uploadPhoto(account, location, new Uint8Array(await data.arrayBuffer()), str(p.category) || "ADDITIONAL");
       return { ref: r.ref, response: r.response, seen: r.ref ? "shown" : undefined };
     }
     case "special_hours": {
@@ -310,6 +311,21 @@ const HANDLERS: Record<string, JobHandler> = {
   trial_reminders: step("trials", trialsJob),
   renewal_reminders: step("renewals", renewalsJob),
   photo_files: step("photo_files", () => removeDuePhotoFiles(photoFileStore(admin()))),
+  // P0.5-01: one uploaded photo, processed by the `photos` function (its own call, so a large photo has that
+  // function's time to itself and never holds up the other jobs here).
+  process_photo: async (job) => {
+    const photoId = String(job.payload.photo_id ?? "");
+    if (!photoId) throw new PermanentJobError("process_photo needs a photo");
+    const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/photos`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json", "x-cron-secret": (await internalSecret()) ?? "",
+        authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY") ?? ""}`,
+      },
+      body: JSON.stringify({ do: "process", photo_id: photoId }),
+    });
+    if (!res.ok) throw new Error(`photos ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  },
   disconnect: disconnectJob,
   // P0.3-05: the task detectors for one business (K-08); they also run at once in the database when a source changes.
   // P0.3-06: the invitation email for one team invite (Settings, Team); sent only while the invite is open.

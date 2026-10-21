@@ -51,8 +51,9 @@ export type LocalPost = {
 };
 export type ListLocalPostsResponse = { localPosts?: LocalPost[]; nextPageToken?: string };
 
+export type MediaItemDataRef = { resourceName: string };
 export type MediaItem = {
-  name?: string; mediaFormat?: "PHOTO" | "VIDEO"; sourceUrl?: string;
+  name?: string; mediaFormat?: "PHOTO" | "VIDEO"; sourceUrl?: string; dataRef?: MediaItemDataRef;
   locationAssociation?: { category?: string; priceListItemId?: string };
   googleUrl?: string; thumbnailUrl?: string; createTime?: string;
   dimensions?: { widthPixels?: number; heightPixels?: number };

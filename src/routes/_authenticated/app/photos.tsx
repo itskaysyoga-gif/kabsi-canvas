@@ -30,14 +30,35 @@ type Photo = {
   created_at: string;
 };
 const CATEGORIES: Record<string, string> = {
-  FOOD_AND_DRINK: "Food & drink",
-  PRODUCT: "Product",
-  INTERIOR: "Inside",
   EXTERIOR: "Outside",
-  TEAMS: "Team at work",
+  INTERIOR: "Inside",
+  TEAMS: "Team",
+  AT_WORK: "At work",
+  PRODUCT: "Product",
+  FOOD_AND_DRINK: "Food and drink",
+  MENU: "Menu",
   ADDITIONAL: "Other",
 };
-const MAX = 5 * 1024 * 1024;
+const MAX = 20 * 1024 * 1024;
+const EXT_BY_TYPE: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/heic": "heic",
+  "image/heif": "heic",
+  "video/mp4": "mp4",
+  "video/quicktime": "mov",
+};
+const TYPE_BY_EXT: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  heic: "image/heic",
+  heif: "image/heif",
+  mp4: "video/mp4",
+  mov: "video/quicktime",
+};
 
 async function loadPhotos(locationId: string) {
   const { data, error } = await supabase
@@ -86,35 +107,52 @@ function PhotosPage() {
   });
   const placeLink = usePlaceLink(access.data?.role === "staff" ? loc?.id : undefined);
 
-  async function onFile(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  // P0.5-01: up to 20 at a time. The file goes to the business's private folder and Kabsi's photo engine checks it in
+  // the background (its real type, size, location data removed, quality); nothing is checked here.
+  async function onFiles(e: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []).slice(0, 20);
     e.target.value = "";
-    if (!file || !loc) return;
+    if (!files.length || !loc) return;
     setMsg("");
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type))
-      return setMsg("Use a JPG, PNG or WebP photo.");
-    if (file.size > MAX) return setMsg("That photo is over 5 MB. Try a smaller one.");
     setBusy(true);
-    try {
-      const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-      const path = `${loc.id}/${crypto.randomUUID()}.${ext}`;
-      const up = await supabase.storage
-        .from("owner-photos")
-        .upload(path, file, { contentType: file.type });
-      if (up.error) throw new Error("Upload failed. Try again.");
-      const { data: id, error } = await supabase.rpc("add_photo", {
-        p_location: loc.id,
-        p_path: path,
-      });
-      if (error) throw new Error("Upload failed. Try again.");
-      await refresh();
-      setMsg("Checking your photo…");
-      await contentCall({ do: "photo_check", photo_id: id as string });
-      setMsg("");
-      await refresh();
-    } catch (x) {
-      setMsg(x instanceof Error ? x.message : "Something went wrong.");
+    let added = 0;
+    let note = "";
+    for (const file of files) {
+      if (file.size > MAX) {
+        note = "A file over 20 MB was left out.";
+        continue;
+      }
+      try {
+        const type =
+          file.type || TYPE_BY_EXT[file.name.split(".").pop()?.toLowerCase() ?? ""] || "";
+        const ext = EXT_BY_TYPE[type];
+        if (!ext) {
+          note = "Use JPG, PNG, WebP or HEIC photos.";
+          continue;
+        }
+        const path = `${loc.id}/${crypto.randomUUID()}.${ext}`;
+        const up = await supabase.storage
+          .from("owner-photos")
+          .upload(path, file, { contentType: type });
+        if (up.error) throw new Error("Upload failed. Try again.");
+        const { error } = await supabase.rpc("add_photo", { p_location: loc.id, p_path: path });
+        if (error) throw new Error("Upload failed. Try again.");
+        added++;
+      } catch (x) {
+        note = x instanceof Error ? x.message : "Something went wrong.";
+      }
     }
+    await refresh();
+    setMsg(
+      [
+        added
+          ? `${added} ${added === 1 ? "photo is" : "photos are"} being checked. This takes a minute.`
+          : "",
+        note,
+      ]
+        .filter(Boolean)
+        .join(" "),
+    );
     setBusy(false);
   }
 
@@ -135,14 +173,17 @@ function PhotosPage() {
       {loc && loc.status === "active" && !loc.concierge ? (
         <label className="mt-7 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-large border-2 border-dashed border-kb-hairline bg-kb-white p-8 text-center hover:border-kb-black">
           <ImagePlus className="size-8" aria-hidden="true" />
-          <span className="font-bold">{busy ? "Working…" : "Add a photo"}</span>
-          <span className="text-sm text-kb-stone">JPG, PNG or WebP, up to 5 MB</span>
+          <span className="font-bold">{busy ? "Working…" : "Add photos"}</span>
+          <span className="text-sm text-kb-stone">
+            Up to 20 at a time, 20 MB each. Kabsi removes location data from every photo.
+          </span>
           <input
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime"
+            multiple
             className="sr-only"
             disabled={busy}
-            onChange={(e) => void onFile(e)}
+            onChange={(e) => void onFiles(e)}
           />
         </label>
       ) : loc ? (
@@ -161,7 +202,10 @@ function PhotosPage() {
       ) : null}
       {(
         [
-          ["Waiting for you", (p: Photo) => p.state === "draft" || p.state === "checking"],
+          [
+            "Waiting for you",
+            (p: Photo) => ["draft", "checking", "refused", "held"].includes(p.state),
+          ],
           ["Sending to Google", (p: Photo) => p.state === "publishing"],
           ["On Google", (p: Photo) => p.state === "posted"],
           ["Couldn't post", (p: Photo) => p.state === "failed"],
@@ -208,15 +252,14 @@ function PhotoCard({
   const [category, setCategory] = useState(photo.category ?? "ADDITIONAL");
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
-  async function run(kind: "publish" | "skip" | "check") {
+  async function run(kind: "publish" | "skip") {
     setBusy(kind);
     setErr("");
     try {
       if (kind === "publish") {
         await contentCall({ do: "photo_publish", photo_id: photo.id, category });
         track("photo_approved", { channel: "dashboard" });
-      } else if (kind === "skip") await contentCall({ do: "photo_skip", photo_id: photo.id });
-      else await contentCall({ do: "photo_check", photo_id: photo.id });
+      } else await contentCall({ do: "photo_skip", photo_id: photo.id });
       onChanged();
     } catch (x) {
       setErr(x instanceof Error ? x.message : "Something went wrong.");
@@ -240,18 +283,10 @@ function PhotoCard({
       )}
       <div className="p-5">
         {photo.state === "checking" ? (
-          <>
-            <p className="text-sm text-kb-stone">Not checked yet.</p>
-            <Button
-              size="compact"
-              variant="outline"
-              className="mt-3"
-              disabled={!!busy}
-              onClick={() => void run("check")}
-            >
-              {busy === "check" ? "Checking…" : "Check photo"}
-            </Button>
-          </>
+          <p className="text-sm text-kb-stone">Kabsi is checking this photo.</p>
+        ) : null}
+        {photo.state === "refused" || photo.state === "held" ? (
+          <p className="text-sm text-kb-stone">{photo.suitability_note}</p>
         ) : null}
         {photo.state === "draft" ? (
           <>

@@ -10,9 +10,9 @@
 //   POST { do: "hours_publish", location_id, start_date, end_date, closed, open_time?, close_time?, reason? }
 //   POST { do: "hours_regular", location_id, week: { MONDAY: [{ open, close }], ... } }  → the weekly opening hours (P0.5-03)
 //   POST { do: "holiday_answer", prompt_id, answer: "normal" | "closed" | "custom", open?, close?, from?, to? }  → the holiday question
-//   POST { do: "photo_check", photo_id } · { do: "photo_publish", photo_id, category } · { do: "photo_skip", photo_id }
+//   POST { do: "photo_publish", photo_id, category } · { do: "photos_approve_all", location_id } · { do: "photo_skip", photo_id }
+//   (P0.5-01: uploads are checked by the process_photo job and the `photos` function, never here)
 //   POST { do: "shield_decide", change_id, decision: "revert" | "keep" }                  → Google Protection (D218)
-import { MODELS } from "../_shared/models.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
 import { parseWeek, regularHoursDisplay, validateWeek, weekToRaw } from "../_shared/hours.ts";
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
@@ -21,32 +21,10 @@ import { auditedAdmin, auditHeaders } from "../_shared/audit.ts";
 import { CTAS, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, withFacts, writePost } from "../_shared/posts.ts";
 import { AI_BUDGET_MESSAGE, AiBudgetError } from "../_shared/ai-budget.ts";
 
-const CHECK_MODEL = MODELS.check;
-const PHOTO_CATEGORIES = ["EXTERIOR", "INTERIOR", "PRODUCT", "FOOD_AND_DRINK", "TEAMS", "ADDITIONAL"];
+// Google's photo categories (P0.5-01). COVER and LOGO are the owner's preferred cover photo and logo: Google decides
+// what it shows, so the screen calls them "preferred".
+const PHOTO_CATEGORIES = ["EXTERIOR", "INTERIOR", "PRODUCT", "AT_WORK", "TEAMS", "FOOD_AND_DRINK", "MENU", "COMMON_AREA", "ROOMS", "ADDITIONAL", "COVER", "LOGO"];
 
-// Photo check (Haiku vision): is it a real, clear photo of the business that fits Google's photo rules?
-async function checkPhoto(bytes: Uint8Array, mime: string) {
-  const key = Deno.env.get("ANTHROPIC_API_KEY") ?? Deno.env.get("Anthropic_Api");
-  if (!key) throw new Error("anthropic_not_configured");
-  let bin = "";
-  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({
-      model: CHECK_MODEL, max_tokens: 300,
-      system: `You check a photo a business owner wants to add to their Google Business Profile. Reply with JSON only:
-{"suitable": true|false, "note": "<one short sentence for the owner>", "category": "EXTERIOR"|"INTERIOR"|"PRODUCT"|"FOOD_AND_DRINK"|"TEAMS"|"ADDITIONAL"}
-Not suitable: blurry or very dark; a screenshot, flyer, poster or mostly text; a stock-looking or AI-generated image; a logo alone; people's faces as the main subject; anything offensive. Suitable: a real, clear photo of the place, products, food, drinks or team at work.`,
-      messages: [{ role: "user", content: [{ type: "image", source: { type: "base64", media_type: mime, data: btoa(bin) } }, { type: "text", text: "Check this photo." }] }],
-    }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(`anthropic ${res.status}: ${JSON.stringify(data).slice(0, 200)}`);
-  const text = (data.content ?? []).filter((b: { type: string }) => b.type === "text").map((b: { text: string }) => b.text).join("");
-  const j = JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1)) as { suitable?: boolean; note?: string; category?: string };
-  return { suitable: j.suitable === true, note: String(j.note ?? "").slice(0, 200), category: PHOTO_CATEGORIES.includes(String(j.category)) ? String(j.category) : "ADDITIONAL" };
-}
 type Loc = PostLoc;
 
 // The owner's approval of one post, photo or special hours period (the one approval path, K-38, P0.1-13b). The
@@ -60,15 +38,16 @@ async function approveChange(req: Request, userId: string, targetType: "local_po
   return { state: r.state, publication: r.publication_id, publish_after: r.publish_after, created: r.created };
 }
 
-// K-16 (P0.3-06): staff may only check a photo they are adding; everything else here is for owners and managers.
+// K-16 (P0.3-06): staff add photos (the add_photo RPC) and share the review link; everything here is for owners and
+// managers.
 // Approvals (post_publish, photo_publish, hours_publish, shield_decide) are decided again in the database by the policy.
-async function member(req: Request, locationId: string, op: unknown) {
+async function member(req: Request, locationId: string) {
   const user = await currentUser(req);
   if (!user) return { error: fail("not_signed_in", "Please log in.", 401) };
   const db = admin();
   const { data: m } = await db.from("location_members").select("role").eq("location_id", locationId).eq("user_id", user.id).maybeSingle();
   if (!m) return { error: fail("forbidden", "You don't have access to this business.", 403) };
-  if (m.role === "staff" && op !== "photo_check") {
+  if (m.role === "staff") {
     return { error: fail("forbidden", "Staff can add photos and share the review link. The owner does the rest.", 403) };
   }
   const { data: loc } = await db.from("locations").select(POST_LOC_COLUMNS).eq("id", locationId).single();
@@ -108,11 +87,11 @@ Deno.serve(async (req) => {
       locationId = data.location_id;
     }
     if (!locationId) return fail("bad_input", "Missing business.");
-    const ctx = await member(req, locationId, b.do);
+    const ctx = await member(req, locationId);
     if ("error" in ctx) return ctx.error!;
     const { user, loc } = ctx;
     // Early access (D267): a person handles replies by hand; profile work starts once Kabsi connects to Google.
-    if (loc.concierge && /^(post_|photo_|hours_|holiday_|keyword_|shield_)/.test(String(b.do))) {
+    if (loc.concierge && /^(post_|photos?_|hours_|holiday_|keyword_|shield_)/.test(String(b.do))) {
       return fail("early_access", CONCIERGE_COPY.profile, 409);
     }
 
@@ -216,20 +195,9 @@ Deno.serve(async (req) => {
         const r = data as { state: string; answer: string; publication_id?: string; publish_after?: string | null; repeat?: boolean };
         return json({ ok: true, state: r.state, answer: r.answer, publication: r.publication_id ?? null, publish_after: r.publish_after ?? null, repeat: r.repeat === true });
       }
-      case "photo_check": {
-        if (!photo || photo.state !== "checking") return fail("bad_input", "This photo was already checked.");
-        if (!(await rateLimit(`photo_check:${loc.id}`, 30, 86400, { failClosed: true }))) return fail("rate_limited", "That's enough photos for today.", 429);
-        const { data: file, error } = await db.storage.from("owner-photos").download(photo.storage_path);
-        if (error || !file) throw error ?? new Error("download_failed");
-        const bytes = new Uint8Array(await file.arrayBuffer());
-        const mime = file.type && file.type.startsWith("image/") ? file.type : "image/jpeg";
-        const r = await checkPhoto(bytes, mime);
-        await db.from("photos").update({ suitable: r.suitable, suitability_note: r.note, category: r.category, state: "draft" }).eq("id", photo.id);
-        return json({ ok: true, ...r });
-      }
       case "photo_skip": {
         if (!photo) return fail("bad_input", "Missing photo.");
-        await db.from("photos").update({ state: "skipped" }).eq("id", photo.id).in("state", ["checking", "draft"]);
+        await db.from("photos").update({ state: "skipped" }).eq("id", photo.id).in("state", ["checking", "draft", "held", "refused"]);
         return json({ ok: true });
       }
       case "photo_publish": {
@@ -239,6 +207,19 @@ Deno.serve(async (req) => {
         // One approval (K-38): the publish job signs a fresh link to the photo when it sends it.
         const r = await approveChange(req, user.id, "photo", photo.id, { category });
         return json({ ok: true, ...r });
+      }
+      case "photos_approve_all": {
+        // The batch card (K-23): each checked photo is its own approval and its own publication, so each goes to
+        // Google once, after its own undo window. Photos Kabsi has doubts about are left for one by one.
+        if (loc.status !== "active" || !loc.google_location_id) return fail("not_active", "This business isn't active yet.", 409);
+        const { data: drafts, error } = await db.from("photos").select("id, category, suitable")
+          .eq("location_id", loc.id).eq("state", "draft").eq("kind", "photo").eq("suitable", true).limit(20);
+        if (error) throw error;
+        const results = [];
+        for (const d of drafts ?? []) {
+          results.push({ photo_id: d.id, ...(await approveChange(req, user.id, "photo", d.id, { category: d.category ?? "ADDITIONAL" })) });
+        }
+        return json({ ok: true, approved: results.length, results });
       }
       case "shield_decide": {
         // "accept" is "Google is right", "reject" is "Keep my information" (K-19). The older names still work.
@@ -274,6 +255,8 @@ Deno.serve(async (req) => {
     if (msg.includes("location_not_active")) return fail("not_active", "This business isn't active yet.", 409);
     if (msg.includes("concierge_profile")) return fail("early_access", CONCIERGE_COPY.profile, 409);
     if (msg.includes("bad_post_text")) return fail("bad_text", "Posts must be between 10 and 1,500 characters.");
+    if (msg.includes("video_later")) return fail("video_later", "Sending videos to Google comes later. Kabsi keeps this video for 30 days.", 409);
+    if (msg.includes("bad_category")) return fail("bad_input", "Choose a category for this photo.");
     await captureError("content", e);
     return fail("internal", "Something went wrong. Nothing was posted.", 500);
   }

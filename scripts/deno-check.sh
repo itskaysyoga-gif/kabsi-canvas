@@ -17,8 +17,9 @@ for dir in */; do
   [ "$fn" = "_shared" ] && continue
   deno check "$fn/index.ts"
 done
-# --allow-env: satori (the review graphic, P0.8-07) reads NODE_ENV and JEST_WORKER_ID when it loads.
-deno test --no-check --allow-env _shared/
+# --allow-env: satori (the review graphic, P0.8-07) reads NODE_ENV and JEST_WORKER_ID when it loads. --allow-read and
+# --allow-net: the photo engine tests (P0.5-01) read tests/fixtures/photos and load the image codecs.
+deno test --no-check --allow-env --allow-read --allow-net=deno.land,cdn.jsdelivr.net _shared/
 # P0.3-04: the evaluation set and the prompt gate, with stub models only (no network).
 cd "$scratch"
 deno check scripts/eval/*.ts
