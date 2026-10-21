@@ -10,7 +10,7 @@ Don't want weekly drafts? Switch them off on the Posts page.
 
 --
 Nothing is published until you approve it.
-Why you got this: Kabsi prepared a post or photos for you to approve.
+Why you got this: Kabsi prepared a post, photos or a question about your hours for you to approve.
 Email settings: https://kabsi.co/app/settings#choices
 Unsubscribe from these emails: https://kabsi.co/unsubscribe?t=SAMPLE
 

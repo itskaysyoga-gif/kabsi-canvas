@@ -15,7 +15,7 @@
 // one whose outcome is not known yet. Neither ever sends a write twice. These are the only Google writes in Kabsi,
 // apart from disconnect (P0.2-02, _shared/disconnect.ts), which removes Kabsi's own Manager entry after the signed-in
 // owner asked for it in Settings, and never touches the profile itself.
-import { admin, APP_URL, captureError, isInternal, jobLog, json } from "../_shared/kabsi.ts";
+import { admin, APP_URL, captureError, isInternal, jobLog, json, sha256Hex } from "../_shared/kabsi.ts";
 import { notify, notifyDue } from "../_shared/notify.ts";
 import { lifecycleJob } from "../_shared/lifecycle-db.ts";
 import * as copy from "../_shared/email/copy.ts";
@@ -34,6 +34,7 @@ import {
 import { accessJob, deletionsJob, ratingsJob, renewalsJob, trialsJob, weeklyJob } from "./cron.ts";
 import { photoFileStore, removeDuePhotoFiles } from "../_shared/retention.ts";
 import { detectTasks } from "../_shared/tasks.ts";
+import { type HolidayAsk, type HolidayAskDeps, sendHolidayAsks } from "../_shared/holiday.ts";
 import { sendTeamInvite, type TeamInvite, teamInviteEmail } from "../_shared/team.ts";
 
 // Offer a job. Returns its id, or null when the same dedupe key is already pending, running or retrying.
@@ -269,6 +270,19 @@ const step = (name: string, run: () => Promise<Record<string, unknown>>): JobHan
   if (Object.values(detail).some((v) => typeof v === "number" && v > 0)) await jobLog(name, true, { ...detail, ms: Date.now() - started });
 };
 
+// The holiday questions: which ones to email, the link's hash, and the email itself (P0.5-03, _shared/holiday.ts).
+const HOLIDAY_ASKS: HolidayAskDeps = {
+  toSend: (locationId) => rpcJson<HolidayAsk[]>("holiday_prompts_to_send", { p_location: locationId }),
+  async markSent(promptId, tokenHash, expires) {
+    await rpcJson("mark_holiday_prompt_sent", { p_prompt: promptId, p_token_hash: tokenHash, p_expires: expires.toISOString() });
+  },
+  notify,
+  sha256: sha256Hex,
+  random: () => crypto.getRandomValues(new Uint8Array(32)),
+  now: () => new Date(),
+  appUrl: APP_URL,
+};
+
 const HANDLERS: Record<string, JobHandler> = {
   sync_reviews: syncReviews,
   draft_reply: draftReplyJob,
@@ -312,6 +326,15 @@ const HANDLERS: Record<string, JobHandler> = {
   detect_tasks: async (job) => {
     const made = await detectTasks(job.location_id, (id) => rpcJson<Record<string, number> | null>("run_task_detectors", { p_location: id }));
     if (Object.values(made).some((n) => n > 0)) await jobLog("detect_tasks", true, { location: job.location_id, ...made });
+    // P0.5-03: the holiday questions the detector just opened are emailed. A failure here never fails the detectors.
+    if (job.location_id) {
+      try {
+        const sent = await sendHolidayAsks(job.location_id, HOLIDAY_ASKS);
+        if (sent > 0) await jobLog("holiday_asks", true, { location: job.location_id, sent });
+      } catch (e) {
+        await captureError("dispatch", e, { job: "holiday_asks", location: job.location_id });
+      }
+    }
   },
 };
 

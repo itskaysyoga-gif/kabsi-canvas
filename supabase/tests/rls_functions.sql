@@ -35,7 +35,7 @@ insert into tested values
   ('answer_knowledge_confirm(uuid,text)'), ('answer_style_offer(uuid,boolean)'),
   ('update_notification_settings(uuid,text[],smallint,text,integer)'),
   ('my_notification_prefs(uuid)'), ('set_notification_pref(uuid,text,text,text)'), ('list_my_notifications(uuid,integer)'),
-  ('mark_notifications_read(uuid,uuid[])');
+  ('mark_notifications_read(uuid,uuid[])'), ('holiday_calendar(uuid,integer)');
 
 select is(
   (select coalesce(array_agg(p.oid::regprocedure::text order by 1), '{}') from pg_proc p
@@ -138,6 +138,7 @@ select throws_ok($$ select public.confirm_business_details('00000000-0000-4000-8
 select throws_ok($$ select public.request_location_deletion('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'request_location_deletion refuses a non-member');
 select throws_ok($$ select public.save_consent('00000000-0000-4000-8000-0000000000c1', 'yes') $$, '42501', null, 'save_consent refuses a non-member');
 select throws_ok($$ select public.set_auto_posts('00000000-0000-4000-8000-0000000000c1', false) $$, '42501', null, 'set_auto_posts refuses a non-member');
+select throws_ok($$ select public.holiday_calendar('00000000-0000-4000-8000-0000000000c1', 60) $$, '42501', null, 'holiday_calendar refuses a non-member');
 select throws_ok($$ select public.set_card_active('VCTM22', false) $$, '42501', null, 'set_card_active refuses a non-member');
 select throws_ok($$ select public.set_review_link_mode('VCTM22', 'page') $$, '42501', null, 'set_review_link_mode refuses a non-member');
 select throws_ok($$ select public.feature_access('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'feature_access refuses a non-member');
