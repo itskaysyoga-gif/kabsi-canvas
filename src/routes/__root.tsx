@@ -16,7 +16,9 @@ import {
   startAnalytics,
   syncReplayWithPath,
   telemetryHeadScripts,
+  trackLanding,
 } from "@/lib/telemetry";
+import { captureTouch } from "@/lib/attribution";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { GlobalErrorBoundary } from "@/components/shared/error-boundary";
 import { Button } from "@/components/ui/button";
@@ -120,6 +122,8 @@ function RootComponent() {
   useEffect(() => {
     startAnalytics();
     syncReplayWithPath(pathname);
+    captureTouch();
+    trackLanding(pathname, window.location.search);
   }, [pathname]);
   return (
     <QueryClientProvider client={queryClient}>

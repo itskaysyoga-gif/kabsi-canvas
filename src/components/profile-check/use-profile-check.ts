@@ -28,7 +28,6 @@ export function useProfileCheck(source: "tool" | "onboarding") {
     setBusy(true);
     try {
       setResults(await findBusinesses(query, token));
-      track("free_tool_used", { source: `profile_check_search_${source}` });
     } catch (e) {
       setResults(null);
       fail(e);
@@ -42,7 +41,9 @@ export function useProfileCheck(source: "tool" | "onboarding") {
     try {
       setSnapshot(await runCheck(place.place_id, token));
       setPhase("result");
-      track("free_tool_used", { source: `profile_check_result_${source}` });
+      // G-44: the business is found, then its snapshot is on screen.
+      track("business_found", { source });
+      track("snapshot_viewed", { source });
     } catch (e) {
       fail(e);
     }

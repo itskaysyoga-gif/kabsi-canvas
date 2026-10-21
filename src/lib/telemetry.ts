@@ -14,7 +14,10 @@ import { analyticsAllowed, analyticsPersistent, onConsentChange } from "@/lib/co
 
 const SENTRY_PUBLIC_KEY = "b09a18a8ac370accf6b8e423fff77a8d";
 const POSTHOG_KEY = "phc_rDzVWhoR2wSXyVHVMypztnf8YKHCszd9c9mryMv6W4mW";
-const POSTHOG_HOST = "https://us.i.posthog.com";
+// P0.6-02: PostHog goes through kabsi.co itself (vercel.json rewrites /ingest to PostHog's US hosts), so ad blockers
+// that block posthog.com do not hide events. The server sends straight to PostHog (product_events).
+const POSTHOG_PROXY_PATH = "/ingest";
+const POSTHOG_UI_HOST = "https://us.posthog.com";
 
 type SentryLike = {
   init?: (options: Record<string, unknown>) => void;
@@ -81,7 +84,9 @@ const bootScript = `
   if (window.__kabsiAnalyticsStarted) return; window.__kabsiAnalyticsStarted = true;
   !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
   posthog.init(${JSON.stringify(POSTHOG_KEY)}, {
-    api_host: ${JSON.stringify(POSTHOG_HOST)},
+    api_host: location.origin + ${JSON.stringify(POSTHOG_PROXY_PATH)},
+    ui_host: ${JSON.stringify(POSTHOG_UI_HOST)},
+    autocapture: false,
     defaults: "2025-05-24",
     person_profiles: "identified_only",
     persistence: "memory",
@@ -135,34 +140,85 @@ export function reportError(error: unknown, context: Record<string, unknown> = {
   }
 }
 
-// Event names and allowed properties come from docs/KABSI-PLAN.md and the G-47 event map.
-export type KabsiEvent =
+// Event names exactly as G-31 and G-44 (P0.6-02): object_action, past tense, one name per action, the same name
+// whether the browser or the server sends it. The browser sends only what happens in the browser. Access, drafts,
+// approvals, publications, decisions, payments and new accounts are sent by the database from its own records
+// (public.product_events, supabase/migrations/20261021234210_product_events.sql), never from here.
+export type BrowserEvent =
+  | "landing_viewed"
+  | "business_found"
+  | "snapshot_viewed"
+  | "connect_started"
+  | "profile_state_seen"
+  | "setup_call_booked"
+  | "weekly_report_opened";
+
+// The server's names, listed so both sides read the same table. track() refuses them at compile time.
+export type ServerEvent =
+  | "registration_completed"
+  | "google_access_granted"
+  | "details_confirmed"
+  | "reply_draft_ready"
+  | "reply_approved"
+  | "reply_published"
+  | "backlog_cleared"
+  | "profile_change_decided"
+  | "photo_published"
+  | "post_published"
+  | "trial_converted"
+  | "payment_failed"
+  | "subscription_paused"
+  | "subscription_cancelled";
+
+// Names from before P0.6-02 that some screens still call. They send nothing: the action is either a server event now
+// or has no G-31 name. Remove the calls as those screens change.
+type RetiredEvent =
   | "signup_started"
   | "business_selected"
   | "eligibility_answered"
   | "consent_given"
-  | "access_granted"
   | "plan_selected"
-  | "checkout_started"
-  | "payment_recorded"
   | "draft_generated"
-  | "draft_edited"
-  | "reply_approved"
   | "reply_published"
   | "reply_skipped"
   | "reply_undone"
   | "post_approved"
   | "photo_approved"
   | "special_hours_approved"
-  | "shield_alert_sent"
   | "shield_reverted"
   | "shield_kept"
   | "card_activated"
-  | "lead_submitted"
   | "free_tool_used";
+export type KabsiEvent = BrowserEvent | RetiredEvent;
+const BROWSER_EVENTS: ReadonlySet<string> = new Set<BrowserEvent>([
+  "landing_viewed",
+  "business_found",
+  "snapshot_viewed",
+  "connect_started",
+  "profile_state_seen",
+  "setup_call_booked",
+  "weekly_report_opened",
+]);
 
+// Ids, countries, labels and UTM fields only. Never review text, reviewer names or email addresses.
 type SafeProps = Partial<
-  Record<"location_id" | "country" | "source" | "plan" | "channel" | "answer", string>
+  Record<
+    | "location_id"
+    | "country"
+    | "source"
+    | "plan"
+    | "channel"
+    | "answer"
+    | "route"
+    | "state"
+    | "page_type"
+    | "category"
+    | "utm_source"
+    | "utm_medium"
+    | "utm_campaign"
+    | "utm_content",
+    string
+  >
 >;
 
 // Demo workspace (P0.1-06, R-17): nothing from a demo business reaches PostHog. The app and the email-link page
@@ -201,11 +257,48 @@ function applyCapture() {
 
 export function track(event: KabsiEvent, properties: SafeProps = {}) {
   if (typeof window === "undefined" || paused || !analyticsAllowed()) return;
+  if (!BROWSER_EVENTS.has(event)) return;
   try {
     window.posthog?.capture?.(event, properties);
   } catch {
     /* ignore */
   }
+}
+
+// One landing_viewed per public page view (G-31: page_type and the UTM fields). Private pages send none.
+export function pageTypeOf(path: string): string {
+  if (path === "/") return "home";
+  const first = path.split("/")[1] ?? "";
+  const known: Record<string, string> = {
+    pricing: "pricing",
+    "how-it-works": "how_it_works",
+    faq: "faq",
+    guides: "guide",
+    for: "industry",
+    "google-profile-check": "tool_profile_check",
+    "google-review-link": "tool_review_link",
+    "get-started": "get_started",
+    "setup-call": "setup_call",
+    about: "about",
+    security: "security",
+    privacy: "legal",
+    terms: "legal",
+    partners: "partners",
+    review: "review_page",
+    meta: "meta",
+  };
+  return known[first] ?? "other";
+}
+export function trackLanding(path: string, search: string) {
+  if (isPrivatePath(path)) return;
+  const params = new URLSearchParams(search);
+  const props: SafeProps = { page_type: pageTypeOf(path) };
+  if (path.startsWith("/for/")) props.category = path.split("/")[2]?.slice(0, 40) ?? "";
+  for (const k of ["utm_source", "utm_medium", "utm_campaign", "utm_content"] as const) {
+    const v = params.get(k)?.trim().slice(0, 100);
+    if (v) props[k] = v;
+  }
+  track("landing_viewed", props);
 }
 
 export function identify(userId: string | null) {
