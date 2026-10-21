@@ -6,7 +6,7 @@
 import { admin, APP_URL, captureError, isInternal, jobLog, json } from "../_shared/kabsi.ts";
 import { notify } from "../_shared/notify.ts";
 import * as copy from "../_shared/email/copy.ts";
-import { dueRenewalEmail, dueTrialEmail, localDateHour, PLAN_LABEL, type RenewalStage, type TrialStage } from "../_shared/plans.ts";
+import { dueRenewalEmail, localDateHour, PLAN_LABEL, type RenewalStage } from "../_shared/plans.ts";
 import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google/index.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
 import { accessChangeEmail } from "../_shared/disconnect.ts";
@@ -159,29 +159,11 @@ export async function deletionsJob() {
 
 const formatDay = (ymd: string) => new Date(`${ymd}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 
-// Job: free trial reminders, 7 days, 1 day and the last day (Q05). Sent from 09:00 local time; one per stage per
-// address (the emails table's dedupe_key makes re-runs safe). This is a billing notice, so a pause on other emails
-// does not stop it. Nothing is sent when a paid plan already continues the business.
-export async function trialsJob() {
-  const db = admin();
-  const { data, error } = await db.rpc("trial_reminder_candidates");
-  if (error) throw error;
-  let reminders = 0;
-  for (const c of (data ?? []) as { plan_id: string; location_id: string; name: string; time_zone: string; last_day: string; continues: boolean }[]) {
-    const now = localDateHour(new Date(), c.time_zone);
-    const { data: done } = await db.from("emails").select("kind").eq("location_id", c.location_id).like("dedupe_key", `trial_%:${c.plan_id}:%`);
-    const sent = (done ?? []).map((r) => String(r.kind).replace("trial_", "")) as TrialStage[];
-    const stage = dueTrialEmail(c.last_day, now.date, now.hour, sent, c.continues);
-    if (!stage) continue;
-    const day = formatDay(c.last_day);
-    await notify({
-      category: "billing", kind: `trial_${stage}`, key: `trial_${stage}:${c.plan_id}`, locationId: c.location_id, to: "owners",
-      inApp: { title: `Your free trial ends ${stage === "d7" ? `on ${day}` : stage === "d1" ? "tomorrow" : "today"}`, link: "/app/plan" },
-      content: copy.trialReminder(stage, c.name, day, APP_URL),
-    }).catch((e) => captureError("cron-tick", e, { job: "trials", location: c.location_id }));
-    reminders++;
-  }
-  return { reminders };
+// Job: free trial reminders. Retired (P0.8-02b): the trial emails are the lifecycle set (P0.4-10: day 2, day 7, day 11,
+// day 14, in _shared/lifecycle.ts), so an owner never gets two sets. The job kind stays registered because
+// private.produce_jobs() still offers it every 5 minutes; it does nothing, and a later migration stops offering it.
+export function trialsJob() {
+  return Promise.resolve({ reminders: 0, retired: true });
 }
 
 // Job: renewal reminders for paid monthly and yearly plans (Q06), 5 days and 1 day before the last day, from 09:00

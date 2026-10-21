@@ -54,19 +54,6 @@ export function trialEnd(start: Date, tz: string, days: number): { lastDay: stri
   return { lastDay, endsAt: localMidnightUtc(addDays(lastDay, 1), tz) };
 }
 
-export type TrialStage = "d7" | "d1" | "d0";
-/**
- * Which reminder is due now, in the business's local time. Sent from 09:00 local on lastDay-7, lastDay-1 and
- * lastDay; only the latest due stage is sent (a late run never sends three at once) and never after lastDay.
- * Nothing is sent when a paid plan already continues the business past the trial.
- */
-export function dueTrialEmail(lastDay: string, localDate: string, localHour: number, sent: TrialStage[], continues: boolean): TrialStage | null {
-  if (continues || localDate > lastDay) return null;
-  const at = (ymd: string) => localDate > ymd || (localDate === ymd && localHour >= 9);
-  const stage: TrialStage | null = at(lastDay) ? "d0" : at(addDays(lastDay, -1)) ? "d1" : at(addDays(lastDay, -7)) ? "d7" : null;
-  return stage && !sent.includes(stage) ? stage : null;
-}
-
 const addMonthsUtc = (d: Date, months: number): Date => {
   const day = d.getUTCDate();
   const r = new Date(d.getTime());

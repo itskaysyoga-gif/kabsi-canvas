@@ -102,4 +102,7 @@ export const SYSTEM_WHY: Record<SystemCategory, string> = {
   internal: "This is a notice for the Kabsi team.",
 };
 
+/** Mail for the Kabsi team, not for a customer: it gets the plain staff footer (P0.8-02b). */
+export const isStaffCategory = (id: string) => id === "internal";
+
 export const categoryOf = (id: string): Category | undefined => (CATEGORIES as readonly Category[]).find((c) => c.id === id);

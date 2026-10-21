@@ -1,6 +1,6 @@
 // The review emails (K-13, K-102, R-30), as pure functions: what one review looks like in an email, from data the
 // caller has already read. reviews.ts reads the draft and makes the approval links; this file only writes the words.
-//   one review      "<Business>: new <n>-star review, reply ready" with the one yellow button "Review reply", and the
+//   one review      "<Business>: new <n>-star review, reply ready" with the one yellow button "Approve reply", and the
 //                   plain links Edit, Skip and Open Kabsi
 //   a risky review  "<Business>: a review needs a little more care": the checklist, no draft, one button "Open Kabsi"
 //   a digest line   the review and its draft with text links only, so the digest keeps its one button
@@ -59,12 +59,12 @@ export function reviewBlock(i: ReviewInput, withPost: boolean): Block {
   const plain = `${plainHead}\n\n${issueText}Drafted reply:\n${i.draft.body}`;
   if (withPost) {
     return {
-      html: drafted + `<div style="margin:0;">${emailLink("Review reply", i.links.post)}${emailLink("Edit", i.links.edit)}${emailLink("Skip", i.links.skip)}</div>`,
-      text: `${plain}\n\nReview reply: ${i.links.post}\nEdit: ${i.links.edit}\nSkip: ${i.links.skip}`,
+      html: drafted + `<div style="margin:0;">${emailLink("Approve reply", i.links.post)}${emailLink("Edit", i.links.edit)}${emailLink("Skip", i.links.skip)}</div>`,
+      text: `${plain}\n\nApprove reply: ${i.links.post}\nEdit: ${i.links.edit}\nSkip: ${i.links.skip}`,
     };
   }
   return {
-    html: drafted, text: plain, button: { label: "Review reply", url: i.links.post },
+    html: drafted, text: plain, button: { label: "Approve reply", url: i.links.post },
     links: [{ label: "Edit", url: i.links.edit }, { label: "Skip", url: i.links.skip }, { label: "Open Kabsi", url: inbox }],
   };
 }

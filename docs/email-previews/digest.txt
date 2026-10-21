@@ -10,19 +10,19 @@ Lovely staff and the best man'oushe in town.
 Drafted reply:
 Thank you, Sarah. We are glad you enjoyed your visit and we hope to see you again soon.
 
-Review reply: https://kabsi.co/a/POSTTOKEN
+Approve reply: https://kabsi.co/a/POSTTOKEN
 Edit: https://kabsi.co/a/EDITTOKEN
 Skip: https://kabsi.co/a/SKIPTOKEN
 
 ---
 
-Sarah: 5 of 5
-Lovely staff and the best man'oushe in town.
+Omar: 4 of 5
+Friendly service and fresh bread. It was busy, so we waited a little for a table.
 
 Drafted reply:
-Thank you, Sarah. We are glad you enjoyed your visit and we hope to see you again soon.
+Thank you, Omar. We are glad you liked the bread and the service, and we are sorry about the wait for a table. We hope to see you again soon.
 
-Review reply: https://kabsi.co/a/POSTTOKEN
+Approve reply: https://kabsi.co/a/POSTTOKEN
 Edit: https://kabsi.co/a/EDITTOKEN
 Skip: https://kabsi.co/a/SKIPTOKEN
 

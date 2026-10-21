@@ -298,5 +298,10 @@ Deno.test("findings: three to five, labelled, ordered, no score, no dashes or ex
   assert.equal(findings({ ...strong, hours: [] }).some((f) => f.title === "Your opening hours are missing"), true);
   const mail = checkEmail({ esc, appUrl: "https://kabsi.co" }, strong, true);
   assert.doesNotMatch(renderEmail(mail, CTX).html.replace("<!doctype html>", "") + mail.text + mail.subject, /[\u2013\u2014!]/);
-  assert.match(mail.text, /Join early access: https:\/\/kabsi.co\/start/);
+  assert.match(mail.text, /Start your free trial: https:\/\/kabsi.co\/get-started/);
+  assert.doesNotMatch(mail.text + mail.bodyHtml, /Join early access/);
+  // The public-information sentence is the note, said once in the rendered email and not also in the body (P0.8-02b).
+  const rendered = renderEmail(mail, CTX);
+  assert.equal(rendered.text.split("This check uses public information").length - 1, 1);
+  assert.equal(rendered.html.split("This check uses public information").length - 1, 1);
 });

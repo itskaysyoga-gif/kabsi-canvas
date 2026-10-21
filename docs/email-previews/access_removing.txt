@@ -6,7 +6,7 @@ Kabsi could not remove its own Manager access this time, so a person on our team
 
 You can also remove it yourself now: On your Business Profile open Menu, then Business Profile settings, then People and access. Remove Kabsi Clients there.
 
-You stay the owner of your profile. Your review link and cards keep working until your plan ends.
+You stay the owner of your profile. Your review link and QR code keep working.
 
 Open Kabsi: https://kabsi.co/app/settings
 

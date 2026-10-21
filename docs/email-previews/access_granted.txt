@@ -6,7 +6,7 @@ What it lets Kabsi do: read your reviews and profile, and publish only what you 
 
 Kabsi is now watching your reviews. When the next one arrives you'll get an email with a reply ready.
 
-How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or On your Business Profile open Menu, then Business Profile settings, then People and access. Remove Kabsi Clients there.
+How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or on your Business Profile open Menu, then Business Profile settings, then People and access. Remove Kabsi Clients there.
 
 Open Kabsi: https://kabsi.co/app
 

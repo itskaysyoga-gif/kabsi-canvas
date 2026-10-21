@@ -1,6 +1,6 @@
 // Run: deno test supabase/functions/_shared/plans.test.ts
 import assert from "node:assert/strict";
-import { dueRenewalEmail, dueTrialEmail, paidWindow, trialDays, trialEligible, trialEnd } from "./plans.ts";
+import { dueRenewalEmail, paidWindow, trialDays, trialEligible, trialEnd } from "./plans.ts";
 
 const iso = (d: Date) => d.toISOString().replace(".000", "");
 
@@ -21,21 +21,6 @@ Deno.test("trialEnd is the local last day, ending at local midnight after it", (
     assert.equal(r.lastDay, lastDay, `${start} ${tz} lastDay`);
     assert.equal(iso(r.endsAt), endsAt, `${start} ${tz} endsAt`);
   }
-});
-
-Deno.test("dueTrialEmail picks one stage from 09:00 local and never after the last day", () => {
-  const last = "2026-10-15";
-  const t = (d: string, h: number, sent: ("d7" | "d1" | "d0")[] = [], continues = false) => dueTrialEmail(last, d, h, sent, continues);
-  assert.equal(t("2026-10-07", 10), null);
-  assert.equal(t("2026-10-08", 8), null);
-  assert.equal(t("2026-10-08", 9), "d7");
-  assert.equal(t("2026-10-08", 9, ["d7"]), null);
-  assert.equal(t("2026-10-10", 14), "d7"); // catch-up after a missed run
-  assert.equal(t("2026-10-14", 9), "d1"); // d7 skipped when d1 is already due
-  assert.equal(t("2026-10-15", 9, ["d7", "d1"]), "d0");
-  assert.equal(t("2026-10-15", 8, ["d7"]), "d1");
-  assert.equal(t("2026-10-16", 9), null);
-  assert.equal(t("2026-10-08", 9, [], true), null); // a paid plan continues: no reminder
 });
 
 Deno.test("paidWindow starts after the latest active plan and clamps month ends", () => {
