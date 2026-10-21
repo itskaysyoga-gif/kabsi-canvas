@@ -8,10 +8,12 @@
 //   POST { do: "post_skip", post_id }
 //   POST { do: "keyword_suggest", location_id }                                       → search phrases for posts
 //   POST { do: "hours_publish", location_id, start_date, end_date, closed, open_time?, close_time?, reason? }
+//   POST { do: "hours_regular", location_id, week: { MONDAY: [{ open, close }], ... } }  → the weekly opening hours (P0.5-03)
 //   POST { do: "photo_check", photo_id } · { do: "photo_publish", photo_id, category } · { do: "photo_skip", photo_id }
 //   POST { do: "shield_decide", change_id, decision: "revert" | "keep" }                  → Google Protection (D218)
 import { MODELS } from "../_shared/models.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
+import { parseWeek, regularHoursDisplay, validateWeek, weekToRaw } from "../_shared/hours.ts";
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
 import { decideChange, decisionRefusal } from "../_shared/protection.ts";
 import { auditedAdmin, auditHeaders } from "../_shared/audit.ts";
@@ -176,6 +178,23 @@ Deno.serve(async (req) => {
           throw err;
         }
       }
+      case "hours_regular": {
+        // The owner's own weekly hours (P0.5-03, K-21): the approval of exactly this week. The database makes it the
+        // approved fact Google Protection compares and sends it through the one pipeline after the undo window.
+        if (loc.status !== "active" || !loc.google_location_id) return fail("not_active", "This business isn't active yet.", 409);
+        const week = parseWeek(b.week);
+        const problem = week ? validateWeek(week) : "Check the hours.";
+        if (!week || problem) return fail("bad_input", problem ?? "Check the hours.");
+        if (!(await rateLimit(`hours_regular:${loc.id}`, 20, 86400, { failClosed: true }))) return fail("rate_limited", "That is enough changes for today. Try again tomorrow.", 429);
+        const raw = weekToRaw(week);
+        const { data, error } = await auditedAdmin(auditHeaders(req, user.id)).rpc("apply_regular_hours", {
+          p_location: loc.id, p_user: user.id, p_channel: "dashboard", p_display: regularHoursDisplay(raw), p_raw: raw,
+        });
+        if (error) throw new Error(error.message);
+        const r = data as { state: string; publication_id?: string; publish_after?: string | null; created?: boolean };
+        if (r.state === "unchanged") return json({ ok: true, state: "unchanged" });
+        return json({ ok: true, state: r.state, publication: r.publication_id ?? null, publish_after: r.publish_after ?? null, created: r.created ?? true });
+      }
       case "photo_check": {
         if (!photo || photo.state !== "checking") return fail("bad_input", "This photo was already checked.");
         if (!(await rateLimit(`photo_check:${loc.id}`, 30, 86400, { failClosed: true }))) return fail("rate_limited", "That's enough photos for today.", 429);
@@ -221,6 +240,7 @@ Deno.serve(async (req) => {
     // The daily AI budget is used up (K-100): a clear message, not an error report.
     if (e instanceof AiBudgetError) return fail("ai_budget", AI_BUDGET_MESSAGE[e.scope], 429);
     const msg = String(e);
+    if (msg.includes("bad_hours")) return fail("bad_input", "Check the hours.");
     if (msg.includes("already_handled")) return fail("bad_input", "This was already handled.", 409);
     if (msg.includes("not_allowed_to_approve") || msg.includes("owner_only")) {
       return fail("owner_approves", "The owner approves this one. They can let managers approve it in Settings, Team.", 403);
