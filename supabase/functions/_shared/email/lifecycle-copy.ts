@@ -124,7 +124,8 @@ export function lifecycleEmail(step: StepId, s: Snapshot, c: LifecycleCtx): Emai
       const what = parts.join(" and ");
       const verb = s.waitingReviews + s.waitingChanges === 1 ? "is" : "are";
       return {
-        subject: `${s.name}: ${what} ${verb} waiting for you`, title: step === "winback_17" ? "Kabsi kept what it prepared" : "Still here when you want to continue",
+        subject: step === "winback_17" ? `${s.name}: ${what} ${verb} waiting for you` : `${s.name}: what Kabsi prepared is still here`,
+        title: step === "winback_17" ? "Kabsi kept what it prepared" : "Still here when you want to continue",
         preheader: "Choose a plan to pick up where you left off.",
         why: "You tried Kabsi and agreed to get emails about it. You can stop them with the link below.",
         bodyHtml: p(`Your free trial ended and Kabsi stopped. ${esc(what)} ${verb} still waiting in Kabsi for <strong>${esc(s.name)}</strong>, with replies already prepared where Kabsi could write one. Nothing is published until you approve it.`) + p("Choose a plan to pick up where you left off."),

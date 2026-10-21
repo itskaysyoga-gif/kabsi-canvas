@@ -124,3 +124,19 @@ Deno.test("retired emails stay gone (P0.8-01, K-123 to K-127): no partner, payme
     assert.doesNotMatch(all, /\bcash\b|NFC card(s)? (order|price)|order (a|your) card/i, c.kind);
   }
 });
+
+Deno.test("P0.8-02: the two win-backs have different subjects", () => {
+  const s17 = catalog().find((c) => c.kind === "life_winback_17")!.content.subject;
+  const s30 = catalog().find((c) => c.kind === "life_winback_30")!.content.subject;
+  assert.notEqual(s17, s30);
+  assert.ok(s17.startsWith("Yawmiyati: ") && s30.startsWith("Yawmiyati: "));
+});
+
+Deno.test("P0.8-02: no email keeps the old Weekly Care Report subject or the old deletion wording", () => {
+  for (const c of catalog()) {
+    const all = `${c.content.subject}\n${c.content.title}\n${c.content.preheader}`;
+    assert.doesNotMatch(all, /Your week on Google/, c.kind);
+    assert.doesNotMatch(all, /will be deleted from Kabsi/, c.kind);
+  }
+  assert.equal(catalog().find((c) => c.kind === "weekly_report")!.content.subject, "Yawmiyati: your Weekly Care Report");
+});

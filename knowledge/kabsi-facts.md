@@ -577,7 +577,7 @@ The privacy page shows the 11 rows of the retention table (`retention_policies`,
 ### 9.8 Your rights and deleting data
 
 - You can ask to see, correct, delete, get a copy of, or object to the use of your data. Most of it works in the app; otherwise email hello@kabsi.co from your account address, and Kabsi replies within 30 days. You can also complain to your local data protection authority.
-- **Delete a business:** Settings, Emails page, **Delete this business from Kabsi**, type the business name, **Delete in 7 days**. You get an email notice. Until the date, everything keeps working and you can tap **Cancel deletion**. Then Kabsi deletes reviews, drafts, posts, photos, reports and settings, deletes review links, unlinks NFC cards (they stop opening your page), and emails a confirmation. Payment records are kept where the law requires.
+- **Delete a business:** Settings, Emails page, **Delete this business from Kabsi**, type the business name, **Delete in 7 days**. You get an email notice ("<Business>: leaves Kabsi on <date> unless you cancel"). Until the date, everything keeps working and you can tap **Cancel deletion**. Then Kabsi deletes reviews, drafts, posts, photos, reports and settings, deletes review links, unlinks NFC cards (they stop opening your page), and emails a confirmation. Payment records are kept where the law requires.
 - Also remove the Kabsi Clients group (ID 5481006796) from People and access. To delete your login too, or if you can't sign in, email hello@kabsi.co.
 - A reviewer asking about their review: hand off.
 

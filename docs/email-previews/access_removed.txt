@@ -1,0 +1,20 @@
+Subject: Yawmiyati: Kabsi is disconnected
+
+What changed: on 20 October 2026 Kabsi removed its Manager access to Yawmiyati's Google profile. Kabsi no longer reads or changes anything on it, and approvals that were waiting were cancelled.
+
+How to check: On your Business Profile open Menu, then Business Profile settings, then People and access. Kabsi Clients is no longer listed. You stay the owner, and nothing else on your profile changed.
+
+What happens next: the Google data Kabsi kept for you is deleted within 30 days. Your review link and cards keep working until your plan ends. To use Kabsi again, write to hello@kabsi.co.
+
+Open Kabsi: https://kabsi.co/app
+
+This is Kabsi's own notice of a change to your Google access.
+
+--
+Nothing is published until you approve it.
+Why you got this: This is Kabsi's own notice of a change to your Google access.
+Email settings: https://kabsi.co/app/settings#choices
+
+Questions? Reply to this email or write to hello@kabsi.co. WhatsApp +1 201-483-5474.
+Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.
+Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co
