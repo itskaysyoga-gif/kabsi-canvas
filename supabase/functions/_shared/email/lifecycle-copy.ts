@@ -17,7 +17,8 @@ export type LifecycleCtx = { appUrl: string; removalOn: boolean };
 const day = (d: Date | null, tz: string) => (d ? d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: tz }) : "");
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
-const helpLinks = (c: LifecycleCtx) => [{ label: "Book a free setup call", url: `${c.appUrl}/setup-call` }, { label: "Message us on WhatsApp", url: WHATSAPP_URL }];
+// The WhatsApp link is left out while Kabsi has no WhatsApp number (whatsapp-setting.ts); the footer keeps hello@kabsi.co.
+const helpLinks = (c: LifecycleCtx) => [{ label: "Book a free setup call", url: `${c.appUrl}/setup-call` }, ...(WHATSAPP_URL ? [{ label: "Message us on WhatsApp", url: WHATSAPP_URL }] : [])];
 
 function noAccess(step: "no_access_1h" | "no_access_24h" | "no_access_72h", s: Snapshot, c: LifecycleCtx): EmailContent {
   const url = `${c.appUrl}/manager-steps`;

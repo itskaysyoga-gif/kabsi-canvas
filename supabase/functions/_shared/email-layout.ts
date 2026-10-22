@@ -2,9 +2,13 @@
 // itself (sand background, white card, footer) is email/template.ts. Pure functions, no environment access.
 import { FONT, TOKENS } from "./email/tokens.ts";
 export const LOGO = "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/brand/mark.png?v=2";
-// Kabsi's WhatsApp number (K-122), answered by a person. Keep equal to WHATSAPP_NUMBER in src/lib/site.ts (tests/whatsapp.test.ts checks it).
-export const WHATSAPP_NUMBER = "+1 201-483-5474";
-export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, "")}?text=${encodeURIComponent("Hello Kabsi, I have a question about an email I got from Kabsi.")}`;
+// Kabsi's WhatsApp number (K-122) comes from the one setting, whatsapp-setting.ts. While it is empty WHATSAPP_URL is
+// null and every email leaves the WhatsApp line out (hello@kabsi.co stays).
+import { WHATSAPP_DIGITS, WHATSAPP_NUMBER, WHATSAPP_ON } from "./whatsapp-setting.ts";
+export { WHATSAPP_NUMBER, WHATSAPP_ON };
+export const WHATSAPP_URL: string | null = WHATSAPP_ON
+  ? `https://wa.me/${WHATSAPP_DIGITS}?text=${encodeURIComponent("Hello Kabsi, I have a question about an email I got from Kabsi.")}`
+  : null;
 // The Kabsi Clients Google group owners add as Manager. Keep equal to KABSI_GROUP_ID in src/lib/site.ts (tests/notifications.test.ts checks it).
 export const KABSI_GROUP_ID = "5481006796";
 // The legal seller (D1, R-20). Keep equal to LEGAL_SELLER in src/lib/site.ts (tests/notifications.test.ts checks it).

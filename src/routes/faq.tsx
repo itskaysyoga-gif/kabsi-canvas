@@ -13,7 +13,7 @@ import {
 import { AnswerVisual } from "@/components/marketing/visuals";
 import { BookingLink } from "@/components/shared/booking-link";
 import { WhatsappLink } from "@/components/shared/whatsapp-link";
-import { CONTACT_EMAIL, WHATSAPP_NUMBER, pageHead } from "@/lib/site";
+import { CONTACT_EMAIL, WHATSAPP_NUMBER, WHATSAPP_ON, pageHead } from "@/lib/site";
 import { FAQ, faqJsonLd } from "@/lib/faq";
 
 export const Route = createFileRoute("/faq")({
@@ -60,14 +60,16 @@ function Page() {
                     {CONTACT_EMAIL}
                   </a>
                 </li>
-                <li className="flex items-center gap-3">
-                  <IconBadge
-                    icon={<MessageCircle />}
-                    tone="sand"
-                    className="size-9 bg-kb-white [&_svg]:size-4"
-                  />
-                  <WhatsappLink kind="general">WhatsApp {WHATSAPP_NUMBER}</WhatsappLink>
-                </li>
+                {WHATSAPP_ON ? (
+                  <li className="flex items-center gap-3">
+                    <IconBadge
+                      icon={<MessageCircle />}
+                      tone="sand"
+                      className="size-9 bg-kb-white [&_svg]:size-4"
+                    />
+                    <WhatsappLink kind="general">WhatsApp {WHATSAPP_NUMBER}</WhatsappLink>
+                  </li>
+                ) : null}
                 <li className="flex items-center gap-3">
                   <IconBadge
                     icon={<BookOpen />}

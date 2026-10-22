@@ -16,6 +16,7 @@ import * as copy from "../_shared/email/copy.ts";
 import { MODELS } from "../_shared/models.ts";
 import { countryFromTimezone } from "../_shared/tz-country.ts";
 import { nextTasks } from "../_shared/tasks.ts";
+import { WHATSAPP_NUMBER, WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
 
 const MODEL = MODELS.chat;
 const CLASSIFY_MODEL = MODELS.check;
@@ -88,7 +89,7 @@ Getting to know them (like a good person at a shop counter, never a gate)
 Handing off to a person
 - Hand off when: the knowledge base doesn't answer it after one honest try, billing disputes or refunds, account access problems you can't solve, legal or privacy requests, a bug, anything in the knowledge base's hand-off list, the visitor asks for a person, or the visitor is upset after one calm reply.
 - To hand off you need an email address to reply to. If the <context> shows a signed-in email, use it. Otherwise ask for it first.
-- Then call hand_off_to_human with a clear summary. Tell them a person will reply by email, usually within one working day, and that they can also write to hello@kabsi.co or message the team on WhatsApp, +1 201-483-5474, where a person answers. Nothing is approved or changed over WhatsApp, and Kabsi never asks for a Google password or codes there.
+- Then call hand_off_to_human with a clear summary. Tell them a person will reply by email, usually within one working day, and that they can also write to hello@kabsi.co${WHATSAPP_ON ? ` or message the team on WhatsApp, ${WHATSAPP_NUMBER}, where a person answers. Nothing is approved or changed over WhatsApp, and Kabsi never asks for a Google password or codes there` : `. Kabsi has no WhatsApp number at the moment, so never give one. Kabsi never asks for a Google password or codes`}.
 - Never claim you handed off unless the tool returned ok.
 
 ## Signed-in owners (only when the tools list_tasks and save_fact are available)

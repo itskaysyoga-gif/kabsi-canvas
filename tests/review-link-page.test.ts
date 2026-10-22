@@ -100,7 +100,7 @@ describe("what the function returns", () => {
   });
 
   it("uses only an international number for wa.me", () => {
-    expect(whatsappDigits("+1 (201) 483-5474")).toBe("12014835474");
+    expect(whatsappDigits("+1 (201) 555-0100")).toBe("12015550100");
     expect(whatsappDigits("050 123 4567")).toBeNull();
     expect(whatsappDigits("+12")).toBeNull();
     expect(whatsappDigits("+1234567890123456")).toBeNull();

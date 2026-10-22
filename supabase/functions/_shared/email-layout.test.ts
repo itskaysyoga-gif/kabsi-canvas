@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { emailButton, emailLink } from "./email-layout.ts";
+import { WHATSAPP_DIGITS, WHATSAPP_NUMBER, WHATSAPP_ON } from "./whatsapp-setting.ts";
 import { type EmailContent, renderEmail } from "./email/template.ts";
 
 // The page is the one template (email/template.ts); the pieces are in email-layout.ts.
@@ -48,9 +49,14 @@ Deno.test("button width never exceeds the phone content width", () => {
   assert.match(emailButton("Open Google Protection", "https://x.test/"), /width="100%"[^>]*max-width:320px/);
 });
 
-Deno.test("every email footer carries the WhatsApp click-to-chat link and the number", () => {
+Deno.test("every email footer carries the WhatsApp line only while the setting has a number", () => {
   const html = emailLayout({ bodyHtml: "<p>Hello</p>" });
-  assert.equal(html.includes("https://wa.me/12014835474?text=Hello%20Kabsi"), true);
-  assert.equal(html.includes("WhatsApp +1 201-483-5474"), true);
+  if (WHATSAPP_ON) {
+    assert.equal(html.includes(`https://wa.me/${WHATSAPP_DIGITS}?text=Hello%20Kabsi`), true);
+    assert.equal(html.includes(`WhatsApp ${WHATSAPP_NUMBER}`), true);
+  } else {
+    assert.equal(/WhatsApp|wa\.me/.test(html), false);
+    assert.equal(html.includes("hello@kabsi.co"), true);
+  }
   assert.equal(yellow(html), 0);
 });

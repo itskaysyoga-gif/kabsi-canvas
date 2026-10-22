@@ -9,6 +9,7 @@ import {
   CONTACT_EMAIL,
   SETUP_CALL_MINUTES,
   WHATSAPP_NUMBER,
+  WHATSAPP_ON,
   bookingUrl,
   pageHead,
 } from "@/lib/site";
@@ -82,15 +83,17 @@ function SetupCallPage() {
           </a>
           .
         </p>
-        <p className="text-sm text-kb-stone">
-          Prefer to type? Message us on{" "}
-          <WhatsappLink
-            kind={kind === "setup" ? "setup" : kind === "partner" ? "partner" : "general"}
-          >
-            WhatsApp {WHATSAPP_NUMBER}
-          </WhatsappLink>
-          . A person replies. We never ask for your Google password or codes there either.
-        </p>
+        {WHATSAPP_ON ? (
+          <p className="text-sm text-kb-stone">
+            Prefer to type? Message us on{" "}
+            <WhatsappLink
+              kind={kind === "setup" ? "setup" : kind === "partner" ? "partner" : "general"}
+            >
+              WhatsApp {WHATSAPP_NUMBER}
+            </WhatsappLink>
+            . A person replies. We never ask for your Google password or codes there either.
+          </p>
+        ) : null}
       </Section>
     </PublicLayout>
   );
