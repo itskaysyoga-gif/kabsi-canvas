@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { LIFE_SAMPLE } from "./email/catalog.ts";
-import { lifecycleEmail, PRICE_MONTHLY, PRICE_YEARLY } from "./email/lifecycle-copy.ts";
+import { CARD_PAYMENTS_COMING, lifecycleEmail, PLAN_PRICES, PRICES_SENTENCE } from "./email/lifecycle-copy.ts";
 import { dueSteps, lifecycleKey, marketingAllowed, OPT_IN_COUNTRIES, type Snapshot, type StepId } from "./lifecycle.ts";
 import { type LifecycleDeps, runLifecycle } from "./lifecycle-run.ts";
 
@@ -171,13 +171,21 @@ Deno.test("the day-7 recap says exactly the numbers of the snapshot, which come 
   assert.doesNotMatch(one.text, /posts? you approved/);
 });
 
-Deno.test("prices and offer: both prices, the yearly offer from day 7, no end-of-trial discount", () => {
+Deno.test("prices and offer: Essentials, Pro and an extra location, card payments marked coming, no end-of-trial discount", () => {
   const ctx = { appUrl: "https://kabsi.co", removalOn: true };
-  for (const step of ["trial_day7", "trial_day11"] as const) {
-    const t = lifecycleEmail(step, LIFE_SAMPLE, ctx).text;
-    assert.match(t, new RegExp(`\\$${PRICE_MONTHLY} a month`));
-    assert.match(t, new RegExp(`\\$${PRICE_YEARLY} a year, which is two months free`));
-    assert.match(t, /plus tax where it applies/);
+  assert.deepEqual(Object.values(PLAN_PRICES), [19, 190, 39, 390, 15, 150]);
+  for (const step of ["trial_day7", "trial_day11", "trial_day14", "winback_17", "winback_30"] as const) {
+    const m = lifecycleEmail(step, LIFE_SAMPLE, ctx);
+    for (const t of [m.text, m.bodyHtml]) {
+      assert.match(t, /Essentials is \$19 a month or \$190 a year/, step);
+      assert.match(t, /Pro is \$39 a month or \$390 a year/, step);
+      assert.match(t, /An extra location is \$15 a month or \$150 a year/, step);
+      assert.match(t, /plus tax where it applies/, step);
+    }
+    assert.ok(m.text.includes(PRICES_SENTENCE), step);
+    assert.ok(m.text.includes(CARD_PAYMENTS_COMING), step);
+    assert.equal(m.button?.label, "See your plan", step);
+    assert.doesNotMatch(m.text, /Kabsi Pro is \$19|Choose a plan:|checkout/i, step);
   }
   for (const step of Object.keys({ welcome: 1, no_access_1h: 1, no_access_24h: 1, no_access_72h: 1, first_reply_approved: 1, trial_day2: 1, trial_day7: 1, trial_day11: 1, trial_day14: 1, winback_17: 1, winback_30: 1 }) as StepId[]) {
     const m = lifecycleEmail(step, LIFE_SAMPLE, ctx);

@@ -5,6 +5,7 @@
 // supabase/functions/_shared/whatsapp-setting.ts switches every line with no code change.
 import {
   CHECKOUT_LIVE,
+  COMING_SOON,
   CTA_CHECK,
   CTA_PRIMARY,
   GOOGLE_NOTICE,
@@ -32,7 +33,7 @@ export const HOME_ORDER = [
 export type HomeSection = (typeof HOME_ORDER)[number];
 
 /** The marker on a feature that is decided and not built, or built and waiting. No date, ever. */
-export const COMING_SOON = "Coming soon";
+export { COMING_SOON };
 
 export const PILLARS = [
   {
