@@ -275,7 +275,9 @@ export function gate(s: Score, expected = 200): { pass: boolean; failures: strin
 export function sample(n: number, list: Case[] = CASES): Case[] {
   const by = new Map<string, Case[]>();
   for (const c of list) by.set(c.category, [...(by.get(c.category) ?? []), c]);
-  return [...by.values()].flatMap((cs) => cs.slice(0, Math.max(1, Math.round((cs.length * n) / list.length))));
+  return [...by.values()].flatMap((cs) =>
+    cs.slice(0, Math.max(1, Math.round((cs.length * n) / list.length))),
+  );
 }
 
 export async function runAll(

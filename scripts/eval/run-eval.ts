@@ -37,7 +37,10 @@ if (stub) {
   Deno.exit(2);
 }
 
-const { results, score, gate } = await runAll(model, { concurrency: stub ? 1 : 4, cases: size ? sample(size) : undefined });
+const { results, score, gate } = await runAll(model, {
+  concurrency: stub ? 1 : 4,
+  cases: size ? sample(size) : undefined,
+});
 if (out) await Deno.writeTextFile(out, JSON.stringify({ score, gate, results }, null, 1));
 const pct = (n: number) => `${Math.round(n * 1000) / 10} percent`;
 console.log(
