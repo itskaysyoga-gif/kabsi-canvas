@@ -1,0 +1,35 @@
+{
+  "_source": "Live read-only call by session 18 (P0.7-01) through google-capture (hello@kabsi.co, Kabsi Clients group), request 43139.",
+  "_doc": "https://developers.google.com/my-business/reference/rest/v4/accounts.locations.localPosts/list",
+  "_captured_at": "2026-10-22T05:46:46Z",
+  "_url": "https://mybusiness.googleapis.com/v4/accounts/113746201522792609010/locations/4825254240697973899/localPosts",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses.",
+  "_note": "Page size 1. The summary and the link name a person (a 2019 article headline), so both are removed here by hand; the page token is shortened to [removed]. The post's photo comes back as name, mediaFormat and googleUrl, never sourceUrl.",
+  "body": {
+    "localPosts": [
+      {
+        "name": "accounts/113746201522792609010/locations/4825254240697973899/localPosts/454698435052947827",
+        "languageCode": "en",
+        "summary": "[removed]",
+        "callToAction": {
+          "actionType": "LEARN_MORE",
+          "url": "[removed]"
+        },
+        "state": "LIVE",
+        "updateTime": "2019-02-22T14:53:49.302Z",
+        "createTime": "2019-02-22T14:53:49.302Z",
+        "searchUrl": "https://local.google.com/place?id=14469239004530145122&use=posts&lpsid=CIHM0ogKEICAgIDiluGMiwE",
+        "media": [
+          {
+            "name": "accounts/113746201522792609010/locations/4825254240697973899/media/localPosts/AF1QipNQtRp0-5mRN7P0H3MiUAT6d2bkxq__bHAgVebC",
+            "mediaFormat": "PHOTO",
+            "googleUrl": "https://lh3.googleusercontent.com/p/AF1QipNQtRp0-5mRN7P0H3MiUAT6d2bkxq__bHAgVebC"
+          }
+        ],
+        "topicType": "STANDARD"
+      }
+    ],
+    "nextPageToken": "[removed]"
+  }
+}

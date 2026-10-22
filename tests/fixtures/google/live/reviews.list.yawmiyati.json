@@ -1,0 +1,27 @@
+{
+  "_source": "Live read-only call by session 18 (P0.7-01) through google-capture (hello@kabsi.co, Kabsi Clients group), request 43144.",
+  "_doc": "https://developers.google.com/my-business/reference/rest/v4/accounts.locations.reviews/list",
+  "_captured_at": "2026-10-22T05:49:50Z",
+  "_url": "https://mybusiness.googleapis.com/v4/accounts/113746201522792609010/locations/4825254240697973899/reviews",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses.",
+  "_note": "A star rating with no text: Google leaves comment out. No review on either profile has a reply, so reviewReply does not appear.",
+  "body": {
+    "reviews": [
+      {
+        "reviewId": "AbFvOql5_6OU_lcrjyFeG_xESylve2IuPcO8zmWfBaRolm20hU4s1F_PLq5tNhzTAiqm8H2qCF14",
+        "reviewer": {
+          "profilePhotoUrl": "[removed]",
+          "displayName": "[removed]"
+        },
+        "starRating": "FIVE",
+        "createTime": "2018-02-23T09:35:08.006Z",
+        "updateTime": "2018-02-23T09:35:08.006Z",
+        "name": "accounts/113746201522792609010/locations/4825254240697973899/reviews/AbFvOql5_6OU_lcrjyFeG_xESylve2IuPcO8zmWfBaRolm20hU4s1F_PLq5tNhzTAiqm8H2qCF14",
+        "reviewReplyUrl": "https://business.google.com/n/4825254240697973899/reviews/ChZDSUhNMG9nS0VJQ0FnSUNBdTQ3OFFBEAE"
+      }
+    ],
+    "averageRating": 5,
+    "totalReviewCount": 1
+  }
+}

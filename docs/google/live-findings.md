@@ -25,6 +25,15 @@ Reading (not confirmed): Google has not opened this API to the project. Gate A s
   - The capture filter turns `phoneNumbers` (an object in Google's answer) into the string `"[removed]"`. A fixture therefore cannot be compared on that field's type; the contract test treats `[removed]` as a wildcard.
 - **Still not answerable without a write:** whether an invitation exposes the role (no pending invitation exists), and whether a Manager can delete its own admin entry (K-41). Both stay for P0.7-05.
 
+## Update, 22 Oct 2026 (session 18): reviews, posts and media are open
+
+Rashid enabled the Google My Business API (`mybusiness.googleapis.com`) in project smiling-chess-505915-b7 (856347937978) as hello@kabsi.co on 22 Oct 2026. Read-only captures with `google-capture` (one GET each; `net._http_response` ids 43139, 43143, 43144, 43145; 05:46 to 05:50 UTC):
+
+- **Yawmiyati:** reviews 200, 1 review (5 stars, a rating with no text, so `comment` is absent), `averageRating` 5, `totalReviewCount` 1, no reply. Local posts 200 (one 2019 post, `LIVE`, `STANDARD`, a `LEARN_MORE` link and one photo, more pages). Media 200, 3 items (the first a `VIDEO`, category `ADDITIONAL`).
+- **Abou Hamze Auto Center:** reviews 200, 2 reviews (5 stars, both with text, no reply), `averageRating` 5, `totalReviewCount` 2; with page size 1 Google returns a `nextPageToken`. Local posts 200 (one 2019 post, `CALL` button, no `url`). Media 200, 12 items.
+- Real fixtures: `reviews.list.<profile>.json`, `posts.list.<profile>.json`, `media.list.<profile>.json` in `tests/fixtures/google/live/`. Reviewer names, photos and review text are removed in the function; the Yawmiyati post's text and link name a person, so both are removed by hand. The 403 records (`v4.probe.*.json`, `reviews.list.error.json`) stay as the shape of Google's SERVICE_DISABLED error.
+- Things the docs do not say: every review carries `reviewReplyUrl` (a business.google.com link); `updateTime` is always sent and equals `createTime` when nothing changed; a post's photo comes back as `name`, `mediaFormat` and `googleUrl`, never the `sourceUrl` it was created with.
+
 ## What was read, and the status of each call
 
 Thirty calls, 15 per profile, all **200** (15:43 to 15:44 UTC), plus the inventory and the one 403 above. No 429; the quota was not near its limit.
@@ -55,7 +64,7 @@ Thirty calls, 15 per profile, all **200** (15:43 to 15:44 UTC), plus the invento
    - Booking and ordering links also show up as attributes: `attributes/url_appointment` (repeatable) on both, and `attributes/url_shop_online` ("Place an order link") on Abou Hamze.
    - These are the same for both categories (media company, auto parts store) in Lebanon. Neither profile has any attribute set: `attributes.get` returns only the name.
 4. **Can products be written?** No, as far as the APIs go. None of the enabled Business Profile APIs has a products resource, and no captured response mentions products. Product upload goes through the assisted task in K-117.4. This rests on the API reference and the responses, not on a write.
-5. **Does moderation state appear on replies?** Blocked. Replies live in the v4 reviews API, which answers 403 SERVICE_DISABLED (K-116.1 stays open).
+5. **Does moderation state appear on replies?** **No moderation field exists on the wire (22 Oct 2026, session 18).** The real `reviews.list` answers for both profiles (3 reviews, none replied) carry `reviewId`, `reviewer`, `starRating`, `comment` (absent on a rating with no text), `createTime`, `updateTime`, `name` and `reviewReplyUrl`; no field holds a review's or a reply's moderation state, and Google's v4 `ReviewReply` resource documents only `comment` and `updateTime`. So K-116.1's "checking" state cannot be read from Google: Kabsi infers it the way the pipeline already does, by reading the reply back (`readReply`) and keeping the publication in `checking` while Google does not yet show the approved text (never re-posting). The first real reply in P0.7-05 is read back and recorded here, which shows what a held reply looks like on the wire.
 
 ## The other dagger items and open risks
 

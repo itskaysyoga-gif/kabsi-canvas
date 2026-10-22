@@ -8,7 +8,8 @@ export type MockReviewRow = {
 };
 const STARS: StarRating[] = ["STAR_RATING_UNSPECIFIED", "ONE", "TWO", "THREE", "FOUR", "FIVE"];
 
-// One stored row as Google's Review. The mock's updateTime is the reply time, as before the move.
+// One stored row as Google's Review. Google always sends updateTime (the review's own time when nothing changed,
+// real fixtures of 22 Oct 2026); the mock uses the reply time when there is one, as before the move.
 export function reviewFromRow(account: string, r: MockReviewRow): Review {
   const out: Review = {
     name: `${account}/${r.google_location_id}/reviews/${r.review_id}`, reviewId: r.review_id,
@@ -16,7 +17,7 @@ export function reviewFromRow(account: string, r: MockReviewRow): Review {
     createTime: r.create_time,
   };
   if (r.comment != null) out.comment = r.comment;
-  if (r.reply_update_time) out.updateTime = r.reply_update_time;
+  out.updateTime = r.reply_update_time ?? r.create_time;
   if (r.reply_comment != null) out.reviewReply = { comment: r.reply_comment, ...(r.reply_update_time ? { updateTime: r.reply_update_time } : {}) };
   return out;
 }
