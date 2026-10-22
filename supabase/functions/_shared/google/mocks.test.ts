@@ -120,7 +120,9 @@ Deno.test("a mock review keeps the stored values", () => {
   assert.equal(r.reviewReply?.comment, "Thank you, Sam.");
   assert.equal(r.updateTime, row.reply_update_time);
   const bare = reviews.reviewFromRow(A, { ...row, comment: null, reply_comment: null, reply_update_time: null });
-  assert.equal("comment" in bare || "reviewReply" in bare || "updateTime" in bare, false);
+  assert.equal("comment" in bare || "reviewReply" in bare, false);
+  // Google always sends updateTime; with nothing changed it is the review's own time (real fixtures, 22 Oct 2026).
+  assert.equal(bare.updateTime, row.create_time);
 });
 
 Deno.test("a new mock listing invents no phone and no category (K-99, A13)", () => {

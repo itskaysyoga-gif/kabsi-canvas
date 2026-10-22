@@ -7,8 +7,10 @@ export const calls = { startUpload: 0, upload: 0, create: 0 };
 export function createMedia(account: string, location: string, body: MediaItem): Promise<MediaItem> {
   calls.create++;
   const id = crypto.randomUUID().replace(/-/g, "");
+  // Google answers with the stored item, not the upload reference or source address it was given (real media, 22 Oct 2026).
+  const { dataRef: _ref, sourceUrl: _src, ...item } = body;
   return Promise.resolve({
-    ...body, name: `${account}/${location}/media/${id}`, createTime: new Date().toISOString(),
+    ...item, name: `${account}/${location}/media/${id}`, createTime: new Date().toISOString(),
     googleUrl: "https://kabsi.co/mock-photo", thumbnailUrl: "https://kabsi.co/mock-photo",
   });
 }

@@ -1,0 +1,29 @@
+{
+  "_source": "Live read-only call by session 18 (P0.7-01) through google-capture (hello@kabsi.co, Kabsi Clients group), request 43143.",
+  "_doc": "https://developers.google.com/my-business/reference/rest/v4/accounts.locations.media/list",
+  "_captured_at": "2026-10-22T05:49:48Z",
+  "_url": "https://mybusiness.googleapis.com/v4/accounts/113746201522792609010/locations/1850906632456176734/media",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses.",
+  "_note": "Page size 1 of 12 items.",
+  "body": {
+    "mediaItems": [
+      {
+        "name": "accounts/113746201522792609010/locations/1850906632456176734/media/AF1QipOa7WJH6WwMtH_3iMIhFkFDI7KRQzclgCVFYHc",
+        "mediaFormat": "PHOTO",
+        "locationAssociation": {
+          "category": "ADDITIONAL"
+        },
+        "googleUrl": "https://lh3.googleusercontent.com/uUhYRRMnUJiuFCdGD019Rk2uWFFgjRrBWpxXMqOdVR38d5Ixjfez5Ll7FZjVqa2j97qeSgFJBPRgQr8=s0",
+        "thumbnailUrl": "https://lh3.googleusercontent.com/p/AF1QipOa7WJH6WwMtH_3iMIhFkFDI7KRQzclgCVFYHc=s300",
+        "createTime": "2020-01-15T17:35:40Z",
+        "dimensions": {
+          "widthPixels": 4032,
+          "heightPixels": 3024
+        }
+      }
+    ],
+    "totalMediaItemCount": 12,
+    "nextPageToken": "AB6XkXrrq2ulQoXpOzWUoMjTvz5185WEBgBjVpgATchAeAv1Xi9Cr08"
+  }
+}
