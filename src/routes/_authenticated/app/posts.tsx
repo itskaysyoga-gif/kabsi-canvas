@@ -31,7 +31,7 @@ import {
   type PostType,
 } from "@/lib/posts";
 
-// Posts (P0.5-02, K-24, K-80): the month view. Kabsi prepares posts from what is true (2 a month by default) and asks
+// Posts (P0.5-02, K-24, K-80): the month view. Kabsi prepares posts from what is true (one a week by default) and asks
 // one question when it has nothing true to say; the owner writes an Update, Offer or Event, approves the month or each
 // post, and Kabsi sends each at its time through the one pipeline. Nothing goes to Google without the approval (D202).
 export const Route = createFileRoute("/_authenticated/app/posts")({
@@ -67,7 +67,7 @@ function PostsPage() {
   const inMonth = all.filter((p) => monthOf(p) === month);
   const prepared = inMonth.filter((p) => p.state === "draft");
   const planned = inMonth.filter((p) => p.state !== "skipped");
-  const cadence = settings.data?.posts_per_month ?? 2;
+  const cadence = settings.data?.posts_per_month ?? 4;
   const ready = loc && loc.status === "active" && !loc.concierge;
 
   return (
@@ -558,7 +558,7 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
   );
 }
 
-// Kabsi's own posts: on or off, and how many a month (2 by default, 1 or 4).
+// Kabsi's own posts: on or off, and how many a month (4 by default, one a week, or 2).
 function Settings({ locationId }: { locationId: string }) {
   const queryClient = useQueryClient();
   const settings = useQuery({
@@ -607,7 +607,7 @@ function Settings({ locationId }: { locationId: string }) {
           aria-label="Posts a month"
         >
           <span className="text-sm">Posts a month:</span>
-          {([1, 2, 4] as const).map((n) => (
+          {([4, 2] as const).map((n) => (
             <button
               key={n}
               type="button"

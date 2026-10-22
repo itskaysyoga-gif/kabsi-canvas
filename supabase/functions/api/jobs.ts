@@ -329,7 +329,7 @@ async function carePosts(locationId: string) {
   const slot = l.post_slot === "pro" ? "pro" : "retail";
   const results = [];
   for (const month of [nowLocal.slice(0, 7), next]) {
-    results.push(await careMonth(month, (l.posts_per_month ?? 2) as Cadence, slot, nowLocal, {
+    results.push(await careMonth(month, (l.posts_per_month ?? 4) as Cadence, slot, nowLocal, {
       planned: async (mo) => ((await rpcJson<{ publish_local: string; state: string; summary: string }[]>("post_month_plan", { p_location: locationId, p_month: mo })) ?? [])
         .map((x): Planned => ({ publishLocal: x.publish_local, state: x.state, summary: x.summary })),
       material: () => postMaterial(db, locationId),

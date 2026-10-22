@@ -1,5 +1,5 @@
 // The posts care routine (P0.5-02, K-24, K-115): the job that replaces posts-weekly. Once a day, per business, it
-// looks at this month and the next: how many posts the owner chose (2 a month by default, or 1 or 4), how many are
+// looks at this month and the next: how many posts the owner chose (4 a month, one a week, by default, or 2; a 1 stored earlier still works), how many are
 // already prepared, waiting or published, and fills the gap. A post is prepared only from something true (verified
 // facts, an approved photo); when there is nothing true to say, Kabsi asks one question instead of writing filler.
 // Kabsi's own drafts are always Updates; an Offer or Event exists only because the owner typed it. Nothing is
