@@ -18,6 +18,9 @@ const POSTHOG_KEY = "phc_rDzVWhoR2wSXyVHVMypztnf8YKHCszd9c9mryMv6W4mW";
 // that block posthog.com do not hide events. The server sends straight to PostHog (product_events).
 const POSTHOG_PROXY_PATH = "/ingest";
 const POSTHOG_UI_HOST = "https://us.posthog.com";
+// P0.6-08 (K-118): the web build's release tag, set by vite.config.ts from the commit Vercel builds.
+declare const __KABSI_RELEASE__: string;
+export const SENTRY_RELEASE = typeof __KABSI_RELEASE__ === "string" ? __KABSI_RELEASE__ : "dev";
 
 type SentryLike = {
   init?: (options: Record<string, unknown>) => void;
@@ -68,7 +71,7 @@ const bootScript = `
   // Email action links carry a one-time credential in the path (/a/<token>): never send it anywhere.
   var scrub = function(u){ return typeof u === "string" ? u.replace(/\\/a\\/[^\\/?#]+/g, "/a/:token").replace(/([?&](?:t|token)=)[^&#]+/g, "$1redacted") : u; };
   window.sentryOnLoad = function(){
-    Sentry.init({ environment: env, sendDefaultPii: false, tracesSampleRate: 0,
+    Sentry.init({ environment: env, release: ${JSON.stringify(SENTRY_RELEASE)}, sendDefaultPii: false, tracesSampleRate: 0,
       beforeSend: function(event){ if (event.user) { event.user = event.user.id ? { id: event.user.id } : undefined; }
         if (event.request && event.request.headers) { delete event.request.headers["X-Forwarded-For"]; delete event.request.cookies; }
         if (event.request) { event.request.url = scrub(event.request.url); if (event.request.headers) event.request.headers.Referer = scrub(event.request.headers.Referer); }

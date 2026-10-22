@@ -3,6 +3,7 @@
 // Vars: TAP_FUNCTION_URL, APP_ORIGIN. Secret: TAP_SECRET.
 //   GET /{CODE}      NFC tap  → 302 to the business's Google review page (or its Kabsi page, see below)
 //   GET /{CODE}?s=q  QR scan  → same, logged as source=qr
+//   GET /_check      the uptime monitor's check: 200 when the Worker runs and its KV table reads, 503 otherwise (P0.6-08)
 // A link goes straight to Google (the default, so every printed QR code keeps working) or, when the owner switched
 // that link to the page (P0.8-05, K-132), to https://kabsi.co/review/{CODE}: the same page for every visitor, the
 // Google button first. Either way there is no rating screen and no routing (D212). No IP is stored.
@@ -18,6 +19,10 @@ export default {
     const app = (env.APP_ORIGIN || "https://kabsi.co").replace(/\/$/, "");
     const path = url.pathname.replace(/^\/+|\/+$/g, "");
     if (!path) return Response.redirect("https://kabsi.co", 302);
+
+    // P0.6-08 (K-118): the uptime monitor's check. 200 when the Worker runs and its KV table can be read, 503 when it
+    // cannot. "_check" is not a card code (codes are six characters), so no card is affected.
+    if (path === "_check") return check(env);
 
     const code = path.toUpperCase();
     if (!CODE_RE.test(code)) return Response.redirect(`${app}/`, 302);
@@ -41,6 +46,16 @@ export default {
     return Response.redirect(`${app}/activate/${code}`, 302); // unknown or not linked yet
   },
 };
+
+async function check(env) {
+  const headers = { "cache-control": "no-store", "content-type": "text/plain" };
+  try {
+    if (env.STICKERS) await env.STICKERS.get("_check");
+    return new Response("ok", { status: 200, headers });
+  } catch {
+    return new Response("kv unreadable", { status: 503, headers });
+  }
+}
 
 // D271: repeat taps by the same visitor on the same card within 10 minutes count once. The visitor key is a
 // SHA-256 of the IP, the code, the UTC date and the tap secret (a salt that changes daily), so no IP is stored.

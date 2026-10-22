@@ -8,6 +8,12 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import { nitro } from "nitro/vite";
 
 export default defineConfig(({ command }) => ({
+  // The Sentry release tag for the web build (P0.6-08, K-118): the commit Vercel builds, so an error names its deploy.
+  define: {
+    __KABSI_RELEASE__: JSON.stringify(
+      process.env["VERCEL_GIT_COMMIT_SHA"] ?? process.env["GITHUB_SHA"] ?? "dev",
+    ),
+  },
   css: { transformer: "lightningcss" },
   resolve: {
     alias: { "@": `${process.cwd()}/src` },
