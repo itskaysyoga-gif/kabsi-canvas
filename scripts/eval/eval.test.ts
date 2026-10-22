@@ -3,7 +3,7 @@
 // set has the 200 cases the card asks for; a passing stub passes the gate; a failing stub is blocked on every rule; a
 // stub that follows only what its prompts say passes on today's prompts and is blocked when a prompt is weakened.
 import assert from "node:assert/strict";
-import { BUSINESSES, CASES, gate, runAll, RULE_LINES, score, stubModel } from "./eval.ts";
+import { BUSINESSES, CASES, gate, runAll, RULE_LINES, sample, score, stubModel } from "./eval.ts";
 import { REPLY_RULES } from "../../supabase/functions/_shared/ai/prompts/reply.v2.ts";
 import { CLASSIFY_RULES } from "../../supabase/functions/_shared/ai/prompts/classify.v2.ts";
 import { UNTRUSTED } from "../../supabase/functions/_shared/ai/fence.ts";
@@ -137,3 +137,34 @@ Deno.test("a stub that throws counts as an error and blocks, never as a pass", a
   assert.equal(r.gate.pass, false);
   assert.ok(r.score.errors > 0);
 });
+
+Deno.test(
+  "R-45: the 20-case sample is fixed, covers every group, and is gated on its own size",
+  async () => {
+    const s = sample(20);
+    assert.equal(s.length, 20);
+    const count = (k: string) => s.filter((c) => c.category === k).length;
+    assert.deepEqual(
+      [
+        count("normal"),
+        count("complaint"),
+        count("high_risk"),
+        count("injection"),
+        count("healthcare"),
+        count("invented_fact"),
+      ],
+      [6, 4, 3, 3, 2, 2],
+    );
+    assert.deepEqual(
+      sample(20).map((c) => c.id),
+      s.map((c) => c.id),
+      "the same cases every run",
+    );
+    const pass = await runAll(stubModel("pass"), { cases: s });
+    assert.deepEqual(pass.gate.failures, []);
+    const fail = await runAll(stubModel("fail"), { cases: s });
+    assert.equal(fail.gate.pass, false);
+    // A sample is not the full run: the 200-case gate still refuses it.
+    assert.match(gate(pass.score).failures[0], /expected 200 cases, ran 20/);
+  },
+);
