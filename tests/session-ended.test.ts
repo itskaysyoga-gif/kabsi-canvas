@@ -90,7 +90,7 @@ describe("session ended", () => {
     const src = (p: string) => readFileSync(p, "utf8");
     expect(src("src/lib/supabase.ts")).toMatch(/global: \{ fetch: sessionFetch \}/);
     expect(src("src/lib/reviews.ts")).toMatch(
-      /if \(!token\) throw endSession\(\);\n  return sessionFetch\(/,
+      /if \(!token\) throw endSession\(\);\n {2}return sessionFetch\(/,
     );
     for (const f of ["src/lib/insights.ts", "src/lib/review-graphic.ts", "src/lib/holidays.ts"])
       expect(src(f)).toMatch(/sessionFetch\(`\$\{supabaseUrl\}\/functions\/v1\//);
