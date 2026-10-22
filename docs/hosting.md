@@ -1,6 +1,6 @@
 # Hosting
 
-The website and app run on Vercel (team itskaysyoga-5542s-projects, project kabsi-canvas), built from `main` of `itskaysyoga-gif/kabsi-canvas`. Every pull request gets a preview deployment. Edge Functions and the `kabsi-go` Worker are deployed by `.github/workflows/deploy.yml`, not by Vercel.
+The website and app run on Vercel (team itskaysyoga-5542s-projects, project kabsi-canvas), built from `main` of `itskaysyoga-gif/kabsi-canvas`. Branches named `claude/*` are not built by Vercel (`git.deploymentEnabled` in `vercel.json`), and an `ignoreCommand` skips the build when a commit changes only files under `docs/` or `*.md` files (Vercel's daily deployment limit, 22 Oct 2026). Other branches still get a preview deployment. Edge Functions and the `kabsi-go` Worker are deployed by `.github/workflows/deploy.yml`, not by Vercel.
 
 ## Environment variables
 
@@ -21,7 +21,7 @@ The site code reads no server secret, so none belongs here. In particular: `SUPA
 
 ## Previews
 
-Pull request previews use the same Supabase project. Preview and `*.vercel.app` addresses send `X-Robots-Tag: noindex` (`vercel.json`). Vercel Authentication protects them for team members; the connector can fetch one with a temporary link.
+Previews of branches that Vercel builds use the same Supabase project. Preview and `*.vercel.app` addresses send `X-Robots-Tag: noindex` (`vercel.json`). Vercel Authentication protects them for team members; the connector can fetch one with a temporary link.
 
 ## Old address
 
