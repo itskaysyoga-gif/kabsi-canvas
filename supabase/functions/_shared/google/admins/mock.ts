@@ -36,7 +36,7 @@ const kabsiAdmin = (location: string) => `${location}/admins/mock-kabsi`;
 
 export async function listLocationAdmins(location: string): Promise<ListAdminsResponse> {
   const { removed } = await store.read(location);
-  const admins: NonNullable<ListAdminsResponse["admins"]> = [{ name: `${location}/admins/mock-owner`, admin: "Business owner", role: "PRIMARY_OWNER" }];
+  const admins: NonNullable<ListAdminsResponse["admins"]> = [{ name: `${location}/admins/mock-owner`, admin: "Business owner", account: "accounts/mock-owner", role: "PRIMARY_OWNER" }];
   if (!removed) admins.push({ name: kabsiAdmin(location), admin: "Kabsi Clients", account: MOCK_ACCOUNT, role: "MANAGER" });
   return { admins };
 }

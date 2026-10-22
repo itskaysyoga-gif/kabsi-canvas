@@ -3,7 +3,7 @@
 // into the app types below. Fixtures with the documentation link for each: tests/fixtures/google/.
 
 // ─── wire: Business Profile
-export type Account = { name: string; accountName?: string; type?: string; role?: string; verificationState?: string; vettedState?: string };
+export type Account = { name: string; accountName?: string; type?: string; role?: string; permissionLevel?: string; accountNumber?: string; verificationState?: string; vettedState?: string };
 export type ListAccountsResponse = { accounts?: Account[]; nextPageToken?: string };
 export type Invitation = {
   name: string; role?: string; targetType?: string;

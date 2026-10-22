@@ -133,7 +133,7 @@ Deno.test("a new mock listing invents no phone and no category (K-99, A13)", () 
 
 Deno.test("the mock getGoogleUpdated names the fields Google shows differently from the business's own values", () => {
   const same = updates.googleUpdatedFromFields(L, { title: "Harbour Lane Coffee", merchant: { title: "Harbour Lane Coffee" } });
-  assert.deepEqual(same, { location: { name: L } });
+  assert.deepEqual(same, { location: { name: L, title: "Harbour Lane Coffee" } });
   const moved = updates.googleUpdatedFromFields(L, {
     title: "Harbour Lane", hours: "Mon to Sun 09:00 to 17:00", open_status: "CLOSED_PERMANENTLY", map_pin: "33.1, 35.2",
     merchant: { title: "Harbour Lane Coffee", hours: "Mon to Sun 09:00 to 17:00", open_status: "OPEN" },
@@ -148,7 +148,8 @@ Deno.test("mock performance values are zero, never invented", async () => {
   const d = await performance.dailyMetrics(L, ["CALL_CLICKS"], { year: 2026, month: 9, day: 30 }, { year: 2026, month: 10, day: 1 });
   const values = d.multiDailyMetricTimeSeries![0].dailyMetricTimeSeries![0].timeSeries!.datedValues!;
   assert.equal(values.length, 2);
-  assert.ok(values.every((v) => v.value === "0"));
+  // A day with nothing carries a date and no value, as Google sends it; read as a number it is zero.
+  assert.ok(values.every((v) => v.value === undefined));
 });
 
 Deno.test("special hours read back match whatever the key order of the stored dates (P0.1-13b)", async () => {
