@@ -567,6 +567,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 - Checks run: typecheck, eslint and prettier on the changed files, check:tokens, check:anon, check:google, `npm test` (252 pass), `npm run build`, `bash scripts/deno-check.sh` (every function type-checks, 445 Deno tests pass).
 - Screens: a headless Chromium checked /manager-steps and the step with a seeded query cache at 390 px and 1440 px; scroll width equals client width at both (no horizontal scroll). The first run found the dots row overflowing at 390 and it was rebuilt before the PR. Screenshots are not stored in the repo.
 - Not run: no live Google, Places or Anthropic call; no email was sent; the pgTAP file has no local run (no Docker), CI runs it.
+
 ### P0.7-01 part 2 (branch claude/elegant-feynman-7l0al8, 22 Oct 2026, Rashid's session 16, Sonnet)
 - Model check: the session is `claude-sonnet-5-5`, as the card says (R-39).
 - Live re-check of the closed service (read-only, 22 Oct 2026, 04:22:27 UTC, `google-capture` v42 on the live project, one GET each, `net._http_response` ids 43012 to 43014): `inventory` 200, 3 accounts (personal 0 locations, Kabsi Clients `LOCATION_GROUP` with 2 locations, `kabsi.co` `ORGANIZATION` 0); `reviews` on Yawmiyati and on Abou Hamze Auto Center both **403 PERMISSION_DENIED, reason SERVICE_DISABLED**, service `mybusiness.googleapis.com`, consumer `projects/856347937978`. `mybusiness.googleapis.com` is still closed; reviews, posts and media stay blocked on Google (step 16).
