@@ -3,9 +3,10 @@
 //
 //   bash scripts/eval/gate.sh                       the real run (needs ANTHROPIC_API_KEY; CI runs it on a prompt change)
 //   deno run -A scripts/eval/run-eval.ts --stub pass   the gate itself, no network (also "fail" and "rules")
+//   bash scripts/eval/gate.sh --sample 20           R-45: the hand-run sample when a reply prompt changes (eval-sample.yml)
 //
 // Run from a copy of the repo with nodeModulesDir set: gate.sh makes one.
-import { liveModel, type Model, runAll, stubModel } from "./eval.ts";
+import { CASES, liveModel, type Model, runAll, sample, stubModel } from "./eval.ts";
 
 const args = Deno.args;
 const flag = (name: string) => {
@@ -14,6 +15,11 @@ const flag = (name: string) => {
 };
 const stub = flag("--stub") as "pass" | "fail" | "rules" | undefined;
 const out = flag("--out");
+const size = flag("--sample") ? Number(flag("--sample")) : undefined;
+if (size !== undefined && !(size > 0 && size < CASES.length)) {
+  console.error(`--sample takes a number from 1 to ${CASES.length - 1}.`);
+  Deno.exit(2);
+}
 
 let model: Model;
 if (stub) {
@@ -31,7 +37,7 @@ if (stub) {
   Deno.exit(2);
 }
 
-const { results, score, gate } = await runAll(model, { concurrency: stub ? 1 : 4 });
+const { results, score, gate } = await runAll(model, { concurrency: stub ? 1 : 4, cases: size ? sample(size) : undefined });
 if (out) await Deno.writeTextFile(out, JSON.stringify({ score, gate, results }, null, 1));
 const pct = (n: number) => `${Math.round(n * 1000) / 10} percent`;
 console.log(
