@@ -36,7 +36,8 @@ insert into tested values
   ('update_notification_settings(uuid,text[],smallint,text,integer)'),
   ('my_notification_prefs(uuid)'), ('set_notification_pref(uuid,text,text,text)'), ('list_my_notifications(uuid,integer)'),
   ('mark_notifications_read(uuid,uuid[])'), ('save_signup_attribution(jsonb)'), ('holiday_calendar(uuid,integer)'), ('coach_checklist(uuid)'),
-  ('photo_link_create(uuid)'), ('photo_link_revoke(uuid)'), ('photo_link_status(uuid)'), ('set_post_cadence(uuid,integer)');
+  ('photo_link_create(uuid)'), ('photo_link_revoke(uuid)'), ('photo_link_status(uuid)'), ('set_post_cadence(uuid,integer)'),
+  ('whatsapp_connect_start(text)'), ('whatsapp_status()'), ('whatsapp_set_prefs(boolean,boolean)'), ('whatsapp_disconnect()');
 
 select is(
   (select coalesce(array_agg(p.oid::regprocedure::text order by 1), '{}') from pg_proc p
@@ -145,6 +146,11 @@ select throws_ok($$ select public.photo_link_create('00000000-0000-4000-8000-000
 select throws_ok($$ select public.photo_link_revoke('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'photo_link_revoke refuses a non-member');
 select throws_ok($$ select public.photo_link_status('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'photo_link_status refuses a non-member');
 select throws_ok($$ select public.set_post_cadence('00000000-0000-4000-8000-0000000000c1', 4) $$, '42501', null, 'set_post_cadence refuses a non-member');
+-- P0.8-03: WhatsApp is per person; a stranger cannot connect and sees and changes only their own (empty) status.
+select throws_ok($$ select public.whatsapp_connect_start(repeat('Consent text shown to the owner. ', 3)) $$, '42501', null, 'whatsapp_connect_start refuses a non-member');
+select is(public.whatsapp_status() ->> 'state', 'none', 'whatsapp_status shows a stranger nothing of the owner''s');
+select is(public.whatsapp_set_prefs(false, true) ->> 'state', 'none', 'whatsapp_set_prefs changes nothing of the owner''s');
+select is(public.whatsapp_disconnect() ->> 'state', 'none', 'whatsapp_disconnect stops nothing of the owner''s');
 select throws_ok($$ select public.set_card_active('VCTM22', false) $$, '42501', null, 'set_card_active refuses a non-member');
 select throws_ok($$ select public.set_review_link_mode('VCTM22', 'page') $$, '42501', null, 'set_review_link_mode refuses a non-member');
 select throws_ok($$ select public.feature_access('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'feature_access refuses a non-member');

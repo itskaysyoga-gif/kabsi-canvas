@@ -69,3 +69,5 @@ verify_jwt = true
 # production. `supabase functions deploy` does not read this section.
 [db]
 major_version = 17
+[functions.whatsapp]          # WhatsApp owner channel (P0.8-03): Kapso calls it without a JWT; the Kapso signature over the raw body, Kabsi's phone number id, the replay window and the opt-in run in code
+verify_jwt = false

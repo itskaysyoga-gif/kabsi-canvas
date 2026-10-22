@@ -1,5 +1,5 @@
 // Phase 4 pipeline: sync → classify → draft → safety check → owner email → approve → publish.
-import { admin, APP_URL, sha256Hex } from "./kabsi.ts";
+import { admin, APP_URL, captureError, sha256Hex } from "./kabsi.ts";
 import { notify } from "./notify.ts";
 import { reviewEmail } from "./email/review.ts";
 import { backlogReady } from "./email/copy.ts";
@@ -11,6 +11,7 @@ import { recordAiUsage, takeAiBudget } from "./ai-budget.ts";
 import { isConciergeLocationId, matchConciergeReview, type ConciergeCandidate } from "./concierge.ts";
 import { auditedAdmin } from "./audit.ts";
 import { backlogLimit, backlogPolicy, backlogState, reopensOnPlan } from "./backlog.ts";
+import { whatsappReviewAlert } from "./whatsapp/db.ts";
 
 
 type Loc = {
@@ -273,6 +274,8 @@ export async function notifyLocation(loc: Loc) {
       inApp: { title: high ? HIGH_RISK_TITLE.replace(/\.$/, "") : `New ${r.star_rating}-star review`, body: high ? "Kabsi did not draft a reply." : "A reply is ready.", link: "/app/reviews?f=needs" },
       content: (rec, mode) => reviewContent(loc, r, rec.userId, mode),
     });
+    // P0.8-03 (K-129): the same review on WhatsApp to the people who opted in. A failure never stops the email.
+    await whatsappReviewAlert(loc, r).catch((e) => captureError("whatsapp", e, { step: "review_alert" }));
     await mark([r.id]);
     handed++;
   }
