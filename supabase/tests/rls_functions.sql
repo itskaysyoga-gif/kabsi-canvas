@@ -38,7 +38,8 @@ insert into tested values
   ('mark_notifications_read(uuid,uuid[])'), ('save_signup_attribution(jsonb)'), ('holiday_calendar(uuid,integer)'), ('coach_checklist(uuid)'),
   ('photo_link_create(uuid)'), ('photo_link_revoke(uuid)'), ('photo_link_status(uuid)'), ('set_post_cadence(uuid,integer)'),
   ('whatsapp_connect_start(text)'), ('whatsapp_status()'), ('whatsapp_set_prefs(boolean,boolean)'), ('whatsapp_disconnect()'),
-  ('set_protection_autofix(uuid,text,boolean,text)');
+  ('set_protection_autofix(uuid,text,boolean,text)'),
+  ('send_manager_steps(uuid,integer)');
 
 select is(
   (select coalesce(array_agg(p.oid::regprocedure::text order by 1), '{}') from pg_proc p
@@ -161,6 +162,7 @@ select throws_ok($$ select public.advance_review_report('00000000-0000-4000-8000
 select throws_ok($$ select public.list_review_reports('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'list_review_reports refuses a non-member');
 select throws_ok($$ select public.set_onboarding_step('00000000-0000-4000-8000-0000000000c1', 'done') $$, '42501', null, 'set_onboarding_step refuses a non-member');
 select throws_ok($$ select public.skip_review('00000000-0000-4000-8000-0000000000e1') $$, '42501', null, 'skip_review refuses a non-member');
+select throws_ok($$ select public.send_manager_steps('00000000-0000-4000-8000-0000000000c1', 3) $$, '42501', null, 'send_manager_steps refuses a non-member');
 -- P0.3-01: Business Knowledge, fact by fact. The card's writer is retired and nobody may run it.
 select throws_ok($$ select public.save_fact('00000000-0000-4000-8000-0000000000c1', 'about', '"Hijacked"') $$, '42501', null, 'save_fact refuses a non-member');
 select throws_ok($$ select public.confirm_fact('00000000-0000-4000-8000-0000000000fd') $$, '42501', null, 'confirm_fact refuses a non-member');

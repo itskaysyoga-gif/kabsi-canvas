@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { callFunction } from "@/lib/api";
 import type { PlanKind } from "@/lib/plans";
 
-export type OnboardingStep = "business" | "access" | "knowledge" | "plan" | "done";
+export type OnboardingStep = "business" | "access" | "knowledge" | "confirm" | "plan" | "done";
 export type Location = {
   id: string;
   name: string;
@@ -121,3 +121,27 @@ export const choosePlan = (locationId: string, kind: PlanKind) =>
   rpc<string>("choose_plan", { p_location: locationId, p_kind: kind });
 export const activateCard = (code: string, locationId: string, label?: string) =>
   rpc<string>("activate_card", { p_code: code, p_location: locationId, p_label: label ?? null });
+
+/** Google access as the database knows it (google_connections.access_state): the one source of the live status pill. */
+export type AccessState =
+  "none" | "pending" | "granted" | "error" | "lost" | "removing" | "removed";
+export async function loadAccessState(locationId: string): Promise<AccessState> {
+  const { data, error } = await supabase
+    .from("google_connections")
+    .select("access_state")
+    .eq("location_id", locationId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return ((data as { access_state?: AccessState } | null)?.access_state ?? "none") as AccessState;
+}
+
+/** Before Gate A every Google call runs in mock mode and a person accepts the invitation by hand (K-93). */
+export async function loadGoogleLive(): Promise<boolean> {
+  const { data, error } = await supabase.rpc("google_mode");
+  if (error) return false;
+  return data === "live";
+}
+
+/** "Send these steps to my other device": one email to the signed-in person's own address (send_manager_steps). */
+export const sendManagerSteps = (locationId: string, step: number) =>
+  rpc<void>("send_manager_steps", { p_location: locationId, p_step: step });

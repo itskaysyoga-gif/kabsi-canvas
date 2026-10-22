@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
+import { flowStepOf } from "@/lib/onboarding-flow";
 import {
   AccessStep,
   BusinessStep,
@@ -82,19 +83,19 @@ function StartPage() {
 
   if (query.isLoading)
     return (
-      <OnboardingShell step="business">
+      <OnboardingShell step="check">
         <p className="text-kb-stone">Loading…</p>
       </OnboardingShell>
     );
   if (query.isError)
     return (
-      <OnboardingShell step="business">
+      <OnboardingShell step="check">
         <p className="text-kb-red">We couldn't load your setup. Reload the page.</p>
       </OnboardingShell>
     );
 
   return (
-    <OnboardingShell step={step}>
+    <OnboardingShell step={flowStepOf(step)}>
       {cardNote ? (
         <p className="mb-6 rounded-card bg-kb-sand px-4 py-3 text-sm font-medium" role="status">
           {cardNote}
@@ -103,7 +104,9 @@ function StartPage() {
       {step === "business" && <BusinessStep onCreated={created} />}
       {step === "access" && <AccessStep location={location} onChanged={refresh} />}
       {step === "knowledge" && <KnowledgeStep location={location} onChanged={refresh} />}
-      {step === "plan" && <PlanStep location={location} onChanged={refresh} />}
+      {(step === "plan" || step === "confirm") && (
+        <PlanStep location={location} onChanged={refresh} />
+      )}
       {step === "done" && <DoneStep location={location} />}
     </OnboardingShell>
   );

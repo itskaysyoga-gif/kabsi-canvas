@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Check, Copy, MapPin, Search, Share2, TriangleAlert } from "lucide-react";
+import { Check, MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -10,14 +10,14 @@ import {
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ErrorNote, StepTitle } from "@/components/onboarding/onboarding-shell";
-import { ManagerAccessInstructions } from "@/components/onboarding/manager-access-instructions";
+import { ManagerGuide } from "@/components/onboarding/manager-guide";
+import { AccessStatus } from "@/components/onboarding/access-status";
+import { AccessExits } from "@/components/onboarding/access-exits";
 import { EligibilityCheck, type Eligibility } from "@/components/onboarding/eligibility";
 import { KnowledgeForm } from "@/components/app/knowledge-form";
-import { copyText } from "@/lib/clipboard";
 import {
   CONSENT_TEXT,
   choosePlan,
@@ -32,7 +32,6 @@ import {
 } from "@/lib/onboarding";
 import { track } from "@/lib/telemetry";
 import { CARD_PAYMENTS_COMING, loadPlanSummary } from "@/lib/plans";
-import { KABSI_GROUP_ID, SITE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { forgetSnapshot, keptSnapshot } from "@/lib/signup";
 
@@ -162,11 +161,11 @@ export function BusinessStep({ onCreated }: { onCreated: () => Promise<unknown> 
   );
 }
 
-// ── Step 2: consent + invite the Kabsi business group as Manager
+// ── Step 3 of six: add Kabsi as a Manager, with a live status (K-93, K-141). The consent comes first (it is the
+// owner's authorisation, stored with its text and time); then the guide, the status pill and the three exits.
 export function AccessStep({ location, onChanged }: StepProps) {
   const [agreed, setAgreed] = useState(Boolean(location?.consent_at));
-  const [copyState, setCopyState] = useState<"idle" | "done" | "failed">("idle");
-  const [shareState, setShareState] = useState<"idle" | "done" | "failed">("idle");
+  const [card, setCard] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   if (!location) return null;
@@ -178,7 +177,7 @@ export function AccessStep({ location, onChanged }: StepProps) {
     setError("");
     try {
       await saveConsent(location!.id);
-      // G-44: the owner starts giving Kabsi access. Only the manual Manager invite exists today.
+      // G-44: the owner starts giving Kabsi access. Only the manual Manager invite exists today (route "manual").
       track("connect_started", { location_id: location!.id, route: "manual" });
       await onChanged();
     } catch (e) {
@@ -197,31 +196,12 @@ export function AccessStep({ location, onChanged }: StepProps) {
     }
     setBusy(false);
   }
-  async function copyGroupId() {
-    const ok = await copyText(KABSI_GROUP_ID);
-    setCopyState(ok ? "done" : "failed");
-    window.setTimeout(() => setCopyState("idle"), 2000);
-  }
-  async function shareSteps() {
-    const url = `${SITE_URL}/manager-steps?b=${encodeURIComponent(location!.name)}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: "Add Kabsi as a Manager", url });
-        return;
-      } catch (shareError) {
-        if (shareError instanceof DOMException && shareError.name === "AbortError") return;
-      }
-    }
-    const ok = await copyText(url);
-    setShareState(ok ? "done" : "failed");
-    window.setTimeout(() => setShareState("idle"), 2000);
-  }
 
   return (
     <>
       <StepTitle
-        title="Give Kabsi access"
-        sub={`Kabsi needs to be a Manager on ${location.name}'s Google Business Profile to read reviews and post the replies you approve. You can remove Kabsi at any time.`}
+        title="Add Kabsi as a Manager"
+        sub={`Kabsi needs to be a Manager on ${location.name}'s Google Business Profile to read reviews and prepare the replies you approve. Nothing is published without your approval.`}
       />
       <label className="flex cursor-pointer items-start gap-3 rounded-card border-2 border-kb-hairline p-4">
         <Checkbox
@@ -233,43 +213,21 @@ export function AccessStep({ location, onChanged }: StepProps) {
         <span className="text-sm leading-6">{CONSENT_TEXT}</span>
       </label>
 
-      <Tabs defaultValue="phone" className="mt-6">
-        <TabsList className="grid h-12 w-full grid-cols-2 rounded-card bg-kb-sand p-1">
-          <TabsTrigger value="phone" className="h-10 rounded-[10px] text-base">
-            On your phone
-          </TabsTrigger>
-          <TabsTrigger value="computer" className="h-10 rounded-[10px] text-base">
-            On a computer
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="phone" className="mt-6">
-          <ManagerAccessInstructions mode="phone" businessName={location.name} />
-        </TabsContent>
-        <TabsContent value="computer" className="mt-6">
-          <ManagerAccessInstructions mode="computer" />
-        </TabsContent>
-      </Tabs>
-      <Button
-        type="button"
-        onClick={copyGroupId}
-        variant="ghost"
-        className="mt-5 w-full justify-between rounded-card bg-kb-sand px-4"
-      >
-        Kabsi group ID: {KABSI_GROUP_ID}{" "}
-        {copyState === "done" ? (
-          <span className="flex items-center gap-1 text-sm text-kb-green">
-            <Check className="size-4" />
-            Copied
-          </span>
-        ) : copyState === "failed" ? (
-          <span className="flex items-center gap-1 text-sm text-kb-red">
-            <TriangleAlert className="size-4" />
-            Couldn't copy
-          </span>
-        ) : (
-          <Copy className="size-4" aria-label="Copy group ID" />
-        )}
-      </Button>
+      <div className="mt-6">
+        <ManagerGuide businessName={location.name} onStep={setCard} />
+      </div>
+
+      <AccessStatus
+        location={location}
+        onConnected={() => {
+          // Access works: the screen moves on by itself after a moment, so the green pill is seen.
+          if (location.onboarding_step === "access") {
+            window.setTimeout(() => void next(), 2500);
+          }
+        }}
+      />
+
+      <AccessExits location={location} step={card} />
 
       <Accordion type="multiple" className="mt-5 border-t border-kb-hairline">
         <AccordionItem value="people-access" className="border-kb-hairline">
@@ -278,7 +236,7 @@ export function AccessStep({ location, onChanged }: StepProps) {
           </AccordionTrigger>
           <AccordionContent className="leading-6 text-kb-stone">
             That menu only shows for the profile's owner. Ask whoever verified the profile to add
-            us, or send them these steps with the button below.
+            us, or send them these steps with the button above.
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="no-access" className="border-kb-hairline">
@@ -290,54 +248,10 @@ export function AccessStep({ location, onChanged }: StepProps) {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-      <Button
-        type="button"
-        variant="outline"
-        className="mt-5 min-h-[52px] h-auto w-full whitespace-normal py-3 text-center"
-        onClick={shareSteps}
-      >
-        {shareState === "done" ? (
-          <Check />
-        ) : shareState === "failed" ? (
-          <TriangleAlert />
-        ) : (
-          <Share2 />
-        )}
-        {shareState === "done"
-          ? "Link copied"
-          : shareState === "failed"
-            ? "Couldn't copy link"
-            : "Send these steps to whoever manages our profile"}
-      </Button>
 
-      <div
-        className={cn(
-          "mt-6 rounded-card border-2 p-4",
-          granted ? "border-kb-green" : "border-kb-hairline",
-        )}
-        aria-live="polite"
-      >
-        {granted ? (
-          <p className="flex items-center gap-2 font-bold text-kb-green">
-            <Check className="size-5" />
-            Access received
-          </p>
-        ) : location.consent_at ? (
-          <div>
-            <span className="inline-flex rounded-pill border border-kb-hairline px-2.5 py-1 text-xs font-bold text-kb-stone">
-              Early access
-            </span>
-            <p className="mt-3 text-kb-stone">
-              We will email you as soon as access works. You can close this page.
-            </p>
-          </div>
-        ) : (
-          <p className="text-kb-stone">Tick the box above, then send the invite.</p>
-        )}
-      </div>
       <ErrorNote message={error} />
       <Button className="mt-6 w-full" onClick={next} disabled={busy || !location.consent_at}>
-        {granted ? "Continue" : "I've sent the invite, continue"}
+        {granted ? "Continue" : "I've sent the invitation"}
       </Button>
       {!granted ? (
         <Button
