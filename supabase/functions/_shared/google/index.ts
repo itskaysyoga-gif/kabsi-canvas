@@ -207,6 +207,20 @@ export async function localPostState(accountId: string, locationId: string, ref:
   return post ? (POST_STATE[post.state ?? ""] ?? "in_review") : null;
 }
 
+// Removes one post Kabsi published, by its name (P0.7-05, the owner's approval through the pipeline). A post Google
+// no longer has (404) is already removed; any other refusal is Google's to explain.
+export async function removeLocalPost(locationId: string, ref: string): Promise<{ response: unknown; alreadyGone: boolean }> {
+  assertNotConcierge(locationId);
+  const mode = modeFor(locationId);
+  try {
+    const r = await by(mode, postsLive, postsMock).deleteLocalPost(ref);
+    return { response: mode === "mock" ? { mock: true, removed: ref } : r, alreadyGone: false };
+  } catch (e) {
+    if (/^Error: google 404 /.test(String(e))) return { response: { removed: ref, already_gone: true }, alreadyGone: true };
+    throw e;
+  }
+}
+
 // ─── Special hours: adds one period, keeping the periods already on the profile (PATCH replaces the whole list).
 const ymd = (d: string) => { const [year, month, day] = d.split("-").map(Number); return { year, month, day }; };
 const hm = (t: string) => { const [hours, minutes] = t.split(":").map(Number); return { hours, minutes }; };

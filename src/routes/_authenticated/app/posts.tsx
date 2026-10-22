@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAutosize } from "@/lib/use-autosize";
 import { myLatestLocation } from "@/lib/onboarding";
 import { contentCall } from "@/lib/reviews";
+import { PublishingBanner } from "@/components/reviews/review-card";
 import { track } from "@/lib/telemetry";
 import { Megaphone as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
@@ -22,6 +23,8 @@ import {
   monthOf,
   nextMonths,
   postPhotos,
+  publishPost,
+  removePost,
   savePost,
   setAutoPosts,
   setCadence,
@@ -29,6 +32,7 @@ import {
   TYPE_LABEL,
   type Post,
   type PostType,
+  undoPost,
 } from "@/lib/posts";
 
 // Posts (P0.5-02, K-24, K-80): the month view. Kabsi prepares posts from what is true (one a week by default) and asks
@@ -207,12 +211,7 @@ function MonthView({
               {p.state === "draft" ? (
                 <DraftCard post={p} onChanged={onChanged} />
               ) : (
-                <div className="rounded-card bg-kb-white p-4 shadow-kb">
-                  <PostMeta post={p} />
-                  <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-6">
-                    {p.body}
-                  </p>
-                </div>
+                <SentCard post={p} onChanged={onChanged} />
               )}
             </li>
           ))}
@@ -234,24 +233,66 @@ function PostMeta({ post }: { post: Post }) {
   );
 }
 
+// The 10 seconds after an approval (K-70): the countdown with Undo, for a post or its removal.
+type Pending = { publication: string; until: number };
+function usePending(postId: string, onChanged: () => unknown) {
+  const [pending, setPending] = useState<Pending | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const start = (r: { publication: string; publish_after: string | null }) =>
+    setPending({
+      publication: r.publication,
+      until: r.publish_after ? Date.parse(r.publish_after) : Date.now(),
+    });
+  async function undo() {
+    if (!pending) return;
+    setBusy(true);
+    setErr("");
+    try {
+      await undoPost(postId, pending.publication);
+      setPending(null);
+      onChanged();
+    } catch (x) {
+      setErr(
+        x instanceof Error ? x.message : "Couldn't undo. Check your connection and try again.",
+      );
+    }
+    setBusy(false);
+  }
+  return { pending, busy, err, start, undo };
+}
+
 function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }) {
   const [body, setBody] = useState(post.body ?? "");
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
   const ref = useAutosize(body);
+  const wait = usePending(post.id, onChanged);
   async function run(kind: "publish" | "skip") {
     setBusy(kind);
     setErr("");
     try {
       if (kind === "publish") {
-        await contentCall({ do: "post_publish", post_id: post.id, body });
+        wait.start(await publishPost(post.id, body));
         track("post_approved", { channel: "dashboard" });
-      } else await contentCall({ do: "post_skip", post_id: post.id });
-      onChanged();
+      } else {
+        await contentCall({ do: "post_skip", post_id: post.id });
+        onChanged();
+      }
     } catch (x) {
       setErr(x instanceof Error ? x.message : "Something went wrong.");
     }
     setBusy("");
+  }
+  if (wait.pending) {
+    return (
+      <PublishingBanner
+        until={wait.pending.until}
+        busy={wait.busy}
+        error={wait.err}
+        onUndo={() => void wait.undo()}
+      />
+    );
   }
   return (
     <article className="rounded-large bg-kb-white p-5 shadow-kb">
@@ -300,6 +341,82 @@ function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }
         </p>
       ) : null}
     </article>
+  );
+}
+
+// A post that left the drafts. A published one can be removed from Google (P0.7-05): one confirmation, then the same
+// approval and 10 second undo as any write.
+function SentCard({ post, onChanged }: { post: Post; onChanged: () => unknown }) {
+  const [confirm, setConfirm] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const wait = usePending(post.id, onChanged);
+  async function remove() {
+    setBusy(true);
+    setErr("");
+    try {
+      wait.start(await removePost(post.id));
+      setConfirm(false);
+    } catch (x) {
+      setErr(x instanceof Error ? x.message : "Something went wrong.");
+    }
+    setBusy(false);
+  }
+  if (wait.pending) {
+    return (
+      <PublishingBanner
+        until={wait.pending.until}
+        busy={wait.busy}
+        error={wait.err}
+        onUndo={() => void wait.undo()}
+        verb="Removing from Google"
+        done="Approved. Kabsi is removing it from Google."
+      />
+    );
+  }
+  return (
+    <div className="rounded-card bg-kb-white p-4 shadow-kb">
+      <PostMeta post={post} />
+      <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-6">
+        {post.body}
+      </p>
+      {post.state === "posted" ? (
+        confirm ? (
+          <div className="mt-3">
+            <p className="text-sm">
+              Remove this post from your Google profile? You have 10 seconds to undo.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button
+                size="compact"
+                variant="outline"
+                disabled={busy}
+                onClick={() => void remove()}
+              >
+                {busy ? "Removing…" : "Remove from Google"}
+              </Button>
+              <Button
+                size="compact"
+                variant="ghost"
+                disabled={busy}
+                onClick={() => setConfirm(false)}
+              >
+                Keep it
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button size="compact" variant="ghost" className="mt-2" onClick={() => setConfirm(true)}>
+            Remove from Google
+          </Button>
+        )
+      ) : null}
+      {err ? (
+        <p className="mt-2 text-sm text-kb-red" role="alert">
+          {err}
+        </p>
+      ) : null}
+    </div>
   );
 }
 

@@ -5,6 +5,8 @@
 //   POST { do: "post_draft", location_id, owner_input, keywords?, cta_type?, cta_url? } → new draft
 //   POST { do: "post_redraft", post_id, instruction }                                  → new version
 //   POST { do: "post_publish", post_id, body }                                          → approves exactly `body`
+//   POST { do: "post_remove", post_id }                                                 → approves removing a posted post from Google
+//   POST { do: "post_undo", post_id, publication_id }                                   → undo inside the 10 seconds (K-70)
 //   POST { do: "post_skip", post_id }
 //   POST { do: "post_save", location_id | post_id, type, summary, ... }                → the owner's own post (P0.5-02)
 //   POST { do: "posts_approve_month", location_id, month: "YYYY-MM" }                 → approves the month's posts
@@ -33,7 +35,7 @@ type Loc = PostLoc;
 
 // The owner's approval of one post, photo or special hours period (the one approval path, K-38, P0.1-13b). The
 // publish job sends it to Google after the 10 second undo window; a second click gets the same publication back.
-async function approveChange(req: Request, userId: string, targetType: "local_post" | "photo" | "special_hours", targetId: string, payload: Record<string, unknown>) {
+async function approveChange(req: Request, userId: string, targetType: "local_post" | "local_post_removal" | "photo" | "special_hours", targetId: string, payload: Record<string, unknown>) {
   const { data, error } = await auditedAdmin(auditHeaders(req, userId)).rpc("approve_publication", {
     p_target_type: targetType, p_target_id: targetId, p_payload: payload, p_approved_by: userId, p_channel: "dashboard",
   });
@@ -200,6 +202,26 @@ Deno.serve(async (req) => {
         // One approval (K-38): a double click or two tabs get the same publication back, never a second post.
         const r = await approveChange(req, user.id, "local_post", post.id, { summary: text, language: postLanguage(text) });
         return json({ ok: true, ...r });
+      }
+      case "post_remove": {
+        // P0.7-05: the owner approves removing a post Kabsi published. The same pipeline as any write: the approval,
+        // the 10 second undo, one DELETE to Google, then Kabsi reads Google until the post is gone.
+        if (!post || post.state !== "posted") return fail("bad_input", "Only a post that is on Google can be removed.");
+        if (loc.status !== "active" || !loc.google_location_id) return fail("not_active", "This business isn't active yet.", 409);
+        const r = await approveChange(req, user.id, "local_post_removal", post.id, {});
+        return json({ ok: true, ...r });
+      }
+      case "post_undo": {
+        // K-70: inside the 10 seconds an approved post, or an approved removal, stops before Google has it.
+        if (!post) return fail("bad_input", "Missing post.");
+        const pub = String(b.publication_id ?? "");
+        const { data: found } = await db.from("publications").select("id").eq("id", pub).eq("target_id", post.id)
+          .in("target_type", ["local_post", "local_post_removal"]).maybeSingle();
+        if (!found) return fail("not_found", "Nothing to undo.", 404);
+        const { data, error } = await db.rpc("undo_publication", { p_publication: found.id, p_user: user.id });
+        if (error && /too_late/.test(error.message)) return fail("too_late", "Too late to undo: Google already has it.", 409);
+        if (error) throw error;
+        return json({ ok: true, ...(data as Record<string, unknown>) });
       }
       case "hours_publish": {
         const s = String(b.start_date ?? ""), e = String(b.end_date ?? s);

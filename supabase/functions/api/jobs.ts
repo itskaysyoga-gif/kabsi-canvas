@@ -25,7 +25,7 @@ import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation }
 import { AiBudgetError } from "../_shared/ai-budget.ts";
 import { protectionCheck } from "../_shared/protection.ts";
 import {
-  addSpecialHours, coachRead, createLocalPost, hasSpecialHours, localPostState, mediaExists, patchListing, protectionShown,
+  addSpecialHours, coachRead, createLocalPost, hasSpecialHours, localPostState, mediaExists, patchListing, protectionShown, removeLocalPost,
   readReply, removeKabsiAccess, sendReply, type SpecialDay, uploadPhoto,
 } from "../_shared/google/index.ts";
 import { accessChangeEmail, type DisconnectDeps, runDisconnect } from "../_shared/disconnect.ts";
@@ -185,6 +185,14 @@ async function send(i: Item): Promise<Sent> {
       });
       return { ref: r.ref, response: r.response, seen: POST_SEEN[r.state] };
     }
+    case "local_post_removal": {
+      // P0.7-05: the owner approved removing a post Kabsi published; the post's Google name is in the payload. Google
+      // no longer having it (404) means it is already gone, which is what was approved.
+      const ref = str(p.post_ref);
+      if (!ref) throw new NotSent("no Google post to remove");
+      const r = await removeLocalPost(location, ref);
+      return { ref, response: r.response, seen: r.alreadyGone ? "shown" : undefined };
+    }
     case "photo": {
       // The processed JPEG (no metadata, P0.5-01) goes up as bytes; Google never gets a link to Kabsi's storage.
       const { data, error } = await admin().storage.from("owner-photos").download(str(p.storage_path));
@@ -212,6 +220,11 @@ async function read(i: Item): Promise<Seen> {
     case "local_post": {
       const state = await localPostState(account, location, i.google_ref ?? null, str(p.summary));
       return state ? POST_SEEN[state] : "absent";
+    }
+    case "local_post_removal": {
+      // Removed means Google no longer has the post; still there means Google has not applied it yet.
+      const state = await localPostState(account, location, str(p.post_ref) || null, str(p.summary));
+      return state === null ? "shown" : "pending";
     }
     case "photo":
       return i.google_ref && (await mediaExists(location, i.google_ref)) ? "shown" : "absent";
