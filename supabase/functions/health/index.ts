@@ -91,6 +91,11 @@ Deno.serve(async (req) => {
     if (!t.ok) checks.google_token = `refresh failed (${t.status}): ${tj.error ?? ""}`;
     else {
       checks.google_token = `ok, scope ${String(tj.scope ?? "").includes("business.manage") ? "business.manage" : `MISSING business.manage (${tj.scope})`}`;
+      // Google adds refresh_token_expires_in only when the refresh token has a time limit (an OAuth app in Testing
+      // gives 7 days). Its absence means the token does not expire on a timer.
+      checks.google_token_expiry = tj.refresh_token_expires_in
+        ? `expires in ${Math.floor(Number(tj.refresh_token_expires_in) / 3600)} hours (time-limited token, OAuth app likely in Testing)`
+        : "no time limit";
       const a = await listAccountsOnce(String(tj.access_token));
       checks.google_accounts = a.ok
         ? `ok, ${(a.body.accounts ?? []).length} account(s)`
