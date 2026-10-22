@@ -1,10 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { PublicLayout } from "@/components/layouts/public-layout";
-import { ManagerAccessInstructions } from "@/components/onboarding/manager-access-instructions";
-import { CopyButton } from "@/components/shared/copy-button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { KABSI_GROUP_ID, pageHead } from "@/lib/site";
+import { ManagerGuide } from "@/components/onboarding/manager-guide";
+import { pageHead } from "@/lib/site";
 
 const searchSchema = z.object({
   b: z
@@ -12,6 +10,7 @@ const searchSchema = z.object({
     .transform((value) => value.trim().slice(0, 80))
     .optional()
     .catch(undefined),
+  s: z.coerce.number().int().min(1).max(5).optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/manager-steps")({
@@ -27,7 +26,7 @@ export const Route = createFileRoute("/manager-steps")({
 });
 
 function ManagerStepsPage() {
-  const { b } = Route.useSearch();
+  const { b, s: step } = Route.useSearch();
   const businessName = b || "This business";
 
   return (
@@ -47,27 +46,7 @@ function ManagerStepsPage() {
       </header>
 
       <section className="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
-        <Tabs defaultValue="computer">
-          <TabsList className="grid h-12 w-full grid-cols-2 rounded-card bg-kb-sand p-1">
-            <TabsTrigger value="computer" className="h-10 rounded-[10px] text-base">
-              On a computer
-            </TabsTrigger>
-            <TabsTrigger value="phone" className="h-10 rounded-[10px] text-base">
-              On your phone
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="computer" className="mt-8">
-            <ManagerAccessInstructions mode="computer" />
-          </TabsContent>
-          <TabsContent value="phone" className="mt-8">
-            <ManagerAccessInstructions mode="phone" {...(b ? { businessName: b } : {})} />
-          </TabsContent>
-        </Tabs>
-
-        <div className="mt-8 flex flex-col gap-3 rounded-card bg-kb-sand p-5 sm:flex-row sm:items-center sm:justify-between">
-          <span className="font-bold">Kabsi group ID: {KABSI_GROUP_ID}</span>
-          <CopyButton text={KABSI_GROUP_ID} label="Copy group ID" />
-        </div>
+        <ManagerGuide {...(b ? { businessName: b } : {})} start={step ?? 1} />
 
         <p className="mt-8 border-l-4 border-kb-yellow pl-4 leading-7">
           You can remove Kabsi at any time in People and access.

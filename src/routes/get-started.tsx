@@ -24,7 +24,7 @@ function Page() {
   const check = useProfileCheck("onboarding");
   const showing = check.phase === "result" && check.snapshot;
   return (
-    <OnboardingShell step={showing ? "snapshot" : "find"}>
+    <OnboardingShell step="check">
       {showing ? (
         <>
           <StepTitle title="Here's what customers see" />

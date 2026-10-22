@@ -30,6 +30,19 @@ export function backlogReady(business: string, n: number, appUrl: string): Email
   };
 }
 
+/** "Send these steps to my other device" (K-93, P0.4-03): to the signed-in person's own address, with a one-tap link back to the step. */
+export function managerSteps(business: string, appUrl: string, step: number): EmailContent {
+  const n = Math.min(Math.max(Math.round(step) || 1, 1), 5);
+  const url = `${appUrl}/manager-steps?b=${encodeURIComponent(business)}&s=${n}`;
+  return {
+    subject: `${business}: add Kabsi as a Manager`, title: "Add Kabsi as a Manager", preheader: "Open these steps on the device where you sign in to Google.",
+    bodyHtml: p(`You asked for the steps to add Kabsi as a Manager on the Google Business Profile of <strong>${esc(business)}</strong>. Open them on the device where you are signed in to Google.`)
+      + p("It takes about two minutes, and each tap is shown. You can remove Kabsi at any time. Kabsi never asks for your Google password or a verification code."),
+    text: `You asked for the steps to add Kabsi as a Manager on the Google Business Profile of ${business}. Open them on the device where you are signed in to Google.\n\nIt takes about two minutes, and each tap is shown. You can remove Kabsi at any time. Kabsi never asks for your Google password or a verification code.`,
+    button: { label: "Open the steps", url },
+  };
+}
+
 // ─── Google access ────────────────────────────────────────────────────────────────────────────────────────────
 
 export function accessLost(business: string, appUrl: string): EmailContent {
