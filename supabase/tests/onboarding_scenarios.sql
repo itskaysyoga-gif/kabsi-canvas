@@ -103,7 +103,7 @@ select tests.act_as('00000000-0000-4000-8000-0000000009a1');
 select lives_ok($$ select public.clear_onboarding_scenario('00000000-0000-4000-8000-0000000009c1') $$, 'Back to the steps clears it');
 reset role;
 select ok((select resolved_at is not null from public.onboarding_scenarios where location_id = '00000000-0000-4000-8000-0000000009c1'), 'it is resolved, not deleted');
-select is(pg_temp.snap('00000000-0000-4000-8000-0000000009c1') -> 'scenario', 'null'::jsonb, 'and the reminders no longer see it');
+select is(pg_temp.snap('00000000-0000-4000-8000-0000000009c1'), null, 'and the reminders no longer see it: an old business with nothing open is not listed');
 select tests.act_as('00000000-0000-4000-8000-0000000009a1');
 select public.set_onboarding_scenario('00000000-0000-4000-8000-0000000009c1', 'google_reviewing');
 reset role;
