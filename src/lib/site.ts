@@ -77,6 +77,8 @@ export function bookingHref(kind: BookingKind): string {
 
 /** The legal seller (plan section 5, D1; R-20). City only, never a street address. Change it here and nowhere else. */
 export const FOUNDER_NAME = "Hussein Slim";
+/** Who signs the founder note on the homepage (lane R, 22 Oct 2026). The seller line above is separate and stays. */
+export const FOUNDER_SIGNATURE = "Rashid Abou Hamzy, founder";
 export const LEGAL_SELLER = `${FOUNDER_NAME}, Dubai, United Arab Emirates`;
 /** The operator line for the footer, terms and emails (R-20). */
 export const OPERATOR_LINE = `Kabsi is operated by ${LEGAL_SELLER}. Contact: ${CONTACT_EMAIL}`;

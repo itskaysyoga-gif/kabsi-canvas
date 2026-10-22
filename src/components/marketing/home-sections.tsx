@@ -41,7 +41,7 @@ import {
   CONTACT_EMAIL,
   CTA_CHECK,
   CTA_HOW,
-  FOUNDER_NAME,
+  FOUNDER_SIGNATURE,
   PLAN_PRICES,
   TAX_NOTE,
   WHATSAPP_ON,
@@ -410,7 +410,7 @@ function Founder() {
           </div>
           <p className="mt-4 text-lg leading-8 text-kb-stone">{FOUNDER_NOTE}</p>
           <p className="mt-4 font-bold text-kb-ink">
-            {FOUNDER_NAME}.{" "}
+            {FOUNDER_SIGNATURE}{" "}
             <Link to="/about" className="underline underline-offset-4">
               About Kabsi
             </Link>

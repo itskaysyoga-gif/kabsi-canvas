@@ -7,7 +7,9 @@ import {
   CHECKOUT_LIVE,
   CTA_CHECK,
   CTA_PRIMARY,
+  FOUNDER_SIGNATURE,
   GOOGLE_NOTICE,
+  LEGAL_SELLER,
   PLAN_PRICES,
   WHATSAPP_ON,
   heroSub,
@@ -256,5 +258,16 @@ describe("the pricing and how it works pages (P0.8-13 part 3)", () => {
   it("keep /partners the holding page and have no /meta page", () => {
     expect(readFileSync("src/routes/partners.tsx", "utf8")).toContain("opening soon");
     expect(existsSync("src/routes/meta.tsx")).toBe(false);
+  });
+});
+
+describe("the founder note (lane R, 22 Oct 2026)", () => {
+  it("is Rashid's note, signed by him, and the legal seller line is still Hussein Slim", () => {
+    expect(FOUNDER_NOTE).toBe(
+      "I spent years running ads and online presence for local businesses. The same thing came up every time: reviews left unanswered and details on Google out of date, because the owner was busy running the business. Kabsi takes that work off their hands, and nothing goes public without their yes. If something is not right, write to me at hello@kabsi.co.",
+    );
+    expect(FOUNDER_SIGNATURE).toBe("Rashid Abou Hamzy, founder");
+    expect(FOUNDER_NOTE).not.toMatch(/Hussein/);
+    expect(LEGAL_SELLER).toBe("Hussein Slim, Dubai, United Arab Emirates");
   });
 });
