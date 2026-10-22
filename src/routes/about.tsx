@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { H2, PageHero, Section } from "@/components/marketing/parts";
-import { CONTACT_EMAIL, FOUNDER_NAME, pageHead } from "@/lib/site";
+import { CONTACT_EMAIL, OPERATOR_NAME, pageHead } from "@/lib/site";
 
 export const Route = createFileRoute("/about")({
   head: () =>
     pageHead({
       title: "About Kabsi",
-      description: `Kabsi is run by ${FOUNDER_NAME} from Dubai. It helps local businesses answer reviews and look after their listing, and a person answers when you write.`,
+      description: `Kabsi is operated by ${OPERATOR_NAME}. It helps local businesses answer reviews and look after their listing, and a person answers when you write.`,
       path: "/about",
       crumbs: [{ name: "About", path: "/about" }],
     }),
@@ -29,8 +29,8 @@ function AboutPage() {
           <section>
             <H2 className="text-3xl">Who runs it</H2>
             <p className="mt-4 text-kb-stone">
-              Kabsi is run by {FOUNDER_NAME}, from Dubai. {FOUNDER_NAME} is the seller and the
-              person responsible for your data. Kabsi serves businesses in any country.
+              Kabsi is operated by {OPERATOR_NAME}. Contact: {CONTACT_EMAIL}. {OPERATOR_NAME} is
+              the person responsible for your data. Kabsi serves businesses in any country.
             </p>
           </section>
 

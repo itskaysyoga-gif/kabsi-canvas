@@ -1,6 +1,6 @@
 // Questions shown on /faq (all) and the homepage (the first five). Every answer must stay true of the
 // system as built (§3). Used for the FAQPage JSON-LD too, so answers are plain text.
-import { LEGAL_SELLER, PLAN_PRICES, SETUP_CALL_MINUTES, TAX_NOTE } from "@/lib/site";
+import { OPERATOR_NAME, PLAN_PRICES, SETUP_CALL_MINUTES, TAX_NOTE } from "@/lib/site";
 
 export const FAQ: { q: string; a: string }[] = [
   {
@@ -89,7 +89,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Who is behind Kabsi?",
-    a: `Kabsi is operated by ${LEGAL_SELLER}. It is independent and not affiliated with Google. You can write to hello@kabsi.co.`,
+    a: `Kabsi is operated by ${OPERATOR_NAME}. It is independent and not affiliated with Google. You can write to hello@kabsi.co.`,
   },
 ];
 

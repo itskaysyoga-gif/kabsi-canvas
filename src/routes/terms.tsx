@@ -4,7 +4,7 @@ import {
   CONTACT_EMAIL,
   KABSI_GROUP_ID,
   KABSI_GROUP_NAME,
-  LEGAL_SELLER,
+  OPERATOR_NAME,
   OPERATOR_LINE,
   PLAN_PRICES,
   WHATSAPP_NUMBER,
@@ -36,9 +36,9 @@ function Page() {
 
       <section>
         <p>
-          These terms are the agreement between you and Kabsi, an independent business run by{" "}
-          {LEGAL_SELLER}, who is the seller. By creating an account or paying for a plan, you accept
-          them on behalf of your business. Our <Link to="/privacy">privacy policy</Link> explains
+          These terms are the agreement between you and Kabsi, an independent business operated by{" "}
+          {OPERATOR_NAME}. By creating an account or paying for a plan, you accept them on behalf of
+          your business. Our <Link to="/privacy">privacy policy</Link> explains
           how we handle data.
         </p>
       </section>
@@ -203,8 +203,8 @@ function Page() {
           </li>
           <li>
             You pay by card, in US dollars. That is the only way to pay Kabsi. Card payments are
-            coming; until they open there is nothing to pay. A payment counts once our payment
-            provider has confirmed it.
+            coming; until they open there is nothing to pay. Payments are processed by Creem, our
+            merchant of record. A payment counts once Creem has confirmed it.
           </li>
           <li>Any fees your own bank charges are yours.</li>
           <li>
