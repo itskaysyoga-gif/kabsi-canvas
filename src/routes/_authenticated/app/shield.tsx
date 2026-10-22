@@ -205,7 +205,7 @@ function ProfilePage() {
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs font-bold uppercase text-kb-stone">You approved</dt>
+                      <dt className="text-xs font-bold uppercase text-kb-stone">Approved by you</dt>
                       <dd dir="auto" className="break-words">
                         {r.approved === null ? (
                           <span className="text-kb-stone">Nothing yet</span>

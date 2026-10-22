@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ActionCard } from "@/components/home/action-card";
 import { BacklogCard } from "@/components/home/backlog-card";
 import { HomeStrip } from "@/components/home/home-strip";
+import { TrialBanner } from "@/components/home/trial-banner";
 import { ProfileGaps } from "@/components/app/profile-gaps";
 import {
   checkStrip,
@@ -58,6 +59,7 @@ export function ActionCenter({ loc, role }: { loc: Location; role: Role }) {
 
   return (
     <>
+      {role === "owner" ? <TrialBanner locationId={loc.id} /> : null}
       <HomeStrip strip={strip} plan={plan} />
 
       {list.isError ? (

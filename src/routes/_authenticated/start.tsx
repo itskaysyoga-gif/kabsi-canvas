@@ -4,13 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { flowStepOf } from "@/lib/onboarding-flow";
-import {
-  AccessStep,
-  BusinessStep,
-  DoneStep,
-  KnowledgeStep,
-  PlanStep,
-} from "@/components/onboarding/steps";
+import { AccessStep, BusinessStep } from "@/components/onboarding/steps";
+import { ConfirmStep } from "@/components/onboarding/confirm-step";
+import { QuestionsStep } from "@/components/onboarding/questions-step";
 import {
   activateCard,
   friendlyError,
@@ -72,6 +68,10 @@ function StartPage() {
 
   const refresh = () => query.refetch();
   const navigate = useNavigate();
+  // Setup is finished (step 6, the trial runs): Home is where the first prepared replies are.
+  useEffect(() => {
+    if (!startNew && location && step === "done") void navigate({ to: "/app" });
+  }, [location, step, startNew, navigate]);
   const qc = useQueryClient();
   // After "Add another business" creates the new one, leave ?new so the stepper follows it,
   // and refresh the header's business switcher.
@@ -103,11 +103,13 @@ function StartPage() {
       ) : null}
       {step === "business" && <BusinessStep onCreated={created} />}
       {step === "access" && <AccessStep location={location} onChanged={refresh} />}
-      {step === "knowledge" && <KnowledgeStep location={location} onChanged={refresh} />}
-      {(step === "plan" || step === "confirm") && (
-        <PlanStep location={location} onChanged={refresh} />
-      )}
-      {step === "done" && <DoneStep location={location} />}
+      {step === "knowledge" && location ? (
+        <QuestionsStep location={location} onChanged={refresh} />
+      ) : null}
+      {(step === "confirm" || step === "plan") && location ? (
+        <ConfirmStep location={location} onChanged={refresh} />
+      ) : null}
+      {step === "done" ? <p className="text-kb-stone">Taking you to Home…</p> : null}
     </OnboardingShell>
   );
 }
