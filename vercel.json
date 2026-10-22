@@ -3,6 +3,12 @@
   "framework": "tanstack-start",
   "installCommand": "npm install --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund",
   "buildCommand": "node scripts/check-env.mjs && npm run build",
+  "git": {
+    "deploymentEnabled": {
+      "claude/*": false
+    }
+  },
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude,glob)docs/**' ':(exclude,glob)**/*.md'",
   "redirects": [
     {
       "source": "/r/:code(SEVEN1|seven1)",
