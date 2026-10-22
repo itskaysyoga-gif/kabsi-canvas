@@ -41,7 +41,7 @@ const REVIEW_REFUND: ReviewInput = {
 const SNAPSHOT: Snapshot = {
   place_id: "ChIJsample0000000", name: BIZ, address: "12 Hamra Street, Beirut", category: "Bakery", rating: 4.6, review_count: 128, business_status: "OPERATIONAL",
   open_now: true, hours: [], phone: null, website: "https://example.com", has_photos: true, photo_count: 12, cached: false, checklist: [],
-  findings: [{ level: "urgent", title: "Your opening hours are missing", detail: "Customers cannot tell when you are open." }, { level: "recommended", title: "No phone number on your listing", detail: "Customers who want to call have nothing to tap." }],
+  flags: [{ tone: "danger", fact: "No opening hours are shown on Google.", action: "Kabsi asks you for your hours and prepares them for you to approve." }, { tone: "warning", fact: "No phone number is shown on Google.", action: "Kabsi asks you to confirm it and prepares the change for you to approve." }],
 };
 const REPORT = {
   period: { from: "Oct 12", to: "Oct 19" }, rating: 4.6, rating_count: 128, rating_change: 0.1, rating_drop: false, new_reviews: 6, new_avg: 4.7, replied: 5, waiting: 1,

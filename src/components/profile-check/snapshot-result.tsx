@@ -10,18 +10,22 @@ import { CoachList } from "@/components/coach/coach-list";
 import {
   CheckError,
   emailCheck,
-  LEVEL_LABEL,
   TIPS_CONSENT_TEXT,
-  type Level,
+  TONE_LABEL,
+  WHATSAPP_CONSENT_TEXT,
+  whatsappCheck,
   type Snapshot,
+  type Tone,
 } from "@/lib/profile-check";
-import { CTA_PRIMARY, GOOGLE_NOTICE } from "@/lib/site";
+import { CTA_PRIMARY, GOOGLE_NOTICE, WHATSAPP_ON } from "@/lib/site";
 import { track } from "@/lib/telemetry";
 
-const TONE: Record<Level, StatusTone> = { urgent: "red", recommended: "amber", nice: "grey" };
+// The design tokens' states: danger is red (a real problem), warning is amber (needs attention), neutral is grey.
+const TONE: Record<Tone, StatusTone> = { danger: "red", warning: "amber", neutral: "grey" };
 
-/** The free snapshot (step 2, "Here's what customers see"): public facts, findings with labels (never a score),
- * the R-02 button, the email form and Google Maps attribution. */
+/** The free snapshot (step 2, "Here's what customers see"): public facts, status flags (a plain fact and what Kabsi
+ * would do, never a score), the R-02 button, the email form, the WhatsApp form while Kabsi has a number, and Google Maps
+ * attribution. */
 export function SnapshotResult({
   snapshot: s,
   page,
@@ -31,6 +35,7 @@ export function SnapshotResult({
   page: "/google-profile-check" | "/get-started" | "/";
   onAnother: () => void;
 }) {
+  const todo = s.flags.filter((f) => f.tone !== "neutral").length;
   return (
     <div data-testid="snapshot">
       <div className="min-w-0">
@@ -81,13 +86,19 @@ export function SnapshotResult({
         )}
       </div>
 
-      <h3 className="mt-8 font-display text-2xl leading-tight">What Kabsi would take care of</h3>
-      <ul className="mt-4 space-y-3" aria-label="Findings">
-        {s.findings.map((f) => (
-          <li key={f.title} className="rounded-card border-2 border-kb-hairline p-4">
-            <StatusPill tone={TONE[f.level]}>{LEVEL_LABEL[f.level]}</StatusPill>
-            <p className="mt-2 font-bold">{f.title}</p>
-            <p className="mt-1 text-sm leading-6 text-kb-stone">{f.detail}</p>
+      <h3 className="mt-8 font-display text-2xl leading-tight">
+        What needs fixing, and what Kabsi would do
+      </h3>
+      <ul className="mt-4 space-y-3" aria-label="Status flags">
+        {s.flags.map((f) => (
+          <li
+            key={f.fact}
+            className="rounded-card border-2 border-kb-hairline p-4"
+            data-tone={f.tone}
+          >
+            <StatusPill tone={TONE[f.tone]}>{TONE_LABEL[f.tone]}</StatusPill>
+            <p className="mt-2 font-bold">{f.fact}</p>
+            <p className="mt-1 text-sm leading-6 text-kb-stone">{f.action}</p>
           </li>
         ))}
       </ul>
@@ -106,8 +117,9 @@ export function SnapshotResult({
 
       <div className="mt-6 rounded-large bg-kb-carbon p-6 text-kb-white">
         <p className="text-lg font-bold">
-          Kabsi can take care of {s.findings.length === 1 ? "this" : `these ${s.findings.length}`}.
-          You approve each one.
+          Kabsi can take care of{" "}
+          {todo === 1 ? "this" : todo === 0 ? "what comes up" : `these ${todo}`}. You approve each
+          one.
         </p>
         <SaveSnapshotButton
           snapshot={{ place_id: s.place_id, name: s.name, address: s.address }}
@@ -116,6 +128,7 @@ export function SnapshotResult({
       </div>
 
       <EmailForm placeId={s.place_id} page={page} />
+      {WHATSAPP_ON ? <WhatsappForm placeId={s.place_id} page={page} /> : null}
 
       <button
         type="button"
@@ -241,6 +254,101 @@ function EmailForm({
         disabled={busy || !token || !email}
       >
         {busy ? "Sending" : "Email me this check"}
+      </Button>
+    </form>
+  );
+}
+
+/** "Send my check to WhatsApp": shown only while Kabsi has a WhatsApp number. One message after the unticked box is
+ * ticked; the server stores the words, the page and the time (G-21) and a hash of the number, never the number. There
+ * is no follow-up: the words say so. The email form above stays exactly as it is. */
+function WhatsappForm({
+  placeId,
+  page,
+}: {
+  placeId: string;
+  page: "/google-profile-check" | "/get-started" | "/";
+}) {
+  const [phone, setPhone] = useState("");
+  const [ok, setOk] = useState(false);
+  const [token, setToken] = useState("");
+  const [round, setRound] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [sentTo, setSentTo] = useState("");
+  const [err, setErr] = useState("");
+
+  async function send(e: FormEvent) {
+    e.preventDefault();
+    setErr("");
+    setBusy(true);
+    const t = token;
+    try {
+      await whatsappCheck({ placeId, phone, page, turnstile: t });
+      setSentTo(phone.trim());
+      track("free_tool_used", { source: "profile_check_whatsapp" });
+    } catch (x) {
+      setErr(x instanceof CheckError ? x.message : "That didn't work. Please try again.");
+    }
+    setToken("");
+    setRound((n) => n + 1);
+    setBusy(false);
+  }
+
+  if (sentTo)
+    return (
+      <p className="mt-4 rounded-card bg-kb-sand p-4 text-sm" role="status">
+        Done. We sent your check to WhatsApp on <span className="font-bold">{sentTo}</span>.
+      </p>
+    );
+
+  return (
+    <form
+      onSubmit={send}
+      className="mt-4 rounded-large border-2 border-kb-hairline p-5"
+      data-testid="whatsapp-form"
+    >
+      <h3 className="font-bold">Send my check to WhatsApp</h3>
+      <p className="mt-1 text-sm text-kb-stone">
+        One message with this check. Nothing else after it.
+      </p>
+      <label htmlFor="check-whatsapp" className="sr-only">
+        Your WhatsApp number with the country code
+      </label>
+      <Input
+        id="check-whatsapp"
+        type="tel"
+        inputMode="tel"
+        autoComplete="tel"
+        required
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        placeholder="+1 201 555 0100"
+        className="mt-3 h-[52px] rounded-card px-4 text-base"
+      />
+      <label className="mt-3 flex cursor-pointer items-start gap-3 text-sm leading-6">
+        <Checkbox
+          checked={ok}
+          onCheckedChange={(v) => setOk(v === true)}
+          className="mt-0.5 size-5 rounded-md border-2 border-kb-black"
+          data-testid="whatsapp-box"
+        />
+        <span>{WHATSAPP_CONSENT_TEXT}</span>
+      </label>
+      <div className="mt-3">
+        <Turnstile key={round} onToken={setToken} />
+      </div>
+      {err ? (
+        <p className="mt-2 text-sm text-kb-red" role="alert">
+          {err}
+        </p>
+      ) : null}
+      <Button
+        type="submit"
+        variant="secondary"
+        className="mt-3 w-full sm:w-auto"
+        disabled={busy || !token || !phone || !ok}
+      >
+        {busy ? "Sending" : "Send my check to WhatsApp"}
       </Button>
     </form>
   );
