@@ -5,7 +5,7 @@
 import assert from "node:assert/strict";
 import { getCachedSnapshot, getSnapshotPlace, guard, SNAPSHOT_FIELD_MASK, searchText } from "./google/places/live.ts";
 import type { Place } from "./google/types.ts";
-import { buildSnapshot, CHECK_PAGES, checkEmail, type Deps, findings, LIMITS, makeHandler, TIPS_CONSENT_TEXT } from "./profile-snapshot.ts";
+import { buildSnapshot, CHECK_PAGES, checkEmail, type Deps, flags, LIMITS, makeHandler, normalizePhone, TIPS_CONSENT_TEXT, WHATSAPP_CONSENT_TEXT, whatsappParams } from "./profile-snapshot.ts";
 import { esc } from "./email-layout.ts";
 import { FREE_TOOL_BUSY } from "./free-tool-busy.ts";
 import { type EmailContent, renderEmail } from "./email/template.ts";
@@ -27,7 +27,7 @@ const FULL: Place = {
 type Seen = { url: string; method: string; mask: string | null; body: string }[];
 
 // A world with the Places day cap, an in-memory cache, an in-memory limiter and every outbound effect recorded.
-function world(opts: { cap?: number; place?: Place; turnstile?: boolean } = {}) {
+function world(opts: { cap?: number; place?: Place; turnstile?: boolean; whatsapp?: boolean; waState?: "sent" | "mock_sent" | "held" | "failed" } = {}) {
   const cap = opts.cap ?? 100;
   const requests: Seen = [];
   const cache = new Map<string, Place>();
@@ -56,6 +56,7 @@ function world(opts: { cap?: number; place?: Place; turnstile?: boolean } = {}) 
   const saved: Record<string, unknown>[] = [];
   const sent: { kind: string; to: string; subject: string; html: string; text: string; dedupeKey: string; content: EmailContent }[] = [];
   const errors: unknown[] = [];
+  const wa = { saved: [] as Record<string, unknown>[], sent: [] as { to: string; params: string[] }[], marked: [] as { id: string; state: string }[] };
   const deps: Deps = {
     env: (n) => (n === "PLACES_API_KEY" ? "test-key" : n === "SUPABASE_URL" ? "https://example.supabase.co" : undefined),
     ip: (req) => req.headers.get("x-forwarded-for") ?? "unknown",
@@ -74,6 +75,10 @@ function world(opts: { cap?: number; place?: Place; turnstile?: boolean } = {}) 
     searchText,
     getSnapshotPlace,
     getCachedSnapshot,
+    whatsappOn: opts.whatsapp === true,
+    saveWhatsapp: (row) => (wa.saved.push(row), Promise.resolve(`row-${wa.saved.length}`)),
+    sendWhatsapp: (o) => (wa.sent.push(o), Promise.resolve({ state: opts.waState ?? "sent", id: "wamid.1" })),
+    markWhatsapp: (id, r) => (wa.marked.push({ id, state: r.state }), Promise.resolve()),
     saveEmail: (row) => (saved.push(row), Promise.resolve()),
     sendEmail: (o) => (sent.push({ ...o, subject: o.content.subject, ...renderEmail(o.content, CTX) }), Promise.resolve({ sent: "x" })),
     captureError: (_fn, e) => (errors.push(e), Promise.resolve()),
@@ -88,7 +93,7 @@ function world(opts: { cap?: number; place?: Place; turnstile?: boolean } = {}) 
     }));
     return { status: res.status, body: await res.json() as Record<string, any> };
   };
-  return { requests, cache, cachePuts, saved, sent, errors, hits, call };
+  return { requests, cache, cachePuts, saved, sent, errors, hits, call, wa };
 }
 function restore() {
   Object.assign(guard, real);
@@ -281,23 +286,36 @@ Deno.test("Turnstile and the per-minute limit stop a call before it reaches Plac
   }
 });
 
-Deno.test("findings: three to five, labelled, ordered, no score, no dashes or exclamation marks", () => {
+Deno.test("flags: a plain fact and what Kabsi would do, danger before warning before neutral, no score, no dashes or exclamation marks", () => {
   const strong = buildSnapshot(PLACE_A, FULL, false);
-  assert.ok(strong.findings.length >= 3 && strong.findings.length <= 5);
+  // A complete profile has no danger or warning flag, only the three things public data cannot show.
+  assert.deepEqual(strong.flags.map((f) => f.tone), ["neutral", "neutral", "neutral"]);
   const bare = buildSnapshot(PLACE_B, { id: PLACE_B, displayName: { text: "Bare" }, businessStatus: "CLOSED_TEMPORARILY", userRatingCount: 0 }, false);
-  assert.ok(bare.findings.length <= 5);
-  assert.equal(bare.findings[0].level, "urgent");
-  assert.match(bare.findings[0].title, /temporarily closed/);
-  const levels = bare.findings.map((f) => f.level);
-  assert.deepEqual(levels, [...levels].sort((a, b) => ["urgent", "recommended", "nice"].indexOf(a) - ["urgent", "recommended", "nice"].indexOf(b)));
+  assert.equal(bare.flags[0].tone, "danger");
+  assert.match(bare.flags[0].fact, /temporarily closed/);
+  const tones = bare.flags.map((f) => f.tone);
+  assert.deepEqual(tones, [...tones].sort((a, b) => ["danger", "warning", "neutral"].indexOf(a) - ["danger", "warning", "neutral"].indexOf(b)));
+  const facts = bare.flags.map((f) => f.fact);
+  for (const want of [/No opening hours are shown/, /No phone number/, /No website/, /No category/, /no photos/, /no reviews yet/]) {
+    assert.ok(facts.some((t) => want.test(t)), String(want));
+  }
   for (const s of [strong, bare]) {
-    for (const f of s.findings) {
-      const text = `${f.title} ${f.detail}`;
+    for (const f of s.flags) {
+      const text = `${f.fact} ${f.action}`;
       assert.doesNotMatch(text, /[\u2013\u2014!]/, text);
-      assert.doesNotMatch(text, /score|rank|best|guarantee|automatically|approved by google/i, text);
+      assert.doesNotMatch(text, /score|rank|best|guarantee|automatically|approved by google|costing|losing|customers will not/i, text);
+      assert.doesNotMatch(text, /\d+\s?%/, text);
     }
   }
-  assert.equal(findings({ ...strong, hours: [] }).some((f) => f.title === "Your opening hours are missing"), true);
+  // Review replies, holiday hours, post and photo dates are not in Google's public data: never a count, never a problem.
+  const neutral = strong.flags.filter((f) => f.tone === "neutral").map((f) => f.fact).join(" ");
+  assert.match(neutral, /which reviews have a reply/);
+  assert.match(neutral, /holiday hours/);
+  assert.match(neutral, /photos and posts/);
+  assert.doesNotMatch(strong.flags.map((f) => f.fact).join(" "), /\d+ reviews? (have|has) no reply/);
+  assert.equal(flags({ ...strong, hours: [] }).some((f) => f.tone === "danger" && f.fact === "No opening hours are shown on Google."), true);
+  assert.equal(flags({ ...strong, review_count: 4 }).some((f) => f.tone === "warning" && f.fact === "There are 4 reviews so far."), true);
+  assert.equal(flags({ ...strong, review_count: 1 }).some((f) => f.fact === "There is 1 review so far."), true);
   const mail = checkEmail({ esc, appUrl: "https://kabsi.co" }, strong, true);
   assert.doesNotMatch(renderEmail(mail, CTX).html.replace("<!doctype html>", "") + mail.text + mail.subject, /[\u2013\u2014!]/);
   assert.match(mail.text, /Start your free trial: https:\/\/kabsi.co\/get-started/);
@@ -306,4 +324,121 @@ Deno.test("findings: three to five, labelled, ordered, no score, no dashes or ex
   const rendered = renderEmail(mail, CTX);
   assert.equal(rendered.text.split("This check uses public information").length - 1, 1);
   assert.equal(rendered.html.split("This check uses public information").length - 1, 1);
+});
+
+// "Send my check to WhatsApp" (lane R sync, item D). Shown only while Kabsi has a number; one message after a ticked
+// opt-in whose words are recorded; the number is never stored; no follow-up; nothing leaves from a test.
+const WA = { action: "whatsapp", place_id: PLACE_A, phone: "+1 (201) 555-0100", consent: true, consent_text: WHATSAPP_CONSENT_TEXT, page: "/" };
+
+Deno.test("whatsapp: refused while Kabsi has no number, and nothing is sent or recorded", async () => {
+  const w = world({ whatsapp: false });
+  try {
+    await w.call({ action: "check", place_id: PLACE_A });
+    const r = await w.call(WA);
+    assert.equal(r.status, 503);
+    assert.equal(r.body.error, "whatsapp_off");
+    assert.equal(w.wa.sent.length, 0);
+    assert.equal(w.wa.saved.length, 0);
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("whatsapp: one message after the ticked opt-in, the words recorded, the number never stored", async () => {
+  const w = world({ whatsapp: true });
+  try {
+    await w.call({ action: "check", place_id: PLACE_A });
+    const before = w.requests.length;
+    const r = await w.call(WA);
+    assert.equal(r.status, 200);
+    assert.equal(r.body.ok, true);
+    assert.equal(w.requests.length, before, "built from the cache: no Places request");
+    assert.equal(w.wa.sent.length, 1);
+    assert.equal(w.wa.sent[0].to, "+12015550100");
+    assert.equal(w.wa.saved.length, 1);
+    const row = w.wa.saved[0];
+    assert.equal(row.consent_text, WHATSAPP_CONSENT_TEXT);
+    assert.equal(row.page, "/");
+    assert.equal(row.place_id, PLACE_A);
+    assert.doesNotMatch(JSON.stringify(row), /2015550100/, "the number itself is not in the record");
+    assert.match(String(row.phone_hash), /^[0-9a-f]{40}$/);
+    assert.deepEqual(w.wa.marked, [{ id: "row-1", state: "sent" }]);
+    for (const p of w.wa.sent[0].params) assert.doesNotMatch(p, /[\n\t]|[\u2013\u2014!]/, "one line, no dashes or exclamation marks");
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("whatsapp: no tick, other words, a bad number or an expired check is refused before anything is sent", async () => {
+  const w = world({ whatsapp: true });
+  try {
+    await w.call({ action: "check", place_id: PLACE_A });
+    assert.equal((await w.call({ ...WA, consent: false })).body.error, "no_consent");
+    assert.equal((await w.call({ ...WA, consent: "true" })).body.error, "no_consent");
+    assert.equal((await w.call({ ...WA, consent_text: "Yes please" })).body.error, "bad_input");
+    assert.equal((await w.call({ ...WA, page: "/elsewhere" })).body.error, "bad_input");
+    assert.equal((await w.call({ ...WA, phone: "0201 555 0100" })).body.error, "bad_phone");
+    assert.equal((await w.call({ ...WA, place_id: "x" })).body.error, "bad_place");
+    assert.equal((await w.call({ ...WA, place_id: PLACE_B })).body.error, "expired");
+    assert.equal(w.wa.sent.length, 0);
+    assert.equal(w.wa.saved.length, 0);
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("whatsapp: a number gets one check a day, a visitor three an hour, and Turnstile is required", async () => {
+  const w = world({ whatsapp: true });
+  try {
+    await w.call({ action: "check", place_id: PLACE_A });
+    assert.equal((await w.call(WA)).status, 200);
+    const again = await w.call(WA);
+    assert.equal(again.status, 429);
+    assert.equal(again.body.error, "number_limit");
+    // The refused repeat still counted against the visitor's three an hour.
+    assert.equal((await w.call({ ...WA, phone: "+12015550101" })).status, 200);
+    assert.equal((await w.call({ ...WA, phone: "+12015550102" })).body.error, "rate_limited");
+    assert.equal(w.wa.sent.length, 2);
+  } finally {
+    restore();
+  }
+  const noChallenge = world({ whatsapp: true, turnstile: false });
+  try {
+    assert.equal((await noChallenge.call(WA)).body.error, "challenge_failed");
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("whatsapp: the mock sender, a missing template or a failure never says sent", async () => {
+  for (const state of ["mock_sent", "held", "failed"] as const) {
+    const w = world({ whatsapp: true, waState: state });
+    try {
+      await w.call({ action: "check", place_id: PLACE_A });
+      const r = await w.call(WA);
+      assert.equal(r.status, 503, state);
+      assert.equal(r.body.error, "whatsapp_off", state);
+      assert.deepEqual(w.wa.marked, [{ id: "row-1", state }]);
+    } finally {
+      restore();
+    }
+  }
+});
+
+Deno.test("whatsapp: phone numbers, the words and the one-line message", () => {
+  assert.equal(normalizePhone(" +44 7700 900123 "), "+447700900123");
+  assert.equal(normalizePhone("+1 (201) 555-0100"), "+12015550100");
+  assert.equal(normalizePhone("2015550100"), null);
+  assert.equal(normalizePhone("+0123456789"), null);
+  assert.equal(normalizePhone("+123"), null);
+  assert.equal(normalizePhone("+1 201 555 0100 ext 5"), null);
+  assert.doesNotMatch(WHATSAPP_CONSENT_TEXT, /[\u2013\u2014!]/);
+  const bare = buildSnapshot(PLACE_B, { id: PLACE_B, displayName: { text: "Bare\nShop" }, userRatingCount: 0 }, true);
+  const [name, line] = whatsappParams(bare);
+  assert.equal(name, "Bare Shop");
+  assert.match(line, /^\d+ things to look at: /);
+  assert.match(line, /No opening hours are shown on Google\./);
+  assert.doesNotMatch(line, /which reviews have a reply|After you connect/, "public-data blind spots are not listed as problems");
+  const strong = whatsappParams(buildSnapshot(PLACE_A, FULL, true));
+  assert.equal(strong[1], "Nothing needs fixing in what Google shows the public.");
 });
