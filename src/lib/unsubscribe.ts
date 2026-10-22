@@ -1,7 +1,7 @@
 // One-click unsubscribe (K-102, P0.4-08). The link in an email's footer opens /unsubscribe?t=TOKEN. The page asks the
 // email function what the link would stop (a read, so a mail scanner that opens the link changes nothing), and only the
 // button sends the POST. The token is signed on the server and names one address and one kind of notice.
-import { supabaseUrl } from "@/lib/supabase";
+import { supabaseUrl } from "@/lib/supabase-config";
 
 export type UnsubscribeResult = { ok: true; label: string } | { ok: false; message: string };
 

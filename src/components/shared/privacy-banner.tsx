@@ -15,10 +15,19 @@ import {
 } from "@/lib/consent";
 import { isPrivatePath } from "@/lib/telemetry";
 
+/**
+ * The wording as one short paragraph per sentence, the words unchanged. A banner that opens after the page has painted
+ * must not become the largest thing on the page: one six-line paragraph is larger than the headline text it appears
+ * over, and then it, not the page, is what the browser reports as the page's main content (lane R, 22 Oct 2026).
+ */
+export function sentences(wording: string): string[] {
+  return wording.split(/(?<=\.)\s+/).filter(Boolean);
+}
+
 // The one privacy banner (P0.6-01, R-04): a small first-party sheet at the foot of the screen, no third-party tool.
 // It opens by itself on public pages while there is no choice for the current wording, and from "Privacy choices"
 // in the footer at any time. The site works the same whatever the visitor picks.
-export function PrivacyBanner() {
+export function PrivacyBanner({ onMounted }: { onMounted?: () => void } = {}) {
   const pathname = useLocation({ select: (l) => l.pathname });
   const [consent, setConsent] = useState<ConsentState>(getConsent());
   const [reopened, setReopened] = useState(false);
@@ -28,7 +37,10 @@ export function PrivacyBanner() {
 
   useEffect(() => {
     const off = onConsentChange(setConsent);
+    // The root component starts the consent check as the page hydrates (initConsent runs once); this call is a no-op
+    // then, and the banner reads the state that is already there.
     void initConsent();
+    setConsent(getConsent());
     const open = () => {
       const s = getConsent();
       setAnalytics(s.choice ? s.choice.analytics : s.rule !== "opt_in");
@@ -37,6 +49,7 @@ export function PrivacyBanner() {
       setReopened(true);
     };
     window.addEventListener(OPEN_EVENT, open);
+    onMounted?.();
     return () => {
       off();
       window.removeEventListener(OPEN_EVENT, open);
@@ -69,7 +82,11 @@ export function PrivacyBanner() {
       className="fixed inset-x-0 bottom-0 z-50 border-t border-kb-hairline bg-kb-white px-5 py-5 shadow-kb sm:inset-x-auto sm:bottom-5 sm:left-5 sm:max-w-md sm:rounded-card sm:border"
     >
       <h2 className="text-base font-bold text-kb-ink">Your privacy choices</h2>
-      <p className="mt-2 text-sm leading-6 text-kb-stone">{wording}</p>
+      <div className="mt-2 grid gap-1.5 text-sm leading-6 text-kb-stone">
+        {sentences(wording).map((line) => (
+          <p key={line}>{line}</p>
+        ))}
+      </div>
       {choosing ? (
         <div className="mt-4 grid gap-3">
           <label className="flex items-center justify-between gap-4 text-sm font-medium text-kb-ink">

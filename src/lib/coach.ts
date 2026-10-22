@@ -1,8 +1,6 @@
 // The Profile Coach (P0.8-09, K-136): the checklist of what a complete Google profile has. Essentials sees it (what is
 // missing and why); the changes themselves are Pro and arrive with part B. The titles are the same as the free Profile
 // Check shows (supabase/functions/_shared/coach/catalog.ts; tests/coach.test.ts keeps the two equal).
-import { functionCall } from "@/lib/reviews";
-import { supabase } from "@/lib/supabase";
 
 export type CoachItemId =
   | "description"
@@ -134,6 +132,8 @@ export type Coach = {
 };
 
 export async function loadCoach(locationId: string): Promise<Coach> {
+  // The client loads when the app asks for the checklist; the pure rows above are shared with the public pages.
+  const { supabase } = await import("@/lib/supabase");
   const { data, error } = await supabase.rpc("coach_checklist", { p_location: locationId });
   if (error) throw new Error(error.message);
   return data as Coach;
@@ -161,7 +161,10 @@ export const coachCall = <T>(
   locationId: string,
   action: CoachAction,
   extra: Record<string, unknown> = {},
-) => functionCall<T>("coach", { do: action, location_id: locationId, ...extra });
+) =>
+  import("@/lib/reviews").then((m) =>
+    m.functionCall<T>("coach", { do: action, location_id: locationId, ...extra }),
+  );
 
 export type Verdict = "match" | "mismatch" | "unknown";
 export const VERDICT_LABEL: Record<Verdict, string> = {

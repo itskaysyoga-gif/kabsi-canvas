@@ -235,6 +235,7 @@ describe("the pricing and how it works pages (P0.8-13 part 3)", () => {
     "src/routes/for.$slug.tsx",
     "src/routes/for.index.tsx",
     "src/components/marketing/home-sections.tsx",
+    "src/components/marketing/home-sections-below.tsx",
     "src/lib/website.ts",
     "src/lib/verticals.tsx",
   ];

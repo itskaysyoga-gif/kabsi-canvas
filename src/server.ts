@@ -3,6 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { legacyRedirectTarget } from "./lib/legacy-host";
+import { withLeanHead, wantsLeanHead } from "./lib/head-hints";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -52,7 +53,8 @@ export default {
       if (moved) return Response.redirect(moved, 301);
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const normal = await normalizeCatastrophicSsrResponse(response);
+      return wantsLeanHead(request, normal) ? withLeanHead(normal) : normal;
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {

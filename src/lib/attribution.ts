@@ -7,7 +7,6 @@
 //   so they are kept only where the visitor's privacy choice allows advertising (src/lib/consent.ts).
 // - via=CODE: a first-party cookie for 60 days; the last referral wins. Disclosed on /privacy.
 import { advertisingAllowed, onConsentChange } from "@/lib/consent";
-import { supabase } from "@/lib/supabase";
 
 const TOUCH_KEY = "kabsi_touch";
 const SAVED_KEY = "kabsi_touch_saved";
@@ -133,6 +132,8 @@ export async function saveSignupAttribution(userId: string) {
   if (typeof window === "undefined") return;
   try {
     if (window.localStorage.getItem(SAVED_KEY) === userId) return;
+    // The client loads here, after sign-in, and not with the first page view (public pages do not carry supabase-js).
+    const { supabase } = await import("@/lib/supabase");
     const { error } = await supabase.rpc("save_signup_attribution", { p: attributionPayload() });
     if (!error) window.localStorage.setItem(SAVED_KEY, userId);
   } catch {
