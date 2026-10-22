@@ -103,6 +103,55 @@ export async function reviews(profile: string) {
   return { account: p.account, location: p.location, status: r.status, url: r.url, body: redact(r.body) };
 }
 
+// What a v4 list call (reviews, local posts, media) answered: the status, and for a refusal only Google's reason and
+// service; for a 200 only the redacted first item and the counts. Nothing else is kept.
+export function probeSummary(r: Raw) {
+  const b = (r.body ?? {}) as Json;
+  if (r.status !== 200) {
+    const info = ((b.error?.details ?? []) as Json[]).find((d) => d?.reason);
+    return { status: r.status, url: r.url, code: b.error?.status, reason: info?.reason, service: info?.metadata?.service, consumer: info?.metadata?.consumer };
+  }
+  const key = ["reviews", "localPosts", "mediaItems"].find((k) => Array.isArray(b[k]));
+  return { status: r.status, url: r.url, list: key, count: key ? b[key].length : 0, totalSize: b.totalSize ?? b.totalReviewCount, body: redact(b) };
+}
+
+// Reviews, local posts and media (all v4, mybusiness.googleapis.com) for one profile: one GET each, page size 1, so
+// the three answers can be recorded together while the service is closed and checked again once it opens.
+export async function v4Probe(profile: string) {
+  const p = await findProfile(profile);
+  if (!p) return { error: "profile not found under any account" };
+  const base = `${V4}/${p.account}/${p.location}`;
+  const out: Record<string, unknown> = {};
+  for (const [key, path] of [["reviews", "reviews"], ["localPosts", "localPosts"], ["media", "media"]] as const) {
+    out[key] = probeSummary(await get(`${base}/${path}?pageSize=1`));
+  }
+  return { profile, account: p.account, location: p.location, probed_at: new Date().toISOString(), calls: out };
+}
+
+// The locations of the account that holds a Kabsi-owned profile, every field (locations.list). Both profiles sit
+// under the Kabsi Clients group, so one call shows both; the list is redacted like the rest.
+export async function accountLocations(profile: string) {
+  const p = await findProfile(profile);
+  if (!p) return { error: "profile not found under any account" };
+  const r = await get(`${BI}/${p.account}/locations?readMask=${LOCATION_MASK}&pageSize=100`);
+  return { account: p.account, status: r.status, url: r.url, captured_at: new Date().toISOString(), body: redact(r.body) };
+}
+
+// categories.list for the profile's own primary category and country, the call the Profile Coach makes
+// (`_shared/google/categories/live.ts`): BASIC view, English, filtered by display name.
+export async function categoriesList(profile: string) {
+  const p = await findProfile(profile);
+  if (!p) return { error: "profile not found under any account" };
+  const loc = await get(`${BI}/${p.location}?readMask=categories,storefrontAddress`);
+  const b = loc.body as Json;
+  const name: string | undefined = b.categories?.primaryCategory?.displayName;
+  const region: string | undefined = b.storefrontAddress?.regionCode;
+  if (!name || !region) return { error: "the profile has no primary category or country" };
+  const q = new URLSearchParams({ regionCode: region, languageCode: "en", view: "BASIC", pageSize: "20", filter: `displayName=${JSON.stringify(name)}` });
+  const r = await get(`${BI}/categories?${q}`);
+  return { profile, region, status: r.status, url: r.url, captured_at: new Date().toISOString(), body: redact(r.body) };
+}
+
 // Every field the Business Information API returns for a location (Location resource, v1).
 export const LOCATION_MASK = [
   "name", "languageCode", "storeCode", "title", "phoneNumbers", "categories", "storefrontAddress", "websiteUri",
