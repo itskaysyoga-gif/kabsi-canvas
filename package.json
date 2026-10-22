@@ -16,6 +16,7 @@
     "check:tokens": "node scripts/check-tokens.mjs",
     "check:google": "node scripts/check-google-calls.mjs",
     "check:deno": "bash scripts/deno-check.sh",
+    "eval:nora": "node scripts/nora-eval/run-nora-eval.ts",
     "format": "prettier --write ."
   },
   "overrides": {

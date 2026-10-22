@@ -6,10 +6,12 @@
 # gate tested with stub models here too.
 set -euo pipefail
 scratch="$(mktemp -d)"
-mkdir -p "$scratch/supabase/functions" "$scratch/tests" "$scratch/scripts/eval"
+mkdir -p "$scratch/supabase/functions" "$scratch/tests" "$scratch/scripts/eval" "$scratch/scripts/nora-eval" "$scratch/knowledge"
 cp -r supabase/functions/. "$scratch/supabase/functions/"
 cp -r tests/fixtures "$scratch/tests/"
 cp -r scripts/eval/. "$scratch/scripts/eval/"
+cp -r scripts/nora-eval/. "$scratch/scripts/nora-eval/"
+cp knowledge/kabsi-facts.md "$scratch/knowledge/"
 echo '{"nodeModulesDir":"auto"}' > "$scratch/deno.json"
 cd "$scratch/supabase/functions"
 for dir in */; do
@@ -24,3 +26,6 @@ deno test --no-check --allow-env --allow-read --allow-net=deno.land,cdn.jsdelivr
 cd "$scratch"
 deno check scripts/eval/*.ts
 deno test --no-check scripts/eval/
+# P0.6-06: Nora's evaluation (60 questions) is type-checked here; its stub run is a vitest test (tests/nora-sync.test.ts).
+deno check scripts/nora-eval/*.ts
+deno run --allow-read --allow-env scripts/nora-eval/run-nora-eval.ts --stub pass
