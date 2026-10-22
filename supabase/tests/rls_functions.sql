@@ -28,6 +28,7 @@ insert into tested values
   ('staff_concierge_mark_posted(uuid)'),
   ('staff_concierge_queue()'), ('staff_concierge_task_done(uuid,text)'), ('staff_contacts(integer)'),
   ('staff_grant_trial(uuid,integer)'), ('staff_job_health()'),
+  ('staff_system_health()'), ('staff_job_retry(bigint)'), ('staff_job_cancel(bigint)'), ('staff_business_diagnostics(uuid)'),
   ('staff_mock_listing_edit(uuid,text,text)'), ('staff_mock_review(uuid,integer,text,text)'),
   ('staff_set_concierge(uuid,boolean)'),
   ('start_location(text,text,text,text,text)'),
@@ -201,6 +202,10 @@ select throws_ok($$ select public.staff_concierge_task_done('00000000-0000-4000-
 select throws_ok($$ select * from public.staff_contacts(10) $$, '42501', null, 'staff_contacts refuses a non-staff user');
 select throws_ok($$ select public.staff_grant_trial('00000000-0000-4000-8000-0000000000c1', 7) $$, '42501', null, 'staff_grant_trial refuses a non-staff user');
 select throws_ok($$ select public.staff_job_health() $$, '42501', null, 'staff_job_health refuses a non-staff user');
+select throws_ok($$ select public.staff_system_health() $$, '42501', null, 'staff_system_health refuses a non-staff user');
+select throws_ok($$ select public.staff_job_retry(1) $$, '42501', null, 'staff_job_retry refuses a non-staff user');
+select throws_ok($$ select public.staff_job_cancel(1) $$, '42501', null, 'staff_job_cancel refuses a non-staff user');
+select throws_ok($$ select public.staff_business_diagnostics('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'staff_business_diagnostics refuses a non-staff user');
 select throws_ok($$ select public.staff_complete_followup(gen_random_uuid(), 'x') $$, '42501', null, 'staff_complete_followup refuses a non-staff user');
 select throws_ok($$ select public.staff_mock_listing_edit('00000000-0000-4000-8000-0000000000c1', 'phone', '1') $$, '42501', null, 'staff_mock_listing_edit refuses a non-staff user');
 select throws_ok($$ select public.staff_mock_review('00000000-0000-4000-8000-0000000000c1', 5, 'n', 'c') $$, '42501', null, 'staff_mock_review refuses a non-staff user');
