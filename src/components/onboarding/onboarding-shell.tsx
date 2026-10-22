@@ -2,14 +2,22 @@ import type { ReactNode } from "react";
 import { KabsiLogo } from "@/components/shared/kabsi-logo";
 import { cn } from "@/lib/utils";
 import { FLOW, type FlowStep } from "@/lib/onboarding-flow";
+import { AssistantWidget } from "@/components/assistant/assistant-widget";
+import { NeedAHand, type HelpState } from "@/components/onboarding/need-a-hand";
 
 // The progress bar of six (K-141): Check, Sign up, Connect, About you, Confirm, Trial. Steps 1 and 2 happen before the
 // account (get-started and the sign-up sheet); /start is steps 3 to 6.
 export function OnboardingShell({
   step,
+  help,
+  assistant = "app",
   children,
 }: {
   step: FlowStep | "done";
+  /** The step's help (K-111): the "Need a hand?" chip goes under the main button, the same place on every screen. */
+  help?: HelpState;
+  /** Nora's surface: the public site before sign-up, the app after. She has no launcher here; the chip opens her. */
+  assistant?: "site" | "app";
   children: ReactNode;
 }) {
   const index = step === "done" ? FLOW.length : FLOW.findIndex((s) => s.key === step);
@@ -58,8 +66,12 @@ export function OnboardingShell({
             ))}
           </ol>
         ) : null}
-        <section className="rounded-large bg-kb-white p-6 shadow-kb sm:p-9">{children}</section>
+        <section className="rounded-large bg-kb-white p-6 shadow-kb sm:p-9">
+          {children}
+          {help ? <NeedAHand help={help} /> : null}
+        </section>
       </div>
+      <AssistantWidget surface={assistant} />
     </main>
   );
 }

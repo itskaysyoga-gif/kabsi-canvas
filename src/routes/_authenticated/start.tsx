@@ -10,9 +10,12 @@ import { QuestionsStep } from "@/components/onboarding/questions-step";
 import {
   activateCard,
   friendlyError,
+  loadAccessState,
+  loadScenario,
   myLatestLocation,
   type OnboardingStep,
 } from "@/lib/onboarding";
+import type { HelpState } from "@/components/onboarding/need-a-hand";
 import { track } from "@/lib/telemetry";
 
 const searchSchema = z.object({
@@ -47,6 +50,39 @@ function StartPage() {
   });
   const location = startNew ? null : (query.data ?? null);
   const step: OnboardingStep = location ? location.onboarding_step : "business";
+  // "Need a hand?" (K-111): the same queries the Manager step uses (one cache), so the chip knows the situation and the
+  // access state without asking twice.
+  const scenario = useQuery({
+    queryKey: ["scenario", location?.id],
+    queryFn: () => loadScenario(location!.id),
+    enabled: !!location && step === "access",
+  });
+  const accessState = useQuery({
+    queryKey: ["access-state", location?.id],
+    queryFn: () => loadAccessState(location!.id),
+    enabled: !!location && step === "access",
+    refetchInterval: 30_000,
+  });
+  const help: HelpState | undefined = location
+    ? {
+        step:
+          step === "access"
+            ? scenario.data && !location.access_granted_at
+              ? "scenario"
+              : "access"
+            : step === "knowledge"
+              ? "questions"
+              : step === "confirm" || step === "plan"
+                ? location.access_granted_at
+                  ? "confirm"
+                  : "waiting"
+                : "find",
+        locationId: location.id,
+        agreed: !!location.consent_at,
+        accessWorking: !!location.access_granted_at,
+        accessState: accessState.data ?? null,
+      }
+    : { step: "find" };
 
   useEffect(() => {
     if (!query.isLoading && !location) track("signup_started", { source: "self" });
@@ -95,7 +131,7 @@ function StartPage() {
     );
 
   return (
-    <OnboardingShell step={flowStepOf(step)}>
+    <OnboardingShell step={flowStepOf(step)} {...(step !== "done" ? { help } : {})}>
       {cardNote ? (
         <p className="mb-6 rounded-card bg-kb-sand px-4 py-3 text-sm font-medium" role="status">
           {cardNote}

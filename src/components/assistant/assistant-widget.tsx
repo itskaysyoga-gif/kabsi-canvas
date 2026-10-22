@@ -136,10 +136,17 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
 
   // Other parts of the app can open Nora with a first message (the list of what needs attention).
   const sendRef = useRef<(t: string) => void>(() => undefined);
+  // P0.4-11: a chat opened from an onboarding step's "Need a hand?" chip carries which screen it came from, so Nora
+  // knows the step, and the conversation's page says it, so the team can count help per step.
+  const onboardingRef = useRef<{ screen: string; page: string } | null>(null);
   useEffect(() => {
     const onOpen = (e: Event) => {
       setOpen(true);
-      const prompt = (e as CustomEvent<{ prompt?: string }>).detail?.prompt;
+      const d = (
+        e as CustomEvent<{ prompt?: string; onboarding?: { screen: string; page: string } }>
+      ).detail;
+      onboardingRef.current = d?.onboarding ?? null;
+      const prompt = d?.prompt;
       if (prompt) window.setTimeout(() => sendRef.current(prompt), 150);
     };
     window.addEventListener("kabsi:open-nora", onOpen);
@@ -155,6 +162,8 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
     const message = text.trim();
     if (!message || busy) return;
     if (needsCheck && !checkToken) {
+      // Keep what they asked (a suggested question from a setup step, for one) so they only press send once the check is done.
+      setInput(message);
       setError("Please complete the check below first.");
       return;
     }
@@ -177,8 +186,11 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
           visitor: visitorId(),
           conversation: conversation.current,
           message,
-          page: path,
+          page: onboardingRef.current?.page ?? path,
           surface,
+          ...(onboardingRef.current
+            ? { onboarding: { screen: onboardingRef.current.screen } }
+            : {}),
           meta: visitorMeta(),
           ...(needsCheck ? { turnstile: checkToken } : {}),
         }),
@@ -235,12 +247,13 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
 
   const starters = surface === "app" ? APP_STARTERS : SITE_STARTERS;
 
-  // No launcher on the login and setup screens.
-  if (path === "/login" || path === "/start") return null;
+  // No launcher on the login and setup screens. Setup has its own "Need a hand?" chip (P0.4-11), which opens this panel.
+  if (path === "/login") return null;
+  const setupScreen = path === "/start" || path === "/get-started";
 
   return (
     <>
-      {!open ? (
+      {!open && !setupScreen ? (
         <button
           ref={launcherRef}
           type="button"
