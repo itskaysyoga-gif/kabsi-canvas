@@ -233,6 +233,8 @@ Signing up and logging in are the same steps. After the free check on /get-start
 
 ### 3.3 The setup steps (/start)
 
+Setup has six steps, with a bar of six at the top (on a phone it reads "Step 3 of 6: Connect"): **1 Check** (the free Google Profile Check), **2 Sign up**, **3 Connect** (add Kabsi as a Manager, with a live status), **4 About you** (five quick questions), **5 Confirm** (confirm your details once access works), **6 Trial** (the Pro trial runs). Steps 1 and 2 come before there is an account. The target is your first approved reply within 10 minutes of access working.
+
 **Step 1: Find your business**
 
 Search the name and city as on Google Maps (or name plus street or area), pick the result and tap **Yes, this is {business}**.
@@ -243,16 +245,17 @@ Then **One quick check**: "Kabsi works with a verified Google Business Profile t
 - **I'm not sure:** a 30-second check at business.google.com shows how to tell.
 - **No, it isn't verified yet, or someone else manages it:** setup shows how to verify or ask for access on Google, and waits until then. Nothing is saved before you answer yes.
 
-**Step 2: Give Kabsi access**
+**Step 3: Add Kabsi as a Manager**
 
 1. Tick the box: "I authorise Kabsi to manage review replies and profile updates for this business on Google, and to publish only what I approve."
-2. Add the Kabsi group ID 5481006796 as a Manager. In the Google Maps app: tap your profile picture, then **Your business profiles**; choose the business, then **⋮** or **Profile settings**, then **People and access**; tap **Add**, paste the group ID 5481006796, choose **Manager**, then **Invite**. On a computer: open your Business Profile, then **More** (or **Menu**), **Business Profile settings**, **People and access**, **Add**, paste the group ID 5481006796, choose **Manager**, **Invite**. Invite the group, never the email address hello@kabsi.co.
-3. The status box shows "Waiting for your invite…" and updates by itself, usually a few minutes after the invite once Kabsi is live on Google (see 2.2). Then it shows "Access received" and you get Kabsi's own access notice, "Kabsi is now a Manager of {business} on Google": what changed, what Kabsi can do, and how to remove Kabsi (Settings, **Disconnect Kabsi from Google**, or People and access). Kabsi sends this notice for every change it makes to its access to your profile, within 48 hours and separate from Google's own emails.
-4. Tap **I've sent the invite, continue**, or **Do this later** and finish the other steps first.
+2. The guide shows the **Kabsi group ID 5481006796** large, with **Copy group ID** (it says **Copied**). Under it are five cards, one step each, tapped forward with **Next** and **Back** (or swiped): 1 open your Business Profile (**Open my Google listing** opens it in a new tab); 2 open Business Profile settings; 3 choose People and access; 4 add a person; 5 paste the group ID, choose **Manager**, **Invite**. A computer shows a real screenshot on each card (taken 4 October 2026) and a phone shows plain steps; **Show me the phone version** or **Show me the computer version** switches. In the Google Maps app: tap your profile picture, then **Your business profiles**; choose the business, then **⋮** or **Profile settings**, then **People and access**; tap **Add**, paste the group ID, choose **Manager**, then **Invite**. On a computer: open your Business Profile, the menu next to the business name, **Business Profile settings**, **People and access**, **Add**, paste the group ID, choose **Manager**, **Invite**. Invite the group, never the email address hello@kabsi.co. Kabsi never asks for your Google password or a verification code.
+3. The status under the guide reads **Waiting for your invitation. We check every 30 seconds.** and turns green, **Invitation received. You're connected**, and the screen moves on by itself. While Kabsi is still in early access (see 2.2) a person on the Kabsi team accepts the invitation by hand, so it reads **We'll email you when access is ready** and you can close the page. When access works you get Kabsi's own access notice, "Kabsi is now a Manager of {business} on Google": what changed, what Kabsi can do, and how to remove Kabsi (Settings, **Disconnect Kabsi from Google**, or People and access). Kabsi sends this notice for every change it makes to its access to your profile, within 48 hours and separate from Google's own emails.
+4. Three ways out sit under the status. **Send these steps to my other device**: **Email them to me** sends one email to your own address with a link back to the step (at most 3 times a day), or **Share on WhatsApp** opens a share message with the link. **Someone else manages my Google listing**: a ready message to copy or send by WhatsApp or email to whoever manages the profile; it asks them to add Kabsi as a Manager and never asks for a password or code. **Book a free 20-minute setup call.** The page kabsi.co/manager-steps shows the same guide for anyone you send it to.
+5. Tap **I've sent the invitation** (or **Continue** once connected), or **Do this later** and finish the other steps first.
 
 A Manager can do everything Kabsi needs; only owners can add or remove people. You stay the owner and can remove Kabsi any time, without asking us: in Kabsi (Settings, **Disconnect Kabsi from Google**) or on Google (People and access).
 
-**Step 3: About your business**
+**Step 4: About your business** (the five questions; this step is being reworked)
 
 "Replies only use what you write here. If something isn't here, it's left out, never made up."
 
@@ -624,7 +627,7 @@ Check spam, check the address, tap **Resend code**. Still stuck: hand off.
 **I can't find "People and access" on my Google profile.**
 Kabsi works with a verified profile that you own or manage. The listing may need to be verified or claimed on Google first, and only owners can add people. You can finish the other setup steps now.
 
-**I sent the invite but it still says "Waiting for your invite".**
+**I sent the invitation but it still says "Waiting for your invitation" (or "We'll email you when access is ready").**
 **[TIME-SENSITIVE]** While Kabsi is in test mode (2.2), real businesses stay at "Waiting for Google access" until the team accepts the invitation (early access, within one working day) or Kabsi connects to Google. Check that you invited group ID 5481006796 exactly, with the Manager role, on the right business, and that you did not invite the email address hello@kabsi.co.
 
 **I got "Kabsi can't reach {business} on Google".**

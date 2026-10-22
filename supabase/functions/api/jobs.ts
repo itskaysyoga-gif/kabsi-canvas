@@ -396,6 +396,18 @@ const HANDLERS: Record<string, JobHandler> = {
       },
     });
   },
+  // P0.4-03: "Send these steps to my other device": one email to the signed-in person's own address, with a link back to
+  // the step. The address is read from the database for that person and that business, never taken from the request.
+  manager_steps_email: async (job) => {
+    const userId = String(job.payload.user_id ?? "");
+    if (!userId || !job.location_id) throw new PermanentJobError("manager_steps_email needs a person and a business");
+    const t = await rpcJson<{ name: string; email: string } | null>("manager_steps_target", { p_location: job.location_id, p_user: userId });
+    if (!t) return;
+    await notify({
+      category: "direct", kind: "manager_steps", key: `manager_steps:${job.id}`, locationId: job.location_id, to: [{ email: t.email, userId }],
+      content: copy.managerSteps(t.name, APP_URL, Number(job.payload.step ?? 1)),
+    });
+  },
   // P0.4-09: held and digested emails come due (K-46). Offered every 5 minutes once app_settings.notify_due is 'on'.
   // P0.4-10: the lifecycle emails ride on the same 5 minute clock (they are sent through the same outbox); off until
   // app_settings.lifecycle_emails is 'on'. A failure there never stops held and digested mail from going out.

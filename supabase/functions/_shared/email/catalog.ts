@@ -96,6 +96,7 @@ export function catalog(): CatalogEntry[] {
     e("access_removing", "access", true, removing),
     e("access_removed", "access", true, removed),
     e("access_lost", "access", true, copy.accessLost(BIZ, APP)),
+    e("manager_steps", "direct", true, copy.managerSteps(BIZ, APP, 3)),
     e("deletion_scheduled", "account", true, copy.deletionScheduled(BIZ, "28 October 2026", APP)),
     e("deletion_done", "account", true, copy.deletionDone(BIZ, APP)),
     e("renew_r5", "billing", true, copy.renewalReminder("r5", BIZ, "Kabsi Pro, monthly", "28 October 2026", "pro_monthly", APP)),

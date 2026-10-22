@@ -1,35 +1,18 @@
 import type { ReactNode } from "react";
 import { KabsiLogo } from "@/components/shared/kabsi-logo";
 import { cn } from "@/lib/utils";
-import type { OnboardingStep } from "@/lib/onboarding";
+import { FLOW, type FlowStep } from "@/lib/onboarding-flow";
 
-const STEPS: { key: OnboardingStep; label: string }[] = [
-  { key: "business", label: "Business" },
-  { key: "access", label: "Access" },
-  { key: "knowledge", label: "About you" },
-  { key: "plan", label: "Plan" },
-];
-
-// The five steps of the new flow (design review, "Signup, login and onboarding"). Steps 1 and 2 come before sign-up
-// (P0.4-01); the screens for 3 to 5 arrive in P0.4-03 to P0.4-05.
-const FLOW: { key: string; label: string }[] = [
-  { key: "find", label: "Find" },
-  { key: "snapshot", label: "Check" },
-  { key: "connect", label: "Connect" },
-  { key: "questions", label: "About" },
-  { key: "confirm", label: "Confirm" },
-];
-
+// The progress bar of six (K-141): Check, Sign up, Connect, About you, Confirm, Trial. Steps 1 and 2 happen before the
+// account (get-started and the sign-up sheet); /start is steps 3 to 6.
 export function OnboardingShell({
   step,
   children,
 }: {
-  step: OnboardingStep | "find" | "snapshot";
+  step: FlowStep | "done";
   children: ReactNode;
 }) {
-  const steps: { key: string; label: string }[] =
-    step === "find" || step === "snapshot" ? FLOW : STEPS;
-  const index = step === "done" ? steps.length : steps.findIndex((s) => s.key === step);
+  const index = step === "done" ? FLOW.length : FLOW.findIndex((s) => s.key === step);
   return (
     <main className="min-h-screen bg-kb-sand">
       <header className="border-b border-kb-hairline bg-kb-white">
@@ -37,7 +20,7 @@ export function OnboardingShell({
           <KabsiLogo />
           <a
             href="mailto:hello@kabsi.co"
-            className="-mr-2 inline-flex min-h-10 items-center rounded-card px-2 text-sm font-medium text-kb-stone underline-offset-4 hover:underline"
+            className="-mr-2 inline-flex min-h-11 items-center rounded-card px-2 text-sm font-medium text-kb-stone underline-offset-4 hover:underline"
           >
             Need help?
           </a>
@@ -45,11 +28,13 @@ export function OnboardingShell({
       </header>
       <div className="mx-auto max-w-2xl px-5 pb-16 pt-6 sm:pt-10">
         {step !== "done" ? (
-          <ol
-            className={cn("mb-6 grid gap-2", steps.length === 5 ? "grid-cols-5" : "grid-cols-4")}
-            aria-label="Setup progress"
-          >
-            {steps.map((s, i) => (
+          <p className="mb-2 text-sm font-bold text-kb-ink sm:hidden">
+            Step {index + 1} of {FLOW.length}: {FLOW[index]?.label}
+          </p>
+        ) : null}
+        {step !== "done" ? (
+          <ol className="mb-6 grid grid-cols-6 gap-1.5 sm:gap-2" aria-label="Setup progress">
+            {FLOW.map((s, i) => (
               <li key={s.key} className="min-w-0">
                 <div
                   className={cn(
@@ -59,13 +44,16 @@ export function OnboardingShell({
                 />
                 <p
                   className={cn(
-                    "mt-2 truncate text-xs font-medium sm:text-sm",
+                    "mt-2 hidden truncate text-sm font-medium sm:block",
                     i === index ? "text-kb-ink" : "text-kb-stone",
                   )}
                   aria-current={i === index ? "step" : undefined}
                 >
                   {i + 1}. {s.label}
                 </p>
+                {i === index ? (
+                  <span className="sr-only sm:hidden">Current step: {s.label}</span>
+                ) : null}
               </li>
             ))}
           </ol>
