@@ -5,32 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Turnstile } from "@/components/turnstile";
 import { cn } from "@/lib/utils";
-import { CTA_PRIMARY } from "@/lib/site";
+import { FreeToolBusy } from "@/components/shared/free-tool-busy";
 import type { ProfileCheckState } from "@/components/profile-check/use-profile-check";
-
-/** The calm state when the Places daily cap is reached or the check is paused: "Back soon". No error colour, no dead end. */
-export function BackSoon({ message }: { message: string }) {
-  return (
-    <div
-      role="status"
-      data-testid="back-soon"
-      className="rounded-large bg-kb-sand p-6 text-kb-ink sm:p-8"
-    >
-      <h2 className="font-display text-3xl leading-tight">Back soon</h2>
-      <p className="mt-3 max-w-xl leading-7 text-kb-stone">
-        {message.replace(/^Back soon\.?\s*/, "") ||
-          "The free check is paused for today. Please try again tomorrow."}
-      </p>
-      <p className="mt-3 max-w-xl leading-7 text-kb-stone">
-        You do not have to wait to get started. Kabsi can look after your reviews and your listing,
-        and you approve each step.
-      </p>
-      <Button asChild className="mt-5 w-full sm:w-auto">
-        <Link to="/start">{CTA_PRIMARY}</Link>
-      </Button>
-    </div>
-  );
-}
 
 /**
  * Step 1, "Which business is yours?": search by name and area, pick from the results. Turnstile guards the search and
@@ -63,7 +39,7 @@ export function BusinessFinder({
     await state.pick(place, t);
   }
 
-  if (backSoon) return <BackSoon message={error?.message ?? ""} />;
+  if (backSoon) return <FreeToolBusy />;
 
   return (
     <div>

@@ -14,6 +14,7 @@ import type { Place } from "./google/types.ts";
 import type { PlacesResult } from "./google/places/live.ts";
 import type { EmailContent } from "./email/template.ts";
 import { type CoachRow, freeChecklist } from "./coach/catalog.ts";
+import { FREE_TOOL_BUSY } from "./free-tool-busy.ts";
 
 export const TIPS_CONSENT_TEXT = "Send me tips on managing my Google profile";
 export const CHECK_PAGES = ["/google-profile-check", "/get-started"];
@@ -170,7 +171,7 @@ export function makeHandler(d: Deps) {
           return fail("rate_limited", "That is a lot of searches. Try again in an hour.", 429);
         }
         const r = await d.searchText(key, q, 5, "places.id,places.displayName,places.formattedAddress");
-        if (r.backSoon) return fail("back_soon", "Back soon. The free check is paused for today. Please try again tomorrow.", 503);
+        if (r.backSoon) return fail("back_soon", FREE_TOOL_BUSY, 503);
         if (!r.ok) throw new Error(`places ${r.status}`);
         return reply({
           places: (r.data.places ?? []).map((p) => ({
@@ -192,7 +193,7 @@ export function makeHandler(d: Deps) {
         const r = await d.getSnapshotPlace(key, placeId);
         if (r.backSoon) {
           await d.giveBack(quotaKey).catch(() => {});
-          return fail("back_soon", "Back soon. The free check is paused for today. Please try again tomorrow.", 503);
+          return fail("back_soon", FREE_TOOL_BUSY, 503);
         }
         if (!r.ok) {
           await d.giveBack(quotaKey).catch(() => {});
