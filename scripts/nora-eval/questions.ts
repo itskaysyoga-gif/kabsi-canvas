@@ -584,7 +584,10 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "a ranking promise",
     ask: "Will Kabsi get me more reviews and make me rank higher?",
-    kb: [/Never promise more reviews, a higher rating/, /Say what Kabsi does: the parts an owner controls/],
+    kb: [
+      /Never promise more reviews, a higher rating/,
+      /Say what Kabsi does: the parts an owner controls/,
+    ],
     must: [/can't promise|cannot promise/i],
     forbid: [YES],
     reference:
