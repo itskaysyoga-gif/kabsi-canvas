@@ -3,7 +3,6 @@
 // clearly labelled. Examples are fictional. Care notes only describe what the product really does.
 import type { ReactNode } from "react";
 import {
-  BedDouble,
   CalendarClock,
   Camera,
   Car,
@@ -11,17 +10,12 @@ import {
   Clock3,
   Coffee,
   Croissant,
-  Flower2,
-  Gift,
-  Phone,
-  Globe2,
   HeartPulse,
   Languages,
   MessageSquareReply,
   Receipt,
   Scissors,
   ShieldCheck,
-  ShoppingBag,
   Sparkles,
   Stethoscope,
   UtensilsCrossed,
@@ -63,6 +57,10 @@ export type Vertical = {
   placements: string[];
   care: { title: string; text: string };
   guide: { slug: string; title: string };
+  /** The kinds of photo customers look for in this trade. */
+  photoTypes: string[];
+  /** The trade's care rules, in plain words: what a reply never does. */
+  careRules: string[];
   faqs: { q: string; a: string }[];
 };
 
@@ -119,6 +117,17 @@ export const VERTICALS: Vertical[] = [
     },
     exampleNote:
       "Fictional example. The draft thanks the guest, answers the one point they raised and invents nothing.",
+    photoTypes: [
+      "The dishes people order most, in daylight",
+      "The dining room, empty and set",
+      "The entrance and the street sign, so people find the door",
+      "The menu board or a clear photo of the menu",
+    ],
+    careRules: [
+      "A reply never offers a discount or a free meal to change a review.",
+      "A reply never says what caused an illness or names a staff member in a complaint.",
+      "A review about food safety is shown to you first, with no quick Approve button.",
+    ],
     helps: [
       {
         icon: <ClipboardList />,
@@ -175,13 +184,13 @@ export const VERTICALS: Vertical[] = [
     ],
   },
   {
-    slug: "cafes-and-bakeries",
-    name: "cafés and bakeries",
-    label: "Cafés and bakeries",
+    slug: "cafes",
+    name: "cafés",
+    label: "Cafés",
     icon: <Coffee />,
     hero: "bakery",
     side: "cafe",
-    title: "Kabsi for cafés and bakeries | Google profile care you approve",
+    title: "Kabsi for cafés | Google profile care you approve",
     description:
       "Kabsi keeps your café or bakery's Google profile complete and current: fresh post drafts, early-morning hours and a reply to every review. You approve everything.",
     h1: BRAND_LINE,
@@ -227,6 +236,17 @@ export const VERTICALS: Vertical[] = [
     },
     exampleNote:
       "Fictional example. The review is in Arabic, so the draft is too. It thanks the customer for what they mentioned and invents nothing.",
+    photoTypes: [
+      "The counter and the cabinet, as customers see them",
+      "A few of the drinks and pastries you sell most",
+      "The seating, inside and outside",
+      "The shopfront at opening time",
+    ],
+    careRules: [
+      "A reply never offers a free coffee or a discount to change a review.",
+      "Allergen and ingredient answers come only from facts you confirmed.",
+      "A reply thanks a barista by name only when the name is on your list.",
+    ],
     helps: [
       {
         icon: <ClipboardList />,
@@ -280,115 +300,12 @@ export const VERTICALS: Vertical[] = [
     ],
   },
   {
-    slug: "clinics-and-dentists",
-    name: "clinics and dentists",
-    label: "Clinics and dentists",
-    icon: <Stethoscope />,
-    hero: "dentist",
-    title: "Kabsi for clinics and dentists | Careful Google profile care",
-    description:
-      "Kabsi keeps your clinic's Google profile complete and current, with calm reply drafts that make no medical claims. Nothing is published without your approval.",
-    h1: BRAND_LINE,
-    sub: "Patients read your profile before they book. Kabsi shows what to complete on it and drafts a calm, professional reply to each review. Replies never make medical claims, and nothing is posted until you approve it.",
-    summary:
-      "Kabsi keeps a clinic's Google Business Profile complete and current. It drafts calm, general replies to every review. Drafts make no medical claims, share no personal details and can be told never to confirm that someone is a patient. It also keeps your hours right and alerts you when your listing changes.",
-    headings: {
-      pains: "Patients read your reviews before they book.",
-      example: "Calm replies that protect patient privacy.",
-      helps: "What Kabsi handles for your clinic.",
-    },
-    pains: [
-      {
-        icon: <HeartPulse />,
-        title: "Replies have to be careful",
-        text: "A public reply should never discuss someone's care. Drafts stay general and invite the person to talk privately.",
-      },
-      {
-        icon: <Clock3 />,
-        title: "No time between patients",
-        text: "Drafts reach your email ready to read. Approve, edit or skip them when you have a moment.",
-      },
-      {
-        icon: <ClipboardList />,
-        title: "Hours and phone must be right",
-        text: "A wrong number on Google means missed calls. Google Protection emails you when it changes.",
-      },
-      {
-        icon: <Languages />,
-        title: "Patients speak many languages",
-        text: "Each draft is written in the language of the review.",
-      },
-    ],
-    example: {
-      label: "Example review and draft",
-      lang: "Español",
-      name: "Lucía",
-      rating: 2,
-      review: "Tuve que esperar casi una hora aunque tenía cita. Nadie me explicó el retraso.",
-      reply:
-        "Gracias por contarnos su experiencia. Lamentamos la espera y la falta de información, y nos gustaría entender lo ocurrido. Por favor, llámenos al 555 0142 para hablarlo en privado.\n\nClínica Dental Sol",
-    },
-    exampleNote:
-      "Fictional example. The draft apologises for the wait, doesn't confirm any treatment and moves the conversation to a private call.",
-    helps: [
-      {
-        icon: <ClipboardList />,
-        title: "What needs attention",
-        text: "A short list of what needs attention, marked Urgent, Recommended or Nice to have: hours, phone, website, categories, photos of the reception and the building. Each item comes with a ready draft where Kabsi can write one.",
-      },
-      {
-        icon: <MessageSquareReply />,
-        title: "Careful reply drafts",
-        text: "No medical claims, no personal details, no admissions of fault. Hard reviews get a calm draft and no quick Approve button.",
-      },
-      {
-        icon: <ShieldCheck />,
-        title: "Google Protection",
-        text: "Watches your name, phone, address, hours, website and category, and emails you if one changes.",
-      },
-      {
-        icon: <CalendarClock />,
-        title: "Special hours",
-        text: "Holidays and closures posted to Google in a minute, so patients don't arrive to a closed door.",
-      },
-      {
-        icon: <Sparkles />,
-        title: "Fresh posts, drafted",
-        text: "A short Google post from the facts you gave Kabsi. You approve or skip it.",
-      },
-    ],
-    placements: [
-      "At the reception desk, next to the payment terminal.",
-      "Printed QR on the appointment card or the aftercare sheet.",
-      "Your review link in the follow-up email you already send.",
-    ],
-    care: {
-      title: "Keep patient details out of public replies",
-      text: "In many countries, health privacy rules (HIPAA in the US, for example) mean a public reply shouldn't confirm that someone is a patient or mention their care. Add \"Don't confirm the reviewer is a patient or mention any treatment\" under Anything Kabsi should never say, and Kabsi's drafts and safety check follow it.",
-    },
-    guide: { slug: "how-to-reply-to-google-reviews", title: "How to reply to Google reviews" },
-    faqs: [
-      {
-        q: "Does Kabsi post replies automatically?",
-        a: "No. Every reply waits for your approval, by email or in the dashboard. Nothing is published until you approve it.",
-      },
-      {
-        q: "Can I stop Kabsi mentioning certain things?",
-        a: "Yes. In About your business, list anything Kabsi should never say or promise. Drafts follow it and the safety check blocks drafts that don't.",
-      },
-      {
-        q: "Can Kabsi remove a negative review?",
-        a: "No. Nobody outside Google can remove a review. Kabsi helps you answer it calmly. You can report a review that breaks Google's rules through Google itself.",
-      },
-    ],
-  },
-  {
-    slug: "salons-and-barbers",
+    slug: "salons",
     name: "salons and barbers",
-    label: "Salons and barbers",
+    label: "Salons",
     icon: <Scissors />,
     hero: "salon",
-    title: "Kabsi for salons and barbers | Google profile care you approve",
+    title: "Kabsi for salons | Google profile care you approve",
     description:
       "Kabsi keeps your salon's Google profile complete and current: photos of your work checked before they go up, and a reply to every review. You approve every post.",
     h1: BRAND_LINE,
@@ -433,6 +350,17 @@ export const VERTICALS: Vertical[] = [
     },
     exampleNote:
       "Fictional example. The stylist's name is used because it's on the salon's staff list.",
+    photoTypes: [
+      "Finished cuts and colour, with the client's permission",
+      "The chairs and the reception area",
+      "Your team at work, with their agreement",
+      "The shopfront and the sign",
+    ],
+    careRules: [
+      "Only photos of clients who said yes go on your profile.",
+      "A reply never offers a discount or a free service to change a review.",
+      "A reply thanks a stylist by name only when the name is on your list.",
+    ],
     helps: [
       {
         icon: <ClipboardList />,
@@ -486,115 +414,240 @@ export const VERTICALS: Vertical[] = [
     ],
   },
   {
-    slug: "hotels-and-guesthouses",
-    name: "hotels and guesthouses",
-    label: "Hotels and B&Bs",
-    icon: <BedDouble />,
-    hero: "hotel",
-    title: "Kabsi for hotels and B&Bs | Google profile care in every language",
+    slug: "clinics",
+    name: "clinics",
+    label: "Clinics",
+    icon: <Stethoscope />,
+    hero: "dentist",
+    title: "Kabsi for clinics | Careful Google profile care",
     description:
-      "Kabsi keeps your hotel or guesthouse's Google profile complete and current and drafts a reply in each guest's language. Nothing is published without your approval.",
+      "Kabsi keeps your clinic's Google profile complete and current, with calm reply drafts that make no medical claims. Nothing is published without your approval.",
     h1: BRAND_LINE,
-    sub: "Guests arrive from everywhere and review in their own language. Kabsi shows what to complete on your profile and drafts a warm reply in each guest's language. You approve everything.",
+    sub: "Patients read your profile before they book. Kabsi shows what to complete on it and drafts a calm, professional reply to each review. Replies never make medical claims, and nothing is posted until you approve it.",
     summary:
-      "Kabsi keeps a hotel, guesthouse or B&B's Google Business Profile complete and current. It drafts a warm reply to every review in the guest's own language, from English and Spanish to Arabic and French, watches your phone, address and website on Google and sends the Weekly Care Report every Monday.",
+      "Kabsi keeps a clinic's Google Business Profile complete and current. It drafts calm, general replies to every review. Drafts make no medical claims, share no personal details and can be told never to confirm that someone is a patient. It also keeps your hours right and alerts you when your listing changes.",
     headings: {
-      pains: "Guests from everywhere, reviews in every language.",
-      example: "A warm reply in the guest's own language.",
-      helps: "What Kabsi handles for your hotel.",
+      pains: "Patients read your reviews before they book.",
+      example: "Calm replies that protect patient privacy.",
+      helps: "What Kabsi handles for your clinic.",
     },
     pains: [
       {
-        icon: <Globe2 />,
-        title: "Reviews in many languages",
-        text: "English, Spanish, French, Arabic and more. Each draft matches the language of the review.",
+        icon: <HeartPulse />,
+        title: "Replies have to be careful",
+        text: "A public reply should never discuss someone's care. Drafts stay general and invite the person to talk privately.",
       },
       {
         icon: <Clock3 />,
-        title: "Reception is always busy",
-        text: "Drafts reach your email. Approve them when the desk is quiet.",
+        title: "No time between patients",
+        text: "Drafts reach your email ready to read. Approve, edit or skip them when you have a moment.",
       },
       {
         icon: <ClipboardList />,
-        title: "Details must be exact",
-        text: "Phone, address, website and check-in hours. Google Protection emails you when one changes on Google.",
+        title: "Hours and phone must be right",
+        text: "A wrong number on Google means missed calls. Google Protection emails you when it changes.",
       },
       {
-        icon: <CalendarClock />,
-        title: "Seasons change the hours",
-        text: "Reception or restaurant hours for holidays and low season, posted in a minute.",
+        icon: <Languages />,
+        title: "Patients speak many languages",
+        text: "Each draft is written in the language of the review.",
       },
     ],
     example: {
       label: "Example review and draft",
-      lang: "Français",
-      name: "Sophie",
-      rating: 5,
-      review:
-        "Séjour parfait, chambre très propre et un petit-déjeuner délicieux. L'équipe a été aux petits soins.",
+      lang: "Español",
+      name: "Lucía",
+      rating: 2,
+      review: "Tuve que esperar casi una hora aunque tenía cita. Nadie me explicó el retraso.",
       reply:
-        "Merci beaucoup, Sophie. Nous sommes ravis que la chambre et le petit-déjeuner vous aient plu, et nous transmettrons vos mots à l'équipe. Au plaisir de vous accueillir à nouveau.\n\nHôtel des Tilleuls",
+        "Gracias por contarnos su experiencia. Lamentamos la espera y la falta de información, y nos gustaría entender lo ocurrido. Por favor, llámenos al 555 0142 para hablarlo en privado.\n\nClínica Dental Sol",
     },
-    exampleNote: "Fictional example. The reply is written in the guest's language, French.",
+    exampleNote:
+      "Fictional example. The draft apologises for the wait, doesn't confirm any treatment and moves the conversation to a private call.",
+    photoTypes: [
+      "The entrance and the reception desk",
+      "The waiting room",
+      "The building and the parking, so patients find you",
+      "Your team, with their agreement. Never a patient.",
+    ],
+    careRules: [
+      "A reply never confirms that the reviewer is a patient.",
+      "A reply never mentions a treatment, a result or a diagnosis.",
+      "A reply invites the person to call you, and the details stay in that call.",
+    ],
     helps: [
       {
         icon: <ClipboardList />,
         title: "What needs attention",
-        text: "A short list of what needs attention, marked Urgent, Recommended or Nice to have: phone, website, categories, room and exterior photos, a fresh post. Each item comes with a ready draft where Kabsi can write one.",
+        text: "A short list of what needs attention, marked Urgent, Recommended or Nice to have: hours, phone, website, categories, photos of the reception and the building. Each item comes with a ready draft where Kabsi can write one.",
       },
       {
-        icon: <Languages />,
-        title: "Replies in the guest's language",
-        text: "Drafted from your facts: check-in times, parking, breakfast hours. Nothing invented.",
+        icon: <MessageSquareReply />,
+        title: "Careful reply drafts",
+        text: "No medical claims, no personal details, no admissions of fault. Hard reviews get a calm draft and no quick Approve button.",
       },
       {
         icon: <ShieldCheck />,
         title: "Google Protection",
-        text: "Watches your name, phone, address, hours, website and category.",
+        text: "Watches your name, phone, address, hours, website and category, and emails you if one changes.",
       },
       {
-        icon: <Camera />,
-        title: "Room photos, checked",
-        text: "Clear photos of rooms, breakfast and the building, checked before you post them.",
+        icon: <CalendarClock />,
+        title: "Special hours",
+        text: "Holidays and closures posted to Google in a minute, so patients don't arrive to a closed door.",
       },
       {
         icon: <Sparkles />,
-        title: "A Monday report",
-        text: "Your Google rating, new reviews and how many got a reply, every Monday morning.",
+        title: "Fresh posts, drafted",
+        text: "A short Google post from the facts you gave Kabsi. You approve or skip it.",
       },
     ],
     placements: [
-      "At the reception desk, where guests check out.",
-      "In the room, next to the Wi-Fi details.",
-      "Your review link in the thank-you email after the stay.",
+      "At the reception desk, next to the payment terminal.",
+      "Printed QR on the appointment card or the aftercare sheet.",
+      "Your review link in the follow-up email you already send.",
     ],
     care: {
-      title: "Ask every guest the same way",
-      text: "Share the link with every guest, never only the happy ones. Ask every customer the same way, as they visit. Never offer a reward.",
+      title: "Keep patient details out of public replies",
+      text: "In many countries, health privacy rules (HIPAA in the US, for example) mean a public reply shouldn't confirm that someone is a patient or mention their care. Add \"Don't confirm the reviewer is a patient or mention any treatment\" under Anything Kabsi should never say, and Kabsi's drafts and safety check follow it.",
     },
     guide: { slug: "how-to-reply-to-google-reviews", title: "How to reply to Google reviews" },
     faqs: [
       {
-        q: "Which languages can Kabsi reply in?",
-        a: "The language of each review, including English, Spanish, French and Arabic. You can edit any draft before posting.",
+        q: "Does Kabsi post replies without me?",
+        a: "No. Every reply waits for your approval, by email or in the dashboard. Nothing is published until you approve it.",
       },
       {
-        q: "Does Kabsi work with booking sites?",
-        a: "No. Kabsi works with your Google Business Profile only: Google reviews, posts, photos, hours and listing details.",
+        q: "Can I stop Kabsi mentioning certain things?",
+        a: "Yes. In About your business, list anything Kabsi should never say or promise. Drafts follow it and the safety check blocks drafts that don't.",
       },
       {
-        q: "Do I need anything besides the review link?",
-        a: "No. Your review link and QR code work on their own, for example in the email you send after checkout.",
+        q: "Can Kabsi remove a negative review?",
+        a: "No. Nobody outside Google can remove a review. Kabsi helps you answer it calmly. You can report a review that breaks Google's rules through Google itself.",
       },
     ],
   },
   {
-    slug: "garages-and-auto-repair",
-    name: "garages and auto repair shops",
-    label: "Garages and repairs",
+    slug: "dentists",
+    name: "dental practices",
+    label: "Dentists",
+    icon: <Stethoscope />,
+    hero: "dentist",
+    title: "Kabsi for dentists | Careful Google profile care",
+    description:
+      "Kabsi keeps your dental practice's Google profile complete and current, with calm reply drafts that make no medical claims. Nothing is published without your approval.",
+    h1: BRAND_LINE,
+    sub: "Patients read your profile before they book. Kabsi shows what to complete on it and drafts a calm, professional reply to each review. Replies never make medical claims, and nothing is posted until you approve it.",
+    summary:
+      "Kabsi keeps a dental practice's Google Business Profile complete and current. It drafts calm, general replies to every review. Drafts make no medical claims, share no personal details and can be told never to confirm that someone is a patient. It also keeps your hours right and alerts you when your listing changes.",
+    headings: {
+      pains: "A nervous patient reads your reviews first.",
+      example: "Warm replies that never confirm who a patient is.",
+      helps: "What Kabsi handles for your practice.",
+    },
+    pains: [
+      {
+        icon: <HeartPulse />,
+        title: "A reply must not name a patient",
+        text: "A public reply never says who is a patient or what was done. Drafts thank the reviewer and keep the details for a call.",
+      },
+      {
+        icon: <Clock3 />,
+        title: "Your hands are busy chairside",
+        text: "Drafts wait in your email. Approve, edit or skip them between appointments or at the end of the day.",
+      },
+      {
+        icon: <ClipboardList />,
+        title: "Hours and phone must be right",
+        text: "A wrong number on Google means missed calls. Google Protection emails you when it changes.",
+      },
+      {
+        icon: <Camera />,
+        title: "Photos need care",
+        text: "Show the reception, the building and an empty surgery. A photo of a patient needs their written consent, which is yours to get.",
+      },
+    ],
+    example: {
+      label: "Example review and draft",
+      lang: "English",
+      name: "Tom",
+      rating: 5,
+      review: "I was nervous about going, but the whole team put me at ease. Easy to park, too.",
+      reply:
+        "Thank you for your kind words, Tom. The whole team will be glad to read this.\n\nSunrise Dental",
+    },
+    exampleNote:
+      "Fictional example. The draft thanks the reviewer and does not confirm that he is a patient or mention any care.",
+    photoTypes: [
+      "The reception desk and the waiting room",
+      "The outside of the practice and the sign",
+      "A surgery room, empty and clean",
+      "Your team, with their agreement. Never a patient.",
+    ],
+    careRules: [
+      "A reply never confirms that the reviewer is a patient.",
+      "A reply never mentions a treatment, a result or a diagnosis, or a before and after photo.",
+      "A reply invites the person to call you, and the details stay in that call.",
+    ],
+    helps: [
+      {
+        icon: <ClipboardList />,
+        title: "What needs attention",
+        text: "A short list of what needs attention, marked Urgent, Recommended or Nice to have: hours, phone, website, categories, photos of the reception, the building and the surgery. Each item comes with a ready draft where Kabsi can write one.",
+      },
+      {
+        icon: <MessageSquareReply />,
+        title: "Careful reply drafts",
+        text: "No medical claims, no personal details, no admissions of fault. Hard reviews get a calm draft and no quick Approve button.",
+      },
+      {
+        icon: <ShieldCheck />,
+        title: "Google Protection",
+        text: "Watches your name, phone, address, hours, website and category, and emails you if one changes.",
+      },
+      {
+        icon: <CalendarClock />,
+        title: "Special hours",
+        text: "Holidays and closures posted to Google in a minute, so patients don't arrive to a closed door.",
+      },
+      {
+        icon: <Sparkles />,
+        title: "Fresh posts, drafted",
+        text: "A short Google post from the facts you gave Kabsi. You approve or skip it.",
+      },
+    ],
+    placements: [
+      "At the reception desk, next to the payment terminal.",
+      "Printed QR on the appointment card or the aftercare sheet.",
+      "Your review link in the follow-up email you already send.",
+    ],
+    care: {
+      title: "Keep patient details out of public replies",
+      text: "In many countries, health privacy rules (HIPAA in the US, for example) mean a public reply shouldn't confirm that someone is a patient or mention their care. Add \"Don't confirm the reviewer is a patient or mention any treatment\" under Anything Kabsi should never say, and Kabsi's drafts and safety check follow it.",
+    },
+    guide: { slug: "how-to-reply-to-google-reviews", title: "How to reply to Google reviews" },
+    faqs: [
+      {
+        q: "Will a reply ever say the reviewer was our patient?",
+        a: "No. Drafts thank the reviewer and do not confirm a visit, a treatment or a name from your records. You read every draft before it is published.",
+      },
+      {
+        q: "Can Kabsi answer a complaint about a treatment?",
+        a: "Kabsi drafts a calm reply that invites the person to call you. It does not discuss care in public, and that review has no quick Approve button.",
+      },
+      {
+        q: "Can I post before and after photos?",
+        a: "Kabsi checks each photo for size and clarity before you post it. A photo of a patient needs the patient's written consent, which is yours to get, so we suggest the reception, the building and the rooms.",
+      },
+    ],
+  },
+  {
+    slug: "car-services",
+    name: "car services",
+    label: "Car services",
     icon: <Car />,
     hero: "garage",
-    title: "Kabsi for garages and auto repair | Calm Google profile care",
+    title: "Kabsi for car services | Calm Google profile care",
     description:
       "Kabsi keeps your garage's Google profile complete and current, with a calm reply draft for every review. Nothing is published without your approval.",
     h1: BRAND_LINE,
@@ -639,6 +692,17 @@ export const VERTICALS: Vertical[] = [
     },
     exampleNote:
       "Fictional example. The draft doesn't argue, admit fault or offer money. It moves the talk to a phone call.",
+    photoTypes: [
+      "The workshop floor and the bays",
+      "The front of the building and the forecourt",
+      "Your team at work",
+      "The waiting area and the reception desk",
+    ],
+    careRules: [
+      "A reply never argues about a bill or promises money in public.",
+      "A reply never admits fault for a repair; it invites the customer to call you.",
+      "A price dispute is shown to you first, with no quick Approve button.",
+    ],
     helps: [
       {
         icon: <ClipboardList />,
@@ -694,232 +758,28 @@ export const VERTICALS: Vertical[] = [
       },
     ],
   },
-  {
-    slug: "shops-and-boutiques",
-    name: "shops and boutiques",
-    label: "Shops and boutiques",
-    icon: <ShoppingBag />,
-    hero: "boutique",
-    title: "Kabsi for shops and boutiques | Google profile care you approve",
-    description:
-      "Kabsi keeps your shop's Google profile complete and current: fresh posts for new arrivals, holiday hours and a reply to every review. You approve everything.",
-    h1: BRAND_LINE,
-    sub: "Shoppers check Google before they visit. Kabsi shows what to improve on your profile, drafts fresh posts and a reply to every review, and keeps your holiday hours right. You approve each one.",
-    summary:
-      "Kabsi keeps a shop or boutique's Google Business Profile complete and current. It drafts a reply to every review in the customer's language, drafts short Google posts about what's new, sets holiday hours and alerts you when your listing changes.",
-    headings: {
-      pains: "Shoppers check Google before they visit.",
-      example: "A friendly reply for every shopper.",
-      helps: "What Kabsi handles for your shop.",
-    },
-    pains: [
-      {
-        icon: <Clock3 />,
-        title: "Serving customers comes first",
-        text: "Drafts reach your email. Approve, edit or skip them after closing.",
-      },
-      {
-        icon: <Sparkles />,
-        title: "New stock, nobody knows",
-        text: "Tell Kabsi what's new in a sentence and it drafts a Google update with a button like Shop or Call.",
-      },
-      {
-        icon: <CalendarClock />,
-        title: "Holiday hours",
-        text: "Late openings and closures posted to Google for the dates you choose.",
-      },
-      {
-        icon: <Camera />,
-        title: "Photos of the shop",
-        text: "Window displays and new arrivals, checked before they go up.",
-      },
-    ],
-    example: {
-      label: "Example review and draft",
-      lang: "English",
-      name: "Daniel",
-      rating: 5,
-      review: "Found the perfect jacket, and the staff took the time to help me find my size.",
-      reply:
-        "Thank you, Daniel. We're so glad you found the right jacket, and we'll tell the team you appreciated their help. See you again soon.\n\nLena, The Linen Rail",
-    },
-    exampleNote:
-      "Fictional example. The draft reflects what the customer said and adds nothing new.",
-    helps: [
-      {
-        icon: <ClipboardList />,
-        title: "What needs attention",
-        text: "A short list of what needs attention, marked Urgent, Recommended or Nice to have: hours, phone, website, photos of the shop and new arrivals, a fresh post. Each item comes with a ready draft where Kabsi can write one.",
-      },
-      {
-        icon: <MessageSquareReply />,
-        title: "A reply for every review",
-        text: "In the customer's language, from your facts, never inventing offers or prices.",
-      },
-      {
-        icon: <Sparkles />,
-        title: "Fresh posts, drafted",
-        text: "Written from your facts. You approve it, change it or skip it.",
-      },
-      {
-        icon: <CalendarClock />,
-        title: "Special hours",
-        text: "Holiday openings and closures posted in a minute.",
-      },
-      {
-        icon: <ShieldCheck />,
-        title: "Google Protection",
-        text: "An email if your phone, hours, address or website change on Google.",
-      },
-    ],
-    placements: [
-      "At the till, next to the card reader.",
-      "Printed QR on the receipt or the shopping bag.",
-      "Your review link in order confirmations if you sell online too.",
-    ],
-    care: {
-      title: "Ask every customer the same way",
-      text: "Share the link at every checkout. Ask every customer the same way, as they visit. Never offer a reward.",
-    },
-    guide: { slug: "google-review-link-and-qr-code", title: "Your Google review link and QR code" },
-    faqs: [
-      {
-        q: "Will Kabsi post updates for me?",
-        a: "Kabsi drafts short posts and emails them to you. Nothing is published until you approve it, and you can switch post drafts off.",
-      },
-      {
-        q: "Will updates mention prices or sales?",
-        a: "Only what you tell Kabsi. It never invents prices, offers or dates.",
-      },
-      {
-        q: "Does it work for more than one shop?",
-        a: "Yes. Each shop is its own business in Kabsi, with its own profile, reviews and review link.",
-      },
-    ],
-  },
-  {
-    slug: "florists",
-    name: "florists",
-    label: "Florists",
-    icon: <Flower2 />,
-    hero: "florist",
-    title: "Kabsi for florists | Google profile care you approve",
-    description:
-      "Kabsi keeps your flower shop's Google profile complete and current: holiday hours for busy seasons, arrangement photos checked and a reply to every review.",
-    h1: BRAND_LINE,
-    sub: "Customers order for birthdays, weddings and hard days. Kabsi shows what to complete on your profile, drafts a kind reply to every review, keeps your phone and seasonal hours right, and waits for your approval.",
-    summary:
-      "Kabsi keeps a florist's Google Business Profile complete and current. It drafts a kind reply to every review in the customer's language, sets special hours for busy seasons, checks photos of your arrangements before they go up and alerts you if your phone number changes on Google.",
-    headings: {
-      pains: "Busy seasons, lots of orders, one phone.",
-      example: "A thank-you for every bouquet review.",
-      helps: "What Kabsi handles for your flower shop.",
-    },
-    pains: [
-      {
-        icon: <Gift />,
-        title: "Peak days are packed",
-        text: "Valentine's and Mother's Day leave no time. Drafts wait in your email until the orders are out.",
-      },
-      {
-        icon: <Phone />,
-        title: "Orders come by phone",
-        text: "A wrong number on Google means lost orders. Google Protection emails you when it changes.",
-      },
-      {
-        icon: <Camera />,
-        title: "Your arrangements sell",
-        text: "Photos of bouquets and events show your style. Kabsi checks each one before you post it.",
-      },
-      {
-        icon: <CalendarClock />,
-        title: "Seasonal hours",
-        text: "Open late before a holiday, closed after. Special hours posted to Google in a minute.",
-      },
-    ],
-    example: {
-      label: "Example review and draft",
-      lang: "English",
-      name: "Priya",
-      rating: 5,
-      review: "Beautiful bouquet for my mum's birthday, and they wrapped it so nicely.",
-      reply:
-        "Thank you, Priya. We're so glad the bouquet was right for your mum's birthday. We hope to see you again soon.\n\nAnna, Bloom & Stem",
-    },
-    exampleNote:
-      "Fictional example. The draft thanks the customer for the occasion they mentioned and adds nothing new.",
-    helps: [
-      {
-        icon: <ClipboardList />,
-        title: "What needs attention",
-        text: "A short list of what needs attention, marked Urgent, Recommended or Nice to have: seasonal hours, phone, website, photos of your arrangements, a fresh post. Each item comes with a ready draft where Kabsi can write one.",
-      },
-      {
-        icon: <MessageSquareReply />,
-        title: "Kind reply drafts",
-        text: "Warm for celebrations, gentle for sympathy orders, and never mentioning details the customer didn't share.",
-      },
-      {
-        icon: <Camera />,
-        title: "Arrangement photos, checked",
-        text: "Clear, well-lit photos go up; blurry shots and screenshots are flagged first.",
-      },
-      {
-        icon: <CalendarClock />,
-        title: "Special hours",
-        text: "Holiday openings and closures posted to Google for the dates you choose.",
-      },
-      {
-        icon: <ShieldCheck />,
-        title: "Google Protection",
-        text: "An email with before and after if your phone, hours or address change on Google.",
-      },
-    ],
-    placements: [
-      "A small card tucked into each bouquet or delivery.",
-      "At the counter where customers collect orders.",
-      "Your review link in the delivery confirmation message.",
-    ],
-    care: {
-      title: "Ask every customer the same way",
-      text: "Include the link with every order. Ask every customer the same way, as they visit. Never offer a reward.",
-    },
-    guide: {
-      slug: "how-to-reply-to-google-reviews",
-      title: "How to reply to Google reviews",
-    },
-    faqs: [
-      {
-        q: "Can replies be gentle for sympathy orders?",
-        a: "Yes. Drafts follow the tone of the review, and you can edit any draft before posting. Kabsi never adds details the customer didn't share.",
-      },
-      {
-        q: "Can I post photos of my arrangements?",
-        a: "Yes. Add a photo from your phone; Kabsi checks it's clear and fits Google's photo rules, and you approve it with one tap.",
-      },
-      {
-        q: "How do customers leave a review?",
-        a: "Every business gets a review link and a printable QR code, free. Share the same link with every customer, on a table card, a receipt or a message. It works with your own QR codes and NFC cards.",
-      },
-    ],
-  },
 ];
 
 export const verticalBySlug = (slug: string) => VERTICALS.find((v) => v.slug === slug);
 
 /** Business-type tile → the industry page it links to (one page per tile, no duplicates). */
 export const VERTICAL_FOR_PHOTO: Partial<Record<PhotoId, string>> = {
-  bakery: "cafes-and-bakeries",
+  bakery: "cafes",
+  cafe: "cafes",
   restaurant: "restaurants",
-  dentist: "clinics-and-dentists",
-  salon: "salons-and-barbers",
-  florist: "florists",
-  garage: "garages-and-auto-repair",
-  boutique: "shops-and-boutiques",
-  hotel: "hotels-and-guesthouses",
+  dentist: "dentists",
+  salon: "salons",
+  garage: "car-services",
 };
 
 /** Old slugs that moved (D259). */
 export const VERTICAL_REDIRECTS: Record<string, string> = {
   "restaurants-and-cafes": "restaurants",
+  "cafes-and-bakeries": "cafes",
+  "salons-and-barbers": "salons",
+  "clinics-and-dentists": "clinics",
+  "garages-and-auto-repair": "car-services",
 };
+
+/** Industry pages that no longer exist (P0.8-13): they send the visitor to the /for page. */
+export const VERTICAL_GONE = ["hotels-and-guesthouses", "shops-and-boutiques", "florists"];

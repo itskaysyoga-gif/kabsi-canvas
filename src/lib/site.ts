@@ -88,6 +88,9 @@ export const BRAND_EXPLAINER =
 /** The calls to action, worded once (R-02). */
 export const CTA_PRIMARY = "Join early access";
 export const CTA_SECONDARY = "See it work";
+/** The hero button on every public page (K-140): the free Profile Check, at all times, never a trial button. */
+export const CTA_CHECK = "Check my Google profile free";
+export const CTA_HOW = "See how it works";
 /** The full non-affiliation notice, shown in every public footer (K-112). */
 export const GOOGLE_NOTICE =
   "Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.";
