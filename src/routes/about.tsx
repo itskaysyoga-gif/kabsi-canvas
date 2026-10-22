@@ -29,8 +29,8 @@ function AboutPage() {
           <section>
             <H2 className="text-3xl">Who runs it</H2>
             <p className="mt-4 text-kb-stone">
-              Kabsi is operated by {OPERATOR_NAME}. Contact: {CONTACT_EMAIL}. {OPERATOR_NAME} is
-              the person responsible for your data. Kabsi serves businesses in any country.
+              Kabsi is operated by {OPERATOR_NAME}. Contact: {CONTACT_EMAIL}. {OPERATOR_NAME} is the
+              person responsible for your data. Kabsi serves businesses in any country.
             </p>
           </section>
 

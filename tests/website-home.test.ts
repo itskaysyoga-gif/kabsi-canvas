@@ -318,7 +318,9 @@ describe("the founder note (lane R, 22 Oct 2026)", () => {
   });
 
   it("the terms name Creem as the merchant of record", () => {
-    expect(readFileSync("src/routes/terms.tsx", "utf8")).toMatch(/processed by Creem,[\s\S]*merchant of record/);
+    expect(readFileSync("src/routes/terms.tsx", "utf8")).toMatch(
+      /processed by Creem,[\s\S]*merchant of record/,
+    );
     expect(readFileSync("knowledge/kabsi-facts.md", "utf8")).toContain(
       "Payments are processed by Creem, our merchant of record",
     );

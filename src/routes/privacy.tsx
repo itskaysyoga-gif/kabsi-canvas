@@ -56,8 +56,8 @@ function Page() {
       <section>
         <h2>1. Who we are</h2>
         <p>
-          Kabsi is operated by {OPERATOR_NAME}, who is responsible for the personal data described here.
-          Contact: {CONTACT_EMAIL}
+          Kabsi is operated by {OPERATOR_NAME}, who is responsible for the personal data described
+          here. Contact: {CONTACT_EMAIL}
           {WHATSAPP_ON ? `, or WhatsApp on ${WHATSAPP_NUMBER}` : ""}.
         </p>
         <p>

@@ -38,8 +38,7 @@ function Page() {
         <p>
           These terms are the agreement between you and Kabsi, an independent business operated by{" "}
           {OPERATOR_NAME}. By creating an account or paying for a plan, you accept them on behalf of
-          your business. Our <Link to="/privacy">privacy policy</Link> explains
-          how we handle data.
+          your business. Our <Link to="/privacy">privacy policy</Link> explains how we handle data.
         </p>
       </section>
 
