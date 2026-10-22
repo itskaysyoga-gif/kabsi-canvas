@@ -87,6 +87,26 @@ describe("track in the browser", () => {
     expect(posthog.capture).toHaveBeenCalledWith("snapshot_viewed", { source: "tool" });
   });
 
+  it("weekly_report_opened is sent once per report, with the business and where it was opened", async () => {
+    const posthog = { capture: vi.fn() };
+    vi.stubGlobal("window", { posthog });
+    const { trackReportOpened } = await import("../src/lib/telemetry");
+    trackReportOpened("loc-1", "rep-1");
+    trackReportOpened("loc-1", "rep-1");
+    trackReportOpened("loc-1", "rep-2");
+    expect(posthog.capture).toHaveBeenCalledTimes(2);
+    expect(posthog.capture).toHaveBeenNthCalledWith(1, "weekly_report_opened", {
+      location_id: "loc-1",
+      source: "app",
+    });
+  });
+
+  it("the Weekly Care Report screen fires it", () => {
+    const screen = readFileSync("src/routes/_authenticated/app/report.tsx", "utf8");
+    expect(screen).toContain("trackReportOpened");
+    expect(screen).toContain("useEffect");
+  });
+
   it("landing_viewed carries the page type and UTM fields, and private pages send nothing", async () => {
     const posthog = { capture: vi.fn() };
     vi.stubGlobal("window", { posthog });

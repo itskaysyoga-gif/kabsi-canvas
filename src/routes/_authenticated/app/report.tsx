@@ -1,8 +1,10 @@
+import { useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
+import { trackReportOpened } from "@/lib/telemetry";
 import { ChevronDown, FileBarChart as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
 import { CareBottom, CareTop, type CareData } from "@/components/report/care-blocks";
@@ -59,6 +61,11 @@ function ReportPage() {
     queryFn: () => loadReports(loc!.id),
     enabled: !!loc,
   });
+  // G-44: the owner opened the report (the latest one on screen), once per report per session.
+  const latestId = reports.data?.[0]?.id;
+  useEffect(() => {
+    if (loc && latestId) trackReportOpened(loc.id, latestId);
+  }, [loc, latestId]);
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <Link

@@ -327,11 +327,11 @@ export const QUESTIONS: Question[] = [
     ask: "Will Kabsi set my opening hours for public holidays?",
     kb: [
       /Five days before a public holiday Kabsi asks the owner/,
-      /\*\*Australia and Ireland are not covered yet\*\*/,
+      /\*\*Australia and Ireland\*\* are different/,
     ],
     must: [/five days|5 days/i, /confirm/i],
     reference:
-      "Kabsi asks you five days before a public holiday: normal hours, closed or custom hours. It never assumes. Closed and custom hours go to Google only after you confirm, with a 10 second undo. Kabsi uses the official holiday lists of England and Wales, the United States, Canada, New Zealand, Singapore and the United Arab Emirates. Australia and Ireland are not covered yet, so Kabsi asks nothing there.",
+      "Kabsi asks you five days before a public holiday: normal hours, closed or custom hours. It never assumes. Closed and custom hours go to Google only after you confirm, with a 10 second undo. Kabsi uses the official holiday lists of England and Wales, the United States, Canada, New Zealand, Singapore and the United Arab Emirates. Australia and Ireland use the national public days from a software package, because their official pages could not be read. State and county holidays are not covered there.",
   },
   {
     id: "en25",
