@@ -1,0 +1,18 @@
+{
+  "_source": "Live read-only call by P0.7-01 part 2 through google-capture v44 (hello@kabsi.co, Kabsi Clients group), 22 Oct 2026.",
+  "_doc": "https://developers.google.com/my-business/reference/businessinformation/rest/v1/categories/list",
+  "_captured_at": "2026-10-22T04:29:36Z",
+  "_url": "https://mybusinessbusinessinformation.googleapis.com/v1/categories",
+  "_status": 200,
+  "_redacted": "Nothing personal in this response; Google's category list.",
+  "_query": "regionCode=LB&languageCode=en&view=BASIC&pageSize=20&filter=displayName=\"Media company\"",
+  "body": {
+    "categories": [
+      {
+        "name": "categories/gcid:media_company",
+        "displayName": "Media company"
+      }
+    ]
+  },
+  "_note": "One exact match for the filter."
+}

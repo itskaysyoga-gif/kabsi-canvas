@@ -41,6 +41,8 @@ Confirmed by Hussein: project number; 300 requests per minute on Account Managem
 
 Correction (8 Oct, P0.7-01): the earlier note that the Google My Business API (`mybusiness.googleapis.com`, reviews, posts and media) was enabled on 7 Oct, with a quota of 300, was wrong. It is not in the enabled list; enabling it fails with PERMISSION_DENIED (`servicemanagement.services.bind`) and its Library page does not load; the live reviews list call on Yawmiyati returned 403 PERMISSION_DENIED, reason SERVICE_DISABLED, consumer `projects/856347937978`. Reviews, posts and media are blocked on Google (case 1-4624000041157) until Google makes the API available to the project.
 
+Re-checked 22 Oct 2026 (P0.7-01 part 2, 04:22 and 04:29 UTC): reviews, local posts and media still answer 403 SERVICE_DISABLED on both Kabsi-owned profiles, consumer `projects/856347937978`. Nothing changed; the other seven services still answer 200. Kill-gate (R-43): if reviews are still closed on 30 Nov 2026 the lane R chat re-plans launch.
+
 ## Rules that stay
 
 - Every call runs in mock mode until P0.7-04 switches `google_mode()` to live.
