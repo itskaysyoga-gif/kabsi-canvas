@@ -180,7 +180,14 @@ async function checkProfile(loc: Loc) {
   const { data, error } = await db.rpc("record_protection_check", { p_location: loc.id, p_reads: buildReads(now, (facts ?? []) as Fact[]) });
   if (error) throw error;
   const created = ((data as { changes?: { id: string }[] })?.changes ?? []);
-  for (const c of created) await alertOwner(loc, c.id);
+  for (const c of created) {
+    // P0.8-04 (K-130): Pro auto-fix, only where the owner opted in. Off by policy (Google's rule, K-130 point 5), so
+    // the answer today is "off" and the owner decides as before. Kabsi does not read the profile's verification
+    // state yet, so even when switched on nothing is patched until it does (never unless VERIFIED).
+    const fix = await db.rpc("protection_autofix", { p_change: c.id, p_verification: null });
+    if ((fix.data as { result?: string } | null)?.result === "fixed") continue;
+    await alertOwner(loc, c.id);
+  }
   return created.length;
 }
 
@@ -218,6 +225,13 @@ async function alertOwner(loc: Loc, changeId: string) {
     inApp: { title: `Your ${label} changed on Google`, body: "Choose in Google Protection what to do.", link: "/app/shield" },
     content: copy.profileChange(loc.name, label, { lines, approvedBefore: !!c.previous_fact_id, before, after }, APP_URL),
   });
+  // P0.8-04 (K-130 point 1): the same change on WhatsApp to the people who opted in, with "Put it back" where WhatsApp
+  // may approve it. A failure never stops the email.
+  if (c.previous_fact_id) {
+    const { whatsappProtectionAlert } = await import("./whatsapp/db.ts");
+    await whatsappProtectionAlert(loc, { id: c.id, field: c.field, label, before, after })
+      .catch(async (e) => (await kabsi()).captureError("whatsapp", e, { step: "protection_alert" }));
+  }
 }
 
 // ─── Decide (K-19 steps 4 and 5) ──────────────────────────────────────────────────────────────────────────────────

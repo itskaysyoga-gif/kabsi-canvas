@@ -39,7 +39,7 @@ export type Db = {
   statusUpdate(providerId: string, state: string, error: string | null): Promise<void>;
 };
 
-export type Ctx = { db: Db; sender: Sender; on: boolean; phoneNumberId: string; appUrl: string; templates: { review?: string | null; post?: string | null }; now?: () => number };
+export type Ctx = { db: Db; sender: Sender; on: boolean; phoneNumberId: string; appUrl: string; templates: { review?: string | null; post?: string | null; protection?: string | null }; now?: () => number };
 
 type Outgoing = { userId: string; locationId: string | null; kind: string; dedupe?: string; body: string; buttons?: Button[]; template?: { name: string | null | undefined; params: string[] }; alert?: "review" | "digest" };
 
@@ -96,6 +96,24 @@ export async function sendPostAlert(ctx: Ctx, userIds: string[], p: { postId: st
       body: `${postAlertBody(p.business, p.summary)}\n\nOpen in Kabsi: ${ctx.appUrl}/app/posts`,
       buttons: action.ok && action.token ? alertButtons(action.token, true) : undefined,
       template: { name: ctx.templates.post, params: [p.business] },
+    });
+  }
+  return out;
+}
+
+/** A Google Protection change (K-130 point 1): what Google shows and what the owner approved, with "Put it back" for the
+ *  fields WhatsApp may approve. The identity fields get only the link to the app, where the owner signs in. Never says who
+ *  made the edit beyond what Google says (K-130 point 4). */
+export async function sendProtectionAlert(ctx: Ctx, userIds: string[], c: { changeId: string; locationId: string; business: string; label: string; before: string; after: string; identity: boolean }) {
+  const out: Record<string, string> = {};
+  for (const userId of userIds) {
+    const action = c.identity ? { ok: false } : await ctx.db.actionCreate(userId, "listing_revert", c.changeId);
+    const body = [`${c.business}: your ${c.label} changed on Google.`, `Google shows: ${c.after || "nothing"}`,
+      `You approved: ${c.before || "nothing"}`, `Open in Kabsi: ${ctx.appUrl}/app/shield`].join("\n\n").slice(0, 1024);
+    out[userId] = await deliver(ctx, {
+      userId, locationId: c.locationId, kind: "protection_alert", dedupe: `protection_alert:${c.changeId}:${userId}`, body, alert: "review",
+      buttons: action.ok && action.token ? [{ id: `a:${action.token}`, title: "Put it back" }] : undefined,
+      template: { name: ctx.templates.protection, params: [c.business, c.label] },
     });
   }
   return out;
