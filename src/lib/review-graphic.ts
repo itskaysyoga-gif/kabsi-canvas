@@ -1,7 +1,8 @@
 // Review graphics (P0.8-07, K-134, Pro): a square or story image for a 4 or 5 star review, made on request by the
 // review-graphic Edge Function from the stored review and handed back. Nothing is posted anywhere and nothing is
 // stored: the owner downloads it or shares it from the phone's share sheet.
-import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
+import { anonHeaders, sessionFetch, supabase, supabaseUrl } from "@/lib/supabase";
+import { SessionEnded } from "@/lib/session-ended";
 
 export type GraphicSize = "square" | "story";
 export const GRAPHIC_SIZES: { id: GraphicSize; label: string; hint: string }[] = [
@@ -32,7 +33,7 @@ export async function requestGraphic(reviewId: string, size: GraphicSize): Promi
   if (!token) throw new GraphicError("sign_in_required", "Sign in to make a graphic.");
   let res: Response;
   try {
-    res = await fetch(`${supabaseUrl}/functions/v1/review-graphic`, {
+    res = await sessionFetch(`${supabaseUrl}/functions/v1/review-graphic`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -41,7 +42,8 @@ export async function requestGraphic(reviewId: string, size: GraphicSize): Promi
       },
       body: JSON.stringify({ review_id: reviewId, size }),
     });
-  } catch {
+  } catch (e) {
+    if (e instanceof SessionEnded) throw e;
     throw new GraphicError(
       "network",
       "We could not reach Kabsi. Check your connection and try again.",

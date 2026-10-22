@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/components/auth/auth-provider";
+import { SessionEndedGate } from "@/components/auth/session-ended-gate";
 
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -22,5 +23,10 @@ export function RequireAuth({ children }: { children: ReactNode }) {
       <div className="grid min-h-screen place-items-center bg-kb-sand text-kb-stone">Loading…</div>
     );
   }
-  return children;
+  return (
+    <>
+      {children}
+      <SessionEndedGate />
+    </>
+  );
 }
