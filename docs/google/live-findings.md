@@ -14,6 +14,17 @@ The redacted responses are in `tests/fixtures/google/live/`. Each file names the
 
 Reading (not confirmed): Google has not opened this API to the project. Gate A seems to have covered the v1 APIs only. The fix is on Google's side, through case 1-4624000041157 or the Business Profile API contact form. Until then, P0.7-01 stays open for reviews, posts and media, and P0.7-04 (the switch to live) cannot go ahead.
 
+## Update, 22 Oct 2026 (P0.7-01 part 2): still closed, and three more captures
+
+- **Still closed.** At 04:22 UTC and again at 04:29 UTC on 22 Oct 2026, one GET each to reviews, local posts and media on both profiles answered **403 PERMISSION_DENIED, reason SERVICE_DISABLED**, service `mybusiness.googleapis.com`, consumer `projects/856347937978` (`v4.probe.yawmiyati.json`, `v4.probe.abouhamze.json`; reviews also in the 22 Oct inventory run). Nothing about this changed since 8 Oct. Reviews, posts and media have no real response, so the moderation question (answer 5 below), the review and reply wire shape, the post states and the media shape stay unanswered, and the mocks for those three modules cannot be checked against Google yet (see `docs/google/mock-vs-real.md`).
+- **Inventory unchanged.** `accounts.list` still shows the personal account (0 locations), Kabsi Clients (`LOCATION_GROUP`, 2 locations: Abou Hamze Auto Center and Yawmiyati) and the `kabsi.co` organisation (0 locations). The group's invitations list is still `{}`.
+- **Captured now:** `locations.list.group.json` (both profiles under the group in one call, every field in the read mask), `categories.list.yawmiyati.json` and `categories.list.abouhamze.json` (the call the Profile Coach makes, for each profile's own category and country). What they add:
+  - `locations.list` returns the same unset-fields-left-out shape as `locations.get`; there is no `nextPageToken` and no `totalSize` for two locations.
+  - Only Abou Hamze carries `metadata.hasGoogleUpdated` (`true`) and `metadata.canModifyServiceList`. Yawmiyati has neither key, and no `profile.description`.
+  - `categories.list` with a `displayName` filter returns every category whose name contains the text: Abou Hamze's "Auto parts store" also returns "Used auto parts store". The Coach's lookup takes the exact match, which is right. Yawmiyati's "Media company" returns one.
+  - The capture filter turns `phoneNumbers` (an object in Google's answer) into the string `"[removed]"`. A fixture therefore cannot be compared on that field's type; the contract test treats `[removed]` as a wildcard.
+- **Still not answerable without a write:** whether an invitation exposes the role (no pending invitation exists), and whether a Manager can delete its own admin entry (K-41). Both stay for P0.7-05.
+
 ## What was read, and the status of each call
 
 Thirty calls, 15 per profile, all **200** (15:43 to 15:44 UTC), plus the inventory and the one 403 above. No 429; the quota was not near its limit.
@@ -29,8 +40,10 @@ Thirty calls, 15 per profile, all **200** (15:43 to 15:44 UTC), plus the invento
 | placeActions | action links; allowed action types | `placeActions.list.yawmiyati.json`, `placeActions.typeMetadata.<profile>.json` |
 | verifications | verifications list; Voice of Merchant state | `verifications.list.<profile>.json`, `verifications.voiceOfMerchant.yawmiyati.json` |
 | notifications | notification setting of the Kabsi Clients group | `notifications.get.json` |
-| reviews | reviews list (403, blocked) | `reviews.list.error.json` |
-| posts, media | not called (same blocked service) | none yet |
+| reviews | reviews list (403, blocked) | `reviews.list.error.json`, `v4.probe.<profile>.json` |
+| locations (list) | locations list for the group, every field (22 Oct) | `locations.list.group.json` |
+| categories | categories list by display name (22 Oct) | `categories.list.<profile>.json` |
+| posts, media | local posts and media lists (403, blocked) | `v4.probe.<profile>.json` |
 
 ## Answers to the card's questions
 

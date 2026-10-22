@@ -1,0 +1,36 @@
+{
+  "_source": "Live read-only call by P0.7-01 part 2 through google-capture v44 (hello@kabsi.co, Kabsi Clients group), 22 Oct 2026.",
+  "_doc": "https://developers.google.com/my-business/reference/rest/v4/accounts.locations.reviews/list",
+  "_captured_at": "2026-10-22T04:29:36Z",
+  "_status": 403,
+  "_redacted": "Only the status and Google's reason are kept (google-capture op v4).",
+  "profile": "yawmiyati",
+  "location": "locations/4825254240697973899",
+  "calls": {
+    "reviews": {
+      "status": 403,
+      "url": "https://mybusiness.googleapis.com/v4/accounts/113746201522792609010/locations/4825254240697973899/reviews",
+      "code": "PERMISSION_DENIED",
+      "reason": "SERVICE_DISABLED",
+      "service": "mybusiness.googleapis.com",
+      "consumer": "projects/856347937978"
+    },
+    "localPosts": {
+      "status": 403,
+      "url": "https://mybusiness.googleapis.com/v4/accounts/113746201522792609010/locations/4825254240697973899/localPosts",
+      "code": "PERMISSION_DENIED",
+      "reason": "SERVICE_DISABLED",
+      "service": "mybusiness.googleapis.com",
+      "consumer": "projects/856347937978"
+    },
+    "media": {
+      "status": 403,
+      "url": "https://mybusiness.googleapis.com/v4/accounts/113746201522792609010/locations/4825254240697973899/media",
+      "code": "PERMISSION_DENIED",
+      "reason": "SERVICE_DISABLED",
+      "service": "mybusiness.googleapis.com",
+      "consumer": "projects/856347937978"
+    }
+  },
+  "_note": "Reviews, local posts and media (all mybusiness.googleapis.com v4) answer 403 SERVICE_DISABLED for project 856347937978. No data came back, so there is nothing to compare the mocks with yet."
+}

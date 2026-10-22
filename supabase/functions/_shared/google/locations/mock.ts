@@ -38,8 +38,11 @@ export function parsePin(s: string): { latitude: number; longitude: number } | n
 }
 
 // The documented Location shape for a mock listing. Regular hours stay out: the mock keeps them as free text.
-export function locationFromFields(location: string, f: Fields): Location {
+// withUpdateFlag: Google marks a location it has changed with metadata.hasGoogleUpdated (seen live on Abou Hamze, 22 Oct
+// 2026); the location getGoogleUpdated returns never carries the flag.
+export function locationFromFields(location: string, f: Fields, withUpdateFlag = false): Location {
   const out: Location = { name: location, title: text(f, "title") };
+  if (withUpdateFlag && mockDiff(f).length) out.metadata = { hasGoogleUpdated: true };
   if (text(f, "phone")) out.phoneNumbers = { primaryPhone: text(f, "phone") };
   if (text(f, "address")) out.storefrontAddress = { addressLines: [text(f, "address")] };
   if (text(f, "website")) out.websiteUri = text(f, "website");
@@ -67,7 +70,7 @@ export const listLocations = (_account: string, _readMask: string, _pageToken = 
 
 export async function getLocation(location: string, _readMask: string): Promise<Location> {
   const { data } = await (await mockDb()).from("mock_listings").select("fields").eq("google_location_id", location).maybeSingle();
-  return locationFromFields(location, (data?.fields ?? {}) as Fields);
+  return locationFromFields(location, (data?.fields ?? {}) as Fields, true);
 }
 
 export function listingFromFields(f: Fields): Listing {

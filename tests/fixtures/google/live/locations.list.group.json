@@ -1,0 +1,417 @@
+{
+  "_source": "Live read-only call by P0.7-01 part 2 through google-capture v44 (hello@kabsi.co, Kabsi Clients group), 22 Oct 2026.",
+  "_doc": "https://developers.google.com/my-business/reference/businessinformation/rest/v1/accounts.locations/list",
+  "_captured_at": "2026-10-22T04:29:34Z",
+  "_url": "https://mybusinessbusinessinformation.googleapis.com/v1/accounts/113746201522792609010/locations",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses, admin names, personal account names, the organisation's postal address.",
+  "body": {
+    "locations": [
+      {
+        "name": "locations/1850906632456176734",
+        "title": "Abou Hamze Auto Center - أبو حمزة أوتو سنتر",
+        "latlng": {
+          "latitude": 33.6687179,
+          "longitude": 35.6016805
+        },
+        "profile": {
+          "description": "Your best place for all your spare parts need. Visit Abou Hamze Auto Center in Bakaata Al Shouf, Ain Wzien Road, Facing Coop. Call us or whatsapp on [phone removed]"
+        },
+        "metadata": {
+          "mapsUri": "https://maps.google.com/maps?cid=2030032073090672028",
+          "placeId": "ChIJeaz8F0khHxURnCU4N2ofLBw",
+          "canDelete": true,
+          "newReviewUri": "https://search.google.com/local/writereview?placeid=ChIJeaz8F0khHxURnCU4N2ofLBw",
+          "hasGoogleUpdated": true,
+          "hasVoiceOfMerchant": true,
+          "canModifyServiceList": true
+        },
+        "openInfo": {
+          "status": "OPEN",
+          "canReopen": true
+        },
+        "categories": {
+          "primaryCategory": {
+            "name": "categories/gcid:auto_parts_store",
+            "displayName": "Auto parts store",
+            "moreHoursTypes": [
+              {
+                "displayName": "Access",
+                "hoursTypeId": "ACCESS",
+                "localizedDisplayName": "Access"
+              },
+              {
+                "displayName": "Breakfast",
+                "hoursTypeId": "BREAKFAST",
+                "localizedDisplayName": "Breakfast"
+              },
+              {
+                "displayName": "Brunch",
+                "hoursTypeId": "BRUNCH",
+                "localizedDisplayName": "Brunch"
+              },
+              {
+                "displayName": "Delivery",
+                "hoursTypeId": "DELIVERY",
+                "localizedDisplayName": "Delivery"
+              },
+              {
+                "displayName": "Dinner",
+                "hoursTypeId": "DINNER",
+                "localizedDisplayName": "Dinner"
+              },
+              {
+                "displayName": "Drive through",
+                "hoursTypeId": "DRIVE_THROUGH",
+                "localizedDisplayName": "Drive through"
+              },
+              {
+                "displayName": "Happy hours",
+                "hoursTypeId": "HAPPY_HOUR",
+                "localizedDisplayName": "Happy hours"
+              },
+              {
+                "displayName": "Kitchen",
+                "hoursTypeId": "KITCHEN",
+                "localizedDisplayName": "Kitchen"
+              },
+              {
+                "displayName": "Lunch",
+                "hoursTypeId": "LUNCH",
+                "localizedDisplayName": "Lunch"
+              },
+              {
+                "displayName": "Online service hours",
+                "hoursTypeId": "ONLINE_SERVICE_HOURS",
+                "localizedDisplayName": "Online service hours"
+              },
+              {
+                "displayName": "Pickup",
+                "hoursTypeId": "PICKUP",
+                "localizedDisplayName": "Pickup"
+              },
+              {
+                "displayName": "Takeout",
+                "hoursTypeId": "TAKEOUT",
+                "localizedDisplayName": "Takeout"
+              },
+              {
+                "displayName": "Senior hours",
+                "hoursTypeId": "SENIOR_HOURS",
+                "localizedDisplayName": "Senior hours"
+              }
+            ]
+          }
+        },
+        "websiteUri": "https://www.facebook.com/AbouHamzeAutoCenter/",
+        "languageCode": "en",
+        "phoneNumbers": "[removed]",
+        "regularHours": {
+          "periods": [
+            {
+              "openDay": "MONDAY",
+              "closeDay": "MONDAY",
+              "openTime": {
+                "hours": 8
+              },
+              "closeTime": {
+                "hours": 19
+              }
+            },
+            {
+              "openDay": "TUESDAY",
+              "closeDay": "TUESDAY",
+              "openTime": {
+                "hours": 8
+              },
+              "closeTime": {
+                "hours": 19
+              }
+            },
+            {
+              "openDay": "WEDNESDAY",
+              "closeDay": "WEDNESDAY",
+              "openTime": {
+                "hours": 8
+              },
+              "closeTime": {
+                "hours": 19
+              }
+            },
+            {
+              "openDay": "THURSDAY",
+              "closeDay": "THURSDAY",
+              "openTime": {
+                "hours": 8
+              },
+              "closeTime": {
+                "hours": 19
+              }
+            },
+            {
+              "openDay": "FRIDAY",
+              "closeDay": "FRIDAY",
+              "openTime": {
+                "hours": 8
+              },
+              "closeTime": {
+                "hours": 19
+              }
+            },
+            {
+              "openDay": "SATURDAY",
+              "closeDay": "SATURDAY",
+              "openTime": {
+                "hours": 8
+              },
+              "closeTime": {
+                "hours": 19,
+                "minutes": 30
+              }
+            }
+          ]
+        },
+        "storefrontAddress": {
+          "locality": "Bakaata",
+          "regionCode": "LB",
+          "addressLines": [
+            "Ain Wzien Road - Facing Coop"
+          ]
+        },
+        "adWordsLocationExtensions": {
+          "adPhone": "[phone removed]"
+        }
+      },
+      {
+        "name": "locations/4825254240697973899",
+        "title": "Yawmiyati",
+        "latlng": {
+          "latitude": 33.8845673,
+          "longitude": 35.5461495
+        },
+        "metadata": {
+          "mapsUri": "https://maps.google.com/maps?cid=14469239004530145122",
+          "placeId": "ChIJaXHRjL4XHxURYvc-mzYQzcg",
+          "canDelete": true,
+          "newReviewUri": "https://search.google.com/local/writereview?placeid=ChIJaXHRjL4XHxURYvc-mzYQzcg",
+          "hasVoiceOfMerchant": true
+        },
+        "openInfo": {
+          "status": "OPEN",
+          "canReopen": true
+        },
+        "categories": {
+          "primaryCategory": {
+            "name": "categories/gcid:media_company",
+            "displayName": "Media company",
+            "moreHoursTypes": [
+              {
+                "displayName": "Access",
+                "hoursTypeId": "ACCESS",
+                "localizedDisplayName": "Access"
+              },
+              {
+                "displayName": "Breakfast",
+                "hoursTypeId": "BREAKFAST",
+                "localizedDisplayName": "Breakfast"
+              },
+              {
+                "displayName": "Brunch",
+                "hoursTypeId": "BRUNCH",
+                "localizedDisplayName": "Brunch"
+              },
+              {
+                "displayName": "Delivery",
+                "hoursTypeId": "DELIVERY",
+                "localizedDisplayName": "Delivery"
+              },
+              {
+                "displayName": "Dinner",
+                "hoursTypeId": "DINNER",
+                "localizedDisplayName": "Dinner"
+              },
+              {
+                "displayName": "Drive through",
+                "hoursTypeId": "DRIVE_THROUGH",
+                "localizedDisplayName": "Drive through"
+              },
+              {
+                "displayName": "Happy hours",
+                "hoursTypeId": "HAPPY_HOUR",
+                "localizedDisplayName": "Happy hours"
+              },
+              {
+                "displayName": "Kitchen",
+                "hoursTypeId": "KITCHEN",
+                "localizedDisplayName": "Kitchen"
+              },
+              {
+                "displayName": "Lunch",
+                "hoursTypeId": "LUNCH",
+                "localizedDisplayName": "Lunch"
+              },
+              {
+                "displayName": "Online service hours",
+                "hoursTypeId": "ONLINE_SERVICE_HOURS",
+                "localizedDisplayName": "Online service hours"
+              },
+              {
+                "displayName": "Pickup",
+                "hoursTypeId": "PICKUP",
+                "localizedDisplayName": "Pickup"
+              },
+              {
+                "displayName": "Takeout",
+                "hoursTypeId": "TAKEOUT",
+                "localizedDisplayName": "Takeout"
+              },
+              {
+                "displayName": "Senior hours",
+                "hoursTypeId": "SENIOR_HOURS",
+                "localizedDisplayName": "Senior hours"
+              }
+            ]
+          },
+          "additionalCategories": [
+            {
+              "name": "categories/gcid:publisher",
+              "displayName": "Publisher",
+              "moreHoursTypes": [
+                {
+                  "displayName": "Access",
+                  "hoursTypeId": "ACCESS",
+                  "localizedDisplayName": "Access"
+                },
+                {
+                  "displayName": "Breakfast",
+                  "hoursTypeId": "BREAKFAST",
+                  "localizedDisplayName": "Breakfast"
+                },
+                {
+                  "displayName": "Brunch",
+                  "hoursTypeId": "BRUNCH",
+                  "localizedDisplayName": "Brunch"
+                },
+                {
+                  "displayName": "Delivery",
+                  "hoursTypeId": "DELIVERY",
+                  "localizedDisplayName": "Delivery"
+                },
+                {
+                  "displayName": "Dinner",
+                  "hoursTypeId": "DINNER",
+                  "localizedDisplayName": "Dinner"
+                },
+                {
+                  "displayName": "Drive through",
+                  "hoursTypeId": "DRIVE_THROUGH",
+                  "localizedDisplayName": "Drive through"
+                },
+                {
+                  "displayName": "Happy hours",
+                  "hoursTypeId": "HAPPY_HOUR",
+                  "localizedDisplayName": "Happy hours"
+                },
+                {
+                  "displayName": "Kitchen",
+                  "hoursTypeId": "KITCHEN",
+                  "localizedDisplayName": "Kitchen"
+                },
+                {
+                  "displayName": "Lunch",
+                  "hoursTypeId": "LUNCH",
+                  "localizedDisplayName": "Lunch"
+                },
+                {
+                  "displayName": "Online service hours",
+                  "hoursTypeId": "ONLINE_SERVICE_HOURS",
+                  "localizedDisplayName": "Online service hours"
+                },
+                {
+                  "displayName": "Pickup",
+                  "hoursTypeId": "PICKUP",
+                  "localizedDisplayName": "Pickup"
+                },
+                {
+                  "displayName": "Takeout",
+                  "hoursTypeId": "TAKEOUT",
+                  "localizedDisplayName": "Takeout"
+                },
+                {
+                  "displayName": "Senior hours",
+                  "hoursTypeId": "SENIOR_HOURS",
+                  "localizedDisplayName": "Senior hours"
+                }
+              ]
+            }
+          ]
+        },
+        "websiteUri": "http://yawmiyati.com/",
+        "languageCode": "en",
+        "phoneNumbers": "[removed]",
+        "regularHours": {
+          "periods": [
+            {
+              "openDay": "MONDAY",
+              "closeDay": "MONDAY",
+              "openTime": {
+                "hours": 9
+              },
+              "closeTime": {
+                "hours": 17
+              }
+            },
+            {
+              "openDay": "TUESDAY",
+              "closeDay": "TUESDAY",
+              "openTime": {
+                "hours": 9
+              },
+              "closeTime": {
+                "hours": 17
+              }
+            },
+            {
+              "openDay": "WEDNESDAY",
+              "closeDay": "WEDNESDAY",
+              "openTime": {
+                "hours": 9
+              },
+              "closeTime": {
+                "hours": 17
+              }
+            },
+            {
+              "openDay": "THURSDAY",
+              "closeDay": "THURSDAY",
+              "openTime": {
+                "hours": 9
+              },
+              "closeTime": {
+                "hours": 17
+              }
+            },
+            {
+              "openDay": "FRIDAY",
+              "closeDay": "FRIDAY",
+              "openTime": {
+                "hours": 9
+              },
+              "closeTime": {
+                "hours": 17
+              }
+            }
+          ]
+        },
+        "storefrontAddress": {
+          "regionCode": "LB",
+          "addressLines": [
+            "Mirna Chalouhi"
+          ],
+          "languageCode": "en"
+        }
+      }
+    ]
+  },
+  "_note": "Both Kabsi-owned profiles under the Kabsi Clients group in one call, every field in the read mask. phoneNumbers is redacted to a string by the capture filter (Google returns an object). No nextPageToken and no totalSize came back for two locations. Unset fields are left out (Yawmiyati has no profile.description and no hasGoogleUpdated)."
+}

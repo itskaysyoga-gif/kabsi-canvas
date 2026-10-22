@@ -5,7 +5,7 @@ import type { ListAccountsResponse, ListInvitationsResponse } from "../types.ts"
 export const MOCK_ACCOUNT = "accounts/mock-kabsi-clients";
 
 export const listAccounts = (): Promise<ListAccountsResponse> => Promise.resolve({
-  accounts: [{ name: MOCK_ACCOUNT, accountName: "Kabsi Clients", type: "LOCATION_GROUP", role: "OWNER", verificationState: "UNVERIFIED", vettedState: "NOT_VETTED" }],
+  accounts: [{ name: MOCK_ACCOUNT, accountName: "Kabsi Clients", type: "LOCATION_GROUP", role: "PRIMARY_OWNER", permissionLevel: "OWNER_LEVEL", verificationState: "UNVERIFIED", vettedState: "NOT_VETTED" }],
 });
 export const listInvitations = (_account: string): Promise<ListInvitationsResponse> => Promise.resolve({});
 export const acceptInvitation = (_invitation: string): Promise<Record<string, never>> => Promise.resolve({});

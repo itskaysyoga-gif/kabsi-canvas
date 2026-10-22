@@ -1,12 +1,14 @@
 // Mock of getGoogleUpdated: the fields the mock listing shows differently from what the business sent (fields.merchant)
-// are Google's updates. As live: only {location} when nothing differs, else Google's values and diffMask (P0.2-04).
+// are Google's updates. As live: always the whole location, and the diffMask only when something differs (P0.2-04;
+// Google returns the full location with no diffMask when nothing differs, seen live on Yawmiyati 8 Oct 2026).
 import { mockDb } from "../client.ts";
 import { type Fields, locationFromFields, mockDiff } from "../locations/mock.ts";
 import type { GoogleUpdatedLocation } from "../types.ts";
 
 export function googleUpdatedFromFields(location: string, f: Fields): GoogleUpdatedLocation {
   const diff = mockDiff(f);
-  return diff.length ? { location: locationFromFields(location, f), diffMask: diff.join(",") } : { location: { name: location } };
+  const full = locationFromFields(location, f);
+  return diff.length ? { location: full, diffMask: diff.join(",") } : { location: full };
 }
 
 export async function getGoogleUpdated(location: string, _readMask: string): Promise<GoogleUpdatedLocation> {
