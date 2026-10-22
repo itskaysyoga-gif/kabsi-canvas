@@ -9,7 +9,8 @@ select * from no_plan();
 \ir _fixtures.psql
 
 update public.locations set consent_at = now(), access_granted_at = now(), google_account_id = 'accounts/test',
-  google_location_id = 'locations/mock-victim', status = 'active'
+  google_location_id = case when id = '00000000-0000-4000-8000-0000000000c1' then 'locations/mock-victim' else 'locations/mock-other' end,
+  status = 'active'
  where id in ('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000c2');
 -- A paid plan, so the trial's three-fix cap does not apply to the put-backs below.
 insert into public.subscriptions (organization_id, plan, state, period, current_period_end, provider)
