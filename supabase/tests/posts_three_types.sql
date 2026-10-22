@@ -11,7 +11,7 @@ update public.locations set consent_at = now(), access_granted_at = now(), googl
   google_location_id = 'locations/mock-victim', status = 'active', time_zone = 'UTC'
  where id = '00000000-0000-4000-8000-0000000000c1';
 
-select is((select posts_per_month from public.locations where id = '00000000-0000-4000-8000-0000000000c1'), 2::smallint, 'two posts a month by default');
+select is((select posts_per_month from public.locations where id = '00000000-0000-4000-8000-0000000000c1'), 4::smallint, 'four posts a month (one a week) by default');
 select ok(not has_function_privilege('authenticated', 'public.post_prepare(uuid,text,text,uuid,jsonb)', 'execute')
       and not has_function_privilege('authenticated', 'public.post_question(uuid,text,text)', 'execute')
       and not has_function_privilege('authenticated', 'public.post_month_plan(uuid,text)', 'execute'), 'the care routine functions are service role only');
@@ -71,8 +71,10 @@ select is((select state from public.tasks where dedupe_key = 'post_month:2027-01
 -- The cadence.
 set local role authenticated;
 set local request.jwt.claims = '{"sub": "00000000-0000-4000-8000-0000000000a1", "role": "authenticated"}';
+select is(public.set_post_cadence('00000000-0000-4000-8000-0000000000c1', 2), 2, 'the owner can lower it to 2 a month');
 select is(public.set_post_cadence('00000000-0000-4000-8000-0000000000c1', 4), 4, 'the owner chooses 4 a month');
-select throws_ok($$ select public.set_post_cadence('00000000-0000-4000-8000-0000000000c1', 3) $$, 'P0001', 'bad_cadence', 'only 1, 2 or 4');
+select throws_ok($$ select public.set_post_cadence('00000000-0000-4000-8000-0000000000c1', 3) $$, 'P0001', 'bad_cadence', 'only 2 or 4');
+select throws_ok($$ select public.set_post_cadence('00000000-0000-4000-8000-0000000000c1', 1) $$, 'P0001', 'bad_cadence', 'a 1 a month is no longer a choice');
 reset role;
 set local request.jwt.claims = '';
 

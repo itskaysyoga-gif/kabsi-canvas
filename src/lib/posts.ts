@@ -96,7 +96,7 @@ export async function setAutoPosts(locationId: string, on: boolean) {
   const { error } = await supabase.rpc("set_auto_posts", { p_location: locationId, p_enabled: on });
   if (error) throw new Error("Couldn't change the setting. Try again.");
 }
-export async function setCadence(locationId: string, n: 1 | 2 | 4) {
+export async function setCadence(locationId: string, n: 2 | 4) {
   const { error } = await supabase.rpc("set_post_cadence", {
     p_location: locationId,
     p_per_month: n,
