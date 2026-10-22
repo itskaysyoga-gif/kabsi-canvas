@@ -2,7 +2,7 @@
 // hours, closed, or custom hours. The answer is the approval. Two doors lead to the same database rule: the Hours screen
 // (signed in, through the content function) and the link in the email (/h/<token>). Nothing here decides anything:
 // the database checks the answer, the dates and who may approve hours.
-import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
+import { anonHeaders, sessionFetch, supabase, supabaseUrl } from "@/lib/supabase";
 import { contentCall } from "@/lib/reviews";
 
 export type HolidayAnswer = "normal" | "closed" | "custom";
@@ -75,7 +75,7 @@ async function linkFetch(query: string, body?: Record<string, unknown>) {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
   const auth = token ? { authorization: `Bearer ${token}` } : {};
-  return fetch(`${supabaseUrl}/functions/v1/api/holiday${query}`, {
+  return sessionFetch(`${supabaseUrl}/functions/v1/api/holiday${query}`, {
     ...(body ? { method: "POST", body: JSON.stringify(body) } : {}),
     headers: { "content-type": "application/json", ...anonHeaders, ...auth },
   });

@@ -1,6 +1,7 @@
 // Shared helpers for every Kabsi Edge Function.
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
 import { unsubscribeHeaders } from "./email/unsubscribe.ts";
+import { carriesUser } from "./jwt-user.ts";
 
 export const APP_URL = Deno.env.get("APP_URL") ?? "https://kabsi.co";
 const SENTRY_DSN = Deno.env.get("SENTRY_DSN_EDGE") ??
@@ -31,7 +32,7 @@ export function admin(): SupabaseClient {
 // The signed-in user behind a browser call (verify_jwt already checked the signature).
 export async function currentUser(req: Request) {
   const token = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
-  if (!token) return null;
+  if (!token || !carriesUser(token)) return null;
   const { data, error } = await admin().auth.getUser(token);
   return error ? null : data.user;
 }

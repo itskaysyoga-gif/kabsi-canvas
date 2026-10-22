@@ -7,6 +7,7 @@ import { identify, isPrivatePath } from "@/lib/telemetry";
 import { saveSignupAttribution } from "@/lib/attribution";
 import { clearSeen, isIdle, lastSeen, OWNER_IDLE_MS, STAFF_IDLE_MS, touch } from "@/lib/idle";
 import { hasStoredSession, signInInUrl, SUPABASE_READY_EVENT } from "@/lib/stored-session";
+import { resetSessionEnded } from "@/lib/session-ended";
 
 type AuthContextValue = {
   session: Session | null;
@@ -73,6 +74,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         queryClient.clear();
         clearAssistantChat();
       }
+      // A fresh sign-in clears "Your session ended" (session-ended.ts).
+      if (event === "SIGNED_IN") resetSessionEnded();
       lastUser = nextUser;
       setSession(nextSession);
       setLoading(false);
