@@ -584,11 +584,11 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "a ranking promise",
     ask: "Will Kabsi get me more reviews and make me rank higher?",
-    kb: [/Never promise more reviews, a higher rating/, /Google decides its own results/],
-    must: [/Google decides|can't promise|cannot promise/i],
+    kb: [/Never promise more reviews, a higher rating/, /Say what Kabsi does: the parts an owner controls/],
+    must: [/can't promise|cannot promise/i],
     forbid: [YES],
     reference:
-      "I can't promise that. Google decides its own results. Kabsi does the parts you control: a reply ready for each review, details kept right, and photos and posts that you approve.",
+      "I can't promise that, and nobody can. Kabsi does the parts you control: a reply ready for each review, details kept right, and photos and posts that you approve.",
   },
   {
     id: "en48",
