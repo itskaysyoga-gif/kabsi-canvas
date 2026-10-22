@@ -224,7 +224,7 @@ Every build chat reads this file after `docs/KABSI-PLAN.md` and updates it befor
 | P0.6-05 | Security headers, Turnstile everywhere, rate limits | Opus (session 11, R-42) | done (merged 136, 327764b; Deploy passed; After merge passed 21 Oct 19:25 UTC); follow-up: enforce the CSP after 14 clean days (on or after 4 Nov 2026) | 136 | 21 Oct 2026 |
 | P0.6-06 | Nora in sync: facts file, handover and evaluation | Sonnet (R-39) | merged (165, 26c74f6, 22 Oct 2026); CI green; Deploy 73 green; stub evaluation 60 of 60, zero honesty failures; the live run is by hand only (R-45); open: kabsi.co/llms-full.txt still served the old file when checked, see After merge | 165 | 22 Oct 2026 |
 | P0.6-07 | Honest proof pages: founder note, About, Security | Sonnet | merged (84, 64adfad, 12 Oct); CI green; live /about serves the new page (fetched 12 Oct 06:25 UTC); 390 px checked by script, no horizontal scroll; open: Hussein's look and the photo question | 12 Oct | |
-| P0.6-08 | Supporting platforms checked against K-118 | Sonnet | PR open (22 Oct 2026, session 15); the platform table is in Evidence; Rashid steps A1 to E2 in `docs/platforms.md` | 166 | 22 Oct 2026 |
+| P0.6-08 | Supporting platforms checked against K-118 | Sonnet | PR open (22 Oct 2026, session 15); the platform table is in Evidence; Rashid steps A1 to E2 in `docs/platforms.md` | 168 | 22 Oct 2026 |
 | P0.6-09 | Meta account fixes (VIDEO Part 7) | Sonnet | todo | | |
 | P0.6-10 | WhatsApp click-to-chat on the Kapso US number | Sonnet | merged (86, 00d3515, 12 Oct); CI green; Deploy passed; live pages checked (Evidence); open: Kapso step 12 (the inbox setup) and Hussein's 390 px look | 86 | 12 Oct |
 | P0.6-11 | Staff system health page | Sonnet | todo | | |
