@@ -38,7 +38,9 @@ export function withLeanHead(response: Response): Response {
       if (end === -1 && buffered.length < HEAD_LIMIT) return;
       sent = true;
       controller.enqueue(
-        encoder.encode(end === -1 ? buffered : dropModulePreloads(buffered.slice(0, end)) + buffered.slice(end)),
+        encoder.encode(
+          end === -1 ? buffered : dropModulePreloads(buffered.slice(0, end)) + buffered.slice(end),
+        ),
       );
       buffered = "";
     },

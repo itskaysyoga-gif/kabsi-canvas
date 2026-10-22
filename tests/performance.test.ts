@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { afterPaint } from "../src/lib/after-paint";
 import { dropModulePreloads, wantsLeanHead, withLeanHead } from "../src/lib/head-hints";
 import { CONSENT_WORDING } from "../src/lib/consent-rules";
-import { sentences } from "../src/components/shared/privacy-banner";
+import { sentences } from "../src/lib/consent-text";
 import { hasStoredSession, signInInUrl } from "../src/lib/stored-session";
 
 const read = (f: string) => readFileSync(f, "utf8");
@@ -79,7 +79,7 @@ describe("the privacy banner and Nora come after the first paint", () => {
     const code = read("src/components/shared/deferred-privacy-banner.tsx");
     expect(code).toContain("OPEN_EVENT");
     expect(code).toContain("openPrivacyChoices()");
-    expect(read("src/components/shared/privacy-banner.tsx")).toContain("onMounted?.()");
+    expect(read("src/components/shared/privacy-banner.tsx")).toContain("mounted.current?.()");
   });
   it("the banner says the same words, one short paragraph per sentence", () => {
     for (const rules of Object.values(CONSENT_WORDING))

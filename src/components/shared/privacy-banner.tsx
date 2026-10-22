@@ -1,5 +1,5 @@
 import { useLocation } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -13,16 +13,8 @@ import {
   saveChoice,
   type ConsentState,
 } from "@/lib/consent";
+import { sentences } from "@/lib/consent-text";
 import { isPrivatePath } from "@/lib/telemetry";
-
-/**
- * The wording as one short paragraph per sentence, the words unchanged. A banner that opens after the page has painted
- * must not become the largest thing on the page: one six-line paragraph is larger than the headline text it appears
- * over, and then it, not the page, is what the browser reports as the page's main content (lane R, 22 Oct 2026).
- */
-export function sentences(wording: string): string[] {
-  return wording.split(/(?<=\.)\s+/).filter(Boolean);
-}
 
 // The one privacy banner (P0.6-01, R-04): a small first-party sheet at the foot of the screen, no third-party tool.
 // It opens by itself on public pages while there is no choice for the current wording, and from "Privacy choices"
@@ -34,6 +26,8 @@ export function PrivacyBanner({ onMounted }: { onMounted?: () => void } = {}) {
   const [choosing, setChoosing] = useState(false);
   const [analytics, setAnalytics] = useState(false);
   const [advertising, setAdvertising] = useState(false);
+  const mounted = useRef(onMounted);
+  mounted.current = onMounted;
 
   useEffect(() => {
     const off = onConsentChange(setConsent);
@@ -49,7 +43,7 @@ export function PrivacyBanner({ onMounted }: { onMounted?: () => void } = {}) {
       setReopened(true);
     };
     window.addEventListener(OPEN_EVENT, open);
-    onMounted?.();
+    mounted.current?.();
     return () => {
       off();
       window.removeEventListener(OPEN_EVENT, open);
