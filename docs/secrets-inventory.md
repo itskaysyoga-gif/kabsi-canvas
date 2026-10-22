@@ -29,7 +29,7 @@ Rotate on the due date, at once if a secret may have been seen, and always when 
 | `SLACK_BOT_TOKEN`, `SLACK_SIGNING_SECRET` | Posts to the Slack channels and verifies Slack's calls | Supabase Edge Function secrets | `slack` | Not recorded | Yearly |
 | `SENTRY_DSN_EDGE` | Where Edge Function errors go (a DSN is write-only) | Supabase Edge Function secrets | functions | Not recorded | Only if exposed |
 | `SENTRY_AUTH_TOKEN` | Uploads release tags and source maps | Vercel and GitHub, build time only | build | Not recorded | Yearly |
-| `KAPSO_API_KEY`, `KAPSO_WEBHOOK_SECRET`, `KAPSO_PHONE_NUMBER_ID`, `KAPSO_TEMPLATE_REVIEW_ALERT`, `KAPSO_TEMPLATE_POST_READY`, `KAPSO_TEMPLATE_PROFILE_CHANGE`, `WHATSAPP_LIVE` | WhatsApp owner channel through Kapso | Supabase Edge Function secrets | `whatsapp` | Not set: Kabsi has no WhatsApp number (22 Oct 2026) | When a number exists |
+| `KAPSO_API_KEY`, `KAPSO_WEBHOOK_SECRET`, `KAPSO_PHONE_NUMBER_ID`, `KAPSO_TEMPLATE_REVIEW_ALERT`, `KAPSO_TEMPLATE_POST_READY`, `KAPSO_TEMPLATE_PROFILE_CHANGE`, `KAPSO_TEMPLATE_PROFILE_CHECK`, `WHATSAPP_LIVE` | WhatsApp owner channel through Kapso, and the free check's one WhatsApp message (the template name only) | Supabase Edge Function secrets | `whatsapp`, `profile-snapshot` | Not set: Kabsi has no WhatsApp number (22 Oct 2026) | When a number exists |
 | `CREEM_*` | Card payments | Supabase Edge Function secrets | `billing` | Not set: card payments are not built yet (P0.4-07) | When Creem opens |
 | `META_CAPI_TOKEN`, `META_DATASET_ID` | Meta Conversions API | Supabase Edge Function secrets | the events sender | Not set (P0.6-03 is after launch) | When built |
 | `APP_URL`, `KABSI_ENV` | Settings, not secrets | Edge Function secrets | functions | n/a | n/a |

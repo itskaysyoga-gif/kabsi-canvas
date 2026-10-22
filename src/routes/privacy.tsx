@@ -130,8 +130,11 @@ function Page() {
           hash of your IP address for one day to enforce the limit of 3 checks a day. If you ask for
           the check by email, we keep your address, the Google Place ID of the business, whether you
           ticked "Send me tips on managing my Google profile", those words, the page and the time,
-          as proof of your choice. The check uses public information only and never your Business
-          Profile.
+          as proof of your choice.{" "}
+          {WHATSAPP_ON
+            ? "If you ask for the check on WhatsApp, we use your number once to send one message and keep only a one-way hash of it, the Google Place ID, the words next to the tick, the page, the time and whether the message was sent, as proof of your choice. We do not message you again unless you ask. "
+            : ""}
+          The check uses public information only and never your Business Profile.
         </p>
         <p>
           <b>If you write to us through a form:</b> what you enter (for example name, email,
@@ -410,6 +413,9 @@ function Page() {
           <li>
             Google's public details for a business you checked: 24 hours. Your email request for the
             check, with your choice about tips: until you ask us to remove it.
+            {WHATSAPP_ON
+              ? " Your WhatsApp request for the check, without your number: the same."
+              : ""}
           </li>
         </ul>
       </section>

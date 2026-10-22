@@ -6,11 +6,11 @@ Yawmiyati
 12 Hamra Street, Beirut
 Rating 4.6 · 128 reviews · Bakery
 
-Urgent: Your opening hours are missing
-Customers cannot tell when you are open.
+Needs fixing: No opening hours are shown on Google.
+Kabsi asks you for your hours and prepares them for you to approve.
 
-Recommended: No phone number on your listing
-Customers who want to call have nothing to tap.
+Worth fixing: No phone number is shown on Google.
+Kabsi asks you to confirm it and prepares the change for you to approve.
 
 Kabsi can take care of these. You approve each one.
 Start your free trial: https://kabsi.co/get-started

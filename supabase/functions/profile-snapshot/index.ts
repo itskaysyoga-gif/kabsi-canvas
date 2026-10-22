@@ -4,7 +4,7 @@
 import { getCachedSnapshot, getSnapshotPlace, searchText } from "../_shared/google/index.ts";
 import { admin, APP_URL, captureError, CORS, esc, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { notify } from "../_shared/notify.ts";
-import { makeHandler, WHATSAPP_CHECK_TEMPLATE_ENV } from "../_shared/profile-snapshot.ts";
+import { makeHandler } from "../_shared/profile-snapshot.ts";
 import { whatsappCtx } from "../_shared/whatsapp/db.ts";
 import { WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
 
@@ -34,7 +34,8 @@ Deno.serve(makeHandler({
   // One approved template message to the number the visitor typed. The mock sender (live switch off) and a missing
   // template never count as sent. Nothing is logged but the outcome: the number and the message stay out of Sentry.
   sendWhatsapp: async ({ to, params }) => {
-    const template = Deno.env.get(WHATSAPP_CHECK_TEMPLATE_ENV);
+    // KAPSO_TEMPLATE_PROFILE_CHECK: the Meta-approved template of the one message, set in the WhatsApp go-live session (13b).
+    const template = Deno.env.get("KAPSO_TEMPLATE_PROFILE_CHECK");
     if (!template) return { state: "held", error: "no_template" };
     const ctx = await whatsappCtx();
     if (!ctx.on) return { state: "held", error: "no_number" };

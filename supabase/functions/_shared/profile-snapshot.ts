@@ -22,8 +22,6 @@ import { FREE_TOOL_BUSY } from "./free-tool-busy.ts";
 export const TIPS_CONSENT_TEXT = "Send me tips on managing my Google profile";
 /** The words next to the WhatsApp tick. Keep equal to WHATSAPP_CONSENT_TEXT in src/lib/profile-check.ts (a test checks it). */
 export const WHATSAPP_CONSENT_TEXT = "Send my Google Profile Check to this WhatsApp number as one message. I understand Kabsi will not message me again unless I ask.";
-/** The Meta-approved template for the one message (submitted in the WhatsApp go-live session, 13b). */
-export const WHATSAPP_CHECK_TEMPLATE_ENV = "KAPSO_TEMPLATE_PROFILE_CHECK";
 const PHONE_RE = /^\+[1-9]\d{7,14}$/;
 /** "+1 (201) 555-0100" becomes "+12015550100"; anything without a country code, or not 8 to 15 digits, is refused. */
 export function normalizePhone(v: string): string | null {
@@ -52,7 +50,7 @@ const ORDER: Record<Tone, number> = { danger: 0, warning: 1, neutral: 2 };
 
 // Only facts the public Places data holds become danger or warning flags. It has no review replies, holiday hours, posts
 // or photo dates (K-82), so those three say so in a neutral flag and promise only what Kabsi does after the owner
-// connects. Nothing here asks Places for reviews (the field mask holds that, and tests check it).
+// connects. Nothing here widens the Places field mask (tests hold the mask).
 export function flags(s: Omit<Snapshot, "flags" | "checklist" | "cached">): Flag[] {
   const out: Flag[] = [];
   if (s.business_status === "CLOSED_PERMANENTLY") {
