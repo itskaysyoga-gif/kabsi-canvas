@@ -246,7 +246,16 @@ export function FeatureCard({
   );
 }
 
-export function CtaBand({ title = BRAND_LINE, sub }: { title?: string; sub?: string }) {
+export function CtaBand({
+  title = BRAND_LINE,
+  sub,
+  cta = { to: "/start", label: CTA_PRIMARY },
+}: {
+  title?: string;
+  sub?: string;
+  /** The yellow button. The homepage and the pricing page pass the free Profile Check (K-140). */
+  cta?: { to: "/start" | "/google-profile-check"; label: string };
+}) {
   return (
     <section className="bg-kb-carbon text-kb-white">
       <div className="mx-auto flex max-w-6xl flex-col items-start gap-7 px-5 py-16 sm:px-8 sm:py-20 md:flex-row md:items-center md:justify-between">
@@ -257,8 +266,8 @@ export function CtaBand({ title = BRAND_LINE, sub }: { title?: string; sub?: str
           <p className="mt-3 max-w-xl text-kb-stone-on-dark">{sub ?? BRAND_EXPLAINER}</p>
         </div>
         <Button asChild className="w-full shrink-0 md:w-auto">
-          <Link to="/start">
-            {CTA_PRIMARY} <ArrowRight />
+          <Link to={cta.to}>
+            {cta.label} <ArrowRight />
           </Link>
         </Button>
       </div>
