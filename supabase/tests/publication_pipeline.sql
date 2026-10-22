@@ -86,7 +86,8 @@ select throws_ok($$ select pg_temp.approve('x', '00000000-0000-4000-8000-0000000
   'P0001', 'approver_not_member', 'someone outside the business cannot approve');
 select throws_ok($$ select pg_temp.approve('x', '00000000-0000-4000-8000-000000000102', '00000000-0000-4000-8000-0000000000a1', 'dashboard', '  ') $$,
   'P0001', 'bad_reply_text', 'an empty reply is refused');
-select throws_ok($$ select pg_temp.approve('x', '00000000-0000-4000-8000-000000000102', '00000000-0000-4000-8000-0000000000a1', 'whatsapp') $$,
+-- P0.8-03: whatsapp is a channel now (supabase/tests/whatsapp_channel.sql); sms is not.
+select throws_ok($$ select pg_temp.approve('x', '00000000-0000-4000-8000-000000000102', '00000000-0000-4000-8000-0000000000a1', 'sms') $$,
   'P0001', 'bad_channel', 'an unknown channel is refused');
 
 -- Claim: not before publish_after, once.

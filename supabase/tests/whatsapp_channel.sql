@@ -27,11 +27,16 @@ insert into public.gbp_posts (id, location_id, owner_input, body, state)
 values ('00000000-0000-4000-8000-000000000311', '00000000-0000-4000-8000-0000000000c1', 'x', 'Fresh bread every morning from 7.', 'draft');
 insert into public.profile_changes (id, location_id, field, source, severity, status)
 values ('00000000-0000-4000-8000-000000000321', '00000000-0000-4000-8000-0000000000c1', 'name', 'scheduled_check', 'urgent', 'awaiting_review'),
-       ('00000000-0000-4000-8000-000000000322', '00000000-0000-4000-8000-0000000000c1', 'phone', 'scheduled_check', 'urgent', 'awaiting_review'),
        ('00000000-0000-4000-8000-000000000323', '00000000-0000-4000-8000-0000000000c1', 'open_status', 'scheduled_check', 'urgent', 'awaiting_review'),
        ('00000000-0000-4000-8000-000000000324', '00000000-0000-4000-8000-0000000000c1', 'map_pin', 'scheduled_check', 'urgent', 'awaiting_review'),
        ('00000000-0000-4000-8000-000000000325', '00000000-0000-4000-8000-0000000000c1', 'address', 'scheduled_check', 'urgent', 'awaiting_review'),
        ('00000000-0000-4000-8000-000000000326', '00000000-0000-4000-8000-0000000000c1', 'main_category', 'scheduled_check', 'urgent', 'awaiting_review');
+-- The fixtures already hold an open phone change for the victim (one open change per field); it stays open.
+update public.profile_changes set status = 'awaiting_review'
+ where location_id = '00000000-0000-4000-8000-0000000000c1' and field = 'phone' and status in ('detected', 'awaiting_review');
+select is((select count(*) from public.profile_changes where location_id = '00000000-0000-4000-8000-0000000000c1'
+            and field in ('name', 'phone', 'open_status', 'map_pin', 'address', 'main_category') and status = 'awaiting_review'),
+  6::bigint, 'one open change for each of the six identity fields');
 
 create temp table t (k text primary key, v jsonb);
 grant all on t to authenticated;
@@ -98,7 +103,8 @@ select is(public.whatsapp_action_create('00000000-0000-4000-8000-0000000000a1', 
   'no_safe_draft', 'no Approve button for a draft that failed its checks');
 select is(public.whatsapp_action_create('00000000-0000-4000-8000-0000000000a1', 'listing_revert', id) ->> 'reason', 'identity_field',
   'no Approve button for ' || field)
-  from public.profile_changes where id::text like '00000000-0000-4000-8000-00000000032%';
+  from public.profile_changes where location_id = '00000000-0000-4000-8000-0000000000c1'
+    and field in ('name', 'phone', 'open_status', 'map_pin', 'address', 'main_category') and status = 'awaiting_review';
 select is(public.whatsapp_action_create('00000000-0000-4000-8000-0000000000b1', 'review_reply', '00000000-0000-4000-8000-000000000301') ->> 'reason',
   'not_member', 'no button for someone outside the business');
 select is(public.whatsapp_action_create('00000000-0000-4000-8000-0000000000a1', 'photo', '00000000-0000-4000-8000-000000000301') ->> 'reason',
@@ -167,7 +173,8 @@ select throws_ok($$ select public.approve_publication('review_reply', '00000000-
   '00000000-0000-4000-8000-0000000000a1', 'whatsapp') $$, 'P0001', 'not_on_whatsapp', 'high risk never through the whatsapp channel');
 select throws_ok(format($$ select public.approve_publication('listing_revert', %L, '{}'::jsonb, '00000000-0000-4000-8000-0000000000a1', 'whatsapp') $$, id),
   'P0001', 'not_on_whatsapp', field || ' never through the whatsapp channel')
-  from public.profile_changes where id::text like '00000000-0000-4000-8000-00000000032%';
+  from public.profile_changes where location_id = '00000000-0000-4000-8000-0000000000c1'
+    and field in ('name', 'phone', 'open_status', 'map_pin', 'address', 'main_category') and status = 'awaiting_review';
 select throws_ok($$ select public.approve_publication('special_hours', gen_random_uuid(), '{}'::jsonb, '00000000-0000-4000-8000-0000000000a1', 'sms') $$,
   'P0001', 'bad_channel', 'an unknown channel is refused');
 
