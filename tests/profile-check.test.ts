@@ -5,6 +5,7 @@ import {
   CHECK_PAGES,
   LIMITS,
   TIPS_CONSENT_TEXT as SERVER_CONSENT,
+  WHATSAPP_CONSENT_TEXT as SERVER_WHATSAPP_CONSENT,
 } from "../supabase/functions/_shared/profile-snapshot";
 
 // P0.4-01: the free snapshot and Google Profile Check. The behaviour tests (field mask, the fourth check, the cache,
@@ -14,6 +15,49 @@ const root = join(__dirname, "..");
 const read = (p: string) => readFileSync(join(root, p), "utf8");
 // The client file imports through the "@" alias, which this runner does not resolve, so its constants are read as text.
 const CLIENT_CONSENT = read("src/lib/profile-check.ts").match(/TIPS_CONSENT_TEXT = "([^"]+)"/)?.[1];
+
+const CLIENT_WHATSAPP_CONSENT = read("src/lib/profile-check.ts").match(
+  /WHATSAPP_CONSENT_TEXT =\s*"([^"]+)"/,
+)?.[1];
+
+describe("Free Profile Check, status flags and WhatsApp (lane R sync, item D)", () => {
+  it("the words next to the WhatsApp tick are the same in the browser and in the function that stores them", () => {
+    expect(CLIENT_WHATSAPP_CONSENT).toBe(SERVER_WHATSAPP_CONSENT);
+    expect(CLIENT_WHATSAPP_CONSENT).toContain("as one message");
+    expect(CLIENT_WHATSAPP_CONSENT).toContain("will not message me again");
+  });
+
+  it("the WhatsApp form is built but shown only when WHATSAPP_NUMBER is set, and the email form is untouched", () => {
+    const src = read("src/components/profile-check/snapshot-result.tsx");
+    expect(src).toMatch(/\{WHATSAPP_ON \? <WhatsappForm[^>]*\/> : null\}/);
+    expect(src).toContain("<EmailForm placeId={s.place_id} page={page} />");
+    expect(src).toContain("Send my check to WhatsApp");
+    expect(src).toContain("Email me this check");
+    // The box starts unticked and the button waits for it.
+    expect(src).toMatch(/useState\(false\);\s*const \[token/);
+    expect(src).toContain("!ok");
+  });
+
+  it("the headline is the one of 22 Oct 2026, and the flags use the design tokens' warning and danger states", () => {
+    expect(read("src/routes/google-profile-check.tsx")).toContain(
+      'title="See what customers see on Google, and what needs fixing."',
+    );
+    const src = read("src/components/profile-check/snapshot-result.tsx");
+    expect(src).toContain('danger: "red", warning: "amber", neutral: "grey"');
+  });
+
+  it("no fear claim, statistic or score wording on the check screens", () => {
+    for (const f of [
+      "src/components/profile-check/snapshot-result.tsx",
+      "src/routes/google-profile-check.tsx",
+      "supabase/functions/_shared/profile-snapshot.ts",
+    ]) {
+      expect(read(f), f).not.toMatch(
+        /costing you|losing customers|customers will not|\d+\s?% (more|of)/i,
+      );
+    }
+  });
+});
 
 describe("Free Profile Check (P0.4-01)", () => {
   it("the words next to the tips box are the same in the browser and in the function that stores them", () => {
@@ -82,10 +126,10 @@ describe("Free Profile Check (P0.4-01)", () => {
     expect(sql).not.toMatch(/delete|drop /i);
   });
 
-  it("the three level labels are the ones in the card, and nothing on the screens says score or rank", () => {
-    const labels = read("src/lib/profile-check.ts").match(/LEVEL_LABEL[^{]*\{([^}]*)\}/)?.[1] ?? "";
+  it("the three flag labels are the ones in the card, and nothing on the screens says score or rank", () => {
+    const labels = read("src/lib/profile-check.ts").match(/TONE_LABEL[^{]*\{([^}]*)\}/)?.[1] ?? "";
     expect(labels.replace(/\s+/g, " ").trim()).toBe(
-      'urgent: "Urgent", recommended: "Recommended", nice: "Nice to have",',
+      'danger: "Needs fixing", warning: "Worth fixing", neutral: "After you connect",',
     );
     for (const f of [
       "src/components/profile-check/snapshot-result.tsx",

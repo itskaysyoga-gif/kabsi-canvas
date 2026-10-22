@@ -30,7 +30,7 @@ Key facts:
 - [FAQ](https://kabsi.co/faq): what Kabsi does, eligibility, approvals, languages, access, Google Protection, Gemini, payment
 - [Kabsi Partners](https://kabsi.co/partners): the affiliate program, opening soon
 - [Free Google review link and QR code](https://kabsi.co/google-review-link): no sign-up tool
-- [Free Google Profile Check](https://kabsi.co/google-profile-check): see what customers see on Google, public information only, no sign-up
+- [Free Google Profile Check](https://kabsi.co/google-profile-check): see what customers see on Google, and what needs fixing, public information only, no sign-up
 - [About](https://kabsi.co/about): who built Kabsi and why it has its name
 - [Security](https://kabsi.co/security): Manager access, approvals, removal and Google data retention
 
