@@ -7,6 +7,10 @@
 // What is sent, and when (G-25):
 //   welcome              the business was created                       the one next step: invite Kabsi as Manager
 //   no_access_1h/24h/72h access asked for, still no access               help to finish (stops at access)
+//   verify_1 to verify_5 the owner said the profile needs verifying or   "Verified yet? Tap to continue" every 2 days
+//                        is under review, still no access (K-95, P0.4-04) (stops at access or when the situation is cleared)
+//   ownership_day3/7     the owner asked for ownership of the profile   "Has your request come through?" on day 3 and 7
+//                        (K-97, P0.4-04)                                 after "I've done it"
 //   first_reply_approved the first reply was approved (audit log)       a short thank-you
 //   trial_day2/7/11      the trial clock (K-101), only while on trial    first win, your week with the yearly offer
 //                                                                        (G-30), three days left with both prices
@@ -39,6 +43,8 @@ export type Snapshot = {
   waitingReviews: number;
   waitingChanges: number;
   firstApprovalAt: Date | null;
+  /** The situation the owner reported while setting up (P0.4-04), still open; null when none or once it is cleared. */
+  scenario: { id: string; variant: string | null; startedAt: Date; doneAt: Date | null } | null;
   /** From audit_events only, counted from the trial start (or from the business's creation when there was no trial). */
   recap: { repliesPrepared: number; repliesSent: number; postsSent: number; changesCaught: number };
 };
@@ -52,6 +58,7 @@ export function snapshotFromRow(r: Record<string, any>): Snapshot {
     owners: ((r.owners ?? []) as { user_id: string; email: string }[]).map((o) => ({ userId: o.user_id, email: o.email })),
     marketingConsent: r.marketing_consent === true, waitingReviews: Number(r.waiting_reviews ?? 0), waitingChanges: Number(r.waiting_changes ?? 0),
     firstApprovalAt: d(r.first_approval_at),
+    scenario: r.scenario?.id ? { id: String(r.scenario.id), variant: r.scenario.variant ? String(r.scenario.variant) : null, startedAt: new Date(r.scenario.started_at), doneAt: d(r.scenario.done_at) } : null,
     recap: {
       repliesPrepared: Number(r.recap?.replies_prepared ?? 0), repliesSent: Number(r.recap?.replies_sent ?? 0),
       postsSent: Number(r.recap?.posts_sent ?? 0), changesCaught: Number(r.recap?.changes_caught ?? 0),
@@ -79,6 +86,7 @@ export function marketingAllowed(country: string | null, consent: boolean, notic
 
 export type StepId =
   | "welcome" | "no_access_1h" | "no_access_24h" | "no_access_72h" | "first_reply_approved"
+  | "verify_1" | "verify_2" | "verify_3" | "verify_4" | "verify_5" | "ownership_day3" | "ownership_day7"
   | "trial_day2" | "trial_day7" | "trial_day11" | "trial_day14" | "winback_17" | "winback_30";
 
 export type StepMeta = { id: StepId; category: CategoryId; consent: "service" | "marketing" };
@@ -88,6 +96,15 @@ export const STEPS: Record<StepId, StepMeta> = {
   no_access_24h: { id: "no_access_24h", category: "access", consent: "service" },
   no_access_72h: { id: "no_access_72h", category: "access", consent: "service" },
   first_reply_approved: { id: "first_reply_approved", category: "trial", consent: "service" },
+  // Setup help for an owner stuck at Google's side (P0.4-04). Like the no-access reminders these are about Google access,
+  // so they go from the account address and stop at access; they are service mail, never marketing.
+  verify_1: { id: "verify_1", category: "access", consent: "service" },
+  verify_2: { id: "verify_2", category: "access", consent: "service" },
+  verify_3: { id: "verify_3", category: "access", consent: "service" },
+  verify_4: { id: "verify_4", category: "access", consent: "service" },
+  verify_5: { id: "verify_5", category: "access", consent: "service" },
+  ownership_day3: { id: "ownership_day3", category: "access", consent: "service" },
+  ownership_day7: { id: "ownership_day7", category: "access", consent: "service" },
   trial_day2: { id: "trial_day2", category: "trial", consent: "service" },
   trial_day7: { id: "trial_day7", category: "trial", consent: "service" },
   trial_day11: { id: "trial_day11", category: "trial", consent: "service" },
@@ -97,6 +114,10 @@ export const STEPS: Record<StepId, StepMeta> = {
 };
 
 const H = 3_600_000, D = 86_400_000;
+// The reminder rules of src/lib/scenarios.ts (tests/scenarios.test.ts keeps the two equal): a check-back every 2 days,
+// ownership reminders on day 3 and day 7.
+export const CHECKBACK_EVERY_DAYS = 2;
+export const OWNERSHIP_DAYS = [3, 7] as const;
 type Window = { at: Date; until: Date };
 const win = (at: Date | null, length: number): Window | null => (at ? { at, until: new Date(at.getTime() + length) } : null);
 const plus = (t: Date | null, ms: number) => (t ? new Date(t.getTime() + ms) : null);
@@ -108,6 +129,12 @@ function windowOf(step: StepId, s: Snapshot): Window | null {
     case "no_access_1h": return win(plus(s.consentAt, H), 23 * H);
     case "no_access_24h": return win(plus(s.consentAt, 24 * H), 48 * H);
     case "no_access_72h": return win(plus(s.consentAt, 72 * H), 4 * D);
+    case "verify_1": case "verify_2": case "verify_3": case "verify_4": case "verify_5": {
+      const n = Number(step.slice(-1));
+      return win(plus(s.scenario?.startedAt ?? null, n * CHECKBACK_EVERY_DAYS * D), CHECKBACK_EVERY_DAYS * D);
+    }
+    case "ownership_day3": return win(plus(s.scenario?.doneAt ?? null, OWNERSHIP_DAYS[0] * D), (OWNERSHIP_DAYS[1] - OWNERSHIP_DAYS[0]) * D);
+    case "ownership_day7": return win(plus(s.scenario?.doneAt ?? null, OWNERSHIP_DAYS[1] * D), 3 * D);
     case "first_reply_approved": return win(s.firstApprovalAt, 3 * D);
     case "trial_day2": return win(plus(s.trialStartedAt, 2 * D), 3 * D);
     case "trial_day7": return win(plus(s.trialStartedAt, 7 * D), 3 * D);
@@ -125,6 +152,10 @@ function applies(step: StepId, s: Snapshot): boolean {
     case "welcome": return true;
     case "no_access_1h": case "no_access_24h": case "no_access_72h":
       return !!s.consentAt && !s.accessGrantedAt && s.status === "access_pending";
+    case "verify_1": case "verify_2": case "verify_3": case "verify_4": case "verify_5":
+      return !s.accessGrantedAt && (s.scenario?.id === "needs_verifying" || s.scenario?.id === "google_reviewing");
+    case "ownership_day3": case "ownership_day7":
+      return !s.accessGrantedAt && s.scenario?.id === "someone_else_owns" && s.scenario.doneAt !== null;
     case "first_reply_approved": case "trial_day2": case "trial_day7": case "trial_day11": return s.entitlement === "trial";
     case "trial_day14": return s.entitlement === "grace" || s.entitlement === "ended";
     case "winback_17": case "winback_30": return s.entitlement === "ended" && s.waitingReviews + s.waitingChanges > 0;
@@ -147,4 +178,6 @@ export function dueSteps(s: Snapshot, now: Date, o: DueOptions): StepId[] {
   return out;
 }
 
-export const lifecycleKey = (step: StepId, locationId: string) => `life:${step}:${locationId}`;
+/** The scenario steps carry the day the situation began, so a later, different situation is a new email, not a repeat. */
+export const lifecycleKey = (step: StepId, locationId: string, scenarioStart?: Date | null) =>
+  `life:${step}:${locationId}${scenarioStart && /^(verify_|ownership_)/.test(step) ? `:${Math.floor(scenarioStart.getTime() / 86_400_000)}` : ""}`;

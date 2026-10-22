@@ -72,7 +72,10 @@ export const LIFE_SAMPLE: LifeSnapshot = {
   accessGrantedAt: new Date("2026-10-01T10:00:00Z"), entitlement: "trial", trialStartedAt: new Date("2026-10-01T10:00:00Z"), trialEndsAt: new Date("2026-10-15T10:00:00Z"),
   owners: [{ userId: "u1", email: "owner@example.test" }], marketingConsent: true, waitingReviews: 4, waitingChanges: 1, firstApprovalAt: new Date("2026-10-02T09:00:00Z"),
   recap: { repliesPrepared: 9, repliesSent: 6, postsSent: 1, changesCaught: 2 },
+  scenario: null,
 };
+/** A business waiting on Google, for the setup-help emails (verification and ownership). */
+const SETUP_SAMPLE: LifeSnapshot = { ...LIFE_SAMPLE, accessGrantedAt: null, status: "access_pending", entitlement: "none", trialStartedAt: null, trialEndsAt: null };
 
 export function catalog(): CatalogEntry[] {
   const e = (kind: string, category: CatalogEntry["category"], business: boolean, content: EmailContent): CatalogEntry => ({ kind, category, business, content });
@@ -113,7 +116,11 @@ export function catalog(): CatalogEntry[] {
     e("assistant_report", "internal", false, copy.noraReport({ subject: "Chat: Sarah · Sales · Warm", summary: "A visitor asked about pricing.", bodyHtml: claimBody, text: "A visitor asked about pricing.", replyTo: null }, APP)),
     e("assistant_handoff", "internal", false, copy.noraHandoff({ reason: "billing", email: "visitor@example.test", summary: "Needs a person.", bodyHtml: claimBody, text: "Needs a person." }, APP)),
     e("assistant_handoff_ack", "direct", false, copy.noraAck()),
-    ...(Object.keys(STEPS) as StepId[]).map((id) => e(`life_${id}`, STEPS[id].category, true, lifecycleEmail(id, LIFE_SAMPLE, { appUrl: APP, removalOn: true }))),
+    ...(Object.keys(STEPS) as StepId[]).map((id) => e(`life_${id}`, STEPS[id].category, true, lifecycleEmail(id, id.startsWith("ownership_")
+      ? { ...SETUP_SAMPLE, scenario: { id: "someone_else_owns", variant: "dont_know", startedAt: new Date("2026-10-01T09:00:00Z"), doneAt: new Date("2026-10-01T09:30:00Z") } }
+      : id.startsWith("verify_")
+        ? { ...SETUP_SAMPLE, scenario: { id: id === "verify_2" ? "google_reviewing" : "needs_verifying", variant: null, startedAt: new Date("2026-10-01T09:00:00Z"), doneAt: null } }
+        : LIFE_SAMPLE, { appUrl: APP, removalOn: true }))),
     e("lead_alert", "internal", false, copy.leadAlert("business", "Rana", "rana@example.test", "<p><strong>name:</strong> Rana</p><p><strong>message:</strong> I run three salons.</p>", "name: Rana\nmessage: I run three salons.")),
   ];
 }

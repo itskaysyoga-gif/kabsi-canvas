@@ -8,7 +8,8 @@ import { NotificationBell } from "@/components/home/notification-bell";
 import { myAccess } from "@/lib/team";
 import { supabase } from "@/lib/supabase";
 import { loadEntitlements } from "@/lib/entitlements";
-import { myLatestLocation, type Location } from "@/lib/onboarding";
+import { loadScenario, myLatestLocation, type Location } from "@/lib/onboarding";
+import { screenFor } from "@/lib/scenarios";
 import { cn } from "@/lib/utils";
 
 // Home: one calm page that says what needs the owner now, then how the week looks. Facts only (§3, D222).
@@ -181,14 +182,24 @@ function Disconnected({ loc }: { loc: Location }) {
 
 function Setup({ loc }: { loc: Location }) {
   const paid = useQuery({ queryKey: ["paid-plan", loc.id], queryFn: () => hasPaidPlan(loc.id) });
+  // The situation the owner reported while adding Kabsi (P0.4-04): Home says it calmly, with what happens to the trial.
+  const scenario = useQuery({
+    queryKey: ["scenario", loc.id],
+    queryFn: () => loadScenario(loc.id),
+  });
+  const waiting =
+    scenario.data && !loc.access_granted_at
+      ? screenFor(scenario.data.scenario, scenario.data.variant)
+      : null;
   const knowledgeDone = loc.onboarding_step === "plan" || loc.onboarding_step === "done";
   const steps = [
     { label: "Find your business on Google", done: true, note: "" },
     {
       label: "Add Kabsi as a Manager on your Google profile",
       done: !!loc.access_granted_at,
-      note:
-        loc.consent_at && !loc.access_granted_at
+      note: waiting
+        ? `${waiting.home} ${waiting.trial}`
+        : loc.consent_at && !loc.access_granted_at
           ? loc.concierge
             ? CONCIERGE_COPY.setup
             : "Waiting for Google access"
