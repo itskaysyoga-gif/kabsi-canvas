@@ -19,6 +19,8 @@ export const Route = createFileRoute("/_authenticated/app/")({
   beforeLoad: async () => {
     try {
       // K-16 (P0.3-06): an invitation to someone's team becomes a membership when its address signs in.
+      // The client loads here, with the app, and not with every public page's entry code (lane R, performance).
+      const { supabase } = await import("@/lib/supabase");
       await supabase.rpc("claim_team_invites");
     } catch {
       // Home still loads; the invitation is claimed on the next visit.

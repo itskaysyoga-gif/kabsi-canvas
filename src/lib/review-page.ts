@@ -1,7 +1,7 @@
 // The page behind a review link set to "Show the page" (P0.8-05, K-132). Everyone sees the same page: the Google
 // review button first, then one line to message the manager when the business saved a WhatsApp number. Nothing here
 // asks a question, reads a rating or routes anybody.
-import { anonHeaders, supabaseUrl } from "@/lib/supabase";
+import { anonHeaders, supabaseUrl } from "@/lib/supabase-config";
 
 export type ReviewPageData = {
   name: string;

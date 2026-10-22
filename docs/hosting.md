@@ -32,3 +32,8 @@ The Lovable project Kabsi Canvas (GitHub disconnected on 8 Oct 2026) stays publi
 - Old kabsi.co pages with no twin on the new site, permanent: `/product` to `/lebanon`, `/contact` to `/faq`, `/report` to `/how-it-works`, `/admin` and `/auth/...` to `/login`, `/r-not-found` to `/`. `/`, `/how-it-works`, `/pricing`, `/faq`, `/privacy`, `/terms`, `/login` and `/app` exist on the new site.
 - Old review cards: `/r/SEVEN1` redirects (302) to that business's Google review page; any other `/r/<code>` goes to `/` (302). New cards use go.kabsi.co.
 - Only kabsi.co is indexable: `*.vercel.app` (previews and the Vercel address) sends `X-Robots-Tag: noindex`; so do the private paths (`/app`, `/partner`, `/staff`, `/start`, `/login`, `/a/`, `/activate/`).
+
+
+## Public page speed (lane R, 22 Oct 2026)
+
+`src/server.ts` drops the `<link rel="modulepreload">` hints from the head of public HTML pages (`src/lib/head-hints.ts`); the app, sign-in and setup keep them. The privacy banner, Nora's launcher and PostHog load after the first paint, and the Supabase client loads only when there is a session. Numbers and method: `docs/reports/lighthouse-home-2026-10-22.md`. `tests/performance.test.ts` keeps these in place.

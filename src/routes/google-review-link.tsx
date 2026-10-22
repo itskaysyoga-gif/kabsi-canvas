@@ -26,7 +26,7 @@ import {
   Section,
 } from "@/components/marketing/parts";
 import { ReviewLinkVisual } from "@/components/marketing/visuals";
-import { anonHeaders, supabaseUrl } from "@/lib/supabase";
+import { anonHeaders, supabaseUrl } from "@/lib/supabase-config";
 import { Turnstile } from "@/components/turnstile";
 import { qrSvg } from "@/lib/qr";
 import { track } from "@/lib/telemetry";

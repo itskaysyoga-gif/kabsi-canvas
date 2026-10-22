@@ -23,7 +23,7 @@ import {
   WHATSAPP_ON,
 } from "@/lib/site";
 import { openPrivacyChoices } from "@/lib/consent";
-import { AssistantWidget } from "@/components/assistant/assistant-widget";
+import { DeferredAssistant } from "@/components/assistant/deferred-assistant";
 import { useAuth } from "@/components/auth/auth-provider";
 import {
   DropdownMenu,
@@ -244,7 +244,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           <p className="pt-2 text-sm leading-6 text-kb-stone-on-dark">© Kabsi</p>
         </div>
       </footer>
-      <AssistantWidget surface="site" />
+      <DeferredAssistant surface="site" />
     </div>
   );
 }

@@ -11,6 +11,7 @@
 //   and records sessions only after a yes.
 
 import { analyticsAllowed, analyticsPersistent, onConsentChange } from "@/lib/consent";
+import { afterPaint } from "@/lib/after-paint";
 
 const SENTRY_PUBLIC_KEY = "b09a18a8ac370accf6b8e423fff77a8d";
 const POSTHOG_KEY = "phc_rDzVWhoR2wSXyVHVMypztnf8YKHCszd9c9mryMv6W4mW";
@@ -47,19 +48,8 @@ declare global {
   }
 }
 
-const PRIVATE_PATHS = [
-  /^\/app(\/|$)/,
-  /^\/partner(\/|$)/,
-  /^\/staff(\/|$)/,
-  /^\/start(\/|$)/,
-  /^\/login(\/|$)/,
-  /^\/a\//,
-  /^\/activate\//,
-];
-
-export function isPrivatePath(path: string) {
-  return PRIVATE_PATHS.some((pattern) => pattern.test(path));
-}
+export { isPrivatePath } from "@/lib/private-paths";
+import { isPrivatePath } from "@/lib/private-paths";
 
 // Inline boot script: sets environment, configures Sentry before its loader runs, and installs
 // the standard PostHog snippet with replay off until a public page turns it on.
@@ -116,10 +106,25 @@ export const telemetryHeadScripts = [
 let pendingUser: string | null = null;
 let consentWatched = false;
 let lastPath = "/";
+// PostHog's script (about 95 KB compressed, 330 KB to run) loads once the page has painted and settled, not while it is
+// being made ready: 1.5 seconds after load, or at the first touch (lane R, 22 Oct 2026, performance). A browser event
+// sent before then waits in a short list and goes out when PostHog starts, if statistics are still allowed.
+const WAIT_MS = 1500;
+const waiting: Array<[string, SafeProps]> = [];
+let started = false;
+let cancelStart: (() => void) | null = null;
 export function startAnalytics() {
+  if (typeof window === "undefined" || started || cancelStart) return;
+  cancelStart = afterPaint(runStart, WAIT_MS);
+}
+function runStart() {
   if (typeof window === "undefined") return;
+  started = true;
+  cancelStart = null;
   try {
     window.__kabsiStartAnalytics?.();
+    flushWaiting();
+    syncReplayWithPath(lastPath);
     if (!consentWatched) {
       consentWatched = true;
       onConsentChange(() => {
@@ -258,9 +263,26 @@ function applyCapture() {
   }
 }
 
+function flushWaiting() {
+  const list = waiting.splice(0);
+  if (paused || !analyticsAllowed()) return;
+  for (const [event, properties] of list) {
+    try {
+      window.posthog?.capture?.(event, properties);
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
 export function track(event: KabsiEvent, properties: SafeProps = {}) {
   if (typeof window === "undefined" || paused || !analyticsAllowed()) return;
   if (!BROWSER_EVENTS.has(event)) return;
+  if (!window.posthog) {
+    // PostHog has not started yet (see startAnalytics): keep the event until it has.
+    if (waiting.length < 20) waiting.push([event, properties]);
+    return;
+  }
   try {
     window.posthog?.capture?.(event, properties);
   } catch {

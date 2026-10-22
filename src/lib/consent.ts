@@ -14,7 +14,8 @@ import {
   type ConsentAction,
   type ConsentRule,
 } from "@/lib/consent-rules";
-import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
+import { anonHeaders, supabaseUrl } from "@/lib/supabase-config";
+import { hasStoredSession } from "@/lib/stored-session";
 
 export { CONSENT_VERSION, CONSENT_WORDING, type ConsentRule } from "@/lib/consent-rules";
 
@@ -167,6 +168,16 @@ export async function initConsent(fetchImpl: typeof fetch = fetch) {
   set({ rule: ruleFor(geo.country), country: geo.country, countrySource: geo.source, ready: true });
 }
 
+async function sessionToken(): Promise<string | undefined> {
+  try {
+    const { supabase } = await import("@/lib/supabase");
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token;
+  } catch {
+    return undefined;
+  }
+}
+
 // Saves a choice from the banner: in this browser at once, then the proof on the server.
 export async function saveChoice(
   action: ConsentAction,
@@ -184,8 +195,9 @@ export async function saveChoice(
   write(local(), STORE_KEY, choice);
   set({ choice });
   try {
-    const { data } = await supabase.auth.getSession();
-    const token = data.session?.access_token;
+    // The proof carries the signed-in person's token when there is one. supabase-js is loaded only for a visitor who
+    // has a stored session, so choosing "Decline" on a first visit loads nothing extra.
+    const token = hasStoredSession() ? await sessionToken() : undefined;
     await fetch(`${supabaseUrl}/functions/v1/consent`, {
       method: "POST",
       headers: {
