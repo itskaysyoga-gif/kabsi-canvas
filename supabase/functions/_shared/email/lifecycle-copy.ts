@@ -8,10 +8,21 @@ import { p } from "./copy.ts";
 import { isSetupHelpStep, setupHelpEmail } from "./setup-help-copy.ts";
 import type { EmailContent } from "./template.ts";
 
-// Keep equal to PRICES.proMonthly and PRICES.proYearly in src/lib/site.ts (tests/lifecycle.test.ts checks it).
-export const PRICE_MONTHLY = 19;
-export const PRICE_YEARLY = 190;
-const PRICE_LINE = `Kabsi Pro is $${PRICE_MONTHLY} a month, or $${PRICE_YEARLY} a year, which is two months free. Prices are plus tax where it applies.`;
+// The prices of the website (lane R, 22 Oct 2026): Essentials, Pro and an extra location. Keep equal to PLAN_PRICES and
+// PRICES_SENTENCE in src/lib/site.ts (tests/lifecycle.test.ts checks it). Card payments through Creem are not open, so
+// every email that names a price also says so.
+export const PLAN_PRICES = {
+  essentialsMonthly: 19,
+  essentialsYearly: 190,
+  proMonthly: 39,
+  proYearly: 390,
+  extraLocationMonthly: 15,
+  extraLocationYearly: 150,
+} as const;
+export const PRICES_SENTENCE = `Essentials is $${PLAN_PRICES.essentialsMonthly} a month or $${PLAN_PRICES.essentialsYearly} a year. Pro is $${PLAN_PRICES.proMonthly} a month or $${PLAN_PRICES.proYearly} a year. An extra location is $${PLAN_PRICES.extraLocationMonthly} a month or $${PLAN_PRICES.extraLocationYearly} a year. Prices are in US dollars, plus tax where it applies.`;
+// Keep equal to CARD_PAYMENTS_COMING in src/lib/plans.ts.
+export const CARD_PAYMENTS_COMING = "Card payments in US dollars are coming. Until they open there is nothing to pay.";
+const PRICE_LINE = `${PRICES_SENTENCE} ${CARD_PAYMENTS_COMING}`;
 
 export type LifecycleCtx = { appUrl: string; removalOn: boolean };
 
@@ -99,7 +110,7 @@ export function lifecycleEmail(step: StepId, s: Snapshot, c: LifecycleCtx): Emai
       return {
         subject: `${s.name}: your first week with Kabsi`, title: "Your first week with Kabsi", preheader: "What Kabsi did for you this week, from your own record.",
         bodyHtml: p("Here is your first week, counted from the record of what Kabsi did and what you approved:") + list(lines) + p(esc(PRICE_LINE)) + (ends ? p(`Your free trial runs until ${esc(ends)}.`) : ""),
-        button: { label: "Choose a plan", url: plan }, links: [{ label: "Open Kabsi", url: open }],
+        button: { label: "See your plan", url: plan }, links: [{ label: "Open Kabsi", url: open }],
         text: `Here is your first week, counted from the record of what Kabsi did and what you approved:\n\n${lines.map((l) => `- ${l}`).join("\n")}\n\n${PRICE_LINE}${ends ? `\n\nYour free trial runs until ${ends}.` : ""}`,
       };
     }
@@ -108,7 +119,7 @@ export function lifecycleEmail(step: StepId, s: Snapshot, c: LifecycleCtx): Emai
         subject: `${s.name}: your free trial ends in 3 days`, title: "Your free trial ends in 3 days", preheader: "Choose a plan to keep Kabsi publishing for you.",
         bodyHtml: p(`Your free trial ends on <strong>${esc(ends)}</strong>. After that Kabsi keeps watching and drafting for 7 more days, but publishes nothing until you choose a plan. Your review link keeps working.`)
           + p(esc(PRICE_LINE)),
-        button: { label: "Choose a plan", url: plan }, links: [{ label: "Open Kabsi", url: open }],
+        button: { label: "See your plan", url: plan }, links: [{ label: "Open Kabsi", url: open }],
         text: `Your free trial ends on ${ends}. After that Kabsi keeps watching and drafting for 7 more days, but publishes nothing until you choose a plan. Your review link keeps working.\n\n${PRICE_LINE}`,
       };
     case "trial_day14": {
@@ -117,9 +128,9 @@ export function lifecycleEmail(step: StepId, s: Snapshot, c: LifecycleCtx): Emai
       return {
         subject: `${s.name}: your free trial has ended`, title: "Your free trial has ended", preheader: "Kabsi keeps watching and drafting for 7 days. Choose a plan to publish again.",
         bodyHtml: p(`Your free trial ended on ${esc(ends)}. For 7 more days Kabsi keeps watching your reviews and your profile and drafting replies, but publishes nothing. Home shows what is waiting.${esc(removal)}`)
-          + p("Your review link keeps working. One tap continues Kabsi where it was."),
-        button: { label: "Choose a plan", url: plan }, links: [{ label: "Open Kabsi", url: open }],
-        text: `Your free trial ended on ${ends}. For 7 more days Kabsi keeps watching your reviews and your profile and drafting replies, but publishes nothing. Home shows what is waiting.${removal}\n\nYour review link keeps working. One tap continues Kabsi where it was.`,
+          + p("Your review link keeps working.") + p(esc(PRICE_LINE)),
+        button: { label: "See your plan", url: plan }, links: [{ label: "Open Kabsi", url: open }],
+        text: `Your free trial ended on ${ends}. For 7 more days Kabsi keeps watching your reviews and your profile and drafting replies, but publishes nothing. Home shows what is waiting.${removal}\n\nYour review link keeps working.\n\n${PRICE_LINE}`,
       };
     }
     case "winback_17": case "winback_30": {
@@ -131,9 +142,9 @@ export function lifecycleEmail(step: StepId, s: Snapshot, c: LifecycleCtx): Emai
         title: step === "winback_17" ? "Kabsi kept what it prepared" : "Still here when you want to continue",
         preheader: "Choose a plan to pick up where you left off.",
         why: "You tried Kabsi and agreed to get emails about it. You can stop them with the link below.",
-        bodyHtml: p(`Your free trial ended and Kabsi stopped. ${esc(what)} ${verb} still waiting in Kabsi for <strong>${esc(s.name)}</strong>, with replies already prepared where Kabsi could write one. Nothing is published until you approve it.`) + p("Choose a plan to pick up where you left off."),
-        button: { label: "Choose a plan", url: plan },
-        text: `Your free trial ended and Kabsi stopped. ${what} ${verb} still waiting in Kabsi for ${s.name}, with replies already prepared where Kabsi could write one. Nothing is published until you approve it.\n\nChoose a plan to pick up where you left off.`,
+        bodyHtml: p(`Your free trial ended and Kabsi stopped. ${esc(what)} ${verb} still waiting in Kabsi for <strong>${esc(s.name)}</strong>, with replies already prepared where Kabsi could write one. Nothing is published until you approve it.`) + p("Choose a plan to pick up where you left off.") + p(esc(PRICE_LINE)),
+        button: { label: "See your plan", url: plan },
+        text: `Your free trial ended and Kabsi stopped. ${what} ${verb} still waiting in Kabsi for ${s.name}, with replies already prepared where Kabsi could write one. Nothing is published until you approve it.\n\nChoose a plan to pick up where you left off.\n\n${PRICE_LINE}`,
       };
     }
   }

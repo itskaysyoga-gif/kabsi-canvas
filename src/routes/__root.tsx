@@ -22,7 +22,8 @@ import { captureTouch } from "@/lib/attribution";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { GlobalErrorBoundary } from "@/components/shared/error-boundary";
 import { Button } from "@/components/ui/button";
-import { PrivacyBanner } from "@/components/shared/privacy-banner";
+import { DeferredPrivacyBanner } from "@/components/shared/deferred-privacy-banner";
+import { initConsent } from "@/lib/consent";
 
 function NotFoundComponent() {
   return (
@@ -120,6 +121,9 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useLocation({ select: (location) => location.pathname });
   useEffect(() => {
+    // The country rule and the stored choice are read as the page hydrates, before analytics start and whether or not
+    // the banner has loaded yet (it loads after first paint).
+    void initConsent();
     startAnalytics();
     syncReplayWithPath(pathname);
     captureTouch();
@@ -130,7 +134,7 @@ function RootComponent() {
       <AuthProvider>
         <GlobalErrorBoundary>
           <Outlet />
-          <PrivacyBanner />
+          <DeferredPrivacyBanner />
         </GlobalErrorBoundary>
       </AuthProvider>
     </QueryClientProvider>

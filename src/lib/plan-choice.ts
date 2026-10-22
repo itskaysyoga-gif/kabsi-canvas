@@ -1,9 +1,11 @@
 // Onboarding step 6, from day 11 (K-141, K-126): the Home card that says the trial is nearly over and that the plan is the
 // owner's to choose. Card payments are not open yet (facts 4.2), so the card says that in the facts file's words and offers
 // no button that cannot work; it links to the Plan page, which always works. Entitlements are read only through
-// public.entitlements (loadEntitlements). No prices here: Essentials and Pro are marked coming in the facts file.
+// public.entitlements (loadEntitlements). It states the three prices of the website (PRICES_SENTENCE, lane R, 22 Oct 2026)
+// and marks card payments as coming.
 import type { Entitlements } from "@/lib/entitlements";
 import { CARD_PAYMENTS_COMING } from "@/lib/plans";
+import { PRICES_SENTENCE } from "@/lib/site";
 
 export const CHOICE_FROM_DAY = 11;
 
@@ -34,7 +36,7 @@ export function planChoice(
     return {
       tone: "info",
       title: left === 0 ? "Your Pro trial ends today" : `Your Pro trial ends in ${dayWord(left)}`,
-      body: `You choose Essentials or Pro, monthly or yearly, on the Plan page. ${CARD_PAYMENTS_COMING} Your review link and QR code stay free either way.`,
+      body: `${PRICES_SENTENCE} You choose Essentials or Pro, monthly or yearly, on the Plan page. ${CARD_PAYMENTS_COMING} Your review link and QR code stay free either way.`,
       cta,
     };
   }
@@ -43,7 +45,7 @@ export function planChoice(
     return {
       tone: "attention",
       title: "Your trial has ended",
-      body: `Kabsi keeps watching your profile and preparing replies for ${dayWord(left)} more, but publishes nothing until you choose a plan. Whatever is waiting stays waiting. ${CARD_PAYMENTS_COMING}`,
+      body: `Kabsi keeps watching your profile and preparing replies for ${dayWord(left)} more, but publishes nothing until you choose a plan. Whatever is waiting stays waiting. ${PRICES_SENTENCE} ${CARD_PAYMENTS_COMING}`,
       cta,
     };
   }
@@ -51,7 +53,7 @@ export function planChoice(
     return {
       tone: "attention",
       title: "Your plan has ended",
-      body: `Drafts, Google Protection and the Weekly Care Report are paused. ${CARD_PAYMENTS_COMING} Your review link and QR code keep working.`,
+      body: `Drafts, Google Protection and the Weekly Care Report are paused. ${PRICES_SENTENCE} ${CARD_PAYMENTS_COMING} Your review link and QR code keep working.`,
       cta,
     };
   }

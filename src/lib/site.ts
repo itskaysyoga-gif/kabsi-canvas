@@ -77,6 +77,8 @@ export function bookingHref(kind: BookingKind): string {
 
 /** The legal seller (plan section 5, D1; R-20). City only, never a street address. Change it here and nowhere else. */
 export const FOUNDER_NAME = "Hussein Slim";
+/** Who signs the founder note on the homepage (lane R, 22 Oct 2026). The seller line above is separate and stays. */
+export const FOUNDER_SIGNATURE = "Rashid Abou Hamzy, founder";
 export const LEGAL_SELLER = `${FOUNDER_NAME}, Dubai, United Arab Emirates`;
 /** The operator line for the footer, terms and emails (R-20). */
 export const OPERATOR_LINE = `Kabsi is operated by ${LEGAL_SELLER}. Contact: ${CONTACT_EMAIL}`;
@@ -88,6 +90,12 @@ export const BRAND_EXPLAINER =
 /** The calls to action, worded once (R-02). */
 export const CTA_PRIMARY = "Join early access";
 export const CTA_SECONDARY = "See it work";
+/** The trial button on the free tools when they are busy for the day (lane R, 22 Oct 2026). Never "Join early access" there. */
+export const CTA_TRIAL = "Start your free trial";
+export {
+  FREE_TOOL_BUSY,
+  FREE_TOOL_BUSY_CODES,
+} from "../../supabase/functions/_shared/free-tool-busy.ts";
 /** The hero button on every public page (K-140): the free Profile Check, at all times, never a trial button. */
 export const CTA_CHECK = "Check my Google profile free";
 export const CTA_HOW = "See how it works";
@@ -105,17 +113,11 @@ export function heroSub(whatsappOn: boolean = WHATSAPP_ON): string {
 export const GOOGLE_NOTICE =
   "Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.";
 
-export const PRICES = {
-  proMonthly: 19,
-  proYearly: 190,
-  extraLocationMonthly: 15,
-  extraLocationYearly: 150,
-} as const;
-
 /**
  * The plans on the website (K-126, 22 Oct 2026), in US dollars. Card payments through Creem (P0.4-07) are not open, so
- * every plan button starts the free Profile Check and the pages say card payments are coming. `PRICES` above is the
- * single Pro price the earlier emails and terms were written against; P0.4-07 retires it when Creem goes live.
+ * every plan button starts the free Profile Check and the pages say card payments are coming. These are the only prices
+ * in the product: the Plan page, the Home card, the trial emails, the FAQ and the terms all read them or repeat
+ * `PRICES_SENTENCE`. The earlier single Pro price is retired, and tests/prices.test.ts fails if it comes back.
  */
 export const PLAN_PRICES = {
   essentialsMonthly: 19,
@@ -125,6 +127,25 @@ export const PLAN_PRICES = {
   extraLocationMonthly: 15,
   extraLocationYearly: 150,
 } as const;
+/** The three prices in one sentence, worded once, for the Plan page, the Home card, the FAQ and the trial emails. */
+export const PRICES_SENTENCE = `Essentials is $${PLAN_PRICES.essentialsMonthly} a month or $${PLAN_PRICES.essentialsYearly} a year. Pro is $${PLAN_PRICES.proMonthly} a month or $${PLAN_PRICES.proYearly} a year. An extra location is $${PLAN_PRICES.extraLocationMonthly} a month or $${PLAN_PRICES.extraLocationYearly} a year. Prices are in US dollars, plus tax where it applies.`;
+/** The three rows the Plan page lists, worded from the same numbers. */
+export const PLAN_PRICE_ROWS = [
+  {
+    name: "Kabsi Essentials",
+    price: `$${PLAN_PRICES.essentialsMonthly} a month or $${PLAN_PRICES.essentialsYearly} a year`,
+  },
+  {
+    name: "Kabsi Pro",
+    price: `$${PLAN_PRICES.proMonthly} a month or $${PLAN_PRICES.proYearly} a year`,
+  },
+  {
+    name: "Extra location",
+    price: `$${PLAN_PRICES.extraLocationMonthly} a month or $${PLAN_PRICES.extraLocationYearly} a year`,
+  },
+] as const;
+/** The marker on a feature or payment that is decided and not open. No date, ever. */
+export const COMING_SOON = "Coming soon";
 /** True once Creem checkout is merged and live (P0.4-07). While false, no page may link to a checkout. */
 export const CHECKOUT_LIVE = false;
 /** The words after a price, worded once. */

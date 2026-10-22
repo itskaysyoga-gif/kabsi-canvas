@@ -13,7 +13,7 @@ export type Classify = (jpeg: Uint8Array) => Promise<{ category: string | null; 
 export const FLAG_TEXT: Record<Flag, string> = {
   children: "There seem to be children's faces in this photo.",
   screen: "This photo shows someone else's screen.",
-  flyer: "This is mostly text, like a flyer. Google prefers real photos.",
+  flyer: "This is mostly text, like a flyer. Kabsi suggests a photo of your real place or work instead.",
   screenshot: "This looks like a screenshot.",
   stock_or_ai: "This looks like a stock or computer-made image. Google asks for real photos of your business.",
   brand_logo: "Another brand's logo is in this photo.",

@@ -5,7 +5,8 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { ArrowUp, Loader2, MessageCircle, RotateCcw, Sparkles, X } from "lucide-react";
-import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
+import { anonHeaders, supabaseUrl } from "@/lib/supabase-config";
+import { hasStoredSession } from "@/lib/stored-session";
 import { ASSISTANT_CONVERSATION_KEY, ASSISTANT_VISITOR_KEY } from "@/lib/assistant-storage";
 import { cn } from "@/lib/utils";
 import { WhatsappLink } from "@/components/shared/whatsapp-link";
@@ -65,6 +66,14 @@ function visitorId() {
   return id;
 }
 
+// The signed-in person's token, if there is one. A visitor with no stored session never loads supabase-js for Nora.
+async function accessToken(): Promise<string | undefined> {
+  if (!hasStoredSession()) return undefined;
+  const { supabase } = await import("@/lib/supabase");
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token;
+}
+
 export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
   const path = useLocation({ select: (l) => l.pathname });
   const [open, setOpen] = useState(false);
@@ -93,12 +102,10 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
     if (!conv) return;
     conversation.current = conv;
     setHasConversation(true);
-    void supabase.auth
-      .getSession()
-      .then(({ data }) => {
+    void accessToken()
+      .then((token) => {
         const headers: Record<string, string> = { ...anonHeaders };
-        if (data.session?.access_token)
-          headers["authorization"] = `Bearer ${data.session.access_token}`;
+        if (token) headers["authorization"] = `Bearer ${token}`;
         return fetch(
           `${ENDPOINT}?visitor=${encodeURIComponent(visitorId())}&conversation=${encodeURIComponent(conv)}`,
           { headers },
@@ -172,13 +179,12 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
     setMessages((m) => [...m, { role: "user", content: message }]);
     setBusy(true);
     try {
-      const { data } = await supabase.auth.getSession();
+      const token = await accessToken();
       const headers: Record<string, string> = {
         "content-type": "application/json",
         ...anonHeaders,
       };
-      if (data.session?.access_token)
-        headers["authorization"] = `Bearer ${data.session.access_token}`;
+      if (token) headers["authorization"] = `Bearer ${token}`;
       const res = await fetch(ENDPOINT, {
         method: "POST",
         headers,

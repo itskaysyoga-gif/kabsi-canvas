@@ -4,6 +4,7 @@
 // itself) and 400 searches a day in total, so the Places bill stays inside the free monthly credit.
 import { searchText } from "../_shared/google/index.ts";
 import { captureError, CORS, fail, json, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
+import { FREE_TOOL_BUSY } from "../_shared/free-tool-busy.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -20,7 +21,7 @@ Deno.serve(async (req) => {
     return fail("rate_limited", "That's a lot of searches. Try again in an hour.", 429);
   }
   if (!(await rateLimit("review-link:all", 400, 86400))) {
-    return fail("busy", "The tool is busy today. Please try again tomorrow.", 429);
+    return fail("busy", FREE_TOOL_BUSY, 429);
   }
 
   const key = Deno.env.get("PLACES_API_KEY");
@@ -32,7 +33,7 @@ Deno.serve(async (req) => {
 
   try {
     const { ok, status, data, backSoon } = await searchText(key, q, 5, "places.id,places.displayName,places.formattedAddress");
-    if (backSoon) return fail("back_soon", "Back soon. The tool is paused for today. Please try again tomorrow.", 503);
+    if (backSoon) return fail("back_soon", FREE_TOOL_BUSY, 503);
     if (!ok) throw new Error(`places ${status}: ${JSON.stringify(data).slice(0, 300)}`);
     const places = (data.places ?? []).map((p) => ({
       place_id: p.id as string,

@@ -1,6 +1,6 @@
 # Hosting
 
-The website and app run on Vercel (team itskaysyoga-5542s-projects, project kabsi-canvas), built from `main` of `itskaysyoga-gif/kabsi-canvas`. Every pull request gets a preview deployment. Edge Functions and the `kabsi-go` Worker are deployed by `.github/workflows/deploy.yml`, not by Vercel.
+The website and app run on Vercel (team itskaysyoga-5542s-projects, project kabsi-canvas), built from `main` of `itskaysyoga-gif/kabsi-canvas`. Branches named `claude/*` are not built by Vercel (`git.deploymentEnabled` in `vercel.json`), and an `ignoreCommand` skips the build when a commit changes only files under `docs/` or `*.md` files (Vercel's daily deployment limit, 22 Oct 2026). Other branches still get a preview deployment. Edge Functions and the `kabsi-go` Worker are deployed by `.github/workflows/deploy.yml`, not by Vercel.
 
 ## Environment variables
 
@@ -21,7 +21,7 @@ The site code reads no server secret, so none belongs here. In particular: `SUPA
 
 ## Previews
 
-Pull request previews use the same Supabase project. Preview and `*.vercel.app` addresses send `X-Robots-Tag: noindex` (`vercel.json`). Vercel Authentication protects them for team members; the connector can fetch one with a temporary link.
+Previews of branches that Vercel builds use the same Supabase project. Preview and `*.vercel.app` addresses send `X-Robots-Tag: noindex` (`vercel.json`). Vercel Authentication protects them for team members; the connector can fetch one with a temporary link.
 
 ## Old address
 
@@ -32,3 +32,8 @@ The Lovable project Kabsi Canvas (GitHub disconnected on 8 Oct 2026) stays publi
 - Old kabsi.co pages with no twin on the new site, permanent: `/product` to `/lebanon`, `/contact` to `/faq`, `/report` to `/how-it-works`, `/admin` and `/auth/...` to `/login`, `/r-not-found` to `/`. `/`, `/how-it-works`, `/pricing`, `/faq`, `/privacy`, `/terms`, `/login` and `/app` exist on the new site.
 - Old review cards: `/r/SEVEN1` redirects (302) to that business's Google review page; any other `/r/<code>` goes to `/` (302). New cards use go.kabsi.co.
 - Only kabsi.co is indexable: `*.vercel.app` (previews and the Vercel address) sends `X-Robots-Tag: noindex`; so do the private paths (`/app`, `/partner`, `/staff`, `/start`, `/login`, `/a/`, `/activate/`).
+
+
+## Public page speed (lane R, 22 Oct 2026)
+
+`src/server.ts` drops the `<link rel="modulepreload">` hints from the head of public HTML pages (`src/lib/head-hints.ts`); the app, sign-in and setup keep them. The privacy banner, Nora's launcher and PostHog load after the first paint, and the Supabase client loads only when there is a session. Numbers and method: `docs/reports/lighthouse-home-2026-10-22.md`. `tests/performance.test.ts` keeps these in place.

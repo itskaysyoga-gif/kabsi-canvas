@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CHOICE_FROM_DAY, daysUntil, planChoice } from "@/lib/plan-choice";
 import { CARD_PAYMENTS_COMING } from "@/lib/plans";
+import { PRICES_SENTENCE } from "@/lib/site";
 
 const now = new Date("2026-11-10T09:00:00Z");
 const trial = (day: number, endsInDays: number, graceInDays = endsInDays + 7) => ({
@@ -44,7 +45,19 @@ describe("plan choice from day 11", () => {
     expect(c.body).toContain("review link and QR code keep working");
   });
 
-  it("only ever links to the Plan page, never a checkout, and names no price, dash or exclamation mark", () => {
+  it("states the three prices and marks card payments as coming in every card", () => {
+    const cards = [
+      planChoice(trial(11, 3), now)!,
+      planChoice({ ...trial(15, -1, 6), state: "grace" }, now)!,
+      planChoice({ state: "ended", trial: null }, now)!,
+    ];
+    for (const c of cards) {
+      expect(c.body).toContain(PRICES_SENTENCE);
+      expect(c.body).toContain(CARD_PAYMENTS_COMING);
+    }
+  });
+
+  it("only ever links to the Plan page, never a checkout, and uses no dash or exclamation mark", () => {
     const cards = [
       planChoice(trial(11, 3), now)!,
       planChoice({ ...trial(15, -1, 6), state: "grace" }, now)!,
@@ -53,7 +66,8 @@ describe("plan choice from day 11", () => {
     for (const c of cards) {
       expect(c.cta.to).toBe("/app/plan");
       const all = `${c.title} ${c.body} ${c.cta.label}`;
-      expect(all).not.toMatch(/\$\s?\d|[–—!]|Profile Score|Do now|Listing Shield|Put mine back/);
+      expect(all).not.toMatch(/[–—!]|Profile Score|Do now|Listing Shield|Put mine back/);
+      expect(all).not.toMatch(/checkout/i);
     }
   });
 

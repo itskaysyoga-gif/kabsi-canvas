@@ -5,6 +5,7 @@
 // supabase/functions/_shared/whatsapp-setting.ts switches every line with no code change.
 import {
   CHECKOUT_LIVE,
+  COMING_SOON,
   CTA_CHECK,
   CTA_PRIMARY,
   GOOGLE_NOTICE,
@@ -32,7 +33,7 @@ export const HOME_ORDER = [
 export type HomeSection = (typeof HOME_ORDER)[number];
 
 /** The marker on a feature that is decided and not built, or built and waiting. No date, ever. */
-export const COMING_SOON = "Coming soon";
+export { COMING_SOON };
 
 export const PILLARS = [
   {
@@ -183,7 +184,7 @@ export const CONTROL_ITEMS = [
 ] as const;
 
 export const FOUNDER_NOTE =
-  "I run Kabsi from Dubai. Nothing goes on your Google profile until you approve it, and you can remove Kabsi at any time. If you want to talk to a person, write to hello@kabsi.co.";
+  "I spent years running ads and online presence for local businesses. The same thing came up every time: reviews left unanswered and details on Google out of date, because the owner was busy running the business. Kabsi takes that work off their hands, and nothing goes public without their yes. If something is not right, write to me at hello@kabsi.co.";
 
 /** Proof the visitor can check without taking our word for it. There are no customer quotes, logos or numbers yet. */
 export const PROOF_NOTE =

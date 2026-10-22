@@ -8,7 +8,7 @@
 // The trial clock starts only when Kabsi has working access to a verified profile (K-94), so none of these costs the
 // owner a trial day; each screen says so in its own words.
 import { GUIDELINES_URL, NOT_ELIGIBLE } from "@/lib/eligibility";
-import { PRICES } from "@/lib/site";
+import { PLAN_PRICES } from "@/lib/site";
 
 export type ScenarioId =
   | "manager_not_owner"
@@ -168,7 +168,7 @@ export const SCREENS: Record<Exclude<ScenarioId, "someone_else_owns">, Screen> =
     steps: [
       "Choose the location you want first and set it up here.",
       "Once it works, add each other location from your account with Add another business.",
-      `Each extra location is $${PRICES.extraLocationMonthly} a month or $${PRICES.extraLocationYearly} a year, plus tax where it applies.`,
+      `Each extra location is $${PLAN_PRICES.extraLocationMonthly} a month or $${PLAN_PRICES.extraLocationYearly} a year, plus tax where it applies.`,
     ],
     trial: "Your free trial starts when Kabsi has access to your first location.",
     doneLabel: "Continue with this location",
