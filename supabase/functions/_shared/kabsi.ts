@@ -220,8 +220,15 @@ export async function verifyTurnstile(token: string | undefined, ip?: string): P
     const body = new URLSearchParams({ secret, response: token });
     if (ip && ip !== "unknown") body.set("remoteip", ip);
     const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body });
-    const j = (await res.json()) as { success?: boolean };
-    return j.success === true;
+    const j = (await res.json()) as { success?: boolean; "error-codes"?: string[] };
+    if (j.success === true) return true;
+    // Hotfix 20h: the codes say whether the visitor failed or Kabsi's own secret is wrong (invalid-input-secret).
+    const codes = j["error-codes"] ?? [];
+    log("turnstile", { ok: false, codes });
+    if (codes.includes("invalid-input-secret") || codes.includes("missing-input-secret")) {
+      await captureError("turnstile", new Error(`siteverify rejected the secret: ${codes.join(",")}`));
+    }
+    return false;
   } catch (e) {
     log("turnstile", { ok: false, err: String(e) });
     return false;
