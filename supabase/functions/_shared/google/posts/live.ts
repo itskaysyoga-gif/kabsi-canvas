@@ -9,3 +9,5 @@ export const listLocalPosts = (account: string, location: string): Promise<ListL
   gbp(`${V4}/${account}/${location}/localPosts?pageSize=100`);
 // post is "accounts/{a}/locations/{l}/localPosts/{id}".
 export const getLocalPost = (post: string): Promise<LocalPost> => gbp(`${V4}/${post}`);
+// Removes one post the owner approved removing (P0.7-05). Google answers an empty body.
+export const deleteLocalPost = (post: string): Promise<Record<string, never>> => gbp(`${V4}/${post}`, { method: "DELETE" });
