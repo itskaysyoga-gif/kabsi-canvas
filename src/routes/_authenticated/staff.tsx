@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { amStaff } from "@/lib/reviews";
 import { OpsPanel } from "@/components/staff/ops-panel";
+import { BusinessDiagnostics, SystemHealthPanel } from "@/components/staff/system-health-panel";
 import { ChatsPanel } from "@/components/staff/chats-panel";
 import { ConciergePanel } from "@/components/staff/concierge-panel";
 import { FollowupsPanel } from "@/components/staff/followups-panel";
@@ -63,6 +64,9 @@ function StaffPage() {
             <FollowupsPanel />
             <ConciergePanel />
             <ChatsPanel />
+            <div className="mt-8">
+              <SystemHealthPanel />
+            </div>
             <OpsPanel />
             <h2 className="mt-10 text-xl font-bold">Businesses</h2>
             <p className="mt-1 text-sm text-kb-stone">Newest first.</p>
@@ -84,6 +88,7 @@ function LocationRow({ row }: { row: Row }) {
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [diag, setDiag] = useState(false);
 
   async function conciergeToggle(on: boolean) {
     setBusy(true);
@@ -162,8 +167,12 @@ function LocationRow({ row }: { row: Row }) {
               Give Pro trial
             </Button>
           ) : null}
+          <Button size="compact" variant="ghost" onClick={() => setDiag((v) => !v)}>
+            {diag ? "Hide diagnostics" : "Diagnostics"}
+          </Button>
         </div>
       </div>
+      {diag ? <BusinessDiagnostics location={row.id} /> : null}
       {msg ? <p className="mt-3 text-sm text-kb-stone">{msg}</p> : null}
     </div>
   );
