@@ -1,6 +1,7 @@
 // Reviews data layer: inbox reads go through RLS; every write goes through the `api` Edge Function
 // (posting is the only path to Google, D202) or a membership-checked RPC.
-import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
+import { anonHeaders, sessionFetch, supabase, supabaseUrl } from "@/lib/supabase";
+import { endSession } from "@/lib/session-ended";
 import { SENT_STATES } from "@/lib/dashboard";
 
 export type ReviewState =
@@ -87,8 +88,9 @@ export async function allReviews(locationId: string): Promise<ReviewRow[]> {
 async function authed(path: string, body: Record<string, unknown>) {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
-  if (!token) throw new Error("Please log in again.");
-  return fetch(`${supabaseUrl}/functions/v1/${path}`, {
+  // No session: nothing is sent, and the screen says so (session-ended.ts).
+  if (!token) throw endSession();
+  return sessionFetch(`${supabaseUrl}/functions/v1/${path}`, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
     body: JSON.stringify(body),

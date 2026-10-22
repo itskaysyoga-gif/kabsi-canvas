@@ -2,7 +2,8 @@
 // the last full month. The insights Edge Function reads them from Google when the screen opens and stores nothing;
 // the browser keeps them in memory only. While Google is in mock mode the answer says `example` and every figure is
 // labelled Example on screen.
-import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
+import { anonHeaders, sessionFetch, supabase, supabaseUrl } from "@/lib/supabase";
+import { SessionEnded } from "@/lib/session-ended";
 
 export type TileKey = "calls" | "website_clicks" | "directions" | "views" | "bookings" | "messages";
 export type InsightTile = {
@@ -49,7 +50,7 @@ export async function loadInsights(locationId: string): Promise<InsightsAnswer> 
   if (!token) throw new InsightsError("sign_in_required", "Sign in to see your Insights.");
   let res: Response;
   try {
-    res = await fetch(`${supabaseUrl}/functions/v1/insights`, {
+    res = await sessionFetch(`${supabaseUrl}/functions/v1/insights`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -58,7 +59,8 @@ export async function loadInsights(locationId: string): Promise<InsightsAnswer> 
       },
       body: JSON.stringify({ location_id: locationId }),
     });
-  } catch {
+  } catch (e) {
+    if (e instanceof SessionEnded) throw e;
     throw new InsightsError(
       "network",
       "We could not reach Kabsi. Check your connection and try again.",
