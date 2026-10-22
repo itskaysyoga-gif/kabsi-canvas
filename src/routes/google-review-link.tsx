@@ -31,7 +31,8 @@ import { Turnstile } from "@/components/turnstile";
 import { qrSvg } from "@/lib/qr";
 import { track } from "@/lib/telemetry";
 import { faqJsonLd } from "@/lib/faq";
-import { SITE_URL, pageHead } from "@/lib/site";
+import { FreeToolBusy } from "@/components/shared/free-tool-busy";
+import { FREE_TOOL_BUSY_CODES, SITE_URL, pageHead } from "@/lib/site";
 
 // Free tool (D252): search a business, get Google's own review link and a QR code. No sign-in; the search
 // runs through the review-link Edge Function so the Places key stays on the server.
@@ -144,12 +145,14 @@ function Finder({ onPick }: { onPick: (p: Place) => void }) {
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [busyToday, setBusyToday] = useState(false);
   const [results, setResults] = useState<Place[] | null>(null);
   const [token, setToken] = useState("");
   const [round, setRound] = useState(0);
   async function search(e: FormEvent) {
     e.preventDefault();
     setErr("");
+    setBusyToday(false);
     setBusy(true);
     try {
       const res = await fetch(`${supabaseUrl}/functions/v1/review-link`, {
@@ -157,10 +160,20 @@ function Finder({ onPick }: { onPick: (p: Place) => void }) {
         headers: { "content-type": "application/json", ...anonHeaders },
         body: JSON.stringify({ query: q, turnstile: token }),
       });
-      const j = (await res.json().catch(() => ({}))) as { places?: Place[]; message?: string };
-      if (!res.ok) throw new Error(j.message || "Search didn't work. Try again.");
-      setResults(j.places ?? []);
-      track("free_tool_used", { source: "review_link_search" });
+      const j = (await res.json().catch(() => ({}))) as {
+        places?: Place[];
+        message?: string;
+        error?: string;
+      };
+      if (!res.ok && (FREE_TOOL_BUSY_CODES as readonly string[]).includes(j.error ?? "")) {
+        setResults(null);
+        setBusyToday(true);
+      } else if (!res.ok) {
+        throw new Error(j.message || "Search didn't work. Try again.");
+      } else {
+        setResults(j.places ?? []);
+        track("free_tool_used", { source: "review_link_search" });
+      }
     } catch (x) {
       setErr(x instanceof Error ? x.message : "Search didn't work. Try again.");
     }
@@ -193,6 +206,11 @@ function Finder({ onPick }: { onPick: (p: Place) => void }) {
       <div className="mt-3">
         <Turnstile key={round} onToken={setToken} />
       </div>
+      {busyToday ? (
+        <div className="mt-4">
+          <FreeToolBusy />
+        </div>
+      ) : null}
       {err ? (
         <p className="mt-3 text-sm text-kb-yellow" role="alert">
           {err}

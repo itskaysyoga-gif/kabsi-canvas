@@ -7,6 +7,7 @@ import { getCachedSnapshot, getSnapshotPlace, guard, SNAPSHOT_FIELD_MASK, search
 import type { Place } from "./google/types.ts";
 import { buildSnapshot, CHECK_PAGES, checkEmail, type Deps, findings, LIMITS, makeHandler, TIPS_CONSENT_TEXT } from "./profile-snapshot.ts";
 import { esc } from "./email-layout.ts";
+import { FREE_TOOL_BUSY } from "./free-tool-busy.ts";
 import { type EmailContent, renderEmail } from "./email/template.ts";
 
 const CTX = { appUrl: "https://kabsi.test", defaultWhy: "You asked for this email." };
@@ -167,7 +168,8 @@ Deno.test("Places daily cap 0: Back soon, no request at all, and the visitor kee
       const s = await w.call({ action: "search", query: "Harbour Lane" }, `203.0.113.${20 + i}`);
       assert.equal(s.status, 503);
       assert.equal(s.body.error, "back_soon");
-      assert.match(s.body.message, /^Back soon/);
+      assert.equal(s.body.message, FREE_TOOL_BUSY);
+      assert.doesNotMatch(s.body.message, /early access|Back soon/i);
     }
     // One visitor asks 5 times: each is "Back soon" (not the daily limit) because every refused ask is handed back.
     for (let i = 0; i < 5; i++) {

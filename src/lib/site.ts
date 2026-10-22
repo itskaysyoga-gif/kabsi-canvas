@@ -90,6 +90,12 @@ export const BRAND_EXPLAINER =
 /** The calls to action, worded once (R-02). */
 export const CTA_PRIMARY = "Join early access";
 export const CTA_SECONDARY = "See it work";
+/** The trial button on the free tools when they are busy for the day (lane R, 22 Oct 2026). Never "Join early access" there. */
+export const CTA_TRIAL = "Start your free trial";
+export {
+  FREE_TOOL_BUSY,
+  FREE_TOOL_BUSY_CODES,
+} from "../../supabase/functions/_shared/free-tool-busy.ts";
 /** The hero button on every public page (K-140): the free Profile Check, at all times, never a trial button. */
 export const CTA_CHECK = "Check my Google profile free";
 export const CTA_HOW = "See how it works";
