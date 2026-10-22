@@ -25,7 +25,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Will Kabsi get me more reviews, a better rating or a higher ranking?",
-    a: "We don't promise that, and nobody honest can. Google decides local results by relevance, distance and prominence. Kabsi does the parts you control: every review gets a reply, your details stay accurate and complete, your profile stays up to date, and leaving a review is easy for every customer. Google doesn't say that replies or posts raise your ranking.",
+    a: "We don't promise that, and nobody honest can. Kabsi does the parts you control: every review gets a reply, your details stay accurate and complete, your profile stays up to date, and leaving a review is easy for every customer.",
   },
   {
     q: "Which languages does it reply in?",
@@ -77,7 +77,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Will replying help me show up on Google?",
-    a: "Google's own guidance lists complete and accurate details, up-to-date opening hours, replying to reviews and adding photos among the ways to improve local ranking. Kabsi helps with those jobs. Nobody can promise a ranking, and we don't.",
+    a: "Kabsi does the jobs you control: a reply ready for every review, complete and accurate details, opening hours that stay right, and photos you approve. Nobody can promise a ranking, and we don't.",
   },
   {
     q: "How is this different from Gemini in Business Profile?",
