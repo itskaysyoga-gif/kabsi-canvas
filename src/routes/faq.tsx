@@ -83,7 +83,7 @@ function Page() {
               </ul>
               <div className="mt-5 flex flex-col gap-3">
                 <BookingLink kind="other" button>
-                  Talk to Hussein
+                  Talk to the Kabsi team
                 </BookingLink>
               </div>
             </div>

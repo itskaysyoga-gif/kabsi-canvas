@@ -1,10 +1,10 @@
 // The one email template (K-102, P0.4-08). Every Kabsi email is structured content in, HTML and plain text out:
 // sand background, one white card with the mark, the heading, the content, at most one yellow button with black text
 // (everything else is a plain link), then the footer: the approval promise, why you got this, the Email settings link
-// (and a one-click unsubscribe where the owner can switch the email off), the questions line, the legal seller and
+// (and a one-click unsubscribe where the owner can switch the email off), the questions line, the operator line and
 // the Google notice. 600 px at most, 16 px body text, taps at least 44 px tall. The notification engine
 // (notify-engine.ts) is the only caller. Pure functions, no environment access, so Deno tests can import it.
-import { emailButton, emailLink, esc, LEGAL_SELLER, LOGO, WHATSAPP_NUMBER, WHATSAPP_URL } from "../email-layout.ts";
+import { emailButton, emailLink, esc, OPERATOR_NAME, LOGO, WHATSAPP_NUMBER, WHATSAPP_URL } from "../email-layout.ts";
 import { FONT, SIZES, TOKENS } from "./tokens.ts";
 
 export type EmailContent = {
@@ -41,7 +41,7 @@ export const SETTINGS_PATH = "/app/settings#choices";
 export const PROMISE = "Nothing is published until you approve it.";
 const QUESTIONS = "Questions? Reply to this email or write to hello@kabsi.co.";
 export const GOOGLE_NOTICE = "Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.";
-export const operatorLine = () => `Kabsi is operated by ${LEGAL_SELLER}. Contact: hello@kabsi.co`;
+export const operatorLine = () => `Kabsi is operated by ${OPERATOR_NAME}. Contact: hello@kabsi.co.`;
 
 export type Rendered = { html: string; text: string };
 

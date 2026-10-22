@@ -11,8 +11,8 @@ export const WHATSAPP_URL: string | null = WHATSAPP_ON
   : null;
 // The Kabsi Clients Google group owners add as Manager. Keep equal to KABSI_GROUP_ID in src/lib/site.ts (tests/notifications.test.ts checks it).
 export const KABSI_GROUP_ID = "5481006796";
-// The legal seller (D1, R-20). Keep equal to LEGAL_SELLER in src/lib/site.ts (tests/notifications.test.ts checks it).
-export const LEGAL_SELLER = "Hussein Slim, Dubai, United Arab Emirates";
+// Who operates Kabsi (R-55). Keep equal to OPERATOR_NAME in src/lib/site.ts (tests/notifications.test.ts checks it).
+export const OPERATOR_NAME = "Rashid Abou Hamzy";
 export function esc(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 }

@@ -246,14 +246,14 @@ Deno.test("a suppressed address is never sent to: not now, not from quiet hours,
   assert.equal(f.sent.length, 1);
 });
 
-Deno.test("every email carries why you got this, the settings link, the legal seller and the Google notice", async () => {
+Deno.test("every email carries why you got this, the settings link, the operator line and the Google notice", async () => {
   const f = fake();
   await runNotify(input({ key: "w:1", to: [OWNER] }), f.deps);
   await runNotify({ category: "direct", kind: "x", key: "w:2", to: [{ email: "v@example.test", userId: null }], content: content("Direct") }, f.deps);
   for (const m of f.sent) {
     assert.match(m.html, /Why you got this:/);
     assert.match(m.html, /Email settings/);
-    assert.match(m.html, /Hussein Slim, Dubai, United Arab Emirates/);
+    assert.match(m.html, /Kabsi is operated by Rashid Abou Hamzy\. Contact: hello@kabsi\.co\./);
     assert.match(m.html, /not affiliated with, sponsored by or endorsed by Google/);
     assert.match(m.text, /Why you got this:/);
     assert.match(m.text, /Email settings: https:\/\/kabsi.test\/app\/settings#choices/);

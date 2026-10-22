@@ -6,7 +6,7 @@ import {
   CONTACT_EMAIL,
   KABSI_GROUP_ID,
   KABSI_GROUP_NAME,
-  LEGAL_SELLER,
+  OPERATOR_NAME,
   OPERATOR_LINE,
   WHATSAPP_NUMBER,
   WHATSAPP_ON,
@@ -56,8 +56,8 @@ function Page() {
       <section>
         <h2>1. Who we are</h2>
         <p>
-          Kabsi is run by {LEGAL_SELLER}, who is responsible for the personal data described here.
-          Contact: {CONTACT_EMAIL}
+          Kabsi is operated by {OPERATOR_NAME}, who is responsible for the personal data described
+          here. Contact: {CONTACT_EMAIL}
           {WHATSAPP_ON ? `, or WhatsApp on ${WHATSAPP_NUMBER}` : ""}.
         </p>
         <p>
@@ -257,6 +257,10 @@ function Page() {
           <li>Supabase: database, sign-in and file storage, in Frankfurt, Germany.</li>
           <li>Cloudflare: card and review links (go.kabsi.co) and the bot check on our forms.</li>
           <li>Vercel: hosting the website and app.</li>
+          <li>
+            Creem: card payments. Creem is our merchant of record and receives what it needs to take
+            a payment.
+          </li>
           <li>Resend: sending email, through Amazon's EU (Ireland) region.</li>
           <li>
             Anthropic: drafting replies and posts and checking photos. Review text and your business

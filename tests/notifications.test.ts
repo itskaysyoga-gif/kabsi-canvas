@@ -4,11 +4,11 @@ import { describe, expect, it } from "vitest";
 import { CATEGORIES as EDGE_CATEGORIES } from "../supabase/functions/_shared/notify-categories";
 import {
   KABSI_GROUP_ID as EDGE_GROUP_ID,
-  LEGAL_SELLER as EDGE_SELLER,
+  OPERATOR_NAME as EDGE_OPERATOR,
 } from "../supabase/functions/_shared/email-layout";
 import { CATEGORIES, DEFAULT_LINE } from "../src/lib/notification-categories";
 import { choice, emailOptions, groupedCategories, type Pref } from "../src/lib/notifications";
-import { KABSI_GROUP_ID, LEGAL_SELLER } from "../src/lib/site";
+import { KABSI_GROUP_ID, OPERATOR_NAME } from "../src/lib/site";
 
 // P0.4-09: one notification engine (K-46). The engine itself is tested in supabase/functions/_shared/notify-*.test.ts
 // (Deno); these tests keep the browser's copy of the categories, the database check and the one-outbox rule honest.
@@ -114,8 +114,8 @@ describe("one outbox", () => {
     ).toEqual([]);
   });
 
-  it("the Kabsi group ID and the legal seller in emails equal the ones on the screens", () => {
+  it("the Kabsi group ID and the operator name in emails equal the ones on the screens", () => {
     expect(EDGE_GROUP_ID).toBe(KABSI_GROUP_ID);
-    expect(EDGE_SELLER).toBe(LEGAL_SELLER);
+    expect(EDGE_OPERATOR).toBe(OPERATOR_NAME);
   });
 });

@@ -49,7 +49,7 @@ Nothing is published until you approve it.<br>
 <a href="https://kabsi.co/app/settings#choices" style="color:#111111;text-decoration:underline;">Email settings</a><br>
 Questions? Reply to this email or write to <a href="mailto:hello@kabsi.co" style="color:#111111;">hello@kabsi.co</a>.{WHATSAPP_LINE}<br>
 Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.<br>
-Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co
+Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co.
 </td></tr>
 </table>
 </td></tr>

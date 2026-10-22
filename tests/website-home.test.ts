@@ -9,10 +9,11 @@ import {
   CTA_PRIMARY,
   FOUNDER_SIGNATURE,
   GOOGLE_NOTICE,
-  LEGAL_SELLER,
+  OPERATOR_LINE,
   PLAN_PRICES,
   WHATSAPP_ON,
   heroSub,
+  ORG_LD,
 } from "../src/lib/site";
 import {
   COMING_SOON,
@@ -279,12 +280,49 @@ describe("the pricing and how it works pages (P0.8-13 part 3)", () => {
 });
 
 describe("the founder note (lane R, 22 Oct 2026)", () => {
-  it("is Rashid's note, signed by him, and the legal seller line is still Hussein Slim", () => {
+  it("is Rashid's note, signed by him, and the operator line names him with no city", () => {
     expect(FOUNDER_NOTE).toBe(
       "I spent years running ads and online presence for local businesses. The same thing came up every time: reviews left unanswered and details on Google out of date, because the owner was busy running the business. Kabsi takes that work off their hands, and nothing goes public without their yes. If something is not right, write to me at hello@kabsi.co.",
     );
     expect(FOUNDER_SIGNATURE).toBe("Rashid Abou Hamzy, founder");
     expect(FOUNDER_NOTE).not.toMatch(/Hussein/);
-    expect(LEGAL_SELLER).toBe("Hussein Slim, Dubai, United Arab Emirates");
+    expect(OPERATOR_LINE).toBe("Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co.");
+  });
+
+  it("no public page, email, fact file or JSON-LD names Hussein or the old operator city (R-55)", () => {
+    const files = [
+      "src/lib/site.ts",
+      "src/lib/faq.ts",
+      "src/routes/about.tsx",
+      "src/routes/terms.tsx",
+      "src/routes/privacy.tsx",
+      "src/routes/faq.tsx",
+      "src/components/layouts/public-layout.tsx",
+      "knowledge/kabsi-facts.md",
+      "public/llms.txt",
+      "public/llms-full.txt",
+      "supabase/functions/_shared/email-layout.ts",
+      "supabase/functions/_shared/email/template.ts",
+      "emails/build.py",
+      "emails/auth/confirm-signup.html",
+      "emails/auth/magic-link.html",
+      "emails/auth/reauthentication.html",
+      "emails/auth/change-email.html",
+    ];
+    for (const f of files) {
+      const text = readFileSync(f, "utf8");
+      expect(text, f).not.toMatch(/Hussein/);
+      expect(text, f).not.toMatch(/operated by [^.]*Dubai|run by [^.]*Dubai/);
+    }
+    expect(ORG_LD).not.toHaveProperty("address");
+  });
+
+  it("the terms name Creem as the merchant of record", () => {
+    expect(readFileSync("src/routes/terms.tsx", "utf8")).toMatch(
+      /processed by Creem,[\s\S]*merchant of record/,
+    );
+    expect(readFileSync("knowledge/kabsi-facts.md", "utf8")).toContain(
+      "Payments are processed by Creem, our merchant of record",
+    );
   });
 });

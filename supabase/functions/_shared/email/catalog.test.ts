@@ -60,12 +60,12 @@ Deno.test("every email has a preview line and a plain-text version with its butt
     if (isStaffCategory(c.category)) {
       // P0.8-02b: mail for the Kabsi team has a plain staff footer (tested below).
       assert.match(text, /Why you got this: /, c.kind);
-      assert.match(text, /Hussein Slim, Dubai, United Arab Emirates/, c.kind);
+      assert.match(text, /Kabsi is operated by Rashid Abou Hamzy\. Contact: hello@kabsi\.co\./, c.kind);
     } else {
       assert.match(text, /Nothing is published until you approve it\./, c.kind);
       assert.match(text, /Why you got this: /, c.kind);
       assert.match(text, /Email settings: https:\/\/kabsi.co\/app\/settings#choices/, c.kind);
-      assert.match(text, /Hussein Slim, Dubai, United Arab Emirates/, c.kind);
+      assert.match(text, /Kabsi is operated by Rashid Abou Hamzy\. Contact: hello@kabsi\.co\./, c.kind);
     }
     assert.doesNotMatch(text, /<[a-z][^>]*>/i, `${c.kind}: no HTML in the plain text`);
   }

@@ -75,13 +75,12 @@ export function bookingHref(kind: BookingKind): string {
   return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}`;
 }
 
-/** The legal seller (plan section 5, D1; R-20). City only, never a street address. Change it here and nowhere else. */
-export const FOUNDER_NAME = "Hussein Slim";
-/** Who signs the founder note on the homepage (lane R, 22 Oct 2026). The seller line above is separate and stays. */
-export const FOUNDER_SIGNATURE = "Rashid Abou Hamzy, founder";
-export const LEGAL_SELLER = `${FOUNDER_NAME}, Dubai, United Arab Emirates`;
-/** The operator line for the footer, terms and emails (R-20). */
-export const OPERATOR_LINE = `Kabsi is operated by ${LEGAL_SELLER}. Contact: ${CONTACT_EMAIL}`;
+/** Who operates Kabsi and answers for the personal data (lane R, 22 Oct 2026, R-55). No city, never a street address. Change it here and nowhere else. */
+export const OPERATOR_NAME = "Rashid Abou Hamzy";
+/** Who signs the founder note on the homepage (lane R, 22 Oct 2026). */
+export const FOUNDER_SIGNATURE = `${OPERATOR_NAME}, founder`;
+/** The operator line for the footer, terms, privacy page and emails (R-55). Payments are processed by Creem, the merchant of record. */
+export const OPERATOR_LINE = `Kabsi is operated by ${OPERATOR_NAME}. Contact: ${CONTACT_EMAIL}.`;
 
 /** The brand line and the line under it (K-112, K-110). Google's name never appears in the slogan. */
 export const BRAND_LINE = "Your reviews and listing. Taken care of.";
@@ -235,11 +234,6 @@ export const ORG_LD = {
     "Kabsi looks after a local business on Google: a reply ready for every new review, hours and details kept right, and fresh posts. Nothing is published until the owner approves it.",
   logo: `${SITE_URL}/kabsi-mark.svg`,
   email: CONTACT_EMAIL,
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Dubai",
-    addressCountry: "AE",
-  },
 };
 export const WEBSITE_LD = {
   "@context": "https://schema.org",
