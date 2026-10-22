@@ -341,23 +341,23 @@ function Page() {
           <ul>
             <li>
               The Kabsi WhatsApp number, {WHATSAPP_NUMBER}, is for questions, sales and support. A
-              person answers it, and it is not an automatic bot. Nothing is approved, published or
-              changed over WhatsApp: you approve only on kabsi.co, and we never ask for your Google
+              person answers it, and it is not an automatic bot. We never ask for your Google
               password or a code Google sends you.
             </li>
             <li>
-              Kapso provides the inbox where we read and answer your messages, and Meta runs
-              WhatsApp, which carries them. WhatsApp's own terms apply to your use of WhatsApp. What
-              we collect and how long we keep it is in section 14 of our{" "}
-              <Link to="/privacy">privacy policy</Link>.
+              If you opt in with Connect WhatsApp, we send you review alerts there and you can
+              approve low and medium risk replies and posts, with 10 seconds to undo. High-risk
+              reviews and changes to your business name, address, categories, map pin, phone or
+              opening status are approved only on kabsi.co, signed in. You can reply STOP at any
+              time to stop every message at once.
+            </li>
+            <li>
+              Kapso provides the messaging service and Meta runs WhatsApp, which carries the
+              messages. WhatsApp&apos;s own terms apply to your use of WhatsApp. What we collect and
+              how long we keep it is in section 14 of our <Link to="/privacy">privacy policy</Link>.
             </li>
             <li>We do not use the Kabsi WhatsApp number for marketing messages.</li>
-            <li>
-              Alerts and the assistant on WhatsApp are not available yet. If we add them, you will
-              have to opt in, you can reply STOP at any time to stop them at once, and approval will
-              still happen only on kabsi.co. We will update these terms and email account holders
-              before they start.
-            </li>
+            <li>The assistant on WhatsApp is not available yet.</li>
           </ul>
         ) : (
           <p>

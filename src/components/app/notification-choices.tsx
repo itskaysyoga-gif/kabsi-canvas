@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
+import { WhatsappChannel } from "@/components/app/whatsapp-channel";
 import {
   choice,
   emailOptions,
@@ -48,6 +49,7 @@ export function NotificationChoices({ locationId }: { locationId: string }) {
         Choose how each kind of notice reaches you. Emails do not arrive between 22:00 and 08:00
         your time, except an urgent change to your profile. They wait until 08:00.
       </p>
+      <WhatsappChannel />
       {prefs.isError ? (
         <p className="mt-4 text-kb-small text-kb-red" role="alert">
           We couldn't load your choices. Refresh and try again.

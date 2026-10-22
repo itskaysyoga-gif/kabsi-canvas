@@ -70,3 +70,13 @@ export async function whatsappReviewAlert(loc: { id: string; name: string }, r: 
     draft: d?.body ?? null, safeDraft: !!d?.safety_ok, risk: r.risk,
   });
 }
+
+/** P0.8-03: a post the care routine prepared, to everyone at the business who opted in, with Approve. */
+export async function whatsappPostAlert(locationId: string, postId: string, summary: string) {
+  if (!WHATSAPP_ON) return {};
+  const users = await alertRecipients(locationId);
+  if (!users.length) return {};
+  const { data: l } = await admin().from("locations").select("name").eq("id", locationId).maybeSingle();
+  const { sendPostAlert } = await import("./deliver.ts");
+  return sendPostAlert(await whatsappCtx(), users, { postId, locationId, business: (l?.name as string | undefined) ?? "Your business", summary });
+}

@@ -40,6 +40,7 @@ import { checkContext, postMaterial } from "../_shared/posts/context.ts";
 import { type CoachRefreshDeps, refreshCoach } from "../_shared/coach/refresh.ts";
 import { type HolidayAsk, type HolidayAskDeps, sendHolidayAsks } from "../_shared/holiday.ts";
 import { sendTeamInvite, type TeamInvite, teamInviteEmail } from "../_shared/team.ts";
+import { whatsappPostAlert } from "../_shared/whatsapp/db.ts";
 
 // Offer a job. Returns its id, or null when the same dedupe key is already pending, running or retrying.
 async function enqueueJob(kind: string, locationId: string | null, dedupeKey: string, payload: Record<string, unknown> = {}) {
@@ -333,7 +334,12 @@ async function carePosts(locationId: string) {
         .map((x): Planned => ({ publishLocal: x.publish_local, state: x.state, summary: x.summary })),
       material: () => postMaterial(db, locationId),
       context: () => checkContext(db, locationId),
-      prepare: (p) => rpcJson<string>("post_prepare", { p_location: locationId, p_publish_local: p.publishLocal, p_summary: p.summary, p_photo: p.photoId, p_checks: [] }),
+      prepare: async (p) => {
+        const id = await rpcJson<string>("post_prepare", { p_location: locationId, p_publish_local: p.publishLocal, p_summary: p.summary, p_photo: p.photoId, p_checks: [] });
+        // P0.8-03 (K-129): the prepared post on WhatsApp too, with Approve and the 10 second undo. Never fails the routine.
+        if (id) await whatsappPostAlert(locationId, id, p.summary).catch((e) => captureError("whatsapp", e, { step: "post_alert" }));
+        return id;
+      },
       ask: async (mo, q) => void await rpcJson("post_question", { p_location: locationId, p_month: mo, p_question: q }),
     }));
   }
