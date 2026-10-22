@@ -563,7 +563,7 @@ After pull requests 17 and 18 are merged and Lovable has deployed `main`:
 ### Session 16 After merge (22 Oct 2026, 04:24 to 04:44 UTC, Rashid's session 16)
 - PR 0 (152, 49206d4): Deploy run 65 success. PR 153 (a051145): Deploy run 66 success, `google-capture` v44. PR 155 (0241c6d, docs and fixtures): no deploy needed. PR 156 (d0a34d5, mocks and contract test): Deploy run 68 success (04:42:02 to 04:43:09 UTC).
 - Live: `api` answers 401 without a user and `health` 403 without its secret (both up); `google_mode()` reads `mock`, `places_daily_cap` 0, `locations.posts_per_month` default 4.
-- CI note: the separate Load workflow ran 10 to 13 minutes on each pull request; ci.yml (App, Edge Functions and Worker, Prompt gate, Database) was green on the head of PR 152, 153, 155 and 156 before each merge, and Load had not failed on any of them when merged.
+- CI note: ci.yml (App, Edge Functions and Worker, Prompt gate, Database) was green on the head of PR 152, 153, 155 and 156 before each merge. The separate Load workflow takes about 13 minutes and had not finished when each was merged: it later passed for PR 152 and PR 153; for PR 156 (run 39723416507) it was still running at 04:44 UTC, outcome not recorded here. If it fails, the next chat reports it first.
 
 ### P0.7-02 (branch claude/elegant-feynman-7l0al8, 22 Oct 2026, Rashid's session 16, Sonnet)
 - Model check: `claude-sonnet-5-5`, as the card says (R-39).
