@@ -1,0 +1,38 @@
+name: Eval sample (by hand, R-45)
+
+# R-45 (22 Oct 2026): AI is on demand only. EVAL_LIVE stays false, so CI never runs the live evaluation. When a reply
+# prompt changes, someone runs this by hand (Actions, "Eval sample", Run workflow): 20 cases of scripts/eval/cases.json
+# through the production steps on the real models, a few cents on the prepaid balance. The full 200-case run waits for a
+# top-up before launch. Needs the repository secret ANTHROPIC_API_KEY.
+on:
+  workflow_dispatch:
+    inputs:
+      size:
+        description: Number of cases (20 by R-45)
+        required: true
+        default: "20"
+
+permissions:
+  contents: read
+
+jobs:
+  sample:
+    name: Evaluation sample (real models)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Run the sample
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: bash scripts/eval/gate.sh --sample "${{ inputs.size }}"
+      - name: Keep the results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-sample-result
+          path: eval-result.json
+          if-no-files-found: ignore
