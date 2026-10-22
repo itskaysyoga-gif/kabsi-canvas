@@ -241,7 +241,7 @@ Deno.test("email capture stores the consent text, the choice and the page; the t
       { consent_text: TIPS_CONSENT_TEXT, page: "/google-profile-check", tips: true, email: "not-an-email" },
     ]) assert.equal((await w.call({ action: "email", place_id: PLACE_A, ...bad })).status, 400);
     assert.equal(w.saved.length, 2);
-    assert.ok(CHECK_PAGES.includes("/get-started") && CHECK_PAGES.includes("/google-profile-check"));
+    assert.ok(CHECK_PAGES.includes("/") && CHECK_PAGES.includes("/get-started") && CHECK_PAGES.includes("/google-profile-check"));
   } finally {
     restore();
   }

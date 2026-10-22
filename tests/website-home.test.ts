@@ -102,6 +102,31 @@ describe("the WhatsApp switch (lane R, 22 Oct 2026)", () => {
     expect(heroSub(false)).not.toMatch(/WhatsApp/);
     expect(WHATSAPP_ON ? heroSub() : heroSub()).toBe(heroSub(WHATSAPP_ON));
   });
+  it("is the subline of the 22 Oct 2026 decision, with only the ending switching", () => {
+    expect(heroSub(false)).toBe(
+      "Every review answered, every change to your listing caught, a fresh post every week. You approve in one tap.",
+    );
+    expect(heroSub(true)).toBe(
+      "Every review answered, every change to your listing caught, a fresh post every week. You approve on WhatsApp.",
+    );
+  });
+  it("puts the business search in the hero, keeps See how it works, and loads Turnstile only when it wakes", () => {
+    const home = readFileSync("src/components/marketing/home-sections.tsx", "utf8");
+    expect(home).toContain("<HeroFinder");
+    expect(home).toContain("{CTA_HOW}");
+    // The first load carries no Turnstile: the finder and the result are lazy chunks.
+    expect(home).not.toMatch(
+      /from "@\/components\/(turnstile|profile-check\/(business-finder|snapshot-result))"/,
+    );
+    const hero = readFileSync("src/components/marketing/hero-check.tsx", "utf8");
+    expect(hero).toMatch(
+      /lazy\(\(\) =>\s*import\("@\/components\/profile-check\/business-finder"\)/,
+    );
+    expect(hero).toContain("ARM_AFTER_MS");
+    expect(readFileSync("src/components/marketing/home-check-result.tsx", "utf8")).toContain(
+      'page="/"',
+    );
+  });
   it("marks every WhatsApp feature Coming soon while there is no number, and none when there is", () => {
     const soon = (on: boolean) => {
       const g = planGrid(on);

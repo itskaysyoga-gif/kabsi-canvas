@@ -15,11 +15,16 @@ import type { ProfileCheckState } from "@/components/profile-check/use-profile-c
 export function BusinessFinder({
   state,
   tone = "light",
+  initialQuery = "",
+  autoFocus = false,
 }: {
   state: ProfileCheckState;
   tone?: "light" | "dark";
+  /** The homepage hero starts with a plain box and swaps this in; what was typed so far carries over. */
+  initialQuery?: string;
+  autoFocus?: boolean;
 }) {
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQuery);
   const [token, setToken] = useState("");
   const [round, setRound] = useState(0);
   const dark = tone === "dark";
@@ -54,6 +59,7 @@ export function BusinessFinder({
           placeholder="Business name and city"
           maxLength={120}
           autoComplete="organization"
+          autoFocus={autoFocus}
           className="h-[52px] rounded-card bg-kb-white px-4 text-base text-kb-ink"
         />
         <Button

@@ -6,6 +6,8 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Check, Eye, Smartphone, UserPlus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Eyebrow, H2, IconBadge, Section } from "@/components/marketing/parts";
+import { HeroFinder } from "@/components/marketing/hero-check";
+import { useProfileCheck } from "@/components/profile-check/use-profile-check";
 import {
   CoachScreen,
   MockFigure,
@@ -15,58 +17,69 @@ import {
   ReviewScreen,
   WhatsappChat,
 } from "@/components/marketing/mockups";
-import { BRAND_LINE, CTA_CHECK, CTA_HOW, WHATSAPP_ON, heroSub } from "@/lib/site";
+import { BRAND_LINE, CTA_CHECK, CTA_HOW, HERO_CHECK_LABEL, WHATSAPP_ON, heroSub } from "@/lib/site";
 import { HOME_ORDER, PILLARS, howSteps, type HomeSection } from "@/lib/website";
 
+// The result of the check is a separate chunk that loads only when there is one.
+const HomeCheckResult = lazy(() => import("@/components/marketing/home-check-result"));
+
 function Hero() {
+  const check = useProfileCheck("home");
+  const showing = check.phase === "result" && check.snapshot;
   return (
-    <section className="relative isolate overflow-hidden bg-kb-carbon text-kb-white">
-      <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16 lg:py-24">
-        <div>
-          <h1 className="font-display text-[clamp(2.7rem,6.6vw,5.2rem)] leading-[0.95] text-balance">
-            {BRAND_LINE}
-          </h1>
-          <p className="mt-7 max-w-xl text-lg leading-8 text-kb-stone-on-dark">{heroSub()}</p>
-          <div className="mt-9 grid gap-3 sm:flex">
-            <Button asChild className="w-full sm:w-auto">
-              <Link to="/google-profile-check">
-                {CTA_CHECK} <ArrowRight />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="w-full border-kb-white text-kb-white hover:bg-kb-white/10 sm:w-auto"
-            >
-              <a href="#how">{CTA_HOW}</a>
-            </Button>
+    <>
+      <section className="relative isolate overflow-hidden bg-kb-carbon text-kb-white">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16 lg:py-24">
+          <div>
+            <h1 className="font-display text-[clamp(2.7rem,6.6vw,5.2rem)] leading-[0.95] text-balance">
+              {BRAND_LINE}
+            </h1>
+            <p className="mt-7 max-w-xl text-lg leading-8 text-kb-stone-on-dark">{heroSub()}</p>
+            <div className="mt-9 max-w-xl">
+              <p className="mb-3 font-bold">{HERO_CHECK_LABEL}</p>
+              <HeroFinder state={check} />
+            </div>
+            <div className="mt-6 grid gap-3 sm:flex">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full border-kb-white text-kb-white hover:bg-kb-white/10 sm:w-auto"
+              >
+                <a href="#how">{CTA_HOW}</a>
+              </Button>
+            </div>
+            <ul className="mt-9 grid gap-x-6 gap-y-2 text-[15px] text-kb-stone-on-dark sm:flex sm:flex-wrap">
+              {PILLARS.map((p) => (
+                <li key={p.id} className="flex items-center gap-2">
+                  <Check className="size-4 text-kb-yellow" aria-hidden="true" />
+                  {p.title}
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="mt-9 grid gap-x-6 gap-y-2 text-[15px] text-kb-stone-on-dark sm:flex sm:flex-wrap">
-            {PILLARS.map((p) => (
-              <li key={p.id} className="flex items-center gap-2">
-                <Check className="size-4 text-kb-yellow" aria-hidden="true" />
-                {p.title}
-              </li>
-            ))}
-          </ul>
+          <div className="kb-hero-visual">
+            {WHATSAPP_ON ? (
+              <MockFigure caption="Example: a new review arrives on WhatsApp with a reply ready and an Approve button.">
+                <Phone title={<PhoneTitle>Kabsi on WhatsApp</PhoneTitle>}>
+                  <WhatsappChat />
+                </Phone>
+              </MockFigure>
+            ) : (
+              <MockFigure caption="Example: a new review in Kabsi with a reply ready and an Approve button.">
+                <Phone title={<PhoneTitle>Reviews</PhoneTitle>}>
+                  <ReviewScreen />
+                </Phone>
+              </MockFigure>
+            )}
+          </div>
         </div>
-        <div className="kb-hero-visual">
-          {WHATSAPP_ON ? (
-            <MockFigure caption="Example: a new review arrives on WhatsApp with a reply ready and an Approve button.">
-              <Phone title={<PhoneTitle>Kabsi on WhatsApp</PhoneTitle>}>
-                <WhatsappChat />
-              </Phone>
-            </MockFigure>
-          ) : (
-            <MockFigure caption="Example: a new review in Kabsi with a reply ready and an Approve button.">
-              <Phone title={<PhoneTitle>Reviews</PhoneTitle>}>
-                <ReviewScreen />
-              </Phone>
-            </MockFigure>
-          )}
-        </div>
-      </div>
-    </section>
+      </section>
+      {showing ? (
+        <Suspense fallback={null}>
+          <HomeCheckResult snapshot={check.snapshot!} onAnother={check.again} />
+        </Suspense>
+      ) : null}
+    </>
   );
 }
 

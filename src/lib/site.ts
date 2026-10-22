@@ -98,13 +98,16 @@ export {
 /** The hero button on every public page (K-140): the free Profile Check, at all times, never a trial button. */
 export const CTA_CHECK = "Check my Google profile free";
 export const CTA_HOW = "See how it works";
+/** The line above the business search in the homepage hero (lane R, 22 Oct 2026). */
+export const HERO_CHECK_LABEL = "Check your Google profile free";
 
 /**
- * The line under the homepage headline (K-140). "You approve on WhatsApp." is true only while Kabsi has a WhatsApp
- * number; with none it ends "You approve in one tap." Both switch with the one setting, with no code change.
+ * The line under the homepage headline (K-140, lane R 22 Oct 2026). "You approve on WhatsApp." is true only while
+ * `WHATSAPP_NUMBER` is set; with none it ends "You approve in one tap." Both switch with the one setting, with no code
+ * change.
  */
 export function heroSub(whatsappOn: boolean = WHATSAPP_ON): string {
-  return `Kabsi replies to your Google reviews, watches your Google Business Profile and makes it easy for customers to choose you. ${
+  return `Every review answered, every change to your listing caught, a fresh post every week. ${
     whatsappOn ? "You approve on WhatsApp." : "You approve in one tap."
   }`;
 }

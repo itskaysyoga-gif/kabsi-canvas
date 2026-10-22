@@ -17,7 +17,7 @@ import { type CoachRow, freeChecklist } from "./coach/catalog.ts";
 import { FREE_TOOL_BUSY } from "./free-tool-busy.ts";
 
 export const TIPS_CONSENT_TEXT = "Send me tips on managing my Google profile";
-export const CHECK_PAGES = ["/google-profile-check", "/get-started"];
+export const CHECK_PAGES = ["/", "/google-profile-check", "/get-started"];
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 const PLACE_ID_RE = /^[A-Za-z0-9_-]{10,200}$/;
 export const LIMITS = { perMinute: 10, checksPerDay: 3, searchesPerHour: 20, emailsPerHour: 5 };
