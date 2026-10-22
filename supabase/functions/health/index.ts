@@ -48,6 +48,7 @@ async function jobsFreshness(): Promise<string> {
 const SECRETS = [
   "RESEND_API_KEY", "PLACES_API_KEY", "TAP_SECRET", "CF_API_TOKEN", "CF_ACCOUNT_ID",
   "ANTHROPIC_API_KEY", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_REFRESH_TOKEN", "GOOGLE_MODE", "APP_URL",
+  "TURNSTILE_SECRET_KEY",
 ];
 
 // GET /health/queue (P0.6-08, K-118): public, for the uptime monitor. It reveals only a status and counts. 200 when no job
@@ -62,11 +63,25 @@ async function queueCheck(): Promise<Response> {
   return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 }
 
+// Hotfix 20h: a made-up token must fail only as invalid-input-response; invalid-input-secret means the stored
+// secret does not belong to any Turnstile widget and every real visitor is refused.
+async function turnstileCheck(): Promise<string | null> {
+  const secret = Deno.env.get("TURNSTILE_SECRET_KEY");
+  if (!secret) return null;
+  const r = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    body: new URLSearchParams({ secret, response: "health-probe" }),
+  });
+  const codes = ((await r.json().catch(() => ({}))) as { "error-codes"?: string[] })["error-codes"] ?? [];
+  return codes.includes("invalid-input-secret") ? "secret rejected by Cloudflare" : `secret valid (${codes.join(",")})`;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "GET" && new URL(req.url).pathname.replace(/\/+$/, "").endsWith("/queue")) return await queueCheck();
   if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
   const body = await req.json().catch(() => ({})) as { only?: string };
   if (body.only === "jobs") return json({ checks: { jobs_recent: await jobsFreshness() } });
+  if (body.only === "turnstile") return json({ checks: { turnstile: (await turnstileCheck()) ?? "not configured" } });
   const all = Object.keys(Deno.env.toObject());
   const set: Record<string, boolean> = {};
   for (const name of SECRETS) set[name] = Boolean(Deno.env.get(name));
@@ -79,6 +94,8 @@ Deno.serve(async (req) => {
     const r = await fetch("https://api.cloudflare.com/client/v4/user/tokens/verify", { headers: { authorization: `Bearer ${cfToken}` } });
     checks.cloudflare = r.ok ? "token valid" : `token rejected (${r.status})`;
   }
+  const turnstile = await turnstileCheck();
+  if (turnstile) checks.turnstile = turnstile;
   const resend = Deno.env.get("RESEND_API_KEY");
   if (resend) {
     const r = await fetch("https://api.resend.com/domains", { headers: { authorization: `Bearer ${resend}` } });
