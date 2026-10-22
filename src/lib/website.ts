@@ -183,7 +183,7 @@ export const CONTROL_ITEMS = [
 ] as const;
 
 export const FOUNDER_NOTE =
-  "I run Kabsi from Dubai. Nothing goes on your Google profile until you approve it, and you can remove Kabsi at any time. If you want to talk to a person, write to hello@kabsi.co.";
+  "I spent years running ads and online presence for local businesses. The same thing came up every time: reviews left unanswered and details on Google out of date, because the owner was busy running the business. Kabsi takes that work off their hands, and nothing goes public without their yes. If something is not right, write to me at hello@kabsi.co.";
 
 /** Proof the visitor can check without taking our word for it. There are no customer quotes, logos or numbers yet. */
 export const PROOF_NOTE =
