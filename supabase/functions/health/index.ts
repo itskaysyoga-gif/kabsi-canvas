@@ -1,7 +1,8 @@
-// health: internal (cron secret). Reports which secrets are set (true/false only, never values)
+// health: internal (cron secret), except GET /health/queue, which is public and answers only a status (P0.6-08). Reports which secrets are set (true/false only, never values)
 // and whether each external service answers. Used by Claude to verify setup without seeing secrets.
 // Self-contained apart from the Google layer (K-34), so it stays tiny.
 import { googleMode, listAccountsOnce, refreshToken, searchText } from "../_shared/google/index.ts";
+import { queueResponse, type QueueHealthRow } from "../_shared/queue-health.ts";
 
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { "content-type": "application/json" } });
 async function isInternal(req: Request) {
@@ -49,7 +50,20 @@ const SECRETS = [
   "ANTHROPIC_API_KEY", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_REFRESH_TOKEN", "GOOGLE_MODE", "APP_URL",
 ];
 
+// GET /health/queue (P0.6-08, K-118): public, for the uptime monitor. It reveals only a status and counts. 200 when no job
+// that was due has waited more than 10 minutes; 503 otherwise, and 503 when the queue cannot be read.
+async function queueCheck(): Promise<Response> {
+  let row: QueueHealthRow = null;
+  try {
+    const r = await rest("rpc/queue_health", { method: "POST", body: "{}" });
+    if (r.ok) row = await r.json();
+  } catch { /* an unreadable queue is red */ }
+  const { status, body } = queueResponse(row);
+  return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+}
+
 Deno.serve(async (req) => {
+  if (req.method === "GET" && new URL(req.url).pathname.replace(/\/+$/, "").endsWith("/queue")) return await queueCheck();
   if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
   const body = await req.json().catch(() => ({})) as { only?: string };
   if (body.only === "jobs") return json({ checks: { jobs_recent: await jobsFreshness() } });

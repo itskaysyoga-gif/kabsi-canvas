@@ -250,3 +250,14 @@ exclamation mark, and a delete question whose first sentence is not the never-de
 - `--live --sample 20` asks the real Nora (`_shared/nora-rules.ts`, the same words as the `assistant` function) on 20
   questions spread over the set, and needs `ANTHROPIC_API_KEY`. By hand only (R-45: a small prepaid balance, `EVAL_LIVE`
   false); CI's Nora gate would run the full set only if `EVAL_LIVE` were true.
+
+## Queue health and the Worker check (P0.6-08)
+
+- `supabase/tests/queue_health.sql`: `public.queue_health()` is closed to anon and authenticated, green on an empty queue,
+  green for a job due 2 minutes ago, ignores a job due in the future, turns red for a pending job due 20 minutes ago and
+  a retrying job due 11 minutes ago, ignores dead, finished and running jobs, and answers only counts and times.
+- `supabase/functions/_shared/queue-health.test.ts`: the `GET /health/queue` answer is 200 only when the database says ok;
+  stuck is 503; an unreadable queue is 503 `unknown`, never green.
+- `tests/worker-check.test.ts`: `go.kabsi.co/_check` answers 200 when KV reads and 503 when it cannot, and touches no card.
+- `tests/platforms-docs.test.ts`: every secret name the functions and the Worker read is in `docs/secrets-inventory.md`,
+  and neither the inventory nor `docs/platforms.md` holds a value.
