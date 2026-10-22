@@ -123,6 +123,22 @@ describe("the WhatsApp switch (lane R, 22 Oct 2026)", () => {
     expect(homeFaq(false)[3]!.a).toMatch(/coming soon/i);
     expect(homeFaq(true)[3]!.a).not.toMatch(/coming soon/i);
   });
+  it("lists the search terms report under Pro with no Coming soon marker (lane R, 22 Oct 2026)", () => {
+    for (const on of [true, false]) {
+      const item = planGrid(on).proAdds.find((i) => i.text === "The search terms report");
+      expect(item).toBeDefined();
+      expect(item!.soon).toBeFalsy();
+    }
+    expect(
+      planGrid(true)
+        .essentials.map((i) => i.text)
+        .join(" "),
+    ).not.toMatch(/search terms/i);
+    const facts = readFileSync("knowledge/kabsi-facts.md", "utf8");
+    const para = facts.match(/\*\*Search terms report \(Pro[^\n]*/)?.[0] ?? "";
+    expect(para).toMatch(/not marked Coming soon/);
+    expect(facts).not.toMatch(/\[COMING\][^\n]*[Ss]earch terms/);
+  });
   it("offers no auto-fix and no card payments before Creem", () => {
     const words = pageWords().join("\n");
     expect(words).not.toMatch(/auto-?fix/i);

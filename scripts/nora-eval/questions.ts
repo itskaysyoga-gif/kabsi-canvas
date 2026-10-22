@@ -359,14 +359,13 @@ export const QUESTIONS: Question[] = [
     topic: "search terms",
     ask: "Can I see what people search to find my business?",
     kb: [
-      /\*\*Search terms report \(Pro\):\*\*/,
+      /\*\*Search terms report \(Pro, live from 21 Oct 2026, P0\.5-05\)\.\*\*/,
       /fewer than 15/,
-      /real figures start when Kabsi's Google connection is live/,
+      /part of Pro/,
     ],
-    must: [/example/i],
-    coming: true,
+    must: [/Pro/, /fewer than 15/],
     reference:
-      "A search terms report for Pro shows the words people searched to find you each month, as Google reports them, with fewer than 15 where Google gives only a threshold. The screen is built and shows labelled examples, and real figures are not available yet: they start when Kabsi's Google connection is live.",
+      "Yes, on Pro. The search terms report in Insights shows the words people searched on Google to find you, for the last full month, as Google reports them, with fewer than 15 where Google gives only a threshold. On Essentials the screen says the report is part of Pro.",
   },
   {
     id: "en28",
