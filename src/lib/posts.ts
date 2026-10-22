@@ -10,7 +10,7 @@ export type Post = {
   body: string | null;
   cta_type: string | null;
   cta_url: string | null;
-  state: "draft" | "publishing" | "posted" | "skipped" | "failed";
+  state: "draft" | "publishing" | "posted" | "skipped" | "failed" | "removing" | "removed";
   source: "owner" | "auto";
   topic_type: PostType;
   event_title: string | null;
@@ -48,6 +48,8 @@ export const STATE_LABEL: Record<Post["state"], string> = {
   posted: "Published",
   skipped: "Skipped",
   failed: "Not published",
+  removing: "Being removed",
+  removed: "Removed from Google",
 };
 
 const COLUMNS =
@@ -147,6 +149,19 @@ export const savePost = (locationId: string, input: PostInput, postId?: string) 
     do: "post_save",
     ...(postId ? { post_id: postId } : { location_id: locationId }),
     ...input,
+  });
+type Approval = { ok: true; state: string; publication: string; publish_after: string | null };
+// Approves exactly this text; it goes to Google after the 10 second undo window (K-70).
+export const publishPost = (postId: string, body: string) =>
+  contentCall<Approval>({ do: "post_publish", post_id: postId, body });
+// P0.7-05: removing a published post from Google, the same approval and undo as any write.
+export const removePost = (postId: string) =>
+  contentCall<Approval>({ do: "post_remove", post_id: postId });
+export const undoPost = (postId: string, publicationId: string) =>
+  contentCall<{ ok: true; state: string }>({
+    do: "post_undo",
+    post_id: postId,
+    publication_id: publicationId,
   });
 export const approveMonth = (locationId: string, month: string) =>
   contentCall<{ approved: unknown[]; held: { post_id: string }[] }>({

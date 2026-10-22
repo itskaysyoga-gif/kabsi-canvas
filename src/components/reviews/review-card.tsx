@@ -66,17 +66,22 @@ const SECONDARY =
 
 type Busy = "" | "post" | "skip" | "redraft" | "mine" | "holding" | "undo";
 
-/** "Publishing in 10 seconds" with Undo (K-70). When the time is up it says the reply is on its way. */
+/** "Publishing in 10 seconds" with Undo (K-70). When the time is up it says the reply is on its way. A removal
+ * (P0.7-05) passes its own words. */
 export function PublishingBanner({
   until,
   busy,
   error,
   onUndo,
+  verb = "Publishing",
+  done = "Approved. On its way to Google.",
 }: {
   until: number;
   busy: boolean;
   error: string;
   onUndo: () => void;
+  verb?: string;
+  done?: string;
 }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -93,9 +98,7 @@ export function PublishingBanner({
           ) : (
             <CheckCircle2 className="size-5 text-kb-green" aria-hidden="true" />
           )}
-          {left > 0
-            ? `Publishing in ${left} ${left === 1 ? "second" : "seconds"}`
-            : "Approved. On its way to Google."}
+          {left > 0 ? `${verb} in ${left} ${left === 1 ? "second" : "seconds"}` : done}
         </p>
         {left > 0 ? (
           <Button variant="secondary" size="compact" disabled={busy} onClick={onUndo}>
