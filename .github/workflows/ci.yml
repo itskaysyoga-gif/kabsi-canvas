@@ -100,6 +100,46 @@ jobs:
           path: eval-result.json
           if-no-files-found: ignore
 
+  # P0.6-06 (K-104): Nora's evaluation. The stub run (60 questions against knowledge/kabsi-facts.md: honesty, her rules,
+  # prices held to the evaluation) is a test in the app job and always runs. The real model run needs the AI credit: it
+  # runs only when the facts file or Nora's rules change AND the repository variable EVAL_LIVE is "true"; otherwise this
+  # job says so and passes, and nothing is sent to Anthropic (cost rule 2.12).
+  nora_gate:
+    name: Nora gate (60 questions)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Did Nora's facts or rules change?
+        id: changed
+        run: |
+          if git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep -E '^(knowledge/kabsi-facts\.md|supabase/functions/_shared/nora-rules\.ts|supabase/functions/assistant/|scripts/nora-eval/)'; then
+            echo "nora=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Nora's facts and rules did not change."
+          fi
+      - name: The stub run
+        run: node scripts/nora-eval/run-nora-eval.ts --stub pass
+      - name: The live run is off
+        if: steps.changed.outputs.nora == 'true' && vars.EVAL_LIVE != 'true'
+        run: echo "::notice::Nora's facts or rules changed. The live run waits for ANTHROPIC_API_KEY and EVAL_LIVE, which R-45 keeps false; only the stub run was made. Nothing was sent to Anthropic."
+      - name: The live run
+        if: steps.changed.outputs.nora == 'true' && vars.EVAL_LIVE == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/nora-eval/run-nora-eval.ts --live --out nora-eval-result.json
+      - name: Keep the results
+        if: always() && steps.changed.outputs.nora == 'true' && vars.EVAL_LIVE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nora-eval-result
+          path: nora-eval-result.json
+          if-no-files-found: ignore
+
   database:
     name: Database (pgTAP on a local Supabase stack)
     runs-on: ubuntu-latest
