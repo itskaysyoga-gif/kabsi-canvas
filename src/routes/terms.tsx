@@ -8,6 +8,7 @@ import {
   OPERATOR_LINE,
   PRICES,
   WHATSAPP_NUMBER,
+  WHATSAPP_ON,
   pageHead,
 } from "@/lib/site";
 
@@ -336,27 +337,35 @@ function Page() {
 
       <section>
         <h2>16. WhatsApp</h2>
-        <ul>
-          <li>
-            The Kabsi WhatsApp number, {WHATSAPP_NUMBER}, is for questions, sales and support. A
-            person answers it, and it is not an automatic bot. Nothing is approved, published or
-            changed over WhatsApp: you approve only on kabsi.co, and we never ask for your Google
-            password or a code Google sends you.
-          </li>
-          <li>
-            Kapso provides the inbox where we read and answer your messages, and Meta runs WhatsApp,
-            which carries them. WhatsApp's own terms apply to your use of WhatsApp. What we collect
-            and how long we keep it is in section 14 of our{" "}
-            <Link to="/privacy">privacy policy</Link>.
-          </li>
-          <li>We do not use the Kabsi WhatsApp number for marketing messages.</li>
-          <li>
-            Alerts and the assistant on WhatsApp are not available yet. If we add them, you will
-            have to opt in, you can reply STOP at any time to stop them at once, and approval will
-            still happen only on kabsi.co. We will update these terms and email account holders
-            before they start.
-          </li>
-        </ul>
+        {WHATSAPP_ON ? (
+          <ul>
+            <li>
+              The Kabsi WhatsApp number, {WHATSAPP_NUMBER}, is for questions, sales and support. A
+              person answers it, and it is not an automatic bot. Nothing is approved, published or
+              changed over WhatsApp: you approve only on kabsi.co, and we never ask for your Google
+              password or a code Google sends you.
+            </li>
+            <li>
+              Kapso provides the inbox where we read and answer your messages, and Meta runs
+              WhatsApp, which carries them. WhatsApp's own terms apply to your use of WhatsApp. What
+              we collect and how long we keep it is in section 14 of our{" "}
+              <Link to="/privacy">privacy policy</Link>.
+            </li>
+            <li>We do not use the Kabsi WhatsApp number for marketing messages.</li>
+            <li>
+              Alerts and the assistant on WhatsApp are not available yet. If we add them, you will
+              have to opt in, you can reply STOP at any time to stop them at once, and approval will
+              still happen only on kabsi.co. We will update these terms and email account holders
+              before they start.
+            </li>
+          </ul>
+        ) : (
+          <p>
+            Kabsi has no WhatsApp number at the moment. Write to {CONTACT_EMAIL} and a person
+            replies. Nothing is approved, published or changed over WhatsApp, and we never ask for
+            your Google password or a code Google sends you.
+          </p>
+        )}
       </section>
 
       <section>
@@ -373,8 +382,9 @@ function Page() {
         <p>
           These terms are governed by the laws of the United Arab Emirates, and the courts of Dubai
           have jurisdiction, without taking away any protection the law of your country gives you.
-          Questions or complaints: {CONTACT_EMAIL} or WhatsApp {WHATSAPP_NUMBER}. A person replies,
-          and we try to settle any problem with you directly first.
+          Questions or complaints: {CONTACT_EMAIL}
+          {WHATSAPP_ON ? ` or WhatsApp ${WHATSAPP_NUMBER}` : ""}. A person replies, and we try to
+          settle any problem with you directly first.
         </p>
       </section>
     </LegalPage>

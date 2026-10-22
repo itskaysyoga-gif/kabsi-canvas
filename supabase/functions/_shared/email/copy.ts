@@ -133,7 +133,7 @@ export function noraAck(): EmailContent {
   return {
     subject: "We got your question", preheader: "A person from Kabsi will reply by email.", title: "We got your question",
     bodyHtml: p("Thanks for writing to Kabsi. A person on the team will reply to this address, usually within one working day.") + p("If you want to add anything, just reply to this email."),
-    button: { label: "Message us on WhatsApp", url: WHATSAPP_URL },
+    button: WHATSAPP_URL ? { label: "Message us on WhatsApp", url: WHATSAPP_URL } : { label: "Write to hello@kabsi.co", url: "mailto:hello@kabsi.co" },
     text: "Thanks for writing to Kabsi. A person on the team will reply to this address, usually within one working day. If you want to add anything, just reply to this email.",
   };
 }

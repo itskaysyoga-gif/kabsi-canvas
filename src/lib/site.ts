@@ -1,6 +1,8 @@
 // Public-site facts and SEO helpers. Every number here comes from knowledge/kabsi-facts.md; every sentence
 // must pass docs/KABSI-PLAN.md section 2.2 (no promises of reviews, ratings or rankings; no invented numbers; no Google affiliation).
 
+import { WHATSAPP_DIGITS } from "../../supabase/functions/_shared/whatsapp-setting.ts";
+
 // Canonical origin (P0.1-03: kabsi.co is served by Vercel). Canonical links are built from the route path only, so a query string never reaches them.
 // Public Cloudflare Turnstile site key (safe in the browser). The secret lives in Supabase secrets.
 export const TURNSTILE_SITE_KEY = "0x4AAAAAAFHvWh4ra3THq5g0";
@@ -11,11 +13,15 @@ export const KABSI_GROUP_ID = "5481006796";
 export const KABSI_GROUP_NAME = "Kabsi Clients";
 
 /**
- * Kabsi's one WhatsApp number (K-122): the Kapso-provided US number. Answered by a person; it approves nothing and
- * sends no alerts. Change it here and in `supabase/functions/_shared/email-layout.ts` (a test keeps them equal).
+ * Kabsi's one WhatsApp number (K-122) lives in one setting, `supabase/functions/_shared/whatsapp-setting.ts`, read by
+ * the site, the Edge Functions and the auth email builder. It is empty while Kabsi has no number: `WHATSAPP_ON` is then
+ * false and every WhatsApp link and line is hidden (hello@kabsi.co stays).
  */
-export const WHATSAPP_NUMBER = "+1 201-483-5474";
-export const WHATSAPP_DIGITS = WHATSAPP_NUMBER.replace(/\D/g, "");
+export {
+  WHATSAPP_DIGITS,
+  WHATSAPP_NUMBER,
+  WHATSAPP_ON,
+} from "../../supabase/functions/_shared/whatsapp-setting.ts";
 
 /**
  * The short prefilled message for each placement. Plain text only: no business name, email, review text or any

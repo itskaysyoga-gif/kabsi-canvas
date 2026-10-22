@@ -1,12 +1,16 @@
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { whatsappHref, type WhatsappKind } from "@/lib/site";
+import { WHATSAPP_ON, whatsappHref, type WhatsappKind } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 type Props = { kind?: WhatsappKind; children: ReactNode; className?: string; button?: boolean };
 
-/** A click-to-chat link to Kabsi's WhatsApp number with a short prefilled message (K-122). A person answers it. */
+/**
+ * A click-to-chat link to Kabsi's WhatsApp number with a short prefilled message (K-122). A person answers it.
+ * Renders nothing while the WhatsApp setting is empty, so no page ever shows a dead link.
+ */
 export function WhatsappLink({ kind = "general", children, className, button = false }: Props) {
+  if (!WHATSAPP_ON) return null;
   const external = { target: "_blank", rel: "noopener noreferrer" };
   if (button) {
     return (

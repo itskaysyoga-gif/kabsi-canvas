@@ -9,7 +9,7 @@ import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
 import { ASSISTANT_CONVERSATION_KEY, ASSISTANT_VISITOR_KEY } from "@/lib/assistant-storage";
 import { cn } from "@/lib/utils";
 import { WhatsappLink } from "@/components/shared/whatsapp-link";
-import { WHATSAPP_NUMBER } from "@/lib/site";
+import { WHATSAPP_NUMBER, WHATSAPP_ON } from "@/lib/site";
 import { Turnstile } from "@/components/turnstile";
 import { useAuth } from "@/components/auth/auth-provider";
 
@@ -340,12 +340,24 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
             ) : null}
             {handoff ? (
               <p className="rounded-card bg-kb-white p-3 text-xs leading-5 text-kb-stone ring-1 ring-kb-hairline">
-                A person from Kabsi has this conversation and will reply by email. You can also
-                message us on{" "}
-                <WhatsappLink kind="handover" className="font-bold">
-                  WhatsApp {WHATSAPP_NUMBER}
-                </WhatsappLink>
-                .
+                A person from Kabsi has this conversation and will reply by email.{" "}
+                {WHATSAPP_ON ? (
+                  <>
+                    You can also message us on{" "}
+                    <WhatsappLink kind="handover" className="font-bold">
+                      WhatsApp {WHATSAPP_NUMBER}
+                    </WhatsappLink>
+                    .
+                  </>
+                ) : (
+                  <>
+                    You can also write to{" "}
+                    <a href="mailto:hello@kabsi.co" className="font-bold underline">
+                      hello@kabsi.co
+                    </a>
+                    .
+                  </>
+                )}
               </p>
             ) : null}
             {open && needsCheck ? (

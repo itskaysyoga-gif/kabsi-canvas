@@ -1,7 +1,16 @@
 """Builds Kabsi's branded Supabase Auth email templates from one layout.
 Run: python3 emails/build.py  → writes emails/auth/*.html
 Paste each file into Supabase → Authentication → Emails → <template> (Source)."""
-import pathlib
+import pathlib, re, urllib.parse
+# The WhatsApp number comes from the one setting the site and the Edge Functions read (K-122). Empty means no
+# WhatsApp line in these emails; hello@kabsi.co stays.
+_setting = (pathlib.Path(__file__).parent.parent / "supabase/functions/_shared/whatsapp-setting.ts").read_text()
+WHATSAPP_NUMBER = re.search(r'export const WHATSAPP_NUMBER: string = "([^"]*)";', _setting).group(1).strip()
+WHATSAPP_LINE = (
+    ' You can also message us on <a href="https://wa.me/%s?text=%s" style="color:#111111;">WhatsApp %s</a>.'
+    % (re.sub(r"\D", "", WHATSAPP_NUMBER), urllib.parse.quote("Hello Kabsi, I have a question about an email I got from Kabsi."), WHATSAPP_NUMBER)
+    if WHATSAPP_NUMBER else ""
+)
 LOGO = "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/brand/mark.png?v=2"
 FONT = "'Readex Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
 
@@ -38,7 +47,7 @@ def layout(preheader, title, intro, code_label, after, note, why):
 Nothing is published until you approve it.<br>
 <strong style="color:#111111;">Why you got this:</strong> {why}<br>
 <a href="https://kabsi.co/app/settings#choices" style="color:#111111;text-decoration:underline;">Email settings</a><br>
-Questions? Reply to this email or write to <a href="mailto:hello@kabsi.co" style="color:#111111;">hello@kabsi.co</a>. You can also message us on <a href="https://wa.me/12014835474?text=Hello%20Kabsi%2C%20I%20have%20a%20question%20about%20an%20email%20I%20got%20from%20Kabsi." style="color:#111111;">WhatsApp +1 201-483-5474</a>.<br>
+Questions? Reply to this email or write to <a href="mailto:hello@kabsi.co" style="color:#111111;">hello@kabsi.co</a>.{WHATSAPP_LINE}<br>
 Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.<br>
 Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co
 </td></tr>

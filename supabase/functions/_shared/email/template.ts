@@ -69,7 +69,7 @@ export function renderEmail(c: EmailContent, ctx: RenderCtx): Rendered {
 ${esc(operatorLine())}` : `${esc(PROMISE)}<br>
 <strong style="color:${TOKENS.ink};">Why you got this:</strong> ${esc(why)}<br>
 ${link("Email settings", settings)}${ctx.unsubscribePage ? ` &nbsp;|&nbsp; ${link("Unsubscribe from these emails", ctx.unsubscribePage)}` : ""}<br>
-${esc(QUESTIONS)} You can also message us on <a href="${esc(WHATSAPP_URL)}" style="color:${TOKENS.ink};">WhatsApp ${WHATSAPP_NUMBER}</a>.<br>
+${esc(QUESTIONS)}${WHATSAPP_URL ? ` You can also message us on <a href="${esc(WHATSAPP_URL)}" style="color:${TOKENS.ink};">WhatsApp ${esc(WHATSAPP_NUMBER)}</a>.` : ""}<br>
 ${esc(GOOGLE_NOTICE)}<br>
 ${esc(operatorLine())}`}</td></tr>
 </table></td></tr></table></body></html>`;
@@ -83,7 +83,7 @@ ${esc(operatorLine())}`}</td></tr>
     ctx.staff
       ? ["--", STAFF_FOOTER, `Why you got this: ${why}`, operatorLine()].join("\n")
       : ["--", PROMISE, `Why you got this: ${why}`, `Email settings: ${settings}`, ...(ctx.unsubscribePage ? [`Unsubscribe from these emails: ${ctx.unsubscribePage}`] : [])].join("\n"),
-    ...(ctx.staff ? [] : [[`${QUESTIONS} WhatsApp ${WHATSAPP_NUMBER}.`, GOOGLE_NOTICE, operatorLine()].join("\n")]),
+    ...(ctx.staff ? [] : [[WHATSAPP_URL ? `${QUESTIONS} WhatsApp ${WHATSAPP_NUMBER}.` : QUESTIONS, GOOGLE_NOTICE, operatorLine()].join("\n")]),
   ].join("\n\n");
   return { html, text };
 }

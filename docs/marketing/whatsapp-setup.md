@@ -2,9 +2,13 @@
 
 Decisions: K-122 (the number), K-121 point 3 (greeting, away message, quick replies, labels), K-103, G-36. Task P0.6-10.
 
-The number is **+1 201-483-5474** (Kapso). A person answers it. It is not an automatic bot, it sends no alerts and nothing is approved over it. The website, the assistant's hand-off note and the footer of Kabsi emails open `https://wa.me/12014835474` with a short message already typed; the visitor presses send.
+The number is **the Kapso number (deleted from Kapso on 22 Oct 2026; `WHATSAPP_NUMBER` is empty until a new number exists)** (Kapso). A person answers it. It is not an automatic bot, it sends no alerts and nothing is approved over it. The website, the assistant's hand-off note and the footer of Kabsi emails open `https://wa.me/<digits of WHATSAPP_NUMBER>` with a short message already typed; the visitor presses send.
 
 This file was written without a Kapso login, so the screen names below may differ a little from what you see. Use whatever the Kapso inbox offers for each item. If it offers none of a kind (for example no labels), skip that item and tell the next build chat.
+
+## Status (22 Oct 2026)
+
+The Kapso number was deleted from Kapso on 22 Oct 2026, so Kabsi has no WhatsApp number now. `WHATSAPP_NUMBER` in `supabase/functions/_shared/whatsapp-setting.ts` is empty and the site, Nora and every email show hello@kabsi.co instead. When a new number exists, put it in that one setting and redo the steps below for it.
 
 ## Status (12 Oct 2026)
 
@@ -15,7 +19,7 @@ The greeting (first message of a conversation only) and the away message (Monday
 Do these in order. Nothing here needs an API key, and you never paste a key into a chat. Kapso's API keys are only needed later (P1-21) and go straight into Supabase secrets.
 
 1. Sign in to Kapso with hello@kabsi.co (never a personal address).
-2. Open the page that lists your WhatsApp numbers. Check that **+1 201-483-5474** is there and shows as connected.
+2. Open the page that lists your WhatsApp numbers. Check that **the Kapso number (deleted from Kapso on 22 Oct 2026; `WHATSAPP_NUMBER` is empty until a new number exists)** is there and shows as connected.
 3. Open that number's **business profile**. Paste the profile text from section 1 below, one field at a time, and save.
 4. Open the **inbox** for the number. Find the place for a **greeting message** and paste section 2. Save.
 5. Find the place for an **away message** and paste section 3. Set the hours to Monday to Friday, 8am to 6pm Beirut time (the hours of the setup call). Save.
@@ -24,7 +28,7 @@ Do these in order. Nothing here needs an API key, and you never paste a key into
 8. Send a test: from your own phone, open the link under "Test" below, press send, and check the message arrives in the Kapso inbox. Reply from the inbox and check it arrives on your phone.
 9. Tell the build chat what was not available (no labels, no away message, and so on) so this file is corrected.
 
-Test link: `https://wa.me/12014835474?text=Hello%20Kabsi%2C%20I%20have%20a%20question.`
+Test link: `https://wa.me/<digits of WHATSAPP_NUMBER>?text=Hello%20Kabsi%2C%20I%20have%20a%20question.`
 
 ## 1. Business profile
 
