@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabase";
 import { loadEntitlements } from "@/lib/entitlements";
 import { loadScenario, myLatestLocation, type Location } from "@/lib/onboarding";
 import { screenFor } from "@/lib/scenarios";
+import { KABSI_GROUP_ID } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 // Home: one calm page that says what needs the owner now, then how the week looks. Facts only (§3, D222).
@@ -191,7 +192,8 @@ function Setup({ loc }: { loc: Location }) {
     scenario.data && !loc.access_granted_at
       ? screenFor(scenario.data.scenario, scenario.data.variant)
       : null;
-  const knowledgeDone = loc.onboarding_step === "plan" || loc.onboarding_step === "done";
+  const questionsDone = ["confirm", "plan", "done"].includes(loc.onboarding_step);
+  const confirmDone = loc.onboarding_step === "done";
   const steps = [
     { label: "Find your business on Google", done: true, note: "" },
     {
@@ -205,11 +207,20 @@ function Setup({ loc }: { loc: Location }) {
             : "Waiting for Google access"
           : "",
     },
-    { label: "Tell Kabsi about your business", done: knowledgeDone, note: "" },
     {
-      label: "Choose your plan",
+      label: "Five quick questions",
+      done: questionsDone,
+      note: questionsDone ? "" : "Skip any of them",
+    },
+    {
+      label: "Confirm your details",
+      done: confirmDone,
+      note: confirmDone || loc.access_granted_at ? "" : "Once Kabsi has access",
+    },
+    {
+      label: "Your Pro trial",
       done: paid.data === true,
-      note: loc.onboarding_step === "done" && paid.data === false ? "Card payments are coming" : "",
+      note: paid.data === true ? "" : "Starts when Kabsi has access. No card needed.",
     },
   ];
   const doneCount = steps.filter((s) => s.done).length;
@@ -223,8 +234,8 @@ function Setup({ loc }: { loc: Location }) {
           <ShieldAlert className="mt-0.5 size-5 shrink-0 text-kb-red" aria-hidden="true" />
           <p>
             <b>Kabsi can't reach your Google profile any more.</b> Someone may have removed Kabsi as
-            a Manager. Invite the Kabsi group ID 5481006796 again and Kabsi picks up where it left
-            off.
+            a Manager. Invite the Kabsi group ID {KABSI_GROUP_ID} again and Kabsi picks up where it
+            left off.
           </p>
         </div>
       ) : null}
@@ -269,11 +280,6 @@ function Setup({ loc }: { loc: Location }) {
             Continue setup <ArrowRight />
           </Link>
         </Button>
-        {paid.data === false && loc.onboarding_step === "done" ? (
-          <Button asChild variant="outline">
-            <Link to="/app/plan">Your plan</Link>
-          </Button>
-        ) : null}
       </div>
     </div>
   );

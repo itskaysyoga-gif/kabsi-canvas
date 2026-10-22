@@ -296,137 +296,18 @@ export function AccessStep({ location, onChanged }: StepProps) {
   );
 }
 
-// ── Step 3: the facts drafts may use (full form lives in Settings, About your business)
-export function KnowledgeStep({
-  location,
-  onChanged,
-  mode = "onboarding",
-}: StepProps & { mode?: "onboarding" | "settings" }) {
+// ── About your business (Settings): the full facts screen. Onboarding no longer uses this: step 4 is the five questions
+// (questions-step.tsx), saved through the same facts functions.
+export function KnowledgeStep({ location, onChanged }: StepProps & { mode?: "settings" }) {
   if (!location) return null;
   return (
-    <>
-      {mode === "onboarding" ? (
-        <StepTitle
-          title="About your business"
-          sub="Replies only use what you write here. If something isn't here, it's left out, never made up."
-        />
-      ) : null}
-      <KnowledgeForm
-        location={location}
-        mode={mode}
-        submitLabel={mode === "onboarding" ? "Save and continue" : "Save"}
-        onSaved={async () => {
-          if (mode === "onboarding") await setStep(location.id, "plan");
-          await onChanged();
-        }}
-      />
-    </>
-  );
-}
-
-// ── Step 4: plan. Card payments open with Creem (P0.4-07); until then the step offers the trial or says card
-// payments are coming, and never shows another way to pay (K-124).
-export function PlanStep({ location, onChanged }: StepProps) {
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const summary = useQuery({
-    queryKey: ["plan-summary", location?.id],
-    queryFn: () => loadPlanSummary(location!.id),
-    enabled: !!location,
-  });
-  if (!location) return null;
-  const s = summary.data;
-  if (!s) {
-    return summary.isError ? (
-      <ErrorNote message="Couldn't load your plan options. Refresh the page." />
-    ) : null;
-  }
-  // The trial is offered once the new plans are live (staff can grant one earlier, and test owners get one).
-  const trialOffered = s.v2 && !s.trial_used;
-
-  async function finish() {
-    setBusy(true);
-    setError("");
-    try {
-      await choosePlan(location!.id, "trial");
-      track("plan_selected", { plan: "trial", location_id: location!.id });
-      await onChanged();
-    } catch (e) {
-      setError(friendlyError(e));
-    }
-    setBusy(false);
-  }
-
-  return (
-    <>
-      <StepTitle
-        title="Your plan"
-        sub={
-          trialOffered
-            ? `Start with a ${s.trial_days} day Pro trial. No card. It starts when Kabsi's access to your Google profile works.`
-            : CARD_PAYMENTS_COMING
-        }
-      />
-      <p className="text-sm text-kb-stone">
-        Your review link and QR code are free in every country.
-      </p>
-      <ErrorNote message={error} />
-      <Button className="mt-6 w-full" onClick={finish} disabled={busy}>
-        {busy ? "Saving…" : trialOffered ? "Start trial" : "Finish setup"}
-      </Button>
-    </>
-  );
-}
-
-// ── Done: what happens next
-export function DoneStep({ location }: { location: Location | null }) {
-  if (!location) return null;
-  const active = location.status === "active";
-  const needsPlan = !active;
-  const hasAccess = Boolean(location.access_granted_at);
-  const hasPlan = !needsPlan;
-  const setupComplete = hasAccess && hasPlan;
-  return (
-    <>
-      <StepTitle
-        title={setupComplete ? "You're set" : "Almost there"}
-        sub={
-          setupComplete
-            ? "Kabsi is watching your reviews. When the next one arrives you'll get an email with a reply ready."
-            : "When your next Google review arrives, you'll get an email with a reply ready, as soon as the steps below are done."
-        }
-      />
-      <ul className="space-y-3">
-        <li className="flex items-center gap-3">
-          <StatusDot done={hasAccess} />
-          Access from Google
-        </li>
-        <li className="flex items-center gap-3">
-          <StatusDot done={hasPlan} />
-          Your plan
-        </li>
-      </ul>
-      {needsPlan ? (
-        <div className="mt-6 rounded-card bg-kb-sand p-5 text-sm leading-6">
-          <p className="font-bold">How to pay</p>
-          <p className="mt-2">{CARD_PAYMENTS_COMING}</p>
-        </div>
-      ) : null}
-      <Button asChild className="mt-6 w-full">
-        <a href="/app">Go to your dashboard</a>
-      </Button>
-    </>
-  );
-}
-function StatusDot({ done }: { done: boolean }) {
-  return (
-    <span
-      className={cn(
-        "grid size-6 shrink-0 place-items-center rounded-full",
-        done ? "bg-kb-green text-kb-white" : "border-2 border-kb-hairline",
-      )}
-    >
-      {done ? <Check className="size-4" /> : null}
-    </span>
+    <KnowledgeForm
+      location={location}
+      mode="settings"
+      submitLabel="Save"
+      onSaved={async () => {
+        await onChanged();
+      }}
+    />
   );
 }

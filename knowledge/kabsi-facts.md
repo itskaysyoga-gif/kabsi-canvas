@@ -253,22 +253,19 @@ Then **One quick check**: "Kabsi works with a verified Google Business Profile t
 
 A Manager can do everything Kabsi needs; only owners can add or remove people. You stay the owner and can remove Kabsi any time, without asking us: in Kabsi (Settings, **Disconnect Kabsi from Google**) or on Google (People and access).
 
-**Step 4: About your business** (the five questions; this step is being reworked)
+**Step 4: Five quick questions** (while Kabsi waits for access)
 
-"Replies only use what you write here. If something isn't here, it's left out, never made up."
+"While you wait for access: these make replies sound like you. Skip any of them and Kabsi uses safe defaults." Five questions, each saved as a fact you gave (Verified, from you), in Settings, About your business:
 
-| Field | Required? | Why it matters |
+| Question | Saved as | Why it matters |
 |---|---|---|
-| How you sign replies (for example "Luca, Trattoria Verde") | Required | Every reply ends with it |
-| Tone: Warm, Formal, or Short & friendly | Choose one | Sets the voice of drafts |
-| Business phone | Optional | Never written in a public reply. Unhappy customers are asked to contact you through the details on your Google profile, because Google can reject replies that contain phone numbers |
-| Opening hours note (for example "Open daily 8am to midnight") | Optional | Used when a reviewer asks about hours |
-| Anything you'd like mentioned (for example delivery area, parking) | Optional | Used only when a reviewer raises that topic |
-| Staff names that may appear in replies (one at a time, up to 20, in Settings) | Optional | Lets replies thank the right person. Names not on the list are never used |
-| Anything Kabsi should never say or promise (for example "Don't promise same-day delivery") | Optional | Drafts, posts and the safety check all follow it |
-| Questions customers ask (up to 8 question and answer pairs) | Optional, in Settings only | Replies and posts can use these answers and nothing beyond them |
+| How do you sign off a reply? (for example "Luca, Trattoria Verde") | How you sign replies | Every reply ends with it |
+| How should replies sound? Three tappable examples: Warm, Formal, Short and friendly, each with a sample reply line | Tone | Sets the voice of drafts |
+| How can an unhappy customer reach you? A phone or WhatsApp number | Business phone | Never written in a public reply. Unhappy customers are asked to contact you through the details on your Google profile, because Google can reject replies that contain phone numbers |
+| One thing customers love about you | Things you'd like mentioned | Used only when a reviewer raises that topic |
+| One thing Kabsi should never say or promise (for example "Never promise same-day delivery") | Never say | Drafts, posts and the safety check all follow it |
 
-Tap **Save and continue**. Later changes in Settings, About your business apply to new drafts.
+Beside them is a card, **Get your reviews on WhatsApp**. While Kabsi has no WhatsApp number it says **WhatsApp: coming soon** and offers nothing to tap; once there is a number it shows **Connect WhatsApp** (a one-time code you send from your phone, which is also your opt-in). It never blocks setup, and neither does any question: **Skip for now** moves on, and the answers can be added or changed later in Settings, About your business. **If you skip a question**, replies are signed with your business name, sound warm, ask unhappy customers to use the details on your Google profile, and nothing extra is added or avoided. Staff names, customer questions and everything else are added later in Settings.
 
 **Settings, About your business** (each fact on its own line, with its status):
 
@@ -280,9 +277,13 @@ Tap **Save and continue**. Later changes in Settings, About your business apply 
 
 Never-say examples: "Don't confirm the reviewer is a patient or mention any treatment." "Don't promise same-day delivery." "Don't mention the old location."
 
-**Step 4: Your plan**
+**Step 5: Confirm your details** (once Kabsi has access)
 
-Owners start with the **14-day free trial** (no card; it begins when Google access works) and tap **Start trial**. Where no trial is offered, the step says card payments are coming and the owner taps **Finish setup**. The last screen, **You're set**, shows access and plan status; while a plan is still needed it says "Card payments in US dollars are coming. Until they open there is nothing to pay."
+Until access works this step says **Waiting for your invitation** with the live status, that waiting costs you no trial days, and **Go to Home**; nothing waits on a spinner. When access works, **Confirm your details** shows the six details Google shows customers: business name, phone, opening hours, website, main category and open status. Each has **Correct** (it is right) or **Change** (type the right value; for open status choose open, closed temporarily or closed permanently). Details you confirm show **Approved by you**, become the facts you approved and the baseline Google Protection keeps (see Google Protection); if Google later changes one, you decide what happens, and Kabsi writes nothing to Google here. A detail you leave alone stays as it is and shows **Needs your OK** in Google Profile, where **Approved by you** also shows next to each detail you approved. If Kabsi has not read the profile yet (it takes a few minutes), the step says so and **Skip for now** moves on. Then Home opens with the day-one backlog card ("We found 23 unanswered reviews. Replies are ready."), and the first reply you approve within 10 minutes of access is the goal.
+
+**Step 6: The Pro trial runs**
+
+Home shows a banner for the first days: "Your 14-day Pro trial has started. No card needed." (30 days when the owner came through a partner link). The trial starts only when Kabsi has working access to a verified profile, so waiting for access or for Google to verify a profile costs no days. The setup emails (welcome, day 2, day 7 your week, day 11 three days left) run as described in 4.3; from day 11 you choose Essentials or Pro, monthly or yearly, in Settings and in the email, and choosing a plan never interrupts approving a reply. Until card payments open (section 4.2) the plan page says "Card payments in US dollars are coming. Until they open there is nothing to pay." Your review link and QR code are free in every country.
 
 ### 3.4 After setup
 
