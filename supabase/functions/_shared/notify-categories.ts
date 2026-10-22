@@ -69,9 +69,9 @@ export const CATEGORIES = [
     description: "Payments, plan changes, and what happens when your trial ends. This one always stays on.",
   },
   {
-    id: "trial", why: "You are trying Kabsi, and these short emails help you get the most from it.", label: "Trial tips", group: "Trial and billing", switchable: true, emailDefault: "instant",
+    id: "trial", why: "You are setting up or trying Kabsi, and these short emails help you get the most from it.", label: "Trial tips", group: "Trial and billing", switchable: true, emailDefault: "instant",
     quietExempt: false, inApp: false, noun: ["trial tip", "trial tips"],
-    description: "A few short emails while you try Kabsi: your first win, your week, the days left.",
+    description: "A few short emails while you set up and try Kabsi: a nudge if Google has not finished verifying your profile or answering your request for access, your first win, your week, the days left.",
   },
   {
     id: "account", why: "This is about your Kabsi account.", label: "Your account", group: "Account and help", switchable: false, emailDefault: "instant",
