@@ -247,6 +247,6 @@ exclamation mark, and a delete question whose first sentence is not the never-de
   holds every dollar amount in the file to `AMOUNTS` in `questions.ts` (a changed or new price fails until the evaluation
   moves with it), and checks the file names every feature merged so far, the [COMING] items, the hand-over rules, auto-fix
   off and no WhatsApp number.
-- `--live` asks the real Nora (`_shared/nora-rules.ts`, the same words as the `assistant` function) and needs
-  `ANTHROPIC_API_KEY`. It is not run until the AI credit is on (R-43); CI's Nora gate runs it only when the facts or her
-  rules change and `EVAL_LIVE` is true.
+- `--live --sample 20` asks the real Nora (`_shared/nora-rules.ts`, the same words as the `assistant` function) on 20
+  questions spread over the set, and needs `ANTHROPIC_API_KEY`. By hand only (R-45: a small prepaid balance, `EVAL_LIVE`
+  false); CI's Nora gate would run the full set only if `EVAL_LIVE` were true.

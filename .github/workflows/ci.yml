@@ -126,7 +126,7 @@ jobs:
         run: node scripts/nora-eval/run-nora-eval.ts --stub pass
       - name: The live run is off
         if: steps.changed.outputs.nora == 'true' && vars.EVAL_LIVE != 'true'
-        run: echo "::notice::Nora's facts or rules changed. The live run waits for ANTHROPIC_API_KEY and EVAL_LIVE (R-43); only the stub run was made. Nothing was sent to Anthropic."
+        run: echo "::notice::Nora's facts or rules changed. The live run waits for ANTHROPIC_API_KEY and EVAL_LIVE, which R-45 keeps false; only the stub run was made. Nothing was sent to Anthropic."
       - name: The live run
         if: steps.changed.outputs.nora == 'true' && vars.EVAL_LIVE == 'true'
         env:

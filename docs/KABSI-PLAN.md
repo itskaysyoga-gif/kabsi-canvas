@@ -13,7 +13,7 @@ This file replaces `docs/WORK-QUEUE.md`, `docs/KABSI-SPEC.md` and `docs/KABSI-ST
 1. Guardrails (copied from `docs/source/KABSI-GUARDRAILS.md`, unchanged)
 2. Rules for every build chat
 3. Sources and precedence
-4. Review decisions (R-01 to R-44): where this plan changes or settles the source documents
+4. Review decisions (R-01 to R-45): where this plan changes or settles the source documents
 5. Decisions and inputs (the lane R chat decides, R-41; see the notes at the top of section 5)
 6. Classification: every decision as P0, P1, P2 or Deferred
 7. Wave P0.1: truth and foundations
@@ -442,6 +442,8 @@ No Anthropic, Google or other paid API call is made until Hussein says so in the
 
 **Changed by R-43 (21 Oct 2026).** "Until Hussein says so" is now a rule: the Anthropic credit turns on the day Google enables `mybusiness.googleapis.com` for project 856347937978 (key under hello@kabsi.co in Supabase secrets only, hard limit 20 US dollars a month), then `EVAL_LIVE` = true. Live WhatsApp sends to Kabsi's own test numbers start from session 13. Until PROGRESS records that paid calls are on, everything above holds. Kill-gate: if reviews are still closed on 30 Nov 2026, the lane R chat re-plans launch (D5).
 
+**Changed by R-45 (22 Oct 2026).** AI is on demand only: a prepaid balance of about 3 US dollars, auto-reload off, no monthly top-up; `EVAL_LIVE` stays false; a 20-case live evaluation runs by hand only when a reply prompt changes; the full 200-case run waits for a top-up before launch. The kill-gate is cleared: Google opened reviews, posts and media on 22 Oct 2026.
+
 ## 3. Sources and precedence
 
 The source of truth is the six documents in `docs/source/` (converted from the originals in the Claude project; the two diagrams are not reproduced):
@@ -465,7 +467,7 @@ Order when two things disagree:
 
 Not a source of truth any more: `docs/KABSI-SPEC.md`, `docs/KABSI-STATE.md`, `docs/WORK-QUEUE.md`, `docs/VIDEO-PLAN.md`, `docs/GO-LIVE.md` and every project file they replaced. Their still-true facts are in Appendix A and B.
 
-## 4. Review decisions (R-01 to R-44)
+## 4. Review decisions (R-01 to R-45)
 
 Each one either settles something the documents left open, fixes a contradiction between them, or changes a decision because the code or the live system showed something the documents did not know. Reason in one line.
 
@@ -515,6 +517,7 @@ Each one either settles something the documents left open, fixes a contradiction
 | R-42 | **Launch scope.** P0.8-12, P0.6-09, P0.6-03, P0.6-04, P0.8-08 and P0.8-10 move to the "After launch" table in section 7 (L1 to L4, each with its gate). Session 11 is Opus: P0.6-01, P0.6-02, P0.6-05. Session 15: P0.6-06, P0.6-08, P0.6-11. Session 17 is empty. Session 19 is P0.7-05b only. P0.8-13 no longer depends on P0.8-12, P0.8-08, P0.8-10 or P0.6-04 (their features show as coming, with no date). P0.7-07 depends on P0.6 done except P0.6-03, P0.6-04 and P0.6-09. | Section 7 bundled sessions; the cards P0.8-12, P0.6-09, P0.6-03, P0.6-04, P0.8-08, P0.8-10, P0.8-13, P0.7-05b, P0.7-07 | Launch needs reviews, Protection, hours, Profile Coach, search terms, the review link and the Weekly Care Report working; partners, Meta tracking, What customers say and the order button each wait for a real signal. |
 | R-43 | **Paid calls (D5).** The Anthropic credit turns on the day Google enables `mybusiness.googleapis.com` for project 856347937978. The key lives under hello@kabsi.co in Supabase secrets only, with a hard limit of 20 US dollars a month; then `EVAL_LIVE` = true. Live WhatsApp sends to Kabsi's own test numbers start from session 13. Kill-gate: if reviews are still closed on 30 Nov 2026, the lane R chat re-plans launch around Protection, hours, Profile Coach, search terms, the review link and the Weekly Care Report, with replies marked coming. | D5 (section 5), 2.12, K-146, the `kabsi-reply-lab` and `kabsi-build-session` skills | Credit spent before reviews can be read buys nothing; the date and the limit are the rule, not a chat message. |
 | R-44 | **Cascade SQL.** Additive SQL with `on delete` clauses (for example foreign keys with `on delete cascade`) is applied by the session with `execute_sql` and a read-back in the same call. Only drops and real deletions go to Rashid, each in its own file with a read-back. | 2.3, R-35 (drops only), the `_links` file pattern | The connector's `apply_migration` refuses the clause but `execute_sql` runs it, and it removes no data; a person running it by hand only slowed the work. |
+| R-45 | **AI on demand only (22 Oct 2026, replaces R-43's spend rule).** `ANTHROPIC_API_KEY` (Supabase secrets, under hello@kabsi.co) runs on a prepaid balance of about 3 US dollars with auto-reload off; there is no monthly top-up and no 20 US dollar monthly limit. `EVAL_LIVE` stays false: no live evaluation in CI. A live evaluation runs only by hand when a reply prompt changes, on a sample of 20 cases from `scripts/eval/cases.json`; the full 200-case run waits for a top-up before launch. Each session makes only the model calls a card needs and reports how many. Google opened `mybusiness.googleapis.com` for project 856347937978 on 22 Oct 2026, so R-43's kill-gate (30 Nov) is cleared. | R-43 (spend rule and `EVAL_LIVE` = true), D5, 2.12, step 17 | A small prepaid balance cannot overspend; a 20-case sample checks a prompt change for a few cents, and the full run is only worth paying for once, before launch. |
 
 ## 5. Decisions and inputs that belong to Rashid
 
@@ -533,7 +536,7 @@ The planning chat and build chats plan around these and ask before any task that
 | I2 | Real screenshots of Google's "People and access" steps. **4 Oct: desktop done**, six images in `public/help/manager-steps/desktop/` (personal details blurred, browser bar cropped). Phone screenshots still to come. | P0.4-03 | Desktop guide uses them; phone cards use text steps until phone screenshots arrive. |
 | I3 | Referral reward (K-62). **Decided 4 Oct: one free month.** | P1-15 (needs re-scoping: there is no Free plan and no partner audit link, K-126, K-127) | Not built. |
 | D4 | Governing law and seller wording in the terms. **Decided 21 Oct: seller Hussein Slim, Dubai; governing law the United Arab Emirates (K-124). A lawyer confirms both before launch.** | P0.8-01 writes it; P0.7-07 waits for the lawyer's read | The pages carry the decided wording. |
-| D5 | When paid API calls may start (K-146): Anthropic credit and real model calls, live WhatsApp sends, live Google writes. **Decided 21 Oct (R-43): the Anthropic credit turns on the day Google enables `mybusiness.googleapis.com` for project 856347937978; key under hello@kabsi.co in Supabase secrets only; hard limit 20 US dollars a month; then `EVAL_LIVE` = true. Live WhatsApp sends to Kabsi's own test numbers from session 13. Kill-gate: if reviews are still closed on 30 Nov 2026, the lane R chat re-plans launch around Protection, hours, Profile Coach, search terms, the review link and the Weekly Care Report, replies marked coming.** | P0.8-03 live sends, P0.8-08 and P0.8-09 real runs, P0.3-04 live evaluation, P0.7-05 | Mocks, stubs, sandboxes and `kabsi-reply-lab`. |
+| D5 | When paid API calls may start (K-146): Anthropic credit and real model calls, live WhatsApp sends, live Google writes. **Decided 21 Oct (R-43): the Anthropic credit turns on the day Google enables `mybusiness.googleapis.com` for project 856347937978; key under hello@kabsi.co in Supabase secrets only; hard limit 20 US dollars a month; then `EVAL_LIVE` = true. Live WhatsApp sends to Kabsi's own test numbers from session 13. Kill-gate: if reviews are still closed on 30 Nov 2026, the lane R chat re-plans launch around Protection, hours, Profile Coach, search terms, the review link and the Weekly Care Report, replies marked coming.** **Changed 22 Oct by R-45: AI on demand only, a prepaid balance of about 3 US dollars with auto-reload off and no monthly top-up; `EVAL_LIVE` stays false; a 20-case live evaluation by hand when a reply prompt changes, the full 200-case run after a top-up before launch. Kill-gate cleared: reviews opened 22 Oct 2026.** | P0.8-03 live sends, P0.8-08 and P0.8-09 real runs, P0.3-04 live evaluation, P0.7-05 | Mocks, stubs, sandboxes and `kabsi-reply-lab`. |
 | D6 | Opening Kabsi Partners and approving each partner (K-127). **Not before live reviews work (P0.7-05) and the first founding customers (guardrail 28).** | P0.8-12 switch `partners_open` | The page shows the holding line. |
 
 **Steps only Rashid can do** (his accounts; each takes minutes; the task that needs it says when):

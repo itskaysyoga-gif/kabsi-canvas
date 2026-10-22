@@ -2,13 +2,13 @@
 // unless the gate holds.
 //
 //   node scripts/nora-eval/run-nora-eval.ts --stub pass    the checker and the facts file, no network (also "fail")
-//   node scripts/nora-eval/run-nora-eval.ts --live         the real Nora; needs ANTHROPIC_API_KEY (R-43), not run until
-//                                                          the AI credit is on, and then only when Rashid says so (2.12)
+//   node scripts/nora-eval/run-nora-eval.ts --live --sample 20   the real Nora on 20 questions spread over the set; needs
+//                                                          ANTHROPIC_API_KEY; by hand only, when Rashid says so (R-45, 2.12)
 //
 // Add --out <file> to keep the findings. Nothing is stored and no account is read.
 import { readFileSync, writeFileSync } from "node:fs";
 import process from "node:process";
-import { gate, liveModel, runAll, stubModel, type Answerer } from "./nora-eval.ts";
+import { gate, liveModel, runAll, sample, stubModel, type Answerer } from "./nora-eval.ts";
 import { noraRules } from "../../supabase/functions/_shared/nora-rules.ts";
 
 const args = process.argv.slice(2);
@@ -38,8 +38,10 @@ if (stub) {
   process.exit(2);
 }
 
-const { score, answers } = await runAll(model, kb, { concurrency: stub ? 1 : 4 });
-const g = gate(score);
+const n = Number(flag("--sample") ?? 60);
+const only = sample(n);
+const { score, answers } = await runAll(model, kb, { concurrency: stub ? 1 : 4, only });
+const g = gate(score, only.length);
 if (out) writeFileSync(out, JSON.stringify({ score, gate: g, answers }, null, 1));
 console.log(
   [

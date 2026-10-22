@@ -8,7 +8,7 @@
 //   3. the question's own rules: what the answer must say (`must`) and must not say (`forbid`), for example the call and
 //      the support email on a hand-over, and the never-delete warning first on any delete question;
 //   4. house style: no dashes, no exclamation marks.
-// The model is passed in: the real Nora (needs ANTHROPIC_API_KEY, not run until the AI credit is on, R-43), or a stub. The
+// The model is passed in: the real Nora (needs ANTHROPIC_API_KEY; by hand only, on a sample of 20, R-45), or a stub. The
 // stubs prove the checker: "pass" answers with the reference answers and "fail" breaks the rules in ways the checker must
 // catch. A question whose facts were taken out of the file fails the support check with either stub.
 import { QUESTIONS, type Question } from "./questions.ts";
@@ -142,13 +142,24 @@ export function support(q: Question, kb: string): Finding[] {
     .map((re) => ({ id: q.id, kind: "support" as const, detail: `the facts file lacks ${re}` }));
 }
 
-export async function runAll(model: Answerer, kb: string, opts: { concurrency?: number } = {}) {
+/** n questions spread evenly over the set (English, Spanish, French and Arabic all appear), for a small paid run (R-45). */
+export function sample(n: number): Question[] {
+  if (n >= QUESTIONS.length) return QUESTIONS;
+  return Array.from({ length: n }, (_, k) => QUESTIONS[Math.floor((k * QUESTIONS.length) / n)]!);
+}
+
+export async function runAll(
+  model: Answerer,
+  kb: string,
+  opts: { concurrency?: number; only?: Question[] } = {},
+) {
   const findings: Finding[] = [];
   const answers: Record<string, string> = {};
+  const list = opts.only ?? QUESTIONS;
   let i = 0;
   const worker = async () => {
     for (;;) {
-      const q = QUESTIONS[i++];
+      const q = list[i++];
       if (!q) return;
       findings.push(...support(q, kb));
       try {
@@ -161,16 +172,16 @@ export async function runAll(model: Answerer, kb: string, opts: { concurrency?: 
     }
   };
   await Promise.all(Array.from({ length: opts.concurrency ?? 1 }, worker));
-  return { score: score(model.name, findings), answers };
+  return { score: score(model.name, findings, list), answers };
 }
 
-export function score(model: string, findings: Finding[]): Score {
+export function score(model: string, findings: Finding[], list: Question[] = QUESTIONS): Score {
   const n = (kinds: Finding["kind"][]) => findings.filter((x) => kinds.includes(x.kind)).length;
   const byLang: Record<string, number> = {};
-  for (const q of QUESTIONS) byLang[q.lang] = (byLang[q.lang] ?? 0) + 1;
+  for (const q of list) byLang[q.lang] = (byLang[q.lang] ?? 0) + 1;
   return {
     model,
-    questions: QUESTIONS.length,
+    questions: list.length,
     byLang,
     supportFailures: n(["support"]),
     honestyFailures: n(["honesty"]),
@@ -182,9 +193,10 @@ export function score(model: string, findings: Finding[]): Score {
 }
 
 /** The gate: zero honesty failures, every rule held, every fact still in the file, nothing failed to run. */
-export function gate(s: Score): { pass: boolean; failures: string[] } {
+export function gate(s: Score, expected = 60): { pass: boolean; failures: string[] } {
   const failures: string[] = [];
-  if (s.questions !== 60) failures.push(`the set has ${s.questions} questions, not 60`);
+  if (s.questions !== expected)
+    failures.push(`the run has ${s.questions} questions, not ${expected}`);
   if (s.honestyFailures) failures.push(`${s.honestyFailures} honesty failure(s)`);
   if (s.ruleFailures) failures.push(`${s.ruleFailures} rule failure(s)`);
   if (s.supportFailures)
