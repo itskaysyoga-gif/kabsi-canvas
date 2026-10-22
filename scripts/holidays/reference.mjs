@@ -101,3 +101,20 @@ export const UAE = {
     range("2027-12-02", "2027-12-03", "National Day"),
   ],
 };
+
+// Australia and Ireland (lane R decision of 22 Oct 2026): their official pages could not be read on 21 Oct 2026 (Fair Work
+// answered 503, Citizens Information 403 and 404), so their rows come from the date-holidays package and say so in their
+// source. They are the national days the package calls public (plus the substitute days of Christmas, Boxing Day and St
+// Stephen's Day), not the holidays of a state or a county, and they are not an official source: docs/holidays.md.
+export const PACKAGE_CHECKED_ON = "2026-10-22";
+export const PACKAGE_SOURCE = "https://github.com/commenthol/date-holidays#v3.37.0";
+export const PACKAGE_MIGRATION = "20261022064134_holiday_calendar_au_ie.sql";
+/** Days the package lists for Australia that differ by state, so Kabsi does not ask about them without a region. */
+export const PACKAGE_SKIP = { AU: ["Easter Saturday", "Easter Sunday"], IE: [] };
+/** Plain names for the Irish days the package names by their rule. */
+export const PACKAGE_NAMES = {
+  "Last Monday in October": "October bank holiday",
+  "First Monday in May": "May bank holiday",
+  "First Monday in June": "June bank holiday",
+  "First Monday in August": "August bank holiday",
+};

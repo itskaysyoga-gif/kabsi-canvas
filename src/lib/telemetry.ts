@@ -304,6 +304,16 @@ export function trackLanding(path: string, search: string) {
   track("landing_viewed", props);
 }
 
+// The Weekly Care Report screen (G-44): sent once per report per browser session, with the business id and where it was
+// opened ("app"). The email's own open is not measured here.
+const reportsSeen = new Set<string>();
+export function trackReportOpened(locationId: string, reportId: string) {
+  const key = `${locationId}:${reportId}`;
+  if (reportsSeen.has(key)) return;
+  reportsSeen.add(key);
+  track("weekly_report_opened", { location_id: locationId, source: "app" });
+}
+
 export function identify(userId: string | null) {
   if (typeof window === "undefined") return;
   pendingUser = userId;

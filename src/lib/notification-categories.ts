@@ -112,7 +112,7 @@ export const CATEGORIES: readonly Category[] = [
     quietExempt: false,
     inApp: false,
     description:
-      "A few short emails while you try Kabsi: your first win, your week, the days left.",
+      "A few short emails while you set up and try Kabsi: a nudge if Google has not finished verifying your profile or answering your request for access, your first win, your week, the days left.",
   },
   {
     id: "account",

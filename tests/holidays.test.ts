@@ -1,6 +1,11 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { buildRows, buildSql } from "../scripts/build-holidays.mjs";
+import {
+  buildPackageRows,
+  buildPackageSql,
+  buildRows,
+  buildSql,
+} from "../scripts/build-holidays.mjs";
 import { addDays, checkAnswer, readBack, whenWords, type HolidayInfo } from "../src/lib/holidays";
 
 // P0.5-03 (K-131): the holiday calendar and the words on the screens. The seed is made by scripts/build-holidays.mjs from
@@ -23,7 +28,7 @@ describe("the holiday seed", () => {
     expect(seed).toBe(buildSql());
   });
 
-  it("covers the countries whose official page could be read, and none that could not", () => {
+  it("covers, from official pages, the countries whose official page could be read", () => {
     expect([...new Set(rows.map((r) => r.country))].sort()).toEqual([
       "AE",
       "CA",
@@ -84,6 +89,53 @@ describe("the holiday seed", () => {
       expect(r.end >= "2026-10-21" && r.start <= "2027-12-31", r.name).toBe(true);
       expect(r.name).not.toMatch(/[—–!]/);
     }
+  });
+});
+
+describe("Australia and Ireland (the date-holidays package, lane R decision of 22 Oct 2026)", () => {
+  const pkg = buildPackageRows() as typeof rows;
+  const file = readFileSync(
+    "supabase/migrations/20261022064134_holiday_calendar_au_ie.sql",
+    "utf8",
+  );
+
+  it("is exactly what the script makes (run node scripts/build-holidays.mjs)", () => {
+    expect(file).toBe(buildPackageSql());
+  });
+
+  it("covers Australia and Ireland only, each row saying the package is its source", () => {
+    expect([...new Set(pkg.map((r) => r.country))].sort()).toEqual(["AU", "IE"]);
+    for (const r of pkg) {
+      expect(r.source, r.name).toMatch(/^https:\/\/github\.com\/commenthol\/date-holidays#v\d/);
+      expect(r.verified).toBe("2026-10-22");
+      expect(r.kind).toBe("public");
+      expect(r.estimated).toBe(false);
+      expect(r.region).toBeNull();
+      expect(r.name).not.toMatch(/[\u2014\u2013!]/);
+    }
+    // No row of the official seed was changed or reused for them.
+    expect(rows.some((r) => ["AU", "IE"].includes(r.country))).toBe(false);
+  });
+
+  it("keeps the national days and leaves out the ones that differ by state or are not public days", () => {
+    const au = pkg.filter((r) => r.country === "AU").map((r) => r.name);
+    expect(au).toEqual(
+      expect.arrayContaining(["Australia Day", "Good Friday", "Easter Monday", "Anzac Day"]),
+    );
+    expect(au).not.toContain("Easter Saturday");
+    expect(au).not.toContain("Easter Sunday");
+    expect(au).not.toContain("Mother's Day");
+    const ie = pkg.filter((r) => r.country === "IE");
+    expect(ie.map((r) => r.name)).toEqual(
+      expect.arrayContaining(["St. Patrick's Day", "October bank holiday", "May bank holiday"]),
+    );
+    expect(ie.some((r) => r.name === "Good Friday")).toBe(false); // a bank day, not a public holiday in Ireland
+    expect(ie.some((r) => /Last Monday|First Monday/.test(r.name))).toBe(false);
+  });
+
+  it("stays inside the window", () => {
+    for (const r of pkg)
+      expect(r.start >= "2026-10-21" && r.start <= "2027-12-31", r.name).toBe(true);
   });
 });
 

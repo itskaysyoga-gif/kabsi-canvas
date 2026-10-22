@@ -96,15 +96,17 @@ export const STEPS: Record<StepId, StepMeta> = {
   no_access_24h: { id: "no_access_24h", category: "access", consent: "service" },
   no_access_72h: { id: "no_access_72h", category: "access", consent: "service" },
   first_reply_approved: { id: "first_reply_approved", category: "trial", consent: "service" },
-  // Setup help for an owner stuck at Google's side (P0.4-04). Like the no-access reminders these are about Google access,
-  // so they go from the account address and stop at access; they are service mail, never marketing.
-  verify_1: { id: "verify_1", category: "access", consent: "service" },
-  verify_2: { id: "verify_2", category: "access", consent: "service" },
-  verify_3: { id: "verify_3", category: "access", consent: "service" },
-  verify_4: { id: "verify_4", category: "access", consent: "service" },
-  verify_5: { id: "verify_5", category: "access", consent: "service" },
-  ownership_day3: { id: "ownership_day3", category: "access", consent: "service" },
-  ownership_day7: { id: "ownership_day7", category: "access", consent: "service" },
+  // Setup help for an owner stuck at Google's side (P0.4-04). They stop at access and are service mail, never marketing. Since
+  // 22 Oct 2026 they sit in the Trial tips category like the other tips, so the owner can turn them off (the footer has
+  // "Unsubscribe from these emails" and Settings, What Kabsi tells you, has the switch). The no-access reminders stay
+  // in Google access, which cannot be switched off.
+  verify_1: { id: "verify_1", category: "trial", consent: "service" },
+  verify_2: { id: "verify_2", category: "trial", consent: "service" },
+  verify_3: { id: "verify_3", category: "trial", consent: "service" },
+  verify_4: { id: "verify_4", category: "trial", consent: "service" },
+  verify_5: { id: "verify_5", category: "trial", consent: "service" },
+  ownership_day3: { id: "ownership_day3", category: "trial", consent: "service" },
+  ownership_day7: { id: "ownership_day7", category: "trial", consent: "service" },
   trial_day2: { id: "trial_day2", category: "trial", consent: "service" },
   trial_day7: { id: "trial_day7", category: "trial", consent: "service" },
   trial_day11: { id: "trial_day11", category: "trial", consent: "service" },

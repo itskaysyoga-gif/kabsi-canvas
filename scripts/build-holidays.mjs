@@ -1,12 +1,25 @@
 // Builds the seed of the holiday calendar (P0.5-03, K-131) from the official references in scripts/holidays/ and, for
 // the Islamic dates only, the date-holidays package.
-//   node scripts/build-holidays.mjs            writes supabase/migrations/20261021240005_holiday_calendar_seed.sql
+//   node scripts/build-holidays.mjs            writes supabase/migrations/20261021240005_holiday_calendar_seed.sql and, for Australia
+//                                              and Ireland from the date-holidays package, the PACKAGE_MIGRATION file (reference.mjs)
 //   node scripts/build-holidays.mjs --check    exits 1 when the file on disk is not what this script makes (CI: tests/holidays.test.ts)
 // Every row says where it comes from. Rows are "verified" when an official source stated them (or the rule they
 // follow); a date that follows the moon is "estimated". Run it again each year with the window extended.
 import { readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { CANADA, CHECKED_ON, FROM, OFFICIAL, TO, UAE } from "./holidays/reference.mjs";
+import {
+  CANADA,
+  CHECKED_ON,
+  FROM,
+  OFFICIAL,
+  PACKAGE_CHECKED_ON,
+  PACKAGE_MIGRATION,
+  PACKAGE_NAMES,
+  PACKAGE_SKIP,
+  PACKAGE_SOURCE,
+  TO,
+  UAE,
+} from "./holidays/reference.mjs";
 
 const require = createRequire(import.meta.url);
 const OUT = new URL(
@@ -137,6 +150,47 @@ export function buildRows() {
   return rows;
 }
 
+/** Australia and Ireland from the date-holidays package (not an official page; see reference.mjs and docs/holidays.md). */
+export function buildPackageRows() {
+  const Holidays = require("date-holidays");
+  const rows = [];
+  const seen = new Set();
+  for (const country of ["AU", "IE"]) {
+    const h = new Holidays(country, { languages: ["en"] });
+    for (const y of [2026, 2027])
+      for (const x of h.getHolidays(y)) {
+        const substitute = x.substitute && /substitute day/.test(x.name);
+        if (x.type !== "public" && !substitute) continue;
+        const clean = x.name.replace(/\u2019/g, "'");
+        const base = clean.replace(/ \(substitute day\)$/, "");
+        if (PACKAGE_SKIP[country].includes(base)) continue;
+        const name = PACKAGE_NAMES[base] ? clean.replace(base, PACKAGE_NAMES[base]) : clean;
+        const day = x.date.slice(0, 10);
+        const key = `${country}|${day}|${name}`;
+        if (seen.has(key) || !inWindow({ start: day, end: day })) continue;
+        seen.add(key);
+        rows.push({
+          country,
+          region: null,
+          name,
+          start: day,
+          end: day,
+          kind: "public",
+          estimated: false,
+          source: PACKAGE_SOURCE,
+          verified: PACKAGE_CHECKED_ON,
+        });
+      }
+  }
+  rows.sort(
+    (a, b) =>
+      a.country.localeCompare(b.country) ||
+      a.start.localeCompare(b.start) ||
+      a.name.localeCompare(b.name),
+  );
+  return rows;
+}
+
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`;
 export function buildSql() {
   const rows = buildRows();
@@ -156,23 +210,51 @@ on conflict do nothing;
 `;
 }
 
+const PACKAGE_OUT = new URL(`../supabase/migrations/${PACKAGE_MIGRATION}`, import.meta.url);
+export function buildPackageSql() {
+  const rows = buildPackageRows();
+  const values = rows.map(
+    (r) =>
+      `  (${q(r.country)}, null, ${q(r.name)}, '${r.start}', '${r.end}', ${q(r.kind)}, ${r.estimated}, ${q(r.source)}, '${r.verified}')`,
+  );
+  return `-- P0.5-03 leftovers (lane R decision of 22 Oct 2026): Australia and Ireland. ${rows.length} rows, ${FROM} to ${TO}, from the date-holidays
+-- package (${PACKAGE_SOURCE.split("#")[1]}), because the official pages could not be read on ${CHECKED_ON}. This is the package's list of national public days, with
+-- the substitute days of Christmas, Boxing Day and St Stephen's Day, and without the days that differ by state (Easter
+-- Saturday and Easter Sunday in Australia). It is not an official source. Made by scripts/build-holidays.mjs; do not edit by hand.
+-- The first seed file still says Australia and Ireland have no rows: this file adds them. Additive, nothing is changed.
+
+insert into public.holidays (country, region, name, starts_on, ends_on, kind, estimated, source, verified_on) values
+${values.join(",\n")}
+on conflict do nothing;
+`;
+}
+
 if (process.argv[1] === new URL(import.meta.url).pathname) {
-  const sql = buildSql();
+  const files = [
+    [OUT, buildSql()],
+    [PACKAGE_OUT, buildPackageSql()],
+  ];
   if (process.argv.includes("--check")) {
-    const have = (() => {
-      try {
-        return readFileSync(OUT, "utf8");
-      } catch {
-        return "";
+    for (const [out, sql] of files) {
+      const have = (() => {
+        try {
+          return readFileSync(out, "utf8");
+        } catch {
+          return "";
+        }
+      })();
+      if (have !== sql) {
+        console.error(
+          `holiday seed is out of date: run node scripts/build-holidays.mjs (${out.pathname})`,
+        );
+        process.exit(1);
       }
-    })();
-    if (have !== sql) {
-      console.error("holiday seed is out of date: run node scripts/build-holidays.mjs");
-      process.exit(1);
     }
-    console.log("holiday seed is up to date");
+    console.log("holiday seeds are up to date");
   } else {
-    writeFileSync(OUT, sql);
-    console.log(`wrote ${OUT.pathname} (${buildRows().length} rows)`);
+    for (const [out, sql] of files) writeFileSync(out, sql);
+    console.log(
+      `wrote ${OUT.pathname} (${buildRows().length} rows) and ${PACKAGE_OUT.pathname} (${buildPackageRows().length} rows)`,
+    );
   }
 }
