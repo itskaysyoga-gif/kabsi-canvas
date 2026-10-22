@@ -5,6 +5,8 @@
 -- plan and its payment so it can still publish), the demo workspace (Harbour Lane Coffee, Juniper Hair Studio and
 -- their mock rows, R-17), every audit event and the email records that are not listed.
 -- The read-back at the end must show 0 in every line.
+-- Run by Rashid on 22 Oct 2026 (yes to the list). The tasks check below was relaxed to `n < 9` in his run: the daily
+-- care_posts routine had added one post task at 06:13 UTC, so 10 Yawmiyati tasks were deleted, not 9.
 begin;
 
 do $$
