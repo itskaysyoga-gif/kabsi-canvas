@@ -9,10 +9,11 @@
 //     the mock's answer, with fetch standing in for Google. Both must give the same kind of result, and the real
 //     one must give the values the fixture holds.
 //
-// Reviews, local posts and media (mybusiness.googleapis.com v4) answer 403 SERVICE_DISABLED for the project, so
-// there is no real response to compare yet. Those three modules are listed in BLOCKED: the test checks that the
-// capture still says 403 and, the day a real fixture appears (reviews.list.<profile>.json, posts.list.<profile>.json,
-// media.list.<profile>.json), it fails until the module's case below is added. Run with: scripts/deno-check.sh.
+// Reviews, local posts and media (mybusiness.googleapis.com v4) answered 403 SERVICE_DISABLED until Google opened
+// the service on 22 Oct 2026 (the v4.probe files and reviews.list.error.json keep that error's shape). Session 18
+// captured them the same day (reviews.list, posts.list and media.list for both profiles); their cases are below.
+// No review on either profile has a reply yet, so reviewReply is checked against Google's documented shape only
+// (mocks.test.ts) until the first live reply (P0.7-05). Run with: scripts/deno-check.sh.
 import assert from "node:assert/strict";
 import * as accounts from "./accounts/mock.ts";
 import * as admins from "./admins/mock.ts";
@@ -21,9 +22,12 @@ import * as categoriesMock from "./categories/mock.ts";
 import { io } from "./client.ts";
 import * as google from "./index.ts";
 import * as locations from "./locations/mock.ts";
+import * as mediaMock from "./media/mock.ts";
 import * as notifications from "./notifications/mock.ts";
 import * as performance from "./performance/mock.ts";
 import * as placeActions from "./placeActions/mock.ts";
+import * as postsMock from "./posts/mock.ts";
+import * as reviewsMock from "./reviews/mock.ts";
 import * as updates from "./updates/mock.ts";
 import * as verifications from "./verifications/mock.ts";
 
@@ -74,6 +78,12 @@ function merge(...bodies: Json[]): Json {
 // A demo location id always runs on the mock (R-17), so the parser tests use a plain mock id to reach the live code path.
 const A = accounts.MOCK_ACCOUNT, L = "locations/mock-contract-test";
 admins.useAdminStore({ read: () => Promise.resolve({ removed: false, refuse: false }), remove: () => Promise.resolve() });
+const mockRow: reviewsMock.MockReviewRow = {
+  review_id: "mock-1", google_location_id: L, reviewer_name: "Sam", star_rating: 4, comment: "Good coffee.",
+  create_time: "2026-10-01T09:00:00.000Z", reply_comment: null, reply_update_time: null,
+};
+// The list calls are compared as a whole; their items are compared one by one below.
+const items = (key: string) => async (name: string): Promise<Json> => ({ ...(await body(name))[key][0], ...merge(...(await body(name))[key]) });
 
 const shapeCases: [string, () => Promise<Json>, string[]][] = [
   ["accounts.listAccounts", () => accounts.listAccounts(), ["accounts.list.json"]],
@@ -99,11 +109,28 @@ const shapeCases: [string, () => Promise<Json>, string[]][] = [
     title: "Harbour Lane Coffee", website: "https://kabsi.co", map_pin: "33.1, 35.2",
     merchant: { title: "Harbour Lane Coffee", website: "https://example.com", map_pin: "33.0, 35.0" },
   })), ["updates.getGoogleUpdated.abouhamze.json"]],
+  ["reviews.listReviews (a page, no reply yet)", () => Promise.resolve({ reviews: [reviewsMock.reviewFromRow(A, mockRow)], totalReviewCount: 1 }), ["reviews.list.yawmiyati.json", "reviews.list.abouhamze.json"]],
+  ["reviews.reviewFromRow (a rating with no text)", () => Promise.resolve(reviewsMock.reviewFromRow(A, { ...mockRow, comment: null })), ["review:reviews.list.yawmiyati.json", "review:reviews.list.abouhamze.json"]],
+  ["posts.listLocalPosts", () => postsMock.listLocalPosts(A, L), ["posts.list.yawmiyati.json", "posts.list.abouhamze.json"]],
+  ["posts.createLocalPost (with a photo and a link)", () => postsMock.createLocalPost(A, L, {
+    languageCode: "en", summary: "New pastries.", topicType: "STANDARD", callToAction: { actionType: "LEARN_MORE", url: "https://kabsi.co" },
+    media: [{ mediaFormat: "PHOTO", sourceUrl: "https://kabsi.co/x.jpg" }],
+  }), ["post:posts.list.yawmiyati.json", "post:posts.list.abouhamze.json"]],
+  ["posts.getLocalPost", () => postsMock.getLocalPost(`${A}/${L}/localPosts/1`), ["post:posts.list.abouhamze.json"]],
+  ["media.listMedia", () => mediaMock.listMedia(A, L), ["media.list.yawmiyati.json", "media.list.abouhamze.json"]],
+  ["media.createMedia (an uploaded photo)", () => mediaMock.createMedia(A, L, { mediaFormat: "PHOTO", locationAssociation: { category: "EXTERIOR" }, dataRef: { resourceName: "r" } }), ["item:media.list.yawmiyati.json", "item:media.list.abouhamze.json"]],
+  ["media.getMedia", () => mediaMock.getMedia(`${A}/${L}/media/1`), ["item:media.list.abouhamze.json"]],
 ];
+
+// "review:", "post:" and "item:" compare against the items of a list response rather than the whole body.
+const realBody = (f: string) => {
+  const [k, name] = f.includes(":") ? f.split(":") : ["", f];
+  return k ? items({ review: "reviews", post: "localPosts", item: "mediaItems" }[k]!)(name) : body(name);
+};
 
 for (const [name, run, files] of shapeCases) {
   Deno.test(`contract (shape): mock ${name} agrees with Google's real response`, async () => {
-    const real = merge(...await Promise.all(files.map(body)));
+    const real = merge(...await Promise.all(files.map(realBody)));
     const problems = shapeProblems(await run(), real);
     assert.deepEqual(problems, [], `${name}:\n${problems.join("\n")}`);
   });
@@ -116,7 +143,7 @@ Deno.test("contract (shape): the check finds a field Google does not return and 
 });
 
 // ─── Fixtures stay what the capture says they are
-Deno.test("contract: every live fixture is a 200 response, except the three closed v4 services", async () => {
+Deno.test("contract: every live fixture is a 200 response, except the record of the v4 services before they opened", async () => {
   const seen: string[] = [];
   for await (const f of Deno.readDir(LIVE)) {
     if (!f.name.endsWith(".json")) continue;
@@ -133,23 +160,17 @@ Deno.test("contract: every live fixture is a 200 response, except the three clos
   assert.ok(seen.length >= 27, `only ${seen.length} live fixtures found`);
 });
 
-// The reviews, local posts and media modules cannot be compared yet: Google has not opened mybusiness.googleapis.com.
-const BLOCKED = ["reviews", "localPosts", "media"] as const;
-Deno.test("contract: reviews, posts and media are still closed on Google's side, and no real fixture exists for them", async () => {
+// Google opened mybusiness.googleapis.com on 22 Oct 2026: the 403 records stay as the error's shape, and each of
+// the three modules has a real fixture for both profiles.
+Deno.test("contract: reviews, posts and media have a real fixture for both profiles, and the 403 record keeps its shape", async () => {
   for (const p of ["yawmiyati", "abouhamze"]) {
     const fx = await fixture(`v4.probe.${p}.json`);
-    for (const k of BLOCKED) {
-      assert.equal(fx.calls[k].status, 403, `${p} ${k}`);
+    for (const k of ["reviews", "localPosts", "media"]) {
       assert.equal(fx.calls[k].reason, "SERVICE_DISABLED", `${p} ${k}`);
       assert.equal(fx.calls[k].service, "mybusiness.googleapis.com", `${p} ${k}`);
     }
+    for (const m of ["reviews.list", "posts.list", "media.list"]) assert.equal((await fixture(`${m}.${p}.json`))._status, 200, `${m}.${p}`);
   }
-  const names: string[] = [];
-  for await (const f of Deno.readDir(LIVE)) names.push(f.name);
-  // The day Google opens the service and a session captures these, this fails: add the module's shape and parser
-  // cases above, remove the 403 probe files and update docs/google/mock-vs-real.md.
-  const real = names.filter((n) => /^(reviews\.list|posts\.list|media\.list)\.(yawmiyati|abouhamze)\.json$/.test(n));
-  assert.deepEqual(real, [], "a real fixture for reviews, posts or media exists: add its contract cases");
 });
 
 // ─── Parser: the production code on the real fixture and on the mock's answer
@@ -319,4 +340,52 @@ Deno.test("contract (parser): the category lookup takes the exact match, though 
   assert.equal(y?.name, "categories/gcid:media_company");
   assert.equal(await withGoogle([["/categories?", await body("categories.list.abouhamze.json")]], () => google.findCategory(p.location, "LB", "Used auto parts")), null);
   assert.ok(await categoriesMock.findCategory("LB", "Coffee shop"));
+});
+
+Deno.test("contract (parser): reviews from the real lists: a rating with no text, no reply, and Google's own updateTime", async () => {
+  for (const [name, n, texts] of [["yawmiyati", 1, 0], ["abouhamze", 2, 2]] as const) {
+    const p = PROFILES[name];
+    const r = await withGoogle([[`${p.location}/reviews?`, await body(`reviews.list.${name}.json`)]], () => google.listReviews(GROUP, p.location));
+    assert.equal(r.length, n, name);
+    assert.equal(r.filter((x) => x.comment !== null).length, texts, name);
+    for (const x of r) {
+      assert.equal(x.rating, 5);
+      assert.equal(x.reply, null, "no reply on Google yet");
+      assert.ok(x.updateTime && x.createTime, name);
+      assert.ok(x.reviewId.startsWith("AbFvOq"), name);
+    }
+  }
+  // The mock's review comes out the same way.
+  const m = await withGoogle([[`${L}/reviews?`, { reviews: [reviewsMock.reviewFromRow(A, mockRow)], totalReviewCount: 1 }]], () => google.listReviews(A, L));
+  assert.equal(m.length, 1);
+  assert.equal(m[0].updateTime, mockRow.create_time);
+});
+
+Deno.test("contract (parser): reviews follow Google's nextPageToken, 50 at a time", async () => {
+  const p = PROFILES.abouhamze;
+  const [first, second] = (await body("reviews.list.abouhamze.json")).reviews;
+  const r = await withGoogle([
+    [/pageToken=next1/, { reviews: [second], averageRating: 5, totalReviewCount: 2 }],
+    [`${p.location}/reviews?pageSize=50`, { reviews: [first], averageRating: 5, totalReviewCount: 2, nextPageToken: "next1" }],
+  ], () => google.listReviews(GROUP, p.location));
+  assert.deepEqual(r.map((x) => x.reviewId), [first.reviewId, second.reviewId]);
+});
+
+Deno.test("contract (parser): a real post reads as live, by its name and by its text", async () => {
+  const p = PROFILES.abouhamze;
+  const list = await body("posts.list.abouhamze.json");
+  const post = list.localPosts[0];
+  assert.equal(await withGoogle([[post.name, post]], () => google.localPostState(GROUP, p.location, post.name, "x")), "live");
+  assert.equal(await withGoogle([[`${p.location}/localPosts?`, list]], () => google.localPostState(GROUP, p.location, null, post.summary)), "live");
+  assert.equal(await withGoogle([[`${p.location}/localPosts?`, list]], () => google.localPostState(GROUP, p.location, null, "Another text")), null);
+  // The mock's created post reads back the same way.
+  const made = await postsMock.createLocalPost(A, L, { languageCode: "en", summary: "New pastries.", topicType: "STANDARD" });
+  assert.equal(await withGoogle([[made.name!, made]], () => google.localPostState(A, L, made.name!, "New pastries.")), "live");
+});
+
+Deno.test("contract (parser): a real photo is found by its name", async () => {
+  const p = PROFILES.yawmiyati;
+  const item = (await body("media.list.yawmiyati.json")).mediaItems[0];
+  assert.equal(await withGoogle([[item.name, item]], () => google.mediaExists(p.location, item.name)), true);
+  assert.equal(await withGoogle([[item.name, { error: { code: 404, status: "NOT_FOUND" } }, 404]], () => google.mediaExists(p.location, item.name)), false);
 });

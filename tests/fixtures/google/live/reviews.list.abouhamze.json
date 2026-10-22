@@ -1,0 +1,41 @@
+{
+  "_source": "Live read-only call by session 18 (P0.7-01) through google-capture (hello@kabsi.co, Kabsi Clients group), request 43145.",
+  "_doc": "https://developers.google.com/my-business/reference/rest/v4/accounts.locations.reviews/list",
+  "_captured_at": "2026-10-22T05:49:52Z",
+  "_url": "https://mybusiness.googleapis.com/v4/accounts/113746201522792609010/locations/1850906632456176734/reviews",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses.",
+  "_note": "Both reviews have text (removed here) and no reply.",
+  "body": {
+    "reviews": [
+      {
+        "reviewId": "AbFvOqlWS9uYuDKoqe2M3ZSNMR-AXDAxUG36Dwb8COBda79VBtsOaB-OanNrdPxEp1GZepBhoPDB",
+        "reviewer": {
+          "profilePhotoUrl": "[removed]",
+          "displayName": "[removed]"
+        },
+        "starRating": "FIVE",
+        "comment": "[removed]",
+        "createTime": "2026-08-17T18:14:20.179378Z",
+        "updateTime": "2026-08-17T18:14:20.179378Z",
+        "name": "accounts/113746201522792609010/locations/1850906632456176734/reviews/AbFvOqlWS9uYuDKoqe2M3ZSNMR-AXDAxUG36Dwb8COBda79VBtsOaB-OanNrdPxEp1GZepBhoPDB",
+        "reviewReplyUrl": "https://business.google.com/n/1850906632456176734/reviews/Ci9DQUlRQUNvZENodHljRjlvT2t4cmFIaFZXVk5HZEdsQlRsZG5PVlZoWjFScVVrRRAB"
+      },
+      {
+        "reviewId": "AbFvOqkcaqbwhvxukihbWymz65YdkvhoKGC5jjf5tjYE9ipLU6C02JIAO4-IEz7Qb9cO7TUTdH3uaw",
+        "reviewer": {
+          "profilePhotoUrl": "[removed]",
+          "displayName": "[removed]"
+        },
+        "starRating": "FIVE",
+        "comment": "[removed]",
+        "createTime": "2024-11-06T22:54:24.897719Z",
+        "updateTime": "2024-11-06T22:54:24.897719Z",
+        "name": "accounts/113746201522792609010/locations/1850906632456176734/reviews/AbFvOqkcaqbwhvxukihbWymz65YdkvhoKGC5jjf5tjYE9ipLU6C02JIAO4-IEz7Qb9cO7TUTdH3uaw",
+        "reviewReplyUrl": "https://business.google.com/n/1850906632456176734/reviews/ChdDSUhNMG9nS0VJQ0FnSUMzNmRyRzVnRRAB"
+      }
+    ],
+    "averageRating": 5,
+    "totalReviewCount": 2
+  }
+}

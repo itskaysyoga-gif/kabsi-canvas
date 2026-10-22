@@ -50,7 +50,8 @@ export type LocalPost = {
   topicType?: string; searchUrl?: string;
   event?: { title?: string; schedule?: { startDate?: GDate; startTime?: TimeOfDay; endDate?: GDate; endTime?: TimeOfDay } };
   offer?: { couponCode?: string; redeemOnlineUrl?: string; termsConditions?: string };
-  media?: { mediaFormat: "PHOTO"; sourceUrl: string }[];
+  // Sent with sourceUrl; Google answers with its own name and googleUrl instead (real posts, 22 Oct 2026).
+  media?: { name?: string; mediaFormat: "PHOTO" | "VIDEO"; sourceUrl?: string; googleUrl?: string }[];
 };
 export type ListLocalPostsResponse = { localPosts?: LocalPost[]; nextPageToken?: string };
 

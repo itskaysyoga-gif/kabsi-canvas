@@ -42,18 +42,17 @@ No production parser was changed to fit a mock. In every case below the real sha
 - **Rate limits.** No 429 was seen in any read call so far (limit 300 a minute). The retry and breaker code (`client.ts`, `limits.test.ts`) stands on Google's documented behaviour, not on a real 429.
 - **Error shape.** The one real error is the 403 SERVICE_DISABLED body (`reviews.list.error.json`, `v4.probe.*.json`): `error.code`, `error.status` `PERMISSION_DENIED`, `details[].reason` `SERVICE_DISABLED`, `metadata.service`, `metadata.consumer`. `gbp()` turns any non-2xx into `google <status> <url>: <body>`, which is what `removeKabsiEntries` matches on (`google 403 `, `google 404 `); the mock admins use the same message form.
 
-## Not comparable yet: reviews, local posts, media
+## Reviews, local posts and media (22 Oct 2026, session 18)
 
-`mybusiness.googleapis.com` is closed for project 856347937978 (403 SERVICE_DISABLED on 8 Oct and again on 22 Oct 2026, six of six calls on 22 Oct). There is no real response for:
+Google opened `mybusiness.googleapis.com` on 22 Oct 2026; the real lists for both profiles are in `tests/fixtures/google/live/` and `contract.test.ts` runs them (shape and parser cases). Changed in the mocks:
 
-- **reviews** (`reviews.list`, `reviews.get`, reply update): the wire shape of a review, the average rating and total, the reply object, moderation state on replies (K-116.1), `orderBy`, paging.
-- **local posts** (`create`, `list`, `get`): `state` values, event and offer fields, `searchUrl`.
-- **media** (`startUpload`, `create`, `list`): the data reference, `googleUrl`, `thumbnailUrl`, the dimensions.
+| Module | Real | Mock before | Mock now |
+|---|---|---|---|
+| reviews (`reviewFromRow`) | `updateTime` always sent; equals `createTime` when nothing changed (all three real reviews) | `updateTime` only when the row had a reply | `updateTime` is the reply time, else the review's own time (`mocks.test.ts` updated) |
+| posts (`createLocalPost`) | a post's photo is `{ name, mediaFormat, googleUrl }` | echoed the `{ mediaFormat, sourceUrl }` it was given | answers `{ name, mediaFormat, googleUrl }`; `LocalPost.media` type widened to match (`types.ts`) |
+| media (`createMedia`) | an item is `name`, `mediaFormat`, `locationAssociation`, `googleUrl`, `thumbnailUrl`, `createTime`, `dimensions` | echoed `dataRef` and `sourceUrl` back | drops both |
 
-Those mocks (`reviews/mock.ts`, `posts/mock.ts`, `media/mock.ts`) are still modelled on Google's documented responses (`tests/fixtures/google/reviews.*.json`, `posts.*.json`, `media.*.json`), checked by `mocks.test.ts`. The contract test fails on purpose the day a real `reviews.list.<profile>.json`, `posts.list.<profile>.json` or `media.list.<profile>.json` appears next to the 403 probes, so that module's shape and parser cases get added then. Until Google opens the service, **P0.7-04 (the switch to live) should not be treated as proven for reviews, posts and photos**: they have run only against the documented shape.
+No production parser changed: `listReviews`, `localPostState` and `mediaExists` read the real fixtures correctly as they were (tested, with paging on `nextPageToken`).
 
-## How to rerun after Google opens the service
+Kept on purpose: the mock leaves out `reviewReplyUrl`, `averageRating`, `nextPageToken`, `thumbnailUrl` on post photos and `dimensions` (Google omits unset fields, and no Kabsi code reads them). A reply object (`reviewReply`) has no real sample yet: no review on either profile is answered. It stays checked against Google's documented shape (`mocks.test.ts`) until the first live reply in P0.7-05, which is read back and added here.
 
-1. `google-capture` ops `reviews` and `v4` for both profiles (same as 22 Oct, read-only, through SQL with the cron secret kept inside the database).
-2. Save the redacted answers as `reviews.list.<profile>.json`, `posts.list.<profile>.json`, `media.list.<profile>.json`, remove `v4.probe.*.json` and `reviews.list.error.json`.
-3. Add the shape and parser cases to `contract.test.ts`; fix mock and parser together where they differ and say which here.

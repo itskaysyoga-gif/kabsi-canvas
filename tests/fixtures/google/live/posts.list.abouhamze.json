@@ -1,0 +1,33 @@
+{
+  "_source": "Live read-only call by session 18 (P0.7-01) through google-capture (hello@kabsi.co, Kabsi Clients group), request 43143.",
+  "_doc": "https://developers.google.com/my-business/reference/rest/v4/accounts.locations.localPosts/list",
+  "_captured_at": "2026-10-22T05:49:48Z",
+  "_url": "https://mybusiness.googleapis.com/v4/accounts/113746201522792609010/locations/1850906632456176734/localPosts",
+  "_status": 200,
+  "_redacted": "Personal data removed in the function before it left Supabase: reviewer and person names, review and reply text, photo addresses, phone numbers, email addresses.",
+  "_note": "Page size 1; the only post on the profile (no nextPageToken).",
+  "body": {
+    "localPosts": [
+      {
+        "name": "accounts/113746201522792609010/locations/1850906632456176734/localPosts/8373441539494136309",
+        "languageCode": "en",
+        "summary": "Free Delivery - Call us on [phone removed]",
+        "callToAction": {
+          "actionType": "CALL"
+        },
+        "state": "LIVE",
+        "updateTime": "2019-05-29T16:40:52.317Z",
+        "createTime": "2019-05-29T16:40:52.317Z",
+        "searchUrl": "https://local.google.com/place?id=2030032073090672028&use=posts&lpsid=CIHM0ogKEICAgIDix9T1Kw",
+        "media": [
+          {
+            "name": "accounts/113746201522792609010/locations/1850906632456176734/media/localPosts/AF1QipOr00dbgMqdKP_qH7dy-0NsrmSQKdv0mN_xtWU",
+            "mediaFormat": "PHOTO",
+            "googleUrl": "https://lh3.googleusercontent.com/p/AF1QipOr00dbgMqdKP_qH7dy-0NsrmSQKdv0mN_xtWU"
+          }
+        ],
+        "topicType": "STANDARD"
+      }
+    ]
+  }
+}

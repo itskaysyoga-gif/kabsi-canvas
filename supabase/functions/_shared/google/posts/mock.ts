@@ -4,8 +4,10 @@ import type { ListLocalPostsResponse, LocalPost } from "../types.ts";
 export function createLocalPost(account: string, location: string, body: LocalPost): Promise<LocalPost> {
   const now = new Date().toISOString();
   const id = crypto.randomUUID().replace(/-/g, "").slice(0, 19);
+  // Google answers a post's photo with its own name and googleUrl, not the sourceUrl it was given (real posts, 22 Oct 2026).
+  const media = body.media?.map((m, i) => ({ name: `${account}/${location}/media/localPosts/mock${id}${i}`, mediaFormat: m.mediaFormat, googleUrl: "https://kabsi.co/mock-photo" }));
   return Promise.resolve({
-    ...body, name: `${account}/${location}/localPosts/${id}`, createTime: now, updateTime: now, state: "LIVE",
+    ...body, ...(media ? { media } : {}), name: `${account}/${location}/localPosts/${id}`, createTime: now, updateTime: now, state: "LIVE",
     searchUrl: "https://kabsi.co",
   });
 }
