@@ -1,5 +1,5 @@
 import { assertEquals } from "jsr:@std/assert@1";
-import { redact } from "./capture.ts";
+import { probeSummary, redact } from "./capture.ts";
 
 Deno.test("redact removes names, review text, phones and emails, keeps ids and times", () => {
   const out = redact({
@@ -42,4 +42,25 @@ Deno.test("redact keeps Google's own labels, removes an organisation's address",
   assertEquals(out.organizationInfo.address, "[removed]");
   assertEquals(out.organizationInfo.phoneNumber, "[removed]");
   assertEquals(out.organizationInfo.registeredDomain, "kabsi.co");
+});
+
+Deno.test("probeSummary keeps only the status and Google's reason for a refusal", () => {
+  const out = probeSummary({
+    url: "https://mybusiness.googleapis.com/v4/accounts/1/locations/2/reviews", status: 403,
+    body: { error: { code: 403, status: "PERMISSION_DENIED", message: "has not been used in project 856347937978", details: [{ reason: "SERVICE_DISABLED", metadata: { service: "mybusiness.googleapis.com", consumer: "projects/856347937978" } }] } },
+  });
+  assertEquals(out, { status: 403, url: "https://mybusiness.googleapis.com/v4/accounts/1/locations/2/reviews", code: "PERMISSION_DENIED", reason: "SERVICE_DISABLED", service: "mybusiness.googleapis.com", consumer: "projects/856347937978" });
+});
+
+Deno.test("probeSummary redacts a list that did open: no review text, no reviewer name", () => {
+  const out = probeSummary({
+    url: "https://mybusiness.googleapis.com/v4/accounts/1/locations/2/reviews", status: 200,
+    body: { reviews: [{ name: "accounts/1/locations/2/reviews/r", starRating: "FIVE", comment: "Lovely", reviewer: { displayName: "A Person" } }], totalReviewCount: 7 },
+  }) as { list: string; count: number; totalSize: number; body: { reviews: { comment: string; reviewer: { displayName: string }; starRating: string }[] } };
+  assertEquals(out.list, "reviews");
+  assertEquals(out.count, 1);
+  assertEquals(out.totalSize, 7);
+  assertEquals(out.body.reviews[0].comment, "[removed]");
+  assertEquals(out.body.reviews[0].reviewer.displayName, "[removed]");
+  assertEquals(out.body.reviews[0].starRating, "FIVE");
 });

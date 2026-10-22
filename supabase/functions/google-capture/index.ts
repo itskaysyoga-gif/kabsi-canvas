@@ -1,7 +1,7 @@
 // google-capture: internal (cron secret), read-only. Captures real Google responses for the two Kabsi-owned profiles
 // (P0.7-01, K-34) with personal data removed. Every request is a GET (see _shared/google/capture.ts); it never
 // writes to Google and never changes GOOGLE_MODE.
-import { capture, inventory, reviews } from "../_shared/google/capture.ts";
+import { accountLocations, capture, categoriesList, inventory, reviews, v4Probe } from "../_shared/google/capture.ts";
 
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { "content-type": "application/json" } });
 async function isInternal(req: Request) {
@@ -22,6 +22,9 @@ Deno.serve(async (req) => {
     if (body.op === "inventory") return json(await inventory());
     if (body.op === "capture") return json(await capture(String(body.profile ?? "")));
     if (body.op === "reviews") return json(await reviews(String(body.profile ?? "")));
+    if (body.op === "v4") return json(await v4Probe(String(body.profile ?? "")));
+    if (body.op === "locations") return json(await accountLocations(String(body.profile ?? "")));
+    if (body.op === "categories") return json(await categoriesList(String(body.profile ?? "")));
     return json({ error: "unknown op" }, 400);
   } catch (e) {
     return json({ error: String((e as Error).message ?? e).slice(0, 300) }, 500);
