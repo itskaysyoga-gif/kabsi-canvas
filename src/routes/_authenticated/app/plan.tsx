@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { CARD_PAYMENTS_COMING, loadPlanSummary, PLAN_NAMES, type PlanSummary } from "@/lib/plans";
 import { daysUntil } from "@/lib/dashboard";
+import { COMING_SOON, PLAN_PRICE_ROWS, TAX_NOTE } from "@/lib/site";
 import { Wallet as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
 
@@ -218,10 +219,34 @@ function PlanPage() {
           </section>
 
           <section className="mt-6 rounded-large bg-kb-white p-6 shadow-kb sm:p-8">
+            <h2 className="text-xl font-bold">Plans and prices</h2>
+            <dl className="mt-3 divide-y divide-kb-hairline">
+              {PLAN_PRICE_ROWS.map((r) => (
+                <div
+                  key={r.name}
+                  className="flex flex-wrap items-baseline justify-between gap-x-4 py-3"
+                >
+                  <dt className="font-bold">{r.name}</dt>
+                  <dd className="text-kb-stone">{r.price}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-3 text-sm leading-6 text-kb-stone">
+              Prices are in US dollars, {TAX_NOTE}, and the same in every country. Every trial is 14
+              days of Pro with no card.
+            </p>
+          </section>
+
+          <section className="mt-6 rounded-large bg-kb-white p-6 shadow-kb sm:p-8">
             <div className="flex items-start gap-3">
               <CreditCard className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
               <div>
-                <h2 className="text-xl font-bold">How to pay</h2>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h2 className="text-xl font-bold">How to pay</h2>
+                  <span className="rounded-pill bg-kb-sand px-2.5 py-1 text-xs font-bold text-kb-stone">
+                    {COMING_SOON}
+                  </span>
+                </div>
                 <p className="mt-1 leading-7 text-kb-stone">{CARD_PAYMENTS_COMING}</p>
               </div>
             </div>

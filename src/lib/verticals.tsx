@@ -22,7 +22,7 @@ import {
   Wrench,
 } from "lucide-react";
 import type { PhotoId } from "@/lib/site-photos";
-import { BRAND_LINE } from "@/lib/site";
+import { BRAND_LINE, PRICES_SENTENCE } from "@/lib/site";
 
 export type Vertical = {
   slug: string;
@@ -754,7 +754,7 @@ export const VERTICALS: Vertical[] = [
       },
       {
         q: "How do I pay?",
-        a: "Kabsi Pro is $19 a month or $190 a year, and you can start with a 14-day free trial, no card. Prices are in US dollars and the same in every country.",
+        a: `${PRICES_SENTENCE} You can start with a 14-day Pro trial, no card. Prices are the same in every country. Card payments are coming. Until they open there is nothing to pay.`,
       },
     ],
   },

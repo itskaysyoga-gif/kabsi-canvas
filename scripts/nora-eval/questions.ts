@@ -754,10 +754,10 @@ export const QUESTIONS: Question[] = [
  */
 export const AMOUNTS: Record<string, string> = {
   $0: "Free plan (today)",
-  $19: "Pro monthly today; Essentials monthly when plans open",
-  $190: "Pro yearly today; Essentials yearly when plans open",
-  $39: "Pro monthly when plans open",
-  $390: "Pro yearly when plans open",
+  $19: "Essentials monthly",
+  $190: "Essentials yearly",
+  $39: "Pro monthly",
+  $390: "Pro yearly",
   $15: "extra location monthly",
   $150: "extra location yearly",
   $50: "partner payout minimum",

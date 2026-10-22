@@ -38,7 +38,7 @@ Hussein approved final product decisions on 21 Oct 2026. Most are not built yet.
 - The trial will be **14 days of Pro, no card**, and **30 days** through a partner link. There will be no Free plan: a business with no plan keeps its review link and QR code and nothing else runs.
 - **Essentials will include:** review alerts and ready replies; approving in the app or on WhatsApp; the day-one backlog; profile watch with a one-tap "Put it back"; the review link and QR code (works with your own NFC cards) with a "Message the manager" page; holiday hours reminders; the Weekly Care Report; Business Knowledge; Nora; the Profile Coach checklist.
 - **Pro will add:** sending photos on WhatsApp; weekly posts; review graphics; a monthly "What customers say" summary; the Profile Coach actions; your own order and booking button on Google; a search terms report; a "Report a fake review" helper; team roles and approval rules.
-- The website lists these prices as early-access pricing from 22 Oct 2026. Until card payments open nothing can be bought, so the earlier prices in section 4.1 are what the app and the emails still quote. Do not quote Essentials or Pro prices as available: say what the website shows, that card payments are coming and that there is nothing to pay today.
+- The website lists these prices as early-access pricing from 22 Oct 2026. Until card payments open nothing can be bought. The Plan page, the Home plan card, the trial emails, the FAQ and the terms quote the same prices as the website. Do not quote Essentials or Pro prices as available: say what the website shows, that card payments are coming and that there is nothing to pay today.
 
 **Review link page (live from 21 Oct 2026, P0.8-05).** Each review link either goes straight to Google (every existing link, so printed QR codes never change) or, when the owner switches that link to "Show the page" on Get reviews, opens a short Kabsi page at kabsi.co/review/{CODE}. The page shows the Google review button first and large, the same for every visitor, then one line, "Need help now? Message the manager", that opens the business's own WhatsApp (the number is a fact the owner adds in About your business, with the country code; with no number the line is hidden). It asks no question about the visit, shows no rating screen and sends nobody elsewhere. Opens are counted per link the same way as before. A business with no plan keeps its review link and QR code.
 
@@ -70,7 +70,7 @@ Hussein approved final product decisions on 21 Oct 2026. Most are not built yet.
 
 **[CHANGING] Being replaced.**
 
-- The **Free and Pro** plans and the $19 Pro price are replaced by Essentials and Pro when card payments open.
+- The earlier **Free and Pro** plans, with their single Pro price, are retired. No page or email quotes that price any more: the plans are Essentials and Pro, and they can be bought when card payments open.
 
 **The new homepage (live from 22 Oct 2026, P0.8-13).** The headline is "Your reviews and listing. Taken care of." The line under it is "Kabsi replies to your Google reviews, watches your Google Business Profile and makes it easy for customers to choose you." followed by **"You approve in one tap."** while Kabsi has no WhatsApp number, and **"You approve on WhatsApp."** once it has one (the site switches by itself when the number is set). The yellow button is "Check my Google profile free" (the free Profile Check, always); the second is "See how it works". The page runs in this order: how it works in four steps (check your profile, add Kabsi as a Manager, approve replies from your phone, Kabsi keeps watching); the three pillars Every review answered, Your profile protected and Ready to be found, each with a picture of the real screen marked "Example"; a WhatsApp section marked **Coming soon** while there is no number; the Essentials and Pro grid; pricing with the 14-day Pro trial; "You stay in control" (nothing posted without your OK, never your Google password, you stay the owner, disconnect any time, independent and not affiliated with Google); a founder note signed Rashid Abou Hamzy, founder, and proof; links to the six industry pages; questions; and a last yellow button. The page marks as **Coming soon**, with no date: approving and sending photos on WhatsApp, What customers say and the own order and booking button. It shows no customer quote, logo, rating or number of Kabsi's own, because there are no customers yet, and it promises no more reviews, calls or customers. The pictures are drawn from the real screens (the review card, Google Protection, the Profile Coach) with invented data. Pricing on the page: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year, an extra location $15 a month or $150 a year, plus tax where it applies, with a 14-day Pro trial and no card. **Card payments are not open**: every plan button starts the free Profile Check, and the page says "Card payments are coming. Until they open there is nothing to pay." Never say a plan can be bought today.
 
@@ -95,9 +95,9 @@ Check this block first. It holds every fact likely to change, verified against t
 
 | Topic | Fact |
 |---|---|
-| Plans | The website (from 22 Oct 2026) lists two plans, **Essentials** and **Pro** (K-126), as early-access pricing. **Nothing can be bought yet** (card payments are not open). The app's Plan page, the trial emails and the terms' older wording still speak of the earlier **Free** and **Pro** ($19 a month) until card payments open. **[CHANGING]** There is no Partner plan and, with Essentials and Pro, no Free plan. |
+| Plans | The website (from 22 Oct 2026) lists two plans, **Essentials** and **Pro** (K-126), as early-access pricing. **Nothing can be bought yet** (card payments are not open). The app's Plan page, the Home plan card, the trial emails and the terms quote the same Essentials and Pro prices as the website. **[CHANGING]** There is no Partner plan and, with Essentials and Pro, no Free plan. |
 | Free tools | The review link, QR code, printable table card, a message to share and the free Google Profile Check are free for everyone and keep working with no plan. |
-| Pro price | The website shows **Essentials $19 a month** or **$190 a year**, **Pro $39 a month** or **$390 a year**, an extra location $15 a month or $150 a year, in US dollars, plus tax where it applies, the same in every country, with a 14-day Pro trial and no card. **[COMING]** None of it can be bought until card payments open; every plan button on the website starts the free Google Profile Check. The earlier Pro price, $19 a month or $190 a year, is what the app and the trial emails still quote until then. |
+| Pro price | The website shows **Essentials $19 a month** or **$190 a year**, **Pro $39 a month** or **$390 a year**, an extra location $15 a month or $150 a year, in US dollars, plus tax where it applies, the same in every country, with a 14-day Pro trial and no card. **[COMING]** None of it can be bought until card payments open; every plan button on the website starts the free Google Profile Check. |
 | What each plan includes, as the website lists it | Essentials: review alerts and a reply ready for each one, approving in the app, the day-one backlog, Google Protection with a one-tap Put it back, the review link and QR code with a Message the manager page, Send review link for staff, holiday hours reminders, the Weekly Care Report, Business Knowledge, Nora and the Profile Coach checklist. Pro adds weekly posts, review graphics, the Profile Coach actions, the search terms report, a Report a fake review helper and team roles and approval rules. **[COMING]**, marked Coming soon with no date: approving on WhatsApp and sending photos on WhatsApp (Kabsi has no WhatsApp number), the monthly What customers say summary and your own order and booking button. |
 | Calls to action | The trial button (the header and the end of most pages) is **Join early access**. The homepage hero button, every plan button and the last button on the homepage are **Check my Google profile free** (the free Profile Check, always); the second hero button is **See how it works**. "Start free" replaces **Join early access** only after the launch gate (plan R-02). |
 | Extra locations | **$15 a month** or **$150 a year** for each extra Google profile. |
@@ -184,7 +184,7 @@ Kabsi is presented as five modules. Use these exact names.
 - **Get Reviews:** a review link and QR code for everyone; they work with your own QR codes and NFC cards. The page shows "link activity", which is not the same as reviews: Google decides which reviews appear.
 - **Weekly Care Report (live from 21 Oct 2026, P0.5-04):** an email every Monday at 08:00 local time, also kept under Insights. It starts with how many things Kabsi took care of that week, counted from the record of what Kabsi did (replies prepared, updates and photos published, changes to your profile found), then: the reviews (new, replies published, average rating), the Google Profile (checked how many times, changes found and how each was resolved, or "No important changes"), content (updates and photos published), customer activity for the week against the week before (views, calls, website clicks, direction requests; labelled as examples until Kabsi's Google connection is live), what needs you (nothing, or at most three lines), the Profile Coach's plan for the week (at most three lines), and the time saved. The time saved is an estimate and is never turned into money: 5 minutes for each reply published, 15 for each update (a post, a change to your hours or a profile detail), 10 for each batch of photos and 10 for each profile check that found something, with the working one tap away. On Pro it also shows how people found you. No review text and no customer names appear in it. Google's figures are kept with a report for 30 days and then removed from the report; Kabsi's own counts stay.
 
-Plans are Free and Pro. Free is Get Reviews (the review link and QR code). Pro is all five modules.
+Plans are Essentials and Pro (section 4.1). Get Reviews (the review link and QR code) is free for everyone and needs no plan.
 
 ### 2.1b What needs your attention
 
@@ -325,21 +325,23 @@ Statuses: Setup not finished, Waiting for Google access, Free, Active. A busines
 
 ### 4.1 Prices (US dollars, same in every country)
 
-**[CHANGING]** This table is true today. Essentials ($19 a month or $190 a year) and Pro ($39 a month or $390 a year) will replace the plans below, and card checkout through Creem will be the only way to pay (see the 21 Oct block).
+Essentials is $19 a month or $190 a year. Pro is $39 a month or $390 a year. An extra location is $15 a month or $150 a year. Prices are in US dollars, plus tax where it applies. Yearly is ten months for the price of twelve ("2 months free" on the pricing page). The website, the Plan page, the Home plan card, the trial emails (day 7, day 11, day 14 and the two follow-ups), the FAQ and the terms all say exactly this.
+
+**[COMING]** Card payments in US dollars are coming. Until they open there is nothing to pay and nothing to buy: no page has a checkout button. The Plan page lists the prices and marks How to pay as Coming soon.
 
 | Item | Price | Notes |
 |---|---|---|
-| Free | $0 | Review link, QR code, printable table card and a message to share. Never expires |
-| Kabsi Pro, monthly | $19 a month | All five modules. Cancel any time |
-| Kabsi Pro, yearly | $190 a year | Two months free |
+| Kabsi Essentials, monthly | $19 a month | Cancel any time |
+| Kabsi Essentials, yearly | $190 a year | Two months free |
+| Kabsi Pro, monthly | $39 a month | Everything in Essentials and the Pro additions listed at the top of this file. Cancel any time |
+| Kabsi Pro, yearly | $390 a year | Two months free |
 | Extra location | $15 a month or $150 a year | One plan covers one Google profile; each extra profile is added on top |
 
-- **Free trial: 14 days, no card**, for everyone. It starts when Kabsi's access to your Google profile works, so waiting for access costs you nothing. There is one trial per Google business.
-- **Same everywhere:** Kabsi Pro is software only, at the same price in every country. Kabsi sells no cards. Every business everywhere gets a free review link and QR code, which work with your own QR codes and NFC cards (section 5).
-- Pro includes everything in section 2: Reviews, Google Profile, Google Protection, Get Reviews and the Weekly Care Report.
+- **Free trial: 14 days, no card**, for everyone, with the whole of Pro. It starts when Kabsi's access to your Google profile works, so waiting for access costs you nothing. There is one trial per Google business.
+- **Same everywhere:** Kabsi is software only, at the same price in every country. Kabsi sells no cards. Every business everywhere gets a free review link and QR code, which work with your own QR codes and NFC cards (section 5), with no plan.
 - Monthly plans can be cancelled at any time. Yearly plans are refundable within 14 days.
 - Kabsi may change prices for future purchases. A plan already paid for keeps its price.
-- **[TIME-SENSITIVE]** The assistant may describe these prices once the pricing page shows them. If the pricing page still shows different prices, say so and hand off.
+- The assistant may quote these prices, always with: card payments are coming and nothing can be bought today.
 
 ### 4.2 How to pay
 
@@ -359,7 +361,7 @@ By card, in US dollars, and nothing else. **[COMING]** Card checkout through Cre
 
 Plans paid before 21 Oct 2026 don't renew by themselves; Kabsi never charges on its own. Home shows the plan and the days left in its top strip, and a card when the plan is about to end. **[COMING]** Renewing by card opens with card payments; until then the Plan page says card payments are coming.
 
-During a trial, Kabsi sends a few short emails, each only once and only while it is true for your business: a welcome with the one next step (invite Kabsi as a Manager); if access is still missing, a reminder 1 hour, 24 hours and 72 hours after you asked for it (they stop as soon as Kabsi has access); if you told Kabsi your profile needs verifying or Google is reviewing it, a short "Verified yet? Tap to continue" every 2 days, up to 5 times; if you asked Google for ownership of the profile and tapped "I've done it", a note on day 3 and on day 7 (all of these stop when Kabsi has access or you go back to the steps); a thank-you after your first approved reply; on day 2 what Kabsi has done so far; on day 7 your week, counted from the record of what Kabsi did and what you approved, with the yearly plan ($190 a year, two months free); on day 11 that your trial ends in 3 days, what happens next and both prices ($19 a month or $190 a year, plus tax where it applies); and on day 14 that the trial has ended (Kabsi keeps watching and drafting for 7 more days but publishes nothing until you choose a plan). These are the only trial emails: the older day 7, day 1 and last-day trial reminders were retired on 21 Oct 2026, so nobody gets two sets. There is no end-of-trial discount. The tips can be switched off: the "Verified yet?" and ownership notes (since 22 Oct 2026), the thank-you, and the day 2, day 7 and day 11 emails all carry **Unsubscribe from these emails** at the bottom, and Settings, What Kabsi tells you, under **Trial tips**, has the same switch. The welcome, the 1, 24 and 72 hour access reminders and the day 14 notice cannot be switched off. If you do not continue, you may get one note about the replies and changes still waiting, about 17 days and 30 days after the trial ended, only if you said yes to marketing emails (in the UK, the EU and EEA, Saudi Arabia, the UAE and wherever your country is not known, always only with your yes). A business that pays and a business set up by the Kabsi team get none of the trial emails.
+During a trial, Kabsi sends a few short emails, each only once and only while it is true for your business: a welcome with the one next step (invite Kabsi as a Manager); if access is still missing, a reminder 1 hour, 24 hours and 72 hours after you asked for it (they stop as soon as Kabsi has access); if you told Kabsi your profile needs verifying or Google is reviewing it, a short "Verified yet? Tap to continue" every 2 days, up to 5 times; if you asked Google for ownership of the profile and tapped "I've done it", a note on day 3 and on day 7 (all of these stop when Kabsi has access or you go back to the steps); a thank-you after your first approved reply; on day 2 what Kabsi has done so far; on day 7 your week, counted from the record of what Kabsi did and what you approved, with the prices of Essentials, Pro and an extra location and a line that card payments are coming; on day 11 that your trial ends in 3 days, what happens next and the same prices; and on day 14 that the trial has ended (Kabsi keeps watching and drafting for 7 more days but publishes nothing until you choose a plan), with the same prices. The two follow-ups after the trial carry them too. The one button in these emails is See your plan, and it opens the Plan page, never a checkout. These are the only trial emails: the older day 7, day 1 and last-day trial reminders were retired on 21 Oct 2026, so nobody gets two sets. There is no end-of-trial discount. The tips can be switched off: the "Verified yet?" and ownership notes (since 22 Oct 2026), the thank-you, and the day 2, day 7 and day 11 emails all carry **Unsubscribe from these emails** at the bottom, and Settings, What Kabsi tells you, under **Trial tips**, has the same switch. The welcome, the 1, 24 and 72 hour access reminders and the day 14 notice cannot be switched off. If you do not continue, you may get one note about the replies and changes still waiting, about 17 days and 30 days after the trial ended, only if you said yes to marketing emails (in the UK, the EU and EEA, Saudi Arabia, the UAE and wherever your country is not known, always only with your yes). A business that pays and a business set up by the Kabsi team get none of the trial emails.
 
 ### 4.5 Refunds
 
@@ -880,7 +882,7 @@ You can. Kabsi saves the writing, drafts in the customer's language, catches eve
 Adding a Manager is Google's own way to give a service access, and Kabsi uses Google's official Business Profile APIs. It posts only what you approve and never filters or rewards reviewers.
 
 **Isn't Pro expensive?**
-It's $19 a month, or $190 a year, and you can cancel a monthly plan any time. You can also start with a 14-day free trial with no card, so you see the drafts before you pay.
+Essentials is $19 a month or $190 a year and Pro is $39 a month or $390 a year, and you can cancel a monthly plan any time. You can start with a 14-day Pro trial with no card, so you see the drafts before you pay. Card payments are coming; until they open there is nothing to pay.
 
 **What if I pay and Google access takes time?**
 Your plan starts only when access works, so waiting costs you nothing.
@@ -1025,7 +1027,7 @@ No. NFC doesn't work through metal.
 ### Pricing and payment
 
 **How much is Kabsi?**
-Kabsi Pro is $19 a month or $190 a year, with a 14-day free trial and no card. Extra locations are $15 a month or $150 a year. There is also a free plan with your review link and QR code.
+Essentials is $19 a month or $190 a year. Pro is $39 a month or $390 a year. Extra locations are $15 a month or $150 a year. There is a 14-day Pro trial with no card, and your review link and QR code are free for everyone. Card payments are coming; until they open there is nothing to pay.
 
 **Is there a free trial?**
 Yes. 14 days, no card. It starts when Kabsi's access to your Google profile works.
@@ -1037,7 +1039,7 @@ Yes. Free is your review link, a QR code, a printable table card and a message t
 Yes, in US dollars.
 
 **Is there a monthly plan?**
-Yes. Kabsi Pro is $19 a month, and you can cancel any time. The yearly plan is $190 a year, two months free.
+Yes. Essentials is $19 a month and Pro is $39 a month, and you can cancel any time. The yearly plans are $190 and $390 a year, two months free. Card payments are coming; until they open there is nothing to pay.
 
 **How do I pay?**
 By card, in US dollars. Card payments are coming; until they open there is nothing to pay, and the trial needs no card.

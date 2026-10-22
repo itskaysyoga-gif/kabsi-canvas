@@ -107,17 +107,11 @@ export function heroSub(whatsappOn: boolean = WHATSAPP_ON): string {
 export const GOOGLE_NOTICE =
   "Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.";
 
-export const PRICES = {
-  proMonthly: 19,
-  proYearly: 190,
-  extraLocationMonthly: 15,
-  extraLocationYearly: 150,
-} as const;
-
 /**
  * The plans on the website (K-126, 22 Oct 2026), in US dollars. Card payments through Creem (P0.4-07) are not open, so
- * every plan button starts the free Profile Check and the pages say card payments are coming. `PRICES` above is the
- * single Pro price the earlier emails and terms were written against; P0.4-07 retires it when Creem goes live.
+ * every plan button starts the free Profile Check and the pages say card payments are coming. These are the only prices
+ * in the product: the Plan page, the Home card, the trial emails, the FAQ and the terms all read them or repeat
+ * `PRICES_SENTENCE`. The earlier single Pro price is retired, and tests/prices.test.ts fails if it comes back.
  */
 export const PLAN_PRICES = {
   essentialsMonthly: 19,
@@ -127,6 +121,25 @@ export const PLAN_PRICES = {
   extraLocationMonthly: 15,
   extraLocationYearly: 150,
 } as const;
+/** The three prices in one sentence, worded once, for the Plan page, the Home card, the FAQ and the trial emails. */
+export const PRICES_SENTENCE = `Essentials is $${PLAN_PRICES.essentialsMonthly} a month or $${PLAN_PRICES.essentialsYearly} a year. Pro is $${PLAN_PRICES.proMonthly} a month or $${PLAN_PRICES.proYearly} a year. An extra location is $${PLAN_PRICES.extraLocationMonthly} a month or $${PLAN_PRICES.extraLocationYearly} a year. Prices are in US dollars, plus tax where it applies.`;
+/** The three rows the Plan page lists, worded from the same numbers. */
+export const PLAN_PRICE_ROWS = [
+  {
+    name: "Kabsi Essentials",
+    price: `$${PLAN_PRICES.essentialsMonthly} a month or $${PLAN_PRICES.essentialsYearly} a year`,
+  },
+  {
+    name: "Kabsi Pro",
+    price: `$${PLAN_PRICES.proMonthly} a month or $${PLAN_PRICES.proYearly} a year`,
+  },
+  {
+    name: "Extra location",
+    price: `$${PLAN_PRICES.extraLocationMonthly} a month or $${PLAN_PRICES.extraLocationYearly} a year`,
+  },
+] as const;
+/** The marker on a feature or payment that is decided and not open. No date, ever. */
+export const COMING_SOON = "Coming soon";
 /** True once Creem checkout is merged and live (P0.4-07). While false, no page may link to a checkout. */
 export const CHECKOUT_LIVE = false;
 /** The words after a price, worded once. */
