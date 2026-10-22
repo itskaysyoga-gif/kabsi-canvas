@@ -6,7 +6,7 @@ import {
   KABSI_GROUP_NAME,
   LEGAL_SELLER,
   OPERATOR_LINE,
-  PRICES,
+  PLAN_PRICES,
   WHATSAPP_NUMBER,
   WHATSAPP_ON,
   pageHead,
@@ -192,11 +192,14 @@ function Page() {
         <h2>8. Prices and payment</h2>
         <ul>
           <li>
-            Kabsi Pro is ${PRICES.proMonthly} a month or ${PRICES.proYearly} a year, and an extra
-            location is ${PRICES.extraLocationMonthly} a month or ${PRICES.extraLocationYearly} a
-            year. Prices are in US dollars and the same in every country. You can start with a
-            14-day free trial, no card. Monthly plans can be cancelled at any time and run to the
-            end of the month you paid for. Yearly plans are refundable within 14 days (section 10).
+            Kabsi Essentials is ${PLAN_PRICES.essentialsMonthly} a month or $
+            {PLAN_PRICES.essentialsYearly} a year, Kabsi Pro is ${PLAN_PRICES.proMonthly} a month or
+            ${PLAN_PRICES.proYearly} a year, and an extra location is $
+            {PLAN_PRICES.extraLocationMonthly} a month or ${PLAN_PRICES.extraLocationYearly} a year.
+            Prices are in US dollars, plus tax where it applies, and the same in every country. You
+            can start with a 14-day free trial of Pro, no card. Monthly plans can be cancelled at
+            any time and run to the end of the month you paid for. Yearly plans are refundable
+            within 14 days (section 10).
           </li>
           <li>
             You pay by card, in US dollars. That is the only way to pay Kabsi. Card payments are

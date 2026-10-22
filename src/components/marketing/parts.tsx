@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { KabsiMark } from "@/components/shared/kabsi-logo";
 import { cn } from "@/lib/utils";
 import { BRAND_EXPLAINER, BRAND_LINE, CTA_PRIMARY } from "@/lib/site";
+import { COMING_SOON } from "@/lib/website";
 import type { PhotoId } from "@/lib/site-photos";
 import { SiteImg } from "@/components/marketing/site-img";
 
@@ -376,5 +377,19 @@ export function Photo({
       priority={priority}
       className={cn("block h-auto w-full rounded-large bg-kb-sand object-cover", className)}
     />
+  );
+}
+
+/** "Coming soon", with no date. */
+export function SoonPill({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex shrink-0 rounded-pill bg-kb-amber-soft px-2.5 py-0.5 text-xs font-bold text-kb-amber",
+        className,
+      )}
+    >
+      {COMING_SOON}
+    </span>
   );
 }

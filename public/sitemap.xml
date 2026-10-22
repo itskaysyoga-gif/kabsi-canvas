@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
-    <loc>https://kabsi.co</loc><lastmod>2026-09-27</lastmod><changefreq>weekly</changefreq><priority>1.0</priority>
+    <loc>https://kabsi.co</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>1.0</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/hero-home-1600.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-bakery-1200.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-restaurant-1200.webp</image:loc></image:image>
@@ -13,14 +13,14 @@
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-hotel-1200.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi.co/how-it-works</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <loc>https://kabsi.co/how-it-works</loc><lastmod>2026-10-22</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/hero-how-1600.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-cafe-1200.webp</image:loc></image:image>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/biz-dentist-1200.webp</image:loc></image:image>
     <image:image><image:loc>https://kabsi.co/images/nfc-card-closeup.webp</image:loc></image:image>
   </url>
   <url>
-    <loc>https://kabsi.co/pricing</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.9</priority>
+    <loc>https://kabsi.co/pricing</loc><lastmod>2026-10-22</lastmod><changefreq>monthly</changefreq><priority>0.9</priority>
     <image:image><image:loc>https://ynjdqjlmdwjgbfezevxy.supabase.co/storage/v1/object/public/site/v2/hero-pricing-1600.webp</image:loc></image:image>
     <image:image><image:loc>https://kabsi.co/images/nfc-cards.webp</image:loc></image:image>
   </url>

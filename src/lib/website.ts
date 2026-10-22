@@ -10,6 +10,7 @@ import {
   GOOGLE_NOTICE,
   KABSI_GROUP_ID,
   PLAN_PRICES,
+  TAX_NOTE,
   WHATSAPP_ON,
 } from "@/lib/site";
 import { FAQ } from "@/lib/faq";
@@ -225,3 +226,79 @@ export function homeFaq(whatsappOn: boolean = WHATSAPP_ON): { q: string; a: stri
     },
   ];
 }
+
+/** The pricing page questions (design review, "Pricing page"). Plain text, because they also feed the FAQPage JSON-LD. */
+export function pricingFaq(whatsappOn: boolean = WHATSAPP_ON): { q: string; a: string }[] {
+  return [
+    {
+      q: "What is the difference between Essentials and Pro?",
+      a: `Essentials answers your reviews and watches your listing: review alerts with a reply ready, the backlog of older reviews, Google Protection with a one-tap Put it back, your review link and QR code, holiday hours reminders, the Weekly Care Report, Business Knowledge, Nora and the Profile Coach checklist. Pro adds weekly posts, review graphics, the Profile Coach actions, the search terms report, a Report a fake review helper, team roles and approval rules${
+        whatsappOn ? ", photos sent on WhatsApp" : ""
+      }, and two things that are coming soon: a monthly What customers say summary and your own order and booking button${whatsappOn ? "" : ". Sending photos on WhatsApp is coming soon too"}.`,
+    },
+    {
+      q: "How does the free trial work?",
+      a: `You try Pro free for 14 days with no card. It starts when Kabsi's access to your Google profile works. From day 11 Kabsi shows you the plans. If the trial ends with no plan, Kabsi keeps watching and drafting for 7 days but publishes nothing, then it stops, and your review link and QR code keep working.`,
+    },
+    {
+      q: "How do I pay?",
+      a: `By card, in US dollars, and nothing else. Card payments are coming, and until they open there is nothing to pay. Prices are $${PLAN_PRICES.essentialsMonthly} a month or $${PLAN_PRICES.essentialsYearly} a year for Essentials and $${PLAN_PRICES.proMonthly} a month or $${PLAN_PRICES.proYearly} a year for Pro, ${TAX_NOTE}.`,
+    },
+    {
+      q: "Is there a free plan?",
+      a: "No. After a trial you choose Essentials or Pro. Your review link and QR code, and the free Google Profile Check, stay free for everyone and keep working with no plan.",
+    },
+    {
+      q: "Can I add a second location?",
+      a: `Yes. One plan covers one Google profile. Each extra location is $${PLAN_PRICES.extraLocationMonthly} a month or $${PLAN_PRICES.extraLocationYearly} a year.`,
+    },
+    {
+      q: "Can I cancel or get a refund?",
+      a: "Monthly plans cancel any time and run to the end of the month you paid for. Yearly plans are refunded in full within 14 days of the plan starting. Write to hello@kabsi.co.",
+    },
+    {
+      q: "Is the price the same in every country?",
+      a: `Yes, in US dollars, ${TAX_NOTE}.`,
+    },
+  ];
+}
+
+/** The operating loop in plain words (design review, "How it works"). */
+export const LOOP = [
+  {
+    title: "Kabsi watches",
+    text: "It reads your new reviews and watches your name, phone, address, hours, website and category on Google.",
+  },
+  {
+    title: "Kabsi prepares",
+    text: "It writes a reply for each review from the facts you gave it, and prepares posts, photos and holiday hours.",
+  },
+  {
+    title: "Kabsi asks",
+    text: "Each one waits for you with the exact words and what will happen if you approve.",
+  },
+  {
+    title: "Kabsi publishes",
+    text: "Only what you approved goes to Google, after a 10-second undo, and Kabsi checks that Google shows it.",
+  },
+  {
+    title: "Kabsi reports",
+    text: "The Weekly Care Report says what changed, what was answered and what still needs you. Facts only.",
+  },
+] as const;
+
+export const CAN = [
+  "Read your reviews and prepare a reply for each one",
+  "Watch your listing and show you what changed",
+  "Prepare posts, photos and holiday hours for you to approve",
+  "Publish what you approved, and check that Google shows it",
+  "Be removed by you at any time",
+] as const;
+
+export const CANNOT = [
+  "See your Google password, or ask for it",
+  "Post, reply or change anything without your approval",
+  "Lock your listing or stop people suggesting edits to Google",
+  "Remove a review, or promise that Google will",
+  "Promise more reviews, calls or customers",
+] as const;
