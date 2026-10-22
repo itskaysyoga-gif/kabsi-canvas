@@ -19,6 +19,9 @@ language sql immutable set search_path = '' as $$
   end
 $$;
 
+-- Only the functions below use it: no role of the API runs it (the private schema stays out of reach).
+revoke all on function private.google_error_type(text) from public, anon, authenticated;
+
 -- 2. The System health read -------------------------------------------------------------------------------------------
 
 create or replace function public.staff_system_health() returns jsonb

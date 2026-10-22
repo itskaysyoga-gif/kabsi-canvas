@@ -4,7 +4,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 select * from no_plan();
-create temp table ids as select 0::bigint as dead_job, 0::bigint as cancel_job;
+create temp table ids as select 0::bigint as dead_job, 0::bigint as cancel_job, 0::bigint as dup_job;
 grant select on ids to authenticated;
 
 \ir _fixtures.psql
@@ -81,18 +81,19 @@ select ok((select h -> 'google' -> 'places' ? 'daily_cap' from health), 'the Pla
 
 -- Retry and cancel.
 select is((select public.staff_job_retry(dead_job) ->> 'state' from ids), 'pending', 'retry answers pending');
-select is((select state || ':' || attempts::text || ':' || coalesce(last_error, 'none') from public.jobs where id = (select dead_job from ids)),
-  'pending:0:none', 'retry moves the dead job back to pending with fresh tries');
 select throws_ok($$ select public.staff_job_retry((select dead_job from ids)) $$, 'P0001', 'not_dead', 'a job that is not dead cannot be retried');
 select is((select public.staff_job_cancel(cancel_job) ->> 'state' from ids), 'failed', 'cancel closes a dead job as failed');
-select ok((select last_error like 'cancelled by staff%' from public.jobs where id = (select cancel_job from ids)), 'with the reason');
 select throws_ok($$ select public.staff_job_cancel(0) $$, 'P0001', 'not_found', 'an unknown job is refused');
--- The same work already open blocks a retry.
 reset role;
+select is((select state || ':' || attempts::text || ':' || coalesce(last_error, 'none') from public.jobs where id = (select dead_job from ids)),
+  'pending:0:none', 'retry moves the dead job back to pending with fresh tries');
+select ok((select last_error like 'cancelled by staff%' from public.jobs where id = (select cancel_job from ids)), 'cancel leaves the reason');
+-- The same work already open blocks a retry.
 insert into public.jobs (kind, state, attempts, max_attempts, finished_at, dedupe_key) values ('test_dup', 'dead', 5, 5, now() - interval '1 hour', 'test:dup');
 insert into public.jobs (kind, state, dedupe_key) values ('test_dup', 'pending', 'test:dup');
+update ids set dup_job = (select id from public.jobs where dedupe_key = 'test:dup' and state = 'dead');
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');
-select throws_ok($$ select public.staff_job_retry((select id from public.jobs where dedupe_key = 'test:dup' and state = 'dead')) $$,
+select throws_ok($$ select public.staff_job_retry((select dup_job from ids)) $$,
   'P0001', 'already_open', 'a dead job whose work is already open is not retried twice');
 reset role;
 select ok(
