@@ -16,7 +16,15 @@ import {
   Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CtaBand, Eyebrow, FaqList, H2, IconBadge, Section } from "@/components/marketing/parts";
+import {
+  CtaBand,
+  Eyebrow,
+  FaqList,
+  H2,
+  IconBadge,
+  Section,
+  SoonPill,
+} from "@/components/marketing/parts";
 import { KabsiMark } from "@/components/shared/kabsi-logo";
 import {
   CoachScreen,
@@ -62,27 +70,9 @@ import {
 import { VERTICALS } from "@/lib/verticals";
 import { cn } from "@/lib/utils";
 
-/** "Coming soon", with no date. */
-export function SoonPill({ className }: { className?: string }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex shrink-0 rounded-pill bg-kb-amber-soft px-2.5 py-0.5 text-xs font-bold text-kb-amber",
-        className,
-      )}
-    >
-      {COMING_SOON}
-    </span>
-  );
-}
-
 function Hero() {
   return (
     <section className="relative isolate overflow-hidden bg-kb-carbon text-kb-white">
-      <div
-        aria-hidden="true"
-        className="absolute -right-24 top-10 -z-10 size-[28rem] rounded-full bg-kb-yellow/10 blur-3xl"
-      />
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16 lg:py-24">
         <div>
           <h1 className="font-display text-[clamp(2.7rem,6.6vw,5.2rem)] leading-[0.95] text-balance">

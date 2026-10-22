@@ -1,6 +1,6 @@
 // P0.8-13: the homepage (K-140, K-144, K-112, R-02). The order of the sections, the WhatsApp switch, the Coming soon
 // markers, the plan buttons while Creem is not live, and the claims rule on every word of the page.
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
@@ -17,6 +17,9 @@ import {
   CONTROL_ITEMS,
   FOUNDER_NOTE,
   HOME_ORDER,
+  CAN,
+  CANNOT,
+  LOOP,
   PAYMENT_LINE,
   PILLARS,
   PRICE_LINES,
@@ -26,6 +29,7 @@ import {
   howSteps,
   planButton,
   planGrid,
+  pricingFaq,
   whatsappText,
 } from "../src/lib/website";
 import { EXAMPLE_REVIEW, ExampleTag, WhatsappChat } from "../src/components/marketing/mockups";
@@ -53,6 +57,10 @@ function pageWords(): string[] {
       TRIAL_BOX,
       PAYMENT_LINE,
       Object.values(PRICE_LINES),
+      pricingFaq(on),
+      LOOP,
+      CAN,
+      CANNOT,
     ]),
   );
 }
@@ -198,5 +206,55 @@ describe("the mockups", () => {
         /new Date\(|Date\.now\(|Math\.random\(|toLocale\w*\(|Intl\.|fmtDate|timeAgo|typeof window/,
       );
     }
+  });
+});
+
+describe("the pricing and how it works pages (P0.8-13 part 3)", () => {
+  const sources = [
+    "src/routes/index.tsx",
+    "src/routes/pricing.tsx",
+    "src/routes/how-it-works.tsx",
+    "src/routes/for.$slug.tsx",
+    "src/routes/for.index.tsx",
+    "src/components/marketing/home-sections.tsx",
+    "src/lib/website.ts",
+    "src/lib/verticals.tsx",
+  ];
+  it("have no Lebanon, card-sale, crypto or partner-resale text", () => {
+    for (const file of sources)
+      expect(readFileSync(file, "utf8"), file).not.toMatch(
+        /Leban|USDT|Binance|Whish|\bOMT\b|NOWPayments|reseller|resale|NFC card sale|sell(s)? NFC/i,
+      );
+  });
+  it("show no Free or Partner plan column and no picture of a card on the pricing page", () => {
+    const code = readFileSync("src/routes/pricing.tsx", "utf8");
+    expect(code).not.toMatch(/name="Free"|name="Partner"|CardRender|PricingVisual/);
+    expect(code).toContain("Essentials");
+    expect(code).toContain("planButton()");
+  });
+  it("name the plans, the trial, the extra location and the Creem line on the pricing page", () => {
+    const words = pricingFaq()
+      .map((f) => f.a)
+      .join("\n");
+    expect(words).toMatch(/\$39 a month or \$390 a year/);
+    expect(words).toMatch(/\$15 a month or \$150 a year/);
+    expect(words).toMatch(/14 days with no card/);
+    expect(readFileSync("src/routes/pricing.tsx", "utf8")).toContain("Cards through Creem");
+  });
+  it("say what Kabsi cannot do, including the password and posting without you", () => {
+    expect(CANNOT.join("\n")).toMatch(/password/);
+    expect(CANNOT.join("\n")).toMatch(/without your approval/);
+    expect(CANNOT.join("\n")).toMatch(/Lock your listing/);
+    expect(LOOP.map((l) => l.title)).toEqual([
+      "Kabsi watches",
+      "Kabsi prepares",
+      "Kabsi asks",
+      "Kabsi publishes",
+      "Kabsi reports",
+    ]);
+  });
+  it("keep /partners the holding page and have no /meta page", () => {
+    expect(readFileSync("src/routes/partners.tsx", "utf8")).toContain("opening soon");
+    expect(existsSync("src/routes/meta.tsx")).toBe(false);
   });
 });
