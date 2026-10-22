@@ -1,5 +1,6 @@
 // Mock of the Performance API. No search terms (as before the move: posts fall back to the owner's own words) and
-// zero daily values, so no invented number can appear in a report (guardrail 23).
+// zero daily values, so no invented number can appear in a report (guardrail 23). Google leaves `value` out of a day
+// with nothing (seen live, 8 Oct 2026), so the mock does too: a day is a date and no value.
 import type { DailyMetricsResponse, GDate, SearchKeywordsResponse } from "../types.ts";
 
 export const searchKeywordsMonthly = (_location: string, _start: { year: number; month: number }, _end: { year: number; month: number }): Promise<SearchKeywordsResponse> =>
@@ -13,7 +14,7 @@ export function dailyMetrics(_location: string, metrics: string[], start: GDate,
   }
   return Promise.resolve({
     multiDailyMetricTimeSeries: [{
-      dailyMetricTimeSeries: metrics.map((dailyMetric) => ({ dailyMetric, timeSeries: { datedValues: days.map((date) => ({ date, value: "0" })) } })),
+      dailyMetricTimeSeries: metrics.map((dailyMetric) => ({ dailyMetric, timeSeries: { datedValues: days.map((date) => ({ date })) } })),
     }],
   });
 }
