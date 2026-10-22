@@ -1,5 +1,5 @@
 // CI guard (D295). Functions the browser calls without a session have verify_jwt on, so every such call must send
-// the public anon JWT. This checks that src/lib/supabase.ts exports anonHeaders and that each call site below
+// the public anon JWT. This checks that src/lib/supabase-config.ts defines anonHeaders (src/lib/supabase.ts re-exports it) and that each call site below
 // imports it and uses it near every fetch to that function. Text based on purpose: it is a tripwire, not a parser.
 import { readFileSync } from "node:fs";
 
@@ -38,16 +38,28 @@ const read = (f) => {
   }
 };
 
-const lib = read("src/lib/supabase.ts");
+// The headers live in the light config file so a public page can call a function without loading supabase-js; the
+// client file re-exports them, so older imports keep working.
+const lib = read("src/lib/supabase-config.ts");
 if (lib && !/export\s+const\s+anonHeaders\b/.test(lib))
-  problems.push("src/lib/supabase.ts does not export anonHeaders");
+  problems.push("src/lib/supabase-config.ts does not export anonHeaders");
+const client = read("src/lib/supabase.ts");
+if (
+  client &&
+  !/export\s*\{[^}]*\banonHeaders\b[^}]*\}\s*from\s*["']@\/lib\/supabase-config["']/.test(client)
+)
+  problems.push("src/lib/supabase.ts does not re-export anonHeaders");
 
 for (const { fn, file, target } of SITES) {
   const src = read(file);
   if (!src) continue;
   const lines = src.split("\n");
-  if (!/import\s*\{[^}]*\banonHeaders\b[^}]*\}\s*from\s*["']@\/lib\/supabase["']/.test(src)) {
-    problems.push(`${file} (${fn}): does not import anonHeaders from @/lib/supabase`);
+  if (
+    !/import\s*\{[^}]*\banonHeaders\b[^}]*\}\s*from\s*["']@\/lib\/supabase(-config)?["']/.test(src)
+  ) {
+    problems.push(
+      `${file} (${fn}): does not import anonHeaders from @/lib/supabase or @/lib/supabase-config`,
+    );
   }
   let calls = 0;
   lines.forEach((line, i) => {
