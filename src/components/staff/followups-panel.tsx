@@ -6,7 +6,9 @@ import { fmtDate } from "@/lib/format";
 import { supabase } from "@/lib/supabase";
 import { KABSI_GROUP_ID } from "@/lib/site";
 
-// Staff follow-ups. google_access_removal (K-41, P0.2-02): an owner disconnected Kabsi and Google did not let Kabsi
+// Staff follow-ups. whatsapp_nudge (K-61, P0.4-04): an owner agreed 72 hours ago, Kabsi still has no access and they gave a
+// phone number; a person sends a short personal WhatsApp from their own phone. The follow-up holds no phone number: the
+// detail says where it is (Staff, Contacts). google_access_removal (K-41, P0.2-02): an owner disconnected Kabsi and Google did not let Kabsi
 // remove its own Manager access, or the business is handled by hand. Google's limit is 7 business days from the
 // request; the due date says when. Closing one marks access removed and emails the owner (staff_complete_followup).
 // google_support (K-19, P0.2-04): Google changed a detail again after Kabsi put the owner's approved value back twice
@@ -62,6 +64,7 @@ function FollowupCard({ f }: { f: Followup }) {
   const [err, setErr] = useState("");
   const late = Date.parse(f.due_at) < Date.now();
   const support = f.kind === "google_support";
+  const nudge = f.kind === "whatsapp_nudge";
   async function done() {
     setBusy(true);
     setErr("");
@@ -72,7 +75,18 @@ function FollowupCard({ f }: { f: Followup }) {
   }
   return (
     <div className="rounded-large bg-kb-white p-5 shadow-kb">
-      {support ? (
+      {nudge ? (
+        <>
+          <p className="font-bold">Send a personal WhatsApp to the owner of {f.location_name}</p>
+          <p className={late ? "mt-1 text-sm font-bold text-kb-red" : "mt-1 text-sm text-kb-stone"}>
+            Due {fmtDate(f.due_at)}. Asked {fmtDate(f.created_at)}.
+          </p>
+          <p className="mt-2 text-sm leading-6 text-kb-stone">
+            They have not added Kabsi as a Manager yet. Write from your own phone: ask if they need
+            a hand, offer the free setup call, and never ask for a Google password or code.
+          </p>
+        </>
+      ) : support ? (
         <>
           <p className="font-bold">Contact Google support for {f.location_name}</p>
           <p className={late ? "mt-1 text-sm font-bold text-kb-red" : "mt-1 text-sm text-kb-stone"}>
@@ -113,7 +127,13 @@ function FollowupCard({ f }: { f: Followup }) {
         disabled={busy || !note.trim()}
         onClick={() => void done()}
       >
-        {busy ? "Saving…" : support ? "Done, Google support contacted" : "Done, Kabsi is removed"}
+        {busy
+          ? "Saving…"
+          : nudge
+            ? "Done, I sent a message"
+            : support
+              ? "Done, Google support contacted"
+              : "Done, Kabsi is removed"}
       </Button>
       {err ? (
         <p className="mt-2 text-sm text-kb-red" role="alert">

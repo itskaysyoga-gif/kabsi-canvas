@@ -3,6 +3,7 @@
 import { supabase } from "@/lib/supabase";
 import { callFunction } from "@/lib/api";
 import type { PlanKind } from "@/lib/plans";
+import type { OwnerVariant, ScenarioId } from "@/lib/scenarios";
 
 export type OnboardingStep = "business" | "access" | "knowledge" | "confirm" | "plan" | "done";
 export type Location = {
@@ -145,3 +146,35 @@ export async function loadGoogleLive(): Promise<boolean> {
 /** "Send these steps to my other device": one email to the signed-in person's own address (send_manager_steps). */
 export const sendManagerSteps = (locationId: string, step: number) =>
   rpc<void>("send_manager_steps", { p_location: locationId, p_step: step });
+
+/** The situation the owner reported while adding Kabsi (P0.4-04): the open one, or null. Read through RLS. */
+export type ScenarioRow = {
+  scenario: ScenarioId;
+  variant: OwnerVariant | null;
+  started_at: string;
+  done_at: string | null;
+};
+export async function loadScenario(locationId: string): Promise<ScenarioRow | null> {
+  const { data, error } = await supabase
+    .from("onboarding_scenarios")
+    .select("scenario, variant, started_at, done_at")
+    .eq("location_id", locationId)
+    .is("resolved_at", null)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return (data as ScenarioRow | null) ?? null;
+}
+export const setScenario = (
+  locationId: string,
+  scenario: ScenarioId,
+  variant?: OwnerVariant | null,
+) =>
+  rpc<void>("set_onboarding_scenario", {
+    p_location: locationId,
+    p_scenario: scenario,
+    p_variant: variant ?? null,
+  });
+export const scenarioDone = (locationId: string) =>
+  rpc<void>("scenario_done", { p_location: locationId });
+export const clearScenario = (locationId: string) =>
+  rpc<void>("clear_onboarding_scenario", { p_location: locationId });

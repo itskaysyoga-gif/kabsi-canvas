@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { LIFE_SAMPLE } from "./email/catalog.ts";
 import { lifecycleEmail, PRICE_MONTHLY, PRICE_YEARLY } from "./email/lifecycle-copy.ts";
-import { dueSteps, marketingAllowed, OPT_IN_COUNTRIES, type Snapshot, type StepId } from "./lifecycle.ts";
+import { dueSteps, lifecycleKey, marketingAllowed, OPT_IN_COUNTRIES, type Snapshot, type StepId } from "./lifecycle.ts";
 import { type LifecycleDeps, runLifecycle } from "./lifecycle-run.ts";
 
 const H = 3_600_000, D = 86_400_000;
@@ -190,4 +190,68 @@ Deno.test("day 14 mentions removing access only when removal is on (the plan say
   const off = lifecycleEmail("trial_day14", LIFE_SAMPLE, { appUrl: "https://kabsi.co", removalOn: false });
   assert.match(on.text, /removes its Manager access/);
   assert.doesNotMatch(off.text, /removes its Manager access/);
+});
+
+// ─── P0.4-04: the setup-help reminders (K-95, K-97, K-61) ───────────────────────────────────────────────────────────
+
+Deno.test("verification check-backs: every 2 days while the profile is not verified, each once, none after access", async () => {
+  const waiting = (n: Date): Snapshot => ({ ...base, consentAt: null, status: "onboarding", createdAt: at(-30 * D), scenario: { id: "needs_verifying", variant: null, startedAt: at(H), doneAt: null } });
+  const sent = await run(waiting, 14 * 24, { since: at(-60 * D) });
+  const checks = sent.filter((s) => s.step.startsWith("verify_"));
+  assert.deepEqual(checks.map((s) => s.step), ["verify_1", "verify_2", "verify_3", "verify_4", "verify_5"]);
+  assert.deepEqual(checks.map((s) => (s.at.getTime() - T0.getTime()) / H), [1 + 48, 1 + 96, 1 + 144, 1 + 192, 1 + 240]);
+  assert.equal(new Set(checks.map((s) => s.key)).size, 5);
+  // access on day 5: the third and later never go
+  const early = await run((n) => ({ ...waiting(n), accessGrantedAt: n >= at(5 * D) ? at(5 * D) : null }), 14 * 24, { since: at(-60 * D) });
+  assert.deepEqual(early.filter((s) => s.step.startsWith("verify_")).map((s) => s.step), ["verify_1", "verify_2"]);
+});
+
+Deno.test("verification check-backs also run while Google is reviewing, and stop when the owner clears the situation", async () => {
+  const reviewing = (n: Date): Snapshot => ({ ...base, consentAt: null, createdAt: at(-30 * D), scenario: { id: "google_reviewing", variant: null, startedAt: at(0), doneAt: null } });
+  assert.deepEqual((await run(reviewing, 5 * 24, { since: at(-60 * D) })).filter((s) => s.step.startsWith("verify_")).map((s) => s.step), ["verify_1", "verify_2"]);
+  const cleared = (n: Date): Snapshot => ({ ...base, consentAt: null, createdAt: at(-30 * D), scenario: n < at(3 * D) ? { id: "google_reviewing", variant: null, startedAt: at(0), doneAt: null } : null });
+  assert.deepEqual((await run(cleared, 12 * 24, { since: at(-60 * D) })).filter((s) => s.step.startsWith("verify_")).map((s) => s.step), ["verify_1"]);
+});
+
+Deno.test("no check-back for a situation that is not about verification, and none without an owner account", () => {
+  for (const id of ["suspended", "manager_not_owner", "no_profile_in_account", "not_eligible", "several_locations", "workspace_blocks", "someone_else_owns"]) {
+    const s: Snapshot = { ...base, createdAt: at(-30 * D), scenario: { id, variant: null, startedAt: at(-3 * D), doneAt: null } };
+    assert.deepEqual(dueSteps(s, at(0), { since: at(-60 * D) }).filter((x) => x.startsWith("verify_")), [], id);
+  }
+  const v: Snapshot = { ...base, createdAt: at(-30 * D), owners: [], scenario: { id: "needs_verifying", variant: null, startedAt: at(-3 * D), doneAt: null } };
+  assert.deepEqual(dueSteps(v, at(0), { since: at(-60 * D) }), []);
+});
+
+Deno.test("ownership reminders: day 3 and day 7 after 'I've done it', each once, nothing before the request, none after access", async () => {
+  const asked = (n: Date): Snapshot => ({ ...base, consentAt: null, createdAt: at(-30 * D), scenario: { id: "someone_else_owns", variant: "dont_know", startedAt: at(0), doneAt: n >= at(D) ? at(D) : null } });
+  const sent = (await run(asked, 12 * 24, { since: at(-60 * D) })).filter((s) => s.step.startsWith("ownership_"));
+  assert.deepEqual(sent.map((s) => s.step), ["ownership_day3", "ownership_day7"]);
+  assert.deepEqual(sent.map((s) => (s.at.getTime() - T0.getTime()) / D), [4, 8]);
+  // never asked: no reminder at all
+  const never = await run((n) => ({ ...asked(n), scenario: { id: "someone_else_owns", variant: null, startedAt: at(0), doneAt: null } }), 12 * 24, { since: at(-60 * D) });
+  assert.deepEqual(never.filter((s) => s.step.startsWith("ownership_")), []);
+  // access on day 5: the day 7 reminder never goes
+  const early = await run((n) => ({ ...asked(n), accessGrantedAt: n >= at(5 * D) ? at(5 * D) : null }), 12 * 24, { since: at(-60 * D) });
+  assert.deepEqual(early.filter((s) => s.step.startsWith("ownership_")).map((s) => s.step), ["ownership_day3"]);
+});
+
+Deno.test("a new situation is a new email: the dedupe key carries the day it began", () => {
+  const a = lifecycleKey("verify_1", "loc1", at(0));
+  const b = lifecycleKey("verify_1", "loc1", at(20 * D));
+  assert.notEqual(a, b);
+  assert.equal(lifecycleKey("welcome", "loc1", at(0)), "life:welcome:loc1");
+});
+
+Deno.test("the setup-help emails: one yellow button, never ask for a code, house style, business first", () => {
+  for (const id of ["verify_1", "verify_2", "ownership_day3", "ownership_day7"] as StepId[]) {
+    const snap: Snapshot = { ...LIFE_SAMPLE, accessGrantedAt: null, scenario: { id: id === "verify_2" ? "google_reviewing" : id.startsWith("verify") ? "needs_verifying" : "someone_else_owns", variant: null, startedAt: at(0), doneAt: at(0) } };
+    const m = lifecycleEmail(id, snap, { appUrl: "https://kabsi.co", removalOn: false });
+    assert.ok(m.subject.startsWith(`${snap.name}:`), id);
+    assert.equal(m.button?.url, "https://kabsi.co/start", id);
+    const all = `${m.subject} ${m.title} ${m.preheader} ${m.bodyHtml} ${m.text}`;
+    assert.ok(!/[—–!]/.test(all), `${id}: no dashes or exclamation marks`);
+    assert.match(m.text, /never asks for your Google password or a verification code/, id);
+    assert.ok(!/send us your code|your verification code to/i.test(all), id);
+  }
+  assert.equal(lifecycleEmail("verify_1", { ...LIFE_SAMPLE, scenario: { id: "needs_verifying", variant: null, startedAt: at(0), doneAt: null } }, { appUrl: "https://kabsi.co", removalOn: false }).button?.label, "Verified yet? Tap to continue");
 });

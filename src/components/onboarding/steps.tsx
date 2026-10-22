@@ -1,13 +1,7 @@
 import { useState, type FormEvent } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,13 +10,19 @@ import { ErrorNote, StepTitle } from "@/components/onboarding/onboarding-shell";
 import { ManagerGuide } from "@/components/onboarding/manager-guide";
 import { AccessStatus } from "@/components/onboarding/access-status";
 import { AccessExits } from "@/components/onboarding/access-exits";
+import { ScenarioPicker } from "@/components/onboarding/scenario-picker";
+import { ScenarioScreen } from "@/components/onboarding/scenario-screen";
 import { EligibilityCheck, type Eligibility } from "@/components/onboarding/eligibility";
 import { KnowledgeForm } from "@/components/app/knowledge-form";
 import {
   CONSENT_TEXT,
   choosePlan,
+  clearScenario,
   friendlyError,
+  loadScenario,
   saveConsent,
+  scenarioDone,
+  setScenario,
   searchPlaces,
   setStep,
   startLocation,
@@ -34,6 +34,7 @@ import { track } from "@/lib/telemetry";
 import { CARD_PAYMENTS_COMING, loadPlanSummary } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 import { forgetSnapshot, keptSnapshot } from "@/lib/signup";
+import type { OwnerVariant, ScenarioId } from "@/lib/scenarios";
 
 type StepProps = { location: Location | null; onChanged: () => Promise<unknown> };
 
@@ -168,8 +169,37 @@ export function AccessStep({ location, onChanged }: StepProps) {
   const [card, setCard] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const qc = useQueryClient();
+  const scenario = useQuery({
+    queryKey: ["scenario", location?.id],
+    queryFn: () => loadScenario(location!.id),
+    enabled: !!location,
+  });
   if (!location) return null;
   const granted = Boolean(location.access_granted_at);
+
+  async function change(run: () => Promise<unknown>) {
+    setBusy(true);
+    setError("");
+    try {
+      await run();
+      await qc.invalidateQueries({ queryKey: ["scenario", location!.id] });
+    } catch (e) {
+      setError(friendlyError(e));
+    }
+    setBusy(false);
+  }
+  const pick = (id: ScenarioId) => void change(() => setScenario(location.id, id));
+  const pickVariant = (v: OwnerVariant) =>
+    void change(() => setScenario(location.id, "someone_else_owns", v));
+  // "I've done it": the owner did what the screen said. They carry on with the questions while Google catches up.
+  async function doneIt() {
+    await change(async () => {
+      await scenarioDone(location!.id);
+      await setStep(location!.id, "knowledge");
+    });
+    await onChanged();
+  }
 
   async function saveAgreement(value: boolean) {
     setAgreed(value);
@@ -195,6 +225,23 @@ export function AccessStep({ location, onChanged }: StepProps) {
       setError(friendlyError(e));
     }
     setBusy(false);
+  }
+
+  if (scenario.data && !granted) {
+    return (
+      <>
+        <ScenarioScreen
+          locationId={location.id}
+          businessName={location.name}
+          row={scenario.data}
+          busy={busy}
+          onPickVariant={pickVariant}
+          onDone={() => void doneIt()}
+          onBack={() => void change(() => clearScenario(location.id))}
+        />
+        <ErrorNote message={error} />
+      </>
+    );
   }
 
   return (
@@ -229,25 +276,7 @@ export function AccessStep({ location, onChanged }: StepProps) {
 
       <AccessExits location={location} step={card} />
 
-      <Accordion type="multiple" className="mt-5 border-t border-kb-hairline">
-        <AccordionItem value="people-access" className="border-kb-hairline">
-          <AccordionTrigger className="min-h-11 text-base">
-            Can't find People and access?
-          </AccordionTrigger>
-          <AccordionContent className="leading-6 text-kb-stone">
-            That menu only shows for the profile's owner. Ask whoever verified the profile to add
-            us, or send them these steps with the button above.
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="no-access" className="border-kb-hairline">
-          <AccordionTrigger className="min-h-11 text-base">
-            We don't have access to our profile
-          </AccordionTrigger>
-          <AccordionContent className="leading-6 text-kb-stone">
-            Write to hello@kabsi.co and we will help you work out how to request access from Google.
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      {!granted ? <ScenarioPicker busy={busy} onPick={pick} /> : null}
 
       <ErrorNote message={error} />
       <Button className="mt-6 w-full" onClick={next} disabled={busy || !location.consent_at}>

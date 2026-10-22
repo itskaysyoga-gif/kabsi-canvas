@@ -70,6 +70,8 @@ insert into public.rate_limits (key) values ('victim');
 insert into public.billing_events (provider, event_key) values ('creem', 'victim-event');
 insert into public.staff_followups (kind, location_id, location_name, due_at, done_at, done_note)
 values ('google_access_removal', '00000000-0000-4000-8000-0000000000c1', 'Victim Bakery', now(), now(), 'Victim follow-up');
+-- P0.4-04: the situation the victim owner reported while adding Kabsi.
+insert into public.onboarding_scenarios (location_id, scenario) values ('00000000-0000-4000-8000-0000000000c1', 'needs_verifying');
 insert into public.style_offers (id, location_id, kind, text, text_hash)
 values ('00000000-0000-4000-8000-0000000000fc', '00000000-0000-4000-8000-0000000000c1', 'fact', 'Victim offer text', 'victim');
 insert into public.knowledge_confirms (id, location_id, slot, key, proposed_value, proposed_source)

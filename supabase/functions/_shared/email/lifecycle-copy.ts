@@ -5,6 +5,7 @@
 import { esc, WHATSAPP_URL } from "../email-layout.ts";
 import type { Snapshot, StepId } from "../lifecycle.ts";
 import { p } from "./copy.ts";
+import { isSetupHelpStep, setupHelpEmail } from "./setup-help-copy.ts";
 import type { EmailContent } from "./template.ts";
 
 // Keep equal to PRICES.proMonthly and PRICES.proYearly in src/lib/site.ts (tests/lifecycle.test.ts checks it).
@@ -62,6 +63,7 @@ export function lifecycleEmail(step: StepId, s: Snapshot, c: LifecycleCtx): Emai
   const open = `${c.appUrl}/app`;
   const plan = `${c.appUrl}/app/plan`;
   const ends = day(s.trialEndsAt, s.timeZone);
+  if (isSetupHelpStep(step)) return setupHelpEmail(step, s, c);
   switch (step) {
     case "welcome":
       return {

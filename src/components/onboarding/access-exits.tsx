@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Check, Mail, MessageCircle, Share2, TriangleAlert, Users } from "lucide-react";
+import { Check, Mail, MessageCircle, Share2, Users } from "lucide-react";
 import { BookingLink } from "@/components/shared/booking-link";
+import { ReadyMessage } from "@/components/onboarding/ready-message";
 import { Button } from "@/components/ui/button";
-import { copyText } from "@/lib/clipboard";
-import { mailtoUrl, readyMessage, stepsUrl, whatsappShareUrl } from "@/lib/manager-guide";
+import { readyMessage, stepsUrl, whatsappShareUrl } from "@/lib/manager-guide";
 import { friendlyError, sendManagerSteps, type Location } from "@/lib/onboarding";
 import { SETUP_CALL_MINUTES, SITE_URL } from "@/lib/site";
 
@@ -17,27 +17,9 @@ type Panel = "device" | "someone" | null;
  */
 export function AccessExits({ location, step }: { location: Location; step: number }) {
   const [open, setOpen] = useState<Panel>(null);
-  const [copied, setCopied] = useState<"idle" | "done" | "failed">("idle");
   const link = stepsUrl(SITE_URL, location.name, step);
   const message = readyMessage(location.name, stepsUrl(SITE_URL, location.name));
   const email = useMutation({ mutationFn: () => sendManagerSteps(location.id, step) });
-
-  async function copyMessage() {
-    const ok = await copyText(message);
-    setCopied(ok ? "done" : "failed");
-    window.setTimeout(() => setCopied("idle"), 2000);
-  }
-  async function shareMessage() {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: "Add Kabsi as a Manager", text: message });
-        return;
-      } catch (e) {
-        if (e instanceof DOMException && e.name === "AbortError") return;
-      }
-    }
-    await copyMessage();
-  }
 
   return (
     <div className="mt-6 space-y-3">
@@ -98,34 +80,8 @@ export function AccessExits({ location, step }: { location: Location; step: numb
           <p className="text-sm leading-6">
             Send this to whoever manages it. They add Kabsi as a Manager, and you carry on here.
           </p>
-          <p
-            className="mt-3 whitespace-pre-wrap rounded-card bg-kb-white p-3 text-sm leading-6"
-            data-testid="ready-message"
-          >
-            {message}
-          </p>
-          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Button type="button" variant="outline" size="compact" onClick={copyMessage}>
-              {copied === "done" ? <Check /> : copied === "failed" ? <TriangleAlert /> : null}
-              {copied === "done"
-                ? "Copied"
-                : copied === "failed"
-                  ? "Couldn't copy"
-                  : "Copy message"}
-            </Button>
-            <Button type="button" variant="outline" size="compact" onClick={shareMessage}>
-              <Share2 /> Share
-            </Button>
-            <Button asChild variant="outline" size="compact">
-              <a href={whatsappShareUrl(message)} target="_blank" rel="noopener noreferrer">
-                <MessageCircle /> WhatsApp
-              </a>
-            </Button>
-            <Button asChild variant="outline" size="compact">
-              <a href={mailtoUrl(`Add Kabsi as a Manager for ${location.name}`, message)}>
-                <Mail /> Email
-              </a>
-            </Button>
+          <div className="mt-3">
+            <ReadyMessage text={message} subject={`Add Kabsi as a Manager for ${location.name}`} />
           </div>
         </div>
       ) : null}

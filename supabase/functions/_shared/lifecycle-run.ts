@@ -30,7 +30,7 @@ export async function runLifecycle(d: LifecycleDeps): Promise<LifecycleResult> {
       out.due++;
       try {
         out.sent += await d.send({
-          step, kind: `life_${step}`, category: STEPS[step].category, key: lifecycleKey(step, s.locationId), locationId: s.locationId,
+          step, kind: `life_${step}`, category: STEPS[step].category, key: lifecycleKey(step, s.locationId, s.scenario?.startedAt), locationId: s.locationId,
           to: s.owners, content: lifecycleEmail(step, s, { appUrl: d.appUrl, removalOn: cfg.removalOn }),
         });
       } catch (e) {
