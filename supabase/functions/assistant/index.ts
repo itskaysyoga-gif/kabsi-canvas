@@ -17,6 +17,7 @@ import { MODELS } from "../_shared/models.ts";
 import { countryFromTimezone } from "../_shared/tz-country.ts";
 import { nextTasks } from "../_shared/tasks.ts";
 import { WHATSAPP_NUMBER, WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
+import { cleanScreen, inOnboarding, ONBOARDING_RULES, onboardingHandoffLine, onboardingLines, onboardingStateResult, type OnboardingState } from "../_shared/onboarding-context.ts";
 
 const MODEL = MODELS.chat;
 const CLASSIFY_MODEL = MODELS.check;
@@ -154,6 +155,16 @@ const OWNER_TOOLS = [
   },
 ] as const;
 
+// Read-only: where the owner is in setup (the step of six, whether Google access works, the situation they reported). It
+// reads the owner's own business through the service role for that one signed-in owner and returns nothing else.
+const ONBOARDING_TOOLS = [
+  {
+    name: "onboarding_state",
+    description: "Read where this owner is in setting up Kabsi: the step of six, whether Google access works now, and the situation they reported. Use it when the owner says something changed (for example that they just added Kabsi), before you answer about their setup.",
+    input_schema: { type: "object", properties: {} },
+  },
+] as const;
+
 type Msg = { role: "user" | "assistant"; content: unknown };
 type Conv = { id: string; visitor_id: string; user_id: string | null; contact_id: string | null; status: string; message_count: number; tokens_in: number; tokens_out: number; cache_read: number };
 // Runs RPCs as the signed-in owner, so every membership check applies exactly as in the browser.
@@ -165,6 +176,24 @@ function asUser(req: Request) {
 }
 const EMAIL = /^[^\s@<>()]+@[^\s@<>()]+\.[a-z]{2,}$/i;
 const clip = (v: unknown, n: number) => (typeof v === "string" ? v.trim().slice(0, n) : "");
+
+// The owner's setup state for the one business that is not finished, read for a signed-in user (P0.4-11).
+async function readOnboarding(db: ReturnType<typeof admin>, userId: string, screen: string | null): Promise<OnboardingState | null> {
+  const { data: rows } = await db.from("location_members").select("locations(id, name, onboarding_step, consent_at, access_granted_at)").eq("user_id", userId).in("role", ["owner", "manager"]).limit(5);
+  type Loc = { id: string; name: string; onboarding_step: string; consent_at: string | null; access_granted_at: string | null };
+  const loc = ((rows ?? []) as unknown as { locations: Loc | null }[]).map((r) => r.locations).filter((l): l is Loc => !!l && l.onboarding_step !== "done")[0];
+  if (!loc) return null;
+  const [{ data: conn }, { data: sc }] = await Promise.all([
+    db.from("google_connections").select("access_state").eq("location_id", loc.id).maybeSingle(),
+    db.from("onboarding_scenarios").select("scenario, variant, started_at, done_at").eq("location_id", loc.id).is("resolved_at", null).maybeSingle(),
+  ]);
+  return {
+    business: loc.name, step: loc.onboarding_step, agreed: !!loc.consent_at, accessWorking: !!loc.access_granted_at,
+    accessState: (conn?.access_state as string | undefined) ?? null,
+    scenario: sc ? { id: sc.scenario as string, variant: (sc.variant as string | null) ?? null, since: sc.started_at as string, doneAt: (sc.done_at as string | null) ?? null } : null,
+    screen,
+  };
+}
 
 async function claude(system: unknown[], messages: Msg[], tools: readonly unknown[] = TOOLS) {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -336,6 +365,8 @@ Deno.serve(async (req) => {
   const page = clip(b.page, 200) || "/";
   const surface = b.surface === "app" ? "app" : "site";
   const meta = (b.meta ?? {}) as Record<string, unknown>;
+  // P0.4-11: the screen the owner asked from, held to a fixed list; the state itself is always read from the database.
+  const screen = cleanScreen((b.onboarding as Record<string, unknown> | undefined)?.screen);
   const tz = clip(meta.tz, 60);
   const device = ["mobile", "tablet", "desktop"].includes(String(meta.device)) ? String(meta.device) : null;
   const netCountry = clip(req.headers.get("cf-ipcountry") ?? req.headers.get("x-country") ?? "", 8).toUpperCase();
@@ -407,6 +438,11 @@ Deno.serve(async (req) => {
         if (l.id) await db.from("chat_conversations").update({ location_id: l.id }).eq("id", conv.id).is("location_id", null);
       }
     }
+    let onboarding: OnboardingState | null = null;
+    if (user) {
+      onboarding = await readOnboarding(db, user.id, screen);
+      if (onboarding) ctx.push(...onboardingLines(onboarding));
+    }
     if (conv.contact_id) {
       const { data: c } = await db.from("contacts").select("name, email, business_name").eq("id", conv.contact_id).maybeSingle();
       if (c) ctx.push(`Contact already saved: ${[c.name, c.email, c.business_name].filter(Boolean).join(", ")}`);
@@ -422,7 +458,7 @@ Deno.serve(async (req) => {
 
     const kb = await knowledge();
     const system = [
-      { type: "text", text: `${RULES}\n\n<knowledge_base>\n${kb || "(The knowledge base could not be loaded. Answer nothing factual; offer to pass the question to the team.)"}\n</knowledge_base>`, cache_control: { type: "ephemeral" } },
+      { type: "text", text: `${RULES}\n\n${ONBOARDING_RULES}\n\n<knowledge_base>\n${kb || "(The knowledge base could not be loaded. Answer nothing factual; offer to pass the question to the team.)"}\n</knowledge_base>`, cache_control: { type: "ephemeral" } },
       { type: "text", text: `<context>\n${ctx.join("\n")}\n</context>` },
     ];
 
@@ -439,7 +475,7 @@ Deno.serve(async (req) => {
           ? { role: m.role, content: [{ type: "text", text: m.content as string, cache_control: { type: "ephemeral" } }] }
           : m,
       );
-      const out = await claude(system, withCache, ownerLoc ? [...TOOLS, ...OWNER_TOOLS] : TOOLS);
+      const out = await claude(system, withCache, [...TOOLS, ...(ownerLoc ? OWNER_TOOLS : []), ...(onboarding && inOnboarding(onboarding) ? ONBOARDING_TOOLS : [])]);
       tin += out.usage.input_tokens + (out.usage.cache_creation_input_tokens ?? 0);
       tout += out.usage.output_tokens;
       tcache += out.usage.cache_read_input_tokens ?? 0;
@@ -493,8 +529,8 @@ Deno.serve(async (req) => {
               category: "internal", kind: "assistant_handoff", key: `assistant_handoff:${conv.id}:${n}`, to: [{ email: "hello@kabsi.co", userId: null }], replyTo: email,
               content: copy.noraHandoff({
                 reason, email, summary,
-                bodyHtml: `<p><b>Reply to:</b> ${esc(email)}<br><b>Reason:</b> ${esc(reason)}<br><b>Page:</b> ${esc(page)}${user?.email ? `<br><b>Signed in as:</b> ${esc(user.email)}` : ""}</p><p><b>Summary</b><br>${esc(summary)}</p><p><b>Conversation</b></p><pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;background:#F6F4EF;padding:12px;border-radius:10px;">${esc(transcript)}</pre>`,
-                text: `Reply to: ${email}\nReason: ${reason}\nPage: ${page}\n\n${summary}\n\n${transcript}`,
+                bodyHtml: `<p><b>Reply to:</b> ${esc(email)}<br><b>Reason:</b> ${esc(reason)}<br><b>Page:</b> ${esc(page)}${user?.email ? `<br><b>Signed in as:</b> ${esc(user.email)}` : ""}${onboardingHandoffLine(onboarding) ? `<br><b>${esc(onboardingHandoffLine(onboarding))}</b>` : ""}</p><p><b>Summary</b><br>${esc(summary)}</p><p><b>Conversation</b></p><pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;background:#F6F4EF;padding:12px;border-radius:10px;">${esc(transcript)}</pre>`,
+                text: `Reply to: ${email}\nReason: ${reason}\nPage: ${page}${onboardingHandoffLine(onboarding) ? `\n${onboardingHandoffLine(onboarding)}` : ""}\n\n${summary}\n\n${transcript}`,
               }, APP_URL),
             });
             // Sent because the visitor just asked for a person: no choices and no quiet hours (category direct).
@@ -505,6 +541,10 @@ Deno.serve(async (req) => {
             handoff = true;
             result = { ok: true, reply_by: "email", email };
           }
+        } else if (u.name === "onboarding_state" && user) {
+          // Fresh, so "I just added Kabsi" is answered from what the database says now.
+          onboarding = await readOnboarding(db, user.id, screen);
+          result = onboardingStateResult(onboarding);
         } else if (u.name === "list_tasks" && ownerLoc) {
           // The one task queue (K-08), read as the owner (RLS and the membership check apply).
           const { data, error } = await asUser(req).rpc("list_tasks", { p_location: ownerLoc });
