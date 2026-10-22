@@ -261,3 +261,13 @@ exclamation mark, and a delete question whose first sentence is not the never-de
 - `tests/worker-check.test.ts`: `go.kabsi.co/_check` answers 200 when KV reads and 503 when it cannot, and touches no card.
 - `tests/platforms-docs.test.ts`: every secret name the functions and the Worker read is in `docs/secrets-inventory.md`,
   and neither the inventory nor `docs/platforms.md` holds a value.
+
+## Staff System health (P0.6-11)
+
+- `supabase/tests/system_health.sql`: the four staff functions are closed to anon and refuse a stranger and an owner; Google
+  error messages are sorted into plain types; a forced dead job, a publication stuck in `checking` for 3 hours (not one
+  of 10 minutes), an open breaker, a refused photo and a failed email each appear; retry moves a dead job to pending with
+  fresh tries, cancel closes one as failed, a retry is refused when the same work is already open, both are audited; no key
+  in either answer names a credential, review text or a reviewer.
+- `tests/system-health.test.ts`: what needs attention first (red for an open breaker, a dead job, a stuck publication or a
+  job waiting over 10 minutes) and that the panel reads only through the staff functions.
