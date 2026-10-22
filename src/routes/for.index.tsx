@@ -10,9 +10,10 @@ import { SITE_URL, pageHead } from "@/lib/site";
 export const Route = createFileRoute("/for/")({
   head: () =>
     pageHead({
-      title: "Kabsi for your business | Restaurants, clinics, salons and more",
+      title:
+        "Kabsi for your business | Restaurants, cafés, salons, clinics, dentists and car services",
       description:
-        "How Kabsi looks after the Google Business Profile of restaurants, cafés, clinics, salons, hotels, garages, shops and florists. You approve every post.",
+        "How Kabsi looks after the Google Business Profile of restaurants, cafés, salons, clinics, dentists and car services. You approve every post.",
       path: "/for",
       crumbs: [{ name: "For your business", path: "/for" }],
       jsonLd: [
@@ -50,7 +51,7 @@ function Page() {
       />
       <Section>
         <Eyebrow>Pick your business</Eyebrow>
-        <H2>Eight kinds of business, one simple rule.</H2>
+        <H2>Six kinds of business, one simple rule.</H2>
         <p className="mt-5 max-w-2xl text-lg leading-8 text-kb-stone">
           Kabsi drafts, you decide. Nothing is posted to Google until you approve it, whatever you
           run.
@@ -95,7 +96,7 @@ function Page() {
 
 /** Hero visual: four of the business photos as a small collage (the hub gives an overview). */
 function Collage() {
-  const ids = ["restaurant", "salon", "garage", "hotel"] as const;
+  const ids = ["restaurant", "salon", "garage", "cafe"] as const;
   return (
     <div className="grid w-full max-w-md grid-cols-2 gap-3" aria-hidden="true">
       {ids.map((id, i) => (

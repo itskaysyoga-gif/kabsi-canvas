@@ -1,6 +1,6 @@
 // Questions shown on /faq (all) and the homepage (the first five). Every answer must stay true of the
 // system as built (§3). Used for the FAQPage JSON-LD too, so answers are plain text.
-import { LEGAL_SELLER, PRICES, SETUP_CALL_MINUTES } from "@/lib/site";
+import { LEGAL_SELLER, PLAN_PRICES, SETUP_CALL_MINUTES, TAX_NOTE } from "@/lib/site";
 
 export const FAQ: { q: string; a: string }[] = [
   {
@@ -65,15 +65,15 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "How do I pay?",
-    a: `Kabsi Pro is $${PRICES.proMonthly} a month or $${PRICES.proYearly} a year, and you can start with a 14-day free trial, no card. Prices are in US dollars and the same in every country. You will pay by card; card payments are coming, and until they open there is nothing to pay.`,
+    a: `Kabsi Essentials is $${PLAN_PRICES.essentialsMonthly} a month or $${PLAN_PRICES.essentialsYearly} a year and Kabsi Pro is $${PLAN_PRICES.proMonthly} a month or $${PLAN_PRICES.proYearly} a year, ${TAX_NOTE}. You start with a 14-day free trial of Pro, no card. Prices are in US dollars and the same in every country. You will pay by card; card payments are coming, and until they open there is nothing to pay.`,
   },
   {
     q: "What happens when my plan ends?",
-    a: "Reviews, Google Profile, Google Protection and the Weekly Care Report stop. Get Reviews keeps working. Your review link, QR code and any NFC card that carries the link still open your Google review page.",
+    a: "Watching and drafting stop: Reviews, Google Profile, Google Protection and the Weekly Care Report. Your review link and QR code keep working, and so does any NFC card that carries the link, and the free Google Profile Check stays free.",
   },
   {
     q: "Can I get a refund?",
-    a: "Kabsi Pro is refundable in full within 14 days of the plan starting. Cards aren't refunded.",
+    a: "Yearly plans are refundable in full within 14 days of the plan starting. Monthly plans cancel any time and run to the end of the month you paid for. Write to hello@kabsi.co.",
   },
   {
     q: "Will replying help me show up on Google?",

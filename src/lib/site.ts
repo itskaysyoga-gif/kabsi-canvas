@@ -1,7 +1,7 @@
 // Public-site facts and SEO helpers. Every number here comes from knowledge/kabsi-facts.md; every sentence
 // must pass docs/KABSI-PLAN.md section 2.2 (no promises of reviews, ratings or rankings; no invented numbers; no Google affiliation).
 
-import { WHATSAPP_DIGITS } from "../../supabase/functions/_shared/whatsapp-setting.ts";
+import { WHATSAPP_DIGITS, WHATSAPP_ON } from "../../supabase/functions/_shared/whatsapp-setting.ts";
 
 // Canonical origin (P0.1-03: kabsi.co is served by Vercel). Canonical links are built from the route path only, so a query string never reaches them.
 // Public Cloudflare Turnstile site key (safe in the browser). The secret lives in Supabase secrets.
@@ -88,6 +88,19 @@ export const BRAND_EXPLAINER =
 /** The calls to action, worded once (R-02). */
 export const CTA_PRIMARY = "Join early access";
 export const CTA_SECONDARY = "See it work";
+/** The hero button on every public page (K-140): the free Profile Check, at all times, never a trial button. */
+export const CTA_CHECK = "Check my Google profile free";
+export const CTA_HOW = "See how it works";
+
+/**
+ * The line under the homepage headline (K-140). "You approve on WhatsApp." is true only while Kabsi has a WhatsApp
+ * number; with none it ends "You approve in one tap." Both switch with the one setting, with no code change.
+ */
+export function heroSub(whatsappOn: boolean = WHATSAPP_ON): string {
+  return `Kabsi replies to your Google reviews, watches your Google Business Profile and makes it easy for customers to choose you. ${
+    whatsappOn ? "You approve on WhatsApp." : "You approve in one tap."
+  }`;
+}
 /** The full non-affiliation notice, shown in every public footer (K-112). */
 export const GOOGLE_NOTICE =
   "Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.";
@@ -98,6 +111,24 @@ export const PRICES = {
   extraLocationMonthly: 15,
   extraLocationYearly: 150,
 } as const;
+
+/**
+ * The plans on the website (K-126, 22 Oct 2026), in US dollars. Card payments through Creem (P0.4-07) are not open, so
+ * every plan button starts the free Profile Check and the pages say card payments are coming. `PRICES` above is the
+ * single Pro price the earlier emails and terms were written against; P0.4-07 retires it when Creem goes live.
+ */
+export const PLAN_PRICES = {
+  essentialsMonthly: 19,
+  essentialsYearly: 190,
+  proMonthly: 39,
+  proYearly: 390,
+  extraLocationMonthly: 15,
+  extraLocationYearly: 150,
+} as const;
+/** True once Creem checkout is merged and live (P0.4-07). While false, no page may link to a checkout. */
+export const CHECKOUT_LIVE = false;
+/** The words after a price, worded once. */
+export const TAX_NOTE = "plus tax where it applies";
 
 /** The trial line, worded once. */
 export const TRIAL_LINE = "14-day free trial, no card";
@@ -201,24 +232,24 @@ export const WEBSITE_LD = {
 export const PRODUCT_LD = {
   "@context": "https://schema.org",
   "@type": "Product",
-  name: "Kabsi Pro",
+  name: "Kabsi",
   description:
     "Kabsi looks after a local business on Google: a reply ready for every new review, hours and details kept right, and fresh posts. Nothing is published until the owner approves it.",
   brand: { "@type": "Brand", name: "Kabsi" },
-  offers: [
-    {
-      "@type": "Offer",
-      name: "Kabsi Pro, monthly",
-      price: PRICES.proMonthly,
-      priceCurrency: "USD",
-      url: `${SITE_URL}/pricing`,
-    },
-    {
-      "@type": "Offer",
-      name: "Kabsi Pro, yearly",
-      price: PRICES.proYearly,
-      priceCurrency: "USD",
-      url: `${SITE_URL}/pricing`,
-    },
-  ],
+  // Card payments are not open yet, so the offers say pre-order, not in stock.
+  offers: (
+    [
+      ["Kabsi Essentials, monthly", PLAN_PRICES.essentialsMonthly],
+      ["Kabsi Essentials, yearly", PLAN_PRICES.essentialsYearly],
+      ["Kabsi Pro, monthly", PLAN_PRICES.proMonthly],
+      ["Kabsi Pro, yearly", PLAN_PRICES.proYearly],
+    ] as const
+  ).map(([name, price]) => ({
+    "@type": "Offer",
+    name,
+    price,
+    priceCurrency: "USD",
+    availability: "https://schema.org/PreOrder",
+    url: `${SITE_URL}/pricing`,
+  })),
 };

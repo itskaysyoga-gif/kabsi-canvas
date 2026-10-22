@@ -48,7 +48,7 @@ export const QUESTIONS: Question[] = [
     must: [/\$39/, /\$390/],
     coming: true,
     reference:
-      "Today the pricing page shows Pro at $19 a month or $190 a year. That is changing: Essentials will be $19 a month or $190 a year and Pro $39 a month or $390 a year, but those plans are not available yet. Card payments are not open yet either, so there is nothing to pay today.",
+      "The website lists Essentials at $19 a month or $190 a year and Pro at $39 a month or $390 a year as early-access pricing, but those plans cannot be bought yet. Card payments are not open yet either, so there is nothing to pay today.",
   },
   {
     id: "en02",
@@ -613,7 +613,7 @@ export const QUESTIONS: Question[] = [
     coming: true,
     forbid: [/^\s*(sí|claro)\b/i],
     reference:
-      "Hoy la página de precios muestra Pro a $19 al mes o $190 al año. Eso va a cambiar: Essentials y Pro, este último a $39 al mes, todavía no están disponibles. Los pagos con tarjeta en dólares son la única forma de pagar y todavía no están abiertos, así que hoy no hay nada que pagar. Kabsi no acepta criptomonedas.",
+      "La página de precios muestra Essentials a $19 al mes y Pro a $39 al mes como precios de acceso anticipado, pero todavía no se pueden comprar. Los pagos con tarjeta en dólares son la única forma de pagar y todavía no están abiertos, así que hoy no hay nada que pagar. Kabsi no acepta criptomonedas.",
   },
   {
     id: "es50",
@@ -707,7 +707,7 @@ export const QUESTIONS: Question[] = [
     must: [/\$39/],
     coming: true,
     reference:
-      "اليوم تعرض صفحة الأسعار Pro بسعر $19 شهريا أو $190 سنويا. هذا سيتغير: خطتا Essentials وPro، وسعر Pro فيها $39 شهريا، غير متاحتين بعد. الدفع بالبطاقة بالدولار الأمريكي هو الطريقة الوحيدة وهو غير مفتوح بعد، فلا يوجد ما تدفعه اليوم.",
+      "تعرض صفحة الأسعار خطة Essentials بسعر $19 شهريا وخطة Pro بسعر $39 شهريا كأسعار الوصول المبكر، لكنها غير متاحة للشراء بعد. الدفع بالبطاقة بالدولار الأمريكي هو الطريقة الوحيدة وهو غير مفتوح بعد، فلا يوجد ما تدفعه اليوم.",
   },
   {
     id: "ar58",

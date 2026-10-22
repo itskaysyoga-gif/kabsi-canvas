@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { KabsiMark } from "@/components/shared/kabsi-logo";
 import { cn } from "@/lib/utils";
-import { CardRender, DemoQr, IconBadge } from "./parts";
+import { DemoQr, IconBadge } from "./parts";
 
 function Panel({ children, className }: { children: ReactNode; className?: string }) {
   return (
@@ -94,15 +94,6 @@ export function FlowVisual() {
       <p className="mt-3 text-center text-xs text-kb-stone-on-dark">
         Nothing is published until you approve it.
       </p>
-    </div>
-  );
-}
-
-/** Pricing: the card render, slightly turned, with the one-time tap ripple. */
-export function PricingVisual() {
-  return (
-    <div aria-hidden="true" className="w-full max-w-[340px] -rotate-3 text-kb-ink">
-      <CardRender />
     </div>
   );
 }

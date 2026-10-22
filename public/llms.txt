@@ -17,16 +17,16 @@ Key facts:
 - Nora: Kabsi's assistant. She answers questions on the site and in the dashboard, and helps owners fill in their business facts. She is an AI and says so when asked.
 - Get Reviews (review link and QR code): free in every country. They open the business's own Google review form for every customer. There is no filtering of unhappy customers. Ask every customer the same way, as they visit. Never offer a reward. Opens are counted as opens, not reviews. They work with the owner's own QR codes and NFC cards. Kabsi sells no NFC cards.
 - What Kabsi does not do: it does not promise more reviews, higher ratings or better rankings, it cannot remove reviews, and it does not publish or change anything without approval.
-- Prices (USD, every country): Kabsi Pro $19 a month or $190 a year, extra locations $15 a month or $150 a year, with a 14-day free trial and no card. Free: review link, QR code and a printable table card. Monthly plans cancel any time; yearly plans are refundable within 14 days. Payment is by card only, in US dollars; card payments are coming. No crypto, cash or transfer.
+- Prices (USD, every country, plus tax where it applies): Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year, an extra location $15 a month or $150 a year, with a 14-day Pro trial and no card. Card payments are coming and are the only way to pay; until they open there is nothing to pay. The review link, QR code and Google Profile Check are free for everyone. Monthly plans cancel any time; yearly plans are refundable within 14 days. No crypto, cash or transfer.
 - Google data: review text and reviewer names are kept at most 30 days after Google last returned them.
 - Compared with Gemini in Business Profile: Gemini is Google's free assistant for one verified profile that the owner opens and asks. Kabsi comes to the owner with a reply already prepared, tells the owner when Google changes the listing, writes only from facts the owner confirmed, and has a person behind it. Source: https://support.google.com/business/answer/17142585
 - Operator and contact: Kabsi is operated by Hussein Slim, Dubai, United Arab Emirates. Contact: hello@kabsi.co
 
 ## Main pages
 
-- [Home](https://kabsi.co/): a reply ready for every new review, with an example review and draft
-- [How it works](https://kabsi.co/how-it-works): access, drafts, approval, who can use Kabsi
-- [Pricing](https://kabsi.co/pricing): Free and Pro plans, trial, payment methods, refunds
+- [Home](https://kabsi.co/): a reply ready for every new review, how it works in four steps, the plans and what you control, with pictures of the real screens marked Example
+- [How it works](https://kabsi.co/how-it-works): the loop (watch, prepare, ask, publish, report), what Kabsi can and cannot do, who can use Kabsi
+- [Pricing](https://kabsi.co/pricing): Essentials and Pro, monthly and yearly, extra locations, the 14-day Pro trial, card payments (coming), refunds
 - [FAQ](https://kabsi.co/faq): what Kabsi does, eligibility, approvals, languages, access, Google Protection, Gemini, payment
 - [Kabsi Partners](https://kabsi.co/partners): the affiliate program, opening soon
 - [Free Google review link and QR code](https://kabsi.co/google-review-link): no sign-up tool
@@ -38,13 +38,11 @@ Key facts:
 
 - [All businesses](https://kabsi.co/for)
 - [Restaurants](https://kabsi.co/for/restaurants)
-- [Cafés and bakeries](https://kabsi.co/for/cafes-and-bakeries)
-- [Clinics and dentists](https://kabsi.co/for/clinics-and-dentists)
-- [Salons and barbers](https://kabsi.co/for/salons-and-barbers)
-- [Hotels and B&Bs](https://kabsi.co/for/hotels-and-guesthouses)
-- [Garages and auto repair](https://kabsi.co/for/garages-and-auto-repair)
-- [Shops and boutiques](https://kabsi.co/for/shops-and-boutiques)
-- [Florists](https://kabsi.co/for/florists)
+- [Cafés](https://kabsi.co/for/cafes)
+- [Clinics](https://kabsi.co/for/clinics)
+- [Dentists](https://kabsi.co/for/dentists)
+- [Salons](https://kabsi.co/for/salons)
+- [Car services](https://kabsi.co/for/car-services)
 
 ## Guides
 
