@@ -6,6 +6,8 @@ Version 1, 4 Oct 2026. Written by the planning chat (Opus) from the six source d
 
 **Updated 21 Oct 2026 by the lane R chat** (R-41 to R-44, section 4): from 21 Oct 2026 Rashid runs Kabsi and the lane R chat makes every product decision, price and rule; Hussein only holds the Creem account and stays the legal seller. The launch scope is cut (R-42, "After launch" table in section 7), paid calls have a date rule (R-43) and cascade SQL is applied by the session (R-44).
 
+**Updated 22 Oct 2026 by the lane R chat** (R-47 to R-54, section 4): the Places cap, PostHog after first paint, the Kapso account and project, Meta verification not needed to launch, Vercel Pro and Supabase Pro before card payments open, the session list, the Gemini review verdict (section 14) and the Kabsi Outbound option (item 28).
+
 This file replaces `docs/WORK-QUEUE.md`, `docs/KABSI-SPEC.md` and `docs/KABSI-STATE.md` as the place a build chat looks for what to do. Progress lives in `docs/KABSI-PROGRESS.md`.
 
 ## Contents
@@ -13,7 +15,7 @@ This file replaces `docs/WORK-QUEUE.md`, `docs/KABSI-SPEC.md` and `docs/KABSI-ST
 1. Guardrails (copied from `docs/source/KABSI-GUARDRAILS.md`, unchanged)
 2. Rules for every build chat
 3. Sources and precedence
-4. Review decisions (R-01 to R-46): where this plan changes or settles the source documents
+4. Review decisions (R-01 to R-54): where this plan changes or settles the source documents
 5. Decisions and inputs (the lane R chat decides, R-41; see the notes at the top of section 5)
 6. Classification: every decision as P0, P1, P2 or Deferred
 7. Wave P0.1: truth and foundations
@@ -323,6 +325,8 @@ In this order, each step waiting for the one before:
 4. Open Kabsi Partners (K-127) with real proof, not before live reviews work.
 5. Start Meta ads only after onboarding converts (the first approval within 10 minutes of access, K-141) and the four gates in KABSI-VIDEO.docx are clear (guardrail 0.13).
 
+**Option after P0.7-07, for the founding customers (R-54, 22 Oct 2026): Kabsi Outbound.** Recorded only; nothing is built for it. Harvey (github.com/ethanplusai/harvey) as a private fork, run only from claude.ai/code as a daily scheduled task. Data from OpenStreetMap and the business's own website only, never Kabsi's Google project, the Places key or the Business Profile API. A separate sending domain and mailbox, never kabsi.co. At most 20 to 30 emails a day and at most one follow-up. Every email is approved by Rashid, names the sender and carries a working unsubscribe that is honoured at once. US first; no UK or EU sole traders without consent; no Lebanon. Kabsi's claims rule (2.11) applies. Kill-gate: after 300 approved emails, fewer than 3 replies that lead to a free check or trial means stop.
+
 ### 29. AI agents (21 Oct 2026, K-143)
 
 Five agents. All run as jobs in the task engine (guardrails 5 and 10). None publishes to Google without the owner's approval, except the fields an owner opted in to auto-fix (K-130). An agent never has more authority than the human role it acts for (guardrail 11).
@@ -469,7 +473,7 @@ Order when two things disagree:
 
 Not a source of truth any more: `docs/KABSI-SPEC.md`, `docs/KABSI-STATE.md`, `docs/WORK-QUEUE.md`, `docs/VIDEO-PLAN.md`, `docs/GO-LIVE.md` and every project file they replaced. Their still-true facts are in Appendix A and B.
 
-## 4. Review decisions (R-01 to R-46)
+## 4. Review decisions (R-01 to R-54)
 
 Each one either settles something the documents left open, fixes a contradiction between them, or changes a decision because the code or the live system showed something the documents did not know. Reason in one line.
 
@@ -498,7 +502,7 @@ Each one either settles something the documents left open, fixes a contradiction
 | R-21 | Review text sent to the AI is capped at 4,096 characters (today there is no cap at all, not 1,000 as K-99 assumed), with a per-business and a global daily AI budget. | K-99.5 premise | The code has no cap, which is a cost risk rather than a quality one. |
 | R-22 (amended by R-34) | Roles are the four in K-16 (owner, manager, staff, partner member). The guardrails' test list (owner, manager, reviewer, viewer, partner) maps to them: "reviewer" and "viewer" are not separate roles. | Guardrail 25 wording | The audit wins over the guardrails. |
 | R-23 (retired by R-34) | `kabsi_partner_billing` (monthly wholesale invoices in USDT) stays switched on but bills nothing while there are no live partner clients; it is replaced by Creem-based commission in P1 (K-32, K-106). | Old D239 | Nothing to bill today; the replacement needs Creem. |
-| R-25 | Meta business details and Business Verification use the same identity as Creem: Hussein Slim. If Meta will not verify an individual without a company, ads still run; verification waits until it is needed for WhatsApp automation (P2). | VIDEO Part 7 ("the same as Creem") | One seller identity across Creem, Meta, terms, privacy and email footer. |
+| R-25 | Meta business details and Business Verification use the same identity as Creem: Hussein Slim. If Meta will not verify an individual without a company, ads still run; verification waits until it is needed for WhatsApp automation (P2; R-50 of 22 Oct 2026: not needed to launch). | VIDEO Part 7 ("the same as Creem") | One seller identity across Creem, Meta, terms, privacy and email footer. |
 | R-24 (retired by R-33) | NOWPayments stays for annual crypto payments on request only (K-106). The old `$1 test` and `plans_v2` switch are retired: plans move to `subscriptions` on the organisation in P0.4, with Creem as the card path. | Old D269 and D281 flags | One billing model, as K-33 and K-106 require. |
 | R-26 | **Superseded by R-41 (21 Oct 2026).** **Hussein runs everything; Rashid has stopped working on the project (5 Oct 2026).** The repo belongs to Hussein's GitHub account (`itskaysyoga-gif/kabsi-canvas`). `kabsi-prod` moved to Hussein's own Supabase organisation (free plan, same project and keys). Every manual step of Rashid's in this plan is Hussein's. Build chats apply database changes and merge their own pull requests once CI is green, without asking; they stop only before dropping tables or columns or deleting real data. | Section 2.3, 2.5, 2.9 and every ready prompt; the old "Rashid merges" rule; CLAUDE.md | One person now owns the accounts and the merge button; waiting for a second person to click merge only slows the work. The stop stays where a mistake cannot be undone. |
 | R-27 | **Gate A was approved on 5 Oct 2026** (Google Cloud project 856347937978, 300 queries per minute). The Gate A tasks moved from Wave P0.7 to the new Wave P0.G (section 7A), right after Wave P0.1: enable the reviews and posts API, capture real responses, compare with the mocks, the `business.manage` package, the switch to live, the test on Kabsi's own profiles. The features that need later waves are tested in P0.7-05b. The call to action stays "Join early access" until P0.7-07 (R-02). | Wave P0.7 order; section 2.2 "until Gate A"; K-86 plan B (not needed) | The approval is the longest wait in the plan; real responses should shape the remaining waves, not follow them. |
@@ -521,6 +525,14 @@ Each one either settles something the documents left open, fixes a contradiction
 | R-44 | **Cascade SQL.** Additive SQL with `on delete` clauses (for example foreign keys with `on delete cascade`) is applied by the session with `execute_sql` and a read-back in the same call. Only drops and real deletions go to Rashid, each in its own file with a read-back. | 2.3, R-35 (drops only), the `_links` file pattern | The connector's `apply_migration` refuses the clause but `execute_sql` runs it, and it removes no data; a person running it by hand only slowed the work. |
 | R-45 | **AI on demand only (22 Oct 2026, replaces R-43's spend rule).** `ANTHROPIC_API_KEY` (Supabase secrets, under hello@kabsi.co) runs on a prepaid balance of about 3 US dollars with auto-reload off; there is no monthly top-up and no 20 US dollar monthly limit. `EVAL_LIVE` stays false: no live evaluation in CI. A live evaluation runs only by hand when a reply prompt changes, on a sample of 20 cases from `scripts/eval/cases.json`; the full 200-case run waits for a top-up before launch. Each session makes only the model calls a card needs and reports how many. Google opened `mybusiness.googleapis.com` for project 856347937978 on 22 Oct 2026, so R-43's kill-gate (30 Nov) is cleared. | R-43 (spend rule and `EVAL_LIVE` = true), D5, 2.12, step 17 | A small prepaid balance cannot overspend; a 20-case sample checks a prompt change for a few cents, and the full run is only worth paying for once, before launch. |
 | R-46 | **AI credit (22 Oct 2026).** Kabsi has about 100 US dollars of promotional Anthropic credit until 17 Nov 2026, auto-reload off. Full evaluations (the 200-case reply set, the 60-question Nora set) run by hand only, never in CI on every change; `EVAL_LIVE` stays false. The 20-case sample by hand when a reply prompt changes (R-45) stays. | R-45 (the prepaid balance of about 3 US dollars and "the full run waits for a top-up") | The promotional credit pays for the full runs before launch; running them on every change would spend it on nothing. |
+| R-47 | **Places cap (22 Oct 2026).** `app_settings.places_daily_cap` is 20, set live by the lane R chat on 22 Oct 2026. Google's own quotas for Text Search and Place Details stay at 100 a day, so Kabsi's cap sits well inside them. The October Google bill came from a separate scraping project, not from Kabsi. The free tools stay inside the cap and say "The free check is busy today" when it is used up. | P0.2-06 (the cap value), section 5 step 3 | One number to raise later, in one place, once real traffic shows what the free tools need; the bill has a known cause that is not this product. |
+| R-48 | **PostHog loads after the first paint (22 Oct 2026, accepted).** Session 20b loads PostHog 1.5 s after the page loads, with a short event queue, so the homepage keeps a Lighthouse mobile score of 90 or more. Consent rules (P0.6-01) are unchanged: no PostHog storage before a choice. | P0.6-02 load timing | The earliest events of a visit are queued, not lost; the speed gain is the reason the homepage passes. |
+| R-49 | **Kapso (22 Oct 2026).** There is one Kapso account, under rashid.abouhamzy@yawmiyati.com, with the project "Kabsi.co" (app.kapso.ai/projects/d2ead89f-dedc-4902-967d-0f9586a8c1ef) and hello@kabsi.co invited as owner. A new number comes in session 13b (WhatsApp go-live); it replaces `KAPSO_API_KEY`, `KAPSO_PHONE_NUMBER_ID` and `KAPSO_CONFIG_ID` in Supabase secrets and sets `WHATSAPP_NUMBER`. **Build sessions never use the Kapso connector for Kabsi.** | R-29, K-122, input I1, step 11 (the account line), the earlier "new Kapso account under hello@kabsi.co only" note | The connector can reach other projects of the same login; keys and the number are Rashid's steps and Kapso is reached only by Kabsi's own code. |
+| R-50 | **Meta business verification is not needed to launch (22 Oct 2026).** The WhatsApp owner channel uses templates, buttons and lists only, no WhatsApp Flows, and an unverified business may start 250 business-started conversations a day. Verification waits until Kabsi needs more than that, or Flows. | R-25 (verification as a WhatsApp precondition), step 18, the P0.8-03 note on business verification | 250 a day is far above the founding customers; verification takes time that the launch does not need to spend. |
+| R-51 | **Paid plans before card payments open (launch gate).** Vercel Pro (Hobby is for non-commercial use only) and Supabase Pro with point-in-time recovery (K-87) must both be in place before card payments open. Both are added to P0.7-07. | P0.7-07 depends-on line, section 5 step 12 | Taking money on a Hobby plan breaks Vercel's terms, and a database that cannot be restored to a point in time is not fit for customers' data. |
+| R-52 | **Session list (22 Oct 2026).** This sync session (lane R decisions of 22 Oct). Session 19 (Opus): P0.7-05b, the fix for N-004 (an empty reply when the model stops at the token limit), and the full 200-case reply evaluation and the 60-question Nora evaluation, run live by hand on the promotional credit (it expires 17 Nov 2026), never in CI. Session 13b: WhatsApp go-live (new Kapso number, secrets, `WHATSAPP_NUMBER`, template submission). Session 20c: P0.7-06, the page-by-page audit (it leaves session 20, which is P0.8-13 only). Session 21: the launch gate, P0.7-07. | Section 7 bundled sessions; R-46 | The audit should read the site after Website v2 and the later copy changes, the live evaluations should run once, on the final prompts, before the credit ends, and WhatsApp needs its own session once a number exists. |
+| R-53 | **Gemini review verdict (22 Oct 2026).** What is accepted becomes a list of after-launch work (Wave G, P1) and what is rejected is listed with reasons. Both lists are in section 14 and nothing in them is built now. | Section 14, K-145 (rejected list) | Outside review is useful when its ideas are sorted against Google's rules and Kabsi's claims rule instead of copied. |
+| R-54 | **Kabsi Outbound (22 Oct 2026), a go to market option after P0.7-07, for the founding customers.** Harvey (github.com/ethanplusai/harvey), as a private fork run only from claude.ai/code as a daily scheduled task. Data comes from OpenStreetMap and the business's own website only, never Kabsi's Google project, the Places key or the Business Profile API. A separate sending domain and mailbox, never kabsi.co. At most 20 to 30 emails a day and at most one follow-up; every email approved by Rashid; the sender named; a working unsubscribe honoured at once. US first; no UK or EU sole traders without consent; no Lebanon. Kabsi's claims rule (2.11) applies to every email. Kill-gate: after 300 approved emails, fewer than 3 replies that lead to a free check or trial means stop. Recorded only; nothing is built for it. | Guardrail 28 (go to market), K-142 | A cheap way to reach the first founding customers without touching Google's data or Kabsi's sending reputation, with a number that says when to stop. |
 
 ## 5. Decisions and inputs that belong to Rashid
 
@@ -546,7 +558,7 @@ The planning chat and build chats plan around these and ask before any task that
 
 1. Superseded 7 Oct (R-28): the Lovable domain step. Hosting is Vercel now; the DNS records Vercel shows go in Cloudflare DNS (keep the Zoho MX, SPF and DKIM records, the `send` and `go` records). Task P0.1-03 gives the exact clicks.
 2. Supabase dashboard (Hussein's own organisation): Authentication, URL configuration: Site URL `https://kabsi.co`, add `https://kabsi.co/**` and the Vercel preview pattern to the redirect URLs. Task P0.1-03.
-3. Google Cloud (project smiling-chess-505915-b7): Quotas, set Place Details and Text Search to 100 requests a day; budget alerts at $5 and $10 a day; disable `places-backend.googleapis.com` (only the new Places API is used: checked, every call goes to places.googleapis.com/v1). Task P0.2-06.
+3. Google Cloud (project smiling-chess-505915-b7): Quotas, set Place Details and Text Search to 100 requests a day (Kabsi's own `places_daily_cap` is 20, R-47); budget alerts at $5 and $10 a day; disable `places-backend.googleapis.com` (only the new Places API is used: checked, every call goes to places.googleapis.com/v1). Task P0.2-06.
 4. Google Cloud and Search Console identities (K-99.3, R-32): create a second kabsi.co address on Zoho; make hello@kabsi.co and it the OAuth support and developer contacts and the Search Console owners; remove rashid.abouhamzy@yawmiyati.com and rashid.hamzy@gmail.com once the kabsi.co owners are confirmed. No personal address of anyone stays as an owner or recovery contact (R-32). Any time in P0.1.
 5. Supabase dashboard: Authentication, Providers, Google: paste the OAuth client ID and secret (basic scopes). Task P0.4-02.
 6. Meta Business Settings items in VIDEO Part 7 that need his login (payment method, second admin, business info after D1, domain verification TXT record in Cloudflare). Task P0.6-09 writes the exact clicks.
@@ -554,8 +566,8 @@ The planning chat and build chats plan around these and ask before any task that
 8. Done 4 Oct: Hussein Slim agreed to be named as the seller on Creem, Meta and the site. No written agreement (Rashid's decision; K-106's agreement is waived).
 9. Vercel (done 7 Oct): account created and connected to GitHub, Supabase and Claude. The remaining Vercel steps are the plain-word list in task P0.1-03 (DNS in Cloudflare, Supabase Auth URLs, OAuth consent URLs, Search Console, the last Lovable publish).
 10. Google Cloud, project 856347937978 (Gate A approved 5 Oct): only if a session cannot do it, enable the reviews and posts API and read the quota (P0.7-01a); submit the `business.manage` verification package from the console (P0.7-02).
-11. Kapso account for the Kabsi number (deleted from Kapso on 22 Oct 2026; `WHATSAPP_NUMBER` is empty until a new number exists) (K-122): the account, the number's WhatsApp business profile and Meta's template approval screens; `KAPSO_API_KEY` goes into Supabase secrets, never into the chat. Tasks P0.6-10 and P0.8-03 give the clicks. From 21 Oct the same number is the owner channel (K-129), so the templates in P0.8-03 need Meta's approval and Meta business verification (R-25).
-12. Supabase Pro with point-in-time recovery, in Hussein's own organisation, before the first real customer other than the two Kabsi-owned profiles connects ($25 a month, K-87). Task P0.7-07.
+11. Kapso account for the Kabsi number (deleted from Kapso on 22 Oct 2026; `WHATSAPP_NUMBER` is empty until a new number exists) (K-122): the account, the number's WhatsApp business profile and Meta's template approval screens; `KAPSO_API_KEY` goes into Supabase secrets, never into the chat. Tasks P0.6-10 and P0.8-03 give the clicks. From 21 Oct the same number is the owner channel (K-129), so the templates in P0.8-03 need Meta's approval and Meta business verification (R-25). **Account (R-49, 22 Oct 2026): one Kapso account under rashid.abouhamzy@yawmiyati.com, project "Kabsi.co" (app.kapso.ai/projects/d2ead89f-dedc-4902-967d-0f9586a8c1ef), hello@kabsi.co invited as owner; the new number comes in session 13b and replaces `KAPSO_API_KEY`, `KAPSO_PHONE_NUMBER_ID` and `KAPSO_CONFIG_ID` and sets `WHATSAPP_NUMBER`. Build sessions never use the Kapso connector for Kabsi. Meta business verification is not needed to launch (R-50).**
+12. Supabase Pro with point-in-time recovery, in Hussein's own organisation, before the first real customer other than the two Kabsi-owned profiles connects ($25 a month, K-87). **And Vercel Pro (Hobby is non-commercial) before card payments open (R-51).** Both are checked in P0.7-07.
 13. Calendly: free plan, one event type (R-31). Task P0.1-V3.
 14. Say, in the chat, when paid API calls may start (D5, K-146). Until then nothing paid is called.
 15. Open Kabsi Partners and approve each applicant by hand (D6). Task P0.8-12 builds the staff screen.
@@ -764,14 +776,16 @@ Set by Hussein on 13 Oct 2026, **rebuilt on 21 Oct 2026** and **cut on 21 Oct 20
 | 11 | Opus | P0.6-01 (consent banner), P0.6-02 (events and attribution), P0.6-05 (security headers, Turnstile, rate limits) | Consent, events and security before onboarding; the 60-day code and its disclosure sit with consent and events (R-42) |
 | 12 | Opus | P0.5-01 (photo engine, video), P0.5-02 (posts) | Google writes and storage access; the WhatsApp photo drop needs it |
 | 13 | Opus | P0.8-03 (WhatsApp owner channel), P0.8-04 (Protection put-back and auto-fix) | WhatsApp approvals and Google writes |
+| 13b | Opus | WhatsApp go-live: the new Kapso number replaces `KAPSO_API_KEY`, `KAPSO_PHONE_NUMBER_ID` and `KAPSO_CONFIG_ID` and sets `WHATSAPP_NUMBER`; templates submitted (R-49, R-50) | The number was deleted on 22 Oct 2026; nothing live on WhatsApp until it exists |
 | 14 | Sonnet | P0.4-03, P0.4-04, P0.4-05, P0.4-11 (onboarding in six steps and the help chip) | Step 4 needs Connect WhatsApp from session 13 |
 | 15 | Sonnet | P0.6-06 (Nora in sync), P0.6-08 (supporting platforms), P0.6-11 (staff system health) | Nora learns every new feature last (R-42) |
 | 16 | Sonnet | P0.7-01 (the rest, read-only), P0.7-01b (mocks against real responses), P0.7-02 (business.manage package) | Google paperwork; no Google write |
 | 17 | | (empty) | P0.6-05 moved to session 11; P0.6-09, P0.6-03, P0.6-04 moved to L2 (R-42) |
 | 18 | Opus | P0.7-04 (switch to live), P0.7-05 (internal live test), P0.7-03 (Pub/Sub) | The first Google writes; Hussein approves the deletions |
-| 19 | Opus | P0.7-05b (live test of the later features) | Google writes on real responses; P0.8-10 moved to L4 (R-42) |
-| 20 | Sonnet | P0.8-13 (Website v2), P0.7-06 (page-by-page audit) | Just before the launch gate; the audit covers the new site |
-| 21 | Opus | P0.7-07 (first real customer and the launch gate) | One card by design |
+| 19 | Opus | P0.7-05b (live test of the later features); the fix for N-004 (an empty reply when the model stops at the token limit); the full 200-case reply evaluation and the 60-question Nora evaluation, live, by hand, on the promotional credit that expires 17 Nov 2026 (never in CI) | Google writes on real responses; P0.8-10 moved to L4 (R-42); evaluations run once on the final prompts (R-46, R-52) |
+| 20 | Sonnet | P0.8-13 (Website v2) | Just before the launch gate; session 20b (homepage speed, tidy-ups) is finished |
+| 20c | Sonnet | P0.7-06 (page-by-page audit) | The audit covers the new site and the 22 Oct copy changes (R-52) |
+| 21 | Opus | P0.7-07 (first real customer and the launch gate) | One card by design; Vercel Pro and Supabase Pro first (R-51) |
 
 ### After launch (R-42)
 
@@ -2302,10 +2316,10 @@ Read guardrails 21, 24 and 25. Record every finding; fix only copy and layout is
 
 - Decisions: guardrail 22, guardrail 27, G-39 tier 1, VIDEO "Read first" gates, R-02, D2.
 - Touches: with the first real customer (D2, written consent): business discovery, snapshot, sign-up, Google access, knowledge, first value, review draft, owner approval, publication, verification, audit event, notification, weekly report, billing (Creem checkout on a phone), disconnect including Manager access removal; success and failure paths (a rejected reply, a failed publication, a revoked access) with real Google responses; then the G-39 tier 1 checklist; then switch the CTA from "Join early access" to "Start free" with "14 days free. No card." everywhere (one constant) and remove "Early access" tags.
-- Depends on: P0.7-06, P0.4-07, P0.6 done except P0.6-03, P0.6-04 and P0.6-09 (R-42). D2 is decided: Abou Hamze Auto Center; the owner agreed and Kabsi is Manager. Before the first real customer other than the two Kabsi-owned profiles connects, Hussein upgrades `kabsi-prod` from the free plan to Supabase Pro with point-in-time recovery (K-87, $25 a month, in Hussein's own organisation) and the session runs the first restore test into a scratch project (project and time recorded in PROGRESS).
+- Depends on: P0.7-06, P0.4-07, P0.6 done except P0.6-03, P0.6-04 and P0.6-09 (R-42). **Before card payments open (R-51, 22 Oct 2026): Vercel Pro (Hobby is non-commercial) and Supabase Pro with point-in-time recovery (K-87); the session checks both are active and records them in PROGRESS.** D2 is decided: Abou Hamze Auto Center; the owner agreed and Kabsi is Manager. Before the first real customer other than the two Kabsi-owned profiles connects, Hussein upgrades `kabsi-prod` from the free plan to Supabase Pro with point-in-time recovery (K-87, $25 a month, in Hussein's own organisation) and the session runs the first restore test into a scratch project (project and time recorded in PROGRESS).
 - Ask Hussein before: contacting the customer, and before switching the CTA.
 - Model: Opus.
-- Done when: the Pro upgrade and the restore test are recorded; every step of guardrail 22 has evidence from the real run; every G-39 tier 1 line is ticked or explicitly waived by Rashid; the four VIDEO gates are clear; only then the CTA changes and PROGRESS records "Paid ads may start".
+- Done when: the Vercel Pro and Supabase Pro upgrades and the restore test are recorded; every step of guardrail 22 has evidence from the real run; every G-39 tier 1 line is ticked or explicitly waived by Rashid; the four VIDEO gates are clear; only then the CTA changes and PROGRESS records "Paid ads may start".
 - Prompt:
 
 ```
@@ -2349,6 +2363,30 @@ P1 starts when Wave P0.3 is done and never delays a P0 task (guardrail 20). The 
 | P1-20 | **RETIRED 21 Oct 2026 (K-140, replaced by P0.8-13).** Was: Pricing page rebuild | design review "Pricing page", K-106, K-107 | three columns (Free, Pro, Partner), outcome list, "2 months free" on the toggle, location calculator, guarantee box, card first then other ways in Lebanon, FAQ, Lebanon block by region | P0.4-07 | Sonnet | Prices on the page come from the same constants as Creem products (test) |
 | P1-21 | **RETIRED 21 Oct 2026 (K-129, replaced by P0.8-03, which is P0).** Was: WhatsApp owner alerts through Kapso | K-122, K-37, K-113, guardrail 6 and 8 | opt-in per owner and phone number recorded with time and wording (`whatsapp_optins`); Meta-approved utility templates (a new review has a reply ready, a Google change needs a look, the Weekly Care Report is ready) each with one button to the kabsi.co approval page; sent only from the job queue (no direct send), an audit event for every send, failure and delivery status; STOP and its variants honoured at once and recorded; the signed Kapso inbound webhook receiver (signature verified, replay window, unknown sender ignored); the star rating may appear (confirmed by Hussein, 7 Oct), but no review text, reviewer name or Business Knowledge in a message; nothing is approved inside WhatsApp, the button opens the approval page where the normal approval pipeline runs | P0.6-10, P0.6-12, P0.3-06, P0.4-09, Meta business verification (R-25) | Opus | (retired, see P0.8-03) A test owner opts in, gets a template with the button, approving on kabsi.co publishes once; STOP stops sends and the audit log shows both; a forged webhook is refused (test); a send without opt-in is refused (test); Kapso API keys are only in Supabase secrets |
 | P1-22 | **CHANGED (K-129): depends on P0.8-03, not P1-21.** Nora on WhatsApp | K-122, K-104, K-120 | the P1-21 webhook routes an owner's message to Nora under the same facts, memory and safety rules as the in-app Nora; handover to Hussein when Nora cannot answer; Nora never approves, publishes or changes anything over WhatsApp, and any action link goes to the kabsi.co approval page; 24-hour window respected, templates outside it | P0.8-03 | Opus | A signed test message gets a grounded answer; an unsigned one gets none (test); a "publish it" message replies with the approval link and publishes nothing; the conversation is stored under the business with the retention rule |
+
+### Gemini review verdict (22 Oct 2026, R-53)
+
+**Accepted, after launch (Wave G, P1).** Recorded as a list; none of it is built now, and each item gets a card when P1 is ordered.
+
+- Voice notes to drafts over WhatsApp (an owner speaks, Kabsi drafts, the owner approves in the normal pipeline).
+- One WhatsApp chat for several branches, with a branch picker.
+- Instagram or Facebook caption to Google post (a draft the owner approves; nothing is posted without the owner).
+- Post and report frequency set in WhatsApp.
+- More industry templates: service-area businesses, retail and professional services.
+- Website importer (P1-05).
+- Customer-facing WhatsApp assistant (Phase 2).
+
+**Rejected, with reasons.**
+
+| Idea | Reason |
+|---|---|
+| The "Negative Feedback Shield" | It is review gating: steering unhappy customers away from Google's reviews is against Google's review rules (K-25 and K-116). |
+| "3x more customers" | An outcome promise with no evidence; the claims rule (2.11, K-144) forbids it. |
+| "Rank #1" | A ranking promise; forbidden by K-53 and K-145. |
+| Fake map visuals | Fake or placeholder proof is rejected (K-145); a map must show real data or not appear. |
+| "Passes AI-detection filters" | Kabsi's replies are written from the owner's facts and approved by the owner; claiming to evade detection is not a promise Kabsi can keep and it invites doubt about honesty. |
+| Keywords in replies | Rejected on 21 Oct 2026 (K-145); replies answer the reviewer, they are not search copy. |
+| "Dominate local search" | A ranking and dominance promise; forbidden by the claims rule. |
 
 Prompt for any P1 task:
 
