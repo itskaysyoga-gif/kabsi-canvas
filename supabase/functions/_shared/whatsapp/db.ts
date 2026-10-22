@@ -52,7 +52,8 @@ export async function whatsappCtx(): Promise<Ctx> {
   ctx = {
     db, on: WHATSAPP_ON, phoneNumberId, appUrl: APP_URL,
     sender: await pickSender({ live: Deno.env.get("WHATSAPP_LIVE"), apiKey: Deno.env.get("KAPSO_API_KEY"), phoneNumberId, numberOn: WHATSAPP_ON }),
-    templates: { review: Deno.env.get("KAPSO_TEMPLATE_REVIEW_ALERT") || null, post: Deno.env.get("KAPSO_TEMPLATE_POST_READY") || null },
+    templates: { review: Deno.env.get("KAPSO_TEMPLATE_REVIEW_ALERT") || null, post: Deno.env.get("KAPSO_TEMPLATE_POST_READY") || null,
+      protection: Deno.env.get("KAPSO_TEMPLATE_PROFILE_CHANGE") || null },
   };
   return ctx;
 }
@@ -79,4 +80,14 @@ export async function whatsappPostAlert(locationId: string, postId: string, summ
   const { data: l } = await admin().from("locations").select("name").eq("id", locationId).maybeSingle();
   const { sendPostAlert } = await import("./deliver.ts");
   return sendPostAlert(await whatsappCtx(), users, { postId, locationId, business: (l?.name as string | undefined) ?? "Your business", summary });
+}
+
+/** P0.8-04: a Protection change on WhatsApp, with "Put it back" where WhatsApp may approve it. */
+export async function whatsappProtectionAlert(loc: { id: string; name: string }, c: { id: string; field: string; label: string; before: string; after: string }) {
+  if (!WHATSAPP_ON) return {};
+  const users = await alertRecipients(loc.id);
+  if (!users.length) return {};
+  const { sendProtectionAlert } = await import("./deliver.ts");
+  const identity = ["name", "address", "main_category", "categories", "map_pin", "phone", "open_status"].includes(c.field);
+  return sendProtectionAlert(await whatsappCtx(), users, { changeId: c.id, locationId: loc.id, business: loc.name, label: c.label, before: c.before, after: c.after, identity });
 }

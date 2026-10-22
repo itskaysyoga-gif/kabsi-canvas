@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import {
   alertButtons, excerpt, firstName, fresh, type Inbound, intentOf, parseWebhook, refusal, reviewAlertBody, verifySignature,
 } from "./channel.ts";
-import { type Ctx, type Db, deliver, handleInbound, type MaySend, mockSender, sendReviewAlert } from "./deliver.ts";
+import { type Ctx, type Db, deliver, handleInbound, type MaySend, mockSender, sendProtectionAlert, sendReviewAlert } from "./deliver.ts";
 import { senderMode } from "./kapso.ts";
 
 const enc = (s: string) => new TextEncoder().encode(s);
@@ -215,4 +215,20 @@ Deno.test("a photo from a Pro owner goes to the photo engine with source whatsap
   const f = fakeCtx();
   assert.equal(await handleInbound(f.ctx, inbound({ type: "image", mediaId: "m1" })), "photo");
   assert.deepEqual(f.calls, ["photo:loc1:u1"]);
+});
+
+Deno.test("P0.8-04: a Protection change offers Put it back on WhatsApp, never for an identity field", async () => {
+  const base = { changeId: "c1", locationId: "loc1", business: "Harbour Lane Coffee", before: "Mon to Fri 07:00 to 18:00", after: "Mon to Fri 07:00 to 16:00" };
+  const f = fakeCtx();
+  await sendProtectionAlert(f.ctx, ["u1"], { ...base, label: "opening hours", identity: false });
+  assert.equal(f.log[0].kind, "buttons:Put it back");
+  assert.match(f.log[0].body, /Google shows: Mon to Fri 07:00 to 16:00/);
+  assert.match(f.log[0].body, /You approved: Mon to Fri 07:00 to 18:00/);
+  assert.doesNotMatch(f.log[0].body, /competitor|customer|[—–!]/i, "never says who made the edit");
+  for (const label of ["business name", "address", "main category", "map pin", "phone number", "open status"]) {
+    const id = fakeCtx();
+    await sendProtectionAlert(id.ctx, ["u1"], { ...base, label, identity: true });
+    assert.equal(id.log[0].kind, "text", `${label}: no button`);
+    assert.deepEqual(id.calls, [], `${label}: no button token`);
+  }
 });
