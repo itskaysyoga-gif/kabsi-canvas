@@ -2,7 +2,7 @@
 
 > Kabsi looks after your business on Google: a reply ready for every new review, your hours and details kept right, a Weekly Care Report and fresh posts. The owner approves every change and nothing is published without it. Kabsi is independent and not affiliated with Google. Short version: https://kabsi.co/llms.txt
 
-Last updated: 22 Oct 2026 (P0.6-06, Nora in sync). Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md.
+Last updated: 22 Oct 2026 (P0.8-13, industry pages). Source: docs/source (K and G decisions) and docs/KABSI-PLAN.md.
 
 # Kabsi Master Knowledge Base
 
@@ -70,13 +70,15 @@ Hussein approved final product decisions on 21 Oct 2026. Most are not built yet.
 - **Order and booking button (Pro):** adds your own order or booking link on Google and alerts you if it goes missing or changes. Kabsi cannot remove links from delivery or booking marketplaces.
 - **Search terms report (Pro):** the words people searched to find you, each month, as Google reports them, with "fewer than 15" where Google gives only a threshold. The screen is built and shows labelled example figures; real figures start when Kabsi's Google connection is live.
 - **Kabsi Partners:** an affiliate program. Anyone can apply and the team approves each person. A partner earns 30% of every payment for the first 12 months of each business they refer, after a 30-day hold, paid monthly with a $50 minimum, with no upfront payment. The referred business gets a 30-day Pro trial. The link is kabsi.co/?via=CODE and Kabsi keeps the code for 60 days. Partners must label paid promotion, follow local influencer rules, never claim a Google partnership and never promise rankings, review removal or rewards for reviews. An agency that manages a client's profile is invited by the owner as Manager in Team; there is no reselling. Not open yet.
-- **A new website** and new industry pages for restaurants, cafes, salons, clinics, dentists and car services.
+- **A new homepage, pricing page and how it works page** (the rest of the new website, P0.8-13). The industry pages are live (next block).
 
 **[CHANGING] Being replaced.**
 
 - The **Free and Pro** plans and the $19 Pro price are replaced by Essentials and Pro when card payments open.
 
 **Website v2 wording [COMING] (Hussein, 21 Oct 2026).** The homepage subline will read: "Kabsi replies to your Google reviews, watches your Google Business Profile and makes it easy for customers to choose you. You approve on WhatsApp." The three pillars will be "Every review answered", "Your profile protected" and "Ready to be found". It promises no more customers, calls or rankings. Not on the site yet (P0.8-13).
+
+**Industry pages (live from 22 Oct 2026, P0.8-13).** kabsi.co/for has one page for each of restaurants, cafes, salons, clinics, dentists and car services (kabsi.co/for/restaurants, /for/cafes, /for/salons, /for/clinics, /for/dentists, /for/car-services). Each page has what gets in the way for that trade, one example review with a draft marked Example, what Kabsi does, the kinds of photo customers look for, how replies are kept careful, where to put the review link and a few questions. The button is the free Google Profile Check. For clinics and dentists a reply never confirms that the reviewer is a patient and never mentions a treatment, a result or a diagnosis. The older pages for cafes and bakeries, salons and barbers, clinics and dentists, and garages forward to the new ones; the pages for hotels, shops and florists forward to kabsi.co/for. Kabsi still works for those kinds of business and for any other business that meets the eligibility rules; they just have no page of their own.
 
 **Removed on 21 Oct 2026 (P0.8-01).** These no longer exist. Never offer them; if someone asks, say they are gone and what Kabsi does instead.
 

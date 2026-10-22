@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, Check, QrCode } from "lucide-react";
+import { ArrowRight, BookOpen, Camera, Check, QrCode, ShieldCheck } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import {
   CtaBand,
@@ -14,10 +14,10 @@ import {
 } from "@/components/marketing/parts";
 import { Callout, Example, IconGrid } from "@/components/marketing/guide-kit";
 import { Button } from "@/components/ui/button";
-import { VERTICALS, VERTICAL_REDIRECTS, verticalBySlug } from "@/lib/verticals";
+import { VERTICALS, VERTICAL_GONE, VERTICAL_REDIRECTS, verticalBySlug } from "@/lib/verticals";
 import { faqJsonLd } from "@/lib/faq";
 import { photoSrc } from "@/lib/site-photos";
-import { CTA_PRIMARY, PRICES, SITE_URL, pageHead } from "@/lib/site";
+import { CTA_CHECK, SITE_URL, pageHead } from "@/lib/site";
 
 // Industry pages (D258, D259). Content lives in src/lib/verticals.tsx; every example is fictional and
 // labelled. Each page has its own headings, example and FAQ so no two pages repeat each other.
@@ -25,6 +25,8 @@ export const Route = createFileRoute("/for/$slug")({
   loader: ({ params }) => {
     const moved = VERTICAL_REDIRECTS[params.slug];
     if (moved) throw redirect({ to: "/for/$slug", params: { slug: moved }, statusCode: 301 });
+    // The kinds of business that no longer have their own page go to the /for page (P0.8-13).
+    if (VERTICAL_GONE.includes(params.slug)) throw redirect({ to: "/for", statusCode: 301 });
     const v = verticalBySlug(params.slug);
     if (!v) throw notFound();
     return { slug: v.slug };
@@ -63,13 +65,6 @@ export const Route = createFileRoute("/for/$slug")({
           areaServed: "Worldwide",
           audience: { "@type": "BusinessAudience", name: v.label },
           provider: { "@id": `${SITE_URL}/#organization`, "@type": "Organization", name: "Kabsi" },
-          offers: {
-            "@type": "Offer",
-            name: "Kabsi Pro, monthly",
-            price: PRICES.proMonthly,
-            priceCurrency: "USD",
-            url: `${SITE_URL}/pricing`,
-          },
         },
         faqJsonLd(v.faqs),
       ],
@@ -93,8 +88,8 @@ function Page() {
       >
         <div className="mt-9 grid gap-3 sm:flex">
           <Button asChild className="w-full sm:w-auto">
-            <Link to="/start">
-              {CTA_PRIMARY} <ArrowRight />
+            <Link to="/google-profile-check">
+              {CTA_CHECK} <ArrowRight />
             </Link>
           </Button>
           <Button
@@ -114,8 +109,7 @@ function Page() {
             {v.summary} Nothing is posted to Google until you approve it.
           </p>
           <p className="mt-3 text-[15px] leading-7 text-kb-stone">
-            Kabsi Pro is ${PRICES.proMonthly} a month or ${PRICES.proYearly} a year, with a 14-day
-            free trial and no card.{" "}
+            Every plan starts with a 14-day Pro trial and no card.{" "}
             <Link to="/pricing" className="font-bold text-kb-ink underline underline-offset-4">
               See pricing
             </Link>
@@ -188,6 +182,41 @@ function Page() {
       </Section>
 
       <Section tone="sand">
+        <div className="grid gap-5 md:grid-cols-2">
+          <div className="rounded-large bg-kb-white p-6 shadow-kb sm:p-8">
+            <IconBadge icon={<Camera />} />
+            <h3 className="mt-5 text-xl font-bold">Photos customers look for</h3>
+            <ul className="mt-4 space-y-3">
+              {v.photoTypes.map((t) => (
+                <li key={t} className="flex gap-3 leading-7">
+                  <Check className="mt-1 size-4 shrink-0 text-kb-green" aria-hidden="true" /> {t}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-sm leading-6 text-kb-stone">
+              Kabsi checks each photo for size and clarity before you post it. You choose what goes
+              up.
+            </p>
+          </div>
+          <div className="rounded-large bg-kb-white p-6 shadow-kb sm:p-8">
+            <IconBadge icon={<ShieldCheck />} />
+            <h3 className="mt-5 text-xl font-bold">How replies are kept careful</h3>
+            <ul className="mt-4 space-y-3">
+              {v.careRules.map((t) => (
+                <li key={t} className="flex gap-3 leading-7">
+                  <Check className="mt-1 size-4 shrink-0 text-kb-green" aria-hidden="true" /> {t}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-sm leading-6 text-kb-stone">
+              You read every reply before it is published, and nothing goes out without your
+              approval.
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <Section>
         <div>
           <div>
             <Eyebrow>Getting reviews</Eyebrow>

@@ -38,13 +38,11 @@ Key facts:
 
 - [All businesses](https://kabsi.co/for)
 - [Restaurants](https://kabsi.co/for/restaurants)
-- [Cafés and bakeries](https://kabsi.co/for/cafes-and-bakeries)
-- [Clinics and dentists](https://kabsi.co/for/clinics-and-dentists)
-- [Salons and barbers](https://kabsi.co/for/salons-and-barbers)
-- [Hotels and B&Bs](https://kabsi.co/for/hotels-and-guesthouses)
-- [Garages and auto repair](https://kabsi.co/for/garages-and-auto-repair)
-- [Shops and boutiques](https://kabsi.co/for/shops-and-boutiques)
-- [Florists](https://kabsi.co/for/florists)
+- [Cafés](https://kabsi.co/for/cafes)
+- [Clinics](https://kabsi.co/for/clinics)
+- [Dentists](https://kabsi.co/for/dentists)
+- [Salons](https://kabsi.co/for/salons)
+- [Car services](https://kabsi.co/for/car-services)
 
 ## Guides
 
