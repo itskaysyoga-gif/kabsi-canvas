@@ -232,3 +232,21 @@ or file at run time. Regenerate it only when a font or the renderer changes: in 
 `npm i @resvg/resvg-wasm@2.6.2 @fontsource/readex-pro @fontsource/lalezar`, then base64 the files
 `@resvg/resvg-wasm/index_bg.wasm` (gzip it first), `@fontsource/readex-pro/files/readex-pro-latin-{400,700}-normal.woff`
 and `@fontsource/lalezar/files/lalezar-latin-400-normal.woff` into the four exports.
+
+## Nora's evaluation (P0.6-06)
+
+`scripts/nora-eval/`: 60 questions owners write (48 English, then 4 each in Spanish, French and Arabic), scored by code
+against `knowledge/kabsi-facts.md` (K-104). A question names the lines of the facts file its answer rests on (`kb`), what a
+good answer says (`must`) and never says (`forbid`), and whether the item is [COMING] (it must say "not available yet"
+and give no date). The checker also fails any dollar amount or number-with-unit the facts file does not hold, a promised
+result, an "automatically", a Google relationship, a phone number, a request for a password or a code, a dash or an
+exclamation mark, and a delete question whose first sentence is not the never-delete warning.
+
+- `npm run eval:nora -- --stub pass` (or `node scripts/nora-eval/run-nora-eval.ts --stub pass`): the reference answers
+  against the file, no network. `--stub fail` shows the checker blocking bad answers. `tests/nora-sync.test.ts` runs both,
+  holds every dollar amount in the file to `AMOUNTS` in `questions.ts` (a changed or new price fails until the evaluation
+  moves with it), and checks the file names every feature merged so far, the [COMING] items, the hand-over rules, auto-fix
+  off and no WhatsApp number.
+- `--live` asks the real Nora (`_shared/nora-rules.ts`, the same words as the `assistant` function) and needs
+  `ANTHROPIC_API_KEY`. It is not run until the AI credit is on (R-43); CI's Nora gate runs it only when the facts or her
+  rules change and `EVAL_LIVE` is true.
