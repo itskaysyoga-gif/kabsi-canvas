@@ -10,8 +10,8 @@ import { track } from "@/lib/telemetry";
 
 export type Phase = "find" | "result";
 
-/** State of the free Profile Check, shared by /google-profile-check and onboarding steps 1 and 2. */
-export function useProfileCheck(source: "tool" | "onboarding") {
+/** State of the free Profile Check, shared by /google-profile-check, the homepage hero and onboarding steps 1 and 2. */
+export function useProfileCheck(source: "tool" | "onboarding" | "home") {
   const [phase, setPhase] = useState<Phase>("find");
   const [results, setResults] = useState<FoundBusiness[] | null>(null);
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);

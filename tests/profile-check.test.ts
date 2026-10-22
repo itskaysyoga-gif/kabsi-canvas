@@ -21,14 +21,14 @@ describe("Free Profile Check (P0.4-01)", () => {
     expect(CLIENT_CONSENT).toBe("Send me tips on managing my Google profile");
   });
 
-  it("the pages that may send an email request are the two screens that exist", () => {
-    expect(CHECK_PAGES).toEqual(["/google-profile-check", "/get-started"]);
+  it("the pages that may send an email request are the three screens that exist", () => {
+    expect(CHECK_PAGES).toEqual(["/", "/google-profile-check", "/get-started"]);
     for (const page of CHECK_PAGES) {
-      const route = read(`src/routes/${page.slice(1)}.tsx`);
+      const route = read(`src/routes/${page === "/" ? "index" : page.slice(1)}.tsx`);
       expect(route).toContain(`createFileRoute("${page}")`);
     }
     expect(read("src/components/profile-check/snapshot-result.tsx")).toContain(
-      '"/google-profile-check" | "/get-started"',
+      '"/google-profile-check" | "/get-started" | "/"',
     );
   });
 

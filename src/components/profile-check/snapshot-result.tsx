@@ -28,7 +28,7 @@ export function SnapshotResult({
   onAnother,
 }: {
   snapshot: Snapshot;
-  page: "/google-profile-check" | "/get-started";
+  page: "/google-profile-check" | "/get-started" | "/";
   onAnother: () => void;
 }) {
   return (
@@ -163,7 +163,7 @@ function EmailForm({
   page,
 }: {
   placeId: string;
-  page: "/google-profile-check" | "/get-started";
+  page: "/google-profile-check" | "/get-started" | "/";
 }) {
   const [email, setEmail] = useState("");
   const [tips, setTips] = useState(false);

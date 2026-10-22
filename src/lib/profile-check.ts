@@ -79,7 +79,7 @@ export async function emailCheck(o: {
   placeId: string;
   email: string;
   tips: boolean;
-  page: "/google-profile-check" | "/get-started";
+  page: "/google-profile-check" | "/get-started" | "/";
   turnstile: string;
 }) {
   await call<{ ok: true }>({
