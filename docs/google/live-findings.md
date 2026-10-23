@@ -34,6 +34,11 @@ Rashid enabled the Google My Business API (`mybusiness.googleapis.com`) in proje
 - Real fixtures: `reviews.list.<profile>.json`, `posts.list.<profile>.json`, `media.list.<profile>.json` in `tests/fixtures/google/live/`. Reviewer names, photos and review text are removed in the function; the Yawmiyati post's text and link name a person, so both are removed by hand. The 403 records (`v4.probe.*.json`, `reviews.list.error.json`) stay as the shape of Google's SERVICE_DISABLED error.
 - Things the docs do not say: every review carries `reviewReplyUrl` (a business.google.com link); `updateTime` is always sent and equals `createTime` when nothing changed; a post's photo comes back as `name`, `mediaFormat` and `googleUrl`, never the `sourceUrl` it was created with.
 
+## Removing a post (22 and 23 Oct 2026, session 18)
+
+- `DELETE` on a local post (the first removal through the pipeline, 22 Oct 16:59 UTC) answered **500 INTERNAL** although the post was removed: on 23 Oct 04:36 UTC the post list for Yawmiyati held only its two 2019 posts (`google-capture` op `posts`, request 45089).
+- `GET` on the deleted post's own name answers **500 INTERNAL**, not 404. So Kabsi decides a removal from the business's post list, not from the post's name (`localPostGone`).
+
 ## What was read, and the status of each call
 
 Thirty calls, 15 per profile, all **200** (15:43 to 15:44 UTC), plus the inventory and the one 403 above. No 429; the quota was not near its limit.

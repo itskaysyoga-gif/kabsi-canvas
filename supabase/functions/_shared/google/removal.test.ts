@@ -1,6 +1,6 @@
 // P0.7-05: removing a post Kabsi published. One DELETE to the post's own name, nothing else; a post Google no longer
 // has counts as removed; any other refusal is Google's and goes back to the owner; after the removal Kabsi reads the
-// post by name and a 404 means it is gone. Run with: scripts/deno-check.sh.
+// business's post list (Google answers a deleted post's own name with 500 INTERNAL, not 404). Run with: scripts/deno-check.sh.
 import assert from "node:assert/strict";
 import { io } from "./client.ts";
 import * as google from "./index.ts";
@@ -48,12 +48,17 @@ Deno.test("removal: any other refusal is Google's, thrown for the pipeline to gi
   );
 });
 
-Deno.test("removal: after it, a post Google answers 404 for reads as gone, a live one as still there", async () => {
-  const gone = await withGoogle({ status: 404, body: { error: { code: 404 } } }, () => google.localPostState("accounts/113746201522792609010", LOC, POST, "x"));
-  assert.equal(gone.out, null);
-  assert.deepEqual(gone.calls, [`GET https://mybusiness.googleapis.com/v4/${POST}`]);
-  const still = await withGoogle({ status: 200, body: { name: POST, state: "LIVE" } }, () => google.localPostState("accounts/113746201522792609010", LOC, POST, "x"));
-  assert.equal(still.out, "live");
+Deno.test("removal: gone means not in the post list; Google's 500 on the deleted post's own name is never asked", async () => {
+  const ACC = "accounts/113746201522792609010";
+  const other = { name: `${ACC}/${LOC}/localPosts/454698435052947827`, state: "LIVE" };
+  const gone = await withGoogle({ status: 200, body: { localPosts: [other] } }, () => google.localPostGone(ACC, LOC, POST));
+  assert.equal(gone.out, true);
+  assert.deepEqual(gone.calls, [`GET https://mybusiness.googleapis.com/v4/${ACC}/${LOC}/localPosts?pageSize=100`]);
+  const still = await withGoogle({ status: 200, body: { localPosts: [other, { name: POST, state: "LIVE" }] } }, () => google.localPostGone(ACC, LOC, POST));
+  assert.equal(still.out, false);
+  // More pages than one read: not proof either way.
+  const unsure = await withGoogle({ status: 200, body: { localPosts: [other], nextPageToken: "t" } }, () => google.localPostGone(ACC, LOC, POST));
+  assert.equal(unsure.out, null);
 });
 
 Deno.test("removal: a demo business never reaches Google (R-17)", async () => {

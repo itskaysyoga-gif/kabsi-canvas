@@ -25,7 +25,7 @@ import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation }
 import { AiBudgetError } from "../_shared/ai-budget.ts";
 import { protectionCheck } from "../_shared/protection.ts";
 import {
-  addSpecialHours, coachRead, createLocalPost, hasSpecialHours, localPostState, mediaExists, patchListing, protectionShown, removeLocalPost,
+  addSpecialHours, coachRead, createLocalPost, hasSpecialHours, localPostGone, localPostState, mediaExists, patchListing, protectionShown, removeLocalPost,
   readReply, removeKabsiAccess, sendReply, type SpecialDay, uploadPhoto,
 } from "../_shared/google/index.ts";
 import { accessChangeEmail, type DisconnectDeps, runDisconnect } from "../_shared/disconnect.ts";
@@ -222,9 +222,9 @@ async function read(i: Item): Promise<Seen> {
       return state ? POST_SEEN[state] : "absent";
     }
     case "local_post_removal": {
-      // Removed means Google no longer has the post; still there means Google has not applied it yet.
-      const state = await localPostState(account, location, str(p.post_ref) || null, str(p.summary));
-      return state === null ? "shown" : "pending";
+      // Removed means the post is no longer in the business's post list; still listed means Google has not applied it.
+      const gone = await localPostGone(account, location, str(p.post_ref));
+      return gone ? "shown" : "pending";
     }
     case "photo":
       return i.google_ref && (await mediaExists(location, i.google_ref)) ? "shown" : "absent";
