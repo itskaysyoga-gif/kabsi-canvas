@@ -221,6 +221,16 @@ export async function removeLocalPost(locationId: string, ref: string): Promise<
   }
 }
 
+// Whether a post Kabsi removed is gone (P0.7-05). Read from the business's post list, not the post's own name: Google
+// answers a deleted post's name with 500 INTERNAL, not 404 (read live on 22 and 23 Oct 2026), so only the list can
+// say it is gone. null when the list has more pages than one read covers and the post is not on the first.
+export async function localPostGone(accountId: string, locationId: string, ref: string): Promise<boolean | null> {
+  assertNotConcierge(locationId);
+  const list = await by(modeFor(locationId), postsLive, postsMock).listLocalPosts(accountId, locationId);
+  if ((list.localPosts ?? []).some((p) => p.name === ref)) return false;
+  return list.nextPageToken ? null : true;
+}
+
 // ─── Special hours: adds one period, keeping the periods already on the profile (PATCH replaces the whole list).
 const ymd = (d: string) => { const [year, month, day] = d.split("-").map(Number); return { year, month, day }; };
 const hm = (t: string) => { const [hours, minutes] = t.split(":").map(Number); return { hours, minutes }; };
