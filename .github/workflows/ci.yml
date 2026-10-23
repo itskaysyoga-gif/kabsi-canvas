@@ -140,6 +140,26 @@ jobs:
           path: nora-eval-result.json
           if-no-files-found: ignore
 
+  # Ops 1 part A (R-66, master plan 19.4): gitleaks looks for secrets in the commits of this pull request only
+  # (base to head), so old history cannot turn CI red. The release is pinned and its checksum is checked. Findings are
+  # printed redacted (file, line, rule, commit) and never as values. False positives go in .gitleaks.toml with a reason.
+  gitleaks:
+    name: Secret scan (gitleaks, this pull request's commits)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks 8.30.0 (checksum checked)
+        run: |
+          curl -sSfL -o gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v8.30.0/gitleaks_8.30.0_linux_x64.tar.gz
+          echo "79a3ab579b53f71efd634f3aaf7e04a0fa0cf206b7ed434638d1547a2470a66e  gitleaks.tar.gz" | sha256sum -c -
+          tar xzf gitleaks.tar.gz gitleaks
+      - name: Scan the pull request's commits
+        run: |
+          ./gitleaks git --redact=100 --no-banner --verbose --config .gitleaks.toml \
+            --log-opts="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+
   database:
     name: Database (pgTAP on a local Supabase stack)
     runs-on: ubuntu-latest

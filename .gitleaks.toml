@@ -1,0 +1,73 @@
+# gitleaks configuration (Ops 1 part A, R-66, master plan 19.4).
+# The default rules stay on. Each allowlist below is one real false positive found by the full-history scan of
+# 23 Oct 2026, scoped to one rule and to the narrowest path or text that still covers it, so a real key in the same
+# file would still be caught. Never add a broad path or a value here.
+title = "Kabsi gitleaks"
+
+[extend]
+useDefault = true
+
+# Supabase's browser keys are public by design: the publishable key (sb_publishable_ prefix) and the older anon key
+# (a JWT with role anon). They sit in the website code and the README. A service role key or an sb_secret_ key is
+# not covered: the first allowlist matches the prefix only, and the second is limited to the two files that hold the
+# anon key.
+[[allowlists]]
+description = "Supabase publishable key (public by design, shipped in the browser bundle)"
+targetRules = ["generic-api-key"]
+regexes = ['''^sb_publishable_''']
+
+[[allowlists]]
+description = "Supabase anon key in the two browser config files (role anon, public by design)"
+condition = "AND"
+targetRules = ["jwt"]
+paths = ['''^src/lib/supabase\.ts$''', '''^src/lib/supabase-config\.ts$''']
+
+# PostHog project API keys start with phc_ and are public by design (they are sent from every visitor's browser).
+[[allowlists]]
+description = "PostHog project API key (phc_ prefix, public by design)"
+targetRules = ["generic-api-key"]
+regexes = ['''^phc_[A-Za-z0-9]+$''']
+
+# The Sentry key in the CSP report-uri is the public part of a DSN: it can only send reports.
+[[allowlists]]
+description = "Sentry public key in the CSP report-uri of vercel.json (write-only by design)"
+condition = "AND"
+targetRules = ["generic-api-key"]
+paths = ['''^vercel\.json$''']
+regexTarget = "match"
+regexes = ['''sentry_key=''']
+
+# Recorded Google API answers used as test fixtures: nextPageToken is a paging cursor, not a credential.
+[[allowlists]]
+description = "Google nextPageToken paging cursor in recorded test fixtures"
+condition = "AND"
+targetRules = ["generic-api-key"]
+paths = ['''^tests/fixtures/google/.*\.json$''']
+regexTarget = "match"
+regexes = ['''nextPageToken''']
+
+# Kapso's own agent-skill docs use the literal placeholder YOUR_API_KEY in curl examples.
+[[allowlists]]
+description = "Placeholder YOUR_API_KEY in the Kapso agent-skill reference docs"
+condition = "AND"
+targetRules = ["curl-auth-header"]
+paths = ['''^\.claude/skills/[^/]+/references/.*\.md$''']
+regexes = ['''^YOUR_API_KEY$''']
+
+# A WhatsApp template category name ("AUTHENTICATION: OTP/verification"), not a key.
+[[allowlists]]
+description = "WhatsApp template category line in the Kapso templates reference"
+condition = "AND"
+targetRules = ["generic-api-key"]
+paths = ['''^\.claude/skills/integrate-whatsapp/references/templates-reference\.md$''']
+regexTarget = "match"
+regexes = ['''AUTHENTICATION: OTP''']
+
+# A list of Meta audience names (KB_..._180D) in the video plan, not a key.
+[[allowlists]]
+description = "Meta audience names in the video plan"
+condition = "AND"
+targetRules = ["generic-api-key"]
+paths = ['''^docs/source/KABSI-VIDEO\.md$''']
+regexTarget = "match"
+regexes = ['''KB_GOOGLE_ACCESS_GRANTED_180D''']
