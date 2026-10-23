@@ -64,3 +64,32 @@ Deno.test("probeSummary redacts a list that did open: no review text, no reviewe
   assertEquals(out.body.reviews[0].reviewer.displayName, "[removed]");
   assertEquals(out.body.reviews[0].starRating, "FIVE");
 });
+
+Deno.test("posts op: GET only, no post text, and a name outside the profile is refused", async () => {
+  const { io } = await import("./client.ts");
+  const { postsList } = await import("./capture.ts");
+  const was = { fetch: globalThis.fetch, token: io.token, gate: io.gate };
+  const calls: string[] = [];
+  io.token = () => Promise.resolve("t");
+  io.gate = () => Promise.resolve({});
+  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    calls.push(`${init?.method ?? "GET"} ${url}`);
+    const body = url.endsWith("/accounts") ? { accounts: [{ name: "accounts/1" }] }
+      : url.includes("/locations?readMask") ? { locations: [{ name: "locations/2", title: "Yawmiyati" }] }
+      : url.includes("/localPosts?") ? { localPosts: [{ name: "accounts/1/locations/2/localPosts/9", state: "LIVE", summary: "secret text" }] }
+      : { error: { code: 404, status: "NOT_FOUND" } };
+    return Promise.resolve(new Response(JSON.stringify(body), { status: "error" in body ? 404 : 200 }));
+  }) as typeof fetch;
+  try {
+    const r = await postsList("yawmiyati", "accounts/1/locations/2/localPosts/9") as Record<string, unknown>;
+    if (JSON.stringify(r).includes("secret text")) throw new Error("post text leaked");
+    if ((r.post as { status: number }).status !== 404) throw new Error("the post read is not reported");
+    const bad = await postsList("yawmiyati", "accounts/9/locations/9/localPosts/1") as Record<string, unknown>;
+    if (bad.error !== "post not under this profile") throw new Error("a post outside the profile was read");
+    if (!calls.every((c) => c.startsWith("GET "))) throw new Error("a write was sent");
+  } finally {
+    Object.assign(globalThis, { fetch: was.fetch });
+    Object.assign(io, { token: was.token, gate: was.gate });
+  }
+});
