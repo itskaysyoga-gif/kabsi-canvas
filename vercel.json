@@ -5,7 +5,8 @@
   "buildCommand": "node scripts/check-env.mjs && npm run build",
   "git": {
     "deploymentEnabled": {
-      "claude/*": false
+      "claude/*": false,
+      "dependabot/*": false
     }
   },
   "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude,glob)docs/**' ':(exclude,glob)**/*.md'",
