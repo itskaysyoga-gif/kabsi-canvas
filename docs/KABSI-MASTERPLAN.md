@@ -1,8 +1,10 @@
-# Kabsi master plan (lane R chat, 23 Oct 2026, v3.1, with the 23 Oct addendum merged in)
+# Kabsi master plan (lane R chat, 23 Oct 2026, v3.2, with addenda 1 and 2 of 23 Oct merged in)
 
 Decided by the lane R chat on Rashid's authority. Session 19's PR 0 copied this file into the repo as docs/KABSI-MASTERPLAN.md with the lane R chat's addendum of 23 Oct 2026 (10:40 Beirut) merged in (sections 0, 9.8, 9.9 and 17), recorded R-55, R-56 and R-58 to R-64 in plan section 4 and added section 17's waves to plan section 7. The addendum won over the master plan wherever they differed. Where older plan text disagrees, this file wins.
 
 Numbering note: plan section 4 already used R-55 (identity), R-56 (homepage hero) and R-57 (free Google Profile Check) on 22 Oct 2026. In this file, R-55 means the Kapso account (section 0) and R-56 and R-63 mean skills and tools (section 14); plan section 4 records those two as R-55b and R-56b so neither pair of rows is overwritten.
+
+Addendum 2 (23 Oct 2026, 11:30 Beirut) is sections 18 and 19 below, recorded as R-65 and R-66 in plan section 4; its updated waves are at the end of section 17. Its small fixes: number alerts by email go to hello@kabsi.co only (section 9.9, R-32); the facts file's "no WhatsApp number" line changes in session 13b part 1 (section 9.8); R-55b and R-56b stay as numbered and R-58 stays reserved.
 
 What stays fixed: Google's API and review rules (no review gating, incentives or fake reviews; owner approval before anything is published), Meta's WhatsApp rules, payment processor rules and consumer law. Breaking them gets Kabsi's Google access, WhatsApp number or payments shut off, which ends the business; everything else is open.
 
@@ -109,6 +111,7 @@ At least 100 scripted conversations covering 9.2 to 9.5 (Gemini's 80 corrected a
 - Username "kabsi": blocked until Meta business verification (a higher messaging tier). Claim it right after verification.
 - Meta business verification: do it when business-started conversations reach about 150 a day (section 9), or earlier if the username or a higher tier is needed. The lane R chat prepares the documents question then.
 - Meta WhatsApp account time zone stays as created (US/Alaska); it cannot be changed and only affects Meta's own reports. Kabsi's code uses each business's time zone and Beirut for staff.
+- Session 13b part 1 also changes the line in `knowledge/kabsi-facts.md` that says Kabsi has no WhatsApp number, because from then on owners can use the number.
 - Session 13b: register the webhook (Kapso, phone number, Webhooks) to the Supabase whatsapp function with its own secret saved as KAPSO_WEBHOOK_SECRET; submit the utility templates through Kapso's API; set WHATSAPP_NUMBER; read number health through the API; confirm no Kapso automation or Kapso Agent auto-reply is switched on for the number, so only Kabsi's own code answers.
 
 ### 9.9 Staff alerts on WhatsApp (R-64)
@@ -117,7 +120,7 @@ At least 100 scripted conversations covering 9.2 to 9.5 (Gemini's 80 corrected a
 - Staff alerts go to Rashid's phone from Kabsi's own number:
   - urgent, at once: jobs failing above the normal rate, Google errors or access lost on any business, the Creem webhook failing, the publication pipeline stuck, a new paying customer, a cancellation, an owner asking for a person;
   - daily at 08:00 Beirut: one summary (new sign-ups, trials, paid, reviews answered, items waiting, AI cost, Kapso credit balance, number quality).
-- Anything about the WhatsApp number itself (quality drop, restriction, template rejected, low Kapso credit) goes by email to hello@kabsi.co and Rashid's address as well, because the number may be the thing that is failing.
+- Anything about the WhatsApp number itself (quality drop, restriction, template rejected, low Kapso credit) goes by email to hello@kabsi.co only (R-32: no personal address), because the number may be the thing that is failing.
 - Staff commands from Rashid's phone: "status" (system health), "waiting" (handoffs and stuck items), "today" (the daily numbers), "pause <business>" (stop sends for one business). Only phones with staff_admin can use them.
 - Owner handoffs ("talk to a person") land in the Kapso team inbox; Rashid answers there, from the Kabsi number, so the owner sees one conversation.
 - Sentry and UptimeRobot alerts go to email; the urgent ones are also forwarded to the staff WhatsApp alert.
@@ -160,3 +163,61 @@ Parallel rules: at most 2 Opus sessions at once (Max plan usage), plus Sonnet se
   - Web 1 (Sonnet) after the mockups are approved. Area: public pages; it leaves the pricing page to session 10 and takes it over after session 10 merges.
   - Session 13b part 2 (Opus) after part 1 and session 19 rest: staff alerts on WhatsApp (addendum B), Slack removal, the payment reminders once Creem is in.
 - Wave 4: UX 1 (Sonnet), then session 20c audit, then session 21 launch gate, then Outbound.
+
+### Updated waves (addendum 2 of 23 Oct 2026, adds to section 17)
+- Wave 2 (in parallel): Session 19 rest (Opus) also builds 18.2's detection. Session 13b part 1 (Opus) also builds 18.2's owner message and 18.3's tests.
+- Wave 3 (in parallel): Session 10 Creem (Opus) with 18.7; Web 1 (Sonnet); Ops 1 part B (Sonnet: backups, restore drill, scrubbing, the privacy page items); Session 13b part 2 (Opus) after its part 1.
+
+## 18. Gemini review of 23 Oct (R-65)
+1. Google Q&A monitoring: not built. Google discontinued the Q&A API on 3 Nov 2025 and is replacing Q&A on profiles with AI answers. Kabsi never offers or mentions Q&A.
+2. Suspension and verification alert: built.
+   - Session 19 rest: read VoiceOfMerchantState in the daily profile job and on every Pub/Sub notification for the location. hasVoiceOfMerchant false, a complyWithGuidelines action or a verify action marks the business "Google needs action": publishing pauses for that business, a task is created and an ops event is written.
+   - Session 13b part 1: the owner gets a WhatsApp message at once (allowed in quiet hours, like identity-field changes): what Google is asking, plain steps, and the link to Google's own help page for that case (the session checks the current page on support.google.com; no guessed links). Staff alert at the same time. Kabsi never files an appeal for the owner and never promises reinstatement. Publishing resumes by itself when Google clears the state.
+   - Test cases in the 13b suite: suspended, verification required, cleared again.
+3. iPhone photos: already handled in code (above). Session 13b adds tests for the WhatsApp paths: a photo sent as an image (arrives as JPEG) and photos sent as documents (HEIC, PNG, WebP), each ending as a clean JPEG that meets Google's current photo rules, and an unreadable file answered with "Please send it as a photo".
+4. Outbound website reading: plain fetch first; Jina Reader as the fallback when a page needs JavaScript. Only the home and contact pages, robots.txt respected. Firecrawl not used. Decided again when Outbound starts.
+5. Langfuse or Helicone: not used. ai_usage and ai_runs already give tokens and cost per business, and sending prompts that contain customers' reviews to another company adds a processor for no gain. The staff page shows AI cost per business from ai_usage with the 3 US dollar alert (section 15).
+6. An image-processing skill: not needed; the code and its tests cover it.
+7. Billing skill: session 10 first reads Creem's current webhook and API docs (docs.creem.io, with context7 where it has them), builds the signature check from Creem's own example with tests, and only then writes .claude/skills/kabsi-billing with the verified facts and the doc links. No Stripe code or Stripe header names.
+
+## 19. Keeping Kabsi running, safe and backed up (R-66)
+Built by session Ops 1 (Sonnet), part A on 23 Oct and part B in wave 3. Its area is .github, docs and scripts only, so it touches nothing the other sessions change.
+
+### 19.1 Backups and restores
+- Supabase Pro before the first paying customer (daily backups, 7 days kept).
+- Weekly database dump by a GitHub Action, encrypted with an age public key in the repo (Rashid keeps the private key offline, printed and in his password manager), stored in a private Cloudflare R2 bucket, 8 weeks kept. Storage photos copied weekly to the same bucket.
+- Weekly git bundle of kabsi-canvas (and kabsi-outbound later) to the same bucket, because Kabsi has one GitHub account and an earlier account was banned.
+- A restore drill once a month: the newest dump into a scratch database and the newest bundle cloned; the result goes in the daily staff summary. Gate: no paying customer before one drill passes.
+
+### 19.2 No single point of failure
+- Google access: owners add only the Kabsi group (KABSI_GROUP_ID). The group gets a second Kabsi-owned Google account as a member, both with 2-step verification, so losing one account does not cut off every business.
+- WhatsApp: the standby number on Kapso Pro (section 9.6). The sender sits behind one interface, so moving from Kapso to Meta's Cloud API directly is one module. Alert when Kapso credit falls under 5 US dollars.
+- AI: model names live in one place (models.ts); a retired model is a one-line change. When the AI provider is down, drafts wait in the queue and nothing wrong is sent.
+- Domain kabsi.co: auto-renew on, registrar lock on, 2-step verification on the registrar.
+- Vercel Pro before payments (section 15).
+
+### 19.3 Things that keep working
+- Skills are copied into the repo, so they never change underneath a session. context7 is optional; nothing depends on it.
+- Package versions stay pinned (lockfile, exact versions in npm: imports). Dependabot security updates on, with .github/dependabot.yml; updates merge only on green CI.
+- The Supabase security and performance advisors run weekly; a new security finding goes to the staff alert.
+
+### 19.4 Secrets
+- docs/SECRETS.md lists every secret by name, where it lives, who rotates it and when it was last rotated. Never a value.
+- Rotate the main keys (Anthropic, Kapso, Creem, Resend, Google, cron secret) every 90 days and at once after any leak.
+- gitleaks in CI and GitHub secret scanning with push protection on.
+- Sentry and PostHog drop phone numbers, emails and review text before sending.
+
+### 19.5 Rules Kabsi follows (built in, not optional)
+- Privacy policy and terms list every company that handles customer data: Anthropic, Supabase, Vercel, Cloudflare, Kapso and Meta, Creem, Resend, PostHog, Sentry, Google.
+- Google API Services User Data Policy, including the Limited Use statement on the privacy page.
+- Self-serve data export and deletion (section 15).
+- WhatsApp opt-in stored with time and source for every phone.
+- Outbound emails: true sender (Nora disclosed as Kabsi's AI assistant), the postal address, a working opt-out honoured at once.
+- Cookie consent for visitors from the EU and UK before PostHog loads.
+- The lawyer's read before launch (section 15).
+
+### 19.6 Rashid's own list (once, before launch)
+- 2-step verification with an authenticator app on GitHub, Supabase, Vercel, Cloudflare, Kapso, Meta, Google (both Kabsi accounts), Anthropic, Resend, PostHog, Sentry and the domain registrar; Hussein the same on Creem.
+- Recovery codes printed and kept offline.
+- Create the second Kabsi Google account and add it to the group.
+- Create the R2 bucket and an R2 token for the backup Action, typed only into GitHub secrets (Ops 1 gives the exact names).
