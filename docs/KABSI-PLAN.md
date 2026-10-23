@@ -10,6 +10,8 @@ Version 1, 4 Oct 2026. Written by the planning chat (Opus) from the six source d
 
 **Updated 23 Oct 2026 by the lane R chat** (R-55b, R-56b and R-58 to R-64, section 4; the waves from 25 Oct, section 7): the master plan is `docs/KABSI-MASTERPLAN.md` (Kabsi runs on WhatsApp, the number is live, staff alerts on WhatsApp, no Arabic shown, one social links constant) and where it disagrees with older text in this file, it wins. Every "Ask Hussein before" and manual step of Hussein's now reads Rashid; Hussein keeps only the Creem account.
 
+**Updated 23 Oct 2026 by the lane R chat, addendum 2** (R-65 and R-66, section 4; master plan sections 18 and 19; the updated waves, section 7): the Gemini review verdict of 23 Oct (suspension and verification alerts, iPhone photo tests, Outbound page reading, Billing skill) and the Ops 1 session (backups, no single point of failure, secrets, privacy rules). Small fixes: number alerts by email go to hello@kabsi.co only (R-32); the facts file's "no WhatsApp number" line changes in session 13b part 1.
+
 This file replaces `docs/WORK-QUEUE.md`, `docs/KABSI-SPEC.md` and `docs/KABSI-STATE.md` as the place a build chat looks for what to do. Progress lives in `docs/KABSI-PROGRESS.md`.
 
 ## Contents
@@ -17,7 +19,7 @@ This file replaces `docs/WORK-QUEUE.md`, `docs/KABSI-SPEC.md` and `docs/KABSI-ST
 1. Guardrails (copied from `docs/source/KABSI-GUARDRAILS.md`, unchanged)
 2. Rules for every build chat
 3. Sources and precedence
-4. Review decisions (R-01 to R-64): where this plan changes or settles the source documents
+4. Review decisions (R-01 to R-66): where this plan changes or settles the source documents
 5. Decisions and inputs (the lane R chat decides, R-41; see the notes at the top of section 5)
 6. Classification: every decision as P0, P1, P2 or Deferred
 7. Wave P0.1: truth and foundations
@@ -477,7 +479,7 @@ Order when two things disagree:
 
 Not a source of truth any more: `docs/KABSI-SPEC.md`, `docs/KABSI-STATE.md`, `docs/WORK-QUEUE.md`, `docs/VIDEO-PLAN.md`, `docs/GO-LIVE.md` and every project file they replaced. Their still-true facts are in Appendix A and B.
 
-## 4. Review decisions (R-01 to R-64)
+## 4. Review decisions (R-01 to R-66)
 
 Each one either settles something the documents left open, fixes a contradiction between them, or changes a decision because the code or the live system showed something the documents did not know. Reason in one line.
 
@@ -549,6 +551,8 @@ Each one either settles something the documents left open, fixes a contradiction
 | R-62 | **WhatsApp agent and Kapso (master plan section 9, with 9.8 Kabsi's number).** One number for every subscriber, the message handler, owner actions, the safety rules and the 100-conversation suite as the go-live gate. The number is live (23 Oct 2026). | P0.8-03, session 13b, R-49, R-50 | One agent, one sender, one set of limits for every owner. |
 | R-63 | **Tools (master plan section 14).** context7 on trial in `.mcp.json`, no keys in the file. Not used: obra/superpowers, scroll-craft, open-seo, VoiceStudio; hyperframes only for ad videos later. | `.mcp.json`, section 2.10 | Current library docs for build chats without another account. |
 | R-64 | **Staff alerts move from Slack to WhatsApp (master plan section 9.9).** Urgent alerts at once and one summary at 08:00 Beirut go to Rashid's phone from Kabsi's number; number problems also go by email; staff commands from a `staff_admin` phone. Session 13b part 2 removes Slack; until then alerts reach Rashid by Sentry and UptimeRobot email only. | Guardrail 6 and section 2.2 (Slack named), R-17 (Slack) | One channel Rashid reads, and no second tool to keep. |
+| R-65 | **Gemini review of 23 Oct (master plan section 18).** Google Q&A monitoring is not built (Google discontinued the Q&A API on 3 Nov 2025) and Kabsi never offers or mentions Q&A. A suspension and verification alert is built: session 19 rest reads `VoiceOfMerchantState` in the daily profile job and on every Pub/Sub notification, and `hasVoiceOfMerchant` false or a complyWithGuidelines or verify action marks the business "Google needs action" (publishing pauses for it, a task and an ops event are made); session 13b part 1 sends the owner a WhatsApp message at once (allowed in quiet hours) with plain steps and the link to Google's own help page, and alerts staff; Kabsi never files an appeal or promises reinstatement, and publishing resumes when Google clears the state. Session 13b adds tests for iPhone photos by WhatsApp (an image, and HEIC, PNG and WebP sent as documents, each ending as a clean JPEG; an unreadable file answered with "Please send it as a photo"). Outbound reads a website with a plain fetch first and Jina Reader as the fallback, only the home and contact pages, robots.txt respected; Firecrawl, Langfuse, Helicone and an image-processing skill are not used. Session 10 reads Creem's current docs, builds and tests the signature check from Creem's own example, and only then writes `.claude/skills/kabsi-billing`. | Section 14 and R-53 (what the Gemini review changed), P0.8-03 (owner alerts), session 10 | Closes the gaps the 23 Oct review found without adding a processor or a feature Google has retired. |
+| R-66 | **Keeping Kabsi running, safe and backed up (master plan section 19).** Built by session Ops 1: part A on 23 Oct (docs, CI and repo settings: Dependabot security updates only, gitleaks in CI, secret scanning, `docs/SECRETS.md`) and part B in wave 3 (weekly encrypted database dump, photo copy and git bundle to a private Cloudflare R2 bucket, 8 weeks kept; a monthly restore drill, with no paying customer before one passes; Sentry and PostHog scrubbing; the privacy page items). Also decided: a second Kabsi-owned Google account in the Kabsi group, the standby WhatsApp number on Kapso Pro with the sender behind one interface, model names only in `models.ts`, domain auto-renew and registrar lock, weekly Supabase advisors, main keys rotated every 90 days and at once after a leak, and the rules Kabsi follows (processors listed in the privacy policy and terms, Google's Limited Use statement, WhatsApp opt-in with time and source, Outbound sender disclosure and opt-out, cookie consent for EU and UK visitors before PostHog loads). | R-51 (Supabase Pro and Vercel Pro), section 5 steps 11 and 12 | One account was banned before; a single lost key, number, account or database must not end the business. |
 
 ## 5. Decisions and inputs that belong to Rashid
 
@@ -819,6 +823,12 @@ Parallel rules: at most 2 Opus sessions at once (Max plan usage), plus Sonnet se
   - Web 1 (Sonnet) after the mockups are approved. Area: public pages; it leaves the pricing page to session 10 and takes it over after session 10 merges.
   - Session 13b part 2 (Opus) after part 1 and session 19 rest: staff alerts on WhatsApp (master plan section 9.9, R-64), Slack removal, the payment reminders once Creem is in.
 - Wave 4: UX 1 (Sonnet), then session 20c audit, then session 21 launch gate, then Outbound.
+
+Updated by addendum 2 (23 Oct 2026, R-65 and R-66, master plan sections 18 and 19):
+
+- Ops 1 part A (Sonnet, 23 Oct, alone): Dependabot security updates, gitleaks in CI, secret scanning, `docs/SECRETS.md`. Area: `.github`, `docs`, `vercel.json` only.
+- Wave 2 (in parallel): Session 19 rest (Opus) also builds the suspension and verification detection (master plan 18.2). Session 13b part 1 (Opus) also builds 18.2's owner message and 18.3's photo tests, and changes the facts file's "no WhatsApp number" line.
+- Wave 3 (in parallel): Session 10 Creem (Opus) with 18.7 (reads Creem's docs, then writes the billing skill); Web 1 (Sonnet); Ops 1 part B (Sonnet: backups, restore drill, Sentry and PostHog scrubbing, the privacy page items); Session 13b part 2 (Opus) after its part 1.
 
 ### After launch (R-42)
 
