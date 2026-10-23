@@ -8,6 +8,8 @@ Version 1, 4 Oct 2026. Written by the planning chat (Opus) from the six source d
 
 **Updated 22 Oct 2026 by the lane R chat** (R-47 to R-57, section 4): the Places cap, PostHog after first paint, the Kapso account and project, Meta verification not needed to launch, Vercel Pro and Supabase Pro before card payments open, the session list, the Gemini review verdict (section 14) and the Kabsi Outbound option (item 28).
 
+**Updated 23 Oct 2026 by the lane R chat** (R-55b, R-56b and R-58 to R-64, section 4; the waves from 25 Oct, section 7): the master plan is `docs/KABSI-MASTERPLAN.md` (Kabsi runs on WhatsApp, the number is live, staff alerts on WhatsApp, no Arabic shown, one social links constant) and where it disagrees with older text in this file, it wins. Every "Ask Hussein before" and manual step of Hussein's now reads Rashid; Hussein keeps only the Creem account.
+
 This file replaces `docs/WORK-QUEUE.md`, `docs/KABSI-SPEC.md` and `docs/KABSI-STATE.md` as the place a build chat looks for what to do. Progress lives in `docs/KABSI-PROGRESS.md`.
 
 ## Contents
@@ -15,7 +17,7 @@ This file replaces `docs/WORK-QUEUE.md`, `docs/KABSI-SPEC.md` and `docs/KABSI-ST
 1. Guardrails (copied from `docs/source/KABSI-GUARDRAILS.md`, unchanged)
 2. Rules for every build chat
 3. Sources and precedence
-4. Review decisions (R-01 to R-57): where this plan changes or settles the source documents
+4. Review decisions (R-01 to R-64): where this plan changes or settles the source documents
 5. Decisions and inputs (the lane R chat decides, R-41; see the notes at the top of section 5)
 6. Classification: every decision as P0, P1, P2 or Deferred
 7. Wave P0.1: truth and foundations
@@ -229,7 +231,7 @@ AI agents call internal tools only through the same permission, approval, audit 
 
 ### 19. Partners
 
-**Replaced 21 Oct 2026 by K-127.** There is one partner program, Kabsi Partners, for affiliates only: anyone can apply, Hussein approves each, 30% of every payment for the first 12 months of each referred business after a 30-day hold, paid monthly with a $50 minimum, a partner dashboard and a staff screen. No resale, no partner-covered plans, no partner workspaces, no partner approvals. An agency that manages a client's profile is invited by the owner as Manager in Team. Owner product-market fit first, partner scale second. No agency CRM.
+**Replaced 21 Oct 2026 by K-127.** There is one partner program, Kabsi Partners, for affiliates only: anyone can apply, Rashid approves each, 30% of every payment for the first 12 months of each referred business after a 30-day hold, paid monthly with a $50 minimum, a partner dashboard and a staff screen. No resale, no partner-covered plans, no partner workspaces, no partner approvals. An agency that manages a client's profile is invited by the owner as Manager in Team. Owner product-market fit first, partner scale second. No agency CRM.
 
 ### 20. Document completeness is not product completeness
 
@@ -389,7 +391,7 @@ Run what applies and paste the result in the pull request:
 
 ### 2.5 Git and the pull request (the session merges)
 
-Hussein runs the project. The build chat opens, checks and merges its own pull request, and does not ask first.
+Rashid runs the project (R-41). The build chat opens, checks and merges its own pull request, and does not ask first.
 
 - Branch `claude/<task-id>` (for example `claude/p0-1-03`). One pull request per task, at most about 10 changed files of code; if you need more, split the task in PROGRESS and do the first half.
 - Never force-push, rebase, amend or squash pushed commits. Merge with a merge commit (not squash, not rebase).
@@ -400,11 +402,11 @@ Hussein runs the project. The build chat opens, checks and merges its own pull r
   3. updates `docs/KABSI-PROGRESS.md` on the same branch (task status, the evidence so far, and the "After merge" checks still to run);
   4. merges the pull request itself once CI is green and there is no conflict. Never merge on red CI, never merge with an unresolved conflict;
   5. runs the After-merge checks it can (Deploy workflow result, function versions, the Vercel preview or live URL, a live email). It records the evidence and marks the task done in a small docs-only pull request, merged the same way. Checks it cannot run stay in PROGRESS under "After merge" for the next chat;
-  6. gives Hussein the pull request link and a 3-line summary: what changed, how it was checked, what to look at or do.
-- It stops and asks only in these cases: before dropping tables or columns or deleting real data (section 2.3); before a step marked "Ask Hussein before" in the task; when a task needs one of Hussein's manual steps (section 5) that PROGRESS does not record as done.
+  6. gives Rashid the pull request link and a 3-line summary: what changed, how it was checked, what to look at or do.
+- It stops and asks only in these cases: before dropping tables or columns or deleting real data (section 2.3); before a step marked "Ask Rashid before" in the task; when a task needs one of Rashid's manual steps (section 5) that PROGRESS does not record as done.
 - "Done when" checks that need the merged code live (deployed function versions, the live site, a live email) are listed in PROGRESS under "After merge" for that task. If one fails, the chat reports it before starting anything else.
 - Visual checks after a merge use the Vercel preview URL of the pull request or the live URL (kabsi.co once P0.1-03 is done), never the old Lovable address.
-- Tasks marked "Ask Hussein before" in their section need his yes in the chat before the step named. That marker overrides the no-asking rule above.
+- Tasks marked "Ask Rashid before" in their section need Rashid's yes in the chat before the step named. That marker overrides the no-asking rule above.
 
 ### 2.6 Proof
 
@@ -426,13 +428,15 @@ Each task names its model. **Rule from 21 Oct 2026 (R-39):** Opus is used only w
 
 Every task below has a ready prompt. They all start with the same opening, shown once here and written out in full in each prompt:
 
-> You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task <ID>, then docs/KABSI-PROGRESS.md. Do only task <ID>. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+> You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task <ID>, then docs/KABSI-PROGRESS.md. Do only task <ID>. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 
 ### 2.10 Skills (21 Oct 2026, K-146)
 
 - Build sessions use the `kabsi-build-session` skill (the standing rules, hard stops, lean testing and handoff format; it includes the Google guard). Add "Use the kabsi-build-session skill." to the first paragraph of any prompt below that lacks it.
-- A change to a reply prompt uses `kabsi-reply-lab`: it runs the evaluation cases with the session itself (no API credit), scores them against Kabsi's checks, proposes prompt edits, and the results are recorded in PROGRESS. The CI prompt gate's live run (`EVAL_LIVE`) stays off until Hussein says so (2.12).
-- Outreach to partners and owners uses `kabsi-outreach`: it qualifies the people Hussein lists and writes DMs, briefs and scripts; no scraping.
+- A change to a reply prompt uses `kabsi-reply-lab`: it runs the evaluation cases with the session itself (no API credit), scores them against Kabsi's checks, proposes prompt edits, and the results are recorded in PROGRESS. The CI prompt gate's live run (`EVAL_LIVE`) stays off until Rashid says so (2.12).
+- Outbound (master plan section 13) uses `kabsi-outbound` (renamed from `kabsi-outreach` on 23 Oct 2026): it qualifies the people Rashid lists and writes drafts, briefs and scripts for Rashid to approve; no scraping.
+- Every line a reader sees (website, emails, WhatsApp, Nora, ads, Outbound) uses `kabsi-copy`: plain English for owners, the approved lines in master plan section 1, no Arabic shown, no dashes or exclamation marks (K-112).
+- Session 19 PR 0 also commits Anthropic's `frontend-design`, Supabase's agent skills and Kapso's agent skills to `.claude/skills` (master plan section 14, R-56b and R-63).
 - Website v2 (P0.8-13) also uses the frontend-design skill. The WhatsApp session (P0.8-03) installs `gokapso/agent-skills` (integrate-whatsapp, observe-whatsapp).
 - P1 note: `gokapso/whatsapp-cloud-inbox` is a possible staff inbox with quick replies and labels (not planned until P1 is ordered).
 
@@ -442,9 +446,9 @@ Never quote an industry statistic such as "520% more calls" or "16% of ranking" 
 
 ### 2.12 Cost rule (21 Oct 2026, K-146)
 
-No Anthropic, Google or other paid API call is made until Hussein says so in the chat. That covers real model calls in builds, tests and evaluations; live WhatsApp sends; live Google calls beyond the read-only ones already approved; and CI evaluation runs. Build against mocks, fixtures, sandboxes and stubs, and say in the pull request what was not run live. A card that needs a live call stops and asks.
+No Anthropic, Google or other paid API call is made until Rashid says so in the chat. That covers real model calls in builds, tests and evaluations; live WhatsApp sends; live Google calls beyond the read-only ones already approved; and CI evaluation runs. Build against mocks, fixtures, sandboxes and stubs, and say in the pull request what was not run live. A card that needs a live call stops and asks.
 
-**Changed by R-43 (21 Oct 2026).** "Until Hussein says so" is now a rule: the Anthropic credit turns on the day Google enables `mybusiness.googleapis.com` for project 856347937978 (key under hello@kabsi.co in Supabase secrets only, hard limit 20 US dollars a month), then `EVAL_LIVE` = true. Live WhatsApp sends to Kabsi's own test numbers start from session 13. Until PROGRESS records that paid calls are on, everything above holds. Kill-gate: if reviews are still closed on 30 Nov 2026, the lane R chat re-plans launch (D5).
+**Changed by R-43 (21 Oct 2026).** "Until Rashid says so" is now a rule: the Anthropic credit turns on the day Google enables `mybusiness.googleapis.com` for project 856347937978 (key under hello@kabsi.co in Supabase secrets only, hard limit 20 US dollars a month), then `EVAL_LIVE` = true. Live WhatsApp sends to Kabsi's own test numbers start from session 13. Until PROGRESS records that paid calls are on, everything above holds. Kill-gate: if reviews are still closed on 30 Nov 2026, the lane R chat re-plans launch (D5).
 
 **Changed by R-45 (22 Oct 2026).** AI is on demand only: a prepaid balance of about 3 US dollars, auto-reload off, no monthly top-up; `EVAL_LIVE` stays false; a 20-case live evaluation runs by hand only when a reply prompt changes; the full 200-case run waits for a top-up before launch. The kill-gate is cleared: Google opened reviews, posts and media on 22 Oct 2026.
 
@@ -473,7 +477,7 @@ Order when two things disagree:
 
 Not a source of truth any more: `docs/KABSI-SPEC.md`, `docs/KABSI-STATE.md`, `docs/WORK-QUEUE.md`, `docs/VIDEO-PLAN.md`, `docs/GO-LIVE.md` and every project file they replaced. Their still-true facts are in Appendix A and B.
 
-## 4. Review decisions (R-01 to R-57)
+## 4. Review decisions (R-01 to R-64)
 
 Each one either settles something the documents left open, fixes a contradiction between them, or changes a decision because the code or the live system showed something the documents did not know. Reason in one line.
 
@@ -513,7 +517,7 @@ Each one either settles something the documents left open, fixes a contradiction
 | R-32 | **The legal seller is Hussein Slim, Dubai** (D1 and R-25 stand). **Hussein's personal email is never used anywhere in Kabsi:** not as an account owner, contact, recovery address, DNS or console contact, nor in Calendly, Creem, Meta, Google or Supabase settings. Only kabsi.co addresses. | R-20, R-25, K-99.3 | The seller line is public; the mailbox must belong to the company, not a person. |
 | R-33 | **Kabsi is international and has one payment route.** No Lebanon offer, price, page or phone number; no NFC card sales anywhere; Creem (cards) is the only way to pay, in US dollars. The `/lebanon` page answers 301 to `/pricing`; `/r/<code>` redirects keep working, unadvertised. The terms name Hussein Slim, Dubai, and the law of the United Arab Emirates (lawyer to confirm). | D3, D297, I1 (Lebanese number), R-24, K-106, K-122 point 1 | Hussein's decision of 21 Oct 2026 (K-123, K-124, K-125). One market, one money path, nothing to keep in sync. |
 | R-34 | **One partner program, Kabsi Partners, affiliates only.** The old model (resale, partner-covered plans, partner workspaces, invoices, partner-invited businesses, partner approval policies, partner emails, QA Partner data) is deleted; every card and K-decision about it is retired (P1-01 to P1-04, K-29 to K-32). Agencies are Managers invited by the owner. | R-22 (three roles), R-23, K-16, guardrail 19, D274 | K-127 and K-128. Nothing in the program reads or writes a client's Google data, so the access rules get simpler, not looser. |
-| R-35 | **Removal order.** Code, copy and RLS stop using a retired structure first and ship; the tables and columns are dropped later, only by separate SQL files that Hussein runs in the SQL editor (the `_links` pattern), each with row counts. | Section 2.3 contract rule | Dropping is the one step that cannot be undone; the session writes the file and never runs it. |
+| R-35 | **Removal order.** Code, copy and RLS stop using a retired structure first and ship; the tables and columns are dropped later, only by separate SQL files that Rashid runs in the SQL editor (the `_links` pattern), each with row counts. | Section 2.3 contract rule | Dropping is the one step that cannot be undone; the session writes the file and never runs it. |
 | R-36 | **WhatsApp becomes an approval channel for low and medium risk.** The owner channel (opt-in, alerts, Approve, 10-second undo through the job queue, 24-hour window, digest, photo drop) is a P0 card (P0.8-03) and replaces P1-21. Never for high-risk reviews or identity fields. Auto-fix (Pro) is opt-in per field for hours and website only, with the Google policy check recorded first (P0.8-04). | K-122 points 1 and 2, R-29 scope, guardrail 0.12, P1-21, P0.2-04 "nothing is ever reverted without a decision" | K-129 and K-130. The approval still goes through guardrail 6; only the button moved. |
 | R-37 | **"What customers say" replaces review themes.** Reviews are fetched at run time (no storage past 30 days), the result keeps no review text, only AI credit starts a run, and Google's written answer is on file before real customers get it. | K-27, P1-10 | K-135. Keeps the Google storage rule that made K-27 a P1 item. |
 | R-38 | **The Profile Coach replaces the attribute and service optimizer and takes parts of P1-06.** | P1-06a to P1-06c, K-22 | K-136. One weekly check, one task path, the owner approves each change. |
@@ -536,10 +540,19 @@ Each one either settles something the documents left open, fixes a contradiction
 | R-55 | **Identity (22 Oct 2026).** Rashid Abou Hamzy is the owner and operator. The line on About, the terms, the privacy page, the footer, every email, `knowledge/kabsi-facts.md`, `public/llms-full.txt` and Nora's facts is "Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co.", with no city, from one constant (`OPERATOR_NAME` in `src/lib/site.ts`, mirrored in `supabase/functions/_shared/email-layout.ts`). Creem's own documentation (docs.creem.io, "Creem is a Merchant of Record"; "We are the legal seller of record") says it is the merchant of record, so the terms say "Payments are processed by Creem, our merchant of record", the privacy page lists Creem as a processor and Hussein's name is removed from the site, the emails and the facts. Governing law stays the United Arab Emirates (lawyer to confirm). Use "we" and "the Kabsi team"; no team members, headcounts, customers, logos, quotes or numbers are added. Hussein stays the holder of the Creem account (section 5, step 7), which is not public. | R-20, R-25, R-32, R-33 and D1 and D4 (the legal seller wording), section 2.2 (the seller line) | Rashid runs Kabsi (R-41); the merchant of record is the legal seller of every card payment, so the site does not need a second seller name. |
 | R-56 | **Homepage hero (22 Oct 2026).** The H1 stays "Your reviews and listing. Taken care of." The subline is "Every review answered, every change to your listing caught, a fresh post every week. You approve in one tap.", ending "You approve on WhatsApp." only when `WHATSAPP_NUMBER` is set. The free check's business search (`BusinessFinder`) sits in the hero so a visitor starts the check without leaving the homepage; the result opens under the hero; the secondary button stays "See how it works". The search first shows as a plain box and the real finder (with Cloudflare's Turnstile script) replaces it at the first touch or 3 seconds after load, so the Lighthouse mobile score stays at 90 or more on a cold cache. | P0.8-13 hero line, K-140 (hero button), R-48 | The check is the product's front door; starting it on the first screen removes a click, and deferring Turnstile keeps the page fast. |
 | R-57 | **Free Google Profile Check (22 Oct 2026).** Headline "See what customers see on Google, and what needs fixing." The result is a list of status flags, each a plain fact and what Kabsi would do: red (danger) for a business shown as closed or with no opening hours, amber (warning) for no phone, website, category or photos shown and for fewer than 10 reviews, grey for what Google's public data cannot show. No fear claims, no scores, no statistics. **Limit of the data, recorded so no session promises more:** Google's public Places data has no review replies, holiday hours, post dates or photo dates, so "3 reviews have no reply", "no holiday hours" and "no posts in 90 days" cannot be known before the owner connects; those three are grey flags that say so and name what Kabsi does after connecting, never a count or a problem. **Send my check to WhatsApp** is built and shown only when `WHATSAPP_NUMBER` is set: the visitor types a number with the country code and ticks an unticked box whose words are recorded (a hash of the number, the Place ID, the words, the page and the time, in `profile_check_whatsapp`; the number itself is not kept); one template message and no follow-up; a number gets one check a day and a visitor three an hour; the template (`KAPSO_TEMPLATE_PROFILE_CHECK`) is submitted in session 13b and until then nothing is sent. While the number is empty the email option is exactly as it was. Places use stays inside `places_daily_cap` (the WhatsApp and email messages are built from the 24 hour cache, so they take nothing from it). | P0.4-01, K-82, K-144, R-47, R-50 | A check that shows only facts is believable; stating the limits of public data is the honest way to keep the claims rule. |
+| R-55b | **Kapso account (23 Oct 2026; master plan section 0).** One Kapso account under rashid.abouhamzy@yawmiyati.com serves Kabsi and Alo King, with hello@kabsi.co an owner of the Kabsi.co project. Called R-55 in the master plan; R-55b here because R-55 above is the identity decision. | R-49 (the account line), R-32 | A deliberate exception to R-32 so one paid Kapso plan covers both businesses. |
+| R-56b | **Skills committed to the repo (master plan section 14).** kabsi-build-session, kabsi-reply-lab, kabsi-outbound, kabsi-copy, frontend-design, Supabase's agent skills and Kapso's agent skills live in `.claude/skills`. Called R-56 in the master plan; R-56b here because R-56 above is the homepage hero. | Section 2.10 (the skills list) | Every build chat reads the same skills from the repo. |
+| R-58 | **Reserved.** The master plan header lists R-58 but no section carries that number. | None | Held so the sequence stays whole; the lane R chat fills it when a decision needs it. |
+| R-59 | **Social channels (master plan section 2).** Facebook and Instagram links come from one `SOCIAL_LINKS` constant: site footer, About, Organization JSON-LD `sameAs`, every email footer, Nora's facts, `knowledge/kabsi-facts.md`, the llms files and Outbound signatures; a test fails if one is missing. | Footer, About, JSON-LD, emails, facts | One list cannot drift between surfaces. |
+| R-60 | **Position: Kabsi runs on WhatsApp (master plan section 1).** The two-touch rule (the website on day 1 and when paying; everything else in WhatsApp), the hero H1 "Run your Google listing from WhatsApp.", the pillars and the approved lines. Launch waits for WhatsApp to be live. | R-56 (hero lines, when Web 1 builds the new homepage), K-140 | The product is the WhatsApp agent; the dashboard is setup, settings and history. |
+| R-61 | **No Arabic shown (master plan section 3).** Nothing in Arabic appears on the website, in marketing, ads, public facts, llms files, guides, industry pages, screenshots or Outbound; Lebanese or Arabic examples in public copy become US examples. The product still works in Arabic where the owner or reviewer writes it. | Guardrail 0.10 and K-119 (the Arabic lines), R-33 | US launch; Spanish is shown where it helps US businesses. |
+| R-62 | **WhatsApp agent and Kapso (master plan section 9, with 9.8 Kabsi's number).** One number for every subscriber, the message handler, owner actions, the safety rules and the 100-conversation suite as the go-live gate. The number is live (23 Oct 2026). | P0.8-03, session 13b, R-49, R-50 | One agent, one sender, one set of limits for every owner. |
+| R-63 | **Tools (master plan section 14).** context7 on trial in `.mcp.json`, no keys in the file. Not used: obra/superpowers, scroll-craft, open-seo, VoiceStudio; hyperframes only for ad videos later. | `.mcp.json`, section 2.10 | Current library docs for build chats without another account. |
+| R-64 | **Staff alerts move from Slack to WhatsApp (master plan section 9.9).** Urgent alerts at once and one summary at 08:00 Beirut go to Rashid's phone from Kabsi's number; number problems also go by email; staff commands from a `staff_admin` phone. Session 13b part 2 removes Slack; until then alerts reach Rashid by Sentry and UptimeRobot email only. | Guardrail 6 and section 2.2 (Slack named), R-17 (Slack) | One channel Rashid reads, and no second tool to keep. |
 
 ## 5. Decisions and inputs that belong to Rashid
 
-**Note (R-41, 21 Oct 2026).** From 21 Oct 2026 Rashid runs Kabsi and the lane R chat makes every product decision, price and rule; Hussein only holds the Creem account and stays the legal seller. Wherever this plan or PROGRESS says "Ask Hussein", "Hussein's OK", "Hussein's call", "until Hussein says so" or names Hussein in a step, a question, an input or an "Ask Hussein before" line, read the lane R chat, and record the answer in PROGRESS. Every dashboard step is Rashid's; Hussein's only step is Creem (step 7 below). Facts about the past and the legal seller keep Hussein's name. R-26 below is superseded.
+**Note (R-41, 21 Oct 2026).** From 21 Oct 2026 Rashid runs Kabsi and the lane R chat makes every product decision, price and rule; Hussein only holds the Creem account and stays the legal seller. Wherever this plan or PROGRESS says "Ask Hussein", "Hussein's OK", "Hussein's call", "until Hussein says so" or names Hussein in a step, a question, an input or an "Ask Rashid before" line, read the lane R chat, and record the answer in PROGRESS. Every dashboard step is Rashid's; Hussein's only step is Creem (step 7 below). Facts about the past and the legal seller keep Hussein's name. R-26 below is superseded.
 
 **Note (R-26, 5 Oct 2026; superseded by R-41).** Rashid has stopped working on the project and Hussein runs everything. Wherever this plan or PROGRESS says "Rashid" in a step, a question, an input or an "Ask Rashid before" line, read Hussein. This section is now Hussein's; the repo is on Hussein's GitHub account and `kabsi-prod` is in Hussein's own Supabase organisation (free plan, same project and keys). Facts about the past (D1, D2 and the 4 Oct decisions) keep Rashid's name because that is who decided. Hussein's personal email is never used in Kabsi (R-32).
 
@@ -762,7 +775,7 @@ Done when (wave): kabsi.co serves the new build with K-112 wording; no file in t
 
 ### Bundled sessions
 
-Set by Hussein on 13 Oct 2026, **rebuilt on 21 Oct 2026** and **cut on 21 Oct 2026 by the lane R chat (R-42)** after his final product decisions (R-39, R-40). Sessions 1 to 6 are finished and unchanged. Sessions 7 to 21 are 2 to 4 related cards each (the launch gate is one card by design), in this order: the international and partner cleanup first; then the Sonnet work that needs no live Google (review link page, staff link, review graphics, fake review helper, the Growth cards with the Profile Coach, Kabsi Partners); then WhatsApp and Protection; onboarding; the Google go-live; and Website v2 just before the launch gate. Opus runs a session only where a card writes to Google, handles money, changes access rules or approves from WhatsApp. One build session runs the tasks of one row, in the order written. Rule: one pull request per task (large cards split as their prompts say), merged (CI green, After-merge checks run) before the next task starts. If a session runs low on context it stops after a merge and reports what is left. Hussein's manual items (section 5) are not sessions. Cards named P0.8-xx are in section 12A.
+Set by Hussein on 13 Oct 2026, **rebuilt on 21 Oct 2026** and **cut on 21 Oct 2026 by the lane R chat (R-42)** after his final product decisions (R-39, R-40). Sessions 1 to 6 are finished and unchanged. Sessions 7 to 21 are 2 to 4 related cards each (the launch gate is one card by design), in this order: the international and partner cleanup first; then the Sonnet work that needs no live Google (review link page, staff link, review graphics, fake review helper, the Growth cards with the Profile Coach, Kabsi Partners); then WhatsApp and Protection; onboarding; the Google go-live; and Website v2 just before the launch gate. Opus runs a session only where a card writes to Google, handles money, changes access rules or approves from WhatsApp. One build session runs the tasks of one row, in the order written. Rule: one pull request per task (large cards split as their prompts say), merged (CI green, After-merge checks run) before the next task starts. If a session runs low on context it stops after a merge and reports what is left. Rashid's manual items (section 5) are not sessions. Cards named P0.8-xx are in section 12A.
 
 | Session | Model | Tasks | Why here |
 |---|---|---|---|
@@ -790,6 +803,23 @@ Set by Hussein on 13 Oct 2026, **rebuilt on 21 Oct 2026** and **cut on 21 Oct 20
 | 20c | Sonnet | P0.7-06 (page-by-page audit) | The audit covers the new site and the 22 Oct copy changes (R-52) |
 | 21 | Opus | P0.7-07 (first real customer and the launch gate) | One card by design; Vercel Pro and Supabase Pro first (R-51) |
 
+### Waves from Sunday 25 Oct 2026 (R-62, master plan section 17)
+
+Set by the lane R chat on 23 Oct 2026 (addendum C). The sessions in the table above keep their numbers; these waves say the order and what may run together.
+
+Parallel rules: at most 2 Opus sessions at once (Max plan usage), plus Sonnet sessions. Two sessions never touch the same area at the same time. Every session merges main into its branch (merge commit, never rebase) and runs the checks again right before its own merge. Each session writes only its own heading in `docs/KABSI-PROGRESS.md`. Migrations get a timestamp in the file name, so parallel ones do not clash. AI calls for evaluations come out of the promotional credit; each session reports what it spent.
+
+- Wave 1, alone: Session 19 PR 0. The master plan, the addendum, R-55b, R-56b, R-58 to R-64, the social links rule, no Arabic shown, the skills (kabsi-skills.zip plus the new ones), `.mcp.json` with context7. Docs and skills only, merged first so every later session reads the same plan.
+- Wave 2, in parallel after PR 0 merges:
+  - Session 19 rest (Opus): P0.7-05b with the post Undo test (tap the Update's own Approve, not "Approve the month"), P0.7-03 Pub/Sub, N-004, the full live evaluations (200 cases plus Nora 60). Area: Google functions, content and the AI prompts.
+  - Session 13b part 1 (Opus): the WhatsApp agent with master plan section 9 and 9.8, webhook, router, phone binding, templates, the 100-conversation suite. Area: the whatsapp function and its tables.
+  - Lane R chat: Web 1 mockups in the Design type for Rashid to approve.
+- Wave 3:
+  - Session 10 Creem (Opus) as soon as `CREEM_API_KEY` and `CREEM_WEBHOOK_SECRET` are in Supabase. Area: billing-creem, prices, checkout, the pricing page.
+  - Web 1 (Sonnet) after the mockups are approved. Area: public pages; it leaves the pricing page to session 10 and takes it over after session 10 merges.
+  - Session 13b part 2 (Opus) after part 1 and session 19 rest: staff alerts on WhatsApp (master plan section 9.9, R-64), Slack removal, the payment reminders once Creem is in.
+- Wave 4: UX 1 (Sonnet), then session 20c audit, then session 21 launch gate, then Outbound.
+
 ### After launch (R-42)
 
 These cards leave the launch path. Each waits for its gate, then runs as its own session in the order written, under the same rules as the bundled sessions. Until then their features show as coming in the product, on the website and in `knowledge/kabsi-facts.md`, with no date.
@@ -815,7 +845,7 @@ These cards leave the launch path. Each waits for its gate, then runs as its own
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-01, then docs/KABSI-PROGRESS.md. Do only task P0.1-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-01, then docs/KABSI-PROGRESS.md. Do only task P0.1-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Delete the retired docs listed in the task, move docs/KNOWLEDGE-BASE.md to knowledge/kabsi-facts.md with git mv and point scripts/build-kb.mjs at it. Update AGENTS.md. Then update the Lovable project knowledge with set_project_knowledge: keep every existing rule, replace the copy rules with section 2.2 of the plan, and add "use only the design tokens". Do not change any other file.
 ```
 
@@ -830,7 +860,7 @@ Delete the retired docs listed in the task, move docs/KNOWLEDGE-BASE.md to knowl
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-01b, then docs/KABSI-PROGRESS.md. Do only task P0.1-01b. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-01b, then docs/KABSI-PROGRESS.md. Do only task P0.1-01b. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Comment and doc changes only. Replace each old-spec reference as described, regenerate public/llms-full.txt with node scripts/build-kb.mjs, delete docs/WORK-QUEUE.md, run the grep in Done when and paste its output in PROGRESS. Also mark P0.1-01 done in PROGRESS (its leftover grep lines are this task).
 ```
 
@@ -858,7 +888,7 @@ Comment and doc changes only. Replace each old-spec reference as described, rege
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-02a, then docs/KABSI-PROGRESS.md. Do only task P0.1-02a. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-02a, then docs/KABSI-PROGRESS.md. Do only task P0.1-02a. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 This is a copy task on the public site only. Make exactly the changes listed under "What changes", using the wording given there word for word. Do not redesign layouts. Keep the existing demo and photos. Update knowledge/kabsi-facts.md where a fact or wording changed, then rebuild llms-full.txt with node scripts/build-kb.mjs.
 ```
 
@@ -882,7 +912,7 @@ This is a copy task on the public site only. Make exactly the changes listed und
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-02b, then docs/KABSI-PROGRESS.md. Do only task P0.1-02b. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-02b, then docs/KABSI-PROGRESS.md. Do only task P0.1-02b. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Copy and label changes in the signed-in app, the email templates and Nora's tool text, exactly as listed. No schema change. Keep URLs. List as After-merge checks in PROGRESS: trigger one mock review on Yawmiyati with staff_mock_review through the Supabase connector and paste the resulting emails row.
 ```
 
@@ -894,7 +924,7 @@ Copy and label changes in the signed-in app, the email templates and Nora's tool
   2. **Remove Lovable-only code and settings.** `src/lib/lovable-error-reporting.ts` and its call in `src/routes/__root.tsx`; the `lovable` host test in `src/lib/telemetry.ts` (preview is `*.vercel.app` now); every `@lovable.dev/*` dependency in `package.json` and the matching line in `bunfig.toml`; the `.lovable/` folder; the Lovable block in `AGENTS.md`; the Lovable lines in `CLAUDE.md`, `README.md`, `supabase/README.md`, `.gitignore`, `.github/workflows/ci.yml` comments and Appendix A of this plan; "Lovable: hosting the website and app" on `/privacy` becomes Vercel (and `knowledge/kabsi-facts.md`, `public/llms-full.txt`). Lovable project knowledge is not edited again; Hussein disconnects the project at the end (step 5 below).
   3. **Environment variables.** Every `VITE_*` and server value the build needs is set in Vercel for Production and Preview. `docs/hosting.md` (new) lists them by name and where each value comes from, never the value. A check fails the build when a required name is missing. Secrets stay in Supabase secrets and GitHub secrets; none appears in code, logs, the pull request or screenshots.
   4. **Preview deployments for every pull request.** Each pull request gets a Vercel preview URL. Previews send `X-Robots-Tag: noindex`, use the same Supabase project, and are in the Supabase Auth redirect list (a wildcard for the team's `vercel.app` previews) so sign-in can be tested on a preview. From now on after-merge visual checks use the preview or the live URL.
-  5. **kabsi.co and www on Vercel.** `kabsi.co` and `www.kabsi.co` added to the Vercel project (www redirects to the apex); the Lovable address `kabsi-app.lovable.app` redirects 301 to the same path on `https://kabsi.co` (a host check in `src/server.ts`, harmless on Vercel, plus one last Publish in Lovable by Hussein; if Lovable cannot publish it, PROGRESS says so and the old address stays unlinked and noindex); old kabsi.co URLs that have a new equivalent (`/privacy`, `/terms`, `/pricing`) answer from the new build, the rest return 404.
+  5. **kabsi.co and www on Vercel.** `kabsi.co` and `www.kabsi.co` added to the Vercel project (www redirects to the apex); the Lovable address `kabsi-app.lovable.app` redirects 301 to the same path on `https://kabsi.co` (a host check in `src/server.ts`, harmless on Vercel, plus one last Publish in Lovable by Rashid; if Lovable cannot publish it, PROGRESS says so and the old address stays unlinked and noindex); old kabsi.co URLs that have a new equivalent (`/privacy`, `/terms`, `/pricing`) answer from the new build, the rest return 404.
   6. **Addresses and search, from K-110.** Supabase Auth Site URL `https://kabsi.co` with redirect URLs; Google OAuth consent screen home page, privacy and terms links and authorised domain on kabsi.co (change only the fields Google lists, since branding edits can trigger a re-check); `src/lib/site.ts` (`SITE_URL`), `public/sitemap.xml`, `public/robots.txt`, `public/llms.txt`, `knowledge/kabsi-facts.md` and `public/llms-full.txt`, `workers/kabsi-go/wrangler.jsonc` and the fallback in `workers/kabsi-go/src/index.js` (`APP_ORIGIN`), `supabase/functions/_shared/kabsi.ts` (`APP_URL` fallback), Supabase secret `APP_URL`, `app_settings.app_url`, the canonical helper in `src/lib/site.ts` (strip query parameters), noindex on `/app`, `/partner`, `/staff`, `/start`, `/login`, `/a/*`, `/activate/*`; sitemap resubmitted in Search Console.
 - Depends on: P0.1-02a, P0.1-02b, and the Hussein steps below.
 - Model: Sonnet.
@@ -905,7 +935,7 @@ Copy and label changes in the signed-in app, the email templates and Nora's tool
   4. In Search Console, resubmit `https://kabsi.co/sitemap.xml`.
   5. In Lovable, press Publish once after the redirect is merged, then open the project settings and disconnect GitHub.
   6. In Vercel, if the session says a value is missing, paste it into Settings, Environment Variables. Never paste a value into the chat.
-- Ask Hussein before: telling them the exact DNS records Vercel shows, and the moment the DNS switches kabsi.co.
+- Ask Rashid before: telling them the exact DNS records Vercel shows, and the moment the DNS switches kabsi.co.
 - Done when:
   - `curl -sI https://kabsi.co` returns 200 with a Vercel header (`x-vercel-id`) and the HTML title carries the K-112 line; `https://www.kabsi.co` redirects to `https://kabsi.co`; `curl -sI https://kabsi-app.lovable.app/pricing` returns 301 to `https://kabsi.co/pricing`.
   - A new pull request gets a Vercel preview URL that loads, sends `noindex`, and signs in with an email code (the connector's deployment list is pasted in PROGRESS).
@@ -920,8 +950,8 @@ Copy and label changes in the signed-in app, the email templates and Nora's tool
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-03, then docs/KABSI-PROGRESS.md. Do only task P0.1-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
-First record the current DNS for kabsi.co (dig A, AAAA, MX, TXT) in PROGRESS and read the Vercel project through the connector. Do the repository work first (Vercel config, Lovable removal, environment variable list, preview deployments), merge it, and check the preview. Then give Hussein the manual steps from the task section one at a time in plain words and wait for "done" on each. Then change every place that names kabsi-app.lovable.app to https://kabsi.co, add the canonical query-stripping and the noindex list, update APP_URL and app_settings.app_url, and run every Done-when check with curl, dig and the Vercel connector. Never write an environment variable value anywhere.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-03, then docs/KABSI-PROGRESS.md. Do only task P0.1-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+First record the current DNS for kabsi.co (dig A, AAAA, MX, TXT) in PROGRESS and read the Vercel project through the connector. Do the repository work first (Vercel config, Lovable removal, environment variable list, preview deployments), merge it, and check the preview. Then give Rashid the manual steps from the task section one at a time in plain words and wait for "done" on each. Then change every place that names kabsi-app.lovable.app to https://kabsi.co, add the canonical query-stripping and the noindex list, update APP_URL and app_settings.app_url, and run every Done-when check with curl, dig and the Vercel connector. Never write an environment variable value anywhere.
 ```
 
 ### P0.1-04 AI and Google-rules fixes in drafting
@@ -943,7 +973,7 @@ First record the current DNS for kabsi.co (dig A, AAAA, MX, TXT) in PROGRESS and
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-04, then docs/KABSI-PROGRESS.md. Do only task P0.1-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-04, then docs/KABSI-PROGRESS.md. Do only task P0.1-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-14, K-100 and K-113 in docs/source/KABSI-AUDIT.md first. Write the Deno tests first, see them fail, then change the code. Apply the ai_usage migration with the Supabase connector before opening the pull request. Keep the existing injection fence and safety check; add, do not loosen.
 ```
 
@@ -960,7 +990,7 @@ Read K-14, K-100 and K-113 in docs/source/KABSI-AUDIT.md first. Write the Deno t
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-05, then docs/KABSI-PROGRESS.md. Do only task P0.1-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-05, then docs/KABSI-PROGRESS.md. Do only task P0.1-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-108 in docs/source/KABSI-AUDIT.md and the "Visual system" section of docs/source/KABSI-DESIGN.md. Consolidate the existing --kb-* tokens into one block; do not change existing colour values except adding amber. Build the components once; do not migrate existing screens in this task (later tasks use them).
 ```
 
@@ -978,14 +1008,14 @@ Read K-108 in docs/source/KABSI-AUDIT.md and the "Visual system" section of docs
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-06, then docs/KABSI-PROGRESS.md. Do only task P0.1-06. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-06, then docs/KABSI-PROGRESS.md. Do only task P0.1-06. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Ask Rashid one question first: may the demo login be demo@kabsi.co (he creates the Zoho alias) or should it be a @test.local address. Then add is_demo, the exclusions, the Demo data tag and the seed. Every name, review and number in the seed is invented and international (US-style). Prove isolation with SQL.
 ```
 
 ### P0.1-06c Move the demo login to a kabsi.co address
 
 - Decisions: R-32, R-17, the P0.1-06 demo isolation (`app_settings.demo_login_email`).
-- Touches: `app_settings.demo_login_email` (changed from the Gmail address chosen on 4 Oct to `hello+demo@kabsi.co`, which lands in the hello@kabsi.co mailbox and needs no new Zoho alias; any other hello@kabsi.co address is fine if Hussein prefers), the demo user in Supabase Auth, the membership rows that link the demo user to Harbour Lane Coffee and Juniper Hair Studio, `docs/KABSI-PROGRESS.md` (the old address is removed from the log), `supabase/seed/demo.sql` comments. No code change expected: the address lives only in the setting.
+- Touches: `app_settings.demo_login_email` (changed from the Gmail address chosen on 4 Oct to `hello+demo@kabsi.co`, which lands in the hello@kabsi.co mailbox and needs no new Zoho alias; any other hello@kabsi.co address is fine if Rashid prefers), the demo user in Supabase Auth, the membership rows that link the demo user to Harbour Lane Coffee and Juniper Hair Studio, `docs/KABSI-PROGRESS.md` (the old address is removed from the log), `supabase/seed/demo.sql` comments. No code change expected: the address lives only in the setting.
 - Order that matters: first set `demo_login_email` to the new address (so the first sign-in is already treated as the demo login and sends no Slack or PostHog events); then sign in once with the new address (the code arrives in hello@kabsi.co) or create the user through the connector with the email confirmed; then move the memberships to the new user; then check isolation; then delete the old demo user, which removes a personal address from Kabsi.
 - Depends on: P0.1-06.
 - Model: Opus (isolation from real data).
@@ -993,7 +1023,7 @@ Ask Rashid one question first: may the demo login be demo@kabsi.co (he creates t
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-06c, then docs/KABSI-PROGRESS.md. Do only task P0.1-06c. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-06c, then docs/KABSI-PROGRESS.md. Do only task P0.1-06c. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Small task. Set app_settings.demo_login_email to hello+demo@kabsi.co before anything else, then move the demo user and its memberships, prove isolation with SQL, then delete the old demo user (a demo account, not real data). Never print the old personal address in the pull request, PROGRESS or logs.
 ```
 
@@ -1008,7 +1038,7 @@ Small task. Set app_settings.demo_login_email to hello+demo@kabsi.co before anyt
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-V1, then docs/KABSI-PROGRESS.md. Do only task P0.1-V1. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-V1, then docs/KABSI-PROGRESS.md. Do only task P0.1-V1. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read docs/source/KABSI-VIDEO.md Parts 2, 4, 5 and the rules section in full. Write the brand kit text, feature-truth.md and shot sheets V01 to V08 as described. No code changes.
 ```
 
@@ -1022,7 +1052,7 @@ Read docs/source/KABSI-VIDEO.md Parts 2, 4, 5 and the rules section in full. Wri
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-V2, then docs/KABSI-PROGRESS.md. Do only task P0.1-V2. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-V2, then docs/KABSI-PROGRESS.md. Do only task P0.1-V2. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Use the same format as docs/marketing/shot-sheets/V01.md. Read docs/source/KABSI-VIDEO.md Parts 2 and 3 and the rules section. No code changes.
 ```
 
@@ -1036,7 +1066,7 @@ Use the same format as docs/marketing/shot-sheets/V01.md. Read docs/source/KABSI
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-V3, then docs/KABSI-PROGRESS.md. Do only task P0.1-V3. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-V3, then docs/KABSI-PROGRESS.md. Do only task P0.1-V3. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Ask Rashid one question: which hours (Beirut time) he takes calls, and which days. Then create the Calendly event type through the Calendly connector, and add the page and links listed. The booking page stays on Calendly's default look (free plan).
 ```
 
@@ -1051,7 +1081,7 @@ Ask Rashid one question: which hours (Beirut time) he takes calls, and which day
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-07, then docs/KABSI-PROGRESS.md. Do only task P0.1-07. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-07, then docs/KABSI-PROGRESS.md. Do only task P0.1-07. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Build the local-stack database job and the pgTAP suite described. Generate the per-table and per-function tests from the catalog so new tables and functions are covered by default. Prove the suite catches a bad policy with a throwaway branch, then delete that branch.
 ```
 
@@ -1065,7 +1095,7 @@ Build the local-stack database job and the pgTAP suite described. Generate the p
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-08, then docs/KABSI-PROGRESS.md. Do only task P0.1-08. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-08, then docs/KABSI-PROGRESS.md. Do only task P0.1-08. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 List every SECURITY DEFINER function with its callers (grep src and supabase/functions, and cron.job) before moving anything. Move only functions with no browser caller. Update cron commands in the same migration. If leaked-password protection cannot be set through the tools you have, give Rashid the one dashboard step and record it.
 ```
 
@@ -1079,7 +1109,7 @@ List every SECURITY DEFINER function with its callers (grep src and supabase/fun
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-09, then docs/KABSI-PROGRESS.md. Do only task P0.1-09. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-09, then docs/KABSI-PROGRESS.md. Do only task P0.1-09. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-16, K-33 and K-48 in docs/source/KABSI-AUDIT.md. Expand only: add tables, columns and backfill; keep old columns (partner_id, plans) working. Write the RLS tests for each new table in the same pull request. Regenerate src/types/db.ts if the project uses generated types.
 ```
 
@@ -1093,7 +1123,7 @@ Read K-16, K-33 and K-48 in docs/source/KABSI-AUDIT.md. Expand only: add tables,
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-10, then docs/KABSI-PROGRESS.md. Do only task P0.1-10. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-10, then docs/KABSI-PROGRESS.md. Do only task P0.1-10. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-09, K-40 and K-43 in docs/source/KABSI-AUDIT.md. Build the table, the single insert function, the immutability trigger and the feed RPC, then wire the existing approval and publish paths to it. Tests first.
 ```
 
@@ -1107,7 +1137,7 @@ Read K-09, K-40 and K-43 in docs/source/KABSI-AUDIT.md. Build the table, the sin
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-11, then docs/KABSI-PROGRESS.md. Do only task P0.1-11. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-11, then docs/KABSI-PROGRESS.md. Do only task P0.1-11. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-34 and the "Google reality check" section of docs/source/KABSI-AUDIT.md. Build mocks from Google's documented response shapes (cite the doc URL in each fixture), not from the current hand-written mock. Behaviour of existing features must not change; this is a move plus better mocks. Split into two pull requests if it passes 10 files: layer and fixtures first, call-site moves second.
 ```
 
@@ -1121,7 +1151,7 @@ Read K-34 and the "Google reality check" section of docs/source/KABSI-AUDIT.md. 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-12a, then docs/KABSI-PROGRESS.md. Do only task P0.1-12a. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-12a, then docs/KABSI-PROGRESS.md. Do only task P0.1-12a. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-35 in docs/source/KABSI-AUDIT.md. Build the jobs table, claim function and dispatcher, then port review sync, draft and notify from api/cron.ts. Leave access acceptance and Protection on the old cron until P0.1-12b.
 ```
 
@@ -1135,7 +1165,7 @@ Read K-35 in docs/source/KABSI-AUDIT.md. Build the jobs table, claim function an
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-12b, then docs/KABSI-PROGRESS.md. Do only task P0.1-12b. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-12b, then docs/KABSI-PROGRESS.md. Do only task P0.1-12b. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-36. Add the limiter and breaker inside the Google layer only, port the remaining cron steps to jobs, run the 500-business load test on the local stack and record the numbers.
 ```
 
@@ -1149,7 +1179,7 @@ Read K-36. Add the limiter and breaker inside the Google layer only, port the re
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-13a, then docs/KABSI-PROGRESS.md. Do only task P0.1-13a. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-13a, then docs/KABSI-PROGRESS.md. Do only task P0.1-13a. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-38, K-70 and K-116.1 in docs/source/KABSI-AUDIT.md, and R-05 in the plan. Tests first. Never retry a write after an ambiguous failure; reconcile by reading Google. Port only review replies in this task.
 ```
 
@@ -1163,13 +1193,13 @@ Read K-38, K-70 and K-116.1 in docs/source/KABSI-AUDIT.md, and R-05 in the plan.
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-13b, then docs/KABSI-PROGRESS.md. Do only task P0.1-13b. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.1-13b, then docs/KABSI-PROGRESS.md. Do only task P0.1-13b. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Port posts, photos, special hours and listing changes onto the pipeline built in P0.1-13a, with the same tests per type, then remove the old per-type claim logic.
 ```
 
 ## 7A. Wave P0.G: Google go-live
 
-Gate A was approved on 5 Oct 2026: Google Cloud project 856347937978, Business Profile APIs, 300 queries per minute. Hussein confirmed on the Google Cloud dashboard (7 Oct) that 856347937978 is the project number of `smiling-chess-505915-b7`, and that the quota reads 300 requests per minute on Account Management, Business Information, Notifications, Place Actions, Q&A and Verifications. The Google My Business API that serves reviews and posts is not yet enabled; enabling it is pending on Hussein (P0.7-01a). The tasks that need Google's access moved here from Wave P0.7 (section 13) and run right after Wave P0.1, ahead of P0.2 to P0.6. Wave P0.1 is finished when P0.1-03 (Vercel), P0.1-V3, P0.1-13a and P0.1-13b are done in PROGRESS.
+Gate A was approved on 5 Oct 2026: Google Cloud project 856347937978, Business Profile APIs, 300 queries per minute. Hussein confirmed on the Google Cloud dashboard (7 Oct) that 856347937978 is the project number of `smiling-chess-505915-b7`, and that the quota reads 300 requests per minute on Account Management, Business Information, Notifications, Place Actions, Q&A and Verifications. The Google My Business API that serves reviews and posts is not yet enabled; enabling it is pending on Rashid (P0.7-01a). The tasks that need Google's access moved here from Wave P0.7 (section 13) and run right after Wave P0.1, ahead of P0.2 to P0.6. Wave P0.1 is finished when P0.1-03 (Vercel), P0.1-V3, P0.1-13a and P0.1-13b are done in PROGRESS.
 
 Goal: real Google responses captured and the mocks corrected, the verification package submitted, Kabsi switched to live Google on Kabsi's own two profiles (Yawmiyati and Abou Hamze Auto Center), and a first real reply published and verified through the pipeline.
 
@@ -1200,23 +1230,23 @@ Done when (wave): every Google module has a real fixture and the mocks agree wit
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-01a, then docs/KABSI-PROGRESS.md. Do only task P0.7-01a. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
-Read-only. Enable the API through the console if the session can; otherwise give Hussein the manual step above in plain words and wait for the answer. Never ask for or store a Google password, code or token in the chat.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-01a, then docs/KABSI-PROGRESS.md. Do only task P0.7-01a. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+Read-only. Enable the API through the console if the session can; otherwise give Rashid the manual step above in plain words and wait for the answer. Never ask for or store a Google password, code or token in the chat.
 ```
 
 ### P0.7-01 Capture real Google responses
 
 - Decisions: K-34 (record real responses), K-56, K-116 and K-117 items marked with a dagger, K-82 (chat and social attribute names), K-41 open risk (can a Manager remove itself), K-37 open risk (Pub/Sub for group-held locations), D293 (API side of the group flow).
-- Touches: read-only calls with hello@kabsi.co's credential against Yawmiyati and Abou Hamze Auto Center (the Abou Hamze owner agreed on 4 Oct; Hussein confirms that still stands): accounts and invitations (what an invitation exposes, the invited role), location read with every field mask, getGoogleUpdated, reviews list with reply state and moderation fields, media list, performance and search keywords, attributes metadata for the category and country, place action links, verification state; responses saved, with personal data removed, as fixtures in `tests/fixtures/google/live/`; a short findings note `docs/google/live-findings.md` answering each dagger item.
+- Touches: read-only calls with hello@kabsi.co's credential against Yawmiyati and Abou Hamze Auto Center (the Abou Hamze owner agreed on 4 Oct; Rashid confirms that still stands): accounts and invitations (what an invitation exposes, the invited role), location read with every field mask, getGoogleUpdated, reviews list with reply state and moderation fields, media list, performance and search keywords, attributes metadata for the category and country, place action links, verification state; responses saved, with personal data removed, as fixtures in `tests/fixtures/google/live/`; a short findings note `docs/google/live-findings.md` answering each dagger item.
 - Depends on: Gate A (done 5 Oct), P0.1-11, P0.7-01a.
-- Ask Hussein before: the first live call (confirm the quota reads 300, the businesses to read, and that the Abou Hamze consent still stands).
+- Ask Rashid before: the first live call (confirm the quota reads 300, the businesses to read, and that the Abou Hamze consent still stands).
 - Model: Sonnet (R-39; was Opus; read-only Google).
 - Done when: each module has at least one real fixture; the findings note answers: does an invitation expose the role, can a Manager remove its own access through the admins API, which attribute names hold the chat and social links, can products be written, does moderation state appear on replies; nothing was written to Google.
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-01, then docs/KABSI-PROGRESS.md. Do only task P0.7-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
-Read-only: no write call of any kind. Ask Hussein to confirm the quota reads 300 and which profiles to read. Strip reviewer names, review text and phone numbers from fixtures before committing.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-01, then docs/KABSI-PROGRESS.md. Do only task P0.7-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+Read-only: no write call of any kind. Ask Rashid to confirm the quota reads 300 and which profiles to read. Strip reviewer names, review text and phone numbers from fixtures before committing.
 ```
 
 ### P0.7-01b Compare real responses with the mocks and fix the mocks
@@ -1229,22 +1259,22 @@ Read-only: no write call of any kind. Ask Hussein to confirm the quota reads 300
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-01b, then docs/KABSI-PROGRESS.md. Do only task P0.7-01b. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-01b, then docs/KABSI-PROGRESS.md. Do only task P0.7-01b. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Do not change production parsing to fit a mock: if the real shape differs, fix the mock and the parser together, and say which. Read-only against Google.
 ```
 
 ### P0.7-02 business.manage verification package
 
 - Decisions: K-113.6, K-92, K-99.2.
-- Touches: `docs/google/business-manage-verification.md`: the scope justification (the token is used once to invite Kabsi's business group as Manager and is then revoked; no refresh tokens kept; Google data never used for advertising or AI model training), the demo video script showing the address bar with the OAuth client ID, the consent screen and the Manager invitation (recorded by Hussein on the demo flow once P1-18 exists in a test build, or on a staging route), the privacy page link with the Limited Use sentence (live since P0.2-07), and the exact Cloud Console steps to submit. Contact addresses are kabsi.co addresses only, never a personal email.
+- Touches: `docs/google/business-manage-verification.md`: the scope justification (the token is used once to invite Kabsi's business group as Manager and is then revoked; no refresh tokens kept; Google data never used for advertising or AI model training), the demo video script showing the address bar with the OAuth client ID, the consent screen and the Manager invitation (recorded by Rashid on the demo flow once P1-18 exists in a test build, or on a staging route), the privacy page link with the Limited Use sentence (live since P0.2-07), and the exact Cloud Console steps to submit. Contact addresses are kabsi.co addresses only, never a personal email.
 - Depends on: Gate A (done), P0.1-03 (kabsi.co on Vercel), P0.2-07. Writing the package can start before those; submitting cannot.
 - Model: Sonnet (R-39; was Opus; it writes a document).
 - Done when: the package file is complete; Hussein submits it (date in PROGRESS); answers from Google are tracked in PROGRESS.
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-02, then docs/KABSI-PROGRESS.md. Do only task P0.7-02. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
-Read K-92 and K-113 point 6. Write the package and the step list for Hussein; confirm kabsi.co/privacy carries the Limited Use sentence word for word before it is submitted.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-02, then docs/KABSI-PROGRESS.md. Do only task P0.7-02. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+Read K-92 and K-113 point 6. Write the package and the step list for Rashid; confirm kabsi.co/privacy carries the Limited Use sentence word for word before it is submitted.
 ```
 
 ### P0.7-04 The switch to live
@@ -1254,27 +1284,27 @@ Read K-92 and K-113 point 6. Write the package and the step list for Hussein; co
 - Decisions: K-56, D279, A13, R-27.
 - Touches: delete mock rows (`mock_listings`, `mock_google_reviews`) and every test account and business listed in PROGRESS "Test data" (QA Bakery and its owner, QA Partner and the test invite, Safa Chicken and tarikhtube@gmail.com, the gmail.co typo account, Nora test chats, Yawmiyati's overlapping test plans and payments, test photos); keep Yawmiyati and the demo workspace; re-read both connected businesses from Google and confirm the baseline with their owners; `GOOGLE_MODE` secret and `app_settings.google_mode` to live. Supabase Pro with point-in-time recovery and the first restore test (K-87) move to P0.7-07: kabsi-prod is on the free plan in Hussein's organisation until the first real customer connects.
 - Depends on: P0.7-01b, P0.1-13a, P0.1-13b.
-- Ask Hussein before: the deletions (show the exact list and row counts; this is the stop for deleting real data).
+- Ask Rashid before: the deletions (show the exact list and row counts; this is the stop for deleting real data).
 - Model: Opus.
 - Done when: the deletion counts match the shown list; no mock row remains; `google_mode()` returns live; the permanent demo login still works on mock (R-17); no customer other than the two Kabsi-owned profiles is connected.
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-04, then docs/KABSI-PROGRESS.md. Do only task P0.7-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
-Read K-56 and K-87. Build the deletion list with row counts and show it to Hussein; delete nothing until the answer is yes. Then flip to live and run the checks.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-04, then docs/KABSI-PROGRESS.md. Do only task P0.7-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+Read K-56 and K-87. Build the deletion list with row counts and show it to Rashid; delete nothing until the answer is yes. Then flip to live and run the checks.
 ```
 
 ### P0.7-05 Internal live test on Kabsi's own profiles
 
 - Decisions: K-85, K-99.6, K-67, K-66, K-41 (self-removal), K-117 (search terms in the report).
-- Touches: what exists after Wave P0.1, on Yawmiyati (internal only, never in public material) and, with the owner's consent, Abou Hamze Auto Center: sync of reviews, listing, media and performance; one real review drafted and one real reply approved by Hussein in the app, published and `verified` through the pipeline (P0.1-13a), with undo checked; one test post, photo or hours change through the pipeline (P0.1-13b) on Yawmiyati; the Google update flow read (getGoogleUpdated) and shown, not acted on. The items that need later waves (backlog on day one, voice rules from past replies, Business Knowledge baseline, the recognised Google name update, disconnect and reconnect) move to P0.7-05b.
+- Touches: what exists after Wave P0.1, on Yawmiyati (internal only, never in public material) and, with the owner's consent, Abou Hamze Auto Center: sync of reviews, listing, media and performance; one real review drafted and one real reply approved by Rashid in the app, published and `verified` through the pipeline (P0.1-13a), with undo checked; one test post, photo or hours change through the pipeline (P0.1-13b) on Yawmiyati; the Google update flow read (getGoogleUpdated) and shown, not acted on. The items that need later waves (backlog on day one, voice rules from past replies, Business Knowledge baseline, the recognised Google name update, disconnect and reconnect) move to P0.7-05b.
 - Depends on: P0.7-04.
 - Model: Opus (live Google).
 - Done when: each item above has evidence (a response, a row, a screenshot path); a real reply is live on Google with `verified` in the pipeline; the audit log shows who approved it.
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-05, then docs/KABSI-PROGRESS.md. Do only task P0.7-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-05, then docs/KABSI-PROGRESS.md. Do only task P0.7-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-67, K-85 and K-117. Every write to Google needs Hussein's own approval in the app, as for any owner. Write only to Yawmiyati unless the other owner has consented to a named write.
 ```
 
@@ -1294,7 +1324,7 @@ Done when (wave): an owner can disconnect in 3 taps and the access-change email 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-01, then docs/KABSI-PROGRESS.md. Do only task P0.2-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-01, then docs/KABSI-PROGRESS.md. Do only task P0.2-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-40 in docs/source/KABSI-AUDIT.md. Make the policy table the single source the retention job reads. Tests first, with rows on both sides of every limit.
 ```
 
@@ -1308,7 +1338,7 @@ Read K-40 in docs/source/KABSI-AUDIT.md. Make the policy table the single source
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-02, then docs/KABSI-PROGRESS.md. Do only task P0.2-02. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-02, then docs/KABSI-PROGRESS.md. Do only task P0.2-02. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-41 and K-113 points 1 and 2 in docs/source/KABSI-AUDIT.md. Build the screen, the RPC, the disconnect job, the follow-up and the two emails. Use the admins module in _shared/google; it is mock until Gate A.
 ```
 
@@ -1322,7 +1352,7 @@ Read K-41 and K-113 points 1 and 2 in docs/source/KABSI-AUDIT.md. Build the scre
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-03, then docs/KABSI-PROGRESS.md. Do only task P0.2-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-03, then docs/KABSI-PROGRESS.md. Do only task P0.2-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-10, K-11, K-18 and K-20 in docs/source/KABSI-AUDIT.md. Expand only: add the two tables, migrate data, keep knowledge_card readable until P0.3-01 switches readers. Tests first.
 ```
 
@@ -1336,7 +1366,7 @@ Read K-10, K-11, K-18 and K-20 in docs/source/KABSI-AUDIT.md. Expand only: add t
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-04, then docs/KABSI-PROGRESS.md. Do only task P0.2-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-04, then docs/KABSI-PROGRESS.md. Do only task P0.2-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-18 to K-20, K-77 and K-116 point 2 in docs/source/KABSI-AUDIT.md and guardrail 7. Never revert anything automatically. Build detection, explanation, the two decisions through the pipeline and the guards; the full Google Profile screen comes in P0.3-11, so keep the UI to the change card and the Home status line.
 ```
 
@@ -1350,7 +1380,7 @@ Read K-18 to K-20, K-77 and K-116 point 2 in docs/source/KABSI-AUDIT.md and guar
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-05, then docs/KABSI-PROGRESS.md. Do only task P0.2-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-05, then docs/KABSI-PROGRESS.md. Do only task P0.2-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-17 in docs/source/KABSI-AUDIT.md. Keep the scanner-safe design (GET shows, POST performs). Tests first.
 ```
 
@@ -1364,7 +1394,7 @@ Read K-17 in docs/source/KABSI-AUDIT.md. Keep the scanner-safe design (GET shows
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-06, then docs/KABSI-PROGRESS.md. Do only task P0.2-06. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-06, then docs/KABSI-PROGRESS.md. Do only task P0.2-06. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-100 in docs/source/KABSI-AUDIT.md. Add masks, session tokens, the cache and the kill switch. Then give Rashid step 3 from section 5 of the plan in plain words and record his confirmation.
 ```
 
@@ -1381,7 +1411,7 @@ Read K-100 in docs/source/KABSI-AUDIT.md. Add masks, session tokens, the cache a
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-07, then docs/KABSI-PROGRESS.md. Do only task P0.2-07. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.2-07, then docs/KABSI-PROGRESS.md. Do only task P0.2-07. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-40, K-41, K-112 and K-113 in docs/source/KABSI-AUDIT.md. Every sentence must be true of the system as built today; mark nothing as coming. Use the LEGAL_SELLER constant for the seller line. Add a note in PROGRESS that a lawyer should read both pages before launch.
 ```
 
@@ -1401,7 +1431,7 @@ Done when (wave): a new mock review becomes a task, a draft, an approval and a p
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-01, then docs/KABSI-PROGRESS.md. Do only task P0.3-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-01, then docs/KABSI-PROGRESS.md. Do only task P0.3-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-10, K-11 and K-120 in docs/source/KABSI-AUDIT.md and guardrail 4. Switch every reader to knowledge_facts, rebuild the About your business screen with the shared components from P0.1-05, then retire knowledge_card writes.
 ```
 
@@ -1415,7 +1445,7 @@ Read K-10, K-11 and K-120 in docs/source/KABSI-AUDIT.md and guardrail 4. Switch 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-02, then docs/KABSI-PROGRESS.md. Do only task P0.3-02. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-02, then docs/KABSI-PROGRESS.md. Do only task P0.3-02. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-14, K-39, K-116 point 4 and K-120 in docs/source/KABSI-AUDIT.md. Keep the existing fence and injection defences. Code decides the flow; the model only writes text inside it. Tests first.
 ```
 
@@ -1429,7 +1459,7 @@ Read K-14, K-39, K-116 point 4 and K-120 in docs/source/KABSI-AUDIT.md. Keep the
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-03, then docs/KABSI-PROGRESS.md. Do only task P0.3-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-03, then docs/KABSI-PROGRESS.md. Do only task P0.3-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-13 in docs/source/KABSI-AUDIT.md. Replace the urgent flag with the three levels everywhere it is read (emails, Home, review screen) and test every trigger.
 ```
 
@@ -1443,7 +1473,7 @@ Read K-13 in docs/source/KABSI-AUDIT.md. Replace the urgent flag with the three 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-04, then docs/KABSI-PROGRESS.md. Do only task P0.3-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-04, then docs/KABSI-PROGRESS.md. Do only task P0.3-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-39 in docs/source/KABSI-AUDIT.md. Every case is invented; no real reviews. Check whether the ANTHROPIC_API_KEY GitHub secret exists; if not, ask Rashid to add it and wait.
 ```
 
@@ -1457,7 +1487,7 @@ Read K-39 in docs/source/KABSI-AUDIT.md. Every case is invented; no real reviews
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-05, then docs/KABSI-PROGRESS.md. Do only task P0.3-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-05, then docs/KABSI-PROGRESS.md. Do only task P0.3-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-07 and K-08 in docs/source/KABSI-AUDIT.md and R-05 in the plan. Tasks are created only by server-side detectors, never by the browser. Migrate, then retire profile_tasks and the score. Tests first.
 ```
 
@@ -1473,7 +1503,7 @@ Read K-07 and K-08 in docs/source/KABSI-AUDIT.md and R-05 in the plan. Tasks are
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-06, then docs/KABSI-PROGRESS.md. Do only task P0.3-06. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-06, then docs/KABSI-PROGRESS.md. Do only task P0.3-06. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-16 in docs/source/KABSI-AUDIT.md. Enforce roles in the database (RLS and RPC checks), not only in the UI. Tests per role per action.
 ```
 
@@ -1487,7 +1517,7 @@ Read K-16 in docs/source/KABSI-AUDIT.md. Enforce roles in the database (RLS and 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-07, then docs/KABSI-PROGRESS.md. Do only task P0.3-07. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-07, then docs/KABSI-PROGRESS.md. Do only task P0.3-07. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-06 and K-09 in docs/source/KABSI-AUDIT.md and the "Owner dashboard" section of docs/source/KABSI-DESIGN.md. Use only the shared components and tokens. Phone first.
 ```
 
@@ -1501,7 +1531,7 @@ Read K-06 and K-09 in docs/source/KABSI-AUDIT.md and the "Owner dashboard" secti
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-08, then docs/KABSI-PROGRESS.md. Do only task P0.3-08. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-08, then docs/KABSI-PROGRESS.md. Do only task P0.3-08. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-02 and K-03. Change navigation and page titles only; keep every old URL working with redirects.
 ```
 
@@ -1515,7 +1545,7 @@ Read K-02 and K-03. Change navigation and page titles only; keep every old URL w
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-09, then docs/KABSI-PROGRESS.md. Do only task P0.3-09. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-09, then docs/KABSI-PROGRESS.md. Do only task P0.3-09. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-15 and K-70 in docs/source/KABSI-AUDIT.md and the Reviews row in docs/source/KABSI-DESIGN.md. Use the pipeline's undo RPC. Phone first.
 ```
 
@@ -1529,7 +1559,7 @@ Read K-15 and K-70 in docs/source/KABSI-AUDIT.md and the Reviews row in docs/sou
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-10, then docs/KABSI-PROGRESS.md. Do only task P0.3-10. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-10, then docs/KABSI-PROGRESS.md. Do only task P0.3-10. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-66 and K-101 in docs/source/KABSI-AUDIT.md. The owner's consent covers exactly the list shown; record that list in the approval.
 ```
 
@@ -1543,7 +1573,7 @@ Read K-66 and K-101 in docs/source/KABSI-AUDIT.md. The owner's consent covers ex
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-11, then docs/KABSI-PROGRESS.md. Do only task P0.3-11. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.3-11, then docs/KABSI-PROGRESS.md. Do only task P0.3-11. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-18 and K-19 and the Google Profile row in docs/source/KABSI-DESIGN.md. Read data only from knowledge_facts, profile_changes, tasks and google_connections.
 ```
 
@@ -1565,7 +1595,7 @@ Run order in this wave: P0.4-09, P0.4-01, P0.4-02, P0.4-03, P0.4-04, P0.4-05, P0
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-01, then docs/KABSI-PROGRESS.md. Do only task P0.4-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-01, then docs/KABSI-PROGRESS.md. Do only task P0.4-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-91, K-100 and G-27, and the "Free tools" and "Signup, login and onboarding" sections of docs/source/KABSI-DESIGN.md. Public data only. Add the new function to supabase/config.toml.
 ```
 
@@ -1579,7 +1609,7 @@ Read K-91, K-100 and G-27, and the "Free tools" and "Signup, login and onboardin
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-02, then docs/KABSI-PROGRESS.md. Do only task P0.4-02. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-02, then docs/KABSI-PROGRESS.md. Do only task P0.4-02. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-91 and K-100. Give Rashid step 5 from section 5 and wait for his "done" before testing Google sign-in. Sign-in asks for basic scopes only.
 ```
 
@@ -1595,7 +1625,7 @@ Read K-91 and K-100. Give Rashid step 5 from section 5 and wait for his "done" b
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-03, then docs/KABSI-PROGRESS.md. Do only task P0.4-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-03, then docs/KABSI-PROGRESS.md. Do only task P0.4-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-93 and the manual guide section of docs/source/KABSI-DESIGN.md. Keep the group ID in KABSI_GROUP_ID only. Never ask for a password or a code.
 ```
 
@@ -1609,7 +1639,7 @@ Read K-93 and the manual guide section of docs/source/KABSI-DESIGN.md. Keep the 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-04, then docs/KABSI-PROGRESS.md. Do only task P0.4-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-04, then docs/KABSI-PROGRESS.md. Do only task P0.4-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-61 and K-94 to K-98 in docs/source/KABSI-AUDIT.md and the scenario screens in docs/source/KABSI-DESIGN.md. No Google jargon on any screen. Link each scenario to its guide only when that guide exists.
 ```
 
@@ -1625,7 +1655,7 @@ Read K-61 and K-94 to K-98 in docs/source/KABSI-AUDIT.md and the scenario screen
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-05, then docs/KABSI-PROGRESS.md. Do only task P0.4-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-05, then docs/KABSI-PROGRESS.md. Do only task P0.4-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-18 and K-45. Use the facts RPCs from P0.3-01; do not write knowledge any other way.
 ```
 
@@ -1641,7 +1671,7 @@ Read K-18 and K-45. Use the facts RPCs from P0.3-01; do not write knowledge any 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-06, then docs/KABSI-PROGRESS.md. Do only task P0.4-06. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-06, then docs/KABSI-PROGRESS.md. Do only task P0.4-06. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-48, K-94 and K-101 in docs/source/KABSI-AUDIT.md. One entitlements function decides access; billing state never touches google_connections. Tests first.
 ```
 
@@ -1656,7 +1686,7 @@ Read K-48, K-94 and K-101 in docs/source/KABSI-AUDIT.md. One entitlements functi
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-07, then docs/KABSI-PROGRESS.md. Do only task P0.4-07. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-07, then docs/KABSI-PROGRESS.md. Do only task P0.4-07. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Check PROGRESS for Rashid step 7 (Creem keys in Supabase secrets). If it is missing, stop and ask. Read K-48, K-106 and K-107. Work in Creem's test mode first; the webhook is the only writer of paid state.
 ```
 
@@ -1670,7 +1700,7 @@ Check PROGRESS for Rashid step 7 (Creem keys in Supabase secrets). If it is miss
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-08, then docs/KABSI-PROGRESS.md. Do only task P0.4-08. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-08, then docs/KABSI-PROGRESS.md. Do only task P0.4-08. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-102 and K-118 in docs/source/KABSI-AUDIT.md and the Emails section of docs/source/KABSI-DESIGN.md. One template for every email; move existing emails onto it without changing what triggers them.
 ```
 
@@ -1684,7 +1714,7 @@ Read K-102 and K-118 in docs/source/KABSI-AUDIT.md and the Emails section of doc
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-09, then docs/KABSI-PROGRESS.md. Do only task P0.4-09. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-09, then docs/KABSI-PROGRESS.md. Do only task P0.4-09. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-46 and K-57. Every send goes through one outbox; no channel bypasses approvals.
 ```
 
@@ -1700,7 +1730,7 @@ Read K-46 and K-57. Every send goes through one outbox; no channel bypasses appr
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-10, then docs/KABSI-PROGRESS.md. Do only task P0.4-10. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-10, then docs/KABSI-PROGRESS.md. Do only task P0.4-10. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read G-24, G-25 and G-30 in docs/source/KABSI-GROWTH.md and K-101. Counts come only from the audit log. No end-of-trial discount.
 ```
 
@@ -1714,7 +1744,7 @@ Read G-24, G-25 and G-30 in docs/source/KABSI-GROWTH.md and K-101. Counts come o
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-11, then docs/KABSI-PROGRESS.md. Do only task P0.4-11. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.4-11, then docs/KABSI-PROGRESS.md. Do only task P0.4-11. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-111 and the help section in docs/source/KABSI-DESIGN.md. Nora never asks for a password or code and answers only from the facts file and live state.
 ```
 
@@ -1736,7 +1766,7 @@ Done when (wave): a photo goes from a phone to Google (mock) with metadata strip
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-01, then docs/KABSI-PROGRESS.md. Do only task P0.5-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-01, then docs/KABSI-PROGRESS.md. Do only task P0.5-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-23, K-78 and K-116 point 6 in docs/source/KABSI-AUDIT.md. Never generate or edit a photo beyond orientation and basic exposure. Processing runs in a job, never in the request. Split into two pull requests if needed: pipeline and storage first, screen second.
 ```
 
@@ -1750,7 +1780,7 @@ Read K-23, K-78 and K-116 point 6 in docs/source/KABSI-AUDIT.md. Never generate 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-02, then docs/KABSI-PROGRESS.md. Do only task P0.5-02. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-02, then docs/KABSI-PROGRESS.md. Do only task P0.5-02. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-24, K-80 and K-116 points 3, 5 and 12. Never invent an offer, price, event, service, policy, staff member or hours. Do not market scheduling as a feature.
 ```
 
@@ -1764,7 +1794,7 @@ Read K-24, K-80 and K-116 points 3, 5 and 12. Never invent an offer, price, even
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-03, then docs/KABSI-PROGRESS.md. Do only task P0.5-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-03, then docs/KABSI-PROGRESS.md. Do only task P0.5-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-21 in docs/source/KABSI-AUDIT.md. Holiday dates come from a maintained table checked against an official source for each country, with the source noted per row.
 ```
 
@@ -1780,7 +1810,7 @@ Read K-21 in docs/source/KABSI-AUDIT.md. Holiday dates come from a maintained ta
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-04, then docs/KABSI-PROGRESS.md. Do only task P0.5-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-04, then docs/KABSI-PROGRESS.md. Do only task P0.5-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-28 and K-72. Every number Kabsi claims as its own work comes from the audit log; nothing is estimated except the labelled time-saved line.
 ```
 
@@ -1796,7 +1826,7 @@ Read K-28 and K-72. Every number Kabsi claims as its own work comes from the aud
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-05, then docs/KABSI-PROGRESS.md. Do only task P0.5-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.5-05, then docs/KABSI-PROGRESS.md. Do only task P0.5-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-26 in docs/source/KABSI-AUDIT.md. Never claim a cause for a change. Use the dataviz rules: one simple chart style, readable on a phone.
 ```
 
@@ -1816,7 +1846,7 @@ Done when (wave): the consent banner works by country with stored proof; PageVie
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-01, then docs/KABSI-PROGRESS.md. Do only task P0.6-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-01, then docs/KABSI-PROGRESS.md. Do only task P0.6-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read G-18 to G-21 in docs/source/KABSI-GROWTH.md and R-04. Build the banner and the records table; no third-party consent tool. English only at launch.
 ```
 
@@ -1832,7 +1862,7 @@ Read G-18 to G-21 in docs/source/KABSI-GROWTH.md and R-04. Build the banner and 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-02, then docs/KABSI-PROGRESS.md. Do only task P0.6-02. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-02, then docs/KABSI-PROGRESS.md. Do only task P0.6-02. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read G-28, G-31, G-32 and G-44 in docs/source/KABSI-GROWTH.md. One name per action; the Meta names come in P0.6-03 from the G-47 table. Use the PostHog connector to confirm events arrive.
 ```
 
@@ -1848,7 +1878,7 @@ Read G-28, G-31, G-32 and G-44 in docs/source/KABSI-GROWTH.md. One name per acti
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-03, then docs/KABSI-PROGRESS.md. Do only task P0.6-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-03, then docs/KABSI-PROGRESS.md. Do only task P0.6-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read G-19 and G-47 in docs/source/KABSI-GROWTH.md and Part 7 of docs/source/KABSI-VIDEO.md. Check PROGRESS that Rashid created the Kabsi dataset and the "Kabsi CAPI" system user and put the token in Supabase secrets; if not, stop and ask. Use Meta's Test Events code for every check.
 ```
 
@@ -1864,7 +1894,7 @@ Read G-19 and G-47 in docs/source/KABSI-GROWTH.md and Part 7 of docs/source/KABS
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-04, then docs/KABSI-PROGRESS.md. Do only task P0.6-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-04, then docs/KABSI-PROGRESS.md. Do only task P0.6-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read G-26 and the "Meta landing page" bullet in docs/source/KABSI-DESIGN.md. No 3D, no carousel, no autoplay. Use the shared components and tokens.
 ```
 
@@ -1878,7 +1908,7 @@ Read G-26 and the "Meta landing page" bullet in docs/source/KABSI-DESIGN.md. No 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-05, then docs/KABSI-PROGRESS.md. Do only task P0.6-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-05, then docs/KABSI-PROGRESS.md. Do only task P0.6-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read G-15 and G-16 in docs/source/KABSI-GROWTH.md. Set the headers in `vercel.json`, check them on a Vercel preview first, then on kabsi.co. Start the CSP in report-only mode.
 ```
 
@@ -1894,7 +1924,7 @@ Read G-15 and G-16 in docs/source/KABSI-GROWTH.md. Set the headers in `vercel.js
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-06, then docs/KABSI-PROGRESS.md. Do only task P0.6-06. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-06, then docs/KABSI-PROGRESS.md. Do only task P0.6-06. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-58, K-104 and K-111 in docs/source/KABSI-AUDIT.md. Every fact in the file must be true of the system on main today; anything not live is written as not available yet. Nora never asks for a password or a code.
 ```
 
@@ -1904,12 +1934,12 @@ Read K-58, K-104 and K-111 in docs/source/KABSI-AUDIT.md. Every fact in the file
 - Touches: `about.tsx` (who runs Kabsi, why it exists, how to reach a person, the sign-off line), `security.tsx` lead (no password ever, Manager access you can remove, nothing posted without you, then what exists today: 30-day Google data, encryption, Advanced Protection on Kabsi's Google account), a short founder note block on the homepage, W4 slot on About.
 - Depends on: P0.2-07.
 - Model: Sonnet.
-- Ask Hussein before: whether the founder note uses his photo (the design review suggests it for the owner site; K-105 says no photo for partner surfaces).
+- Ask Rashid before: whether the founder note uses his photo (Rashid's, as founder) (the design review suggests it for the owner site; K-105 says no photo for partner surfaces).
 - Done when: every claim on the three pages is true today (checked line by line against the facts file, list in PROGRESS); no testimonial, logo wall or number that is not Kabsi's own.
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-07, then docs/KABSI-PROGRESS.md. Do only task P0.6-07. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-07, then docs/KABSI-PROGRESS.md. Do only task P0.6-07. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Ask Rashid one question: photo on the founder note, yes or no. Then write the pages from the design review's guidance, true today, no invented proof.
 ```
 
@@ -1923,7 +1953,7 @@ Ask Rashid one question: photo on the founder note, yes or no. Then write the pa
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-08, then docs/KABSI-PROGRESS.md. Do only task P0.6-08. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-08, then docs/KABSI-PROGRESS.md. Do only task P0.6-08. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-87 and K-118 in docs/source/KABSI-AUDIT.md. Use the Resend, Sentry, PostHog, UptimeRobot and Slack connectors to check and fix what they allow; list exact steps for Rashid for the rest. Never write a secret value anywhere.
 ```
 
@@ -1939,7 +1969,7 @@ Read K-87 and K-118 in docs/source/KABSI-AUDIT.md. Use the Resend, Sentry, PostH
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-09, then docs/KABSI-PROGRESS.md. Do only task P0.6-09. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-09, then docs/KABSI-PROGRESS.md. Do only task P0.6-09. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read Part 7 of docs/source/KABSI-VIDEO.md. Write the step list for Rashid in plain words, one action per line, then verify each step he reports done with the tools you have. Business info and verification use Hussein Slim's details (R-25).
 ```
 
@@ -1948,15 +1978,15 @@ Read Part 7 of docs/source/KABSI-VIDEO.md. Write the step list for Rashid in pla
 **Changed 21 Oct 2026 (K-123).** The Lebanese number and every "kept on /lebanon" line are gone (P0.8-01). From P0.8-03 the same Kapso number also carries the owner channel.
 
 - Decisions: K-122 (replaces the Numero part of K-121), K-121 points 3 to 5, K-103, G-36, K-57, R-29.
-- Touches: `WHATSAPP_NUMBER` in `src/lib/site.ts` set to the Kapso number (deleted from Kapso on 22 Oct 2026; `WHATSAPP_NUMBER` is empty until a new number exists), replacing `CONTACT_PHONE` for support; a `wa.me` link with a short prefilled message on the contact page, footer, `/setup-call`, Nora's handover and support emails; the Kapso inbox profile text and quick replies written for Hussein in `docs/marketing/whatsapp-setup.md` (greeting, away message, quick replies: how to add Kabsi as Manager, the booking link with each answer, prices and trial, how to disconnect, "We never ask for your Google password or codes", labels), in whatever Kapso's inbox offers; `knowledge/kabsi-facts.md` and `public/llms-full.txt`: the number, "answered by a person", and Kapso and Meta named as the processors of WhatsApp messages; the Lebanese field contact kept only on `/lebanon` if Hussein wants it.
+- Touches: `WHATSAPP_NUMBER` in `src/lib/site.ts` set to the Kapso number (deleted from Kapso on 22 Oct 2026; `WHATSAPP_NUMBER` is empty until a new number exists), replacing `CONTACT_PHONE` for support; a `wa.me` link with a short prefilled message on the contact page, footer, `/setup-call`, Nora's handover and support emails; the Kapso inbox profile text and quick replies written for Rashid in `docs/marketing/whatsapp-setup.md` (greeting, away message, quick replies: how to add Kabsi as Manager, the booking link with each answer, prices and trial, how to disconnect, "We never ask for your Google password or codes", labels), in whatever Kapso's inbox offers; `knowledge/kabsi-facts.md` and `public/llms-full.txt`: the number, "answered by a person", and Kapso and Meta named as the processors of WhatsApp messages; the Lebanese field contact kept only on `/lebanon` if Rashid wants it.
 - Depends on: P0.1-03, Hussein's step 11 (Kapso account and the number's profile).
 - Model: Sonnet.
 - Done when: each placement opens WhatsApp with the prefilled text (URLs tested); no page shows the old number except `/lebanon` if kept; the setup file exists; the facts file names Kapso and Meta; WhatsApp here is people-answered only and approves nothing.
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-10, then docs/KABSI-PROGRESS.md. Do only task P0.6-10. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
-Use one WHATSAPP_NUMBER constant set to the Kapso number (deleted from Kapso on 22 Oct 2026; `WHATSAPP_NUMBER` is empty until a new number exists) (K-122). Keep the Lebanese number on /lebanon. WhatsApp here is people-answered only; it approves nothing and sends no alerts. Give Hussein the Kapso clicks one at a time in plain words and never ask for an API key in the chat.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-10, then docs/KABSI-PROGRESS.md. Do only task P0.6-10. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+Use one WHATSAPP_NUMBER constant set to the Kapso number (deleted from Kapso on 22 Oct 2026; `WHATSAPP_NUMBER` is empty until a new number exists) (K-122). Keep the Lebanese number on /lebanon. WhatsApp here is people-answered only; it approves nothing and sends no alerts. Give Rashid the Kapso clicks one at a time in plain words and never ask for an API key in the chat.
 ```
 
 ### P0.6-12 WhatsApp privacy and processors
@@ -1969,7 +1999,7 @@ Use one WHATSAPP_NUMBER constant set to the Kapso number (deleted from Kapso on 
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-12, then docs/KABSI-PROGRESS.md. Do only task P0.6-12. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-12, then docs/KABSI-PROGRESS.md. Do only task P0.6-12. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-122 in docs/source/KABSI-AUDIT.md. Describe only what is built: click-to-chat now, alerts and Nora on WhatsApp later (P1-21, P1-22), marked as not yet live.
 ```
 
@@ -1983,7 +2013,7 @@ Read K-122 in docs/source/KABSI-AUDIT.md. Describe only what is built: click-to-
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-11, then docs/KABSI-PROGRESS.md. Do only task P0.6-11. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.6-11, then docs/KABSI-PROGRESS.md. Do only task P0.6-11. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-44 in docs/source/KABSI-AUDIT.md. Staff only; owners see plain messages, never this page.
 ```
 
@@ -2019,7 +2049,7 @@ Changed (the card text carries a "Changed 21 Oct 2026" line):
 | P0.7-07 | Pricing, the trial and the CTA switch use the new plans | K-126, K-140 |
 | P1-11 | The cards tab becomes "Your own NFC cards and tags" (how to write the link), no ordering | K-125 |
 | P1-22 | Depends on P0.8-03 instead of P1-21 | K-129 |
-| P1-23 | Voice notes on the WhatsApp owner channel | K-129 (voice notes are P1) | an owner's voice note is turned into a text the owner confirms before anything is drafted or approved; no audio is kept past the retention limit | P0.8-03, Hussein's yes on paid calls (2.12) | Sonnet | A test voice note becomes a confirmed text; nothing is approved from a voice note alone |
+| P1-23 | Voice notes on the WhatsApp owner channel | K-129 (voice notes are P1) | an owner's voice note is turned into a text the owner confirms before anything is drafted or approved; no audio is kept past the retention limit | P0.8-03, Rashid's yes on paid calls (2.12) | Sonnet | A test voice note becomes a confirmed text; nothing is approved from a voice note alone |
 
 Retired (the row is marked RETIRED where it is listed; do not build):
 
@@ -2047,29 +2077,29 @@ Retired (the row is marked RETIRED where it is listed; do not build):
   - **Old partner model.** Functions `partner` and the resale branch of `lead`; routes `/partner` (old dashboard), `src/lib/partner.ts`, `src/components/staff/partners-panel.tsx`; `partner_covered` and every partner path in `entitlements` and `choose_plan` (`plan_through_partner`); the approval policies "partner may approve" and "partner prepares, owner approves" and the partner role in `location_members` / roles migrations and RLS; partner invoices, payments and the `kabsi_partner_billing` job (unscheduled); partner emails (`_shared/email/catalog.ts`, `copy.ts`, `notify-categories`); resale lead flows; the QA Partner test data (named test rows, deleted with the connector); pgTAP tests and `scripts/check-anon-headers.mjs` entries that name them.
   - **Words and legal.** `src/routes/terms.tsx` and `privacy.tsx`: seller Hussein Slim, Dubai; governing law the law of the United Arab Emirates (lawyer to confirm, kept in PROGRESS "Decisions to confirm"); no partner clauses, no crypto or cash clauses, no card-order clauses. `knowledge/kabsi-facts.md` and `public/llms-full.txt`: every removal above moves from "changing" to removed. `public/llms.txt`, `docs/marketing/feature-truth.md`, `whatsapp-setup.md`, `brand-kit.md` and the V06 shot sheet lose Lebanon and card lines.
   - **Placeholder for the partner page.** `/partners` shows a plain holding page ("Kabsi Partners is opening soon", `hello@kabsi.co`) until P0.8-12 replaces it.
-  - **Old tables and columns** (`partners`, `partner_members`, `partner_invites`, `partner_clients`, `partner_invoices`, `usdt_claims`, `card_orders`, the partner columns on `locations` and `plans`, and anything else the grep shows unused): never dropped by this session. The session writes them as separate SQL files in `supabase/migrations/` (the `_links` pattern used since P0.3-05), with row counts, for Hussein to run in the SQL editor; the code stops using them first, and the stop in section 2.3 applies.
+  - **Old tables and columns** (`partners`, `partner_members`, `partner_invites`, `partner_clients`, `partner_invoices`, `usdt_claims`, `card_orders`, the partner columns on `locations` and `plans`, and anything else the grep shows unused): never dropped by this session. The session writes them as separate SQL files in `supabase/migrations/` (the `_links` pattern used since P0.3-05), with row counts, for Rashid to run in the SQL editor; the code stops using them first, and the stop in section 2.3 applies.
 - Depends on: sessions 1 to 6 done (P0.4-10 merged).
 - Model: Opus (billing and access rules).
-- Done when: the greps in "Words" below return nothing in `src`, `supabase/functions`, `public`, `knowledge`; `curl -sI https://kabsi.co/lebanon` returns 301 to `/pricing`; `/r/<an existing code>` still answers 302; `/pricing` shows no Lebanon block, no card price and no USDT; `entitlements` and `choose_plan` have no partner branch (SQL read-back); the database suite passes without the partner tests; the removal SQL files exist with counts and are listed in PROGRESS for Hussein; Nora's facts no longer offer any removed route (checked by hand on three questions).
+- Done when: the greps in "Words" below return nothing in `src`, `supabase/functions`, `public`, `knowledge`; `curl -sI https://kabsi.co/lebanon` returns 301 to `/pricing`; `/r/<an existing code>` still answers 302; `/pricing` shows no Lebanon block, no card price and no USDT; `entitlements` and `choose_plan` have no partner branch (SQL read-back); the database suite passes without the partner tests; the removal SQL files exist with counts and are listed in PROGRESS for Rashid; Nora's facts no longer offer any removed route (checked by hand on three questions).
   - Words: `grep -rniE "lebanon|lebanese|\+961|usdt|binance|whish|\bomt\b|nowpayments|partner_covered|resale|\$120|bundle" src supabase/functions public knowledge` returns only the 301 redirect and the facts file's "removed" lines.
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-01, then docs/KABSI-PROGRESS.md. Do only task P0.8-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
-Read K-123, K-124, K-125, K-127 and K-145 in docs/source/KABSI-AUDIT.md. This is a removal task. Split it into pull requests of about 10 files: (1) market, cards and the /lebanon redirect, (2) payments, (3) old partner model in code and RLS, (4) the SQL files for Hussein. Never drop a table or column yourself. Keep /r/<code> redirects working. Update knowledge/kabsi-facts.md in each pull request and rebuild public/llms-full.txt.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-01, then docs/KABSI-PROGRESS.md. Do only task P0.8-01. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
+Read K-123, K-124, K-125, K-127 and K-145 in docs/source/KABSI-AUDIT.md. This is a removal task. Split it into pull requests of about 10 files: (1) market, cards and the /lebanon redirect, (2) payments, (3) old partner model in code and RLS, (4) the SQL files for Rashid. Never drop a table or column yourself. Keep /r/<code> redirects working. Update knowledge/kabsi-facts.md in each pull request and rebuild public/llms-full.txt.
 ```
 
 ### P0.8-02 Session 6 email fixes and email previews
 
 - Decisions: K-102, K-118, P0.4-08, P0.4-10 (the findings of session 6).
-- Touches: `_shared/email/` and the lifecycle sender: the day 17 and the day 30 win-backs get different subjects (today they share one); the old-format Weekly Care Report subject is changed to the P0.4-08 format; a script `scripts/render-emails.ts` renders every email kind to `docs/email-previews/<kind>.html` (with fixture data, light mode, plus the plain-text next to it) so Hussein can review all of them in a browser; a test that the previews are current.
+- Touches: `_shared/email/` and the lifecycle sender: the day 17 and the day 30 win-backs get different subjects (today they share one); the old-format Weekly Care Report subject is changed to the P0.4-08 format; a script `scripts/render-emails.ts` renders every email kind to `docs/email-previews/<kind>.html` (with fixture data, light mode, plus the plain-text next to it) so Rashid can review all of them in a browser; a test that the previews are current.
 - Depends on: P0.4-08, P0.4-10 (both merged).
 - Model: Sonnet (it runs inside the Opus session 7 because it follows the cleanup in the same files).
 - Done when: the two win-back emails differ in subject (test); no email kind keeps the old report subject (test over the catalog); `docs/email-previews/` holds one HTML file per email kind in the catalog (count equals the catalog); typecheck, lint, tests and `bash scripts/deno-check.sh` pass.
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-02, then docs/KABSI-PROGRESS.md. Do only task P0.8-02. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-02, then docs/KABSI-PROGRESS.md. Do only task P0.8-02. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
 Fix the three email items and add the preview renderer. No new email kinds. Send nothing to real addresses; previews are files.
 ```
 
@@ -2081,12 +2111,12 @@ Fix the three email items and add the preview renderer. No new email kinds. Send
 - Touches: Edge Function `whatsapp` (new; a line in `supabase/config.toml`, `verify_jwt` false, Kapso signature verified, replay window, unknown sender ignored) built on github.com/gokapso/whatsapp-cloud-api-js; the session installs github.com/gokapso/agent-skills (integrate-whatsapp, observe-whatsapp); tables `whatsapp_optins` (owner, phone, one-time code, state, consent text and time, STOP time), `whatsapp_window` (owner, last inbound at, so the 24-hour service window is tracked), `whatsapp_messages` (kind, state, provider id, error); the "Connect WhatsApp" flow (button opens `wa.me` with a prefilled one-time code; the owner sends it; that verifies the number and opens the window); review alerts (draft and the buttons "Approve" and "Edit in app", templates outside the window); approval handler: allowed only for low and medium risk replies and weekly posts, never high risk and never identity fields (name, address, categories, map pin, phone, open or closed), which reply with a link to the app; the approval creates the publication with `publish_after = now() + 10 seconds` through the job queue (server-side undo, K-70), and the publish job re-checks that the reply is still a draft; weekly digest opt-in; photos sent to the number become uploads in the photo engine (needs P0.5-01; the handler is wired in P0.5-01's follow-up if that has not merged); audit events with channel `whatsapp`; STOP and variants; Settings, "What Kabsi tells you" gets the WhatsApp channel; `/privacy`, `/terms` and facts updated (WhatsApp is now an approval channel for low and medium risk); `KAPSO_API_KEY` and the webhook secret only in Supabase secrets (names added to Appendix A). Voice notes are P1.
 - Depends on: P0.4-09 (notification engine), P0.3-06, P0.6-10, P0.6-12, P0.5-01 for the photo drop. Kapso template approvals and Meta business verification (R-25) are Hussein's steps (section 5, step 11 and 14).
 - Model: Opus (WhatsApp approvals reach Google through the pipeline).
-- Done when (all on the Kapso sandbox or a mock client until Hussein says live sends may start, K-146): tests prove an Approve on a low-risk draft publishes once after 10 seconds, an Undo inside 10 seconds cancels, a second Approve is a no-op, a draft that changed to approved or discarded is not published, a high-risk review and an identity-field change are refused with the app link, a send outside the 24-hour window uses a template or is held, a send without opt-in is refused, STOP stops sends, a forged webhook is refused; the audit rows carry channel `whatsapp`; the K-113 answer on message content (rating and draft only, or with a short excerpt) is recorded in PROGRESS; no key appears in code, logs or the PR.
+- Done when (all on the Kapso sandbox or a mock client until Rashid says live sends may start, K-146): tests prove an Approve on a low-risk draft publishes once after 10 seconds, an Undo inside 10 seconds cancels, a second Approve is a no-op, a draft that changed to approved or discarded is not published, a high-risk review and an identity-field change are refused with the app link, a send outside the 24-hour window uses a template or is held, a send without opt-in is refused, STOP stops sends, a forged webhook is refused; the audit rows carry channel `whatsapp`; the K-113 answer on message content (rating and draft only, or with a short excerpt) is recorded in PROGRESS; no key appears in code, logs or the PR.
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-03, then docs/KABSI-PROGRESS.md. Do only task P0.8-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
-Read K-129, K-17, K-70 and K-113 in docs/source/KABSI-AUDIT.md. Install gokapso/agent-skills (integrate-whatsapp, observe-whatsapp) and build on gokapso/whatsapp-cloud-api-js. Make no live WhatsApp send until Hussein says so; use Kapso's sandbox or a mock client. KAPSO_API_KEY lives only in Supabase secrets; never ask for it in the chat. Tests first.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-03, then docs/KABSI-PROGRESS.md. Do only task P0.8-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
+Read K-129, K-17, K-70 and K-113 in docs/source/KABSI-AUDIT.md. Install gokapso/agent-skills (integrate-whatsapp, observe-whatsapp) and build on gokapso/whatsapp-cloud-api-js. Make no live WhatsApp send until Rashid says so; use Kapso's sandbox or a mock client. KAPSO_API_KEY lives only in Supabase secrets; never ask for it in the chat. Tests first.
 ```
 
 ### P0.8-04 Protection: one-tap put-back and Pro auto-fix
@@ -2101,7 +2131,7 @@ Read K-129, K-17, K-70 and K-113 in docs/source/KABSI-AUDIT.md. Install gokapso/
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-04, then docs/KABSI-PROGRESS.md. Do only task P0.8-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-04, then docs/KABSI-PROGRESS.md. Do only task P0.8-04. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
 Read K-19, K-130 and guardrail 7. Build on the mock. Before enabling auto-fix for live profiles, re-read Google's Business Profile API policy on automatic changes and record the exact sentence in PROGRESS; if it forbids the owner-opt-in design, ship auto-fix switched off and say so to Hussein.
 ```
 
@@ -2117,7 +2147,7 @@ Read K-19, K-130 and guardrail 7. Build on the mock. Before enabling auto-fix fo
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-05, then docs/KABSI-PROGRESS.md. Do only task P0.8-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-05, then docs/KABSI-PROGRESS.md. Do only task P0.8-05. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
 Read K-132 and K-25. The Google review button is always first and always shown to everyone; no question is asked; nobody is routed. Phone first at 390 px.
 ```
 
@@ -2131,7 +2161,7 @@ Read K-132 and K-25. The Google review button is always first and always shown t
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-06, then docs/KABSI-PROGRESS.md. Do only task P0.8-06. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-06, then docs/KABSI-PROGRESS.md. Do only task P0.8-06. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
 Read K-133 and K-25. No quotas, no per-staff counting, no rewards, no "if you enjoyed". Every customer gets the same message.
 ```
 
@@ -2145,7 +2175,7 @@ Read K-133 and K-25. No quotas, no per-staff counting, no rewards, no "if you en
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-07, then docs/KABSI-PROGRESS.md. Do only task P0.8-07. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-07, then docs/KABSI-PROGRESS.md. Do only task P0.8-07. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
 Read K-134 and K-113. Nothing is posted automatically. Use only design tokens (K-108). Render on request; keep nothing past Google's 30-day review limit.
 ```
 
@@ -2158,12 +2188,12 @@ Read K-134 and K-113. Nothing is posted automatically. Use only design tokens (K
 - Decisions: K-135, K-27, K-113, K-100, K-143 (Insights agent), K-146, R-37.
 - Touches: a monthly job (Insights agent) that fetches up to 90 days of reviews at run time and sends them to Claude Haiku in one batch (staff, place, products or services mentioned); input capped at about 10,000 tokens, the most recent reviews above that; the run counts against the AI budget (`ai_usage`) and does not start when AI credit is off or the budget is used up; the result stores only a short summary and counts (no review text, no names) and is shown in the monthly Weekly Care Report block, in Insights and as a WhatsApp message (P0.8-03); a feature flag that stays off for real customers until Google's written answer on the data-access question (K-27) is on file; the entitlement check (Pro); `knowledge/kabsi-facts.md` as coming. P1-10 is retired.
 - Depends on: P0.5-04, P0.8-03, P0.4-06.
-- Model: Sonnet (the first real run waits for Hussein's yes on API calls, K-146; tests use stubs).
+- Model: Sonnet (the first real run waits for Rashid's yes on API calls, K-146; tests use stubs).
 - Done when: tests prove the input is cut at the cap with the newest reviews kept, a run with credit off does nothing, each run writes an `ai_usage` row, the stored result contains no review text, and an Essentials business sees no block; the flag state and the Google answer status are recorded in PROGRESS.
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-08, then docs/KABSI-PROGRESS.md. Do only task P0.8-08. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-08, then docs/KABSI-PROGRESS.md. Do only task P0.8-08. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
 Read K-135, K-27 and K-113. Make no real model call: test with stubs. Review text is never stored.
 ```
 
@@ -2181,15 +2211,15 @@ Read K-135, K-27 and K-113. Make no real model call: test with stubs. Review tex
   8. Schema snippet: a `LocalBusiness` JSON-LD built from the profile with a copy button.
   9. Website match check: an SSRF-safe fetch of the owner's public website (no private addresses, no off-domain redirects, robots.txt, one to three pages) comparing name, phone, address and hours with the profile, listing mismatches as tasks.
   10. Never suggest keywords in the business name.
-  The free Profile Check page (P0.4-01) shows the same completeness checklist. Gaps and the weekly task plan appear in the Weekly Care Report (P0.5-04). The description writer's real model calls wait for AI credit and Hussein's yes (K-146); everything else uses no AI. Pro gating by entitlement; `knowledge/kabsi-facts.md` as coming.
+  The free Profile Check page (P0.4-01) shows the same completeness checklist. Gaps and the weekly task plan appear in the Weekly Care Report (P0.5-04). The description writer's real model calls wait for AI credit and Rashid's yes (K-146); everything else uses no AI. Pro gating by entitlement; `knowledge/kabsi-facts.md` as coming.
 - Depends on: P0.3-05, P0.2-03, P0.4-01, P0.5-05 (data), P0.4-06; photo counts need P0.5-01 (the nudge appears when it has merged).
 - Model: Sonnet.
 - Done when: tests per item above; a gap found twice creates one task (dedupe); a primary-category suggestion never reaches the pipeline without a signed-in approval (test); the description check rejects links, phone numbers and promotions; a name containing keywords is never suggested; the website check refuses `127.0.0.1` and a redirect to another domain (tests); the free Profile Check shows the checklist; an Essentials business sees the checklist only.
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-09, then docs/KABSI-PROGRESS.md. Do only task P0.8-09. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
-Read K-136, K-83 and K-116 in docs/source/KABSI-AUDIT.md. Every change is a task the owner approves. Build on the mock; make no real model call (use stubs) until Hussein says so. Split into two pull requests if it passes 10 files: checklist and tasks first, actions second.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-09, then docs/KABSI-PROGRESS.md. Do only task P0.8-09. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
+Read K-136, K-83 and K-116 in docs/source/KABSI-AUDIT.md. Every change is a task the owner approves. Build on the mock; make no real model call (use stubs) until Rashid says so. Split into two pull requests if it passes 10 files: checklist and tasks first, actions second.
 ```
 
 ### P0.8-10 Own order and booking button (Pro)
@@ -2204,7 +2234,7 @@ Read K-136, K-83 and K-116 in docs/source/KABSI-AUDIT.md. Every change is a task
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-10, then docs/KABSI-PROGRESS.md. Do only task P0.8-10. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-10, then docs/KABSI-PROGRESS.md. Do only task P0.8-10. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
 Read K-137 and the Place Actions fixtures from P0.7-01. Writes go through the one pipeline. Never retry after NOT_FOUND or PERMISSION_DENIED. No live write until P0.7-05b and Hussein's approval of each write.
 ```
 
@@ -2218,7 +2248,7 @@ Read K-137 and the Place Actions fixtures from P0.7-01. Writes go through the on
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-11, then docs/KABSI-PROGRESS.md. Do only task P0.8-11. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-11, then docs/KABSI-PROGRESS.md. Do only task P0.8-11. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
 Read K-139. Take the category list and the Reviews Management Tool link from Google's own help pages and note the date checked. Kabsi never promises a removal and never uses legal language.
 ```
 
@@ -2228,22 +2258,22 @@ Read K-139. Take the category list and the Reviews Management Tool link from Goo
 
 - Decisions: K-127, K-128, K-126 (30-day trial), K-124 (Creem), K-144, R-34, G-32.
 - Touches:
-  - **Public.** `/partners` (replaces the holding page from P0.8-01): who can apply (creators, agencies, consultants, accountants, web and POS sellers), the terms in plain words (30% of every payment for the first 12 months of each referred business, a 30-day hold, paid monthly, $50 minimum, no upfront bounty; the referred business gets a 30-day Pro trial), the partner rules (K-128), an application form (name, email, who you are, audience or client base, country, website or channel; Turnstile; a stored row, not a sales lead), and the line "Hussein approves each partner". No earnings promises, no income claims.
+  - **Public.** `/partners` (replaces the holding page from P0.8-01): who can apply (creators, agencies, consultants, accountants, web and POS sellers), the terms in plain words (30% of every payment for the first 12 months of each referred business, a 30-day hold, paid monthly, $50 minimum, no upfront bounty; the referred business gets a 30-day Pro trial), the partner rules (K-128), an application form (name, email, who you are, audience or client base, country, website or channel; Turnstile; a stored row, not a sales lead), and the line "Rashid approves each partner". No earnings promises, no income claims.
   - **Attribution.** `kabsi.co/?via=CODE` sets a first-party cookie for 60 days (last referral wins); the code is saved on the user and business at sign-up server-side (P0.6-02 carries the event plumbing); disclosed on `/privacy` and in the consent text; invalid or unapproved codes are ignored; self-referral (same email or Google account as the partner) earns nothing.
   - **Partner dashboard** (`/partner`, new): link and code, clicks, sign-ups, trials, paying businesses, earned, paid. Aggregates and pseudonymous rows only; no business name beyond what the partner already told, no Google data, no reviews.
   - **Staff screen** (in `/staff`): applications to approve or decline, partners, referrals, commission rows, mark payouts paid (monthly, $50 minimum, the hold date shown), a reversal when a payment is refunded or charged back.
   - **Money.** First check whether Creem affiliates cover recurring commission for 12 months, a 30-day hold, monthly payout and our last-referral attribution; if they do, use them and keep a read-only mirror; if not, an own ledger (`kabsi_partners`, `partner_referrals`, `partner_commissions`) written by the Creem webhook (P0.4-07) with states pending, payable after the hold, paid, reversed. Record the choice and the reasons in PROGRESS.
   - **Rules in the product.** Partner copy and the script kit (approved claims list from K-53, the video claims table and the claims rule) in `docs/marketing/partner-kit.md`; the paid-partnership label rule and the licence rule in the terms for partners.
   - **Not here.** Resale, partner-covered plans, partner workspaces, partner approvals, agency roles: agencies are invited by the owner as Manager in Team.
-  - Live only after live reviews work: a switch (`app_settings.partners_open`) stays off until P0.7-05 has passed and Hussein turns it on; the public page shows the holding line until then.
+  - Live only after live reviews work: a switch (`app_settings.partners_open`) stays off until P0.7-05 has passed and Rashid turns it on; the public page shows the holding line until then.
 - Depends on: P0.8-01, P0.4-07 (the Creem webhook), P0.6-02, P0.6-01.
 - Model: Sonnet.
 - Done when: a test payment from a referred business inside 12 months creates a pending commission of 30% of the amount, payable after 30 days, and none after month 12; a refund reverses it; the last referral inside 60 days wins; an unapproved partner earns nothing; a partner sees no other partner's rows and no business data (database tests); the staff screen marks a payout paid only at or above $50; `/privacy` states the 60-day code; the switch is off.
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-12, then docs/KABSI-PROGRESS.md. Do only task P0.8-12. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
-Read K-127 and K-128. This is the only partner program; the old model was deleted in P0.8-01. Check Creem affiliates first and record whether they fit. Keep the program switched off (app_settings.partners_open) until Hussein turns it on after live reviews work. Split into pull requests of about 10 files: data and attribution, dashboard, staff screen, public page.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-12, then docs/KABSI-PROGRESS.md. Do only task P0.8-12. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill.
+Read K-127 and K-128. This is the only partner program; the old model was deleted in P0.8-01. Check Creem affiliates first and record whether they fit. Keep the program switched off (app_settings.partners_open) until Rashid turns it on after live reviews work. Split into pull requests of about 10 files: data and attribution, dashboard, staff screen, public page.
 ```
 
 ### P0.8-13 Website v2
@@ -2259,7 +2289,7 @@ Read K-127 and K-128. This is the only partner program; the old model was delete
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-13, then docs/KABSI-PROGRESS.md. Do only task P0.8-13. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill and the frontend-design skill.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.8-13, then docs/KABSI-PROGRESS.md. Do only task P0.8-13. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data. Use the kabsi-build-session skill and the frontend-design skill.
 Read K-140, K-112 and K-144 and the existing design tokens. The homepage text is fixed in the card; do not add proof that is not real. Split into pull requests of about 10 files: homepage, pricing and how it works, industry template, partners page.
 ```
 
@@ -2279,7 +2309,7 @@ Gate A was approved on 5 Oct 2026, so the plan B in K-86 (reapply, concierge onl
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-03, then docs/KABSI-PROGRESS.md. Do only task P0.7-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-03, then docs/KABSI-PROGRESS.md. Do only task P0.7-03. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-37. Events only enqueue jobs. Give Rashid the console steps for the topic and subscription if you cannot create them, then verify with a real event.
 ```
 
@@ -2295,7 +2325,7 @@ Read K-37. Events only enqueue jobs. Give Rashid the console steps for the topic
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-05b, then docs/KABSI-PROGRESS.md. Do only task P0.7-05b. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-05b, then docs/KABSI-PROGRESS.md. Do only task P0.7-05b. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read K-67, K-85 and K-117. Every write to Google needs Hussein's own approval in the app, as for any owner.
 ```
 
@@ -2309,25 +2339,25 @@ Read K-67, K-85 and K-117. Every write to Google needs Hussein's own approval in
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-06, then docs/KABSI-PROGRESS.md. Do only task P0.7-06. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-06, then docs/KABSI-PROGRESS.md. Do only task P0.7-06. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read guardrails 21, 24 and 25. Record every finding; fix only copy and layout issues in this task and open new PROGRESS items for anything else.
 ```
 
 ### P0.7-07 First real customer end to end, and the launch gate
 
-**Changed 21 Oct 2026 (K-126, K-140, K-141, D4, D6).** Creem checkout is tested on Essentials and Pro; the CTA switch changes the trial buttons from "Join early access" to "Start free" (the hero "Check my Google profile free" never changes); a lawyer has read `/terms` and `/privacy`; Kabsi Partners stays off until Hussein opens it; the 5 to 10 founding customers follow (guardrail 28).
+**Changed 21 Oct 2026 (K-126, K-140, K-141, D4, D6).** Creem checkout is tested on Essentials and Pro; the CTA switch changes the trial buttons from "Join early access" to "Start free" (the hero "Check my Google profile free" never changes); a lawyer has read `/terms` and `/privacy`; Kabsi Partners stays off until Rashid opens it; the 5 to 10 founding customers follow (guardrail 28).
 
 - Decisions: guardrail 22, guardrail 27, G-39 tier 1, VIDEO "Read first" gates, R-02, D2.
 - Touches: with the first real customer (D2, written consent): business discovery, snapshot, sign-up, Google access, knowledge, first value, review draft, owner approval, publication, verification, audit event, notification, weekly report, billing (Creem checkout on a phone), disconnect including Manager access removal; success and failure paths (a rejected reply, a failed publication, a revoked access) with real Google responses; then the G-39 tier 1 checklist; then switch the CTA from "Join early access" to "Start free" with "14 days free. No card." everywhere (one constant) and remove "Early access" tags.
-- Depends on: P0.7-06, P0.4-07, P0.6 done except P0.6-03, P0.6-04 and P0.6-09 (R-42). **Before card payments open (R-51, 22 Oct 2026): Vercel Pro (Hobby is non-commercial) and Supabase Pro with point-in-time recovery (K-87); the session checks both are active and records them in PROGRESS.** D2 is decided: Abou Hamze Auto Center; the owner agreed and Kabsi is Manager. Before the first real customer other than the two Kabsi-owned profiles connects, Hussein upgrades `kabsi-prod` from the free plan to Supabase Pro with point-in-time recovery (K-87, $25 a month, in Hussein's own organisation) and the session runs the first restore test into a scratch project (project and time recorded in PROGRESS).
-- Ask Hussein before: contacting the customer, and before switching the CTA.
+- Depends on: P0.7-06, P0.4-07, P0.6 done except P0.6-03, P0.6-04 and P0.6-09 (R-42). **Before card payments open (R-51, 22 Oct 2026): Vercel Pro (Hobby is non-commercial) and Supabase Pro with point-in-time recovery (K-87); the session checks both are active and records them in PROGRESS.** D2 is decided: Abou Hamze Auto Center; the owner agreed and Kabsi is Manager. Before the first real customer other than the two Kabsi-owned profiles connects, Rashid upgrades `kabsi-prod` from the free plan to Supabase Pro with point-in-time recovery (K-87, $25 a month, in Hussein's own organisation) and the session runs the first restore test into a scratch project (project and time recorded in PROGRESS).
+- Ask Rashid before: contacting the customer, and before switching the CTA.
 - Model: Opus.
 - Done when: the Vercel Pro and Supabase Pro upgrades and the restore test are recorded; every step of guardrail 22 has evidence from the real run; every G-39 tier 1 line is ticked or explicitly waived by Rashid; the four VIDEO gates are clear; only then the CTA changes and PROGRESS records "Paid ads may start".
 - Prompt:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-07, then docs/KABSI-PROGRESS.md. Do only task P0.7-07. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
-Check PROGRESS that Creem is live. Walk guardrail 22 with real Google responses, record evidence per step, then the G-39 tier 1 list. Ask Hussein before changing the call to action.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the section for task P0.7-07, then docs/KABSI-PROGRESS.md. Do only task P0.7-07. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+Check PROGRESS that Creem is live. Walk guardrail 22 with real Google responses, record evidence per step, then the G-39 tier 1 list. Ask Rashid before changing the call to action.
 ```
 
 ## 14. P1 tasks
@@ -2394,7 +2424,7 @@ P1 starts when Wave P0.3 is done and never delays a P0 task (guardrail 20). The 
 Prompt for any P1 task:
 
 ```
-You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the row for task <ID> in section 14, then docs/KABSI-PROGRESS.md. Do only task <ID>. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Hussein the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
+You are a Kabsi build chat. Work in the GitHub repo itskaysyoga-gif/kabsi-canvas. Read docs/KABSI-PLAN.md sections 1 and 2 and the row for task <ID> in section 14, then docs/KABSI-PROGRESS.md. Do only task <ID>. Follow section 2: apply database changes yourself, open the pull request, make sure CI is green, update PROGRESS on the branch, merge the pull request yourself, run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Stop and ask only before dropping tables or columns or deleting real data.
 Read the decisions the row names in docs/source/ in full before starting. If the row's "Depends on" is not done in PROGRESS, stop and report.
 ```
 
@@ -2470,7 +2500,7 @@ Ads start only after P0.7-07 records "Paid ads may start" (the four VIDEO gates 
 
 ### Database today (public schema, 40 tables, RLS on all)
 
-*Changing on 21 Oct 2026:* `partners`, `partner_members`, `partner_invites`, `partner_clients`, `partner_invoices`, `usdt_claims` and `card_orders` (and the partner columns on `locations` and `plans`) are retired; Hussein drops them with separate SQL files after P0.8-01 (R-35). New: `whatsapp_optins`, `whatsapp_window`, `whatsapp_messages` (P0.8-03), `google_revert_log` (P0.8-04), the Kabsi Partners tables (P0.8-12).
+*Changing on 21 Oct 2026:* `partners`, `partner_members`, `partner_invites`, `partner_clients`, `partner_invoices`, `usdt_claims` and `card_orders` (and the partner columns on `locations` and `plans`) are retired; Rashid drops them with separate SQL files after P0.8-01 (R-35). New: `whatsapp_optins`, `whatsapp_window`, `whatsapp_messages` (P0.8-03), `google_revert_log` (P0.8-04), the Kabsi Partners tables (P0.8-12).
 
 staff, partners, partner_members, partner_invites, locations (3 rows: Yawmiyati, QA Bakery, Safa Chicken; all test or internal), location_members, plans, payments, partner_invoices, usdt_claims, cards (22), taps, card_orders, reviews, reply_drafts, gbp_posts, photos, special_hours, listing_baselines, listing_changes, publications, action_tokens, emails, leads, jobs_log, rate_limits, mock_google_reviews, mock_listings, rating_snapshots, weekly_reports, app_settings, chat_conversations, chat_messages, contacts, ops_events, trial_grants, concierge_tasks, billing_invoices, billing_events, profile_tasks. Five auth users, all test accounts. `app_settings`: google_mode mock, plans_v2 off, nowpayments test, concierge_cap 30 (R-09 sets 20), app_url kabsi-app.lovable.app (P0.1-03 changes it).
 
