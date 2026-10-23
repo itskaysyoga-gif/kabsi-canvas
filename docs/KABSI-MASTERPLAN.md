@@ -2,7 +2,9 @@
 
 Decided by the lane R chat on Rashid's authority. Session 19's PR 0 copied this file into the repo as docs/KABSI-MASTERPLAN.md with the lane R chat's addendum of 23 Oct 2026 (10:40 Beirut) merged in (sections 0, 9.8, 9.9 and 17), recorded R-55, R-56 and R-58 to R-64 in plan section 4 and added section 17's waves to plan section 7. The addendum won over the master plan wherever they differed. Where older plan text disagrees, this file wins.
 
-Numbering note: plan section 4 already used R-55 (identity), R-56 (homepage hero) and R-57 (free Google Profile Check) on 22 Oct 2026. In this file, R-55 means the Kapso account (section 0) and R-56 and R-63 mean skills and tools (section 14); plan section 4 records those two as R-55b and R-56b so neither pair of rows is overwritten. What stays fixed: Google's API and review rules (no review gating, incentives or fake reviews; owner approval before anything is published), Meta's WhatsApp rules, payment processor rules and consumer law. Breaking them gets Kabsi's Google access, WhatsApp number or payments shut off, which ends the business; everything else is open.
+Numbering note: plan section 4 already used R-55 (identity), R-56 (homepage hero) and R-57 (free Google Profile Check) on 22 Oct 2026. In this file, R-55 means the Kapso account (section 0) and R-56 and R-63 mean skills and tools (section 14); plan section 4 records those two as R-55b and R-56b so neither pair of rows is overwritten.
+
+What stays fixed: Google's API and review rules (no review gating, incentives or fake reviews; owner approval before anything is published), Meta's WhatsApp rules, payment processor rules and consumer law. Breaking them gets Kabsi's Google access, WhatsApp number or payments shut off, which ends the business; everything else is open.
 
 GitHub: the only account is itskaysyoga-gif (itskaysyoga@gmail.com, Rashid's).
 
