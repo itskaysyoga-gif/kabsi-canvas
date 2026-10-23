@@ -128,6 +128,24 @@ export async function v4Probe(profile: string) {
   return { profile, account: p.account, location: p.location, probed_at: new Date().toISOString(), calls: out };
 }
 
+// Every local post of one Kabsi-owned profile (name, state, times, no text), and optionally one post read by its name
+// (P0.7-05: whether a removed post is gone). GET only, like the rest of this module.
+export async function postsList(profile: string, name?: string) {
+  const p = await findProfile(profile);
+  if (!p) return { error: "profile not found under any account" };
+  const base = `${V4}/${p.account}/${p.location}`;
+  const list = await get(`${base}/localPosts?pageSize=100`);
+  const posts = (((list.body as Json).localPosts ?? []) as Json[])
+    .map((x) => ({ name: x.name, state: x.state, topicType: x.topicType, createTime: x.createTime, updateTime: x.updateTime }));
+  let one: { status: number; state?: string; code?: string } | undefined;
+  if (name) {
+    if (!name.startsWith(`${p.account}/${p.location}/localPosts/`)) return { error: "post not under this profile" };
+    const r = await get(`${V4}/${name}`);
+    one = { status: r.status, state: (r.body as Json).state, code: (r.body as Json).error?.status };
+  }
+  return { profile, status: list.status, count: posts.length, posts, post: one, captured_at: new Date().toISOString() };
+}
+
 // The locations of the account that holds a Kabsi-owned profile, every field (locations.list). Both profiles sit
 // under the Kabsi Clients group, so one call shows both; the list is redacted like the rest.
 export async function accountLocations(profile: string) {
