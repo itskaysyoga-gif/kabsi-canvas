@@ -9,6 +9,8 @@ platforms it has no connector for).
 
 Rotate on the due date, at once if a secret may have been seen, and always when a person with access leaves.
 
+**23 Oct 2026 (Ops 1 part A, R-66):** `docs/SECRETS.md` is the rotation table now: 90 days for Anthropic, Kapso, Creem, Resend, Google and the cron secret, on a leak for the rest. Where this file says yearly for one of those, SECRETS.md wins. This file stays until the test that reads it is pointed at SECRETS.md.
+
 | Secret | What it opens | Where it lives | Read by | Last set | Next due |
 | --- | --- | --- | --- | --- | --- |
 | `SUPABASE_SERVICE_ROLE_KEY` | The database with every right | Supabase Edge Function secrets (set by Supabase itself) | every Edge Function | Not recorded | On any suspicion; yearly |
