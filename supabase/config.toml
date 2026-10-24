@@ -18,6 +18,8 @@ verify_jwt = false
 verify_jwt = false
 [functions.email]            # one-click unsubscribe (signed link) and the Resend webhook (Svix signature); /test needs x-cron-secret (P0.4-08)
 verify_jwt = false
+[functions.google-events]    # Pub/Sub push (P0.7-03): Google's OIDC token for Kabsi's push service account, checked in code
+verify_jwt = false
 [functions.billing]          # retired 410 stub (P0.8-01); the old crypto webhook sends no JWT
 verify_jwt = false
 
