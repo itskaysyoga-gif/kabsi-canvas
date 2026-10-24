@@ -117,7 +117,7 @@ jobs:
       - name: Did Nora's facts or rules change?
         id: changed
         run: |
-          if git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep -E '^(knowledge/kabsi-facts\.md|supabase/functions/_shared/nora-rules\.ts|supabase/functions/assistant/|scripts/nora-eval/)'; then
+          if git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep -E '^(knowledge/(kabsi-facts\.md|facts/)|scripts/kb-lib\.mjs|supabase/functions/_shared/nora-rules\.ts|supabase/functions/assistant/|scripts/nora-eval/)'; then
             echo "nora=true" >> "$GITHUB_OUTPUT"
           else
             echo "Nora's facts and rules did not change."

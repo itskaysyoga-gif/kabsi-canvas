@@ -14,6 +14,7 @@ vi.mock("@tanstack/react-router", () => ({
 import { FreeToolBusy } from "../src/components/shared/free-tool-busy";
 import { CTA_PRIMARY, CTA_TRIAL, FREE_TOOL_BUSY } from "../src/lib/site";
 import { FREE_TOOL_BUSY as SERVER_SENTENCE } from "../supabase/functions/_shared/free-tool-busy";
+import { readText } from "./helpers/facts";
 
 describe("the free tools when the day's cap is 0 or used up", () => {
   it("say the sentence and offer the free trial as the button, never Join early access", () => {
@@ -56,7 +57,7 @@ describe("the free tools when the day's cap is 0 or used up", () => {
 
   it("is in the facts file and in llms-full.txt", () => {
     for (const f of ["knowledge/kabsi-facts.md", "public/llms-full.txt"]) {
-      const text = readFileSync(f, "utf8");
+      const text = readText(f);
       expect(text).toContain(FREE_TOOL_BUSY);
       expect(text).toContain("**Start your free trial**");
     }

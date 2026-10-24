@@ -36,6 +36,7 @@ import {
   whatsappText,
 } from "../src/lib/website";
 import { EXAMPLE_REVIEW, ExampleTag, WhatsappChat } from "../src/components/marketing/mockups";
+import { readText } from "./helpers/facts";
 
 const flat = (v: unknown, out: string[] = []): string[] => {
   if (typeof v === "string") out.push(v);
@@ -160,7 +161,7 @@ describe("the WhatsApp switch (lane R, 22 Oct 2026)", () => {
         .essentials.map((i) => i.text)
         .join(" "),
     ).not.toMatch(/search terms/i);
-    const facts = readFileSync("knowledge/kabsi-facts.md", "utf8");
+    const facts = readText("knowledge/kabsi-facts.md");
     const para = facts.match(/\*\*Search terms report \(Pro[^\n]*/)?.[0] ?? "";
     expect(para).toMatch(/not marked Coming soon/);
     expect(facts).not.toMatch(/\[COMING\][^\n]*[Ss]earch terms/);
@@ -335,7 +336,7 @@ describe("the founder note (lane R, 22 Oct 2026)", () => {
       "emails/auth/change-email.html",
     ];
     for (const f of files) {
-      const text = readFileSync(f, "utf8");
+      const text = readText(f);
       expect(text, f).not.toMatch(/Hussein/);
       expect(text, f).not.toMatch(/operated by [^.]*Dubai|run by [^.]*Dubai/);
     }
@@ -346,7 +347,7 @@ describe("the founder note (lane R, 22 Oct 2026)", () => {
     expect(readFileSync("src/routes/terms.tsx", "utf8")).toMatch(
       /processed by Creem,[\s\S]*merchant of record/,
     );
-    expect(readFileSync("knowledge/kabsi-facts.md", "utf8")).toContain(
+    expect(readText("knowledge/kabsi-facts.md")).toContain(
       "Payments are processed by Creem, our merchant of record",
     );
   });

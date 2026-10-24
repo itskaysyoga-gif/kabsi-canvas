@@ -23,6 +23,7 @@ import {
   onboardingStateResult,
   type OnboardingState,
 } from "../supabase/functions/_shared/onboarding-context";
+import { readText } from "./helpers/facts";
 
 // P0.4-11 (K-111, K-89): "Need a hand?" on every onboarding step, Nora's stuck prompt once per step, and what Nora knows.
 const STEPS = Object.keys(HELP) as HelpStep[];
@@ -209,7 +210,7 @@ describe("what Nora knows while an owner sets up (P0.4-11)", () => {
   });
 
   it("the facts file answers Where is People and access? for a phone and a computer", () => {
-    const facts = readFileSync("knowledge/kabsi-facts.md", "utf8");
+    const facts = readText("knowledge/kabsi-facts.md");
     for (const p of [
       /Your business profiles/,
       /Profile settings/,

@@ -1,13 +1,14 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { readText } from "./helpers/facts";
 
 // P0.6-12: the WhatsApp privacy text on /privacy and /terms, Nora's facts and the public llms file say the same
 // thing (K-122, K-104). Nothing here calls an AI model: Nora's source is the facts file, published as
 // public/llms-full.txt, and these checks read it directly.
 const privacy = readFileSync("src/routes/privacy.tsx", "utf8");
 const terms = readFileSync("src/routes/terms.tsx", "utf8");
-const facts = readFileSync("knowledge/kabsi-facts.md", "utf8");
-const llms = readFileSync("public/llms-full.txt", "utf8");
+const facts = readText("knowledge/kabsi-facts.md");
+const llms = readText("public/llms-full.txt");
 
 const between = (text: string, from: string, to: string) => {
   const a = text.indexOf(from);

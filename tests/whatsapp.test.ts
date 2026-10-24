@@ -19,6 +19,7 @@ import {
 } from "../supabase/functions/_shared/email-layout";
 import { noraAck } from "../supabase/functions/_shared/email/copy";
 import { renderEmail } from "../supabase/functions/_shared/email/template";
+import { readText } from "./helpers/facts";
 
 const kinds = Object.keys(WHATSAPP_MESSAGES) as WhatsappKind[];
 
@@ -60,12 +61,18 @@ describe("WhatsApp is one setting that can be empty (PR 0, 22 Oct 2026)", () => 
     expect(copies).toEqual([]);
   });
 
-  it("the deleted Kapso number appears nowhere outside docs/source and PROGRESS", () => {
+  it("the deleted Kapso number appears nowhere outside docs/source, PROGRESS and its archive", () => {
     // Built from parts so this file does not contain it either.
     const old = new RegExp(["\\(?201\\)?", "483", "5474"].join("[\\s.\\-]?"));
     const digits = ["1", "201", "483", "5474"].join("");
     const offenders = repoFiles.filter((f) => {
-      if (f.startsWith(join("docs", "source")) || f.endsWith("KABSI-PROGRESS.md")) return false;
+      if (
+        f.startsWith(join("docs", "source")) ||
+        f.startsWith(join("docs", "progress", "archive")) ||
+        f.startsWith(join("docs", "plan", "archive")) ||
+        f.endsWith("KABSI-PROGRESS.md")
+      )
+        return false;
       const text = readFileSync(f, "utf8");
       return old.test(text) || text.includes(`wa.me/${digits}`);
     });
@@ -123,7 +130,7 @@ describe("WhatsApp is one setting that can be empty (PR 0, 22 Oct 2026)", () => 
     });
 
     it("the facts file, the auth emails and the previews carry the number", () => {
-      expect(readFileSync("knowledge/kabsi-facts.md", "utf8")).toContain(WHATSAPP_NUMBER);
+      expect(readText("knowledge/kabsi-facts.md")).toContain(WHATSAPP_NUMBER);
       for (const f of readdirSync("emails/auth").filter((n) => n.endsWith(".html")))
         expect(readFileSync(join("emails/auth", f), "utf8")).toContain(`wa.me/${WHATSAPP_DIGITS}`);
     });
@@ -167,7 +174,7 @@ describe("WhatsApp is one setting that can be empty (PR 0, 22 Oct 2026)", () => 
 
     it("the facts file and Nora's public copy say there is no number and give none", () => {
       for (const file of ["knowledge/kabsi-facts.md", "public/llms-full.txt"]) {
-        const text = readFileSync(file, "utf8");
+        const text = readText(file);
         expect(text).toContain("Kabsi has no WhatsApp number at the moment");
         expect(text).not.toMatch(/wa\.me\/\d|WhatsApp \*\*\+|WhatsApp \+\d/);
       }

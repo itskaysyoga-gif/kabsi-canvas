@@ -5,7 +5,7 @@ description: "Use in any Claude Code session building Kabsi (repo itskaysyoga-gi
 
 # Kabsi build session
 
-Rashid runs Kabsi and the build sessions, and the lane R chat decides on his authority (R-41). Hussein only holds the Creem account. You build. The repo is the source of truth: CLAUDE.md, docs/KABSI-MASTERPLAN.md (it wins over older plan text), docs/KABSI-PLAN.md (section 2 rules, section 4 decisions, section 7 order and waves), docs/KABSI-PROGRESS.md, docs/source/.
+Rashid runs Kabsi and the build sessions, and the lane R chat decides on his authority (R-41). Hussein only holds the Creem account. You build. The repo is the source of truth: CLAUDE.md, docs/KABSI-MASTERPLAN.md (it wins over older plan text), docs/KABSI-PLAN.md (the index: section 2 rules, section 4 decisions, section 7 order; the cards are in docs/plan/archive/), docs/KABSI-PROGRESS.md (one-page status; history in docs/progress/archive/), docs/source/.
 
 ## Start
 1. Confirm the model matches the one named in the prompt. If not, stop and say so.
@@ -55,7 +55,7 @@ Goal: features that work, proven once.
 - Never imply Google approves, endorses, sponsors or partners with Kabsi (K-112). No "compliant with Google" badges.
 - No invented proof: no fake logos, numbers, testimonials or "trusted by" lines. No ranking or autopilot promises. No industry statistics (plan 2.11).
 - Never use anyone's personal email in Kabsi (R-32). Kabsi uses hello@kabsi.co.
-- Every behaviour, price or wording change updates knowledge/kabsi-facts.md (K-104) and public/llms-full.txt when relevant.
+- Every behaviour, price or wording change updates the facts (K-104): edit the numbered file in knowledge/facts/ and run node scripts/build-kb.mjs, which writes knowledge/kabsi-facts.md and the llms files.
 - Design tokens only (K-108). English first (K-119). No em dashes, en dashes or exclamation marks anywhere. Product copy follows the kabsi-copy skill.
 - Facebook and Instagram links come only from the SOCIAL_LINKS constant (R-59). No Arabic is shown anywhere public (R-61); the product still answers in Arabic silently where the owner or reviewer writes it.
 - Staff alerts go to WhatsApp, never Slack (R-64). Leave existing Slack code alone until session 13b part 2 removes it.
@@ -63,7 +63,7 @@ Goal: features that work, proven once.
 - Use available Claude skills when they fit: frontend-design for new screens, kabsi-reply-lab for anything touching reply prompts, kabsi-copy for any line a reader sees, kabsi-outbound for Outbound, the Supabase and Kapso skills for database and WhatsApp work, xlsx/pdf/docx for files.
 
 ## Finish
-Update docs/KABSI-PROGRESS.md (row, evidence, After merge, Found not done, Decisions to confirm) in the task PR or one small docs PR.
+Update docs/KABSI-PROGRESS.md (the one-page status) and put the long record (evidence, After merge, Found not done, Decisions to confirm) in a new file docs/progress/archive/<date>-<session>.md, in the task PR or one small docs PR.
 Reply to Rashid, short, per task:
 - What changed (plain words, no file lists).
 - What you verified (one line).

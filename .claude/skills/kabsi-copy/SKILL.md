@@ -51,4 +51,4 @@ Never: Profile Score, Do now, Listing Shield, Profile Care, Replies as a module,
 2. Search for Arabic script and for Lebanon-only examples.
 3. Search for banned names and banned claims above.
 4. Read it aloud once. If an owner would stumble, rewrite it.
-5. If the change alters wording, price or behaviour, update knowledge/kabsi-facts.md and public/llms-full.txt (K-104).
+5. If the change alters wording, price or behaviour, update the facts in knowledge/facts/ and run node scripts/build-kb.mjs, which rebuilds knowledge/kabsi-facts.md and the llms files (K-104).
