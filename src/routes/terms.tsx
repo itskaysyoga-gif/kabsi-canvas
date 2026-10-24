@@ -25,7 +25,7 @@ export const Route = createFileRoute("/terms")({
   component: Page,
 });
 
-const UPDATED = "21 October 2026";
+const UPDATED = "24 October 2026";
 
 function Page() {
   return (
@@ -67,6 +67,10 @@ function Page() {
           <li>
             Answers questions and helps you fill in your business facts through Nora, an AI
             assistant.
+          </li>
+          <li>
+            From launch, shows where your business appears on Google Maps around it and in AI
+            answers, next to the competitors you pick, using data from other companies (section 6).
           </li>
         </ul>
       </section>
@@ -160,6 +164,12 @@ function Page() {
             We can't remove or hide reviews. Only Google can remove reviews that break its policies.
           </li>
           <li>
+            That a map, an AI answer or a competitor figure matches what you see when you search
+            yourself. They come from other companies (DataForSEO and Google's Gemini API), are a
+            sample taken at one moment, and change from run to run. Kabsi shows them as a sample and
+            never as a promise.
+          </li>
+          <li>
             Google Protection alerts you and lets you keep your information if you choose. It can't
             lock your listing or stop people suggesting edits to Google.
           </li>
@@ -177,6 +187,10 @@ function Page() {
           <li>
             post fake, misleading, abusive, discriminatory or illegal content, or anyone's personal
             data;
+          </li>
+          <li>
+            set review targets or quotas for individual staff, or reward or punish staff by the
+            reviews they bring in;
           </li>
           <li>manage a profile you're not allowed to manage;</li>
           <li>break, overload, copy or resell Kabsi.</li>
@@ -283,7 +297,12 @@ function Page() {
           <li>
             You can stop at any time: disconnect Kabsi from Google (section 4), and delete your
             business in Settings if you want your data gone. Deleting takes effect 7 days after you
-            ask, and you can cancel before then.
+            ask, and you can cancel before then. Older backups hold a copy until they expire, at
+            most 8 weeks later, and are never restored into the live service afterwards.
+          </li>
+          <li>
+            You can ask for a copy of your data at any time by email to {CONTACT_EMAIL} from your
+            account address. We send you a file within 30 days.
           </li>
           <li>
             We may pause or stop the service for a business that breaks section 7, puts others at
@@ -358,6 +377,16 @@ function Page() {
               messages. WhatsApp&apos;s own terms apply to your use of WhatsApp. What we collect and
               how long we keep it is in section 14 of our <Link to="/privacy">privacy policy</Link>.
             </li>
+            <li>
+              Kabsi writes first only to a number that opted in, and outside 24 hours from your last
+              message only with a message template Meta has approved. We keep the time, your number
+              and the words you saw when you opted in. START opts you back in after STOP.
+            </li>
+            <li>
+              You can send a voice note. We turn it into text, delete the audio at once and keep the
+              text (section 14 of our <Link to="/privacy">privacy policy</Link>). Notes over 3
+              minutes or 10 MB are refused.
+            </li>
             <li>We do not use the Kabsi WhatsApp number for marketing messages.</li>
             <li>The assistant on WhatsApp is not available yet.</li>
           </ul>
@@ -371,7 +400,17 @@ function Page() {
       </section>
 
       <section>
-        <h2>17. Changes to these terms</h2>
+        <h2>17. Kabsi Partners</h2>
+        <p>
+          If you join Kabsi Partners to recommend Kabsi and earn a share of what the businesses you
+          bring pay, the <Link to="/partners/terms">partner terms</Link> apply to you as well. They
+          never change what a business owner pays or gets: the owner's plan, price and these terms
+          are the same whether or not a partner brought them.
+        </p>
+      </section>
+
+      <section>
+        <h2>18. Changes to these terms</h2>
         <p>
           If we change these terms in a way that matters, we email account holders at least 14 days
           before the change applies. If you don't agree, you can stop and ask for a refund of the
@@ -380,7 +419,7 @@ function Page() {
       </section>
 
       <section>
-        <h2>18. Law and contact</h2>
+        <h2>19. Law and contact</h2>
         <p>
           These terms are governed by the laws of the United Arab Emirates, and the courts of Dubai
           have jurisdiction, without taking away any protection the law of your country gives you.

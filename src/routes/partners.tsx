@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
 import { Eyebrow, H2, PageHero, Section } from "@/components/marketing/parts";
@@ -31,6 +31,11 @@ function Page() {
             Email {CONTACT_EMAIL}
           </a>
         </Button>
+        <p className="mt-4 text-sm">
+          <Link to="/partners/terms" className="font-bold underline underline-offset-4">
+            Read the partner terms
+          </Link>
+        </p>
       </PageHero>
 
       <Section tone="sand">

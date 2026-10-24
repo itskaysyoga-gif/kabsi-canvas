@@ -21,6 +21,7 @@ Rashid runs Kabsi and the build sessions, and the lane R chat decides on his aut
 
 ## Hard stops
 - Paid calls follow R-43 to R-46 and PROGRESS. AI is on demand only: the Anthropic key lives in Supabase secrets, there is about 100 US dollars of promotional credit until 17 Nov 2026 with auto-reload off, and EVAL_LIVE stays false (no live evaluation in CI). Build against mocks, fixtures and stubs. Make only the model calls a card needs and report how many in the PR and in PROGRESS. A live reply evaluation runs by hand only: 20 cases from scripts/eval/cases.json when a reply prompt changes, and the full 200-case reply set and Nora's 60 questions once, on the final prompts, before the credit ends.
+- The skill-creator skill's eval and description-improvement scripts call `claude -p`, which is a paid model call: run them only with Rashid's yes (plan 2.12).
 - Live WhatsApp sends go only to Kabsi's own test phones until launch. No cold messages, ever. No other paid API calls (Meta templates, transcription, data providers) without Rashid's yes.
 - Google calls follow google_mode() and PROGRESS. The demo business stays on mock always (R-17). places_daily_cap is 20 (R-47); raise it only when Rashid says so.
 - Never use the Kapso connector for Kabsi (R-49). Kapso is reached only by Kabsi's own code. Never write, paste or print a secret.
@@ -64,7 +65,12 @@ Goal: features that work, proven once.
 
 ## Finish
 Update docs/KABSI-PROGRESS.md (the one-page status) and put the long record (evidence, After merge, Found not done, Decisions to confirm) in a new file docs/progress/archive/<date>-<session>.md, in the task PR or one small docs PR.
-Reply to Rashid, short, per task:
-- What changed (plain words, no file lists).
-- What you verified (one line).
-- What needs Rashid: only real actions, each with the exact SQL file path or click path and the read-back result to expect. Creem account steps go to Hussein.
+The R decisions table has a status column from R-55 (Approved, Building, Merged, Verified live, Retired). Move a row only with evidence: a pull request number, a check, a live response.
+Reply to Rashid with the session report (master plan 25.6, also in CLAUDE.md), in this order, plain words:
+1. The pull request link.
+2. A 3-line summary: what changed, why, what to look at.
+3. Tests actually run: the exact commands and what each printed. A check that could not run is listed as not run, with the reason.
+4. Verified live, and how: the request, query or screen you checked after the deploy, with the result.
+5. Manual steps left for Rashid: only real actions, each with the exact SQL file path or click path and the read-back result to expect. Creem account steps go to Hussein.
+6. Known limits: what is not covered, what was not run live, what a later session must do.
+A merged pull request or a passing mock test is never called "live".

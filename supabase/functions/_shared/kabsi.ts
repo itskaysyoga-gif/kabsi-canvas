@@ -145,6 +145,9 @@ export { emailButton, emailLink, esc } from "./email-layout.ts";
 
 // The From address lives in app_settings.email_from (migration 016), so switching sender is one SQL update.
 // Two sending subdomains (G-22, R-03): send.kabsi.co for account and product mail, news.kabsi.co for lifecycle mail.
+// Master plan 30.4: Kabsi's own product mail goes from "Kabsi <hello@send.kabsi.co>" with Reply-To hello@kabsi.co (below),
+// so the root domain keeps its reputation for people's own mail. app_settings.email_from must hold the same address
+// (migration 20261024215145); the value there wins over the fallback in this constant.
 const FROM = { send: { key: "email_from", fallback: "Kabsi <hello@send.kabsi.co>" }, news: { key: "email_from_news", fallback: "Kabsi <hello@news.kabsi.co>" } } as const;
 export type Stream = keyof typeof FROM;
 const fromCache = new Map<Stream, { value: string; at: number }>();

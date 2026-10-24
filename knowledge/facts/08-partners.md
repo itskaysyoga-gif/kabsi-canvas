@@ -7,4 +7,4 @@
 - Questions about becoming a partner: hello@kabsi.co. Do not promise terms, dates or earnings.
 
 ---
-
+- The partner terms are public at kabsi.co/partners/terms (added 24 Oct 2026): what the program is, the commission, the hold and payout, how a referral is credited, the rules every partner follows, fraud and ending, what a partner sees, liability and law. If someone asks about terms, earnings or dates, point to that page and to hello@kabsi.co. Do not quote earnings, and say Kabsi Partners opens at launch. The terms of service (section 17) and the privacy policy (sections 2, 6 and 8) mention partners.
