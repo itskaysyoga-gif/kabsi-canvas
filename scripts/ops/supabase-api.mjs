@@ -11,11 +11,19 @@ export async function api(path, init = {}) {
   if (!token) throw new Error("SUPABASE_ACCESS_TOKEN is not set");
   const res = await fetch(`https://api.supabase.com/v1/projects/${PROJECT_REF}${path}`, {
     ...init,
-    headers: { authorization: `Bearer ${token}`, "content-type": "application/json", ...(init.headers ?? {}) },
+    headers: {
+      authorization: `Bearer ${token}`,
+      "content-type": "application/json",
+      ...(init.headers ?? {}),
+    },
   });
-  if (!res.ok) throw new Error(`Supabase Management API answered ${res.status} for ${path}: ${(await res.text()).slice(0, 200)}`);
+  if (!res.ok)
+    throw new Error(
+      `Supabase Management API answered ${res.status} for ${path}: ${(await res.text()).slice(0, 200)}`,
+    );
   return res.json();
 }
 
 /** Runs SQL as the postgres role. Returns the rows of the last statement that returns any. */
-export const runSql = (query) => api("/database/query", { method: "POST", body: JSON.stringify({ query }) });
+export const runSql = (query) =>
+  api("/database/query", { method: "POST", body: JSON.stringify({ query }) });

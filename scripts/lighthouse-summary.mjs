@@ -16,7 +16,9 @@ const median = (xs) => {
 const byUrl = new Map();
 for (const f of readdirSync(dir).filter((n) => /^lhr-.*\.json$/.test(n))) {
   const r = JSON.parse(readFileSync(join(dir, f), "utf8"));
-  const script = r.audits["resource-summary"]?.details?.items?.find((i) => i.resourceType === "script")?.transferSize ?? NaN;
+  const script =
+    r.audits["resource-summary"]?.details?.items?.find((i) => i.resourceType === "script")
+      ?.transferSize ?? NaN;
   const row = {
     perf: r.categories.performance.score * 100,
     a11y: r.categories.accessibility.score * 100,
@@ -43,6 +45,10 @@ for (const [path, rows] of byUrl) {
       `${(m("lcp") / 1000).toFixed(1)} | ${m("tbt").toFixed(0)} | ${m("cls").toFixed(3)} | ${m("js").toFixed(0)} |`,
   );
 }
-lines.push("", "The CI server is a plain Node server without Vercel's compression and CDN, so JS KB and LCP read worse here than on kabsi.co. Web 2 points this at the Vercel preview and makes it blocking.");
+lines.push(
+  "",
+  "The CI server is a plain Node server without Vercel's compression and CDN, so JS KB and LCP read worse here than on kabsi.co. Web 2 points this at the Vercel preview and makes it blocking.",
+);
 console.log(lines.join("\n"));
-if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
+if (process.env.GITHUB_STEP_SUMMARY)
+  appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);

@@ -36,6 +36,9 @@ jobs:
       - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
         with:
           version: 2.119.0
+      # Ops 1 part B (master plan 29.9): stamp the commit into the Sentry release tag every function reports.
+      - name: Stamp the Sentry release (the commit being deployed)
+        run: printf 'export const RELEASE = "%s";\n' "$GITHUB_SHA" > supabase/functions/_shared/release.ts
       - name: Deploy every function (verify_jwt comes from supabase/config.toml)
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}

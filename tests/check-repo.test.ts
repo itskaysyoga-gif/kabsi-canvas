@@ -17,7 +17,13 @@ describe("check-repo", () => {
 
   it("rejects a migration without a timestamp and a repeated timestamp", () => {
     const d = tmp();
-    for (const f of ["20261024120000_ok.sql", "20261024120000_twin.sql", "add_table.sql", "2026102412_short.sql", "20261024130000_Upper.sql"])
+    for (const f of [
+      "20261024120000_ok.sql",
+      "20261024120000_twin.sql",
+      "add_table.sql",
+      "2026102412_short.sql",
+      "20261024130000_Upper.sql",
+    ])
       writeFileSync(join(d, f), "");
     const problems: string[] = checkMigrations(d);
     expect(problems.length).toBe(4);
@@ -30,7 +36,7 @@ describe("check-repo", () => {
       mkdirSync(join(d, name));
       writeFileSync(join(d, name, "SKILL.md"), body);
     };
-    skill("good", "---\nname: good\ndescription: \"Does a thing\"\n---\nBody");
+    skill("good", '---\nname: good\ndescription: "Does a thing"\n---\nBody');
     skill("nofront", "Body only");
     skill("wrongname", "---\nname: other\ndescription: x\n---\n");
     skill("nodesc", "---\nname: nodesc\n---\n");

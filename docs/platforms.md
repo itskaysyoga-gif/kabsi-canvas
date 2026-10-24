@@ -2,7 +2,7 @@
 
 Checked on 22 Oct 2026 through the Resend, Sentry, PostHog, UptimeRobot, Slack and Supabase connectors, DNS-over-HTTPS and
 the code. Each row says done, Rashid step, or not possible, and what shows it. Secret names and rotation dates are in
-`docs/secrets-inventory.md`; no value appears anywhere. The same table was in `docs/KABSI-PROGRESS.md` until the docs diet of 24 Oct 2026; its old text is `docs/progress/archive/` and `docs/SECRETS.md` wins.
+`docs/SECRETS.md`; no value appears anywhere. The same table was in `docs/KABSI-PROGRESS.md` until the docs diet of 24 Oct 2026; its old text is in `docs/progress/archive/`.
 
 ## Where each platform stands
 
@@ -30,7 +30,7 @@ the code. Each row says done, Rashid step, or not possible, and what shows it. S
 | UptimeRobot | The app, the Creem and Meta webhook endpoints | The app is a step; the others cannot exist yet | Monitor `https://kabsi.co/login` (the app's front door). The Creem webhook is built with P0.4-07 and the Meta endpoint with P0.6-03 (after launch); add them then |
 | UptimeRobot | Public status page at `status.kabsi.co` | Rashid step D2 | `list-psps`: none. `status.kabsi.co` has no DNS record. A status page on a custom domain is a paid UptimeRobot feature and needs a CNAME in Cloudflare |
 | Slack | Map the six channels to K-118's alerts | Done below | See the mapping; five of the six carry events today |
-| Secrets | Inventory at `docs/secrets-inventory.md` | Done | Names, where each lives, who reads it; last-set dates "Not recorded" until Rashid enters them |
+| Secrets | List at `docs/SECRETS.md` | Done | Names, where each lives, who reads it; last-set dates "Not recorded" until Rashid enters them |
 | All | Second trusted admin on each platform | Rashid step E1 | No connector can add a person to Supabase, Vercel, Cloudflare, Resend, Sentry, PostHog, Slack, Creem, Meta or Google Cloud |
 
 ## Slack channels (K-118 against what exists)
@@ -54,4 +54,4 @@ the code. Each row says done, Rashid step, or not possible, and what shows it. S
 - **D1 UptimeRobot account.** Sign up at uptimerobot.com with hello@kabsi.co and two-factor sign-in, then create these monitors (HTTP, expect 200, alert contact hello@kabsi.co): `https://kabsi.co`, `https://kabsi.co/login`, `https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/health/queue`, `https://go.kabsi.co/_check`. Use a 1-minute interval if the plan allows, otherwise 5 minutes. The old account can then be closed.
 - **D2 Status page.** In the new UptimeRobot account, Status pages, New: add the four monitors; for `status.kabsi.co` choose Custom domain (a paid feature), then add the CNAME it shows in Cloudflare, DNS only. Link it in the footer afterwards (a later change).
 - **E1 Second admins.** On each of Supabase, Vercel, GitHub, Cloudflare, Resend, Sentry, PostHog, Slack, Creem, Meta and Google Cloud add one trusted person with two-factor sign-in, and tick it off in PROGRESS.
-- **E2 Rotation dates.** When you next rotate a secret, write the date in `docs/secrets-inventory.md`.
+- **E2 Rotation dates.** When you next rotate a secret, write the date in `docs/SECRETS.md`.

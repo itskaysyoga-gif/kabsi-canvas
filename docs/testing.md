@@ -259,8 +259,8 @@ exclamation mark, and a delete question whose first sentence is not the never-de
 - `supabase/functions/_shared/queue-health.test.ts`: the `GET /health/queue` answer is 200 only when the database says ok;
   stuck is 503; an unreadable queue is 503 `unknown`, never green.
 - `tests/worker-check.test.ts`: `go.kabsi.co/_check` answers 200 when KV reads and 503 when it cannot, and touches no card.
-- `tests/platforms-docs.test.ts`: every secret name the functions and the Worker read is in `docs/secrets-inventory.md`,
-  and neither the inventory nor `docs/platforms.md` holds a value.
+- `tests/platforms-docs.test.ts`: every secret name the functions and the Worker read is in `docs/SECRETS.md`,
+  and neither that file nor `docs/platforms.md` holds a value.
 
 ## Staff System health (P0.6-11)
 

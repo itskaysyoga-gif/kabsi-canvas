@@ -17,8 +17,10 @@ const CHANNELS = ["alerts", "customers", "chats", "money", "partners", "daily"];
 export function buildSql(v, now = new Date()) {
   if (!v.kind || !v.title) throw new Error("--kind and --title are required");
   const channel = v.channel ?? "alerts";
-  if (!CHANNELS.includes(channel)) throw new Error(`--channel must be one of ${CHANNELS.join(", ")}`);
-  if (v.setting && !/^[a-z][a-z0-9_]{2,60}$/.test(v.setting)) throw new Error("--setting must be snake_case");
+  if (!CHANNELS.includes(channel))
+    throw new Error(`--channel must be one of ${CHANNELS.join(", ")}`);
+  if (v.setting && !/^[a-z][a-z0-9_]{2,60}$/.test(v.setting))
+    throw new Error("--setting must be snake_case");
   const fields = (v.field ?? []).map((f) => {
     const i = f.indexOf("=");
     return { l: f.slice(0, i), v: f.slice(i + 1).slice(0, 300) };

@@ -13,11 +13,14 @@ export function checkMigrations(dir) {
   const seen = new Map();
   for (const f of readdirSync(dir).filter((n) => !n.startsWith("."))) {
     if (!/^\d{14}_[a-z0-9_]+\.sql$/.test(f)) {
-      problems.push(`migration ${f}: the name must be a 14 digit timestamp, an underscore, lower case words with underscores, then .sql`);
+      problems.push(
+        `migration ${f}: the name must be a 14 digit timestamp, an underscore, lower case words with underscores, then .sql`,
+      );
       continue;
     }
     const ts = f.slice(0, 14);
-    if (seen.has(ts)) problems.push(`migration ${f}: the timestamp ${ts} is already used by ${seen.get(ts)}`);
+    if (seen.has(ts))
+      problems.push(`migration ${f}: the timestamp ${ts} is already used by ${seen.get(ts)}`);
     else seen.set(ts, f);
   }
   return problems;
@@ -25,7 +28,9 @@ export function checkMigrations(dir) {
 
 export function checkSkills(skillsDir, lockPath) {
   const problems = [];
-  const folders = readdirSync(skillsDir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name);
+  const folders = readdirSync(skillsDir, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name);
   for (const name of folders) {
     const file = join(skillsDir, name, "SKILL.md");
     if (!existsSync(file)) {
@@ -37,13 +42,18 @@ export function checkSkills(skillsDir, lockPath) {
       problems.push(`skill ${name}: SKILL.md has no frontmatter (--- block) at the top`);
       continue;
     }
-    const field = (k) => (m[1].match(new RegExp(`^${k}:\\s*(.+)$`, "m")) ?? [])[1]?.trim().replace(/^["']|["']$/g, "");
-    if (field("name") !== name) problems.push(`skill ${name}: the frontmatter name is "${field("name") ?? ""}", it must equal the folder name`);
+    const field = (k) =>
+      (m[1].match(new RegExp(`^${k}:\\s*(.+)$`, "m")) ?? [])[1]?.trim().replace(/^["']|["']$/g, "");
+    if (field("name") !== name)
+      problems.push(
+        `skill ${name}: the frontmatter name is "${field("name") ?? ""}", it must equal the folder name`,
+      );
     if (!field("description")) problems.push(`skill ${name}: the frontmatter has no description`);
   }
   if (existsSync(lockPath)) {
     for (const name of Object.keys(JSON.parse(readFileSync(lockPath, "utf8")).skills ?? {})) {
-      if (!folders.includes(name)) problems.push(`skills-lock.json lists ${name}, which has no folder in .claude/skills`);
+      if (!folders.includes(name))
+        problems.push(`skills-lock.json lists ${name}, which has no folder in .claude/skills`);
     }
   }
   return problems;
@@ -52,17 +62,22 @@ export function checkSkills(skillsDir, lockPath) {
 export function checkWorkflows(dir) {
   const problems = [];
   for (const f of readdirSync(dir).filter((n) => /\.ya?ml$/.test(n))) {
-    readFileSync(join(dir, f), "utf8").split("\n").forEach((line, i) => {
-      const m = line.match(/^\s*-?\s*uses:\s*([^\s#]+)/);
-      if (!m || m[1].startsWith("./")) return;
-      if (!/^[\w.-]+\/[\w./-]+@[0-9a-f]{40}$/.test(m[1])) problems.push(`${f}:${i + 1}: ${m[1]} must be pinned to a full commit SHA`);
-    });
+    readFileSync(join(dir, f), "utf8")
+      .split("\n")
+      .forEach((line, i) => {
+        const m = line.match(/^\s*-?\s*uses:\s*([^\s#]+)/);
+        if (!m || m[1].startsWith("./")) return;
+        if (!/^[\w.-]+\/[\w./-]+@[0-9a-f]{40}$/.test(m[1]))
+          problems.push(`${f}:${i + 1}: ${m[1]} must be pinned to a full commit SHA`);
+      });
   }
   return problems;
 }
 
 export function checkLockfile(root) {
-  return existsSync(join(root, "package-lock.json")) ? [] : ["package-lock.json is not committed (CI and Vercel use npm ci)"];
+  return existsSync(join(root, "package-lock.json"))
+    ? []
+    : ["package-lock.json is not committed (CI and Vercel use npm ci)"];
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

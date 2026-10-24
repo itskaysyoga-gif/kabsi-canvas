@@ -14,6 +14,10 @@ export default defineConfig(({ command }) => ({
       process.env["VERCEL_GIT_COMMIT_SHA"] ?? process.env["GITHUB_SHA"] ?? "dev",
     ),
   },
+  // Ops 1 part B (master plan 29.9): when the Vercel build has a Sentry token, it also writes source maps. "hidden" leaves
+  // no sourceMappingURL in the files, scripts/sentry-sourcemaps.mjs uploads the maps to Sentry under the release tag above,
+  // and deletes them from the output so they are never served.
+  build: { sourcemap: process.env["SENTRY_AUTH_TOKEN"] ? "hidden" : false },
   css: { transformer: "lightningcss" },
   resolve: {
     alias: { "@": `${process.cwd()}/src` },

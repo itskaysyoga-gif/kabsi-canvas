@@ -38,15 +38,24 @@ export function flatten(payload) {
 
 const stable = (o) => JSON.stringify(o, Object.keys(o ?? {}).sort());
 export const keyFor = (f) =>
-  `advisor:${f.name}:${createHash("sha1").update(f.cacheKey ?? stable(f.metadata)).digest("hex").slice(0, 16)}`;
+  `advisor:${f.name}:${createHash("sha1")
+    .update(f.cacheKey ?? stable(f.metadata))
+    .digest("hex")
+    .slice(0, 16)}`;
 
 export function planSql(findings, knownKeys) {
   const alerts = findings.filter((f) => ALERT_LEVELS.has(f.level));
   const baseline = knownKeys.size === 0;
   const fresh = alerts.filter((f) => !knownKeys.has(keyFor(f)));
   const rows = fresh.map((f) => {
-    const where = [f.metadata.schema, f.metadata.name ?? f.metadata.entity].filter(Boolean).join(".");
-    const fields = [{ l: "Level", v: f.level }, ...(where ? [{ l: "Where", v: where }] : []), ...(f.remediation ? [{ l: "How to fix", v: f.remediation }] : [])];
+    const where = [f.metadata.schema, f.metadata.name ?? f.metadata.entity]
+      .filter(Boolean)
+      .join(".");
+    const fields = [
+      { l: "Level", v: f.level },
+      ...(where ? [{ l: "Where", v: where }] : []),
+      ...(f.remediation ? [{ l: "How to fix", v: f.remediation }] : []),
+    ];
     return (
       `(${lit("advisor_finding")}, 'alerts', ${lit(`New security finding: ${f.title}`.slice(0, 200))}, ${lit(f.detail.slice(0, 600))}, ` +
       `${lit(JSON.stringify(fields))}::jsonb, ${lit(keyFor(f))}, ${baseline ? "now()" : "null"})`
@@ -69,22 +78,31 @@ export function planSql(findings, knownKeys) {
 }
 
 if (process.argv[1] === new URL(import.meta.url).pathname) {
-  const { values } = parseArgs({ options: { fixture: { type: "string" }, "dry-run": { type: "boolean", default: false } } });
-  const security = values.fixture ? JSON.parse(readFileSync(values.fixture, "utf8")) : await api("/advisors/security");
+  const { values } = parseArgs({
+    options: { fixture: { type: "string" }, "dry-run": { type: "boolean", default: false } },
+  });
+  const security = values.fixture
+    ? JSON.parse(readFileSync(values.fixture, "utf8"))
+    : await api("/advisors/security");
   const findings = flatten(security);
   let known = new Set();
   if (!values.fixture && !values["dry-run"]) {
-    const rows = await runSql("select dedupe_key from public.ops_events where dedupe_key like 'advisor:%'");
+    const rows = await runSql(
+      "select dedupe_key from public.ops_events where dedupe_key like 'advisor:%'",
+    );
     known = new Set(rows.map((r) => r.dedupe_key));
   }
   const plan = planSql(findings, known);
   const lines = [
     `Security advisors: ${findings.length} findings (${plan.alerts.length} ERROR or WARN).`,
-    plan.baseline ? "First run: recorded as the baseline." : `${plan.fresh.length} new since the last run.`,
+    plan.baseline
+      ? "First run: recorded as the baseline."
+      : `${plan.fresh.length} new since the last run.`,
     ...plan.fresh.map((f) => `- NEW ${f.level} ${f.title}: ${f.detail.slice(0, 160)}`),
   ];
   console.log(lines.join("\n"));
-  if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
+  if (process.env.GITHUB_STEP_SUMMARY)
+    appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
   if (values["dry-run"] || values.fixture) console.log(plan.sql || "(nothing to write)");
   else if (plan.sql) await runSql(plan.sql);
   if (!values.fixture) {
@@ -92,7 +110,8 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
       const perf = flatten(await api("/advisors/performance"));
       const summary = `Performance advisors: ${perf.length} findings (not alerts).`;
       console.log(summary);
-      if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${summary}\n`);
+      if (process.env.GITHUB_STEP_SUMMARY)
+        appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${summary}\n`);
     } catch (e) {
       console.log(`Performance advisors could not be read: ${String(e.message).slice(0, 120)}`);
     }
