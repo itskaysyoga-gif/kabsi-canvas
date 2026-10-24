@@ -7,7 +7,7 @@ One page, under 10 KB. Updated 24 Oct 2026 by Clean 1 (master plan 28.9); first 
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati; the first real reply was published and verified; the post removal was verified on Google (23 Oct). kabsi.co runs on Vercel; Creem is the only payment route (test mode, not open). Evidence: `docs/progress/archive/evidence.md` and `where-things-stand.md`.
 - Merged 23 and 24 Oct, docs and config only: Session 19 PR 0 (PR 196, the master plan and skills), Ops 1 part A (PR 197, Dependabot, gitleaks, docs/SECRETS.md), Session 0 part 1 (PR 198, master plan sections 20 to 29, decisions R-67 to R-89, the new order of work, the facts lines).
 - Session 0 is complete (PR 198 and PR 199, the docs diet).
-- Clean 1 (master plan 28.9, branch claude/clean-1): unused code, packages, Edge Functions, a script, a page and a skill removed, the Lovable leftovers gone, the database drops written for Rashid. Detail: `docs/progress/archive/2026-10-24-clean-1.md`.
+- Clean 1 (master plan 28.9, PR 200, merged and verified live 24 Oct): unused code, packages, Edge Functions, a script, a page and a skill removed, the Lovable leftovers gone, the database drops written for Rashid. Detail: `docs/progress/archive/2026-10-24-clean-1.md`.
 - Next: Wave A: session 19 rest, session 13b part 1, Ops 1 part B.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
@@ -28,7 +28,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
 - GitHub repository settings: Dependabot alerts and Dependabot security updates are done (marked 24 Oct by Clean 1, as Rashid asked). Open: Secret Protection (secret scanning and push protection), which Rashid confirms himself.
-- Clean 1: run `supabase/manual/20261024_clean1_drops.sql` after a yes to its list (two empty or backup tables, two unused functions); check after the merge that the Deploy run deleted the six removed functions (if not, delete them in the Supabase dashboard, Edge Functions).
+- Clean 1: run `supabase/manual/20261024_clean1_drops.sql` after a yes to its list (two empty or backup tables, two unused functions).
 - Supabase Auth: leaked-password protection; paste the four `emails/auth/*.html` templates (the footer changed again).
 - Google Cloud: Places quotas and budget alerts; contacts and owners on kabsi.co addresses only.
 - Supabase Pro with point-in-time recovery and Vercel Pro, before the first payment and before card payments open.
