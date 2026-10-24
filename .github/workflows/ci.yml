@@ -16,15 +16,15 @@ jobs:
     name: App (typecheck, lint, anon JWT guard, tests, build)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
-      # CI installs from npm like the local setup and Vercel (package-lock.json is gitignored, D265).
+      # Ops 1 part B (master plan 25.1): package-lock.json is committed; CI and Vercel install exactly what it names.
       - name: Install
-        run: npm install --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund
+        run: npm ci --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund
       - name: Type-check
         run: npm run typecheck
       - name: Lint changed files
@@ -37,6 +37,9 @@ jobs:
         run: npm run check:tokens
       - name: Google calls only in the Google layer (K-34)
         run: npm run check:google
+      # Ops 1 part B (master plan 26.6, 25.1): migration names, SKILL.md frontmatter, actions pinned to a full SHA, lockfile.
+      - name: Repo checks
+        run: npm run check:repo
       - name: Tests
         run: npm test
       - name: Build
@@ -46,11 +49,11 @@ jobs:
     name: Edge Functions and Worker (deno check, Deno tests)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with:
           deno-version: v2.x
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
       - name: Deno check and tests
@@ -66,7 +69,7 @@ jobs:
     name: Prompt gate (evaluation set)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
       - name: Did a prompt change?
@@ -83,7 +86,7 @@ jobs:
         run: |
           echo "::error::A prompt changed, so the evaluation set must pass before this merges. Live evaluation is off (repository variable EVAL_LIVE is not true). Nothing was sent to Anthropic."
           exit 1
-      - uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         if: steps.changed.outputs.prompts == 'true' && vars.EVAL_LIVE == 'true'
         with:
           deno-version: v2.x
@@ -94,7 +97,7 @@ jobs:
         run: bash scripts/eval/gate.sh
       - name: Keep the results
         if: always() && steps.changed.outputs.prompts == 'true' && vars.EVAL_LIVE == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: eval-result
           path: eval-result.json
@@ -108,10 +111,10 @@ jobs:
     name: Nora gate (60 questions)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
       - name: Did Nora's facts or rules change?
@@ -134,7 +137,7 @@ jobs:
         run: node scripts/nora-eval/run-nora-eval.ts --live --out nora-eval-result.json
       - name: Keep the results
         if: always() && steps.changed.outputs.nora == 'true' && vars.EVAL_LIVE == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: nora-eval-result
           path: nora-eval-result.json
@@ -147,7 +150,7 @@ jobs:
     name: Secret scan (gitleaks, this pull request's commits)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
       - name: Install gitleaks 8.30.0 (checksum checked)
@@ -165,10 +168,55 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       # Pinned: "latest" asks the GitHub API and fails on its rate limit.
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
         with:
           version: 2.119.0
       - name: Migrations and pgTAP suite (K-54, P0.1-07)
         run: bash scripts/db-test.sh
+
+  # Ops 1 part B (master plan 26.6): a pull request that adds or upgrades a package with a known vulnerability, or a
+  # licence Kabsi cannot ship, fails here. Needs the dependency graph (Settings, Code security).
+  dependency_review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
+        with:
+          fail-on-severity: high
+
+  # Ops 1 part B (master plan 24.9): Lighthouse CI on a throttled phone for every public page. REPORT ONLY for now: the
+  # job never fails the pull request, and every assertion in lighthouserc.json is a "warn". Web 2 points it at the Vercel
+  # preview, changes "warn" to "error" and removes continue-on-error to make it blocking.
+  lighthouse:
+    name: Lighthouse CI (report only)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Install
+        run: npm ci --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund
+      - name: Build and serve
+        run: |
+          npm run build
+          PORT=4173 node .output/server/index.mjs > serve.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:4173/ > /dev/null && break; sleep 1; done
+      - name: Lighthouse (3 runs per page)
+        run: npx --yes @lhci/cli@0.15.1 autorun --config=lighthouserc.json
+      - name: Summary
+        if: always()
+        run: node scripts/lighthouse-summary.mjs
+      - name: Keep the reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: lighthouse-report
+          path: .lighthouseci-report
+          if-no-files-found: ignore
+

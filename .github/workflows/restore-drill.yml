@@ -1,0 +1,56 @@
+name: Restore drill
+
+# Ops 1 part B (R-66, master plan 19.1). On the 1st of every month: take the newest finished backup set from R2,
+# decrypt it, restore the database dump into a scratch Postgres in this runner, check the row counts against the manifest,
+# clone the git bundle and list the photos archive. The result is written where the daily staff summary reads it
+# (app_settings backup_drill and an ops event), and the run fails if any check fails. Gate (19.1): no paying customer
+# before one drill has passed. The logic is scripts/backup/restore-drill.sh.
+#
+# Secrets: BACKUP_PASSPHRASE, R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY (the backup's) and
+# SUPABASE_ACCESS_TOKEN (already there). Until the backup secrets exist the run only warns.
+
+on:
+  schedule:
+    - cron: "23 4 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: restore-drill
+  cancel-in-progress: false
+
+jobs:
+  drill:
+    name: Restore drill (newest backup into a scratch Postgres)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: scratch
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: PostgreSQL 17 client
+        run: |
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y >/dev/null
+          sudo apt-get install -y --no-install-recommends postgresql-client-17 >/dev/null
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+      - name: Restore the newest backup and check it
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SCRATCH_DB_URL: postgresql://postgres:scratch@localhost:5432/postgres
+        run: bash scripts/backup/restore-drill.sh

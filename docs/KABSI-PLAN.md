@@ -88,7 +88,7 @@ These are the standing rules for every build chat. The list below gives each gua
 
 Run what applies and paste the result in the pull request:
 
-- `npm install --registry=https://registry.npmjs.org --legacy-peer-deps`, then `npm run typecheck`, `npm run lint:changed`, `npm test`, `npm run build`.
+- `npm ci --registry=https://registry.npmjs.org --legacy-peer-deps` (the lockfile is committed since Ops 1 part B; use `npm install` only to change a dependency, and commit the lockfile with it), then `npm run typecheck`, `npm run lint:changed`, `npm test`, `npm run build`.
 - `bash scripts/deno-check.sh` when Edge Functions changed.
 - The database test suite once task P0.1-07 exists (`supabase test db` in CI).
 - For screens: check 390 px and 1440 px. If no browser is available in the session, say so in PROGRESS; never claim a visual check you did not do.

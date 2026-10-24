@@ -13,7 +13,7 @@ This repository is the website and app (TanStack Start, React, Tailwind), the Su
 You need Node.js 22 and npm.
 
 ```sh
-npm install --registry=https://registry.npmjs.org --legacy-peer-deps
+npm ci --registry=https://registry.npmjs.org --legacy-peer-deps
 npm run dev
 ```
 

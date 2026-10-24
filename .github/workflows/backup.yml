@@ -1,0 +1,69 @@
+name: Backup
+
+# Ops 1 part B (R-66, master plan 19.1). Every Sunday: the database, the Storage photos and a git bundle of this
+# repository, each encrypted with age (passphrase mode, BACKUP_PASSPHRASE) and stored in the private Cloudflare R2
+# bucket kabsi-backups. The newest 8 weekly sets are kept. The logic is scripts/backup/backup.sh; the exact clicks to
+# set it up are in docs/OPS-SETUP.md, and what to do when it fails is in docs/RUNBOOK.md (Backups).
+#
+# Secrets (Settings, Secrets and variables, Actions): SUPABASE_DB_URL, BACKUP_PASSPHRASE, R2_ACCOUNT_ID,
+# R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY. SUPABASE_ACCESS_TOKEN is the one deploy.yml already uses. While none of the five
+# exist the weekly run only warns that backups are not set up. A pull request that changes the backup code runs the
+# script as a dry run WITHOUT the secrets (the repository is bundled and encrypted with a throwaway passphrase), so a
+# change to the script can never read production through a pull request.
+
+on:
+  schedule:
+    - cron: "17 2 * * 0"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build and encrypt everything, upload nothing
+        type: boolean
+        default: false
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/backup/**"
+      - "scripts/ops/**"
+      - ".github/workflows/backup.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Weekly backup (database, photos, repository to R2)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
+        with:
+          version: 2.119.0
+      # The database is Postgres 17; pg_dump must be the same major version or newer, and the runner ships 16.
+      - name: PostgreSQL 17 client
+        run: |
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y >/dev/null
+          sudo apt-get install -y --no-install-recommends postgresql-client-17 >/dev/null
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+      - name: Back up
+        env:
+          # Pull requests get none of the secrets (see the header).
+          SUPABASE_DB_URL: ${{ github.event_name != 'pull_request' && secrets.SUPABASE_DB_URL || '' }}
+          BACKUP_PASSPHRASE: ${{ github.event_name != 'pull_request' && secrets.BACKUP_PASSPHRASE || '' }}
+          R2_ACCOUNT_ID: ${{ github.event_name != 'pull_request' && secrets.R2_ACCOUNT_ID || '' }}
+          R2_ACCESS_KEY_ID: ${{ github.event_name != 'pull_request' && secrets.R2_ACCESS_KEY_ID || '' }}
+          R2_SECRET_ACCESS_KEY: ${{ github.event_name != 'pull_request' && secrets.R2_SECRET_ACCESS_KEY || '' }}
+          SUPABASE_ACCESS_TOKEN: ${{ github.event_name != 'pull_request' && secrets.SUPABASE_ACCESS_TOKEN || '' }}
+          GIT_SOURCE: ${{ github.server_url }}/${{ github.repository }}.git
+          GITHUB_TOKEN: ${{ github.token }}
+          DRY: ${{ github.event_name == 'pull_request' || inputs.dry_run }}
+        run: |
+          if [ "$DRY" = "true" ]; then bash scripts/backup/backup.sh --dry-run; else bash scripts/backup/backup.sh; fi
