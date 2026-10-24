@@ -104,6 +104,7 @@ begin
   return v_out;
 end $$;
 
+revoke all on function private.google_action_copy(text, text) from public, anon, authenticated;
 revoke all on function public.record_google_state(uuid, jsonb, text) from public, anon, authenticated;
 grant execute on function public.record_google_state(uuid, jsonb, text) to service_role;
 
