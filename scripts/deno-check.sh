@@ -12,6 +12,8 @@ cp -r tests/fixtures "$scratch/tests/"
 cp -r scripts/eval/. "$scratch/scripts/eval/"
 cp -r scripts/nora-eval/. "$scratch/scripts/nora-eval/"
 cp knowledge/kabsi-facts.md "$scratch/knowledge/"
+cp -r knowledge/facts "$scratch/knowledge/"
+cp scripts/kb-lib.mjs "$scratch/scripts/"
 echo '{"nodeModulesDir":"auto"}' > "$scratch/deno.json"
 cd "$scratch/supabase/functions"
 for dir in */; do

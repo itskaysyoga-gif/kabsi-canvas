@@ -1,4 +1,4 @@
-// Nora's evaluation (P0.6-06; K-104). Scores the 60 questions in questions.ts against knowledge/kabsi-facts.md and exits 1
+// Nora's evaluation (P0.6-06; K-104). Scores the 60 questions in questions.ts against the facts built from knowledge/facts/ (scripts/kb-lib.mjs) and exits 1
 // unless the gate holds.
 //
 //   node scripts/nora-eval/run-nora-eval.ts --stub pass    the checker and the facts file, no network (also "fail")
@@ -6,17 +6,18 @@
 //                                                          ANTHROPIC_API_KEY; by hand only, when Rashid says so (R-45, 2.12)
 //
 // Add --out <file> to keep the findings. Nothing is stored and no account is read.
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import process from "node:process";
 import { gate, liveModel, runAll, sample, stubModel, type Answerer } from "./nora-eval.ts";
 import { noraRules } from "../../supabase/functions/_shared/nora-rules.ts";
+import { buildFacts } from "../kb-lib.mjs";
 
 const args = process.argv.slice(2);
 const flag = (name: string) => {
   const i = args.indexOf(name);
   return i >= 0 ? args[i + 1] : undefined;
 };
-const kb = readFileSync(new URL("../../knowledge/kabsi-facts.md", import.meta.url), "utf8");
+const kb = buildFacts();
 const out = flag("--out");
 const stub = flag("--stub") as "pass" | "fail" | undefined;
 

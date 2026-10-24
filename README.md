@@ -4,7 +4,7 @@ Kabsi looks after a local business's Google Business Profile: a reply ready for 
 
 This repository is the website and app (TanStack Start, React, Tailwind), the Supabase Edge Functions and migrations, and the `kabsi-go` Cloudflare Worker.
 
-- Plan and rules for every change: `docs/KABSI-PLAN.md` (sections 1 and 2), progress in `docs/KABSI-PROGRESS.md`, instructions for Claude in `CLAUDE.md`.
+- Plan index and rules for every change: `docs/KABSI-PLAN.md` (guardrails and section 2; the cards and the rest are in `docs/plan/archive/`), the core in `docs/KABSI-MASTERPLAN.md`, one-page status in `docs/KABSI-PROGRESS.md` (history in `docs/progress/archive/`), instructions for Claude in `CLAUDE.md`.
 - Hosting, environment variables, previews and redirects: `docs/hosting.md`. The site runs on Vercel at https://kabsi.co; every pull request gets a preview.
 - Edge Functions and the Worker are deployed by `.github/workflows/deploy.yml` on a push to `main`.
 

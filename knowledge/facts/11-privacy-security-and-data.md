@@ -1,0 +1,99 @@
+## 9. Privacy, security and data
+
+### 9.1 Who is responsible
+
+Kabsi is operated by Rashid Abou Hamzy, who is also the person responsible for the personal data. The footer, the privacy page, the terms and every email read the operator line from one constant and say: "Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co." The privacy page and the terms say Kabsi is not partnered with Google. Card payments are processed by Creem, our merchant of record, and the privacy page lists Creem as a processor. The site gives no city and never a street address. The footer of every public page says: "Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google."
+
+### 9.2 What Kabsi collects
+
+- **Owners:** email and extra alert addresses; business name, address, country, time zone and Google identifiers; About your business facts; Google reviews (public name, rating, text, dates), drafts and replies; posts, photos, special hours; listing details for Google Protection; plan and payments (plan, amount and date); the authorisation you gave; a log of emails sent; a record of approvals and changes (who did what and when, from the dashboard or an email link, the country of the connection and the browser, never the IP address and never review text).
+- **People who tap a card or open a link:** code, time, country, Android or iPhone, chip or QR, and a crawler flag. Never who they are or their IP address.
+- **Free tool users:** the search text goes to Google's Places API; a one-way salted hash of the IP is kept one hour to stop abuse.
+- **Free Google Profile Check users:** the search text goes to Google's Places API; what Google shows publicly about the business they pick is kept up to 24 hours; a one-way salted hash of the IP is kept one day to enforce 3 checks a day. If they ask for the check by email: the address, the business's Google Place ID, whether they ticked the tips box, the words next to it, the page and the time (proof of their choice). If they ask for it on WhatsApp (only while Kabsi has a number): a one-way hash of the number, the Place ID, the words next to the tick, the page, the time and whether the message was sent; the number itself is used once to send and is not kept.
+- **People who chat with Nora (the assistant):** their messages, the page they asked from, browser time zone and language, device type, the site that sent them, the country from the network (never the IP address), and any contact details they choose to give. Each chat is labelled (topic, intent, country) and a short report goes to the Kabsi team so a person can follow up. News emails only with a yes.
+- **People who wrote to Kabsi's earlier WhatsApp number (before 22 Oct 2026):** they can ask for that chat to be deleted by emailing hello@kabsi.co (see section 9.5b). Kabsi does not copy chats into its own database.
+- **Forms:** what you enter. **Visitors:** anonymous statistics and error reports.
+
+### 9.3 How it's used
+
+To provide Kabsi, to process public reviews so you can answer them, to keep Kabsi secure, and to keep payment records as the law requires. Kabsi doesn't sell or rent personal data, doesn't use it for advertising, doesn't send marketing emails without asking first, and never uses Google data to train AI models.
+
+### 9.4 AI
+
+Review text and business facts go to Anthropic's API for drafts and checks (photos are checked by Kabsi's own code and are not sent to an AI model); Anthropic doesn't train on this data. The owner approves every reply, post, photo and listing change. AI drafts can be wrong, so read each one; you're responsible for what you approve.
+
+### 9.5 Processors and regions
+
+Supabase (database, sign-in, storage; Frankfurt, Germany), Cloudflare (go.kabsi.co links and the bot check on forms), Vercel (hosting), Resend (email; EU, Ireland), Anthropic (drafts), Google (Business Profile and Places APIs), Sentry (error reports; EU, without IPs or review content), PostHog (anonymous statistics; United States), Zoho (the hello@kabsi.co mailbox). Kapso and Meta are listed again when Kabsi has a WhatsApp number. Calendly and Creem are added to the list on the privacy page when they go live.
+
+Some providers are outside the United Arab Emirates and the EU. They process data only on Kabsi's instructions and under their data protection terms, including standard contractual clauses where required.
+
+### 9.5b WhatsApp: privacy (privacy page section 14, terms section 16)
+
+How it works today: Kabsi has no WhatsApp number at the moment (the earlier number was retired on 22 Oct 2026). People write to hello@kabsi.co, and a person at Kabsi reads and answers it; it is not an automatic bot. Nothing is approved, published or changed over WhatsApp. Approvals happen only on kabsi.co. Kabsi never asks for a Google password or a code Google sends, by email, on WhatsApp or anywhere else. People should not send review text, passwords or codes.
+
+What is sent: nothing goes over WhatsApp today. Kabsi puts no Google data and no review text into WhatsApp, and the assistant (Nora) reads no WhatsApp messages.
+
+Who handles it: when Kabsi has a WhatsApp number again, Kapso (the inbox and the messaging service) and Meta (runs WhatsApp and carries the messages) are its processors, and the privacy page and terms name them before it starts. Kabsi does not use WhatsApp for marketing messages.
+
+How long it is kept: if someone wrote to Kabsi's earlier WhatsApp number before 22 Oct 2026, no automatic deletion date was set for that chat; they can ask for it to be deleted by emailing hello@kabsi.co from their account address, and Kabsi tells them when it is done. The chat stays on the person's own phone until they delete it there.
+
+Not live yet (P0.8-03; say "not available yet", never give a date): owner alerts and approvals on WhatsApp. When they come: alerts only after the owner opts in (the time, the phone number and the wording shown are recorded); a review alert carries the business, the star rating, the reviewer's first name, the review text up to 300 characters and the draft, after that opt-in; the owner can reply STOP (or a similar word such as UNSUBSCRIBE) at any time and Kabsi stops at once and records it. The privacy page and terms are updated, and account holders emailed, before any of it is switched on.
+
+Likely questions and the answers: "Do you have a WhatsApp number?" Not at the moment; write to hello@kabsi.co and a person answers, not a bot. "Do you ask for my Google password or code on WhatsApp?" Never, on WhatsApp or anywhere else. "Can I approve a reply or post on WhatsApp?" Not yet; approve on kabsi.co. "Will Kabsi send me alerts on WhatsApp?" Not yet; email is the only alert channel today, and WhatsApp alerts will need the owner's opt-in and can be stopped with STOP. "How do I delete a chat I had with your old WhatsApp number?" Email hello@kabsi.co; there is no automatic deletion date, so Kabsi deletes it when asked.
+
+### 9.6 Cookies
+
+Sign-in storage, the last business you opened (in your browser), and the visitor's privacy choice. A small Kabsi privacy banner (no outside consent tool) asks once, by country: in the EU and EEA (and when the country is unknown) statistics and advertising both wait for a yes; in the UK, the UAE and Saudi Arabia statistics run in totals only with an opt-out and advertising waits for a yes; everywhere else both are on with notice and an opt-out. Until the visitor chooses, PostHog counts visits without cookies or any identifier; after a yes it keeps an anonymous identifier and may record screens on public pages (never inside the app); after a no it stops. Each choice is stored as proof (anonymous id, the signed-in user if any, country and rule, the exact wording and its version, page, time; no IP, email or name). "Privacy choices" at the foot of every page and on /privacy reopens it. The site works the same whatever the visitor picks. No advertising cookies or cross-site tracking today; the Meta Pixel is [COMING] after launch and can load only where the choice allows it. The banner is in English only at launch. It opens after the page has painted (about 1.5 seconds after the page loads, at the first touch, or at once from "Privacy choices"), so a first visit is the page itself; the country rule and any stored choice are read as the page loads, and PostHog starts at the same moment as the banner, so nothing is counted before the visitor could have seen the banner and a visit shorter than that without a touch is not counted. Nora's launcher on public pages appears about 3 seconds after load or at the first touch. A public page's first load does not carry the sign-in client, the banner or Nora (docs/reports/lighthouse-home-2026-10-22.md). Where a sign-up came from: the browser keeps the first and last campaign (utm fields), the first page and the referring site, and Kabsi saves them with the account at sign-up, on the server; a Meta click id (fbclid, fbc) only where the privacy choice allows advertising. A referral link (via=CODE) sets a first-party cookie, kabsi_via, for 60 days, the newest referral wins, and the code is saved with the account and the business at sign-up (disclosed on /privacy); Kabsi Partners itself is [COMING] after launch. Usage events go to PostHog through kabsi.co (kabsi.co/ingest) with ids, counts and channels only; access, drafts, approvals, publishing, decisions, payments and new accounts are sent by Kabsi's servers from its own records, never from the browser; the demo workspace and kabsi.co test accounts send nothing. No autocapture; no screen recording inside the app.
+
+### 9.6b Website protection
+
+kabsi.co sends HSTS, nosniff, a strict referrer policy and a permissions policy that turns off camera, microphone and location for the pages (choosing a photo from the phone still works); a content security policy runs in report-only mode, with reports to Kabsi's error tracker, and is enforced only after 14 clean days. App pages, email action pages and API answers are never cached. A Cloudflare Turnstile check, verified on the server, protects sign-up and login by email code, both free tools (the Profile Check and the review link and QR code), the contact form and the start of a chat with Nora for a visitor who is not signed in; the free tools also allow at most 10 requests a minute from one network. Vercel's bot protection watches kabsi.co. The check is invisible unless Cloudflare needs a click, and then a box with a check box appears in the form. If the check cannot finish within about 10 seconds, the form says "We could not check your browser. Try again." with a Try again link that runs it again. Likely question: "Why do I see a check box?" It is Cloudflare's check that you are a person; it does not track you.
+
+### 9.7 Retention
+
+The privacy page shows the 11 rows of the retention table (`retention_policies`, K-40) in plain words from `src/lib/retention.ts`; a test holds the page equal to the table. The table below adds the rows that follow other rules.
+
+| Data | Kept |
+|---|---|
+| Business data | While you use Kabsi; deleted 7 days after a deletion request |
+| Review text and reviewer names | At most 30 days after Google last sent them |
+| Rating history, quotes in reports sent before 4 October 2026 (newer reports carry none), decided Google Protection before/after values | 30 days |
+| Other Google profile details Kabsi reads (category and area, Google's answer to a change Kabsi sent) | 30 days |
+| Review ids, star ratings, dates, reply state and your own replies | While you use Kabsi |
+| Your own facts and approved values (About your business, the details you confirmed or told Google Protection to keep, approved posts and hours; earlier versions are kept as a history) | While you use Kabsi; deleted with the business. Deleting a fact in About your business removes it and its earlier versions at once |
+| Google's values of your details that you have not confirmed, and Google's side of a Google Protection change | 30 days after Kabsi read them; a change still waiting for your answer keeps them until it is answered or closed |
+| Photos you upload | The file as you sent it and Kabsi's cleaned copy are deleted 30 days after the photo is on Google, or soon after you skip it or Kabsi refuses the file; it then leaves the Photos list (it stays on Google). A video is deleted 30 days after it arrives |
+| Google data after access is removed | Deleted after 30 days unless access returns |
+| Assistant chats | 12 months after the last message |
+| Contact details given to the assistant | Until you ask us to remove them |
+| Email log | 12 months |
+| Record of approvals and changes | 24 months; the details of a deleted business are blanked, who did what and when stays |
+| WhatsApp chats with Kabsi's earlier number (before 22 Oct 2026) | No automatic deletion date was set; deleted when the person asks at hello@kabsi.co |
+| Internal job logs | 90 days |
+| Email action links | Expire after 72 hours, removed 30 days later |
+| Payment records | As long as tax and accounting law requires, unlinked from the business when it's deleted |
+| Review link and QR code opens | Kept without personal data, for counts |
+| Free tool abuse limits | 1 hour |
+| Google's public details for a business checked in the free Profile Check | 24 hours |
+| Email request for the free Profile Check, with the tips choice | Until you ask us to remove it |
+
+### 9.8 Your rights and deleting data
+
+- You can ask to see, correct, delete, get a copy of, or object to the use of your data. Most of it works in the app; otherwise email hello@kabsi.co from your account address, and Kabsi replies within 30 days. You can also complain to your local data protection authority.
+- **Delete a business:** Settings, Emails page, **Delete this business from Kabsi**, type the business name, **Delete in 7 days**. You get an email notice ("<Business>: leaves Kabsi on <date> unless you cancel"). Until the date, everything keeps working and you can tap **Cancel deletion**. Then Kabsi deletes reviews, drafts, posts, photos, reports and settings, deletes review links, unlinks NFC cards (they stop opening your page), and emails a confirmation. Payment records are kept where the law requires.
+- Also remove the Kabsi Clients group (ID 5481006796) from People and access. To delete your login too, or if you can't sign in, email hello@kabsi.co.
+- A reviewer asking about their review: hand off.
+
+### 9.8b About page and founder note
+
+The About page says who runs Kabsi (Kabsi is operated by Rashid Abou Hamzy, who is also the person responsible for data; Kabsi serves businesses in any country), why Kabsi exists, the meaning of the name, how to reach a person (hello@kabsi.co, or the free setup call), and that Kabsi is independent and not affiliated with, sponsored by or endorsed by Google. The homepage carries a short founder note signed Rashid Abou Hamzy, founder, with Kabsi's mark and no photo. It says he spent years running ads and online presence for local businesses, that unanswered reviews and out of date details on Google came up every time because the owner was busy running the business, that Kabsi takes that work off their hands and nothing goes public without their yes, and that if something is not right they can write to him at hello@kabsi.co. The footer, the terms and the privacy page carry the same operator line, and the terms say payments are processed by Creem, our merchant of record. There are no customer quotes, logos or counts on these pages; Kabsi has no published case study yet. The W4 video has its place on About and shows nothing until it exists.
+
+### 9.9 Security
+
+The security page opens with three facts (no password, ever; access you can remove; nothing posted without you), then says: what a Manager can do; that every reply, post, photo and change waits for your tap; that Kabsi gives no one else, partners included, a way to read or write your Google data; how to disconnect (Settings, **Disconnect Kabsi from Google**, or remove Kabsi Clients on Google; team removal within 7 business days if Google refuses); the written notice within 48 hours of any access change; sign-in by email code with no passwords; that Kabsi never asks for a Google password or code and stores no Google token of yours; email links (once, 72 hours, owner only); data in Frankfurt; that Kabsi's own Google account is protected with Google's Advanced Protection Program; Google data never sold, used for ads or used to train AI, read by people at Kabsi only with consent, for security or as the law requires.
+
+Sign-in by one-time email code, no passwords. If a sign-in is no longer accepted (it ended or was signed out on another device), the app covers the screen with "Your session ended. Sign in again." and one button to sign in; nothing is sent until you sign in, and no button that sends nothing stays on screen (live from 22 Oct 2026). Each business's data is separated at the database level; only its members, and Kabsi staff when helping, can read it. Email action links work once, expire after 72 hours, belong to the person they were sent to, are stored only as a hash and never act on opening. Profile changes, hours and reviews that need care also need that person signed in. Kabsi's Google access stays on Kabsi's servers. Data is encrypted in transit. Kabsi is for businesses and not meant for anyone under 18.
+
+---
+

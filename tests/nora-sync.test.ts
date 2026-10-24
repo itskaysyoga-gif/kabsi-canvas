@@ -14,9 +14,10 @@ import {
 } from "../scripts/nora-eval/nora-eval.ts";
 import { AMOUNTS, QUESTIONS } from "../scripts/nora-eval/questions.ts";
 import { noraRules } from "../supabase/functions/_shared/nora-rules.ts";
+import { readText } from "./helpers/facts";
 
-const facts = readFileSync("knowledge/kabsi-facts.md", "utf8");
-const llms = readFileSync("public/llms-full.txt", "utf8");
+const facts = readText("knowledge/kabsi-facts.md");
+const llms = readText("public/llms-full.txt");
 const section = (from: string, to: string) => {
   const a = facts.indexOf(from);
   const b = facts.indexOf(to, a + from.length);

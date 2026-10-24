@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { PLAN_PRICES, PLAN_PRICE_ROWS, PRICES_SENTENCE } from "../src/lib/site";
+import { readText } from "./helpers/facts";
 
 // The prices of lane R (22 Oct 2026), in US dollars: Essentials 19 a month or 190 a year, Pro 39 or 390, an extra
 // location 15 or 150. The earlier single Pro price (19 a month or 190 a year) is retired: it is now the Essentials price,
@@ -60,7 +61,7 @@ const OTHER_AMOUNTS: Record<string, string[]> = {
 describe("no retired price (lane R, 22 Oct 2026)", () => {
   it("nothing calls $19 a month or $190 a year the Pro price", () => {
     for (const f of READABLE) {
-      const text = readFileSync(f, "utf8");
+      const text = readText(f);
       expect(text, `${f}: Pro at the retired price`).not.toMatch(
         /\bPro\b[^.\n|]{0,40}\$(19|190)\b/,
       );
@@ -72,7 +73,7 @@ describe("no retired price (lane R, 22 Oct 2026)", () => {
   it("every dollar amount a reader can see is one of the six prices", () => {
     const allowed = new Set(Object.values(PLAN_PRICES).map((n) => `$${n}`));
     for (const f of READABLE.filter((p) => !/kabsi-facts|llms-full/.test(p))) {
-      const text = readFileSync(f, "utf8").replace(/\$\{[^}]*\}/g, "");
+      const text = readText(f).replace(/\$\{[^}]*\}/g, "");
       for (const m of text.matchAll(/\$(\d{2,}[\d,]*)/g)) {
         const amount = `$${m[1]}`;
         if (allowed.has(amount)) continue;
@@ -82,7 +83,7 @@ describe("no retired price (lane R, 22 Oct 2026)", () => {
   });
   it("the facts file and llms-full.txt quote the six prices and no other Pro price", () => {
     for (const f of ["knowledge/kabsi-facts.md", "public/llms-full.txt"]) {
-      const text = readFileSync(f, "utf8");
+      const text = readText(f);
       expect(text).toContain("Essentials is $19 a month or $190 a year");
       expect(text).toContain("Pro is $39 a month or $390 a year");
       expect(text).toContain("An extra location is $15 a month or $150 a year");

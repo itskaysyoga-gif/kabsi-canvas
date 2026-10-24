@@ -5,6 +5,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { FAQ } from "../src/lib/faq";
+import { readText } from "./helpers/facts";
 
 const RETIRED: RegExp[] = [
   /relevance,? distance,? and prominence/i,
@@ -31,7 +32,7 @@ describe("no line says what Google's ranking uses or rewards (K-144)", () => {
   });
   it("the facts file and the published full-facts file", () => {
     for (const file of ["knowledge/kabsi-facts.md", "public/llms-full.txt", "public/llms.txt"]) {
-      const text = readFileSync(file, "utf8");
+      const text = readText(file);
       for (const re of RETIRED) expect(text, `${file} ${re}`).not.toMatch(re);
     }
   });
@@ -45,7 +46,7 @@ describe("no line says what Google's ranking uses or rewards (K-144)", () => {
     }
   });
   it("still says Kabsi promises no ranking, and says what it does", () => {
-    const facts = readFileSync("knowledge/kabsi-facts.md", "utf8");
+    const facts = readText("knowledge/kabsi-facts.md");
     expect(facts).toMatch(
       /Nobody can promise a ranking, and we don't\. Kabsi does the parts you control/,
     );

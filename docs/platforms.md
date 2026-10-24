@@ -2,7 +2,7 @@
 
 Checked on 22 Oct 2026 through the Resend, Sentry, PostHog, UptimeRobot, Slack and Supabase connectors, DNS-over-HTTPS and
 the code. Each row says done, Rashid step, or not possible, and what shows it. Secret names and rotation dates are in
-`docs/secrets-inventory.md`; no value appears anywhere. The same table is in `docs/KABSI-PROGRESS.md`.
+`docs/secrets-inventory.md`; no value appears anywhere. The same table was in `docs/KABSI-PROGRESS.md` until the docs diet of 24 Oct 2026; its old text is `docs/progress/archive/` and `docs/SECRETS.md` wins.
 
 ## Where each platform stands
 

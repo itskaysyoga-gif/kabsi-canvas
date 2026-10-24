@@ -4,10 +4,11 @@ Kabsi looks after a local business's Google Business Profile: a reply ready for 
 
 ## Read first, in this order
 
-1. `docs/KABSI-PLAN.md` sections 1 (guardrails) and 2 (rules for every build chat), then the section for your task.
-2. `docs/KABSI-MASTERPLAN.md` (it wins over older plan text).
-3. `docs/KABSI-PROGRESS.md`.
-4. Only the decisions your task names, in `docs/source/` (KABSI-AUDIT K-01 to K-146, KABSI-GROWTH G-01 to G-47, KABSI-DESIGN, KABSI-VIDEO).
+1. `CLAUDE.md` (this file).
+2. `docs/KABSI-PLAN.md`, the plan index (under 40 KB): the guardrails list, section 2 (rules for every build chat) and the decision table with status. The full text of a guardrail, the task cards and everything else that used to be in the plan are in `docs/plan/archive/`; the index section "Where everything went" says which file.
+3. `docs/KABSI-MASTERPLAN.md`, the always-read core. Later sections win over earlier ones where they differ: 29 over 28 over 27 over everything older; an older section that a newer one replaces starts with a "Replaced by" or "Changed by" line.
+4. `docs/KABSI-PROGRESS.md`, the one-page status (under 10 KB) with the WhatsApp ladder. Its history is in `docs/progress/archive/`.
+5. Only what the task names: its card in `docs/plan/archive/`, and the decisions it names in `docs/source/` (KABSI-AUDIT K-01 to K-146, KABSI-GROWTH G-01 to G-47, KABSI-DESIGN, KABSI-VIDEO).
 
 One task per chat. The task ID comes from the prompt. Nothing else is in scope.
 
@@ -21,7 +22,7 @@ One task per chat. The task ID comes from the prompt. Nothing else is in scope.
 - No Arabic is shown anywhere public: website, marketing, ads, facts, llms files, guides, screenshots, Outbound (R-61).
 - Staff alerts go to WhatsApp, never Slack (R-64); existing Slack code stays until session 13b part 2 removes it.
 - Secrets never appear in code, commits, logs, pull requests or screenshots.
-- Every change that alters behaviour, price or wording updates `knowledge/kabsi-facts.md`.
+- Every change that alters behaviour, price or wording updates the facts: edit the numbered file in `knowledge/facts/`, then run `node scripts/build-kb.mjs`, which writes `knowledge/kabsi-facts.md`, `public/llms-full.txt` and `public/llms.txt` (never edit those three by hand). Team-only notes go in `knowledge/internal/` and never reach Nora or the site.
 - The Kabsi Google group ID lives only in `KABSI_GROUP_ID` in `src/lib/site.ts`. There is no Lebanon-only wording (K-123); country rules that the law or consent need go in `src/lib/region.ts` when a task adds them.
 
 ## Git and deploys

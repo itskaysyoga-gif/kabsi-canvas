@@ -1,13 +1,24 @@
-// Publishes the knowledge base (knowledge/kabsi-facts.md) as public/llms-full.txt: the full-facts file for AI
-// search (llmstxt.org) and the source the website assistant reads (K-104). Run after editing the KB:
-//   node scripts/build-kb.mjs
-import { readFileSync, writeFileSync } from "node:fs";
+// Builds the facts (master plan 27.12): knowledge/facts/*.md into knowledge/kabsi-facts.md, public/llms-full.txt and
+// public/llms.txt, through scripts/kb-lib.mjs. Run after editing anything in knowledge/facts/:
+//   node scripts/build-kb.mjs           write the three files
+//   node scripts/build-kb.mjs --check   exit 1 if a file is out of date (nothing is written)
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { buildAll } from "./kb-lib.mjs";
 
-const kb = readFileSync(new URL("../knowledge/kabsi-facts.md", import.meta.url), "utf8");
-if (/—/.test(kb))
-  throw new Error(
-    "The knowledge base contains an em dash (house rule: no em dashes). Remove it first.",
-  );
-const head = `# Kabsi: full facts\n\n> Kabsi looks after your business on Google: a reply ready for every new review, your hours and details kept right, a Weekly Care Report and fresh posts. The owner approves every change and nothing is published without it. Kabsi is independent and not affiliated with Google. Short version: https://kabsi.co/llms.txt\n\n`;
-writeFileSync(new URL("../public/llms-full.txt", import.meta.url), head + kb.trim() + "\n");
-console.log(`public/llms-full.txt: ${kb.split(/\s+/).length} words`);
+const check = process.argv.includes("--check");
+const outputs = buildAll();
+let stale = 0;
+for (const [path, text] of Object.entries(outputs)) {
+  const url = new URL(`../${path}`, import.meta.url);
+  const current = existsSync(url) ? readFileSync(url, "utf8") : null;
+  if (check) {
+    if (current !== text) {
+      stale += 1;
+      console.error(`${path} is out of date: run node scripts/build-kb.mjs`);
+    }
+  } else {
+    writeFileSync(url, text);
+    console.log(`${path}: ${text.split(/\s+/).length} words`);
+  }
+}
+if (check && stale) process.exit(1);
