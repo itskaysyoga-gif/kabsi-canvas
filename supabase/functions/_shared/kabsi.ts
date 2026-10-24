@@ -2,6 +2,7 @@
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
 import { unsubscribeHeaders } from "./email/unsubscribe.ts";
 import { carriesUser } from "./jwt-user.ts";
+import { RELEASE } from "./release.ts";
 
 export const APP_URL = Deno.env.get("APP_URL") ?? "https://kabsi.co";
 const SENTRY_DSN = Deno.env.get("SENTRY_DSN_EDGE") ??
@@ -109,9 +110,10 @@ export async function captureError(fn: string, error: unknown, extra: Record<str
     const eventId = crypto.randomUUID().replace(/-/g, "");
     const event = {
       event_id: eventId, timestamp: Date.now() / 1000, platform: "javascript", level: "error",
-      // P0.6-08 (K-118): Supabase names every deploy of a function in DENO_DEPLOYMENT_ID, so an error names its version.
+      // P0.6-08 (K-118), Ops 1 part B (29.9): the release is the commit deploy.yml built (release.ts); before that file is
+      // stamped, Supabase's own DENO_DEPLOYMENT_ID still names the version.
       environment: Deno.env.get("KABSI_ENV") ?? "production", server_name: fn, tags: { function: fn },
-      release: Deno.env.get("DENO_DEPLOYMENT_ID") ?? undefined,
+      release: RELEASE !== "dev" ? RELEASE : Deno.env.get("DENO_DEPLOYMENT_ID") ?? undefined,
       exception: { values: [{ type: err.name, value: safeMessage, stacktrace: { frames: parseStack(err.stack) } }] },
       extra: scrub(extra),
     };
@@ -143,6 +145,9 @@ export { emailButton, emailLink, esc } from "./email-layout.ts";
 
 // The From address lives in app_settings.email_from (migration 016), so switching sender is one SQL update.
 // Two sending subdomains (G-22, R-03): send.kabsi.co for account and product mail, news.kabsi.co for lifecycle mail.
+// Master plan 30.4: Kabsi's own product mail goes from "Kabsi <hello@send.kabsi.co>" with Reply-To hello@kabsi.co (below),
+// so the root domain keeps its reputation for people's own mail. app_settings.email_from must hold the same address
+// (migration 20261024215145); the value there wins over the fallback in this constant.
 const FROM = { send: { key: "email_from", fallback: "Kabsi <hello@send.kabsi.co>" }, news: { key: "email_from_news", fallback: "Kabsi <hello@news.kabsi.co>" } } as const;
 export type Stream = keyof typeof FROM;
 const fromCache = new Map<Stream, { value: string; at: number }>();

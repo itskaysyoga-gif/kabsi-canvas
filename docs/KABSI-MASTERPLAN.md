@@ -200,9 +200,10 @@ Built by session Ops 1 (Sonnet), part A on 23 Oct and part B in wave 3. Its area
 
 ### 19.1 Backups and restores
 - Supabase Pro before the first paying customer (daily backups, 7 days kept).
-- Weekly database dump by a GitHub Action, encrypted with an age public key in the repo (Rashid keeps the private key offline, printed and in his password manager), stored in a private Cloudflare R2 bucket, 8 weeks kept. Storage photos copied weekly to the same bucket.
-- Weekly git bundle of kabsi-canvas (and kabsi-outbound later) to the same bucket, because Kabsi has one GitHub account and an earlier account was banned.
-- A restore drill once a month: the newest dump into a scratch database and the newest bundle cloned; the result goes in the daily staff summary. Gate: no paying customer before one drill passes.
+- *Changed by Ops 1 part B (24 Oct 2026): backups are encrypted with a passphrase (age, scrypt mode), stored as the GitHub secret BACKUP_PASSPHRASE, which Rashid types and keeps in his password manager and on paper. No key lives in the repo. Files: .github/workflows/backup.yml and restore-drill.yml, scripts/backup/.*
+- Weekly database dump by a GitHub Action (pg_dump through the GitHub secret SUPABASE_DB_URL), encrypted with age in passphrase mode (BACKUP_PASSPHRASE), stored in the private Cloudflare R2 bucket kabsi-backups, 8 weeks kept. Storage photos copied weekly to the same bucket, encrypted the same way.
+- Weekly git bundle of kabsi-canvas (and kabsi-outbound later) to the same bucket, because Kabsi has one GitHub account and an earlier account was banned. The bundle is encrypted the same way.
+- A restore drill once a month: the newest dump is decrypted into a scratch Postgres in the runner and its row counts checked, the newest bundle is cloned, and the result is written where the daily staff summary reads it (app_settings backup_drill plus an ops event). Gate: no paying customer before one drill passes.
 
 ### 19.2 No single point of failure
 - Google access: owners add only the Kabsi group (KABSI_GROUP_ID). The group gets a second Kabsi-owned Google account as a member, both with 2-step verification, so losing one account does not cut off every business.

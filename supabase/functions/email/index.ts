@@ -7,12 +7,16 @@
 //   POST /email/webhook               Resend's bounce, complaint and delivery events, signed with Svix
 //                                     (RESEND_WEBHOOK_SECRET). A permanent bounce or a complaint puts the address on the
 //                                     one suppression list, and the outbox never mails it again.
-//   POST /email/test                  internal (x-cron-secret): sends one of each email type to hello@kabsi.co only,
-//                                     never to anyone else, so a person can read them in a real inbox (P0.4-08).
+//   POST /email/test                  internal (x-cron-secret): sends one of each email type to hello@kabsi.co, or to the one
+//                                     address in the body's `to` if _shared/email/test-recipient.ts allows it (a
+//                                     mail-tester.com address, or one listed for the inbox test in
+//                                     app_settings.email_test_recipients), so a person can read them in a real inbox
+//                                     (P0.4-08, master plan 30.4). Never to anyone else.
 import { admin, captureError, CORS, internalSecret, isInternal, json, log } from "../_shared/kabsi.ts";
 import { verifyUnsubscribe } from "../_shared/email/unsubscribe.ts";
 import { readEvent, verifySvix } from "../_shared/email/webhook.ts";
 import { categoryOf } from "../_shared/notify-categories.ts";
+import { isAllowedTestRecipient, TEST_HOME } from "../_shared/email/test-recipient.ts";
 
 const FN = "email";
 async function unsubscribe(req: Request, url: URL) {
@@ -66,8 +70,13 @@ Deno.serve(async (req) => {
     if (route === "test" && req.method === "POST") {
       if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
       const { sendCatalogTo } = await import("../_shared/email/catalog-send.ts");
-      const body = await req.json().catch(() => ({})) as { only?: unknown };
-      return json({ ok: true, sent: await sendCatalogTo("hello@kabsi.co", typeof body.only === "string" && /^[a-z_]{1,30}$/.test(body.only) ? body.only : undefined) });
+      const body = await req.json().catch(() => ({})) as { only?: unknown; to?: unknown };
+      const to = typeof body.to === "string" && body.to.trim() ? body.to.trim().toLowerCase() : TEST_HOME;
+      if (to !== TEST_HOME) {
+        const { data: listed } = await admin().from("app_settings").select("value").eq("key", "email_test_recipients").maybeSingle();
+        if (!isAllowedTestRecipient(to, String(listed?.value ?? ""))) return json({ error: "recipient_not_allowed" }, 400);
+      }
+      return json({ ok: true, to, sent: await sendCatalogTo(to, typeof body.only === "string" && /^[a-z_]{1,30}$/.test(body.only) ? body.only : undefined) });
     }
     return json({ error: "not_found" }, 404);
   } catch (e) {

@@ -88,7 +88,7 @@ These are the standing rules for every build chat. The list below gives each gua
 
 Run what applies and paste the result in the pull request:
 
-- `npm install --registry=https://registry.npmjs.org --legacy-peer-deps`, then `npm run typecheck`, `npm run lint:changed`, `npm test`, `npm run build`.
+- `npm ci --registry=https://registry.npmjs.org --legacy-peer-deps` (the lockfile is committed since Ops 1 part B; use `npm install` only to change a dependency, and commit the lockfile with it), then `npm run typecheck`, `npm run lint:changed`, `npm test`, `npm run build`.
 - `bash scripts/deno-check.sh` when Edge Functions changed.
 - The database test suite once task P0.1-07 exists (`supabase test db` in CI).
 - For screens: check 390 px and 1440 px. If no browser is available in the session, say so in PROGRESS; never claim a visual check you did not do.
@@ -327,4 +327,4 @@ The task cards (what each card does, its "Done when" checks and its prompt) are 
 | 17. Appendix A, system reference | `sec-17-appendix-a-system-reference.md` |
 | 18. Appendix B, decisions carried forward | `sec-18-appendix-b-carried-forward.md` |
 
-Other places: `docs/KABSI-MASTERPLAN.md` (the core), `docs/KABSI-PROGRESS.md` (status), `docs/progress/archive/` (progress history), `docs/source/` (the source decisions K-01 to K-146, G-01 to G-47, design and video), `knowledge/facts/` and `knowledge/internal/` (the facts, section 2.2 of the rules above), `.claude/skills/` (build skills).
+Other places: `docs/KABSI-MASTERPLAN.md` (the core), `docs/KABSI-PROGRESS.md` (status), `docs/progress/archive/` (progress history), `docs/source/` (the source decisions K-01 to K-146, G-01 to G-47, design and video), `knowledge/facts/` and `knowledge/internal/` (the facts, section 2.2 of the rules above), `.claude/skills/` (build skills), `docs/RUNBOOK.md` (one printable page per failure), `docs/OPS-SETUP.md` (Rashid's once-only clicks), `docs/SECRETS.md` (every secret and setting by name), `docs/hosting.md` (installs, versions, upgrades).

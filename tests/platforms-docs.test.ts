@@ -1,10 +1,11 @@
-// P0.6-08 (K-87, K-118): the secrets inventory lists every secret the code reads, by name only, and the platform check holds
-// no value. A new secret read by a function fails this test until it is listed in docs/secrets-inventory.md.
+// P0.6-08 (K-87, K-118): the secrets list holds every secret the code reads, by name only, and the platform check holds
+// no value. A new secret read by a function fails this test until it is listed in docs/SECRETS.md (Ops 1 part B merged
+// the old docs/secrets-inventory.md into it).
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const inventory = readFileSync("docs/secrets-inventory.md", "utf8");
+const inventory = readFileSync("docs/SECRETS.md", "utf8");
 const platforms = readFileSync("docs/platforms.md", "utf8");
 
 function files(dir: string, out: string[] = []): string[] {
@@ -16,7 +17,7 @@ function files(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-describe("the secrets inventory", () => {
+describe("the secrets list (docs/SECRETS.md)", () => {
   it("lists every name the Edge Functions and the Worker read from the environment", () => {
     const names = new Set<string>();
     for (const f of [...files("supabase/functions"), ...files("workers/kabsi-go/src")]) {
@@ -46,10 +47,30 @@ describe("the secrets inventory", () => {
     }
   });
 
-  it("gives every row a place it lives and a due date", () => {
+  it("gives every row what it opens, a place it lives, who uses it, a rotation and a date", () => {
     const rows = inventory.split("\n").filter((l) => l.startsWith("| `") || l.startsWith("| Cron"));
-    expect(rows.length).toBeGreaterThan(15);
+    expect(rows.length).toBeGreaterThan(40);
     for (const r of rows) expect(r.split("|").filter((c) => c.trim()).length, r).toBe(6);
+  });
+
+  it("names the planned and the backup secrets", () => {
+    for (const n of [
+      "DATAFORSEO_LOGIN",
+      "DATAFORSEO_PASSWORD",
+      "GEMINI_API_KEY",
+      "GEOAPIFY_API_KEY",
+      "META_PIXEL_ID",
+      "META_CAPI_TOKEN",
+      "VITE_META_PIXEL_ID",
+      "ELEVENLABS_API_KEY",
+      "BACKUP_PASSPHRASE",
+      "SUPABASE_DB_URL",
+      "R2_ACCOUNT_ID",
+      "R2_ACCESS_KEY_ID",
+      "R2_SECRET_ACCESS_KEY",
+      "SENTRY_AUTH_TOKEN",
+    ])
+      expect(inventory, n).toContain(`\`${n}\``);
   });
 
   it("uses no em dashes, en dashes or exclamation marks", () => {

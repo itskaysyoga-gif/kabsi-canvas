@@ -2,7 +2,7 @@
 
 Checked on 22 Oct 2026 through the Resend, Sentry, PostHog, UptimeRobot, Slack and Supabase connectors, DNS-over-HTTPS and
 the code. Each row says done, Rashid step, or not possible, and what shows it. Secret names and rotation dates are in
-`docs/secrets-inventory.md`; no value appears anywhere. The same table was in `docs/KABSI-PROGRESS.md` until the docs diet of 24 Oct 2026; its old text is `docs/progress/archive/` and `docs/SECRETS.md` wins.
+`docs/SECRETS.md`; no value appears anywhere. The same table was in `docs/KABSI-PROGRESS.md` until the docs diet of 24 Oct 2026; its old text is in `docs/progress/archive/`.
 
 ## Where each platform stands
 
@@ -11,12 +11,15 @@ the code. Each row says done, Rashid step, or not possible, and what shows it. S
 | Resend | Sending domains verified | Done for the two that exist | `list-domains`: `kabsi.co` and `send.kabsi.co` both verified, sending on, eu-west-1. The split of K-118 (a marketing subdomain `news.kabsi.co`) does not exist: Rashid step A1 |
 | Resend | DMARC `p=none` with reports | Done | TXT `_dmarc.kabsi.co` = `v=DMARC1; p=none; rua=mailto:hello@kabsi.co` (DNS-over-HTTPS); it covers `send.kabsi.co` by inheritance |
 | Resend | Google Postmaster Tools for both domains | Rashid step A2 | Needs a Google sign-in as hello@kabsi.co; no connector |
-| Resend | Bounce and complaint webhook from P0.4-08 | Rashid step A3 | The handler is live (`email/webhook`, Svix-signed, secret name `RESEND_WEBHOOK_SECRET`) but `list-webhooks` finds 0 webhooks. The session tried to create it and the permission check refused, so it was left undone |
+| Resend | Bounce and complaint webhook from P0.4-08 | Done (24 Oct 2026) | Webhook created in Resend on 24 Oct 2026 (endpoint `email/webhook`, events bounced, complained, delivered). A test email to `bounced@resend.dev` from `hello@send.kabsi.co` put `bounced@resend.dev` on `email_suppressions` with reason bounce within seconds, so the signing secret is saved and the signature check passes. That test row was left in place |
 | Resend | Reply-to hello@kabsi.co | Done | `supabase/functions/_shared/kabsi.ts` sets `reply_to` to hello@kabsi.co unless a person's address is given |
+| Resend | Sender is `Kabsi <hello@send.kabsi.co>` (master plan 30.4) | Done (24 Oct 2026) | `app_settings.email_from` held `Kabsi <hello@kabsi.co>`, which overrode the constant in `_shared/kabsi.ts`; migration `20261024215145_email_from_send_subdomain.sql` set it to the send subdomain. Inbox test results are in `docs/progress/archive/2026-10-24-ops-1-part-b.md` |
 | Sentry | Web and Edge Functions send errors | Done | projects `kabsi-web`, `kabsi-edge`, `kabsi-go` exist; open issues listed |
-| Sentry | Release tags on web and functions | Done in this pull request, live after the deploy | web: `release` = the commit Vercel builds (`vite.config.ts`, `src/lib/telemetry.ts`); functions: `release` = `DENO_DEPLOYMENT_ID` (`_shared/kabsi.ts`). Check a new issue shows a release after the deploy |
+| Sentry | Release tags on web and functions | Done (Ops 1 part B, 24 Oct 2026), live after the deploy | web: `release` = the commit Vercel builds (`vite.config.ts`, `src/lib/telemetry.ts`); functions: `release` = the commit `deploy.yml` stamps into `_shared/release.ts` (`_shared/kabsi.ts`), `DENO_DEPLOYMENT_ID` until then; `tests/sentry-release.test.ts` keeps the wiring. Check a new issue shows the commit as its release |
+| Sentry | Source maps from the Vercel build | Built; needs Rashid step in `docs/OPS-SETUP.md` (5) | `scripts/sentry-sourcemaps.mjs` uploads hidden maps from a production build when `SENTRY_AUTH_TOKEN` is set in Vercel; none is set yet (only the two `VITE_SUPABASE_*` names exist) |
 | Sentry | Personal data scrubbing | Done | web `sendDefaultPii: false`, user reduced to an id, cookies and `X-Forwarded-For` removed, `/a/<token>` and `?t=` scrubbed (`telemetry.ts`); functions scrub keys and emails (`captureError`) |
 | Sentry | Alerts to Slack for new errors | Done another way | Sentry's Slack integration needs the Team plan (D265, `get_alert_options` for Slack returns none), so the `slack` function polls Sentry every 10 minutes and posts each new issue once to #kabsi-alerts |
+| Sentry | Alert rules to hello@kabsi.co | Needs Rashid step in `docs/OPS-SETUP.md` (6) | Three "high priority issues" rules email issue owners or active members (kabsi-web, kabsi-edge, kabsi-go). The only member is a personal Gmail, so hello@kabsi.co receives nothing until it is invited as a member; the rules are then pointed at it |
 | Sentry | Alerts for error spikes | Not possible on this plan | Only the default "high priority issues" rules exist; spike alerts to Slack need the integration. Rashid step B1 if he upgrades |
 | Sentry | Alerts for failed publications | Partly | A failed Google write is captured as an error and reaches #kabsi-alerts through the polling above; there is no separate rule |
 | PostHog | Data region recorded in the privacy page | Done | Kabsi's PostHog project uses the US region (`us.posthog.com`, `vercel.json` rewrites `/ingest` to the US hosts); the facts file and `/privacy` say United States |
@@ -30,7 +33,7 @@ the code. Each row says done, Rashid step, or not possible, and what shows it. S
 | UptimeRobot | The app, the Creem and Meta webhook endpoints | The app is a step; the others cannot exist yet | Monitor `https://kabsi.co/login` (the app's front door). The Creem webhook is built with P0.4-07 and the Meta endpoint with P0.6-03 (after launch); add them then |
 | UptimeRobot | Public status page at `status.kabsi.co` | Rashid step D2 | `list-psps`: none. `status.kabsi.co` has no DNS record. A status page on a custom domain is a paid UptimeRobot feature and needs a CNAME in Cloudflare |
 | Slack | Map the six channels to K-118's alerts | Done below | See the mapping; five of the six carry events today |
-| Secrets | Inventory at `docs/secrets-inventory.md` | Done | Names, where each lives, who reads it; last-set dates "Not recorded" until Rashid enters them |
+| Secrets | List at `docs/SECRETS.md` | Done | Names, where each lives, who reads it; last-set dates "Not recorded" until Rashid enters them |
 | All | Second trusted admin on each platform | Rashid step E1 | No connector can add a person to Supabase, Vercel, Cloudflare, Resend, Sentry, PostHog, Slack, Creem, Meta or Google Cloud |
 
 ## Slack channels (K-118 against what exists)
@@ -48,10 +51,10 @@ the code. Each row says done, Rashid step, or not possible, and what shows it. S
 
 - **A1 Resend marketing subdomain.** Resend, Domains, Add domain `news.kabsi.co`, region eu-west-1; add the records it shows in Cloudflare; Verify. The lifecycle win-back emails stay off until it is verified.
 - **A2 Postmaster Tools.** Sign in to postmaster.google.com as hello@kabsi.co, add `kabsi.co` and `send.kabsi.co` (and `news.kabsi.co` when it exists), add the TXT record in Cloudflare, verify.
-- **A3 Resend webhook.** Resend, Webhooks, Add webhook: endpoint `https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/email/webhook`, events `email.delivered`, `email.bounced`, `email.complained`. Copy the signing secret into Supabase, Edge Function secrets, name `RESEND_WEBHOOK_SECRET` (never into the chat). Then send one email to `bounced@resend.dev` and check the address lands on the suppression list.
+- **A3 Resend webhook (done 24 Oct 2026).** Resend, Webhooks, Add webhook: endpoint `https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/email/webhook`, events `email.delivered`, `email.bounced`, `email.complained`. Copy the signing secret into Supabase, Edge Function secrets, name `RESEND_WEBHOOK_SECRET` (never into the chat). Then send one email to `bounced@resend.dev` and check the address lands on the suppression list.
 - **B1 Sentry spikes (optional).** Only with Sentry's Team plan: install the Slack integration and add an alert for "number of events above 20 in 5 minutes" to #kabsi-alerts. Until then new errors arrive by polling.
 - **C1 PostHog.** Project settings, Session replay: switch it off if you will not use it; the website code already keeps it off in the app.
 - **D1 UptimeRobot account.** Sign up at uptimerobot.com with hello@kabsi.co and two-factor sign-in, then create these monitors (HTTP, expect 200, alert contact hello@kabsi.co): `https://kabsi.co`, `https://kabsi.co/login`, `https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/health/queue`, `https://go.kabsi.co/_check`. Use a 1-minute interval if the plan allows, otherwise 5 minutes. The old account can then be closed.
 - **D2 Status page.** In the new UptimeRobot account, Status pages, New: add the four monitors; for `status.kabsi.co` choose Custom domain (a paid feature), then add the CNAME it shows in Cloudflare, DNS only. Link it in the footer afterwards (a later change).
 - **E1 Second admins.** On each of Supabase, Vercel, GitHub, Cloudflare, Resend, Sentry, PostHog, Slack, Creem, Meta and Google Cloud add one trusted person with two-factor sign-in, and tick it off in PROGRESS.
-- **E2 Rotation dates.** When you next rotate a secret, write the date in `docs/secrets-inventory.md`.
+- **E2 Rotation dates.** When you next rotate a secret, write the date in `docs/SECRETS.md`.

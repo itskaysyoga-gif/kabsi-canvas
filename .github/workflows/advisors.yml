@@ -1,0 +1,32 @@
+name: Supabase advisors
+
+# Ops 1 part B (master plan 19.3). Every Monday: read the Supabase security advisors; a finding Kabsi has not seen
+# before becomes one ops event on the alerts channel (scripts/ops/advisors.mjs). Uses SUPABASE_ACCESS_TOKEN, which
+# deploy.yml already uses. The first run only records the findings open today.
+
+on:
+  schedule:
+    - cron: "7 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: advisors
+  cancel-in-progress: false
+
+jobs:
+  advisors:
+    name: Security advisors (new findings become ops events)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Check the advisors
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: node scripts/ops/advisors.mjs

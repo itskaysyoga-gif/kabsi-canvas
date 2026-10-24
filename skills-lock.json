@@ -25,6 +25,12 @@
       "skillPath": "skills/observe-whatsapp/SKILL.md",
       "computedHash": "dc07c781277bf04e692fb6eb80e52cfb7d11b77a17f63dfec07670ca79dedd47"
     },
+    "skill-creator": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/skill-creator/SKILL.md",
+      "computedHash": "b2bfe91d69ca99994c0566baede889e7d2b9bb8791c6b6106c5d387392f717f6"
+    },
     "supabase": {
       "source": "supabase/agent-skills",
       "sourceType": "github",

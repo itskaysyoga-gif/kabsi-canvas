@@ -28,7 +28,7 @@ export const Route = createFileRoute("/privacy")({
   component: Page,
 });
 
-const UPDATED = "21 October 2026";
+const UPDATED = "24 October 2026";
 
 // K-113.6, word for word. Set as raw HTML so the apostrophe stays a plain ' in the page source.
 const LIMITED_USE =
@@ -41,7 +41,8 @@ function Page() {
         <p>
           This policy explains what Kabsi collects, why, who helps us process it, how long we keep
           it and what you can ask us to do. It covers the website, the Kabsi app, emails from Kabsi,
-          the free review link tool, and Kabsi review links, QR codes and cards.
+          the free review link tool, Kabsi review links, QR codes and cards, WhatsApp messages with
+          Kabsi, and the Kabsi Partners program.
         </p>
       </section>
 
@@ -135,6 +136,26 @@ function Page() {
             ? "If you ask for the check on WhatsApp, we use your number once to send one message and keep only a one-way hash of it, the Google Place ID, the words next to the tick, the page, the time and whether the message was sent, as proof of your choice. We do not message you again unless you ask. "
             : ""}
           The check uses public information only and never your Business Profile.
+        </p>
+        <p>
+          <b>From launch, if Kabsi checks where your business shows:</b> your business name,
+          category, address and the keywords you confirm are sent to DataForSEO, which looks up
+          Google Maps results around your business and what AI assistants answer, and to Google's
+          Gemini API for the same AI answer checks. Geoapify receives map points (coordinates) to
+          draw the map image. We keep the results: your rank at each point on the map, the AI
+          answers (shown as samples, because they change from run to run) and the public details of
+          the competitors you pick: name, rating, number of reviews, category and new reviews a
+          month. No review text and no personal details of your customers are sent for this. These
+          results are kept apart from the numbers Google gives us about your own profile.
+        </p>
+        <p>
+          <b>From launch, if you apply to Kabsi Partners:</b> your name and email, country and city,
+          what you do, where you will share Kabsi and roughly how many local owners that reaches,
+          one line on how you will recommend it, your advertiser permit number if you give one, your
+          WhatsApp number, and the time you accepted the partner terms. When you choose how to be
+          paid, your payout details are kept encrypted in our database vault and shown only as the
+          last 4 characters. We also keep the visits, scans, trials and payments that came through
+          your partner link or code, so we can pay you correctly.
         </p>
         <p>
           <b>If you write to us through a form:</b> what you enter (for example name, email,
@@ -238,8 +259,14 @@ function Page() {
         <ul>
           <li>
             Review text and your business facts are sent to Anthropic's API to draft replies and
-            posts, and photos to check they suit Google. Anthropic does not use this data to train
-            its models.
+            posts. Anthropic does not use this data to train its models. Photos are checked by
+            Kabsi's own code and are not sent to an AI model.
+          </li>
+          <li>
+            From launch, to see what AI assistants say about your business, Kabsi sends questions in
+            your customers' words that name your category and area (for example "best dentist in
+            Jumeirah") to DataForSEO and to Google's Gemini API. The answers change from run to run,
+            so Kabsi shows them as a sample and never as a promise.
           </li>
           <li>
             For posts, Kabsi may also use your category and area, phrases from your reviews and,
@@ -256,9 +283,20 @@ function Page() {
 
       <section>
         <h2>6. Who helps us (processors)</h2>
+        <p>
+          "From launch" marks a company that starts handling data when the feature that uses it is
+          switched on. We list it now so this page is complete before that day.
+        </p>
         <ul>
           <li>Supabase: database, sign-in and file storage, in Frankfurt, Germany.</li>
-          <li>Cloudflare: card and review links (go.kabsi.co) and the bot check on our forms.</li>
+          <li>
+            Cloudflare: card and review links (go.kabsi.co), the bot check on our forms, and R2,
+            where our encrypted backups are kept.
+          </li>
+          <li>
+            GitHub: keeps our code and runs the weekly backup. The backup is encrypted before it
+            leaves that job, with a passphrase only Kabsi holds.
+          </li>
           <li>Vercel: hosting the website and app.</li>
           <li>
             Creem: card payments. Creem is our merchant of record and receives what it needs to take
@@ -266,10 +304,27 @@ function Page() {
           </li>
           <li>Resend: sending email, through Amazon's EU (Ireland) region.</li>
           <li>
-            Anthropic: drafting replies and posts and checking photos. Review text and your business
-            facts reach Anthropic only for this.
+            Anthropic: drafting replies and posts. Review text and your business facts reach
+            Anthropic only for this.
           </li>
           <li>Google: the Business Profile and Places APIs.</li>
+          <li>
+            From launch, Google's Gemini API: checking what AI assistants answer about a business
+            (section 5).
+          </li>
+          <li>
+            From launch, DataForSEO: Google Maps results and AI answers for the keywords you confirm
+            (sections 2 and 5).
+          </li>
+          <li>From launch, Geoapify: the map pictures, from map points only.</li>
+          <li>
+            From launch, Meta, for the Meta Pixel and the Conversions API: measuring which of our
+            ads bring owners (section 7).
+          </li>
+          <li>
+            PayPal: only if you are a Kabsi Partner and choose it to be paid. Partners paid in USDT
+            or USDC are paid from Kabsi's own wallet and no company receives your data.
+          </li>
           <li>
             Sentry: error reports, EU region, without IP addresses, review content or Google data.
           </li>
@@ -280,6 +335,10 @@ function Page() {
               <li>
                 Kapso: the messaging service that holds the chat for {WHATSAPP_NUMBER}, where our
                 team reads and answers your WhatsApp messages (section 14).
+              </li>
+              <li>
+                From launch, a speech to text provider (ElevenLabs or OpenAI; this page names the
+                one in use) that turns a WhatsApp voice note into text (section 14).
               </li>
               <li>
                 Meta: runs WhatsApp, which carries the messages between you and the Kabsi WhatsApp
@@ -336,10 +395,18 @@ function Page() {
             servers. Nothing is sent for the demo workspace.
           </li>
           <li>
-            Advertising: we use no advertising cookies today and don't track you on other sites. If
-            we add Meta&apos;s ad measurement later, it loads only where your choice allows it:
-            after a yes in the UK, the EU and EEA, the UAE and Saudi Arabia, and with notice and an
-            opt-out elsewhere.
+            Advertising: we use no advertising cookies today and don't track you on other sites.
+            From launch, the Meta Pixel runs on our public pages only, never inside the app, the
+            sign-up screens, the staff pages or the links in our emails. It sees page views and a
+            few steps: the pricing page, a finished free scan, a sign-up, a trial and a plan bought.
+            For a trial or a plan, Kabsi also tells Meta from its own servers (the Conversions API),
+            with your email and phone number scrambled by a one-way hash as Meta requires. If you
+            came from a Click to WhatsApp ad, Kabsi sends Meta the click id of that chat, so the ads
+            learn which ones bring paying owners. In the EU, the UK and Switzerland a small bar at
+            the bottom asks once, Yes or No thanks, and nothing for ads loads before a yes.
+            Elsewhere there is no pop-up, and Privacy choices has one switch, "Let Kabsi measure its
+            ads", on or off. Your answer is remembered for 12 months. Kabsi does not sell your data
+            to Meta or anyone else.
           </li>
           <li>
             You can change your choice any time with{" "}
@@ -357,6 +424,14 @@ function Page() {
           No agency or partner sees your business in Kabsi unless you invite them to your team in
           Settings, Team. They then see and do only what their role allows. Kabsi has no partner
           workspaces and no partner who can see your reviews, drafts, replies, photos or reports.
+        </p>
+        <p>
+          Kabsi Partners are different: they recommend Kabsi and are paid a share of what the
+          businesses they bring pay. A partner sees the trade and area of a business that joined
+          through their link, and counts of visits, scans, trials and payments, never its name, its
+          reviews or its data. The one exception is a business that says yes, once, to "Can we tell
+          Sara you joined?". A cancelled trial shows to the partner only as a count. The rules
+          partners agree to are on the <Link to="/partners/terms">partner terms</Link>.
         </p>
       </section>
 
@@ -397,6 +472,21 @@ function Page() {
               stay in the Kapso inbox until you ask us to delete them (section 14).
             </li>
           ) : null}
+          <li>
+            Visibility and AI answer results, and the competitors you pick (from launch): while you
+            use Kabsi, and deleted with the business.
+          </li>
+          <li>
+            WhatsApp voice notes (from launch): the audio is deleted as soon as it has been turned
+            into text. We keep only the text, like any other message. Notes over 10 MB or 3 minutes
+            are refused and never stored.
+          </li>
+          <li>
+            Backups: encrypted copies of the database, the photos and our code are kept for 8 weeks
+            in Cloudflare R2, then deleted. Supabase also keeps its own short-lived backups. A
+            business you delete stays in older backups until they expire, at most 8 weeks, and is
+            never restored into the live service afterwards.
+          </li>
           <li>Internal job logs: 90 days.</li>
           <li>
             Email action links: they work once, expire after 72 hours and are removed 30 days after
@@ -426,8 +516,10 @@ function Page() {
           You can ask to see the personal data we hold about you, correct it, delete it, receive a
           copy in a common format, or object to how we use it. You can do most of this in the app.
           For anything else, email {CONTACT_EMAIL} from the address on your account and we reply
-          within 30 days. If you think we got something wrong, you can also complain to the data
-          protection authority where you live.
+          within 30 days. To get a copy of your data, ask by email: we send you a file you can open
+          in a spreadsheet or a browser within 30 days, covering your business, your reviews and
+          replies, your posts, your settings and your messages with us. If you think we got
+          something wrong, you can also complain to the data protection authority where you live.
         </p>
         <p>
           If you left a review for a business that uses Kabsi and have a question about it, contact
@@ -440,9 +532,10 @@ function Page() {
         <p>
           In Settings, choose <b>Delete this business</b> (you have 7 days to change your mind), or
           email {CONTACT_EMAIL} from your account email. We delete the business's reviews, drafts,
-          posts, photos, reports and settings, and confirm by email. To stop Kabsi reaching your
-          Google profile, disconnect Kabsi as described in section 4. To delete your login as well,
-          say so in your email.
+          posts, photos, reports and settings, and confirm by email. Older backups hold a copy until
+          they expire, at most 8 weeks later (section 9). To stop Kabsi reaching your Google
+          profile, disconnect Kabsi as described in section 4. To delete your login as well, say so
+          in your email.
         </p>
       </section>
 
@@ -494,6 +587,14 @@ function Page() {
               messages; Nora on WhatsApp is not available yet.
             </p>
             <p>
+              <b>Voice notes.</b> You can send Kabsi a voice note instead of typing. From launch,
+              the audio goes to a speech to text provider (section 6) only to be turned into text.
+              We delete the audio as soon as the text is ready and keep only the text, which Kabsi
+              then treats like any message you typed. Please keep a voice note under 3 minutes and
+              10 MB; longer ones are refused. Kabsi never uses a voice note to train AI models or to
+              copy your voice.
+            </p>
+            <p>
               <b>Who handles it.</b> Kapso provides the messaging service and the inbox where our
               team reads and replies. Meta runs WhatsApp and carries the messages. Both process the
               messages to deliver them, and Kapso also holds the chat for us. Kabsi keeps a record
@@ -519,6 +620,11 @@ function Page() {
             account and we tell you when it is done.
           </p>
         )}
+        <p>
+          When Kabsi has a WhatsApp number, you can also send a voice note. The audio is turned into
+          text by a speech to text provider, deleted as soon as the text is ready, and only the text
+          is kept.
+        </p>
       </section>
 
       <section>

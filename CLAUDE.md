@@ -29,5 +29,18 @@ One task per chat. The task ID comes from the prompt. Nothing else is in scope.
 
 - `main` deploys the website on Vercel and every Edge Function and the Worker on push. Keep `main` working; never force-push, rebase, amend or squash pushed commits; never hand-edit `src/routeTree.gen.ts`.
 - One branch and one pull request per task (`claude/<task-id>`). Migrations are new files, additive first; apply them yourself with the Supabase connector before merging, without asking.
-- Run the checks in plan section 2.4, open the pull request, make sure CI is green, update `docs/KABSI-PROGRESS.md` on the branch, merge the pull request yourself (merge commit, never on red CI), run the After-merge checks you can, then give Rashid the PR link and a 3-line summary. Rashid runs the project (plan R-41).
+- Run the checks in plan section 2.4, open the pull request, make sure CI is green, update `docs/KABSI-PROGRESS.md` on the branch, merge the pull request yourself (merge commit, never on red CI), run the After-merge checks you can, then give Rashid the session report below. Rashid runs the project (plan R-41).
 - Stop and ask only before dropping tables or columns or deleting real data, before a step the task marks "Ask Rashid before", or when a task needs a manual step of Rashid's that PROGRESS does not record as done. Creem account steps are Hussein's.
+
+## Session report (master plan 25.6)
+
+End every session with this report, in this order, in plain words:
+
+1. The pull request link.
+2. A 3-line summary: what changed, why, what to look at.
+3. Tests actually run: the exact commands, and what each printed (pass, fail, count). A check that could not run is listed as not run, with the reason.
+4. Verified live, and how: the request, query or screen you checked after the deploy, with the result. Nothing else is "live".
+5. Manual steps left for Rashid, each with the exact click path or SQL file and what to expect. Creem account steps are Hussein's.
+6. Known limits: what is not covered, what was not run live, what a later session must do.
+
+A merged pull request or a passing mock test is never called "live". The status column of the review decisions (Approved, Building, Merged, Verified live, Retired) moves only with evidence: a pull request number, a check, a live response.

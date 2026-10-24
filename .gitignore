@@ -31,11 +31,10 @@ dist-ssr
 *.sln
 *.sw?
 
-# No lockfile is committed: CI and Vercel install with npm from the registry (docs/KABSI-PLAN.md Appendix A, D265).
-package-lock.json
-
 # Vercel build output and local project link
 .vercel
 
 # Prompt gate results (scripts/eval/gate.sh)
 eval-result.json
+.lighthouseci-report
+.lighthouseci
