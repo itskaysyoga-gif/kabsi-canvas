@@ -31,7 +31,10 @@ export async function pickSender(e: SenderEnv): Promise<Sender> {
         phoneNumberId,
         payload: {
           messaging_product: "whatsapp", recipient_type: "individual", to, type: "template",
-          template: { name, language: { code: "en" }, components: [{ type: "body", parameters: params.map((text) => ({ type: "text", text })) }] },
+          template: { name, language: { code: "en" }, components: [{ type: "body", parameters: Array.isArray(params)
+            ? params.map((text) => ({ type: "text", text }))
+            // Named parameters (templates.ts): each carries its name.
+            : Object.entries(params).map(([parameter_name, text]) => ({ type: "text", parameter_name, text })) }] },
         },
       })),
     }),

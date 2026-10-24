@@ -5,19 +5,14 @@
 // Rules this file carries:
 //   - A webhook counts only with a valid X-Webhook-Signature (HMAC-SHA256 of the raw body with the webhook secret,
 //     hex), for Kabsi's own phone number id, and with a message time inside the replay window.
-//   - STOP and its variants stop every send at once (K-129 point 7).
+//   - STOP and its variants stop every send at once (K-129 point 7); the words are read in router.ts.
 //   - What a review alert says is set under K-113 as amended on 21 Oct 2026: the business, the star rating, the
 //     reviewer's first name, the review text up to 300 characters and the draft. Nothing else of a review.
 //   - Approve is offered only where WhatsApp may approve (low and medium risk replies and weekly posts; K-129 point 2);
 //     everything else gets "Edit in app".
+// Session 13b part 1: what a message asks for is read by router.ts and answered by agent.ts (say.ts holds the words).
 
 export const REPLAY_WINDOW_SECONDS = 600;
-// Button ids carry the action and the one-time token: a:<token> approve, u:<token> undo, e:<token> edit in the app.
-export const BUTTON_ID = /^([aue]):([A-Za-z0-9_-]{16,64})$/;
-// STOP and the usual variants (Meta's opt-out words and the common ones in English, French and Arabic).
-const STOP_WORDS = new Set(["stop", "stopall", "unsubscribe", "cancel", "end", "quit", "optout", "opt out", "arret", "arrêt", "توقف", "الغاء", "إلغاء"]);
-// The Connect code: "KABSI 123456", "Kabsi code 123456" or the six digits on their own.
-const CODE_RE = /^(?:kabsi\s*(?:code)?\s*:?\s*)?(\d{6})$/i;
 
 const hex = (b: ArrayBuffer) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
 
@@ -32,6 +27,8 @@ export async function verifySignature(secret: string, raw: Uint8Array<ArrayBuffe
   return diff === 0;
 }
 
+export type Media = { kind: "image" | "document" | "audio" | "video" | "sticker"; id: string; mime: string | null; filename: string | null; size: number | null; voice: boolean };
+export type Contact = { name: string | null; phones: string[] };
 export type Inbound = {
   phoneNumberId: string;
   from: string; // E.164 with the plus sign
@@ -41,6 +38,10 @@ export type Inbound = {
   text: string | null;
   buttonId: string | null;
   mediaId: string | null;
+  // Session 13b part 1: every kind of media, shared contacts, and the Click-to-WhatsApp referral (20.3).
+  media?: Media | null;
+  contacts?: Contact[];
+  referral?: Record<string, string> | null;
 };
 export type StatusEvent = { messageId: string; status: "sent" | "delivered" | "read" | "failed"; error: string | null };
 
@@ -64,7 +65,7 @@ export function parseWebhook(event: string | null, body: unknown): { messages: I
     const kind = str(obj(it).event) ?? event ?? "";
     if (kind === "whatsapp.message.received" || k.direction === "inbound") {
       const interactive = obj(m.interactive);
-      const button = str(obj(interactive.button_reply).id) ?? str(obj(m.button).payload);
+      const button = str(obj(interactive.button_reply).id) ?? str(obj(interactive.list_reply).id) ?? str(obj(m.button).payload);
       const from = str(conv.phone_number) ?? (str(m.from) ? `+${String(m.from).replace(/\D/g, "")}` : null);
       if (!from) continue;
       messages.push({
@@ -73,9 +74,12 @@ export function parseWebhook(event: string | null, body: unknown): { messages: I
         messageId: id,
         timestamp: Number(m.timestamp ?? 0),
         type: str(m.type) ?? "unknown",
-        text: str(obj(m.text).body),
+        text: str(obj(m.text).body) ?? str(obj(m.button).text) ?? caption(m),
         buttonId: button,
         mediaId: str(obj(m.image).id),
+        media: mediaOf(m, k),
+        contacts: contactsOf(m),
+        referral: referralOf(m),
       });
     } else if (["sent", "delivered", "read", "failed"].includes(String(k.status))) {
       const errs = (Array.isArray(k.statuses) ? (k.statuses as unknown[]) : []).flatMap((s) => (Array.isArray(obj(s).errors) ? (obj(s).errors as unknown[]) : []));
@@ -85,72 +89,46 @@ export function parseWebhook(event: string | null, body: unknown): { messages: I
   return { messages, statuses };
 }
 
+const MEDIA_KINDS = ["image", "document", "audio", "video", "sticker"] as const;
+const caption = (m: Obj): string | null => {
+  for (const k of MEDIA_KINDS) { const c = str(obj(m[k]).caption); if (c) return c; }
+  return null;
+};
+function mediaOf(m: Obj, k: Obj): Media | null {
+  for (const kind of MEDIA_KINDS) {
+    const x = obj(m[kind]);
+    const id = str(x.id);
+    if (!id) continue;
+    const md = obj(k.media_data);
+    const size = Number(x.file_size ?? md.byte_size ?? NaN);
+    return { kind, id, mime: str(x.mime_type) ?? str(md.content_type), filename: str(x.filename) ?? str(md.filename),
+      size: Number.isFinite(size) ? size : null, voice: x.voice === true };
+  }
+  return null;
+}
+function contactsOf(m: Obj): Contact[] {
+  if (!Array.isArray(m.contacts)) return [];
+  return (m.contacts as unknown[]).slice(0, 5).map((c) => ({
+    name: str(obj(obj(c).name).formatted_name) ?? str(obj(obj(c).name).first_name),
+    phones: (Array.isArray(obj(c).phones) ? (obj(c).phones as unknown[]) : []).map((p) => str(obj(p).wa_id) ?? str(obj(p).phone) ?? "").filter(Boolean).slice(0, 3),
+  }));
+}
+// 20.3: the ad a Click-to-WhatsApp chat came from. Only ids and the click id are kept, never the ad's text or media.
+function referralOf(m: Obj): Record<string, string> | null {
+  const r = obj(m.referral);
+  const out: Record<string, string> = {};
+  for (const key of ["ctwa_clid", "source_id", "source_type", "source_url", "ad_id", "adset_id", "campaign_id"]) {
+    const v = r[key];
+    if (typeof v === "string" && v.length && v.length <= 500) out[key] = v;
+  }
+  return Object.keys(out).length ? out : null;
+}
+
 /** Inside the replay window: a message older than 10 minutes (or from the future) is refused. */
 export function fresh(timestampSeconds: number, nowMs: number): boolean {
   if (!Number.isFinite(timestampSeconds) || timestampSeconds <= 0) return false;
   const age = nowMs / 1000 - timestampSeconds;
   return age <= REPLAY_WINDOW_SECONDS && age >= -60;
-}
-
-export type Intent =
-  | { kind: "stop" }
-  | { kind: "code"; code: string }
-  | { kind: "approve" | "undo" | "edit"; token: string }
-  | { kind: "photo"; mediaId: string }
-  | { kind: "other" };
-
-/** What one inbound message asks for. */
-export function intentOf(m: Inbound): Intent {
-  if (m.buttonId) {
-    const b = BUTTON_ID.exec(m.buttonId);
-    if (b) return { kind: b[1] === "a" ? "approve" : b[1] === "u" ? "undo" : "edit", token: b[2] };
-    return { kind: "other" };
-  }
-  if (m.type === "image" && m.mediaId) return { kind: "photo", mediaId: m.mediaId };
-  const t = (m.text ?? "").trim();
-  if (STOP_WORDS.has(t.toLowerCase().replace(/[.!]+$/, "").trim())) return { kind: "stop" };
-  const c = CODE_RE.exec(t);
-  if (c) return { kind: "code", code: c[1] };
-  return { kind: "other" };
-}
-
-// ─── What Kabsi says. Plain words, no em or en dashes, no exclamation marks (plan 2.2).
-
-export const SAY = {
-  connected: "Kabsi is connected. Review alerts for your business will come here. Reply STOP at any time to stop them.",
-  badCode: "That code did not work. Open Kabsi, go to Settings, What Kabsi tells you, and press Connect WhatsApp again.",
-  stopped: "You will get no more WhatsApp messages from Kabsi. To turn them on again, press Connect WhatsApp in Kabsi.",
-  approved: "Approved. It goes to Google in 10 seconds. Press Undo to stop it.",
-  undone: "Undone. Nothing was sent. The draft is waiting for you in Kabsi.",
-  tooLate: "It has already gone to Google, so it cannot be undone here. Open Kabsi to see it.",
-  already: "This was already approved. Nothing was sent twice.",
-  photoTaken: "Thank you. Kabsi is checking the photo and will show it in Photos for you to approve.",
-  photoPro: "Sending photos on WhatsApp comes with the Pro plan. You can add photos in Kabsi under Photos.",
-  photoOneBusiness: "Kabsi could not tell which business this photo is for. Add it in Kabsi under Photos.",
-  other: "Kabsi reads only the buttons and photos here. For anything else, write to hello@kabsi.co and a person replies.",
-} as const;
-
-/** Why WhatsApp sends the owner to the app instead of approving (K-129 point 2), in plain words. */
-export function refusal(reason: string): string {
-  switch (reason) {
-    case "high_risk":
-      return "This review needs a careful look, so it is approved only in Kabsi.";
-    case "identity_field":
-    case "not_on_whatsapp":
-      return "Changes to your business name, address, categories, map pin, phone or opening status are approved only in Kabsi, signed in.";
-    case "changed":
-      return "The draft changed since this message. Open Kabsi to read the new one.";
-    case "not_draft":
-      return "This was already handled in Kabsi. Nothing was sent twice.";
-    case "expired":
-      return "This button has expired. Open Kabsi to approve.";
-    case "stopped":
-      return "WhatsApp is turned off for you. Press Connect WhatsApp in Kabsi to turn it on.";
-    case "plan_required":
-      return "Your plan has ended, so nothing can be published. Open Kabsi to choose a plan.";
-    default:
-      return "Kabsi could not approve this here. Open Kabsi to finish.";
-  }
 }
 
 // The wording of the review alert, the post alert and the buttons is in alert-text.ts, so the public website can draw the

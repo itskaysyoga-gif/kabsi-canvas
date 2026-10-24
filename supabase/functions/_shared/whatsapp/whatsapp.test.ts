@@ -1,11 +1,11 @@
 // P0.8-03 WhatsApp owner channel: the Edge Function side with fakes. The database side (opt-in, STOP, the window,
-// approve through the pipeline, undo, a second press, refusals) is in supabase/tests/whatsapp_channel.sql.
+// approve through the pipeline, undo, a second press, refusals) is in supabase/tests/whatsapp_channel.sql. Since
+// session 13b part 1 inbound messages are the agent's (agent.ts); its 100 conversations are in conversations.test.ts.
 import assert from "node:assert/strict";
-import {
-  alertButtons, excerpt, firstName, fresh, type Inbound, intentOf, parseWebhook, refusal, reviewAlertBody, verifySignature,
-} from "./channel.ts";
-import { type Ctx, type Db, deliver, handleInbound, type MaySend, mockSender, sendProtectionAlert, sendReviewAlert } from "./deliver.ts";
+import { alertButtons, excerpt, firstName, fresh, parseWebhook, reviewAlertBody, verifySignature } from "./channel.ts";
+import { type Ctx, type Db, deliver, type MaySend, mockSender, sendProtectionAlert, sendReviewAlert } from "./deliver.ts";
 import { senderMode } from "./kapso.ts";
+import { ref } from "./templates.ts";
 
 const enc = (s: string) => new TextEncoder().encode(s);
 async function sign(secret: string, body: string) {
@@ -52,21 +52,6 @@ Deno.test("parses Kapso v2 messages, button replies, photos, batches and receipt
   assert.deepEqual(receipt.statuses, [{ messageId: "out1", status: "failed", error: "Re-engagement message" }]);
 });
 
-const inbound = (o: Partial<Inbound>): Inbound => ({
-  phoneNumberId: "PNID", from: "+15551234567", messageId: crypto.randomUUID(), timestamp: Date.now() / 1000, type: "text", text: null,
-  buttonId: null, mediaId: null, ...o,
-});
-
-Deno.test("STOP and its variants, the code, buttons and photos", () => {
-  for (const t of ["STOP", "stop", "Stop.", "UNSUBSCRIBE", "cancel", "توقف"]) assert.equal(intentOf(inbound({ text: t })).kind, "stop", t);
-  assert.deepEqual(intentOf(inbound({ text: "KABSI 123456" })), { kind: "code", code: "123456" });
-  assert.deepEqual(intentOf(inbound({ text: "123456" })), { kind: "code", code: "123456" });
-  assert.equal(intentOf(inbound({ text: "please stop by tomorrow" })).kind, "other");
-  assert.equal(intentOf(inbound({ buttonId: "u:abcdefghijklmnopqrstuv" })).kind, "undo");
-  assert.equal(intentOf(inbound({ buttonId: "x:abcdefghijklmnopqrstuv" })).kind, "other");
-  assert.equal(intentOf(inbound({ type: "image", mediaId: "m1" })).kind, "photo");
-});
-
 Deno.test("a review alert: business, stars, first name only, at most 300 characters of the review, the draft", () => {
   const long = "Great coffee. ".repeat(40);
   const body = reviewAlertBody({ business: "Harbour Lane Coffee", stars: 5, reviewer: "Maya Haddad", text: long, draft: "Thank you, Maya." });
@@ -78,13 +63,6 @@ Deno.test("a review alert: business, stars, first name only, at most 300 charact
   assert.doesNotMatch(body, /[—–!]/);
   assert.deepEqual(alertButtons("tok", false).map((b) => b.title), ["Edit in app"]);
   for (const b of alertButtons("tok", true)) assert.ok(b.title.length <= 20);
-});
-
-Deno.test("refusals send the owner to the app in plain words, never an exclamation or a dash", () => {
-  for (const r of ["high_risk", "identity_field", "changed", "not_draft", "expired", "stopped", "plan_required", "x"]) {
-    assert.doesNotMatch(refusal(r), /[—–!]/);
-  }
-  assert.match(refusal("identity_field"), /name, address, categories, map pin, phone or opening status/);
 });
 
 Deno.test("the live sender is off unless the switch, the number, the key and the phone number id are all set", () => {
@@ -120,57 +98,11 @@ function fakeCtx(o: { may?: MaySend; on?: boolean; template?: string | null; app
     acceptPhoto: async (l, u) => (calls.push(`photo:${l}:${u}`), { ok: true }),
     statusUpdate: async () => {},
   };
-  const ctx: Ctx = { db, sender: mockSender(log), on: o.on ?? true, phoneNumberId: "PNID", appUrl: "https://kabsi.co", templates: { review: o.template ?? null, post: null } };
+  const ctx: Ctx = { db, sender: mockSender(log), on: o.on ?? true, phoneNumberId: "PNID", appUrl: "https://kabsi.co" };
   return { ctx, records, calls, log };
 }
 
-Deno.test("unknown senders are ignored: no reply, nothing done", async () => {
-  const f = fakeCtx();
-  assert.equal(await handleInbound(f.ctx, inbound({ from: "+19995550000", text: "hello" })), "ignored");
-  assert.equal(await handleInbound(f.ctx, inbound({ from: "+19995550000", buttonId: "a:abcdefghijklmnopqrstuv" })), "ignored");
-  assert.equal(f.log.length, 0);
-  assert.deepEqual(f.calls, []);
-});
-
-Deno.test("wrong phone number id, a stale message and a replayed message do nothing", async () => {
-  const f = fakeCtx();
-  assert.equal(await handleInbound(f.ctx, inbound({ phoneNumberId: "OTHER", text: "STOP" })), "wrong_number");
-  assert.equal(await handleInbound(f.ctx, inbound({ timestamp: Date.now() / 1000 - 3600, text: "STOP" })), "stale");
-  const m = inbound({ buttonId: "a:abcdefghijklmnopqrstuv" });
-  assert.equal(await handleInbound(f.ctx, m), "approved");
-  assert.equal(await handleInbound(f.ctx, m), "duplicate");
-  assert.equal(f.calls.filter((c) => c.startsWith("approve")).length, 1, "the replay approved nothing");
-});
-
-Deno.test("the code verifies the number and says it is connected", async () => {
-  const f = fakeCtx();
-  assert.equal(await handleInbound(f.ctx, inbound({ from: "+15557778888", text: "KABSI 123456" })), "verified");
-  assert.match(f.log[0].body, /Kabsi is connected/);
-});
-
-Deno.test("Approve answers with Undo; Undo cancels; a second Approve says nothing was sent twice", async () => {
-  const f = fakeCtx();
-  assert.equal(await handleInbound(f.ctx, inbound({ buttonId: "a:abcdefghijklmnopqrstuv" })), "approved");
-  assert.equal(f.log.at(-1)!.kind, "buttons:Undo");
-  assert.equal(await handleInbound(f.ctx, inbound({ buttonId: "u:abcdefghijklmnopqrstuv" })), "undone");
-  const again = fakeCtx({ approve: { result: "approved", repeat: true } });
-  assert.equal(await handleInbound(again.ctx, inbound({ buttonId: "a:abcdefghijklmnopqrstuv" })), "repeat");
-  assert.match(again.log[0].body, /Nothing was sent twice/);
-});
-
-Deno.test("a refused approval (high risk, identity field) sends the app link and approves nothing", async () => {
-  for (const reason of ["high_risk", "identity_field", "changed"]) {
-    const f = fakeCtx({ approve: { result: "refused", reason } });
-    assert.equal(await handleInbound(f.ctx, inbound({ buttonId: "a:abcdefghijklmnopqrstuv" })), `refused:${reason}`);
-    assert.match(f.log[0].body, /https:\/\/kabsi\.co\/app/);
-  }
-});
-
-Deno.test("STOP stops and confirms once; sends after it are refused", async () => {
-  const f = fakeCtx();
-  assert.equal(await handleInbound(f.ctx, inbound({ text: "STOP" })), "stopped");
-  assert.deepEqual(f.calls, ["stop:+15551234567"]);
-  assert.match(f.log[0].body, /no more WhatsApp messages/);
+Deno.test("after STOP, sends are refused", async () => {
   const after = fakeCtx({ may: { ok: false, reason: "stopped" } });
   assert.equal(await deliver(after.ctx, { userId: "u1", locationId: null, kind: "review_alert", body: "x" }), "refused");
   assert.equal(after.log.length, 0);
@@ -182,17 +114,16 @@ Deno.test("a send without opt-in is refused; outside the 24-hour window a templa
   assert.equal(none.log.length, 0);
   const outside = { ok: true as const, phone: "+15551234567", in_window: false, review_alerts: true, digest: false };
   const held = fakeCtx({ may: outside });
-  assert.equal(await deliver(held.ctx, { userId: "u1", locationId: null, kind: "k", body: "x", template: { name: null, params: [] } }), "held");
+  assert.equal(await deliver(held.ctx, { userId: "u1", locationId: null, kind: "k", body: "x", template: null }), "held");
   assert.equal(held.log.length, 0, "nothing goes outside the window without an approved template");
   const tpl = fakeCtx({ may: outside });
-  assert.equal(await deliver(tpl.ctx, { userId: "u1", locationId: null, kind: "k", body: "x", template: { name: "kabsi_review_alert", params: ["B", "5"] } }), "mock_sent");
-  assert.equal(tpl.log[0].kind, "template:kabsi_review_alert");
+  assert.equal(await deliver(tpl.ctx, { userId: "u1", locationId: null, kind: "k", body: "x", template: ref("review_waiting", { business: "B", stars: "5" }) }), "mock_sent");
+  assert.equal(tpl.log[0].kind, "template:kabsi_review_waiting");
 });
 
 Deno.test("nothing is sent while Kabsi has no WhatsApp number", async () => {
   const f = fakeCtx({ on: false });
   assert.equal(await deliver(f.ctx, { userId: "u1", locationId: null, kind: "k", body: "x" }), "off");
-  assert.equal(await handleInbound(f.ctx, inbound({ text: "STOP" })), "off");
   assert.equal(f.log.length + f.records.length, 0);
 });
 
@@ -209,12 +140,6 @@ Deno.test("review alerts: Approve only for a low or medium risk reply with a saf
   const unsafe = fakeCtx();
   await sendReviewAlert(unsafe.ctx, ["u1"], { ...base, risk: "medium", safeDraft: false });
   assert.equal(unsafe.log[0].kind, "text");
-});
-
-Deno.test("a photo from a Pro owner goes to the photo engine with source whatsapp", async () => {
-  const f = fakeCtx();
-  assert.equal(await handleInbound(f.ctx, inbound({ type: "image", mediaId: "m1" })), "photo");
-  assert.deepEqual(f.calls, ["photo:loc1:u1"]);
 });
 
 Deno.test("P0.8-04: a Protection change offers Put it back on WhatsApp, never for an identity field", async () => {

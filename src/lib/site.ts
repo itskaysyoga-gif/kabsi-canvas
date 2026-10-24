@@ -46,6 +46,20 @@ export function whatsappHref(
 }
 
 /**
+ * The Free Visibility Scan hand-off (master plan 24.3, 24.8, 28.1): "Get this on WhatsApp" and "Send the full map to my
+ * WhatsApp" open a chat with the prefilled message carrying the scan code, so Nora picks up the scan. Plain text, no
+ * link; the code (KAB- and 8 to 12 letters or digits) points only to the public scan result. Null for a malformed code.
+ */
+export function scanHandoffText(code: string): string | null {
+  const c = code.trim().toUpperCase();
+  return /^KAB-[A-Z0-9]{8,12}$/.test(c) ? `Hi Kabsi, my scan code is ${c}` : null;
+}
+export function scanHandoffHref(code: string, digits: string = WHATSAPP_DIGITS): string | null {
+  const text = scanHandoffText(code);
+  return text && digits ? `https://wa.me/${digits}?text=${encodeURIComponent(text)}` : null;
+}
+
+/**
  * The one booking link (P0.1-V3, R-31): a single Calendly event type, "Call with Kabsi", 20 minutes, with one required
  * question, "What's the call about?". Replace the placeholder with the event's public URL and nothing else changes.
  * Until it is replaced every booking link falls back to an email to the team, so no page points at a dead address.
