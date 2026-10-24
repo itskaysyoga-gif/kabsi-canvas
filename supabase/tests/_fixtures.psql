@@ -41,6 +41,7 @@ insert into public.taps (code, location_id, source) values ('VCTM22', '00000000-
 insert into public.action_tokens (token_hash, location_id, user_id, action, target_type, target_id, expires_at)
 values ('victim-token', '00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000a1', 'open', 'inbox', 'victim', now() + interval '1 day');
 insert into public.ai_usage (location_id) values ('00000000-0000-4000-8000-0000000000c1');
+insert into public.ai_agent_usage (agent, model, location_id) values ('reply', 'claude-sonnet-5-5', '00000000-0000-4000-8000-0000000000c1');
 insert into public.concierge_tasks (id, location_id, kind) values ('00000000-0000-4000-8000-0000000000f2', '00000000-0000-4000-8000-0000000000c1', 'invite');
 insert into public.emails (location_id, kind, to_address, subject)
 values ('00000000-0000-4000-8000-0000000000c1', 'test', 'victim-owner@example.test', 'Victim email');
