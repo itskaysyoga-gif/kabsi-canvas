@@ -46,6 +46,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 24 Oct 2026, Ops 1 part B, PR 0: master plan section 30 committed and recorded as R-90; the 30.1 fixes applied to sections 23 and 27.14. Docs only. The rest of Ops 1 part B follows on claude/ops-1b-2.
 - 24 Oct 2026, Clean 1 (master plan 28.9): detail `docs/progress/archive/2026-10-24-clean-1.md`. Tracked files 1,255 to 1,204 (11.59 MB to 11.27 MB), npm packages 438 to 364.
 - 24 Oct 2026, Session 0 part 2: docs diet (detail: `docs/progress/archive/2026-10-24-session-0-diet.md`). Plan index 29 KB, status page 5.8 KB; facts split into `knowledge/facts/` and `knowledge/internal/` with one generator (`node scripts/build-kb.mjs`). File sizes are in the pull request.
 - 24 Oct 2026, Session 0 part 1 (PR 198): master plan 20 to 29. Detail: `docs/progress/archive/evidence.md`, entry "Session 0 part 1".
