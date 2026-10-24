@@ -1,0 +1,9 @@
+# Edge Functions removed from the repository. The Deploy workflow deletes each one from Supabase after deploying the
+# rest; a name that is already gone is skipped. One name per line; lines starting with # are ignored.
+# Clean 1 (24 Oct 2026, master plan 28.9): evidence in docs/progress/archive/2026-10-24-clean-1.md.
+cron-tick
+partner
+posts-weekly
+lead
+site-assets
+turnstile-diag

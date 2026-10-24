@@ -6,38 +6,20 @@
   `_shared/kabsi.ts` (clients, auth, rate limit, Sentry, branded email) and `_shared/google/` (the only
   place that calls Google: hello@kabsi.co access, Places, `GOOGLE_MODE=mock|live`; import `_shared/google/index.ts`)
   are bundled into each function at deploy time.
-- There is deliberately **no `config.toml`** here: pushing one through the GitHub integration could
-  overwrite live Auth settings (SMTP, templates, redirect URLs) that were set in the dashboard.
+- `config.toml` holds `verify_jwt` for every function (D295); `.github/workflows/deploy.yml` deploys every
+  function on a push to `main`. Migrations are applied with the Supabase connector, never by the deploy.
 - Nothing generates files in this folder automatically: every change is a reviewed pull request.
 
 ## Functions
 
-| Function | JWT | Called by | Purpose |
-|---|---|---|---|
-| `brand` | no | email clients | Logo PNG for every email |
-| `tap` | no (TAP_SECRET header) | go.kabsi.co Worker | GET resolves a card code; POST logs a tap |
-| `places-search` | yes | `/start` | Business search via Places API (New) |
-| `lead` | no (honeypot + rate limit) | `/partners` form | Stores a lead, emails hello@kabsi.co |
-| `cron-tick` | no (cron secret) | pg_cron every 5 min | Jobs: `access` (accept Manager invites → access granted → email) |
-| `kv-sync` | no (cron secret) | DB trigger on `cards` | Clears the Worker's KV copy of a changed card |
-| `partner` | no (JWT checked by the RPCs it calls; `billing` needs the cron secret) | `/partner`, `/staff`, pg_cron 06:10 UTC | `invite`, `claim`, `decide` run membership-checked RPCs as the caller and send the emails; `billing` creates last month's partner invoices (only when `google_mode` is live) |
+Each function's folder starts with a comment saying who calls it and how it checks the caller; `config.toml` says
+whether the gateway asks for a JWT. Removed in Clean 1 (24 Oct 2026, master plan 28.9): `cron-tick`, `partner` and
+`posts-weekly` (retired 410 stubs), `lead` (no page sent it) and `site-assets` (a one-off image import tool, unused
+since 26 Sep); they stay in git history.
 
-Browser writes go through membership-checked RPCs (see migration `20260925060903`):
-`start_location`, `save_consent`, `set_onboarding_step`, `update_knowledge_card`, `choose_plan`,
-`activate_card`, `set_card_active`, `rename_card`, `update_notification_settings`,
-staff-only `staff_record_payment`, `generate_card_codes`.
-Partners (migration `20260926050830`): `claim_partner_membership`, `partner_create_invite`, `partner_submit_claim`,
-`partner_invoice_calc`, staff-only `staff_create_partner`, `staff_decide_claim`; service-only `partner_billing_run`.
+Browser writes go through membership-checked RPCs or Edge Functions (D206, D226); the browser never writes tables directly.
 
-## Secrets (Supabase → Edge Functions → Secrets)
+## Secrets
 
-| Secret | Needed for | Status |
-|---|---|---|
-| `RESEND_API_KEY` | every email from functions (not the login emails, which use SMTP) | add |
-| `PLACES_API_KEY` | business search in `/start` | add |
-| `TAP_SECRET` | Worker ↔ `tap` (same value in Cloudflare) | add |
-| `CF_API_TOKEN`, `CF_ACCOUNT_ID` | `kv-sync` (token needs Workers KV Storage: Edit) | add |
-| `ANTHROPIC_API_KEY` | reply drafts (Phase 4) | later |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, `GOOGLE_MODE=live` | after GBP API approval | later |
-
-The cron secret is created inside the database (Vault `cron_secret`) and never needs to be copied.
+The list of secrets, where each lives and who reads it is `docs/SECRETS.md`. The cron secret is created inside the
+database (Vault `cron_secret`) and never needs to be copied.

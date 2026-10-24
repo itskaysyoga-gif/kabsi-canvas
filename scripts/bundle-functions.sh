@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Bundles Edge Functions into one file each (whitespace-minified, ASCII-only) for deploying through the
 # Supabase MCP tool, which needs every file's full text. The source of truth stays supabase/functions.
-#   scripts/bundle-functions.sh api content posts-weekly   → .bundles/<name>/index.js
+#   scripts/bundle-functions.sh api content assistant     → .bundles/<name>/index.js
 set -euo pipefail
 cd "$(dirname "$0")/../supabase/functions"
 for f in "$@"; do

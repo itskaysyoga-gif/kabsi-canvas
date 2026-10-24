@@ -119,7 +119,7 @@ Deno.test("the catalog covers every kind of email Kabsi sends", () => {
   const kinds = catalog().map((c) => c.kind);
   for (const needed of ["review_new", "review_high_risk", "backlog_ready", "digest", "access_granted", "access_lost", "deletion_scheduled", "renew_r5",
     "weekly_report", "weekly_post", "shield_alert_urgent", "team_invite", "profile_check",
-    "assistant_report", "assistant_handoff", "assistant_handoff_ack", "lead_alert", "life_welcome", "life_no_access_1h", "life_trial_day7", "life_trial_day14", "life_winback_30"]) assert.ok(kinds.includes(needed), needed);
+    "assistant_report", "assistant_handoff", "assistant_handoff_ack", "life_welcome", "life_no_access_1h", "life_trial_day7", "life_trial_day14", "life_winback_30"]) assert.ok(kinds.includes(needed), needed);
   assert.equal(new Set(kinds).size, kinds.length);
 });
 
@@ -200,7 +200,7 @@ Deno.test("P0.8-02b: wording fixes (the Profile Check, access and report emails,
 });
 
 Deno.test("P0.8-02b: staff-only emails have a plain staff footer: no approval promise, no settings, no unsubscribe", () => {
-  const staff = ["assistant_handoff", "assistant_report", "lead_alert"];
+  const staff = ["assistant_handoff", "assistant_report"];
   for (const kind of staff) {
     const c = catalog().find((x) => x.kind === kind)!;
     assert.equal(c.category, "internal", kind);
