@@ -14,8 +14,6 @@ verify_jwt = false
 verify_jwt = false
 [functions.google-capture]   # x-cron-secret; read-only Google capture (P0.7-01)
 verify_jwt = false
-[functions.site-assets]      # x-cron-secret
-verify_jwt = false
 [functions.slack]            # Slack signs /interact and /command; Slack sends no Supabase JWT
 verify_jwt = false
 [functions.email]            # one-click unsubscribe (signed link) and the Resend webhook (Svix signature); /test needs x-cron-secret (P0.4-08)
@@ -30,17 +28,9 @@ verify_jwt = true
 verify_jwt = true
 [functions.content]
 verify_jwt = true
-[functions.cron-tick]        # retired 410 stub
-verify_jwt = true
 [functions.kv-sync]
 verify_jwt = true
-[functions.lead]
-verify_jwt = true
-[functions.partner]          # retired 410 stub (P0.8-01)
-verify_jwt = true
 [functions.places-search]
-verify_jwt = true
-[functions.posts-weekly]
 verify_jwt = true
 [functions.review-link]
 verify_jwt = true
@@ -63,7 +53,7 @@ verify_jwt = true
 
 # 29 Sep: api, assistant, lead and review-link stay true. Browser calls without a session send the public anon JWT
 # (src/lib/supabase.ts anonHeaders), so no function has to skip verification for them. Only callers that cannot send
-# a JWT at all (tap from the Worker, Slack, health, brand, site-assets) are false.
+# a JWT at all (tap from the Worker, Slack, health, brand) are false.
 
 # Local stack only (P0.1-07, scripts/db-test.sh): the database test job runs the same Postgres major version as
 # production. `supabase functions deploy` does not read this section.

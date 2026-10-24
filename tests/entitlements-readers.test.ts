@@ -9,7 +9,6 @@ const ROOT = join(__dirname, "..");
 const BILLING = new Set([
   "src/routes/_authenticated/app/plan.tsx", // the plan and payments screen (NOWPayments history)
   "supabase/functions/_shared/payments.ts", // records a payment against its plan row
-  "supabase/functions/partner/index.ts", // partner invoices
 ]);
 
 function walk(dir: string, out: string[] = []) {

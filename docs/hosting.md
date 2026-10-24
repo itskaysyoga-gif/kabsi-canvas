@@ -25,11 +25,11 @@ Previews of branches that Vercel builds use the same Supabase project. Preview a
 
 ## Old address
 
-The Lovable project Kabsi Canvas (GitHub disconnected on 8 Oct 2026) stays published only so `kabsi-app.lovable.app` forwards old email links to the same path on kabsi.co (`src/lib/legacy-host.ts`, switched on). It must stay published at least 7 days after `APP_URL` moves to kabsi.co, and 90 days to be safe, then check Lovable visitor analytics before removing it.
+Kabsi does not use Lovable. The Lovable account was cancelled on 23 Oct 2026, so `kabsi-app.lovable.app` no longer forwards anything; the forwarding code (`src/lib/legacy-host.ts`), `bun.lock` and `bunfig.toml` were removed in Clean 1 (master plan 25.10, 28.9). Email links from before 8 Oct 2026 that use the old address no longer open.
 
 ## Redirects and indexing (`vercel.json`)
 
-- Old kabsi.co pages with no twin on the new site, permanent: `/product` to `/lebanon`, `/contact` to `/faq`, `/report` to `/how-it-works`, `/admin` and `/auth/...` to `/login`, `/r-not-found` to `/`. `/`, `/how-it-works`, `/pricing`, `/faq`, `/privacy`, `/terms`, `/login` and `/app` exist on the new site.
+- Old kabsi.co pages with no twin on the new site, permanent: `/lebanon`, `/product` and their subpaths to `/pricing`, `/partner` and its subpaths to `/partners`, `/contact` to `/faq`, `/report` to `/how-it-works`, `/admin` and `/auth/...` to `/login`, `/r-not-found` to `/`.
 - Old review cards: `/r/SEVEN1` redirects (302) to that business's Google review page; any other `/r/<code>` goes to `/` (302). New cards use go.kabsi.co.
 - Only kabsi.co is indexable: `*.vercel.app` (previews and the Vercel address) sends `X-Robots-Tag: noindex`; so do the private paths (`/app`, `/partner`, `/staff`, `/start`, `/login`, `/a/`, `/activate/`).
 

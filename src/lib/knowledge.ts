@@ -135,29 +135,6 @@ export function verifiedValues(facts: Fact[], now = Date.now()) {
   return out;
 }
 
-const POST_FIELDS: Field[] = [
-  "about",
-  "services",
-  "price_notes",
-  "booking",
-  "payment_methods",
-  "hours_note",
-  "service_area",
-  "delivery",
-  "parking",
-  "accessibility",
-  "wifi",
-  "languages",
-  "policies",
-  "mention",
-  "faqs",
-];
-/** Weekly post drafts need at least one verified fact beyond the sign-off. */
-export const hasPostFacts = (facts: Fact[]) => {
-  const v = verifiedValues(facts);
-  return POST_FIELDS.some((k) => v[k] !== undefined && v[k] !== "" && v[k] !== false);
-};
-
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase.rpc(fn, args);
   if (error) throw new Error(error.message);

@@ -1,5 +1,5 @@
 // Marketing photos (D256): plain local businesses from anywhere, no faces, no readable text, no brands.
-// Generated on Higgsfield, converted to WebP and reviewed by the internal `site-assets` Edge Function,
+// Generated on Higgsfield, converted to WebP and reviewed by the `site-assets` Edge Function (removed in Clean 1, in git history),
 // served from the public `site` Storage bucket (cached for a year). Never presented as customers.
 import { supabaseUrl } from "@/lib/supabase-config";
 

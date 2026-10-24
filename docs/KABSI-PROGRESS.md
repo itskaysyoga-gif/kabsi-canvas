@@ -1,13 +1,14 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 24 Oct 2026 by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 24 Oct 2026 by Clean 1 (master plan 28.9); first written by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati; the first real reply was published and verified; the post removal was verified on Google (23 Oct). kabsi.co runs on Vercel; Creem is the only payment route (test mode, not open). Evidence: `docs/progress/archive/evidence.md` and `where-things-stand.md`.
 - Merged 23 and 24 Oct, docs and config only: Session 19 PR 0 (PR 196, the master plan and skills), Ops 1 part A (PR 197, Dependabot, gitleaks, docs/SECRETS.md), Session 0 part 1 (PR 198, master plan sections 20 to 29, decisions R-67 to R-89, the new order of work, the facts lines).
-- Session 0 part 2 (the docs diet of master plan 27.12, branch claude/session-0-diet, this pull request): the plan became an index, this page became the status, the facts were split. Session 0 is complete when it merges.
-- Next: Clean 1 (Opus, alone, master plan 28.9), then Wave A: session 19 rest, session 13b part 1, Ops 1 part B.
+- Session 0 is complete (PR 198 and PR 199, the docs diet).
+- Clean 1 (master plan 28.9, branch claude/clean-1): unused code, packages, Edge Functions, a script, a page and a skill removed, the Lovable leftovers gone, the database drops written for Rashid. Detail: `docs/progress/archive/2026-10-24-clean-1.md`.
+- Next: Wave A: session 19 rest, session 13b part 1, Ops 1 part B.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
@@ -26,7 +27,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
-- GitHub repository settings: Dependabot alerts, Dependabot security updates, Secret scanning and Push protection (the session's proxy refused them on 23 Oct).
+- GitHub repository settings: Dependabot alerts and Dependabot security updates are done (marked 24 Oct by Clean 1, as Rashid asked). Open: Secret Protection (secret scanning and push protection), which Rashid confirms himself.
+- Clean 1: run `supabase/manual/20261024_clean1_drops.sql` after a yes to its list (two empty or backup tables, two unused functions); check after the merge that the Deploy run deleted the six removed functions (if not, delete them in the Supabase dashboard, Edge Functions).
 - Supabase Auth: leaked-password protection; paste the four `emails/auth/*.html` templates (the footer changed again).
 - Google Cloud: Places quotas and budget alerts; contacts and owners on kabsi.co addresses only.
 - Supabase Pro with point-in-time recovery and Vercel Pro, before the first payment and before card payments open.
@@ -44,11 +46,11 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 24 Oct 2026, Clean 1 (master plan 28.9): detail `docs/progress/archive/2026-10-24-clean-1.md`. Tracked files 1,255 to 1,204 (11.59 MB to 11.27 MB), npm packages 438 to 364.
 - 24 Oct 2026, Session 0 part 2: docs diet (detail: `docs/progress/archive/2026-10-24-session-0-diet.md`). Plan index 29 KB, status page 5.8 KB; facts split into `knowledge/facts/` and `knowledge/internal/` with one generator (`node scripts/build-kb.mjs`). File sizes are in the pull request.
 - 24 Oct 2026, Session 0 part 1 (PR 198): master plan 20 to 29. Detail: `docs/progress/archive/evidence.md`, entry "Session 0 part 1".
 - 23 Oct 2026, Ops 1 part A (PR 197). Detail: `docs/progress/archive/evidence.md`, entry "Ops 1 part A".
 - 23 Oct 2026, Session 19 PR 0 (PR 196). Detail: `docs/progress/archive/evidence.md`, entry "Session 19 PR 0".
-- 23 Oct 2026, session 18 closed: the post removal passed and is verified; the Update approve and Undo test moved to session 19 rest.
 
 ## How a session updates this page
 

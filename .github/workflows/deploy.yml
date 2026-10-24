@@ -11,6 +11,7 @@ on:
     paths:
       - "supabase/functions/**"
       - "supabase/config.toml"
+      - "supabase/functions-removed.txt"
       - "workers/kabsi-go/**"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
@@ -39,6 +40,16 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF" --use-api
+      # Clean 1 (master plan 28.9): a function removed from the repository is also removed from Supabase.
+      - name: Delete removed functions (supabase/functions-removed.txt)
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          grep -v '^#' supabase/functions-removed.txt | while read -r fn; do
+            [ -n "$fn" ] || continue
+            if [ -d "supabase/functions/$fn" ]; then echo "::error::$fn is listed as removed but its folder exists"; exit 1; fi
+            supabase functions delete "$fn" --project-ref "$SUPABASE_PROJECT_REF" --yes || echo "$fn: not deleted (already gone?)"
+          done
 
   worker:
     name: Worker kabsi-go

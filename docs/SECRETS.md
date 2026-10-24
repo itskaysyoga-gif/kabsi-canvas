@@ -22,8 +22,8 @@ file was made by reading the code (`Deno.env.get`, `process.env`, `import.meta.e
 
 | Name | Where it lives | What uses it | Rotate every | Last rotated |
 | --- | --- | --- | --- | --- |
-| `ANTHROPIC_API_KEY` | Supabase secret; GitHub secret for the by-hand evaluation runs | `assistant`, drafting, `site-assets`, `.github/workflows/ci.yml` and `eval-sample.yml`, `scripts/nora-eval` (also read from the local environment) | 90 days | Not recorded |
-| `Anthropic_Api` (older name, read as a fallback) | Supabase secret, only if that is the name that was set | drafting, `assistant`, `site-assets`, `health`, when `ANTHROPIC_API_KEY` is empty | 90 days | Not recorded |
+| `ANTHROPIC_API_KEY` | Supabase secret; GitHub secret for the by-hand evaluation runs | `assistant`, drafting, `.github/workflows/ci.yml` and `eval-sample.yml`, `scripts/nora-eval` (also read from the local environment) | 90 days | Not recorded |
+| `Anthropic_Api` (older name, read as a fallback) | Supabase secret, only if that is the name that was set | drafting, `assistant`, `health`, when `ANTHROPIC_API_KEY` is empty | 90 days | Not recorded |
 | `KAPSO_API_KEY` | Supabase secret | `whatsapp` sender | 90 days | Not recorded in PROGRESS (master plan 9.8 says Rashid set the new project key on 23 Oct 2026) |
 | `KAPSO_WEBHOOK_SECRET` | Supabase secret | `whatsapp` webhook signature check | 90 days | Not recorded (session 13b part 1 registers the webhook) |
 | `CREEM_API_KEY` | Supabase secret | `billing-creem` (session 10; not read by any code yet) | 90 days | Not recorded (not set yet) |

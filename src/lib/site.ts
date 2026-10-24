@@ -88,7 +88,6 @@ export const BRAND_EXPLAINER =
   "Kabsi looks after your business on Google: a reply ready for every new review, your hours and details kept right, and fresh posts. You just approve.";
 /** The calls to action, worded once (R-02). */
 export const CTA_PRIMARY = "Join early access";
-export const CTA_SECONDARY = "See it work";
 /** The trial button on the free tools when they are busy for the day (lane R, 22 Oct 2026). Never "Join early access" there. */
 export const CTA_TRIAL = "Start your free trial";
 export {
@@ -152,9 +151,6 @@ export const COMING_SOON = "Coming soon";
 export const CHECKOUT_LIVE = false;
 /** The words after a price, worded once. */
 export const TAX_NOTE = "plus tax where it applies";
-
-/** The trial line, worded once. */
-export const TRIAL_LINE = "14-day free trial, no card";
 
 type Meta = { title?: string; name?: string; property?: string; content?: string };
 

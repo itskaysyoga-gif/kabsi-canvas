@@ -228,10 +228,3 @@ export const OPEN_EVENT = "kabsi:privacy-choices";
 export function openPrivacyChoices() {
   if (typeof window !== "undefined") window.dispatchEvent(new Event(OPEN_EVENT));
 }
-
-// Tests only.
-export function _resetConsentForTests() {
-  started = false;
-  listeners.clear();
-  state = { rule: "opt_in", country: null, countrySource: "unknown", choice: null, ready: false };
-}

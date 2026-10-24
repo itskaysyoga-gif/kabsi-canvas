@@ -762,16 +762,6 @@ export const VERTICALS: Vertical[] = [
 
 export const verticalBySlug = (slug: string) => VERTICALS.find((v) => v.slug === slug);
 
-/** Business-type tile → the industry page it links to (one page per tile, no duplicates). */
-export const VERTICAL_FOR_PHOTO: Partial<Record<PhotoId, string>> = {
-  bakery: "cafes",
-  cafe: "cafes",
-  restaurant: "restaurants",
-  dentist: "dentists",
-  salon: "salons",
-  garage: "car-services",
-};
-
 /** Old slugs that moved (D259). */
 export const VERTICAL_REDIRECTS: Record<string, string> = {
   "restaurants-and-cafes": "restaurants",

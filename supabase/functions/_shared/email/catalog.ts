@@ -121,6 +121,5 @@ export function catalog(): CatalogEntry[] {
       : id.startsWith("verify_")
         ? { ...SETUP_SAMPLE, scenario: { id: id === "verify_2" ? "google_reviewing" : "needs_verifying", variant: null, startedAt: new Date("2026-10-01T09:00:00Z"), doneAt: null } }
         : LIFE_SAMPLE, { appUrl: APP, removalOn: true }))),
-    e("lead_alert", "internal", false, copy.leadAlert("business", "Rana", "rana@example.test", "<p><strong>name:</strong> Rana</p><p><strong>message:</strong> I run three salons.</p>", "name: Rana\nmessage: I run three salons.")),
   ];
 }
