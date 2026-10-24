@@ -23,6 +23,7 @@ Rotate on the due date, at once if a secret may have been seen, and always when 
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Kabsi's Google Cloud OAuth client (project 856347937978) | Supabase Edge Function secrets | Google layer, `health` | Not recorded | Yearly |
 | `GOOGLE_REFRESH_TOKEN` | Kabsi's own Google account (hello@kabsi.co, Advanced Protection) for Business Profile calls; never an owner's token | Supabase Edge Function secrets | Google layer | Not recorded | When Google shows an expiry (the health check reports it) |
 | `GOOGLE_MODE` | `mock` or `live` switch (not secret) | Edge Function secrets and `app_settings` | Google layer | n/a | n/a |
+| `GOOGLE_PUBSUB_AUDIENCE`, `GOOGLE_PUBSUB_SERVICE_ACCOUNT` | The audience and the push service account Google signs each Pub/Sub push for (P0.7-03; not secret, a forged push fails without Google's signature) | Supabase Edge Function secrets | `google-events` | n/a | n/a |
 | `PLACES_API_KEY` | Google Places search for the free Profile Check | Supabase Edge Function secrets | `places-search`, `profile-snapshot` | Not recorded | Yearly |
 | `ANTHROPIC_API_KEY` (older name `Anthropic_Api`) | Reply, post and Nora calls to Anthropic; prepaid balance, auto-reload off (R-45) | Supabase Edge Function secrets; GitHub secret for the by-hand evaluation only | `assistant`, drafting | Not recorded | Yearly |
 | `RESEND_API_KEY` | Sends every Kabsi email | Supabase Edge Function secrets | `email`, notify | Not recorded | Yearly |

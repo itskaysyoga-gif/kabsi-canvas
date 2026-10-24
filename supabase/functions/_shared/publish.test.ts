@@ -317,3 +317,16 @@ Deno.test("a post Google rejects after creating it is rejected, not verified", a
   assert.equal(await publishOne(id, w.deps), "rejected");
   assert.equal(w.rows.get(id)!.reason, "Google did not accept this post. Edit it and approve again.");
 });
+
+Deno.test("18.2: while Google needs action the claim pauses the item; nothing is sent and it stays approved", async () => {
+  const w = world();
+  const { id } = w.approve("r9", "Thank you.");
+  w.due(id);
+  const paused: PublishDeps = { ...w.deps, claim: () => Promise.resolve({ result: "paused", action: "suspended", retry_at: new Date(Date.now() + 3600_000).toISOString() }) };
+  await assert.rejects(publishOne(id, paused), (e) => e instanceof RetryLater && e.until.getTime() > Date.now() + 3500_000);
+  assert.equal(w.google.calls, 0, "no Google call");
+  assert.equal(w.rows.get(id)!.state, "approved", "the item waits, approved");
+  // Google cleared the state: the same item goes out.
+  assert.equal(await publishOne(id, w.deps), "verified");
+  assert.equal(w.google.calls, 1);
+});

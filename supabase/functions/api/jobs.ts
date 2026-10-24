@@ -26,8 +26,9 @@ import { AiBudgetError } from "../_shared/ai-budget.ts";
 import { protectionCheck } from "../_shared/protection.ts";
 import {
   addSpecialHours, coachRead, createLocalPost, hasSpecialHours, localPostGone, localPostState, mediaExists, patchListing, protectionShown, removeLocalPost,
-  readReply, removeKabsiAccess, sendReply, type SpecialDay, uploadPhoto,
+  readGoogleState, readReply, removeKabsiAccess, sendReply, type SpecialDay, uploadPhoto,
 } from "../_shared/google/index.ts";
+import { googleAction, stateDue, stateSummary } from "../_shared/google/state/merchant.ts";
 import { accessChangeEmail, type DisconnectDeps, runDisconnect } from "../_shared/disconnect.ts";
 import {
   type CheckClaim, type Claim, type Item, NotSent, type Outcome, type PublishDeps, publishOne, reconcileOne, replySeen, type Seen, type Sent,
@@ -41,6 +42,7 @@ import { type CoachRefreshDeps, refreshCoach } from "../_shared/coach/refresh.ts
 import { type HolidayAsk, type HolidayAskDeps, sendHolidayAsks } from "../_shared/holiday.ts";
 import { sendTeamInvite, type TeamInvite, teamInviteEmail } from "../_shared/team.ts";
 import { whatsappPostAlert } from "../_shared/whatsapp/db.ts";
+import { useTool } from "../_shared/ai/agents.ts";
 
 // Offer a job. Returns its id, or null when the same dedupe key is already pending, running or retrying.
 async function enqueueJob(kind: string, locationId: string | null, dedupeKey: string, payload: Record<string, unknown> = {}) {
@@ -145,6 +147,25 @@ async function notifyOwner(job: Job) {
 async function protection(job: Job) {
   const alerts = await protectionCheck(job.location_id!);
   if (alerts) await jobLog("shield", true, { alerts, location: job.location_id });
+  // 18.2: the Guard reads Google's state for the profile once a day in this hourly job. Never fails Protection.
+  try {
+    const { data: g } = await admin().from("google_connections").select("google_state_checked_at").eq("location_id", job.location_id!).maybeSingle();
+    if (stateDue(g?.google_state_checked_at ?? null)) await googleStateCheck(job);
+  } catch (e) {
+    await captureError("dispatch", e, { job: "google_state", location: job.location_id });
+  }
+}
+
+// 18.2: read VoiceOfMerchantState and hand it to the database, which pauses or resumes publishing, opens or closes the
+// owner's task and writes the ops event (record_google_state). Also offered at once by every Pub/Sub notification.
+async function googleStateCheck(job: Job) {
+  const loc = await activeLocation(job.location_id!);
+  if (!loc || !isSyncable(loc) || !loc.google_location_id) return;
+  useTool("guard", "read_google_state");
+  const state = await readGoogleState(loc.google_location_id);
+  const action = googleAction(state);
+  const out = await rpcJson<string>("record_google_state", { p_location: loc.id, p_state: stateSummary(state), p_action: action });
+  if (out !== "ok" && out !== "still_needs_action") await jobLog("google_state", true, { location: loc.id, action, out });
 }
 
 async function rpcJson<T>(fn: string, args: Record<string, unknown>): Promise<T> {
@@ -364,6 +385,7 @@ const HANDLERS: Record<string, JobHandler> = {
   draft_reply: draftReplyJob,
   notify_owner: notifyOwner,
   protection_check: protection,
+  google_state_check: googleStateCheck,
   publish: async (job) => void await publishOne(publicationId(job), PUBLISH),
   reconcile_publication: async (job) => void await reconcileOne(publicationId(job), PUBLISH),
   access_check: step("access", accessJob),

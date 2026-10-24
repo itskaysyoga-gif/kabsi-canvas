@@ -48,7 +48,7 @@ const STATUS: Record<string, string> = {
 };
 // The tasks that belong on this screen: what is missing or unconfirmed on the profile, and lost access. Changes have their
 // own cards below, with the two decisions.
-const PROFILE_TASKS = ["profile_gap", "knowledge_confirm", "hours_confirm", "reconnect"];
+const PROFILE_TASKS = ["profile_gap", "knowledge_confirm", "hours_confirm", "reconnect", "google_needs_action"];
 
 async function loadProfile(locationId: string) {
   const [changes, facts, loc, tasks] = await Promise.all([

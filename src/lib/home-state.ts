@@ -112,6 +112,7 @@ export function cardRisk(t: Task): Risk {
   if (t.kind === "profile_change" && t.priority === "urgent")
     return { tone: "red", label: "Check this first" };
   if (t.kind === "reconnect") return { tone: "red", label: "Can't reach Google" };
+  if (t.kind === "google_needs_action") return { tone: "red", label: "Google needs action" };
   return null;
 }
 
@@ -139,6 +140,8 @@ export function cardAction(t: Task): CardAction {
       return { primary: "See how to reconnect", secondary: "Later" };
     case "billing":
       return { primary: "See your plan", secondary: "Later" };
+    case "google_needs_action":
+      return { primary: "See what Google asks", secondary: "Later" };
     default:
       return { primary: "Open", secondary: "Later" };
   }
