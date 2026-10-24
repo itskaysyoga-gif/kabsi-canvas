@@ -4,7 +4,7 @@ import { notify } from "./notify.ts";
 import { reviewEmail } from "./email/review.ts";
 import { backlogReady } from "./email/copy.ts";
 import { listReviews } from "./google/index.ts";
-import { buildMemory, classify, draftGrounded, draftMessage, editKinds, factAdditions, HIGH_RISK_TITLE, industryOf, type Meter, MODELS, newMeter, type Risk, RULE_TEXT, runRecord } from "./ai.ts";
+import { buildMemory, classify, draftGrounded, draftMessage, editKinds, factAdditions, HIGH_RISK_TITLE, industryOf, type Meter, MODELS, newMeter, type Risk, RULE_TEXT, runRecord, type Send, useTool } from "./ai.ts";
 import { instantEmail, riskPlan } from "./review-risk.ts";
 import type { FactRow } from "./facts.ts";
 import { recordAiUsage, takeAiBudget } from "./ai-budget.ts";
@@ -109,7 +109,7 @@ export async function draftReview(reviewId: string, instruction?: string, o: { h
   if (loc.status !== "active") throw new Error("location_not_active");
   // One generation from the business and global daily AI budget (K-100); throws "ai_budget_*" when used up.
   await takeAiBudget(rv.location_id);
-  const meter = newMeter();
+  const meter = newMeter("reply");
   try {
     const { data: cat } = await db.from("knowledge_facts").select("value").eq("location_id", rv.location_id)
       .eq("key", "main_category").order("version", { ascending: false }).limit(1).maybeSingle();
@@ -165,8 +165,9 @@ async function draftWithChecks(rv: DraftRow, business: string, meter: Meter, o: 
   const inputs = await memoryInputs(db, rv.location_id);
   const memory = await buildMemory({ business, facts: inputs.facts, approvedReplies: inputs.replies.slice(0, 5), openQuestions: inputs.openQuestions, language: language ?? "unknown" });
   // An empty answer counts as an answer that does not parse: the draft is kept back, never retried blindly.
-  const send = (system: Parameters<typeof draftMessage>[0], user: string, max: number) =>
-    draftMessage(system, user, max, meter).catch((e) => {
+  useTool("reply", "read_business_knowledge");
+  const send: Send = (system, user, max, opts) =>
+    draftMessage(system, user, max, meter, opts).catch((e) => {
       if (String(e).includes("empty reply")) return { text: "", model: MODELS.draft };
       throw e;
     });
