@@ -122,6 +122,11 @@ Sentry emails alert rules to members of the organisation, so hello@kabsi.co must
 
 ## 8. For the email inbox test (30.4)
 
-Give the build session an Outlook address to use for this test only (a new free outlook.com address is fine; it will be
-removed afterwards). Your Gmail is already connected for the test. Check the hello@kabsi.co inbox and the Spam folder
-for the 20-odd test emails and tell the session where each one landed.
+Done so far (24 Oct 2026): 43 test emails to hello@kabsi.co, all delivered, and four types in your Gmail inbox with DKIM,
+SPF and DMARC passing. Still needed from you:
+
+1. Open the hello@kabsi.co mailbox (Zoho) and its Spam folder: the 43 emails start with "Yawmiyati:" and a few other
+   subjects. Tell the session whether any is in Spam.
+2. Give the session an Outlook address to use for this test only (a new free outlook.com address is fine).
+3. Open mail-tester.com, copy the address it shows (it looks like test-xxxx@srv1.mail-tester.com) and give it to the
+   session; it sends the emails there and reads the score. The target is 9 of 10 or better.
