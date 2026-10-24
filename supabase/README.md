@@ -1,8 +1,8 @@
 # Kabsi backend (Supabase project `kabsi-prod`, ref `ynjdqjlmdwjgbfezevxy`)
 
-- `migrations/` — every migration already applied to production, named with the exact version
+- `migrations/`: every migration already applied to production, named with the exact version
   Supabase recorded (`list_migrations`). Never edit an applied file; add a new one.
-- `functions/` — Edge Functions, deployed by Claude (Supabase MCP) and kept here as the source of truth.
+- `functions/`: Edge Functions, kept here as the source of truth and deployed by `.github/workflows/deploy.yml`.
   `_shared/kabsi.ts` (clients, auth, rate limit, Sentry, branded email) and `_shared/google/` (the only
   place that calls Google: hello@kabsi.co access, Places, `GOOGLE_MODE=mock|live`; import `_shared/google/index.ts`)
   are bundled into each function at deploy time.
