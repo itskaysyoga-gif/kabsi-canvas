@@ -56,6 +56,7 @@ file was made by reading the code (`Deno.env.get`, `process.env`, `import.meta.e
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Vercel env; build-time, checked by `scripts/check-env.mjs` | the website; public by design, it reaches the browser | Not a secret | n/a |
 | `GOOGLE_CLIENT_ID` | Supabase secret | the Google layer, `health` | Not a secret | n/a |
 | `GOOGLE_MODE` | Supabase secret (and `app_settings.google_mode`) | the Google layer; `mock` or `live` | Not a secret | n/a |
+| `GOOGLE_PUBSUB_AUDIENCE`, `GOOGLE_PUBSUB_SERVICE_ACCOUNT` | Supabase secret (set by Rashid with the Pub/Sub push subscription, P0.7-03) | `google-events`: the token audience and the service account Google signs each push for | Not a secret | n/a |
 | `KAPSO_PHONE_NUMBER_ID` | Supabase secret | `whatsapp` sender | Not a secret | n/a |
 | `KAPSO_CONFIG_ID` | Supabase secret (set 23 Oct 2026 per master plan 9.8; no code reads it yet) | session 13b | Not a secret | n/a |
 | `KAPSO_TEMPLATE_REVIEW_ALERT`, `KAPSO_TEMPLATE_POST_READY`, `KAPSO_TEMPLATE_PROFILE_CHANGE`, `KAPSO_TEMPLATE_PROFILE_CHECK` | Supabase secret | `whatsapp`, `profile-snapshot` (approved template names) | Not a secret | n/a |

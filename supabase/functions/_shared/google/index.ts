@@ -30,6 +30,9 @@ import * as mediaMock from "./media/mock.ts";
 import * as performanceLive from "./performance/live.ts";
 import * as performanceMock from "./performance/mock.ts";
 import * as placesLive from "./places/live.ts";
+import * as verificationsLive from "./verifications/live.ts";
+import * as verificationsMock from "./verifications/mock.ts";
+import type { VoiceOfMerchantState } from "./types.ts";
 import {
   type FieldValue, type GDate, type GoogleReview, type Listing, type LocalPost, type Location, type ManagedLocation, type MockSeed,
   type PostInput, PROTECTION_FIELDS, type ProtectionField, type ProtectionRead, type SkippedInvitation, type SpecialDay,
@@ -462,4 +465,11 @@ export async function coachRead(locationId: string): Promise<CoachNumbers & { so
 export async function findCategory(locationId: string, region: string, displayName: string) {
   assertNotConcierge(locationId);
   return by(modeFor(locationId), categoriesLive, categoriesMock).findCategory(region, displayName);
+}
+
+// ─── Google's state for the profile (master plan 18.2, read only): whether Kabsi's edits can reach it, and what Google
+// asks for when they cannot (suspended, verify, ownership). The mock is a verified profile with Voice of Merchant.
+export async function readGoogleState(locationId: string): Promise<VoiceOfMerchantState> {
+  assertNotConcierge(locationId);
+  return await by(modeFor(locationId), verificationsLive, verificationsMock).getVoiceOfMerchantState(locationId);
 }

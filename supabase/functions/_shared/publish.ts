@@ -26,6 +26,8 @@ export type Item = {
 export type Claim =
   | ({ result: "claimed" } & Item)
   | { result: "not_due"; publish_after: string }
+  // 18.2: Google needs action on the profile; nothing is sent and the item stays approved until Google clears it.
+  | { result: "paused"; action: string; retry_at: string }
   | { result: "concierge" | "not_approved" | "stopped" | "missing"; state?: string };
 
 export type CheckClaim =
@@ -97,6 +99,7 @@ const toItem = (c: Item): Item => ({
 export async function publishOne(id: string, deps: PublishDeps): Promise<string> {
   const c = await deps.claim(id);
   if (c.result === "not_due") throw new RetryLater("publish: inside the undo window", new Date(c.publish_after));
+  if (c.result === "paused") throw new RetryLater(`publish: Google needs action (${c.action})`, new Date(c.retry_at));
   if (c.result !== "claimed") return c.result; // concierge task made, undone, already sent, or stopped
   const item = toItem(c);
   if (!(item.target_type in NOUN)) throw new Error(`publish: unknown kind ${item.target_type}`);
