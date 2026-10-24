@@ -43,6 +43,9 @@ export AWS_REQUEST_CHECKSUM_CALCULATION=when_required AWS_RESPONSE_CHECKSUM_VALI
 EP="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
 S3="s3://$BUCKET"
 
+for tool in age jq git python3 psql pg_restore; do
+  command -v "$tool" >/dev/null || { say "::error::$tool is not installed on this machine"; exit 1; }
+done
 FAILS=()
 fail() { say "::error::$*"; FAILS+=("$*"); }
 decrypt() { python3 -I scripts/backup/age-pass.py decrypt "$1" "$2"; }

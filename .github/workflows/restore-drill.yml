@@ -40,10 +40,11 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
-      - name: PostgreSQL 17 client
+      - name: PostgreSQL 17 client and age
         run: |
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y >/dev/null
-          sudo apt-get install -y --no-install-recommends postgresql-client-17 >/dev/null
+          sudo apt-get install -y --no-install-recommends postgresql-client-17 age >/dev/null
+          age --version
           echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
       - name: Restore the newest backup and check it
         env:

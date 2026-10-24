@@ -75,6 +75,9 @@ record_failure() {
 }
 trap 'record_failure' ERR
 
+for tool in age jq git python3; do
+  command -v "$tool" >/dev/null || { say "::error::$tool is not installed on this machine"; exit 1; }
+done
 encrypt() { python3 -I scripts/backup/age-pass.py encrypt "$1" "$2"; }
 decrypt() { python3 -I scripts/backup/age-pass.py decrypt "$1" "$2"; }
 size() { stat -c %s "$1"; }
