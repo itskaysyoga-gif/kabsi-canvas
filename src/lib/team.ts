@@ -71,5 +71,3 @@ export const setPolicy = (locationId: string, kind: ApprovalKind, managersToo: b
     p_kind: kind,
     p_policy: managersToo ? "owner_and_managers" : "owner",
   });
-/** After sign-in: an invitation for this address becomes a membership. */
-export const claimTeamInvites = () => rpc<number>("claim_team_invites", {});

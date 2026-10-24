@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/sheet";
 import { ReviewHead } from "@/components/reviews/review-head";
 
-export { ReviewHead, Stars } from "@/components/reviews/review-head";
+export { ReviewHead } from "@/components/reviews/review-head";
 import { ReviewGraphic } from "@/components/reviews/review-graphic";
 import { ReportReview } from "@/components/reviews/report-review";
 import { myAccess } from "@/lib/team";

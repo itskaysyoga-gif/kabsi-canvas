@@ -51,17 +51,6 @@ export async function waitingReplies(locationId: string): Promise<number> {
   return count ?? 0;
 }
 
-/** Splits the list the way Home shows it: review replies, the other things to act on, and profile gaps. */
-export function groupTasks(tasks: Task[]) {
-  const replies = tasks.filter((t) => t.kind === "review_reply");
-  return {
-    replies,
-    highRisk: replies.filter((t) => t.evidence["risk"] === "high").length,
-    attention: tasks.filter((t) => t.kind !== "review_reply" && t.kind !== "profile_gap"),
-    gaps: tasks.filter((t) => t.kind === "profile_gap"),
-  };
-}
-
 /** Opens Nora, the assistant, optionally with a first message. */
 export function askNora(prompt?: string) {
   window.dispatchEvent(new CustomEvent("kabsi:open-nora", { detail: { prompt } }));

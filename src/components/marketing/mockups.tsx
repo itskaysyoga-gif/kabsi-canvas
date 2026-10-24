@@ -148,25 +148,6 @@ export function ReviewScreen({ review = EXAMPLE_REVIEW }: { review?: InboxReview
   );
 }
 
-/** The home card for a new review, as the app's Action Center draws it. */
-export function ActionScreen() {
-  return (
-    <KabsiCard
-      needsYou
-      eyebrow="New review, 4 stars"
-      title="Emma left a review"
-      draft={EXAMPLE_REVIEW.draft?.body}
-      note="Nothing is published until you approve it."
-      actions={
-        <>
-          <FakeButton className="h-11 px-5 text-sm">Approve reply</FakeButton>
-          <span className={cn(buttonVariants({ variant: "tertiary" }), "px-2 text-sm")}>Later</span>
-        </>
-      }
-    />
-  );
-}
-
 /** A change Google Protection found, as the app's card draws it. A phone number moved by one digit. */
 export const EXAMPLE_CHANGE: Change = {
   id: "example",

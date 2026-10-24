@@ -305,41 +305,6 @@ export function DemoQr({ className }: { className?: string }) {
   );
 }
 
-// A drawn card (not a photo): instruction first, mark small, code DEMO24 only (KABSI-STICKER-SPEC).
-export function CardRender({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        "relative aspect-square w-full max-w-[340px] rounded-large bg-kb-sand p-6 text-kb-ink shadow-[0_18px_40px_rgba(0,0,0,.18)] ring-1 ring-kb-hairline",
-        className,
-      )}
-      aria-label="Example counter card"
-      role="img"
-    >
-      <p className="font-display text-[clamp(1.5rem,6vw,2rem)] leading-[1.05] text-kb-ink">
-        Leave us a review on Google
-      </p>
-      <div className="mt-4 grid grid-cols-[1fr_auto] items-end gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="kb-ripple grid size-12 place-items-center rounded-full bg-kb-white ring-1 ring-kb-hairline">
-              <Nfc className="size-6" />
-            </span>
-            <KabsiMark className="size-6" />
-          </div>
-          <p className="mt-2 text-sm font-bold leading-5">Tap your phone here</p>
-          <p className="text-xs text-kb-stone">or scan the QR code</p>
-        </div>
-        <div className="rounded-lg bg-kb-white p-2">
-          <DemoQr className="size-24" />
-          <p className="mt-1 text-center font-mono text-[10px] tracking-widest">DEMO24</p>
-        </div>
-      </div>
-      <p className="absolute inset-x-6 bottom-4 text-[10px] text-kb-stone">Powered by kabsi.co</p>
-    </div>
-  );
-}
-
 export function FaqList({ items }: { items: { q: string; a: string }[] }) {
   return (
     <div className="divide-y divide-kb-hairline border-y border-kb-hairline">
