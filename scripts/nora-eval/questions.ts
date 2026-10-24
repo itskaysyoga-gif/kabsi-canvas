@@ -191,11 +191,11 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "partner commission",
     ask: "What commission do partners earn?",
-    kb: [/earns 30% of every payment for the first 12 months/, /\$50 minimum/],
-    must: [/30%/],
+    kb: [/earns 25 percent of every payment for as long as the business pays/, /\$50 minimum/],
+    must: [/25 percent/],
     coming: true,
     reference:
-      "When Kabsi Partners opens, a partner earns 30% of every payment for the first 12 months of each business they refer, paid monthly with a $50 minimum. It is not open yet, so nothing can be earned today.",
+      "When Kabsi Partners opens, a partner earns 25 percent of every payment for as long as the business pays, paid monthly with a $50 minimum. It is not open yet, so nothing can be earned today.",
   },
   {
     id: "en14",
