@@ -107,12 +107,12 @@ async function tick() {
       const body = g.cleared ? SAY.googleCleared(g.business) : needsActionBody(g.business, caseOf(g.evidence, g.title));
       await notify(deps.out, { phone: g.phone, userId: g.user_id, locationId: g.location_id, kind: g.cleared ? "google_cleared" : "google_needs_action",
         body, template: ref("google_action", { business: g.business }), urgent: !g.cleared,
-        dedupe: `gna:${g.task_id}:${g.cleared ? "cleared" : "open"}:${g.user_id}` });
+        dedupe: `gna:${g.task_id}:${g.cleared ? "cleared" : String(g.evidence?.action ?? "open")}:${g.user_id}` });
       for (const p of staffPhones) {
         await notify(deps.out, { phone: p, userId: null, locationId: g.location_id, kind: "staff_alert", urgent: true,
           body: `Google ${g.cleared ? "cleared" : "needs action on"} ${g.business}. The owner has been told on WhatsApp.`,
           template: ref("staff_alert", { summary: `Google ${g.cleared ? "cleared" : "needs action on"} ${g.business}` }),
-          dedupe: `gna_staff:${g.task_id}:${g.cleared ? "cleared" : "open"}:${p}` });
+          dedupe: `gna_staff:${g.task_id}:${g.cleared ? "cleared" : String(g.evidence?.action ?? "open")}:${p}` });
       }
     }
     out.google_action = due.length;

@@ -89,6 +89,9 @@ Deno.test("18.2: the case is read from session 19's task", () => {
   assert.equal(caseOf({ action: "COMPLY_WITH_GUIDELINES" }), "suspended");
   assert.equal(caseOf({ reason: "verify" }), "verify");
   assert.equal(caseOf({ has_voice_of_merchant: false }, "Google needs action"), "other");
+  assert.equal(caseOf({ action: "ownership" }), "ownership");
+  assert.equal(caseOf({ action: "no_voice" }), "other");
+  assert.equal(caseOf({ action: "suspended" }), "suspended");
 });
 
 const inbound = (o: Partial<Inbound>): Inbound => ({ phoneNumberId: "P", from: "+12125550143", messageId: "m", timestamp: 1, type: "text", text: null, buttonId: null, mediaId: null, ...o });

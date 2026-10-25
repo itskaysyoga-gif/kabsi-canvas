@@ -511,7 +511,8 @@ language sql security definer set search_path = '' as $$
 $$;
 
 -- 18.2: the owners and managers to tell when Google needs action on a business, and when it is cleared. Read from the
--- task session 19 creates (kind google_needs_action); a message already queued for a person is not queued again.
+-- task session 19's record_google_state creates (kind google_needs_action, evidence.action); a message already queued
+-- for a person and that action is not queued again, so a changed action is told once more.
 create or replace function public.whatsapp_google_action_due() returns jsonb
 language sql stable security definer set search_path = '' as $$
   select coalesce(jsonb_agg(jsonb_build_object('task_id', t.id, 'location_id', t.location_id, 'business', l.name,
@@ -524,7 +525,7 @@ language sql stable security definer set search_path = '' as $$
    where t.kind = 'google_needs_action' and t.created_at > now() - interval '3 days'
      and (t.state = 'open' or t.resolved_at > now() - interval '3 days')
      and not exists (select 1 from public.whatsapp_outbox ob where ob.dedupe_key =
-           'gna:' || t.id || ':' || case when t.resolved_at is null then 'open' else 'cleared' end || ':' || o.user_id)
+           'gna:' || t.id || ':' || case when t.resolved_at is null then coalesce(t.evidence ->> 'action', 'open') else 'cleared' end || ':' || o.user_id)
 $$;
 
 -- The hourly health read: kept, and a drop in quality or a block is an ops event (the email goes to hello@kabsi.co).

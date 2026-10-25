@@ -6,19 +6,25 @@
 //   - "Fix suspended or disabled profiles": https://support.google.com/business/answer/4569145
 //   - "Verify your business on Google": https://support.google.com/business/answer/7107242
 //   - "Guidelines for representing your business on Google": https://support.google.com/business/answer/3038177
+//   - "Request ownership of a Business Profile" (read 25 Oct 2026): https://support.google.com/business/answer/4566671
 
 export const HELP = {
   suspended: "https://support.google.com/business/answer/4569145",
   verify: "https://support.google.com/business/answer/7107242",
   guidelines: "https://support.google.com/business/answer/3038177",
+  ownership: "https://support.google.com/business/answer/4566671",
 } as const;
 
-export type GoogleCase = "suspended" | "verify" | "other";
+export type GoogleCase = "suspended" | "verify" | "ownership" | "other";
 
-/** The case from the task's evidence (session 19 reads VoiceOfMerchantState: a complyWithGuidelines action, a verify
- *  action, or hasVoiceOfMerchant false). Unknown shapes fall back to the general case. */
+/** The case from session 19's task: evidence.action is suspended, verify, ownership or no_voice (record_google_state).
+ *  Other shapes are read loosely and fall back to the general case. */
 export function caseOf(evidence: Record<string, unknown> | null | undefined, title?: string | null): GoogleCase {
+  const a = String(evidence?.action ?? "");
+  if (a === "suspended" || a === "verify" || a === "ownership") return a;
+  if (a === "no_voice") return "other";
   const t = JSON.stringify(evidence ?? {}).toLowerCase() + " " + String(title ?? "").toLowerCase();
+  if (/ownership|claims this profile/.test(t)) return "ownership";
   if (/comply|guideline|suspend|disabled/.test(t)) return "suspended";
   if (/verif/.test(t)) return "verify";
   return "other";
@@ -38,6 +44,12 @@ export function needsActionBody(business: string, c: GoogleCase): string {
       "What Google says: the business needs to be verified.",
       "What to do:\n1. Sign in to your Business Profile with the Google account that owns it.\n2. Choose Verify and follow the steps Google shows, for example a video or a code.",
       `Google's help page: ${HELP.verify}`,
+    );
+  } else if (c === "ownership") {
+    lines.push(
+      "What Google says: someone else also claims this profile, so Google has to settle who manages it.",
+      "What to do:\n1. Sign in with the Google account that should own the profile.\n2. Follow Google's steps to request ownership, or answer the request Google sent you.",
+      `Google's help page: ${HELP.ownership}`,
     );
   } else {
     lines.push(
