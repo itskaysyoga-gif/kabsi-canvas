@@ -5,6 +5,10 @@
 // https://cloud.google.com/pubsub/docs/authenticate-push-subscriptions
 // https://developers.google.com/my-business/reference/notifications/rest/v1/NotificationSetting
 
+// Kabsi's topic (lane R, 25 Oct 2026). Not a secret: Google only publishes to it, and only the push subscription with
+// Kabsi's service account reads it.
+export const KABSI_PUBSUB_TOPIC = "projects/smiling-chess-505915-b7/topics/gbp-notifications";
+
 const ISSUERS = ["accounts.google.com", "https://accounts.google.com"];
 export const GOOGLE_CERTS = "https://www.googleapis.com/oauth2/v3/certs";
 
