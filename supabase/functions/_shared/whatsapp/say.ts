@@ -22,9 +22,10 @@ export const SAY = {
     "I am Nora, Kabsi's assistant. Kabsi looks after your Google listing from WhatsApp: a reply ready for every review, your listing kept right, and nothing goes live without your yes.\n\nYou can send: your business name for a free scan, \"prices\", \"start free\", \"partner\" or \"talk to a person\".",
   prices:
     "Kabsi is free for 14 days, no card. Then Essentials is 19 US dollars a month and Pro is 39 US dollars a month, with an extra location at 15. Card payments open soon. Details: kabsi.co/pricing",
-  trial: "Start free here, no card, about 10 minutes: kabsi.co/get-started. Then connect this WhatsApp from Settings.",
+  // 13b part 2 (judged 25 Oct): only what the facts say is open today; WhatsApp for owners and Partners are not open yet.
+  trial: "Start free here, no card, about 10 minutes: kabsi.co/get-started. The free trial starts once Kabsi can reach your Google listing.",
   partnerProgram:
-    "Kabsi Partners earn 25 percent of every payment, for as long as the business stays. Partner sign-up on WhatsApp opens soon. Read more: kabsi.co/partners",
+    "Kabsi Partners is not open yet. When it opens, a partner earns 25 percent of every payment for as long as the business pays. Read more: kabsi.co/partners",
   needsAccount: "That needs a Kabsi account for your business. Start free, no card: kabsi.co/get-started",
 
   // Binding (9.2).

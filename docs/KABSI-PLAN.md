@@ -257,7 +257,7 @@ One line per decision. The full text, with what each one changes and why, is `do
 | R-61 | No Arabic shown | Approved |
 | R-62 | WhatsApp agent and Kapso | Approved |
 | R-63 | Tools | Merged |
-| R-64 | Staff alerts move from Slack to WhatsApp | Building (PR 230) |
+| R-64 | Staff alerts move from Slack to WhatsApp | Merged (PR 230; Slack function 404, cron jobs gone; first alert queued for the staff phone, not yet delivered) |
 | R-65 | Gemini review of 23 Oct | Approved |
 | R-66 | Keeping Kabsi running, safe and backed up | Building |
 | R-67 | Plans and payments with Creem: master plan section 10 rewritten, the trial in Kabsi, the webhook as the only writer of paid state, plans open at going live | Merged (PR 221) |
