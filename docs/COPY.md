@@ -27,13 +27,18 @@ Decisions taken while writing (lane R, R-41):
 - Under it: "Free. Takes about 10 seconds. No sign-up."
 - Waitlist state (cap 0): "The free scan opens soon. Leave your email or WhatsApp and Kabsi sends your map the day it opens." Button: "Save my place". Done: "Saved. You are on the list."
 
+## 0.1 Words owners understand (lane R, 25 Oct 2026)
+
+- Never "spot", "grid", "grid point", "geo" or "pin" in a line an owner reads. Say "places around you" and "searched like a customer". The number on a dot is "where you came up", 1 is first.
+- Never "the app" or "app". Kabsi has no app. Say "the Kabsi website", "your Kabsi account" or "on kabsi.co". Nav item: "How it works", never "The app". WhatsApp is WhatsApp.
+
 ## 1. Home (/)
 
 **Hero**
 - H1: "See where you show up on Google and in AI answers."
 - Lead: "Kabsi checks your Google Maps ranking and what ChatGPT and Gemini say about you, helps you get more reviews the right way, keeps your listing right and posts for you. You reply Yes on WhatsApp."
 - Scan box. Under it: "Free for 14 days. No card. Cancel in WhatsApp."
-- Visual (Example): the map filling in, the phone receiving it. Map line in the chat: "You are top 3 in 18 of 49 spots for 'dentist'. Smile Clinic beats you north of the mall."
+- Visual (Example): the map filling in, the phone receiving it. Map line in the chat: "We searched 'dentist' on Google Maps from 49 places around your clinic, like a customer would. You came up in the top 3 from 18 of them. North of the mall, Smile Clinic comes up first."
 
 **Pillars** (H2: "One manager for how customers find you")
 1. See where you show up: "A map of your ranking across your area, what AI assistants say about you, and the 3 to 5 competitors around you."
@@ -73,7 +78,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 - Fast result card: "At your address you rank [n] for '[keyword]'." If not in the top 20: "At your address you are not in the top 20 for '[keyword]'."
 - Competitors: H3 "Who shows up around you" then 3 rows: name, rating, review count.
 - AI check: H3 "What an AI assistant said" then "[ChatGPT] named you" or "[ChatGPT] did not name you. It named [A], [B] and [C]." Label: "One sample. AI answers change from run to run."
-- Full map, loading: "Checking 49 spots around you. This takes a few minutes." Button: "Send the full map to my WhatsApp". Ready: the map, then three numbers: "Average rank [n]" / "Top 3 in [n] of 49 spots" / "[Competitor] beats you in [n] spots". Credit: "Kabsi rank check, not provided by Google."
+- Full map, loading: "Searching from 49 places around you, like a customer would. This takes a few minutes." Button: "Send the full map to my WhatsApp". Ready: the map, then three numbers: "Your average position: [n]" / "Top 3 from [n] of 49 places" / "[Competitor] comes up above you from [n] places". Legend under the map: "Each dot is a place near you where Kabsi searched like a customer. The number is where you came up. 1 is first." Credit: "Kabsi rank check, not provided by Google."
 - Public facts (H3 "From your public Google listing"): Rating, Reviews, Latest reviews returned, Hours, Photos, Website, Phone, Categories. Each shows the value or "Missing". Line: "Shown live from Google. Kabsi does not store it."
 - Box (H3 "What Kabsi sees once connected"): "Reviews without a reply, posts, changes others made to your listing, and Google's own warnings."
 - Preview chat (H3 "Here is what Kabsi would send you"): built from a review on their listing. Label: "Preview. Not posted."
@@ -197,7 +202,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 2. "Is anything posted without me?" "No. Every reply, post and change waits for your yes on WhatsApp."
 3. "What if I already reply to reviews myself?" "Keep going. Kabsi drafts a reply for each new review, and you can edit or skip any of them."
 4. "Can Kabsi get me to the top of Google Maps?" "No one can promise that. Kabsi shows where you show up, what changed, and what you can do next."
-5. "Can I edit replies?" "Yes. Tap Edit on WhatsApp or in the app."
+5. "Can I edit replies?" "Yes. Tap Edit on WhatsApp or on the Kabsi website."
 6. "Is this safe with Google?" "Kabsi uses Google's tools for managers and only acts after your yes. Kabsi is independent and not affiliated with Google."
 7. "What happens after the trial?" "Choose a plan to keep going. If you do not, Kabsi stops publishing and you keep your review link and QR code."
 8. "Can I cancel?" "Yes, from WhatsApp, any time."
@@ -211,7 +216,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 - Error: "That code did not work. Check it, or send a new one."
 - Under: "New here?" link "See your map".
 
-## 18. App: onboarding (28.5)
+## 18. Website, signed in: onboarding (28.5)
 
 1. Sign up. H1 "Let's set up [Business]." (or "Find your business" when unknown). Button: "Continue".
 2. Manager. H1 "Add Kabsi as a Manager on Google." Steps with live status: "Invite sent. Waiting for you to accept." / "Access works." Buttons: "Show me how", tertiary "Send this to my manager", "Resend". Line: "Google Business Profile is free from Google. Kabsi is an independent paid service." Link to Google's third party page.
@@ -219,7 +224,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 4. WhatsApp. H1 "Connect WhatsApp." Desktop: "Scan this code with your phone." Phone: button "Open WhatsApp". Line: "Kabsi only messages you about your business. Reply Stop any time."
 5. Done. H1 "Your first map is on its way." Line: "It arrives on WhatsApp within 5 minutes."
 
-## 19. App: dashboard tabs
+## 19. Website, signed in: dashboard tabs
 
 - Home, H1 "Waiting for you". Empty: "All caught up." / "Kabsi will message you on WhatsApp when something needs you." Plan strip: "Pro trial, [n] days left."
 - Visibility, H1 "Where you show up". Sections: "Google Maps" (map, three numbers), "AI answers" ("Named in [n] of [n] answers this period", label "A sample"), "Competitors". Credit line under each: "Kabsi rank check, not provided by Google."
@@ -237,7 +242,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 ## 20. WhatsApp screens (one per role)
 
 - Owner, review: "[Business]: new 4-star review from Maya. 'Great sourdough, a bit of a wait on Saturday.' Reply ready: 'Thank you, Maya...' Reply Yes to publish." Buttons: Yes / Edit / Skip. After Yes: "Published on your Google listing."
-- Owner, first map: "Your first map is ready. You are top 3 in 18 of 49 spots for 'bakery'. Harbor Bakes beats you east of the station. 3 next steps:" Buttons: "Show me" / "Later".
+- Owner, first map: "Your first map is ready. We searched 'bakery' on Google Maps from 49 places around your shop, like a customer standing there. You came up in the top 3 from 18 of them. East of the station, Harbor Bakes comes up first. 3 next steps:" Buttons: "Show me" / "Later".
 - Partner: "Hi Sara. This week: 42 page visits, 6 scans, 2 trials, 1 paying business. Earned $9.75, cleared after the 30-day hold. Next payout: 5 Nov." Buttons: "My link" / "Scan a business".
 - staff_admin: "Morning, Rashid. 3 things today: 2 partner applications, 1 payout list to approve, number health good." Buttons: "Review applications" / "Approve payouts".
 - Unknown: "Welcome to Kabsi. Did you just scan your business on kabsi.co? Send me your business name or the code from the page and I will pick up from there."
