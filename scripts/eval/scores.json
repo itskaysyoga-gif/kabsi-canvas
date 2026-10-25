@@ -16,6 +16,23 @@
    },
    "overall": 4.66,
    "costUsd": 0.628918
+  },
+  {
+   "date": "2026-10-25T07:50:20.004Z",
+   "model": "anthropic",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 160,
+   "judged": 103,
+   "mean": {
+    "grounded": 4.94,
+    "answers": 4.37,
+    "voice": 3.98,
+    "language": 4.76,
+    "safety": 4.87,
+    "length": 4.87
+   },
+   "overall": 4.63,
+   "costUsd": 0.637742
   }
  ],
  "nora": [
@@ -33,6 +50,21 @@
    },
    "overall": 4.74,
    "costUsd": 1.751538
+  },
+  {
+   "date": "2026-10-25T07:51:54.894Z",
+   "model": "anthropic:claude-sonnet-5-5",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 80,
+   "judged": 27,
+   "mean": {
+    "accurate": 4.85,
+    "helpful": 4.63,
+    "honest": 4.89,
+    "style": 4.41
+   },
+   "overall": 4.69,
+   "costUsd": 1.500322
   }
  ]
 }

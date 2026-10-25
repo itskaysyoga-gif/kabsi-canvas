@@ -11,7 +11,8 @@ One page, under 10 KB. Updated 25 Oct 2026 by the lane R chat (master plan 19, 2
 - Ops 1 part B (PR 203 and PR 206): section 30 committed (R-90); weekly encrypted backup and monthly restore drill built (dry run green on `main`: the bundle and all 77 Storage files were read and encrypted; the database step waits for Rashid's secrets); locked installs (`npm ci`) and every action pinned to a SHA; Sentry release tags and source maps; privacy, terms and partner terms; the runbook; Lighthouse CI (report only); advisors check; sender `Kabsi <hello@send.kabsi.co>` live (43 test emails delivered, four in Rashid's Gmail inbox with DKIM, SPF and DMARC passing); the Resend webhook is proven. Detail: `docs/progress/archive/2026-10-24-ops-1-part-b.md`.
 - Session 13b part 1 (the WhatsApp agent): roles and router for every kind of person, the one sender, templates, number health, 18.2 and 18.3, the 141-case suite; migrations applied 25 Oct. Detail and the phone test: `docs/progress/archive/2026-10-25-session-13b-1.md`.
 - 25 Oct, lane R (PR on `claude/lane-r-unified-reference`): the design system approved and written to `DESIGN.md`, the copy for every page in `docs/COPY.md`, the teardown in `docs/source/KABSI-TEARDOWN.md`, the fix-later list `docs/LATER.md`, master plan 30.11, faster session rules in the kabsi-build-session skill, new approved lines in kabsi-copy, the webapp-testing skill.
-- Next: Fix 1 (webhook, templates, eval fixes), then session D (Creem) and V1, then 13b part 2 after the phone test.
+- Fix 1 (PR 219, merged 25 Oct, deploy run 98): the Kapso webhook is registered, the 10 templates are submitted (pending), number health alerts only on YELLOW, RED or BLOCKED, the reply parser takes the first JSON object, the waiting post has Cancel, the evaluation false alarms are fixed. Detail: `docs/progress/archive/2026-10-25-fix-1.md`.
+- Next: the phone test (Rashid), then session D (Creem) and V1, then 13b part 2.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
@@ -22,8 +23,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 |---|---|---|
 | Number acquired | 23 Oct 2026 | +1 205-745-6874 connected in the Kapso project Kabsi.co; Kapso health check Passed 10:17 Beirut (master plan 9.8) |
 | Profile set | 23 Oct 2026 | Photo, about, email, address, website and description live; the display name "Kabsi" is waiting for Meta's approval (master plan 9.8) |
-| Webhook verified | not yet | 25 Oct: `whatsapp/staff/setup` failed, Kapso 422; not registered (session 13b part 1 record) |
-| Templates approved | not yet | 25 Oct: `whatsapp/staff/templates` failed, Meta 400; none submitted |
+| Webhook verified | not yet | 25 Oct (Fix 1): registered, active, on Kabsi's URL, secret in Vault (`whatsapp/staff/setup`, request 49115). Verified when the first message from the phone test arrives |
+| Templates approved | not yet | 25 Oct (Fix 1): all 10 submitted, all PENDING at Meta (request 49120). Approved when they read APPROVED |
 | Inbound tested | not yet | Suite of 141 cases passes in CI; the live pass on Rashid's phone is next |
 | Outbound tested | not yet | A live send to Kabsi's own test phones |
 | Owners switched on | not yet | After the launch gate |
@@ -31,8 +32,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
 - Done 25 Oct: Clean 1 drops (done, read-back 0 on all four), the Places purge (done, read-back `0 | 0 | 0`), the Resend webhook, R2 and the bucket `kabsi-backups`, the five backup secrets, `SENTRY_AUTH_TOKEN` in Vercel, the Pub/Sub topic `gbp-notifications` with its push subscription and secrets, `WHATSAPP_LIVE` set to `true`, the post Undo test.
-- Session 19 rest: the Places purge is done (Rashid ran `supabase/manual/20261025_places_data_purge.sql` on 25 Oct, read-back `0 | 0 | 0`). Pub/Sub waits for a natural review on Yawmiyati: nobody at Kabsi writes or edits a review to test it (fake review rule). The "testing it" post scheduled for 30 Oct: delete it in the app.
-- Phone test (13b part 1): waits for Fix 1 to register the webhook; then make a staff code at kabsi.co/staff and run the test in `docs/progress/archive/2026-10-25-session-13b-1.md`.
+- Session 19 rest: the Places purge is done (Rashid ran `supabase/manual/20261025_places_data_purge.sql` on 25 Oct, read-back `0 | 0 | 0`). Pub/Sub waits for a natural review on Yawmiyati: nobody at Kabsi writes or edits a review to test it (fake review rule). The "testing it" post is cancelled (back to a draft, 25 Oct); Skip it in the app if it is still listed.
+- Phone test (13b part 1): the webhook is registered; make a staff code at kabsi.co/staff and run the test in `docs/progress/archive/2026-10-25-session-13b-1.md`.
 - Postponed to `docs/LATER.md`: the failing Backup run, the disabled branch ruleset, the inbox tests, Sentry membership (free plan allows 1).
 - Supabase Auth: leaked-password protection; paste the four `emails/auth/*.html` templates.
 - Google Cloud: Places quotas and budget alerts; contacts and owners on kabsi.co addresses only.
@@ -52,6 +53,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 25 Oct 2026, Fix 1: webhook, templates, health alert, parser, evaluation, Cancel. Detail: `docs/progress/archive/2026-10-25-fix-1.md`.
 - 25 Oct 2026, lane R: design system, copy, fix-later list, session rules (master plan 30.11).
 - 25 Oct 2026, Session 13b part 1: the WhatsApp agent. Detail: `docs/progress/archive/2026-10-25-session-13b-1.md`.
 - 24 Oct 2026, Ops 1 part B (PR 203, PR 206): detail `docs/progress/archive/2026-10-24-ops-1-part-b.md`.

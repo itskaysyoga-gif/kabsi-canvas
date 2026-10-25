@@ -135,7 +135,7 @@ export const QUESTIONS_28: Question[] = [
     topic: "Ask a customer",
     ask: "Can Kabsi text my customers to ask them for a review?",
     kb: [/Kabsi never messages the customer/],
-    must: [/never messages/i],
+    must: [/never messages|(doesn't|does not|never) (message|text)/i],
     coming: true,
     reference:
       "No, Kabsi never messages your customers. With Ask a customer, which is not available yet, you will share a customer's contact with Kabsi in WhatsApp and Kabsi will send you back a ready message with your review link, which you forward from your own phone. Today you can already use your review link and QR code.",
