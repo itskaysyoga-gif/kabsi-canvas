@@ -12,7 +12,7 @@
 -- 5. private.entitlements adds the plan (essentials or pro), the plan's limits (27.4), the locations allowed, the
 --    payment grace (7 days from the first failed payment) and the paused state. public.founding_places_left is the
 --    live count for the pricing page (the first 30 paying businesses, live mode only).
--- 6. trial_days_for: 30 days for a business that came through a partner (signup_source 'partner...', 29.1), 14 otherwise.
+-- 6. trial_days_for: 30 days for a business that came through a partner (signup_source partner_link or partner_invite, 29.1), 14 otherwise.
 -- No row is removed by this file.
 
 -- 1. subscriptions --------------------------------------------------------------------------------------------------

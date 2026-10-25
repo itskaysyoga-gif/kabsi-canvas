@@ -16,7 +16,7 @@ from (values ('00000000-0000-4000-8000-0000000010a1'::uuid, 'billing-owner-a@exa
              ('00000000-0000-4000-8000-0000000010a2'::uuid, 'billing-owner-b@example.test')) as u(id, email);
 insert into public.locations (id, name, place_id, created_by, time_zone, signup_source)
 values ('00000000-0000-4000-8000-0000000010c1', 'Billing Shop', 'billing-place-1', '00000000-0000-4000-8000-0000000010a1', 'UTC', 'self'),
-       ('00000000-0000-4000-8000-0000000010c2', 'Other Shop', 'billing-place-2', '00000000-0000-4000-8000-0000000010a2', 'UTC', 'partner:P-TEST');
+       ('00000000-0000-4000-8000-0000000010c2', 'Other Shop', 'billing-place-2', '00000000-0000-4000-8000-0000000010a2', 'UTC', 'partner_link');
 insert into public.location_members (location_id, user_id, role)
 values ('00000000-0000-4000-8000-0000000010c1', '00000000-0000-4000-8000-0000000010a1', 'owner'),
        ('00000000-0000-4000-8000-0000000010c2', '00000000-0000-4000-8000-0000000010a2', 'owner');
@@ -97,7 +97,8 @@ update public.subscriptions set mode = 'live' where provider_subscription_id = '
 select is(public.founding_places_left(), 29, 'a live founding business takes one');
 
 -- The trial: 30 days through a partner (29.1), 14 otherwise.
-select is(public.trial_days_for('partner:P-TEST'), 30, '30 days through a partner');
+select is(public.trial_days_for('partner_link'), 30, '30 days through a partner link');
+select is(public.trial_days_for('partner_invite'), 30, 'and through a partner invite');
 select is(public.trial_days_for('self'), 14, '14 days otherwise');
 
 -- The paid buttons: closed until billing_open, except for a Kabsi test account.
