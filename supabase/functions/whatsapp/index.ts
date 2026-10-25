@@ -239,11 +239,23 @@ async function staffAction(action: string) {
         const { data: roles } = await admin().from("phone_roles").select("phone, user_id").eq("role", "staff_admin").is("revoked_at", null).limit(1);
         const target = roles?.[0];
         if (!target?.phone) return { ok: false, error: "no_staff_phone" };
-        if (!(await ctx.out.db.state(target.phone as string)).live_ok) return { ok: false, error: "phone_not_allow_listed" };
+        const st = await ctx.out.db.state(target.phone as string);
+        if (!st.live_ok) return { ok: false, error: "phone_not_allow_listed" };
         const t = ref("staff_alert", { summary: "QA 1 delivery check, no action needed" });
-        const sent = await ctx.out.live.template(target.phone as string, t.name, t.params);
-        await admin().rpc("whatsapp_record", { p_user: target.user_id, p_location: null, p_kind: "qa_delivery_proof", p_state: "sent", p_provider_id: sent.id, p_template: t.name });
-        return { ok: true, provider_id: sent.id, to_ending: (target.phone as string).slice(-4), template: t.name };
+        let sent: { id: string };
+        let via = "template";
+        try {
+          sent = await ctx.out.live.template(target.phone as string, t.name, t.params);
+        } catch (e) {
+          // Meta has not approved the template yet (25 Oct: all ten pending). Inside the 24 hour window the person's own last message
+          // opened, one plain line to the same allow-listed phone proves the same loop: send, then Kapso's delivered receipt.
+          const open = st.window_expires_at && Date.parse(st.window_expires_at) > Date.now();
+          if (!open || !/132001|does not exist/i.test(String((e as Error)?.message ?? e))) throw e;
+          sent = await ctx.out.live.text(target.phone as string, "Kabsi QA delivery check. No action needed.");
+          via = "text_in_window";
+        }
+        await admin().rpc("whatsapp_record", { p_user: target.user_id, p_location: null, p_kind: "qa_delivery_proof", p_state: "sent", p_provider_id: sent.id, p_template: via === "template" ? t.name : null });
+        return { ok: true, provider_id: sent.id, to_ending: (target.phone as string).slice(-4), via };
       }
       case "deliverystatus": {
         const { data } = await admin().from("whatsapp_messages").select("provider_id, state, template, error, created_at, updated_at").eq("kind", "qa_delivery_proof").order("created_at", { ascending: false }).limit(1);
