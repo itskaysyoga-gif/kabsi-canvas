@@ -482,9 +482,9 @@ function Page() {
             are refused and never stored.
           </li>
           <li>
-            Backups: encrypted copies of the database, the photos and our code are kept for 8 weeks
+            Backups: encrypted copies of the database, the photos and our code are kept for 21 days
             in Cloudflare R2, then deleted. Supabase also keeps its own short-lived backups. A
-            business you delete stays in older backups until they expire, at most 8 weeks, and is
+            business you delete stays in older backups until they expire, at most 21 days, and is
             never restored into the live service afterwards.
           </li>
           <li>Internal job logs: 90 days.</li>
@@ -534,7 +534,7 @@ function Page() {
           In Settings, choose <b>Delete this business</b> (you have 7 days to change your mind), or
           email {CONTACT_EMAIL} from your account email. We delete the business's reviews, drafts,
           posts, photos, reports and settings, and confirm by email. Older backups hold a copy until
-          they expire, at most 8 weeks later (section 9). To stop Kabsi reaching your Google
+          they expire, at most 21 days later (section 9). To stop Kabsi reaching your Google
           profile, disconnect Kabsi as described in section 4. To delete your login as well, say so
           in your email.
         </p>
