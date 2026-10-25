@@ -30,7 +30,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
 - **Session 13b part 1:** set the Supabase secret `WHATSAPP_LIVE` to `true`, make a staff code at kabsi.co/staff, then the 10-minute phone test in `docs/progress/archive/2026-10-25-session-13b-1.md`.
-
+- Session 19 rest: run `supabase/manual/20261025_places_data_purge.sql` (expected read-back `0 | 0 | 0`); set up Pub/Sub and the two secrets (`docs/progress/archive/2026-10-24-session-19-rest.md`); approve the Yawmiyati Update only once yawmiyati.com answers.
 - GitHub repository settings: Dependabot alerts and Dependabot security updates are done (marked 24 Oct by Clean 1, as Rashid asked). Open: Secret Protection (secret scanning and push protection), which Rashid confirms himself.
 - Clean 1: run `supabase/manual/20261024_clean1_drops.sql` after a yes to its list (two empty or backup tables, two unused functions).
 - Supabase Auth: leaked-password protection; paste the four `emails/auth/*.html` templates (the footer changed again).
@@ -54,7 +54,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 - 25 Oct 2026, Session 13b part 1: the WhatsApp agent. Detail: `docs/progress/archive/2026-10-25-session-13b-1.md`.
 - 24 Oct 2026, Ops 1 part B (PR 203, PR 206): detail `docs/progress/archive/2026-10-24-ops-1-part-b.md`.
-- 24 Oct 2026, Session 19 rest (in progress, stopped at 25.2 for Rashid): PR 204 merged (N-004 fix, structured drafts, the six agents, cost per agent); PR 205 (Google needs action, Pub/Sub events, checks before every write). Google policy conflicts found and waiting for Rashid. Detail: `docs/progress/archive/2026-10-24-session-19-rest.md`.
+- 25 Oct 2026, Session 19 rest (in progress): PR 204 and PR 205 merged; the Google policy points decided by Rashid (R-91, master plan 30.10); PR C records them and stops storing Places content. Detail: `docs/progress/archive/2026-10-24-session-19-rest.md`.
 - 24 Oct 2026, Clean 1 (master plan 28.9): detail `docs/progress/archive/2026-10-24-clean-1.md`. Tracked files 1,255 to 1,204 (11.59 MB to 11.27 MB), npm packages 438 to 364.
 - 24 Oct 2026, Session 0 part 2: docs diet (detail: `docs/progress/archive/2026-10-24-session-0-diet.md`). Plan index 29 KB, status page 5.8 KB; facts split into `knowledge/facts/` and `knowledge/internal/` with one generator (`node scripts/build-kb.mjs`). File sizes are in the pull request.
 - 24 Oct 2026, Session 0 part 1 (PR 198): master plan 20 to 29. Detail: `docs/progress/archive/evidence.md`, entry "Session 0 part 1".

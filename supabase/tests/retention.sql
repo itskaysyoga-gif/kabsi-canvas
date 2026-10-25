@@ -15,7 +15,7 @@ select results_eq(
     ('audit_log', 731, '24 months, content fields redacted per the rows above', 'Proof of approvals'),
     ('drafts_and_payloads', null::int, 'Redacted with their review (exists)', 'Linked to Google content'),
     ('email_log', 366, '12 months (exists)', 'Delivery disputes'),
-    ('google_data_after_access_lost', 30, 'Deleted after 30 days (exists)', 'Google API policy'),
+    ('google_data_after_access_lost', 7, 'Deleted 7 days after the business leaves Kabsi', 'Google API policy'),
     ('google_performance', 30, '30 days, re-fetched on demand', 'Google API policy'),
     ('google_profile_values', 30, '30 days', 'Google API policy'),
     ('nora_chats', 366, '12 months (exists)', 'Support'),
@@ -41,11 +41,11 @@ select ok(not has_function_privilege('authenticated', 'private.run_retention()',
   'the retention functions are closed to the browser');
 
 -- Seed rows on both sides of every limit -----------------------------------------------------------------------------
--- LA (..c1) is the victim business; a second business ..c3 lost Google access 31 days ago, ..c4 only 29 days ago.
+-- LA (..c1) is the victim business; a second business ..c3 lost Google access 31 days ago, ..c4 only 6 days ago (the limit is 7 days since master plan 30.10.1).
 
 insert into public.locations (id, name, place_id, access_lost_at, access_granted_at) values
   ('00000000-0000-4000-8000-0000000000c3', 'Lost 31', 'lost-31', now() - interval '31 days', null),
-  ('00000000-0000-4000-8000-0000000000c4', 'Lost 29', 'lost-29', now() - interval '29 days', null);
+  ('00000000-0000-4000-8000-0000000000c4', 'Lost 6', 'lost-6', now() - interval '6 days', null);
 insert into public.reviews (id, location_id, google_review_id, star_rating, review_created_at, comment, reviewer_name, fetched_at) values
   ('00000000-0000-4000-8000-000000000e31', '00000000-0000-4000-8000-0000000000c3', 'lost-31-review', 4, now() - interval '40 days', 'Kept?', 'Lost A', now()),
   ('00000000-0000-4000-8000-000000000e29', '00000000-0000-4000-8000-0000000000c4', 'lost-29-review', 4, now() - interval '40 days', 'Kept', 'Lost B', now()),
@@ -140,7 +140,7 @@ select is((select count(*)::int from public.jobs_log where job = 'retention'), 1
 select is((select count(*)::int from public.reviews where id = '00000000-0000-4000-8000-000000000e31'), 0,
   'access lost 31 days ago: the Google reviews are deleted');
 select is((select count(*)::int from public.reviews where id = '00000000-0000-4000-8000-000000000e29'), 1,
-  'access lost 29 days ago: the reviews stay');
+  'access lost 6 days ago: the reviews stay');
 
 -- Review content and what is kept with it
 select is((select row(comment, reviewer_name, content_purged_at is not null, star_rating, google_review_id, review_created_at < now(), existing_reply)::text

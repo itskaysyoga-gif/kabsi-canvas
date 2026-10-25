@@ -84,9 +84,9 @@ export const RETENTION_ROWS: RetentionRow[] = [
   },
   {
     dataClass: "google_data_after_access_lost",
-    keepDays: 30,
+    keepDays: 7,
     data: "Google data of a business whose access was removed",
-    kept: "Deleted after 30 days, unless access comes back",
+    kept: "Deleted 7 days after the business leaves Kabsi, unless access comes back",
     why: "Google's API policy",
   },
 ];

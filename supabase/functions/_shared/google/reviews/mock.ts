@@ -22,12 +22,15 @@ export function reviewFromRow(account: string, r: MockReviewRow): Review {
   return out;
 }
 
+// Like Google, the page carries the profile's average rating and total review count over every review, not the page.
 export async function listReviews(account: string, location: string, pageSize = 50, _pageToken = ""): Promise<ListReviewsResponse> {
   const { data, error } = await (await mockDb()).from("mock_google_reviews").select("*")
-    .eq("google_location_id", location).order("create_time", { ascending: false }).limit(pageSize);
+    .eq("google_location_id", location).order("create_time", { ascending: false }).limit(1000);
   if (error) throw error;
-  const reviews = ((data ?? []) as MockReviewRow[]).map((r) => reviewFromRow(account, r));
-  return { reviews, totalReviewCount: reviews.length };
+  const rows = (data ?? []) as MockReviewRow[];
+  const reviews = rows.slice(0, pageSize).map((r) => reviewFromRow(account, r));
+  const averageRating = rows.length ? Math.round((rows.reduce((s, r) => s + r.star_rating, 0) / rows.length) * 10) / 10 : undefined;
+  return { reviews, totalReviewCount: rows.length, ...(averageRating !== undefined ? { averageRating } : {}) };
 }
 
 // review is "accounts/{a}/locations/{l}/reviews/{id}".

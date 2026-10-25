@@ -10,8 +10,9 @@
 //     recorded; no follow-up sequence. The number is used to send and is not stored, only its hash.
 //
 // Limits (K-100, G-16): Turnstile on every call; 10 requests a minute per visitor; 3 checks a day per visitor (the
-// fourth is refused); 20 searches an hour per visitor; the Places kill switch (the daily cap, "Back soon") and the
-// 24 hour cache both live in the Google layer. A visitor is a salted hash of the IP, never the IP itself.
+// fourth is refused); 20 searches an hour per visitor; the Places kill switch (the daily cap, "Back soon") lives in the
+// Google layer. Nothing from Places is stored but the place ID (master plan 30.10): the check, its email and its
+// WhatsApp copy each read Google live. A visitor is a salted hash of the IP, never the IP itself.
 // Every Places request carries a field mask and none asks for reviews (tests hold that).
 import type { Place } from "./google/types.ts";
 import type { PlacesResult } from "./google/places/live.ts";
@@ -109,7 +110,6 @@ export type Deps = {
   verifyTurnstile: (token: string | undefined, ip?: string) => Promise<boolean>;
   searchText: (key: string, q: string, max: number, mask: string) => Promise<PlacesResult<{ places?: Place[] }>>;
   getSnapshotPlace: (key: string, placeId: string) => Promise<PlacesResult<Place>>;
-  getCachedSnapshot: (placeId: string) => Promise<Place | null>;
   saveEmail: (row: { email: string; place_id: string; tips_opt_in: boolean; consent_text: string; page: string }) => Promise<void>;
   /** True while Kabsi has a WhatsApp number (the one setting). The WhatsApp action answers 503 without it. */
   whatsappOn: boolean;
@@ -170,6 +170,16 @@ export function makeHandler(d: Deps) {
   const reply = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), { status, headers: { ...d.cors, "content-type": "application/json" } });
   const fail = (code: string, message: string, status = 400) => reply({ error: code, message }, status);
+  // The public facts of one business, read from Google now, or the answer to give when that is not possible.
+  const livePlace = async (placeId: string): Promise<Place | Response> => {
+    const key = d.env("PLACES_API_KEY");
+    if (!key) return fail("not_configured", "The check isn't available right now.", 503);
+    const r = await d.getSnapshotPlace(key, placeId);
+    if (r.backSoon) return fail("back_soon", FREE_TOOL_BUSY, 503);
+    if (r.status === 404) return fail("not_found", "We could not find that business. Search again.", 404);
+    if (!r.ok) throw new Error(`places ${r.status}`);
+    return r.data;
+  };
 
   return async (req: Request): Promise<Response> => {
     if (req.method === "OPTIONS") return new Response("ok", { headers: d.cors });
@@ -228,7 +238,7 @@ export function makeHandler(d: Deps) {
           if (r.status === 404) return fail("not_found", "We could not find that business. Search again.", 404);
           throw new Error(`places ${r.status}`);
         }
-        return reply({ snapshot: buildSnapshot(placeId, r.data, r.cached === true) });
+        return reply({ snapshot: buildSnapshot(placeId, r.data, false) });
       }
 
       if (action === "email") {
@@ -244,9 +254,9 @@ export function makeHandler(d: Deps) {
         if (!(await d.rateLimit(`snapshot:email:${visitor}`, LIMITS.emailsPerHour, 3600, { failClosed: true }))) {
           return fail("rate_limited", "That is a lot of emails. Try again in an hour.", 429);
         }
-        // The email is built from the 24 hour cache: no Places request, nothing taken from the day's cap.
-        const place = await d.getCachedSnapshot(placeId);
-        if (!place) return fail("expired", "This check has expired. Run it again, then ask for the email.", 410);
+        // The email is built from a fresh read of Google: nothing from Places is kept between the check and the email.
+        const place = await livePlace(placeId);
+        if (place instanceof Response) return place;
         await d.saveEmail({ email, place_id: placeId, tips_opt_in: b.tips, consent_text: TIPS_CONSENT_TEXT, page });
         const mail = checkEmail(d, buildSnapshot(placeId, place, true), b.tips);
         const dedupeKey = `profile_check:${(await d.sha256Hex(`${email}|${placeId}|${d.today()}`)).slice(0, 40)}`;
@@ -274,9 +284,9 @@ export function makeHandler(d: Deps) {
         if (!(await d.rateLimit(`snapshot:wa-number:${phoneHash}`, LIMITS.whatsappPerNumberPerDay, 86400, { failClosed: true }))) {
           return fail("number_limit", "We already sent a check to this number today.", 429);
         }
-        // Built from the 24 hour cache: no Places request, nothing taken from the day's cap.
-        const place = await d.getCachedSnapshot(placeId);
-        if (!place) return fail("expired", "This check has expired. Run it again, then ask for WhatsApp.", 410);
+        // Built from a fresh read of Google, like the email.
+        const place = await livePlace(placeId);
+        if (place instanceof Response) return place;
         const rowId = await d.saveWhatsapp({ phone_hash: phoneHash, place_id: placeId, consent_text: WHATSAPP_CONSENT_TEXT, page });
         const r = await d.sendWhatsapp({ to: phone, params: whatsappParams(buildSnapshot(placeId, place, true)) });
         await d.markWhatsapp(rowId, r);

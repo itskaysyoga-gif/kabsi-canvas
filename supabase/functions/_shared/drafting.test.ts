@@ -13,7 +13,7 @@ const row = (slot: string, key: string, value: Record<string, unknown>, uses = [
   ({ id: crypto.randomUUID(), slot, key, value, status: "verified", review_after: null, uses } as FactRow);
 // The contact phone is a fact with no public use, so draft_facts never returns it for replies; it is passed here anyway.
 const FACTS = [
-  row("card.contact_phone", "contact", { kind: "phone", text: "+961 3 956 917" }, []),
+  row("card.contact_phone", "contact", { kind: "phone", text: "+1 555 010 4477" }, []),
   row("card.signature", "signature", { text: "Yawmiyati team" }, ["replies"]),
   row("card.about", "description", { text: "A bakery in Beirut." }),
 ];
@@ -34,20 +34,20 @@ Deno.test("a review that asks for the number gets a draft with no run of 7 or mo
   const out = await draftGrounded({ review: askNumber, memory, language: "en", risk: "medium", recentReplies: [] }, send, { checkCall: noCheck });
   assert.ok(out.ok, out.problems.join("; "));
   assert.ok(!SEVEN_DIGITS.test(out.output!.reply), out.output!.reply);
-  assert.ok(!seen.join("").includes("956 917"), "the phone number never reaches the model");
+  assert.ok(!seen.join("").includes("010 4477"), "the phone number never reaches the model");
 });
 
 Deno.test("an unhappy reviewer is pointed to the details on the profile", async () => {
   const memory = await buildMemory({ business: "Yawmiyati", facts: FACTS, approvedReplies: [], openQuestions: [] });
   const system = flat(replySystem(memory));
   assert.match(system, /please contact us through the details on our profile/i);
-  assert.ok(!/may use the phone|Phone for customers|956 917/i.test(system));
+  assert.ok(!/may use the phone|Phone for customers|010 4477/i.test(system));
 });
 
 Deno.test("the code checks block a reply with contact details before any model call", async () => {
   const memory = await buildMemory({ business: "Yawmiyati", facts: FACTS, approvedReplies: [], openQuestions: [] });
   for (const reply of [
-    "Sorry Maya, call us on 03 956 917.", "Write to us at hello@yawmiyati.com.", "See www.yawmiyati.com for more.",
+    "Sorry Maya, call us on 555 010 4477.", "Write to us at hello@yawmiyati.com.", "See www.yawmiyati.com for more.",
     "Follow us @yawmiyati.", "Thanks Maya #bakery", "Our loaf is $4 now.",
   ]) {
     let asked = false;

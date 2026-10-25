@@ -35,7 +35,7 @@ Deno.test("short text is not touched", () => {
 Deno.test("links, contact details, hashtags and handles are removed", () => {
   const t = graphicText({
     star_rating: 5,
-    comment: "Loved it! Call 01 234 567 or +961 3 956 917, mail me@shop.com, see www.shop.com or https://shop.com/menu #bestbread @maria shop.lb/menu",
+    comment: "Loved it! Call 01 234 567 or +1 555 010 4477, mail me@shop.com, see www.shop.com or https://shop.com/menu #bestbread @maria shop.lb/menu",
     reviewer_name: "Sam Lee",
   });
   assert(t.ok);

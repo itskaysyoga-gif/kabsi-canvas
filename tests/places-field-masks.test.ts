@@ -47,6 +47,7 @@ describe("Places field masks (P0.2-06)", () => {
         seen++;
       }
     }
-    expect(seen).toBe(5);
+    // The daily rating no longer reads Places (master plan 30.10): four calls outside the layer.
+    expect(seen).toBe(4);
   });
 });

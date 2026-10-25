@@ -126,12 +126,12 @@ function Page() {
         <p>
           <b>If you use the free Google Profile Check:</b> your search text is sent to Google's
           Places API, and what Google shows publicly about the business you pick (rating, review
-          count, opening hours, phone, website, category and whether it has photos) is kept for up
-          to 24 hours so a second check does not ask Google again. We keep the same one-way, salted
-          hash of your IP address for one day to enforce the limit of 3 checks a day. If you ask for
-          the check by email, we keep your address, the Google Place ID of the business, whether you
-          ticked "Send me tips on managing my Google profile", those words, the page and the time,
-          as proof of your choice.{" "}
+          count, opening hours, phone, website, category and whether it has photos) is shown to you
+          and not kept; only the business's Google Place ID is kept. We keep the same one-way,
+          salted hash of your IP address for one day to enforce the limit of 3 checks a day. If you
+          ask for the check by email, we keep your address, the Google Place ID of the business,
+          whether you ticked "Send me tips on managing my Google profile", those words, the page and
+          the time, as proof of your choice.{" "}
           {WHATSAPP_ON
             ? "If you ask for the check on WhatsApp, we use your number once to send one message and keep only a one-way hash of it, the Google Place ID, the words next to the tick, the page, the time and whether the message was sent, as proof of your choice. We do not message you again unless you ask. "
             : ""}
@@ -482,9 +482,9 @@ function Page() {
             are refused and never stored.
           </li>
           <li>
-            Backups: encrypted copies of the database, the photos and our code are kept for 8 weeks
+            Backups: encrypted copies of the database, the photos and our code are kept for 21 days
             in Cloudflare R2, then deleted. Supabase also keeps its own short-lived backups. A
-            business you delete stays in older backups until they expire, at most 8 weeks, and is
+            business you delete stays in older backups until they expire, at most 21 days, and is
             never restored into the live service afterwards.
           </li>
           <li>Internal job logs: 90 days.</li>
@@ -501,8 +501,9 @@ function Page() {
             Free tool abuse limits: 1 hour. The free Profile Check keeps its daily limit for 1 day.
           </li>
           <li>
-            Google's public details for a business you checked: 24 hours. Your email request for the
-            check, with your choice about tips: until you ask us to remove it.
+            Google's public details for a business you checked: not kept, read from Google each
+            time. Your email request for the check, with your choice about tips: until you ask us to
+            remove it.
             {WHATSAPP_ON
               ? " Your WhatsApp request for the check, without your number: the same."
               : ""}
@@ -533,7 +534,7 @@ function Page() {
           In Settings, choose <b>Delete this business</b> (you have 7 days to change your mind), or
           email {CONTACT_EMAIL} from your account email. We delete the business's reviews, drafts,
           posts, photos, reports and settings, and confirm by email. Older backups hold a copy until
-          they expire, at most 8 weeks later (section 9). To stop Kabsi reaching your Google
+          they expire, at most 21 days later (section 9). To stop Kabsi reaching your Google
           profile, disconnect Kabsi as described in section 4. To delete your login as well, say so
           in your email.
         </p>
