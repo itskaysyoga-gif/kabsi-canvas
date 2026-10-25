@@ -40,3 +40,4 @@ Rule from Rashid (25 Oct 2026, master plan 30.11): a session never loops on a pr
 | Subscribe and StartTrial carry no value (price) for Meta | Meta accepts them without; value matters only for value-based bidding | First Meta ad campaign | the ads session |
 | The shared Switch component is yellow when on; DESIGN.md says green (the privacy panel overrides it locally) | Only the panel needed it now | Web 2 / UX 1 component pass | Web 2 |
 | Header main button still reads "Join early access"; COPY.md and 28.8 say "See your map" | Every public route is rebuilt from the mockups by Web 2 | Web 2 | Web 2 |
+| QA 1 visual baseline: public footers now read "Your privacy choices" and /privacy has new consent lines (Growth 1), so those public screenshots differ from the approved baseline | The visual specs are not in ci.yml; the change is intended | The next baseline refresh | QA 2 or Web 2 |
