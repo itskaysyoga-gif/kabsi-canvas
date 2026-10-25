@@ -85,12 +85,15 @@ export function log(fn: string, fields: Record<string, unknown>) {
 // D266: review text, reviewer names, emails and tokens must never reach Sentry or jobs_log — this is the
 // one choke point every captureError call goes through, so scrubbing here covers every call site at once.
 const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.-]+/g;
+// 20.5: phone numbers too (a number with a plus, or 9 to 15 digits in a row), as src/lib/scrub.ts does in the browser.
+const PHONE_RE = /\+\d[\d\s().-]{6,}\d|\b\d{9,15}\b/g;
+export const scrubText = (s: string) => s.replace(EMAIL_RE, "[email]").replace(PHONE_RE, "[phone]");
 const SENSITIVE_KEYS = new Set([
   "comment", "reviewer_name", "body", "instruction", "text", "payload", "email", "to", "token", "authorization",
-  "sig", "signature", "api_key", "x-api-key",
+  "sig", "signature", "api_key", "x-api-key", "phone", "review", "review_text",
 ]);
 function scrub(value: unknown, depth = 0): unknown {
-  if (typeof value === "string") return value.replace(EMAIL_RE, "[email]").slice(0, 300);
+  if (typeof value === "string") return scrubText(value).slice(0, 300);
   if (depth >= 3 || value === null || typeof value !== "object") return value;
   if (Array.isArray(value)) return value.slice(0, 20).map((v) => scrub(v, depth + 1));
   const out: Record<string, unknown> = {};
@@ -101,7 +104,7 @@ function scrub(value: unknown, depth = 0): unknown {
 }
 export async function captureError(fn: string, error: unknown, extra: Record<string, unknown> = {}) {
   const err = error instanceof Error ? error : new Error(String(error));
-  const safeMessage = String(err.message ?? "").replace(EMAIL_RE, "[email]").slice(0, 300);
+  const safeMessage = scrubText(String(err.message ?? "")).slice(0, 300);
   log(fn, { ok: false, err: safeMessage });
   try {
     const m = SENTRY_DSN.match(/^https:\/\/([^@]+)@([^/]+)\/(\d+)$/);

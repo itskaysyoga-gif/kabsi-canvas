@@ -121,7 +121,7 @@ describe("what Nora knows, against what is built on main", () => {
       ["holiday hours (P0.5-03)", /Five days before a public holiday/],
       ["Profile Coach (P0.8-09)", /Profile Coach, the actions/],
       ["Weekly Care Report (P0.5-04)", /every Monday at 08:00 local time/],
-      ["consent banner (P0.6-01)", /small Kabsi privacy banner/],
+      ["consent bar (P0.6-01, 20.4)", /its own small privacy bar/],
       ["security headers (P0.6-05)", /Website protection/],
       ["photos (P0.5-01)", /Staff upload link/],
       ["posts (P0.5-02)", /Approve the month/],

@@ -12,6 +12,7 @@
 
 import { analyticsAllowed, analyticsPersistent, onConsentChange } from "@/lib/consent";
 import { afterPaint } from "@/lib/after-paint";
+import { EMAIL_PATTERN, PHONE_PATTERN, SECRET_KEYS } from "@/lib/scrub";
 
 const SENTRY_PUBLIC_KEY = "b09a18a8ac370accf6b8e423fff77a8d";
 const POSTHOG_KEY = "phc_rDzVWhoR2wSXyVHVMypztnf8YKHCszd9c9mryMv6W4mW";
@@ -60,13 +61,20 @@ const bootScript = `
   window.__kabsiEnv = env;
   // Email action links carry a one-time credential in the path (/a/<token>): never send it anywhere.
   var scrub = function(u){ return typeof u === "string" ? u.replace(/\\/a\\/[^\\/?#]+/g, "/a/:token").replace(/([?&](?:t|token)=)[^&#]+/g, "$1redacted") : u; };
+  // 20.5: no email address, phone number or review text in a report or an event (src/lib/scrub.ts).
+  var EM = new RegExp(${JSON.stringify(EMAIL_PATTERN)}, "g"), PH = new RegExp(${JSON.stringify(PHONE_PATTERN)}, "g"), SK = ${JSON.stringify(SECRET_KEYS)};
+  var pii = function(v){ return typeof v === "string" ? v.replace(EM, "[email]").replace(PH, "[phone]") : v; };
+  var props = function(o){ if (!o || typeof o !== "object") return o; Object.keys(o).forEach(function(k){ if (SK.indexOf(k.toLowerCase()) >= 0) delete o[k]; else if (k.charAt(0) !== "$") o[k] = pii(o[k]); }); return o; };
   window.sentryOnLoad = function(){
     Sentry.init({ environment: env, release: ${JSON.stringify(SENTRY_RELEASE)}, sendDefaultPii: false, tracesSampleRate: 0,
       beforeSend: function(event){ if (event.user) { event.user = event.user.id ? { id: event.user.id } : undefined; }
         if (event.request && event.request.headers) { delete event.request.headers["X-Forwarded-For"]; delete event.request.cookies; }
         if (event.request) { event.request.url = scrub(event.request.url); if (event.request.headers) event.request.headers.Referer = scrub(event.request.headers.Referer); }
         if (event.transaction) event.transaction = scrub(event.transaction);
-        if (event.breadcrumbs) event.breadcrumbs.forEach(function(b){ if (b.data) { b.data.url = scrub(b.data.url); b.data.from = scrub(b.data.from); b.data.to = scrub(b.data.to); } });
+        if (event.breadcrumbs) event.breadcrumbs.forEach(function(b){ b.message = pii(b.message); if (b.data) { b.data.url = scrub(b.data.url); b.data.from = scrub(b.data.from); b.data.to = scrub(b.data.to); } });
+        event.message = pii(event.message);
+        if (event.exception && event.exception.values) event.exception.values.forEach(function(x){ x.value = pii(x.value); });
+        props(event.extra); props(event.contexts);
         return event; },
       ignoreErrors: ["ResizeObserver loop limit exceeded", "ResizeObserver loop completed with undelivered notifications"] });
   };
@@ -88,7 +96,7 @@ const bootScript = `
     session_recording: { maskAllInputs: true },
     property_denylist: ["$el_text"],
     disable_surveys: true,
-    before_send: function(e){ if (e && e.properties) { ["$current_url","$pathname","$referrer","$initial_current_url","$initial_pathname"].forEach(function(k){ if (k in e.properties) e.properties[k] = scrub(e.properties[k]); }); } return e; }
+    before_send: function(e){ if (e && e.properties) { ["$current_url","$pathname","$referrer","$initial_current_url","$initial_pathname"].forEach(function(k){ if (k in e.properties) e.properties[k] = scrub(e.properties[k]); }); props(e.properties); } return e; }
   });
   };
 })();`;
@@ -100,6 +108,8 @@ export const telemetryHeadScripts = [
     crossOrigin: "anonymous" as const,
     async: true, // never block the first paint; sentryOnLoad initialises it when it arrives
   },
+  // 20.5: Vercel Speed Insights, real visitors' Core Web Vitals, no cookies and no identifier. About 1 KB, deferred.
+  { src: "/_vercel/speed-insights/script.js", defer: true },
 ];
 
 // Called once from the root component after hydration. Replays and the pending user id apply after it.
@@ -148,14 +158,19 @@ export function reportError(error: unknown, context: Record<string, unknown> = {
   }
 }
 
-// Event names exactly as G-31 and G-44 (P0.6-02): object_action, past tense, one name per action, the same name
-// whether the browser or the server sends it. The browser sends only what happens in the browser. Access, drafts,
-// approvals, publications, decisions, payments and new accounts are sent by the database from its own records
-// (public.product_events, supabase/migrations/20261021234210_product_events.sql), never from here.
+// Event names (master plan 20.1, docs/EVENTS.md, the only list): object_action, past tense, one name per action, the
+// same name whether the browser or the server sends it. The browser sends only what happens in the browser. Access,
+// payments, new accounts, WhatsApp, alerts and approvals are sent by the database from its own records
+// (public.product_events), never from here.
 export type BrowserEvent =
   | "landing_viewed"
+  | "pricing_viewed"
+  | "free_scan_started"
+  | "free_scan_completed"
+  | "review_link_created"
+  | "whatsapp_button_clicked"
+  | "signup_started"
   | "business_found"
-  | "snapshot_viewed"
   | "connect_started"
   | "profile_state_seen"
   | "setup_call_booked"
@@ -163,8 +178,18 @@ export type BrowserEvent =
 
 // The server's names, listed so both sides read the same table. track() refuses them at compile time.
 export type ServerEvent =
-  | "registration_completed"
+  | "signup_completed"
   | "google_access_granted"
+  | "whatsapp_connected"
+  | "first_alert_sent"
+  | "first_yes"
+  | "trial_started"
+  | "checkout_started"
+  | "paid"
+  | "plan_changed"
+  | "payment_failed"
+  | "cancel_scheduled"
+  | "churned"
   | "details_confirmed"
   | "reply_draft_ready"
   | "reply_approved"
@@ -173,15 +198,11 @@ export type ServerEvent =
   | "profile_change_decided"
   | "photo_published"
   | "post_published"
-  | "trial_converted"
-  | "payment_failed"
-  | "subscription_paused"
-  | "subscription_cancelled";
+  | "subscription_paused";
 
-// Names from before P0.6-02 that some screens still call. They send nothing: the action is either a server event now
-// or has no G-31 name. Remove the calls as those screens change.
+// Names from before 20.1 that some screens still call. They send nothing: the action is either a server event now
+// or has no name in docs/EVENTS.md. Remove the calls as those screens change.
 type RetiredEvent =
-  | "signup_started"
   | "business_selected"
   | "eligibility_answered"
   | "consent_given"
@@ -200,8 +221,13 @@ type RetiredEvent =
 export type KabsiEvent = BrowserEvent | RetiredEvent;
 const BROWSER_EVENTS: ReadonlySet<string> = new Set<BrowserEvent>([
   "landing_viewed",
+  "pricing_viewed",
+  "free_scan_started",
+  "free_scan_completed",
+  "review_link_created",
+  "whatsapp_button_clicked",
+  "signup_started",
   "business_found",
-  "snapshot_viewed",
   "connect_started",
   "profile_state_seen",
   "setup_call_booked",
@@ -324,6 +350,7 @@ export function trackLanding(path: string, search: string) {
     if (v) props[k] = v;
   }
   track("landing_viewed", props);
+  if (props.page_type === "pricing") track("pricing_viewed", {});
 }
 
 // The Weekly Care Report screen (G-44): sent once per report per browser session, with the business id and where it was

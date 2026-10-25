@@ -45,6 +45,7 @@ import { whatsappPostAlert } from "../_shared/whatsapp/db.ts";
 import { useTool } from "../_shared/ai/agents.ts";
 import { liveAccessWhatsapp } from "../_shared/access-notice.ts";
 import { applyEvent, paymentReminder } from "../_shared/billing.ts";
+import { sendCapi } from "../_shared/meta-capi.ts";
 
 // Offer a job. Returns its id, or null when the same dedupe key is already pending, running or retrying.
 async function enqueueJob(kind: string, locationId: string | null, dedupeKey: string, payload: Record<string, unknown> = {}) {
@@ -442,6 +443,12 @@ const HANDLERS: Record<string, JobHandler> = {
     const id = String(job.payload.event_id ?? "");
     if (!id) throw new PermanentJobError("billing_event needs an event");
     await applyEvent(id);
+  },
+  // Growth 1 (20.4): one sign-up, trial or payment to Meta's Conversions API; skipped without the keys or consent.
+  meta_capi: async (job) => {
+    const id = String(job.payload.event_id ?? "");
+    if (!id) throw new PermanentJobError("meta_capi needs an event");
+    await sendCapi(id);
   },
   // Day 3 and day 6 of a failed payment's 7-day grace (10.2.9); nothing goes once the card works again.
   billing_reminder: async (job) => {

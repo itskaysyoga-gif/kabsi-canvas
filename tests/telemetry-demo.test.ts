@@ -12,12 +12,12 @@ describe("setAnalyticsPaused", () => {
     vi.stubGlobal("window", { posthog });
     const { setAnalyticsPaused, track } = await import("../src/lib/telemetry");
 
-    track("snapshot_viewed", { source: "tool" });
+    track("free_scan_completed", { source: "tool" });
     expect(posthog.capture).toHaveBeenCalledTimes(1);
 
     setAnalyticsPaused(true);
     expect(posthog.opt_out_capturing).toHaveBeenCalledTimes(1);
-    track("snapshot_viewed", { source: "tool" });
+    track("free_scan_completed", { source: "tool" });
     expect(posthog.capture).toHaveBeenCalledTimes(1);
 
     setAnalyticsPaused(true);
@@ -25,7 +25,7 @@ describe("setAnalyticsPaused", () => {
 
     setAnalyticsPaused(false);
     expect(posthog.opt_in_capturing).toHaveBeenCalledTimes(1);
-    track("snapshot_viewed", { source: "tool" });
+    track("free_scan_completed", { source: "tool" });
     expect(posthog.capture).toHaveBeenCalledTimes(2);
   });
 

@@ -1,5 +1,7 @@
 // P0.6-01 (G-18, G-21, R-04): the consent rules, the proof row and the advertising gate.
+import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { CONSENT_ASK_FIRST } from "../src/lib/region";
 import * as browserRules from "../src/lib/consent-rules";
 import * as serverRules from "../supabase/functions/_shared/consent";
 import { consentRow } from "../supabase/functions/_shared/consent-row";
@@ -26,25 +28,38 @@ function geoFetch(country: string | null) {
   ) as unknown as typeof fetch;
 }
 
-describe("rules by country", () => {
-  it("asks before advertising in the UK, EU, EEA, UAE and Saudi Arabia, and when the country is unknown", () => {
-    for (const cc of ["DE", "IE", "FR", "NO", "IS"])
+describe("rules by country (master plan 20.4)", () => {
+  it("asks first in the EU, the EEA, the UK and Switzerland, and when the country is unknown; nowhere else", () => {
+    for (const cc of ["DE", "IE", "FR", "NO", "IS", "GB", "CH"])
       expect(browserRules.ruleFor(cc)).toBe("opt_in");
-    for (const cc of ["GB", "AE", "SA"]) expect(browserRules.ruleFor(cc)).toBe("ads_opt_in");
     for (const cc of [null, "", "XX", "zz9"]) expect(browserRules.ruleFor(cc)).toBe("opt_in");
-    for (const cc of ["US", "CA", "AU", "NZ", "SG", "LB"])
+    for (const cc of ["US", "CA", "AU", "NZ", "SG", "LB", "AE", "SA"])
       expect(browserRules.ruleFor(cc)).toBe("notice");
   });
 
   it("keeps the browser and the server copies equal", () => {
     expect(serverRules.CONSENT_VERSION).toBe(browserRules.CONSENT_VERSION);
     expect(serverRules.CONSENT_WORDING).toEqual(browserRules.CONSENT_WORDING);
-    for (const cc of ["GB", "DE", "US", "AE", null])
+    expect([...serverRules.ASK_FIRST].sort()).toEqual([...CONSENT_ASK_FIRST].sort());
+    for (const cc of ["GB", "CH", "DE", "US", "AE", null])
       expect(serverRules.ruleFor(cc)).toBe(browserRules.ruleFor(cc));
   });
 
+  it("shows the bar and the switch with the lines of docs/COPY.md and 20.4", () => {
+    const w = browserRules.CONSENT_WORDING[browserRules.CONSENT_VERSION]!;
+    const copy = readFileSync("docs/COPY.md", "utf8");
+    expect(copy).toContain(`**Cookie bar:** "${w.opt_in}"`);
+    expect(w.panel).toBe("Let Kabsi measure its ads");
+    const banner = readFileSync("src/components/shared/privacy-banner.tsx", "utf8");
+    for (const label of ["Accept", "Only necessary", "Details", "Your privacy choices"])
+      expect(banner).toContain(label);
+    expect(readFileSync("src/components/layouts/public-layout.tsx", "utf8")).toContain(
+      "Your privacy choices",
+    );
+  });
+
   it("uses no dashes or exclamation marks in the wording", () => {
-    expect(JSON.stringify(browserRules.CONSENT_WORDING)).not.toMatch(/[–—!]/);
+    expect(JSON.stringify(browserRules.CONSENT_WORDING)).not.toMatch(/[\u2013\u2014!]/);
   });
 });
 
@@ -54,11 +69,11 @@ describe("the proof row", () => {
     action: "accept",
     analytics: true,
     advertising: true,
-    version: "2026-10-21",
+    version: "2026-10-25",
     page: "/pricing?utm_source=x",
   };
 
-  it("stores the server's own wording for the rule, the path only, and the network country", () => {
+  it("stores the server's own bar wording, the path only, and the network country", () => {
     const r = consentRow({
       ...base,
       country: "GB",
@@ -69,11 +84,51 @@ describe("the proof row", () => {
     expect(r.row).toMatchObject({
       country: "GB",
       country_source: "network",
-      rule: "ads_opt_in",
+      rule: "opt_in",
       page: "/pricing",
       language: "en",
+      method: "banner",
     });
-    expect(r.row["wording"]).toBe(browserRules.CONSENT_WORDING["2026-10-21"]!.ads_opt_in);
+    expect(r.row["wording"]).toBe(
+      "Kabsi uses cookies to measure visits and improve ads. You choose.",
+    );
+  });
+
+  it("stores the switch line for a choice made in the panel, under every rule", () => {
+    for (const country of ["US", "DE"]) {
+      const r = consentRow({
+        ...base,
+        action: "switch",
+        method: "panel",
+        advertising: false,
+        analytics: false,
+        country,
+        country_source: "network",
+      });
+      if ("error" in r) throw new Error(r.error);
+      expect(r.row).toMatchObject({
+        method: "panel",
+        wording: "Let Kabsi measure its ads",
+        advertising: false,
+      });
+    }
+  });
+
+  it("refuses a bar choice where no bar is shown", () => {
+    expect(consentRow({ ...base, country: "US", country_source: "network" })).toEqual({
+      error: "bad_version",
+    });
+  });
+
+  it("still reads a choice of the earlier version", () => {
+    const r = consentRow({
+      ...base,
+      version: "2026-10-21",
+      country: "DE",
+      country_source: "network",
+    });
+    if ("error" in r) throw new Error(r.error);
+    expect(r.row["wording"]).toBe(browserRules.CONSENT_WORDING["2026-10-21"]!.opt_in);
   });
 
   it("falls back to the time zone, and never keeps an action-link token", () => {
@@ -124,11 +179,11 @@ describe("the advertising gate in the browser", () => {
     return { consent, posts };
   }
 
-  it("UK: no advertising tag before a yes, then it loads once; statistics run cookieless meanwhile", async () => {
+  it("UK: the bar shows, no advertising tag before a yes, then it loads once; statistics cookieless meanwhile", async () => {
     const { consent, posts } = await load("GB");
     const pixel = vi.fn();
     consent.runWhenAdvertisingAllowed(pixel);
-    expect(consent.getConsent().rule).toBe("ads_opt_in");
+    expect(consent.getConsent().rule).toBe("opt_in");
     expect(consent.needsChoice()).toBe(true);
     expect(pixel).not.toHaveBeenCalled();
     expect(consent.analyticsAllowed()).toBe(true);
@@ -143,12 +198,13 @@ describe("the advertising gate in the browser", () => {
       action: "accept",
       country: "GB",
       country_source: "network",
-      version: "2026-10-21",
+      version: "2026-10-25",
+      method: "banner",
     });
   });
 
-  it("UK: declining keeps the tag out and stops statistics, and still writes one record", async () => {
-    const { consent, posts } = await load("GB");
+  it("Switzerland: Only necessary keeps the tag out and stops statistics, and still writes one record", async () => {
+    const { consent, posts } = await load("CH");
     const pixel = vi.fn();
     consent.runWhenAdvertisingAllowed(pixel);
     await consent.saveChoice("decline", { analytics: false, advertising: false }, "/pricing");
@@ -157,12 +213,29 @@ describe("the advertising gate in the browser", () => {
     expect(posts).toHaveLength(1);
   });
 
-  it("US: the notice shows and the tag may load at once", async () => {
-    const { consent } = await load("US");
+  it("US: no bar, the tag may load at once, PostHog stays cookieless, and the switch turns ads off", async () => {
+    const { consent, posts } = await load("US");
     const pixel = vi.fn();
     consent.runWhenAdvertisingAllowed(pixel);
     expect(consent.getConsent().rule).toBe("notice");
-    expect(consent.needsChoice()).toBe(true);
+    expect(consent.needsChoice()).toBe(false);
     expect(pixel).toHaveBeenCalledTimes(1);
+    expect(consent.analyticsPersistent()).toBe(false);
+    await consent.saveChoice("switch", { analytics: false, advertising: false }, "/", "panel");
+    expect(consent.advertisingAllowed()).toBe(false);
+    expect(posts[0]).toMatchObject({ action: "switch", method: "panel" });
+  });
+
+  it("a choice counts for 12 months, then the bar asks again", async () => {
+    const { consent } = await load("DE");
+    await consent.saveChoice("accept", { analytics: true, advertising: true }, "/");
+    const s = consent.getConsent();
+    expect(consent.needsChoice(s)).toBe(false);
+    const old = {
+      ...s,
+      choice: { ...s.choice!, at: new Date(Date.now() - 366 * 86_400_000).toISOString() },
+    };
+    expect(consent.needsChoice(old)).toBe(true);
+    expect(consent.advertisingAllowed(old)).toBe(false);
   });
 });

@@ -13,6 +13,7 @@ One page, under 10 KB. Updated 25 Oct 2026 by the lane R chat (master plan 19, 2
 - Fix 1 (PR 219, merged 25 Oct, deploy run 98): the Kapso webhook is registered, the 10 templates are submitted (pending), number health alerts only on YELLOW, RED or BLOCKED, the reply parser takes the first JSON object, the waiting post has Cancel, the evaluation false alarms are fixed. Detail: `docs/progress/archive/2026-10-25-fix-1.md`.
 - Session 10 / D, Creem (PR 221 merged 25 Oct, deploy run 99; PR 2 on the same branch): the webhook `billing-creem` (signature, once per event, 3-day replay guard, job queue as the only writer of paid state), the owner actions on the Plan page and in WhatsApp, the plan and its 27.4 limits in entitlements, the founding count, the 30-day partner trial, the inline email logo. Live: unsigned and wrong signatures get 401, `/founding` answers 30, the setup action ran in test mode (4 Creem products reused and renamed, 2 created, a second run changed nothing). Plans stay closed (`billing_open` off). Detail: `docs/progress/archive/2026-10-25-session-10-creem.md`.
 - V1 (Visibility Map engine, 25 Oct): 7 by 7 grid from DataForSEO public results only (mock until `dataforseo_mode` is live), three numbers, the WhatsApp line, the map image, competitor picks and snapshots, the category check, the DataForSEO cap, 30-day deletion after leaving. Not sent to owners yet. Google guard: not applicable. Detail: `docs/progress/archive/2026-10-25-v1-visibility-map.md`.
+- Growth 1 (25 Oct): consent bar and "Your privacy choices" (20.4, COPY.md), the 20.1 events in docs/EVENTS.md, Pixel and Conversions API (off until Rashid's Meta step), scrubbing. Detail: `docs/progress/archive/2026-10-25-growth-1.md`.
 - Next: the phone test (Rashid), QA 1 (with the Creem test checkout), then 13b part 2.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
@@ -42,23 +43,23 @@ The facts say "WhatsApp is live" only when the last step is done.
 - Creem (session 10): send one test event from Creem's dashboard to the webhook (expect 200 and one `billing_events` row), add the product bundle, mark Yawmiyati's organisation `billing_test` if you want to try the paid buttons. Hussein only at going live (verification, payout). Exact steps: `docs/progress/archive/2026-10-25-session-10-creem.md`.
 - A lawyer reads /terms, /privacy and the partner terms (master plan 29.8).
 - Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
+- Growth 1: Meta dataset, token, WABA id, VITE_META_PIXEL_ID, Speed Insights (docs/EVENTS.md, last section).
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up and Gemini billing at the launch gate.
 
 ## Open After merge checks and findings
 
 - After merge checks that a session could not run (they need a phone or a person) are in `docs/progress/archive/after-merge.md`. The first session of each kind reads the ones for its own area before starting.
-- New in Ops 1 part B: Growth 1 must make the consent code match the privacy page (20.4, a new CONSENT_VERSION); zod 3 to 4 is a session of its own (dependency review names it as an exception); one test row `bounced@resend.dev` is left in `email_suppressions`. Full list in the archive entry.
+- New in Ops 1 part B: zod 3 to 4 is a session of its own (dependency review names it as an exception); one test row `bounced@resend.dev` is left in `email_suppressions`. Full list in the archive entry.
 - Found, not done: `docs/progress/archive/found-not-done.md`. Decisions to confirm: `docs/progress/archive/decisions-to-confirm.md`.
-- New in Session 0 part 1: the facts file still says Kabsi has no WhatsApp number (session 13b part 1 changes it); the master plan has no 10.2.1 or 10.2.2 numbering, so the plan and trial changes sit at the top of its section 10.
 - Session 19 rest closed the session 18 items: the post Undo test passed on 25 Oct (P0.7-05b, an Update with no Learn more link: approved 05:34:54, undone 3.7 seconds later, cancelled, never sent to Google); Pub/Sub is registered live and a forged push gets 401 (P0.7-03); the push from a real review is still to be seen.
 
 ## Recent entries (newest first)
 
+- 25 Oct 2026, Growth 1: measurement, consent, Meta. Detail: `docs/progress/archive/2026-10-25-growth-1.md`.
 - 25 Oct 2026, V1: Visibility Map engine, map image, Competitor Watch data, category check, spend cap. Detail: `docs/progress/archive/2026-10-25-v1-visibility-map.md`.
 - 25 Oct 2026, Session 10 / D (Creem): PR 221 and the part 2 PR. Detail: `docs/progress/archive/2026-10-25-session-10-creem.md`.
 - 25 Oct 2026, Fix 1: webhook, templates, health alert, parser, evaluation, Cancel. Detail: `docs/progress/archive/2026-10-25-fix-1.md`.
 - 25 Oct 2026, lane R: design system, copy, fix-later list, session rules (master plan 30.11).
-- 25 Oct 2026, Session 13b part 1: the WhatsApp agent. Detail: `docs/progress/archive/2026-10-25-session-13b-1.md`.
 
 ## How a session updates this page
 

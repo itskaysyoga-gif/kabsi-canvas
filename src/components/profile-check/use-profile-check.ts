@@ -6,6 +6,7 @@ import {
   type FoundBusiness,
   type Snapshot,
 } from "@/lib/profile-check";
+import { pixelCustom, pixelEvent } from "@/lib/meta-pixel";
 import { track } from "@/lib/telemetry";
 
 export type Phase = "find" | "result";
@@ -26,6 +27,9 @@ export function useProfileCheck(source: "tool" | "onboarding" | "home") {
   async function search(query: string, token: string) {
     setError(null);
     setBusy(true);
+    // 20.1: the scan starts when the visitor asks for their business ("See your map").
+    track("free_scan_started", { source });
+    pixelCustom("FreeScanStarted");
     try {
       setResults(await findBusinesses(query, token));
     } catch (e) {
@@ -41,9 +45,9 @@ export function useProfileCheck(source: "tool" | "onboarding" | "home") {
     try {
       setSnapshot(await runCheck(place.place_id, token));
       setPhase("result");
-      // G-44: the business is found, then its snapshot is on screen.
-      track("business_found", { source });
-      track("snapshot_viewed", { source });
+      // 20.1 and 20.4: the result is on screen.
+      track("free_scan_completed", { source });
+      pixelEvent("Lead", { content_name: "free_scan" });
     } catch (e) {
       fail(e);
     }

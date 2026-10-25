@@ -228,8 +228,8 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             <FooterCol title="Legal and contact">
               <Link to="/privacy">Privacy</Link>
               <Link to="/terms">Terms</Link>
-              <button type="button" className="text-left" onClick={openPrivacyChoices}>
-                Privacy choices
+              <button type="button" className="text-start" onClick={openPrivacyChoices}>
+                Your privacy choices
               </button>
               <a href="mailto:hello@kabsi.co">hello@kabsi.co</a>
               {WHATSAPP_ON ? (

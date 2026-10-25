@@ -311,6 +311,9 @@ export async function startCheckout(org: string, userId: string, email: string |
   const c = await creem().createCheckout({ productId, units: 1, requestId, successUrl: SUCCESS_URL, email, metadata: { referenceId: org, business_id: location } });
   await db.from("billing_checkouts").upsert({ request_id: requestId, organization_id: org, product_key: key, units: 1, mode: CREEM_MODE,
     checkout_id: c.id, checkout_url: c.checkout_url, created_by: userId }, { onConflict: "request_id" });
+  // 20.1: checkout_started, once per checkout request. An analytics problem never stops the checkout.
+  await db.rpc("record_product_event", { p_event: "checkout_started", p_user: userId, p_location: location || null,
+    p_props: { plan, period }, p_key: `checkout:${requestId}` }).then(() => {}, () => {});
   return c.checkout_url;
 }
 
