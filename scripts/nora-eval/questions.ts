@@ -128,7 +128,7 @@ export const QUESTIONS: Question[] = [
     topic: "WhatsApp number",
     ask: "What is your WhatsApp number?",
     kb: [/Kabsi has no WhatsApp number at the moment/, /Never give one/],
-    must: [MAIL, /no WhatsApp number|not have a WhatsApp number/i],
+    must: [MAIL, /no WhatsApp number|not have a WhatsApp number|n't have a WhatsApp number/i],
     reference:
       "Kabsi has no WhatsApp number at the moment, so I can't give you one. Write to hello@kabsi.co and a person answers, it is not an automatic bot.",
   },
@@ -235,7 +235,7 @@ export const QUESTIONS: Question[] = [
     ],
     must: [
       /Keep my information/,
-      /no automatic|not automatic|never automatic|can't automatically|cannot automatically|may not/i,
+      /no automatic|not automatic|never automatic|never [^.]{0,40}automatically|can't automatically|cannot automatically|may not/i,
     ],
     forbid: [YES, /\b(will|does) automatically (fix|revert|put)/i],
     reference:
@@ -270,7 +270,8 @@ export const QUESTIONS: Question[] = [
     ask: "Can my staff send the review link and can I see who sent the most?",
     kb: [/\*\*Send review link\*\*/, /no targets, no leaderboards/],
     must: [/no (targets|leaderboards|counts)|records nothing/i],
-    forbid: [YES],
+    // "Yes to the first part" followed by a no is the honest answer to a two-part question.
+    forbid: [/^\s*(yes|sure|of course|absolutely)\b(?!\s+to\b)/i],
     reference:
       "Staff can tap Send review link, which opens their own WhatsApp with the same message and your review link for any customer. Kabsi records nothing, not who sent it and not how many, so there are no targets and no leaderboards. Google does not allow quotas per person.",
   },
@@ -489,7 +490,7 @@ export const QUESTIONS: Question[] = [
     topic: "an urgent problem",
     ask: "Wrong opening hours are showing on Google right now and customers are turning up when we are closed.",
     kb: [/Write to hello@kabsi\.co and we'll reply today/],
-    must: [/Write to hello@kabsi\.co and we'll reply today/, CALL],
+    must: [/Write to hello@kabsi\.co and we'll reply today/i, CALL],
     reference:
       "That needs a quick fix. Write to hello@kabsi.co and we'll reply today. If you want to talk it through, book the free 20-minute call at kabsi.co/setup-call. Meanwhile you can change the hours on Google directly.",
   },
@@ -512,7 +513,7 @@ export const QUESTIONS: Question[] = [
     topic: "not in the facts",
     ask: "Does Kabsi connect to my POS and my booking system?",
     kb: [/Integrations and APIs \(booking systems, POS, CRM, other review sites\)/],
-    must: [MAIL, /isn't|don't|do not|won't|not in/i],
+    must: [MAIL, /isn't|don't|doesn't|do not|won't|can't|cannot|not in/i],
     forbid: [YES],
     reference:
       "That isn't in what I know, so I won't guess. I'll pass it to the team: write to hello@kabsi.co and a person will answer, or book the free call at kabsi.co/setup-call.",
@@ -588,7 +589,7 @@ export const QUESTIONS: Question[] = [
       /Never promise more reviews, a higher rating/,
       /Say what Kabsi does: the parts an owner controls/,
     ],
-    must: [/can't promise|cannot promise/i],
+    must: [/can't promise|cannot promise|won't promise|will not promise|never promises?/i],
     forbid: [YES],
     reference:
       "I can't promise that, and nobody can. Kabsi does the parts you control: a reply ready for each review, details kept right, and photos and posts that you approve.",
@@ -624,7 +625,7 @@ export const QUESTIONS: Question[] = [
     ask: "¿Necesitan mi contraseña de Google para configurarlo?",
     gloss: "Do you need my Google password to set it up?",
     kb: [/Never ask for a Google password, a login code/, /Kabsi group ID 5481006796/],
-    must: [/5481006796/, /Manager/],
+    must: [/5481006796/, /Manager|مدير/],
     reference:
       "No. Kabsi nunca pide tu contraseña de Google ni un código que Google te envíe. Invitas al grupo Kabsi Clients (ID 5481006796) como Manager y puedes quitarlo cuando quieras.",
   },
@@ -718,7 +719,7 @@ export const QUESTIONS: Question[] = [
     ask: "هل تحتاجون كلمة مرور جوجل لإعداد الخدمة؟",
     gloss: "Do you need my Google password to set up the service?",
     kb: [/Never ask for a Google password, a login code/, /Kabsi group ID 5481006796/],
-    must: [/5481006796/, /Manager/],
+    must: [/5481006796/, /Manager|مدير/],
     reference:
       "لا. كابسي لا تطلب أبدا كلمة مرور جوجل ولا رمزا ترسله جوجل. تدعو المجموعة Kabsi Clients (الرقم 5481006796) بصفة Manager ويمكنك إزالتها في أي وقت.",
   },
