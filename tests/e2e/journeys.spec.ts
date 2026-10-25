@@ -10,6 +10,8 @@ test.describe.configure({ mode: "serial" });
 
 test.describe("owner journeys (QA demo owner)", () => {
   // The journeys change the QA rows in order and put nothing back by themselves: one size is enough.
+  // Playwright wants its first argument destructured, even when no fixture is used.
+  // eslint-disable-next-line no-empty-pattern
   test.beforeEach(({}, info) => {
     test.skip(info.project.name !== "m390", "the journeys run once, at phone width");
   });
