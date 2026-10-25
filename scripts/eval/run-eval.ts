@@ -44,7 +44,8 @@ if (stub) {
 }
 
 const budgetUsd = flag("--budget") ? Number(flag("--budget")) : undefined;
-const judge = args.includes("--judge") && !stub ? makeJudge(Deno.env.get("ANTHROPIC_API_KEY")!) : undefined;
+const judge =
+  args.includes("--judge") && !stub ? makeJudge(Deno.env.get("ANTHROPIC_API_KEY")!) : undefined;
 const list = args.includes("--cut") ? cut() : size ? sample(size) : undefined;
 const spent = () => meterCost(meter) + (judge?.cost() ?? 0);
 const { results, score, gate, stopped } = await runAll(model, {
@@ -52,17 +53,43 @@ const { results, score, gate, stopped } = await runAll(model, {
   cases: list,
   budget: budgetUsd ? { spent, micros: budgetUsd * 1e6 } : undefined,
   judge: judge
-    ? async (c, r) => judge.reply({ facts: (await memoryFor(c.business)).text, review: c.comment ?? "(no text)", reply: r.text, language: c.language })
+    ? async (c, r) =>
+        judge.reply({
+          facts: (await memoryFor(c.business)).text,
+          review: c.comment ?? "(no text)",
+          reply: r.text,
+          language: c.language,
+        })
     : undefined,
 });
 const judged = results.flatMap((r) => (r.judge ? [r.judge] : []));
 const sum = summarize(judged);
-const cost = { draftsUsd: meterCost(meter) / 1e6, judgeUsd: (judge?.cost() ?? 0) / 1e6, totalUsd: spent() / 1e6 };
-if (out) await Deno.writeTextFile(out, JSON.stringify({ promptVersion: REPLY_V2, score, gate, stopped, cost, judge: sum, results }, null, 1));
+const cost = {
+  draftsUsd: meterCost(meter) / 1e6,
+  judgeUsd: (judge?.cost() ?? 0) / 1e6,
+  totalUsd: spent() / 1e6,
+};
+if (out)
+  await Deno.writeTextFile(
+    out,
+    JSON.stringify(
+      { promptVersion: REPLY_V2, score, gate, stopped, cost, judge: sum, results },
+      null,
+      1,
+    ),
+  );
 if (judge && flag("--scores")) {
   const file = flag("--scores")!;
   const all = JSON.parse(await Deno.readTextFile(file).catch(() => "{}"));
-  const run = { date: new Date().toISOString(), model: score.model, judge: JUDGE_MODEL, cases: score.cases, judged: judged.length, ...sum, costUsd: cost.totalUsd };
+  const run = {
+    date: new Date().toISOString(),
+    model: score.model,
+    judge: JUDGE_MODEL,
+    cases: score.cases,
+    judged: judged.length,
+    ...sum,
+    costUsd: cost.totalUsd,
+  };
   await Deno.writeTextFile(file, JSON.stringify(addRun(all, REPLY_V2, run), null, 1) + "\n");
 }
 const pct = (n: number) => `${Math.round(n * 1000) / 10} percent`;
@@ -79,7 +106,15 @@ console.log(
       ([k, v]) =>
         `  ${k}: ${v.cases} cases, ${v.ready} ready${v.failed.length ? `, failed ${v.failed.join(" ")}` : ""}`,
     ),
-    ...(judge ? [`  judge (${JUDGE_MODEL}) on ${judged.length} ready drafts: overall ${sum.overall} of 5; ${Object.entries(sum.mean).map(([k, v]) => `${k} ${v}`).join(", ")}`] : []),
+    ...(judge
+      ? [
+          `  judge (${JUDGE_MODEL}) on ${judged.length} ready drafts: overall ${sum.overall} of 5; ${Object.entries(
+            sum.mean,
+          )
+            .map(([k, v]) => `${k} ${v}`)
+            .join(", ")}`,
+        ]
+      : []),
     `  cost: drafts ${cost.draftsUsd.toFixed(3)} USD, judge ${cost.judgeUsd.toFixed(3)} USD, total ${cost.totalUsd.toFixed(3)} USD${stopped ? ` (stopped at the ${budgetUsd} USD budget)` : ""}`,
     gate.pass ? "Gate: passed." : `Gate: blocked. ${gate.failures.join("; ")}.`,
   ].join("\n"),

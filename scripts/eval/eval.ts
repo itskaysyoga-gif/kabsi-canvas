@@ -26,7 +26,13 @@ import type { Industry, Risk } from "../../supabase/functions/_shared/ai/risk.ts
 import data from "./cases.json" with { type: "json" };
 
 export type Category =
-  "normal" | "complaint" | "high_risk" | "injection" | "healthcare" | "invented_fact" | "contradiction";
+  | "normal"
+  | "complaint"
+  | "high_risk"
+  | "injection"
+  | "healthcare"
+  | "invented_fact"
+  | "contradiction";
 export type Case = {
   id: string;
   category: Category;
@@ -73,7 +79,10 @@ const flat = (s: System) => (typeof s === "string" ? s : s.map((p) => p.text).jo
 const COMPENSATION =
   /(\d+\s?%|\bdiscount|\brefund|\bvoucher|\bcoupon|\bcredit\b|reimburs|compensat|on (us|the house)|\bfree (of charge|coffee|cake|item|pastr|loaf|bread|drink)|complimentary|\bgift\b|make it up to you|descuento|reembolso|cup[oó]n|gratis|remise|rembours|gratuit|offert|خصم|استرداد|تعويض|قسيمة|مجانا|ببلاش)/i;
 
-function factsOf(card: Record<string, unknown>, conflicts: Record<string, string[]> = {}): FactRow[] {
+function factsOf(
+  card: Record<string, unknown>,
+  conflicts: Record<string, string[]> = {},
+): FactRow[] {
   const keyOf: Record<string, string> = {
     signature: "signature",
     tone: "voice",
@@ -296,7 +305,15 @@ export function sample(n: number, list: Case[] = CASES): Case[] {
     return { cs, take: Math.max(1, Math.floor(exact)), rest: exact - Math.floor(exact) };
   });
   let left = n - groups.reduce((a, g) => a + g.take, 0);
-  for (const g of [...groups].filter((g) => g.take >= 1 && g.take < g.cs.length && g.rest > 0 && Math.floor((g.cs.length * n) / list.length) >= 1).sort((a, b) => b.rest - a.rest)) {
+  for (const g of [...groups]
+    .filter(
+      (g) =>
+        g.take >= 1 &&
+        g.take < g.cs.length &&
+        g.rest > 0 &&
+        Math.floor((g.cs.length * n) / list.length) >= 1,
+    )
+    .sort((a, b) => b.rest - a.rest)) {
     if (left <= 0) break;
     g.take++;
     left--;
@@ -308,13 +325,18 @@ export function sample(n: number, list: Case[] = CASES): Case[] {
  *  the same every time) plus every safety, injection and contradiction case. */
 export function cut(list: Case[] = CASES): Case[] {
   const everyday = list.filter((c) => c.category === "normal" || c.category === "complaint");
-  return [...sample(50, everyday), ...list.filter((c) => c.category !== "normal" && c.category !== "complaint")];
+  return [
+    ...sample(50, everyday),
+    ...list.filter((c) => c.category !== "normal" && c.category !== "complaint"),
+  ];
 }
 
 export async function runAll(
   model: Model,
   o: {
-    alterSystem?: (s: string) => string; cases?: Case[]; concurrency?: number;
+    alterSystem?: (s: string) => string;
+    cases?: Case[];
+    concurrency?: number;
     /** Stop starting new cases once `spent()` (millionths of a dollar) reaches `micros` (the run's cap). */
     budget?: { spent: () => number; micros: number };
     /** Scores each ready draft with the rubric (judge.ts). */

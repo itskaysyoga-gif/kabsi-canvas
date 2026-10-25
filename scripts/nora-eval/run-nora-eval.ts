@@ -51,11 +51,14 @@ if (stub) {
 const all = args.includes("--with-28") ? [...QUESTIONS, ...QUESTIONS_28] : QUESTIONS;
 const n = Number(flag("--sample") ?? all.length);
 const only = n >= all.length ? all : sample(n);
-const judge = args.includes("--judge") && !stub ? makeJudge(process.env.ANTHROPIC_API_KEY!) : undefined;
+const judge =
+  args.includes("--judge") && !stub ? makeJudge(process.env.ANTHROPIC_API_KEY!) : undefined;
 const spent = () => costMicros(noraModel, used) + (judge?.cost() ?? 0);
 const budgetUsd = flag("--budget") ? Number(flag("--budget")) : undefined;
 const { score, answers, stopped } = await runAll(model, kb, {
-  concurrency: stub ? 1 : 4, only, budget: budgetUsd ? { spent, micros: budgetUsd * 1e6 } : undefined,
+  concurrency: stub ? 1 : 4,
+  only,
+  budget: budgetUsd ? { spent, micros: budgetUsd * 1e6 } : undefined,
 });
 const g = gate(score, only.length);
 // The judge scores every answer given, while the budget lasts.
@@ -64,18 +67,44 @@ if (judge) {
   for (const q of only) {
     if (!answers[q.id] || (budgetUsd && spent() >= budgetUsd * 1e6)) continue;
     try {
-      judged[q.id] = await judge.nora({ facts: kb, question: q.gloss ? `${q.ask}\n(${q.gloss})` : q.ask, answer: answers[q.id] });
-    } catch { /* an unreadable verdict is left out, never counted as a score */ }
+      judged[q.id] = await judge.nora({
+        facts: kb,
+        question: q.gloss ? `${q.ask}\n(${q.gloss})` : q.ask,
+        answer: answers[q.id],
+      });
+    } catch {
+      /* an unreadable verdict is left out, never counted as a score */
+    }
   }
 }
 const sum = summarize(Object.values(judged));
-const cost = { noraUsd: costMicros(noraModel, used) / 1e6, judgeUsd: (judge?.cost() ?? 0) / 1e6, totalUsd: spent() / 1e6 };
-if (out) writeFileSync(out, JSON.stringify({ score, gate: g, stopped, cost, judge: sum, judged, answers }, null, 1));
+const cost = {
+  noraUsd: costMicros(noraModel, used) / 1e6,
+  judgeUsd: (judge?.cost() ?? 0) / 1e6,
+  totalUsd: spent() / 1e6,
+};
+if (out)
+  writeFileSync(
+    out,
+    JSON.stringify({ score, gate: g, stopped, cost, judge: sum, judged, answers }, null, 1),
+  );
 if (judge && flag("--scores")) {
   const file = flag("--scores")!;
   let prev = {};
-  try { prev = JSON.parse(readFileSync(file, "utf8")); } catch { /* first run */ }
-  const run = { date: new Date().toISOString(), model: score.model, judge: JUDGE_MODEL, cases: score.questions, judged: Object.keys(judged).length, ...sum, costUsd: cost.totalUsd };
+  try {
+    prev = JSON.parse(readFileSync(file, "utf8"));
+  } catch {
+    /* first run */
+  }
+  const run = {
+    date: new Date().toISOString(),
+    model: score.model,
+    judge: JUDGE_MODEL,
+    cases: score.questions,
+    judged: Object.keys(judged).length,
+    ...sum,
+    costUsd: cost.totalUsd,
+  };
   writeFileSync(file, JSON.stringify(addRun(prev, "nora", run), null, 1) + "\n");
 }
 console.log(
@@ -91,7 +120,15 @@ console.log(
     `  style failures ${score.styleFailures} (must be 0)`,
     `  did not run ${score.errors} (must be 0)`,
     ...score.findings.slice(0, 40).map((f) => `    ${f.id} ${f.kind}: ${f.detail}`),
-    ...(judge ? [`  judge (${JUDGE_MODEL}) on ${Object.keys(judged).length} answers: overall ${sum.overall} of 5; ${Object.entries(sum.mean).map(([k, v]) => `${k} ${v}`).join(", ")}`] : []),
+    ...(judge
+      ? [
+          `  judge (${JUDGE_MODEL}) on ${Object.keys(judged).length} answers: overall ${sum.overall} of 5; ${Object.entries(
+            sum.mean,
+          )
+            .map(([k, v]) => `${k} ${v}`)
+            .join(", ")}`,
+        ]
+      : []),
     `  cost: Nora ${cost.noraUsd.toFixed(3)} USD, judge ${cost.judgeUsd.toFixed(3)} USD, total ${cost.totalUsd.toFixed(3)} USD${stopped ? ` (stopped at the ${budgetUsd} USD budget)` : ""}`,
     g.pass ? "Gate: passed." : `Gate: blocked. ${g.failures.join("; ")}.`,
   ].join("\n"),

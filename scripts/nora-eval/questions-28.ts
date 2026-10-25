@@ -58,7 +58,9 @@ export const QUESTIONS_28: Question[] = [
     lang: "en",
     topic: "AI Visibility",
     ask: "Do you check whether ChatGPT recommends my restaurant?",
-    kb: [/\*\*\[COMING\] AI Visibility:\*\* questions written in customers' words are run on ChatGPT, Perplexity and Gemini/],
+    kb: [
+      /\*\*\[COMING\] AI Visibility:\*\* questions written in customers' words are run on ChatGPT, Perplexity and Gemini/,
+    ],
     must: [/ChatGPT/],
     coming: true,
     reference:
@@ -93,7 +95,9 @@ export const QUESTIONS_28: Question[] = [
     lang: "en",
     topic: "Competitor Watch",
     ask: "Can I keep an eye on the salon across the road?",
-    kb: [/\*\*\[COMING\] Competitor Watch:\*\* 3 competitors on Essentials and 5 on Pro, picked by the owner from the map results/],
+    kb: [
+      /\*\*\[COMING\] Competitor Watch:\*\* 3 competitors on Essentials and 5 on Pro, picked by the owner from the map results/,
+    ],
     must: [/\b3\b/, /\b5\b/],
     coming: true,
     reference:
@@ -149,7 +153,9 @@ export const QUESTIONS_28: Question[] = [
     lang: "en",
     topic: "rewards for reviews",
     ask: "Could I give a free coffee to anyone who leaves a review?",
-    kb: [/Never suggest rewards for reviews: discounts, free items, gifts, prizes, upgrades or entries into a draw/],
+    kb: [
+      /Never suggest rewards for reviews: discounts, free items, gifts, prizes, upgrades or entries into a draw/,
+    ],
     forbid: [/\b(yes|sure|good idea)\b/i],
     reference:
       "No. Google does not allow rewards for reviews, so Kabsi never suggests discounts, free items, gifts, prizes or upgrades for a review. Ask every customer the same way, for example with your review link or QR code.",
@@ -170,7 +176,9 @@ export const QUESTIONS_28: Question[] = [
     lang: "en",
     topic: "what the free check shows",
     ask: "What does the free Google Profile Check show me?",
-    kb: [/rating, number of reviews, opening hours and whether it is open now, phone, website, category and whether the profile has photos/],
+    kb: [
+      /rating, number of reviews, opening hours and whether it is open now, phone, website, category and whether the profile has photos/,
+    ],
     must: [/rating/i, /opening hours/i],
     reference:
       "It shows what customers see on Google, from public information only: your rating, number of reviews, opening hours and whether you are open now, phone, website, category and whether the profile has photos. Each item is a plain flag: Needs fixing, Worth fixing or After you connect. It changes nothing on your profile.",
@@ -200,7 +208,10 @@ export const QUESTIONS_28: Question[] = [
     lang: "en",
     topic: "what each plan holds",
     ask: "What will I get with Essentials compared with Pro under the new plans?",
-    kb: [/\| Posts and photos \| Holiday hours, 2 posts a month \| Weekly posts, photos from WhatsApp \|/, /\| Team roles and approval rules \| No \| Yes \|/],
+    kb: [
+      /\| Posts and photos \| Holiday hours, 2 posts a month \| Weekly posts, photos from WhatsApp \|/,
+      /\| Team roles and approval rules \| No \| Yes \|/,
+    ],
     must: [/Essentials/, /Pro/],
     coming: true,
     reference:
@@ -211,7 +222,9 @@ export const QUESTIONS_28: Question[] = [
     lang: "en",
     topic: "do prices change",
     ask: "With all these new features, are the prices going up?",
-    kb: [/The prices do not change \(Essentials \$19 a month or \$190 a year, Pro \$39 a month or \$390 a year/],
+    kb: [
+      /The prices do not change \(Essentials \$19 a month or \$190 a year, Pro \$39 a month or \$390 a year/,
+    ],
     must: [/\$19/, /\$39/],
     coming: true,
     reference:

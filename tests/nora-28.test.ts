@@ -15,12 +15,23 @@ describe("Nora's 20 questions of 28.7", () => {
     const ids = new Set([...QUESTIONS, ...QUESTIONS_28].map((q) => q.id));
     expect(ids.size).toBe(80);
     for (const q of QUESTIONS_28) if (q.lang !== "en") expect(q.gloss, q.id).toBeTruthy();
-    for (const l of ["es", "fr", "ar"]) expect(QUESTIONS_28.some((q) => q.lang === l), l).toBe(true);
+    for (const l of ["es", "fr", "ar"])
+      expect(
+        QUESTIONS_28.some((q) => q.lang === l),
+        l,
+      ).toBe(true);
   });
 
   it("cover the new position: maps, AI answers, competitors, review requests, the free check and the plans", () => {
     const topics = QUESTIONS_28.map((q) => q.topic).join("|");
-    for (const t of ["Visibility Map", "AI Visibility", "Competitor Watch", "Ask a customer", "free check", "each plan holds"])
+    for (const t of [
+      "Visibility Map",
+      "AI Visibility",
+      "Competitor Watch",
+      "Ask a customer",
+      "free check",
+      "each plan holds",
+    ])
       expect(topics, t).toContain(t);
   });
 

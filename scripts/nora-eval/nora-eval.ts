@@ -153,7 +153,8 @@ export async function runAll(
   model: Answerer,
   kb: string,
   opts: {
-    concurrency?: number; only?: Question[];
+    concurrency?: number;
+    only?: Question[];
     /** Stop asking once `spent()` (millionths of a dollar) reaches `micros`; what was not asked counts as not run. */
     budget?: { spent: () => number; micros: number };
   } = {},
@@ -167,7 +168,8 @@ export async function runAll(
     for (;;) {
       if (opts.budget && opts.budget.spent() >= opts.budget.micros) {
         stopped = true;
-        for (const q of list.slice(i)) findings.push({ id: q.id, kind: "error", detail: "not run: the budget was reached" });
+        for (const q of list.slice(i))
+          findings.push({ id: q.id, kind: "error", detail: "not run: the budget was reached" });
         i = list.length;
         return;
       }
@@ -280,7 +282,11 @@ export function liveModel(apiKey: string, model: string, rules: string, used?: U
           ...(t.effort && takesEffort(model) ? { output_config: { effort: t.effort } } : {}),
           system: [
             { type: "text", text: rules, cache_control: { type: "ephemeral" } },
-            { type: "text", text: `<knowledge_base>\n${kb}\n</knowledge_base>`, cache_control: { type: "ephemeral" } },
+            {
+              type: "text",
+              text: `<knowledge_base>\n${kb}\n</knowledge_base>`,
+              cache_control: { type: "ephemeral" },
+            },
             {
               type: "text",
               text: "<context>\nThe visitor is not signed in. No account tools are available in this evaluation.\n</context>",
