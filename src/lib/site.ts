@@ -11,6 +11,11 @@ export const CONTACT_EMAIL = "hello@kabsi.co";
 // Kabsi's Google business group (plan Appendix B). Owners invite this ID as a Manager. It is an identifier, not a secret.
 export const KABSI_GROUP_ID = "5481006796";
 export const KABSI_GROUP_NAME = "Kabsi Clients";
+// Google's third-party policies (master plan 30.10 point 5): a paid manager says Business Profile itself is free and
+// links Google's "Working with a third party" page. The Edge Functions keep the same words in _shared/access-notice.ts.
+export const FREE_FROM_GOOGLE =
+  "Google Business Profile is free from Google. Kabsi is an independent paid service.";
+export const THIRD_PARTY_HELP_URL = "https://support.google.com/business/answer/7163406";
 
 /**
  * Kabsi's one WhatsApp number (K-122) lives in one setting, `supabase/functions/_shared/whatsapp-setting.ts`, read by

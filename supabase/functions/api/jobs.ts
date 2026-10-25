@@ -43,6 +43,7 @@ import { type HolidayAsk, type HolidayAskDeps, sendHolidayAsks } from "../_share
 import { sendTeamInvite, type TeamInvite, teamInviteEmail } from "../_shared/team.ts";
 import { whatsappPostAlert } from "../_shared/whatsapp/db.ts";
 import { useTool } from "../_shared/ai/agents.ts";
+import { liveAccessWhatsapp } from "../_shared/access-notice.ts";
 
 // Offer a job. Returns its id, or null when the same dedupe key is already pending, running or retrying.
 async function enqueueJob(kind: string, locationId: string | null, dedupeKey: string, payload: Record<string, unknown> = {}) {
@@ -306,6 +307,9 @@ const DISCONNECT: DisconnectDeps = {
       inApp: { title: m.title, link: "/app/settings" },
       content: m,
     });
+    // 30.10 point 5: the same notice on WhatsApp. Never fails the disconnect.
+    await liveAccessWhatsapp(locationId, { change: notice.change, business: notice.name }, dedupe)
+      .catch((e) => captureError("dispatch", e, { job: "access_whatsapp", location: locationId }));
   },
 };
 
@@ -513,4 +517,6 @@ async function emailAccessLost(locationId: string, name: string) {
     inApp: { title: `Kabsi can't reach ${name} on Google`, body: "Invite the Kabsi group again to continue.", link: "/app/settings" },
     content: copy.accessLost(name, APP_URL),
   }).catch((e) => captureError("dispatch", e, { job: "access_lost", location: locationId }));
+  await liveAccessWhatsapp(locationId, { change: "lost", business: name }, `access_lost:${locationId}:${day}`)
+    .catch((e) => captureError("dispatch", e, { job: "access_whatsapp", location: locationId }));
 }

@@ -14,6 +14,7 @@ import { ScenarioPicker } from "@/components/onboarding/scenario-picker";
 import { ScenarioScreen } from "@/components/onboarding/scenario-screen";
 import { EligibilityCheck, type Eligibility } from "@/components/onboarding/eligibility";
 import { KnowledgeForm } from "@/components/app/knowledge-form";
+import { FREE_FROM_GOOGLE, THIRD_PARTY_HELP_URL } from "@/lib/site";
 import {
   CONSENT_TEXT,
   choosePlan,
@@ -259,6 +260,17 @@ export function AccessStep({ location, onChanged }: StepProps) {
         />
         <span className="text-sm leading-6">{CONSENT_TEXT}</span>
       </label>
+      <p className="mt-3 text-xs leading-5 text-kb-stone" data-testid="free-from-google">
+        {FREE_FROM_GOOGLE}{" "}
+        <a
+          href={THIRD_PARTY_HELP_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="underline underline-offset-2"
+        >
+          Google's guide to working with a third party
+        </a>
+      </p>
 
       <div className="mt-6">
         <ManagerGuide businessName={location.name} onStep={setCard} />

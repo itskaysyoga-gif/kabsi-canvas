@@ -1,5 +1,6 @@
 // P0.2-02: the disconnect job, the mock admins API and the access-change notices.
 // Run with: deno test --no-check _shared/ (scripts/deno-check.sh).
+import { THIRD_PARTY_HELP } from "./access-notice.ts";
 import assert from "node:assert/strict";
 import { accessChangeEmail, addBusinessDays, type DisconnectDeps, type DisconnectState, type Notice, RemovalFailed, runDisconnect } from "./disconnect.ts";
 import { removeKabsiEntries } from "./google/index.ts";
@@ -180,7 +181,8 @@ Deno.test("access-change notices say what changed and how to remove Kabsi, withi
     assert.ok(m.bodyHtml.includes("QA &lt;Bakery&gt;"), "the name is escaped");
     for (const s of [m.subject, m.text, m.bodyHtml, m.note, m.title, m.preheader]) {
       assert.doesNotMatch(s, /[–—!]/, "no dashes or exclamation marks");
-      assert.doesNotMatch(s, /\d{6,}/, "no group or account ids in owner email");
+      // Google's own help page address (30.10 point 5) is the one number allowed.
+      assert.doesNotMatch(s.replaceAll(THIRD_PARTY_HELP, ""), /\d{6,}/, "no group or account ids in owner email");
     }
   }
 });

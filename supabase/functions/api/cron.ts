@@ -10,6 +10,7 @@ import { dueRenewalEmail, localDateHour, PLAN_LABEL, type RenewalStage } from ".
 import { acceptInvitationsAndListLocations, googleMode } from "../_shared/google/index.ts";
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
 import { accessChangeEmail } from "../_shared/disconnect.ts";
+import { liveAccessWhatsapp } from "../_shared/access-notice.ts";
 import { snapshotRatings, weeklyReports } from "../_shared/report.ts";
 import { shieldCheck } from "../_shared/protection.ts";
 
@@ -29,13 +30,17 @@ async function conciergeAccessEmails() {
 
 // The access-change notice (K-113.1, P0.2-02): sent in the same run that accepts the Manager invitation, saying what
 // changed and how to remove Kabsi. Same kind and dedupe key as before, so nobody who already had it gets it again.
-function sendAccessNotice(locationId: string, name: string, nextStep: string) {
+// 30.10 point 5: the same notice on WhatsApp to the owners who connected it (never fails the email or the job).
+async function sendAccessNotice(locationId: string, name: string, nextStep: string) {
   const m = accessChangeEmail({ change: "granted", name, at: new Date().toISOString(), nextStep }, APP_URL);
-  return notify({
+  const sent = await notify({
     category: "access", kind: "access_granted", key: `access_granted:${locationId}`, locationId, to: "owners",
     inApp: { title: "Kabsi is now a Manager of your Google profile", link: "/app/settings" },
     content: m,
   }).catch((e) => { captureError("cron-tick", e, { job: "access", location: locationId }); return null; });
+  await liveAccessWhatsapp(locationId, { change: "granted", business: name }, `access_granted:${locationId}`)
+    .catch((e) => captureError("cron-tick", e, { job: "access_whatsapp", location: locationId }));
+  return sent;
 }
 
 // Job: Google access. Owner invited the Kabsi business group as Manager → mark access granted, refresh status, email the owner.
