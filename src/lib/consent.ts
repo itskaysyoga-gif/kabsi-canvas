@@ -1,14 +1,18 @@
-// The visitor's privacy choices in the browser (P0.6-01, G-18, G-21, R-04).
+// The visitor's privacy choices in the browser (P0.6-01, G-18, G-21, R-04, master plan 20.4).
 //
 // - The country comes from kabsi.co itself (/api/geo reads Cloudflare's cf-ipcountry or Vercel's country header);
 //   the browser time zone is the fallback. Until it is known the strictest rule (opt_in) applies.
+// - opt_in (the EU, the EEA, the UK, Switzerland, the UAE and Saudi Arabia): one small bar asks; nothing that needs consent loads before a
+//   yes. notice (everywhere else): no bar; "Your privacy choices" in the footer has one switch.
 // - Before any choice PostHog runs without cookies or identifiers under every rule; it keeps an identifier only
-//   after a yes to statistics, and stops entirely after a no.
-// - Advertising tags (the Meta Pixel, after launch: R-42) may load only through runWhenAdvertisingAllowed, which
-//   waits for a yes wherever the rule is opt_in or ads_opt_in.
+//   after a yes, and stops entirely after a no.
+// - Advertising tags (the Meta Pixel, src/lib/meta-pixel.ts) may load only through runWhenAdvertisingAllowed, which
+//   waits for a yes where the rule is opt_in.
+// - A choice counts for 12 months (CONSENT_DAYS), then the bar asks again where the rule asks first.
 // - The choice is kept in this browser (strictly necessary, so the banner is not shown again) and sent once to the
 //   `consent` Edge Function, which stores the proof.
 import {
+  CONSENT_DAYS,
   CONSENT_VERSION,
   ruleFor,
   type ConsentAction,
@@ -77,22 +81,37 @@ export function onConsentChange(fn: (s: ConsentState) => void): () => void {
   return () => listeners.delete(fn);
 }
 
-// The banner shows while there is no choice for the current wording version.
+// A stored choice counts for 12 months.
+export function liveChoice(
+  s: ConsentState = state,
+  now: number = Date.now(),
+): ConsentChoice | null {
+  const c = s.choice;
+  if (!c) return null;
+  const at = Date.parse(c.at);
+  return Number.isFinite(at) && now - at < CONSENT_DAYS * 86_400_000 ? c : null;
+}
+
+// The bar shows only where the rule asks first, while there is no live choice for the current wording version.
 export function needsChoice(s: ConsentState = state): boolean {
-  return s.ready && (!s.choice || s.choice.version !== CONSENT_VERSION);
+  if (!s.ready || s.rule !== "opt_in") return false;
+  const c = liveChoice(s);
+  return !c || c.version !== CONSENT_VERSION;
 }
 
 // Statistics may be counted (cookieless before a choice, under every rule).
 export function analyticsAllowed(s: ConsentState = state): boolean {
-  return s.choice ? s.choice.analytics : true;
+  const c = liveChoice(s);
+  return c ? c.analytics : true;
 }
 // PostHog may keep an identifier and record a session: only after a yes.
 export function analyticsPersistent(s: ConsentState = state): boolean {
-  return s.choice?.analytics === true;
+  return liveChoice(s)?.analytics === true;
 }
 // Advertising tags may load: a yes, or no choice where the rule is notice and the country is known.
 export function advertisingAllowed(s: ConsentState = state): boolean {
-  if (s.choice) return s.choice.advertising;
+  const c = liveChoice(s);
+  if (c) return c.advertising;
   return s.ready && s.rule === "notice";
 }
 
@@ -178,11 +197,12 @@ async function sessionToken(): Promise<string | undefined> {
   }
 }
 
-// Saves a choice from the banner: in this browser at once, then the proof on the server.
+// Saves a choice from the bar or the panel: in this browser at once, then the proof on the server.
 export async function saveChoice(
   action: ConsentAction,
   choices: { analytics: boolean; advertising: boolean },
   page: string,
+  method: "banner" | "panel" = "banner",
 ) {
   const visitor =
     state.choice?.visitor ?? read<ConsentChoice>(local(), STORE_KEY)?.visitor ?? newVisitorId();
@@ -215,6 +235,7 @@ export async function saveChoice(
         advertising: choices.advertising,
         version: CONSENT_VERSION,
         page,
+        method,
       }),
       keepalive: true,
     });
@@ -223,7 +244,7 @@ export async function saveChoice(
   }
 }
 
-// The footer link "Privacy choices" reopens the banner.
+// The footer link "Your privacy choices" opens the panel.
 export const OPEN_EVENT = "kabsi:privacy-choices";
 export function openPrivacyChoices() {
   if (typeof window !== "undefined") window.dispatchEvent(new Event(OPEN_EVENT));

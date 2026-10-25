@@ -15,3 +15,11 @@ export const ALCOHOL_PROMOTION_RESTRICTED = [
   "SO",
   "YE",
 ];
+
+// Where visitors are asked before anything that needs consent loads (master plan 20.4 and lane R, 25 Oct 2026): the EU
+// and EEA, the United Kingdom, Switzerland, the United Arab Emirates and Saudi Arabia. Everywhere else there is no pop-up, and "Your privacy choices" in the footer has one switch.
+// Kept equal to ASK_FIRST in supabase/functions/_shared/consent.ts by tests/consent.test.ts.
+export const CONSENT_ASK_FIRST =
+  "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE IS LI NO GB CH AE SA".split(
+    " ",
+  );

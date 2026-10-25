@@ -229,7 +229,7 @@ function Finder({ onPick }: { onPick: (p: Place) => void }) {
                 type="button"
                 onClick={() => {
                   onPick(p);
-                  track("free_tool_used", { source: "review_link_pick" });
+                  track("review_link_created", { source: "review_link_tool" });
                   setTimeout(
                     () => document.getElementById("result")?.scrollIntoView({ behavior: "smooth" }),
                     50,

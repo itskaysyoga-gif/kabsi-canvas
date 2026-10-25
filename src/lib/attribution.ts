@@ -1,10 +1,13 @@
-// Where a visitor came from (P0.6-02, G-32, K-127). Read from the address on every page, kept in this browser, and
-// saved on the account once, on the server, right after the first sign-in (public.save_signup_attribution).
+// Where a visitor came from (P0.6-02, G-32, K-127, master plan 20.3). Read from the address on every page, kept for the
+// visit in sessionStorage (no cookie), and saved on the account once, on the server, right after the first sign-in
+// (public.save_signup_attribution). The click id of a Click to WhatsApp ad (ctwa_clid) is kept on the WhatsApp
+// conversation by the Kapso webhook, not here.
 //
 // - First touch and last touch: the UTM fields, the landing path and the referring site. A visit without UTMs does not
 //   replace the last touch.
-// - fbclid and the fbc value made from it, and Meta's fbp cookie when the Pixel has set one: advertising identifiers,
-//   so they are kept only where the visitor's privacy choice allows advertising (src/lib/consent.ts).
+// - fbclid and the fbc value made from it, Meta's fbp cookie when the Pixel has set one, and Google's gclid: advertising
+//   identifiers, so they are kept only where the visitor's privacy choice allows advertising (src/lib/consent.ts).
+// - Whether advertising was allowed when the account was saved (ads), so the Conversions API asks nothing again.
 // - via=CODE: a first-party cookie for 60 days; the last referral wins. Disclosed on /privacy.
 import { advertisingAllowed, onConsentChange } from "@/lib/consent";
 
@@ -15,18 +18,18 @@ const VIA_DAYS = 60;
 const UTM = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"] as const;
 
 export type Touch = Partial<Record<(typeof UTM)[number] | "landing" | "referrer" | "at", string>>;
-type Stored = { first?: Touch; last?: Touch; fbclid?: string; fbc?: string };
+type Stored = { first?: Touch; last?: Touch; fbclid?: string; fbc?: string; gclid?: string };
 
 function readStored(): Stored {
   try {
-    return JSON.parse(window.localStorage.getItem(TOUCH_KEY) ?? "{}") as Stored;
+    return JSON.parse(window.sessionStorage.getItem(TOUCH_KEY) ?? "{}") as Stored;
   } catch {
     return {};
   }
 }
 function writeStored(s: Stored) {
   try {
-    window.localStorage.setItem(TOUCH_KEY, JSON.stringify(s));
+    window.sessionStorage.setItem(TOUCH_KEY, JSON.stringify(s));
   } catch {
     /* private mode */
   }
@@ -57,6 +60,7 @@ export function touchFrom(url: URL, referrer: string, at: Date): Touch | null {
 }
 
 let pendingFbclid: string | null = null;
+let pendingGclid: string | null = null;
 let watching = false;
 
 // Called on every page view from the root component.
@@ -87,6 +91,8 @@ export function captureTouch(
   }
   const fbclid = url.searchParams.get("fbclid");
   if (fbclid && /^[A-Za-z0-9_-]{1,500}$/.test(fbclid)) pendingFbclid = fbclid;
+  const gclid = url.searchParams.get("gclid");
+  if (gclid && /^[A-Za-z0-9_-]{1,300}$/.test(gclid)) pendingGclid = gclid;
   keepAdIds(stored);
   writeStored(stored);
 
@@ -107,10 +113,16 @@ export function captureTouch(
 }
 
 function keepAdIds(s: Stored) {
-  if (!pendingFbclid || !advertisingAllowed()) return;
-  s.fbclid = pendingFbclid;
-  s.fbc = `fb.1.${Date.now()}.${pendingFbclid}`;
-  pendingFbclid = null;
+  if (!advertisingAllowed()) return;
+  if (pendingFbclid) {
+    s.fbclid = pendingFbclid;
+    s.fbc = `fb.1.${Date.now()}.${pendingFbclid}`;
+    pendingFbclid = null;
+  }
+  if (pendingGclid) {
+    s.gclid = pendingGclid;
+    pendingGclid = null;
+  }
 }
 
 // What the browser holds now, in the shape save_signup_attribution reads.
@@ -123,6 +135,8 @@ export function attributionPayload(): Record<string, unknown> {
     fbclid: advertisingAllowed() ? (s.fbclid ?? null) : null,
     fbc: advertisingAllowed() ? (cookie("_fbc") ?? s.fbc ?? null) : null,
     fbp,
+    gclid: advertisingAllowed() ? (s.gclid ?? null) : null,
+    ads: advertisingAllowed(),
     via: cookie(VIA_COOKIE),
   };
 }

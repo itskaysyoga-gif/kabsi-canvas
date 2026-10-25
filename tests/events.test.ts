@@ -1,4 +1,5 @@
-// P0.6-02 (G-31, G-32, G-44, K-127): one name per action, server events never from the browser, and where a sign-up came from.
+// P0.6-02 and Growth 1 (master plan 20.1, 20.3): one name per action, server events never from the browser, and where a
+// sign-up came from.
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -8,7 +9,8 @@ vi.mock("@/lib/supabase", () => ({
   supabase: { auth: { getSession: async () => ({ data: { session: null } }) }, rpc: vi.fn() },
 }));
 
-const MIGRATION = readFileSync("supabase/migrations/20261021234210_product_events.sql", "utf8");
+const MIGRATION = readFileSync("supabase/migrations/20261025210000_growth_events.sql", "utf8");
+const EVENTS_DOC = readFileSync("docs/EVENTS.md", "utf8");
 const TELEMETRY = readFileSync("src/lib/telemetry.ts", "utf8");
 
 function memoryStorage() {
@@ -28,44 +30,49 @@ describe("event names", () => {
   const browser = union("BrowserEvent");
   const server = union("ServerEvent");
 
-  it("follow object_action in lower case, and the two lists never share a name", () => {
-    for (const e of [...browser, ...server]) expect(e).toMatch(/^[a-z]+(_[a-z]+)+$/);
+  it("follow object_action in lower case (paid and churned are single words, as 20.1 names them), and the two lists never share a name", () => {
+    for (const e of [...browser, ...server])
+      expect(e).toMatch(["paid", "churned"].includes(e) ? /^[a-z]+$/ : /^[a-z]+(_[a-z]+)+$/);
     expect(browser.filter((e) => server.includes(e))).toEqual([]);
   });
 
-  it("are exactly the G-31 and G-44 names the card lists", () => {
-    expect([...browser, ...server].sort()).toEqual(
-      [
-        "landing_viewed",
-        "business_found",
-        "snapshot_viewed",
-        "registration_completed",
-        "connect_started",
-        "profile_state_seen",
-        "setup_call_booked",
-        "google_access_granted",
-        "details_confirmed",
-        "reply_draft_ready",
-        "reply_approved",
-        "reply_published",
-        "backlog_cleared",
-        "profile_change_decided",
-        "photo_published",
-        "post_published",
-        "weekly_report_opened",
-        "trial_converted",
-        "payment_failed",
-        "subscription_paused",
-        "subscription_cancelled",
-      ].sort(),
-    );
+  it("carry every name of master plan 20.1", () => {
+    for (const e of [
+      "landing_viewed",
+      "pricing_viewed",
+      "free_scan_started",
+      "free_scan_completed",
+      "review_link_created",
+      "whatsapp_button_clicked",
+      "signup_started",
+    ])
+      expect(browser).toContain(e);
+    for (const e of [
+      "signup_completed",
+      "google_access_granted",
+      "whatsapp_connected",
+      "first_alert_sent",
+      "first_yes",
+      "trial_started",
+      "checkout_started",
+      "paid",
+      "plan_changed",
+      "payment_failed",
+      "cancel_scheduled",
+      "churned",
+    ])
+      expect(server).toContain(e);
+  });
+
+  it("docs/EVENTS.md lists every name, and nothing else is sent", () => {
+    for (const e of [...browser, ...server]) expect(EVENTS_DOC).toContain(`\`${e}\``);
   });
 
   it("the database sends only server names", () => {
     const sent = [...MIGRATION.matchAll(/'([a-z]+(?:_[a-z]+)+)'/g)]
       .map((m) => m[1]!)
       .filter((n) => server.includes(n) || browser.includes(n));
-    expect(sent.length).toBeGreaterThan(10);
+    expect(sent.length).toBeGreaterThan(8);
     for (const n of sent) expect(server).toContain(n);
   });
 });
@@ -80,11 +87,11 @@ describe("track in the browser", () => {
     const posthog = { capture: vi.fn() };
     vi.stubGlobal("window", { posthog });
     const { track } = await import("../src/lib/telemetry");
-    track("snapshot_viewed", { source: "tool" });
+    track("free_scan_completed", { source: "tool" });
     track("reply_published", { channel: "dashboard" });
     track("free_tool_used", { source: "x" });
     expect(posthog.capture).toHaveBeenCalledTimes(1);
-    expect(posthog.capture).toHaveBeenCalledWith("snapshot_viewed", { source: "tool" });
+    expect(posthog.capture).toHaveBeenCalledWith("free_scan_completed", { source: "tool" });
   });
 
   it("weekly_report_opened is sent once per report, with the business and where it was opened", async () => {
@@ -117,14 +124,15 @@ describe("track in the browser", () => {
     );
     trackLanding("/for/dentists", "");
     trackLanding("/app/reviews", "?utm_source=meta");
-    expect(posthog.capture).toHaveBeenCalledTimes(2);
+    expect(posthog.capture).toHaveBeenCalledTimes(3);
+    expect(posthog.capture).toHaveBeenNthCalledWith(2, "pricing_viewed", {});
     expect(posthog.capture).toHaveBeenNthCalledWith(1, "landing_viewed", {
       page_type: "pricing",
       utm_source: "meta",
       utm_medium: "paid_social",
       utm_campaign: "us_reviews_202611",
     });
-    expect(posthog.capture).toHaveBeenNthCalledWith(2, "landing_viewed", {
+    expect(posthog.capture).toHaveBeenNthCalledWith(3, "landing_viewed", {
       page_type: "industry",
       category: "dentists",
     });
@@ -168,7 +176,7 @@ describe("attribution", () => {
   it("keeps the first touch, moves the last touch only with UTMs, and sets the via cookie for 60 days", async () => {
     const { attribution, lastCookie } = await load(true);
     attribution.captureTouch(
-      "https://kabsi.co/meta?utm_source=meta&utm_campaign=us_reviews_202611&fbclid=AbC_1",
+      "https://kabsi.co/meta?utm_source=meta&utm_campaign=us_reviews_202611&fbclid=AbC_1&gclid=Gc_1",
       "https://l.facebook.com/x",
     );
     attribution.captureTouch("https://kabsi.co/pricing", "");
@@ -182,15 +190,27 @@ describe("attribution", () => {
     expect(p["last"]).toMatchObject({ utm_source: "partner", landing: "/" });
     expect(p["fbclid"]).toBe("AbC_1");
     expect(String(p["fbc"])).toMatch(/^fb\.1\.\d+\.AbC_1$/);
+    expect(p["gclid"]).toBe("Gc_1");
+    expect(p["ads"]).toBe(true);
     expect(p["via"]).toBe("DANA7");
     expect(lastCookie()).toContain(`Max-Age=${60 * 86400}`);
   });
 
+  it("keeps the touch for the visit only, with no cookie but the referral one", async () => {
+    const { attribution } = await load(true);
+    attribution.captureTouch("https://kabsi.co/?utm_source=meta", "");
+    const w = window as unknown as { localStorage: Storage; sessionStorage: Storage };
+    expect(w.sessionStorage.getItem("kabsi_touch")).toContain("meta");
+    expect(w.localStorage.getItem("kabsi_touch")).toBeNull();
+  });
+
   it("keeps no advertising identifier where advertising waits for a yes", async () => {
     const { attribution } = await load(false);
-    attribution.captureTouch("https://kabsi.co/meta?utm_source=meta&fbclid=AbC_1", "");
+    attribution.captureTouch("https://kabsi.co/meta?utm_source=meta&fbclid=AbC_1&gclid=Gc_1", "");
     const p = attribution.attributionPayload();
     expect(p["fbclid"]).toBeNull();
+    expect(p["gclid"]).toBeNull();
+    expect(p["ads"]).toBe(false);
     expect(p["fbc"]).toBeNull();
     expect(p["first"]).toMatchObject({ utm_source: "meta" });
   });

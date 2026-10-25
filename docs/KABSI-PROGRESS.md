@@ -15,7 +15,7 @@ One page, under 10 KB. Updated 25 Oct 2026 by the lane R chat (master plan 19, 2
 - V1 (Visibility Map engine, 25 Oct): 7 by 7 grid from DataForSEO public results only (mock until `dataforseo_mode` is live), three numbers, the WhatsApp line, the map image, competitor picks and snapshots, the category check, the DataForSEO cap, 30-day deletion after leaving. Not sent to owners yet. Google guard: not applicable. Detail: `docs/progress/archive/2026-10-25-v1-visibility-map.md`.
 - QA 1 (PR 225 and PR 227, 25 Oct): Playwright journeys, visual baseline and axe, the WhatsApp replay harness, Creem test checkout with a WhatsApp cancel, emails, nightly smoke, Nora judged (3.33 of 5). Fixed a billing race; Creem refuses extra locations on one subscription. Detail: `docs/progress/archive/2026-10-25-qa-1.md`.
 - 25 Oct, lane R: owners read "places around you", never "spots", and "website", never "app" (PR 228). The design studio is set up (master plan 30.13, R-94): itskaysyoga-gif/kabsi-design-studio, synced with Lovable, with its brief, photos, parts and checks.
-- Growth 1 (PR 226): green, not merged; its migration waits for lane R to apply it.
+- Growth 1 (PR 226, 25 Oct): consent bar (EU, EEA, UK, CH, UAE, Saudi Arabia), "Your privacy choices", the 20.1 events (docs/EVENTS.md), Pixel and Conversions API off until Meta is set up. Detail: `docs/progress/archive/2026-10-25-growth-1.md`.
 - Session 13b part 2 (PR 230, merged 25 Oct, deploy run 106): staff alerts and morning digest on WhatsApp, Slack removed, hours and typed posts on WhatsApp, the map image, the billing template (pending at Meta), Nora judged 4.4 of 5 (was 3.33), START fixed. Detail: `docs/progress/archive/2026-10-25-session-13b-2.md`.
 - Next: Design 1 (Opus), then V2 (Sonnet); Design 2 and 3 after Rashid approves Design 1; Web 2 and UX 1 port the approved design.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
@@ -37,7 +37,6 @@ The facts say "WhatsApp is live" only when the last step is done.
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
 - Done 25 Oct: Clean 1 drops (done, read-back 0 on all four), the Places purge (done, read-back `0 | 0 | 0`), the Resend webhook, R2 and the bucket `kabsi-backups`, the five backup secrets, `SENTRY_AUTH_TOKEN` in Vercel, the Pub/Sub topic `gbp-notifications` with its push subscription and secrets, `WHATSAPP_LIVE` set to `true`, the post Undo test.
-- Session 19 rest: the Places purge is done (Rashid ran `supabase/manual/20261025_places_data_purge.sql` on 25 Oct, read-back `0 | 0 | 0`). Pub/Sub waits for a natural review on Yawmiyati: nobody at Kabsi writes or edits a review to test it (fake review rule). The "testing it" post is cancelled (back to a draft, 25 Oct); Skip it in the app if it is still listed.
 - Phone test (13b part 1): passed 25 Oct (ladder above). 13b part 2: send START from the staff phone (it is stopped); delete the Supabase secrets SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET and the Supabase SENTRY_AUTH_TOKEN; run `supabase/manual/20261025_drop_slack_leftovers.sql` (expect `0 | 0 | 0 | 0`); remove the Kabsi app from Slack when you like.
 - Postponed to `docs/LATER.md`: the failing Backup run, the disabled branch ruleset, the inbox tests, Sentry membership (free plan allows 1).
 - Supabase Auth: leaked-password protection; paste the four `emails/auth/*.html` templates.
@@ -46,19 +45,20 @@ The facts say "WhatsApp is live" only when the last step is done.
 - Creem (session 10): send one test event from Creem's dashboard to the webhook (expect 200 and one `billing_events` row), add the product bundle, mark Yawmiyati's organisation `billing_test` if you want to try the paid buttons. Hussein only at going live (verification, payout). Exact steps: `docs/progress/archive/2026-10-25-session-10-creem.md`.
 - A lawyer reads /terms, /privacy and the partner terms (master plan 29.8).
 - Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
+- Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up and Gemini billing at the launch gate.
 
 ## Open After merge checks and findings
 
 - After merge checks that a session could not run (they need a phone or a person) are in `docs/progress/archive/after-merge.md`. The first session of each kind reads the ones for its own area before starting.
-- New in Ops 1 part B: Growth 1 must make the consent code match the privacy page (20.4, a new CONSENT_VERSION); zod 3 to 4 is a session of its own (dependency review names it as an exception); one test row `bounced@resend.dev` is left in `email_suppressions`. Full list in the archive entry.
+- New in Ops 1 part B: zod 3 to 4 is a session of its own (dependency review names it as an exception); one test row `bounced@resend.dev` is left in `email_suppressions`. Full list in the archive entry.
 - Found, not done: `docs/progress/archive/found-not-done.md`. Decisions to confirm: `docs/progress/archive/decisions-to-confirm.md`.
 - Session 19 rest closed the session 18 items: the post Undo test passed on 25 Oct (P0.7-05b, an Update with no Learn more link: approved 05:34:54, undone 3.7 seconds later, cancelled, never sent to Google); Pub/Sub is registered live and a forged push gets 401 (P0.7-03); the push from a real review is still to be seen.
 
 ## Recent entries (newest first)
 
+- 25 Oct 2026, Growth 1: measurement, consent, Meta. Detail: `docs/progress/archive/2026-10-25-growth-1.md`.
 - 25 Oct 2026, Session 13b part 2: staff alerts on WhatsApp, Slack removed, hours and posts, the map, Nora, START. Detail: `docs/progress/archive/2026-10-25-session-13b-2.md`.
-- 25 Oct 2026, QA 1: end-to-end journeys, baseline, replay harness, Creem test checkout, smoke. Detail: `docs/progress/archive/2026-10-25-qa-1.md`.
 
 ## How a session updates this page
 

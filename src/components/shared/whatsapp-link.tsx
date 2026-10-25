@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { WHATSAPP_ON, whatsappHref, type WhatsappKind } from "@/lib/site";
+import { track } from "@/lib/telemetry";
 import { cn } from "@/lib/utils";
 
 type Props = { kind?: WhatsappKind; children: ReactNode; className?: string; button?: boolean };
@@ -11,7 +12,11 @@ type Props = { kind?: WhatsappKind; children: ReactNode; className?: string; but
  */
 export function WhatsappLink({ kind = "general", children, className, button = false }: Props) {
   if (!WHATSAPP_ON) return null;
-  const external = { target: "_blank", rel: "noopener noreferrer" };
+  const external = {
+    target: "_blank",
+    rel: "noopener noreferrer",
+    onClick: () => track("whatsapp_button_clicked", { source: kind }),
+  };
   if (button) {
     return (
       <Button asChild variant="outline" className={className}>

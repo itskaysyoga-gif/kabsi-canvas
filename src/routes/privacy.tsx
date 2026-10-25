@@ -297,7 +297,10 @@ function Page() {
             GitHub: keeps our code and runs the weekly backup. The backup is encrypted before it
             leaves that job, with a passphrase only Kabsi holds.
           </li>
-          <li>Vercel: hosting the website and app.</li>
+          <li>
+            Vercel: hosting the website and app, and Speed Insights, which measures how fast pages
+            load for visitors without cookies or any identifier.
+          </li>
           <li>
             Creem: card payments. Creem is our merchant of record and receives what it needs to take
             a payment.
@@ -364,23 +367,25 @@ function Page() {
             Preferences: the app remembers which business you last opened, in your browser only.
           </li>
           <li>
-            Your privacy choices: your browser remembers the choice you made in the privacy banner,
-            so we don't ask again. We keep a record of each choice (an anonymous id, the country and
-            rule applied, the exact wording, the page and the time) as proof. It holds no IP
-            address, email or name.
+            Your privacy choices: your browser remembers the choice you made, for 12 months, so we
+            don't ask again. We keep a record of each choice (an anonymous id, the country and rule
+            applied, the exact wording, the page and the time) as proof. It holds no IP address,
+            email or name.
           </li>
           <li>
-            Statistics: until you choose, PostHog counts visits without cookies and without any
-            identifier. If you say yes, it also stores an anonymous identifier to see which pages
-            are used, and may record screens on public pages, never inside the app and never with
-            review text, names or email addresses. If you say no, it stops. IP addresses are
+            Statistics: PostHog counts visits without cookies and without any identifier until you
+            say yes. If you say yes, it also stores an anonymous identifier to see which pages are
+            used, and may record screens on public pages, never inside the app and never with review
+            text, names, email addresses or phone numbers. If you say no, it stops. IP addresses are
             anonymised.
           </li>
           <li>
-            Where you came from: your browser keeps the campaign details in the link you arrived by
-            (the utm fields), the first page you saw and the site that sent you, and we save them
-            with your account when you sign up, so we know which campaigns work. A click id from a
-            Meta ad is kept only where your privacy choice allows advertising.
+            Where you came from: for the length of your visit, your browser keeps the campaign
+            details in the link you arrived by (the utm fields), the first page you saw, the site
+            that sent you and an ad click id (gclid or fbclid), with no cookie, and we save them
+            with your account when you sign up, so we know which campaigns work. A Meta click id is
+            kept only where your privacy choice allows advertising. If you came from a Click to
+            WhatsApp ad, the click id of that chat is kept with the conversation.
           </li>
           <li>
             Referrals: a Kabsi link with a referral code (via=CODE) sets a first-party cookie,
@@ -402,16 +407,16 @@ function Page() {
             For a trial or a plan, Kabsi also tells Meta from its own servers (the Conversions API),
             with your email and phone number scrambled by a one-way hash as Meta requires. If you
             came from a Click to WhatsApp ad, Kabsi sends Meta the click id of that chat, so the ads
-            learn which ones bring paying owners. In the EU, the UK and Switzerland a small bar at
-            the bottom asks once, Yes or No thanks, and nothing for ads loads before a yes.
-            Elsewhere there is no pop-up, and Privacy choices has one switch, "Let Kabsi measure its
-            ads", on or off. Your answer is remembered for 12 months. Kabsi does not sell your data
-            to Meta or anyone else.
+            learn which ones bring paying owners. In the EU, the UK, Switzerland, the United Arab
+            Emirates and Saudi Arabia a small bar at the bottom asks once, Accept or Only necessary,
+            and nothing for ads loads before you accept. Elsewhere there is no pop-up, and Your
+            privacy choices has one switch, "Let Kabsi measure its ads", on or off. Your answer is
+            remembered for 12 months. Kabsi does not sell your data to Meta or anyone else.
           </li>
           <li>
             You can change your choice any time with{" "}
             <button type="button" className="font-bold underline" onClick={openPrivacyChoices}>
-              Privacy choices
+              Your privacy choices
             </button>
             , also at the foot of every page.
           </li>

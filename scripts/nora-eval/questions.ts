@@ -388,10 +388,10 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "cookies and consent",
     ask: "Do you use cookies, and can I say no?",
-    kb: [/A small Kabsi privacy banner \(no outside consent tool\)/],
-    must: [/banner/i, /opt.out|yes/i],
+    kb: [/Kabsi uses its own small privacy bar \(no outside consent tool\)/],
+    must: [/bar|privacy choices/i, /accept|only necessary|switch/i],
     reference:
-      "Kabsi shows a small privacy banner once, by country. In the EU and EEA statistics and advertising both wait for your yes. In the UK, the UAE and Saudi Arabia statistics run in totals only with an opt out and advertising waits for a yes. Everywhere else both are on with notice and an opt out.",
+      "Yes, and you choose. In the EU, the UK and Switzerland a small bar asks once, Accept or Only necessary, and nothing for ads loads before you accept. Elsewhere there is no pop-up: Your privacy choices at the foot of every page has one switch, Let Kabsi measure its ads, on or off.",
   },
   {
     id: "en30",
