@@ -12,10 +12,11 @@ begin
   update public.organizations set billing_test = true where id = v_org and not is_demo;
   insert into public.whatsapp_optins (user_id, phone, state, consent_text, requested_at, verified_at, review_alerts)
   values (v_user, '+12125550106', 'active', 'QA 1 fictional person (replay harness)', now(), now(), false)
-  on conflict (user_id) do update set phone = excluded.phone, state = 'active', stopped_at = null;
-  delete from public.phone_roles where phone = '+12125550106';
-  insert into public.phone_roles (phone, role, user_id, location_id, source) values ('+12125550106', 'owner', v_user, v_loc, 'qa-1');
+  on conflict (user_id) do nothing;
+  insert into public.phone_roles (phone, role, user_id, location_id, source)
+  select '+12125550106', 'owner', v_user, v_loc, 'code'
+  where not exists (select 1 from public.phone_roles r where r.phone = '+12125550106' and r.revoked_at is null);
 end $$;
-select o.id as organisation, o.billing_test, (select count(*) from public.organizations where billing_test) as organisations_marked
+select o.id as organisation, o.billing_test, o.is_demo, (select count(*) from public.organizations where billing_test) as organisations_marked
 from public.organizations o join public.locations l on l.organization_id = o.id where l.place_id = 'qa-place-kabsi-qa-cafe';
 -- Expect: billing_test true and organisations_marked 1.

@@ -12,6 +12,7 @@ import {
   ledgerOf,
   orgOf,
   parseEvent,
+  patchFor,
   PRODUCT_DESCRIPTION,
   PRODUCT_KEYS,
   type ProductIds,
@@ -255,6 +256,45 @@ describe("event to state (10.2.9)", () => {
       alert: null,
       message: null,
     });
+  });
+});
+
+describe("two events for one payment (QA 1, 25 Oct 2026)", () => {
+  // Creem sends checkout.completed and subscription.paid within a second; two workers can take them together, and the one that
+  // loses the insert applies its changes to the winner's row. Whichever order they land in, the paid state must be the result.
+  const apply = (events: CreemEvent[]) => {
+    let row: { state: string; past_due_at: string | null } | null = null;
+    for (const e of events) {
+      const w = effectOf(e, IDS).write!;
+      const patch = patchFor(w, subFacts(sub(), IDS), e.eventType, row, new Date(e.created_at));
+      row = {
+        state: String(patch.state ?? row?.state ?? "incomplete"),
+        past_due_at: (patch.past_due_at as string | null | undefined) ?? row?.past_due_at ?? null,
+      };
+    }
+    return row!.state;
+  };
+  const checkout = ev(
+    "checkout.completed",
+    { object: "checkout", status: "completed", subscription: sub(), units: 1 },
+    NOW.getTime() - 1000,
+  );
+  const paid = ev("subscription.paid", sub(), NOW.getTime() - 2000);
+  it("is active when the paid event lands first, or second", () => {
+    expect(apply([paid, checkout])).toBe("active");
+    expect(apply([checkout, paid])).toBe("active");
+  });
+  it("a checkout alone is incomplete, and never moves an active plan back", () => {
+    expect(apply([checkout])).toBe("incomplete");
+    expect(
+      patchFor(
+        effectOf(checkout, IDS).write!,
+        subFacts(sub(), IDS),
+        "checkout.completed",
+        { state: "active", past_due_at: null },
+        NOW,
+      ),
+    ).not.toHaveProperty("state");
   });
 });
 

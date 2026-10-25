@@ -11,7 +11,7 @@ import { ref } from "./whatsapp/templates.ts";
 import {
   CATALOGUE, checkoutRequestId, type Creem, creemClient, CreemError, type CreemEvent, effectOf, eventTime, extraKey, isStale,
   ledgerOf, type Message, type Mode, modeOf, orgOf, type Period, type Plan, planKey, type ProductIds, type ProductKey,
-  PRODUCT_KEYS, scrubEvent, setupPlan, subFacts, subscriptionOf,
+  PRODUCT_KEYS, patchFor, scrubEvent, setupPlan, subFacts, subscriptionOf,
 } from "./creem.ts";
 
 export const CREEM_MODE: Mode = modeOf(Deno.env.get("CREEM_MODE"));
@@ -129,32 +129,24 @@ async function subRow(subscriptionId: string): Promise<SubRow | null> {
 async function writeSub(org: string, subId: string, e: CreemEvent, effect: ReturnType<typeof effectOf>, existing: SubRow | null, at: Date, ids: ProductIds): Promise<SubRow | null> {
   const w = effect.write!;
   const f = subFacts(subscriptionOf(e), ids);
-  const patch: Record<string, unknown> = { last_event_at: at.toISOString(), updated_at: new Date().toISOString() };
-  // A checkout after a cancel never moves an active subscription back to incomplete.
-  if (w.state && !(w.state === "incomplete" && existing && existing.state !== "incomplete")) patch.state = w.state;
-  if (w.plan) patch.plan = w.plan;
-  if (w.period) patch.period = w.period;
-  if (w.productId) patch.product_id = w.productId;
-  if (w.units !== undefined && (w.units > 0 || e.eventType !== "checkout.completed")) patch.units = w.units;
-  if (w.periodStart) patch.current_period_start = w.periodStart;
-  if (w.periodEnd) patch.current_period_end = w.periodEnd;
-  if (w.cancelAtPeriodEnd !== undefined) patch.cancel_at_period_end = w.cancelAtPeriodEnd;
-  if (w.pastDue === "start") patch.past_due_at = existing?.past_due_at ?? at.toISOString();
-  if (w.pastDue === "clear") patch.past_due_at = null;
-  if (w.ended) patch.ended_at = at.toISOString();
-  if (w.state === "active") patch.ended_at = null;
-  if (f.customerId) patch.provider_customer_id = f.customerId;
   const db = admin();
-  if (existing) {
-    const { data, error } = await db.from("subscriptions").update(patch).eq("id", existing.id).select("*").single();
+  const update = async (row: SubRow) => {
+    const { data, error } = await db.from("subscriptions").update(patchFor(w, f, e.eventType, row, at)).eq("id", row.id).select("*").single();
     if (error) throw error;
     return data as SubRow;
-  }
+  };
+  if (existing) return await update(existing);
+  const patch = patchFor(w, f, e.eventType, null, at);
   const { data, error } = await db.from("subscriptions").insert({
     organization_id: org, provider: "creem", provider_subscription_id: subId, mode: CREEM_MODE,
     plan: (patch.plan as string) ?? "pro", state: (patch.state as string) ?? "incomplete", ...patch,
   }).select("*").single();
-  if (error?.code === "23505") return await subRow(subId);
+  if (error?.code === "23505") {
+    // The other event of the same payment made the row a moment ago: this event's changes still apply, to that row.
+    const winner = await subRow(subId);
+    if (!winner) throw error;
+    return await update(winner);
+  }
   if (error) throw error;
   return data as SubRow;
 }
