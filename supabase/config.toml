@@ -22,6 +22,8 @@ verify_jwt = false
 verify_jwt = false
 [functions.billing]          # retired 410 stub (P0.8-01); the old crypto webhook sends no JWT
 verify_jwt = false
+[functions.billing-creem]    # Creem's webhook signs with creem-signature and sends no JWT; /setup needs x-cron-secret or staff, /owner a signed-in owner, checked in code (session 10)
+verify_jwt = false
 
 # JWT required.
 [functions.api]

@@ -188,7 +188,7 @@ Added on 24 Oct 2026: the master plan (`docs/KABSI-MASTERPLAN.md`) sits above it
 
 ## 4. Review decisions (R-01 to R-93)
 
-One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. R-67 is reserved for session 10 (Creem). Later decisions override earlier ones where they differ: R-93 over R-92 over R-91 over R-90 over R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
+One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. Later decisions override earlier ones where they differ: R-93 over R-92 over R-91 over R-90 over R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
 
 | # | Decision | Status |
 |---|---|---|
@@ -260,7 +260,7 @@ One line per decision. The full text, with what each one changes and why, is `do
 | R-64 | Staff alerts move from Slack to WhatsApp | Approved |
 | R-65 | Gemini review of 23 Oct | Approved |
 | R-66 | Keeping Kabsi running, safe and backed up | Building |
-| R-67 | Reserved for session 10 | Approved |
+| R-67 | Plans and payments with Creem: master plan section 10 rewritten, the trial in Kabsi, the webhook as the only writer of paid state, plans open at going live | Building |
 | R-68 | Measurement, funnels and pixels | Approved |
 | R-69 | Search and AI answers | Approved |
 | R-70 | One design system for every screen | Approved |

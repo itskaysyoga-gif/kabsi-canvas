@@ -1,0 +1,396 @@
+// Plans and payments with Creem, the database side (master plan section 10, R-67). The webhook (billing-creem) only
+// checks and stores each event; the job queue runs applyEvent, which is the only writer of paid state (10.2.8). The
+// owner's actions (checkout, portal, cancel, keep, change plan, add a location) and the staff setup action live here
+// too, so the Plan screen and WhatsApp use the same code. The Creem key comes from Supabase secrets only (10.2.5).
+import { admin, APP_URL, captureError, jobLog, log } from "./kabsi.ts";
+import { notify as notifyEmail } from "./notify.ts";
+import { esc } from "./email-layout.ts";
+import type { EmailContent } from "./email/template.ts";
+import { outDb } from "./whatsapp/db.ts";
+import { ref } from "./whatsapp/templates.ts";
+import {
+  CATALOGUE, checkoutRequestId, type Creem, creemClient, CreemError, type CreemEvent, effectOf, eventTime, extraKey, isStale,
+  ledgerOf, type Message, type Mode, modeOf, orgOf, type Period, type Plan, planKey, type ProductIds, type ProductKey,
+  PRODUCT_KEYS, scrubEvent, setupPlan, subFacts, subscriptionOf,
+} from "./creem.ts";
+
+export const CREEM_MODE: Mode = modeOf(Deno.env.get("CREEM_MODE"));
+export const SUCCESS_URL = `${APP_URL}/billing/done`;
+const FOUNDING_PLACES = 30;
+const GRACE_DAYS = 7;
+const DATA_DAYS = 30;
+
+export function creem(): Creem {
+  const key = Deno.env.get("CREEM_API_KEY") ?? "";
+  if (!key) throw new BillingError("not_configured", "Payments are not set up yet.");
+  return creemClient(key, CREEM_MODE);
+}
+export class BillingError extends Error {
+  constructor(readonly code: string, message: string) {
+    super(message);
+  }
+}
+
+const SETTINGS_KEY = (mode: Mode) => `creem_products_${mode}`;
+export async function productIds(mode: Mode = CREEM_MODE): Promise<ProductIds> {
+  const { data } = await admin().from("app_settings").select("value").eq("key", SETTINGS_KEY(mode)).maybeSingle();
+  try {
+    return (data?.value ? JSON.parse(String(data.value)) : {}) as ProductIds;
+  } catch {
+    return {};
+  }
+}
+
+// ─── the webhook's part: store once, then hand to the queue ─────────────────────────────────────────────────────────
+export type Stored = "stored" | "duplicate" | "stale" | "other_mode";
+export async function storeEvent(e: CreemEvent, now = new Date()): Promise<Stored> {
+  const l = ledgerOf(e);
+  const at = eventTime(e);
+  const stale = isStale(e, now);
+  // A test event at the live endpoint (or the reverse) is kept for the record and never applied.
+  const otherMode = !!l.mode && l.mode !== CREEM_MODE && !(CREEM_MODE === "test" && l.mode === "local");
+  const outcome = stale ? "refused_stale" : otherMode ? "refused_other_mode" : "queued";
+  const { error } = await admin().from("billing_events").insert({
+    provider: "creem", event_key: e.id, event_type: e.eventType, event_created_at: at?.toISOString() ?? null,
+    mode: l.mode, organization_id: orgOf(e), provider_subscription_id: l.subscriptionId, provider_customer_id: l.customerId,
+    payment_id: l.paymentId, amount: l.amount, currency: l.currency, payment_status: e.eventType, outcome,
+    detail: scrubEvent(e),
+  });
+  if (error?.code === "23505") return "duplicate";
+  if (error) throw error;
+  if (stale) return "stale";
+  if (otherMode) return "other_mode";
+  const { error: je } = await admin().rpc("enqueue_job", { p_kind: "billing_event", p_location: null, p_dedupe_key: `billing_event:${e.id}`, p_payload: { event_id: e.id } });
+  if (je) throw je;
+  return "stored";
+}
+
+// ─── the queue's part: the one writer of paid state ─────────────────────────────────────────────────────────────────
+type SubRow = {
+  id: string; organization_id: string; plan: string; state: string; period: string | null; units: number;
+  current_period_end: string | null; cancel_at_period_end: boolean | null; provider_customer_id: string | null;
+  provider_subscription_id: string | null; past_due_at: string | null; last_event_at: string | null; founding: boolean;
+  mode: string | null; ended_at: string | null;
+};
+
+export async function applyEvent(eventKey: string): Promise<string> {
+  const db = admin();
+  const { data: row, error } = await db.from("billing_events").select("id, detail, organization_id, processed_at")
+    .eq("provider", "creem").eq("event_key", eventKey).maybeSingle();
+  if (error) throw error;
+  if (!row) return "missing";
+  if (row.processed_at) return "already";
+  const e = row.detail as CreemEvent;
+  const ids = await productIds();
+  const effect = effectOf(e, ids);
+  const at = eventTime(e) ?? new Date();
+  const subId = subFacts(subscriptionOf(e), ids).subscriptionId;
+  let existing = subId ? await subRow(subId) : null;
+  const org = existing?.organization_id ?? (row.organization_id as string | null) ?? orgOf(e);
+  let result = "recorded";
+
+  if (effect.write && subId && org) {
+    // An older event never undoes a newer one (Creem retries for 24 hours and can resend from the dashboard).
+    const older = existing?.last_event_at && new Date(existing.last_event_at) > at;
+    if (older) {
+      result = "older_ignored";
+    } else {
+      existing = await writeSub(org, subId, e, effect, existing, at, ids);
+      result = `applied:${existing?.state ?? "?"}`;
+      if (effect.paid && existing) await foundingCheck(existing);
+      if (e.eventType === "checkout.completed") {
+        const requestId = typeof e.object.request_id === "string" ? e.object.request_id : null;
+        if (requestId) await db.from("billing_checkouts").update({ completed_at: new Date().toISOString(), checkout_id: String(e.object.id ?? "") || null }).eq("request_id", requestId);
+      }
+      if (effect.message && existing) await tellOwner(effect.message, existing, e.id).catch((x) => captureError("billing", x, { step: "message", event: e.eventType }));
+    }
+  } else if (effect.write) {
+    result = "no_business";
+    await staffAlert(`Creem ${e.eventType} with no Kabsi business (${subId ?? "no subscription"})`, `nobiz:${e.id}`);
+  }
+  if (effect.alert) {
+    const what = effect.alert === "refund" ? "a refund" : effect.alert === "dispute" ? "a chargeback" : "a trial event that should never come";
+    const business = org ? await businessName(org) : "an unknown business";
+    await staffAlert(`Creem reported ${what} for ${business}`, `${effect.alert}:${e.id}`);
+  }
+  await db.from("billing_events").update({ processed_at: new Date().toISOString(), outcome: result, organization_id: org })
+    .eq("id", row.id);
+  log("billing", { ok: true, event: e.eventType, result });
+  return result;
+}
+
+async function subRow(subscriptionId: string): Promise<SubRow | null> {
+  const { data, error } = await admin().from("subscriptions").select("*").eq("provider", "creem")
+    .eq("provider_subscription_id", subscriptionId).maybeSingle();
+  if (error) throw error;
+  return data as SubRow | null;
+}
+
+async function writeSub(org: string, subId: string, e: CreemEvent, effect: ReturnType<typeof effectOf>, existing: SubRow | null, at: Date, ids: ProductIds): Promise<SubRow | null> {
+  const w = effect.write!;
+  const f = subFacts(subscriptionOf(e), ids);
+  const patch: Record<string, unknown> = { last_event_at: at.toISOString(), updated_at: new Date().toISOString() };
+  // A checkout after a cancel never moves an active subscription back to incomplete.
+  if (w.state && !(w.state === "incomplete" && existing && existing.state !== "incomplete")) patch.state = w.state;
+  if (w.plan) patch.plan = w.plan;
+  if (w.period) patch.period = w.period;
+  if (w.productId) patch.product_id = w.productId;
+  if (w.units !== undefined && (w.units > 0 || e.eventType !== "checkout.completed")) patch.units = w.units;
+  if (w.periodStart) patch.current_period_start = w.periodStart;
+  if (w.periodEnd) patch.current_period_end = w.periodEnd;
+  if (w.cancelAtPeriodEnd !== undefined) patch.cancel_at_period_end = w.cancelAtPeriodEnd;
+  if (w.pastDue === "start") patch.past_due_at = existing?.past_due_at ?? at.toISOString();
+  if (w.pastDue === "clear") patch.past_due_at = null;
+  if (w.ended) patch.ended_at = at.toISOString();
+  if (w.state === "active") patch.ended_at = null;
+  if (f.customerId) patch.provider_customer_id = f.customerId;
+  const db = admin();
+  if (existing) {
+    const { data, error } = await db.from("subscriptions").update(patch).eq("id", existing.id).select("*").single();
+    if (error) throw error;
+    return data as SubRow;
+  }
+  const { data, error } = await db.from("subscriptions").insert({
+    organization_id: org, provider: "creem", provider_subscription_id: subId, mode: CREEM_MODE,
+    plan: (patch.plan as string) ?? "pro", state: (patch.state as string) ?? "incomplete", ...patch,
+  }).select("*").single();
+  if (error?.code === "23505") return await subRow(subId);
+  if (error) throw error;
+  return data as SubRow;
+}
+
+// The first 30 paying businesses in live mode keep their price while subscribed (10.2.4).
+async function foundingCheck(s: SubRow) {
+  if (s.founding || s.mode !== "live") return;
+  const { data: left } = await admin().rpc("founding_places_left");
+  if (typeof left === "number" && left > 0 && left <= FOUNDING_PLACES) {
+    await admin().from("subscriptions").update({ founding: true }).eq("id", s.id);
+  }
+}
+
+// ─── messages to the owner (WhatsApp and email) and to staff (WhatsApp, R-64) ──────────────────────────────────────
+type Contact = { user_id: string; phone: string | null; location_id: string; business: string };
+async function contacts(org: string): Promise<Contact[]> {
+  const { data, error } = await admin().rpc("billing_owner_contacts", { p_org: org });
+  if (error) throw error;
+  return (data ?? []) as Contact[];
+}
+async function businessName(org: string): Promise<string> {
+  const c = await contacts(org).catch(() => []);
+  return c[0]?.business ?? "a business";
+}
+export const longDate = (d: Date | string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(d));
+const addDays = (d: Date | string, n: number) => new Date(new Date(d).getTime() + n * 86_400_000);
+
+export type Line = { whatsapp: string; buttons?: { id: string; title: string }[]; email?: EmailContent };
+const para = (t: string) => `<p style="margin:0 0 16px 0;">${esc(t)}</p>`;
+function emailOf(subject: string, title: string, lines: string[], button?: { label: string; url: string }): EmailContent {
+  return { subject, title, preheader: lines[0], bodyHtml: lines.map(para).join(""), text: lines.join("\n\n") + (button ? `\n\n${button.label}: ${button.url}` : ""), button };
+}
+
+/** The words of each billing message (10.2.9). Pure, so tests read them. */
+export function billingLine(m: Message | "payment_reminder", c: { business: string; periodEnd?: string | null; graceEnds?: Date; portal?: string | null; dataUntil?: Date }): Line {
+  const end = c.periodEnd ? longDate(c.periodEnd) : null;
+  switch (m) {
+    case "scheduled_cancel": {
+      const lines = [`Your Kabsi plan for ${c.business} ends on ${end ?? "the last day you paid for"}.`, "Until then everything keeps working. Changed your mind? Tap Keep my plan."];
+      return { whatsapp: lines.join(" "), buttons: [{ id: "k:keep", title: "Keep my plan" }], email: emailOf(`${c.business}: your Kabsi plan ends on ${end ?? "your renewal date"}`, "Your plan is set to end", lines) };
+    }
+    case "payment_failed":
+    case "payment_reminder": {
+      const until = c.graceEnds ? longDate(c.graceEnds) : null;
+      const lines = [`${c.business}: your card did not go through. Update it here: ${c.portal ?? `${APP_URL}/app/plan`}`, `Kabsi keeps working until ${until ?? "the grace period ends"}.`];
+      const email = emailOf(`${c.business}: your card did not go through`, "Your card did not go through", [lines[1], "Update your card and Kabsi carries on as before."], { label: "Update your card", url: c.portal ?? `${APP_URL}/app/plan` });
+      return { whatsapp: (m === "payment_reminder" ? "Reminder. " : "") + lines.join("\n"), email };
+    }
+    case "paused": {
+      const until = c.dataUntil ? longDate(c.dataUntil) : null;
+      const lines = [`Your Kabsi plan for ${c.business} is paused. Approvals have stopped and nothing is lost.`, `Your data is kept until ${until}. Reply plan to start again.`];
+      return { whatsapp: lines.join(" "), email: emailOf(`${c.business}: your Kabsi plan is paused`, "Your plan is paused", [lines[0], `Your data is kept until ${until}.`], { label: "Choose your plan", url: `${APP_URL}/app/plan` }) };
+    }
+    case "ended": {
+      const until = c.dataUntil ? longDate(c.dataUntil) : null;
+      const lines = [`Your Kabsi plan for ${c.business} has ended. Thank you for trusting Kabsi with your listing.`, `Your data is kept until ${until}, then deleted. Reply plan any time to come back.`];
+      return { whatsapp: lines.join(" "), email: emailOf(`${c.business}: your Kabsi plan has ended`, "Your plan has ended", lines) };
+    }
+    case "resumed": {
+      const lines = [`Your Kabsi plan for ${c.business} carries on.${end ? ` The next payment is on ${end}.` : ""}`];
+      return { whatsapp: lines[0] };
+    }
+  }
+}
+
+async function tellOwner(m: Message | "payment_reminder", s: SubRow, key: string) {
+  const people = await contacts(s.organization_id);
+  if (!people.length) return;
+  const business = people[0].business;
+  const portal = m === "payment_failed" || m === "payment_reminder" ? await portalFor(s).catch(() => null) : null;
+  const line = billingLine(m, {
+    business, periodEnd: s.current_period_end, portal,
+    graceEnds: s.past_due_at ? addDays(s.past_due_at, GRACE_DAYS) : undefined,
+    dataUntil: addDays(s.ended_at ?? new Date(), DATA_DAYS),
+  });
+  for (const p of people) {
+    if (p.phone) {
+      await outDb.add({ phone: p.phone, userId: p.user_id, locationId: p.location_id, kind: `billing_${m}`, body: line.whatsapp,
+        buttons: line.buttons, urgent: m === "payment_failed", dedupe: `billing:${m}:${key}:${p.user_id}` });
+    }
+  }
+  if (line.email) {
+    await notifyEmail({ category: "billing", kind: `billing_${m}`, key: `billing:${m}:${key}`, locationId: people[0].location_id, to: "owners", content: line.email });
+  }
+  if (m === "payment_failed") {
+    // Reminders on day 3 and day 6 of the 7-day grace; each checks the payment is still failing before it goes.
+    const start = s.past_due_at ? new Date(s.past_due_at) : new Date();
+    for (const day of [3, 6]) {
+      await admin().rpc("enqueue_job", { p_kind: "billing_reminder", p_location: null, p_dedupe_key: `billing_reminder:${s.id}:${start.toISOString().slice(0, 10)}:${day}`,
+        p_payload: { subscription_id: s.id, day }, p_run_at: addDays(start, day).toISOString() });
+    }
+  }
+}
+
+/** The day 3 and day 6 reminder of a failed payment (a job). Sent only while the payment is still failing. */
+export async function paymentReminder(subscriptionRowId: string, day: number): Promise<string> {
+  const { data } = await admin().from("subscriptions").select("*").eq("id", subscriptionRowId).maybeSingle();
+  const s = data as SubRow | null;
+  if (!s || s.state !== "past_due") return "not_due";
+  await tellOwner("payment_reminder", s, `${s.id}:${s.past_due_at ?? ""}:d${day}`);
+  return "sent";
+}
+
+export async function staffAlert(summary: string, key: string) {
+  const { data } = await admin().from("phone_roles").select("phone").eq("role", "staff_admin").is("revoked_at", null);
+  for (const r of (data ?? []) as { phone: string }[]) {
+    await outDb.add({ phone: r.phone, userId: null, locationId: null, kind: "staff_alert", urgent: true, body: `${summary}.`,
+      template: ref("staff_alert", { summary }), dedupe: `billing_staff:${key}:${r.phone}` });
+  }
+  await jobLog("billing_alert", false, { summary });
+}
+
+// ─── the owner's actions ────────────────────────────────────────────────────────────────────────────────────────────
+/** The owner's Creem subscription that still runs (active, past due or paused), newest first. */
+export async function currentSub(org: string): Promise<SubRow | null> {
+  const { data, error } = await admin().from("subscriptions").select("*").eq("organization_id", org).eq("provider", "creem")
+    .in("state", ["active", "past_due", "paused"]).order("updated_at", { ascending: false }).limit(1);
+  if (error) throw error;
+  return ((data ?? [])[0] as SubRow | undefined) ?? null;
+}
+async function lastCustomer(org: string): Promise<string | null> {
+  const { data } = await admin().from("subscriptions").select("provider_customer_id").eq("organization_id", org).eq("provider", "creem")
+    .not("provider_customer_id", "is", null).order("updated_at", { ascending: false }).limit(1);
+  return ((data ?? [])[0]?.provider_customer_id as string | undefined) ?? null;
+}
+async function portalFor(s: { organization_id: string; provider_customer_id: string | null }): Promise<string> {
+  const customer = s.provider_customer_id ?? await lastCustomer(s.organization_id);
+  if (!customer) throw new BillingError("no_customer", "There is no payment on record yet.");
+  return (await creem().portalLink(customer)).customer_portal_link;
+}
+
+/** May this business buy now: plans open (10.2.13), or a Kabsi test account. */
+export async function checkoutOpen(org: string): Promise<boolean> {
+  const [{ data: open }, { data: o }] = await Promise.all([
+    admin().from("app_settings").select("value").eq("key", "billing_open").maybeSingle(),
+    admin().from("organizations").select("billing_test, is_demo").eq("id", org).maybeSingle(),
+  ]);
+  if (o?.is_demo) return false;
+  return open?.value === "on" || !!o?.billing_test;
+}
+
+export async function startCheckout(org: string, userId: string, email: string | null, plan: Plan, period: Period, now = new Date()): Promise<string> {
+  if (!(await checkoutOpen(org))) throw new BillingError("plans_closed", "Plans open soon.");
+  const running = await currentSub(org);
+  if (running && running.state !== "paused") throw new BillingError("already_paid", "This business already has a plan.");
+  const key = planKey(plan, period);
+  const productId = (await productIds())[key];
+  if (!productId) throw new BillingError("not_configured", "Payments are not set up yet.");
+  const requestId = checkoutRequestId(org, key, 1, now);
+  const db = admin();
+  const { data: prior } = await db.from("billing_checkouts").select("checkout_url, completed_at").eq("request_id", requestId).maybeSingle();
+  if (prior?.checkout_url && !prior.completed_at) return prior.checkout_url as string;
+  const location = (await contacts(org))[0]?.location_id ?? "";
+  const c = await creem().createCheckout({ productId, units: 1, requestId, successUrl: SUCCESS_URL, email, metadata: { referenceId: org, business_id: location } });
+  await db.from("billing_checkouts").upsert({ request_id: requestId, organization_id: org, product_key: key, units: 1, mode: CREEM_MODE,
+    checkout_id: c.id, checkout_url: c.checkout_url, created_by: userId }, { onConflict: "request_id" });
+  return c.checkout_url;
+}
+
+export async function portal(org: string): Promise<string> {
+  return await portalFor({ organization_id: org, provider_customer_id: null });
+}
+
+async function mustRun(org: string): Promise<SubRow> {
+  const s = await currentSub(org);
+  if (!s?.provider_subscription_id) throw new BillingError("no_plan", "There is no paid plan to change.");
+  return s;
+}
+
+/** "cancel": at the end of the paid period, never at once (10.2.10). Returns the end date. */
+export async function cancelAtEnd(org: string): Promise<string | null> {
+  const s = await mustRun(org);
+  await creem().cancelAtPeriodEnd(s.provider_subscription_id!);
+  return s.current_period_end;
+}
+/** "Keep my plan": undoes a scheduled cancel. */
+export async function keepPlan(org: string): Promise<string | null> {
+  const s = await mustRun(org);
+  await creem().resume(s.provider_subscription_id!);
+  return s.current_period_end;
+}
+
+/** The price of a change, in dollars, for the Confirm line. */
+export function priceOf(key: ProductKey): number {
+  return CATALOGUE[key].price / 100;
+}
+
+/** "upgrade" charges the difference now; "downgrade" takes effect at renewal (10.2.10). */
+export async function changePlan(org: string, to: Plan): Promise<{ effective: "now" | "renewal"; until: string | null }> {
+  const s = await mustRun(org);
+  if (s.plan === to) throw new BillingError("same_plan", `You are already on ${to === "pro" ? "Pro" : "Essentials"}.`);
+  const period = (s.period === "year" ? "year" : "month") as Period;
+  const productId = (await productIds())[planKey(to, period)];
+  if (!productId) throw new BillingError("not_configured", "Payments are not set up yet.");
+  if (to === "pro") {
+    await creem().upgrade(s.provider_subscription_id!, productId, "proration-charge-immediately");
+    await admin().from("subscriptions").update({ kept_plan: null, kept_plan_until: null }).eq("id", s.id);
+    return { effective: "now", until: null };
+  }
+  // Creem bills the new price from the next renewal (no proration); Kabsi keeps Pro until then.
+  await creem().upgrade(s.provider_subscription_id!, productId, "proration-none");
+  await admin().from("subscriptions").update({ kept_plan: "pro", kept_plan_until: s.current_period_end }).eq("id", s.id);
+  return { effective: "renewal", until: s.current_period_end };
+}
+
+/** "add a location": one more unit of the Extra location item, charged now (10.2.10). */
+export async function addLocation(org: string): Promise<number> {
+  const s = await mustRun(org);
+  const period = (s.period === "year" ? "year" : "month") as Period;
+  const ids = await productIds();
+  const extraId = ids[extraKey(period)];
+  if (!extraId) throw new BillingError("not_configured", "Payments are not set up yet.");
+  const c = creem();
+  const live = subFacts(await c.getSubscription(s.provider_subscription_id!), ids);
+  const units = live.units + 1;
+  await c.setItems(s.provider_subscription_id!, [live.extraItemId ? { id: live.extraItemId, units } : { product_id: extraId, units }]);
+  return units;
+}
+
+// ─── staff: set up the products in this mode (10.2.3) ──────────────────────────────────────────────────────────────
+export async function setupProducts() {
+  const c = creem();
+  const existing = await c.listProducts();
+  const plan = setupPlan(existing);
+  const ids: ProductIds = {};
+  for (const r of plan.reuse) {
+    ids[r.key] = r.id;
+    if (r.rename) await c.renameProduct(r.id, r.key);
+  }
+  for (const key of plan.create) ids[key] = (await c.createProduct(key, SUCCESS_URL)).id;
+  const missing = PRODUCT_KEYS.filter((k) => !ids[k]);
+  if (!missing.length) {
+    const { error } = await admin().from("app_settings").upsert({ key: SETTINGS_KEY(CREEM_MODE), value: JSON.stringify(ids), updated_at: new Date().toISOString() }, { onConflict: "key" });
+    if (error) throw error;
+  }
+  return { mode: CREEM_MODE, reused: plan.reuse.map((r) => ({ key: r.key, id: r.id, renamed: r.rename })), created: plan.create, unmatched: plan.unmatched, missing };
+}
+
+export const isCreemError = (e: unknown): e is CreemError => e instanceof CreemError;
