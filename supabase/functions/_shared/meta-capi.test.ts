@@ -34,7 +34,7 @@ Deno.test(
     const u = e?.user_data as Record<string, unknown>;
     assertEquals((u.em as string[])[0].length, 64);
     assertEquals((u.ph as string[])[0].length, 64);
-    assertEquals(JSON.stringify(e).includes("example.com"), false);
+    assertEquals(/@/.test(JSON.stringify(e)), false);
     assertEquals(JSON.stringify(e).includes("5550100101"), false);
     assertEquals(u.fbc, base.fbc);
   },
