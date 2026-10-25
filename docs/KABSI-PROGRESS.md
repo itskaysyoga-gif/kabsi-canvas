@@ -13,7 +13,8 @@ One page, under 10 KB. Updated 25 Oct 2026 by the lane R chat (master plan 19, 2
 - Fix 1 (PR 219, merged 25 Oct, deploy run 98): the Kapso webhook is registered, the 10 templates are submitted (pending), number health alerts only on YELLOW, RED or BLOCKED, the reply parser takes the first JSON object, the waiting post has Cancel, the evaluation false alarms are fixed. Detail: `docs/progress/archive/2026-10-25-fix-1.md`.
 - Session 10 / D, Creem (PR 221 merged 25 Oct, deploy run 99; PR 2 on the same branch): the webhook `billing-creem` (signature, once per event, 3-day replay guard, job queue as the only writer of paid state), the owner actions on the Plan page and in WhatsApp, the plan and its 27.4 limits in entitlements, the founding count, the 30-day partner trial, the inline email logo. Live: unsigned and wrong signatures get 401, `/founding` answers 30, the setup action ran in test mode (4 Creem products reused and renamed, 2 created, a second run changed nothing). Plans stay closed (`billing_open` off). Detail: `docs/progress/archive/2026-10-25-session-10-creem.md`.
 - V1 (Visibility Map engine, 25 Oct): 7 by 7 grid from DataForSEO public results only (mock until `dataforseo_mode` is live), three numbers, the WhatsApp line, the map image, competitor picks and snapshots, the category check, the DataForSEO cap, 30-day deletion after leaving. Not sent to owners yet. Google guard: not applicable. Detail: `docs/progress/archive/2026-10-25-v1-visibility-map.md`.
-- Next: the phone test (Rashid), QA 1 (with the Creem test checkout), then 13b part 2.
+- QA 1 (PR 225 and part 2, 25 Oct): Playwright journeys, visual baseline and axe, the WhatsApp replay harness (every 13b script step passes on production), Creem test checkout with a cancel from WhatsApp, emails in light and dark, nightly smoke, Nora judged. Fixed a billing race (a paid plan stayed incomplete); Creem refuses extra locations on one subscription. Detail: `docs/progress/archive/2026-10-25-qa-1.md`.
+- Next: 13b part 2 (the two phone-test findings and Nora's full answers), the extra-location fallback, then Web 2.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
@@ -54,11 +55,10 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 25 Oct 2026, QA 1: end-to-end journeys, baseline, replay harness, Creem test checkout, smoke. Detail: `docs/progress/archive/2026-10-25-qa-1.md`.
 - 25 Oct 2026, V1: Visibility Map engine, map image, Competitor Watch data, category check, spend cap. Detail: `docs/progress/archive/2026-10-25-v1-visibility-map.md`.
 - 25 Oct 2026, Session 10 / D (Creem): PR 221 and the part 2 PR. Detail: `docs/progress/archive/2026-10-25-session-10-creem.md`.
 - 25 Oct 2026, Fix 1: webhook, templates, health alert, parser, evaluation, Cancel. Detail: `docs/progress/archive/2026-10-25-fix-1.md`.
-- 25 Oct 2026, lane R: design system, copy, fix-later list, session rules (master plan 30.11).
-- 25 Oct 2026, Session 13b part 1: the WhatsApp agent. Detail: `docs/progress/archive/2026-10-25-session-13b-1.md`.
 
 ## How a session updates this page
 
