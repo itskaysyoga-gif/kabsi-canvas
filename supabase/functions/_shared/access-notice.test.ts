@@ -16,7 +16,7 @@ Deno.test("each change has its own WhatsApp text, plain and in the house style",
   }
   const g = accessWhatsappBody({ change: "granted", business: "Corner Loaf" }, APP);
   assert.ok(g.includes(FREE_FROM_GOOGLE) && g.includes(THIRD_PARTY_HELP), "the granted notice says Business Profile is free and links Google's page");
-  assert.match(accessWhatsappBody({ change: "removed", business: "Corner Loaf" }, APP), /deleted within 30 days/);
+  assert.match(accessWhatsappBody({ change: "removed", business: "Corner Loaf" }, APP), /deleted within 7 days/);
 });
 
 Deno.test("the granted email carries the free-from-Google line and Google's link", () => {

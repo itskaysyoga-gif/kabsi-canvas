@@ -22,7 +22,7 @@ export function accessWhatsappBody(n: AccessNotice, appUrl: string): string {
     ],
     removed: [
       `${n.business}: Kabsi no longer has Manager access to your Google profile. You stay the owner.`,
-      "The Google data Kabsi kept for you is deleted within 30 days.",
+      "The Google data Kabsi kept for you is deleted within 7 days.",
     ],
     lost: [
       `${n.business}: Kabsi can no longer reach your Google profile. The Kabsi group was probably removed as a Manager.`,
