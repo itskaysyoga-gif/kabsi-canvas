@@ -1,0 +1,41 @@
+name: QA Nora judge (by hand)
+
+# QA 1 (master plan 30.12 item 7): scores a saved live replay of Nora's WhatsApp answers (tests/e2e/whatsapp/nora-live-run.json, made by
+# the replay route's nora_live scenario) with the AI judge. Run by hand only (Actions, Run workflow); EVAL_LIVE stays false.
+# Needs the secret ANTHROPIC_API_KEY. The judge model is Haiku; ten answers cost a few cents. The budget stops it.
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: The saved replay run
+        required: true
+        default: tests/e2e/whatsapp/nora-live-run.json
+      budget:
+        description: Budget for the judge, US dollars
+        required: true
+        default: "0.5"
+
+permissions:
+  contents: read
+
+jobs:
+  judge:
+    name: Judge the saved Nora run
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Judge
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node tests/e2e/whatsapp/judge-nora-run.ts "${{ inputs.file }}" --budget "${{ inputs.budget }}" --out nora-judged.json
+      - name: Keep the result
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: nora-judged
+          path: nora-judged.json
+          if-no-files-found: ignore

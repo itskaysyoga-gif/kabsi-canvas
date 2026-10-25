@@ -38,3 +38,8 @@ dist-ssr
 eval-result.json
 .lighthouseci-report
 .lighthouseci
+
+# Playwright (QA 1): reports, traces and the signed-in state of the QA accounts
+test-results/
+playwright-report/
+tests/e2e/.auth/
