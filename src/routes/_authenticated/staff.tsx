@@ -11,6 +11,7 @@ import { BusinessDiagnostics, SystemHealthPanel } from "@/components/staff/syste
 import { ChatsPanel } from "@/components/staff/chats-panel";
 import { ConciergePanel } from "@/components/staff/concierge-panel";
 import { FollowupsPanel } from "@/components/staff/followups-panel";
+import { WhatsappStaffCode } from "@/components/staff/whatsapp-staff-code";
 import { convertConcierge, setConcierge } from "@/lib/concierge";
 import { ClipboardCheck as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
@@ -68,6 +69,7 @@ function StaffPage() {
               <SystemHealthPanel />
             </div>
             <OpsPanel />
+            <WhatsappStaffCode />
             <h2 className="mt-10 text-xl font-bold">Businesses</h2>
             <p className="mt-1 text-sm text-kb-stone">Newest first.</p>
             <div className="mt-4 space-y-4">

@@ -94,6 +94,9 @@ values ('00000000-0000-4000-8000-0000000000fa', '00000000-0000-4000-8000-0000000
         'victim-owner@example.test', 'review_new', 'review_new', 'victim-notice', 'Victim notice', '/app/reviews?f=needs', true, 'sent');
 insert into public.notification_preferences (user_id, location_id, category, channel, frequency)
 values ('00000000-0000-4000-8000-0000000000a1', '00000000-0000-4000-8000-0000000000c1', 'review_new', 'email', 'off');
+-- Session 13b part 1: the victim owner's phone role (whatsapp agent).
+insert into public.phone_roles (phone, role, user_id, location_id, source)
+values ('+15550009999', 'owner', '00000000-0000-4000-8000-0000000000a1', '00000000-0000-4000-8000-0000000000c1', 'membership');
 -- P0.1-09: the victim's organisation, its membership and google_connections rows come from the triggers on
 -- locations and location_members above. subscriptions starts empty.
 insert into public.subscriptions (organization_id, plan, state)

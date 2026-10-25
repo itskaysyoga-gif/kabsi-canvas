@@ -9,7 +9,8 @@ One page, under 10 KB. Updated 24 Oct 2026 by Ops 1 part B (master plan 19, 25.1
 - Session 0 is complete (PR 198 and PR 199, the docs diet).
 - Clean 1 (master plan 28.9, PR 200, merged and verified live 24 Oct): unused code, packages, Edge Functions, a script, a page and a skill removed, the Lovable leftovers gone, the database drops written for Rashid. Detail: `docs/progress/archive/2026-10-24-clean-1.md`.
 - Ops 1 part B (PR 203 and PR 206): section 30 committed (R-90); weekly encrypted backup and monthly restore drill built (dry run green on `main`: the bundle and all 77 Storage files were read and encrypted; the database step waits for Rashid's secrets); locked installs (`npm ci`) and every action pinned to a SHA; Sentry release tags and source maps; privacy, terms and partner terms; the runbook; Lighthouse CI (report only); advisors check; sender `Kabsi <hello@send.kabsi.co>` live (43 test emails delivered, four in Rashid's Gmail inbox with DKIM, SPF and DMARC passing); the Resend webhook is proven. Detail: `docs/progress/archive/2026-10-24-ops-1-part-b.md`.
-- Next: Wave A: session 19 rest and session 13b part 1 (Ops 1 part B waits only for Rashid's clicks in `docs/OPS-SETUP.md`).
+- Session 13b part 1 (the WhatsApp agent): roles and router for every kind of person, the one sender, templates, number health, 18.2 and 18.3, the 141-case suite; migrations applied 25 Oct. Detail and the phone test: `docs/progress/archive/2026-10-25-session-13b-1.md`.
+- Next: Rashid's 10-minute phone test (13b part 1), then Wave B (Ops 1 part B waits only for Rashid's clicks in `docs/OPS-SETUP.md`).
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
@@ -20,14 +21,15 @@ The facts say "WhatsApp is live" only when the last step is done.
 |---|---|---|
 | Number acquired | 23 Oct 2026 | +1 205-745-6874 connected in the Kapso project Kabsi.co; Kapso health check Passed 10:17 Beirut (master plan 9.8) |
 | Profile set | 23 Oct 2026 | Photo, about, email, address, website and description live; the display name "Kabsi" is waiting for Meta's approval (master plan 9.8) |
-| Webhook verified | not yet | Session 13b part 1 registers the webhook with KAPSO_WEBHOOK_SECRET |
-| Templates approved | not yet | Session 13b part 1 submits them through Kapso's API |
-| Inbound tested | not yet | The 100-conversation suite, then a live pass on Rashid's phone |
+| Webhook verified | not yet | Session 13b part 1 registers it after merge (`whatsapp/staff/setup`, secret in Vault) |
+| Templates approved | not yet | 9 utility templates submitted after merge (`whatsapp/staff/templates`); approved when Meta says so |
+| Inbound tested | not yet | Suite of 141 cases passes in CI; the live pass on Rashid's phone is next |
 | Outbound tested | not yet | A live send to Kabsi's own test phones |
 | Owners switched on | not yet | After the launch gate |
 
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
+- **Session 13b part 1:** set the Supabase secret `WHATSAPP_LIVE` to `true`, make a staff code at kabsi.co/staff, then the 10-minute phone test in `docs/progress/archive/2026-10-25-session-13b-1.md`.
 - Session 19 rest: run `supabase/manual/20261025_places_data_purge.sql` (expected read-back `0 | 0 | 0`); set up Pub/Sub and the two secrets (`docs/progress/archive/2026-10-24-session-19-rest.md`); approve the Yawmiyati Update only once yawmiyati.com answers.
 - GitHub repository settings: Dependabot alerts and Dependabot security updates are done (marked 24 Oct by Clean 1, as Rashid asked). Open: Secret Protection (secret scanning and push protection), which Rashid confirms himself.
 - Clean 1: run `supabase/manual/20261024_clean1_drops.sql` after a yes to its list (two empty or backup tables, two unused functions).
@@ -50,12 +52,12 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 25 Oct 2026, Session 13b part 1: the WhatsApp agent. Detail: `docs/progress/archive/2026-10-25-session-13b-1.md`.
 - 24 Oct 2026, Ops 1 part B (PR 203, PR 206): detail `docs/progress/archive/2026-10-24-ops-1-part-b.md`.
 - 25 Oct 2026, Session 19 rest (in progress): PR 204 and PR 205 merged; the Google policy points decided by Rashid (R-91, master plan 30.10); PR C records them and stops storing Places content. Detail: `docs/progress/archive/2026-10-24-session-19-rest.md`.
 - 24 Oct 2026, Clean 1 (master plan 28.9): detail `docs/progress/archive/2026-10-24-clean-1.md`. Tracked files 1,255 to 1,204 (11.59 MB to 11.27 MB), npm packages 438 to 364.
 - 24 Oct 2026, Session 0 part 2: docs diet (detail: `docs/progress/archive/2026-10-24-session-0-diet.md`). Plan index 29 KB, status page 5.8 KB; facts split into `knowledge/facts/` and `knowledge/internal/` with one generator (`node scripts/build-kb.mjs`). File sizes are in the pull request.
 - 24 Oct 2026, Session 0 part 1 (PR 198): master plan 20 to 29. Detail: `docs/progress/archive/evidence.md`, entry "Session 0 part 1".
-- 23 Oct 2026, Ops 1 part A (PR 197). Detail: `docs/progress/archive/evidence.md`, entry "Ops 1 part A".
 
 ## How a session updates this page
 
