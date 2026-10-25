@@ -3,7 +3,8 @@
 // posted, card taps (bots excluded), the week's customer activity (Google's numbers; examples while Google is in mock mode),
 // what needs the owner, the Profile Coach's plan, the time saved (an estimate with its formula) and, on Pro, how people found
 // the profile. No review text and no quotes (K-113.3, R-19). No advice, no claims about causes.
-import { dailyFigures, getPlace, performanceSource, searchTermsFor } from "./google/index.ts";
+import { dailyFigures, performanceSource, profileRating, searchTermsFor } from "./google/index.ts";
+import { isConciergeLocationId } from "./concierge.ts";
 import { ALL_METRICS } from "./insights/summary.ts";
 import { termsMonth } from "./insights/periods.ts";
 import { EXAMPLE_TERMS } from "./insights/example.ts";
@@ -14,7 +15,7 @@ import { notify } from "./notify.ts";
 import * as copy from "./email/copy.ts";
 import { renderReport } from "./email/report-body.ts";
 
-type Loc = { id: string; name: string; place_id: string | null; time_zone: string; emails_paused_until: string | null; google_location_id?: string | null };
+type Loc = { id: string; name: string; place_id: string | null; time_zone: string; emails_paused_until: string | null; google_location_id?: string | null; google_account_id?: string | null };
 const DAY = 86400_000;
 
 function localParts(tz: string, at = new Date()) {
@@ -26,26 +27,22 @@ function localParts(tz: string, at = new Date()) {
 const fmtDay = (d: Date, tz: string) => new Intl.DateTimeFormat("en-US", { timeZone: tz, day: "numeric", month: "short" }).format(d);
 
 // Public Google rating from Places API (New). Works before the GBP API grant.
-async function placesRating(placeId: string) {
-  const key = Deno.env.get("PLACES_API_KEY");
-  if (!key) return null;
-  const { ok, status, data: d, backSoon } = await getPlace(key, placeId, "rating,userRatingCount");
-  if (backSoon) return null; // today's Places cap is reached; tomorrow's run takes the snapshot
-  if (!ok) throw new Error(`places details ${status}`);
-  return { rating: typeof d.rating === "number" ? Math.round(d.rating * 10) / 10 : null, count: d.userRatingCount ?? null };
-}
-
-// Once a day per location: store today's public rating so the report can show the change over 7 days.
+// Once a day per location: store today's rating and review count from the business's own Business Profile, so the
+// report can show the change over 7 days (kept 30 days, K-40). Not from Places: nothing from Places is stored but the
+// place ID (master plan 30.10). A business Kabsi cannot read yet (no access, concierge) is skipped.
 export async function snapshotRatings(locs: Loc[]) {
   const db = admin();
   let taken = 0;
   for (const loc of locs) {
-    if (!loc.place_id) continue;
+    if (!loc.google_location_id || !loc.google_account_id || isConciergeLocationId(loc.google_location_id)) continue;
     const today = localParts(loc.time_zone).date;
     const { data: have } = await db.from("rating_snapshots").select("taken_on").eq("location_id", loc.id).eq("taken_on", today).maybeSingle();
     if (have) continue;
-    const r = await placesRating(loc.place_id);
-    if (!r) continue;
+    const r = await profileRating(loc.google_account_id, loc.google_location_id).catch(async (e) => {
+      await captureError("cron-tick", e, { job: "ratings", location: loc.id });
+      return null;
+    });
+    if (!r || r.rating === null) continue;
     await db.from("rating_snapshots").insert({ location_id: loc.id, taken_on: today, rating: r.rating, review_count: r.count });
     taken++;
   }

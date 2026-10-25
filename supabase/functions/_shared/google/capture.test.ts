@@ -7,7 +7,7 @@ Deno.test("redact removes names, review text, phones and emails, keeps ids and t
     reviewer: { displayName: "A Person", profilePhotoUrl: "https://x/y.jpg" },
     comment: "Great, call me",
     reviewReply: { comment: "Thanks", updateTime: "2026-10-08T12:00:00Z" },
-    summary: "Call +961 3 956 917 or 03 956 917, mail a@b.co",
+    summary: "Call +1 555 010 4477 or 555 010 4477, mail a@b.co",
     message: "has not been used in project 856347937978 before",
     description: "Call us or whatsapp on 70123456",
   });

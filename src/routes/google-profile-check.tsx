@@ -8,8 +8,8 @@ import { faqJsonLd } from "@/lib/faq";
 import { SITE_URL, WHATSAPP_ON, pageHead } from "@/lib/site";
 
 // Free tool (P0.4-01; K-91, K-62, K-82, G-27): search a business and see what customers see on Google, from public data
-// only. The check runs through the profile-snapshot Edge Function, so the Places key, the limits and the 24 hour cache
-// stay on the server. No sign-up, no score, no comparison with other businesses.
+// only. The check runs through the profile-snapshot Edge Function, so the Places key and the limits stay on the server;
+// nothing from Places is kept but the place ID (master plan 30.10). No sign-up, no score, no comparison with other businesses.
 const TOOL_FAQ = [
   {
     q: "What does the check look at?",

@@ -6,8 +6,8 @@
 //
 // Cost guard (K-100, migration 20261012100000_places_cost_guard.sql):
 //   * every request but Autocomplete carries a field mask (callers pass it; never the reviews field);
-//   * Place Details are cached 24 hours by place ID and field mask: a cache hit makes no request and takes nothing
-//     from the day's cap;
+//   * nothing from Places is stored except the place ID (master plan 30.10, Maps Platform Terms 3.2.3(b)): every
+//     Place Details read goes to Google, and nothing is cached;
 //   * every request that reaches Google is first counted by places_take(); past the day's cap it is not sent and the
 //     result says backSoon (the tools show "Back soon"; background jobs skip the work until tomorrow);
 //   * Autocomplete takes a session token, and so does the Place Details call that follows it, so a search plus one
@@ -15,25 +15,17 @@
 import { mockDb, places } from "../client.ts";
 import type { AutocompleteResponse, Place, SearchTextResponse } from "../types.ts";
 
-export type PlacesResult<T> = { ok: boolean; status: number; data: T; backSoon?: boolean; cached?: boolean };
+export type PlacesResult<T> = { ok: boolean; status: number; data: T; backSoon?: boolean };
 type Kind = "search" | "details" | "autocomplete";
 
-// What the guard needs besides Google itself; the tests replace these. The counter and the cache live in the
-// database, reached with the same lazily loaded service client as the rest of the Google layer.
+// What the guard needs besides Google itself; the tests replace it. The counter lives in the database, reached with
+// the same lazily loaded service client as the rest of the Google layer.
 export const guard = {
   // True when the request may go to Google. Fails closed: a counter that cannot be read sends nothing.
   take: async (kind: Kind): Promise<boolean> => {
     const { data, error } = await (await mockDb()).rpc("places_take", { p_kind: kind });
     if (error) return false;
     return (data as { allowed?: boolean } | null)?.allowed === true;
-  },
-  // A cache that cannot be read is a miss, never an error.
-  cacheGet: async (placeId: string, mask: string): Promise<Place | null> => {
-    const { data, error } = await (await mockDb()).rpc("places_cache_get", { p_place_id: placeId, p_field_mask: mask });
-    return error || !data ? null : data as Place;
-  },
-  cachePut: async (placeId: string, mask: string, place: Place): Promise<void> => {
-    await (await mockDb()).rpc("places_cache_put", { p_place_id: placeId, p_field_mask: mask, p_data: place });
   },
 };
 
@@ -55,13 +47,9 @@ export async function autocomplete(key: string, input: string, sessionToken: str
 }
 
 export async function getPlace(key: string, placeId: string, fieldMask: string, sessionToken?: string): Promise<PlacesResult<Place>> {
-  const hit = await guard.cacheGet(placeId, fieldMask);
-  if (hit) return { ok: true, status: 200, data: hit, cached: true };
   if (!(await guard.take("details"))) return backSoon();
   const query = sessionToken ? `?sessionToken=${encodeURIComponent(sessionToken)}` : "";
-  const result = await read<Place>(await places(`/places/${encodeURIComponent(placeId)}${query}`, key, fieldMask));
-  if (result.ok) await guard.cachePut(placeId, fieldMask, result.data).catch(() => {});
-  return result;
+  return read<Place>(await places(`/places/${encodeURIComponent(placeId)}${query}`, key, fieldMask));
 }
 
 // The free Profile Check (P0.4-01, K-100): the one field mask the snapshot ever sends. Rating, review count, hours,
@@ -73,7 +61,3 @@ export const SNAPSHOT_FIELD_MASK =
 export const getSnapshotPlace = (key: string, placeId: string): Promise<PlacesResult<Place>> =>
   getPlace(key, placeId, SNAPSHOT_FIELD_MASK);
 
-// The snapshot from the 24 hour cache only: never a Places request and nothing taken from the cap.
-export async function getCachedSnapshot(placeId: string): Promise<Place | null> {
-  return await guard.cacheGet(placeId, SNAPSHOT_FIELD_MASK);
-}
