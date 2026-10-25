@@ -21,7 +21,7 @@ const bytes = (b64: string) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)
 const buffer = (b64: string): ArrayBuffer => bytes(b64).buffer as ArrayBuffer;
 
 let ready: Promise<{ fonts: { name: string; data: ArrayBuffer; weight: 400 | 700; style: "normal" }[] }> | null = null;
-function setup() {
+export function setup() {
   ready ??= (async () => {
     const stream = new Blob([bytes(RESVG_WASM_GZ)]).stream().pipeThrough(new DecompressionStream("gzip"));
     await initWasm(new Uint8Array(await new Response(stream).arrayBuffer()));
