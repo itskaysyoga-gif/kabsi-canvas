@@ -10,7 +10,7 @@ What stays fixed: Google's API and review rules (no review gating, incentives or
 
 GitHub: the only account is itskaysyoga-gif (itskaysyoga@gmail.com, Rashid's).
 
-Session 0 (24 Oct 2026) added sections 20 to 29 at the end of this file and the "Changed by" lines below. Later sections win over earlier ones where they differ: 29 over 28 over 27 over everything older. Each older section that a later one replaces or changes starts with one italic line that says so and points to the new text; read the new text as current. The decisions are recorded in plan section 4 (R-68 to R-89); the session order is plan section 7.
+Session 0 (24 Oct 2026) added sections 20 to 29 at the end of this file and the "Changed by" lines below; Ops 1 part B added section 30 the same day. Later sections win over earlier ones where they differ: 30 over 29 over 28 over 27 over everything older. Each older section that a later one replaces or changes starts with one italic line that says so and points to the new text; read the new text as current. The decisions are recorded in plan section 4 (R-68 to R-90); the session order is plan section 7.
 
 ## 0. Where things stand (23 Oct 2026)
 - Built and live: sessions 7 to 16, 18, 20a, 20b, hotfix 20h and the 22 Oct sync session (R-47 to R-54 in the plan). Google reviews API open since 22 Oct; Google live on Yawmiyati; the first real reply published and verified; post removal, post Undo, the session-ended screen and the consent token fix live; places_daily_cap 20; homepage hero search and the free check flags live; Rashid Abou Hamzy named as operator, Creem as merchant of record.
@@ -114,7 +114,7 @@ At least 100 scripted conversations covering 9.2 to 9.5 (Gemini's 80 corrected a
 - Number +1 205-745-6874, connected, Kapso health check Passed (23 Oct, 10:17 Beirut). Display name "Kabsi" waiting for Meta's approval. Business unverified, so 250 business-started conversations a day; conversations the owner starts do not count against that.
 - Kapso project Kabsi.co (d2ead89f-dedc-4902-967d-0f9586a8c1ef). Phone number ID 1310486382156171. WhatsApp account ID 1761713808421294. Business portfolio ID 1756516714947073. Kapso config ID fea82e46-b309-4ee8-a579-a7c52d68d670. Meta app: Kapso managed. Meta message fees paid from Kapso credits (8.01 US dollars on 23 Oct). Kapso free plan: 1 number, 2,000 messages a month; upgrade to Kapso Pro before launch (standby number and volume).
 - Supabase secrets set by Rashid on 23 Oct: KAPSO_API_KEY (new project key), KAPSO_PHONE_NUMBER_ID, KAPSO_CONFIG_ID.
-- Staff phone: Rashid, +961 3 956 917, opted in by messaging the Kabsi number on 23 Oct. Session 13b gives this phone the staff_admin role.
+- The staff phone is bound by a one-time staff code in session 13b; no personal phone number is written in the repo.
 - WhatsApp profile, live 23 Oct: photo the Kabsi mark; about "Your Google listing, run from WhatsApp."; email hello@kabsi.co; address 451 Harwinton Ave, Torrington, CT 06790; vertical Professional services; website https://kabsi.co; description "Kabsi runs your Google listing from WhatsApp. Replies to every review, keeps your hours and details right, and posts every week. Nothing goes live without your yes." Calls off. Inbound messages on. Shared with other apps off.
 - Username "kabsi": blocked until Meta business verification (a higher messaging tier). Claim it right after verification.
 - Meta business verification: do it when business-started conversations reach about 150 a day (section 9), or earlier if the username or a higher tier is needed. The lane R chat prepares the documents question then.
@@ -200,9 +200,10 @@ Built by session Ops 1 (Sonnet), part A on 23 Oct and part B in wave 3. Its area
 
 ### 19.1 Backups and restores
 - Supabase Pro before the first paying customer (daily backups, 7 days kept).
-- Weekly database dump by a GitHub Action, encrypted with an age public key in the repo (Rashid keeps the private key offline, printed and in his password manager), stored in a private Cloudflare R2 bucket, 8 weeks kept. Storage photos copied weekly to the same bucket.
-- Weekly git bundle of kabsi-canvas (and kabsi-outbound later) to the same bucket, because Kabsi has one GitHub account and an earlier account was banned.
-- A restore drill once a month: the newest dump into a scratch database and the newest bundle cloned; the result goes in the daily staff summary. Gate: no paying customer before one drill passes.
+- *Changed by Ops 1 part B (24 Oct 2026): backups are encrypted with a passphrase (age, scrypt mode), stored as the GitHub secret BACKUP_PASSPHRASE, which Rashid types and keeps in his password manager and on paper. No key lives in the repo. Files: .github/workflows/backup.yml and restore-drill.yml, scripts/backup/.*
+- Weekly database dump by a GitHub Action (pg_dump through the GitHub secret SUPABASE_DB_URL), encrypted with age in passphrase mode (BACKUP_PASSPHRASE), stored in the private Cloudflare R2 bucket kabsi-backups, 8 weeks kept. Storage photos copied weekly to the same bucket, encrypted the same way.
+- Weekly git bundle of kabsi-canvas (and kabsi-outbound later) to the same bucket, because Kabsi has one GitHub account and an earlier account was banned. The bundle is encrypted the same way.
+- A restore drill once a month: the newest dump is decrypted into a scratch Postgres in the runner and its row counts checked, the newest bundle is cloned, and the result is written where the daily staff summary reads it (app_settings backup_drill plus an ops event). Gate: no paying customer before one drill passes.
 
 ### 19.2 No single point of failure
 - Google access: owners add only the Kabsi group (KABSI_GROUP_ID). The group gets a second Kabsi-owned Google account as a member, both with 2-step verification, so losing one account does not cut off every business.
@@ -318,6 +319,7 @@ Built by SEO 1 (Sonnet, after Web 2). Its area: the sitemap and robots build, pa
 - CI takes screenshots of every route at 390 and 1440 px and fails on a page that does not use the shared layout.
 
 ## 23. Coverage check: every part, who builds it
+*Changed by 30.1: the Growth row's partner line now points to section 29 (Kabsi's own ledger, Creem's affiliate program off).*
 | Part | What must exist | Session |
 | --- | --- | --- |
 | AI brain | Business Knowledge as the only source; Reply, Guard, Growth, Insights agents; style learning from edits; evaluations passing; cost per business with the 15 percent alert (27.4); drafts wait safely when the AI provider is down | 19 rest, UX 1 |
@@ -335,7 +337,7 @@ Built by SEO 1 (Sonnet, after Web 2). Its area: the sitemap and robots build, pa
 | Measurement | Section 20 | Growth 1 |
 | Search and AI answers | Sections 21 and 27.8 | SEO 1 |
 | Design | Sections 22 and 24 | lane R, Web 2, UX 1 |
-| Growth | Founding offer counter, Outbound after launch (27.9), Click-to-WhatsApp ads once trial to paid is proven, Partners through Creem's affiliate program, Front Desk pilot | Web 2, later |
+| Growth | Founding offer counter, Outbound after launch (27.9), Click-to-WhatsApp ads once trial to paid is proven, Kabsi Partners through Kabsi's own ledger (section 29, Creem's affiliate program off), Front Desk pilot | Web 2, PA1 to PA3, later |
 | Quality | Page-by-page audit; launch gate with sections 15 and 27.14 | 20c, 21 |
 
 ## 24. The website that converts (23 Oct 2026; position, free tool and keywords changed by 27)
@@ -634,11 +636,12 @@ Checked against Search Console 6 weeks after launch.
 - Data plus AI cost under 15 percent of the price.
 
 ### 27.14 Not forgotten (the launch gate checks every line)
+*Changed by 30.1: the Growth line's partner item now points to section 29 (Kabsi's own ledger, Creem's affiliate program off).*
 - Accounts and money: Supabase Pro and Vercel Pro before the first payment; Kapso Pro with the standby number before launch; Hussein's Creem business verification and payout account, then live keys; the DataForSEO top-up and Gemini billing when the lane R chat says; the Anthropic promotional credit ends 17 Nov 2026.
 - WhatsApp: display name "Kabsi" approved; Meta business verification at about 150 business-started conversations a day; the username "kabsi" right after verification; staff alerts on WhatsApp and Slack removed (13b part 2); STOP and opt-in records.
 - Google: Search Console sitemap resubmitted and top pages inspected after Web 2 and SEO 1; Bing Webmaster Tools; the second Kabsi Google account in the group; docs/GOOGLE-ARCHITECTURE.md; suspension alerts.
 - Security: 2-step verification on every account (19.6), recovery codes offline, branch protection on main, backups to R2 with a passed restore drill, gitleaks and secret scanning, the runbook.
-- Growth: Facebook and Instagram links everywhere (R-59); Meta Pixel and Conversions API; PostHog funnel and dashboards; the founding offer counter; the proof block only with real data (26.3); Outbound right after launch (27.9); Click-to-WhatsApp ads once trial to paid is proven; Kabsi Partners through Creem's affiliate program; the Front Desk pilot.
+- Growth: Facebook and Instagram links everywhere (R-59); Meta Pixel and Conversions API; PostHog funnel and dashboards; the founding offer counter; the proof block only with real data (26.3); Outbound right after launch (27.9); Click-to-WhatsApp ads once trial to paid is proven; Kabsi Partners through Kabsi's own ledger (section 29, Creem's affiliate program off); the Front Desk pilot.
 - Legal and trust: privacy and terms with every processor (DataForSEO and Gemini included); the cookie bar for the EU, UK and Switzerland; "Your privacy choices"; the lawyer's read; no fake proof; no ranking promises; Google never implied as a partner.
 
 ## 28. Build traps, the first-map onboarding, and the repo clean-up (24 Oct 2026)
@@ -779,3 +782,103 @@ One Kabsi number, one router, one brain in Supabase. Every phone resolves to one
 - Cloudflare: Turnstile on every public form and scan (in place); the kabsi-go Worker for short links and QR redirects, kept only if Clean 1 proves it is used, and used for partner short links (PA1); R2 for backups (Ops 1 part B); DNS stays where it is.
 - Vercel: Speed Insights (Growth 1); environment variables per 19.4 (Ops 1 part B); preview builds stay off for claude/* and dependabot/*; Vercel Pro before the first payment, because the Hobby plan is not for commercial use (27.14).
 - Kapso: one number, the team inbox for hand-offs, the standby number on Kapso Pro before launch; the Kapso skills (integrate-whatsapp, observe-whatsapp, automate-whatsapp) guide 13b and PA2; Kapso's own automations and AI agent stay off for the Kabsi number so only Kabsi's code answers.
+
+## 30. The coverage audit of 24 Oct, the design guarantee, tools, and the risks (24 Oct 2026)
+
+Committed by Ops 1 part B as section 30 and recorded as R-90. Written by the lane R chat on 24 Oct 2026 (23:30 Beirut), checked against the repo (main at de36b23, after Clean 1), Resend and Vercel on 24 Oct. It wins over earlier sections where they differ.
+
+## 30.1 Fixes to the merged plan
+- Section 23 (the Growth row) and 27.14 (Growth) still say "Partners through Creem's affiliate program". Both now point to section 29: Kabsi's own ledger, Creem's affiliate program off.
+- Partner payouts stay as section 29 says (Rashid approves, USDT or USDC from Rashid's wallet, PayPal in Hussein's name run by Rashid, bank and Wise later). Hussein does no work.
+
+## 30.2 Every surface, who builds it (status on 24 Oct)
+| Surface | What must exist | Session | Status | Gap closed by |
+| --- | --- | --- | --- | --- |
+| Home | 27.2 position, map plus phone hero, scan box, proof block | Web 2 | built (old position) | Web 2 |
+| Free Visibility Scan | 28.1 fast part, full map, WhatsApp hand-off | V1, V4, Web 2 | missing | V1 engine, V4 product, Web 2 page |
+| Profile Check page | replaced by the scan | Web 2 | built (old) | Web 2 redirects it to the scan |
+| Review link and QR tool | free tool, counter card, table tent | Web 2, V3 | built (old style) | V3 cards, Web 2 style |
+| Pricing | 27.4 table, honest comparison, FAQ, checkout buttons | Web 2, D | built (old) | D buttons, Web 2 page |
+| How it works | tappable WhatsApp demo (24.4) | Web 2 | built (old) | Web 2 |
+| Partners page, /p/, /s/, /partner | 29.3 | PA3 | /partners built (old), the rest missing | PA3 |
+| Guides | 5 exist plus the 27.8 guides | SEO 1 | 5 built | SEO 1 |
+| Industry pages | 6 exist, auto repair rename, hotels | Web 2, SEO 1 | 6 built | Web 2 style, SEO 1 content |
+| Compare and city pages | 27.8 items 3 and 4 | SEO 1 | missing | SEO 1 |
+| About, FAQ, Security | plain words, operator line | Web 2 | built | Web 2 |
+| Privacy, Terms, Partner terms | 19.5, 29.5, every processor | C | built (old), partner terms missing | C |
+| 404 and error pages | designed, a way back | Web 2 | basic | Web 2 |
+| Login, token, unsubscribe, public review page, get-started, manager steps | calm, shared layout | Web 2 | built | Web 2 |
+| Billing done page | after checkout | D | missing | D |
+| Cookie bar and "Your privacy choices" | 20.4 | E | partial (old banner) | E |
+| Status page | public uptime page at status.kabsi.co | lane R | missing | lane R sets UptimeRobot monitors and the page (30.6) |
+| Onboarding (/start) | 28.5 first map | UX 1 | built (old) | UX 1 |
+| Dashboard | Home, Visibility, Competitors, AI answers, Reviews, Review Growth, Profile, Reports, Kabsi activity | UX 1 | 4 tabs built | UX 1 |
+| Settings | business, keywords and competitors, team and phones, notifications, plan, export and delete | UX 1, D | partial | UX 1, D |
+| Staff pages | costs per business (25.8), partner approvals, payout list, ops | UX 1, PA1 | partial | UX 1, PA1 |
+| WhatsApp, unknown and prospect | Nora sales, scan pick-up | B | missing | B |
+| WhatsApp, owner, manager, staff | 9.3, 27.3, roles | B, 13b part 2, V1 to V4 | missing | B and the V sessions |
+| WhatsApp, partner | 29.2 | PA2 | missing | PA2 |
+| WhatsApp, staff_admin (Rashid) | alerts, commands, approvals | B, 13b part 2, PA1 | missing | B, 13b part 2 |
+| WhatsApp templates | owner (B), staff (13b part 2), partner (PA2), billing (D) | as listed | missing | as listed |
+| Map image | 28.2 | V1 | missing | V1 |
+| Report image and PDF | weekly image for WhatsApp, monthly PDF on Pro | V4 | missing | V4 |
+| Emails | the shared layout on every email, restyled | UX 1 | built (layout exists) | UX 1 |
+| Email sending | kabsi.co and send.kabsi.co verified in Resend (eu-west-1) | C, Rashid | built | 30.4 |
+| Resend webhook | bounces and complaints into the suppression list; the code exists (email/webhook, Svix) | Rashid, C | missing (0 webhooks in Resend; RESEND_WEBHOOK_SECRET not set) | 30.4 |
+| DMARC | a DMARC record on kabsi.co | Rashid | not checked (the sandbox cannot read DNS) | 30.4 |
+| Inbox test | Gmail and Outlook land in the inbox | C | missing | 30.4 |
+| Voice notes | transcription | V3 | missing | V3, 30.5 |
+| Payments | checkout and portal branded, receipts, failed payment flow | D | branding done, store name still "kabsi.co" | D, Rashid renames to "Kabsi" |
+| Facebook and Instagram | name, bio, picture, cover, highlights, link | lane R, Rashid | pages exist, polish missing | 30.6 |
+| LinkedIn page | company page | lane R, Rashid | missing | 30.6 |
+| Search Console, Bing | 21.2 | SEO 1, Rashid | Search Console built, Bing missing | 21.2 |
+| G2, Capterra, Product Hunt, Crunchbase | real listings | lane R, Rashid | missing | 30.6 |
+| Link previews | WhatsApp, LinkedIn, X, Facebook | Web 2, SEO 1 | old images | Web 2 images, SEO 1 tests |
+| Trust | operator line everywhere, security page, processors listed | Web 2, C | partial | Web 2, C |
+| Operations | alerts (13b part 2), backups and runbook (C), cost per business (UX 1), status page (lane R) | as listed | partial | as listed |
+
+## 30.3 New and moved work
+- C gains: commit this section; the 30.1 fixes; the email items of 30.4 (C may touch only the sender address constant and the test route in the email function); the skill-creator skill from github.com/anthropics/skills into .claude/skills; ELEVENLABS_API_KEY as a planned name.
+- V4 gains: the weekly report as an image sized for WhatsApp (1080 by 1350) and the monthly PDF (A4 and US Letter), both from the design system.
+- Web 2 gains: the Profile Check page redirects to the scan; DESIGN.md at the repo root (30.7).
+- lane R gains: the status page (30.6), the social and directory work (30.6), the competitor teardown and the design system (30.7).
+
+## 30.4 Email, done completely
+- Kabsi's own product mail goes from "Kabsi <hello@send.kabsi.co>" with Reply-To hello@kabsi.co, so the root domain keeps its reputation for people's own mail. Outbound later uses its own separate domain (27.9). C changes the sender constant.
+- Rashid, in Resend (signed in as hello@kabsi.co): Webhooks, Add webhook, endpoint https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/email/webhook, events email.bounced, email.complained and email.delivered, Add. Open it, copy the signing secret, and save it in Supabase secrets as RESEND_WEBHOOK_SECRET. C then sends a test event and checks the suppression list.
+- Rashid, in the DNS of kabsi.co: check the DMARC record (mxtoolbox.com, DMARC lookup, kabsi.co). If there is none, add a TXT record named _dmarc with the value v=DMARC1; p=none; rua=mailto:hello@kabsi.co. After two clean weeks, change p=none to p=quarantine.
+- C: one test email of every type through the existing test route to hello@kabsi.co, plus one to a mail-tester.com address (score 9 out of 10 or better), plus Rashid's Gmail and an Outlook address added for this test only; each must land in the inbox, not spam. Report the scores and any fix.
+
+## 30.5 ElevenLabs (Rashid's own account)
+- Use: Scribe for owner voice notes if V3's 20-note test picks it (key ELEVENLABS_API_KEY in Supabase secrets only); voice-over for the 20-second demo loop, ads and reels, made outside the repo.
+- Do not use: voice replies to owners in WhatsApp, a phone agent, or any voice for Nora in 2026 (27.3, Front Desk is text first).
+
+## 30.6 Online presence (lane R writes, Rashid posts)
+- Facebook and Instagram: name "Kabsi", the mark as picture, a cover from the design system, a bio from 27.2 with kabsi.co, highlights (How it works, Free scan, Pricing, Partners), the link to kabsi.co with UTM tags. After the design system is approved.
+- LinkedIn company page: same name, mark, cover and line; Rashid as founder.
+- G2, Capterra, Product Hunt and Crunchbase: listings written by the lane R chat, posted by Rashid in launch week. Product Hunt launch about 30 days after launch, with real proof only.
+- Status page: the lane R chat creates UptimeRobot monitors (kabsi.co, the health function, the WhatsApp webhook, the Creem webhook) and a public status page; Rashid points status.kabsi.co at it if he wants the subdomain.
+
+## 30.7 The design guarantee (before Web 2 starts)
+1. Teardown first, by the lane R chat: Localo, Semrush Local, BrightLocal, Podium, Local Falcon and Birdeye, for clarity, trust and conversion: what each says in 5 seconds, how it shows proof, pricing clarity, onboarding friction. A one-page brief of what Kabsi does better. No copying.
+2. The design system in the Design System type, from the tokens (K-108) and KABSI-DESIGN.md: colour, type, spacing, radius, shadows, icons (one icon set), buttons, inputs, cards, lists, badges, empty, loading and error states, the WhatsApp chat bubble, the map grid (a colour-blind-safe scale with the rank number in each pin, never red against green alone), report image and PDF, email layout (light and dark mail clients), OG image templates, social profile images, motion rules (durations, easing, reduced motion), and right-to-left readiness for the later Saudi step (logical spacing, mirrored icons).
+3. A copy deck per page, written with the kabsi-copy skill before mockups, so no mockup carries placeholder text.
+4. Mockups at 390 and 1440 px: every page type (home, scan result, pricing, how it works, tool, guide, industry, compare, city, partners, partner page, prospect report, about, legal, 404 and error, login) and every app screen (onboarding steps, each dashboard tab, settings, plan, notifications, staff), plus the WhatsApp screens (owner, partner, staff_admin, unknown), the map image, the report image and PDF, three emails and the Creem checkout as Kabsi will style it. Rashid approves each in the Design artifact; nothing is built from an unapproved screen.
+5. DESIGN.md at the repo root (about 8 KB) written from the approved system, modelled on the awesome-design-md format but only Kabsi's own content. Every UI session reads it first.
+6. One shared layout and component set, no page-specific styling, enforced in CI (22).
+7. Visual regression in CI: Playwright screenshots of every route at 390 and 1440 px compared to the approved baseline; an unexplained change fails.
+8. Every visual Kabsi sends meets the same bar: map image, report image and PDF, OG images, emails (tested in Gmail, Outlook and Apple Mail, light and dark), WhatsApp previews, social images, the Creem checkout.
+9. The gates of 22 and 24 stay: the 5-second test with 2 people who never saw Kabsi, speed and accessibility budgets in CI, real iPhone and Android checks, loading, empty and error states, the page-by-page review at 390 and 1440 px.
+10. Before launch, a usability test with 3 real owners (UAE or UK first; if not found in time, any English-speaking owners, with the Abou Hamze pilot as the fourth): tasks are understand Kabsi in 5 seconds, run the scan, start the trial, add Kabsi as Manager, connect WhatsApp, approve a reply, find the report. Any task where 2 of 3 get stuck is fixed before launch and retested with 1 new owner.
+
+## 30.8 Tools decided
+- Add: libphonenumber-js (session B: every owner, staff, partner and "Ask a customer" number checked and stored in E.164); the small Turf modules @turf/destination and @turf/helpers (V1: grid points at a distance from the pin); Anthropic's skill-creator (C installs it; A, D and V1 use it for kabsi-eval, kabsi-billing and kabsi-data-providers); knip (already used in Clean 1); Lighthouse CI (C), axe with Playwright (Web 2, UX 1).
+- Outside the repo, for marketing: instagram-agent-skill, used in the lane R chat or claude.ai for reels scripts, captions and profile audits; it never posts or logs in.
+- Not used: ECC and its AgentShield (Sec 1 already runs CodeQL, gitleaks, dependency review, the Supabase advisors and its own checks; no third-party agent framework in the security session); Baileys and whatsapp-web.js; Google Maps scrapers; Ruflo; MiroFish; worldflowai/everything-claude-code.
+
+## 30.9 The five biggest risks no session covered (now each has an owner)
+1. Meta verification needs a registered business. Kabsi has none; the portfolio is unverified, so business-started conversations stop at 250 a day, the username waits, and the display name could be refused. Owner: Rashid decides the verifying entity before about 150 a day (9.5); the lane R chat prepares the documents question with him at the launch gate.
+2. Real demand for the new modules is unproven. No owner in the UAE or UK has seen a map from Kabsi. Owner: Pilot 1 (lane R and Rashid, from Wave B): 5 pilot businesses in the UAE or UK found through partners, Rashid's network and Kabsi's social pages, each given a free scan and a 30-day trial; gate before Web 2 merges: 3 of 5 say the map and report are worth paying for.
+3. Data that looks wrong kills trust. Grid ranks and AI answers vary. Owner: V1 and V2 add a calibration check: for 3 real businesses, the grid's centre rank matches a manual Maps search from that spot, and AI answers are labelled as samples; any mismatch is fixed before the first report goes to an owner.
+4. Cash before revenue. After 17 Nov the AI credit ends; DataForSEO (50 once), Kapso Pro (25 a month), Supabase Pro (25), Vercel Pro (20) and Gemini come before the first payment. Owner: the lane R chat times each upgrade to its gate (Supabase and Vercel Pro at the first payment, Kapso Pro at launch, DataForSEO at the launch gate) and the staff page shows monthly fixed costs against MRR.
+5. One person runs everything. Approvals, hand-offs, partner applications, payouts and support all land on Rashid. Owner: 13b part 2 and PA1 batch staff work into one morning digest with one-tap actions, Nora answers every question the facts cover before handing off, and the runbook (C) keeps each failure to one page.

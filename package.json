@@ -16,6 +16,7 @@
     "check:tokens": "node scripts/check-tokens.mjs",
     "check:google": "node scripts/check-google-calls.mjs",
     "check:deno": "bash scripts/deno-check.sh",
+    "check:repo": "node scripts/check-repo.mjs",
     "eval:nora": "node scripts/nora-eval/run-nora-eval.ts",
     "format": "prettier --write ."
   },
@@ -65,7 +66,7 @@
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "8.1.5",
+    "vite": "8.1.6",
     "vitest": "^5.0.2"
   }
 }

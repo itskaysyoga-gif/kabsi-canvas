@@ -18,7 +18,7 @@ const between = (text: string, from: string, to: string) => {
   return text.slice(a, b).replace(/\s+/g, " ");
 };
 const privacySection = between(privacy, "<h2>14. WhatsApp</h2>", "<h2>15. Changes</h2>");
-const termsSection = between(terms, "<h2>16. WhatsApp</h2>", "<h2>17. Changes to these terms</h2>");
+const termsSection = between(terms, "<h2>16. WhatsApp</h2>", "<h2>17. Kabsi Partners</h2>");
 const processors = between(privacy, "<h2>6. Who helps us (processors)</h2>", "<h2>7. ");
 const factsBlock = between(facts, "### 9.5b WhatsApp: privacy", "### 9.6 Cookies");
 

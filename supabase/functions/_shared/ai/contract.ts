@@ -5,10 +5,10 @@
 //   3. the code checks; if any fails the model check is not asked and the result is not ready;
 //   4. the model check (a second, cheaper model);
 //   5. a record of the run: prompt version, model, input hash, output hash, checks, memory version (ai_runs).
-import type { System } from "./client.ts";
+import type { CallOptions, JsonSchema, System } from "./client.ts";
 import type { Check } from "./checks.ts";
 
-export type Send = (system: System, user: string, maxTokens: number) => Promise<{ text: string; model: string }>;
+export type Send = (system: System, user: string, maxTokens: number, o?: CallOptions) => Promise<{ text: string; model: string }>;
 
 export type Workflow<I, O> = {
   /** The prompt version, for example "reply.v1". */
@@ -16,6 +16,9 @@ export type Workflow<I, O> = {
   system: (input: I) => System;
   user: (input: I) => string;
   maxTokens: number;
+  effort?: CallOptions["effort"];
+  /** Structured output (26.1): the JSON schema the model must answer in. `parse` still validates it in code. */
+  schema?: JsonSchema;
   /** Structured output: throws on anything that does not fit. */
   parse: (text: string, input: I) => O;
   codeChecks: (output: O, input: I) => Check[];
@@ -50,7 +53,7 @@ export async function runContract<I, O>(wf: Workflow<I, O>, input: I, send: Send
   const inputHash = await sha256(`${wf.promptVersion}\n${systemText(system)}\n${user}`);
   const base = { promptVersion: wf.promptVersion, inputHash, checkModel: null as string | null };
 
-  const gen = await send(system, user, wf.maxTokens);
+  const gen = await send(system, user, wf.maxTokens, { effort: wf.effort, schema: wf.schema });
   let output: O;
   try {
     output = wf.parse(gen.text, input);

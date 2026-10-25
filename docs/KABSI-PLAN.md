@@ -1,13 +1,13 @@
 # Kabsi implementation plan: index
 
-Version 1 was written on 4 Oct 2026 from the six source documents in `docs/source/`. **On 24 Oct 2026 (master plan 27.12, R-85) this file became an index.** It keeps the guardrails, the rules for build sessions, the decision table with status and the order of work. Everything else was moved, word for word, to `docs/plan/archive/`; nothing was deleted, and the full history is in git. The master plan (`docs/KABSI-MASTERPLAN.md`) is the always-read core and wins over this file and every older text; later master plan sections win over earlier ones (29 over 28 over 27 over everything older). Current status is `docs/KABSI-PROGRESS.md` (one page), its history is in `docs/progress/archive/`.
+Version 1 was written on 4 Oct 2026 from the six source documents in `docs/source/`. **On 24 Oct 2026 (master plan 27.12, R-85) this file became an index.** It keeps the guardrails, the rules for build sessions, the decision table with status and the order of work. Everything else was moved, word for word, to `docs/plan/archive/`; nothing was deleted, and the full history is in git. The master plan (`docs/KABSI-MASTERPLAN.md`) is the always-read core and wins over this file and every older text; later master plan sections win over earlier ones (30 over 29 over 28 over 27 over everything older). Current status is `docs/KABSI-PROGRESS.md` (one page), its history is in `docs/progress/archive/`.
 
 ## Contents
 
 1. Guardrails (digest here; full text in the archive)
 2. Rules for every build chat (here, in full)
 3. Sources and precedence (here, in full)
-4. Review decisions R-01 to R-89 (table with status here; full text in the archive)
+4. Review decisions R-01 to R-90 (table with status here; full text in the archive)
 7. Order of work (here, short; the full section and the task cards are in the archive)
 8. Where everything went
 
@@ -88,7 +88,7 @@ These are the standing rules for every build chat. The list below gives each gua
 
 Run what applies and paste the result in the pull request:
 
-- `npm install --registry=https://registry.npmjs.org --legacy-peer-deps`, then `npm run typecheck`, `npm run lint:changed`, `npm test`, `npm run build`.
+- `npm ci --registry=https://registry.npmjs.org --legacy-peer-deps` (the lockfile is committed since Ops 1 part B; use `npm install` only to change a dependency, and commit the lockfile with it), then `npm run typecheck`, `npm run lint:changed`, `npm test`, `npm run build`.
 - `bash scripts/deno-check.sh` when Edge Functions changed.
 - The database test suite once task P0.1-07 exists (`supabase test db` in CI).
 - For screens: check 390 px and 1440 px. If no browser is available in the session, say so in PROGRESS; never claim a visual check you did not do.
@@ -186,9 +186,9 @@ Not a source of truth any more: `docs/KABSI-SPEC.md`, `docs/KABSI-STATE.md`, `do
 
 Added on 24 Oct 2026: the master plan (`docs/KABSI-MASTERPLAN.md`) sits above items 2 to 5 for everything it covers, with its later sections winning over its earlier ones.
 
-## 4. Review decisions (R-01 to R-89)
+## 4. Review decisions (R-01 to R-90)
 
-One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. R-67 is reserved for session 10 (Creem). Later decisions override earlier ones where they differ: R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
+One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. R-67 is reserved for session 10 (Creem). Later decisions override earlier ones where they differ: R-90 over R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
 
 | # | Decision | Status |
 |---|---|---|
@@ -283,6 +283,7 @@ One line per decision. The full text, with what each one changes and why, is `do
 | R-87 | Not forgotten | Approved |
 | R-88 | Build traps, the first-map onboarding and the repo clean-up | Approved |
 | R-89 | Kabsi Partners and one WhatsApp agent for every kind of person | Approved |
+| R-90 | The coverage audit, the design guarantee, tools and risks (master plan section 30) | Approved |
 
 ## 7. Order of work (R-84; master plan 27.11, 28.4, 29.8)
 
@@ -326,4 +327,4 @@ The task cards (what each card does, its "Done when" checks and its prompt) are 
 | 17. Appendix A, system reference | `sec-17-appendix-a-system-reference.md` |
 | 18. Appendix B, decisions carried forward | `sec-18-appendix-b-carried-forward.md` |
 
-Other places: `docs/KABSI-MASTERPLAN.md` (the core), `docs/KABSI-PROGRESS.md` (status), `docs/progress/archive/` (progress history), `docs/source/` (the source decisions K-01 to K-146, G-01 to G-47, design and video), `knowledge/facts/` and `knowledge/internal/` (the facts, section 2.2 of the rules above), `.claude/skills/` (build skills).
+Other places: `docs/KABSI-MASTERPLAN.md` (the core), `docs/KABSI-PROGRESS.md` (status), `docs/progress/archive/` (progress history), `docs/source/` (the source decisions K-01 to K-146, G-01 to G-47, design and video), `knowledge/facts/` and `knowledge/internal/` (the facts, section 2.2 of the rules above), `.claude/skills/` (build skills), `docs/RUNBOOK.md` (one printable page per failure), `docs/OPS-SETUP.md` (Rashid's once-only clicks), `docs/SECRETS.md` (every secret and setting by name), `docs/hosting.md` (installs, versions, upgrades).

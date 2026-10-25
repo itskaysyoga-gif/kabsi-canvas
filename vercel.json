@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "tanstack-start",
-  "installCommand": "npm install --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund",
-  "buildCommand": "node scripts/check-env.mjs && npm run build",
+  "installCommand": "npm ci --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund",
+  "buildCommand": "node scripts/check-env.mjs && npm run build && node scripts/sentry-sourcemaps.mjs",
   "git": {
     "deploymentEnabled": {
       "claude/*": false,

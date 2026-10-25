@@ -12,7 +12,8 @@ export type TaskKind =
   | "knowledge_confirm"
   | "profile_gap"
   | "reconnect"
-  | "billing";
+  | "billing"
+  | "google_needs_action";
 export type TaskPriority = "urgent" | "recommended" | "nice";
 export type Task = {
   id: string;

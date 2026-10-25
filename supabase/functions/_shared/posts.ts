@@ -1,15 +1,15 @@
 // Post drafting with the model, used by `content` when the owner asks Kabsi to write (posts-weekly retired in P0.5-02).
 // Every post is a draft until the owner clicks Post on the exact text (D202).
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
-import { draftMessage, message, type Meter, newMeter, noDashes, parseJson } from "./ai.ts";
-import { MODELS } from "./models.ts";
+import { draftMessage, message, type Meter, newMeter, noDashes, parseJson, task } from "./ai.ts";
 import { businessFacts, hasPostFacts, type KnowledgeCard, loadCard } from "./facts.ts";
 import { contactIssues } from "./contact.ts";
 import { buildKeywords } from "./keywords.ts";
 import { recordAiUsage, takeAiBudget } from "./ai-budget.ts";
 import { googleMode, placeCategory, searchKeywords } from "./google/index.ts";
 
-const CHECK_MODEL = MODELS.check;
+// The Growth agent writes posts (master plan 28.6); its two steps and their models are in ai/agents.ts.
+const CHECK = task("growth", "check_post"), DRAFT = task("growth", "draft_post");
 
 // Buttons Google's localPosts API accepts. CALL uses the phone on the profile; the others need a link.
 export const CTAS = ["CALL", "BOOK", "ORDER", "SHOP", "LEARN_MORE", "SIGN_UP"];
@@ -80,10 +80,10 @@ async function checkPost(loc: PostLoc, user: string, post: string, meter: Meter)
   // Contact details, links, handles, hashtags and unlisted prices fail in code first (K-116.3, K-113.4).
   const fixed = contactIssues(post, { allowedText: `${cardFacts(loc.card).join("\n")}\n${user}` });
   if (fixed.length) return { ok: false, issues: fixed };
-  const out = await message(CHECK_MODEL,
+  const out = await message(CHECK.model,
     `You check a drafted Google Business Profile post before the owner sees it. Reply with JSON only: {"ok": true|false, "issues": ["<short issue>"]}
 Set ok=false if the post states anything not supported by the owner's note or the allowed facts: added days ("every day", "7 days a week"), prices, offers, dates, awards, numbers, services or promises; or if it mentions reviews, ratings, rankings or SEO; or contains a phone number, email address, link, URL or social media handle; or uses hashtags or emojis; or mentions anything the owner asked never to mention. Friendly wording is fine.`,
-    `Allowed facts:\n${cardFacts(loc.card).join("\n") || "(none)"}\n${avoidOf(loc.card) ? `\nThe owner asked never to mention or promise: ${avoidOf(loc.card)}\n` : ""}\nOwner's note and instructions:\n${user}\n\nPost:\n${post}`, 200, meter);
+    `Allowed facts:\n${cardFacts(loc.card).join("\n") || "(none)"}\n${avoidOf(loc.card) ? `\nThe owner asked never to mention or promise: ${avoidOf(loc.card)}\n` : ""}\nOwner's note and instructions:\n${user}\n\nPost:\n${post}`, CHECK.maxTokens, meter);
   const j = parseJson<{ ok?: boolean; issues?: string[] }>(out);
   return { ok: j.ok === true, issues: (j.issues ?? []).map(String).slice(0, 5) };
 }
@@ -93,9 +93,9 @@ Set ok=false if the post states anything not supported by the owner's note or th
 // If the model check itself fails, the code check result stands (contact details are never let through).
 export async function writePost(loc: PostLoc, keywords: string[], user: string) {
   await takeAiBudget(loc.id);
-  const meter = newMeter();
+  const meter = newMeter("growth");
   const draft = async (u: string) =>
-    noDashes((await draftMessage(postSystem(loc, keywords), u, 700, meter)).text.replace(/^["“]|["”]$/g, "").trim()).slice(0, 1500);
+    noDashes((await draftMessage(postSystem(loc, keywords), u, DRAFT.maxTokens, meter, { effort: DRAFT.effort })).text.replace(/^["“]|["”]$/g, "").trim()).slice(0, 1500);
   const check = (text: string) => checkPost(loc, user, text, meter).catch(() => {
     const fixed = contactIssues(text, { allowedText: `${cardFacts(loc.card).join("\n")}\n${user}` });
     return { ok: fixed.length === 0, issues: fixed };

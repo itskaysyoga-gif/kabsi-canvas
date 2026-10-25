@@ -14,14 +14,23 @@ import {
 import { notify } from "../_shared/notify.ts";
 import * as copy from "../_shared/email/copy.ts";
 import { MODELS } from "../_shared/models.ts";
+import { task, type Tool, useTool } from "../_shared/ai/agents.ts";
+import { meterAdd, newMeter } from "../_shared/ai/client.ts";
+import { recordAiUsage } from "../_shared/ai-budget.ts";
 import { countryFromTimezone } from "../_shared/tz-country.ts";
 import { nextTasks } from "../_shared/tasks.ts";
 import { WHATSAPP_NUMBER, WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
 import { noraRules } from "../_shared/nora-rules.ts";
 import { cleanScreen, inOnboarding, ONBOARDING_RULES, onboardingHandoffLine, onboardingLines, onboardingStateResult, type OnboardingState } from "../_shared/onboarding-context.ts";
 
-const MODEL = MODELS.chat;
-const CLASSIFY_MODEL = MODELS.check;
+// Nora is one of the six agents (master plan 28.6): her tools and the model per step are in _shared/ai/agents.ts.
+const CHAT = task("nora", "chat");
+const MODEL = CHAT.model;
+const CLASSIFY_MODEL = task("nora", "label_chat").model;
+const NORA_TOOL: Record<string, Tool> = {
+  save_contact: "save_contact", hand_off_to_human: "hand_to_person", list_tasks: "read_tasks", save_fact: "save_owner_fact",
+  onboarding_state: "read_onboarding_state",
+};
 const MAX_TURNS = 4; // model calls per visitor message (tool use loops)
 const HISTORY = 30; // earlier messages sent with each turn
 const KB_URL = `${APP_URL}/llms-full.txt`;
@@ -149,7 +158,7 @@ async function claude(system: unknown[], messages: Msg[], tools: readonly unknow
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": apiKey(), "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({ model: MODEL, max_tokens: 700, system, tools, messages }),
+    body: JSON.stringify({ model: MODEL, max_tokens: CHAT.maxTokens, output_config: { effort: CHAT.effort }, system, tools, messages }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(`anthropic ${res.status}: ${JSON.stringify(data).slice(0, 300)}`);
@@ -416,6 +425,7 @@ Deno.serve(async (req) => {
     let handoff = conv.status === "handoff";
     let contactSaved = false;
     let tin = 0, tout = 0, tcache = 0;
+    const meter = newMeter("nora");
     const turn: Msg[] = [...messages];
     for (let i = 0; i < MAX_TURNS; i++) {
       // Cache the conversation so far too (second breakpoint), so long chats stay cheap.
@@ -429,6 +439,7 @@ Deno.serve(async (req) => {
       tin += out.usage.input_tokens + (out.usage.cache_creation_input_tokens ?? 0);
       tout += out.usage.output_tokens;
       tcache += out.usage.cache_read_input_tokens ?? 0;
+      meterAdd(meter, MODEL, out.usage);
       const texts = out.content.filter((c) => c.type === "text").map((c) => c.text ?? "").join("\n").trim();
       const uses = out.content.filter((c) => c.type === "tool_use");
       if (!uses.length) { reply = texts; break; }
@@ -436,6 +447,7 @@ Deno.serve(async (req) => {
       const results: unknown[] = [];
       for (const u of uses) {
         const input = u.input ?? {};
+        useTool("nora", NORA_TOOL[u.name ?? ""] ?? ("unknown" as Tool));
         let result: Record<string, unknown> = { ok: false };
         if (u.name === "save_contact") {
           const email = clip(input.email, 200).toLowerCase();
@@ -521,6 +533,7 @@ Deno.serve(async (req) => {
       message_count: conv.message_count + 2, tokens_in: conv.tokens_in + tin, tokens_out: conv.tokens_out + tout,
       cache_read: conv.cache_read + tcache, updated_at: new Date().toISOString(),
     }).eq("id", conv.id);
+    await recordAiUsage(ownerLoc, meter);
     log("assistant", { ok: true, conv: conv.id, tin, tout, tcache, handoff, contactSaved });
     return json({ conversation_id: conv.id, reply, handoff, contact_saved: contactSaved });
   } catch (e) {

@@ -56,7 +56,7 @@ export type Model = { name: string; classify: Call; draft: Send; check: Call };
 export const liveModel = (): Model => ({
   name: "anthropic",
   classify: (m, s, u, t) => message(m, s, u, t),
-  draft: (s, u, t) => draftMessage(s, u, t),
+  draft: (s, u, t, opts) => draftMessage(s, u, t, undefined, opts),
   check: (m, s, u, t) => message(m, s, u, t),
 });
 
@@ -165,7 +165,7 @@ export async function runCase(
     r.routingMiss = c.expect.risk === "high" && cls.risk !== "high";
     if (cls.risk !== "high") {
       const memory = await memoryFor(c.business);
-      const send: Send = (s, u, t) => model.draft(alter(s), u, t);
+      const send: Send = (s, u, t, opts) => model.draft(alter(s), u, t, opts);
       const input = {
         review,
         memory,

@@ -3,8 +3,8 @@
 // the only untrusted input. The model answers {reply, facts_used, language, topics}; code checks every fact it cites
 // and every detail it states; a second model judges tone. A failed check keeps the draft with the problem marked,
 // never as ready.
-import { MODELS } from "../models.ts";
-import { message, parseJson, type Meter, type System } from "./client.ts";
+import { type JsonSchema, message, parseJson, type Meter, type System } from "./client.ts";
+import { task } from "./agents.ts";
 import { fenceReview, houseStyle, type ReviewInput, UNTRUSTED } from "./fence.ts";
 import { type Memory, memoryParts } from "./memory.ts";
 import { type ReplyOutput, replyChecks } from "./checks.ts";
@@ -23,7 +23,8 @@ export async function classify(r: ReviewInput, o: { industry?: Industry | null; 
   const code = riskByRules(r, o.industry ?? null);
   if (!r.comment?.trim()) return { language: "none", ...code };
   if (code.risk === "high") return { language: null, ...code };
-  const out = await (o.call ?? message)(MODELS.check, CLASSIFY_RULES, fenceReview(r), 200, o.meter);
+  const t = task("reply", "classify");
+  const out = await (o.call ?? message)(t.model, CLASSIFY_RULES, fenceReview(r), t.maxTokens, o.meter);
   const j = parseJson<{ language?: string; risk?: unknown; reasons?: unknown }>(out);
   return { language: String(j.language ?? "unknown").slice(0, 12), ...mergeRisk(code, j) };
 }
@@ -52,6 +53,19 @@ export type ReplyInput = {
 export const replySystem = (memory: Memory): System => [{ text: REPLY_RULES, cache: true }, ...memoryParts(memory)];
 export const replyUser = (i: ReplyInput) => `${fenceReview(i.review)}\n\n${replyTask({ languageRule: languageRule(i.language), risk: i.risk, reasons: i.reasons, industry: i.industry, holding: i.holding, instruction: i.instruction, previous: i.previous })}`;
 
+/** The draft's fixed shape, sent as the structured output schema (26.1); parseReply checks it again in code. */
+export const REPLY_SCHEMA: JsonSchema = {
+  type: "object",
+  properties: {
+    reply: { type: "string" },
+    facts_used: { type: "array", items: { type: "string" } },
+    language: { type: "string" },
+    topics: { type: "array", items: { type: "string" } },
+  },
+  required: ["reply", "facts_used", "language", "topics"],
+  additionalProperties: false,
+};
+
 /** Structured output (K-39): anything that does not fit is thrown away. */
 export function parseReply(text: string): ReplyOutput {
   const j = parseJson<Record<string, unknown>>(text);
@@ -65,20 +79,23 @@ export function parseReply(text: string): ReplyOutput {
 
 export function replyWorkflow(o: { checkCall?: typeof message; meter?: Meter } = {}): Workflow<ReplyInput, ReplyOutput> {
   const call = o.checkCall ?? message;
+  const draft = task("reply", "draft"), check = task("reply", "check");
   return {
     promptVersion: REPLY_V2,
     system: (i) => replySystem(i.memory),
     user: replyUser,
-    maxTokens: 500,
+    maxTokens: draft.maxTokens,
+    effort: draft.effort,
+    schema: REPLY_SCHEMA,
     parse: (text) => parseReply(text),
     codeChecks: (out, i) => replyChecks({ out, memory: i.memory, reviewer: i.review.reviewer, reviewText: i.review.comment ?? "", recentReplies: i.recentReplies, industry: i.industry ?? null }),
     modelCheck: async (out, i) => {
       const facts = Object.entries(i.memory.factText).map(([r, t]) => `[${r}] ${t}`).join("\n") || "(none)";
       const avoid = typeof i.memory.card.avoid === "string" && i.memory.card.avoid.trim() ? `\nThe owner asked never to mention or promise (set ok=false if the draft does): ${i.memory.card.avoid.trim()}\n` : "";
-      const raw = await call(MODELS.check, CHECK_RULES,
-        `Allowed facts:\n${facts}\n${avoid}\nThe review (the reviewer's name is always allowed in the reply):\n${fenceReview(i.review)}\n\nDraft:\n${out.reply}`, 250, o.meter);
+      const raw = await call(check.model, CHECK_RULES,
+        `Allowed facts:\n${facts}\n${avoid}\nThe review (the reviewer's name is always allowed in the reply):\n${fenceReview(i.review)}\n\nDraft:\n${out.reply}`, check.maxTokens, o.meter);
       const j = parseJson<{ ok?: boolean; issues?: string[] }>(raw);
-      return { ok: j.ok === true, problems: (j.issues ?? []).map((s) => `The safety check flagged: ${String(s)}`).slice(0, 6), model: MODELS.check };
+      return { ok: j.ok === true, problems: (j.issues ?? []).map((s) => `The safety check flagged: ${String(s)}`).slice(0, 6), model: check.model };
     },
   };
 }
