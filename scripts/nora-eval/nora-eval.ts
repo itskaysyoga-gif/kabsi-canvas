@@ -49,7 +49,8 @@ export function numbersIn(text: string): string[] {
 /** Every distinct dollar amount a text states, as "$39". */
 export const dollarsIn = (text: string) => numbersIn(text).filter((n) => n.startsWith("$"));
 
-const BAD_STYLE = [/[—–]/, /!/];
+// No dashes, no exclamation marks, no markdown bold (Nora answers in plain text; live run of 25 Oct).
+const BAD_STYLE = [/[—–]/, /!/, /\*\*\S/];
 // Honesty rules that hold for every answer, whatever the question.
 const HONESTY: [string, RegExp][] = [
   [
