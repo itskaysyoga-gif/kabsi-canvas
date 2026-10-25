@@ -8,7 +8,7 @@
 -- 2. New server events: whatsapp_connected, first_alert_sent (with minutes since WhatsApp was connected, 26.5),
 --    first_yes, trial_started, checkout_started (from billing-creem through public.record_product_event), paid,
 --    plan_changed.
--- 3. signup_completed, trial_started and paid also offer a meta_capi job: the `api` dispatcher sends the event to
+-- 3. signup_completed, trial_started and paid also offer a meta_capi job (only while product_events is 'on'): the `api` dispatcher sends the event to
 --    Meta's Conversions API (supabase/functions/_shared/meta-capi.ts) when META_PIXEL_ID and META_CAPI_TOKEN are set
 --    and the person allowed ad measurement; otherwise the job ends as skipped. Nothing about the person is stored here.
 -- 4. consent_records takes the panel ("Your privacy choices", method panel, action switch).
@@ -36,7 +36,9 @@ begin
     p_key)
   on conflict (source_key) do nothing
   returning id into v_id;
-  if v_id is not null and p_event in ('signup_completed', 'trial_started', 'paid') then
+  -- Only where events are sent at all (app_settings.product_events 'on': production; off in local and CI databases).
+  if v_id is not null and p_event in ('signup_completed', 'trial_started', 'paid')
+     and coalesce((select value from public.app_settings where key = 'product_events'), 'off') = 'on' then
     perform public.enqueue_job('meta_capi', p_location, 'meta_capi:' || v_id, jsonb_build_object('event_id', v_id));
   end if;
 exception when others then
