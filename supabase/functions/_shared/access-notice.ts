@@ -52,6 +52,12 @@ export async function sendAccessWhatsapp(locationId: string, n: AccessNotice, de
 
 /** The live deps: owners of the business who opted in to WhatsApp, sent through the owner channel's rules. Loaded on
  *  first use so the rules above can be tested without the function's secrets. */
+// The approved template outside the 24-hour window (named params, as 13b part 1's templates are); none until it is set.
+const accessTemplate = (business: string) => {
+  const name = Deno.env.get("KAPSO_TEMPLATE_ACCESS_CHANGE");
+  return name ? { name, params: { business } } : null;
+};
+
 export async function liveAccessWhatsapp(locationId: string, n: AccessNotice, dedupe: string) {
   const { WHATSAPP_ON } = await import("./whatsapp-setting.ts");
   if (!WHATSAPP_ON) return {};
@@ -71,6 +77,6 @@ export async function liveAccessWhatsapp(locationId: string, n: AccessNotice, de
       return ((o ?? []) as { user_id: string }[]).map((r) => r.user_id);
     },
     send: (userId, id, kind, key, body) => deliver(ctx, { userId, locationId: id, kind, dedupe: key, body,
-      template: { name: Deno.env.get("KAPSO_TEMPLATE_ACCESS_CHANGE") || null, params: [n.business] } }),
+      template: accessTemplate(n.business) }),
   });
 }
