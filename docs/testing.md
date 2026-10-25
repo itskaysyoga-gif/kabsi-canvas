@@ -271,3 +271,59 @@ exclamation mark, and a delete question whose first sentence is not the never-de
   in either answer names a credential, review text or a reviewer.
 - `tests/system-health.test.ts`: what needs attention first (red for an open breaker, a dead job, a stuck publication or a
   job waiting over 10 minutes) and that the panel reads only through the staff functions.
+
+## QA 1: end to end, replay, emails and smoke (master plan 30.12, 25 Oct 2026)
+
+Everything below is open source (Playwright, `toHaveScreenshot`, `@axe-core/playwright`) and runs against production with fictional or test-only data. Nothing here reaches a real customer or a real Google profile (R-17). The tools are the dev dependencies `@playwright/test` and `@axe-core/playwright`; the browser is Playwright's Chromium (`npx playwright install chromium` on a new machine).
+
+### Web journeys and the visual baseline (`tests/e2e`)
+
+| File | What it covers | Sign-in |
+|---|---|---|
+| `public.spec.ts` | every public page at 390 and 1440 px: loads, one heading, no sideways scroll, no serious or critical axe issue, matches the baseline; the 404 page | none |
+| `app.spec.ts` | every signed-in screen of the QA demo owner (Home, Reviews, Posts, Photos, Hours, Shield, Report, Insights, Knowledge, Team, Settings, Plan, Cards, Coach), clock fixed, axe, baseline | `KABSI_QA_CODE_DEMO` |
+| `journeys.spec.ts` | approve a reply and Undo it; approve and let it go; approve a post and Cancel it while it waits | `KABSI_QA_CODE_DEMO` |
+| `login.spec.ts` | the real sign-in sheet with an admin-made code (Turnstile and the mail send stood in for) | `KABSI_QA_CODE_UI` |
+| `onboarding.spec.ts` | a new account through every onboarding step on a fictional business | `KABSI_QA_CODE_OWNER` |
+| `billing.spec.ts` | Creem test-mode checkout: a decline (4507 9900 0000 0028), a purchase (4111 1111 1111 1111), then an extra location | `KABSI_QA_CODE_OWNER`, `CREEM_TEST=1` |
+| `email.spec.ts` | every email template (43 in `docs/email-previews` and the 4 Supabase Auth ones) in light and dark, baseline, no dashes | none |
+| `smoke.spec.ts` | the nightly subset (see below) | none |
+
+Run: `npx playwright test` (all), `npx playwright test public.spec.ts` (one file), `--project=m390` or `--project=d1440` (one size). `KABSI_BASE_URL=https://<preview>.vercel.app` points a run at a preview. Reports: `npx playwright show-report`.
+
+**The baseline** is `tests/e2e/baseline/<project>/<file>/<name>.png`, made by `npx playwright test --update-snapshots` on the Linux Chromium that Playwright installs. A page keeps its first 3,000 px on a phone and 2,000 px on a desktop (the rest is covered by the overflow and axe checks). A change that nobody explained fails the run. To change it on purpose, run `--update-snapshots` for the files that changed, look at the images in the pull request, and say in the description why. Fonts and anti-aliasing differ between operating systems: make and compare baselines on Linux only.
+
+**axe**: serious and critical issues fail; moderate and minor ones are not failed. Known issues that cannot be fixed in this session are listed in `docs/LATER.md`.
+
+**QA accounts and data** (all fictional; the SQL is in `tests/e2e/seed/`, run with the Supabase connector's `execute_sql`):
+- `qa-whatsapp-personas.sql` (once): five `@test.local` users and their fictional phones (`+1 212 555 01xx`, the 555-0100 to 555-0199 block reserved for fiction; the area code is 212 because libphonenumber refuses `+1 555`), all on the two demo businesses.
+- `qa-reset.sql` (before each run): creates `qa-demo@test.local` as an owner of Harbour Lane Coffee and puts the QA review and the QA post back as waiting drafts.
+- `qa-owner-reset.sql` (before each onboarding run): creates `delivered+kabsi-qa@resend.dev` (Resend's test address, no inbox) once and removes its fictional business so onboarding can run again.
+- `qa-billing-test.sql` (after onboarding, once per business): sets `billing_test = true` on that one organisation and gives its business the phone `+12125550106`.
+- `qa-login-code.sql` (before each signed-in run): makes a one-time sign-in code for a QA account (Supabase Auth keeps a hash of the address plus the code). Pass the code as `KABSI_QA_CODE_DEMO`, `KABSI_QA_CODE_OWNER` or `KABSI_QA_CODE_UI`; each works once and for 30 minutes. `tests/e2e/global-setup.ts` exchanges it at Supabase Auth's verify endpoint and keeps the session in `tests/e2e/.auth` (ignored by git).
+
+### The WhatsApp replay harness
+
+`POST /functions/v1/whatsapp/staff/replay` with `{"scenario": "<name>"}` and the `x-cron-secret` header (staff only; from SQL: `select public.call_internal('whatsapp/staff/replay', '{"scenario":"owner_script"}')`, then read the answer from `net._http_response`). It signs each message of the scenario in Kapso's format with the webhook secret from Vault (never returned or logged), feeds it to the normal inbound path, waits for the background work, and reads back what was stored (`whatsapp_messages`), what Kabsi answered (`whatsapp_outbox`, which must be `mock_sent`) and the conversation. The answer lists each step with its replies and any problems.
+
+- The caller names a scenario; it cannot send its own text. Only phones that match `+1 212 555 01xx` and are bound only to demo businesses (or to the QA test account's business whose organisation is `billing_test`) run. A real number or a real business is refused before anything is sent.
+- Scenarios (`supabase/functions/_shared/whatsapp/replay.ts`): `owner_script` (the 13b phone test script, owner steps), `owner_stop`, `two_roles`, `two_businesses`, `manager_staff`, `unknown_phone`, `voice_limits`, `old_card`, `stranger_card`, `billing_cancel`, `nora_live` (ten questions on the real router model).
+- `supabase/functions/_shared/whatsapp/replay.test.ts` (Deno, in `scripts/deno-check.sh`): the payload is read by the real parser, the signature is the one the webhook checks, the guards refuse real phones and real businesses, and six scenarios pass on the fake world of the 141-case suite, so a wrong expectation fails in CI before it runs on production.
+- `nora_live` is judged afterwards: save the answer as `tests/e2e/whatsapp/nora-live-run.json`, then run Actions, "QA Nora judge" (or `node tests/e2e/whatsapp/judge-nora-run.ts <file> --budget 0.5` with `ANTHROPIC_API_KEY`). It uses `scripts/eval/judge.ts` and its Nora rubric.
+
+### Real delivery proof
+
+`POST /whatsapp/staff/delivery` (internal) sends one utility template (`kabsi_staff_alert`) to the staff phone, which is Kabsi's own allow-listed test phone, at most once an hour, and records it as `qa_delivery_proof`. Kapso's delivered receipt arrives on the webhook and is read back with `POST /whatsapp/staff/deliverystatus` or `select state from whatsapp_messages where kind = 'qa_delivery_proof'`. No other number is ever used.
+
+### Emails
+
+`email.spec.ts` renders every template with `prefers-color-scheme` light and dark. The templates carry no dark-mode styles today, so the two renderings match; the test will show a template that gains them. Resend's delivered event for one real send to hello@kabsi.co is read with the Resend connector (`list-emails`, `get-email`). Gmail, Outlook and Apple Mail rendering stay in `docs/LATER.md` for Web 2.
+
+### The nightly smoke test (`.github/workflows/smoke.yml`)
+
+`npx playwright test tests/e2e/smoke.spec.ts --project=m390`: eight public pages, the sitemap and the AI files, queue health, the founding count, the Worker, and that the Creem webhook, the WhatsApp webhook, the replay route, the alert route and business search all refuse an unsigned call. Nightly at 03:30 UTC and by hand (Actions, "Smoke", Run workflow). It is not a required check. When it fails and `QA_SMOKE_TOKEN` is set, it calls `POST /whatsapp/qa/alert`, which makes one ops event and sends the staff phones a WhatsApp message (`kabsi_staff_alert`: outside the 24-hour window only the template goes, inside it the full line with the run address).
+To arm the alert (Rashid, once): choose a long random string; add it as the GitHub secret `QA_SMOKE_TOKEN` (Settings, Secrets and variables, Actions) and as the Vault secret `qa_smoke_token` (SQL editor: `select vault.create_secret('<the same string>', 'qa_smoke_token');`). Until then a failing night is only a red run.
+
+### What stays human (master plan 30.12 item 3)
+
+The first real inbound WhatsApp message (done for the staff phone on 25 Oct; owners' phones stay a launch-gate step), the 5-second test with people who never saw Kabsi, the usability test with real owners (30.7.10), and reviews, which only real customers write. Also by eye: Gmail, Outlook and Apple Mail rendering, and a real iPhone and Android pass.

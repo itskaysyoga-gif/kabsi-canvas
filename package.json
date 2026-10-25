@@ -18,7 +18,9 @@
     "check:deno": "bash scripts/deno-check.sh",
     "check:repo": "node scripts/check-repo.mjs",
     "eval:nora": "node scripts/nora-eval/run-nora-eval.ts",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "e2e": "playwright test",
+    "e2e:smoke": "playwright test tests/e2e/smoke.spec.ts --project=m390"
   },
   "overrides": {
     "rolldown": "1.2.1"
@@ -50,7 +52,9 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@eslint/js": "^9.32.0",
+    "@playwright/test": "1.63.0",
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",

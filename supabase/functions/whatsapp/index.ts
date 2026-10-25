@@ -8,7 +8,7 @@
 //   POST /whatsapp/staff/*  internal, staff only: setup (the webhook, its secret into Vault), templates, health (hourly),
 //                           automations. KAPSO_API_KEY is read here and never leaves Supabase secrets.
 // Nothing is sent live unless WHATSAPP_LIVE is true, and until launch only to Kabsi's own test phones and the staff phone.
-import { admin, captureError, fail, isInternal, json } from "../_shared/kabsi.ts";
+import { admin, captureError, fail, isInternal, json, timingSafeEqual } from "../_shared/kabsi.ts";
 import { notify as notifyEmail } from "../_shared/notify.ts";
 import { parseWebhook, verifySignature } from "../_shared/whatsapp/channel.ts";
 import { agentDeps, whatsappCtx } from "../_shared/whatsapp/db.ts";
@@ -19,6 +19,11 @@ import { caseOf, needsActionBody } from "../_shared/whatsapp/google-action.ts";
 import { SAY } from "../_shared/whatsapp/say.ts";
 import { ref } from "../_shared/whatsapp/templates.ts";
 import { checkAutomations, healthAlertText, type KapsoEnv, listWebhooks, readHealth, setupWebhook, submitTemplates } from "../_shared/whatsapp/kapso-admin.ts";
+import { SCENARIO_NAMES, sign } from "../_shared/whatsapp/replay.ts";
+import { replayMedia } from "../_shared/whatsapp/replay-media.ts";
+import { replayIo } from "../_shared/whatsapp/replay-db.ts";
+import { runScenario } from "../_shared/whatsapp/replay-run.ts";
+import { alertHour, alertSummary } from "../_shared/whatsapp/smoke-alert.ts";
 
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void } | undefined;
 const MAX_BODY = 256 * 1024;
@@ -44,12 +49,16 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return fail("method_not_allowed", "Use POST.", 405);
   const path = new URL(req.url).pathname.replace(/\/+$/, "");
   if (path.endsWith("/tick")) return (await isInternal(req)) ? json(await tick()) : fail("forbidden", "Forbidden.", 403);
+  // QA 1 (master plan 30.12): staff-only replay of a named scenario from fictional phones through the normal inbound path.
+  if (path.endsWith("/staff/replay")) return (await isInternal(req)) ? await replay(req) : fail("forbidden", "Forbidden.", 403);
+  // QA 1: the nightly smoke test (GitHub Actions) tells the staff phones when it fails. Its own token, nothing else.
+  if (path.endsWith("/qa/alert")) return await smokeAlert(req);
   const staff = /\/staff\/([a-z]+)$/.exec(path);
   if (staff) return (await isInternal(req)) ? json(await staffAction(staff[1])) : fail("forbidden", "Forbidden.", 403);
   return await webhook(req);
 });
 
-async function webhook(req: Request): Promise<Response> {
+async function webhook(req: Request, opts: { background?: (p: Promise<unknown>) => void; media?: (id: string) => Promise<Uint8Array> } = {}): Promise<Response> {
   const secret = await webhookSecret();
   if (!secret) return fail("not_configured", "WhatsApp is not set up.", 503);
   const raw = new Uint8Array(await req.arrayBuffer());
@@ -78,11 +87,12 @@ async function webhook(req: Request): Promise<Response> {
     }
   }
   if (!ctx.on) return json({ ok: true, handled: 0, off: true });
-  const deps = await agentDeps();
+  const base = await agentDeps();
+  const deps = opts.media ? { ...base, media: opts.media } : base;
   const done: string[] = [];
   for (const m of messages) {
     try {
-      done.push(await receive(deps, m, background));
+      done.push(await receive(deps, m, opts.background ?? background));
     } catch (e) {
       // No message content goes to Sentry, only the step (K-113).
       await captureError("whatsapp", e, { step: "inbound", type: m.type });
@@ -91,6 +101,51 @@ async function webhook(req: Request): Promise<Response> {
   }
   // Always 200 after a valid signature, so Kapso does not retry what was already stored once.
   return json({ ok: true, handled: done.length, statuses: statuses.length });
+}
+
+async function smokeAlert(req: Request): Promise<Response> {
+  const given = req.headers.get("x-smoke-token") ?? "";
+  const { data: token } = await admin().rpc("internal_secret", { p_name: "qa_smoke_token" });
+  if (!given || typeof token !== "string" || !token || !timingSafeEqual(given, token)) return fail("forbidden", "Forbidden.", 403);
+  const body = (await req.json().catch(() => ({}))) as { summary?: unknown; run?: unknown };
+  const text = `Nightly smoke test failed: ${alertSummary(body.summary)}`;
+  // The run's address goes in the full message only (a template carries no link); it must be a GitHub Actions address.
+  const run = typeof body.run === "string" && /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/actions\/runs\/\d+$/.test(body.run) ? body.run : null;
+  const hour = alertHour(new Date());
+  await admin().rpc("ops_emit", { p_kind: "smoke_failed", p_channel: "alerts", p_title: "Nightly smoke test failed", p_body: text, p_dedupe: `smoke:${hour}` });
+  const deps = await agentDeps();
+  let told = 0;
+  for (const phone of await staffAdminPhones()) {
+    await notify(deps.out, { phone, userId: null, locationId: null, kind: "staff_alert", urgent: true, body: run ? `${text}. ${run}` : `${text}.`,
+      template: ref("staff_alert", { summary: text }), dedupe: `smoke:${hour}:${phone}` });
+    told++;
+  }
+  return json({ ok: true, told });
+}
+
+// The replay route: the scenario is chosen by name (no message text comes from the caller). Each message is signed here,
+// with the webhook secret read from Vault, and goes through webhook() exactly as Kapso's own would; the background work
+// is awaited so the answers can be read back. The secret is never returned or logged.
+async function replay(req: Request): Promise<Response> {
+  const { scenario } = (await req.json().catch(() => ({}))) as { scenario?: string };
+  if (!scenario || !SCENARIO_NAMES.includes(scenario)) return fail("unknown_scenario", `Use one of: ${SCENARIO_NAMES.join(", ")}.`, 400);
+  const ctx = await whatsappCtx();
+  if (!ctx.on || !ctx.phoneNumberId) return fail("not_configured", "WhatsApp is not set up.", 503);
+  const io = replayIo({
+    phoneNumberId: ctx.phoneNumberId,
+    async deliver(p) {
+      const raw = new TextEncoder().encode(JSON.stringify(p.body));
+      const signature = await sign(await webhookSecret(), raw);
+      const pending: Promise<unknown>[] = [];
+      const res = await webhook(
+        new Request(FN_URL, { method: "POST", headers: { "x-webhook-signature": signature, "x-webhook-event": p.event }, body: raw }),
+        { background: (x) => void pending.push(x), media: async (id) => replayMedia(id) },
+      );
+      await Promise.allSettled(pending);
+      if (!res.ok) throw new Error(`the inbound path answered ${res.status}`);
+    },
+  });
+  return json(await runScenario(io, scenario, crypto.randomUUID().slice(0, 8)));
 }
 
 async function tick() {
@@ -173,6 +228,27 @@ async function staffAction(action: string) {
         return { ok: true, templates: await submitTemplates(env) };
       case "automations":
         return { ok: true, ...(await checkAutomations(env)) };
+      // QA 1 (30.12 item 3): one real utility template to Kabsi's own allow-listed phone (the staff phone), once an hour at most.
+      // The delivered status then arrives from Kapso on the webhook and is read back with /staff/deliverystatus.
+      case "delivery": {
+        const ctx = await whatsappCtx();
+        if (!ctx.out?.live.live) return { ok: false, error: "live_sender_off" };
+        const since = new Date(Date.now() - 3600_000).toISOString();
+        const { data: recent } = await admin().from("whatsapp_messages").select("provider_id, state").eq("kind", "qa_delivery_proof").gte("created_at", since).limit(1);
+        if (recent?.length) return { ok: false, error: "already_sent_this_hour", provider_id: recent[0]?.provider_id, state: recent[0]?.state };
+        const { data: roles } = await admin().from("phone_roles").select("phone, user_id").eq("role", "staff_admin").is("revoked_at", null).limit(1);
+        const target = roles?.[0];
+        if (!target?.phone) return { ok: false, error: "no_staff_phone" };
+        if (!(await ctx.out.db.state(target.phone as string)).live_ok) return { ok: false, error: "phone_not_allow_listed" };
+        const t = ref("staff_alert", { summary: "QA 1 delivery check, no action needed" });
+        const sent = await ctx.out.live.template(target.phone as string, t.name, t.params);
+        await admin().rpc("whatsapp_record", { p_user: target.user_id, p_location: null, p_kind: "qa_delivery_proof", p_state: "sent", p_provider_id: sent.id, p_template: t.name });
+        return { ok: true, provider_id: sent.id, to_ending: (target.phone as string).slice(-4), template: t.name };
+      }
+      case "deliverystatus": {
+        const { data } = await admin().from("whatsapp_messages").select("provider_id, state, template, error, created_at, updated_at").eq("kind", "qa_delivery_proof").order("created_at", { ascending: false }).limit(1);
+        return { ok: true, message: data?.[0] ?? null };
+      }
       case "health": {
         const h = await readHealth(env);
         const { data } = await admin().rpc("whatsapp_health_record", { p_status: h.status, p_quality: h.quality, p_messaging: h.messaging, p_tier: h.tier, p_detail: h.detail });
