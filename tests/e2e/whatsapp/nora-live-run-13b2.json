@@ -1,0 +1,126 @@
+{
+  "scenario": "nora_live",
+  "run": "13b part 2, 25 Oct 2026 18:29 UTC, production, outbox rows 113 to 122",
+  "steps": [
+    {
+      "n": 1,
+      "note": "nora 1",
+      "sent": "\"how much does kabsi cost\"",
+      "replies": [
+        {
+          "state": "mock_sent",
+          "kind": "reply",
+          "body": "Kabsi is free for 14 days, no card. Then Essentials is 19 US dollars a month and Pro is 39 US dollars a month, with an extra location at 15. Card payments open soon. Details: kabsi.co/pricing"
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "note": "nora 2",
+      "sent": "\"what does kabsi do for my restaurant\"",
+      "replies": [
+        {
+          "state": "mock_sent",
+          "kind": "reply",
+          "body": "For a restaurant, Kabsi takes care of three things that eat up time: it drafts a reply for every new Google review in the customer's own language, it watches your listing so your hours, phone and menu details stay right (and flags it if Google or someone else changes them), and it prepares weekly posts you can approve, like a seasonal dish or an event. You always approve before anything goes live, nothing gets posted on its own.\n\nIt also gives you a free review link and QR code you can put on tables or receipts, so every guest gets the same easy way to leave a review.\n\nWhat's your name, and is it a sit-down restaurant, takeaway, or something else?"
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "note": "nora 3",
+      "sent": "\"do I have to give you my google password\"",
+      "replies": [
+        {
+          "state": "mock_sent",
+          "kind": "reply",
+          "body": "Never. You just add Kabsi's business group as a Manager on your Google Business Profile, Kabsi never asks for your password or any login code. That Manager access only lets Kabsi draft replies and suggest changes, and nothing goes live until you approve it.\n\nWhat kind of business do you run, and what's your name?"
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "note": "nora 4",
+      "sent": "\"can kabsi post replies without asking me\"",
+      "replies": [
+        {
+          "state": "mock_sent",
+          "kind": "reply",
+          "body": "No, never. Every reply Kabsi drafts waits for you to approve it, word for word, before anything goes on Google. You can edit it, ask for changes, or skip it entirely. Nothing gets posted on its own.\n\nCurious what's prompting the question, are you dealing with a lot of reviews right now?"
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "note": "nora 5",
+      "sent": "\"I run a hair salon, is there a free trial\"",
+      "replies": [
+        {
+          "state": "mock_sent",
+          "kind": "reply",
+          "body": "Start free here, no card, about 10 minutes: kabsi.co/get-started. Then connect this WhatsApp from Settings."
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "note": "nora 6",
+      "sent": "\"how do I become a partner\"",
+      "replies": [
+        {
+          "state": "mock_sent",
+          "kind": "reply",
+          "body": "Kabsi Partners earn 25 percent of every payment, for as long as the business stays. Partner sign-up on WhatsApp opens soon. Read more: kabsi.co/partners"
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "note": "nora 7",
+      "sent": "\"will you get me more reviews\"",
+      "replies": [
+        {
+          "state": "mock_sent",
+          "kind": "reply",
+          "body": "Honest answer: no, and no one can really promise that. What Kabsi does is make sure every review gets a reply, your profile details stay accurate, and every customer gets the same easy way to leave a review, one tap or scan.\n\nWhat kind of business do you run, and what's your name?"
+        }
+      ]
+    },
+    {
+      "n": 8,
+      "note": "nora 8",
+      "sent": "\"what happens to my reviews if I cancel\"",
+      "replies": [
+        {
+          "state": "mock_sent",
+          "kind": "reply",
+          "body": "If you cancel a plan, your reviews on Google stay exactly where they are, nothing happens to them. What stops is Kabsi's side: new drafts, Google Protection, and the Weekly Care Report. Your review link and QR code keep working even after you cancel.\n\nA monthly plan can be cancelled any time, and yearly plans are refundable in full within 14 days of starting. Want me to tell you more about how Kabsi works day to day?"
+        }
+      ]
+    },
+    {
+      "n": 9,
+      "note": "nora 9",
+      "sent": "\"is it free\"",
+      "replies": [
+        {
+          "state": "mock_sent",
+          "kind": "reply",
+          "body": "The review link and QR code are free for everyone, no plan needed. Beyond that, Kabsi has Essentials at $19 a month ($190 a year) and Pro at $39 a month ($390 a year), with a 14-day free Pro trial and no card needed to start. Card payments aren't open yet though, so there's nothing to actually pay today.\n\nWhat kind of business do you run? I can point out which parts would help you most."
+        }
+      ]
+    },
+    {
+      "n": 10,
+      "note": "nora 10",
+      "sent": "\"can I talk to a real person\"",
+      "replies": [
+        {
+          "state": "mock_sent",
+          "kind": "reply",
+          "body": "Thanks. A person from Kabsi will answer you here within one business day."
+        }
+      ]
+    }
+  ]
+}
