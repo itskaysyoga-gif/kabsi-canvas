@@ -1,1 +1,38 @@
-{}
+{
+ "reply.v2": [
+  {
+   "date": "2026-10-25T06:48:23.835Z",
+   "model": "anthropic",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 160,
+   "judged": 99,
+   "mean": {
+    "grounded": 4.96,
+    "answers": 4.39,
+    "voice": 4.03,
+    "language": 4.83,
+    "safety": 4.89,
+    "length": 4.87
+   },
+   "overall": 4.66,
+   "costUsd": 0.628918
+  }
+ ],
+ "nora": [
+  {
+   "date": "2026-10-25T06:51:31.039Z",
+   "model": "anthropic:claude-sonnet-5-5",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 80,
+   "judged": 80,
+   "mean": {
+    "accurate": 4.89,
+    "helpful": 4.47,
+    "honest": 4.97,
+    "style": 4.61
+   },
+   "overall": 4.74,
+   "costUsd": 1.751538
+  }
+ ]
+}
