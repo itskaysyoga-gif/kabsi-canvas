@@ -7,6 +7,7 @@
 //   POST { do: "post_publish", post_id, body }                                          → approves exactly `body`
 //   POST { do: "post_remove", post_id }                                                 → approves removing a posted post from Google
 //   POST { do: "post_undo", post_id, publication_id }                                   → undo inside the 10 seconds (K-70)
+//   POST { do: "post_cancel", post_id }                                                  → a waiting post goes back to a draft
 //   POST { do: "post_skip", post_id }
 //   POST { do: "post_save", location_id | post_id, type, summary, ... }                → the owner's own post (P0.5-02)
 //   POST { do: "posts_approve_month", location_id, month: "YYYY-MM" }                 → approves the month's posts
@@ -220,6 +221,19 @@ Deno.serve(async (req) => {
         if (!found) return fail("not_found", "Nothing to undo.", 404);
         const { data, error } = await db.rpc("undo_publication", { p_publication: found.id, p_user: user.id });
         if (error && /too_late/.test(error.message)) return fail("too_late", "Too late to undo: Google already has it.", 409);
+        if (error) throw error;
+        return json({ ok: true, ...(data as Record<string, unknown>) });
+      }
+      case "post_cancel": {
+        // A post that waits for its time (approved, not sent yet) can be cancelled after the 10 seconds, until it is due:
+        // the same undo_publication as Undo, so the post goes back to a draft and nothing reaches Google.
+        if (!post) return fail("bad_input", "Missing post.");
+        if (post.state !== "publishing") return fail("bad_input", "Only a waiting post can be cancelled.");
+        const { data: found } = await db.from("publications").select("id").eq("target_id", post.id).eq("target_type", "local_post")
+          .eq("state", "approved").order("created_at", { ascending: false }).limit(1).maybeSingle();
+        if (!found) return fail("not_found", "Nothing to cancel.", 404);
+        const { data, error } = await db.rpc("undo_publication", { p_publication: found.id, p_user: user.id });
+        if (error && /too_late/.test(error.message)) return fail("too_late", "Too late to cancel: it is going to Google now.", 409);
         if (error) throw error;
         return json({ ok: true, ...(data as Record<string, unknown>) });
       }

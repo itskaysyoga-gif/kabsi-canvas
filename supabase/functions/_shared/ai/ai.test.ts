@@ -7,6 +7,7 @@ import { buildMemory, type Memory } from "./memory.ts";
 import { nameCandidates, replyChecks, type ReplyOutput, similarity, STOCK_PHRASES } from "./checks.ts";
 import { runContract, runRecord, type Send } from "./contract.ts";
 import { draftGrounded, parseReply, replyWorkflow } from "./reply.ts";
+import { parseJson } from "./client.ts";
 import { editKinds, factAdditions, RULE_TEXT } from "./edits.ts";
 import { houseStyle } from "./fence.ts";
 import { REPLY_V2 } from "./prompts/reply.v2.ts";
@@ -131,6 +132,19 @@ Deno.test("checks: stock phrases and near repeats of recent replies fail", async
 Deno.test("checks: the house style removes exclamation marks and dashes from the reply", () => {
   assert.equal(houseStyle("Thanks Maya! See you soon — Rami"), "Thanks Maya. See you soon, Rami");
   assert.equal(parseReply(JSON.stringify({ reply: "Great to hear!", facts_used: [], topics: [] })).reply, "Great to hear.");
+});
+
+Deno.test("parser: the first complete JSON object wins, whatever text comes before or after it (live run I-008)", () => {
+  const obj = { reply: "Thank you Maya, the sourdough is our favourite too {and so is the rye}.", facts_used: ["F1"], language: "en", topics: ["bread"] };
+  const json = JSON.stringify(obj);
+  for (const text of [json, `${json}\n\nNote: I kept it short.`, `Here is the reply:\n${json}`, "```json\n" + json + "\n```", `${json}\n{"second": true}`, `${json} } stray`]) {
+    assert.deepEqual(parseJson(text), obj, text.slice(0, 40));
+    assert.equal(parseReply(text).facts_used[0], "F1");
+  }
+  assert.deepEqual(parseJson<{ ok: boolean }>('Not {valid} but {"ok": true} follows'), { ok: true }, "braces in a sentence are skipped");
+  assert.deepEqual(parseJson('{"a": "quote \\" and } brace"} tail'), { a: 'quote " and } brace' }, "braces and quotes inside strings");
+  assert.throws(() => parseJson("no json here"), /no JSON/);
+  assert.throws(() => parseJson('{"unclosed": 1'), /no JSON/);
 });
 
 // ─── Contract runner ────────────────────────────────────────────────────────────────────────────────────────────

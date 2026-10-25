@@ -8,10 +8,10 @@ Rule from Rashid (25 Oct 2026, master plan 30.11): a session never loops on a pr
 | Branch ruleset protect-main is Disabled (it required "CI / App", a name no job reports) | Sessions merge only on green ci.yml | Launch gate: re-enable with the job names in docs/OPS-SETUP.md step 7 | Rashid |
 | Zoho shows an orange warning icon beside Kabsi emails | Mail lands in the inbox | Launch gate | Rashid |
 | Email logo is an outside image, hidden in Zoho and Outlook until clicked | No owners yet | Session D: inline image (content_id), empty alt | D |
-| Number health email reads "quality GREEN ... while quality is Medium or worse" and carries the owner footer "Nothing is published until you approve it" | Staff-only email | Fix 1 | Fix 1 |
 | Inbox test: mail-tester score and Outlook | Gmail and Zoho inbox placement pass | Web 2 email templates | Web 2 |
 | Sentry alerts go to Rashid's Gmail (free plan, 1 member) | Rashid reads Gmail | Only if the plan changes | none |
 | zod 3 high advisory (Dependabot PR 209, breaking upgrade) | Listed exception | Sec 1 | Sec 1 |
 | Dependabot PR 207 (Actions bumps) | Pins are recent | Any session with a free slot | any |
 | Pub/Sub not yet seen from a real review | Registration read back live; needs a natural review (never one Rashid or anyone at Kabsi writes) | Launch gate | lane R checks google_events |
 | Facts still say Kabsi has no WhatsApp number | True until the phone test passes | 13b phone test | Fix 1 |
+| Rashid's own phone number is still in two Deno test files (`_shared/whatsapp/world.test-helpers.ts`, `agent-units.test.ts` line 30) | Test data only, not shipped | Launch gate: replace with +1 555 numbers | 13b part 2 |
