@@ -12,6 +12,7 @@
 // stubs prove the checker: "pass" answers with the reference answers and "fail" breaks the rules in ways the checker must
 // catch. A question whose facts were taken out of the file fails the support check with either stub.
 import { QUESTIONS, type Question } from "./questions.ts";
+import { task, takesEffort, type Usage } from "../../supabase/functions/_shared/ai/agents.ts";
 
 export type Answerer = { name: string; answer: (q: Question, kb: string) => Promise<string> };
 
@@ -151,14 +152,25 @@ export function sample(n: number): Question[] {
 export async function runAll(
   model: Answerer,
   kb: string,
-  opts: { concurrency?: number; only?: Question[] } = {},
+  opts: {
+    concurrency?: number; only?: Question[];
+    /** Stop asking once `spent()` (millionths of a dollar) reaches `micros`; what was not asked counts as not run. */
+    budget?: { spent: () => number; micros: number };
+  } = {},
 ) {
   const findings: Finding[] = [];
   const answers: Record<string, string> = {};
   const list = opts.only ?? QUESTIONS;
   let i = 0;
+  let stopped = false;
   const worker = async () => {
     for (;;) {
+      if (opts.budget && opts.budget.spent() >= opts.budget.micros) {
+        stopped = true;
+        for (const q of list.slice(i)) findings.push({ id: q.id, kind: "error", detail: "not run: the budget was reached" });
+        i = list.length;
+        return;
+      }
       const q = list[i++];
       if (!q) return;
       findings.push(...support(q, kb));
@@ -171,8 +183,21 @@ export async function runAll(
       }
     }
   };
+  // The first question alone, so the cached prefix is written once before the others read it.
+  if ((opts.concurrency ?? 1) > 1 && list.length) {
+    const first = list[0]!;
+    findings.push(...support(first, kb));
+    try {
+      const a = await model.answer(first, kb);
+      answers[first.id] = a;
+      findings.push(...check(first, a, kb));
+    } catch (e) {
+      findings.push({ id: first.id, kind: "error", detail: String((e as Error).message ?? e) });
+    }
+    i = 1;
+  }
   await Promise.all(Array.from({ length: opts.concurrency ?? 1 }, worker));
-  return { score: score(model.name, findings, list), answers };
+  return { score: score(model.name, findings, list), answers, stopped };
 }
 
 export function score(model: string, findings: Finding[], list: Question[] = QUESTIONS): Score {
@@ -234,8 +259,11 @@ export const stubModel = (kind: "pass" | "fail"): Answerer =>
 
 // ─── the real Nora ────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** Asks the real model the way the `assistant` function does: its rules, then the knowledge base, then the question. */
-export function liveModel(apiKey: string, model: string, rules: string): Answerer {
+/** Asks the real model the way the `assistant` function does: its rules, then the knowledge base, then the question.
+ *  The rules and the knowledge base are the same for every question, so both are cached (26.1); the cap and the effort
+ *  are Nora's chat task (28.6, N-004: room to think and still answer). Usage is added to `used` for the run's cost. */
+export function liveModel(apiKey: string, model: string, rules: string, used?: Usage): Answerer {
+  const t = task("nora", "chat");
   return {
     name: `anthropic:${model}`,
     answer: async (q, kb) => {
@@ -248,10 +276,11 @@ export function liveModel(apiKey: string, model: string, rules: string): Answere
         },
         body: JSON.stringify({
           model,
-          max_tokens: 700,
+          max_tokens: t.maxTokens,
+          ...(t.effort && takesEffort(model) ? { output_config: { effort: t.effort } } : {}),
           system: [
-            { type: "text", text: rules },
-            { type: "text", text: `<knowledge_base>\n${kb}\n</knowledge_base>` },
+            { type: "text", text: rules, cache_control: { type: "ephemeral" } },
+            { type: "text", text: `<knowledge_base>\n${kb}\n</knowledge_base>`, cache_control: { type: "ephemeral" } },
             {
               type: "text",
               text: "<context>\nThe visitor is not signed in. No account tools are available in this evaluation.\n</context>",
@@ -263,6 +292,13 @@ export function liveModel(apiKey: string, model: string, rules: string): Answere
       const data = await res.json();
       if (!res.ok)
         throw new Error(`anthropic ${res.status}: ${JSON.stringify(data).slice(0, 200)}`);
+      if (used) {
+        const u = data.usage ?? {};
+        used.input += Number(u.input_tokens ?? 0);
+        used.output += Number(u.output_tokens ?? 0);
+        used.cacheRead += Number(u.cache_read_input_tokens ?? 0);
+        used.cacheWrite += Number(u.cache_creation_input_tokens ?? 0);
+      }
       return (data.content ?? [])
         .filter((c: { type: string }) => c.type === "text")
         .map((c: { text: string }) => c.text)

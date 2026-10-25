@@ -107,3 +107,26 @@ Deno.test("cost: per model with cache reads and writes; recorded per agent", () 
   assert.equal(m.agent, "reply");
   assert.equal(m.input, 1600, "the daily total counts cached tokens too");
 });
+
+Deno.test("contradictions (26.1): two closing times or two prices are left out of the draft, and the owner is asked", async () => {
+  const f = (slot: string, key: string, text: string) =>
+    ({ id: slot, slot, key, value: { text }, status: "verified", review_after: null, superseded_by: null }) as never;
+  const memory = await buildMemory({
+    business: "Corner Loaf",
+    facts: [
+      f("card.hours_note:a", "hours_note", "We close at 4pm."),
+      f("card.hours_note:b", "hours_note", "We close at 9pm."),
+      f("card.price_notes:a", "price_note", "A loaf is 6 dollars."),
+      f("card.parking", "parking", "Street parking only."),
+      f("card.delivery", "delivery", "Pickup only."),
+    ],
+    approvedReplies: [],
+    openQuestions: ["delivery"],
+  });
+  assert.deepEqual(memory.conflicts, ["hours_note"]);
+  assert.doesNotMatch(memory.text, /4pm|9pm/, "neither closing time reaches the model");
+  assert.doesNotMatch(memory.text, /Pickup only/, "a fact under an open question is left out too");
+  assert.match(memory.text, /A loaf is 6 dollars/, "one price is not a contradiction");
+  assert.match(memory.text, /Street parking only/);
+  assert.match(memory.text, /still checking with the owner about: .*opening hours.*Say nothing about these/);
+});
