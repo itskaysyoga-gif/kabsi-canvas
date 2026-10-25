@@ -22,7 +22,10 @@ export function WhatsappStaffCode() {
     onError: () => setErr("Couldn't make a code. Please try again."),
   });
   return (
-    <section className="mt-8 rounded-card border border-kb-hairline p-4" data-testid="whatsapp-staff-code">
+    <section
+      className="mt-8 rounded-card border border-kb-hairline p-4"
+      data-testid="whatsapp-staff-code"
+    >
       <h2 className="text-xl font-bold">WhatsApp staff phone</h2>
       <p className="mt-1 text-sm leading-6 text-kb-stone">
         Make a code, then send it from the staff phone to Kabsi&apos;s WhatsApp number. That phone
