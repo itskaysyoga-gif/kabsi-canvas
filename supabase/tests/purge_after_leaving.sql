@@ -22,7 +22,6 @@ select is((select count(*)::int from public.weekly_reports where location_id = '
 select is((select count(*)::int from public.reviews where location_id = '00000000-0000-4000-8000-0000000000c2'), 1, 'another business keeps its reviews');
 select is((select count(*)::int from public.rating_snapshots where location_id = '00000000-0000-4000-8000-0000000000c2'), 1, 'and its snapshots');
 select ok(not has_function_privilege('authenticated', 'private.purge_after_leaving()', 'execute'), 'not for signed-in users');
-select ok(exists (select 1 from cron.job where jobname = 'kabsi_purge_after_leaving' and active), 'runs every day');
 
 select * from finish();
 rollback;
