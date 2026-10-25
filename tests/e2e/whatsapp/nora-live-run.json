@@ -1,0 +1,129 @@
+{
+  "scenario": "nora_live",
+  "date": "2026-10-25",
+  "ok": true,
+  "ms": 16253,
+  "note": "Ten questions from fictional unknown phones through POST /whatsapp/staff/replay on production: the real intent router model (Haiku) picks the tool, the answers are Kabsi's fixed lines.",
+  "steps": [
+    {
+      "n": 1,
+      "note": "nora 1",
+      "sent": "\"how much does kabsi cost\"",
+      "result": "prices",
+      "problems": [],
+      "replies": [
+        {
+          "body": "Kabsi is free for 14 days, no card. Then Essentials is 19 US dollars a month and Pro is 39 US dollars a month, with an extra location at 15. Card payments open soon. Details: kabsi.co/pricing"
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "note": "nora 2",
+      "sent": "\"what does kabsi do for my restaurant\"",
+      "result": "help",
+      "problems": [],
+      "replies": [
+        {
+          "body": "I am Nora, Kabsi's assistant. Kabsi looks after your Google listing from WhatsApp: a reply ready for every review, your listing kept right, and nothing goes live without your yes.\n\nYou can send: your business name for a free scan, \"prices\", \"start free\", \"partner\" or \"talk to a person\"."
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "note": "nora 3",
+      "sent": "\"do I have to give you my google password\"",
+      "result": "unclear",
+      "problems": [],
+      "replies": [
+        {
+          "body": "No, we never need your Google password. Are you asking about how we access your Google Business Profile?"
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "note": "nora 4",
+      "sent": "\"can kabsi post replies without asking me\"",
+      "result": "greeting",
+      "problems": [],
+      "replies": [
+        {
+          "body": "Welcome to Kabsi. Did you just scan your business on kabsi.co? Send me your business name or the code from the page and I will pick up from there."
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "note": "nora 5",
+      "sent": "\"I run a hair salon, is there a free trial\"",
+      "result": "trial",
+      "problems": [],
+      "replies": [
+        {
+          "body": "Start free here, no card, about 10 minutes: kabsi.co/get-started. Then connect this WhatsApp from Settings."
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "note": "nora 6",
+      "sent": "\"how do I become a partner\"",
+      "result": "partner_program",
+      "problems": [],
+      "replies": [
+        {
+          "body": "Kabsi Partners earn 25 percent of every payment, for as long as the business stays. Partner sign-up on WhatsApp opens soon. Read more: kabsi.co/partners"
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "note": "nora 7",
+      "sent": "\"will you get me more reviews\"",
+      "result": "unclear",
+      "problems": [],
+      "replies": [
+        {
+          "body": "Are you asking about getting more Google reviews for your business, or something else?"
+        }
+      ]
+    },
+    {
+      "n": 8,
+      "note": "nora 8",
+      "sent": "\"what happens to my reviews if I cancel\"",
+      "result": "greeting",
+      "problems": [],
+      "replies": [
+        {
+          "body": "Welcome to Kabsi. Did you just scan your business on kabsi.co? Send me your business name or the code from the page and I will pick up from there."
+        }
+      ]
+    },
+    {
+      "n": 9,
+      "note": "nora 9",
+      "sent": "\"is it free\"",
+      "result": "unclear",
+      "problems": [],
+      "replies": [
+        {
+          "body": "Are you asking if the scan is free, or about pricing in general?"
+        }
+      ]
+    },
+    {
+      "n": 10,
+      "note": "nora 10",
+      "sent": "\"can I talk to a real person\"",
+      "result": "handoff",
+      "problems": [],
+      "replies": [
+        {
+          "body": "Thanks. A person from Kabsi will answer you here within one business day."
+        }
+      ]
+    }
+  ]
+}
