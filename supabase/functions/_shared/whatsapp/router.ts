@@ -16,6 +16,8 @@ export type Command =
   | { k: "tool"; tool: string; arg?: string }
   | { k: "photo"; media: Media } | { k: "voice"; media: Media } | { k: "video"; media: Media } | { k: "file"; media: Media }
   | { k: "contact"; contacts: Contact[] }
+  | { k: "map"; action: "show" | "later"; scanId: string | null }
+  | { k: "keyword"; action: "yes" | "change"; locationId: string }
   | { k: "free"; text: string }
   | { k: "empty" };
 
@@ -59,7 +61,7 @@ const WORDS: [RegExp, string, string?][] = [
   [/^resume\s+(.{2,80})$/, "staff_resume"],
   [/^partners? approvals?$|^applications$/, "staff_partners"],
   [/^payout list$|^approve payouts$/, "staff_payouts"],
-  [/^(hours|close early|closed tomorrow|opening hours)\b.*$/, "hours"],
+  [/^(hours|close early|closed|closing|opening hours)\b.*$/, "hours"],
   [/^(post|new post)\b.*$/, "post"],
 ];
 
@@ -116,6 +118,14 @@ export function parseButton(id: string): Command {
   if (role) return { k: "role_pick", to: role[1] as "business" | "partner" | "staff" };
   const bill = /^k:(cancel|keep|upgrade|downgrade|add_location)$/.exec(id);
   if (bill) return { k: "tool", tool: "billing", arg: `confirm:${bill[1]}` };
+  // 13b part 2: the map's "Show me" and "Later" (m:s:<scan>, m:l), the owner's keyword confirm (v:y:<business>, v:c:<business>).
+  // The morning digest's one-tap buttons (staff_admin only; the router checks the role).
+  const st = /^s:(status|waiting|today)$/.exec(id);
+  if (st) return { k: "tool", tool: `staff_${st[1]}` };
+  const map = /^m:(s|l)(?::([0-9a-f-]{36}))?$/.exec(id);
+  if (map) return { k: "map", action: map[1] === "s" ? "show" : "later", scanId: map[2] ?? null };
+  const kw = /^v:(y|c):([0-9a-f-]{36})$/.exec(id);
+  if (kw) return { k: "keyword", action: kw[1] === "y" ? "yes" : "change", locationId: kw[2] };
   const biz = /^b:([0-9a-f-]{36})$/.exec(id);
   if (biz) return { k: "business_pick", locationId: biz[1] };
   return { k: "empty" };

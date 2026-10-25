@@ -61,20 +61,23 @@ export type MapMessage = { body: string; buttons: { id: string; title: string }[
 
 export function beatsLine(s: Summary, business: string): string | null {
   if (!s.beats) return null;
-  return s.beats.direction
-    ? `${s.beats.name} beats you ${s.beats.direction} of ${business}.`
-    : `${s.beats.name} beats you in ${s.beats.spots} of ${s.points} spots.`;
+  // docs/COPY.md 0.1 and 20: places around you, never spots; "comes up first", never "beats you".
+  if (!s.beats.direction) return `${s.beats.name} comes up first from ${s.beats.spots} of the ${s.points} places.`;
+  const where = `${s.beats.direction} of ${business}`;
+  return `${where[0].toUpperCase()}${where.slice(1)}, ${s.beats.name} comes up first.`;
 }
 
 /**
- * "Your first map is ready. You are top 3 in 18 of 49 spots for 'bakery'. Harbor Bakes beats you east of the
- * station. 3 next steps:" The steps come from Insights (V4); without them the line ends after the numbers.
+ * docs/COPY.md section 20: "Your first map is ready. We searched 'bakery' on Google Maps from 49 places around your shop,
+ * like a customer standing there. You came up in the top 3 from 18 of them. East of the station, Harbor Bakes comes up
+ * first. 3 next steps:" The steps come from Insights (V4); without them the line ends after the numbers.
  */
 export function mapMessage(o: { summary: Summary; keyword: string; business: string; first: boolean; steps?: string[] }): MapMessage {
   const s = o.summary;
   const parts = [
     o.first ? "Your first map is ready." : "Your new map is ready.",
-    `You are top 3 in ${s.top3} of ${s.points} spots for '${o.keyword}'.`,
+    `We searched '${o.keyword}' on Google Maps from ${s.points} places around ${o.business}, like a customer standing there.`,
+    `You came up in the top 3 from ${s.top3} of them.`,
   ];
   const b = beatsLine(s, o.business);
   if (b) parts.push(b);

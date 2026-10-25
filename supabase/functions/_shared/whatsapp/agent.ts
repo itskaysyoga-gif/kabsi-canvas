@@ -20,20 +20,34 @@ import {
 } from "./roles.ts";
 import { type Command, isAbuse, parse } from "./router.ts";
 import { guessLang, headed, SAY, say } from "./say.ts";
+import { forWhatsApp, type Nora } from "./nora.ts";
+import { describeHours, type HoursChange, parseHours } from "./hours-parse.ts";
+import { checkTypedPost } from "../posts/typed.ts";
+import { keywordFrom, type MapDetails, mapDetailsText } from "./map.ts";
+import { numbersText, type Summary } from "./staff-alerts.ts";
 import { CATALOGUE, extraKey, type Period, type Plan, planKey } from "../creem.ts";
 
 export interface AgentDb {
-  store(phone: string, providerId: string, kind: string, payload: unknown, referral: Record<string, string> | null): Promise<{ duplicate: boolean; id?: string }>;
+  /** first: no earlier message from this phone was ever stored (the welcome goes only then). */
+  store(phone: string, providerId: string, kind: string, payload: unknown, referral: Record<string, string> | null): Promise<{ duplicate: boolean; id?: string; first?: boolean }>;
   done(id: string, result: string): Promise<void>;
   resolve(phone: string): Promise<Who>;
   setConv(phone: string, patch: Record<string, unknown>): Promise<void>;
   attachCode(phone: string, scan: string | null, partner: string | null): Promise<void>;
   bind(phone: string, code: string): Promise<{ result: string; user_id?: string; first_owner_locations?: string[] }>;
   stopOptin(phone: string): Promise<void>;
+  /** START: every opt-in this phone stopped is active again, for every role, and the conversation is no longer stopped. */
+  start(phone: string): Promise<number>;
   tokenOwner(token: string, phone: string): Promise<"mine" | "not_yours" | "unknown">;
   approve(token: string, phone: string): Promise<{ result: string; reason?: string; repeat?: boolean; location_id?: string; target_type?: string }>;
   undo(token: string, phone: string): Promise<{ result: string }>;
-  openItems(phone: string): Promise<{ token: string; kind: string; business: string; location_id: string }[]>;
+  openItems(phone: string): Promise<{ token: string; kind: string; business: string; location_id: string; target_type?: string }[]>;
+  /** 30.10 point 7: special hours the owner typed become one draft (special_hours_prepare) with its Approve token. */
+  hoursPrepare(locationId: string, userId: string, c: HoursChange): Promise<{ ok: boolean; token?: string; reason?: string }>;
+  /** 30.10 point 7: a typed post becomes a draft (owner_post_prepare) with its Approve token. */
+  postPrepare(locationId: string, userId: string, text: string): Promise<{ ok: boolean; token?: string; text?: string; reason?: string }>;
+  /** "Show me" under a map: its numbers, only for a business this phone is bound to. */
+  mapDetails(scanId: string): Promise<(MapDetails & { location_id: string }) | null>;
   ownerDraft(userId: string, reviewId: string, text: string): Promise<{ ok: boolean; reason?: string }>;
   actionCreate(userId: string, targetType: string, targetId: string): Promise<{ ok: boolean; token?: string; text?: string; reason?: string }>;
   stats(locationId: string, days: number): Promise<{ new_reviews: number; answered: number; waiting: number; average: number | null }>;
@@ -41,6 +55,8 @@ export interface AgentDb {
   acceptPhoto(locationId: string, userId: string, bytes: Uint8Array): Promise<{ ok: boolean; reason?: string }>;
   keepVoice(phone: string, messageId: string, bytes: Uint8Array, mime: string | null): Promise<void>;
   staffNumbers(): Promise<Record<string, number | string | null>>;
+  /** 9.9, 26.9: the last 24 hours and the budgets, for "today" and the morning digest. */
+  staffSummary(): Promise<Summary>;
   staffPause(name: string, pause: boolean): Promise<{ ok: boolean; business?: string; matches?: string[] }>;
   handoff(phone: string, summary: string): Promise<void>;
   outboxGet(phone: string, ids: number[]): Promise<{ id: number; body: string; buttons: Button[]; location_id: string | null }[]>;
@@ -66,10 +82,14 @@ export type AgentDeps = {
   appUrl: string;
   media(mediaId: string): Promise<Uint8Array>;
   ai: Ai | null;
+  /** Nora's answer from the public facts to a question the fixed tools do not cover (28.6, 28.7). */
+  nora?: Nora | null;
   /** A new AI draft for a review with the owner's instruction (the existing reply pipeline). */
   editDraft(reviewId: string, instruction: string): Promise<{ ok: boolean; reason?: string }>;
-  /** 28.5: ask Scout for the first map when WhatsApp connects. A stub until V1 merges. */
-  firstMap(locationId: string): Promise<string>;
+  /** 28.5: the first map when WhatsApp connects: run it now when the search is confirmed, else suggest one to confirm. */
+  firstMap(locationId: string): Promise<{ state: "started" | "waiting" | "ask" | "none"; keyword?: string | null }>;
+  /** 27.3 item 1: the owner's yes to a search; the map runs at once (the visibility function, with its plan limits). */
+  confirmKeyword?(locationId: string, keyword: string): Promise<{ ok: boolean; reason?: string }>;
   /** 28.1: the full map image for a scan code, once V1's job has it. A stub (null) until V1 merges. */
   mapImage(scanCode: string): Promise<Uint8Array | null>;
   /** Wakes the sender after a message opened the window (held messages go out). */
@@ -91,7 +111,7 @@ export async function receive(d: AgentDeps, m: Inbound, background?: (p: Promise
   if (!phone) return "bad_phone";
   const stored = await d.db.store(phone, m.messageId, m.media?.kind ?? m.type, m, m.referral ?? null);
   if (stored.duplicate || !stored.id) return "duplicate";
-  const work = handle(d, { ...m, from: phone }).then(async (r) => (await d.db.done(stored.id!, r), r));
+  const work = handle(d, { ...m, from: phone }, { first: !!stored.first }).then(async (r) => (await d.db.done(stored.id!, r), r));
   if (background) {
     background(work.catch(() => "error"));
     return "accepted";
@@ -100,7 +120,7 @@ export async function receive(d: AgentDeps, m: Inbound, background?: (p: Promise
 }
 
 /** The work for one stored message. Also run by the tick for a message whose first try did not finish. */
-export async function handle(d: AgentDeps, m: Inbound): Promise<string> {
+export async function handle(d: AgentDeps, m: Inbound, o: { first?: boolean } = {}): Promise<string> {
   const phone = m.from;
   const [who, s] = await Promise.all([d.db.resolve(phone), d.out.db.state(phone)]);
   // The message opened the 24-hour window: anything held for this phone goes now.
@@ -109,11 +129,15 @@ export async function handle(d: AgentDeps, m: Inbound): Promise<string> {
   const text = m.text ?? "";
   const lang = guessLang(text) ?? who.conversation?.language ?? "en";
   if (text && lang !== who.conversation?.language) await d.db.setConv(phone, { language: lang });
-  const t: Turn = { d, s: { ...s, window_expires_at: new Date((d.now ?? Date.now)() + 86_400_000).toISOString() }, who, phone, lang, m };
+  const t: Turn = { d, s: { ...s, window_expires_at: new Date((d.now ?? Date.now)() + 86_400_000).toISOString() }, who, phone, lang, m, first: !!o.first };
   return await run(t, cmd);
 }
 
-type Turn = { d: AgentDeps; s: SendState; who: Who; phone: string; lang: string; m: Inbound; head?: string | null; business?: BusinessRole | null };
+type Turn = {
+  d: AgentDeps; s: SendState; who: Who; phone: string; lang: string; m: Inbound; head?: string | null; business?: BusinessRole | null;
+  /** The person's first message to Kabsi: the only one that gets the welcome (QA 1, 25 Oct). */
+  first?: boolean;
+};
 
 function say1(t: Turn, body: string, buttons?: Button[]) {
   return sendReply(t.d.out, t.s, t.phone, headed(t.head ?? null, body), buttons, { locationId: t.business?.location_id ?? null });
@@ -132,8 +156,9 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     return "stopped";
   }
   if (cmd.k === "start") {
-    await d.db.setConv(phone, { stopped: false });
-    return answered(t, businesses(who).length || !conv?.stopped_at ? SAY.started : SAY.startedNeedsCode, "started");
+    // START is the person's own opt-in again (13b phone test, 25 Oct): every role comes back, not only the conversation.
+    await d.db.start(phone);
+    return answered(await again(t), SAY.started, "started");
   }
   // A code binds the phone (9.2), even after STOP: sending it is the new opt-in.
   if (cmd.k === "bind") return bind(t, cmd.code);
@@ -169,6 +194,21 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     if (q.type === "business" && q.options[cmd.n - 1]) return pickedBusiness(t, q.options[cmd.n - 1].id);
     if (q.type === "digest" && q.ids[cmd.n - 1]) return openDigestItem(t, q.ids[cmd.n - 1]);
     if (q.type === "which" && q.options[cmd.n - 1]) return approveToken(t, q.options[cmd.n - 1].token);
+  }
+
+  // The map's buttons and the owner's search for the map (28.5).
+  if (cmd.k === "map") return mapButton(t, cmd.action, cmd.scanId);
+  if (cmd.k === "keyword") return keywordButton(t, cmd.action, cmd.locationId);
+  if (conv?.open_question?.type === "keyword" && !conv.open_question.suggested && cmd.k === "free") {
+    return keywordTyped(t, conv.open_question.location_id, cmd.text);
+  }
+
+  // The one question back about an hours change: the answer is read together with the first message.
+  if (conv?.open_question?.type === "hours" && (cmd.k === "free" || (cmd.k === "tool" && cmd.tool === "hours"))) {
+    const q = conv.open_question;
+    await d.db.setConv(phone, { open_question: null, active_location_id: q.location_id, active_role: "business" });
+    const next: Turn = { ...t, who: { ...who, conversation: { ...conv, open_question: null, active_location_id: q.location_id, active_role: "business" } } };
+    return withBusiness(next, "hours", null, (tb) => hours(tb, `${q.pending} ${t.m.text ?? ""}`, true));
   }
 
   // A person is answering in the Kapso inbox: free text waits for them; buttons and commands still work.
@@ -266,7 +306,9 @@ async function tool(t: Turn, name: string, arg: string | undefined, text: string
   switch (name) {
     case "help": return help(t);
     // 24.8: a chat that arrives without the scan code is welcomed and asked for the business name or the code.
-    case "greet": return !domains(who).length ? answered(t, say(t.who.conversation?.scan_code ? "unknownHelp" : "greeting", t.lang), "greeting") : help(t);
+    // The welcome only on a person's first message; later a hello gets the short menu.
+    case "greet": return !domains(who).length ? answered(t, say(t.first && !t.who.conversation?.scan_code ? "greeting" : "unknownHelp", t.lang), t.first ? "greeting" : "help") : help(t);
+    case "question": return askNora(t, arg ?? text);
     // A template's "Show me": what was held is already on its way (the message opened the window).
     case "show": return "show";
     case "switch": return switchCmd(t);
@@ -417,13 +459,53 @@ async function businessTool(t: Turn, name: string, arg: string | undefined): Pro
       return answered(t, name === "qr" ? SAY.qr(b.business, url) : SAY.reviewLink(b.business, url), name);
     }
     case "billing": return billing(t, arg);
-    case "hours": return answered(t, SAY.hoursInApp(b.business, `${app}/app/hours`), "hours_in_app");
-    case "post": return answered(t, SAY.postInApp(b.business, `${app}/app/posts`), "post_in_app");
+    case "hours": return hours(t, t.m.text ?? arg ?? "", false);
+    case "post": return typedPost(t, t.m.text ?? "");
     case "exact_reply": return exactReply(t, arg ?? "");
     case "edit_draft": return editDraft(t, arg ?? "");
     case "switch": return answered(t, SAY.switched(b.business), "switched");
     default: return answered(t, SAY.unclear, "unclear");
   }
+}
+
+// ─── Hours and typed posts (30.10 point 7): drafted, shown back exactly, approved with a Yes through the one pipeline.
+
+async function hours(t: Turn, text: string, asked: boolean): Promise<string> {
+  const b = t.business!;
+  const p = parseHours(text, new Date((t.d.now ?? Date.now)()), b.time_zone ?? "UTC");
+  if (!p.ok) {
+    if (p.why === "permanent") return answered(t, SAY.hoursWeekly(b.business, `${t.d.appUrl}/app/hours`), "hours_weekly");
+    // One short question back (9.3 "unclear times"); the answer is read with this message. Asked once only.
+    const line = p.why === "no_times" ? SAY.hoursNeedTimes : p.why === "bad_time" ? SAY.hoursBadTime : p.why === "past" ? SAY.hoursPast
+      : p.why === "too_far" ? SAY.hoursTooFar : SAY.hoursAsk;
+    if (!asked) await t.d.db.setConv(t.phone, { open_question: { type: "hours", pending: text.slice(0, 300), location_id: b.location_id } satisfies OpenQuestion });
+    return answered(t, line, `hours_${p.why}`);
+  }
+  const r = await t.d.db.hoursPrepare(b.location_id, b.user_id, p.change);
+  if (!r.ok || !r.token) return prepareRefused(t, r.reason, "hours");
+  return answered(t, SAY.hoursShown(b.business, describeHours(p.change)), "hours_shown", [{ id: `a:${r.token}`, title: "Approve" }, { id: `e:${r.token}`, title: "Edit on kabsi.co" }]);
+}
+
+async function typedPost(t: Turn, raw: string): Promise<string> {
+  const b = t.business!;
+  // The post is the owner's own words after "post:"; anything else is asked for once, with an example.
+  const m = /^\s*(?:new\s+)?post\s*:?\s+([\s\S]+)$/i.exec(raw);
+  if (!m) return answered(t, SAY.postAsk(b.business), "post_ask");
+  const c = checkTypedPost(m[1]);
+  if (!c.ok) return answered(t, SAY.postProblem(b.business, c.problems), "post_problem");
+  const r = await t.d.db.postPrepare(b.location_id, b.user_id, c.text);
+  if (!r.ok || !r.token) return prepareRefused(t, r.reason, "post");
+  return answered(t, SAY.postShown(b.business, (r.text ?? c.text).trim()), "post_shown", [{ id: `a:${r.token}`, title: "Approve" }, { id: `e:${r.token}`, title: "Edit on kabsi.co" }]);
+}
+
+function prepareRefused(t: Turn, reason: string | undefined, what: "hours" | "post"): Promise<string> {
+  const b = t.business!;
+  const why = reason ?? "unknown";
+  if (/not_allowed|not_member/.test(why)) return answered(t, SAY.approverOnly(b.business), `${what}_refused:${why}`);
+  if (/location_not_active|concierge/.test(why)) return answered(t, SAY.notConnectedYet(b.business, `${t.d.appUrl}/app`), `${what}_refused:${why}`);
+  if (/bad_dates/.test(why)) return answered(t, SAY.hoursAsk, `${what}_refused:${why}`);
+  if (/house_style|bad_post_text/.test(why)) return answered(t, SAY.postAsk(b.business), `${what}_refused:${why}`);
+  return answered(t, `Kabsi could not prepare this here. Open your Kabsi account to finish: ${t.d.appUrl}/app`, `${what}_refused:${why}`);
 }
 
 function lastReview(t: Turn): string | null {
@@ -532,7 +614,11 @@ async function yes(t: Turn): Promise<string> {
   if (items.length === 1) return approveToken(t, items[0].token);
   // Two or more waiting: "Which one?" with the business named on each (25.5).
   // What it is first, so two buttons stay different inside WhatsApp's 20 characters.
-  const label = (i: { kind: string; business: string }) => `${i.kind.includes("post") ? "Post" : i.kind.includes("protection") ? "Change" : "Reply"}: ${i.business}`.slice(0, 20).trim();
+  const what = (i: { kind: string; target_type?: string }) => {
+    const k = i.target_type ?? i.kind;
+    return k.includes("post") ? "Post" : k.includes("hours") ? "Hours" : k.includes("protection") || k.includes("revert") ? "Change" : "Reply";
+  };
+  const label = (i: { kind: string; business: string; target_type?: string }) => `${what(i)}: ${i.business}`.slice(0, 20).trim();
   const options = items.slice(0, 9).map((i) => ({ token: i.token, label: label(i) }));
   await t.d.db.setConv(t.phone, { open_question: { type: "which", options } satisfies OpenQuestion });
   if (options.length <= 3) return answered(t, SAY.whichOne, "which_one", options.map((o) => ({ id: `w:${o.token}`, title: o.label })));
@@ -552,31 +638,103 @@ async function bind(t: Turn, code: string): Promise<string> {
   const r = await t.d.db.bind(t.phone, code);
   if (r.result === "staff_admin") {
     await t.d.db.setConv(t.phone, { stopped: false });
-    return answered(t, SAY.staffBound, "staff_admin");
+    // The phone is staff_admin from this moment, so this reply already goes live (13b phone test, 25 Oct).
+    return answered(await again(t), SAY.staffBound, "staff_admin");
   }
   if (r.result === "verified") {
     await t.d.db.setConv(t.phone, { stopped: false });
-    // 28.5: the first map is the first wow. Scout is asked for it as soon as WhatsApp connects (a stub until V1).
-    for (const loc of r.first_owner_locations ?? []) await t.d.firstMap(loc).catch(() => "stub");
-    return answered(t, SAY.connected, "verified");
+    const tn = await again(t);
+    await say1(tn, SAY.connected);
+    // 28.5: the first map is the first wow, within 5 minutes of connecting. With a confirmed search it runs now; without
+    // one the owner is asked to confirm the search Kabsi suggests (one business at a time).
+    for (const loc of r.first_owner_locations ?? []) {
+      const f = await t.d.firstMap(loc).catch(() => ({ state: "none" as const, keyword: null }));
+      if (f.state !== "ask") continue;
+      const b = businesses(tn.who).find((x) => x.location_id === loc);
+      if (!b) continue;
+      return askKeyword({ ...tn, business: b, head: head(tn.who, "business", b) }, f.keyword ?? null, "verified");
+    }
+    return "verified";
   }
   if (r.result === "phone_in_use") return answered(t, SAY.phoneInUse, "phone_in_use");
   return answered(t, SAY.badCode, "bad_code");
+}
+
+/** The turn after something changed who the phone is (a code, START): its roles and send state read again. */
+async function again(t: Turn): Promise<Turn> {
+  const [who, s] = await Promise.all([t.d.db.resolve(t.phone), t.d.out.db.state(t.phone)]);
+  return { ...t, who, s: { ...s, stopped: false, window_expires_at: t.s.window_expires_at } };
+}
+
+// ─── The map (28.5, 27.3 item 1).
+
+async function askKeyword(t: Turn, suggested: string | null, result: string): Promise<string> {
+  const b = t.business!;
+  await t.d.db.setConv(t.phone, { open_question: { type: "keyword", location_id: b.location_id, suggested } satisfies OpenQuestion });
+  if (!suggested) return answered(t, SAY.keywordAskOpen(b.business), result);
+  return answered(t, SAY.keywordAsk(b.business, suggested), result,
+    [{ id: `v:y:${b.location_id}`, title: "Yes, use it" }, { id: `v:c:${b.location_id}`, title: "Change it" }]);
+}
+
+/** The owner or a manager of that business only; the search and its limits are the visibility function's. */
+async function confirmSearch(t: Turn, locationId: string, keyword: string): Promise<string> {
+  const b = businesses(t.who).find((x) => x.location_id === locationId);
+  if (!b) return answered(t, SAY.notYours, "keyword_not_yours");
+  const tb = { ...t, business: b, head: head(t.who, "business", b) };
+  if (b.role === "staff") return answered(tb, SAY.roleNotAllowed(b.role), "keyword_staff");
+  if (!t.d.confirmKeyword) return answered(tb, SAY.keywordPaused, "keyword_off");
+  const r = await t.d.confirmKeyword(locationId, keyword).catch(() => ({ ok: false, reason: "error" }));
+  if (r.ok) {
+    await t.d.db.setConv(t.phone, { open_question: null });
+    return answered(tb, SAY.keywordSet(b.business, keyword), "keyword_set");
+  }
+  if (r.reason === "not_found_on_maps") {
+    await t.d.db.setConv(t.phone, { open_question: { type: "keyword", location_id: locationId, suggested: null } satisfies OpenQuestion });
+    return answered(tb, SAY.keywordNotFound(b.business), "keyword_not_found");
+  }
+  await t.d.db.setConv(t.phone, { open_question: null });
+  if (r.reason === "no_plan") return answered(tb, SAY.keywordNoPlan(b.business), "keyword_no_plan");
+  if (r.reason === "keyword_limit") return answered(tb, SAY.keywordLimit(b.business), "keyword_limit");
+  return answered(tb, SAY.keywordPaused, `keyword_${r.reason ?? "error"}`);
+}
+
+async function keywordButton(t: Turn, action: "yes" | "change", locationId: string): Promise<string> {
+  const q = t.who.conversation?.open_question;
+  const b = businesses(t.who).find((x) => x.location_id === locationId);
+  if (!b) return answered(t, SAY.notYours, "keyword_not_yours");
+  const tb = { ...t, business: b, head: head(t.who, "business", b) };
+  if (action === "change") return askKeyword(tb, null, "keyword_change");
+  const suggested = q?.type === "keyword" && q.location_id === locationId ? q.suggested : null;
+  if (!suggested) return answered(tb, SAY.alreadyHandled, "keyword_stale");
+  return confirmSearch(t, locationId, suggested);
+}
+
+async function keywordTyped(t: Turn, locationId: string, text: string): Promise<string> {
+  const k = keywordFrom(text);
+  if (!k) return answered(t, SAY.keywordBad, "keyword_bad");
+  return confirmSearch(t, locationId, k);
+}
+
+async function mapButton(t: Turn, action: "show" | "later", scanId: string | null): Promise<string> {
+  if (action === "later" || !scanId) return answered(t, SAY.mapLater, "map_later");
+  const d = await t.d.db.mapDetails(scanId);
+  const b = d ? businesses(t.who).find((x) => x.location_id === d.location_id) : null;
+  // A map of a business this phone is not bound to is never shown or named (9.2).
+  if (!d || !b) return answered(t, SAY.mapGone, "map_gone");
+  return answered({ ...t, business: b, head: head(t.who, "business", b) }, mapDetailsText(d), "map_show");
 }
 
 // ─── Staff phone (9.9).
 
 async function staff(t: Turn, name: string, arg: string | undefined): Promise<string> {
   switch (name) {
+    case "staff_today": return answered(t, numbersText(await t.d.db.staffSummary()), name);
     case "staff_status":
-    case "staff_waiting":
-    case "staff_today": {
+    case "staff_waiting": {
       const n = await t.d.db.staffNumbers();
       const body = name === "staff_status"
         ? `Jobs failed in the last hour: ${n.jobs_failed_1h}. Jobs late: ${n.jobs_waiting}. Publications stuck: ${n.publications_stuck}. Number quality: ${n.number_quality ?? "not read yet"}.`
-        : name === "staff_waiting"
-        ? `Hand-offs in the last 2 days: ${n.handoffs}. Publications stuck: ${n.publications_stuck}. WhatsApp messages held: ${n.outbox_held}.`
-        : `Today (Beirut): ${n.signups_today} new businesses, ${n.reviews_answered_today} replies on Google.`;
+        : `Hand-offs in the last 2 days: ${n.handoffs}. Publications stuck: ${n.publications_stuck}. WhatsApp messages held: ${n.outbox_held}.`;
       return answered(t, body, name);
     }
     case "staff_pause":
@@ -596,22 +754,22 @@ async function staff(t: Turn, name: string, arg: string | undefined): Promise<st
 
 async function free(t: Turn, text: string): Promise<string> {
   const { who } = t;
-  const d = domains(who);
   const conv = who.conversation;
-  // An unknown phone's first words: the greeting of 24.8 (it may have come from the site without the code).
-  if (!d.length && !conv?.scan_code && !conv?.open_question && !t.d.ai) return answered(t, say("greeting", t.lang), "greeting");
   const choose = needsRoleChoice(who, null);
   if (choose) return askRole(t, choose, text);
   const dom = activeDomain(t);
   const b = dom === "business" ? pickBusiness(who) : null;
   const role: RoleName = roleFor(who, dom, b);
-  if (!t.d.ai) return answered({ ...t, business: b, head: head(who, dom, b) }, role === "unknown" || role === "prospect" ? say("greeting", t.lang) : say("unclear", t.lang), "unclear_no_ai");
+  const stranger = role === "unknown" || role === "prospect";
+  const tb0 = { ...t, business: b, head: head(who, dom, b) };
+  // An unknown phone's first words: the greeting of 24.8 (it may have come from the site without the code).
+  if (!t.d.ai) return answered(tb0, stranger ? say(t.first ? "greeting" : "unknownHelp", t.lang) : say("unclear", t.lang), "unclear_no_ai");
 
   const sleep = t.d.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
   let settled = false;
   let onIt: Promise<unknown> | null = null;
   void sleep(t.d.onItMs ?? 2500).then(() => {
-    if (!settled) onIt = say1({ ...t, business: b, head: head(who, dom, b) }, SAY.onIt);
+    if (!settled) onIt = say1(tb0, SAY.onIt);
   });
   const r = await route(t.d.ai, role, text);
   settled = true;
@@ -623,7 +781,25 @@ async function free(t: Turn, text: string): Promise<string> {
     if (!may(role, r.command.tool)) return answered({ ...t, lang }, say("unclear", lang), "unclear");
     return tool({ ...t, lang }, r.command.tool, r.command.arg, text);
   }
-  const tb = { ...t, lang, business: b, head: head(who, dom, b) };
-  if (role === "unknown" && !conv?.open_question) return answered(tb, say("greeting", lang), "greeting");
+  const tb = { ...tb0, lang };
+  // The welcome goes on the first message only; after that an unclear line from someone Kabsi does not know is a
+  // question for Nora, never the welcome again (QA 1: "what happens to my reviews if I cancel" got the welcome).
+  if (stranger && t.first && !conv?.open_question) return answered(tb, say("greeting", lang), "greeting");
+  if (stranger) return askNora(tb, text);
   return answered(tb, r.question ?? say("unclear", lang), "unclear");
+}
+
+/** Nora answers from the public facts. Without a model, or when it fails, the plain unclear line. */
+async function askNora(t: Turn, question: string): Promise<string> {
+  const dom = activeDomain(t);
+  const b = t.business ?? (dom === "business" ? pickBusiness(t.who) : null);
+  const tb = { ...t, business: b, head: t.head ?? head(t.who, dom, b) };
+  if (!t.d.nora) return answered(tb, say("unclear", t.lang), "unclear_no_nora");
+  try {
+    const text = forWhatsApp(await t.d.nora(question, { role: roleFor(t.who, dom, b), lang: t.lang, business: b?.business ?? null }));
+    if (!text) return answered(tb, say("unclear", t.lang), "nora_empty");
+    return answered(tb, text, "nora");
+  } catch {
+    return answered(tb, say("unclear", t.lang), "nora_failed");
+  }
 }

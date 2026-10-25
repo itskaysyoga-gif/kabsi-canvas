@@ -127,10 +127,11 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "WhatsApp number",
     ask: "What is your WhatsApp number?",
-    kb: [/Kabsi has no WhatsApp number at the moment/, /Never give one/],
-    must: [MAIL, /no WhatsApp number|not have a WhatsApp number|n't have a WhatsApp number/i],
+    // 13b part 2 (25 Oct 2026): Kabsi has a number, in testing until launch; Nora still gives none.
+    kb: [/Kabsi has a WhatsApp number/, /do not give the number yet/],
+    must: [MAIL, /test|at launch|not open|not available yet|can't give|cannot give/i],
     reference:
-      "Kabsi has no WhatsApp number at the moment, so I can't give you one. Write to hello@kabsi.co and a person answers, it is not an automatic bot.",
+      "Kabsi has a WhatsApp number, but it is still being tested and opens to owners at launch, so I can't give it out yet. Until then write to hello@kabsi.co and a person answers, it is not an automatic bot.",
   },
   {
     id: "en09",
@@ -646,11 +647,11 @@ export const QUESTIONS: Question[] = [
     topic: "WhatsApp number",
     ask: "¿Cuál es su número de WhatsApp?",
     gloss: "What is your WhatsApp number?",
-    kb: [/Kabsi has no WhatsApp number at the moment/],
+    kb: [/Kabsi has a WhatsApp number/, /do not give the number yet/],
     must: [MAIL],
     coming: true,
     reference:
-      "Kabsi no tiene un número de WhatsApp por el momento, así que no puedo darte uno. Escribe a hello@kabsi.co y te responde una persona. Aprobar respuestas por WhatsApp todavía no está disponible.",
+      "Kabsi tiene un número de WhatsApp, pero todavía está en pruebas y se abre a los dueños con el lanzamiento, así que aún no puedo darlo. Escribe a hello@kabsi.co y te responde una persona. Aprobar respuestas por WhatsApp todavía no está disponible.",
   },
   {
     id: "fr53",
@@ -740,11 +741,11 @@ export const QUESTIONS: Question[] = [
     topic: "WhatsApp number",
     ask: "ما هو رقم الواتساب عندكم؟",
     gloss: "What is your WhatsApp number?",
-    kb: [/Kabsi has no WhatsApp number at the moment/],
+    kb: [/Kabsi has a WhatsApp number/, /do not give the number yet/],
     must: [MAIL],
     coming: true,
     reference:
-      "ليس لدى كابسي رقم واتساب في الوقت الحالي، لذلك لا أستطيع إعطاءك رقما. اكتب إلى hello@kabsi.co ويرد عليك شخص. الموافقة على الردود عبر واتساب غير متاحة بعد.",
+      "لدى كابسي رقم واتساب، لكنه ما زال قيد التجربة ويفتح لأصحاب الأعمال عند الإطلاق، لذلك لا أستطيع إعطاءه بعد. اكتب إلى hello@kabsi.co ويرد عليك شخص. الموافقة على الردود عبر واتساب غير متاحة بعد.",
   },
 ];
 

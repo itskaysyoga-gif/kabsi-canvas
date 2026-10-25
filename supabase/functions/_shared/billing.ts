@@ -95,6 +95,7 @@ export async function applyEvent(eventKey: string): Promise<string> {
     if (older) {
       result = "older_ignored";
     } else {
+      const wasPaying = existing?.state === "active";
       existing = await writeSub(org, subId, e, effect, existing, at, ids);
       result = `applied:${existing?.state ?? "?"}`;
       if (effect.paid && existing) await foundingCheck(existing);
@@ -103,6 +104,14 @@ export async function applyEvent(eventKey: string): Promise<string> {
         if (requestId) await db.from("billing_checkouts").update({ completed_at: new Date().toISOString(), checkout_id: String(e.object.id ?? "") || null }).eq("request_id", requestId);
       }
       if (effect.message && existing) await tellOwner(effect.message, existing, e.id).catch((x) => captureError("billing", x, { step: "message", event: e.eventType }));
+      // 9.9: a new paying customer and a cancellation reach the staff phone at once.
+      if (existing && ((effect.paid && !wasPaying && existing.state === "active") || effect.message === "scheduled_cancel" || effect.message === "ended")) {
+        const business = await businessName(org);
+        const test = existing.mode === "live" ? "" : " (test mode)";
+        const what = effect.paid ? `New paying customer: ${business} on ${existing.plan === "essentials" ? "Essentials" : "Pro"}`
+          : effect.message === "ended" ? `${business}'s plan has ended` : `${business} cancelled; the plan ends on ${existing.current_period_end ? longDate(existing.current_period_end) : "its renewal date"}`;
+        await staffAlert(`${what}${test}`, `${effect.paid ? "paid" : effect.message}:${e.id}`).catch((x) => captureError("billing", x, { step: "staff_alert" }));
+      }
     }
   } else if (effect.write) {
     result = "no_business";
@@ -224,8 +233,10 @@ async function tellOwner(m: Message | "payment_reminder", s: SubRow, key: string
   });
   for (const p of people) {
     if (p.phone) {
+      // 13b part 2: outside the 24-hour window the billing_notice utility template goes first; the full line follows the reply.
       await outDb.add({ phone: p.phone, userId: p.user_id, locationId: p.location_id, kind: `billing_${m}`, body: line.whatsapp,
-        buttons: line.buttons, urgent: m === "payment_failed", dedupe: `billing:${m}:${key}:${p.user_id}` });
+        buttons: line.buttons, urgent: m === "payment_failed", dedupe: `billing:${m}:${key}:${p.user_id}`,
+        template: ref("billing_notice", { business }) });
     }
   }
   if (line.email) {

@@ -32,7 +32,9 @@ export type OpenQuestion =
   | { type: "role"; pending: string | null; options: Domain[] }
   | { type: "business"; pending: string | null; options: { id: string; name: string }[] }
   | { type: "which"; options: { token: string; label: string }[] }
-  | { type: "digest"; ids: number[] };
+  | { type: "digest"; ids: number[] }
+  | { type: "hours"; pending: string; location_id: string }
+  | { type: "keyword"; location_id: string; suggested: string | null };
 
 export type Who = { phone: string; roles: Role[]; conversation: Conversation | null };
 
@@ -42,14 +44,14 @@ export type Domain = "business" | "partner" | "staff";
 /** The tools each role may use (29.7). The router refuses anything outside the list, so a partner never reaches owner
  *  tools and an owner never reaches partner tools; staff_admin's ops commands answer only staff_admin. */
 export const TOOLS = {
-  unknown: ["help", "scan", "prices", "trial", "partner_program", "person"],
-  prospect: ["help", "scan", "send_map", "prices", "trial", "partner_program", "person"],
-  owner: ["help", "switch", "stats", "review_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
+  unknown: ["help", "question", "scan", "prices", "trial", "partner_program", "person"],
+  prospect: ["help", "question", "scan", "send_map", "prices", "trial", "partner_program", "person"],
+  owner: ["help", "question", "switch", "stats", "review_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
     "hours", "post", "billing", "voice", "person"],
-  manager: ["help", "switch", "stats", "review_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
+  manager: ["help", "question", "switch", "stats", "review_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
     "hours", "post", "voice", "person"],
-  staff: ["help", "switch", "photo", "voice", "person"],
-  partner: ["help", "switch", "partner_tool", "person"],
+  staff: ["help", "question", "switch", "photo", "voice", "person"],
+  partner: ["help", "question", "switch", "partner_tool", "person"],
   staff_admin: ["help", "switch", "staff_status", "staff_waiting", "staff_today", "staff_pause", "staff_partners", "staff_payouts", "person"],
 } as const;
 export type RoleName = keyof typeof TOOLS;
@@ -75,7 +77,7 @@ export const isProspect = (who: Who) => who.roles.some((r) => r.kind === "prospe
 export function domainOf(tool: string): Domain | null {
   if (tool.startsWith("staff_")) return "staff";
   if (tool === "partner_tool") return "partner";
-  if (["help", "greet", "show", "switch", "person", "free", "yes", "no", "number"].includes(tool)) return null;
+  if (["help", "greet", "show", "switch", "person", "free", "yes", "no", "number", "question"].includes(tool)) return null;
   if (["scan", "send_map", "prices", "trial", "partner_program"].includes(tool)) return null;
   return "business";
 }
