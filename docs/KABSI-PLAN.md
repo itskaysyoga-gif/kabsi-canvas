@@ -7,7 +7,7 @@ Version 1 was written on 4 Oct 2026 from the six source documents in `docs/sourc
 1. Guardrails (digest here; full text in the archive)
 2. Rules for every build chat (here, in full)
 3. Sources and precedence (here, in full)
-4. Review decisions R-01 to R-90 (table with status here; full text in the archive)
+4. Review decisions R-01 to R-92 (table with status here; full text in the archive)
 7. Order of work (here, short; the full section and the task cards are in the archive)
 8. Where everything went
 
@@ -186,9 +186,9 @@ Not a source of truth any more: `docs/KABSI-SPEC.md`, `docs/KABSI-STATE.md`, `do
 
 Added on 24 Oct 2026: the master plan (`docs/KABSI-MASTERPLAN.md`) sits above items 2 to 5 for everything it covers, with its later sections winning over its earlier ones.
 
-## 4. Review decisions (R-01 to R-91)
+## 4. Review decisions (R-01 to R-92)
 
-One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. R-67 is reserved for session 10 (Creem). Later decisions override earlier ones where they differ: R-91 over R-90 over R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
+One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. R-67 is reserved for session 10 (Creem). Later decisions override earlier ones where they differ: R-92 over R-91 over R-90 over R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
 
 | # | Decision | Status |
 |---|---|---|
@@ -285,6 +285,7 @@ One line per decision. The full text, with what each one changes and why, is `do
 | R-89 | Kabsi Partners and one WhatsApp agent for every kind of person | Approved |
 | R-90 | The coverage audit, the design guarantee, tools and risks (master plan section 30) | Approved |
 | R-91 | Google's policies on record: retention, DataForSEO only for ranks, nothing from Places but place_id, separate sections, notices (master plan 30.10) | Building |
+| R-92 | One reference and faster sessions: DESIGN.md approved, docs/COPY.md, docs/LATER.md and the no-loop rule, the Working fast rules, lane R applies a stuck additive migration (master plan 30.11) | Approved |
 
 ## 7. Order of work (R-84; master plan 27.11, 28.4, 29.8)
 
