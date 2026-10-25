@@ -4,7 +4,7 @@ What changed: on 20 October 2026 Kabsi removed its Manager access to Yawmiyati's
 
 How to check: On your Business Profile open Menu, then Business Profile settings, then People and access. Kabsi Clients is no longer listed. You stay the owner, and nothing else on your profile changed.
 
-What happens next: the Google data Kabsi kept for you is deleted within 30 days. Your review link and QR code keep working. To use Kabsi again, write to hello@kabsi.co.
+What happens next: the Google data Kabsi kept for you is deleted within 7 days. Your review link and QR code keep working. To use Kabsi again, write to hello@kabsi.co.
 
 Open Kabsi: https://kabsi.co/app
 

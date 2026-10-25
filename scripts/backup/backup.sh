@@ -10,7 +10,8 @@
 #   weekly/<UTC stamp>/kabsi-canvas.bundle.age    a git bundle of every branch and tag of the repository
 #   weekly/<UTC stamp>/manifest.json              names, sizes, sha256 of the encrypted files, row counts. No customer data.
 # The manifest is uploaded last, so a set without one is unfinished and the restore drill ignores it.
-# The newest BACKUP_KEEP (8) sets are kept; older ones are deleted only after the new set is safely uploaded.
+# The newest BACKUP_KEEP (3) sets are kept, 21 days of weekly sets (master plan 30.10 point 1: with the 7 day purge after a
+# business leaves, no copy of its Google data outlives 28 days); older ones are deleted only after the new set is uploaded.
 #
 # Secrets (GitHub, Settings, Secrets and variables, Actions): SUPABASE_DB_URL, BACKUP_PASSPHRASE, R2_ACCOUNT_ID,
 # R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and SUPABASE_ACCESS_TOKEN (already there for deploy.yml). Values are never
@@ -26,7 +27,7 @@ DRY_RUN=0
 
 REF="${SUPABASE_PROJECT_REF:-ynjdqjlmdwjgbfezevxy}"
 BUCKET="${R2_BUCKET:-kabsi-backups}"
-KEEP="${BACKUP_KEEP:-8}"
+KEEP="${BACKUP_KEEP:-3}"
 AWS="${AWS_BIN:-aws}"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 W="${BACKUP_WORKDIR:-$(mktemp -d)}"

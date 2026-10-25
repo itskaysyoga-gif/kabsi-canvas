@@ -1,29 +1,22 @@
 // Run: deno test supabase/functions/_shared/google/places.test.ts
-// The Places cost guard (K-100, P0.2-06). The counter and the cache live in the database and are tested in
-// supabase/tests/places_cost_guard.sql; here their answers are given and Google is a stub with a call counter, so these
-// tests prove what the Places layer does with them.
+// The Places cost guard (K-100, P0.2-06). The counter lives in the database and is tested in
+// supabase/tests/places_cost_guard.sql; here its answers are given and Google is a stub with a call counter, so these
+// tests prove what the Places layer does with them. Nothing from Places is cached (master plan 30.10).
 import assert from "node:assert/strict";
 import { autocomplete, getPlace, guard, searchText } from "./places/live.ts";
-import type { Place } from "./types.ts";
 
 const real = { ...guard };
 const realFetch = globalThis.fetch;
 
-// A world with a day's cap and a cache. Every request to Google is counted and its headers kept.
-function world(cap: number, cached: Record<string, Place> = {}) {
-  const seen = { requests: [] as { url: string; mask: string | null }[], taken: [] as string[], put: [] as string[] };
+// A world with a day's cap. Every request to Google is counted and its headers kept.
+function world(cap: number) {
+  const seen = { requests: [] as { url: string; mask: string | null }[], taken: [] as string[] };
   let used = 0;
   guard.take = (kind) => {
     seen.taken.push(kind);
     if (used >= cap) return Promise.resolve(false);
     used++;
     return Promise.resolve(true);
-  };
-  guard.cacheGet = (placeId, mask) => Promise.resolve(cached[`${placeId}|${mask}`] ?? null);
-  guard.cachePut = (placeId, mask, place) => {
-    cached[`${placeId}|${mask}`] = place;
-    seen.put.push(`${placeId}|${mask}`);
-    return Promise.resolve();
   };
   globalThis.fetch = (input: string | URL | Request, init?: RequestInit) => {
     seen.requests.push({ url: String(input), mask: new Headers(init?.headers).get("x-goog-fieldmask") });
@@ -37,33 +30,17 @@ function restore() {
 }
 const MASK = "rating,userRatingCount";
 
-Deno.test("a cache hit makes no Places request and takes nothing from the cap", async () => {
-  const seen = world(100, { [`p1|${MASK}`]: { rating: 4.2, userRatingCount: 7 } });
-  try {
-    const r = await getPlace("k", "p1", MASK);
-    assert.equal(r.cached, true);
-    assert.equal(r.data.rating, 4.2);
-    assert.equal(seen.requests.length, 0);
-    assert.deepEqual(seen.taken, []);
-  } finally {
-    restore();
-  }
-});
-
-Deno.test("a miss asks Places once, caches the answer, and the second lookup is a hit", async () => {
+Deno.test("nothing is cached: every lookup asks Google and takes one from the cap", async () => {
   const seen = world(100);
   try {
     const first = await getPlace("k", "p2", MASK);
     assert.equal(first.ok, true);
-    assert.equal(first.cached, undefined);
-    assert.equal(seen.requests.length, 1);
-    assert.deepEqual(seen.put, [`p2|${MASK}`]);
+    assert.equal(first.data.rating, 4.5);
     const second = await getPlace("k", "p2", MASK);
-    assert.equal(second.cached, true);
-    assert.equal(seen.requests.length, 1, "the second lookup made no request");
-    // Another field mask is another cache entry.
-    await getPlace("k", "p2", "primaryType");
-    assert.equal(seen.requests.length, 2);
+    assert.equal(second.ok, true);
+    assert.equal(seen.requests.length, 2, "the second lookup asked Google again");
+    assert.deepEqual(seen.taken, ["details", "details"]);
+    assert.ok(!("cacheGet" in guard) && !("cachePut" in guard), "the layer has no cache to read or write");
   } finally {
     restore();
   }

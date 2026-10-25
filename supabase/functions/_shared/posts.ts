@@ -29,15 +29,18 @@ export const POST_LOC_COLUMNS =
 const PRO = /(doctor|dentist|dental|clinic|hospital|medical|physio|chiropract|lawyer|legal|attorney|notary|account|insurance|real_estate|consult|agency|corporate|office|school|university|bank|financ|veterinar|therap|psycholog|architect|engineer|laborator)/;
 export const slotFor = (category: string | null) => (category && PRO.test(category) ? "pro" : "retail");
 
-// Cache category, area and slot on the location (one Places call, then reused).
+// Category and area of the business for the post prompt, read from Places when the post is written and never stored
+// (master plan 30.10: nothing from Places is kept but the place ID). Only Kabsi's own posting slot is saved.
 export async function ensureCategory(db: SupabaseClient, loc: PostLoc) {
-  if (loc.category || !loc.place_id) return loc;
+  if (!loc.place_id) return loc;
   const c = await placeCategory(loc.place_id).catch(() => null);
   if (!c) return loc;
-  // "none" caches a place Google gives no type for, so Places isn't asked again every run.
-  const next = { ...c, category: c.category ?? "none", post_slot: loc.post_slot ?? slotFor(c.category) };
-  await db.from("locations").update(next).eq("id", loc.id);
-  return { ...loc, ...next };
+  if (!loc.post_slot) {
+    const post_slot = slotFor(c.category);
+    await db.from("locations").update({ post_slot }).eq("id", loc.id);
+    return { ...loc, ...c, post_slot };
+  }
+  return { ...loc, ...c };
 }
 
 // Grounded facts only: verified Business Knowledge meant for posts (P0.3-01, K-10, K-11; shared builder, D260).

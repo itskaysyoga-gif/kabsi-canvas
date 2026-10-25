@@ -44,7 +44,8 @@ describe("the free tools when the day's cap is 0 or used up", () => {
 
   it("is what both Edge Functions answer when the cap is reached, with the limits unchanged", () => {
     const check = readFileSync("supabase/functions/_shared/profile-snapshot.ts", "utf8");
-    expect(check.match(/fail\("back_soon", FREE_TOOL_BUSY, 503\)/g)).toHaveLength(2);
+    // Search, and the live read shared by the check, its email and its WhatsApp copy (nothing cached, 30.10).
+    expect(check.match(/fail\("back_soon", FREE_TOOL_BUSY, 503\)/g)).toHaveLength(3);
     expect(check).toMatch(/LIMITS/);
     const link = readFileSync("supabase/functions/review-link/index.ts", "utf8");
     expect(link).toContain('fail("back_soon", FREE_TOOL_BUSY, 503)');

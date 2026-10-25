@@ -156,6 +156,27 @@ export async function sendReply(accountId: string, locationId: string, reviewId:
   return { ref: name, response: mode === "mock" ? { mock: true, reply } : { reply } };
 }
 
+// The business's name and address as its own Business Profile has them (master plan 30.10.1): the name and address
+// picked from the Places search at sign-up are replaced with these on the first successful sync. Read only.
+export async function profileIdentity(locationId: string): Promise<{ name: string | null; address: string | null; country: string | null }> {
+  assertNotConcierge(locationId);
+  const l = await by(modeFor(locationId), locationsLive, locationsMock).getLocation(locationId, "title,storefrontAddress");
+  const a = l.storefrontAddress;
+  const address = a ? [...(a.addressLines ?? []), a.locality, a.administrativeArea, a.postalCode].filter(Boolean).join(", ") : "";
+  return { name: l.title?.trim() || null, address: address || null, country: a?.regionCode ?? null };
+}
+
+// The business's own rating and review count from its Business Profile (master plan 30.10: the weekly change is built
+// from the owner's own profile, never from Places). One short page; Google sends the totals with it.
+export async function profileRating(accountId: string, locationId: string): Promise<{ rating: number | null; count: number | null }> {
+  assertNotConcierge(locationId);
+  const data = await by(modeFor(locationId), reviewsLive, reviewsMock).listReviews(accountId, locationId, 1, "");
+  return {
+    rating: typeof data.averageRating === "number" ? Math.round(data.averageRating * 10) / 10 : null,
+    count: typeof data.totalReviewCount === "number" ? data.totalReviewCount : null,
+  };
+}
+
 // The reply Google shows now for one review, or null (none yet, or still held while Google checks it, K-116.1).
 export async function readReply(accountId: string, locationId: string, reviewId: string): Promise<string | null> {
   assertNotConcierge(locationId);
@@ -431,7 +452,7 @@ export async function searchTermsFor(locationId: string, month: { year: number; 
 }
 
 // ─── Places API (New), on PLACES_API_KEY (works before the Business Profile grant).
-export { autocomplete, getCachedSnapshot, getPlace, getSnapshotPlace, searchText, type PlacesResult } from "./places/live.ts";
+export { autocomplete, getPlace, getSnapshotPlace, searchText, type PlacesResult } from "./places/live.ts";
 
 // Category and area of a place.
 export async function placeCategory(placeId: string) {

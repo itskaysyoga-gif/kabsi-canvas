@@ -139,9 +139,9 @@ export function SnapshotResult({
       </button>
 
       <p className="mt-4 text-xs leading-5 text-kb-stone" data-testid="attribution">
-        Business details come from Google Maps and are public information, shown as they were in the
-        last 24 hours. This check is not a score and does not compare you with other businesses.{" "}
-        {GOOGLE_NOTICE}
+        Business details come from Google Maps and are public information, read from Google for this
+        check and not kept. This check is not a score and does not compare you with other
+        businesses. {GOOGLE_NOTICE}
       </p>
     </div>
   );

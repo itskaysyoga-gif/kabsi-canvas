@@ -298,7 +298,7 @@ function Page() {
             You can stop at any time: disconnect Kabsi from Google (section 4), and delete your
             business in Settings if you want your data gone. Deleting takes effect 7 days after you
             ask, and you can cancel before then. Older backups hold a copy until they expire, at
-            most 8 weeks later, and are never restored into the live service afterwards.
+            most 21 days later, and are never restored into the live service afterwards.
           </li>
           <li>
             You can ask for a copy of your data at any time by email to {CONTACT_EMAIL} from your
