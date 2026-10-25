@@ -15,7 +15,13 @@ describe("map image", () => {
   });
 
   it("uses the DESIGN.md map tokens", () => {
-    for (const [name, key] of [["map-rank-top", "top"], ["map-rank-mid", "mid"], ["map-rank-low", "low"], ["map-rank-none", "none"], ["kb-amber", "amber"]]) {
+    for (const [name, key] of [
+      ["map-rank-top", "top"],
+      ["map-rank-mid", "mid"],
+      ["map-rank-low", "low"],
+      ["map-rank-none", "none"],
+      ["kb-amber", "amber"],
+    ]) {
       const hex = design.match(new RegExp(`\\| ${name} \\| (#[0-9a-f]{6}) \\|`, "i"))?.[1];
       expect(hex, name).toBeTruthy();
       expect(src).toContain(`${key}: "${hex}"`);
@@ -28,7 +34,9 @@ describe("map image", () => {
       expect(line).toContain(`"${words}"`);
       expect(src).toContain(`"${words}"`);
     }
-    expect(line).toContain("Kabsi rank check, not provided by Google. Map: Geoapify, © OpenStreetMap contributors.");
+    expect(line).toContain(
+      "Kabsi rank check, not provided by Google. Map: Geoapify, © OpenStreetMap contributors.",
+    );
     expect(src).toContain('"Kabsi rank check, not provided by Google."');
     expect(src).toContain('"Map: Geoapify, © OpenStreetMap contributors."');
   });
@@ -44,8 +52,16 @@ describe("map image", () => {
 
 describe("visibility tables", () => {
   it("every table has row level security and a members or staff read policy", () => {
-    for (const t of ["visibility_keywords", "visibility_scans", "competitor_picks", "competitor_snapshots"]) expect(migration).toContain(`'${t}'`);
-    expect(migration).toContain("create policy members_read on public.%I for select to authenticated using (public.is_member(location_id) or (select public.is_staff()))");
+    for (const t of [
+      "visibility_keywords",
+      "visibility_scans",
+      "competitor_picks",
+      "competitor_snapshots",
+    ])
+      expect(migration).toContain(`'${t}'`);
+    expect(migration).toContain(
+      "create policy members_read on public.%I for select to authenticated using (public.is_member(location_id) or (select public.is_staff()))",
+    );
     expect(migration).toMatch(/alter table public.visibility_points enable row level security/);
     expect(migration).toMatch(/alter table public.provider_spend enable row level security/);
     expect(migration).not.toMatch(/grant (insert|update|delete)[^;]* to authenticated/);

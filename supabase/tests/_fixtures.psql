@@ -61,6 +61,14 @@ insert into public.rating_snapshots (location_id, taken_on) values ('00000000-00
 insert into public.special_hours (location_id, start_date, end_date, closed) values ('00000000-0000-4000-8000-0000000000c1', '2026-12-24', '2026-12-24', true);
 insert into public.google_events (message_id, type, google_location_id, location_id) values ('victim-message', 'NEW_REVIEW', 'locations/victim', '00000000-0000-4000-8000-0000000000c1');
 insert into public.weekly_reports (location_id, week_of, data) values ('00000000-0000-4000-8000-0000000000c1', '2026-09-28', '{}');
+insert into public.visibility_keywords (id, location_id, keyword, radius_km, center_lat, center_lng, self_title)
+values ('00000000-0000-4000-8000-0000000000f8', '00000000-0000-4000-8000-0000000000c1', 'barber', 3, 25.08, 55.14, 'Victim Barber');
+insert into public.visibility_scans (id, location_id, keyword_id, keyword, radius_km, center_lat, center_lng, zoom, source)
+values ('00000000-0000-4000-8000-0000000000f9', '00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000f8', 'barber', 3, 25.08, 55.14, 13.5, 'mock');
+insert into public.visibility_points (scan_id, row, col, lat, lng) values ('00000000-0000-4000-8000-0000000000f9', 3, 3, 25.08, 55.14);
+insert into public.competitor_picks (location_id, key, name) values ('00000000-0000-4000-8000-0000000000c1', 'cid:victim-rival', 'Victim Rival');
+insert into public.competitor_snapshots (location_id, key, taken_on, name) values ('00000000-0000-4000-8000-0000000000c1', 'cid:victim-rival', current_date, 'Victim Rival');
+insert into public.provider_spend (provider, month, calls, micros) values ('victim-provider', '2026-10-01', 1, 600);
 insert into public.chat_conversations (id, visitor_id, user_id, location_id)
 values ('00000000-0000-4000-8000-0000000000f7', 'victim-visitor', '00000000-0000-4000-8000-0000000000a1', '00000000-0000-4000-8000-0000000000c1');
 insert into public.chat_messages (conversation_id, role, content) values ('00000000-0000-4000-8000-0000000000f7', 'user', 'Hello');

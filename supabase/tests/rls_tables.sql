@@ -66,6 +66,13 @@ select ok(tests.visible_victim_rows('organizations') = 1 and tests.visible_victi
   and tests.visible_victim_rows('subscriptions') = 1,
   'control: the victim owner sees their organisation, membership, Google connection and subscription');
 reset role;
+-- V1: the owner sees their own map, points, picks and snapshots; nobody but staff sees provider spend.
+select tests.act_as('00000000-0000-4000-8000-0000000000a1');
+select ok(tests.visible_victim_rows('visibility_keywords') = 1 and tests.visible_victim_rows('visibility_scans') = 1
+  and tests.visible_victim_rows('visibility_points') = 1 and tests.visible_victim_rows('competitor_picks') = 1
+  and tests.visible_victim_rows('competitor_snapshots') = 1 and tests.visible_victim_rows('provider_spend') = 0,
+  'control: the victim owner sees their own visibility rows and no provider spend');
+reset role;
 
 -- P0.8-01 (K-127): the old partner tables are gone, so no partner can see anything of a business.
 select is(
