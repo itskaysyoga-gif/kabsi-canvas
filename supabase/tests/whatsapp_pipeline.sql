@@ -16,7 +16,7 @@ create temp table tp as select public.owner_post_prepare('00000000-0000-4000-800
   '00000000-0000-4000-8000-0000000000a1', 'Fresh sourdough every Saturday morning.', 'whatsapp') as id;
 select is((select state from public.gbp_posts where id = (select id from tp)), 'draft', 'the typed post is a draft');
 select is((select body from public.gbp_posts where id = (select id from tp)), 'Fresh sourdough every Saturday morning.', 'with the owner''s words');
-select is((public.approve_publication('local_post', (select id from tp), '{"summary": "Fresh sourdough every Saturday morning."}',
+select is((public.approve_publication('local_post', (select id from tp), '{"summary": "Fresh sourdough every Saturday morning."}'::jsonb,
   '00000000-0000-4000-8000-0000000000a1', 'whatsapp') ->> 'created')::boolean, true, 'approved on WhatsApp');
 select ok((select publish_after > now() from public.publications where target_id = (select id from tp)), 'inside the 10 second undo');
 select throws_ok($$ select public.owner_post_prepare('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000b1', 'Fresh sourdough every Saturday.', 'whatsapp') $$,
@@ -32,7 +32,7 @@ select throws_ok($$ select public.owner_post_prepare('00000000-0000-4000-8000-00
 create temp table sh as select public.special_hours_prepare('00000000-0000-4000-8000-0000000000c1',
   '00000000-0000-4000-8000-0000000000a1', current_date + 6, current_date + 6, true, null, null, 'Family event') as id;
 select is((select state from public.special_hours where id = (select id from sh)), 'draft', 'the special hours are a draft');
-select is((public.approve_publication('special_hours', (select id from sh), '{}', '00000000-0000-4000-8000-0000000000a1', 'whatsapp') ->> 'created')::boolean,
+select is((public.approve_publication('special_hours', (select id from sh), '{}'::jsonb, '00000000-0000-4000-8000-0000000000a1', 'whatsapp') ->> 'created')::boolean,
   true, 'special hours approved on WhatsApp');
 select throws_ok($$ select public.special_hours_prepare('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000a1', current_date + 5, current_date + 2, true, null, null, null) $$,
   'bad_dates', 'the end before the start');
