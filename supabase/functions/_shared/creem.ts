@@ -264,6 +264,33 @@ export function effectOf(e: CreemEvent, ids: ProductIds): Effect {
   }
 }
 
+/**
+ * The changes one event makes to a subscription row, given the row as it is now (null when there is none yet). Pure, so the race of
+ * two events for one subscription is tested: Creem sends `checkout.completed` and `subscription.paid` within a second and two
+ * workers can take them together, so whoever loses the insert must apply its own changes to the winner's row (QA 1, 25 Oct).
+ */
+export function patchFor(
+  w: NonNullable<Effect["write"]>, f: SubFacts, eventType: string,
+  existing: { state: string; past_due_at: string | null } | null, at: Date, now: Date = new Date(),
+): Record<string, unknown> {
+  const patch: Record<string, unknown> = { last_event_at: at.toISOString(), updated_at: now.toISOString() };
+  // A checkout after a cancel never moves an active subscription back to incomplete.
+  if (w.state && !(w.state === "incomplete" && existing && existing.state !== "incomplete")) patch.state = w.state;
+  if (w.plan) patch.plan = w.plan;
+  if (w.period) patch.period = w.period;
+  if (w.productId) patch.product_id = w.productId;
+  if (w.units !== undefined && (w.units > 0 || eventType !== "checkout.completed")) patch.units = w.units;
+  if (w.periodStart) patch.current_period_start = w.periodStart;
+  if (w.periodEnd) patch.current_period_end = w.periodEnd;
+  if (w.cancelAtPeriodEnd !== undefined) patch.cancel_at_period_end = w.cancelAtPeriodEnd;
+  if (w.pastDue === "start") patch.past_due_at = existing?.past_due_at ?? at.toISOString();
+  if (w.pastDue === "clear") patch.past_due_at = null;
+  if (w.ended) patch.ended_at = at.toISOString();
+  if (w.state === "active") patch.ended_at = null;
+  if (f.customerId) patch.provider_customer_id = f.customerId;
+  return patch;
+}
+
 // ─── the client (fetch is injected so tests use a fake)
 export type Fetch = (url: string, init: RequestInit) => Promise<Response>;
 export class CreemError extends Error {

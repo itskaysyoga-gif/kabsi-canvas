@@ -1,0 +1,68 @@
+name: Smoke (nightly, production)
+
+# QA 1 (master plan 30.12 item 6): the smoke subset of tests/e2e (public pages, the doors that must stay shut, queue health) run against
+# production every night at 03:30 UTC and by hand. It reads and never writes, and it is NOT a required check: it only tells staff.
+# On failure, when the secret QA_SMOKE_TOKEN is set (GitHub, Settings, Secrets and variables, Actions; the same value as the Vault
+# secret qa_smoke_token), it calls POST /whatsapp/qa/alert, which makes one ops event and a WhatsApp message to the staff phones.
+# Setup steps for Rashid: docs/testing.md, "The nightly smoke test".
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 3 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: smoke
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    name: Smoke against production
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Install
+        run: npm ci --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund
+      - name: Install the browser
+        run: npx playwright install --with-deps chromium
+      - name: Smoke subset
+        id: smoke
+        run: npx playwright test tests/e2e/smoke.spec.ts --project=m390 --reporter=list,json
+        env:
+          CI: "true"
+          PLAYWRIGHT_JSON_OUTPUT_NAME: smoke-result.json
+      - name: Tell staff on WhatsApp when it failed
+        if: failure()
+        env:
+          QA_SMOKE_TOKEN: ${{ secrets.QA_SMOKE_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$QA_SMOKE_TOKEN" ]; then echo "QA_SMOKE_TOKEN is not set: no WhatsApp alert (docs/testing.md)"; exit 0; fi
+          failed=$(node -e '
+            try {
+              const r = JSON.parse(require("fs").readFileSync("smoke-result.json", "utf8"));
+              const out = [];
+              const walk = (s) => { for (const t of s.specs ?? []) if (t.tests?.some((x) => x.results?.some((y) => y.status === "failed" || y.status === "timedOut"))) out.push(t.title); (s.suites ?? []).forEach(walk); };
+              (r.suites ?? []).forEach(walk);
+              console.log(out.slice(0, 3).join("; ") || "see the run");
+            } catch { console.log("see the run"); }
+          ')
+          curl -sS -m 30 -X POST "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/whatsapp/qa/alert" \
+            -H "x-smoke-token: $QA_SMOKE_TOKEN" -H "content-type: application/json" \
+            -d "$(node -e 'console.log(JSON.stringify({summary: process.argv[1], run: process.argv[2]}))' "$failed" "$RUN_URL")"
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: smoke-result
+          path: |
+            smoke-result.json
+            playwright-report
+            test-results
+          if-no-files-found: ignore
