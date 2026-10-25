@@ -5,6 +5,7 @@
 import { categoryOf, isStaffCategory, SYSTEM_WHY, type SystemCategory } from "../notify-categories.ts";
 import { catalog } from "./catalog.ts";
 import { renderEmail } from "./template.ts";
+import { LOGO, LOGO_URL } from "../email-layout.ts";
 
 export type Preview = { kind: string; subject: string; html: string; text: string };
 
@@ -17,7 +18,8 @@ export function previews(): Preview[] {
       unsubscribePage: cat?.switchable ? "https://kabsi.co/unsubscribe?t=SAMPLE" : null,
       staff: isStaffCategory(c.category),
     });
-    return { kind: c.kind, subject: c.content.subject, html, text: `Subject: ${c.content.subject}\n\n${text}\n` };
+    // A browser cannot read the inline attachment (cid:), so the preview shows the hosted copy of the same mark.
+    return { kind: c.kind, subject: c.content.subject, html: html.replaceAll(LOGO, LOGO_URL), text: `Subject: ${c.content.subject}\n\n${text}\n` };
   });
 }
 

@@ -33,6 +33,7 @@ import { Route as AuthenticatedStartRouteImport } from './routes/_authenticated/
 import { Route as ATokenRouteImport } from './routes/a.$token'
 import { Route as ActivateCodeRouteImport } from './routes/activate.$code'
 import { Route as ApiGeoRouteImport } from './routes/api.geo'
+import { Route as BillingDoneRouteImport } from './routes/billing.done'
 import { Route as ForIndexRouteImport } from './routes/for.index'
 import { Route as ForSlugRouteImport } from './routes/for.$slug'
 import { Route as GuidesIndexRouteImport } from './routes/guides.index'
@@ -174,6 +175,11 @@ const ActivateCodeRoute = ActivateCodeRouteImport.update({
 const ApiGeoRoute = ApiGeoRouteImport.update({
   id: '/api/geo',
   path: '/api/geo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BillingDoneRoute = BillingDoneRouteImport.update({
+  id: '/billing/done',
+  path: '/billing/done',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForIndexRoute = ForIndexRouteImport.update({
@@ -319,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
   '/api/geo': typeof ApiGeoRoute
+  '/billing/done': typeof BillingDoneRoute
   '/for/$slug': typeof ForSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
@@ -366,6 +373,7 @@ export interface FileRoutesByTo {
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
   '/api/geo': typeof ApiGeoRoute
+  '/billing/done': typeof BillingDoneRoute
   '/for/$slug': typeof ForSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
@@ -416,6 +424,7 @@ export interface FileRoutesById {
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
   '/api/geo': typeof ApiGeoRoute
+  '/billing/done': typeof BillingDoneRoute
   '/for/$slug': typeof ForSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
@@ -466,6 +475,7 @@ export interface FileRouteTypes {
     | '/a/$token'
     | '/activate/$code'
     | '/api/geo'
+    | '/billing/done'
     | '/for/$slug'
     | '/guides/$slug'
     | '/h/$token'
@@ -513,6 +523,7 @@ export interface FileRouteTypes {
     | '/a/$token'
     | '/activate/$code'
     | '/api/geo'
+    | '/billing/done'
     | '/for/$slug'
     | '/guides/$slug'
     | '/h/$token'
@@ -562,6 +573,7 @@ export interface FileRouteTypes {
     | '/a/$token'
     | '/activate/$code'
     | '/api/geo'
+    | '/billing/done'
     | '/for/$slug'
     | '/guides/$slug'
     | '/h/$token'
@@ -608,6 +620,7 @@ export interface RootRouteChildren {
   ATokenRoute: typeof ATokenRoute
   ActivateCodeRoute: typeof ActivateCodeRoute
   ApiGeoRoute: typeof ApiGeoRoute
+  BillingDoneRoute: typeof BillingDoneRoute
   ForSlugRoute: typeof ForSlugRoute
   GuidesSlugRoute: typeof GuidesSlugRoute
   HTokenRoute: typeof HTokenRoute
@@ -786,6 +799,13 @@ declare module '@tanstack/react-router' {
       path: '/api/geo'
       fullPath: '/api/geo'
       preLoaderRoute: typeof ApiGeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/billing/done': {
+      id: '/billing/done'
+      path: '/billing/done'
+      fullPath: '/billing/done'
+      preLoaderRoute: typeof BillingDoneRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/for/': {
@@ -1031,6 +1051,7 @@ const rootRouteChildren: RootRouteChildren = {
   ATokenRoute: ATokenRoute,
   ActivateCodeRoute: ActivateCodeRoute,
   ApiGeoRoute: ApiGeoRoute,
+  BillingDoneRoute: BillingDoneRoute,
   ForSlugRoute: ForSlugRoute,
   GuidesSlugRoute: GuidesSlugRoute,
   HTokenRoute: HTokenRoute,

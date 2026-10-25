@@ -142,6 +142,7 @@ export function isDefiniteGoogleRejection(e: unknown) {
 
 // ─── email (Resend). Layout and buttons live in email-layout.ts (no environment access, so Deno tests can import it).
 export { emailButton, emailLink, esc } from "./email-layout.ts";
+import { logoAttachment } from "./email-layout.ts";
 
 // The From address lives in app_settings.email_from (migration 016), so switching sender is one SQL update.
 // Two sending subdomains (G-22, R-03): send.kabsi.co for account and product mail, news.kabsi.co for lifecycle mail.
@@ -203,6 +204,8 @@ export async function sendEmail(o: {
     headers: { authorization: `Bearer ${key}`, "content-type": "application/json", "idempotency-key": o.dedupeKey.slice(0, 256) },
     body: JSON.stringify({
       from: await emailFrom(o.stream ?? "send"), reply_to: o.replyTo ?? "hello@kabsi.co", to: [o.to], subject: o.subject, html: o.html, text: o.text,
+      // The mark as an inline image (content id), not an outside link the mail app hides until clicked.
+      ...(logoAttachment(o.html).length ? { attachments: logoAttachment(o.html) } : {}),
       ...(o.unsubscribeUrl ? { headers: unsubscribeHeaders(o.unsubscribeUrl) } : {}),
     }),
   });

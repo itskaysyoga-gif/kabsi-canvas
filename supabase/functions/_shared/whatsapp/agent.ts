@@ -20,6 +20,7 @@ import {
 } from "./roles.ts";
 import { type Command, isAbuse, parse } from "./router.ts";
 import { guessLang, headed, SAY, say } from "./say.ts";
+import { CATALOGUE, extraKey, type Period, type Plan, planKey } from "../creem.ts";
 
 export interface AgentDb {
   store(phone: string, providerId: string, kind: string, payload: unknown, referral: Record<string, string> | null): Promise<{ duplicate: boolean; id?: string }>;
@@ -46,8 +47,20 @@ export interface AgentDb {
   releaseHeld(phone: string): Promise<number>;
 }
 
+/** Session 10 (master plan 10.2.10): the owner's billing actions, by business. The server checks the owner again. */
+export interface BillingDeps {
+  status(locationId: string): Promise<{ plan: Plan; period: Period; state: string; periodEnd: string | null; cancelAtEnd: boolean } | null>;
+  portal(locationId: string): Promise<string>;
+  cancel(locationId: string): Promise<string | null>;
+  keep(locationId: string): Promise<string | null>;
+  change(locationId: string, to: Plan): Promise<{ effective: "now" | "renewal"; until: string | null }>;
+  addLocation(locationId: string): Promise<number>;
+}
+
 export type AgentDeps = {
   db: AgentDb;
+  /** Billing through Creem (session 10). Without it "billing" answers the old line. */
+  billing?: BillingDeps;
   out: Out;
   phoneNumberId: string;
   appUrl: string;
@@ -322,6 +335,72 @@ async function sendMap(t: Turn): Promise<string> {
 
 // ─── Owner, manager and staff tools (9.3), for one business.
 
+// ─── Billing (session 10, master plan 10.2.10): owner only (the role list), each change after a Confirm.
+
+const longDay = (d: string | null) =>
+  d ? new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(d)) : null;
+const priceText = (plan: Plan | "extra", period: Period) => {
+  const cents = CATALOGUE[plan === "extra" ? extraKey(period) : planKey(plan, period)].price;
+  return `$${cents / 100} ${period === "year" ? "a year" : "a month"}`;
+};
+const planName = (plan: Plan, period: Period) => CATALOGUE[planKey(plan, period)].name;
+const CONFIRM = (op: string): Button[] => [{ id: `k:${op}`, title: "Confirm" }];
+const KEEP: Button[] = [{ id: "k:keep", title: "Keep my plan" }];
+
+async function billing(t: Turn, arg: string | undefined): Promise<string> {
+  const bd = t.d.billing;
+  if (!bd) return answered(t, SAY.billingSoon, "billing_stub");
+  const b = t.business!;
+  const w = (arg ?? "").trim().toLowerCase();
+  try {
+    if (/^(card|my card changed|update my card|invoice|receipt|factura|فاتورة)$/.test(w)) {
+      return answered(t, SAY.billingPortal(b.business, await bd.portal(b.location_id)), "billing_portal");
+    }
+    const s = await bd.status(b.location_id);
+    if (!s || !["active", "past_due"].includes(s.state)) return answered(t, SAY.billingNoPlan(b.business, `${t.d.appUrl}/app/plan`), "billing_no_plan");
+    const end = longDay(s.periodEnd);
+    if (w.startsWith("confirm:")) {
+      switch (w.slice(8)) {
+        case "cancel": return answered(t, SAY.billingCancelled(longDay(await bd.cancel(b.location_id))), "billing_cancelled", KEEP);
+        case "keep": await bd.keep(b.location_id); return answered(t, SAY.billingKept, "billing_kept");
+        case "upgrade":
+          if (s.plan === "pro") return answered(t, SAY.billingSamePlan("Pro"), "billing_same_plan");
+          await bd.change(b.location_id, "pro");
+          return answered(t, SAY.billingUpgraded, "billing_upgraded");
+        case "downgrade": {
+          if (s.plan === "essentials") return answered(t, SAY.billingSamePlan("Essentials"), "billing_same_plan");
+          const r = await bd.change(b.location_id, "essentials");
+          return answered(t, SAY.billingDowngraded(longDay(r.until)), "billing_downgraded");
+        }
+        case "add_location": return answered(t, SAY.billingAdded(await bd.addLocation(b.location_id)), "billing_location_added");
+      }
+      return answered(t, SAY.unclear, "billing_unclear");
+    }
+    if (w === "keep my plan") {
+      await bd.keep(b.location_id);
+      return answered(t, SAY.billingKept, "billing_kept");
+    }
+    if (w.startsWith("cancel")) {
+      if (s.cancelAtEnd) return answered(t, SAY.billingAlreadyEnds(end), "billing_already_ends", KEEP);
+      return answered(t, SAY.billingCancelAsk(end), "billing_cancel_ask", CONFIRM("cancel"));
+    }
+    if (w === "upgrade") {
+      if (s.plan === "pro") return answered(t, SAY.billingSamePlan("Pro"), "billing_same_plan");
+      return answered(t, SAY.billingUpgradeAsk(priceText("pro", s.period)), "billing_upgrade_ask", CONFIRM("upgrade"));
+    }
+    if (w === "downgrade") {
+      if (s.plan === "essentials") return answered(t, SAY.billingSamePlan("Essentials"), "billing_same_plan");
+      return answered(t, SAY.billingDowngradeAsk(priceText("essentials", s.period), end), "billing_downgrade_ask", CONFIRM("downgrade"));
+    }
+    if (w === "add a location") return answered(t, SAY.billingAddAsk(priceText("extra", s.period)), "billing_add_ask", CONFIRM("add_location"));
+    return answered(t, SAY.billingStatus(b.business, planName(s.plan, s.period), end, s.cancelAtEnd), "billing_status");
+  } catch (e) {
+    // A refusal the owner can act on ("There is no payment on record yet.") is shown; anything else is the retry line.
+    const code = (e as { code?: string }).code;
+    return answered(t, code ? String((e as Error).message) : SAY.billingTryLater, code ? `billing_${code}` : "billing_error");
+  }
+}
+
 async function businessTool(t: Turn, name: string, arg: string | undefined): Promise<string> {
   const b = t.business!;
   const app = t.d.appUrl;
@@ -337,7 +416,7 @@ async function businessTool(t: Turn, name: string, arg: string | undefined): Pro
       const url = `${app}/review/${code}`;
       return answered(t, name === "qr" ? SAY.qr(b.business, url) : SAY.reviewLink(b.business, url), name);
     }
-    case "billing": return answered(t, SAY.billingSoon, "billing_stub");
+    case "billing": return billing(t, arg);
     case "hours": return answered(t, SAY.hoursInApp(b.business, `${app}/app/hours`), "hours_in_app");
     case "post": return answered(t, SAY.postInApp(b.business, `${app}/app/posts`), "post_in_app");
     case "exact_reply": return exactReply(t, arg ?? "");

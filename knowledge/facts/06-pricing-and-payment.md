@@ -4,7 +4,7 @@
 
 Essentials is $19 a month or $190 a year. Pro is $39 a month or $390 a year. An extra location is $15 a month or $150 a year. Prices are in US dollars, plus tax where it applies. Yearly is ten months for the price of twelve ("2 months free" on the pricing page). The website, the Plan page, the Home plan card, the trial emails (day 7, day 11, day 14 and the two follow-ups), the FAQ and the terms all say exactly this.
 
-**[COMING]** Card payments in US dollars are coming. Until they open there is nothing to pay and nothing to buy: no page has a checkout button. The Plan page lists the prices and marks How to pay as Coming soon.
+**[COMING]** Card payments in US dollars are coming. Until they open there is nothing to pay and nothing to buy. The Plan page lists the prices and shows **Choose Essentials** and **Choose Pro** with a Monthly or Yearly switch; until plans open both buttons read **Plans open soon** and do nothing (only Kabsi's own test accounts can try a test checkout). The pricing page shows the founding offer with the real number of places left, and hides it at 0. (Session 10, 25 Oct 2026, master plan section 10.)
 
 | Item | Price | Notes |
 |---|---|---|
@@ -18,11 +18,18 @@ Essentials is $19 a month or $190 a year. Pro is $39 a month or $390 a year. An 
 - **Same everywhere:** Kabsi is software only, at the same price in every country. Kabsi sells no cards. Every business everywhere gets a free review link and QR code, which work with your own QR codes and NFC cards (section 5), with no plan.
 - Monthly plans can be cancelled at any time. Yearly plans are refundable within 14 days.
 - Kabsi may change prices for future purchases. A plan already paid for keeps its price.
+- **Founding price:** the first 30 paying businesses keep their price for as long as they stay subscribed. The count is real and shown on the pricing page; it hides at 0.
 - The assistant may quote these prices, always with: card payments are coming and nothing can be bought today.
 
 ### 4.2 How to pay
 
-By card, in US dollars, and nothing else. Payments are processed by Creem, our merchant of record. **[COMING]** Card checkout through Creem is not open yet. Until it opens there is nothing to pay: the Plan page says "Card payments in US dollars are coming. Until they open there is nothing to pay." Kabsi takes no crypto, cash or bank transfer, and no other payment app. Never give a wallet address or a payment ID. Anything else about paying: hand off.
+By card, in US dollars, and nothing else. Payments are processed by Creem, our merchant of record. **[COMING]** Card checkout through Creem is not open yet (it is built and runs in Creem's test mode; it opens at the launch gate). Until it opens there is nothing to pay: the Plan page says "Card payments in US dollars are coming. Until they open there is nothing to pay." Kabsi takes no crypto, cash or bank transfer, and no other payment app. Never give a wallet address or a payment ID. Anything else about paying: hand off.
+
+**[COMING] How paying will work once plans open (built 25 Oct 2026, session 10).** Not available yet, no date. Say only what is below.
+- Choosing a plan opens Creem's secure checkout for that business, in US dollars, plus tax where it applies; Creem is the merchant of record and handles sales tax and VAT. The paid period starts the day the owner pays.
+- The owner manages billing on WhatsApp or the Plan page, and only the owner can: "card" or "invoice" sends a fresh link to Creem's page for the card, invoices and receipts; "upgrade" moves to Pro at once after a Confirm that shows the price (Creem charges the difference for the rest of the period that day); "downgrade" moves to Essentials from the next renewal (Pro stays until then); "add a location" adds one extra location after a Confirm that shows the price; "cancel" asks first, then ends the plan at the end of the paid period, never at once, and everything keeps working until that date; "Keep my plan" undoes a cancel before it happens.
+- If a payment fails, Kabsi keeps working for 7 days and sends "Your card did not go through. Update it here" with the card link on WhatsApp and by email, with reminders on day 3 and day 6. After the 7 days the plan is paused: Kabsi keeps watching and preparing, publishes nothing, and nothing is lost.
+- A paused or ended plan keeps the business's data for 30 days. The review link and QR code keep working.
 
 ### 4.3 When the trial and the plan start
 
@@ -30,7 +37,7 @@ By card, in US dollars, and nothing else. Payments are processed by Creem, our m
 - **One trial per business and per person:** one per Google listing (place) and one per Google account (the owner's Google sign-in or email; Gmail dots and +tags count as the same address). A business or account that already had a trial goes straight to a paid plan.
 - **During the trial** you get the full product (new review drafts and publishing, Google Protection, the Weekly Care Report, one post a week, the review link and QR code, the assistant) with three limits: Kabsi lists every profile fix it finds but applies **3 of your choice** (the rest when you subscribe); it drafts replies for up to **10** older unanswered reviews (the rest when you subscribe); and after **100 drafts** it asks you to choose a plan or book a free setup call.
 - A **paid plan** starts when payment is confirmed **and** Kabsi's access works. Time spent waiting for access doesn't count.
-- If you pay during your trial, your paid plan starts the day the trial ends. You keep every trial day.
+- If you pay during your trial, your paid plan starts the day the trial ends. You keep every trial day. **[CHANGING]** Once card payments open, the paid period starts the day you pay (master plan 10.2.2).
 - If you pay before access works, the Plan page shows your plan as "Paid" and says: "Your plan starts the day Kabsi's access to your Google profile works, so you don't lose any days while you wait."
 - **[TIME-SENSITIVE]** While Kabsi is in test mode (2.2), a trial or paid plan waits for Google access. In early access, it starts when the team has connected your business.
 

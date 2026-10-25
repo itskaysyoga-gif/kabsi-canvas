@@ -2,7 +2,7 @@
 // opt-ins, buttons, the outbox) in memory, both senders, a stub model and a clock. It follows the SQL functions of
 // 20261025100000_whatsapp_agent.sql closely enough that the agent cannot tell the difference; the SQL itself is tested
 // against the real database when the migration is applied (see the session's evidence file).
-import type { AgentDb, AgentDeps } from "./agent.ts";
+import type { AgentDb, AgentDeps, BillingDeps } from "./agent.ts";
 import type { Button, Contact, Inbound, Media } from "./channel.ts";
 import type { Sender } from "./deliver.ts";
 import type { Out, OutDb, OutRow } from "./outbox.ts";
@@ -79,6 +79,8 @@ export class World {
   quality: string | null = null;
   tooLate = false;
   failSends = 0;
+  /** Session 10: a fake Creem subscription by business; billing stays the old stub line while this is null. */
+  billingSubs: Map<string, { plan: "essentials" | "pro"; period: "month" | "year"; state: string; periodEnd: string | null; cancelAtEnd: boolean; units: number }> | null = null;
   calls: string[] = [];
   handoffs: string[] = [];
   photos: string[] = [];
@@ -365,6 +367,29 @@ export class World {
     return { db: this.outDb(), live: this.sender(true), mock: this.sender(false), now: () => new Date(this.now) };
   }
 
+  billingDeps(): BillingDeps {
+    const w = this;
+    const sub = (loc: string) => {
+      const s = w.billingSubs!.get(loc);
+      if (!s) throw Object.assign(new Error("There is no paid plan to change."), { code: "no_plan" });
+      return s;
+    };
+    return {
+      status: async (loc) => w.billingSubs!.get(loc) ?? null,
+      portal: async (loc) => (w.calls.push(`portal:${loc}`), "https://creem.io/my-orders/login/test"),
+      cancel: async (loc) => (w.calls.push(`cancel:${loc}`), (sub(loc).cancelAtEnd = true), sub(loc).periodEnd),
+      keep: async (loc) => (w.calls.push(`keep:${loc}`), (sub(loc).cancelAtEnd = false), sub(loc).periodEnd),
+      change: async (loc, to) => {
+        w.calls.push(`change:${loc}:${to}`);
+        const s = sub(loc);
+        const until = to === "essentials" ? s.periodEnd : null;
+        s.plan = to;
+        return { effective: to === "pro" ? "now" : "renewal", until };
+      },
+      addLocation: async (loc) => (w.calls.push(`add_location:${loc}`), ++sub(loc).units),
+    };
+  }
+
   deps(): AgentDeps {
     const w = this;
     const out = this.out();
@@ -385,6 +410,7 @@ export class World {
       // "On it" fires at once in a slow case, never in a fast one.
       sleep: () => (w.onItFast ? Promise.resolve() : new Promise<void>(() => {})),
       onItMs: 2500,
+      billing: w.billingSubs ? w.billingDeps() : undefined,
     };
   }
 }

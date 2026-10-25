@@ -198,6 +198,48 @@ const CASES: Case[] = [
 
   // ─── Manager and staff (9.2 roles).
   { name: "manager: stats, headed as manager", tags: ["manager"], steps: [{ from: PHONES.manager, text: "stats", expect: "stats", head: /^Harbour Lane Coffee \(manager\)/ }] },
+  // Session 10 (10.2.10): billing through Creem, owner only, every change after a Confirm.
+  ...((): Case[] => {
+    const paid = (plan: "essentials" | "pro" = "essentials") => (w: World) => {
+      w.billingSubs = new Map([[BIZ.harbour, { plan, period: "month", state: "active", periodEnd: "2026-11-26T15:00:00Z", cancelAtEnd: false, units: 0 }]]);
+    };
+    return [
+      { name: "owner billing: no paid plan points to the Plan page", tags: ["owner", "billing"], setup: (w) => { w.billingSubs = new Map(); },
+        steps: [{ from: PHONES.owner, text: "upgrade", expect: "billing_no_plan", reply: /kabsi\.co\/app\/plan/ }] },
+      { name: "owner billing: card and invoice give a fresh portal link", tags: ["owner", "billing"], setup: paid(),
+        steps: [{ from: PHONES.owner, text: "invoice", expect: "billing_portal", reply: /https:\/\/creem\.io\// }, { from: PHONES.owner, text: "my card changed", expect: "billing_portal" }],
+        check: (w) => assert.deepEqual(w.calls.filter((c) => c.startsWith("portal")), [`portal:${BIZ.harbour}`, `portal:${BIZ.harbour}`]) },
+      { name: "owner billing: cancel asks first, then cancels at the period end and offers Keep my plan", tags: ["owner", "billing"], setup: paid(),
+        steps: [
+          { from: PHONES.owner, text: "cancel my plan", expect: "billing_cancel_ask", reply: /ends on 26 November 2026, and everything keeps working/, buttons: ["Confirm"] },
+          { from: PHONES.owner, button: "k:cancel", expect: "billing_cancelled", reply: /Your plan ends on 26 November 2026/, buttons: ["Keep my plan"] },
+          { from: PHONES.owner, button: "k:keep", expect: "billing_kept", reply: /carries on/ },
+        ],
+        check: (w) => assert.deepEqual(w.calls.filter((c) => /^(cancel|keep):/.test(c)), [`cancel:${BIZ.harbour}`, `keep:${BIZ.harbour}`]) },
+      { name: "owner billing: upgrade shows the price and charges only after Confirm", tags: ["owner", "billing"], setup: paid(),
+        steps: [
+          { from: PHONES.owner, text: "upgrade", expect: "billing_upgrade_ask", reply: /Switch to Pro for \$39 a month\?/, buttons: ["Confirm"] },
+          { from: PHONES.owner, button: "k:upgrade", expect: "billing_upgraded" },
+          { from: PHONES.owner, text: "upgrade", expect: "billing_same_plan" },
+        ],
+        check: (w) => assert.deepEqual(w.calls.filter((c) => c.startsWith("change")), [`change:${BIZ.harbour}:pro`]) },
+      { name: "owner billing: downgrade takes effect at renewal", tags: ["owner", "billing"], setup: paid("pro"),
+        steps: [
+          { from: PHONES.owner, text: "downgrade", expect: "billing_downgrade_ask", reply: /\$19 a month from your next renewal, 26 November 2026/ },
+          { from: PHONES.owner, button: "k:downgrade", expect: "billing_downgraded", reply: /Essentials starts on 26 November 2026/ },
+        ] },
+      { name: "owner billing: add a location shows the price, then adds one", tags: ["owner", "billing"], setup: paid(),
+        steps: [
+          { from: PHONES.owner, text: "add a location", expect: "billing_add_ask", reply: /\$15 a month/, buttons: ["Confirm"] },
+          { from: PHONES.owner, button: "k:add_location", expect: "billing_location_added", reply: /1 extra location\./ },
+        ] },
+      { name: "owner billing: plan shows the plan and the renewal", tags: ["owner", "billing"], setup: paid(),
+        steps: [{ from: PHONES.owner, text: "plan", expect: "billing_status", reply: /Kabsi Essentials, monthly\. It renews on 26 November 2026/ }] },
+      { name: "manager billing: a Confirm button from a manager's phone changes nothing", tags: ["manager", "billing"], setup: paid(),
+        steps: [{ from: PHONES.manager, button: "k:cancel", expect: "billing_owner_only", reply: /Only the owner/ }],
+        check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("cancel")).length, 0) },
+    ];
+  })(),
   { name: "manager: billing is the owner's", tags: ["manager", "billing"], steps: [{ from: PHONES.manager, text: "upgrade", expect: "billing_owner_only", reply: /Only the owner/ }] },
   { name: "manager: approves what the rules allow", tags: ["manager"], setup: (w) => void w.alert(PHONES.manager, BIZ.harbour), steps: [{ from: PHONES.manager, button: "a:tok00000000000000000001", expect: "approved" }] },
   { name: "manager removed: an old button is no longer theirs", tags: ["manager", "privacy", "25.5"],
