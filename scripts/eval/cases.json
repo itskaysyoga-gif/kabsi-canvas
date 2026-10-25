@@ -2633,7 +2633,8 @@
     "risk": "low",
     "forbid": [
      "\\b(we|our|we're|we've|you can)\\b[^.\\n]*\\b(holiday|bank holiday)",
-     "\\b\\d{1,2}(:\\d{2})?\\s?(am|pm)\\b"
+     "\\b(holiday|bank holiday)s?\\b[^.,;\\n]*\\b\\d{1,2}(:\\d{2})?\\s?(am|pm)\\b",
+     "\\b\\d{1,2}(:\\d{2})?\\s?(am|pm)\\b[^.,;\\n]*\\b(holiday|bank holiday)"
     ]
    }
   },

@@ -6,8 +6,8 @@ import { route, routerSystem } from "./intent.ts";
 import { last4, toE164 } from "./phone.ts";
 import { decide, inQuietHours, next0800 } from "./policy.ts";
 import { parse } from "./router.ts";
-import { ref, submission, TEMPLATES } from "./templates.ts";
-import { checkAutomations, setupWebhook, submitTemplates } from "./kapso-admin.ts";
+import { ACCESS_CHANGE_TEMPLATE, ref, submission, type TemplateDef, TEMPLATES } from "./templates.ts";
+import { checkAutomations, describeError, healthAlertText, healthIsBad, KapsoError, makeWebhookSecret, setupWebhook, submitTemplates } from "./kapso-admin.ts";
 import { caseOf } from "./google-action.ts";
 import { oggSeconds, voiceCheck } from "./media.ts";
 import type { Inbound } from "./channel.ts";
@@ -109,45 +109,130 @@ Deno.test("the router: buttons by id, STOP but not cancel, codes, the scan and p
   assert.equal((parse(inbound({ text: "code P-sara" })) as { code: string }).code, "P-SARA");
 });
 
-// A fake Kapso: records the calls, returns a secret once.
-function fakeKapso(state: { webhooks: { id: string; url: string }[]; templates: string[]; flows?: unknown[] }) {
+// A fake Kapso: records the calls and the bodies it was sent.
+function fakeKapso(state: { webhooks: { id: string; url: string; active?: boolean }[]; templates: string[]; flows?: unknown[]; refuse?: string; failWebhook?: Response }) {
   const calls: string[] = [];
+  const bodies: Record<string, unknown>[] = [];
   const f: typeof fetch = async (input, init) => {
     const url = String(input);
     const method = init?.method ?? "GET";
     calls.push(`${method} ${url.replace("https://api.kapso.ai", "")}`);
+    if (init?.body) bodies.push(JSON.parse(String(init.body)));
     const ok = (b: unknown) => new Response(JSON.stringify(b), { status: 200 });
     if (url.endsWith("/webhooks") && method === "GET") return ok({ data: state.webhooks });
-    if (url.endsWith("/webhooks") && method === "POST") return ok({ data: { id: "wh_2", secret_key: "s".repeat(40) } });
-    if (url.includes("/webhooks/") && method === "DELETE") return ok({});
+    if (url.endsWith("/webhooks") && method === "POST") return state.failWebhook ?? ok({ data: { id: "wh_2" } });
+    if (url.includes("/webhooks/") && method === "PATCH") return state.failWebhook ?? ok({ data: { id: "wh_1" } });
     if (url.includes("/message_templates") && method === "GET") return ok({ data: state.templates.map((name) => ({ name, status: "APPROVED" })) });
-    if (url.includes("/message_templates") && method === "POST") return ok({ id: "t", status: "PENDING" });
+    if (url.includes("/message_templates") && method === "POST") {
+      if (state.refuse && String(init?.body).includes(state.refuse)) {
+        return new Response(JSON.stringify({ error: { message: "Invalid parameter", code: 100, error_subcode: 2388299, error_user_title: "Variable at the start", error_user_msg: "The body cannot start with a variable." } }), { status: 400 });
+      }
+      return ok({ id: "t", status: "PENDING" });
+    }
     if (url.endsWith("/workflows")) return ok({ data: state.flows ?? [] });
     if (url.includes("/triggers")) return ok({ data: [{ trigger_type: "inbound_message", phone_number_id: "PN" }] });
     if (url.includes("/phone_numbers/PN")) return ok({ data: { id: "PN", business_account_id: "1761713808421294", ai_agent_enabled: false } });
     return new Response("{}", { status: 404 });
   };
-  return { f, calls };
+  return { f, calls, bodies };
 }
 
-Deno.test("staff setup: the webhook is made once, its secret goes to Vault and is never returned", async () => {
-  const k = fakeKapso({ webhooks: [{ id: "wh_1", url: "https://fn/whatsapp" }], templates: [] });
+const ENV = (f: typeof fetch) => ({ apiKey: "key", phoneNumberId: "PN", fetch: f });
+
+Deno.test("staff setup: Kabsi makes the 48 character key, sends it as secret_key and keeps it in Vault; the answer never carries it", async () => {
+  const k = fakeKapso({ webhooks: [{ id: "kapso_inbox", url: "https://kapso.example/inbox" }], templates: [] });
   let stored = "";
-  const r = await setupWebhook({ apiKey: "key", phoneNumberId: "PN", fetch: k.f }, "https://fn/whatsapp", { haveSecret: false, storeSecret: async (s) => void (stored = s) });
-  assert.equal(stored.length, 40);
+  const r = await setupWebhook(ENV(k.f), "https://fn/whatsapp", { haveSecret: false, storeSecret: async (s) => void (stored = s) });
+  assert.match(stored, /^[A-Za-z0-9]{48}$/);
+  assert.equal((k.bodies[0].whatsapp_webhook as { secret_key: string }).secret_key, stored, "the key sent is the key stored");
+  assert.equal(r.created, true);
   assert.ok(!JSON.stringify(r).includes(stored), "the answer never carries the secret");
-  assert.ok(k.calls.some((c) => c.startsWith("DELETE")), "an old webhook whose secret Kabsi lacks is replaced");
-  const again = fakeKapso({ webhooks: [{ id: "wh_2", url: "https://fn/whatsapp" }], templates: [] });
-  const r2 = await setupWebhook({ apiKey: "key", phoneNumberId: "PN", fetch: again.f }, "https://fn/whatsapp", { haveSecret: true, storeSecret: async () => assert.fail("no new secret") });
-  assert.equal(r2.created, false);
+  assert.ok(!k.calls.some((c) => c.startsWith("DELETE")), "nothing is deleted, Kapso's own inbox webhook included");
+  assert.notEqual(makeWebhookSecret(), makeWebhookSecret());
+});
+
+Deno.test("staff setup: a webhook already on Kabsi's URL is updated, not duplicated; a known secret needs no call", async () => {
+  const have = fakeKapso({ webhooks: [{ id: "wh_1", url: "https://fn/whatsapp", active: true }], templates: [] });
+  const r = await setupWebhook(ENV(have.f), "https://fn/whatsapp", { haveSecret: true, storeSecret: async () => assert.fail("no new secret") });
+  assert.deepEqual([r.created, r.updated, r.id], [false, false, "wh_1"]);
+  assert.deepEqual(have.calls.length, 1, "only the list");
+  const lost = fakeKapso({ webhooks: [{ id: "wh_1", url: "https://fn/whatsapp", active: false }, { id: "kapso_inbox", url: "https://kapso.example/inbox" }], templates: [] });
+  let stored = "";
+  const r2 = await setupWebhook(ENV(lost.f), "https://fn/whatsapp", { haveSecret: true, storeSecret: async (s) => void (stored = s) });
+  assert.deepEqual([r2.created, r2.updated], [false, true]);
+  assert.ok(lost.calls.includes("PATCH /platform/v1/whatsapp/phone_numbers/PN/webhooks/wh_1"));
+  assert.ok(!lost.calls.some((c) => c.startsWith("POST") || c.startsWith("DELETE")));
+  assert.equal(stored.length, 48);
+});
+
+Deno.test("staff setup: Kapso's error body is in the error, the secret is not, and nothing is stored", async () => {
+  const bad = fakeKapso({ webhooks: [], templates: [], failWebhook: new Response(JSON.stringify({ error: "secret_key is required", errors: { secret_key: ["can't be blank"] } }), { status: 422 }) });
+  let stored = false;
+  const err = await setupWebhook(ENV(bad.f), "https://fn/whatsapp", { haveSecret: false, storeSecret: async () => void (stored = true) }).then(() => null, (e) => e as KapsoError);
+  assert.ok(err instanceof KapsoError);
+  assert.equal(err!.status, 422);
+  assert.match(err!.message, /secret_key is required/);
+  assert.match(err!.message, /can't be blank/);
+  const sent = (bad.bodies[0].whatsapp_webhook as { secret_key: string }).secret_key;
+  assert.ok(!err!.message.includes(sent), "the secret is never in the error");
+  assert.equal(stored, false, "a refused webhook leaves no stored secret");
+});
+
+Deno.test("describeError: Meta's error fields are kept, long tokens are cut out", () => {
+  const t = describeError(JSON.stringify({ error: { message: "Invalid parameter", type: "OAuthException", code: 100, error_subcode: 2388299, error_user_title: "Title", error_user_msg: "Message", fbtrace_id: "A".repeat(40) } }));
+  for (const part of ["message=Invalid parameter", "code=100", "error_subcode=2388299", "error_user_title=Title", "error_user_msg=Message"]) assert.ok(t.includes(part), part);
+  assert.ok(!t.includes("A".repeat(32)));
+  assert.equal(describeError("plain text failure"), "plain text failure");
+  assert.equal(describeError(""), "");
 });
 
 Deno.test("staff templates: only the missing ones are submitted", async () => {
   const k = fakeKapso({ webhooks: [], templates: ["kabsi_review_waiting"] });
-  const out = await submitTemplates({ apiKey: "key", phoneNumberId: "PN", fetch: k.f });
+  const out = await submitTemplates(ENV(k.f));
   assert.equal(out.length, Object.keys(TEMPLATES).length);
   assert.equal(out.find((t) => t.name === "kabsi_review_waiting")!.status, "APPROVED");
   assert.equal(k.calls.filter((c) => c.startsWith("POST")).length, Object.keys(TEMPLATES).length - 1);
+});
+
+Deno.test("staff templates: a refused template is reported with Meta's reason and the rest go on", async () => {
+  const k = fakeKapso({ webhooks: [], templates: [], refuse: "kabsi_post_ready" });
+  const out = await submitTemplates(ENV(k.f));
+  const bad = out.find((t) => t.name === "kabsi_post_ready")!;
+  assert.equal(bad.status, "REFUSED");
+  for (const part of ["message=Invalid parameter", "code=100", "error_subcode=2388299", "error_user_title=Variable at the start", "error_user_msg=The body cannot start with a variable."]) assert.ok(bad.error!.includes(part), part);
+  assert.equal(out.filter((t) => t.status === "PENDING").length, Object.keys(TEMPLATES).length - 1);
+});
+
+Deno.test("templates: what Meta needs, for every one including the access notice", () => {
+  assert.equal(TEMPLATES.access_change.name, ACCESS_CHANGE_TEMPLATE);
+  for (const def of Object.values(TEMPLATES) as TemplateDef[]) {
+    const vars = [...def.body.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]);
+    assert.deepEqual([...new Set(vars)].sort(), Object.keys(def.example).sort(), `${def.name}: an example for every variable, none extra`);
+    for (const v of vars) assert.match(v, /^[a-z]+(_[a-z]+)*$/, `${def.name}: lower snake case`);
+    assert.match(def.name, /^[a-z]+(_[a-z]+)*$/, def.name);
+    assert.doesNotMatch(def.body, /^\{\{/, `${def.name}: does not start with a variable`);
+    assert.doesNotMatch(def.body, /\}\}\W*$/, `${def.name}: does not end with a variable`);
+    assert.doesNotMatch(def.body, /[\u2013\u2014!]/, `${def.name}: no dashes or exclamation marks`);
+    const s = submission(def);
+    assert.equal(s.category, "UTILITY");
+    assert.equal(s.language, "en");
+    assert.equal(s.parameter_format, "NAMED");
+    assert.equal(s.components[0].example!.body_text_named_params.length, Object.keys(def.example).length);
+  }
+});
+
+Deno.test("number health: only YELLOW or RED quality, or BLOCKED messaging, is an alert", () => {
+  assert.equal(healthIsBad({ quality: "GREEN", messaging: "LIMITED" }), false, "LIMITED at tier 250 is normal");
+  assert.equal(healthIsBad({ quality: "GREEN", messaging: "OK" }), false);
+  assert.equal(healthIsBad({ quality: null, messaging: null }), false);
+  assert.equal(healthIsBad({ quality: "YELLOW", messaging: "OK" }), true);
+  assert.equal(healthIsBad({ quality: "red", messaging: "LIMITED" }), true);
+  assert.equal(healthIsBad({ quality: "GREEN", messaging: "BLOCKED" }), true);
+  const t = healthAlertText({ status: "unhealthy", quality: "YELLOW", messaging: "LIMITED", tier: "TIER_250" });
+  assert.match(t, /Quality: YELLOW/);
+  assert.match(t, /digests only/);
+  assert.doesNotMatch(healthAlertText({ status: "x", quality: "GREEN", messaging: "BLOCKED", tier: null }), /quality GREEN|Medium or worse|digests/);
+  assert.doesNotMatch(t, /[\u2013\u2014!]/);
 });
 
 Deno.test("staff automations: an active Kapso workflow answering the number is reported", async () => {

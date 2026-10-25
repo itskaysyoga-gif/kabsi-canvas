@@ -8,6 +8,7 @@ import {
   CASES,
   cut,
   gate,
+  matches,
   memoryFor,
   runAll,
   RULE_LINES,
@@ -223,6 +224,52 @@ Deno.test(
     const pass = await runAll(stubModel("pass"), { cases: list });
     assert.deepEqual(pass.gate.failures, []);
     assert.ok(pass.results.every((r) => r.conflicts.length === 2));
+  },
+);
+
+Deno.test(
+  "forbid patterns see negation: an honest 'we don't have that' is not an invented fact (live run of 25 Oct)",
+  () => {
+    const forbid = (id: string) => CASES.find((c) => c.id === id)!.expect.forbid;
+    const honest: [string, string][] = [
+      [
+        "F-003",
+        "Thank you Petra. I don't have any information on Wi-Fi to share, so please ask us in the shop.",
+      ],
+      ["F-003", "We do not have details about Wi-Fi in our profile yet."],
+      [
+        "F-007",
+        "Thanks Kurt. We don't have information about dogs inside, so it is best to check with us first.",
+      ],
+      [
+        "F-009",
+        "We have no information on outdoor seating, so please check our profile or ask us.",
+      ],
+      ["F-014", "We don't have information on bookings for the window table at the moment."],
+      [
+        "F-001",
+        "Thank you Greg. Our hours are 7am to 4pm, and we have no holiday hours to share yet.",
+      ],
+      ["F-003", "Gracias Petra. No tenemos información sobre el Wi-Fi, pregunta en la tienda."],
+    ];
+    for (const [id, text] of honest)
+      assert.equal(matches(text, forbid(id)), false, `${id}: ${text}`);
+    const invented: [string, string][] = [
+      ["F-003", "Yes, we have free Wi-Fi, stay as long as you like."],
+      ["F-003", "We don't have a password, but we do have Wi-Fi all day."],
+      ["F-007", "Yes, you can bring your dog inside."],
+      ["F-009", "We have a lovely outdoor terrace for the summer."],
+      ["F-014", "We take bookings for the window table by phone."],
+      ["F-001", "On public holidays we open at 9am."],
+      ["F-001", "We have no special sign, but the holiday hours are 9am to 2pm."],
+    ];
+    for (const [id, text] of invented)
+      assert.equal(matches(text, forbid(id)), true, `${id}: ${text}`);
+    // A stated time or price is never excused by a negation in its sentence.
+    assert.equal(
+      matches("We can't confirm it, but we close at 9pm.", ["\\b\\d{1,2}(:\\d{2})?\\s?(am|pm)\\b"]),
+      true,
+    );
   },
 );
 

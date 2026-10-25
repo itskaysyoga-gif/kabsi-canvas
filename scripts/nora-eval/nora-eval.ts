@@ -92,8 +92,22 @@ const DATE_FOR_COMING = new RegExp(
   `\\b(in|by|on|from|before|after|this|next|early|late|mid)\\s+(q[1-4]|${MONTH}|2027|2028|spring|summer|autumn|fall|winter|next (week|month|year))\\b|\\b(next|within the next) (week|month|year|few (days|weeks|months))\\b`,
   "i",
 );
-const NOT_YET =
-  /\bnot yet\b|not (available|open|live|built|offered|possible)( yet)?|isn'?t (available|open|live)( yet)?|aren'?t (available|open|live)( yet)?|coming|comes? later|no .{0,20} at the moment|todavía no|aún no|pas encore|لم يتوفر|غير متاح|ليس متاح|قريبا|قريباً|غير متوفر|لا يتوفر/i;
+// "Not available yet" in the words an owner would hear, in the four languages. Live run of 25 Oct: "Por ahora Kabsi no
+// tiene número de WhatsApp" and "Not on its own, no. Kabsi never messages your customers" were honest and were flagged.
+const NOT_YET = new RegExp(
+  [
+    String.raw`\bnot yet\b`,
+    String.raw`not (available|open|live|built|offered|possible|there)( yet)?`,
+    String.raw`(isn'?t|aren'?t) (available|open|live|there|built)( yet)?`,
+    String.raw`not (today|right now|for now|at the moment|on its own|something kabsi does)`,
+    String.raw`no .{0,20} (at the moment|yet|for now)`,
+    String.raw`\bcoming\b|comes? later|will be (available|added|built)`,
+    String.raw`todav[ií]a no|a[uú]n no|por ahora|por el momento|de momento|no est[aá] disponible|no disponible|a[uú]n no existe`,
+    String.raw`pas encore|pour l'instant|pour le moment|n'est pas (encore )?disponible|pas (encore )?disponible`,
+    "لم يتوفر|غير متاح|ليس متاح|قريبا|قريباً|غير متوفر|لا يتوفر|حاليا لا|حالياً لا",
+  ].join("|"),
+  "i",
+);
 
 /** A rule is broken when a sentence matches it and does not first say no ("Kabsi is not endorsed by Google" is honest). */
 function breaks(answer: string, re: RegExp): boolean {

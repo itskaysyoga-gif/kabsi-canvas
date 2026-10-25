@@ -32,6 +32,7 @@ import {
   TYPE_LABEL,
   type Post,
   type PostType,
+  cancelPost,
   undoPost,
 } from "@/lib/posts";
 
@@ -350,7 +351,20 @@ function SentCard({ post, onChanged }: { post: Post; onChanged: () => unknown })
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [cancelled, setCancelled] = useState(false);
   const wait = usePending(post.id, onChanged);
+  // A waiting post (approved, due later) can be cancelled until its time: it goes back to a draft, nothing is posted.
+  async function cancel() {
+    setBusy(true);
+    setErr("");
+    try {
+      await cancelPost(post.id);
+      setCancelled(true);
+    } catch (x) {
+      setErr(x instanceof Error ? x.message : "Something went wrong.");
+    }
+    setBusy(false);
+  }
   async function remove() {
     setBusy(true);
     setErr("");
@@ -374,12 +388,35 @@ function SentCard({ post, onChanged }: { post: Post; onChanged: () => unknown })
       />
     );
   }
+  if (cancelled) {
+    return (
+      <div className="rounded-card bg-kb-white p-4 shadow-kb">
+        <p className="text-sm font-bold" role="status">
+          Cancelled. Nothing was posted.
+        </p>
+        <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-6">
+          {post.body}
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="rounded-card bg-kb-white p-4 shadow-kb">
       <PostMeta post={post} />
       <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-6">
         {post.body}
       </p>
+      {post.state === "publishing" ? (
+        <Button
+          size="compact"
+          variant="outline"
+          className="mt-3"
+          disabled={busy}
+          onClick={() => void cancel()}
+        >
+          {busy ? "Cancelling…" : "Cancel"}
+        </Button>
+      ) : null}
       {post.state === "posted" ? (
         confirm ? (
           <div className="mt-3">

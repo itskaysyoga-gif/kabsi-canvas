@@ -4,7 +4,9 @@
 // Everything about the new product is [COMING]: the answer says it is not available yet and gives no date.
 import type { Question } from "./questions.ts";
 
-const NOT_PROMISED = /\b(guarantee|we will get you|you will rank|top of google|#1|number one)\b/i;
+// "Kabsi doesn't guarantee any ranking" is the honest answer: a guarantee only counts when nothing negates it just before.
+const NOT_PROMISED =
+  /(?<!n['’]t\s)(?<!\bnot\s)(?<!\bnever\s)(?<!\bno\s)(?<!\bcannot\s)\bguarantee[sd]?\b|\b(we will get you|you will rank|top of google|#1|number one)\b/i;
 
 export const QUESTIONS_28: Question[] = [
   // ── the Visibility Map ───────────────────────────────────────────────────────────────────────────────────────────

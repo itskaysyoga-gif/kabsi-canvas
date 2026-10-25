@@ -2,6 +2,8 @@
 // "provide notice to the end-client of the change within 48 hours after the change is made"). The email goes at once
 // (disconnect.ts accessChangeEmail, email/copy.ts accessLost); this adds the same notice on WhatsApp to the owners who
 // connected WhatsApp, and the line Google's third-party policies ask for. A WhatsApp send never fails the email or the job.
+import { ref } from "./whatsapp/templates.ts";
+
 export const FREE_FROM_GOOGLE = "Google Business Profile is free from Google. Kabsi is an independent paid service.";
 export const THIRD_PARTY_HELP = "https://support.google.com/business/answer/7163406";
 
@@ -52,11 +54,8 @@ export async function sendAccessWhatsapp(locationId: string, n: AccessNotice, de
 
 /** The live deps: owners of the business who opted in to WhatsApp, sent through the owner channel's rules. Loaded on
  *  first use so the rules above can be tested without the function's secrets. */
-// The approved template outside the 24-hour window (named params, as 13b part 1's templates are); none until it is set.
-const accessTemplate = (business: string) => {
-  const name = Deno.env.get("KAPSO_TEMPLATE_ACCESS_CHANGE");
-  return name ? { name, params: { business } } : null;
-};
+// The access template (named params, as 13b part 1's templates are), used outside the 24-hour window.
+const accessTemplate = (business: string) => ref("access_change", { business });
 
 export async function liveAccessWhatsapp(locationId: string, n: AccessNotice, dedupe: string) {
   const { WHATSAPP_ON } = await import("./whatsapp-setting.ts");
