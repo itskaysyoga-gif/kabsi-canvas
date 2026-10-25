@@ -3,9 +3,10 @@
 -- qa-place-kabsi-qa-cafe) and what hangs off it, and nothing else. Run with the Supabase connector. Safe to run when
 -- there is nothing to remove. The account itself stays; create it once with qa-owner-create below.
 -- 1. Once: create the account (an email-confirmed Auth user; the sign-in code comes from qa-login-code.sql).
-insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, is_anonymous)
+insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, is_anonymous,
+      confirmation_token, recovery_token, email_change, email_change_token_new, email_change_token_current, phone_change, phone_change_token, reauthentication_token)
 values ('de300000-0000-4000-8000-0000000000a6', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
-  'delivered+kabsi-qa@resend.dev', now(), '{"provider":"email","providers":["email"]}', '{"qa":"qa-1"}', now(), now(), false)
+  'delivered+kabsi-qa@resend.dev', now(), '{"provider":"email","providers":["email"]}', '{"qa":"qa-1"}', now(), now(), false, '', '', '', '', '', '', '', '')
 on conflict (id) do nothing;
 -- 2. Every time: forget the fictional business (its organisation, members, subscription and rows go with it).
 do $$

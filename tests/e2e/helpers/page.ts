@@ -55,6 +55,14 @@ export async function axeClean(page: Page, label: string, known: string[] = []) 
   const bad = result.violations.filter(
     (v) => (v.impact === "serious" || v.impact === "critical") && !known.includes(v.id),
   );
+  // AXE_REPORT=1 lists the issues instead of failing, to build the known-issues list of a new suite.
+  if (process.env["AXE_REPORT"]) {
+    for (const v of bad)
+      console.log(
+        `AXE ${label} ${v.id} (${v.impact}) ${v.nodes.length}x first ${v.nodes[0]?.target.join(" ")}`,
+      );
+    return;
+  }
   expect(
     bad.map(
       (v) =>

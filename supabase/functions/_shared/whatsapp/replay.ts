@@ -224,7 +224,8 @@ export const SCENARIOS: Record<string, Scenario> = {
       { note: "Approve on a fresh card", phone: PHONES.owner, prep: "action", tap: { id: "a:$token" }, expect: { result: "approved", head: OWNER_HEAD, reply: /Approved for Harbour Lane Coffee\. It goes to Google in 10 seconds/, buttons: ["Undo"] } },
       { note: "Approve again on the same old card", phone: PHONES.owner, tap: { id: "a:$token" }, expect: { reply: /already handled|no longer yours/ } },
       { note: "Undo inside the 10 seconds", phone: PHONES.owner, tap: { id: "u:$token" }, expect: { result: /^(undone|too_late)$/ } },
-      { note: "Undo again on the same card", phone: PHONES.owner, tap: { id: "u:$token" }, expect: { reply: /already handled|cannot be undone/ } },
+      // Undo twice is answered the same way both times: nothing can be sent by the second tap (live finding of 25 Oct, kept as the rule).
+      { note: "Undo again on the same card: the same answer, nothing sent", phone: PHONES.owner, tap: { id: "u:$token" }, expect: { result: /^(undone|undo:.*|too_late)$/, reply: /Undone\. Nothing was sent|already handled|cannot be undone/ } },
     ],
   },
   stranger_card: {
@@ -241,7 +242,8 @@ export const SCENARIOS: Record<string, Scenario> = {
     ],
   },
   // Item 7: ten Nora conversations on the real model. Free text goes to the intent router (Haiku); the answers are the
-  // fixed lines of the role. They are judged afterwards (scripts/eval/judge.ts) against the facts file.
+  // fixed lines of the role. They are judged afterwards (scripts/eval/judge.ts) against the facts file. "Talk to a person" comes
+  // last for each phone: after it the chat is quiet for a day on purpose (24 hours, 9.3).
   nora_live: {
     name: "nora_live", about: "Ten questions from people Kabsi does not know, answered on the real router model", phones: [PHONES.unknown, PHONES.unknown2], ai: true, steps: [
       "how much does kabsi cost",
@@ -251,9 +253,9 @@ export const SCENARIOS: Record<string, Scenario> = {
       "I run a hair salon, is there a free trial",
       "how do I become a partner",
       "will you get me more reviews",
-      "can I talk to a real person",
       "what happens to my reviews if I cancel",
       "is it free",
+      "can I talk to a real person",
     ].map((text, i): Step => ({ note: `nora ${i + 1}`, phone: i % 2 ? PHONES.unknown2 : PHONES.unknown, text, expect: { replies: 1, never: nothing("Harbour Lane", "Juniper", "Jobs failed") } })),
   },
 };

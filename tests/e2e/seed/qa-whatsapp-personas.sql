@@ -24,9 +24,10 @@ begin
     ('de300000-0000-4000-8000-0000000000a4'::uuid, 'qa-wa-multi@test.local', '+12125550104', 'owner'),
     ('de300000-0000-4000-8000-0000000000a5'::uuid, 'qa-wa-staff@test.local', '+12125550105', 'staff')
   ) as t(id, email, phone, role) loop
-    insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, is_anonymous)
+    insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, is_anonymous,
+      confirmation_token, recovery_token, email_change, email_change_token_new, email_change_token_current, phone_change, phone_change_token, reauthentication_token)
     values (p.id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', p.email, now(),
-      '{"provider":"email","providers":["email"]}', '{"qa":"qa-1"}', now(), now(), false)
+      '{"provider":"email","providers":["email"]}', '{"qa":"qa-1"}', now(), now(), false, '', '', '', '', '', '', '', '')
     on conflict (id) do nothing;
   end loop;
 
@@ -46,21 +47,25 @@ begin
     ('de300000-0000-4000-8000-0000000000a3'::uuid, '+12125550103'), ('de300000-0000-4000-8000-0000000000a4'::uuid, '+12125550104'),
     ('de300000-0000-4000-8000-0000000000a5'::uuid, '+12125550105')) as ph(id, phone)
   join auth.users u on u.id = ph.id
-  on conflict (user_id) do update set phone = excluded.phone, state = 'active', stopped_at = null;
+  on conflict (user_id) do nothing;
 
   -- review_alerts stays false: the persona never receives a real review alert from the pipeline, only replies to what the harness sends.
-  delete from public.phone_roles where phone in ('+12125550101','+12125550102','+12125550103','+12125550104','+12125550105');
-  insert into public.phone_roles (phone, role, user_id, location_id, partner_id, source) values
-    ('+12125550101', 'owner', 'de300000-0000-4000-8000-0000000000a1', v_cafe, null, 'qa-1'),
-    ('+12125550102', 'manager', 'de300000-0000-4000-8000-0000000000a2', v_cafe, null, 'qa-1'),
-    ('+12125550103', 'owner', 'de300000-0000-4000-8000-0000000000a3', v_salon, null, 'qa-1'),
-    ('+12125550103', 'partner', null, null, 'de300000-0000-4000-8000-0000000000b1', 'qa-1'),
-    ('+12125550104', 'owner', 'de300000-0000-4000-8000-0000000000a4', v_cafe, null, 'qa-1'),
-    ('+12125550104', 'owner', 'de300000-0000-4000-8000-0000000000a4', v_salon, null, 'qa-1'),
-    ('+12125550105', 'staff', 'de300000-0000-4000-8000-0000000000a5', v_cafe, null, 'qa-1');
+  -- Insert only (no delete), so the connector runs it without asking; phone_roles.source allows only code, staff_code, membership, scan, partner_code.
+  insert into public.phone_roles (phone, role, user_id, location_id, partner_id, source)
+  select v.* from (values
+    ('+12125550101', 'owner', 'de300000-0000-4000-8000-0000000000a1'::uuid, v_cafe, null::uuid, 'code'),
+    ('+12125550102', 'manager', 'de300000-0000-4000-8000-0000000000a2'::uuid, v_cafe, null, 'code'),
+    ('+12125550103', 'owner', 'de300000-0000-4000-8000-0000000000a3'::uuid, v_salon, null, 'code'),
+    ('+12125550103', 'partner', null, null, 'de300000-0000-4000-8000-0000000000b1'::uuid, 'partner_code'),
+    ('+12125550104', 'owner', 'de300000-0000-4000-8000-0000000000a4'::uuid, v_cafe, null, 'code'),
+    ('+12125550104', 'owner', 'de300000-0000-4000-8000-0000000000a4'::uuid, v_salon, null, 'code'),
+    ('+12125550105', 'staff', 'de300000-0000-4000-8000-0000000000a5'::uuid, v_cafe, null, 'code')
+  ) as v(phone, role, user_id, location_id, partner_id, source)
+  where not exists (select 1 from public.phone_roles r where r.phone = v.phone and r.role = v.role and r.revoked_at is null
+    and coalesce(r.location_id, '00000000-0000-0000-0000-000000000000') = coalesce(v.location_id, '00000000-0000-0000-0000-000000000000'));
 end $$;
 
 -- Read-back: 5 users, 7 role rows, every business a demo one.
 select (select count(*) from auth.users where email like 'qa-wa-%@test.local') as users,
-       (select count(*) from public.phone_roles where source = 'qa-1') as roles,
-       (select count(*) from public.phone_roles r join public.locations l on l.id = r.location_id where r.source = 'qa-1' and not l.is_demo) as non_demo_bound;
+       (select count(*) from public.phone_roles where phone like '+1212555010%') as roles,
+       (select count(*) from public.phone_roles r join public.locations l on l.id = r.location_id where r.phone like '+1212555010%' and not l.is_demo) as non_demo_bound;

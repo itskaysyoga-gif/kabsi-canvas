@@ -1,5 +1,5 @@
--- QA 1 (master plan 30.12): puts the two things the web journeys and the WhatsApp replay change back as they were, so a
--- run can be repeated. Run with the Supabase connector (execute_sql) before each run; safe to run again. Everything here
+-- QA 1 (master plan 30.12): after the first run (qa-seed-demo-rows.sql), puts the two things the web journeys and the WhatsApp replay change back as they were, so a
+-- run can be repeated. Run with the Supabase connector (execute_sql) before each run; safe to run again. It deletes the rows a run made, so the connector asks for a confirmation. Everything here
 -- is on the demo business Harbour Lane Coffee (mock Google, R-17); nothing reaches Google or a person.
 --   review  de300000-0000-4000-8000-0000000000f1  one invented review with a draft waiting (the journey approves it, undoes it,
 --                                                  and the WhatsApp card scenarios approve it from a card)
