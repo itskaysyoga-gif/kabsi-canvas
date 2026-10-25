@@ -60,3 +60,47 @@ Rashid decided the nine points (master plan 30.10). Session 19 rest continues.
 - Tests: profile-snapshot (no cache, a second check reads Google, the email and WhatsApp copies read live, busy and not found), places (nothing cached), `supabase/tests/purge_after_leaving.sql`, the counts in `tests/free-tool-busy.test.ts` and `tests/places-field-masks.test.ts`.
 - Google guard: passed. No new write; the rating read is the reviews list Kabsi already reads; mock has the same totals; nothing from Places is stored.
 - 25 Oct, lane R decisions on PR C: (1) apply its migration with execute_sql and record it in schema_migrations; (2) the first Load failure was the same pgTAP check as the Database job (CI unschedules cron jobs, so `cron.job` is empty there); fixed, and Load passed on 9cc4636; (3) **30.10.1:** Google data is deleted 7 days after a business leaves (the `google_data_after_access_lost` row, read by run_retention and purge_after_leaving) and backups keep 3 weekly sets, 21 days (`scripts/backup/backup.sh`, the workflow comment, the RUNBOOK), so the worst case is 28 days; the disconnect email, the facts, the privacy and terms pages and the retention table say so; `tests/retention-page.test.ts` now applies later keep_days changes; (4) on the first successful Business Profile sync the name, address and country picked from Places are replaced from the profile (`adoptProfileIdentity`, `locations.profile_identity_at`).
+- PR 210 merged 25 Oct (merge commit 2432eaf) after the protect-main ruleset that required a check named "CI / App" was disabled by Rashid; its three migrations were applied by lane R. Deploy run 92 green.
+
+## 25 Oct 2026: P0.7-05b, the post Undo test (passed)
+
+- yawmiyati.com stays down, so the test ran on an Update with no Learn more link. Kabsi prepared it as a draft (gbp_posts `f6f2da62`, source auto, "A new story is up on Yawmiyati today. Come and read it with your morning coffee.").
+- Rashid tapped the Update's own Approve, then Undo. The database read-back:
+  - one publication, `2fb23502`, channel dashboard, approved at 05:34:54.50 UTC with `publish_after` 05:35:04.50;
+  - undone at 05:34:58.16 (3.7 seconds later): state `cancelled`, error `undone`, attempts 0, never claimed, no Google reference;
+  - the post is back to `draft`. Nothing reached Google.
+
+## 25 Oct 2026: P0.7-03, Kabsi's account registered with the topic (PR 212)
+
+- `google-events` takes `{"op":"register"}` with the internal secret. It was called from the database with pg_net, so the secret never left it; request 48961 answered 200.
+- Google read the setting back: `accounts/113746201522792609010` (the account Yawmiyati is managed through) points at `projects/smiling-chess-505915-b7/topics/gbp-notifications` for NEW_REVIEW, UPDATED_REVIEW, GOOGLE_UPDATE, NEW_CUSTOMER_MEDIA, DUPLICATE_LOCATION and VOICE_OF_MERCHANT_UPDATED. The Q&A types and LOSS_OF_VOICE_OF_MERCHANT are deprecated and left out.
+- The Pub/Sub Publisher role for mybusiness-api-pubsub@system.gserviceaccount.com was already on the topic (Rashid).
+- Live refusals on google-events: no token 401; a forged RS256 token 401.
+- Not yet seen: a push from a real review. `google_events` was still empty at the last check. Rashid leaves or edits a review on Yawmiyati; then a `google_events` row and a `sync_reviews` job should follow within a minute.
+
+## 25 Oct 2026: PR D (213), access notices, the free-from-Google line, the WhatsApp pipeline side
+
+- Access notices go by email and, for owners with an active WhatsApp opt-in, by WhatsApp: when access is granted, changes or ends. The WhatsApp removed text says the data is deleted within 7 days. The template name is `KAPSO_TEMPLATE_ACCESS_CHANGE` (listed in docs/SECRETS.md); no template is sent until it is set.
+- "Google Business Profile is free from Google. Kabsi is an independent paid service." with Google's "Working with a third party" link, on the onboarding Manager step and in the access email. Facts 05 updated.
+- The WhatsApp pipeline side for 13b part 2:
+  - special hours may be approved on WhatsApp, and `apply_regular_hours` takes the whatsapp channel;
+  - `owner_post_prepare` and `special_hours_prepare` (service only);
+  - `checkTypedPost`.
+- Migration applied with execute_sql. Read-back: both conditions changed, and signed-in users cannot run the new functions.
+- 13b part 1 had already used the timestamp 20261025100000, so the file moved to `20261025100020_whatsapp_pipeline_hours_posts.sql` in PR 215, and schema_migrations records 20261025100020.
+- The first Database run failed: an untyped literal picked the older `approve_publication(text, uuid, text, ...)` overload. The test now passes jsonb.
+
+## 25 Oct 2026: PR 215, main fixed
+
+- PR 213 merged right after PR 211 (13b part 1). The two never ran CI together, so main failed:
+  - the Edge Functions typecheck: `TemplateRef` is now named params;
+  - the repo check: the two migrations shared a timestamp.
+- Both fixed in PR 215, merged with CI green.
+
+## PR E (216): the judge, contradictions, kabsi-eval, Nora's 20 questions, the 27.9 cut, 25.3
+
+- **Contradictions (26.1).** The memory leaves out a one-answer field with two different answers, and any fact under an open question; the existing memory test now expects the hours under an open question to be left out too. 10 cases on a café with two closing times and two prices (EN, ES, FR). The code checks hold a leaking draft ("the opening hours in the draft are not in your facts", "states a price that is not in your facts"), and each case's forbid patterns catch the leak.
+- **The judge (26.1):** `scripts/eval/judge.ts`, a rubric per evaluation, Haiku, cached rubric and facts, scores per prompt version in `scripts/eval/scores.json`. The rubric and the dataset format are in `.claude/skills/kabsi-eval/SKILL.md`.
+- **Nora (28.7):** 20 questions in `scripts/nora-eval/questions-28.ts`; all 80 pass on the reference answers. The live runner now caches the facts and uses Nora's chat task settings (N-004).
+- **27.9:** the cut is 160 cases (50 everyday, all 110 safety, injection and contradiction cases, Spanish included). Both runners stop at a budget. The by-hand workflow `Eval live (by hand, 27.9)` defaults to 5 USD for replies and 2.5 USD for Nora.
+- **25.3:** `supabase/tests/publication_waiting.sql` covers the plan ending, and the owner disconnecting, while an approved item waits. The other 25.3 cases were already covered: double approval, double webhook (google_events message id, email links), two workers claiming, undo, timeout and reconcile, rate limit, moderation, a different result on Google, approver removed, Google needs action, and "published" only after the read back.
