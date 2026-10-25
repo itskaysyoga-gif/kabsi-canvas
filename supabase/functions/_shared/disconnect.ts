@@ -131,8 +131,8 @@ export function accessChangeEmail(n: Notice, appUrl: string): {
     title: "Kabsi is disconnected",
     bodyHtml: p(`What changed: on ${when} Kabsi removed its Manager access to <strong>${name}</strong>'s Google profile. Kabsi no longer reads or changes anything on it, and approvals that were waiting were cancelled.`)
       + p(`How to check: ${esc(CHECK_STEPS)} Kabsi Clients is no longer listed. You stay the owner, and nothing else on your profile changed.`)
-      + p("What happens next: the Google data Kabsi kept for you is deleted within 30 days. Your review link and QR code keep working. To use Kabsi again, write to hello@kabsi.co."),
-    text: `What changed: on ${when} Kabsi removed its Manager access to ${n.name}'s Google profile. Kabsi no longer reads or changes anything on it, and approvals that were waiting were cancelled.\n\nHow to check: ${CHECK_STEPS} Kabsi Clients is no longer listed. You stay the owner, and nothing else on your profile changed.\n\nWhat happens next: the Google data Kabsi kept for you is deleted within 30 days. Your review link and QR code keep working. To use Kabsi again, write to hello@kabsi.co.`,
+      + p("What happens next: the Google data Kabsi kept for you is deleted within 7 days. Your review link and QR code keep working. To use Kabsi again, write to hello@kabsi.co."),
+    text: `What changed: on ${when} Kabsi removed its Manager access to ${n.name}'s Google profile. Kabsi no longer reads or changes anything on it, and approvals that were waiting were cancelled.\n\nHow to check: ${CHECK_STEPS} Kabsi Clients is no longer listed. You stay the owner, and nothing else on your profile changed.\n\nWhat happens next: the Google data Kabsi kept for you is deleted within 7 days. Your review link and QR code keep working. To use Kabsi again, write to hello@kabsi.co.`,
     button: { label: "Open Kabsi", url: `${appUrl}/app` },
     note: "This is Kabsi's own notice of a change to your Google access.",
   };

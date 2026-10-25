@@ -2,7 +2,7 @@ name: Backup
 
 # Ops 1 part B (R-66, master plan 19.1). Every Sunday: the database, the Storage photos and a git bundle of this
 # repository, each encrypted with age (passphrase mode, BACKUP_PASSPHRASE) and stored in the private Cloudflare R2
-# bucket kabsi-backups. The newest 8 weekly sets are kept. The logic is scripts/backup/backup.sh; the exact clicks to
+# bucket kabsi-backups. The newest 3 weekly sets (21 days) are kept. The logic is scripts/backup/backup.sh; the exact clicks to
 # set it up are in docs/OPS-SETUP.md, and what to do when it fails is in docs/RUNBOOK.md (Backups).
 #
 # Secrets (Settings, Secrets and variables, Actions): SUPABASE_DB_URL, BACKUP_PASSPHRASE, R2_ACCOUNT_ID,

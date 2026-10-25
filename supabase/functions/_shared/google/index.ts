@@ -156,6 +156,16 @@ export async function sendReply(accountId: string, locationId: string, reviewId:
   return { ref: name, response: mode === "mock" ? { mock: true, reply } : { reply } };
 }
 
+// The business's name and address as its own Business Profile has them (master plan 30.10.1): the name and address
+// picked from the Places search at sign-up are replaced with these on the first successful sync. Read only.
+export async function profileIdentity(locationId: string): Promise<{ name: string | null; address: string | null; country: string | null }> {
+  assertNotConcierge(locationId);
+  const l = await by(modeFor(locationId), locationsLive, locationsMock).getLocation(locationId, "title,storefrontAddress");
+  const a = l.storefrontAddress;
+  const address = a ? [...(a.addressLines ?? []), a.locality, a.administrativeArea, a.postalCode].filter(Boolean).join(", ") : "";
+  return { name: l.title?.trim() || null, address: address || null, country: a?.regionCode ?? null };
+}
+
 // The business's own rating and review count from its Business Profile (master plan 30.10: the weekly change is built
 // from the owner's own profile, never from Places). One short page; Google sends the totals with it.
 export async function profileRating(accountId: string, locationId: string): Promise<{ rating: number | null; count: number | null }> {

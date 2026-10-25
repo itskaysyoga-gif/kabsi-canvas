@@ -224,7 +224,7 @@ suspended (an earlier Kabsi account was banned once).
 ## 10. Backups: check them, and restore from them
 
 **What runs:** every Sunday the Backup workflow encrypts the database, the Storage photos and a git bundle (age, passphrase
-mode) and stores them in the Cloudflare R2 bucket `kabsi-backups`; the newest 8 weeks are kept. On the 1st of each month
+mode) and stores them in the Cloudflare R2 bucket `kabsi-backups`; the newest 3 weekly sets (21 days) are kept, so with the 7 day purge after a business leaves no copy of its Google data outlives 28 days (master plan 30.10 point 1). On the 1st of each month
 the Restore drill restores the newest set into a scratch Postgres and writes the result to the daily staff summary. Gate:
 no paying customer before one drill has passed.
 

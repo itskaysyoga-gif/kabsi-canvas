@@ -26,7 +26,7 @@ import { AiBudgetError } from "../_shared/ai-budget.ts";
 import { protectionCheck } from "../_shared/protection.ts";
 import {
   addSpecialHours, coachRead, createLocalPost, hasSpecialHours, localPostGone, localPostState, mediaExists, patchListing, protectionShown, removeLocalPost,
-  readGoogleState, readReply, removeKabsiAccess, sendReply, type SpecialDay, uploadPhoto,
+  profileIdentity, readGoogleState, readReply, removeKabsiAccess, sendReply, type SpecialDay, uploadPhoto,
 } from "../_shared/google/index.ts";
 import { googleAction, stateDue, stateSummary } from "../_shared/google/state/merchant.ts";
 import { accessChangeEmail, type DisconnectDeps, runDisconnect } from "../_shared/disconnect.ts";
@@ -111,11 +111,29 @@ async function syncReviews(job: Job) {
   }
   if (loc.access_error_since) await db.from("locations").update({ access_error_since: null }).eq("id", loc.id);
   await recordSync(loc.id, true);
+  // 30.10.1: on the first successful sync the name and address picked from Places at sign-up are replaced with the
+  // Business Profile's own. Never fails the sync; the next sync tries again until it has worked once.
+  await adoptProfileIdentity(loc.id, loc.google_location_id).catch((e) => captureError("dispatch", e, { job: "profile_identity", location: loc.id }));
   // Draft this business's new reviews now rather than at the next producer run (newest first, as before).
   const { data: fresh, error } = await db.from("reviews").select("id").eq("location_id", loc.id).eq("state", "new")
     .lt("draft_attempts", 3).order("review_created_at", { ascending: false }).limit(10);
   if (error) throw error;
   for (const r of fresh ?? []) await enqueueJob("draft_reply", loc.id, `draft_reply:${r.id}`, { review_id: r.id });
+}
+
+async function adoptProfileIdentity(locationId: string, googleLocationId: string | null) {
+  if (!googleLocationId) return;
+  const db = admin();
+  const { data: l, error } = await db.from("locations").select("profile_identity_at").eq("id", locationId).maybeSingle();
+  if (error) throw error;
+  if (!l || l.profile_identity_at) return;
+  const p = await profileIdentity(googleLocationId);
+  const next: Record<string, unknown> = { profile_identity_at: new Date().toISOString() };
+  if (p.name) next.name = p.name;
+  if (p.address) next.address = p.address;
+  if (p.country) next.country = p.country;
+  const { error: ue } = await db.from("locations").update(next).eq("id", locationId).is("profile_identity_at", null);
+  if (ue) throw ue;
 }
 
 async function draftReplyJob(job: Job) {

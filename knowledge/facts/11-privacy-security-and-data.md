@@ -66,15 +66,15 @@ The privacy page shows the 11 rows of the retention table (`retention_policies`,
 | Your own facts and approved values (About your business, the details you confirmed or told Google Protection to keep, approved posts and hours; earlier versions are kept as a history) | While you use Kabsi; deleted with the business. Deleting a fact in About your business removes it and its earlier versions at once |
 | Google's values of your details that you have not confirmed, and Google's side of a Google Protection change | 30 days after Kabsi read them; a change still waiting for your answer keeps them until it is answered or closed |
 | Photos you upload | The file as you sent it and Kabsi's cleaned copy are deleted 30 days after the photo is on Google, or soon after you skip it or Kabsi refuses the file; it then leaves the Photos list (it stays on Google). A video is deleted 30 days after it arrives |
-| Google data after access is removed | Deleted after 30 days unless access returns |
+| Google data after access is removed, Kabsi is disconnected or the business is closed | Deleted 7 days after the business leaves, unless access returns |
 | Assistant chats | 12 months after the last message |
 | Contact details given to the assistant | Until you ask us to remove them |
 | Email log | 12 months |
 | Record of approvals and changes | 24 months; the details of a deleted business are blanked, who did what and when stays |
 | WhatsApp chats with Kabsi's earlier number (before 22 Oct 2026) | No automatic deletion date was set; deleted when the person asks at hello@kabsi.co |
-| Visibility and AI answer results, and the competitors the owner picks (from launch) | While you use Kabsi; deleted with the business |
+| Visibility and AI answer results, and the competitors the owner picks (from launch) | While you use Kabsi; deleted 30 days after the business leaves |
 | WhatsApp voice notes (from launch) | The audio is deleted as soon as it has been turned into text; only the text is kept. Notes over 10 MB or 3 minutes are refused and never stored |
-| Backups | Encrypted copies of the database, the photos and the code are kept 8 weeks in Cloudflare R2, then deleted. A deleted business stays in older backups until they expire (at most 8 weeks) and is never restored into the live service afterwards |
+| Backups | Encrypted copies of the database, the photos and the code are kept 21 days in Cloudflare R2, then deleted. A deleted business stays in older backups until they expire (at most 21 days) and is never restored into the live service afterwards |
 | Internal job logs | 90 days |
 | Email action links | Expire after 72 hours, removed 30 days later |
 | Payment records | As long as tax and accounting law requires, unlinked from the business when it's deleted |
