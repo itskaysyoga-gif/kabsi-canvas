@@ -90,3 +90,13 @@ Deno.test("state: read once a day in the hourly job", () => {
   assert.equal(stateDue(new Date(NOW - 3600_000).toISOString(), NOW), false);
   assert.equal(stateDue(new Date(NOW - 24 * 3600_000).toISOString(), NOW), true);
 });
+
+Deno.test("register: every Kabsi account points at Kabsi's topic with the current types; read back; demo and bad names skipped", async () => {
+  const { registerNotifications, NOTIFICATION_TYPES } = await import("./index.ts");
+  const { KABSI_PUBSUB_TOPIC } = await import("./events.ts");
+  const out = await registerNotifications(["accounts/1137", "accounts/1137", "accounts/demo", "locations/9"], KABSI_PUBSUB_TOPIC, "mock");
+  assert.deepEqual(out, [{ account: "accounts/1137", topic: KABSI_PUBSUB_TOPIC, types: NOTIFICATION_TYPES }]);
+  assert.ok(!NOTIFICATION_TYPES.some((t) => /QUESTION|ANSWER|LOSS_OF/.test(t)), "no type Google deprecated");
+  assert.ok(NOTIFICATION_TYPES.every((t) => jobsFor(t).includes("google_state_check")));
+  await assert.rejects(registerNotifications(["accounts/1"], "gbp-notifications", "mock"), /bad_topic/);
+});

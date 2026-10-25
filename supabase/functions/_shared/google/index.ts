@@ -27,6 +27,8 @@ import * as postsLive from "./posts/live.ts";
 import * as postsMock from "./posts/mock.ts";
 import * as mediaLive from "./media/live.ts";
 import * as mediaMock from "./media/mock.ts";
+import * as notificationsLive from "./notifications/live.ts";
+import * as notificationsMock from "./notifications/mock.ts";
 import * as performanceLive from "./performance/live.ts";
 import * as performanceMock from "./performance/mock.ts";
 import * as placesLive from "./places/live.ts";
@@ -493,4 +495,21 @@ export async function findCategory(locationId: string, region: string, displayNa
 export async function readGoogleState(locationId: string): Promise<VoiceOfMerchantState> {
   assertNotConcierge(locationId);
   return await by(modeFor(locationId), verificationsLive, verificationsMock).getVoiceOfMerchantState(locationId);
+}
+
+// ─── Pub/Sub notifications (P0.7-03): Kabsi's own accounts point at Kabsi's topic, so a new review or a Google update
+// reaches google-events within seconds. Account level, set by staff (google-events op "register"); no business data
+// changes. The Q&A types and LOSS_OF_VOICE_OF_MERCHANT are deprecated by Google and not asked for.
+export const NOTIFICATION_TYPES = ["NEW_REVIEW", "UPDATED_REVIEW", "GOOGLE_UPDATE", "NEW_CUSTOMER_MEDIA", "DUPLICATE_LOCATION", "VOICE_OF_MERCHANT_UPDATED"];
+
+export async function registerNotifications(accounts: string[], topic: string, mode: Mode = googleMode()) {
+  if (!/^projects\/[a-z][a-z0-9-]{4,29}\/topics\/[A-Za-z][\w.~+%-]{2,254}$/.test(topic)) throw new Error("bad_topic");
+  const api = by(mode, notificationsLive, notificationsMock);
+  const out: { account: string; topic: string | null; types: string[] }[] = [];
+  for (const account of [...new Set(accounts)].filter((a) => /^accounts\/\d{1,30}$/.test(a))) {
+    await api.updateNotificationSetting(account, topic, NOTIFICATION_TYPES);
+    const read = await api.getNotificationSetting(account); // read back, as every write is
+    out.push({ account, topic: read.pubsubTopic ?? null, types: read.notificationTypes ?? [] });
+  }
+  return out;
 }
