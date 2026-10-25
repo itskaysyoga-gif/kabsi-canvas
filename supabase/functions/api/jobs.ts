@@ -44,6 +44,7 @@ import { sendTeamInvite, type TeamInvite, teamInviteEmail } from "../_shared/tea
 import { whatsappPostAlert } from "../_shared/whatsapp/db.ts";
 import { useTool } from "../_shared/ai/agents.ts";
 import { liveAccessWhatsapp } from "../_shared/access-notice.ts";
+import { applyEvent, paymentReminder } from "../_shared/billing.ts";
 
 // Offer a job. Returns its id, or null when the same dedupe key is already pending, running or retrying.
 async function enqueueJob(kind: string, locationId: string | null, dedupeKey: string, payload: Record<string, unknown> = {}) {
@@ -436,6 +437,18 @@ const HANDLERS: Record<string, JobHandler> = {
     if (!res.ok) throw new Error(`photos ${res.status}: ${(await res.text()).slice(0, 200)}`);
   },
   disconnect: disconnectJob,
+  // Session 10 (10.2.8): one Creem event, stored once by billing-creem, applied here. The only writer of paid state.
+  billing_event: async (job) => {
+    const id = String(job.payload.event_id ?? "");
+    if (!id) throw new PermanentJobError("billing_event needs an event");
+    await applyEvent(id);
+  },
+  // Day 3 and day 6 of a failed payment's 7-day grace (10.2.9); nothing goes once the card works again.
+  billing_reminder: async (job) => {
+    const id = String(job.payload.subscription_id ?? "");
+    if (!id) throw new PermanentJobError("billing_reminder needs a subscription");
+    await paymentReminder(id, Number(job.payload.day ?? 0));
+  },
   // P0.3-05: the task detectors for one business (K-08); they also run at once in the database when a source changes.
   // P0.3-06: the invitation email for one team invite (Settings, Team); sent only while the invite is open.
   team_invite_email: async (job) => {

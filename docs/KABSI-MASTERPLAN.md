@@ -136,10 +136,81 @@ At least 100 scripted conversations covering 9.2 to 9.5 (Gemini's 80 corrected a
 - Staff alerts count toward the daily cap like any other message and use one utility template outside the 24-hour window.
 
 ## 10. Plans and payments (Creem)
-*Plan contents replaced by 27.4 (the old 10.2.1). The trial now starts when Google access is granted (google_access_granted), not at sign-up (25.1, the old 10.2.2); a sign-up that never connects gets the onboarding nudges, not trial reminders. Partner referrals get a 30-day Pro trial (29.1). Prices are unchanged.*
-Prices: Essentials 19 a month or 190 a year; Pro 39 or 390; extra location 15 or 150. 14-day Pro trial, no card, starting when Google access works. Founding offer: the first 30 paying businesses keep their price while subscribed. Creem is merchant of record.
-Before session 10, typed only into Supabase secrets, never into a chat: CREEM_API_KEY (test mode) and CREEM_WEBHOOK_SECRET. Hussein adds the webhook in Creem (Developers, Webhooks) pointing at https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/billing-creem and copies its signing secret; session 10 builds the function under exactly that name. It verifies Creem's signature on every call, refuses anything unsigned or stale, stores each event id once, and is the only writer of paid state.
-WhatsApp and email: day 11 "Choose your plan" with a Creem checkout button for that business; day 13 reminder; day 14 approvals pause, nothing lost; failed payment: "Your card did not go through. Update it here" (portal), reminders day 3 and day 6 of the 7-day grace; after grace paused, data kept 30 days; yearly renewal reminder 7 days before; card updated confirmation; "invoice" and "cancel" answered with the Creem portal at once.
+*Rewritten by the lane R chat on 23 Oct 2026 and committed by session 10 on 25 Oct 2026 (R-67). Plan contents per module come from 27.4; Front Desk is not created yet.*
+
+### 10.0 Status (23 Oct 2026, 19:45 Beirut)
+- Hussein's Creem account (store kabsi.co) exists and is in Test mode.
+- Supabase secrets saved by Rashid on 23 Oct: CREEM_API_KEY (test), CREEM_WEBHOOK_SECRET (test), CREEM_MODE (test).
+- On sign-up Creem read kabsi.co and created products and a brand design by itself: Essentials 19.00 monthly, Essentials 190.00 yearly, Pro 39.00 monthly, and one more product. These were not made by Kabsi; 10.2.3 says how session 10 handles them.
+- Business details and the payout account can only be completed in live mode, so everything is built and tested in test mode first. Hussein completes business verification and the payout account when the build is done, as the first step of going live (10.2.13).
+
+### 10.1 Facts from Creem's docs (read 23 Oct 2026, docs.creem.io and creem.io/SKILL.md)
+- API: live https://api.creem.io/v1, test https://test-api.creem.io/v1. Header x-api-key. Test keys start with creem_test_. Test and live are fully separate: keys, products, webhooks, customers.
+- Webhook: header creem-signature, the hex HMAC-SHA256 of the raw request body with the webhook secret. No timestamp is signed, so there is no built-in replay protection. Failed deliveries are retried for up to 24 hours, the same event can arrive twice, and the dashboard can resend events.
+- Events: checkout.completed, subscription.active, subscription.paid, subscription.trialing, subscription.update, subscription.scheduled_cancel, subscription.canceled, subscription.past_due, subscription.unpaid, subscription.paused, subscription.expired, refund.created, dispute.created (credits events not used).
+- Creem's own trials always take a card. Cancelling in Creem's customer portal is immediate. A portal link comes from POST /v1/customers/billing (customer_id in, customer_portal_link out); customers also get a portal magic link by email after each payment.
+- Seat-based billing: units at checkout and unit changes on a live subscription, with update behaviour proration-charge-immediately, proration-charge or proration-none. Plan changes use the upgrade endpoint. Self-service plan changes in the portal only between products in a product bundle.
+- Checkouts: POST /v1/checkouts with product_id, units, request_id, success_url, customer, metadata.
+- Fees: 3.9 percent plus 40 cents per successful payment. Creem is merchant of record and handles sales tax and VAT.
+- Live payments need business verification and a payout account (KYC or KYB), done in live mode.
+- Test cards: 4111 1111 1111 1111 succeeds; 4507 9900 0000 0028 declined; 4507 9900 0000 0010 insufficient funds; any future date, any CVV. The dashboard also has "Pay yourself with a test card".
+- Creem's agent rule: the API key goes only to Creem's API or CLI, never another tool; start in test mode; never guess IDs; prefer scheduled cancellation.
+
+### 10.2 Decisions (R-67)
+1. Prices unchanged: Essentials 19 a month or 190 a year; Pro 39 or 390; each extra location 15 or 150. Prices in cents in Creem (1900, 19000, 3900, 39000, 1500, 15000), USD.
+2. The trial lives in Kabsi, not in Creem: 14 days of Pro, no card, starting when Google access is granted (25.1), not at sign-up. Creem products have no trial. The paid period starts the day the owner pays. Day 11 "Choose your plan", day 13 reminder, day 14 approvals pause and nothing is lost.
+3. Products, per mode: Essentials monthly, Essentials yearly, Pro monthly, Pro yearly (in one product bundle with self-service upgrades on), Extra location monthly and yearly (seat-based, units = extra locations). The staff setup action lists the products first, reuses one only when its price, currency, interval and billing type match exactly (renaming it to the exact Kabsi name and description), creates the missing ones, and lists any product that matches nothing for Rashid to archive in the dashboard; it never deletes. Session 10 tests in test mode whether one subscription can carry the plan and the extra-location item together; if it can, one subscription per account; if not, a second subscription for the extra locations with the same customer. The product IDs live in app_settings per mode, never in code.
+4. Founding offer: the first 30 paying businesses keep their price while subscribed. Prices do not change before then. When list prices rise later, new products are made for new customers and existing subscriptions stay where they are, so nothing special is built now beyond the live count of founding places.
+5. No keys in sessions or chats: the staff-only setup action in billing-creem uses CREEM_API_KEY from Supabase secrets. Build sessions never see a key. Kabsi does not use Creem's CLI or MCP server (they are for a person's own machine and would need the key).
+6. No SDK: one module, _shared/creem.ts, with plain fetch and WebCrypto, base URL from CREEM_MODE (test or live). Fewer packages in Edge Functions and nothing that breaks on an SDK update. Types follow Creem's API reference.
+7. Checkout: POST /v1/checkouts with the product, units, request_id (Kabsi's own id, so a repeated tap never makes a second checkout), success_url https://kabsi.co/billing/done, the owner's email, metadata.referenceId = the Kabsi account id and metadata.business_id. The link goes in WhatsApp and email as the full Creem link, never shortened.
+8. Webhook billing-creem at https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/billing-creem:
+   - reads the raw body, compares the signature in constant time, refuses a missing or wrong signature with 401 (logged; repeated failures alert staff);
+   - stores each event id once; a repeat answers 200 and does nothing;
+   - refuses events whose created_at is more than 3 days old (logged), the replay guard Creem does not provide;
+   - answers 200 at once and does the work in the job queue;
+   - is the only writer of paid state.
+9. Event to state:
+   - checkout.completed: link the Creem customer and subscription ids to the account; no access change by itself.
+   - subscription.active and subscription.paid: paid, period end recorded, approvals on.
+   - subscription.update: plan, interval and units recorded.
+   - subscription.scheduled_cancel: stays paid until the period end; WhatsApp confirms the end date with a "Keep my plan" button (resume endpoint).
+   - subscription.past_due and subscription.unpaid: 7-day grace; WhatsApp and email "Your card did not go through. Update it here" with a fresh portal link, reminders on day 3 and day 6.
+   - subscription.paused and subscription.expired: paused; approvals stop; data kept 30 days.
+   - subscription.canceled: ended (the portal cancels at once); a WhatsApp goodbye with the date data is kept until.
+   - refund.created and dispute.created: staff alert; the account state follows the subscription events.
+   - subscription.trialing: should never arrive; staff alert if it does.
+10. WhatsApp billing actions (master plan 9.3), all owner-only:
+   - "cancel": a Confirm button, then Kabsi cancels through the API at the end of the paid period (scheduled, never immediate), and says the date.
+   - "card", "invoice", "receipt": a fresh portal link, made for that request.
+   - "upgrade": the upgrade endpoint with proration-charge-immediately after a Confirm showing the price. "downgrade": takes effect at renewal.
+   - "add a location": units plus one, proration-charge-immediately, after a Confirm showing the price.
+11. Secrets: CREEM_API_KEY, CREEM_WEBHOOK_SECRET, CREEM_MODE. After Creem works, session 10 removes the old billing function (NOWPayments) and the NOWPAYMENTS_API_KEY and NOWPAYMENTS_IPN_SECRET secrets; any table drop goes to Rashid as an SQL file.
+12. Tests: signature good, wrong, missing and from the other mode; duplicate event; old event; every row of 10.2.9; the repeated checkout tap; scheduled cancel and resume. Then Rashid runs a 5-minute test-mode script session 10 gives him: one purchase with 4111 1111 1111 1111, one decline with 4507 9900 0000 0028, one card change in the portal, one cancel from WhatsApp.
+13. Going live (session 21, after everything else passes in test mode):
+   - Hussein completes business verification and the payout account (10.2b); Rashid switches to live and does the rest;
+   - the setup action runs in live mode and creates the live products;
+   - the live webhook is added at the same URL with its own secret;
+   - Rashid replaces CREEM_API_KEY and CREEM_WEBHOOK_SECRET with the live values and sets CREEM_MODE to live;
+   - one real 19 USD purchase, then refunded.
+   Until then the site and WhatsApp offer the trial only; the paid buttons say "Plans open soon" outside test accounts, so no owner meets a test checkout.
+14. After tests pass, session 10 writes .claude/skills/kabsi-billing with these facts and the doc links (section 18.7).
+15. Kabsi Partners (section 29) uses Kabsi's own ledger, not Creem's affiliate program, which stays off. The webhook keeps every payment, renewal, refund and chargeback as a clean event row (amount, currency, business, subscription, Creem ids) so PA1 can write commission lines from it; session 10 adds no partner logic itself.
+16. The checkout and Creem's emails show "Kabsi", the Kabsi mark and the design token colours, support email hello@kabsi.co, so the owner sees one brand from WhatsApp to payment.
+
+### 10.2b Where Creem pays Kabsi (24 Oct, Rashid)
+- Creem stays in Hussein's name; Rashid does all the work in it. Hussein's only steps are the ones that need his identity: business verification and the payout account at going live.
+- Creem pays out by bank transfer (7 US dollars or 1 percent, whichever is higher) or in USDC on the Polygon network (2 percent). First choice: USDC to Rashid's own wallet, if Creem accepts a wallet that is not in the account holder's name; otherwise Hussein's UAE bank account. Rashid asks Creem support before the live switch.
+- Partner payouts (section 29) are separate: USDT or USDC from Rashid's wallet, or PayPal from an account opened in Hussein's name and run by Rashid.
+
+### 10.3 Steps in Creem
+1. Done: Test Mode on.
+2. Done: test API key saved as CREEM_API_KEY.
+3. Done: webhook https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/billing-creem with all events, signing secret saved as CREEM_WEBHOOK_SECRET. Session 10 confirms the URL and events in its first run through a test event.
+4. Done: CREEM_MODE = test.
+5. Done: branding (logo, accent #ffd60a). Store name reads "kabsi.co"; changed to "Kabsi" if the checkout shows it.
+6. At going live: Hussein completes business verification and adds the payout account (10.2b); Rashid does everything else.
+7. Nobody edits or deletes the products Creem created; session 10 handles them (10.2.3).
 
 ## 11. Industries
 *Changed by 27.5 (lead markets are the UAE and the UK, US examples no longer the default) and 27.9 (new industry pages paused until Web 2). The launch set below stays as the list of trades.*
