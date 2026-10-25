@@ -12,6 +12,7 @@
 // (K-113.1): accessChangeEmail builds the three notices (granted, removing, removed). This file has no database or
 // network import, so its tests run without credentials.
 import { esc } from "./email-layout.ts";
+import { FREE_FROM_GOOGLE, THIRD_PARTY_HELP } from "./access-notice.ts";
 
 export type DisconnectState = {
   locationId: string;
@@ -104,8 +105,9 @@ export function accessChangeEmail(n: Notice, appUrl: string): {
       bodyHtml: p(`What changed: on ${when} Kabsi accepted your invitation and became a Manager of <strong>${name}</strong>'s Google profile, through the Kabsi Clients group. You stay the owner.`)
         + p("What it lets Kabsi do: read your reviews and profile, and publish only what you approve.")
         + (next ? p(esc(next)) : "")
-        + p(`How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or ${esc(CHECK_STEPS_INLINE)} Remove Kabsi Clients there.`),
-      text: `What changed: on ${when} Kabsi accepted your invitation and became a Manager of ${n.name}'s Google profile, through the Kabsi Clients group. You stay the owner.\n\nWhat it lets Kabsi do: read your reviews and profile, and publish only what you approve.\n\n${next ? `${next}\n\n` : ""}How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or ${CHECK_STEPS_INLINE} Remove Kabsi Clients there.\n\nOpen Kabsi: ${appUrl}/app`,
+        + p(`How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or ${esc(CHECK_STEPS_INLINE)} Remove Kabsi Clients there.`)
+        + p(`${esc(FREE_FROM_GOOGLE)} <a href="${THIRD_PARTY_HELP}">Google's guide to working with a third party</a>.`),
+      text: `What changed: on ${when} Kabsi accepted your invitation and became a Manager of ${n.name}'s Google profile, through the Kabsi Clients group. You stay the owner.\n\nWhat it lets Kabsi do: read your reviews and profile, and publish only what you approve.\n\n${next ? `${next}\n\n` : ""}How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or ${CHECK_STEPS_INLINE} Remove Kabsi Clients there.\n\n${FREE_FROM_GOOGLE} Google's guide to working with a third party: ${THIRD_PARTY_HELP}\n\nOpen Kabsi: ${appUrl}/app`,
       button: { label: "Open Kabsi", url: `${appUrl}/app` },
       note: "This is Kabsi's own notice of a change to your Google access. Google may send its own email too.",
     };
