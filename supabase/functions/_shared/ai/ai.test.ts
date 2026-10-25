@@ -48,7 +48,7 @@ Deno.test("memory: verified facts with ids, voice, rules, never-say and open que
   assert.match(m.text, /Never mention or promise: the old location/);
   assert.match(m.text, /still checking with the owner about: opening hours/);
   assert.ok(!m.text.includes("Valet"), "an unconfirmed fact is not in the memory");
-  assert.equal(Object.keys(m.refs).length, 4, "about, hours, price and staff can be cited; voice and rules cannot");
+  assert.equal(Object.keys(m.refs).length, 3, "about, price and staff can be cited; voice, rules and the hours under an open question cannot (26.1)");
   assert.match(m.version, /^[0-9a-f]{12}$/);
 });
 

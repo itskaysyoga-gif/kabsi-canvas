@@ -30,7 +30,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
 - **Session 13b part 1 (PR 211, merged):** the phone test waits until the webhook is registered (Known limits in `docs/progress/archive/2026-10-25-session-13b-1.md`); then set `WHATSAPP_LIVE` to `true`, make a staff code at kabsi.co/staff and run the 10-minute test.
-- Session 19 rest: run `supabase/manual/20261025_places_data_purge.sql` (expected read-back `0 | 0 | 0`); set up Pub/Sub and the two secrets (`docs/progress/archive/2026-10-24-session-19-rest.md`); approve the Yawmiyati Update only once yawmiyati.com answers.
+- Session 19 rest: run `supabase/manual/20261025_places_data_purge.sql` (expected read-back `0 | 0 | 0`; PR 210 is merged and deployed, so it can run now); leave or edit one real review on Yawmiyati so the Pub/Sub path can be verified (Kabsi's account is registered with the topic since 25 Oct, PR 212); the "testing it" post for Yawmiyati stays scheduled for 30 Oct (`docs/progress/archive/2026-10-24-session-19-rest.md`).
 - GitHub repository settings: Dependabot alerts and Dependabot security updates are done (marked 24 Oct by Clean 1, as Rashid asked). Open: Secret Protection (secret scanning and push protection), which Rashid confirms himself.
 - Clean 1: run `supabase/manual/20261024_clean1_drops.sql` after a yes to its list (two empty or backup tables, two unused functions).
 - Supabase Auth: leaked-password protection; paste the four `emails/auth/*.html` templates (the footer changed again).
@@ -48,13 +48,13 @@ The facts say "WhatsApp is live" only when the last step is done.
 - New in Ops 1 part B: Growth 1 must make the consent code match the privacy page (20.4, a new CONSENT_VERSION); zod 3 to 4 is a session of its own (dependency review names it as an exception); one test row `bounced@resend.dev` is left in `email_suppressions`. Full list in the archive entry.
 - Found, not done: `docs/progress/archive/found-not-done.md`. Decisions to confirm: `docs/progress/archive/decisions-to-confirm.md`.
 - New in Session 0 part 1: the facts file still says Kabsi has no WhatsApp number (session 13b part 1 changes it); the master plan has no 10.2.1 or 10.2.2 numbering, so the plan and trial changes sit at the top of its section 10.
-- Still open from session 18 (moved to session 19 rest): the post Undo test on the prepared Update (tap the Update's own Approve, not "Approve the month"), P0.7-03 Pub/Sub, and check that yawmiyati.com answers before the Update goes live.
+- Session 19 rest closed the session 18 items: the post Undo test passed on 25 Oct (P0.7-05b, an Update with no Learn more link: approved 05:34:54, undone 3.7 seconds later, cancelled, never sent to Google); Pub/Sub is registered live and a forged push gets 401 (P0.7-03); the push from a real review is still to be seen.
 
 ## Recent entries (newest first)
 
 - 25 Oct 2026, Session 13b part 1: the WhatsApp agent. Detail: `docs/progress/archive/2026-10-25-session-13b-1.md`.
 - 24 Oct 2026, Ops 1 part B (PR 203, PR 206): detail `docs/progress/archive/2026-10-24-ops-1-part-b.md`.
-- 25 Oct 2026, Session 19 rest (in progress): PR 204 and PR 205 merged; the Google policy points decided by Rashid (R-91, master plan 30.10); PR C records them and stops storing Places content. Detail: `docs/progress/archive/2026-10-24-session-19-rest.md`.
+- 25 Oct 2026, Session 19 rest: PR 204, 205, 210 (30.10 and 30.10.1, nothing from Places stored, purge 7 days after leaving, backups 21 days), 212 (Pub/Sub registration), 213 (access notices by email and WhatsApp, the free-from-Google line, the WhatsApp pipeline side), 215 (main fix after 211 and 213 met) and 216 (the judge, contradictions, kabsi-eval, Nora's 20 questions, the 27.9 cut). Detail: `docs/progress/archive/2026-10-24-session-19-rest.md`.
 - 24 Oct 2026, Clean 1 (master plan 28.9): detail `docs/progress/archive/2026-10-24-clean-1.md`. Tracked files 1,255 to 1,204 (11.59 MB to 11.27 MB), npm packages 438 to 364.
 - 24 Oct 2026, Session 0 part 2: docs diet (detail: `docs/progress/archive/2026-10-24-session-0-diet.md`). Plan index 29 KB, status page 5.8 KB; facts split into `knowledge/facts/` and `knowledge/internal/` with one generator (`node scripts/build-kb.mjs`). File sizes are in the pull request.
 - 24 Oct 2026, Session 0 part 1 (PR 198): master plan 20 to 29. Detail: `docs/progress/archive/evidence.md`, entry "Session 0 part 1".

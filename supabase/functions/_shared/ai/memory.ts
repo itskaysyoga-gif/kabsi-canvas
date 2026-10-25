@@ -27,10 +27,12 @@ const LABEL: Record<string, string> = {
 };
 // Voice and rules are memory, not facts to cite.
 const VOICE = new Set(["tone", "tone_notes", "signature", "signature_ar", "avoid", "custom_rules", "contact_phone"]);
+// Fields that hold a list (several facts are normal, never a contradiction).
+const MANY = new Set(["staff_names", "faqs", "services", "mention", "languages", "payment_methods", "policies", "custom_rules"]);
 // What the owner is being asked about (K-11 open questions), by fact key.
 const QUESTION_TOPIC: Record<string, string> = {
   hours_note: "opening hours", regular_hours: "opening hours", phone: "the phone number", contact: "contact details",
-  service: "products and services", product: "products", price_note: "prices",
+  service: "products and services", product: "products", price_note: "prices", price_notes: "prices",
 };
 
 const one = (s: unknown) => (typeof s === "string" ? clean(s).replace(/\s+/g, " ").trim() : "");
@@ -51,6 +53,8 @@ export type Memory = {
   /** Names the reply may use besides the reviewer's: staff in the facts, the business, the sign-off. */
   knownNames: string[];
   replies: string[];
+  /** Fields left out because two facts give different answers (26.1); the owner is asked through knowledge_confirms. */
+  conflicts: string[];
 };
 
 async function sha12(text: string) {
@@ -67,16 +71,31 @@ export async function buildMemory(o: {
   const factText: Record<string, string> = {};
   const factField: Record<string, string> = {};
   const lines: string[] = [];
+  const textOf = (field: string, v: Record<string, unknown>) => {
+    const item = v.item as { q?: string; a?: string } | undefined;
+    return field === "staff_names" ? one(v.name)
+      : field === "faqs" ? `Q: ${one(item?.q)} A: ${one(item?.a)}`
+      : field === "delivery" && typeof v.offered === "boolean" ? (v.offered ? "yes" : "no")
+      : one(v.text);
+  };
+  // 26.1 contradiction rule: a fact under an open question, or a one-answer field with two different answers, is left
+  // out entirely; the reply says nothing about it and Kabsi asks the owner (knowledge_confirms). draft_facts already
+  // drops facts under an open question; this holds even if a caller passes them.
+  const asked = new Set(o.openQuestions);
+  const answers = new Map<string, Set<string>>();
+  for (const f of trusted) {
+    const field = fieldOfSlot(f.slot);
+    if (!field || MANY.has(field)) continue;
+    const t = textOf(field, f.value!).toLowerCase();
+    if (t) answers.set(field, (answers.get(field) ?? new Set()).add(t));
+  }
+  const conflicts = [...answers].filter(([, a]) => a.size > 1).map(([field]) => field);
   let n = 0;
   for (const f of trusted) {
     const field = fieldOfSlot(f.slot);
     if (!field || VOICE.has(field) || !LABEL[field]) continue;
-    const v = f.value!;
-    const item = v.item as { q?: string; a?: string } | undefined;
-    const text = field === "staff_names" ? one(v.name)
-      : field === "faqs" ? `Q: ${one(item?.q)} A: ${one(item?.a)}`
-      : field === "delivery" && typeof v.offered === "boolean" ? (v.offered ? "yes" : "no")
-      : one(v.text);
+    if (conflicts.includes(field) || asked.has(f.key) || asked.has(field)) continue;
+    const text = textOf(field, f.value!);
     if (!text) continue;
     const ref = `F${++n}`;
     refs[ref] = f.id;
@@ -88,7 +107,7 @@ export async function buildMemory(o: {
   const signoff = (o.language?.startsWith("ar") && one(card.signature_ar)) || one(card.signature) || one(o.business);
   const rules = (card.custom_rules ?? []).map(one).filter(Boolean);
   const avoid = one(card.avoid);
-  const waiting = [...new Set(o.openQuestions.map((k) => QUESTION_TOPIC[k]).filter(Boolean))];
+  const waiting = [...new Set([...o.openQuestions, ...conflicts].map((k) => QUESTION_TOPIC[k] ?? (LABEL[k] ? LABEL[k].toLowerCase() : "")).filter(Boolean))];
   const staff = (card.staff_names ?? []).map(one).filter(Boolean);
 
   const text = [
@@ -111,7 +130,7 @@ export async function buildMemory(o: {
 
   return {
     version: await sha12(text), text, styleText, refs, factText, factField, card, signoff,
-    knownNames: [...staff, one(o.business), signoff].filter(Boolean), replies,
+    knownNames: [...staff, one(o.business), signoff].filter(Boolean), replies, conflicts,
   };
 }
 

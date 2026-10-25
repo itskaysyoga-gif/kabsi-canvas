@@ -1,0 +1,57 @@
+name: Eval live (by hand, 27.9)
+
+# Session 19 rest (master plan 27.9 and 26.1): the live evaluation on the promotional credit, run by hand only (Actions,
+# "Eval live", Run workflow). EVAL_LIVE stays false, so CI never runs it. Two parts, each stopped at its own budget so
+# the whole run stays under 8 US dollars:
+#   1. replies: 50 everyday cases plus every safety, injection and contradiction case (160), through the production
+#      steps, each ready draft scored by the judge;
+#   2. Nora: her 60 questions plus the 20 of 28.7, each answer scored by the judge.
+# The results and the judge's scores per prompt version are kept as artifacts. Needs the secret ANTHROPIC_API_KEY.
+on:
+  workflow_dispatch:
+    inputs:
+      reply_budget:
+        description: Budget for the reply part, US dollars
+        required: true
+        default: "5"
+      nora_budget:
+        description: Budget for Nora's part, US dollars
+        required: true
+        default: "2.5"
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    name: Live evaluation (real models)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: v2.x
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Replies (the 27.9 cut, judged)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: bash scripts/eval/gate.sh --cut --judge --budget "${{ inputs.reply_budget }}" --scores "$GITHUB_WORKSPACE/scripts/eval/scores.json"
+        continue-on-error: true
+      - name: Nora (80 questions, judged)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget "${{ inputs.nora_budget }}" --out nora-eval-result.json --scores scripts/eval/scores.json
+        continue-on-error: true
+      - name: Keep the results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: eval-live-result
+          path: |
+            eval-result.json
+            nora-eval-result.json
+            scripts/eval/scores.json
+          if-no-files-found: ignore
