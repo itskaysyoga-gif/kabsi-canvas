@@ -13,10 +13,13 @@ import { ref, type TemplateRef } from "./templates.ts";
 export type OutRow = {
   id: number; phone: string; user_id: string | null; location_id: string | null; kind: string; body: string;
   buttons: Button[]; template: TemplateRef | null; urgent: boolean; state: string; due_at: string; attempts: number;
+  /** 13b part 2: an image that goes with the message, by reference (the map of one finished grid). */
+  media?: OutMedia | null;
 };
+export type OutMedia = { map_scan: string };
 export type NewRow = {
   phone: string; userId: string | null; locationId: string | null; kind: string; body: string; buttons?: Button[];
-  template?: TemplateRef | null; urgent?: boolean; dedupe?: string | null; dueAt?: Date;
+  template?: TemplateRef | null; urgent?: boolean; dedupe?: string | null; dueAt?: Date; media?: OutMedia | null;
 };
 
 export interface OutDb {
@@ -28,7 +31,11 @@ export interface OutDb {
   release(phone: string): Promise<number>;
   setQuestion(phone: string, q: unknown): Promise<void>;
 }
-export type Out = { db: OutDb; live: Sender; mock: Sender; now: () => Date };
+export type Out = {
+  db: OutDb; live: Sender; mock: Sender; now: () => Date;
+  /** The map PNG of one finished grid (the visibility function draws it); null when it cannot be drawn. */
+  mapPng?: (scanId: string) => Promise<Uint8Array | null>;
+};
 
 // A held message waits for the person to write (release() makes it due); it is dropped with the outbox after 30 days.
 const HELD_UNTIL = (now: Date) => new Date(now.getTime() + 30 * 86_400_000);
@@ -69,7 +76,17 @@ export async function notify(o: Out, r: NewRow): Promise<string> {
     return `queued:${d.why}`;
   }
   return await sendRow(o, s, { id, phone: r.phone, user_id: r.userId, location_id: r.locationId, kind: r.kind, body: r.body,
-    buttons: r.buttons ?? [], template: r.template ?? null, urgent: !!r.urgent, state: "sending", due_at: o.now().toISOString(), attempts: 0 });
+    buttons: r.buttons ?? [], template: r.template ?? null, urgent: !!r.urgent, state: "sending", due_at: o.now().toISOString(), attempts: 0,
+    media: r.media ?? null });
+}
+
+/** A message with its image when it has one; without the image (or a sender that cannot send one) the text alone. */
+async function sendBody(o: Out, sender: Sender, row: OutRow) {
+  if (row.media?.map_scan && sender.image && o.mapPng) {
+    const png = await o.mapPng(row.media.map_scan).catch(() => null);
+    if (png?.length) return await sender.image(row.phone, png, row.body, (row.buttons ?? []).slice(0, 3));
+  }
+  return row.buttons?.length ? await sender.buttons(row.phone, row.body, row.buttons.slice(0, 3)) : await sender.text(row.phone, row.body);
 }
 
 /** One row: inside the window as written; outside it only its template; without a template it waits for the person. */
@@ -78,7 +95,7 @@ async function sendRow(o: Out, s: SendState, row: OutRow): Promise<string> {
   const sender = senderFor(o, s);
   try {
     if (inWindow(s, now)) {
-      const r = row.buttons?.length ? await sender.buttons(row.phone, row.body, row.buttons.slice(0, 3)) : await sender.text(row.phone, row.body);
+      const r = await sendBody(o, sender, row);
       await o.db.mark([row.id], doneState(sender), { providerId: r.id });
       return doneState(sender);
     }

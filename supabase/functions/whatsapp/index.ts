@@ -6,7 +6,9 @@
 //   POST /whatsapp/tick     internal (x-cron-secret, pg_cron every minute when something is due): the one sender's queue,
 //                           messages whose first try did not finish, and the "Google needs action" messages (18.2).
 //   POST /whatsapp/staff/*  internal, staff only: setup (the webhook, its secret into Vault), templates, health (hourly),
-//                           automations. KAPSO_API_KEY is read here and never leaves Supabase secrets.
+//                           automations, digest (the morning staff digest, 08:00 Beirut). KAPSO_API_KEY is read here and
+//                           never leaves Supabase secrets.
+// Staff alerts (9.9, R-64): the tick takes each new ops_events row once and sends the urgent ones to the staff phone.
 // Nothing is sent live unless WHATSAPP_LIVE is true, and until launch only to Kabsi's own test phones and the staff phone.
 import { admin, captureError, fail, isInternal, json, timingSafeEqual } from "../_shared/kabsi.ts";
 import { notify as notifyEmail } from "../_shared/notify.ts";
@@ -24,6 +26,7 @@ import { replayMedia } from "../_shared/whatsapp/replay-media.ts";
 import { replayIo } from "../_shared/whatsapp/replay-db.ts";
 import { runScenario } from "../_shared/whatsapp/replay-run.ts";
 import { alertHour, alertSummary } from "../_shared/whatsapp/smoke-alert.ts";
+import { alertText, digestDue, morningDigest, type OpsEvent, routeOf, type Summary } from "../_shared/whatsapp/staff-alerts.ts";
 
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void } | undefined;
 const MAX_BODY = 256 * 1024;
@@ -174,6 +177,44 @@ async function tick() {
   } catch (e) {
     await captureError("whatsapp", e, { step: "google_action" });
   }
+  // 28.5: a finished map goes to the owners and managers who connected WhatsApp, the image with its line (COPY 20). The
+  // first map is what the owner just asked for, so it goes at once; later maps follow the sending rules.
+  try {
+    const { data } = await admin().rpc("whatsapp_maps_due");
+    const maps = (data ?? []) as { scan_id: string; location_id: string; business: string; first: boolean; message: { body?: string } | null; to: { user_id: string; phone: string }[] }[];
+    for (const m of maps) {
+      const line = m.message?.body;
+      if (line) {
+        for (const r of m.to) {
+          await notify(deps.out, { phone: r.phone, userId: r.user_id, locationId: m.location_id, kind: m.first ? "first_map" : "map_ready",
+            body: `${m.business}: ${line}`, buttons: [{ id: `m:s:${m.scan_id}`, title: "Show me" }, { id: "m:l", title: "Later" }],
+            media: { map_scan: m.scan_id }, template: ref("map_ready", { business: m.business }), urgent: m.first, dedupe: `map:${m.scan_id}:${r.user_id}` });
+        }
+      }
+      await admin().rpc("whatsapp_map_sent", { p_scan: m.scan_id });
+    }
+    out.maps = maps.length;
+  } catch (e) {
+    await captureError("whatsapp", e, { step: "maps" });
+  }
+  // 9.9: staff alerts. Each new ops_events row is taken once; urgent ones go to the staff phone at once (quiet hours and the
+  // cap do not apply), the rest are counted in the morning digest. Nothing about the number itself goes here (email only).
+  try {
+    const { data } = await admin().rpc("whatsapp_ops_claim", { p_limit: 50 });
+    const events = (data ?? []) as OpsEvent[];
+    const urgent = events.filter((e) => routeOf(e) === "urgent");
+    const phones = urgent.length ? await staffAdminPhones() : [];
+    for (const e of urgent) {
+      const a = alertText(e);
+      for (const phone of phones) {
+        await notify(deps.out, { phone, userId: null, locationId: null, kind: "staff_alert", urgent: true, body: a.body,
+          template: ref("staff_alert", { summary: a.summary }), dedupe: `ops:${e.id}:${phone}` });
+      }
+    }
+    out.alerts = { taken: events.length, urgent: urgent.length };
+  } catch (e) {
+    await captureError("whatsapp", e, { step: "staff_alerts" });
+  }
   // Messages whose background step did not finish: tried once more.
   try {
     const { data } = await admin().rpc("whatsapp_inbound_retry", { p_limit: 20 });
@@ -226,6 +267,23 @@ async function staffAction(action: string) {
       }
       case "templates":
         return { ok: true, templates: await submitTemplates(env) };
+      // 9.9, 30.9 item 5: the one morning digest to the staff phone, 08:00 Beirut, once a day, with one-tap buttons.
+      case "digest": {
+        const due = digestDue(new Date());
+        if (!due.due) return { ok: true, skipped: "not_08_beirut" };
+        const ctx = await whatsappCtx();
+        if (!ctx.on || !ctx.out) return { ok: false, error: "whatsapp_off" };
+        const { data, error } = await admin().rpc("whatsapp_staff_summary");
+        if (error) throw new Error(`summary: ${error.message}`);
+        const d = morningDigest(data as Summary);
+        let told = 0;
+        for (const phone of await staffAdminPhones()) {
+          await notify(ctx.out, { phone, userId: null, locationId: null, kind: "staff_digest", urgent: true, body: d.body, buttons: d.buttons,
+            template: ref("staff_alert", { summary: "your morning digest is ready" }), dedupe: `staff_digest:${due.day}:${phone}` });
+          told++;
+        }
+        return { ok: true, told };
+      }
       case "automations":
         return { ok: true, ...(await checkAutomations(env)) };
       // QA 1 (30.12 item 3): one real utility template to Kabsi's own allow-listed phone (the staff phone), once an hour at most.

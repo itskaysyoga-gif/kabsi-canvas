@@ -1,6 +1,6 @@
 # Per-function JWT settings (D295). A redeploy without this file defaults verify_jwt to true.
 # false = the caller cannot send a Supabase JWT, and the function checks its own credential in code
-# (Worker secret, Slack signature, or a public asset). true = the gateway requires a JWT; pg_cron and pg_net
+# (Worker secret, a webhook signature, or a public asset). true = the gateway requires a JWT; pg_cron and pg_net
 # calls (call_internal) and browser calls send the anon or user JWT, and the functions still check
 # x-cron-secret, the user or a rate limit in code.
 project_id = "ynjdqjlmdwjgbfezevxy"
@@ -13,8 +13,6 @@ verify_jwt = false
 [functions.health]           # x-cron-secret
 verify_jwt = false
 [functions.google-capture]   # x-cron-secret; read-only Google capture (P0.7-01)
-verify_jwt = false
-[functions.slack]            # Slack signs /interact and /command; Slack sends no Supabase JWT
 verify_jwt = false
 [functions.email]            # one-click unsubscribe (signed link) and the Resend webhook (Svix signature); /test needs x-cron-secret (P0.4-08)
 verify_jwt = false
@@ -57,7 +55,7 @@ verify_jwt = true
 
 # 29 Sep: api, assistant, lead and review-link stay true. Browser calls without a session send the public anon JWT
 # (src/lib/supabase.ts anonHeaders), so no function has to skip verification for them. Only callers that cannot send
-# a JWT at all (tap from the Worker, Slack, health, brand) are false.
+# a JWT at all (tap from the Worker, health, brand) are false. The slack function was removed in session 13b part 2.
 
 # Local stack only (P0.1-07, scripts/db-test.sh): the database test job runs the same Postgres major version as
 # production. `supabase functions deploy` does not read this section.

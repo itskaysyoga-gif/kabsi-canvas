@@ -27,11 +27,11 @@ Deno.test("templates: utility only, named parameters with examples, plain words,
 });
 
 Deno.test("phone numbers: E.164 or nothing (30.8)", () => {
-  assert.equal(toE164("9613956917"), "+9613956917", "a WhatsApp id");
+  assert.equal(toE164("12125550148"), "+12125550148", "a WhatsApp id");
   assert.equal(toE164("+1 (212) 555-0143"), "+12125550143");
-  assert.equal(toE164("00447911123456"), "+447911123456");
+  assert.equal(toE164("0012125550149"), "+12125550149");
   assert.equal(toE164("(212) 555-0177", "US"), "+12125550177", "a local number in the business's country");
-  assert.equal(toE164("07911 123456", "GB"), "+447911123456");
+  assert.equal(toE164("212 555 0149", "US"), "+12125550149");
   assert.equal(toE164("12"), null);
   assert.equal(toE164("not a phone"), null);
   assert.equal(last4("+12125550143"), "0143");

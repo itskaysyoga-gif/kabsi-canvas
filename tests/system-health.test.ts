@@ -24,8 +24,8 @@ const quiet = (): Health => ({
     emails_queued_late: 0,
     notices_failed_24h: 0,
     notices_sending_late: 0,
-    slack_unsent: 0,
-    slack_oldest_unsent_minutes: 0,
+    alerts_unsent: 0,
+    alerts_oldest_unsent_minutes: 0,
     recent_failures: [],
   },
 });

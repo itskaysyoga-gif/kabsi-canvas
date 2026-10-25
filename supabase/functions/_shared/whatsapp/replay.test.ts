@@ -38,13 +38,13 @@ Deno.test("the signature is the one the webhook checks, and only that secret mak
 Deno.test("only fictional phones bound to demo businesses may run", () => {
   assert.equal(phoneProblem([PHONES.owner], [{ phone: PHONES.owner, location_id: "l1", is_demo: true }]), null);
   assert.equal(phoneProblem([PHONES.unknown], []), null);
-  assert.match(phoneProblem(["+9613956917"], []) ?? "", /not a fictional/);
+  assert.match(phoneProblem(["+447700900123"], []) ?? "", /not a fictional/);
   assert.match(phoneProblem(["+12125551234"], []) ?? "", /not a fictional/);
   assert.match(phoneProblem([PHONES.owner], [{ phone: PHONES.owner, location_id: "l2", is_demo: false }]) ?? "", /not a demo business/);
   assert.match(phoneProblem([PHONES.owner], [{ phone: PHONES.owner, location_id: "l2", is_demo: false, billing_test: false }]) ?? "", /not a demo business/);
   // The QA test account's business is allowed only because staff marked its organisation billing_test.
   assert.equal(phoneProblem([PHONES.billing], [{ phone: PHONES.billing, location_id: "l3", is_demo: false, billing_test: true }]), null);
-  assert.match(phoneProblem([PHONES.owner], [{ phone: "+9613956917", location_id: null, is_demo: null }]) ?? "", /not a fictional/);
+  assert.match(phoneProblem([PHONES.owner], [{ phone: "+447700900123", location_id: null, is_demo: null }]) ?? "", /not a fictional/);
   for (const p of Object.values(PHONES)) assert.match(p, REPLAY_PHONE);
 });
 
@@ -154,7 +154,7 @@ Deno.test("the runner refuses an unknown scenario and a phone the guard refuses,
   const w = demoWorld();
   const a = await runScenario(fakeIo(w), "send_anything", "t2");
   assert.deepEqual([a.ok, a.refused], [false, "unknown scenario"]);
-  const b = await runScenario(fakeIo(w, { problem: "+9613956917 is not a fictional +1 212 555 01xx number" }), "unknown_phone", "t3");
+  const b = await runScenario(fakeIo(w, { problem: "+447700900123 is not a fictional +1 212 555 01xx number" }), "unknown_phone", "t3");
   assert.deepEqual([b.ok, b.steps.length], [false, 0]);
   assert.match(b.refused ?? "", /not a fictional/);
   assert.equal(w.sent.length, 0);

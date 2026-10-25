@@ -9,7 +9,7 @@ import type { Media } from "./channel.ts";
 import { flush, notify } from "./outbox.ts";
 import { needsActionBody, caseOf } from "./google-action.ts";
 import { ref } from "./templates.ts";
-import { BIZ, msg, NOW0, PHONES, PNID, type SentMsg, World } from "./world.test-helpers.ts";
+import { BIZ, msg, NOW0, PHONES, PNID, type SentMsg, USERS, World } from "./world.test-helpers.ts";
 
 type Step = {
   from: string; text?: string; button?: string | ((w: World) => string); media?: Media; contacts?: { name: string | null; phones: string[] }[];
@@ -34,6 +34,24 @@ const tool = (t: string, args: Record<string, string> = {}, lang = "en") => JSON
 
 const CASES: Case[] = [
   // ─── Unknown phones and prospects (9.2, 24.8, 29.7).
+  // 13b part 2 (QA 1 Nora finding): the welcome only on the first message; questions get Nora's answer from the facts.
+  { name: "unknown: the welcome goes once, a later hello gets the menu", tags: ["unknown", "nora"], steps: [
+    { from: PHONES.unknown, text: "Hello", expect: "greeting", reply: /Did you just scan/ },
+    { from: PHONES.unknown, text: "Hello", expect: "help", reply: /I am Nora/ }] },
+  { name: "unknown: a question after the first message is answered by Nora, never the welcome", tags: ["unknown", "nora"],
+    setup: (w) => (w.aiMap["what happens to my reviews if I cancel"] = '{"tool":"unclear","args":{},"lang":"en"}'), steps: [
+      { from: PHONES.unknown, text: "prices", expect: "prices" },
+      { from: PHONES.unknown, text: "what happens to my reviews if I cancel", expect: "nora", reply: /Nothing goes to Google without your yes/, ai: 1 }],
+    check: (w) => { const last = w.repliesTo(PHONES.unknown).at(-1)!.body; assert.doesNotMatch(last, /Welcome to Kabsi|Did you just scan/); assert.match(last, /your Kabsi account \(kabsi\.co\/app\)/); assert.equal(w.noraCalls.length, 1); } },
+  { name: "unknown: a first message that is a question gets the answer, not the welcome", tags: ["unknown", "nora"],
+    setup: (w) => (w.aiMap["can kabsi post replies without asking me"] = tool("question", { text: "can kabsi post replies without asking me" })), steps: [
+      { from: PHONES.unknown, text: "can kabsi post replies without asking me", expect: "nora", reply: /without your yes/, ai: 1 }] },
+  { name: "owner: a question about Kabsi goes to Nora, headed with the business", tags: ["owner", "nora"],
+    setup: (w) => (w.aiMap["what happens if I cancel"] = tool("question", { text: "what happens if I cancel" })), steps: [
+      { from: PHONES.owner, text: "what happens if I cancel", expect: "nora", head: /^Harbour Lane Coffee \(owner\)/, ai: 1 }] },
+  { name: "unknown: Nora failing gives the plain unclear line", tags: ["unknown", "nora", "failure"],
+    setup: (w) => { w.noraAnswer = "throw"; w.aiMap["is it safe"] = tool("question", { text: "is it safe" }); }, steps: [
+      { from: PHONES.unknown, text: "is it safe", expect: "nora_failed", reply: /did not catch that/, ai: 1 }] },
   { name: "unknown: hello gets the welcome of 24.8", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "Hello", expect: "greeting", reply: /Did you just scan your business on kabsi\.co/ }] },
   { name: "unknown: the prefilled scan code is picked up", tags: ["unknown", "prospect"], steps: [{ from: PHONES.unknown, text: "Hi Kabsi, my scan code is KAB-7Q4M2X9P", expect: "scan_code", reply: /KAB-7Q4M2X9P/ }],
     check: (w) => { assert.equal(w.conversation(PHONES.unknown).scan_code, "KAB-7Q4M2X9P"); assert.ok(w.prospects.has(PHONES.unknown)); } },
@@ -50,7 +68,7 @@ const CASES: Case[] = [
   { name: "unknown: someone else's Approve button is no longer theirs", tags: ["unknown", "privacy", "25.5"], steps: [
     { from: PHONES.unknown, button: (w) => `a:${w.alert(PHONES.owner, BIZ.harbour)}`, expect: "not_yours", reply: /no longer yours to approve/ }],
     check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 0) },
-  { name: "unknown: a staff command is never revealed", tags: ["unknown", "privacy"], steps: [{ from: PHONES.unknown, text: "status", expect: /^(greeting|unclear)/ }],
+  { name: "unknown: a staff command is never revealed", tags: ["unknown", "privacy"], steps: [{ from: PHONES.unknown, text: "status", expect: /^(greeting|unclear|nora)/ }],
     check: (w) => assert.doesNotMatch(w.sent.map((s) => s.body).join(" "), /Jobs failed/) },
   { name: "unknown: a business name runs the scan inside WhatsApp (stub until V1)", tags: ["unknown"], setup: (w) => (w.aiMap["Harbour Lane Coffee"] = tool("scan", { name: "Harbour Lane Coffee" })),
     steps: [{ from: PHONES.unknown, text: "Harbour Lane Coffee", expect: "scan_stub", reply: /run the scan for Harbour Lane Coffee/, ai: 1 }] },
@@ -88,6 +106,36 @@ const CASES: Case[] = [
     setup: (w) => { w.users[0].phone = null; w.users[0].optin = "none"; },
     steps: [{ from: "+12125550199", text: "KABSI 123456", expect: "verified", reply: /Kabsi is connected/ }],
     check: (w) => { assert.deepEqual(w.firstMaps, [BIZ.harbour]); assert.equal(w.users[0].phone, "+12125550199"); } },
+  // 13b part 2 (28.5, 27.3 item 1): the first map after connecting, the owner's search confirm, the map's buttons.
+  { name: "connect: the owner confirms the suggested search and the first map starts", tags: ["owner", "28.5", "map"],
+    setup: (w) => (w.firstMapAnswer = { state: "ask", keyword: "coffee shop" }), steps: [
+      { from: "+12125550199", text: "KABSI 123456", expect: "verified", reply: /search 'coffee shop' on Google Maps from places around you/, buttons: ["Yes, use it", "Change it"] },
+      { from: "+12125550199", button: `v:y:${BIZ.harbour}`, expect: "keyword_set", reply: /Your map comes here within 5 minutes/ }],
+    check: (w) => { assert.deepEqual(w.firstMaps, [BIZ.harbour]); assert.deepEqual(w.calls.filter((c) => c.startsWith("keyword:")), [`keyword:${BIZ.harbour}:coffee shop`]);
+      assert.match(w.repliesTo("+12125550199")[0].body, /Kabsi is connected/); assert.doesNotMatch(w.repliesTo("+12125550199").map((r) => r.body).join(" "), /\bspots?\b/i); } },
+  { name: "connect: the owner changes the search by typing it", tags: ["owner", "28.5", "map"],
+    setup: (w) => (w.firstMapAnswer = { state: "ask", keyword: "coffee shop" }), steps: [
+      { from: "+12125550199", text: "KABSI 123456", expect: "verified" },
+      { from: "+12125550199", button: `v:c:${BIZ.harbour}`, expect: "keyword_change", reply: /What would a customer type into Google Maps/ },
+      { from: "+12125550199", text: "https://example.com", expect: "keyword_bad" },
+      { from: "+12125550199", text: "Espresso bar", expect: "keyword_set", reply: /'espresso bar' around Harbour Lane Coffee/ }],
+    check: (w) => assert.deepEqual(w.calls.filter((c) => c.startsWith("keyword:")), [`keyword:${BIZ.harbour}:espresso bar`]) },
+  { name: "connect: a search not found on Google Maps asks again", tags: ["owner", "28.5", "map"],
+    setup: (w) => { w.firstMapAnswer = { state: "ask", keyword: "coffee shop" }; w.keywordAnswer = { ok: false, reason: "not_found_on_maps" }; }, steps: [
+      { from: "+12125550199", text: "KABSI 123456", expect: "verified" },
+      { from: "+12125550199", button: `v:y:${BIZ.harbour}`, expect: "keyword_not_found", reply: /Send another search/ }],
+    check: (w) => assert.equal(w.conversation("+12125550199").open_question?.type, "keyword") },
+  { name: "connect: with a confirmed search the map just runs, no question", tags: ["owner", "28.5", "map"],
+    setup: (w) => (w.firstMapAnswer = { state: "started", keyword: "coffee shop" }), steps: [
+      { from: "+12125550199", text: "KABSI 123456", expect: "verified" }],
+    check: (w) => assert.equal(w.repliesTo("+12125550199").length, 1) },
+  { name: "map: Show me gives the numbers behind the line; Later is kind", tags: ["owner", "map"], setup: (w) => w.scans.set("00000000-0000-4000-8000-000000000777", { location: BIZ.harbour, keyword: "coffee shop" }), steps: [
+      { from: PHONES.owner, button: "m:s:00000000-0000-4000-8000-000000000777", expect: "map_show", head: /^Harbour Lane Coffee \(owner\)/, reply: /Top 3 from 18 of them\. In the top 20 from 40\. You came up place 6\.4 on average/ },
+      { from: PHONES.owner, button: "m:l", expect: "map_later", reply: /stays in your Kabsi account/ }] },
+  { name: "map: another business's map is never shown", tags: ["privacy", "map"], setup: (w) => w.scans.set("00000000-0000-4000-8000-000000000777", { location: BIZ.harbour, keyword: "coffee shop" }), steps: [
+      { from: PHONES.plain, button: "m:s:00000000-0000-4000-8000-000000000777", expect: "map_gone" }, { from: PHONES.unknown, button: "m:s:00000000-0000-4000-8000-000000000777", expect: "map_gone" }] },
+  { name: "map: a stranger's keyword button changes nothing", tags: ["privacy", "map"], steps: [
+      { from: PHONES.plain, button: `v:y:${BIZ.harbour}`, expect: "keyword_not_yours" }], check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("keyword:")).length, 0) },
   { name: "a code for a phone already in use elsewhere is refused", tags: ["9.2", "privacy"], steps: [{ from: PHONES.manager, text: "123456", expect: "phone_in_use" }] },
   { name: "a code is one-time: the second use fails", tags: ["9.2"], setup: (w) => { w.users[0].phone = null; w.users[0].optin = "none"; },
     steps: [{ from: "+12125550199", text: "KABSI 123456", expect: "verified" }, { from: "+12125550198", text: "KABSI 123456", expect: "bad_code" }] },
@@ -168,20 +216,62 @@ const CASES: Case[] = [
       { from: PHONES.owner, text: "talk to a person", expect: "handoff", head: /^Harbour Lane Coffee/ },
       { from: PHONES.owner, text: "are you there", expect: "handoff_quiet", none: true },
       { from: PHONES.owner, button: "a:tok00000000000000000001", expect: "approved" }] },
-  { name: "owner: hours go to the app for now", tags: ["owner", "9.3"], steps: [{ from: PHONES.owner, text: "hours", expect: "hours_in_app", reply: /kabsi\.co\/app\/hours/ }] },
-  { name: "owner: close at 3 today is understood as hours", tags: ["owner", "9.3"], setup: (w) => (w.aiMap["close at 3 today"] = tool("hours", { text: "close at 3 today" })),
-    steps: [{ from: PHONES.owner, text: "close at 3 today", expect: "hours_in_app", ai: 1 }] },
+  // 13b part 2 (30.10 point 7): hours and typed posts are drafted, shown back exactly and approved with a Yes.
+  { name: "owner: hours alone gets one question with examples", tags: ["owner", "9.3", "hours"], steps: [{ from: PHONES.owner, text: "hours", expect: "hours_no_day", reply: /closed tomorrow/ }] },
+  { name: "owner: closed tomorrow is shown back, then approved through the pipeline with Undo", tags: ["owner", "9.3", "hours", "30.10"], steps: [
+    { from: PHONES.owner, text: "closed tomorrow", expect: "hours_shown", head: /^Harbour Lane Coffee \(owner\)/, reply: /after your yes\.\n\nTuesday 27 October: closed all day\./, buttons: ["Approve", "Edit on kabsi.co"] },
+    { from: PHONES.owner, text: "yes", expect: "approved", reply: /goes to Google in 10 seconds/ }],
+    check: (w) => { assert.deepEqual(w.calls.filter((c) => c.startsWith("hours:")), [`hours:${BIZ.harbour}:2026-10-27:2026-10-27:closed`]); assert.equal(w.calls.filter((c) => c.startsWith("approve")).length, 1); } },
+  { name: "owner: close at 3 today asks for the opening time, then drafts both", tags: ["owner", "9.3", "hours"], setup: (w) => (w.aiMap["close at 3 today"] = tool("hours", { text: "close at 3 today" })), steps: [
+    { from: PHONES.owner, text: "close at 3 today", expect: "hours_no_times", reply: /What time do you open and close/, ai: 1 },
+    { from: PHONES.owner, text: "open 9 to 3", expect: "hours_shown", reply: /Monday 26 October: open 9am to 3pm\./ }],
+    check: (w) => assert.deepEqual(w.calls.filter((c) => c.startsWith("hours:")), [`hours:${BIZ.harbour}:2026-10-26:2026-10-26:09:00-15:00`]) },
+  { name: "owner: impossible times are caught", tags: ["owner", "9.3", "hours"], steps: [{ from: PHONES.owner, text: "closing 5pm to 1 tomorrow", expect: "hours_bad_time", reply: /closing time must come after/ }] },
+  { name: "owner: a lasting weekly change is confirmed on kabsi.co", tags: ["owner", "9.3", "hours"], steps: [{ from: PHONES.owner, text: "hours: from now on we open at 9", expect: "hours_weekly", reply: /kabsi\.co\/app\/hours/ }] },
+  { name: "owner: date ranges in the business's own days", tags: ["owner", "9.3", "hours"], steps: [{ from: PHONES.owner, text: "closed 24 to 26 December", expect: "hours_shown", reply: /24 December to 26 December: closed all day/ }] },
+  { name: "staff: hours are not theirs", tags: ["staff", "hours", "roles"], steps: [{ from: PHONES.staff, text: "closed tomorrow", expect: "not_for_staff" }], check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("hours:")).length, 0) },
+  { name: "owner: a typed post is shown back exactly and approved", tags: ["owner", "9.3", "post", "30.10"], steps: [
+    { from: PHONES.owner, text: "post: Pumpkin spice lattes are back from Monday", expect: "post_shown", reply: /after your yes\.\n\n"Pumpkin spice lattes are back from Monday"/, buttons: ["Approve", "Edit on kabsi.co"] },
+    { from: PHONES.owner, text: "yes", expect: "approved" }],
+    check: (w) => assert.deepEqual(w.calls.filter((c) => c.startsWith("post:")), [`post:${BIZ.harbour}:Pumpkin spice lattes are back from Monday`]) },
+  { name: "owner: a typed post with a phone number is refused with the reason", tags: ["owner", "post"], steps: [
+    { from: PHONES.owner, text: "post: Call us on 212 555 0177 for the lunch special today", expect: "post_problem", reply: /cannot post that as it is/ }],
+    check: (w) => assert.equal(w.calls.filter((c) => c.startsWith("post:")).length, 0) },
+  { name: "owner: two drafts waiting, a typed yes asks which one", tags: ["owner", "25.5", "post", "hours"], steps: [
+    { from: PHONES.owner, text: "closed tomorrow", expect: "hours_shown" },
+    { from: PHONES.owner, text: "post: Pumpkin spice lattes are back from Monday", expect: "post_shown" },
+    { from: PHONES.owner, text: "yes", expect: "which_one", buttons: ["Hours: Harbour Lane", "Post: Harbour Lane C"] }] },
   { name: "owner: an unclear message gets one short question", tags: ["owner"], steps: [{ from: PHONES.owner, text: "the thing from before", expect: "unclear", reply: /review link or your stats/, ai: 1 }] },
   { name: "owner: a slow answer sends On it first", tags: ["owner", "speed"], setup: (w) => { w.aiSlow = true; w.onItFast = true; w.aiMap["can you put up the lunch special"] = tool("post", { text: "lunch special" }); },
-    steps: [{ from: PHONES.owner, text: "can you put up the lunch special", expect: "post_in_app", ai: 1 }],
-    check: (w) => { const r = w.repliesTo(PHONES.owner).map((s) => s.body); assert.match(r[0], /On it\.$/); assert.match(r[1], /send me a photo/); } },
+    steps: [{ from: PHONES.owner, text: "can you put up the lunch special", expect: "post_ask", ai: 1 }],
+    check: (w) => { const r = w.repliesTo(PHONES.owner).map((s) => s.body); assert.match(r[0], /On it\.$/); assert.match(r[1], /starting with "post:"/); } },
   { name: "owner: a quick answer sends no On it", tags: ["owner", "speed"], setup: (w) => (w.aiMap["can you put up the lunch special"] = tool("post", { text: "x" })),
-    steps: [{ from: PHONES.owner, text: "can you put up the lunch special", expect: "post_in_app", ai: 1 }],
+    steps: [{ from: PHONES.owner, text: "can you put up the lunch special", expect: "post_ask", ai: 1 }],
     check: (w) => assert.equal(w.repliesTo(PHONES.owner).length, 1) },
   { name: "owner: help, headed", tags: ["owner"], steps: [{ from: PHONES.owner, text: "help", expect: "help", head: /^Harbour Lane Coffee \(owner\)/, reply: /review link/ }] },
   { name: "owner: STOP stops alerts too", tags: ["owner", "9.5"], steps: [
     { from: PHONES.owner, text: "STOP", expect: "stopped" }, { from: PHONES.owner, text: "stats", expect: "stopped_ignored", none: true }],
     check: (w) => assert.equal(w.users[0].optin, "stopped") },
+  // 13b phone test findings (25 Oct): START opts back in for every role, the STOP reply names START, a staff code reply goes live.
+  { name: "owner: the STOP reply names START", tags: ["owner", "9.5"], steps: [{ from: PHONES.owner, text: "STOP", expect: "stopped", reply: /Reply START/ }] },
+  { name: "owner: START after STOP brings the business back", tags: ["owner", "9.5"], steps: [
+    { from: PHONES.owner, text: "STOP", expect: "stopped" },
+    { from: PHONES.owner, text: "START", expect: "started", reply: /on again/ },
+    { from: PHONES.owner, text: "stats", expect: "stats" }],
+    check: (w) => { assert.equal(w.users[0].optin, "active"); assert.equal(w.conversation(PHONES.owner).stopped_at, null); } },
+  { name: "staff_admin: START after STOP brings the staff tools and the business back", tags: ["staff_admin", "9.5"], steps: [
+    { from: PHONES.rashid, text: "STOP", expect: "stopped" }, { from: PHONES.rashid, text: "status", expect: "stopped_ignored", none: true },
+    { from: PHONES.rashid, text: "START", expect: "started" },
+    { from: PHONES.rashid, text: "status", expect: "staff_status" }, { from: PHONES.rashid, text: "stats", expect: "stats" }] },
+  { name: "staff_admin: a fresh staff code after STOP turns the phone back on", tags: ["staff_admin", "9.5"],
+    setup: (w) => w.staffCodes.set("EFGH6789", USERS.rashid), steps: [
+      { from: PHONES.rashid, text: "STOP", expect: "stopped" },
+      { from: PHONES.rashid, text: "STAFF EFGH6789", expect: "staff_admin", reply: /staff phone/ },
+      { from: PHONES.rashid, text: "status", expect: "staff_status" }],
+    check: (w) => assert.equal(w.conversation(PHONES.rashid).stopped_at, null) },
+  { name: "staff_admin: the reply to a new staff code already goes live", tags: ["staff_admin"], steps: [
+    { from: PHONES.newStaff, text: "STAFF ABCD2345", expect: "staff_admin" }],
+    check: (w) => { const r = w.repliesTo(PHONES.newStaff); assert.equal(r.length, 1); assert.equal(r[0].live, true); } },
   { name: "owner: a repeated webhook does nothing the second time", tags: ["owner", "9.1", "failure"], steps: [
     { from: PHONES.owner, text: "stats", id: "wamid.same", expect: "stats" }, { from: PHONES.owner, text: "stats", id: "wamid.same", expect: "duplicate", none: true }] },
   { name: "owner: a message older than 10 minutes is refused", tags: ["9.1", "failure"], steps: [{ from: PHONES.owner, text: "stats", ts: NOW0 / 1000 - 3600, expect: "stale", none: true }] },
@@ -286,7 +376,13 @@ const CASES: Case[] = [
   { name: "staff_admin and owner: help asks business or staff tools", tags: ["staff_admin", "two_roles"], steps: [{ from: PHONES.rashid, text: "help", expect: "which_role", reply: /Kabsi staff tools/ }] },
   { name: "staff_admin and owner: stats are the business's", tags: ["staff_admin"], steps: [{ from: PHONES.rashid, text: "stats", expect: "stats", head: /^Yawmiyati \(owner\)/ }] },
   { name: "staff_admin: waiting and today", tags: ["staff_admin", "9.9"], steps: [
-    { from: PHONES.rashid, text: "waiting", expect: "staff_waiting", reply: /Hand-offs/ }, { from: PHONES.rashid, text: "today", expect: "staff_today", reply: /Beirut/ }] },
+    { from: PHONES.rashid, text: "waiting", expect: "staff_waiting", reply: /Hand-offs/ }, { from: PHONES.rashid, text: "today", expect: "staff_today", reply: /Last 24 hours: 2 new businesses.*Places today: 4 of 20\. DataForSEO: \$0\.90 of \$10 this month/s }] },
+  { name: "staff_admin: the morning digest's one-tap buttons answer", tags: ["staff_admin", "9.9", "30.9"], steps: [
+    { from: PHONES.rashid, button: "s:waiting", expect: "staff_waiting", head: /^Kabsi staff/ }, { from: PHONES.rashid, button: "s:today", expect: "staff_today" },
+    { from: PHONES.rashid, button: "s:status", expect: "staff_status" }] },
+  { name: "the digest buttons reveal nothing to anyone else", tags: ["privacy", "9.9"], steps: [
+    { from: PHONES.owner, button: "s:status", expect: /^(unclear|nora)/, buttons: [] }, { from: PHONES.unknown, button: "s:today", expect: /^(greeting|unclear|nora|help)/ }],
+    check: (w) => assert.doesNotMatch(w.sent.map((m) => m.body).join(" "), /Jobs failed|Last 24 hours/) },
   { name: "staff_admin: pause a business by name", tags: ["staff_admin", "9.9"], steps: [{ from: PHONES.rashid, text: "pause Harbour", expect: "staff_pause", reply: /Paused: Kabsi sends Harbour Lane Coffee/ }],
     check: (w) => assert.ok(w.calls.includes(`pause:${BIZ.harbour}`)) },
   { name: "staff_admin: resume", tags: ["staff_admin"], steps: [{ from: PHONES.rashid, text: "resume Corner Deli", expect: "staff_resume" }] },
@@ -311,6 +407,21 @@ const openWindow = (w: World, phone: string) => (w.conversation(phone).window_ex
 const last = (w: World): SentMsg => w.sent.at(-1)!;
 
 const SENDS: SendCase[] = [
+  { name: "map: the image goes with its line and buttons inside the window", tags: ["28.5", "map"], run: async (w) => {
+    openWindow(w, PHONES.owner);
+    const r = await notify(w.out(), { phone: PHONES.owner, userId: null, locationId: BIZ.harbour, kind: "first_map", urgent: true,
+      body: "Harbour Lane Coffee: Your first map is ready.", buttons: [{ id: "m:s:00000000-0000-4000-8000-000000000777", title: "Show me" }, { id: "m:l", title: "Later" }],
+      media: { map_scan: "00000000-0000-4000-8000-000000000777" }, template: ref("map_ready", { business: "Harbour Lane Coffee" }) });
+    assert.equal(r, "mock_sent");
+    assert.equal(last(w).kind, "image");
+    assert.deepEqual(last(w).buttons, ["Show me", "Later"]);
+  } },
+  { name: "map: outside the window only the map_ready template goes; the image follows the reply", tags: ["28.5", "map"], run: async (w) => {
+    const r = await notify(w.out(), { phone: PHONES.owner, userId: null, locationId: BIZ.harbour, kind: "map_ready", urgent: true,
+      body: "Harbour Lane Coffee: Your new map is ready.", buttons: [], media: { map_scan: "00000000-0000-4000-8000-000000000777" }, template: ref("map_ready", { business: "Harbour Lane Coffee" }) });
+    assert.equal(r, "template");
+    assert.equal(last(w).template, "kabsi_map_ready");
+  } },
   { name: "quiet hours: an alert at 22:00 local waits for 08:00", tags: ["9.5"], run: async (w) => {
     w.now = Date.UTC(2026, 9, 27, 2, 0); // 22:00 in New York
     openWindow(w, PHONES.owner);

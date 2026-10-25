@@ -69,7 +69,7 @@ Goal: features that work, proven once.
 - Every behaviour, price or wording change updates the facts (K-104): edit the numbered file in knowledge/facts/ and run node scripts/build-kb.mjs, which writes knowledge/kabsi-facts.md and the llms files.
 - Design tokens only (K-108). English first (K-119). No em dashes, en dashes or exclamation marks anywhere. Product copy follows the kabsi-copy skill.
 - Facebook and Instagram links come only from the SOCIAL_LINKS constant (R-59). No Arabic is shown anywhere public (R-61); the product still answers in Arabic silently where the owner or reviewer writes it.
-- Staff alerts go to WhatsApp, never Slack (R-64). Leave existing Slack code alone until session 13b part 2 removes it.
+- Staff alerts go to WhatsApp, never Slack (R-64). Session 13b part 2 removed the Slack function, its cron jobs and its paths.
 - Never store owners' Google tokens. Never ask anyone for passwords or codes.
 - Use available Claude skills when they fit: frontend-design for new screens, kabsi-reply-lab for anything touching reply prompts, kabsi-copy for any line a reader sees, kabsi-outbound for Outbound, the Supabase and Kapso skills for database and WhatsApp work, xlsx/pdf/docx for files.
 

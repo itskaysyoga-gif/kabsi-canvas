@@ -142,7 +142,8 @@ Deno.test("scan: the three numbers and who beats the business where", () => {
 Deno.test("scan: the WhatsApp line is docs/COPY.md section 20, with no dash and no exclamation mark", () => {
   const s = summarize(mockCells(), who);
   const m = mapMessage({ summary: s, keyword: "bakery", business: "Yawmiyati", first: true });
-  assertEquals(m.body, `Your first map is ready. You are top 3 in ${s.top3} of 49 spots for 'bakery'. Harbor Bakes beats you east of Yawmiyati.`);
+  assertEquals(m.body, `Your first map is ready. We searched 'bakery' on Google Maps from 49 places around Yawmiyati, like a customer standing there. You came up in the top 3 from ${s.top3} of them. East of Yawmiyati, Harbor Bakes comes up first.`);
+  assertEquals(/spot|grid|pin\b/i.test(m.body), false, "COPY 0.1: never spots, grid or pin");
   assertEquals(m.buttons.map((b) => b.title), ["Show me", "Later"]);
   const later = mapMessage({ summary: s, keyword: "bakery", business: "Yawmiyati", first: false, steps: ["Reply to 2 reviews", "Add 5 photos", "Post this week"] });
   assertMatch(later.body, /^Your new map is ready\./);
@@ -150,9 +151,9 @@ Deno.test("scan: the WhatsApp line is docs/COPY.md section 20, with no dash and 
   for (const t of [m.body, later.body]) assert(!/[–—!]/.test(t));
   // Everywhere beaten: no side to name, so the count instead.
   const everywhere = mapMessage({ summary: { ...s, beats: { key: "k", name: "Oven Street", spots: 49, direction: null } }, keyword: "bakery", business: "Y", first: false });
-  assertMatch(everywhere.body, /Oven Street beats you in 49 of 49 spots\.$/);
+  assertMatch(everywhere.body, /Oven Street comes up first from 49 of the 49 places\.$/);
   // Nobody above it anywhere: the line stops after the numbers.
-  assertMatch(mapMessage({ summary: { ...s, beats: null }, keyword: "bakery", business: "Y", first: true }).body, /for 'bakery'\.$/);
+  assertMatch(mapMessage({ summary: { ...s, beats: null }, keyword: "bakery", business: "Y", first: true }).body, /of them\.$/);
 });
 
 Deno.test("Competitor Watch: the offer list, never the business itself, best first", () => {
@@ -227,7 +228,7 @@ Deno.test("run: a due search becomes a finished grid with its numbers, line, off
   const s = w.scans[0];
   assertEquals([s.state, s.source, s.first, s.costMicros], ["done", "mock", true, 0]);
   assertEquals(s.data?.centre_rank, 1);
-  assertMatch((s.data?.message as { body: string }).body, /^Your first map is ready\. You are top 3 in \d+ of 49 spots for 'bakery'\./);
+  assertMatch((s.data?.message as { body: string }).body, /^Your first map is ready\. We searched 'bakery' on Google Maps from 49 places around .+ You came up in the top 3 from \d+ of them\./);
   assertEquals(w.spent, []);
   assertEquals(w.next()?.toISOString(), "2026-11-24T10:00:00.000Z");
   // The business's own public row and the picked competitor's.
