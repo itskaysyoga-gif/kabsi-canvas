@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, CreditCard, Minus, Plus } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
@@ -34,6 +34,7 @@ import {
   type PlanItem,
 } from "@/lib/website";
 import { cn } from "@/lib/utils";
+import { loadFoundingLeft, PRICING_COPY } from "@/lib/plans";
 
 export const Route = createFileRoute("/pricing")({
   head: () =>
@@ -59,6 +60,11 @@ function Page() {
   const essentials = yearly ? PLAN_PRICES.essentialsYearly : PLAN_PRICES.essentialsMonthly;
   const pro = yearly ? PLAN_PRICES.proYearly : PLAN_PRICES.proMonthly;
   const btn = planButton();
+  // Session 10 (10.2.4): the real count of founding places; the block stays hidden at 0 or when the count is unknown.
+  const [founding, setFounding] = useState<number | null>(null);
+  useEffect(() => {
+    void loadFoundingLeft().then(setFounding);
+  }, []);
 
   return (
     <PublicLayout>
@@ -122,6 +128,13 @@ function Page() {
             buttonLabel={btn.label}
           />
         </div>
+
+        <p className="mt-4 text-sm text-kb-stone">{PRICING_COPY.underButtons}</p>
+        {founding ? (
+          <p className="mt-4 rounded-large bg-kb-white p-5 font-bold shadow-kb">
+            {PRICING_COPY.founding(founding)}
+          </p>
+        ) : null}
 
         <div className="mt-6 rounded-large border-l-4 border-kb-yellow bg-kb-white p-6 shadow-kb">
           <p className="font-bold">{TRIAL_BOX}</p>

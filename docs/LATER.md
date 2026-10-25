@@ -7,7 +7,6 @@ Rule from Rashid (25 Oct 2026, master plan 30.11): a session never loops on a pr
 | Backup workflow fails at "Back up" (exit 1). Likely SUPABASE_DB_URL: Session pooler URI, port 5432, user postgres.ynjdqjlmdwjgbfezevxy, password percent-encoded | No paying customer yet | First paying customer: one Backup and one Restore drill green | Rashid, lane R |
 | Branch ruleset protect-main is Disabled (it required "CI / App", a name no job reports) | Sessions merge only on green ci.yml | Launch gate: re-enable with the job names in docs/OPS-SETUP.md step 7 | Rashid |
 | Zoho shows an orange warning icon beside Kabsi emails | Mail lands in the inbox | Launch gate | Rashid |
-| Email logo is an outside image, hidden in Zoho and Outlook until clicked | No owners yet | Session D: inline image (content_id), empty alt | D |
 | Inbox test: mail-tester score and Outlook | Gmail and Zoho inbox placement pass | Web 2 email templates | Web 2 |
 | Sentry alerts go to Rashid's Gmail (free plan, 1 member) | Rashid reads Gmail | Only if the plan changes | none |
 | zod 3 high advisory (Dependabot PR 209, breaking upgrade) | Listed exception | Sec 1 | Sec 1 |
@@ -15,3 +14,8 @@ Rule from Rashid (25 Oct 2026, master plan 30.11): a session never loops on a pr
 | Pub/Sub not yet seen from a real review | Registration read back live; needs a natural review (never one Rashid or anyone at Kabsi writes) | Launch gate | lane R checks google_events |
 | Facts still say Kabsi has no WhatsApp number | True until the phone test passes | 13b phone test | Fix 1 |
 | Rashid's own phone number is still in two Deno test files (`_shared/whatsapp/world.test-helpers.ts`, `agent-units.test.ts` line 30) | Test data only, not shipped | Launch gate: replace with +1 555 numbers | 13b part 2 |
+| Owner billing messages on WhatsApp have no approved template: outside the 24-hour window they wait until the owner writes (the email goes at once) | Plans are not open; email carries every billing notice | Going live (session 21): add a billing template and submit it | 13b part 2 |
+| Creem product bundle (Essentials and Pro, monthly and yearly) with self-service upgrades in the portal: Creem's API has no bundle endpoint | Kabsi's own upgrade and downgrade work without it | Going live (session 21): Products, Bundles in the Creem dashboard, test and live | Rashid |
+| One Creem subscription carrying the plan and the Extra location item is built (items update) but not yet proven with a test purchase | No owner can add a location before plans open | QA 1: test checkout, then "add a location"; if Creem refuses, a second subscription per 10.2.3 | QA 1 |
+| The old `billing` function (410 stub) and the NOWPAYMENTS_API_KEY and NOWPAYMENTS_IPN_SECRET secrets are still there (10.2.11: removed after Creem works) | The stub answers 410 and runs nothing | After QA 1's test checkout passes | lane R |
+| Plan screen screenshots at 390 and 1440 px (needs a signed-in test owner) | The page builds and type-checks; Web 2 restyles it | QA 1 web journeys | QA 1 |

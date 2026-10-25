@@ -60,6 +60,23 @@ export const SAY = {
   qr: (business: string, url: string) =>
     `${business}: your printable QR card is in Kabsi under Get Reviews. It opens this link: ${url}`,
   billingSoon: "Billing is coming soon, reply 'talk to a person' for help",
+  // Session 10 (10.2.10): the owner's billing actions. Prices come from the Creem catalogue; dates are long dates.
+  billingNoPlan: (business: string, url: string) => `${business} has no paid plan right now. Choose your plan here: ${url}`,
+  billingStatus: (business: string, plan: string, end: string | null, ends: boolean) =>
+    `${business} is on ${plan}. ${end ? (ends ? `It ends on ${end}.` : `It renews on ${end}.`) : ""} Reply "card", "invoice", "upgrade", "add a location" or "cancel".`.replace(/\s+/g, " "),
+  billingPortal: (business: string, url: string) => `${business}: your card, invoices and receipts are here: ${url}`,
+  billingCancelAsk: (end: string | null) => `Cancel your plan? It ends on ${end ?? "the last day you paid for"}, and everything keeps working until then.`,
+  billingCancelled: (end: string | null) => `Done. Your plan ends on ${end ?? "the last day you paid for"}. Changed your mind? Tap Keep my plan.`,
+  billingAlreadyEnds: (end: string | null) => `Your plan already ends on ${end ?? "the last day you paid for"}. Tap Keep my plan to carry on.`,
+  billingKept: "Done. Your plan carries on.",
+  billingUpgradeAsk: (price: string) => `Switch to Pro for ${price}? Creem charges the difference for the rest of this period today.`,
+  billingUpgraded: "Done. You are on Pro now.",
+  billingDowngradeAsk: (price: string, end: string | null) => `Switch to Essentials for ${price} from your next renewal${end ? `, ${end}` : ""}? You keep Pro until then.`,
+  billingDowngraded: (end: string | null) => `Done. Essentials starts${end ? ` on ${end}` : " at your next renewal"}.`,
+  billingSamePlan: (plan: string) => `You are already on ${plan}.`,
+  billingAddAsk: (price: string) => `Add a location for ${price}? Creem charges the rest of this period today.`,
+  billingAdded: (n: number) => `Done. Your plan now has ${n} extra ${n === 1 ? "location" : "locations"}.`,
+  billingTryLater: "The payment service did not answer. Please try again in a minute, or reply \"talk to a person\".",
   handoff: "Thanks. A person from Kabsi will answer you here within one business day.",
   hoursInApp: (business: string, url: string) =>
     `${business}: hours changes are confirmed in Kabsi for now, so you see exactly what Google will show. Open Hours: ${url}`,

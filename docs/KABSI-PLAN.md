@@ -260,7 +260,7 @@ One line per decision. The full text, with what each one changes and why, is `do
 | R-64 | Staff alerts move from Slack to WhatsApp | Approved |
 | R-65 | Gemini review of 23 Oct | Approved |
 | R-66 | Keeping Kabsi running, safe and backed up | Building |
-| R-67 | Plans and payments with Creem: master plan section 10 rewritten, the trial in Kabsi, the webhook as the only writer of paid state, plans open at going live | Building |
+| R-67 | Plans and payments with Creem: master plan section 10 rewritten, the trial in Kabsi, the webhook as the only writer of paid state, plans open at going live | Merged (PR 221) |
 | R-68 | Measurement, funnels and pixels | Approved |
 | R-69 | Search and AI answers | Approved |
 | R-70 | One design system for every screen | Approved |

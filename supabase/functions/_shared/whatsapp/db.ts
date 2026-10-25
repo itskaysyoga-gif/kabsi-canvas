@@ -6,7 +6,8 @@ import { admin, APP_URL, log, rateLimit } from "../kabsi.ts";
 import { message, MODELS } from "../ai.ts";
 import { acceptUpload } from "../photos/intake.ts";
 import { WHATSAPP_ON } from "../whatsapp-setting.ts";
-import type { AgentDb, AgentDeps } from "./agent.ts";
+import type { AgentDb, AgentDeps, BillingDeps } from "./agent.ts";
+import { addLocation, cancelAtEnd, changePlan, currentSub, keepPlan, portal } from "../billing.ts";
 import { type Ctx, type Db, type MaySend, mockSender, type Sender } from "./deliver.ts";
 import type { Ai } from "./intent.ts";
 import { pickSender } from "./kapso.ts";
@@ -135,8 +136,30 @@ export async function agentDeps(): Promise<AgentDeps> {
     // 28.1 hook: V1 replaces this with the map image of the scan's queued 7 by 7 grid.
     mapImage: async () => null,
     flush: () => flush(c.out!),
+    billing: billingDeps,
   };
 }
+
+// Session 10: the owner's billing actions on the real Creem code. The agent already checked the phone is the owner's
+// (the role list); each call finds the business's organisation here.
+async function orgOf(locationId: string): Promise<string> {
+  const { data } = await admin().from("locations").select("organization_id").eq("id", locationId).maybeSingle();
+  if (!data?.organization_id) throw new Error("no organisation");
+  return data.organization_id as string;
+}
+const billingDeps: BillingDeps = {
+  async status(locationId) {
+    const s = await currentSub(await orgOf(locationId));
+    if (!s) return null;
+    return { plan: s.plan === "essentials" ? "essentials" : "pro", period: s.period === "year" ? "year" : "month", state: s.state,
+      periodEnd: s.current_period_end, cancelAtEnd: !!s.cancel_at_period_end };
+  },
+  portal: async (locationId) => await portal(await orgOf(locationId)),
+  cancel: async (locationId) => await cancelAtEnd(await orgOf(locationId)),
+  keep: async (locationId) => await keepPlan(await orgOf(locationId)),
+  change: async (locationId, to) => await changePlan(await orgOf(locationId), to),
+  addLocation: async (locationId) => await addLocation(await orgOf(locationId)),
+};
 
 const sha = async (t: string) => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)))]
   .map((b) => b.toString(16).padStart(2, "0")).join("");

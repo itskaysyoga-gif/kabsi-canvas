@@ -43,7 +43,8 @@ const WORDS: [RegExp, string, string?][] = [
   [/^(review link|link|my link|enlace|رابط|رابط التقييم)$/, "review_link"],
   [/^(qr|qr code|qr card|código qr)$/, "qr"],
   [/^(talk to a person|person|human|agent|support|hablar con una persona|persona|التحدث مع شخص|شخص)$/, "person"],
-  [/^(upgrade|add a location|my card changed|invoice|cancel|cancel my plan|billing|plan|factura|فاتورة)$/, "billing"],
+  // Session 10 (10.2.10): the owner's billing words; the word itself goes to the billing tool.
+  [/^(upgrade|downgrade|add a location|my card changed|card|update my card|invoice|receipt|cancel|cancel my plan|keep my plan|billing|plan|factura|فاتورة)$/, "billing"],
   [/^(prices?|pricing|cost|how much( is it)?|precios?|الأسعار|الاسعار|السعر|كم السعر)$/, "prices"],
   [/^(start free|free trial|trial|sign ?up|get started|empezar gratis)$/, "trial"],
   [/^(partner|partners|partner program|kabsi partners|socio)$/, "partner_program"],
@@ -101,18 +102,20 @@ export function parse(m: Inbound): Command {
   if (exact) return { k: "tool", tool: "exact_reply", arg: exact[1].trim() };
   for (const [re, tool, arg] of WORDS) {
     const hit = re.exec(t);
-    if (hit) return { k: "tool", tool, arg: arg ?? (hit[1] && tool.startsWith("staff_") ? raw.trim().split(/\s+/).slice(1).join(" ") : undefined) };
+    if (hit) return { k: "tool", tool, arg: arg ?? (tool === "billing" ? t : hit[1] && tool.startsWith("staff_") ? raw.trim().split(/\s+/).slice(1).join(" ") : undefined) };
   }
   return { k: "free", text: raw.slice(0, 2000) };
 }
 
 // a:<token> approve, u:<token> undo, e:<token> edit, w:<token> the pick from "Which one?" (an approve), r:<domain> the
-// role, b:<uuid> the business.
+// role, b:<uuid> the business, k:<action> the owner's Confirm on a billing change (session 10; the owner is checked again).
 export function parseButton(id: string): Command {
   const tok = /^([auew]):([A-Za-z0-9_-]{16,64})$/.exec(id);
   if (tok) return { k: "button", action: tok[1] === "u" ? "undo" : tok[1] === "e" ? "edit" : "approve", token: tok[2] };
   const role = /^r:(business|partner|staff)$/.exec(id);
   if (role) return { k: "role_pick", to: role[1] as "business" | "partner" | "staff" };
+  const bill = /^k:(cancel|keep|upgrade|downgrade|add_location)$/.exec(id);
+  if (bill) return { k: "tool", tool: "billing", arg: `confirm:${bill[1]}` };
   const biz = /^b:([0-9a-f-]{36})$/.exec(id);
   if (biz) return { k: "business_pick", locationId: biz[1] };
   return { k: "empty" };

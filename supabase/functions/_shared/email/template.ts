@@ -60,7 +60,7 @@ export function renderEmail(c: EmailContent, ctx: RenderCtx): Rendered {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${TOKENS.sand};"><tr><td align="center" style="padding:32px 16px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:${SIZES.width}px;">
 <tr><td style="padding:0 4px 20px 4px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-<td style="vertical-align:middle;"><img src="${LOGO}" width="32" height="32" alt="Kabsi" style="display:block;border:0;width:32px;height:32px;"></td>
+<td style="vertical-align:middle;"><img src="${LOGO}" width="32" height="32" alt="" style="display:block;border:0;width:32px;height:32px;"></td>
 <td style="vertical-align:middle;padding-left:10px;font-family:${FONT};font-size:22px;font-weight:700;color:${TOKENS.black};">kabsi</td></tr></table></td></tr>
 <tr><td style="background:${TOKENS.white};border-radius:14px;padding:32px 24px;font-family:${FONT};color:${TOKENS.ink};font-size:${SIZES.body}px;line-height:1.6;">
 <h1 style="margin:0 0 12px 0;font-size:24px;line-height:1.3;font-weight:700;">${esc(c.title)}</h1>${c.bodyHtml}${button}${links}${note}</td></tr>
