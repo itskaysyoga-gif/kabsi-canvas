@@ -17,7 +17,8 @@ select ok(
                    and has_function_privilege('service_role', f, 'execute'))
      from unnest(array['public.whatsapp_resolve(text)', 'public.whatsapp_bind(text,text)', 'public.whatsapp_set_webhook_secret(text)',
                        'public.whatsapp_inbound_store(text,text,text,jsonb,jsonb)', 'public.whatsapp_conversation_set(text,jsonb)',
-                       'public.whatsapp_outbox_add(text,uuid,uuid,text,text,jsonb,jsonb,boolean,text,timestamptz)',
+                       'public.whatsapp_outbox_add(text,uuid,uuid,text,text,jsonb,jsonb,boolean,text,timestamptz,jsonb)', 'public.whatsapp_start(text)',
+                       'public.whatsapp_ops_claim(integer)', 'public.whatsapp_staff_summary()', 'public.whatsapp_maps_due()', 'public.whatsapp_map_sent(uuid)',
                        'public.whatsapp_send_state(text)', 'public.whatsapp_open_items(text)', 'public.whatsapp_owner_draft(uuid,uuid,text)',
                        'public.whatsapp_staff_numbers()', 'public.whatsapp_staff_pause(text,boolean)', 'public.whatsapp_google_action_due()']) f),
   'the agent side runs for the service role only');
@@ -75,9 +76,9 @@ insert into t select 'staff', public.whatsapp_staff_code();
 reset role;
 set local request.jwt.claims = '';
 select matches((select v ->> 'code' from t where k = 'staff'), '^STAFF [2-9A-HJKMNP-Z]{8}$', 'a staff code');
-select is(public.whatsapp_bind('+9613956917', (select v ->> 'code' from t where k = 'staff')) ->> 'result', 'staff_admin', 'binds staff_admin');
-select ok(public.whatsapp_resolve('+9613956917') -> 'roles' @> '[{"kind": "staff_admin"}]', 'the staff phone resolves as staff_admin');
-select is(public.whatsapp_bind('+9613956918', (select v ->> 'code' from t where k = 'staff')) ->> 'result', 'unknown_code', 'once only');
+select is(public.whatsapp_bind('+12125550148', (select v ->> 'code' from t where k = 'staff')) ->> 'result', 'staff_admin', 'binds staff_admin');
+select ok(public.whatsapp_resolve('+12125550148') -> 'roles' @> '[{"kind": "staff_admin"}]', 'the staff phone resolves as staff_admin');
+select is(public.whatsapp_bind('+447700900124', (select v ->> 'code' from t where k = 'staff')) ->> 'result', 'unknown_code', 'once only');
 
 -- Stored once; the scan and partner codes ------------------------------------------------------------------------------
 select is(public.whatsapp_inbound_store('+12125559876', 'wamid.agent.1', 'text', '{"text": "hi"}', '{"ctwa_clid": "abc"}') ->> 'duplicate', 'false', 'stored');
@@ -93,10 +94,22 @@ select ok(public.whatsapp_outbox_add('+12125550143', null, '00000000-0000-4000-8
 select is((select count(*) from public.whatsapp_outbox_claim(10) where dedupe_key = 'agent-test-1'), 1::bigint, 'claimed');
 select is((select count(*) from public.whatsapp_outbox_claim(10) where dedupe_key = 'agent-test-1'), 0::bigint, 'never claimed twice');
 select is(public.whatsapp_send_state('+12125550143') ->> 'live_ok', 'false', 'before launch an owner gets the mock');
-select is(public.whatsapp_send_state('+9613956917') ->> 'live_ok', 'true', 'the staff phone may get a live message');
+select is(public.whatsapp_send_state('+12125550148') ->> 'live_ok', 'true', 'the staff phone may get a live message');
 update public.app_settings set value = '["+12125550143"]' where key = 'whatsapp_live_phones';
 select is(public.whatsapp_send_state('+12125550143') ->> 'live_ok', 'true', 'a test phone on the list may too');
 select is(public.whatsapp_token_owner('nosuchtoken0000000000', '+12125550143'), 'unknown', 'a token Kabsi never made is unknown');
+
+-- 13b part 2: START, the first message, the staff alert queue ---------------------------------------------------------
+select is(public.whatsapp_inbound_store('+12125559876', 'wamid.agent.2', 'text', '{"text": "again"}', null) ->> 'first', 'false', 'a second message is not the first');
+select is(public.whatsapp_inbound_store('+12125550177', 'wamid.agent.3', 'text', '{"text": "hi"}', null) ->> 'first', 'true', 'a new phone''s first message');
+select lives_ok($$ select public.whatsapp_conversation_set('+12125550148', '{"stopped": true}') $$, 'the staff phone sends STOP');
+select ok(public.whatsapp_start('+12125550148') >= 0, 'START runs');
+select is((select stopped_at from public.whatsapp_conversations where phone = '+12125550148'), null, 'START clears STOP');
+select lives_ok($$ select public.ops_emit('jobs_silent', 'alerts', 'No job finished in 30 minutes', null, '[]', '[]', 'agent-test-ops') $$, 'an alert is queued');
+select is((select count(*) from public.whatsapp_ops_claim(50) x where x ->> 'kind' = 'jobs_silent'), 1::bigint, 'the tick takes it');
+select is((select count(*) from public.whatsapp_ops_claim(50) x where x ->> 'kind' = 'jobs_silent'), 0::bigint, 'never twice');
+select ok(public.whatsapp_staff_summary() ? 'places_cap', 'the morning numbers');
+select ok(not exists (select 1 from cron.job where jobname like 'kabsi_slack%'), 'no Slack cron job is left');
 
 -- The webhook secret goes to Vault --------------------------------------------------------------------------------------
 select ok(public.whatsapp_set_webhook_secret(repeat('s', 40)), 'stored');

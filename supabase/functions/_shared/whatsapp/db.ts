@@ -2,8 +2,10 @@
 // 20261022034000_whatsapp_owner_channel.sql, the photo engine's intake for the photo drop, and the context the
 // `whatsapp` function and the review alerts share. The number and the Kapso phone number id come from settings, never
 // from code: WHATSAPP_NUMBER (whatsapp-setting.ts) and the KAPSO_PHONE_NUMBER_ID secret.
-import { admin, APP_URL, log, rateLimit } from "../kabsi.ts";
-import { message, MODELS } from "../ai.ts";
+import { admin, APP_URL, internalSecret, log, rateLimit } from "../kabsi.ts";
+import { message, MODELS, newMeter, task } from "../ai.ts";
+import { recordAiUsage } from "../ai-budget.ts";
+import { type Nora, noraUser, noraWhatsAppSystem } from "./nora.ts";
 import { acceptUpload } from "../photos/intake.ts";
 import { WHATSAPP_ON } from "../whatsapp-setting.ts";
 import type { AgentDb, AgentDeps, BillingDeps } from "./agent.ts";
@@ -14,6 +16,7 @@ import { pickSender } from "./kapso.ts";
 import { flush, type Out, type OutDb, type OutRow } from "./outbox.ts";
 import type { SendState } from "./policy.ts";
 import type { Who } from "./roles.ts";
+import { suggestKeyword } from "./map.ts";
 
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await admin().rpc(fn, args);
@@ -70,6 +73,10 @@ function guarded(live: Sender, mock: Sender): Sender {
     buttons: async (to, body, b) => ((await ok(to)) ? live : mock).buttons(to, body, b),
     template: async (to, name, params) => ((await ok(to)) ? live : mock).template(to, name, params),
     media: (id) => live.media(id),
+    image: async (to, png, body, b) => {
+      const s = (await ok(to)) ? live : mock;
+      return s.image ? s.image(to, png, body, b) : s.buttons(to, body, b);
+    },
   };
 }
 
@@ -78,6 +85,7 @@ export const outDb: OutDb = {
   add: (r) => rpc<number | null>("whatsapp_outbox_add", {
     p_phone: r.phone, p_user: r.userId, p_location: r.locationId, p_kind: r.kind, p_body: r.body, p_buttons: r.buttons ?? [],
     p_template: r.template ?? null, p_urgent: !!r.urgent, p_dedupe: r.dedupe ?? null, p_due_at: (r.dueAt ?? new Date()).toISOString(),
+    ...(r.media ? { p_media: r.media } : {}),
   }),
   mark: async (ids, state, o = {}) => {
     await rpc("whatsapp_outbox_mark", { p_ids: ids, p_state: state, p_provider_id: o.providerId ?? null, p_error: o.error ?? null,
@@ -91,13 +99,66 @@ export const outDb: OutDb = {
   },
 };
 
+// ─── The map on WhatsApp (28.5): the visibility function owns the grid, the search and the image; WhatsApp asks it.
+async function callVisibility(path: string, init: RequestInit = {}): Promise<Response> {
+  const secret = await internalSecret();
+  if (!secret) throw new Error("no_internal_secret");
+  return await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/visibility/${path}`, {
+    ...init, headers: { "x-cron-secret": secret, "content-type": "application/json", ...(init.headers ?? {}) },
+  });
+}
+/** The map PNG of one finished grid, drawn by the visibility function (V1); null when it cannot be drawn. */
+async function mapPng(scanId: string): Promise<Uint8Array | null> {
+  const res = await callVisibility(`image?scan=${encodeURIComponent(scanId)}`, { method: "GET" });
+  if (!res.ok) return null;
+  const png = new Uint8Array(await res.arrayBuffer());
+  return png.length > 100 ? png : null;
+}
+const runMaps = () => callVisibility("tick", { method: "POST", body: "{}" }).then((r) => r.body?.cancel(), () => {});
+
+/** 28.5: with a confirmed search the first map runs now; without one Kabsi suggests a search for the owner to confirm. */
+async function firstMap(locationId: string): Promise<{ state: "started" | "waiting" | "ask" | "none"; keyword?: string | null }> {
+  const db = admin();
+  const { data: k } = await db.from("visibility_keywords").select("id, keyword").eq("location_id", locationId).eq("active", true)
+    .not("confirmed_at", "is", null).order("created_at").limit(1).maybeSingle();
+  if (k) {
+    const { count } = await db.from("visibility_scans").select("id", { count: "exact", head: true }).eq("location_id", locationId).in("state", ["queued", "done"]);
+    if (count) return { state: "waiting", keyword: k.keyword as string };
+    await db.from("visibility_keywords").update({ next_run_at: new Date().toISOString() }).eq("id", k.id);
+    await runMaps();
+    return { state: "started", keyword: k.keyword as string };
+  }
+  const { data: loc } = await db.from("locations").select("name, category_label, concierge").eq("id", locationId).maybeSingle();
+  if (!loc) return { state: "none" };
+  // The search terms report (Google's own, read only, never stored) when Google has one; the mock has none.
+  let terms: { keyword: string; count: number }[] = [];
+  if (!loc.concierge) {
+    try {
+      const { searchKeywords } = await import("../google/index.ts");
+      terms = await searchKeywords(locationId);
+    } catch (e) {
+      log("whatsapp", { step: "search_terms", ok: false, error: String((e as Error)?.message ?? e).slice(0, 120) });
+    }
+  }
+  return { state: "ask", keyword: suggestKeyword(terms, (loc.category_label as string | null) ?? null, loc.name as string) };
+}
+
+/** 27.3 item 1: the owner's yes to a search, through the visibility function (its plan limits and Maps lookup); then the map runs. */
+async function confirmKeyword(locationId: string, keyword: string): Promise<{ ok: boolean; reason?: string }> {
+  const res = await callVisibility("keyword", { method: "POST", body: JSON.stringify({ location_id: locationId, keyword }) });
+  const body = await res.json().catch(() => ({})) as { ok?: boolean; error?: string };
+  if (!res.ok || !body.ok) return { ok: false, reason: body.error ?? `http_${res.status}` };
+  await runMaps();
+  return { ok: true };
+}
+
 let ctx: Ctx | null = null;
 export async function whatsappCtx(): Promise<Ctx> {
   if (ctx) return ctx;
   const phoneNumberId = Deno.env.get("KAPSO_PHONE_NUMBER_ID") ?? "";
   const live = await pickSender({ live: Deno.env.get("WHATSAPP_LIVE"), apiKey: Deno.env.get("KAPSO_API_KEY"), phoneNumberId, numberOn: AGENT_ON });
   const mock = mockSender();
-  const out: Out = { db: outDb, live, mock, now: () => new Date() };
+  const out: Out = { db: outDb, live, mock, now: () => new Date(), mapPng };
   ctx = {
     db, on: AGENT_ON, phoneNumberId, appUrl: APP_URL, sender: guarded(live, mock), out,
     remember: async (userId, reviewId, locationId) => {
@@ -106,6 +167,36 @@ export async function whatsappCtx(): Promise<Ctx> {
     },
   };
   return ctx;
+}
+
+// Nora's facts: the public knowledge file the website's Nora reads (knowledge/facts, built to llms-full.txt), refreshed every
+// 15 minutes, the last good copy kept.
+let factsCache: { text: string; at: number } | null = null;
+async function publicFacts(): Promise<string> {
+  if (factsCache && Date.now() - factsCache.at < 900_000) return factsCache.text;
+  try {
+    const res = await fetch(`${APP_URL}/llms-full.txt`, { headers: { accept: "text/plain" } });
+    const text = await res.text();
+    if (res.ok && text.includes("Kabsi") && text.length > 2000) factsCache = { text, at: Date.now() };
+  } catch (e) {
+    log("whatsapp", { step: "facts", ok: false, error: String((e as Error)?.message ?? e).slice(0, 120) });
+  }
+  return factsCache?.text ?? "";
+}
+
+/** Nora on WhatsApp: one call of Nora's chat model (Sonnet, 28.6) with the cached facts, counted per agent (25.8). */
+function noraFor(key: string | undefined): Nora | null {
+  if (!key) return null;
+  const chat = task("nora", "chat");
+  return async (question, o) => {
+    // A ceiling for the whole number keeps the credit safe (R-45).
+    if (!(await rateLimit("wa_nora", 300, 3600))) throw new Error("nora_rate_limited");
+    const meter = newMeter("nora");
+    const text = await message(chat.model, [{ text: noraWhatsAppSystem(await publicFacts()), cache: true }], noraUser(question, o),
+      chat.maxTokens, meter, { effort: chat.effort });
+    await recordAiUsage(null, meter);
+    return text;
+  };
 }
 
 /** The agent's dependencies on the real database, Kapso and the model (agent.ts). */
@@ -121,7 +212,7 @@ export async function agentDeps(): Promise<AgentDeps> {
     : null;
   return {
     db: agentDb, out: c.out!, phoneNumberId: c.phoneNumberId, appUrl: APP_URL,
-    media: (id) => c.sender.media(id), ai,
+    media: (id) => c.sender.media(id), ai, nora: noraFor(key),
     editDraft: async (reviewId, instruction) => {
       const { draftReview } = await import("../reviews.ts");
       try {
@@ -131,8 +222,8 @@ export async function agentDeps(): Promise<AgentDeps> {
         return { ok: false, reason: String((e as Error)?.message ?? e).slice(0, 80) };
       }
     },
-    // 28.5 hook: V1 replaces this with the Scout job for the first full map.
-    firstMap: async (locationId) => (log("whatsapp", { step: "first_map_requested", stub: true, location: locationId }), "stub"),
+    firstMap,
+    confirmKeyword,
     // 28.1 hook: V1 replaces this with the map image of the scan's queued 7 by 7 grid.
     mapImage: async () => null,
     flush: () => flush(c.out!),
@@ -183,10 +274,29 @@ export const agentDb: AgentDb = {
   stopOptin: async (phone) => {
     await rpc("whatsapp_stop", { p_phone: phone });
   },
+  start: (phone) => rpc<number>("whatsapp_start", { p_phone: phone }).then((n) => n ?? 0),
   tokenOwner: (token, phone) => rpc("whatsapp_token_owner", { p_token: token, p_phone: phone }),
   approve: (token, phone) => rpc("whatsapp_approve", { p_token: token, p_phone: phone }),
   undo: (token, phone) => rpc("whatsapp_undo", { p_token: token, p_phone: phone }),
   openItems: (phone) => rpc("whatsapp_open_items", { p_phone: phone }),
+  // 30.10 point 7: the drafts come from session 19's pipeline functions; the Approve token from whatsapp_action_create.
+  async hoursPrepare(locationId, userId, c) {
+    try {
+      const id = await rpc<string>("special_hours_prepare", { p_location: locationId, p_user: userId, p_from: c.from, p_to: c.to, p_closed: c.closed,
+        p_open: c.open, p_close: c.close, p_reason: "Typed on WhatsApp" });
+      return await rpc("whatsapp_action_create", { p_user: userId, p_target_type: "special_hours", p_target_id: id });
+    } catch (e) {
+      return { ok: false, reason: String((e as Error)?.message ?? e).replace(/^special_hours_prepare: /, "").slice(0, 80) };
+    }
+  },
+  async postPrepare(locationId, userId, text) {
+    try {
+      const id = await rpc<string>("owner_post_prepare", { p_location: locationId, p_user: userId, p_text: text, p_channel: "whatsapp" });
+      return await rpc("whatsapp_action_create", { p_user: userId, p_target_type: "local_post", p_target_id: id });
+    } catch (e) {
+      return { ok: false, reason: String((e as Error)?.message ?? e).replace(/^owner_post_prepare: /, "").slice(0, 80) };
+    }
+  },
   ownerDraft: (u, r, t) => rpc("whatsapp_owner_draft", { p_user: u, p_review: r, p_text: t }),
   actionCreate: (u, t, id) => rpc("whatsapp_action_create", { p_user: u, p_target_type: t, p_target_id: id }),
   stats: (l, days) => rpc("whatsapp_stats", { p_location: l, p_days: days }),
@@ -198,12 +308,25 @@ export const agentDb: AgentDb = {
     if (error) throw error;
   },
   staffNumbers: () => rpc("whatsapp_staff_numbers", {}),
+  staffSummary: () => rpc("whatsapp_staff_summary", {}),
   staffPause: (name, pause) => rpc("whatsapp_staff_pause", { p_name: name, p_pause: pause }),
   handoff: async (phone, summary) => {
     await rpc("ops_emit", { p_kind: "whatsapp_handoff", p_channel: "customers", p_title: "WhatsApp: a person is asked for",
       p_body: `${summary}. Phone ending ${phone.slice(-4)}. Answer in the Kapso inbox.`, p_dedupe: `wa_handoff:${phone}:${new Date().toISOString().slice(0, 13)}` });
   },
   outboxGet: (phone, ids) => outDb.get(phone, ids),
+  async mapDetails(scanId) {
+    const { data } = await admin().from("visibility_scans").select("location_id, keyword, top3, ranked, average_rank, competitors, state, locations(name)")
+      .eq("id", scanId).maybeSingle();
+    if (!data || data.state !== "done") return null;
+    const { count } = await admin().from("visibility_points").select("scan_id", { count: "exact", head: true }).eq("scan_id", scanId);
+    const loc = (Array.isArray(data.locations) ? data.locations[0] : data.locations) as { name: string } | null;
+    return {
+      location_id: data.location_id as string, business: loc?.name ?? "", keyword: data.keyword as string, points: count ?? 49,
+      top3: Number(data.top3 ?? 0), ranked: Number(data.ranked ?? 0), average: data.average_rank === null ? null : Number(data.average_rank),
+      competitors: ((data.competitors ?? []) as { name: string }[]).map((c) => c.name).slice(0, 3),
+    };
+  },
   releaseHeld: (phone) => outDb.release(phone),
 };
 

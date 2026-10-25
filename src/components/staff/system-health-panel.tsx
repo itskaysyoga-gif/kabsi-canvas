@@ -265,7 +265,7 @@ export function SystemHealthPanel() {
               </span>{" "}
               · queued over 15 min {h.delivery.emails_queued_late} · notices failed{" "}
               {h.delivery.notices_failed_24h} · notices sending over 15 min{" "}
-              {h.delivery.notices_sending_late} · Slack unsent {h.delivery.slack_unsent}
+              {h.delivery.notices_sending_late} · staff alerts unsent {h.delivery.alerts_unsent}
             </p>
             <Rows
               empty=""

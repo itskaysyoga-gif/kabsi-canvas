@@ -7,3 +7,5 @@ posts-weekly
 lead
 site-assets
 turnstile-diag
+# Session 13b part 2 (25 Oct 2026, master plan 9.9, R-64): staff alerts moved to WhatsApp.
+slack

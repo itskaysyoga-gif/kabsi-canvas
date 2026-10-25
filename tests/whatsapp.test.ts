@@ -172,10 +172,12 @@ describe("WhatsApp is one setting that can be empty (PR 0, 22 Oct 2026)", () => 
       }
     });
 
-    it("the facts file and Nora's public copy say there is no number and give none", () => {
+    it("the facts file and Nora's public copy say the number is in testing and give none", () => {
       for (const file of ["knowledge/kabsi-facts.md", "public/llms-full.txt"]) {
         const text = readText(file);
-        expect(text).toContain("Kabsi has no WhatsApp number at the moment");
+        // 13b part 2 (25 Oct 2026): Kabsi has a number; owners stay off until the launch gate, so none is given.
+        expect(text).toContain("Kabsi has a WhatsApp number");
+        expect(text).toContain("do not give the number yet");
         expect(text).not.toMatch(/wa\.me\/\d|WhatsApp \*\*\+|WhatsApp \+\d/);
       }
     });

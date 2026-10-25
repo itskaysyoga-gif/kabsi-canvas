@@ -55,7 +55,6 @@ describe("Review risk levels (P0.3-03)", () => {
       "supabase/functions/_shared/reviews.ts",
       "supabase/functions/api/action.ts",
       "supabase/functions/api/approve.ts",
-      "supabase/functions/slack/index.ts",
     ];
     for (const f of files) expect(read(f), f).not.toMatch(/urgency|\.urgent\b|urgent_waiting/);
   });

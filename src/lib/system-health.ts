@@ -95,8 +95,8 @@ export type Health = {
     emails_queued_late: number;
     notices_failed_24h: number;
     notices_sending_late: number;
-    slack_unsent: number;
-    slack_oldest_unsent_minutes: number;
+    alerts_unsent: number;
+    alerts_oldest_unsent_minutes: number;
     recent_failures: {
       kind: string;
       status: string;
@@ -234,11 +234,11 @@ export function attentionOf(h: Health): Attention[] {
       text: `Email or notice delivery: ${d.emails_failed_24h} emails and ${d.notices_failed_24h} notices failed in 24 hours, ${d.emails_queued_late + d.notices_sending_late} waiting more than 15 minutes.`,
     });
   }
-  if (d.slack_unsent > 0 && d.slack_oldest_unsent_minutes > 15) {
+  if (d.alerts_unsent > 0 && d.alerts_oldest_unsent_minutes > 15) {
     out.push({
-      id: "slack",
+      id: "alerts",
       level: "amber",
-      text: `${d.slack_unsent} Slack ${d.slack_unsent === 1 ? "message is" : "messages are"} unsent, the oldest ${d.slack_oldest_unsent_minutes} minutes.`,
+      text: `${d.alerts_unsent} staff ${d.alerts_unsent === 1 ? "alert is" : "alerts are"} not sent to WhatsApp yet, the oldest ${d.alerts_oldest_unsent_minutes} minutes.`,
     });
   }
   return out;

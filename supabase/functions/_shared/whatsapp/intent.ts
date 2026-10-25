@@ -9,7 +9,8 @@ import type { Command } from "./router.ts";
 export type Ai = (system: string, user: string) => Promise<string>;
 
 const DESCRIBE: Record<string, string> = {
-  help: "the person asks what they can do",
+  help: "the person asks what they can send or do in this chat (the menu)",
+  question: "a question about Kabsi itself: what it does, how it works, plans, the trial, cancelling, safety, Google, reviews (args.text: the question)",
   switch: "the person wants to change business or role",
   stats: "numbers for the last days (args.days: 7 or 30)",
   review_link: "the review link",
@@ -67,6 +68,6 @@ export async function route(ai: Ai, role: RoleName, text: string): Promise<Route
   }
   const value = tool === "stats" ? (arg("days") === "30" ? "30" : "7")
     : tool === "edit_draft" ? arg("instruction") : tool === "exact_reply" ? arg("text") : tool === "scan" ? arg("name")
-    : tool === "hours" || tool === "post" ? arg("text") : undefined;
+    : tool === "hours" || tool === "post" || tool === "question" ? arg("text") : undefined;
   return { command: { k: "tool", tool, arg: value }, lang, question: null };
 }

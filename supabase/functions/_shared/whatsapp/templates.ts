@@ -67,6 +67,13 @@ export const TEMPLATES = {
     example: { business: "Smile Dental" },
     button: "Show me",
   },
+  // 13b part 2: billing notices (session 10, master plan 10.2.9) reach the owner outside the 24-hour window.
+  billing_notice: {
+    name: "kabsi_billing_notice",
+    body: "Kabsi here. There is an update about the Kabsi plan of {{business}}. Reply here to read it.",
+    example: { business: "Smile Dental" },
+    button: "Show me",
+  },
   staff_alert: {
     name: "kabsi_staff_alert",
     body: "Kabsi staff alert: {{summary}}. Reply here for the details.",

@@ -18,13 +18,13 @@ export const PHONES = {
   manager: "+12125550144",
   staff: "+12125550145",
   plain: "+12125550146", // owner of Corner Deli, Essentials (no Pro)
-  multi: "+447911123456", // Smile Dental and Bright Smile Kids, London
-  rashid: "+9613956917", // staff_admin, owner of Yawmiyati
-  partner: "+971501234567", // partner only
-  both: "+971501234568", // partner and owner of Al Noor Salon
-  unknown: "+12125559876",
-  unknown2: "+34612345678",
-  unknown3: "+201001234567",
+  multi: "+12125550149", // Smile Dental and Bright Smile Kids, London
+  rashid: "+12125550148", // staff_admin, owner of Yawmiyati
+  partner: "+12125550150", // partner only
+  both: "+12125550151", // partner and owner of Al Noor Salon
+  unknown: "+12125550152",
+  unknown2: "+12125550153",
+  unknown3: "+12125550154",
   newStaff: "+12125550147",
 } as const;
 
@@ -72,6 +72,9 @@ export class World {
     ["r-harbour-high", { location: BIZ.harbour, state: "drafted", risk: "high" }],
   ]);
   stored = new Set<string>();
+  storedPhones = new Set<string>();
+  noraCalls: string[] = [];
+  noraAnswer: string | null = null;
   done = new Map<string, string>();
   outbox: (OutRow & { dedupe: string | null; sent_at: number | null; error: string | null; provider: string | null })[] = [];
   sent: SentMsg[] = [];
@@ -86,6 +89,10 @@ export class World {
   photos: string[] = [];
   voices: string[] = [];
   firstMaps: string[] = [];
+  /** What the first map step answers after a code binds an owner (28.5). */
+  firstMapAnswer: { state: "started" | "waiting" | "ask" | "none"; keyword?: string | null } = { state: "none" };
+  keywordAnswer: { ok: boolean; reason?: string } = { ok: true };
+  scans = new Map<string, { location: string; keyword: string }>();
   aiCalls = 0;
   aiMap: Record<string, string> = {};
   aiSlow = false;
@@ -151,13 +158,15 @@ export class World {
       async store(phone, id, _kind, _payload, referral) {
         if (w.stored.has(id)) return { duplicate: true };
         w.stored.add(id);
+        const first = !w.storedPhones.has(phone);
+        w.storedPhones.add(phone);
         const c = w.conversation(phone);
         c.window_expires_at = new Date(w.now + 86_400_000).toISOString();
         if (referral) {
           c.referral_first ??= referral;
           c.referral_last = referral;
         }
-        return { duplicate: false, id: `in-${id}` };
+        return { duplicate: false, id: `in-${id}`, first };
       },
       async done(id, r) {
         w.done.set(id, r);
@@ -187,6 +196,8 @@ export class World {
           if (!user || !w.staffUsers.has(user)) return { result: "unknown_code" };
           w.staffCodes.delete(staff[1]);
           w.staffAdmin.set(phone, user);
+          // A fresh staff code is a new opt-in: the conversation is no longer stopped (whatsapp_bind).
+          w.conversation(phone).stopped_at = null;
           return { result: "staff_admin", user_id: user };
         }
         const user = w.ownerCodes.get(code);
@@ -201,6 +212,13 @@ export class World {
       async stopOptin(phone) {
         const u = w.users.find((x) => x.phone === phone);
         if (u) u.optin = "stopped";
+      },
+      async start(phone) {
+        // whatsapp_start: every stopped opt-in of this phone is active again, and the conversation is not stopped.
+        const back = w.users.filter((x) => x.phone === phone && x.optin === "stopped");
+        for (const u of back) u.optin = "active";
+        w.conversation(phone).stopped_at = null;
+        return back.length;
       },
       async tokenOwner(token, phone) {
         const a = w.actions.get(token);
@@ -229,7 +247,23 @@ export class World {
       async openItems(phone) {
         const u = w.userByPhone(phone);
         return [...w.actions.values()].filter((a) => a.user === u?.id && !a.used && !a.stale)
-          .map((a) => ({ token: a.token, kind: a.type === "local_post" ? "post_alert" : "review_alert", business: w.biz.find((b) => b.id === a.location)!.name, location_id: a.location }));
+          .map((a) => ({ token: a.token, kind: a.type === "local_post" ? "post_alert" : "review_alert", business: w.biz.find((b) => b.id === a.location)!.name, location_id: a.location, target_type: a.type }));
+      },
+      async hoursPrepare(loc, user, c) {
+        const role = w.biz.find((b) => b.id === loc)?.members[user];
+        if (role !== "owner" && role !== "manager") return { ok: false, reason: "not_allowed_to_approve" };
+        w.calls.push(`hours:${loc}:${c.from}:${c.to}:${c.closed ? "closed" : `${c.open}-${c.close}`}`);
+        const token = `hrs${String(++w.n).padStart(20, "0")}`;
+        w.actions.set(token, { token, user, location: loc, type: "special_hours", target: `sh-${w.n}`, used: false, stale: false });
+        return { ok: true, token };
+      },
+      async postPrepare(loc, user, text) {
+        const role = w.biz.find((b) => b.id === loc)?.members[user];
+        if (role !== "owner" && role !== "manager") return { ok: false, reason: "not_allowed_to_approve" };
+        w.calls.push(`post:${loc}:${text}`);
+        const token = `pst${String(++w.n).padStart(20, "0")}`;
+        w.actions.set(token, { token, user, location: loc, type: "local_post", target: `po-${w.n}`, used: false, stale: false });
+        return { ok: true, token, text };
       },
       async ownerDraft(user, review, text) {
         w.calls.push(`owner_draft:${review}:${text.length}`);
@@ -263,6 +297,11 @@ export class World {
         return { jobs_failed_1h: 0, jobs_waiting: 0, publications_stuck: 0, handoffs: w.handoffs.length, outbox_held: 0, signups_today: 2,
           reviews_answered_today: 5, number_quality: "GREEN", number_checked_at: null };
       },
+      async staffSummary() {
+        return { signups: 2, trials_started: 1, paid_new: 1, paid_total: 3, cancellations: 0, reviews_answered: 5, replies_waiting: 4, handoffs_waiting: w.handoffs.length,
+          publications_stuck: 0, jobs_failed: 2, errors_by_job: [{ job: "sync", n: 2 }], ai_cost_micros: 1_230_000, places_today: 4, places_cap: 20,
+          dataforseo_micros: 900_000, dataforseo_cap_usd: 10, number_quality: "GREEN", number_messaging: "LIMITED", alerts_24h: 7 };
+      },
       async staffPause(name, pause) {
         const m = w.biz.filter((b) => b.name.toLowerCase().includes(name.toLowerCase()));
         if (m.length !== 1) return { ok: false, matches: m.map((b) => b.name) };
@@ -271,6 +310,12 @@ export class World {
       },
       async handoff(phone, summary) {
         w.handoffs.push(`${phone}:${summary}`);
+      },
+      async mapDetails(scanId) {
+        const sc = w.scans.get(scanId);
+        if (!sc) return null;
+        return { location_id: sc.location, business: w.biz.find((b) => b.id === sc.location)!.name, keyword: sc.keyword, points: 49, top3: 18, ranked: 40,
+          average: 6.4, competitors: ["Harbor Bakes", "Oven Street", "Bean There"] };
       },
       async outboxGet(phone, ids) {
         return w.outbox.filter((r) => r.phone === phone && ids.includes(r.id)).map((r) => ({ id: r.id, body: r.body, buttons: r.buttons, location_id: r.location_id }));
@@ -360,11 +405,13 @@ export class World {
       buttons: async (to, body, b: Button[]) => push({ to, kind: "buttons", body, buttons: b.map((x) => x.title) }),
       template: async (to, name) => push({ to, kind: "template", body: "", buttons: [], template: name }),
       media: async (id) => w.mediaBytes.get(id) ?? new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 16, 74, 70, 73, 70]),
+      image: async (to, png, body, b: Button[]) => push({ to, kind: "image", body, buttons: b.map((x) => x.title) }),
     };
   }
 
   out(): Out {
-    return { db: this.outDb(), live: this.sender(true), mock: this.sender(false), now: () => new Date(this.now) };
+    return { db: this.outDb(), live: this.sender(true), mock: this.sender(false), now: () => new Date(this.now),
+      mapPng: async () => new Uint8Array([0x89, 0x50, 0x4e, 0x47]) };
   }
 
   billingDeps(): BillingDeps {
@@ -402,8 +449,14 @@ export class World {
         if (w.aiSlow) for (let i = 0; i < 20; i++) await Promise.resolve();
         return w.aiMap[text] ?? '{"tool":"unclear","args":{"question":"Do you mean your review link or your stats?"},"lang":"en"}';
       },
+      nora: async (question) => {
+        w.noraCalls.push(question);
+        if (w.noraAnswer === "throw") throw new Error("anthropic 529");
+        return w.noraAnswer ?? "Nothing goes to Google without your yes. Every reply waits for you to approve it on WhatsApp or at [your Kabsi account](/app).";
+      },
       editDraft: async (review, instruction) => (w.calls.push(`edit:${review}:${instruction}`), { ok: true }),
-      firstMap: async (loc) => (w.firstMaps.push(loc), "stub"),
+      firstMap: async (loc) => (w.firstMaps.push(loc), w.firstMapAnswer),
+      confirmKeyword: async (loc, k) => (w.calls.push(`keyword:${loc}:${k}`), w.keywordAnswer),
       mapImage: async () => null,
       flush: async () => {},
       now: () => w.now,

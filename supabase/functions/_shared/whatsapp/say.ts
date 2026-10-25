@@ -32,9 +32,8 @@ export const SAY = {
   staffBound: "This phone is now Kabsi's staff phone. Send \"status\", \"waiting\", \"today\", \"pause\" followed by a business name, or \"help\".",
   badCode: "That code did not work. Open Kabsi, go to Settings, What Kabsi tells you, and press Connect WhatsApp again.",
   phoneInUse: "This phone is already connected to another Kabsi account. Disconnect it there first, then send the code again.",
-  stopped: "You will get no more WhatsApp messages from Kabsi. To turn them on again, press Connect WhatsApp in Kabsi.",
-  started: "Welcome back. Send \"help\" to see what you can do here.",
-  startedNeedsCode: "To turn your messages back on, press Connect WhatsApp in Kabsi and send the new code here.",
+  stopped: "You will get no more WhatsApp messages from Kabsi. Reply START at any time to turn them on again.",
+  started: "Welcome back. Your Kabsi messages are on again. Send \"help\" to see what you can do here.",
 
   // Roles (29.7).
   whichRole: "Your business or your partner tools?",
@@ -78,10 +77,36 @@ export const SAY = {
   billingAdded: (n: number) => `Done. Your plan now has ${n} extra ${n === 1 ? "location" : "locations"}.`,
   billingTryLater: "The payment service did not answer. Please try again in a minute, or reply \"talk to a person\".",
   handoff: "Thanks. A person from Kabsi will answer you here within one business day.",
-  hoursInApp: (business: string, url: string) =>
-    `${business}: hours changes are confirmed in Kabsi for now, so you see exactly what Google will show. Open Hours: ${url}`,
-  postInApp: (business: string, url: string) =>
-    `${business}: send me a photo with a short note and I will prepare the post. You can also write one in Kabsi: ${url}`,
+  // 13b part 2 (30.10 point 7): hours and typed posts approved on WhatsApp, shown back exactly first (25.5).
+  hoursShown: (business: string, line: string) => `${business}: Kabsi will set these hours on Google after your yes.\n\n${line}`,
+  hoursAsk: "Which day, and what hours? For example: \"closed tomorrow\", \"open 10am to 2pm on Friday\" or \"closed 24 to 26 December\".",
+  hoursNeedTimes: "What time do you open and close that day? For example: \"open 9am to 5pm\".",
+  hoursBadTime: "Those times do not work: the closing time must come after the opening time. For example: \"open 9am to 5pm on Friday\".",
+  hoursPast: "That day has already passed. Which day do you mean?",
+  hoursTooFar: "Kabsi can set hours up to a year ahead. Which day do you mean?",
+  hoursWeekly: (business: string, url: string) =>
+    `${business}: a lasting change to your weekly hours is confirmed on kabsi.co, so you see exactly what Google will show. Open Hours: ${url}`,
+  postAsk: (business: string) =>
+    `${business}: send the words of the post starting with "post:", for example "post: Our autumn menu starts on Monday." Or send a photo with a short note.`,
+  postShown: (business: string, text: string) => `${business}: Kabsi will post this on your Google listing after your yes.\n\n"${text}"`,
+  postProblem: (business: string, problems: string[]) =>
+    `${business}: Kabsi cannot post that as it is, because it ${problems.join(" and ")}. Please send it again without that.`,
+  approverOnly: (business: string) => `Your role at ${business} cannot approve this. The owner can, on WhatsApp or on kabsi.co.`,
+  notConnectedYet: (business: string, url: string) => `Kabsi cannot change ${business} on Google yet. Open your Kabsi account to finish setting up: ${url}`,
+  // The map on WhatsApp (28.5, docs/COPY.md 0.1 and 20): places around you, never spots.
+  keywordAsk: (business: string, keyword: string) =>
+    `${business}: your first map is next. Kabsi will search '${keyword}' on Google Maps from places around you, like a customer standing there. Is that what your customers search for?`,
+  keywordAskOpen: (business: string) =>
+    `${business}: your first map is next. What would a customer type into Google Maps to find you? For example "bakery" or "dentist".`,
+  keywordBad: "Please send the search as a customer would type it, in a few words. For example \"bakery\" or \"dentist\".",
+  keywordSet: (business: string, keyword: string) =>
+    `Done. Kabsi is searching '${keyword}' around ${business} now. Your map comes here within 5 minutes.`,
+  keywordNoPlan: (business: string) => `${business}: maps come with a Kabsi plan. Choose yours on kabsi.co.`,
+  keywordNotFound: (business: string) => `Kabsi could not find ${business} on Google Maps for that search. Send another search, for example "bakery".`,
+  keywordLimit: (business: string) => `${business} already has the most searches its plan includes. You can change them on kabsi.co.`,
+  keywordPaused: "Maps are paused for a moment. Kabsi will send yours as soon as they run again.",
+  mapLater: "Okay. Your map stays in your Kabsi account on kabsi.co.",
+  mapGone: "That map is no longer here. Your latest map is in your Kabsi account on kabsi.co.",
   editStarted: "On it. A new draft is coming.",
   noRecentReview: "Which review do you mean? Open the latest review alert and tap Edit in app, or send \"help\".",
   exactShown: (business: string, text: string) =>
@@ -131,14 +156,14 @@ const LOCAL: Record<Exclude<Lang, "en">, Partial<Record<"greeting" | "unknownHel
   es: {
     greeting: "Bienvenido a Kabsi. ¿Acabas de escanear tu negocio en kabsi.co? Envíame el nombre de tu negocio o el código de la página y sigo desde ahí.",
     unknownHelp: "Soy Nora, la asistente de Kabsi. Kabsi cuida tu perfil de Google desde WhatsApp y nada se publica sin tu sí. Envía el nombre de tu negocio, \"precios\" o \"hablar con una persona\".",
-    stopped: "No recibirás más mensajes de Kabsi por WhatsApp. Para activarlos de nuevo, pulsa Connect WhatsApp en Kabsi.",
+    stopped: "No recibirás más mensajes de Kabsi por WhatsApp. Responde START cuando quieras para activarlos de nuevo.",
     handoff: "Gracias. Una persona de Kabsi te responderá aquí en un día hábil.",
     unclear: "No lo entendí. Envía \"ayuda\" o \"hablar con una persona\".",
   },
   ar: {
     greeting: "أهلا بك في كبسي. هل فحصت نشاطك التجاري على kabsi.co للتو؟ أرسل لي اسم نشاطك أو الرمز من الصفحة وسأكمل من هناك.",
     unknownHelp: "أنا نورا، مساعدة كبسي. كبسي يهتم بملفك على جوجل من واتساب، ولا ينشر شيئا بدون موافقتك. أرسل اسم نشاطك أو \"الأسعار\" أو \"التحدث مع شخص\".",
-    stopped: "لن تصلك رسائل أخرى من كبسي على واتساب. لتفعيلها مجددا اضغط Connect WhatsApp في كبسي.",
+    stopped: "لن تصلك رسائل أخرى من كبسي على واتساب. أرسل START في أي وقت لتفعيلها مجددا.",
     handoff: "شكرا. سيرد عليك شخص من كبسي هنا خلال يوم عمل واحد.",
     unclear: "لم أفهم ذلك. أرسل \"مساعدة\" أو \"التحدث مع شخص\".",
   },

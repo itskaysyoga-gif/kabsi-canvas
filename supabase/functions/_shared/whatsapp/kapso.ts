@@ -39,5 +39,13 @@ export async function pickSender(e: SenderEnv): Promise<Sender> {
       })),
     }),
     media: async (mediaId) => new Uint8Array(await client.media.download({ mediaId, phoneNumberId }) as ArrayBuffer),
+    // The map (13b part 2): uploaded to Meta through Kapso, then one button message with the image as its header.
+    image: async (to, png, body, buttons: Button[]) => {
+      const up = await client.media.upload({ phoneNumberId, type: "image/png", file: png, fileName: "kabsi-map.png" }) as { id?: string };
+      if (!up.id) throw new Error("media upload returned no id");
+      if (!buttons.length) return { id: idOf(await client.messages.sendImage({ phoneNumberId, to, image: { id: up.id, caption: body.slice(0, 1024) } })) };
+      return { id: idOf(await client.messages.sendInteractiveButtons({ phoneNumberId, to, bodyText: body.slice(0, 1024), buttons: buttons.slice(0, 3),
+        header: { type: "image", image: { id: up.id } } })) };
+    },
   };
 }

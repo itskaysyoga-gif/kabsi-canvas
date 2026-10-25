@@ -20,6 +20,8 @@ export interface Sender {
   buttons(to: string, body: string, buttons: Button[]): Promise<Sent>;
   template(to: string, name: string, params: Record<string, string> | string[]): Promise<Sent>;
   media(mediaId: string): Promise<Uint8Array>;
+  /** 13b part 2: an image (the map PNG) with its line and up to 3 buttons under it, in one message. */
+  image?(to: string, png: Uint8Array, body: string, buttons: Button[]): Promise<Sent>;
 }
 
 export type MaySend =
@@ -143,5 +145,6 @@ export function mockSender(log: { to: string; kind: string; body: string }[] = [
     buttons: async (to, body, b) => (log.push({ to, kind: `buttons:${b.map((x) => x.title).join("|")}`, body }), { id: id() }),
     template: async (to, name) => (log.push({ to, kind: `template:${name}`, body: "" }), { id: id() }),
     media: async () => new Uint8Array(),
+    image: async (to, png, body, b) => (log.push({ to, kind: `image:${png.length}:${b.map((x) => x.title).join("|")}`, body }), { id: id() }),
   };
 }

@@ -125,7 +125,10 @@ describe("what Nora knows, against what is built on main", () => {
       ["security headers (P0.6-05)", /Website protection/],
       ["photos (P0.5-01)", /Staff upload link/],
       ["posts (P0.5-02)", /Approve the month/],
-      ["WhatsApp channel built (P0.8-03)", /Built 22 Oct 2026 \(P0\.8-03\) but not live/],
+      [
+        "WhatsApp channel built (P0.8-03), tested 25 Oct (13b)",
+        /Built 22 Oct 2026 \(P0\.8-03\), tested 25 Oct 2026, not live for owners yet/,
+      ],
       ["put-back (P0.8-04)", /Keep my information/],
       ["Manager guide (P0.4-03)", /Kabsi group ID 5481006796/],
       ["situation screens (P0.4-04)", /Something not working\?/],
@@ -161,7 +164,7 @@ describe("what Nora knows, against what is built on main", () => {
     }
   });
 
-  it("says auto-fix is off by Google's policy and that WhatsApp has no number", () => {
+  it("says auto-fix is off by Google's policy and that the WhatsApp number is not given yet", () => {
     expect(facts).toMatch(
       /Off, and why \| Automatic put-back \("auto-fix"\) is \*\*off on every plan\*\*/,
     );
@@ -169,8 +172,9 @@ describe("what Nora knows, against what is built on main", () => {
       /You may not use the Business Profile APIs to automatically revert changes made by Google\./,
     );
     expect(facts).toMatch(/There is no automatic put-back/);
-    expect(facts).toMatch(/Kabsi has no WhatsApp number at the moment/);
-    expect(facts).toMatch(/Never give one/);
+    // 13b part 2: Kabsi has a number, in testing until launch, and gives none until owners are switched on.
+    expect(facts).toMatch(/Kabsi has a WhatsApp number/);
+    expect(facts).toMatch(/do not give the number yet/);
     // the app and Nora's rules agree: with no number the rules give none
     const rules = noraRules(false, "");
     expect(rules).toMatch(/Kabsi has no WhatsApp number at the moment, so never give one/);
