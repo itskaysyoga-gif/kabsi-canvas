@@ -2,12 +2,14 @@
 // no secret, no write, no screenshot comparison (a runner's fonts differ from the baseline's). It answers one question: is
 // the public site up, and do the public doors of the functions still refuse what they must refuse?
 import { expect, test } from "@playwright/test";
+import { readFileSync } from "node:fs";
 import { noBanner, settle } from "./helpers/page";
 
 const FN = "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1";
-// The public anon key (src/lib/supabase-config.ts): the gateway wants a bearer token on every function call.
+// The public anon key the browser itself carries: the gateway wants a bearer token on every function call. It is read from the
+// website's own config file, never copied into a test.
 const ANON =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InluamRxamxtZHdqZ2JmZXpldnh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMDA5NzAsImV4cCI6MjEwNTg3Njk3MH0.VfPtwbV2h1-HevQMW8PjVYsO48SHBZ6vXnRivEu07vA";
+  /anonJwt =\s*"([^"]+)"/.exec(readFileSync("src/lib/supabase-config.ts", "utf8"))?.[1] ?? "";
 const headers = {
   apikey: ANON,
   authorization: `Bearer ${ANON}`,

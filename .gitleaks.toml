@@ -17,10 +17,10 @@ targetRules = ["generic-api-key"]
 regexes = ['''^sb_publishable_''']
 
 [[allowlists]]
-description = "Supabase anon key in the two browser config files (role anon, public by design)"
+description = "Supabase anon key in the two browser config files (role anon, public by design), and in the first QA 1 commit of the smoke spec, which now reads the key from the config file"
 condition = "AND"
 targetRules = ["jwt"]
-paths = ['''^src/lib/supabase\.ts$''', '''^src/lib/supabase-config\.ts$''']
+paths = ['''^src/lib/supabase\.ts$''', '''^src/lib/supabase-config\.ts$''', '''^tests/e2e/smoke\.spec\.ts$''']
 
 # PostHog project API keys start with phc_ and are public by design (they are sent from every visitor's browser).
 [[allowlists]]

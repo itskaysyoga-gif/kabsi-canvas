@@ -48,11 +48,13 @@ export async function settle(page: Page) {
 }
 
 /** axe: no serious or critical issue. Moderate and minor ones are listed in the report, not failed (QA 1, 30.12). */
-export async function axeClean(page: Page, label: string) {
+export async function axeClean(page: Page, label: string, known: string[] = []) {
   const result = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
     .analyze();
-  const bad = result.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
+  const bad = result.violations.filter(
+    (v) => (v.impact === "serious" || v.impact === "critical") && !known.includes(v.id),
+  );
   expect(
     bad.map(
       (v) =>
