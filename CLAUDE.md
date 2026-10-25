@@ -8,7 +8,8 @@ Kabsi looks after a local business's Google Business Profile: a reply ready for 
 2. `docs/KABSI-PLAN.md`, the plan index (under 40 KB): the guardrails list, section 2 (rules for every build chat) and the decision table with status. The full text of a guardrail, the task cards and everything else that used to be in the plan are in `docs/plan/archive/`; the index section "Where everything went" says which file.
 3. `docs/KABSI-MASTERPLAN.md`, the always-read core. Later sections win over earlier ones where they differ: 30 over 29 over 28 over 27 over everything older; an older section that a newer one replaces starts with a "Replaced by" or "Changed by" line.
 4. `docs/KABSI-PROGRESS.md`, the one-page status (under 10 KB) with the WhatsApp ladder. Its history is in `docs/progress/archive/`.
-5. Only what the task names: its card in `docs/plan/archive/`, and the decisions it names in `docs/source/` (KABSI-AUDIT K-01 to K-146, KABSI-GROWTH G-01 to G-47, KABSI-DESIGN, KABSI-VIDEO).
+5. For any screen, email, image or line a reader sees: `DESIGN.md` (the approved design system) and `docs/COPY.md` (the copy for every page). Before you report: `docs/LATER.md`, the fix-later list, where you add what can wait instead of looping on it.
+6. Only what the task names: its card in `docs/plan/archive/`, and the decisions it names in `docs/source/` (KABSI-AUDIT K-01 to K-146, KABSI-GROWTH G-01 to G-47, KABSI-DESIGN, KABSI-VIDEO).
 
 One task per chat. The task ID comes from the prompt. Nothing else is in scope.
 

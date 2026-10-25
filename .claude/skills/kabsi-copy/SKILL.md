@@ -15,13 +15,15 @@ Kabsi's readers are busy local business owners. Write the way a calm, capable pe
 - Tell the truth about limits. If Kabsi cannot do something, say so and say what the owner can do.
 - Nothing goes live without the owner's yes. Say so wherever a change is described.
 
-## Approved lines (master plan section 1)
-- Hero H1: "Run your Google listing from WhatsApp."
-- Subline: "Kabsi answers every review, keeps your hours and details right, and posts every week. You just reply Yes."
+## Approved lines (master plan 27.2, 24.5 and 28.8; every page's copy is in docs/COPY.md)
+- Hero H1: "See where you show up on Google and in AI answers."
+- Subline: "Kabsi checks your Google Maps ranking and what ChatGPT and Gemini say about you, helps you get more reviews the right way, keeps your listing right and posts for you. You reply Yes on WhatsApp."
 - Tagline, footer and emails: "Your reviews and listing. Taken care of."
-- Pillars: Every review answered / Your listing protected / Fresh every week / All from WhatsApp.
-- Other approved lines: "Most owners never open an app", "Know the moment anyone changes your listing on Google, competitors included", "Set up in 10 minutes, no passwords", "Nothing goes live without your yes", "Cancel from WhatsApp any time".
-- Kabsi is promoted as "your Google listing, run from WhatsApp", never as a review reply generator.
+- Pillars: See where you show up / More reviews, the right way / Your listing kept right / All from WhatsApp.
+- Main button everywhere: "See your map". Second: "Try it on WhatsApp". Under every main button: "Free for 14 days. No card. Cancel in WhatsApp."
+- Other approved lines: "Set up in 10 minutes, no passwords", "Nothing goes live without your yes", "Cancel from WhatsApp any time", "Know the moment anyone changes your listing on Google, competitors included".
+- The weekly report is the Results Report (27.3); "Weekly Care Report" is retired. Replies stay in every plan and are never the headline.
+- Kabsi is the local visibility and reviews manager, run from WhatsApp. Never promoted as a review reply generator. Google's name never appears in a headline graphic or OG image.
 - Use these lines as they stand. Do not reword them or invent a near copy. A new line needs the lane R chat's yes.
 - Operator line: "Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co." Payments: "Payments are processed by Creem, our merchant of record."
 
@@ -36,7 +38,7 @@ Kabsi's readers are busy local business owners. Write the way a calm, capable pe
 - Facebook and Instagram links come from the SOCIAL_LINKS constant, never typed by hand (R-59).
 
 ## Names (K-02)
-Use exactly: Reviews, Google Profile, Google Protection, Get Reviews, Weekly Care Report, Business Knowledge (screen title "About your business" where the design says so), Insights, Content, Settings, Essentials, Pro, Kabsi Partners, Profile Coach, What customers say, Report a fake review.
+Use exactly: Reviews, Google Profile, Google Protection, Get Reviews, Results Report, Visibility Map, AI Visibility, Competitor Watch, Review Growth, Ask Kabsi, Business Knowledge (screen title "About your business" where the design says so), Insights, Content, Settings, Essentials, Pro, Kabsi Partners, Profile Coach, What customers say, Report a fake review.
 Never: Profile Score, Do now, Listing Shield, Profile Care, Replies as a module, Monday Report, Put mine back. There is no Free plan, Partner plan or Lebanon bundle in any copy.
 
 ## Voice by place

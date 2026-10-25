@@ -19,6 +19,16 @@ Rashid runs Kabsi and the build sessions, and the lane R chat decides on his aut
 - Parallel sessions (master plan section 17): never touch another running session's area. Merge main into your branch (merge commit, never rebase) and run the checks again right before your own merge. Write only your own heading in docs/KABSI-PROGRESS.md. Give migrations a timestamp in the file name.
 - If context runs low, stop after a merge and report what is left. Never start the next session's tasks.
 
+## Working fast (master plan 30.11, from session 19 and 13b on 25 Oct)
+- Never loop on a problem that can wait. If something fails that does not block your own task, write it under Known limits, add a row to docs/LATER.md in your PR, and move on. A problem that blocks your task is fixed.
+- Never sleep-poll. While CI runs, do the next item. Check CI with one `gh pr checks <n>` call per return, or subscribe to the PR. Kill any wait loop you start before you stop.
+- The merge gate is the ci.yml jobs. Lighthouse is report only: never wait for it. Wait for Load only when its paths changed (load.yml lists them).
+- Right before you merge, if main moved since your last green run, merge main into your branch and wait for green again. Two PRs that were each green broke main on 25 Oct (#215).
+- Before you name a migration, list supabase/migrations on origin/main and on every open claude/* branch (`gh pr list`), and pick a timestamp nobody uses. Then register the version in supabase_migrations.schema_migrations when you apply it with execute_sql.
+- Supabase connector prompts: answer "Always allow" is Rashid's choice. If a connector call times out waiting for approval once, do not call it again in that turn: write the exact SQL file path and the read-back in your report, and the lane R chat applies it.
+- UI work reads DESIGN.md first and takes every visible line from docs/COPY.md. Use the webapp-testing skill for screenshots at 390 and 1440 px.
+- Keep the report short. Rashid reads it on his phone.
+
 ## Hard stops
 - Paid calls follow R-43 to R-46 and PROGRESS. AI is on demand only: the Anthropic key lives in Supabase secrets, there is about 100 US dollars of promotional credit until 17 Nov 2026 with auto-reload off, and EVAL_LIVE stays false (no live evaluation in CI). Build against mocks, fixtures and stubs. Make only the model calls a card needs and report how many in the PR and in PROGRESS. A live reply evaluation runs by hand only: 20 cases from scripts/eval/cases.json when a reply prompt changes, and the full 200-case reply set and Nora's 60 questions once, on the final prompts, before the credit ends.
 - The skill-creator skill's eval and description-improvement scripts call `claude -p`, which is a paid model call: run them only with Rashid's yes (plan 2.12).
