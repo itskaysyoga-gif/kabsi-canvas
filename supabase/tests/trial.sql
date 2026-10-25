@@ -72,10 +72,13 @@ select ok((select s.trial_started_at between now() - interval '1 minute' and now
              and s.grace_ends_at = s.trial_ends_at + interval '7 days'
            from public.subscriptions s join public.locations l on l.organization_id = s.organization_id
           where l.id = '00000000-0000-4000-8000-0000000007c1'), '14 days from now, then 7 days of grace, on the organisation');
-select is(pg_temp.ent('00000000-0000-4000-8000-0000000007c1') - 'organization_id' - 'ends_at' - 'trial',
+select is(pg_temp.ent('00000000-0000-4000-8000-0000000007c1') - 'organization_id' - 'ends_at' - 'trial'
+    - 'plan' - 'limits' - 'billing' - 'locations_allowed',
   '{"state": "trial", "watch": true, "draft": true, "publish": true, "trial_used": true,
     "caps": {"profile_fixes": {"limit": 3, "used": 0}, "backlog_drafts": {"limit": 10}, "ai_generations": {"limit": 100, "used": 0}}}'::jsonb,
   'a trial watches, drafts and publishes, with the three caps');
+-- Session 10: the trial is Pro, with Pro's limits (27.4).
+select is(pg_temp.ent('00000000-0000-4000-8000-0000000007c1') ->> 'plan', 'pro', 'the trial is Pro');
 select is((select count(*)::int from public.audit_events where action = 'trial_started' and location_id = '00000000-0000-4000-8000-0000000007c1'), 1,
   'the start is in the audit log');
 

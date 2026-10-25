@@ -3,7 +3,7 @@
 -- 7 days from the first failure, then pauses; paused and expired watch and draft but never publish; cancelled ends;
 -- a checkout alone changes nothing; a downgrade keeps Pro until the renewal; extra locations add to the locations
 -- allowed; each Creem event id is stored once; the founding count is live mode only; the ledger, the checkouts and
--- the owner contacts are closed to browsers; the paid buttons open only for test accounts until billing_open is on.
+-- the owner contacts and the founding count (served by billing-creem) are closed to browsers; the paid buttons open only for test accounts until billing_open is on.
 begin;
 create extension if not exists pgtap with schema extensions;
 select * from no_plan();
@@ -12,8 +12,8 @@ select * from no_plan();
 
 insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
 select '00000000-0000-0000-0000-000000000000', u.id, 'authenticated', 'authenticated', u.email, now(), '{}', '{}', now(), now()
-from (values ('00000000-0000-4000-8000-0000000010a1'::uuid, 'billing-owner@example.test'),
-             ('00000000-0000-4000-8000-0000000010a2'::uuid, 'other-owner@example.test')) as u(id, email);
+from (values ('00000000-0000-4000-8000-0000000010a1'::uuid, 'billing-owner-a@example.test'),
+             ('00000000-0000-4000-8000-0000000010a2'::uuid, 'billing-owner-b@example.test')) as u(id, email);
 insert into public.locations (id, name, place_id, created_by, time_zone, signup_source)
 values ('00000000-0000-4000-8000-0000000010c1', 'Billing Shop', 'billing-place-1', '00000000-0000-4000-8000-0000000010a1', 'UTC', 'self'),
        ('00000000-0000-4000-8000-0000000010c2', 'Other Shop', 'billing-place-2', '00000000-0000-4000-8000-0000000010a2', 'UTC', 'partner:P-TEST');
@@ -109,7 +109,7 @@ update public.organizations set billing_test = true where id = pg_temp.org();
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-0000000010a1", "role": "authenticated"}', true);
 select is((public.plan_summary('00000000-0000-4000-8000-0000000010c1') ->> 'checkout_open')::boolean, true, 'and open for a test account');
-select is(public.founding_places_left(), 29, 'an owner reads the founding count');
+select throws_ok($$ select public.founding_places_left() $$, '42501', null, 'browsers read the founding count only through billing-creem');
 
 -- Browsers never read the ledger, the checkouts or the owner contacts, and one owner never reads another's plan.
 select throws_ok($$ select count(*) from public.billing_events $$, '42501', null, 'the ledger is closed to owners');
@@ -120,7 +120,7 @@ select throws_ok($$ select public.entitlements(null, '00000000-0000-4000-8000-00
   'another owner cannot read this plan');
 reset role;
 set local role anon;
-select is(public.founding_places_left(), 29, 'the pricing page reads the founding count without signing in');
+select throws_ok($$ select public.founding_places_left() $$, '42501', null, 'anon cannot run it either');
 reset role;
 
 select * from finish();

@@ -5,6 +5,7 @@
 //                                  event id is stored once (a repeat answers 200 and does nothing); an event older than
 //                                  3 days is refused; the work runs in the job queue (applyEvent, the one writer).
 //   POST /billing-creem/setup      staff (x-cron-secret or a staff session): lists, reuses, renames and creates the products.
+//   GET  /billing-creem/founding   public: the founding places left (10.2.4) for the pricing page, cached 5 minutes.
 //   POST /billing-creem/owner      the signed-in owner of the business: checkout, portal, cancel, keep, upgrade, downgrade,
 //                                  add_location. The Plan screen calls it; WhatsApp calls the same code in _shared/billing.ts.
 import { admin, captureError, CORS, currentUser, fail, isInternal, json, log, rateLimit } from "../_shared/kabsi.ts";
@@ -101,10 +102,17 @@ async function owner(req: Request): Promise<Response> {
   }
 }
 
+async function founding(): Promise<Response> {
+  const { data, error } = await admin().rpc("founding_places_left");
+  if (error || typeof data !== "number") return json({ error: "unavailable" }, 503);
+  return json({ left: data }, 200, { "cache-control": "public, max-age=300" });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
-  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   const path = new URL(req.url).pathname.replace(/\/+$/, "");
+  if (req.method === "GET" && path.endsWith("/founding")) return await founding();
+  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   if (path.endsWith("/setup")) return await setup(req);
   if (path.endsWith("/owner")) return await owner(req);
   return await webhook(req);
