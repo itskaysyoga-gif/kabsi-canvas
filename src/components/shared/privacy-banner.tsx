@@ -19,8 +19,8 @@ import { isPrivatePath } from "@/lib/telemetry";
 
 // The privacy bar and "Your privacy choices" (P0.6-01, master plan 20.4, docs/COPY.md shared pieces). First party, no
 // outside consent tool, no categories, no vendor list.
-// - The bar: one small line at the foot of the screen, only where the rule asks first (the EU, the EEA, the UK and
-//   Switzerland), on public pages, while there is no live choice. "Accept" or "Only necessary"; "Details" opens /privacy.
+// - The bar: one small line at the foot of the screen, only where the rule asks first (the EU, the EEA, the UK,
+//   Switzerland, the UAE and Saudi Arabia), on public pages, while there is no live choice. "Accept" or "Only necessary"; "Details" opens /privacy.
 // - The panel: opened from "Your privacy choices" in the footer, under every rule. One switch, saved the moment it moves.
 // The site works the same whatever the visitor picks.
 export function PrivacyBanner({ onMounted }: { onMounted?: () => void } = {}) {

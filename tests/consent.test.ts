@@ -29,11 +29,11 @@ function geoFetch(country: string | null) {
 }
 
 describe("rules by country (master plan 20.4)", () => {
-  it("asks first in the EU, the EEA, the UK and Switzerland, and when the country is unknown; nowhere else", () => {
-    for (const cc of ["DE", "IE", "FR", "NO", "IS", "GB", "CH"])
+  it("asks first in the EU, the EEA, the UK, Switzerland, the UAE and Saudi Arabia, and when the country is unknown; nowhere else", () => {
+    for (const cc of ["DE", "IE", "FR", "NO", "IS", "GB", "CH", "AE", "SA"])
       expect(browserRules.ruleFor(cc)).toBe("opt_in");
     for (const cc of [null, "", "XX", "zz9"]) expect(browserRules.ruleFor(cc)).toBe("opt_in");
-    for (const cc of ["US", "CA", "AU", "NZ", "SG", "LB", "AE", "SA"])
+    for (const cc of ["US", "CA", "AU", "NZ", "SG", "LB", "QA", "KW"])
       expect(browserRules.ruleFor(cc)).toBe("notice");
   });
 
@@ -41,7 +41,7 @@ describe("rules by country (master plan 20.4)", () => {
     expect(serverRules.CONSENT_VERSION).toBe(browserRules.CONSENT_VERSION);
     expect(serverRules.CONSENT_WORDING).toEqual(browserRules.CONSENT_WORDING);
     expect([...serverRules.ASK_FIRST].sort()).toEqual([...CONSENT_ASK_FIRST].sort());
-    for (const cc of ["GB", "CH", "DE", "US", "AE", null])
+    for (const cc of ["GB", "CH", "DE", "US", "AE", "SA", null])
       expect(serverRules.ruleFor(cc)).toBe(browserRules.ruleFor(cc));
   });
 
@@ -114,6 +114,14 @@ describe("the proof row", () => {
     }
   });
 
+  it("stores the bar wording for a choice in the UAE and Saudi Arabia", () => {
+    for (const country of ["AE", "SA"]) {
+      const r = consentRow({ ...base, country, country_source: "network" });
+      if ("error" in r) throw new Error(r.error);
+      expect(r.row).toMatchObject({ rule: "opt_in", method: "banner" });
+    }
+  });
+
   it("refuses a bar choice where no bar is shown", () => {
     expect(consentRow({ ...base, country: "US", country_source: "network" })).toEqual({
       error: "bad_version",
@@ -178,6 +186,20 @@ describe("the advertising gate in the browser", () => {
     await consent.initConsent(geoFetch(country));
     return { consent, posts };
   }
+
+  it("UAE and Saudi Arabia: the bar shows and no advertising tag loads before Accept", async () => {
+    for (const country of ["AE", "SA"]) {
+      const { consent } = await load(country);
+      const pixel = vi.fn();
+      consent.runWhenAdvertisingAllowed(pixel);
+      expect(consent.getConsent().rule).toBe("opt_in");
+      expect(consent.needsChoice()).toBe(true);
+      expect(pixel).not.toHaveBeenCalled();
+      expect(consent.analyticsPersistent()).toBe(false);
+      vi.unstubAllGlobals();
+      vi.resetModules();
+    }
+  });
 
   it("UK: the bar shows, no advertising tag before a yes, then it loads once; statistics cookieless meanwhile", async () => {
     const { consent, posts } = await load("GB");

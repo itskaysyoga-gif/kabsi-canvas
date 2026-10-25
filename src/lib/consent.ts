@@ -2,7 +2,7 @@
 //
 // - The country comes from kabsi.co itself (/api/geo reads Cloudflare's cf-ipcountry or Vercel's country header);
 //   the browser time zone is the fallback. Until it is known the strictest rule (opt_in) applies.
-// - opt_in (the EU, the EEA, the UK and Switzerland): one small bar asks; nothing that needs consent loads before a
+// - opt_in (the EU, the EEA, the UK, Switzerland, the UAE and Saudi Arabia): one small bar asks; nothing that needs consent loads before a
 //   yes. notice (everywhere else): no bar; "Your privacy choices" in the footer has one switch.
 // - Before any choice PostHog runs without cookies or identifiers under every rule; it keeps an identifier only
 //   after a yes, and stops entirely after a no.

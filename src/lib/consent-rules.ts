@@ -6,7 +6,7 @@ import { CONSENT_ASK_FIRST } from "@/lib/region";
 
 export const CONSENT_VERSION = "2026-10-25";
 
-// opt_in: the EU, the EEA, the UK and Switzerland (and any visitor whose country is unknown): one small bar at the
+// opt_in: the EU, the EEA, the UK, Switzerland, the UAE and Saudi Arabia (and any visitor whose country is unknown): one small bar at the
 // bottom; nothing that needs consent loads before a yes.
 // notice: everywhere else: no pop-up; the Meta Pixel may run, PostHog stays cookieless, and "Your privacy choices" in
 // the footer has one switch. ads_opt_in is the rule of version 2026-10-21, kept for its stored records only.

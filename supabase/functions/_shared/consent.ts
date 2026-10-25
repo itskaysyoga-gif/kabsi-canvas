@@ -4,12 +4,13 @@
 
 export const CONSENT_VERSION = "2026-10-25";
 
-// opt_in: the EU, the EEA, the UK and Switzerland (and any visitor whose country is unknown): one small bar.
+// opt_in: the EU, the EEA, the UK, Switzerland, the UAE and Saudi Arabia (and any visitor whose country is unknown):
+// one small bar.
 // notice: everywhere else: no pop-up, one switch under "Your privacy choices". ads_opt_in: version 2026-10-21 only.
 export type ConsentRule = "opt_in" | "ads_opt_in" | "notice";
 
 export const ASK_FIRST =
-  "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE IS LI NO GB CH".split(
+  "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE IS LI NO GB CH AE SA".split(
     " ",
   );
 

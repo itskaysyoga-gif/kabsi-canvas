@@ -1,6 +1,6 @@
 // The Meta Pixel (master plan 20.4, docs/EVENTS.md). Public pages only: never the app, /start, /staff, /login, the
 // partner pages, the billing return page, the review page a business's customers see, or any token page. It loads only
-// through runWhenAdvertisingAllowed (src/lib/consent.ts), so in the EU, the EEA, the UK and Switzerland nothing loads
+// through runWhenAdvertisingAllowed (src/lib/consent.ts), so in the EU, the EEA, the UK, Switzerland, the UAE and Saudi Arabia nothing loads
 // before "Accept", and anywhere "Let Kabsi measure its ads" is off it never loads. Without VITE_META_PIXEL_ID (Rashid's
 // step in Meta Events Manager) nothing loads at all.
 //

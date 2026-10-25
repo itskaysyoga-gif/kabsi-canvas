@@ -104,7 +104,7 @@ Lower case, digits and underscores only.
 
 ## Consent (20.4)
 
-- The EU, the EEA, the UK and Switzerland (and a visitor whose country is unknown): one small bar at the bottom: "Kabsi uses cookies to measure visits and improve ads. You choose." Buttons "Accept" and "Only necessary", link "Details" to /privacy (docs/COPY.md). Until Accept, PostHog stays cookieless and nothing for ads loads. "Only necessary" stops PostHog too.
+- The EU, the EEA, the UK, Switzerland, the United Arab Emirates and Saudi Arabia (and a visitor whose country is unknown): one small bar at the bottom: "Kabsi uses cookies to measure visits and improve ads. You choose." Buttons "Accept" and "Only necessary", link "Details" to /privacy (docs/COPY.md). Until Accept, PostHog stays cookieless and nothing for ads loads. "Only necessary" stops PostHog too.
 - Everywhere else: no pop-up. The Meta Pixel may run; PostHog stays cookieless.
 - "Your privacy choices" at the foot of every page opens one switch, "Let Kabsi measure its ads", saved the moment it moves.
 - A choice counts for 12 months. Each one is stored as proof in `consent_records` (version 2026-10-25, method banner or panel).
