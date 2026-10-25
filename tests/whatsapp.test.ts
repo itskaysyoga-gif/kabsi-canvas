@@ -190,8 +190,8 @@ describe("WhatsApp is one setting that can be empty (PR 0, 22 Oct 2026)", () => 
         else if (/\.(tsx?|html|txt)$/.test(name) && !path.endsWith("routeTree.gen.ts")) {
           const text = readFileSync(path, "utf8");
           if (
-            /LEBANON_PHONE|\+961|961 3 956 917/.test(text) ||
-            text.replace(/\D/g, "").includes("9613956917")
+            /LEBANON_PHONE|\+961|\+1 555 010 4477/.test(text) ||
+            text.replace(/\D/g, "").includes("15550104477")
           )
             offenders.push(path);
         }

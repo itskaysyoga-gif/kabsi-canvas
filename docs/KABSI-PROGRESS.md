@@ -30,8 +30,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
-- Done 25 Oct: Clean 1 drops (read-back 0 on all four), the Resend webhook, R2 and the bucket `kabsi-backups`, the five backup secrets, `SENTRY_AUTH_TOKEN` in Vercel, the Pub/Sub topic `gbp-notifications` with its push subscription and secrets, `WHATSAPP_LIVE` set to `true`, the post Undo test.
-- Session 19 rest: run `supabase/manual/20261025_places_data_purge.sql` (read-back `0 | 0 | 0`). Pub/Sub waits for a natural review on Yawmiyati: nobody at Kabsi writes or edits a review to test it (fake review rule). The "testing it" post scheduled for 30 Oct: delete it in the app.
+- Done 25 Oct: Clean 1 drops (done, read-back 0 on all four), the Places purge (done, read-back `0 | 0 | 0`), the Resend webhook, R2 and the bucket `kabsi-backups`, the five backup secrets, `SENTRY_AUTH_TOKEN` in Vercel, the Pub/Sub topic `gbp-notifications` with its push subscription and secrets, `WHATSAPP_LIVE` set to `true`, the post Undo test.
+- Session 19 rest: the Places purge is done (Rashid ran `supabase/manual/20261025_places_data_purge.sql` on 25 Oct, read-back `0 | 0 | 0`). Pub/Sub waits for a natural review on Yawmiyati: nobody at Kabsi writes or edits a review to test it (fake review rule). The "testing it" post scheduled for 30 Oct: delete it in the app.
 - Phone test (13b part 1): waits for Fix 1 to register the webhook; then make a staff code at kabsi.co/staff and run the test in `docs/progress/archive/2026-10-25-session-13b-1.md`.
 - Postponed to `docs/LATER.md`: the failing Backup run, the disabled branch ruleset, the inbox tests, Sentry membership (free plan allows 1).
 - Supabase Auth: leaked-password protection; paste the four `emails/auth/*.html` templates.

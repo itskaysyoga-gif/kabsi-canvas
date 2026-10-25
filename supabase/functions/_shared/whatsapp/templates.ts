@@ -1,59 +1,69 @@
 // The utility templates Kabsi submits through Kapso's API (master plan 9.1 point 4, 9.4, 9.5): plain wording, the
 // category they really are (UTILITY, never marketing to owners), no shortened or tracking links, no promotion. Each one
 // only says that something is waiting and asks the person to reply; the reply opens the 24-hour window and the full
-// message (with its buttons) follows inside it. Named parameters, with examples, as Meta requires.
+// message (with its buttons) follows inside it. Named parameters in lower snake case, each with an example, as Meta
+// requires; a body never starts or ends with a variable (Meta refuses it), so each one opens with "Kabsi here."
 
 export type TemplateDef = { name: string; body: string; example: Record<string, string>; button: string };
 export type TemplateRef = { name: string; params: Record<string, string> };
 
 export const TEMPLATE_LANGUAGE = "en";
 
+/** The access notice template (master plan 19, 30.10): its name lives here, not in a secret. */
+export const ACCESS_CHANGE_TEMPLATE = "kabsi_access_change";
+
 export const TEMPLATES = {
   review_waiting: {
     name: "kabsi_review_waiting",
-    body: "{{business}}: a new {{stars}}-star review is waiting for your reply. Reply here to see the draft.",
+    body: "Kabsi here. A new {{stars}}-star review for {{business}} is waiting for your reply. Reply here to see the draft.",
     example: { business: "Smile Dental", stars: "4" },
     button: "Show me",
   },
   post_ready: {
     name: "kabsi_post_ready",
-    body: "{{business}}: a post is ready for your approval. Reply here to see it.",
+    body: "Kabsi here. A post for {{business}} is ready for your approval. Reply here to see it.",
     example: { business: "Smile Dental" },
     button: "Show me",
   },
   listing_change: {
     name: "kabsi_listing_change",
-    body: "{{business}}: your {{field}} changed on Google. Reply here to see the change and choose what to do.",
+    body: "Kabsi here. The {{field}} of {{business}} changed on Google. Reply here to see the change and choose what to do.",
     example: { business: "Smile Dental", field: "opening hours" },
     button: "Show me",
   },
   google_action: {
     name: "kabsi_google_action",
-    body: "{{business}}: Google is asking for action on your Business Profile. Reply here for the steps.",
+    body: "Kabsi here. Google is asking for action on the Business Profile of {{business}}. Reply here for the steps.",
     example: { business: "Smile Dental" },
     button: "Show me",
   },
   updates_waiting: {
     name: "kabsi_updates_waiting",
-    body: "{{business}}: you have {{count}} updates from Kabsi waiting. Reply here to see them.",
+    body: "Kabsi here. You have {{count}} updates waiting for {{business}}. Reply here to see them.",
     example: { business: "Smile Dental", count: "3" },
     button: "Show me",
   },
   holiday_question: {
     name: "kabsi_holiday_question",
-    body: "{{business}}: {{holiday}} is on {{date}}. Reply here to tell Kabsi your hours for that day.",
+    body: "Kabsi here. {{holiday}} is on {{date}}. Reply here to tell Kabsi the hours of {{business}} for that day.",
     example: { business: "Smile Dental", holiday: "Thanksgiving", date: "26 November" },
     button: "Show me",
   },
   access_lost: {
     name: "kabsi_access_lost",
-    body: "{{business}}: Kabsi can no longer reach your Business Profile. Reply here for the steps to fix it.",
+    body: "Kabsi here. Kabsi can no longer reach the Business Profile of {{business}}. Reply here for the steps to fix it.",
     example: { business: "Smile Dental" },
     button: "Show me",
   },
   map_ready: {
     name: "kabsi_map_ready",
-    body: "{{business}}: your Visibility Map is ready. Reply here to see it.",
+    body: "Kabsi here. The Visibility Map of {{business}} is ready. Reply here to see it.",
+    example: { business: "Smile Dental" },
+    button: "Show me",
+  },
+  access_change: {
+    name: ACCESS_CHANGE_TEMPLATE,
+    body: "Kabsi here. Access to the Business Profile of {{business}} has changed. Reply here to see what changed.",
     example: { business: "Smile Dental" },
     button: "Show me",
   },

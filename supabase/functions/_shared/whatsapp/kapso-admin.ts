@@ -1,7 +1,9 @@
 // Staff-only Kapso actions (master plan 9.8, 9.5, 29.9), run inside the `whatsapp` function so KAPSO_API_KEY never
 // leaves Supabase secrets: nobody sees it, and no session uses the Kapso connector for Kabsi (R-49).
-//   - setup: register the phone-number webhook to this function; the signing secret Kapso returns goes straight into
-//     Supabase Vault and is never returned, logged or printed.
+//   - setup: register the phone-number webhook to this function. Kapso does not generate the signing secret: Kabsi
+//     makes 48 random characters, sends them as `secret_key` and keeps them in Supabase Vault; never returned, logged
+//     or printed. A webhook that already points at this function is updated, never duplicated; Kapso's own inbox
+//     webhook is never touched.
 //   - templates: submit the utility templates (templates.ts) that are not there yet, and report each one's status.
 //   - health: read the number's health and quality rating (hourly, from pg_cron).
 //   - automations: confirm no Kapso workflow or Kapso agent answers the number, so only Kabsi's own code replies.
@@ -18,9 +20,31 @@ const list = (v: unknown): Obj[] => (Array.isArray(v) ? v.map(obj) : Array.isArr
 const unwrap = (v: unknown): Obj => (obj(v).data && !Array.isArray(obj(v).data) ? obj(obj(v).data) : obj(v));
 
 export class KapsoError extends Error {
-  constructor(readonly status: number, readonly where: string) {
-    super(`kapso ${where} ${status}`);
+  constructor(readonly status: number, readonly where: string, readonly detail = "") {
+    super(`kapso ${where} ${status}${detail ? `: ${detail}` : ""}`);
   }
+}
+
+/** What an error body says, for the log: Meta's error fields (message, error_user_title, error_user_msg, code,
+ *  error_subcode) wherever Kapso puts them, else the start of the text. Long token-like strings (keys, secrets) are cut out. */
+export function describeError(text: string, max = 600): string {
+  let parsed: unknown = null;
+  try {
+    parsed = text ? JSON.parse(text) : null;
+  } catch {
+    parsed = null;
+  }
+  const root = obj(parsed);
+  const e = typeof root.error === "object" && root.error ? obj(root.error) : root;
+  const fields = ["message", "error_user_title", "error_user_msg", "code", "error_subcode", "type"]
+    .map((k) => [k, e[k] ?? root[k]] as const)
+    .filter(([, v]) => v !== undefined && v !== null && v !== "" && typeof v !== "object")
+    .map(([k, v]) => `${k}=${String(v)}`);
+  if (typeof root.error === "string") fields.unshift(`error=${root.error}`);
+  const detail = root.errors ?? e.errors ?? e.details;
+  if (detail && typeof detail === "object") fields.push(`errors=${JSON.stringify(detail)}`);
+  const out = fields.length ? fields.join("; ") : text;
+  return out.replace(/[A-Za-z0-9_\-]{32,}/g, "[redacted]").replace(/\s+/g, " ").trim().slice(0, max);
 }
 
 async function call(env: KapsoEnv, url: string, init: RequestInit = {}): Promise<unknown> {
@@ -30,7 +54,7 @@ async function call(env: KapsoEnv, url: string, init: RequestInit = {}): Promise
     headers: { "X-API-Key": env.apiKey, "content-type": "application/json", ...(init.headers ?? {}) },
   });
   const text = await res.text();
-  if (!res.ok) throw new KapsoError(res.status, new URL(url).pathname.split("/").slice(0, 5).join("/"));
+  if (!res.ok) throw new KapsoError(res.status, `${init.method ?? "GET"} ${new URL(url).pathname.split("/").slice(0, 7).join("/")}`, describeError(text));
   try {
     return text ? JSON.parse(text) : {};
   } catch {
@@ -41,21 +65,46 @@ async function call(env: KapsoEnv, url: string, init: RequestInit = {}): Promise
 export const WEBHOOK_EVENTS = ["whatsapp.message.received", "whatsapp.message.sent", "whatsapp.message.delivered",
   "whatsapp.message.read", "whatsapp.message.failed"];
 
-/** Registers the webhook (or re-registers it when its secret is not in Vault yet). Returns the webhook id only. */
+/** 48 random characters (letters and digits) for the webhook's signing key. */
+export function makeWebhookSecret(len = 48): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(len * 2));
+  let out = "";
+  for (const b of bytes) {
+    if (b < 248 && out.length < len) out += chars[b % 62]; // 248 = 4 * 62: no modulo bias
+  }
+  return out.length === len ? out : makeWebhookSecret(len);
+}
+
+export type WebhookState = { id: string; url: string; active: boolean };
+
+/** Kabsi's webhooks on the number, as Kapso lists them (ids, URLs and active flags only). */
+export async function listWebhooks(env: KapsoEnv, url: string): Promise<WebhookState[]> {
+  const base = `${PLATFORM}/whatsapp/phone_numbers/${encodeURIComponent(env.phoneNumberId)}/webhooks`;
+  return list(await call(env, base)).filter((w) => w.url === url).map((w) => ({ id: String(w.id ?? ""), url: String(w.url), active: w.active !== false }));
+}
+
+/** Makes sure one active webhook points at Kabsi's function, signed with a key Kabsi holds. A webhook already on Kabsi's
+ *  URL is updated; one that is not Kabsi's (Kapso's own inbox webhook) is never changed or deleted. The secret is kept
+ *  only after Kapso accepted it. Returns ids and flags only. */
 export async function setupWebhook(env: KapsoEnv, url: string, o: { haveSecret: boolean; storeSecret: (s: string) => Promise<void> }) {
   const base = `${PLATFORM}/whatsapp/phone_numbers/${encodeURIComponent(env.phoneNumberId)}/webhooks`;
-  const existing = list(await call(env, base)).filter((w) => w.url === url);
-  if (existing.length && o.haveSecret) return { id: String(existing[0].id ?? ""), created: false };
-  // A webhook whose secret Kabsi does not hold cannot be verified: replace it.
-  for (const w of existing) await call(env, `${base}/${encodeURIComponent(String(w.id))}`, { method: "DELETE" });
-  const made = unwrap(await call(env, base, {
-    method: "POST",
-    body: JSON.stringify({ whatsapp_webhook: { url, events: WEBHOOK_EVENTS, kind: "kapso", payload_version: "v2", active: true } }),
-  }));
-  const secret = String(made.secret_key ?? made.secret ?? "");
-  if (secret.length < 16) throw new Error("kapso_webhook_no_secret");
+  const existing = await listWebhooks(env, url);
+  const active = existing.find((w) => w.active);
+  if (active && o.haveSecret) return { id: active.id, created: false, updated: false };
+  const secret = makeWebhookSecret();
+  const body = { whatsapp_webhook: { url, events: WEBHOOK_EVENTS, kind: "kapso", payload_version: "v2", active: true, secret_key: secret } };
+  let id: string;
+  let updated = false;
+  if (existing.length) {
+    id = existing[0].id;
+    await call(env, `${base}/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(body) });
+    updated = true;
+  } else {
+    id = String(unwrap(await call(env, base, { method: "POST", body: JSON.stringify(body) })).id ?? "");
+  }
   await o.storeSecret(secret);
-  return { id: String(made.id ?? ""), created: true };
+  return { id, created: !updated, updated };
 }
 
 /** The WhatsApp business account of the number (needed for templates): the setting, else Kapso's record of the number. */
@@ -67,19 +116,25 @@ export async function wabaId(env: KapsoEnv): Promise<string> {
   return id;
 }
 
-/** Submits every utility template that is not there yet. Never re-submits one Meta already has. */
+/** Submits every utility template that is not there yet. Never re-submits one Meta already has. A template Meta refuses
+ *  is reported with Meta's own reason (message, error_user_title, error_user_msg, code, error_subcode) and the rest go on. */
 export async function submitTemplates(env: KapsoEnv) {
   const waba = await wabaId(env);
   const url = `${META}/${waba}/message_templates`;
-  const have = new Map(list(await call(env, `${url}?limit=200`)).map((t) => [String(t.name), String(t.status ?? "")]));
-  const out: { name: string; status: string }[] = [];
+  const have = new Map(list(await call(env, `${url}?fields=name,status,language&limit=200`)).map((t) => [String(t.name), String(t.status ?? "")]));
+  const out: { name: string; status: string; error?: string }[] = [];
   for (const def of Object.values(TEMPLATES)) {
     if (have.has(def.name)) {
       out.push({ name: def.name, status: have.get(def.name)! });
       continue;
     }
-    const r = obj(await call(env, url, { method: "POST", body: JSON.stringify(submission(def)) }));
-    out.push({ name: def.name, status: String(r.status ?? "PENDING") });
+    try {
+      const r = obj(await call(env, url, { method: "POST", body: JSON.stringify(submission(def)) }));
+      out.push({ name: def.name, status: String(r.status ?? "PENDING") });
+    } catch (e) {
+      if (!(e instanceof KapsoError)) throw e;
+      out.push({ name: def.name, status: "REFUSED", error: e.detail });
+    }
   }
   return out;
 }
@@ -104,6 +159,21 @@ export async function readHealth(env: KapsoEnv): Promise<Health> {
     tier: q.messaging_limit_tier ? String(q.messaging_limit_tier) : null,
     detail: { checks: passed, name_status: q.name_status ?? null, number_status: q.status ?? null, checked_at: h.checked_at ?? null },
   };
+}
+
+/** Is this health reading worth an email to the team? Only YELLOW or RED quality, or BLOCKED messaging. LIMITED at tier
+ *  250 is normal for a business Meta has not verified. Keep in step with public.whatsapp_health_record. */
+export const healthIsBad = (h: Pick<Health, "quality" | "messaging">) =>
+  ["YELLOW", "RED"].includes((h.quality ?? "").toUpperCase()) || (h.messaging ?? "").toUpperCase() === "BLOCKED";
+
+/** The plain text of the team email: what the reading is and what Kabsi does about it. */
+export function healthAlertText(h: Pick<Health, "status" | "quality" | "messaging" | "tier">): string {
+  const parts = [`Kabsi's WhatsApp number needs a look. Quality: ${h.quality ?? "unknown"}. Messaging: ${h.messaging ?? "unknown"}.`];
+  if (h.tier) parts.push(`Daily limit: ${h.tier.replace(/^TIER_/, "")} business-started conversations.`);
+  if (["YELLOW", "RED"].includes((h.quality ?? "").toUpperCase())) parts.push("While quality is YELLOW or RED Kabsi sends digests only.");
+  if ((h.messaging ?? "").toUpperCase() === "BLOCKED") parts.push("Messaging is blocked, so nothing reaches customers or owners.");
+  parts.push("Check the number in Kapso.");
+  return parts.join(" ");
 }
 
 /** Is anything other than Kabsi's own code set to answer the number? Active workflows with a trigger on it, and any

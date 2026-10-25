@@ -145,8 +145,25 @@ export type CaseResult = {
   judge?: JudgeScore;
 };
 
-const matches = (text: string, patterns: string[] = []) =>
-  patterns.some((p) => new RegExp(p, "iu").test(text));
+// A sentence that says Kabsi does not have or cannot say something ("we don't have Wi-Fi details", "no information on
+// dogs", "no tenemos información") is honest, not an invented fact. Live run of 25 Oct: five such replies were flagged.
+// A pattern that looks for a number (a time, a price) is never excused: a stated time or price is a fact whatever surrounds it.
+const NEGATED =
+  /\b(?:(?:do|does|did|can|could|will|would|have|has|is|are|was|were)(?:n['’]t| not)|cannot|never|unable to|not able to|no|not|none|nothing|without|neither|nor|unsure|can['’]t|won['’]t)\b|n['’]t\b|\b(?:no (?:tenemos|tengo|sabemos|sé|disponemos|puedo|podemos|hay)|nunca|sin informaci[oó]n|ne (?:sais|savons|peux|pouvons|disposons)|n['’](?:avons|ai|est|y a)|pas de|aucune?|jamais)\b/iu;
+// Sentences, and clauses after "but": "we don't have a password, but we do have Wi-Fi" still claims Wi-Fi.
+const SENTENCES = /(?<=[.!?;:])\s+|\n+|\s+(?:but|however|although|though|pero|mais)\s+/iu;
+
+/** Does the text break a forbid pattern, ignoring a match that its own sentence negates ("we don't have information on dogs")? */
+export const matches = (text: string, patterns: string[] = []) =>
+  patterns.some((p) => {
+    const re = new RegExp(p, "iu");
+    return text.split(SENTENCES).some((sentence) => {
+      const m = re.exec(sentence);
+      if (!m) return false;
+      if (/\\d|\[0-9\]/.test(p)) return true;
+      return !NEGATED.test(sentence.slice(0, m.index + m[0].length));
+    });
+  });
 const contains = (text: string, needles: string[] = []) =>
   needles.some((n) =>
     text.toLowerCase().normalize("NFKC").includes(n.toLowerCase().normalize("NFKC")),

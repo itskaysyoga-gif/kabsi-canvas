@@ -18,7 +18,7 @@ import { flush, notify } from "../_shared/whatsapp/outbox.ts";
 import { caseOf, needsActionBody } from "../_shared/whatsapp/google-action.ts";
 import { SAY } from "../_shared/whatsapp/say.ts";
 import { ref } from "../_shared/whatsapp/templates.ts";
-import { checkAutomations, type KapsoEnv, readHealth, setupWebhook, submitTemplates } from "../_shared/whatsapp/kapso-admin.ts";
+import { checkAutomations, healthAlertText, type KapsoEnv, listWebhooks, readHealth, setupWebhook, submitTemplates } from "../_shared/whatsapp/kapso-admin.ts";
 
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void } | undefined;
 const MAX_BODY = 256 * 1024;
@@ -164,7 +164,10 @@ async function staffAction(action: string) {
             vaultSecret = null;
           },
         });
-        return { ok: true, webhook_id: w.id, created: w.created, secret_in_vault: true, automations: await checkAutomations(env) };
+        // Read back from Kapso and from Vault: ids, URL, active flag, and whether the secret exists (never its value).
+        const listed = await listWebhooks(env, FN_URL);
+        const inVault = !!(Deno.env.get("KAPSO_WEBHOOK_SECRET") || (await admin().rpc("internal_secret", { p_name: "kapso_webhook_secret" })).data);
+        return { ok: true, webhook_id: w.id, created: w.created, updated: w.updated, webhooks: listed, secret_in_vault: inVault, automations: await checkAutomations(env) };
       }
       case "templates":
         return { ok: true, templates: await submitTemplates(env) };
@@ -175,12 +178,13 @@ async function staffAction(action: string) {
         const { data } = await admin().rpc("whatsapp_health_record", { p_status: h.status, p_quality: h.quality, p_messaging: h.messaging, p_tier: h.tier, p_detail: h.detail });
         const r = (data ?? {}) as { bad?: boolean; changed?: boolean };
         // 9.9: anything about the number itself goes by email to hello@kabsi.co only, because the number may be what fails.
+        // Only YELLOW or RED quality, or BLOCKED messaging (public.whatsapp_health_record); LIMITED at tier 250 is normal.
         if (r.bad && r.changed) {
-          const text = `Kabsi's WhatsApp number: status ${h.status}, quality ${h.quality ?? "unknown"}, messaging ${h.messaging ?? "unknown"}. While quality is Medium or worse Kabsi sends digests only. Check the number in Kapso.`;
-          await notifyEmail({ category: "direct", kind: "whatsapp_number_alert", key: `whatsapp_number_alert:${new Date().toISOString().slice(0, 13)}`,
+          const text = healthAlertText(h);
+          await notifyEmail({ category: "internal", kind: "whatsapp_number_alert", key: `whatsapp_number_alert:${new Date().toISOString().slice(0, 13)}`,
             to: [{ email: "hello@kabsi.co", userId: null }],
             content: { subject: "Kabsi WhatsApp number health changed", preheader: "Check the number in Kapso.", title: "WhatsApp number health",
-              bodyHtml: `<p>${text}</p>`, text, why: "This notice is for the Kabsi team only." } }).catch(() => {});
+              bodyHtml: `<p>${text}</p>`, text } }).catch(() => {});
         }
         return { ok: true, status: h.status, quality: h.quality, messaging: h.messaging, tier: h.tier, alerted: !!(r.bad && r.changed) };
       }

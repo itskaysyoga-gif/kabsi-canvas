@@ -106,9 +106,37 @@ export async function draftMessage(system: System, user: string, maxTokens: numb
   }
 }
 
+/** The first complete JSON object in the model's text. Text before it, or after it (a note, a second object, a code
+ *  fence), is ignored: the live evaluation of 25 Oct failed one review because the model wrote text after its JSON. */
 export function parseJson<T>(text: string): T {
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start < 0 || end < start) throw new Error(`model returned no JSON: ${text.slice(0, 120)}`);
-  return JSON.parse(text.slice(start, end + 1)) as T;
+  let from = text.indexOf("{");
+  if (from < 0) throw new Error(`model returned no JSON: ${text.slice(0, 120)}`);
+  while (from >= 0) {
+    const end = objectEnd(text, from);
+    if (end > from) {
+      try {
+        return JSON.parse(text.slice(from, end + 1)) as T;
+      } catch {
+        // not JSON (for example braces in a sentence): try the next opening brace
+      }
+    }
+    from = text.indexOf("{", from + 1);
+  }
+  throw new Error(`model returned no JSON: ${text.slice(0, 120)}`);
+}
+
+/** The index of the brace that closes the object opened at `from`, braces inside strings ignored; -1 when it never closes. */
+function objectEnd(text: string, from: number): number {
+  let depth = 0;
+  let inString = false;
+  for (let i = from; i < text.length; i++) {
+    const c = text[i];
+    if (inString) {
+      if (c === "\\") i++;
+      else if (c === '"') inString = false;
+    } else if (c === '"') inString = true;
+    else if (c === "{") depth++;
+    else if (c === "}" && --depth === 0) return i;
+  }
+  return -1;
 }

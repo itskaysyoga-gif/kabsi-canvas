@@ -163,6 +163,9 @@ export const undoPost = (postId: string, publicationId: string) =>
     post_id: postId,
     publication_id: publicationId,
   });
+// A post waiting for its time goes back to a draft; nothing reaches Google.
+export const cancelPost = (postId: string) =>
+  contentCall<{ ok: true; state: string }>({ do: "post_cancel", post_id: postId });
 export const approveMonth = (locationId: string, month: string) =>
   contentCall<{ approved: unknown[]; held: { post_id: string }[] }>({
     do: "posts_approve_month",
