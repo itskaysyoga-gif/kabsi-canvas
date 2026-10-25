@@ -60,8 +60,6 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 - 25 Oct 2026, Session 13b part 2: staff alerts on WhatsApp, Slack removed, hours and posts, the map, Nora, START. Detail: `docs/progress/archive/2026-10-25-session-13b-2.md`.
 - 25 Oct 2026, QA 1: end-to-end journeys, baseline, replay harness, Creem test checkout, smoke. Detail: `docs/progress/archive/2026-10-25-qa-1.md`.
-- 25 Oct 2026, V1: Visibility Map engine, map image, Competitor Watch data, category check, spend cap. Detail: `docs/progress/archive/2026-10-25-v1-visibility-map.md`.
-- 25 Oct 2026, Session 10 / D (Creem): PR 221 and the part 2 PR. Detail: `docs/progress/archive/2026-10-25-session-10-creem.md`.
 
 ## How a session updates this page
 
