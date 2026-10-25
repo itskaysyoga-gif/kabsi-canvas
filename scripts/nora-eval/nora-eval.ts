@@ -103,9 +103,9 @@ const NOT_YET = new RegExp(
     String.raw`not (today|right now|for now|at the moment|on its own|something kabsi does)`,
     String.raw`no .{0,20} (at the moment|yet|for now)`,
     String.raw`\bcoming\b|comes? later|will be (available|added|built)`,
-    String.raw`todav[ií]a no|a[uú]n no|por ahora|por el momento|de momento|no est[aá] disponible|no disponible|a[uú]n no existe`,
+    String.raw`todav[ií]a no|a[uú]n no|por ahora|ahora mismo|por el momento|de momento|no est[aá] disponible|no disponible|a[uú]n no existe`,
     String.raw`pas encore|pour l'instant|pour le moment|n'est pas (encore )?disponible|pas (encore )?disponible`,
-    "لم يتوفر|غير متاح|ليس متاح|قريبا|قريباً|غير متوفر|لا يتوفر|حاليا لا|حالياً لا",
+    "لم يتوفر|غير متاح|ليس متاح|قريبا|قريباً|غير متوفر|لا يتوفر|حاليا|حالياً|لسه|لسا|ما فتح|لم يفتح",
   ].join("|"),
   "i",
 );
