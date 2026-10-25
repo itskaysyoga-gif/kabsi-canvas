@@ -21,15 +21,15 @@ The facts say "WhatsApp is live" only when the last step is done.
 |---|---|---|
 | Number acquired | 23 Oct 2026 | +1 205-745-6874 connected in the Kapso project Kabsi.co; Kapso health check Passed 10:17 Beirut (master plan 9.8) |
 | Profile set | 23 Oct 2026 | Photo, about, email, address, website and description live; the display name "Kabsi" is waiting for Meta's approval (master plan 9.8) |
-| Webhook verified | not yet | Session 13b part 1 registers it after merge (`whatsapp/staff/setup`, secret in Vault) |
-| Templates approved | not yet | 9 utility templates submitted after merge (`whatsapp/staff/templates`); approved when Meta says so |
+| Webhook verified | not yet | 25 Oct: `whatsapp/staff/setup` failed, Kapso 422; not registered (session 13b part 1 record) |
+| Templates approved | not yet | 25 Oct: `whatsapp/staff/templates` failed, Meta 400; none submitted |
 | Inbound tested | not yet | Suite of 141 cases passes in CI; the live pass on Rashid's phone is next |
 | Outbound tested | not yet | A live send to Kabsi's own test phones |
 | Owners switched on | not yet | After the launch gate |
 
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
-- **Session 13b part 1:** set the Supabase secret `WHATSAPP_LIVE` to `true`, make a staff code at kabsi.co/staff, then the 10-minute phone test in `docs/progress/archive/2026-10-25-session-13b-1.md`.
+- **Session 13b part 1 (PR 211, merged):** the phone test waits until the webhook is registered (Known limits in `docs/progress/archive/2026-10-25-session-13b-1.md`); then set `WHATSAPP_LIVE` to `true`, make a staff code at kabsi.co/staff and run the 10-minute test.
 - Session 19 rest: run `supabase/manual/20261025_places_data_purge.sql` (expected read-back `0 | 0 | 0`); set up Pub/Sub and the two secrets (`docs/progress/archive/2026-10-24-session-19-rest.md`); approve the Yawmiyati Update only once yawmiyati.com answers.
 - GitHub repository settings: Dependabot alerts and Dependabot security updates are done (marked 24 Oct by Clean 1, as Rashid asked). Open: Secret Protection (secret scanning and push protection), which Rashid confirms himself.
 - Clean 1: run `supabase/manual/20261024_clean1_drops.sql` after a yes to its list (two empty or backup tables, two unused functions).
