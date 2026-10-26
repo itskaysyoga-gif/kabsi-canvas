@@ -17,7 +17,7 @@ Check this block first. It holds every fact likely to change, verified against t
 | Ways to pay | By card, in US dollars, and nothing else. **[COMING]** Card payments are not open yet; until they open there is nothing to pay. |
 | Partners | Kabsi Partners, an affiliate program, is coming (see the 21 Oct block above); it is not open yet. The partners page says "Kabsi Partners is opening soon". There is no reselling. |
 | Who can use Kabsi | A **verified** Google Business Profile that the person **owns or manages**. Kabsi cannot check verification itself, so setup asks. |
-| How access works | The owner invites the Kabsi business group **Kabsi Clients, ID 5481006796**, as a **Manager** (People and access, Add, paste the ID, Manager, Invite). Kabsi accepts within minutes once connected. Never the email address hello@kabsi.co. |
+| How access works | The owner invites the Kabsi business group **Kabsi Clients, ID 5481006796**, as a **Manager** (People and access, Add, paste the ID, Manager, then Add, or Invite on some screens). Kabsi accepts within minutes once connected. Never the email address hello@kabsi.co. |
 | **[TIME-SENSITIVE]** Google connection | Kabsi's Google API access is under Google's review, with no date. Until then Kabsi runs in test mode and businesses can start in early access (below). |
 | **[TIME-SENSITIVE]** Early access | A person on the Kabsi team does the Google steps by hand: accepts your invitation and posts what you approve, within one working day. You still approve every word. Google Protection is off until Kabsi connects to Google. Early access is limited to 20 businesses. |
 | Address | The website and the app are at kabsi.co. |
