@@ -280,6 +280,7 @@ begin
   update public.locations set first_task_done_at = now() where id = new.location_id and first_task_done_at is null;
   return new;
 end $$;
+revoke all on function private.first_task_done() from public, anon, authenticated;
 create or replace trigger publications_first_task_done after update of state on public.publications
   for each row when (new.state = 'verified' and old.state is distinct from 'verified') execute function private.first_task_done();
 
