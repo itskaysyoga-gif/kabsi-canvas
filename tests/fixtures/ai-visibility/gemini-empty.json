@@ -1,0 +1,13 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": []
+      }
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 40,
+    "candidatesTokenCount": 0
+  }
+}

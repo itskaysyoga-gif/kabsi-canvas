@@ -1,0 +1,33 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Near Jumeirah you could try:\n1. **Yawmiyati**, a neighbourhood bakery.\n2. **Harbor Bakes**, known for pastries."
+          }
+        ]
+      },
+      "groundingMetadata": {
+        "groundingChunks": [
+          {
+            "maps": {
+              "uri": "https://maps.google.com/?cid=1",
+              "title": "Yawmiyati"
+            }
+          },
+          {
+            "maps": {
+              "uri": "https://maps.google.com/?cid=2",
+              "title": "Harbor Bakes"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 40,
+    "candidatesTokenCount": 120
+  }
+}

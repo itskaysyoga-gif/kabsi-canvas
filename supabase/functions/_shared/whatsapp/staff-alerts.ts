@@ -24,6 +24,8 @@ const URGENT = new Set([
   "whatsapp_handoff", "chat_handoff", "concierge_overdue",
   // budgets (26.9): Places at 80 percent and at the cap, the AI budget
   "places_80", "places_cap", "ai_global_cap",
+  // AI Visibility (V2, 27.10): the monthly provider cap at 80 percent and at the cap
+  "ai_visibility_80", "ai_visibility_cap",
   // the nightly smoke test, the backup
   "smoke_failed", "backup_failed",
 ]);

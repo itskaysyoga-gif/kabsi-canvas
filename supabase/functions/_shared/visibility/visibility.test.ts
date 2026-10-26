@@ -8,8 +8,8 @@ import fxPost from "../../../../tests/fixtures/dataforseo/task-post.json" with {
 import { directionOf, gridPoints, project, radiusFor, zoomFor } from "./grid.ts";
 import { dataForSeo, isSame, keyOf, type MapsItem, parseItems, rankOf, taskBody } from "./dataforseo.ts";
 import { MOCK_CENTER, mockItems, mockProvider, mockRank } from "./mock.ts";
-import { categoryCheck, type CellResult, competitors, mapMessage, reviewRaceLine, summarize } from "./scan.ts";
-import { band, CREDIT_KABSI, CREDIT_MAP, GRID_SPAN, LEGEND, MAX_BYTES, pinStyle, renderMap, title } from "./map-image.ts";
+import { businessType, categoryCheck, type CellResult, competitors, mapMessage, reviewRaceLine, summarize } from "./scan.ts";
+import { band, CREDIT_KABSI, CREDIT_MAP, GRID_SPAN, LEGEND, LEGEND_NOTE, MAX_BYTES, pinStyle, renderMap, title } from "./map-image.ts";
 import { staticMapUrl } from "./geoapify.ts";
 import { locate } from "./locate.ts";
 import { type KeywordRow, type PointRow, type RunDeps, type ScanRow, tick } from "./run.ts";
@@ -141,19 +141,21 @@ Deno.test("scan: the three numbers and who beats the business where", () => {
 
 Deno.test("scan: the WhatsApp line is docs/COPY.md section 20, with no dash and no exclamation mark", () => {
   const s = summarize(mockCells(), who);
-  const m = mapMessage({ summary: s, keyword: "bakery", business: "Yawmiyati", first: true });
-  assertEquals(m.body, `Your first map is ready. We searched 'bakery' on Google Maps from 49 places around Yawmiyati, like a customer standing there. You came up in the top 3 from ${s.top3} of them. East of Yawmiyati, Harbor Bakes comes up first.`);
+  const m = mapMessage({ summary: s, keyword: "bakery", businessType: "bakery", first: true });
+  assertEquals(m.body, `Your first map is ready. We searched 'bakery' on Google Maps from 49 places around your bakery, like a customer standing there. You came up in the top 3 from ${s.top3} of them. To the east, Harbor Bakes comes up first.`);
   assertEquals(/spot|grid|pin\b/i.test(m.body), false, "COPY 0.1: never spots, grid or pin");
+  assertEquals(businessType("Hair Salon"), "hair salon");
+  assertEquals(businessType(null), "business");
   assertEquals(m.buttons.map((b) => b.title), ["Show me", "Later"]);
-  const later = mapMessage({ summary: s, keyword: "bakery", business: "Yawmiyati", first: false, steps: ["Reply to 2 reviews", "Add 5 photos", "Post this week"] });
+  const later = mapMessage({ summary: s, keyword: "bakery", businessType: "bakery", first: false, steps: ["Reply to 2 reviews", "Add 5 photos", "Post this week"] });
   assertMatch(later.body, /^Your new map is ready\./);
   assertMatch(later.body, /3 next steps:\n1\. Reply to 2 reviews\n2\. Add 5 photos\n3\. Post this week$/);
   for (const t of [m.body, later.body]) assert(!/[–—!]/.test(t));
   // Everywhere beaten: no side to name, so the count instead.
-  const everywhere = mapMessage({ summary: { ...s, beats: { key: "k", name: "Oven Street", spots: 49, direction: null } }, keyword: "bakery", business: "Y", first: false });
+  const everywhere = mapMessage({ summary: { ...s, beats: { key: "k", name: "Oven Street", spots: 49, direction: null } }, keyword: "bakery", businessType: "bakery", first: false });
   assertMatch(everywhere.body, /Oven Street comes up first from 49 of the 49 places\.$/);
   // Nobody above it anywhere: the line stops after the numbers.
-  assertMatch(mapMessage({ summary: { ...s, beats: null }, keyword: "bakery", business: "Y", first: true }).body, /of them\.$/);
+  assertMatch(mapMessage({ summary: { ...s, beats: null }, keyword: "bakery", businessType: "bakery", first: true }).body, /of them\.$/);
 });
 
 Deno.test("Competitor Watch: the offer list, never the business itself, best first", () => {
@@ -277,6 +279,8 @@ Deno.test("map image: the bands and pins follow DESIGN.md (never red, amber ring
   assertEquals(pinStyle(15), { band: "low", label: "15", fill: "#fef3c7", text: "#111111", ring: "#b45309" });
   assertEquals(pinStyle(null), { band: "none", label: "20+", fill: "#0b0b0b", text: "#FFFFFF", ring: "#FFFFFF" });
   assertEquals([...LEGEND], ["1 to 3", "4 to 10", "11 to 20", "Not in top 20"]);
+  assertEquals(LEGEND_NOTE, "Each dot is a place near you where Kabsi searched like a customer. The number is where you came up. 1 is first.");
+  assertEquals(/spot|grid|pin\b|[–—!]/i.test(LEGEND_NOTE), false);
   assertEquals(CREDIT_KABSI, "Kabsi rank check, not provided by Google.");
   assertEquals(CREDIT_MAP, "Map: Geoapify, © OpenStreetMap contributors.");
   assertEquals(title("bakery", "Harbor Cafe"), "'bakery' around Harbor Cafe");

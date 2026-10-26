@@ -1,0 +1,56 @@
+{
+  "version": "0.1.20250526",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "cost": 0.0014,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "fixture-task",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "cost": 0.0014,
+      "result": [
+        {
+          "model_name": "gpt-4.1-mini-2025-04-14",
+          "input_tokens": 88,
+          "output_tokens": 310,
+          "web_search": true,
+          "money_spent": 0.0008,
+          "datetime": "2026-10-26 09:00:00 +00:00",
+          "items": [
+            {
+              "type": "message",
+              "sections": [
+                {
+                  "type": "text",
+                  "text": "Here are some well reviewed bakeries in Jumeirah:\n1. **Yawmiyati** - fresh sourdough and a quiet courtyard.\n2. **Harbor Bakes** - known for pastries.\n3. **Corner Crumb** - open late.",
+                  "annotations": [
+                    {
+                      "title": "The best bakeries in Dubai",
+                      "url": "https://www.timeout.com/dubai/restaurants/best-bakeries-in-dubai",
+                      "start_index": 0,
+                      "end_index": 10,
+                      "text": "The best bakeries in Dubai"
+                    },
+                    {
+                      "title": "Bakeries in Dubai",
+                      "url": "https://www.tripadvisor.com/Restaurants-g295424",
+                      "start_index": 0,
+                      "end_index": 10,
+                      "text": "Bakeries in Dubai"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "fan_out_queries": [
+            "best bakery in jumeirah"
+          ]
+        }
+      ]
+    }
+  ]
+}

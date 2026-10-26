@@ -56,30 +56,38 @@ export function summarize(cells: CellResult[], who: Identity): Summary {
   };
 }
 
-// ─── the WhatsApp line (docs/COPY.md section 20, "Owner, first map") ─────────────────────────────────────────────
+// ─── the WhatsApp line (docs/COPY.md sections 0.1 and 20) ───────────────────────────────────────────────────────────
 export type MapMessage = { body: string; buttons: { id: string; title: string }[] };
 
-export function beatsLine(s: Summary, business: string): string | null {
+/** "to the north east": the side the rival leads on, as an owner would say it. */
+const sideOf = (d: Direction) => `To the ${d}`;
+
+export function beatsLine(s: Summary): string | null {
   if (!s.beats) return null;
   // docs/COPY.md 0.1 and 20: places around you, never spots; "comes up first", never "beats you".
   if (!s.beats.direction) return `${s.beats.name} comes up first from ${s.beats.spots} of the ${s.points} places.`;
-  const where = `${s.beats.direction} of ${business}`;
-  return `${where[0].toUpperCase()}${where.slice(1)}, ${s.beats.name} comes up first.`;
+  return `${sideOf(s.beats.direction)}, ${s.beats.name} comes up first.`;
+}
+
+/** The business in the owner's words for "around your ...": its category lower case ("bakery"), else "business". */
+export function businessType(category: string | null | undefined): string {
+  const c = (category ?? "").replace(/[^\p{L}\p{N}\s'&-]/gu, " ").replace(/\s+/g, " ").trim().toLowerCase();
+  return c && c.length <= 40 ? c : "business";
 }
 
 /**
- * docs/COPY.md section 20: "Your first map is ready. We searched 'bakery' on Google Maps from 49 places around your shop,
- * like a customer standing there. You came up in the top 3 from 18 of them. East of the station, Harbor Bakes comes up
- * first. 3 next steps:" The steps come from Insights (V4); without them the line ends after the numbers.
+ * docs/COPY.md 0.1 and 20: "We searched '[keyword]' on Google Maps from 49 places around your [business type], like a
+ * customer standing there. You came up in the top 3 from [n] of them. [Direction], [Competitor] comes up first." The first
+ * map opens with "Your first map is ready." and the steps come from Insights (V4); without them the line ends after the numbers.
  */
-export function mapMessage(o: { summary: Summary; keyword: string; business: string; first: boolean; steps?: string[] }): MapMessage {
+export function mapMessage(o: { summary: Summary; keyword: string; businessType: string; first: boolean; steps?: string[] }): MapMessage {
   const s = o.summary;
   const parts = [
     o.first ? "Your first map is ready." : "Your new map is ready.",
-    `We searched '${o.keyword}' on Google Maps from ${s.points} places around ${o.business}, like a customer standing there.`,
+    `We searched '${o.keyword}' on Google Maps from ${s.points} places around your ${o.businessType}, like a customer standing there.`,
     `You came up in the top 3 from ${s.top3} of them.`,
   ];
-  const b = beatsLine(s, o.business);
+  const b = beatsLine(s);
   if (b) parts.push(b);
   let body = parts.join(" ");
   if (o.steps?.length) body += ` ${o.steps.length} next steps:\n` + o.steps.map((t, i) => `${i + 1}. ${t}`).join("\n");

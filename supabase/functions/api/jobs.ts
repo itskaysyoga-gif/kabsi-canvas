@@ -20,7 +20,7 @@ import { admin, APP_URL, captureError, internalSecret, isInternal, jobLog, json,
 import { notify, notifyDue } from "../_shared/notify.ts";
 import { lifecycleJob } from "../_shared/lifecycle-db.ts";
 import * as copy from "../_shared/email/copy.ts";
-import { type Job, type JobHandler, type JobState, PermanentJobError, runJob } from "../_shared/jobs.ts";
+import { type Job, type JobHandler, type JobState, PermanentJobError, RetryLater, runJob } from "../_shared/jobs.ts";
 import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation } from "../_shared/reviews.ts";
 import { AiBudgetError } from "../_shared/ai-budget.ts";
 import { protectionCheck } from "../_shared/protection.ts";
@@ -46,6 +46,8 @@ import { useTool } from "../_shared/ai/agents.ts";
 import { liveAccessWhatsapp } from "../_shared/access-notice.ts";
 import { applyEvent, paymentReminder } from "../_shared/billing.ts";
 import { sendCapi } from "../_shared/meta-capi.ts";
+import { aiDeps, sendOwnerLine } from "../_shared/visibility/ai/deps.ts";
+import { AiCapped, AiPermanent, runOne as runAiVisibility } from "../_shared/visibility/ai/run.ts";
 
 // Offer a job. Returns its id, or null when the same dedupe key is already pending, running or retrying.
 async function enqueueJob(kind: string, locationId: string | null, dedupeKey: string, payload: Record<string, unknown> = {}) {
@@ -422,6 +424,20 @@ const HANDLERS: Record<string, JobHandler> = {
   // P0.5-02: the posts care routine for one business, this month and the next (_shared/posts/plan.ts). It prepares
   // only from something true and asks one question otherwise; it never publishes.
   care_posts: async (job) => void await carePosts(job.location_id!),
+  // V2: one AI Visibility answer (Scout): a prompt, one provider. A capped month waits a day; a provider that will not
+  // answer is retried by the queue; the last try marks the run failed. When the cycle's last run is in, the owner's line goes out.
+  ai_visibility_run: async (job) => {
+    const runId = String(job.payload.run_id ?? "");
+    if (!runId) throw new PermanentJobError("ai_visibility_run needs a run");
+    try {
+      const r = await runAiVisibility(aiDeps, runId, { lastTry: job.attempts + 1 >= job.max_attempts });
+      if (r === "done" && job.location_id) await sendOwnerLine(job.location_id).catch((e) => captureError("jobs", e, { step: "ai_visibility_line" }));
+    } catch (e) {
+      if (e instanceof AiCapped) throw new RetryLater(e.message, e.until);
+      if (e instanceof AiPermanent) throw new PermanentJobError(e.message);
+      throw e;
+    }
+  },
   // P0.5-01: one uploaded photo, processed by the `photos` function (its own call, so a large photo has that
   // function's time to itself and never holds up the other jobs here).
   process_photo: async (job) => {

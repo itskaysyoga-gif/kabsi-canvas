@@ -1,0 +1,60 @@
+{
+  "version": "0.1.20250526",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "cost": 0.0021,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "fixture-task",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "cost": 0.0021,
+      "result": [
+        {
+          "model_name": "sonar",
+          "input_tokens": 88,
+          "output_tokens": 310,
+          "web_search": true,
+          "money_spent": 0.0015,
+          "datetime": "2026-10-26 09:00:00 +00:00",
+          "items": [
+            {
+              "type": "message",
+              "sections": [
+                {
+                  "type": "text",
+                  "text": "Several bakeries are often recommended in Jumeirah.\n\n- **Harbor Bakes** is frequently mentioned for pastries.\n- **Yawmiyati** is praised for sourdough.\n",
+                  "annotations": [
+                    {
+                      "title": "Bakeries in Dubai",
+                      "url": "https://www.tripadvisor.com/Restaurants-g295424",
+                      "start_index": 0,
+                      "end_index": 10,
+                      "text": "Bakeries in Dubai"
+                    },
+                    {
+                      "title": "Best bakery in Jumeirah",
+                      "url": "https://reddit.com/r/dubai",
+                      "start_index": 0,
+                      "end_index": 10,
+                      "text": "Best bakery in Jumeirah"
+                    },
+                    {
+                      "title": "No url",
+                      "url": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "fan_out_queries": [
+            "best bakery in jumeirah"
+          ]
+        }
+      ]
+    }
+  ]
+}

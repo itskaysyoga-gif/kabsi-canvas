@@ -1,0 +1,17 @@
+{
+  "version": "0.1.20250526",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "cost": 0.0014,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "fixture-task",
+      "status_code": 40501,
+      "status_message": "Internal error.",
+      "cost": 0.0014,
+      "result": null
+    }
+  ]
+}

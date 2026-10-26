@@ -73,6 +73,12 @@ select ok(tests.visible_victim_rows('visibility_keywords') = 1 and tests.visible
   and tests.visible_victim_rows('competitor_snapshots') = 1 and tests.visible_victim_rows('provider_spend') = 0,
   'control: the victim owner sees their own visibility rows and no provider spend');
 reset role;
+-- V2: the owner sees their own AI Visibility prompts, runs and answers.
+select tests.act_as('00000000-0000-4000-8000-0000000000a1');
+select ok(tests.visible_victim_rows('ai_visibility_prompts') = 1 and tests.visible_victim_rows('ai_visibility_runs') = 1
+  and tests.visible_victim_rows('ai_visibility_answers') = 1,
+  'control: the victim owner sees their own AI Visibility rows');
+reset role;
 
 -- P0.8-01 (K-127): the old partner tables are gone, so no partner can see anything of a business.
 select is(
