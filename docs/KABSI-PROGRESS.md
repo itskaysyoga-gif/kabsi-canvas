@@ -11,7 +11,7 @@ One page, under 10 KB. Updated 25 Oct 2026 by the lane R chat (master plan 19, 2
 - V3 (26 Oct, PR 246 merged, deploy run 114 green): Ask a customer is one ready message with the review link (no customer number ever stored), link opens counted apart from reviews, counter card and table tent PDFs, photos from WhatsApp on both plans (Yes, Edit, Skip), the monthly question, sensitive reviews without text, voice notes behind a provider (mock until the key is set). Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
 - 26 Oct, lane R: V2's migration applied; Meta pixel live; QA_SMOKE_TOKEN set; Slack leftovers dropped (0 | 0 | 0 | 0); master plan 30.14.
 - 26 Oct, lane R: the outside review decided (30.15, 30.16) and 30.17 (Founding 25, Home for every business with industry pages, easy access, getkabsi.com). Design 1 to 4 and 3 approved in the design studio. Next: Design 5, V3, Partners, V4, Outbound, Web 2 with Content 1, UX 1, Sec 1, the launch gate.
-- V4 (PR 250, 27 Oct): onboarding in four stages, the first task, every task closes, the work receipt data, nearby places, the free check route, the category and monthly-facts proposals, the voice test op. Detail: `docs/progress/archive/2026-10-27-v4.md`.
+- V4 (PR 250, merged 26 Oct, deploy run 116 green; migration applied by lane R): onboarding in four stages, the first task, every task closes, the work receipt data, nearby places, the free check route, the category and monthly-facts proposals, the voice test op. The voice test did not pass (Gulf Arabic and mixed notes), so voice notes stay off. Detail: `docs/progress/archive/2026-10-27-v4.md`.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
@@ -41,7 +41,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 - Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
 - V3 heads-up: the first live tick after the deploy sent one "your photo is ready" message to the Yawmiyati phone about an old 25 Oct test photo (tap Skip, never Yes: Yes would publish it to the real profile) and queued the monthly question there; your next typed message within 3 days is read as its answer, so reply No to close it.
-- V3 and V4: at the launch gate submit the templates `kabsi_photo_ready`, `kabsi_business_update`, `kabsi_setup_step` and `kabsi_work_update`. The voice test now runs server-side (V4); nothing to run by hand.
+- V3 and V4: at the launch gate submit the templates `kabsi_photo_ready`, `kabsi_business_update`, `kabsi_setup_step` and `kabsi_work_update`. Voice notes stay off: the voice test failed for Gulf Arabic and mixed notes (LATER row).
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up and Gemini billing at the launch gate.
 
 ## Open After merge checks and findings
