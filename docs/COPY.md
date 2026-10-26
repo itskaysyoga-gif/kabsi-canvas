@@ -247,7 +247,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 
 ## 20. WhatsApp screens (one per role)
 
-- Owner, review: "[Business]: new 4-star review from Maya. 'Great sourdough, a bit of a wait on Saturday.' Reply ready: 'Thank you, Maya...' Reply Yes to publish." Buttons: Yes / Edit / Skip. After Yes: "Published on your Google listing."
+- Owner, review: "[Business]: new 4-star review from Maya. 'Great sourdough, a bit of a wait on Saturday.' Reply ready: 'Thank you, Maya...' Reply Yes to publish." Buttons: Yes / Edit / Skip. After Yes: "Published on your Google profile."
 - Owner, first map: "Your first map is ready. We searched 'bakery' on Google Maps from 49 places around your shop, like a customer standing there. You came up in the top 3 from 18 of them. East of the station, Harbor Bakes comes up first. 3 next steps:" Buttons: "Show me" / "Later".
 - Partner: "Hi Sara. This week: 42 page visits, 6 scans, 2 trials, 1 paying business. Earned $9.75, cleared after the 30-day hold. Next payout: 5 Nov." Buttons: "My link" / "Scan a business".
 - staff_admin: "Morning, Rashid. 3 things today: 2 partner applications, 1 payout list to approve, number health good." Buttons: "Review applications" / "Approve payouts".
