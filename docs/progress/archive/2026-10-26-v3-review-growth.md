@@ -41,3 +41,13 @@ No defects in review-cards, the Worker and tap change, the migration's grants an
 8. A failure on one claimed item dropped the rest: each item has its own try, the tick reports the failures after sending the others.
 Also: the photo category menu closes on any other message.
 Final local run after the fixes: `bash scripts/deno-check.sh` 861 and 15 Deno tests pass, Nora stub gate passed; `npx vitest run` 503 pass; typecheck clean.
+
+## CI and merge
+First push: the Database job failed on `supabase/tests/whatsapp_channel.sql` test 35 ("nothing but replies, posts and put-backs"), which asserted that a photo is refused on WhatsApp, the rule this change replaces. The test now asserts the same refusal for a profile edit (`listing_edit`) and its name says photos joined the list. This is an edit to an existing test, listed for lane R; no other test, threshold or workflow was touched. Head d0063bb: all 13 checks green (App, Database, Edge Functions and Worker, Nora gate, Prompt gate, Secret scan, Dependency review, Load, CodeQL, Lighthouse report only). Merged with a merge commit, 8ea50ef, `main` had not moved.
+
+## After merge (PR 246, merge 8ea50ef, Deploy run 114 green)
+- `POST /functions/v1/review-cards` with only the anon key: `401 sign_in_required` (the function is live and refuses anyone who is not signed in). Before the deploy it answered 404 not found.
+- kabsi.co/review/KQA234 answers 200; the live `llms-full.txt` carries the new facts ("Ask a customer" 4 times).
+- Database: no failed jobs in the last hour; `private.review_growth_due()` false after the first tick.
+- The first live tick ran the new code: 7 V3 outbox rows. One "your photo is ready" went live to the Yawmiyati phone (an old test photo from 25 Oct, inside the 2 day window the tick reads), the rest to the fictional QA personas (mock) or queued as a batch; 3 rows in `business_update_prompts` (Yawmiyati, Harbour Lane Coffee, Juniper Hair Studio), the monthly question queued for each. A rollout artefact, not a bug: the photos the engine finished in the last 2 days were announced once.
+- Not verified live: a real photo from the owner's phone through Yes, Edit, Skip to Google; a real voice note; a signed-in PDF download; a forwarded message link counted as `message` (the Worker `kabsi-go` is a job of the same Deploy run 114, which was green, but no real `?s=m` open has been made). These need Rashid's phone and a signed-in session.
