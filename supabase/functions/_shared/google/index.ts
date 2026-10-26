@@ -3,7 +3,7 @@
 // Google's responses into the shapes the app uses. Every write here (sendReply, createLocalPost, uploadPhoto,
 // addSpecialHours, patchListing) is only ever called by the publish job in api/jobs.ts, after the owner's approval
 // and claim_publication (guardrail 6, P0.1-13a and P0.1-13b).
-import { type InvitationAddress, invitationPlace, matchInvitation, type PendingBusiness } from "../invitations.ts";
+import { type InvitationAddress, invitationPlace, matchByPlace, matchInvitation, type PendingBusiness, type PlaceResolver } from "../invitations.ts";
 import { isConciergeLocationId } from "../concierge.ts";
 import { regularHoursDisplay } from "../hours.ts";
 import { assertNotConcierge, googleMode, modeFor, type Mode } from "./client.ts";
@@ -55,7 +55,17 @@ const by = <L, M>(mode: Mode, live: L, mock: M): L | M => (mode === "mock" ? moc
 // location and exactly one consented business matches its name and address or city. Anything else is left
 // pending and reported. Owners invite Kabsi's business group (D293); invitations show up under every account this
 // login can see (the organization, the business group, the personal account), so all of them are listed.
-export async function acceptInvitationsAndListLocations(pending: PendingBusiness[] = []): Promise<{ accepted: number; skipped: SkippedInvitation[]; locations: ManagedLocation[] }> {
+// Access 1b: the Places lookup for invitations whose address text does not match (one result, place ID only).
+const placesResolver = (): PlaceResolver | null => {
+  const key = Deno.env.get("PLACES_API_KEY");
+  if (!key) return null;
+  return async (query) => {
+    const r = await placesLive.searchText(key, query, 1, "places.id");
+    return r.ok ? r.data.places?.[0]?.id ?? null : null;
+  };
+};
+
+export async function acceptInvitationsAndListLocations(pending: PendingBusiness[] = [], resolvePlace: PlaceResolver | null = googleMode() === "live" ? placesResolver() : null): Promise<{ accepted: number; skipped: SkippedInvitation[]; locations: ManagedLocation[] }> {
   const mode = googleMode();
   const accounts = by(mode, accountsLive, accountsMock);
   const locations = by(mode, locationsLive, locationsMock);
@@ -72,7 +82,8 @@ export async function acceptInvitationsAndListLocations(pending: PendingBusiness
       const place = invitationPlace(address);
       if (inv.targetType && inv.targetType !== "LOCATIONS_ONLY" && !inv.targetLocation) { skipped.push({ invitation: inv.name, reason: "not a location invitation", location: locName, place }); continue; }
       if (inv.role && inv.role !== "MANAGER") { skipped.push({ invitation: inv.name, reason: `role ${inv.role}, not MANAGER`, location: locName, place }); continue; }
-      const match = matchInvitation(locName, address, open);
+      let match = matchInvitation(locName, address, open);
+      if (!match.ok && resolvePlace && match.reason.startsWith("name matches")) match = await matchByPlace(locName, address, open, resolvePlace);
       if (!match.ok) { skipped.push({ invitation: inv.name, reason: match.reason, location: locName, place }); continue; }
       await accounts.acceptInvitation(inv.name);
       open = open.filter((p) => p !== match.business);

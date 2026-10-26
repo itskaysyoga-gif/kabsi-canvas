@@ -6,7 +6,7 @@
 // Highway"), so a saved address of two words or more also counts when it appears whole inside Google's street lines
 // and city. Area, postcode and country are never used for this, so "Dubai" or "London" alone never matches.
 
-export type PendingBusiness = { name: string; address?: string | null };
+export type PendingBusiness = { name: string; address?: string | null; placeId?: string | null };
 // Google documents the invitation's address as one formatted string ("1 Main Street, Example Town, CA 00000");
 // the postal-address object is still read in case Google sends that shape.
 export type InvitationAddress = string | { addressLines?: string[]; locality?: string; administrativeArea?: string; postalCode?: string } | null | undefined;
@@ -82,4 +82,23 @@ export function matchInvitation(locationName: string, address: InvitationAddress
   if (!matches.length) return { ok: false, reason: "name matches but address or city does not" };
   if (matches.length > 1) return { ok: false, reason: `ambiguous: ${matches.length} consented businesses match` };
   return { ok: true, business: matches[0] };
+}
+
+// Access 1b (26 Oct 2026): Google can write the invitation's address in another script than the saved one (Arabic
+// for a Lebanese listing: "طريق ميرنا شالوحي, Lebanon" against "Mirna Chalouhi"), so no text rule can match it. When
+// the name matches exactly but the address text does not, Places is asked which listing that name and address is
+// (place IDs only, one result). The invitation is accepted only when that first result is the place ID of exactly one
+// consented business with that name. A same-named listing elsewhere resolves to its own place ID and stays pending.
+export type PlaceResolver = (query: string) => Promise<string | null>;
+export async function matchByPlace(locationName: string, address: InvitationAddress, pending: PendingBusiness[], resolve: PlaceResolver): Promise<InvitationMatch> {
+  const name = norm(locationName);
+  const sameName = pending.filter((p) => norm(p.name) === name && p.placeId);
+  if (!name || !sameName.length) return { ok: false, reason: "no consented business with this name and a place ID" };
+  const text = typeof address === "string" ? address.trim() : invitationPlace(address);
+  if (!text) return { ok: false, reason: "invitation has no address to look up" };
+  const id = await resolve(`${locationName}, ${text}`);
+  if (!id) return { ok: false, reason: "name matches, address does not, and Places found no listing" };
+  const hits = sameName.filter((p) => p.placeId === id);
+  if (hits.length !== 1) return { ok: false, reason: "name matches, address does not, and Places names another listing" };
+  return { ok: true, business: hits[0] };
 }

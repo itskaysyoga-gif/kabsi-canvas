@@ -66,7 +66,7 @@ export async function accessJob() {
       if (testOwner) matches.push({ id: l.id, accountId: "accounts/mock", locationId: `locations/mock-${l.id.slice(0, 8)}` });
     }
   } else {
-    const result = await acceptInvitationsAndListLocations(pending.filter((l) => l.consent_at).map((l) => ({ name: l.name, address: l.address })));
+    const result = await acceptInvitationsAndListLocations(pending.filter((l) => l.consent_at).map((l) => ({ name: l.name, address: l.address, placeId: l.place_id })));
     accepted = result.accepted;
     if (result.skipped.length) await captureError("cron-tick", new Error("Google invitations left pending (D270)"), { job: "access", skipped: result.skipped.slice(0, 10) });
     const byPlace = new Map(result.locations.filter((l) => l.placeId).map((l) => [l.placeId!, l]));

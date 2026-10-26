@@ -58,7 +58,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 26 Oct 2026, Access 1: invitations accepted again. Detail: `docs/progress/archive/2026-10-26-access-1.md`.
+- 26 Oct 2026, Access 1 and 1b: invitations accepted again (Places confirms other scripts). Detail: `docs/progress/archive/2026-10-26-access-1.md`.
 - 26 Oct 2026, V2: AI Visibility. Detail: `docs/progress/archive/2026-10-26-v2-ai-visibility.md`.
 
 ## How a session updates this page

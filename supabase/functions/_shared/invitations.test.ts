@@ -1,6 +1,6 @@
 // Run: deno test supabase/functions/_shared/invitations.test.ts
 import assert from "node:assert/strict";
-import { addressMatches, matchInvitation, norm } from "./invitations.ts";
+import { addressMatches, matchByPlace, matchInvitation, norm } from "./invitations.ts";
 
 const younes = { name: "Cafe Younes", address: "Hamra Street 12, Beirut, Lebanon" };
 const plain = { name: "Cafe", address: "Main Street 5, Beirut, Lebanon" };
@@ -101,4 +101,34 @@ Deno.test("Access 1: Google's address as one string (its documented shape)", () 
   assert.equal(addressMatches("Unit 4, London", "1 High Street, London"), false);
   assert.equal(addressMatches("Mirna Chalouhi", ""), false);
   assert.equal(addressMatches(null, "Mirna Chalouhi"), false);
+});
+
+Deno.test("Access 1b: Google's address in Arabic is confirmed by the place ID from Places", async () => {
+  const yawmiyati = { name: "Yawmiyati", address: "Mirna Chalouhi", placeId: "ChIJyawmiyati" };
+  const arabic = "طريق ميرنا شالوحي, Lebanon";
+  assert.equal(matchInvitation("Yawmiyati", arabic, [yawmiyati]).ok, false);
+  const asked: string[] = [];
+  const r = await matchByPlace("Yawmiyati", arabic, [yawmiyati], (q) => { asked.push(q); return Promise.resolve("ChIJyawmiyati"); });
+  assert.equal(r.ok && r.business.name, "Yawmiyati");
+  assert.deepEqual(asked, ["Yawmiyati, طريق ميرنا شالوحي, Lebanon"]);
+});
+
+Deno.test("Access 1b: Places naming another listing, or none, leaves the invitation pending", async () => {
+  const b = { name: "Fade Barbers", address: "10 King Street, Manchester", placeId: "ChIJmine" };
+  assert.equal((await matchByPlace("Fade Barbers", "5 Other Road, Leeds", [b], () => Promise.resolve("ChIJstranger"))).ok, false);
+  assert.equal((await matchByPlace("Fade Barbers", "5 Other Road, Leeds", [b], () => Promise.resolve(null))).ok, false);
+});
+
+Deno.test("Access 1b: no lookup without a same-named business with a place ID, or without an address", async () => {
+  let calls = 0;
+  const resolve = () => { calls++; return Promise.resolve("ChIJmine"); };
+  assert.equal((await matchByPlace("Fade Barbers", "5 Other Road", [{ name: "Fade Barbers", address: "x", placeId: null }], resolve)).ok, false);
+  assert.equal((await matchByPlace("Other Name", "5 Other Road", [{ name: "Fade Barbers", address: "x", placeId: "ChIJmine" }], resolve)).ok, false);
+  assert.equal((await matchByPlace("Fade Barbers", "", [{ name: "Fade Barbers", address: "x", placeId: "ChIJmine" }], resolve)).ok, false);
+  assert.equal(calls, 0);
+});
+
+Deno.test("Access 1b: two consented businesses sharing a place ID are never accepted", async () => {
+  const a = { name: "Cafe", address: "a", placeId: "ChIJsame" }, b = { name: "Cafe", address: "b", placeId: "ChIJsame" };
+  assert.equal((await matchByPlace("Cafe", "Somewhere", [a, b], () => Promise.resolve("ChIJsame"))).ok, false);
 });
