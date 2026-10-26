@@ -38,7 +38,7 @@ Decisions taken while writing (lane R, R-41):
 - Never: top of Google, more customers, fully automatic, set and forget, we manage everything, Google-approved, Google partner, we remove bad reviews, no work needed, AI recommends you.
 
 **Founding 25 (30.17):** Banner: "Founding 25: three months of Kabsi Pro, free, for 25 businesses. We do the Google work; you tell us what to make better." Then "[n] of 25 places left." (the real count) and the button "Apply for a place". Under it: "By application. No card. After 90 days, choose a plan or stop, nothing is charged by itself."
-**Access steps (30.17, the same everywhere):** "On Google, open your profile (search your business name while signed in), then Menu, Business Profile settings, People and access, Add. Paste 5481006796, choose Manager, Invite." Under it: "5481006796 is Kabsi Clients, Kabsi's business group on Google. Never send us a password or a code." Button: "Copy the ID".
+**Access steps (30.17, the same everywhere):** "On Google, open your profile (search your business name while signed in), then Menu, Business Profile settings, People and access, Add. Paste 5481006796, choose Manager, then Add (on some screens, Invite)." Under it: "5481006796 is Kabsi Clients, Kabsi's business group on Google. Never send us a password or a code." Button: "Copy the ID".
 
 ## 1. Home (/)
 
@@ -260,7 +260,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 **Onboarding, the first 48 hours (30.16 section 3).** Sent only when the event happens. Outside the 24-hour window, the approved template with the same words.
 - First message back: "Hi [Name], I am Nora, Kabsi's AI assistant. I have your free check for [Business]. Can Kabsi send your setup steps and approvals here? Reply Yes, or Help to talk to Rashid, the founder. Reply Stop any time." The free check is sent whatever the answer.
 - The check: "Your nearby check for '[search]', [date]: [one factual line]. Results change by place and time. Nothing has changed on Google."
-- The invite: "Next, add Kabsi as a Manager on your Google profile. On Google: your profile, Business Profile settings, People and access, Add. Paste Kabsi's ID 5481006796 (it comes in the next message, to copy), choose Manager, Invite. Manager access lets Kabsi make changes, and Kabsi publishes only what you approve. You stay the owner and can remove Kabsi any time. Never send us a password or a code."
+- The invite: "Next, add Kabsi as a Manager on your Google profile. On Google: your profile, Business Profile settings, People and access, Add. Paste Kabsi's ID 5481006796 (it comes in the next message, to copy), choose Manager, then Add (on some screens, Invite). Manager access lets Kabsi make changes, and Kabsi publishes only what you approve. You stay the owner and can remove Kabsi any time. Never send us a password or a code."
 - Right after it, on its own so a long press copies it: "5481006796"
 - If someone else looks after the profile: "Send these steps to whoever looks after your Google profile:" then the five steps and the ID.
 - Cannot find it: "You may be signed in to another Google account, or you may be a manager yourself. Only an owner can invite Kabsi. Does someone else look after Google for [Business]?"

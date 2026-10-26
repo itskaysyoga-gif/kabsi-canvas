@@ -1142,3 +1142,53 @@ Changes 30.15 and 30.16 where they differ.
 
 ### 5. Order
 Design 5 (Opus, the design studio: Home for every business with the business picker, the yellow phrase, the industry template, the nine hubs, three finished industry pages as the model, the Founding 25 blocks, the access steps); then V3 (Sonnet) and Partners (Opus, with Founding 25); V4 (Opus); Outbound (Opus); Web 2 (Opus) with Content 1 (Sonnet: the rest of wave 1 from claim sheets and keyword data); UX 1 (Opus); Sec 1 (Opus); the launch gate.
+
+## 30.18 No Arabic in any media, one brand with separate mail streams, emails that look like Kabsi, videos, Design 5 round 2 (lane R, 26 Oct 2026, R-98)
+Changes 30.17 where they differ.
+
+### 1. No Arabic in any media (extends R-61)
+- R-61 covers videos, screen recordings, screenshots, photos, ads, reels, thumbnails and posters too. Any Arabic script in frame is blurred, cropped or re-recorded: business logos (Yawmiyati's logo is Arabic calligraphy), map and street labels, contact names, keyboards, browser tabs, captions and voice. Voice and captions are English only.
+- Every recording also hides Google's logo and colour marks, account photos, email addresses, phone numbers, contact suggestions, other people's photos on a listing, and notifications.
+- Lane R checks every video frame by frame (a contact sheet at 2 frames a second) before it ships.
+
+### 2. One brand, separate mail streams
+- kabsi.co is the brand and the only website. Everything public (site, ads, social, WhatsApp, every email link) points to kabsi.co.
+- getkabsi.com is for mail only and stays silent: no website, no pages, no tracking, never shown anywhere. On Cloudflare: a proxied placeholder record for the root and www and one Redirect Rule that sends every request to https://kabsi.co/ with a 301 (path and query dropped). DNS holds only MX, SPF (Zoho only), DKIM (Zoho) and DMARC: p=none with reports to rashid@getkabsi.com for the first 30 days, then p=quarantine once the reports are clean. It is never used for signups, Resend, links, ads or social accounts.
+- The streams:
+
+| Stream | From | Through | To |
+| --- | --- | --- | --- |
+| Account and product | Kabsi <hello@send.kabsi.co>, Reply-To hello@kabsi.co | Resend | owners who signed up |
+| Lifecycle and news | Kabsi <hello@news.kabsi.co> | Resend | owners, and leads who opted in |
+| People writing to Kabsi | hello@kabsi.co | Zoho | anyone |
+| Outbound | Rashid Abou Hamzy <rashid@getkabsi.com> | Zoho, from the Outbound session's sender, never Resend | published business emails only (30.16) |
+
+- Why separate: if getkabsi.com ever loses reputation, the mail to paying owners on kabsi.co is untouched. Replies to Outbound land in Rashid's Zoho mailbox; an interested reply moves to the free check on kabsi.co or to WhatsApp. More than 3 percent bounces or any complaint stops Outbound (30.16).
+
+### 3. Product and lifecycle emails get a real design (session Email 1, after UX 1, before the launch gate)
+- Built from the design tokens (Kabsi yellow, night, paper, the greens and reds), Bricolage Grotesque headings with system fallbacks, light and dark, phone first at 390 px, under 100 KB, readable with images off, one main action per email, buttons that work in every client, cards with chips and small status icons, and a plain-text part. Emoji only as small section markers, at most one per card, never in place of words and never in account-mail subject lines.
+- The Monday email becomes the visual work receipt of 30.15 section 3.6: what Kabsi did as chips, what waits for a yes with a button, Google's numbers as small week-on-week cards with calls and direction requests apart, one next step. Its name is the Results Report (27.3); "Weekly Care Report" is retired everywhere.
+- A real owner's email never shows example figures. The "Customer activity (example figures)" row seen in a test email hides until real Google numbers exist.
+- Tested in Gmail, Apple Mail and Outlook (web and Windows), at 390 px, light and dark, images off.
+- The full set is 30.15 section 6's list plus COPY.md 22, written to the kabsi-copy rules.
+
+### 4. Outbound emails stay plain text, on purpose
+- Cold email that looks designed (HTML layout, images, emoji, buttons, tracking pixels) is filed as bulk marketing by Gmail and Outlook and is not the personal note 30.16 promises. Harvey's emails are short plain text from Rashid, one link to the owner's own free check result on kabsi.co, his name and kabsi.co in the signature, and an easy way to say no.
+- The design and the conversion work go where the click lands: the personal free check page on kabsi.co (Web 2, V4), then WhatsApp.
+- One promise everywhere (Outbound email, check page, WhatsApp, product email): "Your business on Google. Taken care of.", the free check first, Founding 25 while places are open.
+
+### 5. Videos (docs/VIDEO-PLAN.md)
+- One plan for the website, how-to, social and ads videos, with production rules for the separate video tool: Hussein's Claude account, Claude Code on Rashid's own GitHub repo. Lane R reviews every output before it is posted.
+- No UGC by actors or AI-made people presented as owners or customers: that is invented proof. Founder-led videos, and real Founding 25 owners with written consent.
+- Access recordings, edited by lane R on 26 Oct: phone add, phone remove, computer add. The Google Maps app recording waits for a re-record (the ID was mistyped and the contact suggestions showed). If the Maps app does not find the group by its ID, the steps never mention the Maps app.
+
+### 6. Design 5 round 2 (lane R's review of Design 5)
+1. Manager steps: the recording sits right under the ID and Copy button, before the written steps; then the states and "Send these steps". Phones show the phone recording, 768 px and up show the computer one.
+2. Home: the remove recording moves to Security only; Home keeps "You can remove Kabsi any time" with a link to Security.
+3. The founding price line ("first 30 paying businesses, n places left") shows only on Pricing. Home and the industry pages show only Founding 25, so there is never more than one counter on a page.
+4. Industry pages run about 12,000 px on a phone: "What customers search", "Google categories that fit", "Post ideas" and "Photos that matter" fold into one "More for [trade]" section (open on desktop, in the HTML either way).
+5. The dental line "Rashid can call you today" becomes "A person at Kabsi answers on WhatsApp the same working day." The /founding "within 2 working days" is approved. Content 1 finishes the barbershop page first.
+6. The access steps everywhere: "...choose Manager, then Add (on some screens, Invite)." (changes 30.17 section 3; COPY.md and the facts updated).
+
+### 7. Order
+Design 5 round 2 (the same session); V3 (Sonnet) and Partners (Opus) in parallel; then V4, Outbound (after getkabsi.com), Web 2 with Content 1, UX 1, Email 1, Sec 1, the launch gate.
