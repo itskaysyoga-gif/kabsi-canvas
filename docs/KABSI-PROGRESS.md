@@ -54,7 +54,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 ## Recent entries (newest first)
 
 - 27 Oct 2026, V4 (PR 250): onboarding, first task, task states, work receipt, nearby places, free check, voice test op. Detail: `docs/progress/archive/2026-10-27-v4.md`.
-- 26 Oct 2026, Partners (PR 247): Founding 25 and Kabsi Partners; Creem charges USD or EUR only. Migration applied by lane R. Detail: `docs/progress/archive/2026-10-26-partners.md`.
+- 26 Oct 2026, Partners (PR 247): Founding 25 and Kabsi Partners; Creem charges USD or EUR only. Migration applied by lane R; merged and verified live 26 Oct (`programs/founding` answers 25 places left, deploy 115 green). Detail: `docs/progress/archive/2026-10-26-partners.md`.
 - 26 Oct 2026, V3: Review Growth, photos and the monthly question on WhatsApp, sensitive reviews, voice notes. Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
 
 ## How a session updates this page
