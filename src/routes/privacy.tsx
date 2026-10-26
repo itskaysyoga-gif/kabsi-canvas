@@ -140,12 +140,13 @@ function Page() {
         <p>
           <b>From launch, if Kabsi checks where your business shows:</b> your business name,
           category, address and the keywords you confirm are sent to DataForSEO, which looks up
-          Google Maps results around your business and what ChatGPT and Perplexity answer. Geoapify receives map points (coordinates) to
-          draw the map image. We keep the results: your rank at each point on the map, the AI
-          answers (shown as samples, because they change from run to run) and the public details of
-          the competitors you pick: name, rating, number of reviews, category and new reviews a
-          month. No review text and no personal details of your customers are sent for this. These
-          results are kept apart from the numbers Google gives us about your own profile.
+          Google Maps results around your business and what ChatGPT and Perplexity answer. Geoapify
+          receives map points (coordinates) to draw the map image. We keep the results: your rank at
+          each point on the map, the AI answers (shown as samples, because they change from run to
+          run) and the public details of the competitors you pick: name, rating, number of reviews,
+          category and new reviews a month. No review text and no personal details of your customers
+          are sent for this. These results are kept apart from the numbers Google gives us about
+          your own profile.
         </p>
         <p>
           <b>From launch, if you apply to Kabsi Partners:</b> your name and email, country and city,
@@ -264,8 +265,8 @@ function Page() {
           <li>
             From launch, to see what AI assistants say about your business, Kabsi sends questions in
             your customers' words that name your category and area (for example "best dentist in
-            Jumeirah") to DataForSEO, which asks ChatGPT and Perplexity for them. The answers change from run to run,
-            so Kabsi shows them as a sample and never as a promise.
+            Jumeirah") to DataForSEO, which asks ChatGPT and Perplexity for them. The answers change
+            from run to run, so Kabsi shows them as a sample and never as a promise.
           </li>
           <li>
             For posts, Kabsi may also use your category and area, phrases from your reviews and,
