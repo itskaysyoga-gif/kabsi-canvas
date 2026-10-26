@@ -29,3 +29,42 @@ Deno.test("audio whose length cannot be read is refused when it is too big for 3
   assertEquals(voiceCheck(2_000_000, new Uint8Array(2_000_000)), { ok: false, why: "too_long" });
   assertEquals(voiceCheck(100_000, new Uint8Array(100_000)), { ok: true });
 });
+
+// V4: the server-side run of the same test, with a fake ElevenLabs (no network, no cost).
+Deno.test("the server copy of the notes is the same as the fixture file", async () => {
+  const { VOICE_NOTES } = await import("./notes.ts");
+  assertEquals(VOICE_NOTES, notes);
+});
+Deno.test("the voice test passes only when every language is under the mark, and an untested language fails", async () => {
+  const { runVoiceEval, summarise, table } = await import("./eval.ts");
+  const heard = new Map<string, string>();
+  const fake: typeof fetch = async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/v1/voices")) return Response.json({ voices: [{ voice_id: "v1" }] });
+    if (url.includes("/v1/text-to-speech/")) {
+      const body = JSON.parse(String(init?.body)) as { text: string };
+      return new Response(new TextEncoder().encode(body.text));
+    }
+    // Scribe: the "audio" is the note's text; Spanish notes come back with every other word missing.
+    const file = (init?.body as FormData).get("file") as Blob;
+    const text = new TextDecoder().decode(new Uint8Array(await file.arrayBuffer()));
+    const n = notes.find((x) => x.text === text)!;
+    const out = n.lang === "es" ? text.split(" ").filter((_, i) => i % 2 === 0).join(" ") : text;
+    heard.set(n.id, out);
+    return Response.json({ text: out, language_code: n.lang });
+  };
+  const r = await runVoiceEval("k", notes, { fetcher: fake });
+  assertEquals(r.rows.length, 20);
+  assertEquals(r.pass, false);
+  assertEquals(r.langs.find((l) => l.lang === "es")!.pass, false);
+  assertEquals(r.langs.filter((l) => l.pass).length, 4);
+  assertEquals(table(r).split("\n").length, 6);
+  assertEquals(summarise([{ id: "x", lang: "en", error: "tts 500" }]).pass, false);
+  assertEquals(summarise([{ id: "x", lang: "en", wer: 0.1 }]).pass, true);
+});
+Deno.test("the voice test stops before it spends past the character limit", async () => {
+  const { runVoiceEval } = await import("./eval.ts");
+  let calls = 0;
+  const r = await runVoiceEval("k", [{ id: "big", lang: "en", text: "a".repeat(4000) }], { fetcher: async () => (calls++, new Response("")) });
+  assertEquals([r.stopped, r.pass, calls], ["over_char_limit", false, 0]);
+});

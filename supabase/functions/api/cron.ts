@@ -229,7 +229,7 @@ async function removeStrayListings(managed: ManagedLocation[], unmatchedAccept: 
 }
 
 async function reportLocations() {
-  const { data, error } = await admin().from("locations").select("id, name, place_id, time_zone, emails_paused_until, google_location_id, google_account_id").eq("status", "active");
+  const { data, error } = await admin().from("locations").select("id, name, place_id, time_zone, emails_paused_until, google_location_id, google_account_id, is_demo").eq("status", "active");
   if (error) throw error;
   return data ?? [];
 }

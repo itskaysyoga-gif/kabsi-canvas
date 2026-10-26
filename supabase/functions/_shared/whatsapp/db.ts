@@ -18,6 +18,7 @@ import type { SendState } from "./policy.ts";
 import type { Who } from "./roles.ts";
 import { suggestKeyword } from "./map.ts";
 import { pickTranscriber } from "../voice/transcribe.ts";
+import { onboardingHooks } from "../onboarding/db.ts";
 import { sensitivity } from "../review-growth/sensitive.ts";
 import { sendSensitiveAlert } from "../review-growth/alerts.ts";
 
@@ -112,7 +113,9 @@ async function callVisibility(path: string, init: RequestInit = {}): Promise<Res
 }
 /** The map PNG of one finished grid, drawn by the visibility function (V1); null when it cannot be drawn. */
 async function mapPng(scanId: string): Promise<Uint8Array | null> {
-  const res = await callVisibility(`image?scan=${encodeURIComponent(scanId)}`, { method: "GET" });
+  // V4: "check:<code>" is a free check's nearby places, collected when DataForSEO has them.
+  const q = scanId.startsWith("check:") ? `check=${encodeURIComponent(scanId.slice(6))}` : `scan=${encodeURIComponent(scanId)}`;
+  const res = await callVisibility(`image?${q}`, { method: "GET" });
   if (!res.ok) return null;
   const png = new Uint8Array(await res.arrayBuffer());
   return png.length > 100 ? png : null;
@@ -227,15 +230,20 @@ export async function agentDeps(): Promise<AgentDeps> {
     },
     // V3 (28.3): ElevenLabs Scribe when ELEVENLABS_API_KEY is set, else the mock, which reads only fixtures and tells owners that
     // voice notes are not switched on. A ceiling per phone a day and for the whole number keeps the cost small.
+    // V4: the key alone does not switch them on. app_settings voice_notes is 'on' only after the 20-note test passed in every
+    // language (POST /whatsapp/staff/voice-eval); until then owners are told voice notes are not switched on yet.
     transcribe: async (audio, mime, phone) => {
+      const { data: on } = await admin().from("app_settings").select("value").eq("key", "voice_notes").maybeSingle();
+      if (on?.value !== "on") return { ok: false, reason: "not_configured" };
       if (!(await rateLimit(`wa_voice:${phone}`, 20, 86400)) || !(await rateLimit("wa_voice_all", 400, 86400))) return { ok: false, reason: "failed" };
       const t = pickTranscriber({ key: Deno.env.get("ELEVENLABS_API_KEY") });
       return await t.transcribe(audio, mime);
     },
     firstMap,
     confirmKeyword,
-    // 28.1 hook: V1 replaces this with the map image of the scan's queued 7 by 7 grid.
-    mapImage: async () => null,
+    // 28.1, V4: the free check's nearby places image once its 7 by 7 search is in (the code is KAB-XXXXXXXX).
+    mapImage: (code) => mapPng(`check:${code.replace(/^KAB-/i, "").toUpperCase()}`).catch(() => null),
+    onboarding: onboardingHooks(c.out!),
     flush: () => flush(c.out!),
     billing: billingDeps,
   };
