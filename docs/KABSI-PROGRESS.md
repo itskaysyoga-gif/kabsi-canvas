@@ -58,8 +58,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 26 Oct 2026, Partners (PR 247): Founding 25 (applications, mix, 90 days of Pro from access, day 60/85/90 messages, kill gate) and Kabsi Partners (ledger from Creem events, attribution, payouts on the 5th, 25 USD minimum); Creem charges USD or EUR only. Detail: `docs/progress/archive/2026-10-26-partners.md`.
 - 26 Oct 2026, Access 2: invitations whose address Google writes in another script (Places check, saved copy, automatic removal of a listing nobody consented for). Detail: `docs/progress/archive/2026-10-26-access-2.md`.
-- 26 Oct 2026, Access 1: invitations accepted again. Detail: `docs/progress/archive/2026-10-26-access-1.md`.
 
 ## How a session updates this page
 
