@@ -129,13 +129,13 @@ reset role;
 -- The via code attributes the business once, with the 30-day trial.
 update public.locations set via_code = 'SARA' where id = '00000000-0000-4000-8000-0000000020c2';
 select is((select r.code from public.partner_referrals r where r.organization_id = pg_temp.org('00000000-0000-4000-8000-0000000020c2')), 'P-SARA', 'the via code makes the referral');
-select is((select signup_source from public.locations where id = '00000000-0000-4000-8000-0000000020c2'), 'partner_link', 'and the 30-day trial');
-select is(public.trial_days_for('partner_link'), 30, 'which is 30 days');
+select is(private.partner_trial_days(pg_temp.org('00000000-0000-4000-8000-0000000020c2')), 30, 'and the 30-day trial when it starts');
 update public.locations set via_code = 'P-SELFIE' where id = '00000000-0000-4000-8000-0000000020c2';
 select is((select r.code from public.partner_referrals r where r.organization_id = pg_temp.org('00000000-0000-4000-8000-0000000020c2')), 'P-SARA', 'never changed after sign-up');
 -- A partner referring their own business earns nothing.
 update public.locations set via_code = 'P-SELFIE' where id = '00000000-0000-4000-8000-0000000020c3';
 select is((select self_reason from public.partner_referrals r where r.organization_id = pg_temp.org('00000000-0000-4000-8000-0000000020c3')), 'owner_email', 'a self referral is marked');
+select is(private.partner_trial_days(pg_temp.org('00000000-0000-4000-8000-0000000020c3')), null, 'and gets the 14-day trial, not 30');
 
 -- The ledger: a live payment of Pro (39 US dollars before tax) makes a 9.75 line held 30 days.
 create function pg_temp.event(p_key text, p_type text, p_org uuid, p_detail jsonb, p_at timestamptz, p_payment text default null) returns bigint
@@ -189,6 +189,17 @@ select pg_temp.event('evt_refund_3', 'refund.created', pg_temp.org('00000000-000
   '{"object": {"refund_amount": 3900, "transaction": {"id": "tx_3", "amount": 3900, "amount_paid": 3900}}}', now());
 select is((select commission_cents from public.partner_commissions where kind = 'reversal'), -975, 'a reversal line');
 select is((select state from public.partner_commissions where kind = 'reversal'), 'cleared', 'taken from the next payout');
+
+-- A partial refund inside the hold, then a full chargeback: the line nets to zero, never below.
+select pg_temp.event('evt_paid_5', 'subscription.paid', pg_temp.org('00000000-0000-4000-8000-0000000020c2'),
+  '{"object": {"last_transaction": {"id": "tx_5", "amount": 3900, "amount_paid": 3900}}}', now() - interval '2 days', 'tx_5');
+select pg_temp.event('evt_refund_5', 'refund.created', pg_temp.org('00000000-0000-4000-8000-0000000020c2'),
+  '{"object": {"refund_amount": 1950, "transaction": {"id": "tx_5", "amount": 3900, "amount_paid": 3900}}}', now() - interval '1 day');
+select pg_temp.event('evt_dispute_5', 'dispute.created', pg_temp.org('00000000-0000-4000-8000-0000000020c2'),
+  '{"object": {"amount": 3900, "transaction": {"id": "tx_5", "amount": 3900, "amount_paid": 3900}}}', now());
+select is((select sum(commission_cents)::int from public.partner_commissions where payment_id = 'tx_5' and state <> 'void'), 0,
+  'a partial refund and a later chargeback take back the line once');
+select throws_ok($$ select private.partner_payout_run(current_date + 31) $$, 'P0001', 'future_date', 'the run never clears lines ahead of time');
 
 select * from finish();
 rollback;

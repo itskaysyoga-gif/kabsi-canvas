@@ -106,7 +106,22 @@ language sql stable security definer set search_path = '' as $$
 $$;
 revoke all on function private.founding_days(uuid) from public, anon, authenticated;
 
--- private.start_trial as it stands live (20261021180000), with one change: a Founding 25 business gets 90 days.
+-- 29.1: 30 days for a business that came through a partner, checked when the trial starts: an active referral that is
+-- not a self referral by then. The function body reads tables created further down; plpgsql resolves them at run time.
+create or replace function private.partner_trial_days(p_org uuid) returns integer
+language plpgsql stable security definer set search_path = '' as $$
+declare v_partner uuid; v_status text; v_self boolean;
+begin
+  select r.partner_id, r.status, r.self_referral into v_partner, v_status, v_self from public.partner_referrals r where r.organization_id = p_org;
+  if v_partner is null or v_status <> 'active' or v_self or private.partner_self_reason(v_partner, p_org) is not null then
+    return null;
+  end if;
+  return 30;
+end $$;
+revoke all on function private.partner_trial_days(uuid) from public, anon, authenticated;
+
+-- private.start_trial as it stands live (20261021180000), with one change: a Founding 25 business gets 90 days, and a
+-- business that came through a partner 30 (private.partner_trial_days).
 create or replace function private.start_trial(p_location uuid, p_days integer default null) returns uuid
 language plpgsql security definer set search_path = '' as $$
 declare l public.locations; g public.google_connections; v_keys text[]; v_id uuid; v_ends timestamptz;
@@ -134,7 +149,8 @@ begin
   if exists (select 1 from public.trial_accounts where account_key = any (v_keys)) then return null; end if;
 
   v_ends := public.trial_end_at(now(), coalesce(l.time_zone, 'UTC'),
-    coalesce(p_days, private.founding_days(l.organization_id), public.trial_days_for(l.signup_source)));
+    coalesce(p_days, private.founding_days(l.organization_id), private.partner_trial_days(l.organization_id),
+      public.trial_days_for(l.signup_source)));
   insert into public.subscriptions (organization_id, plan, state, provider, trial_started_at, trial_ends_at, grace_ends_at,
     trial_place_id, trial_account_keys)
   values (l.organization_id, 'pro', 'trialing', 'manual', now(), v_ends,
@@ -425,6 +441,18 @@ begin
 end $$;
 revoke all on function private.founding_tick() from public, anon, authenticated;
 
+-- The first-30 founding count (10.2.4) counts only businesses that paid on their own; a Founding 25 business keeps the
+-- founding price under its own promise (30.17) and does not take one of the 30 places.
+create or replace function public.founding_places_left() returns integer
+language sql stable security definer set search_path = '' as $$
+  select greatest(0, 30 - (select count(distinct s.organization_id) from public.subscriptions s
+                            where s.founding and s.mode = 'live'
+                              and not exists (select 1 from public.founding_applications a
+                                               where a.organization_id = s.organization_id and a.status = 'accepted')))::integer
+$$;
+revoke all on function public.founding_places_left() from public, anon, authenticated;
+grant execute on function public.founding_places_left() to service_role;
+
 -- ─── 6. Kabsi Partners ────────────────────────────────────────────────────────────────────────────────────────────
 create table if not exists public.partner_accounts (
   id uuid primary key default gen_random_uuid(),
@@ -614,64 +642,79 @@ begin
   return jsonb_build_object('method', p_method, 'last4', right(v_detail, 4));
 end $$;
 
--- A self referral (29.4): the partner's email or WhatsApp number is an owner's, or the partner's own Google place is
--- one of the business's. Checked at sign-up and again at each payment (owners can join after the business is made).
+-- A self referral (29.4): the partner's email or WhatsApp number belongs to a member of the business (owner first, then
+-- anyone on its team: a business the partner owns or runs), or one of its Google places is a place of a business the
+-- partner is a member of (or the place staff recorded as the partner's own). Checked at sign-up, when the trial starts
+-- and again at each payment (people can join a business after it is made).
 create or replace function private.partner_self_reason(p_partner uuid, p_org uuid) returns text
 language sql stable security definer set search_path = '' as $$
+  with x as (select * from public.partner_accounts where id = p_partner),
+  mine as (  -- organisations the partner is a member of, by email or WhatsApp number
+    select m.organization_id from public.organization_members m join auth.users u on u.id = m.user_id, x
+     where lower(u.email) = lower(x.email)
+    union
+    select m.organization_id from public.organization_members m join public.whatsapp_optins o on o.user_id = m.user_id, x
+     where x.phone is not null and o.phone = x.phone)
   select case
-    when exists (select 1 from public.organization_members m join auth.users u on u.id = m.user_id
+    when exists (select 1 from public.organization_members m join auth.users u on u.id = m.user_id, x
                   where m.organization_id = p_org and m.role = 'owner' and lower(u.email) = lower(x.email)) then 'owner_email'
-    when x.phone is not null and exists (select 1 from public.whatsapp_optins o join public.organization_members m on m.user_id = o.user_id
-                  where m.organization_id = p_org and m.role = 'owner' and o.phone = x.phone) then 'owner_phone'
-    when x.own_place_id is not null and exists (select 1 from public.locations y where y.organization_id = p_org
-                  and y.place_id = x.own_place_id) then 'google_place'
+    when exists (select 1 from public.whatsapp_optins o join public.organization_members m on m.user_id = o.user_id, x
+                  where m.organization_id = p_org and m.role = 'owner' and x.phone is not null and o.phone = x.phone) then 'owner_phone'
+    when p_org in (select organization_id from mine) then 'team_member'
+    when exists (select 1 from public.locations y where y.organization_id = p_org and y.place_id is not null
+                  and (y.place_id = (select own_place_id from x)
+                       or y.place_id in (select z.place_id from public.locations z where z.organization_id in (select organization_id from mine)
+                                          and z.organization_id <> p_org))) then 'google_place'
     end
-  from public.partner_accounts x where x.id = p_partner
+  from x
 $$;
 revoke all on function private.partner_self_reason(uuid, uuid) from public, anon, authenticated;
 
 -- ─── 7. attribution ───────────────────────────────────────────────────────────────────────────────────────────────
--- The via code saved on the business at sign-up (signup_attribution, Growth 1), or else the partner code an owner's
--- WhatsApp number sent in the 60 days before sign-up (the last one wins). Saved once, never changed. A business that
--- matches its partner by owner email, owner WhatsApp number or Google place is a self referral and earns nothing.
+-- Two ways a business can carry a partner: the via code saved on it at sign-up (signup_attribution, Growth 1, kept 60
+-- days in the visitor's cookie), and the partner code an owner's WhatsApp number sent in the 60 days before sign-up.
+-- When both exist, the later touch wins (the last referral before sign-up). Saved once, never changed. The trial
+-- length is decided when the trial starts (private.partner_trial_days), so a self referral found later still gets 14.
 create or replace function private.partner_attribute(p_location uuid) returns uuid
 language plpgsql security definer set search_path = '' as $$
-declare l public.locations; v_code text; v_touch timestamptz; v_src text; x public.partner_accounts; v_self text; v_id uuid; v_created timestamptz;
+declare l public.locations; v_created timestamptz; v_via text; v_via_at timestamptz; v_wa text; v_wa_at timestamptz;
+  v_code text; v_touch timestamptz; v_src text; x public.partner_accounts; v_self text; v_id uuid;
 begin
   select * into l from public.locations where id = p_location;
   if not found or l.organization_id is null or l.is_demo then return null; end if;
   if exists (select 1 from public.partner_referrals r where r.organization_id = l.organization_id) then return null; end if;
   select o.created_at into v_created from public.organizations o where o.id = l.organization_id;
-  v_code := upper(btrim(coalesce(l.via_code, '')));
-  if v_code <> '' then
-    v_code := case when v_code like 'P-%' then v_code else 'P-' || v_code end;
-    v_src := 'via';
-    v_touch := coalesce((select a.via_at from public.signup_attribution a where a.user_id = l.created_by), l.created_at);
+  v_via := nullif(upper(btrim(coalesce(l.via_code, ''))), '');
+  if v_via is not null then
+    v_via := case when v_via like 'P-%' then v_via else 'P-' || v_via end;
+    if exists (select 1 from public.partner_accounts p where p.code = v_via and p.status in ('approved', 'paused')) then
+      v_via_at := coalesce((select a.via_at from public.signup_attribution a where a.user_id = l.created_by), l.created_at);
+    else
+      v_via := null;
+    end if;
   end if;
-  if v_code is null or v_code = '' or not exists (select 1 from public.partner_accounts p where p.code = v_code and p.status in ('approved', 'paused')) then
-    select c.partner_code, c.partner_code_at into v_code, v_touch
-      from public.whatsapp_conversations c
-     where c.partner_code is not null
-       and c.partner_code_at between v_created - interval '60 days' and v_created + interval '1 day'
-       and c.phone in (select o.phone from public.whatsapp_optins o join public.organization_members m on m.user_id = o.user_id
-                        where m.organization_id = l.organization_id and m.role = 'owner')
-     order by c.partner_code_at desc limit 1;
-    v_src := 'whatsapp';
+  select c.partner_code, c.partner_code_at into v_wa, v_wa_at
+    from public.whatsapp_conversations c
+   where c.partner_code is not null
+     and c.partner_code_at between v_created - interval '60 days' and v_created + interval '1 day'
+     and c.phone in (select o.phone from public.whatsapp_optins o join public.organization_members m on m.user_id = o.user_id
+                      where m.organization_id = l.organization_id and m.role = 'owner')
+     and exists (select 1 from public.partner_accounts p where p.code = c.partner_code and p.status in ('approved', 'paused'))
+   order by c.partner_code_at desc limit 1;
+  if v_via is not null and (v_wa is null or v_via_at >= v_wa_at) then
+    v_code := v_via; v_touch := v_via_at; v_src := 'via';
+  elsif v_wa is not null then
+    v_code := v_wa; v_touch := v_wa_at; v_src := 'whatsapp';
+  else
+    return null;
   end if;
-  if v_code is null then return null; end if;
   select * into x from public.partner_accounts p where p.code = v_code and p.status in ('approved', 'paused');
   if not found then return null; end if;
-
   v_self := private.partner_self_reason(x.id, l.organization_id);
   insert into public.partner_referrals (partner_id, organization_id, location_id, source, code, touched_at, self_referral, self_reason)
   values (x.id, l.organization_id, l.id, v_src, v_code, coalesce(v_touch, now()), v_self is not null, v_self)
   on conflict (organization_id) do nothing
   returning id into v_id;
-  -- 29.1: a business that came through a partner gets the 30-day trial, if its trial has not started yet.
-  if v_id is not null and v_self is null and coalesce(l.signup_source, '') !~* '^partner'
-     and not exists (select 1 from public.subscriptions s where s.organization_id = l.organization_id and s.trial_started_at is not null) then
-    update public.locations set signup_source = 'partner_link' where id = l.id;
-  end if;
   return v_id;
 end $$;
 revoke all on function private.partner_attribute(uuid) from public, anon, authenticated;
@@ -691,19 +734,23 @@ create trigger locations_partner_attribute after insert or update of via_code, o
 -- ─── 8. the ledger, from the payment ledger ───────────────────────────────────────────────────────────────────────
 -- What Kabsi collected before tax for one payment. Creem's transaction.amount is before tax (amount_paid adds it);
 -- an order gives sub_total less discount; else the product price (Kabsi's products are tax exclusive).
+create or replace function private.cents(p text) returns integer
+language sql immutable set search_path = '' as $$
+  select case when p ~ '^-?[0-9]{1,9}$' then p::int end
+$$;
 create or replace function private.creem_base_cents(d jsonb) returns integer
 language sql immutable set search_path = '' as $$
   select coalesce(
-    nullif(d #>> '{object,transaction,amount}', '')::int,
-    nullif(d #>> '{object,last_transaction,amount}', '')::int,
-    (nullif(d #>> '{object,order,sub_total}', '')::int - coalesce(nullif(d #>> '{object,order,discount_amount}', '')::int, 0)),
-    nullif(d #>> '{object,product,price}', '')::int)
+    private.cents(d #>> '{object,transaction,amount}'),
+    private.cents(d #>> '{object,last_transaction,amount}'),
+    private.cents(d #>> '{object,order,sub_total}') - coalesce(private.cents(d #>> '{object,order,discount_amount}'), 0),
+    private.cents(d #>> '{object,product,price}'))
 $$;
 
 create or replace function private.partner_ledger_event(p_event bigint) returns text
 language plpgsql security definer set search_path = '' as $$
 declare e public.billing_events; r public.partner_referrals; x public.partner_accounts; c public.partner_commissions;
-  v_base int; v_paid int; v_back int; v_pay text; v_at timestamptz; v_full boolean;
+  v_base int; v_paid int; v_back int; v_pay text; v_at timestamptz; v_full boolean; v_done int; v_cdone int; v_cback int;
 begin
   select * into e from public.billing_events where id = p_event;
   if not found or e.organization_id is null or e.provider <> 'creem' then return 'skip'; end if;
@@ -725,7 +772,9 @@ begin
     if v_base is null or v_base <= 0 then return 'no_amount'; end if;
     insert into public.partner_commissions (partner_id, referral_id, organization_id, billing_event_id, kind, mode, payment_id,
       provider_subscription_id, currency, base_cents, commission_cents, earned_at, hold_until)
-    values (r.partner_id, r.id, e.organization_id, e.id, 'commission', e.mode, e.payment_id, e.provider_subscription_id,
+    values (r.partner_id, r.id, e.organization_id, e.id, 'commission',
+      case when e.mode in ('live', 'prod', 'production') then 'live' else coalesce(e.mode, 'unknown') end,
+      e.payment_id, e.provider_subscription_id,
       coalesce(e.currency, 'USD'), v_base, round(v_base * 0.25)::int, v_at, v_at + interval '30 days')
     on conflict (billing_event_id, kind) do nothing;
     return 'commission';
@@ -733,18 +782,30 @@ begin
 
   if e.event_type in ('refund.created', 'dispute.created') then
     v_pay := coalesce(e.detail #>> '{object,transaction,id}', e.payment_id);
+    -- Locked, so a payout run attaching this line waits or is waited for; the row is read again after the wait.
     select * into c from public.partner_commissions k
      where k.organization_id = e.organization_id and k.kind = 'commission'
        and (k.payment_id = v_pay or (v_pay is null and k.provider_subscription_id = e.provider_subscription_id))
-     order by (k.payment_id = v_pay) desc nulls last, k.earned_at desc limit 1;
+     order by (k.payment_id = v_pay) desc nulls last, k.earned_at desc limit 1
+     for update;
     if not found then return 'no_line'; end if;
+    if c.state = 'void' then return 'already_void'; end if;
+    -- What is left of the line after earlier refunds or chargebacks, so a partial refund and a later chargeback never
+    -- take back more than the line gave.
+    select coalesce(sum(-k.base_cents), 0), coalesce(sum(-k.commission_cents), 0) into v_done, v_cdone
+      from public.partner_commissions k where k.reverses_id = c.id;
+    if v_done >= c.base_cents then return 'already_reversed'; end if;
     -- The refunded share before tax: refund (or disputed) amount times amount / amount_paid of the transaction.
-    v_paid := nullif(e.detail #>> '{object,transaction,amount_paid}', '')::int;
-    v_back := case when e.event_type = 'refund.created' then nullif(e.detail #>> '{object,refund_amount}', '')::int
-                   else nullif(e.detail #>> '{object,amount}', '')::int end;
+    v_paid := nullif(private.cents(e.detail #>> '{object,transaction,amount_paid}'), 0);
+    v_back := case when e.event_type = 'refund.created' then private.cents(e.detail #>> '{object,refund_amount}')
+                   else private.cents(e.detail #>> '{object,amount}') end;
     v_full := v_back is null or v_paid is null or v_back >= v_paid;
-    v_base := case when v_full then c.base_cents else least(c.base_cents, round(v_back::numeric * c.base_cents / v_paid)::int) end;
-    if c.state in ('held', 'cleared') and c.payout_id is null and v_full then
+    v_base := case when v_full then c.base_cents - v_done
+                   else least(c.base_cents - v_done, round(v_back::numeric * c.base_cents / v_paid)::int) end;
+    -- The commission taken back: what is left of it when the rest of the line goes, else 25 percent of the share.
+    v_cback := case when v_base >= c.base_cents - v_done then c.commission_cents - v_cdone
+                    else least(c.commission_cents - v_cdone, round(v_base * c.rate)::int) end;
+    if c.state in ('held', 'cleared') and c.payout_id is null and v_full and v_done = 0 then
       -- Inside the hold (or cleared, not yet paid): the line is cancelled.
       update public.partner_commissions set state = 'void', void_reason = e.event_type where id = c.id;
       return 'voided';
@@ -753,7 +814,7 @@ begin
     insert into public.partner_commissions (partner_id, referral_id, organization_id, billing_event_id, kind, mode, payment_id,
       provider_subscription_id, currency, base_cents, commission_cents, earned_at, hold_until, state, reverses_id)
     values (c.partner_id, c.referral_id, c.organization_id, e.id, 'reversal', c.mode, c.payment_id, c.provider_subscription_id,
-      c.currency, -v_base, -round(v_base * c.rate)::int, v_at,
+      c.currency, -v_base, -v_cback, v_at,
       case when c.payout_id is null then c.hold_until else v_at end,
       case when c.payout_id is null then c.state else 'cleared' end, c.id)
     on conflict (billing_event_id, kind) do nothing;
@@ -781,33 +842,40 @@ create trigger billing_events_partner_ledger after update of processed_at on pub
 -- over. A paused partner's commission is withheld until staff decide. Test-mode lines clear but are never paid.
 create or replace function private.partner_payout_run(p_run date default current_date) returns jsonb
 language plpgsql security definer set search_path = '' as $$
-declare v_cleared int; v_made int := 0; r record; v_id uuid;
+declare v_cleared int; v_made int := 0; r record; v_id uuid; v_ids bigint[]; v_total int;
 begin
+  if p_run > current_date then raise exception 'future_date' using hint = 'The run clears lines up to its own date, so it never runs ahead.'; end if;
+  -- One run at a time.
+  perform pg_advisory_xact_lock(hashtext('partner_payout_run'));
   update public.partner_commissions set state = 'cleared'
    where state = 'held' and hold_until <= (p_run::timestamp at time zone 'UTC');
   get diagnostics v_cleared = row_count;
   for r in
-    select k.partner_id, k.currency, sum(k.commission_cents)::int total, count(*)::int n
+    select distinct k.partner_id, k.currency
       from public.partner_commissions k join public.partner_accounts p on p.id = k.partner_id
      where k.state = 'cleared' and k.payout_id is null and k.mode = 'live' and p.status = 'approved'
-     group by k.partner_id, k.currency
-    having sum(k.commission_cents) >= 2500
   loop
+    -- Lock this partner's cleared lines, then count exactly the locked lines: a refund applied meanwhile waits for this
+    -- run, and a reversal inserted meanwhile is not in the list, so it comes off the next payout.
+    select array_agg(k.id order by k.id), sum(k.commission_cents)::int into v_ids, v_total
+      from (select k2.id, k2.commission_cents from public.partner_commissions k2
+             where k2.partner_id = r.partner_id and k2.currency = r.currency and k2.state = 'cleared'
+               and k2.payout_id is null and k2.mode = 'live'
+             for update) k;
+    if v_total is null or v_total < 2500 then continue; end if;
     insert into public.partner_payouts (partner_id, run_on, currency, amount_cents, lines, statement)
-    values (r.partner_id, p_run, r.currency, r.total, r.n, jsonb_build_object(
-      'month', to_char(p_run, 'YYYY-MM'), 'currency', r.currency, 'total_cents', r.total,
+    values (r.partner_id, p_run, r.currency, v_total, cardinality(v_ids), jsonb_build_object(
+      'month', to_char(p_run, 'YYYY-MM'), 'currency', r.currency, 'total_cents', v_total,
       'lines', (select jsonb_agg(jsonb_build_object('earned_at', k.earned_at, 'kind', k.kind,
                   'trade', l.category_label, 'area', l.area, 'base_cents', k.base_cents,
                   'commission_cents', k.commission_cents) order by k.earned_at)
                   from public.partner_commissions k left join public.partner_referrals f on f.id = k.referral_id
                   left join public.locations l on l.id = f.location_id
-                 where k.partner_id = r.partner_id and k.currency = r.currency and k.state = 'cleared'
-                   and k.payout_id is null and k.mode = 'live')))
+                 where k.id = any (v_ids))))
     on conflict (partner_id, run_on, currency) do nothing
     returning id into v_id;
     if v_id is not null then
-      update public.partner_commissions set payout_id = v_id
-       where partner_id = r.partner_id and currency = r.currency and state = 'cleared' and payout_id is null and mode = 'live';
+      update public.partner_commissions set payout_id = v_id where id = any (v_ids);
       v_made := v_made + 1;
     end if;
   end loop;
@@ -911,7 +979,7 @@ begin
     execute format('grant execute on function public.%s to authenticated, service_role', f);
   end loop;
 end $$;
-revoke all on function private.founding_caps(), private.partner_handle_ok(text), private.creem_base_cents(jsonb),
+revoke all on function private.founding_caps(), private.partner_handle_ok(text), private.creem_base_cents(jsonb), private.cents(text),
   private.locations_partner_attribute(), private.billing_events_partner_ledger() from public, anon, authenticated;
 
 -- Daily at 06:23 UTC (attribution sweep, founding messages); the payout run on the 5th at 06:17 UTC.

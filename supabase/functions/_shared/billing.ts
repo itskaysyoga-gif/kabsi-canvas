@@ -122,8 +122,11 @@ export async function applyEvent(eventKey: string): Promise<string> {
     const business = org ? await businessName(org) : "an unknown business";
     await staffAlert(`Creem reported ${what} for ${business}`, `${effect.alert}:${e.id}`);
   }
-  await db.from("billing_events").update({ processed_at: new Date().toISOString(), outcome: result, organization_id: org })
+  // The partner ledger runs in a trigger on this update (Partners session): if it fails, the update fails, and the job
+  // must fail too so the queue retries the event rather than lose the commission line.
+  const { error: pe } = await db.from("billing_events").update({ processed_at: new Date().toISOString(), outcome: result, organization_id: org })
     .eq("id", row.id);
+  if (pe) throw pe;
   log("billing", { ok: true, event: e.eventType, result });
   return result;
 }
