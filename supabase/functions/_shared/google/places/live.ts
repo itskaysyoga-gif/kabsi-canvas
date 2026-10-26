@@ -34,7 +34,7 @@ async function read<T>(res: Response): Promise<PlacesResult<T>> {
   return { ok: res.ok, status: res.status, data: await res.json().catch(() => ({})) as T };
 }
 
-// languageCode (Access 2): the language of the names and addresses Google returns; left out, Google prefers English.
+// languageCode (Access 2): the language of the names and addresses in the answer; left out, they come in English where they can.
 export async function searchText(key: string, textQuery: string, maxResultCount: number, fieldMask: string, languageCode?: string): Promise<PlacesResult<SearchTextResponse>> {
   if (!(await guard.take("search"))) return backSoon();
   const body = { textQuery, maxResultCount, ...(languageCode ? { languageCode } : {}) };
