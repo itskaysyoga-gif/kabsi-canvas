@@ -20,7 +20,7 @@ export const Route = createFileRoute("/partners_/terms")({
   component: Page,
 });
 
-const UPDATED = "24 October 2026";
+const UPDATED = "26 October 2026";
 
 function Page() {
   return (
@@ -73,12 +73,14 @@ function Page() {
         <h2>2. Your commission</h2>
         <ul>
           <li>
-            You earn 25 percent of every payment a business makes for as long as that business keeps
-            paying, extra locations included. One rate for everyone.
+            You earn 25 percent of the subscription revenue Kabsi collects from a business you
+            referred, for as long as that subscription stays paid, extra locations included. One
+            rate for everyone.
           </li>
           <li>
-            Commission is worked out on the payment Creem, our merchant of record, confirms, after
-            any refund. Trials earn nothing, only payments do.
+            Revenue collected means what Creem, our merchant of record, confirms Kabsi was paid, not
+            counting sales tax or VAT, refunds or chargebacks. Trials earn nothing, only payments
+            do. Commission stops when the subscription stops being paid.
           </li>
           <li>
             Kabsi keeps its own ledger of payments, refunds and chargebacks, and that ledger is the
@@ -101,11 +103,12 @@ function Page() {
             amount comes off your next payout.
           </li>
           <li>
-            Kabsi pays on the 5th of each month everyone with 50 US dollars or more cleared. Below
-            50 dollars, your balance rolls over to the next month.
+            Each commission line waits 30 days from the payment. Kabsi pays on the 5th of each month
+            everyone with 25 US dollars or more cleared. Below 25 dollars, your balance rolls over
+            to the next month. Every payout comes with a statement of the lines it pays.
           </li>
           <li>
-            You choose how to be paid when your first 50 dollars clears: USDT or USDC sent from
+            You choose how to be paid when your first 25 dollars clears: USDT or USDC sent from
             Kabsi's own wallet, or PayPal. Bank transfer and Wise may come later. Kabsi pays the
             transfer fee. Every payout comes with a WhatsApp message and a PDF statement.
           </li>
@@ -125,9 +128,11 @@ function Page() {
             code is written down at the first real action: a scan, a sign-up or a WhatsApp message.
           </li>
           <li>
-            A referral counts for 60 days. If a person follows more than one partner, the last one
-            counts. When the business signs up, the partner is saved on the business and never
-            changed afterwards.
+            A referral counts for 60 days from the first real action. If a person follows more than
+            one partner, the last partner before the business signs up counts, and the earlier one
+            earns nothing for that business. When the business signs up, the partner is saved on the
+            business and never changed afterwards, even if the owner later follows another partner's
+            link. Kabsi's own records decide which partner was last.
           </li>
           <li>
             Businesses that come through a partner get a 30 day Pro trial instead of 14 days. There
@@ -177,7 +182,8 @@ function Page() {
         <ul>
           <li>
             There is no commission on a referral of yourself: when the owner's email, phone or
-            Google business matches yours.
+            WhatsApp number, or Google business matches yours, or the business is one you own or
+            run. Kabsi checks this at sign-up and again at every payment.
           </li>
           <li>
             Brand bidding, coupon sites and spam end the partnership. For other breaches Kabsi sends

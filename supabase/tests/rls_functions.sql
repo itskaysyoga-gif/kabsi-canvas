@@ -41,7 +41,10 @@ insert into tested values
   ('whatsapp_connect_start(text)'), ('whatsapp_status()'), ('whatsapp_set_prefs(boolean,boolean)'), ('whatsapp_disconnect()'), ('whatsapp_staff_code()'),
   ('set_protection_autofix(uuid,text,boolean,text)'),
   ('send_manager_steps(uuid,integer)'),
-  ('set_onboarding_scenario(uuid,text,text)'), ('scenario_done(uuid)'), ('clear_onboarding_scenario(uuid)');
+  ('set_onboarding_scenario(uuid,text,text)'), ('scenario_done(uuid)'), ('clear_onboarding_scenario(uuid)'),
+  ('staff_founding_decide(uuid,text,text)'), ('staff_founding_link(uuid,uuid)'), ('staff_founding_overview()'),
+  ('staff_partner_decide(uuid,text,text,text)'), ('staff_partner_payout_details(uuid,text,text)'), ('staff_partners_overview()'),
+  ('staff_payouts_approve(date)'), ('staff_payout_sent(uuid,text)'), ('staff_payout_run(date)');
 
 select is(
   (select coalesce(array_agg(p.oid::regprocedure::text order by 1), '{}') from pg_proc p
@@ -202,6 +205,16 @@ select throws_ok($$ select public.staff_concierge_queue() $$, '42501', null, 'st
 select throws_ok($$ select public.staff_concierge_task_done('00000000-0000-4000-8000-0000000000f2', 'x') $$, '42501', null, 'staff_concierge_task_done refuses a non-staff user');
 select throws_ok($$ select * from public.staff_contacts(10) $$, '42501', null, 'staff_contacts refuses a non-staff user');
 select throws_ok($$ select public.staff_grant_trial('00000000-0000-4000-8000-0000000000c1', 7) $$, '42501', null, 'staff_grant_trial refuses a non-staff user');
+-- Partners session: the Founding 25 and Kabsi Partners staff functions.
+select throws_ok($$ select public.staff_founding_decide('00000000-0000-4000-8000-0000000000c1', 'accepted') $$, '42501', null, 'staff_founding_decide refuses a non-staff user');
+select throws_ok($$ select public.staff_founding_link('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'staff_founding_link refuses a non-staff user');
+select throws_ok($$ select public.staff_founding_overview() $$, '42501', null, 'staff_founding_overview refuses a non-staff user');
+select throws_ok($$ select public.staff_partner_decide('00000000-0000-4000-8000-0000000000c1', 'approved') $$, '42501', null, 'staff_partner_decide refuses a non-staff user');
+select throws_ok($$ select public.staff_partner_payout_details('00000000-0000-4000-8000-0000000000c1', 'usdt', 'TXYZ123456') $$, '42501', null, 'staff_partner_payout_details refuses a non-staff user');
+select throws_ok($$ select public.staff_partners_overview() $$, '42501', null, 'staff_partners_overview refuses a non-staff user');
+select throws_ok($$ select public.staff_payouts_approve(current_date) $$, '42501', null, 'staff_payouts_approve refuses a non-staff user');
+select throws_ok($$ select public.staff_payout_sent('00000000-0000-4000-8000-0000000000c1', 'ref') $$, '42501', null, 'staff_payout_sent refuses a non-staff user');
+select throws_ok($$ select public.staff_payout_run(current_date) $$, '42501', null, 'staff_payout_run refuses a non-staff user');
 select throws_ok($$ select public.staff_job_health() $$, '42501', null, 'staff_job_health refuses a non-staff user');
 select throws_ok($$ select public.staff_system_health() $$, '42501', null, 'staff_system_health refuses a non-staff user');
 select throws_ok($$ select public.staff_job_retry(1) $$, '42501', null, 'staff_job_retry refuses a non-staff user');

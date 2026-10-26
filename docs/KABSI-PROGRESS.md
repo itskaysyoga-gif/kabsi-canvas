@@ -61,6 +61,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 26 Oct 2026, Partners (PR 247): Founding 25 and Kabsi Partners; Creem charges USD or EUR only. Migration applied by lane R. Detail: `docs/progress/archive/2026-10-26-partners.md`.
 - 26 Oct 2026, V3: Review Growth, photos and the monthly question on WhatsApp, sensitive reviews, voice notes. Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
 - 26 Oct 2026, Access 2: invitations whose address Google writes in another script (Places check, saved copy, automatic removal of a listing nobody consented for). Detail: `docs/progress/archive/2026-10-26-access-2.md`.
 

@@ -12,11 +12,13 @@ import { ChatsPanel } from "@/components/staff/chats-panel";
 import { ConciergePanel } from "@/components/staff/concierge-panel";
 import { FollowupsPanel } from "@/components/staff/followups-panel";
 import { WhatsappStaffCode } from "@/components/staff/whatsapp-staff-code";
+import { FoundingPanel } from "@/components/staff/founding-panel";
+import { PartnersPanel } from "@/components/staff/partners-panel";
 import { convertConcierge, setConcierge } from "@/lib/concierge";
 import { ClipboardCheck as PageGlyph } from "lucide-react";
 import { PageIcon } from "@/components/shared/page-icon";
 
-// Staff workspace: follow-ups, concierge, chats, job health, existing card codes, and every business. There is no
+// Staff workspace: follow-ups, concierge, chats, Founding 25 and Kabsi Partners, job health, existing card codes, and every business. There is no
 // manual payment confirmation here (K-124, P0.8-01): money is recorded only by the Creem webhook (P0.4-07).
 export const Route = createFileRoute("/_authenticated/staff")({
   head: () => ({ meta: [{ title: "Staff | Kabsi" }, { name: "robots", content: "noindex" }] }),
@@ -65,6 +67,8 @@ function StaffPage() {
             <FollowupsPanel />
             <ConciergePanel />
             <ChatsPanel />
+            <FoundingPanel businesses={rows.data ?? []} />
+            <PartnersPanel />
             <div className="mt-8">
               <SystemHealthPanel />
             </div>

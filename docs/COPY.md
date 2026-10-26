@@ -172,7 +172,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 - The rules (5): "Say it is a paid partnership, every time." / "Never say Kabsi works with Google." / "Never promise rankings, reviews or customers." / "Never offer anything for reviews." / "No bulk or unsolicited messages."
 - Founding Partners: "The first 20 partners get Kabsi Pro free for their own business and a monthly call with Rashid. [n] places left."
 - Buttons: "Apply on WhatsApp" (main), "Apply by email".
-- FAQ: "When do I get paid?" "On the 5th of each month, once at least $50 has cleared its 30-day hold." / "How?" "USDT or USDC, or PayPal." / "What do businesses I refer get?" "30 days of Pro free instead of 14, no card." / "Can I see who joined?" "You see the trade and area. The name only if the owner says yes."
+- FAQ: "When do I get paid?" "On the 5th of each month, once at least $25 has cleared its 30-day hold, with a statement." / "How?" "USDT or USDC, or PayPal." / "What do businesses I refer get?" "30 days of Pro free instead of 14, no card." / "Can I see who joined?" "You see the trade and area. The name only if the owner says yes."
 
 ## 11. Partner page (/p/HANDLE)
 
