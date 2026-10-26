@@ -34,9 +34,11 @@ async function read<T>(res: Response): Promise<PlacesResult<T>> {
   return { ok: res.ok, status: res.status, data: await res.json().catch(() => ({})) as T };
 }
 
-export async function searchText(key: string, textQuery: string, maxResultCount: number, fieldMask: string): Promise<PlacesResult<SearchTextResponse>> {
+// languageCode (Access 2): the language of the names and addresses Google returns; left out, Google prefers English.
+export async function searchText(key: string, textQuery: string, maxResultCount: number, fieldMask: string, languageCode?: string): Promise<PlacesResult<SearchTextResponse>> {
   if (!(await guard.take("search"))) return backSoon();
-  return read(await places("/places:searchText", key, fieldMask, { method: "POST", body: JSON.stringify({ textQuery, maxResultCount }) }));
+  const body = { textQuery, maxResultCount, ...(languageCode ? { languageCode } : {}) };
+  return read(await places("/places:searchText", key, fieldMask, { method: "POST", body: JSON.stringify(body) }));
 }
 
 // Suggestions for a business name as the owner types. One session token for the whole typing session, passed again to

@@ -3,7 +3,9 @@
 // Google's responses into the shapes the app uses. Every write here (sendReply, createLocalPost, uploadPhoto,
 // addSpecialHours, patchListing) is only ever called by the publish job in api/jobs.ts, after the owner's approval
 // and claim_publication (guardrail 6, P0.1-13a and P0.1-13b).
-import { type InvitationAddress, invitationPlace, matchInvitation, type PendingBusiness } from "../invitations.ts";
+import {
+  type InvitationAddress, invitationPlace, type LookupMemory, matchByPlace, matchInvitation, matchSavedCopy, type PendingBusiness, type PlaceSearch,
+} from "../invitations.ts";
 import { isConciergeLocationId } from "../concierge.ts";
 import { regularHoursDisplay } from "../hours.ts";
 import { assertNotConcierge, googleMode, modeFor, type Mode } from "./client.ts";
@@ -52,15 +54,43 @@ const by = <L, M>(mode: Mode, live: L, mock: M): L | M => (mode === "mock" ? moc
 
 // ─── Accounts: accept Manager invitations and list the locations Kabsi manages.
 // D270 vetting (_shared/invitations.ts): an invitation is accepted only when it is a Manager invitation for a
-// location and exactly one consented business matches its name and address or city. Anything else is left
-// pending and reported. Owners invite Kabsi's business group (D293); invitations show up under every account this
-// login can see (the organization, the business group, the personal account), so all of them are listed.
-export async function acceptInvitationsAndListLocations(pending: PendingBusiness[] = []): Promise<{ accepted: number; skipped: SkippedInvitation[]; locations: ManagedLocation[] }> {
+// location and exactly one consented business matches it. Anything else is left pending and reported. Owners invite
+// Kabsi's business group (D293); invitations show up under every account this login can see (the organization, the
+// business group, the personal account), so all of them are listed.
+// Access 2: three ways to match, in order: the text rules of Access 1; the saved copy of Google's own title and
+// address from an earlier grant (no Places call); the Places check (at most one lookup per invitation per day).
+export type AcceptedInvitation = { business: PendingBusiness; title: string; address: string };
+export type AccessDeps = {
+  accounts?: Pick<typeof accountsLive, "listAccounts" | "listInvitations" | "acceptInvitation">;
+  locations?: Pick<typeof locationsLive, "listLocations">;
+  search?: PlaceSearch | null;
+  memory?: LookupMemory | null;
+};
+
+// The Places Text Search for invitations: five results, place ID, name and address only, counted by places_take.
+export function invitationSearch(key = Deno.env.get("PLACES_API_KEY")): PlaceSearch | null {
+  if (!key) return null;
+  return async (query, languageCode) => {
+    const r = await placesLive.searchText(key, query, 5, "places.id,places.displayName,places.formattedAddress", languageCode);
+    if (r.backSoon) return { status: "cap" };
+    return r.ok ? { status: "ok", places: r.data.places ?? [] } : { status: "error" };
+  };
+}
+
+// A PostalAddress as one line, the way the saved copy keeps it ("Mirna Chalouhi, LB" style parts, region last).
+const postalLine = (a?: { addressLines?: string[]; locality?: string; postalCode?: string } | null) =>
+  a ? [...(a.addressLines ?? []), a.locality].filter(Boolean).join(", ") : "";
+
+export async function acceptInvitationsAndListLocations(pending: PendingBusiness[] = [], deps: AccessDeps = {}): Promise<{
+  accepted: number; acceptedFor: AcceptedInvitation[]; skipped: SkippedInvitation[]; locations: ManagedLocation[];
+}> {
   const mode = googleMode();
-  const accounts = by(mode, accountsLive, accountsMock);
-  const locations = by(mode, locationsLive, locationsMock);
+  const accounts = deps.accounts ?? by(mode, accountsLive, accountsMock);
+  const locations = deps.locations ?? by(mode, locationsLive, locationsMock);
+  const search = deps.search === undefined ? (mode === "live" ? invitationSearch() : null) : deps.search;
+  const memory = deps.memory ?? null;
   const { accounts: list = [] } = await accounts.listAccounts();
-  let accepted = 0;
+  const acceptedFor: AcceptedInvitation[] = [];
   const skipped: SkippedInvitation[] = [];
   // Access 1: each consented business is used by one invitation per run, so one consent never opens two listings.
   let open = [...pending];
@@ -72,11 +102,20 @@ export async function acceptInvitationsAndListLocations(pending: PendingBusiness
       const place = invitationPlace(address);
       if (inv.targetType && inv.targetType !== "LOCATIONS_ONLY" && !inv.targetLocation) { skipped.push({ invitation: inv.name, reason: "not a location invitation", location: locName, place }); continue; }
       if (inv.role && inv.role !== "MANAGER") { skipped.push({ invitation: inv.name, reason: `role ${inv.role}, not MANAGER`, location: locName, place }); continue; }
-      const match = matchInvitation(locName, address, open);
+      let match = matchInvitation(locName, address, open);
+      if (!match.ok) {
+        const saved = matchSavedCopy(locName, address, open);
+        if (saved.ok) match = saved;
+      }
+      if (!match.ok && search && memory) {
+        const byPlace = await matchByPlace(inv.name, locName, address, open, search, memory);
+        match = byPlace.ok ? byPlace : { ok: false, reason: `${match.reason}; ${byPlace.reason}` };
+      }
       if (!match.ok) { skipped.push({ invitation: inv.name, reason: match.reason, location: locName, place }); continue; }
       await accounts.acceptInvitation(inv.name);
-      open = open.filter((p) => p !== match.business);
-      accepted++;
+      const business = match.business;
+      open = open.filter((p) => p !== business);
+      acceptedFor.push({ business, title: locName, address: typeof address === "string" ? address : place });
     }
   }
   const { accounts: after = [] } = await accounts.listAccounts();
@@ -84,14 +123,17 @@ export async function acceptInvitationsAndListLocations(pending: PendingBusiness
   for (const acct of after) {
     let pageToken = "";
     do {
-      const data = await locations.listLocations(acct.name, "name,title,metadata", pageToken);
+      const data = await locations.listLocations(acct.name, "name,title,metadata,storefrontAddress", pageToken);
       for (const loc of data.locations ?? []) {
-        managed.push({ accountId: acct.name, locationId: loc.name, placeId: loc.metadata?.placeId ?? null, title: loc.title ?? "" });
+        managed.push({
+          accountId: acct.name, locationId: loc.name, placeId: loc.metadata?.placeId ?? null, title: loc.title ?? "",
+          address: postalLine(loc.storefrontAddress),
+        });
       }
       pageToken = data.nextPageToken ?? "";
     } while (pageToken);
   }
-  return { accepted, skipped, locations: managed };
+  return { accepted: acceptedFor.length, acceptedFor, skipped, locations: managed };
 }
 
 // ─── Disconnect (K-41, K-113.2, P0.2-02): remove Kabsi's own Manager entry from one location. Kabsi's entries are the

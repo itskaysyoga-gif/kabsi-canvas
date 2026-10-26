@@ -4,7 +4,10 @@ import { AM, gbp } from "../client.ts";
 import type { ListAccountsResponse, ListInvitationsResponse } from "../types.ts";
 
 export const listAccounts = (): Promise<ListAccountsResponse> => gbp(`${AM}/accounts`);
-export const listInvitations = (account: string): Promise<ListInvitationsResponse> => gbp(`${AM}/${account}/invitations`);
+// Access 2: ask for English. Google writes the invitation's address in the listing's own script (Arabic for a Lebanese
+// listing); the Account Management API documents no language parameter, so the standard Accept-Language header asks.
+export const listInvitations = (account: string): Promise<ListInvitationsResponse> =>
+  gbp(`${AM}/${account}/invitations`, { headers: { "accept-language": "en" } });
 export const acceptInvitation = (invitation: string): Promise<Record<string, never>> => gbp(`${AM}/${invitation}:accept`, { method: "POST", body: "{}" });
 
 // One call with a token the caller already holds, no retry. For the health check only: before the Business Profile

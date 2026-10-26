@@ -1,0 +1,15 @@
+{
+  "_doc": "https://developers.google.com/my-business/reference/accountmanagement/rest/v1/accounts.invitations/list",
+  "_source": "Yawmiyati's pending invitation as the live access job read it on 26 Oct 2026 (Sentry KABSI-EDGE-G, the skipped entry's location and place). Name and address only; the invitation and account numbers are placeholders, no personal data. Google wrote the address in the listing's own script while Kabsi saved \"Mirna Chalouhi\". Not yet re-read with Accept-Language: en: the invitation was accepted by hand at 13:10 UTC before Access 2 could read it again (google-capture op invitations reads both variants on the next one).",
+  "invitations": [
+    {
+      "name": "accounts/113746201522792609010/invitations/100000000000000001",
+      "role": "MANAGER",
+      "targetType": "LOCATIONS_ONLY",
+      "targetLocation": {
+        "locationName": "Yawmiyati",
+        "address": "طريق ميرنا شالوحي, Lebanon"
+      }
+    }
+  ]
+}
