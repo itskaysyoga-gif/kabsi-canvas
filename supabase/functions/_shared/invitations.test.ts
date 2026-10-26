@@ -90,8 +90,14 @@ Deno.test("Access 1: Google's address as one string (its documented shape)", () 
   assert.equal(addressMatches("1 Main Street, Example Town, CA 00000, USA", "1 Main Street, Example Town, CA 00000"), true);
   // another street in the same city: refused
   assert.equal(addressMatches("Hamra Street 12, Beirut, Lebanon", "Rue 9, Beirut"), false);
-  // one-word or area-only overlaps never count
+  // one-word, country-only or town-different overlaps never count
   assert.equal(addressMatches("Dubai", "Sheikh Zayed Road, Al Barsha, Dubai"), false);
+  assert.equal(addressMatches("10 King Street, Manchester, UK", "United Kingdom"), false);
+  assert.equal(addressMatches("United Kingdom", "10 King Street, Manchester, United Kingdom"), false);
+  assert.equal(addressMatches("United Arab Emirates", "Dubai - United Arab Emirates"), false);
+  assert.equal(addressMatches("High Street, Bromley, UK", "High Street, Croydon"), false);
+  assert.equal(addressMatches("1 High St, London", "1 High St, London SW1A 1AA"), true);
+  assert.equal(addressMatches("1 High St, London, SW1A 1AA, UK", "1 High St, London"), true);
   assert.equal(addressMatches("Unit 4, London", "1 High Street, London"), false);
   assert.equal(addressMatches("Mirna Chalouhi", ""), false);
   assert.equal(addressMatches(null, "Mirna Chalouhi"), false);

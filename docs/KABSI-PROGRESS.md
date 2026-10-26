@@ -54,11 +54,11 @@ The facts say "WhatsApp is live" only when the last step is done.
 - After merge checks that a session could not run (they need a phone or a person) are in `docs/progress/archive/after-merge.md`. The first session of each kind reads the ones for its own area before starting.
 - New in Ops 1 part B: zod 3 to 4 is a session of its own (dependency review names it as an exception); one test row `bounced@resend.dev` is left in `email_suppressions`. Full list in the archive entry.
 - Found, not done: `docs/progress/archive/found-not-done.md`. Decisions to confirm: `docs/progress/archive/decisions-to-confirm.md`.
-- Session 19 rest closed the session 18 items: the post Undo test passed on 25 Oct (P0.7-05b, an Update with no Learn more link: approved 05:34:54, undone 3.7 seconds later, cancelled, never sent to Google); Pub/Sub is registered live and a forged push gets 401 (P0.7-03); the push from a real review is still to be seen.
+- Session 19 rest closed the session 18 items: the post Undo test passed on 25 Oct (P0.7-05b, undone 3.7 seconds after approval, never sent to Google); Pub/Sub is registered live and a forged push gets 401 (P0.7-03); the push from a real review is still to be seen.
 
 ## Recent entries (newest first)
 
-- 26 Oct 2026, Access 1: Manager invitations are accepted again (Google sends the address as one line). Detail: `docs/progress/archive/2026-10-26-access-1.md`.
+- 26 Oct 2026, Access 1: invitations accepted again. Detail: `docs/progress/archive/2026-10-26-access-1.md`.
 - 26 Oct 2026, V2: AI Visibility. Detail: `docs/progress/archive/2026-10-26-v2-ai-visibility.md`.
 
 ## How a session updates this page

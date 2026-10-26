@@ -27,7 +27,7 @@ function containsWords(hay: string, needle: string): boolean {
 export function addressMatches(businessAddress: string | null | undefined, inv: InvitationAddress): boolean {
   const hay = norm(businessAddress);
   if (!hay || !inv) return false;
-  if (typeof inv === "string") return textAddressMatches(hay, inv);
+  if (typeof inv === "string") return textAddressMatches(hay, inv, businessAddress ?? "");
   const street = norm(inv.addressLines?.[0]);
   if (street && containsWords(hay, street)) return true;
   const city = norm(inv.locality);
@@ -39,16 +39,31 @@ export function addressMatches(businessAddress: string | null | undefined, inv: 
 
 const words = (v: string) => (v ? v.split(" ").length : 0);
 
-// Access 1: the string Google sends. Its first part (the street) inside the saved address counts, as does the
-// saved address of two words or more inside Google's whole line, or Google's whole line inside the saved address.
-// Later parts alone (area, postcode, country) never count, so "Dubai" or "London" alone never matches.
-function textAddressMatches(hay: string, inv: string): boolean {
-  const full = norm(inv);
-  if (!full) return false;
-  const street = norm(inv.split(",")[0]);
-  if (words(street) >= 2 && containsWords(hay, street)) return true;
-  if (words(hay) >= 2 && containsWords(full, hay)) return true;
-  return words(full) >= 2 && containsWords(hay, full);
+// Access 1: the string Google sends. Both addresses are split into their comma parts, and the country and
+// postcode parts are dropped. It matches when every remaining part of the shorter address appears, as whole words,
+// in the longer one, and the shorter one's first part (the street) has two words or more. So "Mirna Chalouhi" matches
+// "Mirna Chalouhi, Sin El Fil, Lebanon", while "United Kingdom", "Dubai" or "High Street, Croydon" against
+// "High Street, Bromley" never match.
+const COUNTRIES = new Set(["lebanon", "united kingdom", "uk", "great britain", "england", "scotland", "wales", "northern ireland",
+  "united arab emirates", "uae", "united states", "usa", "us", "united states of america", "canada", "australia", "ireland",
+  "saudi arabia", "qatar", "kuwait", "bahrain", "oman"]);
+const POSTCODE = /^(?=.*\d)[a-z0-9]{2,5}( [a-z0-9]{2,4})?$/;
+function addressParts(v: string): string[] {
+  return v.split(",").map(norm).filter((p) => p && !COUNTRIES.has(p) && !POSTCODE.test(p));
+}
+function textAddressMatches(hay: string, inv: string, saved: string): boolean {
+  const g = addressParts(inv), b = addressParts(saved);
+  if (!g.length || !b.length) return false;
+  // The shorter address inside the longer one; with the same number of parts, either way round.
+  const inside = (short: string[], long: string[]) => {
+    if (words(short[0]) < 2) return false;
+    const longText = long.join(" ");
+    return short.every((p) => containsWords(longText, p));
+  };
+  if (!hay) return false;
+  if (g.length < b.length) return inside(g, b);
+  if (b.length < g.length) return inside(b, g);
+  return inside(g, b) || inside(b, g);
 }
 
 // What the skipped report shows of an invitation's address, so staff can see why it was left pending.

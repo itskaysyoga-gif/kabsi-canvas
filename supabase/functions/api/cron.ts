@@ -100,6 +100,9 @@ export async function accessJob() {
       : "One step left: your plan. As soon as it's confirmed, Kabsi starts drafting replies to your reviews.";
     await sendAccessNotice(m.id, updated.name, next);
   }
+  // Access 1: an accepted invitation that matched no business by place ID leaves Kabsi as Manager of a listing
+  // nobody here consented for. Staff remove it by hand (docs/LATER.md), so say so loudly.
+  if (accepted > granted) await captureError("cron-tick", new Error("Accepted Google invitation matched no business (Access 1)"), { job: "access", accepted, granted });
   return { mode: googleMode(), pending: pending.length, accepted, granted };
 }
 
