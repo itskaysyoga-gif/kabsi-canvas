@@ -40,6 +40,15 @@ export function domainOf(url: string): string | null {
     return null;
   }
 }
+/** ChatGPT cites a Google Maps search link for every place it names: that is the place, not a source an owner can act on. */
+const isMapsLink = (url: string) => {
+  try {
+    const u = new URL(url);
+    return /(^|\.)google\.[a-z.]+$/.test(u.hostname) && u.pathname.startsWith("/maps");
+  } catch {
+    return false;
+  }
+};
 const clean = (s: unknown, max: number) => String(s ?? "").replace(/\s+/g, " ").trim().slice(0, max);
 
 /** Sources cited, domain and title only (no URL path, no snippet), one per domain and title. */
@@ -47,7 +56,7 @@ export function sourcesFrom(annotations: { url?: string | null; title?: string |
   const seen = new Set<string>();
   const out: AiSource[] = [];
   for (const a of annotations ?? []) {
-    const domain = a?.url ? domainOf(a.url) : null;
+    const domain = a?.url && !isMapsLink(a.url) ? domainOf(a.url) : null;
     if (!domain) continue;
     const title = clean(a.title, 120);
     const k = `${domain}|${title.toLowerCase()}`;

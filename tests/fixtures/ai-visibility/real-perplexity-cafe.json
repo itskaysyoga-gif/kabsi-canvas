@@ -1,0 +1,39 @@
+{
+  "version": "0.1.20250526",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "cost": 0.005827,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "calibration-26-oct-2026",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "cost": 0.005827,
+      "result": [
+        {
+          "model_name": "sonar",
+          "web_search": true,
+          "items": [
+            {
+              "type": "message",
+              "sections": [
+                {
+                  "type": "text",
+                  "text": "If you're near **Mirna Chalouhi in Sin El Fil**, the best nearby pick is likely **Qahwa BLK – Jal El Dib**: reliable specialty coffee, a good Spanish latte, and convenient for a quick stop.[1]\n\nOther good options:\n\n- **Croffee** — specialty coffee with croffles; a good choice for coffee and a sweet bite.[4]\n- **Blend – Jal El Dib/Kantari** — popular for Spanish lattes and a more relaxed laptop-friendly atmosphere.[1]\n- **Brimm – Kouraytem** — quieter and suitable for working, though farther from Mirna Chalouhi.[1]\n\n**Best overall recommendation:** Qahwa BLK – Jal El Dib for proximity and convenience.",
+                  "annotations": [
+                    {
+                      "title": "The Specialty Coffee Map of Beirut",
+                      "url": "https://www.lebanontraveler.com/"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

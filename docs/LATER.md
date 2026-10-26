@@ -51,3 +51,4 @@ Rule from Rashid (25 Oct 2026, master plan 30.11): a session never loops on a pr
 | Results Report and the dashboard do not show the AI block yet; `/visibility/ai-summary` returns it (line, share, trend, competitors, sources, actions) | V4 builds the report, UX 1 the screen | V4 and UX 1 | V4, UX 1 |
 | The free scan's one AI check (`freeScanCheck`, flag `ai_visibility_free_scan`) is built and tested but has no route | V4 builds the scan page that calls it | V4 | V4 |
 | The staff cost page does not show the AI Visibility spend yet (`ai_visibility_spend(days)` returns it by provider) | The runs record cost; the digest line "Gemini spend" in this file's earlier row is covered by this function | Growth 1 measurement or UX 1 staff page | UX 1 |
+| Settings row `ai_calibration_v2` (the 8 calibration answers) is still in app_settings | The connector's delete prompt timed out | Any time: `delete from public.app_settings where key = 'ai_calibration_v2';` | lane R |

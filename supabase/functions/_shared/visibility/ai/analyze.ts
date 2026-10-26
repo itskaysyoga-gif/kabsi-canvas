@@ -24,22 +24,47 @@ export function mentions(text: string, name: string): number {
   return -1;
 }
 
-const NOT_NAMES = /^(note|tip|here|these|this|there|however|overall|summary|answer|options?|top|best|recommendations?|please|sources?|disclaimer|i |you |if |for |based|according|keep|check|call|visit|consider|sure|certainly|of course)\b/i;
+const NOT_NAMES = /^(note|tip|here|these|this|there|however|overall|summary|answer|options?|top|best|recommendations?|please|sources?|disclaimer|i |you |if |for |based|according|keep|check|call|visit|consider|sure|certainly|of course|quick|first|other|also|many|some)\b/i;
 
-/** Business names a list in the answer names, in the order they appear: bold names, or the start of numbered and bulleted lines. */
-export function listedNames(text: string): { name: string; at: number }[] {
+/** "Ichkhanian Bakery, Zoukak El-Blat" and "Blend - Jal El Dib" are the business plus where it is: keep the business. */
+function cleanName(raw: string): string {
+  let n = raw.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/[*_`#[\]]/g, "").replace(/\s+/g, " ").trim();
+  n = n.split(/\s[-\u2013\u2014|]\s|:\s|,\s|\s\(|\sor\s/)[0];
+  n = n.replace(/\s+in\s+\p{Lu}.*$/u, "").replace(/[.,;:!?]+$/, "").trim();
+  return n;
+}
+
+function plausible(name: string, original: string, prompt: string | null | undefined): boolean {
+  const words = name.split(" ");
+  if (name.length < 2 || name.length > 60 || words.length > 7) return false;
+  if (!/^\p{Lu}/u.test(name) || /^\d/.test(name)) return false; // a street number is an address, not a business
+  if (/:\s*$/.test(original.trim()) || NOT_NAMES.test(name)) return false;
+  // The area the customer asked about ("Mirna Chalouhi") is a place, not a competitor.
+  const p = ` ${norm(prompt)} `;
+  if (p.trim() && p.includes(` ${norm(name)} `)) return false;
+  return true;
+}
+
+/**
+ * Business names the answer names, in the order they appear: bold names (also bold links, the form ChatGPT uses), else the
+ * start of numbered and bulleted lines.
+ */
+export function listedNames(text: string, prompt?: string | null): { name: string; at: number }[] {
   const out: { name: string; at: number }[] = [];
   let offset = 0;
   for (const line of text.split("\n")) {
-    const m = line.match(/^\s*(?:\d{1,2}[.)]|[-*•])\s+(.*)$/);
-    if (m) {
-      const body = m[1];
-      const bold = body.match(/\*\*([^*]{2,60})\*\*/) ?? body.match(/__([^_]{2,60})__/);
-      let name = bold ? bold[1] : body.split(/\s[-:|]\s|:\s|,\s|\.\s|\(|\s{2,}/)[0];
-      name = name.replace(/[*_`#[\]]/g, "").replace(/\s+/g, " ").replace(/[.,;:!?]+$/, "").trim();
-      const words = name.split(" ");
-      if (name.length >= 2 && name.length <= 60 && words.length <= 7 && /^[\p{Lu}\d]/u.test(name) && !NOT_NAMES.test(name)) {
-        out.push({ name, at: offset + line.indexOf(m[1]) });
+    const spans = [...line.matchAll(/\*\*(.+?)\*\*|__(.+?)__/g)];
+    if (spans.length) {
+      for (const m of spans) {
+        const raw = m[1] ?? m[2];
+        const name = cleanName(raw);
+        if (plausible(name, raw, prompt)) out.push({ name, at: offset + (m.index ?? 0) });
+      }
+    } else {
+      const m = line.match(/^\s*(?:\d{1,2}[.)]|[-*\u2022])\s+(.*)$/);
+      if (m) {
+        const name = cleanName(m[1]);
+        if (plausible(name, m[1], prompt)) out.push({ name, at: offset + line.indexOf(m[1]) });
       }
     }
     offset += line.length + 1;
@@ -47,7 +72,7 @@ export function listedNames(text: string): { name: string; at: number }[] {
   return out;
 }
 
-export function analyze(o: { text: string; sources?: AiSource[]; business: string; known?: KnownCompetitor[] }): Analysis {
+export function analyze(o: { text: string; sources?: AiSource[]; business: string; known?: KnownCompetitor[]; prompt?: string | null }): Analysis {
   const known = o.known ?? [];
   const self = mentions(o.text, o.business);
   const named = self >= 0;
@@ -70,7 +95,7 @@ export function analyze(o: { text: string; sources?: AiSource[]; business: strin
     ents.push(e);
   };
   if (named) add({ name: o.business, at: self, key: null, matched: false, me: true });
-  for (const l of listedNames(o.text)) {
+  for (const l of listedNames(o.text, o.prompt)) {
     if (mentions(l.name, o.business) >= 0 || same(l.name, o.business)) {
       if (named) {
         // The line that names the business gives its place in the list.

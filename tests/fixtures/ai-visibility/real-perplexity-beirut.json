@@ -1,0 +1,47 @@
+{
+  "version": "0.1.20250526",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "cost": 0.005877,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "calibration-26-oct-2026",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "cost": 0.005877,
+      "result": [
+        {
+          "model_name": "sonar",
+          "web_search": true,
+          "items": [
+            {
+              "type": "message",
+              "sections": [
+                {
+                  "type": "text",
+                  "text": "For the **best all-around bakery experience in Beirut**, try **Vanilla Bean in Hamra**—it's highly rated for croissants, sourdough, creative pastries, cakes, and coffee.[1]\n\nOther excellent choices depending on what you want:\n\n- **Ichkhanian Bakery, Zoukak El-Blat** — best for Armenian-style *lahm bi ajin* and savory pastries.[2]\n- **Bakelab Counter, Mar Mikhael** — best for sourdough and inventive pastries such as cruffins and zaatar-labneh rolls.[7]\n- **Bartartine, Mar Mikhael/Achrafieh and other branches** — reliable French-style bread, viennoiseries, tarts, and breakfast.[3][7]\n- **Kabouchieh Bakery, Hamra** — best for traditional manakish, kaak, fatayer, and an old-school Beirut bakery experience.[10]\n- **Baked In Beirut, Gemmayze** — excellent for creative Lebanese-Armenian manouche.[8]\n\n**Quick pick:** Vanilla Bean for pastries and coffee; Ichkhanian or Kabouchieh for authentic savory Lebanese baking.",
+                  "annotations": [
+                    {
+                      "title": "Vanilla Bean - The bakery, Beirut, Lebanon",
+                      "url": "https://wanderlog.com/"
+                    },
+                    {
+                      "title": "ICHKHANIAN BAKERY, Beirut - 2026 Reviews & Information",
+                      "url": "https://www.tripadvisor.co.uk/"
+                    },
+                    {
+                      "title": "Bakeries » Beirut.com",
+                      "url": "https://www.beirut.com/"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
