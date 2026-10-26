@@ -1,6 +1,6 @@
 # Kabsi: instructions for Claude
 
-Kabsi looks after a local business's Google Business Profile: a reply ready for every new review, the listing watched and kept right, photos and posts prepared, a Weekly Care Report, and nothing published without the owner's approval. Brand line: "Your reviews and listing. Taken care of." Kabsi does not use Lovable.
+Kabsi looks after a local business's Google Business Profile: a reply ready for every new review, the listing watched and kept right, photos and posts prepared, a Weekly Care Report, and nothing published without the owner's approval. Brand line: "Your business on Google. Taken care of." (master plan 30.15; was "Your reviews and listing. Taken care of.") Kabsi does not use Lovable.
 
 ## Read first, in this order
 
