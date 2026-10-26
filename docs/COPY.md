@@ -13,34 +13,40 @@ Decisions taken while writing (lane R, R-41):
 
 ## Shared pieces
 
-**Header:** Kabsi mark and name. Links: How it works, Pricing, Free tools, Guides, Partners. Right: Log in, and the button "See your map".
-**Phone bottom bar (after the first scroll):** "See your map" and a WhatsApp icon button labelled "Chat on WhatsApp".
+**Header:** Kabsi mark and name. Links: How it works, Pricing, Free tools, Guides, Partners. Right: Log in, and the button "Check my business free".
+**Phone bottom bar (after the first scroll):** "Check my business free" and a WhatsApp icon button labelled "Chat on WhatsApp".
 **Footer:**
-- Line: "Your reviews and listing. Taken care of."
+- Line: "Your business on Google. Taken care of."
 - Columns. Product: How it works, Pricing, Free Visibility Scan, Review link and QR code, Security. Learn: Guides, Compare, FAQ. Company: About, Partners, Partner terms, Privacy, Terms, Status. Follow: Facebook, Instagram (SOCIAL_LINKS).
 - Small print: "Kabsi is independent and not affiliated with Google. Google Business Profile is free from Google. Kabsi is an independent paid service." with the link "Google's guidance on working with a third party". "Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co. Payments are processed by Creem, our merchant of record."
 **Cookie bar:** "Kabsi uses cookies to measure visits and improve ads. You choose." Buttons: "Accept", "Only necessary". Link: "Details".
 **Scan box (one component, used on many pages):**
 - Label: "Find your business on Google"
 - Placeholder: "Business name and city"
-- Button: "See your map"
-- Under it: "Free. Takes about 10 seconds. No sign-up."
+- Button: "Check my business free"
+- Under it: "Free check. No Google access needed. Takes about 10 seconds."
 - Waitlist state (cap 0): "The free scan opens soon. Leave your email or WhatsApp and Kabsi sends your map the day it opens." Button: "Save my place". Done: "Saved. You are on the list."
 
-## 0.1 Words owners understand (lane R, 25 Oct 2026)
+## 0.1 Words owners understand (lane R, 25 Oct 2026; 30.15 lines added 26 Oct)
 
 - Never "spot", "grid", "grid point", "geo" or "pin" in a line an owner reads. Say "places around you" and "searched like a customer". The number on a dot is "where you came up", 1 is first.
 - Never "the app" or "app". Kabsi has no app. Say "the Kabsi website", "your Kabsi account" or "on kabsi.co". Nav item: "How it works", never "The app". WhatsApp is WhatsApp.
 
+- Never "listing" or "visibility" in a line an owner reads (30.15): say "your business on Google" or "your Google profile".
+- The map leads with three nearby places, then one count: "Near your salon you came up 2nd for 'hair salon'. Near the metro station, Rose Lane Salon came first. You were in the first 3 at 18 of 49 places Kabsi checked." Place names come only from the real checked point. Under it: "Sample Google Maps results, not customer counts."
+- AI answers: "An answer customers might see", never a score. Label: "Answers from ChatGPT and Perplexity through their API, which can differ from their apps."
+- Never: top of Google, more customers, fully automatic, set and forget, we manage everything, Google-approved, Google partner, we remove bad reviews, no work needed, AI recommends you.
+
 ## 1. Home (/)
 
 **Hero**
-- H1: "See where you show up on Google and in AI answers."
-- Lead: "Kabsi checks your Google Maps ranking and what ChatGPT and Perplexity say about you, helps you get more reviews the right way, keeps your listing right and posts for you. You reply Yes on WhatsApp."
-- Scan box. Under it: "Free for 14 days. No card. Cancel in WhatsApp."
+- H1: "Your business on Google. Taken care of through WhatsApp."
+- Lead: "Kabsi prepares your review replies, posts and updates to your business details. You approve each one on WhatsApp before it goes live."
+- Buttons: "Check my business free" (main) and "See how it works" (the WhatsApp demo). The 14-day trial is explained apart from the free check: "Free for 14 days once Kabsi is connected. No card."
+- Scan box (the free check).
 - Visual (Example): the map filling in, the phone receiving it. Map line in the chat: "We searched 'dentist' on Google Maps from 49 places around your clinic, like a customer would. You came up in the top 3 from 18 of them. North of the mall, Smile Clinic comes up first."
 
-**Pillars** (H2: "One manager for how customers find you")
+**Pillars** (H2: "The Google work, done for you"; rewritten by 30.15, Design 4 sets the final lines for lane R)
 1. See where you show up: "A map of your ranking across your area, what AI assistants say about you, and the 3 to 5 competitors around you."
 2. More reviews, the right way: "Your review link, a QR card for the counter, and a ready message you send to every customer. Never only the happy ones."
 3. Your listing kept right: "Hours, holidays, photos and posts kept current. If anyone changes your listing, you know in minutes."
@@ -165,7 +171,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 ## 11. Partner page (/p/HANDLE)
 
 - Strip: partner photo, "Recommended by [Name], Kabsi Partner", their one line.
-- H1: "See where you show up on Google and in AI answers."
+- H1: "Your business on Google. Taken care of through WhatsApp."
 - Scan box. Under: "30 days of Pro free. No card. Cancel in WhatsApp."
 - Pricing and FAQ from the shared blocks.
 - Disclosure under the strip and in the footer: "[Name] is a Kabsi Partner and earns a share if you subscribe."
@@ -241,7 +247,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 
 ## 20. WhatsApp screens (one per role)
 
-- Owner, review: "[Business]: new 4-star review from Maya. 'Great sourdough, a bit of a wait on Saturday.' Reply ready: 'Thank you, Maya...' Reply Yes to publish." Buttons: Yes / Edit / Skip. After Yes: "Published on your Google listing."
+- Owner, review: "[Business]: new 4-star review from Maya. 'Great sourdough, a bit of a wait on Saturday.' Reply ready: 'Thank you, Maya...' Reply Yes to publish." Buttons: Yes / Edit / Skip. After Yes: "Published on your Google profile."
 - Owner, first map: "Your first map is ready. We searched 'bakery' on Google Maps from 49 places around your shop, like a customer standing there. You came up in the top 3 from 18 of them. East of the station, Harbor Bakes comes up first. 3 next steps:" Buttons: "Show me" / "Later".
 - Partner: "Hi Sara. This week: 42 page visits, 6 scans, 2 trials, 1 paying business. Earned $9.75, cleared after the 30-day hold. Next payout: 5 Nov." Buttons: "My link" / "Scan a business".
 - staff_admin: "Morning, Rashid. 3 things today: 2 partner applications, 1 payout list to approve, number health good." Buttons: "Review applications" / "Approve payouts".

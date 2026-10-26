@@ -1002,3 +1002,70 @@ Session 19 rest read Google's current Business Profile APIs policies, third-part
 4. Design 2 (round 1) is approved with the notes in the design repo's brief section 13. Pages a business's customers or an email open (the review page, card set-up, staff upload, email actions, unsubscribe, payment done) use the light theme; the customer's review page shows no stock photo, only the business's name.
 5. ChatGPT (Rashid's free month) may give an outside opinion on Kabsi and gather sourced, dated competitor prices for Web 2. It reads only: it never changes the repo, Supabase, Vercel or Sentry, so the repo stays the one source of truth. Lane R decides what of its feedback is used.
 6. Meta: the dataset kabsi.co is set up, META_PIXEL_ID, META_CAPI_TOKEN and VITE_META_PIXEL_ID are saved, and the pixel is in the live bundle (26 Oct). META_WABA_ID is not set. Vercel Speed Insights needs a paid Vercel plan, so it stays off; Lighthouse CI covers speed until then.
+
+## 30.15 The outside review: what changes before launch (lane R, 26 Oct 2026, R-95)
+ChatGPT reviewed Kabsi in five rounds on 26 Oct (product, design, positioning, architecture and growth; the answers are in the lane R project doc kabsi-chatgpt-review.md). Lane R decided what follows. Where it differs from older sections, this section wins.
+
+### 1. Positioning: sell the work, show WhatsApp at once
+- Kabsi sells done-for-you Google upkeep that the owner approves on WhatsApp. The map and the AI answers are supporting evidence, never the identity.
+- Brand line: "Your business on Google. Taken care of." (was "Your reviews and listing. Taken care of."). What Kabsi is, in one line: "a Google Business Profile assistant on WhatsApp"; as an owner says it: "It takes care of my business on Google through WhatsApp."
+- Home H1: "Your business on Google. Taken care of through WhatsApp." Lead: "Kabsi prepares your review replies, posts and updates to your business details. You approve each one on WhatsApp before it goes live."
+- Main button: "Check my business free" (the free check). Second: "See how it works" (the WhatsApp demo). "Try it on WhatsApp" only where it opens a chat. "See your map" stays only on map ads and map pages.
+- First customer: an independent single-location hair and beauty salon in Dubai with a small team and no marketer. Then UK salons and barbers. Other trades stay open; Home, ads and examples are salon-first and use one consistent example business.
+- Owners never read "listing", "visibility", "grid" or "geo": say "your business on Google" or "your Google profile". Never say: top of Google, more customers or bookings, fully automatic, set and forget, we manage everything, Google-approved or Google partner, we remove bad reviews, no work needed, every change within minutes, AI recommends you, competitors only show dashboards.
+
+### 2. The map: nearby places first, the dots second
+- Default view, on the website and as the WhatsApp image: three checked places as cards: near the business, plus the two checked points with the most different results. Each card: the place, the owner's position ("2nd", "8th", "not in the first 20") and who came first. Under them one count from all checked places: "In the first 3 at 18 of 49 places Kabsi checked." Always the search term, the date and "Sample Google Maps results, not customer counts."
+- Place names come only from reverse geocoding the real checked point (nearest named landmark, station or street); never invented, never a whole neighbourhood from one point.
+- The full 7 by 7 dots stay behind "Detailed results". The grid itself is unchanged: the radius by trade is half the width (a salon's 3 km covers 6 km across, points 1 km apart).
+- No corrective task is invented because a competitor ranks higher.
+
+### 3. Product changes before launch
+1. Close every task: the owner sees approved, sent to Google, confirmed on Google (with a link), or failed with what happens next. "Published" only after Kabsi sees it on Google.
+2. Founder-assisted start for the first cohort: old unanswered reviews, wrong details, missing booking or menu links, done with the owner in the first days.
+3. A monthly business-update question on WhatsApp ("Any new services, prices, products or opening times?") turned into drafts to approve.
+4. Photos from WhatsApp on both plans.
+5. Review requests without customer data: Kabsi gives the owner or staff a ready message with the review link to forward after a real visit. Kabsi never receives a customer's number ("Ask a customer" changes). Link opens are counted apart from new reviews.
+6. The Monday report becomes a short work receipt: what Kabsi did, what waits for a yes, one next step (was three). Google's numbers follow, with calls and direction requests shown separately.
+7. Sensitive reviews (health, threats, legal, staff names) go to the owner with no draft and a route to a person; clinics never get patient details in WhatsApp.
+8. AI answers become "An answer customers might see": the exact question, which assistant and when, named or not, the cited sources and one verified issue if any. Monthly, never urgent, no score. Labelled "Answers from ChatGPT and Perplexity through their API, which can differ from their apps."
+9. Competitor Watch speaks only when something changed that matters ("Harbor Bakes got 14 reviews this month. You got 3."), not routine counts.
+10. The free check shows a useful result before asking for anything: "Free check. No Google access needed." The 14-day trial is explained apart from the check and starts only when Google access works.
+
+### 4. After the first 30 paying customers (docs/LATER.md)
+Booking or checkout triggers for review requests (the one system customers use most); checks that the website, booking and menu links work; consistency with Apple Maps, Bing, Facebook and booking pages (assisted first); a missed-enquiry pilot. Not planned: a universal inbox, a booking system, automatic posting everywhere, a higher done-for-you plan.
+
+### 5. Plans, prices and partners
+- Prices stay 19 and 39 US dollars (a hypothesis for the first cohort). Pro's difference is work first (weekly posts, team roles, menu and offer upkeep), measurement second. Founding price wording: "kept while your subscription stays paid". The founding count shows only the real number.
+- Local currency: pounds for the UK and dirhams for the UAE only if Creem charges in that currency; otherwise USD only, never a converted estimate (the Partners session checks Creem's docs).
+- Partners: 25 percent of subscription revenue collected (excluding tax, refunds and chargebacks) while the referred subscription stays paid; 30-day hold from payment; minimum payout 25 US dollars (was 50); a fixed monthly payout date and a statement; written rules for the referral window, competing and self referrals. Lane R and Rashid recruit the first three partners by hand (salon consultants and freelancers in Dubai, website freelancers in the UK) before the portal grows.
+
+### 6. Growth
+- Outbound with Harvey (section 13) is postponed until after the first 30 paying customers and a UK and UAE legal check. If it ever runs: never through Resend, written as Rashid, never as Nora.
+- First ads after the launch gate, one at a time: (1) show the work, "Your salon's Google reviews and updates, ready to approve on WhatsApp."; (2) the free nearby check; (3) retargeting to finish setup.
+- Emails to add (UX 1): setup incomplete, access works (trial dates and the first task), first work completed, one approval reminder, connection or publication failed, trial ending (work done, price, an explicit choice), receipt, failed payment, cancellation. Owners choose their routine channel; WhatsApp alerts are not copied by email.
+- Email collection before launch: email, business name and country, a launch-notice consent, and a separate unticked marketing consent. "Send me this report" sends that report only.
+
+### 7. Launch blockers outside the code (Rashid and Hussein)
+- Creem: before payments open, Hussein asks Creem in writing whether the arrangement (Hussein's merchant account, Rashid operating Kabsi) is acceptable, and the two sign a short written agreement on payouts, refunds, disputes, tax, access and what happens if either stops. Payments stay closed until both exist.
+- Vercel Pro before charging (Hobby is non-commercial); Supabase Pro per section 15.
+- Kapso: confirm who owns the WhatsApp Business account and how it moves if Kabsi leaves Kapso.
+
+### 8. Security and operations (Sec 1 and the launch gate)
+Sec 1 proves, with evidence: cross-business isolation with two test tenants across tables, Storage, functions and the service role; role revocation (removed staff, changed phones, two-role phones); approvals bound to business, action, content version, approver and expiry (an edit voids the old yes; Undo racing publication); email action links that never act on open; webhook signatures, replay and out-of-order events; separated secrets and MFA on every staff account; prompt injection and hostile files; a privacy trace of one message through every provider; a restore that includes Storage and re-applies deletions; abuse limits and the stop switch for all Google writes. Also: the Google data retention reviewed per source (reports, summaries, PDFs, backups) against the Business Profile and Places policies; OWASP ASVS level 1 as the checklist; fast-check property tests for approve, edit, Undo, retry and revoke orders; an operations view of stuck tasks, disconnected businesses and failed publications.
+
+### 9. How sessions build (kabsi-build-session)
+- A pull request that touches auth, RLS, billing, approvals, retention, secrets, migrations or CI gets an independent review before merge: a fresh agent given only the diff and the rules, its confirmed findings fixed and listed in the report.
+- A session never weakens a test, a threshold or a workflow to get green; any change there is listed in the report for lane R.
+- Reports carry evidence: the commit, which tests ran, what failed, screenshots and how to roll back.
+
+### 10. Design (the design studio)
+- Keep the Design 1 system (dark public site, black and yellow, Bricolage Grotesque and Manrope). From ChatGPT's design system take: one lighter section on Home for contrast, less button glow, quieter Example badges, fewer identical cards, ink on yellow only.
+- Design 4 (Opus) applies 30.15 to the prototype: the new hero and buttons, Home one third shorter and salon-first (hero, the WhatsApp story, three benefits, access and ownership, short pricing, four FAQs, closing band), the nearby-places map, the free check apart from the trial, a simpler scan result (one finding, one action, one button, the raw profile facts folded away), pricing cards with three concrete differences each, trust beside the access step (founder name, what Manager access allows and how to remove it, human help), and the copy fixes of round 2 (search terms, Review Growth spelled out, no "Latest reviews returned", calls and directions apart, no internal rule lines, example replies that use only facts the owner gave).
+- Design 3 (Opus) builds the signed-in website, emails and images to 30.15: the work receipt, the task states, the nearby-places WhatsApp image and the new emails.
+
+### 11. Kept, with the reason
+Two plans (already built, they show whether owners pay for more work); the dark public site and the self-hosted fonts (approved and inside the budget); the current providers (no migration for small savings); the existing evaluation skills instead of Promptfoo; Playwright tests instead of Playwright MCP; the existing job queue (Sec 1 checks it has durable retries and leases).
+
+### 12. Order from here
+Design 4 and Design 3 (Opus, together; Design 3 pulls Design 4's map cards), then V3 (Sonnet, with items 3.3 to 3.5 and 3.7), Partners (Opus, item 5), V4 (Opus, items 2, 3.1, 3.6, 3.8 to 3.10), Web 2 and UX 1 (Opus), Sec 1 (Opus, item 8), the launch gate. Outbound is out of the order.

@@ -27,6 +27,9 @@ Rashid runs Kabsi and the build sessions, and the lane R chat decides on his aut
 - Applying your migration yourself (lane R, 26 Oct 2026): use the Supabase connector's apply_migration, never execute_sql, for every write. Pass the file's text without begin or commit, and as the name the file name without its timestamp. apply_migration records its own version (the current time): read it back with list_migrations, then rename your file in the repo to that version (`git mv`), so the repo and the database match. Read-backs use execute_sql with select only. On delete clauses are fine in apply_migration (V2's on delete cascade went through on 26 Oct).
 - Supabase connector prompts: execute_sql writes ask Rashid for approval and time out when he is away, so never write with execute_sql. If apply_migration ever asks and times out, do not call it again in that turn: give the exact file path and the read-back in your report, and the lane R chat applies it.
 - UI work reads DESIGN.md first and takes every visible line from docs/COPY.md. Use the webapp-testing skill for screenshots at 390 and 1440 px.
+- Independent review (master plan 30.15.9): a pull request that touches auth, RLS, billing, approvals, retention, secrets, migrations or CI gets a review before merge by a fresh agent given only the diff and the rules (not your reasoning). Fix its confirmed findings and list them in the report.
+- Never weaken a test, a threshold or a workflow to get green. Any change to those files is listed in the report for lane R.
+- Reports carry evidence: the commit, which tests ran, what failed, screenshots where a screen changed, and how to roll back.
 - Keep the report short. Rashid reads it on his phone.
 
 ## Hard stops

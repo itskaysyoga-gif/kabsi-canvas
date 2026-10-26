@@ -17,8 +17,8 @@ One page, under 10 KB. Updated 25 Oct 2026 by the lane R chat (master plan 19, 2
 - Growth 1 (PR 226, 25 Oct): consent bar (EU, EEA, UK, CH, UAE, Saudi Arabia), "Your privacy choices", the 20.1 events (docs/EVENTS.md), Pixel and Conversions API off until Meta is set up. Detail: `docs/progress/archive/2026-10-25-growth-1.md`.
 - Session 13b part 2 (PR 230, merged 25 Oct, deploy run 106): staff alerts and morning digest on WhatsApp, Slack removed, hours and typed posts on WhatsApp, the map image, the billing template (pending at Meta), Nora judged 4.4 of 5, START fixed. Verified live 26 Oct: the first morning digest reached the staff phone at 08:02 Beirut (Rashid replied). Detail: `docs/progress/archive/2026-10-25-session-13b-2.md`.
 - V2 (AI Visibility, PR 234, 26 Oct): prompts, runs, numbers, owner line, map line; Gemini off. Calibrated live. Detail: `docs/progress/archive/2026-10-26-v2-ai-visibility.md`.
-- 26 Oct, lane R: V2's migration applied (20261026100000, 3 tables with RLS, 2 cron jobs, mock); Meta pixel in the live bundle; QA_SMOKE_TOKEN set by Rashid; Slack leftovers dropped by Rashid (read-back 0 | 0 | 0 | 0). Decisions in master plan 30.14 (Gemini off, sessions apply migrations with apply_migration).
-- Next: V2 merges after calibration; Design 2 round 2 and Design 3; then V3 and Partners, V4, Web 2 and UX 1 (port the approved design), Sec 1, the launch gate.
+- 26 Oct, lane R: V2's migration applied; Meta pixel live; QA_SMOKE_TOKEN set; Slack leftovers dropped (0 | 0 | 0 | 0); master plan 30.14.
+- 26 Oct, lane R: the outside review decided (master plan 30.15, R-95). V2 merged and live (PR 234, 237). Next: Design 4 and Design 3, V3, Partners, V4, Web 2 and UX 1, Sec 1, the launch gate; Outbound postponed.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
