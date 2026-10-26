@@ -1,8 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Button, Switch } from "@/components/kabsi/ui";
 import {
   CONSENT_VERSION,
   CONSENT_WORDING,
@@ -55,31 +54,31 @@ export function PrivacyBanner({ onMounted }: { onMounted?: () => void } = {}) {
         aria-label="Your privacy choices"
         data-testid="privacy-panel"
         data-rule={consent.rule}
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-kb-hairline bg-kb-white px-5 py-4 shadow-kb sm:inset-x-auto sm:bottom-5 sm:start-5 sm:w-[26rem] sm:rounded-card sm:border"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-line-strong bg-surface-1 px-5 py-4 text-text-1 shadow-float sm:inset-x-auto sm:bottom-5 sm:start-5 sm:w-[26rem] sm:rounded-panel sm:border"
       >
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-base font-bold text-kb-ink">Your privacy choices</h2>
+          <h2 className="font-display text-title font-bold text-text-1">Your privacy choices</h2>
           <button
             type="button"
             aria-label="Close"
             onClick={() => setPanel(false)}
-            className="-me-2 inline-flex size-11 items-center justify-center rounded-full text-kb-ink"
+            className="-me-2 inline-flex size-11 items-center justify-center rounded-full text-text-1"
           >
             <X className="size-5" strokeWidth={1.75} aria-hidden />
           </button>
         </div>
-        <label className="mt-1 flex min-h-11 items-center justify-between gap-4 text-base font-medium text-kb-ink">
-          <span>{wording.panel}</span>
-          <Switch
-            checked={on}
-            onCheckedChange={(v) =>
-              void saveChoice("switch", { analytics: v, advertising: v }, pathname, "panel")
-            }
-            aria-label={wording.panel}
-            className="data-[state=checked]:bg-kb-green data-[state=unchecked]:bg-kb-stone"
-          />
-        </label>
-        <Link to="/privacy" className="mt-1 inline-block text-sm font-bold text-kb-ink underline">
+        <div className="mt-2" />
+        <Switch
+          checked={on}
+          onChange={(v) =>
+            void saveChoice("switch", { analytics: v, advertising: v }, pathname, "panel")
+          }
+          label={wording.panel!}
+        />
+        <Link
+          to="/privacy"
+          className="mt-2 inline-flex min-h-11 items-center text-small font-bold text-text-1 underline"
+        >
           Details
         </Link>
       </section>
@@ -99,19 +98,19 @@ export function PrivacyBanner({ onMounted }: { onMounted?: () => void } = {}) {
       aria-label="Cookies"
       data-testid="privacy-banner"
       data-rule={consent.rule}
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-kb-hairline bg-kb-white px-5 py-4 shadow-kb sm:inset-x-auto sm:bottom-5 sm:start-5 sm:max-w-md sm:rounded-card sm:border"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-line-strong bg-surface-1 p-5 text-text-1 shadow-float pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:inset-x-auto sm:bottom-5 sm:start-5 sm:max-w-md sm:rounded-panel sm:border"
     >
-      <p className="text-sm leading-6 text-kb-ink">
+      <p className="text-body text-text-1">
         {wording.opt_in}{" "}
         <Link to="/privacy" className="font-bold underline">
           Details
         </Link>
       </p>
-      <div className="mt-3 flex flex-wrap gap-3">
-        <Button variant="secondary" size="compact" onClick={() => decide("accept")}>
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <Button variant="secondary" size="md" onClick={() => decide("accept")}>
           Accept
         </Button>
-        <Button variant="secondary" size="compact" onClick={() => decide("decline")}>
+        <Button variant="secondary" size="md" onClick={() => decide("decline")}>
           Only necessary
         </Button>
       </div>

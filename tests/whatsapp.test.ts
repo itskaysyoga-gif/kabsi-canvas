@@ -89,9 +89,10 @@ describe("WhatsApp is one setting that can be empty (PR 0, 22 Oct 2026)", () => 
 
   it("every placement that shows the number is guarded by the setting", () => {
     for (const file of [
-      "src/components/layouts/public-layout.tsx",
+      "src/components/kabsi/site-chrome.tsx",
+      "src/components/kabsi/ui.tsx",
       "src/components/assistant/assistant-widget.tsx",
-      "src/routes/faq.tsx",
+      "src/components/kabsi/d2-legal.tsx",
       "src/routes/terms.tsx",
       "src/routes/privacy.tsx",
       "src/routes/setup-call.tsx",

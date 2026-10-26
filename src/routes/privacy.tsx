@@ -19,6 +19,7 @@ import {
 export const Route = createFileRoute("/privacy")({
   head: () =>
     pageHead({
+      image: "about",
       title: "Privacy policy | Kabsi",
       description:
         "What Kabsi collects, why, who processes it, how long it's kept, how Google data is used, and how to delete it.",
@@ -36,7 +37,15 @@ const LIMITED_USE =
 
 function Page() {
   return (
-    <LegalPage kind="privacy" title="Privacy" updated={UPDATED}>
+    <LegalPage
+      title="Privacy"
+      updated={UPDATED}
+      summary={[
+        "Kabsi collects your email, your WhatsApp number and the details of your business.",
+        "Your public Google profile is shown live in the free tools. Kabsi does not store it.",
+        "Ask a question or ask to see your data: hello@kabsi.co.",
+      ]}
+    >
       <section>
         <p>
           This policy explains what Kabsi collects, why, who helps us process it, how long we keep
@@ -442,12 +451,12 @@ function Page() {
           One table sets these limits, and a job that runs every day applies it. Google's own
           content is never kept for more than 30 days.
         </p>
-        <dl className="my-4 divide-y divide-kb-hairline border-y border-kb-hairline">
+        <dl className="my-4 divide-y divide-line border-y border-line">
           {RETENTION_ROWS.map((row) => (
             <div key={row.dataClass} className="py-3">
               <dt className="font-bold">{row.data}</dt>
               <dd className="mt-1">{row.kept}</dd>
-              <dd className="mt-1 text-sm text-kb-stone">Why: {row.why}</dd>
+              <dd className="mt-1 text-sm text-text-2">Why: {row.why}</dd>
             </div>
           ))}
         </dl>

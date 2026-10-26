@@ -55,7 +55,13 @@ const READABLE = [
 const OTHER_AMOUNTS: Record<string, string[]> = {
   $35: ["src/components/app/knowledge-form.tsx"], // an example price in a help text
   $50: ["knowledge/kabsi-facts.md", "public/llms-full.txt", "public/llms.txt"], // the old partner payout minimum, named as changed
-  $25: ["knowledge/kabsi-facts.md", "public/llms-full.txt", "public/llms.txt"], // the partner payout minimum (30.15 section 5)
+  $25: [
+    "knowledge/kabsi-facts.md",
+    "public/llms-full.txt",
+    "public/llms.txt",
+    "src/components/kabsi/d2-partners.tsx",
+    "src/routes/partners_.terms.tsx",
+  ], // the partner payout minimum (30.15 section 5)
   $0: ["knowledge/kabsi-facts.md", "public/llms-full.txt"],
 };
 

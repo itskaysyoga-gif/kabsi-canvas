@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as FoundingRouteImport } from './routes/founding'
 import { Route as GetStartedRouteImport } from './routes/get-started'
 import { Route as GoogleProfileCheckRouteImport } from './routes/google-profile-check'
 import { Route as GoogleReviewLinkRouteImport } from './routes/google-review-link'
@@ -35,12 +36,14 @@ import { Route as ActivateCodeRouteImport } from './routes/activate.$code'
 import { Route as ApiGeoRouteImport } from './routes/api.geo'
 import { Route as BillingDoneRouteImport } from './routes/billing.done'
 import { Route as ForIndexRouteImport } from './routes/for.index'
-import { Route as ForSlugRouteImport } from './routes/for.$slug'
+import { Route as ForTradeRouteImport } from './routes/for.$trade'
 import { Route as GuidesIndexRouteImport } from './routes/guides.index'
 import { Route as GuidesSlugRouteImport } from './routes/guides.$slug'
 import { Route as HTokenRouteImport } from './routes/h.$token'
 import { Route as PartnersTermsRouteImport } from './routes/partners_.terms'
 import { Route as ReviewCodeRouteImport } from './routes/review.$code'
+import { Route as ScanIndexRouteImport } from './routes/scan.index'
+import { Route as ScanCodeRouteImport } from './routes/scan.$code'
 import { Route as UTokenRouteImport } from './routes/u.$token'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app/index'
 import { Route as AuthenticatedAppCardsRouteImport } from './routes/_authenticated/app/cards'
@@ -75,6 +78,11 @@ const AboutRoute = AboutRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoundingRoute = FoundingRouteImport.update({
+  id: '/founding',
+  path: '/founding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GetStartedRoute = GetStartedRouteImport.update({
@@ -187,9 +195,9 @@ const ForIndexRoute = ForIndexRouteImport.update({
   path: '/for/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ForSlugRoute = ForSlugRouteImport.update({
-  id: '/for/$slug',
-  path: '/for/$slug',
+const ForTradeRoute = ForTradeRouteImport.update({
+  id: '/for/$trade',
+  path: '/for/$trade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuidesIndexRoute = GuidesIndexRouteImport.update({
@@ -215,6 +223,16 @@ const PartnersTermsRoute = PartnersTermsRouteImport.update({
 const ReviewCodeRoute = ReviewCodeRouteImport.update({
   id: '/review/$code',
   path: '/review/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScanIndexRoute = ScanIndexRouteImport.update({
+  id: '/scan/',
+  path: '/scan/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScanCodeRoute = ScanCodeRouteImport.update({
+  id: '/scan/$code',
+  path: '/scan/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UTokenRoute = UTokenRouteImport.update({
@@ -305,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/faq': typeof FaqRoute
+  '/founding': typeof FoundingRoute
   '/get-started': typeof GetStartedRoute
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
@@ -326,14 +345,16 @@ export interface FileRoutesByFullPath {
   '/activate/$code': typeof ActivateCodeRoute
   '/api/geo': typeof ApiGeoRoute
   '/billing/done': typeof BillingDoneRoute
-  '/for/$slug': typeof ForSlugRoute
+  '/for/$trade': typeof ForTradeRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
   '/partners/terms': typeof PartnersTermsRoute
   '/review/$code': typeof ReviewCodeRoute
+  '/scan/$code': typeof ScanCodeRoute
   '/u/$token': typeof UTokenRoute
   '/for/': typeof ForIndexRoute
   '/guides/': typeof GuidesIndexRoute
+  '/scan/': typeof ScanIndexRoute
   '/app/cards': typeof AuthenticatedAppCardsRoute
   '/app/coach': typeof AuthenticatedAppCoachRoute
   '/app/hours': typeof AuthenticatedAppHoursRoute
@@ -354,6 +375,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/faq': typeof FaqRoute
+  '/founding': typeof FoundingRoute
   '/get-started': typeof GetStartedRoute
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
@@ -374,14 +396,16 @@ export interface FileRoutesByTo {
   '/activate/$code': typeof ActivateCodeRoute
   '/api/geo': typeof ApiGeoRoute
   '/billing/done': typeof BillingDoneRoute
-  '/for/$slug': typeof ForSlugRoute
+  '/for/$trade': typeof ForTradeRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
   '/partners/terms': typeof PartnersTermsRoute
   '/review/$code': typeof ReviewCodeRoute
+  '/scan/$code': typeof ScanCodeRoute
   '/u/$token': typeof UTokenRoute
   '/for': typeof ForIndexRoute
   '/guides': typeof GuidesIndexRoute
+  '/scan': typeof ScanIndexRoute
   '/app/cards': typeof AuthenticatedAppCardsRoute
   '/app/coach': typeof AuthenticatedAppCoachRoute
   '/app/hours': typeof AuthenticatedAppHoursRoute
@@ -404,6 +428,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/faq': typeof FaqRoute
+  '/founding': typeof FoundingRoute
   '/get-started': typeof GetStartedRoute
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
@@ -425,14 +450,16 @@ export interface FileRoutesById {
   '/activate/$code': typeof ActivateCodeRoute
   '/api/geo': typeof ApiGeoRoute
   '/billing/done': typeof BillingDoneRoute
-  '/for/$slug': typeof ForSlugRoute
+  '/for/$trade': typeof ForTradeRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/h/$token': typeof HTokenRoute
   '/partners_/terms': typeof PartnersTermsRoute
   '/review/$code': typeof ReviewCodeRoute
+  '/scan/$code': typeof ScanCodeRoute
   '/u/$token': typeof UTokenRoute
   '/for/': typeof ForIndexRoute
   '/guides/': typeof GuidesIndexRoute
+  '/scan/': typeof ScanIndexRoute
   '/_authenticated/app/cards': typeof AuthenticatedAppCardsRoute
   '/_authenticated/app/coach': typeof AuthenticatedAppCoachRoute
   '/_authenticated/app/hours': typeof AuthenticatedAppHoursRoute
@@ -455,6 +482,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/faq'
+    | '/founding'
     | '/get-started'
     | '/google-profile-check'
     | '/google-review-link'
@@ -476,14 +504,16 @@ export interface FileRouteTypes {
     | '/activate/$code'
     | '/api/geo'
     | '/billing/done'
-    | '/for/$slug'
+    | '/for/$trade'
     | '/guides/$slug'
     | '/h/$token'
     | '/partners/terms'
     | '/review/$code'
+    | '/scan/$code'
     | '/u/$token'
     | '/for/'
     | '/guides/'
+    | '/scan/'
     | '/app/cards'
     | '/app/coach'
     | '/app/hours'
@@ -504,6 +534,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/faq'
+    | '/founding'
     | '/get-started'
     | '/google-profile-check'
     | '/google-review-link'
@@ -524,14 +555,16 @@ export interface FileRouteTypes {
     | '/activate/$code'
     | '/api/geo'
     | '/billing/done'
-    | '/for/$slug'
+    | '/for/$trade'
     | '/guides/$slug'
     | '/h/$token'
     | '/partners/terms'
     | '/review/$code'
+    | '/scan/$code'
     | '/u/$token'
     | '/for'
     | '/guides'
+    | '/scan'
     | '/app/cards'
     | '/app/coach'
     | '/app/hours'
@@ -553,6 +586,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/about'
     | '/faq'
+    | '/founding'
     | '/get-started'
     | '/google-profile-check'
     | '/google-review-link'
@@ -574,14 +608,16 @@ export interface FileRouteTypes {
     | '/activate/$code'
     | '/api/geo'
     | '/billing/done'
-    | '/for/$slug'
+    | '/for/$trade'
     | '/guides/$slug'
     | '/h/$token'
     | '/partners_/terms'
     | '/review/$code'
+    | '/scan/$code'
     | '/u/$token'
     | '/for/'
     | '/guides/'
+    | '/scan/'
     | '/_authenticated/app/cards'
     | '/_authenticated/app/coach'
     | '/_authenticated/app/hours'
@@ -604,6 +640,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   FaqRoute: typeof FaqRoute
+  FoundingRoute: typeof FoundingRoute
   GetStartedRoute: typeof GetStartedRoute
   GoogleProfileCheckRoute: typeof GoogleProfileCheckRoute
   GoogleReviewLinkRoute: typeof GoogleReviewLinkRoute
@@ -621,14 +658,16 @@ export interface RootRouteChildren {
   ActivateCodeRoute: typeof ActivateCodeRoute
   ApiGeoRoute: typeof ApiGeoRoute
   BillingDoneRoute: typeof BillingDoneRoute
-  ForSlugRoute: typeof ForSlugRoute
+  ForTradeRoute: typeof ForTradeRoute
   GuidesSlugRoute: typeof GuidesSlugRoute
   HTokenRoute: typeof HTokenRoute
   PartnersTermsRoute: typeof PartnersTermsRoute
   ReviewCodeRoute: typeof ReviewCodeRoute
+  ScanCodeRoute: typeof ScanCodeRoute
   UTokenRoute: typeof UTokenRoute
   ForIndexRoute: typeof ForIndexRoute
   GuidesIndexRoute: typeof GuidesIndexRoute
+  ScanIndexRoute: typeof ScanIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -659,6 +698,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/founding': {
+      id: '/founding'
+      path: '/founding'
+      fullPath: '/founding'
+      preLoaderRoute: typeof FoundingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/get-started': {
@@ -815,11 +861,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/for/$slug': {
-      id: '/for/$slug'
-      path: '/for/$slug'
-      fullPath: '/for/$slug'
-      preLoaderRoute: typeof ForSlugRouteImport
+    '/for/$trade': {
+      id: '/for/$trade'
+      path: '/for/$trade'
+      fullPath: '/for/$trade'
+      preLoaderRoute: typeof ForTradeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guides/': {
@@ -855,6 +901,20 @@ declare module '@tanstack/react-router' {
       path: '/review/$code'
       fullPath: '/review/$code'
       preLoaderRoute: typeof ReviewCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scan/': {
+      id: '/scan/'
+      path: '/scan'
+      fullPath: '/scan/'
+      preLoaderRoute: typeof ScanIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scan/$code': {
+      id: '/scan/$code'
+      path: '/scan/$code'
+      fullPath: '/scan/$code'
+      preLoaderRoute: typeof ScanCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/u/$token': {
@@ -1035,6 +1095,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   FaqRoute: FaqRoute,
+  FoundingRoute: FoundingRoute,
   GetStartedRoute: GetStartedRoute,
   GoogleProfileCheckRoute: GoogleProfileCheckRoute,
   GoogleReviewLinkRoute: GoogleReviewLinkRoute,
@@ -1052,14 +1113,16 @@ const rootRouteChildren: RootRouteChildren = {
   ActivateCodeRoute: ActivateCodeRoute,
   ApiGeoRoute: ApiGeoRoute,
   BillingDoneRoute: BillingDoneRoute,
-  ForSlugRoute: ForSlugRoute,
+  ForTradeRoute: ForTradeRoute,
   GuidesSlugRoute: GuidesSlugRoute,
   HTokenRoute: HTokenRoute,
   PartnersTermsRoute: PartnersTermsRoute,
   ReviewCodeRoute: ReviewCodeRoute,
+  ScanCodeRoute: ScanCodeRoute,
   UTokenRoute: UTokenRoute,
   ForIndexRoute: ForIndexRoute,
   GuidesIndexRoute: GuidesIndexRoute,
+  ScanIndexRoute: ScanIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -19,8 +19,18 @@ describe("no app code in the first load of a public page", () => {
     "src/components/layouts/public-layout.tsx",
     "src/components/assistant/deferred-assistant.tsx",
     "src/components/shared/deferred-privacy-banner.tsx",
-    "src/components/marketing/home-sections.tsx",
-    "src/components/marketing/home-sections-below.tsx",
+    // Web 2: the public pages' own parts (the design studio's system).
+    "src/components/kabsi/site-chrome.tsx",
+    "src/components/kabsi/site-header.tsx",
+    "src/components/kabsi/site-footer.tsx",
+    "src/components/kabsi/ui.tsx",
+    "src/components/kabsi/scan-box.tsx",
+    "src/components/kabsi/scan-live.tsx",
+    "src/components/kabsi/d4-home.tsx",
+    "src/components/kabsi/d5-founding.tsx",
+    "src/components/kabsi/d2-tools.tsx",
+    "src/components/kabsi/d2-partners.tsx",
+    "src/lib/public-api.ts",
     "src/components/coach/coach-list.tsx",
     "src/lib/consent.ts",
     "src/lib/attribution.ts",
@@ -50,20 +60,19 @@ describe("no app code in the first load of a public page", () => {
       /export \{ anonHeaders, anonJwt, supabaseUrl \} from/,
     );
   });
-  it("keep the sections below the first screen in their own lazy chunk", () => {
-    const top = read("src/components/marketing/home-sections.tsx");
-    expect(top).toMatch(
-      /lazy\(\(\) =>\s*import\("@\/components\/marketing\/home-sections-below"\)/,
-    );
+  it("keep the hero story and the sections below the first screen in their own lazy chunks", () => {
+    const top = read("src/routes/index.tsx");
+    expect(top).toMatch(/lazy\(\(\) =>\s*import\("@\/components\/kabsi\/whatsapp"\)/);
+    expect(top).toMatch(/lazy\(\(\) =>\s*import\("@\/components\/kabsi\/d4-home"\)/);
     expect(top).toContain("<Suspense");
-    expect(top).not.toMatch(/function (Pillars|Plans|Pricing|Founder|Faq)\b/);
+    expect(top).not.toMatch(/from "@\/components\/kabsi\/(d4-home|whatsapp)"/);
   });
 });
 
 describe("the privacy banner and Nora come after the first paint", () => {
   it("the root loads the banner and Nora through the deferred wrappers", () => {
     expect(read("src/routes/__root.tsx")).toContain("<DeferredPrivacyBanner />");
-    expect(read("src/components/layouts/public-layout.tsx")).toContain(
+    expect(read("src/components/kabsi/site-chrome.tsx")).toContain(
       '<DeferredAssistant surface="site" />',
     );
   });

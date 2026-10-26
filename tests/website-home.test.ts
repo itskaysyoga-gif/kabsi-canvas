@@ -1,354 +1,254 @@
-// P0.8-13: the homepage (K-140, K-144, K-112, R-02). The order of the sections, the WhatsApp switch, the Coming soon
-// markers, the plan buttons while Creem is not live, and the claims rule on every word of the page.
-import { existsSync, readFileSync } from "node:fs";
-import { renderToStaticMarkup } from "react-dom/server";
+// Web 2 (27 Oct 2026): the public website on the design studio's approved system (master plan 30.13 to 30.18). This
+// replaces the tests of the 22 Oct homepage (P0.8-13), whose components are gone. It keeps their rules: the claims rule
+// and the copy rules on every line a reader sees, no invented proof or number, hello@kabsi.co only, the operator named
+// with no city, Creem as the merchant of record, WhatsApp shown only when the one setting has a number.
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  CHECKOUT_LIVE,
-  CTA_CHECK,
-  CTA_PRIMARY,
-  FOUNDER_SIGNATURE,
-  GOOGLE_NOTICE,
+  BRAND_LINE,
+  KABSI_GROUP_ID,
+  MAIN_CTA,
+  NAV_LINKS,
+  ORG_LD,
   OPERATOR_LINE,
   PLAN_PRICES,
+  SCAN_LINE,
+  SOCIAL_LINKS,
+  TRIAL_LINE,
   WHATSAPP_ON,
-  heroSub,
-  ORG_LD,
+  WHATSAPP_URL,
+  pageHead,
 } from "../src/lib/site";
-import {
-  COMING_SOON,
-  CONTROL_ITEMS,
-  FOUNDER_NOTE,
-  HOME_ORDER,
-  CAN,
-  CANNOT,
-  LOOP,
-  PAYMENT_LINE,
-  PILLARS,
-  PRICE_LINES,
-  PROOF_NOTE,
-  TRIAL_BOX,
-  homeFaq,
-  howSteps,
-  planButton,
-  planGrid,
-  pricingFaq,
-  whatsappText,
-} from "../src/lib/website";
-import { EXAMPLE_REVIEW, ExampleTag, WhatsappChat } from "../src/components/marketing/mockups";
+import { PLANS } from "../src/components/kabsi/plans";
 import { readText } from "./helpers/facts";
 
-const flat = (v: unknown, out: string[] = []): string[] => {
-  if (typeof v === "string") out.push(v);
-  else if (Array.isArray(v)) v.forEach((x) => flat(x, out));
-  else if (v && typeof v === "object") Object.values(v).forEach((x) => flat(x, out));
-  return out;
-};
+const read = (f: string) => readFileSync(f, "utf8");
+const filesIn = (dir: string) =>
+  readdirSync(dir)
+    .filter((n) => /\.(tsx?|ts)$/.test(n))
+    .map((n) => join(dir, n));
 
-/** Every sentence the homepage can show, with the WhatsApp setting both ways. */
-function pageWords(): string[] {
-  return [true, false].flatMap((on) =>
-    flat([
-      heroSub(on),
-      PILLARS,
-      howSteps(on),
-      planGrid(on),
-      whatsappText(on),
-      homeFaq(on),
-      CONTROL_ITEMS,
-      FOUNDER_NOTE,
-      PROOF_NOTE,
-      TRIAL_BOX,
-      PAYMENT_LINE,
-      Object.values(PRICE_LINES),
-      pricingFaq(on),
-      LOOP,
-      CAN,
-      CANNOT,
-    ]),
+/** Every public file Web 2 brought in, and the public routes. */
+const PUBLIC_FILES = [
+  ...filesIn("src/components/kabsi"),
+  ...filesIn("src/content"),
+  ...filesIn("src/content/industries"),
+  ...[
+    "index",
+    "pricing",
+    "how-it-works",
+    "about",
+    "security",
+    "faq",
+    "privacy",
+    "terms",
+    "partners",
+    "partners_.terms",
+    "founding",
+    "manager-steps",
+    "scan.index",
+    "scan.$code",
+    "google-profile-check",
+    "google-review-link",
+    "for.index",
+    "for.$trade",
+  ].map((r) => `src/routes/${r}.tsx`),
+];
+
+/** The lines a reader can see: JSX text and string literals that read as words (a space and a letter). */
+function sentences(code: string): string[] {
+  const out: string[] = [];
+  const clean = code.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  for (const m of clean.matchAll(/"([^"\n]+)"/g)) out.push(m[1]!);
+  for (const m of clean.matchAll(/`([^`]+)`/g)) out.push(m[1]!);
+  for (const m of clean.matchAll(/>([^<>{}]+)</g)) out.push(m[1]!.trim());
+  // Class names and code are not reader lines.
+  return out.filter(
+    (s) =>
+      / /.test(s) &&
+      /[A-Za-z]/.test(s) &&
+      !/^[a-z0-9:[\]()_./%#-]+( [a-z0-9:[\]()_./%#&>-]+)*$/.test(s) &&
+      !/=>|\(\)|\bconst\b|\breturn\b|&&|\|\||className|data:|https?:/.test(s),
   );
 }
 
-describe("homepage order", () => {
-  it("is the order of K-140", () => {
-    expect([...HOME_ORDER]).toEqual([
-      "hero",
-      "how",
-      "pillars",
-      "whatsapp",
-      "plans",
-      "pricing",
-      "control",
-      "founder",
-      "industries",
-      "faq",
-      "final",
-    ]);
-  });
-  it("has the three pillars and four steps of the card", () => {
-    expect(PILLARS.map((p) => p.title)).toEqual([
-      "Every review answered",
-      "Your profile protected",
-      "Ready to be found",
-    ]);
-    expect(howSteps()).toHaveLength(4);
-    expect(homeFaq()).toHaveLength(6);
-  });
-});
+const ALL = PUBLIC_FILES.flatMap((f) => sentences(read(f)).map((s) => [f, s] as const));
+/** Security, Privacy, Terms and the partner terms keep kabsi-canvas's own legal text until the lawyer's (29.8). */
+const LEGAL = /routes\/(security|privacy|terms|partners_\.terms)\.tsx$/;
 
-describe("the WhatsApp switch (lane R, 22 Oct 2026)", () => {
-  it("ends the subline with the one-tap line while there is no number, and with WhatsApp when there is", () => {
-    expect(heroSub(false)).toMatch(/You approve in one tap\.$/);
-    expect(heroSub(true)).toMatch(/You approve on WhatsApp\.$/);
-    expect(heroSub(false)).not.toMatch(/WhatsApp/);
-    expect(WHATSAPP_ON ? heroSub() : heroSub()).toBe(heroSub(WHATSAPP_ON));
-  });
-  it("is the subline of the 22 Oct 2026 decision, with only the ending switching", () => {
-    expect(heroSub(false)).toBe(
-      "Every review answered, every change to your listing caught, a fresh post every week. You approve in one tap.",
-    );
-    expect(heroSub(true)).toBe(
-      "Every review answered, every change to your listing caught, a fresh post every week. You approve on WhatsApp.",
-    );
-  });
-  it("puts the business search in the hero, keeps See how it works, and loads Turnstile only when it wakes", () => {
-    const home = readFileSync("src/components/marketing/home-sections.tsx", "utf8");
-    expect(home).toContain("<HeroFinder");
-    expect(home).toContain("{CTA_HOW}");
-    // The first load carries no Turnstile: the finder and the result are lazy chunks.
-    expect(home).not.toMatch(
-      /from "@\/components\/(turnstile|profile-check\/(business-finder|snapshot-result))"/,
-    );
-    const hero = readFileSync("src/components/marketing/hero-check.tsx", "utf8");
-    expect(hero).toMatch(
-      /lazy\(\(\) =>\s*import\("@\/components\/profile-check\/business-finder"\)/,
-    );
-    expect(hero).toContain("ARM_AFTER_MS");
-    expect(readFileSync("src/components/marketing/home-check-result.tsx", "utf8")).toContain(
-      'page="/"',
-    );
-  });
-  it("marks every WhatsApp feature Coming soon while there is no number, and none when there is", () => {
-    const soon = (on: boolean) => {
-      const g = planGrid(on);
-      return [...g.essentials, ...g.proAdds].filter((i) => i.soon).map((i) => i.text);
-    };
-    expect(soon(false)).toContain("Approve on WhatsApp");
-    expect(soon(false)).toContain("Send photos on WhatsApp");
-    expect(soon(true)).not.toContain("Approve on WhatsApp");
-    expect(soon(true)).not.toContain("Send photos on WhatsApp");
-  });
-  it("marks the features that are decided and not built, with no date", () => {
-    const g = planGrid(true);
-    const soon = [...g.essentials, ...g.proAdds].filter((i) => i.soon).map((i) => i.text);
-    expect(soon).toEqual([
-      "What customers say, a monthly summary",
-      "Your own order and booking button on Google",
-    ]);
-    expect(COMING_SOON).toBe("Coming soon");
-    expect(whatsappText(false).intro).toMatch(/no WhatsApp number yet/);
-    expect(homeFaq(false)[3]!.a).toMatch(/coming soon/i);
-    expect(homeFaq(true)[3]!.a).not.toMatch(/coming soon/i);
-  });
-  it("lists the search terms report under Pro with no Coming soon marker (lane R, 22 Oct 2026)", () => {
-    for (const on of [true, false]) {
-      const item = planGrid(on).proAdds.find((i) => i.text === "The search terms report");
-      expect(item).toBeDefined();
-      expect(item!.soon).toBeFalsy();
-    }
-    expect(
-      planGrid(true)
-        .essentials.map((i) => i.text)
-        .join(" "),
-    ).not.toMatch(/search terms/i);
-    const facts = readText("knowledge/kabsi-facts.md");
-    const para = facts.match(/\*\*Search terms report \(Pro[^\n]*/)?.[0] ?? "";
-    expect(para).toMatch(/not marked Coming soon/);
-    expect(facts).not.toMatch(/\[COMING\][^\n]*[Ss]earch terms/);
-  });
-  it("offers no auto-fix and no card payments before Creem", () => {
-    const words = pageWords().join("\n");
-    expect(words).not.toMatch(/auto-?fix/i);
-    expect(words).toMatch(/Card payments are coming/);
-  });
-});
+describe("the copy rules on every public line (kabsi-copy, K-112, K-144, 30.15)", () => {
+  const all = ALL;
 
-describe("plan buttons", () => {
-  it("start the free Profile Check while Creem checkout is not live, never a dead checkout", () => {
-    expect(CHECKOUT_LIVE).toBe(false);
-    expect(planButton()).toEqual({ to: "/google-profile-check", label: CTA_CHECK });
-    expect(planButton(true).to).toBe("/start");
-    expect(planButton(true).label).toBe(CTA_PRIMARY);
+  it("finds the lines it checks", () => {
+    expect(all.length).toBeGreaterThan(500);
+    expect(all.some(([, s]) => s.includes("Taken care of through WhatsApp."))).toBe(true);
   });
-  it("show the prices of K-126", () => {
-    expect(PLAN_PRICES).toEqual({
-      essentialsMonthly: 19,
-      essentialsYearly: 190,
-      proMonthly: 39,
-      proYearly: 390,
-      extraLocationMonthly: 15,
-      extraLocationYearly: 150,
-    });
-    expect(PRICE_LINES.extra).toBe("$15 a month or $150 a year");
-    expect(TRIAL_BOX).toMatch(/^Try Pro free for 14 days\. No card\./);
+  it("uses no em or en dash anywhere, and no exclamation mark in a line", () => {
+    for (const f of PUBLIC_FILES) expect(read(f), f).not.toMatch(/[–—]/);
+    for (const [f, s] of all) expect(s, `${f}: ${s.slice(0, 50)}`).not.toMatch(/[A-Za-z.)']!/);
   });
-});
-
-describe("the claims rule", () => {
-  it("keeps every word of the page free of dashes, exclamation marks, percent signs and forbidden promises", () => {
-    for (const text of pageWords()) {
-      expect(text, text.slice(0, 50)).not.toMatch(/[—–!%]/);
-      expect(text, text.slice(0, 50)).not.toMatch(
-        /\b(ranking|rankings|rank|autopilot|automatically|guaranteed?|approved by google|google partner|more customers than)\b/i,
+  it("never promises what the claims rule forbids, and never names a retired product", () => {
+    // The legal pages name these promises only to say Kabsi does not make them.
+    for (const [f, s] of all.filter(([f]) => !LEGAL.test(f))) {
+      const at = `${f}: ${s.slice(0, 60)}`;
+      // The honest question "Can Kabsi get me to the top of Google Maps?" is answered "No one can promise that."
+      if (!s.endsWith("?"))
+        expect(s, at).not.toMatch(/\btop of google\b/i);
+      expect(s, at).not.toMatch(
+        /\b(autopilot|automatically|guaranteed?|approved by google|google partner|google-approved|more customers|set and forget|fully automatic|we manage everything|we remove bad reviews|no work needed)\b/i,
       );
-      expect(text, text.slice(0, 50)).not.toMatch(
-        /Profile Score|Do now|Listing Shield|Put mine back/,
+      expect(s, at).not.toMatch(/Profile Score|Do now|Listing Shield|Put mine back/);
+      // The Results Report replaces the Weekly Care Report (30.18); the legal text changes with the lawyer's.
+      if (!LEGAL.test(f)) expect(s, at).not.toMatch(/Weekly Care Report/);
+      expect(s, at).not.toMatch(/partner(s|ed)? with Google|Google'?s? (partner|official)/i);
+    }
+  });
+  it("speaks to owners in their words: no listing, visibility, spot, grid, pin or app", () => {
+    for (const [f, s] of all.filter(([f]) => !LEGAL.test(f))) {
+      expect(s, `${f}: ${s.slice(0, 60)}`).not.toMatch(
+        /\b(listing|visibility|grid point|the app)\b/i,
       );
     }
   });
-  it("names Google only as plain descriptive words and carries the non-affiliation notice", () => {
-    expect(GOOGLE_NOTICE).toMatch(/not affiliated with, sponsored by or endorsed by Google/);
-    expect(CONTROL_ITEMS.some((c) => c.text === GOOGLE_NOTICE)).toBe(true);
-    for (const text of pageWords())
-      expect(text, text.slice(0, 50)).not.toMatch(
-        /partner(s|ed)? with Google|Google'?s? (partner|official)/i,
-      );
+  it("uses hello@kabsi.co as the only email address", () => {
+    for (const f of PUBLIC_FILES)
+      for (const e of read(f).match(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g) ?? [])
+        expect(e, f).toMatch(/^(hello@kabsi\.co|name@shop\.com)$/);
   });
-  it("shows no customer quote, logo or number of our own", () => {
-    expect(PROOF_NOTE).toMatch(/no customer quotes/);
-    const words = pageWords().join("\n");
-    expect(words).not.toMatch(/\b\d[\d,]* (customers|businesses|reviews|users)\b/i);
-  });
-  it("uses hello@kabsi.co only", () => {
-    const emails =
-      pageWords()
-        .join("\n")
-        .match(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g) ?? [];
-    for (const e of emails) expect(e).toBe("hello@kabsi.co");
+  it("shows no Arabic on the public website (R-61)", () => {
+    for (const f of PUBLIC_FILES) expect(read(f), f).not.toMatch(/[؀-ۿ]/);
   });
 });
 
-describe("the mockups", () => {
-  it("are labelled Example and carry no date or time", () => {
-    expect(renderToStaticMarkup(ExampleTag({}))).toContain("Example");
-    expect(EXAMPLE_REVIEW.review_created_at).toBeNull();
+describe("the lines of master plan 30.15 and 30.17", () => {
+  it("are the brand line, the main button, the scan and trial lines", () => {
+    expect(BRAND_LINE).toBe("Your business on Google. Taken care of.");
+    expect(MAIN_CTA).toBe("Check my business free");
+    expect(SCAN_LINE).toBe("Free check. No Google access needed. Takes about 10 seconds.");
+    expect(TRIAL_LINE).toBe("Free for 14 days once Kabsi is connected. No card.");
+    const home = read("src/routes/index.tsx");
+    expect(home).toContain("Your business on Google.");
+    expect(home).toContain('<span className="text-kb-yellow">Taken care of through WhatsApp.</span>');
   });
-  it("draw the WhatsApp message with the same function that builds the real alert", () => {
-    const html = renderToStaticMarkup(WhatsappChat());
-    expect(html).toContain("new 4-star review from Emma");
-    expect(html).toContain("Approve");
-    expect(html).toContain("Edit in app");
-  });
-  it("never print a date or time from the visitor's locale (Sentry KABSI-WEB-7)", () => {
-    for (const file of [
-      "src/components/marketing/mockups.tsx",
-      "src/components/marketing/home-sections.tsx",
-      "src/lib/website.ts",
-      "src/routes/index.tsx",
-    ]) {
-      const code = readFileSync(file, "utf8");
-      expect(code, file).not.toMatch(
-        /new Date\(|Date\.now\(|Math\.random\(|toLocale\w*\(|Intl\.|fmtDate|timeAgo|typeof window/,
-      );
-    }
-  });
-});
-
-describe("the pricing and how it works pages (P0.8-13 part 3)", () => {
-  const sources = [
-    "src/routes/index.tsx",
-    "src/routes/pricing.tsx",
-    "src/routes/how-it-works.tsx",
-    "src/routes/for.$slug.tsx",
-    "src/routes/for.index.tsx",
-    "src/components/marketing/home-sections.tsx",
-    "src/components/marketing/home-sections-below.tsx",
-    "src/lib/website.ts",
-    "src/lib/verticals.tsx",
-  ];
-  it("have no Lebanon, card-sale, crypto or partner-resale text", () => {
-    for (const file of sources)
-      expect(readFileSync(file, "utf8"), file).not.toMatch(
-        /Leban|USDT|Binance|Whish|\bOMT\b|NOWPayments|reseller|resale|NFC card sale|sell(s)? NFC/i,
-      );
-  });
-  it("show no Free or Partner plan column and no picture of a card on the pricing page", () => {
-    const code = readFileSync("src/routes/pricing.tsx", "utf8");
-    expect(code).not.toMatch(/name="Free"|name="Partner"|CardRender|PricingVisual/);
-    expect(code).toContain("Essentials");
-    expect(code).toContain("planButton()");
-  });
-  it("name the plans, the trial, the extra location and the Creem line on the pricing page", () => {
-    const words = pricingFaq()
-      .map((f) => f.a)
-      .join("\n");
-    expect(words).toMatch(/\$39 a month or \$390 a year/);
-    expect(words).toMatch(/\$15 a month or \$150 a year/);
-    expect(words).toMatch(/14 days with no card/);
-    expect(readFileSync("src/routes/pricing.tsx", "utf8")).toContain("Cards through Creem");
-  });
-  it("say what Kabsi cannot do, including the password and posting without you", () => {
-    expect(CANNOT.join("\n")).toMatch(/password/);
-    expect(CANNOT.join("\n")).toMatch(/without your approval/);
-    expect(CANNOT.join("\n")).toMatch(/Lock your listing/);
-    expect(LOOP.map((l) => l.title)).toEqual([
-      "Kabsi watches",
-      "Kabsi prepares",
-      "Kabsi asks",
-      "Kabsi publishes",
-      "Kabsi reports",
+  it("puts Businesses and Founding 25 in the header", () => {
+    expect(NAV_LINKS.map((n) => n.label)).toEqual([
+      "How it works",
+      "Pricing",
+      "Businesses",
+      "Free tools",
+      "Founding 25",
+      "Partners",
     ]);
   });
-  it("keep /partners the holding page and have no /meta page", () => {
-    expect(readFileSync("src/routes/partners.tsx", "utf8")).toContain("opening soon");
-    expect(existsSync("src/routes/meta.tsx")).toBe(false);
+  it("say the access steps the same everywhere, with Add (on some screens, Invite)", () => {
+    const access = read("src/components/kabsi/d5-access.tsx");
+    expect(access).toContain("choose Manager, then Add (on some screens, Invite).");
+    expect(access).toContain('import { KABSI_GROUP_ID } from "@/lib/site";');
+    expect(KABSI_GROUP_ID).toBe("5481006796");
+    expect(read("docs/COPY.md")).toContain("choose Manager, then Add (on some screens, Invite).");
+    // The group ID lives only in src/lib/site.ts (CLAUDE.md).
+    for (const f of PUBLIC_FILES) expect(read(f), f).not.toMatch(/"5481006796"/);
+  });
+  it("list photos from WhatsApp on both plans, and only the prices of K-126", () => {
+    const [essentials, pro] = PLANS;
+    expect(essentials!.monthly).toBe(PLAN_PRICES.essentialsMonthly);
+    expect(essentials!.yearly).toBe(PLAN_PRICES.essentialsYearly);
+    expect(pro!.monthly).toBe(PLAN_PRICES.proMonthly);
+    expect(pro!.yearly).toBe(PLAN_PRICES.proYearly);
+    const rows = read("src/components/kabsi/plans.ts");
+    expect(rows).toMatch(/Holiday hours, 2 posts a month and photos from WhatsApp/);
+    expect(rows).toMatch(/Weekly posts, photos from WhatsApp/);
   });
 });
 
-describe("the founder note (lane R, 22 Oct 2026)", () => {
-  it("is Rashid's note, signed by him, and the operator line names him with no city", () => {
-    expect(FOUNDER_NOTE).toBe(
-      "I spent years running ads and online presence for local businesses. The same thing came up every time: reviews left unanswered and details on Google out of date, because the owner was busy running the business. Kabsi takes that work off their hands, and nothing goes public without their yes. If something is not right, write to me at hello@kabsi.co.",
-    );
-    expect(FOUNDER_SIGNATURE).toBe("Rashid Abou Hamzy, founder");
-    expect(FOUNDER_NOTE).not.toMatch(/Hussein/);
+describe("no invented proof or number (plan 2.11, Web 2 item 4)", () => {
+  it("reads every count from Kabsi's functions, never a constant", () => {
+    for (const f of PUBLIC_FILES)
+      expect(read(f), f).not.toMatch(/FOUNDING25_LEFT|FOUNDING_LEFT|FOUNDING_PARTNERS_LEFT/);
+    const api = read("src/lib/public-api.ts");
+    expect(api).toContain('"programs/founding"');
+    expect(api).toContain('"programs/partners"');
+    expect(api).toContain('"billing-creem/founding"');
+    const founding = read("src/components/kabsi/d5-founding.tsx");
+    expect(founding).toContain("useFoundingPlaces()");
+    expect(founding).toContain("applyFounding(");
+    expect(read("src/components/kabsi/d2-partners.tsx")).toContain("applyPartner(");
+  });
+  it("labels every example, and the fixtures of the prototype are gone", () => {
+    for (const gone of ["d2-data.ts", "scan-data.ts", "scan-result.tsx", "d2-customer.tsx", "home-sections.tsx"])
+      expect(readdirSync("src/components/kabsi"), gone).not.toContain(gone);
+    expect(read("src/components/kabsi/nearby-places.tsx")).toContain("example = true");
+    expect(read("src/components/kabsi/scan-live.tsx")).toContain("example={false}");
+    expect(read("src/components/kabsi/whatsapp.tsx")).toContain("ExampleBadge");
+  });
+  it("keeps the ?state= links of the prototype to development", () => {
+    const parts = read("src/components/kabsi/d2-parts.tsx");
+    expect(parts).toContain('name === "state" && !import.meta.env.DEV ? null : raw');
+  });
+  it("shows no customer quote, logo or user count of Kabsi's own", () => {
+    for (const [f, s] of ALL)
+      expect(s, f).not.toMatch(/\b(trusted by|loved by|\d[\d,]* (customers|businesses use|users))\b/i);
+  });
+});
+
+describe("WhatsApp shows only when the one setting has a number (K-122)", () => {
+  it("hides the WhatsApp buttons while there is no number", () => {
+    expect(read("src/components/kabsi/ui.tsx")).toContain("if (!WHATSAPP_ON) return null;");
+    expect(read("src/components/kabsi/site-chrome.tsx")).toContain("{WHATSAPP_ON && (");
+    if (!WHATSAPP_ON) expect(WHATSAPP_URL).toBe("mailto:hello@kabsi.co");
+  });
+});
+
+describe("the operator, the merchant of record and the social links", () => {
+  it("names Rashid with no city, and Creem as the merchant of record", () => {
     expect(OPERATOR_LINE).toBe("Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co.");
+    const footer = read("src/components/kabsi/site-footer.tsx");
+    expect(footer).toContain("Kabsi is operated by Rashid Abou Hamzy.");
+    expect(footer).toContain("Payments are processed by Creem, our merchant of record.");
+    expect(read("src/routes/terms.tsx")).toMatch(/processed by Creem,[\s\S]*merchant of record/);
+    expect(ORG_LD).not.toHaveProperty("address");
   });
-
   it("no public page, email, fact file or JSON-LD names Hussein or the old operator city (R-55)", () => {
     const files = [
+      ...PUBLIC_FILES,
       "src/lib/site.ts",
       "src/lib/faq.ts",
-      "src/routes/about.tsx",
-      "src/routes/terms.tsx",
-      "src/routes/privacy.tsx",
-      "src/routes/faq.tsx",
-      "src/components/layouts/public-layout.tsx",
       "knowledge/kabsi-facts.md",
       "public/llms.txt",
       "public/llms-full.txt",
       "supabase/functions/_shared/email-layout.ts",
       "supabase/functions/_shared/email/template.ts",
       "emails/build.py",
-      "emails/auth/confirm-signup.html",
-      "emails/auth/magic-link.html",
-      "emails/auth/reauthentication.html",
-      "emails/auth/change-email.html",
     ];
     for (const f of files) {
       const text = readText(f);
       expect(text, f).not.toMatch(/Hussein/);
       expect(text, f).not.toMatch(/operated by [^.]*Dubai|run by [^.]*Dubai/);
     }
-    expect(ORG_LD).not.toHaveProperty("address");
   });
+  it("links Facebook and Instagram only through SOCIAL_LINKS (R-59)", () => {
+    expect(SOCIAL_LINKS.map((s) => s.name)).toEqual(["Facebook", "Instagram"]);
+    for (const f of PUBLIC_FILES)
+      expect(read(f), f).not.toMatch(/facebook\.com|instagram\.com|tiktok|twitter\.com|x\.com\//);
+  });
+});
 
-  it("the terms name Creem as the merchant of record", () => {
-    expect(readFileSync("src/routes/terms.tsx", "utf8")).toMatch(
-      /processed by Creem,[\s\S]*merchant of record/,
-    );
-    expect(readText("knowledge/kabsi-facts.md")).toContain(
-      "Payments are processed by Creem, our merchant of record",
-    );
+describe("the head of every public page (30.16 section 4)", () => {
+  it("has a title, a description, a canonical address and its own share image", () => {
+    const h = pageHead({ title: "T", description: "D", path: "/pricing", image: "pricing" });
+    expect(h.links).toEqual([{ rel: "canonical", href: "https://kabsi.co/pricing" }]);
+    expect(h.meta).toContainEqual({ property: "og:image", content: "https://kabsi.co/og/pricing.png" });
+    for (const r of PUBLIC_FILES.filter((f) => f.startsWith("src/routes/"))) {
+      const code = read(r);
+      expect(code, r).toMatch(/pageHead\(|<LegalPage/);
+      if (/pageHead\(/.test(code)) expect(code, r).toMatch(/image: "\w+"/);
+    }
+    for (const img of ["home", "scan", "pricing", "tool", "guide", "industry", "partner", "about", "founding"])
+      expect(readdirSync("public/og"), img).toContain(`${img}.png`);
+  });
+  it("gives Home the Organization data and the share image of the new brand line", () => {
+    expect(read("src/routes/index.tsx")).toMatch(/jsonLd: \[ORG_LD, WEBSITE_LD/);
+    expect(read("scripts/og.mjs")).toContain("Your business on Google. Taken care of.");
   });
 });

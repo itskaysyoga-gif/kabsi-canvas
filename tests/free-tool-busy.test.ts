@@ -36,8 +36,10 @@ describe("the free tools when the day's cap is 0 or used up", () => {
     const finder = readFileSync("src/components/profile-check/business-finder.tsx", "utf8");
     expect(finder).toContain("<FreeToolBusy />");
     expect(finder).not.toMatch(/CTA_PRIMARY|Join early access|Back soon/);
-    const tool = readFileSync("src/routes/google-review-link.tsx", "utf8");
-    expect(tool).toContain("<FreeToolBusy />");
+    // Web 2: the review link tool is the design studio's (d2-tools.tsx); it shows the same sentence and the trial button.
+    const tool = readFileSync("src/components/kabsi/d2-tools.tsx", "utf8");
+    expect(tool).toContain("{FREE_TOOL_BUSY}");
+    expect(tool).toContain("{CTA_TRIAL}");
     expect(tool).toMatch(/FREE_TOOL_BUSY_CODES/);
     expect(tool).not.toMatch(/CTA_PRIMARY|Join early access|Back soon/);
   });

@@ -38,10 +38,12 @@ describe("Free Profile Check, status flags and WhatsApp (lane R sync, item D)", 
     expect(src).toContain("!ok");
   });
 
-  it("the headline is the one of 22 Oct 2026, and the flags use the design tokens' warning and danger states", () => {
-    expect(read("src/routes/google-profile-check.tsx")).toContain(
-      'title="See what customers see on Google, and what needs fixing."',
-    );
+  it("the old address opens the one free check (Web 2, 30.16 section 4), and the flags use the warning and danger states", () => {
+    const route = read("src/routes/google-profile-check.tsx");
+    expect(route).toContain("<FreeCheckStart />");
+    expect(route).toContain("${SITE_URL}/scan");
+    // The free check result shows the profile check's first flag as "What to do first".
+    expect(read("src/components/kabsi/scan-live.tsx")).toMatch(/f\.tone === "danger"/);
     const src = read("src/components/profile-check/snapshot-result.tsx");
     expect(src).toContain('danger: "red", warning: "amber", neutral: "grey"');
   });

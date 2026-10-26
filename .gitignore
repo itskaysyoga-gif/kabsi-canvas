@@ -43,3 +43,6 @@ eval-result.json
 test-results/
 playwright-report/
 tests/e2e/.auth/
+
+# Screenshot checks (scripts/shots.mjs)
+shots/
