@@ -3,7 +3,7 @@
 // Google's responses into the shapes the app uses. Every write here (sendReply, createLocalPost, uploadPhoto,
 // addSpecialHours, patchListing) is only ever called by the publish job in api/jobs.ts, after the owner's approval
 // and claim_publication (guardrail 6, P0.1-13a and P0.1-13b).
-import { type InvitationAddress, matchInvitation, type PendingBusiness } from "../invitations.ts";
+import { type InvitationAddress, invitationPlace, matchInvitation, type PendingBusiness } from "../invitations.ts";
 import { isConciergeLocationId } from "../concierge.ts";
 import { regularHoursDisplay } from "../hours.ts";
 import { assertNotConcierge, googleMode, modeFor, type Mode } from "./client.ts";
@@ -62,15 +62,20 @@ export async function acceptInvitationsAndListLocations(pending: PendingBusiness
   const { accounts: list = [] } = await accounts.listAccounts();
   let accepted = 0;
   const skipped: SkippedInvitation[] = [];
+  // Access 1: each consented business is used by one invitation per run, so one consent never opens two listings.
+  let open = [...pending];
   for (const acct of list) {
     const { invitations = [] } = await accounts.listInvitations(acct.name);
     for (const inv of invitations) {
       const locName = inv.targetLocation?.locationName ?? "";
-      if (inv.targetType && inv.targetType !== "LOCATIONS_ONLY" && !inv.targetLocation) { skipped.push({ invitation: inv.name, reason: "not a location invitation", location: locName }); continue; }
-      if (inv.role && inv.role !== "MANAGER") { skipped.push({ invitation: inv.name, reason: `role ${inv.role}, not MANAGER`, location: locName }); continue; }
-      const match = matchInvitation(locName, inv.targetLocation?.address as InvitationAddress, pending);
-      if (!match.ok) { skipped.push({ invitation: inv.name, reason: match.reason, location: locName }); continue; }
+      const address = inv.targetLocation?.address as InvitationAddress;
+      const place = invitationPlace(address);
+      if (inv.targetType && inv.targetType !== "LOCATIONS_ONLY" && !inv.targetLocation) { skipped.push({ invitation: inv.name, reason: "not a location invitation", location: locName, place }); continue; }
+      if (inv.role && inv.role !== "MANAGER") { skipped.push({ invitation: inv.name, reason: `role ${inv.role}, not MANAGER`, location: locName, place }); continue; }
+      const match = matchInvitation(locName, address, open);
+      if (!match.ok) { skipped.push({ invitation: inv.name, reason: match.reason, location: locName, place }); continue; }
       await accounts.acceptInvitation(inv.name);
+      open = open.filter((p) => p !== match.business);
       accepted++;
     }
   }

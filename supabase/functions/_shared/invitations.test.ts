@@ -55,3 +55,44 @@ Deno.test("missing address on the invitation or the business is refused", () => 
 Deno.test("empty listing name is refused", () => {
   assert.equal(matchInvitation("  ", inv(), [younes]).ok, false);
 });
+
+Deno.test("Access 1: a saved address of two words or more, whole inside Google's street and city, matches", () => {
+  assert.equal(addressMatches("Mirna Chalouhi", { addressLines: ["Mirna Chalouhi Highway"], locality: "Sin El Fil" }), true);
+  assert.equal(addressMatches("Mirna Chalouhi", { addressLines: ["Main Road"], locality: "Mirna Chalouhi" }), true);
+  assert.equal(matchInvitation("Yawmiyati", { addressLines: ["Mirna Chalouhi Highway"], locality: "Sin El Fil" }, [{ name: "Yawmiyati", address: "Mirna Chalouhi" }]).ok, true);
+});
+
+Deno.test("Access 1: a one-word saved address never matches Google's longer address", () => {
+  assert.equal(addressMatches("Dubai", { addressLines: ["Sheikh Zayed Road"], locality: "Al Barsha" }), false);
+  assert.equal(addressMatches("Chalouhi", { addressLines: ["Mirna Chalouhi Highway"] }), false);
+});
+
+Deno.test("Access 1: area and postcode alone never match", () => {
+  assert.equal(addressMatches("Greater London", { addressLines: ["1 High Street"], locality: "Croydon", administrativeArea: "Greater London" }), false);
+  assert.equal(addressMatches("SW1A 1AA", { addressLines: ["10 Road"], locality: "Kingston", postalCode: "SW1A 1AA" }), false);
+});
+
+Deno.test("Access 1: part of a word never counts", () => {
+  assert.equal(addressMatches("Mirna Chalouhi", { addressLines: ["Mirna Chalouhiyeh Road"] }), false);
+});
+
+Deno.test("Access 1: missing addresses still refused", () => {
+  assert.equal(addressMatches(null, { addressLines: ["Mirna Chalouhi Highway"] }), false);
+  assert.equal(addressMatches("Mirna Chalouhi", null), false);
+  assert.equal(addressMatches("Mirna Chalouhi", { addressLines: [] }), false);
+});
+
+Deno.test("Access 1: Google's address as one string (its documented shape)", () => {
+  // Yawmiyati: Google's listing has only the street line, and so does the saved address
+  assert.equal(matchInvitation("Yawmiyati", "Mirna Chalouhi", [{ name: "Yawmiyati", address: "Mirna Chalouhi" }]).ok, true);
+  assert.equal(addressMatches("Mirna Chalouhi", "Mirna Chalouhi, Sin El Fil, Lebanon"), true);
+  assert.equal(addressMatches("Hamra Street 12, Beirut, Lebanon", "Hamra Street 12, Beirut"), true);
+  assert.equal(addressMatches("1 Main Street, Example Town, CA 00000, USA", "1 Main Street, Example Town, CA 00000"), true);
+  // another street in the same city: refused
+  assert.equal(addressMatches("Hamra Street 12, Beirut, Lebanon", "Rue 9, Beirut"), false);
+  // one-word or area-only overlaps never count
+  assert.equal(addressMatches("Dubai", "Sheikh Zayed Road, Al Barsha, Dubai"), false);
+  assert.equal(addressMatches("Unit 4, London", "1 High Street, London"), false);
+  assert.equal(addressMatches("Mirna Chalouhi", ""), false);
+  assert.equal(addressMatches(null, "Mirna Chalouhi"), false);
+});

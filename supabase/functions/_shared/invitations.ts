@@ -2,9 +2,14 @@
 // Google's Invitation carries the listing's name and address, and no place ID. An invitation is accepted only
 // when exactly one consented, access-pending business has the same normalized name AND a matching address
 // or city. Two candidates, or none, means it stays pending and is reported.
+// Access 1 (26 Oct 2026): the saved address may be shorter than Google's ("Mirna Chalouhi" against "Mirna Chalouhi
+// Highway"), so a saved address of two words or more also counts when it appears whole inside Google's street lines
+// and city. Area, postcode and country are never used for this, so "Dubai" or "London" alone never matches.
 
 export type PendingBusiness = { name: string; address?: string | null };
-export type InvitationAddress = { addressLines?: string[]; locality?: string; administrativeArea?: string; postalCode?: string } | null | undefined;
+// Google documents the invitation's address as one formatted string ("1 Main Street, Example Town, CA 00000");
+// the postal-address object is still read in case Google sends that shape.
+export type InvitationAddress = string | { addressLines?: string[]; locality?: string; administrativeArea?: string; postalCode?: string } | null | undefined;
 export type InvitationMatch =
   | { ok: true; business: PendingBusiness }
   | { ok: false; reason: string };
@@ -22,10 +27,35 @@ function containsWords(hay: string, needle: string): boolean {
 export function addressMatches(businessAddress: string | null | undefined, inv: InvitationAddress): boolean {
   const hay = norm(businessAddress);
   if (!hay || !inv) return false;
+  if (typeof inv === "string") return textAddressMatches(hay, inv);
   const street = norm(inv.addressLines?.[0]);
   if (street && containsWords(hay, street)) return true;
   const city = norm(inv.locality);
-  return !!city && containsWords(hay, city);
+  if (city && containsWords(hay, city)) return true;
+  if (words(hay) < 2) return false;
+  const streetAndCity = norm([...(inv.addressLines ?? []), inv.locality].filter(Boolean).join(" "));
+  return containsWords(streetAndCity, hay);
+}
+
+const words = (v: string) => (v ? v.split(" ").length : 0);
+
+// Access 1: the string Google sends. Its first part (the street) inside the saved address counts, as does the
+// saved address of two words or more inside Google's whole line, or Google's whole line inside the saved address.
+// Later parts alone (area, postcode, country) never count, so "Dubai" or "London" alone never matches.
+function textAddressMatches(hay: string, inv: string): boolean {
+  const full = norm(inv);
+  if (!full) return false;
+  const street = norm(inv.split(",")[0]);
+  if (words(street) >= 2 && containsWords(hay, street)) return true;
+  if (words(hay) >= 2 && containsWords(full, hay)) return true;
+  return words(full) >= 2 && containsWords(hay, full);
+}
+
+// What the skipped report shows of an invitation's address, so staff can see why it was left pending.
+export function invitationPlace(inv: InvitationAddress): string {
+  if (!inv) return "";
+  if (typeof inv === "string") return inv.slice(0, 120);
+  return [inv.addressLines?.[0], inv.locality].filter(Boolean).join(", ");
 }
 
 export function matchInvitation(locationName: string, address: InvitationAddress, pending: PendingBusiness[]): InvitationMatch {

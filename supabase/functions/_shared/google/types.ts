@@ -114,7 +114,7 @@ export type AutocompleteResponse = { suggestions?: { placePrediction?: PlacePred
 
 // ─── app types (unchanged from _shared/google.ts)
 export type ManagedLocation = { accountId: string; locationId: string; placeId: string | null; title: string };
-export type SkippedInvitation = { invitation: string; reason: string; location: string };
+export type SkippedInvitation = { invitation: string; reason: string; location: string; place?: string };
 export type GoogleReview = {
   reviewId: string; reviewer: string; rating: number; comment: string | null;
   createTime: string; updateTime: string | null; reply: string | null;
