@@ -88,6 +88,20 @@ export const TEMPLATES = {
     example: { business: "Smile Dental" },
     button: "Show me",
   },
+  // V4 (30.16 section 3, 30.15 3.1): the next setup step during onboarding, and news about something the owner approved (on
+  // Google, still on its way, or what failed). Submitted with the others at the launch gate; until approved they are held.
+  setup_step: {
+    name: "kabsi_setup_step",
+    body: "Kabsi here. The next step to set up {{business}} is ready. Reply here to see it.",
+    example: { business: "Smile Dental" },
+    button: "Show me",
+  },
+  work_update: {
+    name: "kabsi_work_update",
+    body: "Kabsi here. There is news about a change you approved for {{business}}. Reply here to read it.",
+    example: { business: "Smile Dental" },
+    button: "Show me",
+  },
   staff_alert: {
     name: "kabsi_staff_alert",
     body: "Kabsi staff alert: {{summary}}. Reply here for the details.",

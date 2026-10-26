@@ -1,0 +1,106 @@
+// The 20 voice notes of the transcription test, for the server-side op (V4). The same notes as tests/fixtures/voice/notes.json,
+// which scripts/voice-eval.mjs and the Deno test read; voice.test.ts keeps the two equal. Not public: never on the website.
+import type { Note } from "./eval.ts";
+
+export const VOICE_NOTES: Note[] = [
+  {
+    "id": "en1",
+    "lang": "en",
+    "text": "We are closed this Friday for a private event, and we open again on Saturday at ten in the morning."
+  },
+  {
+    "id": "en2",
+    "lang": "en",
+    "text": "We have a new service now, a deep tissue massage for sixty minutes, and the price is eighty five dollars."
+  },
+  {
+    "id": "en3",
+    "lang": "en",
+    "text": "From next month we open at eight every weekday and we close at six, and on Sundays we are closed."
+  },
+  {
+    "id": "en4",
+    "lang": "en",
+    "text": "Please tell people that we now have oat milk and a vegan chocolate cake on the menu starting tomorrow."
+  },
+  {
+    "id": "gu1",
+    "lang": "ar-gulf",
+    "text": "مرحبا، حنا بنسكر المحل يوم الجمعة بسبب الإجازة، وبنفتح يوم السبت الساعة عشرة الصبح."
+  },
+  {
+    "id": "gu2",
+    "lang": "ar-gulf",
+    "text": "عندنا خدمة جديدة، قص شعر وتنظيف بشرة، والسعر مية وخمسين درهم."
+  },
+  {
+    "id": "gu2b",
+    "lang": "ar-gulf",
+    "text": "من الشهر الجاي بنفتح الساعة تسعة الصبح ونسكر الساعة عشرة بالليل كل يوم."
+  },
+  {
+    "id": "gu3",
+    "lang": "ar-gulf",
+    "text": "وايد زباين يسألون عن الحجز، قول لهم إنه تقدرون تحجزون عن طريق الواتساب."
+  },
+  {
+    "id": "lv1",
+    "lang": "ar-levant",
+    "text": "مرحبا، منسكّر يوم الجمعة، وبنفتح يوم السبت الساعة تسعة الصبح، وضفنا خدمة جديدة."
+  },
+  {
+    "id": "lv2",
+    "lang": "ar-levant",
+    "text": "عنا اليوم عرض على القهوة والكيك، والسعر صار خمسة دولار بدل ستة."
+  },
+  {
+    "id": "lv3",
+    "lang": "ar-levant",
+    "text": "بدي أغير ساعات الدوام، من الأسبوع الجاي منفتح الساعة ثمانية ونسكر الساعة ستة."
+  },
+  {
+    "id": "lv4",
+    "lang": "ar-levant",
+    "text": "كتير ناس بيسألوا إذا عنا توصيل، فيك تكتب إنه منوصل لحد البيت داخل المدينة."
+  },
+  {
+    "id": "mx1",
+    "lang": "mixed",
+    "text": "هاي، we are closed on Friday ورح نفتح يوم السبت at ten a.m."
+  },
+  {
+    "id": "mx2",
+    "lang": "mixed",
+    "text": "عندنا new service اسمها deep cleaning والسعر one hundred dirhams."
+  },
+  {
+    "id": "mx3",
+    "lang": "mixed",
+    "text": "ممكن تعمل post عن الـ opening hours الجديدة، we open at eight كل يوم."
+  },
+  {
+    "id": "mx4",
+    "lang": "mixed",
+    "text": "الـ menu الجديد جاهز، فيه vegan options وكمان gluten free cake."
+  },
+  {
+    "id": "es1",
+    "lang": "es",
+    "text": "Cerramos este viernes por un evento privado y abrimos otra vez el sábado a las diez de la mañana."
+  },
+  {
+    "id": "es2",
+    "lang": "es",
+    "text": "Tenemos un servicio nuevo, un corte de pelo con lavado, y el precio es veinticinco euros."
+  },
+  {
+    "id": "es3",
+    "lang": "es",
+    "text": "A partir del mes que viene abrimos a las ocho de la mañana y cerramos a las seis de la tarde."
+  },
+  {
+    "id": "es4",
+    "lang": "es",
+    "text": "Por favor, avisa que desde mañana tenemos pasteles sin gluten y leche de avena en el menú."
+  }
+];

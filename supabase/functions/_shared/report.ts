@@ -14,8 +14,11 @@ import { admin, APP_URL, captureError, esc } from "./kabsi.ts";
 import { notify } from "./notify.ts";
 import * as copy from "./email/copy.ts";
 import { renderReport } from "./email/report-body.ts";
+import { type AiAnswer, type GrowthStats, monthlyWeek, receipt, type RivalChange } from "./results-report/receipt.ts";
+import { sourceActions } from "./insights/ai-visibility.ts";
+import type { DoneRun } from "./visibility/ai/numbers.ts";
 
-type Loc = { id: string; name: string; place_id: string | null; time_zone: string; emails_paused_until: string | null; google_location_id?: string | null; google_account_id?: string | null };
+type Loc = { id: string; name: string; place_id: string | null; time_zone: string; emails_paused_until: string | null; google_location_id?: string | null; google_account_id?: string | null; is_demo?: boolean | null };
 const DAY = 86400_000;
 
 function localParts(tz: string, at = new Date()) {
@@ -66,12 +69,13 @@ async function careBlocks(loc: Loc, now: Date) {
     const pro = !access.error && (access.data as { pro?: boolean } | null)?.pro === true;
     try {
       if (source === "mock") {
-        activity = weekActivity(exampleWeekSeries(now), now, "mock");
+        // 30.18 section 3: a real owner's report never shows example figures; only the demo business keeps its labelled examples.
+        if (loc.is_demo) activity = weekActivity(exampleWeekSeries(now), now, "mock");
       } else {
         const p = weekPeriods(now);
         activity = weekActivity(await dailyFigures(loc.google_location_id!, ALL_METRICS, p.previous.start, p.current.end), now, "live");
       }
-      if (pro) {
+      if (pro && (source === "live" || loc.is_demo)) {
         const month = termsMonth(now);
         const raw = source === "mock" ? EXAMPLE_TERMS : await searchTermsFor(loc.google_location_id!, month);
         terms = {
@@ -104,11 +108,19 @@ export async function buildReport(loc: Loc, now = new Date()) {
 
   const { count: waiting } = await db.from("reviews").select("id", { count: "exact", head: true })
     .eq("location_id", loc.id).in("state", ["drafted", "blocked"]);
-  const { data: taps } = await db.from("taps").select("source").eq("location_id", loc.id).eq("is_bot", false).gte("created_at", since);
-  const nfc = (taps ?? []).filter((t) => t.source === "nfc").length;
-  const qr = (taps ?? []).filter((t) => t.source === "qr").length;
+  // V3, V4: link opens from review_growth_stats, the same counts the WhatsApp stats line uses (message, QR and tag apart).
+  const { data: gs, error: gsError } = await db.rpc("review_growth_stats", { p_location: loc.id, p_days: 7 });
+  if (gsError) throw gsError;
+  const growth = gs as GrowthStats;
+  const nfc = growth.opens_tag, qr = growth.opens_qr, message = growth.opens_message;
 
   const care = await careBlocks(loc, now);
+  const work = receipt({
+    business: loc.name, counts: care.care.counts, needs: care.needs, needsTotal: care.needs_total, plan: care.plan,
+    activity: care.activity ?? null, demo: !!loc.is_demo, growth, tz: loc.time_zone,
+    ai: await latestAiAnswer(loc.id, now).catch(() => null), aiThisWeek: monthlyWeek(today),
+    rivals: await rivalChanges(loc.id, now).catch(() => []),
+  });
 
   return {
     ...care,
@@ -116,8 +128,48 @@ export async function buildReport(loc: Loc, now = new Date()) {
     rating: current?.rating ?? null, rating_count: current?.review_count ?? null, rating_change: change,
     rating_drop: change != null && change <= -0.1,
     new_reviews: list.length, new_avg: avgNew, replied, waiting: waiting ?? 0,
-    taps: { total: nfc + qr, nfc, qr },
+    taps: { total: nfc + qr + message, nfc, qr, message },
+    receipt: work,
   };
+}
+
+// 30.15 3.8: the month's latest AI answer for the business: the exact question, which assistant and when, named or not, the sources.
+async function latestAiAnswer(locationId: string, now: Date): Promise<AiAnswer | null> {
+  const since = new Date(now.getTime() - 31 * DAY).toISOString();
+  const { data } = await admin().from("ai_visibility_runs").select("provider, run_at, named, position, competitors, sources, ai_visibility_prompts(text)")
+    .eq("location_id", locationId).eq("state", "done").eq("source", "live").gte("run_at", since).order("run_at", { ascending: false }).limit(20);
+  const runs = (data ?? []) as (DoneRun & { ai_visibility_prompts: { text: string } | { text: string }[] | null })[];
+  const r = runs[0];
+  if (!r) return null;
+  const p = Array.isArray(r.ai_visibility_prompts) ? r.ai_visibility_prompts[0] : r.ai_visibility_prompts;
+  if (!p?.text) return null;
+  return {
+    question: p.text, provider: r.provider, asked_at: r.run_at, named: r.named,
+    sources: (r.sources ?? []).slice(0, 3).map((x) => ({ domain: x.domain, title: x.title })),
+    noticed: sourceActions(runs)[0]?.text ?? null,
+  };
+}
+
+// 30.15 3.9: review gains over about a month for the business and the competitors it watches, from Kabsi's own public snapshots.
+async function rivalChanges(locationId: string, now: Date): Promise<RivalChange[]> {
+  const since = new Date(now.getTime() - 35 * DAY).toISOString().slice(0, 10);
+  const { data } = await admin().from("competitor_snapshots").select("key, is_self, name, reviews, taken_on")
+    .eq("location_id", locationId).gte("taken_on", since).order("taken_on");
+  const by = new Map<string, { name: string; self: boolean; first: number | null; last: number | null; days: number }>();
+  const first = new Map<string, string>();
+  for (const s of (data ?? []) as { key: string; is_self: boolean; name: string; reviews: number | null; taken_on: string }[]) {
+    const cur = by.get(s.key) ?? { name: s.name, self: s.is_self, first: s.reviews, last: s.reviews, days: 0 };
+    if (!first.has(s.key)) first.set(s.key, s.taken_on);
+    cur.last = s.reviews ?? cur.last;
+    cur.days = (Date.parse(s.taken_on) - Date.parse(first.get(s.key)!)) / DAY;
+    by.set(s.key, cur);
+  }
+  const gain = (x: { first: number | null; last: number | null }) => (x.first == null || x.last == null ? null : Math.max(0, x.last - x.first));
+  const me = [...by.values()].find((x) => x.self);
+  const mine = me ? gain(me) : null;
+  // Two snapshots at least three weeks apart, or it is not "this month".
+  if (!me || mine == null || me.days < 21) return [];
+  return [...by.values()].filter((x) => !x.self && x.days >= 21 && gain(x) != null).map((x) => ({ name: x.name, theirs: gain(x)!, mine }));
 }
 export type Report = Awaited<ReturnType<typeof buildReport>>;
 

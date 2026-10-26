@@ -11,7 +11,7 @@ import type { Button, Inbound } from "./channel.ts";
 import { fresh } from "./channel.ts";
 import { type Ai, route } from "./intent.ts";
 import { photoRefusal, voiceCheck } from "./media.ts";
-import { type Out, reply as sendReply } from "./outbox.ts";
+import { notify, type Out, reply as sendReply } from "./outbox.ts";
 import type { SendState } from "./policy.ts";
 import { toE164 } from "./phone.ts";
 import {
@@ -31,6 +31,10 @@ import { ANSWER_WINDOW_MS, readUpdate } from "../review-growth/monthly.ts";
 import { CATEGORY_MENU, categoryLabel, type PhotoCategory, pickCategory } from "../review-growth/photo.ts";
 import type { Transcript } from "../voice/transcribe.ts";
 import { CATALOGUE, extraKey, type Period, type Plan, planKey } from "../creem.ts";
+import type { FirstBack, OnboardingHooks } from "../onboarding/hooks.ts";
+import { monthlyFacts, SAY_ONBOARDING, setupReply } from "../onboarding/stages.ts";
+import { inviteButtons } from "../onboarding/tick.ts";
+import type { OnboardingAction } from "./router.ts";
 
 export interface AgentDb {
   /** first: no earlier message from this phone was ever stored (the welcome goes only then). */
@@ -106,6 +110,8 @@ export type AgentDeps = {
   mapImage(scanCode: string): Promise<Uint8Array | null>;
   /** V3 (28.3): a voice note to text. The audio stays in memory and is never stored; without it voice notes say they are off. */
   transcribe?(audio: Uint8Array, mime: string | null, phone: string): Promise<Transcript>;
+  /** V4 (30.16 section 3): onboarding in four stages; absent where a test does not need it. */
+  onboarding?: OnboardingHooks;
   /** Wakes the sender after a message opened the window (held messages go out). */
   flush(): Promise<unknown>;
   now?: () => number;
@@ -237,6 +243,13 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     // Anything that is not a kind of photo is a new message, not an answer: the menu is closed and the message handled as usual.
     if (cmd.k === "free" && pickCategory(cmd.text)) return photoCategoryPicked(t, oq, cmd.text);
     await d.db.setConv(phone, { open_question: null });
+  }
+  // V4: the onboarding buttons, the setup question typed as words, and the owner's yes to the monthly answer's facts.
+  if (cmd.k === "onboarding") return onboardingButton(t, cmd.action, cmd.locationId);
+  if (cmd.k === "facts") return factsButton(t, cmd.action, cmd.locationId, cmd.month);
+  if (oq?.type === "setup") {
+    const typed = cmd.k === "yes" ? "yes" : cmd.k === "tool" && cmd.tool === "help" ? "help" : cmd.k === "free" ? setupReply(cmd.text) : null;
+    if (typed) return onboardingButton(t, typed === "yes" ? "yes" : typed, oq.location_id);
   }
   if (oq?.type === "update" && now - Date.parse(oq.at) < ANSWER_WINDOW_MS) {
     if (cmd.k === "free") return monthlyAnswer(t, oq.location_id, cmd.text);
@@ -402,7 +415,10 @@ async function sendMap(t: Turn): Promise<string> {
   // 28.1: the full map image as soon as V1's job has it. Until V1 merges, there is no image yet.
   const img = await t.d.mapImage(code);
   if (!img) return answered(t, SAY.mapComing, "map_pending");
-  return answered(t, SAY.mapComing, "map_sent");
+  // V4: the nearby places image (three places and the count), drawn again by the sender from the same check.
+  await notify(t.d.out, { phone: t.phone, userId: null, locationId: null, kind: "free_check_map", body: SAY_ONBOARDING.checkMap,
+    media: { map_scan: `check:${code.replace(/^KAB-/i, "").toUpperCase()}` }, dedupe: `free_check_map:${code}:${t.phone}` });
+  return "map_sent";
 }
 
 // ─── Owner, manager and staff tools (9.3), for one business.
@@ -657,12 +673,26 @@ async function monthlyAnswer(t: Turn, locationId: string, text: string): Promise
   const r = readUpdate(text, new Date((t.d.now ?? Date.now)()), b.time_zone ?? "UTC");
   await t.d.db.monthlyAnswered(locationId).catch(() => {});
   if (r.kind === "nothing") return answered(tb, SAY.updateNothing, "update_nothing");
-  if (r.kind === "hours") return hours(tb, r.text, false);
-  if (r.kind === "refused") return answered(tb, SAY.updateProblem(b.business, r.problems), "update_problem");
-  const p = await t.d.db.postPrepare(b.location_id, b.user_id, r.text);
-  if (!p.ok || !p.token) return prepareRefused(tb, p.reason, "post");
-  return answered(tb, SAY.updatePostShown(b.business, (p.text ?? r.text).trim()), "update_post_shown",
-    [{ id: `a:${p.token}`, title: "Approve" }, { id: `e:${p.token}`, title: "Edit on kabsi.co" }]);
+  let result: string;
+  if (r.kind === "hours") result = await hours(tb, r.text, false);
+  else if (r.kind === "refused") result = await answered(tb, SAY.updateProblem(b.business, r.problems), "update_problem");
+  else {
+    const p = await t.d.db.postPrepare(b.location_id, b.user_id, r.text);
+    result = !p.ok || !p.token ? await prepareRefused(tb, p.reason, "post")
+      : await answered(tb, SAY.updatePostShown(b.business, (p.text ?? r.text).trim()), "update_post_shown",
+        [{ id: `a:${p.token}`, title: "Approve" }, { id: `e:${p.token}`, title: "Edit on kabsi.co" }]);
+  }
+  // V4 (LATER row): new services and prices in the answer become About your business facts the owner confirms; none is used before.
+  const facts = monthlyFacts(text);
+  if (facts.length && t.d.onboarding) {
+    const month = new Intl.DateTimeFormat("en-CA", { timeZone: b.time_zone ?? "UTC", year: "numeric", month: "2-digit" }).format(new Date((t.d.now ?? Date.now)()));
+    const n = await t.d.onboarding.proposeFacts(b.location_id, facts, month).catch(() => 0);
+    if (n > 0) {
+      await say1(tb, SAY_ONBOARDING.factsAsk(b.business, facts.map((f) => f.text)),
+        [{ id: `kf:y:${b.location_id}:${month}`, title: "Save them" }, { id: `kf:n:${b.location_id}:${month}`, title: "Not now" }]);
+    }
+  }
+  return result;
 }
 
 /** A voice note (28.3): refused over 10 MB or 3 minutes with the kind line; otherwise transcribed in memory, the audio dropped,
@@ -762,6 +792,9 @@ async function bind(t: Turn, code: string): Promise<string> {
   if (r.result === "verified") {
     await t.d.db.setConv(t.phone, { stopped: false });
     const tn = await again(t);
+    // V4 (30.16 section 3, stage 3): an owner still setting up gets Nora's first message and the free check instead.
+    const ob = t.d.onboarding && r.user_id ? await t.d.onboarding.afterBind(r.user_id, r.first_owner_locations ?? []).catch(() => null) : null;
+    if (ob) return onboardingFirst(tn, ob);
     await say1(tn, SAY.connected);
     // 28.5: the first map is the first wow, within 5 minutes of connecting. With a confirmed search it runs now; without
     // one the owner is asked to confirm the search Kabsi suggests (one business at a time).
@@ -782,6 +815,60 @@ async function bind(t: Turn, code: string): Promise<string> {
 async function again(t: Turn): Promise<Turn> {
   const [who, s] = await Promise.all([t.d.db.resolve(t.phone), t.d.out.db.state(t.phone)]);
   return { ...t, who, s: { ...s, stopped: false, window_expires_at: t.s.window_expires_at } };
+}
+
+// ─── Onboarding in four stages (V4, 30.16 section 3; docs/COPY.md 20).
+
+/** Stage 3: Nora's first message back after the owner connected WhatsApp, then the free check whatever the answer. */
+async function onboardingFirst(t: Turn, ob: FirstBack): Promise<string> {
+  const b = businesses(t.who).find((x) => x.location_id === ob.location_id) ?? null;
+  const tb = { ...t, business: b, head: null };
+  await t.d.db.setConv(t.phone, { open_question: { type: "setup", location_id: ob.location_id } satisfies OpenQuestion });
+  await say1(tb, SAY_ONBOARDING.firstBack(ob.name, ob.business, !!ob.check),
+    [{ id: `ob:y:${ob.location_id}`, title: "Yes" }, { id: `ob:h:${ob.location_id}`, title: "Help" }]);
+  if (ob.check) await say1(tb, SAY_ONBOARDING.check(ob.check.term, ob.check.date, ob.check.fact));
+  return "onboarding_first";
+}
+
+/** The setup replies: only an owner of that business, and only with the onboarding side present. */
+async function onboardingButton(t: Turn, action: OnboardingAction, locationId: string): Promise<string> {
+  const b = businesses(t.who).find((x) => x.location_id === locationId && x.role === "owner");
+  const ob = t.d.onboarding;
+  if (!b || !ob) return answered(t, SAY.notYours, "onboarding_not_yours");
+  const tb = { ...t, business: b, head: head(t.who, "business", b) };
+  if (action === "yes") {
+    const r = await ob.setupYes(locationId, b.user_id);
+    if (!r.ok) return answered(tb, SAY.notYours, "onboarding_not_yours");
+    await t.d.db.setConv(t.phone, { open_question: null });
+    // Stage 4's steps, with the ID on its own so a long press copies it; claimed once with the tick's fallback.
+    if (await ob.claim(locationId, "invite")) {
+      await say1(tb, SAY_ONBOARDING.invite, inviteButtons(locationId));
+      await say1({ ...tb, head: null }, SAY_ONBOARDING.id);
+    }
+    // Stage 3: the search Kabsi will track, prefilled from the free check; the map runs once access works (LATER row).
+    if (r.hasKeyword) return "onboarding_yes";
+    return askKeyword(tb, r.suggested, "onboarding_yes");
+  }
+  if (action === "help") {
+    await t.d.db.setConv(t.phone, { open_question: null });
+    await ob.founderHelp(locationId, b.user_id, t.phone);
+    return answered(tb, SAY_ONBOARDING.founderAsked, "onboarding_help");
+  }
+  if (action === "someone_else") return answered(tb, SAY_ONBOARDING.someoneElse, "onboarding_someone_else");
+  if (action === "cannot_find") return answered(tb, SAY_ONBOARDING.cannotFind(b.business), "onboarding_cannot_find");
+  if (action === "done") return answered(tb, SAY_ONBOARDING.inviteSent, "onboarding_invite_sent");
+  await ob.skipFirst(locationId);
+  return answered(tb, SAY_ONBOARDING.skipped, "first_task_skipped");
+}
+
+/** The owner's (or a manager's) yes to the month's new facts. */
+async function factsButton(t: Turn, action: "yes" | "no", locationId: string, month: string): Promise<string> {
+  const b = businesses(t.who).find((x) => x.location_id === locationId && x.role !== "staff");
+  if (!b || !t.d.onboarding) return answered(t, SAY.notYours, "facts_not_yours");
+  const tb = { ...t, business: b, head: head(t.who, "business", b) };
+  if (action === "no") return answered(tb, SAY_ONBOARDING.factsNotSaved, "facts_not_saved");
+  const n = await t.d.onboarding.confirmFacts(locationId, b.user_id, month).catch(() => 0);
+  return answered(tb, n ? SAY_ONBOARDING.factsSaved(n) : SAY.alreadyHandled, n ? "facts_saved" : "facts_stale");
 }
 
 // ─── The map (28.5, 27.3 item 1).

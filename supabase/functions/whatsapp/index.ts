@@ -10,7 +10,7 @@
 //                           never leaves Supabase secrets.
 // Staff alerts (9.9, R-64): the tick takes each new ops_events row once and sends the urgent ones to the staff phone.
 // Nothing is sent live unless WHATSAPP_LIVE is true, and until launch only to Kabsi's own test phones and the staff phone.
-import { admin, captureError, fail, isInternal, json, timingSafeEqual } from "../_shared/kabsi.ts";
+import { admin, captureError, fail, isInternal, json, rateLimit, timingSafeEqual } from "../_shared/kabsi.ts";
 import { notify as notifyEmail } from "../_shared/notify.ts";
 import { parseWebhook, verifySignature } from "../_shared/whatsapp/channel.ts";
 import { agentDeps, whatsappCtx } from "../_shared/whatsapp/db.ts";
@@ -27,6 +27,12 @@ import { replayIo } from "../_shared/whatsapp/replay-db.ts";
 import { runScenario } from "../_shared/whatsapp/replay-run.ts";
 import { alertHour, alertSummary } from "../_shared/whatsapp/smoke-alert.ts";
 import { reviewGrowthTick } from "../_shared/review-growth/tick.ts";
+import { runVoiceEval, table as voiceTable } from "../_shared/voice/eval.ts";
+import { onboardingTick } from "../_shared/onboarding/tick.ts";
+import { onboardingDb } from "../_shared/onboarding/db.ts";
+import { syncPrompts } from "../_shared/visibility/ai/deps.ts";
+import { SAY_ONBOARDING } from "../_shared/onboarding/stages.ts";
+import { VOICE_NOTES } from "../_shared/voice/notes.ts";
 import { alertText, digestDue, morningDigest, type OpsEvent, routeOf, type Summary } from "../_shared/whatsapp/staff-alerts.ts";
 
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void } | undefined;
@@ -57,6 +63,8 @@ Deno.serve(async (req) => {
   if (path.endsWith("/staff/replay")) return (await isInternal(req)) ? await replay(req) : fail("forbidden", "Forbidden.", 403);
   // QA 1: the nightly smoke test (GitHub Actions) tells the staff phones when it fails. Its own token, nothing else.
   if (path.endsWith("/qa/alert")) return await smokeAlert(req);
+  // V4 item 0: the 20-note voice test, run here because the key lives only in Supabase secrets. Staff only.
+  if (path.endsWith("/staff/voice-eval")) return (await isInternal(req)) ? await voiceEval(req) : fail("forbidden", "Forbidden.", 403);
   const staff = /\/staff\/([a-z]+)$/.exec(path);
   if (staff) return (await isInternal(req)) ? json(await staffAction(staff[1])) : fail("forbidden", "Forbidden.", 403);
   return await webhook(req);
@@ -215,6 +223,24 @@ async function tick() {
   } catch (e) {
     await captureError("whatsapp", e, { step: "review_growth" });
   }
+  // V4 (30.16 section 3, 30.15 3.1): the first-48-hours messages, each when its event happened, and the outcome of every
+  // approval made on WhatsApp. Then the free checks whose nearby places are ready for the phone that sent the code.
+  try {
+    out.onboarding = await onboardingTick(deps, onboardingDb(
+      (id) => deps.firstMap(id).then(() => {}),
+      async (id) => {
+        const { data } = await admin().from("visibility_keywords").select("keyword").eq("location_id", id).eq("active", true).not("confirmed_at", "is", null);
+        for (const k of (data ?? []) as { keyword: string }[]) await syncPrompts(id, k.keyword);
+      },
+    ));
+  } catch (e) {
+    await captureError("whatsapp", e, { step: "onboarding" });
+  }
+  try {
+    out.free_checks = await freeCheckMaps(deps);
+  } catch (e) {
+    await captureError("whatsapp", e, { step: "free_checks" });
+  }
   // 9.9: staff alerts. Each new ops_events row is taken once; urgent ones go to the staff phone at once (quiet hours and the
   // cap do not apply), the rest are counted in the morning digest. Nothing about the number itself goes here (email only).
   try {
@@ -359,4 +385,43 @@ async function staffAction(action: string) {
     await captureError("whatsapp", e, { step: `staff_${action}` });
     return { ok: false, error: String((e as Error)?.message ?? e).replace(/[A-Za-z0-9_-]{32,}/g, "[redacted]").slice(0, 200) };
   }
+}
+
+/** The 20-note voice test (V4 item 0). Runs once a day at most (it spends a few cents), in the background, and writes the
+ *  result to app_settings voice_eval_last (scores only, never the audio or the transcripts). With {"apply": true} it also sets
+ *  voice_notes to 'on' when every language passed, and to 'off' when any failed. */
+async function voiceEval(req: Request): Promise<Response> {
+  const key = Deno.env.get("ELEVENLABS_API_KEY");
+  if (!key) return json({ ok: false, error: "no_key" }, 409);
+  const body = (await req.json().catch(() => ({}))) as { apply?: boolean };
+  if (!(await rateLimit("voice_eval", 1, 86400, { failClosed: true }))) return json({ ok: false, error: "ran_today" }, 429);
+  const work = (async () => {
+    const r = await runVoiceEval(key, VOICE_NOTES);
+    const out = { at: new Date().toISOString(), pass: r.pass, table: voiceTable(r), langs: r.langs, rows: r.rows, chars: r.chars, seconds: r.seconds, stopped: r.stopped };
+    await admin().from("app_settings").upsert({ key: "voice_eval_last", value: JSON.stringify(out) });
+    if (body.apply) await admin().from("app_settings").upsert({ key: "voice_notes", value: r.pass ? "on" : "off" });
+  })().catch((e) => captureError("whatsapp", e, { step: "voice_eval" }));
+  if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) EdgeRuntime.waitUntil(work); else await work;
+  return json({ ok: true, started: true, notes: VOICE_NOTES.length });
+}
+
+/** 28.1, V4: a visitor who sent their free check's code before its full search was in gets the nearby places once it is. */
+async function freeCheckMaps(deps: Awaited<ReturnType<typeof agentDeps>>): Promise<number> {
+  const since = new Date(Date.now() - 86_400_000).toISOString();
+  const { data } = await admin().from("whatsapp_conversations").select("phone, scan_code").not("scan_code", "is", null).gte("scan_code_at", since).limit(50);
+  let sent = 0;
+  for (const c of (data ?? []) as { phone: string; scan_code: string }[]) {
+    const code = c.scan_code.replace(/^KAB-/i, "").toUpperCase();
+    const { data: chk } = await admin().from("free_checks").select("id, state, map_sent_at").eq("code", code).maybeSingle();
+    if (!chk || chk.map_sent_at || chk.state === "failed") continue;
+    // The image route collects what DataForSEO has finished; null while the search is still running.
+    const png = await deps.mapImage(c.scan_code);
+    if (!png) continue;
+    const { data: claimed } = await admin().from("free_checks").update({ map_sent_at: new Date().toISOString() }).eq("id", chk.id).is("map_sent_at", null).select("id");
+    if (!claimed?.length) continue;
+    await notify(deps.out, { phone: c.phone, userId: null, locationId: null, kind: "free_check_map", body: SAY_ONBOARDING.checkMap,
+      media: { map_scan: `check:${code}` }, dedupe: `free_check_map:KAB-${code}:${c.phone}` });
+    sent++;
+  }
+  return sent;
 }

@@ -19,8 +19,14 @@ export type Command =
   | { k: "map"; action: "show" | "later"; scanId: string | null }
   | { k: "keyword"; action: "yes" | "change"; locationId: string }
   | { k: "photo_edit"; photoId: string } | { k: "photo_skip"; token: string }
+  // V4 (30.16 section 3): the setup replies under Kabsi's onboarding messages, and the owner's yes to the monthly answer's facts.
+  | { k: "onboarding"; action: OnboardingAction; locationId: string }
+  | { k: "facts"; action: "yes" | "no"; locationId: string; month: string }
   | { k: "free"; text: string }
   | { k: "empty" };
+
+export type OnboardingAction = "yes" | "help" | "someone_else" | "cannot_find" | "done" | "skip_first";
+const OB: Record<string, OnboardingAction> = { y: "yes", h: "help", s: "someone_else", c: "cannot_find", d: "done" };
 
 // Meta's opt-out words and the usual ones in English, Spanish, French and Arabic. "cancel" is not here: in 9.3 it is the
 // billing question ("cancel my plan"), answered with the billing line.
@@ -135,6 +141,13 @@ export function parseButton(id: string): Command {
   if (map) return { k: "map", action: map[1] === "s" ? "show" : "later", scanId: map[2] ?? null };
   const kw = /^v:(y|c):([0-9a-f-]{36})$/.exec(id);
   if (kw) return { k: "keyword", action: kw[1] === "y" ? "yes" : "change", locationId: kw[2] };
+  // V4: ob:<y|h|s|c|d>:<business> under the setup messages, fs:<business> skips the first task, kf:<y|n>:<business>:<yyyy-mm>.
+  const ob = /^ob:([yhscd]):([0-9a-f-]{36})$/.exec(id);
+  if (ob) return { k: "onboarding", action: OB[ob[1]], locationId: ob[2] };
+  const fs = /^fs:([0-9a-f-]{36})$/.exec(id);
+  if (fs) return { k: "onboarding", action: "skip_first", locationId: fs[1] };
+  const kf = /^kf:(y|n):([0-9a-f-]{36}):(\d{4}-\d{2})$/.exec(id);
+  if (kf) return { k: "facts", action: kf[1] === "y" ? "yes" : "no", locationId: kf[2], month: kf[3] };
   const biz = /^b:([0-9a-f-]{36})$/.exec(id);
   if (biz) return { k: "business_pick", locationId: biz[1] };
   return { k: "empty" };

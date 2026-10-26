@@ -7,7 +7,7 @@ export type ReportData = {
   period: { from: string; to: string };
   rating: number | null; rating_count: number | null; rating_change: number | null; rating_drop: boolean;
   new_reviews: number; new_avg: number | null; replied: number; waiting: number;
-  taps: { total: number; nfc: number; qr: number };
+  taps: { total: number; nfc: number; qr: number; message?: number };
   // P0.5-04: what Kabsi did, counted from the audit log; reports from before it have none of these.
   care?: { headline: string; things: number; profile_line: string; counts: { posts_published: number; hours_updates: number; profile_updates: number; photos_published: number } };
   time_saved?: { minutes: number; words: string; formula: string };
@@ -29,7 +29,7 @@ export function renderReport(loc: { name: string }, r: ReportData) {
     row("Google rating", esc(ratingText) + (r.rating_count != null ? `<br><span style="font-weight:400;color:${TOKENS.stone};font-size:14px;">${r.rating_count} reviews in total</span>` : "")),
     row("New reviews", String(r.new_reviews) + (r.new_avg != null ? `<br><span style="font-weight:400;color:${TOKENS.stone};font-size:14px;">average ${r.new_avg.toFixed(1)} of 5</span>` : "")),
     row("Replied", `${r.replied} of ${r.new_reviews}`),
-    row("Review link and QR code opens", r.taps.total ? `${r.taps.total}<br><span style="font-weight:400;color:${TOKENS.stone};font-size:14px;">${r.taps.nfc} by NFC tag · ${r.taps.qr} by QR code</span>` : "0"),
+    row("Review link and QR code opens", r.taps.total ? `${r.taps.total}<br><span style="font-weight:400;color:${TOKENS.stone};font-size:14px;">${r.taps.nfc} by NFC tag · ${r.taps.qr} by QR code · ${r.taps.message ?? 0} from your message</span>` : "0"),
   ].join("");
   // Honest about what a tap is (D257): an open of the review page, not a review.
   const tapNote = `<p style="margin:10px 0 0 0;color:${TOKENS.stone};font-size:14px;">Opens count how often your review link or QR code opened your Google review page. They don't show whether a review was written.</p>`;

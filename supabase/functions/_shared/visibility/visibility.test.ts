@@ -230,7 +230,9 @@ Deno.test("run: a due search becomes a finished grid with its numbers, line, off
   const s = w.scans[0];
   assertEquals([s.state, s.source, s.first, s.costMicros], ["done", "mock", true, 0]);
   assertEquals(s.data?.centre_rank, 1);
-  assertMatch((s.data?.message as { body: string }).body, /^Your first map is ready\. We searched 'bakery' on Google Maps from 49 places around .+ You came up in the top 3 from \d+ of them\./);
+  // V4 (30.15 section 2): the WhatsApp line leads with the nearby places and ends with the one count and the sample note.
+  assertMatch((s.data?.message as { body: string }).body, /^Your first map is ready\. Near your bakery you came up 1st for 'bakery'\. .+ In the first 3 at \d+ of 49 places Kabsi checked\. 'bakery', .+\. Sample Google Maps results, not customer counts\.$/);
+  assertEquals((s.data?.nearby as { cards: unknown[] }).cards.length, 3);
   assertEquals(w.spent, []);
   assertEquals(w.next()?.toISOString(), "2026-11-24T10:00:00.000Z");
   // The business's own public row and the picked competitor's.
@@ -308,4 +310,20 @@ Deno.test("geoapify: the static map request (never OpenStreetMap's tile servers)
   assertEquals(u.host, "maps.geoapify.com");
   assertEquals(u.searchParams.get("center"), `lonlat:${C.lng},${C.lat}`);
   assertEquals([u.searchParams.get("width"), u.searchParams.get("height"), u.searchParams.get("zoom")], ["1080", "720", "15.3"]);
+});
+
+Deno.test("nearby places image (V4): portrait 1080 by 1500, three cards, under 250 KB", async () => {
+  const { renderNearby } = await import("./nearby-image.ts");
+  const nearby = {
+    keyword: "hair salon", top3: 18, points: 49, count_line: "In the first 3 at 18 of 49 places Kabsi checked.", note: "Sample Google Maps results, not customer counts.",
+    cards: [
+      { kind: "home" as const, row: 3, col: 3, place: "Near your salon", name: null, rank: 2, position: "2nd", first: "Juniper Hair Studio", firstIsYou: false },
+      { kind: "away" as const, row: 0, col: 6, place: "Near Dubai Marina Mall", name: "Dubai Marina Mall", rank: 8, position: "8th", first: "Oven Street", firstIsYou: false },
+      { kind: "away" as const, row: 6, col: 0, place: "About 4 km south west of your salon", name: null, rank: null, position: "not in the first 20", first: null, firstIsYou: false },
+    ],
+  };
+  const png = await renderNearby(nearby, { business: "Rose Lane Salon", date: "26 Oct 2026" });
+  assert(png.length < MAX_BYTES, `size ${png.length}`);
+  const img = await Image.decode(png);
+  assertEquals([img.width, img.height], [1080, 1500]);
 });

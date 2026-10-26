@@ -67,5 +67,5 @@ verify_jwt = true
 major_version = 17
 [functions.whatsapp]          # WhatsApp owner channel (P0.8-03): Kapso calls it without a JWT; the Kapso signature over the raw body, Kabsi's phone number id, the replay window and the opt-in run in code
 verify_jwt = false
-[functions.visibility]        # Visibility Map (V1): /tick needs x-cron-secret (pg_cron sends the anon JWT with it); /keyword, /picks and /image check the member or staff in code
+[functions.visibility]        # Visibility Map (V1): /tick needs x-cron-secret (pg_cron sends the anon JWT with it); /keyword, /picks and /image check the member or staff in code; V4 /check and /terms are public (anon JWT, Turnstile, rate limits and the daily cap in code)
 verify_jwt = true

@@ -6,6 +6,8 @@ import { COST_MICROS, type Identity, keyOf, type MapsItem, type MapsProvider, ty
 import { gridPoints, zoomFor } from "./grid.ts";
 import { GRID_SPAN } from "./map-image.ts";
 import { businessType, type CellResult, categoryCheck, competitors, mapMessage, selfRow, summarize } from "./scan.ts";
+import { nearbyPlaces, nearbyText, type PlaceName } from "./nearby.ts";
+import { mapDate } from "./map-image.ts";
 
 export type KeywordRow = {
   id: string; location_id: string; keyword: string; radius_km: number; center_lat: number; center_lng: number;
@@ -14,6 +16,8 @@ export type KeywordRow = {
 export type ScanRow = {
   id: string; location_id: string; keyword: string; source: "mock" | "live"; first: boolean; created_at: string;
   self: Identity & { title: string }; business: string;
+  /** V4: for the nearby places (distance words) and the date in the business's own time zone. */
+  radius_km?: number; time_zone?: string;
 };
 export type PointRow = { row: number; col: number; lat: number; lng: number; task_id: string | null; rank: number | null; items: MapsItem[] | null; done: boolean };
 export type Snapshot = { key: string; is_self: boolean; name: string; rating: number | null; reviews: number | null; photos: number | null; category: string | null; categories: string[] };
@@ -42,6 +46,8 @@ export type RunDeps = {
   spend: (calls: number, micros: number) => Promise<boolean>;
   staffAlert: (summary: string, key: string) => Promise<void>;
   now: () => Date;
+  /** V4 (30.15 section 2): reverse geocoding of a real checked point for the nearby places; absent in older tests. */
+  placeName?: PlaceName;
 };
 
 export const STALE_HOURS = 24;
@@ -107,7 +113,15 @@ export async function collect(d: RunDeps, limit = 10): Promise<Record<string, nu
     if (pts.every((p) => p.done)) {
       const cells: CellResult[] = pts.map((p) => ({ row: p.row, col: p.col, rank: p.rank, items: p.items ?? [] }));
       const { data, snapshots } = finish(cells, s, await d.db.picks(s.location_id));
-      await d.db.finishScan(s.id, data, snapshots);
+      // V4 (30.15 section 2): the nearby places lead; the WhatsApp line is theirs, the 7 by 7 dots stay behind "Detailed results".
+      const me = selfRow(cells, s.self);
+      const nearby = await nearbyPlaces({
+        cells: pts.map((p) => ({ row: p.row, col: p.col, lat: p.lat, lng: p.lng, rank: p.rank, items: p.items ?? [] })), who: s.self,
+        keyword: s.keyword, radiusKm: s.radius_km ?? 3, businessType: businessType(me?.category), name: d.placeName,
+      });
+      const date = mapDate(d.now(), s.time_zone ?? "UTC");
+      const message = { ...(data.message as { buttons: unknown }), body: `${s.first ? "Your first map is ready." : "Your new map is ready."} ${nearbyText(nearby, date)}` };
+      await d.db.finishScan(s.id, { ...data, nearby, message }, snapshots);
       out.finished++;
     } else if (d.now().getTime() - new Date(s.created_at).getTime() > STALE_HOURS * 3_600_000) {
       await d.db.failScan(s.id, "not_finished_in_24h");

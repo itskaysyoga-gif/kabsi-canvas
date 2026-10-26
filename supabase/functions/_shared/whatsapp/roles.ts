@@ -37,7 +37,9 @@ export type OpenQuestion =
   | { type: "keyword"; location_id: string; suggested: string | null }
   // V3: the monthly "anything new?" question (answered within 3 days) and the category menu under a photo's Edit.
   | { type: "update"; location_id: string; at: string }
-  | { type: "photo_category"; photo_id: string; location_id: string };
+  | { type: "photo_category"; photo_id: string; location_id: string }
+  // V4: the first message back during onboarding ("Can Kabsi send your setup steps and approvals here?").
+  | { type: "setup"; location_id: string };
 
 export type Who = { phone: string; roles: Role[]; conversation: Conversation | null };
 
