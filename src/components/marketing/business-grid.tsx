@@ -1,11 +1,11 @@
-// Compact links to every industry page (internal linking from guides, FAQ and how it works).
+// Compact links to the finished industry pages (internal linking from the guides). Only indexed pages are linked.
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { VERTICALS } from "@/lib/verticals";
+import { INDUSTRIES } from "@/content/industries";
 
-/** Compact links to every industry page (internal linking from guides, FAQ and how it works). */
+/** Compact links to the finished industry pages (internal linking from the guides). */
 export function IndustryLinks({
-  title = "Kabsi for your business",
+  title = "Kabsi for your kind of business",
   className,
 }: {
   title?: string;
@@ -13,17 +13,16 @@ export function IndustryLinks({
 }) {
   return (
     <nav aria-label={title} className={className}>
-      <p className="text-xs font-bold uppercase tracking-wider text-kb-stone">{title}</p>
+      <p className="text-xs font-bold text-kb-stone">{title}</p>
       <ul className="mt-3 flex flex-wrap gap-2">
-        {VERTICALS.map((v) => (
-          <li key={v.slug}>
+        {INDUSTRIES.filter((i) => i.finished).map((i) => (
+          <li key={i.slug}>
             <Link
-              to="/for/$slug"
-              params={{ slug: v.slug }}
-              className="inline-flex items-center gap-2 rounded-pill border border-kb-hairline bg-kb-white px-3.5 py-2 text-sm font-bold hover:border-kb-black [&_svg]:size-4"
+              to="/for/$trade"
+              params={{ trade: i.slug }}
+              className="inline-flex items-center gap-2 rounded-pill border border-kb-hairline bg-kb-white px-3.5 py-2 text-sm font-bold hover:border-kb-black"
             >
-              {v.icon}
-              {v.label}
+              {i.plural}
             </Link>
           </li>
         ))}

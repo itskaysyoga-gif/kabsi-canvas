@@ -15,9 +15,8 @@ const ROUTES = [...new Set([...OTHERS, ...fromSitemap])].filter(Boolean);
 
 // Issues found by this suite that cannot be fixed in QA 1 (docs/LATER.md lists each). A rule listed here is not failed for that page only;
 // every other serious or critical rule still is. Remove the entry when the page is fixed.
-const KNOWN_AXE: Record<string, string[]> = {
-  "/": ["color-contrast"], // the green tint behind the proof line on the home page
-};
+// Web 2 (27 Oct 2026) rebuilt the home page; its green tint is gone, so the list is empty.
+const KNOWN_AXE: Record<string, string[]> = {};
 
 test.describe("public pages", () => {
   test.beforeEach(async ({ page }) => {

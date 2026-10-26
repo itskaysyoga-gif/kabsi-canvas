@@ -12,13 +12,20 @@ const SITES = [
   },
   {
     fn: "review-link",
-    file: "src/routes/google-review-link.tsx",
+    // Web 2: the review link tool is the design studio's component now.
+    file: "src/components/kabsi/d2-tools.tsx",
     target: /functions\/v1\/review-link/,
   },
   {
     fn: "review-page",
     file: "src/lib/review-page.ts",
     target: /functions\/v1\/review-page/,
+  },
+  {
+    // Web 2: programs (Founding 25, Partners), visibility (the free check) and billing-creem/founding.
+    fn: "programs, visibility, billing-creem",
+    file: "src/lib/public-api.ts",
+    target: /functions\/v1\/\$\{path\}/,
   },
   {
     fn: "profile-snapshot",

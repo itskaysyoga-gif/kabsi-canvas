@@ -13,11 +13,11 @@ Decisions taken while writing (lane R, R-41):
 
 ## Shared pieces
 
-**Header:** Kabsi mark and name. Links: How it works, Pricing, Free tools, Guides, Partners. Right: Log in, and the button "Check my business free".
+**Header (Web 2, Design 5):** Kabsi mark and name. Links: How it works, Pricing, Businesses, Free tools, Founding 25, Partners. Right: Log in, and the button "Check my business free". Phone menu: "Open menu", "Close menu"; "Skip to content".
 **Phone bottom bar (after the first scroll):** "Check my business free" and a WhatsApp icon button labelled "Chat on WhatsApp".
 **Footer:**
 - Line: "Your business on Google. Taken care of."
-- Columns. Product: How it works, Pricing, Free Visibility Scan, Review link and QR code, Security. Learn: Guides, Compare, FAQ. Company: About, Partners, Partner terms, Privacy, Terms, Status. Follow: Facebook, Instagram (SOCIAL_LINKS).
+- Columns (Web 2). Product: How it works, Pricing, Free check, Review link and QR code, Security. Learn: Every kind of business, Hair salons, Restaurants, Dental clinics, Guides, FAQ. Company: About, Founding 25, Partners, Partner terms, Privacy, Terms. Follow: Facebook, Instagram (SOCIAL_LINKS in src/lib/site.ts). Bottom: "Your privacy choices", "© 2026 Kabsi". "Kabsi or Google's free tools" waits for its sourced page (docs/LATER.md).
 - Small print: "Kabsi is independent and not affiliated with Google. Google Business Profile is free from Google. Kabsi is an independent paid service." with the link "Google's guidance on working with a third party". "Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co. Payments are processed by Creem, our merchant of record."
 **Cookie bar:** "Kabsi uses cookies to measure visits and improve ads. You choose." Buttons: "Accept", "Only necessary". Link: "Details".
 **Scan box (one component, used on many pages):**
@@ -25,7 +25,7 @@ Decisions taken while writing (lane R, R-41):
 - Placeholder: "Business name and city"
 - Button: "Check my business free"
 - Under it: "Free check. No Google access needed. Takes about 10 seconds."
-- Waitlist state (cap 0): "The free scan opens soon. Leave your email or WhatsApp and Kabsi sends your map the day it opens." Button: "Save my place". Done: "Saved. You are on the list."
+- Waitlist state (cap 0): "The free scan opens soon. Leave your email or WhatsApp and Kabsi sends your map the day it opens." Button: "Save my place". Done: "Saved. You are on the list." On kabsi.co (Web 2) only "The free scan opens soon." shows, in the free check result, until a waiting list can store the email (docs/LATER.md); the free check result offers "Send me this report" instead.
 
 ## 0.1 Words owners understand (lane R, 25 Oct 2026; 30.15 lines added 26 Oct)
 
@@ -37,7 +37,7 @@ Decisions taken while writing (lane R, R-41):
 - AI answers: "An answer customers might see", never a score. Label: "Answers from ChatGPT and Perplexity through their API, which can differ from their apps."
 - Never: top of Google, more customers, fully automatic, set and forget, we manage everything, Google-approved, Google partner, we remove bad reviews, no work needed, AI recommends you.
 
-**Founding 25 (30.17):** Banner: "Founding 25: three months of Kabsi Pro, free, for 25 businesses. We do the Google work; you tell us what to make better." Then "[n] of 25 places left." (the real count) and the button "Apply for a place". Under it: "By application. No card. After 90 days, choose a plan or stop, nothing is charged by itself."
+**Founding 25 (30.17):** Banner: "Founding 25: three months of Kabsi Pro, free, for 25 businesses. We do the Google work; you tell us what to make better." Then "[n] of 25 places left." (the real count from GET programs/founding; no number while it loads or if it fails; "All 25 places are taken." at 0) and the button "Apply for a place". Under it: "By application. No card. After 90 days, choose a plan or stop, nothing is charged by itself."
 **Access steps (30.17, the same everywhere):** "On Google, open your profile (search your business name while signed in), then Menu, Business Profile settings, People and access, Add. Paste 5481006796, choose Manager, then Add (on some screens, Invite)." Under it: "5481006796 is Kabsi Clients, Kabsi's business group on Google. Never send us a password or a code." Button: "Copy the ID".
 
 ## 1. Home (/)
@@ -205,7 +205,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 
 ## 15. 404 and error
 
-- 404 H1: "This page is not here." Line: "The link may be old. Your listing is fine." Buttons: "Go home", tertiary "See your map".
+- 404 H1: "This page is not here." Line: "The link may be old. Your Google profile is fine." Buttons: "Go home", tertiary "Check my business free".
 - Error H1: "Something went wrong on our side." Line: "Nothing you did. Try again in a minute." Button: "Try again".
 
 ## 16. Shared FAQ (answers from the facts)
@@ -306,3 +306,225 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 - Product names: "Kabsi Essentials, monthly" / "yearly", "Kabsi Pro, monthly" / "yearly", "Extra location".
 - Description: "Your Google listing and reviews, managed from WhatsApp. Cancel in WhatsApp any time."
 - Success page: H1 "You are all set." Line: "Your plan starts the day Kabsi's access to your Google listing works." Button: "Back to Kabsi".
+
+## 24. Web 2: the approved design lines on kabsi.co (27 Oct 2026)
+
+Web 2 ported the design studio's public pages (itskaysyoga-gif/kabsi-design-studio, docs/DESIGN-PROPOSAL.md). Every line below was approved by lane R in Design 1 to 5 (DESIGN-BRIEF.md sections 12, 13, 16 and 17) and is copied here word for word, so this file stays the one copy deck. The industry pages' lines are in src/content/industries/*.ts and the Home examples in src/content/home-examples.ts (Design 5, approved); Content 1 finishes the other nine industry pages there.
+
+Where the live site differs from the prototype:
+- Every count is the real one or none: Founding 25 places (GET programs/founding), the founding price places (GET billing-creem/founding, Pricing only), Founding Partner places (GET programs/partners). The Example badge stays on every example (the hero story, the tappable demo, the nearby card on the free check page, the counter card before a business is found).
+- The prototype's ?state= links show states only in development; on kabsi.co a page shows the state it is really in.
+- While Kabsi's WhatsApp number is empty in the one setting (K-122), the WhatsApp buttons ("Chat on WhatsApp", "Apply on WhatsApp", "Get this on WhatsApp", "Send the full map to my WhatsApp", the phone bar's WhatsApp button) are hidden and hello@kabsi.co is shown instead. "Send on WhatsApp" in the access steps opens WhatsApp with no number, so the owner picks who gets the steps.
+- Security, Privacy, Terms and the partner terms keep kabsi-canvas's own full text in the design studio's layout. Their "In short" lines are the approved ones that are true on every count today: Security "Kabsi never sees your Google password.", "You can remove Kabsi as a Manager any time.", "Nothing goes live without your yes.", "Report a problem: hello@kabsi.co."; Privacy "Kabsi collects your email, your WhatsApp number and the details of your business.", "Your public Google profile is shown live in the free tools. Kabsi does not store it.", "Ask a question or ask to see your data: hello@kabsi.co."; Terms "You can cancel from WhatsApp, any time.", "Nothing goes live on your Google profile without your yes.", "Kabsi cannot promise rankings, reviews, calls or customers.", "Kabsi is independent and not affiliated with Google."; Partner terms the five lines of Design 2.
+- The consent bar and "Your privacy choices" keep the wording stored as proof (CONSENT_VERSION 2026-10-25: the bar line above and one switch, "Let Kabsi measure its ads"), in the new look. Design 1's two-switch panel needs a new consent version (docs/LATER.md).
+- The free check result: "What to do first" is the first fact and action the public profile check returns (the profile-snapshot function's lines); the nearby cards, the quick result line, "An answer customers might see" and its label are V4's own lines from GET /visibility/check. "Start free on the web" keeps the business and opens Log in, then setup.
+- About and How it works closing bands: "Start with a free check." (Home's approved line).
+
+New lines Web 2 needed, for lane R to approve (the rest of each form uses approved labels and the server's own messages):
+- Founding 25 form: "Why now?" is required (the server asks for at least a line: "Please tell us in a line or two why now."), so "(optional)" is dropped. The case study is sent as anonymous until the owner chooses with Rashid (decision to confirm).
+- Partners, "Apply by email" form: labels "Your name", "Email", "Who it suits" (the kinds: "Business setup consultant", "Accountant or bookkeeper", "Web or social media freelancer", "POS or booking reseller", "Business group or coworking space", "Creator who speaks to small business owners", "Something else"), "I agree to the partner terms.", the button "Apply by email", done "Application sent." with "Kabsi replies with the next step." Errors are the programs function's own. Step 1 of "How it works" reads "Apply by email" while WhatsApp is off.
+- Free check: "Pick your business" with "This one" (Design 2 lines) when the search finds more than one; "Send me this report" with the fields "Email" and, while WhatsApp is on, "WhatsApp number", each with the stored consent words of the profile check.
+- FAQ "Talk to a person" while WhatsApp is off: "Write to hello@kabsi.co." with the address as the button.
+
+### Design 1
+
+Approved in round 1: every line below down to the /system page lines.
+
+- Scan box empty error: "Type your business name and city."
+- Waitlist field label: "Email or WhatsApp number". Its error: "Type an email address or a WhatsApp number with its
+  country code."
+- Privacy panel: title "Your privacy choices"; "Choose which cookies Kabsi may use. You can change this any time from
+  the footer."; "Necessary" / "Keep the website working and remember these choices. Always on."; "Measuring visits" /
+  "Count visits and see which pages help, without your name."; "Ads" / "Show Kabsi ads to people who visited, and see
+  which ads work."; buttons "Save my choices", "Only necessary".
+- Hero scene lock screen: "Saturday 25 October"; notification time "now"; chat header "Business account"; "Play again".
+- Footer: "Your privacy choices", "© 2026 Kabsi". Header: "Skip to content", "Open menu", "Close menu".
+- /system page lines (internal page, noindex).
+
+New in round 2, for lane R to approve:
+
+- Home: FAQ title "Questions owners ask" (also Pricing); "Compare the plans"; the AI answer card "An AI assistant,
+  asked like a customer", "Where can I get good croissants near the station?", "Corner Bakery is a popular choice,
+  with fresh croissants from 7 in the morning. Harbor Bakes is also nearby.", "Named you"; QR card "Scan to leave a
+  review"; alerts "Saturday hours checked: 7 to 4", "New photo ready to post", "Holiday hours ready for 1 November",
+  "Someone changed your phone number"; WhatsApp card "Corner Bakery: a photo of today's sourdough is ready to post,
+  with: 'Fresh from the oven at 7.' Reply Yes to post."; the story "Yes: It goes live on your Google listing.",
+  "Edit: Change a word, then reply Yes.", "Skip: Nothing is posted.", "Undo: Changed your mind? Tap Undo in the next
+  10 seconds and nothing reaches Google."; report labels "New reviews", "Replies published", "Calls and directions", "Places of 49 where
+  you came up in the top 3", "Your average position", "AI answers of 5 that named you", "The two kinds of numbers are
+  never mixed."; map image title uses COPY.md 21.
+- Scan: searching "Searching for [business]", "Finding your business on Google", "Checking where you come up at your
+  address", "Asking an AI assistant about you"; "The full map"; not found "We could not find that business." and
+  "Check the name and city, or type the name exactly as it shows on Google."; "Missing" as a pill.
+- How it works: the six chat answers (Example), "Your first 14 days", "The same thing shows on WhatsApp and on the
+  Kabsi website. Answer wherever you are.", the seven day lines and their website cards, "Pro trial, ends today.".
+- Pricing: "What each plan includes" (screen readers only).
+- Log in: field label "Code"; "Sent. Check your email."; email error "Check the email. It needs a full address, like
+  name@shop.com.".
+
+### Design 2
+
+Every other line on these pages is from COPY.md (sections 2, 5, 10 to 12, 13 to 17, 20, 22, 23 and the shared pieces).
+
+- Tools: tabs "Review link and QR code", "Google profile check", "Visibility scan"; "Today's free checks are used up."
+  with "Try again tomorrow, or leave your email or WhatsApp and Kabsi sends the result then."; "Your review link";
+  "Building your link and QR code"; "It takes a minute."; the three lines under the box ("Type your business name and
+  city.", "Kabsi finds your listing and builds the link.", "Put the code by the till, and send the link to every
+  customer.").
+- Profile check: H1 "Check your Google profile."; lead "See what customers see on your public listing, and what is
+  missing. Free, no sign-up."; button "Check my profile"; "Reading your public listing", "Checking what is missing";
+  empty cards "Your details", "What is missing", "What to fix first" with one line each; "[n] of 8", "details filled in";
+  the three fixes ("Add your website", "Check your holiday hours", "Reply to the reviews that wait") with their lines;
+  the website line "Add your website. Customers who want a menu or a booking look for it first."
+- Find your business: lead "Kabsi finds your Google listing, so it can set up everything for you."; "Find my business";
+  "Pick your business", "This one"; "Is this your business?", "Yes, this is it", "Pick a different one"; lead under "Let's
+  set up [Business]." "Kabsi sends a code to your email each time you log in. There is no password."; step names "Find
+  your business", "Your email", "Add Kabsi as a Manager"; "Step [n] of 3".
+- Manager steps: "You stay the owner. You can remove Kabsi any time."; "Not started", "Five taps on Google, and Kabsi can
+  start.", "Kabsi checks for your invite by itself. Nothing goes live without your yes."; "Waiting", "Invite sent. Kabsi accepts it within a few minutes.", "This page updates
+  by itself.", "Sent again."; "Done", "Kabsi can now see your listing. Your first map arrives on WhatsApp within 5
+  minutes of connecting it."; "Kabsi cannot see the invite yet." with "Check that you typed the address exactly and
+  chose Manager, not Owner. Then send the invite again." and "Check again"; "How to add Kabsi" and its five steps (open
+  your Business Profile on Google; open Business Profile settings, then People and access; tap Add; type Kabsi's
+  address and choose Manager; tap Invite); "Where you are" with "Send the invite on Google", "Wait for it to arrive";
+  "Kabsi's address", "Copy address"; "Send this to your manager" with its message, "Send on WhatsApp", "Send by email",
+  "Back"; the drawing caption "A drawing of the form, not a screen from Google."
+- Setup call: H1 "Book a setup call."; lead "A short call to set up Kabsi with you. You pick the time."; "Pick a day",
+  "Pick a time", "Times are shown in your time zone."; "Your details", "Your name", "WhatsApp number" with "With its
+  country code. Kabsi sends the call details here.", "Book my call", "Your call", "Pick a time"; the side line; "Booked",
+  "A message is on its way to [number]. It has everything you need for the call.", "Back to Kabsi", "Change the time";
+  "No times left this week." with "Leave your WhatsApp number or email and Kabsi writes to you with new times."; "That
+  time was just taken." with "Someone booked it a moment ago. Nothing was saved." and "Pick another time".
+- Guides: H1 "Plain guides for your Google listing." with "Short answers, then the steps. Each one is checked against
+  Google's own help pages."; "Read the guide", "Next guides", "Next" (a title with no article yet), "More guides", "All
+  guides"; the article "Why is my business not showing on Google Maps?" in full (short answer, six steps, three common
+  problems, three questions); "The short answer", "Check these, in this order", "Common problems", "See where you show
+  up" with "Type your business and Kabsi searches from places around it, like a customer.", "Questions", "Google's own
+  help page", "Let Kabsi look after this." with "Free for 14 days, no card."
+- Industries: H1 "Kabsi for your kind of business." with "Pick yours. See what Kabsi sends and where you could show up.";
+  "What Kabsi sends a [trade]", "Every reply, post and map waits for your yes on WhatsApp.", "A review reply", "A post",
+  "A map line", "Ready to post, waiting for your yes", "Other kinds of business", "Kabsi searches for '[keyword]', like
+  a customer."; each trade's review, reply, post and map line (d2-data.ts).
+- Compare: H1 "Kabsi next to the other ways to look after your listing." with its lead, "An honest comparison, row by
+  row.", "Read it", "Kabsi is independent and not affiliated with [Other].", every cell and the two paragraphs per page.
+- City: H1 "Google Maps rank checker, by city." with its lead, "Searching in [City]", "Places that matter here:", the
+  paragraph for each of the four cities, three questions.
+- Partners: "How it works", "What you could earn" with "Pro is $39 a month. You earn 25% of every payment, for as long as
+  the business stays.", "Businesses you refer", "Who it suits", "The rules", "Read the partner terms", "Founding
+  Partners", "Questions partners ask", "Earn 25% of every payment."; the five line summary and sections of the partner
+  terms; partner page "Simple plans. Free for 30 days."; inactive "This page is no longer active." with "The person who
+  shared it may have stopped. Your listing is fine, and the scan is free."; report "Expired", "This report has expired."
+- Long text: About "Plain facts", "Follow Kabsi", "Or ask a question on WhatsApp. A person answers."; FAQ groups "The
+  basics", "Plans and cancelling", "Google and your data", and the five added questions (messages to customers, price,
+  more than one location); "Talk to a person", "Ask on WhatsApp, or write to hello@kabsi.co."; "In short", "On this page",
+  "Updated [date]"; the text of Security, Privacy and Terms.
+- The review page: "Tell other people how your visit went. It takes a minute.", "Write a review on Google", "Say what you
+  honestly thought. Everyone sees this same page.", "Your review goes to Google. Kabsi does not read it or change it.",
+  "Google is opening.", "If nothing happened, tap the button again.", "We could not open Google.", "Check your connection
+  and try again.", "This review link is no longer active." with "Ask [Business] for a new one. Thank you for trying."
+- Set up a card: "Set up your card.", "Card [code] is new. Find your business and Kabsi links it, so customers who scan it
+  reach your review box.", "Link this card to [Business]?", "Link my card", "Pick a different business", "Your card is
+  ready.", "Customers who scan card [code] go to the review box for [Business]. Put it by the till.", "Log in to see
+  your card", "This card is already linked to [Business]." with its line, "We do not know this card." with "Check the code
+  printed on the back, or ask on WhatsApp.", "We could not link the card."
+- Staff upload: "Send a photo to [Business].", "[Owner] sees it first. Nothing is posted until [Owner] says yes. You do
+  not need an account.", "Take or choose a photo", "Your food, your shop or your work. One photo at a time.", "Choose a
+  photo", "What is it? (optional)", "Send to [Owner]", "Choose a different photo", "Sending", "Sent to [Owner].", "Send
+  another photo", "That photo is too big." with "Choose one under 15 MB, or take a new one.", "That is not a photo." with
+  "Choose a picture from your phone, or take a new one.", "This link has expired." with "Ask [Owner] to send you a new
+  one."
+- Email actions: "A reply is ready.", "Approve reply" (COPY.md 22), "Edit", "Skip", "Save and approve", "Cancel",
+  "Approved.", "Changed your mind? Tap Undo in the next [n] seconds and nothing reaches Google.", "Waiting [n]
+  seconds", "Undo", "Published on your Google listing." (COPY.md 20), "To remove it, open your Kabsi account on the
+  website.", "Undone. Nothing reached Google." with "The reply is back, waiting for your yes.", "This reply is already
+  handled." with "You approved it on WhatsApp, so there is nothing more to do here.", "Log in to approve the reply on the
+  Kabsi website.", "Nothing is published until you approve it."; hours: "Holiday hours ready for 1 November." (Home alert),
+  "Customers look up your hours before a holiday. Say yes and your listing shows them.", "Yes, use these hours",
+  "Change", "Save these hours", "Closed all day", "Opens", "Closes", "Done.", "Your listing will show: [hours] on 1
+  November.", "Skipped. Nothing was changed.", "Your listing keeps its usual hours.", "Nothing changes on Google until you
+  say yes."
+- Unsubscribe and payment: "Stop these emails?", "You get the Results Report by email at [email]. Unsubscribe and Kabsi
+  stops sending it.", "Unsubscribe", "Choose which emails I get", "You are unsubscribed.", "Kabsi stops sending Results
+  Report emails to [email]. WhatsApp messages are not affected.", "Changed your mind? Turn them back on"; "Checking your
+  payment." with "This takes a few seconds. You do not need to pay again.", "We have not received your payment yet." with
+  "If your bank asked you to confirm it, finish that first. If you were charged, write to hello@kabsi.co and a person
+  helps.", "Check again", "Back to the plans". "You are all set." and its line are COPY.md 23.
+
+### Design 4
+
+Every other new line is from COPY.md (sections 0.1, 1, 16, 20 and the shared pieces) or master plan 30.15 and 30.16.
+
+- Nearby cards: "'[search]' around [Business]" (COPY.md 21), "Searched on Google Maps, [date]", "Near your salon",
+  "Near the metro station", "By the park" (Example names), "You came up [2nd].", "You were not in the first 20.",
+  "[Name] came first.", "You came first.", "Detailed results".
+- Home: "Try it: one review, ready for your yes."; "This is how every reply, post and change reaches you. Tap Yes,
+  Edit or Skip."; "Yes: it goes to Google, with 10 seconds to Undo."; "Edit: change a word, then reply Yes.";
+  "Skip: nothing is posted."; "On WhatsApp"; "Send the words you want. I show you the new reply before anything is
+  published."; "Skipped. Nothing is posted."; "Undo ([n])"; "A sample conversation. This preview publishes
+  nothing."; "Start again"; the three benefits ("Review replies, ready", "Your details kept right", "Posts and
+  photos, done" with their lines); "And you see where you come up nearby: three places, who came first there, and
+  one count from the 49 places Kabsi checked."; "For salons", "For barbers"; "You keep the keys." with "The free check
+  needs no access. When you start, you add Kabsi as a Manager on your Google profile." and its three points; "A
+  person helps" with its line; "Two plans. The work comes first."; "Start with a free check." with "The quick check
+  shows in about 10 seconds. The full check from 49 places around you arrives on WhatsApp within minutes."
+- Hero scene review: Layla K., "'Hana did my colour and it is exactly what I asked for.'", reply "'Thank you, Layla.
+  We will pass this on to Hana. See you at your next visit.'"; demo review from Maya and its reply.
+- FAQ 11: "Can't I do this myself for free?" "Yes. Your Google profile is free, and you can reply to reviews and
+  update it yourself. The subscription pays for the ongoing work: Kabsi keeps checking, drafts the replies and
+  posts, follows up, and brings each one to you on WhatsApp for a yes."
+- Free check: "Check your business on Google, free."; "See your public Google profile and where you come up nearby,
+  together. Kabsi asks for nothing before you see the result."; "Your Google profile" and "Where you come up nearby"
+  with their lines; "The full map arrives on WhatsApp within minutes, if you want it."; tab "Free check".
+- Scan result: "Free check, [date]"; "What to do first"; "[n] reviews on your Google profile have no reply."; "Kabsi
+  drafts a reply to each one. You approve them on WhatsApp before anything goes live."; "This was the quick check,
+  from your address. The full check from 49 places around you takes a few minutes."; "How to read it" and its
+  paragraph; "[Assistant], [date]. Asked: '[question]'", "It named you.", "It did not name you.", "Sources it cited:
+  [sources]."; "Your public Google profile, in full"; "Reviews without a reply", "Website or booking link"; the new
+  "What Kabsi sees once connected" text.
+- Review link tool: "A message to send after a visit", "Thank you for visiting [Business]. If you have a minute, you
+  can leave a review on Google here: [link]", "Copy message", "Free, no sign-up."
+- Pricing: the three lines per plan, the two plan lines ("For one business that wants its Google work done and its
+  details kept right.", "For a business that wants more posts, a team that approves, and weekly checks."), the
+  table rows, the founding line.
+- Trade pages: the salon and barber H1s and leads, "Where you show up nearby", "Every reply and post waits for your
+  yes on WhatsApp.", the barber nearby names.
+- How it works: the five setup steps above.
+- Partners: "Earn 25% of every payment." with "Recommend Kabsi to local business owners you know. You earn while the
+  referred subscription stays paid. Everything runs on WhatsApp."
+
+### Design 5
+
+All industry content in src/content/industries/*.ts (hair-salon, restaurant and dental-clinic in full; the nine
+others' leads, searches and tasks) and the eleven Home examples in src/content/home-examples.ts are new lines. Also:
+
+- Picker: "Pick your business", "The example on this page changes to match.", "Other", "Showing [Business], an
+  example.", "Kabsi for hair salons" (and for barbershops, restaurants, cafes, clinics, dental clinics, garages,
+  gyms, hotels, home services, shops); Home: "Kabsi for your kind of business".
+- Industry template: "Your [trade] on Google. Taken care of."; "Five jobs that come back every month"; "Kabsi
+  prepares each one. You reply Yes on WhatsApp."; "What customers search"; "Searches like these. Kabsi checks the
+  ones your customers use in your area."; "Google categories that fit", "First category:", "Also:"; "What customers
+  write about"; "Post ideas"; "Photos that matter"; "Holidays and busy dates"; "Where you come up nearby" with "The
+  free check searches '[search]' from places around you, like a customer standing there."; "Keep reading", "[Hub]:
+  every kind of business", "The free check"; "A sample conversation. Every business here is an example.";
+  breadcrumbs "All businesses".
+- /for and hubs: "Kabsi for every local business." with its lead; the nine hub names and leads (index.ts); "Pages
+  on the way"; "Kabsi works for any business with a Google profile. Start with the free check."; "[n] kinds of
+  business so far, with more every month."
+- Founding 25 (banner from COPY.md): "[n] of 25 places left.", "All 25 places are taken."; /founding: H1
+  "Founding 25: three months of Kabsi Pro, free.", "Who can apply", "What you get", "What Kabsi asks" and their
+  lines, "The 25 places" with the four groups, "A place still open after 30 days goes to the next good applicant
+  of any trade.", "Rashid Abou Hamzy, founder of Kabsi, reads every application himself.", "Apply for a place", "Two
+  minutes. Rashid answers on WhatsApp.", the field labels and errors, the two consents, "Send my application", the
+  five states' lines, the four questions.
+- Access steps: the approved lines of 16.1, the five steps ("On Google, open your profile: search your business name
+  while signed in." / "Tap Menu, then Business Profile settings." / "Tap People and access, then Add." / "Paste
+  5481006796 and choose Manager." / "Tap Add. On some screens the button says Invite."), "Kabsi's ID on Google",
+  "Copy the ID", "Copied", "Five steps on Google", "Our own drawings of each step, not screens from Google.", "After
+  you tap Add", "Invite pending", "Accepted by Kabsi" and "Access checked" with their lines, "Send on WhatsApp", "Send
+  by email", "A 16 second recording, on a real profile.", "Play the recording", "Pause the recording"; "You can
+  remove Kabsi any time." with "On Google: your profile, Business Profile settings, People and access, Kabsi
+  Clients, Remove. Kabsi loses access at once."; free check "When you start: add Kabsi on Google" and its line;
+  /manager-steps "Invite pending", "Kabsi accepted your invite.", "Check that you pasted 5481006796 and chose
+  Manager, not Owner. Then tap Add again."
+- Navigation: header "Businesses", "Founding 25"; footer "Every kind of business", "Hair salons", "Restaurants",
+  "Dental clinics", "Founding 25". About: "Rashid Abou Hamzy, founder of Kabsi".

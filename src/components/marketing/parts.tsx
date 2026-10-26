@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { KabsiMark } from "@/components/shared/kabsi-logo";
 import { cn } from "@/lib/utils";
 import { BRAND_EXPLAINER, BRAND_LINE, CTA_PRIMARY } from "@/lib/site";
-import { COMING_SOON } from "@/lib/website";
+import { COMING_SOON } from "@/lib/site";
 import type { PhotoId } from "@/lib/site-photos";
 import { SiteImg } from "@/components/marketing/site-img";
 

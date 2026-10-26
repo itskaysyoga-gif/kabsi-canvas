@@ -2,6 +2,10 @@
 // must pass docs/KABSI-PLAN.md section 2.2 (no promises of reviews, ratings or rankings; no invented numbers; no Google affiliation).
 
 import { WHATSAPP_DIGITS, WHATSAPP_ON } from "../../supabase/functions/_shared/whatsapp-setting.ts";
+import { CONSENT_ASK_FIRST } from "./region";
+
+/** Where the consent bar asks first (the one list is CONSENT_ASK_FIRST in src/lib/region.ts). */
+export const CONSENT_COUNTRIES: readonly string[] = CONSENT_ASK_FIRST;
 
 // Canonical origin (P0.1-03: kabsi.co is served by Vercel). Canonical links are built from the route path only, so a query string never reaches them.
 // Public Cloudflare Turnstile site key (safe in the browser). The secret lives in Supabase secrets.
@@ -101,8 +105,41 @@ export const FOUNDER_SIGNATURE = `${OPERATOR_NAME}, founder`;
 /** The operator line for the footer, terms, privacy page and emails (R-55). Payments are processed by Creem, the merchant of record. */
 export const OPERATOR_LINE = `Kabsi is operated by ${OPERATOR_NAME}. Contact: ${CONTACT_EMAIL}.`;
 
-/** The brand line and the line under it (K-112, K-110). Google's name never appears in the slogan. */
-export const BRAND_LINE = "Your reviews and listing. Taken care of.";
+/** The brand line (master plan 30.15 section 1; was "Your reviews and listing. Taken care of."). Google's name only as
+ * plain words, never in a logo or graphic (K-112). */
+export const BRAND_LINE = "Your business on Google. Taken care of.";
+/** Every footer, About and the share text say it (K-112). */
+export const NOT_AFFILIATED = "Kabsi is independent and not affiliated with Google.";
+/** The trial, always apart from the free check (master plan 30.15 section 3.10). */
+export const TRIAL_LINE = "Free for 14 days once Kabsi is connected. No card.";
+/** Under every scan box: the free check needs nothing from the owner. */
+export const SCAN_LINE = "Free check. No Google access needed. Takes about 10 seconds.";
+/** The main button on every public page (master plan 30.15 section 1). */
+export const MAIN_CTA = "Check my business free";
+/** Google's own page on working with a third party (footer small print, master plan 30.10 point 5). */
+export const GOOGLE_THIRD_PARTY_URL = THIRD_PARTY_HELP_URL;
+
+/** Kabsi's social channels, the one list (R-59). Every footer and the About page read it. Facebook and Instagram only. */
+export const SOCIAL_LINKS = [
+  { name: "Facebook", href: "https://www.facebook.com/profile.php?id=61574259448145" },
+  { name: "Instagram", href: "https://www.instagram.com/kabsi.co" },
+] as const;
+
+/**
+ * Where a "WhatsApp" button on the public site goes. While WHATSAPP_ON is false (no number in the one setting) it is an
+ * email to hello@kabsi.co, and the parts that only make sense in WhatsApp (the WhatsApp glyph button) hide.
+ */
+export const WHATSAPP_URL = WHATSAPP_ON ? whatsappHref("general") : `mailto:${CONTACT_EMAIL}`;
+
+/** Header links (COPY.md shared pieces, Design 5: "Businesses" and "Founding 25"). */
+export const NAV_LINKS = [
+  { to: "/how-it-works", label: "How it works" },
+  { to: "/pricing", label: "Pricing" },
+  { to: "/for", label: "Businesses" },
+  { to: "/google-review-link", label: "Free tools" },
+  { to: "/founding", label: "Founding 25" },
+  { to: "/partners", label: "Partners" },
+] as const;
 export const BRAND_EXPLAINER =
   "Kabsi looks after your business on Google: a reply ready for every new review, your hours and details kept right, and fresh posts. You just approve.";
 /** The calls to action, worded once (R-02). */
@@ -190,19 +227,25 @@ export function breadcrumbLd(crumbs: Crumb[]) {
   };
 }
 
+/** The share images in public/og (1200 by 630, made by scripts/og.mjs), one per page type. */
+export type ShareImage =
+  "home" | "scan" | "pricing" | "tool" | "guide" | "industry" | "partner" | "about" | "founding";
+
 export function pageHead(o: {
   title: string;
   description: string;
   path: string;
+  /** The share image; Home's when not given. */
+  image?: ShareImage;
   jsonLd?: Record<string, unknown>[];
   noindex?: boolean;
   /** Breadcrumb trail after Home; adds BreadcrumbList JSON-LD. */
   crumbs?: Crumb[];
   type?: "website" | "article";
 }) {
-  // Share image: one designed 1200x630 PNG, because some link previews (LinkedIn, older WhatsApp) skip WebP.
-  // Page photos are WebP and reach search through the image sitemap and Article JSON-LD instead.
-  const og = `${SITE_URL}/og.png`;
+  // Share image: a designed 1200x630 PNG per page type, because some link previews (LinkedIn, older WhatsApp) skip
+  // WebP. Page photos are WebP and reach search through the image sitemap and Article JSON-LD instead.
+  const og = `${SITE_URL}/og/${o.image ?? "home"}.png`;
   const url = `${SITE_URL}${o.path === "/" ? "" : o.path}`;
   const meta: Meta[] = [
     { title: o.title },
@@ -218,7 +261,7 @@ export function pageHead(o: {
     { property: "og:image:height", content: "630" },
     {
       property: "og:image:alt",
-      content: `Kabsi: ${BRAND_LINE} You approve every change.`,
+      content: `Kabsi. ${BRAND_LINE}`,
     },
     { property: "og:locale", content: "en_US" },
     { name: "twitter:card", content: "summary_large_image" },
@@ -227,7 +270,7 @@ export function pageHead(o: {
     { name: "twitter:image", content: og },
     {
       name: "twitter:image:alt",
-      content: `Kabsi: ${BRAND_LINE} You approve every change.`,
+      content: `Kabsi. ${BRAND_LINE}`,
     },
   ];
   if (o.noindex) meta.push({ name: "robots", content: "noindex" });
@@ -249,9 +292,10 @@ export const ORG_LD = {
   name: "Kabsi",
   url: SITE_URL,
   description:
-    "Kabsi looks after a local business on Google: a reply ready for every new review, hours and details kept right, and fresh posts. Nothing is published until the owner approves it.",
-  logo: `${SITE_URL}/kabsi-mark.svg`,
+    "Kabsi prepares a local business's review replies, posts and updates to its business details. The owner approves each one on WhatsApp before it goes live.",
+  logo: `${SITE_URL}/icon-512.png`,
   email: CONTACT_EMAIL,
+  sameAs: SOCIAL_LINKS.map((l) => l.href),
 };
 export const WEBSITE_LD = {
   "@context": "https://schema.org",
@@ -267,7 +311,7 @@ export const PRODUCT_LD = {
   "@type": "Product",
   name: "Kabsi",
   description:
-    "Kabsi looks after a local business on Google: a reply ready for every new review, hours and details kept right, and fresh posts. Nothing is published until the owner approves it.",
+    "Kabsi prepares a local business's review replies, posts and updates to its business details. The owner approves each one on WhatsApp before it goes live.",
   brand: { "@type": "Brand", name: "Kabsi" },
   // Card payments are not open yet, so the offers say pre-order, not in stock.
   offers: (

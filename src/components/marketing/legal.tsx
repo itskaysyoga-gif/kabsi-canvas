@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { FileText, Scale, ShieldCheck } from "lucide-react";
-import { PublicLayout } from "@/components/layouts/public-layout";
-import { IconBadge } from "@/components/marketing/parts";
-
-const ICONS = { privacy: <ShieldCheck />, terms: <Scale />, other: <FileText /> };
+import { Check, ChevronDown } from "lucide-react";
+import { SiteShell } from "@/components/kabsi/site-chrome";
+import { Prose } from "@/components/kabsi/d2-parts";
+import { SectionHead } from "@/components/kabsi/ui";
 
 function slugify(text: string): string {
   return text
@@ -14,36 +13,22 @@ function slugify(text: string): string {
 
 type TocItem = { id: string; text: string };
 
-function TocList({ items }: { items: TocItem[] }) {
-  return (
-    <ul className="space-y-1.5">
-      {items.map((item) => (
-        <li key={item.id}>
-          <a
-            href={`#${item.id}`}
-            className="text-sm font-medium text-kb-stone underline-offset-4 hover:text-kb-ink hover:underline"
-          >
-            {item.text}
-          </a>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-// Plain, readable legal pages (KABSI-LEGAL-COPY.md, corrected to the system as built on 26 Sep 2026).
-// The table of contents is built from the rendered H2 headings: each H2 gets an id (slug of its
-// text) and the list links to it. Smooth scrolling comes from the global CSS, which
-// prefers-reduced-motion already overrides to instant; scroll-mt-24 clears the sticky header.
+// Privacy, Terms, Security and the partner terms in the design studio's layout (Design 2, LegalPage): plain words
+// first, a five line summary, a contents list (folded on a phone, sticky on desktop), then the full text at reading
+// width. The full text is kabsi-canvas's own, written to the system as built; the lawyer's text replaces it (29.8).
+// The contents list is built from the rendered H2 headings: each H2 gets an id (slug of its text).
 export function LegalPage({
   title,
   updated,
-  kind = "other",
+  summary,
   children,
 }: {
   title: string;
   updated: string;
-  kind?: keyof typeof ICONS;
+  /** "In short": lines from docs/COPY.md section 14. */
+  summary?: string[];
+  /** Kept for older callers; every legal page now looks the same. */
+  kind?: "privacy" | "terms" | "other";
   children: ReactNode;
 }) {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -52,13 +37,12 @@ export function LegalPage({
   useEffect(() => {
     const root = contentRef.current;
     if (!root) return;
-    const headings = Array.from(root.querySelectorAll("h2"));
     const used = new Set<string>();
     const next: TocItem[] = [];
-    for (const h of headings) {
+    for (const h of Array.from(root.querySelectorAll("h2"))) {
       const text = h.textContent?.trim() ?? "";
       if (!text) continue;
-      let id = slugify(text) || "section";
+      let id = h.id || slugify(text) || "section";
       while (used.has(id)) id = `${id}-2`;
       used.add(id);
       h.id = id;
@@ -68,43 +52,64 @@ export function LegalPage({
   }, []);
 
   return (
-    <PublicLayout>
-      <header className="border-b border-kb-hairline bg-kb-sand">
-        <div className="mx-auto max-w-5xl px-5 py-14 sm:px-8 sm:py-20">
-          <IconBadge icon={ICONS[kind]} className="size-14 [&_svg]:size-6" />
-          <h1 className="mt-6 font-display text-[clamp(2.6rem,6vw,4rem)] leading-none">{title}</h1>
-          <p className="mt-3 text-sm text-kb-stone">Last updated {updated}</p>
-        </div>
-      </header>
-      <div className="mx-auto max-w-5xl px-5 py-14 sm:px-8 sm:py-16">
-        {items.length > 0 && (
-          <details className="mb-10 rounded-[14px] border border-kb-hairline bg-kb-sand p-5 lg:hidden">
-            <summary className="cursor-pointer text-sm font-bold text-kb-ink">On this page</summary>
-            <nav aria-label="Table of contents" className="mt-4">
-              <TocList items={items} />
-            </nav>
-          </details>
-        )}
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_16rem] lg:gap-12">
-          <div
-            ref={contentRef}
-            className="space-y-10 text-[17px] leading-8 text-kb-ink [&_a]:font-bold [&_a]:underline [&_a]:underline-offset-4 [&_h2]:scroll-mt-24 [&_h2]:text-2xl [&_h2]:font-bold [&_li]:mt-2 [&_p]:mt-3 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:pl-6"
-          >
-            {children}
+    <SiteShell>
+      <section className="container-kb pt-28 lg:pt-36">
+        <SectionHead as="h1" title={title} lead="Plain words first. The full text follows." />
+        <p className="mt-4 text-small text-text-3">Updated {updated}</p>
+      </section>
+      <section className="container-kb mt-10 pb-20 lg:pb-28">
+        {summary?.length ? (
+          <div className="max-w-[44rem] rounded-panel border border-line bg-surface-1 p-6 sm:p-8">
+            <h2 className="text-h3">In short</h2>
+            <ul className="mt-4 space-y-3">
+              {summary.map((s) => (
+                <li key={s} className="flex gap-3 text-body text-text-1">
+                  <span className="mt-1 grid size-5 shrink-0 place-items-center rounded-full bg-kb-green">
+                    <Check className="size-3 text-kb-white" strokeWidth={3.5} aria-hidden />
+                  </span>
+                  {s}
+                </li>
+              ))}
+            </ul>
           </div>
-          {items.length > 0 && (
-            <aside className="hidden lg:block">
-              <nav
-                aria-label="Table of contents"
-                className="sticky top-24 rounded-[14px] border border-kb-hairline bg-kb-sand p-5"
-              >
-                <p className="mb-3 text-sm font-bold text-kb-ink">On this page</p>
-                <TocList items={items} />
-              </nav>
-            </aside>
-          )}
+        ) : null}
+
+        <div className="mt-12 grid gap-10 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-16">
+          <nav aria-label="On this page" className="lg:sticky lg:top-24 lg:self-start">
+            {items.length > 0 && (
+              <details className="group rounded-card border border-line lg:border-0" open>
+                <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 text-small font-bold text-text-1 lg:hidden [&::-webkit-details-marker]:hidden">
+                  On this page
+                  <ChevronDown
+                    className="size-4 transition-transform group-open:rotate-180"
+                    aria-hidden
+                  />
+                </summary>
+                <p className="mb-2 hidden text-label font-bold text-text-3 lg:block">
+                  On this page
+                </p>
+                <ol className="px-2 pb-2 lg:px-0 lg:pb-0">
+                  {items.map((s) => (
+                    <li key={s.id}>
+                      <a
+                        href={`#${s.id}`}
+                        className="inline-flex min-h-11 items-center text-small text-text-2 underline-offset-4 hover:text-text-1 hover:underline"
+                      >
+                        {s.text}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            )}
+          </nav>
+          <div ref={contentRef}>
+            <Prose className="[&_b]:font-bold [&_b]:text-text-1 [&_dl]:mt-4 [&_dt]:text-text-1 [&_section]:mt-10 [&_table]:mt-4 [&_td]:py-2 [&_td]:pe-4 [&_th]:py-2 [&_th]:pe-4 [&_th]:text-start [&_th]:text-text-1">
+              {children}
+            </Prose>
+          </div>
         </div>
-      </div>
-    </PublicLayout>
+      </section>
+    </SiteShell>
   );
 }

@@ -145,7 +145,8 @@ export function publicView(c: CheckRow) {
   const cells: CellResult[] = c.points.filter((p) => p.items != null).map((p) => ({ row: p.row, col: p.col, rank: p.rank ?? null, items: p.items ?? [] }));
   const s = c.state === "done" ? summarize(cells, c.self) : null;
   return {
-    code: c.code, business: c.business, term: c.term, check_line: CHECK_LINE, trial_line: TRIAL_LINE,
+    // created_at: the page prints the date of the search (Web 2), never today's date for an older check.
+    code: c.code, business: c.business, term: c.term, created_at: c.created_at, check_line: CHECK_LINE, trial_line: TRIAL_LINE,
     fast: c.fast, ai: c.ai ? { ...c.ai, line: aiLine(c.ai), label: AI_LABEL } : null,
     map: c.state === "done"
       ? { state: "done", nearby: c.nearby, top3: s!.top3, points: s!.points, average: s!.averageRank,

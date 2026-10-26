@@ -3,7 +3,15 @@
   "_note": "An Attributes resource. Built from the documented schema; replace with a captured response on Gate A day (P0.7-01).",
   "name": "locations/1234567890123456789/attributes",
   "attributes": [
-    { "name": "attributes/has_wheelchair_accessible_entrance", "valueType": "BOOL", "values": [true] },
-    { "name": "attributes/url_menu", "valueType": "URL", "uriValues": [{ "uri": "https://example.com/menu" }] }
+    {
+      "name": "attributes/has_wheelchair_accessible_entrance",
+      "valueType": "BOOL",
+      "values": [true]
+    },
+    {
+      "name": "attributes/url_menu",
+      "valueType": "URL",
+      "uriValues": [{ "uri": "https://example.com/menu" }]
+    }
   ]
 }

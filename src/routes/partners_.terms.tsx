@@ -8,6 +8,7 @@ import { CONTACT_EMAIL, OPERATOR_LINE, OPERATOR_NAME, pageHead } from "@/lib/sit
 export const Route = createFileRoute("/partners_/terms")({
   head: () =>
     pageHead({
+      image: "partner",
       title: "Kabsi Partners terms | Kabsi",
       description:
         "The terms for Kabsi Partners: the 25 percent commission, the 30 day hold, payouts, how a referral is credited and the rules every partner follows.",
@@ -24,7 +25,17 @@ const UPDATED = "26 October 2026";
 
 function Page() {
   return (
-    <LegalPage kind="terms" title="Kabsi Partners terms" updated={UPDATED}>
+    <LegalPage
+      title="Partner terms"
+      updated={UPDATED}
+      summary={[
+        "You earn 25% of every payment from a business you refer, while the referred subscription stays paid.",
+        "You are paid on the 5th of each month, once at least $25 has cleared its 30-day hold.",
+        "Say it is a paid partnership, every time.",
+        "Never promise rankings, reviews or customers, and never say Kabsi works with Google.",
+        "Kabsi can end a partnership that breaks these rules.",
+      ]}
+    >
       <section>
         <p>{OPERATOR_LINE}</p>
       </section>

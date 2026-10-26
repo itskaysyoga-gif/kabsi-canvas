@@ -10,11 +10,13 @@ Disallow: /start
 Disallow: /login
 Disallow: /a/
 Disallow: /activate/
+Disallow: /scan/
 
 User-agent: Googlebot
 User-agent: OAI-SearchBot
 User-agent: ChatGPT-User
 User-agent: PerplexityBot
+User-agent: GPTBot
 Allow: /
 Disallow: /app
 Disallow: /partner$
@@ -25,5 +27,6 @@ Disallow: /start
 Disallow: /login
 Disallow: /a/
 Disallow: /activate/
+Disallow: /scan/
 
 Sitemap: https://kabsi.co/sitemap.xml

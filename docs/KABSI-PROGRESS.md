@@ -11,6 +11,7 @@ One page, under 10 KB. Updated 25 Oct 2026 by the lane R chat (master plan 19, 2
 - V3 (26 Oct, PR 246 merged, deploy run 114 green): Ask a customer is one ready message with the review link (no customer number ever stored), link opens counted apart from reviews, counter card and table tent PDFs, photos from WhatsApp on both plans (Yes, Edit, Skip), the monthly question, sensitive reviews without text, voice notes behind a provider (mock until the key is set). Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
 - 26 Oct, lane R: V2's migration applied; Meta pixel live; QA_SMOKE_TOKEN set; Slack leftovers dropped (0 | 0 | 0 | 0); master plan 30.14.
 - 26 Oct, lane R: the outside review decided (30.15, 30.16) and 30.17 (Founding 25, Home for every business with industry pages, easy access, getkabsi.com). Design 1 to 4 and 3 approved in the design studio. Next: Design 5, V3, Partners, V4, Outbound, Web 2 with Content 1, UX 1, Sec 1, the launch gate.
+- Web 2 (27 Oct, branch `claude/web2-public-site`): kabsi.co's public pages on the design studio's approved system (dark, Bricolage Grotesque and Manrope), every count real (Founding 25, founding price, Founding Partners), the Founding 25 and Partners forms on the programs function, the free check on V4's /visibility/check, the industry pages with nine hubs (hair salon, restaurant and dental clinic indexed; the nine Content 1 pages noindex until lane R approves), DESIGN.md and COPY.md 24, the facts. Detail: `docs/progress/archive/2026-10-27-web2.md`.
 - V4 (PR 250, merged 26 Oct, deploy run 116 green; migration applied by lane R): onboarding in four stages, the first task, every task closes, the work receipt data, nearby places, the free check route, the category and monthly-facts proposals, the voice test op. The voice test did not pass (Gulf Arabic and mixed notes), so voice notes stay off. Detail: `docs/progress/archive/2026-10-27-v4.md`.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
@@ -53,9 +54,9 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 27 Oct 2026, Web 2: the public website ported from the design studio. Detail: `docs/progress/archive/2026-10-27-web2.md`.
 - 27 Oct 2026, V4 (PR 250): onboarding, first task, task states, work receipt, nearby places, free check, voice test op. Detail: `docs/progress/archive/2026-10-27-v4.md`.
 - 26 Oct 2026, Partners (PR 247): Founding 25 and Kabsi Partners; Creem charges USD or EUR only. Migration applied by lane R; merged and verified live 26 Oct (`programs/founding` answers 25 places left, deploy 115 green). Detail: `docs/progress/archive/2026-10-26-partners.md`.
-- 26 Oct 2026, V3: Review Growth, photos and the monthly question on WhatsApp, sensitive reviews, voice notes. Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
 
 ## How a session updates this page
 

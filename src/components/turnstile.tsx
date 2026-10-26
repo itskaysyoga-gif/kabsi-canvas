@@ -136,18 +136,18 @@ export function Turnstile({ onToken }: { onToken: (token: string) => void }) {
         ref={box}
         className={
           interactive && !failed
-            ? "w-full overflow-hidden rounded-card border border-kb-hairline bg-kb-sand"
+            ? "w-full overflow-hidden rounded-card border border-line bg-surface-2"
             : failed
               ? "hidden"
               : "w-full"
         }
       />
       {failed ? (
-        <p className="text-sm text-kb-stone" role="alert">
+        <p className="text-small text-text-2" role="alert">
           We could not check your browser.{" "}
           <button
             type="button"
-            className="min-h-11 font-bold text-kb-ink underline underline-offset-4"
+            className="min-h-11 font-bold text-text-1 underline underline-offset-4"
             onClick={() => setAttempt((n) => n + 1)}
           >
             Try again

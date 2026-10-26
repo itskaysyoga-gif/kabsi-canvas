@@ -14,7 +14,10 @@
         "http://localhost:4173/guides",
         "http://localhost:4173/for",
         "http://localhost:4173/privacy",
-        "http://localhost:4173/terms"
+        "http://localhost:4173/terms",
+        "http://localhost:4173/scan",
+        "http://localhost:4173/founding",
+        "http://localhost:4173/for/hair-salon"
       ],
       "numberOfRuns": 3,
       "settings": {
@@ -25,13 +28,13 @@
     "assert": {
       "assertMatrix": [
         {
-          "matchingUrlPattern": "^http://localhost:4173/(pricing|google-review-link|google-profile-check)?$",
+          "matchingUrlPattern": "^http://localhost:4173/(pricing|google-review-link|google-profile-check|scan)?$",
           "assertions": {
             "categories:performance": ["warn", { "minScore": 0.95 }]
           }
         },
         {
-          "matchingUrlPattern": "^http://localhost:4173/(how-it-works|faq|about|security|partners|guides|for|privacy|terms)$",
+          "matchingUrlPattern": "^http://localhost:4173/(how-it-works|faq|about|security|partners|guides|for|privacy|terms|founding|for/hair-salon)$",
           "assertions": {
             "categories:performance": ["warn", { "minScore": 0.9 }]
           }

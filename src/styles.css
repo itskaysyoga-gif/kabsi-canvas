@@ -1,23 +1,95 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
-/* Brand fonts, self-hosted (OFL-1.1) so no third-party request blocks the first paint. */
-@font-face { font-family: "Lalezar"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/lalezar-latin-400.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: "Lalezar"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/lalezar-arabic-400.woff2") format("woff2"); unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC; }
-@font-face { font-family: "Readex Pro"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/readex-pro-latin-400.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: "Readex Pro"; font-style: normal; font-weight: 500; font-display: swap; src: url("/fonts/readex-pro-latin-500.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: "Readex Pro"; font-style: normal; font-weight: 700; font-display: swap; src: url("/fonts/readex-pro-latin-700.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: "Readex Pro"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/readex-pro-arabic-400.woff2") format("woff2"); unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC; }
+/* Self hosted fonts (OFL, @fontsource-variable). Only the weight axis, latin first; the browser fetches other ranges
+   only when a page needs them. No outside font request. */
+@import "@fontsource-variable/bricolage-grotesque/wght.css";
+@import "@fontsource-variable/manrope/wght.css";
 
 @custom-variant dark (&:is(.dark *));
 
-/* K-108: every design value lives in this one block. Tailwind reads it, nothing else defines colours, type,
-   spacing, radii or shadows. Existing colour values are unchanged; amber is new (design review, Visual system):
-   amber text on soft amber marks "needs your attention", so yellow stays for the action and the "needs you" highlight. */
-@theme {
-  --font-sans: "Readex Pro", sans-serif;
-  --font-display: "Lalezar", sans-serif;
+/*
+ * K-108: every design value lives in this file (DESIGN.md, Web 2, 27 Oct 2026; the system is the design studio's
+ * approved one, docs/DESIGN-PROPOSAL.md in itskaysyoga-gif/kabsi-design-studio).
+ *
+ * Three layers:
+ * 1. Brand constants (--kb-*, --map-*, --wa-*): fixed values, in the @theme static block below (the only place a hex
+ *    value may appear, scripts/check-tokens.mjs).
+ * 2. Roles (--surface-*, --text-*, --line*, --focus...): what pages and components use. The public website is dark
+ *    (.theme-dark, set by SiteShell; the page body follows it). .theme-light is the light look of the customer pages
+ *    and the light section on Home; :root is light too, so the signed-in website keeps its light colours until UX
+ *    1 (its fonts are the new two families and its card radius is the new 16 px, DESIGN.md).
+ * 3. Tailwind names (@theme inline): bg-surface-1, text-text-2, rounded-card, shadow-lift, ease-kb and so on.
+ *
+ * The legacy block (--color-kb-* with the old names, text-kb-*, shadow-kb) is what the signed-in website still reads.
+ * UX 1 moves it to the roles and deletes that block. No new page uses it.
+ */
 
+/* Brand constants */
+@theme static {
+  /* Brand constants */
+  --kb-yellow: #ffd60a;
+  --kb-yellow-pressed: #e8c309;
+  --kb-black: #000000;
+  --kb-night: #0c0c0b;
+  --kb-carbon: #161614;
+  --kb-graphite: #211f1c;
+  --kb-smoke: #2c2a26;
+  --kb-paper: #f5f3ee;
+  --kb-mute: #b8b3a8;
+  --kb-faint: #9a958a;
+  --kb-stroke-dark: #7d786f;
+  --kb-white: #ffffff;
+  --kb-sand: #f6f4ef;
+  --kb-ink: #111111;
+  --kb-stone: #5e5b55;
+  --kb-hairline: #e4e0d7;
+  --kb-pressed-light: #ece9e1;
+  --kb-line-strong-light: #d5d0c4;
+  --kb-green: #1f8a5b;
+  --kb-green-ink: #17704a;
+  --kb-green-soft: #e6f4ec;
+  --kb-green-on-dark: #5fd39b;
+  --kb-red: #d93025;
+  --kb-red-ink: #b3261e;
+  --kb-red-soft: #fce8e6;
+  --kb-red-on-dark: #ff8a80;
+  --kb-amber: #b45309;
+  --kb-amber-soft: #fef3c7;
+  --kb-amber-on-dark: #f5b94a;
+
+  /* The map (docs/reference/DESIGN.md). It always sits on its own light ground. */
+  --map-rank-top: #146c46;
+  --map-rank-mid: #6cc497;
+  --map-rank-low: #fef3c7;
+  --map-rank-none: #0b0b0b;
+  --map-ground: #efece4;
+  --map-block: #e3dfd4;
+  --map-street: #ffffff;
+  --map-water: #d7e3e6;
+
+  /* WhatsApp style mockups only (brief section 5), never Kabsi's own pages */
+  --wa-chat-bg: #efeae2;
+  --wa-bubble-in: #ffffff;
+  --wa-bubble-out: #d9fdd3;
+  --wa-ink: #111b21;
+  --wa-time: #667781;
+  /* #667781 is 4.2 to 1 on the sent bubble; one step darker keeps 4.5 to 1 there */
+  --wa-time-out: #5a6a72;
+  --wa-tick: #53bdeb;
+  --wa-link: #0a6c9c;
+  --wa-header: #f7f8fa;
+  --wa-divider: #e3e6e8;
+  --wa-bubble-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+  --whatsapp: #25d366;
+
+  /* The plain phone frame of the mockups (Magic UI iphone.tsx, always dark) */
+  --phone-edge: #404040;
+  --phone-body: #262626;
+}
+
+/* Legacy tokens: the signed-in website (UX 1 retires them). Values unchanged from DESIGN.md of 25 Oct 2026. */
+@theme {
   --color-kb-yellow: #ffd60a;
   --color-kb-yellow-pressed: #e8c309;
   --color-kb-black: #000000;
@@ -29,11 +101,15 @@
   --color-kb-stone-on-dark: #c9c5bc;
   --color-kb-hairline: #e4e0d7;
   --color-kb-red: #d93025;
+  --color-kb-red-ink: #b3261e;
+  --color-kb-red-soft: #fce8e6;
   --color-kb-green: #1f8a5b;
+  --color-kb-green-ink: #17704a;
+  --color-kb-green-soft: #e6f4ec;
   --color-kb-amber: #b45309;
   --color-kb-amber-soft: #fef3c7;
+  --color-kb-paper: #f5f3ee;
 
-  /* Type: Lalezar for H1 and H2 only, two sizes; Readex Pro for everything else, never below 13 px. */
   --text-kb-hero: clamp(3.5rem, 2.4rem + 4.6vw, 5rem);
   --text-kb-hero--line-height: 1;
   --text-kb-section: clamp(2.25rem, 1.9rem + 1.4vw, 2.75rem);
@@ -47,17 +123,11 @@
   --text-kb-caption: 0.8125rem;
   --text-kb-caption--line-height: 1.4;
 
-  /* Spacing and layout: sections 96 px apart on desktop and 64 px on phones, one 1200 px container, 24 px gutters. */
   --spacing-kb-section: 6rem;
   --spacing-kb-section-sm: 4rem;
   --spacing-kb-gutter: 1.5rem;
   --container-kb: 75rem;
 
-  --radius-sm: 8px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
-  --radius-card: 14px;
   --radius-large: 24px;
   --radius-pill: 999px;
 
@@ -65,16 +135,213 @@
   --shadow-kb-lift: 0 14px 30px rgba(0, 0, 0, 0.09);
 }
 
-/* shadcn semantic names point at the brand tokens above. */
-:root {
-  --background: var(--color-kb-white); --foreground: var(--color-kb-ink); --card: var(--color-kb-white);
-  --card-foreground: var(--color-kb-ink); --popover: var(--color-kb-white); --popover-foreground: var(--color-kb-ink);
-  --primary: var(--color-kb-yellow); --primary-foreground: var(--color-kb-black); --secondary: var(--color-kb-sand);
-  --secondary-foreground: var(--color-kb-ink); --muted: var(--color-kb-sand); --muted-foreground: var(--color-kb-stone);
-  --accent: var(--color-kb-sand); --accent-foreground: var(--color-kb-black); --destructive: var(--color-kb-red);
-  --destructive-foreground: var(--color-kb-white); --border: var(--color-kb-hairline); --input: var(--color-kb-hairline); --ring: var(--color-kb-black);
+/* Roles, light: the default (the signed-in website and emails), the customer pages and the light sections. */
+:root,
+.theme-light {
+  --surface-0: var(--kb-sand);
+  --surface-1: var(--kb-white);
+  --surface-2: var(--kb-sand);
+  --surface-3: var(--kb-pressed-light);
+  --surface-band: var(--kb-black);
+  --text-1: var(--kb-ink);
+  --text-2: var(--kb-stone);
+  --text-3: var(--kb-stone);
+  --line: var(--kb-hairline);
+  --line-strong: var(--kb-line-strong-light);
+  --stroke: var(--kb-stone);
+  --focus: var(--kb-black);
+  --ok: var(--kb-green-ink);
+  --warn: var(--kb-amber);
+  --bad: var(--kb-red-ink);
+  --ok-soft: var(--kb-green-soft);
+  --warn-soft: var(--kb-amber-soft);
+  --bad-soft: var(--kb-red-soft);
+  --info-soft: var(--kb-sand);
+  --glass: rgb(255 255 255 / 0.85);
+  --shadow-rest: 0 1px 2px rgb(17 17 17 / 0.06);
+  --shadow-lift: 0 6px 18px rgb(0 0 0 / 0.06);
+  --shadow-float: 0 14px 30px rgb(0 0 0 / 0.09);
+  --scrim: rgb(0 0 0 / 0.6);
+  --shadow-phone: 0 40px 80px -30px rgb(0 0 0 / 0.9), 0 0 0 1px rgb(255 255 255 / 0.06);
+  --glow-yellow: 0 6px 18px -12px rgb(255 214 10 / 0.3);
 }
+
+/* Roles, dark: the public website. body:has() lets the page ground, portals and dialogs follow the page. */
+.theme-dark,
+body:has(.theme-dark) {
+  --surface-0: var(--kb-night);
+  --surface-1: var(--kb-carbon);
+  --surface-2: var(--kb-graphite);
+  --surface-3: var(--kb-smoke);
+  --surface-band: var(--kb-black);
+  --text-1: var(--kb-paper);
+  --text-2: var(--kb-mute);
+  --text-3: var(--kb-faint);
+  --line: rgb(245 243 238 / 0.1);
+  --line-strong: rgb(245 243 238 / 0.18);
+  --stroke: var(--kb-stroke-dark);
+  --focus: var(--kb-paper);
+  --ok: var(--kb-green-on-dark);
+  --warn: var(--kb-amber-on-dark);
+  --bad: var(--kb-red-on-dark);
+  --ok-soft: rgb(95 211 155 / 0.12);
+  --warn-soft: rgb(245 185 74 / 0.12);
+  --bad-soft: rgb(255 138 128 / 0.12);
+  --info-soft: rgb(245 243 238 / 0.07);
+  --glass: rgb(22 22 20 / 0.78);
+  --scrim: rgb(0 0 0 / 0.6);
+
+  /* Shadows. On dark a shadow alone disappears, so each one carries a 1 px top light. */
+  --shadow-rest: inset 0 1px 0 0 rgb(255 255 255 / 0.05), 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-lift: inset 0 1px 0 0 rgb(255 255 255 / 0.06), 0 18px 40px -18px rgb(0 0 0 / 0.85);
+  --shadow-float: 0 -1px 0 0 rgb(255 255 255 / 0.06) inset, 0 24px 60px -20px rgb(0 0 0 / 0.9);
+  --shadow-phone: 0 40px 80px -30px rgb(0 0 0 / 0.9), 0 0 0 1px rgb(255 255 255 / 0.06);
+  --glow-yellow: 0 6px 18px -12px rgb(255 214 10 / 0.3);
+}
+.theme-dark,
+.theme-light {
+  color: var(--text-1);
+  background-color: var(--surface-0);
+}
+
+/* Motion, the same everywhere */
+:root {
+  --ease-kb: cubic-bezier(0.2, 0.6, 0.3, 1);
+  --dur-press: 80ms;
+  --dur-colour: 160ms;
+  --dur-state: 200ms;
+  --dur-enter: 320ms;
+  --dur-scene: 400ms;
+  --stagger: 60ms;
+  --radius: 1rem;
+}
+
+/* shadcn names. On the signed-in website (:root) they keep their old values; in the new system they follow the roles,
+   declared again in each scope so a nested theme changes them too. */
+:root {
+  --background: var(--color-kb-white);
+  --foreground: var(--color-kb-ink);
+  --card: var(--color-kb-white);
+  --card-foreground: var(--color-kb-ink);
+  --popover: var(--color-kb-white);
+  --popover-foreground: var(--color-kb-ink);
+  --primary: var(--color-kb-yellow);
+  --primary-foreground: var(--color-kb-black);
+  --secondary: var(--color-kb-sand);
+  --secondary-foreground: var(--color-kb-ink);
+  --muted: var(--color-kb-sand);
+  --muted-foreground: var(--color-kb-stone);
+  --accent: var(--color-kb-sand);
+  --accent-foreground: var(--color-kb-black);
+  --destructive: var(--color-kb-red);
+  --destructive-foreground: var(--color-kb-white);
+  --border: var(--color-kb-hairline);
+  --input: var(--color-kb-hairline);
+  --ring: var(--color-kb-black);
+}
+.theme-dark,
+body:has(.theme-dark),
+.theme-light {
+  --background: var(--surface-0);
+  --foreground: var(--text-1);
+  --card: var(--surface-1);
+  --card-foreground: var(--text-1);
+  --popover: var(--surface-1);
+  --popover-foreground: var(--text-1);
+  --primary: var(--kb-yellow);
+  --primary-foreground: var(--kb-black);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--text-1);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--text-2);
+  --accent: var(--surface-3);
+  --accent-foreground: var(--text-1);
+  --destructive: var(--kb-red);
+  --destructive-foreground: var(--kb-white);
+  --border: var(--line);
+  --input: var(--stroke);
+  --ring: var(--focus);
+}
+
 @theme inline {
+  /* Fonts. The Arabic companion slots in after each family for the later Saudi step. */
+  --font-sans: "Manrope Variable", var(--font-arabic-text, ui-sans-serif), system-ui, sans-serif;
+  --font-display:
+    "Bricolage Grotesque Variable", var(--font-arabic-display, ui-sans-serif), system-ui, sans-serif;
+
+  /* Type scale. Phone first; display and h2 grow with the screen. 15 px floor for reading, 13 px for labels. */
+  --text-display: clamp(2.5rem, 1.55rem + 4.1vw, 4.5rem);
+  --text-display--line-height: 1.02;
+  --text-display--letter-spacing: -0.03em;
+  --text-h2: clamp(1.875rem, 1.45rem + 1.8vw, 3rem);
+  --text-h2--line-height: 1.08;
+  --text-h2--letter-spacing: -0.022em;
+  --text-h3: 1.375rem;
+  --text-h3--line-height: 1.25;
+  --text-h3--letter-spacing: -0.012em;
+  --text-title: 1.125rem;
+  --text-title--line-height: 1.35;
+  --text-lead: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  --text-lead--line-height: 1.6;
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+  --text-small: 0.9375rem;
+  --text-small--line-height: 1.5;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.35;
+  /* Inside the phone mockups only: a phone drawn at about 75 percent of real size */
+  --text-chat: 0.875rem;
+  --text-chat--line-height: 1.4;
+  --text-chat-meta: 0.6875rem;
+  --text-chat-meta--line-height: 1;
+
+  /* Colours by role */
+  --color-surface-0: var(--surface-0);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-band: var(--surface-band);
+  --color-text-1: var(--text-1);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-stroke: var(--stroke);
+  --color-focus: var(--focus);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad-soft: var(--bad-soft);
+  --color-info-soft: var(--info-soft);
+  --color-glass: var(--glass);
+  --color-scrim: var(--scrim);
+
+  /* Brand constants that must not follow the theme (kb-* colour names are in the legacy block, same values) */
+  --color-map-top: var(--map-rank-top);
+  --color-map-mid: var(--map-rank-mid);
+  --color-map-low: var(--map-rank-low);
+  --color-map-none: var(--map-rank-none);
+  --color-map-ground: var(--map-ground);
+  --color-map-block: var(--map-block);
+  --color-map-street: var(--map-street);
+  --color-map-water: var(--map-water);
+  --color-wa-chat: var(--wa-chat-bg);
+  --color-wa-in: var(--wa-bubble-in);
+  --color-wa-out: var(--wa-bubble-out);
+  --color-wa-ink: var(--wa-ink);
+  --color-wa-time: var(--wa-time);
+  --color-wa-time-out: var(--wa-time-out);
+  --color-wa-tick: var(--wa-tick);
+  --color-wa-link: var(--wa-link);
+  --color-wa-header: var(--wa-header);
+  --color-wa-divider: var(--wa-divider);
+  --color-whatsapp: var(--whatsapp);
+  --color-phone-edge: var(--phone-edge);
+  --color-phone-body: var(--phone-body);
+
+  /* shadcn names */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -94,57 +361,351 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  /* Radius: small things tight, big things soft. Buttons, chips and badges are pills. */
+  --radius-input: 0.5rem;
+  --radius-bubble: 0.5rem;
+  --radius-inner: 0.75rem;
+  --radius-card: 1rem;
+  --radius-panel: 1.5rem;
+  --radius-phone: 3rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Shadows */
+  --shadow-rest: var(--shadow-rest);
+  --shadow-lift: var(--shadow-lift);
+  --shadow-float: var(--shadow-float);
+  --shadow-phone: var(--shadow-phone);
+  --shadow-bubble: var(--wa-bubble-shadow);
+  --shadow-glow: var(--glow-yellow);
+
+  /* Motion */
+  --ease-kb: var(--ease-kb);
+  --animate-enter: kb-enter var(--dur-enter) var(--ease-kb) both;
+  --animate-drop: kb-drop var(--dur-scene) var(--ease-kb) both;
+  --animate-pop: kb-pop var(--dur-enter) var(--ease-kb) both;
+  --animate-fade: kb-fade var(--dur-enter) var(--ease-kb) both;
+  /* The trades row: the only thing allowed to loop. Pauses on touch and hover, stops under reduced motion. */
+  --animate-marquee: kb-marquee var(--duration) linear infinite;
 }
 
 @layer base {
-  * { border-color: var(--color-kb-hairline); }
-  html { min-width: 320px; overflow-x: hidden; scroll-behavior: smooth; }
-  body { min-width: 320px; overflow-x: hidden; background: var(--background); color: var(--foreground); font-family: var(--font-sans); font-size: 16px; letter-spacing: 0; }
-  button, a, input { transition-duration: 160ms; }
-  :focus-visible { outline: 2px solid var(--color-kb-black); outline-offset: 2px; }
+  * {
+    border-color: var(--color-line);
+  }
+  html {
+    min-width: 320px;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    scroll-padding-top: 5rem;
+  }
+  body {
+    min-width: 320px;
+    overflow-x: hidden;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-feature-settings: "ss01", "cv11";
+  }
+  body:has(.theme-dark) {
+    background-color: var(--surface-0);
+    color: var(--text-1);
+    color-scheme: dark;
+  }
+  .theme-dark h1,
+  .theme-dark h2,
+  .theme-dark h3,
+  .theme-light h1,
+  .theme-light h2,
+  .theme-light h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  ::selection {
+    background: var(--kb-yellow);
+    color: var(--kb-black);
+  }
+  /* One focus ring everywhere: 2 px, 2 px away, the theme's focus colour. Never removed. */
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+}
+
+/* Layout */
+@utility container-kb {
+  width: 100%;
+  max-width: 75rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  @media (min-width: 768px) {
+    padding-inline: 2rem;
+  }
+}
+@utility section-y {
+  padding-block: 4.5rem;
+  @media (min-width: 1024px) {
+    padding-block: 7.5rem;
+  }
+}
+@utility measure {
+  max-width: 38rem;
+}
+
+/* Surfaces */
+@utility glass {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+}
+
+/* Press feedback inside 100 ms on every control (brief 7). */
+@utility press {
+  transition:
+    transform var(--dur-press) var(--ease-kb),
+    background-color var(--dur-colour) var(--ease-kb),
+    border-color var(--dur-colour) var(--ease-kb),
+    color var(--dur-colour) var(--ease-kb),
+    box-shadow var(--dur-state) var(--ease-kb);
+  &:active:not(:disabled):not([aria-disabled="true"]) {
+    transform: scale(0.97);
+  }
+}
+
+/* The map's light ground with our own quiet street pattern */
+@utility map-streets {
+  background-color: var(--map-ground);
+}
+
+/* WhatsApp style chat ground with a faint pattern of our own (never WhatsApp's doodles) */
+@utility wa-ground {
+  background-color: var(--wa-chat-bg);
+  background-image: radial-gradient(rgb(17 27 33 / 0.05) 1px, transparent 1.2px);
+  background-size: 14px 14px;
+}
+
+@keyframes kb-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes kb-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-110%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes kb-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes kb-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes kb-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@keyframes kb-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+@keyframes kb-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+}
+@keyframes kb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes kb-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@utility skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--surface-3) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: kb-shimmer 1.4s linear infinite;
+  border-radius: var(--radius-inner);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-/* Motion (KABSI-BRAND "Allowed motion"): a one-time 8 px rise per section, a one-time tap ripple on the
-   card, pressed states. No loops, no parallax, no counters. Only armed once JS runs (html.kb-motion),
-   so content is always visible without JS, and never with prefers-reduced-motion. */
-[data-rise], [data-stagger] > * {
-  transition: opacity 520ms cubic-bezier(.2,.6,.3,1), transform 520ms cubic-bezier(.2,.6,.3,1);
+/* Legacy motion of the signed-in website (KABSI-BRAND "Allowed motion"). Only armed once JS runs (html.kb-motion). */
+[data-rise],
+[data-stagger] > * {
+  transition:
+    opacity 520ms cubic-bezier(0.2, 0.6, 0.3, 1),
+    transform 520ms cubic-bezier(0.2, 0.6, 0.3, 1);
 }
 html.kb-motion [data-rise]:not(.kb-in),
-html.kb-motion [data-stagger]:not(.kb-in) > * { opacity: 0; transform: translateY(8px); }
-[data-stagger] > *:nth-child(2) { transition-delay: 70ms; }
-[data-stagger] > *:nth-child(3) { transition-delay: 140ms; }
-[data-stagger] > *:nth-child(4) { transition-delay: 210ms; }
-[data-stagger] > *:nth-child(5) { transition-delay: 280ms; }
-[data-stagger] > *:nth-child(n+6) { transition-delay: 350ms; }
-
-@keyframes kb-rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-.kb-hero-visual { animation: kb-rise-in 420ms cubic-bezier(.2,.6,.3,1) both; }
-
-/* One-time tap ripple: two rings leave the NFC spot once, when the card scrolls into view. */
-@keyframes kb-ripple { from { transform: scale(.7); opacity: .6; } to { transform: scale(2.6); opacity: 0; } }
-.kb-ripple { position: relative; }
-.kb-ripple::before, .kb-ripple::after {
-  content: ""; position: absolute; inset: 0; border-radius: 999px; border: 2px solid var(--color-kb-yellow);
-  opacity: 0; pointer-events: none;
+html.kb-motion [data-stagger]:not(.kb-in) > * {
+  opacity: 0;
+  transform: translateY(8px);
 }
-.kb-in .kb-ripple::before, .kb-ripple.kb-in::before { animation: kb-ripple 900ms cubic-bezier(.2,.6,.3,1) 350ms 1 both; }
-.kb-in .kb-ripple::after, .kb-ripple.kb-in::after { animation: kb-ripple 900ms cubic-bezier(.2,.6,.3,1) 600ms 1 both; }
-.kb-hero-visual .kb-ripple::before { animation: kb-ripple 900ms cubic-bezier(.2,.6,.3,1) 800ms 1 both; }
-.kb-hero-visual .kb-ripple::after { animation: kb-ripple 900ms cubic-bezier(.2,.6,.3,1) 1050ms 1 both; }
-
-/* Cards lift a little on hover and press down on tap. */
-.kb-lift { transition: transform 200ms cubic-bezier(.2,.6,.3,1), box-shadow 200ms cubic-bezier(.2,.6,.3,1), border-color 160ms; }
-@media (hover: hover) { .kb-lift:hover { transform: translateY(-3px); box-shadow: var(--shadow-kb-lift); } }
-.kb-lift:active { transform: translateY(0) scale(.99); transition-duration: 80ms; }
-
+[data-stagger] > *:nth-child(2) {
+  transition-delay: 70ms;
+}
+[data-stagger] > *:nth-child(3) {
+  transition-delay: 140ms;
+}
+[data-stagger] > *:nth-child(4) {
+  transition-delay: 210ms;
+}
+[data-stagger] > *:nth-child(5) {
+  transition-delay: 280ms;
+}
+[data-stagger] > *:nth-child(n + 6) {
+  transition-delay: 350ms;
+}
+@keyframes kb-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.kb-hero-visual {
+  animation: kb-rise-in 420ms cubic-bezier(0.2, 0.6, 0.3, 1) both;
+}
+@keyframes kb-ripple {
+  from {
+    transform: scale(0.7);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+.kb-ripple {
+  position: relative;
+}
+.kb-ripple::before,
+.kb-ripple::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 2px solid var(--color-kb-yellow);
+  opacity: 0;
+  pointer-events: none;
+}
+.kb-in .kb-ripple::before,
+.kb-ripple.kb-in::before {
+  animation: kb-ripple 900ms cubic-bezier(0.2, 0.6, 0.3, 1) 350ms 1 both;
+}
+.kb-in .kb-ripple::after,
+.kb-ripple.kb-in::after {
+  animation: kb-ripple 900ms cubic-bezier(0.2, 0.6, 0.3, 1) 600ms 1 both;
+}
+.kb-hero-visual .kb-ripple::before {
+  animation: kb-ripple 900ms cubic-bezier(0.2, 0.6, 0.3, 1) 800ms 1 both;
+}
+.kb-hero-visual .kb-ripple::after {
+  animation: kb-ripple 900ms cubic-bezier(0.2, 0.6, 0.3, 1) 1050ms 1 both;
+}
+.kb-lift {
+  transition:
+    transform 200ms cubic-bezier(0.2, 0.6, 0.3, 1),
+    box-shadow 200ms cubic-bezier(0.2, 0.6, 0.3, 1),
+    border-color 160ms;
+}
+@media (hover: hover) {
+  .kb-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-kb-lift);
+  }
+}
+.kb-lift:active {
+  transform: translateY(0) scale(0.99);
+  transition-duration: 80ms;
+}
 @media (prefers-reduced-motion: reduce) {
-  html.kb-motion [data-rise]:not(.kb-in), html.kb-motion [data-stagger]:not(.kb-in) > * { opacity: 1; transform: none; }
-  .kb-hero-visual { animation: none; }
-  .kb-ripple::before, .kb-ripple::after { display: none; }
-  .kb-lift:hover { transform: none; }
+  html.kb-motion [data-rise]:not(.kb-in),
+  html.kb-motion [data-stagger]:not(.kb-in) > * {
+    opacity: 1;
+    transform: none;
+  }
+  .kb-hero-visual {
+    animation: none;
+  }
+  .kb-ripple::before,
+  .kb-ripple::after {
+    display: none;
+  }
+  .kb-lift:hover {
+    transform: none;
+  }
 }

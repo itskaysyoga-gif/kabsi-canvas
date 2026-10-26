@@ -6,8 +6,18 @@
   "displayName": { "text": "Example Bakery", "languageCode": "en" },
   "formattedAddress": "1 Main Street, Example Town, CA 00000, USA",
   "addressComponents": [
-    { "longText": "Example Town", "shortText": "Example Town", "types": ["locality", "political"], "languageCode": "en" },
-    { "longText": "United States", "shortText": "US", "types": ["country", "political"], "languageCode": "en" }
+    {
+      "longText": "Example Town",
+      "shortText": "Example Town",
+      "types": ["locality", "political"],
+      "languageCode": "en"
+    },
+    {
+      "longText": "United States",
+      "shortText": "US",
+      "types": ["country", "political"],
+      "languageCode": "en"
+    }
   ],
   "primaryType": "bakery",
   "primaryTypeDisplayName": { "text": "Bakery", "languageCode": "en-US" },

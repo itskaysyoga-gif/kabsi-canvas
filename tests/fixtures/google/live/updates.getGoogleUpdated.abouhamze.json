@@ -172,9 +172,7 @@
       "storefrontAddress": {
         "locality": "Bakaata",
         "regionCode": "LB",
-        "addressLines": [
-          "Ain Wzien Road - Facing Coop"
-        ]
+        "addressLines": ["Ain Wzien Road - Facing Coop"]
       },
       "adWordsLocationExtensions": {
         "adPhone": "[phone removed]"

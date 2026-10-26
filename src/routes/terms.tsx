@@ -16,6 +16,7 @@ import {
 export const Route = createFileRoute("/terms")({
   head: () =>
     pageHead({
+      image: "about",
       title: "Terms of service | Kabsi",
       description:
         "Kabsi's terms in plain words: the service, your approval, Google access, prices, refunds, fair use, liability and law.",
@@ -29,7 +30,16 @@ const UPDATED = "24 October 2026";
 
 function Page() {
   return (
-    <LegalPage kind="terms" title="Terms" updated={UPDATED}>
+    <LegalPage
+      title="Terms"
+      updated={UPDATED}
+      summary={[
+        "You can cancel from WhatsApp, any time.",
+        "Nothing goes live on your Google profile without your yes.",
+        "Kabsi cannot promise rankings, reviews, calls or customers.",
+        "Kabsi is independent and not affiliated with Google.",
+      ]}
+    >
       <section>
         <p>{OPERATOR_LINE}</p>
       </section>
