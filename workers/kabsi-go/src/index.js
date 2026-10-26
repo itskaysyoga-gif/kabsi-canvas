@@ -3,6 +3,7 @@
 // Vars: TAP_FUNCTION_URL, APP_ORIGIN. Secret: TAP_SECRET.
 //   GET /{CODE}      NFC tap  → 302 to the business's Google review page (or its Kabsi page, see below)
 //   GET /{CODE}?s=q  QR scan  → same, logged as source=qr
+//   GET /{CODE}?s=m  a forwarded review request message (V3, master plan 30.15 section 3.5) → same, logged as source=message
 //   GET /_check      the uptime monitor's check: 200 when the Worker runs and its KV table reads, 503 otherwise (P0.6-08)
 // A link goes straight to Google (the default, so every printed QR code keeps working) or, when the owner switched
 // that link to the page (P0.8-05, K-132), to https://kabsi.co/review/{CODE}: the same page for every visitor, the
@@ -32,7 +33,7 @@ export default {
       const ua = request.headers.get("user-agent") || "";
       const body = {
         code,
-        source: url.searchParams.get("s") === "q" ? "qr" : "nfc",
+        source: url.searchParams.get("s") === "q" ? "qr" : url.searchParams.get("s") === "m" ? "message" : "nfc",
         country: request.cf && request.cf.country ? String(request.cf.country) : null,
         device: /iphone|ipad|ios/i.test(ua) ? "ios" : /android/i.test(ua) ? "android" : "other",
         is_bot: BOT_RE.test(ua) || (request.cf && request.cf.botManagement && request.cf.botManagement.verifiedBot) === true,

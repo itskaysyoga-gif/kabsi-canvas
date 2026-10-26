@@ -7,6 +7,8 @@ import { intakeRefusal, sniff } from "../photos/sniff.ts";
 
 export const VOICE_MAX_BYTES = 10 * 1024 * 1024;
 export const VOICE_MAX_SECONDS = 180;
+/** About 3 minutes at 64 kbit/s: above this, audio whose length cannot be read is treated as too long. */
+export const UNKNOWN_LENGTH_MAX_BYTES = 1_500_000;
 
 /** Can the photo engine take these bytes? Returns null when it can, or the reason it cannot. */
 export function photoRefusal(bytes: Uint8Array): "not_photo" | "video" | string | null {
@@ -39,6 +41,8 @@ export function voiceCheck(size: number | null, bytes?: Uint8Array): VoiceCheck 
   if (bytes) {
     const secs = oggSeconds(bytes);
     if (secs !== null && secs > VOICE_MAX_SECONDS) return { ok: false, why: "too_long" };
+    // Not Ogg (what WhatsApp records): the length cannot be read, so a file too big for 3 minutes of ordinary audio is refused.
+    if (secs === null && bytes.length > UNKNOWN_LENGTH_MAX_BYTES) return { ok: false, why: "too_long" };
   }
   return { ok: true };
 }

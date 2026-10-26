@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
       const body = await req.json().catch(() => null) as Record<string, unknown> | null;
       const code = String(body?.code ?? "").toUpperCase();
       if (!CODE_RE.test(code)) return json({ error: "bad_code" }, 400);
-      const source = body?.source === "qr" ? "qr" : "nfc";
+      const source = body?.source === "qr" ? "qr" : body?.source === "message" ? "message" : "nfc";
       const device = ["ios", "android"].includes(String(body?.device)) ? String(body?.device) : "other";
       const country = typeof body?.country === "string" && /^[A-Z]{2}$/.test(body.country) ? body.country : null;
       const { data: card } = await db.from("cards").select("location_id").eq("code", code).maybeSingle();

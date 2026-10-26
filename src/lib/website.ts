@@ -88,6 +88,7 @@ export function planGrid(whatsappOn: boolean = WHATSAPP_ON): {
       { text: "Review alerts and a reply ready for each one" },
       { text: "Approve in the Kabsi app" },
       { text: "Approve on WhatsApp", soon: !whatsappOn },
+      { text: "Send photos on WhatsApp", soon: !whatsappOn },
       { text: "The day-one backlog of older reviews" },
       { text: "Google Protection with a one-tap Put it back" },
       { text: "Your review link and QR code, with a Message the manager page" },
@@ -99,7 +100,6 @@ export function planGrid(whatsappOn: boolean = WHATSAPP_ON): {
       { text: "The Profile Coach checklist" },
     ],
     proAdds: [
-      { text: "Send photos on WhatsApp", soon: !whatsappOn },
       { text: "Weekly posts prepared for you" },
       { text: "Review graphics for your best reviews" },
       { text: "What customers say, a monthly summary", soon: true },
@@ -233,9 +233,9 @@ export function pricingFaq(whatsappOn: boolean = WHATSAPP_ON): { q: string; a: s
   return [
     {
       q: "What is the difference between Essentials and Pro?",
-      a: `Essentials answers your reviews and watches your listing: review alerts with a reply ready, the backlog of older reviews, Google Protection with a one-tap Put it back, your review link and QR code, holiday hours reminders, the Weekly Care Report, Business Knowledge, Nora and the Profile Coach checklist. Pro adds weekly posts, review graphics, the Profile Coach actions, the search terms report, a Report a fake review helper, team roles and approval rules${
-        whatsappOn ? ", photos sent on WhatsApp" : ""
-      }, and two things that are coming soon: a monthly What customers say summary and your own order and booking button${whatsappOn ? "" : ". Sending photos on WhatsApp is coming soon too"}.`,
+      a: `Essentials answers your reviews and watches your listing: review alerts with a reply ready, the backlog of older reviews, Google Protection with a one-tap Put it back, your review link and QR code, holiday hours reminders, the Weekly Care Report, Business Knowledge, Nora and the Profile Coach checklist${
+        whatsappOn ? ", and sending photos on WhatsApp" : ""
+      }. Pro adds weekly posts, review graphics, the Profile Coach actions, the search terms report, a Report a fake review helper, team roles and approval rules, and two things that are coming soon: a monthly What customers say summary and your own order and booking button${whatsappOn ? "" : ". Sending photos on WhatsApp, on both plans, is coming soon too"}.`,
     },
     {
       q: "How does the free trial work?",

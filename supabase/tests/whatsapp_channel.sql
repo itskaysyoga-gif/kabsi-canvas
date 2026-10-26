@@ -107,8 +107,8 @@ select is(public.whatsapp_action_create('00000000-0000-4000-8000-0000000000a1', 
     and field in ('name', 'phone', 'open_status', 'map_pin', 'address', 'main_category') and status = 'awaiting_review';
 select is(public.whatsapp_action_create('00000000-0000-4000-8000-0000000000b1', 'review_reply', '00000000-0000-4000-8000-000000000301') ->> 'reason',
   'not_member', 'no button for someone outside the business');
-select is(public.whatsapp_action_create('00000000-0000-4000-8000-0000000000a1', 'photo', '00000000-0000-4000-8000-000000000301') ->> 'reason',
-  'not_on_whatsapp', 'nothing but replies, posts and put-backs');
+select is(public.whatsapp_action_create('00000000-0000-4000-8000-0000000000a1', 'listing_edit', '00000000-0000-4000-8000-000000000301') ->> 'reason',
+  'not_on_whatsapp', 'nothing but replies, posts, hours, photos and put-backs (V3: photos joined the list; a profile edit still does not)');
 insert into t select 'r1', public.whatsapp_action_create('00000000-0000-4000-8000-0000000000a1', 'review_reply', '00000000-0000-4000-8000-000000000301');
 insert into t select 'r2', public.whatsapp_action_create('00000000-0000-4000-8000-0000000000a1', 'review_reply', '00000000-0000-4000-8000-000000000302');
 insert into t select 'p1', public.whatsapp_action_create('00000000-0000-4000-8000-0000000000a1', 'local_post', '00000000-0000-4000-8000-000000000311');

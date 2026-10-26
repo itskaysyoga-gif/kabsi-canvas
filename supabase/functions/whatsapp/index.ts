@@ -26,6 +26,7 @@ import { replayMedia } from "../_shared/whatsapp/replay-media.ts";
 import { replayIo } from "../_shared/whatsapp/replay-db.ts";
 import { runScenario } from "../_shared/whatsapp/replay-run.ts";
 import { alertHour, alertSummary } from "../_shared/whatsapp/smoke-alert.ts";
+import { reviewGrowthTick } from "../_shared/review-growth/tick.ts";
 import { alertText, digestDue, morningDigest, type OpsEvent, routeOf, type Summary } from "../_shared/whatsapp/staff-alerts.ts";
 
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void } | undefined;
@@ -196,6 +197,23 @@ async function tick() {
     out.maps = maps.length;
   } catch (e) {
     await captureError("whatsapp", e, { step: "maps" });
+  }
+  // V3 (30.15 sections 3.3 and 3.4): photos ready to approve and the monthly question, claimed in the database first.
+  try {
+    out.review_growth = await reviewGrowthTick(deps, {
+      photosDue: async (n) => {
+        const { data, error } = await admin().rpc("whatsapp_photos_due", { p_limit: n });
+        if (error) throw error;
+        return (data ?? []) as never;
+      },
+      monthlyDue: async (n) => {
+        const { data, error } = await admin().rpc("whatsapp_monthly_due", { p_limit: n });
+        if (error) throw error;
+        return (data ?? []) as never;
+      },
+    });
+  } catch (e) {
+    await captureError("whatsapp", e, { step: "review_growth" });
   }
   // 9.9: staff alerts. Each new ops_events row is taken once; urgent ones go to the staff phone at once (quiet hours and the
   // cap do not apply), the rest are counted in the morning digest. Nothing about the number itself goes here (email only).

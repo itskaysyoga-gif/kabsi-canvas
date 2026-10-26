@@ -211,7 +211,7 @@ export const QUESTIONS_28: Question[] = [
     topic: "what each plan holds",
     ask: "What will I get with Essentials compared with Pro under the new plans?",
     kb: [
-      /\| Posts and photos \| Holiday hours, 2 posts a month \| Weekly posts, photos from WhatsApp \|/,
+      /\| Posts and photos \| Holiday hours, 2 posts a month, photos from WhatsApp \| Weekly posts, photos from WhatsApp \|/,
       /\| Team roles and approval rules \| No \| Yes \|/,
     ],
     must: [/Essentials/, /Pro/],

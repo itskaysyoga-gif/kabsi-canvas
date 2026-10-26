@@ -74,6 +74,20 @@ export const TEMPLATES = {
     example: { business: "Smile Dental" },
     button: "Show me",
   },
+  // V3 (30.15 sections 3.3 and 3.4): a photo ready to approve (it can reach the owner outside the window when staff sent it), and the
+  // monthly question. Submitted to Meta with the others when Rashid runs the template step; until approved they are held.
+  photo_ready: {
+    name: "kabsi_photo_ready",
+    body: "Kabsi here. A photo for {{business}} is ready for your approval. Reply here to see it.",
+    example: { business: "Smile Dental" },
+    button: "Show me",
+  },
+  business_update: {
+    name: "kabsi_business_update",
+    body: "Kabsi here. A quick question for {{business}}: is anything new this month? Reply here to answer.",
+    example: { business: "Smile Dental" },
+    button: "Show me",
+  },
   staff_alert: {
     name: "kabsi_staff_alert",
     body: "Kabsi staff alert: {{summary}}. Reply here for the details.",

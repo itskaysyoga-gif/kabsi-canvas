@@ -40,6 +40,8 @@ verify_jwt = true
 verify_jwt = true
 [functions.review-graphic]  # Pro review graphic (P0.8-07): the signed-in owner or manager calls it; membership, the Pro check and the rating check run in code
 verify_jwt = true
+[functions.review-cards]     # print-ready counter card and table tent PDFs (V3): the signed-in member of the business calls it; membership and the rate limit run in code
+verify_jwt = true
 [functions.insights]       # Insights (P0.5-05): the signed-in owner or manager calls it; membership, the rate limit and the Pro check for search terms run in code
 verify_jwt = true
 [functions.coach]          # Profile Coach actions (P0.8-09 part B): the signed-in owner or manager calls it; membership, the Pro check, the rate limits and the website safety checks run in code

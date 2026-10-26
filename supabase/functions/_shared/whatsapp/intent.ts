@@ -15,6 +15,7 @@ const DESCRIBE: Record<string, string> = {
   stats: "numbers for the last days (args.days: 7 or 30)",
   review_link: "the review link",
   qr: "the QR card",
+  ask_customer: "the person wants a ready message to send customers asking for a review (Kabsi never sends it and never gets a customer's number)",
   edit_draft: "change the last review reply draft (args.instruction: what to change, in the person's words)",
   exact_reply: "the person typed the exact reply text they want (args.text)",
   hours: "opening hours, early close, closed days or holiday hours (args.text)",
