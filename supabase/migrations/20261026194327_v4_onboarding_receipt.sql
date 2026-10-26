@@ -76,7 +76,7 @@ revoke all on public.industry_search_terms from anon, authenticated;
 -- 3. The first 48 hours on WhatsApp: one row per business and message, claimed before it is sent ---------------------------
 create table if not exists public.onboarding_messages (
   location_id uuid not null references public.locations (id) on delete cascade,
-  kind text not null check (kind ~ '^[a-z_]{3,40}$'),
+  kind text not null check (kind ~ '^[a-z0-9_]{3,40}$'),
   sent_at timestamptz not null default now(),
   detail jsonb,
   primary key (location_id, kind)

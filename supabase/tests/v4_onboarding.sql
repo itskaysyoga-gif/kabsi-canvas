@@ -33,6 +33,9 @@ select is(public.onboarding_resume('not-a-code'), null, 'a bad code finds nothin
 -- One message per business and kind.
 select is(public.onboarding_claim('00000000-0000-4000-8000-0000000000c1', 'invite'), true, 'the first claim wins');
 select is(public.onboarding_claim('00000000-0000-4000-8000-0000000000c1', 'invite'), false, 'a second claim of the same message loses');
+-- Every message kind the tick sends can be stored (lane R, 26 Oct: 'after48' broke the first live apply).
+select ok(public.onboarding_claim('00000000-0000-4000-8000-0000000000c1', k), 'the message kind ' || k || ' can be stored')
+  from unnest(array['access_works', 'first_task', 'first_task_sent', 'after48', 'unlock', 'still_blocked']) k;
 
 -- Stage 3: only an owner says Yes to setup messages.
 select is(public.onboarding_setup_ok('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000b1'), false, 'a stranger cannot say yes for the business');

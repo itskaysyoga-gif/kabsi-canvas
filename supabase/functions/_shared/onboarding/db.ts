@@ -1,5 +1,5 @@
 // The onboarding side on the real database (V4): the agent's hooks (hooks.ts) and the tick's reads (tick.ts). Every write goes
-// through a service-role function of migration 20261027090000_v4_onboarding_receipt.sql, which checks the owner itself.
+// through a service-role function of migration 20261026194327_v4_onboarding_receipt.sql, which checks the owner itself.
 import { admin } from "../kabsi.ts";
 import { notify } from "../whatsapp/outbox.ts";
 import { ref } from "../whatsapp/templates.ts";
