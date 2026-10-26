@@ -5,7 +5,11 @@
     {
       "name": "accounts/112233445566778899000/locations/1234567890123456789/reviews/AbFvOqk1",
       "reviewId": "AbFvOqk1",
-      "reviewer": { "profilePhotoUrl": "https://lh3.googleusercontent.com/a/example", "displayName": "Sam", "isAnonymous": false },
+      "reviewer": {
+        "profilePhotoUrl": "https://lh3.googleusercontent.com/a/example",
+        "displayName": "Sam",
+        "isAnonymous": false
+      },
       "starRating": "FIVE",
       "comment": "Lovely bread and friendly staff.",
       "createTime": "2026-09-30T10:15:00.000Z",

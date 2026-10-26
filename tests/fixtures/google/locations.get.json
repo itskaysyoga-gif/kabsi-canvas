@@ -21,14 +21,30 @@
   "websiteUri": "https://example.com",
   "regularHours": {
     "periods": [
-      { "openDay": "MONDAY", "openTime": { "hours": 9, "minutes": 0 }, "closeDay": "MONDAY", "closeTime": { "hours": 17, "minutes": 0 } }
+      {
+        "openDay": "MONDAY",
+        "openTime": { "hours": 9, "minutes": 0 },
+        "closeDay": "MONDAY",
+        "closeTime": { "hours": 17, "minutes": 0 }
+      }
     ]
   },
   "specialHours": {
     "specialHourPeriods": [
-      { "startDate": { "year": 2026, "month": 12, "day": 25 }, "endDate": { "year": 2026, "month": 12, "day": 25 }, "openTime": { "hours": 10, "minutes": 0 }, "closeTime": { "hours": 14, "minutes": 0 }, "closed": false }
+      {
+        "startDate": { "year": 2026, "month": 12, "day": 25 },
+        "endDate": { "year": 2026, "month": 12, "day": 25 },
+        "openTime": { "hours": 10, "minutes": 0 },
+        "closeTime": { "hours": 14, "minutes": 0 },
+        "closed": false
+      }
     ]
   },
-  "metadata": { "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4", "hasGoogleUpdated": false, "hasVoiceOfMerchant": true, "canDelete": true },
+  "metadata": {
+    "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4",
+    "hasGoogleUpdated": false,
+    "hasVoiceOfMerchant": true,
+    "canDelete": true
+  },
   "profile": { "description": "Fresh bread every morning." }
 }

@@ -33,8 +33,7 @@ const qr = (text) => {
 };
 
 const EX = `<span class="ex">Example</span>`;
-const bubble = (who, text) =>
-  `<div class="bub"><b>${who}</b> ${text}</div>`;
+const bubble = (who, text) => `<div class="bub"><b>${who}</b> ${text}</div>`;
 const place = (l, name, pos, first, cls) =>
   `<div class="row"><i class="${cls}">${l}</i><span><b>${name}</b><br>${pos}<br><small>${first}</small></span></div>`;
 const cards = {

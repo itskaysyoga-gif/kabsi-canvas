@@ -93,8 +93,7 @@ describe("the copy rules on every public line (kabsi-copy, K-112, K-144, 30.15)"
     for (const [f, s] of all.filter(([f]) => !LEGAL.test(f))) {
       const at = `${f}: ${s.slice(0, 60)}`;
       // The honest question "Can Kabsi get me to the top of Google Maps?" is answered "No one can promise that."
-      if (!s.endsWith("?"))
-        expect(s, at).not.toMatch(/\btop of google\b/i);
+      if (!s.endsWith("?")) expect(s, at).not.toMatch(/\btop of google\b/i);
       expect(s, at).not.toMatch(
         /\b(autopilot|automatically|guaranteed?|approved by google|google partner|google-approved|more customers|set and forget|fully automatic|we manage everything|we remove bad reviews|no work needed)\b/i,
       );
@@ -129,7 +128,9 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     expect(TRIAL_LINE).toBe("Free for 14 days once Kabsi is connected. No card.");
     const home = read("src/routes/index.tsx");
     expect(home).toContain("Your business on Google.");
-    expect(home).toContain('<span className="text-kb-yellow">Taken care of through WhatsApp.</span>');
+    expect(home).toContain(
+      '<span className="text-kb-yellow">Taken care of through WhatsApp.</span>',
+    );
   });
   it("puts Businesses and Founding 25 in the header", () => {
     expect(NAV_LINKS.map((n) => n.label)).toEqual([
@@ -176,7 +177,13 @@ describe("no invented proof or number (plan 2.11, Web 2 item 4)", () => {
     expect(read("src/components/kabsi/d2-partners.tsx")).toContain("applyPartner(");
   });
   it("labels every example, and the fixtures of the prototype are gone", () => {
-    for (const gone of ["d2-data.ts", "scan-data.ts", "scan-result.tsx", "d2-customer.tsx", "home-sections.tsx"])
+    for (const gone of [
+      "d2-data.ts",
+      "scan-data.ts",
+      "scan-result.tsx",
+      "d2-customer.tsx",
+      "home-sections.tsx",
+    ])
       expect(readdirSync("src/components/kabsi"), gone).not.toContain(gone);
     expect(read("src/components/kabsi/nearby-places.tsx")).toContain("example = true");
     expect(read("src/components/kabsi/scan-live.tsx")).toContain("example={false}");
@@ -188,7 +195,9 @@ describe("no invented proof or number (plan 2.11, Web 2 item 4)", () => {
   });
   it("shows no customer quote, logo or user count of Kabsi's own", () => {
     for (const [f, s] of ALL)
-      expect(s, f).not.toMatch(/\b(trusted by|loved by|\d[\d,]* (customers|businesses use|users))\b/i);
+      expect(s, f).not.toMatch(
+        /\b(trusted by|loved by|\d[\d,]* (customers|businesses use|users))\b/i,
+      );
   });
 });
 
@@ -238,13 +247,26 @@ describe("the head of every public page (30.16 section 4)", () => {
   it("has a title, a description, a canonical address and its own share image", () => {
     const h = pageHead({ title: "T", description: "D", path: "/pricing", image: "pricing" });
     expect(h.links).toEqual([{ rel: "canonical", href: "https://kabsi.co/pricing" }]);
-    expect(h.meta).toContainEqual({ property: "og:image", content: "https://kabsi.co/og/pricing.png" });
+    expect(h.meta).toContainEqual({
+      property: "og:image",
+      content: "https://kabsi.co/og/pricing.png",
+    });
     for (const r of PUBLIC_FILES.filter((f) => f.startsWith("src/routes/"))) {
       const code = read(r);
       expect(code, r).toMatch(/pageHead\(|<LegalPage/);
       if (/pageHead\(/.test(code)) expect(code, r).toMatch(/image: "\w+"/);
     }
-    for (const img of ["home", "scan", "pricing", "tool", "guide", "industry", "partner", "about", "founding"])
+    for (const img of [
+      "home",
+      "scan",
+      "pricing",
+      "tool",
+      "guide",
+      "industry",
+      "partner",
+      "about",
+      "founding",
+    ])
       expect(readdirSync("public/og"), img).toContain(`${img}.png`);
   });
   it("gives Home the Organization data and the share image of the new brand line", () => {

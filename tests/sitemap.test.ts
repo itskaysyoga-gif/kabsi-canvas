@@ -37,7 +37,8 @@ describe("the sitemap", () => {
     for (const h of HUBS) expect(paths.includes(`/for/${h.id}`), h.id).toBe(hubIndexed(h.id));
   });
   it("leaves out the pages that are noindex or one visitor's", () => {
-    for (const p of paths) expect(p).not.toMatch(/^\/(manager-steps|scan\/|google-profile-check|login|start|app|a\/)/);
+    for (const p of paths)
+      expect(p).not.toMatch(/^\/(manager-steps|scan\/|google-profile-check|login|start|app|a\/)/);
   });
   it("points every address at a route", () => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });

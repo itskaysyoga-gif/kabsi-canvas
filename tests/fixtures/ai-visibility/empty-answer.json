@@ -25,9 +25,7 @@
               "sections": []
             }
           ],
-          "fan_out_queries": [
-            "best bakery in jumeirah"
-          ]
+          "fan_out_queries": ["best bakery in jumeirah"]
         }
       ]
     }

@@ -229,9 +229,7 @@
       },
       "storefrontAddress": {
         "regionCode": "LB",
-        "addressLines": [
-          "Mirna Chalouhi"
-        ],
+        "addressLines": ["Mirna Chalouhi"],
         "languageCode": "en"
       }
     }
