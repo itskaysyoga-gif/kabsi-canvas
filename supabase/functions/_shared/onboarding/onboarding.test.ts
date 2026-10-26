@@ -22,7 +22,8 @@ const base: Facts = {
 };
 const ROW = (f: Partial<DueRow> = {}): DueRow => ({
   ...base, location_id: BIZ.harbour, time_zone: "Asia/Dubai", is_demo: false, place_id: "ChIJabcdefghij1234", setup_at: null, accepted_at: null,
-  created_at: new Date(Date.UTC(2026, 9, 20)).toISOString(), owner: { user_id: USERS.owner, phone: PHONES.owner, name: "Maya" }, sent: {}, done: [], waiting: 0, ...f,
+  created_at: new Date(Date.UTC(2026, 9, 20)).toISOString(), owner: { user_id: USERS.owner, phone: PHONES.owner, name: "Maya" }, sent: {}, done: [], waiting: 0,
+  approved_since_first: false, ...f,
 });
 
 // ─── stages ────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -85,9 +86,13 @@ Deno.test("the first-48-hours messages go only when their event happened, once e
   assert.deepEqual(dueKinds(ROW({ accepted: false, checked: false, created_at: h(2) }), now), ["invite"]);
   assert.deepEqual(dueKinds(ROW({ sent: { invite: { at: h(1), detail: null } }, accepted: false, checked: false, created_at: h(2) }), now), []);
   assert.deepEqual(dueKinds(ROW({ sent: { invite: { at: h(30), detail: null } }, accepted: false, checked: false, created_at: h(40), setup_at: h(30) }), now), ["still_blocked"]);
-  assert.deepEqual(dueKinds(ROW({ sent: { invite: { at: h(3), detail: null } } }), now), ["access_works", "first_task"]);
+  assert.deepEqual(dueKinds(ROW({ sent: { invite: { at: h(3), detail: null } } }), now), ["access_works"], "the first task waits for the first drafts");
+  assert.deepEqual(dueKinds(ROW({ sent: { access_works: { at: h(1), detail: null } } }), now), ["first_task"]);
+  assert.deepEqual(dueKinds(ROW({ sent: { access_works: { at: h(49), detail: null } } }), now), ["after48"], "no first task after 48 hours");
   const after = { invite: { at: h(60), detail: null }, access_works: { at: h(50), detail: null }, first_task: { at: h(50), detail: null }, first_task_sent: { at: h(50), detail: { kind: "review" } } };
   assert.deepEqual(dueKinds(ROW({ sent: after }), now), ["reminder", "after48"]);
+  assert.deepEqual(dueKinds(ROW({ sent: { ...after, first_task_skipped: { at: h(30), detail: null } } }), now), ["after48"], "no reminder after Skip");
+  assert.deepEqual(dueKinds(ROW({ sent: after, approved_since_first: true }), now), ["after48"], "no reminder after a yes");
   assert.deepEqual(dueKinds(ROW({ sent: { ...after, reminder: { at: h(20), detail: null }, after48: { at: h(1), detail: null } }, first_task_done: true }), now), ["unlock"]);
 });
 Deno.test("after 48 hours the work is listed with its Google link", () => {
@@ -101,20 +106,19 @@ Deno.test("the tick sends the outcome of an approval and the first task, each cl
   const now = (d.now ?? Date.now)();
   const db: OnboardingDb = {
     on: async () => true,
-    due: async () => [ROW({ sent: { invite: { at: new Date(now - 3_600_000).toISOString(), detail: null } } })],
+    due: async () => [ROW({ sent: { access_works: { at: new Date(now - 3_600_000).toISOString(), detail: null } } })],
     claim: async (l, k) => (claimed.has(`${l}:${k}`) ? false : (claimed.add(`${l}:${k}`), true)),
     candidates: async () => ({ categories: ["Hair salon"], posts: [], hours: [],
       reviews: [{ review_id: "r-harbour-1", stars: 5, text: "Lovely cut and a warm welcome every time.", risk: "low", reasons: [], draft: "Thank you, we loved having you.", draft_ok: true }] }),
     outcomes: async () => [{ publication_id: "p1", location_id: BIZ.harbour, business: "Harbour Lane Coffee", place_id: "ChIJabcdefghij1234", target_type: "review_reply",
-      state: "verified", response: null, reason: null, user_id: USERS.owner, phone: PHONES.owner }],
+      state: "verified", response: null, user_id: USERS.owner, phone: PHONES.owner }],
     startMaps: async () => {},
     unlock: async () => {},
   };
   const r = await onboardingTick(d, db);
-  assert.deepEqual(r, { outcomes: 1, messages: 2 });
+  assert.deepEqual(r, { outcomes: 1, messages: 1 });
   const bodies = w.outbox.map((o) => o.body);
   assert.ok(bodies.some((b) => /Your reply is on Google: https:\/\/search\.google\.com\/local\/reviews\?placeid=ChIJabcdefghij1234\. Done\./.test(b)));
-  assert.ok(bodies.some((b) => /Kabsi now has Manager access/.test(b)));
   assert.ok(bodies.some((b) => /This review for Rose Lane Salon has no reply: 'Lovely cut/.test(b)));
   assert.ok(claimed.has(`${BIZ.harbour}:first_task_sent`));
   // Run again: nothing new is claimed, so nothing new is sent.
@@ -125,13 +129,13 @@ Deno.test("a clinic's first task is never a customer's review on WhatsApp", asyn
   const w = new World();
   const claimed = new Map<string, unknown>();
   await onboardingTick(w.deps(), {
-    on: async () => true, due: async () => [ROW({ sent: { access_works: { at: new Date(w.now).toISOString(), detail: null } } })],
+    on: async () => true, due: async () => [ROW({ sent: { access_works: { at: new Date(w.now - 3_600_000).toISOString(), detail: null } } })],
     claim: async (l, k, detail) => (claimed.set(k, detail ?? null), true),
     candidates: async () => ({ categories: ["Dental clinic"], posts: [], hours: [],
       reviews: [{ review_id: "r-harbour-1", stars: 5, text: "Great dentist, painless filling and kind staff.", risk: "low", reasons: [], draft: "Thank you.", draft_ok: true }] }),
     outcomes: async () => [], startMaps: async () => {}, unlock: async () => {},
   });
-  assert.deepEqual(claimed.get("first_task"), { kind: "none" });
+  assert.equal(claimed.has("first_task"), false, "nothing offered, nothing claimed: tried again later");
 });
 
 // ─── the agent's onboarding turns ──────────────────────────────────────────────────────────────────────────────────
@@ -203,11 +207,13 @@ Deno.test("the four owner states, and 'on Google' only after Kabsi read it back"
   assert.equal(ownerState("verified"), "confirmed");
   assert.equal(ownerState("rejected"), "failed");
   assert.equal(ownerState("cancelled"), "undone");
-  assert.match(outcomeLine({ business: "B", target_type: "review_reply", state: "published", reason: null, link: null })!, /I have not seen the reply on Google yet/);
-  assert.doesNotMatch(outcomeLine({ business: "B", target_type: "review_reply", state: "published", reason: null, link: null })!, /published/i);
-  assert.match(outcomeLine({ business: "B", target_type: "local_post", state: "failed", reason: "Google does not show this post. Kabsi did not send it again.", link: null })!,
-    /the post did not go through\. Google does not show this post/);
-  assert.equal(outcomeLine({ business: "B", target_type: "photo", state: "approved", reason: null, link: null }), null);
+  assert.match(outcomeLine({ business: "B", target_type: "review_reply", state: "published", link: null })!, /I have not seen the reply on Google yet/);
+  assert.doesNotMatch(outcomeLine({ business: "B", target_type: "review_reply", state: "published", link: null })!, /published/i);
+  assert.equal(outcomeLine({ business: "B", target_type: "local_post", state: "failed", link: null }),
+    "B: the post did not go through. Google does not show this post, and Kabsi did not send it again. You can edit it in Kabsi and approve it again.");
+  assert.equal(outcomeLine({ business: "B", target_type: "photo", state: "rejected", link: null }),
+    "B: the photo did not go through. Google did not accept this photo. Nothing changed on Google.");
+  assert.equal(outcomeLine({ business: "B", target_type: "photo", state: "approved", link: null }), null);
 });
 Deno.test("a link only to Google: a post's own address, else the reviews page or the place", () => {
   assert.equal(googleLink({ target_type: "local_post", place_id: "ChIJabcdefghij1234", response: { searchUrl: "https://evil.example/x" } }),

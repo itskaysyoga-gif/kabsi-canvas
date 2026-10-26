@@ -793,7 +793,7 @@ async function bind(t: Turn, code: string): Promise<string> {
     await t.d.db.setConv(t.phone, { stopped: false });
     const tn = await again(t);
     // V4 (30.16 section 3, stage 3): an owner still setting up gets Nora's first message and the free check instead.
-    const ob = t.d.onboarding && r.user_id ? await t.d.onboarding.afterBind(r.user_id, r.first_owner_locations ?? []).catch(() => null) : null;
+    const ob = t.d.onboarding && r.user_id ? await t.d.onboarding.afterBind(r.user_id, r.first_owner_locations ?? [], t.who.conversation?.scan_code ?? null).catch(() => null) : null;
     if (ob) return onboardingFirst(tn, ob);
     await say1(tn, SAY.connected);
     // 28.5: the first map is the first wow, within 5 minutes of connecting. With a confirmed search it runs now; without

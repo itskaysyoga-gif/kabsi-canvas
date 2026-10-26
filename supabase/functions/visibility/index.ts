@@ -274,9 +274,8 @@ async function image(req: Request, url: URL): Promise<Response> {
     if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
     const c = await loadCheck(code);
     if (!c) return json({ error: "not_found" }, 404);
-    const now = (await refreshCheck(c)) ?? c;
-    if (now.state !== "done" || !now.nearby) return json({ error: "not_ready" }, 409);
-    return png(await renderNearby(now.nearby, { business: now.business, date: mapDate(new Date(now.created_at), "UTC") }));
+    if (c.state !== "done" || !c.nearby) return json({ error: "not_ready" }, 409);
+    return png(await renderNearby(c.nearby, { business: c.business, date: mapDate(new Date(c.created_at), "UTC") }));
   }
   const scanId = url.searchParams.get("scan") ?? "";
   const { data: scan } = await db().from("visibility_scans")
@@ -350,7 +349,8 @@ async function loadCheck(code: string): Promise<CheckRow | null> {
   return (data as CheckRow | null) ?? null;
 }
 
-/** Collect what DataForSEO finished for one check and save it; the changed row, or null when nothing changed. */
+/** Collect what DataForSEO finished for one check and save it; the changed row, or null when nothing changed. Only the
+ *  visibility tick calls it (one writer, so two collects never overwrite each other's points). */
 async function refreshCheck(c: CheckRow): Promise<CheckRow | null> {
   if (c.state !== "mapping") return null;
   const next = await collectCheck({ provider: provider(c.source, c.self), name: deps.placeName, now: () => new Date() }, c);
@@ -406,11 +406,13 @@ async function startFreeCheck(req: Request): Promise<Response> {
   return json({ ...publicView(saved), whatsapp_text: `Hi Kabsi, my scan code is KAB-${saved.code}` });
 }
 
-async function getFreeCheck(url: URL): Promise<Response> {
+/** The page keeps asking while the 7 by 7 search runs: a read only (the tick collects), limited per visitor. */
+async function getFreeCheck(req: Request, url: URL): Promise<Response> {
+  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  if (!(await rateLimit(`free_check_get:${await sha256Hex(`free_check:${ip}`)}`, 240, 3600))) return json({ error: "rate_limited" }, 429);
   const c = await loadCheck(url.searchParams.get("code") ?? "");
   if (!c) return json({ error: "not_found" }, 404);
-  const now = (await refreshCheck(c).catch(() => null)) ?? c;
-  return json(publicView(now));
+  return json(publicView(c));
 }
 
 /** The free checks still mapping, collected on the visibility tick so WhatsApp can send them when they are in. */
@@ -448,7 +450,9 @@ Deno.serve(async (req) => {
   try {
     if (req.method === "POST" && route === "/tick") {
       if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
-      const out = { ...(await tick(deps)), free_checks: await collectChecks().catch(() => 0) };
+      // V4: a search confirmed before access runs once access is checked; free checks still mapping are collected here only.
+      const { data: released } = await db().rpc("release_parked_searches");
+      const out = { released, ...(await tick(deps)), free_checks: await collectChecks().catch(() => 0) };
       log(fn, { action: "tick", ...out });
       return json(out);
     }
@@ -467,7 +471,7 @@ Deno.serve(async (req) => {
     if (req.method === "POST" && route === "/picks") return await setPicks(req);
     if (req.method === "GET" && route === "/image") return await image(req, url);
     if (req.method === "POST" && route === "/check") return await startFreeCheck(req);
-    if (req.method === "GET" && route === "/check") return await getFreeCheck(url);
+    if (req.method === "GET" && route === "/check") return await getFreeCheck(req, url);
     if (req.method === "GET" && route === "/terms") {
       const { data } = await db().from("industry_search_terms").select("industry, market, term, checked_on")
         .eq("industry", url.searchParams.get("industry") ?? "").eq("market", (url.searchParams.get("market") ?? "").toUpperCase()).maybeSingle();

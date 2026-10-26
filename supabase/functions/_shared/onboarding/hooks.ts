@@ -9,7 +9,7 @@ export type FirstBack = {
 };
 export interface OnboardingHooks {
   /** After an owner's phone is connected: the business to welcome, while it is still before stage 4. */
-  afterBind(userId: string, locationIds: string[]): Promise<FirstBack | null>;
+  afterBind(userId: string, locationIds: string[], scanCode?: string | null): Promise<FirstBack | null>;
   /** The owner's Yes to setup messages on WhatsApp; the search to suggest (from the free check) unless one is set. */
   setupYes(locationId: string, userId: string): Promise<{ ok: boolean; suggested: string | null; hasKeyword: boolean }>;
   /** The owner asked for help: the staff phone gets the request and a draft for Rashid to send himself. */

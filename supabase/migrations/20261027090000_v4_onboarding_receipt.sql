@@ -101,6 +101,10 @@ alter table public.publications
   add column if not exists owner_told text check (owner_told is null or owner_told in ('sent', 'final')),
   add column if not exists owner_told_at timestamptz;
 
+-- Nothing from before V4 is told again: publications already decided count as told, and businesses that already have Google
+-- access count every onboarding message as sent (they are past onboarding).
+update public.publications set owner_told = 'final', owner_told_at = now() where owner_told is null;
+
 -- 6. The nearby places on subscriber maps (30.15 section 2) ---------------------------------------------------------------
 alter table public.visibility_scans add column if not exists nearby jsonb;
 comment on column public.visibility_scans.nearby is 'V4: the three nearby places (reverse-geocoded names of the real checked points, or the distance and side) and the one count.';
@@ -229,6 +233,9 @@ language sql stable security definer set search_path = '' as $$
                          from public.onboarding_messages om where om.location_id = l.id), '{}'::jsonb),
       'done', coalesce((select jsonb_agg(jsonb_build_object('target_type', p.target_type, 'response', p.google_response) order by p.approved_at)
                           from public.publications p where p.location_id = l.id and p.state = 'verified'), '[]'::jsonb),
+      'approved_since_first', exists (select 1 from public.publications p join public.onboarding_messages om
+                   on om.location_id = p.location_id and om.kind = 'first_task_sent'
+                   where p.location_id = l.id and p.approved_at > om.sent_at),
       'waiting', (select count(*) from public.tasks t where t.location_id = l.id and t.state = 'open')
                  + (select count(*) from public.reviews r where r.location_id = l.id and r.state = 'drafted')) as j
     from public.locations l
@@ -284,18 +291,18 @@ revoke all on function private.first_task_done() from public, anon, authenticate
 create or replace trigger publications_first_task_done after update of state on public.publications
   for each row when (new.state = 'verified' and old.state is distinct from 'verified') execute function private.first_task_done();
 
--- Every task closes (30.15 3.1): publications approved by someone on WhatsApp whose state they have not been told yet. Claimed
+-- Every task closes (30.15 3.1): publications approved on WhatsApp whose state the approver has not been told yet. Claimed
 -- here (owner_told), so a repeat tick never sends twice. "Sent" is told once, after 30 minutes with no read-back from Google.
 create or replace function public.publication_outcomes_due(p_limit integer default 50) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare v jsonb;
 begin
   with due as (
-    select p.id, p.location_id, p.target_type, p.state, p.google_response, p.error, p.approved_by,
+    select p.id, p.location_id, p.target_type, p.state, p.google_response, p.approved_by,
       case when p.state in ('verified', 'rejected', 'failed') then 'final' else 'sent' end as told
       from public.publications p
      where p.approved_at > now() - interval '8 days'
-       and p.approved_by is not null
+       and p.approved_by is not null and p.channel = 'whatsapp'
        and p.target_type <> 'local_post_removal'
        and ((p.state in ('verified', 'rejected', 'failed') and p.owner_told is distinct from 'final')
          or (p.state in ('published', 'checking', 'verifying') and p.owner_told is null and p.approved_at < now() - interval '30 minutes'))
@@ -310,7 +317,7 @@ begin
   )
   select coalesce(jsonb_agg(jsonb_build_object('publication_id', d.id, 'location_id', d.location_id, 'business', l.name,
            'place_id', l.place_id, 'target_type', d.target_type, 'state', d.state, 'response', d.google_response,
-           'reason', d.error, 'user_id', d.approved_by,
+           'user_id', d.approved_by,
            'phone', (select o.phone from public.whatsapp_optins o where o.user_id = d.approved_by and o.state = 'active'))), '[]'::jsonb)
     into v
     from due d join claimed c on c.id = d.id join public.locations l on l.id = d.location_id;
@@ -424,6 +431,56 @@ end $$;
 revoke all on function public.category_task_from_scan(uuid) from public, anon, authenticated;
 grant execute on function public.category_task_from_scan(uuid) to service_role;
 
+insert into public.onboarding_messages (location_id, kind, detail)
+select l.id, k.kind, jsonb_build_object('backfill', true)
+  from public.locations l
+ cross join (values ('invite'), ('access_works'), ('first_task'), ('first_task_sent'), ('after48'), ('unlock'), ('still_blocked')) k(kind)
+ where l.access_granted_at is not null
+on conflict do nothing;
+
+-- A free check joins the business that signed up from it (stage 1 to stage 2), so its search and its line carry over. The owner
+-- from the website; the WhatsApp agent (service role) when the owner's phone sent the code before connecting.
+create or replace function public.claim_free_check(p_location uuid, p_code text) returns boolean
+language plpgsql security definer set search_path = '' as $$
+declare v_n integer;
+begin
+  if auth.uid() is null then raise exception 'sign_in_required' using errcode = '42501'; end if;
+  if not public.has_location_role(p_location, array['owner']) then raise exception 'forbidden' using errcode = '42501'; end if;
+  update public.free_checks set location_id = p_location
+   where code = upper(regexp_replace(coalesce(p_code, ''), '^KAB-', '', 'i')) and location_id is null and created_at > now() - interval '30 days';
+  get diagnostics v_n = row_count;
+  return v_n = 1;
+end $$;
+revoke all on function public.claim_free_check(uuid, text) from public, anon;
+grant execute on function public.claim_free_check(uuid, text) to authenticated;
+
+create or replace function public.attach_free_check(p_location uuid, p_code text) returns boolean
+language plpgsql security definer set search_path = '' as $$
+declare v_n integer;
+begin
+  update public.free_checks set location_id = p_location
+   where code = upper(regexp_replace(coalesce(p_code, ''), '^KAB-', '', 'i')) and location_id is null and created_at > now() - interval '30 days';
+  get diagnostics v_n = row_count;
+  return v_n = 1;
+end $$;
+revoke all on function public.attach_free_check(uuid, text) from public, anon, authenticated;
+grant execute on function public.attach_free_check(uuid, text) to service_role;
+
+-- A search confirmed before Google access (parked far ahead) runs once access is checked, with or without WhatsApp.
+create or replace function public.release_parked_searches() returns integer
+language plpgsql security definer set search_path = '' as $$
+declare v_n integer;
+begin
+  update public.visibility_keywords k set next_run_at = now()
+    from public.google_connections g
+   where g.location_id = k.location_id and k.active and k.next_run_at > '9000-01-01'::timestamptz
+     and g.access_state = 'granted' and g.voice_of_merchant is true and g.last_successful_sync_at is not null;
+  get diagnostics v_n = row_count;
+  return v_n;
+end $$;
+revoke all on function public.release_parked_searches() from public, anon, authenticated;
+grant execute on function public.release_parked_searches() to service_role;
+
 -- 9. Retention: free checks go after 30 days, or 90 once claimed by a business that signed up ------------------------------
 create or replace function private.purge_free_checks() returns integer
 language plpgsql security definer set search_path = '' as $$
@@ -445,7 +502,8 @@ select cron.schedule('kabsi_purge_free_checks', '41 3 * * *', $$select private.p
 create or replace function private.v4_whatsapp_due() returns boolean
 language sql stable security definer set search_path = '' as $$
   select exists (select 1 from public.publications p
-                  where p.approved_at > now() - interval '8 days' and p.approved_by is not null and p.target_type <> 'local_post_removal'
+                  where p.approved_at > now() - interval '8 days' and p.approved_by is not null and p.channel = 'whatsapp'
+                    and p.target_type <> 'local_post_removal'
                     and ((p.state in ('verified', 'rejected', 'failed') and p.owner_told is distinct from 'final')
                       or (p.state in ('published', 'checking', 'verifying') and p.owner_told is null and p.approved_at < now() - interval '30 minutes'))
                     and exists (select 1 from public.whatsapp_optins o where o.user_id = p.approved_by and o.state = 'active'))
@@ -469,7 +527,10 @@ begin
   d := pg_get_functiondef('private.visibility_tick()'::regprocedure);
   n := replace(d, $x$     or exists (select 1 from public.visibility_scans where state = 'queued') then$x$,
                   $x$     or exists (select 1 from public.visibility_scans where state = 'queued')
-     or exists (select 1 from public.free_checks where state = 'mapping') then$x$);
+     or exists (select 1 from public.free_checks where state = 'mapping')
+     or exists (select 1 from public.visibility_keywords k join public.google_connections g on g.location_id = k.location_id
+                 where k.active and k.next_run_at > '9000-01-01'::timestamptz and g.access_state = 'granted'
+                   and g.voice_of_merchant is true and g.last_successful_sync_at is not null) then$x$);
   if n = d then raise exception 'visibility_tick: the text was not found'; end if;
   execute n;
 end $$;

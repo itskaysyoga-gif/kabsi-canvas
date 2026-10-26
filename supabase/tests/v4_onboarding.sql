@@ -41,7 +41,7 @@ select is(public.onboarding_setup_ok('00000000-0000-4000-8000-0000000000c1', '00
 -- Every task closes: a verified publication approved by someone on WhatsApp is told once, and it unlocks the rest.
 insert into public.whatsapp_optins (user_id, phone, state, consent_text) values ('00000000-0000-4000-8000-0000000000a1', '+15550000001', 'active', 'test')
   on conflict (user_id) do update set phone = excluded.phone, state = 'active';
-update public.publications set approved_at = now() - interval '1 hour', state = 'verified'
+update public.publications set approved_at = now() - interval '1 hour', state = 'verified', channel = 'whatsapp'
  where location_id = '00000000-0000-4000-8000-0000000000c1' and target_type = 'review_reply';
 select isnt((select first_task_done_at from public.locations where id = '00000000-0000-4000-8000-0000000000c1'), null, 'the first verified publication marks the first task done');
 select is(jsonb_array_length(public.publication_outcomes_due(50)), 1, 'the outcome is due once');
@@ -65,6 +65,23 @@ select is(public.propose_monthly_facts('00000000-0000-4000-8000-0000000000c1', '
 select is((select status from public.knowledge_facts where location_id = '00000000-0000-4000-8000-0000000000c1' and source_ref = 'monthly_update:2026-10'), 'needs_confirmation', 'waiting for the owner');
 select throws_ok($$ select public.confirm_monthly_facts('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000b1', '2026-10') $$, '42501', null, 'a stranger cannot confirm');
 select is(public.confirm_monthly_facts('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000a1', '2026-10'), 1, 'the owner confirms');
+
+-- A free check joins the business that signed up from it, once, and only for its owner.
+insert into public.free_checks (code, business, term, country, self, center, radius_km, source, fast)
+values ('ABCD2345', 'Victim Bakery', 'bakery', 'AE', '{"title": "Victim Bakery"}', '{"lat": 25, "lng": 55}', 1, 'mock', '{}');
+select tests.act_as('00000000-0000-4000-8000-0000000000a1');
+select is(public.claim_free_check('00000000-0000-4000-8000-0000000000c1', 'KAB-ABCD2345'), true, 'the owner claims the free check by its code');
+select is(public.claim_free_check('00000000-0000-4000-8000-0000000000c1', 'KAB-ABCD2345'), false, 'a claimed check is not claimed again');
+select is((public.onboarding_status('00000000-0000-4000-8000-0000000000c1') -> 'check' ->> 'term'), 'bakery', 'the search carries over to onboarding');
+reset role;
+
+-- A search confirmed before access waits, and runs once access is checked.
+insert into public.visibility_keywords (location_id, keyword, radius_km, center_lat, center_lng, self_title, cadence, confirmed_at, next_run_at, active)
+values ('00000000-0000-4000-8000-0000000000c1', 'bakery parked', 1, 25, 55, 'Victim Bakery', 'monthly', now(), '9999-12-31', true);
+select is(public.release_parked_searches(), 0, 'no access yet: the search stays parked');
+update public.google_connections set access_state = 'granted', voice_of_merchant = true, last_successful_sync_at = now()
+ where location_id = '00000000-0000-4000-8000-0000000000c1';
+select is(public.release_parked_searches(), 1, 'access checked: the parked search is due');
 
 -- The first task's candidates for the victim: the review with its draft.
 select is(jsonb_array_length(public.first_task_candidates('00000000-0000-4000-8000-0000000000c1') -> 'reviews') >= 0, true, 'candidates are read');

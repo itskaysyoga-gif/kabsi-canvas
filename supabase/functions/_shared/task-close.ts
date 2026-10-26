@@ -54,8 +54,19 @@ export function googleLink(o: { target_type: Kind; place_id: string | null; resp
 /** docs/COPY.md 20, after Yes: "Approved. It goes to Google in 10 seconds. Reply Undo to stop it." */
 export const APPROVED_LINE = "Approved. It goes to Google in 10 seconds. Reply Undo to stop it.";
 
+/**
+ * What failed and what happens next, in owner words chosen from the state and the kind only. The pipeline's own error text
+ * (publications.error) can hold provider codes and is never sent to an owner.
+ */
+export function failedNext(t: Kind, s: PubState): string {
+  const what = nounOf(t);
+  const editable = t === "review_reply" || t === "local_post";
+  const first = s === "rejected" ? `Google did not accept this ${what}.` : `Google does not show this ${what}, and Kabsi did not send it again.`;
+  return `${first} ${editable ? "You can edit it in Kabsi and approve it again." : "Nothing changed on Google."}`;
+}
+
 /** The one WhatsApp line for a state the owner has not been told yet, or null when there is nothing new to say. */
-export function outcomeLine(o: { business: string; target_type: Kind; state: PubState; reason: string | null; link: string | null }): string | null {
+export function outcomeLine(o: { business: string; target_type: Kind; state: PubState; link: string | null }): string | null {
   const what = nounOf(o.target_type);
   const s = ownerState(o.state);
   if (s === "confirmed") {
@@ -65,10 +76,6 @@ export function outcomeLine(o: { business: string; target_type: Kind; state: Pub
   if (s === "sent") {
     return `${o.business}: your yes is saved. I have not seen the ${what} on Google yet. Nothing else is needed from you. I will tell you when it shows.`;
   }
-  if (s === "failed") {
-    // The pipeline's reason already says what failed and what happens next (publish.ts rejectionReason, record_publication).
-    const why = (o.reason ?? "").trim() || `Google did not take this ${what}. Nothing changed on Google.`;
-    return `${o.business}: the ${what} did not go through. ${why}`;
-  }
+  if (s === "failed") return `${o.business}: the ${what} did not go through. ${failedNext(o.target_type, o.state)}`;
   return null;
 }

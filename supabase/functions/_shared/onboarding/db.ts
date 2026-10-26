@@ -24,8 +24,10 @@ async function staffPhones(): Promise<string[]> {
 
 export function onboardingHooks(out: Out): OnboardingHooks {
   return {
-    async afterBind(userId, locationIds) {
+    async afterBind(userId, locationIds, scanCode) {
       for (const id of locationIds) {
+        // The code this phone sent from the free check joins the business it signed up (stage 1 to stage 2).
+        if (scanCode && locationIds.length === 1) await rpc<boolean>("attach_free_check", { p_location: id, p_code: scanCode }).catch(() => false);
         const f = await facts(id).catch(() => null);
         if (!f || f.is_demo) continue;
         const stage = stageOf(f);
@@ -56,10 +58,12 @@ export function onboardingHooks(out: Out): OnboardingHooks {
       const name = (typeof meta.first_name === "string" ? meta.first_name : typeof meta.name === "string" ? meta.name : null) as string | null;
       const stage = stageOf(f);
       const draft = SAY_ONBOARDING.founderDraft(name);
-      await admin().from("staff_followups").insert({
-        kind: "founder_help", location_id: locationId, location_name: f.business, due_at: new Date().toISOString(),
-        detail: `Asked for help on WhatsApp at the ${stage} step. Message them from the Kabsi number: "${draft}"`.slice(0, 500),
+      // A WhatsApp follow-up for the staff list (the kinds allowed are fixed; this is the WhatsApp one).
+      const { error } = await admin().from("staff_followups").insert({
+        kind: "whatsapp_nudge", location_id: locationId, location_name: f.business, due_at: new Date().toISOString(),
+        detail: `Asked for help with setup on WhatsApp at the ${stage} step. Message them from the Kabsi number: "${draft}"`.slice(0, 500),
       });
+      if (error) throw new Error(`staff_followups: ${error.message}`);
       for (const p of await staffPhones()) {
         await notify(out, { phone: p, userId: null, locationId, kind: "staff_alert", urgent: true,
           body: `${f.business} asked for help with setup (${stage} step), from ${phone}. Suggested message:\n${draft}`,

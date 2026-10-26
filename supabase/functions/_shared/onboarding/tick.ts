@@ -15,6 +15,8 @@ export type DueRow = Facts & {
   setup_at: string | null; accepted_at: string | null; created_at: string;
   owner: { user_id: string; phone: string; name: string | null } | null;
   sent: Sent; done: { target_type: string; response: unknown }[]; waiting: number;
+  /** Something was approved for the business after the first task went out (its answer, or anything else). */
+  approved_since_first: boolean;
 };
 export type Candidates = {
   categories: string[];
@@ -24,7 +26,7 @@ export type Candidates = {
 };
 export type Outcome = {
   publication_id: string; location_id: string; business: string; place_id: string | null; target_type: string; state: PubState;
-  response: unknown; reason: string | null; user_id: string; phone: string | null;
+  response: unknown; user_id: string; phone: string | null;
 };
 export interface OnboardingDb {
   on(): Promise<boolean>;
@@ -47,8 +49,11 @@ export function dueKinds(r: DueRow, now: number): string[] {
   const out: string[] = [];
   if (r.setup_ok && !r.accepted && !s.invite) out.push("invite");
   if (r.checked && !s.access_works) out.push("access_works");
-  if (r.checked && (s.access_works || out.includes("access_works")) && !s.first_task && !r.first_task_done) out.push("first_task");
-  if (s.first_task_sent && since(s.first_task_sent.at, now) > 20 * H && !r.first_task_done && !s.reminder) out.push("reminder");
+  // The first task waits 10 minutes after access works, so the first sync's reviews have drafts; tried until 48 hours.
+  const access = since(s.access_works?.at, now);
+  if (r.checked && access > 10 * 60_000 && access < 48 * H && !s.first_task && !r.first_task_done) out.push("first_task");
+  if (s.first_task_sent && since(s.first_task_sent.at, now) > 20 * H && !r.first_task_done && !s.reminder && !s.first_task_skipped
+      && !r.approved_since_first) out.push("reminder");
   if (s.access_works && since(s.access_works.at, now) > 48 * H && !s.after48) out.push("after48");
   if (r.first_task_done && !s.unlock) out.push("unlock");
   if (!r.checked && !s.still_blocked && since(r.created_at, now) > 24 * H && since(r.setup_at ?? s.invite?.at ?? r.created_at, now) > 24 * H) {
@@ -78,7 +83,7 @@ export async function onboardingTick(d: AgentDeps, o: OnboardingDb): Promise<Rec
   for (const x of await o.outcomes(50)) {
     if (!x.phone) continue;
     try {
-      const body = outcomeLine({ business: x.business, target_type: x.target_type as never, state: x.state, reason: x.reason,
+      const body = outcomeLine({ business: x.business, target_type: x.target_type as never, state: x.state,
         link: googleLink({ target_type: x.target_type as never, place_id: x.place_id, response: x.response }) });
       if (!body) continue;
       await notify(d.out, { phone: x.phone, userId: x.user_id, locationId: x.location_id, kind: "task_outcome", body,
@@ -119,6 +124,8 @@ async function send(d: AgentDeps, o: OnboardingDb, r: DueRow, kind: string): Pro
   }
   if (kind === "access_works") {
     if (!(await o.claim(r.location_id, "access_works"))) return false;
+    // The parked search is released by the visibility tick for every business whose access works (with or without WhatsApp);
+    // this only starts it at once.
     await o.startMaps(r.location_id).catch(() => {});
     await msg("access_works", SAY_ONBOARDING.accessWorks(r.business, r.trial_ends_at, r.time_zone));
     return true;
@@ -131,20 +138,23 @@ async function send(d: AgentDeps, o: OnboardingDb, r: DueRow, kind: string): Pro
       return { ...x, sensitive: s.sensitive || !!s.regulated };
     });
     const task = pickFirstTask({ reviews, posts: c.posts, hours: c.hours });
-    if (!(await o.claim(r.location_id, "first_task", { kind: task.kind }))) return false;
+    // Nothing to offer yet (drafts may still be coming): tried again on a later tick; claimed only once it really goes out.
     if (task.kind === "none") return false;
     if (task.kind === "review") {
       const a = await d.db.actionCreate(to.user_id, "review_reply", task.review_id);
       if (!a.ok || !a.token) return false;
+      if (!(await o.claim(r.location_id, "first_task", { kind: task.kind }))) return false;
       await msg("first_task", SAY_ONBOARDING.firstReview(r.business, quote(task.text), task.draft),
         [{ id: `a:${a.token}`, title: "Yes" }, { id: `e:${a.token}`, title: "Edit" }, { id: `fs:${r.location_id}`, title: "Skip" }]);
     } else if (task.kind === "post") {
+      if (!(await o.claim(r.location_id, "first_task", { kind: task.kind }))) return false;
       // The owner's answer is read like the monthly answer: a post in their own words, shown back for a yes.
       await d.out.db.setQuestion(to.phone, { type: "update", location_id: r.location_id, at: new Date((d.now ?? Date.now)()).toISOString() });
       await msg("first_task", SAY_ONBOARDING.postQuestion(task.service));
     } else {
       const a = await d.db.actionCreate(to.user_id, "listing_revert", task.change_id);
       if (!a.ok || !a.token) return false;
+      if (!(await o.claim(r.location_id, "first_task", { kind: task.kind }))) return false;
       await msg("first_task", SAY_ONBOARDING.hoursFix(r.business, task.shown),
         [{ id: `a:${a.token}`, title: "Yes" }, { id: `fs:${r.location_id}`, title: "Skip" }]);
     }
