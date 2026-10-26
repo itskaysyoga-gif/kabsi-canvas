@@ -311,7 +311,7 @@ export const agentDb: AgentDb = {
   staffSummary: () => rpc("whatsapp_staff_summary", {}),
   staffPause: (name, pause) => rpc("whatsapp_staff_pause", { p_name: name, p_pause: pause }),
   handoff: async (phone, summary) => {
-    await rpc("ops_emit", { p_kind: "whatsapp_handoff", p_channel: "customers", p_title: "WhatsApp: a person is asked for",
+    await rpc("ops_emit", { p_kind: "whatsapp_handoff", p_channel: "customers", p_title: "WhatsApp: someone wants to talk to a person",
       p_body: `${summary}. Phone ending ${phone.slice(-4)}. Answer in the Kapso inbox.`, p_dedupe: `wa_handoff:${phone}:${new Date().toISOString().slice(0, 13)}` });
   },
   outboxGet: (phone, ids) => outDb.get(phone, ids),

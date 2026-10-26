@@ -75,7 +75,7 @@ const health = (q: string | null, m: string | null) => {
 /** docs/COPY.md section 20, staff_admin: "Morning. 3 things today: ..." then the numbers, with one-tap buttons. */
 export function morningDigest(s: Summary): { body: string; buttons: Button[] } {
   const things = [
-    n(s.handoffs_waiting) ? plural(n(s.handoffs_waiting), "person asked for a person", "people asked for a person") : null,
+    n(s.handoffs_waiting) ? plural(n(s.handoffs_waiting), "person wants to talk to someone", "people want to talk to someone") : null,
     n(s.publications_stuck) ? plural(n(s.publications_stuck), "publication is stuck", "publications are stuck") : null,
     n(s.replies_waiting) ? plural(n(s.replies_waiting), "reply is waiting for an owner", "replies are waiting for owners") : null,
   ].filter(Boolean) as string[];

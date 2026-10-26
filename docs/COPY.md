@@ -68,7 +68,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 - "Cancel from WhatsApp any time."
 
 **FAQ** (5): see section 16, questions 1, 2, 4, 6, 9.
-**Closing band** (black): H2 "See your map in 10 seconds." Scan box. "Free for 14 days. No card. Cancel in WhatsApp."
+**Closing band** (black): H2 "See where you show up in 10 seconds." Scan box. "Free for 14 days. No card. Cancel in WhatsApp."
 
 ## 2. Scan result (/scan/CODE)
 
