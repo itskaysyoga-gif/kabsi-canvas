@@ -1069,3 +1069,40 @@ Two plans (already built, they show whether owners pay for more work); the dark 
 
 ### 12. Order from here
 Design 4 and Design 3 (Opus, together; Design 3 pulls Design 4's map cards), then V3 (Sonnet, with items 3.3 to 3.5 and 3.7), Partners (Opus, item 5), V4 (Opus, items 2, 3.1, 3.6, 3.8 to 3.10), Web 2 and UX 1 (Opus), Sec 1 (Opus, item 8), the launch gate. Outbound is out of the order.
+
+## 30.16 Lane R on Rashid's answers and the last review round (26 Oct 2026, R-96)
+ChatGPT is one outside opinion; lane R takes what is useful and decides. This section changes 30.15 where they differ.
+
+### 1. Outbound with Harvey runs from launch day (replaces 30.15 section 6, first point)
+Rashid wants Outbound from day 1. It runs from the launch gate, built and warmed up before it, with these rules so neither the domain nor Kabsi gets banned:
+- Who: only businesses that publish a business email address on their own website (info@, hello@, bookings@ or a named business address shown as the contact). UK: only incorporated businesses (a Companies House number found and recorded); never sole traders or partnerships without consent. UAE: businesses with a published business email. US later, under CAN-SPAM. Every target recorded with the source page and date.
+- Every email personal: one real detail from the business's own website or public Google profile, written fresh for that business, approved by Rashid on his phone. No templates sent unchanged, no tracking pixels, no links in email 1, plain text.
+- Honest identity: from Rashid (founder), signature "Rashid Abou Hamzy, founder of Kabsi. Drafted with Nora, Kabsi's AI assistant." Nora never poses as a person. The physical address and "Reply 'no thanks' and we will not write again" in every email; a suppression list checked before every send; one follow-up only.
+- Infrastructure: a separate sending domain and a Zoho Mail Lite mailbox (never Resend, never kabsi.co), SPF, DKIM and DMARC, two weeks of warm-up before the first real email, then 10 a day, 20 from week 3, 30 from week 5, hard stop at 300 a month. Stop at a bounce rate over 3 percent or any spam complaint.
+- A one-page legitimate interest assessment for UK GDPR in docs/legal before the first send.
+- Kill gate unchanged: fewer than 3 replies that lead to a check or a trial in the first 300 emails ends it.
+- The Outbound session runs before the launch gate (order below).
+
+### 2. Who Kabsi is for first: hair businesses
+- Launch focus for the website, examples, guides, ads and Outbound: barbershops and hair salons together ("salons and barbers"), in the UAE and the UK. Not only barbers: the product is the same for both, barbers alone halve the market, and hair salons in Dubai are the strongest single fit. Not everyone: one trade's words and examples convert better.
+- Signup stays open to every local business; nothing in the product is limited to hair. Other trade pages stay built but unlinked and noindex until they have real substance. Reviewed at 30 paying customers.
+- Home's example business is a salon (Rose Lane Salon, Example); the barber page has its own barbershop example.
+
+### 3. Onboarding in four stages (changes 28.5)
+1. The free check gives its result first, with no sign-up. 2. Sign in (email code or Google sign-in, which signs in to Kabsi only) and confirm the business and that you can manage its Google profile. 3. Connect WhatsApp (the owner sends the first message; Kabsi asks to send setup updates and approvals there). 4. Add Kabsi as a Manager on Google, with three states shown (invite pending, accepted, access checked), founder help on request, and the trial starting only when access is checked.
+- Then the first task, in this order of choice: an unanswered review that can be answered accurately, a post from facts the owner confirms, an hours fix only for a real error. Nothing sensitive (category, address) is changed to show activity.
+- After the first completed task, not before: competitors, extra searches, tone, AI questions, team and photos. Of the five questions, only what the first task needs is asked up front.
+- One resume link opens the next unfinished step from any device. The WhatsApp messages for the first 48 hours are in docs/COPY.md section 20 (onboarding), event-triggered, with templates outside the 24-hour window.
+
+### 4. Search and content for kabsi.co (Web 2 and after)
+- At launch, indexed: Home, Pricing, How it works, About, Security, FAQ, Privacy, Terms, Partners, the salon and barber pages, "Kabsi or Google's free tools", the review link and QR tool, and the free check. City pages and the other trade and comparison pages stay unlinked and noindex until each has real substance.
+- Two free tools only: the review link and QR maker (with neutral request wording and the printable card) and one free check that combines the public profile facts with the nearby check. No separate AI visibility checker or reply generator.
+- Guides: 12 in the first 90 days, in this order: why your business is not on Google Maps; your review link and QR code; asking for reviews within Google's rules; replying to a negative review; adding a Manager safely; holiday hours; why your position changes across the area; someone changed my details; salon services on Google; salon photos; what to post; what calls, clicks and direction requests mean.
+- How guides are written (Google's scaled content rules): a claim sheet with a primary source for every fact, steps tested on a real profile, Kabsi's own screenshots, an AI draft from that material only, a separate check pass, lane R review, a pull request, a real "checked on" date, monthly review of prices and steps. Never city or trade copies, invented experience, competitor rewrites or hidden instructions to AI.
+- Technical: server-rendered public pages, sitemap, canonical URLs, Organization, BreadcrumbList and Article data only where true; allow Googlebot, OAI-SearchBot and PerplexityBot through robots.txt and Cloudflare (GPTBot is a separate choice, allowed too); llms.txt stays generated from the facts; Search Console for the UAE and the UK.
+
+### 5. From ChatGPT's landing page (design reference only)
+Design 4 takes these ideas, in Kabsi's own system: the honest FAQ "Can't I do this myself for free?" with its answer (yes, and what the subscription pays for); the trust block "You keep the keys" (you stay the owner, no password, nothing published without your yes, remove access any time); two short proof lines under the hero ("You approve every change." "You keep control of your Google profile."); the tappable Yes, Edit, Skip demo with a live 10 second Undo; the A, B, C letters linking the nearby places to a small schematic; plan cards that list the work first. Not taken: its light palette, system fonts and its own logo drawing.
+
+### 6. Order from here (replaces 30.15 section 12)
+Design 4 and Design 3 (Opus, together); then V3 (Sonnet) and Partners (Opus); V4 (Opus, with the onboarding stages); Outbound (Opus, the Harvey fork with the rules above, warm-up started at least two weeks before the launch gate); Web 2 and UX 1 (Opus); Sec 1 (Opus); the launch gate.
