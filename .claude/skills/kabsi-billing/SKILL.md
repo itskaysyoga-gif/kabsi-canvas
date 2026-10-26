@@ -24,7 +24,7 @@ Written by session 10 on 25 Oct 2026. The decisions are master plan section 10 (
 - `supabase/functions/billing-creem/index.ts`: `POST /` webhook, `POST /setup` (staff or x-cron-secret), `POST /owner` (signed-in owner only), `GET /founding`.
 - WhatsApp: router words and `k:<op>` Confirm buttons in `_shared/whatsapp/router.ts`, the handler `billing()` in `agent.ts`, the real deps in `db.ts`.
 - App: `src/routes/_authenticated/app/plan.tsx`, `src/routes/billing.done.tsx`, `src/lib/plans.ts`; pricing founding block in `src/routes/pricing.tsx`.
-- Partners and Founding 25: migration `20261026160000_partners_founding.sql` (the file name follows the version apply_migration recorded), tests `supabase/tests/partners.sql` and `tests/programs.test.ts`; `supabase/functions/programs` (public applications and counts), `_shared/programs.ts` (pure), `_shared/founding.ts` (jobs `founding_message`, `partner_payouts_ready`), staff panels `src/components/staff/founding-panel.tsx` and `partners-panel.tsx`.
+- Partners and Founding 25: migration `20261026165709_partners_founding.sql` (the file name follows the version apply_migration recorded), tests `supabase/tests/partners.sql` and `tests/programs.test.ts`; `supabase/functions/programs` (public applications and counts), `_shared/programs.ts` (pure), `_shared/founding.ts` (jobs `founding_message`, `partner_payouts_ready`), staff panels `src/components/staff/founding-panel.tsx` and `partners-panel.tsx`.
 - Database: migrations `20261025173010_creem_billing.sql` and `20261025173020_creem_billing_grants.sql`; tests `supabase/tests/billing.sql`, `tests/creem.test.ts`, the billing conversations in `_shared/whatsapp/conversations.test.ts`.
 
 ## Rules
