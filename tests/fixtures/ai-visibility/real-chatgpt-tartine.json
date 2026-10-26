@@ -1,0 +1,47 @@
+{
+  "version": "0.1.20250526",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "cost": 0.030079,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "calibration-26-oct-2026",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "cost": 0.030079,
+      "result": [
+        {
+          "model_name": "gpt-4.1-mini-2025-04-14",
+          "web_search": true,
+          "items": [
+            {
+              "type": "message",
+              "sections": [
+                {
+                  "type": "text",
+                  "text": "San Francisco's Mission District boasts a vibrant array of bakeries, each offering unique flavors and specialties. Here are some top-rated options you might consider:\n\n**[Kahnfections](https://www.google.com/maps/search/Kahnfections%2C+San+Francisco%2C+CA?utm_source=openai)**\n_San Francisco, CA_\nRenowned for its handcrafted biscuits, pastries, and breakfast sandwiches.\n\n**[Tartine Bakery](https://www.google.com/maps/search/Tartine+Bakery%2C+San+Francisco%2C+CA?utm_source=openai)**\n_San Francisco, CA_\nA legendary institution known for its exceptional sourdough bread and French-inspired pastries.\n\n**[Arizmendi Valencia Bakery](https://www.google.com/maps/search/Arizmendi+Valencia+Bakery%2C+San+Francisco%2C+CA?utm_source=openai)**\n_San Francisco, CA_\nA cherished worker-owned institution with daily changing thin-crust pizzas and excellent sourdough loaves.\n",
+                  "annotations": [
+                    {
+                      "title": "Kahnfections",
+                      "url": "https://www.google.com/maps/search/Kahnfections?utm_source=openai"
+                    },
+                    {
+                      "title": "Tartine Bakery",
+                      "url": "https://www.google.com/maps/search/Tartine+Bakery?utm_source=openai"
+                    },
+                    {
+                      "title": "Arizmendi Valencia Bakery",
+                      "url": "https://www.google.com/maps/search/Arizmendi+Valencia+Bakery?utm_source=openai"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

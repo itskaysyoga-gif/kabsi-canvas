@@ -1,0 +1,47 @@
+{
+  "version": "0.1.20250526",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "cost": 0.029846,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "calibration-26-oct-2026",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "cost": 0.029846,
+      "result": [
+        {
+          "model_name": "gpt-4.1-mini-2025-04-14",
+          "web_search": true,
+          "items": [
+            {
+              "type": "message",
+              "sections": [
+                {
+                  "type": "text",
+                  "text": "If you're looking for a café near Mirna Chalouhi in Beirut, here are some options you might consider:\n\n**[Rafic Al Rashidi](https://www.google.com/maps/search/Rafic+Al+Rashidi%2C+Mirna+Chalouhi%2C+Lebanon?utm_source=openai)**\n_Mirna Chalouhi, Lebanon_\nA local café offering a variety of beverages and light snacks.\n\n**[Verseine](https://www.google.com/maps/search/Verseine%2C+Beirut%2C+Lebanon?utm_source=openai)**\n_The Bridge Leb, Mirna Chalouhi, Sin El Fil, Beirut, Lebanon_\nA French-inspired café and restaurant featuring chandeliers and a piano bar.\n\n**[EatQ](https://www.google.com/maps/search/EatQ%2C+Sin+El+Fil%2C+Beirut%2C+Lebanon?utm_source=openai)**\n_Sin El Fil, Mirna Chalouhi Center, 7th Floor, Beirut, Lebanon_\nA modern café on the 7th floor of the Mirna Chalouhi Center.\n",
+                  "annotations": [
+                    {
+                      "title": "Rafic Al Rashidi",
+                      "url": "https://www.google.com/maps/search/Rafic+Al+Rashidi?utm_source=openai"
+                    },
+                    {
+                      "title": "Verseine",
+                      "url": "https://www.google.com/maps/search/Verseine?utm_source=openai"
+                    },
+                    {
+                      "title": "EatQ",
+                      "url": "https://www.google.com/maps/search/EatQ?utm_source=openai"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

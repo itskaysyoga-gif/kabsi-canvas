@@ -33,3 +33,21 @@ No live provider call was made. 0 US dollars of the 1 US dollar provider budget 
 ## Not done in this session, and why
 - The migration was not applied: the Supabase connector's `execute_sql` timed out waiting for approval once (working-fast rule: no second try). The SQL is `supabase/migrations/20261026100000_ai_visibility.sql`; the lane R chat or Rashid applies it with `execute_sql` and registers version `20261026100000` in `supabase_migrations.schema_migrations`.
 - Calibration (30.9 item 3) needs the migration and the deploy first (the keys are only in Supabase secrets). Only Yawmiyati is a real business in the database; the two others have to be named, see the steps in the session report.
+
+## After merge: calibration (30.9 item 3), 26 Oct 2026
+Merged as PR 234 (merge commit 3e05499, Deploy run 110 green). `ai_visibility_mode` stayed `mock` throughout: the internal route `/visibility/ai-calibrate` makes its own live calls (still under the cap check and recorded in `provider_spend`), so the setting never had to be switched. Gemini is off, so no Gemini call was made. Businesses are calibration fixtures only (Yawmiyati in Beirut, Tartine Bakery in San Francisco, Dishoom Shoreditch in London); no owner saw anything.
+
+Spend: 8 live calls through DataForSEO, 0.143 USD of the 1 USD budget (ChatGPT `gpt-4.1-mini` with web search about 0.030 USD a call, Perplexity `sonar` about 0.006 USD a call). 0 USD Anthropic.
+
+| Business and prompt | ChatGPT said | Kabsi recorded (first run) | Perplexity said | Kabsi recorded (first run) |
+|---|---|---|---|---|
+| Yawmiyati, "best bakery in Beirut" | 8 bakeries, not Yawmiyati | not named (right); competitors empty (wrong: bold links not read); sources "google.com" x8 (wrong: Maps place links) | 6 bakeries, not Yawmiyati | not named (right); 5 competitors, 4 with a location suffix, the first pick in prose missed |
+| Yawmiyati, "best cafe near Mirna Chalouhi Beirut" | 5 cafes, not Yawmiyati | not named (right); competitors empty; Maps links as sources | 5 cafes, not Yawmiyati | not named (right); the street "Mirna Chalouhi" not recorded as a rival (right, by luck), first pick missed |
+| Tartine Bakery, "best bakery in the Mission San Francisco" | Kahnfections first, Tartine second | named, position 1 (wrong, it is 2); competitors empty | Tartine first | named, position 1 (right); 4 rivals |
+| Dishoom Shoreditch, "best Indian restaurant in Shoreditch London" | Dishoom first | named, position 1 (right); competitors empty | Dishoom first | named, position 1 (right); a street address recorded as a rival (wrong) |
+
+What was wrong and is fixed in this follow-up (`analyze.ts`, `providers.ts`): ChatGPT's `**[Name](url)**` form is now read, so competitors and the position follow the order in the answer; Google Maps search links are not sources; names are cut at the comma, dash, "or" or "in <place>" so "Ichkhanian Bakery, Zoukak El-Blat" is "Ichkhanian Bakery"; bold prose picks count; a street address, a label ending in a colon and the area the customer asked about are not businesses. The real answers are saved as `tests/fixtures/ai-visibility/real-*.json` (ChatGPT texts cut at the last whole item) and three new tests check them. What the providers showed about the three businesses: neither provider knew Yawmiyati for either prompt (a real result, not a recording fault); both named Dishoom first; both named Tartine, ChatGPT second.
+
+Costs per prompt: ChatGPT 0.030 plus Perplexity 0.006 USD, so Essentials (3 prompts a month) costs about 0.11 USD and Pro (10 prompts every 2 weeks) about 0.78 USD a month, both under 15 percent of the plan price (27.4).
+
+Leftover: the settings row `ai_calibration_v2` (holds the 8 answers) could not be deleted (the connector's delete prompt timed out once). Lane R: `delete from public.app_settings where key = 'ai_calibration_v2';`.

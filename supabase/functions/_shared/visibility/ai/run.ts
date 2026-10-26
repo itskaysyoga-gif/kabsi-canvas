@@ -92,7 +92,7 @@ export async function runOne(d: AiDeps, runId: string, o: { lastTry?: boolean } 
   if (mode === "live" && (await d.spend(1, raw.costMicros))) {
     await d.staffAlert("AI Visibility spend passed 80 percent of this month's cap", `ai_cap80:${month(d.now())}`);
   }
-  const a = analyze({ text: raw.text, sources: raw.sources, business: run.business, known: run.known });
+  const a = analyze({ text: raw.text, sources: raw.sources, business: run.business, known: run.known, prompt: run.prompt });
   await d.db.saveRun(runId, {
     ...a, model: raw.model, source: mode, costMicros: raw.costMicros, sourceCount: raw.sourceCount,
     // Gemini's Maps result is never kept (Additional Terms); the facts above are.
@@ -124,6 +124,6 @@ export async function freeScanCheck(
   if (mode === "live" && (await d.spend(1, raw.costMicros))) {
     await d.staffAlert("AI Visibility spend passed 80 percent of this month's cap", `ai_cap80:${month(d.now())}`);
   }
-  const a = analyze({ text: raw.text, sources: raw.sources, business: o.business });
+  const a = analyze({ text: raw.text, sources: raw.sources, business: o.business, prompt: o.prompt });
   return { provider: "chatgpt", named: a.named, competitors: a.competitors.slice(0, 3).map((c) => c.name), sources: a.sources.slice(0, 3), label: "One sample. AI answers change from run to run." };
 }

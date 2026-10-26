@@ -281,7 +281,7 @@ async function aiCalibrate(req: Request): Promise<Response> {
           if (!(await aiDeps.room(40_000))) { out.push({ ...c, provider: p, error: "cap" }); continue; }
           const raw = await realProvider("live", p, c.business).ask(c.prompt, { country: c.country, city: c.city });
           await aiDeps.spend(1, raw.costMicros);
-          const a = analyze({ text: raw.text, sources: raw.sources, business: c.business, known: (c.known ?? []).map((name) => ({ key: name, name })) });
+          const a = analyze({ text: raw.text, sources: raw.sources, business: c.business, known: (c.known ?? []).map((name) => ({ key: name, name })), prompt: c.prompt });
           out.push({ business: c.business, prompt: c.prompt, provider: p, model: raw.model, cost_micros: raw.costMicros, source_count: raw.sourceCount, text: raw.text, recorded: a });
         } catch (e) {
           out.push({ business: c.business, prompt: c.prompt, provider: p, error: String((e as Error)?.message ?? e).slice(0, 200) });

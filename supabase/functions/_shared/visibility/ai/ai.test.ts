@@ -321,3 +321,37 @@ Deno.test("free scan check: off until V4 turns it on; one answer, three competit
 Deno.test("mock answers contain no dash or exclamation mark in what an owner could read (names and sources are fictional)", () => {
   for (const p of ["chatgpt", "perplexity", "gemini"] as const) assertEquals(mockAnswer(p, "best bakery in jumeirah", ME).costMicros, 0);
 });
+
+// ─── calibration of 26 Oct 2026: real answers from ChatGPT and Perplexity (tests/fixtures/ai-visibility/real-*.json) ───
+import realTartine from "../../../../../tests/fixtures/ai-visibility/real-chatgpt-tartine.json" with { type: "json" };
+import realNot from "../../../../../tests/fixtures/ai-visibility/real-chatgpt-not-named.json" with { type: "json" };
+import realBeirut from "../../../../../tests/fixtures/ai-visibility/real-perplexity-beirut.json" with { type: "json" };
+import realCafe from "../../../../../tests/fixtures/ai-visibility/real-perplexity-cafe.json" with { type: "json" };
+import realDishoom from "../../../../../tests/fixtures/ai-visibility/real-perplexity-dishoom.json" with { type: "json" };
+
+Deno.test("calibration: ChatGPT's bold links give the order (Tartine is second, not first) and no Google Maps place links as sources", () => {
+  const a = parseDfs(realTartine, "m");
+  assertEquals(a.sources, [], "a Maps search link is the place, not a source");
+  const r = analyze({ text: a.text, business: "Tartine Bakery", prompt: "best bakery in the Mission San Francisco" });
+  assertEquals([r.named, r.position], [true, 2]);
+  assertEquals(r.competitors.map((c) => c.name), ["Kahnfections", "Arizmendi Valencia Bakery"]);
+});
+
+Deno.test("calibration: a business the assistant does not know is recorded as not named, with the café names but not the street", () => {
+  const r = analyze({ text: parseDfs(realNot, "m").text, business: "Yawmiyati", prompt: "best cafe near Mirna Chalouhi Beirut" });
+  assertEquals([r.named, r.position], [false, null]);
+  assertEquals(r.competitors.map((c) => c.name), ["Rafic Al Rashidi", "Verseine", "EatQ"]);
+  const p = analyze({ text: parseDfs(realCafe, "sonar").text, business: "Yawmiyati", prompt: "best cafe near Mirna Chalouhi Beirut" });
+  assertEquals(p.competitors.map((c) => c.name), ["Qahwa BLK", "Croffee", "Blend", "Brimm"], "no street, no label, locations cut");
+});
+
+Deno.test("calibration: Perplexity's first pick in prose and names with a location are recorded as the business", () => {
+  const r = analyze({ text: parseDfs(realBeirut, "sonar").text, business: "Yawmiyati", prompt: "best bakery in Beirut" });
+  assertEquals(r.named, false);
+  assertEquals(r.competitors.map((c) => c.name), ["Vanilla Bean", "Ichkhanian Bakery", "Bakelab Counter", "Bartartine", "Kabouchieh Bakery", "Baked In Beirut"]);
+  const d = parseDfs(realDishoom, "sonar");
+  const x = analyze({ text: d.text, sources: d.sources, business: "Dishoom Shoreditch", prompt: "best Indian restaurant in Shoreditch London" });
+  assertEquals([x.named, x.position], [true, 1]);
+  assertEquals(x.competitors.map((c) => c.name), ["Kricket Shoreditch", "Gunpowder Spitalfields", "Hoppers Shoreditch", "Sheba"], "no street address, one name for 'Sheba or Preem'");
+  assertEquals(x.sources.map((s) => s.domain), ["dishoom.com", "tripadvisor.com"]);
+});

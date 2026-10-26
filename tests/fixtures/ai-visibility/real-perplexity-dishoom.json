@@ -1,0 +1,43 @@
+{
+  "version": "0.1.20250526",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "cost": 0.005854,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "calibration-26-oct-2026",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "cost": 0.005854,
+      "result": [
+        {
+          "model_name": "sonar",
+          "web_search": true,
+          "items": [
+            {
+              "type": "message",
+              "sections": [
+                {
+                  "type": "text",
+                  "text": "**Dishoom Shoreditch** is the best all-round choice: a lively Bombay-style café with consistently strong reviews. It's at **7 Boundary Street, E2 7JE**.[6][7][10]\n\nOther excellent options:\n\n- **Kricket Shoreditch** — best for modern, inventive Indian food; **36 Charlotte Road**.[2][3]\n- **Gunpowder Spitalfields** — a good choice for creative small plates.[9]\n- **Hoppers Shoreditch** — choose this for Sri Lankan and South Indian flavours.[8]\n- **Sheba or Preem on Brick Lane** — better for traditional curry-house dining.[4]",
+                  "annotations": [
+                    {
+                      "title": "Indian Restaurant In Shoreditch | Dishoom",
+                      "url": "https://www.dishoom.com/"
+                    },
+                    {
+                      "title": "The Best Indian Restaurants in Shoreditch London - Tripadvisor",
+                      "url": "https://www.tripadvisor.com/"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
