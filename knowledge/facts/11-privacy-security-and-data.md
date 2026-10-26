@@ -73,7 +73,8 @@ The privacy page shows the 11 rows of the retention table (`retention_policies`,
 | Record of approvals and changes | 24 months; the details of a deleted business are blanked, who did what and when stays |
 | WhatsApp chats with Kabsi's earlier number (before 22 Oct 2026) | No automatic deletion date was set; deleted when the person asks at hello@kabsi.co |
 | Visibility and AI answer results, and the competitors the owner picks (from launch) | While you use Kabsi; deleted 30 days after the business leaves |
-| WhatsApp voice notes (from launch) | The audio is deleted as soon as it has been turned into text; only the text is kept. Notes over 10 MB or 3 minutes are refused and never stored |
+| WhatsApp voice notes (from launch) | The audio is held in memory only while it is turned into text and is never written to storage; only the text is used. Notes over 10 MB or 3 minutes are refused and never stored. The transcription provider is ElevenLabs (Scribe) once its key is set |
+| Customer phone numbers and names | Kabsi never receives or stores them: Ask a customer gives the owner a ready message to forward from their own phone, and a contact shared on WhatsApp is dropped before anything is stored |
 | Backups | Encrypted copies of the database, the photos and the code are kept 21 days in Cloudflare R2, then deleted. A deleted business stays in older backups until they expire (at most 21 days) and is never restored into the live service afterwards |
 | Internal job logs | 90 days |
 | Email action links | Expire after 72 hours, removed 30 days later |

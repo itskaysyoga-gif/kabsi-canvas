@@ -167,13 +167,13 @@ export const QUESTIONS: Question[] = [
     topic: "photos on WhatsApp",
     ask: "Can I send my photos to Kabsi on WhatsApp?",
     kb: [
-      /Sending photos to the Kabsi number puts them in Photos for you to approve \(Pro\)/,
-      /Pro's WhatsApp photo drop comes with the WhatsApp owner channel/,
+      /Sending a photo to the Kabsi number works on both plans/,
+      /The WhatsApp photo drop is on both plans/,
     ],
     must: [/Photos/],
     coming: true,
     reference:
-      "Not yet. The WhatsApp photo drop is a Pro feature that comes with WhatsApp, and it is not available yet. Today you add photos on the Photos page, or through a staff upload link, and you approve each one before it goes to Google.",
+      "Not yet. Sending photos on WhatsApp is on both plans and comes with WhatsApp for owners, which is not available yet. Today you add photos on the Photos page, or through a staff upload link, and you approve each one before it goes to Google.",
   },
   // ── what is coming (no date) ─────────────────────────────────────────────────────────────────────────────────────
   {

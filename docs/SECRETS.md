@@ -59,7 +59,7 @@ fails when an Edge Function or the Worker reads a name that is not in this file.
 | `GEMINI_API_KEY` | Google's Gemini API, free tier, for AI answer checks (master plan 27.10) | Supabase secret | V2 (nothing reads it yet) | On leak | Set 24 Oct 2026 by Rashid (master plan 27.10) |
 | `GEOAPIFY_API_KEY` | Geoapify static map images for the visibility map (master plan 28.2) | Supabase secret | V1 | On leak | Planned: not set yet; V1 gives the clicks |
 | `META_CAPI_TOKEN` | Meta Conversions API: server events for CompleteRegistration, StartTrial and Subscribe (master plan 20.4, `_shared/meta-capi.ts`) | Supabase secret | Growth 1 | On leak | Not set yet; the clicks are in docs/EVENTS.md. Until it is set every `meta_capi` job ends as skipped (mock) |
-| `ELEVENLABS_API_KEY` | ElevenLabs Scribe for owner voice notes, if V3's 20-note test picks it (master plan 30.5). Never used for voice replies | Supabase secret only | V3 | On leak | Planned: not set yet |
+| `ELEVENLABS_API_KEY` | ElevenLabs Scribe for owner voice notes, if V3's 20-note test picks it (master plan 30.5). Never used for voice replies | Supabase secret only | V3 | On leak | Wired in V3 (`_shared/voice/transcribe.ts`); not set yet: until it is, voice notes use the mock and owners are told they are not switched on |
 | `SENTRY_DSN_EDGE` | Where Edge Function errors go (write only) | Supabase secret | Edge Function error reporting (`_shared/kabsi.ts`); a DSN can only send reports | On leak | Not recorded |
 | `SUPABASE_ANON_KEY` | Public database key (publishable, safe in the browser) | Supabase secret (set by Supabase itself); public by design | `api`, `assistant` (calls made as the signed-in caller) | On leak (Supabase rotates it) | Not recorded |
 

@@ -18,6 +18,7 @@ export type Command =
   | { k: "contact"; contacts: Contact[] }
   | { k: "map"; action: "show" | "later"; scanId: string | null }
   | { k: "keyword"; action: "yes" | "change"; locationId: string }
+  | { k: "photo_edit"; photoId: string } | { k: "photo_skip"; token: string }
   | { k: "free"; text: string }
   | { k: "empty" };
 
@@ -44,6 +45,8 @@ const WORDS: [RegExp, string, string?][] = [
   [/^(this month|month|stats month|este mes|هذا الشهر)$/, "stats", "30"],
   [/^(review link|link|my link|enlace|رابط|رابط التقييم)$/, "review_link"],
   [/^(qr|qr code|qr card|código qr)$/, "qr"],
+  // V3 (30.15 section 3.5): a ready message with the review link, to forward after a real visit. Never a customer's number.
+  [/^(ask a customer|ask customers?|ask for a review|ask for reviews|request a review|review request|send review link|send the review link|pedir una reseña)$/, "ask_customer"],
   [/^(talk to a person|person|human|agent|support|hablar con una persona|persona|التحدث مع شخص|شخص)$/, "person"],
   // Session 10 (10.2.10): the owner's billing words; the word itself goes to the billing tool.
   [/^(upgrade|downgrade|add a location|my card changed|card|update my card|invoice|receipt|cancel|cancel my plan|keep my plan|billing|plan|factura|فاتورة)$/, "billing"],
@@ -114,6 +117,12 @@ export function parse(m: Inbound): Command {
 export function parseButton(id: string): Command {
   const tok = /^([auew]):([A-Za-z0-9_-]{16,64})$/.exec(id);
   if (tok) return { k: "button", action: tok[1] === "u" ? "undo" : tok[1] === "e" ? "edit" : "approve", token: tok[2] };
+  // V3: a photo's Edit (p e, by photo id) and Skip (p s, by approval token), and the sensitive review's "Talk to a person".
+  const pe = /^pe:([0-9a-f-]{36})$/.exec(id);
+  if (pe) return { k: "photo_edit", photoId: pe[1] };
+  const ps = /^ps:([A-Za-z0-9_-]{16,64})$/.exec(id);
+  if (ps) return { k: "photo_skip", token: ps[1] };
+  if (id === "t:person") return { k: "tool", tool: "person" };
   const role = /^r:(business|partner|staff)$/.exec(id);
   if (role) return { k: "role_pick", to: role[1] as "business" | "partner" | "staff" };
   const bill = /^k:(cancel|keep|upgrade|downgrade|add_location)$/.exec(id);
