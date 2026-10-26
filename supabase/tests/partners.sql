@@ -30,10 +30,18 @@ create function pg_temp.app(p_phone text, p_trade text default 'beauty_hair') re
     'business_kind', 'Hair salon', 'whatsapp', p_phone, 'why_now', 'We have no time for Google.', 'case_study', 'anonymous',
     'checkin_consent', true, 'consent_text', 'I agree to a 2-minute check-in every two weeks.')) $$;
 
+-- Ids read as the table owner, so the staff persona calls the functions without reading the closed tables.
+create function pg_temp.fid(p_phone text) returns uuid language sql security definer as $$
+  select id from public.founding_applications where whatsapp = p_phone $$;
+create function pg_temp.pid(p_email text) returns uuid language sql security definer as $$
+  select id from public.partner_accounts where email = p_email $$;
+create function pg_temp.payout() returns uuid language sql security definer as $$
+  select id from public.partner_payouts limit 1 $$;
+
 -- ─── closed to browsers ──────────────────────────────────────────────────────────────────────────────────────────
 select ok(not has_table_privilege('anon', t, 'select') and not has_table_privilege('authenticated', t, 'select')
   and not has_table_privilege('authenticated', t, 'insert'), t || ' is closed to browsers')
-from unnest(array['public.founding_applications', 'public.partners', 'public.partner_referrals',
+from unnest(array['public.founding_applications', 'public.partner_accounts', 'public.partner_referrals',
   'public.partner_commissions', 'public.partner_payouts']) t;
 select ok(not has_function_privilege('anon', 'public.founding_apply(jsonb)', 'execute')
   and not has_function_privilege('authenticated', 'public.founding_apply(jsonb)', 'execute')
@@ -52,27 +60,27 @@ select is((public.founding_places() ->> 'left')::int, 25, '25 places left before
 
 select tests.act_as('00000000-0000-4000-8000-0000000000b1');
 select throws_ok($$ select public.staff_founding_overview() $$, '42501', null, 'a non-staff user cannot read the applications');
-select throws_ok($$ select public.staff_founding_decide((select id from public.founding_applications limit 1), 'accepted') $$, '42501', null, 'or decide');
+select throws_ok($$ select public.staff_founding_decide(pg_temp.fid('+971500000001'), 'accepted') $$, '42501', null, 'or decide');
 reset role;
 
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');
-select is((public.staff_founding_decide((select id from public.founding_applications where whatsapp = '+971500000001'), 'accepted') ->> 'left')::int,
+select is((public.staff_founding_decide(pg_temp.fid('+971500000001'), 'accepted') ->> 'left')::int,
   24, 'staff accept: 24 places left');
 reset role;
 -- Five food places, then the sixth food applicant waits (the trade is full until 30 days after the first application).
 select pg_temp.app('+97150000010' || n, 'food') from generate_series(1, 6) n;
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');
-select public.staff_founding_decide(id, 'accepted') from public.founding_applications where whatsapp between '+971500000101' and '+971500000105';
-select throws_ok($$ select public.staff_founding_decide((select id from public.founding_applications where whatsapp = '+971500000106'), 'accepted') $$,
+select public.staff_founding_decide(pg_temp.fid('+97150000010' || n), 'accepted') from generate_series(1, 5) n;
+select throws_ok($$ select public.staff_founding_decide(pg_temp.fid('+971500000106'), 'accepted') $$,
   'P0001', 'trade_full', 'the sixth food place is refused');
-select is((public.staff_founding_decide((select id from public.founding_applications where whatsapp = '+971500000106'), 'waitlisted')
+select is((public.staff_founding_decide(pg_temp.fid('+971500000106'), 'waitlisted')
   -> 'by_trade' -> 'food' ->> 'taken')::int, 5, 'and can be waitlisted');
 select is((public.staff_founding_overview() -> 'places' ->> 'left')::int, 19, 'the real count: 19 left');
 reset role;
 -- After 30 days an unused place goes to any trade.
 update public.founding_applications set created_at = created_at - interval '31 days' where whatsapp = '+971500000001';
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');
-select is((public.staff_founding_decide((select id from public.founding_applications where whatsapp = '+971500000106'), 'accepted') ->> 'left')::int,
+select is((public.staff_founding_decide(pg_temp.fid('+971500000106'), 'accepted') ->> 'left')::int,
   18, 'after 30 days the sixth food applicant takes an open place');
 reset role;
 
@@ -81,9 +89,9 @@ insert into public.subscriptions (organization_id, plan, state, provider, trial_
 values (pg_temp.org('00000000-0000-4000-8000-0000000020c1'), 'pro', 'trialing', 'manual', now() - interval '61 days',
   now() - interval '47 days', now() - interval '40 days');
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');
-select ok((public.staff_founding_link((select id from public.founding_applications where whatsapp = '+971500000001'),
+select ok((public.staff_founding_link(pg_temp.fid('+971500000001'),
   '00000000-0000-4000-8000-0000000020c1') ->> 'linked')::boolean, 'staff link the place to the business');
-select throws_ok($$ select public.staff_founding_decide((select id from public.founding_applications where whatsapp = '+971500000001'), 'declined') $$,
+select throws_ok($$ select public.staff_founding_decide(pg_temp.fid('+971500000001'), 'declined') $$,
   'P0001', 'linked', 'a linked place cannot be declined');
 reset role;
 select is(private.founding_days(pg_temp.org('00000000-0000-4000-8000-0000000020c1')), 90, 'the founding flag gives 90 days');
@@ -93,7 +101,6 @@ select ok((select trial_ends_at::date - trial_started_at::date from public.subsc
 select is(private.entitlements(pg_temp.org('00000000-0000-4000-8000-0000000020c1'), null) ->> 'state', 'trial', 'and the business is on Pro again');
 select is(private.founding_days(pg_temp.org('00000000-0000-4000-8000-0000000020c2')), null, 'another business has no founding flag');
 select is(jsonb_typeof(private.entitlements(pg_temp.org('00000000-0000-4000-8000-0000000020c1'), null) -> 'caps'), 'null', 'a founding business has no trial caps');
-select ok((private.entitlements(pg_temp.org('00000000-0000-4000-8000-0000000020c1'), null) ->> 'founding')::boolean, 'and is marked founding');
 
 -- Day 60: one message queued, once.
 select is(private.founding_tick(), 1, 'day 60 queues the message');
@@ -112,10 +119,10 @@ select ok(public.partner_apply('{"name": "Self Partner", "email": "self-partner@
 select throws_ok($$ select public.partner_apply('{"name": "Sara K", "email": "SARA@example.test", "kind": "creator", "terms_version": "2026-10-26"}') $$,
   'P0001', 'already_applied', 'one open application per email');
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');
-select throws_ok($$ select public.staff_partner_decide((select id from public.partners where email = 'sara@example.test'), 'approved', 'googlesara') $$,
+select throws_ok($$ select public.staff_partner_decide(pg_temp.pid('sara@example.test'), 'approved', 'googlesara') $$,
   'P0001', 'bad_handle', 'a handle with a Google word is refused');
-select is(public.staff_partner_decide((select id from public.partners where email = 'sara@example.test'), 'approved', 'sara') ->> 'code', 'P-SARA', 'approval gives the code');
-select is((public.staff_partner_decide((select id from public.partners where email = 'self-partner@example.test'), 'approved', 'selfie')
+select is(public.staff_partner_decide(pg_temp.pid('sara@example.test'), 'approved', 'sara') ->> 'code', 'P-SARA', 'approval gives the code');
+select is((public.staff_partner_decide(pg_temp.pid('self-partner@example.test'), 'approved', 'selfie')
   ->> 'founding_partner')::boolean, true, 'the first 20 are Founding Partners');
 reset role;
 
@@ -170,12 +177,12 @@ select is((select amount_cents from public.partner_payouts), 2925, 'for 29.25');
 select ok((select statement::text from public.partner_payouts) not like '%Referred Barber%', 'the statement never names the business');
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');
 select is(public.staff_payouts_approve(current_date), 1, 'staff approve the month');
-select throws_ok($$ select public.staff_payout_sent((select id from public.partner_payouts), 'tx-hash-1') $$, 'P0001', 'no_method', 'no payout without details');
-select is(public.staff_partner_payout_details((select id from public.partners where code = 'P-SARA'), 'usdt', 'TXYZ1234abcd') ->> 'last4', 'abcd', 'details go to Vault, the last 4 shown');
-select ok((public.staff_payout_sent((select id from public.partner_payouts), 'tx-hash-1') ->> 'sent')::boolean, 'marked sent');
+select throws_ok($$ select public.staff_payout_sent(pg_temp.payout(), 'tx-hash-1') $$, 'P0001', 'no_method', 'no payout without details');
+select is(public.staff_partner_payout_details(pg_temp.pid('sara@example.test'), 'usdt', 'TXYZ1234abcd') ->> 'last4', 'abcd', 'details go to Vault, the last 4 shown');
+select ok((public.staff_payout_sent(pg_temp.payout(), 'tx-hash-1') ->> 'sent')::boolean, 'marked sent');
 reset role;
 select is((select count(*)::int from public.partner_commissions where payout_id is not null and state = 'paid'), 3, 'its lines are paid');
-select is((select payout_last4 from public.partners where code = 'P-SARA'), 'abcd', 'only the last 4 are on the partner row');
+select is((select payout_last4 from public.partner_accounts where code = 'P-SARA'), 'abcd', 'only the last 4 are on the partner row');
 
 -- A refund after the payout comes off the next payout.
 select pg_temp.event('evt_refund_3', 'refund.created', pg_temp.org('00000000-0000-4000-8000-0000000020c2'),

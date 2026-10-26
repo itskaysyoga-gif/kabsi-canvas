@@ -150,8 +150,8 @@ begin
   return v_id;
 end $$;
 
--- private.entitlements as it stands live (20261025173010), with two changes: a Founding 25 business has no trial caps
--- (100 drafts, 10 backlog drafts), and the result says founding.
+-- private.entitlements as it stands live (20261025173010), with one change: a Founding 25 business has no trial caps
+-- (100 drafts, 10 backlog drafts).
 create or replace function private.entitlements(p_org uuid, p_location uuid default null) returns jsonb
 language plpgsql stable security definer set search_path = '' as $$
 declare
@@ -267,8 +267,7 @@ begin
     'trial', v_trial,
     'caps', v_caps,
     'billing', v_billing,
-    'trial_used', v_used,
-    'founding', private.founding_days(p_org) is not null);
+    'trial_used', v_used);
 end $$;
 
 -- private.trial_take as it stands live (20261020160000): a Founding 25 business is not held to the 3 profile fixes.
@@ -277,7 +276,7 @@ language plpgsql security definer set search_path = '' as $$
 declare e jsonb := private.entitlements(null, p_location); v_org uuid := (e ->> 'organization_id')::uuid; v_used integer;
 begin
   if e ->> 'state' not in ('trial', 'grace') then return true; end if;
-  if coalesce((e ->> 'founding')::boolean, false) then return true; end if;
+  if private.founding_days(v_org) is not null then return true; end if;
   if p_kind <> 'profile_fix' then raise exception 'unknown_trial_cap'; end if;
   perform pg_advisory_xact_lock(hashtext('trial_take:' || v_org));
   if exists (select 1 from public.trial_usage where organization_id = v_org and kind = p_kind and ref = p_ref) then return true; end if;
@@ -427,7 +426,7 @@ end $$;
 revoke all on function private.founding_tick() from public, anon, authenticated;
 
 -- ─── 6. Kabsi Partners ────────────────────────────────────────────────────────────────────────────────────────────
-create table if not exists public.partners (
+create table if not exists public.partner_accounts (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -456,14 +455,14 @@ create table if not exists public.partners (
   payout_secret_id uuid,
   left_at timestamptz
 );
-comment on table public.partners is 'Kabsi Partners (master plan 29, 30.15 section 5): affiliates only. Payout details live in Vault (payout_secret_id); only the last 4 characters are kept here.';
-create unique index if not exists partners_open_email on public.partners (lower(email)) where status in ('applied', 'approved', 'paused');
-alter table public.partners enable row level security;
-revoke all on public.partners from anon, authenticated;
+comment on table public.partner_accounts is 'Kabsi Partners, affiliates (master plan 29, 30.15 section 5): affiliates only. Payout details live in Vault (payout_secret_id); only the last 4 characters are kept here.';
+create unique index if not exists partner_accounts_open_email on public.partner_accounts (lower(email)) where status in ('applied', 'approved', 'paused');
+alter table public.partner_accounts enable row level security;
+revoke all on public.partner_accounts from anon, authenticated;
 
 create table if not exists public.partner_referrals (
   id uuid primary key default gen_random_uuid(),
-  partner_id uuid not null references public.partners(id) on delete restrict,
+  partner_id uuid not null references public.partner_accounts(id) on delete restrict,
   organization_id uuid not null unique references public.organizations(id) on delete cascade,
   location_id uuid references public.locations(id) on delete set null,
   source text not null check (source in ('via', 'whatsapp', 'staff')),
@@ -482,7 +481,7 @@ revoke all on public.partner_referrals from anon, authenticated;
 
 create table if not exists public.partner_payouts (
   id uuid primary key default gen_random_uuid(),
-  partner_id uuid not null references public.partners(id) on delete restrict,
+  partner_id uuid not null references public.partner_accounts(id) on delete restrict,
   run_on date not null,
   currency text not null default 'USD',
   amount_cents integer not null check (amount_cents >= 2500),
@@ -502,7 +501,7 @@ revoke all on public.partner_payouts from anon, authenticated;
 
 create table if not exists public.partner_commissions (
   id bigint generated always as identity primary key,
-  partner_id uuid not null references public.partners(id) on delete restrict,
+  partner_id uuid not null references public.partner_accounts(id) on delete restrict,
   referral_id uuid not null references public.partner_referrals(id) on delete restrict,
   organization_id uuid not null,
   billing_event_id bigint not null references public.billing_events(id) on delete restrict,
@@ -534,11 +533,11 @@ create or replace function public.partner_apply(p jsonb) returns uuid
 language plpgsql security definer set search_path = '' as $$
 declare v_id uuid; v_email text := lower(btrim(p ->> 'email'));
 begin
-  if exists (select 1 from public.partners x where lower(x.email) = v_email and x.status = 'declined'
+  if exists (select 1 from public.partner_accounts x where lower(x.email) = v_email and x.status = 'declined'
               and x.decided_at > now() - interval '90 days') then
     raise exception 'reapply_later' using errcode = 'P0001';
   end if;
-  insert into public.partners (name, email, phone, country, city, kind, reach, pitch, uae_permit, source, terms_version, terms_accepted_at)
+  insert into public.partner_accounts (name, email, phone, country, city, kind, reach, pitch, uae_permit, source, terms_version, terms_accepted_at)
   values (btrim(p ->> 'name'), v_email, nullif(p ->> 'phone', ''), nullif(upper(p ->> 'country'), ''), nullif(btrim(p ->> 'city'), ''),
     p ->> 'kind', nullif(btrim(p ->> 'reach'), ''), nullif(btrim(p ->> 'pitch'), ''), nullif(btrim(p ->> 'uae_permit'), ''),
     coalesce(p ->> 'source', 'web'), p ->> 'terms_version', now())
@@ -554,7 +553,7 @@ grant execute on function public.partner_apply(jsonb) to service_role;
 create or replace function public.partner_places() returns jsonb
 language sql stable security definer set search_path = '' as $$
   select jsonb_build_object('founding_total', 20,
-    'founding_left', greatest(0, 20 - (select count(*) from public.partners where founding_partner))::int)
+    'founding_left', greatest(0, 20 - (select count(*) from public.partner_accounts where founding_partner))::int)
 $$;
 revoke all on function public.partner_places() from public, anon, authenticated;
 grant execute on function public.partner_places() to service_role;
@@ -567,40 +566,40 @@ $$;
 
 create or replace function public.staff_partner_decide(p_id uuid, p_status text, p_handle text default null, p_note text default null) returns jsonb
 language plpgsql security definer set search_path = '' as $$
-declare x public.partners; v_handle text; v_founding boolean;
+declare x public.partner_accounts; v_handle text; v_founding boolean;
 begin
   if not public.is_staff() then raise exception 'forbidden' using errcode = '42501'; end if;
   if p_status not in ('approved', 'declined', 'paused', 'left') then raise exception 'bad_status'; end if;
   perform pg_advisory_xact_lock(hashtext('partners_approve'));
-  select * into x from public.partners where id = p_id for update;
+  select * into x from public.partner_accounts where id = p_id for update;
   if not found then raise exception 'not_found'; end if;
   if p_status = 'approved' and x.handle is null then
     v_handle := lower(coalesce(nullif(btrim(p_handle), ''), regexp_replace(lower(x.name), '[^a-z0-9]', '', 'g')));
     v_handle := left(v_handle, 20);
     if not private.partner_handle_ok(v_handle) then raise exception 'bad_handle' using hint = '3 to 20 lowercase letters and numbers, no brand or Google words.'; end if;
-    if exists (select 1 from public.partners where handle = v_handle) then raise exception 'handle_taken'; end if;
-    v_founding := (select count(*) from public.partners where founding_partner) < 20;
-    update public.partners set handle = v_handle, code = 'P-' || upper(v_handle), founding_partner = v_founding where id = p_id;
+    if exists (select 1 from public.partner_accounts where handle = v_handle) then raise exception 'handle_taken'; end if;
+    v_founding := (select count(*) from public.partner_accounts where founding_partner) < 20;
+    update public.partner_accounts set handle = v_handle, code = 'P-' || upper(v_handle), founding_partner = v_founding where id = p_id;
   end if;
-  update public.partners set status = p_status, decided_at = now(), decided_by = auth.uid(), updated_at = now(),
+  update public.partner_accounts set status = p_status, decided_at = now(), decided_by = auth.uid(), updated_at = now(),
     decision_note = coalesce(nullif(btrim(coalesce(p_note, '')), ''), decision_note),
     left_at = case when p_status = 'left' then now() else left_at end
    where id = p_id;
   perform private.audit('staff', auth.uid(), 'partner_' || p_status, null, 'partner', p_id::text,
     jsonb_build_object('status', x.status), jsonb_build_object('status', p_status), 'staff', p_status);
   return (select jsonb_build_object('id', id, 'status', status, 'handle', handle, 'code', code, 'founding_partner', founding_partner)
-            from public.partners where id = p_id);
+            from public.partner_accounts where id = p_id);
 end $$;
 
 -- Payout details go into Vault; the table keeps the method and the last 4 characters (29.1).
 create or replace function public.staff_partner_payout_details(p_id uuid, p_method text, p_detail text) returns jsonb
 language plpgsql security definer set search_path = '' as $$
-declare x public.partners; v_secret uuid; v_detail text := btrim(coalesce(p_detail, ''));
+declare x public.partner_accounts; v_secret uuid; v_detail text := btrim(coalesce(p_detail, ''));
 begin
   if not public.is_staff() then raise exception 'forbidden' using errcode = '42501'; end if;
   if p_method not in ('usdt', 'usdc', 'paypal') then raise exception 'bad_method'; end if;
   if char_length(v_detail) < 6 or char_length(v_detail) > 200 then raise exception 'bad_detail'; end if;
-  select * into x from public.partners where id = p_id for update;
+  select * into x from public.partner_accounts where id = p_id for update;
   if not found then raise exception 'not_found'; end if;
   if x.payout_secret_id is not null then
     perform vault.update_secret(x.payout_secret_id, v_detail, 'partner_payout_' || p_id::text, 'Kabsi partner payout details');
@@ -608,7 +607,7 @@ begin
   else
     v_secret := vault.create_secret(v_detail, 'partner_payout_' || p_id::text, 'Kabsi partner payout details');
   end if;
-  update public.partners set payout_method = p_method, payout_last4 = right(v_detail, 4), payout_secret_id = v_secret, updated_at = now()
+  update public.partner_accounts set payout_method = p_method, payout_last4 = right(v_detail, 4), payout_secret_id = v_secret, updated_at = now()
    where id = p_id;
   perform private.audit('staff', auth.uid(), 'partner_payout_details', null, 'partner', p_id::text, null,
     jsonb_build_object('method', p_method), 'staff', p_method);
@@ -627,7 +626,7 @@ language sql stable security definer set search_path = '' as $$
     when x.own_place_id is not null and exists (select 1 from public.locations y where y.organization_id = p_org
                   and y.place_id = x.own_place_id) then 'google_place'
     end
-  from public.partners x where x.id = p_partner
+  from public.partner_accounts x where x.id = p_partner
 $$;
 revoke all on function private.partner_self_reason(uuid, uuid) from public, anon, authenticated;
 
@@ -637,7 +636,7 @@ revoke all on function private.partner_self_reason(uuid, uuid) from public, anon
 -- matches its partner by owner email, owner WhatsApp number or Google place is a self referral and earns nothing.
 create or replace function private.partner_attribute(p_location uuid) returns uuid
 language plpgsql security definer set search_path = '' as $$
-declare l public.locations; v_code text; v_touch timestamptz; v_src text; x public.partners; v_self text; v_id uuid; v_created timestamptz;
+declare l public.locations; v_code text; v_touch timestamptz; v_src text; x public.partner_accounts; v_self text; v_id uuid; v_created timestamptz;
 begin
   select * into l from public.locations where id = p_location;
   if not found or l.organization_id is null or l.is_demo then return null; end if;
@@ -649,7 +648,7 @@ begin
     v_src := 'via';
     v_touch := coalesce((select a.via_at from public.signup_attribution a where a.user_id = l.created_by), l.created_at);
   end if;
-  if v_code is null or v_code = '' or not exists (select 1 from public.partners p where p.code = v_code and p.status in ('approved', 'paused')) then
+  if v_code is null or v_code = '' or not exists (select 1 from public.partner_accounts p where p.code = v_code and p.status in ('approved', 'paused')) then
     select c.partner_code, c.partner_code_at into v_code, v_touch
       from public.whatsapp_conversations c
      where c.partner_code is not null
@@ -660,7 +659,7 @@ begin
     v_src := 'whatsapp';
   end if;
   if v_code is null then return null; end if;
-  select * into x from public.partners p where p.code = v_code and p.status in ('approved', 'paused');
+  select * into x from public.partner_accounts p where p.code = v_code and p.status in ('approved', 'paused');
   if not found then return null; end if;
 
   v_self := private.partner_self_reason(x.id, l.organization_id);
@@ -703,7 +702,7 @@ $$;
 
 create or replace function private.partner_ledger_event(p_event bigint) returns text
 language plpgsql security definer set search_path = '' as $$
-declare e public.billing_events; r public.partner_referrals; x public.partners; c public.partner_commissions;
+declare e public.billing_events; r public.partner_referrals; x public.partner_accounts; c public.partner_commissions;
   v_base int; v_paid int; v_back int; v_pay text; v_at timestamptz; v_full boolean;
 begin
   select * into e from public.billing_events where id = p_event;
@@ -719,7 +718,7 @@ begin
         self_reason = private.partner_self_reason(r.partner_id, r.organization_id) where id = r.id;
       return 'self_referral';
     end if;
-    select * into x from public.partners where id = r.partner_id;
+    select * into x from public.partner_accounts where id = r.partner_id;
     if x.status not in ('approved', 'paused') then return 'partner_inactive'; end if;
     v_base := private.creem_base_cents(e.detail);
     if v_base is null then v_base := e.amount; end if;
@@ -789,7 +788,7 @@ begin
   get diagnostics v_cleared = row_count;
   for r in
     select k.partner_id, k.currency, sum(k.commission_cents)::int total, count(*)::int n
-      from public.partner_commissions k join public.partners p on p.id = k.partner_id
+      from public.partner_commissions k join public.partner_accounts p on p.id = k.partner_id
      where k.state = 'cleared' and k.payout_id is null and k.mode = 'live' and p.status = 'approved'
      group by k.partner_id, k.currency
     having sum(k.commission_cents) >= 2500
@@ -853,12 +852,12 @@ begin
         'cleared_cents', (select coalesce(sum(k.commission_cents), 0) from public.partner_commissions k where k.partner_id = p.id and k.state = 'cleared' and k.payout_id is null and k.mode = 'live'),
         'paid_cents', (select coalesce(sum(k.commission_cents), 0) from public.partner_commissions k where k.partner_id = p.id and k.state = 'paid'),
         'test_cents', (select coalesce(sum(k.commission_cents), 0) from public.partner_commissions k where k.partner_id = p.id and k.mode is distinct from 'live' and k.state <> 'void'))
-        order by (p.status = 'applied') desc, p.created_at desc) from public.partners p), '[]'::jsonb),
+        order by (p.status = 'applied') desc, p.created_at desc) from public.partner_accounts p), '[]'::jsonb),
     'payouts', coalesce((select jsonb_agg(jsonb_build_object('id', o.id, 'partner_id', o.partner_id, 'partner', p.name,
         'run_on', o.run_on, 'currency', o.currency, 'amount_cents', o.amount_cents, 'lines', o.lines, 'state', o.state,
         'method', coalesce(o.method, p.payout_method), 'last4', p.payout_last4, 'reference', o.reference, 'sent_at', o.sent_at,
         'statement', o.statement) order by o.run_on desc, p.name)
-      from public.partner_payouts o join public.partners p on p.id = o.partner_id where o.run_on > current_date - 400), '[]'::jsonb),
+      from public.partner_payouts o join public.partner_accounts p on p.id = o.partner_id where o.run_on > current_date - 400), '[]'::jsonb),
     'next_run_on', case when extract(day from current_date) <= 5 then date_trunc('month', current_date)::date + 4
                         else (date_trunc('month', current_date) + interval '1 month')::date + 4 end);
 end $$;
@@ -878,13 +877,13 @@ end $$;
 
 create or replace function public.staff_payout_sent(p_payout uuid, p_reference text) returns jsonb
 language plpgsql security definer set search_path = '' as $$
-declare o public.partner_payouts; x public.partners;
+declare o public.partner_payouts; x public.partner_accounts;
 begin
   if not public.is_staff() then raise exception 'forbidden' using errcode = '42501'; end if;
   select * into o from public.partner_payouts where id = p_payout for update;
   if not found then raise exception 'not_found'; end if;
   if o.state <> 'approved' then raise exception 'not_approved'; end if;
-  select * into x from public.partners where id = o.partner_id;
+  select * into x from public.partner_accounts where id = o.partner_id;
   if x.payout_method is null then raise exception 'no_method' using hint = 'Add the partner''s payout details first.'; end if;
   if char_length(btrim(coalesce(p_reference, ''))) < 3 then raise exception 'bad_reference'; end if;
   update public.partner_payouts set state = 'sent', sent_at = now(), method = x.payout_method, reference = btrim(p_reference) where id = o.id;
