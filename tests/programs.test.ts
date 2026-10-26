@@ -111,3 +111,11 @@ describe("Founding 25 messages", () => {
     expect(foundingLine(60, "X", ends, "https://kabsi.co").email.button).toBeUndefined();
   });
 });
+
+describe("the founding consent words (Web 2)", () => {
+  it("are the same on the form and in the stored proof", async () => {
+    const site = await import("../src/lib/public-api");
+    const server = await import("../supabase/functions/_shared/programs.ts");
+    expect(site.FOUNDING_CONSENT_TEXT).toBe(server.FOUNDING_CONSENT_TEXT);
+  });
+});

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Turnstile } from "@/components/turnstile";
 import {
   ApiError,
+  FOUNDING_CONSENT_TEXT,
   applyFounding,
   useFoundingPlaces,
   type FoundingApplication,
@@ -319,7 +320,7 @@ function Tick({
 }
 
 type Errors = Partial<
-  Record<"business" | "country" | "trade" | "phone" | "why" | "caseStudy" | "checkIn", string>
+  Record<"business" | "country" | "trade" | "phone" | "why" | "checkIn", string>
 >;
 
 function Application({ onSent }: { onSent: () => void }) {
@@ -329,7 +330,6 @@ function Application({ onSent }: { onSent: () => void }) {
     trade: "",
     phone: "",
     why: "",
-    caseStudy: false,
     checkIn: false,
   });
   const [errors, setErrors] = useState<Errors>({});
@@ -351,8 +351,8 @@ function Application({ onSent }: { onSent: () => void }) {
     if (f.phone.replace(/\D/g, "").length < 8)
       err.phone = "Type your WhatsApp number with its country code.";
     if (f.why.trim().length < 10) err.why = "Please tell us in a line or two why now.";
-    if (!f.caseStudy) err.caseStudy = "Founding places come with a case study. Tick to agree.";
-    if (!f.checkIn) err.checkIn = "Founding places come with the check-ins. Tick to agree.";
+    if (!f.checkIn)
+      err.checkIn = "Founding places come with the check-ins and a case study. Tick to agree.";
     setErrors(err);
     setFailure(null);
     if (Object.values(err).some(Boolean)) return;
@@ -454,16 +454,9 @@ function Application({ onSent }: { onSent: () => void }) {
           </p>
         )}
       </div>
-      <Tick
-        checked={f.caseStudy}
-        onChange={(v) => set("caseStudy", v)}
-        error={errors.caseStudy || null}
-      >
-        Kabsi may write a case study about my business, named or anonymous. I approve the final text
-        before it is published.
-      </Tick>
+      {/* One tick with the exact words the server stores as proof (programs.ts FOUNDING_CONSENT_TEXT). */}
       <Tick checked={f.checkIn} onChange={(v) => set("checkIn", v)} error={errors.checkIn || null}>
-        I can give a 2-minute check-in every two weeks.
+        {FOUNDING_CONSENT_TEXT}
       </Tick>
       <Turnstile key={round} onToken={setToken} />
       {failure && <Banner tone="bad" title={failure} />}

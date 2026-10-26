@@ -17,7 +17,8 @@
  *    value may appear, scripts/check-tokens.mjs).
  * 2. Roles (--surface-*, --text-*, --line*, --focus...): what pages and components use. The public website is dark
  *    (.theme-dark, set by SiteShell; the page body follows it). .theme-light is the light look of the customer pages
- *    and the light section on Home; :root is light too, so the signed-in website keeps its look until UX 1.
+ *    and the light section on Home; :root is light too, so the signed-in website keeps its light colours until UX
+ *    1 (its fonts are the new two families and its card radius is the new 16 px, DESIGN.md).
  * 3. Tailwind names (@theme inline): bg-surface-1, text-text-2, rounded-card, shadow-lift, ease-kb and so on.
  *
  * The legacy block (--color-kb-* with the old names, text-kb-*, shadow-kb) is what the signed-in website still reads.

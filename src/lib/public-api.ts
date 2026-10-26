@@ -98,6 +98,12 @@ export function usePartnerPlaces(): PartnerPlaces | null {
   return v;
 }
 
+/** The words the founding applicant ticks, shown on the form and stored by the server as proof. Kept equal to
+ * FOUNDING_CONSENT_TEXT in supabase/functions/_shared/programs.ts by tests/programs.test.ts. */
+export const FOUNDING_CONSENT_TEXT =
+  "I agree to a 2-minute check-in with Kabsi every two weeks, and to Kabsi writing a case study about my business. " +
+  "I approve the final text before it is published, and I choose whether my business is named.";
+
 export type FoundingApplication = {
   business_name: string;
   country: "AE" | "GB" | "US";

@@ -326,6 +326,10 @@ function useCheck(started: StartedCheck | null) {
   const [check, setCheck] = useState<FreeCheck | null>(
     started && "code" in started ? started : null,
   );
+  // The saved check (/scan/CODE) arrives after the first render: take it when it comes.
+  useEffect(() => {
+    if (started && "code" in started) setCheck(started);
+  }, [started]);
   useEffect(() => {
     if (!check || check.map.state !== "mapping") return;
     // The 49 places come in over a few minutes; the page asks again every 15 seconds for up to 15 minutes.
@@ -385,7 +389,9 @@ export function LiveResult({
   return (
     <>
       <section className="container-kb pt-28 lg:pt-36">
-        <p className="text-label font-bold text-text-3">Free check, {longDate(new Date())}</p>
+        <p className="text-label font-bold text-text-3">
+          Free check, {longDate(check?.created_at ? new Date(check.created_at) : new Date())}
+        </p>
         <h1 className="mt-3 text-h2 sm:text-display">
           {s.name}
           {term ? `, for '${term}'` : ""}

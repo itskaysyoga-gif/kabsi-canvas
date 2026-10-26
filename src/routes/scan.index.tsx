@@ -37,7 +37,7 @@ function Scan() {
     <SiteShell>
       {q ? (
         <LiveFreeCheck
-          key={`${q}|${keyword ?? ""}`}
+          key={`${q}|${keyword ?? ""}|${industry ?? ""}`}
           query={q}
           keyword={keyword ?? null}
           industry={industry ?? null}
