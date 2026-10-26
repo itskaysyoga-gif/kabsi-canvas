@@ -140,8 +140,7 @@ function Page() {
         <p>
           <b>From launch, if Kabsi checks where your business shows:</b> your business name,
           category, address and the keywords you confirm are sent to DataForSEO, which looks up
-          Google Maps results around your business and what AI assistants answer, and to Google's
-          Gemini API for the same AI answer checks. Geoapify receives map points (coordinates) to
+          Google Maps results around your business and what ChatGPT and Perplexity answer. Geoapify receives map points (coordinates) to
           draw the map image. We keep the results: your rank at each point on the map, the AI
           answers (shown as samples, because they change from run to run) and the public details of
           the competitors you pick: name, rating, number of reviews, category and new reviews a
@@ -265,7 +264,7 @@ function Page() {
           <li>
             From launch, to see what AI assistants say about your business, Kabsi sends questions in
             your customers' words that name your category and area (for example "best dentist in
-            Jumeirah") to DataForSEO and to Google's Gemini API. The answers change from run to run,
+            Jumeirah") to DataForSEO, which asks ChatGPT and Perplexity for them. The answers change from run to run,
             so Kabsi shows them as a sample and never as a promise.
           </li>
           <li>
@@ -311,10 +310,6 @@ function Page() {
             Anthropic only for this.
           </li>
           <li>Google: the Business Profile and Places APIs.</li>
-          <li>
-            From launch, Google's Gemini API: checking what AI assistants answer about a business
-            (section 5).
-          </li>
           <li>
             From launch, DataForSEO: Google Maps results and AI answers for the keywords you confirm
             (sections 2 and 5).

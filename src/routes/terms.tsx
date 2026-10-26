@@ -165,7 +165,7 @@ function Page() {
           </li>
           <li>
             That a map, an AI answer or a competitor figure matches what you see when you search
-            yourself. They come from other companies (DataForSEO and Google's Gemini API), are a
+            yourself. They come from other companies (DataForSEO, which also provides the ChatGPT and Perplexity answers), are a
             sample taken at one moment, and change from run to run. Kabsi shows them as a sample and
             never as a promise.
           </li>

@@ -36,7 +36,7 @@ Decisions taken while writing (lane R, R-41):
 
 **Hero**
 - H1: "See where you show up on Google and in AI answers."
-- Lead: "Kabsi checks your Google Maps ranking and what ChatGPT and Gemini say about you, helps you get more reviews the right way, keeps your listing right and posts for you. You reply Yes on WhatsApp."
+- Lead: "Kabsi checks your Google Maps ranking and what ChatGPT and Perplexity say about you, helps you get more reviews the right way, keeps your listing right and posts for you. You reply Yes on WhatsApp."
 - Scan box. Under it: "Free for 14 days. No card. Cancel in WhatsApp."
 - Visual (Example): the map filling in, the phone receiving it. Map line in the chat: "We searched 'dentist' on Google Maps from 49 places around your clinic, like a customer would. You came up in the top 3 from 18 of them. North of the mall, Smile Clinic comes up first."
 
@@ -219,7 +219,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 ## 18. Website, signed in: onboarding (28.5)
 
 1. Sign up. H1 "Let's set up [Business]." (or "Find your business" when unknown). Button: "Continue".
-2. Manager. H1 "Add Kabsi as a Manager on Google." Steps with live status: "Invite sent. Waiting for you to accept." / "Access works." Buttons: "Show me how", tertiary "Send this to my manager", "Resend". Line: "Google Business Profile is free from Google. Kabsi is an independent paid service." Link to Google's third party page.
+2. Manager. H1 "Add Kabsi as a Manager on Google." Steps with live status: "Invite sent. Kabsi accepts it within a few minutes." / "Access works." Buttons: "Show me how", tertiary "Send this to my manager", "Resend". Line: "Google Business Profile is free from Google. Kabsi is an independent paid service." Link to Google's third party page.
 3. Five questions, one screen. H1 "A few things about your business." Then H2 "The search Kabsi will track" with the keyword prefilled ("Change"), and H2 "Pick your competitors" with the scan's list (pick 3, or 5 on Pro). Button: "Save".
 4. WhatsApp. H1 "Connect WhatsApp." Desktop: "Scan this code with your phone." Phone: button "Open WhatsApp". Line: "Kabsi only messages you about your business. Reply Stop any time."
 5. Done. H1 "Your first map is on its way." Line: "It arrives on WhatsApp within 5 minutes."

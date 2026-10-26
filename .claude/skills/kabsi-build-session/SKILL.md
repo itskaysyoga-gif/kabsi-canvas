@@ -24,8 +24,8 @@ Rashid runs Kabsi and the build sessions, and the lane R chat decides on his aut
 - Never sleep-poll. While CI runs, do the next item. Check CI with one `gh pr checks <n>` call per return, or subscribe to the PR. Kill any wait loop you start before you stop.
 - The merge gate is the ci.yml jobs. Lighthouse is report only: never wait for it. Wait for Load only when its paths changed (load.yml lists them).
 - Right before you merge, if main moved since your last green run, merge main into your branch and wait for green again. Two PRs that were each green broke main on 25 Oct (#215).
-- Before you name a migration, list supabase/migrations on origin/main and on every open claude/* branch (`gh pr list`), and pick a timestamp nobody uses. Then register the version in supabase_migrations.schema_migrations when you apply it with execute_sql.
-- Supabase connector prompts: answer "Always allow" is Rashid's choice. If a connector call times out waiting for approval once, do not call it again in that turn: write the exact SQL file path and the read-back in your report, and the lane R chat applies it.
+- Applying your migration yourself (lane R, 26 Oct 2026): use the Supabase connector's apply_migration, never execute_sql, for every write. Pass the file's text without begin or commit, and as the name the file name without its timestamp. apply_migration records its own version (the current time): read it back with list_migrations, then rename your file in the repo to that version (`git mv`), so the repo and the database match. Read-backs use execute_sql with select only. On delete clauses are fine in apply_migration (V2's on delete cascade went through on 26 Oct).
+- Supabase connector prompts: execute_sql writes ask Rashid for approval and time out when he is away, so never write with execute_sql. If apply_migration ever asks and times out, do not call it again in that turn: give the exact file path and the read-back in your report, and the lane R chat applies it.
 - UI work reads DESIGN.md first and takes every visible line from docs/COPY.md. Use the webapp-testing skill for screenshots at 390 and 1440 px.
 - Keep the report short. Rashid reads it on his phone.
 
@@ -37,7 +37,7 @@ Rashid runs Kabsi and the build sessions, and the lane R chat decides on his aut
 - Never use the Kapso connector for Kabsi (R-49). Kapso is reached only by Kabsi's own code. Never write, paste or print a secret.
 - Do not change prompt files while the eval gate is off, unless the kabsi-reply-lab skill has been run on the change and its results are recorded in PROGRESS.
 - Stop before dropping tables or columns or deleting real data. Drops and real deletions go in their own file with a read-back query and the expected result, and Rashid runs them (R-35, R-44).
-- Additive SQL with on delete clauses (for example foreign keys with on delete cascade) is applied by you with execute_sql and a read-back in the same call (R-44). The connector's apply_migration refuses the clause; execute_sql runs it.
+- Additive SQL is applied by you with apply_migration, then read back with a select (R-44).
 - Stop and ask only before a step the task marks "Ask Rashid before", or when a task needs a manual step of Rashid's that PROGRESS does not record as done.
 
 ## Google guard (any change under supabase/functions/_shared/google/ or anything that writes to Google)
