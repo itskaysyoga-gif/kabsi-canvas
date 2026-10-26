@@ -61,12 +61,12 @@ export const QUESTIONS_28: Question[] = [
     topic: "AI Visibility",
     ask: "Do you check whether ChatGPT recommends my restaurant?",
     kb: [
-      /\*\*\[COMING\] AI Visibility:\*\* questions written in customers' words are run on ChatGPT, Perplexity and Gemini/,
+      /\*\*\[COMING\] AI Visibility:\*\* questions written in customers' words are run on ChatGPT and Perplexity/,
     ],
     must: [/ChatGPT/],
     coming: true,
     reference:
-      "That is AI Visibility, and it is not available yet. Kabsi will ask ChatGPT, Perplexity and Gemini questions in your customers' words and record whether your business is named, where, which competitors are named and which sources are cited. It is shown as a sample, because AI answers change from one run to the next.",
+      "That is AI Visibility, and it is not available yet. Kabsi will ask ChatGPT and Perplexity questions in your customers' words and record whether your business is named, where, which competitors are named and which sources are cited. It is shown as a sample, because AI answers change from one run to the next.",
   },
   {
     id: "n66",
@@ -83,13 +83,13 @@ export const QUESTIONS_28: Question[] = [
     id: "n67",
     lang: "es",
     topic: "AI Visibility in Spanish",
-    ask: "¿Kabsi revisa si Gemini menciona mi negocio?",
-    gloss: "Does Kabsi check whether Gemini mentions my business?",
-    kb: [/run on ChatGPT, Perplexity and Gemini/],
-    must: [/Gemini/],
+    ask: "¿Kabsi revisa si Perplexity menciona mi negocio?",
+    gloss: "Does Kabsi check whether Perplexity mentions my business?",
+    kb: [/run on ChatGPT and Perplexity/],
+    must: [/Perplexity/],
     coming: true,
     reference:
-      "Eso será AI Visibility y todavía no está disponible. Kabsi hará preguntas con las palabras de sus clientes en ChatGPT, Perplexity y Gemini, y anotará si su negocio aparece, en qué lugar y qué competidores y fuentes se citan.",
+      "Eso será AI Visibility y todavía no está disponible. Kabsi hará preguntas con las palabras de sus clientes en ChatGPT y Perplexity, y anotará si su negocio aparece, en qué lugar y qué competidores y fuentes se citan.",
   },
   // ── competitors ──────────────────────────────────────────────────────────────────────────────────────────────────
   {
