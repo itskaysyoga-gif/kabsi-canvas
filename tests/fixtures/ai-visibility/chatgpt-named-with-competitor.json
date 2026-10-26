@@ -1,0 +1,63 @@
+{
+  "version": "0.1.20250526",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "cost": 0.0014,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "fixture-task",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "cost": 0.0014,
+      "result": [
+        {
+          "model_name": "gpt-4.1-mini-2025-04-14",
+          "input_tokens": 88,
+          "output_tokens": 310,
+          "web_search": true,
+          "money_spent": 0.0008,
+          "datetime": "2026-10-26 09:00:00 +00:00",
+          "items": [
+            {
+              "type": "message",
+              "sections": [
+                {
+                  "type": "text",
+                  "text": "Top picks near Jumeirah:\n1. **Harbor Bakes**: great croissants.\n2. **Yawmiyati**: neighbourhood favourite.\n3. **Sunrise Pastry**: early opening.\n4. **Little Rye**: rye breads.",
+                  "annotations": [
+                    {
+                      "title": "The best bakeries in Dubai",
+                      "url": "https://www.timeout.com/dubai/restaurants/best-bakeries-in-dubai",
+                      "start_index": 0,
+                      "end_index": 10,
+                      "text": "The best bakeries in Dubai"
+                    },
+                    {
+                      "title": "Where to eat this week",
+                      "url": "https://dubai.example-eats.test/bakeries",
+                      "start_index": 0,
+                      "end_index": 10,
+                      "text": "Where to eat this week"
+                    },
+                    {
+                      "title": "The best bakeries in Dubai",
+                      "url": "https://www.timeout.com/dubai/restaurants/best-bakeries-in-dubai",
+                      "start_index": 0,
+                      "end_index": 10,
+                      "text": "The best bakeries in Dubai"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "fan_out_queries": [
+            "best bakery in jumeirah"
+          ]
+        }
+      ]
+    }
+  ]
+}

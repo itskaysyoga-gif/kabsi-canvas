@@ -2,6 +2,9 @@
 //   POST /visibility/tick     x-cron-secret (pg_cron every 5 minutes when work is due): start due grids, collect results.
 //   POST /visibility/keyword  the signed-in owner or manager, or staff: track a search (the owner's yes; 27.4 limits).
 //   POST /visibility/picks    the signed-in owner or manager: the competitors to watch (3 on Essentials, 5 on Pro).
+//   POST /visibility/ai-tick  x-cron-secret (pg_cron every 15 minutes when a prompt is due): queue one AI Visibility job per prompt and provider (V2).
+//   GET  /visibility/ai-summary  the signed-in member or staff: the period's AI numbers, the owner's line and Insights' source actions (V2).
+//   POST /visibility/ai-calibrate  x-cron-secret: one live answer per provider for named businesses, saved to app_settings for the calibration check (30.9 item 3).
 //   GET  /visibility/image    the signed-in member, staff or x-cron-secret: the map image of one finished grid (PNG).
 // Ranks and competitors come only from DataForSEO public results (30.10.2); mock mode unless app_settings
 // dataforseo_mode is 'live', and the demo business always on the mock (R-17). The logic is in _shared/visibility/.
@@ -14,6 +17,12 @@ import { locate } from "../_shared/visibility/locate.ts";
 import { radiusFor } from "../_shared/visibility/grid.ts";
 import { mapDate, renderMap } from "../_shared/visibility/map-image.ts";
 import { baseMap } from "../_shared/visibility/geoapify.ts";
+import { aiDeps, doneRuns, enabledProviders, realProvider, setting as aiSetting, syncPrompts } from "../_shared/visibility/ai/deps.ts";
+import { tickAi } from "../_shared/visibility/ai/run.ts";
+import { analyze } from "../_shared/visibility/ai/analyze.ts";
+import { numbers, reportBlock } from "../_shared/visibility/ai/numbers.ts";
+import { PROVIDERS, type AiProviderName } from "../_shared/visibility/ai/providers.ts";
+import { sourceActions } from "../_shared/insights/ai-visibility.ts";
 import { type KeywordRow, type RunDb, type RunDeps, type ScanRow, tick } from "../_shared/visibility/run.ts";
 
 const db = () => admin();
@@ -192,7 +201,15 @@ async function addKeyword(req: Request): Promise<Response> {
     ? must(await db().from("visibility_keywords").update({ cadence, confirmed_at: row.confirmed_at }).eq("id", same.id).select("id, keyword, cadence, radius_km").single())
     : must(await db().from("visibility_keywords").insert(row).select("id, keyword, cadence, radius_km").single());
   log(fn, { action: "keyword", location_id: locationId, by: who.kind });
-  return json({ ok: true, keyword: saved });
+  // V2: the owner's yes to this search is also the yes to the AI Visibility prompts built from it. A failure here never
+  // undoes the search the owner just confirmed.
+  let prompts: string[] = [];
+  try {
+    prompts = await syncPrompts(locationId, keyword);
+  } catch (e) {
+    await captureError(fn, e, { step: "ai_prompts" });
+  }
+  return json({ ok: true, keyword: saved, ai_prompts: prompts });
 }
 
 async function setPicks(req: Request): Promise<Response> {
@@ -239,6 +256,45 @@ async function image(req: Request, url: URL): Promise<Response> {
   return new Response(png, { headers: { ...CORS, "content-type": "image/png", "cache-control": "private, max-age=3600" } });
 }
 
+// ─── AI Visibility (V2) ─────────────────────────────────────────────────────────────────────────────────────────────
+async function aiSummary(req: Request, url: URL): Promise<Response> {
+  const locationId = url.searchParams.get("location_id") ?? "";
+  const days = Math.min(90, Math.max(7, Number(url.searchParams.get("days") ?? 30) || 30));
+  if (!locationId || !(await caller(req, locationId))) return json({ error: "forbidden" }, 403);
+  const to = new Date(), from = new Date(to.getTime() - days * 86_400_000);
+  const runs = await doneRuns(locationId, new Date(from.getTime() - days * 86_400_000));
+  const n = numbers(runs, { from, to: new Date(to.getTime() + 1000) });
+  const when = days <= 14 ? "in the last 2 weeks" : days <= 7 ? "this week" : "this month";
+  return json({ ...reportBlock(n, when), actions: sourceActions(runs.filter((r) => new Date(r.run_at) >= from)) });
+}
+
+/** One live answer per provider for named businesses; the analysis and the text are saved in one settings row, read once and deleted. */
+async function aiCalibrate(req: Request): Promise<Response> {
+  const body = await req.json().catch(() => ({})) as { id?: string; checks?: { business: string; country: string; city: string; prompt: string; providers?: AiProviderName[]; known?: string[] }[] };
+  const id = String(body.id ?? "run").replace(/[^a-z0-9_-]/gi, "").slice(0, 40);
+  const checks = (body.checks ?? []).slice(0, 12);
+  const work = (async () => {
+    const out: unknown[] = [];
+    for (const c of checks) {
+      for (const p of (c.providers ?? PROVIDERS).filter((x) => PROVIDERS.includes(x))) {
+        try {
+          if (!(await aiDeps.room(40_000))) { out.push({ ...c, provider: p, error: "cap" }); continue; }
+          const raw = await realProvider("live", p, c.business).ask(c.prompt, { country: c.country, city: c.city });
+          await aiDeps.spend(1, raw.costMicros);
+          const a = analyze({ text: raw.text, sources: raw.sources, business: c.business, known: (c.known ?? []).map((name) => ({ key: name, name })) });
+          out.push({ business: c.business, prompt: c.prompt, provider: p, model: raw.model, cost_micros: raw.costMicros, source_count: raw.sourceCount, text: raw.text, recorded: a });
+        } catch (e) {
+          out.push({ business: c.business, prompt: c.prompt, provider: p, error: String((e as Error)?.message ?? e).slice(0, 200) });
+        }
+      }
+    }
+    await db().from("app_settings").upsert({ key: `ai_calibration_${id}`, value: JSON.stringify(out) });
+  })();
+  // @ts-ignore EdgeRuntime is provided by the Supabase Edge runtime
+  if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(work); else await work;
+  return json({ ok: true, id, checks: checks.length });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   const url = new URL(req.url);
@@ -250,6 +306,17 @@ Deno.serve(async (req) => {
       log(fn, { action: "tick", ...out });
       return json(out);
     }
+    if (req.method === "POST" && route === "/ai-tick") {
+      if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
+      const out = await tickAi(aiDeps);
+      log(fn, { action: "ai_tick", ...out, providers: (await enabledProviders()).join(",") });
+      return json(out);
+    }
+    if (req.method === "POST" && route === "/ai-calibrate") {
+      if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
+      return await aiCalibrate(req);
+    }
+    if (req.method === "GET" && route === "/ai-summary") return await aiSummary(req, url);
     if (req.method === "POST" && route === "/keyword") return await addKeyword(req);
     if (req.method === "POST" && route === "/picks") return await setPicks(req);
     if (req.method === "GET" && route === "/image") return await image(req, url);

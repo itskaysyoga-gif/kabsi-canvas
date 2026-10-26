@@ -5,7 +5,7 @@
 import { COST_MICROS, type Identity, keyOf, type MapsItem, type MapsProvider, type MapsTask, rankOf } from "./dataforseo.ts";
 import { gridPoints, zoomFor } from "./grid.ts";
 import { GRID_SPAN } from "./map-image.ts";
-import { type CellResult, categoryCheck, competitors, mapMessage, selfRow, summarize } from "./scan.ts";
+import { businessType, type CellResult, categoryCheck, competitors, mapMessage, selfRow, summarize } from "./scan.ts";
 
 export type KeywordRow = {
   id: string; location_id: string; keyword: string; radius_km: number; center_lat: number; center_lng: number;
@@ -127,7 +127,7 @@ export function finish(cells: CellResult[], s: Pick<ScanRow, "self" | "keyword" 
   for (const c of rivals.filter((c) => picked.includes(c.key))) {
     snapshots.push({ key: c.key, is_self: false, name: c.name, rating: c.rating, reviews: c.reviews, photos: c.photos, category: c.category, categories: c.categories });
   }
-  const message = mapMessage({ summary, keyword: s.keyword, business: s.business, first: s.first });
+  const message = mapMessage({ summary, keyword: s.keyword, businessType: businessType(me?.category), first: s.first });
   return {
     data: {
       average_rank: summary.averageRank, top3: summary.top3, ranked: summary.ranked, centre_rank: summary.centreRank,

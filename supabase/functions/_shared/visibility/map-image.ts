@@ -32,6 +32,8 @@ export const MAP_TOKENS = {
 export const KABSI_MARK_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><title>Kabsi</title><circle cx="60" cy="60" r="58" fill="#000000"/><circle cx="60" cy="60" r="42.0036" fill="#FFD60A"/><circle cx="63.5032" cy="64.9996" r="15.9964" fill="#000000"/></svg>';
 
+/** docs/COPY.md section 2: what the dots mean, in the owner's words (never spot, grid or pin). */
+export const LEGEND_NOTE = "Each dot is a place near you where Kabsi searched like a customer. The number is where you came up. 1 is first.";
 export const CREDIT_KABSI = "Kabsi rank check, not provided by Google.";
 export const CREDIT_MAP = "Map: Geoapify, © OpenStreetMap contributors.";
 export const LEGEND = ["1 to 3", "4 to 10", "11 to 20", "Not in top 20"] as const;
@@ -145,7 +147,8 @@ export function mapTree(input: MapImageInput): Node {
       borderTop: `1px solid ${TOKENS.hairline}`, display: "flex", flexDirection: "column", padding: "28px 48px 0 48px",
     }, [
       el("div", { display: "flex", alignItems: "center" }, legend),
-      el("div", { display: "flex", fontFamily: "Readex Pro", fontWeight: 700, fontSize: 22, color: TOKENS.stone, marginTop: 30 }, CREDIT_KABSI),
+      el("div", { display: "flex", fontFamily: "Readex Pro", fontWeight: 400, fontSize: 22, color: TOKENS.stone, marginTop: 14 }, LEGEND_NOTE),
+      el("div", { display: "flex", fontFamily: "Readex Pro", fontWeight: 700, fontSize: 22, color: TOKENS.stone, marginTop: 14 }, CREDIT_KABSI),
       el("div", { display: "flex", fontFamily: "Readex Pro", fontWeight: 400, fontSize: 22, color: TOKENS.stone, marginTop: 8 }, input.base ? CREDIT_MAP : " "),
     ]),
   ]);

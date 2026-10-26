@@ -34,5 +34,24 @@ Kabsi measures where a business shows up. These rules keep that within Google's 
 - Competitor alert: "Smile Clinic got 14 reviews this month. You got 3." Never claim a competitor did anything to the owner's listing.
 - The category check is a proposal the owner approves through the one publication pipeline, never an automatic change.
 
+## AI Visibility providers (V2, checked 26 Oct 2026)
+Code: `supabase/functions/_shared/visibility/ai/`. Tables: `ai_prompts`, `ai_runs`, `ai_answers`. Mock until `app_settings.ai_visibility_mode = live`; the demo business is always mock.
+
+**DataForSEO LLM Responses (ChatGPT and Perplexity)**
+- Docs: [overview](https://docs.dataforseo.com/v3/ai_optimization/overview/), [ChatGPT live](https://docs.dataforseo.com/v3/ai_optimization/chat_gpt/llm_responses/live/), [Perplexity live](https://docs.dataforseo.com/v3/ai_optimization/perplexity/llm_responses/live/), [models](https://docs.dataforseo.com/v3/ai_optimization/chat_gpt/llm_responses/models/), [pricing](https://dataforseo.com/pricing/ai-optimization/llm-responses).
+- Endpoints: `POST /v3/ai_optimization/chat_gpt/llm_responses/live` and `/perplexity/llm_responses/live`. Perplexity is live only; ChatGPT, Claude and Gemini also have task_post / tasks_ready / task_get (standard queue, up to 72 hours). One task per live call; up to 120 seconds.
+- Request: `user_prompt` (max 500 characters), `model_name`, `web_search` (ChatGPT, default false; Perplexity sonar models search by default), `web_search_country_iso_code`, `web_search_city`, `max_output_tokens`, `tag`.
+- Response: `items[].sections[].text` with `annotations[] {title, url, ...}` (null when web search is off), `fan_out_queries`, `money_spent` (the model provider's charge, USD) and `cost` (task price plus `money_spent`).
+- Price: live task 0.0006 USD plus the model provider's charge (`money_spent`); standard 0.0002 plus a 0.01 prepayment, refunded down to the real cost. Kabsi uses live and records `cost` of every call.
+- Limits: up to 10000 calls a minute, 30 concurrent live tasks per account for each platform.
+- Storage: DataForSEO's terms of service (read 26 Oct) have no clause on storing responses. Kabsi keeps the answer text of ChatGPT and Perplexity only while the business uses Kabsi (30.10.9). The model makers' own API terms were not read; lane R decides if that matters before launch.
+
+**Gemini grounding with Google Maps**
+- Docs: [Maps grounding](https://ai.google.dev/gemini-api/docs/maps-grounding), [pricing](https://ai.google.dev/gemini-api/docs/pricing), [Additional Terms](https://ai.google.dev/gemini-api/terms) (section "Grounding with Google Maps").
+- Price: Gemini 2.5 Flash, 500 requests a day free, then 25 USD per 1000 grounded prompts, billed only when at least one Maps result comes back. Gemini 3 and newer: 5000 free a month, then 14 USD per 1000 search queries the model runs. Plus tokens (2.5 Flash 0.30 in, 2.50 out per million). Not on Pro for the free tier. English prompts only. Off unless the request enables the `googleMaps` tool.
+- Terms (Additional Terms, read 26 Oct): results may be shown only to "the end user who initiated the prompt", unmodified, with the Google Maps Links directly after the text. Google Maps Data is the output text, its metadata and the links. You may not "cache or store Google Maps Grounded Results" except up to 90 days "only to evaluate and optimize the display", or in an end user's chat history up to 6 months. You may not "scrape or export any Google Maps Data" or train on it. Google keeps prompts and output 30 days.
+- What this means for Kabsi (lane R decision pending, see the V2 record): Gemini rows never keep answer text, Maps links or titles. They keep only the measured facts (named or not, position, competitors named, a count of sources) and are deleted after 90 days (`expires_at`). Gemini runs stay off (`ai_visibility_gemini = off`) until lane R decides that a scheduled, owner-approved prompt Kabsi runs on the owner's behalf and reports as a count is inside "the end user who initiated the prompt". ChatGPT and Perplexity are not affected.
+- Never put Gemini Maps content in a report, a WhatsApp line or an image beyond the count; "Gemini named you" is a measured fact from the run, not Google Maps content.
+
 ## Calibration (30.9 point 3)
 Before the first map goes to a real owner: for 3 real businesses, the grid's centre rank must match a manual Maps search from that spot. Record the result in PROGRESS.
