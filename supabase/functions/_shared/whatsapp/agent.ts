@@ -232,8 +232,17 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   if (cmd.k === "photo_edit") return photoEdit(t, cmd.photoId);
   if (cmd.k === "photo_skip") return photoSkip(t, cmd.token);
   const oq = conv?.open_question;
-  if (oq?.type === "photo_category" && (cmd.k === "number" || cmd.k === "free")) return photoCategoryPicked(t, oq, cmd.k === "number" ? String(cmd.n) : cmd.text);
-  if (oq?.type === "update" && cmd.k === "free" && now - Date.parse(oq.at) < ANSWER_WINDOW_MS) return monthlyAnswer(t, oq.location_id, cmd.text);
+  if (oq?.type === "photo_category") {
+    if (cmd.k === "number") return photoCategoryPicked(t, oq, String(cmd.n));
+    // Anything that is not a kind of photo is a new message, not an answer: the menu is closed and the message handled as usual.
+    if (cmd.k === "free" && pickCategory(cmd.text)) return photoCategoryPicked(t, oq, cmd.text);
+    await d.db.setConv(phone, { open_question: null });
+  }
+  if (oq?.type === "update" && now - Date.parse(oq.at) < ANSWER_WINDOW_MS) {
+    if (cmd.k === "free") return monthlyAnswer(t, oq.location_id, cmd.text);
+    // A bare yes answers "anything new?", never an approval waiting elsewhere: ask what is new and keep the question open.
+    if (cmd.k === "yes") return answered(t, SAY.updateWhat, "update_what");
+  }
 
   // A person is answering in the Kapso inbox: free text waits for them; buttons and commands still work.
   if (cmd.k === "free" && conv?.handoff_at && now - Date.parse(conv.handoff_at) < HANDOFF_QUIET_MS) return "handoff_quiet";
@@ -590,19 +599,24 @@ async function photo(t: Turn, mediaId: string): Promise<string> {
 
 /** Edit on a photo: which kind of photo is it? The answer sets the category the yes will carry. */
 async function photoEdit(t: Turn, photoId: string): Promise<string> {
-  const b = businesses(t.who).find((x) => x.role !== "staff");
-  if (!b) return answered(t, SAY.notYours, "photo_edit_refused");
-  await t.d.db.setConv(t.phone, { open_question: { type: "photo_category", photo_id: photoId, location_id: b.location_id } satisfies OpenQuestion });
-  return answered({ ...t, business: b, head: head(t.who, "business", b) }, SAY.photoCategoryAsk(CATEGORY_MENU), "photo_edit");
+  const b = pickBusiness(t.who)?.role !== "staff" ? pickBusiness(t.who) : null;
+  const first = businesses(t.who).find((x) => x.role !== "staff");
+  const biz = b ?? first;
+  if (!biz) return answered(t, SAY.notYours, "photo_edit_refused");
+  await t.d.db.setConv(t.phone, { open_question: { type: "photo_category", photo_id: photoId, location_id: biz.location_id } satisfies OpenQuestion });
+  // No business is named here: the menu says nothing about which one, and the confirmation names the photo's own business.
+  return answered(t, SAY.photoCategoryAsk(CATEGORY_MENU), "photo_edit");
 }
 
 async function photoCategoryPicked(t: Turn, q: Extract<OpenQuestion, { type: "photo_category" }>, text: string): Promise<string> {
   const key = pickCategory(text);
   if (!key) return answered(t, SAY.photoCategoryBad, "photo_category_bad");
-  const b = businesses(t.who).find((x) => x.role !== "staff" && x.location_id === q.location_id);
-  if (!b) return answered(t, SAY.notYours, "photo_category_refused");
+  // The photo's own business (the RPC checks the member), not the first business of a phone that has several.
+  const mine = businesses(t.who).filter((x) => x.role !== "staff");
+  if (!mine.length) return answered(t, SAY.notYours, "photo_category_refused");
+  const r = await t.d.db.photoCategory(mine.find((x) => x.location_id === q.location_id)?.user_id ?? mine[0].user_id, q.photo_id, key);
+  const b = mine.find((x) => x.location_id === r.location_id) ?? mine.find((x) => x.location_id === q.location_id) ?? mine[0];
   const tb = { ...t, business: b, head: head(t.who, "business", b) };
-  const r = await t.d.db.photoCategory(b.user_id, q.photo_id, key);
   await t.d.db.setConv(t.phone, { open_question: null });
   if (!r.ok) return answered(tb, SAY.photoGone, `photo_category_refused:${r.reason}`);
   // A new yes for the new category: the old button no longer matches what the owner sees, so it is refused (an edit voids the old yes).
@@ -720,7 +734,7 @@ async function yes(t: Turn): Promise<string> {
   // What it is first, so two buttons stay different inside WhatsApp's 20 characters.
   const what = (i: { kind: string; target_type?: string }) => {
     const k = i.target_type ?? i.kind;
-    return k.includes("post") ? "Post" : k.includes("hours") ? "Hours" : k.includes("protection") || k.includes("revert") ? "Change" : "Reply";
+    return k.includes("photo") ? "Photo" : k.includes("post") ? "Post" : k.includes("hours") ? "Hours" : k.includes("protection") || k.includes("revert") ? "Change" : "Reply";
   };
   const label = (i: { kind: string; business: string; target_type?: string }) => `${what(i)}: ${i.business}`.slice(0, 20).trim();
   const options = items.slice(0, 9).map((i) => ({ token: i.token, label: label(i) }));

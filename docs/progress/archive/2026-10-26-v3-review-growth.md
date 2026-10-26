@@ -28,3 +28,16 @@ Branch `claude/v3-review-growth` (the prompt named it), PR 246. Model: Sonnet. B
 
 ## Migration
 `supabase/migrations/20261026150502_v3_review_growth.sql`, applied with apply_migration (recorded version 20261026150502, file renamed to match). Read-back before and after: the four patch targets matched; after: `approve_publication` allows `photo`, `whatsapp_item` has the photo branch, plan_limits essentials and pro `photos_from_whatsapp` both true, the tick calls `review_growth_due`, taps check allows `message`, 6 new functions, `review_growth_stats` ran (4 tag opens for the first business, 0 else).
+
+## Independent review (fresh agent, diff and rules only)
+No defects in review-cards, the Worker and tap change, the migration's grants and RLS, the contact-not-stored path or the message. Eight confirmed findings, all fixed in this PR with a test each:
+1. A bare "Yes" to the monthly question could approve an unrelated waiting item: it now asks "What is new?" and keeps the question open.
+2. "make it shorter" on a sensitive review could make a draft with an Approve button: the sensitive alert no longer remembers the review, so no draft or exact reply can start from WhatsApp.
+3. The 3 minute limit was Ogg only: audio whose length cannot be read and is over 1.5 MB is now refused with the same kind line.
+4. Staff names missed capitalised roles and commas ("Dr Khan", "Nurse Lina", "Our waiter, Sam"): roles are read in any case, the name must start with a capital.
+5. The "I heard" echo could carry a dash or exclamation mark and was long: cleaned and cut to 160 characters. The reply is kept in the outbox for 30 days like every reply; the audio itself is never kept.
+6. "Which one?" called a photo "Reply": it says "Photo".
+7. Photo Edit used the first business of a phone with several: the menu names none and the confirmation uses the photo's own business.
+8. A failure on one claimed item dropped the rest: each item has its own try, the tick reports the failures after sending the others.
+Also: the photo category menu closes on any other message.
+Final local run after the fixes: `bash scripts/deno-check.sh` 861 and 15 Deno tests pass, Nora stub gate passed; `npx vitest run` 503 pass; typecheck clean.

@@ -125,6 +125,14 @@ Deno.test("a named member of staff counts only in a complaint, never in a thank 
   assertEquals(namesStaffInComplaint({ rating: 3, comment: "A man called Karim was rude" }), true);
   assertEquals(namesStaffInComplaint({ rating: 1, comment: "It was terrible and slow" }), false);
 });
+Deno.test("staff names are found whatever the case or the comma, and a role word alone is not a name", () => {
+  for (const c of ["Dr Khan was rude", "Dr. Khan was rude", "Nurse Lina was awful", "Manager John shouted at us", "Our waiter, Sam, was rude", "the manager John ignored us"]) {
+    assertEquals(namesStaffInComplaint({ rating: 2, comment: c }), true, c);
+  }
+  for (const c of ["The manager was rude", "the doctor was late and the waiting room dirty", "Great waiter, thanks"]) {
+    assertEquals(namesStaffInComplaint({ rating: 2, comment: c }), false, c);
+  }
+});
 Deno.test("the sensitive alert carries no review words, no draft and no Approve, and offers a person; a clinic gets less still", () => {
   const body = sensitiveAlertBody({ business: "Smile Dental", stars: 1, reviewer: "Maya Khan", appUrl: "https://kabsi.co", regulated: "health" });
   assertMatch(body, /^Smile Dental: a new 1-star review needs your care\./);
@@ -148,7 +156,8 @@ Deno.test("the sensitive alert goes through the one sender with no Approve butto
   const sent = w.sent.at(-1)!;
   assertEquals(sent.buttons, ["Talk to a person"]);
   assertNotMatch(sent.body, /Approve/);
-  assert(w.calls.some((c) => c === `remember:${USERS.owner}:r1`));
+  // Not remembered: "make it shorter" must never turn a sensitive review into a draft with an Approve button.
+  assert(!w.calls.some((c) => c.startsWith("remember:")));
 });
 
 // ─── the monthly question
@@ -290,6 +299,48 @@ Deno.test("monthly question: No closes it kindly and an hours answer becomes an 
   await reviewGrowthTick(w2.deps(), growthDb([], row()));
   assertEquals(await say(w2, PHONES.owner, "closed tomorrow"), "hours_shown");
 });
+Deno.test("monthly question: a bare Yes never approves something else; it asks what is new and keeps the question", async () => {
+  const w = new World();
+  open(w, PHONES.owner);
+  const token = w.alert(PHONES.owner, BIZ.harbour);
+  await reviewGrowthTick(w.deps(), growthDb([], [{ location_id: BIZ.harbour, business: "Harbour Lane Coffee", user_id: USERS.owner, phone: PHONES.owner, month: "2026-10-01" }]));
+  assertEquals(await say(w, PHONES.owner, "Yes"), "update_what");
+  assertMatch(lastTo(w, PHONES.owner).body, /What is new\?/);
+  assert(!w.calls.includes(`approve:${token}`));
+  assertEquals(w.conversation(PHONES.owner).open_question?.type, "update");
+});
+Deno.test("photo flow: a waiting photo and a waiting reply are told apart in Which one", async () => {
+  const w = new World();
+  open(w, PHONES.owner);
+  w.alert(PHONES.owner, BIZ.harbour);
+  w.photoDrafts.set(PHOTO, { location: BIZ.harbour, state: "draft", category: "INTERIOR" });
+  await reviewGrowthTick(w.deps(), growthDb([dueRow()]));
+  assertEquals(await say(w, PHONES.owner, "yes"), "which_one");
+  assertEquals(lastTo(w, PHONES.owner).buttons.sort(), ["Photo: Harbour Lane", "Reply: Harbour Lane"].sort());
+});
+Deno.test("photo flow: a message that is not a kind of photo closes the menu and is handled as usual", async () => {
+  const w = new World();
+  open(w, PHONES.owner);
+  w.photoDrafts.set(PHOTO, { location: BIZ.harbour, state: "draft", category: "INTERIOR" });
+  await tap(w, PHONES.owner, `pe:${PHOTO}`);
+  assertEquals(await say(w, PHONES.owner, "stats"), "stats");
+  assertEquals(w.conversation(PHONES.owner).open_question, null);
+});
+Deno.test("the tick sends the other items when one fails, then reports the failure", async () => {
+  const w = new World();
+  open(w, PHONES.owner);
+  const d = w.deps();
+  const real = d.db.actionCreate;
+  let n = 0;
+  d.db.actionCreate = async (...a) => { if (n++ === 0) throw new Error("db down"); return real(...a); };
+  const P2 = "22222222-2222-4222-8222-222222222222";
+  w.photoDrafts.set(PHOTO, { location: BIZ.harbour, state: "draft", category: "INTERIOR" });
+  w.photoDrafts.set(P2, { location: BIZ.harbour, state: "draft", category: "INTERIOR" });
+  let threw = "";
+  try { await reviewGrowthTick(d, growthDb([dueRow(), dueRow({ photo_id: P2 })])); } catch (e) { threw = (e as Error).message; }
+  assertMatch(threw, /1 item\(s\) failed/);
+  assertEquals(w.repliesTo(PHONES.owner).length, 1);
+});
 Deno.test("monthly question: after three days a message is just a message", async () => {
   const w = new World();
   open(w, PHONES.owner);
@@ -330,6 +381,12 @@ Deno.test("Scribe: refuses over 10 MB before sending, and a provider error or em
   assertEquals(await scribe("k", { fetcher: f(500, {}) }).transcribe(new Uint8Array(10), null), { ok: false, reason: "failed" });
   assertEquals(await scribe("k", { fetcher: f(200, { text: "  " }) }).transcribe(new Uint8Array(10), null), { ok: false, reason: "empty" });
   assertEquals(await scribe("k", { fetcher: (async () => { throw new Error("net"); }) as unknown as typeof fetch }).transcribe(new Uint8Array(10), null), { ok: false, reason: "failed" });
+});
+Deno.test("the voice echo is short and has no dash or exclamation mark", async () => {
+  const { SAY } = await import("../whatsapp/say.ts");
+  const e = SAY.voiceHeard("We open at ten \u2014 come in! ".repeat(20));
+  assertNotMatch(e, BANNED);
+  assert(e.length < 180);
 });
 Deno.test("the word error rate ignores case, punctuation and Arabic marks", () => {
   assertEquals(wer("We are closed on Friday.", "we are closed on friday"), 0);

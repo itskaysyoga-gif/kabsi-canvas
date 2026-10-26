@@ -19,8 +19,11 @@ export interface GrowthDb {
 
 export async function reviewGrowthTick(d: AgentDeps, g: GrowthDb): Promise<{ photos: number; questions: number }> {
   let photos = 0, questions = 0;
+  const failed: string[] = [];
+  // Each item is its own try: one failure never drops the others, which are already claimed in the database.
   for (const p of await g.photosDue(20)) {
     for (const to of p.to) {
+      try {
       if (p.state === "refused") {
         await notify(d.out, { phone: to.phone, userId: to.user_id, locationId: p.location_id, kind: "photo_refused", body: photoRefusedBody(p.business, p.note),
           template: ref("photo_ready", { business: p.business }), dedupe: `photo_refused:${p.photo_id}:${to.user_id}` });
@@ -33,14 +36,22 @@ export async function reviewGrowthTick(d: AgentDeps, g: GrowthDb): Promise<{ pho
         body: photoReadyBody({ business: p.business, category: p.category, note: p.suitable === false ? p.note : null, suitable: p.suitable, forOwner: p.sender_role === "staff" }),
         buttons: photoButtons(a.token, p.photo_id), template: ref("photo_ready", { business: p.business }), dedupe: `photo_ready:${p.photo_id}:${to.user_id}` });
       photos++;
+      } catch (e) {
+        failed.push(`photo:${p.photo_id}:${String((e as Error)?.message ?? e).slice(0, 80)}`);
+      }
     }
   }
   for (const m of await g.monthlyDue(20)) {
-    // The next free message from the owner, within 3 days, is the answer (agent.ts reads it).
-    await d.out.db.setQuestion(m.phone, { type: "update", location_id: m.location_id, at: new Date((d.now ?? Date.now)()).toISOString() });
-    await notify(d.out, { phone: m.phone, userId: m.user_id, locationId: m.location_id, kind: "monthly_update", body: MONTHLY_QUESTION(m.business),
-      template: ref("business_update", { business: m.business }), dedupe: `monthly_update:${m.month}:${m.location_id}` });
-    questions++;
+    try {
+      // The next free message from the owner, within 3 days, is the answer (agent.ts reads it).
+      await d.out.db.setQuestion(m.phone, { type: "update", location_id: m.location_id, at: new Date((d.now ?? Date.now)()).toISOString() });
+      await notify(d.out, { phone: m.phone, userId: m.user_id, locationId: m.location_id, kind: "monthly_update", body: MONTHLY_QUESTION(m.business),
+        template: ref("business_update", { business: m.business }), dedupe: `monthly_update:${m.month}:${m.location_id}` });
+      questions++;
+    } catch (e) {
+      failed.push(`monthly:${m.location_id}:${String((e as Error)?.message ?? e).slice(0, 80)}`);
+    }
   }
+  if (failed.length) throw new Error(`review_growth_tick: ${failed.length} item(s) failed after the rest were sent: ${failed.join("; ")}`);
   return { photos, questions };
 }

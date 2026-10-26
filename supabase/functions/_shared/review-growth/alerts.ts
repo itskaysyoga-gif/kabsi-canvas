@@ -17,9 +17,8 @@ export async function sendSensitiveAlert(ctx: Ctx, userIds: string[], r: Sensiti
       buttons: [...SENSITIVE_BUTTONS],
       template: ref("review_waiting", { business: r.business, stars: String(r.stars) }),
     });
-    // Remembered like any review alert, so "reply: ..." knows which review (the owner writes their own reply; a high-risk
-    // reply is never approved on WhatsApp).
-    await ctx.remember?.(userId, r.reviewId, r.locationId).catch(() => {});
+    // Not remembered (no `remember`): "make it shorter" or "reply: ..." on WhatsApp must never make a draft with an Approve button for
+    // a sensitive review. The owner reads it and replies in Kabsi.
   }
   return out;
 }

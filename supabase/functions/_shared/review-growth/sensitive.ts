@@ -8,16 +8,19 @@ import { industryOf, type Industry, isReason, type Risk } from "../ai/risk.ts";
  *  of staff is read here (see namesStaffInComplaint) because the review pipeline's own reasons are a prompt input. */
 export const SENSITIVE_REASONS = ["health_safety", "threat", "legal_threat"] as const;
 
-// "the waiter Sam", "my stylist Maya", "Dr Khan", "nurse Lina", "a girl called Rosa", "named Omar", "manager, John".
-const ROLE_WORDS = "(?:waiter|waitress|server|barista|barber|stylist|hairdresser|therapist|masseuse|technician|mechanic|receptionist|cashier|manager|owner|nurse|dentist|doctor|dr\\.?|assistant|driver|cleaner|trainer|coach|instructor|girl|guy|lady|man|woman|gentleman|staff|employee)";
-const NAME = "[A-Z][a-z]{2,}";
-const STAFF_NAME = new RegExp(`\\b${ROLE_WORDS}\\s+(?:called\\s+|named\\s+)?${NAME}\\b|\\b(?:called|named)\\s+${NAME}\\b`);
+// "the waiter Sam", "my stylist Maya", "Dr Khan", "Nurse Lina", "Manager, John", "a girl called Rosa", "named Omar". The role words are read in
+// any case and the name must start with a capital, so "the manager was rude" is not a name.
+const ROLE_WORDS = "waiter|waitress|server|barista|barber|stylist|hairdresser|therapist|masseuse|technician|mechanic|receptionist|cashier|manager|owner|nurse|dentist|doctor|dr\\.?|assistant|driver|cleaner|trainer|coach|instructor|girl|guy|lady|man|woman|gentleman|staff|employee";
+const ROLE_THEN_NAME = new RegExp(`\\b(?:${ROLE_WORDS})[,\\s]+(?:called\\s+|named\\s+)?([\\p{L}][\\p{L}'-]{1,})`, "giu");
+const CALLED_NAME = /\b(?:called|named)\s+\p{Lu}[\p{L}'-]{1,}/u;
+const NOT_NAMES = new Set(["the", "and", "was", "were", "is", "are", "who", "that", "very", "so", "not", "too", "at", "in", "on", "for", "to", "of", "my", "our", "your", "a", "an", "it", "this", "there", "had", "has", "did", "didn't"]);
+const hasName = (text: string) => [...text.matchAll(ROLE_THEN_NAME)].some((m) => /^\p{Lu}/u.test(m[1]) && !NOT_NAMES.has(m[1].toLowerCase())) || CALLED_NAME.test(text);
 const COMPLAINT = /\b(rude|unprofessional|disrespectful|impolite|arrogant|yelled|shouted|ignored|attitude|terrible|awful|horrible|worst|disappoint\w*|never again|dirty|careless|hurt|painful|mistake|wrong|late|refus\w*)\b/i;
 
 /** A complaint that names someone on the team: the reply must never name them, and the owner should look first. */
 export function namesStaffInComplaint(review: { rating: number; comment: string | null }): boolean {
   const text = (review.comment ?? "").normalize("NFKC");
-  if (!STAFF_NAME.test(text)) return false;
+  if (!hasName(text)) return false;
   return review.rating <= 3 || COMPLAINT.test(text);
 }
 

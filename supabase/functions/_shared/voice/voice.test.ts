@@ -23,3 +23,9 @@ Deno.test("every note goes through the mock provider word for word", async () =>
 Deno.test("each note is short enough to be a voice note: under 200 characters, so well under 3 minutes", () => {
   for (const n of notes) assertEquals(n.text.length < 200, true, n.id);
 });
+
+Deno.test("audio whose length cannot be read is refused when it is too big for 3 minutes, and a short one passes", async () => {
+  const { voiceCheck } = await import("../whatsapp/media.ts");
+  assertEquals(voiceCheck(2_000_000, new Uint8Array(2_000_000)), { ok: false, why: "too_long" });
+  assertEquals(voiceCheck(100_000, new Uint8Array(100_000)), { ok: true });
+});

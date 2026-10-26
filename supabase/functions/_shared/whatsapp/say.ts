@@ -138,7 +138,9 @@ export const SAY = {
   voiceTooLong: "Please keep voice notes under 3 minutes",
   voiceOff: "Voice notes are not switched on yet. Please type your message and I will take it from there.",
   voiceFailed: "I could not hear that note clearly. Please try again, or type your message.",
-  voiceHeard: (text: string) => `I heard: "${text.replace(/\s+/g, " ").trim().slice(0, 300)}"`,
+  // The echo is trimmed and cleaned of dashes and exclamation marks (the house style), and kept short: it is a check, not a record.
+  voiceHeard: (text: string) => `I heard: "${text.replace(/[\u2013\u2014!]/g, " ").replace(/\s+/g, " ").trim().slice(0, 160)}"`,
+  updateWhat: "What is new? Tell me in your own words, for example a new service, a price or new opening times. Or reply No if nothing changed.",
   // "Ask a customer" (30.15 section 3.5): a ready message, forwarded from the owner's own phone. Kabsi never gets a number.
   askNoLink: (business: string) => `${business} has no review link yet. Make one in Kabsi under Get Reviews, then ask me again.`,
   // Monthly question (30.15 section 3.3).
