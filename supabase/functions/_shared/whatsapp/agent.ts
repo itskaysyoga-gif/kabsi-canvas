@@ -581,7 +581,9 @@ async function photo(t: Turn, mediaId: string): Promise<string> {
   const refused = photoRefusal(bytes);
   if (refused === "video") return answered(t, SAY.videoKept, "video");
   if (refused) return answered(t, SAY.photoUnreadable, "photo_unreadable");
-  const r = await t.d.db.acceptPhoto(b.location_id, b.user_id, bytes);
+  // A business Kabsi cannot reach on Google yet (early access) refuses the upload: say so, never a silent failure.
+  const r = await t.d.db.acceptPhoto(b.location_id, b.user_id, bytes).catch(() => null);
+  if (!r) return answered(t, SAY.notConnectedYet(b.business, `${t.d.appUrl}/app`), "photo_not_connected");
   if (!r.ok) return answered(t, SAY.photoUnreadable, "photo_refused");
   return answered(t, b.role === "staff" ? SAY.photoTakenStaff : SAY.photoTaken, "photo");
 }
