@@ -254,6 +254,23 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 - Unknown: "Welcome to Kabsi. Did you just scan your business on kabsi.co? Send me your business name or the code from the page and I will pick up from there."
 - Two roles: "Your business or your partner tools?" Buttons: "Business" / "Partner".
 
+**Onboarding, the first 48 hours (30.16 section 3).** Sent only when the event happens. Outside the 24-hour window, the approved template with the same words.
+- First message back: "Hi [Name], I am Nora, Kabsi's AI assistant. I have your free check for [Business]. Can Kabsi send your setup steps and approvals here? Reply Yes, or Help to talk to Rashid, the founder. Reply Stop any time." The free check is sent whatever the answer.
+- The check: "Your nearby check for '[search]', [date]: [one factual line]. Results change by place and time. Nothing has changed on Google."
+- The invite: "Next, add Kabsi as a Manager on your Google profile. On Google: your profile, Business Profile settings, People and access, Add. Invite [Kabsi's address] as Manager. Manager access lets Kabsi make changes, and Kabsi publishes only what you approve. You stay the owner and can remove Kabsi any time. Never send us a password or a code."
+- Cannot find it: "You may be signed in to another Google account, or you may be a manager yourself. Only an owner can invite Kabsi. Does someone else look after Google for [Business]?"
+- Founder: "Hi [Name], Rashid here, Kabsi's founder. I can help you finish this. Steps here, or a short call? You make every change on your own phone."
+- Access works: "Kabsi now has Manager access to [Business]. Your free trial starts today and ends on [date]. No card, and no charge unless you choose a plan. Nothing has been published. I am preparing your first task."
+- First task (a review with no reply): "This review for [Business] has no reply: '[review]'. Here is the reply I suggest: '[draft]'. Publish it on Google?" Buttons: Yes / Edit / Skip.
+- After Yes: "Approved. It goes to Google in 10 seconds. Reply Undo to stop it."
+- Confirmed: "Your reply is on Google: [link]. Done."
+- Not confirmed yet: "Your yes is saved. I have not seen the reply on Google yet. Nothing else is needed from you. I will tell you when it shows." A known failure says what failed and the next step instead.
+- A post, when useful: "I can prepare a Google post about [service]. Do you offer it now, and is there anything customers should know before booking?"
+- One reminder: "Your [reply or post] for [Business] is ready. Nothing has been published. Review it now, or later?" Never a second reminder.
+- After 48 hours: "Done for [Business] so far: [work, with links]. Waiting for you: [item, or nothing]. Your trial ends on [date]. What still feels like work you do yourself?"
+- Still blocked: "Setup for [Business] is waiting for [step]. Your trial has not started and nothing has been published. Want help with that step?"
+- Stop: "WhatsApp messages are stopped. Your plan and Kabsi's Google access stay as they are; change them here: [link]. Send Start to turn messages back on."
+
 ## 21. Images Kabsi sends
 
 - Map image: title "'[keyword]' around [Business]", date, legend "1 to 3", "4 to 10", "11 to 20", "Not in top 20", credit "Kabsi rank check, not provided by Google. Map: Geoapify, © OpenStreetMap contributors."
