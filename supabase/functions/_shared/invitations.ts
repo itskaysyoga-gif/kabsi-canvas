@@ -192,7 +192,7 @@ export async function matchByPlace(
 
 // The backstop (Access 2, step 3): the listings Kabsi manages that match no business in Kabsi by place ID or Google
 // location. Only a listing first seen in this run, with a place ID, is removed: listings Kabsi already managed before
-// (Kabsi's own profiles, the first run's baseline) are kept, and more than two at once is treated as a fault and only
+// (the first run's baseline) are kept, and Kabsi's own profiles are passed in as businesses (app_settings), and more than two at once is treated as a fault and only
 // reported.
 export type Listing = { locationId: string; placeId: string | null; title: string };
 export function strayListings(
@@ -202,7 +202,7 @@ export function strayListings(
   const locations = new Set(businesses.map((b) => b.googleLocationId).filter(Boolean));
   const stray = managed.filter((m) => !(m.placeId && places.has(m.placeId)) && !locations.has(m.locationId));
   // No baseline yet (the first run, or the memory could not be read): remove nothing.
-  if (!seen || !seen.size) return { remove: [], report: [] };
+  if (!seen) return { remove: [], report: [] };
   const fresh = stray.filter((m) => !seen.has(m.locationId));
   const removable = fresh.filter((m) => m.placeId);
   if (removable.length > 2) return { remove: [], report: fresh };

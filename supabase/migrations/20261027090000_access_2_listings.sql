@@ -70,3 +70,8 @@ create index google_listings_location_idx on public.google_listings (location_id
 alter table public.google_listings enable row level security;
 revoke all on public.google_listings from public, anon, authenticated, service_role;
 grant select, insert, update on public.google_listings to service_role;
+
+-- Kabsi's own Google listings that have no business row in Kabsi, which the access job must never remove (comma
+-- separated Google location names): the Abou Hamze Auto Center test profile (written consent, 8 Oct 2026).
+insert into public.app_settings (key, value) values ('access_keep_listings', 'locations/1850906632456176734')
+on conflict (key) do nothing;

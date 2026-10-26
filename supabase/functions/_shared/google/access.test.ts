@@ -212,8 +212,10 @@ Deno.test("Access 2: a listing that matches no business is removed automatically
   const stranger = { locationId: "locations/999", placeId: "ChIJstranger", title: "Yawmiyati" };
   const businesses = [{ placeId: YAWMIYATI_PLACE, googleLocationId: YAWMIYATI_LOCATION }];
   // The first run has no record: nothing is removed (Kabsi's own profiles become the baseline).
-  assert.deepEqual(strayListings([yaw, abouHamze, stranger], businesses, new Set()), { remove: [], report: [] });
   assert.deepEqual(strayListings([yaw, abouHamze, stranger], businesses, null), { remove: [], report: [] });
+  // Kabsi's own profile named in app_settings counts as a business, even when it was never seen before.
+  const keep = [...businesses, { placeId: null, googleLocationId: abouHamze.locationId }];
+  assert.deepEqual(strayListings([yaw, abouHamze, stranger], keep, new Set()), { remove: [stranger], report: [] });
   // Later: a new listing matching no business is removed; one already managed before is kept.
   const seen = new Set([yaw.locationId, abouHamze.locationId]);
   assert.deepEqual(strayListings([yaw, abouHamze, stranger], businesses, seen), { remove: [stranger], report: [] });

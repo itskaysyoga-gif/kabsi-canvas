@@ -129,7 +129,7 @@ export async function accessJob() {
   // Access 1: an accepted invitation that matched no business by place ID leaves Kabsi as Manager of a listing
   // nobody here consented for. Staff remove it by hand (docs/LATER.md), so say so loudly.
   if (accepted > granted) await captureError("cron-tick", new Error("Accepted Google invitation matched no business (Access 1)"), { job: "access", accepted, granted });
-  const removed = managed ? await removeStrayListings(managed) : 0;
+  const removed = managed ? await removeStrayListings(managed, accepted > granted) : 0;
   return { mode: googleMode(), pending: pending.length, accepted, granted, ...(removed ? { removed } : {}) };
 }
 
@@ -157,22 +157,44 @@ function lookupMemory(): LookupMemory {
 
 // Access 2, the backstop for D270: a listing Kabsi manages that matches no business in Kabsi (by place ID or Google
 // location) and was not managed before is removed at once (removeKabsiEntries), with a WhatsApp staff alert. Listings
-// already managed before (Kabsi's own profiles) are kept; with no record yet (the first run) nothing is removed.
-async function removeStrayListings(managed: ManagedLocation[]): Promise<number> {
+// already managed before are kept, and so are Kabsi's own profiles named in app_settings.access_keep_listings; with no
+// record yet (the first run) nothing is removed.
+async function removeStrayListings(managed: ManagedLocation[], unmatchedAccept: boolean): Promise<number> {
+  if (!managed.length) return 0;
   const db = admin();
-  const [{ data: businesses, error: e1 }, { data: seenRows, error: e2 }] = await Promise.all([
-    db.from("locations").select("place_id, google_location_id"),
-    db.from("google_listings").select("google_location_id").is("removed_at", null),
+  // Only the rows for the listings managed now (no 1,000-row cut-off), plus whether any listing was ever recorded.
+  const locIds = managed.map((l) => l.locationId);
+  const placeIds = managed.map((l) => l.placeId).filter((p): p is string => !!p);
+  const [byPlace, byLocation, seenRows, anyRow, keepSetting] = await Promise.all([
+    placeIds.length ? db.from("locations").select("place_id, google_location_id").in("place_id", placeIds) : Promise.resolve({ data: [], error: null }),
+    db.from("locations").select("place_id, google_location_id").in("google_location_id", locIds),
+    db.from("google_listings").select("google_location_id").in("google_location_id", locIds).is("removed_at", null),
+    db.from("google_listings").select("google_location_id").limit(1),
+    db.from("app_settings").select("value").eq("key", "access_keep_listings").maybeSingle(),
   ]);
-  if (e1 || e2) { await captureError("cron-tick", e1 ?? e2, { job: "access", step: "stray_read" }); return 0; }
-  const seen = new Set((seenRows ?? []).map((r) => r.google_location_id as string));
-  const { remove, report } = strayListings(
-    managed, (businesses ?? []).map((b) => ({ placeId: b.place_id, googleLocationId: b.google_location_id })), seen,
-  );
+  const failed = [byPlace, byLocation, seenRows, anyRow, keepSetting].find((r) => r.error);
+  if (failed) { await captureError("cron-tick", failed.error, { job: "access", step: "stray_read" }); return 0; }
+  // Kabsi's own listings with no business row (the Abou Hamze test profile), named in app_settings, are never removed.
+  const keep = String((keepSetting.data as { value?: string } | null)?.value ?? "").split(",").map((v) => v.trim()).filter(Boolean);
+  const businesses = [...(byPlace.data ?? []), ...(byLocation.data ?? [])]
+    .map((b) => ({ placeId: b.place_id as string | null, googleLocationId: b.google_location_id as string | null }))
+    .concat(keep.map((id) => ({ placeId: null, googleLocationId: id })));
+  const firstRun = !(anyRow.data ?? []).length;
+  // The first run trusts what is managed now; an invitation it accepted that matched no business is told at once.
+  const seen = firstRun ? null : new Set((seenRows.data ?? []).map((r) => r.google_location_id as string));
+  if (firstRun && unmatchedAccept) {
+    await db.rpc("ops_emit", {
+      p_kind: "access_stray_listing", p_channel: "alerts", p_title: "Check the Google listings Kabsi manages",
+      p_body: "An accepted invitation matched no business in Kabsi on the first run of the listing record, so nothing was removed automatically. Compare the listings in the Kabsi Clients group with the businesses in Kabsi.",
+      p_dedupe: `access_stray:first_run:${new Date().toISOString().slice(0, 10)}`,
+    });
+  }
+  const { remove, report } = strayListings(managed, businesses, seen);
   const now = new Date().toISOString();
   const day = now.slice(0, 10);
   let removed = 0;
   const gone = new Set<string>();
+  const failedRemoval = new Set<string>();
   for (const l of remove) {
     let outcome: string;
     try {
@@ -181,6 +203,7 @@ async function removeStrayListings(managed: ManagedLocation[]): Promise<number> 
       gone.add(l.locationId);
     } catch (e) {
       outcome = `failed: ${String((e as Error).message ?? e).slice(0, 160)}`;
+      failedRemoval.add(l.locationId);
       await captureError("cron-tick", e, { job: "access", step: "stray_remove", location: l.locationId });
     }
     const ok = !outcome.startsWith("failed");
@@ -195,7 +218,8 @@ async function removeStrayListings(managed: ManagedLocation[]): Promise<number> 
   }
   if (report.length) await captureError("cron-tick", new Error("Managed Google listings match no business (Access 2, not removed)"), { job: "access", listings: report.map((l) => l.locationId).slice(0, 10) });
   // Every listing still managed is recorded as seen; the ones removed are marked, so they count as new if they return.
-  const kept = managed.filter((l) => !gone.has(l.locationId)).map((l) => ({ google_location_id: l.locationId, place_id: l.placeId, last_seen_at: now }));
+  // A removal that failed is not recorded, so the next run tries it again (its alert is sent once a day).
+  const kept = managed.filter((l) => !gone.has(l.locationId) && !failedRemoval.has(l.locationId)).map((l) => ({ google_location_id: l.locationId, place_id: l.placeId, last_seen_at: now }));
   if (kept.length) {
     const { error } = await db.from("google_listings").upsert(kept, { onConflict: "google_location_id", ignoreDuplicates: true });
     if (error) await captureError("cron-tick", error, { job: "access", step: "seen" });
