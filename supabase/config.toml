@@ -22,6 +22,8 @@ verify_jwt = false
 verify_jwt = false
 [functions.billing-creem]    # Creem's webhook signs with creem-signature and sends no JWT; /setup needs x-cron-secret or staff, /owner a signed-in owner, checked in code (session 10)
 verify_jwt = false
+[functions.programs]         # Founding 25 and Kabsi Partners applications and counts (Partners session): public, Turnstile and rate limits in code, service-role-only database functions
+verify_jwt = false
 
 # JWT required.
 [functions.api]

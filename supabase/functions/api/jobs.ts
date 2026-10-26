@@ -45,6 +45,7 @@ import { whatsappPostAlert } from "../_shared/whatsapp/db.ts";
 import { useTool } from "../_shared/ai/agents.ts";
 import { liveAccessWhatsapp } from "../_shared/access-notice.ts";
 import { applyEvent, paymentReminder } from "../_shared/billing.ts";
+import { foundingMessage, partnerPayoutsReady } from "../_shared/founding.ts";
 import { sendCapi } from "../_shared/meta-capi.ts";
 import { aiDeps, sendOwnerLine } from "../_shared/visibility/ai/deps.ts";
 import { AiCapped, AiPermanent, runOne as runAiVisibility } from "../_shared/visibility/ai/run.ts";
@@ -471,6 +472,16 @@ const HANDLERS: Record<string, JobHandler> = {
     const id = String(job.payload.subscription_id ?? "");
     if (!id) throw new PermanentJobError("billing_reminder needs a subscription");
     await paymentReminder(id, Number(job.payload.day ?? 0));
+  },
+  // Partners session (30.17 section 1): the day-60, day-85 and day-90 messages to a Founding 25 business, once each.
+  founding_message: async (job) => {
+    const id = String(job.payload.application_id ?? "");
+    if (!id) throw new PermanentJobError("founding_message needs an application");
+    await foundingMessage(id, Number(job.payload.day ?? 0));
+  },
+  // Partners session (29.1): the month's partner payout list waits for staff approval (the run on the 5th queues it).
+  partner_payouts_ready: async (job) => {
+    await partnerPayoutsReady(String(job.payload.run_on ?? ""));
   },
   // P0.3-05: the task detectors for one business (K-08); they also run at once in the database when a source changes.
   // P0.3-06: the invitation email for one team invite (Settings, Team); sent only while the invite is open.

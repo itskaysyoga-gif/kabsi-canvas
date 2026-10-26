@@ -14,6 +14,8 @@ Written by session 10 on 25 Oct 2026. The decisions are master plan section 10 (
 - Prices in cents, USD: Essentials 1900 and 19000, Pro 3900 and 39000, extra location 1500 and 15000. Names and description: docs/COPY.md section 23. No product has a Creem trial.
 - Trial lives in Kabsi: 14 days of Pro, 30 through a partner (`trial_days_for`, signup_source starting with "partner"), from working Google access, no card.
 - Founding: the first 30 live paying businesses keep their price (`subscriptions.founding`, `founding_places_left()`, served at `GET /billing-creem/founding`).
+- Founding 25 (30.17 section 1, Partners session): an accepted and linked `founding_applications` row gives Pro for 90 days from working Google access without Creem (`private.founding_days` in `private.start_trial`; no trial caps in `private.entitlements`). At day 90 the owner chooses a plan through the normal checkout; `foundingCheck` marks that subscription `founding` (any mode).
+- Currency: Creem prices products in USD or EUR only (`ProductCurrency` enum in https://docs.creem.io/api-reference/openapi.json; https://docs.creem.io/guides/faq). No pounds or dirhams, so Kabsi stays USD only and never shows a converted estimate.
 - Fees: 3.9 percent plus 40 cents per payment.
 
 ## Code map
@@ -22,6 +24,7 @@ Written by session 10 on 25 Oct 2026. The decisions are master plan section 10 (
 - `supabase/functions/billing-creem/index.ts`: `POST /` webhook, `POST /setup` (staff or x-cron-secret), `POST /owner` (signed-in owner only), `GET /founding`.
 - WhatsApp: router words and `k:<op>` Confirm buttons in `_shared/whatsapp/router.ts`, the handler `billing()` in `agent.ts`, the real deps in `db.ts`.
 - App: `src/routes/_authenticated/app/plan.tsx`, `src/routes/billing.done.tsx`, `src/lib/plans.ts`; pricing founding block in `src/routes/pricing.tsx`.
+- Partners and Founding 25: migration `20261026160000_partners_founding.sql` (the file name follows the version apply_migration recorded), tests `supabase/tests/partners.sql` and `tests/programs.test.ts`; `supabase/functions/programs` (public applications and counts), `_shared/programs.ts` (pure), `_shared/founding.ts` (jobs `founding_message`, `partner_payouts_ready`), staff panels `src/components/staff/founding-panel.tsx` and `partners-panel.tsx`.
 - Database: migrations `20261025173010_creem_billing.sql` and `20261025173020_creem_billing_grants.sql`; tests `supabase/tests/billing.sql`, `tests/creem.test.ts`, the billing conversations in `_shared/whatsapp/conversations.test.ts`.
 
 ## Rules
@@ -31,7 +34,7 @@ Written by session 10 on 25 Oct 2026. The decisions are master plan section 10 (
 - Every change from WhatsApp shows the price and waits for the owner's Confirm. Only the owner (role list and the server check).
 - Until going live (session 21) `app_settings.billing_open` is `off`: the paid buttons read "Plans open soon" except for `organizations.billing_test` accounts.
 - Product ids live in `app_settings.creem_products_<mode>`, written by the setup action. Never put an id in code.
-- Partner commissions (PA1) read `billing_events` (type, amount, currency, organisation, Creem ids). Creem's affiliate program stays off.
+- Partner commissions read `billing_events` through the trigger `billing_events_partner_ledger` (when the job sets `processed_at`): `subscription.paid` makes a 25 percent line on the amount before tax (`private.creem_base_cents`: transaction or last_transaction `amount`, which excludes tax; else order `sub_total` less discount; else the product price), held 30 days; `refund.created` and `dispute.created` void a line still unpaid or add a reversal for the next payout. The payout run (`private.partner_payout_run`, cron on the 5th) pays 25 USD or more cleared, live mode only. Creem's affiliate program stays off.
 
 ## Going live (10.2.13, session 21)
 Hussein: verification and payout. Rashid: switch Creem to live, add the live webhook at the same URL, replace `CREEM_API_KEY` and `CREEM_WEBHOOK_SECRET`, set `CREEM_MODE=live`. Then run the setup action in live mode, set `billing_open` to `on`, make one real 19 USD purchase and refund it.

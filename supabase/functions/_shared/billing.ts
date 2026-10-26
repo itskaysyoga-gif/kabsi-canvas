@@ -161,8 +161,16 @@ async function writeSub(org: string, subId: string, e: CreemEvent, effect: Retur
 }
 
 // The first 30 paying businesses in live mode keep their price while subscribed (10.2.4).
+// A Founding 25 business (30.17) that chooses a plan keeps the founding price too, in either mode.
 async function foundingCheck(s: SubRow) {
-  if (s.founding || s.mode !== "live") return;
+  if (s.founding) return;
+  const { data: f25 } = await admin().from("founding_applications").select("id").eq("organization_id", s.organization_id)
+    .eq("status", "accepted").limit(1);
+  if ((f25 ?? []).length) {
+    await admin().from("subscriptions").update({ founding: true }).eq("id", s.id);
+    return;
+  }
+  if (s.mode !== "live") return;
   const { data: left } = await admin().rpc("founding_places_left");
   if (typeof left === "number" && left > 0 && left <= FOUNDING_PLACES) {
     await admin().from("subscriptions").update({ founding: true }).eq("id", s.id);

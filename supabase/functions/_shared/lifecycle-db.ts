@@ -18,7 +18,16 @@ export async function lifecycleJob(): Promise<LifecycleResult> {
     async snapshots(now) {
       const { data, error } = await db.rpc("lifecycle_snapshots", { p_now: now.toISOString() });
       if (error) throw error;
-      return ((data ?? []) as Record<string, unknown>[]).map(snapshotFromRow);
+      const snaps = ((data ?? []) as Record<string, unknown>[]).map(snapshotFromRow);
+      // Founding 25 businesses (30.17): their locations, by the organisation an accepted place is linked to.
+      const { data: f } = await db.from("founding_applications").select("organization_id").eq("status", "accepted").not("organization_id", "is", null);
+      const orgs = ((f ?? []) as { organization_id: string }[]).map((r) => r.organization_id);
+      if (orgs.length) {
+        const { data: locs } = await db.from("locations").select("id").in("organization_id", orgs);
+        const ids = new Set(((locs ?? []) as { id: string }[]).map((l) => l.id));
+        for (const s of snaps) s.founding = ids.has(s.locationId);
+      }
+      return snaps;
     },
     async send(o) {
       const r = await notify({

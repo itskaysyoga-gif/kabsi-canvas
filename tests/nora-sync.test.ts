@@ -87,7 +87,7 @@ describe("the evaluation set", () => {
     ).toBe(true);
     const price = QUESTIONS.find((x) => x.id === "en07")!;
     expect(
-      check(price, "An extra location is $25 a month.", facts).some((f) => /\$25/.test(f.detail)),
+      check(price, "An extra location is $27 a month.", facts).some((f) => /\$27/.test(f.detail)),
     ).toBe(true);
     const del = QUESTIONS.find((x) => x.id === "en42")!;
     expect(

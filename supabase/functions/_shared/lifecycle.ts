@@ -47,6 +47,8 @@ export type Snapshot = {
   scenario: { id: string; variant: string | null; startedAt: Date; doneAt: Date | null } | null;
   /** From audit_events only, counted from the trial start (or from the business's creation when there was no trial). */
   recap: { repliesPrepared: number; repliesSent: number; postsSent: number; changesCaught: number };
+  /** A Founding 25 business (30.17): 90 free days with its own day-60, day-85 and day-90 messages (founding.ts). */
+  founding?: boolean;
 };
 
 const d = (v: unknown) => (typeof v === "string" ? new Date(v) : null);
@@ -158,7 +160,9 @@ function applies(step: StepId, s: Snapshot): boolean {
       return !s.accessGrantedAt && (s.scenario?.id === "needs_verifying" || s.scenario?.id === "google_reviewing");
     case "ownership_day3": case "ownership_day7":
       return !s.accessGrantedAt && s.scenario?.id === "someone_else_owns" && s.scenario.doneAt !== null;
-    case "first_reply_approved": case "trial_day2": case "trial_day7": case "trial_day11": return s.entitlement === "trial";
+    case "first_reply_approved": case "trial_day2": return s.entitlement === "trial";
+    // Founding 25 gets its own messages instead of the 14-day trial's week-one offer and three-days-left email.
+    case "trial_day7": case "trial_day11": return s.entitlement === "trial" && !s.founding;
     case "trial_day14": return s.entitlement === "grace" || s.entitlement === "ended";
     case "winback_17": case "winback_30": return s.entitlement === "ended" && s.waitingReviews + s.waitingChanges > 0;
   }
