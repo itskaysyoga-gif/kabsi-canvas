@@ -1,7 +1,8 @@
 // health: internal (cron secret), except GET /health/queue, which is public and answers only a status (P0.6-08). Reports which secrets are set (true/false only, never values)
 // and whether each external service answers. Used by Claude to verify setup without seeing secrets.
 // Self-contained apart from the Google layer (K-34), so it stays tiny.
-import { googleMode, listAccountsOnce, refreshToken, searchText } from "../_shared/google/index.ts";
+import { googleMode, invitationSearch, listAccountsOnce, refreshToken, searchText } from "../_shared/google/index.ts";
+import { languageOf, placeFromResults, streetPart } from "../_shared/invitations.ts";
 import { queueResponse, type QueueHealthRow } from "../_shared/queue-health.ts";
 
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { "content-type": "application/json" } });
@@ -63,6 +64,22 @@ async function queueCheck(): Promise<Response> {
   return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 }
 
+// Access 2: the invitation Places check, live, on Yawmiyati's own invitation text only (fixed cases, no free query). One
+// Text Search per call, counted by places_take. Answers the verdict only: no Places name or address leaves the function.
+const YAWMIYATI_PLACE = "ChIJaXHRjL4XHxURYvc-mzYQzcg";
+const INVITATION_CASES: Record<string, string> = { arabic: "طريق ميرنا شالوحي, Lebanon", english: "Mirna Chalouhi, Lebanon" };
+async function invitationPlacesCheck(name: string) {
+  const address = INVITATION_CASES[name];
+  if (!address) return { error: "case is arabic or english" };
+  const search = invitationSearch();
+  if (!search) return { error: "PLACES_API_KEY not set" };
+  const street = streetPart("Yawmiyati", address)!;
+  const r = await search(`Yawmiyati, ${address}`, languageOf(address));
+  if (r.status !== "ok") return { status: r.status };
+  const v = placeFromResults("Yawmiyati", street, r.places);
+  return { status: "ok", language: languageOf(address) ?? null, results: r.places.length, verdict: v.reason, accepted_place_is_yawmiyati: v.placeId === YAWMIYATI_PLACE };
+}
+
 // Hotfix 20h: a made-up token must fail only as invalid-input-response; invalid-input-secret means the stored
 // secret does not belong to any Turnstile widget and every real visitor is refused.
 async function turnstileCheck(): Promise<string | null> {
@@ -81,6 +98,7 @@ Deno.serve(async (req) => {
   if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
   const body = await req.json().catch(() => ({})) as { only?: string };
   if (body.only === "jobs") return json({ checks: { jobs_recent: await jobsFreshness() } });
+  if (body.only === "invitation_places") return json({ checks: { invitation_places: await invitationPlacesCheck(String((body as { case?: string }).case ?? "")) } });
   if (body.only === "turnstile") return json({ checks: { turnstile: (await turnstileCheck()) ?? "not configured" } });
   const all = Object.keys(Deno.env.toObject());
   const set: Record<string, boolean> = {};

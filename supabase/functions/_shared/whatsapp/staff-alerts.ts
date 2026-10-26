@@ -16,6 +16,8 @@ const URGENT = new Set([
   "jobs_silent", "job_failed", "cron_failed", "tick_stalled", "http_errors",
   // Google errors or access lost on any business
   "circuit_open", "access_lost", "google_needs_action", "access_removal_followup",
+  // Access 2: Kabsi removed itself from a Google listing nobody consented for (or must be removed by hand)
+  "access_stray_listing",
   // the publication pipeline stuck or failing
   "publication_failed", "publication_stuck",
   // money: the Creem webhook failing, a new paying customer, a cancellation

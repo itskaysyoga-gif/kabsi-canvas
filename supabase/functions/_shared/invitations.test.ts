@@ -102,3 +102,10 @@ Deno.test("Access 1: Google's address as one string (its documented shape)", () 
   assert.equal(addressMatches("Mirna Chalouhi", ""), false);
   assert.equal(addressMatches(null, "Mirna Chalouhi"), false);
 });
+
+Deno.test("Access 2: if Google answers Accept-Language: en with the Latin address, the Access 1 text rules accept it", () => {
+  const yawmiyati = { name: "Yawmiyati", address: "Mirna Chalouhi" };
+  assert.equal(matchInvitation("Yawmiyati", "Mirna Chalouhi, Lebanon", [yawmiyati]).ok, true);
+  assert.equal(matchInvitation("Yawmiyati", "طريق ميرنا شالوحي, Lebanon", [yawmiyati]).ok, false);
+  assert.equal(matchInvitation("Yawmiyati", "Yawmiyati, Lebanon", [yawmiyati]).ok, false);
+});

@@ -1,0 +1,16 @@
+{
+  "_doc": "https://developers.google.com/maps/documentation/places/web-service/text-search",
+  "_note": "Built from the documented response shape for the Access 2 tests, not captured: Places content is not stored (Maps Platform Terms 3.2.3). Field mask places.id,places.displayName,places.formattedAddress, languageCode ar. The first result is Yawmiyati's real place ID; the second is a made-up same-named listing in another city.",
+  "places": [
+    {
+      "id": "ChIJaXHRjL4XHxURYvc-mzYQzcg",
+      "displayName": { "text": "Yawmiyati", "languageCode": "en" },
+      "formattedAddress": "طريق ميرنا شالوحي، سن الفيل، لبنان"
+    },
+    {
+      "id": "ChIJstrangerYawmiyati000000",
+      "displayName": { "text": "Yawmiyati Bookshop", "languageCode": "en" },
+      "formattedAddress": "شارع الحمرا، بيروت، لبنان"
+    }
+  ]
+}

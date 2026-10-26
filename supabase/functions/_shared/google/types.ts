@@ -113,7 +113,8 @@ export type PlacePrediction = {
 export type AutocompleteResponse = { suggestions?: { placePrediction?: PlacePrediction }[] };
 
 // ─── app types (unchanged from _shared/google.ts)
-export type ManagedLocation = { accountId: string; locationId: string; placeId: string | null; title: string };
+// address (Access 2): Google's own storefront address as one line, kept as the saved copy at grant time.
+export type ManagedLocation = { accountId: string; locationId: string; placeId: string | null; title: string; address?: string };
 export type SkippedInvitation = { invitation: string; reason: string; location: string; place?: string };
 export type GoogleReview = {
   reviewId: string; reviewer: string; rating: number; comment: string | null;

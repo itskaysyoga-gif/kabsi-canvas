@@ -12,11 +12,11 @@ export const PROFILES: Record<string, RegExp> = { yawmiyati: /yawmiyati/i, abouh
 export type Raw = { url: string; status: number; body: unknown };
 
 // One GET, no retry, so the status and error Google gives are reported exactly as sent.
-export async function get(url: string): Promise<Raw> {
+export async function get(url: string, headers: Record<string, string> = {}): Promise<Raw> {
   if (!HOSTS.some((h) => url.startsWith(`${h}/`))) throw new Error("capture: host not allowed");
   await waitTurn(null);
   const token = await io.token();
-  const res = await fetch(url, { method: "GET", headers: { authorization: `Bearer ${token}` } });
+  const res = await fetch(url, { method: "GET", headers: { ...headers, authorization: `Bearer ${token}` } });
   if (res.status === 429 || res.status >= 500) await io.failure().catch(() => {});
   return { url: url.split("?")[0], status: res.status, body: await res.json().catch(() => ({})) };
 }
@@ -80,6 +80,26 @@ export async function inventory() {
     });
   }
   return { accounts_status: acc.status, account_count: accounts.length, accounts: out };
+}
+
+// Access 2: the pending Manager invitations under every account, read twice: as the access job did before (no
+// language) and with Accept-Language: en (what it sends now). Only the two Kabsi-owned profiles keep their name and
+// address; any other invitation is counted with its role, never named.
+export async function invitations() {
+  const acc = await get(`${AM}/accounts`);
+  const out: Json[] = [];
+  for (const a of ((acc.body as Json).accounts ?? []) as Json[]) {
+    for (const [variant, headers] of [["default", {}], ["accept_language_en", { "accept-language": "en" }]] as const) {
+      const r = await get(`${AM}/${a.name}/invitations`, headers);
+      const list = (((r.body as Json).invitations ?? []) as Json[]).map((i) => {
+        const title = i.targetLocation?.locationName ?? "";
+        const ours = Object.values(PROFILES).some((re) => re.test(title));
+        return { role: i.role, targetType: i.targetType, locationName: ours ? title : "[other]", address: ours ? i.targetLocation?.address : "[other]" };
+      });
+      out.push({ account: a.name, variant, status: r.status, count: list.length, invitations: list });
+    }
+  }
+  return { captured_at: new Date().toISOString(), accounts_status: acc.status, lists: out };
 }
 
 // Finds one of the two Kabsi-owned profiles: the account it sits under and its location name.

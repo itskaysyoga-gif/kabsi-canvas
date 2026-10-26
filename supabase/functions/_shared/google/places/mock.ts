@@ -20,7 +20,7 @@ function pick(place: Place, fields: string[]): Place {
   for (const f of fields) if (f in place) out[f] = (place as Record<string, unknown>)[f];
   return out as Place;
 }
-export const searchText = (_key: string, _textQuery: string, maxResultCount: number, fieldMask: string): Promise<PlacesResult<SearchTextResponse>> => {
+export const searchText = (_key: string, _textQuery: string, maxResultCount: number, fieldMask: string, _languageCode?: string): Promise<PlacesResult<SearchTextResponse>> => {
   const fields = fieldMask.split(",").map((f) => f.trim().replace(/^places\./, ""));
   return Promise.resolve({ ok: true, status: 200, data: { places: [pick(MOCK_PLACE, fields)].slice(0, maxResultCount) } });
 };
