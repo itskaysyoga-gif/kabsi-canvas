@@ -28,7 +28,7 @@ Deno.test("Slack-era titles become plain WhatsApp words in the house style", () 
 
 Deno.test("the morning digest: things to do, number health, the numbers, three one-tap buttons", () => {
   const d = morningDigest(S);
-  assert.match(d.body, /^Morning\. 2 things today: 1 person asked for a person, 2 replies are waiting for owners, number health good\./);
+  assert.match(d.body, /^Morning\. 2 things today: 1 person wants to talk to someone, 2 replies are waiting for owners, number health good\./);
   assert.match(d.body, /AI cost since yesterday: \$0\.45\. Places today: 16 of 20\. DataForSEO: \$0\.00 of \$10 this month\./);
   assert.deepEqual(d.buttons.map((b) => b.title), ["Waiting", "Status", "Today"]);
   assert.match(morningDigest({ ...S, handoffs_waiting: 0, replies_waiting: 0, number_quality: "YELLOW" }).body, /^Morning\. Nothing is waiting for you today, number health yellow, messaging limited\./);

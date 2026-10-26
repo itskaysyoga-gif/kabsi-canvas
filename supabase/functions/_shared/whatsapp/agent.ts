@@ -362,7 +362,7 @@ async function switchCmd(t: Turn): Promise<string> {
 async function person(t: Turn): Promise<string> {
   await t.d.db.setConv(t.phone, { handoff: true });
   const b = pickBusiness(t.who);
-  await t.d.db.handoff(t.phone, b ? `${b.business} (${b.role}) asked for a person` : `A ${roleFor(t.who, activeDomain(t), b)} phone asked for a person`);
+  await t.d.db.handoff(t.phone, b ? `${b.business} (${b.role}) asked to talk to someone` : `${/^[aeiou]/i.test(roleFor(t.who, activeDomain(t), b)) ? "An" : "A"} ${roleFor(t.who, activeDomain(t), b)} phone asked to talk to someone`);
   return answered({ ...t, business: b, head: b ? head(t.who, "business", b) : t.head }, say("handoff", t.lang), "handoff");
 }
 
