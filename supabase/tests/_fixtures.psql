@@ -68,6 +68,9 @@ values ('00000000-0000-4000-8000-0000000000f9', '00000000-0000-4000-8000-0000000
 insert into public.visibility_points (scan_id, row, col, lat, lng) values ('00000000-0000-4000-8000-0000000000f9', 3, 3, 25.08, 55.14);
 insert into public.competitor_picks (location_id, key, name) values ('00000000-0000-4000-8000-0000000000c1', 'cid:victim-rival', 'Victim Rival');
 insert into public.competitor_snapshots (location_id, key, taken_on, name) values ('00000000-0000-4000-8000-0000000000c1', 'cid:victim-rival', current_date, 'Victim Rival');
+insert into public.ai_visibility_prompts (id, location_id, text) values ('00000000-0000-4000-8000-0000000000fa', '00000000-0000-4000-8000-0000000000c1', 'best bakery in victimville');
+insert into public.ai_visibility_runs (id, location_id, prompt_id, provider) values ('00000000-0000-4000-8000-0000000000fb', '00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000fa', 'chatgpt');
+insert into public.ai_visibility_answers (run_id, location_id, answer) values ('00000000-0000-4000-8000-0000000000fb', '00000000-0000-4000-8000-0000000000c1', 'Victim Bakery is a bakery.');
 insert into public.provider_spend (provider, month, calls, micros) values ('victim-provider', '2026-10-01', 1, 600);
 insert into public.chat_conversations (id, visitor_id, user_id, location_id)
 values ('00000000-0000-4000-8000-0000000000f7', 'victim-visitor', '00000000-0000-4000-8000-0000000000a1', '00000000-0000-4000-8000-0000000000c1');
