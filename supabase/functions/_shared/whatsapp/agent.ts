@@ -25,6 +25,11 @@ import { describeHours, type HoursChange, parseHours } from "./hours-parse.ts";
 import { checkTypedPost } from "../posts/typed.ts";
 import { keywordFrom, type MapDetails, mapDetailsText } from "./map.ts";
 import { numbersText, type Summary } from "./staff-alerts.ts";
+import { ASK_INTRO, reviewRequestLink, reviewRequestMessage } from "../review-growth/message.ts";
+import { type GrowthStats, growthLine } from "../review-growth/stats.ts";
+import { ANSWER_WINDOW_MS, readUpdate } from "../review-growth/monthly.ts";
+import { CATEGORY_MENU, categoryLabel, type PhotoCategory, pickCategory } from "../review-growth/photo.ts";
+import type { Transcript } from "../voice/transcribe.ts";
 import { CATALOGUE, extraKey, type Period, type Plan, planKey } from "../creem.ts";
 
 export interface AgentDb {
@@ -53,7 +58,14 @@ export interface AgentDb {
   stats(locationId: string, days: number): Promise<{ new_reviews: number; answered: number; waiting: number; average: number | null }>;
   reviewLink(locationId: string): Promise<string | null>;
   acceptPhoto(locationId: string, userId: string, bytes: Uint8Array): Promise<{ ok: boolean; reason?: string }>;
-  keepVoice(phone: string, messageId: string, bytes: Uint8Array, mime: string | null): Promise<void>;
+  /** V3: Review Growth numbers, link opens apart from new reviews (no person is counted). */
+  growth(locationId: string, days: number): Promise<GrowthStats>;
+  /** V3: Edit on a photo waiting for a yes: the category the owner picked. Owner or manager of that business only. */
+  photoCategory(userId: string, photoId: string, category: PhotoCategory): Promise<{ ok: boolean; reason?: string; location_id?: string }>;
+  /** V3: Skip on a photo, from the phone the button was made for. */
+  photoSkip(token: string, phone: string): Promise<{ result: string; location_id?: string }>;
+  /** V3: the owner answered this month's question. */
+  monthlyAnswered(locationId: string): Promise<void>;
   staffNumbers(): Promise<Record<string, number | string | null>>;
   /** 9.9, 26.9: the last 24 hours and the budgets, for "today" and the morning digest. */
   staffSummary(): Promise<Summary>;
@@ -92,6 +104,8 @@ export type AgentDeps = {
   confirmKeyword?(locationId: string, keyword: string): Promise<{ ok: boolean; reason?: string }>;
   /** 28.1: the full map image for a scan code, once V1's job has it. A stub (null) until V1 merges. */
   mapImage(scanCode: string): Promise<Uint8Array | null>;
+  /** V3 (28.3): a voice note to text. The audio stays in memory and is never stored; without it voice notes say they are off. */
+  transcribe?(audio: Uint8Array, mime: string | null, phone: string): Promise<Transcript>;
   /** Wakes the sender after a message opened the window (held messages go out). */
   flush(): Promise<unknown>;
   now?: () => number;
@@ -109,7 +123,10 @@ export async function receive(d: AgentDeps, m: Inbound, background?: (p: Promise
   if (!fresh(m.timestamp, (d.now ?? Date.now)())) return "stale";
   const phone = toE164(m.from);
   if (!phone) return "bad_phone";
-  const stored = await d.db.store(phone, m.messageId, m.media?.kind ?? m.type, m, m.referral ?? null);
+  // V3 (30.15 section 3.5): a shared contact is a customer's name and number. Kabsi never stores it, not even until the message is
+  // handled: only the fact that a contact arrived is kept.
+  const keep = m.contacts?.length ? { ...m, contacts: [] } : m;
+  const stored = await d.db.store(phone, m.messageId, m.contacts?.length ? "contacts" : m.media?.kind ?? m.type, keep, m.referral ?? null);
   if (stored.duplicate || !stored.id) return "duplicate";
   const work = handle(d, { ...m, from: phone }, { first: !!stored.first }).then(async (r) => (await d.db.done(stored.id!, r), r));
   if (background) {
@@ -211,6 +228,13 @@ async function run(t: Turn, cmd: Command): Promise<string> {
     return withBusiness(next, "hours", null, (tb) => hours(tb, `${q.pending} ${t.m.text ?? ""}`, true));
   }
 
+  // V3: a photo's Edit, Skip, and the category the owner picks; the monthly question's answer.
+  if (cmd.k === "photo_edit") return photoEdit(t, cmd.photoId);
+  if (cmd.k === "photo_skip") return photoSkip(t, cmd.token);
+  const oq = conv?.open_question;
+  if (oq?.type === "photo_category" && (cmd.k === "number" || cmd.k === "free")) return photoCategoryPicked(t, oq, cmd.k === "number" ? String(cmd.n) : cmd.text);
+  if (oq?.type === "update" && cmd.k === "free" && now - Date.parse(oq.at) < ANSWER_WINDOW_MS) return monthlyAnswer(t, oq.location_id, cmd.text);
+
   // A person is answering in the Kapso inbox: free text waits for them; buttons and commands still work.
   if (cmd.k === "free" && conv?.handoff_at && now - Date.parse(conv.handoff_at) < HANDOFF_QUIET_MS) return "handoff_quiet";
 
@@ -228,12 +252,9 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   if (cmd.k === "video") return withBusiness(t, "photo", null, (tb) => answered(tb, SAY.videoKept, "video"));
   if (cmd.k === "file") return answered(t, SAY.photoUnreadable, "file_refused");
   if (cmd.k === "contact") {
-    // "Ask a customer" (27.3 item 5): the number is checked and kept in E.164, local numbers read in the business's country.
-    const c = cmd.contacts[0];
-    return withBusiness(t, "contact", null, (tb) => {
-      const ok = c?.phones.map((p) => toE164(p, tb.business?.country ?? null)).find(Boolean);
-      return answered(tb, ok ? SAY.contactTaken(c.name ?? "your customer") : SAY.contactBad, ok ? "contact" : "contact_bad");
-    });
+    // "Ask a customer" (30.15 section 3.5): the owner shared a customer's contact. Kabsi does not read, keep or use the number or the
+    // name; the answer is the one ready message, to forward from the owner's own phone.
+    return withBusiness(t, "ask_customer", null, (tb) => askCustomer(tb));
   }
   if (cmd.k === "empty") return "empty";
   if (cmd.k === "number") return free(t, String(cmd.n));
@@ -449,8 +470,12 @@ async function businessTool(t: Turn, name: string, arg: string | undefined): Pro
   switch (name) {
     case "stats": {
       const days = arg === "30" ? 30 : 7;
-      return answered(t, SAY.stats(b.business, days, await t.d.db.stats(b.location_id, days)), "stats");
+      const line = SAY.stats(b.business, days, await t.d.db.stats(b.location_id, days));
+      // V3: link opens beside the reviews, never added to them ("An open is not a review.").
+      const g = await t.d.db.growth(b.location_id, days).catch(() => null);
+      return answered(t, g ? `${line}\n\n${growthLine(g)}` : line, "stats");
     }
+    case "ask_customer": return askCustomer(t);
     case "review_link":
     case "qr": {
       const code = await t.d.db.reviewLink(b.location_id);
@@ -545,7 +570,8 @@ async function showForYes(t: Turn, reviewId: string, text: string | null, body: 
 
 async function photo(t: Turn, mediaId: string): Promise<string> {
   const b = t.business!;
-  if (!b.pro) return answered(t, SAY.photoPro, "photo_pro");
+  // V3 (30.15 section 3.4): photos from WhatsApp are on both plans. The photo engine checks it in the background; the tick then
+  // asks the owner Yes, Edit or Skip (review-growth/photo.ts). A member of staff sends, the owner approves.
   let bytes: Uint8Array;
   try {
     bytes = await t.d.media(mediaId);
@@ -556,23 +582,99 @@ async function photo(t: Turn, mediaId: string): Promise<string> {
   if (refused === "video") return answered(t, SAY.videoKept, "video");
   if (refused) return answered(t, SAY.photoUnreadable, "photo_unreadable");
   const r = await t.d.db.acceptPhoto(b.location_id, b.user_id, bytes);
-  return answered(t, r.ok ? SAY.photoTaken : SAY.photoUnreadable, r.ok ? "photo" : "photo_refused");
+  if (!r.ok) return answered(t, SAY.photoUnreadable, "photo_refused");
+  return answered(t, b.role === "staff" ? SAY.photoTakenStaff : SAY.photoTaken, "photo");
 }
 
+/** Edit on a photo: which kind of photo is it? The answer sets the category the yes will carry. */
+async function photoEdit(t: Turn, photoId: string): Promise<string> {
+  const b = businesses(t.who).find((x) => x.role !== "staff");
+  if (!b) return answered(t, SAY.notYours, "photo_edit_refused");
+  await t.d.db.setConv(t.phone, { open_question: { type: "photo_category", photo_id: photoId, location_id: b.location_id } satisfies OpenQuestion });
+  return answered({ ...t, business: b, head: head(t.who, "business", b) }, SAY.photoCategoryAsk(CATEGORY_MENU), "photo_edit");
+}
+
+async function photoCategoryPicked(t: Turn, q: Extract<OpenQuestion, { type: "photo_category" }>, text: string): Promise<string> {
+  const key = pickCategory(text);
+  if (!key) return answered(t, SAY.photoCategoryBad, "photo_category_bad");
+  const b = businesses(t.who).find((x) => x.role !== "staff" && x.location_id === q.location_id);
+  if (!b) return answered(t, SAY.notYours, "photo_category_refused");
+  const tb = { ...t, business: b, head: head(t.who, "business", b) };
+  const r = await t.d.db.photoCategory(b.user_id, q.photo_id, key);
+  await t.d.db.setConv(t.phone, { open_question: null });
+  if (!r.ok) return answered(tb, SAY.photoGone, `photo_category_refused:${r.reason}`);
+  // A new yes for the new category: the old button no longer matches what the owner sees, so it is refused (an edit voids the old yes).
+  const a = await t.d.db.actionCreate(b.user_id, "photo", q.photo_id);
+  if (!a.ok || !a.token) return answered(tb, SAY.photoGone, `photo_category_refused:${a.reason}`);
+  return answered(tb, SAY.photoCategorySet(categoryLabel(key)), "photo_category_set", [
+    { id: `a:${a.token}`, title: "Yes" }, { id: `pe:${q.photo_id}`, title: "Edit" }, { id: `ps:${a.token}`, title: "Skip" },
+  ]);
+}
+
+async function photoSkip(t: Turn, token: string): Promise<string> {
+  const owner = await t.d.db.tokenOwner(token, t.phone);
+  if (owner === "not_yours") return answered(t, SAY.notYours, "not_yours");
+  if (owner === "unknown") return answered(t, SAY.photoGone, "stale_button");
+  const r = await t.d.db.photoSkip(token, t.phone);
+  if (t.who.conversation?.open_question?.type === "photo_category") await t.d.db.setConv(t.phone, { open_question: null });
+  return answered(t, r.result === "skipped" ? SAY.photoSkipped : SAY.photoGone, r.result === "skipped" ? "photo_skipped" : `photo_skip:${r.result}`);
+}
+
+/** "Ask a customer": the one ready message with the business's review link, as its own message so it can be forwarded. Kabsi never
+ *  receives, keeps or messages a customer's number; the same message goes to every customer. */
+async function askCustomer(t: Turn): Promise<string> {
+  const b = t.business!;
+  const code = await t.d.db.reviewLink(b.location_id);
+  const link = code ? reviewRequestLink(code) : null;
+  if (!link) return answered(t, SAY.askNoLink(b.business), "ask_no_link");
+  await say1(t, ASK_INTRO);
+  await sendReply(t.d.out, t.s, t.phone, reviewRequestMessage(b.business, link), undefined, { locationId: b.location_id });
+  return "ask_customer";
+}
+
+/** The owner's answer to the monthly question: nothing, an hours draft, or a post made of their own words. Drafts only. */
+async function monthlyAnswer(t: Turn, locationId: string, text: string): Promise<string> {
+  const b = businesses(t.who).find((x) => x.location_id === locationId && x.role !== "staff");
+  await t.d.db.setConv(t.phone, { open_question: null });
+  if (!b) return free(t, text);
+  const tb = { ...t, business: b, head: head(t.who, "business", b) };
+  const r = readUpdate(text, new Date((t.d.now ?? Date.now)()), b.time_zone ?? "UTC");
+  await t.d.db.monthlyAnswered(locationId).catch(() => {});
+  if (r.kind === "nothing") return answered(tb, SAY.updateNothing, "update_nothing");
+  if (r.kind === "hours") return hours(tb, r.text, false);
+  if (r.kind === "refused") return answered(tb, SAY.updateProblem(b.business, r.problems), "update_problem");
+  const p = await t.d.db.postPrepare(b.location_id, b.user_id, r.text);
+  if (!p.ok || !p.token) return prepareRefused(tb, p.reason, "post");
+  return answered(tb, SAY.updatePostShown(b.business, (p.text ?? r.text).trim()), "update_post_shown",
+    [{ id: `a:${p.token}`, title: "Approve" }, { id: `e:${p.token}`, title: "Edit on kabsi.co" }]);
+}
+
+/** A voice note (28.3): refused over 10 MB or 3 minutes with the kind line; otherwise transcribed in memory, the audio dropped,
+ *  and the words handled like a typed message. Only the text is used. */
 async function voice(t: Turn, media: { id: string; size: number | null; mime: string | null }): Promise<string> {
+  if (!domains(t.who).length) return answered(t, say("unclear", t.lang), "voice_stranger");
   const pre = voiceCheck(media.size);
   if (!pre.ok) return answered(t, SAY.voiceTooLong, `voice_${pre.why}`);
+  if (!t.d.transcribe) return answered(t, SAY.voiceOff, "voice_off");
   let bytes: Uint8Array;
   try {
     bytes = await t.d.media(media.id);
   } catch {
-    return answered(t, SAY.unclear, "voice_unreadable");
+    return answered(t, SAY.voiceFailed, "voice_unreadable");
   }
   const post = voiceCheck(media.size, bytes);
   if (!post.ok) return answered(t, SAY.voiceTooLong, `voice_${post.why}`);
-  // Kept privately until V3 adds transcription (28.3); then the audio is deleted and only the text stays.
-  await t.d.db.keepVoice(t.phone, t.m.messageId, bytes, media.mime);
-  return answered(t, SAY.voiceListening, "voice_kept");
+  let r: Transcript;
+  try {
+    r = await t.d.transcribe(bytes, media.mime, t.phone);
+  } catch {
+    r = { ok: false, reason: "failed" };
+  }
+  // The audio was only ever in memory here: nothing wrote it anywhere, and nothing below uses it.
+  if (!r.ok) return answered(t, r.reason === "not_configured" ? SAY.voiceOff : SAY.voiceFailed, `voice_${r.reason}`);
+  await say1(t, SAY.voiceHeard(r.text));
+  const m: Inbound = { ...t.m, text: r.text, media: null, mediaId: null, type: "text" };
+  return run({ ...t, m }, parse(m));
 }
 
 // ─── Buttons and Yes (9.3, 25.5).

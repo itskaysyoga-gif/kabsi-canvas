@@ -34,7 +34,10 @@ export type OpenQuestion =
   | { type: "which"; options: { token: string; label: string }[] }
   | { type: "digest"; ids: number[] }
   | { type: "hours"; pending: string; location_id: string }
-  | { type: "keyword"; location_id: string; suggested: string | null };
+  | { type: "keyword"; location_id: string; suggested: string | null }
+  // V3: the monthly "anything new?" question (answered within 3 days) and the category menu under a photo's Edit.
+  | { type: "update"; location_id: string; at: string }
+  | { type: "photo_category"; photo_id: string; location_id: string };
 
 export type Who = { phone: string; roles: Role[]; conversation: Conversation | null };
 
@@ -47,10 +50,10 @@ export const TOOLS = {
   unknown: ["help", "question", "scan", "prices", "trial", "partner_program", "person"],
   prospect: ["help", "question", "scan", "send_map", "prices", "trial", "partner_program", "person"],
   owner: ["help", "question", "switch", "stats", "review_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
-    "hours", "post", "billing", "voice", "person"],
+    "hours", "post", "billing", "voice", "ask_customer", "person"],
   manager: ["help", "question", "switch", "stats", "review_link", "qr", "approve", "undo", "edit_draft", "exact_reply", "photo", "contact",
-    "hours", "post", "voice", "person"],
-  staff: ["help", "question", "switch", "photo", "voice", "person"],
+    "hours", "post", "voice", "ask_customer", "person"],
+  staff: ["help", "question", "switch", "photo", "voice", "ask_customer", "person"],
   partner: ["help", "question", "switch", "partner_tool", "person"],
   staff_admin: ["help", "switch", "staff_status", "staff_waiting", "staff_today", "staff_pause", "staff_partners", "staff_payouts", "person"],
 } as const;

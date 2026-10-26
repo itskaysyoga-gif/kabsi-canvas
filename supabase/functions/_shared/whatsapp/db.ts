@@ -17,6 +17,9 @@ import { flush, type Out, type OutDb, type OutRow } from "./outbox.ts";
 import type { SendState } from "./policy.ts";
 import type { Who } from "./roles.ts";
 import { suggestKeyword } from "./map.ts";
+import { pickTranscriber } from "../voice/transcribe.ts";
+import { sensitivity } from "../review-growth/sensitive.ts";
+import { sendSensitiveAlert } from "../review-growth/alerts.ts";
 
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await admin().rpc(fn, args);
@@ -222,6 +225,13 @@ export async function agentDeps(): Promise<AgentDeps> {
         return { ok: false, reason: String((e as Error)?.message ?? e).slice(0, 80) };
       }
     },
+    // V3 (28.3): ElevenLabs Scribe when ELEVENLABS_API_KEY is set, else the mock, which reads only fixtures and tells owners that
+    // voice notes are not switched on. A ceiling per phone a day and for the whole number keeps the cost small.
+    transcribe: async (audio, mime, phone) => {
+      if (!(await rateLimit(`wa_voice:${phone}`, 20, 86400)) || !(await rateLimit("wa_voice_all", 400, 86400))) return { ok: false, reason: "failed" };
+      const t = pickTranscriber({ key: Deno.env.get("ELEVENLABS_API_KEY") });
+      return await t.transcribe(audio, mime);
+    },
     firstMap,
     confirmKeyword,
     // 28.1 hook: V1 replaces this with the map image of the scan's queued 7 by 7 grid.
@@ -302,10 +312,14 @@ export const agentDb: AgentDb = {
   stats: (l, days) => rpc("whatsapp_stats", { p_location: l, p_days: days }),
   reviewLink: (l) => rpc("whatsapp_review_link", { p_location: l }),
   acceptPhoto: (l, u, bytes) => db.acceptPhoto(l, u, bytes),
-  keepVoice: async (phone, messageId, bytes, mime) => {
-    const path = `${(await sha(phone)).slice(0, 16)}/${messageId.replace(/[^A-Za-z0-9_.=-]/g, "_").slice(0, 120)}`;
-    const { error } = await admin().storage.from("whatsapp-voice").upload(path, bytes, { contentType: mime ?? "audio/ogg", upsert: true });
-    if (error) throw error;
+  async growth(l, days) {
+    const g = await rpc<{ new_reviews: number; opens_message: number; opens_qr: number; opens_tag: number }>("review_growth_stats", { p_location: l, p_days: days });
+    return { days, newReviews: Number(g.new_reviews), opens: { message: Number(g.opens_message), qr: Number(g.opens_qr), tag: Number(g.opens_tag) } };
+  },
+  photoCategory: (u, photo, category) => rpc("whatsapp_photo_category", { p_user: u, p_photo: photo, p_category: category }),
+  photoSkip: (token, phone) => rpc("whatsapp_photo_skip", { p_token: token, p_phone: phone }),
+  monthlyAnswered: async (l) => {
+    await rpc("whatsapp_monthly_answered", { p_location: l });
   },
   staffNumbers: () => rpc("whatsapp_staff_numbers", {}),
   staffSummary: () => rpc("whatsapp_staff_summary", {}),
@@ -335,11 +349,24 @@ export async function whatsappReviewAlert(loc: { id: string; name: string }, r: 
   if (!AGENT_ON) return {};
   const users = await alertRecipients(loc.id);
   if (!users.length) return {};
+  // V3 (30.15 section 3.7): a review about health, a threat, legal action or a named member of staff goes to the owner with no
+  // draft, no Approve and none of the customer's words; a clinic's never carries patient details.
+  const [{ data: rv }, { data: lc }] = await Promise.all([
+    admin().from("reviews").select("risk_reasons").eq("id", r.id).maybeSingle(),
+    admin().from("locations").select("category, category_label").eq("id", loc.id).maybeSingle(),
+  ]);
+  const s = sensitivity({ risk: r.risk, reasons: (rv?.risk_reasons as string[] | null) ?? [], rating: r.star_rating, comment: r.comment,
+    categories: [lc?.category as string | null, lc?.category_label as string | null] });
+  if (s.sensitive || (r.risk === "high" && s.regulated)) {
+    return sendSensitiveAlert(await whatsappCtx(), users, { reviewId: r.id, locationId: loc.id, business: loc.name, stars: r.star_rating, reviewer: r.reviewer_name, regulated: s.regulated });
+  }
   const { data: d } = await admin().from("reply_drafts").select("body, safety_ok").eq("review_id", r.id)
     .order("version", { ascending: false }).limit(1).maybeSingle();
   const { sendReviewAlert } = await import("./deliver.ts");
   return sendReviewAlert(await whatsappCtx(), users, {
-    reviewId: r.id, locationId: loc.id, business: loc.name, stars: r.star_rating, reviewer: r.reviewer_name, text: r.comment,
+    reviewId: r.id, locationId: loc.id, business: loc.name, stars: r.star_rating, reviewer: r.reviewer_name,
+    // A clinic (health, legal, financial) never gets what a patient or client wrote in WhatsApp, whatever the rating (30.15 3.7).
+    text: s.regulated ? null : r.comment,
     draft: d?.body ?? null, safeDraft: !!d?.safety_ok, risk: r.risk,
   });
 }

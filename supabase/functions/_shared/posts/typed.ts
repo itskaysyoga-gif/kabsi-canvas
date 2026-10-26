@@ -7,9 +7,11 @@ import { noDashes } from "../ai/fence.ts";
 
 export type TypedPost = { ok: true; text: string } | { ok: false; problems: string[] };
 
-export function checkTypedPost(raw: string): TypedPost {
+/** `statedByOwner`: a price is allowed when the owner's own words just stated it (the monthly "anything new?" answer, V3); the
+ *  default is the typed post, whose prices must already be in the owner's facts. */
+export function checkTypedPost(raw: string, o: { statedByOwner?: boolean } = {}): TypedPost {
   const text = noDashes(raw.replace(/\s+/g, " ").trim()).replace(/!+/g, ".").replace(/\.{2,}/g, ".").replace(/\s+\./g, ".");
-  const problems = contactIssues(text, { allowedText: "" });
+  const problems = contactIssues(text, { allowedText: o.statedByOwner ? raw : "" });
   if (text.length < 10) problems.push("is too short for a post (at least 10 characters)");
   if (text.length > 1500) problems.push("is too long for a post (at most 1,500 characters)");
   return problems.length ? { ok: false, problems } : { ok: true, text };

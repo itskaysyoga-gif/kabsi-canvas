@@ -162,8 +162,9 @@ const OWNER_SCRIPT: Step[] = [
   { note: "13b 4: stats", phone: PHONES.owner, text: "stats", expect: { result: "stats", head: OWNER_HEAD, reply: /Harbour Lane Coffee, the last 7 days: \d+ new/, replies: 1 } },
   { note: "13b 5: review link", phone: PHONES.owner, text: "review link", expect: { result: /^(review_link|no_review_link)$/, head: OWNER_HEAD, reply: /review link|no review link yet/ } },
   { note: "13b 6: the scan code from the website", phone: PHONES.owner, text: "Hi Kabsi, my scan code is KAB-7Q4M2X9P", expect: { result: "scan_code", reply: /Thanks, I have your scan KAB-7Q4M2X9P/, conv: { scan_code: "KAB-7Q4M2X9P" } } },
-  { note: "13b 7: a short voice note", phone: PHONES.owner, media: { kind: "audio", id: "replay-voice-5s", mime: "audio/ogg; codecs=opus", size: 20_000, voice: true }, expect: { result: "voice_kept", reply: /Got it, I am listening/ } },
-  { note: "13b 8: a photo of the shop", phone: PHONES.owner, media: { kind: "image", id: "replay-photo", mime: "image/jpeg", size: 7000 }, expect: { result: "photo", head: OWNER_HEAD, reply: /Kabsi is checking the photo/ } },
+  // V3: a voice note is transcribed when the provider key is set; the replay audio is silence, so either way no words come back.
+  { note: "13b 7: a short voice note", phone: PHONES.owner, media: { kind: "audio", id: "replay-voice-5s", mime: "audio/ogg; codecs=opus", size: 20_000, voice: true }, expect: { result: /^voice_(not_configured|failed|empty)$/, reply: /not switched on yet|could not hear that note/ } },
+  { note: "13b 8: a photo of the shop", phone: PHONES.owner, media: { kind: "image", id: "replay-photo", mime: "image/jpeg", size: 7000 }, expect: { result: "photo", head: OWNER_HEAD, reply: /getting your photo ready/ } },
   { note: "13b 9: upgrade (a demo business has no paid plan)", phone: PHONES.owner, text: "upgrade", expect: { result: "billing_no_plan", head: OWNER_HEAD, reply: /has no paid plan right now/ } },
   { note: "13b 10: talk to a person", phone: PHONES.owner, text: "talk to a person", expect: { result: "handoff", reply: /within one business day/, conv: { handoff: true } } },
 ];

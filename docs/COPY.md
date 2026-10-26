@@ -126,6 +126,9 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 - Rules box: "Send it to every customer, the same way. Do not offer anything in return, and do not ask only happy customers. Those are Google's rules."
 - Then: "Want to see where you rank too?" Scan box.
 
+**The page a review link opens (/review/CODE), V3.** H1 the business name under "Thank you for visiting". Line: "Tell other people how your visit went. It takes a minute." Button: "Write a Google review". Under it: "Say what you honestly thought. Everyone sees this same page." and "Your review goes to Google. Kabsi does not read it or change it." Manager line (only when the business saved a WhatsApp number): "Need help now? Message the manager". Inactive: "This review link is no longer active." / "Ask the business for a new one. Thank you for trying."
+**Printed cards (counter card A6, table tent A4), V3.** "Tell others how your visit went" / "Scan to leave a review on Google. It takes a minute." / the business name / "Or type go.kabsi.co/CODE". Table tent fold line: "Fold here".
+
 ## 6. Guide template (/guides/SLUG)
 
 - H1: the question, for example "Why is my business not showing on Google Maps?"
@@ -256,6 +259,15 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 - staff_admin: "Morning, Rashid. 3 things today: 2 partner applications, 1 payout list to approve, number health good." Buttons: "Review applications" / "Approve payouts".
 - Unknown: "Welcome to Kabsi. Did you just scan your business on kabsi.co? Send me your business name or the code from the page and I will pick up from there."
 - Two roles: "Your business or your partner tools?" Buttons: "Business" / "Partner".
+
+**Review Growth, photos, the monthly question and sensitive reviews (V3, 30.15 sections 3.3 to 3.7).**
+- Ask a customer: "Here is the message for your customers. Forward the next message from your own phone, after a real visit. Send it to every customer the same way. Kabsi never gets their number and never messages them." Then, as its own message: "Thanks for visiting [Business]. If you would like to leave a review, here is our link: [link]". No link yet: "[Business] has no review link yet. Make one in Kabsi under Get Reviews, then ask me again."
+- Stats, second paragraph: "[n] new reviews on Google in the last [days] days. Your review link was opened [n] times. An open is not a review."
+- Photo sent: "Got it. Kabsi is getting your photo ready and will ask you here in a minute: Yes, Edit or Skip. Nothing goes on Google until you say yes." From staff: "Thank you. Kabsi is getting the photo ready, and the owner is asked to approve it. Nothing goes on Google until they say yes."
+- Photo ready: "[Business]: your photo is ready. Kabsi checked the size and light and saved a clean copy with no location details. It would go on your Google profile as [the inside]. Put it on your Google profile?" Buttons: Yes / Edit / Skip. Edit: "What is it of? Reply with the number." with eight kinds. Skip: "Okay, skipped. Nothing was put on Google." Could not use: "[Business]: Kabsi could not use that photo. [Reason]. Please send another one."
+- Monthly question: "[Business]: anything new this month? Any new services, prices, products or opening times? Reply here in your own words, or reply No if nothing changed. Kabsi turns your answer into drafts, and nothing goes live without your yes." After No: "Thanks. Nothing to change this month. I will ask again next month." After an answer: "[Business]: thanks. Kabsi can post this on your Google profile after your yes. It is your own words." with the post in quotes, Approve and Edit on kabsi.co.
+- Sensitive review: "[Business]: a new [n]-star review needs your care. It is about something sensitive, so Kabsi shows none of it here and did not write a reply. Read it in Kabsi first." For a clinic: "Kabsi shows nothing of what the customer wrote here, and did not write a reply. Details about a patient or client stay out of WhatsApp. Read it in Kabsi." Then the link, "Reply \"talk to a person\" and someone at Kabsi will help you here." and the button "Talk to a person".
+- Voice note: "I heard: \"[words]\"" then the answer to those words. Not switched on: "Voice notes are not switched on yet. Please type your message and I will take it from there." Not heard: "I could not hear that note clearly. Please try again, or type your message." Too long: "Please keep voice notes under 3 minutes".
 
 **Onboarding, the first 48 hours (30.16 section 3).** Sent only when the event happens. Outside the 24-hour window, the approved template with the same words.
 - First message back: "Hi [Name], I am Nora, Kabsi's AI assistant. I have your free check for [Business]. Can Kabsi send your setup steps and approvals here? Reply Yes, or Help to talk to Rashid, the founder. Reply Stop any time." The free check is sent whatever the answer.

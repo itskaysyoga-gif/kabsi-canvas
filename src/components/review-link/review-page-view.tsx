@@ -15,13 +15,17 @@ export function ReviewPageView({ data }: { data: ReviewPageData }) {
       </p>
       <h1 className="mt-2 font-display text-4xl leading-tight">{data.name}</h1>
       <p className="mt-3 leading-7 text-kb-stone">
-        If you have a minute, tell other people about your visit on Google.
+        Tell other people how your visit went. It takes a minute.
       </p>
       <Button asChild className="mt-7 h-14 w-full text-lg">
         <a href={data.review_url} rel="noopener">
           Write a Google review
         </a>
       </Button>
+      <ul className="mt-6 space-y-2 text-left text-sm leading-6 text-kb-stone">
+        <li>Say what you honestly thought. Everyone sees this same page.</li>
+        <li>Your review goes to Google. Kabsi does not read it or change it.</li>
+      </ul>
       {data.whatsapp ? (
         <a
           href={managerHref(data.whatsapp, data.name)}
@@ -40,9 +44,9 @@ export function ReviewPageView({ data }: { data: ReviewPageData }) {
 export function ReviewPageUnavailable() {
   return (
     <Shell>
-      <h1 className="font-display text-3xl leading-tight">This link is not active</h1>
+      <h1 className="font-display text-3xl leading-tight">This review link is no longer active.</h1>
       <p className="mt-3 leading-7 text-kb-stone">
-        Please ask the staff for a new link, or find the business on Google Maps.
+        Ask the business for a new one. Thank you for trying.
       </p>
     </Shell>
   );

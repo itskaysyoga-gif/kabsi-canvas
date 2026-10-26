@@ -50,8 +50,8 @@ export const SAY = {
 
   // Owner tools (9.3).
   ownerHelp:
-    "You can send:\n\"stats\" or \"this month\"\n\"review link\" or \"QR\"\na photo for a post\n\"reply:\" and your exact reply to the last review\na change to the last draft, for example \"make it shorter\"\n\"switch\" to change business\n\"talk to a person\"",
-  staffHelp: "You can send photos here for the owner to approve, or \"talk to a person\".",
+    "You can send:\n\"stats\" or \"this month\"\n\"review link\" or \"QR\"\n\"ask a customer\" for a ready review message\na photo for your Google profile\na voice note or a message about what is new\n\"reply:\" and your exact reply to the last review\na change to the last draft, for example \"make it shorter\"\n\"switch\" to change business\n\"talk to a person\"",
+  staffHelp: "You can send photos here for the owner to approve, \"ask a customer\" for the review message, or \"talk to a person\".",
   stats: (business: string, days: number, s: { new_reviews: number; answered: number; waiting: number; average: number | null }) =>
     `${business}, the last ${days} days: ${s.new_reviews} new ${s.new_reviews === 1 ? "review" : "reviews"}${s.average ? `, average ${s.average} stars` : ""}, ${s.answered} answered through Kabsi. ${s.waiting} waiting for you.`,
   reviewLink: (business: string, url: string) =>
@@ -126,15 +126,29 @@ export const SAY = {
   abuseNotice: "Kabsi will not reply to messages like this. If you need help, send \"talk to a person\".",
 
   // Media (18.3, 28.3).
-  photoTaken: "Thank you. Kabsi is checking the photo and will show it in Photos for you to approve.",
+  photoTaken: "Got it. Kabsi is getting your photo ready and will ask you here in a minute: Yes, Edit or Skip. Nothing goes on Google until you say yes.",
+  photoTakenStaff: "Thank you. Kabsi is getting the photo ready, and the owner is asked to approve it. Nothing goes on Google until they say yes.",
   photoUnreadable: "Please send it as a photo.",
-  photoPro: "Sending photos on WhatsApp comes with the Pro plan. You can add photos in Kabsi under Photos.",
+  photoCategoryAsk: (menu: string) => menu,
+  photoCategorySet: (label: string) => `Done. It will go on your Google profile as ${label}. Put it on your Google profile?`,
+  photoCategoryBad: "Please reply with a number from 1 to 8.",
+  photoSkipped: "Okay, skipped. Nothing was put on Google.",
+  photoGone: "That photo is already handled. Nothing changed.",
   videoKept: "Thanks. Kabsi keeps videos, but Google posts from WhatsApp take photos only for now.",
   voiceTooLong: "Please keep voice notes under 3 minutes",
-  voiceListening: "Got it, I am listening",
-  contactTaken: (name: string) =>
-    `Thanks. "Ask a customer" comes soon: Kabsi will give you a ready message with your review link to forward to ${name} from your own phone. Kabsi never messages your customers.`,
-  contactBad: "That contact has no phone number I can use.",
+  voiceOff: "Voice notes are not switched on yet. Please type your message and I will take it from there.",
+  voiceFailed: "I could not hear that note clearly. Please try again, or type your message.",
+  voiceHeard: (text: string) => `I heard: "${text.replace(/\s+/g, " ").trim().slice(0, 300)}"`,
+  // "Ask a customer" (30.15 section 3.5): a ready message, forwarded from the owner's own phone. Kabsi never gets a number.
+  askNoLink: (business: string) => `${business} has no review link yet. Make one in Kabsi under Get Reviews, then ask me again.`,
+  // Monthly question (30.15 section 3.3).
+  updateNothing: "Thanks. Nothing to change this month. I will ask again next month.",
+  updatePostShown: (business: string, text: string) =>
+    `${business}: thanks. Kabsi can post this on your Google profile after your yes. It is your own words.\n\n"${text}"`,
+  updateProblem: (business: string, problems: string[]) =>
+    `${business}: thanks. Kabsi cannot post that as it is, because it ${problems.join(" and ")}. Send it again without that, or send \"post:\" and the words you want.`,
+  // Reviews about something sensitive (30.15 section 3.7).
+  statsOpens: (line: string) => line,
 
   // Partner tools (29.2): stubs that PA2 fills.
   partnerSoon: "Partner tools on WhatsApp open soon. Your link, results and payouts will all be here.",

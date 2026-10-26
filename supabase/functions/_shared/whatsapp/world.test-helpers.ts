@@ -72,6 +72,7 @@ export class World {
     ["r-harbour-high", { location: BIZ.harbour, state: "drafted", risk: "high" }],
   ]);
   stored = new Set<string>();
+  storedPayloads: unknown[] = [];
   storedPhones = new Set<string>();
   noraCalls: string[] = [];
   noraAnswer: string | null = null;
@@ -88,6 +89,11 @@ export class World {
   handoffs: string[] = [];
   photos: string[] = [];
   voices: string[] = [];
+  /** V3: processed photos waiting for a yes, by id. */
+  photoDrafts = new Map<string, { location: string; state: string; category: string }>();
+  /** V3: what the transcriber answers for a voice note (tests set it); null means "not configured". */
+  transcript: { ok: true; text: string; language: string | null } | { ok: false; reason: "not_configured" | "empty" | "too_big" | "failed" } | null = null;
+  transcribed: number[] = [];
   firstMaps: string[] = [];
   /** What the first map step answers after a code binds an owner (28.5). */
   firstMapAnswer: { state: "started" | "waiting" | "ask" | "none"; keyword?: string | null } = { state: "none" };
@@ -155,9 +161,10 @@ export class World {
   db(): AgentDb {
     const w = this;
     return {
-      async store(phone, id, _kind, _payload, referral) {
+      async store(phone, id, _kind, payload, referral) {
         if (w.stored.has(id)) return { duplicate: true };
         w.stored.add(id);
+        w.storedPayloads.push(payload);
         const first = !w.storedPhones.has(phone);
         w.storedPhones.add(phone);
         const c = w.conversation(phone);
@@ -274,6 +281,14 @@ export class World {
         return r.state === "drafted" ? { ok: true } : { ok: false, reason: "not_draft" };
       },
       async actionCreate(user, type, target) {
+        if (type === "photo") {
+          const p = w.photoDrafts.get(target);
+          if (!p || p.state !== "draft") return { ok: false, reason: "not_draft" };
+          if (!w.biz.find((b) => b.id === p.location)?.members[user]) return { ok: false, reason: "not_member" };
+          const token = `pho${String(++w.n).padStart(20, "0")}`;
+          w.actions.set(token, { token, user, location: p.location, type, target, used: false, stale: false });
+          return { ok: true, token, text: p.category };
+        }
         const r = w.reviews.get(target);
         if (r?.risk === "high") return { ok: false, reason: "high_risk" };
         const token = `new${String(++w.n).padStart(20, "0")}`;
@@ -290,8 +305,32 @@ export class World {
         w.photos.push(`${l}:${u}:${bytes.length}`);
         return { ok: true };
       },
-      async keepVoice(phone, id, bytes) {
-        w.voices.push(`${phone}:${id}:${bytes.length}`);
+      async growth(_l, days) {
+        return { days, newReviews: 3, opens: { message: 5, qr: 2, tag: 1 } };
+      },
+      async photoCategory(user, photo, category) {
+        const p = w.photoDrafts.get(photo);
+        if (!p) return { ok: false, reason: "unknown_target" };
+        const role = w.biz.find((b) => b.id === p.location)?.members[user];
+        if (role !== "owner" && role !== "manager") return { ok: false, reason: "not_member" };
+        if (p.state !== "draft") return { ok: false, reason: "not_draft" };
+        p.category = category;
+        // The hash of the item changes with the category: tokens made before it are refused ("changed").
+        for (const a of w.actions.values()) if (a.type === "photo" && a.target === photo) a.stale = true;
+        return { ok: true, location_id: p.location };
+      },
+      async photoSkip(token, phone) {
+        const a = w.actions.get(token);
+        const u = a && w.users.find((x) => x.id === a.user);
+        if (!a || a.type !== "photo" || u?.phone !== phone) return { result: "unknown" };
+        if (a.used) return { result: "already", location_id: a.location };
+        a.used = true;
+        const p = w.photoDrafts.get(a.target);
+        if (p) p.state = "skipped";
+        return { result: "skipped", location_id: a.location };
+      },
+      async monthlyAnswered(l) {
+        w.calls.push(`monthly_answered:${l}`);
       },
       async staffNumbers() {
         return { jobs_failed_1h: 0, jobs_waiting: 0, publications_stuck: 0, handoffs: w.handoffs.length, outbox_held: 0, signups_today: 2,
@@ -458,6 +497,10 @@ export class World {
       firstMap: async (loc) => (w.firstMaps.push(loc), w.firstMapAnswer),
       confirmKeyword: async (loc, k) => (w.calls.push(`keyword:${loc}:${k}`), w.keywordAnswer),
       mapImage: async () => null,
+      transcribe: async (audio) => {
+        w.transcribed.push(audio.length);
+        return w.transcript ?? { ok: false, reason: "not_configured" };
+      },
       flush: async () => {},
       now: () => w.now,
       // "On it" fires at once in a slow case, never in a fast one.
