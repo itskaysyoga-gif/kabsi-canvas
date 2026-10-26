@@ -1106,3 +1106,39 @@ Design 4 takes these ideas, in Kabsi's own system: the honest FAQ "Can't I do th
 
 ### 6. Order from here (replaces 30.15 section 12)
 Design 4 and Design 3 (Opus, together); then V3 (Sonnet) and Partners (Opus); V4 (Opus, with the onboarding stages); Outbound (Opus, the Harvey fork with the rules above, warm-up started at least two weeks before the launch gate); Web 2 and UX 1 (Opus); Sec 1 (Opus); the launch gate.
+
+## 30.17 Founding 25, one Home for every business, industry pages, easy access (lane R, 26 Oct 2026, R-97)
+Changes 30.15 and 30.16 where they differ.
+
+### 1. Founding 25: three months of Pro free, to prove the product and earn real case studies
+- 25 places, by application, not first come. Who: a verified Google profile with at least 10 reviews, a physical place customers visit, the owner reachable on WhatsApp, in the UAE, the UK or the US, and a yes to a 2-minute check-in every two weeks.
+- The mix, so the case studies cover the market: 10 beauty and hair (salons, barbers, nails, spas), 5 food and drink, 5 health (dental, clinics, physio), 5 others (auto, fitness, home services, hotels). A place left open after 30 days goes to the next good applicant of any trade.
+- What they get: Pro, free for 90 days from the day Google access works, no card. Then the founding price (19 or 39 US dollars, kept while the subscription stays paid) if they choose a plan; nothing is charged automatically. Leaving any time.
+- What Kabsi gets: honest feedback, permission to write a case study (named or anonymous, the owner approves the final text). A case study uses the owner's words, the work Kabsi did from Kabsi's own records (replies published, posts, details fixed) and only numbers the owner chooses to share from their own Google screens. Kabsi never publishes figures taken from Google's APIs, and never a result the owner did not approve.
+- Cost to Kabsi: about 2.50 to 4 US dollars a business a month on Pro (maps about 0.63, AI answers about 0.78, AI drafting about 0.50 to 1.50, WhatsApp templates about 0.40), so about 200 to 300 US dollars for all 25 over three months, plus fixed costs Kabsi pays anyway. List price given up: up to 2,925 US dollars.
+- Kill gate: at day 45, if fewer than 10 of the 25 approve work at least once a week, pause new places and fix what stops them. Target at day 90: at least 10 of the 25 choose a paid plan.
+- Name and lines: "Founding 25". "Three months of Kabsi Pro, free, for 25 businesses. We do the Google work; you tell us what to make better." Shown on Home, Pricing and every industry page, with the real number of places left.
+- Where they come from: Outbound (Email 1 offers the free check and mentions the Founding 25 places; no link), Meta ads to the industry pages, partners, and the free check result.
+- The Partners session builds it (an application form, the founding flag that grants Pro for 90 days without Creem, the day-60 and day-85 messages, the conversion to a paid plan through Creem at day 90). The founder-assisted start of 30.15 section 3.2 is for these 25.
+
+### 2. One Home for every business, and a landing page for every industry (replaces 30.16 section 2)
+- Home speaks to every local business. Examples rotate with a "Pick your business" row (Salon, Barber, Restaurant, Cafe, Clinic, Dentist, Auto repair, Gym, Hotel, Home services, Shop, Other): each choice changes the hero story's example and links to that industry's page. No trade word in Home's own lines.
+- Industry pages: /for (all industries), nine category hubs (beauty and wellness, food and drink, health, auto, home services, hospitality, fitness and sport, retail, professional services) and one page per industry under them. One template, real substance per industry: the trade's own searches, the Google categories that fit, the review themes customers write about, the five recurring Google tasks of that trade, its own WhatsApp story, post ideas, the photos that matter, its holiday specifics, its own FAQs, the free check prefilled with its search term, the Founding 25 line, pricing.
+- Quality gate against Google's scaled content rules: every industry page needs a claim sheet with sources, its own photos, and at least 60 percent of its text unlike any other industry page (a similarity check in CI). A page that fails stays live but noindex and unlinked until it passes; lane R approves each page before it is indexed.
+- Waves. Wave 1 at launch, 12 industries: hair salons, barbershops, nail and beauty salons, spas and massage, dental clinics, medical and aesthetic clinics, physiotherapy, restaurants, cafes, bakeries, auto repair, gyms and fitness studios. Wave 2 in month 2, 10 more: hotels, car washes, pet grooming and vets, plumbers and electricians, cleaning services, real estate agents, shops, florists, tutoring centres, pharmacies. Then about 10 a month, chosen from real demand (free check searches, signups, Outbound replies, ad results), until every common local trade has a page. Any other business uses Home: "Kabsi works for any business with a Google profile."
+- Every page, built once in the template: server-rendered, its own title, description and share image, Organization and BreadcrumbList data, links to its hub, two guides and the free check, inside the speed budget. Meta ads run one ad set per wave 1 industry to its own page.
+- Search terms per industry and market come from DataForSEO keyword data (a few cents per industry), never guessed.
+- Guides and city pages stay as 30.16 section 4 says.
+
+### 3. Giving Kabsi access: the Kabsi Clients group, made easy (confirms the facts)
+- Owners add the Kabsi Clients business group by its ID 5481006796 as a Manager. Not an email address: the group keeps access tied to Kabsi as a company, never to one person's Google account, and Kabsi accepts the invitation itself within minutes.
+- Easy: the ID on its own line with a Copy button on the website, and as its own WhatsApp message so a long press copies it; the steps in five short lines with Kabsi's own drawings and a 30-second screen recording made by Rashid on a real profile (add, then remove); the three states (invite pending, accepted, access checked); "Send these steps to whoever looks after your Google profile" for owners whose profile someone else manages; Rashid's help on WhatsApp for anyone stuck.
+- The steps, everywhere the same: on Google, open your profile (search your business name while signed in), Menu, Business Profile settings, People and access, Add, paste 5481006796, choose Manager, Invite. Never hello@kabsi.co, never a password or a code.
+
+### 4. Smaller decisions
+- Hero: the H1's last phrase in Kabsi yellow ("Taken care of through WhatsApp." on Home, "Taken care of." on industry pages); the lead stays in the light text colour. One yellow phrase per hero, no other coloured words.
+- The signed-in website is light (Design 3's comparison); dark stays for the public site. The WhatsApp map image is portrait, 1080 by 1500. Design 3's changed lines are approved and go into COPY.md in UX 1. Design 4's new lines are approved.
+- Outbound's sending domain: getkabsi.com, registered on Cloudflare Registrar (at cost, DNS already on Cloudflare), one Zoho Mail Lite mailbox rashid@getkabsi.com in the existing Zoho organisation. A .com is trusted more by spam filters than .co, and Cloudflare keeps DNS in one place.
+
+### 5. Order
+Design 5 (Opus, the design studio: Home for every business with the business picker, the yellow phrase, the industry template, the nine hubs, three finished industry pages as the model, the Founding 25 blocks, the access steps); then V3 (Sonnet) and Partners (Opus, with Founding 25); V4 (Opus); Outbound (Opus); Web 2 (Opus) with Content 1 (Sonnet: the rest of wave 1 from claim sheets and keyword data); UX 1 (Opus); Sec 1 (Opus); the launch gate.

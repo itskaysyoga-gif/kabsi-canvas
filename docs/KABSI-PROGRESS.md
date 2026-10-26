@@ -18,7 +18,7 @@ One page, under 10 KB. Updated 25 Oct 2026 by the lane R chat (master plan 19, 2
 - Session 13b part 2 (PR 230, merged 25 Oct, deploy run 106): staff alerts and morning digest on WhatsApp, Slack removed, hours and typed posts on WhatsApp, the map image, the billing template (pending at Meta), Nora judged 4.4 of 5, START fixed. Verified live 26 Oct: the first morning digest reached the staff phone at 08:02 Beirut (Rashid replied). Detail: `docs/progress/archive/2026-10-25-session-13b-2.md`.
 - V2 (AI Visibility, PR 234, 26 Oct): prompts, runs, numbers, owner line, map line; Gemini off. Calibrated live. Detail: `docs/progress/archive/2026-10-26-v2-ai-visibility.md`.
 - 26 Oct, lane R: V2's migration applied; Meta pixel live; QA_SMOKE_TOKEN set; Slack leftovers dropped (0 | 0 | 0 | 0); master plan 30.14.
-- 26 Oct, lane R: the outside review decided (master plan 30.15, R-95, and 30.16, R-96: Outbound from launch day, salons and barbers first, onboarding in four stages). V2 live (PR 234, 237). Next: Design 4 and Design 3, V3, Partners, V4, Outbound, Web 2 and UX 1, Sec 1, the launch gate.
+- 26 Oct, lane R: the outside review decided (30.15, 30.16) and 30.17 (Founding 25, Home for every business with industry pages, easy access, getkabsi.com). Design 1 to 4 and 3 approved in the design studio. Next: Design 5, V3, Partners, V4, Outbound, Web 2 with Content 1, UX 1, Sec 1, the launch gate.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
