@@ -38,7 +38,10 @@ describe("the ready review message", () => {
 describe("Kabsi never receives or keeps a customer's number", () => {
   it("the agent's contact branch reads no number and no name, and the stored message drops contacts", () => {
     const agent = code("supabase/functions/_shared/whatsapp/agent.ts");
-    const branch = agent.slice(agent.indexOf('if (cmd.k === "contact")'), agent.indexOf('if (cmd.k === "empty")'));
+    const branch = agent.slice(
+      agent.indexOf('if (cmd.k === "contact")'),
+      agent.indexOf('if (cmd.k === "empty")'),
+    );
     expect(branch).toContain("askCustomer");
     expect(branch).not.toMatch(/phones|toE164|\.name|contacts\[/);
     expect(agent).toMatch(/contacts: \[\]/);
@@ -58,7 +61,9 @@ describe("Kabsi never receives or keeps a customer's number", () => {
         /customer_phone|customers?\b.*\.insert|\.from\("customers/i,
       );
     }
-    expect(code("supabase/functions/_shared/review-growth/message.ts")).not.toMatch(/e164|toE164|phones\b|phone_number/i);
+    expect(code("supabase/functions/_shared/review-growth/message.ts")).not.toMatch(
+      /e164|toE164|phones\b|phone_number/i,
+    );
   });
 });
 
@@ -78,7 +83,10 @@ describe("link opens from a forwarded message", () => {
       const res = await worker.fetch(
         new Request(`https://go.kabsi.co/KQA234${query}`, { headers: { "user-agent": "iPhone" } }),
         {
-          STICKERS: { get: vi.fn(async () => ({ d: GOOGLE, b: "loc", a: true, m: "direct" })), put: vi.fn(async () => undefined) },
+          STICKERS: {
+            get: vi.fn(async () => ({ d: GOOGLE, b: "loc", a: true, m: "direct" })),
+            put: vi.fn(async () => undefined),
+          },
           APP_ORIGIN: "https://kabsi.co",
           TAP_FUNCTION_URL: "https://tap.test",
           TAP_SECRET: "s",
@@ -98,14 +106,20 @@ describe("link opens from a forwarded message", () => {
   });
 
   it("the tap function accepts the message source, and the database check allows it", () => {
-    expect(read("supabase/functions/tap/index.ts")).toContain('body?.source === "message" ? "message"');
-    expect(read("supabase/migrations/20261026150502_v3_review_growth.sql")).toContain("source in ('nfc', 'qr', 'message')");
+    expect(read("supabase/functions/tap/index.ts")).toContain(
+      'body?.source === "message" ? "message"',
+    );
+    expect(read("supabase/migrations/20261026150502_v3_review_growth.sql")).toContain(
+      "source in ('nfc', 'qr', 'message')",
+    );
   });
 });
 
 describe("the print cards and the facts", () => {
   it("review-cards is a function with its own line in config.toml, verify_jwt on", () => {
-    expect(read("supabase/config.toml")).toMatch(/\[functions\.review-cards\][^\n]*\nverify_jwt = true/);
+    expect(read("supabase/config.toml")).toMatch(
+      /\[functions\.review-cards\][^\n]*\nverify_jwt = true/,
+    );
   });
   it("the facts say what V3 built, and keep the rule words out of the review request", () => {
     const facts = read("knowledge/facts/07-review-links-and-cards.md");
