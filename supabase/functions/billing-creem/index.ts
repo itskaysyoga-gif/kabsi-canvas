@@ -38,7 +38,8 @@ async function isStaff(req: Request): Promise<boolean> {
   if (await isInternal(req)) return true;
   const user = await currentUser(req);
   if (!user) return false;
-  const { data } = await admin().from("staff").select("user_id").eq("user_id", user.id).maybeSingle();
+  // Sec 2: Kabsi admins only, not installers.
+  const { data } = await admin().from("staff").select("user_id").eq("user_id", user.id).eq("role", "admin").maybeSingle();
   return !!data;
 }
 

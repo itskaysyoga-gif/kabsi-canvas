@@ -127,7 +127,20 @@ fi
 
 # 2b. Sec 2: deletions made after the backup are applied again to the restored copy, then the time-based retention jobs.
 REAPPLIED=0; REAPPLY_LEFT=0; RETENTION_RERUN="not run"; DELETED_LOCATIONS=""
+# The set's name is a UTC stamp; anything else is refused before it reaches SQL (Sec 2 review).
+if [ -n "$STAMP" ] && ! printf '%s' "$STAMP" | grep -Eq '^[0-9]{8}T[0-9]{6}Z$'; then fail "the set's stamp is not a UTC stamp"; STAMP=""; fi
 if [ -f "$W/plain/db.dump" ] && [ -n "$STAMP" ]; then
+  # A plain Postgres has no pg_net: deleting a business with a card fires the card trigger, which calls net.http_post.
+  # The scratch copy gets a no-op stand-in, so a cascade never fails there and nothing is ever sent.
+  psql "$SCRATCH_DB_URL" -q -v ON_ERROR_STOP=1 >/dev/null <<'SQL' || fail "could not prepare the net stand-in"
+do $$ begin
+  if to_regprocedure('net.http_post(text,jsonb,jsonb,jsonb,integer)') is null then
+    create schema if not exists net;
+    create function net.http_post(url text default null, body jsonb default null, params jsonb default null,
+      headers jsonb default null, timeout_milliseconds integer default null) returns bigint language sql as 'select 0::bigint';
+  end if;
+end $$;
+SQL
   SINCE="$(printf '%s' "$STAMP" | sed -E 's/^([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2})([0-9]{2})([0-9]{2})Z$/\1-\2-\3T\4:\5:\6Z/')"
   if have DELETIONS_DB_URL; then
     # A drill on a local stack reads the deletion log from that database directly (no Management API there).
@@ -146,7 +159,9 @@ if [ -f "$W/plain/db.dump" ] && [ -n "$STAMP" ]; then
     fi
     if [ -s "$W/deletions-rows.json" ]; then
       say "Deletions since the backup ($SINCE): $(jq length "$W/deletions-rows.json") ids"
-      REAPPLIED="$(psql "$SCRATCH_DB_URL" -At -v ON_ERROR_STOP=1 -v rows="$(cat "$W/deletions-rows.json")" <<'SQL' || echo error
+      # The list is read inside psql from the file (a long list would not fit in one command-line argument).
+      REAPPLIED="$(psql "$SCRATCH_DB_URL" -At -v ON_ERROR_STOP=1 <<SQL || echo error
+\set rows \`cat $W/deletions-rows.json\`
 select private.reapply_deletions(:'rows'::jsonb);
 SQL
 )"
@@ -155,6 +170,9 @@ SQL
       REAPPLY_LEFT=0
       while IFS=$'\t' read -r tbl rid; do
         [ -n "$tbl" ] || continue
+        case " locations contacts chat_conversations founding_applications partner_accounts free_check_waitlist profile_check_whatsapp " in
+          *" $tbl "*) ;; *) fail "unknown table in the deletion log"; continue ;;
+        esac
         n="$(psql "$SCRATCH_DB_URL" -At -c "select count(*) from public.\"$tbl\" where id::text = '$(printf '%s' "$rid" | tr -cd 'A-Za-z0-9-')'" 2>/dev/null || echo 0)"
         REAPPLY_LEFT=$((REAPPLY_LEFT + n))
         [ "$tbl" = "locations" ] && DELETED_LOCATIONS="$DELETED_LOCATIONS $rid"

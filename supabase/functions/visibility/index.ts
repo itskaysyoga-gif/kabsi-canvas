@@ -166,7 +166,8 @@ async function caller(req: Request, locationId: string | null): Promise<Caller> 
   if (await isInternal(req)) return { kind: "internal" };
   const user = await currentUser(req);
   if (!user) return null;
-  const { data: staff } = await db().from("staff").select("user_id").eq("user_id", user.id).maybeSingle();
+  // Sec 2: Kabsi admins only; an installer (staff.role installer) is not staff here either.
+  const { data: staff } = await db().from("staff").select("user_id").eq("user_id", user.id).eq("role", "admin").maybeSingle();
   if (staff) return { kind: "staff", id: user.id };
   if (!locationId) return null;
   const { data } = await db().from("location_members").select("role").eq("location_id", locationId).eq("user_id", user.id).maybeSingle();

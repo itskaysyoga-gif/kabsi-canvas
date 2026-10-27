@@ -78,6 +78,17 @@ Deno.test("sec1 /a: GET never acts, whatever state the link is in", async () => 
   }
 });
 
+Deno.test("sec1 /a and /h (Sec 2): a GET with the token in the address is refused before any lookup", async () => {
+  const a = actionWorld();
+  const r = await linkRequest(new Request(`https://x.supabase.co/functions/v1/api/action?t=${TOKEN}`), a.deps);
+  assert.equal(r.status, 405);
+  assert.equal(a.calls.use.length + a.calls.view.length + a.calls.details + a.calls.session, 0, "nothing was read or done");
+  const h = holidayWorld();
+  const rh = await holidayRequest(new Request(`https://x.supabase.co/functions/v1/api/holiday?t=${TOKEN}`), h.deps);
+  assert.equal(rh.status, 405);
+  assert.equal(h.calls.view.length + h.calls.use.length + h.calls.undo.length + h.calls.session, 0);
+});
+
 Deno.test("sec1 /a: HEAD and other scanner methods never act and never look the link up", async () => {
   for (const method of SCANNER_METHODS) {
     const { deps, calls } = actionWorld();

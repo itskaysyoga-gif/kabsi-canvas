@@ -68,8 +68,8 @@ reset role;
 insert into public.cards (code, location_id) values ('XTHR22', '00000000-0000-4000-8000-0000000000c2');
 delete from public.rate_limits where key like 'card_try:%';
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
-select is(public.activate_card('XTHR22', '00000000-0000-4000-8000-0000000000c1', null), 'card_in_use',
-  'another business''s card is refused and counted');
+select is(public.activate_card('XTHR22', '00000000-0000-4000-8000-0000000000c1', null), 'unknown_card',
+  'another business''s card is refused, counted, and reads like an unknown code');
 select throws_ok($$ select public.set_card_active('XTHR22', false) $$, '42501', null,
   'set_card_active on another business''s card reads the same as an unknown code');
 select throws_ok($$ select public.set_card_active('NOSUCH', false) $$, '42501', null, 'an unknown code is forbidden too');
@@ -86,6 +86,8 @@ select alike(public.activate_card('XTHR22', '00000000-0000-4000-8000-0000000000c
 select lives_ok($$ select public.set_card_active('XTHR22', true) $$, 'and switch it');
 select throws_ok($$ select public.staff_operations() $$, '42501', null, 'an installer cannot open the operations view');
 reset role;
+select throws_ok($$ insert into public.phone_roles (phone, user_id, role) values ('+15550002301', '00000000-0000-4000-8000-0000000002b6', 'staff_admin') $$,
+  '42501', null, 'an installer cannot hold the WhatsApp staff_admin role');
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');
 select is(public.is_staff(), true, 'a Kabsi admin is staff');
 reset role;

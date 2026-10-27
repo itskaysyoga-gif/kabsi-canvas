@@ -49,8 +49,10 @@ begin
   end if;
   select * into c from public.cards where code = v_code for update;
   if not found then v_refused := 'unknown_card';
+  -- Sec 2 review: another business's card reads like an unknown code to a non-Kabsi caller (no existence oracle).
+  elsif c.location_id is not null and c.location_id <> p_location and not v_admin then
+    v_refused := case when private.is_installer() then 'card_in_use' else 'unknown_card' end;
   elsif c.status = 'disabled' and not v_admin then v_refused := 'card_disabled';
-  elsif c.location_id is not null and c.location_id <> p_location and not v_admin then v_refused := 'card_in_use';
   end if;
   if v_refused is not null then
     if not v_admin then perform public.hit_rate_limit(v_key, 10, 3600); end if;
@@ -308,3 +310,19 @@ revoke all on function private.retention_sources() from public, anon, authentica
 alter table public.contacts add column if not exists news_requested_at timestamptz;
 comment on column public.contacts.news_requested_at is
   'Sec 2: when a visitor asked Nora for news emails for this address; marketing_consent stays false until the inbox confirms.';
+
+-- 8. Sec 2 review: the WhatsApp staff_admin role joins public.staff without a role check (whatsapp_agent migration), so
+-- an installer bound as staff_admin would keep staff powers on WhatsApp. No such binding exists (no installer today);
+-- this trigger keeps it that way: a staff_admin phone role is only for a Kabsi admin.
+create or replace function private.phone_role_staff_admin_only() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  if new.role = 'staff_admin' and new.revoked_at is null
+     and not exists (select 1 from public.staff s where s.user_id = new.user_id and s.role = 'admin') then
+    raise exception 'staff_admin_needs_admin' using errcode = '42501';
+  end if;
+  return new;
+end $$;
+revoke all on function private.phone_role_staff_admin_only() from public, anon, authenticated;
+create or replace trigger phone_role_staff_admin_only before insert or update on public.phone_roles
+  for each row execute function private.phone_role_staff_admin_only();
