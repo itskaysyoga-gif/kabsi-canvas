@@ -592,3 +592,14 @@ Section 24, 25 and 26 still win. Audit 1 (P0.7-06) changed only these lines, to 
 - Home, "A person helps": "Stuck on a step? Write to hello@kabsi.co, and a person answers." while Kabsi's WhatsApp number is empty (K-122); with the number set it reads "Stuck on a step? Reply Help on WhatsApp, or write to hello@kabsi.co, and a person answers."
 - No Arabic anywhere public (R-61): the reply guide shows English, Spanish and French examples and says so ("short examples in English, Spanish and French"); the FAQ answer on languages reads "English, Spanish, French and many others." and the chat-spelling answer no longer names a language.
 - Signed in, when the business cannot be loaded at all: the business switcher reads "Your business" and the page shows the error state of section 15: "Something went wrong on our side." "Nothing you did. Try again in a minute." Button "Try again".
+
+## 28. Eval 1: the report dates, the star rating and the risk line (27 Oct 2026)
+
+Sections 24 to 27 still win. Eval 1 changed only these lines, for lane R to approve:
+
+- Results Report dates, in the subject ("[Business]: your Results Report for 19 to 25 October"), the title ("Your Results Report, 19 to 25 October"), the line under it and the preheader: "19 to 25 October" within a month, "28 October to 3 November" across months (was "19 October to 25 October" in the email and "Oct 19 to Oct 26" from the live report). The report covers Monday to Sunday before the Monday it is sent.
+- The preheader starts with the dates: "19 to 25 October: Kabsi did [n] things. [n] waiting for your yes." and "19 to 25 October: a quiet week. Nothing waits for your yes." (the rest as section 26).
+- The WhatsApp report line starts with the dates: "[Business], 19 to 25 October. Kabsi did: replies sent to Google 3, ..." and "[Business], 19 to 25 October: a quiet week. Kabsi kept watching your Google profile." (was "[Business], this week Kabsi did: ...").
+- The review email: the rating is five star characters, filled ★ and empty ☆ ("★★★★☆"), read out as "4 of 5 stars"; "Rating 5 of 5" is gone. The plain text reads "[Reviewer]: 4 of 5 stars".
+- New risk line for a complaint that names someone on the team (high, no draft): "They name someone on your team in a complaint." The medium line "They complain about someone on your team. The reply names no one." stays for a complaint that names no one.
+- Nora (website rules, no number set): "Kabsi has a WhatsApp number, but it is not given out yet, so never give a number." (was "Kabsi has no WhatsApp number at the moment, so never give one.").
