@@ -1,7 +1,7 @@
 import { PHOTOS } from "@/components/kabsi/photos";
 import type { Industry } from "./types";
 
-// Content 1: finished from docs/claims/physiotherapy.md, noindex until lane R approves it. Motion Works Physio is
+// Content 1: finished from docs/claims/physiotherapy.md, approved by lane R on 27 Oct 2026 (brief section 18). Motion Works Physio is
 // invented (Example). Health rules from master plan 30.15 section 3.7 apply: no draft for a review that names an
 // injury or a result, no patient details. Every fact on this page has a row in the claim sheet.
 export const physiotherapy: Industry = {
@@ -9,7 +9,7 @@ export const physiotherapy: Industry = {
   hub: "health",
   name: "physiotherapy clinic",
   plural: "Physiotherapy",
-  finished: false,
+  finished: true,
   lead: "Kabsi keeps your physios, what you treat and the first assessment link right on Google, and replies to reviews without naming an injury or confirming a patient. You approve each one on WhatsApp.",
   keyword: "physio",
   example: {
@@ -40,7 +40,7 @@ export const physiotherapy: Industry = {
     },
     {
       title: "Open the first assessment from the Book button",
-      text: "Google lets you add your own booking link. It should open the first assessment page. When the page changes, tell Kabsi and the link follows.",
+      text: "Google lets you add your own booking link. It should open the first assessment page. When the page changes, tell Kabsi and the link follows after your Yes.",
     },
     {
       title: "Reply without naming an injury or confirming a patient",
@@ -52,7 +52,7 @@ export const physiotherapy: Industry = {
     },
     {
       title: "Name only the people on your team list",
-      text: "In the UK the titles of the health professions are protected by law, and a physiotherapy clinic's services must be provided by professionals on the HCPC register. Kabsi uses only the names you list.",
+      text: "In the UK only staff on the HCPC register may be called physiotherapists, and 'physical therapist' is protected too. Kabsi uses only the names you list.",
     },
   ],
   categories: {
@@ -101,7 +101,7 @@ export const physiotherapy: Industry = {
   posts: [
     "An evening clinic on Thursdays, with the booking link.",
     "A new physio joins: their qualifications and the days they work.",
-    "Home visits now cover these areas, with the phone number.",
+    "Home visits now cover these areas, with your booking link.",
     "Opening hours for the bank holiday weekend.",
   ],
   photoTips: [
@@ -147,7 +147,7 @@ export const physiotherapy: Industry = {
     },
     {
       q: "Does my profile need to say whether a GP referral is needed?",
-      a: "Tell Kabsi your rule and it goes into a post, which you approve. The NHS says some people can get NHS physiotherapy without a GP referral, so patients may ask.",
+      a: "Say it in a post: tell Kabsi whether patients can book without a referral and it prepares the post for your Yes. The NHS says some people can get NHS physiotherapy without a GP referral, so patients may ask.",
     },
     {
       q: "Can I give a free assessment to anyone who leaves a review?",

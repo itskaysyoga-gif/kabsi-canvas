@@ -1,7 +1,7 @@
 import { PHOTOS } from "@/components/kabsi/photos";
 import type { Industry } from "./types";
 
-// Content 1: finished from docs/claims/bakery.md, noindex until lane R approves it. Corner Bakery is invented
+// Content 1: finished from docs/claims/bakery.md, approved by lane R on 27 Oct 2026 (brief section 18). Corner Bakery is invented
 // (Example). The bakery has one photo of its own (bakery-window); a second is an Open row in DESIGN-PROPOSAL.md.
 // Every fact on this page has a row in the claim sheet; advice and wording are marked there.
 export const bakery: Industry = {
@@ -9,8 +9,8 @@ export const bakery: Industry = {
   hub: "food-and-drink",
   name: "bakery",
   plural: "Bakeries",
-  finished: false,
-  lead: "Kabsi tells Google when the first loaf is out, lists your cakes with a starting price, and replies to reviews of the bread without promising what is left on the shelf. You approve each one on WhatsApp.",
+  finished: true,
+  lead: "Kabsi keeps your opening hours right on Google, early ones included, lists your cakes with a starting price, and replies to reviews of the bread without promising what is left on the shelf. You approve each one on WhatsApp.",
   keyword: "bakery",
   example: {
     business: "Corner Bakery",
@@ -35,8 +35,8 @@ export const bakery: Industry = {
   ],
   tasks: [
     {
-      title: "Say when the first loaf is out",
-      text: "Whatever time the first loaf comes out, the hours on Google carry it. Kabsi sets special hours for the days that differ, so the door and the profile agree.",
+      title: "Keep the early opening hours right",
+      text: "Whatever time the doors open, the hours on Google carry it. Kabsi asks before a holiday and sets special hours for the days that differ, after your Yes.",
     },
     {
       title: "List cakes and breads with a starting price",
@@ -44,11 +44,11 @@ export const bakery: Industry = {
     },
     {
       title: "Link the page where cakes are ordered",
-      text: "Real bakery profiles on Google show an Order online link. Yours can open the cake order page, with the sizes, and a post can say how many days ahead an order must be placed.",
+      text: "Google lets you add your own link, and yours can open the cake order page with the sizes. A post can say how many days ahead an order must be placed.",
     },
     {
       title: "Post what is fresh today",
-      text: "A seasonal pastry, a new loaf, the sourdough that is back. Kabsi writes the draft after the morning rush so it matches what actually came out of the oven.",
+      text: "A seasonal pastry, a new loaf, the sourdough that is back. Kabsi writes the draft so it matches what you tell it, and you approve it first.",
     },
     {
       title: "Photograph the shelf at its fullest",
@@ -151,7 +151,7 @@ export const bakery: Industry = {
     },
     {
       q: "Can customers order from my Google profile?",
-      a: "If you add an order link, yes. Whether Google shows ordering options depends on your country and the provider you use. Kabsi keeps the link right when the page changes.",
+      a: "If you add an order link, yes. Whether Google shows ordering options depends on your country and the provider you use. Kabsi prepares the new link when the page changes, and it goes live after your Yes.",
     },
     {
       q: "Can Kabsi take cake orders on WhatsApp?",

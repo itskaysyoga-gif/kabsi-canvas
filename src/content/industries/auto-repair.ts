@@ -1,14 +1,14 @@
 import { PHOTOS } from "@/components/kabsi/photos";
 import type { Industry } from "./types";
 
-// Content 1: finished from docs/claims/auto-repair.md, noindex until lane R approves it. Westgate Auto Repair is
+// Content 1: finished from docs/claims/auto-repair.md, approved by lane R on 27 Oct 2026 (brief section 18). Westgate Auto Repair is
 // invented (Example). Every fact on this page has a row in the claim sheet; advice and wording are marked there.
 export const autoRepair: Industry = {
   slug: "auto-repair",
   hub: "auto",
   name: "garage",
   plural: "Auto repair",
-  finished: false,
+  finished: true,
   lead: "Kabsi lists the jobs you do, keeps your phone number and hours exact on Google, and writes calm replies to reviews about price and honesty that never argue or promise a refund. You approve each one on WhatsApp.",
   keyword: "car repair",
   example: {
@@ -40,7 +40,7 @@ export const autoRepair: Industry = {
     },
     {
       title: "Say what you do about the MOT or the inspection",
-      text: "In the UK most cars need an MOT by their third anniversary, then every year, and it can be taken up to a month early without losing the renewal date. A garage that tests cars posts its free slots. In Dubai the RTA requires an inspection appointment to register or renew a car.",
+      text: "In Great Britain most cars need an MOT by their third anniversary, then every year, and it can be taken up to a month early without losing the renewal date. A garage that tests cars posts its free slots. In Dubai the RTA requires an inspection appointment to register or renew a car.",
     },
     {
       title: "Keep the phone number and the hours exact",
@@ -140,7 +140,7 @@ export const autoRepair: Industry = {
   faqs: [
     {
       q: "What does Kabsi say when a customer claims the repair was not done properly?",
-      a: "It writes a calm reply that never admits fault and never argues. In the UK the law says a trader must perform a service with reasonable care and skill.",
+      a: "It writes a calm reply that never admits fault and never argues. In the UK the law says a trader must perform a service with reasonable care and skill, and a reply never changes the garage's duty. This is not legal advice.",
     },
     {
       q: "Will Kabsi write prices into a post?",

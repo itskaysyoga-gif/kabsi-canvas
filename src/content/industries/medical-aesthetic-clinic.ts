@@ -1,7 +1,7 @@
 import { PHOTOS } from "@/components/kabsi/photos";
 import type { Industry } from "./types";
 
-// Content 1: finished from docs/claims/medical-and-aesthetic-clinic.md, noindex until lane R approves it.
+// Content 1: finished from docs/claims/medical-and-aesthetic-clinic.md, approved by lane R on 27 Oct 2026 (brief section 18).
 // Clearview Skin Clinic is invented (Example). Health rules from master plan 30.15 section 3.7 apply: no draft for a
 // review about a result, no patient details, no reply that confirms who is a patient. Every fact on this page has a
 // row in the claim sheet; advice and wording are marked there.
@@ -10,16 +10,16 @@ export const medicalAestheticClinic: Industry = {
   hub: "health",
   name: "clinic",
   plural: "Medical and aesthetic clinics",
-  finished: false,
+  finished: true,
   lead: "Kabsi keeps your treatments, doctors' days and consultation link right on Google, and replies to reviews without confirming who is a patient. A review about a result comes to you with no draft. You approve everything on WhatsApp.",
   keyword: "aesthetic clinic",
   example: {
     business: "Clearview Skin Clinic",
-    city: "Dubai",
+    city: "London",
     kind: "clinic",
     rival: "Aura Aesthetics",
     rival2: "Bayside Medical Centre",
-    near: ["Near the healthcare city", "By the main road"],
+    near: ["Near the hospital", "By the high street"],
   },
   photos: [PHOTOS.aestheticTreatment, PHOTOS.aestheticLaser],
   focus: "50% 40%",
@@ -36,7 +36,7 @@ export const medicalAestheticClinic: Industry = {
   tasks: [
     {
       title: "List the treatments your doctors really offer",
-      text: "Laser hair removal, a photo facial, a skin consultation. Google can show a service with a description, and real clinic profiles list them by name. A treatment you stopped offering comes off the list.",
+      text: "Laser hair removal, a photo facial, a skin consultation. Google can show a service with a description, and real clinic profiles list them by name.",
     },
     {
       title: "Reply without saying who is a patient",
@@ -44,21 +44,21 @@ export const medicalAestheticClinic: Industry = {
     },
     {
       title: "Make the Book button open the consultation page",
-      text: "Google lets you add your own link, and clinic profiles show a Book button to a booking page. When the page changes, tell Kabsi and the link follows.",
+      text: "Google lets you add your own link, and clinic profiles show a Book button to a booking page. When the page changes, tell Kabsi and the link follows after your Yes.",
     },
     {
       title: "Check what a post names before it goes out",
-      text: "UK advertising rules say Botox is a prescription-only medicine and cannot be advertised to the public, while a consultation can be promoted. Kabsi writes a post from your words, so you decide what it names, and you approve it.",
+      text: "UK advertising rules say Botox is a prescription-only medicine and cannot be advertised to the public, while a consultation can be promoted if the post does not name Botox or another prescription medicine. Kabsi writes a post from your words and you approve it.",
     },
     {
       title: "Keep the hours of each doctor's day honest",
-      text: "Weekly hours say when the clinic is open and a post says which doctor is in on which day. When a doctor adds or drops a day, both change together.",
+      text: "Weekly hours say when the clinic is open and a post says which doctor is in on which day.",
     },
   ],
   categories: {
     primary: "Skin care clinic",
     more: ["Medical clinic", "Dermatologist", "Laser hair removal service"],
-    note: "All four names are shown by Google under real clinic profiles. Use 'Medical clinic' or 'Dermatologist' only when a licensed doctor on your team practises it. Google says to use as few categories as possible and to keep them specific.",
+    note: "All four names are shown by Google under real clinic profiles. Use 'Medical clinic' only when a licensed doctor on your team practises it, and 'Dermatologist' only when a doctor registered as a dermatologist does. Google says to use as few categories as possible and to keep them specific.",
   },
   reviewThemes: [
     {
@@ -71,7 +71,7 @@ export const medicalAestheticClinic: Industry = {
     },
     {
       theme: "A cancelled or moved appointment",
-      text: "A reply cannot say the writer was booked, because that would confirm a patient. It thanks them for telling you and asks them to get in touch through the details on the profile.",
+      text: "A reply cannot say the writer was booked, because that would confirm a patient. It thanks them and asks them to get in touch through the profile details.",
     },
     {
       theme: "The price after the consultation",
@@ -101,7 +101,7 @@ export const medicalAestheticClinic: Industry = {
   posts: [
     "Consultations now open on a new day, with the booking link.",
     "A new doctor joins: their qualifications and the days they see patients.",
-    "Closed for Eid, and the number to call for an urgent problem.",
+    "Closed for Eid, with the Call button on the profile for an urgent problem.",
     "How to book a first consultation, in three steps.",
   ],
   photoTips: [
@@ -114,14 +114,14 @@ export const medicalAestheticClinic: Industry = {
       text: "Clinics sit in towers and healthcare zones. One photo of the sign and one of the lift button save a missed appointment.",
     },
     {
-      title: "The doctor, with their say so",
-      text: "A doctor in clinic clothes, taken in good light. Google asks for photos in focus and well lit, and Kabsi flags any photo where a face is the main subject.",
+      title: "The waiting area, tidy and bright",
+      text: "Where a first visit starts. Google asks for photos in focus and well lit, and Kabsi flags any photo where a face is the main subject.",
     },
   ],
   holidays: [
     {
       when: "Eid al-Adha, UAE",
-      text: "Eid al-Adha is three days, 10 to 12 Dhu al-Hijjah. A clinic closed for those days should say on Google who to call for an urgent problem, in a post.",
+      text: "Eid al-Adha is three days, 10 to 12 Dhu al-Hijjah. A clinic closed for those days can point to the profile's Call button for an urgent problem. Google may remove a post that carries a phone number.",
     },
     {
       when: "Ramadan, UAE",
@@ -143,7 +143,7 @@ export const medicalAestheticClinic: Industry = {
     },
     {
       q: "Can a clinic's post name Botox?",
-      a: "Check the rules in your country. In the UK, the advertising regulator says Botox is a prescription-only medicine that cannot be advertised to the public. A consultation can be promoted. This is not legal advice.",
+      a: "Rules differ by country. In the UK, the advertising regulator says Botox is a prescription-only medicine that cannot be advertised to the public. A consultation can be promoted if the post does not name Botox or another prescription medicine. This is not legal advice.",
     },
     {
       q: "What does the reply to a five star review say?",

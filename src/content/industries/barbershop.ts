@@ -1,14 +1,14 @@
 import { PHOTOS } from "@/components/kabsi/photos";
 import type { Industry } from "./types";
 
-// Content 1: finished from docs/claims/barbershop.md, noindex until lane R approves it. Northside Barbers is
+// Content 1: finished from docs/claims/barbershop.md, approved by lane R on 27 Oct 2026 (brief section 18). Northside Barbers is
 // invented (Example). Every fact on this page has a row in the claim sheet; advice and wording are marked there.
 export const barbershop: Industry = {
   slug: "barbershop",
   hub: "beauty-and-wellness",
   name: "barbershop",
   plural: "Barbershops",
-  finished: false,
+  finished: true,
   lead: "Kabsi keeps your hours true on bank holiday Mondays, replies to reviews that name the barber who cut, and posts when a chair is free. You approve each one on WhatsApp.",
   keyword: "barber",
   example: {
@@ -34,7 +34,7 @@ export const barbershop: Industry = {
   tasks: [
     {
       title: "Keep the door hours and the holiday hours true",
-      text: "Google keeps weekly hours apart from special hours, so a bank holiday Monday or the day after Eid can differ without touching the normal week. Kabsi asks, then sets them.",
+      text: "Google keeps weekly hours apart from special hours, so a bank holiday Monday or the day after Eid can differ without touching the normal week. Kabsi asks, then sets them once you say Yes.",
     },
     {
       title: "Thank the barber who earned it",
