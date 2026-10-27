@@ -21,6 +21,11 @@ Deno.test("Nora's answers keep Kabsi pages, Google's help and addresses from the
   assert.equal(knownLinksOnly("[Facebook](https://www.facebook.com/profile.php?id=1)", facts), "[Facebook](https://www.facebook.com/profile.php?id=1)");
   assert.equal(knownLinksOnly("Visit www.bad.example, then kabsi.co.", facts), "Visit, then kabsi.co.");
   assert.equal(knownLinksOnly("https://kabsi.co.evil.example/x"), "");
+  assert.equal(knownLinksOnly("Pay here (https://evil.example/pay). Or see evil.example/pay now."), "Pay here. Or see now.");
+  assert.equal(knownLinksOnly("Write to hello@kabsi.co or name@shop.example."), "Write to hello@kabsi.co or name@shop.example.");
+  assert.equal(knownLinksOnly("Read kabsi.co/pricing and Facebook https://www.facebook.com/profile.php?id=61574259448145"),
+    "Read kabsi.co/pricing and Facebook https://www.facebook.com/profile.php?id=61574259448145");
+  assert.equal(knownLinksOnly("[Facebook](https://www.facebook.com)", facts), "Facebook");
   assert.equal(forWhatsApp("Pay at [this page](https://pay.evil.example) or see [pricing](/pricing)."), "Pay at this page or see pricing (kabsi.co/pricing).");
 });
 

@@ -16,7 +16,8 @@ export const QUESTIONS_28: Question[] = [
     topic: "the Visibility Map",
     ask: "Can Kabsi show me where my shop appears on Google Maps around my street?",
     kb: [/\*\*\[COMING\] Visibility Map:\*\* a 7 by 7 grid around the business/],
-    must: [/grid/i],
+    // Eval 1: owners never read "grid" (30.15 section 1), so the 49 checked places say it as well.
+    must: [/grid|49 (places|points)|7 by 7/i],
     forbid: [NOT_PROMISED],
     coming: true,
     reference:
@@ -28,7 +29,8 @@ export const QUESTIONS_28: Question[] = [
     topic: "map keywords per plan",
     ask: "How many keywords can I track on the map with Essentials and with Pro?",
     kb: [/\| Visibility Map \| 1 keyword, monthly \| 5 keywords, weekly \|/],
-    must: [/\b1 keyword/i, /\b5 keywords/i],
+    // Eval 1: "search term" is the owner's word for a keyword since 30.15.
+    must: [/\b1 (keyword|search term)/i, /\b5 (keywords|search terms)/i],
     coming: true,
     reference:
       "The Visibility Map is not available yet. When it is, Essentials will check 1 keyword a month and Pro 5 keywords every week.",

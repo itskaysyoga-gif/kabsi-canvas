@@ -3,6 +3,7 @@
 // WhatsApp). It reports, for each case, what the model did and whether code would have let it through. Nothing is stored.
 //
 //   ANTHROPIC_API_KEY=... deno run --allow-env --allow-read --allow-net=api.anthropic.com scripts/sec1/injection-live.ts
+//   (the workflow allows the network wider, because the run first downloads the npm packages the functions import)
 //   ... --max 10          run at most 10 cases (default: every case, at most 30)
 //   ... --budget 0.30     stop starting cases that would pass this many US dollars (default 0.30)
 //   ... --dry             print the cases and the cost estimate, call nothing
@@ -47,7 +48,13 @@ const ORDER: Record<LiveCase["surface"], number> = { router: 0, nora: 1, review:
 const cases = [...LIVE_CASES]
   .sort((a, b) => ORDER[a.surface] - ORDER[b.surface])
   .slice(0, Math.min(max, 30));
-const budgetMicros = Number(flag("--budget") ?? "0.30") * 1e6;
+// A budget that is not a number between 0 and 1 dollar is refused (it would never stop the run).
+const budgetUsd = Number(flag("--budget") ?? "0.30");
+if (!(budgetUsd > 0 && budgetUsd <= 1)) {
+  console.error("--budget takes a number of US dollars above 0 and at most 1. Nothing was run.");
+  Deno.exit(2);
+}
+const budgetMicros = budgetUsd * 1e6;
 
 // Cost estimate before anything runs: rough tokens per call (system prompt plus input, then the answer), list prices.
 const CALLS: Record<LiveCase["surface"], { model: string; input: number; output: number }[]> = {

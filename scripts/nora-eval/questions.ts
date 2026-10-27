@@ -236,7 +236,8 @@ export const QUESTIONS: Question[] = [
     ],
     must: [
       /Keep my information/,
-      /no automatic|not automatic|never automatic|never [^.]{0,40}automatically|can't automatically|cannot automatically|may not/i,
+      // Eval 1: "Kabsi never puts anything back by itself" (live run) says the same thing.
+      /no automatic|not automatic|never automatic|never [^.]{0,40}automatically|never [^.]{0,40}by itself|can't automatically|cannot automatically|may not/i,
     ],
     forbid: [YES, /\b(will|does) automatically (fix|revert|put)/i],
     reference:
@@ -350,10 +351,7 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "the Results Report",
     ask: "What is in the Results Report and when does it come?",
-    kb: [
-      /every Monday on WhatsApp or by email, the same place as new reviews/,
-      /also kept under Reports/,
-    ],
+    kb: [/every Monday, kept under Reports, and sent on WhatsApp or by email/],
     must: [/Monday/, /Reports/],
     reference:
       "It comes every Monday at 08:00 local time, by email until owners are switched on to WhatsApp, and is kept under Reports. It shows what Kabsi did that week, what waits for your yes, one next step, then Google's own numbers against the week before, with calls and direction requests apart.",

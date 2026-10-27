@@ -1,30 +1,45 @@
 // Nora's standing rules (D261, D299), kept apart from the Edge Function so the evaluation (scripts/nora-eval, P0.6-06) asks the
 // real model with the very same words. The function passes its WhatsApp setting in; with no number there is no WhatsApp line.
 import { stripAll } from "./ai/fence.ts";
+import { SOCIAL_LINKS } from "./social-links.ts";
 
 /** A visitor's words as Nora reads them on the website (Eval 1): fenced as data, any fence tag inside removed. */
 export const fenceVisitor = (text: string) =>
   `<visitor_message>\n${stripAll(text, /<\s*\/?\s*(visitor_message|message|context|knowledge_base)\b[^>]*>/gi)}\n</visitor_message>`;
 
-// Links in Nora's answers (Sec 1 finding, closed by Eval 1): a Kabsi page, Google's own help pages, or an address written
-// in the facts. Anything else is taken out by code, whatever the model wrote: a Markdown link keeps its words, a bare
-// address goes.
+// Links in Nora's answers (Sec 1 finding, closed by Eval 1): a Kabsi page, Google's own help pages, Kabsi's Facebook and
+// Instagram (SOCIAL_LINKS, R-59), or an address written word for word in the facts. Anything else is taken out by code,
+// whatever the model wrote: a Markdown link keeps its words, any other address goes, with or without "https://", because
+// WhatsApp turns a bare "evil.example/pay" into a link too.
 const KNOWN_HOST = /^(?:[a-z0-9-]+\.)*kabsi\.co$|^support\.google\.com$/i;
-const knownUrl = (url: string, facts: string) => {
+const SOCIAL = new Set(SOCIAL_LINKS.map((l) => l.href));
+const ADDRESS = /(?<![@\w.-])(?:https?:\/\/[^\s<>()[\]]+|(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/[^\s<>()[\]]*)?)/gi;
+const trim = (url: string) => url.replace(/[.,;:!?'"]+$/, "");
+const factUrls = (facts: string) => new Set((facts.match(/https?:\/\/[^\s<>()[\]]+/g) ?? []).map(trim));
+const knownUrl = (url: string, facts: Set<string>) => {
   if (url.startsWith("/") && !url.startsWith("//")) return true;
+  const full = /^https?:\/\//i.test(url) ? url : `https://${url}`;
   try {
-    return KNOWN_HOST.test(new URL(url).hostname) || (facts !== "" && facts.includes(url));
+    return KNOWN_HOST.test(new URL(full).hostname) || SOCIAL.has(full) || facts.has(full);
   } catch {
     return false;
   }
 };
 export function knownLinksOnly(text: string, facts = ""): string {
+  const known = factUrls(facts);
+  const kept: string[] = [];
   return text
-    .replace(/\[([^\]]{1,80})\]\(([^)\s]+)\)/g, (m, label: string, url: string) => (knownUrl(url, facts) ? m : label))
-    .replace(/(?<![(\w/])(?:https?:\/\/|www\.)[^\s)<>]+/gi, (url) => {
-      const bare = url.replace(/[.,;:]+$/, "");
-      return knownUrl(bare.startsWith("www.") ? `https://${bare}` : bare, facts) ? url : url.slice(bare.length);
+    .replace(/\[([^\]]{1,80})\]\(([^)\s]+)\)/g, (m, label: string, url: string) => {
+      if (!knownUrl(url, known)) return label;
+      kept.push(m);
+      return `\u0000${kept.length - 1}\u0000`;
     })
+    .replace(ADDRESS, (url) => {
+      const bare = trim(url);
+      return knownUrl(bare, known) ? url : url.slice(bare.length);
+    })
+    .replace(/\u0000(\d+)\u0000/g, (_m, i: string) => kept[Number(i)] ?? "")
+    .replace(/\(\s*\)/g, "")
     .replace(/[ \t]{2,}/g, " ")
     .replace(/ +([.,;:])/g, "$1");
 }
@@ -79,7 +94,7 @@ Getting to know them (like a good person at a shop counter, never a gate)
 
 Handing off to a person
 - Hand off when: the knowledge base doesn't answer it after one honest try, billing disputes or refunds, account access problems you can't solve, legal or privacy requests, a bug, anything in the knowledge base's hand-off list, the visitor asks for a person, or the visitor is upset after one calm reply.
-- Every time you offer or start a hand-off, say both ways to reach a person in that same reply, copied from the knowledge base: the free 20-minute setup call at kabsi.co/setup-call and the address hello@kabsi.co, where a person answers. Where the app offers the Need a hand? box, point to it too. Do this even when you cannot answer the question and before you have the visitor's email.
+- Every time you offer or start a hand-off, say both ways to reach a person in that same reply, copied from the knowledge base: the free 20-minute setup call at kabsi.co/setup-call and the address hello@kabsi.co, where a person answers. Where the app offers the Need a hand? box, point to it too, and when someone is stuck on a setup step, always name the Need a hand? button under that step's main button. Do this even when you cannot answer the question and before you have the visitor's email.
 - To hand off you need an email address to reply to. If the <context> shows a signed-in email, use it. Otherwise ask for it first.
 - Then call hand_off_to_human with a clear summary. Tell them a person will reply by email, usually within one working day, and that they can also write to hello@kabsi.co${WHATSAPP_ON ? ` or message the team on WhatsApp, ${WHATSAPP_NUMBER}, where a person answers. Nothing is approved or changed over WhatsApp, and Kabsi never asks for a Google password or codes there` : `. Kabsi has a WhatsApp number, but it is not given out yet, so never give a number. Kabsi never asks for a Google password or codes`}.
 - Never claim you handed off unless the tool returned ok.

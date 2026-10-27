@@ -53,18 +53,21 @@ jobs:
         if: inputs.evaluations
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: bash scripts/eval/gate.sh --cut --judge --budget "${{ inputs.reply_budget }}" --scores "$GITHUB_WORKSPACE/scripts/eval/scores.json"
+          REPLY_BUDGET: ${{ inputs.reply_budget }}
+        run: bash scripts/eval/gate.sh --cut --judge --budget "$REPLY_BUDGET" --scores "$GITHUB_WORKSPACE/scripts/eval/scores.json"
         continue-on-error: true
       - name: Nora (80 questions, judged)
         if: inputs.evaluations
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget "${{ inputs.nora_budget }}" --out nora-eval-result.json --scores scripts/eval/scores.json
+          NORA_BUDGET: ${{ inputs.nora_budget }}
+        run: node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget "$NORA_BUDGET" --out nora-eval-result.json --scores scripts/eval/scores.json
         continue-on-error: true
       - name: Injection cases (Sec 1, real models)
         if: inputs.injection
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          INJECTION_BUDGET: ${{ inputs.injection_budget }}
         run: |
           scratch="$(mktemp -d)"
           mkdir -p "$scratch/supabase/functions" "$scratch/scripts/sec1" "$scratch/knowledge"
@@ -73,7 +76,7 @@ jobs:
           cp knowledge/kabsi-facts.md "$scratch/knowledge/"
           echo '{"nodeModulesDir":"auto"}' > "$scratch/deno.json"
           cd "$scratch"
-          deno run --allow-env --allow-read --allow-net scripts/sec1/injection-live.ts --budget "${{ inputs.injection_budget }}" | tee "$GITHUB_WORKSPACE/injection-live.txt"
+          deno run --allow-env --allow-read --allow-net scripts/sec1/injection-live.ts --budget "$INJECTION_BUDGET" | tee "$GITHUB_WORKSPACE/injection-live.txt"
         continue-on-error: true
       - name: Keep the results
         if: always()

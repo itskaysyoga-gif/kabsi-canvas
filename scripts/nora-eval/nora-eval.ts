@@ -138,7 +138,9 @@ export function check(q: Question, answer: string, kb: string): Finding[] {
   for (const n of numbersIn(answer))
     if (!known.has(n)) add("honesty", `states "${n}", which the facts file does not hold`);
   if (q.coming) {
-    if (!NOT_YET.test(answer)) add("honesty", "a [COMING] item must be called not available yet");
+    // Eval 1 (live run, ar57): Arabic short vowels ("لم يُفتح بعد", "حاليًا") hid an honest "not yet" from the pattern.
+    if (!NOT_YET.test(answer.replace(/[\u064B-\u0652\u0670]/g, "")))
+      add("honesty", "a [COMING] item must be called not available yet");
     if (DATE_FOR_COMING.test(answer))
       add("honesty", "gives a date or a time frame for a [COMING] item");
   }
