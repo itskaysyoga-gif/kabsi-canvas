@@ -8,6 +8,7 @@ import {
   checkWaitlist,
 } from "../supabase/functions/_shared/visibility/waitlist";
 import { TIPS_CONSENT_TEXT } from "../src/lib/profile-check";
+import { WAITLIST_LINE, WAITLIST_WHATSAPP_LINE } from "../src/lib/waitlist-copy";
 
 // UX 1: "Save my place" while the free check is closed. Stored with the words agreed to; tips are separate and unticked.
 const good = {
@@ -89,10 +90,34 @@ describe("the free check waiting list", () => {
 
   it("shows the visitor the same words the server stores", () => {
     expect(WAITLIST_TIPS_TEXT).toBe(TIPS_CONSENT_TEXT);
+    // What the box prints is what the row keeps: the page imports these two lines and renders both.
+    expect(WAITLIST_LINE).toBe(WAITLIST_NOTICE_TEXT);
+    expect(WAITLIST_WHATSAPP_LINE).toBe(WAITLIST_WHATSAPP_TEXT);
     const page = readFileSync(join(__dirname, "..", "src/components/kabsi/scan-live.tsx"), "utf8");
-    expect(page).toContain(`"${WAITLIST_NOTICE_TEXT}"`);
-    expect(page).toContain(`"${WAITLIST_WHATSAPP_TEXT}"`);
+    expect(page).toContain('from "@/lib/waitlist-copy"');
+    // Each line is the content of a real element, not a comment or a stray token.
+    expect(page).toMatch(/<p className="[^"]*">\{WAITLIST_LINE\}<\/p>/);
+    expect(page).toMatch(/>\s*\{WAITLIST_WHATSAPP_LINE\}\s*</);
+    expect(page).not.toMatch(/"The free (scan|check) opens soon/);
     for (const t of [WAITLIST_NOTICE_TEXT, WAITLIST_TIPS_TEXT, WAITLIST_WHATSAPP_TEXT])
       expect(t).not.toMatch(new RegExp("[\\u2013\\u2014!]"));
+  });
+
+  it("uses owner words: no free scan and no map, and the exact lines the owner approved", () => {
+    expect(WAITLIST_NOTICE_TEXT).toBe(
+      "The free check opens soon. Leave your email or WhatsApp number and Kabsi sends your result the day it opens.",
+    );
+    expect(WAITLIST_WHATSAPP_TEXT).toBe(
+      "Send my result to this WhatsApp number the day the free check opens.",
+    );
+    for (const t of [WAITLIST_NOTICE_TEXT, WAITLIST_WHATSAPP_TEXT])
+      expect(t).not.toMatch(/\b(scan|map)\b/i);
+  });
+
+  it("keeps the database test on the same words, so a check constraint is tried with the stored text", () => {
+    const sql = readFileSync(join(__dirname, "..", "supabase/tests/ux1_waitlist.sql"), "utf8");
+    expect(sql).toContain(WAITLIST_NOTICE_TEXT);
+    expect(sql).toContain(WAITLIST_WHATSAPP_TEXT);
+    expect(sql).not.toMatch(/free scan opens|sends your map|Send my map/);
   });
 });

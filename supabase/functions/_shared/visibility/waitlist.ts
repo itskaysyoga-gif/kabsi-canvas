@@ -5,9 +5,9 @@
 
 /** What the visitor agrees to by pressing "Save my place" (COPY.md, the scan box's waitlist state). Stored as proof. */
 export const WAITLIST_NOTICE_TEXT =
-  "The free scan opens soon. Leave your email or WhatsApp and Kabsi sends your map the day it opens.";
+  "The free check opens soon. Leave your email or WhatsApp number and Kabsi sends your result the day it opens.";
 /** The WhatsApp box (shown only while Kabsi's WhatsApp number is on). Stored with the number as proof. */
-export const WAITLIST_WHATSAPP_TEXT = "Send my map to this WhatsApp number the day the free scan opens.";
+export const WAITLIST_WHATSAPP_TEXT = "Send my result to this WhatsApp number the day the free check opens.";
 /** The separate tips box (the same words the free profile check stores, profile-snapshot.ts TIPS_CONSENT_TEXT). */
 export const WAITLIST_TIPS_TEXT = "Send me tips on managing my Google profile";
 

@@ -11,6 +11,7 @@
   { "path": "/start", "state": "ob-accepted", "name": "ob-accepted" },
   { "path": "/start", "state": "ob-checked", "name": "ob-checked" },
   { "path": "/start", "state": "ob-first-task", "name": "ob-first-task" },
+  { "path": "/start", "state": "ob-wa-off", "name": "ob-setup-link", "click": "Finish on another device" },
   { "path": "/start?preview=rest", "state": "ob-rest", "name": "ob-rest" },
   { "path": "/start", "state": "ob-done", "name": "ob-done" },
   { "path": "/start/resume/0123456789abcdef0123", "state": "ob-resume", "name": "ob-resume" },
