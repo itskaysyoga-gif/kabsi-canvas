@@ -231,3 +231,30 @@ export function backlogBreakdown(c: BacklogCounts): string {
   if (c.high) parts.push(`${c.high} ${c.high === 1 ? "needs" : "need"} care, with no draft`);
   return parts.join(". ") + (parts.length ? "." : "");
 }
+
+// ── Design 3 (master plan 30.17 section 4): Home's lead line and the next report.
+
+/** "3 things need you. Each one is on WhatsApp too: answer wherever you are." */
+export const waitingLead = (total: number) =>
+  `${total} ${total === 1 ? "thing needs" : "things need"} you. Each one is on WhatsApp too: answer wherever you are.`;
+
+/** The next Monday after today, in the owner's words: "Monday 2 November". */
+export function nextMonday(now = new Date(), timeZone?: string | null): string {
+  const day = new Date(now);
+  const wd = (d: Date) =>
+    new Intl.DateTimeFormat("en-GB", {
+      weekday: "short",
+      ...(timeZone ? { timeZone } : {}),
+    }).format(d);
+  do day.setTime(day.getTime() + 86_400_000);
+  while (wd(day) !== "Mon");
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    ...(timeZone ? { timeZone } : {}),
+  }).format(day);
+}
+
+export const nextReportLine = (monday: string) =>
+  `${monday} on WhatsApp: what Kabsi did, what waits for your yes, and one next step.`;

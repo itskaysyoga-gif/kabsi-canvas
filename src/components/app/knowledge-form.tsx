@@ -44,6 +44,7 @@ import {
   type TextField,
 } from "@/lib/knowledge";
 import { cn } from "@/lib/utils";
+import { HeldBack, useFirstTaskDone } from "@/components/kabsi/d3-settings-parts";
 
 type FieldDef = {
   key: TextField;
@@ -428,6 +429,8 @@ function BasicsFields({
 function FactsScreen({ location }: { location: Location }) {
   const knowledge = useKnowledge(location.id);
   const queryClient = useQueryClient();
+  // V4: the tone opens after the first task is done (one thing at a time).
+  const toneOpen = useFirstTaskDone(location.id);
   // One editor open at a time, so the screen keeps one yellow button (K-108).
   const [editing, setEditing] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
@@ -465,15 +468,13 @@ function FactsScreen({ location }: { location: Location }) {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-panel bg-kb-carbon p-5 text-kb-white sm:p-6">
-        <p className="text-small font-bold uppercase tracking-wider text-kb-mute">
-          How Kabsi uses this
-        </p>
-        <p className="mt-2 leading-7">
+      <div className="rounded-card border border-line bg-surface-2 p-4 sm:p-5">
+        <p className="text-title font-bold">How Kabsi uses this</p>
+        <p className="mt-1 text-body text-text-2">
           Replies and posts use only the facts marked Verified, and only when a customer raises the
           topic. Anything else is left out, never made up.
         </p>
-        <p className="mt-3 text-small text-kb-mute">
+        <p className="mt-3 text-small font-semibold text-text-1">
           {counts.verified} verified
           {counts.needs_ok
             ? `, ${counts.needs_ok} ${counts.needs_ok === 1 ? "needs" : "need"} your OK`
@@ -489,12 +490,13 @@ function FactsScreen({ location }: { location: Location }) {
       {GROUPS.map((g) => (
         <section
           key={g.id}
-          className="rounded-panel bg-surface-1 p-5 shadow-rest sm:p-7"
+          className="rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5"
           aria-labelledby={`kg-${g.id}`}
         >
           <GroupHeader id={`kg-${g.id}`} icon={g.icon} title={g.title} sub={g.sub} />
           <div className="mt-5 space-y-5">
-            {g.id === "voice" ? (
+            {g.id === "voice" && toneOpen === false ? <HeldBack /> : null}
+            {g.id === "voice" && toneOpen ? (
               <ToneChoice
                 value={typeof tone?.value?.text === "string" ? tone.value.text : "warm"}
                 onChange={(t) => run(() => saveFact(location.id, "tone", t), "Tone saved.")}
@@ -522,7 +524,7 @@ function FactsScreen({ location }: { location: Location }) {
       ))}
 
       <section
-        className="rounded-panel bg-surface-1 p-5 shadow-rest sm:p-7"
+        className="rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5"
         aria-labelledby="kg-faq"
       >
         <GroupHeader
@@ -573,12 +575,12 @@ function GroupHeader({
     <div className="flex items-start gap-3">
       <span
         aria-hidden="true"
-        className="grid size-10 shrink-0 place-items-center rounded-full bg-kb-yellow text-kb-black [&_svg]:size-5"
+        className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-2 text-text-1 [&_svg]:size-5"
       >
         {icon}
       </span>
       <div className="min-w-0 flex-1">
-        <h2 id={id} className="text-title font-bold leading-tight">
+        <h2 id={id} className="font-display text-h3 font-bold">
           {title}
         </h2>
         <p className="mt-0.5 text-small leading-6 text-text-2">{sub}</p>
@@ -599,12 +601,10 @@ function Question({
   const current = facts.find((f) => f.slot === q.slot);
   return (
     <section
-      className="rounded-panel border border-kb-yellow bg-surface-1 p-5 shadow-rest ring-2 ring-kb-yellow sm:p-7"
+      className="rounded-card border border-warn bg-warn-soft p-4 shadow-rest sm:p-5"
       aria-label="A question about your facts"
     >
-      <p className="text-small font-bold uppercase tracking-wider text-text-2">
-        {labelOf(fieldOf(q.slot))}
-      </p>
+      <p className="text-label font-bold text-text-2">{labelOf(fieldOf(q.slot))}</p>
       <h2 className="mt-1 text-title font-bold leading-tight">
         Kabsi found two different answers. Which is right?
       </h2>
@@ -640,6 +640,43 @@ function Answer({ from, text, onPick }: { from: string; text: string; onPick: ()
         This one is right
       </Button>
     </div>
+  );
+}
+
+/** The tone of replies on its own, for Settings (saved as the "tone" fact, like Business Knowledge does). */
+export function ToneSetting({ locationId }: { locationId: string }) {
+  const knowledge = useKnowledge(locationId);
+  const queryClient = useQueryClient();
+  const [msg, setMsg] = useState("");
+  if (knowledge.isLoading) return <p className="text-small text-text-2">Loading...</p>;
+  if (knowledge.error || !knowledge.data)
+    return (
+      <p className="text-small text-bad" role="alert">
+        Couldn&apos;t load your facts. Refresh the page.
+      </p>
+    );
+  const tone = knowledge.data.facts.find((f) => fieldOf(f.slot) === "tone");
+  async function pick(t: string) {
+    setMsg("");
+    try {
+      await saveFact(locationId, "tone", t);
+      await queryClient.invalidateQueries({ queryKey: ["knowledge", locationId] });
+      setMsg("Tone saved.");
+    } catch (e) {
+      setMsg(friendlyError(e));
+    }
+  }
+  return (
+    <>
+      <ToneChoice
+        value={typeof tone?.value?.text === "string" ? tone.value.text : "warm"}
+        onChange={(t) => void pick(t)}
+        state={tone ? factState(tone) : null}
+      />
+      <p className="mt-2 min-h-6 text-small" role="status">
+        {msg}
+      </p>
+    </>
   );
 }
 

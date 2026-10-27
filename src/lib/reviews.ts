@@ -236,3 +236,31 @@ export async function contentCall<T>(body: Record<string, unknown>) {
 export async function functionCall<T>(path: string, body: Record<string, unknown>) {
   return readJson<T>(await authed(path, body));
 }
+
+// ── Review Growth (V3, 30.15 section 3.5): two numbers from two places, never added together. New reviews come from the
+// Google Business Profile (the reviews Kabsi read from it); opens come from the Kabsi review link (people, not bots).
+export type GrowthCounts = { reviews: number; opens: number };
+
+/** The first moment of this calendar month. */
+export const monthStart = (now = new Date()) =>
+  new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+
+export async function reviewGrowth(locationId: string): Promise<GrowthCounts> {
+  const since = monthStart();
+  const [reviews, taps] = await Promise.all([
+    supabase
+      .from("reviews")
+      .select("id", { count: "exact", head: true })
+      .eq("location_id", locationId)
+      .gte("review_created_at", since),
+    supabase
+      .from("taps")
+      .select("id", { count: "exact", head: true })
+      .eq("location_id", locationId)
+      .eq("is_bot", false)
+      .gte("created_at", since),
+  ]);
+  if (reviews.error) throw new Error(reviews.error.message);
+  if (taps.error) throw new Error(taps.error.message);
+  return { reviews: reviews.count ?? 0, opens: taps.count ?? 0 };
+}

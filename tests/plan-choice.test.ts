@@ -41,7 +41,7 @@ describe("plan choice from day 11", () => {
 
   it("after an ended plan says what is paused and that the review link keeps working", () => {
     const c = planChoice({ state: "ended", trial: null }, now)!;
-    expect(c.body).toContain("Drafts, Google Protection and the Weekly Care Report are paused");
+    expect(c.body).toContain("Drafts, Google Protection and the Results Report are paused");
     expect(c.body).toContain("review link and QR code keep working");
   });
 

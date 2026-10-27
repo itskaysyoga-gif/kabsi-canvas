@@ -1,17 +1,43 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, History } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { KabsiCard } from "@/components/ui/kabsi-card";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Camera,
+  Clock,
+  CreditCard,
+  HelpCircle,
+  History,
+  MessageSquareText,
+  Newspaper,
+  ShieldCheck,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
+import { Button, StatusPill, buttonClass } from "@/components/kabsi/ui";
 import { HistorySheet } from "@/components/home/history-sheet";
+import { HomeCard } from "@/components/home/home-card";
 import { cardAction, cardRisk, REPLY_NOTE } from "@/lib/home-state";
 import type { CardDetail } from "@/lib/home";
 import { timeAgo } from "@/lib/dashboard";
-import type { Task } from "@/lib/tasks";
+import type { Task, TaskKind } from "@/lib/tasks";
 
-// One action card (K-06): what happened, why it matters, what Kabsi recommends, the evidence, a risk label when there is
-// one, the prepared action, one primary and one secondary button, the time, and a History link. The same card is used
-// wherever an item needs the owner. Only the first card on a screen carries the yellow primary (one per screen, K-108).
+// One task that needs the owner (K-06, Design 3's card): what happened, the evidence, what Kabsi prepared, a risk label
+// when there is one, one button that opens it where the owner decides, Later, and the History behind it. Only the first
+// card on Home carries the yellow button (one per screen, K-108).
+
+const ICON: Partial<Record<TaskKind, LucideIcon>> = {
+  review_reply: MessageSquareText,
+  post: Newspaper,
+  photo_batch: Camera,
+  hours_confirm: Clock,
+  profile_change: ShieldCheck,
+  knowledge_confirm: HelpCircle,
+  reconnect: AlertTriangle,
+  google_needs_action: AlertTriangle,
+  billing: CreditCard,
+};
+
 export function ActionCard({
   task,
   detail,
@@ -35,42 +61,77 @@ export function ActionCard({
   // A review card opens that review on the Reviews screen.
   const rid = task.evidence["review_id"];
   const reviewId = isReply && typeof rid === "string" && /^[0-9a-f-]{36}$/.test(rid) ? rid : null;
+  const primary = buttonClass(lead ? "primary" : "secondary", "md");
+  const mainProps = lead ? { "data-main-cta": true } : {};
   return (
-    <KabsiCard
-      needsYou={task.priority === "urgent"}
+    <HomeCard
+      icon={ICON[task.kind] ?? Sparkles}
       title={task.title}
-      {...(detail?.eyebrow ? { eyebrow: detail.eyebrow } : {})}
-      {...(risk ? { status: { label: risk.label, tone: risk.tone } } : {})}
-      {...(detail?.prepared ? { draft: detail.prepared } : {})}
-      {...(isReply || task.kind === "post" ? { note: REPLY_NOTE } : {})}
-      actions={
+      when={timeAgo(task.created_at)}
+      tone={risk?.tone === "red" ? "warn" : "plain"}
+      foot={
         <>
-          <Button asChild variant={lead ? "primary" : "secondary"} size="compact">
+          <div className="flex flex-wrap items-center gap-2">
             {reviewId ? (
-              <Link to="/app/reviews" search={{ f: "needs", r: reviewId }}>
-                {act.primary} <ArrowRight />
+              <Link
+                to="/app/reviews"
+                search={{ f: "needs", r: reviewId }}
+                className={primary}
+                {...mainProps}
+              >
+                {act.primary} <ArrowRight className="size-4" aria-hidden />
               </Link>
             ) : (
-              <Link to={task.path}>
-                {act.primary} <ArrowRight />
+              <Link to={task.path} className={primary} {...mainProps}>
+                {act.primary} <ArrowRight className="size-4" aria-hidden />
               </Link>
             )}
-          </Button>
-          <Button variant="tertiary" disabled={busy} onClick={() => onLater(task)} className="px-2">
-            {act.secondary}
-          </Button>
+            <Button variant="quiet" size="md" disabled={busy} onClick={() => onLater(task)}>
+              {act.secondary}
+            </Button>
+            <Button
+              variant="tertiary"
+              className="ms-auto"
+              onClick={() => setHistory(true)}
+              icon={<History className="size-4" aria-hidden />}
+            >
+              History
+            </Button>
+          </div>
+          {isReply || task.kind === "post" ? (
+            <p className="mt-3 text-small text-text-2">{REPLY_NOTE}</p>
+          ) : null}
         </>
       }
     >
-      {detail?.quote ? (
-        <p className="mb-3 line-clamp-3 text-small italic text-text-2">
-          &ldquo;{detail.quote}&rdquo;
-        </p>
+      <div className="flex flex-wrap items-center gap-2">
+        {risk ? (
+          <StatusPill tone={risk.tone === "red" ? "bad" : "warn"}>{risk.label}</StatusPill>
+        ) : (
+          <StatusPill tone={detail?.prepared ? "info" : "warn"}>
+            {detail?.prepared ? "Waiting for your yes" : "Needs you"}
+          </StatusPill>
+        )}
+      </div>
+      {detail?.eyebrow && !detail.quote ? (
+        <p className="mt-4 text-small font-bold text-text-2">{detail.eyebrow}</p>
       ) : null}
-      {task.why ? <p className="text-small leading-6">{task.why}</p> : null}
+      {detail?.quote ? (
+        <blockquote className="mt-4 border-s-2 border-line-strong ps-3">
+          {detail.eyebrow ? (
+            <p className="text-small font-bold text-text-2">{detail.eyebrow}</p>
+          ) : null}
+          {detail.quote ? (
+            <p dir="auto" className="mt-1 line-clamp-3 text-body text-text-1">
+              {detail.quote}
+            </p>
+          ) : null}
+        </blockquote>
+      ) : null}
+      {task.why ? <p className="mt-3 text-body text-text-1">{task.why}</p> : null}
       {task.recommendation ? (
-        <p className="mt-2 text-small leading-6">
-          <b>Kabsi suggests:</b> {task.recommendation}
+        <p className="mt-2 text-small text-text-2">
+          <b className="text-text-1">Kabsi suggests:</b> {task.recommendation}
         </p>
       ) : null}
       {detail?.evidence.length ? (
@@ -80,17 +141,20 @@ export function ActionCard({
           ))}
         </ul>
       ) : null}
-      <p className="mt-3 flex items-center justify-between gap-3 text-small text-text-2">
-        <span>{timeAgo(task.created_at)}</span>
-        <button
-          type="button"
-          onClick={() => setHistory(true)}
-          className="inline-flex min-h-10 items-center gap-1.5 px-1 underline underline-offset-4 hover:no-underline"
-        >
-          <History className="size-4" aria-hidden="true" /> History
-        </button>
-      </p>
+      {detail?.prepared ? (
+        <div className="mt-4">
+          <p className="text-small font-bold text-text-2">
+            {isReply ? "Reply ready" : task.kind === "post" ? "Post ready" : "Ready"}
+          </p>
+          <p
+            dir="auto"
+            className="mt-2 whitespace-pre-wrap rounded-inner bg-surface-2 p-3 text-body text-text-1"
+          >
+            {detail.prepared}
+          </p>
+        </div>
+      ) : null}
       <HistorySheet open={history} onOpenChange={setHistory} locationId={locationId} task={task} />
-    </KabsiCard>
+    </HomeCard>
   );
 }

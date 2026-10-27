@@ -101,3 +101,51 @@ export function sortReviews<T extends StatusInput & { review_created_at: string 
     f === "needs" ? riskRank(b.risk) - riskRank(a.risk) || newest(a, b) : newest(a, b),
   );
 }
+
+// ── Design 3's three views (master plan 30.17 section 4): Waiting, On Google, All. The old filters above stay as
+// addresses: emails, saved links and /app/inbox still send ?f=needs and land on Waiting.
+export type ReviewView = "waiting" | "google" | "all";
+export const VIEWS: { key: ReviewView; label: string }[] = [
+  { key: "waiting", label: "Waiting" },
+  { key: "google", label: "On Google" },
+  { key: "all", label: "All" },
+];
+
+/** The view an address asks for, old ?f= values included. Undefined when it asks for none. */
+export function viewFor(f: unknown): ReviewView | undefined {
+  switch (f) {
+    case "waiting":
+    case "needs":
+      return "waiting";
+    case "google":
+    case "replied":
+      return "google";
+    case "all":
+    case "positive":
+    case "neutral":
+    case "negative":
+    case "high":
+      return "all";
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * On Google only when Kabsi saw the reply there (its publication is verified, 30.15 section 3.1). A review with no
+ * publication through Kabsi (a reply written on Google, or one from before Kabsi) goes by its own state.
+ */
+export function onGoogle(r: StatusInput, task?: { owner: string } | null): boolean {
+  if (task) return task.owner === "confirmed";
+  return reviewStatus(r).key === "published";
+}
+
+export function matchesView(
+  r: StatusInput,
+  v: ReviewView,
+  task?: { owner: string } | null,
+): boolean {
+  if (v === "waiting") return needsReply(r);
+  if (v === "google") return onGoogle(r, task);
+  return true;
+}

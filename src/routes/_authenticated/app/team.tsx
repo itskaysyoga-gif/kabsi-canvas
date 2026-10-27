@@ -1,12 +1,10 @@
 import { useState, type FormEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Users as PageGlyph } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { PageIcon } from "@/components/shared/page-icon";
+import { ChevronDown, UserPlus } from "lucide-react";
+import { AccountTop, Panel } from "@/components/kabsi/d3-account";
+import { HeldBack, useFirstTaskDone } from "@/components/kabsi/d3-settings-parts";
+import { Button, Field, Segmented, Switch, buttonClass } from "@/components/kabsi/ui";
 import { myLatestLocation } from "@/lib/onboarding";
 import {
   cancelInvite,
@@ -21,10 +19,12 @@ import {
   setPolicy,
   type ApprovalKind,
   type Role,
+  type Team,
 } from "@/lib/team";
 
-// Settings, Team (K-16): the owner invites by email, changes a role or removes someone, and chooses whether managers
-// may approve each kind. The database enforces every right; this page only asks.
+// Team (K-16; UX 1, Design 3): the owner invites by email, changes a role or removes someone, and chooses who approves:
+// "Only me" or "Me and managers" for everything at once, or each kind on its own. The database enforces every right; this
+// page only asks. Held back until the first task is done (V4).
 export const Route = createFileRoute("/_authenticated/app/team")({
   head: () => ({ meta: [{ title: "Team | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: TeamPage,
@@ -32,11 +32,13 @@ export const Route = createFileRoute("/_authenticated/app/team")({
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const KINDS: ApprovalKind[] = ["review_reply", "post", "photo", "hours", "profile_change"];
-const selectClass = "h-[52px] w-full rounded-card border border-line bg-surface-1 px-4 text-body";
+const selectClass =
+  "h-13 w-full rounded-input border border-stroke bg-surface-2 px-4 text-body text-text-1";
 
 function TeamPage() {
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   const loc = location.data;
+  const open = useFirstTaskDone(loc?.id);
   const access = useQuery({
     queryKey: ["access", loc?.id],
     queryFn: () => myAccess(loc!.id),
@@ -44,27 +46,42 @@ function TeamPage() {
   });
   const isOwner = access.data?.role === "owner";
   return (
-    <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
-      <PageIcon icon={<PageGlyph />} />
-      <p className="text-small font-bold uppercase tracking-wider text-text-2">Settings</p>
-      <h1 className="mt-1 font-display text-h2 leading-none sm:text-5xl">Team</h1>
-      {loc ? <p className="mt-2 text-text-2">{loc.name}</p> : null}
-      {location.isLoading || access.isLoading ? <p className="mt-6 text-text-2">Loading…</p> : null}
-      {loc && access.data && !isOwner ? (
-        <p className="mt-6 leading-7 text-text-2">
-          Only the owner can manage the team. You are{" "}
-          {access.data.role === "manager" ? "a manager" : "a staff member"} of this business:{" "}
-          {ROLE_HINT[access.data.role].toLowerCase()}
+    <>
+      <AccountTop title="Team" />
+      {location.isLoading || access.isLoading ? (
+        <p className="text-body text-text-2" role="status">
+          Loading...
         </p>
       ) : null}
-      {loc && isOwner ? <TeamManager locationId={loc.id} /> : null}
-      {!location.isLoading && !loc ? (
-        <Button asChild className="mt-6">
-          <Link to="/start">Add your business</Link>
-        </Button>
+      {loc && access.data && !isOwner ? (
+        <Panel>
+          <p className="text-body text-text-2">
+            Only the owner can manage the team. You are{" "}
+            {access.data.role === "manager" ? "a manager" : "a staff member"} of this business:{" "}
+            {ROLE_HINT[access.data.role].toLowerCase()}
+          </p>
+        </Panel>
       ) : null}
-    </div>
+      {loc && isOwner && open === false ? (
+        <Panel>
+          <HeldBack />
+        </Panel>
+      ) : null}
+      {loc && isOwner && open ? <TeamManager locationId={loc.id} /> : null}
+      {!location.isLoading && !loc ? (
+        <Link to="/start" className={buttonClass()} data-main-cta>
+          Add your business
+        </Link>
+      ) : null}
+    </>
   );
+}
+
+function rule(t: Team): "owner" | "managers" | "custom" {
+  const ps = KINDS.map((k) => t.policies[k]);
+  if (ps.every((p) => p === "owner_and_managers")) return "managers";
+  if (ps.every((p) => p !== "owner_and_managers")) return "owner";
+  return "custom";
 }
 
 function TeamManager({ locationId }: { locationId: string }) {
@@ -93,69 +110,39 @@ function TeamManager({ locationId }: { locationId: string }) {
   }
 
   if (team.isError)
-    return <p className="mt-6 text-bad">We couldn't load your team. Refresh the page.</p>;
-  if (!team.data) return <p className="mt-6 text-text-2">Loading…</p>;
+    return (
+      <p className="text-body text-bad" role="alert">
+        We couldn&apos;t load your team. Refresh the page.
+      </p>
+    );
+  if (!team.data)
+    return (
+      <p className="text-body text-text-2" role="status">
+        Loading...
+      </p>
+    );
   const t = team.data;
+  const current = rule(t);
   return (
-    <>
-      <section className="mt-8 rounded-panel bg-surface-1 p-6 shadow-rest" aria-labelledby="invite">
-        <h2 id="invite" className="text-title font-bold">
-          Invite someone
-        </h2>
-        <p className="mt-1 text-small leading-6 text-text-2">
-          They get an email and join when they sign in with that address.
-        </p>
-        <form onSubmit={invite} className="mt-4 space-y-4">
-          <div>
-            <Label htmlFor="invite-email">Email</Label>
-            <Input
-              id="invite-email"
-              type="email"
-              autoComplete="off"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-2"
-            />
-          </div>
-          <div>
-            <Label htmlFor="invite-role">Role</Label>
-            <select
-              id="invite-role"
-              value={role}
-              onChange={(e) => setRole(e.target.value as "manager" | "staff")}
-              className={`mt-2 ${selectClass}`}
-            >
-              <option value="manager">Manager</option>
-              <option value="staff">Staff</option>
-            </select>
-            <p className="mt-2 text-small leading-6 text-text-2">{ROLE_HINT[role]}</p>
-          </div>
-          <Button type="submit" disabled={act.isPending}>
-            Send invitation
-          </Button>
-        </form>
-        {message ? (
-          <p className="mt-3 text-small" role="status">
-            {message}
-          </p>
-        ) : null}
-      </section>
-
-      <section
-        className="mt-6 rounded-panel bg-surface-1 p-6 shadow-rest"
-        aria-labelledby="members"
-      >
-        <h2 id="members" className="text-title font-bold">
-          People
-        </h2>
-        <ul className="mt-4 divide-y divide-line">
+    <div className="space-y-4">
+      <Panel>
+        <ul className="divide-y divide-line">
           {t.members.map((m) => (
-            <li key={m.user_id} className="py-4">
-              <p className="break-all font-bold">
+            <li
+              key={m.user_id}
+              className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 py-3 sm:grid-cols-[auto_minmax(0,1fr)_auto]"
+            >
+              <span
+                aria-hidden
+                className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-2 font-display font-bold uppercase"
+              >
+                {m.email[0]}
+              </span>
+              <p className="min-w-0 break-words text-body font-semibold">
                 {m.email}
                 {m.you ? <span className="font-normal text-text-2"> (you)</span> : null}
               </p>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
+              <div className="col-start-2 flex flex-wrap items-center gap-2 sm:col-start-3">
                 <select
                   aria-label={`Role of ${m.email}`}
                   value={m.role}
@@ -165,7 +152,7 @@ function TeamManager({ locationId }: { locationId: string }) {
                     const next = e.target.value as Role;
                     act.mutate(() => setMemberRole(locationId, m.user_id, next));
                   }}
-                  className="h-11 rounded-card border border-line bg-surface-1 px-3 text-body"
+                  className="h-11 rounded-full border border-line-strong bg-surface-1 px-3 text-small font-bold"
                 >
                   {(["owner", "manager", "staff"] as Role[]).map((r) => (
                     <option key={r} value={r}>
@@ -175,8 +162,8 @@ function TeamManager({ locationId }: { locationId: string }) {
                 </select>
                 {!m.you ? (
                   <Button
-                    size="compact"
-                    variant="outline"
+                    size="md"
+                    variant="quiet"
                     disabled={act.isPending}
                     onClick={() => act.mutate(() => removeMember(locationId, m.user_id))}
                   >
@@ -187,15 +174,26 @@ function TeamManager({ locationId }: { locationId: string }) {
             </li>
           ))}
           {t.invites.map((i) => (
-            <li key={i.id} className="py-4">
-              <p className="break-all font-bold">{i.email}</p>
-              <p className="text-small text-text-2">
-                Invited as {ROLE_LABEL[i.role].toLowerCase()}, not joined yet
-              </p>
+            <li
+              key={i.id}
+              className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1 py-3 sm:grid-cols-[auto_minmax(0,1fr)_auto]"
+            >
+              <span
+                aria-hidden
+                className="grid size-10 shrink-0 place-items-center rounded-full border border-dashed border-line-strong font-display font-bold uppercase text-text-2"
+              >
+                {i.email[0]}
+              </span>
+              <div className="min-w-0">
+                <p className="break-words text-body font-semibold">{i.email}</p>
+                <p className="text-small text-text-2">
+                  Invited as {ROLE_LABEL[i.role].toLowerCase()}, not joined yet
+                </p>
+              </div>
               <Button
-                size="compact"
-                variant="ghost"
-                className="mt-2"
+                size="md"
+                variant="tertiary"
+                className="col-start-2 justify-self-start sm:col-start-3"
                 disabled={act.isPending}
                 onClick={() => act.mutate(() => cancelInvite(i.id))}
               >
@@ -204,42 +202,107 @@ function TeamManager({ locationId }: { locationId: string }) {
             </li>
           ))}
         </ul>
-      </section>
+      </Panel>
 
-      <section
-        className="mt-6 rounded-panel bg-surface-1 p-6 shadow-rest"
-        aria-labelledby="approvals"
-      >
-        <h2 id="approvals" className="text-title font-bold">
-          Who can approve
-        </h2>
-        <p className="mt-1 text-small leading-6 text-text-2">
-          You approve everything. Turn one on to let managers approve it too. Changes to your
-          business name, address, main category or open status, and reviews that need more care,
-          always need you.
+      <Panel title="Invite someone" id="invite">
+        <p className="text-small text-text-2">
+          They get an email and join when they sign in with that address.
         </p>
-        <ul className="mt-4 divide-y divide-line">
-          {KINDS.map((k) => {
-            const p = t.policies[k];
-            return (
-              <li key={k} className="flex items-center justify-between gap-4 py-3">
-                <Label htmlFor={`policy-${k}`} className="flex-1">
-                  {KIND_LABEL[k]}
-                  <span className="block text-small font-normal text-text-2">
-                    {p === "owner_and_managers" ? "You and managers" : "Only you"}
-                  </span>
-                </Label>
+        <form onSubmit={invite} className="mt-4 grid gap-4 sm:grid-cols-2">
+          <Field
+            id="invite-email"
+            label="Email"
+            type="email"
+            autoComplete="off"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <div>
+            <label htmlFor="invite-role" className="mb-2 block text-small font-bold">
+              Role
+            </label>
+            <select
+              id="invite-role"
+              value={role}
+              onChange={(e) => setRole(e.target.value as "manager" | "staff")}
+              className={selectClass}
+            >
+              <option value="manager">Manager</option>
+              <option value="staff">Staff</option>
+            </select>
+          </div>
+          <p className="text-small text-text-2 sm:col-span-2">{ROLE_HINT[role]}</p>
+          <div className="sm:col-span-2">
+            <Button
+              type="submit"
+              size="md"
+              loading={act.isPending}
+              icon={<UserPlus className="size-4" aria-hidden />}
+              data-main-cta
+            >
+              Send invitation
+            </Button>
+          </div>
+        </form>
+        {message ? (
+          <p className="mt-3 text-small" role="status">
+            {message}
+          </p>
+        ) : null}
+      </Panel>
+
+      <Panel title="Approvals" id="approvals">
+        <p className="mb-3 text-body text-text-2">Who can approve replies and posts</p>
+        <Segmented
+          label="Who can approve replies and posts"
+          value={current}
+          onChange={(v) => {
+            const on = v === "managers";
+            act.mutate(async () => {
+              for (const k of KINDS) {
+                const managersToo = t.policies[k] === "owner_and_managers";
+                if (managersToo !== on) await setPolicy(locationId, k, on);
+              }
+            });
+          }}
+          options={[
+            { value: "owner", label: "Only me" },
+            { value: "managers", label: "Me and managers" },
+          ]}
+        />
+        <p className="mt-3 text-small text-text-2">
+          Staff can send photos. They cannot approve anything.
+        </p>
+        <details className="group mt-4 border-t border-line pt-1" open={current === "custom"}>
+          <summary className="press flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 text-small font-bold [&::-webkit-details-marker]:hidden">
+            Choose for each kind
+            <ChevronDown
+              className="size-5 transition-transform group-open:rotate-180"
+              aria-hidden
+            />
+          </summary>
+          <p className="text-small text-text-2">
+            You approve everything. Turn one on to let managers approve it too. Changes to your
+            business name, address, main category or open status, and reviews that need more care,
+            always need you.
+          </p>
+          <div className="mt-4 space-y-4">
+            {KINDS.map((k) => {
+              const p = t.policies[k];
+              return (
                 <Switch
-                  id={`policy-${k}`}
+                  key={k}
+                  label={KIND_LABEL[k]}
+                  description={p === "owner_and_managers" ? "You and managers" : "Only you"}
                   checked={p === "owner_and_managers"}
                   disabled={act.isPending}
-                  onCheckedChange={(on) => act.mutate(() => setPolicy(locationId, k, on))}
+                  onChange={(on) => act.mutate(() => setPolicy(locationId, k, on))}
                 />
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-    </>
+              );
+            })}
+          </div>
+        </details>
+      </Panel>
+    </div>
   );
 }

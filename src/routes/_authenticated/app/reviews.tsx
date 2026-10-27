@@ -1,36 +1,42 @@
 import { useMemo, useState } from "react";
-import { fmtDate } from "@/lib/format";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { CheckCircle2, ChevronLeft, ChevronRight, RefreshCw, Search, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CheckCircle2, MessageSquareText, QrCode, RefreshCw, Search, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { StatusPill } from "@/components/ui/status-pill";
-import { PageIcon } from "@/components/shared/page-icon";
-import { ReviewCard, ReviewHead } from "@/components/reviews/review-card";
-import { ReviewStatusPill } from "@/components/reviews/review-status";
-import { ReviewGraphic } from "@/components/reviews/review-graphic";
-import { ReportReminders, ReportReview } from "@/components/reviews/report-review";
+import { AccountTop, Panel } from "@/components/kabsi/d3-account";
+import { Button, ButtonLink, Chip, EmptyState, ErrorState, Skeleton } from "@/components/kabsi/ui";
+import { ReviewCard } from "@/components/reviews/review-card";
+import { ReviewDone } from "@/components/reviews/review-done";
+import { ReviewCounts } from "@/components/reviews/review-counts";
+import { ReportReminders } from "@/components/reviews/report-review";
 import { StaffTestTool } from "@/components/reviews/staff-test-tool";
-import { allReviews, type ReviewRow } from "@/lib/reviews";
+import { allReviews } from "@/lib/reviews";
 import {
   FILTERS,
-  matchesFilter,
+  VIEWS,
+  matchesView,
   needsReply,
   sortReviews,
+  viewFor,
   type ReviewFilter,
+  type ReviewView,
 } from "@/lib/review-status";
+import { latestByTarget, recentTasks, type TaskItem } from "@/lib/task-feed";
 import { myLatestLocation } from "@/lib/onboarding";
 import { cn } from "@/lib/utils";
-import { MessageSquareText as PageGlyph } from "lucide-react";
 
-// Reviews (K-15, P0.3-09): one screen for every review. Filters on top; on a phone one review fills the screen with
-// Approve as the large button, on a computer the list sits beside it. The older "To reply" address comes here too.
-type Search = { f?: ReviewFilter; r?: string };
+// Reviews (K-15, P0.3-09, Design 3): every review as a card, filtered Waiting, On Google or All. A waiting review has its
+// reply ready with Approve reply, Edit and Skip; every other review shows its reply and where it is. "On Google" only
+// once Kabsi saw the reply there. The old addresses (/app/inbox, ?f=needs and the older filters) still land here.
+type Search = { f?: ReviewView | ReviewFilter; r?: string };
+const PAGE = 20;
+const NO_TASKS = new Map<string, TaskItem>();
+
 export const Route = createFileRoute("/_authenticated/app/reviews")({
   head: () => ({ meta: [{ title: "Reviews | Kabsi" }, { name: "robots", content: "noindex" }] }),
   validateSearch: (s: Record<string, unknown>): Search => {
-    const f = FILTERS.find((x) => x.key === s["f"])?.key;
+    const raw = s["f"];
+    const f = VIEWS.find((x) => x.key === raw)?.key ?? FILTERS.find((x) => x.key === raw)?.key;
     const r = s["r"];
     return {
       ...(f ? { f } : {}),
@@ -44,81 +50,139 @@ function ReviewsPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const [q, setQ] = useState("");
+  const [count, setCount] = useState(PAGE);
+  // Reviews the owner acted on stay in view while they count down or settle, whatever the filter.
+  const [kept, setKept] = useState<ReadonlySet<string>>(new Set());
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   const loc = location.data;
+  const active = !!loc && loc.status === "active";
   const reviews = useQuery({
     queryKey: ["reviews", loc?.id],
     queryFn: () => allReviews(loc!.id),
-    enabled: !!loc && loc.status === "active",
+    enabled: active,
     refetchInterval: 60_000,
   });
-  const all = useMemo(() => reviews.data ?? [], [reviews.data]);
-  const needs = all.filter(needsReply).length;
-  // Needs reply is where an owner starts, and when nothing waits the full list is more useful than an empty one.
-  const filter: ReviewFilter = search.f ?? (needs > 0 || reviews.isLoading ? "needs" : "all");
-  const needle = q.trim().toLowerCase();
-  const list = useMemo(
-    () =>
-      sortReviews(
-        all.filter(
-          (r) =>
-            matchesFilter(r, filter) &&
-            (!needle ||
-              (r.comment ?? "").toLowerCase().includes(needle) ||
-              (r.reviewer_name ?? "").toLowerCase().includes(needle)),
-        ),
-        filter,
+  // The latest publication of each reply (owners and managers read them; staff read none, and the review's own state
+  // stands in).
+  const tasks = useQuery({
+    queryKey: ["review-tasks", loc?.id],
+    queryFn: async () =>
+      latestByTarget(
+        await recentTasks(loc!.id, { kinds: ["review_reply"], days: 365, limit: 200 }),
       ),
-    [all, filter, needle],
-  );
-  // The open review stays open when it leaves the filter (an approved reply waits 10 seconds with Undo).
-  const current = all.find((r) => r.id === search.r);
-  const shown = current ?? list[0];
-  const at = shown ? list.findIndex((r) => r.id === shown.id) : -1;
-  const open = (id: string | undefined) =>
-    void navigate({
-      search: (s: Search): Search => {
-        const { r: _drop, ...rest } = s;
-        return id ? { ...rest, r: id } : rest;
-      },
-    });
-  const setFilter = (f: ReviewFilter) => void navigate({ search: { f } });
+    enabled: active,
+    refetchInterval: 60_000,
+    retry: false,
+  });
+  const byReview = tasks.data ?? NO_TASKS;
+  const all = useMemo(() => reviews.data ?? [], [reviews.data]);
+  const waitingCount = all.filter(needsReply).length;
+  // Waiting is where an owner starts; when nothing waits the full list is more useful than an empty one.
+  const view: ReviewView =
+    viewFor(search.f) ?? (waitingCount > 0 || reviews.isLoading ? "waiting" : "all");
+  const needle = q.trim().toLowerCase();
+  const list = useMemo(() => {
+    const rows = sortReviews(
+      all.filter(
+        (r) =>
+          (kept.has(r.id) || matchesView(r, view, byReview.get(r.id))) &&
+          (!needle ||
+            (r.comment ?? "").toLowerCase().includes(needle) ||
+            (r.reviewer_name ?? "").toLowerCase().includes(needle)),
+      ),
+      view === "waiting" ? "needs" : "all",
+    );
+    // A review opened from Home, an email or a reminder comes first.
+    const at = search.r ? rows.findIndex((r) => r.id === search.r) : -1;
+    if (at > 0) rows.unshift(...rows.splice(at, 1));
+    return rows;
+  }, [all, view, needle, kept, byReview, search.r]);
+  const setView = (f: ReviewView) => {
+    setCount(PAGE);
+    void navigate({ search: { f } });
+  };
+  const keep = (id: string) => setKept((s) => new Set(s).add(id));
+  // The yellow button goes to the first reply that is ready to approve, else the first review that waits.
+  const firstReady = (
+    list.find((r) => needsReply(r) && r.state !== "new" && r.draft?.safety_ok) ??
+    list.find((r) => needsReply(r) && r.state !== "new")
+  )?.id;
 
-  if (!location.isLoading && !loc) {
+  if (location.isLoading) return <ListSkeleton title />;
+  if (!loc) {
     return (
-      <Page>
-        <p className="leading-7 text-text-2">You haven't added a business yet.</p>
-        <Button asChild className="mt-5">
-          <Link to="/start">Add your business</Link>
-        </Button>
-      </Page>
+      <>
+        <AccountTop title="Reviews" />
+        <EmptyState
+          icon={MessageSquareText}
+          title="You haven't added a business yet."
+          action={<ButtonLink to="/start">Add your business</ButtonLink>}
+        />
+      </>
     );
   }
-  if (loc && loc.status !== "active") {
+  if (!active) {
     return (
-      <Page>
-        <div className="rounded-panel bg-surface-1 p-7 shadow-rest">
-          <p className="font-bold">Replies start once setup is finished.</p>
-          <p className="mt-1 leading-7 text-text-2">
+      <>
+        <AccountTop title="Reviews" />
+        <Panel title="Replies start once setup is finished." id="setup">
+          <p className="text-body text-text-2">
             As soon as Kabsi can reach your Google profile, every new review shows up here with a
             reply ready.
           </p>
-          <Button asChild className="mt-5">
-            <Link to="/start">Continue setup</Link>
-          </Button>
-        </div>
-      </Page>
+          <ButtonLink to="/start" size="md" className="mt-5">
+            Continue setup
+          </ButtonLink>
+        </Panel>
+      </>
     );
   }
 
   return (
-    <Page wide detail={!!current}>
-      <ReportReminders locationId={loc?.id} onOpen={(id) => open(id)} />
+    <>
+      <AccountTop title="Reviews" />
+      <ReportReminders
+        locationId={loc.id}
+        onOpen={(id) => void navigate({ search: { f: "all", r: id } })}
+      />
       {all.length ? (
-        <div className={cn("mt-6 space-y-3", current && "hidden lg:block")}>
+        <div className="mb-5 space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Show">
+              {VIEWS.map((v) => {
+                const n = all.filter((r) => matchesView(r, v.key, byReview.get(r.id))).length;
+                return (
+                  <Chip
+                    key={v.key}
+                    selected={view === v.key}
+                    aria-pressed={view === v.key}
+                    onClick={() => setView(v.key)}
+                  >
+                    {v.label} {n}
+                  </Chip>
+                );
+              })}
+            </div>
+            <Button
+              variant="tertiary"
+              className="ms-auto"
+              onClick={() => {
+                void reviews.refetch();
+                void tasks.refetch();
+              }}
+              icon={
+                <RefreshCw
+                  className={cn("size-4", reviews.isFetching && "animate-spin")}
+                  aria-hidden="true"
+                />
+              }
+            >
+              Refresh
+            </Button>
+          </div>
           <div className="relative">
             <Search
-              className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-text-2"
+              className="pointer-events-none absolute start-4 top-1/2 size-4 -translate-y-1/2 text-text-2"
               aria-hidden="true"
             />
             <Input
@@ -126,297 +190,109 @@ function ReviewsPage() {
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search reviews or names"
               aria-label="Search reviews"
-              className="h-12 rounded-pill bg-surface-1 pl-11"
+              className="h-12 rounded-full border-stroke bg-surface-1 ps-11"
             />
-          </div>
-          <div
-            className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:flex-wrap sm:px-0"
-            role="group"
-            aria-label="Filter reviews"
-          >
-            {FILTERS.map((f) => {
-              const n = all.filter((r) => matchesFilter(r, f.key)).length;
-              return (
-                <button
-                  key={f.key}
-                  type="button"
-                  aria-pressed={filter === f.key}
-                  onClick={() => setFilter(f.key)}
-                  className={cn(
-                    "min-h-10 shrink-0 whitespace-nowrap rounded-pill border px-4 text-small font-bold",
-                    filter === f.key
-                      ? f.key === "high"
-                        ? "border-bad bg-bad text-kb-white"
-                        : "border-text-1 bg-kb-black text-kb-white"
-                      : "border-line bg-surface-1 text-text-2 hover:text-text-1",
-                  )}
-                >
-                  {f.label} {n}
-                </button>
-              );
-            })}
-            <button
-              type="button"
-              onClick={() => void reviews.refetch()}
-              className="ml-auto inline-flex min-h-10 shrink-0 items-center gap-1.5 px-3 text-small font-bold text-text-2 hover:text-text-1"
-            >
-              <RefreshCw
-                className={cn("size-4", reviews.isFetching && "animate-spin")}
-                aria-hidden="true"
-              />
-              Refresh
-            </button>
           </div>
         </div>
       ) : null}
 
       {reviews.isLoading ? (
-        <div className="mt-5 space-y-3" role="status" aria-label="Loading reviews">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-24 animate-pulse rounded-panel bg-kb-white/70" />
-          ))}
-        </div>
-      ) : null}
-      {reviews.error ? (
-        <div className="mt-5 rounded-panel bg-surface-1 p-5 shadow-rest" role="alert">
-          <p className="font-bold">Couldn't load your reviews.</p>
-          <p className="mt-1 text-small text-text-2">Check your connection and try again.</p>
-          <Button
-            variant="outline"
-            size="compact"
-            className="mt-3"
-            onClick={() => void reviews.refetch()}
+        <ListSkeleton />
+      ) : reviews.isError ? (
+        <ErrorState title="This page did not load." onRetry={() => void reviews.refetch()}>
+          Nothing you did, and nothing changed on Google. Try again in a minute.
+        </ErrorState>
+      ) : !list.length ? (
+        view === "waiting" || !all.length ? (
+          <EmptyState
+            icon={all.length ? CheckCircle2 : MessageSquareText}
+            title="No reviews waiting."
+            action={
+              all.length ? (
+                <Button variant="secondary" size="md" onClick={() => setView("all")}>
+                  See all reviews
+                </Button>
+              ) : undefined
+            }
           >
-            Try again
-          </Button>
-        </div>
-      ) : null}
-      {reviews.data && !all.length ? (
-        <div className="mt-6 rounded-panel bg-surface-1 p-8 text-center shadow-rest">
-          <p className="font-display text-h3">No reviews yet</p>
-          <p className="mx-auto mt-2 max-w-md text-small leading-6 text-text-2">
-            New ones show up here and in your email, with a reply ready.
-          </p>
-        </div>
-      ) : null}
-      {reviews.data && all.length && !list.length && !current ? (
-        <div className="mt-6 rounded-panel bg-surface-1 p-8 text-center shadow-rest">
-          <span className="mx-auto grid size-14 place-items-center rounded-full bg-kb-yellow">
-            <CheckCircle2 className="size-7" aria-hidden="true" />
-          </span>
-          <p className="mt-4 font-display text-h3">
-            {filter === "needs" ? "You're all caught up" : "No reviews match"}
-          </p>
-          <p className="mx-auto mt-2 max-w-md text-small leading-6 text-text-2">
-            {filter === "needs"
-              ? "When a new Google review arrives, you'll get an email with a reply ready, and it shows up here too."
-              : "Try another filter."}
-          </p>
-          {filter !== "all" ? (
-            <Button
-              variant="outline"
-              size="compact"
-              className="mt-5"
-              onClick={() => setFilter("all")}
-            >
-              See all reviews
+            When a review comes in, Kabsi drafts a reply and sends it to you on WhatsApp.
+          </EmptyState>
+        ) : (
+          <EmptyState icon={MessageSquareText} title="No reviews match">
+            Try another filter.
+          </EmptyState>
+        )
+      ) : (
+        <div className="space-y-4">
+          {list
+            .slice(0, count)
+            .map((r) =>
+              needsReply(r) || kept.has(r.id) ? (
+                <ReviewCard
+                  key={`${r.id}:${r.draft?.version ?? 0}`}
+                  review={r}
+                  task={byReview.get(r.id)}
+                  primary={r.id === firstReady}
+                  onActed={() => keep(r.id)}
+                />
+              ) : (
+                <ReviewDone
+                  key={r.id}
+                  review={r}
+                  task={byReview.get(r.id)}
+                  concierge={loc.concierge === true}
+                />
+              ),
+            )}
+          {list.length > count ? (
+            <Button variant="secondary" size="md" onClick={() => setCount((c) => c + PAGE)}>
+              Show more
             </Button>
           ) : null}
         </div>
-      ) : null}
+      )}
 
-      {shown ? (
-        <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
-          <ul
-            className={cn("space-y-2", current ? "hidden lg:block" : "block")}
-            aria-label="Reviews"
+      <Panel title="Review Growth" id="growth" className="mt-8">
+        <ReviewCounts locationId={loc.id} />
+        <div className="mt-4 flex flex-wrap gap-2">
+          <ButtonLink
+            to="/app/cards"
+            hash="message"
+            variant="secondary"
+            size="md"
+            icon={<Send className="size-4" aria-hidden />}
           >
-            {list.map((r) => (
-              <li key={r.id}>
-                <ReviewRowButton
-                  row={r}
-                  active={shown.id === r.id}
-                  highlighted={!!current}
-                  concierge={loc?.concierge === true}
-                  onOpen={() => open(r.id)}
-                />
-              </li>
-            ))}
-          </ul>
-          <div className={cn("min-w-0", current ? "block" : "hidden lg:block")}>
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <Button
-                variant="ghost"
-                size="compact"
-                className="lg:hidden"
-                onClick={() => open(undefined)}
-              >
-                <ChevronLeft /> All reviews
-              </Button>
-              <p className="ml-auto flex items-center gap-1 text-small text-text-2">
-                {at >= 0 ? `${at + 1} of ${list.length}` : null}
-                <Button
-                  variant="icon"
-                  size="icon"
-                  aria-label="Previous review"
-                  disabled={at <= 0}
-                  onClick={() => open(list[at - 1]?.id)}
-                >
-                  <ChevronLeft />
-                </Button>
-                <Button
-                  variant="icon"
-                  size="icon"
-                  aria-label="Next review"
-                  disabled={at < 0 || at >= list.length - 1}
-                  onClick={() => open(list[at + 1]?.id)}
-                >
-                  <ChevronRight />
-                </Button>
-              </p>
-            </div>
-            <Detail
-              key={`${shown.id}:${shown.draft?.version ?? 0}`}
-              review={shown}
-              concierge={loc?.concierge === true}
-            />
+            Send your review link
+          </ButtonLink>
+          <ButtonLink
+            to="/app/cards"
+            hash="qr"
+            variant="quiet"
+            size="md"
+            icon={<QrCode className="size-4" aria-hidden />}
+          >
+            Get your QR card
+          </ButtonLink>
+        </div>
+      </Panel>
+      <StaffTestTool locationId={loc.id} />
+    </>
+  );
+}
+
+function ListSkeleton({ title }: { title?: boolean }) {
+  return (
+    <div role="status" aria-busy="true" aria-label="Loading">
+      {title ? <Skeleton className="mb-6 h-10 w-48" /> : null}
+      <div className="space-y-3">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="rounded-card border border-line bg-surface-1 p-5">
+            <Skeleton className="h-5 w-1/2" />
+            <Skeleton className="mt-3 h-4 w-full" />
+            <Skeleton className="mt-2 h-4 w-4/5" />
           </div>
-        </div>
-      ) : null}
-      {loc ? <StaffTestTool locationId={loc.id} /> : null}
-    </Page>
-  );
-}
-
-function Page({
-  children,
-  wide,
-  detail,
-}: {
-  children: React.ReactNode;
-  wide?: boolean;
-  /** A phone shows the open review on its own: no title block or filters above it. */
-  detail?: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        "mx-auto w-full px-5 sm:px-8 sm:py-12",
-        detail ? "py-4" : "py-8",
-        wide ? "max-w-6xl" : "max-w-3xl",
-      )}
-    >
-      <div className={cn(detail && "hidden lg:block")}>
-        <PageIcon icon={<PageGlyph />} />
-        <h1 className="font-display text-h2 leading-none sm:text-5xl">Reviews</h1>
-        <p className="mt-3 max-w-xl text-small leading-6 text-text-2">
-          Every reply is drafted in the reviewer's language from your facts. Nothing goes on Google
-          until you approve it.
-        </p>
+        ))}
       </div>
-      {children}
     </div>
-  );
-}
-
-// One review in the list: stars, name, date, the first lines, its status and, if there is one, its risk.
-function ReviewRowButton({
-  row,
-  active,
-  highlighted,
-  concierge,
-  onOpen,
-}: {
-  row: ReviewRow;
-  active: boolean;
-  /** On a phone the list only marks a review once one is open. */
-  highlighted: boolean;
-  concierge: boolean;
-  onOpen: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onOpen}
-      aria-current={active ? "true" : undefined}
-      className={cn(
-        "block w-full rounded-panel bg-surface-1 p-4 text-left shadow-rest transition-colors",
-        active
-          ? highlighted
-            ? "ring-2 ring-focus"
-            : "lg:ring-2 lg:ring-focus"
-          : "hover:ring-2 hover:ring-line",
-      )}
-    >
-      <span className="flex items-center justify-between gap-2">
-        <span className="flex min-w-0 items-center gap-2">
-          <span
-            className="inline-flex shrink-0 gap-0.5"
-            role="img"
-            aria-label={`${row.star_rating} of 5 stars`}
-          >
-            {[1, 2, 3, 4, 5].map((n) => (
-              <Star
-                key={n}
-                aria-hidden="true"
-                className={cn(
-                  "size-3.5",
-                  n <= row.star_rating ? "fill-kb-black text-text-1" : "text-line-strong",
-                )}
-              />
-            ))}
-          </span>
-          <span className="truncate text-small font-bold">{row.reviewer_name ?? "A customer"}</span>
-        </span>
-        {row.review_created_at ? (
-          <span className="shrink-0 text-label text-text-2">{fmtDate(row.review_created_at)}</span>
-        ) : null}
-      </span>
-      <span dir="auto" className="mt-2 line-clamp-2 block text-small leading-6 text-text-2">
-        {row.comment ||
-          (row.content_purged_at
-            ? "Text removed after 30 days (Google's rule)"
-            : "Rating only, no text")}
-      </span>
-      <span className="mt-3 flex flex-wrap items-center gap-2">
-        <ReviewStatusPill review={row} concierge={concierge} />
-        {row.risk === "high" ? <StatusPill tone="red">High risk</StatusPill> : null}
-        {row.risk === "medium" ? <StatusPill tone="amber">Needs care</StatusPill> : null}
-      </span>
-    </button>
-  );
-}
-
-// A review that needs a reply gets the full card; every other review is read-only with its reply and status.
-function Detail({ review, concierge }: { review: ReviewRow; concierge: boolean }) {
-  if (needsReply(review)) return <ReviewCard review={review} />;
-  const reply = review.my_reply || review.existing_reply;
-  return (
-    <article className="rounded-panel bg-surface-1 p-5 shadow-rest sm:p-7">
-      <ReviewHead review={review} />
-      <div className="mt-4">
-        <ReviewStatusPill review={review} concierge={concierge} />
-      </div>
-      <div className="mt-3 flex flex-wrap gap-x-6">
-        <ReviewGraphic review={review} />
-        <ReportReview review={review} />
-      </div>
-      {review.content_purged_at && !review.comment ? (
-        <p className="mt-3 text-small text-text-2">
-          Google's rules let Kabsi keep review text for 30 days. Read it on your Google profile.
-        </p>
-      ) : null}
-      {reply ? (
-        <div className="mt-4 rounded-card border-l-4 border-kb-yellow bg-surface-2 p-4">
-          <p className="text-label font-bold uppercase tracking-wider text-text-2">Your reply</p>
-          <p dir="auto" className="mt-1 whitespace-pre-wrap text-small leading-6">
-            {reply}
-          </p>
-        </div>
-      ) : null}
-      {review.reply_state_reason && review.reply_state === "in_review" ? (
-        <p className="mt-3 text-small text-text-2">{review.reply_state_reason}</p>
-      ) : null}
-    </article>
   );
 }

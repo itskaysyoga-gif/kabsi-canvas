@@ -5,7 +5,11 @@ import { ReviewStatusPill } from "../src/components/reviews/review-status";
 import { PublishingBanner } from "../src/components/reviews/review-card";
 import {
   FILTERS,
+  VIEWS,
   matchesFilter,
+  matchesView,
+  onGoogle,
+  viewFor,
   needsReply,
   reviewStatus,
   sortReviews,
@@ -115,5 +119,29 @@ describe("approve countdown (K-70)", () => {
     const s = out(Date.now() - 1000);
     expect(s).toContain("On its way to Google");
     expect(s).not.toContain("Undo");
+  });
+});
+
+describe("Design 3 views: Waiting, On Google, All", () => {
+  it("lists the three views in order", () => {
+    expect(VIEWS.map((v) => v.label)).toEqual(["Waiting", "On Google", "All"]);
+  });
+  it("keeps the old addresses working: ?f=needs is Waiting, Replied is On Google, the rest All", () => {
+    expect(viewFor("needs")).toBe("waiting");
+    expect(viewFor("waiting")).toBe("waiting");
+    expect(viewFor("replied")).toBe("google");
+    for (const f of ["all", "positive", "neutral", "negative", "high"])
+      expect(viewFor(f)).toBe("all");
+    expect(viewFor("nonsense")).toBeUndefined();
+  });
+  it("says On Google only once Kabsi saw the reply there, else by the review's own state", () => {
+    const posted = { ...base, state: "posted" };
+    expect(onGoogle(posted, { owner: "sent" })).toBe(false);
+    expect(onGoogle(posted, { owner: "confirmed" })).toBe(true);
+    expect(onGoogle(posted)).toBe(true);
+    expect(onGoogle({ ...posted, reply_state: "in_review" })).toBe(false);
+    expect(matchesView(base, "waiting")).toBe(true);
+    expect(matchesView(base, "google")).toBe(false);
+    expect(matchesView(base, "all")).toBe(true);
   });
 });

@@ -216,7 +216,7 @@ const CASES: Case[] = [
     steps: [{ from: PHONES.unknown, media: voice("v4"), expect: "voice_stranger" }], check: (w) => assert.equal(w.transcribed.length, 0) },
   { name: "owner: a video is kept, not posted", tags: ["owner", "9.3"], steps: [{ from: PHONES.owner, media: { kind: "video", id: "vid", mime: "video/mp4", filename: null, size: 1000, voice: false }, expect: "video" }] },
   { name: "owner: Ask a customer with a shared contact gives the ready message and keeps no number", tags: ["owner", "30.8", "V3"],
-    steps: [{ from: PHONES.owner, contacts: [{ name: "Dana", phones: ["(212) 555-0177"] }], expect: "ask_customer", reply: /Thanks for visiting Harbour Lane Coffee\. If you would like to leave a review, here is our link: https:\/\/go\.kabsi\.co\/ABC234\?s=m$/ }],
+    steps: [{ from: PHONES.owner, contacts: [{ name: "Dana", phones: ["(212) 555-0177"] }], expect: "ask_customer", reply: /Thank you for visiting Harbour Lane Coffee today\. If you have a minute, tell others how your visit went: https:\/\/go\.kabsi\.co\/ABC234\?s=m$/ }],
     check: (w) => {
       assert.equal(w.storedPayloads.length, 1);
       const kept = JSON.stringify(w.storedPayloads[0]);
@@ -224,7 +224,7 @@ const CASES: Case[] = [
       for (const m of w.sent) assert.doesNotMatch(m.body, /5550177|Dana/);
     } },
   { name: "owner: ask a customer in words gives the same message, the intro first", tags: ["owner", "V3"], steps: [{ from: PHONES.owner, text: "ask a customer", expect: "ask_customer", reply: /Forward the next message from your own phone/, ai: 0 }],
-    check: (w) => { const bodies = w.repliesTo(PHONES.owner).map((m) => m.body); assert.equal(bodies.length, 2); assert.match(bodies[1], /^Harbour Lane Coffee \(owner\)\n\nThanks for visiting|^Thanks for visiting/); } },
+    check: (w) => { const bodies = w.repliesTo(PHONES.owner).map((m) => m.body); assert.equal(bodies.length, 2); assert.match(bodies[1], /^Harbour Lane Coffee \(owner\)\n\nThank you for visiting|^Thank you for visiting/); } },
   { name: "owner: ask a customer with no review link yet says where to make one", tags: ["owner", "V3"], steps: [{ from: PHONES.plain, text: "ask a customer", expect: "ask_no_link", reply: /no review link yet/ }] },
   { name: "staff: ask a customer is open to staff, the same message", tags: ["staff", "V3"], steps: [{ from: PHONES.staff, text: "ask a customer", expect: "ask_customer", head: /\(staff\)/ }] },
   { name: "owner: stats show link opens apart from reviews", tags: ["owner", "V3"], steps: [{ from: PHONES.owner, text: "stats", expect: "stats", reply: /8 times\. An open is not a review\./ }] },

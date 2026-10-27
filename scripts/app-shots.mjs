@@ -64,7 +64,11 @@ for (const r of routes) {
       await route.fulfill({
         status: res.status ?? 200,
         contentType: "application/json",
-        headers: { "access-control-allow-origin": "*", ...(res.headers ?? {}) },
+        headers: {
+          "access-control-allow-origin": "*",
+          "access-control-expose-headers": "content-range",
+          ...(res.headers ?? {}),
+        },
         body: res.body === undefined ? "" : JSON.stringify(res.body),
       });
     });

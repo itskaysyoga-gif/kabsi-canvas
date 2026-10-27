@@ -2,8 +2,7 @@ import { CONCIERGE_COPY } from "@/lib/concierge-copy";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { CreditCard } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import {
@@ -17,16 +16,19 @@ import {
   type PlanSummary,
 } from "@/lib/plans";
 import { daysUntil } from "@/lib/dashboard";
-import { PLAN_PRICES, PLAN_PRICE_ROWS, TAX_NOTE } from "@/lib/site";
-import { Wallet as PageGlyph } from "lucide-react";
-import { PageIcon } from "@/components/shared/page-icon";
+import { PLAN_PRICES, PLAN_PRICE_ROWS, TAX_NOTE, WHATSAPP_ON } from "@/lib/site";
+import { PLANS } from "@/components/kabsi/plans";
+import { AccountTop, Panel } from "@/components/kabsi/d3-account";
+import { Banner, Button, Segmented, StatusPill, buttonClass } from "@/components/kabsi/ui";
+import { cn } from "@/lib/utils";
 
-// Plan: what the owner has and until when. There is one way to pay, by card through Creem (K-124, master plan section
-// 10). Session 10 adds the buttons and states: choose a plan (the Creem checkout), card and invoices (Creem's portal),
-// switch plan, add a location, cancel at the period end and keep my plan. Until plans open (10.2.13) the paid buttons
-// read "Plans open soon" for everyone but Kabsi's test accounts. Web 2 restyles the page.
+// Your plan (UX 1, Design 3): the state first as one banner (trial, paid, a payment that did not go through, a plan that
+// ends), then the two plans with the work they do, then the receipts. There is one way to pay, by card through Creem
+// (K-124, master plan section 10): choose a plan (the Creem checkout), card and invoices (Creem's portal), switch plan,
+// add a location, cancel at the period end and keep my plan. Until plans open (10.2.13) the paid buttons read "Plans open
+// soon" for everyone but Kabsi's test accounts. The billing calls and their rules are unchanged from session 10.
 export const Route = createFileRoute("/_authenticated/app/plan")({
-  head: () => ({ meta: [{ title: "Plan | Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Your plan | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: PlanPage,
 });
 
@@ -50,6 +52,8 @@ const shortDate = (d: string | null) =>
   d
     ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
     : "-";
+const longDate = (d: string | null) =>
+  d ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "long" }) : "-";
 
 async function loadPlan(locationId: string) {
   const [plans, payments] = await Promise.all([
@@ -90,8 +94,15 @@ async function loadPlan(locationId: string) {
     payments: (payments.data ?? []) as Payment[],
   };
 }
+type PlanData = Awaited<ReturnType<typeof loadPlan>>;
 
 const ITEM_NAME: Record<string, string> = PLAN_NAMES;
+
+/** The Creem subscription that still decides this screen: anything but a checkout with no payment yet. */
+function creemBilling(s: PlanSummary): Billing | null {
+  const b = s.entitlements?.billing ?? null;
+  return b && b.state !== "incomplete" ? b : null;
+}
 
 function PlanPage() {
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
@@ -108,248 +119,33 @@ function PlanPage() {
   });
   const d = data.data;
   const sum = summaryQ.data;
-  const left = daysUntil(d?.paidUntil ?? null);
 
-  return (
-    <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-      <PageIcon icon={<PageGlyph />} />
-      <p className="text-small font-bold uppercase tracking-wider text-text-2">Settings</p>
-      <h1 className="mt-1 font-display text-h2 leading-none sm:text-5xl">{PLAN_COPY.title}</h1>
-      {loc ? <p className="mt-2 text-text-2">{loc.name}</p> : null}
-      {location.isLoading || data.isLoading || summaryQ.isLoading ? (
-        <p className="mt-6 text-text-2">Loading…</p>
-      ) : null}
-      {!location.isLoading && !loc ? (
-        <Button asChild className="mt-6">
-          <Link to="/start">Add your business</Link>
-        </Button>
-      ) : null}
-      {data.isError || summaryQ.isError ? (
-        <p className="mt-6 text-bad">Couldn't load your plan. Refresh the page.</p>
-      ) : null}
-
-      {loc && sum && d ? (
-        <>
-          {/* Current plan */}
-          <section className="mt-7 overflow-hidden rounded-panel bg-surface-1 shadow-rest">
-            <div className="p-6 sm:p-8">
-              <p className="text-small font-medium text-text-2">Your plan</p>
-              {sum.tier === "early_access" ? (
-                <>
-                  <div className="mt-1 flex flex-wrap items-center gap-3">
-                    <p className="text-h3 font-bold">Early access</p>
-                    <span className="rounded-pill bg-ok-soft px-2.5 py-1 text-label font-bold text-ok">
-                      Active
-                    </span>
-                  </div>
-                  <p className="mt-2 leading-7 text-text-2">{CONCIERGE_COPY.plan}</p>
-                  <p className="mt-2 text-small leading-6 text-text-2">{CONCIERGE_COPY.banner}</p>
-                </>
-              ) : creemBilling(sum) ? (
-                <PaidState b={creemBilling(sum)!} />
-              ) : sum.tier === "trial" && sum.plan ? (
-                <>
-                  <div className="mt-1 flex flex-wrap items-center gap-3">
-                    <p className="text-h3 font-bold">Pro trial</p>
-                    <span className="rounded-pill bg-ok-soft px-2.5 py-1 text-label font-bold text-ok">
-                      Active
-                    </span>
-                  </div>
-                  <p className="mt-2 text-text-2">
-                    Pro trial, ends{" "}
-                    <span className="font-bold text-text-1">{shortDate(sum.plan.last_day)}</span>.
-                    {trialDaysLeft(sum) !== null ? ` ${trialDaysLeft(sum)} days left.` : ""}
-                  </p>
-                  {sum.queued.length ? (
-                    <p className="mt-3 text-small text-text-2">
-                      Already paid: {sum.queued.map((q) => ITEM_NAME[q.kind]).join(", ")}, starts{" "}
-                      {shortDate(sum.queued[0]!.starts_at)}. Nothing stops when the trial ends.
-                    </p>
-                  ) : (
-                    <p className="mt-3 text-small leading-6 text-text-2">
-                      When the trial ends without a plan, reply drafts, Google Protection and the
-                      Weekly Care Report pause. Your review link and QR code keep working.
-                    </p>
-                  )}
-                </>
-              ) : sum.tier === "free" && !d.paidWaiting ? (
-                <>
-                  <div className="mt-1 flex flex-wrap items-center gap-3">
-                    <p className="text-h3 font-bold">No plan</p>
-                  </div>
-                  <p className="mt-2 leading-7 text-text-2">
-                    Your review link and QR code keep working. Reply drafts, Google Protection and
-                    the Weekly Care Report are paused until you choose a plan.
-                  </p>
-                </>
-              ) : d.current ? (
-                <>
-                  <div className="mt-1 flex flex-wrap items-center gap-3">
-                    <p className="text-h3 font-bold">{ITEM_NAME[d.current.kind] ?? "Kabsi Pro"}</p>
-                    <span className="rounded-pill bg-ok-soft px-2.5 py-1 text-label font-bold text-ok">
-                      Active
-                    </span>
-                  </div>
-                  <p className="mt-2 text-text-2">
-                    Paid until{" "}
-                    <span className="font-bold text-text-1">{shortDate(d.paidUntil)}</span>
-                    {left !== null ? ` · ${left} ${left === 1 ? "day" : "days"} left` : ""}
-                  </p>
-                  {d.current.starts_at && d.current.ends_at ? (
-                    <Progress start={d.current.starts_at} end={d.current.ends_at} />
-                  ) : null}
-                  {d.queued.length ? (
-                    <p className="mt-3 text-small text-text-2">
-                      Renewal already paid: {d.queued.map((q) => ITEM_NAME[q.kind]).join(", ")},
-                      starts {shortDate(d.queued[0]!.starts_at)}.
-                    </p>
-                  ) : null}
-                </>
-              ) : d.paidWaiting ? (
-                <>
-                  <div className="mt-1 flex flex-wrap items-center gap-3">
-                    <p className="text-h3 font-bold">
-                      {ITEM_NAME[d.paidWaiting.kind] ?? "Kabsi Pro"}
-                    </p>
-                    <span className="rounded-pill bg-surface-2 px-2.5 py-1 text-label font-bold text-text-2">
-                      Paid
-                    </span>
-                  </div>
-                  <p className="mt-2 leading-7 text-text-2">
-                    Your plan starts the day Kabsi's access to your Google profile works, so you
-                    don't lose any days while you wait.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="mt-1 text-h3 font-bold">No active plan</p>
-                  <p className="mt-2 leading-7 text-text-2">
-                    Your trial starts when Kabsi's access to your Google profile works.
-                  </p>
-                </>
-              )}
-            </div>
-          </section>
-
-          <section className="mt-6 rounded-panel bg-surface-1 p-6 shadow-rest sm:p-8">
-            <h2 className="text-title font-bold">Plans and prices</h2>
-            <dl className="mt-3 divide-y divide-line">
-              {PLAN_PRICE_ROWS.map((r) => (
-                <div
-                  key={r.name}
-                  className="flex flex-wrap items-baseline justify-between gap-x-4 py-3"
-                >
-                  <dt className="font-bold">{r.name}</dt>
-                  <dd className="text-text-2">{r.price}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-3 text-small leading-6 text-text-2">
-              Prices are in US dollars, {TAX_NOTE}, and the same in every country. Every trial is 14
-              days of Pro with no card.
-            </p>
-          </section>
-
-          <PlanActions locationId={loc.id} sum={sum} />
-
-          {d.payments.length ? (
-            <section className="mt-8">
-              <h2 className="text-title font-bold">Payments</h2>
-              <ul className="mt-3 divide-y divide-line rounded-panel bg-surface-1 px-5 shadow-rest">
-                {d.payments.map((p) => (
-                  <li
-                    key={p.id}
-                    className="flex items-center justify-between gap-3 py-3.5 text-small"
-                  >
-                    <span>
-                      <span className="font-medium">{ITEM_NAME[p.item] ?? "Kabsi Pro"}</span>
-                    </span>
-                    <span className="text-right">
-                      <span className="font-bold">{money(p.amount_usd)}</span>
-                      <span className="block text-label text-text-2">
-                        {shortDate(p.created_at)}
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
-          <p className="mt-8 text-small leading-6 text-text-2">
-            Yearly plans are refundable within 14 days. If your plan ends, your review link and QR
-            code keep working; only reply drafts, Google Protection and reports stop.
-          </p>
-        </>
-      ) : null}
-    </div>
-  );
-}
-
-/** The Creem subscription that still decides this screen: anything but a checkout with no payment yet. */
-function creemBilling(s: PlanSummary): Billing | null {
-  const b = s.entitlements?.billing ?? null;
-  return b && b.state !== "incomplete" ? b : null;
-}
-
-function PaidState({ b }: { b: Billing }) {
-  const name = PAID_NAMES[`${b.plan}_${b.period ?? "month"}`] ?? "Kabsi Pro";
-  const ended = b.state === "cancelled" || b.state === "expired";
-  const paused = b.state === "paused" || (b.state === "past_due" && !b.grace_ends_at);
   return (
     <>
-      <div className="mt-1 flex flex-wrap items-center gap-3">
-        <p className="text-h3 font-bold">{name}</p>
-        <span
-          className={
-            ended || paused
-              ? "rounded-pill bg-surface-2 px-2.5 py-1 text-label font-bold text-text-2"
-              : b.payment_failed
-                ? "rounded-pill bg-bad-soft px-2.5 py-1 text-label font-bold text-bad"
-                : "rounded-pill bg-ok-soft px-2.5 py-1 text-label font-bold text-ok"
-          }
-        >
-          {ended
-            ? "Ended"
-            : paused
-              ? "Paused"
-              : b.payment_failed
-                ? "Card did not go through"
-                : "Active"}
-        </span>
-      </div>
-      {b.units > 0 ? (
-        <p className="mt-2 text-text-2">
-          Plus {b.units} extra {b.units === 1 ? "location" : "locations"}.
+      <AccountTop title={PLAN_COPY.title} />
+      {location.isLoading || data.isLoading || summaryQ.isLoading ? (
+        <p className="text-body text-text-2" role="status">
+          Loading...
         </p>
       ) : null}
-      {ended || paused ? (
-        <p className="mt-2 leading-7 text-text-2">
-          {paused ? "Approvals have stopped and nothing is lost." : "Your plan has ended."}
-          {b.data_kept_until ? ` Your data is kept until ${shortDate(b.data_kept_until)}.` : ""}
+      {!location.isLoading && !loc ? (
+        <Link to="/start" className={buttonClass()} data-main-cta>
+          Add your business
+        </Link>
+      ) : null}
+      {data.isError || summaryQ.isError ? (
+        <p className="text-body text-bad" role="alert">
+          Couldn&apos;t load your plan. Refresh the page.
         </p>
-      ) : b.payment_failed ? (
-        <p className="mt-2 leading-7 text-text-2">
-          Your card did not go through. Kabsi keeps working until {shortDate(b.grace_ends_at)}.
-        </p>
-      ) : b.cancel_at_period_end ? (
-        <p className="mt-2 leading-7 text-text-2">
-          Your plan ends on {shortDate(b.current_period_end)}. Until then everything keeps working.
-        </p>
-      ) : (
-        <p className="mt-2 text-text-2">
-          Renews on <span className="font-bold text-text-1">{shortDate(b.current_period_end)}</span>
-          .
-        </p>
-      )}
+      ) : null}
+      {loc && sum && d ? <PlanScreen locationId={loc.id} sum={sum} d={d} /> : null}
     </>
   );
 }
 
 type Pending = { op: BillingOp; line: string; plan?: "essentials" | "pro" } | null;
 
-/** The buttons: choose a plan, or manage the one there is. One yellow button on the screen. */
-function PlanActions({ locationId, sum }: { locationId: string; sum: PlanSummary }) {
+function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSummary; d: PlanData }) {
   const qc = useQueryClient();
   const [period, setPeriod] = useState<"month" | "year">("month");
   const [busy, setBusy] = useState(false);
@@ -407,145 +203,366 @@ function PlanActions({ locationId, sum }: { locationId: string; sum: PlanSummary
     return `$${n} ${per ? "a year" : "a month"}`;
   };
 
+  const cancelLine = () =>
+    b
+      ? setPending({
+          op: "cancel",
+          line: `Cancel at the end of the paid period, ${shortDate(b.current_period_end)}. Everything keeps working until then.`,
+        })
+      : undefined;
+
+  // Which plan card carries the pill: the trial is Pro; a Creem plan names itself.
+  const trial = sum.tier === "trial" && !!sum.plan && !b;
+  const mine: "essentials" | "pro" | null = b
+    ? b.state === "cancelled" || b.state === "expired"
+      ? null
+      : b.plan
+    : trial
+      ? "pro"
+      : null;
+  const showChoose = !running;
+
   return (
-    <section className="mt-6 rounded-panel bg-surface-1 p-6 shadow-rest sm:p-8">
-      <div className="flex items-start gap-3">
-        <CreditCard className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
-        <div className="w-full">
-          {running ? (
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <Button disabled={busy} onClick={() => void run("portal")}>
-                {b.payment_failed ? "Update your card" : "Card and invoices"}
-              </Button>
-              {b.cancel_at_period_end ? (
-                <Button variant="outline" disabled={busy} onClick={() => void run("keep")}>
-                  Keep my plan
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    variant="outline"
-                    disabled={busy}
-                    onClick={() =>
-                      setPending(
-                        b.plan === "pro"
-                          ? {
-                              op: "downgrade",
-                              line: `Switch to Essentials at your next renewal, ${price("essentials")}.`,
-                            }
-                          : {
-                              op: "upgrade",
-                              line: `Switch to Pro now, ${price("pro")}. Creem charges the difference today.`,
-                            },
-                      )
-                    }
-                  >
-                    {b.plan === "pro" ? "Switch to Essentials" : "Switch to Pro"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    disabled={busy}
-                    onClick={() =>
-                      setPending({
-                        op: "add_location",
-                        line: `Add a location for ${price("extra")}, charged today for the rest of this period.`,
-                      })
-                    }
-                  >
-                    Add a location
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    disabled={busy}
-                    onClick={() =>
-                      setPending({
-                        op: "cancel",
-                        line: `Cancel at the end of the paid period, ${shortDate(b.current_period_end)}. Everything keeps working until then.`,
-                      })
-                    }
-                  >
-                    Cancel my plan
-                  </Button>
-                </>
-              )}
-            </div>
-          ) : (
-            <>
-              <div className="flex gap-2" role="group" aria-label="Billing period">
-                {(["month", "year"] as const).map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    aria-pressed={period === p}
-                    onClick={() => setPeriod(p)}
-                    className={
-                      period === p
-                        ? "rounded-pill bg-kb-black px-4 py-2 text-small font-bold text-kb-white"
-                        : "rounded-pill bg-surface-2 px-4 py-2 text-small font-bold text-text-1"
-                    }
-                  >
-                    {p === "month" ? PLAN_COPY.monthly : PLAN_COPY.yearly}
-                  </button>
-                ))}
+    <div className="space-y-4">
+      <StateBanner sum={sum} d={d} b={b} busy={busy} run={run} />
+
+      {showChoose ? (
+        <Segmented
+          label="Billing period"
+          value={period}
+          onChange={setPeriod}
+          options={[
+            { value: "month", label: PLAN_COPY.monthly },
+            { value: "year", label: PLAN_COPY.yearly },
+          ]}
+        />
+      ) : null}
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {PLANS.map((p) => {
+          const per = (b?.period ?? period) === "year";
+          return (
+            <Panel key={p.id} className={cn(mine === p.id && "ring-2 ring-text-1")}>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="font-display text-h3 font-bold">{p.name}</h2>
+                {mine === p.id ? (
+                  <StatusPill tone="info">{trial ? "Your trial" : "Your plan"}</StatusPill>
+                ) : null}
               </div>
-              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <p className="mt-2 font-display text-h2 font-bold">
+                ${per ? p.yearly : p.monthly}
+                <span className="text-body font-semibold text-text-2">
+                  {per ? " a year" : " a month"}
+                </span>
+              </p>
+              <ul className="mt-4 space-y-2">
+                {p.work.map((w) => (
+                  <li key={w} className="flex gap-2 text-body">
+                    <Check className="mt-1 size-4 shrink-0 text-ok" strokeWidth={3} aria-hidden />
+                    {w}
+                  </li>
+                ))}
+              </ul>
+              {showChoose ? (
                 <Button
-                  variant="outline"
+                  full
+                  size="md"
+                  variant={p.id === "pro" ? "primary" : "secondary"}
+                  className="mt-5"
                   disabled={!open || busy}
-                  onClick={() => void run("checkout", { plan: "essentials", period })}
+                  onClick={() => void run("checkout", { plan: p.id, period })}
+                  {...(p.id === "pro" ? { "data-main-cta": true } : {})}
                 >
                   {open
-                    ? `${PLAN_COPY.chooseEssentials}, ${price("essentials")}`
+                    ? `${p.id === "pro" ? PLAN_COPY.choosePro : PLAN_COPY.chooseEssentials}, ${price(p.id)}`
                     : PLAN_COPY.openSoon}
                 </Button>
-                <Button
-                  disabled={!open || busy}
-                  onClick={() => void run("checkout", { plan: "pro", period })}
-                >
-                  {open ? `${PLAN_COPY.choosePro}, ${price("pro")}` : PLAN_COPY.openSoon}
-                </Button>
-              </div>
-            </>
-          )}
-          {pending ? (
-            <div className="mt-4 rounded-card bg-surface-2 p-4">
-              <p className="leading-6">{pending.line}</p>
-              <div className="mt-3 flex gap-3">
-                <Button variant="outline" disabled={busy} onClick={() => void run(pending.op)}>
-                  Confirm
-                </Button>
-                <Button variant="ghost" disabled={busy} onClick={() => setPending(null)}>
-                  Not now
-                </Button>
-              </div>
-            </div>
-          ) : null}
-          {note ? <p className="mt-3 text-small font-bold text-ok">{note}</p> : null}
-          {error ? <p className="mt-3 text-small text-bad">{error}</p> : null}
-          <p className="mt-4 text-small leading-6 text-text-2">{PLAN_COPY.creem}</p>
-        </div>
+              ) : null}
+            </Panel>
+          );
+        })}
       </div>
-    </section>
+
+      {running ? (
+        <Panel title="Manage your plan" id="manage">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Button
+              variant="secondary"
+              size="md"
+              disabled={busy}
+              onClick={() => void run("portal")}
+            >
+              Card and invoices
+            </Button>
+            {b.cancel_at_period_end ? null : (
+              <>
+                <Button
+                  variant="secondary"
+                  size="md"
+                  disabled={busy}
+                  onClick={() =>
+                    setPending(
+                      b.plan === "pro"
+                        ? {
+                            op: "downgrade",
+                            line: `Switch to Essentials at your next renewal, ${price("essentials")}.`,
+                          }
+                        : {
+                            op: "upgrade",
+                            line: `Switch to Pro now, ${price("pro")}. Creem charges the difference today.`,
+                          },
+                    )
+                  }
+                >
+                  {b.plan === "pro" ? "Switch to Essentials" : "Switch to Pro"}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="md"
+                  disabled={busy}
+                  onClick={() =>
+                    setPending({
+                      op: "add_location",
+                      line: `Add a location for ${price("extra")}, charged today for the rest of this period.`,
+                    })
+                  }
+                >
+                  Add a location
+                </Button>
+              </>
+            )}
+          </div>
+          {!b.cancel_at_period_end ? (
+            WHATSAPP_ON ? (
+              <p className="mt-4 text-small text-text-2">
+                Cancel any time: reply Cancel on WhatsApp, or{" "}
+                <button
+                  type="button"
+                  className="inline-flex min-h-11 items-center font-bold text-text-1 underline underline-offset-4"
+                  disabled={busy}
+                  onClick={cancelLine}
+                >
+                  cancel here
+                </button>
+                .
+              </p>
+            ) : (
+              <Button variant="tertiary" className="mt-3" disabled={busy} onClick={cancelLine}>
+                Cancel my plan
+              </Button>
+            )
+          ) : null}
+        </Panel>
+      ) : null}
+
+      {pending ? (
+        <div className="rounded-card border border-line bg-surface-2 p-4" role="status">
+          <p className="text-body">{pending.line}</p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            <Button
+              variant="secondary"
+              size="md"
+              disabled={busy}
+              onClick={() => void run(pending.op)}
+            >
+              Confirm
+            </Button>
+            <Button variant="quiet" size="md" disabled={busy} onClick={() => setPending(null)}>
+              Not now
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      {note ? (
+        <p className="text-small font-bold text-ok" role="status">
+          {note}
+        </p>
+      ) : null}
+      {error ? (
+        <p className="text-small text-bad" role="alert">
+          {error}
+        </p>
+      ) : null}
+
+      <Panel title="Plans and prices" id="prices">
+        <dl className="divide-y divide-line">
+          {PLAN_PRICE_ROWS.map((r) => (
+            <div
+              key={r.name}
+              className="flex flex-wrap items-baseline justify-between gap-x-4 py-2.5"
+            >
+              <dt className="text-small font-bold">{r.name}</dt>
+              <dd className="text-small text-text-2">{r.price}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-3 text-small text-text-2">
+          Prices are in US dollars, {TAX_NOTE}, and the same in every country. Every trial is 14
+          days of Pro with no card.
+        </p>
+      </Panel>
+
+      <Panel title="Receipts" id="receipts">
+        {d.payments.length ? (
+          <ul className="divide-y divide-line">
+            {d.payments.map((p) => (
+              <li
+                key={p.id}
+                className="flex flex-wrap items-center justify-between gap-2 py-3 text-small"
+              >
+                <span>
+                  {shortDate(p.created_at)}, {ITEM_NAME[p.item] ?? "Kabsi Pro"}
+                </span>
+                <span className="font-bold">{money(p.amount_usd)}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-body text-text-2">No payments yet.</p>
+        )}
+      </Panel>
+
+      <div className="space-y-2">
+        <p className="text-small text-text-2">{PLAN_COPY.creem}</p>
+        <p className="text-small text-text-2">
+          Yearly plans are refundable within 14 days. If your plan ends, your review link and QR
+          code keep working; only reply drafts, Google Protection and reports stop.
+        </p>
+      </div>
+    </div>
   );
 }
 
-function trialDaysLeft(s: PlanSummary): number | null {
-  return s.plan ? daysUntil(s.plan.ends_at) : null;
-}
-
-function Progress({ start, end }: { start: string; end: string }) {
-  const s = Date.parse(start);
-  const e = Date.parse(end);
-  const pct = Math.min(100, Math.max(0, ((Date.now() - s) / (e - s)) * 100));
+/** The one banner at the top: what the owner has now and what happens next. */
+function StateBanner({
+  sum,
+  d,
+  b,
+  busy,
+  run,
+}: {
+  sum: PlanSummary;
+  d: PlanData;
+  b: Billing | null;
+  busy: boolean;
+  run: (op: BillingOp) => Promise<void>;
+}) {
+  if (sum.tier === "early_access")
+    return (
+      <Banner tone="ok" title="Early access">
+        <p>{CONCIERGE_COPY.plan}</p>
+        <p className="mt-1">{CONCIERGE_COPY.banner}</p>
+      </Banner>
+    );
+  if (b) {
+    const name = PAID_NAMES[`${b.plan}_${b.period ?? "month"}`] ?? "Kabsi Pro";
+    const ended = b.state === "cancelled" || b.state === "expired";
+    const paused = b.state === "paused" || (b.state === "past_due" && !b.grace_ends_at);
+    const units =
+      b.units > 0 ? ` Plus ${b.units} extra ${b.units === 1 ? "location" : "locations"}.` : "";
+    if (ended || paused)
+      return (
+        <Banner tone="warn" title={`${name}: ${paused ? "paused" : "ended"}.`}>
+          {paused ? "Approvals have stopped and nothing is lost." : "Your plan has ended."}
+          {b.data_kept_until ? ` Your data is kept until ${shortDate(b.data_kept_until)}.` : ""}
+        </Banner>
+      );
+    if (b.payment_failed)
+      return (
+        <Banner
+          tone="bad"
+          title="Your last payment did not go through."
+          action={
+            <Button size="md" disabled={busy} onClick={() => void run("portal")} data-main-cta>
+              Update my card
+            </Button>
+          }
+        >
+          Kabsi keeps working for 7 days while you fix it. Nothing has been deleted.
+        </Banner>
+      );
+    if (b.cancel_at_period_end)
+      return (
+        <Banner
+          tone="warn"
+          title={`Your plan ends on ${longDate(b.current_period_end)}.`}
+          action={
+            <Button variant="secondary" size="md" disabled={busy} onClick={() => void run("keep")}>
+              Keep my plan
+            </Button>
+          }
+        >
+          Kabsi stops publishing then. You keep your review link and QR code.
+        </Banner>
+      );
+    const founding = (b as Billing & { founding?: boolean }).founding === true;
+    return (
+      <Banner tone="ok" title={`${name}.`}>
+        Next payment on {longDate(b.current_period_end)}.
+        {founding ? " Founding price, kept while your subscription stays paid." : ""}
+        {units}
+      </Banner>
+    );
+  }
+  if (sum.tier === "trial" && sum.plan) {
+    const left = sum.plan ? daysUntil(sum.plan.ends_at) : null;
+    return (
+      <Banner
+        tone="info"
+        title={`Pro trial, ends ${longDate(sum.plan.last_day)}.${left !== null ? ` ${left} days left.` : ""}`}
+      >
+        <p>
+          No card, and no charge unless you choose a plan. Photos from WhatsApp and replies are on
+          both.
+        </p>
+        {sum.queued.length ? (
+          <p className="mt-1">
+            Already paid: {sum.queued.map((q) => ITEM_NAME[q.kind]).join(", ")}, starts{" "}
+            {shortDate(sum.queued[0]!.starts_at)}. Nothing stops when the trial ends.
+          </p>
+        ) : (
+          <p className="mt-1">
+            When the trial ends without a plan, reply drafts, Google Protection and the Results
+            Report pause. Your review link and QR code keep working.
+          </p>
+        )}
+      </Banner>
+    );
+  }
+  if (sum.tier === "free" && !d.paidWaiting)
+    return (
+      <Banner tone="warn" title="No plan">
+        Your review link and QR code keep working. Reply drafts, Google Protection and the Results
+        Report are paused until you choose a plan.
+      </Banner>
+    );
+  if (d.current) {
+    const left = daysUntil(d.paidUntil);
+    return (
+      <Banner tone="ok" title={`${ITEM_NAME[d.current.kind] ?? "Kabsi Pro"}.`}>
+        <p>
+          Paid until {shortDate(d.paidUntil)}
+          {left !== null ? `, ${left} ${left === 1 ? "day" : "days"} left` : ""}.
+        </p>
+        {d.queued.length ? (
+          <p className="mt-1">
+            Renewal already paid: {d.queued.map((q) => ITEM_NAME[q.kind]).join(", ")}, starts{" "}
+            {shortDate(d.queued[0]!.starts_at)}.
+          </p>
+        ) : null}
+      </Banner>
+    );
+  }
+  if (d.paidWaiting)
+    return (
+      <Banner tone="info" title={`${ITEM_NAME[d.paidWaiting.kind] ?? "Kabsi Pro"}: paid.`}>
+        Your plan starts the day Kabsi&apos;s access to your Google profile works, so you don&apos;t
+        lose any days while you wait.
+      </Banner>
+    );
   return (
-    <div className="mt-5">
-      <div className="h-2 overflow-hidden rounded-pill bg-surface-2">
-        <div className="h-full rounded-pill bg-kb-yellow" style={{ width: `${pct}%` }} />
-      </div>
-      <div className="mt-1.5 flex justify-between text-label text-text-2">
-        <span>{shortDate(start)}</span>
-        <span>{shortDate(end)}</span>
-      </div>
-    </div>
+    <Banner tone="info" title="No active plan">
+      Your trial starts when Kabsi&apos;s access to your Google profile works.
+    </Banner>
   );
 }

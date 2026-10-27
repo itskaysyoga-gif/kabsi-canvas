@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Banner } from "@/components/ui/banner";
+import { Banner, buttonClass } from "@/components/kabsi/ui";
 import { loadEntitlements } from "@/lib/entitlements";
 import { planChoice } from "@/lib/plan-choice";
 
@@ -14,14 +14,18 @@ export function PlanChoiceCard({ locationId }: { locationId: string }) {
   const card = planChoice(ent.data ?? null);
   if (!card) return null;
   return (
-    <Banner tone={card.tone} className="mt-6" title={card.title} data-testid="plan-choice">
-      <p>{card.body}</p>
-      <Link
-        to={card.cta.to}
-        className="mt-2 inline-block min-h-11 py-2.5 font-bold text-text-1 underline underline-offset-4"
+    <div data-testid="plan-choice">
+      <Banner
+        tone={card.tone === "attention" ? "warn" : "info"}
+        title={card.title}
+        action={
+          <Link to={card.cta.to} className={buttonClass("tertiary")}>
+            {card.cta.label}
+          </Link>
+        }
       >
-        {card.cta.label}
-      </Link>
-    </Banner>
+        {card.body}
+      </Banner>
+    </div>
   );
 }

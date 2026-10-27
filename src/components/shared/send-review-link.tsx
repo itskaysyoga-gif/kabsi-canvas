@@ -1,5 +1,4 @@
-import { MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { WhatsAppGlyph, buttonClass } from "@/components/kabsi/ui";
 import { sendReviewLinkHref } from "@/lib/send-review-link";
 
 /**
@@ -9,17 +8,21 @@ import { sendReviewLinkHref } from "@/lib/send-review-link";
 export function SendReviewLink({ name, link }: { name: string; link: string | null | undefined }) {
   if (!link) return null;
   return (
-    <div className="rounded-card bg-surface-1 p-4 shadow-rest sm:p-5">
+    <div className="rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5">
       <p className="font-bold">Send the review link</p>
-      <p className="mt-1 text-small leading-6 text-text-2">
+      <p className="mt-1 text-small text-text-2">
         Opens your own WhatsApp with a short message and the link. Pick the customer and press send.
         Offer it to every customer the same way.
       </p>
-      <Button asChild variant="outline" className="mt-3 w-full sm:w-auto">
-        <a href={sendReviewLinkHref(name, link)} target="_blank" rel="noopener noreferrer">
-          <MessageCircle aria-hidden="true" /> Send review link
-        </a>
-      </Button>
+      <a
+        href={sendReviewLinkHref(name, link)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={buttonClass("whatsapp", "md") + " mt-3"}
+      >
+        <WhatsAppGlyph className="size-4.5" />
+        Send review link
+      </a>
     </div>
   );
 }

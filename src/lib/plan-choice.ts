@@ -53,7 +53,7 @@ export function planChoice(
     return {
       tone: "attention",
       title: "Your plan has ended",
-      body: `Drafts, Google Protection and the Weekly Care Report are paused. ${PRICES_SENTENCE} ${CARD_PAYMENTS_COMING} Your review link and QR code keep working.`,
+      body: `Drafts, Google Protection and the Results Report are paused. ${PRICES_SENTENCE} ${CARD_PAYMENTS_COMING} Your review link and QR code keep working.`,
       cta,
     };
   }

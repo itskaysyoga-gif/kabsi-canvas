@@ -29,8 +29,8 @@ export function HistorySheet({
   });
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto rounded-t-large">
-        <SheetHeader className="text-left">
+      <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto rounded-t-panel">
+        <SheetHeader className="text-start">
           <SheetTitle>History</SheetTitle>
           <SheetDescription>{task.title}</SheetDescription>
         </SheetHeader>

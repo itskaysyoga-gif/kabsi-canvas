@@ -190,27 +190,35 @@ export const rpc = {
       approve_high_risk: role === "owner",
     };
   },
-  list_tasks: (c) => ({
-    tasks: none(c)
-      ? []
-      : [
-          task(
-            "t-booking",
-            "profile_gap",
-            "Add your booking link",
-            "Customers who want to book look for it first. Send it on WhatsApp and Kabsi adds it after your yes.",
-            "/app/knowledge",
-          ),
-          task(
-            "t-photos",
-            "profile_gap",
-            "Add 3 photos of your work",
-            "Send them on WhatsApp. Kabsi gets them ready and asks before posting.",
-            "/app/photos",
-          ),
-        ],
-    snoozed: 0,
-  }),
+  // Home's tasks (home.mjs) first, then the profile gaps; Home's error state passes through.
+  list_tasks: (c) => {
+    const h = home.rpc.list_tasks(c);
+    if (h && typeof h === "object" && "__status" in h) return h;
+    return {
+      tasks: [
+        ...(h?.tasks ?? []),
+        ...(none(c)
+          ? []
+          : [
+              task(
+                "t-booking",
+                "profile_gap",
+                "Add your booking link",
+                "Customers who want to book look for it first. Send it on WhatsApp and Kabsi adds it after your yes.",
+                "/app/knowledge",
+              ),
+              task(
+                "t-photos",
+                "profile_gap",
+                "Add 3 photos of your work",
+                "Send them on WhatsApp. Kabsi gets them ready and asks before posting.",
+                "/app/photos",
+              ),
+            ]),
+      ],
+      snoozed: h?.snoozed ?? 0,
+    };
+  },
   holiday_calendar: () => ({
     prompts: [
       {

@@ -1,0 +1,16 @@
+[
+  { "path": "/app", "name": "home-tasks" },
+  { "path": "/app", "state": "setup", "name": "home-setup-banner" },
+  { "path": "/app", "state": "first-task", "name": "home-first-task" },
+  { "path": "/app", "state": "empty", "name": "home-empty" },
+  { "path": "/app", "state": "error", "name": "home-error", "wait": 9000 },
+  { "path": "/app", "state": "staff", "name": "home-staff" },
+  { "path": "/app/reviews", "name": "reviews-waiting" },
+  { "path": "/app/reviews?f=all", "name": "reviews-all" },
+  { "path": "/app/reviews?f=google", "name": "reviews-on-google" },
+  { "path": "/app/reviews", "state": "empty", "name": "reviews-empty" },
+  { "path": "/app/inbox", "name": "inbox-redirect" },
+  { "path": "/app/cards", "name": "cards" },
+  { "path": "/app/cards", "state": "staff", "name": "cards-staff" },
+  { "path": "/app/cards", "state": "empty", "name": "cards-no-link" }
+]

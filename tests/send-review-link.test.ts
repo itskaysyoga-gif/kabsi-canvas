@@ -10,7 +10,7 @@ const message = reviewLinkMessage("Yawmiyati", LINK);
 describe("the message", () => {
   it("offers the link to every customer and nothing else", () => {
     expect(message).toBe(
-      "Thanks for visiting Yawmiyati. If you would like to leave a review, here is our link: https://go.kabsi.co/KQA234",
+      "Thank you for visiting Yawmiyati today. If you have a minute, tell others how your visit went: https://go.kabsi.co/KQA234",
     );
   });
 

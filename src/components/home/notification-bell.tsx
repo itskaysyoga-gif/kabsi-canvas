@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/kabsi/ui";
 import {
   Sheet,
   SheetContent,
@@ -42,16 +42,16 @@ export function NotificationBell({ locationId }: { locationId: string }) {
       <SheetTrigger asChild>
         <Button
           variant="secondary"
-          size="icon"
-          className="relative shrink-0"
+          size="md"
+          className="relative w-11 shrink-0 px-0"
           aria-label={unread ? `Notifications, ${unread} new` : "Notifications"}
           data-testid="bell"
         >
-          <Bell />
+          <Bell className="size-5" aria-hidden />
           {unread ? (
             <span
               aria-hidden="true"
-              className="absolute -right-1 -top-1 grid min-w-5 place-content-center rounded-full bg-kb-yellow px-1 text-label font-bold leading-5 text-kb-black"
+              className="absolute -end-1 -top-1 grid min-w-5 place-content-center rounded-full bg-kb-yellow px-1 text-label font-bold leading-5 text-kb-black"
             >
               {unread > 9 ? "9+" : unread}
             </span>
@@ -59,7 +59,7 @@ export function NotificationBell({ locationId }: { locationId: string }) {
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-full max-w-md overflow-y-auto bg-surface-2 p-5">
-        <SheetHeader className="pr-8 text-left">
+        <SheetHeader className="pe-8 text-start">
           <SheetTitle className="font-display text-h3 leading-none">Notifications</SheetTitle>
           <SheetDescription className="text-text-2">
             What Kabsi told you. Nothing here is published until you approve it.
@@ -72,14 +72,14 @@ export function NotificationBell({ locationId }: { locationId: string }) {
           </p>
         ) : null}
         {bell.data && bell.data.items.length === 0 ? (
-          <p className="mt-6 rounded-card bg-surface-1 p-5 text-text-2">
+          <p className="mt-6 rounded-card border border-line bg-surface-1 p-5 text-text-2">
             Nothing new. Kabsi tells you here when something happens.
           </p>
         ) : null}
         {unread ? (
           <Button
             variant="tertiary"
-            className="mt-5 min-h-11 px-0"
+            className="mt-5"
             onClick={() => read.mutate(undefined)}
             disabled={read.isPending}
           >

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, CheckCircle2, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { KabsiCard } from "@/components/ui/kabsi-card";
+import { ArrowRight, CheckCircle2, MessagesSquare, Star } from "lucide-react";
+import { Button, StatusPill, buttonClass } from "@/components/kabsi/ui";
+import { HomeCard } from "@/components/home/home-card";
 import {
   Sheet,
   SheetContent,
@@ -71,34 +71,39 @@ export function BacklogCard({
   const going = !!p && p.sent < p.total;
 
   return (
-    <KabsiCard
-      needsYou={false}
-      eyebrow="Day one"
+    <HomeCard
+      icon={MessagesSquare}
       title={task.title}
-      actions={
-        <>
+      when="Day one"
+      foot={
+        <div className="flex flex-wrap items-center gap-2">
           {mayApprove && counts.low > 0 ? (
             <Button
               variant={lead ? "primary" : "secondary"}
-              size="compact"
+              size="md"
               onClick={() => setOpen(true)}
+              {...(lead ? { "data-main-cta": true } : {})}
             >
-              See the {counts.low} low-risk {counts.low === 1 ? "reply" : "replies"} <ArrowRight />
+              See the {counts.low} low-risk {counts.low === 1 ? "reply" : "replies"}{" "}
+              <ArrowRight className="size-4" aria-hidden />
             </Button>
           ) : null}
-          <Button
-            asChild
-            variant={mayApprove && counts.low > 0 ? "tertiary" : lead ? "primary" : "secondary"}
-            size="compact"
+          <Link
+            to="/app/reviews"
+            search={{ f: "needs" }}
+            className={buttonClass(
+              mayApprove && counts.low > 0 ? "tertiary" : lead ? "primary" : "secondary",
+              "md",
+            )}
+            {...(lead && !(mayApprove && counts.low > 0) ? { "data-main-cta": true } : {})}
           >
-            <Link to="/app/reviews" search={{ f: "needs" }}>
-              Read one by one
-            </Link>
-          </Button>
-        </>
+            Read one by one
+          </Link>
+        </div>
       }
     >
-      <p className="text-small leading-6">{backlogBreakdown(counts)}</p>
+      <StatusPill tone="warn">Needs you</StatusPill>
+      <p className="mt-3 text-body">{backlogBreakdown(counts)}</p>
       {task.why ? <p className="mt-2 text-small leading-6 text-text-2">{task.why}</p> : null}
       {!mayApprove ? (
         <p className="mt-2 text-small text-text-2">
@@ -106,14 +111,14 @@ export function BacklogCard({
         </p>
       ) : null}
       {p ? (
-        <div className="mt-3 rounded-card bg-surface-2 p-3" role="status" aria-live="polite">
+        <div className="mt-3 rounded-inner bg-surface-2 p-3" role="status" aria-live="polite">
           <p className="flex items-center gap-2 text-small font-bold">
             {going ? null : <CheckCircle2 className="size-4 text-ok" aria-hidden="true" />}
             {progressLine(p.sent, p.total)}
           </p>
-          <div className="mt-2 h-2 overflow-hidden rounded-pill bg-surface-1">
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-1">
             <div
-              className="h-full rounded-pill bg-kb-yellow transition-all"
+              className="h-full rounded-full bg-kb-green transition-all"
               style={{ width: `${Math.round((p.sent / Math.max(1, p.total)) * 100)}%` }}
             />
           </div>
@@ -131,8 +136,8 @@ export function BacklogCard({
       ) : null}
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="bottom" className="flex max-h-[90vh] flex-col rounded-t-large">
-          <SheetHeader className="text-left">
+        <SheetContent side="bottom" className="flex max-h-[90vh] flex-col rounded-t-panel">
+          <SheetHeader className="text-start">
             <SheetTitle>
               {list.data
                 ? `${list.data.length} low-risk ${list.data.length === 1 ? "reply" : "replies"}`
@@ -182,7 +187,7 @@ export function BacklogCard({
                   ) : null}
                   <p
                     dir="auto"
-                    className="mt-2 whitespace-pre-wrap rounded-card border-l-4 border-l-kb-yellow bg-surface-2 p-3 text-small leading-6"
+                    className="mt-2 whitespace-pre-wrap rounded-card border-s-4 border-s-line-strong bg-surface-2 p-3 text-small leading-6"
                   >
                     {i.reply}
                   </p>
@@ -198,7 +203,8 @@ export function BacklogCard({
             </p>
           ) : null}
           <Button
-            className="mt-4 w-full"
+            full
+            className="mt-4"
             disabled={approve.isPending || !list.data?.length}
             onClick={() => approve.mutate()}
           >
@@ -211,6 +217,6 @@ export function BacklogCard({
           </p>
         </SheetContent>
       </Sheet>
-    </KabsiCard>
+    </HomeCard>
   );
 }

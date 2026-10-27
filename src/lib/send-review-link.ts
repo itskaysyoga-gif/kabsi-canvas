@@ -4,7 +4,7 @@
 
 /** The one message. It offers the link to every customer and asks for nothing else. */
 export function reviewLinkMessage(businessName: string, link: string): string {
-  return `Thanks for visiting ${businessName}. If you would like to leave a review, here is our link: ${link}`;
+  return `Thank you for visiting ${businessName} today. If you have a minute, tell others how your visit went: ${link}`;
 }
 
 /** wa.me with no number: WhatsApp lets the staff member pick the customer, with the message already written. */
