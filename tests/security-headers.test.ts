@@ -14,6 +14,8 @@ describe("security headers", () => {
       "max-age=63072000; includeSubDomains; preload",
     );
     expect(header("X-Content-Type-Options")).toBe("nosniff");
+    // Sec 1 (ASVS 14.4.7): no page may be framed while the content policy is report-only.
+    expect(header("X-Frame-Options")).toBe("DENY");
     expect(header("Referrer-Policy")).toBe("strict-origin-when-cross-origin");
     expect(header("Permissions-Policy")).toBe("camera=(), microphone=(), geolocation=()");
   });
@@ -51,7 +53,7 @@ describe("abuse checks on public endpoints", () => {
 
   it("the review link tool allows 10 requests a minute per IP before anything else", () => {
     const src = read("supabase/functions/review-link/index.ts");
-    expect(src).toMatch(/rateLimit\(`review-link:min:\$\{visitor\}`, 10, 60\)/);
+    expect(src).toMatch(/rateLimit\(`review-link:min:\$\{visitor\}`, 10, 60, \{ failClosed: true \}\)/);
     expect(src.indexOf("review-link:min:")).toBeLessThan(src.indexOf("verifyTurnstile(turnstile"));
   });
 

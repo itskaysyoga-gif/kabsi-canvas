@@ -2,6 +2,7 @@
 // (P0.7-01, K-34) with personal data removed. Every request is a GET (see _shared/google/capture.ts); it never
 // writes to Google and never changes GOOGLE_MODE.
 import { accountLocations, capture, categoriesList, inventory, invitations, postsList, reviews, v4Probe } from "../_shared/google/capture.ts";
+import { secretMatches } from "../_shared/sec1/guards.ts";
 
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { "content-type": "application/json" } });
 async function isInternal(req: Request) {
@@ -12,7 +13,8 @@ async function isInternal(req: Request) {
     headers: { "content-type": "application/json", apikey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` },
     body: JSON.stringify({ p_name: "cron_secret" }),
   });
-  return res.ok && given === (await res.json());
+  // Sec 1: constant time, like isInternal in _shared/kabsi.ts.
+  return res.ok && secretMatches(given, await res.json());
 }
 
 Deno.serve(async (req) => {

@@ -3,6 +3,7 @@
 // Public (browser calls send the anon JWT). The same answer goes to every visitor: no rating, no answer, no routing.
 // The business's WhatsApp number is a Business Knowledge fact the owner saved for exactly this line; it is returned
 // as digits for wa.me and is not used anywhere else. No visitor data is stored or read.
+import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, fail, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
 import { pageData } from "../_shared/review-page.ts";
 
@@ -12,7 +13,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return fail("method_not_allowed", "Use POST.", 405);
 
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  const ip = clientIp(req);
   const day = new Date().toISOString().slice(0, 10);
   const visitor = (await sha256Hex(`${Deno.env.get("SUPABASE_URL")}:${day}:${ip}`)).slice(0, 24);
   if (!(await rateLimit(`review-page:${visitor}`, 120, 3600)))

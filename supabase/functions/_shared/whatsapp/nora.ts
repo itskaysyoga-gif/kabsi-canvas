@@ -5,7 +5,7 @@
 // on a person's first message (agent.ts), and an answer never starts with it.
 // Pure: the model call and the facts are passed in by db.ts, so the suite runs on a stub.
 import { noraRules } from "../nora-rules.ts";
-import { houseStyle } from "../ai/fence.ts";
+import { houseStyle, stripAll } from "../ai/fence.ts";
 
 export type Nora = (question: string, o: { role: string; lang: string | null; business: string | null }) => Promise<string>;
 
@@ -30,7 +30,7 @@ export function noraUser(question: string, o: { role: string; lang: string | nul
     ? "A person who is not a Kabsi customer yet."
     : `A ${o.role} of ${o.business ?? "a business"} on Kabsi.`;
   return `<context>\n${who}${o.lang ? ` They write in the language with code ${o.lang}.` : ""}\n</context>\n<message>\n${
-    question.replace(/<\/?(message|context)>/gi, "").slice(0, 1500)
+    stripAll(question, /<\s*\/?\s*(message|context)\s*>/gi).slice(0, 1500)
   }\n</message>`;
 }
 

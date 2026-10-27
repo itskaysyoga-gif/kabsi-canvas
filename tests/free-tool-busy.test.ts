@@ -52,10 +52,10 @@ describe("the free tools when the day's cap is 0 or used up", () => {
     const link = readFileSync("supabase/functions/review-link/index.ts", "utf8");
     expect(link).toContain('fail("back_soon", FREE_TOOL_BUSY, 503)');
     expect(link).toContain('fail("busy", FREE_TOOL_BUSY, 429)');
-    // The same limits as before: 10 a minute, 20 an hour, 400 a day.
-    expect(link).toContain("10, 60)");
-    expect(link).toContain("20, 3600)");
-    expect(link).toContain('"review-link:all", 400, 86400)');
+    // The same limits as before: 10 a minute, 20 an hour, 400 a day; since Sec 1 each fails closed.
+    expect(link).toContain("10, 60, { failClosed: true })");
+    expect(link).toContain("20, 3600, { failClosed: true })");
+    expect(link).toContain('"review-link:all", 400, 86400, { failClosed: true })');
   });
 
   it("is in the facts file and in llms-full.txt", () => {

@@ -6,7 +6,8 @@
 const DATES = /\p{Nd}{1,4}[\/.-]\p{Nd}{1,2}[\/.-]\p{Nd}{2,4}/gu;
 const PHONE = /\+?(?:\p{Nd}[\s().\/-]*){7,}/u; // 7 or more digits in one run, spaces and dashes allowed
 const EMAIL = /[\p{L}\p{N}._%+-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)*\.\p{L}{2,}/u;
-const URL = /\bhttps?:\/\/|\bwww\.|\b[a-z0-9-]+\.(?:com|net|org|co|io|me|info|biz|app|shop|store|site|online|lb|ae|uk|us|ca|au|nz|sg|ie)\b/i;
+// Sec 1: the short-link and cheap endings a planted link uses (bit.ly, .xyz, .link) and any name.ending/path count too.
+const URL = /\bhttps?:\/\/|\bwww\.|\b[a-z0-9-]+\.(?:com|net|org|co|io|me|info|biz|app|shop|store|site|online|lb|ae|uk|us|ca|au|nz|sg|ie|ly|xyz|link|gg|top|club|page|dev|ai|tv|fm|cc|ws|ru|cn|tk|click|live|pro|de|fr|eu|gl|sh)\b|\b[a-z0-9-]{2,}\.[a-z]{2,10}\/[^\s]/i;
 const HANDLE = /(?:^|[^\p{L}\p{N}_.@])@[\p{L}\p{N}_.]{2,}/u;
 const HASHTAG = /(?:^|[^\p{L}\p{N}_&])#(?=[\p{L}\p{N}_]*\p{L})[\p{L}\p{N}_]+/u;
 const PRICE = /(?:[$€£]\s?(\p{Nd}[\p{Nd},.]*))|(?:(\p{Nd}[\p{Nd},.]*)\s?(?:\$|€|£|usd|eur|gbp|aed|lbp|sar|dollars?|euros?|pounds?|dirhams?|lira|ل\.ل|درهم|دولار)(?![\p{L}]))/giu;

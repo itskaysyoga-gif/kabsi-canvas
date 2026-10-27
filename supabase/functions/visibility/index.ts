@@ -12,7 +12,9 @@
 //   GET  /visibility/terms    public: the search an industry page prefills (?industry=&market=). POST: staff op, DataForSEO keyword data.
 // Ranks and competitors come only from DataForSEO public results (30.10.2); mock mode unless app_settings
 // dataforseo_mode is 'live', and the demo business always on the mock (R-17). The logic is in _shared/visibility/.
+import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, currentUser, isInternal, json, log, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
+import { mayChangeVisibility, type VisibilityCaller } from "../_shared/sec1/guards.ts";
 import { outDb } from "../_shared/whatsapp/db.ts";
 import { ref } from "../_shared/whatsapp/templates.ts";
 import { COST_MICROS, dataForSeo, type Identity, type MapsItem, type MapsProvider } from "../_shared/visibility/dataforseo.ts";
@@ -157,7 +159,7 @@ const deps: RunDeps = {
 };
 
 // ─── who may ask ──────────────────────────────────────────────────────────────────────────────────────────────────
-type Caller = { kind: "internal" } | { kind: "staff"; id: string } | { kind: "member"; id: string; role: string } | null;
+type Caller = VisibilityCaller;
 async function caller(req: Request, locationId: string | null): Promise<Caller> {
   if (await isInternal(req)) return { kind: "internal" };
   const user = await currentUser(req);
@@ -192,7 +194,8 @@ async function addKeyword(req: Request): Promise<Response> {
   const locationId = String(body.location_id ?? "");
   if (!locationId || keyword.length < 2 || keyword.length > 80) return json({ error: "bad_request" }, 400);
   const who = await caller(req, locationId);
-  if (!who) return json({ error: "forbidden" }, 403);
+  // Sec 1: reading the map is for every member; changing it is for the owner, a manager or Kabsi (K-16).
+  if (!mayChangeVisibility(who)) return json({ error: "forbidden" }, 403);
   if (who.kind !== "internal" && !(await rateLimit(`visibility_kw:${locationId}`, 10, 3600, { failClosed: true }))) return json({ error: "rate_limited" }, 429);
   let ent = await limits(locationId);
   const ob = await onboarding(locationId);
@@ -248,7 +251,8 @@ async function setPicks(req: Request): Promise<Response> {
   const keys = Array.isArray(body.keys) ? [...new Set(body.keys.map(String))] : [];
   if (!locationId) return json({ error: "bad_request" }, 400);
   const who = await caller(req, locationId);
-  if (!who) return json({ error: "forbidden" }, 403);
+  // Sec 1: reading the map is for every member; changing it is for the owner, a manager or Kabsi (K-16).
+  if (!mayChangeVisibility(who)) return json({ error: "forbidden" }, 403);
   if ((await onboarding(locationId)).locked) return json({ error: "after_first_task" }, 409);
   const ent = await limits(locationId);
   const max = ent.limits?.competitors ?? 0;
@@ -369,7 +373,7 @@ async function startFreeCheck(req: Request): Promise<Response> {
     name?: string; address?: string; country?: string; city?: string; place_id?: string; term?: string; industry?: string; turnstile?: string;
   };
   const internal = await isInternal(req);
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  const ip = clientIp(req);
   const name = String(body.name ?? "").replace(/\s+/g, " ").trim().slice(0, 120);
   const country = String(body.country ?? "").toUpperCase();
   const city = body.city ? String(body.city).replace(/\s+/g, " ").trim().slice(0, 80) : null;
@@ -412,7 +416,7 @@ async function startFreeCheck(req: Request): Promise<Response> {
 /** UX 1: "Save my place" while the free check is closed. Turnstile, 5 an hour per visitor; the same contact and business once. */
 async function joinWaitlist(req: Request): Promise<Response> {
   const body = await req.json().catch(() => ({})) as Record<string, unknown>;
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  const ip = clientIp(req);
   if (!(await verifyTurnstile(typeof body.turnstile === "string" ? body.turnstile : undefined, ip))) return json({ error: "challenge_failed" }, 400);
   if (!(await rateLimit(`free_check_waitlist:${await sha256Hex(`free_check:${ip}`)}`, 5, 3600, { failClosed: true }))) return json({ error: "rate_limited" }, 429);
   const c = checkWaitlist(body, WHATSAPP_ON);
@@ -420,13 +424,13 @@ async function joinWaitlist(req: Request): Promise<Response> {
   const { error } = await db().from("free_check_waitlist").insert(c.value);
   // 23505: this contact is already on the list for this business. Saying "Saved" again is true.
   if (error && error.code !== "23505") throw new Error(error.message);
-  log(fn, { action: "waitlist", email: !!c.value.email, phone: !!c.value.phone, tips: c.value.marketing_consent });
+  log(fn, { action: "waitlist", has_email: !!c.value.email, has_phone: !!c.value.phone, tips: c.value.marketing_consent });
   return json({ ok: true });
 }
 
 /** The page keeps asking while the 7 by 7 search runs: a read only (the tick collects), limited per visitor. */
 async function getFreeCheck(req: Request, url: URL): Promise<Response> {
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  const ip = clientIp(req);
   if (!(await rateLimit(`free_check_get:${await sha256Hex(`free_check:${ip}`)}`, 240, 3600))) return json({ error: "rate_limited" }, 429);
   const c = await loadCheck(url.searchParams.get("code") ?? "");
   if (!c) return json({ error: "not_found" }, 404);

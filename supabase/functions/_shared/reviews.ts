@@ -1,5 +1,5 @@
 // Phase 4 pipeline: sync → classify → draft → safety check → owner email → approve → publish.
-import { admin, APP_URL, captureError, sha256Hex } from "./kabsi.ts";
+import { admin, APP_URL, captureError, log, sha256Hex } from "./kabsi.ts";
 import { notify } from "./notify.ts";
 import { reviewEmail } from "./email/review.ts";
 import { backlogReady } from "./email/copy.ts";
@@ -182,7 +182,7 @@ async function draftWithChecks(rv: DraftRow, business: string, meter: Meter, o: 
     await db.from("ai_runs").insert(runRecord(result, { locationId: rv.location_id, reviewId: rv.id, workflow: "review_reply", memoryVersion: memory.version }));
   }
   const body = result.output?.reply ?? "";
-  const factIds = (result.output?.facts_used ?? []).filter((r) => r in memory.refs).map((r) => memory.refs[r]);
+  const factIds = (result.output?.facts_used ?? []).filter((r) => Object.hasOwn(memory.refs, r)).map((r) => memory.refs[r]);
   const { data: draft, error: de } = await db.from("reply_drafts").insert({
     review_id: rv.id, version: (last?.version ?? 0) + 1, body, source: instruction ? "ai_edit" : "ai",
     instruction: instruction ?? (o.holding ? "Neutral holding reply" : null),
@@ -335,7 +335,7 @@ async function learnFromApproval(reviewId: string, text: string, approvedBy: str
     if (error) throw error;
     return (data ?? []) as StyleOffer[];
   } catch (e) {
-    console.log(JSON.stringify({ fn: "reviews", ok: false, learn_from_approval: String(e).slice(0, 200) }));
+    log("reviews", { ok: false, learn_from_approval: String(e).slice(0, 200) });
     return [];
   }
 }

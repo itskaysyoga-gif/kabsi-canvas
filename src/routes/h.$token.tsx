@@ -26,7 +26,12 @@ export const Route = createFileRoute("/h/$token")({
     a: z.enum(["normal", "closed", "custom"]).optional().catch(undefined),
   }),
   head: () => ({
-    meta: [{ title: "Your holiday hours | Kabsi" }, { name: "robots", content: "noindex" }],
+    meta: [
+      { title: "Your holiday hours | Kabsi" },
+      { name: "robots", content: "noindex" },
+      // Sec 1: the address holds a credential; no other site ever gets it as a Referer.
+      { name: "referrer", content: "no-referrer" },
+    ],
   }),
   component: HolidayLinkPage,
 });

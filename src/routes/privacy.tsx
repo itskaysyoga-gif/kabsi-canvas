@@ -408,7 +408,7 @@ function Page() {
             Advertising: we use no advertising cookies today and don't track you on other sites.
             From launch, the Meta Pixel runs on our public pages only, never inside the app, the
             sign-up screens, the staff pages or the links in our emails. It sees page views and a
-            few steps: the pricing page, a finished free scan, a sign-up, a trial and a plan bought.
+            few steps: the pricing page, a finished free check, a sign-up, a trial and a plan bought.
             For a trial or a plan, Kabsi also tells Meta from its own servers (the Conversions API),
             with your email and phone number scrambled by a one-way hash as Meta requires. If you
             came from a Click to WhatsApp ad, Kabsi sends Meta the click id of that chat, so the ads

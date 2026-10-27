@@ -11,6 +11,7 @@ import type { Button, Inbound } from "./channel.ts";
 import { fresh } from "./channel.ts";
 import { type Ai, route } from "./intent.ts";
 import { photoRefusal, voiceCheck } from "./media.ts";
+import { MAX_BYTES } from "../photos/sniff.ts";
 import { notify, type Out, reply as sendReply } from "./outbox.ts";
 import type { SendState } from "./policy.ts";
 import { toE164 } from "./phone.ts";
@@ -269,7 +270,7 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   }
 
   // Media.
-  if (cmd.k === "photo") return withBusiness(t, "photo", null, (tb) => photo(tb, cmd.media.id));
+  if (cmd.k === "photo") return withBusiness(t, "photo", null, (tb) => photo(tb, cmd.media.id, cmd.media.size));
   if (cmd.k === "voice") return voice(t, cmd.media);
   if (cmd.k === "video") return withBusiness(t, "photo", null, (tb) => answered(tb, SAY.videoKept, "video"));
   if (cmd.k === "file") return answered(t, SAY.photoUnreadable, "file_refused");
@@ -593,8 +594,10 @@ async function showForYes(t: Turn, reviewId: string, text: string | null, body: 
   return answered(t, shown, "shown_for_yes", [{ id: `a:${a.token}`, title: "Approve" }, { id: `e:${a.token}`, title: "Edit in app" }]);
 }
 
-async function photo(t: Turn, mediaId: string): Promise<string> {
+async function photo(t: Turn, mediaId: string, size: number | null = null): Promise<string> {
   const b = t.business!;
+  // Sec 1: a file WhatsApp says is over the photo limit is refused before it is downloaded into memory.
+  if ((size ?? 0) > MAX_BYTES) return answered(t, SAY.photoUnreadable, "photo_too_big");
   // V3 (30.15 section 3.4): photos from WhatsApp are on both plans. The photo engine checks it in the background; the tick then
   // asks the owner Yes, Edit or Skip (review-growth/photo.ts). A member of staff sends, the owner approves.
   let bytes: Uint8Array;

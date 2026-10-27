@@ -5,6 +5,11 @@
 // The model is a dep, so tests run with a stub and no AI credit is spent (R-45).
 import { type RoleName, TOOLS } from "./roles.ts";
 import type { Command } from "./router.ts";
+import { stripAll } from "../ai/fence.ts";
+
+const squash = (s: string) => s.toLowerCase().replace(/[\s"'“”‘’]+/g, " ").trim();
+/** Is this text, quotes and spacing aside, part of what the person sent? */
+export const inMessage = (part: string | undefined, message: string) => !!part?.trim() && squash(message).includes(squash(part));
 
 export type Ai = (system: string, user: string) => Promise<string>;
 
@@ -50,7 +55,7 @@ export type Routed = { command: Command; lang: string | null; question: string |
 
 /** One message to one tool. Anything outside the role's list, or a broken answer, becomes "unclear". */
 export async function route(ai: Ai, role: RoleName, text: string): Promise<Routed> {
-  const fenced = `<message>\n${text.replace(/<\/?message>/gi, "").slice(0, 1500)}\n</message>`;
+  const fenced = `<message>\n${stripAll(text, /<\s*\/?\s*message\s*>/gi).slice(0, 1500)}\n</message>`;
   let out: { tool?: string; args?: Record<string, unknown>; lang?: string };
   try {
     const raw = await ai(routerSystem(role), fenced);
@@ -67,6 +72,8 @@ export async function route(ai: Ai, role: RoleName, text: string): Promise<Route
     const q = arg("question");
     return { command: { k: "free", text }, lang, question: q && !/[–—!]/.test(q) ? q.slice(0, 300) : null };
   }
+  // Sec 1: an exact reply is the owner's own words. Text the model wrote that the message does not contain is not used.
+  if (tool === "exact_reply" && !inMessage(arg("text"), text)) return { command: { k: "free", text }, lang, question: null };
   const value = tool === "stats" ? (arg("days") === "30" ? "30" : "7")
     : tool === "edit_draft" ? arg("instruction") : tool === "exact_reply" ? arg("text") : tool === "scan" ? arg("name")
     : tool === "hours" || tool === "post" || tool === "question" ? arg("text") : undefined;

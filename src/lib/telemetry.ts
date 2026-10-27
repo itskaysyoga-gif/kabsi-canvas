@@ -12,7 +12,14 @@
 
 import { analyticsAllowed, analyticsPersistent, onConsentChange } from "@/lib/consent";
 import { afterPaint } from "@/lib/after-paint";
-import { EMAIL_PATTERN, PHONE_PATTERN, SECRET_KEYS } from "@/lib/scrub";
+import {
+  EMAIL_PATTERN,
+  PHONE_PATTERN,
+  SECRET_KEYS,
+  TOKEN_PATH_PATTERN,
+  TOKEN_QUERY_PATTERN,
+  isTokenPath,
+} from "@/lib/scrub";
 
 const SENTRY_PUBLIC_KEY = "b09a18a8ac370accf6b8e423fff77a8d";
 const POSTHOG_KEY = "phc_rDzVWhoR2wSXyVHVMypztnf8YKHCszd9c9mryMv6W4mW";
@@ -59,19 +66,23 @@ const bootScript = `
   var h = location.hostname;
   var env = /\\.vercel\\.app$/.test(h) ? "preview" : (h === "localhost" || h === "127.0.0.1") ? "local" : "production";
   window.__kabsiEnv = env;
-  // Email action links carry a one-time credential in the path (/a/<token>): never send it anywhere.
-  var scrub = function(u){ return typeof u === "string" ? u.replace(/\\/a\\/[^\\/?#]+/g, "/a/:token").replace(/([?&](?:t|token)=)[^&#]+/g, "$1redacted") : u; };
+  // Sec 1: links carry a one-time credential or code in the path (/a/, /h/, /u/, /activate/, /scan/, /review/,
+  // /start/resume/) or the query (t, code, access_token...): never send it anywhere (src/lib/scrub.ts, scrubUrl).
+  var TP = new RegExp(${JSON.stringify(TOKEN_PATH_PATTERN)}, "g"), TQ = new RegExp(${JSON.stringify(TOKEN_QUERY_PATTERN)}, "g");
   // 20.5: no email address, phone number or review text in a report or an event (src/lib/scrub.ts).
   var EM = new RegExp(${JSON.stringify(EMAIL_PATTERN)}, "g"), PH = new RegExp(${JSON.stringify(PHONE_PATTERN)}, "g"), SK = ${JSON.stringify(SECRET_KEYS)};
-  var pii = function(v){ return typeof v === "string" ? v.replace(EM, "[email]").replace(PH, "[phone]") : v; };
-  var props = function(o){ if (!o || typeof o !== "object") return o; Object.keys(o).forEach(function(k){ if (SK.indexOf(k.toLowerCase()) >= 0) delete o[k]; else if (k.charAt(0) !== "$") o[k] = pii(o[k]); }); return o; };
+  var scrub = function(u){ return typeof u === "string" ? u.replace(TP, "/$1/:token").replace(TQ, "$1redacted").replace(EM, "[email]") : u; };
+  var pii = function(v){ return typeof v === "string" ? scrub(v).replace(PH, "[phone]") : v; };
+  // distinct_id (a user id) and token (PostHog's public key) pass untouched: the phone rule could break an id.
+  var props = function(o){ if (!o || typeof o !== "object") return o; Object.keys(o).forEach(function(k){ if (k === "distinct_id" || k === "token") return; if (SK.indexOf(k.toLowerCase()) >= 0) delete o[k]; else if (k.charAt(0) !== "$") o[k] = pii(o[k]); else o[k] = scrub(o[k]); }); return o; };
   window.sentryOnLoad = function(){
     Sentry.init({ environment: env, release: ${JSON.stringify(SENTRY_RELEASE)}, sendDefaultPii: false, tracesSampleRate: 0,
+      replaysSessionSampleRate: 0, replaysOnErrorSampleRate: 0,
       beforeSend: function(event){ if (event.user) { event.user = event.user.id ? { id: event.user.id } : undefined; }
         if (event.request && event.request.headers) { delete event.request.headers["X-Forwarded-For"]; delete event.request.cookies; }
-        if (event.request) { event.request.url = scrub(event.request.url); if (event.request.headers) event.request.headers.Referer = scrub(event.request.headers.Referer); }
+        if (event.request) { event.request.url = scrub(event.request.url); event.request.query_string = undefined; delete event.request.data; if (event.request.headers) event.request.headers.Referer = scrub(event.request.headers.Referer); }
         if (event.transaction) event.transaction = scrub(event.transaction);
-        if (event.breadcrumbs) event.breadcrumbs.forEach(function(b){ b.message = pii(b.message); if (b.data) { b.data.url = scrub(b.data.url); b.data.from = scrub(b.data.from); b.data.to = scrub(b.data.to); } });
+        if (event.breadcrumbs) event.breadcrumbs.forEach(function(b){ b.message = pii(b.message); if (b.data) { b.data.url = scrub(b.data.url); b.data.from = scrub(b.data.from); b.data.to = scrub(b.data.to); delete b.data.arguments; } });
         event.message = pii(event.message);
         if (event.exception && event.exception.values) event.exception.values.forEach(function(x){ x.value = pii(x.value); });
         props(event.extra); props(event.contexts);
@@ -96,7 +107,7 @@ const bootScript = `
     session_recording: { maskAllInputs: true },
     property_denylist: ["$el_text"],
     disable_surveys: true,
-    before_send: function(e){ if (e && e.properties) { ["$current_url","$pathname","$referrer","$initial_current_url","$initial_pathname"].forEach(function(k){ if (k in e.properties) e.properties[k] = scrub(e.properties[k]); }); props(e.properties); } return e; }
+    before_send: function(e){ if (e) { props(e.properties); props(e.$set); props(e.$set_once); } return e; }
   });
   };
 })();`;
@@ -386,7 +397,8 @@ export function syncReplayWithPath(path: string) {
   if (typeof window === "undefined") return;
   lastPath = path;
   try {
-    if (isPrivatePath(path) || !analyticsPersistent()) window.posthog?.stopSessionRecording?.();
+    if (isPrivatePath(path) || isTokenPath(path) || !analyticsPersistent())
+      window.posthog?.stopSessionRecording?.();
     else window.posthog?.startSessionRecording?.();
   } catch {
     /* ignore */

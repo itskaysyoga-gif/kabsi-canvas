@@ -71,9 +71,35 @@ export class GoogleBusy extends RetryLater {
   override name = "GoogleBusy";
 }
 export type Gate = { wait_ms?: number; open_until?: string };
+
+// Sec 1: the one stop switch for every Google write. Staff set app_settings.google_writes to 'paused' (the database
+// side, staff_set_google_writes, also holds claim_publication); while it says 'paused', gbp() sends no write of any
+// kind (reply, reply delete, post, media, location patch, special hours, attributes, admins, invitations,
+// notification settings). Reads still go. The write is not failed: GoogleWritesPaused is a RetryLater, so the job is
+// postponed by WRITES_PAUSED_RETRY_MS and the queued work is kept. A setting that cannot be read counts as paused.
+export const WRITES_PAUSED_RETRY_MS = 15 * 60_000;
+export class GoogleWritesPaused extends GoogleBusy {
+  override name = "GoogleWritesPaused";
+}
+export async function readWritesPaused(): Promise<boolean> {
+  try {
+    const { data, error } = await (await mockDb()).from("app_settings").select("value").eq("key", "google_writes").maybeSingle();
+    if (error) return true;
+    return (data?.value as string | undefined) === "paused";
+  } catch {
+    return true;
+  }
+}
+export async function assertWritesOpen() {
+  if (await io.writesPaused().catch(() => true)) {
+    throw new GoogleWritesPaused("google writes paused by staff (app_settings.google_writes)", new Date(Date.now() + WRITES_PAUSED_RETRY_MS));
+  }
+}
+
 // What gbp needs besides Google itself; the tests replace these. The limiter's state lives in the database, reached
 // with the same lazily loaded service client as the mocks.
 export const io = {
+  writesPaused: (): Promise<boolean> => readWritesPaused(),
   token: () => accessToken(),
   gate: async (profile: string | null): Promise<Gate> => {
     const { data, error } = await (await mockDb()).rpc("google_gate", { p_profile: profile });
@@ -123,6 +149,8 @@ export async function gbp(url: string, init: RequestInit = {}): Promise<any> {
   const method = (init.method ?? "GET").toUpperCase();
   const profile = profileOf(url, method);
   for (let attempt = 0; ; attempt++) {
+    // Every try of a write asks the stop switch first, so a pause also stops a retry already under way.
+    if (method !== "GET") await assertWritesOpen();
     await waitTurn(profile);
     const token = await io.token();
     let res: Response;

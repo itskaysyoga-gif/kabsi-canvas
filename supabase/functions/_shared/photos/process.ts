@@ -5,7 +5,7 @@
 // resizes it.
 import { Image } from "https://deno.land/x/imagescript@1.3.0/mod.ts";
 import { issuesOf, measure, type Issue, type Metrics, type Pixels } from "./quality.ts";
-import type { Sniffed } from "./sniff.ts";
+import { declaredSize, MAX_PIXELS, MAX_SIDE, type Sniffed } from "./sniff.ts";
 
 // Google takes photos from 250 pixels to about 5 MB; Kabsi keeps the long side at most this size.
 export const LONG_SIDE = 2400;
@@ -105,7 +105,13 @@ export type Processed = {
 // One photo: decode, scale down, turn upright, measure, re-encode. `others` are the hashes of the business's other
 // photos. The size check uses the photo as taken; the rest works on the scaled copy, which keeps the work small.
 export async function processPhoto(bytes: Uint8Array, s: Extract<Sniffed, { kind: "photo" }>, decode: Decode, others: string[] = []): Promise<Processed> {
+  // Sec 1: the decoder runs only on a picture whose header size was read and is within the limits (HEIC without an ispe box
+  // is left to libheif, which reads the same box); the decoded size is checked again.
+  const declared = declaredSize(bytes, s);
+  const over = (w: number, h: number) => w > MAX_SIDE || h > MAX_SIDE || w * h > MAX_PIXELS;
+  if (declared ? over(declared.width, declared.height) : s.format !== "heic") throw new Error("photo_too_many_pixels");
   const raw = await decode(s.format, bytes);
+  if (over(raw.width, raw.height)) throw new Error("photo_too_many_pixels");
   const o = s.format === "jpeg" ? jpegOrientation(bytes) : 1;
   const [takenWidth, takenHeight] = o >= 5 ? [raw.height, raw.width] : [raw.width, raw.height];
   const img = scaled(raw);

@@ -67,11 +67,76 @@ export function sniff(b: Uint8Array): Sniffed {
 }
 
 export const MAX_BYTES = 20 * 1024 * 1024;
+// Sec 1 (decompression bombs): a small file can declare a huge picture, and decoding it would fill the function's memory.
+// The size each format writes in its header is read before any decoder runs. 50 million pixels keeps a 48 megapixel phone
+// photo; nothing larger is decoded.
+export const MAX_PIXELS = 50_000_000;
+export const MAX_SIDE = 20_000;
+export const TOO_MANY_PIXELS = "This photo is too large to process. Send a smaller copy of it.";
 
-// Why a file cannot go in, in plain words, or null when it can be processed.
-export function intakeRefusal(s: Sniffed, bytes: number): string | null {
+const u16be = (b: Uint8Array, at: number) => (b[at] << 8) | b[at + 1];
+const u16le = (b: Uint8Array, at: number) => b[at] | (b[at + 1] << 8);
+
+/** The width and height the file's own header declares, or null when they cannot be read from it. */
+export function declaredSize(b: Uint8Array, s: Sniffed): { width: number; height: number } | null {
+  if (s.kind !== "photo") return null;
+  if (s.format === "png") {
+    // IHDR is always the first chunk: width and height at bytes 16 and 20.
+    if (b.length < 24 || ascii(b, 12, 4) !== "IHDR") return null;
+    return { width: u32(b, 16), height: u32(b, 20) };
+  }
+  if (s.format === "jpeg") {
+    // Walk the markers to the first start of frame (SOF0 to SOF15, not DHT C4, JPG C8 or DAC CC).
+    let at = 2;
+    while (at + 9 < b.length) {
+      if (b[at] !== 0xff) return null;
+      const marker = b[at + 1];
+      if (marker === 0xff) { at++; continue; }
+      if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd8)) { at += 2; continue; }
+      if (marker === 0xd9 || marker === 0xda) return null;
+      if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+        return { width: u16be(b, at + 7), height: u16be(b, at + 5) };
+      }
+      at += 2 + u16be(b, at + 2);
+    }
+    return null;
+  }
+  if (s.format === "webp") {
+    const chunk = ascii(b, 12, 4);
+    if (chunk === "VP8X" && b.length >= 30) {
+      return { width: 1 + (b[24] | (b[25] << 8) | (b[26] << 16)), height: 1 + (b[27] | (b[28] << 8) | (b[29] << 16)) };
+    }
+    if (chunk === "VP8 " && b.length >= 30) return { width: u16le(b, 26) & 0x3fff, height: u16le(b, 28) & 0x3fff };
+    if (chunk === "VP8L" && b.length >= 25) {
+      const v = (b[21] | (b[22] << 8) | (b[23] << 16) | (b[24] << 24)) >>> 0;
+      return { width: (v & 0x3fff) + 1, height: ((v >>> 14) & 0x3fff) + 1 };
+    }
+    return null;
+  }
+  // HEIC: every image spatial extent ("ispe") box, the largest one counts.
+  let best: { width: number; height: number } | null = null;
+  for (let at = 4; at + 16 <= b.length; at++) {
+    if (b[at] === 0x69 && b[at + 1] === 0x73 && b[at + 2] === 0x70 && b[at + 3] === 0x65) {
+      const width = u32(b, at + 8), height = u32(b, at + 12);
+      if (!best || width * height > best.width * best.height) best = { width, height };
+    }
+  }
+  return best;
+}
+
+/** Null when the declared picture is within the limits (or not declared at all: the decoder step checks again). */
+export function pixelRefusal(b: Uint8Array, s: Sniffed): string | null {
+  const d = declaredSize(b, s);
+  if (!d) return null;
+  return d.width > MAX_SIDE || d.height > MAX_SIDE || d.width * d.height > MAX_PIXELS ? TOO_MANY_PIXELS : null;
+}
+
+// Why a file cannot go in, in plain words, or null when it can be processed. With the bytes, the declared picture size is
+// checked too (Sec 1).
+export function intakeRefusal(s: Sniffed, bytes: number, b?: Uint8Array): string | null {
   if (bytes > MAX_BYTES) return "This file is over 20 MB. Send a smaller one.";
   if (s.kind === "unknown") return "This is not a photo Kabsi can use. Send a JPG, PNG, WebP or HEIC photo.";
   if (s.kind === "photo" && s.animated) return "This is a moving image. Google takes still photos only.";
+  if (b) return pixelRefusal(b, s);
   return null;
 }

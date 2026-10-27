@@ -99,9 +99,10 @@ Deno.test("Access 2: the Places request: five results, place ID, name and addres
 });
 
 Deno.test("Access 2: invitations are listed with Accept-Language: en", async () => {
-  const was = { fetch: globalThis.fetch, token: io.token, gate: io.gate, mode: Deno.env.get("GOOGLE_MODE") };
+  const was = { fetch: globalThis.fetch, writesPaused: io.writesPaused, token: io.token, gate: io.gate, mode: Deno.env.get("GOOGLE_MODE") };
   const seen: { url: string; lang: string | null }[] = [];
   Deno.env.set("GOOGLE_MODE", "live");
+  io.writesPaused = () => Promise.resolve(false);
   io.token = () => Promise.resolve("t");
   io.gate = () => Promise.resolve({});
   globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
@@ -113,7 +114,7 @@ Deno.test("Access 2: invitations are listed with Accept-Language: en", async () 
     await google.acceptInvitationsAndListLocations([], { search: null, memory: null });
   } finally {
     globalThis.fetch = was.fetch;
-    Object.assign(io, { token: was.token, gate: was.gate });
+    Object.assign(io, { writesPaused: was.writesPaused, token: was.token, gate: was.gate });
     if (was.mode === undefined) Deno.env.delete("GOOGLE_MODE"); else Deno.env.set("GOOGLE_MODE", was.mode);
   }
   const inv = seen.find((s) => s.url.endsWith("/accounts/1/invitations"));

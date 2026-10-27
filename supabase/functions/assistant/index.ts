@@ -7,6 +7,7 @@
 // 3,000 a day in total. The knowledge base is the public /llms-full.txt (same facts the site shows),
 // cached here; the rules below and the knowledge base are sent as a cached prompt prefix (prompt caching),
 // so each turn only pays full price for the new messages.
+import { clientIp } from "../_shared/client-ip.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 import {
   admin, APP_URL, captureError, CORS, currentUser, esc, fail, isInternal, jobLog, json, log, rateLimit, sha256Hex, verifyTurnstile,
@@ -21,6 +22,7 @@ import { countryFromTimezone } from "../_shared/tz-country.ts";
 import { nextTasks } from "../_shared/tasks.ts";
 import { WHATSAPP_NUMBER, WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
 import { noraRules } from "../_shared/nora-rules.ts";
+import { type ContactRow, contactContextLine, exactEmailPattern, ownsContact } from "../_shared/nora-contact.ts";
 import { cleanScreen, inOnboarding, ONBOARDING_RULES, onboardingHandoffLine, onboardingLines, onboardingStateResult, type OnboardingState } from "../_shared/onboarding-context.ts";
 
 // Nora is one of the six agents (master plan 28.6): her tools and the model per step are in _shared/ai/agents.ts.
@@ -336,7 +338,7 @@ Deno.serve(async (req) => {
   if (!/^[a-z0-9-]{16,64}$/i.test(visitor)) return fail("bad_input", "Refresh the page and try again.");
   if (!text) return fail("bad_input", "Type a message first.");
 
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  const ip = clientIp(req);
   const net = (await sha256Hex(`${Deno.env.get("SUPABASE_URL")}:${new Date().toISOString().slice(0, 10)}:${ip}`)).slice(0, 24);
   // D266: every assistant turn calls Anthropic — fail closed if the limiter breaks.
   if (!(await rateLimit(`assistant:v:${visitor}`, 40, 3600, { failClosed: true })) || !(await rateLimit(`assistant:n:${net}`, 80, 3600, { failClosed: true })))
@@ -403,8 +405,8 @@ Deno.serve(async (req) => {
       if (onboarding) ctx.push(...onboardingLines(onboarding));
     }
     if (conv.contact_id) {
-      const { data: c } = await db.from("contacts").select("name, email, business_name").eq("id", conv.contact_id).maybeSingle();
-      if (c) ctx.push(`Contact already saved: ${[c.name, c.email, c.business_name].filter(Boolean).join(", ")}`);
+      const { data: c } = await db.from("contacts").select("id, name, email, business_name, conversation_id").eq("id", conv.contact_id).maybeSingle();
+      if (c) ctx.push(contactContextLine(c as ContactRow, { conversationId: conv.id, signedInEmail: user?.email }));
     }
     if (conv.status === "handoff") ctx.push("This conversation was already passed to the Kabsi team; a person will reply by email.");
 
@@ -458,12 +460,14 @@ Deno.serve(async (req) => {
               phone: clip(input.phone, 40) || undefined, country: clip(input.country, 80) || undefined, city: clip(input.city, 80) || undefined,
               business_type: clip(input.business_type, 80) || undefined, interest: clip(input.interest, 300) || undefined,
             };
-            const { data: existing } = await db.from("contacts").select("id, marketing_consent").ilike("email", email).maybeSingle();
+            const { data: existing } = await db.from("contacts").select("id, email, marketing_consent, conversation_id").ilike("email", exactEmailPattern(email)).maybeSingle();
             let id = existing?.id as string | undefined;
             const clean = Object.fromEntries(Object.entries(fields).filter(([, v]) => v));
-            if (id) {
+            // Sec 1: someone else's row (not made in this chat, not the signed-in address) is linked, never changed.
+            const mine = existing ? ownsContact(existing as ContactRow, { conversationId: conv.id, signedInEmail: user?.email }) : false;
+            if (id && mine) {
               await db.from("contacts").update({ ...clean, marketing_consent: input.marketing_consent === true ? true : existing!.marketing_consent, updated_at: new Date().toISOString() }).eq("id", id);
-            } else {
+            } else if (!id) {
               const { data: row, error } = await db.from("contacts").insert({ email, ...clean, marketing_consent: input.marketing_consent === true, source: surface === "app" ? "assistant_app" : "assistant", conversation_id: conv.id }).select("id").single();
               if (error) throw error;
               id = row.id;

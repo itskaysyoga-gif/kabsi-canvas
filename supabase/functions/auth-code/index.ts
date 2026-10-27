@@ -2,13 +2,14 @@
 // The logic and its limits are in _shared/auth-code.ts. Supabase Auth is called with the service key, so its own
 // captcha check (when switched on in the dashboard) is skipped for this caller only; the visitor's IP goes along in
 // Sb-Forwarded-For so Auth's own per-IP limits still see the real visitor.
+import { clientIp } from "../_shared/client-ip.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 import { captureError, CORS, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { makeHandler } from "../_shared/auth-code.ts";
 
 Deno.serve(makeHandler({
   env: (name) => Deno.env.get(name),
-  ip: (req) => (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown",
+  ip: (req) => clientIp(req),
   sha256Hex,
   rateLimit,
   verifyTurnstile,

@@ -3,6 +3,7 @@ import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.5
 import { unsubscribeHeaders } from "./email/unsubscribe.ts";
 import { carriesUser } from "./jwt-user.ts";
 import { RELEASE } from "./release.ts";
+import { scrubFields as scrub, scrubText } from "./log-scrub.ts";
 
 export const APP_URL = Deno.env.get("APP_URL") ?? "https://kabsi.co";
 const SENTRY_DSN = Deno.env.get("SENTRY_DSN_EDGE") ??
@@ -72,36 +73,22 @@ export async function sha256Hex(text: string) {
 export async function rateLimit(key: string, max: number, windowSeconds: number, opts: { failClosed?: boolean } = {}) {
   const { data, error } = await admin().rpc("hit_rate_limit", { p_key: key, p_max: max, p_window_seconds: windowSeconds });
   if (error) {
-    log("rate_limit", { ok: false, key, failClosed: !!opts.failClosed, err: error.message });
+    // Sec 1: only the key's kind ("authcode", "wa_voice"), never the id, address or number after it.
+    log("rate_limit", { ok: false, key: key.split(":")[0], failClosed: !!opts.failClosed, err: error.message });
     return !opts.failClosed;
   }
   return Boolean(data);
 }
 
 // ─── logging + Sentry (minimal envelope client, no SDK)
+// Sec 1: every log line goes through the same scrub as Sentry: sensitive keys become "[redacted]", and emails, phone
+// numbers and tokens in a link's query lose their value, whatever field they ride in.
 export function log(fn: string, fields: Record<string, unknown>) {
-  console.log(JSON.stringify({ fn, ...fields }));
+  console.log(JSON.stringify({ fn, ...(scrub(fields) as Record<string, unknown>) }));
 }
-// D266: review text, reviewer names, emails and tokens must never reach Sentry or jobs_log — this is the
-// one choke point every captureError call goes through, so scrubbing here covers every call site at once.
-const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.-]+/g;
-// 20.5: phone numbers too (a number with a plus, or 9 to 15 digits in a row), as src/lib/scrub.ts does in the browser.
-const PHONE_RE = /\+\d[\d\s().-]{6,}\d|\b\d{9,15}\b/g;
-export const scrubText = (s: string) => s.replace(EMAIL_RE, "[email]").replace(PHONE_RE, "[phone]");
-const SENSITIVE_KEYS = new Set([
-  "comment", "reviewer_name", "body", "instruction", "text", "payload", "email", "to", "token", "authorization",
-  "sig", "signature", "api_key", "x-api-key", "phone", "review", "review_text",
-]);
-function scrub(value: unknown, depth = 0): unknown {
-  if (typeof value === "string") return scrubText(value).slice(0, 300);
-  if (depth >= 3 || value === null || typeof value !== "object") return value;
-  if (Array.isArray(value)) return value.slice(0, 20).map((v) => scrub(v, depth + 1));
-  const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
-    out[k] = SENSITIVE_KEYS.has(k.toLowerCase()) ? "[redacted]" : scrub(v, depth + 1);
-  }
-  return out;
-}
+// D266: review text, reviewer names, emails and tokens must never reach Sentry or jobs_log: captureError, jobLog and log
+// are the choke points, and they share one scrub (log-scrub.ts, pure so the Node tests can run it too).
+export { scrubText };
 export async function captureError(fn: string, error: unknown, extra: Record<string, unknown> = {}) {
   const err = error instanceof Error ? error : new Error(String(error));
   const safeMessage = scrubText(String(err.message ?? "")).slice(0, 300);

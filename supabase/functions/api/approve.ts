@@ -36,6 +36,10 @@ export async function approve(req: Request): Promise<Response> {
     }
     if (b.do === "undo") {
       if (!b.publication_id) return fail("bad_input", "Missing approval.");
+      // Sec 1: the approval must belong to this review's business, where the role was just checked. undo_publication
+      // checks membership only, so without this a staff member of another business could cancel that business's approval.
+      const { data: pub } = await db.from("publications").select("location_id").eq("id", b.publication_id).maybeSingle();
+      if (!pub || pub.location_id !== rv.location_id) return fail("not_found", "Approval not found.", 404);
       await undoReply({ publicationId: b.publication_id, userId: user.id, audit: auditHeaders(req, user.id) });
       return json({ ok: true, state: "cancelled" });
     }
