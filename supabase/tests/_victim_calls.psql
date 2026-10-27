@@ -1,0 +1,73 @@
+-- Calls on the victim's business (LA) that every caller who is not a member of LA must be refused (K-42, G-17).
+-- Included by rls_functions.sql (as a signed-in stranger) and sec1_tenant_matrix.sql (Sec 1: as the owner, manager
+-- and staff of the other business LB, and as Kabsi staff), after tests.act_as(...). Not a test file: pg_prove runs
+-- *.sql only. Expects the fixtures of _fixtures.psql plus the victim fact ..fd that rls_functions.sql inserts.
+select throws_ok($$ select public.add_photo('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000c1/victim.jpg') $$, '42501', null, 'add_photo refuses a non-member');
+select throws_ok($$ select public.cancel_location_deletion('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'cancel_location_deletion refuses a non-member');
+select throws_ok($$ select public.choose_plan('00000000-0000-4000-8000-0000000000c1', 'trial') $$, '42501', null, 'choose_plan refuses a non-member');
+select throws_ok($$ select public.create_review_link('00000000-0000-4000-8000-0000000000c1', 'x') $$, '42501', null, 'create_review_link refuses a non-member');
+select throws_ok($$ select public.handle_review_offline('00000000-0000-4000-8000-0000000000e1') $$, '42501', null, 'handle_review_offline refuses a non-member');
+select throws_ok($$ select public.task_action('00000000-0000-4000-8000-0000000000f8', 'later') $$, '42501', null, 'task_action refuses a non-member');
+select throws_ok($$ select public.approve_backlog('00000000-0000-4000-8000-0000000000c1', '[]') $$, '42501', null, 'approve_backlog refuses a non-member');
+select is(public.can_see('00000000-0000-4000-8000-0000000000c1', 'all'), false, 'can_see is false for a non-member');
+select is(public.can_see('00000000-0000-4000-8000-0000000000c1', 'photos'), false, 'can_see photos is false for a non-member');
+select throws_ok($$ select public.my_access('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'my_access refuses a non-member');
+select throws_ok($$ select public.set_approval_policy('00000000-0000-4000-8000-0000000000c1', 'review_reply', 'owner_and_managers') $$, '42501', null, 'set_approval_policy refuses a non-member');
+select throws_ok($$ select public.invite_team_member('00000000-0000-4000-8000-0000000000c1', 'x@example.test', 'staff') $$, '42501', null, 'invite_team_member refuses a non-member');
+select throws_ok($$ select public.cancel_team_invite('00000000-0000-4000-8000-0000000000f9') $$, '42501', null, 'cancel_team_invite refuses a non-member');
+select throws_ok($$ select public.set_member_role('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000a1', 'staff') $$, '42501', null, 'set_member_role refuses a non-member');
+select throws_ok($$ select public.list_team('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'list_team refuses a non-member');
+select throws_ok($$ select public.remove_member('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000a1') $$, '42501', null, 'remove_member refuses a non-member');
+select throws_ok($$ select public.rename_card('VCTM22', 'x') $$, '42501', null, 'rename_card refuses a non-member');
+select throws_ok($$ select public.request_disconnect('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'request_disconnect refuses a non-member');
+select throws_ok($$ select public.confirm_business_details('00000000-0000-4000-8000-0000000000c1', '{"phone": {"display": "+961 1 000 000"}}') $$, '42501', null,
+  'confirm_business_details refuses a non-member');
+select throws_ok($$ select public.request_location_deletion('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'request_location_deletion refuses a non-member');
+select throws_ok($$ select public.save_consent('00000000-0000-4000-8000-0000000000c1', 'yes') $$, '42501', null, 'save_consent refuses a non-member');
+select throws_ok($$ select public.set_auto_posts('00000000-0000-4000-8000-0000000000c1', false) $$, '42501', null, 'set_auto_posts refuses a non-member');
+select throws_ok($$ select public.holiday_calendar('00000000-0000-4000-8000-0000000000c1', 60) $$, '42501', null, 'holiday_calendar refuses a non-member');
+select throws_ok($$ select public.photo_link_create('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'photo_link_create refuses a non-member');
+select throws_ok($$ select public.photo_link_revoke('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'photo_link_revoke refuses a non-member');
+select throws_ok($$ select public.photo_link_status('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'photo_link_status refuses a non-member');
+select throws_ok($$ select public.set_post_cadence('00000000-0000-4000-8000-0000000000c1', 4) $$, '42501', null, 'set_post_cadence refuses a non-member');
+select throws_ok($$ select public.set_protection_autofix('00000000-0000-4000-8000-0000000000c1', 'website', false) $$, '42501', null, 'set_protection_autofix refuses a non-member');
+select throws_ok($$ select public.set_review_link_mode('VCTM22', 'page') $$, '42501', null, 'set_review_link_mode refuses a non-member');
+select throws_ok($$ select public.start_review_report('00000000-0000-4000-8000-0000000000e1', 'fake_content') $$, '42501', null, 'start_review_report refuses a non-member');
+select throws_ok($$ select public.advance_review_report('00000000-0000-4000-8000-0000000000f9', 'answered') $$, '42501', null, 'advance_review_report refuses a non-member');
+select throws_ok($$ select public.set_onboarding_step('00000000-0000-4000-8000-0000000000c1', 'done') $$, '42501', null, 'set_onboarding_step refuses a non-member');
+select throws_ok($$ select public.skip_review('00000000-0000-4000-8000-0000000000e1') $$, '42501', null, 'skip_review refuses a non-member');
+select throws_ok($$ select public.send_manager_steps('00000000-0000-4000-8000-0000000000c1', 3) $$, '42501', null, 'send_manager_steps refuses a non-member');
+select throws_ok($$ select public.set_onboarding_scenario('00000000-0000-4000-8000-0000000000c1', 'suspended') $$, '42501', null, 'set_onboarding_scenario refuses a non-member');
+select throws_ok($$ select public.scenario_done('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'scenario_done refuses a non-member');
+select throws_ok($$ select public.clear_onboarding_scenario('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'clear_onboarding_scenario refuses a non-member');
+select throws_ok($$ select public.save_fact('00000000-0000-4000-8000-0000000000c1', 'about', '"Hijacked"') $$, '42501', null, 'save_fact refuses a non-member');
+select throws_ok($$ select public.confirm_fact('00000000-0000-4000-8000-0000000000fd') $$, '42501', null, 'confirm_fact refuses a non-member');
+select throws_ok($$ select public.reject_fact('00000000-0000-4000-8000-0000000000fd') $$, '42501', null, 'reject_fact refuses a non-member');
+select throws_ok($$ select public.remove_fact('00000000-0000-4000-8000-0000000000fd') $$, '42501', null, 'remove_fact refuses a non-member');
+select throws_ok($$ select public.answer_knowledge_confirm('00000000-0000-4000-8000-0000000000fe', 'proposed') $$, '42501', null, 'answer_knowledge_confirm refuses a non-member');
+select throws_ok($$ select public.answer_style_offer('00000000-0000-4000-8000-0000000000fc', true) $$, '42501', null, 'answer_style_offer refuses a non-member');
+select throws_ok($$ select public.update_notification_settings('00000000-0000-4000-8000-0000000000c1', null, null, null, null) $$, '42501', null, 'update_notification_settings refuses a non-member');
+select throws_ok($$ select public.my_notification_prefs('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'my_notification_prefs refuses a non-member');
+select throws_ok($$ select public.set_notification_pref('00000000-0000-4000-8000-0000000000c1', 'review_new', 'email', 'off') $$, '42501', null, 'set_notification_pref refuses a non-member');
+select throws_ok($$ select public.list_my_notifications('00000000-0000-4000-8000-0000000000c1', 10) $$, '42501', null, 'list_my_notifications refuses a non-member');
+select throws_ok($$ select public.mark_notifications_read('00000000-0000-4000-8000-0000000000c1', null) $$, '42501', null, 'mark_notifications_read refuses a non-member');
+select throws_ok($$ select public.onboarding_status('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'onboarding_status refuses a non-member');
+select throws_ok($$ select public.confirm_business('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'confirm_business refuses a non-member');
+select throws_ok($$ select public.claim_free_check('00000000-0000-4000-8000-0000000000c1', 'ABCD2345') $$, '42501', null, 'claim_free_check refuses a non-member');
+select throws_ok($$ select public.save_ai_prompt('00000000-0000-4000-8000-0000000000c1', 'best hair salon near the marina') $$, '42501', null, 'save_ai_prompt refuses a non-member');
+select throws_ok($$ select public.remove_ai_prompt('00000000-0000-4000-8000-0000000000f9') $$, '42501', null, 'remove_ai_prompt refuses a non-member');
+-- Kabsi staff read every business for support and installers activate cards (is_staff() in these functions), so
+-- these refuse every non-member except Kabsi staff. sec1_tenant_matrix.sql sets kabsi_staff for its staff personas.
+\if :{?kabsi_staff}
+\else
+select throws_ok($$ select public.activate_card('VCTM22', '00000000-0000-4000-8000-0000000000c1', 'x') $$, '42501', null, 'activate_card refuses a non-member');
+select throws_ok($$ select * from public.activity_feed('00000000-0000-4000-8000-0000000000c1', 7) $$, '42501', null, 'activity_feed refuses a non-member');
+select throws_ok($$ select public.plan_summary('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'plan_summary refuses a non-member');
+select throws_ok($$ select public.entitlements(null, '00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'entitlements refuses a non-member');
+select throws_ok($$ select public.entitlements((select owner_org from victim_orgs), null) $$, '42501', null, 'entitlements refuses a non-member by organisation');
+select throws_ok($$ select public.list_tasks('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'list_tasks refuses a non-member');
+select throws_ok($$ select public.coach_checklist('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'coach_checklist refuses a non-member');
+select throws_ok($$ select public.set_card_active('VCTM22', false) $$, '42501', null, 'set_card_active refuses a non-member');
+select throws_ok($$ select public.feature_access('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'feature_access refuses a non-member');
+select throws_ok($$ select public.list_review_reports('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'list_review_reports refuses a non-member');
+\endif

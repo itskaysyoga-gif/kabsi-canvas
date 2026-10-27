@@ -14,6 +14,7 @@ type Seen = { gates: (string | null)[]; sleeps: number[]; failures: number; requ
 function world(gates: Gate[], statuses: number[] = [200]) {
   const seen: Seen = { gates: [], sleeps: [], failures: 0, requests: [] };
   let g = 0, r = 0;
+  io.writesPaused = () => Promise.resolve(false);
   io.token = () => Promise.resolve("test-token");
   io.gate = (profile) => {
     seen.gates.push(profile);

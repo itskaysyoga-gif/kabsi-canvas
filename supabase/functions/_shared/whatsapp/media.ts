@@ -15,7 +15,7 @@ export function photoRefusal(bytes: Uint8Array): "not_photo" | "video" | string 
   const s = sniff(bytes);
   if (s.kind === "video") return "video";
   if (s.kind !== "photo") return "not_photo";
-  return intakeRefusal(s, bytes.length);
+  return intakeRefusal(s, bytes.length, bytes);
 }
 
 /** The length of an Ogg Opus voice note (what WhatsApp records), from the last page's granule position at 48 kHz.

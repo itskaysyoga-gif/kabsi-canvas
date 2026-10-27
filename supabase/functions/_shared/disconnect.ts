@@ -14,6 +14,7 @@
 import { esc } from "./email-layout.ts";
 import { FREE_FROM_GOOGLE, THIRD_PARTY_HELP } from "./access-notice.ts";
 import { accessWorks } from "./email/account-copy.ts";
+import { RetryLater } from "./jobs.ts";
 
 export type DisconnectState = {
   locationId: string;
@@ -52,6 +53,9 @@ export async function runDisconnect(locationId: string, deps: DisconnectDeps): P
       try {
         await deps.remove(s.googleLocationId);
       } catch (e) {
+        // Sec 1: Google writes paused by staff, or the rate limit or circuit breaker, stopped the delete before it was
+        // sent. Nothing failed: the job waits and tries again, with no follow-up and no notice.
+        if (e instanceof RetryLater) throw e;
         failure = e;
       }
     }

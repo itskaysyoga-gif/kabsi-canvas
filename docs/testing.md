@@ -329,3 +329,43 @@ To arm the alert (Rashid, once): choose a long random string; add it as the GitH
 ### What stays human (master plan 30.12 item 3)
 
 The first real inbound WhatsApp message (done for the staff phone on 25 Oct; owners' phones stay a launch-gate step), the 5-second test with people who never saw Kabsi, the usability test with real owners (30.7.10), and reviews, which only real customers write. Also by eye: Gmail, Outlook and Apple Mail rendering, and a real iPhone and Android pass.
+
+## Security (Sec 1, 27 Oct 2026)
+
+The checklist is `docs/security/ASVS-L1.md` (OWASP ASVS 4.0.3 level 1, each line pass, fail with its LATER row, or n/a).
+
+- `sec1_tenant_matrix.sql`: two businesses with two accounts each. The other business's manager and staff see no row of
+  the victim's in any table; every owner RPC on the victim's business (`_victim_calls.psql`, also run by
+  `rls_functions.sql` as a stranger) refuses the other business's owner, manager and staff and Kabsi staff (who may only
+  read for support and, as installers, activate cards); the browser roles hold no INSERT, UPDATE, DELETE or TRUNCATE on
+  any table and no write policy exists; every SECURITY DEFINER function pins its search_path; the API roles are not
+  members of service_role or postgres.
+- `sec1_roles_approvals.sql`: a removed or demoted manager, and a manager after the owner takes approvals back, cannot
+  press an old WhatsApp button, and a yes they gave before stops at the publish step; a changed phone presses nothing;
+  one phone with roles in two businesses acts only where each role allows; an edit voids a WhatsApp yes and a redraft
+  stops a dashboard yes; a yes older than 7 days fails as `approval_expired`; the stop switch (`app_settings.google_writes`,
+  flipped only by a staff admin with a reason through `staff_set_google_writes`) keeps due publications approved and
+  unclaimed until it is back on; `staff_founding_matches` gives staff admins the business and last 4 digits only.
+- `sec1_approval_properties.ts` (Deno, fast-check, run by `scripts/db-test.sh` after the pgTAP suite): 400 random orders
+  of approve (dashboard and WhatsApp, by owner, manager, staff, outsider), edit, Undo, time passing, age, claim, failure,
+  retry, revoke and the stop switch, each in a rolled-back transaction. It fails if a reply has two live publications or
+  is sent twice, if anything is claimed without a valid yes (approver allowed now, not undone, window over, under 7 days,
+  switch on, review unchanged), if the claimed text differs from the approved text, if a WhatsApp yes publishes other
+  words than its button showed, or if the runs never reached a claim, a WhatsApp approval, a refused edit or an Undo.
+  `SEC1_RUNS` and `SEC1_SEED` change the count and the seed.
+- `sec1_storage.sql`: owner-photos is private and folder per business for every persona; whatsapp-voice is service role
+  only; site is public and written by the service role only; `add_photo` refuses another business's path.
+- `sec1_webhooks.sql`: repeated Creem, Pub/Sub, Resend and job offers are stored once; an older Creem event never
+  overwrites a newer one (`subscriptions_keep_newest`); a late WhatsApp receipt never moves a message backwards.
+- `sec1_email_links.sql`: a link acts only for its recipient (any other signed-in account gets `wrong_account`) and only
+  on its own business; link tables keep hashes only; a holiday link with no expiry never works.
+- Deno, under `supabase/functions/_shared/sec1/`: `webhooks.test.ts` (wrong signature, replay, duplicate, out of order,
+  malformed and oversized bodies for Kapso, Creem, Pub/Sub and Resend), `email-links.test.ts` (GET and HEAD never act,
+  POST once, expiry, binding, no-store and no-referrer), `routes.test.ts` (every route checks the business before a
+  service-role read or write), `injection.test.ts` (29 hostile cases with stub models that obey the attacker: reviews,
+  names, owner messages, website text, photos and PDFs), `client-ip.test.ts`; and `_shared/google/stop-switch.test.ts`
+  (every Google write refused while paused, reads still go, jobs postponed, fails closed).
+- Vitest: `tests/sec1-no-secrets-in-logs.test.ts` (no console or log call prints a token, code, email, phone or review
+  text; the Sentry and PostHog scrubbers), `tests/sec1-service-role.test.ts` (no service key in browser code or the
+  bundle environment), `tests/sec1-email-routes.test.ts` (token pages act only on POST, no-store, no-referrer).
+- By hand, with the key: `ANTHROPIC_API_KEY=... deno run -A scripts/sec1/injection-live.ts` (at most 30 calls).

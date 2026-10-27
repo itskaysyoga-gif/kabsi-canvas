@@ -22,7 +22,12 @@ import { setAnalyticsPaused, track } from "@/lib/telemetry";
 // link's recipient to sign in first and come back here; after Approve the page counts down 10 seconds with Undo.
 export const Route = createFileRoute("/a/$token")({
   head: () => ({
-    meta: [{ title: "Your review reply | Kabsi" }, { name: "robots", content: "noindex" }],
+    meta: [
+      { title: "Your review reply | Kabsi" },
+      { name: "robots", content: "noindex" },
+      // Sec 1: the address holds a credential; no other site ever gets it as a Referer.
+      { name: "referrer", content: "no-referrer" },
+    ],
   }),
   component: ActionPage,
 });
@@ -176,7 +181,8 @@ function ActionPage() {
       </ConfirmLayout>
     );
   }
-  if (!done && view.sign_in && view.other_account && view.status === "ok") {
+  // Sec 1: any link, not only the ones that need sign-in: another account never acts through it.
+  if (!done && view.other_account && view.status === "ok") {
     return (
       <ConfirmLayout demo={view?.demo === true} mode={view?.mode}>
         <QuietTitle lead="You are signed in to Kabsi with a different email address. Sign out, then sign in with the address this email was sent to.">

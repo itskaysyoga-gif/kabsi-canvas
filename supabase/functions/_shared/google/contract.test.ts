@@ -176,9 +176,10 @@ Deno.test("contract: reviews, posts and media have a real fixture for both profi
 // ─── Parser: the production code on the real fixture and on the mock's answer
 type Route = [needle: string | RegExp, answer: Json, status?: number];
 async function withGoogle<T>(routes: Route[], run: () => Promise<T>): Promise<T> {
-  const was = { fetch: globalThis.fetch, token: io.token, gate: io.gate, failure: io.failure, sleep: io.sleep, mode: Deno.env.get("GOOGLE_MODE") };
+  const was = { fetch: globalThis.fetch, writesPaused: io.writesPaused, token: io.token, gate: io.gate, failure: io.failure, sleep: io.sleep, mode: Deno.env.get("GOOGLE_MODE") };
   const calls: string[] = [];
   Deno.env.set("GOOGLE_MODE", "live");
+  io.writesPaused = () => Promise.resolve(false);
   io.token = () => Promise.resolve("test-token");
   io.gate = () => Promise.resolve({});
   io.failure = () => Promise.resolve();
@@ -196,7 +197,7 @@ async function withGoogle<T>(routes: Route[], run: () => Promise<T>): Promise<T>
     return out;
   } finally {
     globalThis.fetch = was.fetch;
-    Object.assign(io, { token: was.token, gate: was.gate, failure: was.failure, sleep: was.sleep });
+    Object.assign(io, { writesPaused: was.writesPaused, token: was.token, gate: was.gate, failure: was.failure, sleep: was.sleep });
     if (was.mode === undefined) Deno.env.delete("GOOGLE_MODE"); else Deno.env.set("GOOGLE_MODE", was.mode);
   }
 }

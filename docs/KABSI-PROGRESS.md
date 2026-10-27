@@ -10,6 +10,7 @@ One page, under 10 KB. Updated 25 Oct 2026 by the lane R chat (master plan 19, 2
 - V4 (PR 250, merged 26 Oct, deploy run 116 green; migration applied by lane R): onboarding in four stages, the first task, every task closes, the work receipt data, nearby places, the free check route, the category and monthly-facts proposals, the voice test op. The voice test did not pass (Gulf Arabic and mixed notes), so voice notes stay off. Detail: `docs/progress/archive/2026-10-27-v4.md`.
 - UX 1 (PR 254, merged 27 Oct, deploy run 118 green; migrations applied): the signed-in website on Design 3 (light), every task with its state, onboarding in four stages with the resume link, Get reviews with the PDF buttons and the new message, owners' AI questions, the staff AI spend and Founding 25 checklist, the public leftovers, the free check waiting list, named or anonymous case study, the approved terms. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
 - Email 1 (PR 258, 27 Oct): one email design, the 30.15 set, the Results Report receipt, auth templates, streams, the routine channel. Detail: `docs/progress/archive/2026-10-27-email1.md`.
+- Sec 1 (PR pending, 27 Oct): tenant isolation, roles, approvals (7 day yes, fast-check orders), email links, webhooks, injection, abuse limits, one stop switch for Google writes (`app_settings.google_writes`), log scrubbing, zod 4, ASVS L1 (`docs/security/ASVS-L1.md`). Detail: `docs/progress/archive/2026-10-27-sec1.md`.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
@@ -53,6 +54,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 27 Oct 2026, Sec 1: the security tests and fixes; Rashid's steps: Auth captcha and the 600 s code lifetime (LATER rows). Detail: `docs/progress/archive/2026-10-27-sec1.md`.
 - 27 Oct 2026, lane R (PR 260): the Results Report and trial counts say "sent to Google", never "published" for work Google may still be checking (30.15 3.1); UX 1 round 2 and Email 1 reviewed and their new lines approved.
 - 27 Oct 2026, Email 1 (PR 258, 259). Detail: `docs/progress/archive/2026-10-27-email1.md`.
 - 27 Oct 2026, UX 1 round 2 (lane R review): waiting list words and their stored proof, the hero and Try it after a Yes, Barbershops in the footer, closed LATER rows. Detail: the end of `docs/progress/archive/2026-10-27-ux1.md`.

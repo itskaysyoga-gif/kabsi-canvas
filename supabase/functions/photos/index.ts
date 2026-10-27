@@ -4,6 +4,7 @@
 //                                                                 a large photo has this function's time to itself)
 //   POST { do: "link", token }                                  → the business name for the staff upload page, or 410
 //   POST multipart/form-data: token, file                       → one upload through the staff link (no account)
+import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, fail, isInternal, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
 import { type EngineDeps, processUpload, type Result } from "../_shared/photos/engine.ts";
 import { acceptUpload } from "../_shared/photos/intake.ts";
@@ -60,7 +61,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return fail("method_not_allowed", "Use POST.", 405);
   try {
     if ((req.headers.get("content-type") ?? "").startsWith("multipart/form-data")) {
-      const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+      const ip = clientIp(req);
       if (!(await rateLimit(`photo_link_ip:${ip}`, 120, 3600, { failClosed: true }))) return fail("rate_limited", "That is a lot of photos. Try again in an hour.", 429);
       const form = await req.formData().catch(() => null);
       const file = form?.get("file");

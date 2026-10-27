@@ -32,7 +32,7 @@ export function normalizePhone(v: string): string | null {
 export const CHECK_PAGES = ["/", "/google-profile-check", "/get-started"];
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 const PLACE_ID_RE = /^[A-Za-z0-9_-]{10,200}$/;
-export const LIMITS = { perMinute: 10, checksPerDay: 3, searchesPerHour: 20, emailsPerHour: 5, whatsappPerHour: 3, whatsappPerNumberPerDay: 1 };
+export const LIMITS = { perMinute: 10, checksPerDay: 3, searchesPerHour: 20, emailsPerHour: 5, emailsPerAddressPerDay: 2, whatsappPerHour: 3, whatsappPerNumberPerDay: 1 };
 
 // A status flag (lane R, 22 Oct 2026): one plain fact about what Google shows, and what Kabsi would do about it. The tone
 // maps to the design tokens' states: "danger" is red (a real problem), "warning" is amber (needs attention), "neutral"
@@ -253,6 +253,12 @@ export function makeHandler(d: Deps) {
         }
         if (!(await d.rateLimit(`snapshot:email:${visitor}`, LIMITS.emailsPerHour, 3600, { failClosed: true }))) {
           return fail("rate_limited", "That is a lot of emails. Try again in an hour.", 429);
+        }
+        // Sec 1: at most two check emails a day to one address, whatever the place or the visitor, so the form cannot be
+        // used to fill a stranger's inbox. Keyed by a hash of the address; the address itself is not kept here.
+        const addressHash = (await d.sha256Hex(`email:${email}`)).slice(0, 40);
+        if (!(await d.rateLimit(`snapshot:email-to:${addressHash}`, LIMITS.emailsPerAddressPerDay, 86400, { failClosed: true }))) {
+          return fail("address_limit", "We already sent checks to this email today. Try again tomorrow.", 429);
         }
         // The email is built from a fresh read of Google: nothing from Places is kept between the check and the email.
         const place = await livePlace(placeId);

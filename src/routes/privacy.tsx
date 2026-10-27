@@ -408,15 +408,16 @@ function Page() {
             Advertising: we use no advertising cookies today and don't track you on other sites.
             From launch, the Meta Pixel runs on our public pages only, never inside the app, the
             sign-up screens, the staff pages or the links in our emails. It sees page views and a
-            few steps: the pricing page, a finished free scan, a sign-up, a trial and a plan bought.
-            For a trial or a plan, Kabsi also tells Meta from its own servers (the Conversions API),
-            with your email and phone number scrambled by a one-way hash as Meta requires. If you
-            came from a Click to WhatsApp ad, Kabsi sends Meta the click id of that chat, so the ads
-            learn which ones bring paying owners. In the EU, the UK, Switzerland, the United Arab
-            Emirates and Saudi Arabia a small bar at the bottom asks once, Accept or Only necessary,
-            and nothing for ads loads before you accept. Elsewhere there is no pop-up, and Your
-            privacy choices has one switch, "Let Kabsi measure its ads", on or off. Your answer is
-            remembered for 12 months. Kabsi does not sell your data to Meta or anyone else.
+            few steps: the pricing page, a finished free check, a sign-up, a trial and a plan
+            bought. For a trial or a plan, Kabsi also tells Meta from its own servers (the
+            Conversions API), with your email and phone number scrambled by a one-way hash as Meta
+            requires. If you came from a Click to WhatsApp ad, Kabsi sends Meta the click id of that
+            chat, so the ads learn which ones bring paying owners. In the EU, the UK, Switzerland,
+            the United Arab Emirates and Saudi Arabia a small bar at the bottom asks once, Accept or
+            Only necessary, and nothing for ads loads before you accept. Elsewhere there is no
+            pop-up, and Your privacy choices has one switch, "Let Kabsi measure its ads", on or off.
+            Your answer is remembered for 12 months. Kabsi does not sell your data to Meta or anyone
+            else.
           </li>
           <li>
             You can change your choice any time with{" "}

@@ -1,6 +1,7 @@
 // profile-snapshot: the free Google Profile Check on /google-profile-check and onboarding steps 1 and 2 (P0.4-01).
 // Public data only, through the Google layer's Places guard (field mask, daily cap; nothing from Places is stored but the place ID). The Places key
 // never reaches the browser. The logic and its limits are in _shared/profile-snapshot.ts.
+import { clientIp } from "../_shared/client-ip.ts";
 import { getSnapshotPlace, searchText } from "../_shared/google/index.ts";
 import { admin, APP_URL, captureError, CORS, esc, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { notify } from "../_shared/notify.ts";
@@ -10,7 +11,7 @@ import { WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
 
 Deno.serve(makeHandler({
   env: (name) => Deno.env.get(name),
-  ip: (req) => (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown",
+  ip: (req) => clientIp(req),
   today: () => new Date().toISOString().slice(0, 10),
   sha256Hex,
   rateLimit,

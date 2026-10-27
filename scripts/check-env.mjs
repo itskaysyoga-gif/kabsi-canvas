@@ -1,7 +1,8 @@
 // Vercel build guard (P0.1-03). Fails the build when a required variable is missing or empty, and when a server secret
 // has been given a name the browser bundle would read. The values are never printed. See docs/hosting.md.
 const REQUIRED = ["VITE_SUPABASE_URL", "VITE_SUPABASE_PUBLISHABLE_KEY"];
-const SECRET_NAMES = /(SERVICE_ROLE|JWT_SECRET|SECRET_KEY|POSTGRES_PASSWORD)/;
+// Sec 1: SERVICE_KEY and any SECRET too (VITE_SERVICE_KEY, VITE_SB_SECRET would reach the bundle the same way).
+const SECRET_NAMES = /(SERVICE_ROLE|SERVICE_KEY|SECRET|POSTGRES_PASSWORD)/;
 
 export function checkEnv(env) {
   const problems = [];

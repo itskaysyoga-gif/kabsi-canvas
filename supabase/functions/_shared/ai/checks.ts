@@ -8,7 +8,8 @@ import type { Industry } from "./risk.ts";
 export type Check = { name: string; ok: boolean; problem?: string };
 export type ReplyOutput = { reply: string; facts_used: string[]; language: string; topics: string[] };
 
-const MONEY = /(\d+\s?%\s?off|\bdiscount|\brefund|\bvoucher|\bcoupon|reimburs|compensat|on the house|\bfree of charge|descuento|reembolso|cup[oó]n|remise|rembours|خصم|استرداد|تعويض|قسيمة)/i;
+// Sec 1: "on us", a free item, a gift card and "make it up to you" are compensation too (the evaluation's broader list).
+const MONEY = /(\d+\s?%\s?off|\bdiscount|\brefund|\bvoucher|\bcoupon|reimburs|compensat|on the house|\b(?:is|are|be|'s) on us\b|\bfree of charge|\bfree (?:meal|coffee|cake|dessert|drink|round|pastr\w*|loaf|bread|item|dish|night|stay|session|class|treatment|visit)s?\b|\bgift (?:card|certificate)|make it up to you|descuento|reembolso|cup[oó]n|\bgratis\b|remise|rembours|خصم|استرداد|تعويض|قسيمة|مجانا|ببلاش)/i;
 const FAULT = /\b(our (fault|mistake|error)|it was our (fault|mistake|error)|we (made|make) (a|an) (mistake|error)|we messed up|we were wrong|we (are|were|'re) (responsible|liable|at fault)|we take full responsibility|we admit)\b/i;
 const LEAK = /(system prompt|my instructions|these instructions|as an ai\b|language model|business_memory|style_examples|<\/?customer_review)/i;
 const PERSONAL = /\b(order|booking|reservation|invoice|account|table|ticket)\s*(number|no\.?|#)\s*\S+|\b(as (our|a) (patient|client))\b|\byour (appointment|treatment|prescription|diagnosis|visit on|order on|booking on)\b/i;
@@ -78,7 +79,8 @@ export type CheckInput = {
 export function replyChecks(i: CheckInput): Check[] {
   const { out, memory } = i;
   const reply = out.reply;
-  const cited = out.facts_used.filter((r) => r in memory.refs);
+  // Own keys only (Sec 1): `in` also finds "constructor" or "toString" on every object, which let a cited fake id count as a fact.
+  const cited = out.facts_used.filter((r) => Object.hasOwn(memory.refs, r));
   const citedText = cited.map((r) => memory.factText[r]).join("\n");
   const allowedNames = new Set([
     ...words(i.reviewer), ...memory.knownNames.flatMap(words), ...cited.flatMap((r) => words(memory.factText[r])),
@@ -86,7 +88,7 @@ export function replyChecks(i: CheckInput): Check[] {
   const checks: Check[] = [];
   const add = (name: string, ok: boolean, problem: string) => checks.push(ok ? { name, ok } : { name, ok, problem });
 
-  const unknown = out.facts_used.filter((r) => !(r in memory.refs));
+  const unknown = out.facts_used.filter((r) => !Object.hasOwn(memory.refs, r));
   add("facts_in_trusted_set", unknown.length === 0, "Kabsi couldn't safely verify this detail: the draft relies on something that is not in your facts.");
   const names = nameCandidates(reply, i.reviewText).filter((w) => !allowedNames.has(w.toLowerCase()));
   add("no_invented_names", names.length === 0, "Kabsi couldn't safely verify this detail: the draft names a person or place that is not in your facts.");

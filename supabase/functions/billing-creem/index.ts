@@ -9,35 +9,28 @@
 //   POST /billing-creem/owner      the signed-in owner of the business: checkout, portal, cancel, keep, upgrade, downgrade,
 //                                  add_location. The Plan screen calls it; WhatsApp calls the same code in _shared/billing.ts.
 import { admin, captureError, CORS, currentUser, fail, isInternal, json, log, rateLimit } from "../_shared/kabsi.ts";
-import { parseEvent, signatureProblem } from "../_shared/creem.ts";
+import { creemWebhook } from "../_shared/creem-webhook.ts";
 import {
   addLocation, BillingError, cancelAtEnd, changePlan, isCreemError, keepPlan, portal, setupProducts, staffAlert, startCheckout, storeEvent,
 } from "../_shared/billing.ts";
 
-async function webhook(req: Request): Promise<Response> {
-  const raw = await req.text();
-  const problem = await signatureProblem(raw, req.headers.get("creem-signature"), Deno.env.get("CREEM_WEBHOOK_SECRET") ?? "");
-  if (problem) {
-    log("billing-creem", { ok: false, refused: problem });
-    // More than 5 refusals in an hour is somebody trying, or a secret that changed: staff hear about it once an hour.
-    if (!(await rateLimit("creem_signature_failures", 5, 3600))) {
-      await staffAlert("Creem webhook refused more than 5 calls with a bad signature in the last hour", `sig:${new Date().toISOString().slice(0, 13)}`)
-        .catch((e) => captureError("billing-creem", e, { step: "sig_alert" }));
-    }
-    return json({ error: "unauthorized" }, 401);
-  }
-  const event = parseEvent(raw);
-  // A signed body that cannot be read is acknowledged, so Creem does not send it again and again.
-  if (!event) return json({ ok: true, ignored: "unreadable" });
-  try {
-    const stored = await storeEvent(event);
-    log("billing-creem", { ok: true, event: event.eventType, stored });
-    return json({ ok: true, [stored]: true }, 200);
-  } catch (e) {
-    await captureError("billing-creem", e, { step: "store", event: event.eventType });
-    // 500 so Creem retries: nothing was stored.
-    return json({ error: "try_again" }, 500);
-  }
+// The decision is in _shared/creem-webhook.ts (Sec 1: tested with stubs); here it is wired to the database.
+function webhook(req: Request): Promise<Response> {
+  return creemWebhook(req, {
+    secret: Deno.env.get("CREEM_WEBHOOK_SECRET") ?? "",
+    store: (e) => storeEvent(e),
+    refused: async (problem) => {
+      log("billing-creem", { ok: false, refused: problem });
+      // More than 5 refusals in an hour is somebody trying, or a secret that changed: staff hear about it once an hour.
+      if (!(await rateLimit("creem_signature_failures", 5, 3600))) {
+        await staffAlert("Creem webhook refused more than 5 calls with a bad signature in the last hour", `sig:${new Date().toISOString().slice(0, 13)}`)
+          .catch((e) => captureError("billing-creem", e, { step: "sig_alert" }));
+      }
+    },
+    log: (fields) => log("billing-creem", fields),
+    captureError: (e, extra) => captureError("billing-creem", e, extra),
+    json,
+  });
 }
 
 async function isStaff(req: Request): Promise<boolean> {

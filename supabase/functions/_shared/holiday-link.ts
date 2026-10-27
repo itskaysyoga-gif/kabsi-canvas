@@ -8,7 +8,9 @@
 //   POST { t, do: "undo" }              cancels the approval this link made, inside its 10 seconds (K-70).
 //
 // No database or network import: the Deno tests drive it with stubs; api/holiday.ts wires it to Supabase.
-import { hashToken } from "./email-links.ts";
+import { hashToken, LINK_HEADERS } from "./email-links.ts";
+
+export { LINK_HEADERS };
 
 export type HolidayView = {
   status: "invalid" | "expired" | "answered" | "ok";
@@ -68,6 +70,14 @@ export async function holidayPost(body: Record<string, unknown>, deps: HolidayLi
     if (known) return known;
     throw e;
   }
+}
+
+// The whole HTTP surface of /api/holiday (Sec 1): GET reads, POST acts, anything else (HEAD from a link scanner) is
+// refused before any lookup. api/holiday.ts adds the rate limit, the error report and LINK_HEADERS.
+export async function holidayRequest(req: Request, deps: HolidayLinkDeps): Promise<Reply> {
+  if (req.method === "GET") return holidayGet(new URL(req.url).searchParams.get("t"), deps);
+  if (req.method !== "POST") return refusal("method_not_allowed", "Use GET or POST.", 405);
+  return holidayPost(await req.json().catch(() => ({})) as Record<string, unknown>, deps);
 }
 
 // Owner-facing words for what the database refuses. Null for anything unexpected (the caller reports it).

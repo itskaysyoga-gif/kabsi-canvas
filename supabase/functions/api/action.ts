@@ -4,9 +4,10 @@
 //   GET  ?t=TOKEN                       what the link does (never performs anything)
 //   POST { t, do, text? }               performs it once; a second POST gets the first result
 //   POST { t, do: "undo", publication } cancels that link's approval inside its 10 seconds (K-70)
-import { admin, captureError, CORS, currentUser, fail, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
+import { clientIp } from "../_shared/client-ip.ts";
+import { admin, captureError, CORS, currentUser, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
 import { auditedAdmin, auditHeaders } from "../_shared/audit.ts";
-import { type EmailLinkDeps, linkGet, linkPost, type LinkResult, type LinkView } from "../_shared/email-links.ts";
+import { type EmailLinkDeps, LINK_HEADERS, linkRequest, type LinkResult, type LinkView } from "../_shared/email-links.ts";
 
 // P0.1-08: anon can no longer run google_mode(), so the signed-out confirm page gets the Test mode flag from here.
 async function mode(): Promise<"mock" | "live"> {
@@ -63,20 +64,15 @@ function deps(req: Request): EmailLinkDeps {
 
 export async function action(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
-  const ip = req.headers.get("cf-connecting-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  // D266: this is the token-guessing surface (public, unauthenticated GET/POST) — fail closed if the limiter breaks.
-  if (!(await rateLimit(`action:${await sha256Hex(ip + new Date().toISOString().slice(0, 10))}`, 60, 600, { failClosed: true }))) return fail("rate_limited", "Too many tries.", 429);
+  const ip = clientIp(req);
+  // D266: this is the token-guessing surface (public, unauthenticated GET/POST): fail closed if the limiter breaks.
+  if (!(await rateLimit(`action:${await sha256Hex(ip + new Date().toISOString().slice(0, 10))}`, 60, 600, { failClosed: true }))) return json({ error: "rate_limited", message: "Too many tries." }, 429, LINK_HEADERS);
 
   try {
-    if (req.method === "GET") {
-      const r = await linkGet(new URL(req.url).searchParams.get("t"), deps(req));
-      return json(r.body, r.status);
-    }
-    if (req.method !== "POST") return fail("method_not_allowed", "Use GET or POST.", 405);
-    const r = await linkPost(await req.json().catch(() => ({})), deps(req));
-    return json(r.body, r.status);
+    const r = await linkRequest(req, deps(req));
+    return json(r.body, r.status, LINK_HEADERS);
   } catch (e) {
     await captureError("action", e);
-    return fail("internal", "Something went wrong. Nothing was posted. Try again from your Kabsi inbox.", 500);
+    return json({ error: "internal", message: "Something went wrong. Nothing was posted. Try again from your Kabsi inbox." }, 500, LINK_HEADERS);
   }
 }

@@ -1,7 +1,9 @@
 // review-link: the free "Google review link and QR code" tool on /google-review-link (public, no sign-in).
 // POST { query } → up to 5 businesses with their Google review link. The Places key never reaches the browser.
 // Abuse limits: 20 searches per visitor per hour (keyed by a salted hash of the IP, kept 1 hour, never the IP
-// itself) and 400 searches a day in total, so the Places bill stays inside the free monthly credit.
+// itself) and 400 searches a day in total, so the Places bill stays inside the free monthly credit. Sec 1: every limit
+// fails closed (D266, a paid lookup), so a limiter outage cannot let the free tool use up the shared Places cap.
+import { clientIp } from "../_shared/client-ip.ts";
 import { searchText } from "../_shared/google/index.ts";
 import { captureError, CORS, fail, json, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { FREE_TOOL_BUSY } from "../_shared/free-tool-busy.ts";
@@ -10,17 +12,17 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return fail("method_not_allowed", "Use POST.", 405);
 
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  const ip = clientIp(req);
   const day = new Date().toISOString().slice(0, 10);
   const visitor = (await sha256Hex(`${Deno.env.get("SUPABASE_URL")}:${day}:${ip}`)).slice(0, 24);
   // G-16 (P0.6-05): at most 10 requests a minute per IP on a free tool, before anything else runs.
-  if (!(await rateLimit(`review-link:min:${visitor}`, 10, 60))) {
+  if (!(await rateLimit(`review-link:min:${visitor}`, 10, 60, { failClosed: true }))) {
     return fail("rate_limited", "That's a lot of searches. Try again in a minute.", 429);
   }
-  if (!(await rateLimit(`review-link:${visitor}`, 20, 3600))) {
+  if (!(await rateLimit(`review-link:${visitor}`, 20, 3600, { failClosed: true }))) {
     return fail("rate_limited", "That's a lot of searches. Try again in an hour.", 429);
   }
-  if (!(await rateLimit("review-link:all", 400, 86400))) {
+  if (!(await rateLimit("review-link:all", 400, 86400, { failClosed: true }))) {
     return fail("busy", FREE_TOOL_BUSY, 429);
   }
 

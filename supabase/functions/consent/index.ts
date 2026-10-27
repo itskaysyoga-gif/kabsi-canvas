@@ -3,6 +3,7 @@
 // The browser sends the country it applied (read on kabsi.co from the network) and its time zone; the rule is worked
 // out here again and the exact wording stored is this function's own copy for that version, never text from the browser.
 // One row per choice. The signed-in user is attached when the call carries their session. No IP, email or name is kept.
+import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
 import { type ConsentInput, consentRow } from "../_shared/consent-row.ts";
 
@@ -14,7 +15,7 @@ Deno.serve(async (req) => {
   const built = consentRow(b);
   if ("error" in built) return fail(built.error, "Your choice could not be saved.");
 
-  const ip = req.headers.get("cf-connecting-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = clientIp(req);
   const day = new Date().toISOString().slice(0, 10);
   if (!(await rateLimit(`consent:${await sha256Hex(`${ip}|${day}`)}`, 30, 3600))) {
     return fail("rate_limited", "Too many requests. Try again later.", 429);

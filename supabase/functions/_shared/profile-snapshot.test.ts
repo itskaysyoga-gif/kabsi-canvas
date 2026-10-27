@@ -436,3 +436,22 @@ Deno.test("whatsapp: phone numbers, the words and the one-line message", () => {
   const strong = whatsappParams(buildSnapshot(PLACE_A, FULL, true));
   assert.equal(strong[1], "Nothing needs fixing in what Google shows the public.");
 });
+
+Deno.test("Sec 1: one address gets at most two check emails a day, from any visitor and for any place", async () => {
+  const w = world();
+  try {
+    const send = (ip: string, place = PLACE_A) =>
+      w.call({ action: "email", place_id: place, email: "someone@example-cafe.com", tips: false, consent_text: TIPS_CONSENT_TEXT, page: "/google-profile-check" }, ip);
+    assert.equal((await send("203.0.113.1")).status, 200);
+    assert.equal((await send("203.0.113.2")).status, 200);
+    const third = await send("203.0.113.3");
+    assert.equal(third.status, 429);
+    assert.equal(third.body.error, "address_limit");
+    assert.equal(w.sent.length, 2);
+    // Another address from the same visitor still goes.
+    const other = await w.call({ action: "email", place_id: PLACE_A, email: "owner@example-cafe.com", tips: false, consent_text: TIPS_CONSENT_TEXT, page: "/google-profile-check" }, "203.0.113.3");
+    assert.equal(other.status, 200);
+  } finally {
+    restore();
+  }
+});

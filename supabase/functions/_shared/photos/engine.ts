@@ -1,6 +1,6 @@
 // The process_photo job's work (P0.5-01): one uploaded file in, one checked photo (or a plain refusal) out. Storage
 // and the database are passed in, so the tests run on real files without either. The `photos` function wires them.
-import { intakeRefusal, sniff } from "./sniff.ts";
+import { intakeRefusal, sniff, TOO_MANY_PIXELS } from "./sniff.ts";
 import { type Decode, decodePhoto, processPhoto } from "./process.ts";
 import { ISSUE_TEXT } from "./quality.ts";
 
@@ -48,7 +48,7 @@ export async function processUpload(photoId: string, deps: EngineDeps): Promise<
   const bytes = await deps.download(photo.original_path ?? photo.storage_path);
   if (!bytes) return await deps.record(photoId, { outcome: "refused", reason: "The file did not arrive. Send it again." });
   const s = sniff(bytes);
-  const refusal = intakeRefusal(s, bytes.length);
+  const refusal = intakeRefusal(s, bytes.length, bytes);
   if (refusal) return await deps.record(photoId, { outcome: "refused", reason: refusal, bytes: bytes.length });
   if (s.kind === "video") return await deps.record(photoId, { outcome: "video", bytes: bytes.length });
   if (s.kind !== "photo") return await deps.record(photoId, { outcome: "refused", reason: UNREADABLE, bytes: bytes.length });
@@ -57,6 +57,9 @@ export async function processUpload(photoId: string, deps: EngineDeps): Promise<
   try {
     out = await processPhoto(bytes, s, deps.decode ?? decodePhoto, await deps.others(photo.location_id, photoId));
   } catch (e) {
+    if (String(e).includes("photo_too_many_pixels")) {
+      return await deps.record(photoId, { outcome: "refused", reason: TOO_MANY_PIXELS, bytes: bytes.length });
+    }
     if (String(e).includes("photo_too_large")) {
       return await deps.record(photoId, { outcome: "refused", reason: "This photo is too large for Google even after resizing.", bytes: bytes.length });
     }

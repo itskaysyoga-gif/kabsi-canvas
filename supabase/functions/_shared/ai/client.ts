@@ -110,7 +110,9 @@ export async function draftMessage(system: System, user: string, maxTokens: numb
  *  fence), is ignored: the live evaluation of 25 Oct failed one review because the model wrote text after its JSON. */
 export function parseJson<T>(text: string): T {
   let from = text.indexOf("{");
-  if (from < 0) throw new Error(`model returned no JSON: ${text.slice(0, 120)}`);
+  // Sec 1: the length only. The model's text can hold a reviewer's name or the review itself, and this message reaches
+  // the logs, Sentry and the jobs table.
+  if (from < 0) throw new Error(`model returned no JSON (${text.length} characters)`);
   while (from >= 0) {
     const end = objectEnd(text, from);
     if (end > from) {
@@ -122,7 +124,7 @@ export function parseJson<T>(text: string): T {
     }
     from = text.indexOf("{", from + 1);
   }
-  throw new Error(`model returned no JSON: ${text.slice(0, 120)}`);
+  throw new Error(`model returned no JSON (${text.length} characters)`);
 }
 
 /** The index of the brace that closes the object opened at `from`, braces inside strings ignored; -1 when it never closes. */

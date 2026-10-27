@@ -4,6 +4,7 @@
 import { googleMode, invitationSearch, listAccountsOnce, refreshToken, searchText } from "../_shared/google/index.ts";
 import { languageOf, placeFromResults, streetPart } from "../_shared/invitations.ts";
 import { queueResponse, type QueueHealthRow } from "../_shared/queue-health.ts";
+import { secretMatches } from "../_shared/sec1/guards.ts";
 
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { "content-type": "application/json" } });
 async function isInternal(req: Request) {
@@ -14,7 +15,8 @@ async function isInternal(req: Request) {
     headers: { "content-type": "application/json", apikey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` },
     body: JSON.stringify({ p_name: "cron_secret" }),
   });
-  return res.ok && given === (await res.json());
+  // Sec 1: constant time, like isInternal in _shared/kabsi.ts.
+  return res.ok && secretMatches(given, await res.json());
 }
 
 // D295: a redeploy once reset verify_jwt and every cron call got 401 for a day while pg_cron still showed

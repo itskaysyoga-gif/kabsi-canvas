@@ -33,4 +33,9 @@ supabase test db
 # Two real sessions at once (P0.1-12a): not expressible inside one pgTAP transaction.
 bash supabase/tests/jobs_claim_concurrency.sh "$db_url"
 bash supabase/tests/publication_concurrency.sh "$db_url"
+# Sec 1: fast-check property tests of approve, edit, Undo, retry and revoke in random orders, against the real
+# functions. Copied out of the repo so Deno does not install the app's package.json. Needs Deno (CI sets it up).
+prop_dir="$(mktemp -d)"
+cp supabase/tests/sec1_approval_properties.ts "$prop_dir/"
+(cd "$prop_dir" && deno run --allow-net --allow-env --allow-read --no-lock sec1_approval_properties.ts "$db_url")
 echo "Database suite finished in $(( $(date +%s) - started )) s"
