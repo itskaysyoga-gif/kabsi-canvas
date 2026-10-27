@@ -331,11 +331,12 @@ Deno.test("Email 1: the 30.15 section 6 set is in the catalog with COPY.md 25's 
   assert.equal(find("life_no_access_24h").content.subject, "Rose Lane Salon: one step left in your setup");
   assert.equal(find("life_no_access_24h").content.button?.url, "https://kabsi.co/start/resume/3f9a1c7e5b2d4086a1ce");
   assert.match(render(find("one_reminder")).text, /This is the only reminder Kabsi sends for this reply\./);
+  assert.match(render(find("receipt")).text, /Payments are processed by Creem, our merchant of record\./);
   assert.equal(find("life_trial_day11").content.button?.label, "Choose my plan");
   assert.match(find("life_trial_day11").content.text, /Or let it end\./);
   assert.equal(find("payment_failed").content.button?.label, "Update my card");
   assert.equal(find("plan_cancelled").content.button?.label, "Keep my plan");
-  assert.match(find("receipt").content.text, /Payments are processed by Creem, our merchant of record\./);
+  assert.equal(find("receipt").content.note, "Payments are processed by Creem, our merchant of record.");
   assert.equal(find("life_welcome").content.button?.label, "Add Kabsi as a Manager");
   assert.match(find("life_welcome").content.note ?? "", /Google Business Profile is free from Google\. Kabsi is an independent paid service\./);
   // Account mail a person cannot switch off has no unsubscribe link (checked for every email above).
@@ -348,5 +349,17 @@ Deno.test("Email 1: the examples are Rose Lane Salon in Dubai, never a Beirut ad
   for (const c of catalog()) {
     const { html, text } = render(c);
     assert.doesNotMatch(`${c.content.subject}\n${text}\n${html}`, /Beirut|Hamra|Yawmiyati|man'oushe|manakish/i, c.kind);
+  }
+});
+
+Deno.test("Email 1: the plain text says each line once (the note is added by the template, not repeated by the email)", () => {
+  for (const c of catalog()) {
+    const { text } = render(c);
+    const lines = text.split("\n").map((l) => l.trim()).filter((l) => l.length > 30 && !/^[A-Z][a-z ]+: https?:/.test(l));
+    const seen = new Set<string>();
+    for (const l of lines) {
+      assert.ok(!seen.has(l), `${c.kind}: "${l}" appears twice`);
+      seen.add(l);
+    }
   }
 });

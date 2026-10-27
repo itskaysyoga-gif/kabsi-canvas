@@ -108,7 +108,7 @@ export function oneReminder(o: { business: string; what: "reply" | "post" | "cha
     subject: `${o.business}: a ${noun} is ready for your yes`, title: `A ${noun} is waiting.`, preheader: "Nothing has been published. Review it now, or later.",
     bodyHtml: para(esc(lead)) + (o.draft ? card({ label, html: esc(o.draft).replace(/\n/g, "<br>") }) : ""),
     button: { label: "Review it", url: o.url }, note: only,
-    text: `${lead}${o.draft ? `\n\n${label}:\n${o.draft}` : ""}\n\nReview it: ${o.url}\n\n${only}`,
+    text: `${lead}${o.draft ? `\n\n${label}:\n${o.draft}` : ""}\n\nReview it: ${o.url}`,
   };
 }
 
@@ -125,7 +125,7 @@ export function accessStopped(o: { business: string; waiting?: number }, appUrl:
     preheader: "Nothing was published. Your approved work waits until access works.",
     bodyHtml: para(esc(lead)) + card({ label: "What happens next", tone: "bad", html: esc(next) }) + para(esc(steps)),
     button: { label: "Check Kabsi's access", url: `${appUrl}/app/settings` }, note: onPurpose,
-    text: `${lead}\n\nWhat happens next: ${next}\n\n${steps}\n\n${onPurpose}`,
+    text: `${lead}\n\nWhat happens next: ${next}\n\n${steps}`,
   };
 }
 
@@ -166,7 +166,7 @@ export function receiptEmail(o: { business: string; plan: string; amount: number
     subject: `Receipt: ${o.plan}`, title: "Thank you. Your payment went through.", preheader: `${money(o.amount)} paid on ${paid}.`,
     bodyHtml: table + para(esc(after), { muted: true }),
     button: { label: "See your plan", url: `${appUrl}/app/plan` }, note: mor,
-    text: `${rows.map(([k, v]) => `${k}: ${v}`).join("\n")}\n\n${after}\n\n${mor}`,
+    text: `${rows.map(([k, v]) => `${k}: ${v}`).join("\n")}\n\n${after}`,
   };
 }
 
@@ -180,7 +180,7 @@ export function paymentFailed(o: { business: string; plan?: string | null; amoun
     title: "Your payment did not go through.", preheader: o.graceEnds ? `Kabsi keeps working until ${dayMonth(o.graceEnds, tz)} while you fix it.` : "Kabsi keeps working for 7 days while you fix it.",
     bodyHtml: para(esc(lead)) + para(`Business: ${esc(o.business)}.`, { muted: true }),
     button: { label: "Update my card", url: o.portal }, note: help,
-    text: `${lead}\n\nBusiness: ${o.business}.\n\n${help}`,
+    text: `${lead}\n\nBusiness: ${o.business}.`,
   };
 }
 
@@ -193,7 +193,7 @@ export function planCancelled(o: { business: string; plan?: string | null; ends?
     subject: "Your Kabsi plan is cancelled", title: "Your plan is cancelled.", preheader: end ? `Everything works until ${end}.` : "Everything works until your plan ends.",
     bodyHtml: para(esc(lead)) + card({ label: end ? `After ${end}` : "After your plan ends", html: esc(after) }),
     button: { label: "Keep my plan", url: `${appUrl}/app/plan` }, note: ask,
-    text: `${lead}\n\n${end ? `After ${end}` : "After your plan ends"}: ${after}\n\n${ask}`,
+    text: `${lead}\n\n${end ? `After ${end}` : "After your plan ends"}: ${after}`,
   };
 }
 
