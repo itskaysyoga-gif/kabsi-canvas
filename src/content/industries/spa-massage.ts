@@ -158,5 +158,5 @@ export const spaMassage: Industry = {
       a: "You can remove Kabsi any time. On Google: your profile, Business Profile settings, People and access, Kabsi Clients, Remove. Kabsi loses access at once.",
     },
   ],
-  guides: ["how-to-choose-your-primary-category", "how-to-set-holiday-hours-on-google"],
+  guides: ["how-to-reply-to-google-reviews", "how-to-choose-your-primary-category"],
 };

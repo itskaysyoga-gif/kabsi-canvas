@@ -154,5 +154,5 @@ export const physiotherapy: Industry = {
       a: "No. Google does not allow free or discounted services in return for a review. Ask every patient the same way.",
     },
   ],
-  guides: ["how-to-reply-to-google-reviews", "how-to-get-more-google-reviews"],
+  guides: ["how-to-reply-to-google-reviews", "google-review-link-and-qr-code"],
 };

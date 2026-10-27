@@ -156,5 +156,5 @@ export const barbershop: Industry = {
       a: "No. Google does not allow free or discounted services in exchange for a review. Kabsi gives your barbers a ready message with your review link to forward after a real visit, and never receives a customer's number.",
     },
   ],
-  guides: ["how-to-get-more-google-reviews", "how-to-set-holiday-hours-on-google"],
+  guides: ["google-review-link-and-qr-code", "how-to-set-holiday-hours-on-google"],
 };

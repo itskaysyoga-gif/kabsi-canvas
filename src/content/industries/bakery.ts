@@ -158,5 +158,5 @@ export const bakery: Industry = {
       a: "No. The Kabsi chat is between Kabsi and you. It prepares your hours, posts and replies, and it does not talk to your customers.",
     },
   ],
-  guides: ["how-to-set-holiday-hours-on-google", "how-to-get-more-google-reviews"],
+  guides: ["how-to-set-holiday-hours-on-google", "google-review-link-and-qr-code"],
 };

@@ -153,5 +153,5 @@ export const cafe: Industry = {
       a: "It sends the review to you with no draft and a way to reach a person at Kabsi. Nothing is published until you write and approve a reply.",
     },
   ],
-  guides: ["how-to-get-more-google-reviews", "how-to-set-holiday-hours-on-google"],
+  guides: ["google-review-link-and-qr-code", "how-to-set-holiday-hours-on-google"],
 };
