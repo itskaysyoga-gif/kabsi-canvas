@@ -23,13 +23,13 @@ export function CoachList({
         return (
           <li
             key={r.id}
-            className="rounded-card border-2 border-kb-hairline p-4"
+            className="rounded-card border-2 border-line p-4"
             data-testid={`coach-${r.id}`}
           >
             <StatusPill tone={TONE[r.status]}>{STATUS_LABEL[r.status]}</StatusPill>
             <p className="mt-2 font-bold">{r.title}</p>
-            <p className="mt-1 text-sm leading-6 text-kb-stone">{r.why}</p>
-            {line ? <p className="mt-1 text-sm font-medium">{line}</p> : null}
+            <p className="mt-1 text-small leading-6 text-text-2">{r.why}</p>
+            {line ? <p className="mt-1 text-small font-medium">{line}</p> : null}
           </li>
         );
       })}

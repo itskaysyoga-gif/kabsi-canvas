@@ -27,13 +27,13 @@ export function SessionEndedGate() {
       role="alertdialog"
       aria-modal="true"
       aria-labelledby="session-ended-title"
-      className="fixed inset-0 z-50 grid place-items-center bg-kb-sand/95 p-4"
+      className="fixed inset-0 z-50 grid place-items-center bg-surface-0/95 p-4"
     >
-      <div className="w-full max-w-sm rounded-large bg-kb-white p-6 text-center shadow-kb">
-        <h2 id="session-ended-title" className="font-display text-2xl leading-tight">
+      <div className="w-full max-w-sm rounded-panel bg-surface-1 p-6 text-center shadow-rest">
+        <h2 id="session-ended-title" className="font-display text-h3 leading-tight">
           {SESSION_ENDED}
         </h2>
-        <p className="mt-2 text-sm text-kb-stone">Nothing was sent. Sign in and try again.</p>
+        <p className="mt-2 text-small text-text-2">Nothing was sent. Sign in and try again.</p>
         <Button className="mt-4 w-full" onClick={() => void again()}>
           Sign in again
         </Button>

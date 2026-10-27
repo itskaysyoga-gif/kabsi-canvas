@@ -65,7 +65,7 @@ function Page() {
         <Breadcrumbs items={[{ name: "Guides", to: "/guides" }, { name: g.title }]} />
         <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-14">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-kb-stone">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-small text-text-2">
               <IconBadge icon={GUIDE_ICONS[g.slug]} className="size-12 [&_svg]:size-6" />
               <span className="inline-flex items-center gap-1.5">
                 <Clock3 className="size-4" aria-hidden="true" /> {g.minutes} min read
@@ -77,7 +77,7 @@ function Page() {
             <h1 className="mt-5 font-display text-[clamp(2.2rem,5vw,3.5rem)] leading-[1.02] text-balance">
               {g.title}
             </h1>
-            <p className="mt-4 max-w-2xl text-lg leading-8 text-kb-stone">{g.description}</p>
+            <p className="mt-4 max-w-2xl text-title leading-8 text-text-2">{g.description}</p>
             <Photo
               id={g.photo}
               priority
@@ -87,11 +87,11 @@ function Page() {
             <div className="mt-8">
               <KeyPoints items={g.summary} />
             </div>
-            <article className="mt-10 space-y-6 text-[17px] leading-8 text-kb-ink sm:text-lg [&_a]:font-bold [&_a]:underline [&_a]:underline-offset-4 [&_b]:font-bold [&>h2]:!mt-12 [&>h2]:font-display [&>h2]:text-3xl [&>h2]:leading-tight [&>ul]:list-disc [&>ul]:space-y-1 [&>ul]:pl-6">
+            <article className="mt-10 space-y-6 text-[17px] leading-8 text-text-1 sm:text-title [&_a]:font-bold [&_a]:underline [&_a]:underline-offset-4 [&_b]:font-bold [&>h2]:!mt-12 [&>h2]:font-display [&>h2]:text-h3 [&>h2]:leading-tight [&>ul]:list-disc [&>ul]:space-y-1 [&>ul]:pl-6">
               {g.body}
             </article>
-            <aside className="mt-12 rounded-large border border-kb-hairline p-5 text-sm text-kb-stone">
-              <p className="font-bold text-kb-ink">Sources</p>
+            <aside className="mt-12 rounded-panel border border-line p-5 text-small text-text-2">
+              <p className="font-bold text-text-1">Sources</p>
               <ul className="mt-2 space-y-1.5">
                 {g.sources.map((s) => (
                   <li key={s.href}>
@@ -99,7 +99,7 @@ function Page() {
                       href={s.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 underline underline-offset-4 hover:text-kb-black"
+                      className="inline-flex items-center gap-1.5 underline underline-offset-4 hover:text-text-1"
                     >
                       {s.label}
                       <ExternalLink className="size-3.5" aria-hidden="true" />
@@ -111,11 +111,11 @@ function Page() {
             </aside>
           </div>
           <aside className="lg:sticky lg:top-28 lg:self-start">
-            <div className="overflow-hidden rounded-large bg-kb-carbon text-kb-white">
+            <div className="overflow-hidden rounded-panel bg-kb-carbon text-kb-white">
               <div className="p-6">
                 <KabsiMark className="size-9" />
-                <p className="mt-4 text-xl font-bold leading-snug">{BRAND_LINE}</p>
-                <p className="mt-2 text-sm leading-6 text-kb-stone-on-dark">{BRAND_EXPLAINER}</p>
+                <p className="mt-4 text-title font-bold leading-snug">{BRAND_LINE}</p>
+                <p className="mt-2 text-small leading-6 text-kb-mute">{BRAND_EXPLAINER}</p>
                 <Button asChild className="mt-5 w-full">
                   <Link to="/start">
                     {CTA_PRIMARY} <ArrowRight />
@@ -125,12 +125,12 @@ function Page() {
             </div>
             <Link
               to="/google-review-link"
-              className="kb-lift mt-4 flex items-center gap-4 rounded-large border border-kb-hairline bg-kb-white p-5"
+              className="kb-lift mt-4 flex items-center gap-4 rounded-panel border border-line bg-surface-1 p-5"
             >
               <IconBadge icon={<QrCode />} />
               <span>
                 <span className="block font-bold">Free review link and QR</span>
-                <span className="block text-sm text-kb-stone">No sign-up, from any phone.</span>
+                <span className="block text-small text-text-2">No sign-up, from any phone.</span>
               </span>
             </Link>
             <IndustryLinks className="mt-6" />
@@ -139,7 +139,7 @@ function Page() {
       </Section>
 
       <Section tone="sand">
-        <h2 className="font-display text-3xl leading-tight">More guides</h2>
+        <h2 className="font-display text-h3 leading-tight">More guides</h2>
         <ul data-stagger="" className="mt-6 grid gap-4 md:grid-cols-3">
           {more.map((m) => {
             return (
@@ -147,9 +147,9 @@ function Page() {
                 <Link
                   to="/guides/$slug"
                   params={{ slug: m.slug }}
-                  className="kb-lift group flex h-full flex-col overflow-hidden rounded-large bg-kb-white shadow-kb"
+                  className="kb-lift group flex h-full flex-col overflow-hidden rounded-panel bg-surface-1 shadow-rest"
                 >
-                  <span className="block aspect-[16/9] overflow-hidden bg-kb-hairline">
+                  <span className="block aspect-[16/9] overflow-hidden bg-line">
                     <SiteImg
                       id={m.photo}
                       min={480}

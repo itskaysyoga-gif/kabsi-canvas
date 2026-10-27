@@ -34,28 +34,26 @@ function KabsiCard({
   return (
     <article
       className={cn(
-        "rounded-card border bg-kb-white p-5 shadow-kb",
-        needsYou ? "border-kb-yellow ring-2 ring-kb-yellow" : "border-kb-hairline",
+        "rounded-card border bg-surface-1 p-5 shadow-rest",
+        needsYou ? "border-kb-yellow ring-2 ring-kb-yellow" : "border-line",
         className,
       )}
       {...props}
     >
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          {eyebrow ? (
-            <p className="text-kb-caption font-semibold text-kb-stone">{eyebrow}</p>
-          ) : null}
-          <h3 className="text-kb-lead font-bold leading-snug">{title}</h3>
+          {eyebrow ? <p className="text-small font-semibold text-text-2">{eyebrow}</p> : null}
+          <h3 className="text-lead font-bold leading-snug">{title}</h3>
         </div>
         {status ? <StatusPill tone={status.tone}>{status.label}</StatusPill> : null}
       </header>
       {draft ? (
-        <blockquote className="mt-4 rounded-lg bg-kb-sand p-4 text-kb-body text-kb-ink">
+        <blockquote className="mt-4 rounded-lg bg-surface-2 p-4 text-body text-text-1">
           {draft}
         </blockquote>
       ) : null}
       {children ? <div className="mt-4">{children}</div> : null}
-      {note ? <p className="mt-3 text-kb-small text-kb-stone">{note}</p> : null}
+      {note ? <p className="mt-3 text-small text-text-2">{note}</p> : null}
       {actions ? <div className="mt-4 flex flex-wrap items-center gap-3">{actions}</div> : null}
     </article>
   );

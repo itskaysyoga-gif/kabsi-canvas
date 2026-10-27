@@ -37,36 +37,36 @@ export function ChangeCardView({
   const before = change.previous_value?.display || "(empty)";
   const now = change.google_value?.display || "(empty)";
   return (
-    <article className="rounded-large border-2 border-kb-black bg-kb-white p-6">
+    <article className="rounded-panel border-2 border-text-1 bg-surface-1 p-6">
       <p className="font-bold">{label(change.field)} changed on Google</p>
-      <p className="mt-1 text-sm text-kb-stone">{when}</p>
+      <p className="mt-1 text-small text-text-2">{when}</p>
       {change.explanation ? <p className="mt-3 leading-7">{change.explanation}</p> : null}
-      <p className="mt-1 text-sm text-kb-stone">{WHO[change.source] ?? WHO["scheduled_check"]}</p>
+      <p className="mt-1 text-small text-text-2">{WHO[change.source] ?? WHO["scheduled_check"]}</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-card bg-kb-sand p-3">
-          <p className="text-xs font-bold uppercase text-kb-stone">
+        <div className="rounded-card bg-surface-2 p-3">
+          <p className="text-label font-bold uppercase text-text-2">
             {confirmed ? "You approved" : "Not yet confirmed by you"}
           </p>
           <p dir="auto" className="mt-1">
             {before}
           </p>
         </div>
-        <div className="rounded-card bg-kb-sand p-3">
-          <p className="text-xs font-bold uppercase text-kb-stone">Google shows now</p>
+        <div className="rounded-card bg-surface-2 p-3">
+          <p className="text-label font-bold uppercase text-text-2">Google shows now</p>
           <p dir="auto" className="mt-1">
             {now}
           </p>
         </div>
       </div>
       {googleRight && change.recommend_reason ? (
-        <p className="mt-4 rounded-card bg-kb-sand p-3 text-sm">
+        <p className="mt-4 rounded-card bg-surface-2 p-3 text-small">
           <span className="font-bold">Kabsi recommends “Google is right”.</span>{" "}
           {change.recommend_reason}
         </p>
       ) : null}
-      {risky ? <p className="mt-3 text-sm text-kb-stone">{VERIFY_WARNING}</p> : null}
+      {risky ? <p className="mt-3 text-small text-text-2">{VERIFY_WARNING}</p> : null}
       {!confirmed ? (
-        <p className="mt-3 text-sm text-kb-stone">
+        <p className="mt-3 text-small text-text-2">
           You have not confirmed this detail yet, so Kabsi will not put the old value back.
         </p>
       ) : null}

@@ -30,10 +30,10 @@ export function ScenarioPicker({
   return (
     <section
       aria-label="Something not working"
-      className="mt-8 rounded-card border-2 border-kb-hairline p-4"
+      className="mt-8 rounded-card border-2 border-line p-4"
     >
-      <h2 className="text-lg font-bold">Something not working?</h2>
-      <p className="mt-1 text-sm leading-6 text-kb-stone">
+      <h2 className="text-title font-bold">Something not working?</h2>
+      <p className="mt-1 text-small leading-6 text-text-2">
         Answer these and we show you what to do. You can come back to the steps any time.
       </p>
       <ul className="mt-4 space-y-4">
@@ -49,10 +49,10 @@ export function ScenarioPicker({
                   aria-pressed={answers[q.id] === v}
                   onClick={() => answer(q.id, v)}
                   className={cn(
-                    "min-h-11 rounded-pill border-2 px-4 text-base font-bold",
+                    "min-h-11 rounded-pill border-2 px-4 text-body font-bold",
                     answers[q.id] === v
-                      ? "border-kb-black bg-kb-black text-kb-white"
-                      : "border-kb-black bg-transparent text-kb-black hover:bg-kb-sand",
+                      ? "border-text-1 bg-kb-black text-kb-white"
+                      : "border-text-1 bg-transparent text-text-1 hover:bg-surface-2",
                   )}
                 >
                   {v === "yes" ? "Yes" : "No"}
@@ -63,11 +63,11 @@ export function ScenarioPicker({
         ))}
       </ul>
       {allClear ? (
-        <p className="mt-4 rounded-card bg-kb-sand p-3 text-sm leading-6" role="status">
+        <p className="mt-4 rounded-card bg-surface-2 p-3 text-small leading-6" role="status">
           Then nothing is in the way. Follow the steps above, and add Kabsi as a Manager.
         </p>
       ) : null}
-      <p className="mt-5 text-sm font-bold">Or it is one of these</p>
+      <p className="mt-5 text-small font-bold">Or it is one of these</p>
       <ul className="mt-2 space-y-2">
         {MORE_SITUATIONS.map((id) => (
           <li key={id}>
@@ -75,7 +75,7 @@ export function ScenarioPicker({
               type="button"
               disabled={busy}
               onClick={() => onPick(id)}
-              className="flex min-h-11 w-full items-center rounded-card border border-kb-hairline px-3 py-2 text-left text-sm font-medium hover:border-kb-stone"
+              className="flex min-h-11 w-full items-center rounded-card border border-line px-3 py-2 text-left text-small font-medium hover:border-stroke"
             >
               {SITUATION_LABELS[id]}
             </button>

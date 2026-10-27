@@ -86,8 +86,8 @@ export function WeekEditor({
   }
 
   return (
-    <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
-      <ul className="divide-y divide-kb-hairline">
+    <div className="mt-7 rounded-panel bg-surface-1 p-6 shadow-rest sm:p-7">
+      <ul className="divide-y divide-line">
         {DAY_KEYS.map((day) => {
           const periods = week[day];
           const open = periods.length > 0;
@@ -106,7 +106,7 @@ export function WeekEditor({
                       type="button"
                       aria-pressed={open === o}
                       onClick={() => open !== o && toggle(day, o)}
-                      className={`h-10 min-w-20 rounded-card border-2 px-3 text-sm font-bold ${open === o ? "border-kb-black bg-kb-sand" : "border-kb-hairline"}`}
+                      className={`h-10 min-w-20 rounded-card border-2 px-3 text-small font-bold ${open === o ? "border-text-1 bg-surface-2" : "border-line"}`}
                     >
                       {o ? "Open" : "Closed"}
                     </button>
@@ -123,7 +123,7 @@ export function WeekEditor({
                         value={p.open}
                         onChange={(e) => edit((w) => void (w[day][i]!.open = e.target.value))}
                       />
-                      <span className="text-sm text-kb-stone">to</span>
+                      <span className="text-small text-text-2">to</span>
                       <Input
                         type="time"
                         aria-label={`${DAY_LABEL[day]} closes`}
@@ -135,7 +135,7 @@ export function WeekEditor({
                           type="button"
                           aria-label={`Remove this period on ${DAY_LABEL[day]}`}
                           onClick={() => edit((w) => void w[day].splice(i, 1))}
-                          className="grid size-10 shrink-0 place-items-center rounded-card text-kb-stone hover:text-kb-black"
+                          className="grid size-10 shrink-0 place-items-center rounded-card text-text-2 hover:text-text-1"
                         >
                           ×
                         </button>
@@ -149,7 +149,7 @@ export function WeekEditor({
                         onClick={() =>
                           edit((w) => void w[day].push({ open: "14:00", close: "18:00" }))
                         }
-                        className="min-h-10 text-sm font-bold underline underline-offset-4"
+                        className="min-h-10 text-small font-bold underline underline-offset-4"
                       >
                         Add more hours
                       </button>
@@ -162,7 +162,7 @@ export function WeekEditor({
                             for (const d of DAY_KEYS) w[d] = w.MONDAY.map((p) => ({ ...p }));
                           })
                         }
-                        className="min-h-10 text-sm font-bold underline underline-offset-4"
+                        className="min-h-10 text-small font-bold underline underline-offset-4"
                       >
                         Same hours every day
                       </button>
@@ -174,23 +174,23 @@ export function WeekEditor({
           );
         })}
       </ul>
-      <p className="mt-3 text-xs leading-5 text-kb-stone">
+      <p className="mt-3 text-label leading-5 text-text-2">
         To stay open past midnight, set the closing time after midnight (for example 02:00). Closing
         at 00:00 means the end of that day.
       </p>
       {err ? (
-        <p className="mt-3 text-sm text-kb-red" role="alert">
+        <p className="mt-3 text-small text-bad" role="alert">
           {err}
         </p>
       ) : null}
       {msg ? (
-        <p className="mt-3 text-sm text-kb-green" role="status">
+        <p className="mt-3 text-small text-ok" role="status">
           {msg}
         </p>
       ) : null}
       {confirming ? (
-        <div className="mt-5 rounded-card border-2 border-kb-black p-4">
-          <p className="text-sm">Google will show:</p>
+        <div className="mt-5 rounded-card border-2 border-text-1 p-4">
+          <p className="text-small">Google will show:</p>
           <ul className="mt-1 space-y-0.5 font-bold">
             {weekSummary(week).map((line) => (
               <li key={line}>{line}</li>

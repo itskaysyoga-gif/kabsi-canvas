@@ -28,7 +28,6 @@ import { Route as SetupCallRouteImport } from './routes/setup-call'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
-import { Route as AuthenticatedDesignRouteImport } from './routes/_authenticated/design'
 import { Route as AuthenticatedStaffRouteImport } from './routes/_authenticated/staff'
 import { Route as AuthenticatedStartRouteImport } from './routes/_authenticated/start'
 import { Route as ATokenRouteImport } from './routes/a.$token'
@@ -153,11 +152,6 @@ const UnsubscribeRoute = UnsubscribeRouteImport.update({
 const AuthenticatedAppRouteRoute = AuthenticatedAppRouteRouteImport.update({
   id: '/app',
   path: '/app',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedDesignRoute = AuthenticatedDesignRouteImport.update({
-  id: '/design',
-  path: '/design',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedStaffRoute = AuthenticatedStaffRouteImport.update({
@@ -338,7 +332,6 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/app': typeof AuthenticatedAppRouteRouteWithChildren
-  '/design': typeof AuthenticatedDesignRoute
   '/staff': typeof AuthenticatedStaffRoute
   '/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
@@ -389,7 +382,6 @@ export interface FileRoutesByTo {
   '/setup-call': typeof SetupCallRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
-  '/design': typeof AuthenticatedDesignRoute
   '/staff': typeof AuthenticatedStaffRoute
   '/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
@@ -443,7 +435,6 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteRouteWithChildren
-  '/_authenticated/design': typeof AuthenticatedDesignRoute
   '/_authenticated/staff': typeof AuthenticatedStaffRoute
   '/_authenticated/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
@@ -497,7 +488,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/unsubscribe'
     | '/app'
-    | '/design'
     | '/staff'
     | '/start'
     | '/a/$token'
@@ -548,7 +538,6 @@ export interface FileRouteTypes {
     | '/setup-call'
     | '/terms'
     | '/unsubscribe'
-    | '/design'
     | '/staff'
     | '/start'
     | '/a/$token'
@@ -601,7 +590,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/unsubscribe'
     | '/_authenticated/app'
-    | '/_authenticated/design'
     | '/_authenticated/staff'
     | '/_authenticated/start'
     | '/a/$token'
@@ -803,13 +791,6 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AuthenticatedAppRouteRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/design': {
-      id: '/_authenticated/design'
-      path: '/design'
-      fullPath: '/design'
-      preLoaderRoute: typeof AuthenticatedDesignRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/staff': {
@@ -1075,14 +1056,12 @@ const AuthenticatedAppRouteRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRouteRoute: typeof AuthenticatedAppRouteRouteWithChildren
-  AuthenticatedDesignRoute: typeof AuthenticatedDesignRoute
   AuthenticatedStaffRoute: typeof AuthenticatedStaffRoute
   AuthenticatedStartRoute: typeof AuthenticatedStartRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRouteRoute: AuthenticatedAppRouteRouteWithChildren,
-  AuthenticatedDesignRoute: AuthenticatedDesignRoute,
   AuthenticatedStaffRoute: AuthenticatedStaffRoute,
   AuthenticatedStartRoute: AuthenticatedStartRoute,
 }

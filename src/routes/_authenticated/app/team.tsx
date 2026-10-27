@@ -32,8 +32,7 @@ export const Route = createFileRoute("/_authenticated/app/team")({
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const KINDS: ApprovalKind[] = ["review_reply", "post", "photo", "hours", "profile_change"];
-const selectClass =
-  "h-[52px] w-full rounded-card border border-kb-hairline bg-kb-white px-4 text-base";
+const selectClass = "h-[52px] w-full rounded-card border border-line bg-surface-1 px-4 text-body";
 
 function TeamPage() {
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
@@ -47,14 +46,12 @@ function TeamPage() {
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Settings</p>
-      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Team</h1>
-      {loc ? <p className="mt-2 text-kb-stone">{loc.name}</p> : null}
-      {location.isLoading || access.isLoading ? (
-        <p className="mt-6 text-kb-stone">Loading…</p>
-      ) : null}
+      <p className="text-small font-bold uppercase tracking-wider text-text-2">Settings</p>
+      <h1 className="mt-1 font-display text-h2 leading-none sm:text-5xl">Team</h1>
+      {loc ? <p className="mt-2 text-text-2">{loc.name}</p> : null}
+      {location.isLoading || access.isLoading ? <p className="mt-6 text-text-2">Loading…</p> : null}
       {loc && access.data && !isOwner ? (
-        <p className="mt-6 leading-7 text-kb-stone">
+        <p className="mt-6 leading-7 text-text-2">
           Only the owner can manage the team. You are{" "}
           {access.data.role === "manager" ? "a manager" : "a staff member"} of this business:{" "}
           {ROLE_HINT[access.data.role].toLowerCase()}
@@ -96,16 +93,16 @@ function TeamManager({ locationId }: { locationId: string }) {
   }
 
   if (team.isError)
-    return <p className="mt-6 text-kb-red">We couldn't load your team. Refresh the page.</p>;
-  if (!team.data) return <p className="mt-6 text-kb-stone">Loading…</p>;
+    return <p className="mt-6 text-bad">We couldn't load your team. Refresh the page.</p>;
+  if (!team.data) return <p className="mt-6 text-text-2">Loading…</p>;
   const t = team.data;
   return (
     <>
-      <section className="mt-8 rounded-large bg-kb-white p-6 shadow-kb" aria-labelledby="invite">
-        <h2 id="invite" className="text-xl font-bold">
+      <section className="mt-8 rounded-panel bg-surface-1 p-6 shadow-rest" aria-labelledby="invite">
+        <h2 id="invite" className="text-title font-bold">
           Invite someone
         </h2>
-        <p className="mt-1 text-sm leading-6 text-kb-stone">
+        <p className="mt-1 text-small leading-6 text-text-2">
           They get an email and join when they sign in with that address.
         </p>
         <form onSubmit={invite} className="mt-4 space-y-4">
@@ -131,29 +128,32 @@ function TeamManager({ locationId }: { locationId: string }) {
               <option value="manager">Manager</option>
               <option value="staff">Staff</option>
             </select>
-            <p className="mt-2 text-sm leading-6 text-kb-stone">{ROLE_HINT[role]}</p>
+            <p className="mt-2 text-small leading-6 text-text-2">{ROLE_HINT[role]}</p>
           </div>
           <Button type="submit" disabled={act.isPending}>
             Send invitation
           </Button>
         </form>
         {message ? (
-          <p className="mt-3 text-sm" role="status">
+          <p className="mt-3 text-small" role="status">
             {message}
           </p>
         ) : null}
       </section>
 
-      <section className="mt-6 rounded-large bg-kb-white p-6 shadow-kb" aria-labelledby="members">
-        <h2 id="members" className="text-xl font-bold">
+      <section
+        className="mt-6 rounded-panel bg-surface-1 p-6 shadow-rest"
+        aria-labelledby="members"
+      >
+        <h2 id="members" className="text-title font-bold">
           People
         </h2>
-        <ul className="mt-4 divide-y divide-kb-hairline">
+        <ul className="mt-4 divide-y divide-line">
           {t.members.map((m) => (
             <li key={m.user_id} className="py-4">
               <p className="break-all font-bold">
                 {m.email}
-                {m.you ? <span className="font-normal text-kb-stone"> (you)</span> : null}
+                {m.you ? <span className="font-normal text-text-2"> (you)</span> : null}
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <select
@@ -165,7 +165,7 @@ function TeamManager({ locationId }: { locationId: string }) {
                     const next = e.target.value as Role;
                     act.mutate(() => setMemberRole(locationId, m.user_id, next));
                   }}
-                  className="h-11 rounded-card border border-kb-hairline bg-kb-white px-3 text-base"
+                  className="h-11 rounded-card border border-line bg-surface-1 px-3 text-body"
                 >
                   {(["owner", "manager", "staff"] as Role[]).map((r) => (
                     <option key={r} value={r}>
@@ -189,7 +189,7 @@ function TeamManager({ locationId }: { locationId: string }) {
           {t.invites.map((i) => (
             <li key={i.id} className="py-4">
               <p className="break-all font-bold">{i.email}</p>
-              <p className="text-sm text-kb-stone">
+              <p className="text-small text-text-2">
                 Invited as {ROLE_LABEL[i.role].toLowerCase()}, not joined yet
               </p>
               <Button
@@ -206,23 +206,26 @@ function TeamManager({ locationId }: { locationId: string }) {
         </ul>
       </section>
 
-      <section className="mt-6 rounded-large bg-kb-white p-6 shadow-kb" aria-labelledby="approvals">
-        <h2 id="approvals" className="text-xl font-bold">
+      <section
+        className="mt-6 rounded-panel bg-surface-1 p-6 shadow-rest"
+        aria-labelledby="approvals"
+      >
+        <h2 id="approvals" className="text-title font-bold">
           Who can approve
         </h2>
-        <p className="mt-1 text-sm leading-6 text-kb-stone">
+        <p className="mt-1 text-small leading-6 text-text-2">
           You approve everything. Turn one on to let managers approve it too. Changes to your
           business name, address, main category or open status, and reviews that need more care,
           always need you.
         </p>
-        <ul className="mt-4 divide-y divide-kb-hairline">
+        <ul className="mt-4 divide-y divide-line">
           {KINDS.map((k) => {
             const p = t.policies[k];
             return (
               <li key={k} className="flex items-center justify-between gap-4 py-3">
                 <Label htmlFor={`policy-${k}`} className="flex-1">
                   {KIND_LABEL[k]}
-                  <span className="block text-sm font-normal text-kb-stone">
+                  <span className="block text-small font-normal text-text-2">
                     {p === "owner_and_managers" ? "You and managers" : "Only you"}
                   </span>
                 </Label>

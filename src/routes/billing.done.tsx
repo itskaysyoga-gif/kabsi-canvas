@@ -14,8 +14,8 @@ export const Route = createFileRoute("/billing/done")({
 function BillingDonePage() {
   return (
     <ConfirmLayout>
-      <h1 className="font-display text-3xl leading-tight">You are all set.</h1>
-      <p className="mt-3 leading-7 text-kb-stone">
+      <h1 className="font-display text-h3 leading-tight">You are all set.</h1>
+      <p className="mt-3 leading-7 text-text-2">
         Your plan starts the day Kabsi&apos;s access to your Google listing works.
       </p>
       <Button asChild className="mt-6 w-full">

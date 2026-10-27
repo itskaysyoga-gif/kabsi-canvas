@@ -10,19 +10,19 @@ import { MANAGER_LINE, managerHref, type ReviewPageData } from "@/lib/review-pag
 export function ReviewPageView({ data }: { data: ReviewPageData }) {
   return (
     <Shell>
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
+      <p className="text-small font-bold uppercase tracking-wider text-text-2">
         Thank you for visiting
       </p>
-      <h1 className="mt-2 font-display text-4xl leading-tight">{data.name}</h1>
-      <p className="mt-3 leading-7 text-kb-stone">
+      <h1 className="mt-2 font-display text-h2 leading-tight">{data.name}</h1>
+      <p className="mt-3 leading-7 text-text-2">
         Tell other people how your visit went. It takes a minute.
       </p>
-      <Button asChild className="mt-7 h-14 w-full text-lg">
+      <Button asChild className="mt-7 h-14 w-full text-title">
         <a href={data.review_url} rel="noopener">
           Write a Google review
         </a>
       </Button>
-      <ul className="mt-6 space-y-2 text-left text-sm leading-6 text-kb-stone">
+      <ul className="mt-6 space-y-2 text-left text-small leading-6 text-text-2">
         <li>Say what you honestly thought. Everyone sees this same page.</li>
         <li>Your review goes to Google. Kabsi does not read it or change it.</li>
       </ul>
@@ -31,7 +31,7 @@ export function ReviewPageView({ data }: { data: ReviewPageData }) {
           href={managerHref(data.whatsapp, data.name)}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 text-sm font-bold"
+          className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 text-small font-bold"
         >
           <MessageCircle className="size-4 shrink-0" aria-hidden="true" />
           <span className="underline underline-offset-4">{MANAGER_LINE}</span>
@@ -44,8 +44,8 @@ export function ReviewPageView({ data }: { data: ReviewPageData }) {
 export function ReviewPageUnavailable() {
   return (
     <Shell>
-      <h1 className="font-display text-3xl leading-tight">This review link is no longer active.</h1>
-      <p className="mt-3 leading-7 text-kb-stone">
+      <h1 className="font-display text-h3 leading-tight">This review link is no longer active.</h1>
+      <p className="mt-3 leading-7 text-text-2">
         Ask the business for a new one. Thank you for trying.
       </p>
     </Shell>
@@ -55,7 +55,7 @@ export function ReviewPageUnavailable() {
 export function ReviewPageLoading() {
   return (
     <Shell>
-      <p className="text-kb-stone" role="status">
+      <p className="text-text-2" role="status">
         Loading…
       </p>
     </Shell>
@@ -64,12 +64,12 @@ export function ReviewPageLoading() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="grid min-h-screen place-items-center bg-kb-sand px-5 py-10">
+    <main className="grid min-h-screen place-items-center bg-surface-2 px-5 py-10">
       <div className="w-full max-w-md">
-        <div className="flex flex-col items-center rounded-large bg-kb-white p-6 text-center shadow-kb sm:p-10">
+        <div className="flex flex-col items-center rounded-panel bg-surface-1 p-6 text-center shadow-rest sm:p-10">
           {children}
         </div>
-        <p className="mt-6 flex items-center justify-center gap-2 text-sm text-kb-stone">
+        <p className="mt-6 flex items-center justify-center gap-2 text-small text-text-2">
           <KabsiMark className="size-5" />
           Kabsi
         </p>

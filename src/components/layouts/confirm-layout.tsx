@@ -18,13 +18,13 @@ export function ConfirmLayout({
   return (
     <>
       <TestModeBanner concierge={concierge} mode={mode} />
-      <main className="grid min-h-screen place-items-center bg-kb-sand px-5 py-10">
+      <main className="grid min-h-screen place-items-center bg-surface-2 px-5 py-10">
         <div className="w-full max-w-xl">
           <div className="mb-7 flex items-center justify-center gap-3">
             <KabsiLogo />
             {demo ? <ExampleBadge>Demo data</ExampleBadge> : null}
           </div>
-          <div className="rounded-large bg-kb-white p-7 shadow-kb sm:p-10">{children}</div>
+          <div className="rounded-panel bg-surface-1 p-7 shadow-rest sm:p-10">{children}</div>
         </div>
       </main>
     </>

@@ -20,15 +20,15 @@ export function HolidayQuestions({
   return (
     <section className="mt-7" aria-label="Holiday hours">
       {prompts.map((p) => (
-        <article key={p.id} className="mb-4 rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
-          <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Coming up</p>
-          <h2 className="mt-1 font-display text-2xl leading-tight">Your hours for {p.name}</h2>
-          <p className="mt-1 text-sm text-kb-stone">
+        <article key={p.id} className="mb-4 rounded-panel bg-surface-1 p-6 shadow-rest sm:p-7">
+          <p className="text-small font-bold uppercase tracking-wider text-text-2">Coming up</p>
+          <h2 className="mt-1 font-display text-h3 leading-tight">Your hours for {p.name}</h2>
+          <p className="mt-1 text-small text-text-2">
             {p.estimated ? "Expected " : ""}
             {whenWords(p.starts_on, p.ends_on)}
           </p>
           {done[p.id] ? (
-            <p className="mt-4 text-sm text-kb-green" role="status">
+            <p className="mt-4 text-small text-ok" role="status">
               {done[p.id]}
             </p>
           ) : (

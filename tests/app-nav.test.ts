@@ -12,33 +12,33 @@ import {
   tabsFor,
 } from "../src/lib/app-nav";
 
-// P0.3-08: app navigation and product names (K-02, K-03). Eight places on a desktop, five items on a phone, every old
-// app address still on a screen, and none of the retired module names in the app.
+// P0.3-08, UX 1: account navigation and product names (K-02, K-03, Design 3's names). Eight places on a desktop, five
+// items on a phone, every old address still on a screen, and none of the retired module names in the account.
 const root = join(__dirname, "..");
 const appDir = join(root, "src/routes/_authenticated/app");
 
 describe("navigation", () => {
-  it("has the eight destinations of K-03 on a desktop, in order", () => {
+  it("has Design 3's eight destinations on a desktop, in order", () => {
     expect(desktopSections("owner").map((s) => s.label)).toEqual([
       "Home",
       "Reviews",
-      "Get Reviews",
-      "Google Profile",
-      "Content",
-      "Insights",
-      "Business Knowledge",
+      "Google profile",
+      "Posts and photos",
+      "Where you show up",
+      "Reports",
+      "Get reviews",
       "Settings",
     ]);
   });
 
-  it("has five items on a phone: Home, Reviews, Profile, Content and More", () => {
+  it("has five items on a phone: Home, Reviews, Profile, Posts and More", () => {
     const bar = phoneBar("owner").map((s) => s.short);
-    expect(bar).toEqual(["Home", "Reviews", "Profile", "Content"]);
+    expect(bar).toEqual(["Home", "Reviews", "Profile", "Posts"]);
     expect(bar.length + 1).toBe(5);
     expect(moreSections("owner").map((s) => s.label)).toEqual([
-      "Get Reviews",
-      "Insights",
-      "Business Knowledge",
+      "Where you show up",
+      "Reports",
+      "Get reviews",
       "Settings",
     ]);
   });
@@ -60,15 +60,23 @@ describe("navigation", () => {
     }
   });
 
-  it("puts the Plan inside Settings and the report inside Insights", () => {
-    expect(SECTIONS.settings.tabs?.map((t) => t.label)).toContain("Plan");
-    expect(SECTIONS.insights.tabs?.map((t) => t.label)).toContain("Weekly Care Report");
+  it("puts the Plan, Team and Business Knowledge inside Settings, and never says listing or visibility", () => {
+    expect(SECTIONS.settings.tabs?.map((t) => t.label)).toEqual([
+      "Settings",
+      "Business Knowledge",
+      "Team",
+      "Plan",
+    ]);
+    for (const s of Object.values(SECTIONS)) {
+      const words = [s.label, s.short, ...(s.tabs ?? []).map((t) => t.label)].join(" ");
+      expect(words).not.toMatch(/listing|visibility|Weekly Care Report/i);
+    }
   });
 });
 
 describe("roles in navigation", () => {
   it("shows staff photos and the review link only, with no More", () => {
-    expect(desktopSections("staff").map((s) => s.label)).toEqual(["Photos", "Get Reviews"]);
+    expect(desktopSections("staff").map((s) => s.label)).toEqual(["Photos", "Get reviews"]);
     expect(phoneBar("staff")).toHaveLength(2);
     expect(moreSections("staff")).toHaveLength(0);
     expect(canOpen("/app/photos", "staff")).toBe(true);
@@ -94,11 +102,12 @@ describe("roles in navigation", () => {
     expect(canOpen("/app/inbox", "manager")).toBe(true);
     expect(canOpen("/app/report", "manager")).toBe(true);
     const tabs = tabsFor(SECTIONS.settings, "manager").map((t) => t.label);
-    expect(tabs).toEqual(["Notifications"]);
+    expect(tabs).toEqual(["Settings", "Business Knowledge"]);
     expect(tabsFor(SECTIONS.settings, "owner").map((t) => t.label)).toEqual([
-      "Notifications",
-      "Plan",
+      "Settings",
+      "Business Knowledge",
       "Team",
+      "Plan",
     ]);
   });
 
@@ -130,7 +139,7 @@ describe("product names (K-02)", () => {
       ...walk(join(root, "src/routes/_authenticated")),
       ...walk(join(root, "src/components")),
       join(root, "src/lib/app-nav.ts"),
-    ].filter((f) => !f.endsWith("design.tsx"));
+    ];
     for (const f of files) {
       const text = readFileSync(f, "utf8");
       for (const name of retired) expect(text.includes(name), `${name} in ${f}`).toBe(false);

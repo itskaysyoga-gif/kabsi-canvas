@@ -110,13 +110,13 @@ export function ChatsPanel() {
     a.click();
   }
 
-  const select = "h-10 rounded-card border border-kb-hairline bg-kb-white px-3 text-sm";
+  const select = "h-10 rounded-card border border-line bg-surface-1 px-3 text-small";
   return (
     <section className="mt-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold">Chats with Nora</h2>
-          <p className="mt-1 text-sm text-kb-stone">
+          <h2 className="text-title font-bold">Chats with Nora</h2>
+          <p className="mt-1 text-small text-text-2">
             Each chat is labelled and emailed as a report about 10 minutes after it goes quiet.
           </p>
         </div>
@@ -130,8 +130,8 @@ export function ChatsPanel() {
       {stats.data?.length ? (
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {["temperature", "intent", "category", "country"].map((d) => (
-            <div key={d} className="rounded-large bg-kb-white p-4 text-sm shadow-kb">
-              <p className="text-xs font-bold uppercase tracking-wider text-kb-stone">{d}</p>
+            <div key={d} className="rounded-panel bg-surface-1 p-4 text-small shadow-rest">
+              <p className="text-label font-bold uppercase tracking-wider text-text-2">{d}</p>
               <ul className="mt-2 space-y-1">
                 {stats
                   .data!.filter((s) => s.dimension === d)
@@ -215,49 +215,49 @@ export function ChatsPanel() {
         </select>
       </div>
 
-      {chats.isError ? <p className="mt-3 text-kb-red">{String(chats.error.message)}</p> : null}
+      {chats.isError ? <p className="mt-3 text-bad">{String(chats.error.message)}</p> : null}
       <div className="mt-4 space-y-3">
         {chats.data && chats.data.length === 0 ? (
-          <p className="text-kb-stone">No chats match.</p>
+          <p className="text-text-2">No chats match.</p>
         ) : null}
         {chats.data?.map((c) => (
-          <details key={c.id} className="rounded-large bg-kb-white p-5 text-sm shadow-kb">
+          <details key={c.id} className="rounded-panel bg-surface-1 p-5 text-small shadow-rest">
             <summary className="cursor-pointer list-none">
               <div className="flex flex-wrap items-center gap-2">
                 <b>{c.name ?? c.email ?? c.signed_in_business ?? "Anonymous visitor"}</b>
                 {c.lead_temperature ? (
                   <span
                     className={cn(
-                      "rounded-pill px-2 py-0.5 text-xs font-bold",
+                      "rounded-pill px-2 py-0.5 text-label font-bold",
                       c.lead_temperature === "hot"
-                        ? "bg-kb-red text-kb-white"
+                        ? "bg-bad text-kb-white"
                         : c.lead_temperature === "warm"
                           ? "bg-kb-yellow"
-                          : "bg-kb-sand text-kb-stone",
+                          : "bg-surface-2 text-text-2",
                     )}
                   >
                     {c.lead_temperature}
                   </span>
                 ) : (
-                  <span className="rounded-pill bg-kb-sand px-2 py-0.5 text-xs text-kb-stone">
+                  <span className="rounded-pill bg-surface-2 px-2 py-0.5 text-label text-text-2">
                     not labelled yet
                   </span>
                 )}
                 {c.status === "handoff" ? (
-                  <span className="rounded-pill bg-kb-black px-2 py-0.5 text-xs font-bold text-kb-white">
+                  <span className="rounded-pill bg-kb-black px-2 py-0.5 text-label font-bold text-kb-white">
                     needs a person
                   </span>
                 ) : null}
-                <span className="ml-auto text-xs text-kb-stone">{fmtDateTime(c.updated_at)}</span>
+                <span className="ml-auto text-label text-text-2">{fmtDateTime(c.updated_at)}</span>
               </div>
-              <p className="mt-1 text-kb-stone">
+              <p className="mt-1 text-text-2">
                 {[c.country, nice(c.category), nice(c.intent), c.business_type, c.device]
                   .filter((x) => x && x !== "-")
                   .join(" · ")}
               </p>
               {c.summary ? <p className="mt-2">{c.summary}</p> : null}
             </summary>
-            <div className="mt-3 border-t border-kb-hairline pt-3 text-kb-stone">
+            <div className="mt-3 border-t border-line pt-3 text-text-2">
               {c.next_step ? <p>Next step: {c.next_step}</p> : null}
               <p>
                 {[c.email, c.phone, c.business_name].filter(Boolean).join(" · ") ||

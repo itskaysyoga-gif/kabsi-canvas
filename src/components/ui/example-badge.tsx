@@ -10,7 +10,7 @@ function ExampleBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-pill border border-kb-stone px-2.5 py-0.5 text-kb-caption font-semibold uppercase tracking-wide text-kb-stone",
+        "inline-flex items-center rounded-pill border border-stroke px-2.5 py-0.5 text-small font-semibold uppercase tracking-wide text-text-2",
         className,
       )}
       {...props}

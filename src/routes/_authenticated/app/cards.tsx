@@ -81,11 +81,11 @@ function CardsPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
+      <p className="text-small font-bold uppercase tracking-wider text-text-2">
         Make reviewing easy
       </p>
-      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Get reviews</h1>
-      <p className="mt-2 text-kb-stone">
+      <h1 className="mt-1 font-display text-h2 leading-none sm:text-5xl">Get reviews</h1>
+      <p className="mt-2 text-text-2">
         Three steps to make it easy for customers to leave a Google review. Everyone sees the same
         page, and you ask every customer the same way. Never offer a reward for a review: Google can
         remove those reviews. Activity is not the same as reviews. Google decides which reviews
@@ -96,7 +96,7 @@ function CardsPage() {
           <Link to="/start">Add your business</Link>
         </Button>
       ) : null}
-      {data.isLoading ? <p className="mt-6 text-kb-stone">Loading…</p> : null}
+      {data.isLoading ? <p className="mt-6 text-text-2">Loading…</p> : null}
       {loc ? (
         <ReviewLinks
           locationId={loc.id}
@@ -112,8 +112,8 @@ function CardsPage() {
           link={`https://go.kabsi.co/${shareLink.code}`}
         />
       ) : null}
-      <h2 className="mt-10 text-lg font-bold">3. Optional: use your own NFC card or tag</h2>
-      <p className="mt-2 rounded-card bg-kb-white p-4 text-sm leading-6 text-kb-stone shadow-kb">
+      <h2 className="mt-10 text-title font-bold">3. Optional: use your own NFC card or tag</h2>
+      <p className="mt-2 rounded-card bg-surface-1 p-4 text-small leading-6 text-text-2 shadow-rest">
         Already have an NFC tag or sticker? Use a free NFC writer app on your phone, choose "write a
         URL" and paste your review link from step 1. Activity is counted the same way.
       </p>
@@ -130,9 +130,9 @@ function CardsPage() {
             />
           ))}
         {data.data && !data.data.cards.some((c) => c.kind !== "link") ? (
-          <div className="rounded-large bg-kb-white p-6 shadow-kb">
+          <div className="rounded-panel bg-surface-1 p-6 shadow-rest">
             <p className="font-bold">No Kabsi cards added.</p>
-            <p className="mt-1 text-sm text-kb-stone">
+            <p className="mt-1 text-small text-text-2">
               Got a Kabsi card? Add it below with the code printed under the QR.
             </p>
           </div>
@@ -150,12 +150,12 @@ function CardsPage() {
 function CopyField({ url, label }: { url: string; label: string }) {
   const [state, setState] = useState<"idle" | "done" | "failed">("idle");
   return (
-    <div className="mt-4 flex items-center gap-2 rounded-card bg-kb-sand py-1.5 pl-4 pr-1.5 text-sm">
+    <div className="mt-4 flex items-center gap-2 rounded-card bg-surface-2 py-1.5 pl-4 pr-1.5 text-small">
       <span className="min-w-0 flex-1 truncate font-mono">{url.replace(/^https:\/\//, "")}</span>
       <button
         type="button"
         aria-label={label}
-        className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-pill bg-kb-white px-3 text-sm font-bold shadow-kb transition-colors hover:bg-kb-hairline/40"
+        className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-pill bg-surface-1 px-3 text-small font-bold shadow-rest transition-colors hover:bg-kb-hairline/40"
         onClick={() =>
           void copyText(url).then((ok) => {
             setState(ok ? "done" : "failed");
@@ -180,8 +180,8 @@ function OnOff({ active }: { active: boolean }) {
   return (
     <span
       className={cn(
-        "inline-flex rounded-pill px-2 py-0.5 text-xs font-bold",
-        active ? "bg-kb-green/10 text-kb-green" : "bg-kb-sand text-kb-stone",
+        "inline-flex rounded-pill px-2 py-0.5 text-label font-bold",
+        active ? "bg-ok-soft text-ok" : "bg-surface-2 text-text-2",
       )}
     >
       {active ? "On" : "Off"}
@@ -271,21 +271,21 @@ function CardRow({ card, taps, onChanged }: { card: Card; taps: Tap[]; onChanged
 
   return (
     <article
-      className={cn("rounded-large bg-kb-white p-5 shadow-kb sm:p-6", !active && "opacity-80")}
+      className={cn("rounded-panel bg-surface-1 p-5 shadow-rest sm:p-6", !active && "opacity-80")}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <div
             className={cn(
               "grid size-11 shrink-0 place-items-center rounded-full",
-              active ? "bg-kb-yellow" : "bg-kb-sand",
+              active ? "bg-kb-yellow" : "bg-surface-2",
             )}
           >
             <Nfc className="size-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
             <p className="truncate font-bold">{card.label || "NFC card"}</p>
-            <p className="flex items-center gap-2 text-sm text-kb-stone">
+            <p className="flex items-center gap-2 text-small text-text-2">
               <span className="font-mono">{card.code}</span>
               <OnOff active={active} />
             </p>
@@ -293,12 +293,12 @@ function CardRow({ card, taps, onChanged }: { card: Card; taps: Tap[]; onChanged
         </div>
         <div className="grid shrink-0 grid-cols-2 gap-4 text-right">
           <div>
-            <p className="text-2xl font-bold leading-none">{week.length}</p>
-            <p className="mt-1 text-xs text-kb-stone">link activity, 7 days</p>
+            <p className="text-h3 font-bold leading-none">{week.length}</p>
+            <p className="mt-1 text-label text-text-2">link activity, 7 days</p>
           </div>
           <div>
-            <p className="text-2xl font-bold leading-none">{taps.length}</p>
-            <p className="mt-1 text-xs text-kb-stone">link activity, 30 days</p>
+            <p className="text-h3 font-bold leading-none">{taps.length}</p>
+            <p className="mt-1 text-label text-text-2">link activity, 30 days</p>
           </div>
         </div>
       </div>
@@ -322,7 +322,7 @@ function CardRow({ card, taps, onChanged }: { card: Card; taps: Tap[]; onChanged
       </form>
       <div className="mt-2 flex items-center justify-between gap-3">
         {msg ? (
-          <p className="text-sm text-kb-stone" role="status">
+          <p className="text-small text-text-2" role="status">
             {msg}
           </p>
         ) : (
@@ -361,14 +361,11 @@ function AddCard({ locationId, onAdded }: { locationId: string; onAdded: () => u
     setBusy(false);
   }
   return (
-    <form
-      onSubmit={add}
-      className="mt-8 rounded-large border border-dashed border-kb-hairline p-5 sm:p-6"
-    >
+    <form onSubmit={add} className="mt-8 rounded-panel border border-dashed border-line p-5 sm:p-6">
       <Label htmlFor="new-card" className="font-bold">
         Add a Kabsi card
       </Label>
-      <p className="mt-1 text-sm text-kb-stone">The 6-character code printed under the QR.</p>
+      <p className="mt-1 text-small text-text-2">The 6-character code printed under the QR.</p>
       <div className="mt-3 flex gap-2">
         <Input
           id="new-card"
@@ -384,7 +381,7 @@ function AddCard({ locationId, onAdded }: { locationId: string; onAdded: () => u
           {busy ? "Adding…" : "Add"}
         </Button>
       </div>
-      {msg ? <p className="mt-3 text-sm text-kb-stone">{msg}</p> : null}
+      {msg ? <p className="mt-3 text-small text-text-2">{msg}</p> : null}
     </form>
   );
 }
@@ -418,25 +415,25 @@ function ShareKit({ locationId, name, link }: { locationId: string; name: string
   ];
   return (
     <section className="mt-10">
-      <h2 className="text-lg font-bold">2. Share it or print the QR code</h2>
-      <p className="mt-1 text-sm text-kb-stone">
+      <h2 className="text-title font-bold">2. Share it or print the QR code</h2>
+      <p className="mt-1 text-small text-text-2">
         Ready-to-copy texts with your link already in them. Link activity counts how often your page
         was opened, not whether a review was written.
       </p>
       <div className="mt-3 space-y-3">
         <SendReviewLink name={name} link={link} />
         {items.map((it) => (
-          <div key={it.title} className="rounded-card bg-kb-white p-4 shadow-kb sm:p-5">
+          <div key={it.title} className="rounded-card bg-surface-1 p-4 shadow-rest sm:p-5">
             <div className="flex items-center justify-between gap-3">
               <p className="font-bold">{it.title}</p>
               <CopyButton text={it.copy} label="Copy" />
             </div>
-            {it.subject ? <p className="mt-2 text-sm font-bold">Subject: {it.subject}</p> : null}
-            <p className="mt-1 text-sm leading-6 text-kb-stone">{it.text}</p>
+            {it.subject ? <p className="mt-2 text-small font-bold">Subject: {it.subject}</p> : null}
+            <p className="mt-1 text-small leading-6 text-text-2">{it.text}</p>
           </div>
         ))}
       </div>
-      <p className="mt-3 text-sm leading-6 text-kb-stone">
+      <p className="mt-3 text-small leading-6 text-text-2">
         Share the link with every customer. Do not offer rewards or ask only happy customers, Google
         does not allow it.
       </p>
@@ -478,13 +475,13 @@ function ReviewLinks({
   }
   return (
     <section className="mt-10">
-      <h2 className="text-lg font-bold">1. Copy your review link</h2>
-      <p className="mt-1 text-sm text-kb-stone">
+      <h2 className="text-title font-bold">1. Copy your review link</h2>
+      <p className="mt-1 text-small text-text-2">
         A link goes straight to your Google review page, or opens a short page with the Google
         button first and a line to message the manager. Everyone sees the same thing, and nobody is
         asked how their visit went.
       </p>
-      <p className="mt-2 text-sm text-kb-stone">
+      <p className="mt-2 text-small text-text-2">
         Works with your own QR codes and NFC cards. The QR code is below the link, ready to print.
       </p>
       <div className="mt-3 space-y-4">
@@ -508,7 +505,7 @@ function ReviewLinks({
           {busy ? "Creating…" : links.length ? "Create another link" : "Create my review link"}
         </Button>
       ) : null}
-      {msg ? <p className="mt-3 text-sm text-kb-red">{msg}</p> : null}
+      {msg ? <p className="mt-3 text-small text-bad">{msg}</p> : null}
     </section>
   );
 }
@@ -538,14 +535,14 @@ function ModeChoice({ link, onChanged }: { link: Card; onChanged: () => unknown 
   ] as const;
   return (
     <fieldset className="mt-3" disabled={busy}>
-      <legend className="text-sm font-bold">When someone opens this link</legend>
+      <legend className="text-small font-bold">When someone opens this link</legend>
       <div className="mt-1.5 grid gap-2 sm:grid-cols-2">
         {options.map(([mode, label]) => (
           <label
             key={mode}
             className={cn(
-              "flex min-h-11 cursor-pointer items-center gap-2 rounded-card border-2 px-3 text-sm font-bold",
-              link.page_mode === mode ? "border-kb-black bg-kb-sand" : "border-kb-hairline",
+              "flex min-h-11 cursor-pointer items-center gap-2 rounded-card border-2 px-3 text-small font-bold",
+              link.page_mode === mode ? "border-text-1 bg-surface-2" : "border-line",
             )}
           >
             <input
@@ -560,7 +557,7 @@ function ModeChoice({ link, onChanged }: { link: Card; onChanged: () => unknown 
         ))}
       </div>
       {link.page_mode === "page" ? (
-        <p className="mt-2 text-sm text-kb-stone">
+        <p className="mt-2 text-small text-text-2">
           The page shows your Google review button first.{" "}
           <Link to="/app/knowledge" className="font-bold underline underline-offset-4">
             Add your WhatsApp number
@@ -569,7 +566,7 @@ function ModeChoice({ link, onChanged }: { link: Card; onChanged: () => unknown 
         </p>
       ) : null}
       {msg ? (
-        <p className="mt-2 text-sm text-kb-stone" role="status">
+        <p className="mt-2 text-small text-text-2" role="status">
           {msg}
         </p>
       ) : null}
@@ -613,9 +610,9 @@ function LinkRow({ link, taps, onChanged }: { link: Card; taps: Tap[]; onChanged
     w.print();
   }
   return (
-    <article className="flex flex-col gap-5 rounded-large bg-kb-white p-6 shadow-kb sm:flex-row">
+    <article className="flex flex-col gap-5 rounded-panel bg-surface-1 p-6 shadow-rest sm:flex-row">
       <div
-        className="size-44 shrink-0 self-center overflow-hidden rounded-card border border-kb-hairline"
+        className="size-44 shrink-0 self-center overflow-hidden rounded-card border border-line"
         role="img"
         aria-label={`QR code for ${url}`}
         dangerouslySetInnerHTML={{ __html: svg }}
@@ -624,14 +621,14 @@ function LinkRow({ link, taps, onChanged }: { link: Card; taps: Tap[]; onChanged
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="truncate font-bold">{link.label || "Review link"}</p>
-            <p className="mt-0.5 flex items-center gap-2 text-sm text-kb-stone">
+            <p className="mt-0.5 flex items-center gap-2 text-small text-text-2">
               <span className="font-mono">{link.code}</span>
               <OnOff active={active} />
             </p>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold">{week}</p>
-            <p className="text-xs text-kb-stone">link activity, 7 days</p>
+            <p className="text-h3 font-bold">{week}</p>
+            <p className="text-label text-text-2">link activity, 7 days</p>
           </div>
         </div>
         <CopyField url={url} label="Copy review link" />
@@ -645,7 +642,7 @@ function LinkRow({ link, taps, onChanged }: { link: Card; taps: Tap[]; onChanged
           </Button>
           <SwitchButton active={active} what="this review link" onToggle={() => void toggle()} />
         </div>
-        {msg ? <p className="mt-2 text-sm text-kb-stone">{msg}</p> : null}
+        {msg ? <p className="mt-2 text-small text-text-2">{msg}</p> : null}
       </div>
     </article>
   );

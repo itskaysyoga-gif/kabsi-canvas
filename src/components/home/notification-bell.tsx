@@ -51,28 +51,28 @@ export function NotificationBell({ locationId }: { locationId: string }) {
           {unread ? (
             <span
               aria-hidden="true"
-              className="absolute -right-1 -top-1 grid min-w-5 place-content-center rounded-full bg-kb-yellow px-1 text-xs font-bold leading-5 text-kb-black"
+              className="absolute -right-1 -top-1 grid min-w-5 place-content-center rounded-full bg-kb-yellow px-1 text-label font-bold leading-5 text-kb-black"
             >
               {unread > 9 ? "9+" : unread}
             </span>
           ) : null}
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full max-w-md overflow-y-auto bg-kb-sand p-5">
+      <SheetContent side="right" className="w-full max-w-md overflow-y-auto bg-surface-2 p-5">
         <SheetHeader className="pr-8 text-left">
-          <SheetTitle className="font-display text-3xl leading-none">Notifications</SheetTitle>
-          <SheetDescription className="text-kb-stone">
+          <SheetTitle className="font-display text-h3 leading-none">Notifications</SheetTitle>
+          <SheetDescription className="text-text-2">
             What Kabsi told you. Nothing here is published until you approve it.
           </SheetDescription>
         </SheetHeader>
 
         {bell.isError ? (
-          <p className="mt-6 text-kb-small text-kb-red" role="alert">
+          <p className="mt-6 text-small text-bad" role="alert">
             We couldn't load your notifications. Try again in a moment.
           </p>
         ) : null}
         {bell.data && bell.data.items.length === 0 ? (
-          <p className="mt-6 rounded-card bg-kb-white p-5 text-kb-stone">
+          <p className="mt-6 rounded-card bg-surface-1 p-5 text-text-2">
             Nothing new. Kabsi tells you here when something happens.
           </p>
         ) : null}
@@ -94,17 +94,15 @@ export function NotificationBell({ locationId }: { locationId: string }) {
                   {n.read_at ? null : (
                     <span
                       aria-hidden="true"
-                      className="mt-2 size-2.5 shrink-0 rounded-full bg-kb-yellow ring-1 ring-kb-black"
+                      className="mt-2 size-2.5 shrink-0 rounded-full bg-kb-yellow ring-1 ring-focus"
                     />
                   )}
                   <span className={cn("font-bold", n.read_at && "font-medium")}>{n.title}</span>
                 </span>
                 {n.body ? (
-                  <span className="mt-1 block text-kb-small text-kb-stone">{n.body}</span>
+                  <span className="mt-1 block text-small text-text-2">{n.body}</span>
                 ) : null}
-                <span className="mt-1 block text-kb-small text-kb-stone">
-                  {timeAgo(n.created_at)}
-                </span>
+                <span className="mt-1 block text-small text-text-2">{timeAgo(n.created_at)}</span>
               </>
             );
             return (
@@ -116,12 +114,12 @@ export function NotificationBell({ locationId }: { locationId: string }) {
                       if (!n.read_at) read.mutate([n.id]);
                       setOpen(false);
                     }}
-                    className="block min-h-11 rounded-card bg-kb-white p-4 shadow-kb"
+                    className="block min-h-11 rounded-card bg-surface-1 p-4 shadow-rest"
                   >
                     {body}
                   </Link>
                 ) : (
-                  <div className="rounded-card bg-kb-white p-4 shadow-kb">{body}</div>
+                  <div className="rounded-card bg-surface-1 p-4 shadow-rest">{body}</div>
                 )}
               </li>
             );

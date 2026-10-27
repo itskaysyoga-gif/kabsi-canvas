@@ -113,11 +113,11 @@ function PlanPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Settings</p>
-      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">{PLAN_COPY.title}</h1>
-      {loc ? <p className="mt-2 text-kb-stone">{loc.name}</p> : null}
+      <p className="text-small font-bold uppercase tracking-wider text-text-2">Settings</p>
+      <h1 className="mt-1 font-display text-h2 leading-none sm:text-5xl">{PLAN_COPY.title}</h1>
+      {loc ? <p className="mt-2 text-text-2">{loc.name}</p> : null}
       {location.isLoading || data.isLoading || summaryQ.isLoading ? (
-        <p className="mt-6 text-kb-stone">Loading…</p>
+        <p className="mt-6 text-text-2">Loading…</p>
       ) : null}
       {!location.isLoading && !loc ? (
         <Button asChild className="mt-6">
@@ -125,48 +125,48 @@ function PlanPage() {
         </Button>
       ) : null}
       {data.isError || summaryQ.isError ? (
-        <p className="mt-6 text-kb-red">Couldn't load your plan. Refresh the page.</p>
+        <p className="mt-6 text-bad">Couldn't load your plan. Refresh the page.</p>
       ) : null}
 
       {loc && sum && d ? (
         <>
           {/* Current plan */}
-          <section className="mt-7 overflow-hidden rounded-large bg-kb-white shadow-kb">
+          <section className="mt-7 overflow-hidden rounded-panel bg-surface-1 shadow-rest">
             <div className="p-6 sm:p-8">
-              <p className="text-sm font-medium text-kb-stone">Your plan</p>
+              <p className="text-small font-medium text-text-2">Your plan</p>
               {sum.tier === "early_access" ? (
                 <>
                   <div className="mt-1 flex flex-wrap items-center gap-3">
-                    <p className="text-2xl font-bold">Early access</p>
-                    <span className="rounded-pill bg-kb-green/10 px-2.5 py-1 text-xs font-bold text-kb-green">
+                    <p className="text-h3 font-bold">Early access</p>
+                    <span className="rounded-pill bg-ok-soft px-2.5 py-1 text-label font-bold text-ok">
                       Active
                     </span>
                   </div>
-                  <p className="mt-2 leading-7 text-kb-stone">{CONCIERGE_COPY.plan}</p>
-                  <p className="mt-2 text-sm leading-6 text-kb-stone">{CONCIERGE_COPY.banner}</p>
+                  <p className="mt-2 leading-7 text-text-2">{CONCIERGE_COPY.plan}</p>
+                  <p className="mt-2 text-small leading-6 text-text-2">{CONCIERGE_COPY.banner}</p>
                 </>
               ) : creemBilling(sum) ? (
                 <PaidState b={creemBilling(sum)!} />
               ) : sum.tier === "trial" && sum.plan ? (
                 <>
                   <div className="mt-1 flex flex-wrap items-center gap-3">
-                    <p className="text-2xl font-bold">Pro trial</p>
-                    <span className="rounded-pill bg-kb-green/10 px-2.5 py-1 text-xs font-bold text-kb-green">
+                    <p className="text-h3 font-bold">Pro trial</p>
+                    <span className="rounded-pill bg-ok-soft px-2.5 py-1 text-label font-bold text-ok">
                       Active
                     </span>
                   </div>
-                  <p className="mt-2 text-kb-stone">
+                  <p className="mt-2 text-text-2">
                     Pro trial, ends{" "}
-                    <span className="font-bold text-kb-ink">{shortDate(sum.plan.last_day)}</span>.
+                    <span className="font-bold text-text-1">{shortDate(sum.plan.last_day)}</span>.
                     {trialDaysLeft(sum) !== null ? ` ${trialDaysLeft(sum)} days left.` : ""}
                   </p>
                   {sum.queued.length ? (
-                    <p className="mt-3 text-sm text-kb-stone">
+                    <p className="mt-3 text-small text-text-2">
                       Already paid: {sum.queued.map((q) => ITEM_NAME[q.kind]).join(", ")}, starts{" "}
                       {shortDate(sum.queued[0]!.starts_at)}. Nothing stops when the trial ends.
                     </p>
                   ) : (
-                    <p className="mt-3 text-sm leading-6 text-kb-stone">
+                    <p className="mt-3 text-small leading-6 text-text-2">
                       When the trial ends without a plan, reply drafts, Google Protection and the
                       Weekly Care Report pause. Your review link and QR code keep working.
                     </p>
@@ -175,9 +175,9 @@ function PlanPage() {
               ) : sum.tier === "free" && !d.paidWaiting ? (
                 <>
                   <div className="mt-1 flex flex-wrap items-center gap-3">
-                    <p className="text-2xl font-bold">No plan</p>
+                    <p className="text-h3 font-bold">No plan</p>
                   </div>
-                  <p className="mt-2 leading-7 text-kb-stone">
+                  <p className="mt-2 leading-7 text-text-2">
                     Your review link and QR code keep working. Reply drafts, Google Protection and
                     the Weekly Care Report are paused until you choose a plan.
                   </p>
@@ -185,21 +185,21 @@ function PlanPage() {
               ) : d.current ? (
                 <>
                   <div className="mt-1 flex flex-wrap items-center gap-3">
-                    <p className="text-2xl font-bold">{ITEM_NAME[d.current.kind] ?? "Kabsi Pro"}</p>
-                    <span className="rounded-pill bg-kb-green/10 px-2.5 py-1 text-xs font-bold text-kb-green">
+                    <p className="text-h3 font-bold">{ITEM_NAME[d.current.kind] ?? "Kabsi Pro"}</p>
+                    <span className="rounded-pill bg-ok-soft px-2.5 py-1 text-label font-bold text-ok">
                       Active
                     </span>
                   </div>
-                  <p className="mt-2 text-kb-stone">
+                  <p className="mt-2 text-text-2">
                     Paid until{" "}
-                    <span className="font-bold text-kb-ink">{shortDate(d.paidUntil)}</span>
+                    <span className="font-bold text-text-1">{shortDate(d.paidUntil)}</span>
                     {left !== null ? ` · ${left} ${left === 1 ? "day" : "days"} left` : ""}
                   </p>
                   {d.current.starts_at && d.current.ends_at ? (
                     <Progress start={d.current.starts_at} end={d.current.ends_at} />
                   ) : null}
                   {d.queued.length ? (
-                    <p className="mt-3 text-sm text-kb-stone">
+                    <p className="mt-3 text-small text-text-2">
                       Renewal already paid: {d.queued.map((q) => ITEM_NAME[q.kind]).join(", ")},
                       starts {shortDate(d.queued[0]!.starts_at)}.
                     </p>
@@ -208,22 +208,22 @@ function PlanPage() {
               ) : d.paidWaiting ? (
                 <>
                   <div className="mt-1 flex flex-wrap items-center gap-3">
-                    <p className="text-2xl font-bold">
+                    <p className="text-h3 font-bold">
                       {ITEM_NAME[d.paidWaiting.kind] ?? "Kabsi Pro"}
                     </p>
-                    <span className="rounded-pill bg-kb-sand px-2.5 py-1 text-xs font-bold text-kb-stone">
+                    <span className="rounded-pill bg-surface-2 px-2.5 py-1 text-label font-bold text-text-2">
                       Paid
                     </span>
                   </div>
-                  <p className="mt-2 leading-7 text-kb-stone">
+                  <p className="mt-2 leading-7 text-text-2">
                     Your plan starts the day Kabsi's access to your Google profile works, so you
                     don't lose any days while you wait.
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="mt-1 text-2xl font-bold">No active plan</p>
-                  <p className="mt-2 leading-7 text-kb-stone">
+                  <p className="mt-1 text-h3 font-bold">No active plan</p>
+                  <p className="mt-2 leading-7 text-text-2">
                     Your trial starts when Kabsi's access to your Google profile works.
                   </p>
                 </>
@@ -231,20 +231,20 @@ function PlanPage() {
             </div>
           </section>
 
-          <section className="mt-6 rounded-large bg-kb-white p-6 shadow-kb sm:p-8">
-            <h2 className="text-xl font-bold">Plans and prices</h2>
-            <dl className="mt-3 divide-y divide-kb-hairline">
+          <section className="mt-6 rounded-panel bg-surface-1 p-6 shadow-rest sm:p-8">
+            <h2 className="text-title font-bold">Plans and prices</h2>
+            <dl className="mt-3 divide-y divide-line">
               {PLAN_PRICE_ROWS.map((r) => (
                 <div
                   key={r.name}
                   className="flex flex-wrap items-baseline justify-between gap-x-4 py-3"
                 >
                   <dt className="font-bold">{r.name}</dt>
-                  <dd className="text-kb-stone">{r.price}</dd>
+                  <dd className="text-text-2">{r.price}</dd>
                 </div>
               ))}
             </dl>
-            <p className="mt-3 text-sm leading-6 text-kb-stone">
+            <p className="mt-3 text-small leading-6 text-text-2">
               Prices are in US dollars, {TAX_NOTE}, and the same in every country. Every trial is 14
               days of Pro with no card.
             </p>
@@ -254,16 +254,21 @@ function PlanPage() {
 
           {d.payments.length ? (
             <section className="mt-8">
-              <h2 className="text-lg font-bold">Payments</h2>
-              <ul className="mt-3 divide-y divide-kb-hairline rounded-large bg-kb-white px-5 shadow-kb">
+              <h2 className="text-title font-bold">Payments</h2>
+              <ul className="mt-3 divide-y divide-line rounded-panel bg-surface-1 px-5 shadow-rest">
                 {d.payments.map((p) => (
-                  <li key={p.id} className="flex items-center justify-between gap-3 py-3.5 text-sm">
+                  <li
+                    key={p.id}
+                    className="flex items-center justify-between gap-3 py-3.5 text-small"
+                  >
                     <span>
                       <span className="font-medium">{ITEM_NAME[p.item] ?? "Kabsi Pro"}</span>
                     </span>
                     <span className="text-right">
                       <span className="font-bold">{money(p.amount_usd)}</span>
-                      <span className="block text-xs text-kb-stone">{shortDate(p.created_at)}</span>
+                      <span className="block text-label text-text-2">
+                        {shortDate(p.created_at)}
+                      </span>
                     </span>
                   </li>
                 ))}
@@ -271,7 +276,7 @@ function PlanPage() {
             </section>
           ) : null}
 
-          <p className="mt-8 text-sm leading-6 text-kb-stone">
+          <p className="mt-8 text-small leading-6 text-text-2">
             Yearly plans are refundable within 14 days. If your plan ends, your review link and QR
             code keep working; only reply drafts, Google Protection and reports stop.
           </p>
@@ -294,14 +299,14 @@ function PaidState({ b }: { b: Billing }) {
   return (
     <>
       <div className="mt-1 flex flex-wrap items-center gap-3">
-        <p className="text-2xl font-bold">{name}</p>
+        <p className="text-h3 font-bold">{name}</p>
         <span
           className={
             ended || paused
-              ? "rounded-pill bg-kb-sand px-2.5 py-1 text-xs font-bold text-kb-stone"
+              ? "rounded-pill bg-surface-2 px-2.5 py-1 text-label font-bold text-text-2"
               : b.payment_failed
-                ? "rounded-pill bg-kb-red/10 px-2.5 py-1 text-xs font-bold text-kb-red"
-                : "rounded-pill bg-kb-green/10 px-2.5 py-1 text-xs font-bold text-kb-green"
+                ? "rounded-pill bg-bad-soft px-2.5 py-1 text-label font-bold text-bad"
+                : "rounded-pill bg-ok-soft px-2.5 py-1 text-label font-bold text-ok"
           }
         >
           {ended
@@ -314,26 +319,26 @@ function PaidState({ b }: { b: Billing }) {
         </span>
       </div>
       {b.units > 0 ? (
-        <p className="mt-2 text-kb-stone">
+        <p className="mt-2 text-text-2">
           Plus {b.units} extra {b.units === 1 ? "location" : "locations"}.
         </p>
       ) : null}
       {ended || paused ? (
-        <p className="mt-2 leading-7 text-kb-stone">
+        <p className="mt-2 leading-7 text-text-2">
           {paused ? "Approvals have stopped and nothing is lost." : "Your plan has ended."}
           {b.data_kept_until ? ` Your data is kept until ${shortDate(b.data_kept_until)}.` : ""}
         </p>
       ) : b.payment_failed ? (
-        <p className="mt-2 leading-7 text-kb-stone">
+        <p className="mt-2 leading-7 text-text-2">
           Your card did not go through. Kabsi keeps working until {shortDate(b.grace_ends_at)}.
         </p>
       ) : b.cancel_at_period_end ? (
-        <p className="mt-2 leading-7 text-kb-stone">
+        <p className="mt-2 leading-7 text-text-2">
           Your plan ends on {shortDate(b.current_period_end)}. Until then everything keeps working.
         </p>
       ) : (
-        <p className="mt-2 text-kb-stone">
-          Renews on <span className="font-bold text-kb-ink">{shortDate(b.current_period_end)}</span>
+        <p className="mt-2 text-text-2">
+          Renews on <span className="font-bold text-text-1">{shortDate(b.current_period_end)}</span>
           .
         </p>
       )}
@@ -403,7 +408,7 @@ function PlanActions({ locationId, sum }: { locationId: string; sum: PlanSummary
   };
 
   return (
-    <section className="mt-6 rounded-large bg-kb-white p-6 shadow-kb sm:p-8">
+    <section className="mt-6 rounded-panel bg-surface-1 p-6 shadow-rest sm:p-8">
       <div className="flex items-start gap-3">
         <CreditCard className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
         <div className="w-full">
@@ -475,8 +480,8 @@ function PlanActions({ locationId, sum }: { locationId: string; sum: PlanSummary
                     onClick={() => setPeriod(p)}
                     className={
                       period === p
-                        ? "rounded-pill bg-kb-black px-4 py-2 text-sm font-bold text-kb-white"
-                        : "rounded-pill bg-kb-sand px-4 py-2 text-sm font-bold text-kb-ink"
+                        ? "rounded-pill bg-kb-black px-4 py-2 text-small font-bold text-kb-white"
+                        : "rounded-pill bg-surface-2 px-4 py-2 text-small font-bold text-text-1"
                     }
                   >
                     {p === "month" ? PLAN_COPY.monthly : PLAN_COPY.yearly}
@@ -503,7 +508,7 @@ function PlanActions({ locationId, sum }: { locationId: string; sum: PlanSummary
             </>
           )}
           {pending ? (
-            <div className="mt-4 rounded-card bg-kb-sand p-4">
+            <div className="mt-4 rounded-card bg-surface-2 p-4">
               <p className="leading-6">{pending.line}</p>
               <div className="mt-3 flex gap-3">
                 <Button variant="outline" disabled={busy} onClick={() => void run(pending.op)}>
@@ -515,9 +520,9 @@ function PlanActions({ locationId, sum }: { locationId: string; sum: PlanSummary
               </div>
             </div>
           ) : null}
-          {note ? <p className="mt-3 text-sm font-bold text-kb-green">{note}</p> : null}
-          {error ? <p className="mt-3 text-sm text-kb-red">{error}</p> : null}
-          <p className="mt-4 text-sm leading-6 text-kb-stone">{PLAN_COPY.creem}</p>
+          {note ? <p className="mt-3 text-small font-bold text-ok">{note}</p> : null}
+          {error ? <p className="mt-3 text-small text-bad">{error}</p> : null}
+          <p className="mt-4 text-small leading-6 text-text-2">{PLAN_COPY.creem}</p>
         </div>
       </div>
     </section>
@@ -534,10 +539,10 @@ function Progress({ start, end }: { start: string; end: string }) {
   const pct = Math.min(100, Math.max(0, ((Date.now() - s) / (e - s)) * 100));
   return (
     <div className="mt-5">
-      <div className="h-2 overflow-hidden rounded-pill bg-kb-sand">
+      <div className="h-2 overflow-hidden rounded-pill bg-surface-2">
         <div className="h-full rounded-pill bg-kb-yellow" style={{ width: `${pct}%` }} />
       </div>
-      <div className="mt-1.5 flex justify-between text-xs text-kb-stone">
+      <div className="mt-1.5 flex justify-between text-label text-text-2">
         <span>{shortDate(start)}</span>
         <span>{shortDate(end)}</span>
       </div>

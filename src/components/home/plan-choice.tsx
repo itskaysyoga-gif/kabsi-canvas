@@ -18,7 +18,7 @@ export function PlanChoiceCard({ locationId }: { locationId: string }) {
       <p>{card.body}</p>
       <Link
         to={card.cta.to}
-        className="mt-2 inline-block min-h-11 py-2.5 font-bold text-kb-ink underline underline-offset-4"
+        className="mt-2 inline-block min-h-11 py-2.5 font-bold text-text-1 underline underline-offset-4"
       >
         {card.cta.label}
       </Link>

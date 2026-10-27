@@ -43,8 +43,8 @@ export function ConciergePanel() {
   if (!q || (q.count === 0 && q.tasks.length === 0)) {
     return (
       <section className="mt-8">
-        <h2 className="text-xl font-bold">Concierge</h2>
-        <p className="mt-1 text-sm text-kb-stone">
+        <h2 className="text-title font-bold">Concierge</h2>
+        <p className="mt-1 text-small text-text-2">
           No businesses in early access. Turn concierge on for a business in the list below (up to{" "}
           {q?.cap ?? 30}).
         </p>
@@ -54,16 +54,16 @@ export function ConciergePanel() {
   return (
     <section className="mt-8">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-xl font-bold">Concierge</h2>
-        <p className="text-sm text-kb-stone">
+        <h2 className="text-title font-bold">Concierge</h2>
+        <p className="text-small text-text-2">
           {q.count} of {q.cap} businesses in early access
         </p>
       </div>
-      <p className="mt-1 text-sm text-kb-stone">
+      <p className="mt-1 text-small text-text-2">
         Owners were told a person posts what they approve within one working day. Oldest first.
       </p>
       <div className="mt-4 space-y-4">
-        {q.tasks.length === 0 ? <p className="text-kb-stone">Nothing waiting.</p> : null}
+        {q.tasks.length === 0 ? <p className="text-text-2">Nothing waiting.</p> : null}
         {q.tasks.map((t) =>
           t.kind === "post_reply" ? (
             <ReplyTask key={t.id} task={t} />
@@ -92,7 +92,7 @@ function Stars({ n }: { n: number }) {
       {[1, 2, 3, 4, 5].map((i) => (
         <Star
           key={i}
-          className={i <= n ? "size-4 fill-kb-black text-kb-black" : "size-4 text-kb-hairline"}
+          className={i <= n ? "size-4 fill-kb-black text-text-1" : "size-4 text-line"}
         />
       ))}
     </span>
@@ -112,35 +112,35 @@ function ReplyTask({ task }: { task: ConciergeTask }) {
   });
   const r = task.review;
   return (
-    <article className="rounded-large bg-kb-white p-5 shadow-kb">
+    <article className="rounded-panel bg-surface-1 p-5 shadow-rest">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-bold">Post this reply: {task.business}</p>
-          {task.address ? <p className="text-sm text-kb-stone">{task.address}</p> : null}
+          {task.address ? <p className="text-small text-text-2">{task.address}</p> : null}
         </div>
-        <p className="text-xs text-kb-stone">
+        <p className="text-label text-text-2">
           Approved {fmtDateTime(task.approved_at)}
           {task.claimed_by ? ` · ${task.claimed_by} is on it` : ""}
         </p>
       </div>
       {r ? (
-        <div className="mt-4 rounded-card bg-kb-sand p-4 text-sm">
+        <div className="mt-4 rounded-card bg-surface-2 p-4 text-small">
           <p className="flex flex-wrap items-center gap-2">
             <Stars n={r.stars} />
             <span className="font-medium">{r.reviewer ?? "A customer"}</span>
-            <span className="text-kb-stone">{r.date ? fmtDate(r.date) : ""}</span>
+            <span className="text-text-2">{r.date ? fmtDate(r.date) : ""}</span>
           </p>
           <p className="mt-2 whitespace-pre-wrap leading-6">
             {r.text ?? "(no text, only a rating)"}
           </p>
-          <p className="mt-2 text-xs text-kb-stone">Find this review on Google to reply to it.</p>
+          <p className="mt-2 text-label text-text-2">Find this review on Google to reply to it.</p>
         </div>
       ) : null}
-      <p className="mt-4 text-xs font-bold uppercase tracking-wider text-kb-stone">
+      <p className="mt-4 text-label font-bold uppercase tracking-wider text-text-2">
         Reply to paste, exactly as approved
       </p>
       <div
-        className="mt-1 whitespace-pre-wrap rounded-card border-2 border-kb-black p-4 leading-6"
+        className="mt-1 whitespace-pre-wrap rounded-card border-2 border-text-1 p-4 leading-6"
         data-testid="reply-text"
       >
         {task.reply_text ?? "The text was removed after 30 days."}
@@ -172,7 +172,7 @@ function ReplyTask({ task }: { task: ConciergeTask }) {
         </Button>
       </div>
       {cancelling ? (
-        <div className="mt-3 rounded-card bg-kb-sand p-4 text-sm">
+        <div className="mt-3 rounded-card bg-surface-2 p-4 text-small">
           <p className="font-bold">Cancel this task</p>
           <Input
             aria-label="Reason"
@@ -209,7 +209,7 @@ function ReplyTask({ task }: { task: ConciergeTask }) {
           </div>
         </div>
       ) : null}
-      {msg ? <p className="mt-3 text-sm text-kb-red">{msg}</p> : null}
+      {msg ? <p className="mt-3 text-small text-bad">{msg}</p> : null}
       <AlertDialog open={confirm} onOpenChange={setConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -240,16 +240,16 @@ function InviteTask({ task }: { task: ConciergeTask }) {
     onError: (e) => setMsg(e instanceof Error ? e.message : String(e)),
   });
   return (
-    <article className="rounded-large bg-kb-white p-5 shadow-kb">
+    <article className="rounded-panel bg-surface-1 p-5 shadow-rest">
       <p className="font-bold">Accept the invitation: {task.business}</p>
-      {task.address ? <p className="text-sm text-kb-stone">{task.address}</p> : null}
-      <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm leading-6">
+      {task.address ? <p className="text-small text-text-2">{task.address}</p> : null}
+      <ol className="mt-3 list-decimal space-y-1 pl-5 text-small leading-6">
         <li>Open Business Profile Manager as hello@kabsi.co and go to Manage invitations.</li>
         <li>Accept only the Manager invitation for exactly this business name and address.</li>
         <li>Tap Accepted here. The owner gets an email and can start.</li>
       </ol>
       {!task.consented ? (
-        <p className="mt-2 text-sm text-kb-red">The owner has not given consent yet.</p>
+        <p className="mt-2 text-small text-bad">The owner has not given consent yet.</p>
       ) : null}
       <div className="mt-4">
         <Button
@@ -260,7 +260,7 @@ function InviteTask({ task }: { task: ConciergeTask }) {
           Accepted
         </Button>
       </div>
-      {msg ? <p className="mt-3 text-sm text-kb-red">{msg}</p> : null}
+      {msg ? <p className="mt-3 text-small text-bad">{msg}</p> : null}
     </article>
   );
 }
@@ -296,9 +296,9 @@ function ReviewEntry({ queue }: { queue: ConciergeQueue }) {
     setBusy(false);
   }
   return (
-    <form onSubmit={submit} className="mt-6 rounded-large bg-kb-white p-5 shadow-kb">
+    <form onSubmit={submit} className="mt-6 rounded-panel bg-surface-1 p-5 shadow-rest">
       <h3 className="font-bold">Enter a new review</h3>
-      <p className="text-sm text-kb-stone">
+      <p className="text-small text-text-2">
         Copy it from Google exactly. The owner is emailed a drafted reply.
       </p>
       <div className="mt-4 grid gap-3 sm:grid-cols-4">
@@ -306,7 +306,7 @@ function ReviewEntry({ queue }: { queue: ConciergeQueue }) {
           aria-label="Business"
           value={chosen?.id}
           onChange={(e) => setLoc(e.target.value)}
-          className="h-11 rounded-card border border-kb-hairline bg-kb-white px-3 sm:col-span-2"
+          className="h-11 rounded-card border border-line bg-surface-1 px-3 sm:col-span-2"
         >
           {ready.map((b) => (
             <option key={b.id} value={b.id}>
@@ -319,7 +319,7 @@ function ReviewEntry({ queue }: { queue: ConciergeQueue }) {
           aria-label="Stars"
           value={rating}
           onChange={(e) => setRating(Number(e.target.value))}
-          className="h-11 rounded-card border border-kb-hairline bg-kb-white px-3"
+          className="h-11 rounded-card border border-line bg-surface-1 px-3"
         >
           {[5, 4, 3, 2, 1].map((n) => (
             <option key={n} value={n}>
@@ -341,7 +341,7 @@ function ReviewEntry({ queue }: { queue: ConciergeQueue }) {
           value={reviewer}
           onChange={(e) => setReviewer(e.target.value)}
         />
-        <label className="flex items-center gap-2 text-sm sm:col-span-2">
+        <label className="flex items-center gap-2 text-small sm:col-span-2">
           <input type="checkbox" checked={backlog} onChange={(e) => setBacklog(e.target.checked)} />
           Older review, from before Kabsi started
         </label>
@@ -360,7 +360,7 @@ function ReviewEntry({ queue }: { queue: ConciergeQueue }) {
         </Button>
         <CheckedButton business={chosen} />
       </div>
-      {msg ? <p className="mt-3 text-sm text-kb-stone">{msg}</p> : null}
+      {msg ? <p className="mt-3 text-small text-text-2">{msg}</p> : null}
     </form>
   );
 }

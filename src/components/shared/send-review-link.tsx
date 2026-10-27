@@ -9,9 +9,9 @@ import { sendReviewLinkHref } from "@/lib/send-review-link";
 export function SendReviewLink({ name, link }: { name: string; link: string | null | undefined }) {
   if (!link) return null;
   return (
-    <div className="rounded-card bg-kb-white p-4 shadow-kb sm:p-5">
+    <div className="rounded-card bg-surface-1 p-4 shadow-rest sm:p-5">
       <p className="font-bold">Send the review link</p>
-      <p className="mt-1 text-sm leading-6 text-kb-stone">
+      <p className="mt-1 text-small leading-6 text-text-2">
         Opens your own WhatsApp with a short message and the link. Pick the customer and press send.
         Offer it to every customer the same way.
       </p>

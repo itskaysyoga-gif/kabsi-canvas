@@ -22,12 +22,9 @@ export function WhatsappStaffCode() {
     onError: () => setErr("Couldn't make a code. Please try again."),
   });
   return (
-    <section
-      className="mt-8 rounded-card border border-kb-hairline p-4"
-      data-testid="whatsapp-staff-code"
-    >
-      <h2 className="text-xl font-bold">WhatsApp staff phone</h2>
-      <p className="mt-1 text-sm leading-6 text-kb-stone">
+    <section className="mt-8 rounded-card border border-line p-4" data-testid="whatsapp-staff-code">
+      <h2 className="text-title font-bold">WhatsApp staff phone</h2>
+      <p className="mt-1 text-small leading-6 text-text-2">
         Make a code, then send it from the staff phone to Kabsi&apos;s WhatsApp number. That phone
         gets the staff commands. The code works once, for 15 minutes.
       </p>
@@ -40,11 +37,11 @@ export function WhatsappStaffCode() {
         Make a staff code
       </Button>
       {code ? (
-        <p className="mt-3 text-sm leading-6">
+        <p className="mt-3 text-small leading-6">
           Send this exactly: <b className="font-mono">{code}</b>
         </p>
       ) : null}
-      <p className="mt-2 min-h-6 text-sm text-kb-red" role="status">
+      <p className="mt-2 min-h-6 text-small text-bad" role="status">
         {err}
       </p>
     </section>

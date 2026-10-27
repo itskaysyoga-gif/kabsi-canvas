@@ -20,7 +20,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
 
   if (loading || !user) {
     return (
-      <div className="grid min-h-screen place-items-center bg-kb-sand text-kb-stone">Loading…</div>
+      <div className="grid min-h-screen place-items-center bg-surface-2 text-text-2">Loading…</div>
     );
   }
   return (

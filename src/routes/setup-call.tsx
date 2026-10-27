@@ -44,7 +44,7 @@ function SetupCallPage() {
         crumbs={[{ name: "Free setup call" }]}
       />
       <Section className="max-w-3xl space-y-8 text-[17px] leading-8">
-        <p className="text-kb-stone">
+        <p className="text-text-2">
           We guide, you click. We never ask for your Google password, and we never sign in to your
           Google account: you send the Manager invitation yourself, with us beside you.
         </p>
@@ -53,12 +53,12 @@ function SetupCallPage() {
             title="Book a call with Kabsi"
             src={bookingUrl(kind, true)}
             loading="lazy"
-            className="h-[700px] w-full rounded-large border border-kb-hairline bg-kb-white"
+            className="h-[700px] w-full rounded-panel border border-line bg-surface-1"
           />
         ) : (
-          <div className="rounded-large bg-kb-sand p-6">
-            <H2 className="text-2xl">Pick a time by email</H2>
-            <p className="mt-3 text-kb-stone">
+          <div className="rounded-panel bg-surface-2 p-6">
+            <H2 className="text-h3">Pick a time by email</H2>
+            <p className="mt-3 text-text-2">
               The booking calendar is on its way. Until then, write to{" "}
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
@@ -75,7 +75,7 @@ function SetupCallPage() {
             </div>
           </div>
         )}
-        <p className="text-sm text-kb-stone">
+        <p className="text-small text-text-2">
           Calls run Monday to Friday, 8am to 6pm Beirut time. The call is about:{" "}
           {Object.values(BOOKING_ANSWERS).join(", ")}. Questions? Write to{" "}
           <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-4">
@@ -84,7 +84,7 @@ function SetupCallPage() {
           .
         </p>
         {WHATSAPP_ON ? (
-          <p className="text-sm text-kb-stone">
+          <p className="text-small text-text-2">
             Prefer to type? Message us on{" "}
             <WhatsappLink
               kind={kind === "setup" ? "setup" : kind === "partner" ? "partner" : "general"}

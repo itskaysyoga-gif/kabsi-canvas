@@ -69,13 +69,13 @@ function GuideCard({ g, featured = false }: { g: Guide; featured?: boolean }) {
         to="/guides/$slug"
         params={{ slug: g.slug }}
         className={cn(
-          "kb-lift group flex h-full flex-col overflow-hidden rounded-large border border-kb-hairline bg-kb-white hover:border-kb-black",
+          "kb-lift group flex h-full flex-col overflow-hidden rounded-panel border border-line bg-surface-1 hover:border-text-1",
           featured && "md:grid md:grid-cols-[1.15fr_1fr]",
         )}
       >
         <div
           className={cn(
-            "relative overflow-hidden bg-kb-sand",
+            "relative overflow-hidden bg-surface-2",
             featured ? "aspect-[16/9] md:aspect-auto md:h-full" : "aspect-[16/9]",
           )}
         >
@@ -90,7 +90,7 @@ function GuideCard({ g, featured = false }: { g: Guide; featured?: boolean }) {
           />
         </div>
         <div className={cn("flex flex-1 flex-col p-6", featured && "md:justify-center md:p-9")}>
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-kb-stone">
+          <span className="inline-flex items-center gap-1.5 text-label font-bold uppercase tracking-wider text-text-2">
             <Clock3 className="size-3.5" aria-hidden="true" />
             {g.minutes} min read
           </span>
@@ -99,13 +99,13 @@ function GuideCard({ g, featured = false }: { g: Guide; featured?: boolean }) {
               "mt-2 font-bold leading-snug",
               featured
                 ? "font-display text-[clamp(1.8rem,3vw,2.4rem)] font-normal leading-[1.05]"
-                : "text-xl",
+                : "text-title",
             )}
           >
             {g.title}
           </span>
-          <span className="mt-3 flex-1 leading-7 text-kb-stone">{g.description}</span>
-          <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold">
+          <span className="mt-3 flex-1 leading-7 text-text-2">{g.description}</span>
+          <span className="mt-5 inline-flex items-center gap-2 text-small font-bold">
             Read the guide
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
           </span>

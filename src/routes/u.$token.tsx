@@ -62,21 +62,21 @@ function StaffUploadPage() {
   if (!state)
     return (
       <ConfirmLayout>
-        <p className="text-kb-stone">Opening…</p>
+        <p className="text-text-2">Opening…</p>
       </ConfirmLayout>
     );
   if ("gone" in state)
     return (
       <ConfirmLayout>
-        <h1 className="font-display text-3xl leading-tight">This link is not on</h1>
-        <p className="mt-3 text-kb-stone">{state.gone}</p>
+        <h1 className="font-display text-h3 leading-tight">This link is not on</h1>
+        <p className="mt-3 text-text-2">{state.gone}</p>
       </ConfirmLayout>
     );
   return (
     <ConfirmLayout>
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">{state.name}</p>
-      <h1 className="mt-1 font-display text-3xl leading-tight">Add photos</h1>
-      <p className="mt-3 text-kb-stone">
+      <p className="text-small font-bold uppercase tracking-wider text-text-2">{state.name}</p>
+      <h1 className="mt-1 font-display text-h3 leading-tight">Add photos</h1>
+      <p className="mt-3 text-text-2">
         Real photos of the place, the team, the work and what you sell. The owner looks at each one
         before anything goes to Google. Kabsi removes location data from every photo.
       </p>
@@ -87,7 +87,7 @@ function StaffUploadPage() {
         ].map((b) => (
           <label
             key={b.label}
-            className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-large border-2 border-dashed border-kb-hairline bg-kb-white p-4 text-center font-bold hover:border-kb-black"
+            className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-panel border-2 border-dashed border-line bg-surface-1 p-4 text-center font-bold hover:border-text-1"
           >
             {b.camera ? (
               <Camera className="size-6" aria-hidden="true" />
@@ -107,9 +107,9 @@ function StaffUploadPage() {
           </label>
         ))}
       </div>
-      <p className="mt-3 text-sm text-kb-stone">Up to 20 at a time, 20 MB each.</p>
+      <p className="mt-3 text-small text-text-2">Up to 20 at a time, 20 MB each.</p>
       {msg ? (
-        <p className="mt-4 text-sm" role="status">
+        <p className="mt-4 text-small" role="status">
           {msg}
         </p>
       ) : null}

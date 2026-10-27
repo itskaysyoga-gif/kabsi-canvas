@@ -78,9 +78,9 @@ function PostsPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Content</p>
-      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Posts</h1>
-      <p className="mt-2 max-w-xl text-kb-stone">
+      <p className="text-small font-bold uppercase tracking-wider text-text-2">Content</p>
+      <h1 className="mt-1 font-display text-h2 leading-none sm:text-5xl">Posts</h1>
+      <p className="mt-2 max-w-xl text-text-2">
         Short updates on your Google profile, from what is true about your business. You approve
         each one; Kabsi sends it on its day.
       </p>
@@ -92,7 +92,7 @@ function PostsPage() {
       {loc?.concierge ? <EarlyAccessNotice what="Posts" /> : null}
       {loc && !loc.concierge && loc.status !== "active" ? <NotYet /> : null}
       {posts.isError ? (
-        <p className="mt-6 text-sm text-kb-red" role="alert">
+        <p className="mt-6 text-small text-bad" role="alert">
           Couldn't load your posts. Refresh the page to try again.
         </p>
       ) : null}
@@ -107,7 +107,7 @@ function PostsPage() {
                 role="tab"
                 aria-selected={m === month}
                 onClick={() => setMonth(m)}
-                className={`h-11 rounded-pill border px-4 text-sm font-bold ${m === month ? "border-kb-black bg-kb-black text-kb-white" : "border-kb-hairline bg-kb-white"}`}
+                className={`h-11 rounded-pill border px-4 text-small font-bold ${m === month ? "border-text-1 bg-kb-black text-kb-white" : "border-line bg-surface-1"}`}
               >
                 {monthName(m)}
               </button>
@@ -171,12 +171,12 @@ function MonthView({
   return (
     <section className="mt-5">
       {prepared.length ? (
-        <div className="rounded-large bg-kb-white p-5 shadow-kb">
-          <h2 className="font-display text-2xl leading-tight">
+        <div className="rounded-panel bg-surface-1 p-5 shadow-rest">
+          <h2 className="font-display text-h3 leading-tight">
             {prepared.length} {prepared.length === 1 ? "post" : "posts"} for {monthName(month)}{" "}
             {prepared.length === 1 ? "is" : "are"} ready
           </h2>
-          <p className="mt-1 text-sm text-kb-stone">
+          <p className="mt-1 text-small text-text-2">
             Approve the month, or read and approve them one by one below.
           </p>
           <Button
@@ -187,15 +187,15 @@ function MonthView({
             {busy ? "Approving…" : "Approve the month"}
           </Button>
           {msg ? (
-            <p className="mt-3 text-sm" role="status">
+            <p className="mt-3 text-small" role="status">
               {msg}
             </p>
           ) : null}
         </div>
       ) : missing > 0 ? (
-        <div className="rounded-large bg-kb-white p-5 shadow-kb">
-          <h2 className="font-display text-2xl leading-tight">{QUESTION}</h2>
-          <p className="mt-1 text-sm text-kb-stone">
+        <div className="rounded-panel bg-surface-1 p-5 shadow-rest">
+          <h2 className="font-display text-h3 leading-tight">{QUESTION}</h2>
+          <p className="mt-1 text-small text-text-2">
             Kabsi writes posts only from what is true about your business. Tell it below, or add a
             fact in{" "}
             <Link to="/app/knowledge" className="font-bold underline underline-offset-4">
@@ -218,7 +218,7 @@ function MonthView({
           ))}
         </ol>
       ) : (
-        <p className="mt-4 text-sm text-kb-stone">Nothing planned for {monthName(month)} yet.</p>
+        <p className="mt-4 text-small text-text-2">Nothing planned for {monthName(month)} yet.</p>
       )}
     </section>
   );
@@ -226,7 +226,7 @@ function MonthView({
 
 function PostMeta({ post }: { post: Post }) {
   return (
-    <p className="text-xs font-bold uppercase tracking-wider text-kb-stone">
+    <p className="text-label font-bold uppercase tracking-wider text-text-2">
       {STATE_LABEL[post.state]} · {TYPE_LABEL[post.topic_type]}
       {post.publish_at ? ` · ${fmtDateTime(post.publish_at)}` : ` · ${fmtDate(post.created_at)}`}
       {post.source === "auto" ? " · prepared by Kabsi" : ""}
@@ -296,13 +296,13 @@ function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }
     );
   }
   return (
-    <article className="rounded-large bg-kb-white p-5 shadow-kb">
+    <article className="rounded-panel bg-surface-1 p-5 shadow-rest">
       <PostMeta post={post} />
       {post.topic_type === "EVENT" && post.event_title ? (
         <p className="mt-2 font-bold">{post.event_title}</p>
       ) : null}
       {post.topic_type !== "STANDARD" && post.start_date ? (
-        <p className="mt-1 text-sm text-kb-stone">
+        <p className="mt-1 text-small text-text-2">
           {fmtDate(post.start_date)} to {fmtDate(post.end_date)}
           {post.offer_terms ? ` · ${post.offer_terms}` : ""}
         </p>
@@ -319,7 +319,7 @@ function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }
         className="mt-3 min-h-28"
         maxLength={1500}
       />
-      <p className="mt-1 text-xs text-kb-stone">
+      <p className="mt-1 text-label text-text-2">
         {body.length} of 1,500 characters
         {post.cta_type ? ` · Button: ${CTA_LABEL[post.cta_type] ?? post.cta_type}` : ""}
       </p>
@@ -337,7 +337,7 @@ function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }
         </Button>
       </div>
       {err ? (
-        <p className="mt-2 text-sm text-kb-red" role="alert">
+        <p className="mt-2 text-small text-bad" role="alert">
           {err}
         </p>
       ) : null}
@@ -390,20 +390,20 @@ function SentCard({ post, onChanged }: { post: Post; onChanged: () => unknown })
   }
   if (cancelled) {
     return (
-      <div className="rounded-card bg-kb-white p-4 shadow-kb">
-        <p className="text-sm font-bold" role="status">
+      <div className="rounded-card bg-surface-1 p-4 shadow-rest">
+        <p className="text-small font-bold" role="status">
           Cancelled. Nothing was posted.
         </p>
-        <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-6">
+        <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-small leading-6">
           {post.body}
         </p>
       </div>
     );
   }
   return (
-    <div className="rounded-card bg-kb-white p-4 shadow-kb">
+    <div className="rounded-card bg-surface-1 p-4 shadow-rest">
       <PostMeta post={post} />
-      <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-6">
+      <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-small leading-6">
         {post.body}
       </p>
       {post.state === "publishing" ? (
@@ -420,7 +420,7 @@ function SentCard({ post, onChanged }: { post: Post; onChanged: () => unknown })
       {post.state === "posted" ? (
         confirm ? (
           <div className="mt-3">
-            <p className="text-sm">
+            <p className="text-small">
               Remove this post from your Google profile? You have 10 seconds to undo.
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -449,7 +449,7 @@ function SentCard({ post, onChanged }: { post: Post; onChanged: () => unknown })
         )
       ) : null}
       {err ? (
-        <p className="mt-2 text-sm text-kb-red" role="alert">
+        <p className="mt-2 text-small text-bad" role="alert">
           {err}
         </p>
       ) : null}
@@ -514,13 +514,13 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
     }
     setBusy(false);
   }
-  const field = "mt-1 h-11 w-full rounded-card border border-kb-hairline bg-kb-white px-3";
+  const field = "mt-1 h-11 w-full rounded-card border border-line bg-surface-1 px-3";
   return (
     <section className="mt-10">
-      <h2 className="text-sm font-bold uppercase tracking-wider text-kb-stone">Write a post</h2>
+      <h2 className="text-small font-bold uppercase tracking-wider text-text-2">Write a post</h2>
       <form
         onSubmit={(e) => void submit(e)}
-        className="mt-3 space-y-4 rounded-large bg-kb-white p-5 shadow-kb"
+        className="mt-3 space-y-4 rounded-panel bg-surface-1 p-5 shadow-rest"
       >
         <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Kind of post">
           {(["STANDARD", "OFFER", "EVENT"] as PostType[]).map((t) => (
@@ -530,7 +530,7 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
               role="radio"
               aria-checked={type === t}
               onClick={() => setType(t)}
-              className={`h-11 rounded-card border text-sm font-bold ${type === t ? "border-kb-black bg-kb-black text-kb-white" : "border-kb-hairline"}`}
+              className={`h-11 rounded-card border text-small font-bold ${type === t ? "border-text-1 bg-kb-black text-kb-white" : "border-line"}`}
             >
               {TYPE_LABEL[t]}
             </button>
@@ -567,7 +567,7 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
         </div>
         {type !== "STANDARD" ? (
           <div className="grid grid-cols-2 gap-3">
-            <label className="text-sm">
+            <label className="text-small">
               Starts
               <input
                 type="date"
@@ -576,7 +576,7 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
                 className={field}
               />
             </label>
-            <label className="text-sm">
+            <label className="text-small">
               Ends
               <input
                 type="date"
@@ -587,7 +587,7 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
             </label>
             {type === "EVENT" ? (
               <>
-                <label className="text-sm">
+                <label className="text-small">
                   From
                   <input
                     type="time"
@@ -596,7 +596,7 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
                     className={field}
                   />
                 </label>
-                <label className="text-sm">
+                <label className="text-small">
                   To
                   <input
                     type="time"
@@ -637,7 +637,7 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
             </div>
           </>
         ) : null}
-        <label className="block text-sm">
+        <label className="block text-small">
           Button
           <select value={cta} onChange={(e) => setCta(e.target.value)} className={field}>
             <option value="">No button</option>
@@ -661,7 +661,7 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
         ) : null}
         {photos.data?.length ? (
           <fieldset>
-            <legend className="text-sm">One of your photos (if you like)</legend>
+            <legend className="text-small">One of your photos (if you like)</legend>
             <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-6">
               {photos.data.map((p) => (
                 <button
@@ -669,7 +669,7 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
                   type="button"
                   aria-pressed={photo === p.id}
                   onClick={() => setPhoto(photo === p.id ? null : p.id)}
-                  className={`overflow-hidden rounded-card border-2 ${photo === p.id ? "border-kb-black" : "border-transparent"}`}
+                  className={`overflow-hidden rounded-card border-2 ${photo === p.id ? "border-text-1" : "border-transparent"}`}
                 >
                   {p.url ? (
                     <img
@@ -678,14 +678,14 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
                       className="aspect-square w-full object-cover"
                     />
                   ) : (
-                    <span className="block aspect-square w-full bg-kb-sand" />
+                    <span className="block aspect-square w-full bg-surface-2" />
                   )}
                 </button>
               ))}
             </div>
           </fieldset>
         ) : null}
-        <label className="block text-sm">
+        <label className="block text-small">
           Send on (leave empty to send it right after you approve)
           <input
             type="datetime-local"
@@ -698,12 +698,12 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
           {busy ? "Checking…" : "Save the post"}
         </Button>
         {done ? (
-          <p className="text-sm" role="status">
+          <p className="text-small" role="status">
             {done}
           </p>
         ) : null}
         {err ? (
-          <p className="text-sm text-kb-red" role="alert">
+          <p className="text-small text-bad" role="alert">
             {err}
           </p>
         ) : null}
@@ -734,11 +734,11 @@ function Settings({ locationId }: { locationId: string }) {
     setBusy(false);
   }
   return (
-    <section className="mt-10 rounded-large bg-kb-white p-5 shadow-kb">
+    <section className="mt-10 rounded-panel bg-surface-1 p-5 shadow-rest">
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="font-bold">Kabsi's posts</p>
-          <p className="text-sm text-kb-stone">
+          <p className="text-small text-text-2">
             {on
               ? "Kabsi plans your posts each month from what is true, and asks when it has nothing to say."
               : "Off. Your own posts still work."}
@@ -760,7 +760,7 @@ function Settings({ locationId }: { locationId: string }) {
           role="radiogroup"
           aria-label="Posts a month"
         >
-          <span className="text-sm">Posts a month:</span>
+          <span className="text-small">Posts a month:</span>
           {([4, 2] as const).map((n) => (
             <button
               key={n}
@@ -769,7 +769,7 @@ function Settings({ locationId }: { locationId: string }) {
               aria-checked={settings.data?.posts_per_month === n}
               disabled={busy}
               onClick={() => void change(() => setCadence(locationId, n))}
-              className={`h-11 min-w-11 rounded-pill border px-4 text-sm font-bold ${settings.data?.posts_per_month === n ? "border-kb-black bg-kb-black text-kb-white" : "border-kb-hairline"}`}
+              className={`h-11 min-w-11 rounded-pill border px-4 text-small font-bold ${settings.data?.posts_per_month === n ? "border-text-1 bg-kb-black text-kb-white" : "border-line"}`}
             >
               {n}
             </button>
@@ -777,7 +777,7 @@ function Settings({ locationId }: { locationId: string }) {
         </div>
       ) : null}
       {err ? (
-        <p className="mt-2 text-sm text-kb-red" role="alert">
+        <p className="mt-2 text-small text-bad" role="alert">
           {err}
         </p>
       ) : null}
@@ -787,9 +787,9 @@ function Settings({ locationId }: { locationId: string }) {
 
 function NotYet() {
   return (
-    <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
+    <div className="mt-7 rounded-panel bg-surface-1 p-6 shadow-rest">
       <p className="font-bold">Posts start once Kabsi can reach your Google profile.</p>
-      <p className="mt-1 text-sm leading-6 text-kb-stone">
+      <p className="mt-1 text-small leading-6 text-text-2">
         Finish setup and this page fills up with posts to approve.
       </p>
       <Button asChild size="compact" className="mt-4">

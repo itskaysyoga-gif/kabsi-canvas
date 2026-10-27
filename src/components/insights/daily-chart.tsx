@@ -22,13 +22,13 @@ export function DailyChart({
   const high = values.indexOf(Math.max(...values, 0));
   const bar = points.length ? (W - GAP * (points.length - 1)) / points.length : 0;
   return (
-    <figure className="rounded-card bg-kb-sand p-4">
+    <figure className="rounded-card bg-surface-2 p-4">
       <figcaption className="flex items-baseline justify-between gap-3">
         <span className="font-bold">{title}</span>
-        <span className="text-sm text-kb-stone">{total} in all</span>
+        <span className="text-small text-text-2">{total} in all</span>
       </figcaption>
       {points.length === 0 ? (
-        <p className="mt-2 text-sm text-kb-stone">No days to show yet.</p>
+        <p className="mt-2 text-small text-text-2">No days to show yet.</p>
       ) : (
         <svg
           viewBox={`0 0 ${W} ${H}`}
@@ -39,7 +39,7 @@ export function DailyChart({
           }`}
           preserveAspectRatio="none"
         >
-          <line x1="0" x2={W} y1={H - 0.5} y2={H - 0.5} className="stroke-kb-hairline" />
+          <line x1="0" x2={W} y1={H - 0.5} y2={H - 0.5} className="stroke-line" />
           {values.map((v, i) => {
             const h = v === 0 ? 0 : Math.max(2, (v / max) * (H - 4));
             return (

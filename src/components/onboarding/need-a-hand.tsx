@@ -98,10 +98,10 @@ export function NeedAHand({ help }: { help: HelpState }) {
   }
 
   return (
-    <div className="mt-6 border-t border-kb-hairline pt-4" data-testid="need-a-hand">
+    <div className="mt-6 border-t border-line pt-4" data-testid="need-a-hand">
       {showStuck ? (
         <p
-          className="mb-3 rounded-card bg-kb-sand p-3 text-sm leading-6"
+          className="mb-3 rounded-card bg-surface-2 p-3 text-small leading-6"
           role="status"
           data-testid="stuck-line"
         >
@@ -112,7 +112,7 @@ export function NeedAHand({ help }: { help: HelpState }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
-        className="mx-auto flex min-h-11 items-center gap-2 rounded-pill px-4 text-sm font-bold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kb-black"
+        className="mx-auto flex min-h-11 items-center gap-2 rounded-pill px-4 text-small font-bold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
       >
         <HelpCircle className="size-5" aria-hidden="true" /> {CHIP_LABEL}
       </button>
@@ -123,7 +123,7 @@ export function NeedAHand({ help }: { help: HelpState }) {
           className="max-h-[90vh] overflow-y-auto rounded-t-large sm:max-h-none sm:rounded-none"
         >
           <SheetHeader>
-            <SheetTitle className="font-display text-3xl leading-none">{CHIP_LABEL}</SheetTitle>
+            <SheetTitle className="font-display text-h3 leading-none">{CHIP_LABEL}</SheetTitle>
             <SheetDescription>
               Nora is Kabsi&apos;s assistant, with a small AI tag. She never asks for your Google
               password or a code.
@@ -131,7 +131,7 @@ export function NeedAHand({ help }: { help: HelpState }) {
           </SheetHeader>
 
           <section className="mt-5" aria-labelledby="hand-ask">
-            <h3 id="hand-ask" className="flex items-center gap-2 text-base font-bold">
+            <h3 id="hand-ask" className="flex items-center gap-2 text-body font-bold">
               <span
                 className="grid size-6 place-items-center rounded-full bg-kb-yellow text-kb-black"
                 aria-hidden="true"
@@ -139,7 +139,7 @@ export function NeedAHand({ help }: { help: HelpState }) {
                 <MessageCircle className="size-3.5" />
               </span>
               Ask Nora{" "}
-              <span className="rounded-pill border border-kb-hairline px-1.5 text-kb-caption font-medium text-kb-stone">
+              <span className="rounded-pill border border-line px-1.5 text-small font-medium text-text-2">
                 AI
               </span>
             </h3>
@@ -149,7 +149,7 @@ export function NeedAHand({ help }: { help: HelpState }) {
                   <button
                     type="button"
                     onClick={() => ask(q)}
-                    className="flex min-h-11 w-full items-center rounded-card border border-kb-hairline px-3 py-2 text-left text-sm font-medium hover:border-kb-black"
+                    className="flex min-h-11 w-full items-center rounded-card border border-line px-3 py-2 text-left text-small font-medium hover:border-text-1"
                   >
                     {q}
                   </button>
@@ -166,7 +166,7 @@ export function NeedAHand({ help }: { help: HelpState }) {
                 onChange={(e) => setQuestion(e.target.value)}
                 maxLength={300}
                 placeholder="Or ask your own question"
-                className="min-h-11 min-w-0 flex-1 rounded-card border border-kb-hairline px-3 text-base"
+                className="min-h-11 min-w-0 flex-1 rounded-card border border-line px-3 text-body"
               />
               <Button type="submit" variant="outline" size="compact" disabled={!question.trim()}>
                 Ask
@@ -176,7 +176,7 @@ export function NeedAHand({ help }: { help: HelpState }) {
 
           {cfg.clip && STEP_CLIPS[cfg.clip] ? (
             <section className="mt-6" aria-labelledby="hand-watch">
-              <h3 id="hand-watch" className="mb-2 flex items-center gap-2 text-base font-bold">
+              <h3 id="hand-watch" className="mb-2 flex items-center gap-2 text-body font-bold">
                 <Play className="size-4" aria-hidden="true" /> Watch it
               </h3>
               <StepClip clip={cfg.clip} label="This step, in 20 seconds" />
@@ -185,11 +185,11 @@ export function NeedAHand({ help }: { help: HelpState }) {
 
           {cfg.call ? (
             <section className="mt-6" aria-labelledby="hand-call">
-              <h3 id="hand-call" className="flex items-center gap-2 text-base font-bold">
+              <h3 id="hand-call" className="flex items-center gap-2 text-body font-bold">
                 <Phone className="size-4" aria-hidden="true" /> Book a free {SETUP_CALL_MINUTES}
                 -minute setup call
               </h3>
-              <p className="mt-1 text-sm leading-6 text-kb-stone">
+              <p className="mt-1 text-small leading-6 text-text-2">
                 Screen share, no camera needed. A real person does it with you.
               </p>
               <BookingLink kind="setup" button className="mt-3 w-full">

@@ -5,9 +5,9 @@ import type { Strip, StripTone } from "@/lib/home-state";
 
 const DOT: Record<StripTone, string> = {
   green: "bg-kb-green",
-  amber: "bg-kb-amber",
-  red: "bg-kb-red",
-  grey: "bg-kb-hairline",
+  amber: "bg-warn",
+  red: "bg-bad",
+  grey: "bg-line",
 };
 
 // The strip that is on Home whatever the state (K-06): the Google connection, the last successful check and the plan.
@@ -16,12 +16,12 @@ export function HomeStrip({ strip, plan }: { strip: Strip; plan: PlanState | nul
   return (
     <div
       className={cn(
-        "mt-4 flex flex-wrap items-center gap-x-4 gap-y-0.5 rounded-card border px-4 py-2 text-kb-small",
+        "mt-4 flex flex-wrap items-center gap-x-4 gap-y-0.5 rounded-card border px-4 py-2 text-small",
         strip.tone === "amber"
-          ? "border-kb-amber bg-kb-amber-soft text-kb-amber"
+          ? "border-kb-amber bg-warn-soft text-warn"
           : strip.tone === "red"
-            ? "border-kb-red bg-kb-red/10 text-kb-red"
-            : "border-kb-hairline bg-kb-white text-kb-stone",
+            ? "border-bad bg-bad-soft text-bad"
+            : "border-line bg-surface-1 text-text-2",
       )}
       role={strip.tone === "red" || strip.tone === "amber" ? "status" : undefined}
       data-tone={strip.tone}

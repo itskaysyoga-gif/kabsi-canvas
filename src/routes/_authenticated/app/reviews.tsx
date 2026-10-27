@@ -87,7 +87,7 @@ function ReviewsPage() {
   if (!location.isLoading && !loc) {
     return (
       <Page>
-        <p className="leading-7 text-kb-stone">You haven't added a business yet.</p>
+        <p className="leading-7 text-text-2">You haven't added a business yet.</p>
         <Button asChild className="mt-5">
           <Link to="/start">Add your business</Link>
         </Button>
@@ -97,9 +97,9 @@ function ReviewsPage() {
   if (loc && loc.status !== "active") {
     return (
       <Page>
-        <div className="rounded-large bg-kb-white p-7 shadow-kb">
+        <div className="rounded-panel bg-surface-1 p-7 shadow-rest">
           <p className="font-bold">Replies start once setup is finished.</p>
-          <p className="mt-1 leading-7 text-kb-stone">
+          <p className="mt-1 leading-7 text-text-2">
             As soon as Kabsi can reach your Google profile, every new review shows up here with a
             reply ready.
           </p>
@@ -118,7 +118,7 @@ function ReviewsPage() {
         <div className={cn("mt-6 space-y-3", current && "hidden lg:block")}>
           <div className="relative">
             <Search
-              className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-kb-stone"
+              className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-text-2"
               aria-hidden="true"
             />
             <Input
@@ -126,7 +126,7 @@ function ReviewsPage() {
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search reviews or names"
               aria-label="Search reviews"
-              className="h-12 rounded-pill bg-kb-white pl-11"
+              className="h-12 rounded-pill bg-surface-1 pl-11"
             />
           </div>
           <div
@@ -143,12 +143,12 @@ function ReviewsPage() {
                   aria-pressed={filter === f.key}
                   onClick={() => setFilter(f.key)}
                   className={cn(
-                    "min-h-10 shrink-0 whitespace-nowrap rounded-pill border px-4 text-sm font-bold",
+                    "min-h-10 shrink-0 whitespace-nowrap rounded-pill border px-4 text-small font-bold",
                     filter === f.key
                       ? f.key === "high"
-                        ? "border-kb-red bg-kb-red text-kb-white"
-                        : "border-kb-black bg-kb-black text-kb-white"
-                      : "border-kb-hairline bg-kb-white text-kb-stone hover:text-kb-black",
+                        ? "border-bad bg-bad text-kb-white"
+                        : "border-text-1 bg-kb-black text-kb-white"
+                      : "border-line bg-surface-1 text-text-2 hover:text-text-1",
                   )}
                 >
                   {f.label} {n}
@@ -158,7 +158,7 @@ function ReviewsPage() {
             <button
               type="button"
               onClick={() => void reviews.refetch()}
-              className="ml-auto inline-flex min-h-10 shrink-0 items-center gap-1.5 px-3 text-sm font-bold text-kb-stone hover:text-kb-black"
+              className="ml-auto inline-flex min-h-10 shrink-0 items-center gap-1.5 px-3 text-small font-bold text-text-2 hover:text-text-1"
             >
               <RefreshCw
                 className={cn("size-4", reviews.isFetching && "animate-spin")}
@@ -173,14 +173,14 @@ function ReviewsPage() {
       {reviews.isLoading ? (
         <div className="mt-5 space-y-3" role="status" aria-label="Loading reviews">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-24 animate-pulse rounded-large bg-kb-white/70" />
+            <div key={i} className="h-24 animate-pulse rounded-panel bg-kb-white/70" />
           ))}
         </div>
       ) : null}
       {reviews.error ? (
-        <div className="mt-5 rounded-large bg-kb-white p-5 shadow-kb" role="alert">
+        <div className="mt-5 rounded-panel bg-surface-1 p-5 shadow-rest" role="alert">
           <p className="font-bold">Couldn't load your reviews.</p>
-          <p className="mt-1 text-sm text-kb-stone">Check your connection and try again.</p>
+          <p className="mt-1 text-small text-text-2">Check your connection and try again.</p>
           <Button
             variant="outline"
             size="compact"
@@ -192,22 +192,22 @@ function ReviewsPage() {
         </div>
       ) : null}
       {reviews.data && !all.length ? (
-        <div className="mt-6 rounded-large bg-kb-white p-8 text-center shadow-kb">
-          <p className="font-display text-2xl">No reviews yet</p>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-kb-stone">
+        <div className="mt-6 rounded-panel bg-surface-1 p-8 text-center shadow-rest">
+          <p className="font-display text-h3">No reviews yet</p>
+          <p className="mx-auto mt-2 max-w-md text-small leading-6 text-text-2">
             New ones show up here and in your email, with a reply ready.
           </p>
         </div>
       ) : null}
       {reviews.data && all.length && !list.length && !current ? (
-        <div className="mt-6 rounded-large bg-kb-white p-8 text-center shadow-kb">
+        <div className="mt-6 rounded-panel bg-surface-1 p-8 text-center shadow-rest">
           <span className="mx-auto grid size-14 place-items-center rounded-full bg-kb-yellow">
             <CheckCircle2 className="size-7" aria-hidden="true" />
           </span>
-          <p className="mt-4 font-display text-2xl">
+          <p className="mt-4 font-display text-h3">
             {filter === "needs" ? "You're all caught up" : "No reviews match"}
           </p>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-kb-stone">
+          <p className="mx-auto mt-2 max-w-md text-small leading-6 text-text-2">
             {filter === "needs"
               ? "When a new Google review arrives, you'll get an email with a reply ready, and it shows up here too."
               : "Try another filter."}
@@ -253,7 +253,7 @@ function ReviewsPage() {
               >
                 <ChevronLeft /> All reviews
               </Button>
-              <p className="ml-auto flex items-center gap-1 text-sm text-kb-stone">
+              <p className="ml-auto flex items-center gap-1 text-small text-text-2">
                 {at >= 0 ? `${at + 1} of ${list.length}` : null}
                 <Button
                   variant="icon"
@@ -308,8 +308,8 @@ function Page({
     >
       <div className={cn(detail && "hidden lg:block")}>
         <PageIcon icon={<PageGlyph />} />
-        <h1 className="font-display text-4xl leading-none sm:text-5xl">Reviews</h1>
-        <p className="mt-3 max-w-xl text-sm leading-6 text-kb-stone">
+        <h1 className="font-display text-h2 leading-none sm:text-5xl">Reviews</h1>
+        <p className="mt-3 max-w-xl text-small leading-6 text-text-2">
           Every reply is drafted in the reviewer's language from your facts. Nothing goes on Google
           until you approve it.
         </p>
@@ -340,12 +340,12 @@ function ReviewRowButton({
       onClick={onOpen}
       aria-current={active ? "true" : undefined}
       className={cn(
-        "block w-full rounded-large bg-kb-white p-4 text-left shadow-kb transition-colors",
+        "block w-full rounded-panel bg-surface-1 p-4 text-left shadow-rest transition-colors",
         active
           ? highlighted
-            ? "ring-2 ring-kb-black"
-            : "lg:ring-2 lg:ring-kb-black"
-          : "hover:ring-2 hover:ring-kb-hairline",
+            ? "ring-2 ring-focus"
+            : "lg:ring-2 lg:ring-focus"
+          : "hover:ring-2 hover:ring-line",
       )}
     >
       <span className="flex items-center justify-between gap-2">
@@ -361,18 +361,18 @@ function ReviewRowButton({
                 aria-hidden="true"
                 className={cn(
                   "size-3.5",
-                  n <= row.star_rating ? "fill-kb-black text-kb-black" : "text-kb-stone/40",
+                  n <= row.star_rating ? "fill-kb-black text-text-1" : "text-line-strong",
                 )}
               />
             ))}
           </span>
-          <span className="truncate text-sm font-bold">{row.reviewer_name ?? "A customer"}</span>
+          <span className="truncate text-small font-bold">{row.reviewer_name ?? "A customer"}</span>
         </span>
         {row.review_created_at ? (
-          <span className="shrink-0 text-xs text-kb-stone">{fmtDate(row.review_created_at)}</span>
+          <span className="shrink-0 text-label text-text-2">{fmtDate(row.review_created_at)}</span>
         ) : null}
       </span>
-      <span dir="auto" className="mt-2 line-clamp-2 block text-sm leading-6 text-kb-stone">
+      <span dir="auto" className="mt-2 line-clamp-2 block text-small leading-6 text-text-2">
         {row.comment ||
           (row.content_purged_at
             ? "Text removed after 30 days (Google's rule)"
@@ -392,7 +392,7 @@ function Detail({ review, concierge }: { review: ReviewRow; concierge: boolean }
   if (needsReply(review)) return <ReviewCard review={review} />;
   const reply = review.my_reply || review.existing_reply;
   return (
-    <article className="rounded-large bg-kb-white p-5 shadow-kb sm:p-7">
+    <article className="rounded-panel bg-surface-1 p-5 shadow-rest sm:p-7">
       <ReviewHead review={review} />
       <div className="mt-4">
         <ReviewStatusPill review={review} concierge={concierge} />
@@ -402,20 +402,20 @@ function Detail({ review, concierge }: { review: ReviewRow; concierge: boolean }
         <ReportReview review={review} />
       </div>
       {review.content_purged_at && !review.comment ? (
-        <p className="mt-3 text-sm text-kb-stone">
+        <p className="mt-3 text-small text-text-2">
           Google's rules let Kabsi keep review text for 30 days. Read it on your Google profile.
         </p>
       ) : null}
       {reply ? (
-        <div className="mt-4 rounded-card border-l-4 border-kb-yellow bg-kb-sand p-4">
-          <p className="text-xs font-bold uppercase tracking-wider text-kb-stone">Your reply</p>
-          <p dir="auto" className="mt-1 whitespace-pre-wrap text-sm leading-6">
+        <div className="mt-4 rounded-card border-l-4 border-kb-yellow bg-surface-2 p-4">
+          <p className="text-label font-bold uppercase tracking-wider text-text-2">Your reply</p>
+          <p dir="auto" className="mt-1 whitespace-pre-wrap text-small leading-6">
             {reply}
           </p>
         </div>
       ) : null}
       {review.reply_state_reason && review.reply_state === "in_review" ? (
-        <p className="mt-3 text-sm text-kb-stone">{review.reply_state_reason}</p>
+        <p className="mt-3 text-small text-text-2">{review.reply_state_reason}</p>
       ) : null}
     </article>
   );

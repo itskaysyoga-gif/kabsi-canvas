@@ -117,15 +117,15 @@ function ProfilePage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">Google Profile</h1>
-      <p className="mt-2 max-w-2xl text-kb-stone">
+      <h1 className="font-display text-h2 leading-none sm:text-5xl">Google Profile</h1>
+      <p className="mt-2 max-w-2xl text-text-2">
         What customers see on Google, next to what you approved. Google sometimes changes details
         itself or accepts edits from the public. Nothing changes on Google until you choose.
       </p>
       {loc && !loc.concierge ? (
-        <p className="mt-4 inline-flex items-center gap-2 rounded-pill bg-kb-white px-4 py-2 text-sm font-medium shadow-kb">
+        <p className="mt-4 inline-flex items-center gap-2 rounded-pill bg-surface-1 px-4 py-2 text-small font-medium shadow-rest">
           <ShieldCheck
-            className={running ? "size-4 text-kb-green" : "size-4 text-kb-stone"}
+            className={running ? "size-4 text-ok" : "size-4 text-text-2"}
             aria-hidden="true"
           />
           {protectionLine({ running, checkedAt: data.data?.checkedAt ?? null })}
@@ -137,13 +137,13 @@ function ProfilePage() {
         </Button>
       ) : null}
       {data.error ? (
-        <p className="mt-6 text-kb-red" role="alert">
+        <p className="mt-6 text-bad" role="alert">
           Couldn't load your profile. Refresh the page.
         </p>
       ) : null}
       {loc?.concierge ? <EarlyAccessNotice what="Google Protection" /> : null}
       {loc && !loc.concierge && loc.status !== "active" ? (
-        <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
+        <div className="mt-7 rounded-panel bg-surface-1 p-6 shadow-rest">
           <p className="font-bold">
             Google Protection starts once Kabsi can reach your Google profile.
           </p>
@@ -156,11 +156,11 @@ function ProfilePage() {
       {loc && loc.status === "active" && data.data ? (
         <>
           <section className="mt-8" aria-labelledby="attention">
-            <h2 id="attention" className="text-lg font-bold">
+            <h2 id="attention" className="text-title font-bold">
               What needs attention
             </h2>
             {!open.length && !tasks.length ? (
-              <p className="mt-2 text-kb-small text-kb-stone">
+              <p className="mt-2 text-small text-text-2">
                 Nothing needs your attention. Kabsi is watching your profile.
               </p>
             ) : null}
@@ -175,9 +175,9 @@ function ProfilePage() {
                 />
               ))}
               {tasks.map((t) => (
-                <div key={t.id} className="rounded-card bg-kb-white p-4 shadow-kb">
+                <div key={t.id} className="rounded-card bg-surface-1 p-4 shadow-rest">
                   <p className="font-bold">{t.title}</p>
-                  {t.why ? <p className="mt-1 text-sm leading-6 text-kb-stone">{t.why}</p> : null}
+                  {t.why ? <p className="mt-1 text-small leading-6 text-text-2">{t.why}</p> : null}
                   <Button asChild variant="secondary" size="compact" className="mt-3">
                     <Link to={t.path}>
                       Open <ArrowRight />
@@ -189,41 +189,43 @@ function ProfilePage() {
           </section>
 
           <section className="mt-9" aria-labelledby="fields">
-            <h2 id="fields" className="text-lg font-bold">
+            <h2 id="fields" className="text-title font-bold">
               What Kabsi watches
             </h2>
             <ul className="mt-3 space-y-3">
               {rows.map((r) => (
-                <li key={r.key} className="rounded-card bg-kb-white p-4 shadow-kb">
+                <li key={r.key} className="rounded-card bg-surface-1 p-4 shadow-rest">
                   <div className="flex items-start justify-between gap-3">
                     <p className="font-bold">{r.label}</p>
                     <StatusPill tone={r.tone} className="shrink whitespace-normal text-right">
                       {r.status}
                     </StatusPill>
                   </div>
-                  <dl className="mt-3 space-y-2 text-sm">
+                  <dl className="mt-3 space-y-2 text-small">
                     <div>
-                      <dt className="text-xs font-bold uppercase text-kb-stone">Google shows</dt>
+                      <dt className="text-label font-bold uppercase text-text-2">Google shows</dt>
                       <dd dir="auto" className="break-words">
                         {r.google ?? (
-                          <span className="text-kb-stone">Kabsi has not read this yet</span>
+                          <span className="text-text-2">Kabsi has not read this yet</span>
                         )}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs font-bold uppercase text-kb-stone">Approved by you</dt>
+                      <dt className="text-label font-bold uppercase text-text-2">
+                        Approved by you
+                      </dt>
                       <dd dir="auto" className="break-words">
                         {r.approved === null ? (
-                          <span className="text-kb-stone">Nothing yet</span>
+                          <span className="text-text-2">Nothing yet</span>
                         ) : r.approved === NOT_CONFIRMED ? (
-                          <span className="text-kb-amber">{NOT_CONFIRMED}</span>
+                          <span className="text-warn">{NOT_CONFIRMED}</span>
                         ) : (
                           r.approved
                         )}
                       </dd>
                     </div>
                   </dl>
-                  <p className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-kb-stone">
+                  <p className="mt-3 flex flex-wrap items-center justify-between gap-2 text-label text-text-2">
                     <span>
                       {r.google === null
                         ? "Kabsi reads this once Google shows it"
@@ -251,17 +253,17 @@ function ProfilePage() {
 
       {past.length ? (
         <div className="mt-8">
-          <h2 className="text-lg font-bold">History</h2>
+          <h2 className="text-title font-bold">History</h2>
           <div className="mt-3 space-y-2">
             {past.map((c) => (
-              <div key={c.id} className="rounded-card bg-kb-white p-4 text-sm shadow-kb">
+              <div key={c.id} className="rounded-card bg-surface-1 p-4 text-small shadow-rest">
                 <p className="font-medium">
                   {label(c.field)} ·{" "}
                   {c.support_requested_at
                     ? "Kabsi's team is asking Google support"
                     : (STATUS[c.status] ?? c.status)}
                 </p>
-                <p className="text-kb-stone">
+                <p className="text-text-2">
                   {fmtDate(c.detected_at)} ·{" "}
                   {c.google_value
                     ? `Google showed “${c.google_value.display || "(empty)"}”`
@@ -303,14 +305,16 @@ function StaffEdit({ locationId }: { locationId: string }) {
     setMsg(error ? `Couldn't: ${error.message}` : "Edited. The alert arrives within 5 minutes.");
   }
   return (
-    <details className="mt-10 rounded-large border border-dashed border-kb-hairline p-5">
-      <summary className="cursor-pointer text-sm font-bold">Staff: simulate a Google edit</summary>
+    <details className="mt-10 rounded-panel border border-dashed border-line p-5">
+      <summary className="cursor-pointer text-small font-bold">
+        Staff: simulate a Google edit
+      </summary>
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <select
           aria-label="Field"
           value={field}
           onChange={(e) => setField(e.target.value)}
-          className="h-11 rounded-card border border-kb-hairline bg-kb-white px-3"
+          className="h-11 rounded-card border border-line bg-surface-1 px-3"
         >
           {MOCK_FIELDS.map(([k, l]) => (
             <option key={k} value={k}>
@@ -333,7 +337,7 @@ function StaffEdit({ locationId }: { locationId: string }) {
           Simulate
         </Button>
       </div>
-      {msg ? <p className="mt-3 text-sm text-kb-stone">{msg}</p> : null}
+      {msg ? <p className="mt-3 text-small text-text-2">{msg}</p> : null}
     </details>
   );
 }

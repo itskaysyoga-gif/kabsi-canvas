@@ -43,7 +43,7 @@ describe("each status renders", () => {
   it("Rejected by Google", () => {
     const out = html({ state: "drafted", reply_state: "rejected" });
     expect(out).toContain("Rejected by Google");
-    expect(out).toContain("text-kb-red");
+    expect(out).toContain("text-bad");
   });
   it("You chose not to reply", () => {
     expect(html({ state: "skipped" })).toContain("You chose not to reply");

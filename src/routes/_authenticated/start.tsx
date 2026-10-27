@@ -120,20 +120,23 @@ function StartPage() {
   if (query.isLoading)
     return (
       <OnboardingShell step="check">
-        <p className="text-kb-stone">Loading…</p>
+        <p className="text-text-2">Loading…</p>
       </OnboardingShell>
     );
   if (query.isError)
     return (
       <OnboardingShell step="check">
-        <p className="text-kb-red">We couldn't load your setup. Reload the page.</p>
+        <p className="text-bad">We couldn't load your setup. Reload the page.</p>
       </OnboardingShell>
     );
 
   return (
     <OnboardingShell step={flowStepOf(step)} {...(step !== "done" ? { help } : {})}>
       {cardNote ? (
-        <p className="mb-6 rounded-card bg-kb-sand px-4 py-3 text-sm font-medium" role="status">
+        <p
+          className="mb-6 rounded-card bg-surface-2 px-4 py-3 text-small font-medium"
+          role="status"
+        >
           {cardNote}
         </p>
       ) : null}
@@ -145,7 +148,7 @@ function StartPage() {
       {(step === "confirm" || step === "plan") && location ? (
         <ConfirmStep location={location} onChanged={refresh} />
       ) : null}
-      {step === "done" ? <p className="text-kb-stone">Taking you to Home…</p> : null}
+      {step === "done" ? <p className="text-text-2">Taking you to Home…</p> : null}
     </OnboardingShell>
   );
 }

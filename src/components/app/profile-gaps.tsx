@@ -13,23 +13,23 @@ export function ProfileGaps({ locationId, gaps }: { locationId: string; gaps: Ta
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks", locationId] }),
   });
   return (
-    <section className="mt-8 rounded-large bg-kb-white p-6 shadow-kb" aria-labelledby="gaps">
-      <h2 id="gaps" className="text-lg font-bold">
+    <section className="mt-8 rounded-panel bg-surface-1 p-6 shadow-rest" aria-labelledby="gaps">
+      <h2 id="gaps" className="text-title font-bold">
         Make your profile more complete
       </h2>
-      <p className="mt-1 text-sm text-kb-stone">
+      <p className="mt-1 text-small text-text-2">
         Useful next steps, when you have a minute. You approve every change.
       </p>
       {gaps.length === 0 ? (
-        <p className="mt-4 text-sm text-kb-stone">
+        <p className="mt-4 text-small text-text-2">
           Nothing to add right now. Kabsi will tell you when something comes up.
         </p>
       ) : (
         <ul className="mt-4 space-y-3">
           {gaps.map((t) => (
-            <li key={t.id} className="rounded-card border border-kb-hairline p-4">
+            <li key={t.id} className="rounded-card border border-line p-4">
               <p className="font-bold">{t.title}</p>
-              <p className="mt-1 text-sm leading-6 text-kb-stone">{t.why}</p>
+              <p className="mt-1 text-small leading-6 text-text-2">{t.why}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button asChild size="compact" variant="outline">
                   <Link to={t.path}>

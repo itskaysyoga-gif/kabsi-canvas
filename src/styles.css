@@ -17,12 +17,11 @@
  *    value may appear, scripts/check-tokens.mjs).
  * 2. Roles (--surface-*, --text-*, --line*, --focus...): what pages and components use. The public website is dark
  *    (.theme-dark, set by SiteShell; the page body follows it). .theme-light is the light look of the customer pages
- *    and the light section on Home; :root is light too, so the signed-in website keeps its light colours until UX
- *    1 (its fonts are the new two families and its card radius is the new 16 px, DESIGN.md).
+ *    and the light section on Home; :root is light too, and the signed-in website reads the light roles (UX 1).
  * 3. Tailwind names (@theme inline): bg-surface-1, text-text-2, rounded-card, shadow-lift, ease-kb and so on.
  *
- * The legacy block (--color-kb-* with the old names, text-kb-*, shadow-kb) is what the signed-in website still reads.
- * UX 1 moves it to the roles and deletes that block. No new page uses it.
+ * UX 1 (27 Oct 2026) moved the signed-in website onto the roles and retired the legacy block; the kb-* colour names
+ * that remain are brand aliases of layer 1.
  */
 
 /* Brand constants */
@@ -88,51 +87,31 @@
   --phone-body: #262626;
 }
 
-/* Legacy tokens: the signed-in website (UX 1 retires them). Values unchanged from DESIGN.md of 25 Oct 2026. */
-@theme {
-  --color-kb-yellow: #ffd60a;
-  --color-kb-yellow-pressed: #e8c309;
-  --color-kb-black: #000000;
-  --color-kb-carbon: #0b0b0b;
-  --color-kb-ink: #111111;
-  --color-kb-white: #ffffff;
-  --color-kb-sand: #f6f4ef;
-  --color-kb-stone: #5e5b55;
-  --color-kb-stone-on-dark: #c9c5bc;
-  --color-kb-hairline: #e4e0d7;
-  --color-kb-red: #d93025;
-  --color-kb-red-ink: #b3261e;
-  --color-kb-red-soft: #fce8e6;
-  --color-kb-green: #1f8a5b;
-  --color-kb-green-ink: #17704a;
-  --color-kb-green-soft: #e6f4ec;
-  --color-kb-amber: #b45309;
-  --color-kb-amber-soft: #fef3c7;
-  --color-kb-paper: #f5f3ee;
-
-  --text-kb-hero: clamp(3.5rem, 2.4rem + 4.6vw, 5rem);
-  --text-kb-hero--line-height: 1;
-  --text-kb-section: clamp(2.25rem, 1.9rem + 1.4vw, 2.75rem);
-  --text-kb-section--line-height: 1.05;
-  --text-kb-lead: 1.125rem;
-  --text-kb-lead--line-height: 1.6;
-  --text-kb-body: 1rem;
-  --text-kb-body--line-height: 1.6;
-  --text-kb-small: 0.875rem;
-  --text-kb-small--line-height: 1.5;
-  --text-kb-caption: 0.8125rem;
-  --text-kb-caption--line-height: 1.4;
-
-  --spacing-kb-section: 6rem;
-  --spacing-kb-section-sm: 4rem;
-  --spacing-kb-gutter: 1.5rem;
+/* Brand colour names (bg-kb-yellow, text-kb-ink, bg-kb-green...): fixed values that do not follow the theme, for the
+   one yellow action, ink on yellow, ticks and the light cards drawn inside dark pages. Pages use the roles for
+   everything else. UX 1 retired the legacy block of 25 Oct (text-kb-*, shadow-kb, rounded-large, the old kb-carbon). */
+@theme inline {
+  --color-kb-yellow: var(--kb-yellow);
+  --color-kb-yellow-pressed: var(--kb-yellow-pressed);
+  --color-kb-black: var(--kb-black);
+  --color-kb-carbon: var(--kb-carbon);
+  --color-kb-ink: var(--kb-ink);
+  --color-kb-white: var(--kb-white);
+  --color-kb-sand: var(--kb-sand);
+  --color-kb-stone: var(--kb-stone);
+  --color-kb-mute: var(--kb-mute);
+  --color-kb-hairline: var(--kb-hairline);
+  --color-kb-red: var(--kb-red);
+  --color-kb-red-ink: var(--kb-red-ink);
+  --color-kb-red-soft: var(--kb-red-soft);
+  --color-kb-green: var(--kb-green);
+  --color-kb-green-ink: var(--kb-green-ink);
+  --color-kb-green-soft: var(--kb-green-soft);
+  --color-kb-amber: var(--kb-amber);
+  --color-kb-amber-soft: var(--kb-amber-soft);
+  --color-kb-paper: var(--kb-paper);
   --container-kb: 75rem;
-
-  --radius-large: 24px;
   --radius-pill: 999px;
-
-  --shadow-kb: 0 6px 18px rgba(0, 0, 0, 0.06);
-  --shadow-kb-lift: 0 14px 30px rgba(0, 0, 0, 0.09);
 }
 
 /* Roles, light: the default (the signed-in website and emails), the customer pages and the light sections. */
@@ -216,29 +195,8 @@ body:has(.theme-dark) {
   --radius: 1rem;
 }
 
-/* shadcn names. On the signed-in website (:root) they keep their old values; in the new system they follow the roles,
-   declared again in each scope so a nested theme changes them too. */
-:root {
-  --background: var(--color-kb-white);
-  --foreground: var(--color-kb-ink);
-  --card: var(--color-kb-white);
-  --card-foreground: var(--color-kb-ink);
-  --popover: var(--color-kb-white);
-  --popover-foreground: var(--color-kb-ink);
-  --primary: var(--color-kb-yellow);
-  --primary-foreground: var(--color-kb-black);
-  --secondary: var(--color-kb-sand);
-  --secondary-foreground: var(--color-kb-ink);
-  --muted: var(--color-kb-sand);
-  --muted-foreground: var(--color-kb-stone);
-  --accent: var(--color-kb-sand);
-  --accent-foreground: var(--color-kb-black);
-  --destructive: var(--color-kb-red);
-  --destructive-foreground: var(--color-kb-white);
-  --border: var(--color-kb-hairline);
-  --input: var(--color-kb-hairline);
-  --ring: var(--color-kb-black);
-}
+/* shadcn names follow the roles, declared again in each scope so a nested theme changes them too. */
+:root,
 .theme-dark,
 body:has(.theme-dark),
 .theme-light {

@@ -35,19 +35,19 @@ export function HistorySheet({
           <SheetDescription>{task.title}</SheetDescription>
         </SheetHeader>
         {q.isLoading ? (
-          <p className="mt-4 text-kb-small text-kb-stone">Loading...</p>
+          <p className="mt-4 text-small text-text-2">Loading...</p>
         ) : q.isError ? (
-          <p className="mt-4 text-kb-small text-kb-red">
+          <p className="mt-4 text-small text-bad">
             We couldn't load the history. Try again in a moment.
           </p>
         ) : (q.data ?? []).length === 0 ? (
-          <p className="mt-4 text-kb-small text-kb-stone">Nothing has happened to this yet.</p>
+          <p className="mt-4 text-small text-text-2">Nothing has happened to this yet.</p>
         ) : (
-          <ul className="mt-4 divide-y divide-kb-hairline">
+          <ul className="mt-4 divide-y divide-line">
             {(q.data ?? []).map((h) => (
               <li key={h.id} className="py-3">
-                <p className="text-kb-small font-medium">{h.line}</p>
-                <p className="text-kb-caption text-kb-stone">{fmtDateTime(h.at)}</p>
+                <p className="text-small font-medium">{h.line}</p>
+                <p className="text-small text-text-2">{fmtDateTime(h.at)}</p>
               </li>
             ))}
           </ul>

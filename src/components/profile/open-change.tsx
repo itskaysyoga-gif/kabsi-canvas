@@ -54,13 +54,13 @@ export function OpenChange({
   return (
     <ChangeCardView change={change} when={fmtDateTime(change.detected_at)}>
       {err ? (
-        <p className="mt-3 text-sm text-kb-red" role="alert">
+        <p className="mt-3 text-small text-bad" role="alert">
           {err}
         </p>
       ) : null}
       {access && !mayDecide ? (
         <p
-          className="mt-4 rounded-card bg-kb-sand p-3 text-sm leading-6 text-kb-stone"
+          className="mt-4 rounded-card bg-surface-2 p-3 text-small leading-6 text-text-2"
           role="status"
         >
           The owner decides this one.

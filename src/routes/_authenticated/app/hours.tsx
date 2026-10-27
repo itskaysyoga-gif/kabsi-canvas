@@ -119,9 +119,9 @@ function HoursPage() {
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Profile</p>
-      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Hours</h1>
-      <p className="mt-2 text-kb-stone">
+      <p className="text-small font-bold uppercase tracking-wider text-text-2">Profile</p>
+      <h1 className="mt-1 font-display text-h2 leading-none sm:text-5xl">Hours</h1>
+      <p className="mt-2 text-text-2">
         Your weekly hours, holidays and closures, so Google shows the right times. Nothing changes
         on Google until you confirm it.
       </p>
@@ -148,7 +148,7 @@ function HoursPage() {
                 type="button"
                 aria-pressed={mode === m.id}
                 onClick={() => setMode(m.id)}
-                className={`min-h-12 rounded-card border-2 px-2 text-sm font-bold ${mode === m.id ? "border-kb-black bg-kb-sand" : "border-kb-hairline"}`}
+                className={`min-h-12 rounded-card border-2 px-2 text-small font-bold ${mode === m.id ? "border-text-1 bg-surface-2" : "border-line"}`}
               >
                 {m.label}
               </button>
@@ -156,7 +156,7 @@ function HoursPage() {
           </div>
           {mode === "regular" ? (
             approved.isLoading ? (
-              <p className="mt-7 text-kb-stone">Loading…</p>
+              <p className="mt-7 text-text-2">Loading…</p>
             ) : (
               <WeekEditor
                 // A new week arrives after a save: start the editor again from it.
@@ -173,7 +173,7 @@ function HoursPage() {
           )}
         </>
       ) : loc && !loc.concierge ? (
-        <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
+        <div className="mt-7 rounded-panel bg-surface-1 p-6 shadow-rest">
           <p className="font-bold">Hours can be set once Kabsi can reach your Google profile.</p>
           <Button asChild size="compact" className="mt-4">
             <Link to="/start">Continue setup</Link>
@@ -191,16 +191,16 @@ function HoursPage() {
       ) : null}
       {rows.data?.length ? (
         <div className="mt-10">
-          <h2 className="text-lg font-bold">Set with Kabsi</h2>
+          <h2 className="text-title font-bold">Set with Kabsi</h2>
           <div className="mt-3 space-y-2">
             {rows.data.map((r) => (
               <div
                 key={r.id}
-                className="flex items-center justify-between rounded-card bg-kb-white p-4 shadow-kb"
+                className="flex items-center justify-between rounded-card bg-surface-1 p-4 shadow-rest"
               >
                 <div>
                   <p className="font-medium">{range(r)}</p>
-                  <p className="text-sm text-kb-stone">
+                  <p className="text-small text-text-2">
                     {times(r)}
                     {r.reason ? ` · ${r.reason}` : ""}
                   </p>
@@ -208,10 +208,10 @@ function HoursPage() {
                 <span
                   className={
                     r.state === "failed"
-                      ? "shrink-0 rounded-pill bg-kb-red/10 px-2.5 py-1 text-xs font-bold text-kb-red"
+                      ? "shrink-0 rounded-pill bg-bad-soft px-2.5 py-1 text-label font-bold text-bad"
                       : r.state === "posted" || r.state === "live"
-                        ? "shrink-0 rounded-pill bg-kb-green/10 px-2.5 py-1 text-xs font-bold text-kb-green"
-                        : "shrink-0 rounded-pill bg-kb-sand px-2.5 py-1 text-xs font-bold text-kb-stone"
+                        ? "shrink-0 rounded-pill bg-ok-soft px-2.5 py-1 text-label font-bold text-ok"
+                        : "shrink-0 rounded-pill bg-surface-2 px-2.5 py-1 text-label font-bold text-text-2"
                   }
                 >
                   {r.state === "posted" || r.state === "live"

@@ -22,14 +22,14 @@ function ActivatePage() {
       <div className="grid size-12 place-items-center rounded-full bg-kb-yellow">
         <Nfc className="size-6" aria-hidden="true" />
       </div>
-      <h1 className="mt-6 font-display text-4xl leading-tight">This Kabsi card isn't set up yet</h1>
-      <p className="mt-3 leading-7 text-kb-stone">
-        Card code <span className="font-mono font-bold text-kb-ink">{clean}</span>
+      <h1 className="mt-6 font-display text-h2 leading-tight">This Kabsi card isn't set up yet</h1>
+      <p className="mt-3 leading-7 text-text-2">
+        Card code <span className="font-mono font-bold text-text-1">{clean}</span>
       </p>
 
-      <div className="mt-7 rounded-card bg-kb-sand p-5">
+      <div className="mt-7 rounded-card bg-surface-2 p-5">
         <p className="font-bold">Is this your card?</p>
-        <p className="mt-1 text-sm leading-6 text-kb-stone">
+        <p className="mt-1 text-small leading-6 text-text-2">
           Link it to your business, then invite Kabsi as a Manager. We accept your invite and email
           you as soon as we do. After that, every tap opens your Google review page.
         </p>
@@ -40,13 +40,13 @@ function ActivatePage() {
         </Button>
       </div>
 
-      <p className="mt-6 text-sm leading-6 text-kb-stone">
+      <p className="mt-6 text-small leading-6 text-text-2">
         Here to leave a review? Sorry, this card isn't ready yet. Please ask the staff, or find the
         business on Google Maps.
       </p>
-      <p className="mt-4 text-sm text-kb-stone">
+      <p className="mt-4 text-small text-text-2">
         Questions:{" "}
-        <a className="font-medium text-kb-ink underline" href="mailto:hello@kabsi.co">
+        <a className="font-medium text-text-1 underline" href="mailto:hello@kabsi.co">
           hello@kabsi.co
         </a>
       </p>

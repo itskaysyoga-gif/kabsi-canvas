@@ -101,7 +101,7 @@ export function BusinessStep({ onCreated }: { onCreated: () => Promise<unknown> 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Business name and city"
-          className="h-[52px] rounded-card px-4 text-base"
+          className="h-[52px] rounded-card px-4 text-body"
           autoComplete="organization"
           required
           minLength={2}
@@ -112,7 +112,7 @@ export function BusinessStep({ onCreated }: { onCreated: () => Promise<unknown> 
         </Button>
       </form>
       {results && results.length === 0 ? (
-        <p className="mt-5 text-kb-stone">No match. Try the name plus the street or area.</p>
+        <p className="mt-5 text-text-2">No match. Try the name plus the street or area.</p>
       ) : null}
       {results && results.length > 0 ? (
         <ul className="mt-5 space-y-2" aria-label="Search results">
@@ -128,14 +128,14 @@ export function BusinessStep({ onCreated }: { onCreated: () => Promise<unknown> 
                 className={cn(
                   "flex w-full items-start gap-3 rounded-card border-2 p-4 text-left",
                   picked?.place_id === place.place_id
-                    ? "border-kb-black bg-kb-sand"
-                    : "border-kb-hairline hover:border-kb-stone",
+                    ? "border-text-1 bg-surface-2"
+                    : "border-line hover:border-stroke",
                 )}
               >
                 <MapPin className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
                 <span className="min-w-0">
                   <span className="block font-bold">{place.name}</span>
-                  <span className="block text-sm text-kb-stone">{place.address}</span>
+                  <span className="block text-small text-text-2">{place.address}</span>
                 </span>
               </button>
             </li>
@@ -251,16 +251,16 @@ export function AccessStep({ location, onChanged }: StepProps) {
         title="Add Kabsi as a Manager"
         sub={`Kabsi needs to be a Manager on ${location.name}'s Google Business Profile to read reviews and prepare the replies you approve. Nothing is published without your approval.`}
       />
-      <label className="flex cursor-pointer items-start gap-3 rounded-card border-2 border-kb-hairline p-4">
+      <label className="flex cursor-pointer items-start gap-3 rounded-card border-2 border-line p-4">
         <Checkbox
           checked={agreed}
           onCheckedChange={(v) => void saveAgreement(v === true)}
           disabled={Boolean(location.consent_at)}
           className="mt-1"
         />
-        <span className="text-sm leading-6">{CONSENT_TEXT}</span>
+        <span className="text-small leading-6">{CONSENT_TEXT}</span>
       </label>
-      <p className="mt-3 text-xs leading-5 text-kb-stone" data-testid="free-from-google">
+      <p className="mt-3 text-label leading-5 text-text-2" data-testid="free-from-google">
         {FREE_FROM_GOOGLE}{" "}
         <a
           href={THIRD_PARTY_HELP_URL}

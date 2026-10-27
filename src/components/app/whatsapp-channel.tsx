@@ -17,9 +17,9 @@ import {
 export function WhatsappChannel() {
   if (!WHATSAPP_ON) {
     return (
-      <div className="mt-6 rounded-card bg-kb-sand p-4" data-testid="whatsapp-coming-soon">
+      <div className="mt-6 rounded-card bg-surface-2 p-4" data-testid="whatsapp-coming-soon">
         <p className="font-bold">WhatsApp: coming soon</p>
-        <p className="mt-1 text-sm leading-6 text-kb-stone">
+        <p className="mt-1 text-small leading-6 text-text-2">
           Review alerts and Approve on WhatsApp start when Kabsi&apos;s WhatsApp number is ready.
           Until then everything comes by email and in the bell on Home.
         </p>
@@ -54,26 +54,26 @@ function WhatsappConnected() {
   const s = status.data;
 
   return (
-    <div className="mt-6 rounded-card border border-kb-hairline p-4">
+    <div className="mt-6 rounded-card border border-line p-4">
       <p className="font-bold">WhatsApp</p>
       {s?.state === "active" ? (
         <>
-          <p className="mt-1 text-sm leading-6 text-kb-stone">
+          <p className="mt-1 text-small leading-6 text-text-2">
             Connected to the phone ending in {s.phone_last4}. Reply STOP there at any time to stop.
           </p>
-          <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3 text-sm">
+          <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3 text-small">
             <Checkbox
               checked={s.review_alerts !== false}
               onCheckedChange={(v) => prefs.mutate({ alerts: v === true, digest: null })}
-              className="size-5 rounded-md border-2 border-kb-black"
+              className="size-5 rounded-md border-2 border-text-1"
             />
             <span>Review alerts with Approve</span>
           </label>
-          <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm">
+          <label className="flex min-h-11 cursor-pointer items-center gap-3 text-small">
             <Checkbox
               checked={s.digest_optin === true}
               onCheckedChange={(v) => prefs.mutate({ alerts: null, digest: v === true })}
-              className="size-5 rounded-md border-2 border-kb-black"
+              className="size-5 rounded-md border-2 border-text-1"
             />
             <span>The weekly summary on WhatsApp</span>
           </label>
@@ -88,7 +88,7 @@ function WhatsappConnected() {
         </>
       ) : (
         <>
-          <p className="mt-1 text-sm leading-6 text-kb-stone">{WHATSAPP_CONSENT_TEXT}</p>
+          <p className="mt-1 text-small leading-6 text-text-2">{WHATSAPP_CONSENT_TEXT}</p>
           <Button
             variant="outline"
             className="mt-3 min-h-11"
@@ -98,7 +98,7 @@ function WhatsappConnected() {
             Connect WhatsApp
           </Button>
           {code ? (
-            <p className="mt-3 text-sm leading-6">
+            <p className="mt-3 text-small leading-6">
               WhatsApp opens with the code <b>{code.code}</b> typed in. Press send from the phone
               you want to connect. The code works for 30 minutes.{" "}
               <a href={code.href} target="_blank" rel="noopener noreferrer" className="underline">
@@ -111,7 +111,7 @@ function WhatsappConnected() {
           ) : null}
         </>
       )}
-      <p className="mt-2 min-h-6 text-sm text-kb-red" role="status">
+      <p className="mt-2 min-h-6 text-small text-bad" role="status">
         {err}
       </p>
     </div>

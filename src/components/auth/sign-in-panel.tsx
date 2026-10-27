@@ -116,9 +116,9 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
             type="button"
             onClick={() => void google()}
             disabled={busy}
-            className="inline-flex h-[52px] w-full items-center justify-center gap-3 rounded-pill bg-kb-carbon px-6 text-base font-bold text-kb-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kb-black disabled:opacity-50"
+            className="inline-flex h-[52px] w-full items-center justify-center gap-3 rounded-pill bg-kb-carbon px-6 text-body font-bold text-kb-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:opacity-50"
           >
-            <span className="grid size-7 place-items-center rounded-full bg-kb-white">
+            <span className="grid size-7 place-items-center rounded-full bg-surface-1">
               <img src="/brand/google-g.svg" alt="" className="size-[18px]" />
             </span>
             Continue with Google
@@ -134,14 +134,14 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
           >
             Continue with email
           </Button>
-          <p className="pt-1 text-sm leading-6 text-kb-stone">
+          <p className="pt-1 text-small leading-6 text-text-2">
             Google sign-in shares only your name and email address with Kabsi. It does not give
             Kabsi access to your Business Profile.
           </p>
         </div>
       ) : step === "email" ? (
         <form onSubmit={sendCode}>
-          <Label htmlFor="email" className="text-base">
+          <Label htmlFor="email" className="text-body">
             Email address
           </Label>
           <Input
@@ -152,14 +152,14 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-2 h-[52px] rounded-card border-kb-hairline bg-kb-white px-4 text-base"
+            className="mt-2 h-[52px] rounded-card border-line bg-surface-1 px-4 text-body"
             placeholder="you@example.com"
             required
           />
           {(() => {
             const suggestion = emailTypoSuggestion(email.trim());
             return suggestion ? (
-              <p className="mt-2 text-sm text-kb-stone">
+              <p className="mt-2 text-small text-text-2">
                 Did you mean {suggestion}?{" "}
                 <button
                   type="button"
@@ -177,12 +177,12 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
           <Button className="mt-3 w-full" disabled={busy || !token}>
             {busy ? "Sending" : "Send me a code"}
           </Button>
-          <p className="mt-3 text-sm text-kb-stone">
+          <p className="mt-3 text-small text-text-2">
             We email you a 6-digit code. There is no password to remember.
           </p>
           <button
             type="button"
-            className="mt-4 min-h-11 text-sm font-bold underline-offset-4 hover:underline"
+            className="mt-4 min-h-11 text-small font-bold underline-offset-4 hover:underline"
             onClick={() => {
               setError("");
               setStep("choose");
@@ -193,11 +193,11 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
         </form>
       ) : (
         <form onSubmit={verifyCode}>
-          <p className="leading-7 text-kb-stone">
-            Enter the 6-digit code sent to <span className="font-bold text-kb-ink">{email}</span>.
+          <p className="leading-7 text-text-2">
+            Enter the 6-digit code sent to <span className="font-bold text-text-1">{email}</span>.
             It works for 10 minutes.
           </p>
-          <Label htmlFor="login-code" className="mt-4 block text-base">
+          <Label htmlFor="login-code" className="mt-4 block text-body">
             One-time code
           </Label>
           <InputOTP
@@ -221,7 +221,7 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
                 <InputOTPSlot
                   key={index}
                   index={index}
-                  className="h-12 min-w-0 flex-1 rounded-card border border-kb-hairline text-lg first:rounded-card first:border last:rounded-card"
+                  className="h-12 min-w-0 flex-1 rounded-card border border-line text-title first:rounded-card first:border last:rounded-card"
                 />
               ))}
             </InputOTPGroup>
@@ -229,7 +229,7 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
           <Button id="login-submit" className="mt-5 w-full" disabled={busy}>
             {busy ? "Checking" : "Continue"}
           </Button>
-          <p className="mt-3 text-sm text-kb-stone">
+          <p className="mt-3 text-small text-text-2">
             Can't see it? Check your spam folder. The email comes from hello@kabsi.co.
           </p>
           {(() => {
@@ -243,13 +243,13 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
             ) : null;
           })()}
           {seconds > 0 ? (
-            <p className="mt-5 text-sm text-kb-stone">You can ask for a new code in {seconds}s.</p>
+            <p className="mt-5 text-small text-text-2">You can ask for a new code in {seconds}s.</p>
           ) : (
             <div className="mt-5">
               <Turnstile key={round} onToken={setToken} />
               <button
                 type="button"
-                className="mt-2 min-h-11 text-sm font-bold underline-offset-4 hover:underline disabled:text-kb-stone"
+                className="mt-2 min-h-11 text-small font-bold underline-offset-4 hover:underline disabled:text-text-2"
                 disabled={busy || !token}
                 onClick={() => void sendCode()}
               >
@@ -259,7 +259,7 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
           )}
           <button
             type="button"
-            className="mt-2 block min-h-11 text-sm font-bold underline-offset-4 hover:underline"
+            className="mt-2 block min-h-11 text-small font-bold underline-offset-4 hover:underline"
             onClick={() => {
               setStep("email");
               setCode("");
@@ -271,7 +271,7 @@ export function SignInPanel({ next, onDone }: { next: string; onDone: () => void
         </form>
       )}
       {error ? (
-        <p role="alert" className="mt-4 rounded-card bg-kb-red/10 px-4 py-3 text-sm text-kb-red">
+        <p role="alert" className="mt-4 rounded-card bg-bad-soft px-4 py-3 text-small text-bad">
           {error}
         </p>
       ) : null}

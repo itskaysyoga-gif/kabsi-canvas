@@ -28,7 +28,9 @@ export function PartnersPanel() {
   if (q.isLoading) return null;
   if (q.error)
     return (
-      <p className="mt-8 text-sm text-kb-stone">Partners did not load: {String(q.error.message)}</p>
+      <p className="mt-8 text-small text-text-2">
+        Partners did not load: {String(q.error.message)}
+      </p>
     );
   const o = q.data;
   if (!o) return null;
@@ -36,25 +38,25 @@ export function PartnersPanel() {
   return (
     <section className="mt-8">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-xl font-bold">Kabsi Partners</h2>
-        <p className="text-sm text-kb-stone">
+        <h2 className="text-title font-bold">Kabsi Partners</h2>
+        <p className="text-small text-text-2">
           {o.places.founding_left} of {o.places.founding_total} Founding Partner places left · next
           payout run {fmtDate(o.next_run_on)}
         </p>
       </div>
       <div className="mt-4 space-y-4">
-        {o.partners.length === 0 ? <p className="text-kb-stone">No applications yet.</p> : null}
+        {o.partners.length === 0 ? <p className="text-text-2">No applications yet.</p> : null}
         {o.partners.map((p) => (
           <PartnerRow key={p.id} p={p} />
         ))}
       </div>
-      <h3 className="mt-8 text-lg font-bold">Payouts</h3>
+      <h3 className="mt-8 text-title font-bold">Payouts</h3>
       <RunNow />
       {runs.map((r) => (
         <ApproveRun key={r} run={r} />
       ))}
       <div className="mt-4 space-y-3">
-        {o.payouts.length === 0 ? <p className="text-sm text-kb-stone">No payouts yet.</p> : null}
+        {o.payouts.length === 0 ? <p className="text-small text-text-2">No payouts yet.</p> : null}
         {o.payouts.map((p) => (
           <PayoutRow key={p.id} p={p} />
         ))}
@@ -83,33 +85,33 @@ function PartnerRow({ p }: { p: Partner }) {
   const [method, setMethod] = useState<"usdt" | "usdc" | "paypal">("usdt");
   const [detail, setDetail] = useState("");
   return (
-    <article className="rounded-large bg-kb-white p-5 shadow-kb">
+    <article className="rounded-panel bg-surface-1 p-5 shadow-rest">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-bold">
             {p.name}
             {p.founding_partner ? " · Founding Partner" : ""}
           </p>
-          <p className="text-sm text-kb-stone">
+          <p className="text-small text-text-2">
             {p.kind} · {[p.city, p.country].filter(Boolean).join(", ") || "-"} · {p.email}
             {p.phone ? ` · ${p.phone}` : ""}
           </p>
         </div>
-        <p className="text-xs text-kb-stone">
+        <p className="text-label text-text-2">
           {p.status}
           {p.code ? ` · ${p.code}` : ""} · applied {fmtDate(p.created_at)}
         </p>
       </div>
       {p.reach || p.pitch ? (
-        <p className="mt-3 whitespace-pre-wrap text-sm leading-6">
+        <p className="mt-3 whitespace-pre-wrap text-small leading-6">
           {[p.reach, p.pitch].filter(Boolean).join("\n")}
         </p>
       ) : null}
       {p.uae_permit ? (
-        <p className="mt-1 text-xs text-kb-stone">UAE permit: {p.uae_permit}</p>
+        <p className="mt-1 text-label text-text-2">UAE permit: {p.uae_permit}</p>
       ) : null}
       {p.status !== "applied" ? (
-        <p className="mt-3 text-sm">
+        <p className="mt-3 text-small">
           {p.referrals} {p.referrals === 1 ? "business" : "businesses"}
           {p.self_referrals ? ` (+${p.self_referrals} self referral, no commission)` : ""} · held{" "}
           {dollars(p.held_cents)} · cleared {dollars(p.cleared_cents)} · paid{" "}
@@ -168,11 +170,11 @@ function PartnerRow({ p }: { p: Partner }) {
       </div>
       {p.status === "approved" || p.status === "paused" ? (
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="text-sm text-kb-stone">
+          <span className="text-small text-text-2">
             Payout: {p.payout_method ? `${p.payout_method} ending ${p.payout_last4}` : "not set"}
           </span>
           <select
-            className="h-11 rounded-card border border-kb-hairline bg-kb-white px-3 text-sm"
+            className="h-11 rounded-card border border-line bg-surface-1 px-3 text-small"
             value={method}
             onChange={(e) => setMethod(e.target.value as typeof method)}
             aria-label="Payout method"
@@ -204,7 +206,7 @@ function PartnerRow({ p }: { p: Partner }) {
           </Button>
         </div>
       ) : null}
-      {msg ? <p className="mt-3 text-sm text-kb-red">{msg}</p> : null}
+      {msg ? <p className="mt-3 text-small text-bad">{msg}</p> : null}
     </article>
   );
 }
@@ -213,7 +215,7 @@ function RunNow() {
   const { run, msg, setMsg } = useRun();
   return (
     <div className="mt-2 flex flex-wrap items-center gap-2">
-      <p className="text-sm text-kb-stone">
+      <p className="text-small text-text-2">
         The list is made by itself on the 5th. Lines clear 30 days after payment; only live payments
         are paid.
       </p>
@@ -230,7 +232,7 @@ function RunNow() {
       >
         Run today
       </Button>
-      {msg ? <p className="text-sm text-kb-stone">{msg}</p> : null}
+      {msg ? <p className="text-small text-text-2">{msg}</p> : null}
     </div>
   );
 }
@@ -238,8 +240,8 @@ function RunNow() {
 function ApproveRun({ run: on }: { run: string }) {
   const { run, msg } = useRun();
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-2 rounded-card bg-kb-sand p-3">
-      <p className="text-sm font-bold">Payout list of {fmtDate(on)} waits for approval</p>
+    <div className="mt-3 flex flex-wrap items-center gap-2 rounded-card bg-surface-2 p-3">
+      <p className="text-small font-bold">Payout list of {fmtDate(on)} waits for approval</p>
       <Button
         size="compact"
         variant="outline"
@@ -248,7 +250,7 @@ function ApproveRun({ run: on }: { run: string }) {
       >
         Approve the list
       </Button>
-      {msg ? <p className="text-sm text-kb-red">{msg}</p> : null}
+      {msg ? <p className="text-small text-bad">{msg}</p> : null}
     </div>
   );
 }
@@ -257,7 +259,7 @@ function PayoutRow({ p }: { p: Payout }) {
   const { run, msg } = useRun();
   const [ref, setRef] = useState("");
   return (
-    <div className="rounded-card border border-kb-hairline p-3 text-sm">
+    <div className="rounded-card border border-line p-3 text-small">
       <p>
         <span className="font-bold">{p.partner}</span> · {dollars(p.amount_cents)} {p.currency} ·{" "}
         {p.lines} {p.lines === 1 ? "line" : "lines"} · {fmtDate(p.run_on)} · {p.state}
@@ -283,7 +285,7 @@ function PayoutRow({ p }: { p: Payout }) {
           </Button>
         </div>
       ) : null}
-      {msg ? <p className="mt-2 text-kb-red">{msg}</p> : null}
+      {msg ? <p className="mt-2 text-bad">{msg}</p> : null}
     </div>
   );
 }

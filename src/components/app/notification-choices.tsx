@@ -39,37 +39,40 @@ export function NotificationChoices({ locationId }: { locationId: string }) {
 
   return (
     <section
-      className="mt-7 rounded-large bg-kb-white p-6 shadow-kb sm:p-8"
+      className="mt-7 rounded-panel bg-surface-1 p-6 shadow-rest sm:p-8"
       aria-labelledby="choices"
     >
-      <h2 id="choices" className="text-xl font-bold">
+      <h2 id="choices" className="text-title font-bold">
         What Kabsi tells you
       </h2>
-      <p className="mt-1 text-sm leading-6 text-kb-stone">
+      <p className="mt-1 text-small leading-6 text-text-2">
         Choose how each kind of notice reaches you. Emails do not arrive between 22:00 and 08:00
         your time, except an urgent change to your profile. They wait until 08:00.
       </p>
       <WhatsappChannel />
       {prefs.isError ? (
-        <p className="mt-4 text-kb-small text-kb-red" role="alert">
+        <p className="mt-4 text-small text-bad" role="alert">
           We couldn't load your choices. Refresh and try again.
         </p>
       ) : null}
       {prefs.data
         ? groupedCategories().map((g) => (
             <div key={g.group} className="mt-6">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-kb-stone">
+              <h3 className="text-small font-bold uppercase tracking-wider text-text-2">
                 {g.group}
               </h3>
-              <ul className="mt-2 divide-y divide-kb-hairline">
+              <ul className="mt-2 divide-y divide-line">
                 {g.items.map((c) => {
                   const email = choice(prefs.data, c.id, "email");
                   const inApp = choice(prefs.data, c.id, "in_app");
                   return (
                     <li key={c.id} className="py-4">
                       <p className="font-bold">{c.label}</p>
-                      <p className="mt-0.5 text-sm leading-6 text-kb-stone">{c.description}</p>
-                      <label className="mt-3 block text-sm font-medium" htmlFor={`email-${c.id}`}>
+                      <p className="mt-0.5 text-small leading-6 text-text-2">{c.description}</p>
+                      <label
+                        className="mt-3 block text-small font-medium"
+                        htmlFor={`email-${c.id}`}
+                      >
                         Email
                       </label>
                       <select
@@ -82,7 +85,7 @@ export function NotificationChoices({ locationId }: { locationId: string }) {
                             frequency: e.target.value as Frequency,
                           })
                         }
-                        className="mt-1 h-[52px] w-full rounded-card border border-kb-hairline bg-kb-white px-4 text-base"
+                        className="mt-1 h-[52px] w-full rounded-card border border-line bg-surface-1 px-4 text-body"
                       >
                         {emailOptions(c).map((o) => (
                           <option key={o.value} value={o.value}>
@@ -91,7 +94,7 @@ export function NotificationChoices({ locationId }: { locationId: string }) {
                         ))}
                       </select>
                       {c.inApp ? (
-                        <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-3 text-sm">
+                        <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-3 text-small">
                           <Checkbox
                             checked={inApp !== "off"}
                             onCheckedChange={(v) =>
@@ -101,7 +104,7 @@ export function NotificationChoices({ locationId }: { locationId: string }) {
                                 frequency: v === true ? "default" : "off",
                               })
                             }
-                            className="size-5 rounded-md border-2 border-kb-black"
+                            className="size-5 rounded-md border-2 border-text-1"
                             disabled={!c.switchable}
                           />
                           <span>Show in the bell on Home{c.switchable ? "" : " (always on)"}</span>
@@ -114,8 +117,8 @@ export function NotificationChoices({ locationId }: { locationId: string }) {
             </div>
           ))
         : null}
-      <p className="mt-4 min-h-6 text-sm" role="status">
-        {err ? <span className="text-kb-red">{err}</span> : saved}
+      <p className="mt-4 min-h-6 text-small" role="status">
+        {err ? <span className="text-bad">{err}</span> : saved}
       </p>
     </section>
   );

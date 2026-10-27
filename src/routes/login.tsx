@@ -41,10 +41,10 @@ function LoginPage() {
 
   return (
     <PublicLayout>
-      <section className="bg-kb-sand px-5 py-12 sm:py-20">
-        <div className="mx-auto max-w-md rounded-large bg-kb-white p-6 shadow-kb sm:p-9">
+      <section className="bg-surface-2 px-5 py-12 sm:py-20">
+        <div className="mx-auto max-w-md rounded-panel bg-surface-1 p-6 shadow-rest sm:p-9">
           <h1 className="font-display text-5xl leading-none">Log in</h1>
-          <p className="mb-7 mt-3 leading-7 text-kb-stone">
+          <p className="mb-7 mt-3 leading-7 text-text-2">
             New to Kabsi? The same steps create your account.
           </p>
           <SignInPanel next={target} onDone={() => router.history.replace(target)} />

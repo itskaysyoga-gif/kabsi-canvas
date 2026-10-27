@@ -124,7 +124,7 @@ function ActionPage() {
   if (!view)
     return (
       <ConfirmLayout>
-        <p className="text-kb-stone">Loading…</p>
+        <p className="text-text-2">Loading…</p>
       </ConfirmLayout>
     );
 
@@ -142,13 +142,13 @@ function ActionPage() {
         mode={view?.mode}
         concierge={view.concierge === true}
       >
-        <p className="text-sm font-medium text-kb-stone">{view.business}</p>
-        <h1 className="mt-1 font-display text-3xl leading-tight" aria-live="polite">
+        <p className="text-small font-medium text-text-2">{view.business}</p>
+        <h1 className="mt-1 font-display text-h3 leading-tight" aria-live="polite">
           Publishing in {pending.seconds} {pending.seconds === 1 ? "second" : "seconds"}
         </h1>
-        <p className="mt-3 leading-7 text-kb-stone">Nothing is sent to Google until then.</p>
+        <p className="mt-3 leading-7 text-text-2">Nothing is sent to Google until then.</p>
         {error ? (
-          <p className="mt-3 text-sm text-kb-red" role="alert">
+          <p className="mt-3 text-small text-bad" role="alert">
             {error}
           </p>
         ) : null}
@@ -161,8 +161,8 @@ function ActionPage() {
   if (!done && view.sign_in && view.other_account && view.status === "ok") {
     return (
       <ConfirmLayout demo={view?.demo === true} mode={view?.mode}>
-        <h1 className="font-display text-3xl leading-tight">This link was sent to someone else</h1>
-        <p className="mt-3 leading-7 text-kb-stone">
+        <h1 className="font-display text-h3 leading-tight">This link was sent to someone else</h1>
+        <p className="mt-3 leading-7 text-text-2">
           You are signed in to Kabsi with a different email address. Sign out, then sign in with the
           address this email was sent to.
         </p>
@@ -177,7 +177,7 @@ function ActionPage() {
   const needsSignIn = view.sign_in === true && view.signed_in !== true && view.status === "ok";
   const signIn = (label: string, why: string) => (
     <>
-      <p className="mt-5 text-sm leading-6 text-kb-stone">{why} You come back to this page.</p>
+      <p className="mt-5 text-small leading-6 text-text-2">{why} You come back to this page.</p>
       <Button asChild className="mt-4 w-full">
         <Link to="/login" search={{ next: `/a/${token}` }}>
           {label}
@@ -188,8 +188,8 @@ function ActionPage() {
   if (done) {
     return (
       <ConfirmLayout demo={view?.demo === true} mode={view?.mode}>
-        <CheckCircle2 className="size-10 text-kb-green" aria-hidden="true" />
-        <h1 className="mt-4 font-display text-3xl leading-tight">{DONE[done] ?? "Done."}</h1>
+        <CheckCircle2 className="size-10 text-ok" aria-hidden="true" />
+        <h1 className="mt-4 font-display text-h3 leading-tight">{DONE[done] ?? "Done."}</h1>
         {inbox}
       </ConfirmLayout>
     );
@@ -207,19 +207,19 @@ function ActionPage() {
     const decided = c.state !== "open" || view.status === "used";
     return (
       <ConfirmLayout demo={view?.demo === true} mode={view?.mode}>
-        <p className="text-sm font-medium text-kb-stone">{view.business}</p>
-        <h1 className="mt-1 font-display text-3xl leading-tight">
+        <p className="text-small font-medium text-text-2">{view.business}</p>
+        <h1 className="mt-1 font-display text-h3 leading-tight">
           Your {LABELS[c.field] ?? c.field} changed on Google
         </h1>
         <div className="mt-6 grid gap-3">
-          <div className="rounded-card bg-kb-sand p-4">
-            <p className="text-xs font-bold uppercase text-kb-stone">Before</p>
+          <div className="rounded-card bg-surface-2 p-4">
+            <p className="text-label font-bold uppercase text-text-2">Before</p>
             <p dir="auto" className="mt-1">
               {c.before || "(empty)"}
             </p>
           </div>
-          <div className="rounded-card bg-kb-sand p-4">
-            <p className="text-xs font-bold uppercase text-kb-stone">Now</p>
+          <div className="rounded-card bg-surface-2 p-4">
+            <p className="text-label font-bold uppercase text-text-2">Now</p>
             <p dir="auto" className="mt-1">
               {c.after || "(empty)"}
             </p>
@@ -237,7 +237,7 @@ function ActionPage() {
         ) : (
           <>
             {error ? (
-              <p className="mt-3 text-sm text-kb-red" role="alert">
+              <p className="mt-3 text-small text-bad" role="alert">
                 {error}
               </p>
             ) : null}
@@ -261,10 +261,10 @@ function ActionPage() {
   if (view.status === "invalid" || view.status === "expired" || !view.review) {
     return (
       <ConfirmLayout demo={view?.demo === true} mode={view?.mode}>
-        <h1 className="font-display text-3xl leading-tight">
+        <h1 className="font-display text-h3 leading-tight">
           {view.status === "expired" ? "This link has expired" : "This link isn't valid"}
         </h1>
-        <p className="mt-3 leading-7 text-kb-stone">
+        <p className="mt-3 leading-7 text-text-2">
           Email links work once, for 3 days. Your reviews and drafts are always in your Kabsi inbox.
         </p>
         {inbox}
@@ -275,20 +275,20 @@ function ActionPage() {
   const r = view.review;
   const closed = r.state === "posted" || r.state === "skipped" || r.state === "handled_offline";
   const reviewCard = (
-    <div className="rounded-card bg-kb-sand p-5">
+    <div className="rounded-card bg-surface-2 p-5">
       <p className="font-bold">
         {r.reviewer ?? "A customer"}{" "}
-        <span className="font-normal text-kb-stone">· Rating {r.rating} of 5</span>
+        <span className="font-normal text-text-2">· Rating {r.rating} of 5</span>
       </p>
       <p dir="auto" className="mt-2 whitespace-pre-wrap leading-7">
-        {r.comment || <span className="text-kb-stone">No written review, just a rating.</span>}
+        {r.comment || <span className="text-text-2">No written review, just a rating.</span>}
       </p>
     </div>
   );
   const header = (
     <>
-      <p className="text-sm font-medium text-kb-stone">{view.business}</p>
-      <h1 className="mt-1 font-display text-3xl leading-tight">
+      <p className="text-small font-medium text-text-2">{view.business}</p>
+      <h1 className="mt-1 font-display text-h3 leading-tight">
         {r.risk === "high" ? "This review needs a little more care" : "Reply to this review"}
       </h1>
     </>
@@ -311,7 +311,7 @@ function ActionPage() {
         {r.state === "posted" && r.reply ? (
           <p
             dir="auto"
-            className="mt-3 whitespace-pre-wrap rounded-card border border-kb-hairline p-4 text-sm leading-6"
+            className="mt-3 whitespace-pre-wrap rounded-card border border-line p-4 text-small leading-6"
           >
             {r.reply}
           </p>
@@ -337,7 +337,7 @@ function ActionPage() {
             : "You'll handle this one yourself. Kabsi won't post anything."}
         </p>
         {error ? (
-          <p className="mt-3 text-sm text-kb-red" role="alert">
+          <p className="mt-3 text-small text-bad" role="alert">
             {error}
           </p>
         ) : null}
@@ -360,7 +360,7 @@ function ActionPage() {
       {header}
       <div className="mt-6">{reviewCard}</div>
       {r.risk === "high" ? (
-        <div className="mt-5 rounded-card border-2 border-kb-black p-4 text-sm leading-6">
+        <div className="mt-5 rounded-card border-2 border-text-1 p-4 text-small leading-6">
           {issueLines(r.risk_reasons).map((i) => (
             <p key={i}>{i}</p>
           ))}
@@ -371,7 +371,7 @@ function ActionPage() {
           </ol>
         </div>
       ) : r.risk === "medium" && issueLines(r.risk_reasons).length ? (
-        <div className="mt-5 rounded-card border border-kb-amber/30 bg-kb-amber-soft p-4 text-sm leading-6">
+        <div className="mt-5 rounded-card border border-warn/30 bg-warn-soft p-4 text-small leading-6">
           {issueLines(r.risk_reasons).map((i) => (
             <p key={i}>{i}</p>
           ))}
@@ -381,13 +381,13 @@ function ActionPage() {
         Your reply
       </Label>
       {!view.draft ? (
-        <p className="mt-1 text-sm text-kb-stone">
+        <p className="mt-1 text-small text-text-2">
           {r.risk === "high"
             ? "Kabsi did not draft a reply for this one. Write your own when you are ready, or skip it."
             : "Kabsi couldn't safely draft this one. Write your own reply, or skip it."}
         </p>
       ) : (
-        <p className="mt-1 text-sm text-kb-stone">
+        <p className="mt-1 text-small text-text-2">
           Change anything you like. Kabsi publishes exactly this text after you approve.
         </p>
       )}
@@ -399,10 +399,10 @@ function ActionPage() {
         readOnly={needsSignIn}
         rows={7}
         autoFocus={view.action === "edit" && !needsSignIn}
-        className="mt-3 text-base leading-7"
+        className="mt-3 text-body leading-7"
       />
       {error ? (
-        <p className="mt-3 text-sm text-kb-red" role="alert">
+        <p className="mt-3 text-small text-bad" role="alert">
           {error}
         </p>
       ) : null}

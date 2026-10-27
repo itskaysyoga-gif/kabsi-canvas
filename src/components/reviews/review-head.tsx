@@ -29,7 +29,7 @@ export function Stars({ n, className }: { n: number; className?: string }) {
         <Star
           key={s}
           aria-hidden="true"
-          className={cn("size-4", s <= n ? "fill-kb-black text-kb-black" : "text-kb-stone/40")}
+          className={cn("size-4", s <= n ? "fill-kb-black text-text-1" : "text-line-strong")}
         />
       ))}
     </span>
@@ -51,7 +51,7 @@ export function ReviewHead({ review }: { review: InboxReview }) {
       <div className="flex items-start gap-3">
         <span
           aria-hidden="true"
-          className="grid size-11 shrink-0 place-items-center rounded-full bg-kb-carbon text-base font-bold text-kb-white"
+          className="grid size-11 shrink-0 place-items-center rounded-full bg-kb-carbon text-body font-bold text-kb-white"
         >
           {name.charAt(0).toUpperCase()}
         </span>
@@ -59,21 +59,21 @@ export function ReviewHead({ review }: { review: InboxReview }) {
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <p className="font-bold">{name}</p>
             {review.risk === "high" ? (
-              <span className="inline-flex items-center gap-1 rounded-pill bg-kb-red px-2.5 py-0.5 text-xs font-bold text-kb-white">
+              <span className="inline-flex items-center gap-1 rounded-pill bg-bad px-2.5 py-0.5 text-label font-bold text-kb-white">
                 <AlertTriangle className="size-3.5" aria-hidden="true" /> High risk
               </span>
             ) : review.risk === "medium" ? (
-              <span className="rounded-pill bg-kb-amber-soft px-2.5 py-0.5 text-xs font-bold text-kb-amber">
+              <span className="rounded-pill bg-warn-soft px-2.5 py-0.5 text-label font-bold text-warn">
                 Medium risk
               </span>
             ) : null}
             {review.is_backlog ? (
-              <span className="rounded-pill bg-kb-sand px-2.5 py-0.5 text-xs font-bold text-kb-stone">
+              <span className="rounded-pill bg-surface-2 px-2.5 py-0.5 text-label font-bold text-text-2">
                 Older review
               </span>
             ) : null}
           </div>
-          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-kb-stone">
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-small text-text-2">
             <Stars n={review.star_rating} />
             {date ? <span>{date}</span> : null}
             {lang ? (
@@ -85,7 +85,7 @@ export function ReviewHead({ review }: { review: InboxReview }) {
         </div>
       </div>
       <p dir="auto" className="mt-4 whitespace-pre-wrap text-[17px] leading-7">
-        {review.comment || <span className="text-kb-stone">No written review, just a rating.</span>}
+        {review.comment || <span className="text-text-2">No written review, just a rating.</span>}
       </p>
     </>
   );

@@ -40,11 +40,11 @@ function UnsubscribePage() {
 
   return (
     <ConfirmLayout>
-      {state.step === "loading" ? <p className="text-kb-stone">Loading…</p> : null}
+      {state.step === "loading" ? <p className="text-text-2">Loading…</p> : null}
       {state.step === "ask" ? (
         <>
-          <h1 className="font-display text-3xl leading-tight">Stop these emails?</h1>
-          <p className="mt-3 leading-7 text-kb-stone">
+          <h1 className="font-display text-h3 leading-tight">Stop these emails?</h1>
+          <p className="mt-3 leading-7 text-text-2">
             You will stop getting <strong>{state.label}</strong> emails at this address. Your other
             Kabsi emails are not affected, and you can change this any time in Settings.
           </p>
@@ -55,8 +55,8 @@ function UnsubscribePage() {
       ) : null}
       {state.step === "done" ? (
         <>
-          <h1 className="font-display text-3xl leading-tight">Done</h1>
-          <p className="mt-3 leading-7 text-kb-stone">
+          <h1 className="font-display text-h3 leading-tight">Done</h1>
+          <p className="mt-3 leading-7 text-text-2">
             You will not get <strong>{state.label}</strong> emails at this address any more. You can
             change this any time in Settings, Email settings.
           </p>
@@ -67,8 +67,8 @@ function UnsubscribePage() {
       ) : null}
       {state.step === "bad" ? (
         <>
-          <h1 className="font-display text-3xl leading-tight">This link did not work</h1>
-          <p className="mt-3 leading-7 text-kb-stone">
+          <h1 className="font-display text-h3 leading-tight">This link did not work</h1>
+          <p className="mt-3 leading-7 text-text-2">
             {state.message} Open Email settings in Kabsi to choose which emails you get, or write to
             hello@kabsi.co.
           </p>

@@ -60,7 +60,7 @@ export function BusinessFinder({
           maxLength={120}
           autoComplete="organization"
           autoFocus={autoFocus}
-          className="h-[52px] rounded-card bg-kb-white px-4 text-base text-kb-ink"
+          className="h-[52px] rounded-card bg-surface-1 px-4 text-body text-text-1"
         />
         <Button
           type="submit"
@@ -75,7 +75,7 @@ export function BusinessFinder({
       </div>
       {error ? (
         <p
-          className={cn("mt-3 text-sm", dark ? "text-kb-yellow" : "text-kb-red")}
+          className={cn("mt-3 text-small", dark ? "text-kb-yellow" : "text-bad")}
           role="alert"
           data-testid="check-error"
         >
@@ -85,7 +85,7 @@ export function BusinessFinder({
       {results ? (
         <ul className="mt-4 space-y-2" aria-label="Search results">
           {results.length === 0 ? (
-            <li className={cn("text-sm", dark ? "text-kb-stone-on-dark" : "text-kb-stone")}>
+            <li className={cn("text-small", dark ? "text-kb-mute" : "text-text-2")}>
               Nothing found. Try the exact name as it appears on Google Maps plus your city.
             </li>
           ) : null}
@@ -99,21 +99,16 @@ export function BusinessFinder({
                   "flex min-h-14 w-full items-start gap-3 rounded-card p-4 text-left transition-colors disabled:cursor-wait disabled:opacity-60",
                   dark
                     ? "bg-white/5 hover:bg-white/10"
-                    : "border-2 border-kb-hairline hover:border-kb-stone",
+                    : "border-2 border-line hover:border-stroke",
                 )}
               >
                 <MapPin
-                  className={cn("mt-0.5 size-5 shrink-0", dark ? "text-kb-yellow" : "text-kb-ink")}
+                  className={cn("mt-0.5 size-5 shrink-0", dark ? "text-kb-yellow" : "text-text-1")}
                   aria-hidden="true"
                 />
                 <span className="min-w-0">
                   <span className="block font-bold">{p.name}</span>
-                  <span
-                    className={cn(
-                      "block text-sm",
-                      dark ? "text-kb-stone-on-dark" : "text-kb-stone",
-                    )}
-                  >
+                  <span className={cn("block text-small", dark ? "text-kb-mute" : "text-text-2")}>
                     {p.address}
                   </span>
                 </span>
@@ -121,10 +116,7 @@ export function BusinessFinder({
             </li>
           ))}
           {busy && results.length ? (
-            <li
-              className={cn("text-sm", dark ? "text-kb-stone-on-dark" : "text-kb-stone")}
-              role="status"
-            >
+            <li className={cn("text-small", dark ? "text-kb-mute" : "text-text-2")} role="status">
               Checking what customers see on Google
             </li>
           ) : null}

@@ -30,9 +30,9 @@ export function ReadyMessage({ text, subject }: { text: string; subject: string 
   }
 
   return (
-    <div className="rounded-card bg-kb-sand p-4">
+    <div className="rounded-card bg-surface-2 p-4">
       <p
-        className="whitespace-pre-wrap rounded-card bg-kb-white p-3 text-sm leading-6"
+        className="whitespace-pre-wrap rounded-card bg-surface-1 p-3 text-small leading-6"
         data-testid="ready-message"
       >
         {text}

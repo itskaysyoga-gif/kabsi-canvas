@@ -33,8 +33,8 @@ export function AccessExits({ location, step }: { location: Location; step: numb
         <Share2 /> Send these steps to my other device
       </Button>
       {open === "device" ? (
-        <div className="rounded-card bg-kb-sand p-4">
-          <p className="text-sm leading-6">
+        <div className="rounded-card bg-surface-2 p-4">
+          <p className="text-small leading-6">
             Open the steps on the device where you are signed in to Google.
           </p>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row">
@@ -59,7 +59,7 @@ export function AccessExits({ location, step }: { location: Location; step: numb
             </Button>
           </div>
           {email.isError ? (
-            <p role="alert" className="mt-3 text-sm text-kb-red">
+            <p role="alert" className="mt-3 text-small text-bad">
               {friendlyError(email.error)}
             </p>
           ) : null}
@@ -76,8 +76,8 @@ export function AccessExits({ location, step }: { location: Location; step: numb
         <Users /> Someone else manages my Google listing
       </Button>
       {open === "someone" ? (
-        <div className="rounded-card bg-kb-sand p-4">
-          <p className="text-sm leading-6">
+        <div className="rounded-card bg-surface-2 p-4">
+          <p className="text-small leading-6">
             Send this to whoever manages it. They add Kabsi as a Manager, and you carry on here.
           </p>
           <div className="mt-3">

@@ -68,11 +68,11 @@ function SettingsPage() {
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Settings</p>
-      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Emails</h1>
-      {loc ? <p className="mt-2 text-kb-stone">{loc.name}</p> : null}
+      <p className="text-small font-bold uppercase tracking-wider text-text-2">Settings</p>
+      <h1 className="mt-1 font-display text-h2 leading-none sm:text-5xl">Emails</h1>
+      {loc ? <p className="mt-2 text-text-2">{loc.name}</p> : null}
       {location.isLoading || settings.isLoading ? (
-        <p className="mt-6 text-kb-stone">Loading…</p>
+        <p className="mt-6 text-text-2">Loading…</p>
       ) : null}
       {!location.isLoading && !loc ? (
         <Button asChild className="mt-6">
@@ -141,11 +141,11 @@ function AccountCard() {
     }
   }
   return (
-    <section className="mt-8 rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
-      <h2 className="text-xl font-bold">Your account</h2>
-      <p className="mt-2 text-sm text-kb-stone">Signed in as</p>
+    <section className="mt-8 rounded-panel bg-surface-1 p-6 shadow-rest sm:p-7">
+      <h2 className="text-title font-bold">Your account</h2>
+      <p className="mt-2 text-small text-text-2">Signed in as</p>
       <p className="break-all font-medium">{user?.email ?? "-"}</p>
-      <p className="mt-2 text-sm leading-6 text-kb-stone">
+      <p className="mt-2 text-small leading-6 text-text-2">
         You sign in with a 6-digit code sent to this email. There's no password to remember.
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
@@ -173,7 +173,7 @@ function AccountCard() {
         </AlertDialogContent>
       </AlertDialog>
       {err ? (
-        <p className="mt-2 text-sm text-kb-red" role="alert">
+        <p className="mt-2 text-small text-bad" role="alert">
           {err}
         </p>
       ) : null}
@@ -215,41 +215,41 @@ function DisconnectGoogle({
   }
   const steps = (
     <>
-      on your Business Profile open <b className="text-kb-ink">Menu</b>, then{" "}
-      <b className="text-kb-ink">Business Profile settings</b>, then{" "}
-      <b className="text-kb-ink">People and access</b>
+      on your Business Profile open <b className="text-text-1">Menu</b>, then{" "}
+      <b className="text-text-1">Business Profile settings</b>, then{" "}
+      <b className="text-text-1">People and access</b>
     </>
   );
   return (
-    <section className="mt-8 rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
-      <h2 className="text-xl font-bold">Disconnect Kabsi from Google</h2>
+    <section className="mt-8 rounded-panel bg-surface-1 p-6 shadow-rest sm:p-7">
+      <h2 className="text-title font-bold">Disconnect Kabsi from Google</h2>
       {settings.access_removed_at ? (
-        <p className="mt-2 text-sm leading-6 text-kb-stone">
+        <p className="mt-2 text-small leading-6 text-text-2">
           Kabsi removed its Manager access on{" "}
-          <b className="text-kb-ink">{fmtDate(settings.access_removed_at)}</b>. To check: {steps}.
+          <b className="text-text-1">{fmtDate(settings.access_removed_at)}</b>. To check: {steps}.
           Kabsi Clients is no longer listed. Your review link and cards keep working until your plan
           ends.
         </p>
       ) : settings.disconnect_requested_at ? (
-        <p className="mt-2 text-sm leading-6 text-kb-stone" role="status">
+        <p className="mt-2 text-small leading-6 text-text-2" role="status">
           Kabsi has stopped and is removing its Manager access. We email you when it's done, at the
           latest 7 business days after {fmtDate(settings.disconnect_requested_at)}. You can also
           remove it yourself now: {steps}, and remove Kabsi Clients (group ID {KABSI_GROUP_ID}).
         </p>
       ) : (
         <>
-          <p className="mt-2 text-sm leading-6 text-kb-stone">
+          <p className="mt-2 text-small leading-6 text-text-2">
             Kabsi stops at once: no new drafts, no review emails, and nothing more goes to Google.
             Approvals still waiting are cancelled, and Kabsi removes its Manager access to your
             Google profile. You stay the owner. Your review link and cards keep working until your
             plan ends.
           </p>
           {settings.is_demo ? (
-            <p className="mt-3 text-sm text-kb-stone">Demo businesses stay connected.</p>
+            <p className="mt-3 text-small text-text-2">Demo businesses stay connected.</p>
           ) : (
             <Button
               variant="outline"
-              className="mt-4 border-kb-red text-kb-red"
+              className="mt-4 border-bad text-bad"
               onClick={() => setOpen(true)}
             >
               Disconnect Kabsi
@@ -276,7 +276,7 @@ function DisconnectGoogle({
         </AlertDialogContent>
       </AlertDialog>
       {err ? (
-        <p className="mt-3 text-sm text-kb-red" role="alert">
+        <p className="mt-3 text-small text-bad" role="alert">
           {err}
         </p>
       ) : null}
@@ -313,12 +313,12 @@ function DeleteBusiness({
     onChanged();
   }
   return (
-    <section className="mt-12 rounded-large border-2 border-kb-hairline p-6">
-      <h2 className="text-xl font-bold">Delete this business from Kabsi</h2>
+    <section className="mt-12 rounded-panel border-2 border-line p-6">
+      <h2 className="text-title font-bold">Delete this business from Kabsi</h2>
       {due ? (
         <>
-          <p className="mt-2 text-sm leading-6 text-kb-stone">
-            Deletion is scheduled for <b className="text-kb-ink">{due}</b>. Until then everything
+          <p className="mt-2 text-small leading-6 text-text-2">
+            Deletion is scheduled for <b className="text-text-1">{due}</b>. Until then everything
             keeps working and you can cancel.
           </p>
           <Button
@@ -332,13 +332,13 @@ function DeleteBusiness({
         </>
       ) : (
         <>
-          <p className="mt-2 text-sm leading-6 text-kb-stone">
+          <p className="mt-2 text-small leading-6 text-text-2">
             After 7 days we delete its reviews, drafts, posts, photos, reports and settings, and
             your NFC cards stop opening your review page. Payment records are kept where the law
             requires. To stop Kabsi reaching your Google profile, also remove the Kabsi group (ID{" "}
             {KABSI_GROUP_ID}) under People and access.
           </p>
-          <Label htmlFor="confirm-delete" className="mt-4 block text-sm">
+          <Label htmlFor="confirm-delete" className="mt-4 block text-small">
             Type the business name to confirm
           </Label>
           <Input
@@ -350,7 +350,7 @@ function DeleteBusiness({
           />
           <Button
             variant="outline"
-            className="mt-4 border-kb-red text-kb-red"
+            className="mt-4 border-bad text-bad"
             disabled={busy || confirm.trim().toLowerCase() !== name.trim().toLowerCase()}
             onClick={() => void run("request")}
           >
@@ -359,7 +359,7 @@ function DeleteBusiness({
         </>
       )}
       {err ? (
-        <p className="mt-3 text-sm text-kb-red" role="alert">
+        <p className="mt-3 text-small text-bad" role="alert">
           {err}
         </p>
       ) : null}
@@ -431,10 +431,10 @@ function SettingsForm({
   return (
     <form
       onSubmit={(e) => void save(null, e)}
-      className="mt-7 rounded-large bg-kb-white p-6 shadow-kb sm:p-8"
+      className="mt-7 rounded-panel bg-surface-1 p-6 shadow-rest sm:p-8"
     >
-      <h2 className="text-xl font-bold">Review emails</h2>
-      <p className="mt-1 text-sm leading-6 text-kb-stone">
+      <h2 className="text-title font-bold">Review emails</h2>
+      <p className="mt-1 text-small leading-6 text-text-2">
         Reviews that need extra care are emailed right away. Other reviews are emailed at once while
         you are open and come together in one daily email after hours. Below, you can change this
         for each kind of notice.
@@ -447,7 +447,7 @@ function SettingsForm({
         id="hour"
         value={hour}
         onChange={(e) => setHour(Number(e.target.value))}
-        className="mt-2 h-[52px] w-full rounded-card border border-kb-hairline bg-kb-white px-4 text-base"
+        className="mt-2 h-[52px] w-full rounded-card border border-line bg-surface-1 px-4 text-body"
       >
         {Array.from({ length: 24 }, (_, h) => (
           <option key={h} value={h}>
@@ -463,7 +463,7 @@ function SettingsForm({
         id="zone"
         value={zone}
         onChange={(e) => setZone(e.target.value)}
-        className="mt-2 h-[52px] w-full rounded-card border border-kb-hairline bg-kb-white px-4 text-base"
+        className="mt-2 h-[52px] w-full rounded-card border border-line bg-surface-1 px-4 text-body"
       >
         {zones.map((z) => (
           <option key={z} value={z}>
@@ -473,26 +473,26 @@ function SettingsForm({
       </select>
 
       <Label htmlFor="emails" className="mt-5 block">
-        Also send review alerts to <span className="text-kb-stone">(optional, up to 3)</span>
+        Also send review alerts to <span className="text-text-2">(optional, up to 3)</span>
       </Label>
       <Input
         id="emails"
         value={emails}
         onChange={(e) => setEmails(e.target.value)}
         placeholder="manager@yourbusiness.com"
-        className="mt-2 h-[52px] rounded-card px-4 text-base"
+        className="mt-2 h-[52px] rounded-card px-4 text-body"
       />
-      <p className="mt-2 text-sm text-kb-stone">
+      <p className="mt-2 text-small text-text-2">
         These people see new reviews by email. Only you can post replies.
       </p>
 
       {err ? (
-        <p className="mt-4 text-sm text-kb-red" role="alert">
+        <p className="mt-4 text-small text-bad" role="alert">
           {err}
         </p>
       ) : null}
       {msg ? (
-        <p className="mt-4 text-sm text-kb-green" role="status">
+        <p className="mt-4 text-small text-ok" role="status">
           {msg}
         </p>
       ) : null}
@@ -500,9 +500,9 @@ function SettingsForm({
         {busy ? "Saving…" : "Save"}
       </Button>
 
-      <div className="mt-8 border-t border-kb-hairline pt-6">
-        <h2 className="text-xl font-bold">Pause emails</h2>
-        <p className="mt-1 text-sm leading-6 text-kb-stone">
+      <div className="mt-8 border-t border-line pt-6">
+        <h2 className="text-title font-bold">Pause emails</h2>
+        <p className="mt-1 text-small leading-6 text-text-2">
           {paused
             ? `Paused until ${fmtDate(initial.emails_paused_until)}. Reviews still arrive in your inbox.`
             : "Going on holiday? Pause review emails for a week. Reviews still arrive in your Kabsi inbox."}

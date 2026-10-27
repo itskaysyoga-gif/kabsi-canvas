@@ -28,8 +28,8 @@ export function StaffTestTool({ locationId }: { locationId: string }) {
     }
   }
   return (
-    <details className="mt-10 rounded-large border border-dashed border-kb-hairline p-5">
-      <summary className="cursor-pointer text-sm font-bold">Staff: add a test review</summary>
+    <details className="mt-10 rounded-panel border border-dashed border-line p-5">
+      <summary className="cursor-pointer text-small font-bold">Staff: add a test review</summary>
       <div className="mt-4 grid gap-3">
         <div className="flex gap-3">
           <Input
@@ -41,7 +41,7 @@ export function StaffTestTool({ locationId }: { locationId: string }) {
             aria-label="Rating"
             value={rating}
             onChange={(e) => setRating(Number(e.target.value))}
-            className="rounded-card border border-kb-hairline bg-kb-white px-3"
+            className="rounded-card border border-line bg-surface-1 px-3"
           >
             {[5, 4, 3, 2, 1].map((n) => (
               <option key={n} value={n}>
@@ -61,7 +61,7 @@ export function StaffTestTool({ locationId }: { locationId: string }) {
         <Button size="compact" variant="outline" onClick={() => void add()}>
           Add test review
         </Button>
-        {msg ? <p className="text-sm text-kb-stone">{msg}</p> : null}
+        {msg ? <p className="text-small text-text-2">{msg}</p> : null}
       </div>
     </details>
   );

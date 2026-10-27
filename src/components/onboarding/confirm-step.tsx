@@ -61,7 +61,7 @@ export function ConfirmStep({
         />
         <StepClip clip="confirm" label="What happens next, in 20 seconds" />
         <AccessStatus location={location} onConnected={() => void onChanged()} />
-        <p className="mt-6 rounded-card bg-kb-sand p-4 text-sm leading-6">
+        <p className="mt-6 rounded-card bg-surface-2 p-4 text-small leading-6">
           Your free trial starts when Kabsi has access, so waiting costs you no days. When access
           works, you confirm your details here and your first replies are ready.
         </p>
@@ -100,10 +100,10 @@ function ConfirmForm({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  if (facts.isLoading) return <p className="text-kb-stone">Loading…</p>;
+  if (facts.isLoading) return <p className="text-text-2">Loading…</p>;
   if (facts.isError) {
     return (
-      <p role="alert" className="text-kb-red">
+      <p role="alert" className="text-bad">
         Couldn&apos;t load your details. Refresh the page.
       </p>
     );
@@ -154,7 +154,7 @@ function ConfirmForm({
       />
       <StepClip clip="confirm" label="Confirm your details, in 20 seconds" />
       {!read ? (
-        <p className="mb-5 rounded-card bg-kb-sand p-4 text-sm leading-6" role="status">
+        <p className="mb-5 rounded-card bg-surface-2 p-4 text-small leading-6" role="status">
           Kabsi is reading your profile now. It takes a few minutes. You can skip this and confirm
           later in Google Profile.
         </p>
@@ -166,11 +166,11 @@ function ConfirmForm({
           const isEditing = editing === r.key;
           const confirmedNow = m !== undefined || r.confirmed;
           return (
-            <li key={r.key} className="rounded-card border-2 border-kb-hairline p-4">
+            <li key={r.key} className="rounded-card border-2 border-line p-4">
               <div className="flex items-start justify-between gap-3">
-                <p className="text-xs font-bold uppercase text-kb-stone">{r.label}</p>
+                <p className="text-label font-bold uppercase text-text-2">{r.label}</p>
                 {confirmedNow && !isEditing ? (
-                  <span className="inline-flex items-center gap-1 text-sm font-bold text-kb-green">
+                  <span className="inline-flex items-center gap-1 text-small font-bold text-ok">
                     <Check className="size-4" aria-hidden="true" /> Approved by you
                   </span>
                 ) : null}
@@ -188,9 +188,7 @@ function ConfirmForm({
                           onClick={() => setDraft(o.display)}
                           className={cn(
                             "min-h-11 rounded-card border-2 px-3 text-left font-medium",
-                            draft === o.display
-                              ? "border-kb-black bg-kb-sand"
-                              : "border-kb-hairline",
+                            draft === o.display ? "border-text-1 bg-surface-2" : "border-line",
                           )}
                         >
                           {o.display}
@@ -205,12 +203,14 @@ function ConfirmForm({
                       inputMode={d.type === "tel" ? "tel" : d.type === "url" ? "url" : undefined}
                       placeholder={d.placeholder}
                       aria-label={r.label}
-                      className="h-[52px] rounded-card px-4 text-base"
+                      className="h-[52px] rounded-card px-4 text-body"
                     />
                   )}
-                  {d.hint ? <p className="mt-1 text-sm leading-6 text-kb-stone">{d.hint}</p> : null}
+                  {d.hint ? (
+                    <p className="mt-1 text-small leading-6 text-text-2">{d.hint}</p>
+                  ) : null}
                   {problem ? (
-                    <p role="alert" className="mt-1 text-sm text-kb-red">
+                    <p role="alert" className="mt-1 text-small text-bad">
                       {problem}
                     </p>
                   ) : null}
@@ -235,11 +235,11 @@ function ConfirmForm({
                 </div>
               ) : (
                 <>
-                  <p dir="auto" className="mt-1 break-words text-lg leading-7">
+                  <p dir="auto" className="mt-1 break-words text-title leading-7">
                     {m?.kind === "change"
                       ? m.value
                       : (r.shown?.display ?? (
-                          <span className="text-kb-stone">Kabsi has not read this yet</span>
+                          <span className="text-text-2">Kabsi has not read this yet</span>
                         ))}
                   </p>
                   <div className="mt-3 grid grid-cols-2 gap-3">
@@ -269,7 +269,7 @@ function ConfirmForm({
           );
         })}
       </ul>
-      <p className="mt-4 text-sm leading-6 text-kb-stone">
+      <p className="mt-4 text-small leading-6 text-text-2">
         A detail you leave alone stays as it is and shows Needs your OK in Google Profile.
       </p>
       <ErrorNote message={error || finishError} />

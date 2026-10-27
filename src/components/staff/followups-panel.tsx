@@ -41,11 +41,11 @@ export function FollowupsPanel() {
   if (rows.isLoading) return null;
   return (
     <section className="mt-8">
-      <h2 className="text-xl font-bold">Follow-ups</h2>
+      <h2 className="text-title font-bold">Follow-ups</h2>
       {rows.isError ? (
-        <p className="mt-1 text-sm text-kb-red">Couldn't load follow-ups. Refresh the page.</p>
+        <p className="mt-1 text-small text-bad">Couldn't load follow-ups. Refresh the page.</p>
       ) : !rows.data?.length ? (
-        <p className="mt-1 text-sm text-kb-stone">Nothing to finish by hand.</p>
+        <p className="mt-1 text-small text-text-2">Nothing to finish by hand.</p>
       ) : (
         <div className="mt-4 space-y-4">
           {rows.data.map((f) => (
@@ -74,14 +74,16 @@ function FollowupCard({ f }: { f: Followup }) {
     await queryClient.invalidateQueries({ queryKey: ["staff-followups"] });
   }
   return (
-    <div className="rounded-large bg-kb-white p-5 shadow-kb">
+    <div className="rounded-panel bg-surface-1 p-5 shadow-rest">
       {nudge ? (
         <>
           <p className="font-bold">Send a personal WhatsApp to the owner of {f.location_name}</p>
-          <p className={late ? "mt-1 text-sm font-bold text-kb-red" : "mt-1 text-sm text-kb-stone"}>
+          <p
+            className={late ? "mt-1 text-small font-bold text-bad" : "mt-1 text-small text-text-2"}
+          >
             Due {fmtDate(f.due_at)}. Asked {fmtDate(f.created_at)}.
           </p>
-          <p className="mt-2 text-sm leading-6 text-kb-stone">
+          <p className="mt-2 text-small leading-6 text-text-2">
             They have not added Kabsi as a Manager yet. Write from your own phone: ask if they need
             a hand, offer the free setup call, and never ask for a Google password or code.
           </p>
@@ -89,10 +91,12 @@ function FollowupCard({ f }: { f: Followup }) {
       ) : support ? (
         <>
           <p className="font-bold">Contact Google support for {f.location_name}</p>
-          <p className={late ? "mt-1 text-sm font-bold text-kb-red" : "mt-1 text-sm text-kb-stone"}>
+          <p
+            className={late ? "mt-1 text-small font-bold text-bad" : "mt-1 text-small text-text-2"}
+          >
             Due {fmtDate(f.due_at)}. Asked {fmtDate(f.created_at)}.
           </p>
-          <p className="mt-2 text-sm leading-6 text-kb-stone">
+          <p className="mt-2 text-small leading-6 text-text-2">
             Google keeps replacing a detail the owner approved. Open a case with Google Business
             Profile support and ask Google to keep the owner&apos;s value. The values are on the
             change in Google Protection.
@@ -101,17 +105,19 @@ function FollowupCard({ f }: { f: Followup }) {
       ) : (
         <>
           <p className="font-bold">Remove Kabsi from {f.location_name}</p>
-          <p className={late ? "mt-1 text-sm font-bold text-kb-red" : "mt-1 text-sm text-kb-stone"}>
+          <p
+            className={late ? "mt-1 text-small font-bold text-bad" : "mt-1 text-small text-text-2"}
+          >
             Due {fmtDate(f.due_at)} (Google allows 7 business days). Asked {fmtDate(f.created_at)}.
           </p>
-          <p className="mt-2 text-sm leading-6 text-kb-stone">
+          <p className="mt-2 text-small leading-6 text-text-2">
             In Business Profile Manager open the business, then People and access, and remove Kabsi
             Clients (group ID {KABSI_GROUP_ID}). Or ask the owner to remove it there.
           </p>
         </>
       )}
       {f.detail ? (
-        <p className="mt-2 break-words text-xs text-kb-stone">Why it is here: {f.detail}</p>
+        <p className="mt-2 break-words text-label text-text-2">Why it is here: {f.detail}</p>
       ) : null}
       <Input
         className="mt-3"
@@ -136,7 +142,7 @@ function FollowupCard({ f }: { f: Followup }) {
               : "Done, Kabsi is removed"}
       </Button>
       {err ? (
-        <p className="mt-2 text-sm text-kb-red" role="alert">
+        <p className="mt-2 text-small text-bad" role="alert">
           {err}
         </p>
       ) : null}

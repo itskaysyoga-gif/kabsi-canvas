@@ -28,7 +28,7 @@ function Steps({ items }: { items: React.ReactNode[] }) {
     <ol className="mt-3 space-y-3">
       {items.map((text, i) => (
         <li key={i} className="flex gap-3">
-          <span className="grid size-6 shrink-0 place-items-center rounded-full bg-kb-yellow text-xs font-bold">
+          <span className="grid size-6 shrink-0 place-items-center rounded-full bg-kb-yellow text-label font-bold">
             {i + 1}
           </span>
           <span className="leading-6">{text}</span>
@@ -51,9 +51,9 @@ export function EligibilityCheck({
 }) {
   const [copied, setCopied] = useState(false);
   return (
-    <section className="mt-6 rounded-card border-2 border-kb-hairline p-4" aria-label="Quick check">
+    <section className="mt-6 rounded-card border-2 border-line p-4" aria-label="Quick check">
       <h3 className="font-bold">One quick check</h3>
-      <p className="mt-1 text-sm leading-6 text-kb-stone">
+      <p className="mt-1 text-small leading-6 text-text-2">
         Kabsi works with a <strong>verified</strong> Google Business Profile that you own or manage.
         Is <strong>{businessName}</strong> yours on Google?
       </p>
@@ -70,15 +70,13 @@ export function EligibilityCheck({
             }}
             className={cn(
               "flex w-full items-start gap-3 rounded-card border-2 p-3 text-left",
-              value === o.value
-                ? "border-kb-black bg-kb-sand"
-                : "border-kb-hairline hover:border-kb-stone",
+              value === o.value ? "border-text-1 bg-surface-2" : "border-line hover:border-stroke",
             )}
           >
             <span
               className={cn(
                 "mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border-2",
-                value === o.value ? "border-kb-black bg-kb-black text-white" : "border-kb-stone",
+                value === o.value ? "border-text-1 bg-kb-black text-white" : "border-stroke",
               )}
               aria-hidden="true"
             >
@@ -86,14 +84,14 @@ export function EligibilityCheck({
             </span>
             <span>
               <span className="block font-medium">{o.label}</span>
-              <span className="block text-sm text-kb-stone">{o.hint}</span>
+              <span className="block text-small text-text-2">{o.hint}</span>
             </span>
           </button>
         ))}
       </div>
 
       {value === "unsure" ? (
-        <div className="mt-4 rounded-card bg-kb-sand p-4 text-sm">
+        <div className="mt-4 rounded-card bg-surface-2 p-4 text-small">
           <p className="font-bold">How to check</p>
           <Steps
             items={[
@@ -123,7 +121,7 @@ export function EligibilityCheck({
       ) : null}
 
       {value === "notverified" ? (
-        <div className="mt-4 rounded-card bg-kb-sand p-4 text-sm">
+        <div className="mt-4 rounded-card bg-surface-2 p-4 text-small">
           <p className="font-bold">Get your profile ready first (free, done on Google)</p>
           <Steps
             items={[
@@ -151,7 +149,7 @@ export function EligibilityCheck({
               <>Come back here once the profile says Verified. Your search will still be here.</>,
             ]}
           />
-          <p className="mt-3 text-kb-stone">
+          <p className="mt-3 text-text-2">
             We can't start until Google has verified the profile, because that is what lets you
             approve replies for it.
           </p>

@@ -65,9 +65,9 @@ export function ActionCenter({ loc, role }: { loc: Location; role: Role }) {
       <HomeStrip strip={strip} plan={plan} />
 
       {list.isError ? (
-        <section className="mt-6 rounded-large bg-kb-white p-6 shadow-kb" role="alert">
-          <h2 className="text-xl font-bold">We couldn't load what needs you</h2>
-          <p className="mt-1 text-kb-small text-kb-stone">
+        <section className="mt-6 rounded-panel bg-surface-1 p-6 shadow-rest" role="alert">
+          <h2 className="text-title font-bold">We couldn't load what needs you</h2>
+          <p className="mt-1 text-small text-text-2">
             Your replies and your profile are safe. Try again in a moment.
           </p>
           <Button
@@ -85,13 +85,13 @@ export function ActionCenter({ loc, role }: { loc: Location; role: Role }) {
           <div className="h-56 animate-pulse rounded-card bg-kb-white/70" />
         </div>
       ) : state.kind === "clear" ? (
-        <section className="mt-6 flex items-start gap-4 rounded-large bg-kb-carbon p-6 text-kb-white">
+        <section className="mt-6 flex items-start gap-4 rounded-panel bg-kb-carbon p-6 text-kb-white">
           <span className="grid size-12 shrink-0 place-items-center rounded-full bg-kb-yellow text-kb-black">
             <Check className="size-6" aria-hidden="true" />
           </span>
           <div>
-            <h2 className="text-2xl font-bold">{headline(0)}</h2>
-            <p className="mt-2 leading-7 text-kb-stone-on-dark">
+            <h2 className="text-h3 font-bold">{headline(0)}</h2>
+            <p className="mt-2 leading-7 text-kb-mute">
               Kabsi is taking care of the rest. When a new Google review arrives, you'll get an
               email with a reply ready.
             </p>
@@ -99,10 +99,10 @@ export function ActionCenter({ loc, role }: { loc: Location; role: Role }) {
         </section>
       ) : (
         <section className="mt-6" aria-labelledby="needs-you">
-          <h2 id="needs-you" className="text-2xl font-bold">
+          <h2 id="needs-you" className="text-h3 font-bold">
             {headline(state.total)}
           </h2>
-          <p className="mt-1 text-kb-small leading-6 text-kb-stone">
+          <p className="mt-1 text-small leading-6 text-text-2">
             {subline(state.total, replyCount(shown))}
           </p>
           <div className="mt-4 space-y-4">
@@ -133,15 +133,15 @@ export function ActionCenter({ loc, role }: { loc: Location; role: Role }) {
                 {all ? "Show fewer" : `See all ${state.total}`}
               </Button>
               {all ? (
-                <ul className="mt-3 divide-y divide-kb-hairline rounded-card bg-kb-white shadow-kb">
+                <ul className="mt-3 divide-y divide-line rounded-card bg-surface-1 shadow-rest">
                   {state.rest.map((t) => (
                     <li key={t.id}>
                       <Link
                         to={t.path}
-                        className="flex min-h-14 items-center gap-3 px-4 py-3 text-kb-small hover:bg-kb-sand"
+                        className="flex min-h-14 items-center gap-3 px-4 py-3 text-small hover:bg-surface-2"
                       >
                         <span className="flex-1">{t.title}</span>
-                        <ArrowRight className="size-4 shrink-0 text-kb-stone" aria-hidden="true" />
+                        <ArrowRight className="size-4 shrink-0 text-text-2" aria-hidden="true" />
                       </Link>
                     </li>
                   ))}
@@ -179,34 +179,34 @@ function FeedCard({ locationId, linkOpens }: { locationId: string; linkOpens: nu
   });
   const items = q.data ?? [];
   return (
-    <section className="mt-6 rounded-large bg-kb-white p-5 shadow-kb" aria-labelledby="did">
+    <section className="mt-6 rounded-panel bg-surface-1 p-5 shadow-rest" aria-labelledby="did">
       <h2 id="did" className="font-bold">
         What Kabsi did this week
       </h2>
       {q.isLoading ? (
-        <p className="mt-3 text-kb-small text-kb-stone">Loading...</p>
+        <p className="mt-3 text-small text-text-2">Loading...</p>
       ) : q.isError ? (
-        <p className="mt-3 text-kb-small text-kb-stone">We couldn't load this just now.</p>
+        <p className="mt-3 text-small text-text-2">We couldn't load this just now.</p>
       ) : items.length === 0 ? (
-        <p className="mt-3 text-kb-small leading-6 text-kb-stone">
+        <p className="mt-3 text-small leading-6 text-text-2">
           Nothing yet. Kabsi's work shows up here as it happens.
         </p>
       ) : (
         <ul className="mt-3 space-y-3">
           {items.map((a) => (
             <li key={a.key} className="flex items-start gap-3">
-              <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-kb-sand [&_svg]:size-4">
+              <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-surface-2 [&_svg]:size-4">
                 {FEED_ICON(a.action)}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-kb-small font-medium leading-5">{a.text}</span>
-                <span className="block text-kb-caption text-kb-stone">{timeAgo(a.at)}</span>
+                <span className="block text-small font-medium leading-5">{a.text}</span>
+                <span className="block text-small text-text-2">{timeAgo(a.at)}</span>
               </span>
             </li>
           ))}
         </ul>
       )}
-      <div className="mt-4 space-y-2 border-t border-kb-hairline pt-3 text-kb-small text-kb-stone">
+      <div className="mt-4 space-y-2 border-t border-line pt-3 text-small text-text-2">
         {linkOpens > 0 ? (
           <p>
             {linkOpens} {linkOpens === 1 ? "person" : "people"} opened your review link in the last
@@ -215,7 +215,7 @@ function FeedCard({ locationId, linkOpens }: { locationId: string; linkOpens: nu
         ) : null}
         <Link
           to="/app/report"
-          className="inline-flex min-h-10 items-center gap-1.5 text-kb-black underline underline-offset-4 hover:no-underline"
+          className="inline-flex min-h-10 items-center gap-1.5 text-text-1 underline underline-offset-4 hover:no-underline"
         >
           <FileText className="size-4" aria-hidden="true" /> Your Weekly Care Report
         </Link>

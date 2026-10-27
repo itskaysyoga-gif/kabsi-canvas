@@ -62,7 +62,7 @@ import { cn } from "@/lib/utils";
 const MAX = 4000;
 const QUICK_CHANGES = ["Shorter", "More formal", "Warmer", "Say sorry more clearly"];
 const SECONDARY =
-  "h-auto min-h-14 flex-col gap-1 whitespace-normal rounded-card px-1 py-2 text-center text-[13px] leading-tight sm:h-[52px] sm:min-h-0 sm:flex-row sm:gap-2 sm:rounded-pill sm:px-5 sm:py-0 sm:text-base";
+  "h-auto min-h-14 flex-col gap-1 whitespace-normal rounded-card px-1 py-2 text-center text-[13px] leading-tight sm:h-[52px] sm:min-h-0 sm:flex-row sm:gap-2 sm:rounded-pill sm:px-5 sm:py-0 sm:text-body";
 
 type Busy = "" | "post" | "skip" | "redraft" | "mine" | "holding" | "undo";
 
@@ -90,13 +90,13 @@ export function PublishingBanner({
   }, []);
   const left = Math.max(0, Math.ceil((until - now) / 1000));
   return (
-    <div className="rounded-large bg-kb-white p-5 shadow-kb" role="status" aria-live="polite">
+    <div className="rounded-panel bg-surface-1 p-5 shadow-rest" role="status" aria-live="polite">
       <div className="flex items-center justify-between gap-3">
         <p className="flex items-center gap-2 font-bold">
           {left > 0 ? (
             <Loader2 className="size-5 animate-spin" aria-hidden="true" />
           ) : (
-            <CheckCircle2 className="size-5 text-kb-green" aria-hidden="true" />
+            <CheckCircle2 className="size-5 text-ok" aria-hidden="true" />
           )}
           {left > 0 ? `${verb} in ${left} ${left === 1 ? "second" : "seconds"}` : done}
         </p>
@@ -107,12 +107,12 @@ export function PublishingBanner({
         ) : null}
       </div>
       {left > 0 ? (
-        <p className="mt-2 text-sm text-kb-stone">
+        <p className="mt-2 text-small text-text-2">
           Tap Undo now to stop it. After that Google has it.
         </p>
       ) : null}
       {error ? (
-        <p className="mt-2 text-sm text-kb-red" role="alert">
+        <p className="mt-2 text-small text-bad" role="alert">
           {error}
         </p>
       ) : null}
@@ -263,9 +263,9 @@ export function ReviewCard({ review }: { review: InboxReview }) {
 
   if (done)
     return (
-      <div className="rounded-large bg-kb-white p-5 text-sm shadow-kb">
+      <div className="rounded-panel bg-surface-1 p-5 text-small shadow-rest">
         <div className="flex items-center gap-3" role="status">
-          <CheckCircle2 className="size-5 text-kb-green" aria-hidden="true" />
+          <CheckCircle2 className="size-5 text-ok" aria-hidden="true" />
           <span>
             <b>{review.reviewer_name ?? "A customer"}:</b> {done}
           </span>
@@ -279,8 +279,8 @@ export function ReviewCard({ review }: { review: InboxReview }) {
   return (
     <article
       className={cn(
-        "rounded-large bg-kb-white p-5 shadow-kb sm:p-7",
-        review.risk === "high" && "ring-2 ring-kb-red/40",
+        "rounded-panel bg-surface-1 p-5 shadow-rest sm:p-7",
+        review.risk === "high" && "ring-2 ring-bad/40",
       )}
     >
       <ReviewHead review={review} />
@@ -289,7 +289,7 @@ export function ReviewCard({ review }: { review: InboxReview }) {
         <ReportReview review={review} />
       </div>
       {review.risk === "high" ? (
-        <div className="mt-4 rounded-card bg-kb-sand p-4 text-sm leading-6">
+        <div className="mt-4 rounded-card bg-surface-2 p-4 text-small leading-6">
           <p className="flex gap-2 font-bold">
             <Hand className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
             {HIGH_RISK_TITLE}
@@ -306,20 +306,20 @@ export function ReviewCard({ review }: { review: InboxReview }) {
           </ol>
         </div>
       ) : review.risk === "medium" && issues.length ? (
-        <div className="mt-4 rounded-card border border-kb-amber/30 bg-kb-amber-soft p-4 text-sm leading-6">
+        <div className="mt-4 rounded-card border border-warn/30 bg-warn-soft p-4 text-small leading-6">
           {issues.map((i) => (
             <p key={i}>{i}</p>
           ))}
         </div>
       ) : null}
       {review.reply_state === "rejected" && review.reply_state_reason ? (
-        <p className="mt-4 rounded-card bg-kb-sand p-4 text-sm leading-6" role="status">
+        <p className="mt-4 rounded-card bg-surface-2 p-4 text-small leading-6" role="status">
           {review.reply_state_reason}
         </p>
       ) : null}
       {access.data && !mayApprove ? (
         <p
-          className="mt-5 rounded-card bg-kb-sand p-4 text-sm leading-6 text-kb-stone"
+          className="mt-5 rounded-card bg-surface-2 p-4 text-small leading-6 text-text-2"
           role="status"
         >
           {review.risk === "high"
@@ -327,22 +327,22 @@ export function ReviewCard({ review }: { review: InboxReview }) {
             : "The owner approves replies. They can see this one."}
         </p>
       ) : waiting ? (
-        <p className="mt-5 flex items-center gap-2 rounded-card bg-kb-sand p-4 text-sm text-kb-stone">
+        <p className="mt-5 flex items-center gap-2 rounded-card bg-surface-2 p-4 text-small text-text-2">
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           Kabsi is drafting a reply. This takes a minute or two.
         </p>
       ) : highNoDraft ? (
         <>
-          <p className="mt-5 text-sm text-kb-stone">
+          <p className="mt-5 text-small text-text-2">
             Kabsi did not draft a reply. Nothing is posted unless you write or approve one.
           </p>
           {error ? (
-            <p className="mt-3 text-sm text-kb-red" role="alert">
+            <p className="mt-3 text-small text-bad" role="alert">
               {error}
             </p>
           ) : null}
           {note ? (
-            <p className="mt-3 text-sm text-kb-stone" role="status">
+            <p className="mt-3 text-small text-text-2" role="status">
               {note}
             </p>
           ) : null}
@@ -391,13 +391,13 @@ export function ReviewCard({ review }: { review: InboxReview }) {
               {safeDraft ? "Your reply, ready to approve" : "Write your reply"}
             </Label>
             <span
-              className={cn("text-xs", text.length > MAX ? "text-kb-red" : "text-kb-stone")}
+              className={cn("text-label", text.length > MAX ? "text-bad" : "text-text-2")}
               aria-live="polite"
             >
               {text.length > MAX * 0.75 ? `${text.length} / ${MAX}` : ""}
             </span>
           </div>
-          <p className="mt-1 text-sm text-kb-stone">
+          <p className="mt-1 text-small text-text-2">
             {safeDraft
               ? "Kabsi publishes exactly this text after you approve."
               : review.risk === "high"
@@ -405,18 +405,18 @@ export function ReviewCard({ review }: { review: InboxReview }) {
                 : "Kabsi couldn't safely draft this one. Write your own reply, ask for a new version, or skip it."}
           </p>
           {flagged ? (
-            <div className="mt-3 rounded-card border border-kb-amber/30 bg-kb-amber-soft p-4 text-sm">
-              <p className="font-bold text-kb-amber">
+            <div className="mt-3 rounded-card border border-warn/30 bg-warn-soft p-4 text-small">
+              <p className="font-bold text-warn">
                 Not ready: Kabsi couldn't safely verify this draft
               </p>
-              <ul className="mt-1 list-disc space-y-1 pl-5 text-kb-ink">
+              <ul className="mt-1 list-disc space-y-1 pl-5 text-text-1">
                 {(flagged.safety_notes ?? []).slice(0, 4).map((n) => (
                   <li key={n}>{n}</li>
                 ))}
               </ul>
               <p
                 dir="auto"
-                className="mt-3 whitespace-pre-wrap rounded-card bg-kb-white p-3 leading-6"
+                className="mt-3 whitespace-pre-wrap rounded-card bg-surface-1 p-3 leading-6"
               >
                 {flagged.body}
               </p>
@@ -442,30 +442,30 @@ export function ReviewCard({ review }: { review: InboxReview }) {
               onChange={(e) => setText(e.target.value)}
               rows={4}
               placeholder={safeDraft ? undefined : "Write a short, calm reply in your own words."}
-              className="mt-3 resize-none rounded-card border-l-4 border-l-kb-yellow bg-kb-sand/60 text-base leading-7 md:text-base"
+              className="mt-3 resize-none rounded-card border-l-4 border-l-kb-yellow bg-surface-2 text-body leading-7 md:text-body"
             />
           ) : (
             <p
               dir="auto"
               id={`reply-${review.id}`}
-              className="mt-3 whitespace-pre-wrap rounded-card border-l-4 border-l-kb-yellow bg-kb-sand/60 p-4 text-base leading-7"
+              className="mt-3 whitespace-pre-wrap rounded-card border-l-4 border-l-kb-yellow bg-surface-2 p-4 text-body leading-7"
             >
               {text}
             </p>
           )}
           {error ? (
-            <p className="mt-3 text-sm text-kb-red" role="alert">
+            <p className="mt-3 text-small text-bad" role="alert">
               {error}
             </p>
           ) : null}
           {note ? (
-            <p className="mt-3 text-sm text-kb-stone" role="status">
+            <p className="mt-3 text-small text-text-2" role="status">
               {note}
             </p>
           ) : null}
           <div className="mt-5 space-y-2">
             <Button
-              className="h-14 w-full text-lg"
+              className="h-14 w-full text-title"
               disabled={!!busy || !text.trim() || text.trim().length > MAX}
               onClick={() => (sensitive ? setConfirm(true) : void run("post"))}
             >
@@ -499,7 +499,7 @@ export function ReviewCard({ review }: { review: InboxReview }) {
             <SheetTitle>Other options</SheetTitle>
             <SheetDescription>Change the reply, reply yourself, or leave it.</SheetDescription>
           </SheetHeader>
-          <p className="mt-4 text-sm font-bold">Change the reply</p>
+          <p className="mt-4 text-small font-bold">Change the reply</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {QUICK_CHANGES.map((q) => (
               <button
@@ -507,7 +507,7 @@ export function ReviewCard({ review }: { review: InboxReview }) {
                 type="button"
                 disabled={!!busy}
                 onClick={() => void run("redraft", q)}
-                className="min-h-11 rounded-pill border border-kb-hairline px-4 text-sm font-medium hover:border-kb-black disabled:opacity-50"
+                className="min-h-11 rounded-pill border border-line px-4 text-small font-medium hover:border-text-1 disabled:opacity-50"
               >
                 {q}
               </button>
@@ -516,7 +516,7 @@ export function ReviewCard({ review }: { review: InboxReview }) {
               type="button"
               disabled={!!busy}
               onClick={() => void run("redraft", "Write a fresh version")}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-pill border border-kb-hairline px-4 text-sm font-medium hover:border-kb-black disabled:opacity-50"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-pill border border-line px-4 text-small font-medium hover:border-text-1 disabled:opacity-50"
             >
               <Wand2 className="size-4" aria-hidden="true" /> Regenerate
             </button>
@@ -542,18 +542,18 @@ export function ReviewCard({ review }: { review: InboxReview }) {
             </Button>
           </div>
           {error ? (
-            <p className="mt-3 text-sm text-kb-red" role="alert">
+            <p className="mt-3 text-small text-bad" role="alert">
               {error}
             </p>
           ) : null}
-          <div className="mt-5 divide-y divide-kb-hairline border-t border-kb-hairline">
+          <div className="mt-5 divide-y divide-line border-t border-line">
             <button
               type="button"
               disabled={!!busy}
               onClick={() => void run("mine")}
               className="flex min-h-14 w-full items-center gap-3 py-3 text-left font-medium disabled:opacity-50"
             >
-              <Hand className="size-5 text-kb-stone" aria-hidden="true" />
+              <Hand className="size-5 text-text-2" aria-hidden="true" />
               {busy === "mine" ? "Saving..." : "I'll reply myself"}
             </button>
             <button
@@ -562,7 +562,7 @@ export function ReviewCard({ review }: { review: InboxReview }) {
               onClick={() => void run("skip")}
               className="flex min-h-14 w-full items-center gap-3 py-3 text-left font-medium disabled:opacity-50"
             >
-              <SkipForward className="size-5 text-kb-stone" aria-hidden="true" />
+              <SkipForward className="size-5 text-text-2" aria-hidden="true" />
               {busy === "skip" ? "Skipping..." : "Skip this one"}
             </button>
           </div>
@@ -578,7 +578,7 @@ export function ReviewCard({ review }: { review: InboxReview }) {
           </AlertDialogHeader>
           <p
             dir="auto"
-            className="max-h-60 overflow-auto whitespace-pre-wrap rounded-card bg-kb-sand p-4 text-sm leading-6"
+            className="max-h-60 overflow-auto whitespace-pre-wrap rounded-card bg-surface-2 p-4 text-small leading-6"
           >
             {text.trim()}
           </p>
@@ -608,25 +608,25 @@ function OfferCard({ offer }: { offer: StyleOffer }) {
   }
   if (state === "saved" || state === "declined")
     return (
-      <p className="mt-3 text-sm text-kb-stone" role="status">
+      <p className="mt-3 text-small text-text-2" role="status">
         {state === "saved"
           ? "Saved in About your business. New drafts follow it."
           : "OK, Kabsi won't ask about this again."}
       </p>
     );
   return (
-    <div className="mt-4 rounded-card border border-kb-hairline p-4">
+    <div className="mt-4 rounded-card border border-line p-4">
       <p className="font-bold">{isFact ? "Save this as a fact?" : "Save this as a rule?"}</p>
-      <p className="mt-1 text-kb-stone">
+      <p className="mt-1 text-text-2">
         {isFact
           ? "You added this to the reply. Kabsi can use it in later drafts."
           : "You made this change to three drafts."}
       </p>
-      <p dir="auto" className="mt-2 rounded-card bg-kb-sand p-3">
+      <p dir="auto" className="mt-2 rounded-card bg-surface-2 p-3">
         {offer.text}
       </p>
       {state === "error" ? (
-        <p className="mt-2 text-kb-red" role="alert">
+        <p className="mt-2 text-bad" role="alert">
           Couldn't save it. Add it in About your business instead.
         </p>
       ) : null}

@@ -57,10 +57,10 @@ function StaffPage() {
     <AppLayout area="staff">
       <div className="mx-auto w-full max-w-4xl px-5 py-8 sm:px-8 sm:py-12">
         <PageIcon icon={<PageGlyph />} />
-        <h1 className="font-display text-4xl leading-none sm:text-5xl">Staff</h1>
-        {staff.isLoading ? <p className="mt-6 text-kb-stone">Loading…</p> : null}
+        <h1 className="font-display text-h2 leading-none sm:text-5xl">Staff</h1>
+        {staff.isLoading ? <p className="mt-6 text-text-2">Loading…</p> : null}
         {staff.data === false ? (
-          <p className="mt-6 text-kb-stone">This page is for the Kabsi team only.</p>
+          <p className="mt-6 text-text-2">This page is for the Kabsi team only.</p>
         ) : null}
         {staff.data ? (
           <>
@@ -74,11 +74,11 @@ function StaffPage() {
             </div>
             <OpsPanel />
             <WhatsappStaffCode />
-            <h2 className="mt-10 text-xl font-bold">Businesses</h2>
-            <p className="mt-1 text-sm text-kb-stone">Newest first.</p>
+            <h2 className="mt-10 text-title font-bold">Businesses</h2>
+            <p className="mt-1 text-small text-text-2">Newest first.</p>
             <div className="mt-4 space-y-4">
-              {rows.isLoading ? <p className="text-kb-stone">Loading businesses…</p> : null}
-              {rows.data?.length === 0 ? <p className="text-kb-stone">No businesses yet.</p> : null}
+              {rows.isLoading ? <p className="text-text-2">Loading businesses…</p> : null}
+              {rows.data?.length === 0 ? <p className="text-text-2">No businesses yet.</p> : null}
               {rows.data?.map((row) => (
                 <LocationRow key={row.id} row={row} />
               ))}
@@ -139,11 +139,11 @@ function LocationRow({ row }: { row: Row }) {
   }
 
   return (
-    <div className="rounded-large bg-kb-white p-5 shadow-kb">
+    <div className="rounded-panel bg-surface-1 p-5 shadow-rest">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate font-bold">{row.name}</p>
-          <p className="text-sm text-kb-stone">
+          <p className="text-small text-text-2">
             {row.status.replace(/_/g, " ")} · step {row.onboarding_step} · {row.country ?? "-"} ·{" "}
             {fmtDate(row.created_at)}
             {row.access_granted_at ? " · Google access ✓" : ""}
@@ -179,7 +179,7 @@ function LocationRow({ row }: { row: Row }) {
         </div>
       </div>
       {diag ? <BusinessDiagnostics location={row.id} /> : null}
-      {msg ? <p className="mt-3 text-sm text-kb-stone">{msg}</p> : null}
+      {msg ? <p className="mt-3 text-small text-text-2">{msg}</p> : null}
     </div>
   );
 }

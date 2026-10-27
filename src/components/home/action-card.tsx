@@ -63,24 +63,24 @@ export function ActionCard({
       }
     >
       {detail?.quote ? (
-        <p className="mb-3 line-clamp-3 text-kb-small italic text-kb-stone">
+        <p className="mb-3 line-clamp-3 text-small italic text-text-2">
           &ldquo;{detail.quote}&rdquo;
         </p>
       ) : null}
-      {task.why ? <p className="text-kb-small leading-6">{task.why}</p> : null}
+      {task.why ? <p className="text-small leading-6">{task.why}</p> : null}
       {task.recommendation ? (
-        <p className="mt-2 text-kb-small leading-6">
+        <p className="mt-2 text-small leading-6">
           <b>Kabsi suggests:</b> {task.recommendation}
         </p>
       ) : null}
       {detail?.evidence.length ? (
-        <ul className="mt-2 space-y-0.5 text-kb-small text-kb-stone">
+        <ul className="mt-2 space-y-0.5 text-small text-text-2">
           {detail.evidence.map((e) => (
             <li key={e}>{e}</li>
           ))}
         </ul>
       ) : null}
-      <p className="mt-3 flex items-center justify-between gap-3 text-kb-caption text-kb-stone">
+      <p className="mt-3 flex items-center justify-between gap-3 text-small text-text-2">
         <span>{timeAgo(task.created_at)}</span>
         <button
           type="button"

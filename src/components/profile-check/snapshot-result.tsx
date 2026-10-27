@@ -39,9 +39,9 @@ export function SnapshotResult({
   return (
     <div data-testid="snapshot">
       <div className="min-w-0">
-        <h2 className="font-display text-3xl leading-tight sm:text-4xl">{s.name}</h2>
-        <p className="mt-1 text-kb-stone">{s.address}</p>
-        {s.category ? <p className="mt-1 text-sm text-kb-stone">{s.category}</p> : null}
+        <h2 className="font-display text-h3 leading-tight sm:text-h2">{s.name}</h2>
+        <p className="mt-1 text-text-2">{s.address}</p>
+        {s.category ? <p className="mt-1 text-small text-text-2">{s.category}</p> : null}
       </div>
 
       <dl className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -66,9 +66,9 @@ export function SnapshotResult({
         </Fact>
       </dl>
 
-      <div className="mt-3 rounded-card bg-kb-sand p-4">
+      <div className="mt-3 rounded-card bg-surface-2 p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm font-bold">Opening hours</p>
+          <p className="text-small font-bold">Opening hours</p>
           {s.open_now !== null ? (
             <StatusPill tone={s.open_now ? "green" : "grey"}>
               {s.open_now ? "Open now" : "Closed now"}
@@ -76,37 +76,33 @@ export function SnapshotResult({
           ) : null}
         </div>
         {s.hours.length ? (
-          <ul className="mt-2 space-y-0.5 text-sm text-kb-stone">
+          <ul className="mt-2 space-y-0.5 text-small text-text-2">
             {s.hours.map((h) => (
               <li key={h}>{h}</li>
             ))}
           </ul>
         ) : (
-          <p className="mt-2 text-sm text-kb-stone">No opening hours shown on Google.</p>
+          <p className="mt-2 text-small text-text-2">No opening hours shown on Google.</p>
         )}
       </div>
 
-      <h3 className="mt-8 font-display text-2xl leading-tight">
+      <h3 className="mt-8 font-display text-h3 leading-tight">
         What needs fixing, and what Kabsi would do
       </h3>
       <ul className="mt-4 space-y-3" aria-label="Status flags">
         {s.flags.map((f) => (
-          <li
-            key={f.fact}
-            className="rounded-card border-2 border-kb-hairline p-4"
-            data-tone={f.tone}
-          >
+          <li key={f.fact} className="rounded-card border-2 border-line p-4" data-tone={f.tone}>
             <StatusPill tone={TONE[f.tone]}>{TONE_LABEL[f.tone]}</StatusPill>
             <p className="mt-2 font-bold">{f.fact}</p>
-            <p className="mt-1 text-sm leading-6 text-kb-stone">{f.action}</p>
+            <p className="mt-1 text-small leading-6 text-text-2">{f.action}</p>
           </li>
         ))}
       </ul>
 
       {s.checklist?.length ? (
         <>
-          <h3 className="mt-8 font-display text-2xl leading-tight">What a complete profile has</h3>
-          <p className="mt-1 text-sm text-kb-stone">
+          <h3 className="mt-8 font-display text-h3 leading-tight">What a complete profile has</h3>
+          <p className="mt-1 text-small text-text-2">
             Google does not show the rest to the public. Kabsi checks it once you connect.
           </p>
           <div className="mt-4">
@@ -115,8 +111,8 @@ export function SnapshotResult({
         </>
       ) : null}
 
-      <div className="mt-6 rounded-large bg-kb-carbon p-6 text-kb-white">
-        <p className="text-lg font-bold">
+      <div className="mt-6 rounded-panel bg-kb-carbon p-6 text-kb-white">
+        <p className="text-title font-bold">
           Kabsi can take care of{" "}
           {todo === 1 ? "this" : todo === 0 ? "what comes up" : `these ${todo}`}. You approve each
           one.
@@ -133,12 +129,12 @@ export function SnapshotResult({
       <button
         type="button"
         onClick={onAnother}
-        className="mt-6 min-h-11 text-sm font-bold underline underline-offset-4"
+        className="mt-6 min-h-11 text-small font-bold underline underline-offset-4"
       >
         Check another business
       </button>
 
-      <p className="mt-4 text-xs leading-5 text-kb-stone" data-testid="attribution">
+      <p className="mt-4 text-label leading-5 text-text-2" data-testid="attribution">
         Business details come from Google Maps and are public information, read from Google for this
         check and not kept. This check is not a score and does not compare you with other
         businesses. {GOOGLE_NOTICE}
@@ -157,13 +153,13 @@ function Fact({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-card border-2 border-kb-hairline p-4">
-      <span className="mt-0.5 text-kb-stone [&_svg]:size-5" aria-hidden="true">
+    <div className="flex items-start gap-3 rounded-card border-2 border-line p-4">
+      <span className="mt-0.5 text-text-2 [&_svg]:size-5" aria-hidden="true">
         {icon}
       </span>
       <div className="min-w-0">
-        <dt className="text-xs font-bold uppercase tracking-wider text-kb-stone">{label}</dt>
-        <dd className="mt-0.5 text-sm">{children}</dd>
+        <dt className="text-label font-bold uppercase tracking-wider text-text-2">{label}</dt>
+        <dd className="mt-0.5 text-small">{children}</dd>
       </div>
     </div>
   );
@@ -205,15 +201,15 @@ function EmailForm({
 
   if (sentTo)
     return (
-      <p className="mt-6 rounded-card bg-kb-sand p-4 text-sm" role="status">
+      <p className="mt-6 rounded-card bg-surface-2 p-4 text-small" role="status">
         Done. We sent your check to <span className="font-bold">{sentTo}</span>.
       </p>
     );
 
   return (
-    <form onSubmit={send} className="mt-6 rounded-large border-2 border-kb-hairline p-5">
+    <form onSubmit={send} className="mt-6 rounded-panel border-2 border-line p-5">
       <h3 className="font-bold">Email me this check</h3>
-      <p className="mt-1 text-sm text-kb-stone">
+      <p className="mt-1 text-small text-text-2">
         We will send the check to your inbox so you can keep it.
       </p>
       <label htmlFor="check-email" className="sr-only">
@@ -228,13 +224,13 @@ function EmailForm({
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="you@yourbusiness.com"
-        className="mt-3 h-[52px] rounded-card px-4 text-base"
+        className="mt-3 h-[52px] rounded-card px-4 text-body"
       />
-      <label className="mt-3 flex cursor-pointer items-start gap-3 text-sm leading-6">
+      <label className="mt-3 flex cursor-pointer items-start gap-3 text-small leading-6">
         <Checkbox
           checked={tips}
           onCheckedChange={(v) => setTips(v === true)}
-          className="mt-0.5 size-5 rounded-md border-2 border-kb-black"
+          className="mt-0.5 size-5 rounded-md border-2 border-text-1"
           data-testid="tips-box"
         />
         <span>{TIPS_CONSENT_TEXT}</span>
@@ -243,7 +239,7 @@ function EmailForm({
         <Turnstile key={round} onToken={setToken} />
       </div>
       {err ? (
-        <p className="mt-2 text-sm text-kb-red" role="alert">
+        <p className="mt-2 text-small text-bad" role="alert">
           {err}
         </p>
       ) : null}
@@ -296,7 +292,7 @@ function WhatsappForm({
 
   if (sentTo)
     return (
-      <p className="mt-4 rounded-card bg-kb-sand p-4 text-sm" role="status">
+      <p className="mt-4 rounded-card bg-surface-2 p-4 text-small" role="status">
         Done. We sent your check to WhatsApp on <span className="font-bold">{sentTo}</span>.
       </p>
     );
@@ -304,11 +300,11 @@ function WhatsappForm({
   return (
     <form
       onSubmit={send}
-      className="mt-4 rounded-large border-2 border-kb-hairline p-5"
+      className="mt-4 rounded-panel border-2 border-line p-5"
       data-testid="whatsapp-form"
     >
       <h3 className="font-bold">Send my check to WhatsApp</h3>
-      <p className="mt-1 text-sm text-kb-stone">
+      <p className="mt-1 text-small text-text-2">
         One message with this check. Nothing else after it.
       </p>
       <label htmlFor="check-whatsapp" className="sr-only">
@@ -323,13 +319,13 @@ function WhatsappForm({
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         placeholder="+1 201 555 0100"
-        className="mt-3 h-[52px] rounded-card px-4 text-base"
+        className="mt-3 h-[52px] rounded-card px-4 text-body"
       />
-      <label className="mt-3 flex cursor-pointer items-start gap-3 text-sm leading-6">
+      <label className="mt-3 flex cursor-pointer items-start gap-3 text-small leading-6">
         <Checkbox
           checked={ok}
           onCheckedChange={(v) => setOk(v === true)}
-          className="mt-0.5 size-5 rounded-md border-2 border-kb-black"
+          className="mt-0.5 size-5 rounded-md border-2 border-text-1"
           data-testid="whatsapp-box"
         />
         <span>{WHATSAPP_CONSENT_TEXT}</span>
@@ -338,7 +334,7 @@ function WhatsappForm({
         <Turnstile key={round} onToken={setToken} />
       </div>
       {err ? (
-        <p className="mt-2 text-sm text-kb-red" role="alert">
+        <p className="mt-2 text-small text-bad" role="alert">
           {err}
         </p>
       ) : null}

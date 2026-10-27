@@ -13,7 +13,7 @@ export function StepClip({ clip, label }: { clip: ClipKey; label: string }) {
         preload="none"
         poster={c.poster}
         aria-label={label}
-        className="w-full rounded-card bg-kb-sand"
+        className="w-full rounded-card bg-surface-2"
       >
         <source src={c.src} type="video/mp4" />
       </video>

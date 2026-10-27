@@ -18,28 +18,28 @@ function KnowledgePage() {
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
-      {location.isLoading ? <p className="text-kb-stone">Loading…</p> : null}
+      {location.isLoading ? <p className="text-text-2">Loading…</p> : null}
       {!location.isLoading && !location.error && !location.data ? (
         <>
-          <p className="text-kb-stone">Add your business first.</p>
+          <p className="text-text-2">Add your business first.</p>
           <Button asChild className="mt-5">
             <Link to="/start">Add your business</Link>
           </Button>
         </>
       ) : null}
       {location.error ? (
-        <p className="text-kb-red" role="alert">
+        <p className="text-bad" role="alert">
           Couldn't load your business. Refresh the page.
         </p>
       ) : null}
       {location.data ? (
         <>
           <PageIcon icon={<NotebookPen />} />
-          <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Settings</p>
-          <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">
+          <p className="text-small font-bold uppercase tracking-wider text-text-2">Settings</p>
+          <h1 className="mt-1 font-display text-h2 leading-none sm:text-5xl">
             About your business
           </h1>
-          <p className="mt-2 text-kb-stone">{location.data.name}</p>
+          <p className="mt-2 text-text-2">{location.data.name}</p>
           <div className="mt-7">
             <KnowledgeStep
               key={location.data.id}

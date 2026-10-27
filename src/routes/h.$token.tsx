@@ -78,7 +78,7 @@ function HolidayLinkPage() {
   if (!view)
     return (
       <ConfirmLayout>
-        <p className="text-kb-stone">Loading…</p>
+        <p className="text-text-2">Loading…</p>
       </ConfirmLayout>
     );
 
@@ -91,10 +91,10 @@ function HolidayLinkPage() {
   if (view.status === "invalid" || view.status === "expired") {
     return (
       <ConfirmLayout>
-        <h1 className="font-display text-3xl leading-tight">
+        <h1 className="font-display text-h3 leading-tight">
           {view.status === "expired" ? "This link has expired" : "This link isn't valid"}
         </h1>
-        <p className="mt-3 leading-7 text-kb-stone">
+        <p className="mt-3 leading-7 text-text-2">
           You can still answer in Kabsi, under Hours. Nothing is changed until you confirm it.
         </p>
         {open}
@@ -106,13 +106,13 @@ function HolidayLinkPage() {
   if (pending !== null) {
     return (
       <ConfirmLayout demo={view.demo === true}>
-        <p className="text-sm font-medium text-kb-stone">{view.business}</p>
-        <h1 className="mt-1 font-display text-3xl leading-tight" aria-live="polite">
+        <p className="text-small font-medium text-text-2">{view.business}</p>
+        <h1 className="mt-1 font-display text-h3 leading-tight" aria-live="polite">
           Publishing in {pending} {pending === 1 ? "second" : "seconds"}
         </h1>
-        <p className="mt-3 leading-7 text-kb-stone">Nothing is sent to Google until then.</p>
+        <p className="mt-3 leading-7 text-text-2">Nothing is sent to Google until then.</p>
         {error ? (
-          <p className="mt-3 text-sm text-kb-red" role="alert">
+          <p className="mt-3 text-small text-bad" role="alert">
             {error}
           </p>
         ) : null}
@@ -126,15 +126,15 @@ function HolidayLinkPage() {
     const answer = done ?? view.answer ?? null;
     return (
       <ConfirmLayout demo={view.demo === true}>
-        <CheckCircle2 className="size-10 text-kb-green" aria-hidden="true" />
-        <h1 className="mt-4 font-display text-3xl leading-tight">
+        <CheckCircle2 className="size-10 text-ok" aria-hidden="true" />
+        <h1 className="mt-4 font-display text-h3 leading-tight">
           {answer === "normal"
             ? `Noted. Your normal hours stay for ${h.name}.`
             : answer
               ? `Done. Your hours for ${h.name} are on their way to Google.`
               : `You already answered for ${h.name}.`}
         </h1>
-        <p className="mt-3 leading-7 text-kb-stone">
+        <p className="mt-3 leading-7 text-text-2">
           Kabsi checks that Google shows them. You can change them under Hours.
         </p>
         {open}
@@ -144,9 +144,9 @@ function HolidayLinkPage() {
 
   return (
     <ConfirmLayout demo={view.demo === true}>
-      <p className="text-sm font-medium text-kb-stone">{view.business}</p>
-      <h1 className="mt-1 font-display text-3xl leading-tight">Your hours for {h.name}</h1>
-      <p className="mt-2 text-kb-stone">
+      <p className="text-small font-medium text-text-2">{view.business}</p>
+      <h1 className="mt-1 font-display text-h3 leading-tight">Your hours for {h.name}</h1>
+      <p className="mt-2 text-text-2">
         {h.estimated ? "Expected " : ""}
         {whenWords(h.starts_on, h.ends_on)}. Customers check Google for your hours first.
       </p>
@@ -168,7 +168,7 @@ function HolidayLinkPage() {
           if (r.publication && !r.repeat) setPending(UNDO_SECONDS);
         }}
       />
-      <p className="mt-5 text-xs leading-5 text-kb-stone">
+      <p className="mt-5 text-label leading-5 text-text-2">
         Nothing changes on Google until you confirm. Kabsi is independent and not affiliated with
         Google.
       </p>

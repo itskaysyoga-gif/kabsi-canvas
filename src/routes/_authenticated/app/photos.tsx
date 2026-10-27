@@ -90,13 +90,13 @@ function PhotosPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
       <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Content</p>
-      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Photos</h1>
-      <p className="mt-2 text-kb-stone">
+      <p className="text-small font-bold uppercase tracking-wider text-text-2">Content</p>
+      <h1 className="mt-1 font-display text-h2 leading-none sm:text-5xl">Photos</h1>
+      <p className="mt-2 text-text-2">
         Add real photos of your place, your team, your work and what you sell. Kabsi checks each one
         before you approve it.
       </p>
-      <p className="mt-3 flex items-start gap-2 text-sm">
+      <p className="mt-3 flex items-start gap-2 text-small">
         <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
         Kabsi removes location data from every photo before it goes to Google.
       </p>
@@ -122,16 +122,16 @@ function PhotosPage() {
             busy={busy}
             onChange={onFiles}
           />
-          <p className="col-span-2 text-sm text-kb-stone">
+          <p className="col-span-2 text-small text-text-2">
             Up to 20 at a time, 20 MB each. JPG, PNG, WebP or HEIC. Videos are kept for 30 days;
             sending videos to Google comes later.
           </p>
         </div>
       ) : loc && !loc.concierge ? (
-        <p className="mt-6 text-kb-stone">Photos can be added once your business is active.</p>
+        <p className="mt-6 text-text-2">Photos can be added once your business is active.</p>
       ) : null}
       {msg ? (
-        <p className="mt-3 text-sm" role="status">
+        <p className="mt-3 text-small" role="status">
           {msg}
         </p>
       ) : null}
@@ -141,7 +141,7 @@ function PhotosPage() {
         </div>
       ) : null}
       {data.isError ? (
-        <p className="mt-6 text-sm text-kb-red" role="alert">
+        <p className="mt-6 text-small text-bad" role="alert">
           Couldn't load your photos. Refresh the page to try again.
         </p>
       ) : null}
@@ -150,7 +150,7 @@ function PhotosPage() {
         <ReadyBatch locationId={loc.id} ready={ready} urls={urls} onChanged={refresh} />
       ) : null}
       {canWork && ready.length && !approvesHere ? (
-        <p className="mt-8 rounded-large bg-kb-white p-5 shadow-kb">
+        <p className="mt-8 rounded-panel bg-surface-1 p-5 shadow-rest">
           {ready.length} {ready.length === 1 ? "photo is" : "photos are"} ready. The owner approves
           them.
         </p>
@@ -196,7 +196,7 @@ function UploadButton({
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
-    <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-large border-2 border-dashed border-kb-hairline bg-kb-white p-4 text-center font-bold hover:border-kb-black">
+    <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-panel border-2 border-dashed border-line bg-surface-1 p-4 text-center font-bold hover:border-text-1">
       {icon}
       {busy ? "Working…" : label}
       <input
@@ -248,11 +248,11 @@ function ReadyBatch({
   }
   return (
     <section className="mt-8">
-      <div className="rounded-large bg-kb-white p-5 shadow-kb">
-        <h2 className="font-display text-2xl leading-tight">
+      <div className="rounded-panel bg-surface-1 p-5 shadow-rest">
+        <h2 className="font-display text-h3 leading-tight">
           {ready.length} {ready.length === 1 ? "photo is" : "photos are"} ready
         </h2>
-        <p className="mt-1 text-sm text-kb-stone">
+        <p className="mt-1 text-small text-text-2">
           {clean.length === ready.length
             ? "Kabsi checked them and removed the location data."
             : `Kabsi has a note on ${ready.length - clean.length} of them. Look at those one by one below.`}
@@ -271,12 +271,12 @@ function ReadyBatch({
           </Button>
         ) : null}
         {done ? (
-          <p className="mt-3 text-sm" role="status">
+          <p className="mt-3 text-small" role="status">
             {done}
           </p>
         ) : null}
         {err ? (
-          <p className="mt-3 text-sm text-kb-red" role="alert">
+          <p className="mt-3 text-small text-bad" role="alert">
             {err}
           </p>
         ) : null}
@@ -321,21 +321,21 @@ function ReadyCard({
     setBusy("");
   }
   return (
-    <article className="overflow-hidden rounded-large bg-kb-white shadow-kb">
+    <article className="overflow-hidden rounded-panel bg-surface-1 shadow-rest">
       <PhotoImage url={url} />
       <div className="p-5">
-        <p className={`text-sm font-bold ${photo.suitable ? "text-kb-green" : "text-kb-red"}`}>
+        <p className={`text-small font-bold ${photo.suitable ? "text-ok" : "text-bad"}`}>
           {photo.suitable ? "Looks good for Google" : "Kabsi has a note"}
         </p>
         {photo.suitability_note ? (
-          <p className="mt-1 text-sm text-kb-stone">{photo.suitability_note}</p>
+          <p className="mt-1 text-small text-text-2">{photo.suitability_note}</p>
         ) : null}
-        <label className="mt-3 block text-sm">
+        <label className="mt-3 block text-small">
           What it shows
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="mt-1 h-11 w-full rounded-card border border-kb-hairline bg-kb-white px-3"
+            className="mt-1 h-11 w-full rounded-card border border-line bg-surface-1 px-3"
           >
             {Object.entries(CATEGORIES).map(([k, l]) => (
               <option key={k} value={k}>
@@ -344,7 +344,7 @@ function ReadyCard({
             ))}
           </select>
         </label>
-        {advice ? <p className="mt-2 text-sm text-kb-stone">{advice}</p> : null}
+        {advice ? <p className="mt-2 text-small text-text-2">{advice}</p> : null}
         <div className="mt-4 flex flex-wrap gap-2">
           <Button
             size="compact"
@@ -359,7 +359,7 @@ function ReadyCard({
           </Button>
         </div>
         {err ? (
-          <p className="mt-2 text-sm text-kb-red" role="alert">
+          <p className="mt-2 text-small text-bad" role="alert">
             {err}
           </p>
         ) : null}
@@ -381,7 +381,7 @@ function Checking({ photos }: { photos: Photo[] }) {
   return (
     <section className="mt-8">
       {checking.length ? (
-        <p className="rounded-large bg-kb-white p-5 text-sm shadow-kb" role="status">
+        <p className="rounded-panel bg-surface-1 p-5 text-small shadow-rest" role="status">
           Kabsi is checking {checking.length} {checking.length === 1 ? "photo" : "photos"}. This
           takes a minute.
         </p>
@@ -391,7 +391,7 @@ function Checking({ photos }: { photos: Photo[] }) {
           {notes.map((p) => (
             <li
               key={p.id}
-              className="flex items-start justify-between gap-3 rounded-card bg-kb-white p-4 text-sm shadow-kb"
+              className="flex items-start justify-between gap-3 rounded-card bg-surface-1 p-4 text-small shadow-rest"
             >
               <span>
                 <span className="font-bold">
@@ -420,17 +420,17 @@ function CoverAndLogo({ photos, urls }: { photos: Photo[]; urls: Record<string, 
   ];
   return (
     <section className="mt-10">
-      <h2 className="text-sm font-bold uppercase tracking-wider text-kb-stone">Cover and logo</h2>
+      <h2 className="text-small font-bold uppercase tracking-wider text-text-2">Cover and logo</h2>
       <div className="mt-3 grid grid-cols-2 gap-3">
         {tiles.map(([cat, title, p]) => {
           const advice =
             p?.width && p.height ? roleIssue(cat as "COVER" | "LOGO", p.width, p.height) : null;
           return (
-            <div key={cat} className="overflow-hidden rounded-large bg-kb-white shadow-kb">
+            <div key={cat} className="overflow-hidden rounded-panel bg-surface-1 shadow-rest">
               <PhotoImage url={p ? urls[p.storage_path] : undefined} square={cat === "LOGO"} />
               <div className="p-4">
-                <p className="text-sm font-bold">{title}</p>
-                <p className="mt-1 text-sm text-kb-stone">
+                <p className="text-small font-bold">{title}</p>
+                <p className="mt-1 text-small text-text-2">
                   {p
                     ? p.state === "publishing"
                       ? "Sending to Google."
@@ -444,7 +444,7 @@ function CoverAndLogo({ photos, urls }: { photos: Photo[]; urls: Record<string, 
           );
         })}
       </div>
-      <p className="mt-2 text-sm text-kb-stone">
+      <p className="mt-2 text-small text-text-2">
         Google decides which photo it shows first, so Kabsi calls these your preferred ones.
       </p>
     </section>
@@ -478,19 +478,19 @@ function StaffLink({ locationId }: { locationId: string }) {
   }
   const active = status.data?.active === true;
   return (
-    <section className="mt-10 rounded-large bg-kb-white p-5 shadow-kb">
+    <section className="mt-10 rounded-panel bg-surface-1 p-5 shadow-rest">
       <h2 className="flex items-center gap-2 font-bold">
         <Link2 className="size-4" aria-hidden="true" />
         Staff upload link
       </h2>
-      <p className="mt-1 text-sm text-kb-stone">
+      <p className="mt-1 text-small text-text-2">
         Anyone with this link can add photos for you to approve, without an account. It cannot see
         or change anything else.
       </p>
       {link ? (
         <div className="mt-4">
-          <p className="break-all rounded-card bg-kb-sand p-3 text-sm">{link}</p>
-          <p className="mt-2 text-sm text-kb-stone">
+          <p className="break-all rounded-card bg-surface-2 p-3 text-small">{link}</p>
+          <p className="mt-2 text-small text-text-2">
             Copy it now. Kabsi shows it only once; make a new one if you lose it.
           </p>
           <div className="mt-3">
@@ -498,7 +498,7 @@ function StaffLink({ locationId }: { locationId: string }) {
           </div>
         </div>
       ) : active ? (
-        <p className="mt-3 text-sm">
+        <p className="mt-3 text-small">
           A link is on.{" "}
           {status.data?.uploads
             ? `${status.data.uploads} ${status.data.uploads === 1 ? "photo" : "photos"} added through it.`
@@ -516,7 +516,7 @@ function StaffLink({ locationId }: { locationId: string }) {
         ) : null}
       </div>
       {err ? (
-        <p className="mt-2 text-sm text-kb-red" role="alert">
+        <p className="mt-2 text-small text-bad" role="alert">
           {err}
         </p>
       ) : null}
@@ -536,7 +536,7 @@ function Section({
   if (!list.length) return null;
   return (
     <section className="mt-10">
-      <h2 className="text-sm font-bold uppercase tracking-wider text-kb-stone">
+      <h2 className="text-small font-bold uppercase tracking-wider text-text-2">
         {title} · {list.length}
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">{list.map(children)}</div>
@@ -546,12 +546,12 @@ function Section({
 
 function Tile({ photo, url, label }: { photo: Photo; url: string | undefined; label: string }) {
   return (
-    <figure className="overflow-hidden rounded-card bg-kb-white shadow-kb">
+    <figure className="overflow-hidden rounded-card bg-surface-1 shadow-rest">
       <PhotoImage url={url} />
-      <figcaption className="p-3 text-sm font-bold">
+      <figcaption className="p-3 text-small font-bold">
         {label}
         {photo.source === "staff_link" ? (
-          <span className="block font-normal text-kb-stone">From the staff link</span>
+          <span className="block font-normal text-text-2">From the staff link</span>
         ) : null}
       </figcaption>
     </figure>
@@ -571,6 +571,6 @@ function PhotoImage({ url, square = false }: { url: string | undefined; square?:
       className={`${shape} w-full object-cover`}
     />
   ) : (
-    <div className={`${shape} w-full bg-kb-sand`} />
+    <div className={`${shape} w-full bg-surface-2`} />
   );
 }

@@ -60,17 +60,17 @@ export function ScenarioScreen({
       <button
         type="button"
         onClick={onBack}
-        className="-ml-2 inline-flex min-h-11 items-center gap-2 px-2 text-sm font-medium underline-offset-4 hover:underline"
+        className="-ml-2 inline-flex min-h-11 items-center gap-2 px-2 text-small font-medium underline-offset-4 hover:underline"
       >
         <ArrowLeft className="size-4" aria-hidden="true" /> Back to the steps
       </button>
-      <h1 className="mt-2 font-display text-4xl leading-tight sm:text-5xl">
+      <h1 className="mt-2 font-display text-h2 leading-tight sm:text-5xl">
         {SCENARIO_TITLES[row.scenario]}
       </h1>
 
       {choosing ? (
         <div className="mt-5">
-          <p className="leading-7 text-kb-stone">
+          <p className="leading-7 text-text-2">
             Someone else holds the profile, or you cannot sign in to the account that does. Which is
             it?
           </p>
@@ -81,7 +81,7 @@ export function ScenarioScreen({
                   type="button"
                   disabled={busy}
                   onClick={() => onPickVariant(v)}
-                  className="flex min-h-14 w-full items-center rounded-card border-2 border-kb-hairline p-4 text-left font-medium hover:border-kb-stone"
+                  className="flex min-h-14 w-full items-center rounded-card border-2 border-line p-4 text-left font-medium hover:border-stroke"
                 >
                   {OWNER_SCREENS[v].title}
                 </button>
@@ -91,14 +91,14 @@ export function ScenarioScreen({
         </div>
       ) : (
         <>
-          <p className="mt-4 text-lg leading-8">
+          <p className="mt-4 text-title leading-8">
             {row.scenario === "someone_else_owns" && row.variant
               ? OWNER_SCREENS[row.variant].title + ". "
               : ""}
             {screen.happening}
           </p>
           {row.scenario === "google_reviewing" ? (
-            <p className="mt-2 text-sm font-medium text-kb-stone">
+            <p className="mt-2 text-small font-medium text-text-2">
               Review started {dateOf(row.started_at)}.
             </p>
           ) : null}
@@ -110,7 +110,7 @@ export function ScenarioScreen({
           <ol className="mt-5 space-y-4">
             {screen.steps.map((t, i) => (
               <li key={t} className="flex gap-3">
-                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-kb-yellow text-sm font-bold">
+                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-kb-yellow text-small font-bold">
                   {i + 1}
                 </span>
                 <span className="leading-7">{t}</span>
@@ -122,7 +122,7 @@ export function ScenarioScreen({
           ) : null}
           {screen.ready ? (
             <div className="mt-5">
-              <p className="mb-2 text-sm font-bold">Ready message</p>
+              <p className="mb-2 text-small font-bold">Ready message</p>
               <ReadyMessage
                 text={scenarioMessage(screen.ready, businessName, url)}
                 subject={`Kabsi and ${businessName}`}
@@ -140,7 +140,7 @@ export function ScenarioScreen({
               </a>
             </Button>
           ) : null}
-          <p className="mt-5 rounded-card bg-kb-sand p-4 text-sm leading-6">{screen.trial}</p>
+          <p className="mt-5 rounded-card bg-surface-2 p-4 text-small leading-6">{screen.trial}</p>
         </>
       )}
 
@@ -154,9 +154,9 @@ export function ScenarioScreen({
           <a href="mailto:hello@kabsi.co">Write to hello@kabsi.co</a>
         </Button>
       ) : null}
-      <p className={cn("text-sm leading-6 text-kb-stone", choosing ? "mt-6" : "mt-4 text-center")}>
+      <p className={cn("text-small leading-6 text-text-2", choosing ? "mt-6" : "mt-4 text-center")}>
         Stuck?{" "}
-        <BookingLink kind="setup" className="text-kb-ink">
+        <BookingLink kind="setup" className="text-text-1">
           Book a free {SETUP_CALL_MINUTES}-minute setup call
         </BookingLink>
         .

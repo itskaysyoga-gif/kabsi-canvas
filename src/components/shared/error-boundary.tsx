@@ -14,10 +14,10 @@ export class GlobalErrorBoundary extends Component<{ children: ReactNode }, { fa
   override render() {
     if (!this.state.failed) return this.props.children;
     return (
-      <main className="grid min-h-screen place-items-center bg-kb-sand px-5">
-        <div className="w-full max-w-md rounded-large bg-kb-white p-7 text-center shadow-kb sm:p-10">
-          <h1 className="font-display text-4xl text-kb-ink">Something went wrong.</h1>
-          <p className="mt-3 text-kb-stone">Reload the page.</p>
+      <main className="grid min-h-screen place-items-center bg-surface-2 px-5">
+        <div className="w-full max-w-md rounded-panel bg-surface-1 p-7 text-center shadow-rest sm:p-10">
+          <h1 className="font-display text-h2 text-text-1">Something went wrong.</h1>
+          <p className="mt-3 text-text-2">Reload the page.</p>
           <Button className="mt-7 w-full" onClick={() => window.location.reload()}>
             Reload
           </Button>

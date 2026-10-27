@@ -35,7 +35,7 @@ export type CareData = {
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-6">
-      <h3 className="text-base font-bold">{title}</h3>
+      <h3 className="text-body font-bold">{title}</h3>
       <div className="mt-2">{children}</div>
     </section>
   );
@@ -47,9 +47,9 @@ function Lines({ lines }: { lines: CareLine[] }) {
       {lines.map((l) => (
         <li
           key={l.title}
-          className="flex flex-wrap items-center justify-between gap-2 rounded-card border border-kb-hairline p-3"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-card border border-line p-3"
         >
-          <span className="text-sm font-medium">{l.title}</span>
+          <span className="text-small font-medium">{l.title}</span>
           <Button asChild size="compact" variant="outline">
             <Link to={l.path}>Open</Link>
           </Button>
@@ -73,14 +73,14 @@ export function CareTop({ r }: { r: CareData }) {
   const updates = c.posts_published + c.hours_updates + c.profile_updates;
   return (
     <>
-      <p className="mt-3 font-display text-3xl leading-tight" data-testid="care-headline">
+      <p className="mt-3 font-display text-h3 leading-tight" data-testid="care-headline">
         {r.care.headline}
       </p>
       <Block title="Google Profile">
-        <p className="text-sm leading-6">{r.care.profile_line}</p>
+        <p className="text-small leading-6">{r.care.profile_line}</p>
       </Block>
       <Block title="Content">
-        <p className="text-sm leading-6">
+        <p className="text-small leading-6">
           {updates} {updates === 1 ? "update" : "updates"} and {c.photos_published}{" "}
           {c.photos_published === 1 ? "photo" : "photos"} published.
         </p>
@@ -102,17 +102,17 @@ export function CareBottom({ r, latest }: { r: CareData; latest: boolean }) {
               {ACTIVITY.map((a) => {
                 const p = r.activity![a.key];
                 return (
-                  <div key={a.key} className="rounded-card bg-kb-sand p-4">
-                    <p className="text-sm text-kb-stone">{a.label}</p>
-                    <p className="mt-1 text-2xl font-bold">{p.this}</p>
-                    <p className="mt-0.5 text-sm text-kb-stone">
+                  <div key={a.key} className="rounded-card bg-surface-2 p-4">
+                    <p className="text-small text-text-2">{a.label}</p>
+                    <p className="mt-1 text-h3 font-bold">{p.this}</p>
+                    <p className="mt-0.5 text-small text-text-2">
                       {p.change ? `${p.change} than the week before` : `${p.last} the week before`}
                     </p>
                   </div>
                 );
               })}
             </div>
-            <p className="mt-2 text-xs leading-5 text-kb-stone">
+            <p className="mt-2 text-label leading-5 text-text-2">
               Google's figures are kept with a report for 30 days.
               {r.activity.example
                 ? " These are examples until Kabsi's Google connection is live."
@@ -120,7 +120,7 @@ export function CareBottom({ r, latest }: { r: CareData; latest: boolean }) {
             </p>
           </>
         ) : (
-          <p className="text-sm text-kb-stone">
+          <p className="text-small text-text-2">
             Google's figures are not kept for more than 30 days, so this report no longer shows
             them.
           </p>
@@ -133,13 +133,13 @@ export function CareBottom({ r, latest }: { r: CareData; latest: boolean }) {
             <>
               <Lines lines={r.needs} />
               {(r.needs_total ?? 0) > r.needs.length ? (
-                <p className="mt-2 text-sm text-kb-stone">
+                <p className="mt-2 text-small text-text-2">
                   There are {(r.needs_total ?? 0) - r.needs.length} more on Home.
                 </p>
               ) : null}
             </>
           ) : (
-            <p className="text-sm">Nothing needs you right now.</p>
+            <p className="text-small">Nothing needs you right now.</p>
           )}
         </Block>
       ) : null}
@@ -152,15 +152,15 @@ export function CareBottom({ r, latest }: { r: CareData; latest: boolean }) {
 
       {r.time_saved?.words ? (
         <Block title="Time saved">
-          <p className="text-sm font-bold" data-testid="time-saved">
+          <p className="text-small font-bold" data-testid="time-saved">
             {r.time_saved.words} saved
           </p>
           <details className="mt-1">
-            <summary className="min-h-10 cursor-pointer text-sm underline underline-offset-4">
+            <summary className="min-h-10 cursor-pointer text-small underline underline-offset-4">
               How this is worked out
             </summary>
-            <p className="mt-1 text-sm leading-6 text-kb-stone">{r.time_saved.formula}</p>
-            <ul className="mt-2 space-y-1 text-sm">
+            <p className="mt-1 text-small leading-6 text-text-2">{r.time_saved.formula}</p>
+            <ul className="mt-2 space-y-1 text-small">
               {r.time_saved.parts
                 .filter((p) => p.count > 0)
                 .map((p) => (
@@ -176,15 +176,15 @@ export function CareBottom({ r, latest }: { r: CareData; latest: boolean }) {
       {r.terms?.items.length ? (
         <Block title="How people found you">
           {r.terms.example ? <StatusPill tone="grey">Example figures</StatusPill> : null}
-          <ul className="mt-2 space-y-1 text-sm">
+          <ul className="mt-2 space-y-1 text-small">
             {r.terms.items.map((t) => (
               <li key={t.term} className="flex justify-between gap-3">
                 <span>{t.term}</span>
-                <span className="text-kb-stone">{t.count}</span>
+                <span className="text-text-2">{t.count}</span>
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-xs leading-5 text-kb-stone">
+          <p className="mt-2 text-label leading-5 text-text-2">
             The words people searched in {r.terms.month_label}, kept with a report for 30 days.
           </p>
         </Block>
