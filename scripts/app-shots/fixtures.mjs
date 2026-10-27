@@ -130,10 +130,13 @@ const base = {
 
 const AREAS = [base, home, content, profile, settings, onboarding, staff, publicPages, lead];
 
-function pick(kind, name) {
+/** The answer of the last area that has one; a function that returns undefined hands the call to the areas before it. */
+function pick(kind, name, ctx) {
   for (let i = AREAS.length - 1; i >= 0; i--) {
     const a = AREAS[i][kind];
-    if (a && Object.prototype.hasOwnProperty.call(a, name)) return a[name];
+    if (!a || !Object.prototype.hasOwnProperty.call(a, name)) continue;
+    const v = typeof a[name] === "function" ? a[name](ctx) : a[name];
+    if (v !== undefined) return v;
   }
   return undefined;
 }
@@ -153,20 +156,21 @@ export function answer(method, rawUrl, headers, body, state) {
   let key;
   if (p.startsWith("/rest/v1/rpc/")) {
     key = `rpc ${p.slice(13)}`;
-    value = pick("rpc", p.slice(13));
+    value = pick("rpc", p.slice(13), ctx);
   } else if (p.startsWith("/rest/v1/")) {
     key = `table ${p.slice(9)}`;
-    value = pick("tables", p.slice(9));
+    value = pick("tables", p.slice(9), ctx);
     if (method !== "GET" && method !== "HEAD" && value === undefined)
       return { status: 201, body: [] };
   } else if (p.startsWith("/functions/v1/")) {
     key = `function ${method} ${p.slice(14)}`;
-    value = pick("functions", `${method} ${p.slice(14)}`) ?? pick("functions", p.slice(14));
+    value =
+      pick("functions", `${method} ${p.slice(14)}`, ctx) ?? pick("functions", p.slice(14), ctx);
   } else if (p.startsWith("/storage/v1/")) {
     return { body: [] };
   }
   const missing = value === undefined ? key : undefined;
-  let out = typeof value === "function" ? value(ctx) : value;
+  let out = value;
   if (out && typeof out === "object" && "__status" in out)
     return { status: out.__status, body: out.body, missing };
   if (out === undefined)

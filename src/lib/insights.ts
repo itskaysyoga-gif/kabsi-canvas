@@ -304,7 +304,7 @@ export async function loadRivalLine(locationId: string): Promise<string | null> 
 
 export type AiQuestion = { id: string; text: string; kind: "suggested" | "owner"; cadence: string };
 
-/** The AI questions Kabsi asks for this business (read only: there is no member write path yet). */
+/** The AI questions Kabsi asks for this business. Owners and managers change them with save_ai_prompt (UX 1). */
 export async function loadAiQuestions(locationId: string): Promise<AiQuestion[]> {
   const { data, error } = await supabase
     .from("ai_visibility_prompts")
@@ -332,3 +332,46 @@ export async function loadSearches(locationId: string): Promise<TrackedSearch[]>
 
 /** A stored question (kept in lower case by promptFrom) as a sentence: its first letter in capitals. */
 export const asSentence = (q: string) => (q ? q[0]!.toUpperCase() + q.slice(1) : q);
+
+/** Adds a question, or changes one when `id` is given (save_ai_prompt: promptFrom's rules, the plan's limit, after the first task). */
+export async function saveAiPrompt(locationId: string, text: string, id?: string): Promise<string> {
+  const { data, error } = await supabase.rpc("save_ai_prompt", {
+    p_location: locationId,
+    p_text: text,
+    ...(id ? { p_id: id } : {}),
+  });
+  if (error) throw new AiPromptError(error.message, error.details ?? null);
+  return data as string;
+}
+
+/** Stops Kabsi asking a question. */
+export async function removeAiPrompt(id: string): Promise<void> {
+  const { error } = await supabase.rpc("remove_ai_prompt", { p_id: id });
+  if (error) throw new AiPromptError(error.message, null);
+}
+
+export class AiPromptError extends Error {
+  constructor(
+    public code: string,
+    public detail: string | null,
+  ) {
+    super(code);
+  }
+}
+
+/** The owner's words for each refusal of save_ai_prompt. */
+export function aiPromptMessage(e: unknown): string {
+  const code = e instanceof AiPromptError ? e.code : "";
+  if (code.includes("bad_prompt"))
+    return "Write it the way a customer would ask, in 8 to 120 characters, with no links, emails or phone numbers.";
+  if (code.includes("prompt_limit")) {
+    const n = e instanceof AiPromptError && e.detail && /^\d+$/.test(e.detail) ? e.detail : null;
+    return n
+      ? `Your plan asks up to ${n} questions. Remove one to add another.`
+      : "Your plan's questions are all in use. Remove one to add another.";
+  }
+  if (code.includes("duplicate")) return "Kabsi already asks this one.";
+  if (code.includes("after_first_task"))
+    return "These open after your first task is done. One thing at a time.";
+  return "That did not save. Try again in a minute.";
+}

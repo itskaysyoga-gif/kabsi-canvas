@@ -54,8 +54,8 @@ export const CATEGORIES = [
     description: "A post or photo Kabsi prepared, or a question about your hours before a holiday. Nothing goes on Google until you approve it.",
   },
   {
-    id: "weekly_report", why: "Your Weekly Care Report is sent once a week.", label: "Weekly Care Report", group: "Weekly and monthly", switchable: true, emailDefault: "instant",
-    quietExempt: false, inApp: true, noun: ["Weekly Care Report", "Weekly Care Reports"],
+    id: "weekly_report", why: "Your Results Report is sent once a week.", label: "Results Report", group: "Weekly and monthly", switchable: true, emailDefault: "instant",
+    quietExempt: false, inApp: true, noun: ["Results Report", "Results Reports"],
     description: "What Kabsi watched, prepared and published, once a week.",
   },
   {

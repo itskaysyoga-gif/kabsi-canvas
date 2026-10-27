@@ -24,7 +24,14 @@ import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { clearAssistantChat } from "@/lib/assistant-storage";
 import { KABSI_GROUP_ID, WHATSAPP_ON } from "@/lib/site";
-import { asSentence, loadAiQuestions, loadSearches } from "@/lib/insights";
+import {
+  aiPromptMessage,
+  asSentence,
+  loadAiQuestions,
+  loadSearches,
+  removeAiPrompt,
+  saveAiPrompt,
+} from "@/lib/insights";
 import { choice, loadPrefs, savePref } from "@/lib/notifications";
 import { whatsappPrefs, whatsappStatus } from "@/lib/whatsapp-owner";
 
@@ -264,11 +271,42 @@ function RoutineChannel({ locationId }: { locationId: string }) {
   );
 }
 
-/** The AI questions Kabsi asks (read only until a member write path exists; LATER.md). */
+/** The AI questions Kabsi asks: owners and managers add, change and remove them within the plan (UX 1, LATER.md). */
 function AiQuestions({ locationId }: { locationId: string }) {
+  const qc = useQueryClient();
   const q = useQuery({
     queryKey: ["ai-questions", locationId],
     queryFn: () => loadAiQuestions(locationId),
+  });
+  const [text, setText] = useState("");
+  const [editing, setEditing] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  const done = async () => {
+    await qc.invalidateQueries({ queryKey: ["ai-questions", locationId] });
+  };
+  const add = useMutation({
+    mutationFn: () => saveAiPrompt(locationId, text),
+    onSuccess: async () => {
+      setText("");
+      setErr(null);
+      await done();
+    },
+    onError: (e) => setErr(aiPromptMessage(e)),
+  });
+  const edit = useMutation({
+    mutationFn: (id: string) => saveAiPrompt(locationId, editText, id),
+    onSuccess: async () => {
+      setEditing(null);
+      setErr(null);
+      await done();
+    },
+    onError: (e) => setErr(aiPromptMessage(e)),
+  });
+  const remove = useMutation({
+    mutationFn: (id: string) => removeAiPrompt(id),
+    onSuccess: done,
+    onError: (e) => setErr(aiPromptMessage(e)),
   });
   if (q.isError) return null;
   const list = q.data ?? [];
@@ -280,19 +318,88 @@ function AiQuestions({ locationId }: { locationId: string }) {
       {list.length ? (
         <ul className="mt-3 divide-y divide-line">
           {list.map((p) => (
-            <li key={p.id} className="flex flex-wrap items-baseline justify-between gap-2 py-2.5">
-              <span className="min-w-0 break-words text-body">
-                &lsquo;{asSentence(p.text)}&rsquo;
-              </span>
-              <span className="text-label font-bold text-text-2">
-                {p.cadence === "biweekly" ? "Every 2 weeks" : "Monthly"}
-              </span>
+            <li key={p.id} className="py-3">
+              {editing === p.id ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    edit.mutate(p.id);
+                  }}
+                  className="space-y-3"
+                >
+                  <Field
+                    label="Your question"
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    maxLength={120}
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    <Button type="submit" variant="secondary" size="md" loading={edit.isPending}>
+                      Save
+                    </Button>
+                    <Button variant="tertiary" onClick={() => setEditing(null)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="min-w-0 flex-1 break-words text-body">
+                    &lsquo;{asSentence(p.text)}&rsquo;
+                  </span>
+                  <span className="text-label font-bold text-text-2">
+                    {p.cadence === "biweekly" ? "Every 2 weeks" : "Monthly"}
+                  </span>
+                  <span className="flex w-full gap-1 sm:w-auto">
+                    <Button
+                      variant="tertiary"
+                      onClick={() => {
+                        setEditing(p.id);
+                        setEditText(asSentence(p.text));
+                        setErr(null);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="tertiary"
+                      className="ms-3"
+                      disabled={remove.isPending}
+                      onClick={() => remove.mutate(p.id)}
+                    >
+                      Remove
+                    </Button>
+                  </span>
+                </div>
+              )}
             </li>
           ))}
         </ul>
       ) : q.isLoading ? null : (
         <p className="mt-3 text-body">Kabsi suggests your questions after your first check.</p>
       )}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (text.trim()) add.mutate();
+        }}
+        className="mt-4 space-y-3 border-t border-line pt-4"
+      >
+        <Field
+          label="Add a question"
+          hint="The way a customer would ask, for example: best hair salon near the marina"
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value);
+            if (err) setErr(null);
+          }}
+          maxLength={120}
+          error={err}
+        />
+        <Button type="submit" variant="secondary" size="md" loading={add.isPending}>
+          Add question
+        </Button>
+      </form>
     </Panel>
   );
 }

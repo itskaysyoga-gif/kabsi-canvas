@@ -69,7 +69,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "What happens when my plan ends?",
-    a: "Watching and drafting stop: Reviews, Google Profile, Google Protection and the Weekly Care Report. Your review link and QR code keep working, and so does any NFC card that carries the link, and the free Google Profile Check stays free.",
+    a: "Watching and drafting stop: Reviews, Google Profile, Google Protection and the Results Report. Your review link and QR code keep working, and so does any NFC card that carries the link, and the free Google Profile Check stays free.",
   },
   {
     q: "Can I get a refund?",

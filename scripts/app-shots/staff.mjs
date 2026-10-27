@@ -45,7 +45,7 @@ export const tables = {
             concierge: true,
           },
         ]
-      : [location(c.state)],
+      : undefined,
   staff_followups: [
     {
       id: "f1",
@@ -62,10 +62,14 @@ export const tables = {
     { provider: "dataforseo", month: month(1), calls: 288, micros: 1_730_000 },
     { provider: "ai_visibility", month: month(1), calls: 40, micros: 480_000 },
   ],
-  ai_visibility_runs: [
-    ...Array.from({ length: 31 }, () => ({ provider: "chatgpt", cost_micros: 12_000 })),
-    ...Array.from({ length: 22 }, () => ({ provider: "perplexity", cost_micros: 9_000 })),
-  ],
+  // Only the staff page's costs; other areas answer their own runs (fixtures.mjs hands undefined on).
+  ai_visibility_runs: (c) =>
+    staff(c)
+      ? [
+          ...Array.from({ length: 31 }, () => ({ provider: "chatgpt", cost_micros: 12_000 })),
+          ...Array.from({ length: 22 }, () => ({ provider: "perplexity", cost_micros: 9_000 })),
+        ]
+      : undefined,
 };
 
 export const rpc = {
