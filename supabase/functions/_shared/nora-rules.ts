@@ -12,7 +12,7 @@ export const fenceVisitor = (text: string) =>
 // whatever the model wrote: a Markdown link keeps its words, any other address goes, with or without "https://", because
 // WhatsApp turns a bare "evil.example/pay" into a link too.
 const KNOWN_HOST = /^(?:[a-z0-9-]+\.)*kabsi\.co$|^support\.google\.com$/i;
-const SOCIAL = new Set(SOCIAL_LINKS.map((l) => l.href));
+const SOCIAL = new Set<string>(SOCIAL_LINKS.map((l) => l.href));
 const ADDRESS = /(?<![@\w.-])(?:https?:\/\/[^\s<>()[\]]+|(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/[^\s<>()[\]]*)?)/gi;
 const trim = (url: string) => url.replace(/[.,;:!?'"]+$/, "");
 const factUrls = (facts: string) => new Set((facts.match(/https?:\/\/[^\s<>()[\]]+/g) ?? []).map(trim));
