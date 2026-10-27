@@ -371,6 +371,8 @@ export function aiPromptMessage(e: unknown): string {
       : "Your plan's questions are all in use. Remove one to add another.";
   }
   if (code.includes("duplicate")) return "Kabsi already asks this one.";
+  if (code.includes("prompt_rate"))
+    return "That is a lot of changes for one day. Try again tomorrow.";
   if (code.includes("after_first_task"))
     return "These open after your first task is done. One thing at a time.";
   return "That did not save. Try again in a minute.";

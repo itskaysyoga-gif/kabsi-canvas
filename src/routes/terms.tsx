@@ -69,7 +69,7 @@ function Page() {
             profile for changes (Google Protection). When something changes, you choose: Google is
             right, or Keep my information.
           </li>
-          <li>Sends the Results Report and shows your profile's facts in the app.</li>
+          <li>Sends the Results Report and shows your profile's facts on the Kabsi website.</li>
           <li>
             Provides a review link and a QR code that open your Google review page for every
             customer. They work with your own QR codes and NFC cards. Kabsi sells no cards.
@@ -292,7 +292,7 @@ function Page() {
           </li>
           <li>
             They keep working after a plan ends, for as long as Kabsi operates. You can switch any
-            of them off in the app.
+            of them off on the Kabsi website.
           </li>
           <li>
             If you delete your business from Kabsi, its links and QR codes stop working, and so does

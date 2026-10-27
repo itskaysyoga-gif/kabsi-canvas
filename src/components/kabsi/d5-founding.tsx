@@ -462,7 +462,10 @@ function Application({ onSent }: { onSent: () => void }) {
         <Segmented
           label="Named or anonymous case study"
           value={f.caseStudy}
-          onChange={(v) => set("caseStudy", v)}
+          onChange={(v) =>
+            // The tick agrees to the words shown for one choice: a new choice needs a new tick.
+            setF((x) => ({ ...x, caseStudy: v, checkIn: false }))
+          }
           options={[
             { value: "anonymous", label: "Anonymous" },
             { value: "named", label: "Named" },

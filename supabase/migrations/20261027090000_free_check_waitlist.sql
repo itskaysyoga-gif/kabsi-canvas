@@ -15,12 +15,14 @@ create table if not exists public.free_check_waitlist (
   industry text check (industry is null or industry ~ '^[a-z0-9-]{2,40}$'),
   notice_consent_text text not null check (char_length(notice_consent_text) between 10 and 1000),
   notice_consent_at timestamptz not null default now(),
+  whatsapp_consent_text text check (whatsapp_consent_text is null or char_length(whatsapp_consent_text) between 10 and 1000),
   marketing_consent boolean not null default false,
   marketing_consent_text text check (marketing_consent_text is null or char_length(marketing_consent_text) between 10 and 1000),
   page text not null default '/scan' check (page ~ '^/[A-Za-z0-9/_-]{0,120}$'),
   notified_at timestamptz,
   created_at timestamptz not null default now(),
   constraint free_check_waitlist_contact check (email is not null or phone is not null),
+  constraint free_check_waitlist_whatsapp check (phone is null or whatsapp_consent_text is not null),
   constraint free_check_waitlist_marketing check (not marketing_consent or (marketing_consent_text is not null and email is not null))
 );
 comment on table public.free_check_waitlist is 'UX 1: the free check waiting list (email or WhatsApp, the words agreed to). Service role only; purged after 365 days.';

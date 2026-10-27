@@ -1,7 +1,7 @@
 -- UX 1 (27 Oct 2026): owners and managers add, edit and remove their own AI questions on the Kabsi website (docs/LATER.md:
 -- "Owners cannot edit or add their own AI prompts"). The same rules as promptFrom (supabase/functions/_shared/visibility/
--- ai/prompts.ts), the plan's limit (entitlements' limits.ai_prompts; 3 on the demo), only after the first task is done (V4,
--- 30.16 section 3), one question once per business. The visibility tick asks them like the suggested ones.
+-- ai/prompts.ts), the plan's limit (entitlements' limits.ai_prompts), only after the first task is done (V4, 30.16 section 3),
+-- one question once per business, at most 20 saves a day. The visibility tick asks them like the suggested ones.
 -- Additive only: two functions.
 
 create or replace function public.save_ai_prompt(p_location uuid, p_text text, p_id uuid default null) returns uuid
@@ -32,8 +32,25 @@ begin
   end if;
   v_text := lower(v_text);
 
+  -- Editing to the same words changes nothing (and asks nothing again).
+  if p_id is not null then
+    select id into v_id from public.ai_visibility_prompts
+     where id = p_id and location_id = p_location and active and lower(text) = v_text;
+    if v_id is not null then return v_id; end if;
+    if not exists (select 1 from public.ai_visibility_prompts where id = p_id and location_id = p_location and active) then
+      raise exception 'not_found' using errcode = 'P0002';
+    end if;
+  end if;
+  -- One save at a time per business, so two at once cannot pass the limit together.
+  perform 1 from public.locations where id = p_location for update;
+  -- At most 20 saves a day per business: every new question is asked at once, and the AI checks share one monthly cap.
+  if (select count(*) from public.audit_events
+       where location_id = p_location and action = 'ai_prompt_saved' and created_at > now() - interval '1 day') >= 20 then
+    raise exception 'prompt_rate' using errcode = 'P0001';
+  end if;
+
   v_ent := public.entitlements(null, p_location);
-  v_max := coalesce((v_ent -> 'limits' ->> 'ai_prompts')::integer, case when v_ent ->> 'state' = 'demo' then 3 else 0 end);
+  v_max := coalesce((v_ent -> 'limits' ->> 'ai_prompts')::integer, 0);
   v_cadence := case when v_ent -> 'limits' ->> 'ai_every' = '2 weeks' then 'biweekly' else 'monthly' end;
   select count(*) into v_active from public.ai_visibility_prompts
    where location_id = p_location and active and (p_id is null or id <> p_id);
@@ -43,18 +60,16 @@ begin
     raise exception 'duplicate' using errcode = '23505';
   end if;
 
-  if p_id is null then
-    -- A question removed earlier comes back instead of a second row (the unique index is on lower(text)).
-    update public.ai_visibility_prompts set active = true, kind = 'owner', cadence = v_cadence, confirmed_at = now(), next_run_at = now()
-     where location_id = p_location and lower(text) = v_text returning id into v_id;
-    if v_id is null then
-      insert into public.ai_visibility_prompts (location_id, text, kind, cadence, active, confirmed_at, next_run_at)
-      values (p_location, v_text, 'owner', v_cadence, true, now(), now()) returning id into v_id;
-    end if;
-  else
-    update public.ai_visibility_prompts set text = v_text, kind = 'owner', cadence = v_cadence, confirmed_at = now(), next_run_at = now()
-     where id = p_id and location_id = p_location and active returning id into v_id;
-    if v_id is null then raise exception 'not_found' using errcode = 'P0002'; end if;
+  -- An edit is a new question: the old one stops (its answers stay with its own words), the new one is asked.
+  if p_id is not null then
+    update public.ai_visibility_prompts set active = false where id = p_id and location_id = p_location;
+  end if;
+  -- A question removed earlier comes back with its own schedule instead of a second row (the unique index is on lower(text)).
+  update public.ai_visibility_prompts set active = true, kind = 'owner', cadence = v_cadence, confirmed_at = now()
+   where location_id = p_location and lower(text) = v_text returning id into v_id;
+  if v_id is null then
+    insert into public.ai_visibility_prompts (location_id, text, kind, cadence, active, confirmed_at, next_run_at)
+    values (p_location, v_text, 'owner', v_cadence, true, now(), now()) returning id into v_id;
   end if;
   perform private.audit('user', v_uid, 'ai_prompt_saved', p_location, 'ai_visibility_prompt', v_id::text, null,
     jsonb_build_object('edited', p_id is not null), 'dashboard', 'saved');

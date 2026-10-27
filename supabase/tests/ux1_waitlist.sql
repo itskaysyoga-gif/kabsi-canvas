@@ -14,21 +14,24 @@ select ok(not has_function_privilege('authenticated', 'private.purge_free_check_
 
 -- Every value supabase/functions/_shared/visibility/waitlist.ts can write (the notice words, the tips words, each page).
 select lives_ok(format($$insert into public.free_check_waitlist (email, phone, business, country, place_id, term, industry,
-    notice_consent_text, marketing_consent, marketing_consent_text, page)
+    notice_consent_text, whatsapp_consent_text, marketing_consent, marketing_consent_text, page)
   values (%L, %L, 'Rose Lane Salon', 'AE', 'ChIJroselanesalon000001', 'hair salon', 'hair-salons',
     'The free scan opens soon. Leave your email or WhatsApp and Kabsi sends your map the day it opens.',
+    'Send my map to this WhatsApp number the day the free scan opens.',
     true, 'Send me tips on managing my Google profile', %L)$$,
   'owner' || p || '@example.com', '+97150123456' || i, p), 'the page ' || p || ' and both consent texts can be stored')
   from unnest(array['/scan', '/scan/result', '/google-profile-check', '/for/hair-salon', '/for/auto-repair']) with ordinality as t(p, i);
-select lives_ok($$insert into public.free_check_waitlist (phone, business, notice_consent_text)
-  values ('+447700900123', 'Harbor Bakes', 'The free scan opens soon. Leave your email or WhatsApp and Kabsi sends your map the day it opens.')$$,
+select lives_ok($$insert into public.free_check_waitlist (phone, business, notice_consent_text, whatsapp_consent_text)
+  values ('+447700900123', 'Harbor Bakes', 'The free scan opens soon. Leave your email or WhatsApp and Kabsi sends your map the day it opens.',
+          'Send my map to this WhatsApp number the day the free scan opens.')$$,
   'a WhatsApp number alone, with no country, term or tips, can be stored');
 
 -- Asking again changes nothing.
 select is((select count(*)::int from public.free_check_waitlist where business = 'Rose Lane Salon' and email = 'owner/scan@example.com'), 1, 'one row');
-insert into public.free_check_waitlist (email, phone, business, place_id, notice_consent_text, page)
+insert into public.free_check_waitlist (email, phone, business, place_id, notice_consent_text, whatsapp_consent_text, page)
   values ('owner/scan@example.com', '+971501234561', 'Rose Lane Salon', 'ChIJroselanesalon000001',
-          'The free scan opens soon. Leave your email or WhatsApp and Kabsi sends your map the day it opens.', '/scan')
+          'The free scan opens soon. Leave your email or WhatsApp and Kabsi sends your map the day it opens.',
+          'Send my map to this WhatsApp number the day the free scan opens.', '/scan')
   on conflict do nothing;
 select is((select count(*)::int from public.free_check_waitlist where email = 'owner/scan@example.com'), 1, 'the same contact and business is kept once');
 
@@ -41,6 +44,9 @@ select throws_ok($$insert into public.free_check_waitlist (phone, business, noti
   '23514', null, 'tips need an email');
 
 update public.free_check_waitlist set created_at = now() - interval '400 days' where business = 'Harbor Bakes';
+select throws_ok($$insert into public.free_check_waitlist (phone, business, notice_consent_text)
+  values ('+447700900125', 'No Words', 'The free scan opens soon. Leave your email or WhatsApp and Kabsi sends your map the day it opens.')$$,
+  '23514', null, 'a WhatsApp number needs the words agreed to');
 select is(private.purge_free_check_waitlist(), 1, 'a place older than a year is purged');
 -- The test database has no cron jobs (scripts/db-test.sh): the daily schedule is read back on the live project after the migration.
 

@@ -85,7 +85,7 @@ function ReviewsPage() {
     const rows = sortReviews(
       all.filter(
         (r) =>
-          (kept.has(r.id) || matchesView(r, view, byReview.get(r.id))) &&
+          (kept.has(r.id) || matchesView(r, view, byReview.get(r.id), tasks.isSuccess)) &&
           (!needle ||
             (r.comment ?? "").toLowerCase().includes(needle) ||
             (r.reviewer_name ?? "").toLowerCase().includes(needle)),
@@ -96,7 +96,7 @@ function ReviewsPage() {
     const at = search.r ? rows.findIndex((r) => r.id === search.r) : -1;
     if (at > 0) rows.unshift(...rows.splice(at, 1));
     return rows;
-  }, [all, view, needle, kept, byReview, search.r]);
+  }, [all, view, needle, kept, byReview, tasks.isSuccess, search.r]);
   const setView = (f: ReviewView) => {
     setCount(PAGE);
     void navigate({ search: { f } });
@@ -150,7 +150,9 @@ function ReviewsPage() {
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Show">
               {VIEWS.map((v) => {
-                const n = all.filter((r) => matchesView(r, v.key, byReview.get(r.id))).length;
+                const n = all.filter((r) =>
+                  matchesView(r, v.key, byReview.get(r.id), tasks.isSuccess),
+                ).length;
                 return (
                   <Chip
                     key={v.key}

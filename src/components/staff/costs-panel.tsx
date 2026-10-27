@@ -48,15 +48,23 @@ export function sumAiSpend(rows: { provider: string; cost_micros: number | null 
 
 async function aiSpend(days: number): Promise<AiSpend> {
   const since = new Date(Date.now() - days * 86_400_000).toISOString();
-  const { data, error } = await supabase
-    .from("ai_visibility_runs" as never)
-    .select("provider, cost_micros")
-    .eq("state", "done")
-    .eq("source", "live")
-    .gt("run_at", since)
-    .limit(20_000);
-  if (error) throw new Error(error.message);
-  return sumAiSpend((data ?? []) as { provider: string; cost_micros: number | null }[]);
+  // PostgREST answers at most 1000 rows a request: read page by page (at most 20 pages).
+  const rows: { provider: string; cost_micros: number | null }[] = [];
+  for (let page = 0; page < 20; page++) {
+    const { data, error } = await supabase
+      .from("ai_visibility_runs" as never)
+      .select("provider, cost_micros")
+      .eq("state", "done")
+      .eq("source", "live")
+      .gt("run_at", since)
+      .order("id" as never)
+      .range(page * 1000, page * 1000 + 999);
+    if (error) throw new Error(error.message);
+    const got = (data ?? []) as { provider: string; cost_micros: number | null }[];
+    rows.push(...got);
+    if (got.length < 1000) break;
+  }
+  return sumAiSpend(rows);
 }
 
 export function CostsPanel() {

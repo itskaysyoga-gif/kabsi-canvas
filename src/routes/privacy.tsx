@@ -463,6 +463,13 @@ function Page() {
         <p>Also:</p>
         <ul>
           <li>
+            The free check&apos;s waiting list (&quot;Save my place&quot;, while the free check is
+            closed): the email or WhatsApp number you leave, the business name, its country and
+            Google place id, the search, the words you agreed to and whether you asked for tips. We
+            use it only to tell you once that the free check is open, and to send tips by email if
+            you ticked that box. It is deleted after 365 days.
+          </li>
+          <li>
             Your business data: while you use Kabsi. If you ask us to delete a business (Settings,
             or by email), everything is deleted 7 days later, and you can cancel before then.
           </li>

@@ -12,7 +12,7 @@ type Panel = "device" | "someone" | null;
 
 /**
  * The three ways out of the Manager guide (K-93): send the steps to my other device (email, or a WhatsApp share link),
- * someone else manages my Google listing (a ready message to forward), and a free setup call. None of them asks for a
+ * someone else manages my Google profile (a ready message to forward), and a free setup call. None of them asks for a
  * password or a code. The email goes only to the signed-in person's own address.
  */
 export function AccessExits({ location, step }: { location: Location; step: number }) {
@@ -73,7 +73,7 @@ export function AccessExits({ location, step }: { location: Location; step: numb
         aria-expanded={open === "someone"}
         onClick={() => setOpen(open === "someone" ? null : "someone")}
       >
-        <Users /> Someone else manages my Google listing
+        <Users /> Someone else manages my Google profile
       </Button>
       {open === "someone" ? (
         <div className="rounded-card bg-surface-2 p-4">

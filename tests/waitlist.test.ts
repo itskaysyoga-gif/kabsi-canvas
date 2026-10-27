@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   WAITLIST_NOTICE_TEXT,
   WAITLIST_TIPS_TEXT,
+  WAITLIST_WHATSAPP_TEXT,
   checkWaitlist,
 } from "../supabase/functions/_shared/visibility/waitlist";
 import { TIPS_CONSENT_TEXT } from "../src/lib/profile-check";
@@ -60,6 +61,7 @@ describe("the free check waiting list", () => {
       true,
     );
     expect(ok.ok && ok.value.phone).toBe("+971501234567");
+    expect(ok.ok && ok.value.whatsapp_consent_text).toBe(WAITLIST_WHATSAPP_TEXT);
     expect(checkWaitlist({ email: "a@b.co" }, false)).toMatchObject({
       ok: false,
       field: "business",
@@ -89,7 +91,8 @@ describe("the free check waiting list", () => {
     expect(WAITLIST_TIPS_TEXT).toBe(TIPS_CONSENT_TEXT);
     const page = readFileSync(join(__dirname, "..", "src/components/kabsi/scan-live.tsx"), "utf8");
     expect(page).toContain(`"${WAITLIST_NOTICE_TEXT}"`);
-    for (const t of [WAITLIST_NOTICE_TEXT, WAITLIST_TIPS_TEXT])
+    expect(page).toContain(`"${WAITLIST_WHATSAPP_TEXT}"`);
+    for (const t of [WAITLIST_NOTICE_TEXT, WAITLIST_TIPS_TEXT, WAITLIST_WHATSAPP_TEXT])
       expect(t).not.toMatch(new RegExp("[\\u2013\\u2014!]"));
   });
 });

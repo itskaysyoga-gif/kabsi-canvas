@@ -52,12 +52,24 @@ select public.remove_ai_prompt((select id from public.ai_visibility_prompts wher
 select is((select count(*)::int from public.ai_visibility_prompts where location_id = '00000000-0000-4000-8000-0000000000c1' and active and kind = 'owner'), 2, 'removed');
 reset role;
 
--- Another business's owner can do neither.
+select is((select count(*)::int from public.ai_visibility_prompts where location_id = '00000000-0000-4000-8000-0000000000c1'
+  and text like 'where to get a blow dry%' and not active), 1, 'an edit retires the old question, so its answers keep their own words');
+
+-- Another business's owner, and a stranger, can do none of it (the id is read before switching persona: RLS hides it after).
+create temp table victim_prompt as select id from public.ai_visibility_prompts
+  where location_id = '00000000-0000-4000-8000-0000000000c1' and active limit 1;
+grant select on victim_prompt to authenticated;
 select tests.act_as('00000000-0000-4000-8000-0000000000b2');
 select throws_ok($$select public.save_ai_prompt('00000000-0000-4000-8000-0000000000c1', 'a question for someone else entirely')$$,
   '42501', 'forbidden', 'owner B cannot add to business A');
-select throws_ok(format('select public.remove_ai_prompt(%L)', (select id from public.ai_visibility_prompts where location_id = '00000000-0000-4000-8000-0000000000c1' and active limit 1)),
-  '42501', 'forbidden', 'owner B cannot remove business A''s question');
+select throws_ok($$select public.remove_ai_prompt((select id from victim_prompt))$$, '42501', 'forbidden', 'owner B cannot remove business A''s question');
+select throws_ok($$select public.save_ai_prompt('00000000-0000-4000-8000-0000000000c2', 'best bakery near the station today', (select id from victim_prompt))$$,
+  null, null, 'owner B cannot edit business A''s question through their own business');
+reset role;
+select is((select active from public.ai_visibility_prompts where id = (select id from victim_prompt)), true, 'business A''s question is untouched');
+select tests.act_as('00000000-0000-4000-8000-0000000000b1');
+select throws_ok($$select public.save_ai_prompt('00000000-0000-4000-8000-0000000000c1', 'a stranger asking about salons here')$$,
+  '42501', 'forbidden', 'a stranger cannot add');
 reset role;
 
 select * from finish();

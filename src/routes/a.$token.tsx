@@ -28,7 +28,8 @@ export const Route = createFileRoute("/a/$token")({
 });
 
 const DONE: Record<string, string> = {
-  posted: "Published on your Google profile.",
+  // Sent, not yet seen on Google (30.15 section 3.1): "On Google" is said only once Kabsi read it back.
+  posted: "Sent to Google. Kabsi tells you when it shows there.",
   approved: "Approved. Kabsi sends your reply to Google within a few minutes.",
   queued_manual: `${CONCIERGE_COPY.posted} ${CONCIERGE_COPY.waiting}`,
   publishing: `${CONCIERGE_COPY.posted} ${CONCIERGE_COPY.waiting}`,

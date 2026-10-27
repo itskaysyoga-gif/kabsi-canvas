@@ -39,7 +39,10 @@ describe("each status renders", () => {
     expect(html({ risk: "high", draft: null })).toContain("Waiting for you");
     expect(html({ draft: { body: "x", safety_ok: false } })).toContain("Waiting for you");
   });
-  it("Published", () => expect(html({ state: "posted" })).toContain("Published"));
+  it("Sent to Google until Kabsi read the reply back, then On Google", () => {
+    expect(html({ state: "posted" })).toContain("Sent to Google");
+    expect(html({ state: "posted", existing_reply: "Thank you" })).toContain("On Google");
+  });
   it("Google is checking your reply", () =>
     expect(html({ state: "posted", reply_state: "in_review" })).toContain(
       "Google is checking your reply",
@@ -134,12 +137,16 @@ describe("Design 3 views: Waiting, On Google, All", () => {
       expect(viewFor(f)).toBe("all");
     expect(viewFor("nonsense")).toBeUndefined();
   });
-  it("says On Google only once Kabsi saw the reply there, else by the review's own state", () => {
+  it("says On Google only once Kabsi saw the reply there", () => {
     const posted = { ...base, state: "posted" };
     expect(onGoogle(posted, { owner: "sent" })).toBe(false);
     expect(onGoogle(posted, { owner: "confirmed" })).toBe(true);
-    expect(onGoogle(posted)).toBe(true);
-    expect(onGoogle({ ...posted, reply_state: "in_review" })).toBe(false);
+    // No publication found: only a reply read back from Google counts, and never while the publications did not load.
+    expect(onGoogle(posted)).toBe(false);
+    const read = { ...posted, existing_reply: "Thank you" };
+    expect(onGoogle(read)).toBe(true);
+    expect(onGoogle(read, null, false)).toBe(false);
+    expect(onGoogle({ ...read, reply_state: "in_review" })).toBe(false);
     expect(matchesView(base, "waiting")).toBe(true);
     expect(matchesView(base, "google")).toBe(false);
     expect(matchesView(base, "all")).toBe(true);
