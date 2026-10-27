@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { CONCIERGE_COPY } from "@/lib/concierge-copy";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { CheckCircle2 } from "lucide-react";
+import { Check, Clock, Undo2 } from "lucide-react";
 import { ConfirmLayout } from "@/components/layouts/confirm-layout";
+import { QuietMark, QuietTitle } from "@/components/kabsi/d2-quiet";
+import { Button, StatusPill, buttonClass } from "@/components/kabsi/ui";
 import { HIGH_RISK_CHECKLIST, issueLines } from "@/lib/review-risk";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   loadAction,
   runAction,
@@ -29,14 +28,15 @@ export const Route = createFileRoute("/a/$token")({
 });
 
 const DONE: Record<string, string> = {
-  posted: "Posted. Your reply is on Google.",
+  // Sent, not yet seen on Google (30.15 section 3.1): "On Google" is said only once Kabsi read it back.
+  posted: "Sent to Google. Kabsi tells you when it shows there.",
   approved: "Approved. Kabsi sends your reply to Google within a few minutes.",
   queued_manual: `${CONCIERGE_COPY.posted} ${CONCIERGE_COPY.waiting}`,
   publishing: `${CONCIERGE_COPY.posted} ${CONCIERGE_COPY.waiting}`,
   skipped: "Skipped. Nothing was posted.",
   handled_offline: "Noted. Kabsi won't post anything for this review.",
   in_review: "Sent. Google is checking your reply before it appears.",
-  undone: "Undone. Nothing was sent to Google.",
+  undone: "Undone. Nothing reached Google.",
   reverted: "Done. Your version is back on Google.",
   reverting: "Approved. Kabsi puts your version back on Google within a few minutes.",
   kept: "Noted. Kabsi will keep the new version as yours.",
@@ -124,17 +124,26 @@ function ActionPage() {
   if (!view)
     return (
       <ConfirmLayout>
-        <p className="text-kb-stone">Loading…</p>
+        <p className="text-text-2" role="status">
+          Loading
+        </p>
       </ConfirmLayout>
     );
 
   const inbox = (
-    <Button asChild variant="outline" className="mt-6 w-full">
-      <Link to="/app/reviews" search={{ f: "needs" }}>
-        Open your Kabsi reviews
-      </Link>
-    </Button>
+    <Link
+      to="/app/reviews"
+      search={{ f: "needs" }}
+      className={buttonClass("secondary", "md", true) + " mt-6"}
+    >
+      Open your Kabsi reviews
+    </Link>
   );
+  const errorLine = error ? (
+    <p className="mt-3 text-small font-semibold text-bad" role="alert">
+      {error}
+    </p>
+  ) : null;
   if (pending) {
     return (
       <ConfirmLayout
@@ -142,33 +151,42 @@ function ActionPage() {
         mode={view?.mode}
         concierge={view.concierge === true}
       >
-        <p className="text-sm font-medium text-kb-stone">{view.business}</p>
-        <h1 className="mt-1 font-display text-3xl leading-tight" aria-live="polite">
-          Publishing in {pending.seconds} {pending.seconds === 1 ? "second" : "seconds"}
-        </h1>
-        <p className="mt-3 leading-7 text-kb-stone">Nothing is sent to Google until then.</p>
-        {error ? (
-          <p className="mt-3 text-sm text-kb-red" role="alert">
-            {error}
-          </p>
-        ) : null}
-        <Button className="mt-6 w-full" disabled={busy} onClick={() => void undo()}>
-          {busy ? "Undoing…" : "Undo"}
-        </Button>
+        <QuietTitle business={view.business} live>
+          Approved.
+        </QuietTitle>
+        <p className="mt-2 text-body text-text-2" aria-live="polite">
+          Changed your mind? Tap Undo in the next {pending.seconds}{" "}
+          {pending.seconds === 1 ? "second" : "seconds"} and nothing reaches Google.
+        </p>
+        <StatusPill tone="info" className="mt-4">
+          Waiting {pending.seconds} {pending.seconds === 1 ? "second" : "seconds"}
+        </StatusPill>
+        {errorLine}
+        <div className="mt-6" data-main-cta>
+          <Button
+            variant="secondary"
+            full
+            loading={busy}
+            icon={<Undo2 className="size-5" aria-hidden />}
+            onClick={() => void undo()}
+          >
+            Undo
+          </Button>
+        </div>
       </ConfirmLayout>
     );
   }
   if (!done && view.sign_in && view.other_account && view.status === "ok") {
     return (
       <ConfirmLayout demo={view?.demo === true} mode={view?.mode}>
-        <h1 className="font-display text-3xl leading-tight">This link was sent to someone else</h1>
-        <p className="mt-3 leading-7 text-kb-stone">
-          You are signed in to Kabsi with a different email address. Sign out, then sign in with the
-          address this email was sent to.
-        </p>
-        <Button className="mt-6 w-full" onClick={() => void switchAccount()}>
-          Sign out and sign in again
-        </Button>
+        <QuietTitle lead="You are signed in to Kabsi with a different email address. Sign out, then sign in with the address this email was sent to.">
+          This link was sent to someone else
+        </QuietTitle>
+        <div className="mt-6" data-main-cta>
+          <Button full onClick={() => void switchAccount()}>
+            Sign out and sign in again
+          </Button>
+        </div>
         {inbox}
       </ConfirmLayout>
     );
@@ -177,19 +195,35 @@ function ActionPage() {
   const needsSignIn = view.sign_in === true && view.signed_in !== true && view.status === "ok";
   const signIn = (label: string, why: string) => (
     <>
-      <p className="mt-5 text-sm leading-6 text-kb-stone">{why} You come back to this page.</p>
-      <Button asChild className="mt-4 w-full">
-        <Link to="/login" search={{ next: `/a/${token}` }}>
-          {label}
-        </Link>
-      </Button>
+      <p className="mt-5 text-small text-text-2">{why} You come back to this page.</p>
+      <Link
+        to="/login"
+        search={{ next: `/a/${token}` }}
+        data-main-cta
+        className={buttonClass("primary", "lg", true) + " mt-4"}
+      >
+        {label}
+      </Link>
     </>
   );
   if (done) {
     return (
       <ConfirmLayout demo={view?.demo === true} mode={view?.mode}>
-        <CheckCircle2 className="size-10 text-kb-green" aria-hidden="true" />
-        <h1 className="mt-4 font-display text-3xl leading-tight">{DONE[done] ?? "Done."}</h1>
+        <QuietMark
+          icon={done === "undone" ? Undo2 : Check}
+          tone={done === "undone" ? "info" : "ok"}
+        />
+        <QuietTitle
+          lead={
+            done === "undone"
+              ? "The reply is back, waiting for your yes."
+              : done === "posted"
+                ? "To remove it, open your Kabsi account on the website."
+                : undefined
+          }
+        >
+          {DONE[done] ?? "Done."}
+        </QuietTitle>
         {inbox}
       </ConfirmLayout>
     );
@@ -207,26 +241,25 @@ function ActionPage() {
     const decided = c.state !== "open" || view.status === "used";
     return (
       <ConfirmLayout demo={view?.demo === true} mode={view?.mode}>
-        <p className="text-sm font-medium text-kb-stone">{view.business}</p>
-        <h1 className="mt-1 font-display text-3xl leading-tight">
+        <QuietTitle business={view.business}>
           Your {LABELS[c.field] ?? c.field} changed on Google
-        </h1>
+        </QuietTitle>
         <div className="mt-6 grid gap-3">
-          <div className="rounded-card bg-kb-sand p-4">
-            <p className="text-xs font-bold uppercase text-kb-stone">Before</p>
+          <div className="rounded-inner bg-surface-2 p-4">
+            <p className="text-label font-bold text-text-2">Before</p>
             <p dir="auto" className="mt-1">
               {c.before || "(empty)"}
             </p>
           </div>
-          <div className="rounded-card bg-kb-sand p-4">
-            <p className="text-xs font-bold uppercase text-kb-stone">Now</p>
+          <div className="rounded-inner bg-surface-2 p-4">
+            <p className="text-label font-bold text-text-2">Now</p>
             <p dir="auto" className="mt-1">
               {c.after || "(empty)"}
             </p>
           </div>
         </div>
         {decided ? (
-          <p className="mt-5 leading-7">
+          <p className="mt-5 text-body">
             {(view.result && DONE[view.result.done]) || "This change was already handled."}
           </p>
         ) : needsSignIn ? (
@@ -236,22 +269,15 @@ function ActionPage() {
           )
         ) : (
           <>
-            {error ? (
-              <p className="mt-3 text-sm text-kb-red" role="alert">
-                {error}
-              </p>
-            ) : null}
-            <Button className="mt-6 w-full" disabled={busy} onClick={() => void run("revert")}>
-              {busy ? "Working…" : "Keep my information"}
-            </Button>
-            <Button
-              variant="ghost"
-              className="mt-2 w-full"
-              disabled={busy}
-              onClick={() => void run("keep")}
-            >
-              Google is right
-            </Button>
+            {errorLine}
+            <div className="mt-6 space-y-3" data-main-cta>
+              <Button full loading={busy} onClick={() => void run("revert")}>
+                Keep my information
+              </Button>
+              <Button variant="secondary" full disabled={busy} onClick={() => void run("keep")}>
+                Google is right
+              </Button>
+            </div>
           </>
         )}
         {inbox}
@@ -261,12 +287,10 @@ function ActionPage() {
   if (view.status === "invalid" || view.status === "expired" || !view.review) {
     return (
       <ConfirmLayout demo={view?.demo === true} mode={view?.mode}>
-        <h1 className="font-display text-3xl leading-tight">
-          {view.status === "expired" ? "This link has expired" : "This link isn't valid"}
-        </h1>
-        <p className="mt-3 leading-7 text-kb-stone">
-          Email links work once, for 3 days. Your reviews and drafts are always in your Kabsi inbox.
-        </p>
+        <QuietMark icon={Clock} tone="warn" />
+        <QuietTitle lead="Email links work once, for 3 days. Your reviews and drafts are always on the Kabsi website.">
+          {view.status === "expired" ? "This link has expired." : "This link does not work."}
+        </QuietTitle>
         {inbox}
       </ConfirmLayout>
     );
@@ -275,23 +299,19 @@ function ActionPage() {
   const r = view.review;
   const closed = r.state === "posted" || r.state === "skipped" || r.state === "handled_offline";
   const reviewCard = (
-    <div className="rounded-card bg-kb-sand p-5">
-      <p className="font-bold">
-        {r.reviewer ?? "A customer"}{" "}
-        <span className="font-normal text-kb-stone">· Rating {r.rating} of 5</span>
+    <div className="rounded-inner border border-line bg-surface-1 p-4">
+      <p className="text-small font-bold text-text-2">
+        {r.rating}-star review from {r.reviewer ?? "a customer"}
       </p>
-      <p dir="auto" className="mt-2 whitespace-pre-wrap leading-7">
-        {r.comment || <span className="text-kb-stone">No written review, just a rating.</span>}
+      <p dir="auto" className="mt-2 whitespace-pre-wrap text-body text-text-1">
+        {r.comment || <span className="text-text-2">No written review, just a rating.</span>}
       </p>
     </div>
   );
   const header = (
-    <>
-      <p className="text-sm font-medium text-kb-stone">{view.business}</p>
-      <h1 className="mt-1 font-display text-3xl leading-tight">
-        {r.risk === "high" ? "This review needs a little more care" : "Reply to this review"}
-      </h1>
-    </>
+    <QuietTitle business={view.business}>
+      {r.risk === "high" ? "This review needs a little more care" : "A reply is ready."}
+    </QuietTitle>
   );
 
   if (closed || view.status === "used") {
@@ -303,7 +323,7 @@ function ActionPage() {
       >
         {header}
         <div className="mt-6">{reviewCard}</div>
-        <p className="mt-5 leading-7">
+        <p className="mt-5 text-body">
           {closed
             ? DONE[r.state]
             : (view.result && DONE[view.result.done]) || "This link was already used."}
@@ -311,7 +331,7 @@ function ActionPage() {
         {r.state === "posted" && r.reply ? (
           <p
             dir="auto"
-            className="mt-3 whitespace-pre-wrap rounded-card border border-kb-hairline p-4 text-sm leading-6"
+            className="mt-3 whitespace-pre-wrap rounded-inner bg-surface-2 p-4 text-body"
           >
             {r.reply}
           </p>
@@ -331,23 +351,21 @@ function ActionPage() {
       >
         {header}
         <div className="mt-6">{reviewCard}</div>
-        <p className="mt-5 leading-7">
+        <p className="mt-5 text-body">
           {skip
             ? "Skip this review? Nothing will be posted."
             : "You'll handle this one yourself. Kabsi won't post anything."}
         </p>
-        {error ? (
-          <p className="mt-3 text-sm text-kb-red" role="alert">
-            {error}
-          </p>
-        ) : null}
-        <Button
-          className="mt-5 w-full"
-          disabled={busy}
-          onClick={() => void run(view.action as "skip" | "handle_myself")}
-        >
-          {skip ? "Skip review" : "I'll handle it"}
-        </Button>
+        {errorLine}
+        <div className="mt-5" data-main-cta>
+          <Button
+            full
+            loading={busy}
+            onClick={() => void run(view.action as "skip" | "handle_myself")}
+          >
+            {skip ? "Skip review" : "I'll handle it"}
+          </Button>
+        </div>
         {inbox}
       </ConfirmLayout>
     );
@@ -360,38 +378,38 @@ function ActionPage() {
       {header}
       <div className="mt-6">{reviewCard}</div>
       {r.risk === "high" ? (
-        <div className="mt-5 rounded-card border-2 border-kb-black p-4 text-sm leading-6">
+        <div className="mt-5 rounded-inner border border-line-strong bg-surface-2 p-4 text-small">
           {issueLines(r.risk_reasons).map((i) => (
             <p key={i}>{i}</p>
           ))}
-          <ol className="mt-2 list-decimal space-y-1 pl-5">
+          <ol className="mt-2 list-decimal space-y-1 ps-5">
             {HIGH_RISK_CHECKLIST.map((c) => (
               <li key={c}>{c}</li>
             ))}
           </ol>
         </div>
       ) : r.risk === "medium" && issueLines(r.risk_reasons).length ? (
-        <div className="mt-5 rounded-card border border-kb-amber/30 bg-kb-amber-soft p-4 text-sm leading-6">
+        <div className="mt-5 rounded-inner bg-warn-soft p-4 text-small text-text-1">
           {issueLines(r.risk_reasons).map((i) => (
             <p key={i}>{i}</p>
           ))}
         </div>
       ) : null}
-      <Label htmlFor="reply" className="mt-6 block font-bold">
+      <label htmlFor="reply" className="mt-6 block text-small font-bold text-text-1">
         Your reply
-      </Label>
+      </label>
       {!view.draft ? (
-        <p className="mt-1 text-sm text-kb-stone">
+        <p className="mt-1 text-small text-text-2">
           {r.risk === "high"
             ? "Kabsi did not draft a reply for this one. Write your own when you are ready, or skip it."
             : "Kabsi couldn't safely draft this one. Write your own reply, or skip it."}
         </p>
       ) : (
-        <p className="mt-1 text-sm text-kb-stone">
+        <p className="mt-1 text-small text-text-2">
           Change anything you like. Kabsi publishes exactly this text after you approve.
         </p>
       )}
-      <Textarea
+      <textarea
         dir="auto"
         id="reply"
         value={text}
@@ -399,35 +417,36 @@ function ActionPage() {
         readOnly={needsSignIn}
         rows={7}
         autoFocus={view.action === "edit" && !needsSignIn}
-        className="mt-3 text-base leading-7"
+        className="mt-3 w-full rounded-input border border-stroke bg-surface-2 p-3 text-body text-text-1 read-only:opacity-80 focus-visible:border-text-1"
       />
-      {error ? (
-        <p className="mt-3 text-sm text-kb-red" role="alert">
-          {error}
-        </p>
-      ) : null}
+      {errorLine}
       {needsSignIn ? (
         signIn(
           "Sign in to approve",
           "This review needs a little more care, so Kabsi asks you to sign in before a reply goes to Google.",
         )
       ) : (
-        <Button
-          className="mt-5 w-full"
-          disabled={busy || !text.trim() || tooLong}
-          onClick={() => void run("post")}
-        >
-          {busy ? "Approving…" : "Approve reply"}
-        </Button>
+        <div className="mt-5" data-main-cta>
+          <Button
+            full
+            loading={busy}
+            disabled={!text.trim() || tooLong}
+            onClick={() => void run("post")}
+          >
+            Approve reply
+          </Button>
+        </div>
       )}
       <Button
-        variant="ghost"
-        className="mt-2 w-full"
+        variant="secondary"
+        full
+        className="mt-3"
         disabled={busy}
         onClick={() => void run(view.action === "see_draft" ? "handle_myself" : "skip")}
       >
         {view.action === "see_draft" ? "I'll handle it myself" : "Skip this review"}
       </Button>
+      <p className="mt-5 text-small text-text-2">Nothing is published until you approve it.</p>
     </ConfirmLayout>
   );
 }

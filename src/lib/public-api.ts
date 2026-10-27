@@ -98,11 +98,16 @@ export function usePartnerPlaces(): PartnerPlaces | null {
   return v;
 }
 
-/** The words the founding applicant ticks, shown on the form and stored by the server as proof. Kept equal to
- * FOUNDING_CONSENT_TEXT in supabase/functions/_shared/programs.ts by tests/programs.test.ts. */
-export const FOUNDING_CONSENT_TEXT =
-  "I agree to a 2-minute check-in with Kabsi every two weeks, and to Kabsi writing a case study about my business. " +
-  "I approve the final text before it is published, and I choose whether my business is named.";
+/** The words the founding applicant ticks, one for each case study choice, shown on the form and stored by the server as
+ * proof. Kept equal to FOUNDING_CONSENT in supabase/functions/_shared/programs.ts by tests/programs.test.ts. */
+export const FOUNDING_CONSENT = {
+  anonymous:
+    "I agree to a 2-minute check-in with Kabsi every two weeks, and to Kabsi writing a case study that does not name my business. " +
+    "I approve the final text before it is published.",
+  named:
+    "I agree to a 2-minute check-in with Kabsi every two weeks, and to Kabsi writing a case study that names my business. " +
+    "I approve the final text before it is published.",
+} as const;
 
 export type FoundingApplication = {
   business_name: string;
@@ -183,6 +188,22 @@ export function startFreeCheck(o: {
   turnstile: string;
 }) {
   return call<StartedCheck>("visibility/check", { method: "POST", body: JSON.stringify(o) });
+}
+
+/** "Save my place" while the free check is closed (UX 1): an email or a WhatsApp number, told once when it opens. */
+export function joinWaitlist(o: {
+  business: string;
+  country: string | null;
+  place_id: string | null;
+  term: string | null;
+  email: string | null;
+  phone: string | null;
+  whatsapp_consent: boolean;
+  tips: boolean;
+  page: string;
+  turnstile: string;
+}) {
+  return call<{ ok: true }>("visibility/waitlist", { method: "POST", body: JSON.stringify(o) });
 }
 
 export function getFreeCheck(code: string) {

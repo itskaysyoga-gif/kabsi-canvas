@@ -44,6 +44,7 @@ import {
   type TextField,
 } from "@/lib/knowledge";
 import { cn } from "@/lib/utils";
+import { HeldBack, useFirstTaskDone } from "@/components/kabsi/d3-settings-parts";
 
 type FieldDef = {
   key: TextField;
@@ -324,10 +325,10 @@ function BasicsForm({
   submitLabel?: string | undefined;
 }) {
   const knowledge = useKnowledge(location.id);
-  if (knowledge.isLoading) return <p className="text-kb-stone">Loading…</p>;
+  if (knowledge.isLoading) return <p className="text-text-2">Loading…</p>;
   if (knowledge.error) {
     return (
-      <p className="text-kb-red" role="alert">
+      <p className="text-bad" role="alert">
         Couldn't load your facts. Refresh the page.
       </p>
     );
@@ -391,10 +392,10 @@ function BasicsFields({
   return (
     <form onSubmit={save} className="space-y-5">
       <section aria-labelledby="kg-basics">
-        <h2 id="kg-basics" className="text-lg font-bold leading-tight">
+        <h2 id="kg-basics" className="text-title font-bold leading-tight">
           The basics
         </h2>
-        <p className="mt-0.5 text-sm leading-6 text-kb-stone">
+        <p className="mt-0.5 text-small leading-6 text-text-2">
           You can add much more later under Settings, About your business.
         </p>
         <div className="mt-5 space-y-5">
@@ -412,7 +413,7 @@ function BasicsFields({
         </div>
       </section>
       {error ? (
-        <p className="text-sm text-kb-red" role="alert">
+        <p className="text-small text-bad" role="alert">
           {error}
         </p>
       ) : null}
@@ -428,15 +429,17 @@ function BasicsFields({
 function FactsScreen({ location }: { location: Location }) {
   const knowledge = useKnowledge(location.id);
   const queryClient = useQueryClient();
+  // V4: the tone opens after the first task is done (one thing at a time).
+  const toneOpen = useFirstTaskDone(location.id);
   // One editor open at a time, so the screen keeps one yellow button (K-108).
   const [editing, setEditing] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
-  if (knowledge.isLoading) return <p className="text-kb-stone">Loading…</p>;
+  if (knowledge.isLoading) return <p className="text-text-2">Loading…</p>;
   if (knowledge.error || !knowledge.data) {
     return (
-      <p className="text-kb-red" role="alert">
+      <p className="text-bad" role="alert">
         Couldn't load your facts. Refresh the page.
       </p>
     );
@@ -465,15 +468,13 @@ function FactsScreen({ location }: { location: Location }) {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-large bg-kb-carbon p-5 text-kb-white sm:p-6">
-        <p className="text-sm font-bold uppercase tracking-wider text-kb-stone-on-dark">
-          How Kabsi uses this
-        </p>
-        <p className="mt-2 leading-7">
+      <div className="rounded-card border border-line bg-surface-2 p-4 sm:p-5">
+        <p className="text-title font-bold">How Kabsi uses this</p>
+        <p className="mt-1 text-body text-text-2">
           Replies and posts use only the facts marked Verified, and only when a customer raises the
           topic. Anything else is left out, never made up.
         </p>
-        <p className="mt-3 text-sm text-kb-stone-on-dark">
+        <p className="mt-3 text-small font-semibold text-text-1">
           {counts.verified} verified
           {counts.needs_ok
             ? `, ${counts.needs_ok} ${counts.needs_ok === 1 ? "needs" : "need"} your OK`
@@ -489,12 +490,13 @@ function FactsScreen({ location }: { location: Location }) {
       {GROUPS.map((g) => (
         <section
           key={g.id}
-          className="rounded-large bg-kb-white p-5 shadow-kb sm:p-7"
+          className="rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5"
           aria-labelledby={`kg-${g.id}`}
         >
           <GroupHeader id={`kg-${g.id}`} icon={g.icon} title={g.title} sub={g.sub} />
           <div className="mt-5 space-y-5">
-            {g.id === "voice" ? (
+            {g.id === "voice" && toneOpen === false ? <HeldBack /> : null}
+            {g.id === "voice" && toneOpen ? (
               <ToneChoice
                 value={typeof tone?.value?.text === "string" ? tone.value.text : "warm"}
                 onChange={(t) => run(() => saveFact(location.id, "tone", t), "Tone saved.")}
@@ -521,7 +523,10 @@ function FactsScreen({ location }: { location: Location }) {
         </section>
       ))}
 
-      <section className="rounded-large bg-kb-white p-5 shadow-kb sm:p-7" aria-labelledby="kg-faq">
+      <section
+        className="rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5"
+        aria-labelledby="kg-faq"
+      >
         <GroupHeader
           id="kg-faq"
           icon={<CircleHelp />}
@@ -570,15 +575,15 @@ function GroupHeader({
     <div className="flex items-start gap-3">
       <span
         aria-hidden="true"
-        className="grid size-10 shrink-0 place-items-center rounded-full bg-kb-yellow text-kb-black [&_svg]:size-5"
+        className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-2 text-text-1 [&_svg]:size-5"
       >
         {icon}
       </span>
       <div className="min-w-0 flex-1">
-        <h2 id={id} className="text-lg font-bold leading-tight">
+        <h2 id={id} className="font-display text-h3 font-bold">
           {title}
         </h2>
-        <p className="mt-0.5 text-sm leading-6 text-kb-stone">{sub}</p>
+        <p className="mt-0.5 text-small leading-6 text-text-2">{sub}</p>
       </div>
     </div>
   );
@@ -596,16 +601,14 @@ function Question({
   const current = facts.find((f) => f.slot === q.slot);
   return (
     <section
-      className="rounded-large border border-kb-yellow bg-kb-white p-5 shadow-kb ring-2 ring-kb-yellow sm:p-7"
+      className="rounded-card border border-warn bg-warn-soft p-4 shadow-rest sm:p-5"
       aria-label="A question about your facts"
     >
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
-        {labelOf(fieldOf(q.slot))}
-      </p>
-      <h2 className="mt-1 text-lg font-bold leading-tight">
+      <p className="text-label font-bold text-text-2">{labelOf(fieldOf(q.slot))}</p>
+      <h2 className="mt-1 text-title font-bold leading-tight">
         Kabsi found two different answers. Which is right?
       </h2>
-      <p className="mt-1 text-sm text-kb-stone">
+      <p className="mt-1 text-small text-text-2">
         Replies and posts leave this out until you choose.
       </p>
       <div className="mt-4 space-y-3">
@@ -628,8 +631,8 @@ function Question({
 
 function Answer({ from, text, onPick }: { from: string; text: string; onPick: () => void }) {
   return (
-    <div className="rounded-card border border-kb-hairline p-4">
-      <p className="text-sm text-kb-stone">{from}</p>
+    <div className="rounded-card border border-line p-4">
+      <p className="text-small text-text-2">{from}</p>
       <p className="mt-1 whitespace-pre-line break-words" dir="auto">
         {text}
       </p>
@@ -637,6 +640,43 @@ function Answer({ from, text, onPick }: { from: string; text: string; onPick: ()
         This one is right
       </Button>
     </div>
+  );
+}
+
+/** The tone of replies on its own, for Settings (saved as the "tone" fact, like Business Knowledge does). */
+export function ToneSetting({ locationId }: { locationId: string }) {
+  const knowledge = useKnowledge(locationId);
+  const queryClient = useQueryClient();
+  const [msg, setMsg] = useState("");
+  if (knowledge.isLoading) return <p className="text-small text-text-2">Loading...</p>;
+  if (knowledge.error || !knowledge.data)
+    return (
+      <p className="text-small text-bad" role="alert">
+        Couldn&apos;t load your facts. Refresh the page.
+      </p>
+    );
+  const tone = knowledge.data.facts.find((f) => fieldOf(f.slot) === "tone");
+  async function pick(t: string) {
+    setMsg("");
+    try {
+      await saveFact(locationId, "tone", t);
+      await queryClient.invalidateQueries({ queryKey: ["knowledge", locationId] });
+      setMsg("Tone saved.");
+    } catch (e) {
+      setMsg(friendlyError(e));
+    }
+  }
+  return (
+    <>
+      <ToneChoice
+        value={typeof tone?.value?.text === "string" ? tone.value.text : "warm"}
+        onChange={(t) => void pick(t)}
+        state={tone ? factState(tone) : null}
+      />
+      <p className="mt-2 min-h-6 text-small" role="status">
+        {msg}
+      </p>
+    </>
   );
 }
 
@@ -651,7 +691,7 @@ function ToneChoice({
 }) {
   return (
     <fieldset>
-      <legend className="flex items-center gap-2 text-sm font-bold">
+      <legend className="flex items-center gap-2 text-small font-bold">
         Tone{" "}
         {state ? (
           <StatusPill tone={STATE_LABEL[state].tone}>{STATE_LABEL[state].label}</StatusPill>
@@ -665,8 +705,8 @@ function ToneChoice({
             onClick={() => onChange(t)}
             aria-pressed={value === t}
             className={cn(
-              "min-h-11 rounded-card border-2 px-2 text-sm font-bold",
-              value === t ? "border-kb-black bg-kb-sand" : "border-kb-hairline",
+              "min-h-11 rounded-card border-2 px-2 text-small font-bold",
+              value === t ? "border-text-1 bg-surface-2" : "border-line",
             )}
           >
             {label}
@@ -691,9 +731,9 @@ function SingleFact({
     <div>
       <p className="font-bold">
         {def.label}{" "}
-        {def.required ? null : <span className="font-normal text-kb-stone">(optional)</span>}
+        {def.required ? null : <span className="font-normal text-text-2">(optional)</span>}
       </p>
-      {def.hint ? <p className="mt-0.5 text-sm text-kb-stone">{def.hint}</p> : null}
+      {def.hint ? <p className="mt-0.5 text-small text-text-2">{def.hint}</p> : null}
       {ctx.editing === editId ? (
         <Editor
           def={def}
@@ -708,7 +748,7 @@ function SingleFact({
       ) : (
         <Button
           variant="tertiary"
-          className="mt-2 min-h-11 text-sm"
+          className="mt-2 min-h-11 text-small"
           onClick={() => ctx.setEditing(editId)}
         >
           <Plus aria-hidden="true" /> Add
@@ -725,7 +765,7 @@ function ListFacts({ def, facts, ctx }: { def: ListDef; facts: Fact[]; ctx: RowC
   return (
     <div>
       {def.label ? <p className="font-bold">{def.label}</p> : null}
-      {def.hint ? <p className="mt-0.5 text-sm text-kb-stone">{def.hint}</p> : null}
+      {def.hint ? <p className="mt-0.5 text-small text-text-2">{def.hint}</p> : null}
       <div className="mt-2 space-y-3">
         {facts.map((f) =>
           ctx.editing === f.id ? (
@@ -754,7 +794,7 @@ function ListFacts({ def, facts, ctx }: { def: ListDef; facts: Fact[]; ctx: RowC
         ) : facts.length < cap ? (
           <Button
             variant="tertiary"
-            className="min-h-11 text-sm"
+            className="min-h-11 text-small"
             onClick={() => ctx.setEditing(newId)}
           >
             <Plus aria-hidden="true" /> {isFaq ? "Add a question" : "Add a name"}
@@ -772,7 +812,7 @@ function FactLine({ fact, ctx, onEdit }: { fact: Fact; ctx: RowContext; onEdit: 
   if (!state) return null;
   const s = STATE_LABEL[state];
   return (
-    <div className="mt-2 rounded-card border border-kb-hairline p-3 sm:p-4">
+    <div className="mt-2 rounded-card border border-line p-3 sm:p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <p className="min-w-0 flex-1 whitespace-pre-line break-words" dir="auto">
           {factText(fact.value)}
@@ -780,15 +820,15 @@ function FactLine({ fact, ctx, onEdit }: { fact: Fact; ctx: RowContext; onEdit: 
         <StatusPill tone={s.tone}>{s.label}</StatusPill>
       </div>
       {state !== "verified" ? (
-        <p className="mt-1 text-sm text-kb-stone">
+        <p className="mt-1 text-small text-text-2">
           {state === "needs_ok"
             ? `${fromLine(fact.source)}. Replies and posts leave it out until you confirm it.`
             : "Kabsi asks you to check this again. Replies and posts leave it out until you confirm it."}
         </p>
       ) : null}
       {asking ? (
-        <div className="mt-3 rounded-card bg-kb-sand p-3">
-          <p className="text-sm">
+        <div className="mt-3 rounded-card bg-surface-2 p-3">
+          <p className="text-small">
             Delete this for good? Kabsi removes it and every earlier version, and stops using it.
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -885,7 +925,7 @@ function ListEditor({
   const isFaq = def.key === "faqs";
   return (
     <form
-      className="rounded-card border border-kb-hairline p-3 sm:p-4"
+      className="rounded-card border border-line p-3 sm:p-4"
       onSubmit={async (e) => {
         e.preventDefault();
         const v = isFaq ? { q: q.trim(), a: a.trim() } : name.trim();
@@ -904,7 +944,7 @@ function ListEditor({
             onChange={(e) => setQ(e.target.value)}
             placeholder="e.g. Do you have vegan options?"
             maxLength={160}
-            className="h-12 rounded-card px-4 text-base"
+            className="h-12 rounded-card px-4 text-body"
           />
           <Textarea
             aria-label="Answer"
@@ -912,7 +952,7 @@ function ListEditor({
             value={a}
             onChange={(e) => setA(e.target.value)}
             placeholder="e.g. Yes, three vegan dishes every day."
-            className="mt-2 min-h-16 rounded-card px-4 py-3 text-base md:text-base"
+            className="mt-2 min-h-16 rounded-card px-4 py-3 text-body md:text-body"
             maxLength={400}
           />
         </>
@@ -924,7 +964,7 @@ function ListEditor({
           onChange={(e) => setName(e.target.value)}
           placeholder={def.placeholder}
           maxLength={def.max}
-          className="h-12 rounded-card px-4 text-base"
+          className="h-12 rounded-card px-4 text-body"
         />
       )}
       <EditorButtons busy={busy} onCancel={onCancel} />
@@ -965,9 +1005,9 @@ function TextInput({
         <>
           <Label htmlFor={id} className="font-bold">
             {f.label}{" "}
-            {f.required ? null : <span className="font-normal text-kb-stone">(optional)</span>}
+            {f.required ? null : <span className="font-normal text-text-2">(optional)</span>}
           </Label>
-          {f.hint ? <p className="mt-0.5 text-sm text-kb-stone">{f.hint}</p> : null}
+          {f.hint ? <p className="mt-0.5 text-small text-text-2">{f.hint}</p> : null}
         </>
       ) : null}
       {f.long ? (
@@ -981,7 +1021,7 @@ function TextInput({
           placeholder={f.placeholder}
           maxLength={f.max}
           rows={2}
-          className="mt-2 min-h-20 resize-none rounded-card px-4 py-3 text-base md:text-base"
+          className="mt-2 min-h-20 resize-none rounded-card px-4 py-3 text-body md:text-body"
         />
       ) : (
         <Input
@@ -994,11 +1034,11 @@ function TextInput({
           onChange={(e) => onChange(e.target.value)}
           placeholder={f.placeholder}
           maxLength={f.max}
-          className="mt-2 h-12 rounded-card px-4 text-base"
+          className="mt-2 h-12 rounded-card px-4 text-body"
         />
       )}
       {value.length > f.max * 0.8 ? (
-        <p className="mt-1 text-right text-xs text-kb-stone">
+        <p className="mt-1 text-right text-label text-text-2">
           {value.length} / {f.max}
         </p>
       ) : null}

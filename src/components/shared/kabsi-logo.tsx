@@ -24,12 +24,12 @@ export function KabsiLogo({ dark = false }: { dark?: boolean }) {
       to="/"
       className={cn(
         "inline-flex items-center gap-2.5 font-bold",
-        dark ? "text-kb-white" : "text-kb-black",
+        dark ? "text-kb-white" : "text-text-1",
       )}
       aria-label="Kabsi home"
     >
       <KabsiMark className={dark ? "rounded-full ring-2 ring-kb-white/20" : undefined} />
-      <span className="text-xl leading-none">kabsi</span>
+      <span className="text-title leading-none">kabsi</span>
     </Link>
   );
 }

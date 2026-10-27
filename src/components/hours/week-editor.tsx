@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/kabsi/ui";
 import { Input } from "@/components/ui/input";
 import { contentCall } from "@/lib/reviews";
 import { track } from "@/lib/telemetry";
@@ -22,10 +22,13 @@ export function WeekEditor({
   locationId,
   initial,
   onDone,
+  onClose,
 }: {
   locationId: string;
   initial: Week;
   onDone: () => unknown;
+  /** Back to the week as it is, without saving. */
+  onClose?: (() => void) | undefined;
 }) {
   const [week, setWeek] = useState<Week>(() => cloneWeek(initial));
   const [confirming, setConfirming] = useState(false);
@@ -86,15 +89,15 @@ export function WeekEditor({
   }
 
   return (
-    <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
-      <ul className="divide-y divide-kb-hairline">
+    <div>
+      <ul className="divide-y divide-line">
         {DAY_KEYS.map((day) => {
           const periods = week[day];
           const open = periods.length > 0;
           return (
             <li key={day} className="py-4 first:pt-0">
               <div className="flex items-center justify-between gap-3">
-                <p className="font-bold">{DAY_LABEL[day]}</p>
+                <p className="text-body font-bold text-text-1">{DAY_LABEL[day]}</p>
                 <div
                   className="grid grid-cols-2 gap-1"
                   role="group"
@@ -106,7 +109,7 @@ export function WeekEditor({
                       type="button"
                       aria-pressed={open === o}
                       onClick={() => open !== o && toggle(day, o)}
-                      className={`h-10 min-w-20 rounded-card border-2 px-3 text-sm font-bold ${open === o ? "border-kb-black bg-kb-sand" : "border-kb-hairline"}`}
+                      className={`min-h-11 min-w-20 rounded-full border px-3 text-small font-bold ${open === o ? "border-text-1 bg-text-1 text-surface-0" : "border-line-strong text-text-1"}`}
                     >
                       {o ? "Open" : "Closed"}
                     </button>
@@ -123,7 +126,7 @@ export function WeekEditor({
                         value={p.open}
                         onChange={(e) => edit((w) => void (w[day][i]!.open = e.target.value))}
                       />
-                      <span className="text-sm text-kb-stone">to</span>
+                      <span className="text-small text-text-2">to</span>
                       <Input
                         type="time"
                         aria-label={`${DAY_LABEL[day]} closes`}
@@ -135,7 +138,7 @@ export function WeekEditor({
                           type="button"
                           aria-label={`Remove this period on ${DAY_LABEL[day]}`}
                           onClick={() => edit((w) => void w[day].splice(i, 1))}
-                          className="grid size-10 shrink-0 place-items-center rounded-card text-kb-stone hover:text-kb-black"
+                          className="grid size-11 shrink-0 place-items-center rounded-full text-text-2 hover:bg-surface-2 hover:text-text-1"
                         >
                           ×
                         </button>
@@ -149,7 +152,7 @@ export function WeekEditor({
                         onClick={() =>
                           edit((w) => void w[day].push({ open: "14:00", close: "18:00" }))
                         }
-                        className="min-h-10 text-sm font-bold underline underline-offset-4"
+                        className="min-h-11 text-small font-bold underline underline-offset-4"
                       >
                         Add more hours
                       </button>
@@ -162,7 +165,7 @@ export function WeekEditor({
                             for (const d of DAY_KEYS) w[d] = w.MONDAY.map((p) => ({ ...p }));
                           })
                         }
-                        className="min-h-10 text-sm font-bold underline underline-offset-4"
+                        className="min-h-11 text-small font-bold underline underline-offset-4"
                       >
                         Same hours every day
                       </button>
@@ -174,35 +177,35 @@ export function WeekEditor({
           );
         })}
       </ul>
-      <p className="mt-3 text-xs leading-5 text-kb-stone">
+      <p className="mt-3 text-small text-text-2">
         To stay open past midnight, set the closing time after midnight (for example 02:00). Closing
         at 00:00 means the end of that day.
       </p>
       {err ? (
-        <p className="mt-3 text-sm text-kb-red" role="alert">
+        <p className="mt-3 text-small font-semibold text-bad" role="alert">
           {err}
         </p>
       ) : null}
       {msg ? (
-        <p className="mt-3 text-sm text-kb-green" role="status">
+        <p className="mt-3 text-small text-ok" role="status">
           {msg}
         </p>
       ) : null}
       {confirming ? (
-        <div className="mt-5 rounded-card border-2 border-kb-black p-4">
-          <p className="text-sm">Google will show:</p>
-          <ul className="mt-1 space-y-0.5 font-bold">
+        <div className="mt-5 rounded-inner border border-line-strong bg-surface-2 p-4">
+          <p className="text-small text-text-2">Google will show:</p>
+          <ul className="mt-1 space-y-0.5 text-body font-bold text-text-1">
             {weekSummary(week).map((line) => (
               <li key={line}>{line}</li>
             ))}
           </ul>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button type="button" disabled={busy} onClick={() => void confirm()}>
-              {busy ? "Saving…" : "Confirm and save to Google"}
+            <Button size="md" data-main-cta loading={busy} onClick={() => void confirm()}>
+              Confirm and save to Google
             </Button>
             <Button
-              type="button"
-              variant="ghost"
+              size="md"
+              variant="secondary"
               disabled={busy}
               onClick={() => setConfirming(false)}
             >
@@ -211,9 +214,16 @@ export function WeekEditor({
           </div>
         </div>
       ) : (
-        <Button type="button" className="mt-5 w-full" disabled={!changed} onClick={review}>
-          Review
-        </Button>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Button size="md" variant="secondary" disabled={!changed} onClick={review}>
+            Review
+          </Button>
+          {onClose ? (
+            <Button size="md" variant="tertiary" onClick={onClose}>
+              Cancel
+            </Button>
+          ) : null}
+        </div>
       )}
     </div>
   );

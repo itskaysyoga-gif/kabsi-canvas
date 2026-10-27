@@ -334,7 +334,7 @@ Kabsi never charges on its own today. How renewals work with card payments will 
 When payment is confirmed and Kabsi's Google access works. Waiting for access doesn't count.
 
 **What happens when my plan ends?**
-Reviews, Google Profile, Google Protection and the Weekly Care Report stop. Get Reviews keeps working: your review link and QR code still open your Google review page.
+Reviews, Google Profile, Google Protection and the Results Report stop. Get Reviews keeps working: your review link and QR code still open your Google review page.
 
 **Can I get a refund?**
 Yearly plans are refundable in full within 14 days of the plan starting.

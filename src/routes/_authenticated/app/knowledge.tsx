@@ -1,12 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import { KnowledgeStep } from "@/components/onboarding/steps";
+import { AccountTop } from "@/components/kabsi/d3-account";
+import { EmptyState, ErrorState, Skeleton, buttonClass } from "@/components/kabsi/ui";
 import { myLatestLocation } from "@/lib/onboarding";
-import { NotebookPen } from "lucide-react";
-import { PageIcon } from "@/components/shared/page-icon";
 
-// The knowledge card: the only facts reply drafts may use (D223). Same form as onboarding step 3.
+// Business Knowledge: the only facts reply drafts may use (D223). Same form as onboarding step 3, in Design 3's page top.
 export const Route = createFileRoute("/_authenticated/app/knowledge")({
   head: () => ({
     meta: [{ title: "Business Knowledge | Kabsi" }, { name: "robots", content: "noindex" }],
@@ -17,39 +16,41 @@ export const Route = createFileRoute("/_authenticated/app/knowledge")({
 function KnowledgePage() {
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   return (
-    <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
-      {location.isLoading ? <p className="text-kb-stone">Loading…</p> : null}
+    <>
+      <AccountTop title="Business Knowledge" lead={location.data?.name} />
+      {location.isLoading ? (
+        <div
+          className="rounded-card border border-line bg-surface-1 p-5"
+          role="status"
+          aria-label="Loading"
+        >
+          <Skeleton className="h-5 w-1/2" />
+          <Skeleton className="mt-3 h-4 w-full" />
+        </div>
+      ) : null}
       {!location.isLoading && !location.error && !location.data ? (
-        <>
-          <p className="text-kb-stone">Add your business first.</p>
-          <Button asChild className="mt-5">
-            <Link to="/start">Add your business</Link>
-          </Button>
-        </>
+        <EmptyState
+          title="Add your business first."
+          action={
+            <Link to="/start" className={buttonClass()} data-main-cta>
+              Add your business
+            </Link>
+          }
+        />
       ) : null}
       {location.error ? (
-        <p className="text-kb-red" role="alert">
-          Couldn't load your business. Refresh the page.
-        </p>
+        <ErrorState title="This page did not load." onRetry={() => void location.refetch()}>
+          Nothing you did, and nothing changed on Google. Try again in a minute.
+        </ErrorState>
       ) : null}
       {location.data ? (
-        <>
-          <PageIcon icon={<NotebookPen />} />
-          <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Settings</p>
-          <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">
-            About your business
-          </h1>
-          <p className="mt-2 text-kb-stone">{location.data.name}</p>
-          <div className="mt-7">
-            <KnowledgeStep
-              key={location.data.id}
-              location={location.data}
-              onChanged={() => location.refetch()}
-              mode="settings"
-            />
-          </div>
-        </>
+        <KnowledgeStep
+          key={location.data.id}
+          location={location.data}
+          onChanged={() => location.refetch()}
+          mode="settings"
+        />
       ) : null}
-    </div>
+    </>
   );
 }

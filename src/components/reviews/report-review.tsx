@@ -51,7 +51,7 @@ export function ReportReview({ review }: { review: { id: string; location_id: st
   const proOnly = !!access.data && !access.data.pro && !mine;
   return (
     <>
-      <Button variant="tertiary" className="min-h-11 text-sm" onClick={() => setOpen(true)}>
+      <Button variant="tertiary" className="min-h-11 text-small" onClick={() => setOpen(true)}>
         <Flag aria-hidden="true" /> Report this review
       </Button>
       <Sheet open={open} onOpenChange={setOpen}>
@@ -65,11 +65,11 @@ export function ReportReview({ review }: { review: { id: string; location_id: st
             </SheetDescription>
           </SheetHeader>
           {reports.isLoading || access.isLoading ? (
-            <p className="mt-4 text-sm text-kb-stone" role="status">
+            <p className="mt-4 text-small text-text-2" role="status">
               Loading
             </p>
           ) : proOnly ? (
-            <div className="mt-4 rounded-card bg-kb-sand p-4 text-sm leading-6" role="status">
+            <div className="mt-4 rounded-card bg-surface-2 p-4 text-small leading-6" role="status">
               <p className="font-bold">The reporting guide is part of Pro.</p>
               <Link
                 to="/app/plan"
@@ -83,7 +83,7 @@ export function ReportReview({ review }: { review: { id: string; location_id: st
           ) : (
             <Guide reviewId={review.id} locationId={review.location_id} />
           )}
-          <p className="mt-6 text-xs leading-5 text-kb-stone">
+          <p className="mt-6 text-label leading-5 text-text-2">
             Categories and steps read on Google's own help pages on {GOOGLE_CHECKED}:{" "}
             <ExtLink href={GOOGLE_POLICY_URL}>the content policy</ExtLink> and{" "}
             <ExtLink href={GOOGLE_REPORT_HELP_URL}>how to report a review</ExtLink>. Google can
@@ -133,7 +133,7 @@ function Guide({ reviewId, locationId }: { reviewId: string; locationId: string 
         <h3 id="rr-1" className="font-bold">
           1. Pick what fits
         </h3>
-        <p className="mt-0.5 text-sm text-kb-stone">
+        <p className="mt-0.5 text-small text-text-2">
           Choose the reason closest to what is wrong with this review. Reviews you simply disagree
           with are not a reason: Google does not step into disputes between a business and a
           customer.
@@ -141,7 +141,7 @@ function Guide({ reviewId, locationId }: { reviewId: string; locationId: string 
         <div className="mt-3 space-y-4">
           {CATEGORY_GROUPS.map((g) => (
             <fieldset key={g.title}>
-              <legend className="text-xs font-bold uppercase tracking-wider text-kb-stone">
+              <legend className="text-label font-bold uppercase tracking-wider text-text-2">
                 {g.title}
               </legend>
               <div className="mt-1.5 space-y-2">
@@ -150,7 +150,7 @@ function Guide({ reviewId, locationId }: { reviewId: string; locationId: string 
                     key={c.key}
                     className={cn(
                       "flex min-h-11 cursor-pointer gap-3 rounded-card border-2 p-3",
-                      category === c.key ? "border-kb-black bg-kb-sand" : "border-kb-hairline",
+                      category === c.key ? "border-text-1 bg-surface-2" : "border-line",
                     )}
                   >
                     <input
@@ -161,8 +161,8 @@ function Guide({ reviewId, locationId }: { reviewId: string; locationId: string 
                       onChange={() => setCategory(c.key)}
                     />
                     <span>
-                      <span className="block text-sm font-bold">{c.name}</span>
-                      <span className="block text-sm leading-5 text-kb-stone">{c.plain}</span>
+                      <span className="block text-small font-bold">{c.name}</span>
+                      <span className="block text-small leading-5 text-text-2">{c.plain}</span>
                     </span>
                   </label>
                 ))}
@@ -176,7 +176,7 @@ function Guide({ reviewId, locationId }: { reviewId: string; locationId: string 
         <h3 id="rr-2" className="font-bold">
           2. Gather what helps
         </h3>
-        <p className="mt-0.5 text-sm text-kb-stone">
+        <p className="mt-0.5 text-small text-text-2">
           Tick what you have. Keep it yourself: Kabsi remembers only which boxes you ticked.
         </p>
         <div className="mt-2 space-y-2">
@@ -192,7 +192,7 @@ function Guide({ reviewId, locationId }: { reviewId: string; locationId: string 
                   )
                 }
               />
-              <span className="text-sm leading-6">{e.label}</span>
+              <span className="text-small leading-6">{e.label}</span>
             </label>
           ))}
         </div>
@@ -202,7 +202,7 @@ function Guide({ reviewId, locationId }: { reviewId: string; locationId: string 
         <h3 id="rr-3" className="font-bold">
           3. Report it on Google
         </h3>
-        <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm leading-6">
+        <ol className="mt-2 list-decimal space-y-1 pl-5 text-small leading-6">
           {REPORT_STEPS.map((s) => (
             <li key={s}>{s}</li>
           ))}
@@ -212,7 +212,7 @@ function Guide({ reviewId, locationId }: { reviewId: string; locationId: string 
             <ExternalLink aria-hidden="true" /> Open Google's Reviews Management Tool
           </a>
         </Button>
-        <p className="mt-2 text-sm text-kb-stone">
+        <p className="mt-2 text-small text-text-2">
           Google says a report typically takes several days to look at.
         </p>
       </section>
@@ -221,11 +221,11 @@ function Guide({ reviewId, locationId }: { reviewId: string; locationId: string 
         <h3 id="rr-4" className="font-bold">
           4. Tell Kabsi you reported it
         </h3>
-        <p className="mt-0.5 text-sm text-kb-stone">
+        <p className="mt-0.5 text-small text-text-2">
           Kabsi then keeps track, and reminds you after a week to check what Google said.
         </p>
         {error ? (
-          <p className="mt-2 text-sm text-kb-red" role="alert">
+          <p className="mt-2 text-small text-bad" role="alert">
             {error}
           </p>
         ) : null}
@@ -264,16 +264,16 @@ function Tracker({ report, locationId }: { report: ReviewReport; locationId: str
 
   return (
     <div className="mt-5 space-y-5">
-      <div className="rounded-card bg-kb-sand p-4">
-        <p className="text-xs font-bold uppercase tracking-wider text-kb-stone">Where it stands</p>
-        <p className="mt-1 text-lg font-bold">{STATE_LABEL[report.state]}</p>
+      <div className="rounded-card bg-surface-2 p-4">
+        <p className="text-label font-bold uppercase tracking-wider text-text-2">Where it stands</p>
+        <p className="mt-1 text-title font-bold">{STATE_LABEL[report.state]}</p>
         {category ? (
-          <p className="mt-1 text-sm text-kb-stone">Reason you chose: {category.name}</p>
+          <p className="mt-1 text-small text-text-2">Reason you chose: {category.name}</p>
         ) : null}
       </div>
       {report.reminder_due ? (
         <p
-          className="rounded-card border border-kb-amber/30 bg-kb-amber-soft p-4 text-sm leading-6"
+          className="rounded-card border border-warn/30 bg-warn-soft p-4 text-small leading-6"
           role="status"
         >
           It has been a week since your last update. Check Google's Reviews Management Tool and tell
@@ -283,10 +283,10 @@ function Tracker({ report, locationId }: { report: ReviewReport; locationId: str
       {report.state === "still_showing" && !report.appeal_started_at ? (
         <div>
           <p className="font-bold">You can appeal once</p>
-          <p className="mt-0.5 text-sm text-kb-stone">
+          <p className="mt-0.5 text-small text-text-2">
             If Google did not remove it, the tool lets you send one appeal.
           </p>
-          <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm leading-6">
+          <ol className="mt-2 list-decimal space-y-1 pl-5 text-small leading-6">
             {APPEAL_STEPS.map((s) => (
               <li key={s}>{s}</li>
             ))}
@@ -299,7 +299,7 @@ function Tracker({ report, locationId }: { report: ReviewReport; locationId: str
         </div>
       ) : null}
       {error ? (
-        <p className="text-sm text-kb-red" role="alert">
+        <p className="text-small text-bad" role="alert">
           {error}
         </p>
       ) : null}
@@ -316,7 +316,7 @@ function Tracker({ report, locationId }: { report: ReviewReport; locationId: str
         </div>
       ) : null}
       {closed ? (
-        <p className="text-sm leading-6 text-kb-stone">
+        <p className="text-small leading-6 text-text-2">
           {report.state === "removed"
             ? "Google removed this review."
             : "Google kept this review after the appeal. There are no more steps to take here."}
@@ -342,10 +342,10 @@ export function ReportReminders({
       {due.map((r) => (
         <div
           key={r.id}
-          className="flex flex-col gap-2 rounded-card border border-kb-amber/30 bg-kb-amber-soft p-4 sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-2 rounded-card border border-warn/30 bg-warn-soft p-4 sm:flex-row sm:items-center sm:justify-between"
           role="status"
         >
-          <p className="text-sm leading-6">
+          <p className="text-small leading-6">
             You reported a review a week ago or more. How did it go with Google?
           </p>
           <Button variant="secondary" size="compact" onClick={() => onOpen(r.review_id)}>

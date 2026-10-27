@@ -22,9 +22,9 @@ test.describe("log in", () => {
     await page.goto("/login");
     await settle(page);
     await page.getByRole("button", { name: "Continue with email" }).click();
-    await page.getByLabel("Email address").fill("qa-demo@test.local");
+    await page.getByLabel("Email", { exact: true }).fill("qa-demo@test.local");
     await page.getByRole("button", { name: "Send me a code" }).click();
-    await expect(page.getByText("Enter the 6-digit code sent to")).toBeVisible();
+    await expect(page.getByText("Enter the 6-digit code we sent to")).toBeVisible();
     await page
       .getByLabel("6-digit one-time code")
       .first()
@@ -46,11 +46,11 @@ test.describe("log in", () => {
     );
     await page.goto("/login");
     await page.getByRole("button", { name: "Continue with email" }).click();
-    await page.getByLabel("Email address").fill("qa-demo@test.local");
+    await page.getByLabel("Email", { exact: true }).fill("qa-demo@test.local");
     await page.getByRole("button", { name: "Send me a code" }).click();
     await page.getByLabel("6-digit one-time code").first().pressSequentially("000000");
     await expect(
-      page.getByText("That code didn't work. It may have expired: ask for a new one."),
+      page.getByText("That code did not work. Check it, or send a new one."),
     ).toBeVisible();
   });
 });

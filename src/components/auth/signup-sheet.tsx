@@ -31,12 +31,12 @@ export function SaveSnapshotButton({ snapshot, label }: { snapshot: KeptSnapshot
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side="bottom"
-          className="max-h-[92vh] overflow-y-auto rounded-t-large bg-kb-white px-5 pb-8 pt-7 sm:mx-auto sm:max-w-md"
+          className="max-h-[92vh] overflow-y-auto rounded-t-large bg-surface-1 px-5 pb-8 pt-7 sm:mx-auto sm:max-w-md"
         >
-          <SheetTitle className="font-display text-3xl leading-tight">
+          <SheetTitle className="font-display text-h3 leading-tight">
             Save your snapshot and continue
           </SheetTitle>
-          <SheetDescription className="mb-5 mt-2 text-base leading-7 text-kb-stone">
+          <SheetDescription className="mb-5 mt-2 text-body leading-7 text-text-2">
             Create your Kabsi account to keep {snapshot.name} and carry on. No card needed.
           </SheetDescription>
           <SignInPanel next="/start" onDone={go} />

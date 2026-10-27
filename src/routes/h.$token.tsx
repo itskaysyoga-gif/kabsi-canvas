@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { CheckCircle2 } from "lucide-react";
+import { Check, Clock, Undo2 } from "lucide-react";
 import { z } from "zod";
 import { HolidayAnswerForm } from "@/components/hours/holiday-answer";
 import { ConfirmLayout } from "@/components/layouts/confirm-layout";
-import { Button } from "@/components/ui/button";
+import { QuietMark, QuietTitle } from "@/components/kabsi/d2-quiet";
+import { Button, StatusPill, buttonClass } from "@/components/kabsi/ui";
 import { localToday } from "@/lib/hours-format";
 import {
   answerHolidayLink,
@@ -78,25 +79,25 @@ function HolidayLinkPage() {
   if (!view)
     return (
       <ConfirmLayout>
-        <p className="text-kb-stone">Loading…</p>
+        <p className="text-text-2" role="status">
+          Loading
+        </p>
       </ConfirmLayout>
     );
 
   const open = (
-    <Button asChild variant="outline" className="mt-6 w-full">
-      <Link to="/app/hours">Open Hours in Kabsi</Link>
-    </Button>
+    <Link to="/app/hours" className={buttonClass("secondary", "md", true) + " mt-6"}>
+      Open Hours in Kabsi
+    </Link>
   );
 
   if (view.status === "invalid" || view.status === "expired") {
     return (
       <ConfirmLayout>
-        <h1 className="font-display text-3xl leading-tight">
-          {view.status === "expired" ? "This link has expired" : "This link isn't valid"}
-        </h1>
-        <p className="mt-3 leading-7 text-kb-stone">
-          You can still answer in Kabsi, under Hours. Nothing is changed until you confirm it.
-        </p>
+        <QuietMark icon={Clock} tone="warn" />
+        <QuietTitle lead="You can still answer in Kabsi, under Hours. Nothing is changed until you confirm it.">
+          {view.status === "expired" ? "This link has expired." : "This link does not work."}
+        </QuietTitle>
         {open}
       </ConfirmLayout>
     );
@@ -106,19 +107,32 @@ function HolidayLinkPage() {
   if (pending !== null) {
     return (
       <ConfirmLayout demo={view.demo === true}>
-        <p className="text-sm font-medium text-kb-stone">{view.business}</p>
-        <h1 className="mt-1 font-display text-3xl leading-tight" aria-live="polite">
-          Publishing in {pending} {pending === 1 ? "second" : "seconds"}
-        </h1>
-        <p className="mt-3 leading-7 text-kb-stone">Nothing is sent to Google until then.</p>
+        <QuietTitle business={view.business} live>
+          Approved.
+        </QuietTitle>
+        <p className="mt-2 text-body text-text-2" aria-live="polite">
+          Changed your mind? Tap Undo in the next {pending} {pending === 1 ? "second" : "seconds"}{" "}
+          and nothing reaches Google.
+        </p>
+        <StatusPill tone="info" className="mt-4">
+          Waiting {pending} {pending === 1 ? "second" : "seconds"}
+        </StatusPill>
         {error ? (
-          <p className="mt-3 text-sm text-kb-red" role="alert">
+          <p className="mt-3 text-small font-semibold text-bad" role="alert">
             {error}
           </p>
         ) : null}
-        <Button className="mt-6 w-full" disabled={busy} onClick={() => void undo()}>
-          {busy ? "Undoing…" : "Undo"}
-        </Button>
+        <div className="mt-6" data-main-cta>
+          <Button
+            variant="secondary"
+            full
+            loading={busy}
+            icon={<Undo2 className="size-5" aria-hidden />}
+            onClick={() => void undo()}
+          >
+            Undo
+          </Button>
+        </div>
       </ConfirmLayout>
     );
   }
@@ -126,15 +140,15 @@ function HolidayLinkPage() {
     const answer = done ?? view.answer ?? null;
     return (
       <ConfirmLayout demo={view.demo === true}>
-        <CheckCircle2 className="size-10 text-kb-green" aria-hidden="true" />
-        <h1 className="mt-4 font-display text-3xl leading-tight">
+        <QuietMark icon={Check} tone="ok" />
+        <h1 className="font-display text-h3 font-bold">
           {answer === "normal"
             ? `Noted. Your normal hours stay for ${h.name}.`
             : answer
               ? `Done. Your hours for ${h.name} are on their way to Google.`
               : `You already answered for ${h.name}.`}
         </h1>
-        <p className="mt-3 leading-7 text-kb-stone">
+        <p className="mt-2 text-body text-text-2">
           Kabsi checks that Google shows them. You can change them under Hours.
         </p>
         {open}
@@ -144,9 +158,8 @@ function HolidayLinkPage() {
 
   return (
     <ConfirmLayout demo={view.demo === true}>
-      <p className="text-sm font-medium text-kb-stone">{view.business}</p>
-      <h1 className="mt-1 font-display text-3xl leading-tight">Your hours for {h.name}</h1>
-      <p className="mt-2 text-kb-stone">
+      <QuietTitle business={view.business}>Your hours for {h.name}</QuietTitle>
+      <p className="mt-2 text-body text-text-2">
         {h.estimated ? "Expected " : ""}
         {whenWords(h.starts_on, h.ends_on)}. Customers check Google for your hours first.
       </p>
@@ -168,10 +181,7 @@ function HolidayLinkPage() {
           if (r.publication && !r.repeat) setPending(UNDO_SECONDS);
         }}
       />
-      <p className="mt-5 text-xs leading-5 text-kb-stone">
-        Nothing changes on Google until you confirm. Kabsi is independent and not affiliated with
-        Google.
-      </p>
+      <p className="mt-5 text-small text-text-2">Nothing changes on Google until you say yes.</p>
     </ConfirmLayout>
   );
 }

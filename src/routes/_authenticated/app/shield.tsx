@@ -1,39 +1,46 @@
 import { useState } from "react";
-import { EarlyAccessNotice } from "@/components/app/early-access-notice";
-import { fmtDate } from "@/lib/format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, ShieldCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { StatusPill } from "@/components/ui/status-pill";
-import { supabase } from "@/lib/supabase";
-import { myLatestLocation } from "@/lib/onboarding";
-import { amStaff } from "@/lib/reviews";
+import { Check, ShieldCheck } from "lucide-react";
+import { EarlyAccessNotice } from "@/components/app/early-access-notice";
+import { ProfileGaps } from "@/components/app/profile-gaps";
+import { AccountTop, Panel, SourceLabel } from "@/components/kabsi/d3-account";
+import { TaskBlock } from "@/components/kabsi/d3-content-task";
+import {
+  Button,
+  ButtonLink,
+  EmptyState,
+  ErrorState,
+  Skeleton,
+  StatusPill,
+  type Tone,
+} from "@/components/kabsi/ui";
 import { OpenChange } from "@/components/profile/open-change";
-import { loadTasks, type Task } from "@/lib/tasks";
-import { myAccess, type Access } from "@/lib/team";
-import { agoWords } from "@/lib/home-state";
-import { cn } from "@/lib/utils";
+import { changeWords } from "@/components/profile/change-card";
+import { fmtDate } from "@/lib/format";
+import { myLatestLocation } from "@/lib/onboarding";
 import {
   NOT_CONFIRMED,
   OPEN_STATUSES,
   profileRows,
   protectionLine,
-  rowLabel as label,
   type Change,
   type Fact,
+  type ProfileRow,
+  type RowTone,
 } from "@/lib/profile-rows";
-import { ShieldCheck as PageGlyph } from "lucide-react";
-import { PageIcon } from "@/components/shared/page-icon";
+import { amStaff } from "@/lib/reviews";
+import { supabase } from "@/lib/supabase";
+import { latestByTarget, recentTasks } from "@/lib/task-feed";
+import { loadTasks, type Task } from "@/lib/tasks";
+import { myAccess } from "@/lib/team";
 
-// Google Profile (K-18, K-19, P0.3-11): one row for every field Google Protection watches, with what Google shows, what you
-// approved, a status and when it was last checked; what needs your attention at the top, with the two decisions for a
-// change; the Protection status line. Nothing changes on Google until you choose. Editors for description, services and
-// attributes are P1 (K-22): this screen lists what needs attention only.
+// Profile watch (K-18, K-19, P0.3-11; Design 3's "Your Google profile"): changes others made, each with its two
+// decisions; the details Kabsi watches, with what is missing; the things to fix; Google's warnings; and the put-backs
+// Kabsi sent, each with its task state. Nothing changes on Google until the owner chooses.
 export const Route = createFileRoute("/_authenticated/app/shield")({
   head: () => ({
-    meta: [{ title: "Google Profile | Kabsi" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Your Google profile | Kabsi" }, { name: "robots", content: "noindex" }],
   }),
   component: ProfilePage,
 });
@@ -46,18 +53,13 @@ const STATUS: Record<string, string> = {
   expired: "No answer in 14 days",
   superseded: "Replaced by a newer change",
 };
-// The tasks that belong on this screen: what is missing or unconfirmed on the profile, and lost access. Changes have their
-// own cards below, with the two decisions.
-const PROFILE_TASKS = [
-  "profile_gap",
-  "knowledge_confirm",
-  "hours_confirm",
-  "reconnect",
-  "google_needs_action",
-];
+// The things to fix on this screen: what is missing or unconfirmed on the profile, and lost access. Google's own
+// warnings (google_needs_action) have their own panel; changes have their own cards.
+const FIX_TASKS = ["profile_gap", "knowledge_confirm", "hours_confirm", "reconnect"];
+const TONE: Record<RowTone, Tone> = { green: "ok", amber: "warn", red: "bad", grey: "info" };
 
 async function loadProfile(locationId: string) {
-  const [changes, facts, loc, tasks] = await Promise.all([
+  const [changes, facts, loc, tasks, putBacks] = await Promise.all([
     supabase
       .from("profile_changes")
       .select(
@@ -74,6 +76,7 @@ async function loadProfile(locationId: string) {
       .is("superseded_by", null),
     supabase.from("locations").select("shield_checked_at").eq("id", locationId).maybeSingle(),
     loadTasks(locationId).catch(() => ({ tasks: [] as Task[], snoozed: 0 })),
+    recentTasks(locationId, { kinds: ["listing_revert"], days: 60 }).catch(() => []),
   ]);
   if (changes.error) throw new Error(changes.error.message);
   if (facts.error) throw new Error(facts.error.message);
@@ -81,7 +84,9 @@ async function loadProfile(locationId: string) {
     changes: (changes.data ?? []) as Change[],
     facts: (facts.data ?? []) as Fact[],
     checkedAt: (loc.data as { shield_checked_at: string | null } | null)?.shield_checked_at ?? null,
-    tasks: tasks.tasks.filter((t) => PROFILE_TASKS.includes(t.kind)),
+    fix: tasks.tasks.filter((t) => FIX_TASKS.includes(t.kind)),
+    warnings: tasks.tasks.filter((t) => t.kind === "google_needs_action"),
+    putBacks: latestByTarget(putBacks),
   };
 }
 
@@ -97,7 +102,7 @@ function ProfilePage() {
   const data = useQuery({
     queryKey: ["shield", loc?.id],
     queryFn: () => loadProfile(loc!.id),
-    enabled: !!loc,
+    enabled: !!loc && loc.status === "active" && !loc.concierge,
     refetchInterval: 60_000,
   });
   const refresh = () =>
@@ -106,178 +111,240 @@ function ProfilePage() {
         queryClient.invalidateQueries({ queryKey }),
       ),
     );
-  const changes = data.data?.changes ?? [];
-  const facts = data.data?.facts ?? [];
-  const rows = profileRows(facts, changes);
+  const d = data.data;
+  const changes = d?.changes ?? [];
+  const rows = profileRows(d?.facts ?? [], changes);
   const open = changes.filter((c) => OPEN_STATUSES.includes(c.status));
   const past = changes.filter((c) => !OPEN_STATUSES.includes(c.status));
-  const tasks = data.data?.tasks ?? [];
   const running =
     !!loc && loc.status === "active" && !(loc.access_lost_at && !loc.access_granted_at);
+  const live = !!loc && loc.status === "active" && !loc.concierge;
+  // Kabsi has read nothing yet: no fact, no change and no check.
+  const reading = !!d && !d.facts.length && !changes.length && !d.checkedAt;
+
   return (
-    <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-      <PageIcon icon={<PageGlyph />} />
-      <h1 className="font-display text-4xl leading-none sm:text-5xl">Google Profile</h1>
-      <p className="mt-2 max-w-2xl text-kb-stone">
-        What customers see on Google, next to what you approved. Google sometimes changes details
-        itself or accepts edits from the public. Nothing changes on Google until you choose.
-      </p>
-      {loc && !loc.concierge ? (
-        <p className="mt-4 inline-flex items-center gap-2 rounded-pill bg-kb-white px-4 py-2 text-sm font-medium shadow-kb">
-          <ShieldCheck
-            className={running ? "size-4 text-kb-green" : "size-4 text-kb-stone"}
-            aria-hidden="true"
-          />
-          {protectionLine({ running, checkedAt: data.data?.checkedAt ?? null })}
-        </p>
-      ) : null}
-      {!location.isLoading && !loc ? (
-        <Button asChild className="mt-6">
-          <Link to="/start">Add your business</Link>
-        </Button>
-      ) : null}
-      {data.error ? (
-        <p className="mt-6 text-kb-red" role="alert">
-          Couldn't load your profile. Refresh the page.
-        </p>
-      ) : null}
+    <>
+      <AccountTop
+        title="Your Google profile"
+        lead="Kabsi checks your details every day and tells you when anything changes."
+        action={
+          live ? (
+            <SourceLabel>
+              <ShieldCheck
+                className={running ? "size-4 text-ok" : "size-4 text-text-2"}
+                aria-hidden
+              />
+              {protectionLine({ running, checkedAt: d?.checkedAt ?? null })}
+            </SourceLabel>
+          ) : null
+        }
+      />
+      {!location.isLoading && !loc ? <ButtonLink to="/start">Add your business</ButtonLink> : null}
       {loc?.concierge ? <EarlyAccessNotice what="Google Protection" /> : null}
       {loc && !loc.concierge && loc.status !== "active" ? (
-        <div className="mt-7 rounded-large bg-kb-white p-6 shadow-kb">
-          <p className="font-bold">
+        <Panel>
+          <p className="text-body font-bold">
             Google Protection starts once Kabsi can reach your Google profile.
           </p>
-          <Button asChild size="compact" className="mt-4">
-            <Link to="/start">Continue setup</Link>
-          </Button>
-        </div>
+          <ButtonLink to="/start" size="md" className="mt-4">
+            Continue setup
+          </ButtonLink>
+        </Panel>
+      ) : null}
+      {live && data.isLoading ? <Loading /> : null}
+      {live && data.isError ? (
+        <ErrorState title="This page did not load." onRetry={() => void data.refetch()}>
+          Nothing you did, and nothing changed on Google. Try again in a minute.
+        </ErrorState>
+      ) : null}
+      {live && d && reading ? (
+        <EmptyState icon={ShieldCheck} title="Kabsi is reading your profile.">
+          The first check takes a few minutes. Kabsi tells you on WhatsApp when it is done.
+        </EmptyState>
       ) : null}
 
-      {loc && loc.status === "active" && data.data ? (
-        <>
-          <section className="mt-8" aria-labelledby="attention">
-            <h2 id="attention" className="text-lg font-bold">
-              What needs attention
-            </h2>
-            {!open.length && !tasks.length ? (
-              <p className="mt-2 text-kb-small text-kb-stone">
+      {live && d && !reading ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Panel title="Changes others made" id="changes" className="lg:col-span-2">
+            {open.length ? (
+              <div className="space-y-3">
+                {open.map((c, i) => (
+                  <OpenChange
+                    key={c.id}
+                    change={c}
+                    access={access.data}
+                    lead={i === 0}
+                    business={loc.name}
+                    onDone={refresh}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="flex items-center gap-2 text-body text-text-1">
+                <Check className="size-5 shrink-0 text-ok" aria-hidden />
                 Nothing needs your attention. Kabsi is watching your profile.
               </p>
-            ) : null}
-            <div className="mt-3 space-y-4">
-              {open.map((c, i) => (
-                <OpenChange
-                  key={c.id}
-                  change={c}
-                  access={access.data}
-                  lead={i === 0}
-                  onDone={refresh}
-                />
-              ))}
-              {tasks.map((t) => (
-                <div key={t.id} className="rounded-card bg-kb-white p-4 shadow-kb">
-                  <p className="font-bold">{t.title}</p>
-                  {t.why ? <p className="mt-1 text-sm leading-6 text-kb-stone">{t.why}</p> : null}
-                  <Button asChild variant="secondary" size="compact" className="mt-3">
-                    <Link to={t.path}>
-                      Open <ArrowRight />
-                    </Link>
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </section>
+            )}
+          </Panel>
 
-          <section className="mt-9" aria-labelledby="fields">
-            <h2 id="fields" className="text-lg font-bold">
-              What Kabsi watches
-            </h2>
-            <ul className="mt-3 space-y-3">
-              {rows.map((r) => (
-                <li key={r.key} className="rounded-card bg-kb-white p-4 shadow-kb">
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="font-bold">{r.label}</p>
-                    <StatusPill tone={r.tone} className="shrink whitespace-normal text-right">
-                      {r.status}
-                    </StatusPill>
-                  </div>
-                  <dl className="mt-3 space-y-2 text-sm">
-                    <div>
-                      <dt className="text-xs font-bold uppercase text-kb-stone">Google shows</dt>
-                      <dd dir="auto" className="break-words">
-                        {r.google ?? (
-                          <span className="text-kb-stone">Kabsi has not read this yet</span>
-                        )}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs font-bold uppercase text-kb-stone">Approved by you</dt>
-                      <dd dir="auto" className="break-words">
-                        {r.approved === null ? (
-                          <span className="text-kb-stone">Nothing yet</span>
-                        ) : r.approved === NOT_CONFIRMED ? (
-                          <span className="text-kb-amber">{NOT_CONFIRMED}</span>
-                        ) : (
-                          r.approved
-                        )}
-                      </dd>
-                    </div>
-                  </dl>
-                  <p className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-kb-stone">
-                    <span>
-                      {r.google === null
-                        ? "Kabsi reads this once Google shows it"
-                        : data.data?.checkedAt
-                          ? `Last checked ${agoWords(data.data.checkedAt)}`
-                          : "Not checked yet"}
-                    </span>
-                    {r.hint ? (
-                      <Link to="/app/hours" className="underline underline-offset-4">
-                        {r.hint}
-                      </Link>
-                    ) : null}
-                    {r.approved === NOT_CONFIRMED ? (
-                      <Link to="/app/knowledge" className="underline underline-offset-4">
-                        Confirm it
-                      </Link>
-                    ) : null}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </>
-      ) : null}
+          <Panel title="Details" id="details">
+            <Details rows={rows} />
+          </Panel>
 
-      {past.length ? (
-        <div className="mt-8">
-          <h2 className="text-lg font-bold">History</h2>
-          <div className="mt-3 space-y-2">
-            {past.map((c) => (
-              <div key={c.id} className="rounded-card bg-kb-white p-4 text-sm shadow-kb">
-                <p className="font-medium">
-                  {label(c.field)} ·{" "}
-                  {c.support_requested_at
-                    ? "Kabsi's team is asking Google support"
-                    : (STATUS[c.status] ?? c.status)}
-                </p>
-                <p className="text-kb-stone">
-                  {fmtDate(c.detected_at)} ·{" "}
-                  {c.google_value
-                    ? `Google showed “${c.google_value.display || "(empty)"}”`
-                    : "Details removed after 30 days (Google's rule)"}
-                </p>
-              </div>
-            ))}
-          </div>
+          <ProfileGaps
+            locationId={loc.id}
+            gaps={d.fix}
+            title={
+              d.fix.length === 0
+                ? "Nothing to fix"
+                : `${d.fix.length} ${d.fix.length === 1 ? "thing" : "things"} to fix`
+            }
+          />
+
+          <Panel title="Google's warnings" id="warnings" className="lg:col-span-2">
+            {d.warnings.length ? (
+              <ul className="space-y-3">
+                {d.warnings.map((t) => (
+                  <li key={t.id} className="rounded-inner bg-bad-soft p-4">
+                    <StatusPill tone="bad">Needs you</StatusPill>
+                    <p className="mt-3 text-body font-bold text-text-1">{t.title}</p>
+                    {t.why ? <p className="mt-1 text-small text-text-1">{t.why}</p> : null}
+                    <ButtonLink to={t.path} variant="secondary" size="md" className="mt-3">
+                      Open
+                    </ButtonLink>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="flex items-center gap-2 text-body text-text-1">
+                <Check className="size-5 shrink-0 text-ok" aria-hidden />
+                None. Google has not flagged anything on your profile.
+              </p>
+            )}
+          </Panel>
+
+          {past.length ? (
+            <Panel title="History" id="history" className="lg:col-span-2">
+              <ul className="divide-y divide-line">
+                {past.map((c) => (
+                  <PastChange key={c.id} change={c} task={d.putBacks.get(c.id)} />
+                ))}
+              </ul>
+            </Panel>
+          ) : null}
         </div>
       ) : null}
       {loc ? <StaffEdit locationId={loc.id} /> : null}
+    </>
+  );
+}
+
+function Loading() {
+  return (
+    <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="rounded-card border border-line bg-surface-1 p-5">
+          <Skeleton className="h-5 w-1/2" />
+          <Skeleton className="mt-3 h-4 w-full" />
+          <Skeleton className="mt-2 h-4 w-4/5" />
+        </div>
+      ))}
     </div>
   );
 }
 
-// Staff only, simulated locations only: pretend Google edited the profile. The keys are the mock listing's own.
+/** Every watched detail: what Google shows, Missing when it shows nothing, and a status when it is not as approved. */
+function Details({ rows }: { rows: ProfileRow[] }) {
+  return (
+    <dl className="divide-y divide-line">
+      {rows.map((r) => (
+        <div
+          key={r.key}
+          className="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-3"
+        >
+          <dt className="text-small text-text-2">{r.label}</dt>
+          <dd className="min-w-0 text-small">
+            {r.missing ? (
+              <StatusPill tone="warn">Missing</StatusPill>
+            ) : r.google === null ? (
+              <span className="text-text-2">Not read yet</span>
+            ) : (
+              <span dir="auto" className="block break-words font-semibold text-text-1">
+                {r.google}
+              </span>
+            )}
+            {r.tone !== "green" && !(r.google === null && r.tone === "grey") ? (
+              <StatusPill
+                tone={TONE[r.tone]}
+                className="mt-2 h-auto min-h-7 whitespace-normal py-1"
+              >
+                {r.status}
+              </StatusPill>
+            ) : null}
+            {r.hint || r.approved === NOT_CONFIRMED ? (
+              <span className="mt-1 flex flex-wrap gap-x-4">
+                {r.hint ? (
+                  <Link
+                    to="/app/hours"
+                    className="inline-flex min-h-11 items-center underline underline-offset-4"
+                  >
+                    {r.hint}
+                  </Link>
+                ) : null}
+                {r.approved === NOT_CONFIRMED ? (
+                  <Link
+                    to="/app/knowledge"
+                    className="inline-flex min-h-11 items-center underline underline-offset-4"
+                  >
+                    Confirm it
+                  </Link>
+                ) : null}
+              </span>
+            ) : null}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/** A change that is decided: what happened, and for a put-back Kabsi sent, where that task is. */
+function PastChange({
+  change: c,
+  task,
+}: {
+  change: Change;
+  task: Parameters<typeof TaskBlock>[0]["task"];
+}) {
+  const words = changeWords(c.field);
+  return (
+    <li className="py-4 first:pt-0 last:pb-0">
+      <p className="text-body font-semibold text-text-1">
+        {words.noun.charAt(0).toUpperCase() + words.noun.slice(1)}:{" "}
+        {c.support_requested_at
+          ? "Kabsi's team is asking Google support"
+          : (STATUS[c.status] ?? c.status)}
+      </p>
+      <p className="mt-1 text-small text-text-2">
+        {fmtDate(c.detected_at)}.{" "}
+        {c.google_value
+          ? `Google showed “${c.google_value.display || "(empty)"}”`
+          : "Details removed after 30 days (Google's rule)"}
+      </p>
+      {task || c.status === "rejected" || c.status === "corrected" || c.status === "failed" ? (
+        <TaskBlock
+          task={task}
+          kind="listing_revert"
+          rowState={c.status === "failed" ? "failed" : "posted"}
+          seen={c.status === "corrected"}
+          className="mt-3"
+        />
+      ) : null}
+    </li>
+  );
+}
+
+// Staff only, simulated locations only: pretend Google edited the profile. The keys are the mock profile's own.
 const MOCK_FIELDS: [string, string][] = [
   ["title", "Business name"],
   ["phone", "Phone"],
@@ -302,15 +369,18 @@ function StaffEdit({ locationId }: { locationId: string }) {
     });
     setMsg(error ? `Couldn't: ${error.message}` : "Edited. The alert arrives within 5 minutes.");
   }
+  const input = "h-11 rounded-input border border-stroke bg-surface-2 px-3 text-body text-text-1";
   return (
-    <details className="mt-10 rounded-large border border-dashed border-kb-hairline p-5">
-      <summary className="cursor-pointer text-sm font-bold">Staff: simulate a Google edit</summary>
+    <details className="mt-8 rounded-card border border-dashed border-line-strong p-5">
+      <summary className="min-h-11 cursor-pointer text-small font-bold">
+        Staff: simulate a Google edit
+      </summary>
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <select
           aria-label="Field"
           value={field}
           onChange={(e) => setField(e.target.value)}
-          className="h-11 rounded-card border border-kb-hairline bg-kb-white px-3"
+          className={input}
         >
           {MOCK_FIELDS.map(([k, l]) => (
             <option key={k} value={k}>
@@ -318,22 +388,18 @@ function StaffEdit({ locationId }: { locationId: string }) {
             </option>
           ))}
         </select>
-        <Input
+        <input
           aria-label="New value"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="New value"
+          className={`${input} min-w-0 flex-1`}
         />
-        <Button
-          size="compact"
-          variant="outline"
-          disabled={!value.trim()}
-          onClick={() => void run()}
-        >
+        <Button size="md" variant="secondary" disabled={!value.trim()} onClick={() => void run()}>
           Simulate
         </Button>
       </div>
-      {msg ? <p className="mt-3 text-sm text-kb-stone">{msg}</p> : null}
+      {msg ? <p className="mt-3 text-small text-text-2">{msg}</p> : null}
     </details>
   );
 }

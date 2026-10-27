@@ -37,7 +37,7 @@ export function AccessStatus({
       <StatusPill tone={pill.tone} className="max-w-full whitespace-normal text-left">
         {pill.text}
       </StatusPill>
-      {pill.detail ? <p className="mt-2 text-sm leading-6 text-kb-stone">{pill.detail}</p> : null}
+      {pill.detail ? <p className="mt-2 text-small leading-6 text-text-2">{pill.detail}</p> : null}
     </div>
   );
 }

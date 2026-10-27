@@ -241,7 +241,7 @@ describe("the shell carries the chip on every step", () => {
           { client: qc },
           createElement(
             OnboardingShell,
-            { step: "connect", help: { step: s } },
+            { stage: 3, help: { step: s } },
             createElement("button", { id: "main" }, "Main button"),
           ),
         ),

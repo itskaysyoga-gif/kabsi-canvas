@@ -68,7 +68,7 @@ const G = {
 };
 
 const Tool = () => (
-  <Link to="/google-review-link" className="font-bold text-kb-ink underline underline-offset-4">
+  <Link to="/google-review-link" className="font-bold text-text-1 underline underline-offset-4">
     free review link and QR tool
   </Link>
 );

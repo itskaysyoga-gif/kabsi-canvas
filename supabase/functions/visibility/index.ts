@@ -8,6 +8,7 @@
 //   GET  /visibility/image    the signed-in member, staff or x-cron-secret: one finished grid as the nearby places image (PNG),
 //                             or its 7 by 7 dots with view=dots; with check=CODE (x-cron-secret) a free check's nearby places.
 //   POST /visibility/check    public (Turnstile, rate limits, daily cap): the free check (V4, 28.1). GET ?code= its result.
+//   POST /visibility/waitlist public (Turnstile, 5 an hour): "Save my place" while the free check is closed (UX 1).
 //   GET  /visibility/terms    public: the search an industry page prefills (?industry=&market=). POST: staff op, DataForSEO keyword data.
 // Ranks and competitors come only from DataForSEO public results (30.10.2); mock mode unless app_settings
 // dataforseo_mode is 'live', and the demo business always on the mock (R-17). The logic is in _shared/visibility/.
@@ -25,6 +26,8 @@ import type { Nearby } from "../_shared/visibility/nearby.ts";
 import { type CheckRow, cleanTerm, collectCheck, newCode, publicView, startCheck } from "../_shared/visibility/free-check.ts";
 import { freeScanCheck } from "../_shared/visibility/ai/run.ts";
 import { MARKETS, pickTerms, searchVolumes } from "../_shared/visibility/terms.ts";
+import { checkWaitlist } from "../_shared/visibility/waitlist.ts";
+import { WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
 import { aiDeps, doneRuns, enabledProviders, realProvider, setting as aiSetting, syncPrompts } from "../_shared/visibility/ai/deps.ts";
 import { tickAi } from "../_shared/visibility/ai/run.ts";
 import { analyze } from "../_shared/visibility/ai/analyze.ts";
@@ -406,6 +409,21 @@ async function startFreeCheck(req: Request): Promise<Response> {
   return json({ ...publicView(saved), whatsapp_text: `Hi Kabsi, my scan code is KAB-${saved.code}` });
 }
 
+/** UX 1: "Save my place" while the free check is closed. Turnstile, 5 an hour per visitor; the same contact and business once. */
+async function joinWaitlist(req: Request): Promise<Response> {
+  const body = await req.json().catch(() => ({})) as Record<string, unknown>;
+  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  if (!(await verifyTurnstile(typeof body.turnstile === "string" ? body.turnstile : undefined, ip))) return json({ error: "challenge_failed" }, 400);
+  if (!(await rateLimit(`free_check_waitlist:${await sha256Hex(`free_check:${ip}`)}`, 5, 3600, { failClosed: true }))) return json({ error: "rate_limited" }, 429);
+  const c = checkWaitlist(body, WHATSAPP_ON);
+  if (!c.ok) return json({ error: "bad_request", field: c.field, message: c.message }, 400);
+  const { error } = await db().from("free_check_waitlist").insert(c.value);
+  // 23505: this contact is already on the list for this business. Saying "Saved" again is true.
+  if (error && error.code !== "23505") throw new Error(error.message);
+  log(fn, { action: "waitlist", email: !!c.value.email, phone: !!c.value.phone, tips: c.value.marketing_consent });
+  return json({ ok: true });
+}
+
 /** The page keeps asking while the 7 by 7 search runs: a read only (the tick collects), limited per visitor. */
 async function getFreeCheck(req: Request, url: URL): Promise<Response> {
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
@@ -432,13 +450,16 @@ async function terms(): Promise<Response> {
     if (!(await deps.room(80_000))) return json({ error: "cap", done: out }, 503);
     const v = await searchVolumes(login, password, market);
     await deps.spend(1, v.cost);
-    const picked = pickTerms(v.volumes);
+    const picked = pickTerms(v.volumes, market);
     for (const [industry, p] of Object.entries(picked)) {
       must(await db().from("industry_search_terms").upsert({
-        industry, market, term: p.term, volume: p.volume, candidates: p.candidates, checked_on: new Date().toISOString().slice(0, 10),
+        industry, market, term: p.term, volume: p.volume, candidates: p.candidates, source: p.source, checked_on: new Date().toISOString().slice(0, 10),
       }));
     }
-    out[market] = { cost_micros: v.cost, picked: Object.fromEntries(Object.entries(picked).map(([k, p]) => [k, `${p.term} (${p.volume})`])) };
+    out[market] = {
+      cost_micros: v.cost,
+      picked: Object.fromEntries(Object.entries(picked).map(([k, p]) => [k, `${p.term} (${p.volume ?? "no volume"}${p.source === "lane_r_approved" ? ", approved" : ""})`])),
+    };
   }
   return json({ ok: true, ...out });
 }
@@ -471,6 +492,7 @@ Deno.serve(async (req) => {
     if (req.method === "POST" && route === "/picks") return await setPicks(req);
     if (req.method === "GET" && route === "/image") return await image(req, url);
     if (req.method === "POST" && route === "/check") return await startFreeCheck(req);
+    if (req.method === "POST" && route === "/waitlist") return await joinWaitlist(req);
     if (req.method === "GET" && route === "/check") return await getFreeCheck(req, url);
     if (req.method === "GET" && route === "/terms") {
       const { data } = await db().from("industry_search_terms").select("industry, market, term, checked_on")

@@ -8,7 +8,7 @@ Rewritten by Web 2 on 27 Oct 2026 (master plan 30.13 item 5) to the design studi
 - The hero H1's last phrase is the only coloured words: kb-yellow "Taken care of through WhatsApp." on Home, "Taken care of." on industry pages. The lead stays text-2.
 - Phone first at 390 px, then 768 and 1440 px. No sideways scroll at 320 px. Sentence case everywhere; no capitals or tracked eyebrows.
 - Only these tokens (K-108). No hex values in components, no Tailwind default colours, no page-specific styling. scripts/check-tokens.mjs fails a hex value outside the @theme blocks of src/styles.css.
-- The customer pages (review page, card set up, staff upload, email actions, unsubscribe, payment done) and the signed-in website are light (`.theme-light`, lane R 26 Oct 2026). UX 1 moves the signed-in website onto these tokens.
+- The customer pages (review page, card set up, staff upload, email actions, unsubscribe, payment done) and the signed-in website are light (`.theme-light`, lane R 26 Oct 2026). UX 1 (27 Oct 2026) moved the signed-in website onto these tokens and Design 3's layout.
 
 ## Colour (src/styles.css, three layers)
 1. Brand constants, in the `@theme static` block: `--kb-*`, `--map-*`, `--wa-*`, `--phone-*`. Fixed values, never used for a role directly in pages.
@@ -43,7 +43,7 @@ Rewritten by Web 2 on 27 Oct 2026 (master plan 30.13 item 5) to the design studi
 
 - WhatsApp mockups only, never Kabsi's own pages: chat #efeae2, in #ffffff, out #d9fdd3, time #667781 (#5a6a72 on the sent bubble for 4.5:1), ticks #53bdeb, glyph #25d366. The phone frame: phone-edge #404040, phone-body #262626.
 - Every state carries a word or an icon as well as its colour.
-- Legacy: the `--color-kb-*` names of 25 Oct (kb-carbon #0b0b0b, kb-stone-on-dark, text-kb-hero and the others) stay in their own @theme block for the signed-in website only. No new page uses them; UX 1 deletes the block.
+- Brand colour names (`bg-kb-yellow`, `text-kb-black`, `bg-kb-green`, `text-kb-ink` and the rest) are aliases of the brand constants in layer 1, with no hex of their own: for the one main action, ink on yellow, ticks and the light cards drawn inside dark pages. Everything else uses the roles. UX 1 deleted the legacy block of 25 Oct (text-kb-*, shadow-kb, rounded-large, the old kb-carbon).
 
 ## Type
 - Bricolage Grotesque Variable (headings) and Manrope Variable (everything else), self hosted with @fontsource-variable, the latin weight files preloaded from the root, font-display swap. No outside font request. `--font-arabic-display` and `--font-arabic-text` are the slots for the later Saudi step.
@@ -69,7 +69,9 @@ Rewritten by Web 2 on 27 Oct 2026 (master plan 30.13 item 5) to the design studi
 - whatsapp.tsx (PhoneFrame, the hero story), nearby-places.tsx and map.tsx (the three nearby places, the one count, the 7 by 7 dots behind "Detailed results"), map-data.ts.
 - d4-home.tsx (Home below the hero, the one light section), d5-picker.tsx (Pick your business), d5-founding.tsx (Founding 25 banner and /founding, real count), d5-access.tsx (the access steps, the ID with "Copy the ID", the recordings, the three states, "Send these steps"; RemoveKabsi on Security only), d5-industry.tsx (the industry template, hubs, /for), d2-parts.tsx (PageTop, ToolTabs, SearchForm, CopyField, QrCode, FlowProgress, Prose), d2-tools.tsx (the review link tool), d2-flow.tsx (/manager-steps), d2-partners.tsx, d2-legal.tsx (About, FAQ), d4-free-check.tsx and scan-live.tsx (the free check and its result on V4's /visibility/check), hiw-sections.tsx.
 - src/components/marketing/legal.tsx: Security, Privacy, Terms and the partner terms in the LegalPage layout. src/components/shared/privacy-banner.tsx: the consent bar and "Your privacy choices" in the new look.
-- Pages Web 2 did not redesign (guides, log in, setup call, get started, the customer and email-action pages) keep their own light content; the guides, log in and setup call sit inside the new header and footer (PublicLayout).
+- The signed-in website (UX 1, Design 3): src/components/layouts/app-layout.tsx is the account shell (a side bar from 1024 px with the business switcher, the places, the trial strip, Need a hand and Log out; a top bar and a bottom bar of four places plus More below 1024 px). The places and tabs are src/lib/app-nav.ts (Home, Reviews, Google profile, Posts and photos, Where you show up, Reports, Get reviews, Settings). The shell gives every page its column (60rem), so pages add no outer container. d3-account.tsx: AccountTop (H1, one lead, the section's tabs), Panel, SourceLabel (where a number comes from), TaskPill, TaskTrack (Approved, Sent to Google, On Google; the middle step red when it did not go through) and TaskOutcome, read from src/lib/task-state.ts and src/lib/task-feed.ts, the same words as WhatsApp (task-close.ts).
+- The shared Switch (kabsi/ui.tsx and ui/switch.tsx) is kb-green with a tick when on.
+- `node scripts/app-shots.mjs` (with the site running) draws every signed-in and onboarding screen in scripts/app-shots/routes at 390, 768 and 1440 px with a made-up owner and fixtures (no Supabase call), and checks sideways scroll and axe.
 
 ## Icons and imagery
 - Lucide only, 1.75 to 2.5 px stroke as the parts set it. Never emoji in the interface.

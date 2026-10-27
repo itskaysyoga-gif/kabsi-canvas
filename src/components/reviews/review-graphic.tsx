@@ -95,7 +95,7 @@ export function ReviewGraphic({
 
   return (
     <>
-      <Button variant="tertiary" className="min-h-11 text-sm" onClick={() => setOpen(true)}>
+      <Button variant="tertiary" className="min-h-11 text-small" onClick={() => setOpen(true)}>
         <ImageIcon aria-hidden="true" /> Make a graphic
       </Button>
       <Sheet
@@ -117,7 +117,7 @@ export function ReviewGraphic({
             </SheetDescription>
           </SheetHeader>
           {proOnly ? (
-            <div className="mt-4 rounded-card bg-kb-sand p-4 text-sm leading-6" role="status">
+            <div className="mt-4 rounded-card bg-surface-2 p-4 text-small leading-6" role="status">
               <p className="font-bold">Review graphics are part of Pro.</p>
               <Link
                 to="/app/plan"
@@ -137,21 +137,21 @@ export function ReviewGraphic({
                     onClick={() => void make(s.id)}
                     className={cn(
                       "min-h-14 rounded-card border-2 px-4 py-2 text-left disabled:opacity-60",
-                      image && size === s.id ? "border-kb-black bg-kb-sand" : "border-kb-hairline",
+                      image && size === s.id ? "border-text-1 bg-surface-2" : "border-line",
                     )}
                   >
                     <span className="block font-bold">{s.label}</span>
-                    <span className="block text-sm text-kb-stone">{s.hint}</span>
+                    <span className="block text-small text-text-2">{s.hint}</span>
                   </button>
                 ))}
               </div>
               {busy ? (
-                <p className="mt-4 flex items-center gap-2 text-sm text-kb-stone" role="status">
+                <p className="mt-4 flex items-center gap-2 text-small text-text-2" role="status">
                   <Loader2 className="size-4 animate-spin" aria-hidden="true" /> Making your graphic
                 </p>
               ) : null}
               {error ? (
-                <p className="mt-4 text-sm text-kb-red" role="alert">
+                <p className="mt-4 text-small text-bad" role="alert">
                   {error.message}{" "}
                   {error.code === "pro_required" ? (
                     <Link to="/app/plan" className="font-bold underline underline-offset-4">
@@ -166,7 +166,7 @@ export function ReviewGraphic({
                     src={image.url}
                     alt="The review graphic"
                     className={cn(
-                      "mx-auto w-full rounded-card border border-kb-hairline",
+                      "mx-auto w-full rounded-card border border-line",
                       size === "story" ? "max-h-[55vh] w-auto" : "max-w-sm",
                     )}
                   />

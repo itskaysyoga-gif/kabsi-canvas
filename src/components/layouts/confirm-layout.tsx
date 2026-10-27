@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
-import { KabsiLogo } from "@/components/shared/kabsi-logo";
 import { TestModeBanner } from "@/components/shared/test-mode-banner";
-import { ExampleBadge } from "@/components/ui/example-badge";
+import { QuietCard, QuietShell } from "@/components/kabsi/d2-quiet";
+import { Badge } from "@/components/kabsi/ui";
+
+// The pages an email, a staff link or a card opens (/a, /h, /u, /activate, /unsubscribe, /billing/done): Design 2's
+// quiet shell, light, the Kabsi mark, one card, one action. The Test mode line stays on top while Google is in mock mode.
 export function ConfirmLayout({
   children,
   concierge = false,
@@ -16,17 +19,8 @@ export function ConfirmLayout({
   demo?: boolean;
 }) {
   return (
-    <>
-      <TestModeBanner concierge={concierge} mode={mode} />
-      <main className="grid min-h-screen place-items-center bg-kb-sand px-5 py-10">
-        <div className="w-full max-w-xl">
-          <div className="mb-7 flex items-center justify-center gap-3">
-            <KabsiLogo />
-            {demo ? <ExampleBadge>Demo data</ExampleBadge> : null}
-          </div>
-          <div className="rounded-large bg-kb-white p-7 shadow-kb sm:p-10">{children}</div>
-        </div>
-      </main>
-    </>
+    <QuietShell top={<TestModeBanner concierge={concierge} mode={mode} />}>
+      <QuietCard badge={demo ? <Badge>Demo data</Badge> : undefined}>{children}</QuietCard>
+    </QuietShell>
   );
 }

@@ -37,7 +37,7 @@ export function QuestionsStep({
     queryKey: ["knowledge", location.id],
     queryFn: () => loadKnowledge(location.id),
   });
-  if (knowledge.isLoading) return <p className="text-kb-stone">Loading…</p>;
+  if (knowledge.isLoading) return <p className="text-text-2">Loading…</p>;
   const current = verifiedValues(knowledge.data?.facts ?? []);
   return (
     <QuestionsForm
@@ -112,7 +112,7 @@ function QuestionsForm({
         {QUESTIONS_FIVE.map((q) =>
           q.id === "tone" ? (
             <fieldset key={q.id}>
-              <legend className="text-sm font-bold">{q.label}</legend>
+              <legend className="text-small font-bold">{q.label}</legend>
               <div className="mt-2 space-y-2">
                 {TONE_EXAMPLES.map((t) => (
                   <button
@@ -128,12 +128,12 @@ function QuestionsForm({
                     className={cn(
                       "block min-h-14 w-full rounded-card border-2 p-3 text-left",
                       answers.tone === t.value
-                        ? "border-kb-black bg-kb-sand"
-                        : "border-kb-hairline hover:border-kb-stone",
+                        ? "border-text-1 bg-surface-2"
+                        : "border-line hover:border-stroke",
                     )}
                   >
                     <span className="block font-bold">{t.label}</span>
-                    <span className="mt-0.5 block text-sm leading-6 text-kb-stone">
+                    <span className="mt-0.5 block text-small leading-6 text-text-2">
                       &ldquo;{t.example}&rdquo;
                     </span>
                   </button>
@@ -142,10 +142,10 @@ function QuestionsForm({
             </fieldset>
           ) : (
             <div key={q.id}>
-              <Label htmlFor={`q-${q.id}`} className="text-sm font-bold">
+              <Label htmlFor={`q-${q.id}`} className="text-small font-bold">
                 {q.label}
               </Label>
-              {q.hint ? <p className="mt-1 text-sm leading-6 text-kb-stone">{q.hint}</p> : null}
+              {q.hint ? <p className="mt-1 text-small leading-6 text-text-2">{q.hint}</p> : null}
               <Input
                 id={`q-${q.id}`}
                 type={q.type ?? "text"}
@@ -154,11 +154,11 @@ function QuestionsForm({
                 onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
                 placeholder={q.placeholder}
                 maxLength={q.max + 20}
-                className="mt-2 h-[52px] rounded-card px-4 text-base"
+                className="mt-2 h-[52px] rounded-card px-4 text-body"
                 aria-invalid={touched && !!answerProblem(q, answers[q.id])}
               />
               {touched && answerProblem(q, answers[q.id]) ? (
-                <p role="alert" className="mt-1 text-sm text-kb-red">
+                <p role="alert" className="mt-1 text-small text-bad">
                   {answerProblem(q, answers[q.id])}
                 </p>
               ) : null}
@@ -168,12 +168,12 @@ function QuestionsForm({
       </div>
 
       <section className="mt-8" aria-label="WhatsApp">
-        <h2 className="text-lg font-bold">Get your reviews on WhatsApp</h2>
+        <h2 className="text-title font-bold">Get your reviews on WhatsApp</h2>
         <WhatsappChannel />
       </section>
 
-      <details className="mt-5 text-sm leading-6 text-kb-stone">
-        <summary className="min-h-11 cursor-pointer font-medium text-kb-ink">
+      <details className="mt-5 text-small leading-6 text-text-2">
+        <summary className="min-h-11 cursor-pointer font-medium text-text-1">
           If you skip a question
         </summary>
         <ul className="mt-1 list-disc space-y-1 pl-5">

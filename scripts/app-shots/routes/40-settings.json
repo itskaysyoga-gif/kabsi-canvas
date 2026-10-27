@@ -1,0 +1,17 @@
+[
+  { "path": "/app/insights", "name": "insights" },
+  { "path": "/app/insights", "state": "first-task", "name": "insights-first-task" },
+  { "path": "/app/insights", "state": "first-check", "name": "insights-first-check" },
+  { "path": "/app/report", "name": "report" },
+  { "path": "/app/report", "state": "empty", "name": "report-empty" },
+  { "path": "/app/settings", "name": "settings" },
+  { "path": "/app/settings", "state": "first-task", "name": "settings-first-task" },
+  { "path": "/app/settings", "state": "manager", "name": "settings-manager" },
+  { "path": "/app/knowledge", "name": "knowledge" },
+  { "path": "/app/team", "name": "team" },
+  { "path": "/app/team", "state": "first-task", "name": "team-first-task" },
+  { "path": "/app/plan", "name": "plan-trial" },
+  { "path": "/app/plan", "state": "paid", "name": "plan-paid" },
+  { "path": "/app/plan", "state": "failed", "name": "plan-failed" },
+  { "path": "/app/plan", "state": "cancelled", "name": "plan-cancelled" }
+]

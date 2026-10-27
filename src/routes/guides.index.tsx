@@ -1,14 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Clock3 } from "lucide-react";
+import { ArrowUpRight, Clock3 } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/public-layout";
-import { CtaBand, IconBadge, PageHero, Section } from "@/components/marketing/parts";
-import { GUIDE_ICONS, GuidesVisual } from "@/components/marketing/visuals";
+import { GuideClosing, GuidePhoto } from "@/components/marketing/guide-kit";
+import { IconBadge } from "@/components/marketing/parts";
+import { GUIDE_ICONS } from "@/components/marketing/visuals";
 import { GUIDES, type Guide } from "@/lib/guides";
-import { SiteImg } from "@/components/marketing/site-img";
+import { SectionHead } from "@/components/kabsi/ui";
 import { SITE_URL, pageHead } from "@/lib/site";
-import { cn } from "@/lib/utils";
 
-// Guides index (D253, D256).
+// Guides index (D253, D256), in Design 2's guide template: the H1 and lead, the first guide large, the rest as cards,
+// and the closing band with the free check.
 export const Route = createFileRoute("/guides/")({
   head: () =>
     pageHead({
@@ -42,74 +43,83 @@ function Page() {
   const [first, ...rest] = GUIDES;
   return (
     <PublicLayout>
-      <PageHero
-        eyebrow="Guides"
-        title="Look after your Google profile."
-        sub="Short, practical how-tos with pictures, checked against Google's own help pages."
-        visual={<GuidesVisual />}
-        photo="heroGuides"
-      />
-      <Section>
-        <ul data-stagger="" className="grid gap-5 md:grid-cols-2">
-          {first ? <GuideCard g={first} featured /> : null}
+      <section className="container-kb pt-10 sm:pt-16">
+        <SectionHead
+          as="h1"
+          title="Plain guides for your Google profile."
+          lead="Short answers, then the steps. Each one is checked against Google's own help pages."
+        />
+      </section>
+      {first ? (
+        <section className="container-kb mt-10">
+          <Link
+            to="/guides/$slug"
+            params={{ slug: first.slug }}
+            className="press group grid gap-6 rounded-panel border border-line bg-surface-1 p-5 shadow-rest hover:border-line-strong sm:p-8 lg:grid-cols-[1.2fr_1fr] lg:items-center"
+          >
+            <div>
+              <ReadTime g={first} />
+              <h2 className="mt-3 font-display text-h2 font-bold text-text-1">{first.title}</h2>
+              <p className="mt-3 max-w-xl text-lead text-text-2">{first.description}</p>
+              <ReadLink />
+            </div>
+            <GuidePhoto
+              slug={first.slug}
+              priority
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              className="aspect-[4/3] w-full rounded-card object-cover"
+            />
+          </Link>
+        </section>
+      ) : null}
+      <section aria-labelledby="more-guides" className="container-kb pt-14 pb-16 lg:pb-24">
+        <h2 id="more-guides" className="font-display text-h3 font-bold text-text-1">
+          More guides
+        </h2>
+        <ul className="mt-6 grid gap-3 md:grid-cols-2">
           {rest.map((g) => (
             <GuideCard key={g.slug} g={g} />
           ))}
         </ul>
-      </Section>
-      <CtaBand />
+      </section>
+      <GuideClosing />
     </PublicLayout>
   );
 }
 
-function GuideCard({ g, featured = false }: { g: Guide; featured?: boolean }) {
+function ReadTime({ g }: { g: Guide }) {
   return (
-    <li className={cn(featured && "md:col-span-2")}>
+    <span className="inline-flex items-center gap-1.5 text-small font-bold text-text-2">
+      <Clock3 className="size-4" aria-hidden="true" />
+      {g.minutes} min read
+    </span>
+  );
+}
+
+function ReadLink() {
+  return (
+    <span className="mt-5 inline-flex min-h-11 items-center gap-2 text-body font-bold text-text-1 underline decoration-text-3 underline-offset-4 group-hover:decoration-text-1">
+      Read the guide <ArrowUpRight className="size-5" aria-hidden />
+    </span>
+  );
+}
+
+function GuideCard({ g }: { g: Guide }) {
+  return (
+    <li>
       <Link
         to="/guides/$slug"
         params={{ slug: g.slug }}
-        className={cn(
-          "kb-lift group flex h-full flex-col overflow-hidden rounded-large border border-kb-hairline bg-kb-white hover:border-kb-black",
-          featured && "md:grid md:grid-cols-[1.15fr_1fr]",
-        )}
+        className="press group flex h-full gap-4 rounded-card border border-line bg-surface-1 p-5 shadow-rest hover:border-line-strong"
       >
-        <div
-          className={cn(
-            "relative overflow-hidden bg-kb-sand",
-            featured ? "aspect-[16/9] md:aspect-auto md:h-full" : "aspect-[16/9]",
-          )}
-        >
-          <SiteImg
-            id={g.photo}
-            sizes={featured ? "(min-width: 768px) 600px, 100vw" : "(min-width: 768px) 540px, 100vw"}
-            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-          />
-          <IconBadge
-            icon={GUIDE_ICONS[g.slug]}
-            className="absolute bottom-4 left-4 size-12 shadow-[0_8px_20px_rgba(0,0,0,.25)] [&_svg]:size-6"
-          />
-        </div>
-        <div className={cn("flex flex-1 flex-col p-6", featured && "md:justify-center md:p-9")}>
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-kb-stone">
-            <Clock3 className="size-3.5" aria-hidden="true" />
-            {g.minutes} min read
+        <IconBadge icon={GUIDE_ICONS[g.slug]} />
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="text-title font-bold text-text-1">{g.title}</span>
+          <span className="mt-1 flex-1 text-small text-text-2">{g.description}</span>
+          <span className="mt-3">
+            <ReadTime g={g} />
           </span>
-          <span
-            className={cn(
-              "mt-2 font-bold leading-snug",
-              featured
-                ? "font-display text-[clamp(1.8rem,3vw,2.4rem)] font-normal leading-[1.05]"
-                : "text-xl",
-            )}
-          >
-            {g.title}
-          </span>
-          <span className="mt-3 flex-1 leading-7 text-kb-stone">{g.description}</span>
-          <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold">
-            Read the guide
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-          </span>
-        </div>
+        </span>
       </Link>
     </li>
   );

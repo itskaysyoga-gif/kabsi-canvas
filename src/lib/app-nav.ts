@@ -1,22 +1,22 @@
-// The owner app's navigation (K-02, K-03). Pure data, so the five-item phone bar, the eight desktop destinations and
+// The owner's account navigation (K-03, Design 3's names). Pure data, so the five-item phone bar, the eight desktop destinations and
 // the "every old address still lands on the right screen" list are tested in tests/app-nav.test.ts. The layout only draws it.
 import type { Role } from "@/lib/team";
 
 export type SectionId =
   | "home"
   | "reviews"
-  | "get-reviews"
   | "google-profile"
   | "content"
   | "insights"
-  | "knowledge"
+  | "reports"
+  | "get-reviews"
   | "settings"
   | "photos";
 
 export type Tab = { label: string; to: string; roles?: Role[] };
 export type Section = {
   id: SectionId;
-  /** Desktop sidebar label (the K-02 name). */
+  /** Desktop sidebar label (Design 3's owner words, master plan 30.17 section 4). */
   label: string;
   /** Phone bottom bar label, short. */
   short: string;
@@ -28,6 +28,7 @@ export type Section = {
 
 const OWNER_ONLY: Role[] = ["owner"];
 
+// UX 1 (27 Oct 2026): Design 3's names. No "listing" and no "visibility" in a line an owner reads (COPY.md 0.1).
 export const SECTIONS: Record<SectionId, Section> = {
   home: { id: "home", label: "Home", short: "Home", to: "/app", paths: ["/app"] },
   reviews: {
@@ -35,32 +36,25 @@ export const SECTIONS: Record<SectionId, Section> = {
     label: "Reviews",
     short: "Reviews",
     to: "/app/reviews",
-    // /app/inbox ("To reply") is now the Needs reply filter of the one Reviews screen and redirects to it.
+    // /app/inbox is the Waiting filter of the one Reviews screen and redirects to it.
     paths: ["/app/inbox", "/app/reviews"],
-  },
-  "get-reviews": {
-    id: "get-reviews",
-    label: "Get Reviews",
-    short: "Get Reviews",
-    to: "/app/cards",
-    paths: ["/app/cards"],
   },
   "google-profile": {
     id: "google-profile",
-    label: "Google Profile",
+    label: "Google profile",
     short: "Profile",
     to: "/app/shield",
     paths: ["/app/shield", "/app/hours", "/app/coach"],
     tabs: [
-      { label: "Google Profile", to: "/app/shield" },
+      { label: "Profile watch", to: "/app/shield" },
       { label: "Hours", to: "/app/hours" },
       { label: "Profile Coach", to: "/app/coach" },
     ],
   },
   content: {
     id: "content",
-    label: "Content",
-    short: "Content",
+    label: "Posts and photos",
+    short: "Posts",
     to: "/app/posts",
     paths: ["/app/posts", "/app/photos"],
     tabs: [
@@ -70,33 +64,37 @@ export const SECTIONS: Record<SectionId, Section> = {
   },
   insights: {
     id: "insights",
-    label: "Insights",
-    short: "Insights",
+    label: "Where you show up",
+    short: "Show up",
     to: "/app/insights",
-    paths: ["/app/insights", "/app/report"],
-    tabs: [
-      { label: "Overview", to: "/app/insights" },
-      { label: "Weekly Care Report", to: "/app/report" },
-    ],
+    paths: ["/app/insights"],
   },
-  knowledge: {
-    id: "knowledge",
-    label: "Business Knowledge",
-    short: "Knowledge",
-    to: "/app/knowledge",
-    paths: ["/app/knowledge"],
+  reports: {
+    id: "reports",
+    label: "Reports",
+    short: "Reports",
+    to: "/app/report",
+    paths: ["/app/report"],
+  },
+  "get-reviews": {
+    id: "get-reviews",
+    label: "Get reviews",
+    short: "Get reviews",
+    to: "/app/cards",
+    paths: ["/app/cards"],
   },
   settings: {
     id: "settings",
     label: "Settings",
     short: "Settings",
     to: "/app/settings",
-    paths: ["/app/settings", "/app/plan", "/app/team"],
+    paths: ["/app/settings", "/app/knowledge", "/app/plan", "/app/team"],
     // Plan and Team are the owner's: billing and the team are not a manager's (K-16).
     tabs: [
-      { label: "Notifications", to: "/app/settings" },
-      { label: "Plan", to: "/app/plan", roles: OWNER_ONLY },
+      { label: "Settings", to: "/app/settings" },
+      { label: "Business Knowledge", to: "/app/knowledge" },
       { label: "Team", to: "/app/team", roles: OWNER_ONLY },
+      { label: "Plan", to: "/app/plan", roles: OWNER_ONLY },
     ],
   },
   // Staff see photos and the review link and nothing else (K-16).
@@ -113,17 +111,17 @@ export const SECTIONS: Record<SectionId, Section> = {
 export const DESKTOP: SectionId[] = [
   "home",
   "reviews",
-  "get-reviews",
   "google-profile",
   "content",
   "insights",
-  "knowledge",
+  "reports",
+  "get-reviews",
   "settings",
 ];
 /** The four places the phone bar shows by name; the fifth is More (K-03). */
 export const PHONE_BAR: SectionId[] = ["home", "reviews", "google-profile", "content"];
 /** What More opens on a phone (K-03). */
-export const MORE: SectionId[] = ["get-reviews", "insights", "knowledge", "settings"];
+export const MORE: SectionId[] = ["insights", "reports", "get-reviews", "settings"];
 export const STAFF: SectionId[] = ["photos", "get-reviews"];
 
 export const desktopSections = (role: Role | undefined): Section[] =>
@@ -158,8 +156,8 @@ export const OLD_APP_ADDRESSES: Record<string, SectionId> = {
   "/app/posts": "content",
   "/app/photos": "content",
   "/app/insights": "insights",
-  "/app/report": "insights",
-  "/app/knowledge": "knowledge",
+  "/app/report": "reports",
+  "/app/knowledge": "settings",
   "/app/settings": "settings",
   "/app/plan": "settings",
   "/app/team": "settings",

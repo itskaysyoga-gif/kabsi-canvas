@@ -5,15 +5,15 @@ import { cn } from "@/lib/utils";
 // One banner for every notice. Yellow appears only as the "needs you" highlight; amber is "needs your attention";
 // red is for real problems only.
 const bannerVariants = cva(
-  "flex w-full items-start gap-3 rounded-card border px-4 py-3 text-kb-small",
+  "flex w-full items-start gap-3 rounded-card border px-4 py-3 text-small",
   {
     variants: {
       tone: {
-        info: "border-kb-hairline bg-kb-sand text-kb-ink",
-        needsYou: "border-kb-yellow bg-kb-yellow/20 text-kb-ink",
-        attention: "border-kb-amber/30 bg-kb-amber-soft text-kb-amber",
-        success: "border-kb-green/30 bg-kb-green/10 text-kb-green",
-        problem: "border-kb-red/30 bg-kb-red/10 text-kb-red",
+        info: "border-line bg-surface-2 text-text-1",
+        needsYou: "border-kb-yellow bg-kb-yellow/20 text-text-1",
+        attention: "border-warn/30 bg-warn-soft text-warn",
+        success: "border-kb-green/30 bg-ok-soft text-ok",
+        problem: "border-bad/30 bg-bad-soft text-bad",
       },
     },
     defaultVariants: { tone: "info" },

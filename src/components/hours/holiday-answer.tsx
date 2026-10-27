@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/kabsi/ui";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -85,7 +85,7 @@ export function HolidayAnswerForm({
               setAnswer(c.id);
               setErr("");
             }}
-            className={`min-h-12 rounded-card border-2 px-2 text-sm font-bold ${answer === c.id ? "border-kb-black bg-kb-sand" : "border-kb-hairline"}`}
+            className={`min-h-12 rounded-full border px-2 text-small font-bold ${answer === c.id ? "border-text-1 bg-text-1 text-surface-0" : "border-line-strong bg-surface-1 text-text-1"}`}
           >
             {c.label}
           </button>
@@ -95,7 +95,7 @@ export function HolidayAnswerForm({
       {answer && answer !== "normal" ? (
         <div className="mt-4 space-y-3">
           {holiday.estimated ? (
-            <p className="text-sm leading-6 text-kb-stone">
+            <p className="text-small text-text-2">
               This date follows the moon. If the announced days are different, move them here.
             </p>
           ) : null}
@@ -151,39 +151,40 @@ export function HolidayAnswerForm({
       ) : null}
 
       {answer ? (
-        <div className="mt-4 rounded-card border-2 border-kb-black p-4">
-          <p className="text-sm">
+        <div className="mt-4 rounded-inner border border-line-strong bg-surface-2 p-4">
+          <p className="text-small text-text-2">
             {answer === "normal" ? "Kabsi will record:" : "Google will show:"}
           </p>
-          <p className="mt-1 font-bold">
+          <p className="mt-1 text-body font-bold text-text-1">
             {problem ? "Check the details above." : readBack(holiday, answer, f)}
           </p>
           {answer === "normal" && regularHours ? (
-            <p className="mt-1 text-sm text-kb-stone">Your approved hours: {regularHours}</p>
+            <p className="mt-1 text-small text-text-2">Your approved hours: {regularHours}</p>
           ) : null}
           {answer === "normal" ? (
-            <p className="mt-1 text-sm text-kb-stone">Nothing changes on Google.</p>
+            <p className="mt-1 text-small text-text-2">Nothing changes on Google.</p>
           ) : null}
           <Button
+            size="md"
+            data-main-cta
             className="mt-4 w-full sm:w-auto"
-            disabled={busy || !!problem}
+            loading={busy}
+            disabled={!!problem}
             onClick={() => void confirm()}
           >
-            {busy
-              ? "Saving…"
-              : (confirmLabel?.(answer) ??
-                (answer === "normal" ? "Keep my normal hours" : "Confirm and save to Google"))}
+            {confirmLabel?.(answer) ??
+              (answer === "normal" ? "Keep my normal hours" : "Confirm and save to Google")}
           </Button>
         </div>
       ) : (
-        <p className="mt-3 text-sm text-kb-stone">
+        <p className="mt-3 text-small text-text-2">
           {holiday.name} {holiday.estimated ? "is expected" : "is"} on{" "}
           {whenWords(holiday.starts_on, holiday.ends_on)}. Kabsi does not assume your hours: choose
           one.
         </p>
       )}
       {err ? (
-        <p className="mt-3 text-sm text-kb-red" role="alert">
+        <p className="mt-3 text-small font-semibold text-bad" role="alert">
           {err}
         </p>
       ) : null}

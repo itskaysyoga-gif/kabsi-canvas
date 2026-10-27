@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button, Switch, WhatsAppGlyph } from "@/components/kabsi/ui";
 import { WHATSAPP_ON } from "@/lib/site";
 import {
   WHATSAPP_CONSENT_TEXT,
@@ -11,15 +10,15 @@ import {
   whatsappStatus,
 } from "@/lib/whatsapp-owner";
 
-// The WhatsApp channel in "What Kabsi tells you" (P0.8-03, K-129). While Kabsi has no WhatsApp number it says "coming
-// soon" and calls nothing. Connect opens WhatsApp with a one-time code; sending it is the opt-in. Once connected the
-// owner chooses review alerts and the weekly digest, or disconnects (the same as replying STOP).
+// The WhatsApp panel in Settings (P0.8-03, K-129). While Kabsi has no WhatsApp number it says "coming soon" and calls
+// nothing. Connect opens WhatsApp with a one-time code; sending it is the opt-in. Once connected the owner chooses review
+// alerts and the weekly report on WhatsApp, or disconnects (the same as replying STOP).
 export function WhatsappChannel() {
   if (!WHATSAPP_ON) {
     return (
-      <div className="mt-6 rounded-card bg-kb-sand p-4" data-testid="whatsapp-coming-soon">
-        <p className="font-bold">WhatsApp: coming soon</p>
-        <p className="mt-1 text-sm leading-6 text-kb-stone">
+      <div className="rounded-inner bg-surface-2 p-4" data-testid="whatsapp-coming-soon">
+        <p className="text-body font-bold">WhatsApp: coming soon</p>
+        <p className="mt-1 text-small text-text-2">
           Review alerts and Approve on WhatsApp start when Kabsi&apos;s WhatsApp number is ready.
           Until then everything comes by email and in the bell on Home.
         </p>
@@ -54,66 +53,79 @@ function WhatsappConnected() {
   const s = status.data;
 
   return (
-    <div className="mt-6 rounded-card border border-kb-hairline p-4">
-      <p className="font-bold">WhatsApp</p>
+    <div>
       {s?.state === "active" ? (
         <>
-          <p className="mt-1 text-sm leading-6 text-kb-stone">
-            Connected to the phone ending in {s.phone_last4}. Reply STOP there at any time to stop.
+          <p className="flex items-center gap-2 text-body">
+            <WhatsAppGlyph className="size-5" />
+            Connected to the phone ending in {s.phone_last4}.
           </p>
-          <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3 text-sm">
-            <Checkbox
+          <p className="mt-1 text-small text-text-2">Reply STOP there at any time to stop.</p>
+          <div className="mt-4 space-y-4 border-t border-line pt-4">
+            <Switch
+              label="Review alerts with Approve"
               checked={s.review_alerts !== false}
-              onCheckedChange={(v) => prefs.mutate({ alerts: v === true, digest: null })}
-              className="size-5 rounded-md border-2 border-kb-black"
+              disabled={prefs.isPending}
+              onChange={(v) => prefs.mutate({ alerts: v, digest: null })}
             />
-            <span>Review alerts with Approve</span>
-          </label>
-          <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm">
-            <Checkbox
+            <Switch
+              label="Results Report on WhatsApp"
               checked={s.digest_optin === true}
-              onCheckedChange={(v) => prefs.mutate({ alerts: null, digest: v === true })}
-              className="size-5 rounded-md border-2 border-kb-black"
+              disabled={prefs.isPending}
+              onChange={(v) => prefs.mutate({ alerts: null, digest: v })}
             />
-            <span>The weekly summary on WhatsApp</span>
-          </label>
+          </div>
           <Button
-            variant="outline"
-            className="mt-3 min-h-11"
+            variant="secondary"
+            size="md"
+            className="mt-4"
             onClick={() => disconnect.mutate()}
-            disabled={disconnect.isPending}
+            loading={disconnect.isPending}
           >
             Disconnect WhatsApp
           </Button>
         </>
       ) : (
         <>
-          <p className="mt-1 text-sm leading-6 text-kb-stone">{WHATSAPP_CONSENT_TEXT}</p>
+          <p className="text-small text-text-2">{WHATSAPP_CONSENT_TEXT}</p>
           <Button
-            variant="outline"
-            className="mt-3 min-h-11"
+            variant="whatsapp"
+            size="md"
+            className="mt-3"
+            icon={<WhatsAppGlyph className="size-4.5" />}
             onClick={() => connect.mutate()}
-            disabled={connect.isPending}
+            loading={connect.isPending}
           >
             Connect WhatsApp
           </Button>
           {code ? (
-            <p className="mt-3 text-sm leading-6">
+            <p className="mt-3 text-small">
               WhatsApp opens with the code <b>{code.code}</b> typed in. Press send from the phone
               you want to connect. The code works for 30 minutes.{" "}
-              <a href={code.href} target="_blank" rel="noopener noreferrer" className="underline">
+              <a
+                href={code.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center font-bold underline underline-offset-4"
+              >
                 Open WhatsApp again
               </a>{" "}
-              <button type="button" className="underline" onClick={refresh}>
+              <button
+                type="button"
+                className="inline-flex min-h-11 items-center font-bold underline underline-offset-4"
+                onClick={refresh}
+              >
                 I sent it
               </button>
             </p>
           ) : null}
         </>
       )}
-      <p className="mt-2 min-h-6 text-sm text-kb-red" role="status">
-        {err}
-      </p>
+      {err ? (
+        <p className="mt-2 text-small text-bad" role="status">
+          {err}
+        </p>
+      ) : null}
     </div>
   );
 }

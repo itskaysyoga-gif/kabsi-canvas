@@ -1,7 +1,8 @@
 // Data layer for /start and card activation. Every write is a membership-checked RPC or Edge
 // Function (migrations 20260925060903 / places-search). The browser never writes tables directly.
-import { supabase } from "@/lib/supabase";
+import { anonHeaders, sessionFetch, supabase, supabaseUrl } from "@/lib/supabase";
 import { callFunction } from "@/lib/api";
+import { RESUME_CODE, type OnboardingStatus } from "@/lib/onboarding-flow";
 import type { PlanKind } from "@/lib/plans";
 import type { OwnerVariant, ScenarioId } from "@/lib/scenarios";
 
@@ -178,3 +179,43 @@ export const scenarioDone = (locationId: string) =>
   rpc<void>("scenario_done", { p_location: locationId });
 export const clearScenario = (locationId: string) =>
   rpc<void>("clear_onboarding_scenario", { p_location: locationId });
+
+// ── Onboarding in four stages (V4, master plan 30.16 section 3) ───────────────────────────────────────────────────────
+
+/** The stages as the server knows them (members only; owners also get the resume code, made once). */
+export const loadOnboardingStatus = (locationId: string) =>
+  rpc<OnboardingStatus>("onboarding_status", { p_location: locationId });
+
+/** Stage 2: the owner confirms the business and that they can manage its Google profile. */
+export const confirmBusiness = (locationId: string) =>
+  rpc<void>("confirm_business", { p_location: locationId });
+
+/** Joins the free check the owner came from to the business (stage 1 to 2). False when the code is unknown or taken. */
+export const claimFreeCheck = (locationId: string, code: string) =>
+  rpc<boolean>("claim_free_check", { p_location: locationId, p_code: code });
+
+/** What GET /api/resume answers: the business the link belongs to, its stage and the page for it. */
+export type ResumeAnswer = {
+  location_id: string;
+  business: string;
+  stage: "confirm" | "whatsapp" | "access" | "first_task" | "done";
+  access: string;
+  path: string;
+};
+
+/**
+ * The resume link's next step, for the signed-in person. null when the code is not right or the business is not theirs
+ * (the server says "not_found" for both, so a forwarded link shows a stranger nothing).
+ */
+export async function resumeStep(code: string): Promise<ResumeAnswer | null> {
+  if (!RESUME_CODE.test(code)) return null;
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  const res = await sessionFetch(
+    `${supabaseUrl}/functions/v1/api/resume?code=${encodeURIComponent(code)}`,
+    { headers: { ...anonHeaders, ...(token ? { authorization: `Bearer ${token}` } : {}) } },
+  );
+  if (res.status === 400 || res.status === 404) return null;
+  if (!res.ok) throw new Error(`resume_${res.status}`);
+  return (await res.json()) as ResumeAnswer;
+}

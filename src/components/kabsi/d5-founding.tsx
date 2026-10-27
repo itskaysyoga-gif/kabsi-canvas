@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Turnstile } from "@/components/turnstile";
 import {
   ApiError,
-  FOUNDING_CONSENT_TEXT,
+  FOUNDING_CONSENT,
   applyFounding,
   useFoundingPlaces,
   type FoundingApplication,
@@ -16,7 +16,7 @@ import {
 } from "@/lib/public-api";
 import { PageTop, useFlagState } from "./d2-parts";
 import { FOUNDER } from "./photos";
-import { Banner, Button, ButtonLink, Faq, Field, SectionHead, StatusPill } from "./ui";
+import { Banner, Button, ButtonLink, Faq, Field, SectionHead, Segmented, StatusPill } from "./ui";
 
 export const FOUNDING25_TOTAL = 25;
 export const FOUNDING25_LINE =
@@ -330,6 +330,8 @@ function Application({ onSent }: { onSent: () => void }) {
     trade: "",
     phone: "",
     why: "",
+    // UX 1: the owner picks named or anonymous here; anonymous unless they choose named.
+    caseStudy: "anonymous" as "anonymous" | "named",
     checkIn: false,
   });
   const [errors, setErrors] = useState<Errors>({});
@@ -368,8 +370,7 @@ function Application({ onSent }: { onSent: () => void }) {
         business_kind: f.trade,
         whatsapp: f.phone.trim(),
         why_now: f.why.trim(),
-        // The owner chooses named or anonymous when Rashid writes the case study with them; until then, anonymous.
-        case_study: "anonymous",
+        case_study: f.caseStudy,
         checkin_consent: true,
         turnstile: t,
       });
@@ -454,9 +455,26 @@ function Application({ onSent }: { onSent: () => void }) {
           </p>
         )}
       </div>
-      {/* One tick with the exact words the server stores as proof (programs.ts FOUNDING_CONSENT_TEXT). */}
+      <div>
+        <p aria-hidden className="mb-2 text-small font-bold text-text-1">
+          Named or anonymous case study
+        </p>
+        <Segmented
+          label="Named or anonymous case study"
+          value={f.caseStudy}
+          onChange={(v) =>
+            // The tick agrees to the words shown for one choice: a new choice needs a new tick.
+            setF((x) => ({ ...x, caseStudy: v, checkIn: false }))
+          }
+          options={[
+            { value: "anonymous", label: "Anonymous" },
+            { value: "named", label: "Named" },
+          ]}
+        />
+      </div>
+      {/* One tick with the exact words the server stores as proof (programs.ts FOUNDING_CONSENT), for the choice above. */}
       <Tick checked={f.checkIn} onChange={(v) => set("checkIn", v)} error={errors.checkIn || null}>
-        {FOUNDING_CONSENT_TEXT}
+        {FOUNDING_CONSENT[f.caseStudy]}
       </Tick>
       <Turnstile key={round} onToken={setToken} />
       {failure && <Banner tone="bad" title={failure} />}

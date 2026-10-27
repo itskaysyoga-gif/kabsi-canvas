@@ -1,9 +1,9 @@
 import { fmtDateTime } from "@/lib/format";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
+import { Button, STAFF_H2 } from "./staff-ui";
 
 // Staff operations (spec §9): job health, read through the staff-only RPC staff_job_health. Card codes and card
 // orders are gone (K-125, P0.8-01): Kabsi sells no NFC cards and mints no new codes; existing codes keep working.
@@ -64,7 +64,7 @@ async function loadHealth(): Promise<Health> {
 
 export function OpsPanel() {
   return (
-    <div className="mt-8 space-y-10">
+    <div>
       <JobHealth />
     </div>
   );
@@ -73,19 +73,19 @@ export function OpsPanel() {
 function JobHealth() {
   const q = useQuery({ queryKey: ["staff-health"], queryFn: loadHealth });
   const h = q.data;
-  const bad = (n: number) => (n > 0 ? "text-kb-red font-bold" : "");
+  const bad = (n: number) => (n > 0 ? "text-bad font-bold" : "");
   return (
     <section>
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-xl font-bold">Job health</h2>
+        <h2 className={STAFF_H2}>Job health</h2>
         <Button variant="ghost" size="compact" onClick={() => void q.refetch()}>
-          <RefreshCw /> {q.isFetching ? "Checking…" : "Refresh"}
+          <RefreshCw /> {q.isFetching ? "Checking" : "Refresh"}
         </Button>
       </div>
-      {q.isError ? <p className="mt-2 text-kb-red">{q.error.message}</p> : null}
+      {q.isError ? <p className="mt-2 text-bad">{q.error.message}</p> : null}
       {h ? (
         <>
-          <p className="mt-1 text-sm text-kb-stone">
+          <p className="mt-1 text-small text-text-2">
             Google: {h.google_mode} · sending as {h.email_from} · checked {when(h.checked_at)}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -111,9 +111,14 @@ function JobHealth() {
               warn={h.reviews_blocked > 0}
             />
           </div>
-          <div className="mt-4 overflow-x-auto rounded-large bg-kb-white shadow-kb">
-            <table className="w-full text-left text-sm">
-              <thead className="text-kb-stone">
+          <div
+            tabIndex={0}
+            role="region"
+            aria-label="Schedules"
+            className="mt-4 overflow-x-auto rounded-inner border border-line"
+          >
+            <table className="w-full text-start text-small">
+              <thead className="text-text-2">
                 <tr>
                   <th className="p-3 font-medium">Schedule</th>
                   <th className="p-3 font-medium">Runs</th>
@@ -121,12 +126,12 @@ function JobHealth() {
                   <th className="p-3 font-medium">Failed 24h</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-kb-hairline">
+              <tbody className="divide-y divide-line">
                 {h.schedules.map((s) => (
                   <tr key={s.name}>
-                    <td className="p-3 font-mono text-xs">{s.name.replace(/^kabsi_/, "")}</td>
-                    <td className="p-3 font-mono text-xs">{s.schedule}</td>
-                    <td className={cn("p-3", s.last_status === "failed" && "text-kb-red")}>
+                    <td className="p-3 font-mono text-label">{s.name.replace(/^kabsi_/, "")}</td>
+                    <td className="p-3 font-mono text-label">{s.schedule}</td>
+                    <td className={cn("p-3", s.last_status === "failed" && "text-bad")}>
                       {when(s.last_start)} · {s.active ? (s.last_status ?? "never") : "paused"}
                     </td>
                     <td className={cn("p-3", bad(s.failed_24h))}>{s.failed_24h}</td>
@@ -135,7 +140,7 @@ function JobHealth() {
               </tbody>
             </table>
           </div>
-          <p className="mt-3 text-sm text-kb-stone">
+          <p className="mt-3 text-small text-text-2">
             Work done, last 7 days:{" "}
             {h.jobs.length
               ? h.jobs
@@ -144,7 +149,7 @@ function JobHealth() {
               : "nothing yet"}
           </p>
           {h.queue ? (
-            <p className="mt-2 text-sm text-kb-stone">
+            <p className="mt-2 text-small text-text-2">
               Job queue: {h.queue.pending} waiting · {h.queue.running} running · {h.queue.retrying}{" "}
               retrying · <span className={bad(h.queue.due_late)}>{h.queue.due_late} late</span> ·{" "}
               <span className={bad(h.queue.dead_7d + h.queue.failed_7d)}>
@@ -153,11 +158,11 @@ function JobHealth() {
             </p>
           ) : null}
           {h.stopped_jobs?.length ? (
-            <details className="mt-2 text-sm" open>
-              <summary className="cursor-pointer font-bold text-kb-red">
+            <details className="mt-2 text-small" open>
+              <summary className="cursor-pointer font-bold text-bad">
                 {h.stopped_jobs.length} stopped {h.stopped_jobs.length === 1 ? "job" : "jobs"}
               </summary>
-              <ul className="mt-2 space-y-1 font-mono text-xs">
+              <ul className="mt-2 space-y-1 font-mono text-label">
                 {h.stopped_jobs.map((j) => (
                   <li key={j.id}>
                     {when(j.at)} {j.kind} {j.state} after {j.attempts}{" "}
@@ -169,11 +174,11 @@ function JobHealth() {
             </details>
           ) : null}
           {h.recent_failures.length ? (
-            <details className="mt-2 text-sm">
-              <summary className="cursor-pointer font-bold text-kb-red">
+            <details className="mt-2 text-small">
+              <summary className="cursor-pointer font-bold text-bad">
                 {h.recent_failures.length} recent failures
               </summary>
-              <ul className="mt-2 space-y-1 font-mono text-xs">
+              <ul className="mt-2 space-y-1 font-mono text-label">
                 {h.recent_failures.map((f, i) => (
                   <li key={i}>
                     {when(f.at)} {f.job}: {JSON.stringify(f.detail).slice(0, 200)}
@@ -190,9 +195,9 @@ function JobHealth() {
 
 function Stat({ label, value, warn = false }: { label: string; value: string; warn?: boolean }) {
   return (
-    <div className="rounded-large bg-kb-white p-4 shadow-kb">
-      <p className="text-xs text-kb-stone">{label}</p>
-      <p className={cn("mt-1 text-2xl font-bold", warn && "text-kb-red")}>{value}</p>
+    <div className="rounded-inner bg-surface-2 p-4">
+      <p className="text-label text-text-2">{label}</p>
+      <p className={cn("mt-1 text-h3 font-bold", warn && "text-bad")}>{value}</p>
     </div>
   );
 }

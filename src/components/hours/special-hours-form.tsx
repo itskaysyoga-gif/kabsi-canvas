@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/kabsi/ui";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { addDays, fmt, localToday, range, times } from "@/lib/hours-format";
@@ -66,7 +66,7 @@ export function SpecialHoursForm({
   }
 
   return (
-    <form onSubmit={review} className="mt-7 rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
+    <form onSubmit={review} className="mt-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <Label htmlFor="start">From</Label>
@@ -108,7 +108,7 @@ export function SpecialHoursForm({
               setClosed(c);
               setConfirming(false);
             }}
-            className={`h-11 rounded-card border-2 text-sm font-bold ${closed === c ? "border-kb-black bg-kb-sand" : "border-kb-hairline"}`}
+            className={`min-h-11 rounded-full border px-2 text-small font-bold ${closed === c ? "border-text-1 bg-text-1 text-surface-0" : "border-line-strong text-text-1"}`}
           >
             {c ? "Closed" : "Open, different hours"}
           </button>
@@ -144,8 +144,8 @@ export function SpecialHoursForm({
           </div>
         </div>
       ) : null}
-      <Label htmlFor="reason" className="mt-4 block text-sm">
-        Note for yourself <span className="text-kb-stone">(optional, not shown on Google)</span>
+      <Label htmlFor="reason" className="mt-4 block text-small">
+        Note for yourself <span className="text-text-2">(optional, not shown on Google)</span>
       </Label>
       <Input
         id="reason"
@@ -156,28 +156,28 @@ export function SpecialHoursForm({
         className="mt-2"
       />
       {err ? (
-        <p className="mt-3 text-sm text-kb-red" role="alert">
+        <p className="mt-3 text-small font-semibold text-bad" role="alert">
           {err}
         </p>
       ) : null}
       {msg ? (
-        <p className="mt-3 text-sm text-kb-green" role="status">
+        <p className="mt-3 text-small text-ok" role="status">
           {msg}
         </p>
       ) : null}
       {confirming ? (
-        <div className="mt-5 rounded-card border-2 border-kb-black p-4">
-          <p className="text-sm">Google will show:</p>
-          <p className="mt-1 font-bold">
+        <div className="mt-5 rounded-inner border border-line-strong bg-surface-2 p-4">
+          <p className="text-small text-text-2">Google will show:</p>
+          <p className="mt-1 text-body font-bold text-text-1">
             {range(summary)}: {times(summary)}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button type="button" disabled={busy} onClick={() => void confirm()}>
-              {busy ? "Saving…" : "Confirm and save to Google"}
+            <Button size="md" data-main-cta loading={busy} onClick={() => void confirm()}>
+              Confirm and save to Google
             </Button>
             <Button
-              type="button"
-              variant="ghost"
+              size="md"
+              variant="secondary"
               disabled={busy}
               onClick={() => setConfirming(false)}
             >
@@ -186,7 +186,7 @@ export function SpecialHoursForm({
           </div>
         </div>
       ) : (
-        <Button type="submit" className="mt-5 w-full">
+        <Button type="submit" size="md" variant="secondary" className="mt-5">
           Review
         </Button>
       )}
@@ -243,8 +243,8 @@ export function ClosureForm({ locationId, onDone }: { locationId: string; onDone
   }
 
   return (
-    <form onSubmit={review} className="mt-7 rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
-      <p className="text-sm text-kb-stone">
+    <form onSubmit={review} className="mt-4">
+      <p className="text-small text-text-2">
         Closing for a refit, a holiday or a break? Say the first day you are closed and the day you
         open again.
       </p>
@@ -279,8 +279,8 @@ export function ClosureForm({ locationId, onDone }: { locationId: string; onDone
           />
         </div>
       </div>
-      <Label htmlFor="closure-reason" className="mt-4 block text-sm">
-        Note for yourself <span className="text-kb-stone">(optional, not shown on Google)</span>
+      <Label htmlFor="closure-reason" className="mt-4 block text-small">
+        Note for yourself <span className="text-text-2">(optional, not shown on Google)</span>
       </Label>
       <Input
         id="closure-reason"
@@ -291,29 +291,29 @@ export function ClosureForm({ locationId, onDone }: { locationId: string; onDone
         className="mt-2"
       />
       {err ? (
-        <p className="mt-3 text-sm text-kb-red" role="alert">
+        <p className="mt-3 text-small font-semibold text-bad" role="alert">
           {err}
         </p>
       ) : null}
       {msg ? (
-        <p className="mt-3 text-sm text-kb-green" role="status">
+        <p className="mt-3 text-small text-ok" role="status">
           {msg}
         </p>
       ) : null}
       {confirming ? (
-        <div className="mt-5 rounded-card border-2 border-kb-black p-4">
-          <p className="text-sm">Google will show:</p>
-          <p className="mt-1 font-bold">
+        <div className="mt-5 rounded-inner border border-line-strong bg-surface-2 p-4">
+          <p className="text-small text-text-2">Google will show:</p>
+          <p className="mt-1 text-body font-bold text-text-1">
             {range({ start_date: start, end_date: lastClosedDay })}: Closed
           </p>
-          <p className="text-sm">Your usual hours again from {fmt(reopen)}.</p>
+          <p className="text-small">Your usual hours again from {fmt(reopen)}.</p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button type="button" disabled={busy} onClick={() => void confirm()}>
-              {busy ? "Saving…" : "Confirm and save to Google"}
+            <Button size="md" data-main-cta loading={busy} onClick={() => void confirm()}>
+              Confirm and save to Google
             </Button>
             <Button
-              type="button"
-              variant="ghost"
+              size="md"
+              variant="secondary"
               disabled={busy}
               onClick={() => setConfirming(false)}
             >
@@ -322,7 +322,7 @@ export function ClosureForm({ locationId, onDone }: { locationId: string; onDone
           </div>
         </div>
       ) : (
-        <Button type="submit" className="mt-5 w-full">
+        <Button type="submit" size="md" variant="secondary" className="mt-5">
           Review
         </Button>
       )}

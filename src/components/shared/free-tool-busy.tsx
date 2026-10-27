@@ -12,9 +12,9 @@ export function FreeToolBusy() {
     <div
       role="status"
       data-testid="free-tool-busy"
-      className="rounded-large bg-kb-sand p-6 text-kb-ink sm:p-8"
+      className="rounded-panel bg-surface-2 p-6 text-text-1 sm:p-8"
     >
-      <p className="max-w-xl text-lg leading-8">{FREE_TOOL_BUSY}</p>
+      <p className="max-w-xl text-title leading-8">{FREE_TOOL_BUSY}</p>
       <Button asChild className="mt-5 w-full sm:w-auto">
         <Link to="/start">{CTA_TRIAL}</Link>
       </Button>

@@ -1,0 +1,4 @@
+[
+  { "path": "/app", "name": "home" },
+  { "path": "/app", "state": "setup", "name": "home-setup" }
+]

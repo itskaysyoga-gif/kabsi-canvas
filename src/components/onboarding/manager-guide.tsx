@@ -53,8 +53,8 @@ export function ManagerGuide({
 
   return (
     <div>
-      <div className="rounded-card bg-kb-sand p-4 text-center">
-        <p className="text-sm font-bold text-kb-stone">Kabsi group ID</p>
+      <div className="rounded-card bg-surface-2 p-4 text-center">
+        <p className="text-small font-bold text-text-2">Kabsi group ID</p>
         <p className="mt-1 font-display text-5xl leading-none tracking-wide" data-testid="group-id">
           {KABSI_GROUP_ID}
         </p>
@@ -69,7 +69,7 @@ export function ManagerGuide({
 
       <section
         aria-label={`Step ${index + 1} of ${cards.length}`}
-        className="mt-5 rounded-card border-2 border-kb-hairline p-4 sm:p-5"
+        className="mt-5 rounded-card border-2 border-line p-4 sm:p-5"
         onTouchStart={(e) => (touch.current = e.touches[0]?.clientX ?? null)}
         onTouchEnd={(e) => {
           const from = touch.current;
@@ -79,10 +79,10 @@ export function ManagerGuide({
           go(index + (to < from ? 1 : -1));
         }}
       >
-        <p className="text-kb-caption font-bold uppercase text-kb-stone">
+        <p className="text-small font-bold uppercase text-text-2">
           Step {index + 1} of {cards.length}
         </p>
-        <h3 className="mt-1 text-xl font-bold leading-snug">{card.title}</h3>
+        <h3 className="mt-1 text-title font-bold leading-snug">{card.title}</h3>
         <p className="mt-2 leading-7">{card.text}</p>
         {card.images?.map((img) => (
           <img
@@ -92,13 +92,13 @@ export function ManagerGuide({
             width={1600}
             height={885}
             loading="lazy"
-            className="mt-4 h-auto w-full rounded-card border border-kb-hairline"
+            className="mt-4 h-auto w-full rounded-card border border-line"
           />
         ))}
         {card.images ? (
-          <p className="mt-2 text-kb-caption text-kb-stone">
+          <p className="mt-2 text-small text-text-2">
             Screens as of {SCREENSHOT_DATE}. Screens look different?{" "}
-            <BookingLink kind="setup" className="text-kb-ink">
+            <BookingLink kind="setup" className="text-text-1">
               Book a free setup call
             </BookingLink>
             .
@@ -107,12 +107,12 @@ export function ManagerGuide({
         {card.opensListing ? (
           <Button asChild variant="outline" className="mt-4 w-full sm:w-auto">
             <a href={listingUrl(device, businessName)} target="_blank" rel="noopener noreferrer">
-              Open my Google listing <ExternalLink />
+              Open my Google profile <ExternalLink />
             </a>
           </Button>
         ) : null}
         {card.showsId ? (
-          <div className="mt-4 flex flex-wrap items-center gap-3 rounded-card bg-kb-sand px-4 py-3">
+          <div className="mt-4 flex flex-wrap items-center gap-3 rounded-card bg-surface-2 px-4 py-3">
             <span className="font-bold">Group ID {KABSI_GROUP_ID}</span>
             <CopyButton text={KABSI_GROUP_ID} label="Copy group ID" />
           </div>
@@ -129,10 +129,7 @@ export function ManagerGuide({
                 className="grid size-11 place-items-center"
               >
                 <span
-                  className={cn(
-                    "size-2.5 rounded-full",
-                    i === index ? "bg-kb-black" : "bg-kb-hairline",
-                  )}
+                  className={cn("size-2.5 rounded-full", i === index ? "bg-kb-black" : "bg-line")}
                 />
               </button>
             </li>
@@ -164,7 +161,7 @@ export function ManagerGuide({
 
       <button
         type="button"
-        className="mt-3 min-h-11 text-sm font-medium text-kb-ink underline underline-offset-4"
+        className="mt-3 min-h-11 text-small font-medium text-text-1 underline underline-offset-4"
         onClick={() => {
           const other: Device = device === "phone" ? "computer" : "phone";
           setChosen(other);
@@ -173,10 +170,10 @@ export function ManagerGuide({
       >
         {device === "phone" ? "Show me the computer version" : "Show me the phone version"}
       </button>
-      <p className="mt-1 text-sm leading-6 text-kb-stone">
+      <p className="mt-1 text-small leading-6 text-text-2">
         Kabsi can&apos;t see your password. You can remove Kabsi at any time in People and access.{" "}
         Stuck?{" "}
-        <BookingLink kind="setup" className="text-kb-ink">
+        <BookingLink kind="setup" className="text-text-1">
           Book a free {SETUP_CALL_MINUTES}-minute setup call
         </BookingLink>
         .

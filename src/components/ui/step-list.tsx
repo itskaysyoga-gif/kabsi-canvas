@@ -26,21 +26,21 @@ function StepList({
             <span
               aria-hidden="true"
               className={cn(
-                "grid size-8 shrink-0 place-items-center rounded-full text-kb-small font-bold",
+                "grid size-8 shrink-0 place-items-center rounded-full text-small font-bold",
                 done && "bg-kb-green text-kb-white",
-                active && "border-2 border-kb-black bg-kb-white text-kb-black",
-                !done && !active && "bg-kb-sand text-kb-stone",
+                active && "border-2 border-text-1 bg-surface-1 text-text-1",
+                !done && !active && "bg-surface-2 text-text-2",
               )}
             >
               {done ? <Check className="size-4" strokeWidth={3} /> : i + 1}
             </span>
             <div className="min-w-0 pt-0.5">
-              <p className={cn("font-bold", !done && !active && "text-kb-stone")}>
+              <p className={cn("font-bold", !done && !active && "text-text-2")}>
                 {step.title}
                 {done ? <span className="sr-only"> (done)</span> : null}
               </p>
               {step.description ? (
-                <p className="mt-0.5 text-kb-small text-kb-stone">{step.description}</p>
+                <p className="mt-0.5 text-small text-text-2">{step.description}</p>
               ) : null}
             </div>
           </li>

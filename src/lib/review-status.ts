@@ -32,7 +32,12 @@ export function reviewStatus(r: StatusInput, concierge = false): ReviewStatus {
   if (r.reply_state === "rejected") return S("rejected", "Rejected by Google", "red");
   if (r.state === "posted" && r.reply_state === "in_review")
     return S("checking", "Google is checking your reply", "amber");
-  if (r.state === "posted") return S("published", "Published", "green");
+  // UX 1: "On Google" only when Kabsi has read the reply back from Google (existing_reply); a reply Google took but Kabsi
+  // has not seen there yet is "Sent to Google" (30.15 section 3.1).
+  if (r.state === "posted")
+    return r.existing_reply
+      ? S("published", "On Google", "green")
+      : S("on_its_way", "Sent to Google", "grey");
   if (r.state === "publishing")
     return concierge
       ? S("on_its_way", "Approved, our team posts it", "grey")
@@ -41,7 +46,7 @@ export function reviewStatus(r: StatusInput, concierge = false): ReviewStatus {
   if (r.state === "handled_offline") return S("replied_self", "You replied yourself", "grey");
   if (r.state === "archived")
     return r.existing_reply
-      ? S("published", "Published", "green")
+      ? S("published", "On Google", "green")
       : S("older", "Older, not answered", "grey");
   if (r.state === "new") return S("drafting", "Kabsi is drafting", "grey");
   // drafted or blocked: a draft that is ready, or something only the owner can do.
@@ -100,4 +105,63 @@ export function sortReviews<T extends StatusInput & { review_created_at: string 
   return [...rows].sort((a, b) =>
     f === "needs" ? riskRank(b.risk) - riskRank(a.risk) || newest(a, b) : newest(a, b),
   );
+}
+
+// ── Design 3's three views (master plan 30.17 section 4): Waiting, On Google, All. The old filters above stay as
+// addresses: emails, saved links and /app/inbox still send ?f=needs and land on Waiting.
+export type ReviewView = "waiting" | "google" | "all";
+export const VIEWS: { key: ReviewView; label: string }[] = [
+  { key: "waiting", label: "Waiting" },
+  { key: "google", label: "On Google" },
+  { key: "all", label: "All" },
+];
+
+/** The view an address asks for, old ?f= values included. Undefined when it asks for none. */
+export function viewFor(f: unknown): ReviewView | undefined {
+  switch (f) {
+    case "waiting":
+    case "needs":
+      return "waiting";
+    case "google":
+    case "replied":
+      return "google";
+    case "all":
+    case "positive":
+    case "neutral":
+    case "negative":
+    case "high":
+      return "all";
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * On Google only when Kabsi saw the reply there (its publication is verified, 30.15 section 3.1). A review with no
+ * publication through Kabsi (a reply written on Google, or one from before Kabsi) goes by its own state.
+ */
+export function onGoogle(
+  r: StatusInput,
+  task?: { owner: string } | null,
+  tasksLoaded = true,
+): boolean {
+  if (task) return task.owner === "confirmed";
+  // No publication found: only a reply Kabsi read back from Google counts, and never while the publications did not load.
+  return (
+    tasksLoaded &&
+    !!r.existing_reply &&
+    r.reply_state !== "in_review" &&
+    r.reply_state !== "rejected"
+  );
+}
+
+export function matchesView(
+  r: StatusInput,
+  v: ReviewView,
+  task?: { owner: string } | null,
+  tasksLoaded = true,
+): boolean {
+  if (v === "waiting") return needsReply(r);
+  if (v === "google") return onGoogle(r, task, tasksLoaded);
+  return true;
 }

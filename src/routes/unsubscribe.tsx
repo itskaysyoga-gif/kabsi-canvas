@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ConfirmLayout } from "@/components/layouts/confirm-layout";
-import { Button } from "@/components/ui/button";
+import { Check, CircleSlash } from "lucide-react";
+import { QuietMark, QuietTitle } from "@/components/kabsi/d2-quiet";
+import { Button, buttonClass } from "@/components/kabsi/ui";
 import { lookUpUnsubscribe, unsubscribe } from "@/lib/unsubscribe";
 
 // The page behind "Unsubscribe from these emails" in the footer of an email (K-102). It asks first; the button does it.
@@ -38,43 +40,73 @@ function UnsubscribePage() {
     setState(r.ok ? { step: "done", label: r.label } : { step: "bad", message: r.message });
   }
 
+  const settings = (variant: "primary" | "secondary") => (
+    <Link
+      to="/app/settings"
+      data-main-cta={variant === "primary" ? true : undefined}
+      className={buttonClass(variant, variant === "primary" ? "lg" : "md", true) + " mt-6"}
+    >
+      Choose which emails I get
+    </Link>
+  );
   return (
     <ConfirmLayout>
-      {state.step === "loading" ? <p className="text-kb-stone">Loading…</p> : null}
+      {state.step === "loading" ? (
+        <p className="text-text-2" role="status">
+          Loading
+        </p>
+      ) : null}
       {state.step === "ask" ? (
         <>
-          <h1 className="font-display text-3xl leading-tight">Stop these emails?</h1>
-          <p className="mt-3 leading-7 text-kb-stone">
-            You will stop getting <strong>{state.label}</strong> emails at this address. Your other
-            Kabsi emails are not affected, and you can change this any time in Settings.
-          </p>
-          <Button className="mt-6 w-full" disabled={busy} onClick={() => void stop()}>
-            {busy ? "Stopping…" : "Stop these emails"}
-          </Button>
+          <QuietTitle
+            lead={
+              <>
+                You get <strong className="text-text-1">{state.label}</strong> emails at this
+                address. Unsubscribe and Kabsi stops sending them. Your other Kabsi emails are not
+                affected.
+              </>
+            }
+          >
+            Stop these emails?
+          </QuietTitle>
+          <div className="mt-6" data-main-cta>
+            <Button full loading={busy} onClick={() => void stop()}>
+              Unsubscribe
+            </Button>
+          </div>
+          <Link
+            to="/app/settings"
+            className={buttonClass("tertiary") + " mt-3 w-full justify-center"}
+          >
+            Choose which emails I get
+          </Link>
         </>
       ) : null}
       {state.step === "done" ? (
         <>
-          <h1 className="font-display text-3xl leading-tight">Done</h1>
-          <p className="mt-3 leading-7 text-kb-stone">
-            You will not get <strong>{state.label}</strong> emails at this address any more. You can
-            change this any time in Settings, Email settings.
-          </p>
-          <Button asChild variant="secondary" className="mt-6 w-full">
-            <Link to="/app/settings">Open Email settings</Link>
-          </Button>
+          <QuietMark icon={Check} tone="ok" />
+          <QuietTitle
+            lead={
+              <>
+                Kabsi stops sending <strong className="text-text-1">{state.label}</strong> emails to
+                this address. WhatsApp messages are not affected.
+              </>
+            }
+          >
+            You are unsubscribed.
+          </QuietTitle>
+          {settings("secondary")}
         </>
       ) : null}
       {state.step === "bad" ? (
         <>
-          <h1 className="font-display text-3xl leading-tight">This link did not work</h1>
-          <p className="mt-3 leading-7 text-kb-stone">
-            {state.message} Open Email settings in Kabsi to choose which emails you get, or write to
-            hello@kabsi.co.
-          </p>
-          <Button asChild className="mt-6 w-full">
-            <Link to="/app/settings">Open Email settings</Link>
-          </Button>
+          <QuietMark icon={CircleSlash} tone="warn" />
+          <QuietTitle
+            lead={`${state.message} Choose which emails you get on the Kabsi website, or write to hello@kabsi.co.`}
+          >
+            This link did not work.
+          </QuietTitle>
+          {settings("primary")}
         </>
       ) : null}
     </ConfirmLayout>

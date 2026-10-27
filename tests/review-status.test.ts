@@ -5,7 +5,11 @@ import { ReviewStatusPill } from "../src/components/reviews/review-status";
 import { PublishingBanner } from "../src/components/reviews/review-card";
 import {
   FILTERS,
+  VIEWS,
   matchesFilter,
+  matchesView,
+  onGoogle,
+  viewFor,
   needsReply,
   reviewStatus,
   sortReviews,
@@ -35,7 +39,10 @@ describe("each status renders", () => {
     expect(html({ risk: "high", draft: null })).toContain("Waiting for you");
     expect(html({ draft: { body: "x", safety_ok: false } })).toContain("Waiting for you");
   });
-  it("Published", () => expect(html({ state: "posted" })).toContain("Published"));
+  it("Sent to Google until Kabsi read the reply back, then On Google", () => {
+    expect(html({ state: "posted" })).toContain("Sent to Google");
+    expect(html({ state: "posted", existing_reply: "Thank you" })).toContain("On Google");
+  });
   it("Google is checking your reply", () =>
     expect(html({ state: "posted", reply_state: "in_review" })).toContain(
       "Google is checking your reply",
@@ -43,7 +50,7 @@ describe("each status renders", () => {
   it("Rejected by Google", () => {
     const out = html({ state: "drafted", reply_state: "rejected" });
     expect(out).toContain("Rejected by Google");
-    expect(out).toContain("text-kb-red");
+    expect(out).toContain("text-bad");
   });
   it("You chose not to reply", () => {
     expect(html({ state: "skipped" })).toContain("You chose not to reply");
@@ -115,5 +122,33 @@ describe("approve countdown (K-70)", () => {
     const s = out(Date.now() - 1000);
     expect(s).toContain("On its way to Google");
     expect(s).not.toContain("Undo");
+  });
+});
+
+describe("Design 3 views: Waiting, On Google, All", () => {
+  it("lists the three views in order", () => {
+    expect(VIEWS.map((v) => v.label)).toEqual(["Waiting", "On Google", "All"]);
+  });
+  it("keeps the old addresses working: ?f=needs is Waiting, Replied is On Google, the rest All", () => {
+    expect(viewFor("needs")).toBe("waiting");
+    expect(viewFor("waiting")).toBe("waiting");
+    expect(viewFor("replied")).toBe("google");
+    for (const f of ["all", "positive", "neutral", "negative", "high"])
+      expect(viewFor(f)).toBe("all");
+    expect(viewFor("nonsense")).toBeUndefined();
+  });
+  it("says On Google only once Kabsi saw the reply there", () => {
+    const posted = { ...base, state: "posted" };
+    expect(onGoogle(posted, { owner: "sent" })).toBe(false);
+    expect(onGoogle(posted, { owner: "confirmed" })).toBe(true);
+    // No publication found: only a reply read back from Google counts, and never while the publications did not load.
+    expect(onGoogle(posted)).toBe(false);
+    const read = { ...posted, existing_reply: "Thank you" };
+    expect(onGoogle(read)).toBe(true);
+    expect(onGoogle(read, null, false)).toBe(false);
+    expect(onGoogle({ ...read, reply_state: "in_review" })).toBe(false);
+    expect(matchesView(base, "waiting")).toBe(true);
+    expect(matchesView(base, "google")).toBe(false);
+    expect(matchesView(base, "all")).toBe(true);
   });
 });

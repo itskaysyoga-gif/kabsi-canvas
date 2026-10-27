@@ -1,18 +1,21 @@
 import { useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import { ChevronDown, FileText } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { trackReportOpened } from "@/lib/telemetry";
-import { ChevronDown, FileBarChart as PageGlyph } from "lucide-react";
-import { PageIcon } from "@/components/shared/page-icon";
+import { loadNearby } from "@/lib/insights";
+import { AccountTop, Panel } from "@/components/kabsi/d3-account";
+import { EmptyState, ErrorState, Skeleton, buttonClass } from "@/components/kabsi/ui";
 import { CareBottom, CareTop, type CareData } from "@/components/report/care-blocks";
+import { WorkReceipt, type ReceiptData } from "@/components/report/work-receipt";
 
-// Weekly reports (D222): the same facts as the Monday email. Read through RLS (members only).
+// Reports (UX 1, Design 3): the Monday Results Report as a work receipt (V4's data.receipt), then the earlier ones, the last
+// 12 weeks. Reports from before V4 have no receipt and keep their older blocks. Read through RLS (members only).
 export const Route = createFileRoute("/_authenticated/app/report")({
   head: () => ({
-    meta: [{ title: "Weekly Care Report | Kabsi" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Reports | Kabsi" }, { name: "robots", content: "noindex" }],
   }),
   component: ReportPage,
 });
@@ -29,6 +32,7 @@ type ReportData = {
   waiting: number;
   taps: { total: number; nfc: number; qr: number };
   quotes?: string[]; // older reports only; no longer shown (K-113.3, R-19)
+  receipt?: ReceiptData;
 } & CareData;
 type Row = { id: string; week_of: string; data: ReportData };
 
@@ -43,15 +47,7 @@ async function loadReports(locationId: string): Promise<Row[]> {
   return (data ?? []) as Row[];
 }
 
-function Stat({ label, value, sub }: { label: string; value: string; sub?: string | undefined }) {
-  return (
-    <div className="rounded-card bg-kb-sand p-4">
-      <p className="text-sm text-kb-stone">{label}</p>
-      <p className="mt-1 text-2xl font-bold">{value}</p>
-      {sub ? <p className="mt-0.5 text-sm text-kb-stone">{sub}</p> : null}
-    </div>
-  );
-}
+const dates = (r: ReportData) => `${r.period.from} to ${r.period.to}`;
 
 function ReportPage() {
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
@@ -61,80 +57,122 @@ function ReportPage() {
     queryFn: () => loadReports(loc!.id),
     enabled: !!loc,
   });
+  const nearby = useQuery({
+    queryKey: ["nearby", loc?.id],
+    queryFn: () => loadNearby(loc!.id, loc!.name),
+    enabled: !!loc,
+  });
   // G-44: the owner opened the report (the latest one on screen), once per report per session.
   const latestId = reports.data?.[0]?.id;
   useEffect(() => {
     if (loc && latestId) trackReportOpened(loc.id, latestId);
   }, [loc, latestId]);
+  const n = nearby.data;
+  const maps =
+    n?.state === "done" && n.countLine && n.check
+      ? { keyword: n.check.keyword, line: n.countLine }
+      : null;
+  const [latest, ...earlier] = reports.data ?? [];
+
   return (
-    <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-      <Link
-        to="/app"
-        className="-ml-2 inline-flex min-h-10 items-center rounded-card px-2 text-sm font-medium text-kb-stone hover:text-kb-black"
-      >
-        ← Home
-      </Link>
-      <div className="mt-5">
-        <PageIcon icon={<PageGlyph />} />
-      </div>
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Your week</p>
-      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Weekly report</h1>
-      <p className="mt-2 text-kb-stone">
-        Every Monday morning, a short summary of your week on Google. Facts only.
-      </p>
+    <>
+      <AccountTop title="Reports" lead="Every Monday on WhatsApp. The last 12 weeks are here." />
       {!location.isLoading && !loc ? (
-        <Button asChild className="mt-6">
-          <Link to="/start">Add your business</Link>
-        </Button>
+        <Link to="/start" className={buttonClass()} data-main-cta>
+          Add your business
+        </Link>
       ) : null}
-      {reports.isLoading ? <p className="mt-6 text-kb-stone">Loading…</p> : null}
-      {reports.data?.length === 0 ? (
-        <div className="mt-7 rounded-large bg-kb-white p-7 shadow-kb">
-          <p className="font-bold">Your first report arrives on Monday.</p>
-          <p className="mt-1 text-sm text-kb-stone">It's emailed to you and kept here.</p>
+      {location.isLoading || reports.isLoading ? (
+        <div
+          className="rounded-card border border-line bg-surface-1 p-5"
+          role="status"
+          aria-label="Loading"
+        >
+          <Skeleton className="h-5 w-1/2" />
+          <Skeleton className="mt-3 h-4 w-full" />
+          <Skeleton className="mt-2 h-4 w-4/5" />
         </div>
       ) : null}
-      <div className="mt-7 space-y-5">
-        {reports.data?.map(({ id, data: r }, i) =>
-          i === 0 ? (
-            <article key={id} className="rounded-large bg-kb-white p-6 shadow-kb sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">
-                Latest · {r.period.from} to {r.period.to}
-              </p>
-              <ReportBody r={r} latest />
-            </article>
-          ) : (
-            <details key={id} className="group rounded-large bg-kb-white shadow-kb">
-              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-6 py-4 sm:px-7">
-                <span className="font-medium">
-                  {r.period.from} to {r.period.to}
-                </span>
-                <span className="flex items-center gap-3 text-sm text-kb-stone">
-                  {r.rating != null ? `${r.rating.toFixed(1)} ★` : ""} · {r.new_reviews} new
-                  <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
-                </span>
-              </summary>
-              <div className="px-6 pb-6 sm:px-7">
-                <ReportBody r={r} latest={false} />
-              </div>
-            </details>
-          ),
-        )}
-      </div>
+      {reports.isError ? (
+        <ErrorState title="This page did not load." onRetry={() => void reports.refetch()}>
+          Nothing you did, and nothing changed on Google. Try again in a minute.
+        </ErrorState>
+      ) : null}
+      {reports.data?.length === 0 ? (
+        <EmptyState icon={FileText} title="Your first report comes on Monday.">
+          It shows what Kabsi did, what waits for your yes and one next step.
+        </EmptyState>
+      ) : null}
+      {latest && loc ? (
+        latest.data.receipt ? (
+          <WorkReceipt
+            r={latest.data.receipt}
+            business={loc.name}
+            dates={dates(latest.data)}
+            maps={maps}
+          />
+        ) : (
+          <Panel title={`Results Report, ${dates(latest.data)}`} id="latest">
+            <OlderBody r={latest.data} latest />
+          </Panel>
+        )
+      ) : null}
+      {earlier.length && loc ? (
+        <Panel title="Earlier reports" id="earlier" className="mt-4">
+          <ul className="divide-y divide-line">
+            {earlier.map(({ id, data: r }) => (
+              <li key={id}>
+                <details className="group">
+                  <summary className="press flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 py-2 text-body font-semibold [&::-webkit-details-marker]:hidden">
+                    Results Report, {dates(r)}
+                    <ChevronDown
+                      className="size-5 shrink-0 text-text-2 transition-transform group-open:rotate-180"
+                      aria-hidden
+                    />
+                  </summary>
+                  <div className="pb-4">
+                    {r.receipt ? (
+                      <WorkReceipt
+                        r={r.receipt}
+                        business={loc.name}
+                        dates={dates(r)}
+                        headingLevel="h3"
+                      />
+                    ) : (
+                      <OlderBody r={r} latest={false} />
+                    )}
+                  </div>
+                </details>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      ) : null}
+    </>
+  );
+}
+
+function Stat({ label, value, sub }: { label: string; value: string; sub?: string | undefined }) {
+  return (
+    <div className="rounded-inner bg-surface-2 p-3">
+      <dt className="text-small text-text-2">{label}</dt>
+      <dd className="mt-1 font-display text-h3 font-bold">{value}</dd>
+      {sub ? <dd className="text-label font-semibold text-text-2">{sub}</dd> : null}
     </div>
   );
 }
 
-function ReportBody({ r, latest }: { r: ReportData; latest: boolean }) {
+/** A report from before V4's work receipt: its own blocks, as they were sent. */
+function OlderBody({ r, latest }: { r: ReportData; latest: boolean }) {
   return (
     <>
       <CareTop r={r} />
       {r.rating_drop && r.rating_change != null ? (
-        <p className="mt-3 rounded-card border-2 border-kb-black p-3 text-sm">
+        <p className="mt-3 rounded-inner bg-warn-soft p-3 text-small">
           Your Google rating went down {Math.abs(r.rating_change).toFixed(1)} this week.
         </p>
       ) : null}
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat
           label="Google rating"
           value={r.rating == null ? "-" : r.rating.toFixed(1)}
@@ -157,19 +195,19 @@ function ReportBody({ r, latest }: { r: ReportData; latest: boolean }) {
         <Stat
           label="Card and link opens"
           value={String(r.taps.total)}
-          sub={r.taps.total ? `${r.taps.nfc} tap · ${r.taps.qr} QR` : undefined}
+          sub={r.taps.total ? `${r.taps.nfc} tap, ${r.taps.qr} QR` : undefined}
         />
-      </div>
-      <p className="mt-3 text-xs leading-5 text-kb-stone">
+      </dl>
+      <p className="mt-3 text-label font-semibold text-text-2">
         Opens count how often your review page was opened, not how many reviews were written.
       </p>
       {latest && r.waiting ? (
-        <p className="mt-4 text-sm">
+        <p className="mt-4 text-small">
           {r.waiting} {r.waiting === 1 ? "review is" : "reviews are"} waiting for your reply.{" "}
           <Link
             to="/app/reviews"
             search={{ f: "needs" }}
-            className="inline-flex min-h-10 items-center font-bold underline underline-offset-4"
+            className="inline-flex min-h-11 items-center font-bold underline underline-offset-4"
           >
             Reply now
           </Link>

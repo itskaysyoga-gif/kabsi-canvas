@@ -26,7 +26,7 @@ function Panel({ children, className }: { children: ReactNode; className?: strin
     <div
       aria-hidden="true"
       className={cn(
-        "w-full max-w-[400px] rounded-large bg-kb-white p-5 text-kb-ink shadow-[0_18px_40px_rgba(0,0,0,.55)]",
+        "w-full max-w-[400px] rounded-panel bg-surface-1 p-5 text-text-1 shadow-[0_18px_40px_rgba(0,0,0,.55)]",
         className,
       )}
     >
@@ -37,7 +37,7 @@ function Panel({ children, className }: { children: ReactNode; className?: strin
 
 function ExampleTag() {
   return (
-    <span className="rounded-pill bg-kb-sand px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-kb-stone">
+    <span className="rounded-pill bg-surface-2 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-text-2">
       Example
     </span>
   );
@@ -45,7 +45,7 @@ function ExampleTag() {
 
 function Connector() {
   return (
-    <div className="flex justify-center py-1.5 text-kb-stone-on-dark">
+    <div className="flex justify-center py-1.5 text-kb-mute">
       <span className="grid size-7 place-items-center rounded-full bg-kb-white/10 ring-1 ring-kb-white/15">
         <ArrowDown className="size-3.5" />
       </span>
@@ -56,42 +56,42 @@ function Connector() {
 /** How it works: review arrives, a draft is written, you approve it. */
 export function FlowVisual() {
   return (
-    <div aria-hidden="true" className="w-full max-w-[400px] text-kb-ink">
-      <div className="rounded-large bg-kb-white p-4 shadow-[0_18px_40px_rgba(0,0,0,.55)]">
+    <div aria-hidden="true" className="w-full max-w-[400px] text-text-1">
+      <div className="rounded-panel bg-surface-1 p-4 shadow-[0_18px_40px_rgba(0,0,0,.55)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <IconBadge icon={<MessageSquare />} tone="sand" className="size-9 [&_svg]:size-4" />
-            <p className="text-sm font-bold">New Google review</p>
+            <p className="text-small font-bold">New Google review</p>
           </div>
           <ExampleTag />
         </div>
-        <p className="mt-3 rounded-card bg-kb-sand p-3 text-sm leading-6">
+        <p className="mt-3 rounded-card bg-surface-2 p-3 text-small leading-6">
           <b>Emma</b>
           <br />
           Friendly staff and the best croissants on the street.
         </p>
       </div>
       <Connector />
-      <div className="rounded-large bg-kb-white p-4 shadow-[0_18px_40px_rgba(0,0,0,.55)]">
+      <div className="rounded-panel bg-surface-1 p-4 shadow-[0_18px_40px_rgba(0,0,0,.55)]">
         <div className="flex items-center gap-3">
           <IconBadge icon={<PenLine />} className="size-9 [&_svg]:size-4" />
-          <p className="text-sm font-bold">Reply drafted for you</p>
+          <p className="text-small font-bold">Reply drafted for you</p>
         </div>
-        <p className="mt-3 rounded-card border border-kb-hairline p-3 text-sm leading-6 text-kb-stone">
+        <p className="mt-3 rounded-card border border-line p-3 text-small leading-6 text-text-2">
           Thank you, Emma. We're so glad you enjoyed the croissants. See you again soon.
         </p>
       </div>
       <Connector />
-      <div className="flex items-center gap-2 rounded-large bg-kb-white p-3 shadow-[0_18px_40px_rgba(0,0,0,.55)]">
-        <span className="kb-ripple flex h-11 flex-1 items-center justify-center rounded-pill bg-kb-yellow text-sm font-bold text-kb-black">
+      <div className="flex items-center gap-2 rounded-panel bg-surface-1 p-3 shadow-[0_18px_40px_rgba(0,0,0,.55)]">
+        <span className="kb-ripple flex h-11 flex-1 items-center justify-center rounded-pill bg-kb-yellow text-small font-bold text-kb-black">
           Approve
         </span>
-        <span className="flex h-11 items-center rounded-pill border-2 border-kb-black px-5 text-sm font-bold">
+        <span className="flex h-11 items-center rounded-pill border-2 border-text-1 px-5 text-small font-bold">
           Edit
         </span>
-        <span className="px-3 text-sm font-bold">Skip</span>
+        <span className="px-3 text-small font-bold">Skip</span>
       </div>
-      <p className="mt-3 text-center text-xs text-kb-stone-on-dark">
+      <p className="mt-3 text-center text-label text-kb-mute">
         Nothing is published until you approve it.
       </p>
     </div>
@@ -102,23 +102,23 @@ export function FlowVisual() {
 export function AnswerVisual() {
   return (
     <div aria-hidden="true" className="w-full max-w-[400px] space-y-3">
-      <div className="mr-10 flex items-start gap-3 rounded-large rounded-tl-md bg-kb-white/8 p-4 ring-1 ring-kb-white/15">
+      <div className="mr-10 flex items-start gap-3 rounded-panel rounded-tl-md bg-kb-white/8 p-4 ring-1 ring-kb-white/15">
         <IconBadge icon={<MessageSquare />} tone="dark" className="size-9 [&_svg]:size-4" />
         <p className="pt-1.5 text-[15px] font-bold leading-6 text-kb-white">
           Does Kabsi publish replies by itself?
         </p>
       </div>
-      <div className="ml-10 rounded-large rounded-tr-md bg-kb-white p-4 text-kb-ink shadow-[0_18px_40px_rgba(0,0,0,.55)]">
+      <div className="ml-10 rounded-panel rounded-tr-md bg-surface-1 p-4 text-text-1 shadow-[0_18px_40px_rgba(0,0,0,.55)]">
         <div className="flex items-center gap-2">
           <KabsiMark className="size-6" />
-          <p className="text-sm font-bold">Kabsi</p>
+          <p className="text-small font-bold">Kabsi</p>
         </div>
-        <p className="mt-2 text-[15px] leading-6 text-kb-stone">
-          No. Nothing is published until you <b className="text-kb-ink">approve it</b>, and you see
+        <p className="mt-2 text-[15px] leading-6 text-text-2">
+          No. Nothing is published until you <b className="text-text-1">approve it</b>, and you see
           the exact text first.
         </p>
       </div>
-      <div className="mr-10 flex items-center gap-3 rounded-large rounded-tl-md bg-kb-white/8 p-4 ring-1 ring-kb-white/15">
+      <div className="mr-10 flex items-center gap-3 rounded-panel rounded-tl-md bg-kb-white/8 p-4 ring-1 ring-kb-white/15">
         <IconBadge icon={<ShieldCheck />} tone="dark" className="size-9 [&_svg]:size-4" />
         <p className="text-[15px] font-bold leading-6 text-kb-white">
           Can I remove Kabsi's access?
@@ -149,17 +149,17 @@ export function GuidesVisual() {
         <div
           key={c.title}
           className={cn(
-            "flex items-center gap-4 rounded-large bg-kb-white p-4 text-kb-ink shadow-[0_18px_40px_rgba(0,0,0,.55)]",
+            "flex items-center gap-4 rounded-panel bg-surface-1 p-4 text-text-1 shadow-[0_18px_40px_rgba(0,0,0,.55)]",
             c.tilt,
             i > 0 && "-mt-2",
           )}
         >
           <IconBadge icon={c.icon} />
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-kb-stone">Guide</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-text-2">Guide</p>
             <p className="font-bold">{c.title}</p>
           </div>
-          <BookOpen className="ml-auto size-4 text-kb-stone" />
+          <BookOpen className="ml-auto size-4 text-text-2" />
         </div>
       ))}
     </div>
@@ -174,23 +174,23 @@ export function ReviewLinkVisual() {
         <p className="font-bold">Your review link</p>
         <ExampleTag />
       </div>
-      <div className="mt-3 flex items-center gap-2 rounded-card border border-kb-hairline bg-kb-sand p-2.5">
-        <span className="min-w-0 flex-1 truncate font-mono text-xs text-kb-stone">
+      <div className="mt-3 flex items-center gap-2 rounded-card border border-line bg-surface-2 p-2.5">
+        <span className="min-w-0 flex-1 truncate font-mono text-label text-text-2">
           search.google.com/local/writereview?placeid=…
         </span>
-        <span className="grid size-8 place-items-center rounded-full bg-kb-white ring-1 ring-kb-hairline">
+        <span className="grid size-8 place-items-center rounded-full bg-surface-1 ring-1 ring-line">
           <Copy className="size-3.5" />
         </span>
       </div>
       <div className="mt-4 grid grid-cols-[auto_1fr] items-center gap-4">
-        <div className="rounded-card bg-kb-white p-2 ring-1 ring-kb-hairline">
+        <div className="rounded-card bg-surface-1 p-2 ring-1 ring-line">
           <DemoQr className="size-28" />
         </div>
-        <div className="space-y-2 text-sm font-bold">
+        <div className="space-y-2 text-small font-bold">
           <span className="kb-ripple flex h-10 items-center justify-center gap-2 rounded-pill bg-kb-yellow text-kb-black">
             <Download className="size-4" /> QR code
           </span>
-          <span className="flex h-10 items-center justify-center gap-2 rounded-pill border-2 border-kb-black">
+          <span className="flex h-10 items-center justify-center gap-2 rounded-pill border-2 border-text-1">
             <Printer className="size-4" /> Counter card
           </span>
         </div>

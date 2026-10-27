@@ -1,0 +1,7 @@
+[
+  { "path": "/app/shield", "name": "shield" },
+  { "path": "/app/shield", "state": "profile-none", "name": "shield-none" },
+  { "path": "/app/shield", "state": "profile-reading", "name": "shield-reading" },
+  { "path": "/app/hours", "name": "hours" },
+  { "path": "/app/coach", "name": "coach" }
+]

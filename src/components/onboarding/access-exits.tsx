@@ -12,7 +12,7 @@ type Panel = "device" | "someone" | null;
 
 /**
  * The three ways out of the Manager guide (K-93): send the steps to my other device (email, or a WhatsApp share link),
- * someone else manages my Google listing (a ready message to forward), and a free setup call. None of them asks for a
+ * someone else manages my Google profile (a ready message to forward), and a free setup call. None of them asks for a
  * password or a code. The email goes only to the signed-in person's own address.
  */
 export function AccessExits({ location, step }: { location: Location; step: number }) {
@@ -33,8 +33,8 @@ export function AccessExits({ location, step }: { location: Location; step: numb
         <Share2 /> Send these steps to my other device
       </Button>
       {open === "device" ? (
-        <div className="rounded-card bg-kb-sand p-4">
-          <p className="text-sm leading-6">
+        <div className="rounded-card bg-surface-2 p-4">
+          <p className="text-small leading-6">
             Open the steps on the device where you are signed in to Google.
           </p>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row">
@@ -59,7 +59,7 @@ export function AccessExits({ location, step }: { location: Location; step: numb
             </Button>
           </div>
           {email.isError ? (
-            <p role="alert" className="mt-3 text-sm text-kb-red">
+            <p role="alert" className="mt-3 text-small text-bad">
               {friendlyError(email.error)}
             </p>
           ) : null}
@@ -73,11 +73,11 @@ export function AccessExits({ location, step }: { location: Location; step: numb
         aria-expanded={open === "someone"}
         onClick={() => setOpen(open === "someone" ? null : "someone")}
       >
-        <Users /> Someone else manages my Google listing
+        <Users /> Someone else manages my Google profile
       </Button>
       {open === "someone" ? (
-        <div className="rounded-card bg-kb-sand p-4">
-          <p className="text-sm leading-6">
+        <div className="rounded-card bg-surface-2 p-4">
+          <p className="text-small leading-6">
             Send this to whoever manages it. They add Kabsi as a Manager, and you carry on here.
           </p>
           <div className="mt-3">

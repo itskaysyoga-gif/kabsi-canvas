@@ -1,7 +1,8 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Camera, ImagePlus } from "lucide-react";
+import { Camera, CircleSlash, ImagePlus } from "lucide-react";
 import { ConfirmLayout } from "@/components/layouts/confirm-layout";
+import { QuietMark, QuietTitle } from "@/components/kabsi/d2-quiet";
 import { ACCEPT, MAX_BYTES, MAX_FILES, fileType, linkBusiness, staffUpload } from "@/lib/photos";
 
 // The staff upload link (P0.5-01, K-23): a member of staff adds photos for the owner to approve, without an account.
@@ -62,23 +63,26 @@ function StaffUploadPage() {
   if (!state)
     return (
       <ConfirmLayout>
-        <p className="text-kb-stone">Opening…</p>
+        <p className="text-text-2" role="status">
+          Opening
+        </p>
       </ConfirmLayout>
     );
   if ("gone" in state)
     return (
       <ConfirmLayout>
-        <h1 className="font-display text-3xl leading-tight">This link is not on</h1>
-        <p className="mt-3 text-kb-stone">{state.gone}</p>
+        <QuietMark icon={CircleSlash} tone="warn" />
+        <QuietTitle lead={state.gone}>This link does not work.</QuietTitle>
       </ConfirmLayout>
     );
   return (
     <ConfirmLayout>
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">{state.name}</p>
-      <h1 className="mt-1 font-display text-3xl leading-tight">Add photos</h1>
-      <p className="mt-3 text-kb-stone">
-        Real photos of the place, the team, the work and what you sell. The owner looks at each one
-        before anything goes to Google. Kabsi removes location data from every photo.
+      <QuietTitle lead="The owner sees it first. Nothing is posted until the owner says yes. You do not need an account.">
+        Send a photo to {state.name}.
+      </QuietTitle>
+      <p className="mt-3 text-small text-text-2">
+        Your food, your shop or your work: real photos of the place, the team and what you sell.
+        Kabsi removes location data from every photo.
       </p>
       <div className="mt-6 grid grid-cols-2 gap-3">
         {[
@@ -87,14 +91,14 @@ function StaffUploadPage() {
         ].map((b) => (
           <label
             key={b.label}
-            className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-large border-2 border-dashed border-kb-hairline bg-kb-white p-4 text-center font-bold hover:border-kb-black"
+            className="press flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-inner border-2 border-dashed border-stroke bg-surface-2 p-4 text-center text-small font-bold text-text-1 hover:border-text-1 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
           >
             {b.camera ? (
               <Camera className="size-6" aria-hidden="true" />
             ) : (
               <ImagePlus className="size-6" aria-hidden="true" />
             )}
-            {busy ? "Sending…" : b.label}
+            {busy ? "Sending" : b.label}
             <input
               type="file"
               accept={b.camera ? "image/*" : ACCEPT}
@@ -107,9 +111,9 @@ function StaffUploadPage() {
           </label>
         ))}
       </div>
-      <p className="mt-3 text-sm text-kb-stone">Up to 20 at a time, 20 MB each.</p>
+      <p className="mt-3 text-small text-text-2">Up to 20 at a time, 20 MB each.</p>
       {msg ? (
-        <p className="mt-4 text-sm" role="status">
+        <p className="mt-4 rounded-inner bg-surface-2 p-3 text-small text-text-1" role="status">
           {msg}
         </p>
       ) : null}

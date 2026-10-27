@@ -12,6 +12,9 @@ import {
   isBacklogSummary,
   MAX_CARDS,
   progressLine,
+  nextMonday,
+  nextReportLine,
+  waitingLead,
 } from "../src/lib/home-state";
 import type { Task } from "../src/lib/tasks";
 
@@ -169,5 +172,24 @@ describe("the day-one backlog card (P0.3-10)", () => {
   it("says how far the published replies have got", () => {
     expect(progressLine(14, 23)).toBe("14 of 23 published");
     expect(progressLine(23, 23)).toBe("All 23 published");
+  });
+});
+
+describe("Design 3 Home lines", () => {
+  it("counts what waits in the lead line", () => {
+    expect(waitingLead(1)).toBe(
+      "1 thing needs you. Each one is on WhatsApp too: answer wherever you are.",
+    );
+    expect(waitingLead(3)).toBe(
+      "3 things need you. Each one is on WhatsApp too: answer wherever you are.",
+    );
+  });
+  it("names the next Monday after today, never today", () => {
+    // Tuesday 27 October 2026 and Monday 2 November 2026, at noon UTC.
+    expect(nextMonday(new Date("2026-10-27T12:00:00Z"), "UTC")).toBe("Monday 2 November");
+    expect(nextMonday(new Date("2026-11-02T12:00:00Z"), "UTC")).toBe("Monday 9 November");
+    expect(nextReportLine("Monday 2 November")).toBe(
+      "Monday 2 November on WhatsApp: what Kabsi did, what waits for your yes, and one next step.",
+    );
   });
 });

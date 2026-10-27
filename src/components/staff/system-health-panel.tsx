@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { fmtDateTime } from "@/lib/format";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
@@ -12,6 +11,7 @@ import {
   type Diagnostics,
   type Health,
 } from "@/lib/system-health";
+import { Button, STAFF_CARD, STAFF_H2 } from "./staff-ui";
 
 // Staff System health (P0.6-11; K-44 staff part, K-36): everything that can be wrong behind the product, in one place, read
 // through staff-only functions. Technical detail for the team; owners see plain messages elsewhere and never this page.
@@ -70,22 +70,22 @@ export function SystemHealthPanel() {
   const h = q.data;
   const attention = h ? attentionOf(h) : [];
   return (
-    <section id="system-health">
+    <section id="system-health" className={STAFF_CARD}>
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-xl font-bold">System health</h2>
+        <h2 className={STAFF_H2}>System health</h2>
         <Button variant="ghost" size="compact" onClick={() => void q.refetch()}>
-          <RefreshCw /> {q.isFetching ? "Checking…" : "Refresh"}
+          <RefreshCw /> {q.isFetching ? "Checking" : "Refresh"}
         </Button>
       </div>
-      {q.isError ? <p className="mt-2 text-kb-red">{q.error.message}</p> : null}
+      {q.isError ? <p className="mt-2 text-bad">{q.error.message}</p> : null}
       {h ? (
         <>
-          <p className="mt-1 text-sm text-kb-stone">
+          <p className="mt-1 text-small text-text-2">
             Checked {when(h.checked_at)} · refreshes every minute · Google is in {h.google.mode}{" "}
             mode.
           </p>
           {attention.length === 0 ? (
-            <p className="mt-3 rounded-large bg-kb-white p-4 shadow-kb">
+            <p className="mt-3 rounded-inner bg-surface-2 p-4">
               Nothing needs attention. No dead jobs, no stuck publications, the breaker is closed.
             </p>
           ) : (
@@ -94,8 +94,8 @@ export function SystemHealthPanel() {
                 <li
                   key={a.id}
                   className={cn(
-                    "rounded-card border-2 p-3 text-sm",
-                    a.level === "red" ? "border-kb-red font-bold text-kb-red" : "border-kb-black",
+                    "rounded-card border-2 p-3 text-small",
+                    a.level === "red" ? "border-bad font-bold text-bad" : "border-text-1",
                   )}
                 >
                   {a.text}
@@ -103,15 +103,15 @@ export function SystemHealthPanel() {
               ))}
             </ul>
           )}
-          {msg ? <p className="mt-3 text-sm font-bold">{msg}</p> : null}
+          {msg ? <p className="mt-3 text-small font-bold">{msg}</p> : null}
 
           <Block
             title="Google"
             note="Errors by type (24 hours), the breaker, request rates and the Places cap."
           >
-            <p className="text-sm">
+            <p className="text-small">
               Circuit breaker:{" "}
-              <span className={cn(h.google.breaker?.state !== "closed" && "font-bold text-kb-red")}>
+              <span className={cn(h.google.breaker?.state !== "closed" && "font-bold text-bad")}>
                 {h.google.breaker?.state ?? "unknown"}
               </span>
               {h.google.breaker?.state !== "closed" && h.google.breaker?.open_until
@@ -121,13 +121,13 @@ export function SystemHealthPanel() {
                 ? `, ${h.google.breaker.failures_in_window} failures in the current minute (20 opens it)`
                 : ""}
             </p>
-            <p className="mt-1 text-sm">
+            <p className="mt-1 text-small">
               Errors, 24 hours:{" "}
               {h.google.errors_24h.length
                 ? h.google.errors_24h.map((e) => `${errorTypeLabel(e.type)} ${e.n}`).join(" · ")
                 : "none"}
             </p>
-            <p className="mt-1 text-sm">
+            <p className="mt-1 text-small">
               Requests in the last minute:{" "}
               {h.google.rate.length
                 ? h.google.rate.map((r) => `${r.bucket} ${r.calls_last_minute}`).join(" · ")
@@ -169,25 +169,25 @@ export function SystemHealthPanel() {
             title={`Job queue and dead jobs (${h.queue.dead})`}
             note="A dead job has used all its tries. Retry gives it a fresh set. Cancel closes it."
           >
-            <p className="text-sm">
+            <p className="text-small">
               {h.queue.pending} waiting · {h.queue.running} running · {h.queue.retrying} retrying ·{" "}
-              <span className={cn(h.queue.due_late > 0 && "font-bold text-kb-red")}>
+              <span className={cn(h.queue.due_late > 0 && "font-bold text-bad")}>
                 {h.queue.due_late} late
               </span>{" "}
               · oldest due job waited {Math.round(h.queue.oldest_due_seconds / 60)} min
             </p>
             <ul className="mt-2 space-y-2">
               {h.dead_jobs.length === 0 ? (
-                <li className="text-sm text-kb-stone">No dead jobs.</li>
+                <li className="text-small text-text-2">No dead jobs.</li>
               ) : null}
               {h.dead_jobs.map((j) => (
-                <li key={j.id} className="rounded-card bg-kb-sand p-3 text-sm">
+                <li key={j.id} className="rounded-card bg-surface-2 p-3 text-small">
                   <p className="font-bold">
                     #{j.id} {j.kind}
                     {j.business ? ` (${j.business})` : ""} · {j.attempts} of {j.max_attempts} tries
                     · {when(j.at)}
                   </p>
-                  <p className="mt-1 break-words font-mono text-xs">
+                  <p className="mt-1 break-words font-mono text-label">
                     {j.last_error ?? "no error recorded"}
                   </p>
                   <div className="mt-2 flex gap-2">
@@ -226,7 +226,7 @@ export function SystemHealthPanel() {
               }))}
             />
             {h.publications.failed.length ? (
-              <details className="mt-2 text-sm">
+              <details className="mt-2 text-small">
                 <summary className="cursor-pointer font-bold">Recent failures</summary>
                 <Rows
                   empty=""
@@ -258,9 +258,9 @@ export function SystemHealthPanel() {
             title="Email and notification delivery"
             note="Last 24 hours. Addresses are shown as the domain only."
           >
-            <p className="text-sm">
+            <p className="text-small">
               Emails sent {h.delivery.emails_sent_24h} ·{" "}
-              <span className={cn(h.delivery.emails_failed_24h > 0 && "font-bold text-kb-red")}>
+              <span className={cn(h.delivery.emails_failed_24h > 0 && "font-bold text-bad")}>
                 failed {h.delivery.emails_failed_24h}
               </span>{" "}
               · queued over 15 min {h.delivery.emails_queued_late} · notices failed{" "}
@@ -292,9 +292,9 @@ function Block({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mt-5 rounded-large bg-kb-white p-5 shadow-kb">
+    <div className="mt-5 rounded-panel bg-surface-1 p-5 shadow-rest">
       <h3 className="font-bold">{title}</h3>
-      <p className="mt-0.5 text-xs text-kb-stone">{note}</p>
+      <p className="mt-0.5 text-label text-text-2">{note}</p>
       <div className="mt-3">{children}</div>
     </div>
   );
@@ -307,11 +307,11 @@ function Rows({
   rows: { key: string; text: string; bad: boolean }[];
   empty: string;
 }) {
-  if (rows.length === 0) return empty ? <p className="text-sm text-kb-stone">{empty}</p> : null;
+  if (rows.length === 0) return empty ? <p className="text-small text-text-2">{empty}</p> : null;
   return (
-    <ul className="mt-1 space-y-1 font-mono text-xs">
+    <ul className="mt-1 space-y-1 font-mono text-label">
       {rows.map((r) => (
-        <li key={r.key} className={cn("break-words", r.bad && "font-bold text-kb-red")}>
+        <li key={r.key} className={cn("break-words", r.bad && "font-bold text-bad")}>
           {r.text}
         </li>
       ))}
@@ -326,9 +326,9 @@ export function BusinessDiagnostics({ location }: { location: string }) {
     queryFn: () => loadDiagnostics(location),
   });
   const d = q.data;
-  if (q.isLoading) return <p className="mt-3 text-sm text-kb-stone">Reading…</p>;
-  if (q.isError) return <p className="mt-3 text-sm text-kb-red">{q.error.message}</p>;
-  if (!d || !d.business) return <p className="mt-3 text-sm text-kb-stone">No such business.</p>;
+  if (q.isLoading) return <p className="mt-3 text-small text-text-2">Reading</p>;
+  if (q.isError) return <p className="mt-3 text-small text-bad">{q.error.message}</p>;
+  if (!d || !d.business) return <p className="mt-3 text-small text-text-2">No such business.</p>;
   const g = d.google;
   const counts = (o: Record<string, number>) =>
     Object.keys(o).length
@@ -337,7 +337,7 @@ export function BusinessDiagnostics({ location }: { location: string }) {
           .join(" · ")
       : "none";
   return (
-    <div className="mt-3 space-y-3 rounded-card bg-kb-sand p-4 text-sm">
+    <div className="mt-3 space-y-3 rounded-card bg-surface-2 p-4 text-small">
       <p>
         {d.business.status} · step {d.business.onboarding_step}
         {d.business.concierge ? " · early access" : ""} · {d.business.country ?? "no country"} ·
@@ -398,7 +398,7 @@ function List({ title, rows, empty }: { title: string; rows: string[]; empty: st
     <div>
       <p className="font-bold">{title}</p>
       {rows.length ? (
-        <ul className="mt-1 space-y-0.5 font-mono text-xs">
+        <ul className="mt-1 space-y-0.5 font-mono text-label">
           {rows.map((r, i) => (
             <li key={i} className="break-words">
               {r}
@@ -406,7 +406,7 @@ function List({ title, rows, empty }: { title: string; rows: string[]; empty: st
           ))}
         </ul>
       ) : (
-        <p className="text-xs text-kb-stone">{empty}</p>
+        <p className="text-label text-text-2">{empty}</p>
       )}
     </div>
   );

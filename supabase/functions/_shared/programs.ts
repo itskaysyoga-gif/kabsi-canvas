@@ -6,10 +6,18 @@ export const FOUNDING_COUNTRIES = ["AE", "GB", "US"] as const;
 export const PARTNER_KINDS = ["creator", "agency", "accountant", "reseller", "business_group", "other"] as const;
 /** The version of /partners/terms an applicant agrees to. Change it when the terms change in a way that matters. */
 export const PARTNER_TERMS_VERSION = "2026-10-26";
-/** The words the founding applicant agrees to, stored with the application (30.17 section 1). */
-export const FOUNDING_CONSENT_TEXT =
-  "I agree to a 2-minute check-in with Kabsi every two weeks, and to Kabsi writing a case study about my business. " +
-  "I approve the final text before it is published, and I choose whether my business is named.";
+/**
+ * The words the founding applicant agrees to, stored with the application (30.17 section 1). UX 1: the form asks "Named or
+ * anonymous case study" (anonymous unless the owner picks named), and the stored words say which one they agreed to.
+ */
+export const FOUNDING_CONSENT = {
+  anonymous:
+    "I agree to a 2-minute check-in with Kabsi every two weeks, and to Kabsi writing a case study that does not name my business. " +
+    "I approve the final text before it is published.",
+  named:
+    "I agree to a 2-minute check-in with Kabsi every two weeks, and to Kabsi writing a case study that names my business. " +
+    "I approve the final text before it is published.",
+} as const;
 
 const E164 = /^\+[1-9][0-9]{6,14}$/;
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -46,7 +54,7 @@ export function checkFounding(b: Body): Checked<FoundingApplication> {
   const case_study = b.case_study === "named" ? "named" : b.case_study === "anonymous" ? "anonymous" : null;
   if (!case_study) return { ok: false, field: "case_study", message: "Please choose whether a case study may name your business." };
   if (b.checkin_consent !== true) return { ok: false, field: "checkin_consent", message: "Founding 25 needs a yes to the 2-minute check-in every two weeks." };
-  return { ok: true, value: { business_name, country, trade, business_kind, whatsapp, why_now, case_study, checkin_consent: true, consent_text: FOUNDING_CONSENT_TEXT } };
+  return { ok: true, value: { business_name, country, trade, business_kind, whatsapp, why_now, case_study, checkin_consent: true, consent_text: FOUNDING_CONSENT[case_study] } };
 }
 
 export type PartnerApplication = {

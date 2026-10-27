@@ -26,9 +26,9 @@ export function Section({
     <section
       id={id}
       className={cn(
-        tone === "sand" && "bg-kb-sand",
+        tone === "sand" && "bg-surface-2",
         tone === "carbon" && "bg-kb-carbon text-kb-white",
-        tone === "white" && "bg-kb-white",
+        tone === "white" && "bg-surface-1",
       )}
     >
       <div
@@ -43,7 +43,7 @@ export function Section({
 
 export function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <p className="flex items-center gap-3 text-sm font-bold uppercase tracking-wider text-kb-stone">
+    <p className="flex items-center gap-3 text-small font-bold uppercase tracking-wider text-text-2">
       <span className="h-1 w-8 rounded-pill bg-kb-yellow" />
       {children}
     </p>
@@ -81,8 +81,8 @@ export function Breadcrumbs({
     <nav aria-label="Breadcrumb" className={className}>
       <ol
         className={cn(
-          "flex flex-wrap items-center gap-1.5 text-sm",
-          tone === "dark" ? "text-kb-stone-on-dark" : "text-kb-stone",
+          "flex flex-wrap items-center gap-1.5 text-small",
+          tone === "dark" ? "text-kb-mute" : "text-text-2",
         )}
       >
         {all.map((c, i) => {
@@ -94,7 +94,7 @@ export function Breadcrumbs({
                   to={c.to as "/"}
                   className={cn(
                     "font-medium underline-offset-4 hover:underline",
-                    tone === "dark" ? "hover:text-kb-white" : "hover:text-kb-black",
+                    tone === "dark" ? "hover:text-kb-white" : "hover:text-text-1",
                   )}
                 >
                   {c.name}
@@ -102,7 +102,7 @@ export function Breadcrumbs({
               ) : (
                 <span
                   aria-current="page"
-                  className={tone === "dark" ? "text-kb-white" : "text-kb-ink"}
+                  className={tone === "dark" ? "text-kb-white" : "text-text-1"}
                 >
                   {c.name}
                 </span>
@@ -150,7 +150,7 @@ export function PageHero({
       >
         <div>
           {crumbs ? <Breadcrumbs items={crumbs} tone="dark" className="mb-5" /> : null}
-          <p className="flex items-center gap-3 text-sm font-bold uppercase tracking-wider text-kb-stone-on-dark">
+          <p className="flex items-center gap-3 text-small font-bold uppercase tracking-wider text-kb-mute">
             <span className="h-1 w-8 rounded-pill bg-kb-yellow" />
             {eyebrow}
           </p>
@@ -163,7 +163,7 @@ export function PageHero({
           >
             {title}
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-kb-stone-on-dark">{sub}</p>
+          <p className="mt-6 max-w-2xl text-title leading-8 text-kb-mute">{sub}</p>
           {children}
         </div>
         {visual && (
@@ -215,8 +215,8 @@ export function IconBadge({
       aria-hidden="true"
       className={cn(
         "grid size-11 shrink-0 place-items-center rounded-full [&_svg]:size-5 [&_svg]:stroke-[2]",
-        tone === "yellow" && "bg-kb-yellow text-kb-black",
-        tone === "sand" && "bg-kb-sand text-kb-black ring-1 ring-kb-hairline",
+        tone === "yellow" && "bg-surface-2 text-text-1 ring-1 ring-line",
+        tone === "sand" && "bg-surface-2 text-text-1 ring-1 ring-line",
         tone === "dark" && "bg-kb-white/10 text-kb-yellow ring-1 ring-kb-white/15",
         className,
       )}
@@ -239,10 +239,10 @@ export function FeatureCard({
   className?: string;
 }) {
   return (
-    <div className={cn("kb-lift h-full rounded-large bg-kb-white p-6 shadow-kb", className)}>
+    <div className={cn("kb-lift h-full rounded-panel bg-surface-1 p-6 shadow-rest", className)}>
       <IconBadge icon={icon} />
-      <h3 className="mt-5 text-lg font-bold">{title}</h3>
-      <div className="mt-2 leading-7 text-kb-stone [&_b]:text-kb-ink">{children}</div>
+      <h3 className="mt-5 text-title font-bold">{title}</h3>
+      <div className="mt-2 leading-7 text-text-2 [&_b]:text-text-1">{children}</div>
     </div>
   );
 }
@@ -264,7 +264,7 @@ export function CtaBand({
           <h2 className="max-w-2xl font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05]">
             {title}
           </h2>
-          <p className="mt-3 max-w-xl text-kb-stone-on-dark">{sub ?? BRAND_EXPLAINER}</p>
+          <p className="mt-3 max-w-xl text-kb-mute">{sub ?? BRAND_EXPLAINER}</p>
         </div>
         <Button asChild className="w-full shrink-0 md:w-auto">
           <Link to={cta.to}>
@@ -307,16 +307,16 @@ export function DemoQr({ className }: { className?: string }) {
 
 export function FaqList({ items }: { items: { q: string; a: string }[] }) {
   return (
-    <div className="divide-y divide-kb-hairline border-y border-kb-hairline">
+    <div className="divide-y divide-line border-y border-line">
       {items.map((f) => (
         <details key={f.q} className="group py-5">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-bold [&::-webkit-details-marker]:hidden">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-title font-bold [&::-webkit-details-marker]:hidden">
             {f.q}
-            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-kb-sand transition-[transform,background-color] group-open:rotate-45 group-open:bg-kb-yellow">
+            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-surface-2 transition-[transform,background-color] group-open:rotate-45 group-open:bg-kb-yellow">
               <Plus className="size-4" aria-hidden="true" />
             </span>
           </summary>
-          <p className="mt-3 max-w-3xl leading-7 text-kb-stone">{f.a}</p>
+          <p className="mt-3 max-w-3xl leading-7 text-text-2">{f.a}</p>
         </details>
       ))}
     </div>
@@ -340,7 +340,7 @@ export function Photo({
       id={id}
       sizes={sizes}
       priority={priority}
-      className={cn("block h-auto w-full rounded-large bg-kb-sand object-cover", className)}
+      className={cn("block h-auto w-full rounded-panel bg-surface-2 object-cover", className)}
     />
   );
 }
@@ -350,7 +350,7 @@ export function SoonPill({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 rounded-pill bg-kb-amber-soft px-2.5 py-0.5 text-xs font-bold text-kb-amber",
+        "inline-flex shrink-0 rounded-pill bg-warn-soft px-2.5 py-0.5 text-label font-bold text-warn",
         className,
       )}
     >

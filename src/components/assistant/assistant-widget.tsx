@@ -284,7 +284,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
           role="dialog"
           aria-modal="true"
           aria-labelledby="kabsi-assistant-title"
-          className="fixed inset-0 z-50 flex flex-col bg-kb-white sm:inset-auto sm:bottom-6 sm:right-6 sm:h-[min(640px,calc(100vh-48px))] sm:w-[400px] sm:overflow-hidden sm:rounded-large sm:shadow-[0_24px_60px_rgba(0,0,0,.28)] sm:ring-1 sm:ring-kb-hairline"
+          className="fixed inset-0 z-50 flex flex-col bg-kb-white sm:inset-auto sm:bottom-6 sm:right-6 sm:h-[min(640px,calc(100vh-48px))] sm:w-[400px] sm:overflow-hidden sm:rounded-panel sm:shadow-[0_24px_60px_rgba(0,0,0,.28)] sm:ring-1 sm:ring-kb-hairline"
         >
           <header className="flex items-center gap-3 bg-kb-carbon px-4 py-3 text-kb-white [padding-top:max(0.75rem,env(safe-area-inset-top))]">
             <span className="grid size-9 place-items-center rounded-full bg-kb-yellow text-kb-black">
@@ -294,7 +294,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
               <p id="kabsi-assistant-title" className="font-bold leading-tight">
                 Nora from Kabsi
               </p>
-              <p className="text-xs text-kb-stone-on-dark">
+              <p className="text-xs text-kb-mute">
                 AI assistant · a real person is one message away
               </p>
             </div>
@@ -395,7 +395,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
             onSubmit={submit}
             className="border-t border-kb-hairline bg-kb-white p-3 [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]"
           >
-            <div className="flex items-end gap-2 rounded-large border border-kb-hairline bg-kb-white p-1.5 focus-within:border-kb-black">
+            <div className="flex items-end gap-2 rounded-panel border border-kb-hairline bg-kb-white p-1.5 focus-within:border-kb-black">
               <label htmlFor="kabsi-assistant-input" className="sr-only">
                 Your message
               </label>
@@ -446,7 +446,7 @@ function Bubble({ role, children }: { role: "user" | "assistant"; children: Reac
       <div
         dir="auto"
         className={cn(
-          "max-w-[85%] whitespace-pre-wrap break-words rounded-large px-4 py-2.5 text-[15px] leading-6",
+          "max-w-[85%] whitespace-pre-wrap break-words rounded-panel px-4 py-2.5 text-[15px] leading-6",
           role === "user"
             ? "rounded-br-md bg-kb-black text-kb-white"
             : "rounded-bl-md bg-kb-white text-kb-ink shadow-sm ring-1 ring-kb-hairline",

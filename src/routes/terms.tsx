@@ -65,11 +65,11 @@ function Page() {
             lets you approve, edit or skip it from email or the app.
           </li>
           <li>
-            Drafts Google posts, checks photos, prepares special hours, and watches your listing for
-            changes (Google Protection). When something changes, you choose: Google is right, or
-            Keep my information.
+            Drafts Google posts, checks photos, prepares special hours, and watches your Google
+            profile for changes (Google Protection). When something changes, you choose: Google is
+            right, or Keep my information.
           </li>
-          <li>Sends the Weekly Care Report and shows your profile's facts in the app.</li>
+          <li>Sends the Results Report and shows your profile's facts on the Kabsi website.</li>
           <li>
             Provides a review link and a QR code that open your Google review page for every
             customer. They work with your own QR codes and NFC cards. Kabsi sells no cards.
@@ -181,7 +181,7 @@ function Page() {
           </li>
           <li>
             Google Protection alerts you and lets you keep your information if you choose. It can't
-            lock your listing or stop people suggesting edits to Google.
+            lock your Google profile or stop people suggesting edits to Google.
           </li>
         </ul>
       </section>
@@ -206,8 +206,8 @@ function Page() {
           <li>break, overload, copy or resell Kabsi.</li>
         </ul>
         <p>
-          These practices break Google's policies and can get a listing penalised. If we see them,
-          we may pause or stop the service (see section 12).
+          These practices break Google's policies and can get a Google profile penalised. If we see
+          them, we may pause or stop the service (see section 12).
         </p>
       </section>
 
@@ -256,8 +256,8 @@ function Page() {
             renew automatically.
           </li>
           <li>
-            When a plan ends, reply drafts, posts, Google Protection and the Weekly Care Report
-            stop. Your review link and QR code keep working.
+            When a plan ends, reply drafts, posts, Google Protection and the Results Report stop.
+            Your review link and QR code keep working.
           </li>
         </ul>
       </section>
@@ -292,7 +292,7 @@ function Page() {
           </li>
           <li>
             They keep working after a plan ends, for as long as Kabsi operates. You can switch any
-            of them off in the app.
+            of them off on the Kabsi website.
           </li>
           <li>
             If you delete your business from Kabsi, its links and QR codes stop working, and so does

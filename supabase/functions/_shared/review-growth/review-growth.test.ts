@@ -20,7 +20,7 @@ const BANNED = /[–—!]/;
 // ─── 1. the ready message
 Deno.test("the review request: one message, the business's link, no reward, no rating question, no dash", () => {
   const m = reviewRequestMessage("Harbour Lane Coffee", "https://go.kabsi.co/ABC234?s=m");
-  assertEquals(m, "Thanks for visiting Harbour Lane Coffee. If you would like to leave a review, here is our link: https://go.kabsi.co/ABC234?s=m");
+  assertEquals(m, "Thank you for visiting Harbour Lane Coffee today. If you have a minute, tell others how your visit went: https://go.kabsi.co/ABC234?s=m");
   assertEquals(reviewRequestProblems(m), []);
   assertEquals(reviewRequestProblems(ASK_INTRO), []);
   assertNotMatch(m, BANNED);

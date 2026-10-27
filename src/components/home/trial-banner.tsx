@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Banner } from "@/components/ui/banner";
+import { Banner } from "@/components/kabsi/ui";
 import { loadEntitlements } from "@/lib/entitlements";
 import { trialBannerLine } from "@/lib/trial-banner";
 
@@ -13,9 +13,11 @@ export function TrialBanner({ locationId }: { locationId: string }) {
   const line = ent.data ? trialBannerLine(ent.data) : null;
   if (!line) return null;
   return (
-    <Banner tone="success" className="mt-6" title={line} data-testid="trial-banner">
-      Kabsi watches your reviews and your Google profile and prepares what you approve. Choose
-      Essentials or Pro from day 11. Your review link and QR code stay free either way.
-    </Banner>
+    <div data-testid="trial-banner">
+      <Banner tone="ok" title={line}>
+        Kabsi watches your reviews and your Google profile and prepares what you approve. Choose
+        Essentials or Pro from day 11. Your review link and QR code stay free either way.
+      </Banner>
+    </div>
   );
 }

@@ -64,9 +64,9 @@ describe("the owner's checklist", () => {
     );
   });
 
-  it("lives under Google Profile, next to Hours", () => {
+  it("lives under Google profile, next to Hours", () => {
     expect(SECTIONS["google-profile"].tabs?.map((t) => t.label)).toEqual([
-      "Google Profile",
+      "Profile watch",
       "Hours",
       "Profile Coach",
     ]);

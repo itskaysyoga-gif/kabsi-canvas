@@ -254,3 +254,16 @@ export async function loadFeed(locationId: string): Promise<FeedLine[]> {
       times: r.times,
     }));
 }
+
+/** The onboarding facts Home needs (V4's onboarding_status): is Google access checked yet, and is the first task done. */
+export type SetupStatus = { checked: boolean; accepted: boolean; first_task_done: boolean };
+export async function loadSetupStatus(locationId: string): Promise<SetupStatus> {
+  const { data, error } = await supabase.rpc("onboarding_status", { p_location: locationId });
+  if (error) throw new Error(error.message);
+  const d = (data ?? {}) as Partial<SetupStatus>;
+  return {
+    checked: d.checked === true,
+    accepted: d.accepted === true,
+    first_task_done: d.first_task_done === true,
+  };
+}

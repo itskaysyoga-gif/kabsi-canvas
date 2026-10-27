@@ -21,12 +21,12 @@ test.describe("owner journeys (QA demo owner)", () => {
     await signedIn(context, "demo");
   });
 
-  // The Reviews list shows one line per review; opening it shows the review card with its draft and Approve reply.
-  const reviewCard = (page: import("@playwright/test").Page) => page.locator("article");
+  // UX 1: Reviews is a list of cards; the waiting review is the card named "Reply to Quinn Tester" with Approve reply on it.
+  const reviewCard = (page: import("@playwright/test").Page) =>
+    page.getByRole("article", { name: /Quinn Tester/ });
   async function openQaReview(page: import("@playwright/test").Page) {
     await page.goto("/app/reviews");
     await settle(page);
-    await page.getByRole("button", { name: /Quinn Tester/ }).click();
     await expect(reviewCard(page).getByText("Quinn Tester")).toBeVisible();
   }
 
@@ -38,7 +38,9 @@ test.describe("owner journeys (QA demo owner)", () => {
       "the QA review is waiting (run qa-reset.sql)",
     ).toBeVisible();
     await card.getByRole("button", { name: "Approve reply" }).click();
-    const banner = page.getByRole("status").filter({ hasText: /Publishing in \d+ seconds?/ });
+    const banner = page
+      .getByRole("status")
+      .filter({ hasText: /It goes to Google in \d+ seconds?/ });
     await expect(banner).toBeVisible();
     await banner.getByRole("button", { name: "Undo" }).click();
     // The note ("Undone. Nothing was sent to Google...") shows for a moment, and the card then reloads with the draft waiting again.
@@ -50,13 +52,15 @@ test.describe("owner journeys (QA demo owner)", () => {
   test("approve a reply and let the 10 seconds pass: it goes on its way", async ({ page }) => {
     await openQaReview(page);
     await reviewCard(page).getByRole("button", { name: "Approve reply" }).click();
-    await expect(page.getByText(/Publishing in \d+ seconds?/)).toBeVisible();
-    // The 10 seconds run out, the banner goes, and the reply is Google's (the mock's) to take.
-    await expect(page.getByText(/Publishing in \d+ seconds?/)).toHaveCount(0, { timeout: 25_000 });
+    await expect(page.getByText(/It goes to Google in \d+ seconds?/)).toBeVisible();
+    // The 10 seconds run out, the countdown goes, and the reply is Google's (the mock's) to take.
+    await expect(page.getByText(/It goes to Google in \d+ seconds?/)).toHaveCount(0, {
+      timeout: 25_000,
+    });
     await page.goto("/app/reviews");
     await settle(page);
-    // After a reload the review no longer waits for an answer: it has left "Needs reply".
-    await expect(page.getByRole("button", { name: /Quinn Tester/ })).toHaveCount(0);
+    // After a reload the review no longer waits for an answer: it has no Approve reply any more.
+    await expect(reviewCard(page).getByRole("button", { name: "Approve reply" })).toHaveCount(0);
   });
 
   test("approve a post, then Cancel it while it waits for its day: nothing is posted", async ({
@@ -77,7 +81,7 @@ test.describe("owner journeys (QA demo owner)", () => {
     if (await draft.getByRole("button", { name: "Approve", exact: true }).isVisible()) {
       await draft.getByRole("button", { name: "Approve", exact: true }).click();
       // The banner counts to the post's own day, so there is nothing to wait for: the post now waits and can be cancelled.
-      await expect(page.getByText(/Publishing in|On its way to Google/).first()).toBeVisible();
+      await expect(page.getByText(/It goes to Google|On its way to Google/).first()).toBeVisible();
       await page.goto("/app/posts");
       await settle(page);
       await showMonth();

@@ -32,7 +32,7 @@ describe("the page", () => {
 
   it("is the Google review button, large, with the manager line as a wa.me link to the business", () => {
     const out = html(data);
-    expect(out).toContain("Write a Google review");
+    expect(out).toContain("Write a review on Google");
     expect(out).toContain("h-14 w-full");
     const href = managerHref("971501234567", "Yawmiyati");
     expect(new URL(href).origin + new URL(href).pathname).toBe("https://wa.me/971501234567");
@@ -44,7 +44,7 @@ describe("the page", () => {
     const out = html({ ...data, whatsapp: null });
     expect(out).not.toContain(MANAGER_LINE);
     expect(out).not.toContain("wa.me");
-    expect(out).toContain("Write a Google review");
+    expect(out).toContain("Write a review on Google");
   });
 
   it("asks nothing and shows no rating: no form control, no stars, no question about the visit", () => {

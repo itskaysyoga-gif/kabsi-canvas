@@ -9,7 +9,7 @@
 
 /** The one message, for every customer. Same words as the staff "Send review link" button (P0.8-06). */
 export function reviewRequestMessage(businessName: string, link: string): string {
-  return `Thanks for visiting ${businessName}. If you would like to leave a review, here is our link: ${link}`;
+  return `Thank you for visiting ${businessName} today. If you have a minute, tell others how your visit went: ${link}`;
 }
 
 /** Words the message must never contain: rewards, gating, star talk (Google's review rules, K-25). */

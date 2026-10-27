@@ -41,15 +41,17 @@ export function HoursCalendar({
     : [];
 
   return (
-    <section className="mt-10" aria-label="Calendar">
+    <section aria-label="Calendar">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold">{MONTH.format(new Date(view.year, view.month, 1))}</h2>
+        <h2 className="font-display text-h3 font-bold">
+          {MONTH.format(new Date(view.year, view.month, 1))}
+        </h2>
         <div className="flex gap-1">
           <button
             type="button"
             aria-label="Previous month"
             onClick={() => move(-1)}
-            className="grid size-10 place-items-center rounded-card hover:bg-kb-sand"
+            className="grid size-11 place-items-center rounded-full hover:bg-surface-2"
           >
             <ChevronLeft className="size-5" />
           </button>
@@ -57,13 +59,13 @@ export function HoursCalendar({
             type="button"
             aria-label="Next month"
             onClick={() => move(1)}
-            className="grid size-10 place-items-center rounded-card hover:bg-kb-sand"
+            className="grid size-11 place-items-center rounded-full hover:bg-surface-2"
           >
             <ChevronRight className="size-5" />
           </button>
         </div>
       </div>
-      <div className="mt-2 grid grid-cols-7 gap-1 text-center text-xs font-bold text-kb-stone">
+      <div className="mt-2 grid grid-cols-7 gap-1 text-center text-label font-bold text-text-2">
         {WEEKDAYS.map((d) => (
           <span key={d}>{d}</span>
         ))}
@@ -81,30 +83,30 @@ export function HoursCalendar({
               aria-pressed={picked === date}
               aria-label={`${d} ${MONTH.format(new Date(view.year, view.month, 1))}${sp ? ", special hours" : ""}${ho ? ", public holiday" : ""}`}
               onClick={() => setPicked(picked === date ? null : date)}
-              className={`flex h-12 flex-col items-center justify-center rounded-card border text-sm ${
-                date === today ? "border-kb-black" : "border-transparent"
-              } ${picked === date ? "bg-kb-sand" : "bg-kb-white"} shadow-kb`}
+              className={`flex h-12 flex-col items-center justify-center rounded-inner border text-small ${
+                date === today ? "border-text-1" : "border-transparent"
+              } ${picked === date ? "bg-surface-3" : "bg-surface-2"}`}
             >
               <span className={date === today ? "font-bold" : ""}>{d}</span>
               <span className="mt-0.5 flex h-1.5 gap-1" aria-hidden="true">
                 {sp ? <span className="size-1.5 rounded-full bg-kb-black" /> : null}
-                {ho ? <span className="size-1.5 rounded-full bg-kb-amber" /> : null}
+                {ho ? <span className="size-1.5 rounded-full bg-warn" /> : null}
               </span>
             </button>
           );
         })}
       </div>
-      <p className="mt-3 flex flex-wrap gap-x-4 text-xs text-kb-stone">
+      <p className="mt-3 flex flex-wrap gap-x-4 text-label text-text-2">
         <span className="inline-flex items-center gap-1.5">
           <span className="size-1.5 rounded-full bg-kb-black" aria-hidden="true" /> Special hours
           set
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="size-1.5 rounded-full bg-kb-amber" aria-hidden="true" /> Public holiday
+          <span className="size-1.5 rounded-full bg-warn" aria-hidden="true" /> Public holiday
         </span>
       </p>
       {picked ? (
-        <p className="mt-3 rounded-card bg-kb-sand p-3 text-sm" role="status">
+        <p className="mt-3 rounded-inner bg-surface-2 p-3 text-small" role="status">
           {detail.length ? detail.join(". ") : "Nothing special on this day."}
         </p>
       ) : null}

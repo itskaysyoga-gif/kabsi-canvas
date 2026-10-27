@@ -13,14 +13,14 @@ export function IndustryLinks({
 }) {
   return (
     <nav aria-label={title} className={className}>
-      <p className="text-xs font-bold text-kb-stone">{title}</p>
+      <p className="text-label font-bold text-text-2">{title}</p>
       <ul className="mt-3 flex flex-wrap gap-2">
         {INDUSTRIES.filter((i) => i.finished).map((i) => (
           <li key={i.slug}>
             <Link
               to="/for/$trade"
               params={{ trade: i.slug }}
-              className="inline-flex items-center gap-2 rounded-pill border border-kb-hairline bg-kb-white px-3.5 py-2 text-sm font-bold hover:border-kb-black"
+              className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-line-strong bg-surface-1 px-4 text-small font-bold text-text-1 hover:border-text-1"
             >
               {i.plural}
             </Link>
@@ -29,7 +29,7 @@ export function IndustryLinks({
         <li>
           <Link
             to="/for"
-            className="inline-flex items-center gap-1.5 rounded-pill px-3.5 py-2 text-sm font-bold underline underline-offset-4"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-pill px-3.5 text-small font-bold text-text-1 underline underline-offset-4"
           >
             All businesses <ArrowRight className="size-4" aria-hidden="true" />
           </Link>

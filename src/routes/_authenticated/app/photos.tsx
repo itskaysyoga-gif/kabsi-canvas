@@ -1,18 +1,28 @@
 import { useState, type ChangeEvent, type ReactNode } from "react";
-import { EarlyAccessNotice } from "@/components/app/early-access-notice";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Camera, ImagePlus, Link2, ShieldCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { myLatestLocation } from "@/lib/onboarding";
-import { contentCall } from "@/lib/reviews";
-import { track } from "@/lib/telemetry";
-import { ImagePlus as PageGlyph } from "lucide-react";
-import { PageIcon } from "@/components/shared/page-icon";
-import { CopyButton } from "@/components/shared/copy-button";
+import { Camera, ImagePlus, ShieldCheck } from "lucide-react";
+import { EarlyAccessNotice } from "@/components/app/early-access-notice";
+import { CopyField } from "@/components/kabsi/d2-parts";
+import { AccountTop, Panel } from "@/components/kabsi/d3-account";
+import { OpensLater, TaskBlock, useFirstTaskDone } from "@/components/kabsi/d3-content-task";
+import {
+  Button,
+  ButtonLink,
+  EmptyState,
+  ErrorState,
+  StatusPill,
+  WhatsAppLink,
+} from "@/components/kabsi/ui";
 import { SendReviewLink } from "@/components/shared/send-review-link";
+import { myLatestLocation } from "@/lib/onboarding";
 import { usePlaceLink } from "@/lib/place-link";
+import { contentCall } from "@/lib/reviews";
+import { WHATSAPP_ON } from "@/lib/site";
+import { latestByTarget, recentTasks, type TaskItem } from "@/lib/task-feed";
 import { myAccess } from "@/lib/team";
+import { track } from "@/lib/telemetry";
+import { cn } from "@/lib/utils";
 import {
   ACCEPT,
   CATEGORIES,
@@ -25,13 +35,17 @@ import {
   type Photo,
 } from "@/lib/photos";
 
-// Photos (P0.5-01, K-23): add up to 20 from the camera or the gallery; Kabsi's photo engine checks each one in the
-// background and removes its location data; the owner approves them all at once or one by one, and each approved photo
-// goes to Google once through the one pipeline (D202). The preferred cover photo and logo, and a staff upload link.
+// Photos (P0.5-01, K-23; Design 3's Photos tab): send photos on WhatsApp or add them here; Kabsi's photo engine checks
+// each one and removes its location data; the owner approves them all at once or one by one, and each approved photo
+// goes to Google once through the one pipeline (D202) and shows its task state. The preferred cover photo and logo, and
+// the team photo link. V4: the photo ask and the team link open after the first task is done. Staff (K-16) add photos
+// and share the review link here; they approve nothing.
 export const Route = createFileRoute("/_authenticated/app/photos")({
   head: () => ({ meta: [{ title: "Photos | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: PhotosPage,
 });
+
+const SENT = ["publishing", "posted", "failed"];
 
 function PhotosPage() {
   const queryClient = useQueryClient();
@@ -45,26 +59,37 @@ function PhotosPage() {
     refetchInterval: (q) =>
       q.state.data?.photos.some((p) => p.state === "checking") ? 10_000 : false,
   });
-  const refresh = () =>
-    Promise.all(
-      [["photos"], ["dashboard"], ["activity"], ["tasks"]].map((queryKey) =>
-        queryClient.invalidateQueries({ queryKey }),
-      ),
-    );
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState("");
   const access = useQuery({
     queryKey: ["my-access", loc?.id],
     queryFn: () => myAccess(loc!.id),
     enabled: !!loc,
   });
   const role = access.data?.role;
-  const placeLink = usePlaceLink(role === "staff" ? loc?.id : undefined);
+  const approvesHere = role === "owner" || role === "manager";
   const canWork = !!loc && loc.status === "active" && !loc.concierge;
+  const feed = useQuery({
+    queryKey: ["photo-tasks", loc?.id],
+    queryFn: () => recentTasks(loc!.id, { kinds: ["photo"], days: 120, limit: 100 }),
+    enabled: canWork && approvesHere,
+    retry: false,
+  });
+  const firstDone = useFirstTaskDone(canWork && approvesHere ? loc?.id : undefined);
+  const placeLink = usePlaceLink(role === "staff" ? loc?.id : undefined);
+  const refresh = () =>
+    Promise.all(
+      [["photos"], ["photo-tasks"], ["dashboard"], ["activity"], ["tasks"]].map((queryKey) =>
+        queryClient.invalidateQueries({ queryKey }),
+      ),
+    );
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
   const photos = data.data?.photos ?? [];
   const urls = data.data?.urls ?? {};
   const ready = photos.filter((p) => p.state === "draft" && p.kind === "photo");
-  const approvesHere = role === "owner" || role === "manager";
+  const sent = photos.filter((p) => SENT.includes(p.state));
+  const tasks = latestByTarget(feed.data ?? []);
+  // Staff are never held back: they only exist once the owner has a team. Owners wait for the first task (V4).
+  const open = role === "staff" || firstDone === true;
 
   async function onFiles(e: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -88,97 +113,128 @@ function PhotosPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-      <PageIcon icon={<PageGlyph />} />
-      <p className="text-sm font-bold uppercase tracking-wider text-kb-stone">Content</p>
-      <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">Photos</h1>
-      <p className="mt-2 text-kb-stone">
-        Add real photos of your place, your team, your work and what you sell. Kabsi checks each one
-        before you approve it.
-      </p>
-      <p className="mt-3 flex items-start gap-2 text-sm">
-        <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-        Kabsi removes location data from every photo before it goes to Google.
-      </p>
-      {!location.isLoading && !loc ? (
-        <Button asChild className="mt-6">
-          <Link to="/start">Add your business</Link>
-        </Button>
-      ) : null}
+    <>
+      <AccountTop title="Photos" />
+      {!location.isLoading && !loc ? <ButtonLink to="/start">Add your business</ButtonLink> : null}
       {loc?.concierge ? <EarlyAccessNotice what="Photos" /> : null}
+      {loc && !loc.concierge && loc.status !== "active" ? (
+        <Panel>
+          <p className="text-body font-bold">Photos can be added once your business is active.</p>
+        </Panel>
+      ) : null}
 
-      {canWork ? (
-        <div className="mt-7 grid grid-cols-2 gap-3">
-          <UploadButton
-            icon={<Camera className="size-6" aria-hidden="true" />}
-            label="Take a photo"
-            capture
-            busy={busy}
-            onChange={onFiles}
-          />
-          <UploadButton
-            icon={<ImagePlus className="size-6" aria-hidden="true" />}
-            label="Choose photos"
-            busy={busy}
-            onChange={onFiles}
-          />
-          <p className="col-span-2 text-sm text-kb-stone">
-            Up to 20 at a time, 20 MB each. JPG, PNG, WebP or HEIC. Videos are kept for 30 days;
-            sending videos to Google comes later.
-          </p>
+      {canWork && access.data ? (
+        <div className="space-y-6">
+          {open ? (
+            <Panel>
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                <span className="grid size-14 shrink-0 place-items-center rounded-full bg-surface-2">
+                  <Camera className="size-7" strokeWidth={1.75} aria-hidden />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-display text-h3 font-bold">
+                    {WHATSAPP_ON && role !== "staff" ? "Send photos on WhatsApp" : "Add photos"}
+                  </h2>
+                  <p className="mt-1 text-body text-text-2">
+                    {WHATSAPP_ON && role !== "staff"
+                      ? "Send a photo to Kabsi. It checks the size and light, gets it ready and asks for your yes before it goes on Google. On Essentials and Pro."
+                      : role === "staff"
+                        ? "Add real photos of your place, your team, your work and what you sell. Kabsi checks each one, and the owner approves it."
+                        : "Add real photos of your place, your team, your work and what you sell. Kabsi checks each one before you approve it."}
+                  </p>
+                </div>
+                {role !== "staff" ? <WhatsAppLink label="Send a photo" size="md" /> : null}
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-3 border-t border-line pt-5">
+                <UploadButton
+                  icon={<Camera className="size-6" aria-hidden />}
+                  label="Take a photo"
+                  capture
+                  busy={busy}
+                  onChange={onFiles}
+                />
+                <UploadButton
+                  icon={<ImagePlus className="size-6" aria-hidden />}
+                  label="Choose photos"
+                  busy={busy}
+                  onChange={onFiles}
+                />
+                <p className="col-span-2 text-small text-text-2">
+                  Up to 20 at a time, 20 MB each. JPG, PNG, WebP or HEIC. Videos are kept for 30
+                  days; sending videos to Google comes later.
+                </p>
+                <p className="col-span-2 flex items-start gap-2 text-small text-text-1">
+                  <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
+                  Kabsi removes location data from every photo before it goes to Google.
+                </p>
+              </div>
+              {msg ? (
+                <p className="mt-3 text-small text-text-1" role="status">
+                  {msg}
+                </p>
+              ) : null}
+            </Panel>
+          ) : firstDone === false ? (
+            <OpensLater />
+          ) : null}
+
+          {role === "staff" && loc ? (
+            <SendReviewLink name={loc.name} link={placeLink.data} />
+          ) : null}
+
+          {data.isError ? (
+            <ErrorState title="This page did not load." onRetry={() => void data.refetch()}>
+              Nothing you did, and nothing changed on Google. Try again in a minute.
+            </ErrorState>
+          ) : null}
+
+          {ready.length && approvesHere ? (
+            <ReadyBatch locationId={loc.id} ready={ready} urls={urls} onChanged={refresh} />
+          ) : null}
+          {ready.length && !approvesHere ? (
+            <Panel>
+              <p className="text-body text-text-1">
+                {ready.length} {ready.length === 1 ? "photo is" : "photos are"} ready. The owner
+                approves them.
+              </p>
+            </Panel>
+          ) : null}
+
+          <Checking photos={photos} />
+
+          {data.data && !photos.length && open && approvesHere ? (
+            <EmptyState icon={Camera} title="No photos sent yet.">
+              {WHATSAPP_ON
+                ? "Send your first photo on WhatsApp. Your work, your team or your place."
+                : "Add your first photo above. Your work, your team or your place."}
+            </EmptyState>
+          ) : null}
+
+          {sent.length ? (
+            <section aria-labelledby="sent-photos">
+              <h2 id="sent-photos" className="font-display text-h3 font-bold">
+                Sent to Google
+              </h2>
+              <ul className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {sent.map((p) => (
+                  <SentTile
+                    key={p.id}
+                    photo={p}
+                    url={urls[p.storage_path]}
+                    task={tasks.get(p.id)}
+                    approvesHere={approvesHere}
+                  />
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          {approvesHere && open ? <CoverAndLogo photos={photos} urls={urls} /> : null}
+
+          {approvesHere && open && loc ? <TeamLink locationId={loc.id} /> : null}
         </div>
-      ) : loc && !loc.concierge ? (
-        <p className="mt-6 text-kb-stone">Photos can be added once your business is active.</p>
       ) : null}
-      {msg ? (
-        <p className="mt-3 text-sm" role="status">
-          {msg}
-        </p>
-      ) : null}
-      {loc && role === "staff" ? (
-        <div className="mt-6">
-          <SendReviewLink name={loc.name} link={placeLink.data} />
-        </div>
-      ) : null}
-      {data.isError ? (
-        <p className="mt-6 text-sm text-kb-red" role="alert">
-          Couldn't load your photos. Refresh the page to try again.
-        </p>
-      ) : null}
-
-      {canWork && loc && ready.length && approvesHere ? (
-        <ReadyBatch locationId={loc.id} ready={ready} urls={urls} onChanged={refresh} />
-      ) : null}
-      {canWork && ready.length && !approvesHere ? (
-        <p className="mt-8 rounded-large bg-kb-white p-5 shadow-kb">
-          {ready.length} {ready.length === 1 ? "photo is" : "photos are"} ready. The owner approves
-          them.
-        </p>
-      ) : null}
-
-      <Checking photos={photos} />
-
-      {canWork ? <CoverAndLogo photos={photos} urls={urls} /> : null}
-
-      <Section title="Sending to Google" list={photos.filter((p) => p.state === "publishing")}>
-        {(p) => <Tile key={p.id} photo={p} url={urls[p.storage_path]} label="Sending to Google" />}
-      </Section>
-      <Section title="On Google" list={photos.filter((p) => p.state === "posted")}>
-        {(p) => (
-          <Tile
-            key={p.id}
-            photo={p}
-            url={urls[p.storage_path]}
-            label={CATEGORIES[p.category ?? "ADDITIONAL"] ?? "Other"}
-          />
-        )}
-      </Section>
-      <Section title="Couldn't post" list={photos.filter((p) => p.state === "failed")}>
-        {(p) => <Tile key={p.id} photo={p} url={urls[p.storage_path]} label="Not on Google" />}
-      </Section>
-
-      {canWork && approvesHere && loc ? <StaffLink locationId={loc.id} /> : null}
-    </div>
+    </>
   );
 }
 
@@ -196,7 +252,7 @@ function UploadButton({
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
-    <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-large border-2 border-dashed border-kb-hairline bg-kb-white p-4 text-center font-bold hover:border-kb-black">
+    <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-inner border border-dashed border-line-strong bg-surface-2 p-4 text-center text-body font-bold text-text-1 focus-within:outline-2 focus-within:outline-text-1 hover:border-text-1">
       {icon}
       {busy ? "Working…" : label}
       <input
@@ -228,6 +284,8 @@ function ReadyBatch({
   const [err, setErr] = useState("");
   const [done, setDone] = useState("");
   const clean = ready.filter((p) => p.suitable);
+  // One yellow button: Approve all when there are several, else the one photo's Approve photo.
+  const batch = clean.length > 1;
   async function approveAll() {
     setBusy(true);
     setErr("");
@@ -247,45 +305,51 @@ function ReadyBatch({
     setBusy(false);
   }
   return (
-    <section className="mt-8">
-      <div className="rounded-large bg-kb-white p-5 shadow-kb">
-        <h2 className="font-display text-2xl leading-tight">
+    <section className="space-y-4" aria-labelledby="ready-photos">
+      <Panel>
+        <h2 id="ready-photos" className="font-display text-h3 font-bold">
           {ready.length} {ready.length === 1 ? "photo is" : "photos are"} ready
         </h2>
-        <p className="mt-1 text-sm text-kb-stone">
+        <p className="mt-1 text-body text-text-2">
           {clean.length === ready.length
             ? "Kabsi checked them and removed the location data."
             : `Kabsi has a note on ${ready.length - clean.length} of them. Look at those one by one below.`}
         </p>
-        {clean.length ? (
+        {batch ? (
           <Button
+            size="md"
+            data-main-cta
             className="mt-4 w-full sm:w-auto"
-            disabled={busy}
+            loading={busy}
             onClick={() => void approveAll()}
           >
-            {busy
-              ? "Approving…"
-              : clean.length === ready.length
-                ? "Approve all"
-                : `Approve the ${clean.length} without a note`}
+            {clean.length === ready.length
+              ? "Approve all"
+              : `Approve the ${clean.length} without a note`}
           </Button>
         ) : null}
         {done ? (
-          <p className="mt-3 text-sm" role="status">
+          <p className="mt-3 text-small text-text-1" role="status">
             {done}
           </p>
         ) : null}
         {err ? (
-          <p className="mt-3 text-sm text-kb-red" role="alert">
+          <p className="mt-3 text-small font-semibold text-bad" role="alert">
             {err}
           </p>
         ) : null}
-      </div>
-      <div className="mt-4 grid gap-5 sm:grid-cols-2">
-        {ready.map((p) => (
-          <ReadyCard key={p.id} photo={p} url={urls[p.storage_path]} onChanged={onChanged} />
+      </Panel>
+      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {ready.map((p, i) => (
+          <ReadyCard
+            key={p.id}
+            photo={p}
+            url={urls[p.storage_path]}
+            primary={!batch && i === ready.findIndex((x) => x.suitable)}
+            onChanged={onChanged}
+          />
         ))}
-      </div>
+      </ul>
     </section>
   );
 }
@@ -293,10 +357,12 @@ function ReadyBatch({
 function ReadyCard({
   photo,
   url,
+  primary,
   onChanged,
 }: {
   photo: Photo;
   url: string | undefined;
+  primary: boolean;
   onChanged: () => unknown;
 }) {
   const [category, setCategory] = useState(photo.category ?? "ADDITIONAL");
@@ -321,21 +387,21 @@ function ReadyCard({
     setBusy("");
   }
   return (
-    <article className="overflow-hidden rounded-large bg-kb-white shadow-kb">
+    <li className="overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest">
       <PhotoImage url={url} />
-      <div className="p-5">
-        <p className={`text-sm font-bold ${photo.suitable ? "text-kb-green" : "text-kb-red"}`}>
-          {photo.suitable ? "Looks good for Google" : "Kabsi has a note"}
-        </p>
+      <div className="p-4">
+        <StatusPill tone={photo.suitable ? "info" : "warn"}>
+          {photo.suitable ? "Waiting for your yes" : "Kabsi has a note"}
+        </StatusPill>
         {photo.suitability_note ? (
-          <p className="mt-1 text-sm text-kb-stone">{photo.suitability_note}</p>
+          <p className="mt-2 text-small text-text-2">{photo.suitability_note}</p>
         ) : null}
-        <label className="mt-3 block text-sm">
+        <label className="mt-3 block text-small font-bold text-text-1">
           What it shows
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="mt-1 h-11 w-full rounded-card border border-kb-hairline bg-kb-white px-3"
+            className="mt-1 h-11 w-full rounded-input border border-stroke bg-surface-2 px-3 text-body font-normal text-text-1"
           >
             {Object.entries(CATEGORIES).map(([k, l]) => (
               <option key={k} value={k}>
@@ -344,27 +410,36 @@ function ReadyCard({
             ))}
           </select>
         </label>
-        {advice ? <p className="mt-2 text-sm text-kb-stone">{advice}</p> : null}
+        {advice ? <p className="mt-2 text-small text-text-2">{advice}</p> : null}
         <div className="mt-4 flex flex-wrap gap-2">
           <Button
-            size="compact"
-            variant="outline"
+            size="md"
+            {...(primary
+              ? ({ variant: "primary", "data-main-cta": true } as const)
+              : ({ variant: "secondary" } as const))}
+            loading={busy === "publish"}
             disabled={!!busy}
             onClick={() => void run("publish")}
           >
-            {busy === "publish" ? "Approving…" : photo.suitable ? "Approve" : "Approve anyway"}
+            {photo.suitable ? "Approve photo" : "Approve anyway"}
           </Button>
-          <Button size="compact" variant="ghost" disabled={!!busy} onClick={() => void run("skip")}>
+          <Button
+            size="md"
+            variant="quiet"
+            loading={busy === "skip"}
+            disabled={!!busy}
+            onClick={() => void run("skip")}
+          >
             Don't post
           </Button>
         </div>
         {err ? (
-          <p className="mt-2 text-sm text-kb-red" role="alert">
+          <p className="mt-2 text-small font-semibold text-bad" role="alert">
             {err}
           </p>
         ) : null}
       </div>
-    </article>
+    </li>
   );
 }
 
@@ -379,27 +454,29 @@ function Checking({ photos }: { photos: Photo[] }) {
     await queryClient.invalidateQueries({ queryKey: ["photos"] });
   }
   return (
-    <section className="mt-8">
+    <section className="space-y-3">
       {checking.length ? (
-        <p className="rounded-large bg-kb-white p-5 text-sm shadow-kb" role="status">
-          Kabsi is checking {checking.length} {checking.length === 1 ? "photo" : "photos"}. This
-          takes a minute.
-        </p>
+        <Panel>
+          <p className="text-body text-text-1" role="status">
+            Kabsi is checking {checking.length} {checking.length === 1 ? "photo" : "photos"}. This
+            takes a minute.
+          </p>
+        </Panel>
       ) : null}
       {notes.length ? (
-        <ul className="mt-3 grid gap-2">
+        <ul className="grid gap-2">
           {notes.map((p) => (
             <li
               key={p.id}
-              className="flex items-start justify-between gap-3 rounded-card bg-kb-white p-4 text-sm shadow-kb"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-line bg-surface-1 p-4 text-small"
             >
-              <span>
+              <span className="min-w-0 flex-1 text-text-1">
                 <span className="font-bold">
                   {p.kind === "video" ? "Video kept. " : "Not added. "}
                 </span>
                 {p.suitability_note}
               </span>
-              <Button size="compact" variant="ghost" onClick={() => void dismiss(p.id)}>
+              <Button size="md" variant="quiet" onClick={() => void dismiss(p.id)}>
                 Remove
               </Button>
             </li>
@@ -407,6 +484,36 @@ function Checking({ photos }: { photos: Photo[] }) {
         </ul>
       ) : null}
     </section>
+  );
+}
+
+/** A photo that left the ready list, with its task state (approved, sent to Google, on Google, did not go through). */
+function SentTile({
+  photo,
+  url,
+  task,
+  approvesHere,
+}: {
+  photo: Photo;
+  url: string | undefined;
+  task: TaskItem | undefined;
+  approvesHere: boolean;
+}) {
+  return (
+    <li className="overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest">
+      <PhotoImage url={url} />
+      <div className="p-4">
+        <p className="text-small font-bold text-text-1">
+          {CATEGORIES[photo.category ?? "ADDITIONAL"] ?? "Other"}
+          {photo.source === "staff_link" ? (
+            <span className="block font-normal text-text-2">From the team photo link</span>
+          ) : null}
+        </p>
+        {approvesHere ? (
+          <TaskBlock task={task} kind="photo" rowState={photo.state} className="mt-3" />
+        ) : null}
+      </div>
+    </li>
   );
 }
 
@@ -419,22 +526,23 @@ function CoverAndLogo({ photos, urls }: { photos: Photo[]; urls: Record<string, 
     ["LOGO", "Your logo", latest("LOGO")],
   ];
   return (
-    <section className="mt-10">
-      <h2 className="text-sm font-bold uppercase tracking-wider text-kb-stone">Cover and logo</h2>
-      <div className="mt-3 grid grid-cols-2 gap-3">
+    <Panel title="Cover and logo" id="cover">
+      <div className="grid gap-3 sm:grid-cols-2">
         {tiles.map(([cat, title, p]) => {
           const advice =
             p?.width && p.height ? roleIssue(cat as "COVER" | "LOGO", p.width, p.height) : null;
           return (
-            <div key={cat} className="overflow-hidden rounded-large bg-kb-white shadow-kb">
-              <PhotoImage url={p ? urls[p.storage_path] : undefined} square={cat === "LOGO"} />
-              <div className="p-4">
-                <p className="text-sm font-bold">{title}</p>
-                <p className="mt-1 text-sm text-kb-stone">
+            <div key={cat} className="flex gap-3 rounded-inner border border-line p-3">
+              <div className="w-24 shrink-0 overflow-hidden rounded-inner">
+                <PhotoImage url={p ? urls[p.storage_path] : undefined} square />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-small font-bold text-text-1">{title}</p>
+                <p className="mt-1 text-small text-text-2">
                   {p
                     ? p.state === "publishing"
                       ? "Sending to Google."
-                      : (advice ?? "On Google.")
+                      : (advice ?? "Sent to Google.")
                     : cat === "COVER"
                       ? "None yet. Choose Preferred cover photo on a ready photo. A wide photo works best."
                       : "None yet. Choose Logo on a ready photo. A square one works best."}
@@ -444,15 +552,15 @@ function CoverAndLogo({ photos, urls }: { photos: Photo[]; urls: Record<string, 
           );
         })}
       </div>
-      <p className="mt-2 text-sm text-kb-stone">
+      <p className="mt-3 text-small text-text-2">
         Google decides which photo it shows first, so Kabsi calls these your preferred ones.
       </p>
-    </section>
+    </Panel>
   );
 }
 
-// The staff upload link (K-23): uploads only, no account, turned off at any time.
-function StaffLink({ locationId }: { locationId: string }) {
+// The team photo link (K-23): uploads only, no account, turned off at any time. Kabsi shows a new link once.
+function TeamLink({ locationId }: { locationId: string }) {
   const queryClient = useQueryClient();
   const status = useQuery({
     queryKey: ["photo-link", locationId],
@@ -478,27 +586,20 @@ function StaffLink({ locationId }: { locationId: string }) {
   }
   const active = status.data?.active === true;
   return (
-    <section className="mt-10 rounded-large bg-kb-white p-5 shadow-kb">
-      <h2 className="flex items-center gap-2 font-bold">
-        <Link2 className="size-4" aria-hidden="true" />
-        Staff upload link
-      </h2>
-      <p className="mt-1 text-sm text-kb-stone">
-        Anyone with this link can add photos for you to approve, without an account. It cannot see
-        or change anything else.
+    <Panel title="Let your team send photos" id="team-photos">
+      <p className="text-body text-text-2">
+        Share this link with your team. They send photos without an account, and you approve each
+        one first.
       </p>
       {link ? (
         <div className="mt-4">
-          <p className="break-all rounded-card bg-kb-sand p-3 text-sm">{link}</p>
-          <p className="mt-2 text-sm text-kb-stone">
+          <CopyField label="Team photo link" value={link} />
+          <p className="mt-2 text-small text-text-2">
             Copy it now. Kabsi shows it only once; make a new one if you lose it.
           </p>
-          <div className="mt-3">
-            <CopyButton text={link} label="Copy link" />
-          </div>
         </div>
       ) : active ? (
-        <p className="mt-3 text-sm">
+        <p className="mt-3 text-small text-text-1">
           A link is on.{" "}
           {status.data?.uploads
             ? `${status.data.uploads} ${status.data.uploads === 1 ? "photo" : "photos"} added through it.`
@@ -506,55 +607,21 @@ function StaffLink({ locationId }: { locationId: string }) {
         </p>
       ) : null}
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button size="compact" variant="outline" disabled={busy} onClick={() => void run(true)}>
+        <Button size="md" variant="secondary" loading={busy} onClick={() => void run(true)}>
           {active || link ? "Make a new link" : "Make a link"}
         </Button>
         {active || link ? (
-          <Button size="compact" variant="ghost" disabled={busy} onClick={() => void run(false)}>
+          <Button size="md" variant="quiet" disabled={busy} onClick={() => void run(false)}>
             Turn the link off
           </Button>
         ) : null}
       </div>
       {err ? (
-        <p className="mt-2 text-sm text-kb-red" role="alert">
+        <p className="mt-2 text-small font-semibold text-bad" role="alert">
           {err}
         </p>
       ) : null}
-    </section>
-  );
-}
-
-function Section({
-  title,
-  list,
-  children,
-}: {
-  title: string;
-  list: Photo[];
-  children: (p: Photo) => ReactNode;
-}) {
-  if (!list.length) return null;
-  return (
-    <section className="mt-10">
-      <h2 className="text-sm font-bold uppercase tracking-wider text-kb-stone">
-        {title} · {list.length}
-      </h2>
-      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">{list.map(children)}</div>
-    </section>
-  );
-}
-
-function Tile({ photo, url, label }: { photo: Photo; url: string | undefined; label: string }) {
-  return (
-    <figure className="overflow-hidden rounded-card bg-kb-white shadow-kb">
-      <PhotoImage url={url} />
-      <figcaption className="p-3 text-sm font-bold">
-        {label}
-        {photo.source === "staff_link" ? (
-          <span className="block font-normal text-kb-stone">From the staff link</span>
-        ) : null}
-      </figcaption>
-    </figure>
+    </Panel>
   );
 }
 
@@ -571,6 +638,8 @@ function PhotoImage({ url, square = false }: { url: string | undefined; square?:
       className={`${shape} w-full object-cover`}
     />
   ) : (
-    <div className={`${shape} w-full bg-kb-sand`} />
+    <div className={cn(shape, "grid w-full place-items-center bg-surface-2 text-text-3")}>
+      <Camera className="size-8" strokeWidth={1.5} aria-hidden />
+    </div>
   );
 }

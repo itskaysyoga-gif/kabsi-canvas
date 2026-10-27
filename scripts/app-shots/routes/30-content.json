@@ -1,0 +1,7 @@
+[
+  { "path": "/app/posts", "name": "posts" },
+  { "path": "/app/posts", "state": "posts-empty", "name": "posts-empty" },
+  { "path": "/app/photos", "name": "photos" },
+  { "path": "/app/photos", "state": "first-task", "name": "photos-first-task" },
+  { "path": "/app/photos", "state": "staff", "name": "photos-staff" }
+]
