@@ -65,8 +65,9 @@ function Page() {
             lets you approve, edit or skip it from email or the app.
           </li>
           <li>
-            Drafts Google posts, checks photos, prepares special hours, and watches your Google profile for changes (Google Protection). When something changes, you choose: Google is right, or
-            Keep my information.
+            Drafts Google posts, checks photos, prepares special hours, and watches your Google
+            profile for changes (Google Protection). When something changes, you choose: Google is
+            right, or Keep my information.
           </li>
           <li>Sends the Results Report and shows your profile's facts in the app.</li>
           <li>
@@ -179,7 +180,8 @@ function Page() {
             Kabsi shows them as a sample and never as a promise.
           </li>
           <li>
-            Google Protection alerts you and lets you keep your information if you choose. It can't lock your Google profile or stop people suggesting edits to Google.
+            Google Protection alerts you and lets you keep your information if you choose. It can't
+            lock your Google profile or stop people suggesting edits to Google.
           </li>
         </ul>
       </section>
@@ -204,8 +206,8 @@ function Page() {
           <li>break, overload, copy or resell Kabsi.</li>
         </ul>
         <p>
-          These practices break Google's policies and can get a Google profile penalised. If we see them,
-          we may pause or stop the service (see section 12).
+          These practices break Google's policies and can get a Google profile penalised. If we see
+          them, we may pause or stop the service (see section 12).
         </p>
       </section>
 
@@ -254,7 +256,8 @@ function Page() {
             renew automatically.
           </li>
           <li>
-            When a plan ends, reply drafts, posts, Google Protection and the Results Report stop. Your review link and QR code keep working.
+            When a plan ends, reply drafts, posts, Google Protection and the Results Report stop.
+            Your review link and QR code keep working.
           </li>
         </ul>
       </section>
