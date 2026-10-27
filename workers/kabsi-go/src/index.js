@@ -85,19 +85,27 @@ async function logTap(body, request, env) {
 
 // KV first (`s:{CODE}` → {d: destination, b: location_id, a: active}, no expiry: kv-sync writes it whenever a
 // card changes, D271); on a miss, ask the database.
+// Sec 2: an unknown code is remembered for 10 minutes (`n:{CODE}`), so guessing codes does not reach the database on
+// every try; a card that becomes known gets its `s:` entry from kv-sync, which is read first. The code goes to the tap
+// function in a header, never in the address (request logs keep query strings).
+const UNKNOWN_TTL = 600;
 async function lookup(code, env, ctx) {
   const key = `s:${code}`;
   if (env.STICKERS) {
     const cached = await env.STICKERS.get(key, "json").catch(() => null);
     if (cached) return cached;
+    if (await env.STICKERS.get(`n:${code}`).catch(() => null)) return null;
   }
   let res;
   try {
-    res = await fetch(`${env.TAP_FUNCTION_URL}?code=${code}`, { headers: { "x-kabsi-secret": env.TAP_SECRET } });
+    res = await fetch(env.TAP_FUNCTION_URL, { headers: { "x-kabsi-secret": env.TAP_SECRET, "x-kabsi-code": code } });
   } catch {
     return null;
   }
-  if (res.status === 404) return null;
+  if (res.status === 404) {
+    if (env.STICKERS) ctx.waitUntil(env.STICKERS.put(`n:${code}`, "1", { expirationTtl: UNKNOWN_TTL }).catch(() => {}));
+    return null;
+  }
   if (!res.ok) return null;
   const data = await res.json().catch(() => null);
   if (!data) return null;

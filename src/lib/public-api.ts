@@ -207,7 +207,11 @@ export function joinWaitlist(o: {
 }
 
 export function getFreeCheck(code: string) {
-  return call<FreeCheck>(`visibility/check?code=${encodeURIComponent(code)}`, { method: "GET" });
+  // Sec 2: the code in the POST body, never in a query string.
+  return call<FreeCheck>("visibility/check/result", {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  });
 }
 
 /** The country of a Google address, from its last part ("Dubai, United Arab Emirates" is AE). Null when unknown. */

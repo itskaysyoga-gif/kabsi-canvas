@@ -56,6 +56,9 @@ jobs:
 
   worker:
     name: Worker kabsi-go
+    # Sec 2: the Worker sends card codes in a header the tap function reads only from this deploy on, so the function
+    # goes first; a new Worker in front of the old function would remember real codes as unknown for 10 minutes.
+    needs: functions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0

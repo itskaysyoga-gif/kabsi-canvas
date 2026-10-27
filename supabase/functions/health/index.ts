@@ -102,6 +102,9 @@ Deno.serve(async (req) => {
   if (body.only === "jobs") return json({ checks: { jobs_recent: await jobsFreshness() } });
   if (body.only === "invitation_places") return json({ checks: { invitation_places: await invitationPlacesCheck(String((body as { case?: string }).case ?? "")) } });
   if (body.only === "turnstile") return json({ checks: { turnstile: (await turnstileCheck()) ?? "not configured" } });
+  // Sec 2 (the secrets audit): the NAMES of the secrets set for the Edge Functions, never a value, so the inventory in
+  // docs/SECRETS.md can be compared with what is really set and unused ones removed.
+  if (body.only === "secret_names") return json({ checks: { secret_names: Object.keys(Deno.env.toObject()).sort() } });
   const all = Object.keys(Deno.env.toObject());
   const set: Record<string, boolean> = {};
   for (const name of SECRETS) set[name] = Boolean(Deno.env.get(name));

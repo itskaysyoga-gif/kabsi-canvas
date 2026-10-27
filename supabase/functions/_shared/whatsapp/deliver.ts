@@ -12,6 +12,7 @@
 import { alertButtons, type Button, postAlertBody, type ReviewAlert, reviewAlertBody } from "./channel.ts";
 import { notify, type Out } from "./outbox.ts";
 import { ref, type TemplateRef } from "./templates.ts";
+import { errorText } from "../log-scrub.ts";
 
 export type Sent = { id: string };
 export interface Sender {
@@ -77,7 +78,7 @@ export async function deliver(ctx: Ctx, o: Outgoing): Promise<string> {
     }
     return rec("held", { error: "outside_24h_window_no_template" });
   } catch (e) {
-    return rec("failed", { error: String((e as Error)?.message ?? e).slice(0, 300) });
+    return rec("failed", { error: errorText(e, 300) });
   }
 }
 

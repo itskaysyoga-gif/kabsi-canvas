@@ -75,13 +75,14 @@ describe("sec1: opening a page never acts", () => {
     vi.unstubAllGlobals();
   });
 
-  it("/a: the page load is a GET of the token; approve, skip and undo are POSTs", async () => {
+  // Sec 2: the page load is a POST that only reads ({ do: "view" }), so the token is never in an address.
+  it("/a: the page load reads with { do: view }, never in the address; approve, skip and undo are POSTs", async () => {
     const { loadAction, runAction, undoAction } = await import("../src/lib/reviews");
     stubFetch({ status: "ok" });
     await loadAction(TOKEN);
-    expect(calls[0].method).toBe("GET");
-    expect(calls[0].url).toMatch(/\/functions\/v1\/api\/action\?t=/);
-    expect(calls[0].body).toBeUndefined();
+    expect(calls[0].method).toBe("POST");
+    expect(calls[0].url).not.toContain(TOKEN);
+    expect(calls[0].body).toEqual({ t: TOKEN, do: "view" });
     await runAction(TOKEN, "post", "Thank you.");
     await undoAction(TOKEN, "00000000-0000-4000-8000-000000000901");
     expect(calls.slice(1).map((c) => c.method)).toEqual(["POST", "POST"]);
@@ -104,13 +105,14 @@ describe("sec1: opening a page never acts", () => {
     expect(src).not.toContain("view.sign_in && view.other_account");
   });
 
-  it("/h: the page load is a GET; answering and undo are POSTs; ?a= only preselects", async () => {
+  it("/h: the page load reads with { do: view }, never in the address; answering and undo are POSTs; ?a= only preselects", async () => {
     const { loadHolidayLink, answerHolidayLink, undoHolidayLink } =
       await import("../src/lib/holidays");
     stubFetch({ status: "ok", ok: true, state: "answered", answer: "normal" });
     await loadHolidayLink(TOKEN);
-    expect(calls[0].method).toBe("GET");
-    expect(calls[0].url).toMatch(/\/functions\/v1\/api\/holiday\?t=/);
+    expect(calls[0].method).toBe("POST");
+    expect(calls[0].url).not.toContain(TOKEN);
+    expect(calls[0].body).toEqual({ t: TOKEN, do: "view" });
     await answerHolidayLink(TOKEN, "normal");
     await undoHolidayLink(TOKEN);
     expect(calls.slice(1).map((c) => c.method)).toEqual(["POST", "POST"]);
@@ -120,17 +122,19 @@ describe("sec1: opening a page never acts", () => {
     expect(loader).not.toMatch(/answerHolidayLink|undoHolidayLink/);
   });
 
-  it("/unsubscribe: the page load is a GET; only the Unsubscribe button POSTs", async () => {
+  it("/unsubscribe: the page load only reads ({ view: true }); only the Unsubscribe button stops anything", async () => {
     const { lookUpUnsubscribe, unsubscribe } = await import("../src/lib/unsubscribe");
     stubFetch({ ok: true, label: "Weekly report" });
     await lookUpUnsubscribe("payload.sig");
     await unsubscribe("payload.sig");
-    expect(calls.map((c) => c.method)).toEqual(["GET", "POST"]);
-    expect(calls[0].url).toMatch(/\/functions\/v1\/email\/unsubscribe\?t=payload\.sig$/);
+    expect(calls.map((c) => c.method)).toEqual(["POST", "POST"]);
+    expect(calls.every((c) => !c.url.includes("payload.sig"))).toBe(true);
+    expect(calls[0].body).toEqual({ t: "payload.sig", view: true });
+    expect(calls[1].body).toEqual({ t: "payload.sig" });
     const src = read("src/routes/unsubscribe.tsx");
     const effect = src.slice(src.indexOf("useEffect("), src.indexOf("async function stop("));
-    expect(effect).toContain("lookUpUnsubscribe(t)");
-    expect(effect).not.toMatch(/\bunsubscribe\(t\)/);
+    expect(effect).toContain("lookUpUnsubscribe(token)");
+    expect(effect).not.toMatch(/\bunsubscribe\((t|token)\)/);
     expect(src).toMatch(/onClick=\{\(\) => void stop\(\)\}/);
   });
 

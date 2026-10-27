@@ -7,6 +7,11 @@
 //      the one approved (no edit since);
 //   3. what is claimed is exactly the text that was approved, and a WhatsApp yes is for the exact draft it showed;
 //   4. an Undo after the claim is refused, and an undone yes is never claimed.
+// Sec 2 adds:
+//   5. an email page approves only the draft version it showed, and only while that is still the newest version
+//      (a page opened on v1 and posted after v2 is refused with reply_changed and approves nothing);
+//   6. a redraft (save_reply_draft, as draftReview does) never puts the review back to a draft while a yes waits or
+//      the reply is being sent: no review is ever a draft with a live publication under it.
 // Runs from scripts/db-test.sh after the pgTAP suite, against the local test database only:
 //   deno run --allow-net --allow-env --allow-read --no-lock <copy outside the repo>/sec1_approval_properties.ts "<db url>"
 // (copied out of the repo so Deno does not install the app's package.json; db-test.sh does this).
@@ -44,7 +49,9 @@ type Op =
   | { kind: "fail" }
   | { kind: "retry" }
   | { kind: "revoke"; how: "remove_manager" | "demote_manager" | "policy_owner" | "restore" }
-  | { kind: "pause"; on: boolean };
+  | { kind: "pause"; on: boolean }
+  | { kind: "open" }
+  | { kind: "emailPost"; page: number; edited: boolean };
 
 const who = fc.constantFrom<Who>("owner", "manager", "staff", "outsider");
 const op: fc.Arbitrary<Op> = fc.oneof(
@@ -60,6 +67,8 @@ const op: fc.Arbitrary<Op> = fc.oneof(
   { weight: 1, arbitrary: fc.constant({ kind: "retry" as const }) },
   { weight: 2, arbitrary: fc.record({ kind: fc.constant("revoke" as const), how: fc.constantFrom("remove_manager", "demote_manager", "policy_owner", "restore") }) },
   { weight: 1, arbitrary: fc.record({ kind: fc.constant("pause" as const), on: fc.boolean() }) },
+  { weight: 3, arbitrary: fc.constant({ kind: "open" as const }) },
+  { weight: 3, arbitrary: fc.record({ kind: fc.constant("emailPost" as const), page: fc.nat(5), edited: fc.boolean() }) },
 );
 
 type Tx = postgres.TransactionSql;
@@ -102,7 +111,7 @@ async function attempt<T>(tx: Tx, f: () => Promise<T>): Promise<{ ok: true; v: T
 
 type Claim = { publication: string; text: string };
 // What the runs exercised, so a property that held only because nothing happened fails instead.
-const seen = { claimed: 0, whatsappApproved: 0, whatsappChanged: 0, undone: 0, refusedClaims: 0 };
+const seen = { claimed: 0, whatsappApproved: 0, whatsappChanged: 0, undone: 0, refusedClaims: 0, emailApproved: 0, emailStale: 0, redraftRefused: 0 };
 
 async function runOne(ops: Op[]) {
   try {
@@ -111,6 +120,8 @@ async function runOne(ops: Op[]) {
       let version = 1;
       let paused = false;
       const buttons: { token: string; text: string }[] = [];
+      // Email pages the owner opened: a fresh single-use link each, the draft and the version the page showed.
+      const pages: { hash: string; text: string; version: number }[] = [];
       const claims: Claim[] = [];
       const undone = new Set<string>();
 
@@ -148,11 +159,49 @@ async function runOne(ops: Op[]) {
             break;
           }
           case "edit": {
-            version++;
-            // As draftReview does: a new version, and the review back to a draft.
-            await tx`insert into public.reply_drafts (review_id, version, body, source, safety_ok)
-              values (${REVIEW}, ${version}, ${"Thank you, version " + version + "."}, 'ai_edit', true)`;
-            await tx`update public.reviews set state = 'drafted' where id = ${REVIEW} and state in ('drafted', 'blocked', 'publishing')`;
+            // As draftReview does (Sec 2): save_reply_draft makes the next version and moves the review back to a draft,
+            // and refuses while a yes waits or the reply is being sent.
+            const before = (await tx`select state from public.reviews where id = ${REVIEW}`)[0].state as string;
+            const r = await attempt(tx, () => tx`select public.save_reply_draft(${REVIEW}, ${"Thank you, version " + (version + 1) + "."},
+              'ai_edit', 'shorter', true, '[]'::jsonb, 'stub', 'v-test', null, 'en', 'low', '{}'::text[], false) as d`);
+            if (r.ok) version = (r.v[0].d as { version: number }).version;
+            else if (r.e.includes("reply_publishing")) {
+              seen.redraftRefused++;
+              if (before !== "publishing" && before !== "posted") throw new Error(`a redraft was refused on a ${before} review`);
+            } else throw new Error(`save_reply_draft failed: ${r.e}`);
+            if (r.ok && (before === "publishing" || before === "posted")) throw new Error(`a redraft was saved on a ${before} review`);
+            break;
+          }
+          case "open": {
+            // The owner opens the email page: what action_link_view and the details read (the newest draft and its version).
+            const hash = `prop-hash-${pages.length}-${Math.random()}`;
+            await tx`insert into public.action_tokens (token_hash, location_id, user_id, action, target_type, target_id, expires_at)
+              values (${hash}, ${LOC}, ${USERS.owner}, 'post', 'review', ${REVIEW}, now() + interval '72 hours')`;
+            const d = (await tx`select body, version from public.reply_drafts where review_id = ${REVIEW} order by version desc limit 1`)[0];
+            pages.push({ hash, text: d.body, version: d.version });
+            break;
+          }
+          case "emailPost": {
+            if (!pages.length) break;
+            const pg = pages[o.page % pages.length];
+            const text = o.edited ? `My own words on page ${pg.version}.` : pg.text;
+            const newest = (await tx`select coalesce(max(version), 0) as v from public.reply_drafts where review_id = ${REVIEW}`)[0].v as number;
+            const used = (await tx`select used_at from public.action_tokens where token_hash = ${pg.hash}`)[0].used_at;
+            const r = await attempt(tx, () => tx`select public.use_action_link(${pg.hash}, 'post', ${text}, null::uuid, null::uuid, ${pg.version}::int) as r`);
+            if (!r.ok && r.e.includes("reply_changed")) {
+              seen.emailStale++;
+              // 5: refused only because the page is stale, and nothing was approved by it.
+              if (pg.version === newest) throw new Error("a current email page was refused as changed");
+              const t = (await tx`select used_at from public.action_tokens where token_hash = ${pg.hash}`)[0];
+              if (t.used_at) throw new Error("a stale email page used up its link");
+            }
+            if (r.ok && !used && !(r.v[0].r as { repeat?: boolean }).repeat && (r.v[0].r as { done: string }).done === "approved") {
+              // 5: an email yes is for the newest version, with the words the page sent.
+              if (pg.version !== newest) throw new Error(`an email page on version ${pg.version} approved while version ${newest} was the newest`);
+              const p = (await tx`select payload ->> 'text' as text from public.publications where id = ${(r.v[0].r as { publication_id: string }).publication_id}`)[0];
+              if (p.text !== text.trim()) throw new Error("an email yes published other words than the page sent");
+              seen.emailApproved++;
+            }
             break;
           }
           case "undo": {
@@ -238,6 +287,10 @@ async function runOne(ops: Op[]) {
           and state in ('approved', 'publishing', 'published', 'checking', 'verifying', 'verified')`;
         if (live.n > 1) throw new Error(`${live.n} live publications for one reply`);
         if (claims.length > 1) throw new Error("the reply was sent to Google twice");
+        // 6: a review is never a draft (or blocked) while a yes for it waits or is being sent.
+        const [under] = await tx`select count(*)::int as n from public.publications p join public.reviews r on r.id = p.target_id
+          where p.target_id = ${REVIEW} and p.state in ('approved', 'publishing') and r.state in ('drafted', 'blocked')`;
+        if (under.n > 0) throw new Error("the review is a draft while a yes for it is waiting or being sent");
         // Nobody outside the business or in the staff role ever has a publication.
         const [bad] = await tx`select count(*)::int as n from public.publications where target_id = ${REVIEW}
           and approved_by in (${USERS.staff}, ${USERS.outsider})`;

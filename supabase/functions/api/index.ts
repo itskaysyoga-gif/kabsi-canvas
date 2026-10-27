@@ -12,9 +12,14 @@ import { holiday } from "./holiday.ts";
 import { approve } from "./approve.ts";
 import { dispatch } from "./jobs.ts";
 import { resume } from "./resume.ts";
+import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
-Deno.serve((req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.chat).
+  const capped = await capBody(req, BODY_LIMITS.chat, CORS);
+  if (capped instanceof Response) return capped;
+  req = capped;
   const route = new URL(req.url).pathname.split("/").filter(Boolean).pop();
   if (route === "cron-tick") return cronTick(req);
   if (route === "dispatch") return dispatch(req);

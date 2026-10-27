@@ -1,6 +1,7 @@
 // The holiday link page (/h/:token, P0.5-03, K-131): what the confirm page shows, and the one answer.
 //
-//   GET  ?t=TOKEN                       the holiday, the business and the state. Reads only: mail scanners open links.
+//   POST { t, do: "view" }              the holiday, the business and the state. Reads only: mail scanners open links.
+//                                       Sec 2: the token is only ever in the POST body, never in a query string.
 //   POST { t, do: "answer", answer, open?, close?, from?, to? }
 //                                       "normal" needs only the link (it publishes nothing). "closed" and "custom" are the
 //                                       owner's approval of hours: the recipient signed in on the page (K-17), then the
@@ -8,7 +9,7 @@
 //   POST { t, do: "undo" }              cancels the approval this link made, inside its 10 seconds (K-70).
 //
 // No database or network import: the Deno tests drive it with stubs; api/holiday.ts wires it to Supabase.
-import { hashToken, LINK_HEADERS } from "./email-links.ts";
+import { hashToken, LINK_HEADERS, readJsonCapped } from "./email-links.ts";
 
 export { LINK_HEADERS };
 
@@ -72,12 +73,15 @@ export async function holidayPost(body: Record<string, unknown>, deps: HolidayLi
   }
 }
 
-// The whole HTTP surface of /api/holiday (Sec 1): GET reads, POST acts, anything else (HEAD from a link scanner) is
-// refused before any lookup. api/holiday.ts adds the rate limit, the error report and LINK_HEADERS.
+// The whole HTTP surface of /api/holiday (Sec 1, Sec 2): only POST, reading is POST { do: "view" }; anything else (GET,
+// HEAD from a link scanner) is refused before any lookup. The body is capped at 4 KB. api/holiday.ts adds the rate
+// limit, the error report and LINK_HEADERS.
 export async function holidayRequest(req: Request, deps: HolidayLinkDeps): Promise<Reply> {
-  if (req.method === "GET") return holidayGet(new URL(req.url).searchParams.get("t"), deps);
-  if (req.method !== "POST") return refusal("method_not_allowed", "Use GET or POST.", 405);
-  return holidayPost(await req.json().catch(() => ({})) as Record<string, unknown>, deps);
+  if (req.method !== "POST") return refusal("method_not_allowed", "Use POST.", 405);
+  const body = await readJsonCapped(req, 4096);
+  if (body === "too_large") return refusal("too_large", "That is too long.", 413);
+  if (body?.do === "view") return holidayGet(typeof body.t === "string" ? body.t : null, deps);
+  return holidayPost(body ?? {}, deps);
 }
 
 // Owner-facing words for what the database refuses. Null for anything unexpected (the caller reports it).

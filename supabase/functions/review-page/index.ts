@@ -6,17 +6,22 @@
 import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, fail, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
 import { pageData } from "../_shared/review-page.ts";
+import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
 const CODE_RE = /^[2-9A-HJKMNP-Z]{6}$/;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.small).
+  const capped = await capBody(req, BODY_LIMITS.small, CORS);
+  if (capped instanceof Response) return capped;
+  req = capped;
   if (req.method !== "POST") return fail("method_not_allowed", "Use POST.", 405);
 
   const ip = clientIp(req);
   const day = new Date().toISOString().slice(0, 10);
   const visitor = (await sha256Hex(`${Deno.env.get("SUPABASE_URL")}:${day}:${ip}`)).slice(0, 24);
-  if (!(await rateLimit(`review-page:${visitor}`, 120, 3600)))
+  if (!(await rateLimit(`review-page:${visitor}`, 120, 3600, { failClosed: true })))
     return fail("rate_limited", "Try again in a little while.", 429);
 
   const { code: raw } = (await req.json().catch(() => ({}))) as { code?: string };

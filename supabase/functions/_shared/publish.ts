@@ -14,6 +14,7 @@
 // - After a write, Google is read: shown as approved is verified; not shown yet is checking, which is what owners
 //   see as "Google is checking your reply" (K-116.1); refused after the fact (a post Google rejected) is rejected.
 import { RetryLater } from "./jobs.ts";
+import { errorText } from "./log-scrub.ts";
 
 export type TargetType = "review_reply" | "local_post" | "local_post_removal" | "photo" | "special_hours" | "listing_revert";
 
@@ -110,17 +111,17 @@ export async function publishOne(id: string, deps: PublishDeps): Promise<string>
   } catch (e) {
     if (e instanceof RetryLater) {
       // The rate limiter or the circuit breaker stopped the request before it left: nothing reached Google.
-      await deps.record(id, { state: "approved", error: String(e).slice(0, 500) });
+      await deps.record(id, { state: "approved", error: errorText(e, 500) });
       throw e;
     }
     if (definiteRejection(e)) {
-      return await deps.record(id, { state: "rejected", reason: rejectionReason(e, item.target_type), error: String(e).slice(0, 500) });
+      return await deps.record(id, { state: "rejected", reason: rejectionReason(e, item.target_type), error: errorText(e, 500) });
     }
     if (e instanceof NotSent) {
-      return await deps.record(id, { state: "rejected", reason: `Kabsi could not send this ${noun(item.target_type)}. Nothing changed on Google.`, error: String(e).slice(0, 500) });
+      return await deps.record(id, { state: "rejected", reason: `Kabsi could not send this ${noun(item.target_type)}. Nothing changed on Google.`, error: errorText(e, 500) });
     }
     // Ambiguous: Google may have it. Read it later, never send it again.
-    return await deps.record(id, { state: "checking", moderation: "unknown", error: String(e).slice(0, 500) });
+    return await deps.record(id, { state: "checking", moderation: "unknown", error: errorText(e, 500) });
   }
 
   await deps.record(id, { state: "published", googleRef: sent.ref ?? undefined, response: sent.response });
@@ -128,7 +129,7 @@ export async function publishOne(id: string, deps: PublishDeps): Promise<string>
   try {
     seen = sent.seen ?? await deps.read({ ...item, google_ref: sent.ref });
   } catch (e) {
-    return await deps.record(id, { state: "checking", moderation: "unknown", error: String(e).slice(0, 500) });
+    return await deps.record(id, { state: "checking", moderation: "unknown", error: errorText(e, 500) });
   }
   if (seen === "shown") return await deps.record(id, { state: "verified" });
   if (seen === "rejected") {
@@ -150,7 +151,7 @@ export async function reconcileOne(id: string, deps: PublishDeps): Promise<strin
     seen = await deps.read(item);
   } catch (e) {
     // Google busy or not answering: the next check, on the same widening schedule.
-    return await deps.record(id, { state: "checking", error: String(e).slice(0, 500) });
+    return await deps.record(id, { state: "checking", error: errorText(e, 500) });
   }
   if (seen === "shown") return await deps.record(id, { state: "verified" });
   if (seen === "pending") return await deps.record(id, { state: "checking", reason: checkingReason(item.target_type) });

@@ -270,6 +270,52 @@ export const rpc = {
     payouts: [],
     next_run_on: ahead(4).slice(0, 10),
   },
+  // Sec 2: the operations view (public.staff_operations), invented rows.
+  staff_operations: {
+    checked_at: ago(0),
+    google_writes: "on",
+    stuck: [
+      {
+        id: "00000000-0000-4000-8000-0000000000d1",
+        business: "Cedar Corner Bakery",
+        what: "review_reply",
+        state: "approved",
+        since: ago(0.02),
+        todo: "Not sent yet. Check the publish job under Jobs; if it is dead, the owner approves again.",
+      },
+    ],
+    access_stopped: [
+      {
+        business: "Harbour Smiles Dental",
+        location_id: LOC_C,
+        state: "removed",
+        since: ago(2),
+        todo: "Kabsi was removed as Manager. The owner was emailed; follow up once on WhatsApp.",
+      },
+    ],
+    failed_publications: [],
+    jobs: [
+      {
+        id: 4812,
+        kind: "send_email",
+        state: "dead",
+        business: null,
+        attempts: 5,
+        at: ago(1),
+        error: "resend 422: invalid to [email]",
+        todo: "Stopped after its tries. Read the error, fix the cause, then queue it again from Job health.",
+      },
+    ],
+    webhooks_rejected: [
+      {
+        source: "creem",
+        reason: "status_401",
+        count: 3,
+        last_at: ago(0.1),
+        todo: "A few refusals are normal (scanners). Nothing to do unless real events stop arriving.",
+      },
+    ],
+  },
   staff_job_health: {
     schedules: [
       {

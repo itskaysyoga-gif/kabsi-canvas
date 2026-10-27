@@ -10,6 +10,7 @@
 //                                  add_location. The Plan screen calls it; WhatsApp calls the same code in _shared/billing.ts.
 import { admin, captureError, CORS, currentUser, fail, isInternal, json, log, rateLimit } from "../_shared/kabsi.ts";
 import { creemWebhook } from "../_shared/creem-webhook.ts";
+import { counted } from "../_shared/webhook-rejections.ts";
 import {
   addLocation, BillingError, cancelAtEnd, changePlan, isCreemError, keepPlan, portal, setupProducts, staffAlert, startCheckout, storeEvent,
 } from "../_shared/billing.ts";
@@ -37,7 +38,8 @@ async function isStaff(req: Request): Promise<boolean> {
   if (await isInternal(req)) return true;
   const user = await currentUser(req);
   if (!user) return false;
-  const { data } = await admin().from("staff").select("user_id").eq("user_id", user.id).maybeSingle();
+  // Sec 2: Kabsi admins only, not installers.
+  const { data } = await admin().from("staff").select("user_id").eq("user_id", user.id).eq("role", "admin").maybeSingle();
   return !!data;
 }
 
@@ -108,5 +110,6 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   if (path.endsWith("/setup")) return await setup(req);
   if (path.endsWith("/owner")) return await owner(req);
-  return await webhook(req);
+  // Sec 2: refused calls are counted for the staff operations view.
+  return await counted("creem", await webhook(req));
 });

@@ -35,7 +35,7 @@ select throws_ok($$ select public.use_action_link('mail-low-other', 'post', 'Tha
   'P0001', 'wrong_account', 'another account signed in cannot approve in the recipient''s name');
 select is((select count(*) from public.publications where target_id = '00000000-0000-4000-8000-000000000602'), 0::bigint, 'nothing was approved');
 select is((select used_at from public.action_tokens where token_hash = 'mail-low-other'), null, 'and the link is still unused');
-select is(public.use_action_link('mail-low-other', 'post', 'Thank you for coming.', null, null) ->> 'done', 'approved',
+select is(public.use_action_link('mail-low-other', 'post', 'Thank you for coming.', null, null, 1) ->> 'done', 'approved',
   'the link itself, with no other session, still works for its recipient');
 
 -- 3. Only hashes are stored, and the GET helper is read-only.

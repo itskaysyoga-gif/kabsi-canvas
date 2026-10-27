@@ -61,7 +61,10 @@ function actionWorld(o: { view?: Partial<LinkView>; session?: string | null; use
   };
   return { deps, calls };
 }
-const get = (q = TOKEN, method = "GET") => new Request(`https://x.supabase.co/functions/v1/api/action?t=${encodeURIComponent(q)}`, { method });
+// Sec 2: reading is POST { do: "view" }; the token is never in the address. A GET (with the old ?t=) is refused unread.
+const get = (q = TOKEN, method = "GET") =>
+  method === "GET" ? new Request("https://x.supabase.co/functions/v1/api/action", { method: "POST", body: JSON.stringify({ t: q, do: "view" }) })
+    : new Request(`https://x.supabase.co/functions/v1/api/action?t=${encodeURIComponent(q)}`, { method });
 const post = (body: unknown) => new Request("https://x.supabase.co/functions/v1/api/action", { method: "POST", body: JSON.stringify(body) });
 
 Deno.test("sec1 /a: GET never acts, whatever state the link is in", async () => {
@@ -73,6 +76,17 @@ Deno.test("sec1 /a: GET never acts, whatever state the link is in", async () => 
       assert.ok(r.status === 200 || r.status === 404);
     }
   }
+});
+
+Deno.test("sec1 /a and /h (Sec 2): a GET with the token in the address is refused before any lookup", async () => {
+  const a = actionWorld();
+  const r = await linkRequest(new Request(`https://x.supabase.co/functions/v1/api/action?t=${TOKEN}`), a.deps);
+  assert.equal(r.status, 405);
+  assert.equal(a.calls.use.length + a.calls.view.length + a.calls.details + a.calls.session, 0, "nothing was read or done");
+  const h = holidayWorld();
+  const rh = await holidayRequest(new Request(`https://x.supabase.co/functions/v1/api/holiday?t=${TOKEN}`), h.deps);
+  assert.equal(rh.status, 405);
+  assert.equal(h.calls.view.length + h.calls.use.length + h.calls.undo.length + h.calls.session, 0);
 });
 
 Deno.test("sec1 /a: HEAD and other scanner methods never act and never look the link up", async () => {
@@ -149,7 +163,7 @@ Deno.test("sec1 /a: bound to its person, another signed-in account can neither a
 Deno.test("sec1 /a: bound to its business, the request cannot name another business, person or item", async () => {
   const { deps, calls } = actionWorld({ session: OWNER });
   await linkPost({ t: TOKEN, do: "post", text: "x", location_id: "loc-b", user_id: OTHER, target_id: "r-other", recipient: OTHER }, deps);
-  assert.deepEqual(calls.use[0].input, { do: "post", text: "x", session: OWNER, publication: undefined }, "only the verb, text and session pass");
+  assert.deepEqual(calls.use[0].input, { do: "post", text: "x", session: OWNER, publication: undefined, version: undefined }, "only the verb, text, version and session pass");
   assert.equal(calls.use[0].recipient, OWNER, "the recipient comes from the stored link, not the request");
 });
 
@@ -213,7 +227,9 @@ function holidayWorld(o: { view?: Partial<HolidayView>; session?: string | null;
   };
   return { deps, calls };
 }
-const hget = (method = "GET") => new Request(`https://x.supabase.co/functions/v1/api/holiday?t=${TOKEN}`, { method });
+const hget = (method = "GET") =>
+  method === "GET" ? new Request("https://x.supabase.co/functions/v1/api/holiday", { method: "POST", body: JSON.stringify({ t: TOKEN, do: "view" }) })
+    : new Request(`https://x.supabase.co/functions/v1/api/holiday?t=${TOKEN}`, { method });
 const hpost = (body: unknown) => new Request("https://x.supabase.co/functions/v1/api/holiday", { method: "POST", body: JSON.stringify(body) });
 
 Deno.test("sec1 /h: GET never acts, HEAD and the rest do nothing at all", async () => {
@@ -331,10 +347,12 @@ Deno.test("sec1 /unsubscribe: answers are not cached and send no Referer; the ma
   assert.equal(UNSUBSCRIBE_HEADERS["referrer-policy"], "no-referrer");
   assert.match(read("../../email/index.ts"), /json\(r\.body, r\.status, UNSUBSCRIBE_HEADERS\)/);
   const t = await signUnsubscribe(CLAIM, KEY);
-  const h = unsubscribeHeaders(`https://x.supabase.co/functions/v1/email/unsubscribe?t=${t}`);
+  const h = unsubscribeHeaders(`https://x.supabase.co/functions/v1/email/unsubscribe/${t}`);
   assert.equal(h["List-Unsubscribe-Post"], "List-Unsubscribe=One-Click");
-  assert.match(h["List-Unsubscribe"], /^<https:\/\/[^>]+\/email\/unsubscribe\?t=[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+>$/, "one https URL with a signed token");
+  assert.match(h["List-Unsubscribe"], /^<https:\/\/[^>]+\/email\/unsubscribe\/[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+>$/, "one https URL with a signed token");
   const notify = read("../notify.ts");
   assert.match(notify, /const token = await signUnsubscribe\(/, "both links carry the signed token");
-  assert.match(notify, /page: `\$\{APP_URL\}\/unsubscribe\?t=\$\{token\}`, oneClick: `[^`]*\/functions\/v1\/email\/unsubscribe\?t=\$\{token\}`/);
+  // Sec 2: the page's token is in the fragment and the one-click token in the path; neither is in a query string.
+  assert.match(notify, /page: `\$\{APP_URL\}\/unsubscribe#t=\$\{token\}`, oneClick: `[^`]*\/functions\/v1\/email\/unsubscribe\/\$\{token\}`/);
+  assert.match(notify, /internal_secret", \{ p_name: "unsubscribe_key" \}/, "signed with its own key, not the cron secret");
 });

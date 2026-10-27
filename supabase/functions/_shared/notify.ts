@@ -1,6 +1,6 @@
 // The notification engine wired to the database and the outbox (P0.4-09). Everything that tells someone something calls
 // notify(); nothing else sends an email. The rules and the flow are in notify-engine.ts and notify-rules.ts.
-import { admin, APP_URL, internalSecret, log, sendEmail } from "./kabsi.ts";
+import { admin, APP_URL, log, sendEmail } from "./kabsi.ts";
 import { signUnsubscribe } from "./email/unsubscribe.ts";
 import { streamOf } from "./email/streams.ts";
 import { type Deps, type EmailState, type NewRow, type NotifyInput, type NotifyResult, type Recipient, releaseDue, type ReleaseResult, runNotify, type StoredItem } from "./notify-engine.ts";
@@ -81,10 +81,12 @@ export function dbDeps(): Deps {
     },
 
     async unsubscribeLinks(address, userId, locationId, category) {
-      const secret = await internalSecret();
+      // Sec 2: signed with its own key (Vault 'unsubscribe_key'), not the cron secret. The token is in the page's
+      // fragment (never sent to a server) and in the path of the one-click address, never in a query string.
+      const { data: secret } = await db.rpc("internal_secret", { p_name: "unsubscribe_key" });
       if (!secret) throw new Error("no signing secret for unsubscribe links");
-      const token = await signUnsubscribe({ a: address.toLowerCase(), u: userId, l: locationId, c: category }, secret);
-      return { page: `${APP_URL}/unsubscribe?t=${token}`, oneClick: `${Deno.env.get("SUPABASE_URL")}/functions/v1/email/unsubscribe?t=${token}` };
+      const token = await signUnsubscribe({ a: address.toLowerCase(), u: userId, l: locationId, c: category }, secret as string);
+      return { page: `${APP_URL}/unsubscribe#t=${token}`, oneClick: `${Deno.env.get("SUPABASE_URL")}/functions/v1/email/unsubscribe/${token}` };
     },
 
     async listDue(now, limit): Promise<StoredItem[]> {
