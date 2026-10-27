@@ -16,7 +16,8 @@ import { CONTACT_EMAIL, TRIAL_LINE } from "@/lib/site";
 import { FOUNDER } from "./photos";
 import { NearbyPlaces } from "./nearby-places";
 import { ButtonLink, ExampleBadge, Faq, KabsiMark, SectionHead } from "./ui";
-import { Bubble, CLOCK } from "./whatsapp";
+import { LATER_CHIP } from "@/lib/after-yes";
+import { Bubble, CLOCK, DoneBubble, TimeChip } from "./whatsapp";
 import { PLANS } from "./plans";
 import { FAQ, HOME_FAQ } from "./faq-data";
 import { SiteLink } from "./site-link";
@@ -164,14 +165,10 @@ export function TryTheStory({
                 </Bubble>
               )}
               {state === "published" && (
-                <Bubble enter>
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="grid size-4 shrink-0 place-items-center rounded-full bg-kb-green">
-                      <Check className="size-3 text-kb-white" strokeWidth={3.5} aria-hidden />
-                    </span>
-                    Published on your Google profile.
-                  </span>
-                </Bubble>
+                <>
+                  <TimeChip>{LATER_CHIP}</TimeChip>
+                  <DoneBubble business={DEMO.business} />
+                </>
               )}
               {state === "undone" && <Bubble enter>Undone. Nothing reached Google.</Bubble>}
               {state === "edit" && (

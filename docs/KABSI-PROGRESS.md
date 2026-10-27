@@ -56,9 +56,9 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 27 Oct 2026, UX 1 round 2 (lane R review): waiting list words and their stored proof, the hero and Try it after a Yes, Barbershops in the footer, closed LATER rows. Detail: the end of `docs/progress/archive/2026-10-27-ux1.md`.
 - 27 Oct 2026, UX 1 (PR 254): the signed-in website, onboarding and leftovers. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
 - 27 Oct 2026, Web 2: the public website ported from the design studio. Detail: `docs/progress/archive/2026-10-27-web2.md`.
-- 27 Oct 2026, V4 (PR 250): onboarding, first task, task states, work receipt, nearby places, free check, voice test op. Detail: `docs/progress/archive/2026-10-27-v4.md`.
 
 ## How a session updates this page
 

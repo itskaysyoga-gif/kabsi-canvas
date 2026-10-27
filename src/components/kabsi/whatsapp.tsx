@@ -1,6 +1,7 @@
 import { Camera, Check, CheckCheck, ChevronLeft, Mic, Plus, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Iphone } from "@/components/magicui/iphone";
+import { APPROVED_LINE, LATER_CHIP, doneLine } from "@/lib/after-yes";
 import { cn } from "@/lib/utils";
 import { ExampleBadge, KabsiMark, TypingDots } from "./ui";
 import { NearbyPlaces } from "./nearby-places";
@@ -178,14 +179,31 @@ export function Bubble({
   );
 }
 
-export function PublishedBubble({ enter = true }: { enter?: boolean }) {
+export function ApprovedBubble({ enter = true }: { enter?: boolean }) {
+  return <Bubble enter={enter}>{APPROVED_LINE}</Bubble>;
+}
+
+export function TimeChip({ children, enter = true }: { children: ReactNode; enter?: boolean }) {
+  return (
+    <p
+      className={cn(
+        "mx-auto my-0.5 w-fit rounded-md bg-wa-in/90 px-2 py-0.5 text-chat-meta font-semibold text-wa-time shadow-bubble",
+        enter && "animate-pop",
+      )}
+    >
+      {children}
+    </p>
+  );
+}
+
+export function DoneBubble({ business, enter = true }: { business: string; enter?: boolean }) {
   return (
     <Bubble enter={enter}>
       <span className="inline-flex items-center gap-1.5">
         <span className="grid size-4 shrink-0 place-items-center rounded-full bg-kb-green">
           <Check className="size-3 text-kb-white" strokeWidth={3.5} aria-hidden />
         </span>
-        Published on your Google profile.
+        {doneLine(business)}
       </span>
     </Bubble>
   );
@@ -208,7 +226,8 @@ export function MapImage({ check }: { check?: NearbyCheck }) {
 
 /* ---------- The hero scene (brief section 5) ---------- */
 
-// One story only (brief section 14.4): a review arrives, the reply is ready, Yes, published. No map in the hero.
+// One story only (brief section 14.4): a review arrives, the reply is ready, Yes, approved with its 10 seconds, and a few
+// minutes later Kabsi says it is on Google (30.15 3.1: nothing says "published" the moment after Yes). No map in the hero.
 const SCENE = {
   notify: 0,
   open: 1200,
@@ -216,8 +235,10 @@ const SCENE = {
   yes: 2800,
   read: 3150,
   typing: 3300,
-  published: 3900,
-  done: 4400,
+  approved: 3700,
+  later: 4300,
+  onGoogle: 4900,
+  done: 5400,
 } as const;
 const FINAL = 99999;
 
@@ -299,7 +320,8 @@ export function HeroScene({
       <figcaption className="sr-only">
         Example of Kabsi on WhatsApp. A notification: Kabsi, {review.intro} Kabsi writes:{" "}
         {review.business}: {review.intro} {review.quote} Reply ready: {review.draft} Reply Yes to
-        publish. The owner replies Yes. Kabsi: Published on your Google profile.
+        publish. The owner replies Yes. Kabsi: {APPROVED_LINE} {LATER_CHIP}. Kabsi:{" "}
+        {doneLine(review.business)}
       </figcaption>
       <PhoneFrame>
         <div aria-hidden className="relative flex size-full flex-col">
@@ -380,8 +402,10 @@ export function HeroScene({
                   Yes
                 </Bubble>
               )}
-              {at(SCENE.typing) && !at(SCENE.published) && <TypingBubble />}
-              {at(SCENE.published) && <PublishedBubble enter={t !== FINAL} />}
+              {at(SCENE.typing) && !at(SCENE.approved) && <TypingBubble />}
+              {at(SCENE.approved) && <ApprovedBubble enter={t !== FINAL} />}
+              {at(SCENE.later) && <TimeChip enter={t !== FINAL}>{LATER_CHIP}</TimeChip>}
+              {at(SCENE.onGoogle) && <DoneBubble business={review.business} enter={t !== FINAL} />}
             </div>
             <WaComposer />
           </div>
