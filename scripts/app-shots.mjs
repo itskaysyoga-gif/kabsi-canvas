@@ -69,9 +69,18 @@ for (const r of routes) {
       });
     });
     // Turnstile, analytics and fonts from elsewhere never load in a shot.
-    await context.route(
-      /challenges\.cloudflare\.com|posthog|sentry|googletagmanager|facebook/,
-      (route) => route.fulfill({ status: 204, body: "" }),
+    // Turnstile is stood in for by a stub that hands out a token at once, so forms behave as they do after the check.
+    await context.route(/challenges\.cloudflare\.com\/turnstile/, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "text/javascript",
+        body: `window.turnstile = { render: (el, o) => { setTimeout(() => o.callback("shots"), 30); return "w" + Math.random(); },
+          reset: () => {}, remove: () => {}, getResponse: () => "shots" };`,
+      }),
+    );
+    // Analytics and pixels never load in a shot.
+    await context.route(/posthog|sentry|googletagmanager|facebook/, (route) =>
+      route.fulfill({ status: 204, body: "" }),
     );
     const page = await context.newPage();
     const errors = [];

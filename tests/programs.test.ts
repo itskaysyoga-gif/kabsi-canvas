@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   checkFounding,
   checkPartner,
-  FOUNDING_CONSENT_TEXT,
+  FOUNDING_CONSENT,
   FOUNDING_DAYS,
   foundingLine,
   PARTNER_TERMS_VERSION,
@@ -32,7 +32,14 @@ describe("Founding 25 application", () => {
       country: "AE",
       whatsapp: "+971501234567",
     });
-    expect(c.value.consent_text).toBe(FOUNDING_CONSENT_TEXT);
+    expect(c.value.case_study).toBe("anonymous");
+    expect(c.value.consent_text).toBe(FOUNDING_CONSENT.anonymous);
+  });
+  it("stores the words of the case study the applicant chose (UX 1)", () => {
+    const named = checkFounding({ ...good, case_study: "named" });
+    expect(named.ok && named.value.consent_text).toBe(FOUNDING_CONSENT.named);
+    expect(FOUNDING_CONSENT.named).toContain("names my business");
+    expect(FOUNDING_CONSENT.anonymous).toContain("does not name my business");
   });
   it("needs the check-in yes, a case study choice, a country it serves and a WhatsApp number", () => {
     expect(checkFounding({ ...good, checkin_consent: false })).toMatchObject({
@@ -116,6 +123,6 @@ describe("the founding consent words (Web 2)", () => {
   it("are the same on the form and in the stored proof", async () => {
     const site = await import("../src/lib/public-api");
     const server = await import("../supabase/functions/_shared/programs.ts");
-    expect(site.FOUNDING_CONSENT_TEXT).toBe(server.FOUNDING_CONSENT_TEXT);
+    expect(site.FOUNDING_CONSENT).toEqual(server.FOUNDING_CONSENT);
   });
 });

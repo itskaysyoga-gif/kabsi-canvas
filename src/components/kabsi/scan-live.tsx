@@ -23,6 +23,7 @@ import {
   ApiError,
   countryOfAddress,
   getFreeCheck,
+  joinWaitlist,
   startFreeCheck,
   type FreeCheck,
   type StartedCheck,
@@ -493,9 +494,16 @@ export function LiveResult({
           ) : (
             <div className="lg:col-span-2">
               <h2 className="text-h3">Where you come up nearby</h2>
-              <p className="mt-3 text-body text-text-2">
-                {waitlist ? "The free scan opens soon." : SCAN_LINE}
-              </p>
+              {waitlist ? (
+                <Waitlist
+                  business={s.name}
+                  country={countryOfAddress(s.address)}
+                  placeId={s.place_id}
+                  term={term}
+                />
+              ) : (
+                <p className="mt-3 text-body text-text-2">{SCAN_LINE}</p>
+              )}
             </div>
           )}
         </div>
@@ -570,6 +578,124 @@ export function LiveResult({
     </>
   );
 }
+
+/* ---------- Save my place (UX 1): the waiting list while the free check is closed ---------- */
+
+function Waitlist({
+  business,
+  country,
+  placeId,
+  term,
+}: {
+  business: string;
+  country: string | null;
+  placeId: string;
+  term: string | null;
+}) {
+  const { take, widget } = useTokens();
+  const [email, setEmail] = useState("");
+  const [tips, setTips] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [waOk, setWaOk] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [state, setState] = useState<"idle" | "sending" | "saved">("idle");
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    const byEmail = /@/.test(email);
+    const byPhone = WHATSAPP_ON && phone.replace(/\D/g, "").length >= 7;
+    if (!byEmail && !byPhone) {
+      setErr("Type an email address or a WhatsApp number with its country code.");
+      return;
+    }
+    if (byPhone && !waOk) {
+      setErr("Tick the box to get the message on WhatsApp.");
+      return;
+    }
+    setErr(null);
+    setState("sending");
+    try {
+      await joinWaitlist({
+        business,
+        country,
+        place_id: placeId,
+        term,
+        email: byEmail ? email.trim() : null,
+        phone: byPhone ? phone.trim() : null,
+        whatsapp_consent: byPhone && waOk,
+        tips: byEmail && tips,
+        page: "/scan",
+        turnstile: await take(),
+      });
+      track("free_tool_used", { source: "free_check_waitlist" });
+      setState("saved");
+    } catch (x) {
+      setErr(x instanceof ApiError || x instanceof Error ? x.message : plainError(x));
+      setState("idle");
+    }
+  };
+  return (
+    <div className="mt-3 max-w-xl">
+      <p className="text-body text-text-2">{WAITLIST_LINE}</p>
+      {state === "saved" ? (
+        <Banner tone="ok" title="Saved. You are on the list." className="mt-4" />
+      ) : (
+        <form onSubmit={(e) => void submit(e)} noValidate className="mt-4 space-y-4">
+          <Field
+            label="Email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (err) setErr(null);
+            }}
+            error={err}
+          />
+          <label className="flex min-h-11 cursor-pointer items-start gap-3 text-small text-text-1">
+            <input
+              type="checkbox"
+              checked={tips}
+              onChange={(e) => setTips(e.target.checked)}
+              className="mt-0.5 size-5 shrink-0 accent-kb-green"
+            />
+            {TIPS_CONSENT_TEXT}
+          </label>
+          {WHATSAPP_ON && (
+            <>
+              <Field
+                label="WhatsApp number"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+              <label className="flex min-h-11 cursor-pointer items-start gap-3 text-small text-text-1">
+                <input
+                  type="checkbox"
+                  checked={waOk}
+                  onChange={(e) => setWaOk(e.target.checked)}
+                  className="mt-0.5 size-5 shrink-0 accent-kb-green"
+                />
+                {WAITLIST_WHATSAPP_LINE}
+              </label>
+            </>
+          )}
+          {widget}
+          <Button type="submit" variant="secondary" loading={state === "sending"}>
+            Save my place
+          </Button>
+        </form>
+      )}
+    </div>
+  );
+}
+
+/** COPY.md, the scan box's waitlist state; the server stores these words as the proof (waitlist.ts WAITLIST_NOTICE_TEXT). */
+const WAITLIST_LINE =
+  "The free scan opens soon. Leave your email or WhatsApp and Kabsi sends your map the day it opens.";
+const WAITLIST_WHATSAPP_LINE = "Send my map to this WhatsApp number the day the free scan opens.";
 
 /* ---------- Send me this report (the profile-snapshot function's email and WhatsApp actions) ---------- */
 

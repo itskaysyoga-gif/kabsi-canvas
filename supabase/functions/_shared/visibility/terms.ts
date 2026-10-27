@@ -19,6 +19,16 @@ export const CANDIDATES: Record<string, string[]> = {
   "auto-repair": ["car repair", "garage", "auto repair", "mechanic"],
   "gyms-and-fitness-studios": ["gym", "fitness studio", "gym near me", "fitness"],
 };
+/**
+ * Terms lane R approved per market (UX 1, 27 Oct 2026, from Content 1's claim sheets). For these industries and markets the
+ * approved word is kept whatever the volumes say; its volume is still read and stored. Each one is also a candidate above.
+ */
+export const APPROVED: Record<string, Partial<Record<(typeof MARKETS)[number], string>>> = {
+  "cafes": { AE: "cafe", GB: "cafe" },
+  "medical-and-aesthetic-clinics": { AE: "aesthetic clinic", GB: "skin clinic" },
+  "auto-repair": { AE: "car repair", GB: "car repair" },
+  "nail-and-beauty-salons": { AE: "nail salon", GB: "nail salon" },
+};
 /** Launch markets (30.16 section 2): the UAE and the UK. */
 export const MARKETS = ["AE", "GB"] as const;
 export const TERMS_COST_MICROS = 75_000; // one Google Ads search volume task, up to 1000 keywords
@@ -28,17 +38,27 @@ export const plain = (t: string) => t.replace(/\s+near me$/i, "").trim();
 
 export type Volume = { keyword: string; volume: number | null };
 
-/** For each industry, the candidate with the most searches; ties keep the shorter phrase. A missing volume never wins. */
-export function pickTerms(volumes: Volume[]): Record<string, { term: string; volume: number; candidates: Volume[] }> {
+export type Picked = { term: string; volume: number | null; candidates: Volume[]; source: "dataforseo_google_ads" | "lane_r_approved" };
+
+/**
+ * For each industry, the candidate with the most searches; ties keep the shorter phrase. A missing volume never wins. With a
+ * market, a term lane R approved for that market (APPROVED) is picked instead, with its own volume (null when DataForSEO has none).
+ */
+export function pickTerms(volumes: Volume[], market?: string): Record<string, Picked> {
   const by = new Map(volumes.map((v) => [v.keyword.toLowerCase(), v.volume]));
-  const out: Record<string, { term: string; volume: number; candidates: Volume[] }> = {};
+  const out: Record<string, Picked> = {};
   for (const [industry, words] of Object.entries(CANDIDATES)) {
     const scored = words.map((w) => ({ keyword: w, volume: by.get(w.toLowerCase()) ?? null }));
     // Phrases with "near me" count towards their plain search: the free check searches from the business's own place.
     const merged = new Map<string, number>();
     for (const s of scored) if (s.volume != null) merged.set(plain(s.keyword), (merged.get(plain(s.keyword)) ?? 0) + s.volume);
+    const approved = market ? APPROVED[industry]?.[market as (typeof MARKETS)[number]] : undefined;
+    if (approved) {
+      out[industry] = { term: approved, volume: merged.get(approved) ?? null, candidates: scored, source: "lane_r_approved" };
+      continue;
+    }
     const best = [...merged.entries()].sort((a, b) => b[1] - a[1] || a[0].length - b[0].length)[0];
-    if (best && best[1] > 0) out[industry] = { term: best[0], volume: best[1], candidates: scored };
+    if (best && best[1] > 0) out[industry] = { term: best[0], volume: best[1], candidates: scored, source: "dataforseo_google_ads" };
   }
   return out;
 }

@@ -10,7 +10,7 @@ import { countLine, nearbyPlaces, nearbyText, ordinal, pickAway } from "../visib
 import { nameFrom } from "../visibility/geoapify.ts";
 import { aiLine, checkFact, collectCheck, fastLine, newCode, publicView, startCheck } from "../visibility/free-check.ts";
 import { mockProvider } from "../visibility/mock.ts";
-import { pickTerms } from "../visibility/terms.ts";
+import { APPROVED, CANDIDATES, pickTerms } from "../visibility/terms.ts";
 import { parseButton } from "../whatsapp/router.ts";
 import { handle } from "../whatsapp/agent.ts";
 import { BIZ, msg, PHONES, USERS, World } from "../whatsapp/world.test-helpers.ts";
@@ -332,4 +332,21 @@ Deno.test("industry search terms come from the volumes, near me folded into the 
   assert.equal(t["hair-salons"].volume, 3000);
   assert.equal(t["barbershops"].term, "barber");
   assert.equal(t["cafes"], undefined, "no data, no term");
+});
+Deno.test("terms lane R approved per market win over the volumes (UX 1)", () => {
+  const v = [{ keyword: "coffee shop", volume: 9000 }, { keyword: "cafe", volume: 4000 }, { keyword: "clinic", volume: 8000 },
+    { keyword: "aesthetic clinic", volume: 900 }, { keyword: "skin clinic", volume: 700 }, { keyword: "garage", volume: 6000 },
+    { keyword: "car repair", volume: 1200 }, { keyword: "beauty salon", volume: 5000 }, { keyword: "hairdresser", volume: 2500 }];
+  const ae = pickTerms(v, "AE"), gb = pickTerms(v, "GB");
+  assert.deepEqual([ae["cafes"].term, ae["medical-and-aesthetic-clinics"].term, ae["auto-repair"].term, ae["nail-and-beauty-salons"].term],
+    ["cafe", "aesthetic clinic", "car repair", "nail salon"]);
+  assert.deepEqual([gb["cafes"].term, gb["medical-and-aesthetic-clinics"].term, gb["auto-repair"].term, gb["nail-and-beauty-salons"].term],
+    ["cafe", "skin clinic", "car repair", "nail salon"]);
+  assert.equal(ae["cafes"].volume, 4000);
+  assert.equal(ae["nail-and-beauty-salons"].volume, null, "approved with no volume keeps a null volume");
+  assert.equal(gb["cafes"].source, "lane_r_approved");
+  assert.equal(ae["hair-salons"].term, "hairdresser", "other industries still follow the volumes");
+  assert.equal(ae["hair-salons"].source, "dataforseo_google_ads");
+  for (const [industry, markets] of Object.entries(APPROVED))
+    for (const term of Object.values(markets)) assert.ok(CANDIDATES[industry].includes(term!), `${term} is a candidate of ${industry}`);
 });

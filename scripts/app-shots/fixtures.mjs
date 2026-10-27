@@ -10,6 +10,7 @@ import * as settings from "./settings.mjs";
 import * as onboarding from "./onboarding.mjs";
 import * as staff from "./staff.mjs";
 import * as publicPages from "./public.mjs";
+import * as lead from "./lead.mjs";
 
 export const STORAGE_KEY = "sb-ynjdqjlmdwjgbfezevxy-auth-token";
 export const USER_ID = "00000000-0000-4000-8000-000000000001";
@@ -127,7 +128,7 @@ const base = {
   functions: {},
 };
 
-const AREAS = [base, home, content, profile, settings, onboarding, staff, publicPages];
+const AREAS = [base, home, content, profile, settings, onboarding, staff, publicPages, lead];
 
 function pick(kind, name) {
   for (let i = AREAS.length - 1; i >= 0; i--) {
