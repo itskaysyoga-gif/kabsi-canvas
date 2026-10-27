@@ -162,6 +162,22 @@ select pg_temp.due((select v ->> 'publication_id' from t where k = 'd10'));
 select is(public.claim_publication(((select v ->> 'publication_id' from t where k = 'd10'))::uuid) ->> 'result', 'stopped',
   'a reply that went back to a draft after the yes is not sent');
 
+-- An edit inside the 10 seconds, then a WhatsApp yes on the new words: the stale yes is cancelled and the new words go.
+insert into t values ('w9a', public.approve_publication('review_reply', '00000000-0000-4000-8000-000000000409',
+  '{"text": "Thank you for coming, see you soon."}'::jsonb, '00000000-0000-4000-8000-0000000000a1', 'dashboard'));
+insert into public.reply_drafts (review_id, version, body, source, safety_ok)
+values ('00000000-0000-4000-8000-000000000409', 2, 'Thank you, we hope to see you again soon.', 'ai_edit', true);
+update public.reviews set state = 'drafted' where id = '00000000-0000-4000-8000-000000000409';
+insert into t values ('w9b', pg_temp.button('00000000-0000-4000-8000-0000000000a1', 9));
+insert into t values ('w9c', pg_temp.press((select v from t where k = 'w9b'), '+15550002009'));
+select is((select v ->> 'result' from t where k = 'w9c'), 'approved', 'the yes on the new words is approved');
+select isnt((select v ->> 'publication_id' from t where k = 'w9c'), (select v ->> 'publication_id' from t where k = 'w9a'),
+  'with a publication of its own');
+select is((select payload ->> 'text' from public.publications where id = (select (v ->> 'publication_id')::uuid from t where k = 'w9c')),
+  'Thank you, we hope to see you again soon.', 'holding the new words');
+select is((select state || '/' || error from public.publications where id = (select (v ->> 'publication_id')::uuid from t where k = 'w9a')),
+  'cancelled/superseded', 'and the stale yes on the old words is cancelled');
+
 -- 6. An old yes expires --------------------------------------------------------------------------------------------
 insert into t values ('e11', public.approve_publication('review_reply', '00000000-0000-4000-8000-000000000411',
   '{"text": "Thank you for coming."}'::jsonb, '00000000-0000-4000-8000-0000000000a1', 'dashboard'));
