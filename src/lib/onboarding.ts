@@ -219,3 +219,10 @@ export async function resumeStep(code: string): Promise<ResumeAnswer | null> {
   if (!res.ok) throw new Error(`resume_${res.status}`);
   return (await res.json()) as ResumeAnswer;
 }
+
+/** Email 1: whether a setup email with the setup link really went to the signed-in person for this business. */
+export async function setupLinkEmailed(locationId: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc("my_setup_link_emailed", { p_location: locationId });
+  if (error) return false;
+  return data === true;
+}

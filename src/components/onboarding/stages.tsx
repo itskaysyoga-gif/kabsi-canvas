@@ -845,7 +845,7 @@ export function LaterStage() {
 
 /* ---------- One resume link, from any device ---------- */
 
-export function ResumeLink({ code }: { code: string }) {
+export function ResumeLink({ code, emailed = false }: { code: string; emailed?: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="mt-12 border-t border-line pt-6">
@@ -863,6 +863,8 @@ export function ResumeLink({ code }: { code: string }) {
           <CopyField label="Your setup link" value={`${SITE_URL}${resumePath(code)}`} />
           <p className="mt-2 text-small text-text-2">
             It opens the next step you have not finished, on any phone or computer.
+            {/* Email 1: said only once a setup email with this link really went to this person. */}
+            {emailed ? " Kabsi also sent it to your email." : null}
           </p>
         </div>
       ) : null}

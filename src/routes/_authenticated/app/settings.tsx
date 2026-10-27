@@ -32,7 +32,13 @@ import {
   removeAiPrompt,
   saveAiPrompt,
 } from "@/lib/insights";
-import { choice, loadPrefs, savePref } from "@/lib/notifications";
+import {
+  choice,
+  loadPrefs,
+  loadRoutineChannel,
+  savePref,
+  saveRoutineChannel,
+} from "@/lib/notifications";
 import { whatsappPrefs, whatsappStatus } from "@/lib/whatsapp-owner";
 
 // Settings (UX 1, Design 3; COPY.md 19): the business and the email, where routine messages go and the four switches, the
@@ -211,15 +217,21 @@ function BusinessPanel({ locationId, name }: { locationId: string; name: string 
 }
 
 /**
- * One place for routine messages (new reviews and the Results Report): WhatsApp or email, never both. Built from the
- * existing choices: WhatsApp turns the WhatsApp alerts and report on and those two emails off; email does the opposite.
- * Shown only once WhatsApp is connected; until then everything comes by email.
+ * One place for routine messages (new reviews and the Results Report): WhatsApp or email, never both (Email 1). The choice
+ * is stored once (routine_channels, set_routine_channel) and the notification engine reads it, so a routine email is not
+ * sent while WhatsApp is chosen. WhatsApp's own review alerts and Monday report follow the same choice. Shown only once
+ * WhatsApp is connected; until then everything comes by email.
  */
 function RoutineChannel({ locationId }: { locationId: string }) {
   const qc = useQueryClient();
   const status = useQuery({
     queryKey: ["whatsapp-status"],
     queryFn: whatsappStatus,
+    enabled: WHATSAPP_ON,
+  });
+  const stored = useQuery({
+    queryKey: ["routine-channel"],
+    queryFn: loadRoutineChannel,
     enabled: WHATSAPP_ON,
   });
   const prefs = useQuery({
@@ -231,26 +243,33 @@ function RoutineChannel({ locationId }: { locationId: string }) {
   const change = useMutation({
     mutationFn: async (to: "whatsapp" | "email") => {
       const wa = to === "whatsapp";
+      // The stored choice first: if WhatsApp stopped meanwhile it refuses, and nothing else changes.
+      await saveRoutineChannel(to);
       await whatsappPrefs(wa, wa);
-      for (const c of ["review_new", "weekly_report"])
-        await savePref(locationId, c, "email", wa ? "off" : "default");
+      // Back on email: the two emails the earlier switch turned off come back to their default.
+      if (!wa)
+        for (const c of ["review_new", "weekly_report"])
+          await savePref(locationId, c, "email", "default");
     },
     onMutate: () => setErr(""),
     onSettled: () => {
       void qc.invalidateQueries({ queryKey: ["whatsapp-status"] });
+      void qc.invalidateQueries({ queryKey: ["routine-channel"] });
       void qc.invalidateQueries({ queryKey: ["notification-prefs", locationId] });
     },
     onError: () => setErr("Couldn't save. Please try again."),
   });
   const s = status.data;
-  if (!WHATSAPP_ON || s?.state !== "active" || !prefs.data) return null;
+  if (!WHATSAPP_ON || s?.state !== "active" || stored.isLoading || !prefs.data) return null;
+  // Before a stored choice, an owner whose two emails were switched off for WhatsApp (the earlier switch) reads WhatsApp.
   const value =
-    s.review_alerts !== false &&
+    stored.data ??
+    (s.review_alerts !== false &&
     s.digest_optin === true &&
     choice(prefs.data, "review_new", "email") === "off" &&
     choice(prefs.data, "weekly_report", "email") === "off"
       ? "whatsapp"
-      : "email";
+      : "email");
   return (
     <div className="mt-4">
       <Segmented

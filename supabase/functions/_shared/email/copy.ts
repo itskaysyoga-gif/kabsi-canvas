@@ -3,12 +3,13 @@
 // notification engine renders and sends. Moving the copy here, in one place, is what lets a test check every email:
 // one yellow button, the business name first in the subject, a plain-text version, house style (catalog.test.ts).
 // Subjects follow K-102: the business name first, then the action.
-import { esc, KABSI_GROUP_ID, WHATSAPP_URL } from "../email-layout.ts";
+import { esc, KABSI_GROUP_ID, label as smallLabel, quoteBox, WHATSAPP_URL } from "../email-layout.ts";
+import { accessStopped } from "./account-copy.ts";
 import type { EmailContent } from "./template.ts";
 import { TOKENS } from "./tokens.ts";
 
 export const p = (html: string) => `<p style="margin:0 0 16px 0;">${html}</p>`;
-export const box = (s: string) => `<div style="margin:0 0 16px 0;padding:14px 16px;background:${TOKENS.sand};border-radius:14px;white-space:pre-wrap;">${esc(s)}</div>`;
+export const box = quoteBox;
 const link = (appUrl: string, path: string) => `${appUrl}${path}`;
 
 // ─── reviews ──────────────────────────────────────────────────────────────────────────────────────────────────
@@ -45,16 +46,9 @@ export function managerSteps(business: string, appUrl: string, step: number): Em
 
 // ─── Google access ────────────────────────────────────────────────────────────────────────────────────────────
 
-export function accessLost(business: string, appUrl: string): EmailContent {
-  return {
-    subject: `${business}: Kabsi can't reach your Google profile`,
-    preheader: "Invite the Kabsi group again to continue.", title: "Kabsi lost access to your Google profile",
-    bodyHtml: p(`Google stopped letting Kabsi read <strong>${esc(business)}</strong>'s reviews. This usually means the Kabsi group was removed from the profile's managers.`)
-      + p(`To continue: on your Business Profile open <strong>Menu</strong>, then <strong>Business Profile settings</strong>, then <strong>People and access</strong>, and invite the <strong>Kabsi group ID ${KABSI_GROUP_ID}</strong> as a <strong>Manager</strong>. Kabsi reconnects on its own within a few minutes.`)
-      + p("Until then no replies are drafted and nothing is posted. If you removed Kabsi on purpose, you don't need to do anything."),
-    button: { label: "Open Kabsi", url: `${appUrl}/app` },
-    text: `Google stopped letting Kabsi read ${business}'s reviews, usually because the Kabsi group was removed as a Manager.\n\nTo continue, invite the Kabsi group ID ${KABSI_GROUP_ID} as a Manager again under People and access on your Business Profile. Kabsi reconnects within a few minutes.\n\nOpen Kabsi: ${appUrl}/app`,
-  };
+/** Connection or publication failed (30.15 section 6): Kabsi's Google access stopped working. */
+export function accessLost(business: string, appUrl: string, waiting?: number): EmailContent {
+  return accessStopped({ business, waiting }, appUrl);
 }
 
 // ─── deleting a business ──────────────────────────────────────────────────────────────────────────────────────
@@ -83,7 +77,7 @@ export function deletionDone(business: string, appUrl: string): EmailContent {
 export type RenewalStage = "r5" | "r1";
 export function renewalReminder(stage: RenewalStage, business: string, planLabel: string, day: string, planKind: string, appUrl: string): EmailContent {
   const when = stage === "r1" ? "tomorrow" : "in a few days";
-  const plain = `Your ${planLabel} plan for ${business} ends ${when}, on ${day}. To keep reply drafts, Google Protection and the Weekly Care Report going, pay before then. Paying early adds the new period after this one, so you lose no days. Your review link and QR code keep working either way.`;
+  const plain = `Your ${planLabel} plan for ${business} ends ${when}, on ${day}. To keep reply drafts, Google Protection and the Results Report going, pay before then. Paying early adds the new period after this one, so you lose no days. Your review link and QR code keep working either way.`;
   const url = `${appUrl}/app/plan?pay=${encodeURIComponent(planKind)}`;
   return {
     subject: stage === "r1" ? `${business}: your plan ends tomorrow` : `${business}: your plan ends on ${day}`,
@@ -94,10 +88,13 @@ export function renewalReminder(stage: RenewalStage, business: string, planLabel
 
 // ─── the week ─────────────────────────────────────────────────────────────────────────────────────────────────
 
-export function weeklyReport(business: string, o: { newReviews: number; replied: number; headline?: string }, html: string, text: string, appUrl: string): EmailContent {
+/** The Monday Results Report (30.18 section 3): the body is the visual work receipt of report-body.ts. */
+export function weeklyReport(business: string, o: { dates: string; preheader: string; button?: { label: string; path: string } }, html: string, text: string, appUrl: string): EmailContent {
+  const report = `${appUrl}/app/report`;
+  const main = o.button && o.button.path !== "/app/report" ? { label: o.button.label, url: `${appUrl}${o.button.path}` } : { label: "Open your report", url: report };
   return {
-    subject: `${business}: your Weekly Care Report`, preheader: o.headline ?? `${o.newReviews} new reviews, ${o.replied} replied.`, title: "Your Weekly Care Report",
-    bodyHtml: html, button: { label: "Open your week", url: `${appUrl}/app/report` }, text: `${text}\n\nOpen your week: ${appUrl}/app/report`,
+    subject: `${business}: your Results Report for ${o.dates}`, preheader: o.preheader, title: `Your Results Report, ${o.dates}`,
+    bodyHtml: html, button: main, ...(main.url !== report ? { links: [{ label: "Open your report", url: report }] } : {}), text,
   };
 }
 
@@ -106,7 +103,7 @@ export function weeklyPost(business: string, postText: string, appUrl: string): 
   return {
     subject: `${business}: this week's post is ready to review`, preheader: "Read it, change anything, then post it or skip it.", title: "This week's post is ready",
     bodyHtml: p(`Kabsi drafted a Google post for ${esc(business)} from the facts you gave us. Nothing is posted until you approve it.`)
-      + `<p style="margin:0 0 20px 0;padding:14px 16px;background:${TOKENS.sand};border-radius:10px;white-space:pre-wrap;">${esc(postText)}</p>`,
+      + smallLabel("Post ready") + quoteBox(postText),
     button: { label: "Review the post", url }, note: "Don't want weekly drafts? Switch them off on the Posts page.",
     text: `This week's post for ${business} is ready. Nothing is posted until you approve it.\n\n${postText}\n\nReview it: ${url}`,
   };
@@ -119,8 +116,8 @@ export function profileChange(business: string, label: string, o: { lines: strin
   return {
     subject: `${business}: your ${label} changed on Google`, preheader: o.lines[0] ?? "", title: `Your ${label} changed on Google`,
     bodyHtml: o.lines.map((l) => p(esc(l))).join("")
-      + `<p style="margin:0 0 6px 0;font-size:14px;color:${TOKENS.stone};">${o.approvedBefore ? "You approved" : "Kabsi saw before"}</p>${box(o.before || "(empty)")}`
-      + `<p style="margin:0 0 6px 0;font-size:14px;color:${TOKENS.stone};">Google shows now</p>${box(o.after || "(empty)")}`,
+      + smallLabel(o.approvedBefore ? "You approved" : "Kabsi saw before") + box(o.before || "(empty)")
+      + smallLabel("Google shows now") + box(o.after || "(empty)"),
     button: { label: "Open Google Protection", url }, note: "Nothing changes on Google until you choose in Kabsi.",
     text: `${o.lines.join("\n")}\n\nOpen Google Protection: ${url}`,
   };
@@ -181,7 +178,7 @@ export function holidayHoursAsk(o: HolidayAskInput, appUrl: string): EmailConten
     note: "You can also answer in Kabsi, under Hours.",
     text: `${lead}${moon}\n\nKabsi never assumes holiday hours. Choose one, check the hours and confirm. Nothing changes on Google until you do.\n\nChoose your hours: ${o.links.choose}\n${answers.map((a) => `${a.label}: ${a.url}`).join("\n")}\n\nYou can also answer in Kabsi, under Hours: ${link(appUrl, "/app/hours")}`,
     digest: {
-      html: p(`<strong>${esc(o.business)}</strong>: ${esc(lead)} `) + `<div style="margin:0 0 12px 0;">${[{ label: "Choose your hours", url: o.links.choose }, ...answers].map((a) => `<a href="${esc(a.url)}" style="font-weight:700;color:${TOKENS.ink};margin-right:14px;">${esc(a.label)}</a>`).join("")}</div>`,
+      html: p(`<strong>${esc(o.business)}</strong>: ${esc(lead)} `) + `<div style="margin:0 0 12px 0;">${[{ label: "Choose your hours", url: o.links.choose }, ...answers].map((a) => `<a href="${esc(a.url)}" class="kb-t1" style="font-weight:700;color:${TOKENS.ink};margin-right:14px;">${esc(a.label)}</a>`).join("")}</div>`,
       text: `${o.business}: ${lead} Choose your hours: ${o.links.choose}`,
     },
   };

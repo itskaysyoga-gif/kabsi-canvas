@@ -14,6 +14,7 @@ One page, under 10 KB. Updated 25 Oct 2026 by the lane R chat (master plan 19, 2
 - Web 2 (PR 252, merged 26 Oct, deploy run 117 green, kabsi.co serves it): kabsi.co's public pages on the design studio's approved system (dark, Bricolage Grotesque and Manrope), every count real (Founding 25, founding price, Founding Partners), the Founding 25 and Partners forms on the programs function, the free check on V4's /visibility/check, the industry pages with nine hubs (hair salon, restaurant and dental clinic indexed; the nine Content 1 pages noindex until lane R approves), DESIGN.md and COPY.md 24, the facts. Detail: `docs/progress/archive/2026-10-27-web2.md`.
 - V4 (PR 250, merged 26 Oct, deploy run 116 green; migration applied by lane R): onboarding in four stages, the first task, every task closes, the work receipt data, nearby places, the free check route, the category and monthly-facts proposals, the voice test op. The voice test did not pass (Gulf Arabic and mixed notes), so voice notes stay off. Detail: `docs/progress/archive/2026-10-27-v4.md`.
 - UX 1 (PR 254, merged 27 Oct, deploy run 118 green; migrations applied): the signed-in website on Design 3 (light), every task with its state, onboarding in four stages with the resume link, Get reviews with the PDF buttons and the new message, owners' AI questions, the staff AI spend and Founding 25 checklist, the public leftovers, the free check waiting list, named or anonymous case study, the approved terms. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
+- Email 1 (PR 258, 27 Oct): one email design, the 30.15 set, the Results Report receipt, auth templates, streams, the routine channel. Detail: `docs/progress/archive/2026-10-27-email1.md`.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
@@ -35,7 +36,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 - Done 25 Oct: Clean 1 drops (done, read-back 0 on all four), the Places purge (done, read-back `0 | 0 | 0`), the Resend webhook, R2 and the bucket `kabsi-backups`, the five backup secrets, `SENTRY_AUTH_TOKEN` in Vercel, the Pub/Sub topic `gbp-notifications` with its push subscription and secrets, `WHATSAPP_LIVE` set to `true`, the post Undo test.
 - Phone test (13b part 1): passed 25 Oct (ladder above). 13b part 2: send START from the staff phone (it is stopped); delete the Supabase secrets SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET and the Supabase SENTRY_AUTH_TOKEN; run `supabase/manual/20261025_drop_slack_leftovers.sql` (expect `0 | 0 | 0 | 0`); remove the Kabsi app from Slack when you like.
 - Postponed to `docs/LATER.md`: the failing Backup run, the disabled branch ruleset, the inbox tests, Sentry membership (free plan allows 1).
-- Supabase Auth: leaked-password protection; paste the four `emails/auth/*.html` templates.
+- Supabase Auth: leaked-password protection; paste the four rebuilt `emails/auth/*.html` templates (Email 1, steps in emails/auth/README.md).
+- Email 1: news.kabsi.co in Resend and Cloudflare before lifecycle emails go on (LATER row).
 - Google Cloud: Places quotas and budget alerts; contacts and owners on kabsi.co addresses only.
 - Supabase Pro with point-in-time recovery and Vercel Pro, before the first payment.
 - Creem (session 10): send one test event from Creem's dashboard to the webhook (expect 200 and one `billing_events` row), add the product bundle, mark Yawmiyati's organisation `billing_test` if you want to try the paid buttons. Hussein only at going live (verification, payout). Exact steps: `docs/progress/archive/2026-10-25-session-10-creem.md`.
@@ -56,6 +58,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 27 Oct 2026, Email 1 (PR 258). Detail: `docs/progress/archive/2026-10-27-email1.md`.
 - 27 Oct 2026, UX 1 round 2 (lane R review): waiting list words and their stored proof, the hero and Try it after a Yes, Barbershops in the footer, closed LATER rows. Detail: the end of `docs/progress/archive/2026-10-27-ux1.md`.
 - 27 Oct 2026, UX 1 (PR 254): the signed-in website, onboarding and leftovers. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
 - 27 Oct 2026, Web 2: the public website ported from the design studio. Detail: `docs/progress/archive/2026-10-27-web2.md`.

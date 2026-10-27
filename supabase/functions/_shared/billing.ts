@@ -6,6 +6,7 @@ import { admin, APP_URL, captureError, jobLog, log } from "./kabsi.ts";
 import { notify as notifyEmail } from "./notify.ts";
 import { esc } from "./email-layout.ts";
 import type { EmailContent } from "./email/template.ts";
+import { paymentFailed, planCancelled } from "./email/account-copy.ts";
 import { outDb } from "./whatsapp/db.ts";
 import { ref } from "./whatsapp/templates.ts";
 import {
@@ -206,13 +207,15 @@ export function billingLine(m: Message | "payment_reminder", c: { business: stri
   switch (m) {
     case "scheduled_cancel": {
       const lines = [`Your Kabsi plan for ${c.business} ends on ${end ?? "the last day you paid for"}.`, "Until then everything keeps working. Changed your mind? Tap Keep my plan."];
-      return { whatsapp: lines.join(" "), buttons: [{ id: "k:keep", title: "Keep my plan" }], email: emailOf(`${c.business}: your Kabsi plan ends on ${end ?? "your renewal date"}`, "Your plan is set to end", lines) };
+      // Email 1: the cancellation email of 30.15 section 6 (COPY.md 25).
+      return { whatsapp: lines.join(" "), buttons: [{ id: "k:keep", title: "Keep my plan" }], email: planCancelled({ business: c.business, ends: c.periodEnd ?? null, dataDays: DATA_DAYS }, APP_URL) };
     }
     case "payment_failed":
     case "payment_reminder": {
       const until = c.graceEnds ? longDate(c.graceEnds) : null;
       const lines = [`${c.business}: your card did not go through. Update it here: ${c.portal ?? `${APP_URL}/app/plan`}`, `Kabsi keeps working until ${until ?? "the grace period ends"}.`];
-      const email = emailOf(`${c.business}: your card did not go through`, "Your card did not go through", [lines[1], "Update your card and Kabsi carries on as before."], { label: "Update your card", url: c.portal ?? `${APP_URL}/app/plan` });
+      // Email 1: the failed-payment email of 30.15 section 6 (COPY.md 25).
+      const email = paymentFailed({ business: c.business, graceEnds: c.graceEnds ?? null, portal: c.portal ?? `${APP_URL}/app/plan`, reminder: m === "payment_reminder" });
       return { whatsapp: (m === "payment_reminder" ? "Reminder. " : "") + lines.join("\n"), email };
     }
     case "paused": {
@@ -222,8 +225,8 @@ export function billingLine(m: Message | "payment_reminder", c: { business: stri
     }
     case "ended": {
       const until = c.dataUntil ? longDate(c.dataUntil) : null;
-      const lines = [`Your Kabsi plan for ${c.business} has ended. Thank you for trusting Kabsi with your listing.`, `Your data is kept until ${until}, then deleted. Reply plan any time to come back.`];
-      return { whatsapp: lines.join(" "), email: emailOf(`${c.business}: your Kabsi plan has ended`, "Your plan has ended", lines) };
+      const lines = [`Your Kabsi plan for ${c.business} has ended. Thank you for trusting Kabsi with your Google profile.`, `Your data is kept until ${until}, then deleted. Reply plan any time to come back.`];
+      return { whatsapp: lines.join(" "), email: emailOf(`${c.business}: your Kabsi plan has ended`, "Your plan has ended", lines, { label: "Choose your plan", url: `${APP_URL}/app/plan` }) };
     }
     case "resumed": {
       const lines = [`Your Kabsi plan for ${c.business} carries on.${end ? ` The next payment is on ${end}.` : ""}`];

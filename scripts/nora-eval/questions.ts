@@ -348,12 +348,12 @@ export const QUESTIONS: Question[] = [
   {
     id: "en26",
     lang: "en",
-    topic: "the Weekly Care Report",
-    ask: "What is in the Weekly Care Report and when does it come?",
-    kb: [/an email every Monday at 08:00 local time, also kept under Insights/],
-    must: [/Monday/, /Insights/],
+    topic: "the Results Report",
+    ask: "What is in the Results Report and when does it come?",
+    kb: [/an email every Monday, also kept under Reports/],
+    must: [/Monday/, /Reports/],
     reference:
-      "It arrives every Monday at 08:00 local time and is kept under Insights. It starts with how many things Kabsi took care of that week, then your reviews, your Google profile checks, the content published and customer activity against the week before.",
+      "It arrives every Monday at 08:00 local time and is kept under Reports. It shows what Kabsi did that week, what waits for your yes, one next step, then Google's own numbers against the week before, with calls and direction requests apart.",
   },
   {
     id: "en27",

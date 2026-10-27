@@ -85,3 +85,16 @@ export function groupedCategories() {
   }
   return groups;
 }
+
+/** Where the person's routine messages go (Email 1): email or WhatsApp, never both. Null until they choose. */
+export type RoutineChannel = "email" | "whatsapp";
+export async function loadRoutineChannel(): Promise<RoutineChannel | null> {
+  const { data, error } = await supabase.from("routine_channels").select("channel").maybeSingle();
+  if (error) throw new Error(error.message);
+  const c = (data as { channel?: string } | null)?.channel;
+  return c === "whatsapp" || c === "email" ? c : null;
+}
+export async function saveRoutineChannel(channel: RoutineChannel): Promise<void> {
+  const { error } = await supabase.rpc("set_routine_channel", { p_channel: channel });
+  if (error) throw new Error(error.message);
+}

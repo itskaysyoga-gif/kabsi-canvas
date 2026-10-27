@@ -7,10 +7,10 @@
 import { esc } from "../email-layout.ts";
 import { HIGH_RISK_TITLE, issueLines } from "../ai/risk.ts";
 import { highRiskBlock } from "../review-risk.ts";
-import type { EmailContent } from "./template.ts";
+import { type EmailContent, PROMISE } from "./template.ts";
 import { TOKENS } from "./tokens.ts";
 import { highRiskSubject, reviewSubject } from "./copy.ts";
-import { emailLink } from "../email-layout.ts";
+import { emailLink, label, quoteBox } from "../email-layout.ts";
 
 export type ReviewInput = {
   business: string;
@@ -27,7 +27,7 @@ export type ReviewInput = {
   appUrl: string;
 };
 
-const quote = (s: string) => `<div style="margin:0 0 16px 0;padding:14px 16px;background:${TOKENS.sand};border-radius:14px;white-space:pre-wrap;">${esc(s)}</div>`;
+const quote = quoteBox;
 
 type Block = { html: string; text: string; button?: { label: string; url: string }; links?: { label: string; url: string }[] };
 
@@ -35,7 +35,7 @@ type Block = { html: string; text: string; button?: { label: string; url: string
 export function reviewBlock(i: ReviewInput, withPost: boolean): Block {
   const inbox = `${i.appUrl}/app/reviews?f=needs`;
   const head = `<p style="margin:0 0 8px 0;"><strong>${esc(i.reviewer ?? "A customer")}</strong> · Rating ${i.stars} of 5</p>`;
-  const reviewText = i.comment ? quote(i.comment) : `<p style="margin:0 0 16px 0;color:${TOKENS.stone};">No written review, just a rating.</p>`;
+  const reviewText = i.comment ? quote(i.comment) : `<p class="kb-t2" style="margin:0 0 16px 0;color:${TOKENS.stone};">No written review, just a rating.</p>`;
   const plainHead = `${i.reviewer ?? "A customer"}: ${i.stars} of 5\n${i.comment ?? "No written review, just a rating."}`;
   if (!i.links) return { html: head + reviewText, text: plainHead };
   // K-13: a high-risk review has no draft and no approve link; the email is the checklist. A holding reply the owner
@@ -53,10 +53,10 @@ export function reviewBlock(i: ReviewInput, withPost: boolean): Block {
   }
   // K-13: a medium review shows its issue on top of the draft.
   const issues = i.risk === "medium" ? issueLines(i.riskReasons ?? []) : [];
-  const issueHtml = issues.length ? `<p style="margin:0 0 16px 0;padding:12px 14px;border:1px solid ${TOKENS.hairline};border-radius:14px;">${issues.map(esc).join("<br>")}</p>` : "";
+  const issueHtml = issues.length ? `<p class="kb-line" style="margin:0 0 16px 0;padding:12px 14px;border:1px solid ${TOKENS.hairline};border-radius:12px;">${issues.map(esc).join("<br>")}</p>` : "";
   const issueText = issues.length ? `${issues.join("\n")}\n\n` : "";
-  const drafted = head + reviewText + issueHtml + `<p style="margin:0 0 6px 0;font-size:14px;color:${TOKENS.stone};">Drafted reply</p>` + quote(i.draft.body);
-  const plain = `${plainHead}\n\n${issueText}Drafted reply:\n${i.draft.body}`;
+  const drafted = head + reviewText + issueHtml + label("Reply ready") + quote(i.draft.body);
+  const plain = `${plainHead}\n\n${issueText}Reply ready:\n${i.draft.body}`;
   if (withPost) {
     return {
       html: drafted + `<div style="margin:0;">${emailLink("Approve reply", i.links.post)}${emailLink("Edit", i.links.edit)}${emailLink("Skip", i.links.skip)}</div>`,
@@ -73,9 +73,11 @@ export function reviewBlock(i: ReviewInput, withPost: boolean): Block {
 export function reviewEmail(i: ReviewInput, mode: "send" | "hold" | "digest"): EmailContent {
   const high = i.risk === "high";
   const b = reviewBlock(i, mode === "digest");
-  const subject = high ? highRiskSubject(i.business) : reviewSubject(i.business, i.stars, { replyReady: !!i.links && i.state !== "blocked" && !!i.draft?.safe });
+  const ready = !!i.links && i.state !== "blocked" && !!i.draft?.safe;
+  const subject = high ? highRiskSubject(i.business) : reviewSubject(i.business, i.stars, { replyReady: ready });
   return {
-    subject, title: high ? HIGH_RISK_TITLE.replace(/\.$/, "") : "New review", preheader: i.comment ? i.comment.slice(0, 90) : "Nothing is published until you approve it.",
+    subject, title: high ? HIGH_RISK_TITLE.replace(/\.$/, "") : ready ? "A reply is ready." : "New review", preheader: i.comment ? i.comment.slice(0, 90) : PROMISE,
+    ...(mode !== "digest" ? { note: PROMISE } : {}),
     bodyHtml: b.html, text: b.text, button: b.button ?? { label: "Open Kabsi", url: `${i.appUrl}/app/reviews?f=needs` }, ...(b.links ? { links: b.links } : {}),
     ...(mode === "digest" ? { digest: { html: b.html, text: b.text } } : {}),
   };

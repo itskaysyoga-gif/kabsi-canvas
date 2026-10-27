@@ -80,7 +80,19 @@ Rewritten by Web 2 on 27 Oct 2026 (master plan 30.13 item 5) to the design studi
 
 ## Visuals Kabsi sends and share images
 - Share images: public/og/*.png, 1200 by 630, dark, the mark, the page's line, the brand line, the Example badge on anything not real. Made by `node --experimental-strip-types scripts/og.mjs`, which also writes the favicon, the icons and site.webmanifest. `pageHead({ image })` in src/lib/site.ts picks one per page.
-- The WhatsApp nearby image is portrait 1080 by 1500 (Design 3, V4's nearby-image.ts). Emails are Email 1's (30.18 section 3).
+- The WhatsApp nearby image is portrait 1080 by 1500 (Design 3, V4's nearby-image.ts). Emails: the section below.
+
+## Emails (Email 1, master plan 30.18 section 3)
+- One layout for every email (supabase/functions/_shared/email/template.ts), its parts in email-layout.ts, the tokens in email/tokens.ts (copies of the brand constants; tests/email-template.test.ts keeps them equal). Light: kb-sand page, kb-white card with a kb-hairline edge and radius 16, kb-ink text, kb-stone for labels and small print. Dark (prefers-color-scheme, and Outlook.com's [data-ogsc] and [data-ogsb] hooks): kb-night page, kb-carbon card, kb-graphite panels, kb-paper and kb-mute text, the on-dark greens, ambers and reds. Gmail inverts by itself; the button keeps its yellow through a background-image.
+- Headings in Bricolage Grotesque (hosted at kabsi.co/fonts, for the apps that load web fonts) with system fallbacks; body text in the system face, 16 px, line 1.6. H1 26 px, section labels 13 px bold.
+- One column, 600 px at most, phone first at 390 px (the card's padding drops to 18 px under 480 px). Under 100 KB of HTML.
+- One main action: the yellow pill button (kb-yellow, black text, 52 px tall), drawn as a table for every client and as VML for Outlook on Windows. Every other action is an underlined text link with a 44 px tap area.
+- Parts: card (a kb-sand panel, radius 12, a 13 px label, an amber or red left edge for waiting or failed), chips (pills with a tick and a count), status icons (a 20 px round mark beside the words: tick in green, dot in amber, cross in red; never the only signal), ticks (a list with a mark per line), number cards (two to a row, stacked under 340 px: label, a 26 px number, the change against last week), quote box (a review or a draft, keeping line breaks).
+- Emoji only as small section markers, at most one per card, hidden from screen readers, never in an account-mail subject and never in the plain text.
+- The mark is the hosted PNG kabsi.co/email/kabsi-mark.png (96 px, shown at 32 px, alt "Kabsi", with the word Kabsi beside it), made by scripts/email-assets.mjs. No cid attachments.
+- Links are absolute and on kabsi.co, apart from Facebook and Instagram (SOCIAL_LINKS), Google's third-party page and mailto. Previews and test sends carry the Example badge; a real owner's email never does.
+- Footer (COPY.md 25 and 26): why you got this, the brand line, the non-affiliation line, Facebook and Instagram, the unsubscribe link only on mail a person can switch off, the operator line. Every email has a plain-text part.
+- Checks: tests/e2e/email.spec.ts (every email at 390 and 600 px, light and dark, images off, Chromium and WebKit), tests/email-clients.test.ts (caniemail for Gmail, Outlook and Apple Mail), supabase/functions/_shared/email/catalog.test.ts (the house rules for every email).
 
 ## SEO and speed (brief section 7, master plan 24.9)
 - Every public page is server rendered with its own title, description, canonical, share image, and Organization (on Home) and BreadcrumbList data through `pageHead`. Only indexed pages are in public/sitemap.xml (tests/sitemap.test.ts); template industry pages, hubs without a finished page, /manager-steps and free check results are noindex.

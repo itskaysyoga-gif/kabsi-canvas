@@ -13,7 +13,7 @@
 //
 // This file has no database or network import: api and the job wire it to the database in notify.ts, and the tests
 // wire it to fakes.
-import { type CategoryId, categoryOf, type Frequency, isStaffCategory, SYSTEM_CATEGORIES, SYSTEM_WHY, type SystemCategory } from "./notify-categories.ts";
+import { type CategoryId, categoryOf, type Frequency, isRoutine, isStaffCategory, SYSTEM_CATEGORIES, SYSTEM_WHY, type SystemCategory } from "./notify-categories.ts";
 import { decideEmail, digestSubject, type DigestItem, groupDigest, localParts } from "./notify-rules.ts";
 import { type EmailContent, renderEmail } from "./email/template.ts";
 import { emailLink, esc } from "./email-layout.ts";
@@ -72,6 +72,9 @@ export type Deps = {
   business(locationId: string): Promise<Business | null>;
   /** The person's stored choices at this business, keyed `${category}:${channel}`. */
   prefs(userId: string, locationId: string): Promise<Map<string, Frequency>>;
+  /** Where this person's routine message of this kind goes (routine_channels, Email 1): "whatsapp" only while their
+   *  WhatsApp is connected and carries that kind (review alerts, the Results Report), so nothing is lost. */
+  routineChannel(userId: string, category: string): Promise<"email" | "whatsapp">;
   /** The owner-approved opening hours text, or null. */
   hours(locationId: string): Promise<string | null>;
   /** Records the event. fresh is false when this key and address were recorded before; state is then the earlier state. */
@@ -120,8 +123,11 @@ export async function runNotify(input: NotifyInput, d: Deps): Promise<NotifyResu
       const prefs = person.userId && locationId ? await d.prefs(person.userId, locationId) : new Map<string, Frequency>();
       const emailPref = prefs.get(`${cat.id}:email`) ?? "default";
       const inAppOn = !!person.userId && !!locationId && cat.inApp && (prefs.get(`${cat.id}:in_app`) ?? "default") !== "off";
+      // Email 1: a routine message goes to the one place the person chose. On WhatsApp, the email is not sent (the bell
+      // still shows it); urgent categories are never routine, so they keep their own rules.
+      const routineOnWhatsapp = isRoutine(cat.id) && !!person.userId && (await d.routineChannel(person.userId, cat.id)) === "whatsapp";
       // No business context (an invitee): nothing to time against, so it goes now unless switched off.
-      const decision = biz
+      const decision = routineOnWhatsapp ? { mode: "off" as const } : biz
         ? decideEmail({ category: cat.id, pref: emailPref, now, tz: biz.tz, digestHour: biz.digestHour, hours })
         : emailPref === "off" && cat.switchable ? { mode: "off" as const } : { mode: "send" as const };
 
@@ -193,7 +199,16 @@ export type ReleaseResult = { held: number; digests: number; digestItems: number
 export async function releaseDue(d: Deps, limit = 500): Promise<ReleaseResult> {
   const now = d.now();
   const out: ReleaseResult = { held: 0, digests: 0, digestItems: 0, failed: 0 };
-  const due = await d.listDue(now, limit);
+  const all = await d.listDue(now, limit);
+  // A routine email held or put in the digest before the person chose WhatsApp is not sent as well (never both).
+  const due: StoredItem[] = [];
+  for (const item of all) {
+    if (isRoutine(item.category) && item.user_id && (await d.routineChannel(item.user_id, item.category)) === "whatsapp") {
+      await d.update(item.id, { email_state: "off", email_content: null });
+      continue;
+    }
+    due.push(item);
+  }
 
   for (const item of due.filter((i) => i.email_state === "held")) {
     try {

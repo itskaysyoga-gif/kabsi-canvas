@@ -6,6 +6,7 @@ import { esc, WHATSAPP_URL } from "../email-layout.ts";
 import type { Snapshot, StepId } from "../lifecycle.ts";
 import { p } from "./copy.ts";
 import { isSetupHelpStep, setupHelpEmail } from "./setup-help-copy.ts";
+import { firstWorkDone, setupIncomplete, trialEnding, welcomeEmail } from "./account-copy.ts";
 import type { EmailContent } from "./template.ts";
 
 // The prices of the website (lane R, 22 Oct 2026): Essentials, Pro and an extra location. Keep equal to PLAN_PRICES and
@@ -32,31 +33,10 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 // The WhatsApp link is left out while Kabsi has no WhatsApp number (whatsapp-setting.ts); the footer keeps hello@kabsi.co.
 const helpLinks = (c: LifecycleCtx) => [{ label: "Book a free setup call", url: `${c.appUrl}/setup-call` }, ...(WHATSAPP_URL ? [{ label: "Message us on WhatsApp", url: WHATSAPP_URL }] : [])];
 
+// Email 1: the three setup reminders are the setup-incomplete email with the setup link (account-copy.ts).
 function noAccess(step: "no_access_1h" | "no_access_24h" | "no_access_72h", s: Snapshot, c: LifecycleCtx): EmailContent {
-  const url = `${c.appUrl}/manager-steps`;
-  const v = {
-    no_access_1h: {
-      subject: `${s.name}: one step left to start`, title: "Kabsi is ready when you are", preheader: "Invite Kabsi as a Manager and it starts looking after your reviews.",
-      lead: `You asked Kabsi to look after <strong>${esc(s.name)}</strong>. It starts as soon as you invite Kabsi as a Manager on your Google Business Profile. It takes about two minutes, and each tap is shown.`,
-      plain: `You asked Kabsi to look after ${s.name}. It starts as soon as you invite Kabsi as a Manager on your Google Business Profile. It takes about two minutes, and each tap is shown.`,
-    },
-    no_access_24h: {
-      subject: `${s.name}: need a hand adding Kabsi?`, title: "Need a hand adding Kabsi?", preheader: "Most owners finish in two minutes. We can walk you through it.",
-      lead: `Adding Kabsi as a Manager is the only step between you and a reply ready for every new review of <strong>${esc(s.name)}</strong>. If a screen looks different from the guide, a person on our team can walk you through it, free.`,
-      plain: `Adding Kabsi as a Manager is the only step between you and a reply ready for every new review of ${s.name}. If a screen looks different from the guide, a person on our team can walk you through it, free.`,
-    },
-    no_access_72h: {
-      subject: `${s.name}: still want Kabsi to look after your reviews?`, title: "Still want Kabsi to look after your reviews?", preheader: "If something blocked you, tell us and we will help.",
-      lead: `Your reviews are still waiting for you. If something stopped you, for example your profile is not verified yet or someone else manages it, tell us and we will find the way with you. If you changed your mind, you can ignore this email.`,
-      plain: `Your reviews are still waiting for you. If something stopped you, for example your profile is not verified yet or someone else manages it, tell us and we will find the way with you. If you changed your mind, you can ignore this email.`,
-    },
-  }[step];
-  return {
-    subject: v.subject, title: v.title, preheader: v.preheader, why: "You started setting up Kabsi.",
-    bodyHtml: p(v.lead) + p("Kabsi never asks for your Google password or a verification code, and nothing is published until you approve it."),
-    button: { label: "Add Kabsi as a Manager", url }, links: helpLinks(c),
-    text: `${v.plain}\n\nKabsi never asks for your Google password or a verification code, and nothing is published until you approve it.`,
-  };
+  const nudge = step === "no_access_1h" ? "first" : step === "no_access_24h" ? "main" : "last";
+  return setupIncomplete({ business: s.name, resumeCode: s.resumeCode ?? null, nudge }, c.appUrl);
 }
 
 function week(s: Snapshot) {
@@ -77,23 +57,12 @@ export function lifecycleEmail(step: StepId, s: Snapshot, c: LifecycleCtx): Emai
   if (isSetupHelpStep(step)) return setupHelpEmail(step, s, c);
   switch (step) {
     case "welcome":
-      return {
-        subject: `${s.name}: welcome to Kabsi, one step to start`, title: "Welcome to Kabsi", preheader: "One step: invite Kabsi as a Manager on your Google profile.",
-        bodyHtml: p(`Kabsi looks after your reviews and your listing for <strong>${esc(s.name)}</strong>: a reply ready for every new review, and your details watched and kept right. You approve everything before it is published.`)
-          + p("The one step now: invite Kabsi as a Manager on your Google Business Profile. It takes about two minutes, and each tap is shown.")
-          + p("Kabsi never asks for your Google password or a verification code."),
-        button: { label: "Add Kabsi as a Manager", url: `${c.appUrl}/manager-steps` }, links: helpLinks(c),
-        text: `Kabsi looks after your reviews and your listing for ${s.name}: a reply ready for every new review, and your details watched and kept right. You approve everything before it is published.\n\nThe one step now: invite Kabsi as a Manager on your Google Business Profile. It takes about two minutes, and each tap is shown.\n\nKabsi never asks for your Google password or a verification code.`,
-      };
+      return welcomeEmail({ business: s.name }, c.appUrl);
     case "no_access_1h": case "no_access_24h": case "no_access_72h":
       return noAccess(step, s, c);
     case "first_reply_approved":
-      return {
-        subject: `${s.name}: your first reply is on its way`, title: "Your first reply is on its way", preheader: "You approved it. Kabsi sends it to Google now.",
-        bodyHtml: p("You approved your first reply. Kabsi sends it to Google within a few minutes, and Google may check it before it shows under the review.") + p("Nothing was published that you did not approve. That stays true for every reply, post and change."),
-        button: { label: "Open Kabsi", url: open },
-        text: "You approved your first reply. Kabsi sends it to Google within a few minutes, and Google may check it before it shows under the review.\n\nNothing was published that you did not approve. That stays true for every reply, post and change.",
-      };
+      // Email 1: "first work completed" goes once Kabsi saw the first reply on Google (30.15 3.1), not at the approval.
+      return firstWorkDone({ business: s.name }, c.appUrl);
     case "trial_day2": {
       const r = s.recap;
       const first = r.repliesPrepared > 0 || r.changesCaught > 0
@@ -115,13 +84,7 @@ export function lifecycleEmail(step: StepId, s: Snapshot, c: LifecycleCtx): Emai
       };
     }
     case "trial_day11":
-      return {
-        subject: `${s.name}: your free trial ends in 3 days`, title: "Your free trial ends in 3 days", preheader: "Choose a plan to keep Kabsi publishing for you.",
-        bodyHtml: p(`Your free trial ends on <strong>${esc(ends)}</strong>. After that Kabsi keeps watching and drafting for 7 more days, but publishes nothing until you choose a plan. Your review link keeps working.`)
-          + p(esc(PRICE_LINE)),
-        button: { label: "See your plan", url: plan }, links: [{ label: "Open Kabsi", url: open }],
-        text: `Your free trial ends on ${ends}. After that Kabsi keeps watching and drafting for 7 more days, but publishes nothing until you choose a plan. Your review link keeps working.\n\n${PRICE_LINE}`,
-      };
+      return trialEnding({ business: s.name, ends: s.trialEndsAt ?? new Date(), tz: s.timeZone, work: s.recap }, c.appUrl);
     case "trial_day14": {
       const grace = s.trialEndsAt ? day(new Date(s.trialEndsAt.getTime() + 7 * 86_400_000), s.timeZone) : "";
       const removal = c.removalOn ? ` On ${grace} Kabsi removes its Manager access to your Google profile and tells you.` : "";

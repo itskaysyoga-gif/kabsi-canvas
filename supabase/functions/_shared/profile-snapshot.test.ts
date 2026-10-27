@@ -9,7 +9,7 @@ import type { Place } from "./google/types.ts";
 import { buildSnapshot, CHECK_PAGES, checkEmail, type Deps, flags, LIMITS, makeHandler, normalizePhone, TIPS_CONSENT_TEXT, WHATSAPP_CONSENT_TEXT, whatsappParams } from "./profile-snapshot.ts";
 import { esc } from "./email-layout.ts";
 import { FREE_TOOL_BUSY } from "./free-tool-busy.ts";
-import { type EmailContent, renderEmail } from "./email/template.ts";
+import { visibleText, type EmailContent, renderEmail } from "./email/template.ts";
 
 const CTX = { appUrl: "https://kabsi.test", defaultWhy: "You asked for this email." };
 const real = { ...guard };
@@ -311,7 +311,7 @@ Deno.test("flags: a plain fact and what Kabsi would do, danger before warning be
   assert.equal(flags({ ...strong, review_count: 4 }).some((f) => f.tone === "warning" && f.fact === "There are 4 reviews so far."), true);
   assert.equal(flags({ ...strong, review_count: 1 }).some((f) => f.fact === "There is 1 review so far."), true);
   const mail = checkEmail({ esc, appUrl: "https://kabsi.co" }, strong, true);
-  assert.doesNotMatch(renderEmail(mail, CTX).html.replace("<!doctype html>", "") + mail.text + mail.subject, /[\u2013\u2014!]/);
+  assert.doesNotMatch(visibleText(renderEmail(mail, CTX).html) + mail.text + mail.subject, /[\u2013\u2014!]/);
   assert.match(mail.text, /Start your free trial: https:\/\/kabsi.co\/get-started/);
   assert.doesNotMatch(mail.text + mail.bodyHtml, /Join early access/);
   // The public-information sentence is the note, said once in the rendered email and not also in the body (P0.8-02b).
