@@ -1,5 +1,6 @@
 // tap: called only by the go.kabsi.co Worker (header x-kabsi-secret = TAP_SECRET).
-//   GET  ?code=ABC234  → { status, destination, business_id }   (KV miss: database is the source of truth)
+//   GET  (header x-kabsi-code: ABC234) → { status, destination, business_id }   (KV miss: database is the source of truth).
+//        Sec 2: the code is in a header, never in the address; ?code= is still read while an older Worker runs.
 //   POST { code, source, country, device, is_bot }  → 204, one row in public.taps
 // No IP address is ever received or stored.
 import { admin, captureError, json, log, timingSafeEqual } from "../_shared/kabsi.ts";
@@ -14,7 +15,7 @@ Deno.serve(async (req) => {
   const db = admin();
   try {
     if (req.method === "GET") {
-      const code = (new URL(req.url).searchParams.get("code") ?? "").toUpperCase();
+      const code = (req.headers.get("x-kabsi-code") ?? new URL(req.url).searchParams.get("code") ?? "").toUpperCase();
       if (!CODE_RE.test(code)) return json({ status: "unknown" }, 404);
       const { data } = await db.from("cards").select("status, destination, location_id, page_mode").eq("code", code).maybeSingle();
       if (!data) return json({ status: "unknown" }, 404);

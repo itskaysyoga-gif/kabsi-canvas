@@ -3,6 +3,7 @@
 // `whatsapp` function and the review alerts share. The number and the Kapso phone number id come from settings, never
 // from code: WHATSAPP_NUMBER (whatsapp-setting.ts) and the KAPSO_PHONE_NUMBER_ID secret.
 import { admin, APP_URL, internalSecret, log, rateLimit, sha256Hex } from "../kabsi.ts";
+import { errorText } from "../log-scrub.ts";
 import { message, MODELS, newMeter, task } from "../ai.ts";
 import { recordAiUsage } from "../ai-budget.ts";
 import { type Nora, noraUser, noraWhatsAppSystem } from "./nora.ts";
@@ -32,7 +33,7 @@ export const db: Db = {
   maySend: (u) => rpc<MaySend>("whatsapp_may_send", { p_user: u }),
   record: (r) => rpc<string | null>("whatsapp_record", {
     p_user: r.userId, p_location: r.locationId, p_kind: r.kind, p_state: r.state, p_provider_id: r.providerId ?? null,
-    p_template: r.template ?? null, p_error: r.error ?? null, p_dedupe: r.dedupe ?? null,
+    p_template: r.template ?? null, p_error: r.error ? errorText(r.error, 300) : null, p_dedupe: r.dedupe ?? null,
   }),
   inbound: (phone, id, kind) => rpc("whatsapp_inbound", { p_phone: phone, p_provider_id: id, p_kind: kind }),
   verify: (phone, code) => rpc("whatsapp_verify", { p_phone: phone, p_code: code }),
@@ -52,7 +53,7 @@ export const db: Db = {
     return r.ok ? { ok: true } : { ok: false, reason: r.reason };
   },
   async statusUpdate(id, state, error) {
-    await rpc("whatsapp_status_update", { p_provider_id: id, p_state: state, p_error: error });
+    await rpc("whatsapp_status_update", { p_provider_id: id, p_state: state, p_error: error ? errorText(error, 300) : error });
   },
 };
 
@@ -92,7 +93,7 @@ export const outDb: OutDb = {
     ...(r.media ? { p_media: r.media } : {}),
   }),
   mark: async (ids, state, o = {}) => {
-    await rpc("whatsapp_outbox_mark", { p_ids: ids, p_state: state, p_provider_id: o.providerId ?? null, p_error: o.error ?? null,
+    await rpc("whatsapp_outbox_mark", { p_ids: ids, p_state: state, p_provider_id: o.providerId ?? null, p_error: o.error ? errorText(o.error, 300) : null,
       p_due_at: o.dueAt ? o.dueAt.toISOString() : null });
   },
   claim: (n) => rpc<OutRow[]>("whatsapp_outbox_claim", { p_limit: n }).then((r) => r ?? []),
@@ -114,8 +115,10 @@ async function callVisibility(path: string, init: RequestInit = {}): Promise<Res
 /** The map PNG of one finished grid, drawn by the visibility function (V1); null when it cannot be drawn. */
 async function mapPng(scanId: string): Promise<Uint8Array | null> {
   // V4: "check:<code>" is a free check's nearby places, collected when DataForSEO has them.
-  const q = scanId.startsWith("check:") ? `check=${encodeURIComponent(scanId.slice(6))}` : `scan=${encodeURIComponent(scanId)}`;
-  const res = await callVisibility(`image?${q}`, { method: "GET" });
+  // Sec 2: the free check's code goes in a header, never in the address (request logs keep query strings).
+  const res = scanId.startsWith("check:")
+    ? await callVisibility("image", { method: "GET", headers: { "x-kabsi-check": scanId.slice(6) } })
+    : await callVisibility(`image?scan=${encodeURIComponent(scanId)}`, { method: "GET" });
   if (!res.ok) return null;
   const png = new Uint8Array(await res.arrayBuffer());
   return png.length > 100 ? png : null;

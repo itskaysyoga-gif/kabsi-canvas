@@ -211,10 +211,16 @@ export async function resumeStep(code: string): Promise<ResumeAnswer | null> {
   if (!RESUME_CODE.test(code)) return null;
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
-  const res = await sessionFetch(
-    `${supabaseUrl}/functions/v1/api/resume?code=${encodeURIComponent(code)}`,
-    { headers: { ...anonHeaders, ...(token ? { authorization: `Bearer ${token}` } : {}) } },
-  );
+  // Sec 2: the code in the POST body, never in a query string.
+  const res = await sessionFetch(`${supabaseUrl}/functions/v1/api/resume`, {
+    method: "POST",
+    body: JSON.stringify({ code }),
+    headers: {
+      "content-type": "application/json",
+      ...anonHeaders,
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
+    },
+  });
   if (res.status === 400 || res.status === 404) return null;
   if (!res.ok) throw new Error(`resume_${res.status}`);
   return (await res.json()) as ResumeAnswer;

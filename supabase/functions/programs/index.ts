@@ -10,6 +10,7 @@ import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, fail, json, log, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { staffAlert } from "../_shared/billing.ts";
 import { checkFounding, checkPartner } from "../_shared/programs.ts";
+import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
 const CACHE = { "cache-control": "public, max-age=300" };
 
@@ -72,6 +73,10 @@ async function applyPartner(req: Request): Promise<Response> {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
+  // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.form).
+  const capped = await capBody(req, BODY_LIMITS.form, CORS);
+  if (capped instanceof Response) return capped;
+  req = capped;
   const path = new URL(req.url).pathname.replace(/\/+$/, "");
   const founding = path.endsWith("/founding");
   const partners = path.endsWith("/partners");

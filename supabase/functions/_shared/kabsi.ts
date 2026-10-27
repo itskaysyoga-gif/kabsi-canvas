@@ -206,11 +206,23 @@ export async function sendEmail(o: {
 }
 
 // Cloudflare Turnstile (Q10). The secret lives in Supabase secrets as TURNSTILE_SECRET_KEY.
-// Until the secret is set the check passes, so a missing secret never takes a public form down;
-// once it is set, a missing or bad token is refused.
+// Sec 2: a missing secret fails closed (every token is refused and Sentry is told), except on a local stack, where the
+// forms are tried without Cloudflare. A missing or bad token is always refused once the secret is set.
+export function isLocalRun(env: (name: string) => string | undefined = (n) => Deno.env.get(n)): boolean {
+  const url = env("SUPABASE_URL") ?? "";
+  return /^https?:\/\/(127\.0\.0\.1|localhost|kong|host\.docker\.internal)([:/]|$)/.test(url) || env("KABSI_ENV") === "local";
+}
+let turnstileMissingReported = false;
 export async function verifyTurnstile(token: string | undefined, ip?: string): Promise<boolean> {
   const secret = Deno.env.get("TURNSTILE_SECRET_KEY");
-  if (!secret) return true;
+  if (!secret) {
+    if (isLocalRun()) return true;
+    if (!turnstileMissingReported) {
+      turnstileMissingReported = true;
+      await captureError("turnstile", new Error("TURNSTILE_SECRET_KEY is not set: public forms refuse every visitor"));
+    }
+    return false;
+  }
   if (!token) return false;
   try {
     const body = new URLSearchParams({ secret, response: token });

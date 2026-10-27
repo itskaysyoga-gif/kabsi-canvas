@@ -6,6 +6,7 @@ import { AppLayout } from "@/components/layouts/app-layout";
 import { supabase } from "@/lib/supabase";
 import { amStaff } from "@/lib/reviews";
 import { OpsPanel } from "@/components/staff/ops-panel";
+import { OperationsPanel } from "@/components/staff/operations-panel";
 import { BusinessDiagnostics, SystemHealthPanel } from "@/components/staff/system-health-panel";
 import { ChatsPanel } from "@/components/staff/chats-panel";
 import { ConciergePanel } from "@/components/staff/concierge-panel";
@@ -18,7 +19,7 @@ import { CostsPanel } from "@/components/staff/costs-panel";
 import { Button, STAFF_CARD, STAFF_H2, STAFF_ITEM } from "@/components/staff/staff-ui";
 import { AccountTop } from "@/components/kabsi/d3-account";
 
-// Staff workspace: follow-ups, concierge, chats, Founding 25 (with the V4 start checklist) and Kabsi Partners, system
+// Staff workspace: the operations view (Sec 2), follow-ups, concierge, chats, Founding 25 (with the V4 start checklist) and Kabsi Partners, system
 // and job health, costs (data providers and AI Visibility by provider), the WhatsApp staff code, and every business. There is no
 // manual payment confirmation here (K-124, P0.8-01): money is recorded only by the Creem webhook (P0.4-07).
 export const Route = createFileRoute("/_authenticated/staff")({
@@ -88,6 +89,7 @@ function StaffPage() {
             </ul>
           </nav>
           <div className="space-y-5">
+            <OperationsPanel />
             <div id="followups" className="scroll-mt-24">
               <FollowupsPanel />
             </div>
@@ -128,6 +130,7 @@ function StaffPage() {
 }
 
 const JUMPS: [string, string][] = [
+  ["operations", "Operations"],
   ["followups", "Follow-ups"],
   ["concierge", "Concierge"],
   ["chats", "Chats"],

@@ -1,10 +1,14 @@
 // Email action links (/a/:token), tightened in P0.2-05 (K-17, K-38, K-70, A16).
 //
-//   GET  ?t=TOKEN                       what the link does, the exact text, and whether the page must sign in first.
-//                                       Reads only: public.action_link_view is STABLE, so Postgres refuses any write
-//                                       in it, and the details are plain selects. Mail scanners open links.
-//   POST { t, do, text? }               the link's own action, once (public.use_action_link): post | skip |
-//                                       handle_myself | revert | keep. A second POST gets the first result.
+//   POST { t, do: "view" }              what the link does, the exact text and its draft version, and whether the page
+//                                       must sign in first. Reads only: public.action_link_view is STABLE, so Postgres
+//                                       refuses any write in it, and the details are plain selects. Mail scanners
+//                                       open links; opening the page sends this from the page, never from the address.
+//   POST { t, do, text?, version? }     the link's own action, once (public.use_action_link): post | skip |
+//                                       handle_myself | revert | keep. A second POST gets the first result. A post
+//                                       carries the draft version the page showed; a newer one is refused (Sec 2).
+//
+// Sec 2: the token travels only in the POST body, never in a query string (request logs keep query strings).
 //   POST { t, do: "undo", publication } cancels the publication this link made, inside its 10 seconds (K-70).
 //
 // Links last 72 hours and belong to one item and one recipient. Profile changes, hours and high-risk reviews need that
@@ -35,7 +39,7 @@ export type LinkView = {
   result?: LinkResult | null;
 };
 
-export type UseInput = { do: string; text?: string; session: string | null; publication?: string };
+export type UseInput = { do: string; text?: string; session: string | null; publication?: string; version?: number };
 
 export type EmailLinkDeps = {
   /** The signed-in user behind the page (a verified Supabase session), or null. */
@@ -82,7 +86,8 @@ export async function linkGet(t: string | null, deps: EmailLinkDeps): Promise<Re
 }
 
 // POST: the one action.
-export async function linkPost(body: { t?: unknown; do?: unknown; text?: unknown; publication?: unknown }, deps: EmailLinkDeps): Promise<Reply> {
+export async function linkPost(body: { t?: unknown; do?: unknown; text?: unknown; publication?: unknown; version?: unknown }, deps: EmailLinkDeps): Promise<Reply> {
+  if (body.do === "view") return linkGet(typeof body.t === "string" ? body.t : null, deps);
   if (!wellFormed(body.t)) return refusal("invalid", "This link isn't valid.", 404);
   const verb = typeof body.do === "string" && VERBS.includes(body.do) ? body.do : null;
   if (!verb) return refusal("not_allowed", "This link can't do that.", 400);
@@ -97,7 +102,8 @@ export async function linkPost(body: { t?: unknown; do?: unknown; text?: unknown
   // needs no sign-in: otherwise a forwarded email would approve in the recipient's name while someone else is signed in.
   if (session !== null && v.other_account) return refusal("wrong_account", "This link was sent to someone else. Sign out, then sign in with the email address it was sent to.", 403);
   try {
-    const r = await deps.use(hash, { do: verb, text: typeof body.text === "string" ? body.text : undefined, session, publication }, v.user_id ?? null);
+    const version = typeof body.version === "number" && Number.isInteger(body.version) && body.version >= 0 ? body.version : undefined;
+    const r = await deps.use(hash, { do: verb, text: typeof body.text === "string" ? body.text : undefined, session, publication, version }, v.user_id ?? null);
     return { status: 200, body: { ok: true, done: r.done, state: r.state, publication: r.publication_id, publish_after: r.publish_after ?? null,
       repeat: r.repeat === true } };
   } catch (e) {
@@ -110,12 +116,45 @@ export async function linkPost(body: { t?: unknown; do?: unknown; text?: unknown
 // Headers for every answer of a link endpoint (Sec 1): never cached (the answer is one person's), and never a Referer.
 export const LINK_HEADERS: Record<string, string> = { "cache-control": "no-store", "referrer-policy": "no-referrer" };
 
-// The whole HTTP surface of /api/action (Sec 1): GET reads, POST acts, anything else (HEAD from a link scanner, PUT,
-// DELETE) is refused before any lookup. api/action.ts adds the rate limit, the error report and LINK_HEADERS.
+// The whole HTTP surface of /api/action (Sec 1, Sec 2): only POST. Reading is POST { do: "view" }, so the token is never
+// in a query string; GET, HEAD (a link scanner), PUT and DELETE are refused before any lookup. The body is capped at
+// 16 KB (a reply is at most 4,000 characters). api/action.ts adds the rate limit, the error report and LINK_HEADERS.
+export const LINK_BODY_LIMIT = 16_384;
 export async function linkRequest(req: Request, deps: EmailLinkDeps): Promise<Reply> {
-  if (req.method === "GET") return linkGet(new URL(req.url).searchParams.get("t"), deps);
-  if (req.method !== "POST") return refusal("method_not_allowed", "Use GET or POST.", 405);
-  return linkPost(await req.json().catch(() => ({})), deps);
+  if (req.method !== "POST") return refusal("method_not_allowed", "Use POST.", 405);
+  const body = await readJsonCapped(req, LINK_BODY_LIMIT);
+  if (body === "too_large") return refusal("too_large", "That is too long.", 413);
+  return linkPost(body ?? {}, deps);
+}
+
+/** Reads a JSON body of at most `limit` bytes without holding more in memory: "too_large" past it, null when it is not
+ *  JSON. Used by the public functions (Sec 2: body size limits). */
+export async function readJsonCapped(req: Request, limit: number): Promise<Record<string, unknown> | null | "too_large"> {
+  const declared = Number(req.headers.get("content-length") ?? "0");
+  if (declared > limit) return "too_large";
+  if (!req.body) return null;
+  const reader = req.body.getReader();
+  const parts: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > limit) {
+      await reader.cancel().catch(() => {});
+      return "too_large";
+    }
+    parts.push(value);
+  }
+  const all = new Uint8Array(size);
+  let at = 0;
+  for (const p of parts) { all.set(p, at); at += p.byteLength; }
+  try {
+    const v = JSON.parse(new TextDecoder().decode(all));
+    return v && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : null;
+  } catch {
+    return null;
+  }
 }
 
 // Owner-facing words for the refusals of use_action_link. Null for anything unexpected (the caller reports it).
@@ -136,6 +175,7 @@ export function linkRefusal(message: string): Reply | null {
     ["already_decided", "already_decided", "This change was already handled.", 409],
     ["owner_only", "owner_only", "Only the owner can choose this one.", 403],
     ["not_confirmed", "not_confirmed", "You have not confirmed this detail yet, so Kabsi can't put the old value back.", 409],
+    ["reply_changed", "reply_changed", "This reply changed since you opened this page. Here is the new one. Read it, then approve.", 409],
     ["values_cleared", "values_cleared", "Google's value is no longer kept (after 30 days). Kabsi will show it again if it is still there.", 409],
   ];
   for (const [needle, code, text, status] of known) if (message.includes(needle)) return refusal(code, text, status);

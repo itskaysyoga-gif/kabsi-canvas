@@ -24,6 +24,7 @@ import { WHATSAPP_NUMBER, WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
 import { noraRules } from "../_shared/nora-rules.ts";
 import { type ContactRow, contactContextLine, exactEmailPattern, ownsContact } from "../_shared/nora-contact.ts";
 import { cleanScreen, inOnboarding, ONBOARDING_RULES, onboardingHandoffLine, onboardingLines, onboardingStateResult, type OnboardingState } from "../_shared/onboarding-context.ts";
+import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
 // Nora is one of the six agents (master plan 28.6): her tools and the model per step are in _shared/ai/agents.ts.
 const CHAT = task("nora", "chat");
@@ -294,6 +295,10 @@ ${row("Passed to a person", c.status === "handoff" ? `Yes (${c.handoff_reason ??
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.chat).
+  const capped = await capBody(req, BODY_LIMITS.chat, CORS);
+  if (capped instanceof Response) return capped;
+  req = capped;
   const db = admin();
   const url = new URL(req.url);
 

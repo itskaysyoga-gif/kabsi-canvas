@@ -8,6 +8,7 @@ import { Button, StatusPill, buttonClass } from "@/components/kabsi/ui";
 import { HIGH_RISK_CHECKLIST, issueLines } from "@/lib/review-risk";
 import {
   loadAction,
+  ReplyChanged,
   runAction,
   undoAction,
   type ActionResult,
@@ -76,7 +77,12 @@ function ActionPage() {
     setError("");
     setBusy(true);
     try {
-      const result = await runAction(token, what, what === "post" ? text : undefined);
+      const result = await runAction(
+        token,
+        what,
+        what === "post" ? text : undefined,
+        what === "post" ? (view?.draft_version ?? 0) : undefined,
+      );
       if (!result.repeat) {
         if (what === "revert" || what === "keep")
           track(what === "revert" ? "shield_reverted" : "shield_kept", { channel: "email_link" });
@@ -88,6 +94,14 @@ function ActionPage() {
         setPending({ result, seconds: UNDO_SECONDS });
       else setDone(result.state === "in_review" ? "in_review" : result.done);
     } catch (e) {
+      // Sec 2: a newer draft arrived after this page loaded. Nothing was approved; show the new one.
+      if (e instanceof ReplyChanged) {
+        const v = await loadAction(token).catch(() => null);
+        if (v) {
+          setView(v);
+          setText(v.draft ?? "");
+        }
+      }
       setError(e instanceof Error ? e.message : "Something went wrong. Nothing was posted.");
     }
     setBusy(false);

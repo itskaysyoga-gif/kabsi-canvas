@@ -6,9 +6,14 @@
 import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
 import { type ConsentInput, consentRow } from "../_shared/consent-row.ts";
+import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.small).
+  const capped = await capBody(req, BODY_LIMITS.small, CORS);
+  if (capped instanceof Response) return capped;
+  req = capped;
   if (req.method !== "POST") return fail("method_not_allowed", "Use POST.", 405);
 
   const b = await req.json().catch(() => ({})) as ConsentInput;
@@ -17,7 +22,7 @@ Deno.serve(async (req) => {
 
   const ip = clientIp(req);
   const day = new Date().toISOString().slice(0, 10);
-  if (!(await rateLimit(`consent:${await sha256Hex(`${ip}|${day}`)}`, 30, 3600))) {
+  if (!(await rateLimit(`consent:${await sha256Hex(`${ip}|${day}`)}`, 30, 3600, { failClosed: true }))) {
     return fail("rate_limited", "Too many requests. Try again later.", 429);
   }
 

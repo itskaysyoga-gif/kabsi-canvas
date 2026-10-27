@@ -70,7 +70,7 @@ export async function approve(req: Request): Promise<Response> {
     if (msg.includes("trial_profile_fix_cap")) return fail("trial_cap", "Your free trial applies 3 profile fixes. The rest apply when you choose a plan.", 402);
     if (msg.includes("bad_reply_text")) return fail("bad_text", "The reply is empty or too long.", 400);
     if (msg.includes("high_risk_no_draft")) return fail("high_risk", "This review needs a little more care, so Kabsi did not draft a reply. Ask for a neutral holding reply or write your own.", 409);
-    if (msg.includes("too_late")) return fail("too_late", "It is already on its way to Google.", 409);
+    if (msg.includes("too_late") || msg.includes("reply_publishing")) return fail("too_late", "It is already on its way to Google.", 409);
     if (msg.includes("not_allowed_to_approve")) return fail("owner_approves", OWNER_APPROVES_MESSAGE, 403);
     if (msg.includes("not_member") || msg.includes("unknown_publication")) return fail("not_found", "Approval not found.", 404);
     await captureError("approve", e);

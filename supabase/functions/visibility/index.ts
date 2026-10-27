@@ -6,13 +6,14 @@
 //   GET  /visibility/ai-summary  the signed-in member or staff: the period's AI numbers, the owner's line and Insights' source actions (V2).
 //   POST /visibility/ai-calibrate  x-cron-secret: one live answer per provider for named businesses, saved to app_settings for the calibration check (30.9 item 3).
 //   GET  /visibility/image    the signed-in member, staff or x-cron-secret: one finished grid as the nearby places image (PNG),
-//                             or its 7 by 7 dots with view=dots; with check=CODE (x-cron-secret) a free check's nearby places.
-//   POST /visibility/check    public (Turnstile, rate limits, daily cap): the free check (V4, 28.1). GET ?code= its result.
+//                             or its 7 by 7 dots with view=dots; with the header x-kabsi-check: CODE (x-cron-secret) a free check's nearby places.
+//   POST /visibility/check    public (Turnstile, rate limits, daily cap): the free check (V4, 28.1). POST /check/result { code } its result.
 //   POST /visibility/waitlist public (Turnstile, 5 an hour): "Save my place" while the free check is closed (UX 1).
 //   GET  /visibility/terms    public: the search an industry page prefills (?industry=&market=). POST: staff op, DataForSEO keyword data.
 // Ranks and competitors come only from DataForSEO public results (30.10.2); mock mode unless app_settings
 // dataforseo_mode is 'live', and the demo business always on the mock (R-17). The logic is in _shared/visibility/.
 import { clientIp } from "../_shared/client-ip.ts";
+import { readJsonCapped } from "../_shared/email-links.ts";
 import { admin, captureError, CORS, currentUser, isInternal, json, log, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { mayChangeVisibility, type VisibilityCaller } from "../_shared/sec1/guards.ts";
 import { outDb } from "../_shared/whatsapp/db.ts";
@@ -37,6 +38,7 @@ import { numbers, reportBlock } from "../_shared/visibility/ai/numbers.ts";
 import { PROVIDERS, type AiProviderName } from "../_shared/visibility/ai/providers.ts";
 import { sourceActions } from "../_shared/insights/ai-visibility.ts";
 import { type KeywordRow, type RunDb, type RunDeps, type ScanRow, tick } from "../_shared/visibility/run.ts";
+import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
 const db = () => admin();
 const fn = "visibility";
@@ -275,7 +277,8 @@ async function setPicks(req: Request): Promise<Response> {
 const png = (bytes: Uint8Array<ArrayBuffer>) => new Response(bytes, { headers: { ...CORS, "content-type": "image/png", "cache-control": "private, max-age=3600" } });
 
 async function image(req: Request, url: URL): Promise<Response> {
-  const code = url.searchParams.get("check");
+  // Sec 2: a free check's code comes in a header from the WhatsApp function, never in the address.
+  const code = req.headers.get("x-kabsi-check");
   if (code) {
     // A free check's nearby places, for WhatsApp only (the page draws its own cards from GET /check).
     if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
@@ -429,10 +432,13 @@ async function joinWaitlist(req: Request): Promise<Response> {
 }
 
 /** The page keeps asking while the 7 by 7 search runs: a read only (the tick collects), limited per visitor. */
-async function getFreeCheck(req: Request, url: URL): Promise<Response> {
+// Sec 2: the code comes in the POST body (POST /check/result), never in a query string, which request logs keep.
+async function getFreeCheck(req: Request): Promise<Response> {
   const ip = clientIp(req);
-  if (!(await rateLimit(`free_check_get:${await sha256Hex(`free_check:${ip}`)}`, 240, 3600))) return json({ error: "rate_limited" }, 429);
-  const c = await loadCheck(url.searchParams.get("code") ?? "");
+  if (!(await rateLimit(`free_check_get:${await sha256Hex(`free_check:${ip}`)}`, 240, 3600, { failClosed: true }))) return json({ error: "rate_limited" }, 429);
+  const body = await readJsonCapped(req, 1024);
+  if (body === "too_large") return json({ error: "too_large" }, 413);
+  const c = await loadCheck(typeof body?.code === "string" ? body.code : "");
   if (!c) return json({ error: "not_found" }, 404);
   return json(publicView(c));
 }
@@ -470,6 +476,10 @@ async function terms(): Promise<Response> {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
+  // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.form).
+  const capped = await capBody(req, BODY_LIMITS.form, CORS);
+  if (capped instanceof Response) return capped;
+  req = capped;
   const url = new URL(req.url);
   const route = url.pathname.replace(/^.*\/visibility/, "") || "/";
   try {
@@ -497,7 +507,7 @@ Deno.serve(async (req) => {
     if (req.method === "GET" && route === "/image") return await image(req, url);
     if (req.method === "POST" && route === "/check") return await startFreeCheck(req);
     if (req.method === "POST" && route === "/waitlist") return await joinWaitlist(req);
-    if (req.method === "GET" && route === "/check") return await getFreeCheck(req, url);
+    if (req.method === "POST" && route === "/check/result") return await getFreeCheck(req);
     if (req.method === "GET" && route === "/terms") {
       const { data } = await db().from("industry_search_terms").select("industry, market, term, checked_on")
         .eq("industry", url.searchParams.get("industry") ?? "").eq("market", (url.searchParams.get("market") ?? "").toUpperCase()).maybeSingle();

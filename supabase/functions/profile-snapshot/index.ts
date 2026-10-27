@@ -8,8 +8,10 @@ import { notify } from "../_shared/notify.ts";
 import { makeHandler } from "../_shared/profile-snapshot.ts";
 import { whatsappCtx } from "../_shared/whatsapp/db.ts";
 import { WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
+import { BODY_LIMITS, withBodyCap } from "../_shared/body-cap.ts";
 
-Deno.serve(makeHandler({
+// Sec 2: the body is capped before the handler reads it (413 past BODY_LIMITS.small).
+Deno.serve(withBodyCap(makeHandler({
   env: (name) => Deno.env.get(name),
   ip: (req) => clientIp(req),
   today: () => new Date().toISOString().slice(0, 10),
@@ -57,4 +59,4 @@ Deno.serve(makeHandler({
   appUrl: APP_URL,
   cors: CORS,
   esc,
-}));
+}), BODY_LIMITS.small, CORS));

@@ -34,6 +34,7 @@ import { syncPrompts } from "../_shared/visibility/ai/deps.ts";
 import { SAY_ONBOARDING } from "../_shared/onboarding/stages.ts";
 import { VOICE_NOTES } from "../_shared/voice/notes.ts";
 import { alertText, digestDue, morningDigest, type OpsEvent, routeOf, type Summary } from "../_shared/whatsapp/staff-alerts.ts";
+import { counted } from "../_shared/webhook-rejections.ts";
 
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void } | undefined;
 const FN_URL = "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/whatsapp";
@@ -66,7 +67,8 @@ Deno.serve(async (req) => {
   if (path.endsWith("/staff/voice-eval")) return (await isInternal(req)) ? await voiceEval(req) : fail("forbidden", "Forbidden.", 403);
   const staff = /\/staff\/([a-z]+)$/.exec(path);
   if (staff) return (await isInternal(req)) ? json(await staffAction(staff[1])) : fail("forbidden", "Forbidden.", 403);
-  return await webhook(req);
+  // Sec 2: refused calls are counted for the staff operations view.
+  return await counted("whatsapp", await webhook(req));
 });
 
 // The decision is in _shared/whatsapp/webhook-route.ts (Sec 1: tested with stubs); here it is wired to the database.
