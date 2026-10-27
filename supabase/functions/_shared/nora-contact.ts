@@ -23,3 +23,16 @@ export function contactContextLine(row: ContactRow, o: { conversationId: string;
   if (!ownsContact(row, o)) return "Contact already saved for this chat.";
   return `Contact already saved: ${[row.name, row.email, row.business_name].filter(Boolean).join(", ")}`;
 }
+
+/** Sec 2: news consent counts only for an address its owner proved. When Nora hears "yes, send me news", the consent
+ *  is stored at once only if the address is the one the visitor is signed in with (Supabase verified it); for any
+ *  other address only the request is kept (news_requested_at) and marketing_consent stays as it was, until a
+ *  confirmation from that inbox (LATER row: the confirmation email). Typing someone else's address can never sign
+ *  them up. */
+export function newsConsent(o: { asked: boolean; email: string; signedInEmail?: string | null; current: boolean | null }, now = new Date()):
+  { marketing_consent: boolean; news_requested_at?: string } {
+  const current = o.current === true;
+  if (!o.asked) return { marketing_consent: current };
+  const proven = !!o.signedInEmail && o.signedInEmail.trim().toLowerCase() === o.email.trim().toLowerCase();
+  return proven ? { marketing_consent: true } : { marketing_consent: current, news_requested_at: now.toISOString() };
+}

@@ -196,3 +196,15 @@ Deno.test("sec2 webhooks: a refused call is counted for the operations view; an 
     assertMatch(read(`../../${fn}/index.ts`), new RegExp(`counted\\("${src}", await `), fn);
   }
 });
+
+Deno.test("sec2 Nora: a yes to news counts only for the signed-in person's own address", async () => {
+  const { newsConsent } = await import("../nora-contact.ts");
+  const now = new Date("2026-10-27T12:00:00Z");
+  assertEquals(newsConsent({ asked: true, email: "me@example.test", signedInEmail: "ME@example.test", current: false }, now), { marketing_consent: true });
+  assertEquals(newsConsent({ asked: true, email: "someone@example.test", signedInEmail: null, current: false }, now),
+    { marketing_consent: false, news_requested_at: "2026-10-27T12:00:00.000Z" }, "a typed address is only a request");
+  assertEquals(newsConsent({ asked: true, email: "someone@example.test", signedInEmail: "me@example.test", current: null }, now).marketing_consent, false);
+  assertEquals(newsConsent({ asked: false, email: "x@example.test", current: true }), { marketing_consent: true }, "an earlier yes is not taken away");
+  assertMatch(read("../../assistant/index.ts"), /\.\.\.news\(false\)/);
+  ok(!/marketing_consent: input\.marketing_consent === true/.test(read("../../assistant/index.ts")));
+});

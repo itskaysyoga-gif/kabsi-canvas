@@ -121,8 +121,17 @@ export const setStep = (locationId: string, step: OnboardingStep) =>
   rpc<void>("set_onboarding_step", { p_location: locationId, p_step: step });
 export const choosePlan = (locationId: string, kind: PlanKind) =>
   rpc<string>("choose_plan", { p_location: locationId, p_kind: kind });
-export const activateCard = (code: string, locationId: string, label?: string) =>
-  rpc<string>("activate_card", { p_code: code, p_location: locationId, p_label: label ?? null });
+// Sec 2: a refused code comes back as its reason ("unknown_card", "card_in_use", "card_disabled", "rate_limited"),
+// not as an error, so the database can count the try; a destination always starts with https://.
+export async function activateCard(code: string, locationId: string, label?: string) {
+  const result = await rpc<string>("activate_card", {
+    p_code: code,
+    p_location: locationId,
+    p_label: label ?? null,
+  });
+  if (!result.startsWith("https://")) throw new Error(result);
+  return result;
+}
 
 /** Google access as the database knows it (google_connections.access_state): the one source of the live status pill. */
 export type AccessState =

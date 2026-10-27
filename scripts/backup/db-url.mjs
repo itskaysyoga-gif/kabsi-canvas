@@ -34,15 +34,22 @@ if (!direct) {
   process.exit(0);
 }
 const ref = direct[1];
-if (!token) fail("SUPABASE_DB_URL is the direct address (IPv6 only) and SUPABASE_ACCESS_TOKEN is not set to look up the pooler.");
+if (!token)
+  fail(
+    "SUPABASE_DB_URL is the direct address (IPv6 only) and SUPABASE_ACCESS_TOKEN is not set to look up the pooler.",
+  );
 
 const res = await fetch(`https://api.supabase.com/v1/projects/${ref}/config/database/pooler`, {
   headers: { authorization: `Bearer ${token}` },
 }).catch(() => null);
-if (!res || !res.ok) fail(`the Management API did not give the pooler address (status ${res ? res.status : "none"})`);
+if (!res || !res.ok)
+  fail(`the Management API did not give the pooler address (status ${res ? res.status : "none"})`);
 const configs = await res.json().catch(() => null);
 const list = Array.isArray(configs) ? configs : configs ? [configs] : [];
-const primary = list.find((c) => c && typeof c.db_host === "string" && (c.database_type ?? "PRIMARY") === "PRIMARY") ?? list.find((c) => c?.db_host);
+const primary =
+  list.find(
+    (c) => c && typeof c.db_host === "string" && (c.database_type ?? "PRIMARY") === "PRIMARY",
+  ) ?? list.find((c) => c?.db_host);
 if (!primary) fail("the pooler configuration has no host");
 
 const out = new URL(url);

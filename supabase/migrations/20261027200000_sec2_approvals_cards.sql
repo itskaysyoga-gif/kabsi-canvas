@@ -267,3 +267,44 @@ begin
       'Sec 2: signs the one-click unsubscribe links (supabase/functions/_shared/email/unsubscribe.ts)');
   end if;
 end $$;
+
+-- 6. Privacy trace (docs/security/privacy-trace.md): a WhatsApp alert's text (review excerpt, reviewer first name, the
+-- draft) stays in whatsapp_outbox only until it is sent; one day after it was sent, failed, dropped or put in a digest
+-- the text is replaced. The privacy page says alert review text is not kept. Run inside the retention job, so it is a
+-- dry run until Rashid switches retention_sources on.
+create or replace function private.clear_sent_alert_texts() returns integer
+language plpgsql security definer set search_path = '' as $$
+declare n integer;
+begin
+  update public.whatsapp_outbox set body = '[sent]'
+   where state in ('sent', 'mock_sent', 'failed', 'dropped', 'digested') and body <> '[sent]'
+     and coalesce(sent_at, created_at) < now() - interval '1 day';
+  get diagnostics n = row_count;
+  return n;
+end $$;
+revoke all on function private.clear_sent_alert_texts() from public, anon, authenticated;
+
+create or replace function private.retention_sources() returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare v jsonb := '{}'::jsonb;
+  v_on boolean := coalesce((select value from public.app_settings where key = 'retention_sources'), 'dry_run') = 'on';
+begin
+  begin
+    v := private.retention_sources_apply() || jsonb_build_object('alert_texts', private.clear_sent_alert_texts());
+    if not v_on then raise exception 'retention_dry_run'; end if;
+  exception when raise_exception then
+    if sqlerrm <> 'retention_dry_run' then raise; end if;
+  end;
+  v := v || jsonb_build_object('mode', case when v_on then 'on' else 'dry_run' end);
+  insert into public.jobs_log (job, ok, detail)
+  select 'retention_sources', true, v
+   where exists (select 1 from jsonb_each_text(v - 'mode') where value::int > 0);
+  return v;
+end $$;
+revoke all on function private.retention_sources() from public, anon, authenticated;
+
+-- 7. Nora's save_contact (Sec 1 LATER row): a yes to news counts at once only for the address the visitor is signed in
+-- with; for any other typed address only the request and its time are kept, until that inbox confirms.
+alter table public.contacts add column if not exists news_requested_at timestamptz;
+comment on column public.contacts.news_requested_at is
+  'Sec 2: when a visitor asked Nora for news emails for this address; marketing_consent stays false until the inbox confirms.';

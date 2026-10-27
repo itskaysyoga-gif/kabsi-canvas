@@ -55,3 +55,16 @@ describe("Sec 2: codes out of query strings", () => {
     expect(read("src/lib/scrub.ts")).toContain("start\\\\/resume|unsubscribe)");
   });
 });
+
+describe("Sec 2: card codes", () => {
+  it("a refused code answered as text becomes the same friendly error as before", async () => {
+    const { friendlyError } = await import("../src/lib/onboarding");
+    expect(friendlyError(new Error("rate_limited"))).toBe(
+      "Too many tries. Wait a few minutes and try again.",
+    );
+    expect(friendlyError(new Error("unknown_card"))).toMatch(/couldn't find that card code/);
+    expect(readFileSync(new URL("../src/lib/onboarding.ts", import.meta.url), "utf8")).toMatch(
+      /if \(!result\.startsWith\("https:\/\/"\)\) throw new Error\(result\);/,
+    );
+  });
+});

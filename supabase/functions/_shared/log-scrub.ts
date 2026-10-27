@@ -24,8 +24,8 @@ export const SENSITIVE_KEYS = new Set([
   "sig", "signature", "api_key", "x-api-key", "phone", "review", "review_text",
   // Sec 1: credentials and codes by name.
   "access_token", "refresh_token", "id_token", "otp", "password", "secret", "cookie", "apikey", "x-kabsi-secret",
-  // Sec 2: codes that moved from query strings into bodies and headers.
-  "x-kabsi-check", "x-kabsi-code",
+  // Sec 2: codes that moved from query strings into bodies and headers; names of people and businesses (privacy trace).
+  "x-kabsi-check", "x-kabsi-code", "reviewer", "reviewer_first", "business_name",
 ]);
 
 export function scrubFields(value: unknown, depth = 0): unknown {

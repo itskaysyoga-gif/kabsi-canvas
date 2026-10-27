@@ -125,6 +125,9 @@ values ('whatsapp_nudge', 'Old Cafe', 'sec2', now() - interval '205 days', now()
 insert into public.notifications (location_id, to_address, category, kind, dedupe_key, title, created_at)
 values ('00000000-0000-4000-8000-0000000000c1', 'victim-owner@example.test', 'review_new', 'sec2_old', 'sec2-old-notice', 'Old notice', now() - interval '400 days');
 insert into public.deletion_log (tbl, row_id, deleted_at) values ('contacts', 'old', now() - interval '61 days');
+insert into public.whatsapp_outbox (phone, kind, body, state, sent_at, created_at) values
+  ('+15550002101', 'review_alert', 'Sam: Great cut. Draft: Thank you Sam.', 'sent', now() - interval '2 days', now() - interval '2 days'),
+  ('+15550002102', 'review_alert', 'Waiting alert text.', 'queued', null, now() - interval '2 days');
 
 -- Until the switch is on, a dry run: counts, nothing deleted.
 select is((private.retention_sources() ->> 'mode'), 'dry_run', 'without the switch the job is a dry run');
@@ -145,9 +148,29 @@ select is((select count(*) from public.whatsapp_number_health where checked_at <
 select is((select count(*) from public.staff_followups where detail = 'sec2'), 0::bigint, 'done follow-ups older than 180 days go');
 select is((select count(*) from public.notifications where kind = 'sec2_old'), 0::bigint, 'notifications older than 12 months go');
 select is((select count(*) from public.deletion_log where row_id = 'old'), 0::bigint, 'the deletion log keeps 60 days');
+select is((select array_agg(body order by phone) from public.whatsapp_outbox where phone in ('+15550002101', '+15550002102')),
+  array['[sent]', 'Waiting alert text.'], 'a sent alert''s text is cleared after a day; a waiting one keeps its text');
 select is((select count(*) from cron.job where jobname = 'kabsi_retention_sources'), 1::bigint, 'the job runs every day')
   where exists (select 1 from cron.job where jobname = 'kabsi_retention_sources')
 union all select pass('the cron job is unscheduled in the test database') where not exists (select 1 from cron.job where jobname = 'kabsi_retention_sources');
+
+-- Sources an earlier job already covered, proved here because no test held them: the free check (30 days without a
+-- business, 90 with one) and visibility results 30 days after a business leaves.
+insert into public.free_checks (code, business, term, country, self, center, radius_km, fast, source, created_at) values
+  ('OLDCHK22', 'Old Check', 'barber', 'AE', '{}', '{}', 3, '{}', 'mock', now() - interval '31 days'),
+  ('NEWCHK22', 'New Check', 'barber', 'AE', '{}', '{}', 3, '{}', 'mock', now() - interval '2 days');
+select ok(private.purge_free_checks() >= 1, 'purge_free_checks deletes a free check older than 30 days');
+select is((select array_agg(code order by code) from public.free_checks where code in ('OLDCHK22', 'NEWCHK22')), array['NEWCHK22'],
+  'and keeps a recent one');
+insert into public.locations (id, name, place_id, access_lost_at) values ('00000000-0000-4000-8000-0000000002c8', 'Left Barber', 'left-place', now() - interval '31 days');
+insert into public.visibility_keywords (id, location_id, keyword, radius_km, center_lat, center_lng, self_title)
+values ('00000000-0000-4000-8000-0000000002f8', '00000000-0000-4000-8000-0000000002c8', 'barber', 3, 25.08, 55.14, 'Left Barber');
+insert into public.visibility_scans (location_id, keyword_id, keyword, radius_km, center_lat, center_lng, zoom, source)
+values ('00000000-0000-4000-8000-0000000002c8', '00000000-0000-4000-8000-0000000002f8', 'barber', 3, 25.08, 55.14, 13.5, 'mock');
+select ok((private.purge_visibility_after_leaving() ->> 'scans')::int >= 1, 'map results go 30 days after a business left');
+select is((select count(*) from public.visibility_scans where location_id = '00000000-0000-4000-8000-0000000002c8'), 0::bigint, 'none are left');
+select is((select count(*) from public.visibility_scans where location_id = '00000000-0000-4000-8000-0000000000c1'), 1::bigint,
+  'a business that is still with Kabsi keeps its map');
 
 -- Photos of a business that left are due for removal.
 insert into public.locations (id, name, place_id, access_lost_at) values ('00000000-0000-4000-8000-0000000002c9', 'Gone Cafe', 'gone-place', now() - interval '10 days');

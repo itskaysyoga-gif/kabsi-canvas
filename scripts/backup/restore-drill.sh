@@ -129,11 +129,22 @@ fi
 REAPPLIED=0; REAPPLY_LEFT=0; RETENTION_RERUN="not run"; DELETED_LOCATIONS=""
 if [ -f "$W/plain/db.dump" ] && [ -n "$STAMP" ]; then
   SINCE="$(printf '%s' "$STAMP" | sed -E 's/^([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2})([0-9]{2})([0-9]{2})Z$/\1-\2-\3T\4:\5:\6Z/')"
-  if have SUPABASE_ACCESS_TOKEN; then
+  if have DELETIONS_DB_URL; then
+    # A drill on a local stack reads the deletion log from that database directly (no Management API there).
+    psql "$DELETIONS_DB_URL" -At -v ON_ERROR_STOP=1 -c "select coalesce(jsonb_agg(jsonb_build_object('tbl', tbl, 'row_id', row_id)), '[]'::jsonb)
+      from public.deletion_log where deleted_at >= '$SINCE'::timestamptz" > "$W/deletions-rows.json" || fail "could not read the deletion log"
+  fi
+  if have DELETIONS_DB_URL || have SUPABASE_ACCESS_TOKEN; then
+    if ! have DELETIONS_DB_URL; then
     Q="$(jq -n --arg s "$SINCE" '{query: ("select coalesce(jsonb_agg(jsonb_build_object($$tbl$$, tbl, $$row_id$$, row_id)), $$[]$$::jsonb) as rows from public.deletion_log where deleted_at >= " + ("$$" + $s + "$$") + "::timestamptz")}')"
     if curl -fsS -X POST "https://api.supabase.com/v1/projects/$REF/database/query" -H "authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
          -H "content-type: application/json" -d "$Q" -o "$W/deletions.json"; then
       jq -c '.[0].rows // []' "$W/deletions.json" > "$W/deletions-rows.json"
+    else
+      fail "could not read the deletion log from the live database"
+    fi
+    fi
+    if [ -s "$W/deletions-rows.json" ]; then
       say "Deletions since the backup ($SINCE): $(jq length "$W/deletions-rows.json") ids"
       REAPPLIED="$(psql "$SCRATCH_DB_URL" -At -v ON_ERROR_STOP=1 -v rows="$(cat "$W/deletions-rows.json")" <<'SQL' || echo error
 select private.reapply_deletions(:'rows'::jsonb);
@@ -149,8 +160,12 @@ SQL
         [ "$tbl" = "locations" ] && DELETED_LOCATIONS="$DELETED_LOCATIONS $rid"
       done < <(jq -r '.[] | "\(.tbl)\t\(.row_id)"' "$W/deletions-rows.json")
       [ "$REAPPLY_LEFT" -eq 0 ] || fail "$REAPPLY_LEFT deleted rows are still in the restored copy"
-    else
-      fail "could not read the deletion log from the live database"
+      # A deleted business's Storage rows go too (its folder is its id; Storage's own delete guard is a trigger, skipped on
+      # this scratch copy only); the files are removed from the scratch copy below.
+      for loc in $DELETED_LOCATIONS; do
+        loc="$(printf '%s' "$loc" | tr -cd 'a-f0-9-')"
+        [ -n "$loc" ] && psql "$SCRATCH_DB_URL" -q -c "set session_replication_role = replica" -c "delete from storage.objects where split_part(name, '/', 1) = '$loc'" >/dev/null 2>&1
+      done
     fi
   else
     fail "SUPABASE_ACCESS_TOKEN is not set, so deletions after the backup cannot be applied again"
