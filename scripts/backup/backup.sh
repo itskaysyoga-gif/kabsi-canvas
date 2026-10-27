@@ -127,6 +127,10 @@ say "  main at $HEAD_SHA"
 # because the live database keeps changing between the two.
 if have SUPABASE_DB_URL; then
   say "Database dump"
+  # Sec 2: GitHub's runners have no IPv6 and the direct address answers on IPv6 only; db-url.mjs swaps it for the
+  # session pooler (IPv4). The resolved address is kept in this variable only, never printed.
+  SUPABASE_DB_URL="$(node scripts/backup/db-url.mjs)"
+  export SUPABASE_DB_URL
   pg_dump --format=custom --compress=6 --no-owner --no-privileges \
     --schema=public --schema=private --schema=auth --schema=storage --schema=supabase_migrations \
     --file "$PLAIN/db.dump" "$SUPABASE_DB_URL"

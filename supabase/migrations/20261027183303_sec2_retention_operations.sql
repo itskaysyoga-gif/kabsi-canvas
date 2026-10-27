@@ -1,6 +1,8 @@
 -- Sec 2 (27 Oct 2026), part 2: retention per source, the deletion log a restore re-applies, rejected webhooks counted,
 -- and the staff operations view (master plan 30.15 section 8). The table of every source is docs/security/retention.md.
---   1. private.retention_sources(), daily at 03:31 UTC: the sources no earlier job covered. Declined and waitlisted
+--   1. private.retention_sources(), daily at 03:31 UTC: the sources no earlier job covered. A dry run (counts only,
+--      nothing deleted) until app_settings retention_sources is 'on', which Rashid sets with
+--      supabase/data/20261027_sec2_retention_on.sql after reading the dry run's counts. Declined and waitlisted
 --      Founding 25 applications and declined partner applications get a deletion date (founding_applications.delete_after,
 --      set when staff decide; rows decided before this have their date worked out from decided_at); finished jobs,
 --      Pub/Sub events, sent product events, WhatsApp number health, invitation lookups, used WhatsApp buttons, done staff
@@ -98,7 +100,7 @@ create or replace trigger decision_delete_after before update on public.partner_
 -- The days of each rule below are set here, not in retention_policies: that table is the privacy page's own list
 -- (src/lib/retention.ts, tests/retention-page.test.ts), and these sources are staff and operations records, the
 -- applications and the deletion log. docs/security/retention.md lists every source with its days.
-create or replace function private.retention_sources() returns jsonb
+create or replace function private.retention_sources_apply() returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare v jsonb := '{}'::jsonb; n integer;
   d_found_dec constant int := 90; d_found_wait constant int := 180; d_partner constant int := 90;
@@ -113,7 +115,11 @@ begin
   get diagnostics n = row_count; v := v || jsonb_build_object('founding_applications', n);
 
   delete from public.partner_accounts
-   where status = 'declined' and coalesce(delete_after, decided_at + make_interval(days => d_partner)) < now();
+   where status = 'declined' and coalesce(delete_after, decided_at + make_interval(days => d_partner)) < now()
+     -- A partner with any money record is kept (payment records follow tax law, not this rule).
+     and not exists (select 1 from public.partner_referrals r where r.partner_id = partner_accounts.id)
+     and not exists (select 1 from public.partner_commissions c where c.partner_id = partner_accounts.id)
+     and not exists (select 1 from public.partner_payouts o where o.partner_id = partner_accounts.id);
   get diagnostics n = row_count; v := v || jsonb_build_object('partner_applications', n);
 
   delete from public.jobs where state in ('succeeded', 'dead', 'failed')
@@ -159,8 +165,28 @@ begin
   delete from public.deletion_log where deleted_at < now() - make_interval(days => d_log);
   get diagnostics n = row_count; v := v || jsonb_build_object('deletion_log', n);
 
+  return v;
+end $$;
+revoke all on function private.retention_sources_apply() from public, anon, authenticated;
+
+-- The daily job. Until app_settings retention_sources reads 'on' it is a dry run: the deletes run and are rolled back,
+-- and only the counts are kept in jobs_log, so Rashid sees what the first real run removes before switching it on
+-- (supabase/data/20261027_sec2_retention_on.sql; deleting real data is his step, CLAUDE.md).
+create or replace function private.retention_sources() returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare v jsonb := '{}'::jsonb;
+  v_on boolean := coalesce((select value from public.app_settings where key = 'retention_sources'), 'dry_run') = 'on';
+begin
+  begin
+    v := private.retention_sources_apply();
+    if not v_on then raise exception 'retention_dry_run'; end if;
+  exception when raise_exception then
+    if sqlerrm <> 'retention_dry_run' then raise; end if;
+  end;
+  v := v || jsonb_build_object('mode', case when v_on then 'on' else 'dry_run' end);
   insert into public.jobs_log (job, ok, detail)
-  select 'retention_sources', true, v where exists (select 1 from jsonb_each_text(v) where value::int > 0);
+  select 'retention_sources', true, v
+   where exists (select 1 from jsonb_each_text(v - 'mode') where value::int > 0);
   return v;
 end $$;
 revoke all on function private.retention_sources() from public, anon, authenticated;

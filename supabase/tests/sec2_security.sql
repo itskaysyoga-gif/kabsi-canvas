@@ -126,7 +126,14 @@ insert into public.notifications (location_id, to_address, category, kind, dedup
 values ('00000000-0000-4000-8000-0000000000c1', 'victim-owner@example.test', 'review_new', 'sec2_old', 'sec2-old-notice', 'Old notice', now() - interval '400 days');
 insert into public.deletion_log (tbl, row_id, deleted_at) values ('contacts', 'old', now() - interval '61 days');
 
-select ok((private.retention_sources() ->> 'founding_applications')::int = 1, 'the job deletes the application decided 100 days ago');
+-- Until the switch is on, a dry run: counts, nothing deleted.
+select is((private.retention_sources() ->> 'mode'), 'dry_run', 'without the switch the job is a dry run');
+select is((select count(*) from public.founding_applications where id = '00000000-0000-4000-8000-0000000002f3'), 1::bigint,
+  'and deletes nothing');
+select ok((select (detail ->> 'jobs')::int >= 1 from public.jobs_log where job = 'retention_sources' order by created_at desc limit 1),
+  'its counts are kept in jobs_log for Rashid to read');
+insert into public.app_settings (key, value) values ('retention_sources', 'on') on conflict (key) do update set value = 'on';
+select ok((private.retention_sources() ->> 'founding_applications')::int = 1, 'switched on, the job deletes the application decided 100 days ago');
 select is((select array_agg(business_name order by business_name) from public.founding_applications
             where id::text like '00000000-0000-4000-8000-0000000002f%'),
   array['Accepted Salon', 'Declined Salon', 'Waiting Salon'], 'the ones still inside their time and the accepted one stay');

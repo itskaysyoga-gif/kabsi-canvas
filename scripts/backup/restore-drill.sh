@@ -8,7 +8,13 @@
 #   2. the database dump restores into an empty scratch Postgres, and every table has the rows the manifest counted
 #      (a table may differ by 5 percent or 2 rows, because the live database changed between the dump and the count);
 #   3. the git bundle verifies, clones, and its main branch is the commit the manifest names;
-#   4. the photos archive lists exactly the number of files the manifest counted.
+#   4. the photos archive lists exactly the number of files the manifest counted, and (Sec 2) it is unpacked into a
+#      scratch folder and checked against the restored storage.objects rows: every object row has its file;
+#   5. (Sec 2) deletions made after the backup are applied again: the ids the live database wrote to
+#      public.deletion_log since the set's time are read through the Management API (ids only) and deleted from the
+#      restored copy by private.reapply_deletions, their Storage folders are removed from the scratch files, and the
+#      time-based retention jobs run on the restored copy, so a restore never brings back what was deleted;
+#   6. the time the whole drill took is recorded.
 # The result goes to the daily staff summary: an ops_events row (daily when it passed, alerts when it failed) and the
 # app_settings key backup_drill, which the summary reads. The job fails when any check fails.
 #
@@ -17,6 +23,8 @@
 # restored data is never printed (only table names and counts).
 set -uo pipefail
 cd "$(dirname "$0")/../.."
+STARTED="$(date +%s)"
+REF="${SUPABASE_PROJECT_REF:-ynjdqjlmdwjgbfezevxy}"
 
 BUCKET="${R2_BUCKET:-kabsi-backups}"
 AWS="${AWS_BIN:-aws}"
@@ -72,7 +80,7 @@ else
   done
 fi
 
-TABLES=0; BAD_TABLES=0; RESTORE_ERRORS=0; COMMITS=0; PHOTOS=0
+TABLES=0; BAD_TABLES=0; RESTORE_ERRORS=0; COMMITS=0; PHOTOS=0; STORAGE_ROWS=0; STORAGE_MISSING=0
 # 2. The database.
 if [ -f "$W/plain/db.dump" ]; then
   say "Restoring the database into the scratch Postgres"
@@ -117,6 +125,48 @@ elif [ -n "$SET" ]; then
   fail "the set has no database dump"
 fi
 
+# 2b. Sec 2: deletions made after the backup are applied again to the restored copy, then the time-based retention jobs.
+REAPPLIED=0; REAPPLY_LEFT=0; RETENTION_RERUN="not run"; DELETED_LOCATIONS=""
+if [ -f "$W/plain/db.dump" ] && [ -n "$STAMP" ]; then
+  SINCE="$(printf '%s' "$STAMP" | sed -E 's/^([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2})([0-9]{2})([0-9]{2})Z$/\1-\2-\3T\4:\5:\6Z/')"
+  if have SUPABASE_ACCESS_TOKEN; then
+    Q="$(jq -n --arg s "$SINCE" '{query: ("select coalesce(jsonb_agg(jsonb_build_object($$tbl$$, tbl, $$row_id$$, row_id)), $$[]$$::jsonb) as rows from public.deletion_log where deleted_at >= " + ("$$" + $s + "$$") + "::timestamptz")}')"
+    if curl -fsS -X POST "https://api.supabase.com/v1/projects/$REF/database/query" -H "authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+         -H "content-type: application/json" -d "$Q" -o "$W/deletions.json"; then
+      jq -c '.[0].rows // []' "$W/deletions.json" > "$W/deletions-rows.json"
+      say "Deletions since the backup ($SINCE): $(jq length "$W/deletions-rows.json") ids"
+      REAPPLIED="$(psql "$SCRATCH_DB_URL" -At -v ON_ERROR_STOP=1 -v rows="$(cat "$W/deletions-rows.json")" <<'SQL' || echo error
+select private.reapply_deletions(:'rows'::jsonb);
+SQL
+)"
+      [ "$REAPPLIED" = "error" ] && { fail "reapply_deletions failed on the restored copy"; REAPPLIED=0; }
+      # Nothing that was deleted is left in the restored copy.
+      REAPPLY_LEFT=0
+      while IFS=$'\t' read -r tbl rid; do
+        [ -n "$tbl" ] || continue
+        n="$(psql "$SCRATCH_DB_URL" -At -c "select count(*) from public.\"$tbl\" where id::text = '$(printf '%s' "$rid" | tr -cd 'A-Za-z0-9-')'" 2>/dev/null || echo 0)"
+        REAPPLY_LEFT=$((REAPPLY_LEFT + n))
+        [ "$tbl" = "locations" ] && DELETED_LOCATIONS="$DELETED_LOCATIONS $rid"
+      done < <(jq -r '.[] | "\(.tbl)\t\(.row_id)"' "$W/deletions-rows.json")
+      [ "$REAPPLY_LEFT" -eq 0 ] || fail "$REAPPLY_LEFT deleted rows are still in the restored copy"
+    else
+      fail "could not read the deletion log from the live database"
+    fi
+  else
+    fail "SUPABASE_ACCESS_TOKEN is not set, so deletions after the backup cannot be applied again"
+  fi
+  # The time-based rules apply themselves again (review text after 30 days, leaving businesses after 7, and the rest).
+  RETENTION_ERRS="$(psql "$SCRATCH_DB_URL" -At -v ON_ERROR_STOP=0 2>&1 <<'SQL' | grep -c '^ERROR\|ERROR:' || true
+select private.run_retention();
+select private.purge_after_leaving();
+select private.purge_visibility_after_leaving();
+select private.retention_sources();
+SQL
+)"
+  RETENTION_RERUN="$([ "${RETENTION_ERRS:-0}" -eq 0 ] && echo ok || echo "$RETENTION_ERRS errors")"
+  say "  $REAPPLIED rows deleted again, $REAPPLY_LEFT left; retention jobs on the copy: $RETENTION_RERUN"
+fi
+
 # 3. The repository.
 if [ -f "$W/plain/kabsi-canvas.bundle" ]; then
   say "Cloning the git bundle"
@@ -142,6 +192,23 @@ if [ -f "$W/plain/photos.tar.gz" ]; then
   PHOTOS="$(tar -tzf "$W/plain/photos.tar.gz" | grep -vc '/$' || true)"
   say "Photos archive: $PHOTOS files (manifest $want)"
   [ "$PHOTOS" = "$want" ] || fail "the photos archive holds $PHOTOS files, the manifest says $want"
+  # Sec 2: Storage restored into a scratch folder and checked against the restored database.
+  mkdir -p "$W/plain/restore" && tar -xzf "$W/plain/photos.tar.gz" -C "$W/plain/restore" || fail "the photos archive did not unpack"
+  for loc in $DELETED_LOCATIONS; do
+    loc="$(printf '%s' "$loc" | tr -cd 'a-f0-9-')"
+    [ -n "$loc" ] && find "$W/plain/restore/storage" -mindepth 2 -maxdepth 2 -type d -name "$loc" -exec rm -rf {} + 2>/dev/null
+  done
+  if [ -f "$W/plain/db.dump" ]; then
+    psql "$SCRATCH_DB_URL" -At -F $'\t' -c "select bucket_id, name from storage.objects" > "$W/objects.tsv" 2>/dev/null || : > "$W/objects.tsv"
+    STORAGE_ROWS=0; STORAGE_MISSING=0
+    while IFS=$'\t' read -r b name; do
+      [ -n "$b" ] || continue
+      STORAGE_ROWS=$((STORAGE_ROWS + 1))
+      [ -f "$W/plain/restore/storage/$b/$name" ] || STORAGE_MISSING=$((STORAGE_MISSING + 1))
+    done < "$W/objects.tsv"
+    say "  Storage restored: $(find "$W/plain/restore/storage" -type f | wc -l | tr -d ' ') files for $STORAGE_ROWS object rows, $STORAGE_MISSING rows without a file"
+    [ "$STORAGE_MISSING" -eq 0 ] || say "::warning::$STORAGE_MISSING Storage rows have no file in the archive (an object added between the dump and the copy is normal)"
+  fi
 else
   say "The set has no photos archive (Storage was skipped when it was made)"
 fi
@@ -153,8 +220,12 @@ RESULT="$W/result.json"
 jq -n --argjson ok "$OK" --arg day "$DAY" --arg set "${STAMP:-none}" --argjson tables "$TABLES" --argjson bad "$BAD_TABLES" \
   --argjson errs "$RESTORE_ERRORS" --argjson commits "$COMMITS" --argjson photos "$PHOTOS" \
   --arg run "${GITHUB_RUN_ID:-local}" --arg fails "$(printf '%s; ' "${FAILS[@]+"${FAILS[@]}"}")" \
+  --argjson reapplied "${REAPPLIED:-0}" --argjson left "${REAPPLY_LEFT:-0}" --arg retention "$RETENTION_RERUN" \
+  --argjson srows "$STORAGE_ROWS" --argjson smissing "$STORAGE_MISSING" --argjson secs "$(( $(date +%s) - STARTED ))" \
   '{ok: $ok, day: $day, backup_set: $set, tables_checked: $tables, tables_wrong: $bad, restore_errors: $errs,
-    commits: $commits, photo_files: $photos, run: $run, problems: $fails}' > "$RESULT"
+    commits: $commits, photo_files: $photos, storage_rows: $srows, storage_rows_without_file: $smissing,
+    deletions_reapplied: $reapplied, deleted_rows_left: $left, retention_rerun: $retention, seconds: $secs,
+    run: $run, problems: $fails}' > "$RESULT"
 cat "$RESULT"
 if [ "$OK" = true ]; then
   node scripts/ops/record-event.mjs --kind backup_drill --channel daily --title "Restore drill passed" \
