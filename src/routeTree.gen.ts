@@ -59,6 +59,7 @@ import { Route as AuthenticatedAppReviewsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app/settings'
 import { Route as AuthenticatedAppShieldRouteImport } from './routes/_authenticated/app/shield'
 import { Route as AuthenticatedAppTeamRouteImport } from './routes/_authenticated/app/team'
+import { Route as AuthenticatedStartResumeCodeRouteImport } from './routes/_authenticated/start_.resume.$code'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -312,6 +313,12 @@ const AuthenticatedAppTeamRoute = AuthenticatedAppTeamRouteImport.update({
   path: '/team',
   getParentRoute: () => AuthenticatedAppRouteRoute,
 } as any)
+const AuthenticatedStartResumeCodeRoute =
+  AuthenticatedStartResumeCodeRouteImport.update({
+    id: '/start_/resume/$code',
+    path: '/start/resume/$code',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -363,6 +370,7 @@ export interface FileRoutesByFullPath {
   '/app/shield': typeof AuthenticatedAppShieldRoute
   '/app/team': typeof AuthenticatedAppTeamRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/start/resume/$code': typeof AuthenticatedStartResumeCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -413,6 +421,7 @@ export interface FileRoutesByTo {
   '/app/shield': typeof AuthenticatedAppShieldRoute
   '/app/team': typeof AuthenticatedAppTeamRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/start/resume/$code': typeof AuthenticatedStartResumeCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -466,6 +475,7 @@ export interface FileRoutesById {
   '/_authenticated/app/shield': typeof AuthenticatedAppShieldRoute
   '/_authenticated/app/team': typeof AuthenticatedAppTeamRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/start_/resume/$code': typeof AuthenticatedStartResumeCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -519,6 +529,7 @@ export interface FileRouteTypes {
     | '/app/shield'
     | '/app/team'
     | '/app/'
+    | '/start/resume/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -569,6 +580,7 @@ export interface FileRouteTypes {
     | '/app/shield'
     | '/app/team'
     | '/app'
+    | '/start/resume/$code'
   id:
     | '__root__'
     | '/'
@@ -621,6 +633,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/shield'
     | '/_authenticated/app/team'
     | '/_authenticated/app/'
+    | '/_authenticated/start_/resume/$code'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1010,6 +1023,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppTeamRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/start_/resume/$code': {
+      id: '/_authenticated/start_/resume/$code'
+      path: '/start/resume/$code'
+      fullPath: '/start/resume/$code'
+      preLoaderRoute: typeof AuthenticatedStartResumeCodeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -1058,12 +1078,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRouteRoute: typeof AuthenticatedAppRouteRouteWithChildren
   AuthenticatedStaffRoute: typeof AuthenticatedStaffRoute
   AuthenticatedStartRoute: typeof AuthenticatedStartRoute
+  AuthenticatedStartResumeCodeRoute: typeof AuthenticatedStartResumeCodeRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRouteRoute: AuthenticatedAppRouteRouteWithChildren,
   AuthenticatedStaffRoute: AuthenticatedStaffRoute,
   AuthenticatedStartRoute: AuthenticatedStartRoute,
+  AuthenticatedStartResumeCodeRoute: AuthenticatedStartResumeCodeRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

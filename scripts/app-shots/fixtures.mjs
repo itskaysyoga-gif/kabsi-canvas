@@ -85,7 +85,7 @@ const base = {
   rpc: {
     my_access: (c) => ({
       role: role(c.state),
-      approve: { reply: true, post: true, photo: true, hours: true, profile: true },
+      approve: { review_reply: true, post: true, photo: true, hours: true, profile_change: true },
       approve_high_risk: role(c.state) === "owner",
     }),
     is_staff: (c) => c.state === "staff-admin",

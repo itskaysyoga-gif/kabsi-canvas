@@ -71,7 +71,13 @@ export async function continueWithGoogle(
 // so it survives the trip to Google and back; onboarding step 3 starts from it and then forgets it.
 const KEY = "kabsi.snapshot";
 const DAY = 24 * 60 * 60 * 1000;
-export type KeptSnapshot = { place_id: string; name: string; address: string };
+export type KeptSnapshot = {
+  place_id: string;
+  name: string;
+  address: string;
+  /** The free check's code (8 letters and digits), so /start can join the check to the new business (claim_free_check). */
+  check?: string;
+};
 
 export function keepSnapshot(s: KeptSnapshot) {
   try {
@@ -85,7 +91,8 @@ export function keptSnapshot(): KeptSnapshot | null {
     const v = JSON.parse(localStorage.getItem(KEY) ?? "null") as
       (KeptSnapshot & { at: number }) | null;
     if (!v || typeof v.place_id !== "string" || Date.now() - v.at > DAY) return null;
-    return { place_id: v.place_id, name: v.name, address: v.address };
+    const check = typeof v.check === "string" && /^[A-Z2-9]{8}$/.test(v.check) ? v.check : null;
+    return { place_id: v.place_id, name: v.name, address: v.address, ...(check ? { check } : {}) };
   } catch {
     return null;
   }

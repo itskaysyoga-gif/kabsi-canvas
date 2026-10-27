@@ -373,7 +373,13 @@ export function LiveResult({
   const startWeb = async () => {
     // lib/signup loads the Supabase client, so it comes only when the visitor starts.
     const { keepSnapshot } = await import("@/lib/signup");
-    keepSnapshot({ place_id: s.place_id, name: s.name, address: s.address });
+    keepSnapshot({
+      place_id: s.place_id,
+      name: s.name,
+      address: s.address,
+      // V4: /start claims this free check for the business it makes (claim_free_check).
+      ...(check?.code ? { check: check.code } : {}),
+    });
     track("signup_started", { source: "snapshot" });
     void navigate({ to: "/login", search: { next: "/start" } as never });
   };

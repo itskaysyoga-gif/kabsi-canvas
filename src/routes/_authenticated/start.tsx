@@ -3,19 +3,38 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
-import { flowStepOf } from "@/lib/onboarding-flow";
-import { AccessStep, BusinessStep } from "@/components/onboarding/steps";
-import { ConfirmStep } from "@/components/onboarding/confirm-step";
-import { QuestionsStep } from "@/components/onboarding/questions-step";
+import { BusinessStep } from "@/components/onboarding/steps";
+import { ScenarioScreen } from "@/components/onboarding/scenario-screen";
+import {
+  CheckStage,
+  CheckedStage,
+  ConfirmStage,
+  FirstTaskStage,
+  LaterStage,
+  ManagerStage,
+  ResumeLink,
+  WhatsAppStage,
+  type Who,
+} from "@/components/onboarding/stages";
+import { ErrorNote } from "@/components/onboarding/onboarding-shell";
+import { ErrorState } from "@/components/kabsi/ui";
+import { STAGE_OF, screenOf, type Screen } from "@/lib/onboarding-flow";
 import {
   activateCard,
+  clearScenario,
+  confirmBusiness,
   friendlyError,
-  loadAccessState,
+  loadOnboardingStatus,
   loadScenario,
   myLatestLocation,
-  type OnboardingStep,
+  scenarioDone,
+  setScenario,
+  setStep,
 } from "@/lib/onboarding";
+import type { OwnerVariant, ScenarioId } from "@/lib/scenarios";
 import type { HelpState } from "@/components/onboarding/need-a-hand";
+import type { HelpStep } from "@/lib/onboarding-help";
+import { WHATSAPP_ON } from "@/lib/site";
 import { track } from "@/lib/telemetry";
 
 const searchSchema = z.object({
@@ -25,6 +44,9 @@ const searchSchema = z.object({
     .optional()
     .catch(undefined), // card to link
   new: z.coerce.boolean().optional().catch(undefined), // start another business
+  // Screenshots on the development server only (scripts/app-shots/onboarding.mjs): states that need a tap or a
+  // WhatsApp number. Ignored in a production build.
+  preview: z.enum(["wa", "wa-notyet", "wa-done", "rest"]).optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/_authenticated/start")({
@@ -39,50 +61,73 @@ export const Route = createFileRoute("/_authenticated/start")({
   component: StartPage,
 });
 
+const HELP_STEP: Record<Screen, HelpStep> = {
+  find: "find",
+  check: "snapshot",
+  confirm: "find",
+  whatsapp: "find",
+  manager: "access",
+  checked: "waiting",
+  first_task: "waiting",
+  later: "waiting",
+};
+
+// "Access works." shows once, until the owner taps "See your first task"; remembered in this browser.
+const CHECKED_KEY = (id: string) => `kabsi.onboarding.checked.${id}`;
+function seenChecked(id: string) {
+  try {
+    return window.localStorage.getItem(CHECKED_KEY(id)) === "1";
+  } catch {
+    return false;
+  }
+}
+function rememberChecked(id: string) {
+  try {
+    window.localStorage.setItem(CHECKED_KEY(id), "1");
+  } catch {
+    /* private mode: remembered for this page view */
+  }
+}
+
 function StartPage() {
-  const { code, new: startNew } = Route.useSearch();
-  const query = useQuery({
-    queryKey: ["onboarding-location"],
-    queryFn: myLatestLocation,
-    // While waiting for Google access, re-check every 10 seconds.
-    refetchInterval: (q) =>
-      q.state.data && q.state.data.consent_at && !q.state.data.access_granted_at ? 10_000 : false,
-  });
+  const { code, new: startNew, preview: rawPreview } = Route.useSearch();
+  const preview = import.meta.env.DEV ? rawPreview : undefined;
+  const whatsappOn = WHATSAPP_ON || (preview?.startsWith("wa") ?? false);
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+
+  const query = useQuery({ queryKey: ["onboarding-location"], queryFn: myLatestLocation });
   const location = startNew ? null : (query.data ?? null);
-  const step: OnboardingStep = location ? location.onboarding_step : "business";
-  // "Need a hand?" (K-111): the same queries the Manager step uses (one cache), so the chip knows the situation and the
-  // access state without asking twice.
+
+  // Choices on this page the server does not keep: past the free check, past WhatsApp, past "Access works.".
+  const [seen, setSeen] = useState<{ check?: boolean; whatsapp?: boolean; checked?: boolean }>({});
+  const checkedSeen = location ? seen.checked || seenChecked(location.id) : false;
+  // Connected on this visit: "Connected" stays until the owner taps Next.
+  const [waHold, setWaHold] = useState(preview === "wa-done");
+  const [who, setWho] = useState<Who>("owner");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const status = useQuery({
+    queryKey: ["onboarding-status", location?.id],
+    queryFn: () => loadOnboardingStatus(location!.id),
+    enabled: !!location,
+    // While Kabsi waits for the invite or checks access, look again every 10 seconds.
+    refetchInterval: (q) => (q.state.data && !q.state.data.checked ? 10_000 : false),
+  });
+  const screen: Screen = waHold
+    ? "whatsapp"
+    : screenOf({
+        status: location ? (status.data ?? null) : null,
+        whatsappOn,
+        seen: { ...seen, checked: checkedSeen },
+      });
+
   const scenario = useQuery({
     queryKey: ["scenario", location?.id],
     queryFn: () => loadScenario(location!.id),
-    enabled: !!location && step === "access",
+    enabled: !!location && screen === "manager",
   });
-  const accessState = useQuery({
-    queryKey: ["access-state", location?.id],
-    queryFn: () => loadAccessState(location!.id),
-    enabled: !!location && step === "access",
-    refetchInterval: 30_000,
-  });
-  const help: HelpState | undefined = location
-    ? {
-        step:
-          step === "access"
-            ? scenario.data && !location.access_granted_at
-              ? "scenario"
-              : "access"
-            : step === "knowledge"
-              ? "questions"
-              : step === "confirm" || step === "plan"
-                ? location.access_granted_at
-                  ? "confirm"
-                  : "waiting"
-                : "find",
-        locationId: location.id,
-        agreed: !!location.consent_at,
-        accessWorking: !!location.access_granted_at,
-        accessState: accessState.data ?? null,
-      }
-    : { step: "find" };
 
   useEffect(() => {
     if (!query.isLoading && !location) track("signup_started", { source: "self" });
@@ -102,53 +147,165 @@ function StartPage() {
       .catch((e) => setCardNote(friendlyError(e)));
   }, [code, location]);
 
-  const refresh = () => query.refetch();
-  const navigate = useNavigate();
-  // Setup is finished (step 6, the trial runs): Home is where the first prepared replies are.
-  useEffect(() => {
-    if (!startNew && location && step === "done") void navigate({ to: "/app" });
-  }, [location, step, startNew, navigate]);
-  const qc = useQueryClient();
-  // After "Add another business" creates the new one, leave ?new so the stepper follows it,
-  // and refresh the header's business switcher.
+  const refresh = async () => {
+    await Promise.all([query.refetch(), status.refetch()]);
+  };
+  // After "Add another business" creates the new one, leave ?new so the page follows it, and refresh the switcher.
   const created = async () => {
     await qc.invalidateQueries();
     if (startNew) await navigate({ to: "/start", search: {} });
     await query.refetch();
   };
 
-  if (query.isLoading)
+  async function run(fn: () => Promise<unknown>) {
+    setBusy(true);
+    setError("");
+    try {
+      await fn();
+    } catch (e) {
+      setError(friendlyError(e));
+    }
+    setBusy(false);
+  }
+  const confirm = () =>
+    void run(async () => {
+      await confirmBusiness(location!.id);
+      await status.refetch();
+    });
+  const toFirstTask = () =>
+    void run(async () => {
+      // The old step list ends here too, so Home and Nora see setup as finished.
+      if (location!.onboarding_step !== "done")
+        await setStep(location!.id, "done").catch(() => undefined);
+      rememberChecked(location!.id);
+      setSeen((s) => ({ ...s, checked: true }));
+      await refresh();
+    });
+  const changeScenario = (fn: () => Promise<unknown>) =>
+    void run(async () => {
+      await fn();
+      await qc.invalidateQueries({ queryKey: ["scenario", location!.id] });
+    });
+  const pickScenario = (id: ScenarioId) => changeScenario(() => setScenario(location!.id, id));
+  const pickVariant = (v: OwnerVariant) =>
+    changeScenario(() => setScenario(location!.id, "someone_else_owns", v));
+
+  if (query.isLoading || (location && status.isLoading))
     return (
-      <OnboardingShell step="check">
-        <p className="text-text-2">Loading…</p>
+      <OnboardingShell>
+        <p className="text-text-2" role="status">
+          Loading…
+        </p>
       </OnboardingShell>
     );
-  if (query.isError)
+  if (query.isError || status.isError)
     return (
-      <OnboardingShell step="check">
-        <p className="text-bad">We couldn't load your setup. Reload the page.</p>
+      <OnboardingShell>
+        <ErrorState title="This page did not load." onRetry={() => void refresh()}>
+          Nothing you did, and nothing changed on Google. Try again in a minute.
+        </ErrorState>
       </OnboardingShell>
     );
 
+  const s = status.data ?? null;
+  const help: HelpState = location
+    ? {
+        step:
+          screen === "manager" && scenario.data && !scenario.data.done_at
+            ? "scenario"
+            : HELP_STEP[screen],
+        locationId: location.id,
+        agreed: !!s?.consent,
+        accessWorking: !!s?.accepted,
+        accessState: null,
+      }
+    : { step: "find" };
+  const showResume =
+    !!s?.resume_code && (screen === "confirm" || screen === "whatsapp" || screen === "manager");
+
   return (
-    <OnboardingShell step={flowStepOf(step)} {...(step !== "done" ? { help } : {})}>
+    <OnboardingShell
+      stage={STAGE_OF[screen]}
+      help={help}
+      below={showResume ? <ResumeLink code={s!.resume_code!} /> : null}
+    >
       {cardNote ? (
         <p
-          className="mb-6 rounded-card bg-surface-2 px-4 py-3 text-small font-medium"
+          className="mb-6 rounded-card bg-surface-2 px-4 py-3 text-small font-semibold"
           role="status"
         >
           {cardNote}
         </p>
       ) : null}
-      {step === "business" && <BusinessStep onCreated={created} />}
-      {step === "access" && <AccessStep location={location} onChanged={refresh} />}
-      {step === "knowledge" && location ? (
-        <QuestionsStep location={location} onChanged={refresh} />
+      {screen === "find" && <BusinessStep who={who} onWho={setWho} onCreated={created} />}
+      {screen === "check" && s ? (
+        <CheckStage status={s} onNext={() => setSeen((x) => ({ ...x, check: true }))} />
       ) : null}
-      {(step === "confirm" || step === "plan") && location ? (
-        <ConfirmStep location={location} onChanged={refresh} />
+      {screen === "confirm" && location ? (
+        <ConfirmStage
+          location={location}
+          who={who}
+          onWho={setWho}
+          busy={busy}
+          error={error}
+          onConfirm={confirm}
+        />
       ) : null}
-      {step === "done" ? <p className="text-text-2">Taking you to Home…</p> : null}
+      {screen === "whatsapp" && s ? (
+        <WhatsAppStage
+          status={s}
+          on={whatsappOn}
+          preview={preview === "wa-notyet" ? "notyet" : undefined}
+          hold={waHold}
+          onConnected={() => {
+            setWaHold(true);
+            void status.refetch();
+          }}
+          onNext={() => {
+            setWaHold(false);
+            setSeen((x) => ({ ...x, whatsapp: true }));
+          }}
+        />
+      ) : null}
+      {screen === "manager" && location && s ? (
+        // A situation the owner reported (K-94) shows its own screen until "I've done it".
+        scenario.data && !scenario.data.done_at && !s.accepted ? (
+          <>
+            <ScenarioScreen
+              locationId={location.id}
+              businessName={location.name}
+              row={scenario.data}
+              busy={busy}
+              onPickVariant={pickVariant}
+              onDone={() => changeScenario(() => scenarioDone(location.id))}
+              onBack={() => changeScenario(() => clearScenario(location.id))}
+            />
+            <ErrorNote message={error} />
+          </>
+        ) : (
+          <>
+            <ManagerStage
+              location={location}
+              status={s}
+              who={who}
+              busy={busy}
+              onPickScenario={pickScenario}
+              onChanged={refresh}
+            />
+            <ErrorNote message={error} />
+          </>
+        )
+      ) : null}
+      {screen === "checked" && s ? (
+        <>
+          <CheckedStage status={s} busy={busy} onNext={toFirstTask} />
+          <ErrorNote message={error} />
+        </>
+      ) : null}
+      {screen === "first_task" && location && s ? (
+        <FirstTaskStage location={location} status={s} showRest={preview === "rest"} />
+      ) : null}
+      {screen === "later" ? <LaterStage /> : null}
     </OnboardingShell>
   );
 }

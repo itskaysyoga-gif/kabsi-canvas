@@ -77,7 +77,7 @@ test.describe("owner journeys (QA demo owner)", () => {
     if (await draft.getByRole("button", { name: "Approve", exact: true }).isVisible()) {
       await draft.getByRole("button", { name: "Approve", exact: true }).click();
       // The banner counts to the post's own day, so there is nothing to wait for: the post now waits and can be cancelled.
-      await expect(page.getByText(/Publishing in|On its way to Google/).first()).toBeVisible();
+      await expect(page.getByText(/It goes to Google|On its way to Google/).first()).toBeVisible();
       await page.goto("/app/posts");
       await settle(page);
       await showMonth();

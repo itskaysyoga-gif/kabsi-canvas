@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { HolidayAnswerForm } from "@/components/hours/holiday-answer";
+import { StatusPill } from "@/components/kabsi/ui";
 import { answerHoliday, whenWords, type HolidayPrompt } from "@/lib/holidays";
 import { track } from "@/lib/telemetry";
 
@@ -18,17 +19,17 @@ export function HolidayQuestions({
   const [done, setDone] = useState<Record<string, string>>({});
   if (prompts.length === 0) return null;
   return (
-    <section className="mt-7" aria-label="Holiday hours">
+    <section className="mb-4 space-y-3" aria-label="Holiday hours">
       {prompts.map((p) => (
-        <article key={p.id} className="mb-4 rounded-panel bg-surface-1 p-6 shadow-rest sm:p-7">
-          <p className="text-small font-bold uppercase tracking-wider text-text-2">Coming up</p>
-          <h2 className="mt-1 font-display text-h3 leading-tight">Your hours for {p.name}</h2>
+        <article key={p.id} className="rounded-inner bg-surface-2 p-4">
+          <StatusPill tone="warn">Needs you</StatusPill>
+          <h3 className="mt-3 text-title font-bold text-text-1">Your hours for {p.name}</h3>
           <p className="mt-1 text-small text-text-2">
             {p.estimated ? "Expected " : ""}
             {whenWords(p.starts_on, p.ends_on)}
           </p>
           {done[p.id] ? (
-            <p className="mt-4 text-small text-ok" role="status">
+            <p className="mt-4 text-small font-semibold text-ok" role="status">
               {done[p.id]}
             </p>
           ) : (

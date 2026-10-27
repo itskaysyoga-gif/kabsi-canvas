@@ -1,24 +1,25 @@
 import { useState } from "react";
-import { EarlyAccessNotice } from "@/components/app/early-access-notice";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import { Clock } from "lucide-react";
+import { EarlyAccessNotice } from "@/components/app/early-access-notice";
+import { AccountTop, Panel } from "@/components/kabsi/d3-account";
+import { TaskBlock } from "@/components/kabsi/d3-content-task";
+import { Button, ButtonLink, EmptyState, ErrorState, Skeleton } from "@/components/kabsi/ui";
 import { HolidayQuestions } from "@/components/hours/holiday-questions";
 import { HoursCalendar } from "@/components/hours/hours-calendar";
 import { ClosureForm, SpecialHoursForm } from "@/components/hours/special-hours-form";
-import { localToday, range, times } from "@/lib/hours-format";
-import { addDays } from "@/lib/holidays";
 import { WeekEditor } from "@/components/hours/week-editor";
-import { loadHolidayCalendar } from "@/lib/holidays";
-import { emptyWeek, weekFromFact } from "@/lib/hours";
-import { supabase } from "@/lib/supabase";
+import { addDays, loadHolidayCalendar } from "@/lib/holidays";
+import { DAY_KEYS, DAY_LABEL, emptyWeek, weekFromFact, type Week } from "@/lib/hours";
+import { localToday, range, times } from "@/lib/hours-format";
 import { myLatestLocation } from "@/lib/onboarding";
-import { CalendarClock as PageGlyph } from "lucide-react";
-import { PageIcon } from "@/components/shared/page-icon";
+import { supabase } from "@/lib/supabase";
+import { latestByTarget, recentTasks } from "@/lib/task-feed";
 
-// Hours (P0.5-03, K-21): one editor for the weekly hours, special days and a closure with a reopening date, and a
-// calendar of what is set. The owner confirms the exact hours before anything changes on Google (D202); every
-// approval goes through the one publication pipeline.
+// Hours (P0.5-03, K-21; Design 3's Hours tab): the usual week, holidays and special days, and a calendar of what is set.
+// The owner confirms the exact hours before anything changes on Google (D202); every approval goes through the one
+// publication pipeline, and each special day Kabsi sent shows its task state.
 export const Route = createFileRoute("/_authenticated/app/hours")({
   head: () => ({ meta: [{ title: "Hours | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: HoursPage,
@@ -67,17 +68,18 @@ const holidayDays = (start: string, end: string, name: string) => {
   return out;
 };
 
-const MODES = [
-  { id: "regular", label: "Opening hours" },
-  { id: "special", label: "Special days" },
-  { id: "closure", label: "Closed for a while" },
-] as const;
-type Mode = (typeof MODES)[number]["id"];
+const dayText = (week: Week, d: (typeof DAY_KEYS)[number]) =>
+  week[d].length
+    ? week[d].map((p) => `${p.open} to ${p.close === "00:00" ? "midnight" : p.close}`).join(", ")
+    : "Closed";
+
+type Extra = "special" | "closure" | null;
 
 function HoursPage() {
   const queryClient = useQueryClient();
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   const loc = location.data;
+  const live = !!loc && loc.status === "active" && !loc.concierge;
   const rows = useQuery({
     queryKey: ["hours", loc?.id],
     queryFn: () => loadHours(loc!.id),
@@ -91,15 +93,23 @@ function HoursPage() {
   const holidays = useQuery({
     queryKey: ["holidays", loc?.id],
     queryFn: () => loadHolidayCalendar(loc!.id),
-    enabled: !!loc && loc.status === "active" && !loc.concierge,
+    enabled: live,
     retry: false,
   });
-  const [mode, setMode] = useState<Mode>("regular");
+  const tasks = useQuery({
+    queryKey: ["hours-tasks", loc?.id],
+    queryFn: () => recentTasks(loc!.id, { kinds: ["special_hours"], days: 120, limit: 60 }),
+    enabled: live,
+    retry: false,
+  });
+  const [editing, setEditing] = useState(false);
+  const [extra, setExtra] = useState<Extra>(null);
   const refresh = () =>
     Promise.all(
       [
         ["hours"],
         ["hours-approved"],
+        ["hours-tasks"],
         ["holidays"],
         ["shield"],
         ["tasks"],
@@ -107,8 +117,10 @@ function HoursPage() {
         ["home-facts"],
       ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
     );
-  const live = !!loc && loc.status === "active" && !loc.concierge;
   const today = localToday();
+  const week = weekFromFact(approved.data);
+  const byRow = latestByTarget(tasks.data ?? []);
+  const sent = (rows.data ?? []).filter((r) => r.state !== "skipped" && r.state !== "draft");
   const entries = (rows.data ?? [])
     .filter((r) => r.state !== "skipped")
     .map((r) => ({
@@ -116,117 +128,154 @@ function HoursPage() {
       end: r.end_date,
       label: `${times(r)}${r.reason ? `, ${r.reason}` : ""}`,
     }));
+
   return (
-    <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
-      <PageIcon icon={<PageGlyph />} />
-      <p className="text-small font-bold uppercase tracking-wider text-text-2">Profile</p>
-      <h1 className="mt-1 font-display text-h2 leading-none sm:text-5xl">Hours</h1>
-      <p className="mt-2 text-text-2">
-        Your weekly hours, holidays and closures, so Google shows the right times. Nothing changes
-        on Google until you confirm it.
-      </p>
-      {!location.isLoading && !loc ? (
-        <Button asChild className="mt-6">
-          <Link to="/start">Add your business</Link>
-        </Button>
-      ) : null}
+    <>
+      <AccountTop title="Hours" />
+      {!location.isLoading && !loc ? <ButtonLink to="/start">Add your business</ButtonLink> : null}
       {loc?.concierge ? <EarlyAccessNotice what="Hours" /> : null}
-      {live ? (
-        <HolidayQuestions
-          prompts={holidays.data?.prompts ?? []}
-          today={today}
-          regularHours={typeof approved.data?.display === "string" ? approved.data.display : null}
-          onDone={refresh}
-        />
+      {loc && !loc.concierge && loc.status !== "active" ? (
+        <Panel>
+          <p className="text-body font-bold">
+            Hours can be set once Kabsi can reach your Google profile.
+          </p>
+          <ButtonLink to="/start" size="md" className="mt-4">
+            Continue setup
+          </ButtonLink>
+        </Panel>
       ) : null}
-      {live ? (
-        <>
-          <div className="mt-6 grid grid-cols-3 gap-2" role="group" aria-label="What to change">
-            {MODES.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                aria-pressed={mode === m.id}
-                onClick={() => setMode(m.id)}
-                className={`min-h-12 rounded-card border-2 px-2 text-small font-bold ${mode === m.id ? "border-text-1 bg-surface-2" : "border-line"}`}
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
-          {mode === "regular" ? (
-            approved.isLoading ? (
-              <p className="mt-7 text-text-2">Loading…</p>
-            ) : (
+      {live && approved.isError ? (
+        <ErrorState title="This page did not load." onRetry={() => void approved.refetch()}>
+          Nothing you did, and nothing changed on Google. Try again in a minute.
+        </ErrorState>
+      ) : null}
+
+      {live && !approved.isError ? (
+        <div className="grid items-start gap-4 lg:grid-cols-2">
+          <Panel title="Usual hours" id="usual">
+            {approved.isLoading ? (
+              <div role="status" aria-busy="true" aria-label="Loading">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="mt-3 h-4 w-4/5" />
+                <Skeleton className="mt-3 h-4 w-3/5" />
+              </div>
+            ) : editing ? (
               <WeekEditor
                 // A new week arrives after a save: start the editor again from it.
                 key={JSON.stringify(approved.data ?? null)}
                 locationId={loc.id}
-                initial={weekFromFact(approved.data) ?? emptyWeek()}
+                initial={week ?? emptyWeek()}
+                onDone={refresh}
+                onClose={() => setEditing(false)}
+              />
+            ) : week ? (
+              <>
+                <dl className="divide-y divide-line">
+                  {DAY_KEYS.map((d) => (
+                    <div key={d} className="flex justify-between gap-3 py-2.5 text-small">
+                      <dt className="text-text-2">{DAY_LABEL[d]}</dt>
+                      <dd className="text-end font-semibold text-text-1">{dayText(week, d)}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <Button
+                  variant="secondary"
+                  size="md"
+                  className="mt-4"
+                  onClick={() => setEditing(true)}
+                >
+                  Change hours
+                </Button>
+              </>
+            ) : (
+              <EmptyState
+                icon={Clock}
+                title="No hours on Google yet."
+                action={
+                  <Button variant="secondary" size="md" onClick={() => setEditing(true)}>
+                    Change hours
+                  </Button>
+                }
+              >
+                Send your opening hours on WhatsApp and Kabsi adds them after your yes.
+              </EmptyState>
+            )}
+          </Panel>
+
+          <div className="space-y-4">
+            <Panel title="Holidays" id="holidays">
+              <HolidayQuestions
+                prompts={holidays.data?.prompts ?? []}
+                today={today}
+                regularHours={
+                  typeof approved.data?.display === "string" ? approved.data.display : null
+                }
                 onDone={refresh}
               />
-            )
-          ) : mode === "special" ? (
-            <SpecialHoursForm locationId={loc.id} onDone={refresh} />
-          ) : (
-            <ClosureForm locationId={loc.id} onDone={refresh} />
-          )}
-        </>
-      ) : loc && !loc.concierge ? (
-        <div className="mt-7 rounded-panel bg-surface-1 p-6 shadow-rest">
-          <p className="font-bold">Hours can be set once Kabsi can reach your Google profile.</p>
-          <Button asChild size="compact" className="mt-4">
-            <Link to="/start">Continue setup</Link>
-          </Button>
-        </div>
-      ) : null}
-      {live ? (
-        <HoursCalendar
-          entries={entries}
-          holidays={(holidays.data?.upcoming ?? []).flatMap((h) =>
-            holidayDays(h.starts_on, h.ends_on, h.name),
-          )}
-          today={today}
-        />
-      ) : null}
-      {rows.data?.length ? (
-        <div className="mt-10">
-          <h2 className="text-title font-bold">Set with Kabsi</h2>
-          <div className="mt-3 space-y-2">
-            {rows.data.map((r) => (
+              {sent.length ? (
+                <ul className="divide-y divide-line" aria-label="Special days set with Kabsi">
+                  {sent.map((r) => (
+                    <li key={r.id} className="py-4 first:pt-0 last:pb-0">
+                      <p className="text-body font-semibold text-text-1">{range(r)}</p>
+                      <p className="text-small text-text-2">
+                        {times(r)}
+                        {r.reason ? `. ${r.reason}` : ""}
+                      </p>
+                      <TaskBlock
+                        task={byRow.get(r.id)}
+                        kind="special_hours"
+                        rowState={r.state}
+                        className="mt-3"
+                      />
+                    </li>
+                  ))}
+                </ul>
+              ) : !holidays.data?.prompts.length ? (
+                <p className="text-body text-text-2">
+                  Kabsi asks about your hours before each public holiday.
+                </p>
+              ) : null}
               <div
-                key={r.id}
-                className="flex items-center justify-between rounded-card bg-surface-1 p-4 shadow-rest"
+                className="mt-4 flex flex-wrap gap-2 border-t border-line pt-4"
+                role="group"
+                aria-label="Add different hours"
               >
-                <div>
-                  <p className="font-medium">{range(r)}</p>
-                  <p className="text-small text-text-2">
-                    {times(r)}
-                    {r.reason ? ` · ${r.reason}` : ""}
-                  </p>
-                </div>
-                <span
-                  className={
-                    r.state === "failed"
-                      ? "shrink-0 rounded-pill bg-bad-soft px-2.5 py-1 text-label font-bold text-bad"
-                      : r.state === "posted" || r.state === "live"
-                        ? "shrink-0 rounded-pill bg-ok-soft px-2.5 py-1 text-label font-bold text-ok"
-                        : "shrink-0 rounded-pill bg-surface-2 px-2.5 py-1 text-label font-bold text-text-2"
-                  }
+                <Button
+                  variant={extra === "special" ? "quiet" : "secondary"}
+                  size="md"
+                  aria-pressed={extra === "special"}
+                  onClick={() => setExtra(extra === "special" ? null : "special")}
                 >
-                  {r.state === "posted" || r.state === "live"
-                    ? "On Google"
-                    : r.state === "failed"
-                      ? "Not saved"
-                      : r.state === "in_review"
-                        ? "Google is reviewing"
-                        : "Sending"}
-                </span>
+                  Special days
+                </Button>
+                <Button
+                  variant={extra === "closure" ? "quiet" : "secondary"}
+                  size="md"
+                  aria-pressed={extra === "closure"}
+                  onClick={() => setExtra(extra === "closure" ? null : "closure")}
+                >
+                  Closed for a while
+                </Button>
               </div>
-            ))}
+              {extra === "special" ? (
+                <SpecialHoursForm locationId={loc.id} onDone={refresh} />
+              ) : null}
+              {extra === "closure" ? <ClosureForm locationId={loc.id} onDone={refresh} /> : null}
+            </Panel>
+            <p className="text-small text-text-2">Nothing changes on Google until you say yes.</p>
           </div>
+
+          <Panel className="lg:col-span-2">
+            <HoursCalendar
+              entries={entries}
+              holidays={(holidays.data?.upcoming ?? []).flatMap((h) =>
+                holidayDays(h.starts_on, h.ends_on, h.name),
+              )}
+              today={today}
+            />
+          </Panel>
         </div>
       ) : null}
-    </div>
+    </>
   );
 }

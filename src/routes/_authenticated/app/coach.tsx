@@ -1,11 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ListChecks as PageGlyph } from "lucide-react";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { CoachActions } from "@/components/coach/coach-actions";
 import { CoachList } from "@/components/coach/coach-list";
-import { PageIcon } from "@/components/shared/page-icon";
-import { Button } from "@/components/ui/button";
+import { AccountTop, Panel, SourceLabel } from "@/components/kabsi/d3-account";
+import { Banner, ButtonLink, ErrorState, Skeleton } from "@/components/kabsi/ui";
 import { coachRows, loadCoach } from "@/lib/coach";
 import { myLatestLocation } from "@/lib/onboarding";
 
@@ -31,6 +30,7 @@ function CoachPage() {
   });
   const c = coach.data;
   const rows = c ? coachRows(c) : [];
+  const done = rows.filter((r) => r.status === "done").length;
   // After an action: the checklist, the tasks on Home and the profile watch all move.
   const changed = () =>
     Promise.all(
@@ -39,76 +39,87 @@ function CoachPage() {
       ),
     );
   return (
-    <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8 sm:py-12">
-      <PageIcon icon={<PageGlyph />} />
-      <p className="text-small font-bold uppercase tracking-wider text-text-2">Profile</p>
-      <h1 className="mt-1 font-display text-h2 leading-none sm:text-5xl">Profile Coach</h1>
-      <p className="mt-2 text-text-2">
-        What a complete Google profile has, and what yours is missing. Nothing changes on Google
-        until you approve it.
-      </p>
-      {!location.isLoading && !loc ? (
-        <Button asChild className="mt-6">
-          <Link to="/start">Add your business</Link>
-        </Button>
-      ) : null}
+    <>
+      <AccountTop
+        title="Profile Coach"
+        lead="What a complete Google profile has, and what yours is missing. Nothing changes on Google until you approve it."
+      />
+      {!location.isLoading && !loc ? <ButtonLink to="/start">Add your business</ButtonLink> : null}
       {loc?.concierge ? <EarlyAccessNotice what="The Profile Coach" /> : null}
       {loc && !live && !loc.concierge ? (
-        <div className="mt-7 rounded-panel bg-surface-1 p-6 shadow-rest">
-          <p className="font-bold">The Coach starts once Kabsi can reach your Google profile.</p>
-          <Button asChild size="compact" className="mt-4">
-            <Link to="/start">Continue setup</Link>
-          </Button>
+        <Panel>
+          <p className="text-body font-bold">
+            The Coach starts once Kabsi can reach your Google profile.
+          </p>
+          <ButtonLink to="/start" size="md" className="mt-4">
+            Continue setup
+          </ButtonLink>
+        </Panel>
+      ) : null}
+      {live && coach.isLoading ? (
+        <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="rounded-card border border-line bg-surface-1 p-5">
+              <Skeleton className="h-5 w-1/2" />
+              <Skeleton className="mt-3 h-4 w-full" />
+            </div>
+          ))}
         </div>
       ) : null}
-      {live && coach.isLoading ? <p className="mt-7 text-text-2">Loading…</p> : null}
       {live && coach.isError ? (
-        <p className="mt-7 text-text-2" role="alert">
-          The checklist did not load. Please try again in a moment.
-        </p>
+        <ErrorState title="The checklist did not load." onRetry={() => void coach.refetch()}>
+          Please try again in a moment.
+        </ErrorState>
       ) : null}
       {live && c?.locked ? (
-        <div className="mt-7 rounded-panel bg-surface-1 p-6 shadow-rest">
-          <p className="font-bold">The Profile Coach comes with Essentials and Pro.</p>
+        <Panel>
+          <p className="text-body font-bold">The Profile Coach comes with Essentials and Pro.</p>
           <p className="mt-1 text-small text-text-2">
             Choose a plan and Kabsi shows what your profile is missing, one step at a time.
           </p>
-          <Button asChild size="compact" className="mt-4">
-            <Link to="/app/plan">See plans</Link>
-          </Button>
-        </div>
+          <ButtonLink to="/app/plan" size="md" className="mt-4">
+            See plans
+          </ButtonLink>
+        </Panel>
       ) : null}
       {live && c && !c.locked ? (
-        <div className="mt-7">
+        <div className="space-y-4">
           {c.source !== "live" ? (
-            <p
-              className="mb-4 rounded-card bg-surface-2 p-4 text-small"
-              data-testid="coach-not-live"
-            >
-              Kabsi reads the description, categories and details from your live Google profile.
-              Until that is connected they show as not checked yet.
-            </p>
+            <div data-testid="coach-not-live">
+              <Banner title="Not checked yet">
+                Kabsi reads the description, categories and details from your live Google profile.
+                Until that is connected they show as not checked yet.
+              </Banner>
+            </div>
           ) : null}
-          <CoachList rows={rows} />
+          <Panel
+            title="Your checklist"
+            id="checklist"
+            action={
+              <SourceLabel>
+                {done} of {rows.length} done
+              </SourceLabel>
+            }
+          >
+            <CoachList rows={rows} />
+          </Panel>
           {c.pro && loc ? (
             <CoachActions locationId={loc.id} onChanged={changed} />
           ) : (
-            <section
-              className="mt-8 rounded-panel bg-surface-1 p-6 shadow-rest"
-              data-testid="coach-pro-note"
-            >
-              <p className="font-bold">With Pro, Kabsi does these for you</p>
-              <p className="mt-1 text-small text-text-2">
-                Pro prepares the website tag, more categories, a website check and a snippet for
-                your website. You approve each one before anything reaches Google.
-              </p>
-              <Button asChild size="compact" className="mt-4">
-                <Link to="/app/plan">See plans</Link>
-              </Button>
+            <section data-testid="coach-pro-note">
+              <Panel title="With Pro, Kabsi does these for you" id="pro">
+                <p className="text-body text-text-2">
+                  Pro prepares the website tag, more categories, a website check and a snippet for
+                  your website. You approve each one before anything reaches Google.
+                </p>
+                <ButtonLink to="/app/plan" size="md" variant="secondary" className="mt-4">
+                  See plans
+                </ButtonLink>
+              </Panel>
             </section>
           )}
         </div>
       ) : null}
-    </div>
+    </>
   );
 }

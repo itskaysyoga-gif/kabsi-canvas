@@ -49,6 +49,8 @@ export type ProfileRow = {
   /** What the owner approved, or "Not yet confirmed by you" when they have not, or null when there is nothing to approve. */
   approved: string | null;
   confirmed: boolean;
+  /** Kabsi has read this field and Google shows nothing for it (Design 3's "Missing"). */
+  missing: boolean;
   status: string;
   tone: RowTone;
   /** The open change for this field, if any (its card has the two decisions). */
@@ -70,7 +72,15 @@ export function profileRow(
   const open = mine.find((c) => OPEN_STATUSES.includes(c.status)) ?? null;
   const latest = mine[0] ?? null;
   const confirmed = fact?.status === "verified";
-  const base = { key: w.key, label: w.label, hint: w.hint ?? null, confirmed, change: open };
+  const known = fact ? show(fact.value) : null;
+  const base = {
+    key: w.key,
+    label: w.label,
+    hint: w.hint ?? null,
+    confirmed,
+    change: open,
+    missing: !open && !!fact && !known,
+  };
 
   if (open) {
     return {
@@ -81,7 +91,6 @@ export function profileRow(
       tone: "amber",
     };
   }
-  const known = fact ? show(fact.value) : null;
   if (latest?.status === "rejected") {
     return {
       ...base,
@@ -96,6 +105,7 @@ export function profileRow(
       ...base,
       google: show(latest.google_value) ?? known,
       approved: known,
+      missing: !!fact && !(show(latest.google_value) ?? known),
       status: "Google did not take your information",
       tone: "red",
     };

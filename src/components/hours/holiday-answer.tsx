@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/kabsi/ui";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -85,7 +85,7 @@ export function HolidayAnswerForm({
               setAnswer(c.id);
               setErr("");
             }}
-            className={`min-h-12 rounded-card border-2 px-2 text-small font-bold ${answer === c.id ? "border-text-1 bg-surface-2" : "border-line"}`}
+            className={`min-h-12 rounded-full border px-2 text-small font-bold ${answer === c.id ? "border-text-1 bg-text-1 text-surface-0" : "border-line-strong bg-surface-1 text-text-1"}`}
           >
             {c.label}
           </button>
@@ -95,7 +95,7 @@ export function HolidayAnswerForm({
       {answer && answer !== "normal" ? (
         <div className="mt-4 space-y-3">
           {holiday.estimated ? (
-            <p className="text-small leading-6 text-text-2">
+            <p className="text-small text-text-2">
               This date follows the moon. If the announced days are different, move them here.
             </p>
           ) : null}
@@ -151,11 +151,11 @@ export function HolidayAnswerForm({
       ) : null}
 
       {answer ? (
-        <div className="mt-4 rounded-card border-2 border-text-1 p-4">
-          <p className="text-small">
+        <div className="mt-4 rounded-inner border border-line-strong bg-surface-2 p-4">
+          <p className="text-small text-text-2">
             {answer === "normal" ? "Kabsi will record:" : "Google will show:"}
           </p>
-          <p className="mt-1 font-bold">
+          <p className="mt-1 text-body font-bold text-text-1">
             {problem ? "Check the details above." : readBack(holiday, answer, f)}
           </p>
           {answer === "normal" && regularHours ? (
@@ -165,14 +165,15 @@ export function HolidayAnswerForm({
             <p className="mt-1 text-small text-text-2">Nothing changes on Google.</p>
           ) : null}
           <Button
+            size="md"
+            data-main-cta
             className="mt-4 w-full sm:w-auto"
-            disabled={busy || !!problem}
+            loading={busy}
+            disabled={!!problem}
             onClick={() => void confirm()}
           >
-            {busy
-              ? "Saving…"
-              : (confirmLabel?.(answer) ??
-                (answer === "normal" ? "Keep my normal hours" : "Confirm and save to Google"))}
+            {confirmLabel?.(answer) ??
+              (answer === "normal" ? "Keep my normal hours" : "Confirm and save to Google")}
           </Button>
         </div>
       ) : (
@@ -183,7 +184,7 @@ export function HolidayAnswerForm({
         </p>
       )}
       {err ? (
-        <p className="mt-3 text-small text-bad" role="alert">
+        <p className="mt-3 text-small font-semibold text-bad" role="alert">
           {err}
         </p>
       ) : null}

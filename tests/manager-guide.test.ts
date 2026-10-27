@@ -4,7 +4,19 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { ManagerGuide } from "../src/components/onboarding/manager-guide";
 import { accessPill } from "../src/lib/access-status";
-import { FLOW, confirmMode, flowStepOf } from "../src/lib/onboarding-flow";
+import {
+  LATER,
+  RESUME_CODE,
+  STAGES,
+  STAGE_OF,
+  accessOf,
+  confirmMode,
+  resumePath,
+  resumeTarget,
+  screenOf,
+  trialStartedToday,
+  type OnboardingStatus,
+} from "../src/lib/onboarding-flow";
 import {
   COMPUTER_CARDS,
   PHONE_CARDS,
@@ -60,7 +72,7 @@ describe("the Manager guide (P0.4-03)", () => {
     expect(html).toContain("Step 1 of 5");
     expect(html).toContain("Show me the phone version");
     expect(html).toContain("setup call");
-    expect(html).toContain("Open my Google listing");
+    expect(html).toContain("Open my Google profile");
     expect(html).toContain("/help/manager-steps/desktop/step-1-open-profile.png");
     // the 20 second clip slot renders nothing until the clip exists
     expect(html).not.toContain("<video");
@@ -128,26 +140,91 @@ describe("the live status pill", () => {
   });
 });
 
-describe("the six steps", () => {
-  it("lists them in the order of K-141", () => {
-    expect(FLOW.map((s) => s.label)).toEqual([
-      "Check",
-      "Sign up",
-      "Connect",
-      "About you",
-      "Confirm",
-      "Trial",
+describe("the four stages (V4, master plan 30.16 section 3)", () => {
+  const base: OnboardingStatus = {
+    location_id: "l",
+    business: "Rose Lane Salon",
+    time_zone: "Asia/Dubai",
+    is_demo: false,
+    check: null,
+    confirmed: true,
+    whatsapp: true,
+    setup_ok: true,
+    keyword: null,
+    consent: true,
+    accepted: true,
+    checked: true,
+    trial_ends_at: null,
+    first_task_done: false,
+    resume_code: null,
+  };
+  const at = (s: Partial<OnboardingStatus>, seen = {}, whatsappOn = true, now?: number) =>
+    screenOf({ status: { ...base, ...s }, whatsappOn, seen, ...(now ? { now } : {}) });
+  it("names them in order", () => {
+    expect([...STAGES]).toEqual([
+      "Your free check",
+      "Sign in",
+      "Connect WhatsApp",
+      "Add Kabsi on Google",
     ]);
   });
-  it("maps the stored step to a screen", () => {
-    expect(flowStepOf("business")).toBe("check");
-    expect(flowStepOf("access")).toBe("connect");
-    expect(flowStepOf("knowledge")).toBe("questions");
-    expect(flowStepOf("confirm")).toBe("confirm");
-    expect(flowStepOf("plan")).toBe("confirm");
-    expect(flowStepOf("done")).toBe("done");
+  it("opens the next unfinished stage", () => {
+    expect(screenOf({ status: null, whatsappOn: true, seen: {} })).toBe("find");
+    expect(at({ confirmed: false, check: { code: "RLS2345A", term: "hair salon" } })).toBe("check");
+    expect(
+      at({ confirmed: false, check: { code: "RLS2345A", term: "hair salon" } }, { check: true }),
+    ).toBe("confirm");
+    expect(at({ confirmed: false })).toBe("confirm");
+    expect(at({ whatsapp: false })).toBe("whatsapp");
+    expect(at({ whatsapp: false, checked: false }, { whatsapp: true })).toBe("manager");
+    expect(at({ accepted: false, checked: false })).toBe("manager");
+    expect(at({ checked: false })).toBe("manager");
+    expect(at({ first_task_done: true })).toBe("later");
   });
-  it("step 5 waits for access and then asks to confirm", () => {
+  it("without a WhatsApp number, stage 3 is behind the owner once they authorise access", () => {
+    expect(
+      at({ whatsapp: false, consent: false, accepted: false, checked: false }, {}, false),
+    ).toBe("whatsapp");
+    expect(at({ whatsapp: false, accepted: false, checked: false }, {}, false)).toBe("manager");
+  });
+  it("shows Access works. on the day the trial starts, then the first task", () => {
+    const now = Date.parse("2026-10-27T10:00:00Z");
+    expect(at({ trial_ends_at: "2026-11-10T10:00:00Z" }, {}, true, now)).toBe("checked");
+    expect(at({ trial_ends_at: "2026-11-10T10:00:00Z" }, { checked: true }, true, now)).toBe(
+      "first_task",
+    );
+    expect(at({ trial_ends_at: "2026-11-05T10:00:00Z" }, {}, true, now)).toBe("first_task");
+    expect(trialStartedToday(null)).toBe(true);
+  });
+  it("puts each screen on its stage", () => {
+    expect(STAGE_OF.check).toBe(0);
+    expect(STAGE_OF.confirm).toBe(1);
+    expect(STAGE_OF.whatsapp).toBe(2);
+    expect(STAGE_OF.manager).toBe(3);
+    expect(STAGE_OF.first_task).toBe(4);
+  });
+  it("tracks access in three states", () => {
+    expect(accessOf({ consent: false, accepted: false, checked: false })).toBe("not_started");
+    expect(accessOf({ consent: true, accepted: false, checked: false })).toBe("invite_pending");
+    expect(accessOf({ consent: true, accepted: true, checked: false })).toBe("accepted");
+    expect(accessOf({ consent: true, accepted: true, checked: true })).toBe("checked");
+  });
+  it("the resume link opens /start for a setup step and Home otherwise", () => {
+    expect(RESUME_CODE.test("0123456789abcdef0123")).toBe(true);
+    expect(RESUME_CODE.test("0123456789ABCDEF0123")).toBe(false);
+    expect(resumePath("0123456789abcdef0123")).toBe("/start/resume/0123456789abcdef0123");
+    for (const p of ["/start/business", "/start/whatsapp", "/start/manager"])
+      expect(resumeTarget(p)).toBe("/start");
+    expect(resumeTarget("/app")).toBe("/app");
+    expect(resumeTarget("https://evil.example/start")).toBe("/app");
+    expect(resumeTarget(undefined)).toBe("/app");
+  });
+  it("the rest of setup keeps house style", () => {
+    const all = LATER.map((l) => `${l.title} ${l.line}`).join(" ") + STAGES.join(" ");
+    expect(all).not.toMatch(/[—–!]|listing|visibility/i);
+    expect(LATER).toHaveLength(6);
+  });
+  it("the old step 5 waits for access and then asks to confirm", () => {
     expect(confirmMode({ access_granted_at: null })).toBe("waiting");
     expect(confirmMode({ access_granted_at: "2026-10-22T10:00:00Z" })).toBe("confirm");
   });

@@ -63,7 +63,7 @@ export type Screen = {
 const TRIAL_WAIT = "Your free trial starts when Google is ready, so you don't lose any days.";
 
 export const GOOGLE = {
-  manager: { label: "Open my Google listing", url: "https://business.google.com/" },
+  manager: { label: "Open my Google profile", url: "https://business.google.com/" },
   verify: {
     label: "Open Google's help to verify",
     url: "https://support.google.com/business/answer/7107242",

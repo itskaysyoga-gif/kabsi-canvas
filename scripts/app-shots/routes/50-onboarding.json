@@ -1,0 +1,22 @@
+[
+  { "path": "/start?new=1", "state": "ob-find", "name": "ob-find" },
+  { "path": "/start", "state": "ob-check", "name": "ob-check" },
+  { "path": "/start", "state": "ob-confirm", "name": "ob-confirm" },
+  { "path": "/start", "state": "ob-wa-off", "name": "ob-wa-off" },
+  { "path": "/start?preview=wa", "state": "ob-wa-wait", "name": "ob-wa-wait" },
+  { "path": "/start?preview=wa-notyet", "state": "ob-wa-notyet", "name": "ob-wa-notyet" },
+  { "path": "/start?preview=wa-done", "state": "ob-wa-done", "name": "ob-wa-done" },
+  { "path": "/start", "state": "ob-consent", "name": "ob-consent" },
+  { "path": "/start", "state": "ob-invite", "name": "ob-invite" },
+  { "path": "/start", "state": "ob-accepted", "name": "ob-accepted" },
+  { "path": "/start", "state": "ob-checked", "name": "ob-checked" },
+  { "path": "/start", "state": "ob-first-task", "name": "ob-first-task" },
+  { "path": "/start?preview=rest", "state": "ob-rest", "name": "ob-rest" },
+  { "path": "/start", "state": "ob-done", "name": "ob-done" },
+  { "path": "/start/resume/0123456789abcdef0123", "state": "ob-resume", "name": "ob-resume" },
+  {
+    "path": "/start/resume/ffffffffffffffffffff",
+    "state": "ob-resume-bad",
+    "name": "ob-resume-bad"
+  }
+]

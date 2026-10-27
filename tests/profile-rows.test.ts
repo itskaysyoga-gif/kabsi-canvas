@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { OpenChange } from "../src/components/profile/open-change";
+import { changeWords } from "../src/components/profile/change-card";
 import {
   NOT_CONFIRMED,
   profileRows,
@@ -122,6 +123,31 @@ describe("the rows", () => {
     );
   });
 
+  it("marks a detail Missing only when Kabsi read it and Google shows nothing", () => {
+    const facts: Fact[] = [
+      { key: "description", value: v(""), status: "verified" },
+      { key: "phone", value: v("+1 555 0100"), status: "verified" },
+    ];
+    const rows = profileRows(facts, []);
+    expect(row(rows, "description").missing).toBe(true);
+    expect(row(rows, "phone").missing).toBe(false);
+    // not read yet is not Missing
+    expect(row(rows, "website").missing).toBe(false);
+    expect(row(rows, "website").status).toBe("Not read yet");
+  });
+
+  it("names each changed detail in the owner's words, never with a person", () => {
+    expect(changeWords("phone", "Rose Lane Salon")).toEqual({
+      noun: "phone number",
+      headline: "Google shows a new phone number for Rose Lane Salon.",
+      putBack: "Put my phone number back",
+      keep: "The new phone number is right",
+    });
+    expect(changeWords("regular_hours").headline).toBe("Google shows new opening hours.");
+    expect(changeWords("regular_hours").keep).toBe("The new opening hours are right");
+    expect(changeWords("phone").putBack).not.toMatch(/Put mine back/);
+  });
+
   it("writes the Protection status line", () => {
     const now = Date.parse("2026-10-20T12:00:00Z");
     expect(protectionLine({ running: true, checkedAt: "2026-10-20T09:14:00Z", now })).toMatch(
@@ -150,18 +176,19 @@ describe("the open change card", () => {
 
   it("shows the two decisions and the two values, stacked on a phone", () => {
     const out = html({ ...phoneChange, previous_fact_id: "f1" }, owner);
-    expect(out).toContain("Keep my information");
-    expect(out).toContain("Google is right");
+    expect(out).toContain("Put my phone number back");
+    expect(out).toContain("The new phone number is right");
     expect(out).toContain("You approved");
     expect(out).toContain("Google shows now");
     expect(out).toContain("grid gap-3 sm:grid-cols-2");
   });
 
-  it("offers only Google is right, and says why, for a detail the owner has not confirmed", () => {
+  it("offers only the new value is right, and says why, for a detail the owner has not confirmed", () => {
     const out = html(phoneChange, owner);
     expect(out).toContain("Not yet confirmed by you");
     expect(out).toContain("will not put the old value back");
-    expect(out).not.toContain("Keep my information");
+    expect(out).toContain("The new phone number is right");
+    expect(out).not.toContain("Put my phone number back");
   });
 
   it("warns before a name, address, category or open status decision", () => {

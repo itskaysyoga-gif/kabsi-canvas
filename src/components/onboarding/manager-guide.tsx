@@ -107,7 +107,7 @@ export function ManagerGuide({
         {card.opensListing ? (
           <Button asChild variant="outline" className="mt-4 w-full sm:w-auto">
             <a href={listingUrl(device, businessName)} target="_blank" rel="noopener noreferrer">
-              Open my Google listing <ExternalLink />
+              Open my Google profile <ExternalLink />
             </a>
           </Button>
         ) : null}

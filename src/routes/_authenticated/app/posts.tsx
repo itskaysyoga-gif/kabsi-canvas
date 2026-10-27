@@ -1,19 +1,32 @@
 import { useState, type FormEvent } from "react";
-import { EarlyAccessNotice } from "@/components/app/early-access-notice";
-import { fmtDate, fmtDateTime } from "@/lib/format";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import { Check, Newspaper, Pencil, SkipForward } from "lucide-react";
+import { EarlyAccessNotice } from "@/components/app/early-access-notice";
+import { AccountTop, Panel } from "@/components/kabsi/d3-account";
+import { TaskBlock, UndoBar } from "@/components/kabsi/d3-content-task";
+import {
+  Button,
+  ButtonLink,
+  EmptyState,
+  ErrorState,
+  Skeleton,
+  StatusPill,
+  Switch,
+  WhatsAppLink,
+  buttonClass,
+} from "@/components/kabsi/ui";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useAutosize } from "@/lib/use-autosize";
+import { fmtDate, fmtDateTime } from "@/lib/format";
 import { myLatestLocation } from "@/lib/onboarding";
 import { contentCall } from "@/lib/reviews";
-import { PublishingBanner } from "@/components/reviews/review-card";
+import { WHATSAPP_ON } from "@/lib/site";
+import { latestByTarget, recentTasks, type TaskItem } from "@/lib/task-feed";
 import { track } from "@/lib/telemetry";
-import { Megaphone as PageGlyph } from "lucide-react";
-import { PageIcon } from "@/components/shared/page-icon";
+import { useAutosize } from "@/lib/use-autosize";
+import { cn } from "@/lib/utils";
 import {
   approveMonth,
   CTA_LABEL,
@@ -28,7 +41,6 @@ import {
   savePost,
   setAutoPosts,
   setCadence,
-  STATE_LABEL,
   TYPE_LABEL,
   type Post,
   type PostType,
@@ -36,20 +48,22 @@ import {
   undoPost,
 } from "@/lib/posts";
 
-// Posts (P0.5-02, K-24, K-80): the month view. Kabsi prepares posts from what is true (one a week by default) and asks
-// one question when it has nothing true to say; the owner writes an Update, Offer or Event, approves the month or each
-// post, and Kabsi sends each at its time through the one pipeline. Nothing goes to Google without the approval (D202).
+// Posts (P0.5-02, K-24, K-80; Design 3's Posts tab): the monthly "anything new" question, the month's posts, each with
+// Approve, Edit and Skip and the 10 second Undo, and each approved post with its task state (approved, sent to Google,
+// on Google with the link, or did not go through). Kabsi prepares posts from what is true; the owner writes an Update,
+// Offer or Event; nothing goes to Google without the approval (D202).
 export const Route = createFileRoute("/_authenticated/app/posts")({
   head: () => ({ meta: [{ title: "Posts | Kabsi" }, { name: "robots", content: "noindex" }] }),
   component: PostsPage,
 });
 
-const QUESTION = "Anything new this month? A dish, a service, an event?";
+type Tasks = { post: Map<string, TaskItem>; removal: Map<string, TaskItem> };
 
 function PostsPage() {
   const queryClient = useQueryClient();
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   const loc = location.data;
+  const ready = !!loc && loc.status === "active" && !loc.concierge;
   const posts = useQuery({
     queryKey: ["posts", loc?.id],
     queryFn: () => loadPosts(loc!.id),
@@ -60,10 +74,17 @@ function PostsPage() {
     queryFn: () => loadSettings(loc!.id),
     enabled: !!loc,
   });
+  const feed = useQuery({
+    queryKey: ["post-tasks", loc?.id],
+    queryFn: () =>
+      recentTasks(loc!.id, { kinds: ["local_post", "local_post_removal"], days: 120, limit: 100 }),
+    enabled: ready,
+    retry: false,
+  });
   const refresh = () =>
     Promise.all(
-      [["posts"], ["dashboard"], ["activity"], ["tasks"], ["post-settings"]].map((queryKey) =>
-        queryClient.invalidateQueries({ queryKey }),
+      [["posts"], ["post-tasks"], ["dashboard"], ["activity"], ["tasks"], ["post-settings"]].map(
+        (queryKey) => queryClient.invalidateQueries({ queryKey }),
       ),
     );
   const months = nextMonths(2);
@@ -73,61 +94,98 @@ function PostsPage() {
   const prepared = inMonth.filter((p) => p.state === "draft");
   const planned = inMonth.filter((p) => p.state !== "skipped");
   const cadence = settings.data?.posts_per_month ?? 4;
-  const ready = loc && loc.status === "active" && !loc.concierge;
+  const items = feed.data ?? [];
+  const tasks: Tasks = {
+    post: latestByTarget(items.filter((t) => t.kind === "local_post")),
+    removal: latestByTarget(items.filter((t) => t.kind === "local_post_removal")),
+  };
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
-      <PageIcon icon={<PageGlyph />} />
-      <p className="text-small font-bold uppercase tracking-wider text-text-2">Content</p>
-      <h1 className="mt-1 font-display text-h2 leading-none sm:text-5xl">Posts</h1>
-      <p className="mt-2 max-w-xl text-text-2">
-        Short updates on your Google profile, from what is true about your business. You approve
-        each one; Kabsi sends it on its day.
-      </p>
-      {!location.isLoading && !loc ? (
-        <Button asChild className="mt-6">
-          <Link to="/start">Add your business</Link>
-        </Button>
-      ) : null}
+    <>
+      <AccountTop
+        title="Posts"
+        lead="On Pro, Kabsi writes a post every week. On Essentials, 2 a month."
+      />
+      {!location.isLoading && !loc ? <ButtonLink to="/start">Add your business</ButtonLink> : null}
       {loc?.concierge ? <EarlyAccessNotice what="Posts" /> : null}
       {loc && !loc.concierge && loc.status !== "active" ? <NotYet /> : null}
-      {posts.isError ? (
-        <p className="mt-6 text-small text-bad" role="alert">
-          Couldn't load your posts. Refresh the page to try again.
-        </p>
+      {ready && posts.isError ? (
+        <ErrorState title="This page did not load." onRetry={() => void posts.refetch()}>
+          Nothing you did, and nothing changed on Google. Try again in a minute.
+        </ErrorState>
       ) : null}
 
-      {ready ? (
-        <>
-          <div className="mt-7 flex gap-2" role="tablist" aria-label="Month">
-            {months.map((m) => (
-              <button
-                key={m}
-                type="button"
-                role="tab"
-                aria-selected={m === month}
-                onClick={() => setMonth(m)}
-                className={`h-11 rounded-pill border px-4 text-small font-bold ${m === month ? "border-text-1 bg-kb-black text-kb-white" : "border-line bg-surface-1"}`}
-              >
-                {monthName(m)}
-              </button>
-            ))}
-          </div>
+      {ready && !posts.isError ? (
+        <div className="space-y-4">
+          <Panel title="Anything new this month?" id="monthly">
+            <p className="text-body text-text-2">
+              Any new services, prices, products or opening times? Kabsi turns your answer into
+              posts and updates, and asks for your yes on each one.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {WHATSAPP_ON ? (
+                <WhatsAppLink label="Answer on WhatsApp" size="md" />
+              ) : (
+                <a href="#write-post" className={buttonClass("secondary", "md")}>
+                  Write a post
+                </a>
+              )}
+            </div>
+          </Panel>
 
-          <MonthView
-            locationId={loc.id}
-            month={month}
-            posts={inMonth}
-            prepared={prepared}
-            missing={Math.max(cadence - planned.length, 0)}
-            onChanged={refresh}
-          />
+          {posts.isLoading ? (
+            <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading">
+              {[0, 1].map((i) => (
+                <div key={i} className="rounded-card border border-line bg-surface-1 p-5">
+                  <Skeleton className="h-5 w-1/2" />
+                  <Skeleton className="mt-3 h-4 w-full" />
+                  <Skeleton className="mt-2 h-4 w-4/5" />
+                </div>
+              ))}
+            </div>
+          ) : all.length === 0 ? (
+            <EmptyState icon={Newspaper} title="No posts yet.">
+              Tell Kabsi about a new service, an offer or an event on WhatsApp, and it writes the
+              post.
+            </EmptyState>
+          ) : (
+            <>
+              <div className="flex flex-wrap gap-2" role="tablist" aria-label="Month">
+                {months.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    role="tab"
+                    aria-selected={m === month}
+                    onClick={() => setMonth(m)}
+                    className={cn(
+                      "min-h-11 rounded-full border px-4 text-small font-bold",
+                      m === month
+                        ? "border-text-1 bg-text-1 text-surface-0"
+                        : "border-line-strong bg-surface-1 text-text-1",
+                    )}
+                  >
+                    {monthName(m)}
+                  </button>
+                ))}
+              </div>
+              <MonthView
+                locationId={loc.id}
+                month={month}
+                posts={inMonth}
+                prepared={prepared}
+                missing={Math.max(cadence - planned.length, 0)}
+                tasks={tasks}
+                onChanged={refresh}
+              />
+            </>
+          )}
 
           <WritePost locationId={loc.id} onSaved={refresh} />
           <Settings locationId={loc.id} />
-        </>
+        </div>
       ) : null}
-    </div>
+    </>
   );
 }
 
@@ -137,6 +195,7 @@ function MonthView({
   posts,
   prepared,
   missing,
+  tasks,
   onChanged,
 }: {
   locationId: string;
@@ -144,6 +203,7 @@ function MonthView({
   posts: Post[];
   prepared: Post[];
   missing: number;
+  tasks: Tasks;
   onChanged: () => unknown;
 }) {
   const [busy, setBusy] = useState(false);
@@ -165,74 +225,91 @@ function MonthView({
     }
     setBusy(false);
   }
-  const order = [...posts].sort((a, b) =>
-    (a.publish_at ?? a.created_at).localeCompare(b.publish_at ?? b.created_at),
-  );
+  // What waits for a yes first, in date order; then what was sent, newest first.
+  const at = (p: Post) => p.publish_at ?? p.created_at;
+  const order = [
+    ...posts.filter((p) => p.state === "draft").sort((a, b) => at(a).localeCompare(at(b))),
+    ...posts.filter((p) => p.state !== "draft").sort((a, b) => at(b).localeCompare(at(a))),
+  ];
+  // One yellow button: "Approve the month" when several posts wait, else the first post's Approve.
+  const many = prepared.length > 1;
+  const firstDraft = order.find((p) => p.state === "draft")?.id;
   return (
-    <section className="mt-5">
-      {prepared.length ? (
-        <div className="rounded-panel bg-surface-1 p-5 shadow-rest">
-          <h2 className="font-display text-h3 leading-tight">
-            {prepared.length} {prepared.length === 1 ? "post" : "posts"} for {monthName(month)}{" "}
-            {prepared.length === 1 ? "is" : "are"} ready
-          </h2>
-          <p className="mt-1 text-small text-text-2">
+    <section className="space-y-4" aria-label={`Posts for ${monthName(month)}`}>
+      {many ? (
+        <Panel
+          title={`${prepared.length} posts for ${monthName(month)} are ready`}
+          id="month-ready"
+        >
+          <p className="text-body text-text-2">
             Approve the month, or read and approve them one by one below.
           </p>
           <Button
+            size="md"
+            data-main-cta
             className="mt-4 w-full sm:w-auto"
-            disabled={busy}
+            loading={busy}
             onClick={() => void approveAll()}
           >
-            {busy ? "Approving…" : "Approve the month"}
+            Approve the month
           </Button>
           {msg ? (
-            <p className="mt-3 text-small" role="status">
+            <p className="mt-3 text-small text-text-1" role="status">
               {msg}
             </p>
           ) : null}
-        </div>
-      ) : missing > 0 ? (
-        <div className="rounded-panel bg-surface-1 p-5 shadow-rest">
-          <h2 className="font-display text-h3 leading-tight">{QUESTION}</h2>
-          <p className="mt-1 text-small text-text-2">
-            Kabsi writes posts only from what is true about your business. Tell it below, or add a
-            fact in{" "}
-            <Link to="/app/knowledge" className="font-bold underline underline-offset-4">
-              About your business
-            </Link>
-            .
-          </p>
-        </div>
+        </Panel>
+      ) : !prepared.length && missing > 0 ? (
+        <p className="text-small text-text-2">
+          Kabsi writes posts only from what is true about your business. Answer the question above,
+          or write a post below.
+        </p>
       ) : null}
       {order.length ? (
-        <ol className="mt-4 space-y-3">
+        <ol className="space-y-4">
           {order.map((p) => (
             <li key={p.id}>
               {p.state === "draft" ? (
-                <DraftCard post={p} onChanged={onChanged} />
+                <DraftCard post={p} primary={!many && p.id === firstDraft} onChanged={onChanged} />
               ) : (
-                <SentCard post={p} onChanged={onChanged} />
+                <SentCard post={p} tasks={tasks} onChanged={onChanged} />
               )}
             </li>
           ))}
         </ol>
       ) : (
-        <p className="mt-4 text-small text-text-2">Nothing planned for {monthName(month)} yet.</p>
+        <p className="text-body text-text-2">Nothing planned for {monthName(month)} yet.</p>
       )}
     </section>
   );
 }
 
-function PostMeta({ post }: { post: Post }) {
+/** The card's top: the kind, the title and when (Design 3's KabsiCard header). */
+function CardHead({ post }: { post: Post }) {
+  const title =
+    post.topic_type === "EVENT" && post.event_title
+      ? post.event_title
+      : `${TYPE_LABEL[post.topic_type]}${post.source === "auto" ? ", prepared by Kabsi" : ""}`;
   return (
-    <p className="text-label font-bold uppercase tracking-wider text-text-2">
-      {STATE_LABEL[post.state]} · {TYPE_LABEL[post.topic_type]}
-      {post.publish_at ? ` · ${fmtDateTime(post.publish_at)}` : ` · ${fmtDate(post.created_at)}`}
-      {post.source === "auto" ? " · prepared by Kabsi" : ""}
-    </p>
+    <header className="flex items-start gap-3">
+      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-2 text-text-2">
+        <Newspaper className="size-5" strokeWidth={1.75} aria-hidden />
+      </span>
+      <div className="min-w-0 flex-1">
+        <h3 className="text-title font-bold text-text-1">{title}</h3>
+        <p className="text-small text-text-2">
+          {post.publish_at ? fmtDateTime(post.publish_at) : fmtDate(post.created_at)}
+          {post.topic_type !== "STANDARD" && post.start_date
+            ? `. Runs ${fmtDate(post.start_date)} to ${fmtDate(post.end_date)}`
+            : ""}
+          {post.offer_terms ? `. ${post.offer_terms}` : ""}
+        </p>
+      </div>
+    </header>
   );
 }
+
+const cardCls = "rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5";
 
 // The 10 seconds after an approval (K-70): the countdown with Undo, for a post or its removal.
 type Pending = { publication: string; until: number };
@@ -263,8 +340,17 @@ function usePending(postId: string, onChanged: () => unknown) {
   return { pending, busy, err, start, undo };
 }
 
-function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }) {
+function DraftCard({
+  post,
+  primary,
+  onChanged,
+}: {
+  post: Post;
+  primary: boolean;
+  onChanged: () => unknown;
+}) {
   const [body, setBody] = useState(post.body ?? "");
+  const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
   const ref = useAutosize(body);
@@ -275,6 +361,7 @@ function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }
     try {
       if (kind === "publish") {
         wait.start(await publishPost(post.id, body));
+        setEditing(false);
         track("post_approved", { channel: "dashboard" });
       } else {
         await contentCall({ do: "post_skip", post_id: post.id });
@@ -287,73 +374,140 @@ function DraftCard({ post, onChanged }: { post: Post; onChanged: () => unknown }
   }
   if (wait.pending) {
     return (
-      <PublishingBanner
+      <UndoBar
         until={wait.pending.until}
         busy={wait.busy}
         error={wait.err}
         onUndo={() => void wait.undo()}
+        later={`Approved. It goes to Google on ${fmtDateTime(wait.pending.until)}.`}
       />
     );
   }
+  const yes = primary
+    ? ({ variant: "primary", "data-main-cta": true } as const)
+    : ({ variant: "secondary" } as const);
   return (
-    <article className="rounded-panel bg-surface-1 p-5 shadow-rest">
-      <PostMeta post={post} />
-      {post.topic_type === "EVENT" && post.event_title ? (
-        <p className="mt-2 font-bold">{post.event_title}</p>
-      ) : null}
-      {post.topic_type !== "STANDARD" && post.start_date ? (
-        <p className="mt-1 text-small text-text-2">
-          {fmtDate(post.start_date)} to {fmtDate(post.end_date)}
-          {post.offer_terms ? ` · ${post.offer_terms}` : ""}
-        </p>
-      ) : null}
-      <Label htmlFor={`post-${post.id}`} className="sr-only">
-        Post text
-      </Label>
-      <Textarea
-        id={`post-${post.id}`}
-        ref={ref}
-        dir="auto"
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        className="mt-3 min-h-28"
-        maxLength={1500}
-      />
-      <p className="mt-1 text-label text-text-2">
-        {body.length} of 1,500 characters
-        {post.cta_type ? ` · Button: ${CTA_LABEL[post.cta_type] ?? post.cta_type}` : ""}
-      </p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Button
-          size="compact"
-          variant="outline"
-          disabled={!!busy}
-          onClick={() => void run("publish")}
-        >
-          {busy === "publish" ? "Approving…" : "Approve"}
-        </Button>
-        <Button size="compact" variant="ghost" disabled={!!busy} onClick={() => void run("skip")}>
-          Skip
-        </Button>
+    <article className={cardCls} aria-label={post.event_title ?? TYPE_LABEL[post.topic_type]}>
+      <CardHead post={post} />
+      <div className="mt-3">
+        <StatusPill tone="info">Waiting for your yes</StatusPill>
       </div>
-      {err ? (
-        <p className="mt-2 text-small text-bad" role="alert">
-          {err}
-        </p>
-      ) : null}
+      <div className="mt-4">
+        <p className="text-small font-bold text-text-2">Post ready</p>
+        {editing ? (
+          <>
+            <Label htmlFor={`post-${post.id}`} className="sr-only">
+              Post text
+            </Label>
+            <Textarea
+              id={`post-${post.id}`}
+              ref={ref}
+              dir="auto"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              className="mt-2 min-h-28"
+              maxLength={1500}
+            />
+            <p className="mt-1 text-small text-text-2">
+              {body.length} of 1,500 characters
+              {post.cta_type ? `. Button: ${CTA_LABEL[post.cta_type] ?? post.cta_type}` : ""}
+            </p>
+          </>
+        ) : (
+          <p
+            dir="auto"
+            className="mt-2 whitespace-pre-wrap rounded-inner bg-surface-2 p-3 text-body text-text-1"
+          >
+            {body}
+          </p>
+        )}
+      </div>
+      <div className="mt-5 border-t border-line pt-4">
+        {editing ? (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="md"
+              {...yes}
+              loading={busy === "publish"}
+              disabled={!!busy || body.trim().length < 10}
+              onClick={() => void run("publish")}
+            >
+              Save and approve
+            </Button>
+            <Button
+              variant="tertiary"
+              onClick={() => {
+                setBody(post.body ?? "");
+                setEditing(false);
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="md"
+                {...yes}
+                icon={<Check className="size-4" aria-hidden />}
+                loading={busy === "publish"}
+                disabled={!!busy}
+                onClick={() => void run("publish")}
+              >
+                Approve
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
+                icon={<Pencil className="size-4" aria-hidden />}
+                disabled={!!busy}
+                onClick={() => setEditing(true)}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="quiet"
+                size="md"
+                icon={<SkipForward className="size-4" aria-hidden />}
+                loading={busy === "skip"}
+                disabled={!!busy}
+                onClick={() => void run("skip")}
+              >
+                Skip
+              </Button>
+            </div>
+            <p className="mt-3 text-small text-text-2">
+              Nothing is published until you approve it.
+            </p>
+          </>
+        )}
+        {err ? (
+          <p className="mt-3 text-small font-semibold text-bad" role="alert">
+            {err}
+          </p>
+        ) : null}
+      </div>
     </article>
   );
 }
 
-// A post that left the drafts. A published one can be removed from Google (P0.7-05): one confirmation, then the same
-// approval and 10 second undo as any write.
-function SentCard({ post, onChanged }: { post: Post; onChanged: () => unknown }) {
+// A post that left the drafts, with its task state. A waiting one can be cancelled until its time; a published one can
+// be removed from Google (P0.7-05): one confirmation, then the same approval and 10 second undo as any write.
+function SentCard({
+  post,
+  tasks,
+  onChanged,
+}: {
+  post: Post;
+  tasks: Tasks;
+  onChanged: () => unknown;
+}) {
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [cancelled, setCancelled] = useState(false);
   const wait = usePending(post.id, onChanged);
-  // A waiting post (approved, due later) can be cancelled until its time: it goes back to a draft, nothing is posted.
   async function cancel() {
     setBusy(true);
     setErr("");
@@ -378,82 +532,101 @@ function SentCard({ post, onChanged }: { post: Post; onChanged: () => unknown })
   }
   if (wait.pending) {
     return (
-      <PublishingBanner
+      <UndoBar
         until={wait.pending.until}
         busy={wait.busy}
         error={wait.err}
         onUndo={() => void wait.undo()}
-        verb="Removing from Google"
-        done="Approved. Kabsi is removing it from Google."
       />
     );
   }
   if (cancelled) {
     return (
-      <div className="rounded-card bg-surface-1 p-4 shadow-rest">
-        <p className="text-small font-bold" role="status">
+      <div className={cardCls}>
+        <p className="text-body font-bold text-text-1" role="status">
           Cancelled. Nothing was posted.
         </p>
-        <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-small leading-6">
+        <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-small text-text-2">
           {post.body}
         </p>
       </div>
     );
   }
+  const removal = post.state === "removing" || post.state === "removed";
+  const task = removal ? tasks.removal.get(post.id) : tasks.post.get(post.id);
+  const skipped = post.state === "skipped";
+  const waitsForDay =
+    post.state === "publishing" && post.publish_at && Date.parse(post.publish_at) > Date.now();
   return (
-    <div className="rounded-card bg-surface-1 p-4 shadow-rest">
-      <PostMeta post={post} />
-      <p dir="auto" className="mt-2 line-clamp-3 whitespace-pre-wrap text-small leading-6">
+    <article className={cardCls} aria-label={post.event_title ?? TYPE_LABEL[post.topic_type]}>
+      <CardHead post={post} />
+      <p
+        dir="auto"
+        className={cn(
+          "mt-4 line-clamp-4 whitespace-pre-wrap rounded-inner bg-surface-2 p-3 text-body",
+          skipped ? "text-text-2 line-through decoration-text-3" : "text-text-1",
+        )}
+      >
         {post.body}
       </p>
+      {skipped ? (
+        <p className="mt-4 text-small text-text-2">Skipped. Nothing was published.</p>
+      ) : (
+        <>
+          {removal ? (
+            <p className="mt-4 text-small font-bold text-text-2">Removal from Google</p>
+          ) : null}
+          <TaskBlock
+            task={task}
+            kind={removal ? "local_post_removal" : "local_post"}
+            rowState={post.state}
+            className="mt-4"
+          />
+          {waitsForDay ? (
+            <p className="mt-2 text-small text-text-2">
+              Goes to Google on {fmtDateTime(post.publish_at)}.
+            </p>
+          ) : null}
+        </>
+      )}
       {post.state === "publishing" ? (
         <Button
-          size="compact"
-          variant="outline"
-          className="mt-3"
-          disabled={busy}
+          size="md"
+          variant="secondary"
+          className="mt-4"
+          loading={busy}
           onClick={() => void cancel()}
         >
-          {busy ? "Cancelling…" : "Cancel"}
+          Cancel
         </Button>
       ) : null}
       {post.state === "posted" ? (
         confirm ? (
-          <div className="mt-3">
-            <p className="text-small">
+          <div className="mt-4 border-t border-line pt-4">
+            <p className="text-body text-text-1">
               Remove this post from your Google profile? You have 10 seconds to undo.
             </p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <Button
-                size="compact"
-                variant="outline"
-                disabled={busy}
-                onClick={() => void remove()}
-              >
-                {busy ? "Removing…" : "Remove from Google"}
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button size="md" variant="secondary" loading={busy} onClick={() => void remove()}>
+                Remove from Google
               </Button>
-              <Button
-                size="compact"
-                variant="ghost"
-                disabled={busy}
-                onClick={() => setConfirm(false)}
-              >
+              <Button size="md" variant="quiet" disabled={busy} onClick={() => setConfirm(false)}>
                 Keep it
               </Button>
             </div>
           </div>
         ) : (
-          <Button size="compact" variant="ghost" className="mt-2" onClick={() => setConfirm(true)}>
+          <Button variant="tertiary" className="mt-2" onClick={() => setConfirm(true)}>
             Remove from Google
           </Button>
         )
       ) : null}
       {err ? (
-        <p className="mt-2 text-small text-bad" role="alert">
+        <p className="mt-3 text-small font-semibold text-bad" role="alert">
           {err}
         </p>
       ) : null}
-    </div>
+    </article>
   );
 }
 
@@ -514,14 +687,11 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
     }
     setBusy(false);
   }
-  const field = "mt-1 h-11 w-full rounded-card border border-line bg-surface-1 px-3";
+  const field =
+    "mt-1 h-11 w-full rounded-input border border-stroke bg-surface-2 px-3 text-body text-text-1";
   return (
-    <section className="mt-10">
-      <h2 className="text-small font-bold uppercase tracking-wider text-text-2">Write a post</h2>
-      <form
-        onSubmit={(e) => void submit(e)}
-        className="mt-3 space-y-4 rounded-panel bg-surface-1 p-5 shadow-rest"
-      >
+    <Panel title="Write a post" id="write-post">
+      <form onSubmit={(e) => void submit(e)} className="space-y-4">
         <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Kind of post">
           {(["STANDARD", "OFFER", "EVENT"] as PostType[]).map((t) => (
             <button
@@ -530,7 +700,7 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
               role="radio"
               aria-checked={type === t}
               onClick={() => setType(t)}
-              className={`h-11 rounded-card border text-small font-bold ${type === t ? "border-text-1 bg-kb-black text-kb-white" : "border-line"}`}
+              className={`min-h-11 rounded-full border px-2 text-small font-bold ${type === t ? "border-text-1 bg-text-1 text-surface-0" : "border-line-strong text-text-1"}`}
             >
               {TYPE_LABEL[t]}
             </button>
@@ -669,7 +839,7 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
                   type="button"
                   aria-pressed={photo === p.id}
                   onClick={() => setPhoto(photo === p.id ? null : p.id)}
-                  className={`overflow-hidden rounded-card border-2 ${photo === p.id ? "border-text-1" : "border-transparent"}`}
+                  className={`overflow-hidden rounded-inner border-2 ${photo === p.id ? "border-text-1" : "border-transparent"}`}
                 >
                   {p.url ? (
                     <img
@@ -694,8 +864,14 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
             className={field}
           />
         </label>
-        <Button type="submit" variant="outline" disabled={busy || summary.trim().length < 10}>
-          {busy ? "Checking…" : "Save the post"}
+        <Button
+          type="submit"
+          size="md"
+          variant="secondary"
+          loading={busy}
+          disabled={summary.trim().length < 10}
+        >
+          Save the post
         </Button>
         {done ? (
           <p className="text-small" role="status">
@@ -703,12 +879,12 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
           </p>
         ) : null}
         {err ? (
-          <p className="text-small text-bad" role="alert">
+          <p className="text-small font-semibold text-bad" role="alert">
             {err}
           </p>
         ) : null}
       </form>
-    </section>
+    </Panel>
   );
 }
 
@@ -734,33 +910,25 @@ function Settings({ locationId }: { locationId: string }) {
     setBusy(false);
   }
   return (
-    <section className="mt-10 rounded-panel bg-surface-1 p-5 shadow-rest">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="font-bold">Kabsi's posts</p>
-          <p className="text-small text-text-2">
-            {on
-              ? "Kabsi plans your posts each month from what is true, and asks when it has nothing to say."
-              : "Off. Your own posts still work."}
-          </p>
-        </div>
-        <Button
-          size="compact"
-          variant="outline"
-          disabled={busy || settings.isLoading}
-          aria-pressed={on}
-          onClick={() => void change(() => setAutoPosts(locationId, !on))}
-        >
-          {on ? "Turn off" : "Turn on"}
-        </Button>
-      </div>
+    <Panel>
+      <Switch
+        checked={on}
+        label="Kabsi's posts"
+        description={
+          on
+            ? "Kabsi plans your posts each month from what is true, and asks when it has nothing to say."
+            : "Off. Your own posts still work."
+        }
+        disabled={busy || settings.isLoading}
+        onChange={(v) => void change(() => setAutoPosts(locationId, v))}
+      />
       {on ? (
         <div
           className="mt-4 flex flex-wrap items-center gap-2"
           role="radiogroup"
           aria-label="Posts a month"
         >
-          <span className="text-small">Posts a month:</span>
+          <span className="text-small text-text-1">Posts a month:</span>
           {([4, 2] as const).map((n) => (
             <button
               key={n}
@@ -769,7 +937,12 @@ function Settings({ locationId }: { locationId: string }) {
               aria-checked={settings.data?.posts_per_month === n}
               disabled={busy}
               onClick={() => void change(() => setCadence(locationId, n))}
-              className={`h-11 min-w-11 rounded-pill border px-4 text-small font-bold ${settings.data?.posts_per_month === n ? "border-text-1 bg-kb-black text-kb-white" : "border-line"}`}
+              className={cn(
+                "min-h-11 min-w-11 rounded-full border px-4 text-small font-bold",
+                settings.data?.posts_per_month === n
+                  ? "border-text-1 bg-text-1 text-surface-0"
+                  : "border-line-strong text-text-1",
+              )}
             >
               {n}
             </button>
@@ -777,24 +950,24 @@ function Settings({ locationId }: { locationId: string }) {
         </div>
       ) : null}
       {err ? (
-        <p className="mt-2 text-small text-bad" role="alert">
+        <p className="mt-2 text-small font-semibold text-bad" role="alert">
           {err}
         </p>
       ) : null}
-    </section>
+    </Panel>
   );
 }
 
 function NotYet() {
   return (
-    <div className="mt-7 rounded-panel bg-surface-1 p-6 shadow-rest">
-      <p className="font-bold">Posts start once Kabsi can reach your Google profile.</p>
-      <p className="mt-1 text-small leading-6 text-text-2">
+    <Panel>
+      <p className="text-body font-bold">Posts start once Kabsi can reach your Google profile.</p>
+      <p className="mt-1 text-small text-text-2">
         Finish setup and this page fills up with posts to approve.
       </p>
-      <Button asChild size="compact" className="mt-4">
-        <Link to="/start">Continue setup</Link>
-      </Button>
-    </div>
+      <ButtonLink to="/start" size="md" className="mt-4">
+        Continue setup
+      </ButtonLink>
+    </Panel>
   );
 }
