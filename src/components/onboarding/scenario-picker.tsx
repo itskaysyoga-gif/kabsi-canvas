@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MORE_SITUATIONS, QUESTIONS, SITUATION_LABELS, type ScenarioId } from "@/lib/scenarios";
+import { Button } from "@/components/kabsi/ui";
 import { cn } from "@/lib/utils";
 
 /**
@@ -42,21 +43,21 @@ export function ScenarioPicker({
             <p className="font-medium leading-6">{q.text}</p>
             <div className="mt-2 grid grid-cols-2 gap-3" role="group" aria-label={q.text}>
               {(["yes", "no"] as const).map((v) => (
-                <button
+                <Button
                   key={v}
-                  type="button"
+                  variant="secondary"
+                  size="md"
+                  full
                   disabled={busy}
                   aria-pressed={answers[q.id] === v}
                   onClick={() => answer(q.id, v)}
                   className={cn(
-                    "min-h-11 rounded-pill border-2 px-4 text-body font-bold",
-                    answers[q.id] === v
-                      ? "border-text-1 bg-kb-black text-kb-white"
-                      : "border-text-1 bg-transparent text-text-1 hover:bg-surface-2",
+                    answers[q.id] === v &&
+                      "border-text-1 bg-kb-black text-kb-white hover:bg-kb-black active:bg-kb-black",
                   )}
                 >
                   {v === "yes" ? "Yes" : "No"}
-                </button>
+                </Button>
               ))}
             </div>
           </li>

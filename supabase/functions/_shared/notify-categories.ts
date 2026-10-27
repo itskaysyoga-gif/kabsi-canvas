@@ -56,7 +56,7 @@ export const CATEGORIES = [
   {
     id: "weekly_report", why: "Your Results Report is sent once a week.", label: "Results Report", group: "Weekly and monthly", switchable: true, emailDefault: "instant",
     quietExempt: false, inApp: true, noun: ["Results Report", "Results Reports"],
-    description: "What Kabsi watched, prepared and published, once a week.",
+    description: "What Kabsi watched, prepared and sent to Google, once a week.",
   },
   {
     id: "access", why: "This is Kabsi's own notice of a change to your Google access.", label: "Google access", group: "Google access", switchable: false, emailDefault: "instant",

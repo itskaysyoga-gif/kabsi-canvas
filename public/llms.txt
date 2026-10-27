@@ -2,47 +2,54 @@
 
 Your business on Google. Taken care of.
 
-> Kabsi prepares a local business's review replies, posts and updates to its business details. The owner approves each one on WhatsApp before it goes live. Kabsi is independent and not affiliated with Google.
+> Kabsi looks after a local business's Google Business Profile: a reply ready for every new review, the profile watched and kept right, photos and posts prepared, and a weekly Results Report. The owner approves each change before it goes to Google. Kabsi is independent and not affiliated with Google.
 
 Key facts:
 
-- What it is: a service that looks after the Google Business Profile of a local business, in any country. Names: Reviews, Google Profile, Google Protection, Get Reviews, Weekly Care Report.
-- What needs attention: a short list of the next improvements, marked Urgent, Recommended or Nice to have, each with a reason and a ready draft where Kabsi can write one. Kabsi gives no score and does not predict rankings.
+- What it is: a service that looks after the Google Business Profile of a local business, in any country. Names: Reviews, Google Profile, Google Protection, Get Reviews, Results Report.
+- What needs attention: a short list of tasks, each with a reason and a ready draft where Kabsi can write one, and what each is waiting on. Kabsi gives no score and does not predict rankings.
 - Who can use it: a verified Google Business Profile that the owner owns or manages, for a business that meets customers in person during stated hours, or a service-area business that travels to customers. Not eligible under Google's guidelines: online-only businesses, rental or for-sale properties, PO boxes and virtual offices used as an address, and other cases Google lists.
 - How it connects: the owner adds the Kabsi group ID 5481006796 as a Manager on their Google Business Profile (on Google: the profile, Menu, Business Profile settings, People and access, Add, paste 5481006796, choose Manager, then Add, or Invite on some screens). The owner keeps full ownership and can remove Kabsi at any time.
-- Reviews: each new review gets a draft reply in the reviewer's language (for example English, Spanish, Arabic or French). Drafts only use facts the owner gave Kabsi, make no promises of money, and are checked before they reach the owner. Hard reviews get a calm draft with no one-tap Approve button.
+- Reviews: each new review gets a draft reply in the reviewer's language (for example English, Spanish or French). Drafts only use facts the owner gave Kabsi, make no promises of money, and are checked before they reach the owner. Hard reviews get a calm draft with no one-tap Approve button.
 - Google Profile: post drafts (optional), photo checks before publishing, special and holiday hours. All of it waits for the owner's approval; nothing is published on a schedule.
-- Google Protection: watches the listing's name, phone, address, hours, website and category, and emails the owner when one changes on Google. The owner chooses: Google is right, or Keep my information. Nothing changes unless the owner says so. It cannot lock a listing.
-- Weekly Care Report: every Monday, the public Google rating, new reviews, how many got a reply, and review link opens. Facts only.
+- Google Protection: watches the Google profile's name, phone, address, hours, website and category, and emails the owner when one changes on Google. The owner chooses: Google is right, or Keep my information. Nothing changes unless the owner says so. It cannot lock a profile.
+- Results Report: every Monday, an email with what Kabsi did that week (replies, posts and photos sent to Google, changes caught), what waits for the owner's yes, the numbers Google gives (calls, direction requests, website clicks, new reviews) and review link opens. Facts only.
 - Nora: Kabsi's assistant. She answers questions on the site and in the dashboard, and helps owners fill in their business facts. She is an AI and says so when asked.
 - Get Reviews (review link and QR code): free in every country. They open the business's own Google review form for every customer. There is no filtering of unhappy customers. Ask every customer the same way, as they visit. Never offer a reward. Opens are counted as opens, not reviews. They work with the owner's own QR codes and NFC cards. Kabsi sells no NFC cards.
 - What Kabsi does not do: it does not promise more reviews, higher ratings or better rankings, it cannot remove reviews, and it does not publish or change anything without approval.
 - Prices (USD, every country, plus tax where it applies): Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year, an extra location $15 a month or $150 a year, with a 14-day Pro trial and no card. Card payments are coming and are the only way to pay; until they open there is nothing to pay. The review link, QR code and the free check (kabsi.co/scan) are free for everyone. Founding 25: three months of Kabsi Pro free for 25 businesses, by application at kabsi.co/founding. Monthly plans cancel any time; yearly plans are refundable within 14 days. No crypto, cash or transfer.
 - Google data: review text and reviewer names are kept at most 30 days after Google last returned them.
-- Compared with Gemini in Business Profile: Gemini is Google's free assistant for one verified profile that the owner opens and asks. Kabsi comes to the owner with a reply already prepared, tells the owner when Google changes the listing, writes only from facts the owner confirmed, and has a person behind it. Source: https://support.google.com/business/answer/17142585
+- Compared with Gemini in Business Profile: Gemini is Google's free assistant for one verified profile that the owner opens and asks. Kabsi comes to the owner with a reply already prepared, tells the owner when Google changes the profile, writes only from facts the owner confirmed, and has a person behind it. Source: https://support.google.com/business/answer/17142585
 - Operator and contact: Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co.
 
 ## Main pages
 
-- [Home](https://kabsi.co/): a reply ready for every new review, how it works in four steps, the plans and what you control, with pictures of the real screens marked Example
+- [Home](https://kabsi.co/): your business on Google, taken care of; the free check; how it works; the plans and what you control; invented examples marked Example
 - [How it works](https://kabsi.co/how-it-works): the loop (watch, prepare, ask, publish, report), what Kabsi can and cannot do, who can use Kabsi
 - [Pricing](https://kabsi.co/pricing): Essentials and Pro, monthly and yearly, extra locations, the 14-day Pro trial, card payments (coming), refunds
 - [FAQ](https://kabsi.co/faq): what Kabsi does, eligibility, approvals, languages, access, Google Protection, Gemini, payment
-- [Kabsi Partners](https://kabsi.co/partners): the affiliate program, opening soon
+- [Kabsi Partners](https://kabsi.co/partners): the affiliate program; anyone can apply and the team approves each person
+- [Founding 25](https://kabsi.co/founding): three months of Pro free for 25 businesses, by application
 - [Free Google review link and QR code](https://kabsi.co/google-review-link): no sign-up tool
-- [Free Google Profile Check](https://kabsi.co/google-profile-check): see what customers see on Google, and what needs fixing, public information only, no sign-up
+- [Free check](https://kabsi.co/scan): see what customers see on your Google profile, public information only, no Google access (kabsi.co/google-profile-check opens the same page)
 - [About](https://kabsi.co/about): who built Kabsi and why it has its name
 - [Security](https://kabsi.co/security): Manager access, approvals, removal and Google data retention
 
 ## For each kind of business
 
 - [All businesses](https://kabsi.co/for)
-- [Restaurants](https://kabsi.co/for/restaurants)
-- [Cafés](https://kabsi.co/for/cafes)
-- [Clinics](https://kabsi.co/for/clinics)
-- [Dentists](https://kabsi.co/for/dentists)
-- [Salons](https://kabsi.co/for/salons)
-- [Car services](https://kabsi.co/for/car-services)
+- [Hair salons](https://kabsi.co/for/hair-salon)
+- [Barbershops](https://kabsi.co/for/barbershop)
+- [Nail salons](https://kabsi.co/for/nail-salon)
+- [Spas and massage](https://kabsi.co/for/spa-and-massage)
+- [Dental clinics](https://kabsi.co/for/dental-clinic)
+- [Medical and aesthetic clinics](https://kabsi.co/for/medical-and-aesthetic-clinic)
+- [Physiotherapy](https://kabsi.co/for/physiotherapy)
+- [Restaurants](https://kabsi.co/for/restaurant)
+- [Cafes](https://kabsi.co/for/cafe)
+- [Bakeries](https://kabsi.co/for/bakery)
+- [Auto repair](https://kabsi.co/for/auto-repair)
+- [Gyms and fitness studios](https://kabsi.co/for/gym-and-fitness)
 
 ## Guides
 

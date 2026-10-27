@@ -3,7 +3,7 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 import { BookingLink } from "@/components/shared/booking-link";
 import { ReadyMessage } from "@/components/onboarding/ready-message";
 import { StepClip } from "@/components/onboarding/step-clip";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/kabsi/ui";
 import { stepsUrl } from "@/lib/manager-guide";
 import type { ScenarioRow } from "@/lib/onboarding";
 import {
@@ -130,29 +130,34 @@ export function ScenarioScreen({
             </div>
           ) : null}
           {screen.google ? (
-            <Button
-              asChild
-              variant="outline"
-              className="mt-5 h-auto min-h-[52px] w-full whitespace-normal py-3 text-center"
+            <a
+              className={cn(
+                buttonClass("secondary", "lg", true),
+                "mt-5 h-auto min-h-13 whitespace-normal py-3 text-center",
+              )}
+              href={screen.google.url}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <a href={screen.google.url} target="_blank" rel="noopener noreferrer">
-                {screen.google.label} <ExternalLink />
-              </a>
-            </Button>
+              {screen.google.label} <ExternalLink className="size-5" />
+            </a>
           ) : null}
           <p className="mt-5 rounded-card bg-surface-2 p-4 text-small leading-6">{screen.trial}</p>
         </>
       )}
 
       {!choosing && !screen.noDone ? (
-        <Button className="mt-6 w-full" onClick={onDone} disabled={busy}>
+        <Button full className="mt-6" onClick={onDone} disabled={busy}>
           {busy ? "Saving…" : (screen.doneLabel ?? "I've done it")}
         </Button>
       ) : null}
       {!choosing && screen.noDone ? (
-        <Button className="mt-6 w-full" variant="outline" asChild>
-          <a href="mailto:hello@kabsi.co">Write to hello@kabsi.co</a>
-        </Button>
+        <a
+          className={cn(buttonClass("secondary", "lg", true), "mt-6")}
+          href="mailto:hello@kabsi.co"
+        >
+          Write to hello@kabsi.co
+        </a>
       ) : null}
       <p className={cn("text-small leading-6 text-text-2", choosing ? "mt-6" : "mt-4 text-center")}>
         Stuck?{" "}

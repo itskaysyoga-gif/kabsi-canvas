@@ -165,8 +165,8 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 
 - H1: "Earn 25% of every payment, for as long as they stay."
 - Lead: "Recommend Kabsi to local business owners you know. Everything runs on WhatsApp."
-- Steps: 1 "Apply on WhatsApp" 2 "Share your page or scan a business for them" 3 "Get paid on the 5th of each month".
-- What partners get: "Your own page and QR code" / "Free scans to send to businesses you know" / "A kit of ready posts and a short video" / "A WhatsApp summary every Monday".
+- Steps: 1 "Apply on WhatsApp" 2 "Share your page or check a business for them" 3 "Get paid on the 5th of each month".
+- What partners get: "Your own page and QR code" / "Free checks to send to businesses you know" / "A kit of ready posts and a short video" / "A WhatsApp summary every Monday".
 - Earnings slider (labelled Example): "If 10 businesses you refer pay for Pro, you earn about $97.50 a month."
 - Who it suits: business setup consultants, accountants and bookkeepers, web and social media freelancers, POS and booking resellers, business groups and coworking spaces, creators who speak to small business owners.
 - The rules (5): "Say it is a paid partnership, every time." / "Never say Kabsi works with Google." / "Never promise rankings, reviews or customers." / "Never offer anything for reviews." / "No bulk or unsolicited messages."
@@ -226,7 +226,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 - H1: "Log in to Kabsi"
 - Field: "Email". Button: "Send me a code". Then: "Enter the 6-digit code we sent to [email]." Button: "Log in". Link: "Send a new code".
 - Error: "That code did not work. Check it, or send a new one."
-- Under: "New here?" link "See your map".
+- Under: "New here?" link "Check my business free" (changed in Audit 1: "See your map" is retired, section 24 names the button).
 
 ## 18. Website, signed in: onboarding (28.5)
 
@@ -580,3 +580,15 @@ Lane R, 27 Oct 2026: every line below is approved, with one change: the work chi
 - Receipt, failed payment, cancellation: the studio's lines; the cancellation's "data from your Google profile is deleted after 7 days" reads "your data is kept for 30 days, then deleted" (billing.ts keeps it 30 days, as the plan-ended email says); failed payment says "Kabsi keeps working until [date]" when the grace end is known, and a reminder's subject is "Reminder: your payment for Kabsi did not go through"; cancellation without a known end says "the last day you paid for".
 - Auth emails: "Kabsi never asks anyone for this code. Never share it." added to the sign-in and sign-up codes; "Confirm it is you" (was "Confirm it's you").
 - Onboarding (section 25): "Kabsi also sent it to your email." is back under "Your setup link", shown only once a setup email with the link really went to that person.
+
+## 27. Audit 1: lines changed by the page-by-page audit (27 Oct 2026)
+
+Section 24, 25 and 26 still win. Audit 1 (P0.7-06) changed only these lines, to match them:
+
+- "Published" is said only after Kabsi sees it on Google (30.15 3.1): the post state labels read "Prepared", "Waiting", "Sent to Google", "Skipped", "Did not go through", "Being removed", "Removed from Google"; the Home backlog line reads "[n] of [m] sent to Google" and "All [m] sent to Google"; the Results Report's Content block reads "[n] updates and [m] photos sent to Google."; the notification category "Results Report every Monday" reads "What Kabsi watched, prepared and sent to Google, once a week."
+- "Listing" is never said to an owner (30.15): the hero line reads "every change to your Google profile caught"; the FAQ answers, the trial line ("Your trial starts when Kabsi's access to your Google profile works.") and Nora's lines ("Kabsi looks after your business on Google from WhatsApp", "your Google profile kept right", "The free trial starts once Kabsi can reach your Google profile.", "Kabsi will post this on your Google profile after your yes.") say "Google profile". The Creem product description (section 23) still reads "Your Google listing and reviews, managed from WhatsApp." because it is registered at Creem; a LATER row changes it with the product.
+- "Free scan" is "free check" everywhere an owner or a partner reads it (Partners: "Share your page or check a business for them", "Free checks to send to businesses you know"; Nora's help line "your business name for a free check").
+- Log in: the link under the sheet is "New here? Check my business free" (was "See your map", retired in section 24).
+- Home, "A person helps": "Stuck on a step? Write to hello@kabsi.co, and a person answers." while Kabsi's WhatsApp number is empty (K-122); with the number set it reads "Stuck on a step? Reply Help on WhatsApp, or write to hello@kabsi.co, and a person answers."
+- No Arabic anywhere public (R-61): the reply guide shows English, Spanish and French examples and says so ("short examples in English, Spanish and French"); the FAQ answer on languages reads "English, Spanish, French and many others." and the chat-spelling answer no longer names a language.
+- Signed in, when the business cannot be loaded at all: the business switcher reads "Your business" and the page shows the error state of section 15: "Something went wrong on our side." "Nothing you did. Try again in a minute." Button "Try again".

@@ -53,7 +53,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ButtonLink, ExampleBadge, KabsiMark } from "@/components/kabsi/ui";
+import { ButtonLink, ErrorState, ExampleBadge, KabsiMark } from "@/components/kabsi/ui";
 import { TestModeBanner } from "@/components/shared/test-mode-banner";
 import { useAuth } from "@/components/auth/auth-provider";
 import { setAnalyticsPaused } from "@/lib/telemetry";
@@ -92,7 +92,11 @@ function BusinessMenu({ compact = false }: { compact?: boolean }) {
     chooseLocation(id);
     await queryClient.invalidateQueries();
   }
-  const name = location.isLoading ? "Loading" : (loc?.name ?? "Add your business");
+  const name = location.isLoading
+    ? "Loading"
+    : location.isError
+      ? "Your business"
+      : (loc?.name ?? "Add your business");
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -575,6 +579,14 @@ export function AppLayout({
                 Back to Home
               </ButtonLink>
             </div>
+          ) : area === "app" && myLoc.isError ? (
+            <ErrorState
+              className="mt-6 max-w-xl"
+              title="Something went wrong on our side."
+              onRetry={() => void myLoc.refetch()}
+            >
+              Nothing you did. Try again in a minute.
+            </ErrorState>
           ) : (
             children
           )}

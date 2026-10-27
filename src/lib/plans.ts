@@ -125,5 +125,5 @@ export const PRICING_COPY = {
   founding: (n: number) =>
     `Founding price: the first 30 paying businesses keep their price for as long as they stay. ${n} places left.`,
   underButtons:
-    "Free for 14 days. No card. Cancel in WhatsApp. Your trial starts when Kabsi's access to your listing works.",
+    "Free for 14 days. No card. Cancel in WhatsApp. Your trial starts when Kabsi's access to your Google profile works.",
 } as const;

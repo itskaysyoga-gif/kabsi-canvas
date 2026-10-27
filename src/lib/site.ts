@@ -161,7 +161,7 @@ export const HERO_CHECK_LABEL = "Check your Google profile free";
  * change.
  */
 export function heroSub(whatsappOn: boolean = WHATSAPP_ON): string {
-  return `Every review answered, every change to your listing caught, a fresh post every week. ${
+  return `Every review answered, every change to your Google profile caught, a fresh post every week. ${
     whatsappOn ? "You approve on WhatsApp." : "You approve in one tap."
   }`;
 }

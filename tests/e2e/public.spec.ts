@@ -50,10 +50,74 @@ test.describe("public pages", () => {
     await expect(page).toHaveScreenshot("not-found.png", await keep(page));
   });
 
-  // COPY.md: while free_scan_daily_cap is 0 the scan box shows the waitlist state ("Save my place"). The visibility scan and its
-  // cap are built in V1 and Web 2; until then the page runs the Free Profile Check. This test turns on with that session.
-  test.fixme("the scan box shows the waitlist while the daily cap is 0", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.getByRole("button", { name: "Save my place" })).toBeVisible();
+  // UX 1 (waiting list) and QA 2: while the nearby check is closed, /scan shows the public profile facts and "Save my place".
+  // Nothing paid or sent: Turnstile, the Places-backed profile-snapshot, visibility/check and visibility/waitlist are stood in for.
+  test("the free check shows the waiting list while the nearby check is closed, and saves a place", async ({
+    page,
+  }) => {
+    await noBanner(page);
+    const json = (body: unknown) => ({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(body),
+    });
+    const place = {
+      place_id: "ChIJqa000000000000001",
+      name: "Rose Lane Salon",
+      address: "12 Al Wasl Road, Dubai, United Arab Emirates",
+    };
+    let saved: Record<string, unknown> | null = null;
+    await page.route("https://challenges.cloudflare.com/turnstile/v0/api.js*", (route) =>
+      route.fulfill({
+        contentType: "text/javascript",
+        body: "window.turnstile={render:function(el,o){setTimeout(function(){o.callback('qa-pass')},50);return 'qa'},reset:function(){},remove:function(){}};",
+      }),
+    );
+    await page.route("**/functions/v1/profile-snapshot", (route) => {
+      const action = route.request().postDataJSON()?.action;
+      return route.fulfill(
+        json(
+          action === "search"
+            ? { places: [place] }
+            : {
+                snapshot: {
+                  ...place,
+                  category: "Hair salon",
+                  rating: 4.6,
+                  review_count: 38,
+                  business_status: "OPERATIONAL",
+                  open_now: true,
+                  hours: ["Monday: 10:00 to 21:00"],
+                  phone: "+971 4 000 0000",
+                  website: null,
+                  has_photos: true,
+                  photo_count: 12,
+                  flags: [],
+                  checklist: [],
+                  cached: false,
+                },
+              },
+        ),
+      );
+    });
+    await page.route("**/functions/v1/visibility/check", (route) =>
+      route.fulfill(json({ state: "waitlist" })),
+    );
+    await page.route("**/functions/v1/visibility/waitlist", (route) => {
+      saved = route.request().postDataJSON();
+      return route.fulfill(json({ ok: true }));
+    });
+    await page.goto("/scan?q=Rose%20Lane%20Salon");
+    const save = page.getByRole("button", { name: "Save my place" });
+    await expect(save).toBeVisible({ timeout: 30_000 });
+    const form = page.locator("form", { has: save });
+    await form.getByLabel("Email").fill("qa-waiting@test.local");
+    await save.click();
+    await expect(page.getByText("Saved. You are on the list.")).toBeVisible();
+    expect(saved).toMatchObject({
+      business: "Rose Lane Salon",
+      email: "qa-waiting@test.local",
+      page: "/scan",
+    });
   });
 });

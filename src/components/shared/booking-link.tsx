@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { buttonClass } from "@/components/kabsi/ui";
 import { BOOKING_READY, bookingHref, type BookingKind } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -10,11 +10,13 @@ export function BookingLink({ kind, children, className, button = false }: Props
   const external = BOOKING_READY ? { target: "_blank", rel: "noopener noreferrer" } : {};
   if (button) {
     return (
-      <Button asChild variant="outline" className={className}>
-        <a href={bookingHref(kind)} {...external}>
-          {children}
-        </a>
-      </Button>
+      <a
+        href={bookingHref(kind)}
+        {...external}
+        className={cn(buttonClass("secondary", "lg"), className)}
+      >
+        {children}
+      </a>
     );
   }
   return (

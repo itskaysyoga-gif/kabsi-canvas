@@ -57,7 +57,7 @@ function LoginPage() {
               to="/scan"
               className="inline-flex min-h-11 items-center font-bold text-text-1 underline underline-offset-4"
             >
-              See your map
+              Check my business free
             </SiteLink>
           </p>
         </div>

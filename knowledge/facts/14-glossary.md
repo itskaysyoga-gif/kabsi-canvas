@@ -14,7 +14,7 @@
 - **Kabsi's posts:** the posts Kabsi prepares each month (2 by default, 1 or 4 by choice) for your approval.
 - **Search phrases:** words people use to search for a business like yours, worked into a post's first line. They come from your category, your area and the services you listed in About your business, and, once Kabsi is connected to Google live, from Google's own search terms. Never from your reviews.
 - **Special hours:** hours for specific dates, like holidays.
-- **Google Protection:** watches key listing details, alerts you and lets you choose in the app whether to keep your information.
+- **Google Protection:** watches key profile details, alerts you and lets you choose on Kabsi whether to keep your information.
 - **Profile health:** the suggestions list on Home, no score.
 - **Review link:** go.kabsi.co/{CODE}, opens your Google review page, or a short Kabsi page with the Google button first if you chose that. Up to 5 per business.
 - **NTAG213 / NTAG215:** common NFC chip types that work for review links.

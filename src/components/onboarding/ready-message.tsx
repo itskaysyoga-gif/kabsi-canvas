@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Check, Mail, MessageCircle, Share2, TriangleAlert } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/kabsi/ui";
 import { copyText } from "@/lib/clipboard";
 import { mailtoUrl, whatsappShareUrl } from "@/lib/manager-guide";
 
@@ -38,23 +38,34 @@ export function ReadyMessage({ text, subject }: { text: string; subject: string 
         {text}
       </p>
       <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-        <Button type="button" variant="outline" size="compact" onClick={copy}>
-          {copied === "done" ? <Check /> : copied === "failed" ? <TriangleAlert /> : null}
+        <Button
+          variant="secondary"
+          size="md"
+          onClick={copy}
+          icon={
+            copied === "done" ? (
+              <Check className="size-5" />
+            ) : copied === "failed" ? (
+              <TriangleAlert className="size-5" />
+            ) : null
+          }
+        >
           {copied === "done" ? "Copied" : copied === "failed" ? "Couldn't copy" : "Copy message"}
         </Button>
-        <Button type="button" variant="outline" size="compact" onClick={share}>
-          <Share2 /> Share
+        <Button variant="secondary" size="md" onClick={share} icon={<Share2 className="size-5" />}>
+          Share
         </Button>
-        <Button asChild variant="outline" size="compact">
-          <a href={whatsappShareUrl(text)} target="_blank" rel="noopener noreferrer">
-            <MessageCircle /> WhatsApp
-          </a>
-        </Button>
-        <Button asChild variant="outline" size="compact">
-          <a href={mailtoUrl(subject, text)}>
-            <Mail /> Email
-          </a>
-        </Button>
+        <a
+          className={buttonClass("secondary", "md")}
+          href={whatsappShareUrl(text)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <MessageCircle className="size-5" /> WhatsApp
+        </a>
+        <a className={buttonClass("secondary", "md")} href={mailtoUrl(subject, text)}>
+          <Mail className="size-5" /> Email
+        </a>
       </div>
     </div>
   );

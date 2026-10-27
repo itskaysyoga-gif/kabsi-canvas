@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 25 Oct 2026 by the lane R chat (master plan 19, 25.1, 26.6, 29.9, 30); first written by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 27 Oct 2026 by Audit 1 (earlier: the lane R chat, 25 Oct) (master plan 19, 25.1, 26.6, 29.9, 30); first written by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -53,10 +53,10 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 27 Oct 2026, Audit 1 (P0.7-06, session 20c): every public page and signed-in screen walked at 390 and 1440 px, the stale-language sweep ended at zero or a reason, 10 findings fixed, 6 in LATER; llms lists the twelve wave 1 industry addresses; the waiting list journey is on; the signed-in and public baselines are refreshed. Detail and pictures: `docs/progress/archive/2026-10-27-audit1.md`.
 - 27 Oct 2026, lane R (PR 260): the Results Report and trial counts say "sent to Google", never "published" for work Google may still be checking (30.15 3.1); UX 1 round 2 and Email 1 reviewed and their new lines approved.
 - 27 Oct 2026, Email 1 (PR 258, 259). Detail: `docs/progress/archive/2026-10-27-email1.md`.
 - 27 Oct 2026, UX 1 round 2 (lane R review): waiting list words and their stored proof, the hero and Try it after a Yes, Barbershops in the footer, closed LATER rows. Detail: the end of `docs/progress/archive/2026-10-27-ux1.md`.
-- 27 Oct 2026, UX 1 (PR 254): the signed-in website, onboarding and leftovers. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
 
 ## How a session updates this page
 

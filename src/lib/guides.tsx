@@ -78,7 +78,7 @@ export const GUIDES: Guide[] = [
     slug: "how-to-reply-to-google-reviews",
     title: "How to reply to Google reviews (with examples)",
     description:
-      "The exact steps to reply to a Google review, what a good reply looks like, and short examples in English, Spanish, Arabic and French.",
+      "The exact steps to reply to a Google review, what a good reply looks like, and short examples in English, Spanish and French.",
     updated: "2026-09-27",
     minutes: 4,
     photo: "guideReply",
@@ -166,15 +166,6 @@ export const GUIDES: Guide[] = [
             rating={4}
             review="Muy buen ambiente y el café riquísimo. Solo tardaron un poco en atendernos."
             reply="Muchas gracias, Lucía. Nos alegra que te gustaran el ambiente y el café, y sentimos la espera. Te esperamos pronto. Luca, dueño"
-          />
-          <Example
-            label="4 stars"
-            lang="العربية"
-            name="Karim"
-            rating={4}
-            dir="rtl"
-            review="الطعام لذيذ جداً، لكن الخدمة كانت بطيئة قليلاً."
-            reply="شكراً جزيلاً على تقييمك. سعداء أن الطعام أعجبك، ونعتذر عن تأخر الخدمة. نتطلع لرؤيتك قريباً."
           />
           <Example
             label="2 stars"
