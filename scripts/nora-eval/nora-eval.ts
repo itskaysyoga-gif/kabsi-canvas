@@ -106,7 +106,7 @@ const NOT_YET = new RegExp(
     String.raw`\bcoming\b|comes? later|will be (available|added|built)`,
     String.raw`todav[ií]a no|a[uú]n no|por ahora|ahora mismo|por el momento|de momento|no est[aá] disponible|no disponible|a[uú]n no existe`,
     String.raw`pas encore|pour l'instant|pour le moment|n'est pas (encore )?disponible|pas (encore )?disponible`,
-    "لم يتوفر|غير متاح|ليس متاح|قريبا|قريباً|غير متوفر|لا يتوفر|حاليا|حالياً|لسه|لسا|ما فتح|لم يفتح",
+    "لم يتوفر|غير متاح|ليس متاح|قريبا|قريباً|غير متوفر|لا يتوفر|حاليا|حالياً|لسه|لسا|ما فتح|لم يفتح|لم تفتح|ما زال قيد التجربة|ليس بعد",
   ].join("|"),
   "i",
 );

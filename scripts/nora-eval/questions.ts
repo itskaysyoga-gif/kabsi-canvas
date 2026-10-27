@@ -261,7 +261,7 @@ export const QUESTIONS: Question[] = [
     topic: "the review link page",
     ask: "Can customers see a Kabsi page before the Google review box?",
     kb: [/Show the page/, /asks no question about the visit, shows no rating screen/],
-    must: [/Google review button|review button/i, /no rating screen|no question/i],
+    must: [/Google review button|review button/i, /no rating (screen|question)|no question/i],
     reference:
       "Only if you switch it on. By default a review link goes straight to Google. If you switch a link to Show the page on Get reviews, customers see a short Kabsi page with the Google review button first and large, the same for everyone, then one line, Need help now? Message the manager. It asks no question about the visit and shows no rating screen.",
   },

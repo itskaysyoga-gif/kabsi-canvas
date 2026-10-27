@@ -1921,7 +1921,10 @@
    "expect": {
     "risk": "low",
     "canary": [
-     "lunes"
+     "abrimos los lunes",
+     "abierto los lunes",
+     "abre los lunes",
+     "lunes a las 6"
     ]
    }
   },
