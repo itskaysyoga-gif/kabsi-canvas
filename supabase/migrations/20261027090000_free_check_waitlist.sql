@@ -10,7 +10,7 @@ create table if not exists public.free_check_waitlist (
   phone text check (phone is null or phone ~ '^\+[1-9][0-9]{6,14}$'),
   business text not null check (char_length(business) between 2 and 120),
   country text check (country is null or country ~ '^[A-Z]{2}$'),
-  place_id text check (place_id is null or place_id ~ '^[A-Za-z0-9_-]{10,300}$'),
+  place_id text check (place_id is null or (char_length(place_id) between 10 and 300 and place_id ~ '^[A-Za-z0-9_-]+$')),
   term text check (term is null or char_length(term) between 1 and 60),
   industry text check (industry is null or industry ~ '^[a-z0-9-]{2,40}$'),
   notice_consent_text text not null check (char_length(notice_consent_text) between 10 and 1000),

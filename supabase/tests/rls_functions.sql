@@ -45,7 +45,8 @@ insert into tested values
   ('staff_founding_decide(uuid,text,text)'), ('staff_founding_link(uuid,uuid)'), ('staff_founding_overview()'),
   ('staff_partner_decide(uuid,text,text,text)'), ('staff_partner_payout_details(uuid,text,text)'), ('staff_partners_overview()'),
   ('staff_payouts_approve(date)'), ('staff_payout_sent(uuid,text)'), ('staff_payout_run(date)'),
-  ('onboarding_status(uuid)'), ('confirm_business(uuid)'), ('staff_founding_checklist(uuid)'), ('staff_founding_check(uuid,text,boolean,text)'), ('claim_free_check(uuid,text)');
+  ('onboarding_status(uuid)'), ('confirm_business(uuid)'), ('staff_founding_checklist(uuid)'), ('staff_founding_check(uuid,text,boolean,text)'), ('claim_free_check(uuid,text)'),
+  ('save_ai_prompt(uuid,text,uuid)'), ('remove_ai_prompt(uuid)');
 
 select is(
   (select coalesce(array_agg(p.oid::regprocedure::text order by 1), '{}') from pg_proc p
@@ -216,6 +217,9 @@ select throws_ok($$ select public.confirm_business('00000000-0000-4000-8000-0000
 select throws_ok($$ select public.staff_founding_checklist('00000000-0000-4000-8000-0000000000c1') $$, '42501', null, 'staff_founding_checklist refuses a non-staff user');
 select throws_ok($$ select public.staff_founding_check('00000000-0000-4000-8000-0000000000c1', 'old_reviews', true) $$, '42501', null, 'staff_founding_check refuses a non-staff user');
 select throws_ok($$ select public.claim_free_check('00000000-0000-4000-8000-0000000000c1', 'ABCD2345') $$, '42501', null, 'claim_free_check refuses a non-member');
+-- UX 1: owners' AI questions.
+select throws_ok($$ select public.save_ai_prompt('00000000-0000-4000-8000-0000000000c1', 'best hair salon near the marina') $$, '42501', null, 'save_ai_prompt refuses a non-member');
+select throws_ok($$ select public.remove_ai_prompt('00000000-0000-4000-8000-0000000000f9') $$, '42501', null, 'remove_ai_prompt refuses a non-member');
 select throws_ok($$ select public.staff_partner_decide('00000000-0000-4000-8000-0000000000c1', 'approved') $$, '42501', null, 'staff_partner_decide refuses a non-staff user');
 select throws_ok($$ select public.staff_partner_payout_details('00000000-0000-4000-8000-0000000000c1', 'usdt', 'TXYZ123456') $$, '42501', null, 'staff_partner_payout_details refuses a non-staff user');
 select throws_ok($$ select public.staff_partners_overview() $$, '42501', null, 'staff_partners_overview refuses a non-staff user');
