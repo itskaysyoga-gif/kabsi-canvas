@@ -111,7 +111,7 @@ export function SnapshotResult({
         </>
       ) : null}
 
-      <div className="mt-6 rounded-panel bg-kb-carbon p-6 text-kb-white">
+      <div className="mt-6 rounded-card border border-line bg-surface-2 p-5 sm:p-6">
         <p className="text-title font-bold">
           Kabsi can take care of{" "}
           {todo === 1 ? "this" : todo === 0 ? "what comes up" : `these ${todo}`}. You approve each
@@ -158,7 +158,7 @@ function Fact({
         {icon}
       </span>
       <div className="min-w-0">
-        <dt className="text-label font-bold uppercase tracking-wider text-text-2">{label}</dt>
+        <dt className="text-label font-bold text-text-2">{label}</dt>
         <dd className="mt-0.5 text-small">{children}</dd>
       </div>
     </div>
@@ -207,7 +207,7 @@ function EmailForm({
     );
 
   return (
-    <form onSubmit={send} className="mt-6 rounded-panel border-2 border-line p-5">
+    <form onSubmit={send} className="mt-6 rounded-card border border-line bg-surface-1 p-5">
       <h3 className="font-bold">Email me this check</h3>
       <p className="mt-1 text-small text-text-2">
         We will send the check to your inbox so you can keep it.
@@ -224,7 +224,7 @@ function EmailForm({
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="you@yourbusiness.com"
-        className="mt-3 h-[52px] rounded-card px-4 text-body"
+        className="mt-3 h-13 rounded-input border-stroke bg-surface-2 px-4 text-body"
       />
       <label className="mt-3 flex cursor-pointer items-start gap-3 text-small leading-6">
         <Checkbox
@@ -300,7 +300,7 @@ function WhatsappForm({
   return (
     <form
       onSubmit={send}
-      className="mt-4 rounded-panel border-2 border-line p-5"
+      className="mt-4 rounded-card border border-line bg-surface-1 p-5"
       data-testid="whatsapp-form"
     >
       <h3 className="font-bold">Send my check to WhatsApp</h3>
@@ -319,7 +319,7 @@ function WhatsappForm({
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         placeholder="+1 201 555 0100"
-        className="mt-3 h-[52px] rounded-card px-4 text-body"
+        className="mt-3 h-13 rounded-input border-stroke bg-surface-2 px-4 text-body"
       />
       <label className="mt-3 flex cursor-pointer items-start gap-3 text-small leading-6">
         <Checkbox

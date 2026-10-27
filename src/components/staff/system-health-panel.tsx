@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { fmtDateTime } from "@/lib/format";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
@@ -12,6 +11,7 @@ import {
   type Diagnostics,
   type Health,
 } from "@/lib/system-health";
+import { Button, STAFF_CARD, STAFF_H2 } from "./staff-ui";
 
 // Staff System health (P0.6-11; K-44 staff part, K-36): everything that can be wrong behind the product, in one place, read
 // through staff-only functions. Technical detail for the team; owners see plain messages elsewhere and never this page.
@@ -70,11 +70,11 @@ export function SystemHealthPanel() {
   const h = q.data;
   const attention = h ? attentionOf(h) : [];
   return (
-    <section id="system-health">
+    <section id="system-health" className={STAFF_CARD}>
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-title font-bold">System health</h2>
+        <h2 className={STAFF_H2}>System health</h2>
         <Button variant="ghost" size="compact" onClick={() => void q.refetch()}>
-          <RefreshCw /> {q.isFetching ? "Checking…" : "Refresh"}
+          <RefreshCw /> {q.isFetching ? "Checking" : "Refresh"}
         </Button>
       </div>
       {q.isError ? <p className="mt-2 text-bad">{q.error.message}</p> : null}
@@ -85,7 +85,7 @@ export function SystemHealthPanel() {
             mode.
           </p>
           {attention.length === 0 ? (
-            <p className="mt-3 rounded-panel bg-surface-1 p-4 shadow-rest">
+            <p className="mt-3 rounded-inner bg-surface-2 p-4">
               Nothing needs attention. No dead jobs, no stuck publications, the breaker is closed.
             </p>
           ) : (
@@ -326,7 +326,7 @@ export function BusinessDiagnostics({ location }: { location: string }) {
     queryFn: () => loadDiagnostics(location),
   });
   const d = q.data;
-  if (q.isLoading) return <p className="mt-3 text-small text-text-2">Reading…</p>;
+  if (q.isLoading) return <p className="mt-3 text-small text-text-2">Reading</p>;
   if (q.isError) return <p className="mt-3 text-small text-bad">{q.error.message}</p>;
   if (!d || !d.business) return <p className="mt-3 text-small text-text-2">No such business.</p>;
   const g = d.google;

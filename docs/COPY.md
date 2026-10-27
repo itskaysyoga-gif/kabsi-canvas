@@ -126,7 +126,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 - Rules box: "Send it to every customer, the same way. Do not offer anything in return, and do not ask only happy customers. Those are Google's rules."
 - Then: "Want to see where you rank too?" Scan box.
 
-**The page a review link opens (/review/CODE), V3.** H1 the business name under "Thank you for visiting". Line: "Tell other people how your visit went. It takes a minute." Button: "Write a Google review". Under it: "Say what you honestly thought. Everyone sees this same page." and "Your review goes to Google. Kabsi does not read it or change it." Manager line (only when the business saved a WhatsApp number): "Need help now? Message the manager". Inactive: "This review link is no longer active." / "Ask the business for a new one. Thank you for trying."
+**The page a review link opens (/review/CODE), V3.** H1 the business name under "Thank you for visiting". Line: "Tell other people how your visit went. It takes a minute." Button: "Write a review on Google" (Design 2, UX 1; was "Write a Google review"). Under it: "Say what you honestly thought. Everyone sees this same page." and "Your review goes to Google. Kabsi does not read it or change it." Manager line (only when the business saved a WhatsApp number): "Need help now? Message the manager". Inactive: "This review link is no longer active." / "Ask the business for a new one. Thank you for trying."
 **Printed cards (counter card A6, table tent A4), V3.** "Tell others how your visit went" / "Scan to leave a review on Google. It takes a minute." / the business name / "Or type go.kabsi.co/CODE". Table tent fold line: "Fold here".
 
 ## 6. Guide template (/guides/SLUG)

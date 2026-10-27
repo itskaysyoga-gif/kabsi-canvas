@@ -5,6 +5,7 @@ import { PublicLayout } from "@/components/layouts/public-layout";
 import { SignInPanel } from "@/components/auth/sign-in-panel";
 import { useAuth } from "@/components/auth/auth-provider";
 import { safeNext } from "@/lib/signup";
+import { SiteLink } from "@/components/kabsi/site-link";
 
 const searchSchema = z.object({ next: z.string().optional().catch(undefined) });
 
@@ -41,13 +42,24 @@ function LoginPage() {
 
   return (
     <PublicLayout>
-      <section className="bg-surface-2 px-5 py-12 sm:py-20">
-        <div className="mx-auto max-w-md rounded-panel bg-surface-1 p-6 shadow-rest sm:p-9">
-          <h1 className="font-display text-5xl leading-none">Log in</h1>
-          <p className="mb-7 mt-3 leading-7 text-text-2">
-            New to Kabsi? The same steps create your account.
+      <section className="container-kb py-10 sm:py-16">
+        <div className="mx-auto w-full max-w-md">
+          <div className="rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-8">
+            <h1 className="font-display text-h2 font-bold text-text-1">Log in to Kabsi</h1>
+            <p className="mt-3 mb-7 text-body text-text-2">
+              New to Kabsi? The same steps create your account.
+            </p>
+            <SignInPanel next={target} onDone={() => router.history.replace(target)} />
+          </div>
+          <p className="mt-6 text-center text-small text-text-2">
+            New here?{" "}
+            <SiteLink
+              to="/scan"
+              className="inline-flex min-h-11 items-center font-bold text-text-1 underline underline-offset-4"
+            >
+              See your map
+            </SiteLink>
           </p>
-          <SignInPanel next={target} onDone={() => router.history.replace(target)} />
         </div>
       </section>
     </PublicLayout>

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fmtDate } from "@/lib/format";
 import {
@@ -14,6 +13,8 @@ import {
   type Partner,
   type Payout,
 } from "@/lib/programs";
+import { Button, STAFF_CARD, STAFF_H2, STAFF_ITEM } from "./staff-ui";
+import { cn } from "@/lib/utils";
 
 // Kabsi Partners (master plan 29, 30.15 section 5): applications to approve or decline, each partner's code and
 // ledger (held for 30 days, cleared, paid; test-mode lines apart), payout details kept in Vault, and the monthly
@@ -28,7 +29,7 @@ export function PartnersPanel() {
   if (q.isLoading) return null;
   if (q.error)
     return (
-      <p className="mt-8 text-small text-text-2">
+      <p className={cn(STAFF_CARD, "text-small text-text-2")}>
         Partners did not load: {String(q.error.message)}
       </p>
     );
@@ -36,9 +37,9 @@ export function PartnersPanel() {
   if (!o) return null;
   const runs = [...new Set(o.payouts.filter((p) => p.state === "proposed").map((p) => p.run_on))];
   return (
-    <section className="mt-8">
+    <section className={STAFF_CARD}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-title font-bold">Kabsi Partners</h2>
+        <h2 className={STAFF_H2}>Kabsi Partners</h2>
         <p className="text-small text-text-2">
           {o.places.founding_left} of {o.places.founding_total} Founding Partner places left · next
           payout run {fmtDate(o.next_run_on)}
@@ -85,7 +86,7 @@ function PartnerRow({ p }: { p: Partner }) {
   const [method, setMethod] = useState<"usdt" | "usdc" | "paypal">("usdt");
   const [detail, setDetail] = useState("");
   return (
-    <article className="rounded-panel bg-surface-1 p-5 shadow-rest">
+    <article className={STAFF_ITEM}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-bold">
@@ -174,7 +175,7 @@ function PartnerRow({ p }: { p: Partner }) {
             Payout: {p.payout_method ? `${p.payout_method} ending ${p.payout_last4}` : "not set"}
           </span>
           <select
-            className="h-11 rounded-card border border-line bg-surface-1 px-3 text-small"
+            className="h-11 rounded-input border border-stroke bg-surface-1 px-3 text-small"
             value={method}
             onChange={(e) => setMethod(e.target.value as typeof method)}
             aria-label="Payout method"

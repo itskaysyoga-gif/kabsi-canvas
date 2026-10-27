@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { fmtDateTime } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
+import { Button, STAFF_CARD, STAFF_H2 } from "./staff-ui";
 
 type Chat = {
   id: string;
@@ -110,12 +110,12 @@ export function ChatsPanel() {
     a.click();
   }
 
-  const select = "h-10 rounded-card border border-line bg-surface-1 px-3 text-small";
+  const select = "h-11 rounded-input border border-stroke bg-surface-1 px-3 text-small";
   return (
-    <section className="mt-8">
+    <section className={STAFF_CARD}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-title font-bold">Chats with Nora</h2>
+          <h2 className={STAFF_H2}>Chats with Nora</h2>
           <p className="mt-1 text-small text-text-2">
             Each chat is labelled and emailed as a report about 10 minutes after it goes quiet.
           </p>
@@ -130,8 +130,8 @@ export function ChatsPanel() {
       {stats.data?.length ? (
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {["temperature", "intent", "category", "country"].map((d) => (
-            <div key={d} className="rounded-panel bg-surface-1 p-4 text-small shadow-rest">
-              <p className="text-label font-bold uppercase tracking-wider text-text-2">{d}</p>
+            <div key={d} className="rounded-inner bg-surface-2 p-4 text-small">
+              <p className="text-label font-bold text-text-2">{d}</p>
               <ul className="mt-2 space-y-1">
                 {stats
                   .data!.filter((s) => s.dimension === d)
@@ -221,7 +221,10 @@ export function ChatsPanel() {
           <p className="text-text-2">No chats match.</p>
         ) : null}
         {chats.data?.map((c) => (
-          <details key={c.id} className="rounded-panel bg-surface-1 p-5 text-small shadow-rest">
+          <details
+            key={c.id}
+            className="rounded-inner border border-line bg-surface-1 p-4 text-small"
+          >
             <summary className="cursor-pointer list-none">
               <div className="flex flex-wrap items-center gap-2">
                 <b>{c.name ?? c.email ?? c.signed_in_business ?? "Anonymous visitor"}</b>
@@ -230,9 +233,9 @@ export function ChatsPanel() {
                     className={cn(
                       "rounded-pill px-2 py-0.5 text-label font-bold",
                       c.lead_temperature === "hot"
-                        ? "bg-bad text-kb-white"
+                        ? "bg-bad-soft text-bad"
                         : c.lead_temperature === "warm"
-                          ? "bg-kb-yellow"
+                          ? "bg-warn-soft text-warn"
                           : "bg-surface-2 text-text-2",
                     )}
                   >

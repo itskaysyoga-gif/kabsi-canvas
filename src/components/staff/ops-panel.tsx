@@ -1,9 +1,9 @@
 import { fmtDateTime } from "@/lib/format";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
+import { Button, STAFF_H2 } from "./staff-ui";
 
 // Staff operations (spec §9): job health, read through the staff-only RPC staff_job_health. Card codes and card
 // orders are gone (K-125, P0.8-01): Kabsi sells no NFC cards and mints no new codes; existing codes keep working.
@@ -64,7 +64,7 @@ async function loadHealth(): Promise<Health> {
 
 export function OpsPanel() {
   return (
-    <div className="mt-8 space-y-10">
+    <div>
       <JobHealth />
     </div>
   );
@@ -77,9 +77,9 @@ function JobHealth() {
   return (
     <section>
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-title font-bold">Job health</h2>
+        <h2 className={STAFF_H2}>Job health</h2>
         <Button variant="ghost" size="compact" onClick={() => void q.refetch()}>
-          <RefreshCw /> {q.isFetching ? "Checking…" : "Refresh"}
+          <RefreshCw /> {q.isFetching ? "Checking" : "Refresh"}
         </Button>
       </div>
       {q.isError ? <p className="mt-2 text-bad">{q.error.message}</p> : null}
@@ -111,8 +111,13 @@ function JobHealth() {
               warn={h.reviews_blocked > 0}
             />
           </div>
-          <div className="mt-4 overflow-x-auto rounded-panel bg-surface-1 shadow-rest">
-            <table className="w-full text-left text-small">
+          <div
+            tabIndex={0}
+            role="region"
+            aria-label="Schedules"
+            className="mt-4 overflow-x-auto rounded-inner border border-line"
+          >
+            <table className="w-full text-start text-small">
               <thead className="text-text-2">
                 <tr>
                   <th className="p-3 font-medium">Schedule</th>
@@ -190,7 +195,7 @@ function JobHealth() {
 
 function Stat({ label, value, warn = false }: { label: string; value: string; warn?: boolean }) {
   return (
-    <div className="rounded-panel bg-surface-1 p-4 shadow-rest">
+    <div className="rounded-inner bg-surface-2 p-4">
       <p className="text-label text-text-2">{label}</p>
       <p className={cn("mt-1 text-h3 font-bold", warn && "text-bad")}>{value}</p>
     </div>

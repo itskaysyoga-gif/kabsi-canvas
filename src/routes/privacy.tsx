@@ -102,14 +102,13 @@ function Page() {
             them for as long as your account exists, because they say which business is yours.
           </li>
           <li>
-            The facts you give Kabsi for drafting and for watching your listing: sign-off, tone,
+            The facts you give Kabsi for drafting and for watching your Google profile: sign-off, tone,
             phone number, hours, what to mention, staff names and answers to customer questions.
             Earlier versions of a fact are kept as a history.
           </li>
           <li>
             Your Google reviews (reviewer's public name, rating, text and dates), the replies we
-            draft and the replies you post; posts, photos and special hours you prepare; your
-            listing's name, phone, address, hours, website and category, to detect changes.
+            draft and the replies you post; posts, photos and special hours you prepare; your Google profile's name, phone, address, hours, website and category, to detect changes.
           </li>
           <li>Your plan and payments: the plan, the amount and the date.</li>
           <li>The date and wording of the authorisation you gave Kabsi.</li>
@@ -187,8 +186,7 @@ function Page() {
         <h2>3. Why we use it</h2>
         <ul>
           <li>
-            To provide Kabsi: draft replies and posts, send your emails, watch your listing, publish
-            what you approve, and run your plan. We rely on our contract with you.
+            To provide Kabsi: draft replies and posts, send your emails, watch your Google profile, publish what you approve, and run your plan. We rely on our contract with you.
           </li>
           <li>
             To process reviews written by your customers so you can answer them. This is in your
@@ -282,8 +280,7 @@ function Page() {
             once connected, the search terms Google reports for your profile.
           </li>
           <li>
-            A person, you, approves every reply, post, photo and listing change before it's
-            published. Kabsi makes no automated decisions that have legal or similarly significant
+            A person, you, approves every reply, post, photo and Google profile change before it's published. Kabsi makes no automated decisions that have legal or similarly significant
             effects on anyone.
           </li>
           <li>We never put a reviewer's personal details into a reply.</li>

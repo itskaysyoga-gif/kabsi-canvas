@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fmtDate } from "@/lib/format";
 import { supabase } from "@/lib/supabase";
 import { KABSI_GROUP_ID } from "@/lib/site";
+import { Button, STAFF_CARD, STAFF_H2, STAFF_ITEM } from "./staff-ui";
 
 // Staff follow-ups. whatsapp_nudge (K-61, P0.4-04): an owner agreed 72 hours ago, Kabsi still has no access and they gave a
 // phone number; a person sends a short personal WhatsApp from their own phone. The follow-up holds no phone number: the
@@ -40,8 +40,8 @@ export function FollowupsPanel() {
   });
   if (rows.isLoading) return null;
   return (
-    <section className="mt-8">
-      <h2 className="text-title font-bold">Follow-ups</h2>
+    <section className={STAFF_CARD}>
+      <h2 className={STAFF_H2}>Follow-ups</h2>
       {rows.isError ? (
         <p className="mt-1 text-small text-bad">Couldn't load follow-ups. Refresh the page.</p>
       ) : !rows.data?.length ? (
@@ -74,7 +74,7 @@ function FollowupCard({ f }: { f: Followup }) {
     await queryClient.invalidateQueries({ queryKey: ["staff-followups"] });
   }
   return (
-    <div className="rounded-panel bg-surface-1 p-5 shadow-rest">
+    <div className={STAFF_ITEM}>
       {nudge ? (
         <>
           <p className="font-bold">Send a personal WhatsApp to the owner of {f.location_name}</p>
@@ -134,7 +134,7 @@ function FollowupCard({ f }: { f: Followup }) {
         onClick={() => void done()}
       >
         {busy
-          ? "Saving…"
+          ? "Saving"
           : nudge
             ? "Done, I sent a message"
             : support

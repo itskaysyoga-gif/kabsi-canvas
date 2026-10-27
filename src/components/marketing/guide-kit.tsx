@@ -21,18 +21,62 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MAIN_CTA } from "@/lib/site";
+import { ScanBox } from "@/components/kabsi/scan-box";
+import { ButtonLink, TrialLine } from "@/components/kabsi/ui";
+import { Img, PHOTOS } from "@/components/kabsi/photos";
 import { DemoQr, IconBadge } from "./parts";
+
+/* ───────────── Design 2's guide template: the inline free check and the closing band ───────────── */
+
+/** "See where you show up", inside an article. */
+export function InlineScan() {
+  return (
+    <aside
+      aria-labelledby="inline-scan"
+      className="not-prose rounded-panel border border-line-strong bg-surface-1 p-5 sm:p-7"
+    >
+      <h2 id="inline-scan" className="font-display text-h3 font-bold text-text-1">
+        See where you show up
+      </h2>
+      <p className="mt-2 text-body text-text-2">
+        Type your business and Kabsi searches from places around it, like a customer.
+      </p>
+      <ScanBox id="guide-scan" className="mt-5" />
+    </aside>
+  );
+}
+
+/** The black closing band at the end of the guides (on the dark tokens, inside the light content). */
+export function GuideClosing() {
+  return (
+    <section aria-labelledby="guide-closing" className="theme-dark border-t border-line bg-band">
+      <div className="container-kb section-y">
+        <div className="max-w-[40rem]">
+          <h2 id="guide-closing" className="font-display text-h2 font-bold text-text-1">
+            Let Kabsi look after this.
+          </h2>
+          <p className="mt-4 text-lead text-text-2">Free for 14 days, no card.</p>
+          <div className="mt-8" data-main-cta>
+            <ButtonLink to="/scan">{MAIN_CTA}</ButtonLink>
+          </div>
+          <TrialLine className="mt-3" />
+        </div>
+      </div>
+    </section>
+  );
+}
 
 /* ───────────── text blocks ───────────── */
 
 export function KeyPoints({ items }: { items: string[] }) {
   return (
-    <aside className="not-prose rounded-panel bg-surface-2 p-6">
-      <p className="text-label font-bold uppercase tracking-wider text-text-2">In this guide</p>
+    <aside className="not-prose rounded-panel border border-line bg-surface-1 p-5 sm:p-7">
+      <h2 className="font-display text-h3 font-bold text-text-1">The short answer</h2>
       <ul className="mt-3 space-y-2.5">
         {items.map((t) => (
-          <li key={t} className="flex gap-3 text-[16px] leading-7 text-text-1">
-            <span className="mt-1 grid size-5 shrink-0 place-items-center rounded-full bg-kb-yellow">
+          <li key={t} className="flex gap-3 text-body text-text-1">
+            <span className="mt-1 grid size-5 shrink-0 place-items-center rounded-full bg-kb-green text-kb-white">
               <Check className="size-3.5" aria-hidden="true" />
             </span>
             {t}
@@ -51,13 +95,13 @@ export function Steps({ items }: { items: ReactNode[] }) {
           {i < items.length - 1 ? (
             <span
               aria-hidden="true"
-              className="absolute bottom-[-18px] left-[17px] top-10 w-0.5 bg-line"
+              className="absolute bottom-[-18px] start-[17px] top-10 w-0.5 bg-line"
             />
           ) : null}
-          <span className="relative grid size-9 shrink-0 place-items-center rounded-full bg-kb-yellow text-small font-bold text-kb-black">
+          <span className="relative grid size-9 shrink-0 place-items-center rounded-full border border-line-strong bg-surface-1 text-small font-bold text-text-1">
             {i + 1}
           </span>
-          <div className="pt-1.5 text-[17px] leading-7 text-text-1 [&_b]:font-bold">{it}</div>
+          <div className="pt-1.5 text-body text-text-1 [&_b]:font-bold">{it}</div>
         </li>
       ))}
     </ol>
@@ -76,10 +120,8 @@ export function Callout({
   return (
     <aside
       className={cn(
-        "not-prose flex gap-4 rounded-panel p-5",
-        kind === "tip"
-          ? "bg-kb-yellow/15 ring-1 ring-kb-yellow/60"
-          : "bg-surface-2 ring-1 ring-line",
+        "not-prose flex gap-4 rounded-card p-5",
+        kind === "tip" ? "bg-surface-2 ring-1 ring-line-strong" : "bg-surface-2 ring-1 ring-line",
       )}
     >
       <IconBadge
@@ -89,7 +131,7 @@ export function Callout({
       />
       <div>
         <p className="font-bold text-text-1">{title}</p>
-        <div className="mt-1 text-[16px] leading-7 text-text-2 [&_a]:font-bold [&_a]:text-text-1 [&_a]:underline [&_b]:text-text-1">
+        <div className="mt-1 text-body text-text-2 [&_a]:font-bold [&_a]:text-text-1 [&_a]:underline [&_b]:text-text-1">
           {children}
         </div>
       </div>
@@ -101,14 +143,11 @@ export function IconGrid({ items }: { items: { icon: ReactNode; title: string; t
   return (
     <div className="not-prose grid gap-3 sm:grid-cols-2">
       {items.map((it) => (
-        <div
-          key={it.title}
-          className="flex gap-4 rounded-panel border border-line bg-surface-1 p-4"
-        >
+        <div key={it.title} className="flex gap-4 rounded-card border border-line bg-surface-1 p-4">
           <IconBadge icon={it.icon} className="size-10" />
           <div>
             <p className="font-bold text-text-1">{it.title}</p>
-            <p className="mt-0.5 text-[15px] leading-6 text-text-2">{it.text}</p>
+            <p className="mt-0.5 text-small text-text-2">{it.text}</p>
           </div>
         </div>
       ))}
@@ -129,14 +168,14 @@ export function DoDont({
 }) {
   return (
     <div className="not-prose grid gap-3 sm:grid-cols-2">
-      <div className="rounded-panel border border-line bg-surface-1 p-5">
+      <div className="rounded-card border border-line bg-surface-1 p-5">
         <p className="flex items-center gap-2 font-bold text-text-1">
-          <span className="grid size-7 place-items-center rounded-full bg-kb-yellow">
+          <span className="grid size-7 place-items-center rounded-full bg-kb-green text-kb-white">
             <Check className="size-4" aria-hidden="true" />
           </span>
           {yesTitle}
         </p>
-        <ul className="mt-3 space-y-2 text-[15px] leading-6 text-text-2">
+        <ul className="mt-3 space-y-2 text-small text-text-2">
           {yes.map((t) => (
             <li key={t} className="flex gap-2">
               <Check className="mt-1 size-4 shrink-0 text-text-1" aria-hidden="true" />
@@ -145,14 +184,14 @@ export function DoDont({
           ))}
         </ul>
       </div>
-      <div className="rounded-panel border border-line bg-surface-2 p-5">
+      <div className="rounded-card border border-line bg-surface-2 p-5">
         <p className="flex items-center gap-2 font-bold text-text-1">
-          <span className="grid size-7 place-items-center rounded-full bg-kb-carbon text-kb-white">
+          <span className="grid size-7 place-items-center rounded-full bg-text-1 text-surface-0">
             <X className="size-4" aria-hidden="true" />
           </span>
           {noTitle}
         </p>
-        <ul className="mt-3 space-y-2 text-[15px] leading-6 text-text-2">
+        <ul className="mt-3 space-y-2 text-small text-text-2">
           {no.map((t) => (
             <li key={t} className="flex gap-2">
               <X className="mt-1 size-4 shrink-0 text-text-1" aria-hidden="true" />
@@ -174,7 +213,7 @@ export function Compare({
 }) {
   const Mark = ({ on }: { on: boolean }) =>
     on ? (
-      <span className="mx-auto grid size-7 place-items-center rounded-full bg-kb-yellow">
+      <span className="mx-auto grid size-7 place-items-center rounded-full bg-kb-green text-kb-white">
         <Check className="size-4" aria-label="Yes" />
       </span>
     ) : (
@@ -183,9 +222,9 @@ export function Compare({
       </span>
     );
   return (
-    <div className="not-prose overflow-hidden rounded-panel border border-line bg-surface-1">
-      <table className="w-full text-left text-[15px]">
-        <thead className="bg-surface-2 text-label font-bold uppercase tracking-wider text-text-2">
+    <div className="not-prose overflow-hidden rounded-card border border-line bg-surface-1">
+      <table className="w-full text-start text-small">
+        <thead className="bg-surface-2 text-label font-bold text-text-2">
           <tr>
             <th className="px-4 py-3 font-bold">What they can do</th>
             <th className="w-24 px-2 py-3 text-center font-bold">{cols[0]}</th>
@@ -243,8 +282,8 @@ export function Example({
   dir?: "ltr" | "rtl";
 }) {
   return (
-    <figure className="not-prose overflow-hidden rounded-panel border border-line bg-surface-1 shadow-rest">
-      <figcaption className="flex items-center justify-between gap-3 border-b border-line bg-surface-2 px-5 py-2.5 text-label font-bold uppercase tracking-wider text-text-2">
+    <figure className="not-prose overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest">
+      <figcaption className="flex items-center justify-between gap-3 border-b border-line bg-surface-2 px-5 py-2.5 text-label font-bold text-text-2">
         <span>{label}</span>
         <span className="rounded-pill bg-surface-1 px-2.5 py-1 normal-case tracking-normal text-text-1">
           {lang}
@@ -252,7 +291,7 @@ export function Example({
       </figcaption>
       <div className="p-5">
         <div className="flex items-center gap-3">
-          <span className="grid size-9 place-items-center rounded-full bg-kb-carbon text-small font-bold text-kb-white">
+          <span className="grid size-9 place-items-center rounded-full bg-text-1 text-small font-bold text-surface-0">
             {name.charAt(0)}
           </span>
           <div>
@@ -260,15 +299,15 @@ export function Example({
             <Stars n={rating} />
           </div>
         </div>
-        <p dir={dir} className="mt-3 text-[16px] leading-7 text-text-1">
+        <p dir={dir} className="mt-3 text-body text-text-1">
           {review}
         </p>
-        <div className="mt-4 rounded-card border-l-4 border-kb-yellow bg-surface-2 p-4">
-          <p className="flex items-center gap-2 text-label font-bold uppercase tracking-wider text-text-2">
+        <div className="mt-4 rounded-card border-s-4 border-line-strong bg-surface-2 p-4">
+          <p className="flex items-center gap-2 text-label font-bold text-text-2">
             <MessageSquareReply className="size-4" aria-hidden="true" />
             Reply from the business
           </p>
-          <p dir={dir} className="mt-2 whitespace-pre-line text-[16px] leading-7 text-text-1">
+          <p dir={dir} className="mt-2 whitespace-pre-line text-body text-text-1">
             {reply}
           </p>
         </div>
@@ -282,7 +321,7 @@ export function Example({
 function Sketch({ caption, children }: { caption: string; children: ReactNode }) {
   return (
     <figure
-      className="not-prose rounded-panel bg-surface-2 p-4 sm:p-7"
+      className="not-prose rounded-card bg-surface-2 p-4 sm:p-7"
       style={{
         backgroundImage: "radial-gradient(rgba(94,91,85,.18) 1px, transparent 1px)",
         backgroundSize: "16px 16px",
@@ -300,7 +339,7 @@ function Sketch({ caption, children }: { caption: string; children: ReactNode })
 
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-card bg-surface-1 shadow-[0_10px_30px_rgba(0,0,0,.08)] ring-1 ring-line">
+    <div className="overflow-hidden rounded-card bg-surface-1 shadow-rest ring-1 ring-line">
       <div className="flex items-center gap-2 border-b border-line px-4 py-2.5">
         <span className="flex gap-1">
           <span className="size-2 rounded-full bg-line" />
@@ -332,11 +371,11 @@ function Lines({ n = 2 }: { n?: number }) {
 function Hit({ children, tag }: { children: ReactNode; tag: string }) {
   return (
     <span className="relative inline-flex">
-      <span className="inline-flex items-center gap-1.5 rounded-pill bg-surface-1 px-3 py-1.5 text-label font-bold text-text-1 ring-[3px] ring-kb-yellow">
+      <span className="inline-flex items-center gap-1.5 rounded-pill bg-surface-1 px-3 py-1.5 text-label font-bold text-text-1 ring-[3px] ring-text-1">
         {children}
       </span>
-      <span className="absolute left-1/2 top-full z-10 mt-2 inline-flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-pill bg-kb-carbon px-2.5 py-1 text-[11px] font-bold text-kb-white">
-        <MousePointerClick className="size-3.5 text-kb-yellow" />
+      <span className="absolute start-1/2 top-full z-10 mt-2 inline-flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-pill bg-text-1 px-2.5 py-1 text-label font-bold text-surface-0">
+        <MousePointerClick className="size-3.5 text-surface-0" />
         {tag}
       </span>
     </span>
@@ -346,7 +385,7 @@ function Hit({ children, tag }: { children: ReactNode; tag: string }) {
 function MiniReview({ name, stars }: { name: string; stars: number }) {
   return (
     <div className="flex gap-3">
-      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-kb-carbon text-label font-bold text-kb-white">
+      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-text-1 text-label font-bold text-surface-0">
         {name.charAt(0)}
       </span>
       <div className="min-w-0 flex-1">
@@ -364,7 +403,7 @@ export function ReplySketch() {
     <Sketch caption="Reviews on your Business Profile">
       <Panel title="Reviews">
         <MiniReview name="Emma" stars={5} />
-        <div className="mt-4 flex items-center gap-3 pb-12 pl-11">
+        <div className="mt-4 flex items-center gap-3 pb-12 ps-11">
           <Hit tag="Select Reply">
             <MessageSquareReply className="size-3.5" /> Reply
           </Hit>
@@ -376,7 +415,7 @@ export function ReplySketch() {
           Thank you, Emma. We're glad you enjoyed the coffee. See you again soon.
         </div>
         <div className="mt-3 flex justify-end">
-          <span className="rounded-pill bg-kb-carbon px-4 py-1.5 text-label font-bold text-kb-white">
+          <span className="rounded-pill bg-text-1 px-4 py-1.5 text-label font-bold text-surface-0">
             Reply
           </span>
         </div>
@@ -397,12 +436,12 @@ export function ReportSketch() {
         </div>
         <div className="rounded-card bg-surface-2 p-3">
           <p className="text-label font-bold text-text-1">Why are you reporting it?</p>
-          <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px] text-text-1">
+          <div className="mt-2 grid grid-cols-2 gap-1.5 text-label text-text-1">
             {["Spam", "Off topic", "Profanity", "Personal information"].map((r, i) => (
               <span
                 key={r}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-lg bg-surface-1 px-2 py-1.5",
+                  "flex items-center gap-1.5 rounded-input bg-surface-1 px-2 py-1.5",
                   i === 0 && "ring-2 ring-text-1",
                 )}
               >
@@ -417,7 +456,7 @@ export function ReportSketch() {
             ))}
           </div>
           <div className="mt-3 flex justify-end">
-            <span className="rounded-pill bg-kb-carbon px-3 py-1.5 text-[11px] font-bold text-kb-white">
+            <span className="rounded-pill bg-text-1 px-3 py-1.5 text-label font-bold text-surface-0">
               Send report
             </span>
           </div>
@@ -437,23 +476,23 @@ export function ManagerSketch() {
           </Hit>
         </div>
         <div className="flex items-center gap-3 rounded-card bg-surface-2 px-3 py-2.5">
-          <span className="grid size-7 place-items-center rounded-full bg-kb-yellow text-label font-bold">
+          <span className="grid size-7 place-items-center rounded-full bg-kb-green text-label font-bold text-surface-0">
             Y
           </span>
           <span className="flex-1 text-label font-bold text-text-1">You</span>
-          <span className="text-[11px] font-bold text-text-2">Primary owner</span>
+          <span className="text-label font-bold text-text-2">Primary owner</span>
         </div>
         <div className="mt-3 rounded-card border border-line p-3">
-          <p className="text-[11px] font-bold text-text-2">Name or email</p>
-          <p className="mt-1 rounded-lg bg-surface-2 px-2.5 py-2 text-label text-text-1">
+          <p className="text-label font-bold text-text-2">Name or email</p>
+          <p className="mt-1 rounded-input bg-surface-2 px-2.5 py-2 text-label text-text-1">
             name@example.com
           </p>
-          <p className="mt-3 text-[11px] font-bold text-text-2">Access</p>
-          <p className="mt-1 flex items-center justify-between rounded-lg px-2.5 py-2 text-label font-bold text-text-1 ring-2 ring-kb-yellow">
+          <p className="mt-3 text-label font-bold text-text-2">Access</p>
+          <p className="mt-1 flex items-center justify-between rounded-input px-2.5 py-2 text-label font-bold text-text-1 ring-2 ring-text-1">
             Manager <ChevronDown className="size-3.5" />
           </p>
           <div className="mt-3 flex justify-end">
-            <span className="rounded-pill bg-kb-carbon px-4 py-1.5 text-[11px] font-bold text-kb-white">
+            <span className="rounded-pill bg-text-1 px-4 py-1.5 text-label font-bold text-surface-0">
               Invite
             </span>
           </div>
@@ -467,9 +506,9 @@ export function LinkSketch() {
   return (
     <Sketch caption="Get more reviews: your link and QR code">
       <Panel title="Get more reviews">
-        <p className="text-[11px] font-bold text-text-2">Share review form</p>
-        <div className="mt-1.5 flex items-center gap-2 rounded-lg bg-surface-2 p-2 pb-2">
-          <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-text-2">
+        <p className="text-label font-bold text-text-2">Share review form</p>
+        <div className="mt-1.5 flex items-center gap-2 rounded-input bg-surface-2 p-2 pb-2">
+          <span className="min-w-0 flex-1 truncate font-mono text-label text-text-2">
             g.page/r/…/review
           </span>
         </div>
@@ -479,7 +518,7 @@ export function LinkSketch() {
           </Hit>
         </div>
         <div className="flex items-center gap-4 rounded-card border border-line p-3">
-          <div className="rounded-lg bg-surface-1 p-1.5 ring-1 ring-line">
+          <div className="rounded-input bg-surface-1 p-1.5 ring-1 ring-line">
             <DemoQr className="size-16" />
           </div>
           <div className="text-label leading-5 text-text-2">
@@ -506,19 +545,19 @@ export function CalmFlow() {
     { icon: <Phone />, title: "Take it offline", text: "Give a phone number or email to talk." },
   ];
   return (
-    <figure className="not-prose rounded-panel bg-kb-carbon p-5 text-kb-white sm:p-7">
+    <figure className="not-prose rounded-card bg-surface-2 p-5 text-text-1 sm:p-7">
       <ol className="grid gap-3 sm:grid-cols-[1fr_auto_1fr_auto_1fr] sm:items-stretch">
         {steps.map((s, i) => (
           <li key={s.title} className="contents">
-            <div className="rounded-card bg-white/[.06] p-4 ring-1 ring-white/10">
+            <div className="rounded-inner bg-surface-1 p-4 ring-1 ring-line">
               <IconBadge icon={s.icon} className="size-10" />
               <p className="mt-3 font-bold">
                 {i + 1}. {s.title}
               </p>
-              <p className="mt-1 text-small leading-6 text-kb-mute">{s.text}</p>
+              <p className="mt-1 text-small text-text-2">{s.text}</p>
             </div>
             {i < steps.length - 1 ? (
-              <span className="hidden items-center text-kb-yellow sm:flex" aria-hidden="true">
+              <span className="hidden items-center text-text-2 sm:flex" aria-hidden="true">
                 <ArrowRight className="size-5" />
               </span>
             ) : null}
@@ -526,5 +565,34 @@ export function CalmFlow() {
         ))}
       </ol>
     </figure>
+  );
+}
+
+/** The guide's photo from the site's own set (src/assets/photos, Design 2: bakery-window for the guides). */
+const GUIDE_PHOTO: Record<string, keyof typeof PHOTOS> = {
+  "how-to-reply-to-google-reviews": "phoneTyping",
+  "how-to-respond-to-negative-google-reviews": "phoneReading",
+  "can-you-remove-a-google-review": "phoneShop",
+  "add-manager-google-business-profile": "salonTablet",
+  "google-review-link-and-qr-code": "bakeryCounter",
+};
+export function GuidePhoto({
+  slug,
+  sizes,
+  className,
+  priority,
+}: {
+  slug: string;
+  sizes: string;
+  className?: string;
+  priority?: boolean;
+}) {
+  return (
+    <Img
+      photo={PHOTOS[GUIDE_PHOTO[slug] ?? "bakeryWindow"]}
+      sizes={sizes}
+      className={className}
+      priority={priority}
+    />
   );
 }

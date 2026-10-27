@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layouts/public-layout";
-import { H2, PageHero, Section } from "@/components/marketing/parts";
 import { BookingLink } from "@/components/shared/booking-link";
+import { SectionHead } from "@/components/kabsi/ui";
 import { WhatsappLink } from "@/components/shared/whatsapp-link";
 import {
   BOOKING_ANSWERS,
@@ -37,64 +37,70 @@ function SetupCallPage() {
 
   return (
     <PublicLayout>
-      <PageHero
-        eyebrow="Free call"
-        title="Book a free setup call"
-        sub={`${SETUP_CALL_MINUTES} minutes with the Kabsi team. Pick a time that suits you and tell us what the call is about.`}
-        crumbs={[{ name: "Free setup call" }]}
-      />
-      <Section className="max-w-3xl space-y-8 text-[17px] leading-8">
-        <p className="text-text-2">
-          We guide, you click. We never ask for your Google password, and we never sign in to your
-          Google account: you send the Manager invitation yourself, with us beside you.
-        </p>
-        {BOOKING_READY ? (
-          <iframe
-            title="Book a call with Kabsi"
-            src={bookingUrl(kind, true)}
-            loading="lazy"
-            className="h-[700px] w-full rounded-panel border border-line bg-surface-1"
-          />
-        ) : (
-          <div className="rounded-panel bg-surface-2 p-6">
-            <H2 className="text-h3">Pick a time by email</H2>
-            <p className="mt-3 text-text-2">
-              The booking calendar is on its way. Until then, write to{" "}
+      <section className="container-kb py-10 sm:py-16">
+        <SectionHead
+          as="h1"
+          title="Book a setup call."
+          lead={`A short call to set up Kabsi with you. You pick the time. ${SETUP_CALL_MINUTES} minutes with the Kabsi team.`}
+        />
+        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+          {BOOKING_READY ? (
+            <iframe
+              title="Book a call with Kabsi"
+              src={bookingUrl(kind, true)}
+              loading="lazy"
+              className="h-[700px] w-full rounded-card border border-line bg-surface-1 shadow-rest"
+            />
+          ) : (
+            <div className="rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-7">
+              <h2 className="font-display text-h3 font-bold text-text-1">Pick a time by email</h2>
+              <p className="mt-3 text-body text-text-2">
+                The booking calendar is on its way. Until then, write to{" "}
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  className="font-bold text-text-1 underline underline-offset-4"
+                >
+                  {CONTACT_EMAIL}
+                </a>{" "}
+                and a person replies with times.
+              </p>
+              <div className="mt-5" data-main-cta>
+                <BookingLink kind={kind} button>
+                  Email the team
+                </BookingLink>
+              </div>
+            </div>
+          )}
+          <aside className="space-y-4 rounded-card border border-line bg-surface-2 p-5 text-small text-text-2">
+            <p>
+              We guide, you click. We never ask for your Google password, and we never sign in to
+              your Google account: you send the Manager invitation yourself, with us beside you.
+            </p>
+            <p>
+              Calls run Monday to Friday, 8am to 6pm Beirut time. The call is about:{" "}
+              {Object.values(BOOKING_ANSWERS).join(", ")}. Questions? Write to{" "}
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="font-bold underline underline-offset-4"
+                className="text-text-1 underline underline-offset-4"
               >
                 {CONTACT_EMAIL}
-              </a>{" "}
-              and a person replies with times.
+              </a>
+              .
             </p>
-            <div className="mt-5">
-              <BookingLink kind={kind} button>
-                Email the team
-              </BookingLink>
-            </div>
-          </div>
-        )}
-        <p className="text-small text-text-2">
-          Calls run Monday to Friday, 8am to 6pm Beirut time. The call is about:{" "}
-          {Object.values(BOOKING_ANSWERS).join(", ")}. Questions? Write to{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-4">
-            {CONTACT_EMAIL}
-          </a>
-          .
-        </p>
-        {WHATSAPP_ON ? (
-          <p className="text-small text-text-2">
-            Prefer to type? Message us on{" "}
-            <WhatsappLink
-              kind={kind === "setup" ? "setup" : kind === "partner" ? "partner" : "general"}
-            >
-              WhatsApp {WHATSAPP_NUMBER}
-            </WhatsappLink>
-            . A person replies. We never ask for your Google password or codes there either.
-          </p>
-        ) : null}
-      </Section>
+            {WHATSAPP_ON ? (
+              <p>
+                Prefer to type? Message us on{" "}
+                <WhatsappLink
+                  kind={kind === "setup" ? "setup" : kind === "partner" ? "partner" : "general"}
+                >
+                  WhatsApp {WHATSAPP_NUMBER}
+                </WhatsappLink>
+                . A person replies. We never ask for your Google password or codes there either.
+              </p>
+            ) : null}
+          </aside>
+        </div>
+      </section>
     </PublicLayout>
   );
 }

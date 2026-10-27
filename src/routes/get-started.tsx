@@ -34,7 +34,7 @@ function Page() {
         <>
           <StepTitle
             title="Which business is yours?"
-            sub="Search by name and city, the way it appears on Google Maps. No account needed."
+            sub="Kabsi finds your Google profile, so it can set up everything for you. Search by name and city, the way it appears on Google Maps. No account needed."
           />
           <BusinessFinder state={check} />
         </>

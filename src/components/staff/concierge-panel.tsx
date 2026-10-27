@@ -11,7 +11,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CopyButton } from "@/components/shared/copy-button";
@@ -28,6 +27,8 @@ import {
   type ConciergeQueue,
   type ConciergeTask,
 } from "@/lib/concierge";
+import { Button, STAFF_CARD, STAFF_H2, STAFF_ITEM } from "./staff-ui";
+import { cn } from "@/lib/utils";
 
 // Concierge queue (D267): what a person on the team does by hand during early access. The reply text shown here is
 // exactly what the owner approved; it is pasted on Google unchanged, then marked posted. The owner's approval is
@@ -42,8 +43,8 @@ export function ConciergePanel() {
   if (queue.isLoading) return null;
   if (!q || (q.count === 0 && q.tasks.length === 0)) {
     return (
-      <section className="mt-8">
-        <h2 className="text-title font-bold">Concierge</h2>
+      <section className={STAFF_CARD}>
+        <h2 className={STAFF_H2}>Concierge</h2>
         <p className="mt-1 text-small text-text-2">
           No businesses in early access. Turn concierge on for a business in the list below (up to{" "}
           {q?.cap ?? 30}).
@@ -52,9 +53,9 @@ export function ConciergePanel() {
     );
   }
   return (
-    <section className="mt-8">
+    <section className={STAFF_CARD}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-title font-bold">Concierge</h2>
+        <h2 className={STAFF_H2}>Concierge</h2>
         <p className="text-small text-text-2">
           {q.count} of {q.cap} businesses in early access
         </p>
@@ -112,7 +113,7 @@ function ReplyTask({ task }: { task: ConciergeTask }) {
   });
   const r = task.review;
   return (
-    <article className="rounded-panel bg-surface-1 p-5 shadow-rest">
+    <article className={STAFF_ITEM}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-bold">Post this reply: {task.business}</p>
@@ -136,9 +137,7 @@ function ReplyTask({ task }: { task: ConciergeTask }) {
           <p className="mt-2 text-label text-text-2">Find this review on Google to reply to it.</p>
         </div>
       ) : null}
-      <p className="mt-4 text-label font-bold uppercase tracking-wider text-text-2">
-        Reply to paste, exactly as approved
-      </p>
+      <p className="mt-4 text-label font-bold text-text-2">Reply to paste, exactly as approved</p>
       <div
         className="mt-1 whitespace-pre-wrap rounded-card border-2 border-text-1 p-4 leading-6"
         data-testid="reply-text"
@@ -240,10 +239,10 @@ function InviteTask({ task }: { task: ConciergeTask }) {
     onError: (e) => setMsg(e instanceof Error ? e.message : String(e)),
   });
   return (
-    <article className="rounded-panel bg-surface-1 p-5 shadow-rest">
+    <article className={STAFF_ITEM}>
       <p className="font-bold">Accept the invitation: {task.business}</p>
       {task.address ? <p className="text-small text-text-2">{task.address}</p> : null}
-      <ol className="mt-3 list-decimal space-y-1 pl-5 text-small leading-6">
+      <ol className="mt-3 list-decimal space-y-1 ps-5 text-small leading-6">
         <li>Open Business Profile Manager as hello@kabsi.co and go to Manage invitations.</li>
         <li>Accept only the Manager invitation for exactly this business name and address.</li>
         <li>Tap Accepted here. The owner gets an email and can start.</li>
@@ -296,7 +295,7 @@ function ReviewEntry({ queue }: { queue: ConciergeQueue }) {
     setBusy(false);
   }
   return (
-    <form onSubmit={submit} className="mt-6 rounded-panel bg-surface-1 p-5 shadow-rest">
+    <form onSubmit={submit} className={cn("mt-6", STAFF_ITEM)}>
       <h3 className="font-bold">Enter a new review</h3>
       <p className="text-small text-text-2">
         Copy it from Google exactly. The owner is emailed a drafted reply.
@@ -306,7 +305,7 @@ function ReviewEntry({ queue }: { queue: ConciergeQueue }) {
           aria-label="Business"
           value={chosen?.id}
           onChange={(e) => setLoc(e.target.value)}
-          className="h-11 rounded-card border border-line bg-surface-1 px-3 sm:col-span-2"
+          className="h-11 rounded-input border border-stroke bg-surface-1 px-3 sm:col-span-2"
         >
           {ready.map((b) => (
             <option key={b.id} value={b.id}>
@@ -319,7 +318,7 @@ function ReviewEntry({ queue }: { queue: ConciergeQueue }) {
           aria-label="Stars"
           value={rating}
           onChange={(e) => setRating(Number(e.target.value))}
-          className="h-11 rounded-card border border-line bg-surface-1 px-3"
+          className="h-11 rounded-input border border-stroke bg-surface-1 px-3"
         >
           {[5, 4, 3, 2, 1].map((n) => (
             <option key={n} value={n}>
@@ -356,7 +355,7 @@ function ReviewEntry({ queue }: { queue: ConciergeQueue }) {
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <Button type="submit" size="compact" disabled={busy}>
-          {busy ? "Saving…" : "Add review"}
+          {busy ? "Saving" : "Add review"}
         </Button>
         <CheckedButton business={chosen} />
       </div>

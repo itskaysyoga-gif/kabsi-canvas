@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Check } from "lucide-react";
 import { ConfirmLayout } from "@/components/layouts/confirm-layout";
-import { Button } from "@/components/ui/button";
+import { QuietMark, QuietTitle } from "@/components/kabsi/d2-quiet";
+import { buttonClass } from "@/components/kabsi/ui";
 
 // Where Creem sends the owner after paying (master plan 10.2.7, success_url). The copy is docs/COPY.md section 23. The
 // page changes nothing: the paid state is written only by the Creem webhook (10.2.8).
@@ -14,13 +16,13 @@ export const Route = createFileRoute("/billing/done")({
 function BillingDonePage() {
   return (
     <ConfirmLayout>
-      <h1 className="font-display text-h3 leading-tight">You are all set.</h1>
-      <p className="mt-3 leading-7 text-text-2">
-        Your plan starts the day Kabsi&apos;s access to your Google listing works.
-      </p>
-      <Button asChild className="mt-6 w-full">
-        <Link to="/app/plan">Back to Kabsi</Link>
-      </Button>
+      <QuietMark icon={Check} tone="ok" />
+      <QuietTitle lead="Your plan starts the day Kabsi's access to your Google profile works.">
+        You are all set.
+      </QuietTitle>
+      <Link to="/app/plan" data-main-cta className={buttonClass("primary", "lg", true) + " mt-6"}>
+        Back to Kabsi
+      </Link>
     </ConfirmLayout>
   );
 }

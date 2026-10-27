@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { MapPin, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/kabsi/ui";
 import { Input } from "@/components/ui/input";
 import { Turnstile } from "@/components/turnstile";
 import { cn } from "@/lib/utils";
@@ -60,22 +60,25 @@ export function BusinessFinder({
           maxLength={120}
           autoComplete="organization"
           autoFocus={autoFocus}
-          className="h-[52px] rounded-card bg-surface-1 px-4 text-body text-text-1"
+          className="h-13 rounded-input border-stroke bg-surface-2 px-4 text-body text-text-1"
         />
-        <Button
-          type="submit"
-          className="shrink-0 sm:w-48"
-          disabled={busy || q.trim().length < 2 || !token}
-        >
-          <Search /> {busy && !results ? "Searching" : "Find my business"}
-        </Button>
+        <div className="shrink-0" data-main-cta>
+          <Button
+            type="submit"
+            className="w-full sm:w-auto"
+            icon={<Search className="size-5" aria-hidden />}
+            disabled={busy || q.trim().length < 2 || !token}
+          >
+            {busy && !results ? "Searching" : "Find my business"}
+          </Button>
+        </div>
       </form>
       <div className="mt-3">
         <Turnstile key={round} onToken={setToken} />
       </div>
       {error ? (
         <p
-          className={cn("mt-3 text-small", dark ? "text-kb-yellow" : "text-bad")}
+          className={cn("mt-3 text-small", dark ? "text-warn" : "text-bad")}
           role="alert"
           data-testid="check-error"
         >
@@ -85,7 +88,7 @@ export function BusinessFinder({
       {results ? (
         <ul className="mt-4 space-y-2" aria-label="Search results">
           {results.length === 0 ? (
-            <li className={cn("text-small", dark ? "text-kb-mute" : "text-text-2")}>
+            <li className={cn("text-small", "text-text-2")}>
               Nothing found. Try the exact name as it appears on Google Maps plus your city.
             </li>
           ) : null}
@@ -96,27 +99,25 @@ export function BusinessFinder({
                 disabled={busy || !token}
                 onClick={() => void pick(p)}
                 className={cn(
-                  "flex min-h-14 w-full items-start gap-3 rounded-card p-4 text-left transition-colors disabled:cursor-wait disabled:opacity-60",
+                  "press flex min-h-14 w-full items-start gap-3 rounded-card p-4 text-start transition-colors disabled:cursor-wait disabled:opacity-60",
                   dark
-                    ? "bg-white/5 hover:bg-white/10"
-                    : "border-2 border-line hover:border-stroke",
+                    ? "bg-surface-2 hover:bg-surface-3"
+                    : "border border-line-strong bg-surface-1 hover:border-text-1",
                 )}
               >
                 <MapPin
-                  className={cn("mt-0.5 size-5 shrink-0", dark ? "text-kb-yellow" : "text-text-1")}
+                  className={cn("mt-0.5 size-5 shrink-0", "text-text-1")}
                   aria-hidden="true"
                 />
                 <span className="min-w-0">
                   <span className="block font-bold">{p.name}</span>
-                  <span className={cn("block text-small", dark ? "text-kb-mute" : "text-text-2")}>
-                    {p.address}
-                  </span>
+                  <span className={cn("block text-small", "text-text-2")}>{p.address}</span>
                 </span>
               </button>
             </li>
           ))}
           {busy && results.length ? (
-            <li className={cn("text-small", dark ? "text-kb-mute" : "text-text-2")} role="status">
+            <li className={cn("text-small", "text-text-2")} role="status">
               Checking what customers see on Google
             </li>
           ) : null}

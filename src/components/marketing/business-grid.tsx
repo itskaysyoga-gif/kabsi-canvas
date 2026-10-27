@@ -20,7 +20,7 @@ export function IndustryLinks({
             <Link
               to="/for/$trade"
               params={{ trade: i.slug }}
-              className="inline-flex items-center gap-2 rounded-pill border border-line bg-surface-1 px-3.5 py-2 text-small font-bold hover:border-text-1"
+              className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-line-strong bg-surface-1 px-4 text-small font-bold text-text-1 hover:border-text-1"
             >
               {i.plural}
             </Link>
@@ -29,7 +29,7 @@ export function IndustryLinks({
         <li>
           <Link
             to="/for"
-            className="inline-flex items-center gap-1.5 rounded-pill px-3.5 py-2 text-small font-bold underline underline-offset-4"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-pill px-3.5 text-small font-bold text-text-1 underline underline-offset-4"
           >
             All businesses <ArrowRight className="size-4" aria-hidden="true" />
           </Link>

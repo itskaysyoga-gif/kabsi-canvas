@@ -215,7 +215,7 @@ export function IconBadge({
       aria-hidden="true"
       className={cn(
         "grid size-11 shrink-0 place-items-center rounded-full [&_svg]:size-5 [&_svg]:stroke-[2]",
-        tone === "yellow" && "bg-kb-yellow text-kb-black",
+        tone === "yellow" && "bg-surface-2 text-text-1 ring-1 ring-line",
         tone === "sand" && "bg-surface-2 text-text-1 ring-1 ring-line",
         tone === "dark" && "bg-kb-white/10 text-kb-yellow ring-1 ring-kb-white/15",
         className,

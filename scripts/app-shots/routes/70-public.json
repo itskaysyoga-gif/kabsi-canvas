@@ -1,0 +1,20 @@
+[
+  { "path": "/guides", "name": "public-guides" },
+  { "path": "/guides/how-to-reply-to-google-reviews", "name": "public-guide-article" },
+  { "path": "/login?next=/login", "name": "public-login" },
+  { "path": "/setup-call", "name": "public-setup-call" },
+  { "path": "/get-started", "name": "public-get-started" },
+  { "path": "/review/KQA234", "name": "public-review" },
+  { "path": "/review/KQA234", "state": "inactive", "name": "public-review-inactive" },
+  { "path": "/a/shots-token", "name": "public-approve" },
+  { "path": "/a/shots-token", "state": "a-used", "name": "public-approve-used" },
+  { "path": "/a/shots-token", "state": "a-expired", "name": "public-approve-expired" },
+  { "path": "/h/shots-token", "name": "public-hours" },
+  { "path": "/h/shots-token", "state": "h-expired", "name": "public-hours-expired" },
+  { "path": "/u/shots-token", "name": "public-upload" },
+  { "path": "/u/shots-token", "state": "u-off", "name": "public-upload-off" },
+  { "path": "/activate/KQA234", "name": "public-activate" },
+  { "path": "/unsubscribe?t=shots-token", "name": "public-unsubscribe" },
+  { "path": "/unsubscribe", "name": "public-unsubscribe-bad" },
+  { "path": "/billing/done", "name": "public-billing-done" }
+]
