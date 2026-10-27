@@ -308,7 +308,7 @@ Deno.test("Email 1: the Results Report is the work receipt; a row without real n
   const { REPORT_NO_GOOGLE } = await import("./catalog.ts");
   const c = catalog().find((x) => x.kind === "weekly_report")!;
   const { text, html } = render(c);
-  assert.match(text, /What Kabsi did: Replies published 4/);
+  assert.match(text, /What Kabsi did: Replies sent to Google 4/);
   assert.match(text, /Waiting for your yes: A reply to Maya K\.'s review/);
   assert.match(text, /One next step: Send your review link/);
   assert.match(text, /- Calls: 18 \(4 more than last week\)/);

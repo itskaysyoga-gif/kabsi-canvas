@@ -23,9 +23,9 @@ const ASSISTANT: Record<string, string> = { chatgpt: "ChatGPT", perplexity: "Per
 /** What Kabsi did this week, as chips: only the kinds that happened, most owner-visible first. */
 export function didChips(c: Counts): Chip[] {
   return [
-    { key: "replies", label: "Replies published", count: c.replies_published },
-    { key: "posts", label: "Posts published", count: c.posts_published },
-    { key: "photos", label: "Photos published", count: c.photos_published },
+    { key: "replies", label: "Replies sent to Google", count: c.replies_published },
+    { key: "posts", label: "Posts sent to Google", count: c.posts_published },
+    { key: "photos", label: "Photos sent to Google", count: c.photos_published },
     { key: "hours", label: "Hours updated", count: c.hours_updates },
     { key: "details", label: "Profile details updated", count: c.profile_updates },
     { key: "put_back", label: "Changes put back", count: c.changes_put_back },

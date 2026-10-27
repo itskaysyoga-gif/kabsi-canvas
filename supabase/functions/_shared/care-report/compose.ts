@@ -24,7 +24,7 @@ export type Inputs = { counts: Counts; needs: Line[]; needs_total: number; plan:
 /** K-72: minutes of an owner's time each kind of work saves. */
 export const MINUTES = { reply: 5, update: 15, photo_batch: 10, profile_check: 10 } as const;
 export const FORMULA =
-  "5 minutes for each reply published, 15 for each update (a post, a change to your hours or a profile detail), 10 for each batch of photos and 10 for each profile check that found something. It is an estimate, counted from what Kabsi did.";
+  "5 minutes for each reply sent to Google, 15 for each update (a post, a change to your hours or a profile detail), 10 for each batch of photos and 10 for each profile check that found something. It is an estimate, counted from what Kabsi did.";
 
 /** Posts, hours changes and profile edits that went to Google: the "updates" of K-28. */
 export const updatesCount = (c: Counts) => c.posts_published + c.hours_updates + c.profile_updates;
@@ -34,8 +34,8 @@ export const thingsCount = (c: Counts) => c.replies_prepared + updatesCount(c) +
 export type TimeSaved = { minutes: number; parts: { label: string; count: number; minutes_each: number; minutes: number }[]; formula: string };
 export function timeSaved(c: Counts): TimeSaved {
   const parts = [
-    { label: "Replies published", count: c.replies_published, minutes_each: MINUTES.reply },
-    { label: "Updates published", count: updatesCount(c), minutes_each: MINUTES.update },
+    { label: "Replies sent to Google", count: c.replies_published, minutes_each: MINUTES.reply },
+    { label: "Updates sent to Google", count: updatesCount(c), minutes_each: MINUTES.update },
     { label: "Batches of photos", count: c.photo_batches, minutes_each: MINUTES.photo_batch },
     { label: "Profile checks that found something", count: c.changes_found, minutes_each: MINUTES.profile_check },
   ].map((p) => ({ ...p, minutes: p.count * p.minutes_each }));

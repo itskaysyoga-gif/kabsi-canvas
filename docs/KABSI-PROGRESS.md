@@ -5,12 +5,7 @@ One page, under 10 KB. Updated 25 Oct 2026 by the lane R chat (master plan 19, 2
 ## Where things stand
 
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati; the first real reply was published and verified; the post removal was verified on Google (23 Oct). kabsi.co runs on Vercel; Creem is the only payment route (test mode, not open). Evidence: `docs/progress/archive/evidence.md` and `where-things-stand.md`.
-- Sessions 19 PR 0, Ops 1 parts A and B, Session 0, Clean 1, 13b part 1, Fix 1, Session 10 Creem, V1, QA 1, Growth 1 and the 25 Oct lane R notes: one line each in `docs/progress/archive/where-things-stand.md` (moved 27 Oct by V4), detail in their own archive files.
-- Session 13b part 2 (PR 230, merged 25 Oct): staff alerts and morning digest on WhatsApp, Slack removed, hours and typed posts on WhatsApp, the map image, Nora judged 4.4 of 5. Verified live 26 Oct: the first morning digest reached the staff phone. Detail: `docs/progress/archive/2026-10-25-session-13b-2.md`.
-- V2 (AI Visibility, PR 234, 26 Oct): prompts, runs, numbers, owner line, map line; Gemini off. Calibrated live. Detail: `docs/progress/archive/2026-10-26-v2-ai-visibility.md`.
-- V3 (26 Oct, PR 246 merged, deploy run 114 green): Ask a customer is one ready message with the review link (no customer number ever stored), link opens counted apart from reviews, counter card and table tent PDFs, photos from WhatsApp on both plans (Yes, Edit, Skip), the monthly question, sensitive reviews without text, voice notes behind a provider (mock until the key is set). Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
-- 26 Oct, lane R: V2's migration applied; Meta pixel live; QA_SMOKE_TOKEN set; Slack leftovers dropped (0 | 0 | 0 | 0); master plan 30.14.
-- 26 Oct, lane R: the outside review decided (30.15, 30.16) and 30.17 (Founding 25, Home for every business with industry pages, easy access, getkabsi.com). Design 1 to 4 and 3 approved in the design studio. Next: Design 5, V3, Partners, V4, Outbound, Web 2 with Content 1, UX 1, Sec 1, the launch gate.
+- Sessions 19 PR 0, Ops 1 parts A and B, Session 0, Clean 1, 13b part 1 and part 2, Fix 1, Session 10 Creem, V1, V2, V3, QA 1, Growth 1 and the lane R notes of 25 and 26 Oct: one line each in `docs/progress/archive/where-things-stand.md` (moved 27 Oct by V4), detail in their own archive files.
 - Web 2 (PR 252, merged 26 Oct, deploy run 117 green, kabsi.co serves it): kabsi.co's public pages on the design studio's approved system (dark, Bricolage Grotesque and Manrope), every count real (Founding 25, founding price, Founding Partners), the Founding 25 and Partners forms on the programs function, the free check on V4's /visibility/check, the industry pages with nine hubs (hair salon, restaurant and dental clinic indexed; the nine Content 1 pages noindex until lane R approves), DESIGN.md and COPY.md 24, the facts. Detail: `docs/progress/archive/2026-10-27-web2.md`.
 - V4 (PR 250, merged 26 Oct, deploy run 116 green; migration applied by lane R): onboarding in four stages, the first task, every task closes, the work receipt data, nearby places, the free check route, the category and monthly-facts proposals, the voice test op. The voice test did not pass (Gulf Arabic and mixed notes), so voice notes stay off. Detail: `docs/progress/archive/2026-10-27-v4.md`.
 - UX 1 (PR 254, merged 27 Oct, deploy run 118 green; migrations applied): the signed-in website on Design 3 (light), every task with its state, onboarding in four stages with the resume link, Get reviews with the PDF buttons and the new message, owners' AI questions, the staff AI spend and Founding 25 checklist, the public leftovers, the free check waiting list, named or anonymous case study, the approved terms. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
@@ -58,10 +53,10 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 27 Oct 2026, Email 1 (PR 258). Detail: `docs/progress/archive/2026-10-27-email1.md`.
+- 27 Oct 2026, lane R (PR 260): the Results Report and trial counts say "sent to Google", never "published" for work Google may still be checking (30.15 3.1); UX 1 round 2 and Email 1 reviewed and their new lines approved.
+- 27 Oct 2026, Email 1 (PR 258, 259). Detail: `docs/progress/archive/2026-10-27-email1.md`.
 - 27 Oct 2026, UX 1 round 2 (lane R review): waiting list words and their stored proof, the hero and Try it after a Yes, Barbershops in the footer, closed LATER rows. Detail: the end of `docs/progress/archive/2026-10-27-ux1.md`.
 - 27 Oct 2026, UX 1 (PR 254): the signed-in website, onboarding and leftovers. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
-- 27 Oct 2026, Web 2: the public website ported from the design studio. Detail: `docs/progress/archive/2026-10-27-web2.md`.
 
 ## How a session updates this page
 

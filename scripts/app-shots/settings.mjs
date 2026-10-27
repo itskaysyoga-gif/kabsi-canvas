@@ -124,8 +124,8 @@ const pair = (t, l, change) => ({ this: t, last: l, change });
 const receipt = (o = {}) => ({
   v: 3,
   did: [
-    { key: "replies", label: "Replies published", count: 4 },
-    { key: "posts", label: "Posts published", count: 1 },
+    { key: "replies", label: "Replies sent to Google", count: 4 },
+    { key: "posts", label: "Posts sent to Google", count: 1 },
     { key: "hours", label: "Hours updated", count: 1 },
   ],
   did_total: 6,
@@ -187,7 +187,7 @@ const reports = (c) =>
           "19 Oct",
           day(8),
           receipt({
-            did: [{ key: "replies", label: "Replies published", count: 2 }],
+            did: [{ key: "replies", label: "Replies sent to Google", count: 2 }],
             waiting: { count: 0, items: [] },
           }),
         ),
