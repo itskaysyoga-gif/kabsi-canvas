@@ -174,6 +174,16 @@ select is((select state || '/' || error from public.publications where id = (sel
 select is((select state from public.reviews where id = '00000000-0000-4000-8000-000000000411'), 'drafted',
   'and the reply is back with the owner');
 
+-- A post approved ahead for a later date is measured from that date, not from the approval.
+insert into public.gbp_posts (id, location_id, owner_input, body, state)
+values ('00000000-0000-4000-8000-0000000004a1', '00000000-0000-4000-8000-0000000000c1', 'x', 'Fresh bread every morning from 7.', 'draft');
+insert into t values ('p20', public.approve_publication('local_post', '00000000-0000-4000-8000-0000000004a1',
+  '{"summary": "Fresh bread every morning from 7."}'::jsonb, '00000000-0000-4000-8000-0000000000a1', 'dashboard'));
+update public.publications set approved_at = now() - interval '20 days', publish_after = now() - interval '1 second'
+ where id = (select (v ->> 'publication_id')::uuid from t where k = 'p20');
+select is(public.claim_publication(((select v ->> 'publication_id' from t where k = 'p20'))::uuid) ->> 'result', 'claimed',
+  'a post approved 20 days before its date still goes on its date');
+
 -- 7. The stop switch -------------------------------------------------------------------------------------------------
 select is((select value from public.app_settings where key = 'google_writes'), 'on', 'Google writes are on by default');
 select ok(not has_function_privilege('authenticated', 'public.google_writes_paused()', 'execute')

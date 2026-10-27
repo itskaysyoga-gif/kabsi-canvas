@@ -6,15 +6,16 @@
 --   2. One stop switch for every Google write: app_settings google_writes ('on' or 'paused'). claim_publication waits
 --      while it is paused (the job is postponed, nothing is lost) and the Google layer checks it for every other write.
 --      Only a Kabsi staff admin flips it, with a reason, an audit event and a staff alert.
---   3. An approval is good for 7 days: claim_publication refuses an older one (approval_expired), so a yes given long
---      ago cannot reach Google after a pause.
---   5. clean_ai_text read new.state on a reply_drafts row when the draft was the owner's (no such column), so an owner
---      draft row could not be saved. It now reads each table's own columns only.
+--   3. An approval is good for 7 days after the item was due (the later of the approval and its publish time, so a post
+--      approved ahead for a later date is not affected): claim_publication refuses an older one (approval_expired), so a
+--      yes given long ago cannot reach Google after a pause.
 --   4. Founding 25 (LATER row): staff_founding_matches finds the businesses whose owner's WhatsApp number is the
 --      application's number, for staff admins only, returning the business and the last 4 digits, never the number.
+--   5. clean_ai_text read new.state on a reply_drafts row when the draft was the owner's (no such column), so an owner
+--      draft row could not be saved. It now reads each table's own columns only.
 --   6. Email links (database side of the Edge checks): use_action_link refuses any signed-in account that is not the
 --      recipient, on every kind of link, and a skip changes only a review of the link's own business; use_holiday_link
---      treats a link with no expiry as expired.
+--      treats a link with no expiry as expired, and so does the page that shows it (holiday_link_view).
 --   7. Webhooks out of order: an older Creem event never overwrites a newer one on subscriptions, even when two jobs
 --      race (a BEFORE UPDATE guard on last_event_at); a late WhatsApp receipt never moves a message backwards
 --      (read stays read when a delivered receipt arrives after it).
@@ -85,7 +86,8 @@ begin
   if p.publish_after > now() then return jsonb_build_object('result', 'not_due', 'publish_after', p.publish_after); end if;
   -- Sec 1: a yes is good for 7 days. An approval still waiting after that (Google needed action, the switch was off)
   -- is not sent: the owner approves again, on what the item says then.
-  if p.approved_at < now() - interval '7 days' then
+  -- Measured from when the item was due: a post approved in a month plan for a later date is not expired by waiting.
+  if greatest(p.approved_at, p.publish_after) < now() - interval '7 days' then
     perform public.record_publication(p.id, 'failed', 'This approval is more than 7 days old. Nothing was sent. Approve it again.',
       'approval_expired', null, null, null, true);
     return jsonb_build_object('result', 'stopped');
@@ -347,3 +349,25 @@ begin
      and coalesce(case state when 'sent' then 1 when 'delivered' then 2 when 'read' then 3 when 'failed' then 4 end, 0) < v_rank;
   return found;
 end $$;
+
+-- 6. The holiday link page says expired for a link with no expiry, like the action.
+CREATE OR REPLACE FUNCTION public.holiday_link_view(p_token_hash text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare pr public.holiday_prompts; h public.holidays; l public.locations; f public.knowledge_facts; v_status text;
+begin
+  select * into pr from public.holiday_prompts where token_hash = p_token_hash;
+  if not found then return jsonb_build_object('status', 'invalid'); end if;
+  select * into h from public.holidays where id = pr.holiday_id;
+  select * into l from public.locations where id = pr.location_id;
+  select * into f from public.knowledge_facts where location_id = l.id and slot = 'profile.regular_hours' and superseded_by is null;
+  v_status := case when pr.state = 'answered' then 'answered'
+                   when pr.state = 'expired' or coalesce(pr.token_expires_at, '-infinity') < now() then 'expired' else 'ok' end;
+  return jsonb_build_object('status', v_status, 'business', l.name, 'demo', l.is_demo, 'location_id', l.id,
+    'holiday', jsonb_build_object('name', h.name, 'starts_on', h.starts_on, 'ends_on', h.ends_on, 'kind', h.kind, 'estimated', h.estimated),
+    'answer', pr.answer, 'special_hours_id', pr.special_hours_id,
+    'regular_hours', case when f.status = 'verified' then f.value ->> 'display' end);
+end $function$;

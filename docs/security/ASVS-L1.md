@@ -40,7 +40,7 @@ Level 1 has no V1 requirement in ASVS 4.0.3 (they start at level 2). The archite
 
 | ID | Requirement | Verdict | Proof or reason |
 |---|---|---|---|
-| 4.1.1 | Access rules enforced on a trusted service layer | pass | RLS and SECURITY DEFINER checks (`rls_tables.sql`, `rls_functions.sql`, `sec1_tenant_matrix.sql`); the browser roles hold no table write and no TRUNCATE (`sec1_tenant_matrix.sql`, migration `20261027150000_sec1_hardening.sql`). |
+| 4.1.1 | Access rules enforced on a trusted service layer | pass | RLS and SECURITY DEFINER checks (`rls_tables.sql`, `rls_functions.sql`, `sec1_tenant_matrix.sql`); the browser roles hold no table write and no TRUNCATE (`sec1_tenant_matrix.sql`, migration `20261027150429_sec1_hardening.sql`). |
 | 4.1.2 | Attributes used for access cannot be changed by users | pass | Roles live in `location_members` and `staff`, writable only through owner-only RPCs (`roles.sql`). |
 | 4.1.3 | Least privilege | pass with note | Every role gets exactly its rights (`roles.sql`); a role in one business gives nothing in another (`sec1_tenant_matrix.sql`). Kabsi installers read every business for support, which is wider than they need: LATER row "installer least privilege". |
 | 4.1.5 | Access control fails securely | pass | Unknown or missing membership raises 42501; limiters on paid or Google-adjacent calls fail closed (`tests/free-tool-busy.test.ts`, Sec 1 abuse review). |

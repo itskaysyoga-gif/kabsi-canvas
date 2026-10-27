@@ -53,7 +53,9 @@ describe("abuse checks on public endpoints", () => {
 
   it("the review link tool allows 10 requests a minute per IP before anything else", () => {
     const src = read("supabase/functions/review-link/index.ts");
-    expect(src).toMatch(/rateLimit\(`review-link:min:\$\{visitor\}`, 10, 60, \{ failClosed: true \}\)/);
+    expect(src).toMatch(
+      /rateLimit\(`review-link:min:\$\{visitor\}`, 10, 60, \{ failClosed: true \}\)/,
+    );
     expect(src.indexOf("review-link:min:")).toBeLessThan(src.indexOf("verifyTurnstile(turnstile"));
   });
 

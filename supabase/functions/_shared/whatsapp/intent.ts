@@ -7,7 +7,8 @@ import { type RoleName, TOOLS } from "./roles.ts";
 import type { Command } from "./router.ts";
 import { stripAll } from "../ai/fence.ts";
 
-const squash = (s: string) => s.toLowerCase().replace(/[\s"'“”‘’]+/g, " ").trim();
+// Case, spaces, quotes and punctuation are ignored, so a model that tidies a comma still matches the owner's words.
+const squash = (s: string) => s.toLowerCase().replace(/[\s\p{P}\p{S}]+/gu, " ").trim();
 /** Is this text, quotes and spacing aside, part of what the person sent? */
 export const inMessage = (part: string | undefined, message: string) => !!part?.trim() && squash(message).includes(squash(part));
 

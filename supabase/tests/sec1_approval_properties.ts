@@ -3,7 +3,7 @@
 // claim, a retry, a failure and revoke (removal, demotion, the owner taking approvals back) must never break these:
 //   1. at most one live publication per reply, and Google is sent the reply at most once (one successful claim);
 //   2. nothing is claimed without a valid yes: the approver is a member allowed to approve at claim time, the yes is
-//      not undone, its undo window is over, it is not older than 7 days, the stop switch is on, and the review is still
+//      not undone, its undo window is over, it was due no more than 7 days ago, the stop switch is on, and the review is still
 //      the one approved (no edit since);
 //   3. what is claimed is exactly the text that was approved, and a WhatsApp yes is for the exact draft it showed;
 //   4. an Undo after the claim is refused, and an undone yes is never claimed.
@@ -191,7 +191,7 @@ async function runOne(ops: Op[]) {
                 !allowed && "the approver may no longer approve",
                 undone.has(p.id) && "the yes was undone",
                 facts.publish_after > facts.now && "the undo window was not over",
-                facts.approved_at < new Date(facts.now.getTime() - 7 * 86400_000) && "the yes was older than 7 days",
+                Math.max(facts.approved_at.getTime(), facts.publish_after.getTime()) < facts.now.getTime() - 7 * 86400_000 && "the yes was older than 7 days",
                 paused && "Google writes were paused",
                 facts.review_state !== "publishing" && "the review changed after the yes",
               ].filter(Boolean);

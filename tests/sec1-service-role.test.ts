@@ -27,7 +27,9 @@ function files(dir: string, exts: RegExp, out: string[] = []): string[] {
 function serviceJwt(text: string): boolean {
   for (const m of text.matchAll(JWT)) {
     try {
-      const payload = JSON.parse(Buffer.from(m[1].replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
+      const payload = JSON.parse(
+        Buffer.from(m[1].replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"),
+      );
       if (payload?.role === "service_role") return true;
     } catch {
       // not a JWT after all
@@ -51,9 +53,19 @@ describe("Sec 1: the service role stays on the server", () => {
   it("the browser reads only the two public Supabase values and the pixel id from the environment", () => {
     const used = new Set<string>();
     for (const f of files("src", /\.(ts|tsx)$/)) {
-      for (const m of readFileSync(f, "utf8").matchAll(/import\.meta\.env\.([A-Z0-9_]+)/g)) used.add(m[1]);
+      for (const m of readFileSync(f, "utf8").matchAll(/import\.meta\.env\.([A-Z0-9_]+)/g))
+        used.add(m[1]);
     }
-    const allowed = new Set(["DEV", "PROD", "MODE", "SSR", "BASE_URL", "VITE_SUPABASE_URL", "VITE_SUPABASE_PUBLISHABLE_KEY", "VITE_META_PIXEL_ID"]);
+    const allowed = new Set([
+      "DEV",
+      "PROD",
+      "MODE",
+      "SSR",
+      "BASE_URL",
+      "VITE_SUPABASE_URL",
+      "VITE_SUPABASE_PUBLISHABLE_KEY",
+      "VITE_META_PIXEL_ID",
+    ]);
     expect([...used].filter((n) => !allowed.has(n))).toEqual([]);
   });
 
@@ -66,13 +78,20 @@ describe("Sec 1: the service role stays on the server", () => {
     // `define` writes values into the client code: only the commit id may go there (the Sentry release tag).
     const define = /define:\s*\{([\s\S]*?)\n\s{2}\},/.exec(cfg)?.[1] ?? "";
     expect(define).not.toBe("");
-    const defined = [...define.matchAll(/process\.env\[["']([A-Z0-9_]+)["']\]|process\.env\.([A-Z0-9_]+)/g)].map((m) => m[1] ?? m[2]);
+    const defined = [
+      ...define.matchAll(/process\.env\[["']([A-Z0-9_]+)["']\]|process\.env\.([A-Z0-9_]+)/g),
+    ].map((m) => m[1] ?? m[2]);
     expect(defined.filter((n) => !["VERCEL_GIT_COMMIT_SHA", "GITHUB_SHA"].includes(n))).toEqual([]);
   });
 
   it("the build guard refuses a service key under any browser-visible name", () => {
     const good = { VITE_SUPABASE_URL: "https://x.supabase.co", VITE_SUPABASE_PUBLISHABLE_KEY: "k" };
-    for (const name of ["VITE_SUPABASE_SERVICE_ROLE_KEY", "VITE_SERVICE_KEY", "VITE_SUPABASE_SECRET_KEY", "VITE_SB_SECRET"]) {
+    for (const name of [
+      "VITE_SUPABASE_SERVICE_ROLE_KEY",
+      "VITE_SERVICE_KEY",
+      "VITE_SUPABASE_SECRET_KEY",
+      "VITE_SB_SECRET",
+    ]) {
       const problems: string[] = checkEnv({ ...good, [name]: "x" });
       expect(problems.join("\n"), name).toContain(name);
     }

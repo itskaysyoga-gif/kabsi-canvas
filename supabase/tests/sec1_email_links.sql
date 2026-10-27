@@ -55,6 +55,7 @@ insert into public.holiday_prompts (location_id, holiday_id, token_hash, token_e
 values ('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000006d1', 'hol-noexp', null);
 select throws_ok($$ select public.use_holiday_link('hol-noexp', 'normal', null, null, null, null, null) $$, 'P0001', 'link_expired',
   'a holiday link without an expiry never works');
+select is(public.holiday_link_view('hol-noexp') ->> 'status', 'expired', 'and its page says so, offering nothing');
 
 select * from finish();
 rollback;

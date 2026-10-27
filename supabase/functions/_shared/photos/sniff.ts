@@ -89,7 +89,8 @@ export function declaredSize(b: Uint8Array, s: Sniffed): { width: number; height
     // Walk the markers to the first start of frame (SOF0 to SOF15, not DHT C4, JPG C8 or DAC CC).
     let at = 2;
     while (at + 9 < b.length) {
-      if (b[at] !== 0xff) return null;
+      // Stray bytes between segments are skipped, as decoders do (Sec 1 review).
+      if (b[at] !== 0xff) { at++; continue; }
       const marker = b[at + 1];
       if (marker === 0xff) { at++; continue; }
       if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd8)) { at += 2; continue; }
@@ -113,10 +114,11 @@ export function declaredSize(b: Uint8Array, s: Sniffed): { width: number; height
     }
     return null;
   }
-  // HEIC: every image spatial extent ("ispe") box, the largest one counts.
+  // HEIC: every image spatial extent ("ispe") box, the largest one counts. A real ispe box is 20 bytes long, so the
+  // size before the name is checked too: four letters that happen to read "ispe" inside the picture data do not count.
   let best: { width: number; height: number } | null = null;
   for (let at = 4; at + 16 <= b.length; at++) {
-    if (b[at] === 0x69 && b[at + 1] === 0x73 && b[at + 2] === 0x70 && b[at + 3] === 0x65) {
+    if (b[at] === 0x69 && b[at + 1] === 0x73 && b[at + 2] === 0x70 && b[at + 3] === 0x65 && u32(b, at - 4) === 20) {
       const width = u32(b, at + 8), height = u32(b, at + 12);
       if (!best || width * height > best.width * best.height) best = { width, height };
     }
