@@ -16,6 +16,9 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width
 const browser = await chromium.launch();
 const pg = await browser.newPage({ viewport: { width: 96, height: 96 } });
 await pg.setContent(`<body style="margin:0;width:96px;height:96px">${svg}</body>`);
-writeFileSync("public/email/kabsi-mark.png", await pg.screenshot({ type: "png", omitBackground: true }));
+writeFileSync(
+  "public/email/kabsi-mark.png",
+  await pg.screenshot({ type: "png", omitBackground: true }),
+);
 await browser.close();
 console.log("public/email/kabsi-mark.png, public/fonts/bricolage-grotesque-latin-wght.woff2");

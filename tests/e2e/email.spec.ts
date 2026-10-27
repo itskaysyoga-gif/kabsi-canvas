@@ -32,6 +32,8 @@ test.afterAll(async () => {
 for (const [dir, file] of [...previews, ...auth]) {
   const name = `${dir.endsWith("auth") ? "auth/" : ""}${file}`;
   test.describe(name, () => {
+    // Playwright needs the first argument destructured; this hook uses no fixture.
+    // eslint-disable-next-line no-empty-pattern
     test.beforeEach(({}, info) => {
       test.skip(
         info.project.name !== "m390",
