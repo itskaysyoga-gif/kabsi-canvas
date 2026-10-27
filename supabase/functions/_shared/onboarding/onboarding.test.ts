@@ -237,7 +237,7 @@ Deno.test("the receipt: what Kabsi did, what waits, one next step, then Google's
   assert.equal(r.next_step?.title, "Approve the reply to Lina");
   assert.deepEqual(r.google?.lines, ["Calls from your Google profile: 9 (up 2).", "Direction requests: 12 (up 1)."]);
   assert.match(r.growth!.line, /Your review link was opened 7 times\. An open is not a review\./);
-  assert.match(r.whatsapp, /^Rose Lane Salon, this week Kabsi did: replies published 3, posts published 1, replies prepared 1\./);
+  assert.match(r.whatsapp, /^Rose Lane Salon, this week Kabsi did: replies sent to Google 3, posts sent to Google 1, replies prepared 1\./);
   assert.doesNotMatch(r.whatsapp, /[–—!]/);
 });
 Deno.test("a real owner's receipt never shows example figures; the demo keeps them labelled", () => {

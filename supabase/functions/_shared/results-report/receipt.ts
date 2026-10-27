@@ -126,7 +126,7 @@ export function receiptText(o: {
 }): string {
   const parts: string[] = [];
   parts.push(o.did.length
-    ? `${o.business}, this week Kabsi did: ${o.did.map((c) => `${c.label.toLowerCase()} ${c.count}`).join(", ")}.`
+    ? `${o.business}, this week Kabsi did: ${o.did.map((c) => `${c.label.toLowerCase().replace(/\bgoogle\b/g, "Google")} ${c.count}`).join(", ")}.`
     : `${o.business}, a quiet week. Kabsi kept watching your Google profile.`);
   parts.push(o.waiting ? `Waiting for your yes: ${o.waiting}.` : "Nothing is waiting for your yes.");
   if (o.next) parts.push(`Next step: ${o.next}.`.replace(/\.\.$/, "."));
