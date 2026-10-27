@@ -295,3 +295,15 @@ Deno.test("Email 1: with email as the routine channel nothing changes", async ()
   await runNotify(input({ key: "review:email" }), f.deps);
   assert.equal(f.rows.find((x) => x.to_address === OWNER.email)?.email_state, "sent");
 });
+
+Deno.test("Email 1: a routine email held before the owner chose WhatsApp is not sent as well", async () => {
+  const wa: string[] = [];
+  const f = fake({ now: "2026-11-10T21:30:00Z", whatsapp: wa }); // 23:30 in Beirut: quiet hours hold it
+  await runNotify(input({ key: "review:held", to: [OWNER] }), f.deps);
+  assert.equal(f.rows[0]!.email_state, "held");
+  wa.push(OWNER.userId);
+  f.setNow("2026-11-11T06:30:00Z");
+  await releaseDue(f.deps);
+  assert.equal(f.rows[0]!.email_state, "off");
+  assert.equal(f.sent.length, 0);
+});

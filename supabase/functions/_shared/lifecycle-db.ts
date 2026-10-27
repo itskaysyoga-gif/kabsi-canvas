@@ -32,10 +32,10 @@ export async function lifecycleJob(): Promise<LifecycleResult> {
         const ids = snaps.map((s) => s.locationId);
         const { data: codes } = await db.from("locations").select("id, resume_code").in("id", ids);
         const code = new Map(((codes ?? []) as { id: string; resume_code: string | null }[]).map((l) => [l.id, l.resume_code]));
-        const { data: pubs } = await db.from("publications").select("location_id, updated_at").in("location_id", ids)
-          .eq("target_type", "review_reply").eq("state", "verified").order("updated_at", { ascending: true });
-        const first = new Map<string, Date>();
-        for (const p of (pubs ?? []) as { location_id: string; updated_at: string }[]) if (!first.has(p.location_id)) first.set(p.location_id, new Date(p.updated_at));
+        // One row per business, aggregated in the database; timed from the approval, which never changes.
+        const { data: pubs, error: pe } = await db.rpc("first_replies_on_google", { p_locations: ids });
+        if (pe) throw pe;
+        const first = new Map(((pubs ?? []) as { location_id: string; first_at: string }[]).map((p) => [p.location_id, new Date(p.first_at)]));
         for (const s of snaps) { s.resumeCode = code.get(s.locationId) ?? null; s.firstOnGoogleAt = first.get(s.locationId) ?? null; }
       }
       return snaps;

@@ -92,10 +92,10 @@ export function renderReport(loc: { name: string }, r: ReportData): RenderedRepo
     parts.push(statCards(stats));
     text.push(`From your Google Business Profile${ex}:\n${stats.map((s) => `- ${s.label}: ${s.value} (${s.change})`).join("\n")}`);
   } else if (r.new_reviews) {
-    // Kabsi's own record of the reviews still counts when Google's figures are not in.
-    parts.push(label("From your Google Business Profile"));
+    // Kabsi's own record of the reviews still counts when Google's figures are not in, under its own source label.
+    parts.push(label("From Kabsi's record of your reviews"));
     parts.push(statCards([{ label: "New reviews", value: String(r.new_reviews), change: r.new_avg != null ? `Average ${r.new_avg.toFixed(1)} stars` : "This week" }]));
-    text.push(`From your Google Business Profile: ${r.new_reviews} new reviews.`);
+    text.push(`From Kabsi's record of your reviews: ${r.new_reviews} new reviews.`);
   }
 
   // The review link: opens are never reviews

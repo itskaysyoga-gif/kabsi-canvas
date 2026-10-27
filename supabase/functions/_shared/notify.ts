@@ -34,8 +34,8 @@ export function dbDeps(): Deps {
       return new Map(((data ?? []) as { category: string; channel: string; frequency: Frequency }[]).map((p) => [`${p.category}:${p.channel}`, p.frequency]));
     },
 
-    async routineChannel(userId) {
-      const { data, error } = await db.rpc("routine_channel_of", { p_user: userId });
+    async routineChannel(userId, category) {
+      const { data, error } = await db.rpc("routine_channel_of", { p_user: userId, p_category: category });
       if (error) throw error;
       return data === "whatsapp" ? "whatsapp" : "email";
     },

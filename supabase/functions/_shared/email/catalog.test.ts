@@ -317,7 +317,7 @@ Deno.test("Email 1: the Results Report is the work receipt; a row without real n
   assert.doesNotMatch(`${text}\n${html}`, /example figures/i, "a real owner's report never shows example figures");
   const none = renderReport({ name: "Rose Lane Salon" }, REPORT_NO_GOOGLE as never);
   assert.doesNotMatch(none.text, /Calls|Direction requests|Website clicks/);
-  assert.match(none.text, /From your Google Business Profile: 3 new reviews\./);
+  assert.match(none.text, /From Kabsi's record of your reviews: 3 new reviews\./);
 });
 
 Deno.test("Email 1: lifecycle mail goes from send.kabsi.co until news.kabsi.co is verified, account mail always from send", async () => {

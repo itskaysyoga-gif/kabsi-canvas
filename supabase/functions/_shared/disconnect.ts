@@ -101,7 +101,7 @@ export function accessChangeEmail(n: Notice, appUrl: string): {
     // Email 1 (30.15 section 6): "access works", which is also Kabsi's notice of the change (K-113.1): what changed,
     // what it lets Kabsi do, how to remove Kabsi, and Google's third-party line.
     const m = accessWorks({
-      business: n.name, when, trialStart: n.trialStart ?? null, trialEnd: n.trialEnd ?? null, tz: n.tz,
+      business: n.name, when, nextStep: n.nextStep ?? null, trialStart: n.trialStart ?? null, trialEnd: n.trialEnd ?? null, tz: n.tz,
       removeSteps: `${CHECK_STEPS_INLINE} Remove Kabsi Clients there.`, freeLine: FREE_FROM_GOOGLE, helpUrl: THIRD_PARTY_HELP,
     }, appUrl);
     return { ...m, button: m.button!, note: m.note! };

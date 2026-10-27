@@ -208,7 +208,7 @@ export function billingLine(m: Message | "payment_reminder", c: { business: stri
     case "scheduled_cancel": {
       const lines = [`Your Kabsi plan for ${c.business} ends on ${end ?? "the last day you paid for"}.`, "Until then everything keeps working. Changed your mind? Tap Keep my plan."];
       // Email 1: the cancellation email of 30.15 section 6 (COPY.md 25).
-      return { whatsapp: lines.join(" "), buttons: [{ id: "k:keep", title: "Keep my plan" }], email: planCancelled({ business: c.business, ends: c.periodEnd ?? null }, APP_URL) };
+      return { whatsapp: lines.join(" "), buttons: [{ id: "k:keep", title: "Keep my plan" }], email: planCancelled({ business: c.business, ends: c.periodEnd ?? null, dataDays: DATA_DAYS }, APP_URL) };
     }
     case "payment_failed":
     case "payment_reminder": {

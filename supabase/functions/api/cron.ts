@@ -29,19 +29,24 @@ async function conciergeAccessEmails() {
   return n;
 }
 
+// The email shows the trial in its own card, so the trial sentence is left out of the next step there; a business on its
+// way to the first task gets the "first task" card instead of the WhatsApp-era sentence.
+const nextStepForEmail = (s: string) => (/^Kabsi is now watching your reviews\./.test(s) ? undefined : s);
+
 // The access-change notice (K-113.1, P0.2-02): sent in the same run that accepts the Manager invitation, saying what
 // changed and how to remove Kabsi. Same kind and dedupe key as before, so nobody who already had it gets it again.
 // 30.10 point 5: the same notice on WhatsApp to the owners who connected it (never fails the email or the job).
 async function sendAccessNotice(locationId: string, name: string, nextStep: string) {
-  // Email 1: "access works" names the trial's dates when the trial has started (subscriptions.trial_ends_at).
-  const { data: loc } = await admin().from("locations").select("organization_id, time_zone").eq("id", locationId).maybeSingle();
-  const { data: sub } = loc?.organization_id
-    ? await admin().from("subscriptions").select("trial_started_at, trial_ends_at").eq("organization_id", loc.organization_id)
-      .not("trial_ends_at", "is", null).order("updated_at", { ascending: false }).limit(1).maybeSingle()
-    : { data: null };
+  // Email 1: "access works" names the trial's dates only while the business is on its trial (entitlements, P0.4-06).
+  const [{ data: ent }, { data: loc }] = await Promise.all([
+    admin().rpc("entitlements", { p_org: null, p_location: locationId }),
+    admin().from("locations").select("time_zone").eq("id", locationId).maybeSingle(),
+  ]);
+  const e = ent as { state?: string; trial?: { starts_at?: string; ends_at?: string } | null } | null;
+  const trial = e?.state === "trial" ? e.trial ?? null : null;
   const m = accessChangeEmail({
-    change: "granted", name, at: new Date().toISOString(), nextStep, tz: (loc?.time_zone as string | undefined) ?? "UTC",
-    trialStart: (sub?.trial_started_at as string | null | undefined) ?? null, trialEnd: (sub?.trial_ends_at as string | null | undefined) ?? null,
+    change: "granted", name, at: new Date().toISOString(), nextStep: nextStepForEmail(nextStep), tz: (loc?.time_zone as string | undefined) ?? "UTC",
+    trialStart: trial?.starts_at ?? null, trialEnd: trial?.ends_at ?? null,
   }, APP_URL);
   const sent = await notify({
     category: "access", kind: "access_granted", key: `access_granted:${locationId}`, locationId, to: "owners",

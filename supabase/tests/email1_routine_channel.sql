@@ -27,6 +27,12 @@ select is(public.set_routine_channel('whatsapp'), 'whatsapp', 'with WhatsApp con
 select is((select channel from public.routine_channels where user_id = '00000000-0000-4000-8000-0000000000a1'), 'whatsapp', 'the owner reads their own choice');
 reset role;
 select is(public.routine_channel_of('00000000-0000-4000-8000-0000000000a1'), 'whatsapp', 'the engine reads WhatsApp');
+-- Per kind: WhatsApp carries a review only with review alerts on, the Results Report only with its report on.
+update public.whatsapp_optins set review_alerts = true, digest_optin = false where user_id = '00000000-0000-4000-8000-0000000000a1';
+select is(public.routine_channel_of('00000000-0000-4000-8000-0000000000a1', 'review_new'), 'whatsapp', 'reviews go on WhatsApp with alerts on');
+select is(public.routine_channel_of('00000000-0000-4000-8000-0000000000a1', 'weekly_report'), 'email', 'the report stays on email while its WhatsApp report is off');
+select ok(not has_function_privilege('authenticated', 'public.routine_channel_of(uuid, text)', 'execute')
+  and not has_function_privilege('authenticated', 'public.first_replies_on_google(uuid[])', 'execute'), 'the per-kind channel and the first reply are server-only');
 
 -- Another person never sees it.
 select tests.act_as('00000000-0000-4000-8000-0000000000b1');
@@ -36,6 +42,7 @@ reset role;
 -- WhatsApp stopped: routine messages fall back to email, never lost.
 update public.whatsapp_optins set state = 'stopped' where user_id = '00000000-0000-4000-8000-0000000000a1';
 select is(public.routine_channel_of('00000000-0000-4000-8000-0000000000a1'), 'email', 'a stopped WhatsApp reads as email');
+select is(public.routine_channel_of('00000000-0000-4000-8000-0000000000a1', 'review_new'), 'email', 'a stopped WhatsApp reads as email for reviews too');
 
 -- Anon cannot set anything.
 select tests.act_as('anon');

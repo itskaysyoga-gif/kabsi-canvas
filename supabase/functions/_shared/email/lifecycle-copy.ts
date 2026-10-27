@@ -62,7 +62,7 @@ export function lifecycleEmail(step: StepId, s: Snapshot, c: LifecycleCtx): Emai
       return noAccess(step, s, c);
     case "first_reply_approved":
       // Email 1: "first work completed" goes once Kabsi saw the first reply on Google (30.15 3.1), not at the approval.
-      return firstWorkDone({ business: s.name, at: s.firstOnGoogleAt ?? s.firstApprovalAt ?? new Date(), tz: s.timeZone }, c.appUrl);
+      return firstWorkDone({ business: s.name }, c.appUrl);
     case "trial_day2": {
       const r = s.recap;
       const first = r.repliesPrepared > 0 || r.changesCaught > 0
