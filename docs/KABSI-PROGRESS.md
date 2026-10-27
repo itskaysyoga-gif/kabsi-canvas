@@ -11,7 +11,7 @@ One page, under 10 KB. Updated 27 Oct 2026 by Sec 2 (before it: Audit 1) (earlie
 - UX 1 (PR 254, merged 27 Oct, deploy run 118 green; migrations applied): the signed-in website on Design 3 (light), every task with its state, onboarding in four stages with the resume link, Get reviews with the PDF buttons and the new message, owners' AI questions, the staff AI spend and Founding 25 checklist, the public leftovers, the free check waiting list, named or anonymous case study, the approved terms. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
 - Email 1 (PR 258, 27 Oct): one email design, the 30.15 set, the Results Report receipt, auth templates, streams, the routine channel. Detail: `docs/progress/archive/2026-10-27-email1.md`.
 - Sec 1 (PR 261, merged 27 Oct): tenant isolation, roles, approvals, email links, webhooks, injection, abuse limits, the stop switch for Google writes, log scrubbing, ASVS L1 (`docs/security/ASVS-L1.md`). Detail: `docs/progress/archive/2026-10-27-sec1.md`.
-- Sec 2 (27 Oct): approvals bound to the draft version shown, retention per source, privacy trace, backup to the pooler and a restore drill that re-applies deletions (passed locally), secrets audit, Sec 1 leftovers, the staff Operations view. Detail: `docs/progress/archive/2026-10-27-sec2.md`.
+- Sec 2 (27 Oct): approvals bound to the draft version shown, retention per source, privacy trace, backup to the pooler and a restore drill that re-applies deletions (passed locally), secrets audit, Sec 1 leftovers, the staff Operations view. PR 266, deployed and checked live. Detail: `docs/progress/archive/2026-10-27-sec2.md`.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
