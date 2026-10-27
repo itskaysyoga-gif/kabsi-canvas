@@ -1,6 +1,6 @@
 // Web 2: the industry pages and Home's examples (master plan 30.17 section 2; ported from the design studio's
 // src/test/design5.test.ts). The similarity test is the quality gate against Google's scaled content rules: no two
-// industry pages share more than 40 percent of their text. Content 1 finishes the other nine pages in
+// industry pages share more than 40 percent of their text. Content 1 finished the other nine pages in
 // src/content/industries; a page that is not finished stays noindex and out of the sitemap (tests/sitemap.test.ts).
 import { readFileSync } from "node:fs";
 import { createRouter, rootRouteId } from "@tanstack/react-router";
@@ -93,14 +93,10 @@ describe("industry pages (Design 5, Web 2)", () => {
     expect(overlap(salon, swapped)).toBeGreaterThan(0.9);
   });
 
-  it("wave 1 has twelve industries; three are finished and indexed", () => {
+  it("wave 1 has twelve industries, all finished and indexed (Content 1)", () => {
     expect(INDUSTRIES).toHaveLength(12);
     expect(new Set(INDUSTRIES.map((i) => i.slug)).size).toBe(12);
-    expect(INDUSTRIES.filter((i) => i.finished).map((i) => i.slug)).toEqual([
-      "hair-salon",
-      "dental-clinic",
-      "restaurant",
-    ]);
+    expect(INDUSTRIES.filter((i) => !i.finished).map((i) => i.slug)).toEqual([]);
   });
 
   it("every page has its searches, five tasks, its own example and photos with alt text", () => {

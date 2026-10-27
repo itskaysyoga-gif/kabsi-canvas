@@ -1,15 +1,15 @@
 import { PHOTOS } from "@/components/kabsi/photos";
 import type { Industry } from "./types";
 
-// Content 1: finished from docs/claims/cafe.md, noindex until lane R approves it. Brew Lane Cafe is invented
+// Content 1: finished from docs/claims/cafe.md, approved by lane R on 27 Oct 2026 (brief section 18). Brew Lane Cafe is invented
 // (Example). Every fact on this page has a row in the claim sheet; advice and wording are marked there.
 export const cafe: Industry = {
   slug: "cafe",
   hub: "food-and-drink",
   name: "cafe",
   plural: "Cafes",
-  finished: false,
-  lead: "Kabsi gets your opening time exact on Google, shows the menu and the room's wifi and laptop rules, and writes the day's post once the morning rush is over. You approve each one on WhatsApp.",
+  finished: true,
+  lead: "Kabsi gets your opening time exact on Google, shows the menu, puts your laptop rule in a post, and writes the day's drafts once the morning rush is over. You approve each one on WhatsApp.",
   keyword: "cafe",
   example: {
     business: "Brew Lane Cafe",
@@ -35,7 +35,7 @@ export const cafe: Industry = {
   tasks: [
     {
       title: "Put the opening time on Google to the minute",
-      text: "The weekly hours on Google say when the doors open, and special hours cover the days that differ. Kabsi asks before each public holiday and sets your answer.",
+      text: "The weekly hours on Google say when the doors open, and special hours cover the days that differ. Kabsi asks before each public holiday and sets your answer once you say Yes.",
     },
     {
       title: "Show the drinks people ask for, with prices",
@@ -51,7 +51,7 @@ export const cafe: Industry = {
     },
     {
       title: "Point the order link at the right page",
-      text: "Real bakery and breakfast profiles on Google show an Order online link. Whether Google shows ordering options depends on your country and your ordering provider. When your order page changes, tell Kabsi and the link follows.",
+      text: "Real bakery and breakfast profiles on Google show an Order online link. Whether Google shows ordering options depends on your country and your ordering provider. When your order page changes, tell Kabsi and the link follows once you say Yes.",
     },
   ],
   categories: {
@@ -120,7 +120,7 @@ export const cafe: Industry = {
   holidays: [
     {
       when: "Ramadan, UAE",
-      text: "The UAE cuts private sector working hours by two hours a day for the month. A cafe sets its own hours for Ramadan and tells Google once, so the old opening time never shows.",
+      text: "The UAE cuts private sector working hours by two hours a day for the month. A cafe sets its own hours for Ramadan, and Kabsi sets the new time on Google once you say Yes, so the old opening time never shows.",
     },
     {
       when: "UK: bank holiday Mondays",
@@ -153,5 +153,5 @@ export const cafe: Industry = {
       a: "It sends the review to you with no draft and a way to reach a person at Kabsi. Nothing is published until you write and approve a reply.",
     },
   ],
-  guides: ["how-to-get-more-google-reviews", "how-to-set-holiday-hours-on-google"],
+  guides: ["google-review-link-and-qr-code", "how-to-set-holiday-hours-on-google"],
 };

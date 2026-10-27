@@ -1,7 +1,7 @@
 import { PHOTOS } from "@/components/kabsi/photos";
 import type { Industry } from "./types";
 
-// Content 1: finished from docs/claims/gym-and-fitness.md, noindex until lane R approves it. Harbour Strength Studio
+// Content 1: finished from docs/claims/gym-and-fitness.md, approved by lane R on 27 Oct 2026 (brief section 18). Harbour Strength Studio
 // is invented (Example). The gym has one photo of its own (gym-training); a second is an Open row in
 // DESIGN-PROPOSAL.md. Every fact on this page has a row in the claim sheet; advice and wording are marked there.
 export const gymFitness: Industry = {
@@ -9,8 +9,8 @@ export const gymFitness: Industry = {
   hub: "fitness-and-sport",
   name: "gym",
   plural: "Gyms and fitness studios",
-  finished: false,
-  lead: "Kabsi puts your classes and trial offers on Google as posts with real dates, keeps your hours right for holidays, and replies to reviews about the coaches without arguing about a bill. You approve each one on WhatsApp.",
+  finished: true,
+  lead: "Kabsi puts your classes and trial offers on Google as posts with real dates, keeps your hours right for holidays, and replies to reviews that name your coaches, and never argues about a bill in public. You approve each one on WhatsApp.",
   keyword: "gym",
   example: {
     business: "Harbour Strength Studio",
@@ -143,7 +143,7 @@ export const gymFitness: Industry = {
     },
     {
       q: "Is a free first week allowed on Google?",
-      a: "Yes, as an offer for new members. What Google does not allow is an incentive in return for a review, such as a free month for a five star one.",
+      a: "Google has an offer post for it. What Google does not allow is an incentive in return for a review, such as a free month for a five star one.",
     },
     {
       q: "A member says she hurt herself here. What does Kabsi do?",

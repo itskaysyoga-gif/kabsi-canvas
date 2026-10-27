@@ -1,14 +1,14 @@
 import { PHOTOS } from "@/components/kabsi/photos";
 import type { Industry } from "./types";
 
-// Content 1: finished from docs/claims/spa-and-massage.md, noindex until lane R approves it. Stillwater Spa is
+// Content 1: finished from docs/claims/spa-and-massage.md, approved by lane R on 27 Oct 2026 (brief section 18). Stillwater Spa is
 // invented (Example). Every fact on this page has a row in the claim sheet; advice and wording are marked there.
 export const spaMassage: Industry = {
   slug: "spa-and-massage",
   hub: "beauty-and-wellness",
   name: "spa",
   plural: "Spas and massage",
-  finished: false,
+  finished: true,
   lead: "Kabsi puts each treatment on Google with its length and price, drafts calm replies that never describe a client's body, and has holiday hours ready before the long weekend. You approve each one on WhatsApp.",
   keyword: "spa",
   example: {
@@ -40,7 +40,7 @@ export const spaMassage: Industry = {
     },
     {
       title: "Link the page where people book",
-      text: "Some profiles on Google show a booking button and an 'Online scheduling' line. Yours can too, once the link points at your own booking page. When the page moves, one message changes the link.",
+      text: "Some profiles on Google show a booking button and an 'Online scheduling' line. Yours can too, once the link points at your own booking page. When the page moves, tell Kabsi and the link changes after your Yes.",
     },
     {
       title: "Reply to the calm reviews, hand over the sensitive ones",
@@ -67,7 +67,7 @@ export const spaMassage: Industry = {
     },
     {
       theme: "The room, the quiet, the scent",
-      text: "The atmosphere is the product. The reply picks one thing the writer said and gives it back in a line.",
+      text: "The reply picks one thing the writer said and gives it back in a line.",
     },
     {
       theme: "A session that started late or ended short",
@@ -158,5 +158,5 @@ export const spaMassage: Industry = {
       a: "You can remove Kabsi any time. On Google: your profile, Business Profile settings, People and access, Kabsi Clients, Remove. Kabsi loses access at once.",
     },
   ],
-  guides: ["how-to-choose-your-primary-category", "how-to-set-holiday-hours-on-google"],
+  guides: ["how-to-reply-to-google-reviews", "how-to-choose-your-primary-category"],
 };

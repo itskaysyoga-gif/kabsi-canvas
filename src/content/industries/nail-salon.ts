@@ -1,14 +1,14 @@
 import { PHOTOS } from "@/components/kabsi/photos";
 import type { Industry } from "./types";
 
-// Content 1: finished from docs/claims/nail-salon.md, noindex until lane R approves it. Polish Room is invented
+// Content 1: finished from docs/claims/nail-salon.md, approved by lane R on 27 Oct 2026 (brief section 18). Polish Room is invented
 // (Example). Every fact on this page has a row in the claim sheet; advice and wording are marked there.
 export const nailSalon: Industry = {
   slug: "nail-salon",
   hub: "beauty-and-wellness",
   name: "nail salon",
   plural: "Nail and beauty salons",
-  finished: false,
+  finished: true,
   lead: "Kabsi keeps your set prices and service menu right on Google, replies to reviews that name the technician, and turns your best nail photos into posts. You approve each one on WhatsApp.",
   keyword: "nail salon",
   example: {
@@ -43,7 +43,7 @@ export const nailSalon: Industry = {
     },
     {
       title: "Make the Book button open the right page",
-      text: "Google lets you add your own booking link. It should open your nail booking page, not your home page. When you change booking tool, tell Kabsi and the link changes.",
+      text: "Google lets you add your own booking link. It should open your nail booking page, not your home page. When you change booking tool, tell Kabsi and the link changes once you say Yes.",
     },
     {
       title: "Post the new set, not last season's",
@@ -106,7 +106,7 @@ export const nailSalon: Industry = {
   photoTips: [
     {
       title: "The hand, from straight above",
-      text: "Daylight, a plain surface and no heavy filter. Google asks for photos in focus and well lit, and the colour in the photo has to be the colour on the nail.",
+      text: "Daylight, a plain surface and no heavy filter. Google asks for photos in focus and well lit, without significant alterations. Keep the colour in the photo the colour on the nail.",
     },
     {
       title: "The station and the colour wall",
@@ -120,7 +120,7 @@ export const nailSalon: Industry = {
   holidays: [
     {
       when: "Eid al-Fitr, UAE",
-      text: "The UAE gives it as 1 to 3 Shawwal, four days, and counts day 30 of Ramadan as a holiday when the month has 30 days. The moon decides, so Kabsi asks five days ahead and you answer with your hours.",
+      text: "The UAE gives it as 1 to 3 Shawwal, three days, four when Ramadan has 30 days. The moon decides, so Kabsi asks five days ahead and you answer with your hours.",
     },
     {
       when: "Hijri New Year and the Prophet's birthday, UAE",
