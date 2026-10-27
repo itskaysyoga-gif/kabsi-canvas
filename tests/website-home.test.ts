@@ -228,7 +228,7 @@ describe("the operator, the merchant of record and the social links", () => {
       "public/llms-full.txt",
       "supabase/functions/_shared/email-layout.ts",
       "supabase/functions/_shared/email/template.ts",
-      "emails/build.py",
+      "supabase/functions/_shared/email/auth-templates.ts",
     ];
     for (const f of files) {
       const text = readText(f);

@@ -13,6 +13,7 @@
 // network import, so its tests run without credentials.
 import { esc } from "./email-layout.ts";
 import { FREE_FROM_GOOGLE, THIRD_PARTY_HELP } from "./access-notice.ts";
+import { accessWorks } from "./email/account-copy.ts";
 
 export type DisconnectState = {
   locationId: string;
@@ -24,7 +25,7 @@ export type DisconnectState = {
   followupDueAt: string | null;
 };
 
-export type Notice = { change: AccessChange; name: string; at: string; dueAt?: string | null; nextStep?: string };
+export type Notice = { change: AccessChange; name: string; at: string; dueAt?: string | null; nextStep?: string; trialStart?: string | null; trialEnd?: string | null; tz?: string };
 
 export type DisconnectDeps = {
   load: (locationId: string) => Promise<DisconnectState | null>;
@@ -97,20 +98,13 @@ export function accessChangeEmail(n: Notice, appUrl: string): {
   const when = day(n.at);
   const p = (s: string) => `<p style="margin:0 0 16px 0;">${s}</p>`;
   if (n.change === "granted") {
-    const next = n.nextStep ?? "";
-    return {
-      subject: `${n.name}: Kabsi is now a Manager on Google`,
-      preheader: "A change to who can manage your Google profile.",
-      title: "Kabsi now has Manager access",
-      bodyHtml: p(`What changed: on ${when} Kabsi accepted your invitation and became a Manager of <strong>${name}</strong>'s Google profile, through the Kabsi Clients group. You stay the owner.`)
-        + p("What it lets Kabsi do: read your reviews and profile, and publish only what you approve.")
-        + (next ? p(esc(next)) : "")
-        + p(`How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or ${esc(CHECK_STEPS_INLINE)} Remove Kabsi Clients there.`)
-        + p(`${esc(FREE_FROM_GOOGLE)} <a href="${THIRD_PARTY_HELP}">Google's guide to working with a third party</a>.`),
-      text: `What changed: on ${when} Kabsi accepted your invitation and became a Manager of ${n.name}'s Google profile, through the Kabsi Clients group. You stay the owner.\n\nWhat it lets Kabsi do: read your reviews and profile, and publish only what you approve.\n\n${next ? `${next}\n\n` : ""}How to remove Kabsi at any time: in Kabsi open Settings, then Disconnect Kabsi from Google. Or ${CHECK_STEPS_INLINE} Remove Kabsi Clients there.\n\n${FREE_FROM_GOOGLE} Google's guide to working with a third party: ${THIRD_PARTY_HELP}\n\nOpen Kabsi: ${appUrl}/app`,
-      button: { label: "Open Kabsi", url: `${appUrl}/app` },
-      note: "This is Kabsi's own notice of a change to your Google access. Google may send its own email too.",
-    };
+    // Email 1 (30.15 section 6): "access works", which is also Kabsi's notice of the change (K-113.1): what changed,
+    // what it lets Kabsi do, how to remove Kabsi, and Google's third-party line.
+    const m = accessWorks({
+      business: n.name, when, trialStart: n.trialStart ?? null, trialEnd: n.trialEnd ?? null, tz: n.tz,
+      removeSteps: `${CHECK_STEPS_INLINE} Remove Kabsi Clients there.`, freeLine: FREE_FROM_GOOGLE, helpUrl: THIRD_PARTY_HELP,
+    }, appUrl);
+    return { ...m, button: m.button!, note: m.note! };
   }
   if (n.change === "removing") {
     const due = n.dueAt ? day(n.dueAt) : "within 7 business days";

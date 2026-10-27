@@ -101,8 +101,10 @@ describe("one outbox", () => {
     const callers = walk(join(__dirname, "..", "supabase", "functions"))
       .filter((p) => /\brenderEmail\(/.test(readFileSync(p, "utf8")))
       .map((p) => p.slice(p.indexOf("supabase/functions/") + "supabase/functions/".length));
-    // P0.8-02: previews.ts renders the catalog to files for reading (docs/email-previews) and sends nothing.
+    // P0.8-02: previews.ts renders the catalog to files for reading (docs/email-previews) and sends nothing. Email 1:
+    // auth-templates.ts renders the four Supabase Auth templates to files (emails/auth) and sends nothing.
     expect(callers.sort()).toEqual([
+      "_shared/email/auth-templates.ts",
       "_shared/email/previews.ts",
       "_shared/email/template.ts",
       "_shared/notify-engine.ts",

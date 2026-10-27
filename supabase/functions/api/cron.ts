@@ -33,7 +33,16 @@ async function conciergeAccessEmails() {
 // changed and how to remove Kabsi. Same kind and dedupe key as before, so nobody who already had it gets it again.
 // 30.10 point 5: the same notice on WhatsApp to the owners who connected it (never fails the email or the job).
 async function sendAccessNotice(locationId: string, name: string, nextStep: string) {
-  const m = accessChangeEmail({ change: "granted", name, at: new Date().toISOString(), nextStep }, APP_URL);
+  // Email 1: "access works" names the trial's dates when the trial has started (subscriptions.trial_ends_at).
+  const { data: loc } = await admin().from("locations").select("organization_id, time_zone").eq("id", locationId).maybeSingle();
+  const { data: sub } = loc?.organization_id
+    ? await admin().from("subscriptions").select("trial_started_at, trial_ends_at").eq("organization_id", loc.organization_id)
+      .not("trial_ends_at", "is", null).order("updated_at", { ascending: false }).limit(1).maybeSingle()
+    : { data: null };
+  const m = accessChangeEmail({
+    change: "granted", name, at: new Date().toISOString(), nextStep, tz: (loc?.time_zone as string | undefined) ?? "UTC",
+    trialStart: (sub?.trial_started_at as string | null | undefined) ?? null, trialEnd: (sub?.trial_ends_at as string | null | undefined) ?? null,
+  }, APP_URL);
   const sent = await notify({
     category: "access", kind: "access_granted", key: `access_granted:${locationId}`, locationId, to: "owners",
     inApp: { title: "Kabsi is now a Manager of your Google profile", link: "/app/settings" },

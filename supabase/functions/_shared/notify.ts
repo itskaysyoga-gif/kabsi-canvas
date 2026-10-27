@@ -2,6 +2,7 @@
 // notify(); nothing else sends an email. The rules and the flow are in notify-engine.ts and notify-rules.ts.
 import { admin, APP_URL, internalSecret, log, sendEmail } from "./kabsi.ts";
 import { signUnsubscribe } from "./email/unsubscribe.ts";
+import { streamOf } from "./email/streams.ts";
 import { type Deps, type EmailState, type NewRow, type NotifyInput, type NotifyResult, type Recipient, releaseDue, type ReleaseResult, runNotify, type StoredItem } from "./notify-engine.ts";
 import type { Frequency } from "./notify-categories.ts";
 
@@ -33,6 +34,12 @@ export function dbDeps(): Deps {
       return new Map(((data ?? []) as { category: string; channel: string; frequency: Frequency }[]).map((p) => [`${p.category}:${p.channel}`, p.frequency]));
     },
 
+    async routineChannel(userId) {
+      const { data, error } = await db.rpc("routine_channel_of", { p_user: userId });
+      if (error) throw error;
+      return data === "whatsapp" ? "whatsapp" : "email";
+    },
+
     async hours(locationId) {
       const { data, error } = await db.from("knowledge_facts").select("value").eq("location_id", locationId).eq("slot", "profile.regular_hours")
         .eq("status", "verified").is("superseded_by", null).maybeSingle();
@@ -55,18 +62,13 @@ export function dbDeps(): Deps {
     },
 
     async deliver(o) {
-      // Lifecycle tips go from news.kabsi.co (G-22, R-03), never from the account subdomain. Until Hussein has verified that
-      // domain in Resend (app_settings.news_domain_verified = 'on') they are not sent; the lifecycle job is off until then
-      // anyway. A test email to the team (kind test_...) is the one exception: it goes from the account subdomain.
-      const news = o.category === "trial";
-      if (news && !o.kind.startsWith("test_")) {
-        const { data } = await db.from("app_settings").select("value").eq("key", "news_domain_verified").maybeSingle();
-        if (data?.value !== "on") return { skipped: "news_domain_not_verified" };
-      }
+      // 30.18 section 2: lifecycle mail (Trial tips) goes from the news stream once news.kabsi.co is verified in Resend; until
+      // then from send.kabsi.co (streamOf). Account and product mail always goes from send.kabsi.co, Reply-To hello@kabsi.co.
+      const stream = streamOf(o.category);
       const r = await sendEmail({
         kind: o.kind, to: o.to, subject: o.subject, html: o.html, text: o.text, dedupeKey: o.dedupeKey, locationId: o.locationId,
         ...(o.replyTo ? { replyTo: o.replyTo } : {}), category: o.category, notificationId: o.notificationId ?? null,
-        unsubscribeUrl: o.unsubscribeUrl ?? null, stream: news && !o.kind.startsWith("test_") ? "news" : "send",
+        unsubscribeUrl: o.unsubscribeUrl ?? null, stream,
       });
       if ("sent" in r && o.notificationId) await db.from("notifications").update({ email_id: (r as { id?: string }).id ?? null }).eq("id", o.notificationId);
       return "sent" in r ? { sent: r.sent as string } : { skipped: r.skipped };

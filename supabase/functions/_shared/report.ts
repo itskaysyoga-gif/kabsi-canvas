@@ -197,7 +197,7 @@ export async function weeklyReports(locs: Loc[], opts: { forceLocation?: string 
     await notify({
       category: "weekly_report", kind: "weekly_report", key: `weekly:${loc.id}:${date}`, locationId: loc.id, to: "owners",
       inApp: { title: "Your Results Report is ready", link: "/app/report" },
-      content: copy.weeklyReport(loc.name, { newReviews: data.new_reviews, replied: data.replied, headline: data.care.headline }, body.html, body.text, APP_URL),
+      content: copy.weeklyReport(loc.name, { dates: body.dates, preheader: body.preheader, button: body.button }, body.html, body.text, APP_URL),
     });
     sent++;
   }

@@ -11,7 +11,7 @@ const ALERT = { email: "front-desk@example.test", userId: null, role: "alert" };
 type Stored = NewRow & { id: string; email_id: string | null };
 
 // An in-memory outbox: the same contract as the database wiring in notify.ts.
-function fake(opts: { now?: string; prefs?: Record<string, Frequency>; hours?: string | null; paused?: string | null; people?: typeof OWNER[]; failFirstSend?: boolean; suppressed?: string[] } = {}) {
+function fake(opts: { now?: string; prefs?: Record<string, Frequency>; hours?: string | null; paused?: string | null; people?: typeof OWNER[]; failFirstSend?: boolean; suppressed?: string[]; whatsapp?: string[] } = {}) {
   const rows: Stored[] = [];
   const sent: Outgoing[] = [];
   const built: string[] = [];
@@ -24,6 +24,7 @@ function fake(opts: { now?: string; prefs?: Record<string, Frequency>; hours?: s
     business: async () => ({ name: "Yawmiyati", tz: "Asia/Beirut", digestHour: 19, pausedUntil: opts.paused ?? null }),
     prefs: async (userId) => new Map(Object.entries(userId === OWNER.userId ? (opts.prefs ?? {}) : {})) as Map<string, Frequency>,
     hours: async () => opts.hours ?? null,
+    routineChannel: async (userId) => ((opts.whatsapp ?? []).includes(userId) ? "whatsapp" : "email"),
     async insert(row) {
       const same = rows.find((r) => r.dedupe_key === row.dedupe_key && r.to_address === row.to_address);
       if (same) return { id: same.id, fresh: false, state: same.email_state };
@@ -246,17 +247,18 @@ Deno.test("a suppressed address is never sent to: not now, not from quiet hours,
   assert.equal(f.sent.length, 1);
 });
 
-Deno.test("every email carries why you got this, the settings link, the operator line and the Google notice", async () => {
+Deno.test("every email carries why you got this, the brand line, the non-affiliation line, the social links and the operator line", async () => {
   const f = fake();
   await runNotify(input({ key: "w:1", to: [OWNER] }), f.deps);
   await runNotify({ category: "direct", kind: "x", key: "w:2", to: [{ email: "v@example.test", userId: null }], content: content("Direct") }, f.deps);
   for (const m of f.sent) {
     assert.match(m.html, /Why you got this:/);
-    assert.match(m.html, /Email settings/);
+    assert.match(m.html, /Your business on Google\. Taken care of\./);
+    assert.match(m.html, /Kabsi is independent and not affiliated with Google\./);
+    assert.match(m.html, />Facebook</);
+    assert.match(m.html, />Instagram</);
     assert.match(m.html, /Kabsi is operated by Rashid Abou Hamzy\. Contact: hello@kabsi\.co\./);
-    assert.match(m.html, /not affiliated with, sponsored by or endorsed by Google/);
     assert.match(m.text, /Why you got this:/);
-    assert.match(m.text, /Email settings: https:\/\/kabsi.test\/app\/settings#choices/);
   }
   assert.match(f.sent[0]!.html, /A new review arrived for your business\./);
   assert.match(f.sent[1]!.html, /You asked for this email\./);
@@ -270,4 +272,26 @@ Deno.test("mail with no business (a deleted business) is sent without a notice r
   assert.equal(gone.sent, 1);
   assert.equal(f.rows.length, 0);
   assert.match(f.sent[0]!.html, /This is about your Kabsi account\./);
+});
+
+Deno.test("Email 1: routine messages go to the one place the owner chose, never both; urgent ones keep their rules", async () => {
+  const f = fake({ whatsapp: [OWNER.userId] });
+  const r = await runNotify(input({ key: "review:routine" }), f.deps);
+  // The owner chose WhatsApp: no review email for them (the bell still shows it); the manager and the alert address still get it.
+  assert.deepEqual(states(f.rows), [[OWNER.email, "off"], [MANAGER.email, "sent"], [ALERT.email, "sent"]]);
+  assert.equal(r.off, 1);
+  assert.equal(f.rows[0]!.in_app, true);
+  await runNotify(input({ key: "report:routine", category: "weekly_report", kind: "weekly_report", to: "owners" }), f.deps);
+  assert.equal(f.rows.find((x) => x.dedupe_key === "report:routine" && x.to_address === OWNER.email)?.email_state, "off");
+  // A review that needs care, an urgent change, access and billing are not routine: the email still goes.
+  for (const category of ["review_high_risk", "profile_urgent", "access", "billing"] as const) {
+    await runNotify(input({ key: `urgent:${category}`, category, kind: category, to: "owners" }), f.deps);
+    assert.equal(f.rows.find((x) => x.dedupe_key === `urgent:${category}` && x.to_address === OWNER.email)?.email_state, "sent", category);
+  }
+});
+
+Deno.test("Email 1: with email as the routine channel nothing changes", async () => {
+  const f = fake();
+  await runNotify(input({ key: "review:email" }), f.deps);
+  assert.equal(f.rows.find((x) => x.to_address === OWNER.email)?.email_state, "sent");
 });

@@ -22,7 +22,7 @@ function journey(over: Partial<Snapshot> = {}) {
     return {
       ...base, status: hasAccess ? "active" : "access_pending", consentAt: t >= 10 * 60_000 ? consentAt : null, accessGrantedAt: hasAccess ? accessAt : null,
       entitlement, trialStartedAt: hasAccess ? trialStart : null, trialEndsAt: hasAccess ? trialEnd : null,
-      firstApprovalAt: now >= at(6 * D) ? at(6 * D) : null, waitingReviews: 3, recap: { repliesPrepared: 7, repliesSent: 4, postsSent: 0, changesCaught: 1 }, ...over,
+      firstApprovalAt: now >= at(6 * D) ? at(6 * D) : null, firstOnGoogleAt: now >= at(6 * D) ? at(6 * D) : null, waitingReviews: 3, recap: { repliesPrepared: 7, repliesSent: 4, postsSent: 0, changesCaught: 1 }, ...over,
     };
   };
 }
@@ -181,7 +181,14 @@ Deno.test("the day-7 recap says exactly the numbers of the snapshot, which come 
 Deno.test("prices and offer: Essentials, Pro and an extra location, card payments marked coming, no end-of-trial discount", () => {
   const ctx = { appUrl: "https://kabsi.co", removalOn: true };
   assert.deepEqual(Object.values(PLAN_PRICES), [19, 190, 39, 390, 15, 150]);
-  for (const step of ["trial_day7", "trial_day11", "trial_day14", "winback_17", "winback_30"] as const) {
+  // Email 1: the trial-ending email (day 11) gives the explicit choice with the monthly prices instead (30.15 section 6).
+  const ending = lifecycleEmail("trial_day11", LIFE_SAMPLE, ctx);
+  assert.match(ending.text, /Pro is \$39 a month/);
+  assert.match(ending.text, /Essentials is \$19 a month/);
+  assert.match(ending.text, /plus tax where it applies/);
+  assert.ok(ending.text.includes(CARD_PAYMENTS_COMING));
+  assert.equal(ending.button?.label, "Choose my plan");
+  for (const step of ["trial_day7", "trial_day14", "winback_17", "winback_30"] as const) {
     const m = lifecycleEmail(step, LIFE_SAMPLE, ctx);
     for (const t of [m.text, m.bodyHtml]) {
       assert.match(t, /Essentials is \$19 a month or \$190 a year/, step);

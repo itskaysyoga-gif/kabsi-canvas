@@ -27,6 +27,7 @@ import {
   loadOnboardingStatus,
   loadScenario,
   myLatestLocation,
+  setupLinkEmailed,
   scenarioDone,
   setScenario,
   setStep,
@@ -123,6 +124,12 @@ function StartPage() {
         seen: { ...seen, checked: checkedSeen },
       });
 
+  // Email 1: "Kabsi also sent it to your email." only once the setup email with the link went to this person.
+  const emailed = useQuery({
+    queryKey: ["setup-link-emailed", status.data?.location_id],
+    queryFn: () => setupLinkEmailed(status.data!.location_id),
+    enabled: !!status.data?.resume_code && !!status.data?.location_id,
+  });
   const scenario = useQuery({
     queryKey: ["scenario", location?.id],
     queryFn: () => loadScenario(location!.id),
@@ -227,7 +234,9 @@ function StartPage() {
     <OnboardingShell
       stage={STAGE_OF[screen]}
       help={help}
-      below={showResume ? <ResumeLink code={s!.resume_code!} /> : null}
+      below={
+        showResume ? <ResumeLink code={s!.resume_code!} emailed={emailed.data === true} /> : null
+      }
     >
       {cardNote ? (
         <p

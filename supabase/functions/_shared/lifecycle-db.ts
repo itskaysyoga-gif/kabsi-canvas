@@ -27,6 +27,17 @@ export async function lifecycleJob(): Promise<LifecycleResult> {
         const ids = new Set(((locs ?? []) as { id: string }[]).map((l) => l.id));
         for (const s of snaps) s.founding = ids.has(s.locationId);
       }
+      // Email 1: the setup link's code and the first reply Kabsi saw on Google, for the setup and first-work emails.
+      if (snaps.length) {
+        const ids = snaps.map((s) => s.locationId);
+        const { data: codes } = await db.from("locations").select("id, resume_code").in("id", ids);
+        const code = new Map(((codes ?? []) as { id: string; resume_code: string | null }[]).map((l) => [l.id, l.resume_code]));
+        const { data: pubs } = await db.from("publications").select("location_id, updated_at").in("location_id", ids)
+          .eq("target_type", "review_reply").eq("state", "verified").order("updated_at", { ascending: true });
+        const first = new Map<string, Date>();
+        for (const p of (pubs ?? []) as { location_id: string; updated_at: string }[]) if (!first.has(p.location_id)) first.set(p.location_id, new Date(p.updated_at));
+        for (const s of snaps) { s.resumeCode = code.get(s.locationId) ?? null; s.firstOnGoogleAt = first.get(s.locationId) ?? null; }
+      }
       return snaps;
     },
     async send(o) {

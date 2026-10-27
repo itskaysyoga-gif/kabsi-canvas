@@ -3,6 +3,7 @@
 
 import { WHATSAPP_DIGITS, WHATSAPP_ON } from "../../supabase/functions/_shared/whatsapp-setting.ts";
 import { CONSENT_ASK_FIRST } from "./region";
+import { SOCIAL_LINKS } from "../../supabase/functions/_shared/social-links.ts";
 
 /** Where the consent bar asks first (the one list is CONSENT_ASK_FIRST in src/lib/region.ts). */
 export const CONSENT_COUNTRIES: readonly string[] = CONSENT_ASK_FIRST;
@@ -120,10 +121,8 @@ export const MAIN_CTA = "Check my business free";
 export const GOOGLE_THIRD_PARTY_URL = THIRD_PARTY_HELP_URL;
 
 /** Kabsi's social channels, the one list (R-59). Every footer and the About page read it. Facebook and Instagram only. */
-export const SOCIAL_LINKS = [
-  { name: "Facebook", href: "https://www.facebook.com/profile.php?id=61574259448145" },
-  { name: "Instagram", href: "https://www.instagram.com/kabsi.co" },
-] as const;
+// The one constant lives beside the Edge Functions so every email footer reads the same two links.
+export { SOCIAL_LINKS };
 
 /**
  * Where a "WhatsApp" button on the public site goes. While WHATSAPP_ON is false (no number in the one setting) it is an

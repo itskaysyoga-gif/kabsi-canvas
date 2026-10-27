@@ -6,12 +6,12 @@
 //
 // What is sent, and when (G-25):
 //   welcome              the business was created                       the one next step: invite Kabsi as Manager
-//   no_access_1h/24h/72h access asked for, still no access               help to finish (stops at access)
+//   no_access_1h/24h/72h access asked for, still no access               the setup link to finish (stops at access; Email 1)
 //   verify_1 to verify_5 the owner said the profile needs verifying or   "Verified yet? Tap to continue" every 2 days
 //                        is under review, still no access (K-95, P0.4-04) (stops at access or when the situation is cleared)
 //   ownership_day3/7     the owner asked for ownership of the profile   "Has your request come through?" on day 3 and 7
 //                        (K-97, P0.4-04)                                 after "I've done it"
-//   first_reply_approved the first reply was approved (audit log)       a short thank-you
+//   first_reply_approved Kabsi first saw a reply on Google (Email 1)     "Your first reply is on Google"
 //   trial_day2/7/11      the trial clock (K-101), only while on trial    first win, your week with the yearly offer
 //                                                                        (G-30), three days left with both prices
 //   trial_day14          trial ended, grace begins (K-48)                what continues, what waits, one tap to continue
@@ -49,6 +49,10 @@ export type Snapshot = {
   recap: { repliesPrepared: number; repliesSent: number; postsSent: number; changesCaught: number };
   /** A Founding 25 business (30.17): 90 free days with its own day-60, day-85 and day-90 messages (founding.ts). */
   founding?: boolean;
+  /** The setup link's code (locations.resume_code, V4), for the setup-incomplete email; null until onboarding made one. */
+  resumeCode?: string | null;
+  /** When Kabsi first saw one of the business's replies on Google (a verified publication): the "first work completed" email. */
+  firstOnGoogleAt?: Date | null;
 };
 
 const d = (v: unknown) => (typeof v === "string" ? new Date(v) : null);
@@ -94,9 +98,10 @@ export type StepId =
 export type StepMeta = { id: StepId; category: CategoryId; consent: "service" | "marketing" };
 export const STEPS: Record<StepId, StepMeta> = {
   welcome: { id: "welcome", category: "account", consent: "service" },
-  no_access_1h: { id: "no_access_1h", category: "access", consent: "service" },
-  no_access_24h: { id: "no_access_24h", category: "access", consent: "service" },
-  no_access_72h: { id: "no_access_72h", category: "access", consent: "service" },
+  // Email 1 (30.15 section 6): the setup reminders are lifecycle mail a person can switch off (Trial tips), not access notices.
+  no_access_1h: { id: "no_access_1h", category: "trial", consent: "service" },
+  no_access_24h: { id: "no_access_24h", category: "trial", consent: "service" },
+  no_access_72h: { id: "no_access_72h", category: "trial", consent: "service" },
   first_reply_approved: { id: "first_reply_approved", category: "trial", consent: "service" },
   // Setup help for an owner stuck at Google's side (P0.4-04). They stop at access and are service mail, never marketing. Since
   // 22 Oct 2026 they sit in the Trial tips category like the other tips, so the owner can turn them off (the footer has
@@ -111,7 +116,8 @@ export const STEPS: Record<StepId, StepMeta> = {
   ownership_day7: { id: "ownership_day7", category: "trial", consent: "service" },
   trial_day2: { id: "trial_day2", category: "trial", consent: "service" },
   trial_day7: { id: "trial_day7", category: "trial", consent: "service" },
-  trial_day11: { id: "trial_day11", category: "trial", consent: "service" },
+  // Email 1: the trial-ending email asks for a choice (30.15 section 6), so it is plan mail a person cannot switch off.
+  trial_day11: { id: "trial_day11", category: "billing", consent: "service" },
   trial_day14: { id: "trial_day14", category: "billing", consent: "service" },
   winback_17: { id: "winback_17", category: "trial", consent: "marketing" },
   winback_30: { id: "winback_30", category: "trial", consent: "marketing" },
@@ -139,7 +145,7 @@ function windowOf(step: StepId, s: Snapshot): Window | null {
     }
     case "ownership_day3": return win(plus(s.scenario?.doneAt ?? null, OWNERSHIP_DAYS[0] * D), (OWNERSHIP_DAYS[1] - OWNERSHIP_DAYS[0]) * D);
     case "ownership_day7": return win(plus(s.scenario?.doneAt ?? null, OWNERSHIP_DAYS[1] * D), 3 * D);
-    case "first_reply_approved": return win(s.firstApprovalAt, 3 * D);
+    case "first_reply_approved": return win(s.firstOnGoogleAt ?? null, 3 * D);
     case "trial_day2": return win(plus(s.trialStartedAt, 2 * D), 3 * D);
     case "trial_day7": return win(plus(s.trialStartedAt, 7 * D), 3 * D);
     case "trial_day11": return s.trialEndsAt ? { at: new Date(s.trialEndsAt.getTime() - 3 * D), until: s.trialEndsAt } : null;
