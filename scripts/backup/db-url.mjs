@@ -48,6 +48,8 @@ if (!primary) fail("the pooler configuration has no host");
 const out = new URL(url);
 out.hostname = primary.db_host;
 out.port = "5432"; // session mode: pg_dump needs a session, not the transaction pooler on 6543
-out.username = typeof primary.db_user === "string" && primary.db_user ? primary.db_user : `postgres.${ref}`;
+// The pooler finds the project by the user name: postgres.<ref>. The API may name the plain database user.
+const user = typeof primary.db_user === "string" && primary.db_user ? primary.db_user : "postgres";
+out.username = user.endsWith(`.${ref}`) ? user : `${user}.${ref}`;
 if (!out.pathname || out.pathname === "/") out.pathname = "/postgres";
 process.stdout.write(out.toString());
