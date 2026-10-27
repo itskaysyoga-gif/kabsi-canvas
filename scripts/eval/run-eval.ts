@@ -83,7 +83,8 @@ if (out)
 async function promptsHash(): Promise<string> {
   const dir = new URL("../../supabase/functions/_shared/ai/prompts/", import.meta.url);
   const names: string[] = [];
-  for await (const f of Deno.readDir(dir)) if (f.isFile && f.name.endsWith(".ts")) names.push(f.name);
+  for await (const f of Deno.readDir(dir))
+    if (f.isFile && f.name.endsWith(".ts")) names.push(f.name);
   const parts = await Promise.all(names.sort().map((n) => Deno.readFile(new URL(n, dir))));
   const all = new Uint8Array(parts.reduce((s, p) => s + p.length, 0));
   let at = 0;

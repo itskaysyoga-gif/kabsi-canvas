@@ -44,7 +44,9 @@ const flag = (name: string) => {
 const max = Math.min(Number(flag("--max") ?? LIVE_CASES.length), MAX_CALLS);
 const dry = args.includes("--dry");
 const ORDER: Record<LiveCase["surface"], number> = { router: 0, nora: 1, review: 2 };
-const cases = [...LIVE_CASES].sort((a, b) => ORDER[a.surface] - ORDER[b.surface]).slice(0, Math.min(max, 30));
+const cases = [...LIVE_CASES]
+  .sort((a, b) => ORDER[a.surface] - ORDER[b.surface])
+  .slice(0, Math.min(max, 30));
 const budgetMicros = Number(flag("--budget") ?? "0.30") * 1e6;
 
 // Cost estimate before anything runs: rough tokens per call (system prompt plus input, then the answer), list prices.
@@ -130,16 +132,26 @@ const LEAK =
 type Line = { id: string; surface: string; outcome: string; detail: string };
 const lines: Line[] = [];
 const caseEstimate = (c: LiveCase, noraDone: number) =>
-  CALLS[c.surface].reduce((s, k) => s + costMicros(k.model, {
-    input: c.surface === "nora" && noraDone > 0 ? 5_000 : k.input,
-    output: k.output,
-    cacheRead: c.surface === "nora" && noraDone > 0 ? 50_000 : 0,
-    cacheWrite: 0,
-  }), 0);
+  CALLS[c.surface].reduce(
+    (s, k) =>
+      s +
+      costMicros(k.model, {
+        input: c.surface === "nora" && noraDone > 0 ? 5_000 : k.input,
+        output: k.output,
+        cacheRead: c.surface === "nora" && noraDone > 0 ? 50_000 : 0,
+        cacheWrite: 0,
+      }),
+    0,
+  );
 let noraDone = 0;
 for (const c of cases) {
   if (meterCost(meter) + caseEstimate(c, noraDone) > budgetMicros) {
-    lines.push({ id: c.id, surface: c.surface, outcome: "not run (budget)", detail: `spent $${(meterCost(meter) / 1e6).toFixed(4)}` });
+    lines.push({
+      id: c.id,
+      surface: c.surface,
+      outcome: "not run (budget)",
+      detail: `spent $${(meterCost(meter) / 1e6).toFixed(4)}`,
+    });
     continue;
   }
   if (c.surface === "nora") noraDone++;
