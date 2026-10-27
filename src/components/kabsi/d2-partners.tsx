@@ -26,15 +26,15 @@ const STEPS = [
     text: "Send a message. Kabsi replies with the next step.",
   },
   {
-    title: "Share your page or scan a business for them",
-    text: "Send your own page, or run the free scan for a business you know.",
+    title: "Share your page or check a business for them",
+    text: "Send your own page, or run the free check for a business you know.",
   },
   { title: "Get paid on the 5th of each month", text: "For every business that pays." },
 ];
 
 const GETS: [typeof QrIcon, string][] = [
   [QrIcon, "Your own page and QR code"],
-  [Gift, "Free scans to send to businesses you know"],
+  [Gift, "Free checks to send to businesses you know"],
   [Video, "A kit of ready posts and a short video"],
   [MessageCircle, "A WhatsApp summary every Monday"],
 ];

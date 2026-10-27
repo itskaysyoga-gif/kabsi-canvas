@@ -3,7 +3,8 @@ import { useMutation } from "@tanstack/react-query";
 import { Check, Mail, MessageCircle, Share2, Users } from "lucide-react";
 import { BookingLink } from "@/components/shared/booking-link";
 import { ReadyMessage } from "@/components/onboarding/ready-message";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/kabsi/ui";
+import { cn } from "@/lib/utils";
 import { readyMessage, stepsUrl, whatsappShareUrl } from "@/lib/manager-guide";
 import { friendlyError, sendManagerSteps, type Location } from "@/lib/onboarding";
 import { SETUP_CALL_MINUTES, SITE_URL } from "@/lib/site";
@@ -24,13 +25,14 @@ export function AccessExits({ location, step }: { location: Location; step: numb
   return (
     <div className="mt-6 space-y-3">
       <Button
-        type="button"
-        variant="outline"
-        className="h-auto min-h-[52px] w-full whitespace-normal py-3 text-center"
+        variant="secondary"
+        full
+        className="h-auto min-h-13 whitespace-normal py-3 text-center"
         aria-expanded={open === "device"}
         onClick={() => setOpen(open === "device" ? null : "device")}
+        icon={<Share2 className="size-5" />}
       >
-        <Share2 /> Send these steps to my other device
+        Send these steps to my other device
       </Button>
       {open === "device" ? (
         <div className="rounded-card bg-surface-2 p-4">
@@ -39,24 +41,22 @@ export function AccessExits({ location, step }: { location: Location; step: numb
           </p>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row">
             <Button
-              type="button"
-              variant="outline"
-              size="compact"
+              variant="secondary"
+              size="md"
               onClick={() => email.mutate()}
               disabled={email.isPending || email.isSuccess}
+              icon={email.isSuccess ? <Check className="size-5" /> : <Mail className="size-5" />}
             >
-              {email.isSuccess ? <Check /> : <Mail />}
               {email.isSuccess ? "Sent to your email" : "Email them to me"}
             </Button>
-            <Button asChild variant="outline" size="compact">
-              <a
-                href={whatsappShareUrl(`Steps to add Kabsi as a Manager: ${link}`)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <MessageCircle /> Share on WhatsApp
-              </a>
-            </Button>
+            <a
+              className={buttonClass("secondary", "md")}
+              href={whatsappShareUrl(`Steps to add Kabsi as a Manager: ${link}`)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <MessageCircle className="size-5" /> Share on WhatsApp
+            </a>
           </div>
           {email.isError ? (
             <p role="alert" className="mt-3 text-small text-bad">
@@ -67,13 +67,14 @@ export function AccessExits({ location, step }: { location: Location; step: numb
       ) : null}
 
       <Button
-        type="button"
-        variant="outline"
-        className="h-auto min-h-[52px] w-full whitespace-normal py-3 text-center"
+        variant="secondary"
+        full
+        className="h-auto min-h-13 whitespace-normal py-3 text-center"
         aria-expanded={open === "someone"}
         onClick={() => setOpen(open === "someone" ? null : "someone")}
+        icon={<Users className="size-5" />}
       >
-        <Users /> Someone else manages my Google profile
+        Someone else manages my Google profile
       </Button>
       {open === "someone" ? (
         <div className="rounded-card bg-surface-2 p-4">
@@ -89,7 +90,7 @@ export function AccessExits({ location, step }: { location: Location; step: numb
       <BookingLink
         kind="setup"
         button
-        className="h-auto min-h-[52px] w-full whitespace-normal py-3 text-center"
+        className="h-auto min-h-13 w-full whitespace-normal py-3 text-center"
       >
         Book a free {SETUP_CALL_MINUTES}-minute setup call
       </BookingLink>

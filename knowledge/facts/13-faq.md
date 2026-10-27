@@ -3,7 +3,7 @@
 ### About Kabsi
 
 **What is Kabsi?**
-Kabsi looks after your business on Google: a reply is drafted for every new review in the reviewer's language, your hours and details are kept right, and fresh posts are prepared. It also shows what needs attention on your profile and watches your listing for changes you did not make (Google Protection). Nothing is posted or changed until you approve it.
+Kabsi looks after your business on Google: a reply is drafted for every new review in the reviewer's language, your hours and details are kept right, and fresh posts are prepared. It also shows what needs attention on your profile and watches your Google profile for changes you did not make (Google Protection). Nothing is posted or changed until you approve it.
 
 **Who is Kabsi for?**
 Any local business with a verified Google Business Profile that meets customers in person or travels to them, in any country: cafés, restaurants, clinics, salons, garages, hotels, shops, florists, plumbers, cleaners and more. Not online-only businesses, rental or for-sale properties, or PO boxes and virtual offices used as an address (section 2.1c).
@@ -12,7 +12,7 @@ Any local business with a verified Google Business Profile that meets customers 
 No. Kabsi is independent and not affiliated with Google. It works through Google's official Business Profile access, like a staff member you add as a Manager.
 
 **How is this different from Gemini in Business Profile?**
-Gemini is Google's free assistant for one verified profile that you open and ask. Kabsi comes to you with a reply already prepared, tells you when Google changes your listing, writes only from facts you confirmed, and has a person behind it. Source: https://support.google.com/business/answer/17142585
+Gemini is Google's free assistant for one verified profile that you open and ask. Kabsi comes to you with a reply already prepared, tells you when Google changes your profile, writes only from facts you confirmed, and has a person behind it. Source: https://support.google.com/business/answer/17142585
 
 **Which businesses can use Kabsi?**
 Any business with a verified Google Business Profile that you own or manage. Setup asks first. If your profile isn't verified yet, or someone else manages it, setup shows what to do on Google, and you can come back.
@@ -21,7 +21,7 @@ Any business with a verified Google Business Profile that you own or manage. Set
 Yes. The team offers a free 20-minute setup call, Monday to Friday, 8am to 6pm Beirut time. Book it at kabsi.co/setup-call, or email hello@kabsi.co and we'll arrange a time. Staff never sign in to your Google account: you send the invitation yourself.
 
 **How does Kabsi protect my Google profile?**
-You invite the Kabsi Clients group (ID 5481006796) as a Manager, not as an owner, and you can remove it at any time from People and access. Kabsi only accepts an invitation that matches a business you have set up and only for the Manager role: the listing's exact name and its street must match, and when Google writes the address in another script (Arabic, for example) Kabsi checks the listing's place on Google Maps against the place you picked at sign-up. An invitation with no street in its address waits for a person on the Kabsi team. If Kabsi ever finds itself a Manager of a listing nobody set up in Kabsi, it removes itself at once and the team is told. Kabsi's Google account uses Google's Advanced Protection. Nothing is written to Google without your approval, and each approval is recorded with the exact text, who approved it, when, and whether it came from the dashboard or an email link.
+You invite the Kabsi Clients group (ID 5481006796) as a Manager, not as an owner, and you can remove it at any time from People and access. Kabsi only accepts an invitation that matches a business you have set up and only for the Manager role: the profile's exact name and its street must match, and when Google writes the address in another script (for example Greek or Cyrillic) Kabsi checks the profile's place on Google Maps against the place you picked at sign-up. An invitation with no street in its address waits for a person on the Kabsi team. If Kabsi ever finds itself a Manager of a profile nobody set up in Kabsi, it removes itself at once and the team is told. Kabsi's Google account uses Google's Advanced Protection. Nothing is written to Google without your approval, and each approval is recorded with the exact text, who approved it, when, and whether it came from the dashboard or an email link.
 
 **Where is Kabsi based?**
 Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co. Kabsi serves businesses in any country.
@@ -56,7 +56,7 @@ A few minutes: find your business, add the Kabsi group ID 5481006796 as a Manage
 Kabsi checks every few minutes. Reviews of 3 stars or less, and any review Kabsi marks medium or high risk, are emailed right away; other reviews are emailed at once while your business is open and come together in the daily email, at the hour you choose, outside your opening hours. Nothing is emailed between 22:00 and 08:00; it waits until 08:00.
 
 **Can I reply from my phone?**
-Yes. Tap Approve reply, Edit or Skip in the email, confirm on the page that opens, or use the app in your phone's browser. A high-risk review asks you to sign in on that page first.
+Yes. Tap Approve reply, Edit or Skip in the email, confirm on the page that opens, or use Kabsi in your phone's browser. A high-risk review asks you to sign in on that page first.
 
 **Can I edit a draft before posting?**
 Yes. Change anything you like. Kabsi publishes exactly the text you approve.
@@ -130,13 +130,13 @@ Only names you add to the staff list, and only when the customer mentioned them.
 Review text is treated as data, never instructions. Kabsi ignores commands inside a review and answers only the real content.
 
 **Which languages does Kabsi reply in?**
-The reviewer's language: English, Spanish, Arabic, French and many others.
+The reviewer's language: English, Spanish, French and many others.
 
-**What about Franco-Arabic?**
-Arabic written in Latin letters gets a simple English reply, because model-written Franco reads badly in public.
+**What about chat spelling in Latin letters?**
+A review in chat spelling, a language written in Latin letters the way people type it, gets a simple English reply, because a model-written reply in that spelling reads badly in public.
 
 **Is the app in other languages?**
-Not yet. The app and website are in English. Reply drafts are in each reviewer's language.
+Not yet. Kabsi is in English. Reply drafts are in each reviewer's language.
 
 **Does Kabsi use my data to train AI?**
 No. Google data is never used to train AI, and Anthropic, which drafts the replies, does not train on it.
@@ -234,10 +234,10 @@ Yes. On Hours, choose the dates, Closed or different hours, review what Google w
 ### Google Protection
 
 **What is Google Protection?**
-Kabsi watches your business name, phone, website, address, opening hours, main category, open status (open, temporarily closed, permanently closed) and map pin, and compares them with the details you confirmed. When Google shows something different, you get one email that explains it, for example "Google shows Sunday closing at 18:00. You approved 22:00.", and says whether Google made the change itself or Kabsi does not know who did. In the app you choose: "Google is right" (Google's value becomes your approved detail and nothing is sent to Google) or "Keep my information" (Kabsi sends your approved value back to Google, then checks Google shows it). Nothing changes on Google unless you say so, and Kabsi never puts anything back by itself. A change waiting for the owner appears as a card on Home.
+Kabsi watches your business name, phone, website, address, opening hours, main category, open status (open, temporarily closed, permanently closed) and map pin, and compares them with the details you confirmed. When Google shows something different, you get one email that explains it, for example "Google shows Sunday closing at 18:00. You approved 22:00.", and says whether Google made the change itself or Kabsi does not know who did. On Kabsi you choose: "Google is right" (Google's value becomes your approved detail and nothing is sent to Google) or "Keep my information" (Kabsi sends your approved value back to Google, then checks Google shows it). Nothing changes on Google unless you say so, and Kabsi never puts anything back by itself. A change waiting for the owner appears as a card on Home.
 
-**Can Google Protection lock my listing?**
-No. Nobody can lock a Google listing or stop people suggesting edits. Kabsi tells you fast and puts your version back only if you say so.
+**Can Google Protection lock my Google profile?**
+No. Nobody can lock a Google profile or stop people suggesting edits. Kabsi tells you fast and puts your version back only if you say so.
 
 **How fast will I hear about a change?**
 Kabsi checks about once an hour once connected, and emails you when a detail changes.
@@ -249,7 +249,7 @@ Tap "Google is right". Google's value becomes your approved version.
 Google removes things from business names that break its naming rules: a web address, a city or area, a slogan or extra keywords. When that is what Google removed (for example "Yawmiyati.com" to "Yawmiyati"), Kabsi recommends "Google is right" and says why: business names on Google can't include them, and putting them back can lead to a suspension. "Keep my information" is still there, with that warning.
 
 **Why do I have to sign in for some changes?**
-Your business name, address, main category, open status and map pin can make Google ask you to verify your business again when they change. Kabsi asks you to sign in to choose these (an email link alone is not enough; the email page asks you to sign in and brings you back), only the owner can choose, and the app says "Changing this can make Google ask you to verify your business again." Kabsi also sends at most one of these details back to Google at a time, at least 7 days apart; a second one inside the 7 days waits, and the app says the date it can go.
+Your business name, address, main category, open status and map pin can make Google ask you to verify your business again when they change. Kabsi asks you to sign in to choose these (an email link alone is not enough; the email page asks you to sign in and brings you back), only the owner can choose, and Kabsi says "Changing this can make Google ask you to verify your business again." Kabsi also sends at most one of these details back to Google at a time, at least 7 days apart; a second one inside the 7 days waits, and Kabsi says the date it can go.
 
 **What if Google keeps changing the same detail?**
 Kabsi puts the same detail back at most twice in 30 days. If Google changes it a third time, Kabsi does not send it again: a person on the Kabsi team contacts Google Business Profile support for you, with an explanation ready.

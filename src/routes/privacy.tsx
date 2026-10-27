@@ -491,8 +491,8 @@ function Page() {
             </li>
           ) : null}
           <li>
-            Visibility and AI answer results, and the competitors you pick (from launch): while you
-            use Kabsi, and deleted with the business.
+            Visibility Map and AI Visibility results, and the competitors you pick (from launch):
+            while you use Kabsi, and deleted with the business.
           </li>
           <li>
             WhatsApp voice notes (from launch): the audio is deleted as soon as it has been turned

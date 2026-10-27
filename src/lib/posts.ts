@@ -45,9 +45,9 @@ export const CTA_LABEL: Record<string, string> = {
 export const STATE_LABEL: Record<Post["state"], string> = {
   draft: "Prepared",
   publishing: "Waiting",
-  posted: "Published",
+  posted: "Sent to Google",
   skipped: "Skipped",
-  failed: "Not published",
+  failed: "Did not go through",
   removing: "Being removed",
   removed: "Removed from Google",
 };

@@ -81,7 +81,7 @@ export function CareTop({ r }: { r: CareData }) {
       <Block title="Content">
         <p className="text-small leading-6">
           {updates} {updates === 1 ? "update" : "updates"} and {c.photos_published}{" "}
-          {c.photos_published === 1 ? "photo" : "photos"} published.
+          {c.photos_published === 1 ? "photo" : "photos"} sent to Google.
         </p>
       </Block>
     </>

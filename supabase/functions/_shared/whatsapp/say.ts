@@ -19,11 +19,11 @@ export const SAY = {
     "Your full map is being made. It comes here as soon as it is ready.",
   partnerCodeNoted: "Welcome to Kabsi. You came through a Kabsi Partner, so your free Pro trial is 30 days, no card. Start here: kabsi.co/get-started",
   unknownHelp:
-    "I am Nora, Kabsi's assistant. Kabsi looks after your Google listing from WhatsApp: a reply ready for every review, your listing kept right, and nothing goes live without your yes.\n\nYou can send: your business name for a free scan, \"prices\", \"start free\", \"partner\" or \"talk to a person\".",
+    "I am Nora, Kabsi's assistant. Kabsi looks after your business on Google from WhatsApp: a reply ready for every review, your Google profile kept right, and nothing goes live without your yes.\n\nYou can send: your business name for a free check, \"prices\", \"start free\", \"partner\" or \"talk to a person\".",
   prices:
     "Kabsi is free for 14 days, no card. Then Essentials is 19 US dollars a month and Pro is 39 US dollars a month, with an extra location at 15. Card payments open soon. Details: kabsi.co/pricing",
   // 13b part 2 (judged 25 Oct): only what the facts say is open today; WhatsApp for owners and Partners are not open yet.
-  trial: "Start free here, no card, about 10 minutes: kabsi.co/get-started. The free trial starts once Kabsi can reach your Google listing.",
+  trial: "Start free here, no card, about 10 minutes: kabsi.co/get-started. The free trial starts once Kabsi can reach your Google profile.",
   partnerProgram:
     "Kabsi Partners is not open yet. When it opens, a partner earns 25 percent of every payment for as long as the business pays. Read more: kabsi.co/partners",
   needsAccount: "That needs a Kabsi account for your business. Start free, no card: kabsi.co/get-started",
@@ -89,7 +89,7 @@ export const SAY = {
     `${business}: a lasting change to your weekly hours is confirmed on kabsi.co, so you see exactly what Google will show. Open Hours: ${url}`,
   postAsk: (business: string) =>
     `${business}: send the words of the post starting with "post:", for example "post: Our autumn menu starts on Monday." Or send a photo with a short note.`,
-  postShown: (business: string, text: string) => `${business}: Kabsi will post this on your Google listing after your yes.\n\n"${text}"`,
+  postShown: (business: string, text: string) => `${business}: Kabsi will post this on your Google profile after your yes.\n\n"${text}"`,
   postProblem: (business: string, problems: string[]) =>
     `${business}: Kabsi cannot post that as it is, because it ${problems.join(" and ")}. Please send it again without that.`,
   approverOnly: (business: string) => `Your role at ${business} cannot approve this. The owner can, on WhatsApp or on kabsi.co.`,

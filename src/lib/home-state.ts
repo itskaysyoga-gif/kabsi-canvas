@@ -218,9 +218,9 @@ export function backlogCounts(t: Task): BacklogCounts {
   };
 }
 
-/** "14 of 23 published", and what has not gone yet. */
+/** "14 of 23 sent to Google", and what has not gone yet. */
 export function progressLine(sent: number, total: number) {
-  return sent >= total ? `All ${total} published` : `${sent} of ${total} published`;
+  return sent >= total ? `All ${total} sent to Google` : `${sent} of ${total} sent to Google`;
 }
 
 /** The counts under the card title: what is ready to approve together, and what is not. */

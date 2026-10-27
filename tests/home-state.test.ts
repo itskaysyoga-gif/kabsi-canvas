@@ -170,8 +170,8 @@ describe("the day-one backlog card (P0.3-10)", () => {
   });
 
   it("says how far the published replies have got", () => {
-    expect(progressLine(14, 23)).toBe("14 of 23 published");
-    expect(progressLine(23, 23)).toBe("All 23 published");
+    expect(progressLine(14, 23)).toBe("14 of 23 sent to Google");
+    expect(progressLine(23, 23)).toBe("All 23 sent to Google");
   });
 });
 

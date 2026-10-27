@@ -19,5 +19,6 @@
     "path": "/start/resume/ffffffffffffffffffff",
     "state": "ob-resume-bad",
     "name": "ob-resume-bad"
-  }
+  },
+  { "path": "/start", "state": "ob-invite", "name": "ob-situations", "click": "Cannot find People and access?" }
 ]

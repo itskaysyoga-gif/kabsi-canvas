@@ -12,7 +12,7 @@ import { industryCheck } from "@/content/industries";
 import { FoundingBanner } from "./d5-founding";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { CONTACT_EMAIL, TRIAL_LINE } from "@/lib/site";
+import { CONTACT_EMAIL, TRIAL_LINE, WHATSAPP_ON } from "@/lib/site";
 import { FOUNDER } from "./photos";
 import { NearbyPlaces } from "./nearby-places";
 import { ButtonLink, ExampleBadge, Faq, KabsiMark, SectionHead } from "./ui";
@@ -320,8 +320,9 @@ export function KeepTheKeys() {
                 <CheckCircle2 className="size-5 text-ok" aria-hidden /> A person helps
               </p>
               <p className="mt-2 text-body text-text-2">
-                Kabsi is built and run by Rashid Abou Hamzy, its founder. Stuck on a step? Reply
-                Help on WhatsApp, or write to {CONTACT_EMAIL}, and a person answers.
+                Kabsi is built and run by Rashid Abou Hamzy, its founder. Stuck on a step?{" "}
+                {WHATSAPP_ON ? "Reply Help on WhatsApp, or write" : "Write"} to {CONTACT_EMAIL}, and
+                a person answers.
               </p>
             </div>
           </div>

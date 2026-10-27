@@ -5,7 +5,7 @@ import { OPERATOR_NAME, PLAN_PRICES, SETUP_CALL_MINUTES, TAX_NOTE } from "@/lib/
 export const FAQ: { q: string; a: string }[] = [
   {
     q: "What does Kabsi do for my Google Business Profile?",
-    a: "Kabsi looks after your business on Google: a reply is drafted for every new review in the reviewer's language, your hours and details are kept right, and fresh posts are prepared. It also shows what needs attention on your profile, each with a ready draft, and watches your listing for changes you did not make. You approve every change.",
+    a: "Kabsi looks after your business on Google: a reply is drafted for every new review in the reviewer's language, your hours and details are kept right, and fresh posts are prepared. It also shows what needs attention on your profile, each with a ready draft, and watches your Google profile for changes you did not make. You approve every change.",
   },
   {
     q: "Does Kabsi post or change anything by itself?",
@@ -29,7 +29,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Which languages does it reply in?",
-    a: "The reviewer's language: English, Spanish, Arabic, French and many others. Arabic written in Latin letters (Franco-Arabic) gets a simple English reply, because it reads badly in public.",
+    a: "The reviewer's language: English, Spanish, French and many others. A review in chat spelling that would read badly in public gets a simple English reply.",
   },
   {
     q: "Can Kabsi remove bad reviews?",
@@ -57,11 +57,11 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Is my Google data sold or used to train AI?",
-    a: "No. Your Google data is never sold or rented, and it is never used to train AI models. Kabsi uses it only to draft your replies and posts, watch your listing and send your reports.",
+    a: "No. Your Google data is never sold or rented, and it is never used to train AI models. Kabsi uses it only to draft your replies and posts, watch your Google profile and send your reports.",
   },
   {
     q: "What is Google Protection?",
-    a: "Kabsi watches your listing's name, phone, address, hours, website and categories. If something changes that you didn't approve, you get one email with the before and after and two buttons: Keep my information and Google is right. Nothing changes unless you say so. It can't lock your listing or stop people from suggesting edits to Google.",
+    a: "Kabsi watches your Google profile's name, phone, address, hours, website and categories. If something changes that you didn't approve, you get one email with the before and after and two buttons: Keep my information and Google is right. Nothing changes unless you say so. It can't lock your Google profile or stop people from suggesting edits to Google.",
   },
   {
     q: "How do I pay?",
@@ -81,11 +81,11 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "How is this different from Gemini in Business Profile?",
-    a: "Gemini is Google's free assistant for one verified profile that you open and ask. Kabsi comes to you with a reply already prepared, tells you when Google changes your listing, writes only from facts you confirmed, and has a person behind it. Source: support.google.com/business/answer/17142585",
+    a: "Gemini is Google's free assistant for one verified profile that you open and ask. Kabsi comes to you with a reply already prepared, tells you when Google changes your profile, writes only from facts you confirmed, and has a person behind it. Source: support.google.com/business/answer/17142585",
   },
   {
     q: "What can Kabsi do on my profile as a Manager?",
-    a: "Kabsi uses Manager access to read your reviews, post the replies and posts you approve, and watch your listing for unwanted changes. It writes nothing you have not approved. You can remove Kabsi in People and access at any time.",
+    a: "Kabsi uses Manager access to read your reviews, post the replies and posts you approve, and watch your Google profile for unwanted changes. It writes nothing you have not approved. You can remove Kabsi in People and access at any time.",
   },
   {
     q: "Who is behind Kabsi?",

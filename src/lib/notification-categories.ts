@@ -79,7 +79,7 @@ export const CATEGORIES: readonly Category[] = [
     emailDefault: "instant",
     quietExempt: false,
     inApp: true,
-    description: "What Kabsi watched, prepared and published, once a week.",
+    description: "What Kabsi watched, prepared and sent to Google, once a week.",
   },
   {
     id: "access",

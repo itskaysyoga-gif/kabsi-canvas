@@ -16,7 +16,7 @@ export const OUTPUTS = {
   short: "public/llms.txt",
 };
 
-const LLMS_FULL_HEAD = `# Kabsi: full facts\n\n> Kabsi looks after your business on Google: a reply ready for every new review, your hours and details kept right, a Weekly Care Report and fresh posts. The owner approves every change and nothing is published without it. Kabsi is independent and not affiliated with Google. Short version: https://kabsi.co/llms.txt\n\n`;
+const LLMS_FULL_HEAD = `# Kabsi: full facts\n\n> Kabsi looks after your business on Google: a reply ready for every new review, your hours and details kept right, a weekly Results Report and fresh posts. The owner approves every change and nothing goes to Google without it. Kabsi is independent and not affiliated with Google. Short version: https://kabsi.co/llms.txt\n\n`;
 
 /** The combined facts: every knowledge/facts/*.md in file-name order, joined as they were split. */
 export function buildFacts() {

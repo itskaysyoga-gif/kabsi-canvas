@@ -6,11 +6,9 @@ import { expect, test } from "@playwright/test";
 import { savedSession, signedIn } from "./helpers/auth";
 import { axeClean, keep, MASKS, noBanner, settle } from "./helpers/page";
 
-// Found by this suite and listed in docs/LATER.md; every other serious or critical rule still fails. Remove a rule when it is fixed.
-//   label-content-name-mismatch: the business switcher's label does not contain its visible text (every screen)
-//   color-contrast: the green and red tinted badges (Home, Shield, Knowledge, Cards, Coach)
-//   aria-prohibited-attr: one element carries an aria attribute its role forbids
-const KNOWN_AXE = ["label-content-name-mismatch", "color-contrast", "aria-prohibited-attr"];
+// UX 1 restyled every screen and the Audit 1 run (27 Oct 2026, real demo data) found no serious or critical axe issue, so nothing is
+// listed as known. Add a rule here only with a docs/LATER.md row.
+const KNOWN_AXE: string[] = [];
 
 const SCREENS = [
   ["/app", "home"],
