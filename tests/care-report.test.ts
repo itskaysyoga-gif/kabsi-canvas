@@ -50,7 +50,7 @@ describe("the Weekly Care Report", () => {
   it("says the time saved is an estimate, with its formula, and never in money", () => {
     const compose = read("supabase/functions/_shared/care-report/compose.ts");
     expect(compose).toContain("It is an estimate, counted from what Kabsi did.");
-    expect(compose).toContain("5 minutes for each reply published, 15 for each update");
+    expect(compose).toContain("5 minutes for each reply sent to Google, 15 for each update");
     const formula = /export const FORMULA =\s*"([^"]+)"/.exec(compose)![1]!;
     expect(formula).not.toMatch(/[$€£]|money|dollar/i);
   });

@@ -161,3 +161,11 @@
 - QA 1 (PR 225 and PR 227, 25 Oct): Playwright journeys, visual baseline and axe, the WhatsApp replay harness, Creem test checkout, nightly smoke, Nora judged 3.33 of 5. Detail: `docs/progress/archive/2026-10-25-qa-1.md`.
 - 25 Oct, lane R: owners read "places around you", never "spots", and "website", never "app" (PR 228). The design studio is set up (master plan 30.13, R-94): itskaysyoga-gif/kabsi-design-studio, synced with Lovable, with its brief, photos, parts and checks.
 - Growth 1 (PR 226, 25 Oct): consent bar (EU, EEA, UK, CH, UAE, Saudi Arabia), "Your privacy choices", the 20.1 events (docs/EVENTS.md), Pixel and Conversions API off until Meta is set up. Detail: `docs/progress/archive/2026-10-25-growth-1.md`.
+
+Moved from KABSI-PROGRESS.md by lane R on 27 Oct 2026 (word for word):
+
+- Session 13b part 2 (PR 230, merged 25 Oct): staff alerts and morning digest on WhatsApp, Slack removed, hours and typed posts on WhatsApp, the map image, Nora judged 4.4 of 5. Verified live 26 Oct: the first morning digest reached the staff phone. Detail: `docs/progress/archive/2026-10-25-session-13b-2.md`.
+- V2 (AI Visibility, PR 234, 26 Oct): prompts, runs, numbers, owner line, map line; Gemini off. Calibrated live. Detail: `docs/progress/archive/2026-10-26-v2-ai-visibility.md`.
+- V3 (26 Oct, PR 246 merged, deploy run 114 green): Ask a customer is one ready message with the review link (no customer number ever stored), link opens counted apart from reviews, counter card and table tent PDFs, photos from WhatsApp on both plans (Yes, Edit, Skip), the monthly question, sensitive reviews without text, voice notes behind a provider (mock until the key is set). Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
+- 26 Oct, lane R: V2's migration applied; Meta pixel live; QA_SMOKE_TOKEN set; Slack leftovers dropped (0 | 0 | 0 | 0); master plan 30.14.
+- 26 Oct, lane R: the outside review decided (30.15, 30.16) and 30.17 (Founding 25, Home for every business with industry pages, easy access, getkabsi.com). Design 1 to 4 and 3 approved in the design studio. Next: Design 5, V3, Partners, V4, Outbound, Web 2 with Content 1, UX 1, Sec 1, the launch gate.

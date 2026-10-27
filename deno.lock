@@ -47,6 +47,7 @@
         "npm:class-variance-authority@~0.7.1",
         "npm:clsx@^2.1.1",
         "npm:date-holidays@^3.37.0",
+        "npm:doiuse-email@0.4.1",
         "npm:eslint-config-prettier@^10.1.1",
         "npm:eslint-plugin-prettier@^5.2.6",
         "npm:eslint-plugin-react-hooks@^5.2.0",

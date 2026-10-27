@@ -21,7 +21,7 @@ Deno.test("the time saved is the counts times 5, 15, 10 and 10 minutes, and says
   const c = { ...none, replies_published: 4, posts_published: 1, hours_updates: 1, profile_updates: 0, photo_batches: 2, changes_found: 1 };
   const t = timeSaved(c);
   assertEquals(t.parts.map((p) => [p.label, p.count, p.minutes]), [
-    ["Replies published", 4, 20], ["Updates published", 2, 30], ["Batches of photos", 2, 20], ["Profile checks that found something", 1, 10],
+    ["Replies sent to Google", 4, 20], ["Updates sent to Google", 2, 30], ["Batches of photos", 2, 20], ["Profile checks that found something", 1, 10],
   ]);
   assertEquals(t.minutes, 80);
   assertEquals(t.formula, FORMULA);

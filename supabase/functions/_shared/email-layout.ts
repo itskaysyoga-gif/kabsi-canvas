@@ -72,7 +72,7 @@ export function card(o: { label?: string; marker?: string; html: string; tone?: 
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px 0;"><tr><td class="kb-soft" style="background:${TOKENS.sand};border-radius:12px;padding:14px 16px;${edge ? `border-left:3px solid ${edge};` : ""}">${head}<div style="font-size:16px;line-height:1.55;">${o.html}</div></td></tr></table>`;
 }
 
-/** Chips: short labels with a count, wrapping on a phone ("Replies published 4"). */
+/** Chips: short labels with a count, wrapping on a phone ("Replies sent to Google 4"). */
 export function chips(list: { label: string; count?: number; status?: Status }[]) {
   return `<div style="margin:0 0 8px 0;font-size:0;line-height:0;">${list.map((c) =>
     `<span class="kb-chip" style="display:inline-block;margin:0 6px 6px 0;padding:5px 11px 5px ${c.status ? 6 : 11}px;border:1px solid ${TOKENS.hairline};border-radius:999px;background:${TOKENS.white};font-family:${FONT};font-size:14px;line-height:20px;font-weight:700;color:${TOKENS.ink};">${c.status ? `${statusIcon(c.status, 18)} ` : ""}${esc(c.label)}${c.count != null ? ` <span class="kb-t2" style="font-weight:400;color:${TOKENS.stone};">${c.count}</span>` : ""}</span>`
