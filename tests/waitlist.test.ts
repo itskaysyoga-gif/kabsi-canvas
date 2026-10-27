@@ -89,6 +89,7 @@ describe("the free check waiting list", () => {
     expect(WAITLIST_TIPS_TEXT).toBe(TIPS_CONSENT_TEXT);
     const page = readFileSync(join(__dirname, "..", "src/components/kabsi/scan-live.tsx"), "utf8");
     expect(page).toContain(`"${WAITLIST_NOTICE_TEXT}"`);
-    for (const t of [WAITLIST_NOTICE_TEXT, WAITLIST_TIPS_TEXT]) expect(t).not.toMatch(/[–—!]/);
+    for (const t of [WAITLIST_NOTICE_TEXT, WAITLIST_TIPS_TEXT])
+      expect(t).not.toMatch(new RegExp("[\\u2013\\u2014!]"));
   });
 });
