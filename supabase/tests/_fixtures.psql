@@ -108,6 +108,8 @@ values ('00000000-0000-4000-8000-0000000000a1', '00000000-0000-4000-8000-0000000
 -- Session 13b part 1: the victim owner's phone role (whatsapp agent).
 insert into public.phone_roles (phone, role, user_id, location_id, source)
 values ('+15550009999', 'owner', '00000000-0000-4000-8000-0000000000a1', '00000000-0000-4000-8000-0000000000c1', 'membership');
+-- Email 1: the victim owner's routine channel.
+insert into public.routine_channels (user_id, channel) values ('00000000-0000-4000-8000-0000000000a1', 'email');
 -- P0.1-09: the victim's organisation, its membership and google_connections rows come from the triggers on
 -- locations and location_members above. subscriptions starts empty.
 insert into public.subscriptions (organization_id, plan, state)
