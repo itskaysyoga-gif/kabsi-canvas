@@ -56,7 +56,6 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 - 27 Oct 2026, Eval 1 (PR 265, open: the Prompt gate is red while EVAL_LIVE is false, lane R decides): the facts say reviews and the report come on WhatsApp or by email; staff_named is high risk; the check model and website Nora read fenced text; Nora keeps only known links; the injection run (0.28 USD, nothing leaked); two live evaluations (replies 4.67 and 4.69, Nora 4.77 and 4.80; 5.64 USD in all); report dates and the star rating. Detail: `docs/progress/archive/2026-10-27-eval1.md`.
 - 27 Oct 2026, Audit 1 (P0.7-06, session 20c): every public page and signed-in screen walked at 390 and 1440 px, the stale-language sweep ended at zero or a reason, 10 findings fixed, 6 in LATER; llms lists the twelve wave 1 industry addresses; the waiting list journey is on; the signed-in and public baselines are refreshed. Detail and pictures: `docs/progress/archive/2026-10-27-audit1.md`.
-- 27 Oct 2026, Sec 1: the security tests and fixes; Rashid's steps: Auth captcha and the 600 s code lifetime (LATER rows). Detail: `docs/progress/archive/2026-10-27-sec1.md`.
 
 ## How a session updates this page
 
