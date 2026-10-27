@@ -5,7 +5,8 @@
 //   BASE=http://127.0.0.1:5173 node scripts/app-shots.mjs              every route in scripts/app-shots/routes/*.json
 //   ONLY=/app/reviews node scripts/app-shots.mjs                        one route (every state of it)
 //   WIDTHS=390 node scripts/app-shots.mjs                               one width
-// A route can name a fixture "state" (read by the area fixture files) to draw the same screen in another state.
+// A route can name a fixture "state" (read by the area fixture files) to draw the same screen in another state, and a
+// "click" (a button's name) to press before the shot.
 // Writes shots/app/<name>-<width>.png (gitignored), lists unanswered calls, and fails on sideways scroll or a serious
 // or critical axe issue.
 import { createRequire } from "node:module";
@@ -93,6 +94,11 @@ for (const r of routes) {
     // The dev server compiles a page the first time it is asked for: wait for the H1, then let the queries settle.
     await page.waitForSelector("main h1, h1", { timeout: 20_000 }).catch(() => undefined);
     await page.waitForTimeout(r.wait ?? 1200);
+    // A route can name a button to press first ("click"), to draw a folded part open.
+    if (r.click) {
+      await page.getByRole("button", { name: r.click }).click();
+      await page.waitForTimeout(300);
+    }
     const name =
       r.name ??
       r.path.replace(/^\//, "").replace(/\//g, "_").replace(/[?=&]/g, "-") +

@@ -31,6 +31,7 @@ import {
 import { track } from "@/lib/telemetry";
 import { pixelCustom, pixelEvent } from "@/lib/meta-pixel";
 import { AccessSteps } from "./d5-access";
+import { WAITLIST_LINE, WAITLIST_WHATSAPP_LINE } from "@/lib/waitlist-copy";
 import { NEARBY_SAMPLE, type NearbyCheck, type NearbyPlace } from "./map-data";
 import { NearbyPlaces } from "./nearby-places";
 import { ScanBox } from "./scan-box";
@@ -697,11 +698,6 @@ function Waitlist({
     </div>
   );
 }
-
-/** COPY.md, the scan box's waitlist state; the server stores these words as the proof (waitlist.ts WAITLIST_NOTICE_TEXT). */
-const WAITLIST_LINE =
-  "The free scan opens soon. Leave your email or WhatsApp and Kabsi sends your map the day it opens.";
-const WAITLIST_WHATSAPP_LINE = "Send my map to this WhatsApp number the day the free scan opens.";
 
 /* ---------- Send me this report (the profile-snapshot function's email and WhatsApp actions) ---------- */
 

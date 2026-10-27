@@ -26,6 +26,7 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
     links: [
       { label: "Every kind of business", to: "/for" },
       { label: "Hair salons", to: "/for/hair-salon" },
+      { label: "Barbershops", to: "/for/barbershop" },
       { label: "Restaurants", to: "/for/restaurant" },
       { label: "Dental clinics", to: "/for/dental-clinic" },
       { label: "Guides", to: "/guides" },
