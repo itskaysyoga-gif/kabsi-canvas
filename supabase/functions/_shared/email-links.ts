@@ -8,8 +8,8 @@
 //   POST { t, do: "undo", publication } cancels the publication this link made, inside its 10 seconds (K-70).
 //
 // Links last 72 hours and belong to one item and one recipient. Profile changes, hours and high-risk reviews need that
-// recipient signed in on the page (the page asks and comes back); any other account's session is refused. The token
-// stays the credential for review replies, skips and photos. Every use is recorded with the channel email_link, the
+// recipient signed in on the page (the page asks and comes back); any other account's session is refused on every kind
+// of link (Sec 1). The token stays the credential for review replies, skips and photos. Every use is recorded with the channel email_link, the
 // user, the IP country and the user agent (the audited client in api/action.ts forwards them).
 //
 // This file has no database or network import, so its tests run without credentials; api/action.ts wires it up.
@@ -74,8 +74,9 @@ export async function linkGet(t: string | null, deps: EmailLinkDeps): Promise<Re
   const page = { status: v.status, mode: await deps.mode(), sign_in: v.sign_in === true, signed_in: v.signed_in === true,
     other_account: v.other_account === true };
   if (v.status === "expired") return { status: 200, body: page };
-  // Another account on a link that needs its recipient: say so, show nothing of the item.
-  if (v.sign_in && v.other_account) return { status: 200, body: { ...page, action: v.action } };
+  // Another account signed in on this browser (Sec 1): say so, show nothing of the item, whatever kind of link it is.
+  // The page offers "Sign out and sign in again"; a POST from this session is refused below.
+  if (v.other_account) return { status: 200, body: { ...page, action: v.action } };
   const result = v.status === "used" && v.result ? { result: { done: v.result.done } } : {};
   return { status: 200, body: { ...page, ...result, ...(await deps.details(v)) } };
 }
@@ -92,6 +93,9 @@ export async function linkPost(body: { t?: unknown; do?: unknown; text?: unknown
   // The recipient, so the audit log records the action as theirs.
   const v = await deps.view(hash, session);
   if (v.status === "invalid") return refusal("invalid", "This link isn't valid.", 404);
+  // Sec 1: bound to its person. A session that is not the link's recipient never acts through it, even on a kind that
+  // needs no sign-in: otherwise a forwarded email would approve in the recipient's name while someone else is signed in.
+  if (session !== null && v.other_account) return refusal("wrong_account", "This link was sent to someone else. Sign out, then sign in with the email address it was sent to.", 403);
   try {
     const r = await deps.use(hash, { do: verb, text: typeof body.text === "string" ? body.text : undefined, session, publication }, v.user_id ?? null);
     return { status: 200, body: { ok: true, done: r.done, state: r.state, publication: r.publication_id, publish_after: r.publish_after ?? null,
@@ -101,6 +105,17 @@ export async function linkPost(body: { t?: unknown; do?: unknown; text?: unknown
     if (known) return known;
     throw e;
   }
+}
+
+// Headers for every answer of a link endpoint (Sec 1): never cached (the answer is one person's), and never a Referer.
+export const LINK_HEADERS: Record<string, string> = { "cache-control": "no-store", "referrer-policy": "no-referrer" };
+
+// The whole HTTP surface of /api/action (Sec 1): GET reads, POST acts, anything else (HEAD from a link scanner, PUT,
+// DELETE) is refused before any lookup. api/action.ts adds the rate limit, the error report and LINK_HEADERS.
+export async function linkRequest(req: Request, deps: EmailLinkDeps): Promise<Reply> {
+  if (req.method === "GET") return linkGet(new URL(req.url).searchParams.get("t"), deps);
+  if (req.method !== "POST") return refusal("method_not_allowed", "Use GET or POST.", 405);
+  return linkPost(await req.json().catch(() => ({})), deps);
 }
 
 // Owner-facing words for the refusals of use_action_link. Null for anything unexpected (the caller reports it).

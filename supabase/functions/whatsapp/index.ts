@@ -12,7 +12,7 @@
 // Nothing is sent live unless WHATSAPP_LIVE is true, and until launch only to Kabsi's own test phones and the staff phone.
 import { admin, captureError, fail, isInternal, json, rateLimit, timingSafeEqual } from "../_shared/kabsi.ts";
 import { notify as notifyEmail } from "../_shared/notify.ts";
-import { parseWebhook, verifySignature } from "../_shared/whatsapp/channel.ts";
+import { kapsoWebhook } from "../_shared/whatsapp/webhook-route.ts";
 import { agentDeps, whatsappCtx } from "../_shared/whatsapp/db.ts";
 import { handle, receive } from "../_shared/whatsapp/agent.ts";
 import type { Inbound } from "../_shared/whatsapp/channel.ts";
@@ -36,7 +36,6 @@ import { VOICE_NOTES } from "../_shared/voice/notes.ts";
 import { alertText, digestDue, morningDigest, type OpsEvent, routeOf, type Summary } from "../_shared/whatsapp/staff-alerts.ts";
 
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void } | undefined;
-const MAX_BODY = 256 * 1024;
 const FN_URL = "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/whatsapp";
 
 let vaultSecret: string | null = null;
@@ -70,49 +69,35 @@ Deno.serve(async (req) => {
   return await webhook(req);
 });
 
+// The decision is in _shared/whatsapp/webhook-route.ts (Sec 1: tested with stubs); here it is wired to the database.
 async function webhook(req: Request, opts: { background?: (p: Promise<unknown>) => void; media?: (id: string) => Promise<Uint8Array> } = {}): Promise<Response> {
-  const secret = await webhookSecret();
-  if (!secret) return fail("not_configured", "WhatsApp is not set up.", 503);
-  const raw = new Uint8Array(await req.arrayBuffer());
-  if (raw.length > MAX_BODY) return fail("too_large", "Too large.", 413);
-  if (!(await verifySignature(secret, raw, req.headers.get("x-webhook-signature")))) {
-    // A secret rotated by setup: read Vault again once before refusing.
-    vaultSecret = null;
-    const again = await webhookSecret();
-    if (!again || again === secret || !(await verifySignature(again, raw, req.headers.get("x-webhook-signature")))) return fail("forbidden", "Bad signature.", 401);
-  }
-  let body: unknown;
-  try {
-    body = JSON.parse(new TextDecoder().decode(raw));
-  } catch {
-    return fail("bad_json", "Bad JSON.", 400);
-  }
-  const { messages, statuses } = parseWebhook(req.headers.get("x-webhook-event"), body);
-  const ctx = await whatsappCtx();
-  for (const s of statuses) {
-    try {
-      await ctx.db.statusUpdate(s.messageId, s.status, s.error);
-      await admin().from("whatsapp_outbox").update({ state: s.status === "failed" ? "failed" : "sent", error: s.error })
-        .eq("provider_id", s.messageId).in("state", ["sent", "held"]).then(() => {}, () => {});
-    } catch (e) {
-      await captureError("whatsapp", e, { step: "status" });
-    }
-  }
-  if (!ctx.on) return json({ ok: true, handled: 0, off: true });
-  const base = await agentDeps();
-  const deps = opts.media ? { ...base, media: opts.media } : base;
-  const done: string[] = [];
-  for (const m of messages) {
-    try {
-      done.push(await receive(deps, m, opts.background ?? background));
-    } catch (e) {
-      // No message content goes to Sentry, only the step (K-113).
-      await captureError("whatsapp", e, { step: "inbound", type: m.type });
-      done.push("error");
-    }
-  }
-  // Always 200 after a valid signature, so Kapso does not retry what was already stored once.
-  return json({ ok: true, handled: done.length, statuses: statuses.length });
+  return await kapsoWebhook(req, {
+    secret: webhookSecret,
+    rereadSecret: () => {
+      vaultSecret = null;
+      return webhookSecret();
+    },
+    ctx: async () => {
+      const ctx = await whatsappCtx();
+      return {
+        on: ctx.on,
+        statusUpdate: async (s) => {
+          await ctx.db.statusUpdate(s.messageId, s.status, s.error);
+          await admin().from("whatsapp_outbox").update({ state: s.status === "failed" ? "failed" : "sent", error: s.error })
+            .eq("provider_id", s.messageId).in("state", ["sent", "held"]).then(() => {}, () => {});
+        },
+      };
+    },
+    agentDeps: async () => {
+      const base = await agentDeps();
+      return opts.media ? { ...base, media: opts.media } : base;
+    },
+    receive,
+    background: opts.background ?? background,
+    captureError: (e, extra) => captureError("whatsapp", e, extra),
+    json,
+    fail,
+  });
 }
 
 async function smokeAlert(req: Request): Promise<Response> {

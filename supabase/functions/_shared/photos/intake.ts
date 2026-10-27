@@ -21,7 +21,7 @@ const EXT: Record<string, string> = {
 export async function acceptUpload(u: Upload, deps: IntakeDeps): Promise<Accepted> {
   if (u.bytes.length > MAX_BYTES) return { ok: false, reason: "This file is over 20 MB. Send a smaller one." };
   const s = sniff(u.bytes);
-  const refusal = intakeRefusal(s, u.bytes.length);
+  const refusal = intakeRefusal(s, u.bytes.length, u.bytes);
   if (refusal || s.kind === "unknown") return { ok: false, reason: refusal ?? "This is not a photo Kabsi can use." };
   const path = `${u.locationId}/${(deps.id ?? (() => crypto.randomUUID()))()}.${EXT[s.mime] ?? "bin"}`;
   await deps.put(path, u.bytes, s.mime);

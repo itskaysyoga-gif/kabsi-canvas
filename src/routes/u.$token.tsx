@@ -9,7 +9,12 @@ import { ACCEPT, MAX_BYTES, MAX_FILES, fileType, linkBusiness, staffUpload } fro
 // The page can only upload; it shows nothing of the business but its name. The owner turns the link off on Photos.
 export const Route = createFileRoute("/u/$token")({
   head: () => ({
-    meta: [{ title: "Add photos | Kabsi" }, { name: "robots", content: "noindex" }],
+    meta: [
+      { title: "Add photos | Kabsi" },
+      { name: "robots", content: "noindex" },
+      // Sec 1: the address holds a credential; no other site ever gets it as a Referer.
+      { name: "referrer", content: "no-referrer" },
+    ],
   }),
   component: StaffUploadPage,
 });

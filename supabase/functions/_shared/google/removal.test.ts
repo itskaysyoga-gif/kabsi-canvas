@@ -9,9 +9,10 @@ const LOC = "locations/4825254240697973899";
 const POST = `accounts/113746201522792609010/${LOC}/localPosts/129998751652000497`;
 
 async function withGoogle<T>(answer: { status: number; body: unknown }, run: () => Promise<T>, mode = "live") {
-  const was = { fetch: globalThis.fetch, token: io.token, gate: io.gate, failure: io.failure, sleep: io.sleep, mode: Deno.env.get("GOOGLE_MODE") };
+  const was = { fetch: globalThis.fetch, writesPaused: io.writesPaused, token: io.token, gate: io.gate, failure: io.failure, sleep: io.sleep, mode: Deno.env.get("GOOGLE_MODE") };
   const calls: string[] = [];
   Deno.env.set("GOOGLE_MODE", mode);
+  io.writesPaused = () => Promise.resolve(false);
   io.token = () => Promise.resolve("test-token");
   io.gate = () => Promise.resolve({});
   io.failure = () => Promise.resolve();
@@ -24,7 +25,7 @@ async function withGoogle<T>(answer: { status: number; body: unknown }, run: () 
     return { out: await run(), calls };
   } finally {
     globalThis.fetch = was.fetch;
-    Object.assign(io, { token: was.token, gate: was.gate, failure: was.failure, sleep: was.sleep });
+    Object.assign(io, { writesPaused: was.writesPaused, token: was.token, gate: was.gate, failure: was.failure, sleep: was.sleep });
     if (was.mode === undefined) Deno.env.delete("GOOGLE_MODE"); else Deno.env.set("GOOGLE_MODE", was.mode);
   }
 }

@@ -6,6 +6,7 @@
 //   GET  /programs/partners   the Founding Partner places left (the first 20 approved)
 //   POST /programs/partners   a Kabsi Partners application ("Apply by email" on /partners; WhatsApp is PA2)
 // Staff alerts on WhatsApp (R-64) tell Rashid a new application is waiting; the staff page decides.
+import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, fail, json, log, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { staffAlert } from "../_shared/billing.ts";
 import { checkFounding, checkPartner } from "../_shared/programs.ts";
@@ -18,11 +19,12 @@ async function count(fn: "founding_places" | "partner_places"): Promise<Response
   return json(data, 200, CACHE);
 }
 
+// Sec 1: the limits fail closed: a limiter outage stops applications (the insert would fail anyway) and the staff alert.
 async function gate(req: Request, body: Record<string, unknown>, what: string): Promise<Response | null> {
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  const ip = clientIp(req);
   const visitor = await sha256Hex(`programs:${ip}`);
-  if (!(await rateLimit(`programs:${what}:${visitor}`, 5, 3600))) return fail("slow_down", "Please wait a little and try again.", 429);
-  if (!(await rateLimit(`programs:${what}:all`, 300, 86400))) return fail("busy", "Applications are busy right now. Please try again tomorrow.", 503);
+  if (!(await rateLimit(`programs:${what}:${visitor}`, 5, 3600, { failClosed: true }))) return fail("slow_down", "Please wait a little and try again.", 429);
+  if (!(await rateLimit(`programs:${what}:all`, 300, 86400, { failClosed: true }))) return fail("busy", "Applications are busy right now. Please try again tomorrow.", 503);
   if (!(await verifyTurnstile(typeof body.turnstile === "string" ? body.turnstile : undefined, ip))) {
     return fail("challenge_failed", "Please complete the check and try again.", 400);
   }

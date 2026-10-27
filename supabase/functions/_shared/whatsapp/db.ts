@@ -2,7 +2,7 @@
 // 20261022034000_whatsapp_owner_channel.sql, the photo engine's intake for the photo drop, and the context the
 // `whatsapp` function and the review alerts share. The number and the Kapso phone number id come from settings, never
 // from code: WHATSAPP_NUMBER (whatsapp-setting.ts) and the KAPSO_PHONE_NUMBER_ID secret.
-import { admin, APP_URL, internalSecret, log, rateLimit } from "../kabsi.ts";
+import { admin, APP_URL, internalSecret, log, rateLimit, sha256Hex } from "../kabsi.ts";
 import { message, MODELS, newMeter, task } from "../ai.ts";
 import { recordAiUsage } from "../ai-budget.ts";
 import { type Nora, noraUser, noraWhatsAppSystem } from "./nora.ts";
@@ -235,7 +235,7 @@ export async function agentDeps(): Promise<AgentDeps> {
     transcribe: async (audio, mime, phone) => {
       const { data: on } = await admin().from("app_settings").select("value").eq("key", "voice_notes").maybeSingle();
       if (on?.value !== "on") return { ok: false, reason: "not_configured" };
-      if (!(await rateLimit(`wa_voice:${phone}`, 20, 86400)) || !(await rateLimit("wa_voice_all", 400, 86400))) return { ok: false, reason: "failed" };
+      if (!(await rateLimit(`wa_voice:${(await sha256Hex(`wa_voice:${phone}`)).slice(0, 24)}`, 20, 86400)) || !(await rateLimit("wa_voice_all", 400, 86400))) return { ok: false, reason: "failed" };
       const t = pickTranscriber({ key: Deno.env.get("ELEVENLABS_API_KEY") });
       return await t.transcribe(audio, mime);
     },

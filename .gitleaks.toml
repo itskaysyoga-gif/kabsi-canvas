@@ -71,3 +71,12 @@ targetRules = ["generic-api-key"]
 paths = ['''^docs/source/KABSI-VIDEO\.md$''']
 regexTarget = "match"
 regexes = ['''KB_GOOGLE_ACCESS_GRANTED_180D''']
+
+# The placeholder "ANTHROPIC_API_KEY=..." in how-to lines of the docs (Sec 1): three dots, then the command, not a key.
+[[allowlists]]
+description = "The ANTHROPIC_API_KEY=... placeholder in how-to lines of the docs"
+condition = "AND"
+targetRules = ["generic-api-key"]
+paths = ['''^docs/[^/]+\.md$''']
+regexTarget = "match"
+regexes = ['''ANTHROPIC_API_KEY=\.\.\. ''']

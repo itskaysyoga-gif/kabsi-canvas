@@ -68,8 +68,9 @@ Deno.test("probeSummary redacts a list that did open: no review text, no reviewe
 Deno.test("posts op: GET only, no post text, and a name outside the profile is refused", async () => {
   const { io } = await import("./client.ts");
   const { postsList } = await import("./capture.ts");
-  const was = { fetch: globalThis.fetch, token: io.token, gate: io.gate };
+  const was = { fetch: globalThis.fetch, writesPaused: io.writesPaused, token: io.token, gate: io.gate };
   const calls: string[] = [];
+  io.writesPaused = () => Promise.resolve(false);
   io.token = () => Promise.resolve("t");
   io.gate = () => Promise.resolve({});
   globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
@@ -90,6 +91,6 @@ Deno.test("posts op: GET only, no post text, and a name outside the profile is r
     if (!calls.every((c) => c.startsWith("GET "))) throw new Error("a write was sent");
   } finally {
     Object.assign(globalThis, { fetch: was.fetch });
-    Object.assign(io, { token: was.token, gate: was.gate });
+    Object.assign(io, { writesPaused: was.writesPaused, token: was.token, gate: was.gate });
   }
 });

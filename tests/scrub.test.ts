@@ -49,8 +49,10 @@ describe("scrubbing in the browser", () => {
 
 describe("scrubbing on the server", () => {
   it("captureError runs messages and extras through the same phone and email rule", () => {
+    // Sec 1: the rule moved to log-scrub.ts, which kabsi.ts imports for captureError, jobLog and log.
+    const rule = readFileSync("supabase/functions/_shared/log-scrub.ts", "utf8");
+    expect(rule).toContain("const PHONE_RE = /\\+\\d[\\d\\s().-]{6,}\\d|\\b\\d{9,15}\\b/g;");
     const src = readFileSync("supabase/functions/_shared/kabsi.ts", "utf8");
-    expect(src).toContain("const PHONE_RE = /\\+\\d[\\d\\s().-]{6,}\\d|\\b\\d{9,15}\\b/g;");
     expect(src).toContain("scrubText(String(err.message");
     expect(new RegExp(PHONE_PATTERN).source).toBe("\\+\\d[\\d\\s().-]{6,}\\d|\\b\\d{9,15}\\b");
   });

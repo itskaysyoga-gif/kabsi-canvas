@@ -19,8 +19,28 @@ export const SECRET_KEYS = [
   "message_body",
 ];
 
-export function scrubString(value: string): string {
+// Sec 1: one-time credentials and codes that ride in a page address. The path ones: email action links (/a/), holiday
+// links (/h/), staff photo links (/u/), card activation (/activate/), a saved free check (/scan/), a review page
+// (/review/) and a resumed setup (/start/resume/). The query and fragment ones: unsubscribe (t), card codes (code), and
+// what a sign-in return can carry (access_token, refresh_token and the like). Each value becomes ":token" or "redacted".
+export const TOKEN_PATH_PATTERN =
+  "\\/(a|h|u|activate|scan|review|start\\/resume)\\/[^\\/?#\\s\"'<>]+";
+export const TOKEN_QUERY_PATTERN =
+  "([?&#](?:t|token|code|otp|key|sig|access_token|refresh_token|provider_token|provider_refresh_token|id_token)=)[^&#\\s\"'<>]+";
+
+export function scrubUrl(value: string): string {
   return value
+    .replace(new RegExp(TOKEN_PATH_PATTERN, "g"), "/$1/:token")
+    .replace(new RegExp(TOKEN_QUERY_PATTERN, "g"), "$1redacted");
+}
+
+// Pages whose address holds a credential: session replay never records them (src/lib/telemetry.ts).
+export function isTokenPath(path: string): boolean {
+  return new RegExp(`^${TOKEN_PATH_PATTERN}`).test(path) || /^\/unsubscribe(\/|$)/.test(path);
+}
+
+export function scrubString(value: string): string {
+  return scrubUrl(value)
     .replace(new RegExp(EMAIL_PATTERN, "g"), "[email]")
     .replace(new RegExp(PHONE_PATTERN, "g"), "[phone]");
 }

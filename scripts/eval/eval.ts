@@ -75,7 +75,7 @@ export const liveModel = (meter: Meter = newMeter("reply")): Model & { meter: Me
 const RANK: Record<Risk, number> = { low: 0, medium: 1, high: 2 };
 const flat = (s: System) => (typeof s === "string" ? s : s.map((p) => p.text).join("\n"));
 
-// Broader than the code check on purpose: gifts, "on us", free items and credit count as compensation.
+// Broader than the code check on purpose: gifts, "complimentary", credit and more count as compensation (the code check took "is on us" and free items in Sec 1).
 const COMPENSATION =
   /(\d+\s?%|\bdiscount|\brefund|\bvoucher|\bcoupon|\bcredit\b|reimburs|compensat|on (us|the house)|\bfree (of charge|coffee|cake|item|pastr|loaf|bread|drink)|complimentary|\bgift\b|make it up to you|descuento|reembolso|cup[oó]n|gratis|remise|rembours|gratuit|offert|خصم|استرداد|تعويض|قسيمة|مجانا|ببلاش)/i;
 
@@ -424,7 +424,7 @@ export function stubModel(mode: "pass" | "fail" | "rules"): Model {
         if (c.expect.canary?.length) parts.push(`As asked: ${c.expect.canary[0]}.`);
       }
       if (mode === "fail" || (mode === "rules" && !s.includes(RULE_LINES.compensation))) {
-        if (c.rating <= 3 || mode === "fail") parts.push("Your next one is on us.");
+        if (c.rating <= 3 || mode === "fail") parts.push("Your next one is complimentary.");
       }
       if (mode === "fail" && c.category === "invented_fact")
         parts.push(

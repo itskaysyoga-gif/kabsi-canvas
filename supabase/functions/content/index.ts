@@ -27,6 +27,7 @@ import { CTAS, POST_LOC_COLUMNS, type PostLoc, suggestKeywords, withFacts, write
 import { AI_BUDGET_MESSAGE, AiBudgetError } from "../_shared/ai-budget.ts";
 import { checkPost, type Issue, type PostFields, type PostType, POST_TYPES } from "../_shared/posts/checks.ts";
 import { checkContext } from "../_shared/posts/context.ts";
+import { resolveOneLocation } from "../_shared/sec1/guards.ts";
 
 // Google's photo categories (P0.5-01). COVER and LOGO are the owner's preferred cover photo and logo: Google decides
 // what it shows, so the screen calls them "preferred".
@@ -67,33 +68,39 @@ Deno.serve(async (req) => {
   const b = await req.json().catch(() => ({})) as Record<string, unknown>;
   const db = admin();
   try {
-    // Resolve the location from the post when the call is about an existing post.
-    let locationId = typeof b.location_id === "string" ? b.location_id : "";
+    // Resolve the location from the post when the call is about an existing post. Every id in the body must point at
+    // the same business (Sec 1): the membership check below runs on that one business, never on one id while the
+    // work runs on another business's row.
+    const named: (string | null)[] = [typeof b.location_id === "string" ? b.location_id : null];
     let post: PostRow | null = null;
     if (typeof b.post_id === "string") {
       const { data } = await db.from("gbp_posts").select(POST_ROW).eq("id", b.post_id).maybeSingle();
       if (!data) return fail("not_found", "Post not found.", 404);
       post = data;
-      locationId = data.location_id;
+      named.push(data.location_id);
     }
     let photo: { id: string; location_id: string; storage_path: string; state: string; category: string | null } | null = null;
     if (typeof b.photo_id === "string") {
       const { data } = await db.from("photos").select("id, location_id, storage_path, state, category").eq("id", b.photo_id).maybeSingle();
       if (!data) return fail("not_found", "Photo not found.", 404);
       photo = data;
-      locationId = data.location_id;
+      named.push(data.location_id);
     }
     if (typeof b.prompt_id === "string") {
       const { data } = await db.from("holiday_prompts").select("location_id").eq("id", b.prompt_id).maybeSingle();
       if (!data) return fail("not_found", "Question not found.", 404);
-      locationId = data.location_id;
+      named.push(data.location_id);
     }
     if (typeof b.change_id === "string") {
       const { data } = await db.from("profile_changes").select("location_id").eq("id", b.change_id).maybeSingle();
       if (!data) return fail("not_found", "Change not found.", 404);
-      locationId = data.location_id;
+      named.push(data.location_id);
     }
-    if (!locationId) return fail("bad_input", "Missing business.");
+    const one = resolveOneLocation(named);
+    if (!one.ok && one.reason === "missing") return fail("bad_input", "Missing business.");
+    // Ids from two businesses: answered like a row that does not exist, so nothing about the other business shows.
+    if (!one.ok) return fail("not_found", "Not found.", 404);
+    const locationId = one.locationId;
     const ctx = await member(req, locationId);
     if ("error" in ctx) return ctx.error!;
     const { user, loc } = ctx;

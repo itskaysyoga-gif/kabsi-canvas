@@ -10,7 +10,12 @@ import { lookUpUnsubscribe, unsubscribe } from "@/lib/unsubscribe";
 export const Route = createFileRoute("/unsubscribe")({
   validateSearch: (s: Record<string, unknown>) => ({ t: typeof s["t"] === "string" ? s["t"] : "" }),
   head: () => ({
-    meta: [{ title: "Email settings | Kabsi" }, { name: "robots", content: "noindex" }],
+    meta: [
+      { title: "Email settings | Kabsi" },
+      { name: "robots", content: "noindex" },
+      // Sec 1: the address holds a credential; no other site ever gets it as a Referer.
+      { name: "referrer", content: "no-referrer" },
+    ],
   }),
   component: UnsubscribePage,
 });

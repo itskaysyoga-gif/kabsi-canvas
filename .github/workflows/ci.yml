@@ -173,6 +173,10 @@ jobs:
       - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
         with:
           version: 2.119.0
+      # Sec 1: the approval property tests (supabase/tests/sec1_approval_properties.ts) run with Deno after pgTAP.
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: v2.x
       - name: Migrations and pgTAP suite (K-54, P0.1-07)
         run: bash scripts/db-test.sh
 
@@ -186,10 +190,6 @@ jobs:
       - uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
         with:
           fail-on-severity: high
-          # One known exception, accepted on 24 Oct 2026 when the lockfile was first committed (so every package counted as
-          # "new"): zod 3.25.76, a direct dependency, memory use on oversized constrained collections. The fix exists only in
-          # zod 4, a breaking change, so it is its own session. Remove this line when zod is upgraded.
-          allow-ghsas: GHSA-mrhx-c7xc-m3w5
 
   # Ops 1 part B (master plan 24.9): Lighthouse CI on a throttled phone for every public page. REPORT ONLY for now: the
   # job never fails the pull request, and every assertion in lighthouserc.json is a "warn". Web 2 points it at the Vercel
