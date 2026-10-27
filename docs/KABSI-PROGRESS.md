@@ -13,6 +13,7 @@ One page, under 10 KB. Updated 25 Oct 2026 by the lane R chat (master plan 19, 2
 - 26 Oct, lane R: the outside review decided (30.15, 30.16) and 30.17 (Founding 25, Home for every business with industry pages, easy access, getkabsi.com). Design 1 to 4 and 3 approved in the design studio. Next: Design 5, V3, Partners, V4, Outbound, Web 2 with Content 1, UX 1, Sec 1, the launch gate.
 - Web 2 (PR 252, merged 26 Oct, deploy run 117 green, kabsi.co serves it): kabsi.co's public pages on the design studio's approved system (dark, Bricolage Grotesque and Manrope), every count real (Founding 25, founding price, Founding Partners), the Founding 25 and Partners forms on the programs function, the free check on V4's /visibility/check, the industry pages with nine hubs (hair salon, restaurant and dental clinic indexed; the nine Content 1 pages noindex until lane R approves), DESIGN.md and COPY.md 24, the facts. Detail: `docs/progress/archive/2026-10-27-web2.md`.
 - V4 (PR 250, merged 26 Oct, deploy run 116 green; migration applied by lane R): onboarding in four stages, the first task, every task closes, the work receipt data, nearby places, the free check route, the category and monthly-facts proposals, the voice test op. The voice test did not pass (Gulf Arabic and mixed notes), so voice notes stay off. Detail: `docs/progress/archive/2026-10-27-v4.md`.
+- UX 1 (PR 254, 27 Oct): the signed-in website on Design 3 (light), every task with its state, onboarding in four stages with the resume link, Get reviews with the PDF buttons and the new message, owners' AI questions, the staff AI spend and Founding 25 checklist, the public leftovers, the free check waiting list, named or anonymous case study, the approved terms. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
@@ -43,6 +44,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
 - V3 heads-up: the first live tick after the deploy sent one "your photo is ready" message to the Yawmiyati phone about an old 25 Oct test photo (tap Skip, never Yes: Yes would publish it to the real profile) and queued the monthly question there; your next typed message within 3 days is read as its answer, so reply No to close it.
 - V3 and V4: at the launch gate submit the templates `kabsi_photo_ready`, `kabsi_business_update`, `kabsi_setup_step` and `kabsi_work_update`. Voice notes stay off: the voice test failed for Gulf Arabic and mixed notes (LATER row).
+- UX 1: after the deploy, `POST /visibility/terms` once (two DataForSEO calls, about 0.15 USD) and the read-back in the UX 1 archive file.
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up and Gemini billing at the launch gate.
 
 ## Open After merge checks and findings
@@ -54,9 +56,9 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 27 Oct 2026, UX 1 (PR 254): the signed-in website, onboarding and leftovers. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
 - 27 Oct 2026, Web 2: the public website ported from the design studio. Detail: `docs/progress/archive/2026-10-27-web2.md`.
 - 27 Oct 2026, V4 (PR 250): onboarding, first task, task states, work receipt, nearby places, free check, voice test op. Detail: `docs/progress/archive/2026-10-27-v4.md`.
-- 26 Oct 2026, Partners (PR 247): Founding 25 and Kabsi Partners; Creem charges USD or EUR only. Migration applied by lane R; merged and verified live 26 Oct (`programs/founding` answers 25 places left, deploy 115 green). Detail: `docs/progress/archive/2026-10-26-partners.md`.
 
 ## How a session updates this page
 
