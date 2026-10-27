@@ -307,7 +307,15 @@ const runs = Number(Deno.env.get("SEC1_RUNS") ?? 400);
 const seed = Deno.env.get("SEC1_SEED") ? Number(Deno.env.get("SEC1_SEED")) : undefined;
 const started = Date.now();
 try {
-  await fc.assert(fc.asyncProperty(fc.array(op, { minLength: 1, maxLength: 25 }), runOne), { numRuns: runs, seed, verbose: 1 });
+  // Fixed orders run first, so every case below is reached whatever the seed (a random seed once reached no stale email
+  // page in 400 runs); the random runs then explore the rest.
+  const examples: [Op[]][] = [
+    [[{ kind: "open" }, { kind: "edit" }, { kind: "emailPost", page: 0, edited: false }]],
+    [[{ kind: "open" }, { kind: "emailPost", page: 0, edited: false }, { kind: "time" }, { kind: "claim" }]],
+    [[{ kind: "approve", who: "owner", edited: false }, { kind: "edit" }, { kind: "claim" }, { kind: "undo", who: "owner" }]],
+    [[{ kind: "button", who: "owner" }, { kind: "edit" }, { kind: "press", button: 0 }, { kind: "button", who: "owner" }, { kind: "press", button: 1 }]],
+  ];
+  await fc.assert(fc.asyncProperty(fc.array(op, { minLength: 1, maxLength: 25 }), runOne), { numRuns: runs, seed, verbose: 1, examples });
   const idle = Object.entries(seen).filter(([, n]) => n === 0).map(([k]) => k);
   if (idle.length) throw new Error(`the runs never reached: ${idle.join(", ")}`);
   console.log(`ok: ${runs} random orders of approve, edit, Undo, retry and revoke kept every rule (${Math.round((Date.now() - started) / 1000)} s; ${JSON.stringify(seen)})`);
