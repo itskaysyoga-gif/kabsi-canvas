@@ -145,7 +145,7 @@ export const QUESTIONS: Question[] = [
     must: [/kabsi\.co/],
     coming: true,
     reference:
-      "Not yet. Approving on WhatsApp is not available yet because Kabsi has no WhatsApp number at the moment. Today you approve on kabsi.co, in the app or from the email. When it opens it will work for low and medium risk replies and weekly posts, never for high-risk reviews or your business name, address, categories, map pin, phone or open or closed status.",
+      "Not yet. Approving on WhatsApp is not available yet: Kabsi has a WhatsApp number, but owners are not switched on yet. Today you approve on kabsi.co, in the app or from the email. When it opens it will work for low and medium risk replies and weekly posts, never for high-risk reviews or your business name, address, categories, map pin, phone or open or closed status.",
   },
   {
     id: "en10",
@@ -350,10 +350,13 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "the Results Report",
     ask: "What is in the Results Report and when does it come?",
-    kb: [/an email every Monday, also kept under Reports/],
+    kb: [
+      /every Monday on WhatsApp or by email, the same place as new reviews/,
+      /also kept under Reports/,
+    ],
     must: [/Monday/, /Reports/],
     reference:
-      "It arrives every Monday at 08:00 local time and is kept under Reports. It shows what Kabsi did that week, what waits for your yes, one next step, then Google's own numbers against the week before, with calls and direction requests apart.",
+      "It comes every Monday at 08:00 local time, by email until owners are switched on to WhatsApp, and is kept under Reports. It shows what Kabsi did that week, what waits for your yes, one next step, then Google's own numbers against the week before, with calls and direction requests apart.",
   },
   {
     id: "en27",

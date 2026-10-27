@@ -21,7 +21,7 @@ import { recordAiUsage } from "../_shared/ai-budget.ts";
 import { countryFromTimezone } from "../_shared/tz-country.ts";
 import { nextTasks } from "../_shared/tasks.ts";
 import { WHATSAPP_NUMBER, WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
-import { noraRules } from "../_shared/nora-rules.ts";
+import { fenceVisitor, knownLinksOnly, noraRules } from "../_shared/nora-rules.ts";
 import { type ContactRow, contactContextLine, exactEmailPattern, ownsContact } from "../_shared/nora-contact.ts";
 import { cleanScreen, inOnboarding, ONBOARDING_RULES, onboardingHandoffLine, onboardingLines, onboardingStateResult, type OnboardingState } from "../_shared/onboarding-context.ts";
 
@@ -411,10 +411,11 @@ Deno.serve(async (req) => {
     if (conv.status === "handoff") ctx.push("This conversation was already passed to the Kabsi team; a person will reply by email.");
 
     const { data: past } = await db.from("chat_messages").select("role, content").eq("conversation_id", conv.id).order("id", { ascending: false }).limit(HISTORY);
-    const messages: Msg[] = ((past ?? []) as { role: "user" | "assistant"; content: string }[]).reverse().map((m) => ({ role: m.role, content: m.content }));
+    const messages: Msg[] = ((past ?? []) as { role: "user" | "assistant"; content: string }[]).reverse().map((m) => ({ role: m.role, content: m.role === "user" ? fenceVisitor(m.content) : m.content }));
     // The API needs alternating turns starting with the user.
     while (messages.length && messages[0].role !== "user") messages.shift();
-    messages.push({ role: "user", content: text });
+    // The visitor's words reach the model fenced as data (Eval 1); the stored message keeps what they typed.
+    messages.push({ role: "user", content: fenceVisitor(text) });
     await db.from("chat_messages").insert({ conversation_id: conv.id, role: "user", content: text, page });
 
     const kb = await knowledge();
@@ -444,7 +445,7 @@ Deno.serve(async (req) => {
       meterAdd(meter, MODEL, out.usage);
       const texts = out.content.filter((c) => c.type === "text").map((c) => c.text ?? "").join("\n").trim();
       const uses = out.content.filter((c) => c.type === "tool_use");
-      if (!uses.length) { reply = texts; break; }
+      if (!uses.length) { reply = knownLinksOnly(texts, kb); break; }
       turn.push({ role: "assistant", content: out.content });
       const results: unknown[] = [];
       for (const u of uses) {
@@ -528,7 +529,7 @@ Deno.serve(async (req) => {
         results.push({ type: "tool_result", tool_use_id: u.id, content: JSON.stringify(result) });
       }
       turn.push({ role: "user", content: results });
-      if (i === MAX_TURNS - 1) reply = texts;
+      if (i === MAX_TURNS - 1) reply = knownLinksOnly(texts, kb);
     }
     reply = noDashes(reply || "Sorry, I couldn't answer that. Please email hello@kabsi.co and a person will reply.").slice(0, 4000);
 

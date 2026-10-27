@@ -134,6 +134,9 @@ export type RunSummary = {
   mean: Record<string, number>;
   overall: number;
   costUsd: number;
+  /** Eval 1: whether the run passed its gate, and the hash of the prompt files it ran on. */
+  gate?: boolean;
+  promptsHash?: string;
 };
 
 /** The mean of each criterion over the judged answers. */

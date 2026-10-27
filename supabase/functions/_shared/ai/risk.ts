@@ -18,6 +18,7 @@ export const RISK_REASONS = {
   privacy: { level: "high", issue: "They mention their personal data or privacy." },
   regulator: { level: "high", issue: "They mention a regulator, an inspection or a report to the authorities." },
   crime: { level: "high", issue: "They accuse someone of a crime." },
+  staff_named: { level: "high", issue: "They name someone on your team in a complaint." },
   refund: { level: "medium", issue: "They mention a refund. Kabsi didn't promise one." },
   staff_complaint: { level: "medium", issue: "They complain about someone on your team. The reply names no one." },
   disputed_fact: { level: "medium", issue: "They say something about your business that may not be right. The reply doesn't confirm or deny it." },
@@ -60,6 +61,24 @@ const RULES: [RiskReason, RegExp][] = [
   ["complaint", /\b(terrible|awful|horrible|worst|disappoint\w*|never again|not coming back|won'?t be back|waste of|overpriced|dirty|filthy|bad (service|experience|food)|p[eé]sim[oa]|decepci\w*|nunca m[aá]s|d[ée]çu\w*|d[ée]cevant|jamais plus)\b|سيء|سيئ|زفت|ما بنصح|مقرف|\bkhara\b/i],
 ];
 
+// A complaint that names someone on the team (master plan 30.15 section 3.7): "the waiter Sam", "my stylist Maya", "Dr Khan",
+// "Nurse Lina", "Manager, John", "a girl called Rosa", "named Omar". The role words are read in any case and the name must
+// start with a capital, so "the manager was rude" is not a name. WhatsApp's sensitive rule (review-growth/sensitive.ts)
+// reads the same function.
+const ROLE_WORDS = "waiter|waitress|server|barista|barber|stylist|hairdresser|therapist|masseuse|technician|mechanic|receptionist|cashier|manager|owner|nurse|dentist|doctor|dr\\.?|assistant|driver|cleaner|trainer|coach|instructor|girl|guy|lady|man|woman|gentleman|staff|employee";
+const ROLE_THEN_NAME = new RegExp(`\\b(?:${ROLE_WORDS})[,\\s]+(?:called\\s+|named\\s+)?([\\p{L}][\\p{L}'-]{1,})`, "giu");
+const CALLED_NAME = /\b(?:called|named)\s+\p{Lu}[\p{L}'-]{1,}/u;
+const NOT_NAMES = new Set(["the", "and", "was", "were", "is", "are", "who", "that", "very", "so", "not", "too", "at", "in", "on", "for", "to", "of", "my", "our", "your", "a", "an", "it", "this", "there", "had", "has", "did", "didn't"]);
+export const namesStaff = (text: string) => [...text.matchAll(ROLE_THEN_NAME)].some((m) => /^\p{Lu}/u.test(m[1]) && !NOT_NAMES.has(m[1].toLowerCase())) || CALLED_NAME.test(text);
+const STAFF_COMPLAINT = /\b(rude|unprofessional|disrespectful|impolite|arrogant|yelled|shouted|ignored|attitude|terrible|awful|horrible|worst|disappoint\w*|never again|dirty|careless|hurt|painful|mistake|wrong|late|refus\w*)\b/i;
+
+/** WhatsApp's wider reading (sensitive.ts): a name plus a low rating or any word of complaint ("hurt", "late"). */
+export function namesStaffInComplaint(review: { rating: number; comment: string | null }): boolean {
+  const text = (review.comment ?? "").normalize("NFKC");
+  if (!namesStaff(text)) return false;
+  return review.rating <= 3 || STAFF_COMPLAINT.test(text);
+}
+
 /** The industry from the Google category (K-13). Health, legal and financial businesses are at least medium. */
 export function industryOf(categories: (string | null | undefined)[]): Industry | null {
   const text = categories.filter(Boolean).join(" ").toLowerCase().replace(/_/g, " ");
@@ -76,6 +95,8 @@ export type RiskResult = { risk: Risk; reasons: RiskReason[] };
 export function riskByRules(review: { rating: number; comment: string | null }, industry: Industry | null): RiskResult {
   const text = (review.comment ?? "").normalize("NFKC");
   const reasons: RiskReason[] = RULES.filter(([, re]) => re.test(text)).map(([k]) => k);
+  // staff_named: a name and a complaint the rules above already read (or a low rating). No draft; the owner looks first.
+  if (namesStaff(text) && (review.rating <= 3 || reasons.includes("staff_complaint") || reasons.includes("complaint"))) reasons.push("staff_named");
   if (review.rating <= 3) reasons.push("low_rating");
   if (industry) reasons.push("regulated_industry");
   return { risk: levelOf(reasons), reasons: order(reasons) };

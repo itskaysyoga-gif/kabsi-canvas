@@ -13,6 +13,7 @@
 // catch. A question whose facts were taken out of the file fails the support check with either stub.
 import { QUESTIONS, type Question } from "./questions.ts";
 import { task, takesEffort, type Usage } from "../../supabase/functions/_shared/ai/agents.ts";
+import { fenceVisitor } from "../../supabase/functions/_shared/nora-rules.ts";
 
 export type Answerer = { name: string; answer: (q: Question, kb: string) => Promise<string> };
 
@@ -307,7 +308,7 @@ export function liveModel(apiKey: string, model: string, rules: string, used?: U
               text: "<context>\nThe visitor is not signed in. No account tools are available in this evaluation.\n</context>",
             },
           ],
-          messages: [{ role: "user", content: q.ask }],
+          messages: [{ role: "user", content: fenceVisitor(q.ask) }],
         }),
       });
       const data = await res.json();

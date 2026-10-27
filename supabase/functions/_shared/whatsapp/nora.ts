@@ -4,7 +4,7 @@
 // her WhatsApp answers 3.33 of 5 because a question got the welcome line instead of an answer: the welcome now goes only
 // on a person's first message (agent.ts), and an answer never starts with it.
 // Pure: the model call and the facts are passed in by db.ts, so the suite runs on a stub.
-import { noraRules } from "../nora-rules.ts";
+import { knownLinksOnly, noraRules } from "../nora-rules.ts";
 import { houseStyle, stripAll } from "../ai/fence.ts";
 
 export type Nora = (question: string, o: { role: string; lang: string | null; business: string | null }) => Promise<string>;
@@ -37,7 +37,7 @@ export function noraUser(question: string, o: { role: string; lang: string | nul
 /** The answer as WhatsApp shows it: plain text, the house style, no Markdown, never the welcome line. */
 export function forWhatsApp(text: string): string {
   return houseStyle(
-    text
+    knownLinksOnly(text)
       .replace(/\[([^\]]{1,80})\]\((?:https?:\/\/)?(?:kabsi\.co)?(\/[^)\s]*)\)/g, (_m, label: string, path: string) =>
         path === "/" ? `${label} (kabsi.co)` : `${label} (kabsi.co${path})`)
       .replace(/\[([^\]]{1,80})\]\((https?:\/\/[^)\s]+)\)/g, "$1 ($2)")

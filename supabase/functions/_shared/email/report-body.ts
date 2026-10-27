@@ -21,6 +21,18 @@ export type ReportData = {
   receipt?: Receipt;
 };
 
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const ISO_DAY = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/** The report's dates (Eval 1): "19 to 25 October" within a month, "28 October to 3 November" across months. The period
+ *  holds YYYY-MM-DD days in the business's time zone; a report stored before Eval 1 holds other words and keeps them. */
+export function dateRange(p: { from: string; to: string }): string {
+  const a = ISO_DAY.exec(p.from), b = ISO_DAY.exec(p.to);
+  if (!a || !b) return `${p.from} to ${p.to}`;
+  const day = (m: RegExpExecArray) => Number(m[3]), month = (m: RegExpExecArray) => MONTHS[Number(m[2]) - 1];
+  return a[1] === b[1] && a[2] === b[2] ? `${day(a)} to ${day(b)} ${month(b)}` : `${day(a)} ${month(a)} to ${day(b)} ${month(b)}`;
+}
+
 /** "4 more than last week", "2 fewer than last week", "Same as last week". */
 export function weekChange(now: number, last: number): string {
   const d = now - last;
@@ -35,7 +47,7 @@ const counts = (c: ReportData["care"]): Counts => ({
 export type RenderedReport = { html: string; text: string; dates: string; preheader: string; button: { label: string; path: string } };
 
 export function renderReport(loc: { name: string }, r: ReportData): RenderedReport {
-  const dates = `${r.period.from} to ${r.period.to}`;
+  const dates = dateRange(r.period);
   const rc = r.receipt;
   const did = rc?.did ?? didChips(counts(r.care));
   const waiting = rc?.waiting ?? { count: r.needs_total ?? r.waiting, items: (r.needs ?? []).slice(0, 3) };
@@ -116,7 +128,7 @@ export function renderReport(loc: { name: string }, r: ReportData): RenderedRepo
   const first = waiting.items[0];
   const button = waiting.count && first ? { label: "Review and approve", path: first.path } : { label: "Open your report", path: "/app/report" };
   const preheader = did.length
-    ? `Kabsi did ${did.reduce((s, c) => s + c.count, 0)} things this week. ${waiting.count ? `${waiting.count} waiting for your yes.` : "Nothing waits for your yes."}`
-    : `A quiet week. ${waiting.count ? `${waiting.count} waiting for your yes.` : "Nothing waits for your yes."}`;
+    ? `${dates}: Kabsi did ${did.reduce((s, c) => s + c.count, 0)} things this week. ${waiting.count ? `${waiting.count} waiting for your yes.` : "Nothing waits for your yes."}`
+    : `${dates}: a quiet week. ${waiting.count ? `${waiting.count} waiting for your yes.` : "Nothing waits for your yes."}`;
   return { html: parts.join(""), text: text.join("\n\n"), dates, preheader, button };
 }

@@ -13,7 +13,7 @@ import { type Counts, composeCare, exampleWeekSeries, type Inputs, type ReportTe
 import { admin, APP_URL, captureError, esc } from "./kabsi.ts";
 import { notify } from "./notify.ts";
 import * as copy from "./email/copy.ts";
-import { renderReport } from "./email/report-body.ts";
+import { dateRange, renderReport } from "./email/report-body.ts";
 import { type AiAnswer, type GrowthStats, monthlyWeek, receipt, type RivalChange } from "./results-report/receipt.ts";
 import { sourceActions } from "./insights/ai-visibility.ts";
 import type { DoneRun } from "./visibility/ai/numbers.ts";
@@ -27,7 +27,8 @@ function localParts(tz: string, at = new Date()) {
   const hour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "numeric", hour12: false }).format(at));
   return { date, weekday, hour };
 }
-const fmtDay = (d: Date, tz: string) => new Intl.DateTimeFormat("en-US", { timeZone: tz, day: "numeric", month: "short" }).format(d);
+// The report's days as YYYY-MM-DD in the business's time zone; dateRange (email/report-body.ts) turns them into words.
+const isoDay = (d: Date, tz: string) => new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(d);
 
 // Public Google rating from Places API (New). Works before the GBP API grant.
 // Once a day per location: store today's rating and review count from the business's own Business Profile, so the
@@ -115,7 +116,10 @@ export async function buildReport(loc: Loc, now = new Date()) {
   const nfc = growth.opens_tag, qr = growth.opens_qr, message = growth.opens_message;
 
   const care = await careBlocks(loc, now);
+  // The 7 days before the Monday it is sent: Monday to Sunday.
+  const period = { from: isoDay(new Date(now.getTime() - 7 * DAY), loc.time_zone), to: isoDay(new Date(now.getTime() - DAY), loc.time_zone) };
   const work = receipt({
+    dates: dateRange(period),
     business: loc.name, counts: care.care.counts, needs: care.needs, needsTotal: care.needs_total, plan: care.plan,
     activity: care.activity ?? null, demo: !!loc.is_demo, growth, tz: loc.time_zone,
     ai: await latestAiAnswer(loc.id, now).catch(() => null), aiThisWeek: monthlyWeek(today),
@@ -124,7 +128,7 @@ export async function buildReport(loc: Loc, now = new Date()) {
 
   return {
     ...care,
-    period: { from: fmtDay(new Date(now.getTime() - 7 * DAY), loc.time_zone), to: fmtDay(now, loc.time_zone) },
+    period,
     rating: current?.rating ?? null, rating_count: current?.review_count ?? null, rating_change: change,
     rating_drop: change != null && change <= -0.1,
     new_reviews: list.length, new_avg: avgNew, replied, waiting: waiting ?? 0,

@@ -177,7 +177,9 @@ describe("what Nora knows, against what is built on main", () => {
     expect(facts).toMatch(/do not give the number yet/);
     // the app and Nora's rules agree: with no number the rules give none
     const rules = noraRules(false, "");
-    expect(rules).toMatch(/Kabsi has no WhatsApp number at the moment, so never give one/);
+    expect(rules).toMatch(
+      /Kabsi has a WhatsApp number, but it is not given out yet, so never give a number/,
+    );
     expect(rules).not.toMatch(/\d{9,}/);
   });
 

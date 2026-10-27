@@ -34,7 +34,7 @@ export const AGENTS: Record<AgentName, Agent> = {
     },
   },
   guard: {
-    job: "Google Protection: watches the listing, Google's own updates and the suspension and verification state, and tells the owner.",
+    job: "Google Protection: watches the Google profile, Google's own updates and the suspension and verification state, and tells the owner.",
     tools: ["read_google_profile", "read_google_state", "read_business_knowledge", "open_task", "alert_staff", "propose_publication"],
     tasks: {},
   },
@@ -58,7 +58,7 @@ export const AGENTS: Record<AgentName, Agent> = {
     tasks: {},
   },
   nora: {
-    job: "Kabsi's voice on the site, in the app and in WhatsApp: answers only from the public facts, sells with the free scan, supports owners, hands to a person.",
+    job: "Kabsi's voice on the site, in the app and in WhatsApp: answers only from the public facts, sells with the free check, supports owners, hands to a person.",
     // save_owner_fact writes the owner's own answer into Business Knowledge (signed in, their business); nothing reaches Google.
     tools: ["read_public_facts", "save_contact", "hand_to_person", "read_tasks", "save_owner_fact", "read_onboarding_state"],
     tasks: {

@@ -2,27 +2,13 @@
 // named member of staff goes to the owner with no draft, no Approve button, no excerpt of what the customer wrote, and a way
 // to reach a person. A clinic (health, legal or financial business) never gets patient or client details in WhatsApp at all.
 // The risk levels and their reasons are risk.ts (K-13); this file only decides what WhatsApp may carry. Pure.
-import { industryOf, type Industry, isReason, type Risk } from "../ai/risk.ts";
+import { industryOf, type Industry, isReason, namesStaffInComplaint } from "../ai/risk.ts";
 
-/** The reasons that make a review sensitive on WhatsApp. Health, threats and legal action are risk.ts reasons; a named member
- *  of staff is read here (see namesStaffInComplaint) because the review pipeline's own reasons are a prompt input. */
-export const SENSITIVE_REASONS = ["health_safety", "threat", "legal_threat"] as const;
+export { namesStaffInComplaint };
 
-// "the waiter Sam", "my stylist Maya", "Dr Khan", "Nurse Lina", "Manager, John", "a girl called Rosa", "named Omar". The role words are read in
-// any case and the name must start with a capital, so "the manager was rude" is not a name.
-const ROLE_WORDS = "waiter|waitress|server|barista|barber|stylist|hairdresser|therapist|masseuse|technician|mechanic|receptionist|cashier|manager|owner|nurse|dentist|doctor|dr\\.?|assistant|driver|cleaner|trainer|coach|instructor|girl|guy|lady|man|woman|gentleman|staff|employee";
-const ROLE_THEN_NAME = new RegExp(`\\b(?:${ROLE_WORDS})[,\\s]+(?:called\\s+|named\\s+)?([\\p{L}][\\p{L}'-]{1,})`, "giu");
-const CALLED_NAME = /\b(?:called|named)\s+\p{Lu}[\p{L}'-]{1,}/u;
-const NOT_NAMES = new Set(["the", "and", "was", "were", "is", "are", "who", "that", "very", "so", "not", "too", "at", "in", "on", "for", "to", "of", "my", "our", "your", "a", "an", "it", "this", "there", "had", "has", "did", "didn't"]);
-const hasName = (text: string) => [...text.matchAll(ROLE_THEN_NAME)].some((m) => /^\p{Lu}/u.test(m[1]) && !NOT_NAMES.has(m[1].toLowerCase())) || CALLED_NAME.test(text);
-const COMPLAINT = /\b(rude|unprofessional|disrespectful|impolite|arrogant|yelled|shouted|ignored|attitude|terrible|awful|horrible|worst|disappoint\w*|never again|dirty|careless|hurt|painful|mistake|wrong|late|refus\w*)\b/i;
-
-/** A complaint that names someone on the team: the reply must never name them, and the owner should look first. */
-export function namesStaffInComplaint(review: { rating: number; comment: string | null }): boolean {
-  const text = (review.comment ?? "").normalize("NFKC");
-  if (!hasName(text)) return false;
-  return review.rating <= 3 || COMPLAINT.test(text);
-}
+/** The reasons that make a review sensitive on WhatsApp, all risk.ts reasons. A named member of staff is also read from the
+ *  text here, so a review stored before Eval 1 added the staff_named reason is still sensitive. */
+export const SENSITIVE_REASONS = ["health_safety", "threat", "legal_threat", "staff_named"] as const;
 
 export type SensitiveInput = {
   risk: string;
@@ -38,7 +24,7 @@ export type Sensitivity = { sensitive: boolean; why: string[]; regulated: Indust
 export function sensitivity(r: SensitiveInput): Sensitivity {
   const reasons = (r.reasons ?? []).filter(isReason);
   const why: string[] = (SENSITIVE_REASONS as readonly string[]).filter((k) => reasons.includes(k as never));
-  if (namesStaffInComplaint({ rating: r.rating, comment: r.comment })) why.push("staff_named");
+  if (!why.includes("staff_named") && namesStaffInComplaint({ rating: r.rating, comment: r.comment })) why.push("staff_named");
   return { sensitive: why.length > 0, why, regulated: industryOf(r.categories ?? []) };
 }
 

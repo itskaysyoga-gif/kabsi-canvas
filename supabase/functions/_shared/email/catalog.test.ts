@@ -257,7 +257,7 @@ Deno.test("P0.8-02b: the sample reviews are realistic: a careful draft for a ref
   const { text: dtext } = render(digest);
   assert.match(dtext, /Maya K\./);
   assert.match(dtext, /Omar H\./);
-  const reviewers = [...dtext.matchAll(/^([A-Z][a-z]+ [A-Z]\.): \d of 5$/gm)].map((m) => m[1]);
+  const reviewers = [...dtext.matchAll(/^([A-Z][a-z]+ [A-Z]\.): \d of 5 stars$/gm)].map((m) => m[1]);
   assert.deepEqual(reviewers, ["Maya K.", "Omar H."]);
 });
 
@@ -272,7 +272,8 @@ Deno.test("Email 1: emoji only as small section markers, at most one per card, n
     // Each card is one table; no card carries more than one emoji, and no emoji stands in a sentence of the plain text.
     for (const cardHtml of html.split('<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px 0;">').slice(1)) {
       const inCard = cardHtml.slice(0, cardHtml.indexOf("</table>"));
-      assert.ok((inCard.match(/\p{Extended_Pictographic}/gu) ?? []).length <= 1, c.kind);
+      // The review's star rating (★, Eval 1) is a row of text characters, not an emoji marker.
+      assert.ok((inCard.match(/(?!\u2605)\p{Extended_Pictographic}/gu) ?? []).length <= 1, c.kind);
     }
     assert.doesNotMatch(text, EMOJI, `${c.kind}: the plain text never needs an emoji`);
   }

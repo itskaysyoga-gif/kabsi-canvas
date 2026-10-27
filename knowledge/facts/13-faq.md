@@ -44,7 +44,7 @@ The home page shows pictures of the real screens (a review with its reply ready,
 ### How it works
 
 **Does Kabsi post replies by itself?**
-No. Kabsi drafts a reply and emails it to you. Nothing goes on your Google profile until you tap Approve reply, and you see the exact text first.
+No. Kabsi drafts a reply and sends it to you, by email today and on WhatsApp once owners are switched on, if you choose WhatsApp for routine messages. Nothing goes on your Google profile until you tap Approve reply, and you see the exact text first.
 
 **What does Kabsi need from me?**
 Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile, then tell Kabsi a few facts in About your business. Drafts only use the facts you give.
@@ -53,10 +53,10 @@ Add the Kabsi group ID 5481006796 as a Manager on your Google Business Profile, 
 A few minutes: find your business, add the Kabsi group ID 5481006796 as a Manager, fill in About your business, choose a plan.
 
 **How fast do new reviews reach me?**
-Kabsi checks every few minutes. Reviews of 3 stars or less, and any review Kabsi marks medium or high risk, are emailed right away; other reviews are emailed at once while your business is open and come together in the daily email, at the hour you choose, outside your opening hours. Nothing is emailed between 22:00 and 08:00; it waits until 08:00.
+Kabsi checks every few minutes. Today new reviews come by email; once owners are switched on to WhatsApp you choose one place for them, WhatsApp or email, and a review that needs care still also comes by email. Reviews of 3 stars or less, and any review Kabsi marks medium or high risk, are emailed right away; other reviews are emailed at once while your business is open and come together in the daily email, at the hour you choose, outside your opening hours. Nothing is emailed between 22:00 and 08:00; it waits until 08:00.
 
 **Can I reply from my phone?**
-Yes. Tap Approve reply, Edit or Skip in the email, confirm on the page that opens, or use Kabsi in your phone's browser. A high-risk review asks you to sign in on that page first.
+Yes. Tap Approve reply, Edit or Skip in the email (or on WhatsApp once owners are switched on), confirm on the page that opens, or use Kabsi in your phone's browser. A high-risk review asks you to sign in on that page first.
 
 **Can I edit a draft before posting?**
 Yes. Change anything you like. Kabsi publishes exactly the text you approve.
@@ -67,8 +67,8 @@ Yes. Tap Other options, then choose Shorter, More formal, Warmer, Say sorry more
 **What happens with hard reviews?**
 Kabsi gives every review one of three risk levels. Rules in code look first, then a small AI model, and the higher level wins.
 - Low (normal praise or mild feedback): a draft as usual.
-- Medium (a complaint, a refund request, a complaint about staff, something said about your business that may be wrong, any rating of 1 to 3, and every review of a medical, dental, legal or financial business): a careful draft, with the issue shown above it, for example "They mention a refund. Kabsi didn't promise one."
-- High (a legal threat, discrimination, illness, injury, an allergy or another safety problem, a threat, harassment, privacy or personal data, a regulator or an inspection, an accusation of a crime): no draft. The review is marked "This review needs a little more care" with a short checklist, and the email has the checklist and no approve button. If you want, Kabsi writes a short, neutral holding reply, only when you ask for it. You can also write your own, choose "I'll reply myself" or skip it.
+- Medium (a complaint, a refund request, a complaint about staff that names no one, something said about your business that may be wrong, any rating of 1 to 3, and every review of a medical, dental, legal or financial business): a careful draft, with the issue shown above it, for example "They mention a refund. Kabsi didn't promise one."
+- High (a legal threat, discrimination, illness, injury, an allergy or another safety problem, a threat, harassment, privacy or personal data, a regulator or an inspection, an accusation of a crime, a complaint that names a member of your team): no draft. The review is marked "This review needs a little more care" with a short checklist, and the email has the checklist and no approve button. If you want, Kabsi writes a short, neutral holding reply, only when you ask for it. You can also write your own, choose "I'll reply myself" or skip it.
 
 **Does Kabsi treat clinics, law firms and financial businesses differently?**
 Yes. For a health, dental, legal or financial business (from your Google category), every review is at least medium risk, and a reply never says the reviewer was a patient or client and never mentions a visit, an appointment or a treatment. Kabsi checks each draft for this before you see it.
