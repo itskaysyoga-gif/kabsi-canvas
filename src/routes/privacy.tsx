@@ -29,7 +29,7 @@ export const Route = createFileRoute("/privacy")({
   component: Page,
 });
 
-const UPDATED = "24 October 2026";
+const UPDATED = "28 October 2026";
 
 // K-113.6, word for word. Set as raw HTML so the apostrophe stays a plain ' in the page source.
 const LIMITED_USE =
@@ -272,6 +272,12 @@ function Page() {
             Kabsi's own code and are not sent to an AI model.
           </li>
           <li>
+            The WhatsApp messages you type to Kabsi are read by an AI model from Anthropic, to
+            understand what you want, and Nora's answers on WhatsApp are written by it too. They
+            reach Anthropic's API on the same terms as review text: only for this, and never to
+            train its models.
+          </li>
+          <li>
             From launch, to see what AI assistants say about your business, Kabsi sends questions in
             your customers' words that name your category and area (for example "best dentist in
             Jumeirah") to DataForSEO, which asks ChatGPT and Perplexity for them. The answers change
@@ -316,8 +322,9 @@ function Page() {
           </li>
           <li>Resend: sending email, through Amazon's EU (Ireland) region.</li>
           <li>
-            Anthropic: drafting replies and posts. Review text and your business facts reach
-            Anthropic only for this.
+            Anthropic: drafting replies and posts, understanding your WhatsApp messages and writing
+            Nora's answers. Review text, your business facts and those messages reach Anthropic only
+            for this.
           </li>
           <li>Google: the Business Profile and Places APIs.</li>
           <li>
@@ -602,8 +609,9 @@ function Page() {
               WhatsApp name as WhatsApp shows them, what you write, any photo or file you attach,
               and the time. A photo you send after connecting goes into Photos in Kabsi for you to
               approve. Please do not send passwords or codes. Kabsi puts no Google data into
-              WhatsApp beyond your own alerts, and the assistant (Nora) does not read your WhatsApp
-              messages; Nora on WhatsApp is not available yet.
+              WhatsApp beyond your own alerts. The messages you type are read by an AI model from
+              Anthropic to understand what you want. Nora on WhatsApp is not available yet; when it
+              is, her answers are written by it too (section 5).
             </p>
             <p>
               <b>Voice notes.</b> You can send Kabsi a voice note instead of typing. From launch,

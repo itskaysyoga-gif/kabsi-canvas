@@ -4,11 +4,12 @@
 //     makes 48 random characters, sends them as `secret_key` and keeps them in Supabase Vault; never returned, logged
 //     or printed. A webhook that already points at this function is updated, never duplicated; Kapso's own inbox
 //     webhook is never touched.
-//   - templates: submit the utility templates (templates.ts) that are not there yet, and report each one's status.
+//   - templates: submit the utility templates (templates.ts, v2 names included) that are not there yet, and report each one's status.
+//   - templatestatus: read only. Each template's status and category as Meta has them now; nothing is submitted.
 //   - health: read the number's health and quality rating (hourly, from pg_cron).
 //   - automations: confirm no Kapso workflow or Kapso agent answers the number, so only Kabsi's own code replies.
 // Answers carry ids, names and statuses only. The network is a dep, so tests never call Kapso.
-import { submission, TEMPLATES } from "./templates.ts";
+import { allDefs, submission } from "./templates.ts";
 
 const PLATFORM = "https://api.kapso.ai/platform/v1";
 const META = "https://api.kapso.ai/meta/whatsapp/v24.0";
@@ -116,21 +117,42 @@ export async function wabaId(env: KapsoEnv): Promise<string> {
   return id;
 }
 
-/** Submits every utility template that is not there yet. Never re-submits one Meta already has. A template Meta refuses
- *  is reported with Meta's own reason (message, error_user_title, error_user_msg, code, error_subcode) and the rest go on. */
+export type TemplateRow = { name: string; status: string; category: string | null; reason?: string };
+
+const FIELDS = "name,status,category,language,rejected_reason";
+const rows = (v: unknown): TemplateRow[] => list(v).map((t) => ({
+  name: String(t.name), status: String(t.status ?? ""), category: t.category ? String(t.category) : null,
+  ...(t.rejected_reason && t.rejected_reason !== "NONE" ? { reason: String(t.rejected_reason) } : {}),
+}));
+
+/** Read only: every template on the business account with its status and category. Nothing is submitted or changed. */
+export async function readTemplates(env: KapsoEnv): Promise<TemplateRow[]> {
+  const waba = await wabaId(env);
+  return rows(await call(env, `${META}/${waba}/message_templates?fields=${FIELDS}&limit=200`));
+}
+
+/** The statuses Kabsi's sender needs: only the names in templates.ts, status by name (nothing else is stored). */
+export function statusMap(found: TemplateRow[]): Record<string, string> {
+  const ours = new Set(allDefs().map((d) => d.name));
+  return Object.fromEntries(found.filter((t) => ours.has(t.name)).map((t) => [t.name, t.status]));
+}
+
+/** Submits every utility template that is not there yet (the v2 names too). Never re-submits one Meta already has. A template
+ *  Meta refuses is reported with Meta's own reason (message, error_user_title, error_user_msg, code, error_subcode) and the rest go on. */
 export async function submitTemplates(env: KapsoEnv) {
   const waba = await wabaId(env);
   const url = `${META}/${waba}/message_templates`;
-  const have = new Map(list(await call(env, `${url}?fields=name,status,language&limit=200`)).map((t) => [String(t.name), String(t.status ?? "")]));
-  const out: { name: string; status: string; error?: string }[] = [];
-  for (const def of Object.values(TEMPLATES)) {
-    if (have.has(def.name)) {
-      out.push({ name: def.name, status: have.get(def.name)! });
+  const have = new Map(rows(await call(env, `${url}?fields=${FIELDS}&limit=200`)).map((t) => [t.name, t]));
+  const out: { name: string; status: string; category?: string | null; error?: string }[] = [];
+  for (const def of allDefs()) {
+    const there = have.get(def.name);
+    if (there) {
+      out.push({ name: def.name, status: there.status, category: there.category });
       continue;
     }
     try {
       const r = obj(await call(env, url, { method: "POST", body: JSON.stringify(submission(def)) }));
-      out.push({ name: def.name, status: String(r.status ?? "PENDING") });
+      out.push({ name: def.name, status: String(r.status ?? "PENDING"), category: r.category ? String(r.category) : "UTILITY" });
     } catch (e) {
       if (!(e instanceof KapsoError)) throw e;
       out.push({ name: def.name, status: "REFUSED", error: e.detail });
