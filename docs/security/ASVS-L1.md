@@ -1,6 +1,6 @@
 # OWASP ASVS 4.0.3, level 1: Kabsi
 
-Written by Sec 1 on 27 Oct 2026 (master plan 30.15 section 8). Every level 1 requirement is listed with **pass**, **fail** (with its row in `docs/LATER.md`) or **n/a** (with the reason). "Proof" names the test or file that holds it; a test name in `supabase/tests/` runs in CI's Database job, `supabase/functions/_shared/**.test.ts` in the Edge Functions job, `tests/*.test.ts` in the App job.
+Written by Sec 1 on 27 Oct 2026 (master plan 30.15 section 8), updated by Sec 2 the same day. Every level 1 requirement is listed with **pass**, **fail** (with its row in `docs/LATER.md`) or **n/a** (with the reason). "Proof" names the test or file that holds it; a test name in `supabase/tests/` runs in CI's Database job, `supabase/functions/_shared/**.test.ts` in the Edge Functions job, `tests/*.test.ts` in the App job.
 
 Kabsi in one line for this list: sign-in is a one-time email code (Supabase Auth), no passwords; the browser reads through row level security and writes only through checked RPCs and Edge Functions; every Google write goes through one publication pipeline with the owner's approval.
 
@@ -13,13 +13,13 @@ Level 1 has no V1 requirement in ASVS 4.0.3 (they start at level 2). The archite
 | ID | Requirement | Verdict | Proof or reason |
 |---|---|---|---|
 | 2.1.1 to 2.1.12 | Password rules | n/a | No passwords anywhere: sign-in is a one-time email code. |
-| 2.2.1 | Anti-automation on authentication | fail | `auth-code` has Turnstile and per-IP and per-address limits (Sec 1 abuse review), but Supabase Auth's own captcha is off, so `/auth/v1/otp` can be called directly with the public key. LATER row "Supabase Auth captcha". |
-| 2.2.2 | Weak authenticators (SMS, email) only as secondary | pass with note | The email code is the only factor for owners, which ASVS accepts at level 1 for low-value accounts; staff MFA is Sec 2's audit. |
+| 2.2.1 | Anti-automation on authentication | pass | `auth-code` has Turnstile and per-IP and per-address limits, and Supabase Auth's own captcha is on (Rashid, 27 Oct). Read back by Sec 2 on 27 Oct: a direct `POST /auth/v1/otp` with the public key and no token answers 400 `captcha_failed`. Turnstile fails closed when its secret is missing (Sec 2, `_shared/sec2/sec2.test.ts`). |
+| 2.2.2 | Weak authenticators (SMS, email) only as secondary | pass with note | The email code is the only factor for owners, which ASVS accepts at level 1 for low-value accounts. Staff and platform accounts: two-step login checklist in `docs/security/secrets-and-accounts.md` (Rashid's step; no session can read it back). |
 | 2.2.3 | Notify after authentication detail changes | n/a | There is no password or authenticator a user can change; the email address is the identity. |
 | 2.3.1 | System-generated initial secrets | pass | Codes are random, single use and expire (Supabase Auth; `_shared/auth-code.ts`). |
 | 2.5.1 to 2.5.4, 2.5.6 | Recovery | pass | No recovery secret or security question exists; recovery is a new email code. No default or shared account (`rls_tables.sql` checks no shared fixture can read data). |
 | 2.7.1 | Out-of-band code not by SMS or PSTN | pass | Email only. |
-| 2.7.2 | Out-of-band code expires within 10 minutes | fail | The email code's lifetime is a Supabase Auth project setting, not in the repo; Supabase's default is 1 hour. LATER row "sign-in code lifetime" (Rashid: Authentication, Providers, Email, Email OTP Expiration 600). |
+| 2.7.2 | Out-of-band code expires within 10 minutes | pass with note | Rashid set Email OTP Expiration to 600 seconds (27 Oct). No connector reads Auth settings, so Sec 2 could not read it back; the LATER row stays until a sign-in test shows a code refused after 10 minutes. |
 | 2.7.3 | Out-of-band code used once | pass | Supabase verifies and consumes the code; the WhatsApp connect code is single use (`whatsapp_channel.sql` "a code works once"). |
 | 2.7.4 | Out-of-band channel secure | pass | TLS to Resend and Supabase. |
 | 2.8.1 | Time-based OTP | n/a | No TOTP. |
@@ -42,11 +42,11 @@ Level 1 has no V1 requirement in ASVS 4.0.3 (they start at level 2). The archite
 |---|---|---|---|
 | 4.1.1 | Access rules enforced on a trusted service layer | pass | RLS and SECURITY DEFINER checks (`rls_tables.sql`, `rls_functions.sql`, `sec1_tenant_matrix.sql`); the browser roles hold no table write and no TRUNCATE (`sec1_tenant_matrix.sql`, migration `20261027150429_sec1_hardening.sql`). |
 | 4.1.2 | Attributes used for access cannot be changed by users | pass | Roles live in `location_members` and `staff`, writable only through owner-only RPCs (`roles.sql`). |
-| 4.1.3 | Least privilege | pass with note | Every role gets exactly its rights (`roles.sql`); a role in one business gives nothing in another (`sec1_tenant_matrix.sql`). Kabsi installers read every business for support, which is wider than they need: LATER row "installer least privilege". |
+| 4.1.3 | Least privilege | pass | Every role gets exactly its rights (`roles.sql`); a role in one business gives nothing in another (`sec1_tenant_matrix.sql`). Since Sec 2 `is_staff()` is Kabsi admins only: installers read no business and may only activate and switch cards (`sec2_security.sql` section 4). |
 | 4.1.5 | Access control fails securely | pass | Unknown or missing membership raises 42501; limiters on paid or Google-adjacent calls fail closed (`tests/free-tool-busy.test.ts`, Sec 1 abuse review). |
 | 4.2.1 | Protection against IDOR | pass | Every RPC refuses another business (`_victim_calls.psql` run as a stranger, the other business's owner, manager and staff, and Kabsi staff); Edge routes check the business before any service-role read or write (`_shared/sec1/routes.test.ts`; the `content` route was fixed by Sec 1); Storage is folder per business (`sec1_storage.sql`). |
 | 4.2.2 | CSRF protection | pass | Authenticated calls use a bearer token, not a cookie; email links act only on POST (`_shared/sec1/email-links.test.ts`). |
-| 4.3.1 | Administrative interfaces use MFA | n/a here | Staff MFA is Sec 2's audit (task "the MFA and secrets audit"). |
+| 4.3.1 | Administrative interfaces use MFA | pass with note | The staff page is reached through a Supabase session of a staff admin; the platform consoles' two-step login is Rashid's checklist (`docs/security/secrets-and-accounts.md`). |
 | 4.3.2 | Directory browsing disabled | pass | Vercel and Supabase Storage do not list folders; buckets are private except `site` (`sec1_storage.sql`). |
 
 ## V5 Validation, sanitisation and encoding
@@ -81,7 +81,7 @@ Level 1 has no V1 requirement in ASVS 4.0.3 (they start at level 2). The archite
 
 | ID | Requirement | Verdict | Proof or reason |
 |---|---|---|---|
-| 7.1.1 | No credentials or session tokens in logs | pass with note | Edge `log()` scrubs keys, emails, phones and query tokens (`_shared/log-scrub.ts`, `tests/sec1-no-secrets-in-logs.test.ts`); 24 hours of production function logs read on 27 Oct: 0 emails, 0 phones, 0 tokens in 5728 lines. Supabase's own request log keeps full URLs, and two requests carried a code in the query: LATER row "codes in query strings". |
+| 7.1.1 | No credentials or session tokens in logs | pass | Edge `log()` scrubs keys, emails, phones, query tokens and (Sec 2) unsubscribe tokens in a path (`_shared/log-scrub.ts`); since Sec 2 no code rides in a query string, so Supabase's request log holds none (8.3.1). Errors shown to staff are scrubbed before they are stored (`errorText`) and again in the operations view (`private.scrub_text`). |
 | 7.1.2 | No other sensitive data in logs | pass | Model output is no longer quoted in errors (`ai/client.ts`); Sentry and PostHog scrub token paths (`src/lib/scrub.ts`). |
 | 7.4.1 | Generic error message with an id | pass | `fail()` answers plain words; details go to Sentry scrubbed. |
 
@@ -92,10 +92,10 @@ Level 1 has no V1 requirement in ASVS 4.0.3 (they start at level 2). The archite
 | 8.2.1 | Anti-caching headers on sensitive data | pass | `no-store` on app pages, API answers and every token page (`vercel.json`, `tests/sec1-email-routes.test.ts`). |
 | 8.2.2 | No sensitive data in browser storage | pass with note | Only the Supabase session (3.2.3) and the consent choice. |
 | 8.2.3 | Data cleared after the session | pass | `signOut` clears the session. |
-| 8.3.1 | Sensitive data in the body or headers, not the URL | fail | Email links carry their link token in the path (by design, single use and hashed), but `api/action?t=`, `email/unsubscribe?t=`, `api/resume?code=` and `visibility/check?code=` put it in the query string. LATER row "codes in query strings". |
+| 8.3.1 | Sensitive data in the body or headers, not the URL | pass | Sec 2: the email link, holiday link, resume code and free check code go in POST bodies; the Worker sends card codes and WhatsApp sends free check codes in headers; the unsubscribe page reads its token from the fragment and the one-click address carries it in the path (no-referrer on every token page). Links already sent with `?t=` keep working. `tests/sec2-codes.test.ts`, `_shared/sec2/sec2.test.ts`. |
 | 8.3.2 | Users can remove or export their data | pass | Disconnect and deletion (`disconnect.sql`, `purge_after_leaving.sql`); export by request (privacy page). |
 | 8.3.3 | Clear privacy language and consent | pass | `/privacy`, consent proof stored with its wording (`consent.ts`). |
-| 8.3.4 | Sensitive data identified and protected | pass | Retention table K-40 (`retention.sql`); per-source review is Sec 2. |
+| 8.3.4 | Sensitive data identified and protected | pass | Every source with its time, job and test: `docs/security/retention.md`; one message and one review through every provider: `docs/security/privacy-trace.md`. A restore re-applies deletions made after the backup (`deletion_log`, `restore-drill.sh`). |
 
 ## V9 Communications
 
@@ -109,7 +109,7 @@ Level 1 has no V1 requirement in ASVS 4.0.3 (they start at level 2). The archite
 | ID | Requirement | Verdict | Proof or reason |
 |---|---|---|---|
 | 10.3.1 | Auto-update integrity | n/a | No auto-update. |
-| 10.3.2 | Subresource integrity on third-party scripts | fail | The Sentry loader, Turnstile and the Meta pixel load from their CDNs without `integrity` (they change under the same URL by design). LATER row "third-party scripts". |
+| 10.3.2 | Subresource integrity on third-party scripts | fail (vendor) | The Sentry loader, Turnstile and the Meta pixel change under the same URL by design, and none of the three vendors supports a fixed hash (Cloudflare says not to pin Turnstile's api.js). No script on kabsi.co can carry `integrity` today; the CSP allowlist is the control. LATER row kept. |
 | 10.3.3 | No subdomain takeover | pass with note | Every kabsi.co record points at a live service (docs/OPS-SETUP.md); not re-read live in this session. |
 
 ## V11 Business logic
@@ -120,7 +120,7 @@ Level 1 has no V1 requirement in ASVS 4.0.3 (they start at level 2). The archite
 | 11.1.2 | Realistic human time | pass | Rate limits on every public endpoint (Sec 1 abuse review). |
 | 11.1.3 | Limits per user and per business | pass | AI caps, places cap, redraft limit, backlog spacing (`backlog.sql`, `places_cost_guard.sql`). |
 | 11.1.4 | Anti-automation | pass | Turnstile and limits on free check, waiting list, Founding 25, Partners, review link, sign-in codes. |
-| 11.1.5 | Business logic limits | pass | One publication per item, approvals bound to approver, content and 7 days, one stop switch (`sec1_roles_approvals.sql`). |
+| 11.1.5 | Business logic limits | pass | One publication per item, approvals bound to approver, content, the draft version the page showed (Sec 2) and 7 days, one stop switch; a redraft never moves a review back to a draft under a waiting yes (`sec1_approval_properties.ts`, now with email pages and redrafts, 1,900 random orders; `sec2_security.sql`). Card codes: 10 refused tries an hour per person. |
 
 ## V12 Files and resources
 
@@ -140,8 +140,8 @@ Level 1 has no V1 requirement in ASVS 4.0.3 (they start at level 2). The archite
 | ID | Requirement | Verdict | Proof or reason |
 |---|---|---|---|
 | 13.1.1 | Same encoding and parsers | pass | JSON everywhere. |
-| 13.1.3 | API URLs expose no sensitive data | fail | Same as 8.3.1. |
-| 13.2.1 | Methods used as meant | pass | A GET never acts; HEAD refused on link routes (`email-links.test.ts`). |
+| 13.1.3 | API URLs expose no sensitive data | pass | Same as 8.3.1. |
+| 13.2.1 | Methods used as meant | pass | Link routes take POST only (reading is `do: view`); GET and HEAD are refused unread (`_shared/sec2/sec2.test.ts`). Public functions cap the body size before reading it (`_shared/body-cap.ts`). |
 | 13.2.2 | JSON schema validation | pass | Route parsers and RPC parameter checks. |
 | 13.2.3 | CSRF on REST | pass | Bearer tokens; one-click unsubscribe is a signed claim (RFC 8058). |
 | 13.3.1 | SOAP and XML | n/a | None. |
@@ -152,12 +152,12 @@ Level 1 has no V1 requirement in ASVS 4.0.3 (they start at level 2). The archite
 |---|---|---|---|
 | 14.2.1 | Components up to date | pass | Dependency review in CI with no exception left (zod 4.6.7 from Sec 1). |
 | 14.2.2 | Unneeded features removed | pass with note | The old `billing` function answers 410 and runs nothing (LATER row, lane R). |
-| 14.2.3 | Third-party assets with SRI | fail | Same as 10.3.2. |
+| 14.2.3 | Third-party assets with SRI | fail (vendor) | Same as 10.3.2. |
 | 14.3.2 | Debug modes off | pass | Production builds; Sentry `sendDefaultPii` false. |
 | 14.3.3 | No version detail in headers | pass | Vercel and Supabase defaults; no framework banner. |
 | 14.4.1 | Content-Type with charset | pass | Vercel and `json()`. |
 | 14.4.2 | Content-Disposition on API file answers | pass | PDF and image downloads name their file. |
-| 14.4.3 | Content Security Policy | fail | The policy is report-only until Web 2 has a clean week of reports (`tests/security-headers.test.ts`). LATER row "CSP enforce". |
+| 14.4.3 | Content Security Policy | fail | Still report-only. Sec 2 read Sentry on 27 Oct: the reports are not clean (200 `eval` blocks under script-src in the last 2 hours, and Facebook frame and form-action blocks), so enforcing would break pages. LATER row with the issues to fix first. |
 | 14.4.4 | nosniff | pass | `tests/security-headers.test.ts`. |
 | 14.4.5 | HSTS | pass | Two years, subdomains, preload. |
 | 14.4.6 | Referrer-Policy | pass | `strict-origin-when-cross-origin`, and `no-referrer` on token pages. |

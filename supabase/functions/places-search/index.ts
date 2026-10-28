@@ -3,9 +3,14 @@
 // The Places API key never reaches the browser.
 import { searchText } from "../_shared/google/index.ts";
 import { captureError, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
+import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.small).
+  const capped = await capBody(req, BODY_LIMITS.small, CORS);
+  if (capped instanceof Response) return capped;
+  req = capped;
   if (req.method !== "POST") return fail("method_not_allowed", "Use POST.", 405);
 
   const user = await currentUser(req);

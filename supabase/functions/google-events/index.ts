@@ -7,6 +7,7 @@ import { admin, captureError, isInternal, json, log } from "../_shared/kabsi.ts"
 import { googleKeys, KABSI_PUBSUB_TOPIC } from "../_shared/google/events.ts";
 import { googlePush } from "../_shared/google/events-route.ts";
 import { registerNotifications } from "../_shared/google/index.ts";
+import { counted } from "../_shared/webhook-rejections.ts";
 
 async function register() {
   const { data, error } = await admin().from("locations").select("google_account_id")
@@ -34,11 +35,12 @@ Deno.serve(async (req) => {
   const serviceAccount = Deno.env.get("GOOGLE_PUBSUB_SERVICE_ACCOUNT") ?? "";
   if (!audience || !serviceAccount) return json({ error: "not_configured" }, 503);
   // The decision is in _shared/google/events-route.ts (Sec 1: tested with a stub database); here it is wired to the database.
-  return await googlePush(req, {
+  // Sec 2: refused pushes are counted for the staff operations view.
+  return await counted("google_events", await googlePush(req, {
     auth: { audience, serviceAccount, keys: googleKeys },
     db: admin(),
     log: (fields) => log("google-events", fields),
     captureError: (e, extra) => captureError("google-events", e, extra),
     json,
-  });
+  }));
 });

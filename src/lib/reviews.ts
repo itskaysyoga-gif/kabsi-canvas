@@ -154,6 +154,8 @@ export type ActionView = {
     reply: string | null;
   } | null;
   draft?: string | null;
+  /** The version of the draft shown (Sec 2): Approve sends it back, and a newer one is refused. */
+  draft_version?: number;
   /** Early access (D267): a person posts approved replies by hand. */
   concierge?: boolean;
   /** Google mode from the server (P0.1-08: the signed-out page cannot ask google_mode() itself). */
@@ -190,17 +192,29 @@ async function linkFetch(query: string, body?: Record<string, unknown>) {
     headers: { "content-type": "application/json", ...anonHeaders, ...auth },
   });
 }
+// Sec 2: the token goes in the POST body, never in the address of the request (request logs keep query strings).
 export async function loadAction(token: string): Promise<ActionView> {
-  const res = await linkFetch(`?t=${encodeURIComponent(token)}`);
+  const res = await linkFetch("", { t: token, do: "view" });
   if (res.status === 404) return { status: "invalid" };
   return readJson<ActionView>(res);
 }
+/** Thrown when the draft changed after the page loaded (Sec 2): the page shows the new one. */
+export class ReplyChanged extends Error {}
 export async function runAction(
   token: string,
   doWhat: "post" | "skip" | "handle_myself" | "revert" | "keep",
   text?: string,
+  version?: number,
 ) {
-  return readJson<ActionResult>(await linkFetch("", { t: token, do: doWhat, text }));
+  const res = await linkFetch("", { t: token, do: doWhat, text, version });
+  if (res.status === 409) {
+    const data = (await res
+      .clone()
+      .json()
+      .catch(() => ({}))) as ApiError;
+    if (data.error === "reply_changed") throw new ReplyChanged(data.message || "");
+  }
+  return readJson<ActionResult>(res);
 }
 // Undo inside the 10 seconds (K-70), for the publication this link made.
 export async function undoAction(token: string, publication: string) {

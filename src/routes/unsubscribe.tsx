@@ -26,17 +26,27 @@ type State =
   | { step: "done"; label: string }
   | { step: "bad"; message: string };
 
+// Sec 2: new links carry the token in the fragment (#t=TOKEN), which the browser never sends to a server or in a
+// Referer; links sent before Sec 2 carry ?t=TOKEN and keep working.
+function tokenFromHash() {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.hash.replace(/^#/, "")).get("t") ?? "";
+}
+
 function UnsubscribePage() {
-  const { t } = Route.useSearch();
+  const { t: fromSearch } = Route.useSearch();
+  const [t, setT] = useState(fromSearch);
   const [state, setState] = useState<State>({ step: "loading" });
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!t) return setState({ step: "bad", message: "This link is not valid." });
-    void lookUpUnsubscribe(t).then((r) =>
+    const token = fromSearch || tokenFromHash();
+    setT(token);
+    if (!token) return setState({ step: "bad", message: "This link is not valid." });
+    void lookUpUnsubscribe(token).then((r) =>
       setState(r.ok ? { step: "ask", label: r.label } : { step: "bad", message: r.message }),
     );
-  }, [t]);
+  }, [fromSearch]);
 
   async function stop() {
     setBusy(true);

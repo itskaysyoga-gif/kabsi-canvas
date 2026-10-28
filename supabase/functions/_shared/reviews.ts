@@ -101,9 +101,11 @@ export async function syncLocation(loc: Loc) {
 export async function draftReview(reviewId: string, instruction?: string, o: { holding?: boolean } = {}) {
   const db = admin();
   const { data: rv, error } = await db.from("reviews")
-    .select("id, location_id, reviewer_name, star_rating, comment, draft_attempts, language, risk, risk_reasons, locations(name, status, category, category_label)")
+    .select("id, location_id, state, reviewer_name, star_rating, comment, draft_attempts, language, risk, risk_reasons, locations(name, status, category, category_label)")
     .eq("id", reviewId).single();
   if (error) throw error;
+  // Sec 2: a yes is waiting or the reply is on Google. No model call; save_reply_draft refuses the same at the end.
+  if (rv.state === "publishing" || rv.state === "posted") throw new Error("reply_publishing");
   const loc = rv.locations as unknown as { name: string; status: string; category: string | null; category_label: string | null };
   // Drafting is part of an active trial or plan (Q05): a Free business gets no new drafts, from any caller.
   if (loc.status !== "active") throw new Error("location_not_active");
@@ -155,9 +157,9 @@ async function draftWithChecks(rv: DraftRow, business: string, meter: Meter, o: 
   const { data: last } = await db.from("reply_drafts").select("version, body").eq("review_id", rv.id).order("version", { ascending: false }).limit(1).maybeSingle();
   const plan = riskPlan({ risk, holding: o.holding, hasDraft: !!last, instruction });
   if (plan === "no_draft") {
-    await db.from("reviews").update({
-      language, risk, risk_reasons: reasons, state: "blocked", draft_attempts: rv.draft_attempts + 1, notified_at: null,
-    }).eq("id", rv.id);
+    // Sec 2: never under a waiting yes or a posted reply (block_reply_draft changes nothing then).
+    const { error: be } = await db.rpc("block_reply_draft", { p_review: rv.id, p_language: language, p_risk: risk, p_risk_reasons: reasons });
+    if (be) throw be;
     return { ok: false, body: "", issues: [] as string[], risk };
   }
   const holding = plan === "holding";
@@ -183,19 +185,17 @@ async function draftWithChecks(rv: DraftRow, business: string, meter: Meter, o: 
   }
   const body = result.output?.reply ?? "";
   const factIds = (result.output?.facts_used ?? []).filter((r) => Object.hasOwn(memory.refs, r)).map((r) => memory.refs[r]);
-  const { data: draft, error: de } = await db.from("reply_drafts").insert({
-    review_id: rv.id, version: (last?.version ?? 0) + 1, body, source: instruction ? "ai_edit" : "ai",
-    instruction: instruction ?? (o.holding ? "Neutral holding reply" : null),
-    safety_ok: result.ok, safety_notes: result.problems, model: result.model, prompt_version: result.promptVersion, facts_used: factIds,
-  }).select("id").single();
+  // Sec 2: one locked step saves the version and moves the review back to a draft. It refuses ('reply_publishing')
+  // when a yes is waiting or the reply is on Google, so a redraft never leaves the review a draft under a waiting yes.
+  // A version the owner asked for (an instruction, or the holding reply) sends no new email.
+  const { data: draft, error: de } = await db.rpc("save_reply_draft", {
+    p_review: rv.id, p_body: body, p_source: instruction ? "ai_edit" : "ai",
+    p_instruction: instruction ?? (o.holding ? "Neutral holding reply" : null),
+    p_safety_ok: result.ok, p_safety_notes: result.problems, p_model: result.model, p_prompt_version: result.promptVersion,
+    p_facts_used: factIds, p_language: language, p_risk: risk, p_risk_reasons: reasons, p_renotify: !(instruction || o.holding),
+  });
   if (de) throw de;
-  await db.from("ai_runs").update({ draft_id: draft.id }).eq("review_id", rv.id).is("draft_id", null);
-  await db.from("reviews").update({
-    language, risk, risk_reasons: reasons,
-    state: result.ok ? "drafted" : "blocked", draft_attempts: rv.draft_attempts + 1,
-    // A version the owner asked for (an instruction, or the holding reply) sends no new email.
-    ...(instruction || o.holding ? {} : { notified_at: null }),
-  }).eq("id", rv.id);
+  await db.from("ai_runs").update({ draft_id: (draft as { id: string }).id }).eq("review_id", rv.id).is("draft_id", null);
   return { ok: result.ok, body, issues: result.problems, risk };
 }
 

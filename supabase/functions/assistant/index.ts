@@ -22,8 +22,9 @@ import { countryFromTimezone } from "../_shared/tz-country.ts";
 import { nextTasks } from "../_shared/tasks.ts";
 import { WHATSAPP_NUMBER, WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
 import { fenceVisitor, knownLinksOnly, noraRules } from "../_shared/nora-rules.ts";
-import { type ContactRow, contactContextLine, exactEmailPattern, ownsContact } from "../_shared/nora-contact.ts";
+import { type ContactRow, contactContextLine, exactEmailPattern, newsConsent, ownsContact } from "../_shared/nora-contact.ts";
 import { cleanScreen, inOnboarding, ONBOARDING_RULES, onboardingHandoffLine, onboardingLines, onboardingStateResult, type OnboardingState } from "../_shared/onboarding-context.ts";
+import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
 // Nora is one of the six agents (master plan 28.6): her tools and the model per step are in _shared/ai/agents.ts.
 const CHAT = task("nora", "chat");
@@ -294,6 +295,10 @@ ${row("Passed to a person", c.status === "handoff" ? `Yes (${c.handoff_reason ??
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.chat).
+  const capped = await capBody(req, BODY_LIMITS.chat, CORS);
+  if (capped instanceof Response) return capped;
+  req = capped;
   const db = admin();
   const url = new URL(req.url);
 
@@ -466,10 +471,13 @@ Deno.serve(async (req) => {
             const clean = Object.fromEntries(Object.entries(fields).filter(([, v]) => v));
             // Sec 1: someone else's row (not made in this chat, not the signed-in address) is linked, never changed.
             const mine = existing ? ownsContact(existing as ContactRow, { conversationId: conv.id, signedInEmail: user?.email }) : false;
+            // Sec 2: a yes to news counts only for the signed-in person's own address; otherwise the request is kept.
+            const news = (current: boolean | null) =>
+              newsConsent({ asked: input.marketing_consent === true, email, signedInEmail: user?.email, current });
             if (id && mine) {
-              await db.from("contacts").update({ ...clean, marketing_consent: input.marketing_consent === true ? true : existing!.marketing_consent, updated_at: new Date().toISOString() }).eq("id", id);
+              await db.from("contacts").update({ ...clean, ...news(existing!.marketing_consent as boolean | null), updated_at: new Date().toISOString() }).eq("id", id);
             } else if (!id) {
-              const { data: row, error } = await db.from("contacts").insert({ email, ...clean, marketing_consent: input.marketing_consent === true, source: surface === "app" ? "assistant_app" : "assistant", conversation_id: conv.id }).select("id").single();
+              const { data: row, error } = await db.from("contacts").insert({ email, ...clean, ...news(false), source: surface === "app" ? "assistant_app" : "assistant", conversation_id: conv.id }).select("id").single();
               if (error) throw error;
               id = row.id;
             }

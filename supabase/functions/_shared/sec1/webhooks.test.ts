@@ -283,17 +283,38 @@ Deno.test("pubsub: a replay of an old push with an expired token is refused", as
   assert.equal(rows(db, "google_events").length, 0);
 });
 
-Deno.test("pubsub: the same message pushed twice is stored once and offers its jobs once", async () => {
+Deno.test("pubsub: the same message pushed twice is stored once and its jobs are queued once", async () => {
   const db = googleDb();
   const body = pushBody({ type: "GOOGLE_UPDATE", location: "accounts/1/locations/77" }, "m-dup");
   const first = await google(post(body, { authorization: await token() }));
   assert.deepEqual(await first.json(), { ok: true, offered: 2 });
   const second = await google(post(body, { authorization: await token() }));
   assert.equal(second.status, 200);
-  assert.deepEqual(await second.json(), { ok: true, duplicate: true });
+  // Sec 2: the repeat offers the jobs again; their dedupe keys keep the waiting ones from being added twice.
+  assert.deepEqual(await second.json(), { ok: true, duplicate: true, offered: 0 });
   assert.equal(rows(db, "google_events").length, 1);
   assert.equal(rows(db, "google_events")[0].jobs, 2);
-  assert.equal(db.rpcCalls.filter((c) => c.fn === "enqueue_job").length, 2);
+  assert.equal(db.rpcCalls.filter((c) => c.fn === "enqueue_job").length, 4, "offered twice, queued once (offered 0 the second time)");
+});
+
+Deno.test("pubsub (Sec 2): a row stored but whose jobs failed to queue gets them on Pub/Sub's retry", async () => {
+  const db = googleDb();
+  const real = db.rpc.enqueue_job;
+  let broken = true;
+  db.rpc.enqueue_job = (a) => {
+    if (broken) throw new Error("database busy");
+    return real(a);
+  };
+  const body = pushBody({ type: "NEW_REVIEW", location: "accounts/1/locations/77" }, "m-fail");
+  const first = await google(post(body, { authorization: await token() }));
+  assert.equal(first.status, 500, "Pub/Sub retries a failed push");
+  assert.equal(rows(db, "google_events").length, 1, "the row was stored before the offers failed");
+  broken = false;
+  const retry = await google(post(body, { authorization: await token() }));
+  assert.equal(retry.status, 200);
+  const r = await retry.json();
+  assert.equal(r.duplicate, true);
+  assert.ok(r.offered > 0, "the retry offered the jobs the first delivery could not");
 });
 
 Deno.test("pubsub: an older message arriving after a newer one only offers jobs (deduped) and writes no business data", async () => {

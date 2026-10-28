@@ -6,8 +6,10 @@ import { clientIp } from "../_shared/client-ip.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 import { captureError, CORS, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { makeHandler } from "../_shared/auth-code.ts";
+import { BODY_LIMITS, withBodyCap } from "../_shared/body-cap.ts";
 
-Deno.serve(makeHandler({
+// Sec 2: the body is capped before the handler reads it (413 past BODY_LIMITS.small).
+Deno.serve(withBodyCap(makeHandler({
   env: (name) => Deno.env.get(name),
   ip: (req) => clientIp(req),
   sha256Hex,
@@ -23,4 +25,4 @@ Deno.serve(makeHandler({
   },
   captureError,
   cors: CORS,
-}));
+}), BODY_LIMITS.small, CORS));

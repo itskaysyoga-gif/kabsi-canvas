@@ -121,8 +121,17 @@ export const setStep = (locationId: string, step: OnboardingStep) =>
   rpc<void>("set_onboarding_step", { p_location: locationId, p_step: step });
 export const choosePlan = (locationId: string, kind: PlanKind) =>
   rpc<string>("choose_plan", { p_location: locationId, p_kind: kind });
-export const activateCard = (code: string, locationId: string, label?: string) =>
-  rpc<string>("activate_card", { p_code: code, p_location: locationId, p_label: label ?? null });
+// Sec 2: a refused code comes back as its reason ("unknown_card", "card_in_use", "card_disabled", "rate_limited"),
+// not as an error, so the database can count the try; a destination always starts with https://.
+export async function activateCard(code: string, locationId: string, label?: string) {
+  const result = await rpc<string>("activate_card", {
+    p_code: code,
+    p_location: locationId,
+    p_label: label ?? null,
+  });
+  if (!result.startsWith("https://")) throw new Error(result);
+  return result;
+}
 
 /** Google access as the database knows it (google_connections.access_state): the one source of the live status pill. */
 export type AccessState =
@@ -211,10 +220,16 @@ export async function resumeStep(code: string): Promise<ResumeAnswer | null> {
   if (!RESUME_CODE.test(code)) return null;
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
-  const res = await sessionFetch(
-    `${supabaseUrl}/functions/v1/api/resume?code=${encodeURIComponent(code)}`,
-    { headers: { ...anonHeaders, ...(token ? { authorization: `Bearer ${token}` } : {}) } },
-  );
+  // Sec 2: the code in the POST body, never in a query string.
+  const res = await sessionFetch(`${supabaseUrl}/functions/v1/api/resume`, {
+    method: "POST",
+    body: JSON.stringify({ code }),
+    headers: {
+      "content-type": "application/json",
+      ...anonHeaders,
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
+    },
+  });
   if (res.status === 400 || res.status === 404) return null;
   if (!res.ok) throw new Error(`resume_${res.status}`);
   return (await res.json()) as ResumeAnswer;

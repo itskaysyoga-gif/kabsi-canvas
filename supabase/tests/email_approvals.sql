@@ -27,7 +27,10 @@ language sql as $$
 $$;
 create function pg_temp.use(p_hash text, p_do text, p_session text default null, p_text text default 'Thank you for coming.',
   p_publication uuid default null) returns jsonb language sql as $$
-  select public.use_action_link(p_hash, p_do, p_text, p_session::uuid, p_publication)
+  -- Sec 2: the page sends the draft version it showed; these cases show the newest one.
+  select public.use_action_link(p_hash, p_do, p_text, p_session::uuid, p_publication,
+    (select coalesce(max(d.version), 0) from public.reply_drafts d
+      where d.review_id::text = (select t.target_id::text from public.action_tokens t where t.token_hash = p_hash)))
 $$;
 create function pg_temp.view(p_hash text, p_session text default null) returns jsonb language sql as $$
   select public.action_link_view(p_hash, p_session::uuid)
@@ -41,8 +44,9 @@ $$;
 select has_column('public', 'action_tokens', 'result', 'action_tokens.result keeps the first result of a link');
 select ok((select bool_and(not has_function_privilege('anon', f, 'execute') and not has_function_privilege('authenticated', f, 'execute')
                            and has_function_privilege('service_role', f, 'execute'))
-             from unnest(array['public.action_link_view(text,uuid)', 'public.use_action_link(text,text,text,uuid,uuid)']) f),
-  'the two email link functions run for the service role only (the page goes through api/action)');
+             from unnest(array['public.action_link_view(text,uuid)', 'public.use_action_link(text,text,text,uuid,uuid)',
+                               'public.use_action_link(text,text,text,uuid,uuid,integer)']) f),
+  'the email link functions run for the service role only (the page goes through api/action)');
 select is((select provolatile from pg_proc where oid = 'public.action_link_view(text,uuid)'::regprocedure), 's',
   'the GET function is STABLE, so Postgres refuses any write inside it');
 select ok(not has_function_privilege('authenticated', 'private.signed_in_as(uuid)', 'execute')

@@ -24,7 +24,7 @@ export const SECRET_KEYS = [
 // (/review/) and a resumed setup (/start/resume/). The query and fragment ones: unsubscribe (t), card codes (code), and
 // what a sign-in return can carry (access_token, refresh_token and the like). Each value becomes ":token" or "redacted".
 export const TOKEN_PATH_PATTERN =
-  "\\/(a|h|u|activate|scan|review|start\\/resume)\\/[^\\/?#\\s\"'<>]+";
+  "\\/(a|h|u|activate|scan|review|start\\/resume|unsubscribe)\\/[^\\/?#\\s\"'<>]+";
 export const TOKEN_QUERY_PATTERN =
   "([?&#](?:t|token|code|otp|key|sig|access_token|refresh_token|provider_token|provider_refresh_token|id_token)=)[^&#\\s\"'<>]+";
 

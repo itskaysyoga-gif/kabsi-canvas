@@ -48,14 +48,28 @@ export async function verifyUnsubscribe(token: string, secret: string): Promise<
   }
 }
 
+/** Where the token of an unsubscribe request is (Sec 2): the last path segment (/email/unsubscribe/TOKEN, the
+ *  one-click address in new emails), the POST body's `t` (the kabsi.co page), or the query string of links sent before
+ *  Sec 2. New links never put it in a query string, which request logs keep. */
+export function unsubscribeToken(url: URL, body: Record<string, unknown> | null): string | null {
+  const parts = url.pathname.split("/").filter(Boolean);
+  const at = parts.lastIndexOf("unsubscribe");
+  if (at >= 0 && parts[at + 1]) return decodeURIComponent(parts[at + 1]);
+  if (body && typeof body.t === "string") return body.t;
+  return url.searchParams.get("t");
+}
+
 /** The headers Gmail, Apple Mail and Yahoo read to show their own Unsubscribe button (RFC 8058). */
 export function unsubscribeHeaders(url: string): Record<string, string> {
   return { "List-Unsubscribe": `<${url}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" };
 }
 
 export type UnsubscribeDeps = {
-  /** The signing key, or null when it cannot be read. */
+  /** The signing key (Vault 'unsubscribe_key' since Sec 2), or null when it cannot be read. */
   secret(): Promise<string | null>;
+  /** The key that signed the links sent before Sec 2 (the internal cron secret). Those links work for good, so they
+   *  are still read; nothing new is signed with it. */
+  oldSecret?(): Promise<string | null>;
   /** The words for a category ("weekly report"). */
   label(category: string): string;
   /** public.apply_unsubscribe for the claim; false when the database refused (the caller has reported it). */
@@ -72,7 +86,11 @@ export const UNSUBSCRIBE_HEADERS: Record<string, string> = { "cache-control": "n
 export async function unsubscribeRequest(method: string, token: string | null, deps: UnsubscribeDeps): Promise<UnsubscribeReply> {
   if (method !== "GET" && method !== "POST") return { status: 405, body: { error: "method_not_allowed", message: "Use GET or POST." } };
   const secret = await deps.secret();
-  const claim = secret ? await verifyUnsubscribe(token ?? "", secret) : null;
+  let claim = secret ? await verifyUnsubscribe(token ?? "", secret) : null;
+  if (!claim && deps.oldSecret) {
+    const old = await deps.oldSecret();
+    claim = old ? await verifyUnsubscribe(token ?? "", old) : null;
+  }
   if (!claim) return { status: 400, body: { error: "invalid_link", message: "This link is not valid." } };
   const label = deps.label(claim.c);
   // Reads only: what the link would stop. A mail scanner that opens it changes nothing.

@@ -6,9 +6,17 @@ const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.-]+/g;
 const PHONE_RE = /\+\d[\d\s().-]{6,}\d|\b\d{9,15}\b/g;
 // Sec 1: a token in a link's query (unsubscribe t, action t, an API key) loses its value too.
 const QUERY_SECRET_RE = /([?&#](?:t|token|key|sig|code|otp|access_token|refresh_token|api_key)=)[^&#\s"']+/g;
+// Sec 2: the one-click unsubscribe token rides in the path (/email/unsubscribe/TOKEN, /unsubscribe/TOKEN).
+const PATH_SECRET_RE = /(\/unsubscribe\/)[^/?#\s"']+/g;
 
 export const scrubText = (s: string) =>
-  s.replace(QUERY_SECRET_RE, "$1[redacted]").replace(EMAIL_RE, "[email]").replace(PHONE_RE, "[phone]");
+  s.replace(QUERY_SECRET_RE, "$1[redacted]").replace(PATH_SECRET_RE, "$1[redacted]").replace(EMAIL_RE, "[email]")
+    .replace(PHONE_RE, "[phone]");
+
+/** An error's text as staff may see it (Sec 2: the operations view, publication and WhatsApp errors): scrubbed of
+ *  emails, phone numbers and tokens, and cut to `max` characters. */
+export const errorText = (e: unknown, max = 300) =>
+  scrubText(String((e as Error)?.message ?? e)).slice(0, max);
 
 // Keys whose value is dropped whatever it holds.
 export const SENSITIVE_KEYS = new Set([
@@ -16,6 +24,8 @@ export const SENSITIVE_KEYS = new Set([
   "sig", "signature", "api_key", "x-api-key", "phone", "review", "review_text",
   // Sec 1: credentials and codes by name.
   "access_token", "refresh_token", "id_token", "otp", "password", "secret", "cookie", "apikey", "x-kabsi-secret",
+  // Sec 2: codes that moved from query strings into bodies and headers; names of people and businesses (privacy trace).
+  "x-kabsi-check", "x-kabsi-code", "reviewer", "reviewer_first", "business_name",
 ]);
 
 export function scrubFields(value: unknown, depth = 0): unknown {

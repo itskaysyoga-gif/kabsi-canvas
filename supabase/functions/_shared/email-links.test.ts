@@ -77,7 +77,7 @@ Deno.test("email link: POST performs once, as the recipient, with the session pa
   assert.equal(r.status, 200);
   assert.deepEqual(r.body, { ok: true, done: "approved", state: "approved", publication: PUB, publish_after: "2026-10-12T10:00:10Z", repeat: false });
   assert.equal(calls.use.length, 1);
-  assert.deepEqual(calls.use[0].input, { do: "post", text: "Thank you so much.", session: OWNER, publication: undefined });
+  assert.deepEqual(calls.use[0].input, { do: "post", text: "Thank you so much.", session: OWNER, publication: undefined, version: undefined });
   assert.equal(calls.use[0].recipient, OWNER, "the audit headers name the link's recipient");
 });
 

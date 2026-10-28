@@ -1,8 +1,8 @@
 // action: the email links (/a/:token). Public: the token is the credential, plus a signed-in session for the kinds
 // that need one (K-17). The rules are in _shared/email-links.ts and the database (public.action_link_view,
 // public.use_action_link, P0.2-05); this file wires them to Supabase.
-//   GET  ?t=TOKEN                       what the link does (never performs anything)
-//   POST { t, do, text? }               performs it once; a second POST gets the first result
+//   POST { t, do: "view" }              what the link does (never performs anything)
+//   POST { t, do, text?, version? }     performs it once; a second POST gets the first result
 //   POST { t, do: "undo", publication } cancels that link's approval inside its 10 seconds (K-70)
 import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, currentUser, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
@@ -30,13 +30,15 @@ async function details(v: LinkView) {
     };
   }
   const { data: rv } = await db.from("reviews").select("id, reviewer_name, star_rating, comment, state, risk, risk_reasons, existing_reply, locations(name, concierge, is_demo)").eq("id", v.target_id).single();
-  const { data: draft } = await db.from("reply_drafts").select("body, safety_ok").eq("review_id", v.target_id).order("version", { ascending: false }).limit(1).maybeSingle();
+  const { data: draft } = await db.from("reply_drafts").select("body, safety_ok, version").eq("review_id", v.target_id).order("version", { ascending: false }).limit(1).maybeSingle();
   return {
     action: v.action, business: (rv?.locations as unknown as { name: string } | null)?.name ?? "",
     concierge: (rv?.locations as unknown as { concierge: boolean } | null)?.concierge === true,
     demo: (rv?.locations as unknown as { is_demo: boolean } | null)?.is_demo === true,
     review: rv && { id: rv.id, reviewer: rv.reviewer_name, rating: rv.star_rating, comment: rv.comment, state: rv.state, risk: rv.risk, risk_reasons: rv.risk_reasons ?? [], reply: rv.existing_reply },
     draft: draft?.safety_ok ? draft.body : null,
+    // Sec 2: the version the page shows; its Approve sends it back and a newer one is refused.
+    draft_version: draft?.version ?? 0,
   };
 }
 
@@ -55,6 +57,7 @@ function deps(req: Request): EmailLinkDeps {
     use: async (hash, input, recipient) => {
       const { data, error } = await auditedAdmin(auditHeaders(req, recipient)).rpc("use_action_link", {
         p_token_hash: hash, p_do: input.do, p_text: input.text ?? null, p_session_user: input.session, p_publication: input.publication ?? null,
+        p_version: input.version ?? null,
       });
       if (error) throw new Error(error.message);
       return data as LinkResult;

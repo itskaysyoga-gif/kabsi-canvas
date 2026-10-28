@@ -92,7 +92,8 @@ async function read<T>(res: Response): Promise<T> {
 }
 
 export async function loadHolidayLink(token: string): Promise<HolidayLinkView> {
-  const res = await linkFetch(`?t=${encodeURIComponent(token)}`);
+  // Sec 2: the token in the POST body, never in a query string.
+  const res = await linkFetch("", { t: token, do: "view" });
   if (res.status === 404) return { status: "invalid" };
   return read<HolidayLinkView>(res);
 }

@@ -1,13 +1,17 @@
 // resume: the onboarding resume link (V4, master plan 30.16 section 3). One link opens the next unfinished step on any device.
 // The code finds the business; the person must be signed in as one of its members, so the link never signs anyone in and a
-// forwarded link shows a stranger nothing. GET /api/resume?code=<20 hex> with the user's JWT answers the step and its page.
+// forwarded link shows a stranger nothing. POST /api/resume { code: <20 hex> } with the user's JWT answers the step and its page.
+// Sec 2: the code is in the body, never in a query string (request logs keep query strings).
 import { admin, CORS, currentUser, fail, json, rateLimit } from "../_shared/kabsi.ts";
+import { readJsonCapped } from "../_shared/email-links.ts";
 import { accessOf, type Facts, RESUME_CODE, STAGE_PATH, stageOf } from "../_shared/onboarding/stages.ts";
 
 export async function resume(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
-  if (req.method !== "GET") return fail("method_not_allowed", "Use GET.", 405);
-  const code = new URL(req.url).searchParams.get("code") ?? "";
+  if (req.method !== "POST") return fail("method_not_allowed", "Use POST.", 405);
+  const body = await readJsonCapped(req, 1024);
+  if (body === "too_large") return fail("too_large", "That link is not right.", 413);
+  const code = typeof body?.code === "string" ? body.code : "";
   if (!RESUME_CODE.test(code)) return fail("bad_code", "That link is not right.", 400);
   const user = await currentUser(req);
   if (!user) return json({ sign_in: true }, 401);

@@ -169,3 +169,7 @@ Moved from KABSI-PROGRESS.md by lane R on 27 Oct 2026 (word for word):
 - V3 (26 Oct, PR 246 merged, deploy run 114 green): Ask a customer is one ready message with the review link (no customer number ever stored), link opens counted apart from reviews, counter card and table tent PDFs, photos from WhatsApp on both plans (Yes, Edit, Skip), the monthly question, sensitive reviews without text, voice notes behind a provider (mock until the key is set). Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
 - 26 Oct, lane R: V2's migration applied; Meta pixel live; QA_SMOKE_TOKEN set; Slack leftovers dropped (0 | 0 | 0 | 0); master plan 30.14.
 - 26 Oct, lane R: the outside review decided (30.15, 30.16) and 30.17 (Founding 25, Home for every business with industry pages, easy access, getkabsi.com). Design 1 to 4 and 3 approved in the design studio. Next: Design 5, V3, Partners, V4, Outbound, Web 2 with Content 1, UX 1, Sec 1, the launch gate.
+
+Moved from KABSI-PROGRESS.md recent entries by lane R on 28 Oct 2026 (word for word):
+
+- 27 Oct 2026, Sec 1: the security tests and fixes; Rashid's steps: Auth captcha and the 600 s code lifetime (LATER rows). Detail: `docs/progress/archive/2026-10-27-sec1.md`.
