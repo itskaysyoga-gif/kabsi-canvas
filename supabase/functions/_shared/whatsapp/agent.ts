@@ -87,7 +87,8 @@ export interface BillingDeps {
   cancel(locationId: string): Promise<string | null>;
   keep(locationId: string): Promise<string | null>;
   change(locationId: string, to: Plan): Promise<{ effective: "now" | "renewal"; until: string | null }>;
-  addLocation(locationId: string): Promise<number>;
+  /** Billing 2: the checkout link for one more location (its own Creem subscription on the same customer). */
+  addLocation(locationId: string): Promise<string>;
 }
 
 export type AgentDeps = {
@@ -461,7 +462,7 @@ async function billing(t: Turn, arg: string | undefined): Promise<string> {
           const r = await bd.change(b.location_id, "essentials");
           return answered(t, SAY.billingDowngraded(longDay(r.until)), "billing_downgraded");
         }
-        case "add_location": return answered(t, SAY.billingAdded(await bd.addLocation(b.location_id)), "billing_location_added");
+        case "add_location": return answered(t, SAY.billingAddLink(await bd.addLocation(b.location_id)), "billing_location_link");
       }
       return answered(t, SAY.unclear, "billing_unclear");
     }

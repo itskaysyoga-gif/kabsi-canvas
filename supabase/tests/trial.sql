@@ -74,7 +74,7 @@ select ok((select s.trial_started_at between now() - interval '1 minute' and now
           where l.id = '00000000-0000-4000-8000-0000000007c1'), '14 days from now, then 7 days of grace, on the organisation');
 select is(pg_temp.ent('00000000-0000-4000-8000-0000000007c1') - 'organization_id' - 'ends_at' - 'trial'
     - 'plan' - 'limits' - 'billing' - 'locations_allowed',
-  '{"state": "trial", "watch": true, "draft": true, "publish": true, "trial_used": true,
+  '{"state": "trial", "watch": true, "draft": true, "publish": true, "trial_used": true, "location_on_plan": true,
     "caps": {"profile_fixes": {"limit": 3, "used": 0}, "backlog_drafts": {"limit": 10}, "ai_generations": {"limit": 100, "used": 0}}}'::jsonb,
   'a trial watches, drafts and publishes, with the three caps');
 -- Session 10: the trial is Pro, with Pro's limits (27.4).

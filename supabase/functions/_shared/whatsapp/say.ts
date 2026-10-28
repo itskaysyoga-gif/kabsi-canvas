@@ -74,8 +74,9 @@ export const SAY = {
   billingDowngradeAsk: (price: string, end: string | null) => `Switch to Essentials for ${price} from your next renewal${end ? `, ${end}` : ""}? You keep Pro until then.`,
   billingDowngraded: (end: string | null) => `Done. Essentials starts${end ? ` on ${end}` : " at your next renewal"}.`,
   billingSamePlan: (plan: string) => `You are already on ${plan}.`,
-  billingAddAsk: (price: string) => `Add a location for ${price}? Creem charges the rest of this period today.`,
-  billingAdded: (n: number) => `Done. Your plan now has ${n} extra ${n === 1 ? "location" : "locations"}.`,
+  // Billing 2 (10.2.3): an extra location is its own Creem payment on the owner's customer, renewed from the day it is paid.
+  billingAddAsk: (price: string) => `Add a location for ${price}? You pay for it on Creem's page, and it renews from today.`,
+  billingAddLink: (url: string) => `Pay for the extra location here: ${url}\nKabsi adds it to your plan when the payment goes through.`,
   billingTryLater: "The payment service did not answer. Please try again in a minute, or reply \"talk to a person\".",
   handoff: "Thanks. A person from Kabsi will answer you here within one business day.",
   // 13b part 2 (30.10 point 7): hours and typed posts approved on WhatsApp, shown back exactly first (25.5).

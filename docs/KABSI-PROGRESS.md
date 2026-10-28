@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 28 Oct 2026 by WhatsApp 2 (before it: Sec 2) (master plan 19, 25.1, 26.6, 29.9, 30); first written by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 28 Oct 2026 by Billing 2 and WhatsApp 2 (before them: Sec 2) (master plan 19, 25.1, 26.6, 29.9, 30); first written by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -13,6 +13,7 @@ One page, under 10 KB. Updated 28 Oct 2026 by WhatsApp 2 (before it: Sec 2) (mas
 - Sec 1 (PR 261, 27 Oct): tenant isolation, roles, approvals, webhooks, the stop switch for Google writes, ASVS L1. Detail: `docs/progress/archive/2026-10-27-sec1.md`.
 - Sec 2 (PR 266, 27 Oct, deployed and checked live): approvals bound to the draft shown, retention per source, privacy trace, backup and restore drill, secrets audit, the staff Operations view. Detail: `docs/progress/archive/2026-10-27-sec2.md`.
 - WhatsApp 2 (PRs 268, 270, 271, 28 Oct; deploys 126 to 128): Meta put 9 of the 11 templates in Marketing (no delivery to US numbers), so each has a Utility replacement; 13 are PENDING (Utility), none new is APPROVED yet; the sender uses a replacement only once it is APPROVED and UTILITY; one real template (`kabsi_staff_alert`) reached the staff phone, delivered receipt read back; `/privacy` and the facts name Anthropic for WhatsApp messages and Nora. Detail and the full table: `docs/progress/archive/2026-10-28-whatsapp2.md`.
+- Billing 2 (PR 269, 28 Oct): extra locations as their own Creem subscription on the same customer, units kept on the plan row; Remove a location; Creem's `prod` read as live; the partner base for extras; the 410 billing stub removed from the repo. Detail: `docs/progress/archive/2026-10-28-billing2.md`.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
@@ -57,10 +58,10 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 28 Oct 2026, Billing 2. Detail: `docs/progress/archive/2026-10-28-billing2.md`.
 - 28 Oct 2026, WhatsApp 2. Detail: `docs/progress/archive/2026-10-28-whatsapp2.md`.
 - 27 Oct 2026, Sec 2. Detail: `docs/progress/archive/2026-10-27-sec2.md`.
-
-- 27 Oct 2026, Audit 1 (P0.7-06, session 20c): every public page and signed-in screen walked at 390 and 1440 px, the stale-language sweep ended at zero or a reason, 10 findings fixed, 6 in LATER; llms lists the twelve wave 1 industry addresses; the waiting list journey is on; the signed-in and public baselines are refreshed. Detail and pictures: `docs/progress/archive/2026-10-27-audit1.md`.
+- 27 Oct 2026, Audit 1. Detail: `docs/progress/archive/2026-10-27-audit1.md`.
 
 ## How a session updates this page
 

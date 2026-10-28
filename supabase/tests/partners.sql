@@ -201,5 +201,15 @@ select is((select sum(commission_cents)::int from public.partner_commissions whe
   'a partial refund and a later chargeback take back the line once');
 select throws_ok($$ select private.partner_payout_run(current_date + 31) $$, 'P0001', 'future_date', 'the run never clears lines ahead of time');
 
+-- Billing 2: a payment for an extra location (its own Creem subscription) pays 25 percent of what was collected before tax,
+-- like the base plan; with no transaction or order, the product price times its units.
+select pg_temp.event('evt_paid_x1', 'subscription.paid', pg_temp.org('00000000-0000-4000-8000-0000000020c2'),
+  '{"object": {"product": {"id": "prod_x", "price": 1500}, "last_transaction": {"id": "tx_x1", "amount": 1500, "amount_paid": 1815}}}', now(), 'tx_x1');
+select is((select commission_cents from public.partner_commissions where payment_id = 'tx_x1'), 375, 'an extra location pays 25 percent of its 15 US dollars');
+select pg_temp.event('evt_paid_x2', 'subscription.paid', pg_temp.org('00000000-0000-4000-8000-0000000020c2'),
+  '{"object": {"product": {"id": "prod_x", "price": 1500}, "items": [{"product_id": "prod_x", "units": 2}]}}', now(), 'tx_x2');
+select is((select base_cents from public.partner_commissions where payment_id = 'tx_x2'), 3000, 'without a transaction the base is the price times its units');
+select is(private.creem_base_cents('{"object": {"product": {"id": "prod_p", "price": 3900}}}'), 3900, 'one unit when Creem sends no items');
+
 select * from finish();
 rollback;
