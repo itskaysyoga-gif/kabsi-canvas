@@ -20,6 +20,7 @@ export const RISK_ISSUES: Record<string, { level: Risk; issue: string }> = {
     issue: "They mention a regulator, an inspection or a report to the authorities.",
   },
   crime: { level: "high", issue: "They accuse someone of a crime." },
+  staff_named: { level: "high", issue: "They name someone on your team in a complaint." },
   refund: { level: "medium", issue: "They mention a refund. Kabsi didn't promise one." },
   staff_complaint: {
     level: "medium",

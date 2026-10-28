@@ -7,6 +7,8 @@ name: Eval live (by hand, 27.9)
 #      steps, each ready draft scored by the judge;
 #   2. Nora: her 60 questions plus the 20 of 28.7, each answer scored by the judge.
 # The results and the judge's scores per prompt version are kept as artifacts. Needs the secret ANTHROPIC_API_KEY.
+# Eval 1: two switches. "evaluations" runs parts 1 and 2 (on by default); "injection" also runs the Sec 1 hostile text
+# cases (scripts/sec1/injection-live.ts: at most 30 cases, stopped at its own budget, 0.30 US dollars by default).
 on:
   workflow_dispatch:
     inputs:
@@ -18,6 +20,18 @@ on:
         description: Budget for Nora's part, US dollars
         required: true
         default: "2.5"
+      evaluations:
+        description: Run the reply and Nora evaluations
+        type: boolean
+        default: true
+      injection:
+        description: Run the Sec 1 injection cases (at most 30 cases)
+        type: boolean
+        default: false
+      injection_budget:
+        description: Budget for the injection cases, US dollars
+        required: true
+        default: "0.30"
 
 permissions:
   contents: read
@@ -36,14 +50,33 @@ jobs:
         with:
           node-version: 22
       - name: Replies (the 27.9 cut, judged)
+        if: inputs.evaluations
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: bash scripts/eval/gate.sh --cut --judge --budget "${{ inputs.reply_budget }}" --scores "$GITHUB_WORKSPACE/scripts/eval/scores.json"
+          REPLY_BUDGET: ${{ inputs.reply_budget }}
+        run: bash scripts/eval/gate.sh --cut --judge --budget "$REPLY_BUDGET" --scores "$GITHUB_WORKSPACE/scripts/eval/scores.json"
         continue-on-error: true
       - name: Nora (80 questions, judged)
+        if: inputs.evaluations
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget "${{ inputs.nora_budget }}" --out nora-eval-result.json --scores scripts/eval/scores.json
+          NORA_BUDGET: ${{ inputs.nora_budget }}
+        run: node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget "$NORA_BUDGET" --out nora-eval-result.json --scores scripts/eval/scores.json
+        continue-on-error: true
+      - name: Injection cases (Sec 1, real models)
+        if: inputs.injection
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          INJECTION_BUDGET: ${{ inputs.injection_budget }}
+        run: |
+          scratch="$(mktemp -d)"
+          mkdir -p "$scratch/supabase/functions" "$scratch/scripts/sec1" "$scratch/knowledge"
+          cp -r supabase/functions/. "$scratch/supabase/functions/"
+          cp scripts/sec1/injection-live.ts "$scratch/scripts/sec1/"
+          cp knowledge/kabsi-facts.md "$scratch/knowledge/"
+          echo '{"nodeModulesDir":"auto"}' > "$scratch/deno.json"
+          cd "$scratch"
+          deno run --allow-env --allow-read --allow-net scripts/sec1/injection-live.ts --budget "$INJECTION_BUDGET" | tee "$GITHUB_WORKSPACE/injection-live.txt"
         continue-on-error: true
       - name: Keep the results
         if: always()
@@ -53,5 +86,6 @@ jobs:
           path: |
             eval-result.json
             nora-eval-result.json
+            injection-live.txt
             scripts/eval/scores.json
           if-no-files-found: ignore

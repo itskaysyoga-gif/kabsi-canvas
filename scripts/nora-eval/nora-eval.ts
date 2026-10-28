@@ -13,6 +13,7 @@
 // catch. A question whose facts were taken out of the file fails the support check with either stub.
 import { QUESTIONS, type Question } from "./questions.ts";
 import { task, takesEffort, type Usage } from "../../supabase/functions/_shared/ai/agents.ts";
+import { fenceVisitor } from "../../supabase/functions/_shared/nora-rules.ts";
 
 export type Answerer = { name: string; answer: (q: Question, kb: string) => Promise<string> };
 
@@ -105,7 +106,7 @@ const NOT_YET = new RegExp(
     String.raw`\bcoming\b|comes? later|will be (available|added|built)`,
     String.raw`todav[ií]a no|a[uú]n no|por ahora|ahora mismo|por el momento|de momento|no est[aá] disponible|no disponible|a[uú]n no existe`,
     String.raw`pas encore|pour l'instant|pour le moment|n'est pas (encore )?disponible|pas (encore )?disponible`,
-    "لم يتوفر|غير متاح|ليس متاح|قريبا|قريباً|غير متوفر|لا يتوفر|حاليا|حالياً|لسه|لسا|ما فتح|لم يفتح",
+    "لم يتوفر|غير متاح|ليس متاح|قريبا|قريباً|غير متوفر|لا يتوفر|حاليا|حالياً|لسه|لسا|ما فتح|لم يفتح|لم تفتح|ما زال قيد التجربة|ليس بعد",
   ].join("|"),
   "i",
 );
@@ -137,7 +138,9 @@ export function check(q: Question, answer: string, kb: string): Finding[] {
   for (const n of numbersIn(answer))
     if (!known.has(n)) add("honesty", `states "${n}", which the facts file does not hold`);
   if (q.coming) {
-    if (!NOT_YET.test(answer)) add("honesty", "a [COMING] item must be called not available yet");
+    // Eval 1 (live run, ar57): Arabic short vowels ("لم يُفتح بعد", "حاليًا") hid an honest "not yet" from the pattern.
+    if (!NOT_YET.test(answer.replace(/[\u064B-\u0652\u0670]/g, "")))
+      add("honesty", "a [COMING] item must be called not available yet");
     if (DATE_FOR_COMING.test(answer))
       add("honesty", "gives a date or a time frame for a [COMING] item");
   }
@@ -307,7 +310,7 @@ export function liveModel(apiKey: string, model: string, rules: string, used?: U
               text: "<context>\nThe visitor is not signed in. No account tools are available in this evaluation.\n</context>",
             },
           ],
-          messages: [{ role: "user", content: q.ask }],
+          messages: [{ role: "user", content: fenceVisitor(q.ask) }],
         }),
       });
       const data = await res.json();

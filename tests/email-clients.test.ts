@@ -14,6 +14,8 @@ const ALLOWED: Record<string, string> = {
   opacity: "the hidden preheader",
   "role attribute": "role=presentation is ignored where unsupported",
   "aria-hidden attribute": "decorative marks only; ignored where unsupported",
+  "aria-label attribute":
+    "the review's star rating (Eval 1): where unsupported a screen reader reads the five star characters",
   "border-radius": "square corners in Outlook on Windows; its button is the VML copy",
   "white-space": "quoted text wraps normally in Outlook on Windows",
 };

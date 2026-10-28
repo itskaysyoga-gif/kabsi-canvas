@@ -78,6 +78,24 @@ if (out)
       1,
     ),
   );
+// The prompt files this run tested, as one hash (Eval 1), so a committed score names the very prompts it ran on. The same
+// bytes as `cat` of the files in name order piped to sha256sum. The CI prompt gate does not read it (lane R decides).
+async function promptsHash(): Promise<string> {
+  const dir = new URL("../../supabase/functions/_shared/ai/prompts/", import.meta.url);
+  const names: string[] = [];
+  for await (const f of Deno.readDir(dir))
+    if (f.isFile && f.name.endsWith(".ts")) names.push(f.name);
+  const parts = await Promise.all(names.sort().map((n) => Deno.readFile(new URL(n, dir))));
+  const all = new Uint8Array(parts.reduce((s, p) => s + p.length, 0));
+  let at = 0;
+  for (const p of parts) {
+    all.set(p, at);
+    at += p.length;
+  }
+  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", all));
+  return [...digest].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 if (judge && flag("--scores")) {
   const file = flag("--scores")!;
   const all = JSON.parse(await Deno.readTextFile(file).catch(() => "{}"));
@@ -89,6 +107,9 @@ if (judge && flag("--scores")) {
     judged: judged.length,
     ...sum,
     costUsd: cost.totalUsd,
+    // Eval 1: whether the gate passed (a run stopped by its budget never does) and on which prompt files.
+    gate: gate.pass,
+    promptsHash: await promptsHash(),
   };
   await Deno.writeTextFile(file, JSON.stringify(addRun(all, REPLY_V2, run), null, 1) + "\n");
 }

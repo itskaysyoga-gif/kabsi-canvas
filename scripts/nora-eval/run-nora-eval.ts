@@ -41,7 +41,7 @@ if (stub) {
     );
     process.exit(2);
   }
-  // The same words as the assistant function, with no WhatsApp number (there is none).
+  // The same words as the assistant function on the website, where no WhatsApp number is given yet.
   model = liveModel(key, noraModel, noraRules(false, ""), used);
 } else {
   console.error("Use --live or --stub pass|fail.");

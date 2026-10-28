@@ -52,6 +52,12 @@ Deno.test("medium: a staff complaint", () => {
   expect("El camarero fue muy grosero.", "medium", "staff_complaint");
   expect("Serveur très impoli.", "medium", "staff_complaint");
 });
+Deno.test("high: a complaint that names a member of staff (30.15 3.7, Eval 1)", () => {
+  expect("The waiter Sam was rude to us.", "high", "staff_named");
+  assert.equal(rules("Our stylist Maya was wonderful", 5).reasons.includes("staff_named"), false);
+  assert.equal(rules("The stylist Maya ignored us", 2).risk, "high");
+  assert.match(CLASSIFY_RULES, /"staff_named" \(high\)/);
+});
 Deno.test("medium: a disputed fact", () => {
   expect("Google said you were open but the door was locked. False advertising.", "medium", "disputed_fact");
   expect("Wrong hours on the profile.", "medium", "disputed_fact");

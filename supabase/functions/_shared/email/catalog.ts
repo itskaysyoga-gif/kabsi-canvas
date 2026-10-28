@@ -48,12 +48,12 @@ const SNAPSHOT: Snapshot = {
 };
 const COUNTS = { replies_prepared: 5, replies_published: 4, posts_published: 1, photos_published: 2, photo_batches: 1, hours_updates: 1, profile_updates: 0, profile_checks: 2016, changes_found: 1, changes_kept: 0, changes_put_back: 1 };
 const REPORT = {
-  period: { from: "19 October", to: "25 October" }, rating: 4.7, rating_count: 212, rating_change: 0.1, rating_drop: false, new_reviews: 3, new_avg: 4.7, replied: 3, waiting: 1,
+  period: { from: "2026-10-19", to: "2026-10-25" }, rating: 4.7, rating_count: 212, rating_change: 0.1, rating_drop: false, new_reviews: 3, new_avg: 4.7, replied: 3, waiting: 1,
   taps: { total: 9, nfc: 0, qr: 4, message: 5 },
   care: { headline: "Kabsi took care of 10 things this week.", things: 10, profile_line: "Checked 2,016 times. 1 change found: 1 put back.", counts: COUNTS },
   needs: [{ title: "A reply to Maya K.'s review", path: "/app/reviews?f=needs" }], needs_total: 1,
   plan: [{ title: "Send your review link to customers after their visit this week.", path: "/app/get-reviews" }],
-  receipt: receipt({
+  receipt: receipt({ dates: "19 to 25 October",
     business: BIZ, counts: COUNTS, needs: [{ title: "A reply to Maya K.'s review", path: "/app/reviews?f=needs" }], needsTotal: 1,
     plan: [{ title: "Send your review link to customers after their visit this week", path: "/app/get-reviews" }],
     activity: {

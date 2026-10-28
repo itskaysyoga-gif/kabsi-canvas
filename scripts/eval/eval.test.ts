@@ -247,6 +247,10 @@ Deno.test(
       ],
       ["F-014", "We don't have information on bookings for the window table at the moment."],
       [
+        "F-019",
+        "We can only speak to what we know, and a second shop is not something we can confirm here.",
+      ],
+      [
         "F-001",
         "Thank you Greg. Our hours are 7am to 4pm, and we have no holiday hours to share yet.",
       ],
@@ -260,6 +264,8 @@ Deno.test(
       ["F-007", "Yes, you can bring your dog inside."],
       ["F-009", "We have a lovely outdoor terrace for the summer."],
       ["F-014", "We take bookings for the window table by phone."],
+      ["F-019", "Yes, we have a second shop in Queens."],
+      ["F-019", "You can also find us in Queens now."],
       ["F-001", "On public holidays we open at 9am."],
       ["F-001", "We have no special sign, but the holiday hours are 9am to 2pm."],
     ];

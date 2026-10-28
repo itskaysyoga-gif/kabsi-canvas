@@ -14,8 +14,8 @@ ${UNTRUSTED}
  "risk": "<low | medium | high>",
  "reasons": ["<reason key>", ...]}
 Levels:
-- high: a legal threat, discrimination, a health or safety claim (illness, injury, allergy, pests, food safety), a threat, harassment, privacy or personal data, a regulator or an inspection, an accusation of a crime.
-- medium: a complaint, a refund request, a complaint about a member of staff, a claim that something about the business is wrong.
+- high: a legal threat, discrimination, a health or safety claim (illness, injury, allergy, pests, food safety), a threat, harassment, privacy or personal data, a regulator or an inspection, an accusation of a crime, a complaint that names a member of staff ("the waiter Sam was rude").
+- medium: a complaint, a refund request, a complaint about a member of staff who is not named, a claim that something about the business is wrong.
 - low: praise or mild feedback.
 Reason keys (use only these): ${reasons}.
 When in doubt between two levels, choose the higher one.`;

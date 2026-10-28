@@ -145,7 +145,7 @@ export const QUESTIONS: Question[] = [
     must: [/kabsi\.co/],
     coming: true,
     reference:
-      "Not yet. Approving on WhatsApp is not available yet because Kabsi has no WhatsApp number at the moment. Today you approve on kabsi.co, in the app or from the email. When it opens it will work for low and medium risk replies and weekly posts, never for high-risk reviews or your business name, address, categories, map pin, phone or open or closed status.",
+      "Not yet. Approving on WhatsApp is not available yet: Kabsi has a WhatsApp number, but owners are not switched on yet. Today you approve on kabsi.co, in the app or from the email. When it opens it will work for low and medium risk replies and weekly posts, never for high-risk reviews or your business name, address, categories, map pin, phone or open or closed status.",
   },
   {
     id: "en10",
@@ -236,7 +236,8 @@ export const QUESTIONS: Question[] = [
     ],
     must: [
       /Keep my information/,
-      /no automatic|not automatic|never automatic|never [^.]{0,40}automatically|can't automatically|cannot automatically|may not/i,
+      // Eval 1: "Kabsi never puts anything back by itself" (live run) says the same thing.
+      /no automatic|not automatic|never automatic|never [^.]{0,40}automatically|never [^.]{0,40}by itself|can't automatically|cannot automatically|may not/i,
     ],
     forbid: [YES, /\b(will|does) automatically (fix|revert|put)/i],
     reference:
@@ -260,7 +261,7 @@ export const QUESTIONS: Question[] = [
     topic: "the review link page",
     ask: "Can customers see a Kabsi page before the Google review box?",
     kb: [/Show the page/, /asks no question about the visit, shows no rating screen/],
-    must: [/Google review button|review button/i, /no rating screen|no question/i],
+    must: [/Google review button|review button/i, /no rating (screen|question)|no question/i],
     reference:
       "Only if you switch it on. By default a review link goes straight to Google. If you switch a link to Show the page on Get reviews, customers see a short Kabsi page with the Google review button first and large, the same for everyone, then one line, Need help now? Message the manager. It asks no question about the visit and shows no rating screen.",
   },
@@ -350,10 +351,10 @@ export const QUESTIONS: Question[] = [
     lang: "en",
     topic: "the Results Report",
     ask: "What is in the Results Report and when does it come?",
-    kb: [/an email every Monday, also kept under Reports/],
+    kb: [/every Monday, kept under Reports, and sent on WhatsApp or by email/],
     must: [/Monday/, /Reports/],
     reference:
-      "It arrives every Monday at 08:00 local time and is kept under Reports. It shows what Kabsi did that week, what waits for your yes, one next step, then Google's own numbers against the week before, with calls and direction requests apart.",
+      "It comes every Monday at 08:00 local time, by email until owners are switched on to WhatsApp, and is kept under Reports. It shows what Kabsi did that week, what waits for your yes, one next step, then Google's own numbers against the week before, with calls and direction requests apart.",
   },
   {
     id: "en27",

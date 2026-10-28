@@ -11,7 +11,7 @@ export type ReplyOutput = { reply: string; facts_used: string[]; language: strin
 // Sec 1: "on us", a free item, a gift card and "make it up to you" are compensation too (the evaluation's broader list).
 const MONEY = /(\d+\s?%\s?off|\bdiscount|\brefund|\bvoucher|\bcoupon|reimburs|compensat|on the house|\b(?:is|are|be|'s) on us\b|\bfree of charge|\bfree (?:meal|coffee|cake|dessert|drink|round|pastr\w*|loaf|bread|item|dish|night|stay|session|class|treatment|visit)s?\b|\bgift (?:card|certificate)|make it up to you|descuento|reembolso|cup[oó]n|\bgratis\b|remise|rembours|خصم|استرداد|تعويض|قسيمة|مجانا|ببلاش)/i;
 const FAULT = /\b(our (fault|mistake|error)|it was our (fault|mistake|error)|we (made|make) (a|an) (mistake|error)|we messed up|we were wrong|we (are|were|'re) (responsible|liable|at fault)|we take full responsibility|we admit)\b/i;
-const LEAK = /(system prompt|my instructions|these instructions|as an ai\b|language model|business_memory|style_examples|<\/?customer_review)/i;
+const LEAK = /(system prompt|my instructions|these instructions|as an ai\b|language model|business_memory|style_examples|<\/?(customer_review|draft)\b)/i;
 const PERSONAL = /\b(order|booking|reservation|invoice|account|table|ticket)\s*(number|no\.?|#)\s*\S+|\b(as (our|a) (patient|client))\b|\byour (appointment|treatment|prescription|diagnosis|visit on|order on|booking on)\b/i;
 // K-13: a health, legal or financial business never confirms the reviewer was a patient or client, never mentions a
 // treatment, a visit, a case or an account. English, Spanish, French and Arabic.

@@ -5,7 +5,7 @@
 // never as ready.
 import { type JsonSchema, message, parseJson, type Meter, type System } from "./client.ts";
 import { task } from "./agents.ts";
-import { fenceReview, houseStyle, type ReviewInput, UNTRUSTED } from "./fence.ts";
+import { fenceDraft, fenceReview, houseStyle, type ReviewInput, UNTRUSTED } from "./fence.ts";
 import { type Memory, memoryParts } from "./memory.ts";
 import { type ReplyOutput, replyChecks } from "./checks.ts";
 import { runContract, type Send, type Workflow } from "./contract.ts";
@@ -93,7 +93,7 @@ export function replyWorkflow(o: { checkCall?: typeof message; meter?: Meter } =
       const facts = Object.entries(i.memory.factText).map(([r, t]) => `[${r}] ${t}`).join("\n") || "(none)";
       const avoid = typeof i.memory.card.avoid === "string" && i.memory.card.avoid.trim() ? `\nThe owner asked never to mention or promise (set ok=false if the draft does): ${i.memory.card.avoid.trim()}\n` : "";
       const raw = await call(check.model, CHECK_RULES,
-        `Allowed facts:\n${facts}\n${avoid}\nThe review (the reviewer's name is always allowed in the reply):\n${fenceReview(i.review)}\n\nDraft:\n${out.reply}`, check.maxTokens, o.meter);
+        `Allowed facts:\n${facts}\n${avoid}\nThe review (the reviewer's name is always allowed in the reply):\n${fenceReview(i.review)}\n\nThe draft to judge:\n${fenceDraft(out.reply)}`, check.maxTokens, o.meter);
       const j = parseJson<{ ok?: boolean; issues?: string[] }>(raw);
       return { ok: j.ok === true, problems: (j.issues ?? []).map((s) => `The safety check flagged: ${String(s)}`).slice(0, 6), model: check.model };
     },

@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { trackReportOpened } from "@/lib/telemetry";
 import { loadNearby } from "@/lib/insights";
+import { dateRange } from "@/lib/date-range";
 import { AccountTop, Panel } from "@/components/kabsi/d3-account";
 import { EmptyState, ErrorState, Skeleton, buttonClass } from "@/components/kabsi/ui";
 import { CareBottom, CareTop, type CareData } from "@/components/report/care-blocks";
@@ -47,7 +48,7 @@ async function loadReports(locationId: string): Promise<Row[]> {
   return (data ?? []) as Row[];
 }
 
-const dates = (r: ReportData) => `${r.period.from} to ${r.period.to}`;
+const dates = (r: ReportData) => dateRange(r.period);
 
 function ReportPage() {
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });

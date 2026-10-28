@@ -29,14 +29,21 @@ export type ReviewInput = {
 
 const quote = quoteBox;
 
+const starsOf = (n: number) => Math.max(0, Math.min(5, Math.round(n)));
+/** The rating as five star characters (Eval 1): filled ★, empty ☆, in the text colour, read out as "4 of 5 stars". */
+export function starRow(stars: number): string {
+  const n = starsOf(stars);
+  return `<span role="img" aria-label="${n} of 5 stars" style="font-size:18px;letter-spacing:2px;">${"★".repeat(n)}${"☆".repeat(5 - n)}</span>`;
+}
+
 type Block = { html: string; text: string; button?: { label: string; url: string }; links?: { label: string; url: string }[] };
 
 /** One review as the body of an email (or of a digest line when withPost is true). */
 export function reviewBlock(i: ReviewInput, withPost: boolean): Block {
   const inbox = `${i.appUrl}/app/reviews?f=needs`;
-  const head = `<p style="margin:0 0 8px 0;"><strong>${esc(i.reviewer ?? "A customer")}</strong> · Rating ${i.stars} of 5</p>`;
+  const head = `<p style="margin:0 0 8px 0;"><strong>${esc(i.reviewer ?? "A customer")}</strong> · ${starRow(i.stars)}</p>`;
   const reviewText = i.comment ? quote(i.comment) : `<p class="kb-t2" style="margin:0 0 16px 0;color:${TOKENS.stone};">No written review, just a rating.</p>`;
-  const plainHead = `${i.reviewer ?? "A customer"}: ${i.stars} of 5\n${i.comment ?? "No written review, just a rating."}`;
+  const plainHead = `${i.reviewer ?? "A customer"}: ${starsOf(i.stars)} of 5 stars\n${i.comment ?? "No written review, just a rating."}`;
   if (!i.links) return { html: head + reviewText, text: plainHead };
   // K-13: a high-risk review has no draft and no approve link; the email is the checklist. A holding reply the owner
   // asked for is approved in Kabsi, signed in.

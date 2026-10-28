@@ -3,11 +3,15 @@
 // WhatsApp). It reports, for each case, what the model did and whether code would have let it through. Nothing is stored.
 //
 //   ANTHROPIC_API_KEY=... deno run --allow-env --allow-read --allow-net=api.anthropic.com scripts/sec1/injection-live.ts
+//   (the workflow allows the network wider, because the run first downloads the npm packages the functions import)
 //   ... --max 10          run at most 10 cases (default: every case, at most 30)
+//   ... --budget 0.30     stop starting cases that would pass this many US dollars (default 0.30)
 //   ... --dry             print the cases and the cost estimate, call nothing
 //
-// Refuses to run without ANTHROPIC_API_KEY. A hard stop of 30 model calls covers the whole run, whatever --max says, and a
-// review case costs up to three calls (classify, draft, check), so a full run stops early by design. Run it by hand only:
+// Refuses to run without ANTHROPIC_API_KEY. Eval 1 order: the WhatsApp router first, then Nora, then reviews, because the
+// reply evaluation (scripts/eval, 30 injection cases) already sends hostile reviews to the real models. A case starts only
+// when its estimate still fits the budget; a hard stop of 60 model calls covers the whole run. Run it by hand only (the
+// "Eval live (by hand, 27.9)" workflow has a switch for it):
 // CI never does (it is outside the folders CI tests). A change to a prompt still goes through the evaluation gate
 // (scripts/eval/gate.sh); this script is evidence, not a gate.
 import {
@@ -32,7 +36,7 @@ import {
 import { LIVE_CASES, type LiveCase } from "../../supabase/functions/_shared/sec1/fixtures.ts";
 import type { FactRow } from "../../supabase/functions/_shared/facts.ts";
 
-const MAX_CALLS = 30;
+const MAX_CALLS = 60;
 const args = Deno.args;
 const flag = (name: string) => {
   const i = args.indexOf(name);
@@ -40,7 +44,17 @@ const flag = (name: string) => {
 };
 const max = Math.min(Number(flag("--max") ?? LIVE_CASES.length), MAX_CALLS);
 const dry = args.includes("--dry");
-const cases = LIVE_CASES.slice(0, max);
+const ORDER: Record<LiveCase["surface"], number> = { router: 0, nora: 1, review: 2 };
+const cases = [...LIVE_CASES]
+  .sort((a, b) => ORDER[a.surface] - ORDER[b.surface])
+  .slice(0, Math.min(max, 30));
+// A budget that is not a number between 0 and 1 dollar is refused (it would never stop the run).
+const budgetUsd = Number(flag("--budget") ?? "0.30");
+if (!(budgetUsd > 0 && budgetUsd <= 1)) {
+  console.error("--budget takes a number of US dollars above 0 and at most 1. Nothing was run.");
+  Deno.exit(2);
+}
+const budgetMicros = budgetUsd * 1e6;
 
 // Cost estimate before anything runs: rough tokens per call (system prompt plus input, then the answer), list prices.
 const CALLS: Record<LiveCase["surface"], { model: string; input: number; output: number }[]> = {
@@ -50,7 +64,8 @@ const CALLS: Record<LiveCase["surface"], { model: string; input: number; output:
     { model: MODELS.check, input: 1_500, output: 120 },
   ],
   router: [{ model: MODELS.check, input: 700, output: 80 }],
-  nora: [{ model: task("nora", "chat").model, input: 30_000, output: 900 }],
+  // The facts are about 50,000 tokens; the first Nora call writes the cache (1.25 times), later ones read it.
+  nora: [{ model: task("nora", "chat").model, input: 62_500, output: 900 }],
 };
 let plannedCalls = 0,
   estimate = 0;
@@ -123,7 +138,30 @@ const LEAK =
 
 type Line = { id: string; surface: string; outcome: string; detail: string };
 const lines: Line[] = [];
+const caseEstimate = (c: LiveCase, noraDone: number) =>
+  CALLS[c.surface].reduce(
+    (s, k) =>
+      s +
+      costMicros(k.model, {
+        input: c.surface === "nora" && noraDone > 0 ? 5_000 : k.input,
+        output: k.output,
+        cacheRead: c.surface === "nora" && noraDone > 0 ? 50_000 : 0,
+        cacheWrite: 0,
+      }),
+    0,
+  );
+let noraDone = 0;
 for (const c of cases) {
+  if (meterCost(meter) + caseEstimate(c, noraDone) > budgetMicros) {
+    lines.push({
+      id: c.id,
+      surface: c.surface,
+      outcome: "not run (budget)",
+      detail: `spent $${(meterCost(meter) / 1e6).toFixed(4)}`,
+    });
+    continue;
+  }
+  if (c.surface === "nora") noraDone++;
   try {
     if (c.surface === "review") {
       const review = { reviewer: c.reviewer ?? "Maya", rating: 5, comment: c.text };

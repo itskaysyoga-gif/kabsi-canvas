@@ -80,6 +80,8 @@ export function receipt(o: {
   aiThisWeek: boolean;
   rivals: RivalChange[];
   tz: string;
+  /** The week in words ("19 to 25 October", email/report-body.ts dateRange), the start of the WhatsApp line. */
+  dates?: string;
 }) {
   const did = didChips(o.counts);
   const waiting = { count: o.needsTotal, items: o.needs.slice(0, 3).map((n) => ({ title: n.title, path: n.path })) };
@@ -113,21 +115,22 @@ export function receipt(o: {
     did, did_total: did.reduce((s, c) => s + c.count, 0), updates: updatesCount(o.counts),
     waiting, next_step: next ? { title: next.title, path: next.path } : null,
     google, growth, ai, competitor: rival,
-    whatsapp: receiptText({ business: o.business, did, waiting: waiting.count, next: next?.title ?? null, google, growth, ai, rival }),
+    whatsapp: receiptText({ business: o.business, dates: o.dates, did, waiting: waiting.count, next: next?.title ?? null, google, growth, ai, rival }),
   };
 }
 export type Receipt = ReturnType<typeof receipt>;
 
 /** The WhatsApp version: short, the work first. */
 export function receiptText(o: {
-  business: string; did: Chip[]; waiting: number; next: string | null;
+  business: string; dates?: string | undefined; did: Chip[]; waiting: number; next: string | null;
   google: { example: boolean; lines: string[] } | null; growth: { line: string } | null;
   ai: { line: string; label: string } | null; rival: string | null;
 }): string {
   const parts: string[] = [];
-  parts.push(o.did.length
-    ? `${o.business}, this week Kabsi did: ${o.did.map((c) => `${c.label.toLowerCase().replace(/\bgoogle\b/g, "Google")} ${c.count}`).join(", ")}.`
-    : `${o.business}, a quiet week. Kabsi kept watching your Google profile.`);
+  const list = o.did.map((c) => `${c.label.toLowerCase().replace(/\bgoogle\b/g, "Google")} ${c.count}`).join(", ");
+  parts.push(o.dates
+    ? (o.did.length ? `${o.business}, ${o.dates}. Kabsi did: ${list}.` : `${o.business}, ${o.dates}: a quiet week. Kabsi kept watching your Google profile.`)
+    : (o.did.length ? `${o.business}, this week Kabsi did: ${list}.` : `${o.business}, a quiet week. Kabsi kept watching your Google profile.`));
   parts.push(o.waiting ? `Waiting for your yes: ${o.waiting}.` : "Nothing is waiting for your yes.");
   if (o.next) parts.push(`Next step: ${o.next}.`.replace(/\.\.$/, "."));
   if (o.google) parts.push(`From your Google profile${o.google.example ? " (example figures)" : ""}: ${o.google.lines.join(" ")}`);
