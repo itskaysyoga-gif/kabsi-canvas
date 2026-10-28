@@ -27,6 +27,7 @@ create table if not exists public.billing_extras (
   current_period_end timestamptz,
   cancel_at_period_end boolean not null default false,
   ended_with_plan boolean not null default false,
+  cancel_requested_at timestamptz,
   past_due_at timestamptz,
   last_event_at timestamptz,
   ended_at timestamptz,
@@ -40,6 +41,7 @@ revoke all on table public.billing_extras from public, anon, authenticated;
 grant select, insert, update, delete on table public.billing_extras to service_role;
 comment on table public.billing_extras is 'Billing 2 (10.2.3): one row per Creem subscription of the Extra location product. Written only by the billing job; the running units are kept on the plan row.';
 comment on column public.billing_extras.subscription_id is 'The owner''s plan row (subscriptions) these units are kept on.';
+comment on column public.billing_extras.cancel_requested_at is 'The owner asked to remove this extra location; Creem''s scheduled_cancel event sets the paid state.';
 comment on column public.billing_extras.ended_with_plan is 'Kabsi scheduled this cancel because the base plan was cancelled; Keep my plan resumes it.';
 
 -- The units of the running extras, written on the owner's plan row (the newest running Creem plan). Returns the units.
@@ -49,7 +51,9 @@ declare v_units integer; v_sub uuid;
 begin
   perform pg_advisory_xact_lock(hashtext('billing_extras:' || p_org::text));
   select coalesce(sum(x.units), 0)::integer into v_units from public.billing_extras x
-   where x.organization_id = p_org and x.state in ('active', 'past_due');
+   where x.organization_id = p_org
+     and (x.state = 'active'
+       or (x.state = 'past_due' and coalesce(x.past_due_at, x.updated_at) + interval '7 days' > now()));
   select s.id into v_sub from public.subscriptions s
    where s.organization_id = p_org and s.provider = 'creem' and s.plan in ('essentials', 'pro')
    order by (s.state in ('active', 'past_due')) desc, coalesce(s.last_event_at, s.updated_at) desc nulls last limit 1;
@@ -166,7 +170,12 @@ begin
   -- Billing 2 (10.2.3): a Creem plan covers 1 + its extra locations. The oldest businesses of the organisation are on
   -- the plan; a business past that number (an extra location cancelled) stops its Kabsi work, and nothing on Google
   -- changes. Plans paid before Creem are per business and are not counted here.
-  v_allowed := case when v_state = 'paid' then 1 + coalesce(v_paid_sub.units, 0) when v_plan is not null then 1 else 0 end;
+  -- The plan row's units, never more than the extras running now: a failed payment of an extra counts 7 days, like the plan.
+  v_allowed := case when v_state = 'paid' then 1 + least(coalesce(v_paid_sub.units, 0), (
+      select coalesce(sum(x.units), 0)::integer from public.billing_extras x
+       where x.organization_id = p_org
+         and (x.state = 'active' or (x.state = 'past_due' and coalesce(x.past_due_at, x.updated_at) + interval '7 days' > now()))))
+    when v_plan is not null then 1 else 0 end;
   if p_location is not null and v_state = 'paid' and v_paid_sub.provider = 'creem' and v_legacy_paid is null then
     select r.n into v_rank from (
       select l.id, row_number() over (order by l.created_at, l.id) as n from public.locations l

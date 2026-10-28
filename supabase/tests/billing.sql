@@ -46,8 +46,18 @@ select is((pg_temp.ent() ->> 'publish')::boolean, true, 'paid publishes');
 select is((pg_temp.ent() ->> 'locations_allowed')::int, 1, 'one location');
 
 -- Extra locations (units) and the upgrade.
-select pg_temp.set_sub('active', ', units = 2');
+-- Billing 2: the units come from the extra-location subscriptions (billing_extras), synced onto the plan row.
+insert into public.billing_extras (organization_id, provider_subscription_id, mode, state, period, units)
+values (pg_temp.org(), 'sub_extra_a', 'test', 'active', 'month', 1), (pg_temp.org(), 'sub_extra_b', 'test', 'active', 'month', 1);
+select is(public.billing_extras_sync(pg_temp.org()), 2, 'two paid extra locations');
 select is((pg_temp.ent() ->> 'locations_allowed')::int, 3, 'two extra locations make three');
+select pg_temp.set_sub('active', ', units = 5');
+select is((pg_temp.ent() ->> 'locations_allowed')::int, 3, 'never more than the extras that are paid');
+update public.billing_extras set state = 'past_due', past_due_at = now() - interval '8 days' where provider_subscription_id = 'sub_extra_b';
+select is((pg_temp.ent() ->> 'locations_allowed')::int, 2, 'an extra whose payment failed 8 days ago no longer counts');
+select is(public.billing_extras_sync(pg_temp.org()), 1, 'nor in the sync');
+delete from public.billing_extras where organization_id = pg_temp.org();
+select pg_temp.set_sub('active', ', units = 0');
 select pg_temp.set_sub('active', ', plan = ''pro''');
 select is(pg_temp.ent() ->> 'plan', 'pro', 'an upgrade changes the plan at once');
 select is((pg_temp.ent() -> 'limits' ->> 'competitors')::int, 5, 'Pro watches 5 competitors');
