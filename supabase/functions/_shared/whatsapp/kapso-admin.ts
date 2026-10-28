@@ -9,7 +9,7 @@
 //   - health: read the number's health and quality rating (hourly, from pg_cron).
 //   - automations: confirm no Kapso workflow or Kapso agent answers the number, so only Kabsi's own code replies.
 // Answers carry ids, names and statuses only. The network is a dep, so tests never call Kapso.
-import { allDefs, submission } from "./templates.ts";
+import { allDefs, isReplacement, submission } from "./templates.ts";
 
 const PLATFORM = "https://api.kapso.ai/platform/v1";
 const META = "https://api.kapso.ai/meta/whatsapp/v24.0";
@@ -134,7 +134,9 @@ export async function readTemplates(env: KapsoEnv): Promise<TemplateRow[]> {
 /** The statuses Kabsi's sender needs: only the names in templates.ts, status by name (nothing else is stored). */
 export function statusMap(found: TemplateRow[]): Record<string, string> {
   const ours = new Set(allDefs().map((d) => d.name));
-  return Object.fromEntries(found.filter((t) => ours.has(t.name)).map((t) => [t.name, t.status]));
+  // A replacement (v2 or later) only counts when Meta filed it as Utility: marketing templates do not reach US numbers.
+  return Object.fromEntries(found.filter((t) => ours.has(t.name))
+    .map((t) => [t.name, isReplacement(t.name) && t.category !== "UTILITY" ? "NOT_UTILITY" : t.status]));
 }
 
 /** Submits every utility template that is not there yet (the v2 names too). Never re-submits one Meta already has. A template
