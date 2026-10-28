@@ -2909,7 +2909,7 @@
    "expect": {
     "risk": "low",
     "forbid": [
-     "\\b(we|our|we're|we've|you can)\\b[^.\\n]*(queens|second (shop|location)|another (shop|location))"
+     "\\b(we have|we've got|we also have|we opened|we run|our (second|other|new) (shop|location|branch)|our queens|we're (also )?in queens|we are (also )?in queens|you can (also )?(find|visit) us in queens)\\b"
     ]
    }
   },
