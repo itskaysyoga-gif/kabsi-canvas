@@ -247,6 +247,10 @@ Deno.test(
       ],
       ["F-014", "We don't have information on bookings for the window table at the moment."],
       [
+        "F-019",
+        "We can only speak to what we know, and a second shop is not something we can confirm here.",
+      ],
+      [
         "F-001",
         "Thank you Greg. Our hours are 7am to 4pm, and we have no holiday hours to share yet.",
       ],
