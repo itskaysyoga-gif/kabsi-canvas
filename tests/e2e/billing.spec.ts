@@ -98,15 +98,9 @@ test.describe("Creem test checkout (QA owner)", () => {
     await axeClean(page, "/app/plan (paid)", KNOWN_AXE);
   });
 
-  // Creem answers the "add a location" call with 400 subscription_item_add_unsupported ("Adding new items to a subscription is not
-  // supported", 25 Oct 2026): one subscription cannot carry the plan and the extra-location item. The master plan's fallback
-  // (10.2.3) is a second subscription for the extra locations on the same customer, which is not built yet (docs/LATER.md). This
-  // test states the wanted behaviour and is expected to fail until then; when it passes, Playwright reports it and the annotation goes.
+  // Billing 2 (10.2.3): Creem refuses to add an item to a subscription (subscription_item_add_unsupported), so an extra location
+  // is a second checkout for the Extra location product on the same Creem customer. The webhook keeps its unit on the plan.
   test("an extra location joins the plan", async ({ page }) => {
-    test.fail(
-      true,
-      "Creem refuses to add an item to a subscription (subscription_item_add_unsupported)",
-    );
     await page.goto("/app/plan");
     const add = page.getByRole("button", { name: "Add a location" });
     // After the cancel from WhatsApp the plan is set to end and the page offers "Keep my plan" instead.
@@ -114,9 +108,32 @@ test.describe("Creem test checkout (QA owner)", () => {
     test.skip(!(await add.isVisible()), "the plan is already set to end");
     await add.click();
     await page.getByRole("button", { name: "Confirm" }).click();
-    await expect(page.getByText("Something went wrong with the payment service.")).toHaveCount(0, {
-      timeout: 20_000,
-    });
-    await expect(page.getByText(/1 extra location/i)).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("Something went wrong with the payment service.")).toHaveCount(0);
+    // The same customer: Creem may already hold the address, so the details step is filled only when it is shown.
+    await page.waitForURL(/creem\.io\/test\/checkout/, { timeout: 45_000 });
+    if (
+      await page
+        .getByRole("textbox", { name: "Address line 1" })
+        .isVisible({ timeout: 10_000 })
+        .catch(() => false)
+    ) {
+      await details(page);
+    }
+    await card(page, "4111111111111111");
+    await page.waitForURL(/kabsi\.co\/billing\/done/, { timeout: 90_000 });
+    await page.goto("/app/plan");
+    await expect(async () => {
+      await page.reload();
+      await expect(page.getByText(/1 extra location/i)).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 150_000, intervals: [5_000] });
+  });
+
+  test("removing the extra location ends it at the end of its paid period", async ({ page }) => {
+    await page.goto("/app/plan");
+    const remove = page.getByRole("button", { name: "Remove a location" });
+    test.skip(!(await remove.isVisible().catch(() => false)), "the plan has no extra location");
+    await remove.click();
+    await page.getByRole("button", { name: "Confirm" }).click();
+    await expect(page.getByText(/The extra location ends on/)).toBeVisible({ timeout: 20_000 });
   });
 });

@@ -25,6 +25,8 @@ export type PlanSummary = {
     plan: "essentials" | "pro" | null;
     billing: Billing | null;
     ends_at: string | null;
+    /** Billing 2: false when this business is past the plan's locations (an extra location ended); its work stops. */
+    location_on_plan?: boolean;
   } | null;
 };
 
@@ -42,7 +44,14 @@ export type Billing = {
 };
 
 export type BillingOp =
-  "checkout" | "portal" | "cancel" | "keep" | "upgrade" | "downgrade" | "add_location";
+  | "checkout"
+  | "portal"
+  | "cancel"
+  | "keep"
+  | "upgrade"
+  | "downgrade"
+  | "add_location"
+  | "remove_location";
 /** One owner action through billing-creem (the Plan screen; WhatsApp runs the same code on the server). */
 export async function billingAction(
   op: BillingOp,

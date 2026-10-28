@@ -175,7 +175,8 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
       if (op === "upgrade") setNote("Done. You are on Pro now.");
       if (op === "downgrade")
         setNote(`Done. Essentials starts on ${shortDate(b?.current_period_end ?? null)}.`);
-      if (op === "add_location") setNote("Done. Kabsi added a location to your plan.");
+      if (op === "remove_location")
+        setNote(`Done. The extra location ends on ${shortDate(r.ends_at ?? null)}.`);
       setPending(null);
       await qc.invalidateQueries({ queryKey: ["plan-summary", locationId] });
     } catch (e) {
@@ -323,12 +324,27 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
                   onClick={() =>
                     setPending({
                       op: "add_location",
-                      line: `Add a location for ${price("extra")}, charged today for the rest of this period.`,
+                      line: `Add a location for ${price("extra")}. You pay for it on Creem's page now, and it renews from today.`,
                     })
                   }
                 >
                   Add a location
                 </Button>
+                {b.units > 0 ? (
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    disabled={busy}
+                    onClick={() =>
+                      setPending({
+                        op: "remove_location",
+                        line: "Remove one extra location at the end of its paid period. Then Kabsi stops its work for your newest business. Nothing changes on Google.",
+                      })
+                    }
+                  >
+                    Remove a location
+                  </Button>
+                ) : null}
               </>
             )}
           </div>
@@ -452,6 +468,13 @@ function StateBanner({
       <Banner tone="ok" title="Early access">
         <p>{CONCIERGE_COPY.plan}</p>
         <p className="mt-1">{CONCIERGE_COPY.banner}</p>
+      </Banner>
+    );
+  // Billing 2: an extra location ended, so this business is past the plan's locations; its work has stopped.
+  if (b && sum.entitlements?.location_on_plan === false)
+    return (
+      <Banner tone="warn" title="This business is not on your plan.">
+        Kabsi has stopped its work here. Nothing on Google changed. Add a location to start again.
       </Banner>
     );
   if (b) {

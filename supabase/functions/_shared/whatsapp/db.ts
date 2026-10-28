@@ -270,7 +270,7 @@ const billingDeps: BillingDeps = {
   cancel: async (locationId) => await cancelAtEnd(await orgOf(locationId)),
   keep: async (locationId) => await keepPlan(await orgOf(locationId)),
   change: async (locationId, to) => await changePlan(await orgOf(locationId), to),
-  addLocation: async (locationId) => await addLocation(await orgOf(locationId)),
+  addLocation: async (locationId) => await addLocation(await orgOf(locationId), null),
 };
 
 const sha = async (t: string) => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)))]

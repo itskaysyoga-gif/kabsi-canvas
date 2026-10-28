@@ -312,6 +312,14 @@ Changed by section 25 (UX 1, Design 3's approved lines win where they differ).
 - Product names: "Kabsi Essentials, monthly" / "yearly", "Kabsi Pro, monthly" / "yearly", "Extra location".
 - Description: "Your Google listing and reviews, managed from WhatsApp. Cancel in WhatsApp any time."
 - Success page: H1 "You are all set." Line: "Your plan starts the day Kabsi's access to your Google listing works." Button: "Back to Kabsi".
+- Extra locations (Billing 2, 28 Oct 2026, master plan 10.2.3; each extra location is its own Creem payment on the owner's same Creem customer):
+  - Plan page buttons: "Add a location", "Remove a location" (shown when the plan has an extra location).
+  - Confirm lines: "Add a location for [$15 a month]. You pay for it on Creem's page now, and it renews from today." / "Remove one extra location at the end of its paid period. Then Kabsi stops its work for your newest business. Nothing changes on Google."
+  - After removing: "Done. The extra location ends on [date]."
+  - Banner on a business past the plan's locations: title "This business is not on your plan." Line: "Kabsi has stopped its work here. Nothing on Google changed. Add a location to start again."
+  - WhatsApp: "Add a location for [$15 a month]? You pay for it on Creem's page, and it renews from today." Then after Confirm: "Pay for the extra location here: [Creem link]" and "Kabsi adds it to your plan when the payment goes through."
+  - Refusals (Plan page and WhatsApp): "Your plan is set to end. Tap Keep my plan first, then add a location." / "Kabsi is adding that location now. Check your plan again in a minute." / "Your plan has no extra location to remove."
+  - Retired: "Done. Kabsi added a location to your plan." and "Done. Your plan now has [n] extra locations." (the location now joins when Creem's payment goes through).
 
 ## 24. Web 2: the approved design lines on kabsi.co (27 Oct 2026)
 

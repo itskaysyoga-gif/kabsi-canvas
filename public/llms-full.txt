@@ -407,7 +407,8 @@ By card, in US dollars, and nothing else. Payments are processed by Creem, our m
 
 **[COMING] How paying will work once plans open (built 25 Oct 2026, session 10).** Not available yet, no date. Say only what is below.
 - Choosing a plan opens Creem's secure checkout for that business, in US dollars, plus tax where it applies; Creem is the merchant of record and handles sales tax and VAT. The paid period starts the day the owner pays.
-- The owner manages billing on WhatsApp or the Plan page, and only the owner can: "card" or "invoice" sends a fresh link to Creem's page for the card, invoices and receipts; "upgrade" moves to Pro at once after a Confirm that shows the price (Creem charges the difference for the rest of the period that day); "downgrade" moves to Essentials from the next renewal (Pro stays until then); "add a location" adds one extra location after a Confirm that shows the price; "cancel" asks first, then ends the plan at the end of the paid period, never at once, and everything keeps working until that date; "Keep my plan" undoes a cancel before it happens.
+- The owner manages billing on WhatsApp or the Plan page, and only the owner can: "card" or "invoice" sends a fresh link to Creem's page for the card, invoices and receipts; "upgrade" moves to Pro at once after a Confirm that shows the price (Creem charges the difference for the rest of the period that day); "downgrade" moves to Essentials from the next renewal (Pro stays until then); "add a location" shows the price and, after a Confirm, sends a link to Creem's page to pay for that extra location (built 28 Oct 2026, Billing 2); "cancel" asks first, then ends the plan at the end of the paid period, never at once, and everything keeps working until that date; "Keep my plan" undoes a cancel before it happens.
+- An extra location is its own payment through Creem on the owner's same Creem account: it is paid on Creem's page when it is added and renews every month (or year) from that day, on its own date. It joins the plan when the payment goes through. **Remove a location** on the Plan page ends one extra location at the end of its paid period, never at once; then Kabsi stops its work for the newest business on the plan, and nothing changes on its Google profile. Cancelling the plan ends the extra locations with it, and Keep my plan carries them on too.
 - If a payment fails, Kabsi keeps working for 7 days and sends "Your card did not go through. Update it here" with the card link on WhatsApp and by email, with reminders on day 3 and day 6. After the 7 days the plan is paused: Kabsi keeps watching and preparing, publishes nothing, and nothing is lost.
 - A paused or ended plan keeps the business's data for 30 days. The review link and QR code keep working.
 
@@ -520,7 +521,7 @@ Where people pay or wait (counter, till, reception), on tables, on receipts, inv
 
 **[COMING]** Kabsi Partners, an affiliate program, is not open yet: partner links switch on at the launch gate, and people can apply before (the partners page form, or hello@kabsi.co). The team approves each partner; the first 20 approved are Founding Partners. The rules (decided 26 Oct 2026, master plan 30.15 section 5; the partner terms at kabsi.co/partners/terms are the full text):
 
-- A partner earns 25 percent of the subscription revenue Kabsi collects from a business they referred, not counting tax, refunds or chargebacks, for as long as that subscription stays paid, extra locations included. Trials earn nothing.
+- A partner earns 25 percent of the subscription revenue Kabsi collects from a business they referred, not counting tax, refunds or chargebacks, for as long as that subscription stays paid, extra locations included: an extra location is paid as its own payment and earns the same 25 percent of what was collected for it. Trials earn nothing.
 - Each commission waits 30 days from the payment. A refund or chargeback inside the 30 days cancels it; one after a payout comes off the next payout.
 - Payouts are on the 5th of each month for every partner with 25 US dollars or more cleared; below that it rolls over. Each payout comes with a statement. USDT, USDC or PayPal.
 - A referral counts for 60 days from the first real action (a scan, a sign-up or a WhatsApp message with the partner's code). If a person follows more than one partner, the last one before sign-up counts; at sign-up the partner is saved on the business and never changed.
@@ -1158,7 +1159,7 @@ No discounts are listed. For anything special, email hello@kabsi.co.
 Yes. Each location is its own business in Kabsi, with its own Google profile, reviews, plan and review link. Switch between them in the header.
 
 **Is there a multi-location price?**
-One plan covers one Google profile. For volume pricing, email hello@kabsi.co.
+One plan covers one Google profile. Each extra one is $15 a month or $150 a year on the same plan, paid through Creem as its own payment. For volume pricing, email hello@kabsi.co.
 
 **Can my team use Kabsi?**
 Up to 3 extra addresses can receive review emails. Only the business's members can post. For other access needs, email hello@kabsi.co.

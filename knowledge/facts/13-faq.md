@@ -348,7 +348,7 @@ No discounts are listed. For anything special, email hello@kabsi.co.
 Yes. Each location is its own business in Kabsi, with its own Google profile, reviews, plan and review link. Switch between them in the header.
 
 **Is there a multi-location price?**
-One plan covers one Google profile. For volume pricing, email hello@kabsi.co.
+One plan covers one Google profile. Each extra one is $15 a month or $150 a year on the same plan, paid through Creem as its own payment. For volume pricing, email hello@kabsi.co.
 
 **Can my team use Kabsi?**
 Up to 3 extra addresses can receive review emails. Only the business's members can post. For other access needs, email hello@kabsi.co.

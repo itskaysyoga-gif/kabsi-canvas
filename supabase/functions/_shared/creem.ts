@@ -6,6 +6,17 @@
 export type Mode = "test" | "live";
 export const CREEM_BASE: Record<Mode, string> = { test: "https://test-api.creem.io/v1", live: "https://api.creem.io/v1" };
 export const modeOf = (v: string | null | undefined): Mode => (v === "live" ? "live" : "test");
+/** Creem's own word for the mode on an event (EnvironmentMode in Creem's API reference: test, prod, sandbox), read as
+ * Kabsi's mode. "live" and "production" are read as live too, so the first live event is never kept and left unapplied. */
+export function eventModeOf(v: string | null | undefined): Mode | null {
+  const m = (v ?? "").trim().toLowerCase();
+  if (m === "prod" || m === "live" || m === "production") return "live";
+  if (m === "test" || m === "sandbox" || m === "local") return "test";
+  return null;
+}
+/** Does an event's mode belong to this endpoint? An event with no mode is read as this endpoint's own. */
+export const sameMode = (eventMode: string | null | undefined, mode: Mode) =>
+  !eventMode || eventModeOf(eventMode) === mode;
 
 // ─── the products (10.2.1, 10.2.3; names and description from docs/COPY.md section 23)
 export type ProductKey = "essentials_month" | "essentials_year" | "pro_month" | "pro_year" | "extra_month" | "extra_year";
@@ -23,6 +34,7 @@ export const CATALOGUE: Record<ProductKey, { name: string; price: number; period
 export const PRODUCT_KEYS = Object.keys(CATALOGUE) as ProductKey[];
 export const planKey = (plan: Plan, period: Period): ProductKey => `${plan}_${period}` as ProductKey;
 export const extraKey = (period: Period): ProductKey => `extra_${period}` as ProductKey;
+export const isExtraKey = (k: ProductKey | null | undefined) => k === "extra_month" || k === "extra_year";
 const BILLING_PERIOD: Record<Period, string> = { month: "every-month", year: "every-year" };
 
 /** The product ids Kabsi uses in one mode (app_settings creem_products_<mode>), by key. */
@@ -156,7 +168,7 @@ export function ledgerOf(e: CreemEvent) {
   const tx = obj(e.object.transaction) ?? obj(sub?.last_transaction) ?? obj(e.object.order);
   const refund = e.eventType === "refund.created";
   const dispute = e.eventType === "dispute.created";
-  const amount = refund ? num(e.object.refund_amount) : dispute ? num(e.object.amount) : num(tx?.amount) ?? (e.eventType === "subscription.paid" ? num(obj(sub?.product)?.price) : null);
+  const amount = refund ? num(e.object.refund_amount) : dispute ? num(e.object.amount) : num(tx?.amount) ?? (e.eventType === "subscription.paid" ? listAmount(sub) : null);
   const currency = refund ? str(e.object.refund_currency) : dispute ? str(e.object.currency) : str(tx?.currency) ?? str(obj(sub?.product)?.currency);
   return {
     subscriptionId: idOf(sub) ?? str(obj(e.object.transaction)?.subscription),
@@ -165,6 +177,15 @@ export function ledgerOf(e: CreemEvent) {
     amount, currency: currency ? currency.toUpperCase() : null,
     mode: str(e.object.mode) ?? str(sub?.mode),
   };
+}
+/** A payment with no transaction in the event: the product's price times its units (the partner ledger reads the same). */
+function listAmount(sub: Obj | null): number | null {
+  const product = obj(sub?.product);
+  const price = num(product?.price);
+  if (price === null) return null;
+  const items = Array.isArray(sub?.items) ? (sub!.items as Obj[]) : [];
+  const units = items.filter((it) => str(it.product_id) === str(product?.id)).reduce((n, it) => n + Math.max(0, Math.round(num(it.units) ?? 0)), 0);
+  return price * Math.max(1, units);
 }
 /** The event body as stored: everything Kabsi needs to apply it, without the customer's name or email. */
 export function scrubEvent(e: CreemEvent): CreemEvent {
@@ -186,6 +207,8 @@ export type SubFacts = {
   subscriptionId: string | null; customerId: string | null; productId: string | null;
   plan: Plan | null; period: Period | null; units: number; periodStart: string | null; periodEnd: string | null;
   status: string | null; extraItemId: string | null;
+  /** Billing 2: this is an Extra location subscription (its own Creem subscription, 10.2.3), not a plan. */
+  extra: boolean;
 };
 export function subFacts(sub: Obj | null, ids: ProductIds): SubFacts {
   const productId = idOf(sub?.product);
@@ -205,7 +228,7 @@ export function subFacts(sub: Obj | null, ids: ProductIds): SubFacts {
     subscriptionId: idOf(sub), customerId: idOf(sub?.customer), productId,
     plan: c && c.plan !== "extra" ? c.plan : null, period: c ? c.period : null, units,
     periodStart: str(sub?.current_period_start_date), periodEnd: str(sub?.current_period_end_date) ?? str(sub?.next_transaction_date),
-    status: str(sub?.status), extraItemId,
+    status: str(sub?.status), extraItemId, extra: isExtraKey(key),
   };
 }
 
@@ -321,10 +344,11 @@ export function creemClient(key: string, mode: Mode, f: Fetch = fetch) {
     },
     createProduct: (key: ProductKey, successUrl: string) => call<CreemProduct>("POST", "/products", createBody(key, successUrl)),
     renameProduct: (id: string, key: ProductKey) => call<CreemProduct>("PATCH", `/products/${encodeURIComponent(id)}`, { name: CATALOGUE[key].name, description: PRODUCT_DESCRIPTION }),
-    createCheckout: (b: { productId: string; units?: number; requestId: string; successUrl: string; email?: string | null; metadata: Record<string, string> }) =>
+    // Billing 2: an extra location names the owner's Creem customer by id (Creem takes id or email, never both).
+    createCheckout: (b: { productId: string; units?: number; requestId: string; successUrl: string; email?: string | null; customerId?: string | null; metadata: Record<string, string> }) =>
       call<{ id: string; checkout_url: string }>("POST", "/checkouts", {
         product_id: b.productId, units: b.units ?? 1, request_id: b.requestId, success_url: b.successUrl,
-        ...(b.email ? { customer: { email: b.email } } : {}), metadata: b.metadata,
+        ...(b.customerId ? { customer: { id: b.customerId } } : b.email ? { customer: { email: b.email } } : {}), metadata: b.metadata,
       }),
     portalLink: (customerId: string) => call<{ customer_portal_link: string }>("POST", "/customers/billing", { customer_id: customerId }),
     getSubscription: (id: string) => call<Obj>("GET", `/subscriptions?subscription_id=${encodeURIComponent(id)}`),
@@ -332,8 +356,6 @@ export function creemClient(key: string, mode: Mode, f: Fetch = fetch) {
     resume: (id: string) => call<Obj>("POST", `/subscriptions/${encodeURIComponent(id)}/resume`, {}),
     upgrade: (id: string, productId: string, behavior: "proration-charge-immediately" | "proration-none") =>
       call<Obj>("POST", `/subscriptions/${encodeURIComponent(id)}/upgrade`, { product_id: productId, update_behavior: behavior }),
-    setItems: (id: string, items: { id?: string; product_id?: string; units: number }[]) =>
-      call<Obj>("POST", `/subscriptions/${encodeURIComponent(id)}`, { items, update_behavior: "proration-charge-immediately" }),
   };
 }
 export type Creem = ReturnType<typeof creemClient>;

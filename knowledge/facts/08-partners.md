@@ -2,7 +2,7 @@
 
 **[COMING]** Kabsi Partners, an affiliate program, is not open yet: partner links switch on at the launch gate, and people can apply before (the partners page form, or hello@kabsi.co). The team approves each partner; the first 20 approved are Founding Partners. The rules (decided 26 Oct 2026, master plan 30.15 section 5; the partner terms at kabsi.co/partners/terms are the full text):
 
-- A partner earns 25 percent of the subscription revenue Kabsi collects from a business they referred, not counting tax, refunds or chargebacks, for as long as that subscription stays paid, extra locations included. Trials earn nothing.
+- A partner earns 25 percent of the subscription revenue Kabsi collects from a business they referred, not counting tax, refunds or chargebacks, for as long as that subscription stays paid, extra locations included: an extra location is paid as its own payment and earns the same 25 percent of what was collected for it. Trials earn nothing.
 - Each commission waits 30 days from the payment. A refund or chargeback inside the 30 days cancels it; one after a payout comes off the next payout.
 - Payouts are on the 5th of each month for every partner with 25 US dollars or more cleared; below that it rolls over. Each payout comes with a statement. USDT, USDC or PayPal.
 - A referral counts for 60 days from the first real action (a scan, a sign-up or a WhatsApp message with the partner's code). If a person follows more than one partner, the last one before sign-up counts; at sign-up the partner is saved on the business and never changed.
