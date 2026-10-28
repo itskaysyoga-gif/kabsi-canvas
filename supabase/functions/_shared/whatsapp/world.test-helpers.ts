@@ -472,7 +472,8 @@ export class World {
         s.plan = to;
         return { effective: to === "pro" ? "now" : "renewal", until };
       },
-      addLocation: async (loc) => (w.calls.push(`add_location:${loc}`), ++sub(loc).units),
+      // Billing 2: a second Creem checkout for the Extra location product; the webhook adds the unit once it is paid.
+      addLocation: async (loc) => (w.calls.push(`add_location:${loc}`), sub(loc), "https://creem.io/test/checkout/prod_xm/ch_extra"),
     };
   }
 

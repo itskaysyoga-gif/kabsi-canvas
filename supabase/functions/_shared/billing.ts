@@ -12,7 +12,7 @@ import { ref } from "./whatsapp/templates.ts";
 import {
   CATALOGUE, checkoutRequestId, type Creem, creemClient, CreemError, type CreemEvent, effectOf, eventTime, extraKey, isStale,
   ledgerOf, type Message, type Mode, modeOf, orgOf, type Period, type Plan, planKey, type ProductIds, type ProductKey,
-  PRODUCT_KEYS, patchFor, scrubEvent, setupPlan, subFacts, subscriptionOf,
+  PRODUCT_KEYS, patchFor, sameMode, scrubEvent, setupPlan, type SubFacts, subFacts, subscriptionOf,
 } from "./creem.ts";
 
 export const CREEM_MODE: Mode = modeOf(Deno.env.get("CREEM_MODE"));
@@ -48,8 +48,9 @@ export async function storeEvent(e: CreemEvent, now = new Date()): Promise<Store
   const l = ledgerOf(e);
   const at = eventTime(e);
   const stale = isStale(e, now);
-  // A test event at the live endpoint (or the reverse) is kept for the record and never applied.
-  const otherMode = !!l.mode && l.mode !== CREEM_MODE && !(CREEM_MODE === "test" && l.mode === "local");
+  // A test event at the live endpoint (or the reverse) is kept for the record and never applied. Creem's live events say
+  // "prod" (its EnvironmentMode); "live" and "production" are read as live too (Billing 2).
+  const otherMode = !sameMode(l.mode, CREEM_MODE);
   const outcome = stale ? "refused_stale" : otherMode ? "refused_other_mode" : "queued";
   const { error } = await admin().from("billing_events").insert({
     provider: "creem", event_key: e.id, event_type: e.eventType, event_created_at: at?.toISOString() ?? null,
@@ -85,20 +86,33 @@ export async function applyEvent(eventKey: string): Promise<string> {
   const ids = await productIds();
   const effect = effectOf(e, ids);
   const at = eventTime(e) ?? new Date();
-  const subId = subFacts(subscriptionOf(e), ids).subscriptionId;
-  let existing = subId ? await subRow(subId) : null;
-  const org = existing?.organization_id ?? (row.organization_id as string | null) ?? orgOf(e);
+  const facts = subFacts(subscriptionOf(e), ids);
+  const subId = facts.subscriptionId;
+  // Billing 2 (10.2.3): an Extra location subscription has its own row in billing_extras; its units go on the plan row.
+  const knownExtra = subId ? await extraRow(subId) : null;
+  const extra = facts.extra || knownExtra !== null;
+  let existing = subId && !extra ? await subRow(subId) : null;
+  // A renewal may carry no metadata: the business comes from the row Kabsi already keeps (plan or extra).
+  const org = existing?.organization_id ?? knownExtra?.organization_id ?? (row.organization_id as string | null) ?? orgOf(e);
   let result = "recorded";
 
-  if (effect.write && subId && org) {
+  if (extra && effect.write && subId && org) {
+    result = await applyExtra(org, subId, e, effect, facts, at);
+  } else if (effect.write && subId && org) {
     // An older event never undoes a newer one (Creem retries for 24 hours and can resend from the dashboard).
     const older = existing?.last_event_at && new Date(existing.last_event_at) > at;
     if (older) {
       result = "older_ignored";
     } else {
       const wasPaying = existing?.state === "active";
-      existing = await writeSub(org, subId, e, effect, existing, at, ids);
+      // The plan row's units are the running extra locations (synced below), never what the plan's own items say.
+      existing = await writeSub(org, subId, e, { ...effect, write: { ...effect.write, units: undefined } }, existing, at, ids);
       result = `applied:${existing?.state ?? "?"}`;
+      await syncExtras(org);
+      // Cancelling the base plan ends the extra locations with it (portal cancels and Creem's own ends included).
+      if (existing && (effect.message === "scheduled_cancel" || effect.message === "ended" || e.eventType === "subscription.expired" || e.eventType === "subscription.paused")) {
+        await endExtrasWithPlan(org).catch((x) => captureError("billing", x, { step: "end_extras", event: e.eventType }));
+      }
       if (effect.paid && existing) await foundingCheck(existing);
       if (e.eventType === "checkout.completed") {
         const requestId = typeof e.object.request_id === "string" ? e.object.request_id : null;
@@ -137,6 +151,99 @@ async function subRow(subscriptionId: string): Promise<SubRow | null> {
     .eq("provider_subscription_id", subscriptionId).maybeSingle();
   if (error) throw error;
   return data as SubRow | null;
+}
+
+type ExtraRow = {
+  id: string; organization_id: string; state: string; units: number; provider_subscription_id: string;
+  current_period_end: string | null; cancel_at_period_end: boolean; ended_with_plan: boolean; last_event_at: string | null;
+  past_due_at: string | null; created_at: string; cancel_requested_at: string | null;
+};
+async function extraRow(subscriptionId: string): Promise<ExtraRow | null> {
+  const { data, error } = await admin().from("billing_extras").select("*").eq("provider_subscription_id", subscriptionId).maybeSingle();
+  if (error) throw error;
+  return data as ExtraRow | null;
+}
+async function syncExtras(org: string): Promise<number> {
+  const { data, error } = await admin().rpc("billing_extras_sync", { p_org: org });
+  if (error) throw error;
+  return Number(data ?? 0);
+}
+
+/** One event of an Extra location subscription: its own row, then the units on the plan row. No owner message: the owner
+ * asked for it on the Plan page or WhatsApp and was answered there. Returns the job's result. */
+async function applyExtra(org: string, subId: string, e: CreemEvent, effect: ReturnType<typeof effectOf>, f: SubFacts, at: Date): Promise<string> {
+  const db = admin();
+  const w = effect.write!;
+  const units = f.units > 0 ? f.units : Math.max(1, Math.round(Number(e.object.units ?? 1)) || 1);
+  // The same changes as a plan row (state, period end, past due, cancel), without plan or units: one extra is one location.
+  const patchOn = (row: ExtraRow | null) => {
+    const patch = patchFor({ ...w, plan: undefined, period: undefined, productId: undefined, units: undefined }, f, e.eventType, row, at);
+    delete patch.product_id;
+    return patch;
+  };
+  const update = async (row: ExtraRow): Promise<string | null> => {
+    // An older event never undoes a newer one.
+    if (row.last_event_at && new Date(row.last_event_at) > at) return "extra_older_ignored";
+    const patch = patchOn(row);
+    // Resumed at Creem (the portal or the dashboard): no longer being removed.
+    if (patch.cancel_at_period_end === false) patch.cancel_requested_at = null;
+    const { error } = await db.from("billing_extras").update({ ...patch, units }).eq("id", row.id);
+    if (error) throw error;
+    return null;
+  };
+  const existing = await extraRow(subId);
+  if (existing) {
+    const older = await update(existing);
+    if (older) return older;
+  } else {
+    const row = { organization_id: org, provider_subscription_id: subId, mode: CREEM_MODE, period: f.period, units, state: "incomplete", ...patchOn(null) };
+    const { error } = await db.from("billing_extras").insert(row);
+    if (error?.code === "23505") {
+      // The other event of the same payment made the row a moment ago (checkout.completed and subscription.paid race): this
+      // event's changes apply to the winner's row as it is now, so a checkout never moves a paid extra back to incomplete.
+      const winner = await extraRow(subId);
+      if (!winner) throw error;
+      const older = await update(winner);
+      if (older) return older;
+    } else if (error) throw error;
+  }
+  if (e.eventType === "checkout.completed") {
+    const requestId = typeof e.object.request_id === "string" ? e.object.request_id : null;
+    if (requestId) await db.from("billing_checkouts").update({ completed_at: new Date().toISOString(), checkout_id: String(e.object.id ?? "") || null }).eq("request_id", requestId);
+  }
+  const total = await syncExtras(org);
+  const after = await extraRow(subId);
+  return `extra:${after?.state ?? "?"}:${total}`;
+}
+
+/** The base plan was cancelled or ended: every extra location still running is cancelled at its own period end (scheduled,
+ * never at once), marked as ended with the plan so Keep my plan resumes it. A Creem refusal reaches staff. */
+async function endExtrasWithPlan(org: string): Promise<number> {
+  const running = await runningExtras(org);
+  let n = 0;
+  // Every extra still renewing is cancelled with the plan. One the owner already removed is not marked, so Keep my plan never
+  // brings it back (its own cancel may still be on its way; a second scheduled cancel changes nothing at Creem).
+  for (const x of running.filter((r) => !r.cancel_at_period_end && !r.ended_with_plan)) {
+    if (!x.cancel_requested_at) {
+      await admin().from("billing_extras").update({ ended_with_plan: true, updated_at: new Date().toISOString() }).eq("id", x.id);
+    }
+    try {
+      await creem().cancelAtPeriodEnd(x.provider_subscription_id);
+      n++;
+    } catch (err) {
+      // The plan's own cancel already went through; a person cancels this one by hand.
+      await captureError("billing", err, { step: "end_extra" });
+      await staffAlert(`Creem did not cancel the extra location ${x.provider_subscription_id} after its plan was cancelled. Cancel it in the Creem dashboard`, `extra_end:${x.id}`)
+        .catch((y) => captureError("billing", y, { step: "end_extra_alert" }));
+    }
+  }
+  return n;
+}
+async function runningExtras(org: string): Promise<ExtraRow[]> {
+  const { data, error } = await admin().from("billing_extras").select("*").eq("organization_id", org)
+    .in("state", ["active", "past_due"]).order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as ExtraRow[];
 }
 
 async function writeSub(org: string, subId: string, e: CreemEvent, effect: ReturnType<typeof effectOf>, existing: SubRow | null, at: Date, ids: ProductIds): Promise<SubRow | null> {
@@ -313,7 +420,7 @@ export async function checkoutOpen(org: string): Promise<boolean> {
   return open?.value === "on" || !!o?.billing_test;
 }
 
-export async function startCheckout(org: string, userId: string, email: string | null, plan: Plan, period: Period, now = new Date()): Promise<string> {
+export async function startCheckout(org: string, userId: string | null, email: string | null, plan: Plan, period: Period, now = new Date()): Promise<string> {
   if (!(await checkoutOpen(org))) throw new BillingError("plans_closed", "Plans open soon.");
   const running = await currentSub(org);
   if (running && running.state !== "paused") throw new BillingError("already_paid", "This business already has a plan.");
@@ -348,12 +455,29 @@ async function mustRun(org: string): Promise<SubRow> {
 export async function cancelAtEnd(org: string): Promise<string | null> {
   const s = await mustRun(org);
   await creem().cancelAtPeriodEnd(s.provider_subscription_id!);
+  // Billing 2: the extra locations end with the plan. The plan's own cancel already went through, so a problem here goes to
+  // staff and Sentry, never back to the owner as a failed cancel.
+  await endExtrasWithPlan(org).catch((x) => captureError("billing", x, { step: "end_extras_owner" }));
   return s.current_period_end;
 }
 /** "Keep my plan": undoes a scheduled cancel. */
 export async function keepPlan(org: string): Promise<string | null> {
   const s = await mustRun(org);
-  await creem().resume(s.provider_subscription_id!);
+  const c = creem();
+  await c.resume(s.provider_subscription_id!);
+  // Billing 2: the extra locations that were ending only because the plan was carry on with it.
+  // Whether or not each extra's own scheduled_cancel event has arrived yet.
+  for (const x of (await runningExtras(org)).filter((r) => r.ended_with_plan && !r.cancel_requested_at)) {
+    try {
+      await c.resume(x.provider_subscription_id);
+      await admin().from("billing_extras").update({ ended_with_plan: false, updated_at: new Date().toISOString() }).eq("id", x.id);
+    } catch (err) {
+      // The plan itself carries on; a person resumes this extra by hand.
+      await captureError("billing", err, { step: "resume_extra" });
+      await staffAlert(`Creem did not resume the extra location ${x.provider_subscription_id} after Keep my plan. Resume it in the Creem dashboard`, `extra_resume:${x.id}`)
+        .catch((y) => captureError("billing", y, { step: "resume_extra_alert" }));
+    }
+  }
   return s.current_period_end;
 }
 
@@ -380,18 +504,56 @@ export async function changePlan(org: string, to: Plan): Promise<{ effective: "n
   return { effective: "renewal", until: s.current_period_end };
 }
 
-/** "add a location": one more unit of the Extra location item, charged now (10.2.10). */
-export async function addLocation(org: string): Promise<number> {
+/**
+ * "add a location" (10.2.10, Billing 2): Creem cannot add the Extra location item to the plan's subscription
+ * (subscription_item_add_unsupported), so each extra location is a second checkout for the Extra location product, on the
+ * owner's own Creem customer, in the plan's period. The owner pays on Creem's page; the webhook adds the location when the
+ * payment goes through. A repeated tap the same day returns the same link. Returns the checkout link.
+ */
+export async function addLocation(org: string, userId: string | null, now = new Date()): Promise<string> {
   const s = await mustRun(org);
+  if (s.cancel_at_period_end) throw new BillingError("plan_ends", "Your plan is set to end. Tap Keep my plan first, then add a location.");
   const period = (s.period === "year" ? "year" : "month") as Period;
-  const ids = await productIds();
-  const extraId = ids[extraKey(period)];
-  if (!extraId) throw new BillingError("not_configured", "Payments are not set up yet.");
-  const c = creem();
-  const live = subFacts(await c.getSubscription(s.provider_subscription_id!), ids);
-  const units = live.units + 1;
-  await c.setItems(s.provider_subscription_id!, [live.extraItemId ? { id: live.extraItemId, units } : { product_id: extraId, units }]);
-  return units;
+  const key = extraKey(period);
+  const productId = (await productIds())[key];
+  if (!productId) throw new BillingError("not_configured", "Payments are not set up yet.");
+  const customer = s.provider_customer_id ?? await lastCustomer(org);
+  if (!customer) throw new BillingError("no_customer", "There is no payment on record yet.");
+  // Every extra ever made counts, so an extra that ended today never gives a new tap an old, completed request id.
+  const { count } = await admin().from("billing_extras").select("id", { count: "exact", head: true }).eq("organization_id", org);
+  const n = (count ?? 0) + 1;
+  const requestId = checkoutRequestId(org, key, n, now);
+  const db = admin();
+  const { data: prior } = await db.from("billing_checkouts").select("checkout_url, completed_at").eq("request_id", requestId).maybeSingle();
+  if (prior?.checkout_url && !prior.completed_at) return prior.checkout_url as string;
+  if (prior?.completed_at) throw new BillingError("adding", "Kabsi is adding that location now. Check your plan again in a minute.");
+  const location = (await contacts(org))[0]?.location_id ?? "";
+  const c = await creem().createCheckout({ productId, units: 1, requestId, successUrl: SUCCESS_URL, customerId: customer,
+    metadata: { referenceId: org, business_id: location, kind: "extra_location", plan_subscription: s.provider_subscription_id ?? "" } });
+  await db.from("billing_checkouts").upsert({ request_id: requestId, organization_id: org, product_key: key, units: 1, mode: CREEM_MODE,
+    checkout_id: c.id, checkout_url: c.checkout_url, created_by: userId }, { onConflict: "request_id" });
+  return c.checkout_url;
+}
+
+/** "Remove a location" (Billing 2): the newest extra location is cancelled at the end of its paid period (scheduled, never at
+ * once). Then that business's Kabsi work stops; nothing on Google changes. Returns the date it ends. */
+export async function removeLocation(org: string): Promise<string | null> {
+  await mustRun(org);
+  const x = (await runningExtras(org)).filter((r) => !r.cancel_at_period_end && !r.cancel_requested_at && !r.ended_with_plan).pop();
+  if (!x) throw new BillingError("no_extra", "Your plan has no extra location to remove.");
+  // Kept so a second tap picks the next extra, not this one again; the paid state still changes only with Creem's event.
+  await admin().from("billing_extras").update({ cancel_requested_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", x.id);
+  try {
+    await creem().cancelAtPeriodEnd(x.provider_subscription_id);
+  } catch (err) {
+    // A clear refusal (4xx): the extra is not being removed. A timeout or a 5xx may have gone through, so the flag stays and
+    // the extra's own event decides.
+    if (isCreemError(err) && err.status >= 400 && err.status < 500) {
+      await admin().from("billing_extras").update({ cancel_requested_at: null, updated_at: new Date().toISOString() }).eq("id", x.id);
+    }
+    throw err;
+  }
+  return x.current_period_end;
 }
 
 // ─── staff: set up the products in this mode (10.2.3) ──────────────────────────────────────────────────────────────

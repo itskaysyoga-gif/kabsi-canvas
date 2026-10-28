@@ -4,6 +4,8 @@
 // leaves Kabsi (K-146). The key is read from the environment only and never logged.
 import type { Button } from "./channel.ts";
 import { mockSender, type Sender } from "./deliver.ts";
+import { sendName } from "./templates.ts";
+import type { StatusMap } from "./template-status.ts";
 
 const KAPSO_PROXY = "https://api.kapso.ai/meta/whatsapp";
 
@@ -13,7 +15,8 @@ export function senderMode(e: SenderEnv): "live" | "mock" {
   return e.live === "true" && e.numberOn && !!e.apiKey && !!e.phoneNumberId ? "live" : "mock";
 }
 
-export async function pickSender(e: SenderEnv): Promise<Sender> {
+/** `statuses` reads the stored template statuses: a v2 template is sent only when it reads APPROVED (templates.ts sendName). */
+export async function pickSender(e: SenderEnv, statuses: () => Promise<StatusMap> = async () => ({})): Promise<Sender> {
   if (senderMode(e) !== "live") return mockSender();
   const { WhatsAppClient } = await import("npm:@kapso/whatsapp-cloud-api@0.4.0");
   const client = new WhatsAppClient({ baseUrl: KAPSO_PROXY, kapsoApiKey: e.apiKey! });
@@ -31,7 +34,7 @@ export async function pickSender(e: SenderEnv): Promise<Sender> {
         phoneNumberId,
         payload: {
           messaging_product: "whatsapp", recipient_type: "individual", to, type: "template",
-          template: { name, language: { code: "en" }, components: [{ type: "body", parameters: Array.isArray(params)
+          template: { name: sendName(name, await statuses()), language: { code: "en" }, components: [{ type: "body", parameters: Array.isArray(params)
             ? params.map((text) => ({ type: "text", text }))
             // Named parameters (templates.ts): each carries its name.
             : Object.entries(params).map(([parameter_name, text]) => ({ type: "text", parameter_name, text })) }] },

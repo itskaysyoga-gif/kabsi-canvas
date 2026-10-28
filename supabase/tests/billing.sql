@@ -46,8 +46,18 @@ select is((pg_temp.ent() ->> 'publish')::boolean, true, 'paid publishes');
 select is((pg_temp.ent() ->> 'locations_allowed')::int, 1, 'one location');
 
 -- Extra locations (units) and the upgrade.
-select pg_temp.set_sub('active', ', units = 2');
+-- Billing 2: the units come from the extra-location subscriptions (billing_extras), synced onto the plan row.
+insert into public.billing_extras (organization_id, provider_subscription_id, mode, state, period, units)
+values (pg_temp.org(), 'sub_extra_a', 'test', 'active', 'month', 1), (pg_temp.org(), 'sub_extra_b', 'test', 'active', 'month', 1);
+select is(public.billing_extras_sync(pg_temp.org()), 2, 'two paid extra locations');
 select is((pg_temp.ent() ->> 'locations_allowed')::int, 3, 'two extra locations make three');
+select pg_temp.set_sub('active', ', units = 5');
+select is((pg_temp.ent() ->> 'locations_allowed')::int, 3, 'never more than the extras that are paid');
+update public.billing_extras set state = 'past_due', past_due_at = now() - interval '8 days' where provider_subscription_id = 'sub_extra_b';
+select is((pg_temp.ent() ->> 'locations_allowed')::int, 2, 'an extra whose payment failed 8 days ago no longer counts');
+select is(public.billing_extras_sync(pg_temp.org()), 1, 'nor in the sync');
+delete from public.billing_extras where organization_id = pg_temp.org();
+select pg_temp.set_sub('active', ', units = 0');
 select pg_temp.set_sub('active', ', plan = ''pro''');
 select is(pg_temp.ent() ->> 'plan', 'pro', 'an upgrade changes the plan at once');
 select is((pg_temp.ent() -> 'limits' ->> 'competitors')::int, 5, 'Pro watches 5 competitors');
@@ -101,6 +111,44 @@ select is(public.trial_days_for('partner_link'), 30, '30 days through a partner 
 select is(public.trial_days_for('partner_invite'), 30, 'and through a partner invite');
 select is(public.trial_days_for('self'), 14, '14 days otherwise');
 
+-- Billing 2 (10.2.3): each extra location is its own Creem subscription; its units are kept on the plan row, never a
+-- second plan row. Every value the code writes into the new check constraints is accepted.
+select pg_temp.set_sub('active', ', ended_at = null, units = 0, current_period_end = now() + interval ''30 days''');
+insert into public.locations (id, name, place_id, created_by, time_zone, signup_source, created_at)
+values ('00000000-0000-4000-8000-0000000010c3', 'Billing Shop Two', 'billing-place-3', '00000000-0000-4000-8000-0000000010a1', 'UTC', 'self', now() + interval '1 second');
+select is((select organization_id from public.locations where id = '00000000-0000-4000-8000-0000000010c3'), pg_temp.org(), 'the second business joins the owner''s organisation');
+select lives_ok($$
+  insert into public.billing_extras (organization_id, provider, provider_subscription_id, mode, state, period, units)
+  select pg_temp.org(), 'creem', 'sub_extra_' || st || '_' || per || '_' || m, m, st, per, 1
+    from unnest(array['incomplete', 'active', 'past_due', 'paused', 'cancelled', 'expired']) st, unnest(array['month', 'year']) per,
+         unnest(array['test', 'live']) m $$, 'every extra state, period and mode the code writes is accepted');
+delete from public.billing_extras where organization_id = pg_temp.org();
+select throws_ok($$ insert into public.billing_extras (organization_id, provider_subscription_id, state) values (pg_temp.org(), 'sub_bad', 'trialing') $$,
+  '23514', null, 'an unknown extra state is refused');
+select throws_ok($$ insert into public.billing_extras (organization_id, provider, provider_subscription_id) values (pg_temp.org(), 'stripe', 'sub_bad') $$,
+  '23514', null, 'Creem is the only provider');
+select is((private.entitlements(pg_temp.org(), '00000000-0000-4000-8000-0000000010c1') ->> 'publish')::boolean, true, 'the first business is on the plan');
+select is((private.entitlements(pg_temp.org(), '00000000-0000-4000-8000-0000000010c3') ->> 'location_on_plan')::boolean, false,
+  'a second business without an extra location is not on the plan');
+select is((private.entitlements(pg_temp.org(), '00000000-0000-4000-8000-0000000010c3') ->> 'watch')::boolean, false, 'and Kabsi does no work there');
+insert into public.billing_extras (organization_id, provider_subscription_id, mode, state, period, units)
+values (pg_temp.org(), 'sub_extra_1', 'test', 'incomplete', 'month', 1);
+select is(public.billing_extras_sync(pg_temp.org()), 0, 'a checkout alone adds no location');
+update public.billing_extras set state = 'active' where provider_subscription_id = 'sub_extra_1';
+select is(public.billing_extras_sync(pg_temp.org()), 1, 'a paid extra location counts');
+select is((select units from public.subscriptions where provider_subscription_id = 'sub_test_1'), 1, 'its unit is kept on the plan row');
+select is((select count(*)::int from public.subscriptions where organization_id = pg_temp.org() and provider = 'creem'), 1, 'never a second plan row');
+select is((select subscription_id from public.billing_extras where provider_subscription_id = 'sub_extra_1'),
+  (select id from public.subscriptions where provider_subscription_id = 'sub_test_1'), 'the extra points at the plan row');
+select is((pg_temp.ent() ->> 'locations_allowed')::int, 2, 'the plan covers two businesses');
+select is((private.entitlements(pg_temp.org(), '00000000-0000-4000-8000-0000000010c3') ->> 'publish')::boolean, true, 'the second business works');
+update public.billing_extras set state = 'past_due' where provider_subscription_id = 'sub_extra_1';
+select is(public.billing_extras_sync(pg_temp.org()), 1, 'a failed payment of the extra keeps it while Creem retries');
+update public.billing_extras set state = 'cancelled', ended_at = now() where provider_subscription_id = 'sub_extra_1';
+select is(public.billing_extras_sync(pg_temp.org()), 0, 'a cancelled extra location is removed');
+select is((private.entitlements(pg_temp.org(), '00000000-0000-4000-8000-0000000010c3') ->> 'draft')::boolean, false, 'and its work stops');
+select is((private.entitlements(pg_temp.org(), '00000000-0000-4000-8000-0000000010c1') ->> 'publish')::boolean, true, 'the first business carries on');
+
 -- The paid buttons: closed until billing_open, except for a Kabsi test account.
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-0000000010a1", "role": "authenticated"}', true);
@@ -115,6 +163,8 @@ select throws_ok($$ select public.founding_places_left() $$, '42501', null, 'bro
 -- Browsers never read the ledger, the checkouts or the owner contacts, and one owner never reads another's plan.
 select throws_ok($$ select count(*) from public.billing_events $$, '42501', null, 'the ledger is closed to owners');
 select throws_ok($$ select count(*) from public.billing_checkouts $$, '42501', null, 'the checkouts are closed to owners');
+select throws_ok($$ select count(*) from public.billing_extras $$, '42501', null, 'the extra locations are closed to owners');
+select throws_ok($$ select public.billing_extras_sync(pg_temp.org()) $$, '42501', null, 'and only the billing job syncs them');
 select throws_ok($$ select * from public.billing_owner_contacts(pg_temp.org()) $$, '42501', null, 'the owner contacts are service only');
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-0000000010a2", "role": "authenticated"}', true);
 select throws_ok($$ select public.entitlements(null, '00000000-0000-4000-8000-0000000010c1') $$, '42501', null,

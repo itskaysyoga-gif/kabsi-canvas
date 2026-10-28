@@ -173,3 +173,4 @@ Moved from KABSI-PROGRESS.md by lane R on 27 Oct 2026 (word for word):
 Moved from KABSI-PROGRESS.md recent entries by lane R on 28 Oct 2026 (word for word):
 
 - 27 Oct 2026, Sec 1: the security tests and fixes; Rashid's steps: Auth captcha and the 600 s code lifetime (LATER rows). Detail: `docs/progress/archive/2026-10-27-sec1.md`.
+- 27 Oct 2026, Audit 1 (PR 262, 264). Detail: `docs/progress/archive/2026-10-27-audit1.md`. (moved by lane R, 28 Oct)

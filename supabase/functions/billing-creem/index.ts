@@ -7,12 +7,17 @@
 //   POST /billing-creem/setup      staff (x-cron-secret or a staff session): lists, reuses, renames and creates the products.
 //   GET  /billing-creem/founding   public: the founding places left (10.2.4) for the pricing page, cached 5 minutes.
 //   POST /billing-creem/owner      the signed-in owner of the business: checkout, portal, cancel, keep, upgrade, downgrade,
-//                                  add_location. The Plan screen calls it; WhatsApp calls the same code in _shared/billing.ts.
+//                                  add_location (a checkout link for the Extra location product, Billing 2), remove_location.
+//                                  The Plan screen calls it; WhatsApp calls the same code in _shared/billing.ts.
+//   POST /billing-creem/test-run   Billing 2: staff only, Creem test mode only, an organisation marked billing_test only: the
+//                                  same actions for one named organisation, so a session can run the test-mode script
+//                                  (purchase, extra location, cancel the extra, cancel the plan) without an owner's login.
 import { admin, captureError, CORS, currentUser, fail, isInternal, json, log, rateLimit } from "../_shared/kabsi.ts";
 import { creemWebhook } from "../_shared/creem-webhook.ts";
 import { counted } from "../_shared/webhook-rejections.ts";
 import {
-  addLocation, BillingError, cancelAtEnd, changePlan, isCreemError, keepPlan, portal, setupProducts, staffAlert, startCheckout, storeEvent,
+  addLocation, BillingError, cancelAtEnd, changePlan, CREEM_MODE, isCreemError, keepPlan, portal, removeLocation, setupProducts, staffAlert,
+  startCheckout, storeEvent,
 } from "../_shared/billing.ts";
 
 // The decision is in _shared/creem-webhook.ts (Sec 1: tested with stubs); here it is wired to the database.
@@ -86,7 +91,9 @@ async function owner(req: Request): Promise<Response> {
       case "downgrade":
         return json({ ok: true, ...(await changePlan(org, "essentials")) });
       case "add_location":
-        return json({ ok: true, units: await addLocation(org) });
+        return json({ ok: true, url: await addLocation(org, user.id) });
+      case "remove_location":
+        return json({ ok: true, ends_at: await removeLocation(org) });
       default:
         return fail("bad_request", "Unknown action.");
     }
@@ -94,6 +101,39 @@ async function owner(req: Request): Promise<Response> {
     if (e instanceof BillingError) return fail(e.code, e.message, e.code === "not_configured" ? 503 : 409);
     await captureError("billing-creem", e, { step: "owner", op: b.op, creem: isCreemError(e) ? e.status : null });
     return fail("try_again", "Something went wrong with the payment service. Please try again in a minute.", 502);
+  }
+}
+
+// Billing 2: the test-mode script for one billing_test organisation, run by staff (x-cron-secret through call_internal).
+// Never in live mode, never for any other organisation, and the same code as the owner's actions.
+type TestBody = { op?: string; organization_id?: string; plan?: string; period?: string };
+async function testRun(req: Request): Promise<Response> {
+  if (!(await isStaff(req))) return json({ error: "forbidden" }, 403);
+  if (CREEM_MODE !== "test") return json({ error: "test_mode_only" }, 403);
+  const b = await req.json().catch(() => ({})) as TestBody;
+  if (!b.organization_id || !/^[0-9a-f-]{36}$/i.test(b.organization_id)) return json({ error: "bad_request" }, 400);
+  const org = b.organization_id.toLowerCase();
+  const { data: o } = await admin().from("organizations").select("billing_test, is_demo").eq("id", org).maybeSingle();
+  if (!o?.billing_test || o.is_demo) return json({ error: "not_a_test_account" }, 403);
+  try {
+    switch (b.op) {
+      case "checkout":
+        return json({ ok: true, url: await startCheckout(org, null, null, b.plan === "essentials" ? "essentials" : "pro", b.period === "year" ? "year" : "month") });
+      case "add_location":
+        return json({ ok: true, url: await addLocation(org, null) });
+      case "remove_location":
+        return json({ ok: true, ends_at: await removeLocation(org) });
+      case "cancel":
+        return json({ ok: true, ends_at: await cancelAtEnd(org) });
+      case "keep":
+        return json({ ok: true, ends_at: await keepPlan(org) });
+      default:
+        return json({ error: "bad_request" }, 400);
+    }
+  } catch (e) {
+    if (e instanceof BillingError) return json({ error: e.code, message: e.message }, 409);
+    await captureError("billing-creem", e, { step: "test_run", op: b.op, creem: isCreemError(e) ? e.status : null });
+    return json({ error: "creem_failed", status: isCreemError(e) ? e.status : null }, 502);
   }
 }
 
@@ -110,6 +150,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   if (path.endsWith("/setup")) return await setup(req);
   if (path.endsWith("/owner")) return await owner(req);
+  if (path.endsWith("/test-run")) return await testRun(req);
   // Sec 2: refused calls are counted for the staff operations view.
   return await counted("creem", await webhook(req));
 });

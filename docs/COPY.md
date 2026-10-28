@@ -312,6 +312,14 @@ Changed by section 25 (UX 1, Design 3's approved lines win where they differ).
 - Product names: "Kabsi Essentials, monthly" / "yearly", "Kabsi Pro, monthly" / "yearly", "Extra location".
 - Description: "Your Google listing and reviews, managed from WhatsApp. Cancel in WhatsApp any time."
 - Success page: H1 "You are all set." Line: "Your plan starts the day Kabsi's access to your Google listing works." Button: "Back to Kabsi".
+- Extra locations (Billing 2, 28 Oct 2026, master plan 10.2.3; each extra location is its own Creem payment on the owner's same Creem customer):
+  - Plan page buttons: "Add a location", "Remove a location" (shown when the plan has an extra location).
+  - Confirm lines: "Add a location for [$15 a month]. You pay for it on Creem's page now, and it renews from today." / "Remove one extra location at the end of its paid period. Then Kabsi stops its work for your newest business. Nothing changes on Google."
+  - After removing: "Done. The extra location ends on [date]."
+  - Banner on a business past the plan's locations: title "This business is not on your plan." Line: "Kabsi has stopped its work here. Nothing on Google changed. Add a location to start again."
+  - WhatsApp: "Add a location for [$15 a month]? You pay for it on Creem's page, and it renews from today." Then after Confirm: "Pay for the extra location here: [Creem link]" and "Kabsi adds it to your plan when the payment goes through."
+  - Refusals (Plan page and WhatsApp): "Your plan is set to end. Tap Keep my plan first, then add a location." / "Kabsi is adding that location now. Check your plan again in a minute." / "Your plan has no extra location to remove."
+  - Retired: "Done. Kabsi added a location to your plan." and "Done. Your plan now has [n] extra locations." (the location now joins when Creem's payment goes through).
 
 ## 24. Web 2: the approved design lines on kabsi.co (27 Oct 2026)
 
@@ -608,3 +616,36 @@ Sections 24 to 27 still win. Eval 1 changed only these lines, for lane R to appr
 - Email action page (/a/TOKEN), when the reply changed after the page was opened: "This reply changed since you opened this page. Here is the new one. Read it, then approve." The page then shows the newest draft. A second approval while one is already on its way reuses the approved line "It is already on its way to Google."
 - Card activation, after 10 refused codes in an hour: the approved line "Too many tries. Wait a few minutes and try again."
 - Staff page, Operations panel (staff only, not owner copy): H2 "Operations"; lead "What needs a person now. Each row says what to do."; groups "Approved, not sent after 15 minutes", "Google access stopped", "Failed publications, last 7 days", "Jobs failing or waiting too long", "Webhooks refused, last 24 hours"; empty lines "Nothing is stuck.", "Every business's access works.", "No failed publications.", "Every job is running on time.", "No webhook was refused."; error "The operations view did not load. Try Refresh."; the what-to-do lines are written in `public.staff_operations()` (migration `sec2_retention_operations`).
+
+## 30. WhatsApp 2: every template wording (28 Oct 2026)
+
+The words Meta approves and Kabsi sends outside the 24-hour window. All are submitted as Utility. A name ending in _v2 (billing: _v3) replaces the name without it once Meta shows it Approved and filed under Utility; until then the first name is the fallback (supabase/functions/_shared/whatsapp/templates.ts, which is the source of these lines). Each opens with "Kabsi here.", names the owner's own setup, account or Google profile as the reason, and has no offer, no promotion and no "free". The button on every one reads "Show me". The full message with its buttons follows inside the window once the owner replies.
+
+- `kabsi_review_waiting`: "Kabsi here. A new {{stars}}-star review for {{business}} is waiting for your reply. Reply here to see the draft."
+- `kabsi_post_ready`: "Kabsi here. A post for {{business}} is ready for your approval. Reply here to see it."
+- `kabsi_listing_change`: "Kabsi here. The {{field}} of {{business}} changed on Google. Reply here to see the change and choose what to do."
+- `kabsi_listing_change_v2`: "Kabsi here. You asked Kabsi to watch the Business Profile of {{business}}, and its {{field}} changed on Google. Reply here to see the change and choose what to do."
+- `kabsi_google_action`: "Kabsi here. Google is asking for action on the Business Profile of {{business}}. Reply here for the steps."
+- `kabsi_google_action_v2`: "Kabsi here. Google is asking for action on the Business Profile of {{business}}, which you connected to Kabsi. Reply here for the steps."
+- `kabsi_updates_waiting`: "Kabsi here. You have {{count}} updates waiting for {{business}}. Reply here to see them."
+- `kabsi_updates_waiting_v2`: "Kabsi here. Kabsi has prepared {{count}} items for {{business}}, and each one needs your approval before anything changes on Google. Reply here to review them."
+- `kabsi_holiday_question`: "Kabsi here. {{holiday}} is on {{date}}. Reply here to tell Kabsi the hours of {{business}} for that day."
+- `kabsi_holiday_question_v2`: "Kabsi here. {{holiday}} is on {{date}}, and Kabsi needs the opening hours of {{business}} for that day to keep its Business Profile right. Reply here with the hours."
+- `kabsi_access_lost`: "Kabsi here. Kabsi can no longer reach the Business Profile of {{business}}. Reply here for the steps to fix it."
+- `kabsi_access_lost_v2`: "Kabsi here. The access you gave Kabsi to the Business Profile of {{business}} has been lost, so Kabsi cannot work on it. Reply here for the steps to fix it."
+- `kabsi_map_ready`: "Kabsi here. The Visibility Map of {{business}} is ready. Reply here to see it."
+- `kabsi_map_ready_v2`: "Kabsi here. The Visibility Map of {{business}} from your Kabsi account is ready. Reply here to see it."
+- `kabsi_access_change`: "Kabsi here. Access to the Business Profile of {{business}} has changed. Reply here to see what changed."
+- `kabsi_access_change_v2`: "Kabsi here. Access for Kabsi to the Business Profile of {{business}} has changed. Reply here to see what changed."
+- `kabsi_billing_notice`: "Kabsi here. There is an update about the Kabsi plan of {{business}}. Reply here to read it."
+- `kabsi_billing_notice_v3`: "Kabsi here. Your Kabsi account for {{business}} has a billing update: a payment, receipt, trial date or plan change. Reply here to read the details." (`kabsi_billing_notice_v2` was submitted first and Meta filed it under Marketing, so it is not used.)
+- `kabsi_photo_ready`: "Kabsi here. A photo for {{business}} is ready for your approval, and nothing goes on Google until you say yes. Reply here to see it."
+- `kabsi_business_update`: "Kabsi here. Once a month Kabsi asks what is new at {{business}}, so its Business Profile stays right: any new services, prices or opening times? Reply here to answer."
+- `kabsi_business_update_v2`: "Kabsi here. This is the monthly check on {{business}} that you set up with Kabsi: has anything changed, like opening times, services or contact details? Reply here to answer." (the first name was filed under Marketing by Meta)
+- `kabsi_setup_step`: "Kabsi here. You started setting up Kabsi for {{business}}, and the next step is ready. Reply here to see it."
+- `kabsi_work_update`: "Kabsi here. There is news about a change you approved for {{business}}: it is on Google, still on its way, or needs another try. Reply here to read it."
+- `kabsi_work_update_v2`: "Kabsi here. The status of a change you approved for {{business}} has been updated: it is live on Google, in progress, or did not go through. Reply here to read the details." (the first name was filed under Marketing by Meta)
+- `kabsi_staff_alert`: "Kabsi staff alert: {{summary}}. Reply here for the details."
+- `kabsi_staff_alert_v3`: "Kabsi here. This is a service alert for your Kabsi staff account: {{summary}}. Reply here for the details." (`kabsi_staff_alert_v2` was filed under Marketing by Meta, so it is not used.)
+
+Reasons for the changes: Meta put nine of the first eleven in Marketing, which it does not deliver to US numbers. kabsi_review_waiting and kabsi_post_ready were already Utility and are unchanged. kabsi_map_ready_v2 is Utility because the map is a result of the owner's own Kabsi account, named as such; if Meta files it under Marketing it is reported, not forced.

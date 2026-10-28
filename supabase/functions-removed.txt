@@ -9,3 +9,5 @@ site-assets
 turnstile-diag
 # Session 13b part 2 (25 Oct 2026, master plan 9.9, R-64): staff alerts moved to WhatsApp.
 slack
+# Billing 2 (28 Oct 2026, master plan 10.2.11): the retired 410 billing stub (NOWPayments).
+billing

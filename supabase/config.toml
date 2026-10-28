@@ -18,8 +18,6 @@ verify_jwt = false
 verify_jwt = false
 [functions.google-events]    # Pub/Sub push (P0.7-03): Google's OIDC token for Kabsi's push service account, checked in code
 verify_jwt = false
-[functions.billing]          # retired 410 stub (P0.8-01); the old crypto webhook sends no JWT
-verify_jwt = false
 [functions.billing-creem]    # Creem's webhook signs with creem-signature and sends no JWT; /setup needs x-cron-secret or staff, /owner a signed-in owner, checked in code (session 10)
 verify_jwt = false
 [functions.programs]         # Founding 25 and Kabsi Partners applications and counts (Partners session): public, Turnstile and rate limits in code, service-role-only database functions

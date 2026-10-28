@@ -6,6 +6,7 @@ import {
   type CreemEvent,
   type CreemProduct,
   effectOf,
+  eventModeOf,
   eventTime,
   hmacHex,
   isStale,
@@ -16,6 +17,7 @@ import {
   PRODUCT_DESCRIPTION,
   PRODUCT_KEYS,
   type ProductIds,
+  sameMode,
   scrubEvent,
   setupPlan,
   signatureProblem,
@@ -158,6 +160,90 @@ describe("reading an event", () => {
     expect(clean).not.toContain("owner@example.com");
     expect(clean).not.toContain("Owner Name");
     expect(clean).toContain("cust_1");
+  });
+});
+
+describe("Creem's mode on an event (Billing 2)", () => {
+  // Creem's API reference names the event mode EnvironmentMode: test, prod or sandbox. A live event that says "prod" (the
+  // documented value) or "live" must be applied at the live endpoint, or the first live payment is kept and never applied.
+  it("reads Creem's documented live value, prod, as live", () => {
+    expect(eventModeOf("prod")).toBe("live");
+    expect(sameMode("prod", "live")).toBe(true);
+    expect(sameMode("prod", "test")).toBe(false);
+  });
+  it("reads live and production as live too", () => {
+    expect(sameMode("live", "live")).toBe(true);
+    expect(sameMode("production", "live")).toBe(true);
+    expect(sameMode("LIVE", "live")).toBe(true);
+    expect(sameMode("live", "test")).toBe(false);
+  });
+  it("reads test, sandbox and local as test", () => {
+    for (const m of ["test", "sandbox", "local"]) {
+      expect(sameMode(m, "test")).toBe(true);
+      expect(sameMode(m, "live")).toBe(false);
+    }
+  });
+  it("an event with no mode belongs to the endpoint; an unknown word belongs to neither", () => {
+    expect(sameMode(null, "live")).toBe(true);
+    expect(sameMode("", "test")).toBe(true);
+    expect(sameMode("staging", "live")).toBe(false);
+    expect(sameMode("staging", "test")).toBe(false);
+  });
+});
+
+describe("extra locations (Billing 2, 10.2.3)", () => {
+  const extra = (over: Record<string, unknown> = {}) =>
+    sub({
+      id: "sub_x1",
+      product: { id: "prod_xm", price: 1500, currency: "USD" },
+      items: [{ id: "item_x", product_id: "prod_xm", units: 1 }],
+      last_transaction: { id: "tran_x1", amount: 1500, currency: "USD" },
+      ...over,
+    });
+  it("an Extra location subscription is read as an extra, never as a plan", () => {
+    const f = subFacts(extra(), IDS);
+    expect(f).toMatchObject({
+      extra: true,
+      plan: null,
+      period: "month",
+      units: 1,
+      customerId: "cust_1",
+    });
+    expect(subFacts(sub(), IDS).extra).toBe(false);
+    // A checkout names the product by id only.
+    expect(subFacts({ id: "sub_x1", product: "prod_xy", customer: "cust_1" }, IDS)).toMatchObject({
+      extra: true,
+      period: "year",
+    });
+  });
+  it("its payment, renewal and cancel follow the event table like a plan", () => {
+    expect(effectOf(ev("subscription.paid", extra()), IDS).write).toMatchObject({
+      state: "active",
+    });
+    expect(effectOf(ev("subscription.paid", extra()), IDS).write?.plan).toBeUndefined();
+    expect(effectOf(ev("subscription.canceled", extra()), IDS).write).toMatchObject({
+      state: "cancelled",
+      ended: true,
+    });
+  });
+  it("the ledger keeps what was collected for it, before tax", () => {
+    expect(ledgerOf(ev("subscription.paid", extra()))).toMatchObject({
+      amount: 1500,
+      paymentId: "tran_x1",
+    });
+  });
+  it("with no transaction in the event, the amount is the price times its units", () => {
+    const e = ev(
+      "subscription.paid",
+      extra({
+        last_transaction: undefined,
+        items: [{ id: "item_x", product_id: "prod_xm", units: 2 }],
+      }),
+    );
+    expect(ledgerOf(e).amount).toBe(3000);
+    expect(
+      ledgerOf(ev("subscription.paid", sub({ last_transaction: undefined, items: [] }))).amount,
+    ).toBe(3900);
   });
 });
 
@@ -417,18 +503,35 @@ describe("the client", () => {
       method: "POST",
     });
   });
-  it("upgrades with the charge now and adds a location as a unit", async () => {
+  it("upgrades with the charge now", async () => {
     const { calls, f } = fake();
     const c = creemClient("k", "test", f);
     await c.upgrade("sub_1", "prod_pm", "proration-charge-immediately");
-    await c.setItems("sub_1", [{ product_id: "prod_xm", units: 1 }]);
     expect(calls[0].body).toEqual({
       product_id: "prod_pm",
       update_behavior: "proration-charge-immediately",
     });
-    expect(calls[1].body).toEqual({
-      items: [{ product_id: "prod_xm", units: 1 }],
-      update_behavior: "proration-charge-immediately",
+    // Billing 2: Creem refuses to add an item to a subscription, so the client has no call for it.
+    expect("setItems" in c).toBe(false);
+  });
+  it("an extra location is a second checkout on the same Creem customer, by id", async () => {
+    const { calls, f } = fake();
+    await creemClient("k", "test", f).createCheckout({
+      productId: "prod_xm",
+      requestId: "r2",
+      successUrl: "https://kabsi.co/billing/done",
+      email: "o@example.com",
+      customerId: "cust_1",
+      metadata: { referenceId: ORG, business_id: "loc", kind: "extra_location" },
+    });
+    expect(calls[0].url).toBe("https://test-api.creem.io/v1/checkouts");
+    expect(calls[0].body).toEqual({
+      product_id: "prod_xm",
+      units: 1,
+      request_id: "r2",
+      success_url: "https://kabsi.co/billing/done",
+      customer: { id: "cust_1" },
+      metadata: { referenceId: ORG, business_id: "loc", kind: "extra_location" },
     });
   });
   it("sends the checkout with Kabsi's request id and the business in metadata", async () => {
@@ -448,6 +551,11 @@ describe("the client", () => {
       customer: { email: "o@example.com" },
       metadata: { referenceId: ORG, business_id: "loc" },
     });
+  });
+  it("the second extra location of the day gets its own request id", () => {
+    expect(checkoutRequestId(ORG, "extra_month", 2, NOW)).not.toBe(
+      checkoutRequestId(ORG, "extra_month", 1, NOW),
+    );
   });
   it("a repeated tap the same day makes the same request id", () => {
     const a = checkoutRequestId(ORG, "pro_month", 1, NOW);

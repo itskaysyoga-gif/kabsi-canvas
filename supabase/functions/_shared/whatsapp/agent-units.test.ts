@@ -6,19 +6,20 @@ import { route, routerSystem } from "./intent.ts";
 import { last4, toE164 } from "./phone.ts";
 import { decide, inQuietHours, next0800 } from "./policy.ts";
 import { parse } from "./router.ts";
-import { ACCESS_CHANGE_TEMPLATE, ref, submission, type TemplateDef, TEMPLATES } from "./templates.ts";
-import { checkAutomations, describeError, healthAlertText, healthIsBad, KapsoError, makeWebhookSecret, setupWebhook, submitTemplates } from "./kapso-admin.ts";
+import { ACCESS_CHANGE_TEMPLATE, allDefs, isReplacement, ref, sendName, submission, type TemplateDef, TEMPLATES } from "./templates.ts";
+import { parseStatuses, statusLoader } from "./template-status.ts";
+import { checkAutomations, describeError, healthAlertText, healthIsBad, KapsoError, makeWebhookSecret, readTemplates, setupWebhook, statusMap, submitTemplates } from "./kapso-admin.ts";
 import { caseOf } from "./google-action.ts";
 import { oggSeconds, voiceCheck } from "./media.ts";
 import type { Inbound } from "./channel.ts";
 
 Deno.test("templates: utility only, named parameters with examples, plain words, no links", () => {
-  for (const def of Object.values(TEMPLATES)) {
+  for (const def of allDefs()) {
     const s = submission(def);
     assert.equal(s.category, "UTILITY");
     assert.equal(s.parameter_format, "NAMED");
     assert.doesNotMatch(def.body, /[–—!]|https?:|www\./, def.name);
-    assert.match(def.name, /^kabsi_[a-z_]+$/);
+    assert.match(def.name, /^kabsi_[a-z0-9_]+$/);
     const named = [...def.body.matchAll(/\{\{([a-z_]+)\}\}/g)].map((m) => m[1]).sort();
     assert.deepEqual(named, Object.keys(def.example).sort(), `${def.name}: every parameter has an example`);
     assert.ok(def.button.length <= 20);
@@ -189,9 +190,9 @@ Deno.test("describeError: Meta's error fields are kept, long tokens are cut out"
 Deno.test("staff templates: only the missing ones are submitted", async () => {
   const k = fakeKapso({ webhooks: [], templates: ["kabsi_review_waiting"] });
   const out = await submitTemplates(ENV(k.f));
-  assert.equal(out.length, Object.keys(TEMPLATES).length);
+  assert.equal(out.length, allDefs().length);
   assert.equal(out.find((t) => t.name === "kabsi_review_waiting")!.status, "APPROVED");
-  assert.equal(k.calls.filter((c) => c.startsWith("POST")).length, Object.keys(TEMPLATES).length - 1);
+  assert.equal(k.calls.filter((c) => c.startsWith("POST")).length, allDefs().length - 1);
 });
 
 Deno.test("staff templates: a refused template is reported with Meta's reason and the rest go on", async () => {
@@ -200,16 +201,16 @@ Deno.test("staff templates: a refused template is reported with Meta's reason an
   const bad = out.find((t) => t.name === "kabsi_post_ready")!;
   assert.equal(bad.status, "REFUSED");
   for (const part of ["message=Invalid parameter", "code=100", "error_subcode=2388299", "error_user_title=Variable at the start", "error_user_msg=The body cannot start with a variable."]) assert.ok(bad.error!.includes(part), part);
-  assert.equal(out.filter((t) => t.status === "PENDING").length, Object.keys(TEMPLATES).length - 1);
+  assert.equal(out.filter((t) => t.status === "PENDING").length, allDefs().length - 1);
 });
 
 Deno.test("templates: what Meta needs, for every one including the access notice", () => {
   assert.equal(TEMPLATES.access_change.name, ACCESS_CHANGE_TEMPLATE);
-  for (const def of Object.values(TEMPLATES) as TemplateDef[]) {
+  for (const def of allDefs()) {
     const vars = [...def.body.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]);
     assert.deepEqual([...new Set(vars)].sort(), Object.keys(def.example).sort(), `${def.name}: an example for every variable, none extra`);
     for (const v of vars) assert.match(v, /^[a-z]+(_[a-z]+)*$/, `${def.name}: lower snake case`);
-    assert.match(def.name, /^[a-z]+(_[a-z]+)*$/, def.name);
+    assert.match(def.name, /^[a-z]+(_[a-z0-9]+)*$/, def.name);
     assert.doesNotMatch(def.body, /^\{\{/, `${def.name}: does not start with a variable`);
     assert.doesNotMatch(def.body, /\}\}\W*$/, `${def.name}: does not end with a variable`);
     assert.doesNotMatch(def.body, /[\u2013\u2014!]/, `${def.name}: no dashes or exclamation marks`);
@@ -241,4 +242,72 @@ Deno.test("staff automations: an active Kapso workflow answering the number is r
   const busy = await checkAutomations({ apiKey: "key", phoneNumberId: "PN", fetch: fakeKapso({ webhooks: [], templates: [], flows: [{ id: "wf1", name: "Auto reply", status: "active" }] }).f });
   assert.deepEqual(busy.answering_workflows, ["Auto reply"]);
   assert.equal(busy.clear, false);
+});
+
+Deno.test("templates v2 (WhatsApp 2): the same parameters as the first name, utility wording, no offer, no promotion, no free", () => {
+  const withV2 = (Object.values(TEMPLATES) as TemplateDef[]).filter((d) => d.v2);
+  assert.equal(withV2.length, 11, "the nine Meta put in Marketing, plus the two new ones it filed there on 28 Oct");
+  for (const def of withV2) {
+    assert.match(def.v2!.name, new RegExp(`^${def.name}_v[23]$`));
+    const first = [...def.body.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]).sort();
+    const next = [...def.v2!.body.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]).sort();
+    assert.deepEqual(next, first, `${def.v2!.name}: callers pass the same parameters to either name`);
+    assert.doesNotMatch(def.v2!.body, /\b(free|offer|discount|deal|save|promo|limited time|upgrade|buy|special)\b/i, def.v2!.name);
+  }
+  assert.equal(new Set(allDefs().map((d) => d.name)).size, allDefs().length, "no name twice");
+  for (const k of ["photo_ready", "setup_step"] as const) {
+    assert.equal((TEMPLATES[k] as TemplateDef).v2, undefined, `${k} read Utility, so it has no v2`);
+  }
+});
+
+Deno.test("sendName: a v2 name only once it reads APPROVED, else the first name", () => {
+  assert.equal(sendName("kabsi_access_lost", {}), "kabsi_access_lost");
+  assert.equal(sendName("kabsi_access_lost", { kabsi_access_lost_v2: "PENDING" }), "kabsi_access_lost");
+  assert.equal(sendName("kabsi_access_lost", { kabsi_access_lost_v2: "REJECTED" }), "kabsi_access_lost");
+  assert.equal(sendName("kabsi_access_lost", { kabsi_access_lost_v2: "APPROVED" }), "kabsi_access_lost_v2");
+  assert.equal(sendName("kabsi_review_waiting", { kabsi_review_waiting_v2: "APPROVED" }), "kabsi_review_waiting", "no v2 exists");
+  assert.equal(sendName("something_else", { something_else_v2: "APPROVED" }), "something_else");
+});
+
+Deno.test("template status store: parsed defensively, cached five minutes, a failed read means nothing approved", async () => {
+  assert.deepEqual(parseStatuses('{"a":"APPROVED","b":3}'), { a: "APPROVED" });
+  assert.deepEqual(parseStatuses("not json"), {});
+  assert.deepEqual(parseStatuses(null), {});
+  let reads = 0;
+  let t = 1_000;
+  const load = statusLoader(async () => (reads++, '{"kabsi_access_lost_v2":"APPROVED"}'), () => t);
+  assert.equal((await load()).kabsi_access_lost_v2, "APPROVED");
+  t += 299_000;
+  await load();
+  assert.equal(reads, 1, "cached");
+  t += 2_000;
+  await load();
+  assert.equal(reads, 2, "read again after five minutes");
+  const bad = statusLoader(async () => { throw new Error("db down"); });
+  assert.deepEqual(await bad(), {});
+});
+
+Deno.test("staff templatestatus: read only, status and category of each, and only Kabsi's own names are kept for the sender", async () => {
+  const k = fakeKapso({ webhooks: [], templates: ["kabsi_review_waiting", "someone_elses_template"] });
+  const rows = await readTemplates(ENV(k.f));
+  assert.equal(rows.length, 2);
+  assert.ok(!k.calls.some((c) => c.startsWith("POST") || c.startsWith("DELETE") || c.startsWith("PATCH")), "nothing is submitted or changed");
+  assert.deepEqual(statusMap(rows), { kabsi_review_waiting: "APPROVED" });
+  assert.ok(k.calls.some((c) => c.includes("fields=name,status,category")), "category is asked for");
+});
+
+Deno.test("a replacement Meta filed under Marketing is never sent, whatever its status", () => {
+  const rows = [
+    { name: "kabsi_access_lost", status: "APPROVED", category: "MARKETING" },
+    { name: "kabsi_access_lost_v2", status: "APPROVED", category: "UTILITY" },
+    { name: "kabsi_listing_change_v2", status: "APPROVED", category: "MARKETING" },
+    { name: "kabsi_google_action_v2", status: "PENDING", category: "UTILITY" },
+  ];
+  const map = statusMap(rows);
+  assert.equal(map.kabsi_access_lost, "APPROVED", "a first name keeps its status; it is the fallback");
+  assert.equal(map.kabsi_listing_change_v2, "NOT_UTILITY");
+  assert.equal(sendName("kabsi_access_lost", map), "kabsi_access_lost_v2");
+  assert.equal(sendName("kabsi_listing_change", map), "kabsi_listing_change", "approved as Marketing: not used");
+  assert.equal(sendName("kabsi_google_action", map), "kabsi_google_action", "still pending");
+  assert.ok(isReplacement("kabsi_billing_notice_v3") && !isReplacement("kabsi_billing_notice"));
 });
