@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 27 Oct 2026 by Sec 2 (before it: Audit 1) (earlier: the lane R chat, 25 Oct) (master plan 19, 25.1, 26.6, 29.9, 30); first written by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 28 Oct 2026 by Billing 2 (before it: Sec 2) (earlier: the lane R chat, 25 Oct) (master plan 19, 25.1, 26.6, 29.9, 30); first written by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -12,6 +12,7 @@ One page, under 10 KB. Updated 27 Oct 2026 by Sec 2 (before it: Audit 1) (earlie
 - Email 1 (PR 258, 27 Oct): one email design, the 30.15 set, the Results Report receipt, auth templates, streams, the routine channel. Detail: `docs/progress/archive/2026-10-27-email1.md`.
 - Sec 1 (PR 261, merged 27 Oct): tenant isolation, roles, approvals, email links, webhooks, injection, abuse limits, the stop switch for Google writes, log scrubbing, ASVS L1 (`docs/security/ASVS-L1.md`). Detail: `docs/progress/archive/2026-10-27-sec1.md`.
 - Sec 2 (27 Oct): approvals bound to the draft version shown, retention per source, privacy trace, backup to the pooler and a restore drill that re-applies deletions (passed locally), secrets audit, Sec 1 leftovers, the staff Operations view. PR 266, deployed and checked live. Detail: `docs/progress/archive/2026-10-27-sec2.md`.
+- Billing 2 (PR 269, 28 Oct): extra locations as their own Creem subscription on the same customer (units kept on the plan row), Remove a location, Creem's `prod` mode read as live, the partner base for extras, the 410 billing stub removed from the repo. Detail: `docs/progress/archive/2026-10-28-billing2.md`.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
@@ -56,10 +57,9 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 28 Oct 2026, Billing 2. Detail: `docs/progress/archive/2026-10-28-billing2.md`.
 - 27 Oct 2026, Sec 2. Detail: `docs/progress/archive/2026-10-27-sec2.md`.
-
-- 27 Oct 2026, Audit 1 (P0.7-06, session 20c): every public page and signed-in screen walked at 390 and 1440 px, the stale-language sweep ended at zero or a reason, 10 findings fixed, 6 in LATER; llms lists the twelve wave 1 industry addresses; the waiting list journey is on; the signed-in and public baselines are refreshed. Detail and pictures: `docs/progress/archive/2026-10-27-audit1.md`.
-- 27 Oct 2026, Sec 1: the security tests and fixes; Rashid's steps: Auth captcha and the 600 s code lifetime (LATER rows). Detail: `docs/progress/archive/2026-10-27-sec1.md`.
+- 27 Oct 2026, Audit 1. Detail: `docs/progress/archive/2026-10-27-audit1.md`.
 
 ## How a session updates this page
 
