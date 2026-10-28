@@ -246,7 +246,7 @@ Deno.test("staff automations: an active Kapso workflow answering the number is r
 
 Deno.test("templates v2 (WhatsApp 2): the same parameters as the first name, utility wording, no offer, no promotion, no free", () => {
   const withV2 = (Object.values(TEMPLATES) as TemplateDef[]).filter((d) => d.v2);
-  assert.equal(withV2.length, 9, "the nine Meta put in Marketing");
+  assert.equal(withV2.length, 11, "the nine Meta put in Marketing, plus the two new ones it filed there on 28 Oct");
   for (const def of withV2) {
     assert.match(def.v2!.name, new RegExp(`^${def.name}_v[23]$`));
     const first = [...def.body.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]).sort();
@@ -255,8 +255,8 @@ Deno.test("templates v2 (WhatsApp 2): the same parameters as the first name, uti
     assert.doesNotMatch(def.v2!.body, /\b(free|offer|discount|deal|save|promo|limited time|upgrade|buy|special)\b/i, def.v2!.name);
   }
   assert.equal(new Set(allDefs().map((d) => d.name)).size, allDefs().length, "no name twice");
-  for (const k of ["photo_ready", "business_update", "setup_step", "work_update"] as const) {
-    assert.equal((TEMPLATES[k] as TemplateDef).v2, undefined, `${k} was never submitted, so it has no v2`);
+  for (const k of ["photo_ready", "setup_step"] as const) {
+    assert.equal((TEMPLATES[k] as TemplateDef).v2, undefined, `${k} read Utility, so it has no v2`);
   }
 });
 
