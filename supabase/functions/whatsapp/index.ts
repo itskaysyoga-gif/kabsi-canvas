@@ -13,14 +13,14 @@
 import { admin, captureError, fail, isInternal, json, rateLimit, timingSafeEqual } from "../_shared/kabsi.ts";
 import { notify as notifyEmail } from "../_shared/notify.ts";
 import { kapsoWebhook } from "../_shared/whatsapp/webhook-route.ts";
-import { agentDeps, whatsappCtx } from "../_shared/whatsapp/db.ts";
+import { agentDeps, templateStatuses, whatsappCtx } from "../_shared/whatsapp/db.ts";
 import { handle, receive } from "../_shared/whatsapp/agent.ts";
 import type { Inbound } from "../_shared/whatsapp/channel.ts";
 import { flush, notify } from "../_shared/whatsapp/outbox.ts";
 import { caseOf, needsActionBody } from "../_shared/whatsapp/google-action.ts";
 import { SAY } from "../_shared/whatsapp/say.ts";
-import { ref } from "../_shared/whatsapp/templates.ts";
-import { checkAutomations, healthAlertText, type KapsoEnv, listWebhooks, readHealth, setupWebhook, submitTemplates } from "../_shared/whatsapp/kapso-admin.ts";
+import { ref, sendName, TEMPLATE_STATUS_KEY } from "../_shared/whatsapp/templates.ts";
+import { checkAutomations, healthAlertText, type KapsoEnv, listWebhooks, readHealth, readTemplates, setupWebhook, statusMap, submitTemplates, type TemplateRow } from "../_shared/whatsapp/kapso-admin.ts";
 import { SCENARIO_NAMES, sign } from "../_shared/whatsapp/replay.ts";
 import { replayMedia } from "../_shared/whatsapp/replay-media.ts";
 import { replayIo } from "../_shared/whatsapp/replay-db.ts";
@@ -275,6 +275,12 @@ function kapsoEnv(): KapsoEnv | null {
   return { apiKey, phoneNumberId };
 }
 
+/** Meta's status by name for Kabsi's own templates, kept where the sender reads it (statuses only, nothing else). */
+async function storeStatuses(found: TemplateRow[]) {
+  const { error } = await admin().from("app_settings").upsert({ key: TEMPLATE_STATUS_KEY, value: JSON.stringify(statusMap(found)), updated_at: new Date().toISOString() });
+  if (error) throw new Error(`template_status_store: ${error.message}`);
+}
+
 // Staff actions. Answers hold ids, names and statuses only: never the key, the webhook secret or message content.
 async function staffAction(action: string) {
   const env = kapsoEnv();
@@ -296,8 +302,18 @@ async function staffAction(action: string) {
         const inVault = !!(Deno.env.get("KAPSO_WEBHOOK_SECRET") || (await admin().rpc("internal_secret", { p_name: "kapso_webhook_secret" })).data);
         return { ok: true, webhook_id: w.id, created: w.created, updated: w.updated, webhooks: listed, secret_in_vault: inVault, automations: await checkAutomations(env) };
       }
-      case "templates":
-        return { ok: true, templates: await submitTemplates(env) };
+      // WhatsApp 2: read only. Every template with the status and category Meta has now; the statuses of Kabsi's own names are
+      // stored for the sender (a v2 name is used only once it reads APPROVED).
+      case "templatestatus": {
+        const found = await readTemplates(env);
+        await storeStatuses(found);
+        return { ok: true, templates: found, stored: Object.keys(statusMap(found)).length };
+      }
+      case "templates": {
+        const submitted = await submitTemplates(env);
+        await storeStatuses(await readTemplates(env));
+        return { ok: true, templates: submitted };
+      }
       // 9.9, 30.9 item 5: the one morning digest to the staff phone, 08:00 Beirut, once a day, with one-tap buttons.
       case "digest": {
         const due = digestDue(new Date());
@@ -330,7 +346,8 @@ async function staffAction(action: string) {
         if (!target?.phone) return { ok: false, error: "no_staff_phone" };
         const st = await ctx.out.db.state(target.phone as string);
         if (!st.live_ok) return { ok: false, error: "phone_not_allow_listed" };
-        const t = ref("staff_alert", { summary: "QA 1 delivery check, no action needed" });
+        const t = ref("staff_alert", { summary: "a WhatsApp delivery check, no action needed" });
+        const used = sendName(t.name, await templateStatuses());
         let sent: { id: string };
         let via = "template";
         try {
@@ -343,8 +360,8 @@ async function staffAction(action: string) {
           sent = await ctx.out.live.text(target.phone as string, "Kabsi QA delivery check. No action needed.");
           via = "text_in_window";
         }
-        await admin().rpc("whatsapp_record", { p_user: target.user_id, p_location: null, p_kind: "qa_delivery_proof", p_state: "sent", p_provider_id: sent.id, p_template: via === "template" ? t.name : null });
-        return { ok: true, provider_id: sent.id, to_ending: (target.phone as string).slice(-4), via };
+        await admin().rpc("whatsapp_record", { p_user: target.user_id, p_location: null, p_kind: "qa_delivery_proof", p_state: "sent", p_provider_id: sent.id, p_template: via === "template" ? used : null });
+        return { ok: true, provider_id: sent.id, to_ending: (target.phone as string).slice(-4), via, template: via === "template" ? used : null };
       }
       case "deliverystatus": {
         const { data } = await admin().from("whatsapp_messages").select("provider_id, state, template, error, created_at, updated_at").eq("kind", "qa_delivery_proof").order("created_at", { ascending: false }).limit(1);
@@ -352,6 +369,8 @@ async function staffAction(action: string) {
       }
       case "health": {
         const h = await readHealth(env);
+        // Hourly: keep the stored template statuses fresh, so a v2 name is used within the hour of Meta approving it.
+        await readTemplates(env).then(storeStatuses).catch(() => {});
         const { data } = await admin().rpc("whatsapp_health_record", { p_status: h.status, p_quality: h.quality, p_messaging: h.messaging, p_tier: h.tier, p_detail: h.detail });
         const r = (data ?? {}) as { bad?: boolean; changed?: boolean };
         // 9.9: anything about the number itself goes by email to hello@kabsi.co only, because the number may be what fails.

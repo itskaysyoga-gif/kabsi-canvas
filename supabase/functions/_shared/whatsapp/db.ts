@@ -14,6 +14,7 @@ import { addLocation, cancelAtEnd, changePlan, currentSub, keepPlan, portal } fr
 import { type Ctx, type Db, type MaySend, mockSender, type Sender } from "./deliver.ts";
 import type { Ai } from "./intent.ts";
 import { pickSender } from "./kapso.ts";
+import { statusLoader, TEMPLATE_STATUS_KEY } from "./template-status.ts";
 import { flush, type Out, type OutDb, type OutRow } from "./outbox.ts";
 import type { SendState } from "./policy.ts";
 import type { Who } from "./roles.ts";
@@ -161,11 +162,14 @@ async function confirmKeyword(locationId: string, keyword: string): Promise<{ ok
   return { ok: true };
 }
 
+/** The stored status of each template by name (WhatsApp 2): a v2 name is sent only when this reads APPROVED. */
+export const templateStatuses = statusLoader(async () => (await admin().from("app_settings").select("value").eq("key", TEMPLATE_STATUS_KEY).maybeSingle()).data?.value as string | null ?? null);
+
 let ctx: Ctx | null = null;
 export async function whatsappCtx(): Promise<Ctx> {
   if (ctx) return ctx;
   const phoneNumberId = Deno.env.get("KAPSO_PHONE_NUMBER_ID") ?? "";
-  const live = await pickSender({ live: Deno.env.get("WHATSAPP_LIVE"), apiKey: Deno.env.get("KAPSO_API_KEY"), phoneNumberId, numberOn: AGENT_ON });
+  const live = await pickSender({ live: Deno.env.get("WHATSAPP_LIVE"), apiKey: Deno.env.get("KAPSO_API_KEY"), phoneNumberId, numberOn: AGENT_ON }, templateStatuses);
   const mock = mockSender();
   const out: Out = { db: outDb, live, mock, now: () => new Date(), mapPng };
   ctx = {
