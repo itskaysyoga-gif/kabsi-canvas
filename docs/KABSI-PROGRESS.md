@@ -12,7 +12,7 @@ One page, under 10 KB. Updated 28 Oct 2026 by WhatsApp 2 (before it: Sec 2) (mas
 - Email 1 (PR 258, 27 Oct): one email design for every email. Detail: `docs/progress/archive/2026-10-27-email1.md`.
 - Sec 1 (PR 261, 27 Oct): tenant isolation, roles, approvals, webhooks, the stop switch for Google writes, ASVS L1. Detail: `docs/progress/archive/2026-10-27-sec1.md`.
 - Sec 2 (PR 266, 27 Oct, deployed and checked live): approvals bound to the draft shown, retention per source, privacy trace, backup and restore drill, secrets audit, the staff Operations view. Detail: `docs/progress/archive/2026-10-27-sec2.md`.
-- WhatsApp 2 (PRs 268, 270, 271, 28 Oct; deploys 126 to 128): Meta put 9 of the 11 templates in Marketing (no delivery to US numbers), so each has a Utility replacement; 14 are PENDING, none new is APPROVED yet; the sender uses a replacement only once it is APPROVED and UTILITY; one real template (`kabsi_staff_alert`) reached the staff phone, delivered receipt read back; `/privacy` and the facts name Anthropic for WhatsApp messages and Nora. Detail and the full table: `docs/progress/archive/2026-10-28-whatsapp2.md`.
+- WhatsApp 2 (PRs 268, 270, 271, 28 Oct; deploys 126 to 128): Meta put 9 of the 11 templates in Marketing (no delivery to US numbers), so each has a Utility replacement; 13 are PENDING (Utility), none new is APPROVED yet; the sender uses a replacement only once it is APPROVED and UTILITY; one real template (`kabsi_staff_alert`) reached the staff phone, delivered receipt read back; `/privacy` and the facts name Anthropic for WhatsApp messages and Nora. Detail and the full table: `docs/progress/archive/2026-10-28-whatsapp2.md`.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
@@ -24,7 +24,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 | Number acquired | 23 Oct 2026 | +1 205-745-6874 connected in the Kapso project Kabsi.co; Kapso health check Passed 10:17 Beirut (master plan 9.8) |
 | Profile set | 23 Oct 2026 | Photo, about, email, address, website and description live; the display name "Kabsi" is waiting for Meta's approval (master plan 9.8) |
 | Webhook verified | 25 Oct 2026 | Rashid's live phone test: his 12 messages reached Kabsi's function through the registered Kapso webhook (Fix 1, request 49115); his chat export confirms them |
-| Templates approved | not yet | 28 Oct (WhatsApp 2): the 11 first names read APPROVED (request 55390) but 9 are MARKETING; 14 Utility replacements and new names submitted 08:09 to 08:50 UTC are PENDING (requests 55391, 55438, 55465; table in the archive file). Done when each replacement reads APPROVED and UTILITY |
+| Templates approved | not yet | 28 Oct (WhatsApp 2): the 11 first names read APPROVED (request 55390) but 9 are MARKETING; 13 Utility replacements and new names submitted 08:09 to 08:50 UTC are PENDING (requests 55391, 55438, 55465; table in the archive file). Done when each replacement reads APPROVED and UTILITY |
 | Inbound tested | 25 Oct 2026 | Rashid's live test: 12 messages in, each handled (chat export); the suite (now 231 WhatsApp cases) passes in CI |
 | Outbound tested | 25 Oct 2026 | Rashid's live test: 11 replies delivered to his phone (chat export); QA 1's delivered receipt read back. 28 Oct: a real template (`kabsi_staff_alert`) delivered to the staff phone, request 55442 |
 | Owners switched on | not yet | After the launch gate |
@@ -44,7 +44,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 - Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
 - V3 heads-up: the first live tick after the deploy sent one "your photo is ready" message to the Yawmiyati phone about an old 25 Oct test photo (tap Skip, never Yes: Yes would publish it to the real profile) and queued the monthly question there; your next typed message within 3 days is read as its answer, so reply No to close it.
-- Templates: lane R reads the 14 PENDING with `select public.call_internal('whatsapp/staff/templatestatus', '{}'::jsonb)` (then `net._http_response`) before the launch gate. Voice notes stay off: the voice test failed for Gulf Arabic and mixed notes (LATER row).
+- Templates: lane R reads the 13 PENDING with `select public.call_internal('whatsapp/staff/templatestatus', '{}'::jsonb)` (then `net._http_response`) before the launch gate. Voice notes stay off: the voice test failed for Gulf Arabic and mixed notes (LATER row).
 - UX 1: after the deploy, `POST /visibility/terms` once (two DataForSEO calls, about 0.15 USD) and the read-back in the UX 1 archive file.
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up and Gemini billing at the launch gate.
 
