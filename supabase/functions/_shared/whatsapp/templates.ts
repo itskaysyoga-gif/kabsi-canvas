@@ -108,9 +108,10 @@ export const TEMPLATES = {
     body: "Kabsi here. There is an update about the Kabsi plan of {{business}}. Reply here to read it.",
     example: { business: "Smile Dental" },
     button: "Show me",
+    // v2 was filed under Marketing by Meta on 28 Oct (pending), so the replacement is a new, more specific wording: v3.
     v2: {
-      name: "kabsi_billing_notice_v2",
-      body: "Kabsi here. A notice about the Kabsi plan of {{business}} is waiting for you, about your trial, payment or plan. Reply here to read it.",
+      name: "kabsi_billing_notice_v3",
+      body: "Kabsi here. Your Kabsi account for {{business}} has a billing update: a payment, receipt, trial date or plan change. Reply here to read the details.",
     },
   },
   // V3 (30.15 sections 3.3 and 3.4): a photo ready to approve (it can reach the owner outside the window when staff sent it), and the
@@ -168,7 +169,11 @@ export function allDefs(): TemplateDef[] {
 /** Where the last read of Meta's template statuses is kept (app_settings, JSON of name to status). */
 export const TEMPLATE_STATUS_KEY = "whatsapp_template_status";
 
-/** The name to send: the v2 name when its stored status reads APPROVED, else the name the code was given (the fallback). */
+/** True for a replacement name (a v2 or later) from the table above. */
+export const isReplacement = (name: string) => (Object.values(TEMPLATES) as TemplateDef[]).some((d) => d.v2?.name === name);
+
+/** The name to send: the replacement name when its stored status reads APPROVED, else the name the code was given (the fallback).
+ *  statusMap stores NOT_UTILITY for a replacement Meta filed under any other category, so it is never chosen. */
 export function sendName(name: string, statuses: Record<string, string>): string {
   const def = (Object.values(TEMPLATES) as TemplateDef[]).find((d) => d.name === name);
   return def?.v2 && statuses[def.v2.name] === "APPROVED" ? def.v2.name : name;
