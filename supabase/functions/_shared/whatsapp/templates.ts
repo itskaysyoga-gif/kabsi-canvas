@@ -127,6 +127,11 @@ export const TEMPLATES = {
     body: "Kabsi here. Once a month Kabsi asks what is new at {{business}}, so its Business Profile stays right: any new services, prices or opening times? Reply here to answer.",
     example: { business: "Smile Dental" },
     button: "Show me",
+    // Meta filed the first name under Marketing on 28 Oct (pending), so there is a v2 with no services or prices to read as an offer.
+    v2: {
+      name: "kabsi_business_update_v2",
+      body: "Kabsi here. This is the monthly check on {{business}} that you set up with Kabsi: has anything changed, like opening times, services or contact details? Reply here to answer.",
+    },
   },
   // V4 (30.16 section 3, 30.15 3.1): the next setup step during onboarding, and news about something the owner approved (on
   // Google, still on its way, or what failed). WhatsApp 2: submitted as Utility under these names; until approved they are held.
@@ -141,15 +146,20 @@ export const TEMPLATES = {
     body: "Kabsi here. There is news about a change you approved for {{business}}: it is on Google, still on its way, or needs another try. Reply here to read it.",
     example: { business: "Smile Dental" },
     button: "Show me",
+    v2: {
+      name: "kabsi_work_update_v2",
+      body: "Kabsi here. The status of a change you approved for {{business}} has been updated: it is live on Google, in progress, or did not go through. Reply here to read the details.",
+    },
   },
   staff_alert: {
     name: "kabsi_staff_alert",
     body: "Kabsi staff alert: {{summary}}. Reply here for the details.",
     example: { summary: "2 jobs failed in the last hour" },
     button: "Show me",
+    // v2 was filed under Marketing by Meta on 28 Oct (pending), so the replacement is v3.
     v2: {
-      name: "kabsi_staff_alert_v2",
-      body: "Kabsi here. This is an alert for the Kabsi team about the service you run: {{summary}}. Reply here for the details.",
+      name: "kabsi_staff_alert_v3",
+      body: "Kabsi here. This is a service alert for your Kabsi staff account: {{summary}}. Reply here for the details.",
     },
   },
 } as const satisfies Record<string, TemplateDef>;

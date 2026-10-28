@@ -623,9 +623,11 @@ The words Meta approves and Kabsi sends outside the 24-hour window. All are subm
 - `kabsi_billing_notice_v3`: "Kabsi here. Your Kabsi account for {{business}} has a billing update: a payment, receipt, trial date or plan change. Reply here to read the details." (`kabsi_billing_notice_v2` was submitted first and Meta filed it under Marketing, so it is not used.)
 - `kabsi_photo_ready`: "Kabsi here. A photo for {{business}} is ready for your approval, and nothing goes on Google until you say yes. Reply here to see it."
 - `kabsi_business_update`: "Kabsi here. Once a month Kabsi asks what is new at {{business}}, so its Business Profile stays right: any new services, prices or opening times? Reply here to answer."
+- `kabsi_business_update_v2`: "Kabsi here. This is the monthly check on {{business}} that you set up with Kabsi: has anything changed, like opening times, services or contact details? Reply here to answer." (the first name was filed under Marketing by Meta)
 - `kabsi_setup_step`: "Kabsi here. You started setting up Kabsi for {{business}}, and the next step is ready. Reply here to see it."
 - `kabsi_work_update`: "Kabsi here. There is news about a change you approved for {{business}}: it is on Google, still on its way, or needs another try. Reply here to read it."
+- `kabsi_work_update_v2`: "Kabsi here. The status of a change you approved for {{business}} has been updated: it is live on Google, in progress, or did not go through. Reply here to read the details." (the first name was filed under Marketing by Meta)
 - `kabsi_staff_alert`: "Kabsi staff alert: {{summary}}. Reply here for the details."
-- `kabsi_staff_alert_v2`: "Kabsi here. This is an alert for the Kabsi team about the service you run: {{summary}}. Reply here for the details."
+- `kabsi_staff_alert_v3`: "Kabsi here. This is a service alert for your Kabsi staff account: {{summary}}. Reply here for the details." (`kabsi_staff_alert_v2` was filed under Marketing by Meta, so it is not used.)
 
 Reasons for the changes: Meta put nine of the first eleven in Marketing, which it does not deliver to US numbers. kabsi_review_waiting and kabsi_post_ready were already Utility and are unchanged. kabsi_map_ready_v2 is Utility because the map is a result of the owner's own Kabsi account, named as such; if Meta files it under Marketing it is reported, not forced.
