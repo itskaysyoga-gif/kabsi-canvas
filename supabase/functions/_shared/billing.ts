@@ -184,7 +184,10 @@ async function applyExtra(org: string, subId: string, e: CreemEvent, effect: Ret
   const update = async (row: ExtraRow): Promise<string | null> => {
     // An older event never undoes a newer one.
     if (row.last_event_at && new Date(row.last_event_at) > at) return "extra_older_ignored";
-    const { error } = await db.from("billing_extras").update({ ...patchOn(row), units }).eq("id", row.id);
+    const patch = patchOn(row);
+    // Resumed at Creem (the portal or the dashboard): no longer being removed.
+    if (patch.cancel_at_period_end === false) patch.cancel_requested_at = null;
+    const { error } = await db.from("billing_extras").update({ ...patch, units }).eq("id", row.id);
     if (error) throw error;
     return null;
   };
@@ -218,9 +221,12 @@ async function applyExtra(org: string, subId: string, e: CreemEvent, effect: Ret
 async function endExtrasWithPlan(org: string): Promise<number> {
   const running = await runningExtras(org);
   let n = 0;
-  // An extra the owner already removed stays removed: it is not marked, so Keep my plan never brings it back.
-  for (const x of running.filter((r) => !r.cancel_at_period_end && !r.ended_with_plan && !r.cancel_requested_at)) {
-    await admin().from("billing_extras").update({ ended_with_plan: true, updated_at: new Date().toISOString() }).eq("id", x.id);
+  // Every extra still renewing is cancelled with the plan. One the owner already removed is not marked, so Keep my plan never
+  // brings it back (its own cancel may still be on its way; a second scheduled cancel changes nothing at Creem).
+  for (const x of running.filter((r) => !r.cancel_at_period_end && !r.ended_with_plan)) {
+    if (!x.cancel_requested_at) {
+      await admin().from("billing_extras").update({ ended_with_plan: true, updated_at: new Date().toISOString() }).eq("id", x.id);
+    }
     try {
       await creem().cancelAtPeriodEnd(x.provider_subscription_id);
       n++;
@@ -462,8 +468,15 @@ export async function keepPlan(org: string): Promise<string | null> {
   // Billing 2: the extra locations that were ending only because the plan was carry on with it.
   // Whether or not each extra's own scheduled_cancel event has arrived yet.
   for (const x of (await runningExtras(org)).filter((r) => r.ended_with_plan && !r.cancel_requested_at)) {
-    await c.resume(x.provider_subscription_id);
-    await admin().from("billing_extras").update({ ended_with_plan: false, updated_at: new Date().toISOString() }).eq("id", x.id);
+    try {
+      await c.resume(x.provider_subscription_id);
+      await admin().from("billing_extras").update({ ended_with_plan: false, updated_at: new Date().toISOString() }).eq("id", x.id);
+    } catch (err) {
+      // The plan itself carries on; a person resumes this extra by hand.
+      await captureError("billing", err, { step: "resume_extra" });
+      await staffAlert(`Creem did not resume the extra location ${x.provider_subscription_id} after Keep my plan. Resume it in the Creem dashboard`, `extra_resume:${x.id}`)
+        .catch((y) => captureError("billing", y, { step: "resume_extra_alert" }));
+    }
   }
   return s.current_period_end;
 }
@@ -533,8 +546,11 @@ export async function removeLocation(org: string): Promise<string | null> {
   try {
     await creem().cancelAtPeriodEnd(x.provider_subscription_id);
   } catch (err) {
-    // Creem did not take it: the extra is not being removed, so the plan's own cancel must still end it.
-    await admin().from("billing_extras").update({ cancel_requested_at: null, updated_at: new Date().toISOString() }).eq("id", x.id);
+    // A clear refusal (4xx): the extra is not being removed. A timeout or a 5xx may have gone through, so the flag stays and
+    // the extra's own event decides.
+    if (isCreemError(err) && err.status >= 400 && err.status < 500) {
+      await admin().from("billing_extras").update({ cancel_requested_at: null, updated_at: new Date().toISOString() }).eq("id", x.id);
+    }
     throw err;
   }
   return x.current_period_end;
