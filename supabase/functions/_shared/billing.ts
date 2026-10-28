@@ -530,7 +530,13 @@ export async function removeLocation(org: string): Promise<string | null> {
   if (!x) throw new BillingError("no_extra", "Your plan has no extra location to remove.");
   // Kept so a second tap picks the next extra, not this one again; the paid state still changes only with Creem's event.
   await admin().from("billing_extras").update({ cancel_requested_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", x.id);
-  await creem().cancelAtPeriodEnd(x.provider_subscription_id);
+  try {
+    await creem().cancelAtPeriodEnd(x.provider_subscription_id);
+  } catch (err) {
+    // Creem did not take it: the extra is not being removed, so the plan's own cancel must still end it.
+    await admin().from("billing_extras").update({ cancel_requested_at: null, updated_at: new Date().toISOString() }).eq("id", x.id);
+    throw err;
+  }
   return x.current_period_end;
 }
 
