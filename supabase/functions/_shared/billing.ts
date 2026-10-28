@@ -218,7 +218,8 @@ async function applyExtra(org: string, subId: string, e: CreemEvent, effect: Ret
 async function endExtrasWithPlan(org: string): Promise<number> {
   const running = await runningExtras(org);
   let n = 0;
-  for (const x of running.filter((r) => !r.cancel_at_period_end && !r.ended_with_plan)) {
+  // An extra the owner already removed stays removed: it is not marked, so Keep my plan never brings it back.
+  for (const x of running.filter((r) => !r.cancel_at_period_end && !r.ended_with_plan && !r.cancel_requested_at)) {
     await admin().from("billing_extras").update({ ended_with_plan: true, updated_at: new Date().toISOString() }).eq("id", x.id);
     try {
       await creem().cancelAtPeriodEnd(x.provider_subscription_id);
@@ -460,7 +461,7 @@ export async function keepPlan(org: string): Promise<string | null> {
   await c.resume(s.provider_subscription_id!);
   // Billing 2: the extra locations that were ending only because the plan was carry on with it.
   // Whether or not each extra's own scheduled_cancel event has arrived yet.
-  for (const x of (await runningExtras(org)).filter((r) => r.ended_with_plan)) {
+  for (const x of (await runningExtras(org)).filter((r) => r.ended_with_plan && !r.cancel_requested_at)) {
     await c.resume(x.provider_subscription_id);
     await admin().from("billing_extras").update({ ended_with_plan: false, updated_at: new Date().toISOString() }).eq("id", x.id);
   }
