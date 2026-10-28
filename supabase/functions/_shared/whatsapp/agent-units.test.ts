@@ -6,7 +6,7 @@ import { route, routerSystem } from "./intent.ts";
 import { last4, toE164 } from "./phone.ts";
 import { decide, inQuietHours, next0800 } from "./policy.ts";
 import { parse } from "./router.ts";
-import { ACCESS_CHANGE_TEMPLATE, allDefs, ref, sendName, submission, type TemplateDef, TEMPLATES } from "./templates.ts";
+import { ACCESS_CHANGE_TEMPLATE, allDefs, isReplacement, ref, sendName, submission, type TemplateDef, TEMPLATES } from "./templates.ts";
 import { parseStatuses, statusLoader } from "./template-status.ts";
 import { checkAutomations, describeError, healthAlertText, healthIsBad, KapsoError, makeWebhookSecret, readTemplates, setupWebhook, statusMap, submitTemplates } from "./kapso-admin.ts";
 import { caseOf } from "./google-action.ts";
@@ -248,7 +248,7 @@ Deno.test("templates v2 (WhatsApp 2): the same parameters as the first name, uti
   const withV2 = (Object.values(TEMPLATES) as TemplateDef[]).filter((d) => d.v2);
   assert.equal(withV2.length, 9, "the nine Meta put in Marketing");
   for (const def of withV2) {
-    assert.equal(def.v2!.name, `${def.name}_v2`);
+    assert.match(def.v2!.name, new RegExp(`^${def.name}_v[23]$`));
     const first = [...def.body.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]).sort();
     const next = [...def.v2!.body.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]).sort();
     assert.deepEqual(next, first, `${def.v2!.name}: callers pass the same parameters to either name`);
@@ -294,4 +294,20 @@ Deno.test("staff templatestatus: read only, status and category of each, and onl
   assert.ok(!k.calls.some((c) => c.startsWith("POST") || c.startsWith("DELETE") || c.startsWith("PATCH")), "nothing is submitted or changed");
   assert.deepEqual(statusMap(rows), { kabsi_review_waiting: "APPROVED" });
   assert.ok(k.calls.some((c) => c.includes("fields=name,status,category")), "category is asked for");
+});
+
+Deno.test("a replacement Meta filed under Marketing is never sent, whatever its status", () => {
+  const rows = [
+    { name: "kabsi_access_lost", status: "APPROVED", category: "MARKETING" },
+    { name: "kabsi_access_lost_v2", status: "APPROVED", category: "UTILITY" },
+    { name: "kabsi_listing_change_v2", status: "APPROVED", category: "MARKETING" },
+    { name: "kabsi_google_action_v2", status: "PENDING", category: "UTILITY" },
+  ];
+  const map = statusMap(rows);
+  assert.equal(map.kabsi_access_lost, "APPROVED", "a first name keeps its status; it is the fallback");
+  assert.equal(map.kabsi_listing_change_v2, "NOT_UTILITY");
+  assert.equal(sendName("kabsi_access_lost", map), "kabsi_access_lost_v2");
+  assert.equal(sendName("kabsi_listing_change", map), "kabsi_listing_change", "approved as Marketing: not used");
+  assert.equal(sendName("kabsi_google_action", map), "kabsi_google_action", "still pending");
+  assert.ok(isReplacement("kabsi_billing_notice_v3") && !isReplacement("kabsi_billing_notice"));
 });

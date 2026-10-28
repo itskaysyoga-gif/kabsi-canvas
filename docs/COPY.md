@@ -609,7 +609,7 @@ Section 24, 25 and 26 still win. Audit 1 (P0.7-06) changed only these lines, to 
 
 ## 29. WhatsApp 2: every template wording (28 Oct 2026)
 
-The words Meta approves and Kabsi sends outside the 24-hour window. All are submitted as Utility. A name ending in _v2 replaces the name without it once Meta shows it Approved; until then the first name is the fallback (supabase/functions/_shared/whatsapp/templates.ts, which is the source of these lines). Each opens with "Kabsi here.", names the owner's own setup, account or Google profile as the reason, and has no offer, no promotion and no "free". The button on every one reads "Show me". The full message with its buttons follows inside the window once the owner replies.
+The words Meta approves and Kabsi sends outside the 24-hour window. All are submitted as Utility. A name ending in _v2 (billing: _v3) replaces the name without it once Meta shows it Approved and filed under Utility; until then the first name is the fallback (supabase/functions/_shared/whatsapp/templates.ts, which is the source of these lines). Each opens with "Kabsi here.", names the owner's own setup, account or Google profile as the reason, and has no offer, no promotion and no "free". The button on every one reads "Show me". The full message with its buttons follows inside the window once the owner replies.
 
 - `kabsi_review_waiting`: "Kabsi here. A new {{stars}}-star review for {{business}} is waiting for your reply. Reply here to see the draft."
 - `kabsi_post_ready`: "Kabsi here. A post for {{business}} is ready for your approval. Reply here to see it."
@@ -628,7 +628,7 @@ The words Meta approves and Kabsi sends outside the 24-hour window. All are subm
 - `kabsi_access_change`: "Kabsi here. Access to the Business Profile of {{business}} has changed. Reply here to see what changed."
 - `kabsi_access_change_v2`: "Kabsi here. Access for Kabsi to the Business Profile of {{business}} has changed. Reply here to see what changed."
 - `kabsi_billing_notice`: "Kabsi here. There is an update about the Kabsi plan of {{business}}. Reply here to read it."
-- `kabsi_billing_notice_v2`: "Kabsi here. A notice about the Kabsi plan of {{business}} is waiting for you, about your trial, payment or plan. Reply here to read it."
+- `kabsi_billing_notice_v3`: "Kabsi here. Your Kabsi account for {{business}} has a billing update: a payment, receipt, trial date or plan change. Reply here to read the details." (`kabsi_billing_notice_v2` was submitted first and Meta filed it under Marketing, so it is not used.)
 - `kabsi_photo_ready`: "Kabsi here. A photo for {{business}} is ready for your approval, and nothing goes on Google until you say yes. Reply here to see it."
 - `kabsi_business_update`: "Kabsi here. Once a month Kabsi asks what is new at {{business}}, so its Business Profile stays right: any new services, prices or opening times? Reply here to answer."
 - `kabsi_setup_step`: "Kabsi here. You started setting up Kabsi for {{business}}, and the next step is ready. Reply here to see it."
