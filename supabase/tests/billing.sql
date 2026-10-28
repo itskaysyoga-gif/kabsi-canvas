@@ -109,7 +109,7 @@ values ('00000000-0000-4000-8000-0000000010c3', 'Billing Shop Two', 'billing-pla
 select is((select organization_id from public.locations where id = '00000000-0000-4000-8000-0000000010c3'), pg_temp.org(), 'the second business joins the owner''s organisation');
 select lives_ok($$
   insert into public.billing_extras (organization_id, provider, provider_subscription_id, mode, state, period, units)
-  select pg_temp.org(), 'creem', 'sub_extra_' || st || '_' || per, m, st, per, 1
+  select pg_temp.org(), 'creem', 'sub_extra_' || st || '_' || per || '_' || m, m, st, per, 1
     from unnest(array['incomplete', 'active', 'past_due', 'paused', 'cancelled', 'expired']) st, unnest(array['month', 'year']) per,
          unnest(array['test', 'live']) m $$, 'every extra state, period and mode the code writes is accepted');
 delete from public.billing_extras where organization_id = pg_temp.org();
