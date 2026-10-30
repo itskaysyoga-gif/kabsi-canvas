@@ -84,7 +84,7 @@ export class World {
   tooLate = false;
   failSends = 0;
   /** Session 10: a fake Creem subscription by business; billing stays the old stub line while this is null. */
-  billingSubs: Map<string, { plan: "essentials" | "pro"; period: "month" | "year"; state: string; periodEnd: string | null; cancelAtEnd: boolean; units: number }> | null = null;
+  billingSubs: Map<string, { plan: "essentials" | "pro"; period: "month" | "year"; state: string; periodEnd: string | null; cancelAtEnd: boolean; units: number; family: "founding" | "list" }> | null = null;
   calls: string[] = [];
   handoffs: string[] = [];
   photos: string[] = [];
