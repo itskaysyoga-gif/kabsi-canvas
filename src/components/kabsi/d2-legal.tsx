@@ -226,7 +226,7 @@ export function FaqPage() {
 /** A black closing band with the scan box, as on Home. */
 function ClosingScan({ title }: { title: string }) {
   return (
-    <section aria-labelledby="closing-scan-h" className="border-t border-line bg-band">
+    <section aria-labelledby="closing-scan-h" className="theme-dark border-t border-line bg-band">
       <div className="container-kb section-y">
         <div className="mx-auto max-w-[40rem]">
           <h2 id="closing-scan-h" className="text-h2">

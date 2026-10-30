@@ -243,7 +243,7 @@ export function PartnersPage() {
         </div>
       </section>
 
-      <section id="apply" className="scroll-mt-20 border-t border-line bg-band">
+      <section id="apply" className="theme-dark scroll-mt-20 border-t border-line bg-band">
         <div className="container-kb section-y grid gap-10 lg:grid-cols-2 lg:gap-16">
           <div>
             <h2 className="max-w-[40rem] text-h2">Earn 25% of every payment.</h2>

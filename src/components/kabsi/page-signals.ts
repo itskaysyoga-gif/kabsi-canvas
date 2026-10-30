@@ -52,9 +52,9 @@ export function useSearchFlag(name: string) {
   return value;
 }
 
-/* A tiny shared store for the phone menu, so the phone bar can step aside. */
-type ChromeState = { menuOpen: boolean };
-let chrome: ChromeState = { menuOpen: false };
+/* A tiny shared store for the phone menu and Nora's panel, so the phone bar can step aside (Design 6). */
+type ChromeState = { menuOpen: boolean; noraOpen: boolean };
+let chrome: ChromeState = { menuOpen: false, noraOpen: false };
 const subs = new Set<() => void>();
 export function setChrome(patch: Partial<ChromeState>) {
   chrome = { ...chrome, ...patch };
@@ -71,4 +71,37 @@ export function useChrome() {
     };
   }, []);
   return s;
+}
+
+/**
+ * Design 6 (lane R, 30 Oct 2026): the phone bar and, on a phone, Nora's launcher wait until the visitor is past the
+ * hero, so neither covers the hero's phone. A page marks its hero with data-hero; a page without one counts as past
+ * once the visitor has scrolled `fallback` px.
+ */
+export function useHeroPast(fallback = 360) {
+  const scrolled = useScrolledPast(fallback);
+  const hero = useHeroState();
+  return hero === "none" ? scrolled : hero === "past";
+}
+
+/** "none" when the page has no data-hero, else whether the hero is on screen or already scrolled past. */
+export function useHeroState() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [hero, setHero] = useState<"none" | "on" | "past">("none");
+  useEffect(() => {
+    const el = document.querySelector("[data-hero]");
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setHero("none");
+      return;
+    }
+    setHero("on");
+    const io = new IntersectionObserver(([e]) => {
+      if (!e) return;
+      // Past means the hero has left the top of the screen, not that it is still below.
+      setHero(e.isIntersecting ? "on" : e.boundingClientRect.top < 0 ? "past" : "on");
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [pathname]);
+  return hero;
 }

@@ -89,7 +89,7 @@ function Home() {
 
 function Hero({ example }: { example: HomeExample }) {
   return (
-    <section aria-labelledby="hero-title" className="relative isolate overflow-hidden">
+    <section data-hero aria-labelledby="hero-title" className="relative isolate overflow-hidden">
       {/* Soft light behind the phone; on wide screens the salon photo sits behind it. */}
       <div
         aria-hidden
@@ -104,7 +104,7 @@ function Hero({ example }: { example: HomeExample }) {
           {/* The one yellow phrase of the hero (brief section 16, item 2). */}
           <h1 id="hero-title" className="animate-enter text-display">
             Your business on Google.{" "}
-            <span className="text-kb-yellow">Taken care of through WhatsApp.</span>
+            <span className="text-phrase">Taken care of through WhatsApp.</span>
           </h1>
           <p
             className="mt-5 animate-enter text-lead text-text-2"
@@ -182,7 +182,7 @@ function Hero({ example }: { example: HomeExample }) {
 
 function ClosingBand() {
   return (
-    <section aria-labelledby="closing-title" className="border-t border-line bg-band">
+    <section aria-labelledby="closing-title" className="theme-dark border-t border-line bg-band">
       <div className="container-kb section-y">
         <div className="mx-auto max-w-[40rem]">
           <h2 id="closing-title" className="text-h2">

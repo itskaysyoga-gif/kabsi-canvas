@@ -90,7 +90,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
       <section className="container-kb grid items-center gap-10 pt-6 pb-16 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:pb-20">
         <div>
           <h1 className="text-display">
-            Your {i.name} on Google. <span className="text-kb-yellow">{YELLOW_PHRASE}</span>
+            Your {i.name} on Google. <span className="text-phrase">{YELLOW_PHRASE}</span>
           </h1>
           <p className="mt-5 max-w-[38rem] text-lead text-text-2">{i.lead}</p>
           <ScanBox keyword={i.keyword} industry={i.slug} className="mt-8" id="industry-scan" />

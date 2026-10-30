@@ -88,7 +88,7 @@ function HowItWorks() {
         </div>
       </section>
 
-      <section aria-labelledby="hiw-close" className="border-t border-line bg-band">
+      <section aria-labelledby="hiw-close" className="theme-dark border-t border-line bg-band">
         <div className="container-kb section-y">
           <div className="mx-auto max-w-[40rem]">
             <h2 id="hiw-close" className="text-h2">
