@@ -86,7 +86,8 @@ const TOOLS = [
     input_schema: {
       type: "object",
       properties: {
-        reason: { type: "string", enum: ["unknown_answer", "billing", "account", "legal_privacy", "bug", "partnership", "asked_for_person", "upset", "other"] },
+        reason: { type: "string", enum: ["unknown_answer", "not_supported", "billing", "account", "legal_privacy", "bug", "partnership", "asked_for_person", "upset", "other"],
+          description: "not_supported: the visitor asked for something Kabsi does not do (another platform, a connection to a system, a feature that is not built)" },
         summary: { type: "string", description: "2 to 4 sentences: who they are, what they need, what you already told them" },
         email: { type: "string", description: "Email to reply to, if not already saved or signed in" },
       },
@@ -498,6 +499,26 @@ Deno.serve(async (req) => {
             const reason = clip(input.reason, 40) || "other";
             const summary = clip(input.summary, 1500);
             await db.from("chat_conversations").update({ status: "handoff", handoff_reason: reason }).eq("id", conv.id);
+            // Scope 1 (30.19 section 3 item 3): a hand-off about something Kabsi does not do is one row of the staff evidence log, with
+            // the visitor's own last words. Staff only, kept 24 months. A failure here never stops the hand-off.
+            if (reason === "not_supported") {
+              try {
+                const last = [...messages].reverse().find((m) => m.role === "user" && typeof m.content === "string");
+                const { data: cv } = await db.from("chat_conversations").select("location_id").eq("id", conv.id).maybeSingle();
+                const locationId = (cv?.location_id as string | null | undefined) ?? null;
+                let business = "";
+                if (!locationId && conv.contact_id) {
+                  const { data: c } = await db.from("contacts").select("business_name").eq("id", conv.contact_id).maybeSingle();
+                  business = clip(c?.business_name, 200);
+                }
+                await db.from("staff_evidence").insert({
+                  location_id: locationId, business_name: locationId ? null : business || "Website visitor",
+                  source: "nora", type: "request", words: clip(typeof last?.content === "string" ? last.content : "", 600) || null,
+                });
+              } catch (e) {
+                await captureError("assistant", e, { step: "evidence_row" });
+              }
+            }
             const transcript = [...messages].slice(-20).map((m) => `${m.role === "user" ? "Visitor" : "Nora"}: ${typeof m.content === "string" ? m.content : ""}`).join("\n\n");
             const n = conv.message_count + 1;
             await notify({

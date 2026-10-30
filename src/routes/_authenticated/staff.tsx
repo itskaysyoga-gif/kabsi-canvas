@@ -16,6 +16,8 @@ import { FoundingPanel } from "@/components/staff/founding-panel";
 import { PartnersPanel } from "@/components/staff/partners-panel";
 import { convertConcierge, setConcierge } from "@/lib/concierge";
 import { CostsPanel } from "@/components/staff/costs-panel";
+import { EvidencePanel } from "@/components/staff/evidence-panel";
+import { ValidationPanel } from "@/components/staff/validation-panel";
 import { Button, STAFF_CARD, STAFF_H2, STAFF_ITEM } from "@/components/staff/staff-ui";
 import { AccountTop } from "@/components/kabsi/d3-account";
 
@@ -105,6 +107,10 @@ function StaffPage() {
             <div id="partners" className="scroll-mt-24">
               <PartnersPanel />
             </div>
+            <ValidationPanel />
+            <EvidencePanel
+              businesses={(rows.data ?? []).map((r) => ({ id: r.id, name: r.name }))}
+            />
             <CostsPanel />
             <SystemHealthPanel />
             <div id="jobs" className="scroll-mt-24">
@@ -136,6 +142,8 @@ const JUMPS: [string, string][] = [
   ["chats", "Chats"],
   ["founding", "Founding 25"],
   ["partners", "Partners"],
+  ["validation", "Validation"],
+  ["evidence", "Evidence log"],
   ["costs", "Costs"],
   ["system-health", "System health"],
   ["jobs", "Jobs"],
