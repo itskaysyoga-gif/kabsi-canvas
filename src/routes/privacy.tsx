@@ -167,6 +167,11 @@ function Page() {
           your partner link or code, so we can pay you correctly.
         </p>
         <p>
+          <b>If you ask Nora for a person, or tell us what you need:</b> our team may write a short
+          note of it (the business, the date, where it came from, and your own words) to learn what
+          owners need. The note is not shared outside Kabsi.
+        </p>
+        <p>
           <b>If you apply for a Founding 25 place:</b> your business name, country, kind of
           business, WhatsApp number, why you want a place, whether we may name you in a case study,
           and the words you agreed to for the check-ins.
@@ -504,6 +509,12 @@ function Page() {
               inbox until you ask us to delete it (section 14).
             </li>
           ) : null}
+          <li>
+            Notes our team keeps about what owners ask for, repeated problems, time saved, missed
+            enquiries and the help we gave, with your own words when you say them to us or to Nora
+            when she passes you to a person: deleted 24 months after the note is written. Only the
+            Kabsi team can read them.
+          </li>
           <li>
             Applications to Founding 25 and Kabsi Partners: if we decline an application, we delete
             it 90 days after we decided. If we put a Founding 25 application on the waiting list, we

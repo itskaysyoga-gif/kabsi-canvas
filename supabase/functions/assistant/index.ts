@@ -86,7 +86,8 @@ const TOOLS = [
     input_schema: {
       type: "object",
       properties: {
-        reason: { type: "string", enum: ["unknown_answer", "billing", "account", "legal_privacy", "bug", "partnership", "asked_for_person", "upset", "other"] },
+        reason: { type: "string", enum: ["unknown_answer", "not_supported", "billing", "account", "legal_privacy", "bug", "partnership", "asked_for_person", "upset", "other"],
+          description: "not_supported: the visitor asked for something Kabsi does not do (another platform, a connection to a system, a feature that is not built)" },
         summary: { type: "string", description: "2 to 4 sentences: who they are, what they need, what you already told them" },
         email: { type: "string", description: "Email to reply to, if not already saved or signed in" },
       },
@@ -498,6 +499,30 @@ Deno.serve(async (req) => {
             const reason = clip(input.reason, 40) || "other";
             const summary = clip(input.summary, 1500);
             await db.from("chat_conversations").update({ status: "handoff", handoff_reason: reason }).eq("id", conv.id);
+            // Scope 1 (30.19 section 3 item 3): a hand-off about something Kabsi does not do is one row of the staff evidence log, with
+            // the visitor's own last words. Staff only, kept 24 months. A failure here never stops the hand-off.
+            if (reason === "not_supported" && conv.status !== "handoff") {
+              try {
+                const { data: cv } = await db.from("chat_conversations").select("location_id").eq("id", conv.id).maybeSingle();
+                const locationId = (cv?.location_id as string | null | undefined) ?? null;
+                let business = "";
+                if (!locationId && conv.contact_id) {
+                  const { data: c } = await db.from("contacts").select("business_name").eq("id", conv.contact_id).maybeSingle();
+                  business = clip(c?.business_name, 200);
+                }
+                // The visitor's own last request: the turns are stored fenced (fenceVisitor), so the fence is taken off, a turn that
+                // is only an email address (the reply to "where can we write to you?") is skipped, and no address is kept.
+                const plain = (t: string) => t.replace(/<\/?visitor_message>/g, "").replace(/[^\s@]+@[^\s@]+\.[^\s@]+/g, "").replace(/\s+/g, " ").trim();
+                const turns = [...messages].reverse().filter((m) => m.role === "user" && typeof m.content === "string").map((m) => plain(m.content as string));
+                const words = clip(turns.find((t) => t.length >= 25) ?? turns.find((t) => t.length > 0) ?? plain(summary), 600) || null;
+                const { error: evErr } = await db.from("staff_evidence").insert({
+                  location_id: locationId, business_name: locationId ? null : business || "Website visitor", source: "nora", type: "request", words,
+                });
+                if (evErr) await captureError("assistant", new Error(evErr.message), { step: "evidence_row" });
+              } catch (e) {
+                await captureError("assistant", e, { step: "evidence_row" });
+              }
+            }
             const transcript = [...messages].slice(-20).map((m) => `${m.role === "user" ? "Visitor" : "Nora"}: ${typeof m.content === "string" ? m.content : ""}`).join("\n\n");
             const n = conv.message_count + 1;
             await notify({
