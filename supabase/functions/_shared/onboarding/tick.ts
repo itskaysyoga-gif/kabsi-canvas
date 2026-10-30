@@ -38,7 +38,14 @@ export interface OnboardingDb {
   startMaps(locationId: string): Promise<void>;
   /** The first task is done: the AI questions for the confirmed searches are made now (30.16 section 3). */
   unlock(locationId: string): Promise<void>;
+  /** Scope 1 (30.19): businesses whose first verified value (B) has not landed 48 hours after access, with real work waiting.
+   *  Each is claimed in the database as it is returned, so it comes back once. */
+  slowStart?(limit: number): Promise<SlowStart[]>;
+  /** Hands a claim back when its alert could not be sent, so the next tick tries again. */
+  slowStartRelease?(locationId: string): Promise<void>;
+  staffPhones?(): Promise<string[]>;
 }
+export type SlowStart = { location_id: string; business: string; step: string };
 
 const H = 3_600_000;
 const since = (iso: string | null | undefined, now: number) => (iso ? now - Date.parse(iso) : -1);
@@ -75,9 +82,37 @@ export function doneWords(r: Pick<DueRow, "done" | "place_id">): string[] {
 }
 
 export async function onboardingTick(d: AgentDeps, o: OnboardingDb): Promise<Record<string, number>> {
-  const out = { outcomes: 0, messages: 0 };
+  const out: Record<string, number> = { outcomes: 0, messages: 0 };
   const failed: string[] = [];
   const now = (d.now ?? Date.now)();
+
+  // Scope 1 (30.19 section 3 item 2): one staff WhatsApp alert, through the existing staff template, for a business that has
+  // had Google access for 48 hours with no first verified value and real work waiting. Nothing is sent to the owner, and a
+  // business with nothing real to do is never alerted (it waits).
+  if (o.slowStart && o.staffPhones) {
+    out.alerts = 0;
+    try {
+      // With no staff phone there is nobody to tell, and nothing is claimed.
+      const phones = await o.staffPhones();
+      const rows = phones.length ? await o.slowStart(20) : [];
+      for (const x of rows) {
+        try {
+          const summary = `${x.business} has had Google access for 48 hours and no first result yet. Kabsi is waiting on ${x.step}`;
+          for (const phone of phones) {
+            await notify(d.out, { phone, userId: null, locationId: x.location_id, kind: "staff_alert", urgent: true, body: `${summary}.`,
+              template: ref("staff_alert", { summary }), dedupe: `slow_start:${x.location_id}:${phone}` });
+          }
+          out.alerts++;
+        } catch (e) {
+          // This business was claimed and not told: hand the claim back, and go on with the others.
+          await o.slowStartRelease?.(x.location_id).catch(() => {});
+          failed.push(`slow_start:${x.location_id}:${String((e as Error)?.message ?? e).slice(0, 80)}`);
+        }
+      }
+    } catch (e) {
+      failed.push(`slow_start:${String((e as Error)?.message ?? e).slice(0, 80)}`);
+    }
+  }
 
   // Every task closes (30.15 3.1): confirmed on Google with a link, still on its way, or what failed and what happens next.
   for (const x of await o.outcomes(50)) {
@@ -94,7 +129,11 @@ export async function onboardingTick(d: AgentDeps, o: OnboardingDb): Promise<Rec
     }
   }
 
-  if (!(await o.on())) return out;
+  const done = () => {
+    if (failed.length) throw new Error(`onboarding_tick: ${failed.length} item(s) failed after the rest were sent: ${failed.join("; ")}`);
+    return out;
+  };
+  if (!(await o.on())) return done();
   for (const r of await o.due(50)) {
     if (!r.owner) continue;
     for (const kind of dueKinds(r, now)) {
@@ -105,8 +144,7 @@ export async function onboardingTick(d: AgentDeps, o: OnboardingDb): Promise<Rec
       }
     }
   }
-  if (failed.length) throw new Error(`onboarding_tick: ${failed.length} item(s) failed after the rest were sent: ${failed.join("; ")}`);
-  return out;
+  return done();
 }
 
 async function send(d: AgentDeps, o: OnboardingDb, r: DueRow, kind: string): Promise<boolean> {

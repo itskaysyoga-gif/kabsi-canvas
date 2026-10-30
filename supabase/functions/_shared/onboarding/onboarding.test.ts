@@ -350,3 +350,47 @@ Deno.test("terms lane R approved per market win over the volumes (UX 1)", () => 
   for (const [industry, markets] of Object.entries(APPROVED))
     for (const term of Object.values(markets)) assert.ok(CANDIDATES[industry].includes(term!), `${term} is a candidate of ${industry}`);
 });
+
+Deno.test("Scope 1: a business slow to its first result gets one staff alert, naming the business and the step, never the owner", async () => {
+  const w = new World();
+  const d = w.deps();
+  const rows = [{ location_id: BIZ.harbour, business: "Harbour Lane Coffee", step: "the owner's yes on a reply" }];
+  const db: OnboardingDb = {
+    on: async () => false, due: async () => [], claim: async () => true, candidates: async () => ({ categories: [], posts: [], hours: [], reviews: [] }),
+    outcomes: async () => [], startMaps: async () => {}, unlock: async () => {},
+    slowStart: async () => rows.splice(0),
+    staffPhones: async () => [PHONES.staff],
+  };
+  const r = await onboardingTick(d, db);
+  assert.equal(r.alerts, 1);
+  const staff = w.outbox.filter((o) => o.phone === PHONES.staff);
+  assert.equal(staff.length, 1);
+  assert.match(staff[0]!.body, /Harbour Lane Coffee has had Google access for 48 hours and no first result yet\. Kabsi is waiting on the owner's yes on a reply\./);
+  assert.equal(staff[0]!.kind, "staff_alert");
+  assert.equal(w.outbox.filter((o) => o.phone === PHONES.owner).length, 0, "nothing goes to the owner");
+  // The database returns a business once (it claims it), so the next tick has nothing; the dedupe key holds even if it did not.
+  assert.equal((await onboardingTick(d, db)).alerts, 0);
+  rows.push({ location_id: BIZ.harbour, business: "Harbour Lane Coffee", step: "the owner's yes on a reply" });
+  await onboardingTick(d, db);
+  assert.equal(w.outbox.filter((o) => o.phone === PHONES.staff).length, 1, "the same business never alerts the same phone twice");
+});
+
+Deno.test("Scope 1: with no staff phone nothing is claimed, and a send that fails hands the claim back and goes on with the others", async () => {
+  const w = new World();
+  const d = w.deps();
+  let asked = 0;
+  const released: string[] = [];
+  const base: OnboardingDb = {
+    on: async () => false, due: async () => [], claim: async () => true, candidates: async () => ({ categories: [], posts: [], hours: [], reviews: [] }),
+    outcomes: async () => [], startMaps: async () => {}, unlock: async () => {},
+  };
+  await onboardingTick(d, { ...base, slowStart: async () => (asked++, []), staffPhones: async () => [] });
+  assert.equal(asked, 0, "nobody to tell: the database is not asked, so nothing is claimed");
+  const bad = { ...d, out: { ...d.out, db: { ...d.out.db, add: async () => { throw new Error("outbox down"); } } } } as typeof d;
+  await assert.rejects(
+    onboardingTick(bad, { ...base, staffPhones: async () => [PHONES.staff],
+      slowStart: async () => [{ location_id: BIZ.harbour, business: "Harbour Lane Coffee", step: "a post" }], slowStartRelease: async (l) => { released.push(l); } }),
+    /slow_start/,
+  );
+  assert.deepEqual(released, [BIZ.harbour], "the claim goes back so the next tick tries again");
+});
