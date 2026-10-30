@@ -177,7 +177,10 @@ export function TaskTrack({ state, className }: { state: OwnerState; className?:
       label: "Sent to Google",
       s: state === "approved" ? "now" : state === "failed" ? "bad" : "done",
     },
-    { label: "Live on Google", s: state === "confirmed" ? "done" : state === "sent" ? "now" : "later" },
+    {
+      label: "Live on Google",
+      s: state === "confirmed" ? "done" : state === "sent" ? "now" : "later",
+    },
   ];
   return (
     <ol className={cn("grid grid-cols-3 gap-2", className)} aria-label="Where this task is">
