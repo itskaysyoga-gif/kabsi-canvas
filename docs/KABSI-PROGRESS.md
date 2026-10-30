@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 30 Oct 2026 by Price 1 (master plan 30.20, 30.21) (master plan 19, 25.1, 26.6, 29.9, 30); first written by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 30 Oct 2026 by Web 3 (master plan 30.20, 30.21) (master plan 19, 25.1, 26.6, 29.9, 30); first written by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -60,9 +60,9 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 30 Oct 2026, Web 3 (PR 289 onwards): Design 6 ported in four parts; part 1 the light-led shell. Detail: `docs/progress/archive/2026-10-30-web3.md`.
 - 30 Oct 2026, Price 1 (PRs 285 to 288): claims fixed, prices 29 and 59 with the founding price, help lines, MRR from price. Detail: `docs/progress/archive/2026-10-30-price1.md`.
 - 30 Oct 2026, lane R: master plan 30.20 and 30.21 (R-100, R-101). Scope 1 verified; WhatsApp ownership confirmed; Creem payouts to Hussein; redesign track; prices 29 and 59 after Rashid's yes.
-- 30 Oct 2026, Scope 1 part 2 (PRs 280, 281): activation measures, slow start alert, evidence log, validation figures. Detail: `docs/progress/archive/2026-10-30-scope1.md`.
 
 ## How a session updates this page
 
