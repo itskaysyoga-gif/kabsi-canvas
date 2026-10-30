@@ -173,7 +173,7 @@ export function PartnersPage() {
             <SectionHead
               id="p-earn"
               title="What you could earn"
-              lead="Pro is $39 a month. You earn 25% of every payment, while the referred subscription stays paid."
+              lead={`Pro is $${PRO.monthly} a month. You earn 25% of every payment, while the referred subscription stays paid.`}
             />
           </div>
           <Earnings />

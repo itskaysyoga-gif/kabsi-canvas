@@ -205,7 +205,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     name: "unknown_phone", about: "A phone Kabsi does not know: the welcome, prices, the scan code, nothing of any business", phones: [PHONES.unknown], ai: false, steps: [
       // The welcome goes on a phone's first message only; a replay phone has written before, so it gets the short menu.
       { note: "hello is the welcome of 24.8, or the menu after the first message", phone: PHONES.unknown, text: "Hello", expect: { result: /^(greeting|help)$/, reply: /Did you just scan your business on kabsi\.co|I am Nora, Kabsi's assistant/ } },
-      { note: "prices", phone: PHONES.unknown, text: "prices", expect: { result: "prices", reply: /19 US dollars.*39 US dollars/s } },
+      { note: "prices", phone: PHONES.unknown, text: "prices", expect: { result: "prices", reply: /29 US dollars.*59 US dollars/s } },
       { note: "stats needs an account and shows no business", phone: PHONES.unknown, text: "stats", expect: { result: "needs_account", reply: /needs a Kabsi account/, never: nothing("Harbour Lane", "Juniper") } },
       { note: "a staff command is never revealed", phone: PHONES.unknown, text: "status", expect: { result: /^(greeting|unclear|free|nora)/, never: nothing("Jobs failed", "Kabsi staff") } },
       { note: "the scan code", phone: PHONES.unknown, text: "Hi Kabsi, my scan code is KAB-2M9Q4X7P", expect: { result: "scan_code", reply: /KAB-2M9Q4X7P/, conv: { scan_code: "KAB-2M9Q4X7P" } } },
