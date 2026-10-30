@@ -16,6 +16,7 @@ import {
   nextReportLine,
   waitingLead,
   splitCards,
+  homeSections,
 } from "../src/lib/home-state";
 import type { Task } from "../src/lib/tasks";
 
@@ -186,6 +187,30 @@ describe("Design 3 Home lines", () => {
     );
     // While Kabsi's WhatsApp number is not set, the lead says nothing about WhatsApp (the one switch).
     expect(waitingLead(2, false)).toBe("2 things need you.");
+  });
+  it("keeps a section whose tasks all sit behind See all, with its count (review finding 1)", () => {
+    const r1 = { kind: "review_reply" as const, id: "r1" };
+    const r2 = { kind: "review_reply" as const, id: "r2" };
+    const r3 = { kind: "review_reply" as const, id: "r3" };
+    const b = { kind: "billing" as const, id: "b" };
+    const v = homeSections([r1, r2, r3], [b]);
+    expect(v.sections.map((x) => [x.title, x.total, x.shown.map((t) => t.id)])).toEqual([
+      ["Needs your yes", 3, ["r1", "r2", "r3"]],
+      ["Needs attention", 1, ["b"]],
+    ]);
+    expect(v.hidden).toEqual([]);
+  });
+  it("puts the section of the most urgent task first, and shows or hides each task once (review finding 2)", () => {
+    const c = { kind: "reconnect" as const, id: "c" };
+    const r = { kind: "review_reply" as const, id: "r" };
+    const p = { kind: "post" as const, id: "p" };
+    const h = { kind: "hours_confirm" as const, id: "h" };
+    const v = homeSections([c, r, p], [h]);
+    expect(v.sections.map((x) => x.title)).toEqual(["Needs attention", "Needs your yes"]);
+    expect(v.sections[1]!.total).toBe(3);
+    expect(v.hidden.map((t) => t.id)).toEqual(["h"]);
+    const seen = [...v.sections.flatMap((x) => x.shown), ...v.hidden].map((t) => t.id).sort();
+    expect(seen).toEqual(["c", "h", "p", "r"]);
   });
   it("splits what waits into Needs your yes and Needs attention (Design 6)", () => {
     const t = (kind: Parameters<typeof splitCards>[0][number]["kind"]) => ({ kind });

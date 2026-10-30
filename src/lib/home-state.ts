@@ -259,6 +259,42 @@ export function splitCards<T extends Pick<Task, "kind">>(cards: T[]): { yes: T[]
   return { yes, attention: cards.filter((t) => !NEEDS_YES.includes(t.kind)) };
 }
 
+export type HomeSectionView<T> = {
+  key: "yes" | "attention";
+  title: "Needs your yes" | "Needs attention";
+  total: number;
+  shown: T[];
+};
+
+/**
+ * The two Home sections from the cards Home shows and the rest behind "See all". Each section counts all of its tasks,
+ * shown or not; a section whose tasks all sit behind "See all" still shows its first one, so it never disappears; the
+ * section holding the most urgent task (list_tasks' first) comes first. Every task is either shown or hidden, once.
+ */
+export function homeSections<T extends Pick<Task, "kind">>(
+  cards: T[],
+  rest: T[],
+): { sections: HomeSectionView<T>[]; hidden: T[] } {
+  const all = [...cards, ...rest];
+  const groups = splitCards(all);
+  const visible = new Set<T>(cards);
+  const sections: HomeSectionView<T>[] = [];
+  for (const key of ["yes", "attention"] as const) {
+    const items = groups[key];
+    if (items.length === 0) continue;
+    const shown = items.filter((t) => visible.has(t));
+    sections.push({
+      key,
+      title: key === "yes" ? "Needs your yes" : "Needs attention",
+      total: items.length,
+      shown: shown.length > 0 ? shown : items.slice(0, 1),
+    });
+  }
+  if (all[0] && sections.length === 2 && !NEEDS_YES.includes(all[0].kind)) sections.reverse();
+  const onScreen = new Set(sections.flatMap((x) => x.shown));
+  return { sections, hidden: all.filter((t) => !onScreen.has(t)) };
+}
+
 /** The next Monday after today, in the owner's words: "Monday 2 November". */
 export function nextMonday(now = new Date(), timeZone?: string | null): string {
   const day = new Date(now);

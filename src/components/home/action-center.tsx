@@ -12,7 +12,7 @@ import { TrialBanner } from "@/components/home/trial-banner";
 import { ProfileGaps } from "@/components/app/profile-gaps";
 import {
   checkStrip,
-  splitCards,
+  homeSections,
   homeState,
   isBacklogSummary,
   nextMonday,
@@ -87,42 +87,33 @@ export function ActionCenter({ loc, role }: { loc: Location; role: Role }) {
       ) : (
         <div className="space-y-8">
           {(() => {
-            const groups = splitCards(state.cards);
-            const totals = splitCards([...state.cards, ...state.rest]);
-            const card = (t: Task, lead: boolean) =>
-              isBacklogSummary(t) ? (
-                <BacklogCard key={t.id} task={t} locationId={loc.id} lead={lead} />
-              ) : (
-                <ActionCard
-                  key={t.id}
-                  task={t}
-                  detail={details.data?.[t.id]}
-                  locationId={loc.id}
-                  lead={lead}
-                  busy={later.isPending}
-                  onLater={(x) => later.mutate(x)}
-                />
-              );
-            return (
-              <>
-                {groups.yes.length > 0 ? (
-                  <HomeSection id="yes-h" title="Needs your yes" count={totals.yes.length}>
-                    {groups.yes.map((t) => card(t, t === state.cards[0]))}
-                  </HomeSection>
-                ) : null}
-                {groups.attention.length > 0 ? (
-                  <HomeSection
-                    id="attention-h"
-                    title="Needs attention"
-                    count={totals.attention.length}
-                  >
-                    {groups.attention.map((t) => card(t, t === state.cards[0]))}
-                  </HomeSection>
-                ) : null}
-              </>
-            );
+            const view = homeSections(state.cards, state.rest);
+            return view.sections.map((sec) => (
+              <HomeSection key={sec.key} id={`${sec.key}-h`} title={sec.title} count={sec.total}>
+                {sec.shown.map((t) =>
+                  isBacklogSummary(t) ? (
+                    <BacklogCard
+                      key={t.id}
+                      task={t}
+                      locationId={loc.id}
+                      lead={t === state.cards[0]}
+                    />
+                  ) : (
+                    <ActionCard
+                      key={t.id}
+                      task={t}
+                      detail={details.data?.[t.id]}
+                      locationId={loc.id}
+                      lead={t === state.cards[0]}
+                      busy={later.isPending}
+                      onLater={(x) => later.mutate(x)}
+                    />
+                  ),
+                )}
+              </HomeSection>
+            ));
           })()}
-          {state.rest.length > 0 ? (
+          {homeSections(state.cards, state.rest).hidden.length > 0 ? (
             <div>
               <Button
                 variant="secondary"
@@ -134,7 +125,7 @@ export function ActionCenter({ loc, role }: { loc: Location; role: Role }) {
               </Button>
               {all ? (
                 <ul className="mt-3 divide-y divide-line rounded-card border border-line bg-surface-1 shadow-rest">
-                  {state.rest.map((t) => (
+                  {homeSections(state.cards, state.rest).hidden.map((t) => (
                     <li key={t.id}>
                       <Link
                         to={t.path}
@@ -243,9 +234,13 @@ function HomeSection({
     <section aria-labelledby={id}>
       <h2 id={id} className="mb-4 flex items-center gap-2 font-display text-h3 font-bold">
         {title}
-        <span className="grid size-7 place-items-center rounded-full bg-text-1 text-label font-bold text-surface-0">
+        <span
+          aria-hidden
+          className="grid size-7 place-items-center rounded-full bg-text-1 text-label font-bold text-surface-0"
+        >
           {count}
         </span>
+        <span className="sr-only">, {count} waiting</span>
       </h2>
       <div className="space-y-4">{children}</div>
     </section>
