@@ -292,7 +292,7 @@ One line per decision. The full text, with what each one changes and why, is `do
 | R-96 | Outbound from launch day with strict rules; hair businesses first (salons and barbers); onboarding in four stages; the launch page set and 12 guides; two free tools (master plan 30.16) | Approved |
 | R-97 | Founding 25 (three months of Pro free, by application, case studies); Home for every business with industry landing pages in waves; access by the Kabsi Clients group ID made easy; getkabsi.com for Outbound (master plan 30.17) | Approved |
 | R-98 | No Arabic in any media; kabsi.co the only brand, getkabsi.com silent and mail only, four mail streams; product emails redesigned (Email 1), Outbound stays plain text; the video plan; Design 5 round 2 (master plan 30.18) | Approved |
-| R-99 | The universal assistant brief is not taken: Kabsi stays a Google Business Profile assistant on WhatsApp until 30 paying customers; honest limits and time to first work (Scope 1); later steps each gated; one set of Outbound rules; the launch gate's blockers and waivers; point-in-time recovery from 500 US dollars MRR (master plan 30.19) | Approved |
+| R-99 | Launch preserved: Kabsi launches as a Google Business Profile assistant on WhatsApp; the wider assistant is a hypothesis tested by milestones (M1, M2, the early prototype rule); honest limits, two activation measures and a request log (Scope 1); one set of Outbound rules; the launch gate's blockers and waivers; point-in-time recovery from 500 US dollars MRR (master plan 30.19) | Approved |
 
 ## 7. Order of work (R-84; master plan 27.11, 28.4, 29.8)
 
