@@ -48,7 +48,8 @@ insert into tested values
   ('onboarding_status(uuid)'), ('confirm_business(uuid)'), ('staff_founding_checklist(uuid)'), ('staff_founding_check(uuid,text,boolean,text)'), ('claim_free_check(uuid,text)'),
   ('save_ai_prompt(uuid,text,uuid)'), ('remove_ai_prompt(uuid)'),
   ('set_routine_channel(text)'), ('my_setup_link_emailed(uuid)'),
-  ('staff_set_google_writes(boolean,text)'), ('staff_founding_matches(uuid)'), ('staff_operations()');
+  ('staff_set_google_writes(boolean,text)'), ('staff_founding_matches(uuid)'), ('staff_operations()'),
+  ('staff_evidence_add(uuid,text,date,text,text,text)'), ('staff_evidence_delete(uuid)'), ('staff_activation()'), ('staff_validation()');
 
 select is(
   (select coalesce(array_agg(p.oid::regprocedure::text order by 1), '{}') from pg_proc p
@@ -174,6 +175,10 @@ select throws_ok($$ select public.staff_payout_sent('00000000-0000-4000-8000-000
 select throws_ok($$ select public.staff_payout_run(current_date) $$, '42501', null, 'staff_payout_run refuses a non-staff user');
 select throws_ok($$ select public.staff_job_health() $$, '42501', null, 'staff_job_health refuses a non-staff user');
 select throws_ok($$ select public.staff_operations() $$, '42501', null, 'staff_operations refuses a non-staff user');
+select throws_ok($$ select public.staff_evidence_add('00000000-0000-4000-8000-0000000000c1', null, current_date, 'call', 'request', 'x') $$, '42501', null, 'staff_evidence_add refuses a non-staff user');
+select throws_ok($$ select public.staff_evidence_delete(gen_random_uuid()) $$, '42501', null, 'staff_evidence_delete refuses a non-staff user');
+select throws_ok($$ select public.staff_activation() $$, '42501', null, 'staff_activation refuses a non-staff user');
+select throws_ok($$ select public.staff_validation() $$, '42501', null, 'staff_validation refuses a non-staff user');
 select throws_ok($$ select public.staff_system_health() $$, '42501', null, 'staff_system_health refuses a non-staff user');
 select throws_ok($$ select public.staff_job_retry(1) $$, '42501', null, 'staff_job_retry refuses a non-staff user');
 select throws_ok($$ select public.staff_job_cancel(1) $$, '42501', null, 'staff_job_cancel refuses a non-staff user');

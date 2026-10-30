@@ -374,3 +374,23 @@ Deno.test("Scope 1: a business slow to its first result gets one staff alert, na
   await onboardingTick(d, db);
   assert.equal(w.outbox.filter((o) => o.phone === PHONES.staff).length, 1, "the same business never alerts the same phone twice");
 });
+
+Deno.test("Scope 1: with no staff phone nothing is claimed, and a send that fails hands the claim back and goes on with the others", async () => {
+  const w = new World();
+  const d = w.deps();
+  let asked = 0;
+  const released: string[] = [];
+  const base: OnboardingDb = {
+    on: async () => false, due: async () => [], claim: async () => true, candidates: async () => ({ categories: [], posts: [], hours: [], reviews: [] }),
+    outcomes: async () => [], startMaps: async () => {}, unlock: async () => {},
+  };
+  await onboardingTick(d, { ...base, slowStart: async () => (asked++, []), staffPhones: async () => [] });
+  assert.equal(asked, 0, "nobody to tell: the database is not asked, so nothing is claimed");
+  const bad = { ...d, out: { ...d.out, db: { ...d.out.db, add: async () => { throw new Error("outbox down"); } } } } as typeof d;
+  await assert.rejects(
+    onboardingTick(bad, { ...base, staffPhones: async () => [PHONES.staff],
+      slowStart: async () => [{ location_id: BIZ.harbour, business: "Harbour Lane Coffee", step: "a post" }], slowStartRelease: async (l) => { released.push(l); } }),
+    /slow_start/,
+  );
+  assert.deepEqual(released, [BIZ.harbour], "the claim goes back so the next tick tries again");
+});
