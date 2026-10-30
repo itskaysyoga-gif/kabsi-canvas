@@ -62,7 +62,7 @@ Jobs run in the database with pg_cron (UTC). "pgTAP" means a test in `supabase/t
 | Staff follow-ups | Business name and a note | 180 days after done (new) | `retention_sources()` | pgTAP `sec2_security.sql` |
 | WhatsApp number health, invitation lookups | Status rows | 90 days (new) | `retention_sources()` | pgTAP `sec2_security.sql` |
 | Refused webhooks | Counts per source, reason, hour | 90 days (new) | `retention_sources()` | pgTAP `sec2_security.sql` section 7 |
-| WhatsApp messages and the outbox | Text of the chat | No automatic date today (privacy page: until the person asks) | On request | LATER row: lane R decides a limit |
+| WhatsApp messages and the outbox | Text of the chat | 12 months after it was sent (messages: `created_at`; outbox: `sent_at`, else `created_at`; a queued or sending row is never deleted). The chat in the Kapso inbox stays until the person asks (privacy page section 14) | `retention_sources()` (Scope 1, 30 Oct 2026) | pgTAP `scope1_retention.sql` |
 | Payments | Amount, plan, Creem ids | As tax law requires; the business link removed when the business is deleted | None (legal) | Privacy page |
 
 ## Logs outside the database

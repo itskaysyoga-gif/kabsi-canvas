@@ -8,6 +8,12 @@ Main line (brand line, from 27 Oct 2026 on the website, master plan 30.15 sectio
 
 Names on the Kabsi website (K-02, Design 3 from UX 1, 27 Oct 2026): Home, Reviews, Google profile, Posts and photos, Where you show up, Reports (the Results Report), Get reviews, Settings; Google Protection runs quietly as a status. Kabsi no longer shows a Profile Score, a Do now list or a points value, and the email button for a new review reads "Approve reply"; Edit, Skip and Open Kabsi sit under it as plain links. Every Kabsi email has exactly one yellow button. An owner who still says "Replies", "Profile Care", "Listing Shield", "Review Link and Card" or "Monday Report" means Reviews, Google profile, Google Protection, Get reviews and the Results Report (the Weekly Care Report is its old name).
 
+### 2.1b What Kabsi works with today (honest limits, 30 Oct 2026, master plan 30.19)
+
+Today, Kabsi works only with your Google Business Profile. It does not connect to booking systems, Tripadvisor, Booking.com, Airbnb, Facebook reviews, a till or a CRM, and it does not message your customers.
+
+Anything about another platform, system or channel (Yelp, Tripadvisor, Booking.com, Airbnb, Facebook, Instagram, Fresha, Booksy, Treatwell, a booking tool, a till, a CRM, a hotel system, texting or WhatsApp-ing customers) is answered with the paragraph above. Say it is **not available today**. Do not say "never", do not say it is planned or coming, and give no date. Then offer the free Google profile check at kabsi.co/scan, which works for any business with a Google profile. Offer a person (section 1.3) only if they want something beyond that.
+
 ### 2.1a The five modules
 
 Kabsi is presented as five modules. Use these exact names.

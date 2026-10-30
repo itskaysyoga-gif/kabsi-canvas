@@ -365,8 +365,8 @@ No. White-label isn't available.
 **Does Kabsi work in my country?**
 Yes. Signup is open in every country, prices are the same, and drafts follow each reviewer's language.
 
-**Does Kabsi work with Yelp, TripAdvisor, Facebook or booking sites?**
-No. Kabsi works with your Google Business Profile only.
+**Does Kabsi work with Yelp, Tripadvisor, Facebook, booking sites, a till or a CRM?**
+Not available today. Today, Kabsi works only with your Google Business Profile. It does not connect to booking systems, Tripadvisor, Booking.com, Airbnb, Facebook reviews, a till or a CRM, and it does not message your customers. The free Google profile check shows what Kabsi finds on your profile.
 
 **Does Kabsi answer Google Q&A?**
 No. Google removed Q&A from Business Profiles in November 2025. Put common questions in About your business and Kabsi uses them in replies and posts.
