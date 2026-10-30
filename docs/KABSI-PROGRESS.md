@@ -58,7 +58,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 30 Oct 2026, Scope 1 part 1 (PR in review): honest limits line and Nora cases, WhatsApp retention 12 months, application deletion dates on /privacy. Detail: `docs/progress/archive/2026-10-30-scope1.md`.
+- 30 Oct 2026, Scope 1 part 1 (PR 278, then list errors and the refused photo): honest limits line and Nora cases, WhatsApp retention, application dates on /privacy. Detail: `docs/progress/archive/2026-10-30-scope1.md`.
 - 30 Oct 2026, lane R: master plan 30.19 (R-99). Launch preserved, expansion on evidence; next Scope 1 then the launch gate, with Outbound on its own track; blockers and waivers decided there.
 - 28 Oct 2026, Eval 1 (PR 265). Detail: `docs/progress/archive/2026-10-27-eval1.md`.
 
