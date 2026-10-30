@@ -4,8 +4,8 @@
   "description": "Your business on Google. Taken care of.",
   "start_url": "/",
   "display": "browser",
-  "background_color": "#0c0c0b",
-  "theme_color": "#0c0c0b",
+  "background_color": "#f6f4ef",
+  "theme_color": "#f6f4ef",
   "icons": [
     {
       "src": "/icon-192.png",
