@@ -59,7 +59,7 @@ const CASES: Case[] = [
     { from: PHONES.unknown, text: "my scan code is KAB-7Q4M2X9P", expect: "scan_code" },
     { from: PHONES.unknown, text: "Send the full map to my WhatsApp", expect: "map_pending", reply: /comes here as soon as it is ready/ }] },
   { name: "unknown: send the full map without a code asks for it", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "send the full map", expect: "map_no_code", reply: /business name or the code/ }] },
-  { name: "unknown: prices", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "prices", expect: "prices", reply: /19 US dollars.*39 US dollars/s }] },
+  { name: "unknown: prices", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "prices", expect: "prices", reply: /29 US dollars.*59 US dollars.*first 30 paying businesses pay 19 or 39/s }] },
   { name: "unknown: start free", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "start free", expect: "trial", reply: /kabsi\.co\/get-started/ }] },
   { name: "unknown: partner program", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "partner", expect: "partner_program", reply: /25 percent/ }] },
   { name: "unknown: talk to a person", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "talk to a person", expect: "handoff", reply: /within one business day/ }],

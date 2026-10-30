@@ -114,6 +114,14 @@ describe("no retired price (lane R, 22 Oct 2026)", () => {
       }
     }
   });
+  it("never calls 19 or 39 the list price (Price 1): those amounts appear only as the founding price", () => {
+    for (const f of READABLE) {
+      const text = readText(f);
+      expect(text, `${f}: an old list price`).not.toMatch(
+        /(Essentials|Pro) (is|at|costs) \$?(19|39|190|390)\b|Essentials is (19|39) US dollars|Pro is (19|39) US dollars/,
+      );
+    }
+  });
   it("the facts file and llms-full.txt quote the six prices and no other Pro price", () => {
     for (const f of ["knowledge/kabsi-facts.md", "public/llms-full.txt"]) {
       const text = readText(f);

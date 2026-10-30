@@ -168,7 +168,7 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
   // Price 1: a running plan shows the price family it is on; a new checkout shows the founding price while places remain
   // (the server decides under its lock, and Creem's page shows the exact price before paying).
   const left = useFoundingLeft();
-  const founding = b ? !!b.founding : left !== null && left > 0;
+  const founding = running ? !!b.founding : left !== null && left > 0;
 
   async function run(
     op: BillingOp,
@@ -266,7 +266,7 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
               </div>
               <p className="mt-2 font-display text-h2 font-bold">
                 $
-                {b?.founding
+                {running && b.founding
                   ? per
                     ? p.foundingYearly
                     : p.foundingMonthly
@@ -277,11 +277,11 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
                   {per ? " a year" : " a month"}
                 </span>
               </p>
-              {b?.founding ? (
+              {running && b.founding ? (
                 <p className="mt-1 text-small font-semibold text-text-1">
                   Founding price, kept while you stay subscribed.
                 </p>
-              ) : b ? null : (
+              ) : running ? null : (
                 <FoundingPriceLine plan={p.id} yearly={per} left={left} />
               )}
               <ul className="mt-4 space-y-2">
@@ -315,6 +315,9 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
           );
         })}
       </div>
+      {showChoose && open ? (
+        <p className="text-small text-text-2">Creem's page shows the exact price before you pay.</p>
+      ) : null}
 
       {running ? (
         <Panel title="Manage your plan" id="manage">

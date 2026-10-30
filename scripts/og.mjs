@@ -49,8 +49,8 @@ const cards = {
   },
   pricing: {
     h: "Simple plans. Free for 14 days.",
-    p: "Every plan runs from WhatsApp.",
-    art: `<div class="stack"><div class="plan"><b>Essentials</b><span>$19</span><i>a month</i></div><div class="plan pro"><b>Pro</b><span>$39</span><i>a month</i></div></div>`,
+    p: "You approve every change.",
+    art: `<div class="stack"><div class="plan"><b>Essentials</b><span>$29</span><i>a month</i></div><div class="plan pro"><b>Pro</b><span>$59</span><i>a month</i></div></div>`,
   },
   tool: {
     h: "Get your Google review link and QR code.",
