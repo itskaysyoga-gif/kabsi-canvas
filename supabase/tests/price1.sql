@@ -63,6 +63,13 @@ values ('Price F25', 'AE', 'beauty_hair', 'Hair salon', '+15550003004', 'We have
   'I agree to a check-in call.', 'accepted', pg_temp.org('4'));
 select is(pg_temp.pick('4', 'req-f25'), 'founding', 'a Founding 25 business gets the founding price with no place left');
 select is(private.founding_places_left_in('test'), 0, 'and takes no place');
+-- Review of Price 1: an accepted Founding 25 business whose open checkout was at the list price gets the founding price.
+insert into public.billing_checkouts (request_id, organization_id, product_key, mode, price_family, checkout_url)
+values ('req-f25-old', pg_temp.org('4'), 'essentials_month_list', 'test', 'list', 'https://creem.io/old');
+select is(pg_temp.pick('4', 'req-f25-old', 'essentials'), 'founding', 'the same request moves to the founding price');
+select is((select product_key from public.billing_checkouts where request_id = 'req-f25-old'), 'essentials_month',
+  'on the founding product, with no old link kept');
+select is(public.founding_places_taken(), 0, 'no live place taken yet');
 
 -- Live mode: a founding subscription takes a place; the public count reads live mode.
 insert into public.subscriptions (organization_id, plan, state, period, provider, provider_subscription_id, mode, founding)
@@ -70,6 +77,7 @@ values (pg_temp.org('2'), 'pro', 'active', 'month', 'creem', 'sub_price1_live', 
 select is(public.founding_places_left(), 29, 'a live founding subscription takes one of the 30');
 select is(pg_temp.pick('3', 'req-live', 'pro', 'live'), 'founding', 'a live checkout still gets the founding price');
 select is(public.founding_places_left(), 28, 'and holds its place');
+select is(public.founding_places_taken(), 2, 'founding_places_taken counts the same places, unclamped');
 
 select throws_ok($$ select public.billing_checkout_family(pg_temp.org('1'), 'x', 'live', 'gold', 'month', null) $$, 'P0001', 'bad_input',
   'an unknown plan is refused');

@@ -22,22 +22,29 @@ comment on column public.billing_checkouts.price_family is
 -- How many founding places exist in test mode, so a test can reach the list price (live mode is always 30).
 insert into public.app_settings (key, value) values ('founding_places_test', '30') on conflict (key) do nothing;
 
-create or replace function private.founding_places_left_in(p_mode text) returns integer
+-- The businesses holding a founding place in a mode (Founding 25 takes none): a founding subscription, a completed founding
+-- checkout, or an open founding checkout of the last 24 hours.
+create or replace function private.founding_places_taken_in(p_mode text) returns integer
 language sql stable security definer set search_path = '' as $$
-  with f25 as (
-    select a.organization_id from public.founding_applications a where a.status = 'accepted' and a.organization_id is not null
-  ), taken as (
+  select count(*)::integer from (
     select s.organization_id from public.subscriptions s where s.founding and s.mode = p_mode
     union
     select c.organization_id from public.billing_checkouts c
      where c.price_family = 'founding' and c.mode = p_mode
        and (c.completed_at is not null or c.created_at > now() - interval '24 hours')
-  )
+  ) t
+  where not exists (select 1 from public.founding_applications a
+                     where a.status = 'accepted' and a.organization_id = t.organization_id)
+$$;
+revoke all on function private.founding_places_taken_in(text) from public, anon, authenticated;
+
+create or replace function private.founding_places_left_in(p_mode text) returns integer
+language sql stable security definer set search_path = '' as $$
   select greatest(0,
     (case when p_mode = 'live' then 30
           else coalesce((select case when s.value ~ '^[0-9]{1,4}$' then s.value::integer end
                            from public.app_settings s where s.key = 'founding_places_test'), 30) end)
-    - (select count(*) from taken t where not exists (select 1 from f25 where f25.organization_id = t.organization_id)))::integer
+    - private.founding_places_taken_in(p_mode))::integer
 $$;
 revoke all on function private.founding_places_left_in(text) from public, anon, authenticated;
 
@@ -52,7 +59,7 @@ grant execute on function public.founding_places_left() to service_role;
 create or replace function public.billing_checkout_family(p_org uuid, p_request_id text, p_mode text, p_plan text,
   p_period text, p_user uuid) returns jsonb
 language plpgsql security definer set search_path = '' as $$
-declare r public.billing_checkouts; v_family text;
+declare r public.billing_checkouts; v_family text; v_had boolean;
 begin
   if p_org is null or coalesce(p_request_id, '') = '' or p_mode not in ('test', 'live')
      or p_plan not in ('essentials', 'pro') or p_period not in ('month', 'year') then
@@ -61,22 +68,29 @@ begin
   -- One lock for every founding decision: the count and the new row are one step.
   perform pg_advisory_xact_lock(hashtext('kabsi_founding_places'));
   select * into r from public.billing_checkouts where request_id = p_request_id;
-  if found then
+  v_had := found;
+  if v_had and not (r.price_family = 'list' and exists (select 1 from public.founding_applications a
+                     where a.organization_id = p_org and a.status = 'accepted')) then
     return jsonb_build_object('family', coalesce(r.price_family, case when r.product_key like '%\_list' then 'list' else 'founding' end),
       'checkout_url', r.checkout_url, 'completed', r.completed_at is not null);
   end if;
-  select c.price_family into v_family from public.billing_checkouts c
-   where c.organization_id = p_org and c.mode = p_mode and c.price_family is not null
-     and c.completed_at is null and c.created_at > now() - interval '24 hours'
-   order by c.created_at desc limit 1;
+  -- Founding 25 first: the founding price whatever the count or an earlier checkout says.
+  if exists (select 1 from public.founding_applications a where a.organization_id = p_org and a.status = 'accepted') then
+    v_family := 'founding';
+  else
+    select c.price_family into v_family from public.billing_checkouts c
+     where c.organization_id = p_org and c.mode = p_mode and c.price_family is not null
+       and c.completed_at is null and c.created_at > now() - interval '24 hours'
+     order by c.created_at desc limit 1;
+  end if;
   if v_family is null then
-    if exists (select 1 from public.founding_applications a where a.organization_id = p_org and a.status = 'accepted') then
-      v_family := 'founding';
-    elsif private.founding_places_left_in(p_mode) > 0 then
-      v_family := 'founding';
-    else
-      v_family := 'list';
-    end if;
+    v_family := case when private.founding_places_left_in(p_mode) > 0 then 'founding' else 'list' end;
+  end if;
+  if v_had then
+    -- A Founding 25 business whose earlier checkout today was at the list price: the same request moves to founding.
+    update public.billing_checkouts set price_family = v_family, product_key = p_plan || '_' || p_period,
+      checkout_id = null, checkout_url = null where request_id = p_request_id;
+    return jsonb_build_object('family', v_family, 'checkout_url', null, 'completed', false);
   end if;
   insert into public.billing_checkouts (request_id, organization_id, product_key, units, mode, created_by, price_family)
   values (p_request_id, p_org, p_plan || '_' || p_period || case when v_family = 'list' then '_list' else '' end, 1, p_mode,
@@ -85,3 +99,12 @@ begin
 end $$;
 revoke all on function public.billing_checkout_family(uuid, text, text, text, text, uuid) from public, anon, authenticated;
 grant execute on function public.billing_checkout_family(uuid, text, text, text, text, uuid) to service_role;
+
+-- Founding places taken in live mode, unclamped, so the billing job tells staff if a founding payment arrives with no place
+-- left (an old founding checkout link paid after its 24-hour hold). The price the owner was shown stands.
+create or replace function public.founding_places_taken() returns integer
+language sql stable security definer set search_path = '' as $$
+  select private.founding_places_taken_in('live')
+$$;
+revoke all on function public.founding_places_taken() from public, anon, authenticated;
+grant execute on function public.founding_places_taken() to service_role;

@@ -282,7 +282,17 @@ async function foundingCheck(s: SubRow, family: PriceFamily | null) {
       .eq("status", "accepted").limit(1);
     founding = (f25 ?? []).length > 0;
   }
-  if (founding) await admin().from("subscriptions").update({ founding: true }).eq("id", s.id);
+  if (!founding) return;
+  await admin().from("subscriptions").update({ founding: true }).eq("id", s.id);
+  // Review of Price 1: an old founding checkout link paid after its 24-hour hold can make a 31st founding business. The price
+  // the owner was shown stands; staff hear about it.
+  if (family === "founding" && s.mode === "live") {
+    const { data: taken } = await admin().rpc("founding_places_taken");
+    if (typeof taken === "number" && taken > 30) {
+      await staffAlert(`Founding place ${taken} of 30 was taken by ${await businessName(s.organization_id)} (an older founding checkout link was paid). The price stands`, `founding_over:${s.id}`)
+        .catch((x) => captureError("billing", x, { step: "founding_over" }));
+    }
+  }
 }
 /** The price family a running subscription is on: its product's family, else its founding flag. Changes stay in it. */
 export function familyOfSub(s: Pick<SubRow, "founding" | "product_id">, ids: ProductIds): PriceFamily {
@@ -426,7 +436,7 @@ export async function startCheckout(org: string, userId: string | null, email: s
   const running = await currentSub(org);
   if (running && running.state !== "paused") throw new BillingError("already_paid", "This business already has a plan.");
   const ids = await productIds();
-  if (!ids[planKey(plan, period, "founding")] || !ids[planKey(plan, period, "list")]) throw new BillingError("not_configured", "Payments are not set up yet.");
+  if (!ids[planKey(plan, period, "founding")] && !ids[planKey(plan, period, "list")]) throw new BillingError("not_configured", "Payments are not set up yet.");
   // Price 1: the request id names the plan, not the price, so a repeated tap keeps the price the owner was shown.
   const requestId = checkoutRequestId(org, `${plan}_${period}`, 1, now);
   const db = admin();
@@ -438,10 +448,22 @@ export async function startCheckout(org: string, userId: string | null, email: s
   const picked = f as { family: PriceFamily; checkout_url: string | null; completed: boolean };
   if (picked.checkout_url && !picked.completed) return picked.checkout_url;
   const key = planKey(plan, period, picked.family);
-  const productId = ids[key]!;
+  const productId = ids[key];
+  // A checkout that never reached Creem holds no founding place (review of Price 1).
+  const release = () => db.from("billing_checkouts").delete().eq("request_id", requestId).is("checkout_url", null).then(() => {}, () => {});
+  if (!productId) {
+    await release();
+    throw new BillingError("not_configured", "Payments are not set up yet.");
+  }
   const location = (await contacts(org))[0]?.location_id ?? "";
-  const c = await creem().createCheckout({ productId, units: 1, requestId, successUrl: SUCCESS_URL, email,
-    metadata: { referenceId: org, business_id: location, price_family: picked.family } });
+  let c: { id: string; checkout_url: string };
+  try {
+    c = await creem().createCheckout({ productId, units: 1, requestId, successUrl: SUCCESS_URL, email,
+      metadata: { referenceId: org, business_id: location, price_family: picked.family } });
+  } catch (err) {
+    await release();
+    throw err;
+  }
   const { error: ue } = await db.from("billing_checkouts").update({ product_key: key, checkout_id: c.id, checkout_url: c.checkout_url })
     .eq("request_id", requestId);
   if (ue) throw ue;
