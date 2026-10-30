@@ -4,8 +4,8 @@
 //   node scripts/nora-eval/run-nora-eval.ts --stub pass    the checker and the facts file, no network (also "fail")
 //   node scripts/nora-eval/run-nora-eval.ts --live --sample 20   the real Nora on 20 questions spread over the set; needs
 //                                                          ANTHROPIC_API_KEY; by hand only, when Rashid says so (R-45, 2.12)
-//   node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget 2.5   all 80 questions (the 60 and the
-//                                                          20 of 28.7), each scored by the judge (26.1), stopped at the budget
+//   node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget 2.5   all 83 questions (the 60, the
+//                                                          20 of 28.7 and the 3 of Scope 1), each scored by the judge (26.1), stopped at the budget
 //
 // Add --out <file> to keep the findings. Nothing is stored and no account is read.
 import { writeFileSync } from "node:fs";
@@ -13,6 +13,7 @@ import process from "node:process";
 import { gate, liveModel, runAll, sample, stubModel, type Answerer } from "./nora-eval.ts";
 import { QUESTIONS } from "./questions.ts";
 import { QUESTIONS_28 } from "./questions-28.ts";
+import { QUESTIONS_SCOPE1 } from "./questions-scope1.ts";
 import { addRun, JUDGE_MODEL, makeJudge, summarize, type JudgeScore } from "../eval/judge.ts";
 import { costMicros, type Usage } from "../../supabase/functions/_shared/ai/agents.ts";
 import { readFileSync } from "node:fs";
@@ -48,7 +49,9 @@ if (stub) {
   process.exit(2);
 }
 
-const all = args.includes("--with-28") ? [...QUESTIONS, ...QUESTIONS_28] : QUESTIONS;
+const all = args.includes("--with-28")
+  ? [...QUESTIONS, ...QUESTIONS_28, ...QUESTIONS_SCOPE1]
+  : QUESTIONS;
 const n = Number(flag("--sample") ?? all.length);
 const only = n >= all.length ? all : sample(n);
 const judge =

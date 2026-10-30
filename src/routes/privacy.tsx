@@ -167,6 +167,11 @@ function Page() {
           your partner link or code, so we can pay you correctly.
         </p>
         <p>
+          <b>If you apply for a Founding 25 place:</b> your business name, country, kind of
+          business, WhatsApp number, why you want a place, whether we may name you in a case study,
+          and the words you agreed to for the check-ins.
+        </p>
+        <p>
           <b>If you write to us through a form:</b> what you enter (for example name, email,
           Instagram handle, country and message).
         </p>
@@ -493,10 +498,19 @@ function Page() {
           </li>
           {WHATSAPP_ON ? (
             <li>
-              WhatsApp chats with the Kabsi number: no automatic deletion date is set today. They
-              stay in the Kapso inbox until you ask us to delete them (section 14).
+              WhatsApp messages with the Kabsi number: Kabsi deletes its own record of each one 12
+              months after it was sent. The text Kabsi queues to send to you is cleared a day after
+              it is sent, and its queue record is deleted after 30 days. The chat stays in the Kapso
+              inbox until you ask us to delete it (section 14).
             </li>
           ) : null}
+          <li>
+            Applications to Founding 25 and Kabsi Partners: if we decline an application, we delete
+            it 90 days after we decided. If we put a Founding 25 application on the waiting list, we
+            delete it 180 days after we decided. An accepted place is kept while you are in the
+            program. A declined partner application that has a referral, commission or payout record
+            is kept only as long as that record needs it, and as tax and accounting law requires.
+          </li>
           <li>
             Visibility Map and AI Visibility results, and the competitors you pick (from launch):
             while you use Kabsi, and deleted with the business.
@@ -630,12 +644,15 @@ function Page() {
               of WhatsApp is also covered by WhatsApp&apos;s own terms and privacy policy.
             </p>
             <p>
-              <b>How long it is kept.</b> No automatic deletion date is set for WhatsApp chats
-              today. They stay in the Kapso inbox until you ask us to delete them: email{" "}
-              {CONTACT_EMAIL} from the address on your account, or say so in the chat, and we delete
-              the chat on our side and tell you when it is done. Kapso and Meta may keep messages
-              under their own terms, and the chat stays on your own phone until you delete it there.
-              Review text in an alert is not kept by Kabsi.
+              <b>How long it is kept.</b> Kabsi deletes its own record of each WhatsApp message 12
+              months after it was sent. The text Kabsi queues to send to you is cleared a day after
+              it is sent, and its queue record is deleted after 30 days. The chat stays in the Kapso
+              inbox until you ask us to delete it: email {CONTACT_EMAIL} from the address on your
+              account, or say so in the chat, and we delete the chat on our side and tell you when
+              it is done. A chat with Kabsi&apos;s earlier number (before 22 October 2026) has no
+              automatic deletion date. Kapso and Meta may keep messages under their own terms, and
+              the chat stays on your own phone until you delete it there. Review text in an alert is
+              not kept by Kabsi.
             </p>
           </>
         ) : (

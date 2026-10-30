@@ -34,12 +34,13 @@ export type Score = {
   findings: Finding[];
 };
 
-/** Dollar amounts and number-plus-unit phrases in a text, normalised so "20-minute" and "20 minutes" compare equal. */
+/** Dollar amounts and number-plus-unit phrases in a text, normalised so "20-minute" and "20 minutes" compare equal.
+ *  The unit ends the word: "3 monthly" (3 times a month, a count) is not "3 month" (Scope 1, en02). */
 export function numbersIn(text: string): string[] {
   const out = new Set<string>();
   for (const m of text.matchAll(/\$\s?\d[\d,]*(?:\.\d+)?/g)) out.add(m[0].replace(/\s/g, ""));
   const unit =
-    /\b(\d[\d,]*)[\s-]*(days?|hours?|minutes?|months?|years?|weeks?|seconds?|percent|posts?|photos?|characters?|locations?|businesses|pixels?|MB|%)/gi;
+    /\b(\d[\d,]*)[\s-]*(days?|hours?|minutes?|months?|years?|weeks?|seconds?|percent|posts?|photos?|characters?|locations?|businesses|pixels?|MB|%)(?![a-z])/gi;
   for (const m of text.matchAll(unit)) {
     const u = m[2].toLowerCase().replace(/s$/, "").replace("percent", "%");
     out.add(`${m[1].replace(/,/g, "")} ${u}`);

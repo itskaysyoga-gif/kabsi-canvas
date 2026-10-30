@@ -221,6 +221,12 @@ Main line (brand line, from 27 Oct 2026 on the website, master plan 30.15 sectio
 
 Names on the Kabsi website (K-02, Design 3 from UX 1, 27 Oct 2026): Home, Reviews, Google profile, Posts and photos, Where you show up, Reports (the Results Report), Get reviews, Settings; Google Protection runs quietly as a status. Kabsi no longer shows a Profile Score, a Do now list or a points value, and the email button for a new review reads "Approve reply"; Edit, Skip and Open Kabsi sit under it as plain links. Every Kabsi email has exactly one yellow button. An owner who still says "Replies", "Profile Care", "Listing Shield", "Review Link and Card" or "Monday Report" means Reviews, Google profile, Google Protection, Get reviews and the Results Report (the Weekly Care Report is its old name).
 
+### 2.1b What Kabsi works with today (honest limits, 30 Oct 2026, master plan 30.19)
+
+Today, Kabsi works only with your Google Business Profile. It does not connect to booking systems, Tripadvisor, Booking.com, Airbnb, Facebook reviews, a till or a CRM, and it does not message your customers.
+
+Anything about another platform, system or channel (Yelp, Tripadvisor, Booking.com, Airbnb, Facebook, Instagram, Fresha, Booksy, Treatwell, a booking tool, a till, a CRM, a hotel system, texting or WhatsApp-ing customers) is answered with the paragraph above. Say it is **not available today**. Do not say "never", do not say it is planned or coming, and give no date. Then offer the free Google profile check at kabsi.co/scan, which works for any business with a Google profile, and say that a person answers at hello@kabsi.co if they want to talk it through (section 1.3 has the call and the email; do not start a hand-off unless they ask for one).
+
 ### 2.1a The five modules
 
 Kabsi is presented as five modules. Use these exact names.
@@ -633,6 +639,7 @@ Kabsi is operated by Rashid Abou Hamzy, who is also the person responsible for t
 - **Free tool users:** the search text goes to Google's Places API; a one-way salted hash of the IP is kept one hour to stop abuse.
 - **Free Google Profile Check users:** the search text goes to Google's Places API; what Google shows publicly about the business they pick is shown and not kept (only the business's Google Place ID is kept with an email or WhatsApp request); a one-way salted hash of the IP is kept one day to enforce 3 checks a day. If they ask for the check by email: the address, the business's Google Place ID, whether they ticked the tips box, the words next to it, the page and the time (proof of their choice). If they ask for it on WhatsApp (only while Kabsi has a number): a one-way hash of the number, the Place ID, the words next to the tick, the page, the time and whether the message was sent; the number itself is used once to send and is not kept.
 - **[COMING] Visibility checks (from launch):** the business name, category, address and the keywords the owner confirms go to DataForSEO (Google Maps results, and the AI answers of ChatGPT and Perplexity); Geoapify gets the map's centre point to draw the street map under the pins, and two checked points of each map to name the nearest landmark or street for the nearby places (no business or personal details go with them). Kept: rank at each map point, the public name, rating, review count, photo count and categories of the businesses in the results, the AI answers from ChatGPT and Perplexity (shown as samples), and the competitors the owner picks. No review text, no addresses or phone numbers of other businesses and no customer personal details are kept or sent for this. Kept while the business uses Kabsi and deleted 30 days after it leaves.
+- **People who apply for a Founding 25 place:** business name, country, kind of business, WhatsApp number, why they want a place, whether Kabsi may name them in a case study, and the words they agreed to for the check-ins. Deleted 90 days after a decline and 180 days after a waitlist decision.
 - **[COMING] People who apply to Kabsi Partners (from launch):** name, email, country and city, what they do, where they will share Kabsi and how many local owners that reaches, one line on how they will recommend it, the UAE advertiser permit number if given, WhatsApp number, the time they accepted the partner terms. Payout details are kept encrypted in the database vault and shown as the last 4 characters. A partner sees the trade and area of a business that joined through them and counts of visits, scans, trials and payments, never its name, reviews or data unless the owner says yes once.
 - **People who chat with Nora (the assistant):** their messages, the page they asked from, browser time zone and language, device type, the site that sent them, the country from the network (never the IP address), and any contact details they choose to give. Each chat is labelled (topic, intent, country) and a short report goes to the Kabsi team so a person can follow up. News emails only with a yes.
 - **People who wrote to Kabsi's earlier WhatsApp number (before 22 Oct 2026):** they can ask for that chat to be deleted by emailing hello@kabsi.co (see section 9.5b). Kabsi does not copy chats into its own database.
@@ -660,7 +667,7 @@ What is sent: nothing goes to customers over WhatsApp today; only Kabsi's own te
 
 Who handles it: Kapso (the inbox and the messaging service) and Meta (runs WhatsApp and carries the messages) are its processors, and the privacy page and terms name them before owners are switched on. Kabsi does not use WhatsApp for marketing messages. The notices Kabsi sends an owner outside the 24-hour window are Meta utility templates about the owner's own account, approvals and Google profile, with no offer and nothing promotional.
 
-How long it is kept: if someone wrote to Kabsi's earlier WhatsApp number before 22 Oct 2026, no automatic deletion date was set for that chat; they can ask for it to be deleted by emailing hello@kabsi.co from their account address, and Kabsi tells them when it is done. The chat stays on the person's own phone until they delete it there.
+How long it is kept: Kabsi deletes its own record of each WhatsApp message 12 months after it was sent (Scope 1, 30 Oct 2026); the text it queues to send is cleared a day after it is sent and its queue record is deleted after 30 days; the chat also stays in the Kapso inbox until the person asks for it to be deleted). If someone wrote to Kabsi's earlier WhatsApp number before 22 Oct 2026, no automatic deletion date was set for that chat; they can ask for it to be deleted by emailing hello@kabsi.co from their account address, and Kabsi tells them when it is done. The chat stays on the person's own phone until they delete it there.
 
 Not live yet (P0.8-03; say "not available yet", never give a date): owner alerts and approvals on WhatsApp. When they come: alerts only after the owner opts in (the time, the phone number and the wording shown are recorded); a review alert carries the business, the star rating, the reviewer's first name, the review text up to 300 characters and the draft, after that opt-in; the owner can reply STOP (or a similar word such as UNSUBSCRIBE) at any time and Kabsi stops at once and records it. The privacy page and terms are updated, and account holders emailed, before any of it is switched on.
 
@@ -693,6 +700,9 @@ The privacy page shows the 11 rows of the retention table (`retention_policies`,
 | Contact details given to the assistant | Until you ask us to remove them |
 | Email log | 12 months |
 | Record of approvals and changes | 24 months; the details of a deleted business are blanked, who did what and when stays |
+| WhatsApp messages with the Kabsi number | Kabsi deletes its own record of each one 12 months after it was sent (received, for an incoming message). The text queued to send is cleared a day after it is sent and its queue record is deleted after 30 days |
+| Founding 25 applications | Declined: deleted 90 days after the decision. Waitlisted: deleted 180 days after it. Accepted: kept while in the program |
+| Kabsi Partners applications | Declined: deleted 90 days after the decision, unless a referral, commission or payout record exists (kept as long as that record needs it and tax and accounting law requires) |
 | WhatsApp chats with Kabsi's earlier number (before 22 Oct 2026) | No automatic deletion date was set; deleted when the person asks at hello@kabsi.co |
 | Visibility and AI answer results, and the competitors the owner picks (from launch) | While you use Kabsi; deleted 30 days after the business leaves |
 | A free check (from launch): the business's public Google Maps results bought from DataForSEO, one AI answer's findings and the nearby places | 30 days, or 90 days once the business signs up; nothing from Google's Places service but the Place ID |
@@ -1172,8 +1182,8 @@ No. White-label isn't available.
 **Does Kabsi work in my country?**
 Yes. Signup is open in every country, prices are the same, and drafts follow each reviewer's language.
 
-**Does Kabsi work with Yelp, TripAdvisor, Facebook or booking sites?**
-No. Kabsi works with your Google Business Profile only.
+**Does Kabsi work with Yelp, Tripadvisor, Facebook, booking sites, a till or a CRM?**
+Not available today. Today, Kabsi works only with your Google Business Profile. It does not connect to booking systems, Tripadvisor, Booking.com, Airbnb, Facebook reviews, a till or a CRM, and it does not message your customers. The free Google profile check shows what Kabsi finds on your profile.
 
 **Does Kabsi answer Google Q&A?**
 No. Google removed Q&A from Business Profiles in November 2025. Put common questions in About your business and Kabsi uses them in replies and posts.
@@ -1311,7 +1321,7 @@ The assistant must not answer these. Say you'll pass it to the Kabsi team and gi
 - Terms and privacy interpretation for a specific case.
 
 **Product**
-- Integrations and APIs (booking systems, POS, CRM, other review sites), and features not described here.
+- Features not described here. Integrations and APIs (booking systems, POS, CRM, other review sites) are answered first with the line in section 2.1b (not available today, no date, the free check); and the address hello@kabsi.co for anything more.
 - Bugs, errors or anything that behaves differently from this document.
 - Requests to change how drafts are written beyond About your business.
 - Roadmap questions (more site languages, other notification channels, new features).
