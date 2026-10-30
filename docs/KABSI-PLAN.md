@@ -7,7 +7,7 @@ Version 1 was written on 4 Oct 2026 from the six source documents in `docs/sourc
 1. Guardrails (digest here; full text in the archive)
 2. Rules for every build chat (here, in full)
 3. Sources and precedence (here, in full)
-4. Review decisions R-01 to R-98 (table with status here; full text in the archive)
+4. Review decisions R-01 to R-99 (table with status here; full text in the archive)
 7. Order of work (here, short; the full section and the task cards are in the archive)
 8. Where everything went
 
@@ -186,9 +186,9 @@ Not a source of truth any more: `docs/KABSI-SPEC.md`, `docs/KABSI-STATE.md`, `do
 
 Added on 24 Oct 2026: the master plan (`docs/KABSI-MASTERPLAN.md`) sits above items 2 to 5 for everything it covers, with its later sections winning over its earlier ones.
 
-## 4. Review decisions (R-01 to R-98)
+## 4. Review decisions (R-01 to R-99)
 
-One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. Later decisions override earlier ones where they differ: R-98 over R-97 over R-96 over R-95 over R-94 over R-93 over R-92 over R-91 over R-90 over R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
+One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. Later decisions override earlier ones where they differ: R-99 over R-98 over R-97 over R-96 over R-95 over R-94 over R-93 over R-92 over R-91 over R-90 over R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
 
 | # | Decision | Status |
 |---|---|---|
@@ -292,6 +292,7 @@ One line per decision. The full text, with what each one changes and why, is `do
 | R-96 | Outbound from launch day with strict rules; hair businesses first (salons and barbers); onboarding in four stages; the launch page set and 12 guides; two free tools (master plan 30.16) | Approved |
 | R-97 | Founding 25 (three months of Pro free, by application, case studies); Home for every business with industry landing pages in waves; access by the Kabsi Clients group ID made easy; getkabsi.com for Outbound (master plan 30.17) | Approved |
 | R-98 | No Arabic in any media; kabsi.co the only brand, getkabsi.com silent and mail only, four mail streams; product emails redesigned (Email 1), Outbound stays plain text; the video plan; Design 5 round 2 (master plan 30.18) | Approved |
+| R-99 | Launch preserved: Kabsi launches as a Google Business Profile assistant on WhatsApp; the wider assistant is a hypothesis, not a commitment; paid demand tracked apart from Founding 25 with a paid gate at day 45; three activation measures, an evidence log and a validation view (Scope 1); new capabilities chosen on wider evidence with Rashid's yes; five integration classes; Outbound a separate track that never blocks launch and sends only when the four conditions of 30.19 section 7 hold; the launch gate's blockers and waivers; point-in-time recovery from 500 US dollars MRR (master plan 30.19, docs/strategy/2026-10-30-expansion-evidence.md) | Approved |
 
 ## 7. Order of work (R-84; master plan 27.11, 28.4, 29.8)
 
