@@ -1,19 +1,20 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 30 Oct 2026 by lane R (master plan 30.19) (master plan 19, 25.1, 26.6, 29.9, 30); first written by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 30 Oct 2026 by Price 1 (master plan 30.20, 30.21) (master plan 19, 25.1, 26.6, 29.9, 30); first written by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati; the first real reply was published and verified; the post removal was verified on Google (23 Oct). kabsi.co runs on Vercel; Creem is the only payment route (test mode, not open). Evidence: `docs/progress/archive/evidence.md` and `where-things-stand.md`.
 - Sessions 19 PR 0, Ops 1 parts A and B, Session 0, Clean 1, 13b part 1 and part 2, Fix 1, Session 10 Creem, V1, V2, V3, QA 1, Growth 1 and the lane R notes of 25 and 26 Oct: one line each in `docs/progress/archive/where-things-stand.md` (moved 27 Oct by V4), detail in their own archive files.
-- Web 2 (PR 252, 26 Oct): kabsi.co's public pages on the approved dark system, real counts, the Founding 25 and Partners forms, the free check. Detail: `docs/progress/archive/2026-10-27-web2.md`.
+- Web 2 (PR 252, 26 Oct): the public pages, real counts, Founding 25 and Partners forms, the free check. Detail: `docs/progress/archive/2026-10-27-web2.md`.
 - V4 (PR 250, 26 Oct): onboarding in four stages, task states, the work receipt, nearby places, the free check route. Detail: `docs/progress/archive/2026-10-27-v4.md`.
 - UX 1: the signed-in website on Design 3, onboarding in four stages, Get reviews, the staff AI spend and Founding 25 checklist. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
 - Email 1: one email design for every email. Detail: `docs/progress/archive/2026-10-27-email1.md`.
 - Sec 1 (PR 261, 27 Oct): tenant isolation, roles, approvals, webhooks, the stop switch for Google writes, ASVS L1. Detail: `docs/progress/archive/2026-10-27-sec1.md`.
-- Sec 2 (PR 266, 27 Oct, deployed and checked live): approvals bound to the draft shown, retention per source, privacy trace, backup and restore drill, secrets audit, the staff Operations view. Detail: `docs/progress/archive/2026-10-27-sec2.md`.
-- WhatsApp 2 (PRs 268, 270, 271, 28 Oct; deploys 126 to 128): Meta put 9 of the 11 templates in Marketing (no delivery to US numbers), so each has a Utility replacement; 13 are PENDING (Utility), none new is APPROVED yet; the sender uses a replacement only once it is APPROVED and UTILITY; one real template (`kabsi_staff_alert`) reached the staff phone, delivered receipt read back; `/privacy` and the facts name Anthropic for WhatsApp messages and Nora. Detail and the full table: `docs/progress/archive/2026-10-28-whatsapp2.md`.
-- Billing 2 (PR 269, 28 Oct): extra locations as their own Creem subscription on the same customer, units kept on the plan row; Remove a location; Creem's `prod` read as live; the partner base for extras; the 410 billing stub removed from the repo. Detail: `docs/progress/archive/2026-10-28-billing2.md`.
+- Sec 2 (PR 266, 27 Oct, checked live): approvals bound to the draft shown, retention, backup drill, secrets audit, staff Operations. Detail: `docs/progress/archive/2026-10-27-sec2.md`.
+- WhatsApp 2 (PRs 268, 270, 271, 28 Oct): Utility replacements for the Marketing templates, all approved 29 Oct (ladder); `/privacy` names Anthropic for WhatsApp and Nora. Detail: `docs/progress/archive/2026-10-28-whatsapp2.md`.
+- Billing 2 (PR 269, 28 Oct): extra locations as their own Creem subscription on the same customer; Remove a location. Detail: `docs/progress/archive/2026-10-28-billing2.md`.
+- Price 1 (PRs 285 to 288, 30 Oct): the site's claims match the facts; list prices 29 and 59 a month (290, 590 a year), the founding price 19 and 39 for the first 30 paying businesses chosen at checkout under one lock, Founding 25 too; built features only on the plan cards; the help lines; MRR from the plan's price. Creem test-mode list products made by the setup action. Detail: `docs/progress/archive/2026-10-30-price1.md`.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
@@ -40,12 +41,13 @@ The facts say "WhatsApp is live" only when the last step is done.
 - Email 1: news.kabsi.co in Resend and Cloudflare before lifecycle emails go on (LATER row).
 - Google Cloud: Places quotas and budget alerts; contacts and owners on kabsi.co addresses only.
 - Supabase Pro with point-in-time recovery and Vercel Pro, before the first payment.
+- Price 1: before plans open, the test-mode checkout on both price families (LATER row: set `founding_places_test` to 0 in app_settings for the list price, then back to 30). The live list products are made by the setup action at going live, no dashboard step.
 - Creem (session 10): send one test event from Creem's dashboard to the webhook (expect 200 and one `billing_events` row), add the product bundle, mark Yawmiyati's organisation `billing_test` if you want to try the paid buttons. Hussein only at going live (verification, payout). Exact steps: `docs/progress/archive/2026-10-25-session-10-creem.md`.
 - A lawyer reads /terms, /privacy and the partner terms (master plan 29.8).
 - Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
-- V3 heads-up: the first live tick after the deploy sent one "your photo is ready" message to the Yawmiyati phone about an old 25 Oct test photo (tap Skip, never Yes: Yes would publish it to the real profile) and queued the monthly question there; your next typed message within 3 days is read as its answer, so reply No to close it.
-- Templates: lane R reads the 13 PENDING with `select public.call_internal('whatsapp/staff/templatestatus', '{}'::jsonb)` (then `net._http_response`) before the launch gate. Voice notes stay off: the voice test failed for Gulf Arabic and mixed notes (LATER row).
+- V3 heads-up (25 Oct): on the Yawmiyati phone tap Skip on the old photo message, never Yes, and reply No to the monthly question. Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
+- Templates: all approved 29 Oct (ladder). Voice notes stay off: the voice test failed for Gulf Arabic and mixed notes (LATER row).
 - UX 1: after the deploy, `POST /visibility/terms` once (two DataForSEO calls, about 0.15 USD) and the read-back in the UX 1 archive file.
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up and Gemini billing at the launch gate.
 
@@ -58,9 +60,9 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 30 Oct 2026, Price 1 (PRs 285 to 288): claims fixed, prices 29 and 59 with the founding price, help lines, MRR from price. Detail: `docs/progress/archive/2026-10-30-price1.md`.
 - 30 Oct 2026, lane R: master plan 30.20 and 30.21 (R-100, R-101). Scope 1 verified; WhatsApp ownership confirmed; Creem payouts to Hussein; redesign track; prices 29 and 59 after Rashid's yes.
 - 30 Oct 2026, Scope 1 part 2 (PRs 280, 281): activation measures, slow start alert, evidence log, validation figures. Detail: `docs/progress/archive/2026-10-30-scope1.md`.
-- 30 Oct 2026, Scope 1 part 1 (PRs 278, 279): honest limits line and Nora cases, WhatsApp retention, application dates on /privacy. Detail: `docs/progress/archive/2026-10-30-scope1.md`.
 
 ## How a session updates this page
 
