@@ -58,7 +58,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 30 Oct 2026, lane R: master plan 30.20 (R-100). Scope 1 verified; Creem payouts to Hussein's account only; redesign track; list prices 29 and 59 after Rashid's yes.
+- 30 Oct 2026, lane R: master plan 30.20 and 30.21 (R-100, R-101). Scope 1 verified; WhatsApp ownership confirmed; Creem payouts to Hussein; redesign track; prices 29 and 59 after Rashid's yes.
 - 30 Oct 2026, Scope 1 part 2 (PRs 280, 281): activation measures, slow start alert, evidence log, validation figures. Detail: `docs/progress/archive/2026-10-30-scope1.md`.
 - 30 Oct 2026, Scope 1 part 1 (PRs 278, 279): honest limits line and Nora cases, WhatsApp retention, application dates on /privacy. Detail: `docs/progress/archive/2026-10-30-scope1.md`.
 

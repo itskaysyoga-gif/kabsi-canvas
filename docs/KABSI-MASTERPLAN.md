@@ -1367,3 +1367,22 @@ Removed: the lawyer's read (section 5); Kapso's written answer (replaced by Rash
 - Product launch track: Price 1 (Opus, after Rashid's yes), the launch gate (Opus).
 - Acquisition track: Outbound (Opus, after "getkabsi done"), sending under section 5's three conditions.
 - Design track (never blocks the launch gate; blocks paid Meta ads): Design 6 (Opus, kabsi-design-studio, stages A and B), lane R's review, then Web 3 (Opus, kabsi-canvas) in small pull requests.
+
+## 30.21 Rashid's design answers, WhatsApp ownership confirmed, support promise, videos (lane R, 30 Oct 2026, R-101)
+Rashid's message of 30 Oct (11:57). Changes 30.18 and 30.20 where they differ.
+
+### 1. Done and confirmed
+- The verified_at backfill ran: 0 left. PR 283 (30.20) merged.
+- WhatsApp ownership: Meta Business Settings shows +1 205-745-6874 under the Kabsi.co business portfolio (1756516714947073), WhatsApp account asset 2102427697303726 (Rashid's screenshot, 30 Oct). The launch gate blocker is closed. Kapso's message named WABA 1761713808421294; the id in Meta's own settings is the one Kabsi records (META_WABA_ID when the ads session needs it).
+- Payouts go to an account in Hussein's own name; Rashid and Hussein settle between themselves (30.20 section 4). Listing Rashid as authorised representative and hello@kabsi.co as the support email in Creem's business details stays a launch gate blocker, because Creem's terms require accurate details and a closed account bars connected persons.
+
+### 2. Taken
+- **Say what should be done, never promise results.** Pages may say what a business owner should do on Google (reply to every review, keep hours and details right, post when something changes, add photos) and that Kabsi does that work for them. A line that cites Google's own advice quotes or links Google's help page. Nothing promises more reviews, more customers, higher rankings or visibility.
+- **Videos later, made in kabsi-design-studio.** After launch the design studio also becomes the video studio for the website and social media (a session Video 1 then sets it up: the demonstration's own components rendered as video, 9:16, 1:1 and 16:9, English voice and captions only, no Arabic in any frame, 30.18). This replaces 30.18 section 5's separate video repo. Until a real video exists no page shows "Watch the demo"; Design 6 leaves a hidden slot for it.
+- **Priority help on Pro, because Rashid will give it.** Pro: "Priority help: a person answers on WhatsApp within 4 working hours, and a call when you need one." Essentials: "A person answers on WhatsApp the same working day." Working hours are stated where the line appears. Price 1 puts this in the plan cards, the facts and the terms; if Rashid cannot keep it, the line changes first.
+- **"Recommendations" means what exists.** The plan cards may say "Profile Coach suggestions" (built, both plans) and "a next step in every weekly report"; never a feature that is not built.
+- **AI-generated people in scene photography.** Rashid wants them, and lane R accepts them as illustrative scenes (a stylist at work, an owner holding a phone): no name, no quote, no star rating, no caption or layout that presents the person as a Kabsi customer, never in a testimonial, case study or "trusted by" row, and no Arabic script in frame. This changes 30.18 section 5 for scene photography only. Ads that use them follow Meta's rules for AI-made images.
+
+### 3. Not taken, and why (Rashid asked for these; lane R declines them)
+- **Google's logo.** Kabsi's whole product runs on Google's Business Profile API access, which Google approved and can withdraw. Google's brand rules require Google's permission to use its logos and forbid implying that Google endorses a product. Kabsi uses Google's name as plain words, and Places attribution only where Google requires it. The risk is the product itself, so this does not change.
+- **Stars and avatars saying "Trusted by local businesses", and invented customers.** Kabsi has no customers yet, so this would be fake social proof. The UK bans fake reviews and testimonials for consumers and businesses alike, Creem's website rule says "No fake reviews, testimonials, or inflated user/customer counts" (a breach can freeze payouts), and the project's own rule is no fake proof. Instead: the Founding 25 count, the founder's real name and photo, the demonstration marked Example, and real owners' words as soon as Founding 25 owners approve them.
