@@ -6,9 +6,9 @@ One page, under 10 KB. Updated 30 Oct 2026 by lane R (master plan 30.19) (master
 
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati; the first real reply was published and verified; the post removal was verified on Google (23 Oct). kabsi.co runs on Vercel; Creem is the only payment route (test mode, not open). Evidence: `docs/progress/archive/evidence.md` and `where-things-stand.md`.
 - Sessions 19 PR 0, Ops 1 parts A and B, Session 0, Clean 1, 13b part 1 and part 2, Fix 1, Session 10 Creem, V1, V2, V3, QA 1, Growth 1 and the lane R notes of 25 and 26 Oct: one line each in `docs/progress/archive/where-things-stand.md` (moved 27 Oct by V4), detail in their own archive files.
-- Web 2 (PR 252, 26 Oct, deploy run 117 green): kabsi.co's public pages on the approved dark system, real counts, the Founding 25 and Partners forms, the free check, nine industry hubs (three indexed). Detail: `docs/progress/archive/2026-10-27-web2.md`.
-- V4 (PR 250, 26 Oct, deploy run 116 green): onboarding in four stages, task states, the work receipt, nearby places, the free check route. The voice test did not pass, so voice notes stay off. Detail: `docs/progress/archive/2026-10-27-v4.md`.
-- UX 1 (PR 254, 27 Oct, deploy run 118 green): the signed-in website on Design 3, onboarding in four stages, Get reviews, the staff AI spend and Founding 25 checklist. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
+- Web 2 (PR 252, 26 Oct, deploy run 117 green): kabsi.co's public pages on the approved dark system, real counts, the Founding 25 and Partners forms, the free check. Detail: `docs/progress/archive/2026-10-27-web2.md`.
+- V4 (PR 250, 26 Oct, deploy run 116 green): onboarding in four stages, task states, the work receipt, nearby places, the free check route. Detail: `docs/progress/archive/2026-10-27-v4.md`.
+- UX 1 (PR 254, 27 Oct): the signed-in website on Design 3, onboarding in four stages, Get reviews, the staff AI spend and Founding 25 checklist. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
 - Email 1 (PR 258, 27 Oct): one email design for every email. Detail: `docs/progress/archive/2026-10-27-email1.md`.
 - Sec 1 (PR 261, 27 Oct): tenant isolation, roles, approvals, webhooks, the stop switch for Google writes, ASVS L1. Detail: `docs/progress/archive/2026-10-27-sec1.md`.
 - Sec 2 (PR 266, 27 Oct, deployed and checked live): approvals bound to the draft shown, retention per source, privacy trace, backup and restore drill, secrets audit, the staff Operations view. Detail: `docs/progress/archive/2026-10-27-sec2.md`.
@@ -58,9 +58,9 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 30 Oct 2026, Scope 1 part 1 (PR in review): honest limits line and Nora cases, WhatsApp retention 12 months, application deletion dates on /privacy. Detail: `docs/progress/archive/2026-10-30-scope1.md`.
 - 30 Oct 2026, lane R: master plan 30.19 (R-99). Launch preserved, expansion on evidence; next Scope 1 then the launch gate, with Outbound on its own track; blockers and waivers decided there.
 - 28 Oct 2026, Eval 1 (PR 265). Detail: `docs/progress/archive/2026-10-27-eval1.md`.
-- 28 Oct 2026, Billing 2. Detail: `docs/progress/archive/2026-10-28-billing2.md`.
 
 ## How a session updates this page
 
