@@ -41,6 +41,8 @@ export interface OnboardingDb {
   /** Scope 1 (30.19): businesses whose first verified value (B) has not landed 48 hours after access, with real work waiting.
    *  Each is claimed in the database as it is returned, so it comes back once. */
   slowStart?(limit: number): Promise<SlowStart[]>;
+  /** Hands a claim back when its alert could not be sent, so the next tick tries again. */
+  slowStartRelease?(locationId: string): Promise<void>;
   staffPhones?(): Promise<string[]>;
 }
 export type SlowStart = { location_id: string; business: string; step: string };
@@ -90,15 +92,22 @@ export async function onboardingTick(d: AgentDeps, o: OnboardingDb): Promise<Rec
   if (o.slowStart && o.staffPhones) {
     out.alerts = 0;
     try {
-      const rows = await o.slowStart(20);
-      const phones = rows.length ? await o.staffPhones() : [];
+      // With no staff phone there is nobody to tell, and nothing is claimed.
+      const phones = await o.staffPhones();
+      const rows = phones.length ? await o.slowStart(20) : [];
       for (const x of rows) {
-        const summary = `${x.business} has had Google access for 48 hours and no first result yet. Kabsi is waiting on ${x.step}`;
-        for (const phone of phones) {
-          await notify(d.out, { phone, userId: null, locationId: x.location_id, kind: "staff_alert", urgent: true, body: `${summary}.`,
-            template: ref("staff_alert", { summary }), dedupe: `slow_start:${x.location_id}:${phone}` });
+        try {
+          const summary = `${x.business} has had Google access for 48 hours and no first result yet. Kabsi is waiting on ${x.step}`;
+          for (const phone of phones) {
+            await notify(d.out, { phone, userId: null, locationId: x.location_id, kind: "staff_alert", urgent: true, body: `${summary}.`,
+              template: ref("staff_alert", { summary }), dedupe: `slow_start:${x.location_id}:${phone}` });
+          }
+          out.alerts++;
+        } catch (e) {
+          // This business was claimed and not told: hand the claim back, and go on with the others.
+          await o.slowStartRelease?.(x.location_id).catch(() => {});
+          failed.push(`slow_start:${x.location_id}:${String((e as Error)?.message ?? e).slice(0, 80)}`);
         }
-        out.alerts++;
       }
     } catch (e) {
       failed.push(`slow_start:${String((e as Error)?.message ?? e).slice(0, 80)}`);

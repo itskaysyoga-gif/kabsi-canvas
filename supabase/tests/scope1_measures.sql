@@ -23,8 +23,8 @@ update public.locations set created_at = now() - interval '10 days'
 
 -- 1. A, and the free check before sign-up stored apart ------------------------------------------------------------------------
 insert into public.free_checks (code, business, term, country, self, center, radius_km, fast, source, state, done_at, location_id, created_at) values
-  ('PRECHK21', 'Measure One', 'barber', 'AE', '{}', '{}', 3, '{}', 'mock', 'done', now() - interval '12 days', '00000000-0000-4000-8000-000000003101', now() - interval '12 days'),
-  ('PRECHK22', 'Measure Two', 'barber', 'AE', '{}', '{}', 3, '{}', 'mock', 'done', now() - interval '11 days', '00000000-0000-4000-8000-000000003102', now() - interval '11 days'),
+  ('PRECHKAB', 'Measure One', 'barber', 'AE', '{}', '{}', 3, '{}', 'mock', 'done', now() - interval '12 days', '00000000-0000-4000-8000-000000003101', now() - interval '12 days'),
+  ('PRECHKBC', 'Measure Two', 'barber', 'AE', '{}', '{}', 3, '{}', 'mock', 'done', now() - interval '11 days', '00000000-0000-4000-8000-000000003102', now() - interval '11 days'),
   ('POSTCHK3', 'Measure Three', 'barber', 'AE', '{}', '{}', 3, '{}', 'mock', 'done', now() - interval '9 days', '00000000-0000-4000-8000-000000003103', now() - interval '9 days');
 select is((select free_check_before_signup_at::date from public.locations where id = '00000000-0000-4000-8000-000000003101'),
   (now() - interval '12 days')::date, 'a check finished before sign-up is stored apart on the business');
@@ -77,6 +77,16 @@ select is((select private.hours_between(access_at, b_at) from private.activation
   'B counts a task the owner closed as done where Google cannot show it');
 select is((select c_at from private.activation_rows() where location_id = '00000000-0000-4000-8000-000000003104'), null, 'and it is not C');
 
+-- A change verified before verified_at existed (no stamp, a check time) still ends B, so it cannot cause a false alert.
+update public.locations set access_granted_at = now() - interval '4 days' where id = '00000000-0000-4000-8000-000000003102';
+insert into public.publications (id, location_id, target_type, target_id, payload, approved_by, channel, state, last_checked_at) values
+  ('00000000-0000-4000-8000-000000003183', '00000000-0000-4000-8000-000000003102', 'review_reply', '00000000-0000-4000-8000-000000003173', '{}', '00000000-0000-4000-8000-0000000000a1', 'whatsapp', 'verified', now() - interval '3 days');
+update public.publications set verified_at = null where id = '00000000-0000-4000-8000-000000003183';
+select is((select private.hours_between(access_at, b_at) from private.activation_rows() where location_id = '00000000-0000-4000-8000-000000003102'), 24.0,
+  'a change verified before the column existed ends B at the time of the check that saw it');
+update public.locations set access_granted_at = now() - interval '1 day' where id = '00000000-0000-4000-8000-000000003102';
+delete from public.publications where id = '00000000-0000-4000-8000-000000003183';
+
 -- 3. The slow start alert -----------------------------------------------------------------------------------------------------
 update public.locations set access_granted_at = now() - interval '3 days' where id = '00000000-0000-4000-8000-000000003105';
 delete from public.tasks where location_id = '00000000-0000-4000-8000-000000003105';
@@ -88,7 +98,10 @@ select is(public.slow_start_due(10) -> 0 ->> 'step', null, 'claimed once: the se
 select ok((select slow_start_alert_at is not null from public.locations where id = '00000000-0000-4000-8000-000000003105'), 'the claim is stored on the business');
 update public.locations set access_granted_at = now() - interval '1 day' where id = '00000000-0000-4000-8000-000000003102';
 select is(jsonb_array_length(public.slow_start_due(10)), 0, 'a business with access 1 day ago, or with B landed, is not alerted');
-select ok(not has_function_privilege('authenticated', 'public.slow_start_due(integer)', 'execute'), 'the alert query is for the service role only');
+select ok(not has_function_privilege('authenticated', 'public.slow_start_due(integer)', 'execute')
+  and not has_function_privilege('authenticated', 'public.slow_start_release(uuid)', 'execute'), 'the alert query and its release are for the service role only');
+select is(public.slow_start_release('00000000-0000-4000-8000-000000003105'), true, 'a claim can be handed back');
+select is(public.slow_start_due(10) -> 0 ->> 'business', 'Measure Five', 'and the alert comes back to be sent');
 
 -- 4. The evidence log ----------------------------------------------------------------------------------------------------------
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');
@@ -97,11 +110,11 @@ select ok(public.staff_evidence_add('00000000-0000-4000-8000-000000003101', null
 select throws_ok($$ select public.staff_evidence_add(null, null, current_date, 'call', 'request', 'x') $$, '23514', null, 'a row needs a business');
 select throws_ok($$ select public.staff_evidence_add(null, 'Cafe', current_date, 'fax', 'request', 'x') $$, '23514', null, 'and a known source');
 select throws_ok($$ select public.staff_evidence_add(null, 'Cafe', current_date, 'call', 'gossip', 'x') $$, '23514', null, 'and a known type');
-select is((select count(*) from public.staff_evidence), 1::bigint, 'staff read the log');
+select is((select count(*) from public.staff_evidence where source = 'call' and type = 'request' and words = 'Can it answer my customers?'), 1::bigint, 'staff read the log');
 reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
 select throws_ok($$ select public.staff_evidence_add(null, 'Cafe', current_date, 'call', 'request', 'x') $$, '42501', null, 'an owner cannot add');
-select is((select count(*) from public.staff_evidence), 0::bigint, 'an owner reads none of it');
+select is((select count(*) from public.staff_evidence), 0::bigint, 'an owner reads none of it, not even the victim row');
 reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000b1');
 select throws_ok($$ select public.staff_validation() $$, '42501', null, 'a stranger cannot open the validation figures');
@@ -116,6 +129,11 @@ insert into public.app_settings (key, value) values ('retention_sources', 'on') 
 select ok((private.retention_sources() ->> 'staff_evidence')::int = 1, 'switched on, the job deletes the evidence row written 25 months ago');
 select is((select array_agg(business_name order by business_name) from public.staff_evidence where business_name like '%Cafe'), array['Young Cafe'],
   'and keeps the one written 23 months ago');
+
+-- A business with evidence rows can still be deleted: the row stays with no business (the table has no check that stops it).
+insert into public.locations (id, name, place_id) values ('00000000-0000-4000-8000-000000003109', 'Deleted Soon', 'm-del');
+insert into public.staff_evidence (location_id, source, type) values ('00000000-0000-4000-8000-000000003109', 'call', 'request');
+select lives_ok($$ delete from public.locations where id = '00000000-0000-4000-8000-000000003109' $$, 'deleting a business with an evidence row works');
 
 -- 5. The validation figures ----------------------------------------------------------------------------------------------------
 select tests.act_as('00000000-0000-4000-8000-0000000000a3');

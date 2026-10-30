@@ -91,5 +91,8 @@ export const onboardingDb = (startMaps: (locationId: string) => Promise<void>, u
   startMaps,
   unlock,
   slowStart: (limit) => rpc<SlowStart[]>("slow_start_due", { p_limit: limit }),
+  slowStartRelease: async (locationId) => {
+    await rpc<boolean>("slow_start_release", { p_location: locationId });
+  },
   staffPhones,
 });

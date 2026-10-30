@@ -63,8 +63,7 @@ create table if not exists public.staff_evidence (
   type text not null check (type in ('request', 'repeated_problem', 'time_saved', 'missed_enquiry', 'support_given')),
   words text check (words is null or char_length(words) <= 1000),
   created_by uuid,
-  created_at timestamptz not null default now(),
-  check (location_id is not null or business_name is not null)
+  created_at timestamptz not null default now()
 );
 create index if not exists staff_evidence_day_idx on public.staff_evidence (observed_on desc);
 create index if not exists staff_evidence_location_idx on public.staff_evidence (location_id) where location_id is not null;
@@ -81,6 +80,10 @@ returns uuid language plpgsql security definer set search_path = '' as $$
 declare v_id uuid;
 begin
   if not public.is_staff() then raise exception 'forbidden' using errcode = '42501'; end if;
+  -- A row names its business. (The table has no such check: deleting a business sets location_id to null and must still work.)
+  if p_location is null and nullif(btrim(coalesce(p_business, '')), '') is null then
+    raise exception 'a row needs a business' using errcode = '23514';
+  end if;
   insert into public.staff_evidence (location_id, business_name, observed_on, source, type, words, created_by)
   values (p_location, nullif(btrim(p_business), ''), coalesce(p_observed_on, current_date), p_source, p_type,
           nullif(btrim(p_words), ''), auth.uid())
@@ -109,7 +112,7 @@ grant execute on function public.staff_evidence_delete(uuid) to authenticated;
 --      free check finished after sign-up (free_checks.done_at). Strictly after sign-up, so a free check finished before
 --      sign-up (locations.free_check_before_signup_at) never ends A and A is never zero or negative because of it.
 --   B: Google access confirmed (locations.access_granted_at) to the first verified value: the first change Kabsi saw live on
---      Google (publications.verified_at), or the first task an owner or manager closed as done where Google cannot show it
+--      Google (publications.verified_at; for a change verified before this column existed, the time of the check that saw it), or the first task an owner or manager closed as done where Google cannot show it
 --      (a profile change or gap, or a Google action, with no publication; tasks.resolved_at).
 --   C: Google access confirmed to the first owner-approved action Kabsi saw live on Google (publications.verified_at where the
 --      owner approved this action: every channel but auto_fix, which the owner switched on once and approves nothing one by one).
@@ -131,8 +134,8 @@ language sql stable security definer set search_path = '' as $$
         select min(k.done_at) from public.free_checks k where k.location_id = l.id and k.state = 'done' and k.done_at > l.created_at
      ) x),
     case when l.access_granted_at is null then null else (select min(y.t) from (
-        select min(p.verified_at) as t from public.publications p
-         where p.location_id = l.id and p.verified_at is not null and p.verified_at >= l.access_granted_at
+        select min(coalesce(p.verified_at, p.last_checked_at, p.updated_at)) as t from public.publications p
+         where p.location_id = l.id and p.state = 'verified' and coalesce(p.verified_at, p.last_checked_at, p.updated_at) >= l.access_granted_at
         union all
         select min(k.resolved_at) from public.tasks k
          where k.location_id = l.id and k.state = 'done' and k.publication_id is null and k.resolved_at >= l.access_granted_at
@@ -140,8 +143,9 @@ language sql stable security definer set search_path = '' as $$
            and exists (select 1 from public.location_members m
                         where m.location_id = k.location_id and m.user_id = k.resolved_by and m.role in ('owner', 'manager'))
      ) y) end,
-    case when l.access_granted_at is null then null else (select min(p.verified_at) from public.publications p
-         where p.location_id = l.id and p.channel <> 'auto_fix' and p.verified_at is not null and p.verified_at >= l.access_granted_at) end
+    case when l.access_granted_at is null then null else (select min(coalesce(p.verified_at, p.last_checked_at, p.updated_at)) from public.publications p
+         where p.location_id = l.id and p.channel <> 'auto_fix' and p.state = 'verified'
+           and coalesce(p.verified_at, p.last_checked_at, p.updated_at) >= l.access_granted_at) end
   from public.locations l
   join public.organizations o on o.id = l.organization_id
   where not l.is_demo and not o.is_demo and not coalesce(o.billing_test, false)
@@ -212,6 +216,15 @@ begin
 end $$;
 revoke all on function public.slow_start_due(integer) from public, anon, authenticated;
 grant execute on function public.slow_start_due(integer) to service_role;
+
+-- A claimed alert that could not be sent is handed back, so it is tried again on the next tick.
+create or replace function public.slow_start_release(p_location uuid) returns boolean
+language sql security definer set search_path = '' as $$
+  with r as (update public.locations set slow_start_alert_at = null where id = p_location and slow_start_alert_at is not null returning 1)
+  select exists (select 1 from r)
+$$;
+revoke all on function public.slow_start_release(uuid) from public, anon, authenticated;
+grant execute on function public.slow_start_release(uuid) to service_role;
 
 -- 7. The validation figures (30.19 section 3 item 4) ---------------------------------------------------------------------------
 -- Two cohorts apart: founding (Founding 25, free) and paying (trial, then a plan). Counts, A, B and C (median and slowest, in
@@ -299,7 +312,7 @@ begin
                           where e.provider_subscription_id = l.psid and e.event_type = 'subscription.paid' and e.mode = 'live' and e.amount is not null
                           order by e.event_created_at desc limit 1) e on true
   )
-  select count(*), count(*) filter (where amount is null), count(*) filter (where amount is not null and coalesce(currency, '') <> 'USD'),
+  select count(*), count(*) filter (where amount is null or period is null), count(*) filter (where amount is not null and coalesce(currency, '') <> 'USD'),
          sum(amount / case period when 'year' then 12.0 else 1.0 end) filter (where amount is not null and currency = 'USD')
     into v_subs, v_unmatched, v_other_currency, v_mrr_cents from paid;
   v_mrr := case when v_unmatched > 0 or v_other_currency > 0 then jsonb_build_object('status', 'no_data', 'subscriptions', v_subs)
@@ -332,7 +345,7 @@ begin
       then jsonb_build_object('month', x -> 'month', 'status', 'no_data') else x end) from jsonb_array_elements(v_cash) x), '[]'::jsonb);
 
   -- Contribution margin per paying account: cash collected, less refunds and chargebacks, less the cost per business already
-  -- measured (AI use by agent, free check data cost). Tax and Creem's fees are not in the events, so they are not taken off,
+  -- measured (AI use by agent, free check, Visibility Map and AI Visibility data cost). Tax and Creem's fees are not in the events, so they are not taken off,
   -- and the figure says so. An account with an unreconciled event shows no_data.
   select coalesce(jsonb_agg(row_to_json(q)::jsonb order by q.business), '[]'::jsonb) into v_margin from (
     select l.name as business, o.id as organization_id,
@@ -350,7 +363,9 @@ begin
     left join lateral (select sum(e.amount)::numeric as cents from public.billing_events e
         where e.organization_id = o.id and e.mode = 'live' and e.event_type in ('refund.created', 'dispute.created')) rf on true
     left join lateral (select coalesce((select sum(u.cost_micros) from public.ai_agent_usage u join public.locations x on x.id = u.location_id where x.organization_id = o.id), 0)
-                              + coalesce((select sum(k.cost_micros) from public.free_checks k join public.locations x on x.id = k.location_id where x.organization_id = o.id), 0) as micros) cost on true
+                              + coalesce((select sum(k.cost_micros) from public.free_checks k join public.locations x on x.id = k.location_id where x.organization_id = o.id), 0)
+                              + coalesce((select sum(k.cost_micros) from public.visibility_scans k join public.locations x on x.id = k.location_id where x.organization_id = o.id), 0)
+                              + coalesce((select sum(k.cost_micros) from public.ai_visibility_runs k join public.locations x on x.id = k.location_id where x.organization_id = o.id), 0) as micros) cost on true
     left join lateral (select count(*)::int as n from public.billing_events e where e.organization_id = o.id and e.mode = 'live'
         and ((e.event_type in ('subscription.paid', 'checkout.completed') and (e.amount is null or e.payment_id is null))
           or (e.amount is not null and coalesce(e.currency, '') <> 'USD')
