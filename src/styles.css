@@ -143,11 +143,13 @@
   --scrim: rgb(0 0 0 / 0.6);
   --shadow-phone: 0 40px 80px -30px rgb(0 0 0 / 0.9), 0 0 0 1px rgb(255 255 255 / 0.06);
   --glow-yellow: 0 6px 18px -12px rgb(255 214 10 / 0.3);
+  /* The one coloured headline phrase: ink on light, yellow on dark (Design 6), never yellow on ivory. */
+  --phrase: var(--kb-ink);
 }
 
 /* Roles, dark: the public website. body:has() lets the page ground, portals and dialogs follow the page. */
 .theme-dark,
-body:has(.theme-dark) {
+body:not(:has(.page-light)):has(.theme-dark) {
   --surface-0: var(--kb-night);
   --surface-1: var(--kb-carbon);
   --surface-2: var(--kb-graphite);
@@ -167,6 +169,7 @@ body:has(.theme-dark) {
   --warn-soft: rgb(245 185 74 / 0.12);
   --bad-soft: rgb(255 138 128 / 0.12);
   --info-soft: rgb(245 243 238 / 0.07);
+  --phrase: var(--kb-yellow);
   --glass: rgb(22 22 20 / 0.78);
   --scrim: rgb(0 0 0 / 0.6);
 
@@ -198,7 +201,7 @@ body:has(.theme-dark) {
 /* shadcn names follow the roles, declared again in each scope so a nested theme changes them too. */
 :root,
 .theme-dark,
-body:has(.theme-dark),
+body:not(:has(.page-light)):has(.theme-dark),
 .theme-light {
   --background: var(--surface-0);
   --foreground: var(--text-1);
@@ -260,6 +263,7 @@ body:has(.theme-dark),
   --color-surface-3: var(--surface-3);
   --color-band: var(--surface-band);
   --color-text-1: var(--text-1);
+  --color-phrase: var(--phrase);
   --color-text-2: var(--text-2);
   --color-text-3: var(--text-3);
   --color-line: var(--line);
@@ -373,7 +377,7 @@ body:has(.theme-dark),
     line-height: var(--text-body--line-height);
     font-feature-settings: "ss01", "cv11";
   }
-  body:has(.theme-dark) {
+  body:not(:has(.page-light)):has(.theme-dark) {
     background-color: var(--surface-0);
     color: var(--text-1);
     color-scheme: dark;

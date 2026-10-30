@@ -130,14 +130,13 @@ export { SOCIAL_LINKS };
  */
 export const WHATSAPP_URL = WHATSAPP_ON ? whatsappHref("general") : `mailto:${CONTACT_EMAIL}`;
 
-/** Header links (COPY.md shared pieces, Design 5: "Businesses" and "Founding 25"). */
+/** Header links (Design 6, Web 3): Free tools and Partners moved to the footer. Log in and the one action follow. */
 export const NAV_LINKS = [
   { to: "/how-it-works", label: "How it works" },
   { to: "/pricing", label: "Pricing" },
   { to: "/for", label: "Businesses" },
-  { to: "/google-review-link", label: "Free tools" },
   { to: "/founding", label: "Founding 25" },
-  { to: "/partners", label: "Partners" },
+  { to: "/about", label: "About" },
 ] as const;
 export const BRAND_EXPLAINER =
   "Kabsi looks after your business on Google: a reply ready for every new review, your hours and details kept right, and fresh posts. You just approve.";

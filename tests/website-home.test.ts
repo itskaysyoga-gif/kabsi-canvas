@@ -128,19 +128,19 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     expect(TRIAL_LINE).toBe("Free for 14 days once Kabsi is connected. No card.");
     const home = read("src/routes/index.tsx");
     expect(home).toContain("Your business on Google.");
-    expect(home).toContain(
-      '<span className="text-kb-yellow">Taken care of through WhatsApp.</span>',
-    );
+    expect(home).toContain('<span className="text-phrase">Taken care of through WhatsApp.</span>');
   });
-  it("puts Businesses and Founding 25 in the header", () => {
+  it("puts the Design 6 links in the header, with Free tools and Partners in the footer", () => {
     expect(NAV_LINKS.map((n) => n.label)).toEqual([
       "How it works",
       "Pricing",
       "Businesses",
-      "Free tools",
       "Founding 25",
-      "Partners",
+      "About",
     ]);
+    const footer = read("src/components/kabsi/site-footer.tsx");
+    expect(footer).toContain('title: "Free tools"');
+    expect(footer).toContain('{ label: "Partners", to: "/partners" }');
   });
   it("say the access steps the same everywhere, with Add (on some screens, Invite)", () => {
     const access = read("src/components/kabsi/d5-access.tsx");

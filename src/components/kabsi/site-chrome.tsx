@@ -1,21 +1,37 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { getConsent, needsChoice, onConsentChange } from "@/lib/consent";
+import { useEffect, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { MAIN_CTA, WHATSAPP_ON, WHATSAPP_URL } from "@/lib/site";
 import { ButtonLink, WhatsAppGlyph, buttonClass } from "./ui";
-import { useChrome, useMainCtaInView, useScrolledPast } from "./page-signals";
+import { setChrome, useChrome, usePhoneBarShown } from "./page-signals";
 import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
 import { DeferredAssistant } from "@/components/assistant/deferred-assistant";
 
 /**
- * Every public page: header, main, footer and the phone bar, on the dark ground (.theme-dark). The consent bar and
- * "Your privacy choices" are the site-wide ones (src/components/shared/privacy-banner.tsx, P0.6-01), loaded after the
- * first paint from the root, so the proof and the country rules stay in one place.
+ * Every public page: header, main, footer and the phone bar. Design 6 (Web 3, master plan 30.20 section 3) made the
+ * site light-led: ivory reading areas (.theme-light .page-light), near-black bands where a page puts .theme-dark, and
+ * the footer on the dark band. The consent bar and "Your privacy choices" are the site-wide ones
+ * (src/components/shared/privacy-banner.tsx, P0.6-01), loaded after the first paint from the root.
  */
-export function SiteShell({ children, className }: { children: ReactNode; className?: string }) {
+export function SiteShell({
+  children,
+  className,
+  theme = "light",
+}: {
+  children: ReactNode;
+  className?: string;
+  /** "dark" keeps a page on the dark ground until its own Web 3 pull request moves it. */
+  theme?: "light" | "dark";
+}) {
+  const light = theme === "light";
   return (
-    <div className={cn("theme-dark min-h-dvh overflow-x-clip", className)}>
+    <div
+      className={cn(
+        "min-h-dvh overflow-x-clip",
+        light ? "theme-light page-light" : "theme-dark",
+        className,
+      )}
+    >
       <a
         href="#main"
         className="press fixed start-3 top-3 z-[60] -translate-y-20 rounded-full bg-kb-yellow px-4 py-3 text-small font-bold text-kb-black focus:translate-y-0"
@@ -24,26 +40,26 @@ export function SiteShell({ children, className }: { children: ReactNode; classN
       </a>
       <SiteHeader />
       <main id="main">{children}</main>
-      <SiteFooter />
+      <div className={light ? "theme-dark" : undefined}>
+        <SiteFooter />
+      </div>
       <PhoneBar />
       <DeferredAssistant surface="site" />
     </div>
   );
 }
 
-/* ---------- Sticky phone bar (after the first scroll) ---------- */
+/* ---------- Sticky phone bar (once the visitor is past the hero) ---------- */
 
 export function PhoneBar() {
-  const past = useScrolledPast(360);
-  const mainInView = useMainCtaInView();
-  const { menuOpen } = useChrome();
-  // The consent bar sits where the phone bar would, so the phone bar waits for the visitor's choice.
-  const [consentOpen, setConsentOpen] = useState(false);
+  const { noraOpen } = useChrome();
+  // Nora sits above the bar only on pages that have one (not /get-started, for example).
   useEffect(() => {
-    setConsentOpen(needsChoice(getConsent()));
-    return onConsentChange((s) => setConsentOpen(needsChoice(s)));
+    setChrome({ phoneBarMounted: true });
+    return () => setChrome({ phoneBarMounted: false });
   }, []);
-  const show = past && !mainInView && !menuOpen && !consentOpen;
+  // The phone bar steps aside while Nora's panel is open.
+  const show = usePhoneBarShown() && !noraOpen;
   return (
     <div
       aria-hidden={!show}

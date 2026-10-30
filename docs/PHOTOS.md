@@ -5,6 +5,10 @@ Rashid chose 15 free stock photos (Pexels or Unsplash licence: free for commerci
 (9 to 127 KB). The originals are in design-originals/ and are never bundled. owner.jpg is Lovable's generated image:
 replace it with a real photo and delete it.
 
+Source record (lane R decision of 30 Oct 2026, Web 3): every photo in src/assets/photos was chosen by Rashid from
+Pexels or Unsplash on 25 and 26 Oct 2026; page links not kept. The photos stay as they are; a photo Rashid later
+gives a page link for gets it written here, and AI-generated scenes (master plan 30.21) may replace any of them.
+
 Rules: a photo shows a kind of business at work, never "our customer". No caption, quote, name, star rating or
 logo is ever put on a person in a photo. No Google, WhatsApp or other brand mark is added onto a photo.
 

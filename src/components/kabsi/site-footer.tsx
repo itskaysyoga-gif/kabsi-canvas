@@ -16,9 +16,16 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
     links: [
       { label: "How it works", to: "/how-it-works" },
       { label: "Pricing", to: "/pricing" },
-      { label: "Free check", to: "/scan" },
-      { label: "Review link and QR code", to: "/google-review-link" },
       { label: "Security", to: "/security" },
+      { label: "FAQ", to: "/faq" },
+    ],
+  },
+  {
+    title: "Free tools",
+    links: [
+      { label: "Free check", to: "/scan" },
+      { label: "Google profile check", to: "/google-profile-check" },
+      { label: "Review link and QR code", to: "/google-review-link" },
     ],
   },
   {
@@ -30,7 +37,6 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
       { label: "Restaurants", to: "/for/restaurant" },
       { label: "Dental clinics", to: "/for/dental-clinic" },
       { label: "Guides", to: "/guides" },
-      { label: "FAQ", to: "/faq" },
     ],
   },
   {
@@ -63,7 +69,7 @@ export function SiteFooter() {
           <WhatsAppLink className="self-start lg:self-auto" />
         </div>
 
-        <div className="grid grid-cols-2 gap-x-6 gap-y-10 pt-10 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 pt-10 md:grid-cols-3 lg:grid-cols-5">
           {COLUMNS.map((c) => (
             <nav key={c.title} aria-label={c.title}>
               <h2 className="font-sans text-label font-bold text-text-3">{c.title}</h2>
