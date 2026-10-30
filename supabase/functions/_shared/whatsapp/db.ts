@@ -10,7 +10,7 @@ import { type Nora, noraUser, noraWhatsAppSystem } from "./nora.ts";
 import { acceptUpload } from "../photos/intake.ts";
 import { WHATSAPP_ON } from "../whatsapp-setting.ts";
 import type { AgentDb, AgentDeps, BillingDeps } from "./agent.ts";
-import { addLocation, cancelAtEnd, changePlan, currentSub, keepPlan, portal } from "../billing.ts";
+import { addLocation, cancelAtEnd, changePlan, currentSub, familyOfSub, keepPlan, portal, productIds } from "../billing.ts";
 import { type Ctx, type Db, type MaySend, mockSender, type Sender } from "./deliver.ts";
 import type { Ai } from "./intent.ts";
 import { pickSender } from "./kapso.ts";
@@ -268,7 +268,7 @@ const billingDeps: BillingDeps = {
     const s = await currentSub(await orgOf(locationId));
     if (!s) return null;
     return { plan: s.plan === "essentials" ? "essentials" : "pro", period: s.period === "year" ? "year" : "month", state: s.state,
-      periodEnd: s.current_period_end, cancelAtEnd: !!s.cancel_at_period_end };
+      periodEnd: s.current_period_end, cancelAtEnd: !!s.cancel_at_period_end, family: familyOfSub(s, await productIds()) };
   },
   portal: async (locationId) => await portal(await orgOf(locationId)),
   cancel: async (locationId) => await cancelAtEnd(await orgOf(locationId)),

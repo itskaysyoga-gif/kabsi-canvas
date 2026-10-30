@@ -19,20 +19,37 @@ export const sameMode = (eventMode: string | null | undefined, mode: Mode) =>
   !eventMode || eventModeOf(eventMode) === mode;
 
 // ─── the products (10.2.1, 10.2.3; names and description from docs/COPY.md section 23)
-export type ProductKey = "essentials_month" | "essentials_year" | "pro_month" | "pro_year" | "extra_month" | "extra_year";
+// Price 1 (master plan 30.20 section 6): two price families. "list" is the price for new businesses (29 and 59 a month,
+// 290 and 590 a year); "founding" is the first 30 paying businesses and Founding 25 (19 and 39, 190 and 390), kept while the
+// subscription stays paid. The founding products are the ones Creem has had since session 10, so their keys stay as they
+// were. An extra location is one price in both families.
+export type ProductKey =
+  | "essentials_month" | "essentials_year" | "pro_month" | "pro_year"
+  | "essentials_month_list" | "essentials_year_list" | "pro_month_list" | "pro_year_list"
+  | "extra_month" | "extra_year";
 export type Plan = "essentials" | "pro";
 export type Period = "month" | "year";
-export const PRODUCT_DESCRIPTION = "Your Google listing and reviews, managed from WhatsApp. Cancel in WhatsApp any time.";
+export type PriceFamily = "founding" | "list";
+export const PRODUCT_DESCRIPTION = "Your Google profile and reviews, managed from WhatsApp.";
 export const CATALOGUE: Record<ProductKey, { name: string; price: number; period: Period; plan: Plan | "extra" }> = {
-  essentials_month: { name: "Kabsi Essentials, monthly", price: 1900, period: "month", plan: "essentials" },
-  essentials_year: { name: "Kabsi Essentials, yearly", price: 19000, period: "year", plan: "essentials" },
-  pro_month: { name: "Kabsi Pro, monthly", price: 3900, period: "month", plan: "pro" },
-  pro_year: { name: "Kabsi Pro, yearly", price: 39000, period: "year", plan: "pro" },
+  essentials_month: { name: "Kabsi Essentials, monthly, founding price", price: 1900, period: "month", plan: "essentials" },
+  essentials_year: { name: "Kabsi Essentials, yearly, founding price", price: 19000, period: "year", plan: "essentials" },
+  pro_month: { name: "Kabsi Pro, monthly, founding price", price: 3900, period: "month", plan: "pro" },
+  pro_year: { name: "Kabsi Pro, yearly, founding price", price: 39000, period: "year", plan: "pro" },
+  essentials_month_list: { name: "Kabsi Essentials, monthly", price: 2900, period: "month", plan: "essentials" },
+  essentials_year_list: { name: "Kabsi Essentials, yearly", price: 29000, period: "year", plan: "essentials" },
+  pro_month_list: { name: "Kabsi Pro, monthly", price: 5900, period: "month", plan: "pro" },
+  pro_year_list: { name: "Kabsi Pro, yearly", price: 59000, period: "year", plan: "pro" },
   extra_month: { name: "Extra location", price: 1500, period: "month", plan: "extra" },
   extra_year: { name: "Extra location", price: 15000, period: "year", plan: "extra" },
 };
 export const PRODUCT_KEYS = Object.keys(CATALOGUE) as ProductKey[];
-export const planKey = (plan: Plan, period: Period): ProductKey => `${plan}_${period}` as ProductKey;
+/** The product of a plan in a price family. Every caller names the family, so a change never crosses families. */
+export const planKey = (plan: Plan, period: Period, family: PriceFamily): ProductKey =>
+  `${plan}_${period}${family === "list" ? "_list" : ""}` as ProductKey;
+/** The price family of a plan product; null for an extra location (one price in both families) or an unknown product. */
+export const familyOfKey = (k: ProductKey | null | undefined): PriceFamily | null =>
+  !k || isExtraKey(k) ? null : k.endsWith("_list") ? "list" : "founding";
 export const extraKey = (period: Period): ProductKey => `extra_${period}` as ProductKey;
 export const isExtraKey = (k: ProductKey | null | undefined) => k === "extra_month" || k === "extra_year";
 const BILLING_PERIOD: Record<Period, string> = { month: "every-month", year: "every-year" };
@@ -207,6 +224,8 @@ export type SubFacts = {
   subscriptionId: string | null; customerId: string | null; productId: string | null;
   plan: Plan | null; period: Period | null; units: number; periodStart: string | null; periodEnd: string | null;
   status: string | null; extraItemId: string | null;
+  /** Price 1: the price family of the plan's product (null for an extra location or a product Kabsi does not know). */
+  family: PriceFamily | null;
   /** Billing 2: this is an Extra location subscription (its own Creem subscription, 10.2.3), not a plan. */
   extra: boolean;
 };
@@ -228,7 +247,7 @@ export function subFacts(sub: Obj | null, ids: ProductIds): SubFacts {
     subscriptionId: idOf(sub), customerId: idOf(sub?.customer), productId,
     plan: c && c.plan !== "extra" ? c.plan : null, period: c ? c.period : null, units,
     periodStart: str(sub?.current_period_start_date), periodEnd: str(sub?.current_period_end_date) ?? str(sub?.next_transaction_date),
-    status: str(sub?.status), extraItemId, extra: isExtraKey(key),
+    status: str(sub?.status), extraItemId, extra: isExtraKey(key), family: familyOfKey(key),
   };
 }
 
@@ -362,5 +381,5 @@ export type Creem = ReturnType<typeof creemClient>;
 
 /** Kabsi's own request id for a checkout: the same business, product and units on the same day give the same id, so a
  * repeated tap returns the link already made (10.2.7). */
-export const checkoutRequestId = (orgId: string, key: ProductKey, units: number, now: Date) =>
+export const checkoutRequestId = (orgId: string, key: string, units: number, now: Date) =>
   `kabsi-${orgId}-${key}-${units}-${now.toISOString().slice(0, 10)}`;
