@@ -168,9 +168,9 @@ export function ValidationPanel() {
           <div className={STAFF_ITEM}>
             <p className="font-bold">Money</p>
             <p className="text-small text-text-2">
-              MRR is each active paid subscription at its price per month (yearly divided by 12),
-              not cash. Cash is shown apart. Margin is before tax and Creem&apos;s fees, which the
-              events do not carry.
+              MRR is each active paid plan at its own price, read from the Creem product it is on
+              (yearly divided by 12), with extra locations, never a payment amount. Cash is shown
+              apart. Margin is before tax and Creem&apos;s fees, which the events do not carry.
             </p>
             <dl className="mt-2 divide-y divide-line">
               <Line

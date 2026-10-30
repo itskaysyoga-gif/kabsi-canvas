@@ -211,5 +211,16 @@ select pg_temp.event('evt_paid_x2', 'subscription.paid', pg_temp.org('00000000-0
 select is((select base_cents from public.partner_commissions where payment_id = 'tx_x2'), 3000, 'without a transaction the base is the price times its units');
 select is(private.creem_base_cents('{"object": {"product": {"id": "prod_p", "price": 3900}}}'), 3900, 'one unit when Creem sends no items');
 
+-- Price 1 (master plan 30.20 section 6): 25 percent of the collected amount for both price families.
+select pg_temp.event('evt_paid_list', 'subscription.paid', pg_temp.org('00000000-0000-4000-8000-0000000020c2'),
+  '{"object": {"product": {"id": "prod_list", "price": 5900}, "last_transaction": {"id": "tx_list", "amount": 5900, "amount_paid": 7139}}}', now(), 'tx_list');
+select is((select commission_cents from public.partner_commissions where payment_id = 'tx_list'), 1475, 'a list-price Pro payment (59) pays 25 percent, 14.75');
+select pg_temp.event('evt_paid_found', 'subscription.paid', pg_temp.org('00000000-0000-4000-8000-0000000020c2'),
+  '{"object": {"product": {"id": "prod_found", "price": 1900}, "last_transaction": {"id": "tx_found", "amount": 1900, "amount_paid": 2299}}}', now(), 'tx_found');
+select is((select commission_cents from public.partner_commissions where payment_id = 'tx_found'), 475, 'a founding Essentials payment (19) pays 25 percent, 4.75');
+select pg_temp.event('evt_paid_prorated', 'subscription.paid', pg_temp.org('00000000-0000-4000-8000-0000000020c2'),
+  '{"object": {"product": {"id": "prod_list", "price": 5900}, "last_transaction": {"id": "tx_pro", "amount": 2000, "amount_paid": 2420}}}', now(), 'tx_pro');
+select is((select commission_cents from public.partner_commissions where payment_id = 'tx_pro'), 500, 'a prorated upgrade pays 25 percent of what was collected, not of the list price');
+
 select * from finish();
 rollback;
