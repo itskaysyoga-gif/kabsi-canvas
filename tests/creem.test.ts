@@ -8,12 +8,14 @@ import {
   effectOf,
   eventModeOf,
   eventTime,
+  familyOfKey,
   hmacHex,
   isStale,
   ledgerOf,
   orgOf,
   parseEvent,
   patchFor,
+  planKey,
   PRODUCT_DESCRIPTION,
   PRODUCT_KEYS,
   type ProductIds,
@@ -385,14 +387,26 @@ describe("two events for one payment (QA 1, 25 Oct 2026)", () => {
 });
 
 describe("the products (10.2.3)", () => {
-  it("are the six Kabsi products in cents, US dollars, with the copy of section 23", () => {
+  it("are the ten Kabsi products in cents, US dollars, with the copy of section 23", () => {
+    // Price 1: the founding family keeps the session 10 products (19, 39); the list family is 29 and 59.
     expect(PRODUCT_KEYS.map((k) => CATALOGUE[k].price)).toEqual([
-      1900, 19000, 3900, 39000, 1500, 15000,
+      1900, 19000, 3900, 39000, 2900, 29000, 5900, 59000, 1500, 15000,
     ]);
-    expect(CATALOGUE.pro_year.name).toBe("Kabsi Pro, yearly");
-    expect(PRODUCT_DESCRIPTION).toBe(
-      "Your Google listing and reviews, managed from WhatsApp. Cancel in WhatsApp any time.",
-    );
+    expect(CATALOGUE.pro_year_list.name).toBe("Kabsi Pro, yearly");
+    expect(CATALOGUE.pro_year.name).toBe("Kabsi Pro, yearly, founding price");
+    expect(PRODUCT_DESCRIPTION).toBe("Your Google profile and reviews, managed from WhatsApp.");
+  });
+  it("keeps a change in the price family the business is on (Price 1)", () => {
+    expect(planKey("pro", "month", "list")).toBe("pro_month_list");
+    expect(planKey("essentials", "year", "founding")).toBe("essentials_year");
+    expect(familyOfKey("essentials_month_list")).toBe("list");
+    expect(familyOfKey("pro_year")).toBe("founding");
+    expect(familyOfKey("extra_month")).toBeNull();
+    expect(familyOfKey(null)).toBeNull();
+    const ids = { pro_month: "p_f", pro_month_list: "p_l", extra_month: "x" };
+    expect(subFacts({ id: "s", product: { id: "p_l" } }, ids).family).toBe("list");
+    expect(subFacts({ id: "s", product: { id: "p_f" } }, ids).family).toBe("founding");
+    expect(subFacts({ id: "s", product: { id: "x" } }, ids).family).toBeNull();
   });
   it("reuses exact matches, renames them, creates the rest and lists the others, never deleting", () => {
     const made: CreemProduct[] = [
@@ -448,9 +462,17 @@ describe("the products (10.2.3)", () => {
     expect(p.reuse).toEqual([
       { key: "essentials_month", id: "a", rename: true },
       { key: "essentials_year", id: "b", rename: true },
-      { key: "pro_month", id: "c", rename: false },
+      { key: "pro_month", id: "c", rename: true },
     ]);
-    expect(p.create).toEqual(["pro_year", "extra_month", "extra_year"]);
+    expect(p.create).toEqual([
+      "pro_year",
+      "essentials_month_list",
+      "essentials_year_list",
+      "pro_month_list",
+      "pro_year_list",
+      "extra_month",
+      "extra_year",
+    ]);
     expect(p.unmatched.map((u) => u.id)).toEqual(["d", "e"]);
   });
 });

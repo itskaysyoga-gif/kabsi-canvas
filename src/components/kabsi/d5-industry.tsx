@@ -327,7 +327,7 @@ function PricingStrip() {
                 </span>
               </p>
               <p className="mt-2 text-small text-text-2">
-                {p.work[0]}. {p.work[2]}.
+                {p.work[0]}. {p.work[1]}.
               </p>
             </li>
           ))}

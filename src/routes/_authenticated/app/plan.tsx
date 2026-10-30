@@ -16,8 +16,18 @@ import {
   type PlanSummary,
 } from "@/lib/plans";
 import { daysUntil } from "@/lib/dashboard";
-import { PLAN_PRICES, PLAN_PRICE_ROWS, TAX_NOTE, WHATSAPP_ON } from "@/lib/site";
+import {
+  FOUNDING_PRICES,
+  FOUNDING_SENTENCE,
+  PLAN_PRICES,
+  PLAN_PRICE_ROWS,
+  TAX_NOTE,
+  WHATSAPP_ON,
+  WORKING_HOURS,
+  foundingPlacesLine,
+} from "@/lib/site";
 import { PLANS } from "@/components/kabsi/plans";
+import { FoundingPriceLine, useFoundingLeft } from "@/components/kabsi/founding-price";
 import { AccountTop, Panel } from "@/components/kabsi/d3-account";
 import { Banner, Button, Segmented, StatusPill, buttonClass } from "@/components/kabsi/ui";
 import { cn } from "@/lib/utils";
@@ -155,6 +165,10 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
   const b = creemBilling(sum);
   const running = b && (b.state === "active" || b.state === "past_due");
   const open = !!sum.checkout_open;
+  // Price 1: a running plan shows the price family it is on; a new checkout shows the founding price while places remain
+  // (the server decides under its lock, and Creem's page shows the exact price before paying).
+  const left = useFoundingLeft();
+  const founding = running ? !!b.founding : left !== null && left > 0;
 
   async function run(
     op: BillingOp,
@@ -187,7 +201,7 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
   }
 
   const price = (plan: "essentials" | "pro" | "extra") => {
-    const p = PLAN_PRICES;
+    const p = founding ? { ...PLAN_PRICES, ...FOUNDING_PRICES } : PLAN_PRICES;
     const per = (b?.period ?? period) === "year";
     const n =
       plan === "essentials"
@@ -201,7 +215,7 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
           : per
             ? p.extraLocationYearly
             : p.extraLocationMonthly;
-    return `$${n} ${per ? "a year" : "a month"}`;
+    return `$${n} ${per ? "a year" : "a month"}${founding && plan !== "extra" ? ", founding price" : ""}`;
   };
 
   const cancelLine = () =>
@@ -251,11 +265,25 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
                 ) : null}
               </div>
               <p className="mt-2 font-display text-h2 font-bold">
-                ${per ? p.yearly : p.monthly}
+                $
+                {running && b.founding
+                  ? per
+                    ? p.foundingYearly
+                    : p.foundingMonthly
+                  : per
+                    ? p.yearly
+                    : p.monthly}
                 <span className="text-body font-semibold text-text-2">
                   {per ? " a year" : " a month"}
                 </span>
               </p>
+              {running && b.founding ? (
+                <p className="mt-1 text-small font-semibold text-text-1">
+                  Founding price, kept while you stay subscribed.
+                </p>
+              ) : running ? null : (
+                <FoundingPriceLine plan={p.id} yearly={per} left={left} />
+              )}
               <ul className="mt-4 space-y-2">
                 {p.work.map((w) => (
                   <li key={w} className="flex gap-2 text-body">
@@ -264,6 +292,10 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
                   </li>
                 ))}
               </ul>
+              <p className="mt-4 text-small">
+                <span className="block font-bold">{p.help}</span>
+                <span className="block text-text-2">{WORKING_HOURS}</span>
+              </p>
               {showChoose ? (
                 <Button
                   full
@@ -283,6 +315,9 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
           );
         })}
       </div>
+      {showChoose && open ? (
+        <p className="text-small text-text-2">Creem's page shows the exact price before you pay.</p>
+      ) : null}
 
       {running ? (
         <Panel title="Manage your plan" id="manage">
@@ -416,6 +451,11 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
           Prices are in US dollars, {TAX_NOTE}, and the same in every country. Every trial is 14
           days of Pro with no card.
         </p>
+        {left !== null && left > 0 ? (
+          <p className="mt-2 text-small text-text-2">
+            {FOUNDING_SENTENCE} {foundingPlacesLine(left)}
+          </p>
+        ) : null}
       </Panel>
 
       <Panel title="Receipts" id="receipts">

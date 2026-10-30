@@ -1,6 +1,14 @@
 // About and the FAQ (COPY.md 13 and 16). Security, Privacy and Terms keep kabsi-canvas's own full text in this layout
 // (src/components/marketing/legal.tsx).
-import { CONTACT_EMAIL, SOCIAL_LINKS, TRIAL_LINE, WHATSAPP_ON, WHATSAPP_URL } from "@/lib/site";
+import {
+  CONTACT_EMAIL,
+  FOUNDING_SENTENCE,
+  PRICES_SENTENCE,
+  SOCIAL_LINKS,
+  TRIAL_LINE,
+  WHATSAPP_ON,
+  WHATSAPP_URL,
+} from "@/lib/site";
 import { PageTop } from "./d2-parts";
 import { FAQ } from "./faq-data";
 import { FOUNDER, Img, PHOTOS } from "./photos";
@@ -133,7 +141,7 @@ const GROUPS: { id: string; title: string; items: { q: string; a: string }[] }[]
     items: [
       {
         q: "What does Kabsi cost?",
-        a: "Essentials is $19 a month and Pro is $39 a month. Both are free for 14 days, with no card.",
+        a: `${PRICES_SENTENCE} ${FOUNDING_SENTENCE} Both plans are free for 14 days, with no card.`,
       },
       {
         q: "Can I run more than one location?",

@@ -96,7 +96,7 @@ describe("the evaluation set", () => {
   });
 
   it("fails when a price in the facts file changes and the evaluation does not", () => {
-    const changed = facts.replace("| Pro | $39 | $390 |", "| Pro | $49 | $490 |");
+    const changed = facts.replace("| Pro | $59 | $590 |", "| Pro | $49 | $490 |");
     expect(changed).not.toBe(facts);
     const broken = QUESTIONS.flatMap((q) => support(q, changed));
     expect(broken.length).toBeGreaterThan(0);

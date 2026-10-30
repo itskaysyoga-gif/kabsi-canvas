@@ -6,8 +6,11 @@ import {
   KABSI_GROUP_NAME,
   OPERATOR_NAME,
   OPERATOR_LINE,
+  FOUNDING_SENTENCE,
+  HELP_LINES,
   PLAN_PRICES,
   WHATSAPP_NUMBER,
+  WORKING_HOURS,
   WHATSAPP_ON,
   pageHead,
 } from "@/lib/site";
@@ -219,10 +222,16 @@ function Page() {
             {PLAN_PRICES.essentialsYearly} a year, Kabsi Pro is ${PLAN_PRICES.proMonthly} a month or
             ${PLAN_PRICES.proYearly} a year, and an extra location is $
             {PLAN_PRICES.extraLocationMonthly} a month or ${PLAN_PRICES.extraLocationYearly} a year.
-            Prices are in US dollars, plus tax where it applies, and the same in every country. You
-            can start with a 14-day free trial of Pro, no card. Monthly plans can be cancelled at
-            any time and run to the end of the month you paid for. Yearly plans are refundable
-            within 14 days (section 10).
+            Prices are in US dollars, plus tax where it applies, and the same in every country.{" "}
+            {FOUNDING_SENTENCE} A Founding 25 business that chooses a plan after its 90 days pays
+            the founding price too. You can start with a 14-day free trial of Pro, no card. Monthly
+            plans can be cancelled at any time and run to the end of the month you paid for. Yearly
+            plans are refundable within 14 days (section 10).
+          </li>
+          <li>
+            Cancelling on the Plan page or by asking Kabsi ends your plan at the end of the period
+            you paid for, and everything keeps working until then. Cancelling in Creem's own billing
+            page ends the plan at once.
           </li>
           <li>
             You pay by card, in US dollars. That is the only way to pay Kabsi. Card payments are
@@ -337,7 +346,10 @@ function Page() {
       </section>
 
       <section>
-        <h2>14. Availability</h2>
+        <h2>14. Availability and help</h2>
+        <p>
+          Essentials: {HELP_LINES.essentials} Pro: {HELP_LINES.pro} {WORKING_HOURS}
+        </p>
         <p>
           We work to keep Kabsi running and your emails arriving, but we can't guarantee it will
           always be available or error-free. We may improve or change features; if a change removes

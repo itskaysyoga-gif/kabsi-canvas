@@ -151,15 +151,18 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     // The group ID lives only in src/lib/site.ts (CLAUDE.md).
     for (const f of PUBLIC_FILES) expect(read(f), f).not.toMatch(/"5481006796"/);
   });
-  it("list photos from WhatsApp on both plans, and only the prices of K-126", () => {
+  it("list only built features on both plans (Price 1), and only the list prices", () => {
     const [essentials, pro] = PLANS;
     expect(essentials!.monthly).toBe(PLAN_PRICES.essentialsMonthly);
     expect(essentials!.yearly).toBe(PLAN_PRICES.essentialsYearly);
     expect(pro!.monthly).toBe(PLAN_PRICES.proMonthly);
     expect(pro!.yearly).toBe(PLAN_PRICES.proYearly);
     const rows = read("src/components/kabsi/plans.ts");
-    expect(rows).toMatch(/Holiday hours, 2 posts a month and photos from WhatsApp/);
-    expect(rows).toMatch(/Weekly posts, photos from WhatsApp/);
+    expect(rows).toMatch(/Holiday hours, 2 posts a month and your photos/);
+    expect(rows).toMatch(/More checks come later\./);
+    expect(rows).not.toMatch(
+      /Competitor Watch|category check|voice notes|monthly PDF|ChatGPT|search terms? checked/,
+    );
   });
 });
 

@@ -41,6 +41,7 @@ Decisions taken while writing (lane R, R-41):
 **Access steps (30.17, the same everywhere):** "On Google, open your profile (search your business name while signed in), then Menu, Business Profile settings, People and access, Add. Paste 5481006796, choose Manager, then Add (on some screens, Invite)." Under it: "5481006796 is Kabsi Clients, Kabsi's business group on Google. Never send us a password or a code." Button: "Copy the ID".
 
 ## 1. Home (/)
+*Changed by section 34 (Price 1, 30 Oct 2026): the prices in this section are replaced by the list prices 29 and 59 and the founding price 19 and 39.*
 
 **Hero**
 - H1: "Your business on Google. Taken care of through WhatsApp."
@@ -95,6 +96,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 - Leaving: "Send me this report" with email or WhatsApp. Done: "Sent."
 
 ## 3. Pricing (/pricing)
+*Changed by section 34 (Price 1, 30 Oct 2026): the prices in this section are replaced by the list prices 29 and 59 and the founding price 19 and 39.*
 
 - H1: "Simple plans. Free for 14 days."
 - Lead: "Every plan has unlimited review replies and runs from WhatsApp. Prices in US dollars."
@@ -322,6 +324,7 @@ Changed by section 25 (UX 1, Design 3's approved lines win where they differ).
   - Retired: "Done. Kabsi added a location to your plan." and "Done. Your plan now has [n] extra locations." (the location now joins when Creem's payment goes through).
 
 ## 24. Web 2: the approved design lines on kabsi.co (27 Oct 2026)
+*Changed by section 34 (Price 1, 30 Oct 2026): the prices in this section are replaced by the list prices 29 and 59 and the founding price 19 and 39.*
 
 Web 2 ported the design studio's public pages (itskaysyoga-gif/kabsi-design-studio, docs/DESIGN-PROPOSAL.md). Every line below was approved by lane R in Design 1 to 5 (DESIGN-BRIEF.md sections 12, 13, 16 and 17) and is copied here word for word, so this file stays the one copy deck. The industry pages' lines are in src/content/industries/*.ts and the Home examples in src/content/home-examples.ts (Design 5, approved); Content 1 finishes the other nine industry pages there.
 
@@ -685,3 +688,20 @@ Each line replaces the one in brackets. Lines marked "switch" read the one Whats
 - Hair salons: "keeps your hours and details right" (was "keeps your services and booking link right"); "A common complaint in a busy salon." (was "The most common complaint")
 - Founding 25 form: "Two minutes. Rashid answers within 2 working days." (was "Rashid answers on WhatsApp."); banner and lead: "Kabsi does the Google work; you tell Rashid what to make better."
 - 404: "The link may be old. Nothing on your Google profile changed."
+
+## 34. Price 1 part B: prices, the founding price and the help lines (30 Oct 2026, master plan 30.20 section 6 and 30.21 section 2, Rashid's "yes 29/59")
+
+- List prices: Essentials $29 a month or $290 a year; Pro $59 a month or $590 a year; an extra location $15 a month or $150 a year. These replace the prices in sections 3 and 19.
+- On each plan card while founding places remain (never a crossed-out price): "Founding price for the first 30 paying businesses: 19 US dollars a month, kept while you stay subscribed. Then 29." Pro: "...: 39 US dollars a month, ... Then 59." Yearly: "190 US dollars a year ... Then 290." and "390 ... Then 590."
+- The count: "Founding price for the first 30 paying businesses, kept while you stay subscribed. [n] of 30 founding places left." (Pricing); "[n] of 30 founding places left." (Home's preview). Hidden at 0 and while the count loads.
+- One sentence (Plan page, terms, FAQ, emails, facts): "The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year."
+- Under the plan cards: "Nothing to pay today. Card payments in US dollars are coming." / "Prices are in US dollars, plus tax where it applies." / "Monthly plans can be cancelled at any time. Yearly plans are refundable within 14 days."
+- Pricing and Home lead: "Each plan does the Google work for one business, and you approve every change. Prices in US dollars, plus tax where it applies." (Design 6; was "runs from WhatsApp").
+- Essentials card: "A reply ready for every new review" / "Holiday hours, 2 posts a month and your photos" / "Profile Coach suggestions, and a next step in every weekly report". Pro card ("For a business that wants weekly posts and a team that approves.", badge "Weekly posts"): "Everything in Essentials, with a post every week" / "Review graphics to share, and the words people searched to find you" / "The guide to report a review that breaks Google's rules" / "Team roles and approval rules".
+- Comparison rows (built only): replies, posts and photos, Google Protection, Review Growth, Profile Coach suggestions, Results Report with a next step, review graphics, "The words people searched to find you", "The guide to report a review that breaks Google's rules", team roles, "A person on WhatsApp": "The same working day" / "Within 4 working hours, and a call". Under the table: "More checks come later." Removed: the nearby check, the AI answers, Competitor Watch, the category check, voice notes, the monthly PDF.
+- Help lines (plan cards, Plan page, terms section 14), exactly as 30.21: Essentials "A person answers on WhatsApp the same working day." Pro "Priority help: a person answers on WhatsApp within 4 working hours, and a call when you need one." Beside them: "Working hours: Monday to Friday, 9:00 to 18:00, UAE time."
+- Plan page: the button "Choose Pro, $39 a month, founding price" while places remain (else "Choose Pro, $59 a month"); a founding plan shows its price and "Founding price, kept while you stay subscribed."
+- Terms section 8: the founding sentence, Founding 25 at the founding price, and "Cancelling on the Plan page or by asking Kabsi ends your plan at the end of the period you paid for, and everything keeps working until then. Cancelling in Creem's own billing page ends the plan at once."
+- Trial-ending email: "Pro is $59 a month: a post every week, team roles, review graphics and the words people searched to find you. Essentials is $29 a month: every reply and 2 posts a month." then the founding sentence.
+- Creem product names (section 23 changes): list "Kabsi Essentials, monthly" / "yearly", "Kabsi Pro, monthly" / "yearly"; founding "Kabsi Essentials, monthly, founding price" and the same for the other three; "Extra location". Description: "Your Google profile and reviews, managed from WhatsApp."
+- Review fixes (Price 1 part B2): the /faq answer "What does Kabsi cost?" is the prices sentence and the founding sentence, then "Both plans are free for 14 days, with no card."; /partners "Pro is $59 a month. You earn 25% of every payment..."; the WhatsApp "prices" reply "Then Essentials is 29 US dollars a month and Pro is 59 US dollars a month, with an extra location at 15. The first 30 paying businesses pay 19 or 39 and keep that price while they stay subscribed."; the Plan page under the plan buttons "Creem's page shows the exact price before you pay."; the pricing share image "$29" and "$59" with "You approve every change."

@@ -21,7 +21,7 @@ export const SAY = {
   unknownHelp:
     "I am Nora, Kabsi's assistant. Kabsi looks after your business on Google from WhatsApp: a reply ready for every review, your Google profile kept right, and nothing goes live without your yes.\n\nYou can send: your business name for a free check, \"prices\", \"start free\", \"partner\" or \"talk to a person\".",
   prices:
-    "Kabsi is free for 14 days, no card. Then Essentials is 19 US dollars a month and Pro is 39 US dollars a month, with an extra location at 15. Card payments open soon. Details: kabsi.co/pricing",
+    "Kabsi is free for 14 days, no card. Then Essentials is 29 US dollars a month and Pro is 59 US dollars a month, with an extra location at 15. The first 30 paying businesses pay 19 or 39 and keep that price while they stay subscribed. Card payments open soon. Details: kabsi.co/pricing",
   // 13b part 2 (judged 25 Oct): only what the facts say is open today; WhatsApp for owners and Partners are not open yet.
   trial: "Start free here, no card, about 10 minutes: kabsi.co/get-started. The free trial starts once Kabsi can reach your Google profile.",
   partnerProgram:

@@ -180,19 +180,22 @@ Deno.test("the day-7 recap says exactly the numbers of the snapshot, which come 
 
 Deno.test("prices and offer: Essentials, Pro and an extra location, card payments marked coming, no end-of-trial discount", () => {
   const ctx = { appUrl: "https://kabsi.co", removalOn: true };
-  assert.deepEqual(Object.values(PLAN_PRICES), [19, 190, 39, 390, 15, 150]);
+  assert.deepEqual(Object.values(PLAN_PRICES), [29, 290, 59, 590, 15, 150]);
   // Email 1: the trial-ending email (day 11) gives the explicit choice with the monthly prices instead (30.15 section 6).
   const ending = lifecycleEmail("trial_day11", LIFE_SAMPLE, ctx);
-  assert.match(ending.text, /Pro is \$39 a month/);
-  assert.match(ending.text, /Essentials is \$19 a month/);
+  assert.match(ending.text, /Pro is \$59 a month/);
+  assert.match(ending.text, /Essentials is \$29 a month/);
+  assert.match(ending.text, /founding price and keep it while they stay subscribed: Essentials \$19 a month/);
+  assert.doesNotMatch(ending.text, /search(es)? checked/);
   assert.match(ending.text, /plus tax where it applies/);
   assert.ok(ending.text.includes(CARD_PAYMENTS_COMING));
   assert.equal(ending.button?.label, "Choose my plan");
   for (const step of ["trial_day7", "trial_day14", "winback_17", "winback_30"] as const) {
     const m = lifecycleEmail(step, LIFE_SAMPLE, ctx);
     for (const t of [m.text, m.bodyHtml]) {
-      assert.match(t, /Essentials is \$19 a month or \$190 a year/, step);
-      assert.match(t, /Pro is \$39 a month or \$390 a year/, step);
+      assert.match(t, /Essentials is \$29 a month or \$290 a year/, step);
+      assert.match(t, /Pro is \$59 a month or \$590 a year/, step);
+      assert.match(t, /Pro \$39 a month or \$390 a year/, step);
       assert.match(t, /An extra location is \$15 a month or \$150 a year/, step);
       assert.match(t, /plus tax where it applies/, step);
     }

@@ -228,12 +228,12 @@ export const QUESTIONS_28: Question[] = [
     topic: "do prices change",
     ask: "With all these new features, are the prices going up?",
     kb: [
-      /The prices do not change \(Essentials \$19 a month or \$190 a year, Pro \$39 a month or \$390 a year/,
+      /The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials \$19 a month/,
     ],
-    must: [/\$19/, /\$39/],
+    must: [/\$29/, /\$19/],
     coming: true,
     reference:
-      "No, the prices do not change: Essentials $19 a month or $190 a year and Pro $39 a month or $390 a year. The plans cannot be bought yet, because card payments are not open yet.",
+      "The list prices are Essentials $29 a month or $290 a year and Pro $59 a month or $590 a year. The first 30 paying businesses pay the founding price, Essentials $19 or Pro $39 a month, and keep it while they stay subscribed. The plans cannot be bought yet, because card payments are not open yet.",
   },
   {
     id: "n80",

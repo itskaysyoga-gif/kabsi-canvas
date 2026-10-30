@@ -59,7 +59,7 @@ const CASES: Case[] = [
     { from: PHONES.unknown, text: "my scan code is KAB-7Q4M2X9P", expect: "scan_code" },
     { from: PHONES.unknown, text: "Send the full map to my WhatsApp", expect: "map_pending", reply: /comes here as soon as it is ready/ }] },
   { name: "unknown: send the full map without a code asks for it", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "send the full map", expect: "map_no_code", reply: /business name or the code/ }] },
-  { name: "unknown: prices", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "prices", expect: "prices", reply: /19 US dollars.*39 US dollars/s }] },
+  { name: "unknown: prices", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "prices", expect: "prices", reply: /29 US dollars.*59 US dollars.*first 30 paying businesses pay 19 or 39/s }] },
   { name: "unknown: start free", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "start free", expect: "trial", reply: /kabsi\.co\/get-started/ }] },
   { name: "unknown: partner program", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "partner", expect: "partner_program", reply: /25 percent/ }] },
   { name: "unknown: talk to a person", tags: ["unknown"], steps: [{ from: PHONES.unknown, text: "talk to a person", expect: "handoff", reply: /within one business day/ }],
@@ -310,8 +310,8 @@ const CASES: Case[] = [
   { name: "manager: stats, headed as manager", tags: ["manager"], steps: [{ from: PHONES.manager, text: "stats", expect: "stats", head: /^Harbour Lane Coffee \(manager\)/ }] },
   // Session 10 (10.2.10): billing through Creem, owner only, every change after a Confirm.
   ...((): Case[] => {
-    const paid = (plan: "essentials" | "pro" = "essentials") => (w: World) => {
-      w.billingSubs = new Map([[BIZ.harbour, { plan, period: "month", state: "active", periodEnd: "2026-11-26T15:00:00Z", cancelAtEnd: false, units: 0 }]]);
+    const paid = (plan: "essentials" | "pro" = "essentials", family: "founding" | "list" = "founding") => (w: World) => {
+      w.billingSubs = new Map([[BIZ.harbour, { plan, period: "month", state: "active", periodEnd: "2026-11-26T15:00:00Z", cancelAtEnd: false, units: 0, family }]]);
     };
     return [
       { name: "owner billing: no paid plan points to the Plan page", tags: ["owner", "billing"], setup: (w) => { w.billingSubs = new Map(); },
@@ -338,6 +338,15 @@ const CASES: Case[] = [
           { from: PHONES.owner, text: "downgrade", expect: "billing_downgrade_ask", reply: /\$19 a month from your next renewal, 26 November 2026/ },
           { from: PHONES.owner, button: "k:downgrade", expect: "billing_downgraded", reply: /Essentials starts on 26 November 2026/ },
         ] },
+      // Price 1: a business on the list price is priced and changed at the list price; extra locations cost the same.
+      { name: "owner billing: on the list price, upgrade shows 59 and downgrade 29", tags: ["owner", "billing", "price1"], setup: paid("essentials", "list"),
+        steps: [
+          { from: PHONES.owner, text: "upgrade", expect: "billing_upgrade_ask", reply: /Switch to Pro for \$59 a month\?/, buttons: ["Confirm"] },
+          { from: PHONES.owner, text: "add a location", expect: "billing_add_ask", reply: /\$15 a month\?/ },
+          { from: PHONES.owner, text: "plan", expect: "billing_status", reply: /Kabsi Essentials, monthly\. It renews/ },
+        ] },
+      { name: "owner billing: on the list price, Pro downgrades to Essentials at 29", tags: ["owner", "billing", "price1"], setup: paid("pro", "list"),
+        steps: [{ from: PHONES.owner, text: "downgrade", expect: "billing_downgrade_ask", reply: /\$29 a month from your next renewal/ }] },
       { name: "owner billing: add a location shows the price, then the Creem payment link", tags: ["owner", "billing"], setup: paid(),
         steps: [
           { from: PHONES.owner, text: "add a location", expect: "billing_add_ask", reply: /\$15 a month\? You pay for it on Creem's page/, buttons: ["Confirm"] },

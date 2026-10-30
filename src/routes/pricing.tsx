@@ -2,13 +2,22 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Check, Minus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { PRODUCT_LD, TRIAL_LINE, pageHead } from "@/lib/site";
+import {
+  PAY_TODAY_LINE,
+  PRICE_TAX_LINE,
+  PRODUCT_LD,
+  REFUND_LINE,
+  TRIAL_LINE,
+  WORKING_HOURS,
+  foundingPlacesLine,
+  pageHead,
+} from "@/lib/site";
 import { faqJsonLd } from "@/lib/faq";
-import { loadFoundingPriceLeft } from "@/lib/public-api";
 import { SiteShell } from "@/components/kabsi/site-chrome";
 import { useSearchFlag } from "@/components/kabsi/page-signals";
 import { Badge, ButtonLink, Faq, SectionHead, Segmented } from "@/components/kabsi/ui";
-import { FOUNDING_TOTAL, PLANS, PLAN_ROWS } from "@/components/kabsi/plans";
+import { FOUNDING_TOTAL, MORE_LATER, PLANS, PLAN_ROWS } from "@/components/kabsi/plans";
+import { FoundingPriceLine, useFoundingLeft } from "@/components/kabsi/founding-price";
 import { FoundingBanner } from "@/components/kabsi/d5-founding";
 import { FAQ, PRICING_FAQ } from "@/components/kabsi/faq-data";
 import { Img, PHOTOS } from "@/components/kabsi/photos";
@@ -18,7 +27,7 @@ export const Route = createFileRoute("/pricing")({
     pageHead({
       title: "Kabsi pricing: Simple plans. Free for 14 days.",
       description:
-        "Every plan has unlimited review replies and runs from WhatsApp. Prices in US dollars.",
+        "Each plan does the Google work for one business, and you approve every change. Prices in US dollars, plus tax where it applies.",
       path: "/pricing",
       image: "pricing",
       crumbs: [{ name: "Pricing", path: "/pricing" }],
@@ -36,10 +45,7 @@ function Pricing() {
     if (periodFlag === "yearly") setPeriod("yearly");
   }, [periodFlag]);
   // The real count of founding price places (session 10). The block stays hidden at 0 or while the count is unknown.
-  const [left, setLeft] = useState<number | null>(null);
-  useEffect(() => {
-    void loadFoundingPriceLeft().then(setLeft);
-  }, []);
+  const left = useFoundingLeft();
 
   return (
     <SiteShell>
@@ -47,7 +53,7 @@ function Pricing() {
         <SectionHead
           as="h1"
           title="Simple plans. Free for 14 days."
-          lead="Every plan has unlimited review replies and runs from WhatsApp. Prices in US dollars."
+          lead="Each plan does the Google work for one business, and you approve every change. Prices in US dollars, plus tax where it applies."
         />
         <Segmented
           className="mt-8"
@@ -86,6 +92,7 @@ function Pricing() {
                     {period === "monthly" ? "a month" : "a year"}
                   </span>
                 </p>
+                <FoundingPriceLine plan={p.id} yearly={period === "yearly"} left={left} />
                 <p className="mt-4 text-body text-text-2">{p.line}</p>
                 <ul className="mt-6 space-y-3 border-t border-line pt-6">
                   {p.work.map((w) => (
@@ -99,6 +106,10 @@ function Pricing() {
                     </li>
                   ))}
                 </ul>
+                <p className="mt-6 rounded-inner bg-surface-2 p-4 text-small">
+                  <span className="block font-bold text-text-1">{p.help}</span>
+                  <span className="mt-1 block text-text-2">{WORKING_HOURS}</span>
+                </p>
                 <div className="mt-auto pt-8">
                   <ButtonLink to="/get-started" full variant={pro ? "primary" : "secondary"}>
                     Start free
@@ -108,9 +119,12 @@ function Pricing() {
             );
           })}
         </div>
-        <p className="mt-5 max-w-2xl text-small text-text-2">
-          {TRIAL_LINE} Your trial starts when Kabsi's access to your Google profile works.
-        </p>
+        <div className="mt-5 grid max-w-2xl gap-2 text-small text-text-2">
+          <p>{TRIAL_LINE} Your trial starts when Kabsi's access to your Google profile works.</p>
+          <p>{PAY_TODAY_LINE}</p>
+          <p>{PRICE_TAX_LINE}</p>
+          <p>{REFUND_LINE}</p>
+        </div>
 
         {left !== null && left > 0 && (
           <div className="mt-8 flex flex-col gap-4 rounded-panel border border-line bg-surface-1 p-5 sm:flex-row sm:items-center sm:p-6">
@@ -122,8 +136,8 @@ function Pricing() {
             </div>
             <div className="flex-1">
               <p className="text-body font-semibold text-text-1">
-                Founding price for the first {FOUNDING_TOTAL} paying businesses, kept while your
-                subscription stays paid. {left} places left.
+                Founding price for the first {FOUNDING_TOTAL} paying businesses, kept while you stay
+                subscribed. {foundingPlacesLine(left)}
               </p>
               <div
                 className="mt-3 h-2 overflow-hidden rounded-full bg-surface-3"
@@ -171,6 +185,7 @@ function Pricing() {
             ))}
           </dl>
         </div>
+        <p className="mt-4 text-small text-text-2">{MORE_LATER}</p>
       </section>
 
       <section aria-labelledby="pfaq-h" className="border-t border-line">

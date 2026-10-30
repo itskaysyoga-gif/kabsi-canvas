@@ -4,7 +4,7 @@
 // COPY.md 25's; the body lines are the design studio's /emails (d3-emails.tsx), written to the kabsi-copy rules. Pure
 // functions over data the caller already read: no number, date or name is invented here.
 import { card, esc, KABSI_GROUP_ID, label, para, ticks, WHATSAPP_URL } from "../email-layout.ts";
-import { CARD_PAYMENTS_COMING, PLAN_PRICES } from "./lifecycle-copy.ts";
+import { CARD_PAYMENTS_COMING, FOUNDING_SENTENCE, PLAN_PRICES } from "./lifecycle-copy.ts";
 import type { EmailContent } from "./template.ts";
 import { TOKENS } from "./tokens.ts";
 
@@ -139,7 +139,8 @@ export function trialEnding(o: { business: string; ends: Date | string; tz?: str
     w.postsSent ? `${plural(w.postsSent, "post", "posts")} sent to Google` : "",
     w.changesCaught ? `${plural(w.changesCaught, "change to your Google profile", "changes to your Google profile")} caught` : "",
   ].filter(Boolean);
-  const choice = `Pro is $${PLAN_PRICES.proMonthly} a month: a post every week, team roles and 5 searches checked weekly. Essentials is $${PLAN_PRICES.essentialsMonthly} a month: every reply, 2 posts a month and 1 search checked monthly. Prices are in US dollars, plus tax where it applies.`;
+  // Price 1: built features only, and the founding price beside the list price.
+  const choice = `Pro is $${PLAN_PRICES.proMonthly} a month: a post every week, team roles, review graphics and the words people searched to find you. Essentials is $${PLAN_PRICES.essentialsMonthly} a month: every reply and 2 posts a month. ${FOUNDING_SENTENCE} Prices are in US dollars, plus tax where it applies.`;
   const letEnd = `Or let it end. Nothing is charged, and from ${end} Kabsi publishes nothing. For 7 more days it keeps watching your reviews and drafting replies, in case you choose a plan. You keep your review link and QR code.`;
   const doneText = done.length ? done : ["Kabsi watched your reviews and your Google profile every day"];
   return {
