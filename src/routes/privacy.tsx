@@ -505,8 +505,8 @@ function Page() {
           ) : null}
           <li>
             Applications to Founding 25 and Kabsi Partners: if we decline an application, we delete
-            it 90 days after we decided. If we put a Founding 25 application on the waiting list,
-            we delete it 180 days after we decided. An accepted place is kept while you are in the
+            it 90 days after we decided. If we put a Founding 25 application on the waiting list, we
+            delete it 180 days after we decided. An accepted place is kept while you are in the
             program. A declined partner application that has a payment record is kept only as long
             as tax and accounting law requires.
           </li>
@@ -643,14 +643,14 @@ function Page() {
               of WhatsApp is also covered by WhatsApp&apos;s own terms and privacy policy.
             </p>
             <p>
-              <b>How long it is kept.</b> Kabsi deletes its own record of each WhatsApp message,
-              and the text queued to send to you, 12 months after it was sent. The chat stays in
-              the Kapso inbox until you ask us to delete it: email {CONTACT_EMAIL} from the address
-              on your account, or say so in the chat, and we delete the chat on our side and tell
-              you when it is done. A chat with Kabsi&apos;s earlier number (before 22 October 2026)
-              has no automatic deletion date. Kapso and Meta may keep messages
-              under their own terms, and the chat stays on your own phone until you delete it there.
-              Review text in an alert is not kept by Kabsi.
+              <b>How long it is kept.</b> Kabsi deletes its own record of each WhatsApp message, and
+              the text queued to send to you, 12 months after it was sent. The chat stays in the
+              Kapso inbox until you ask us to delete it: email {CONTACT_EMAIL} from the address on
+              your account, or say so in the chat, and we delete the chat on our side and tell you
+              when it is done. A chat with Kabsi&apos;s earlier number (before 22 October 2026) has
+              no automatic deletion date. Kapso and Meta may keep messages under their own terms,
+              and the chat stays on your own phone until you delete it there. Review text in an
+              alert is not kept by Kabsi.
             </p>
           </>
         ) : (

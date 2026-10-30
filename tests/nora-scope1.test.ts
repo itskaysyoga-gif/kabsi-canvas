@@ -66,7 +66,11 @@ describe("the Eval 1 row: en02 and n71", () => {
     const n71 = QUESTIONS_28.find((q) => q.id === "n71")!;
     expect(n71.coming).toBeFalsy();
     expect(
-      check(n71, "No, Kabsi does not message your customers. Use your review link and QR code.", facts),
+      check(
+        n71,
+        "No, Kabsi does not message your customers. Use your review link and QR code.",
+        facts,
+      ),
     ).toEqual([]);
   });
 });
