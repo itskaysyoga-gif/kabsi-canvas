@@ -160,7 +160,9 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     const rows = read("src/components/kabsi/plans.ts");
     expect(rows).toMatch(/Holiday hours, 2 posts a month and your photos/);
     expect(rows).toMatch(/More checks come later\./);
-    expect(rows).not.toMatch(/Competitor Watch|category check|voice notes|monthly PDF|ChatGPT|search terms? checked/);
+    expect(rows).not.toMatch(
+      /Competitor Watch|category check|voice notes|monthly PDF|ChatGPT|search terms? checked/,
+    );
   });
 });
 
