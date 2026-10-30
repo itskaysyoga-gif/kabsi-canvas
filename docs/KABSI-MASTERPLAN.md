@@ -221,6 +221,7 @@ Launch set with US examples, page, reply tone, post ideas, photo and attribute c
 Profile Check or Click-to-WhatsApp, sign-up, add Kabsi as Manager (guide with live status, "send to my manager"), five questions, connect WhatsApp (QR on desktop, one tap on a phone), the first review alert arrives in WhatsApp before the owner closes the page. Measure time to first Yes.
 
 ## 13. Kabsi Outbound with Harvey (after the launch gate)
+*Replaced by 30.19 section 5 (the one set of Outbound rules), which wins over everything below and over 27.9, 30.16, 30.17 and 30.18 where they differ.*
 *Changed by 27.9: it starts right after the launch gate, targets the UAE and the UK first and then the US, and Email 1 offers the Free Visibility Scan instead of the Profile Check. Partner invitations by Outbound: 29.6, which also replaces the partner lines here.*
 Private repo itskaysyoga-gif/kabsi-outbound imported from github.com/ethanplusai/harvey at that time; a daily scheduled run in claude.ai/code; drafts approved on Rashid's phone in /staff/outbound; sender "Nora at Kabsi", signature "Nora, Kabsi's AI assistant. Rashid Abou Hamzy, founder, reads every reply."; footer: Kabsi, 451 Harwinton Ave, Torrington, CT 06790 and "Reply 'no thanks' and we will not write again"; a separate sending domain on Zoho Mail Lite with SPF, DKIM and DMARC and two weeks of warm-up; OpenStreetMap and the business's own website only; Email 1 plain text, under 80 words, no link, one real detail, "Want me to run a free check of <business>'s Google profile and send you what I find?"; a yes gets the check result, the founding offer and the WhatsApp button within minutes; one follow-up on day 4; US, auto repair, salons and barbers, cafes and restaurants first; 20 a day for two weeks then 30, hard stop at 300; kill-gate fewer than 3 replies that lead to a check or trial.
 
@@ -1192,3 +1193,91 @@ Changes 30.17 where they differ.
 
 ### 7. Order
 Design 5 round 2 (the same session); V3 (Sonnet) and Partners (Opus) in parallel; then V4, Outbound (after getkabsi.com), Web 2 with Content 1, UX 1, Email 1, Sec 1, the launch gate.
+
+## 30.19 The "Kabsi 3.0, universal AI business assistant" brief: what Kabsi takes, final Outbound rules, the launch gate decided (lane R, 30 Oct 2026, R-99)
+ChatGPT sent a brief dated 27 Oct 2026 that proposes Kabsi become a universal AI business assistant for every industry: a customer-facing receptionist, bookings, CRM, quotes, payments, team tasks, a connector marketplace, industry packs with hospitality as the deep dive, a new headline and prices of 49 to 199 US dollars a month. Lane R read it against the repo (main at 81ae275) and sections 1 to 30.18. It is outside input; the brief itself asks to be challenged and to start from a narrow wedge. Rashid allowed lane R to override any earlier decision if it agreed. Where this section differs from older ones, it wins.
+
+### 1. The decision: Kabsi stays a Google Business Profile assistant on WhatsApp
+Kabsi does not become a universal assistant. It stays what it is until it has 30 paying customers, then section 4 below decides each step on evidence. Why:
+1. Kabsi is two sessions from launch with no paying customer. The brief's own phases 0 to 2 (audit, a safe core, one wedge with paid pilots) are where Kabsi already is: the core is built (tenants and roles, the one publication pipeline, approvals bound to the draft shown, audit, the jobs table with leases and retries, the stop switch, consent, billing, retention) and the wedge is chosen (salons and barbers in the UAE and the UK, Founding 25). A pivot now restarts the build and delays the only proof that matters: an owner paying.
+2. Most of the brief depends on access Kabsi cannot get. Booking.com's partner portal says new connectivity providers are paused; Tripadvisor's Content API excludes business reputation management (the brief says both). Each PMS, POS, booking system or CRM is its own contract, review and upkeep. One person cannot run a connector marketplace.
+3. A receptionist that answers a business's customers is another product: each business connects its own WhatsApp number, with its own templates and opt-ins, and Kabsi becomes answerable for what the AI tells customers (prices, availability, health questions).
+4. WhatsApp's Business Solution terms (in force since 15 Jan 2026) bar providers whose main offering on the platform is a general-purpose AI assistant. Kabsi's number is safe because it does one job, Google profile work that the owner approves, with AI as a part of it. "Your business has an AI team. It lives on WhatsApp." describes the kind of service those terms target and puts Kabsi's one number at risk. Meta's WhatsApp rules are a fixed rule.
+5. That headline promises customer messages, bookings, orders and daily operations, which Kabsi does not do. The claims rules (say what Kabsi does, no fake proof) forbid it.
+6. Every vertical pack adds onboarding and support that lands on one person (30.9 risk 5), against Rashid's goal of a business he runs alone.
+
+### 2. Not taken
+- The headline "Your business has an AI team. It lives on WhatsApp.", its supporting line, the slogan "Your business, taken care of. Right on WhatsApp." and the CTAs "See Kabsi work for your business" and "Explore industries". The brand line, the Home H1 and the buttons of 30.15 stay.
+- The customer-facing receptionist, bookings and scheduling, CRM and customer memory, quote-to-sale, payment links and invoicing, team tasks, the missed-revenue detector, the growth studio, website and catalogue ingestion, voice.
+- The connector framework, the capability registry, the integration directory page, the industry pack SDK and the vertical data schemas (lodging, restaurant, auto, field service and the rest).
+- Hospitality as a pack (Booking.com, Tripadvisor or Terra, Airbnb, Expedia, Cloudbeds, Mews, SiteMinder). Hotels keep their wave 2 industry page for Google work only.
+- The price ladder of 49 to 199 US dollars. Prices stay 19 and 39 (30.15 section 5) and are reviewed at 30 paying customers with the cost per business the staff page already shows.
+- English and Arabic localisation: no Arabic is shown anywhere public (R-61, 30.18).
+- Tools: Trigger.dev and Inngest (the jobs table passed Sec 1), LangGraph, pgvector (the facts fit in the prompt), Cal.com, Langfuse (it would send review text to another tool, which plan 2.2 forbids), the 13 suggested project skills (the existing skills cover the work).
+- The research report of its section 20 (a 25-industry scoring matrix and a twelve-part report). This section is the answer. The order of industries comes from real demand (free check searches, signups, Outbound replies, Founding 25 applications), as 30.17 says.
+- Agencies, consultants and software resellers as a sales motion. Rashid does no sales work beyond the two exceptions he chose (Outbound, and messaging partners himself). Other partners come through the Partners page.
+
+### 3. Taken
+Already true, no work (each checked in the repo): nothing public without the owner's yes; Kabsi observes and suggests, anything public or about money needs the owner, and AI never refunds or moves money; model text never authorises an action (server-side checks, approvals bound to business, action, content version, approver and expiry); idempotent jobs, retries, audit and the stop switch; the trial starts only when Google access is checked; review requests with no gating or incentives; no ranking promises and no invented testimonials; cost per business on the staff page; prompt injection and leakage tests (Sec 1, Eval 1); salons and barbers as the first wedge; one Home with the business picker (30.17).
+
+New, built by session Scope 1 (Sonnet, now):
+1. Honest limits, in the facts and in Nora. The line: "Kabsi works with your Google Business Profile. It does not connect to booking systems, Tripadvisor, Booking.com, Airbnb, Facebook reviews, a till or a CRM, and it does not message your customers." Nora answers any question about another platform with it and offers the free check. Three Nora evaluation cases (stub) cover it.
+2. Time to first work, the brief's "proof of work within 48 hours". Measured per business from "access checked" to the first task approved and sent to Google, shown on the staff Operations view and the Founding 25 checklist, target under 48 hours. A business with no such task 48 hours after access is checked raises one staff WhatsApp alert (approved template kabsi_staff_alert_v3), so Rashid starts the founder-assisted start (30.15 section 3.2). The Founding 25 day 45 kill gate (30.17) reads the same numbers.
+3. The docs/LATER.md rows due "before owners are switched on" that need code. WhatsApp messages and outbox text are deleted 12 months after they were sent, through private.retention_sources (lane R's decision on the Sec 2 row), with the privacy line and the facts. The privacy page states the Founding 25 and partner application deletion dates (90 days after a decline, 180 after a waitlist). Every signed-in list screen gets its own error state with Try again (Audit 1 row). A refused photo outside the 24-hour window waits until the owner writes; no new template (WhatsApp 2 row). The Nora evaluation fixes en02 (number reading) and n71 (coming flag) on stubs (Eval 1 row); the live Nora run belongs to the launch gate.
+
+### 4. Later, after 30 paying customers, each with its own gate
+At 30 paying customers lane R reviews these, in this order. Each is its own decision with its own kill gate; nothing is built before its gate:
+1. Review requests triggered by the booking system paying owners use most, only through an official API (30.15 section 4).
+2. Reply drafts for other review sites, owner-assisted only: Kabsi drafts, the owner copies and posts through a link, and Kabsi never says "published" or "sent" for them. No login to another site, no scraping. Gate: at least 5 paying owners ask for it in writing.
+3. A missed-enquiry pilot on the business's own WhatsApp number (30.15 section 4). Gate: at least 5 paying owners ask, a fresh read of WhatsApp's terms on AI, its own price, 3 owners for 30 days. Kill gate: fewer than 2 of the 3 keep it on.
+Not planned: a universal assistant, a connector marketplace, a hospitality pack, a booking system, a CRM, payments for owners.
+
+### 5. Outbound: one set of rules (replaces section 13 and the Outbound lines of 27.9, 30.16, 30.17 and 30.18 where they differ)
+The kabsi-outbound skill and section 13 still describe the older plan (Nora as sender, US first, a Torrington address, 20 then 30 a day). These rules win; the Outbound session brings the skill in line.
+- Sender: Rashid Abou Hamzy <rashid@getkabsi.com>, through Zoho (the Zoho Mail API, or SMTP on port 465), never Resend, never kabsi.co. Written as Rashid. Signature: "Rashid Abou Hamzy, founder of Kabsi. Drafted with Nora, Kabsi's AI assistant.", then kabsi.co and the Facebook and Instagram addresses from SOCIAL_LINKS as plain text (R-59).
+- Who: salons and barbers first, then the Founding 25 mix of trades. UK: only incorporated businesses, with the Companies House number recorded. UAE: businesses with a published business email. US later, only once Kabsi has a postal address it can publish (CAN-SPAM). Only an email the business publishes as its contact on its own website. Every target recorded with the source page, the date and the one detail used. Sources: the business's own website, Companies House, OpenStreetMap. Never Google scraping, Places, the Business Profile API, bought lists or directories. Skip anyone suppressed, any Kabsi customer, applicant or partner.
+- Email 1: plain text, under 90 words, one real detail from the business's own site, no tracked link, no image, no pixel, no check link. One line on Founding 25. It ends: "Want me to run a free check of <business>'s Google profile and send you what I find?" This settles 30.17 (no link) against 30.18 (one link to a check result): a check run before anyone asks spends DataForSEO and Places for nothing, and links in a new domain's first email are filtered more. A yes gets the personal free check link in Rashid's reply, inside places_daily_cap.
+- Follow-up: one, on day 4 or 5, shorter, same rules. No reply after it means no more mail.
+- Footer: "Why you got this: your business email is on your website. Reply 'no thanks' and I will not write again. How Kabsi handles data: kabsi.co/privacy". No postal address while Kabsi has none it may publish (R-55); the Torrington address of section 13 is retired.
+- Approval: Rashid approves, edits or skips every email on his phone at kabsi.co/staff/outbound. Nothing sends without his yes.
+- Volume: weekdays only, 9:00 to 17:00 in the recipient's time zone. Sending is off until 14 days after lane R reads back the getkabsi.com records; warm-up is Rashid using the mailbox for real mail in those 14 days, never a warm-up service (they fake opens and replies). Then 10 a day in weeks 1 and 2, 20 in weeks 3 and 4, 30 from week 5, hard stop 300 a calendar month.
+- Stops: any spam complaint, or bounces above 3 percent over the last 100 sends, stops sending at once; it resumes only with lane R. Any reply that says no in any words suppresses the address at once (kept as a hash).
+- Data: a prospect with no reply is deleted 90 days after the last email; a no keeps only the suppression hash; a yes becomes a contact under the privacy page. The privacy page gets a section "If Kabsi emailed your business". A one-page legitimate interest assessment in docs/legal/outbound-lia.md before the first send; the lawyer's read (29.8) includes it.
+- Kill gate unchanged: fewer than 3 replies that lead to a check or a trial in the first 300 emails ends Outbound.
+
+### 6. The launch gate, decided now
+Supabase point-in-time recovery costs about 100 US dollars a month for 7 days (Supabase's usage page, 30 Oct 2026), not part of the 25 US dollar Pro plan. This changes K-87, R-51 and the P0.7-07 card: Supabase Pro is needed before the first payment; point-in-time recovery is switched on when MRR passes 500 US dollars a month. Until then recovery is Pro's daily backups plus Kabsi's own daily backup to R2 (21 days), proven by a green Backup run and a green Restore drill.
+
+Blockers (each needs evidence in the gate's report):
+- Vercel Pro and Supabase Pro active; Backup and Restore drill green; the four VIDEO gates as the card says.
+- Hussein's written reply from Creem (operator arrangement accepted, portal cancellation at period end, adding to a subscription in live mode) and the written agreement between Rashid and Hussein signed. Payments stay closed until both exist. If the portal can only cancel at once, extra locations are cancelled only from Kabsi's Plan page (Remove a location) and the portal link is shown for the main plan only.
+- Creem's product bundle (Hussein, in the Creem dashboard).
+- Kapso: written confirmation of who owns the WhatsApp Business account and how the number moves if Kabsi leaves Kapso.
+- Two-step login on every account; the protect-main ruleset re-enabled; the nightly smoke alert armed; the go.kabsi.co rate limit Deployed; one sign-in with a code used after 11 minutes and refused.
+- DataForSEO topped up (50 US dollars once); the map calibration and the AI answers calibration for 3 real businesses; then dataforseo_mode and ai_visibility_mode live.
+- Nora's live run after Scope 1's fixes; the 13 remaining injection cases (budget 0.35 US dollars) before 17 Nov.
+- Product emails opened by eye in the Gmail app, Apple Mail and Outlook web, light and dark.
+- The replay harness personas and the QA business deleted (docs/progress/archive/test-data-to-delete-at-go-live.md, as a data file Rashid runs).
+- The first real customer end to end with real Google answers (Abou Hamze Auto Center, D2; Ask Rashid before contacting).
+- Then, with Rashid's yes: owners switched on (Kabsi's WhatsApp number set in its one setting, the ladder's last row), the call to action switched, Founding 25 opened.
+
+Waived at the gate, each with its reason (their docs/LATER.md rows say "waived by 30.19"):
+- Pub/Sub not yet seen from a real review: the daily reconciliation reads every review; lane R keeps watching google_events.
+- The Zoho orange icon: the mail lands in the inbox.
+- Sentry and UptimeRobot alerts by email, not WhatsApp: Rashid reads the email; revisited at 10 customers.
+- The content policy stays report-only: Sentry shows it is not clean yet; enforced 30 days after launch once a clean week is seen.
+- The billing notice v3 row: approved on 29 Oct (request 58250); closed.
+- The extra location refund: no partial refunds (decided 28 Oct); closed. Kabsi sends no receipt of its own: Creem, the merchant of record, sends it; closed.
+- The email reminder: every onboarded owner has WhatsApp connected (stage 3).
+- A lasting weekly hours change on WhatsApp: the owner uses Hours on kabsi.co until owners ask.
+- Voice notes stay off; owners are told to type.
+- The kabsi_ai_answers template: the monthly AI line is never urgent, so it waits for the owner's next message.
+- The website lines that name WhatsApp: true once owners are switched on.
+- news.kabsi.co, double opt-in and lifecycle emails: lifecycle and news mail stay off at launch.
+- PostHog dashboards: lane R builds them with the PostHog connector before the first Meta ad, not at the gate.
+- The Meta dataset, Conversions API value and WABA id: before the first Meta ad.
+
+### 7. Order
+1. Scope 1 (Sonnet), now.
+2. Outbound (Opus), after Scope 1 merges and lane R reads back the getkabsi.com records; sending starts 14 days after the read-back.
+3. The launch gate (Opus, P0.7-07), after Outbound merges and Rashid's and Hussein's steps; it ends with owners switched on, the call to action switched and Founding 25 open. If Outbound's 14 days end after the gate, Outbound starts the day they end.

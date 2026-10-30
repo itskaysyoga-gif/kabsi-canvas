@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 28 Oct 2026 by lane R (Eval 1, Billing 2, WhatsApp 2) (master plan 19, 25.1, 26.6, 29.9, 30); first written by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 30 Oct 2026 by lane R (master plan 30.19) (master plan 19, 25.1, 26.6, 29.9, 30); first written by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -58,10 +58,9 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 30 Oct 2026, lane R: master plan 30.19 (R-99). The universal assistant brief is not taken; Scope 1, Outbound and the launch gate are next; the gate's blockers and waivers are decided there.
 - 28 Oct 2026, Eval 1 (PR 265). Detail: `docs/progress/archive/2026-10-27-eval1.md`.
 - 28 Oct 2026, Billing 2. Detail: `docs/progress/archive/2026-10-28-billing2.md`.
-- 28 Oct 2026, WhatsApp 2. Detail: `docs/progress/archive/2026-10-28-whatsapp2.md`.
-- 27 Oct 2026, Sec 2. Detail: `docs/progress/archive/2026-10-27-sec2.md`.
 
 ## How a session updates this page
 
