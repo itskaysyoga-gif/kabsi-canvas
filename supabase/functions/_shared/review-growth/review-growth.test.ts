@@ -2,6 +2,7 @@
 // sensitive reviews and voice notes. All on fakes: no database, no network, no Kapso, no model.
 import { assert, assertEquals, assertMatch, assertNotMatch } from "jsr:@std/assert@1";
 import { receive } from "../whatsapp/agent.ts";
+import { flush } from "../whatsapp/outbox.ts";
 import { BIZ, msg, PHONES, USERS, World } from "../whatsapp/world.test-helpers.ts";
 import { ASK_INTRO, reviewRequestLink, reviewRequestMessage, reviewRequestProblems } from "./message.ts";
 import { growthLine, opensBreakdown } from "./stats.ts";
@@ -262,6 +263,19 @@ Deno.test("photo flow: a photo Kabsi could not use goes back to the sender with 
   assertMatch(lastTo(w, PHONES.owner).body, /could not use that photo\. This is not a photo Kabsi can use\. Please send another one\./);
   assertEquals(await reviewGrowthTick(w.deps(), growthDb([dueRow({ state: "refused" })])), { photos: 1, questions: 0 });
   assertEquals(w.repliesTo(PHONES.owner).length, 1); // the same dedupe key: nothing twice
+});
+Deno.test("photo flow: a refused photo outside the 24-hour window sends no kabsi_photo_ready and waits for the owner's next message", async () => {
+  const w = new World(); // the owner's window is closed
+  await reviewGrowthTick(w.deps(), growthDb([dueRow({ state: "refused", note: "This is not a photo Kabsi can use." })]));
+  assertEquals(w.repliesTo(PHONES.owner).length, 0); // no template (kabsi_photo_ready says a photo is ready to approve), no text
+  assertEquals(w.sent.filter((x) => x.template === "kabsi_photo_ready").length, 0);
+  const row = w.outbox.find((r) => r.kind === "photo_refused")!;
+  assertEquals([row.state, row.error, row.template], ["held", "outside_window", null]);
+  // The owner writes: the window opens and the held note goes out.
+  await say(w, PHONES.owner, "hello");
+  await flush(w.out());
+  assertMatch(w.repliesTo(PHONES.owner).map((x) => x.body).join("\n"), /could not use that photo\. This is not a photo Kabsi can use\./);
+  assertEquals(w.sent.filter((x) => x.template === "kabsi_photo_ready").length, 0);
 });
 Deno.test("photo flow: a manager's Edit only works on their own business", async () => {
   const w = new World();

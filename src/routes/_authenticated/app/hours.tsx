@@ -204,6 +204,18 @@ function HoursPage() {
 
           <div className="space-y-4">
             <Panel title="Holidays" id="holidays">
+              {rows.isError || holidays.isError ? (
+                <ErrorState
+                  className="mb-4"
+                  title="Your holidays did not load."
+                  onRetry={() => {
+                    void rows.refetch();
+                    void holidays.refetch();
+                  }}
+                >
+                  Nothing you did, and nothing changed on Google. Try again in a minute.
+                </ErrorState>
+              ) : null}
               <HolidayQuestions
                 prompts={holidays.data?.prompts ?? []}
                 today={today}

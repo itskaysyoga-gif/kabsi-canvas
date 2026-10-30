@@ -115,6 +115,15 @@ function PostsPage() {
         </ErrorState>
       ) : null}
 
+      {ready && !posts.isError && feed.isError ? (
+        <ErrorState
+          title="Where your posts are on Google did not load."
+          onRetry={() => void feed.refetch()}
+        >
+          Nothing you did, and nothing changed on Google. Try again in a minute.
+        </ErrorState>
+      ) : null}
+
       {ready && !posts.isError ? (
         <div className="space-y-4">
           <Panel title="Anything new this month?" id="monthly">
