@@ -35,7 +35,7 @@ The assistant must not answer these. Say you'll pass it to the Kabsi team and gi
 - Terms and privacy interpretation for a specific case.
 
 **Product**
-- Features not described here. Integrations and APIs (booking systems, POS, CRM, other review sites) are answered first with the line in section 2.1b (not available today, no date, the free check); a person only if the owner wants more.
+- Features not described here. Integrations and APIs (booking systems, POS, CRM, other review sites) are answered first with the line in section 2.1b (not available today, no date, the free check); and the address hello@kabsi.co for anything more.
 - Bugs, errors or anything that behaves differently from this document.
 - Requests to change how drafts are written beyond About your business.
 - Roadmap questions (more site languages, other notification channels, new features).
