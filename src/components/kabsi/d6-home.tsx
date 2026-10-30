@@ -427,7 +427,8 @@ export function PricingPreview() {
               </div>
               <p className="mt-2 text-small text-text-2">{p.line}</p>
               {/* On a phone: Pro's list only, what it adds; the full lists are on Pricing. */}
-              <ul className={cn("mt-5 space-y-2.5", p.id !== "pro" && "hidden sm:block")}>
+              {p.lead && <p className="mt-5 text-small font-bold">{p.lead}</p>}
+              <ul className={cn("space-y-2.5", p.lead ? "mt-3" : "mt-5 hidden sm:block")}>
                 {(p.id === "pro" ? [...p.work, p.help] : p.work.slice(0, 3)).map((f) => (
                   <li
                     key={f}

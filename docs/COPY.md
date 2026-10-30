@@ -97,6 +97,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 - Leaving: "Send me this report" with email or WhatsApp. Done: "Sent."
 
 ## 3. Pricing (/pricing)
+*Changed by Web 3 (Design 6 round 2, lane R 30 Oct 2026): H1 "Two plans. Free for 14 days." The plan cards and the comparison table use the lines in `src/components/kabsi/plans.ts` word for word (Essentials six lines; Pro "Everything in Essentials, and:" and five lines; the table adds "Profile Coach actions: the change made for you after your yes", Pro only, and lane R keeps the Coach's actions off the cards). The Founding 25 banner reads "Kabsi does the Google work; you tell Rashid what to make better." Prices, the founding lines and the help lines are section 34's, unchanged.*
 *Changed by section 34 (Price 1, 30 Oct 2026): the prices in this section are replaced by the list prices 29 and 59 and the founding price 19 and 39.*
 
 - H1: "Simple plans. Free for 14 days."
@@ -142,6 +143,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 - Rule for the ranking guides: explain what Google says it uses (relevance, distance, prominence) and what an owner controls. No promise that any step raises a rank.
 
 ## 7. Industry template (/for/TRADE)
+*Changed by Web 3: every finished industry page is on the light-led Design 6 shell; the H1's last phrase uses the phrase role (ink on ivory, never yellow on ivory). Unfinished pages stay noindex and unlinked.*
 
 - H1: "See where your [trade] shows up on Google." (barber shop, cafe, auto repair shop, dental clinic, salon, small hotel)
 - Lead: "Customers search '[trade] near me'. Kabsi shows you where you appear across your area, and who appears above you."

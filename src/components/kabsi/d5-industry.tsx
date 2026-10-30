@@ -87,7 +87,10 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
   return (
     <>
       <Crumbs items={crumbsFor(i)} />
-      <section className="container-kb grid items-center gap-10 pt-6 pb-16 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:pb-20">
+      <section
+        data-hero
+        className="container-kb grid items-center gap-10 pt-6 pb-16 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:pb-20"
+      >
         <div>
           <h1 className="text-display">
             Your {i.name} on Google. <span className="text-phrase">{YELLOW_PHRASE}</span>

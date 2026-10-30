@@ -52,7 +52,7 @@ function Pricing() {
       <section className="container-kb pt-28 lg:pt-36">
         <SectionHead
           as="h1"
-          title="Simple plans. Free for 14 days."
+          title="Two plans. Free for 14 days."
           lead="Each plan does the Google work for one business, and you approve every change. Prices in US dollars, plus tax where it applies."
         />
         <Segmented
@@ -94,7 +94,8 @@ function Pricing() {
                 </p>
                 <FoundingPriceLine plan={p.id} yearly={period === "yearly"} left={left} />
                 <p className="mt-4 text-body text-text-2">{p.line}</p>
-                <ul className="mt-6 space-y-3 border-t border-line pt-6">
+                {p.lead && <p className="mt-6 text-small font-bold text-text-1">{p.lead}</p>}
+                <ul className={cn("space-y-3 border-t border-line pt-6", p.lead ? "mt-3" : "mt-6")}>
                   {p.work.map((w) => (
                     <li key={w} className="flex gap-3 text-body text-text-1">
                       <Check

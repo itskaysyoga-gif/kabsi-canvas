@@ -37,8 +37,8 @@ export function FoundingBanner({ className }: { className?: string | undefined }
             Founding 25
           </p>
           <p className="mt-3 max-w-[40rem] font-display text-h3 font-semibold text-text-1">
-            Three months of Kabsi Pro, free, for 25 businesses. We do the Google work; you tell us
-            what to make better.
+            Three months of Kabsi Pro, free, for 25 businesses. Kabsi does the Google work; you tell
+            Rashid what to make better.
           </p>
           <p className="mt-3 text-small text-text-2">{FOUNDING25_UNDER}</p>
         </div>
