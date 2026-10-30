@@ -503,6 +503,23 @@ describe("the client", () => {
       method: "POST",
     });
   });
+  // Price 1 (master plan 30.20 section 4): Kabsi's own Cancel is scheduled and keeps access to the period end; a portal
+  // cancellation arrives as subscription.canceled and ends access at once.
+  it("tells Kabsi's scheduled cancel apart from a portal cancel", async () => {
+    const { calls, f } = fake();
+    await creemClient("k", "live", f).cancelAtPeriodEnd("sub_1");
+    expect(calls[0]!.body).toEqual({ mode: "scheduled", onExecute: "cancel" });
+    const scheduled = effectOf(
+      ev("subscription.scheduled_cancel", sub({ status: "scheduled_cancel" })),
+      IDS,
+    );
+    expect(scheduled.write).toMatchObject({ cancelAtPeriodEnd: true });
+    expect(scheduled.write).not.toHaveProperty("state");
+    expect(scheduled.write).not.toHaveProperty("ended");
+    const portal = effectOf(ev("subscription.canceled", sub({ status: "canceled" })), IDS);
+    expect(portal.write).toMatchObject({ state: "cancelled", ended: true });
+    expect(portal.message).toBe("ended");
+  });
   it("upgrades with the charge now", async () => {
     const { calls, f } = fake();
     const c = creemClient("k", "test", f);

@@ -149,11 +149,32 @@ reset role;
 -- Money: an active live subscription, a paid event, a refund and a payment with no payment id.
 update public.subscriptions set state = 'active', mode = 'live', plan = 'pro', period = 'year', provider_subscription_id = 'sub_scope1', trial_started_at = null
  where organization_id = (select organization_id from public.locations where id = '00000000-0000-4000-8000-0000000000c1');
-select is(private.money_figures() -> 'mrr' ->> 'status', 'no_data', 'an active live subscription with no paid event is no_data, never an estimate');
+-- Price 1: MRR is the plan's own price by its Creem product id, never a payment amount.
+select is(private.money_figures() -> 'mrr' ->> 'status', 'no_data', 'an active live subscription on a product Kabsi does not know is no_data, never an estimate');
+insert into public.app_settings (key, value) values ('creem_products_live',
+  '{"essentials_month":"p_em","essentials_year":"p_ey","pro_month":"p_pm","pro_year":"p_py","essentials_month_list":"p_eml","essentials_year_list":"p_eyl","pro_month_list":"p_pml","pro_year_list":"p_pyl","extra_month":"p_xm","extra_year":"p_xy"}')
+on conflict (key) do update set value = excluded.value;
+update public.subscriptions set product_id = 'p_py' where provider_subscription_id = 'sub_scope1';
+select is(private.money_figures() -> 'mrr' ->> 'usd_per_month', '32.50', 'a founding yearly Pro plan counts at 390 divided by 12, with no payment yet');
 insert into public.billing_events (provider, event_key, event_type, event_created_at, mode, organization_id, provider_subscription_id, payment_id, amount, currency)
 select 'creem', 'scope1-paid', 'subscription.paid', now(), 'live', organization_id, 'sub_scope1', 'pay_1', 39000, 'USD'
   from public.locations where id = '00000000-0000-4000-8000-0000000000c1';
-select is(private.money_figures() -> 'mrr' ->> 'usd_per_month', '32.50', 'a yearly plan counts at its yearly price divided by 12');
+insert into public.billing_events (provider, event_key, event_type, event_created_at, mode, organization_id, provider_subscription_id, payment_id, amount, currency)
+select 'creem', 'scope1-prorated', 'subscription.paid', now() + interval '1 minute', 'live', organization_id, 'sub_scope1', 'pay_prorated', 1234, 'USD'
+  from public.locations where id = '00000000-0000-4000-8000-0000000000c1';
+select is(private.money_figures() -> 'mrr' ->> 'usd_per_month', '32.50', 'a prorated payment never becomes the price');
+update public.subscriptions set product_id = 'p_pml' where provider_subscription_id = 'sub_scope1';
+select is(private.money_figures() -> 'mrr' ->> 'usd_per_month', '59.00', 'a list-price Pro plan counts at 59');
+insert into public.billing_extras (organization_id, provider_subscription_id, mode, state, period, units)
+select organization_id, 'sub_scope1_extra', 'live', 'active', 'year', 1 from public.locations where id = '00000000-0000-4000-8000-0000000000c1';
+select is(private.money_figures() -> 'mrr' ->> 'usd_per_month', '71.50', 'an extra location adds 150 divided by 12');
+select is((private.money_figures() -> 'mrr' ->> 'subscriptions')::int, 2, 'the plan and the extra location');
+select is((select cents from private.creem_plan_price('live', 'p_eml')), 2900, 'the list Essentials price');
+select is((select period from private.creem_plan_price('live', 'p_ey')), 'year', 'a yearly product is yearly');
+select is((select count(*)::int from private.creem_plan_price('test', 'p_eml')), 0, 'test mode ids are their own');
+delete from public.billing_extras where provider_subscription_id = 'sub_scope1_extra';
+update public.subscriptions set product_id = 'p_py' where provider_subscription_id = 'sub_scope1';
+delete from public.billing_events where event_key = 'scope1-prorated';
 select is(private.money_figures() -> 'cash_by_month' -> 0 ->> 'payments_usd', '390.00', 'cash is the payment, apart from MRR');
 insert into public.billing_events (provider, event_key, event_type, event_created_at, mode, organization_id, provider_subscription_id, payment_id, amount, currency)
 select 'creem', 'scope1-refund', 'refund.created', now(), 'live', organization_id, 'sub_scope1', null, 5000, 'USD'
