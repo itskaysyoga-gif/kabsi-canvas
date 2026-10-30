@@ -37,7 +37,10 @@ export const ADD_KABSI: AccessVideo = {
     { at: 5.1, line: `Paste ${KABSI_GROUP_ID}.` },
     { at: 9.2, line: "Choose Kabsi Clients and keep Manager." },
     { at: 11.1, line: "Tap Add. On some screens the button says Invite." },
-    { at: 12.5, line: "Done. It shows as pending until Kabsi accepts, usually within minutes." },
+    {
+      at: 12.5,
+      line: "Done. It shows as pending until a person at Kabsi accepts it, within one working day.",
+    },
   ],
 };
 

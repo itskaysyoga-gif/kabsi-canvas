@@ -92,7 +92,7 @@ describe("the copy rules on every public line (kabsi-copy, K-112, K-144, 30.15)"
     // The legal pages name these promises only to say Kabsi does not make them.
     for (const [f, s] of all.filter(([f]) => !LEGAL.test(f))) {
       const at = `${f}: ${s.slice(0, 60)}`;
-      // The honest question "Can Kabsi get me to the top of Google Maps?" is answered "No one can promise that."
+      // A question that ends in "?" may name a claim only to answer "No one can promise that."
       if (!s.endsWith("?")) expect(s, at).not.toMatch(/\btop of google\b/i);
       expect(s, at).not.toMatch(
         /\b(autopilot|automatically|guaranteed?|approved by google|google partner|google-approved|more customers|set and forget|fully automatic|we manage everything|we remove bad reviews|no work needed)\b/i,

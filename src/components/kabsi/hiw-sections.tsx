@@ -140,7 +140,7 @@ const DAYS: {
 }[] = [
   {
     day: 1,
-    title: "Your first full map arrives on WhatsApp.",
+    title: "At launch: where you come up nearby, from 49 places.",
     wa: "Your first map is ready. We searched 'bakery' on Google Maps from 49 places around your shop, like a customer standing there. You came up in the top 3 from 18 of them.",
     web: "Nearby: in the first 3 at 18 of 49 places",
     tone: "ok",

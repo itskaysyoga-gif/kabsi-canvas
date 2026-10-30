@@ -8,7 +8,7 @@ export const Route = createFileRoute("/founding")({
     pageHead({
       title: "Kabsi: Founding 25, three months of Kabsi Pro, free",
       description:
-        "For 25 businesses, by application. We do the Google work; you tell us what to make better. No card.",
+        "For 25 businesses, by application. Kabsi does the Google work; you tell Rashid what to make better. No card.",
       path: "/founding",
       image: "founding",
       crumbs: [{ name: "Founding 25", path: "/founding" }],

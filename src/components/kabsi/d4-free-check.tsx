@@ -39,7 +39,7 @@ export function FreeCheckStart() {
               </li>
             </ul>
             <p className="mt-8 max-w-xl text-small text-text-2">
-              The full map arrives on WhatsApp within minutes, if you want it. {TRIAL_LINE}
+              The full check from 49 places around you opens at launch. {TRIAL_LINE}
             </p>
           </div>
           <NearbyPlaces title="h2" />

@@ -117,7 +117,9 @@ export function PartnersPage() {
           <SectionHead
             as="h1"
             title="Earn 25% of every payment."
-            lead="Recommend Kabsi to local business owners you know. You earn while the referred subscription stays paid. Everything runs on WhatsApp."
+            lead={`Recommend Kabsi to local business owners you know. You earn while the referred subscription stays paid. Kabsi Partners opens at launch.${
+              WHATSAPP_ON ? " Everything runs on WhatsApp." : ""
+            }`}
           />
           <ApplyButtons className="mt-8" />
         </div>
@@ -245,6 +247,7 @@ export function PartnersPage() {
         <div className="container-kb section-y grid gap-10 lg:grid-cols-2 lg:gap-16">
           <div>
             <h2 className="max-w-[40rem] text-h2">Earn 25% of every payment.</h2>
+            <p className="mt-4 text-body text-text-2">Kabsi Partners opens at launch.</p>
             {WHATSAPP_ON && (
               <a
                 href={whatsappHref("partner")}

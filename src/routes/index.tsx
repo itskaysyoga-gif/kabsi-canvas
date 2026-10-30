@@ -5,7 +5,15 @@ import { SiteShell } from "@/components/kabsi/site-chrome";
 import { ScanBox } from "@/components/kabsi/scan-box";
 import { buttonClass } from "@/components/kabsi/ui";
 import { Img, PHOTOS } from "@/components/kabsi/photos";
-import { ORG_LD, PRODUCT_LD, TRIAL_LINE, WEBSITE_LD, pageHead } from "@/lib/site";
+import {
+  ORG_LD,
+  PRODUCT_LD,
+  TRIAL_LINE,
+  WEBSITE_LD,
+  WHATSAPP_LAUNCH_LINE,
+  WHATSAPP_ON,
+  pageHead,
+} from "@/lib/site";
 import { faqJsonLd } from "@/lib/faq";
 import { FAQ, HOME_FAQ } from "@/components/kabsi/faq-data";
 import { cn } from "@/lib/utils";
@@ -30,7 +38,7 @@ export const Route = createFileRoute("/")({
     const h = pageHead({
       title: "Kabsi: Your business on Google. Taken care of through WhatsApp.",
       description:
-        "Kabsi prepares your review replies, posts and updates to your business details. You approve each one on WhatsApp before it goes live.",
+        "Kabsi prepares your review replies, posts and updates to your business details. You approve each one before it goes live.",
       path: "/",
       image: "home",
       jsonLd: [ORG_LD, WEBSITE_LD, PRODUCT_LD, faqJsonLd(HOME_FAQ.map((i) => FAQ[i - 1]!))],
@@ -104,6 +112,7 @@ function Hero({ example }: { example: HomeExample }) {
           >
             Kabsi prepares your review replies, posts and updates to your business details. You
             approve each one on WhatsApp before it goes live.
+            {!WHATSAPP_ON && ` ${WHATSAPP_LAUNCH_LINE}`}
           </p>
           <div className="mt-8 animate-enter" style={{ animationDelay: "120ms" }}>
             <ScanBox id="hero-scan" />
@@ -182,7 +191,7 @@ function ClosingBand() {
           {/* The 10 seconds and the minutes, explained (brief section 14.9). */}
           <p className="mt-4 text-lead text-text-2">
             The quick check shows in about 10 seconds. The full check from 49 places around you
-            arrives on WhatsApp within minutes.
+            opens at launch.
           </p>
           <ScanBox id="closing-scan" className="mt-8" />
           <p className="mt-2 text-small text-text-2">{TRIAL_LINE}</p>

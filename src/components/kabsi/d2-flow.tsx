@@ -71,11 +71,11 @@ export function ManagerSteps() {
                 className="size-6 shrink-0 animate-[kb-spin_0.9s_linear_infinite]"
                 aria-hidden
               />
-              Invite sent. Kabsi accepts it within a few minutes.
+              Invite sent. A person at Kabsi accepts it within one working day.
             </p>
             <p className="mt-2 text-body text-text-2">
-              It shows as Pending until Kabsi accepts, usually within minutes. This page updates by
-              itself.
+              It shows as Pending until a person at Kabsi accepts it, within one working day. This
+              page updates by itself.
             </p>
             <div className="mt-6">
               <Button variant="secondary" onClick={() => setResent(true)}>

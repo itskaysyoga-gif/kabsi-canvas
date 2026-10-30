@@ -20,7 +20,7 @@ import { Banner, Button, ButtonLink, Faq, Field, SectionHead, Segmented, StatusP
 
 export const FOUNDING25_TOTAL = 25;
 export const FOUNDING25_LINE =
-  "Founding 25: three months of Kabsi Pro, free, for 25 businesses. We do the Google work; you tell us what to make better.";
+  "Founding 25: three months of Kabsi Pro, free, for 25 businesses. Kabsi does the Google work; you tell Rashid what to make better.";
 export const FOUNDING25_UNDER =
   "By application. No card. After 90 days, choose a plan or stop, nothing is charged by itself.";
 
@@ -146,7 +146,7 @@ export function FoundingPage() {
     <>
       <PageTop
         title="Founding 25: three months of Kabsi Pro, free."
-        lead="For 25 businesses. We do the Google work; you tell us what to make better."
+        lead="For 25 businesses. Kabsi does the Google work; you tell Rashid what to make better."
       >
         {places && (
           <p className="mt-6 text-body font-bold">
@@ -398,7 +398,7 @@ function Application({ onSent }: { onSent: () => void }) {
       <h2 id="founding-form-h" className="text-h2">
         Apply for a place
       </h2>
-      <p className="text-body text-text-2">Two minutes. Rashid answers on WhatsApp.</p>
+      <p className="text-body text-text-2">Two minutes. Rashid answers within 2 working days.</p>
       <Field
         label="Business name"
         value={f.business}
