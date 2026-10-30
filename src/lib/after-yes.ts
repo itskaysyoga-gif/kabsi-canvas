@@ -4,4 +4,4 @@
 export const APPROVED_LINE = "Approved. It goes to Google in 10 seconds. Reply Undo to stop it.";
 export const LATER_CHIP = "A few minutes later";
 /** The closing line for a reply Kabsi has seen on Google (task-close.ts outcomeLine, state confirmed, no link). */
-export const doneLine = (business: string) => `${business}: Your reply is on Google. Done.`;
+export const doneLine = (business: string) => `${business}: Your reply is live on Google. Done.`;

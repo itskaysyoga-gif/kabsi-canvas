@@ -4,7 +4,17 @@
 // only: onboarding_status, confirm_business, the WhatsApp connect code, the access steps and the task queue.
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Check, Clock, LifeBuoy, LoaderCircle, Lock, ShieldCheck, Smartphone } from "lucide-react";
+import {
+  Check,
+  Clock,
+  KeyRound,
+  LifeBuoy,
+  LoaderCircle,
+  Lock,
+  ShieldCheck,
+  Smartphone,
+  X,
+} from "lucide-react";
 import { AccessSteps, PENDING_LINE } from "@/components/kabsi/d5-access";
 import { CopyField, QrCode } from "@/components/kabsi/d2-parts";
 import {
@@ -597,6 +607,7 @@ export function ManagerStage({
             Manager access lets Kabsi make changes, and Kabsi publishes only what you approve. Never
             send us a password or a code.
           </p>
+          <ManagerMeaning />
 
           <div className="flex flex-col items-start gap-1 border-t border-line pt-4">
             <Button
@@ -869,5 +880,60 @@ export function ResumeLink({ code, emailed = false }: { code: string; emailed?: 
         </div>
       ) : null}
     </div>
+  );
+}
+
+/* ---------- What Manager access means (Design 6, Web 3; the six lines are lane R's, approved 30 Oct 2026) ---------- */
+
+const CAN = [
+  "Read your reviews and your details on Google",
+  "Send a reply, post or change after your yes",
+  "Tell you when something on your profile changes",
+];
+const CANNOT = [
+  "See your Google password",
+  "Remove you as the owner",
+  "Publish anything without your yes",
+];
+
+export function ManagerMeaning() {
+  return (
+    <section
+      aria-labelledby="manager-meaning-h"
+      className="rounded-panel border border-line bg-surface-1 p-5 shadow-rest"
+    >
+      <h2 id="manager-meaning-h" className="flex items-center gap-2 text-title">
+        <KeyRound className="size-5" aria-hidden />
+        What Manager access means
+      </h2>
+      <div className="mt-4 grid gap-5 sm:grid-cols-2">
+        <div>
+          <p className="text-label font-bold text-text-2">Kabsi can</p>
+          <ul className="mt-2 space-y-2">
+            {CAN.map((c) => (
+              <li key={c} className="flex gap-2.5 text-small">
+                <Check className="mt-0.5 size-4 shrink-0 text-ok" strokeWidth={2.5} aria-hidden />
+                {c}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <p className="text-label font-bold text-text-2">Kabsi cannot</p>
+          <ul className="mt-2 space-y-2">
+            {CANNOT.map((c) => (
+              <li key={c} className="flex gap-2.5 text-small">
+                <X className="mt-0.5 size-4 shrink-0 text-text-2" strokeWidth={2.5} aria-hidden />
+                {c}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <p className="mt-5 flex gap-2.5 border-t border-line pt-4 text-small text-text-2">
+        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-ok" aria-hidden />
+        Your trial starts when access works. Waiting costs you nothing.
+      </p>
+    </section>
   );
 }

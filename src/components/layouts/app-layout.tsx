@@ -551,7 +551,7 @@ export function AppLayout({
         ) : null}
       </header>
 
-      <main id="main" className="pb-28 lg:ps-64 lg:pb-12">
+      <main id="main" className="pb-[calc(7rem+env(safe-area-inset-bottom))] lg:ps-64 lg:pb-12">
         {signOutError ? (
           <p
             role="alert"

@@ -1,6 +1,7 @@
 // What Home says (K-06, K-07): the header strip, the two states and the cards. Pure functions, no network, so the
 // states are tested in tests/home-state.test.ts. Priorities, never points or a score.
-import type { Task } from "@/lib/tasks";
+import type { Task, TaskKind } from "@/lib/tasks";
+import { WHATSAPP_ON } from "@/lib/site";
 
 export const CHECK_STALE_MS = 6 * 3_600_000;
 export const MAX_CARDS = 3;
@@ -167,7 +168,7 @@ export function historyLine(
       return "You approved it";
     case "publication":
       return result === "live"
-        ? "It is on Google"
+        ? "It is live on Google"
         : result === "in_review"
           ? "Sent to Google, which is checking it"
           : result === "failed" || result === "rejected"
@@ -235,8 +236,28 @@ export function backlogBreakdown(c: BacklogCounts): string {
 // ── Design 3 (master plan 30.17 section 4): Home's lead line and the next report.
 
 /** "3 things need you. Each one is on WhatsApp too: answer wherever you are." */
-export const waitingLead = (total: number) =>
-  `${total} ${total === 1 ? "thing needs" : "things need"} you. Each one is on WhatsApp too: answer wherever you are.`;
+/** The lead under Home's title. The WhatsApp half shows only once Kabsi's WhatsApp number is set (the one switch). */
+export const waitingLead = (total: number, whatsappOn: boolean = WHATSAPP_ON) =>
+  `${total} ${total === 1 ? "thing needs" : "things need"} you.${
+    whatsappOn ? " Each one is on WhatsApp too: answer wherever you are." : ""
+  }`;
+
+/**
+ * Design 6 (Web 3, master plan 30.20 section 3): Home splits what waits for the owner into "Needs your yes" (a draft
+ * ready for approval: a reply, a post, photos, hours, a business fact) and "Needs attention" (something changed or
+ * stopped: a profile change, a lost connection, billing, a Google warning). The order inside each stays list_tasks'.
+ */
+export const NEEDS_YES: readonly TaskKind[] = [
+  "review_reply",
+  "post",
+  "photo_batch",
+  "hours_confirm",
+  "knowledge_confirm",
+];
+export function splitCards<T extends Pick<Task, "kind">>(cards: T[]): { yes: T[]; attention: T[] } {
+  const yes = cards.filter((t) => NEEDS_YES.includes(t.kind));
+  return { yes, attention: cards.filter((t) => !NEEDS_YES.includes(t.kind)) };
+}
 
 /** The next Monday after today, in the owner's words: "Monday 2 November". */
 export function nextMonday(now = new Date(), timeZone?: string | null): string {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, Check } from "lucide-react";
@@ -12,6 +12,7 @@ import { TrialBanner } from "@/components/home/trial-banner";
 import { ProfileGaps } from "@/components/app/profile-gaps";
 import {
   checkStrip,
+  splitCards,
   homeState,
   isBacklogSummary,
   nextMonday,
@@ -24,9 +25,9 @@ import { timeAgo } from "@/lib/dashboard";
 import type { Role } from "@/lib/team";
 import type { Location } from "@/lib/onboarding";
 
-// Home, "Waiting for you" (K-06, Design 3, COPY.md 19): the tasks that need the owner, at most three cards with the rest
-// behind "See all", or "All caught up.". Below: what Kabsi sent to Google lately with each task's state (30.15 section
-// 3.1), the next report, and the profile suggestions.
+// Home (K-06, Design 3, COPY.md 19; Design 6 sections, Web 3): the tasks that need the owner, in "Needs your yes" and
+// "Needs attention", at most three cards with the rest behind "See all", or "All caught up.". Below: "Done by Kabsi"
+// with each task's state (30.15 section 3.1), "Your business on Google", the next report, and the profile suggestions.
 export function ActionCenter({ loc, role }: { loc: Location; role: Role }) {
   const qc = useQueryClient();
   const facts = useQuery({
@@ -84,22 +85,43 @@ export function ActionCenter({ loc, role }: { loc: Location; role: Role }) {
           Kabsi will message you on WhatsApp when something needs you.
         </EmptyState>
       ) : (
-        <section aria-label="Waiting for you" className="space-y-4">
-          {state.cards.map((t, i) =>
-            isBacklogSummary(t) ? (
-              <BacklogCard key={t.id} task={t} locationId={loc.id} lead={i === 0} />
-            ) : (
-              <ActionCard
-                key={t.id}
-                task={t}
-                detail={details.data?.[t.id]}
-                locationId={loc.id}
-                lead={i === 0}
-                busy={later.isPending}
-                onLater={(x) => later.mutate(x)}
-              />
-            ),
-          )}
+        <div className="space-y-8">
+          {(() => {
+            const groups = splitCards(state.cards);
+            const totals = splitCards([...state.cards, ...state.rest]);
+            const card = (t: Task, lead: boolean) =>
+              isBacklogSummary(t) ? (
+                <BacklogCard key={t.id} task={t} locationId={loc.id} lead={lead} />
+              ) : (
+                <ActionCard
+                  key={t.id}
+                  task={t}
+                  detail={details.data?.[t.id]}
+                  locationId={loc.id}
+                  lead={lead}
+                  busy={later.isPending}
+                  onLater={(x) => later.mutate(x)}
+                />
+              );
+            return (
+              <>
+                {groups.yes.length > 0 ? (
+                  <HomeSection id="yes-h" title="Needs your yes" count={totals.yes.length}>
+                    {groups.yes.map((t) => card(t, t === state.cards[0]))}
+                  </HomeSection>
+                ) : null}
+                {groups.attention.length > 0 ? (
+                  <HomeSection
+                    id="attention-h"
+                    title="Needs attention"
+                    count={totals.attention.length}
+                  >
+                    {groups.attention.map((t) => card(t, t === state.cards[0]))}
+                  </HomeSection>
+                ) : null}
+              </>
+            );
+          })()}
           {state.rest.length > 0 ? (
             <div>
               <Button
@@ -127,11 +149,18 @@ export function ActionCenter({ loc, role }: { loc: Location; role: Role }) {
               ) : null}
             </div>
           ) : null}
-        </section>
+        </div>
       )}
 
-      <div className="grid gap-4 pt-5 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid gap-4 pt-5 lg:grid-cols-2">
         <DoneLately locationId={loc.id} />
+        <Panel title="Your business on Google" id="business-on-google">
+          <p className="text-body font-semibold text-text-1">{strip.connection}</p>
+          {strip.checked ? <p className="text-small text-text-2">{strip.checked}</p> : null}
+          <ButtonLink to="/app/shield" variant="tertiary" className="mt-2">
+            See your Google profile
+          </ButtonLink>
+        </Panel>
         <Panel title="Your next report" id="next-report">
           <p className="text-body text-text-2">{nextReportLine(nextMonday())}</p>
           <ButtonLink to="/app/report" variant="tertiary" className="mt-2">
@@ -165,8 +194,9 @@ function taskTitle(t: TaskItem) {
   );
 }
 
-// "Done lately" (Design 3): what the owner approved in the last two weeks and where each one is now. Read from the
-// publications, so it never claims a task that did not happen; "On Google" only once Kabsi saw it there.
+// "Done by Kabsi" (Design 6; Design 3's "Done lately"): what the owner approved in the last two weeks and where each one
+// is now. Read from the publications, so it never claims a task that did not happen; "Live on Google" only once Kabsi
+// saw it there.
 function DoneLately({ locationId }: { locationId: string }) {
   const q = useQuery({
     queryKey: ["done-lately", locationId],
@@ -174,7 +204,7 @@ function DoneLately({ locationId }: { locationId: string }) {
     refetchInterval: 60_000,
   });
   return (
-    <Panel title="Done lately" id="done-lately">
+    <Panel title="Done by Kabsi" id="done-lately">
       {q.isLoading ? (
         <div className="space-y-2" aria-hidden>
           <Skeleton className="h-4 w-3/4" />
@@ -194,5 +224,30 @@ function DoneLately({ locationId }: { locationId: string }) {
         </ul>
       )}
     </Panel>
+  );
+}
+
+/** A Home section with its count (Design 6): "Needs your yes" and "Needs attention". */
+function HomeSection({
+  id,
+  title,
+  count,
+  children,
+}: {
+  id: string;
+  title: string;
+  count: number;
+  children: ReactNode;
+}) {
+  return (
+    <section aria-labelledby={id}>
+      <h2 id={id} className="mb-4 flex items-center gap-2 font-display text-h3 font-bold">
+        {title}
+        <span className="grid size-7 place-items-center rounded-full bg-text-1 text-label font-bold text-surface-0">
+          {count}
+        </span>
+      </h2>
+      <div className="space-y-4">{children}</div>
+    </section>
   );
 }

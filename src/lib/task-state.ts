@@ -1,6 +1,6 @@
 // Every task closes, on the Kabsi website (master plan 30.15 section 3.1, V4's supabase/functions/_shared/task-close.ts).
 // The owner sees one of four states for anything Kabsi sends to Google: approved, sent to Google, on Google (with a link),
-// or did not go through with what happens next. "On Google" only after Kabsi has read it back on Google (verified).
+// or did not go through with what happens next. "Live on Google" only after Kabsi has read it back on Google (verified).
 // The same words as WhatsApp: tests/task-state.test.ts checks this file against task-close.ts for every state and kind.
 
 export type PubState =
@@ -26,7 +26,7 @@ export type TaskKind =
 export const OWNER_LABEL: Record<OwnerState, string> = {
   approved: "Approved",
   sent: "Sent to Google",
-  confirmed: "On Google",
+  confirmed: "Live on Google",
   failed: "Did not go through",
   undone: "Undone",
 };

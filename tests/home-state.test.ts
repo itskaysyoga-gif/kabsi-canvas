@@ -15,6 +15,7 @@ import {
   nextMonday,
   nextReportLine,
   waitingLead,
+  splitCards,
 } from "../src/lib/home-state";
 import type { Task } from "../src/lib/tasks";
 
@@ -129,7 +130,7 @@ describe("cards", () => {
 
   it("writes history in plain words", () => {
     expect(historyLine("approval", "ok", "review_reply")).toBe("You approved it");
-    expect(historyLine("publication", "live", "review_reply")).toBe("It is on Google");
+    expect(historyLine("publication", "live", "review_reply")).toBe("It is live on Google");
     expect(historyLine("something_new", null, null)).toBe("Something new");
   });
 });
@@ -177,12 +178,41 @@ describe("the day-one backlog card (P0.3-10)", () => {
 
 describe("Design 3 Home lines", () => {
   it("counts what waits in the lead line", () => {
-    expect(waitingLead(1)).toBe(
+    expect(waitingLead(1, true)).toBe(
       "1 thing needs you. Each one is on WhatsApp too: answer wherever you are.",
     );
-    expect(waitingLead(3)).toBe(
+    expect(waitingLead(3, true)).toBe(
       "3 things need you. Each one is on WhatsApp too: answer wherever you are.",
     );
+    // While Kabsi's WhatsApp number is not set, the lead says nothing about WhatsApp (the one switch).
+    expect(waitingLead(2, false)).toBe("2 things need you.");
+  });
+  it("splits what waits into Needs your yes and Needs attention (Design 6)", () => {
+    const t = (kind: Parameters<typeof splitCards>[0][number]["kind"]) => ({ kind });
+    const { yes, attention } = splitCards([
+      t("profile_change"),
+      t("review_reply"),
+      t("post"),
+      t("reconnect"),
+      t("photo_batch"),
+      t("hours_confirm"),
+      t("knowledge_confirm"),
+      t("billing"),
+      t("google_needs_action"),
+    ]);
+    expect(yes.map((x) => x.kind)).toEqual([
+      "review_reply",
+      "post",
+      "photo_batch",
+      "hours_confirm",
+      "knowledge_confirm",
+    ]);
+    expect(attention.map((x) => x.kind)).toEqual([
+      "profile_change",
+      "reconnect",
+      "billing",
+      "google_needs_action",
+    ]);
   });
   it("names the next Monday after today, never today", () => {
     // Tuesday 27 October 2026 and Monday 2 November 2026, at noon UTC.

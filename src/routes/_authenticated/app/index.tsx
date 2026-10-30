@@ -55,7 +55,7 @@ function HomePage() {
   if (location.isError)
     return (
       <>
-        <AccountTop title="Waiting for you" />
+        <AccountTop title="Home" />
         <ErrorState title="This page did not load." onRetry={() => void location.refetch()}>
           Nothing you did, and nothing changed on Google. Try again in a minute.
         </ErrorState>
@@ -66,7 +66,7 @@ function HomePage() {
   return (
     <>
       <AccountTop
-        title="Waiting for you"
+        title="Home"
         lead={live && total > 0 ? waitingLead(total) : undefined}
         action={role && role !== "staff" ? <NotificationBell locationId={loc.id} /> : undefined}
       />
