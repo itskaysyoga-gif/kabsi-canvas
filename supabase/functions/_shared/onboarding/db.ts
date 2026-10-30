@@ -8,7 +8,7 @@ import { checkFact, type CheckRow } from "../visibility/free-check.ts";
 import { mapDate } from "../visibility/map-image.ts";
 import type { FirstBack, OnboardingHooks } from "./hooks.ts";
 import { type Facts, SAY_ONBOARDING, stageOf } from "./stages.ts";
-import type { Candidates, DueRow, OnboardingDb, Outcome } from "./tick.ts";
+import type { Candidates, DueRow, OnboardingDb, Outcome, SlowStart } from "./tick.ts";
 
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await admin().rpc(fn, args);
@@ -90,4 +90,6 @@ export const onboardingDb = (startMaps: (locationId: string) => Promise<void>, u
   outcomes: (limit) => rpc<Outcome[]>("publication_outcomes_due", { p_limit: limit }),
   startMaps,
   unlock,
+  slowStart: (limit) => rpc<SlowStart[]>("slow_start_due", { p_limit: limit }),
+  staffPhones,
 });
