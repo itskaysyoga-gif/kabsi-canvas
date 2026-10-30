@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, UserPlus } from "lucide-react";
 import { AccountTop, Panel } from "@/components/kabsi/d3-account";
 import { HeldBack, useFirstTaskDone } from "@/components/kabsi/d3-settings-parts";
-import { Button, Field, Segmented, Switch, buttonClass } from "@/components/kabsi/ui";
+import { Button, ErrorState, Field, Segmented, Switch, buttonClass } from "@/components/kabsi/ui";
 import { myLatestLocation } from "@/lib/onboarding";
 import {
   cancelInvite,
@@ -111,9 +111,9 @@ function TeamManager({ locationId }: { locationId: string }) {
 
   if (team.isError)
     return (
-      <p className="text-body text-bad" role="alert">
-        We couldn&apos;t load your team. Refresh the page.
-      </p>
+      <ErrorState title="Your team did not load." onRetry={() => void team.refetch()}>
+        Nothing you did, and nothing changed on Google. Try again in a minute.
+      </ErrorState>
     );
   if (!team.data)
     return (

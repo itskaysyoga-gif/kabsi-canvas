@@ -25,8 +25,10 @@ export async function reviewGrowthTick(d: AgentDeps, g: GrowthDb): Promise<{ pho
     for (const to of p.to) {
       try {
       if (p.state === "refused") {
+        // Scope 1 (30.19): no template. kabsi_photo_ready says a photo is ready for approval, which a refused one is not, so
+        // outside the 24-hour window the note is held and goes out when the owner next writes (outbox.ts sendRow).
         await notify(d.out, { phone: to.phone, userId: to.user_id, locationId: p.location_id, kind: "photo_refused", body: photoRefusedBody(p.business, p.note),
-          template: ref("photo_ready", { business: p.business }), dedupe: `photo_refused:${p.photo_id}:${to.user_id}` });
+          dedupe: `photo_refused:${p.photo_id}:${to.user_id}` });
         photos++;
         continue;
       }

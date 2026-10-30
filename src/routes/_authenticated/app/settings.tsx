@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AccountTop, Panel, useAccountRole } from "@/components/kabsi/d3-account";
 import { HeldBack, useFirstTaskDone } from "@/components/kabsi/d3-settings-parts";
-import { Button, Field, Segmented, buttonClass } from "@/components/kabsi/ui";
+import { Button, ErrorState, Field, Segmented, buttonClass } from "@/components/kabsi/ui";
 import { MessageSwitches, NotificationChoices } from "@/components/app/notification-choices";
 import { WhatsappChannel } from "@/components/app/whatsapp-channel";
 import { ToneSetting } from "@/components/app/knowledge-form";
@@ -208,10 +208,21 @@ function BusinessPanel({ locationId, name }: { locationId: string; name: string 
                   .join("; ")
               : searches.isLoading
                 ? "..."
-                : "None yet"}
+                : searches.isError
+                  ? "-"
+                  : "None yet"}
           </dd>
         </div>
       </dl>
+      {searches.isError ? (
+        <ErrorState
+          className="mt-4"
+          title="Your searches did not load."
+          onRetry={() => void searches.refetch()}
+        >
+          Nothing you did, and nothing changed on Google. Try again in a minute.
+        </ErrorState>
+      ) : null}
     </Panel>
   );
 }
@@ -327,7 +338,14 @@ function AiQuestions({ locationId }: { locationId: string }) {
     onSuccess: done,
     onError: (e) => setErr(aiPromptMessage(e)),
   });
-  if (q.isError) return null;
+  if (q.isError)
+    return (
+      <Panel title="Your AI questions" id="ai-questions">
+        <ErrorState title="Your AI questions did not load." onRetry={() => void q.refetch()}>
+          Nothing you did, and nothing changed on Google. Try again in a minute.
+        </ErrorState>
+      </Panel>
+    );
   const list = q.data ?? [];
   return (
     <Panel title="Your AI questions" id="ai-questions">
