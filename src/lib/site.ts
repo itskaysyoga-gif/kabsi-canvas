@@ -165,6 +165,11 @@ export function heroSub(whatsappOn: boolean = WHATSAPP_ON): string {
     whatsappOn ? "You approve on WhatsApp." : "You approve in one tap."
   }`;
 }
+/**
+ * The line beside every "on WhatsApp" line while Kabsi's WhatsApp number is not set (Design 6 audit section 4, Price 1).
+ * Shown only while WHATSAPP_ON is false; the plain line stands alone once the number is set.
+ */
+export const WHATSAPP_LAUNCH_LINE = "WhatsApp opens at launch. Until then you approve on kabsi.co.";
 /** The full non-affiliation notice, shown in every public footer (K-112). */
 export const GOOGLE_NOTICE =
   "Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.";

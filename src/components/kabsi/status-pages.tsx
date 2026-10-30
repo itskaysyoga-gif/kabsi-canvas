@@ -40,7 +40,7 @@ export function NotFoundPage() {
         <div className="max-w-xl">
           <h1 className="text-display">This page is not here.</h1>
           <p className="mt-5 text-lead text-text-2">
-            The link may be old. Your Google profile is fine.
+            The link may be old. Nothing on your Google profile changed.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <ButtonLink to="/">Go home</ButtonLink>

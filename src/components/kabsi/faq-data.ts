@@ -13,7 +13,7 @@ export const FAQ: { q: string; a: string }[] = [
     a: "Keep going. Kabsi drafts a reply for each new review, and you can edit or skip any of them.",
   },
   {
-    q: "Can Kabsi get me to the top of Google Maps?",
+    q: "Can Kabsi promise where I come up on Google Maps?",
     a: "No one can promise that. Kabsi shows where you show up, what changed, and what you can do next.",
   },
   { q: "Can I edit replies?", a: "Yes. Tap Edit on WhatsApp or on the Kabsi website." },
@@ -25,7 +25,10 @@ export const FAQ: { q: string; a: string }[] = [
     q: "What happens after the trial?",
     a: "Choose a plan to keep going. If you do not, Kabsi stops publishing and you keep your review link and QR code.",
   },
-  { q: "Can I cancel?", a: "Yes, from WhatsApp, any time." },
+  {
+    q: "Can I cancel?",
+    a: "Yes, any time. Your plan runs to the end of the period you paid for.",
+  },
   {
     q: "Where does the ranking data come from?",
     a: "Kabsi runs its own checks of public Google Maps and AI answers. They are separate from the numbers in your Google Business Profile.",

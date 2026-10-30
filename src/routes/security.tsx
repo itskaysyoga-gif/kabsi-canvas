@@ -97,14 +97,15 @@ function SecurityPage() {
       <section>
         <h2>How your data is handled</h2>
         <p>
-          Your data is stored in the EU, in Frankfurt, and encrypted in transit. Each business's
-          data is separated at the database level, so only its members, and Kabsi staff when helping
-          you, can read it. Review text and reviewer names that come from Google are removed 30 days
-          after Google last returned them. Kabsi's own Google account is protected with Google's
-          Advanced Protection Program. We never sell Google data, use it for advertising or use it
-          to train AI models. People at Kabsi read it only with your consent, to keep Kabsi secure,
-          or when the law requires it. Read the <Link to="/privacy">privacy policy</Link> for the
-          full list of what we keep and who helps us run Kabsi.
+          Kabsi's database is in Frankfurt. The privacy policy lists every provider. Data is
+          encrypted in transit. Each business's data is separated at the database level, so only its
+          members, and Kabsi staff when helping you, can read it. Review text and reviewer names
+          that come from Google are removed 30 days after Google last returned them. Kabsi's own
+          Google account is protected with Google's Advanced Protection Program. We never sell
+          Google data, use it for advertising or use it to train AI models. People at Kabsi read it
+          only with your consent, to keep Kabsi secure, or when the law requires it. Read the{" "}
+          <Link to="/privacy">privacy policy</Link> for the full list of what we keep and who helps
+          us run Kabsi.
         </p>
       </section>
 

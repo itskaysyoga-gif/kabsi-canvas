@@ -8,7 +8,7 @@ export const hairSalon: Industry = {
   name: "hair salon",
   plural: "Hair salons",
   finished: true,
-  lead: "Kabsi drafts a reply to every review that names a stylist, keeps your services and booking link right, and gets your Eid and wedding season hours on Google before the rush. You approve each one on WhatsApp.",
+  lead: "Kabsi drafts a reply to every review that names a stylist, keeps your hours and details right, and gets your Eid and wedding season hours on Google before the rush. You approve each one on WhatsApp.",
   keyword: "hair salon",
   example: {
     business: "Rose Lane Salon",
@@ -68,7 +68,7 @@ export const hairSalon: Industry = {
     },
     {
       theme: "Waiting past the booked time",
-      text: "The most common complaint in a busy salon. Say sorry for the wait; do not invent a reason.",
+      text: "A common complaint in a busy salon. Say sorry for the wait; do not invent a reason.",
     },
     {
       theme: "The price on the day",
@@ -145,7 +145,7 @@ export const hairSalon: Industry = {
     },
     {
       q: "My booking system already asks for reviews. Do I still need Kabsi?",
-      a: "Keep it. Kabsi replies to the reviews that come in, keeps your hours, services and booking link right, and posts for you. It does not message your clients.",
+      a: "Keep it. Kabsi replies to the reviews that come in, keeps your hours and details right, and posts for you. It does not message your clients.",
     },
     {
       q: "Some reviews are about a stylist who left. What then?",

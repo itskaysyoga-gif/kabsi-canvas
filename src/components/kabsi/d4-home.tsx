@@ -208,7 +208,9 @@ const WORK = [
   },
   {
     title: "Your details kept right",
-    text: "Hours, holidays, phone and booking link checked. If anyone changes your Google profile, you hear about it on WhatsApp.",
+    text: `Hours, holidays, phone and booking link checked. If anyone changes your Google profile, you hear about it ${
+      WHATSAPP_ON ? "by email and on WhatsApp." : "by email, and on WhatsApp once it opens."
+    }`,
   },
   {
     title: "Posts and photos, done",

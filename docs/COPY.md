@@ -37,7 +37,7 @@ Decisions taken while writing (lane R, R-41):
 - AI answers: "An answer customers might see", never a score. Label: "Answers from ChatGPT and Perplexity through their API, which can differ from their apps."
 - Never: top of Google, more customers, fully automatic, set and forget, we manage everything, Google-approved, Google partner, we remove bad reviews, no work needed, AI recommends you.
 
-**Founding 25 (30.17):** Banner: "Founding 25: three months of Kabsi Pro, free, for 25 businesses. We do the Google work; you tell us what to make better." Then "[n] of 25 places left." (the real count from GET programs/founding; no number while it loads or if it fails; "All 25 places are taken." at 0) and the button "Apply for a place". Under it: "By application. No card. After 90 days, choose a plan or stop, nothing is charged by itself."
+**Founding 25 (30.17):** Banner: "Founding 25: three months of Kabsi Pro, free, for 25 businesses. Kabsi does the Google work; you tell Rashid what to make better." (Price 1, 30 Oct 2026; was "We do the Google work; you tell us what to make better.") Then "[n] of 25 places left." (the real count from GET programs/founding; no number while it loads or if it fails; "All 25 places are taken." at 0) and the button "Apply for a place". Under it: "By application. No card. After 90 days, choose a plan or stop, nothing is charged by itself."
 **Access steps (30.17, the same everywhere):** "On Google, open your profile (search your business name while signed in), then Menu, Business Profile settings, People and access, Add. Paste 5481006796, choose Manager, then Add (on some screens, Invite)." Under it: "5481006796 is Kabsi Clients, Kabsi's business group on Google. Never send us a password or a code." Button: "Copy the ID".
 
 ## 1. Home (/)
@@ -55,7 +55,7 @@ Decisions taken while writing (lane R, R-41):
 3. Your listing kept right: "Hours, holidays, photos and posts kept current. If anyone changes your listing, you know in minutes."
 4. All from WhatsApp: "Every reply, post and change comes to you ready. Reply Yes and it goes live. Nothing goes live without your yes."
 
-**How it works** (H2: "Set up in 10 minutes, no passwords")
+**How it works** (H2: "Set up in a few steps, no passwords"; Price 1, 30 Oct 2026, was "Set up in 10 minutes")
 1. "See your map": "Run the free scan. It takes about 10 seconds."
 2. "Add Kabsi as a Manager": "On your Google listing, in a few taps. You stay the owner."
 3. "Connect WhatsApp": "Your first full map arrives within 5 minutes."
@@ -205,7 +205,7 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 
 ## 15. 404 and error
 
-- 404 H1: "This page is not here." Line: "The link may be old. Your Google profile is fine." Buttons: "Go home", tertiary "Check my business free".
+- 404 H1: "This page is not here." Line: "The link may be old. Nothing on your Google profile changed." (Price 1, 30 Oct 2026) Buttons: "Go home", tertiary "Check my business free".
 - Error H1: "Something went wrong on our side." Line: "Nothing you did. Try again in a minute." Button: "Try again".
 
 ## 16. Shared FAQ (answers from the facts)
@@ -213,11 +213,11 @@ Table: Do it yourself (Free / Your evenings / Easy to forget) · Hire an agency 
 1. "Does Kabsi need my Google password?" "No. You add Kabsi as a Manager on your listing. You stay the owner and can remove Kabsi any time."
 2. "Is anything posted without me?" "No. Every reply, post and change waits for your yes on WhatsApp."
 3. "What if I already reply to reviews myself?" "Keep going. Kabsi drafts a reply for each new review, and you can edit or skip any of them."
-4. "Can Kabsi get me to the top of Google Maps?" "No one can promise that. Kabsi shows where you show up, what changed, and what you can do next."
+4. "Can Kabsi promise where I come up on Google Maps?" (Price 1, 30 Oct 2026) "No one can promise that. Kabsi shows where you show up, what changed, and what you can do next."
 5. "Can I edit replies?" "Yes. Tap Edit on WhatsApp or on the Kabsi website."
 6. "Is this safe with Google?" "Kabsi uses Google's tools for managers and only acts after your yes. Kabsi is independent and not affiliated with Google."
 7. "What happens after the trial?" "Choose a plan to keep going. If you do not, Kabsi stops publishing and you keep your review link and QR code."
-8. "Can I cancel?" "Yes, from WhatsApp, any time."
+8. "Can I cancel?" "Yes, any time. Your plan runs to the end of the period you paid for." (Price 1, 30 Oct 2026: Kabsi's own Cancel is scheduled, master plan 30.20 section 4)
 9. "Where does the ranking data come from?" "Kabsi runs its own checks of public Google Maps and AI answers. They are separate from the numbers in your Google Business Profile."
 10. "Is my data safe?" "Yes. Read how Kabsi handles it on the Privacy page."
 
@@ -669,3 +669,19 @@ Sections 24 to 31 still win. These are on /staff, which only the Kabsi team sees
 - Evidence log lead: "One row for each thing an owner asks for that Kabsi does not do, a repeated problem, time saved, a missed enquiry or sale, or support given. Write the owner's own words when there are some. Kept 24 months." Types: "Asked for something Kabsi does not do", "Repeated problem", "Time saved", "Missed enquiry or sale", "Support given". Sources: Call, WhatsApp, Email, Nora, Meeting, Other. Buttons: "Add the row", "Export CSV", "Delete". Empty: "Nothing written yet." Errors: "The evidence log did not load." and "The figures did not load." each with "Try again".
 - The slow start staff alert, through the approved template kabsi_staff_alert_v3 (its text is unchanged): "[Business] has had Google access for 48 hours and no first result yet. Kabsi is waiting on [the owner's yes on a reply]." Sent once for a business, only to the staff phones.
 - Privacy page: "Notes our team keeps about what owners ask for, repeated problems, time saved, missed enquiries and the help we gave, with your own words when you say them to us or to Nora when she passes you to a person: deleted 24 months after the note is written. Only the Kabsi team can read them." and, in section 3, "If you ask Nora for a person, or tell us what you need:" with "our team may write a short note of it (the business, the date, where it came from, and your own words) to learn what owners need. The note is not shared outside Kabsi."
+
+## 33. Price 1 part A: the live site says only what is true (30 Oct 2026, Design 6 audit section 4, lane R review)
+
+Each line replaces the one in brackets. Lines marked "switch" read the one WhatsApp setting (`WHATSAPP_ON`): the first wording while Kabsi's WhatsApp number is not set, the second once it is.
+- The launch line (switch, new constant `WHATSAPP_LAUNCH_LINE`): "WhatsApp opens at launch. Until then you approve on kabsi.co." It follows Home's lead "Kabsi prepares your review replies, posts and updates to your business details. You approve each one on WhatsApp before it goes live." while the number is not set; Home's meta description drops "on WhatsApp".
+- Home, details kept right (switch): "If anyone changes your Google profile, you hear about it by email, and on WhatsApp once it opens." / "...by email and on WhatsApp." (was "you hear about it on WhatsApp.")
+- Home closing band and the free check page: "The full check from 49 places around you opens at launch." (was "arrives on WhatsApp within minutes")
+- How it works, day 1: "At launch: where you come up nearby, from 49 places." (was "Your first full map arrives on WhatsApp.")
+- How it works H2: "Set up in a few steps, no passwords" (was "Set up in 10 minutes, no passwords")
+- Access steps, Pending: "It shows as Pending until a person at Kabsi accepts it, within one working day." /manager-steps after Invite: "Invite sent. A person at Kabsi accepts it within one working day." (was "usually within minutes")
+- FAQ 4: "Can Kabsi promise where I come up on Google Maps?"; FAQ 8: "Yes, any time. Your plan runs to the end of the period you paid for."; the terms summary: "You can cancel any time. Your plan runs to the end of the period you paid for."
+- Partners: "Kabsi Partners opens at launch." after the lead and under "Earn 25% of every payment." in the apply band; the lead's "Everything runs on WhatsApp." shows only once the number is set (switch).
+- Security: "Kabsi's database is in Frankfurt. The privacy policy lists every provider. Data is encrypted in transit." (was "Your data is stored in the EU, in Frankfurt")
+- Hair salons: "keeps your hours and details right" (was "keeps your services and booking link right"); "A common complaint in a busy salon." (was "The most common complaint")
+- Founding 25 form: "Two minutes. Rashid answers within 2 working days." (was "Rashid answers on WhatsApp."); banner and lead: "Kabsi does the Google work; you tell Rashid what to make better."
+- 404: "The link may be old. Nothing on your Google profile changed."

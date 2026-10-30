@@ -26,7 +26,7 @@ export const Route = createFileRoute("/terms")({
   component: Page,
 });
 
-const UPDATED = "24 October 2026";
+const UPDATED = "30 October 2026";
 
 function Page() {
   return (
@@ -34,7 +34,7 @@ function Page() {
       title="Terms"
       updated={UPDATED}
       summary={[
-        "You can cancel from WhatsApp, any time.",
+        "You can cancel any time. Your plan runs to the end of the period you paid for.",
         "Nothing goes live on your Google profile without your yes.",
         "Kabsi cannot promise rankings, reviews, calls or customers.",
         "Kabsi is independent and not affiliated with Google.",

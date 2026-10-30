@@ -70,7 +70,7 @@ function HowItWorks() {
         className="container-kb section-y grid gap-12 lg:grid-cols-2"
       >
         <div>
-          <SectionHead id="setup-h" title="Set up in 10 minutes, no passwords" />
+          <SectionHead id="setup-h" title="Set up in a few steps, no passwords" />
           <StepList steps={SETUP} className="mt-10" />
         </div>
         <div>
