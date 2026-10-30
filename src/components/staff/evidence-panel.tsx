@@ -77,7 +77,7 @@ export function EvidencePanel({ businesses }: { businesses: { id: string; name: 
   }
 
   function exportCsv() {
-    const blob = new Blob([evidenceCsv(rows.data ?? [], names)], {
+    const blob = new Blob(["\uFEFF", evidenceCsv(rows.data ?? [], names)], {
       type: "text/csv;charset=utf-8",
     });
     const url = URL.createObjectURL(blob);
@@ -205,7 +205,9 @@ export function EvidencePanel({ businesses }: { businesses: { id: string; name: 
               <button
                 type="button"
                 className="text-small text-text-2 underline"
-                onClick={() => void remove(r.id)}
+                onClick={() => {
+                  if (window.confirm("Delete this row? It cannot be put back.")) void remove(r.id);
+                }}
               >
                 Delete
               </button>
@@ -218,7 +220,7 @@ export function EvidencePanel({ businesses }: { businesses: { id: string; name: 
         ))}
         {(rows.data?.length ?? 0) > 50 ? (
           <p className="text-small text-text-2">
-            The newest 50 are shown. The export holds every row.
+            The newest 50 are shown. The export holds the newest 1000.
           </p>
         ) : null}
       </div>

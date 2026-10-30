@@ -204,7 +204,9 @@ export function ValidationPanel() {
                   {q.data.v.money.cash_by_month.map((m) => (
                     <tr key={m.month} className="border-t border-line">
                       <td className="py-1 pe-3">{fmtDate(m.month)}</td>
-                      <td className="py-1 pe-3">{m.status === "ok" ? usd(m.payments_usd) : NO}</td>
+                      <td className="py-1 pe-3">
+                        {m.status === "ok" ? usd(m.payments_usd ?? 0) : NO}
+                      </td>
                       <td className="py-1 pe-3">{m.status === "ok" ? usd(m.refunds_usd) : NO}</td>
                       <td className="py-1">{m.status === "ok" ? usd(m.chargebacks_usd) : NO}</td>
                     </tr>

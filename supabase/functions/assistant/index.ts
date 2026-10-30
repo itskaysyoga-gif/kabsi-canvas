@@ -501,9 +501,8 @@ Deno.serve(async (req) => {
             await db.from("chat_conversations").update({ status: "handoff", handoff_reason: reason }).eq("id", conv.id);
             // Scope 1 (30.19 section 3 item 3): a hand-off about something Kabsi does not do is one row of the staff evidence log, with
             // the visitor's own last words. Staff only, kept 24 months. A failure here never stops the hand-off.
-            if (reason === "not_supported") {
+            if (reason === "not_supported" && conv.status !== "handoff") {
               try {
-                const last = [...messages].reverse().find((m) => m.role === "user" && typeof m.content === "string");
                 const { data: cv } = await db.from("chat_conversations").select("location_id").eq("id", conv.id).maybeSingle();
                 const locationId = (cv?.location_id as string | null | undefined) ?? null;
                 let business = "";
@@ -511,10 +510,15 @@ Deno.serve(async (req) => {
                   const { data: c } = await db.from("contacts").select("business_name").eq("id", conv.contact_id).maybeSingle();
                   business = clip(c?.business_name, 200);
                 }
-                await db.from("staff_evidence").insert({
-                  location_id: locationId, business_name: locationId ? null : business || "Website visitor",
-                  source: "nora", type: "request", words: clip(typeof last?.content === "string" ? last.content : "", 600) || null,
+                // The visitor's own last request: the turns are stored fenced (fenceVisitor), so the fence is taken off, a turn that
+                // is only an email address (the reply to "where can we write to you?") is skipped, and no address is kept.
+                const plain = (t: string) => t.replace(/<\/?visitor_message>/g, "").replace(/[^\s@]+@[^\s@]+\.[^\s@]+/g, "").replace(/\s+/g, " ").trim();
+                const turns = [...messages].reverse().filter((m) => m.role === "user" && typeof m.content === "string").map((m) => plain(m.content as string));
+                const words = clip(turns.find((t) => t.length >= 25) ?? turns.find((t) => t.length > 0) ?? plain(summary), 600) || null;
+                const { error: evErr } = await db.from("staff_evidence").insert({
+                  location_id: locationId, business_name: locationId ? null : business || "Website visitor", source: "nora", type: "request", words,
                 });
+                if (evErr) await captureError("assistant", new Error(evErr.message), { step: "evidence_row" });
               } catch (e) {
                 await captureError("assistant", e, { step: "evidence_row" });
               }
