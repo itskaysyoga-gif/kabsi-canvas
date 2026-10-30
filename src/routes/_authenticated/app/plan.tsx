@@ -284,7 +284,8 @@ function PlanScreen({ locationId, sum, d }: { locationId: string; sum: PlanSumma
               ) : running ? null : (
                 <FoundingPriceLine plan={p.id} yearly={per} left={left} />
               )}
-              <ul className="mt-4 space-y-2">
+              {p.lead && <p className="mt-4 text-small font-bold">{p.lead}</p>}
+              <ul className={cn("space-y-2", p.lead ? "mt-2" : "mt-4")}>
                 {p.work.map((w) => (
                   <li key={w} className="flex gap-2 text-body">
                     <Check className="mt-1 size-4 shrink-0 text-ok" strokeWidth={3} aria-hidden />
