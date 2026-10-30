@@ -15,6 +15,8 @@ import {
   nextMonday,
   nextReportLine,
   waitingLead,
+  splitCards,
+  homeSections,
 } from "../src/lib/home-state";
 import type { Task } from "../src/lib/tasks";
 
@@ -129,7 +131,7 @@ describe("cards", () => {
 
   it("writes history in plain words", () => {
     expect(historyLine("approval", "ok", "review_reply")).toBe("You approved it");
-    expect(historyLine("publication", "live", "review_reply")).toBe("It is on Google");
+    expect(historyLine("publication", "live", "review_reply")).toBe("It is live on Google");
     expect(historyLine("something_new", null, null)).toBe("Something new");
   });
 });
@@ -177,12 +179,65 @@ describe("the day-one backlog card (P0.3-10)", () => {
 
 describe("Design 3 Home lines", () => {
   it("counts what waits in the lead line", () => {
-    expect(waitingLead(1)).toBe(
+    expect(waitingLead(1, true)).toBe(
       "1 thing needs you. Each one is on WhatsApp too: answer wherever you are.",
     );
-    expect(waitingLead(3)).toBe(
+    expect(waitingLead(3, true)).toBe(
       "3 things need you. Each one is on WhatsApp too: answer wherever you are.",
     );
+    // While Kabsi's WhatsApp number is not set, the lead says nothing about WhatsApp (the one switch).
+    expect(waitingLead(2, false)).toBe("2 things need you.");
+  });
+  it("keeps a section whose tasks all sit behind See all, with its count (review finding 1)", () => {
+    const r1 = { kind: "review_reply" as const, id: "r1" };
+    const r2 = { kind: "review_reply" as const, id: "r2" };
+    const r3 = { kind: "review_reply" as const, id: "r3" };
+    const b = { kind: "billing" as const, id: "b" };
+    const v = homeSections([r1, r2, r3], [b]);
+    expect(v.sections.map((x) => [x.title, x.total, x.shown.map((t) => t.id)])).toEqual([
+      ["Needs your yes", 3, ["r1", "r2", "r3"]],
+      ["Needs attention", 1, ["b"]],
+    ]);
+    expect(v.hidden).toEqual([]);
+  });
+  it("puts the section of the most urgent task first, and shows or hides each task once (review finding 2)", () => {
+    const c = { kind: "reconnect" as const, id: "c" };
+    const r = { kind: "review_reply" as const, id: "r" };
+    const p = { kind: "post" as const, id: "p" };
+    const h = { kind: "hours_confirm" as const, id: "h" };
+    const v = homeSections([c, r, p], [h]);
+    expect(v.sections.map((x) => x.title)).toEqual(["Needs attention", "Needs your yes"]);
+    expect(v.sections[1]!.total).toBe(3);
+    expect(v.hidden.map((t) => t.id)).toEqual(["h"]);
+    const seen = [...v.sections.flatMap((x) => x.shown), ...v.hidden].map((t) => t.id).sort();
+    expect(seen).toEqual(["c", "h", "p", "r"]);
+  });
+  it("splits what waits into Needs your yes and Needs attention (Design 6)", () => {
+    const t = (kind: Parameters<typeof splitCards>[0][number]["kind"]) => ({ kind });
+    const { yes, attention } = splitCards([
+      t("profile_change"),
+      t("review_reply"),
+      t("post"),
+      t("reconnect"),
+      t("photo_batch"),
+      t("hours_confirm"),
+      t("knowledge_confirm"),
+      t("billing"),
+      t("google_needs_action"),
+    ]);
+    expect(yes.map((x) => x.kind)).toEqual([
+      "review_reply",
+      "post",
+      "photo_batch",
+      "hours_confirm",
+      "knowledge_confirm",
+    ]);
+    expect(attention.map((x) => x.kind)).toEqual([
+      "profile_change",
+      "reconnect",
+      "billing",
+      "google_needs_action",
+    ]);
   });
   it("names the next Monday after today, never today", () => {
     // Tuesday 27 October 2026 and Monday 2 November 2026, at noon UTC.

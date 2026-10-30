@@ -41,7 +41,7 @@ describe("each status renders", () => {
   });
   it("Sent to Google until Kabsi read the reply back, then On Google", () => {
     expect(html({ state: "posted" })).toContain("Sent to Google");
-    expect(html({ state: "posted", existing_reply: "Thank you" })).toContain("On Google");
+    expect(html({ state: "posted", existing_reply: "Thank you" })).toContain("Live on Google");
   });
   it("Google is checking your reply", () =>
     expect(html({ state: "posted", reply_state: "in_review" })).toContain(
@@ -127,7 +127,7 @@ describe("approve countdown (K-70)", () => {
 
 describe("Design 3 views: Waiting, On Google, All", () => {
   it("lists the three views in order", () => {
-    expect(VIEWS.map((v) => v.label)).toEqual(["Waiting", "On Google", "All"]);
+    expect(VIEWS.map((v) => v.label)).toEqual(["Waiting", "Live on Google", "All"]);
   });
   it("keeps the old addresses working: ?f=needs is Waiting, Replied is On Google, the rest All", () => {
     expect(viewFor("needs")).toBe("waiting");

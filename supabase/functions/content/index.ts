@@ -214,7 +214,7 @@ Deno.serve(async (req) => {
       case "post_remove": {
         // P0.7-05: the owner approves removing a post Kabsi published. The same pipeline as any write: the approval,
         // the 10 second undo, one DELETE to Google, then Kabsi reads Google until the post is gone.
-        if (!post || post.state !== "posted") return fail("bad_input", "Only a post that is on Google can be removed.");
+        if (!post || post.state !== "posted") return fail("bad_input", "Only a post that is live on Google can be removed.");
         if (loc.status !== "active" || !loc.google_location_id) return fail("not_active", "This business isn't active yet.", 409);
         const r = await approveChange(req, user.id, "local_post_removal", post.id, {});
         return json({ ok: true, ...r });

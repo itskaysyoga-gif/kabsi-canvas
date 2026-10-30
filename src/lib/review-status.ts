@@ -32,11 +32,11 @@ export function reviewStatus(r: StatusInput, concierge = false): ReviewStatus {
   if (r.reply_state === "rejected") return S("rejected", "Rejected by Google", "red");
   if (r.state === "posted" && r.reply_state === "in_review")
     return S("checking", "Google is checking your reply", "amber");
-  // UX 1: "On Google" only when Kabsi has read the reply back from Google (existing_reply); a reply Google took but Kabsi
+  // UX 1: "Live on Google" (Web 3, was "On Google") only when Kabsi has read the reply back from Google (existing_reply); a reply Google took but Kabsi
   // has not seen there yet is "Sent to Google" (30.15 section 3.1).
   if (r.state === "posted")
     return r.existing_reply
-      ? S("published", "On Google", "green")
+      ? S("published", "Live on Google", "green")
       : S("on_its_way", "Sent to Google", "grey");
   if (r.state === "publishing")
     return concierge
@@ -46,7 +46,7 @@ export function reviewStatus(r: StatusInput, concierge = false): ReviewStatus {
   if (r.state === "handled_offline") return S("replied_self", "You replied yourself", "grey");
   if (r.state === "archived")
     return r.existing_reply
-      ? S("published", "On Google", "green")
+      ? S("published", "Live on Google", "green")
       : S("older", "Older, not answered", "grey");
   if (r.state === "new") return S("drafting", "Kabsi is drafting", "grey");
   // drafted or blocked: a draft that is ready, or something only the owner can do.
@@ -112,7 +112,7 @@ export function sortReviews<T extends StatusInput & { review_created_at: string 
 export type ReviewView = "waiting" | "google" | "all";
 export const VIEWS: { key: ReviewView; label: string }[] = [
   { key: "waiting", label: "Waiting" },
-  { key: "google", label: "On Google" },
+  { key: "google", label: "Live on Google" },
   { key: "all", label: "All" },
 ];
 

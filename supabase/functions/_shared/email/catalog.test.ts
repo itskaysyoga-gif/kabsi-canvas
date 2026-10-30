@@ -49,7 +49,7 @@ Deno.test("the single review email: the button is Approve reply, Edit, Skip and 
 const OWN_SUBJECTS: Record<string, string> = {
   life_welcome: "Welcome to Kabsi, one step left",
   access_granted: "Kabsi can now look after Rose Lane Salon",
-  life_first_reply_approved: "Your first reply is on Google",
+  life_first_reply_approved: "Your first reply is live on Google",
   life_trial_day11: "Your Kabsi trial ends on 15 October",
   receipt: "Receipt: Kabsi Pro, monthly",
   payment_failed: "Your payment for Kabsi did not go through",

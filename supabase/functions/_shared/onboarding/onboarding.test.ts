@@ -118,7 +118,7 @@ Deno.test("the tick sends the outcome of an approval and the first task, each cl
   const r = await onboardingTick(d, db);
   assert.deepEqual(r, { outcomes: 1, messages: 1 });
   const bodies = w.outbox.map((o) => o.body);
-  assert.ok(bodies.some((b) => /Your reply is on Google: https:\/\/search\.google\.com\/local\/reviews\?placeid=ChIJabcdefghij1234\. Done\./.test(b)));
+  assert.ok(bodies.some((b) => /Your reply is live on Google: https:\/\/search\.google\.com\/local\/reviews\?placeid=ChIJabcdefghij1234\. Done\./.test(b)));
   assert.ok(bodies.some((b) => /This review for Rose Lane Salon has no reply: 'Lovely cut/.test(b)));
   assert.ok(claimed.has(`${BIZ.harbour}:first_task_sent`));
   // Run again: nothing new is claimed, so nothing new is sent.

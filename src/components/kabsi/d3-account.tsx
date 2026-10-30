@@ -168,7 +168,7 @@ export function TaskPill({ state, className }: { state: OwnerState; className?: 
 
 type Step = "done" | "now" | "later" | "bad";
 
-/** Approved, Sent to Google, On Google; the middle step turns red when it did not go through. */
+/** Approved, Sent to Google, Live on Google; the middle step turns red when it did not go through. */
 export function TaskTrack({ state, className }: { state: OwnerState; className?: string }) {
   if (state === "undone") return null;
   const steps: { label: string; s: Step }[] = [
@@ -177,7 +177,10 @@ export function TaskTrack({ state, className }: { state: OwnerState; className?:
       label: "Sent to Google",
       s: state === "approved" ? "now" : state === "failed" ? "bad" : "done",
     },
-    { label: "On Google", s: state === "confirmed" ? "done" : state === "sent" ? "now" : "later" },
+    {
+      label: "Live on Google",
+      s: state === "confirmed" ? "done" : state === "sent" ? "now" : "later",
+    },
   ];
   return (
     <ol className={cn("grid grid-cols-3 gap-2", className)} aria-label="Where this task is">

@@ -1,6 +1,7 @@
 // What Home says (K-06, K-07): the header strip, the two states and the cards. Pure functions, no network, so the
 // states are tested in tests/home-state.test.ts. Priorities, never points or a score.
-import type { Task } from "@/lib/tasks";
+import type { Task, TaskKind } from "@/lib/tasks";
+import { WHATSAPP_ON } from "@/lib/site";
 
 export const CHECK_STALE_MS = 6 * 3_600_000;
 export const MAX_CARDS = 3;
@@ -167,7 +168,7 @@ export function historyLine(
       return "You approved it";
     case "publication":
       return result === "live"
-        ? "It is on Google"
+        ? "It is live on Google"
         : result === "in_review"
           ? "Sent to Google, which is checking it"
           : result === "failed" || result === "rejected"
@@ -235,8 +236,64 @@ export function backlogBreakdown(c: BacklogCounts): string {
 // ── Design 3 (master plan 30.17 section 4): Home's lead line and the next report.
 
 /** "3 things need you. Each one is on WhatsApp too: answer wherever you are." */
-export const waitingLead = (total: number) =>
-  `${total} ${total === 1 ? "thing needs" : "things need"} you. Each one is on WhatsApp too: answer wherever you are.`;
+/** The lead under Home's title. The WhatsApp half shows only once Kabsi's WhatsApp number is set (the one switch). */
+export const waitingLead = (total: number, whatsappOn: boolean = WHATSAPP_ON) =>
+  `${total} ${total === 1 ? "thing needs" : "things need"} you.${
+    whatsappOn ? " Each one is on WhatsApp too: answer wherever you are." : ""
+  }`;
+
+/**
+ * Design 6 (Web 3, master plan 30.20 section 3): Home splits what waits for the owner into "Needs your yes" (a draft
+ * ready for approval: a reply, a post, photos, hours, a business fact) and "Needs attention" (something changed or
+ * stopped: a profile change, a lost connection, billing, a Google warning). The order inside each stays list_tasks'.
+ */
+export const NEEDS_YES: readonly TaskKind[] = [
+  "review_reply",
+  "post",
+  "photo_batch",
+  "hours_confirm",
+  "knowledge_confirm",
+];
+export function splitCards<T extends Pick<Task, "kind">>(cards: T[]): { yes: T[]; attention: T[] } {
+  const yes = cards.filter((t) => NEEDS_YES.includes(t.kind));
+  return { yes, attention: cards.filter((t) => !NEEDS_YES.includes(t.kind)) };
+}
+
+export type HomeSectionView<T> = {
+  key: "yes" | "attention";
+  title: "Needs your yes" | "Needs attention";
+  total: number;
+  shown: T[];
+};
+
+/**
+ * The two Home sections from the cards Home shows and the rest behind "See all". Each section counts all of its tasks,
+ * shown or not; a section whose tasks all sit behind "See all" still shows its first one, so it never disappears; the
+ * section holding the most urgent task (list_tasks' first) comes first. Every task is either shown or hidden, once.
+ */
+export function homeSections<T extends Pick<Task, "kind">>(
+  cards: T[],
+  rest: T[],
+): { sections: HomeSectionView<T>[]; hidden: T[] } {
+  const all = [...cards, ...rest];
+  const groups = splitCards(all);
+  const visible = new Set<T>(cards);
+  const sections: HomeSectionView<T>[] = [];
+  for (const key of ["yes", "attention"] as const) {
+    const items = groups[key];
+    if (items.length === 0) continue;
+    const shown = items.filter((t) => visible.has(t));
+    sections.push({
+      key,
+      title: key === "yes" ? "Needs your yes" : "Needs attention",
+      total: items.length,
+      shown: shown.length > 0 ? shown : items.slice(0, 1),
+    });
+  }
+  if (all[0] && sections.length === 2 && !NEEDS_YES.includes(all[0].kind)) sections.reverse();
+  const onScreen = new Set(sections.flatMap((x) => x.shown));
+  return { sections, hidden: all.filter((t) => !onScreen.has(t)) };
+}
 
 /** The next Monday after today, in the owner's words: "Monday 2 November". */
 export function nextMonday(now = new Date(), timeZone?: string | null): string {

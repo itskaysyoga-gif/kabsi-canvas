@@ -90,7 +90,7 @@ export function firstWorkDone(o: { business: string }, appUrl: string): EmailCon
   const lead = `Kabsi saw your first reply for ${o.business} on Google. Done.`;
   const next = "From now on, Kabsi drafts a reply for each new review and asks for your yes. When you have a minute, pick your competitors and the searches Kabsi checks.";
   return {
-    subject: "Your first reply is on Google", title: "Your first reply is on Google.", preheader: "Kabsi saw your reply on Google.",
+    subject: "Your first reply is live on Google", title: "Your first reply is live on Google.", preheader: "Kabsi saw your reply live on Google.",
     bodyHtml: para(esc(lead)) + para(esc(next), { muted: true }),
     button: { label: "See your reply", url: `${appUrl}/app/reviews` },
     text: `${lead}\n\n${next}`,

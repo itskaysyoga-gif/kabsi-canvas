@@ -10,7 +10,7 @@ export type OwnerState = "approved" | "sent" | "confirmed" | "failed" | "undone"
 export const OWNER_LABEL: Record<OwnerState, string> = {
   approved: "Approved",
   sent: "Sent to Google",
-  confirmed: "On Google",
+  confirmed: "Live on Google",
   failed: "Did not go through",
   undone: "Undone",
 };
@@ -71,7 +71,7 @@ export function outcomeLine(o: { business: string; target_type: Kind; state: Pub
   const s = ownerState(o.state);
   if (s === "confirmed") {
     const your = what.startsWith("change") ? `The ${what}` : `Your ${what}`;
-    return o.link ? `${o.business}: ${your} is on Google: ${o.link}. Done.` : `${o.business}: ${your} is on Google. Done.`;
+    return o.link ? `${o.business}: ${your} is live on Google: ${o.link}. Done.` : `${o.business}: ${your} is live on Google. Done.`;
   }
   if (s === "sent") {
     return `${o.business}: your yes is saved. I have not seen the ${what} on Google yet. Nothing else is needed from you. I will tell you when it shows.`;

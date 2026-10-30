@@ -11,7 +11,7 @@
 //                        is under review, still no access (K-95, P0.4-04) (stops at access or when the situation is cleared)
 //   ownership_day3/7     the owner asked for ownership of the profile   "Has your request come through?" on day 3 and 7
 //                        (K-97, P0.4-04)                                 after "I've done it"
-//   first_reply_approved Kabsi first saw a reply on Google (Email 1)     "Your first reply is on Google"
+//   first_reply_approved Kabsi first saw a reply on Google (Email 1)     "Your first reply is live on Google"
 //   trial_day2/7/11      the trial clock (K-101), only while on trial    first win, your week with the yearly offer
 //                                                                        (G-30), three days left with both prices
 //   trial_day14          trial ended, grace begins (K-48)                what continues, what waits, one tap to continue
