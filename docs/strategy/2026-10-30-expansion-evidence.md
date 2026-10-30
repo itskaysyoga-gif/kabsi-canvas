@@ -48,11 +48,11 @@ Five classes: verified direct integration (built and working), authorised partne
 
 Owner-assisted reply drafting means the owner gives Kabsi the review (pasted or forwarded) and posts the approved reply himself. It is not automatic retrieval, not publishing, and not a permission from any of these platforms. No platform found sends a true "appointment completed" event; the closest are Cal.com's meeting ended event, checkout or payment events, and a check at the booking's end time.
 
-## 3. Data flow for a booking-triggered review message (if candidate is chosen)
+## 3. Data flow for a booking-triggered review message (if this candidate is chosen)
 
 1. The owner connects the booking tool with that tool's own consent screen (OAuth or the owner's key), from the Kabsi website. Kabsi never holds a password.
-2. Kabsi asks only for the narrowest scope that gives booking times and status. Where a tool's scope also returns customer details, Kabsi drops them on arrival and never stores them.
+2. Kabsi asks only for the narrowest scope that gives booking times and status. Where a tool's scope also returns customer details, Kabsi may receive them but discards them on arrival and never stores them.
 3. When a booking ends or is paid, Kabsi sends the owner (on WhatsApp, inside the rules of section 1) "Your 15:00 booking is done. Forward this to your customer?" with the ready review message and the business's review link.
-4. The owner forwards it from his own phone. Kabsi never messages the customer, never learns the customer's number, and counts link opens apart from new reviews (30.15 section 3.5).
+4. The owner forwards it from his own phone. Kabsi never messages the customer, never stores the customer's number, and counts link opens apart from new reviews (30.15 section 3.5).
 5. Stored: the booking id, its end time and whether the owner forwarded, with the same retention and deletion as other business data; listed on /privacy before the first connection.
 Anything that would let Kabsi message a business's customers directly is a different workflow (section 1, the receptionist row) and needs its own decision.
