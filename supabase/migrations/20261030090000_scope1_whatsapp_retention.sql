@@ -1,8 +1,8 @@
--- Scope 1 (30 Oct 2026, master plan 30.19 section 3 item 5): WhatsApp messages and the outbox text get a deletion date.
--- A new source in private.retention_sources_apply(): whatsapp_messages 12 months after they were sent or received,
--- whatsapp_outbox 12 months after sent_at (created_at for a row that never sent; a queued or sending row is never
--- deleted). The function is replaced whole, as before, with these two blocks added; the daily job, the dry run and the
--- alert-text clearing (sec2_approvals_cards) are unchanged. Additive only: create or replace.
+-- Scope 1 (30 Oct 2026, master plan 30.19 section 3 item 5): WhatsApp messages get a deletion date, 12 months after
+-- they were sent or received. A new source in private.retention_sources_apply(): whatsapp_messages by created_at. The
+-- outbox is already shorter (whatsapp_tick deletes its rows at 30 days, clear_sent_alert_texts blanks a sent text after a
+-- day), so it gets no block. The function is replaced whole, as before, with this block added; the daily job, the dry run
+-- and the alert-text clearing (sec2_approvals_cards) are unchanged. Additive only: create or replace.
 create or replace function private.retention_sources_apply() returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare v jsonb := '{}'::jsonb; n integer;
@@ -68,13 +68,11 @@ begin
   delete from public.deletion_log where deleted_at < now() - make_interval(days => d_log);
   get diagnostics n = row_count; v := v || jsonb_build_object('deletion_log', n);
 
-  -- Scope 1 (30.19): a WhatsApp message and the text queued to send are deleted 12 months after they were sent
-  -- (received, for an incoming one). Nothing younger is touched, and a message still waiting to go is never deleted.
+  -- Scope 1 (30.19): a WhatsApp message is deleted 12 months after it was sent (received, for an incoming one).
+  -- Nothing younger is touched. The outbox needs no block: private.whatsapp_tick() already deletes its rows after 30 days
+  -- and clear_sent_alert_texts() blanks a sent text after one day, both sooner than 12 months.
   delete from public.whatsapp_messages where created_at < now() - interval '12 months';
   get diagnostics n = row_count; v := v || jsonb_build_object('whatsapp_messages', n);
-  delete from public.whatsapp_outbox
-   where coalesce(sent_at, created_at) < now() - interval '12 months' and state not in ('queued', 'sending');
-  get diagnostics n = row_count; v := v || jsonb_build_object('whatsapp_outbox', n);
 
   return v;
 end $$;
