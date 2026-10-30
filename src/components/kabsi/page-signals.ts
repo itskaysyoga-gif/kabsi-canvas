@@ -1,5 +1,6 @@
 import { useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { getConsent, needsChoice, onConsentChange } from "@/lib/consent";
 
 /**
  * One yellow button per screen. Any element marked data-main-cta (the hero scan box, the closing band, a plan
@@ -53,8 +54,8 @@ export function useSearchFlag(name: string) {
 }
 
 /* A tiny shared store for the phone menu and Nora's panel, so the phone bar can step aside (Design 6). */
-type ChromeState = { menuOpen: boolean; noraOpen: boolean };
-let chrome: ChromeState = { menuOpen: false, noraOpen: false };
+type ChromeState = { menuOpen: boolean; noraOpen: boolean; phoneBarMounted: boolean };
+let chrome: ChromeState = { menuOpen: false, noraOpen: false, phoneBarMounted: false };
 const subs = new Set<() => void>();
 export function setChrome(patch: Partial<ChromeState>) {
   chrome = { ...chrome, ...patch };
@@ -104,4 +105,26 @@ export function useHeroState() {
     return () => io.disconnect();
   }, [pathname]);
   return hero;
+}
+
+/** True while the consent bar waits for the visitor's choice (it sits where the phone bar and Nora would). */
+export function useConsentOpen() {
+  const [consentOpen, setConsentOpen] = useState(false);
+  useEffect(() => {
+    setConsentOpen(needsChoice(getConsent()));
+    return onConsentChange((s) => setConsentOpen(needsChoice(s)));
+  }, []);
+  return consentOpen;
+}
+
+/**
+ * When the phone bar shows: on a page that has one (SiteShell), past the hero (Design 6, the same rule as Nora), no
+ * other main action on screen, the menu and the consent bar closed. Nora's launcher reads it to sit above the bar.
+ */
+export function usePhoneBarShown() {
+  const past = useHeroPast(360);
+  const mainInView = useMainCtaInView();
+  const { menuOpen, phoneBarMounted } = useChrome();
+  const consentOpen = useConsentOpen();
+  return phoneBarMounted && past && !mainInView && !menuOpen && !consentOpen;
 }

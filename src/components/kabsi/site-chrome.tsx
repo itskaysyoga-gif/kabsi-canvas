@@ -1,9 +1,8 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { getConsent, needsChoice, onConsentChange } from "@/lib/consent";
+import { useEffect, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { MAIN_CTA, WHATSAPP_ON, WHATSAPP_URL } from "@/lib/site";
 import { ButtonLink, WhatsAppGlyph, buttonClass } from "./ui";
-import { useChrome, useHeroPast, useMainCtaInView } from "./page-signals";
+import { setChrome, useChrome, usePhoneBarShown } from "./page-signals";
 import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
 import { DeferredAssistant } from "@/components/assistant/deferred-assistant";
@@ -52,30 +51,13 @@ export function SiteShell({
 
 /* ---------- Sticky phone bar (once the visitor is past the hero) ---------- */
 
-/** True while the consent bar waits for the visitor's choice (it sits where the phone bar and Nora would). */
-export function useConsentOpen() {
-  const [consentOpen, setConsentOpen] = useState(false);
-  useEffect(() => {
-    setConsentOpen(needsChoice(getConsent()));
-    return onConsentChange((s) => setConsentOpen(needsChoice(s)));
-  }, []);
-  return consentOpen;
-}
-
-/**
- * When the phone bar shows: past the hero (Design 6, the same rule as Nora), no other main action on screen, the
- * menu and the consent bar closed. Nora's launcher reads it to sit above the bar.
- */
-export function usePhoneBarShown() {
-  const past = useHeroPast(360);
-  const mainInView = useMainCtaInView();
-  const { menuOpen } = useChrome();
-  const consentOpen = useConsentOpen();
-  return past && !mainInView && !menuOpen && !consentOpen;
-}
-
 export function PhoneBar() {
   const { noraOpen } = useChrome();
+  // Nora sits above the bar only on pages that have one (not /get-started, for example).
+  useEffect(() => {
+    setChrome({ phoneBarMounted: true });
+    return () => setChrome({ phoneBarMounted: false });
+  }, []);
   // The phone bar steps aside while Nora's panel is open.
   const show = usePhoneBarShown() && !noraOpen;
   return (

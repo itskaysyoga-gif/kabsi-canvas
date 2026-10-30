@@ -2,7 +2,15 @@
 // knowledge base, saves contact details the visitor offers, and hands off to a person by email.
 // Phones: a full-screen sheet. Desktop: a panel above the launcher. The conversation survives a reload
 // (visitor and conversation ids in localStorage, messages fetched back from the server).
-import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { ArrowUp, Loader2, MessageCircle, RotateCcw, Sparkles, X } from "lucide-react";
 import { anonHeaders, supabaseUrl } from "@/lib/supabase-config";
@@ -13,8 +21,13 @@ import { WhatsappLink } from "@/components/shared/whatsapp-link";
 import { WHATSAPP_NUMBER, WHATSAPP_ON } from "@/lib/site";
 import { Turnstile } from "@/components/turnstile";
 import { useAuth } from "@/components/auth/auth-provider";
-import { setChrome, useChrome, useHeroState } from "@/components/kabsi/page-signals";
-import { useConsentOpen, usePhoneBarShown } from "@/components/kabsi/site-chrome";
+import {
+  setChrome,
+  useChrome,
+  useConsentOpen,
+  useHeroState,
+  usePhoneBarShown,
+} from "@/components/kabsi/page-signals";
 
 type Msg = { role: "user" | "assistant"; content: string };
 const ENDPOINT = `${supabaseUrl}/functions/v1/assistant`;
@@ -103,7 +116,8 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
   const barUp = usePhoneBarShown();
   const hero = useHeroState();
   const [phone, setPhone] = useState(false);
-  useEffect(() => {
+  // Layout effect: the phone check is known before the launcher first paints, so it never flashes over the hero.
+  useLayoutEffect(() => {
     const mq = window.matchMedia("(max-width: 639px)");
     const on = () => setPhone(mq.matches);
     on();
@@ -183,7 +197,13 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
 
   const close = useCallback(() => {
     setOpen(false);
-    window.setTimeout(() => launcherRef.current?.focus(), 0);
+    window.setTimeout(() => {
+      if (launcherRef.current) return launcherRef.current.focus();
+      // The launcher may be waiting (over the hero on a phone, or behind the menu): focus goes back to the page.
+      const main = document.getElementById("main");
+      main?.setAttribute("tabindex", "-1");
+      main?.focus({ preventScroll: true });
+    }, 0);
   }, []);
 
   async function send(text: string) {
@@ -291,10 +311,10 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
             surface === "app"
               ? "bottom-24 lg:bottom-6 lg:size-14"
               : "sm:bottom-6 sm:h-14 sm:w-auto sm:pl-4 sm:pr-5",
-            // The phone bar (below 768 px) is 76 px tall; the launcher keeps 12 px of air above it.
+            // The phone bar (below 768 px) is 64 px plus its bottom padding; the launcher keeps 12 px of air above it.
             surface === "site" &&
               barUp &&
-              "bottom-[calc(5.5rem+env(safe-area-inset-bottom))] sm:bottom-[calc(5.5rem+env(safe-area-inset-bottom))] md:bottom-6",
+              "bottom-[calc(4.75rem+max(0.75rem,env(safe-area-inset-bottom)))] sm:bottom-[calc(4.75rem+max(0.75rem,env(safe-area-inset-bottom)))] md:bottom-6",
           )}
         >
           <span className="grid size-8 place-items-center rounded-full bg-kb-yellow text-kb-black">
