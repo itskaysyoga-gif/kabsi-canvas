@@ -60,12 +60,11 @@ describe("no app code in the first load of a public page", () => {
       /export \{ anonHeaders, anonJwt, supabaseUrl \} from/,
     );
   });
-  it("keep the hero story and the sections below the first screen in their own lazy chunks", () => {
+  it("keep Home and its demonstration in their own lazy chunk (Design 6, Web 3)", () => {
     const top = read("src/routes/index.tsx");
-    expect(top).toMatch(/lazy\(\(\) =>\s*import\("@\/components\/kabsi\/whatsapp"\)/);
-    expect(top).toMatch(/lazy\(\(\) =>\s*import\("@\/components\/kabsi\/d4-home"\)/);
+    expect(top).toMatch(/lazy\(\(\) =>\s*import\("@\/components\/kabsi\/d6-home"\)/);
     expect(top).toContain("<Suspense");
-    expect(top).not.toMatch(/from "@\/components\/kabsi\/(d4-home|whatsapp)"/);
+    expect(top).not.toMatch(/from "@\/components\/kabsi\/(d6-home|d6-demo|whatsapp)"/);
   });
 });
 

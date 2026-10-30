@@ -214,6 +214,7 @@ export function NearbyPlaces({
   details = true,
   title = "h3",
   className,
+  sketchClassName,
 }: {
   check?: NearbyCheck | undefined;
   variant?: "page" | "image";
@@ -223,6 +224,8 @@ export function NearbyPlaces({
   details?: boolean | undefined;
   title?: "h2" | "h3" | "p";
   className?: string | undefined;
+  /** Hides or sizes the drawn map, for example "hidden sm:block" where a phone shows only the places (Design 6). */
+  sketchClassName?: string | undefined;
 }) {
   const img = variant === "image";
   const T = title;
@@ -253,7 +256,11 @@ export function NearbyPlaces({
 
       <NearbySketch
         check={check}
-        className={cn("overflow-hidden", img ? "mt-2 rounded-[0.25rem]" : "mt-4 rounded-inner")}
+        className={cn(
+          "overflow-hidden",
+          img ? "mt-2 rounded-[0.25rem]" : "mt-4 rounded-inner",
+          sketchClassName,
+        )}
       />
 
       <ul className={cn(img ? "mt-1" : "mt-2")}>
