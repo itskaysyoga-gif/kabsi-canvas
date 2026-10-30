@@ -13,17 +13,19 @@ import type { EmailContent } from "./template.ts";
 // PRICES_SENTENCE in src/lib/site.ts (tests/lifecycle.test.ts checks it). Card payments through Creem are not open, so
 // every email that names a price also says so.
 export const PLAN_PRICES = {
-  essentialsMonthly: 19,
-  essentialsYearly: 190,
-  proMonthly: 39,
-  proYearly: 390,
+  essentialsMonthly: 29,
+  essentialsYearly: 290,
+  proMonthly: 59,
+  proYearly: 590,
   extraLocationMonthly: 15,
   extraLocationYearly: 150,
 } as const;
+// Price 1: the founding price for the first 30 paying businesses. Keep equal to FOUNDING_SENTENCE in src/lib/site.ts.
+export const FOUNDING_SENTENCE = "The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year.";
 export const PRICES_SENTENCE = `Essentials is $${PLAN_PRICES.essentialsMonthly} a month or $${PLAN_PRICES.essentialsYearly} a year. Pro is $${PLAN_PRICES.proMonthly} a month or $${PLAN_PRICES.proYearly} a year. An extra location is $${PLAN_PRICES.extraLocationMonthly} a month or $${PLAN_PRICES.extraLocationYearly} a year. Prices are in US dollars, plus tax where it applies.`;
 // Keep equal to CARD_PAYMENTS_COMING in src/lib/plans.ts.
 export const CARD_PAYMENTS_COMING = "Card payments in US dollars are coming. Until they open there is nothing to pay.";
-const PRICE_LINE = `${PRICES_SENTENCE} ${CARD_PAYMENTS_COMING}`;
+const PRICE_LINE = `${PRICES_SENTENCE} ${FOUNDING_SENTENCE} ${CARD_PAYMENTS_COMING}`;
 
 export type LifecycleCtx = { appUrl: string; removalOn: boolean };
 

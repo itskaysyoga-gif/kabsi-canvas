@@ -162,7 +162,7 @@ You can. Kabsi saves the writing, drafts in the customer's language, catches eve
 Adding a Manager is Google's own way to give a service access, and Kabsi uses Google's official Business Profile APIs. It posts only what you approve and never filters or rewards reviewers.
 
 **Isn't Pro expensive?**
-Essentials is $19 a month or $190 a year and Pro is $39 a month or $390 a year, and you can cancel a monthly plan any time. You can start with a 14-day Pro trial with no card, so you see the drafts before you pay. Card payments are coming; until they open there is nothing to pay.
+Essentials is $29 a month or $290 a year and Pro is $59 a month or $590 a year, and you can cancel a monthly plan any time. The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year. You can start with a 14-day Pro trial with no card, so you see the drafts before you pay. Card payments are coming; until they open there is nothing to pay.
 
 **What if I pay and Google access takes time?**
 Your plan starts only when access works, so waiting costs you nothing.
@@ -307,7 +307,7 @@ No. NFC doesn't work through metal.
 ### Pricing and payment
 
 **How much is Kabsi?**
-Essentials is $19 a month or $190 a year. Pro is $39 a month or $390 a year. Extra locations are $15 a month or $150 a year. There is a 14-day Pro trial with no card, and your review link and QR code are free for everyone. Card payments are coming; until they open there is nothing to pay.
+Essentials is $29 a month or $290 a year. Pro is $59 a month or $590 a year. Extra locations are $15 a month or $150 a year. The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year. There is a 14-day Pro trial with no card, and your review link and QR code are free for everyone. Card payments are coming; until they open there is nothing to pay.
 
 **Is there a free trial?**
 Yes. 14 days, no card. It starts when Kabsi's access to your Google profile works.
@@ -319,7 +319,7 @@ Yes. Free is your review link, a QR code, a printable table card and a message t
 Yes, in US dollars.
 
 **Is there a monthly plan?**
-Yes. Essentials is $19 a month and Pro is $39 a month, and you can cancel any time. The yearly plans are $190 and $390 a year, two months free. Card payments are coming; until they open there is nothing to pay.
+Yes. Essentials is $29 a month and Pro is $59 a month, and you can cancel any time. The yearly plans are $290 and $590 a year, two months free. The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year. Card payments are coming; until they open there is nothing to pay.
 
 **How do I pay?**
 By card, in US dollars. Card payments are coming; until they open there is nothing to pay, and the trial needs no card.

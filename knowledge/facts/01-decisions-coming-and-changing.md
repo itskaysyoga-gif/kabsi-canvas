@@ -23,9 +23,11 @@ Final product decisions were made on 21 Oct 2026. Most are not built yet. This b
 
 | Plan | Monthly | Yearly |
 |---|---|---|
-| Essentials | $19 | $190 |
-| Pro | $39 | $390 |
+| Essentials | $29 | $290 |
+| Pro | $59 | $590 |
 | Extra location | $15 | $150 |
+
+From 30 Oct 2026 (Price 1, master plan 30.20 section 6) these are the list prices. The first 30 paying businesses pay the founding price and keep it while they stay subscribed: Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year. Founding 25 businesses that choose a plan after their 90 days pay the founding price too.
 
 - The trial will be **14 days of Pro, no card**, and **30 days** through a partner link. There will be no Free plan: a business with no plan keeps its review link and QR code and nothing else runs.
 - **Essentials will include:** review alerts and ready replies; approving on the website or on WhatsApp; the day-one backlog; profile watch with a one-tap "Put it back"; the review link and QR code (works with your own NFC cards) with a "Message the manager" page; holiday hours reminders; the Weekly Care Report; Business Knowledge; Nora; the Profile Coach checklist.
@@ -86,7 +88,7 @@ Final product decisions were made on 21 Oct 2026. Most are not built yet. This b
 - **Founding 25, founder-assisted start:** for each place, the team has a checklist for the first days: old reviews with no reply, details on Google that differ from the owner's, the booking link, and the menu link for food and drink.
 - **The monthly answer adds to About your business:** new services and prices in the owner's answer to the monthly question are kept in the owner's own words as details that need the owner's OK ("Save them" or "Not now" on WhatsApp). Kabsi uses none of them before the owner says yes.
 
-**[COMING] Plan contents (decided 24 Oct 2026, master plan 27.4).** The prices do not change (Essentials $19 a month or $190 a year, Pro $39 a month or $390 a year, an extra location $15 a month or $150 a year). The contents below replace the earlier "Essentials will include" and "Pro will add" lists once they are built; until then the lists on the website are what exist.
+**[COMING] Plan contents (decided 24 Oct 2026, master plan 27.4).** The prices were changed by Price 1 on 30 Oct 2026 (see the table above and section 4.1). The contents below replace the earlier "Essentials will include" and "Pro will add" lists once they are built; until then the lists on the website are what exist.
 
 | | Essentials | Pro |
 |---|---|---|

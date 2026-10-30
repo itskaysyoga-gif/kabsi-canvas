@@ -41,6 +41,8 @@ export type Billing = {
   payment_failed: boolean;
   grace_ends_at: string | null;
   data_kept_until: string | null;
+  /** Price 1: on the founding price (19 or 39), kept while the subscription stays paid. */
+  founding?: boolean;
 };
 
 export type BillingOp =

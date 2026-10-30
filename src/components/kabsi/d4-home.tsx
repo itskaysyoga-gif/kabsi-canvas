@@ -12,13 +12,14 @@ import { industryCheck } from "@/content/industries";
 import { FoundingBanner } from "./d5-founding";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { CONTACT_EMAIL, TRIAL_LINE, WHATSAPP_ON } from "@/lib/site";
+import { CONTACT_EMAIL, TRIAL_LINE, WHATSAPP_ON, foundingPlacesLine } from "@/lib/site";
 import { FOUNDER } from "./photos";
 import { NearbyPlaces } from "./nearby-places";
 import { ButtonLink, ExampleBadge, Faq, KabsiMark, SectionHead } from "./ui";
 import { LATER_CHIP } from "@/lib/after-yes";
 import { Bubble, CLOCK, DoneBubble, TimeChip } from "./whatsapp";
 import { PLANS } from "./plans";
+import { FoundingPriceLine, useFoundingLeft } from "./founding-price";
 import { FAQ, HOME_FAQ } from "./faq-data";
 import { SiteLink } from "./site-link";
 
@@ -349,13 +350,14 @@ export function KeepTheKeys() {
 /* ---------- Short pricing: plan cards that list the work first ---------- */
 
 export function ShortPricing() {
+  const left = useFoundingLeft();
   return (
     <section aria-labelledby="price-h" className="border-t border-line">
       <div className="container-kb section-y">
         <SectionHead
           id="price-h"
           title="Two plans. The work comes first."
-          lead="Every plan has unlimited review replies and runs from WhatsApp. Prices in US dollars."
+          lead="Each plan does the Google work for one business, and you approve every change. Prices in US dollars, plus tax where it applies."
         />
         <div className="mt-10 grid gap-4 md:grid-cols-2">
           {PLANS.map((p) => (
@@ -373,6 +375,7 @@ export function ShortPricing() {
                   <span className="ms-1 text-small text-text-2">a month</span>
                 </p>
               </div>
+              <FoundingPriceLine plan={p.id} left={left} />
               <ul className="mt-5 space-y-2.5">
                 {p.work.map((w) => (
                   <li key={w} className="flex gap-3 text-body text-text-1">
@@ -385,6 +388,9 @@ export function ShortPricing() {
           ))}
         </div>
         <p className="mt-6 text-small text-text-2">{TRIAL_LINE}</p>
+        {left !== null && left > 0 ? (
+          <p className="mt-2 text-small text-text-2">{foundingPlacesLine(left)}</p>
+        ) : null}
         <ButtonLink to="/pricing" variant="secondary" className="mt-6">
           Compare the plans
         </ButtonLink>
