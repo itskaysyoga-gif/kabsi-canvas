@@ -82,7 +82,7 @@ describe("the copy rules on every public line (kabsi-copy, K-112, K-144, 30.15)"
 
   it("finds the lines it checks", () => {
     expect(all.length).toBeGreaterThan(500);
-    expect(all.some(([, s]) => s.includes("Taken care of through WhatsApp."))).toBe(true);
+    expect(all.some(([, s]) => s.includes("Kabsi does the work and asks for your yes"))).toBe(true);
   });
   it("uses no em or en dash anywhere, and no exclamation mark in a line", () => {
     for (const f of PUBLIC_FILES) expect(read(f), f).not.toMatch(/[–—]/);
@@ -126,9 +126,13 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     expect(MAIN_CTA).toBe("Check my business free");
     expect(SCAN_LINE).toBe("Free check. No Google access needed. Takes about 10 seconds.");
     expect(TRIAL_LINE).toBe("Free for 14 days once Kabsi is connected. No card.");
-    const home = read("src/routes/index.tsx");
-    expect(home).toContain("Your business on Google.");
-    expect(home).toContain('<span className="text-phrase">Taken care of through WhatsApp.</span>');
+    // Design 6 (Web 3): the H1 is the brand line itself, and the supporting line is 30.20's.
+    const home = read("src/components/kabsi/d6-home.tsx");
+    expect(home).toContain("Your business on Google. Taken care of.");
+    expect(read("src/components/kabsi/d6-data.ts")).toContain(
+      "Kabsi does the work and asks for your yes on WhatsApp.",
+    );
+    expect(home).toContain("{!WHATSAPP_ON && (");
   });
   it("puts the Design 6 links in the header, with Free tools and Partners in the footer", () => {
     expect(NAV_LINKS.map((n) => n.label)).toEqual([

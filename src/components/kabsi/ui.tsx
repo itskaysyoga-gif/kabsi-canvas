@@ -319,9 +319,12 @@ export function SectionHead({
   center,
   as: H = "h2",
   id,
+  leadClassName,
 }: {
   title: ReactNode;
   lead?: ReactNode | undefined;
+  /** For example "hidden sm:block", where a phone shows the heading alone (Design 6). */
+  leadClassName?: string | undefined;
   className?: string | undefined;
   center?: boolean | undefined;
   as?: "h1" | "h2";
@@ -332,7 +335,7 @@ export function SectionHead({
       <H id={id} className={H === "h1" ? "text-display" : "text-h2"}>
         {title}
       </H>
-      {lead && <p className="mt-4 text-lead text-text-2">{lead}</p>}
+      {lead && <p className={cn("mt-4 text-lead text-text-2", leadClassName)}>{lead}</p>}
     </div>
   );
 }

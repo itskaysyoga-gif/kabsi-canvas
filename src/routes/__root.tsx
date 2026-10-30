@@ -31,7 +31,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "author", content: "Kabsi" },
-      { name: "theme-color", content: "#0c0c0b" },
+      // The light-led site (Design 6, Web 3): the browser bar takes the ivory ground (kb-sand in src/styles.css).
+      { name: "theme-color", content: "#f6f4ef" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
