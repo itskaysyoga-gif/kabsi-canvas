@@ -58,8 +58,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 30 Oct 2026, Scope 1 part 2 (PR 280 and the staff screens): activation measures, slow start alert, evidence log, validation figures. Detail: `docs/progress/archive/2026-10-30-scope1.md`.
-- 30 Oct 2026, Scope 1 part 1 (PRs 278 and 279): honest limits line and Nora cases, WhatsApp retention, application dates on /privacy. Detail: `docs/progress/archive/2026-10-30-scope1.md`.
+- 30 Oct 2026, Scope 1 part 2 (PRs 280, 281): activation measures, slow start alert, evidence log, validation figures. Detail: `docs/progress/archive/2026-10-30-scope1.md`.
+- 30 Oct 2026, Scope 1 part 1 (PRs 278, 279): honest limits line and Nora cases, WhatsApp retention, application dates on /privacy. Detail: `docs/progress/archive/2026-10-30-scope1.md`.
 - 30 Oct 2026, lane R: master plan 30.19 (R-99). Launch preserved, expansion on evidence; next Scope 1 then the launch gate, with Outbound on its own track; blockers and waivers decided there.
 
 ## How a session updates this page
