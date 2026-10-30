@@ -518,7 +518,7 @@ export const QUESTIONS: Question[] = [
     must: [MAIL, /isn't|don't|doesn't|do not|won't|can't|cannot|not in/i],
     forbid: [YES],
     reference:
-      "That isn't in what I know, so I won't guess. I'll pass it to the team: write to hello@kabsi.co and a person will answer, or book the free call at kabsi.co/setup-call.",
+      "That isn't available today. Today, Kabsi works only with your Google Business Profile. It does not connect to booking systems, Tripadvisor, Booking.com, Airbnb, Facebook reviews, a till or a CRM, and it does not message your customers. You can run the free check at kabsi.co/scan, and a person answers at hello@kabsi.co if you want to talk it through.",
   },
   // ── never delete (K-114.3): the warning comes first ─────────────────────────────────────────────────────────────
   {
