@@ -10,14 +10,14 @@ import { paymentFailed, planCancelled } from "./email/account-copy.ts";
 import { outDb } from "./whatsapp/db.ts";
 import { ref } from "./whatsapp/templates.ts";
 import {
-  CATALOGUE, checkoutRequestId, type Creem, creemClient, CreemError, type CreemEvent, effectOf, eventTime, extraKey, isStale,
-  ledgerOf, type Message, type Mode, modeOf, orgOf, type Period, type Plan, planKey, type ProductIds, type ProductKey,
+  CATALOGUE, checkoutRequestId, type Creem, creemClient, CreemError, type CreemEvent, effectOf, eventTime, extraKey, familyOfKey,
+  isStale, keyOfProduct, ledgerOf, type Message, type Mode, modeOf, orgOf, type Period, type Plan, planKey, type PriceFamily,
+  type ProductIds, type ProductKey,
   PRODUCT_KEYS, patchFor, sameMode, scrubEvent, setupPlan, type SubFacts, subFacts, subscriptionOf,
 } from "./creem.ts";
 
 export const CREEM_MODE: Mode = modeOf(Deno.env.get("CREEM_MODE"));
 export const SUCCESS_URL = `${APP_URL}/billing/done`;
-const FOUNDING_PLACES = 30;
 const GRACE_DAYS = 7;
 const DATA_DAYS = 30;
 
@@ -72,7 +72,7 @@ type SubRow = {
   id: string; organization_id: string; plan: string; state: string; period: string | null; units: number;
   current_period_end: string | null; cancel_at_period_end: boolean | null; provider_customer_id: string | null;
   provider_subscription_id: string | null; past_due_at: string | null; last_event_at: string | null; founding: boolean;
-  mode: string | null; ended_at: string | null;
+  mode: string | null; ended_at: string | null; product_id?: string | null;
 };
 
 export async function applyEvent(eventKey: string): Promise<string> {
@@ -113,7 +113,7 @@ export async function applyEvent(eventKey: string): Promise<string> {
       if (existing && (effect.message === "scheduled_cancel" || effect.message === "ended" || e.eventType === "subscription.expired" || e.eventType === "subscription.paused")) {
         await endExtrasWithPlan(org).catch((x) => captureError("billing", x, { step: "end_extras", event: e.eventType }));
       }
-      if (effect.paid && existing) await foundingCheck(existing);
+      if (effect.paid && existing) await foundingCheck(existing, facts.family);
       if (e.eventType === "checkout.completed") {
         const requestId = typeof e.object.request_id === "string" ? e.object.request_id : null;
         if (requestId) await db.from("billing_checkouts").update({ completed_at: new Date().toISOString(), checkout_id: String(e.object.id ?? "") || null }).eq("request_id", requestId);
@@ -271,21 +271,32 @@ async function writeSub(org: string, subId: string, e: CreemEvent, effect: Retur
   return data as SubRow;
 }
 
-// The first 30 paying businesses in live mode keep their price while subscribed (10.2.4).
-// A Founding 25 business (30.17) that chooses a plan keeps the founding price too, in either mode.
-async function foundingCheck(s: SubRow) {
+// The first 30 paying businesses keep their price while subscribed (10.2.4, Price 1). The place is taken at checkout, under
+// a database lock (billing_checkout_family), so a payment on a founding product marks its subscription founding. A Founding
+// 25 business (30.17) that chooses a plan keeps the founding price too, in either mode.
+async function foundingCheck(s: SubRow, family: PriceFamily | null) {
   if (s.founding) return;
-  const { data: f25 } = await admin().from("founding_applications").select("id").eq("organization_id", s.organization_id)
-    .eq("status", "accepted").limit(1);
-  if ((f25 ?? []).length) {
-    await admin().from("subscriptions").update({ founding: true }).eq("id", s.id);
-    return;
+  let founding = family === "founding";
+  if (!founding) {
+    const { data: f25 } = await admin().from("founding_applications").select("id").eq("organization_id", s.organization_id)
+      .eq("status", "accepted").limit(1);
+    founding = (f25 ?? []).length > 0;
   }
-  if (s.mode !== "live") return;
-  const { data: left } = await admin().rpc("founding_places_left");
-  if (typeof left === "number" && left > 0 && left <= FOUNDING_PLACES) {
-    await admin().from("subscriptions").update({ founding: true }).eq("id", s.id);
+  if (!founding) return;
+  await admin().from("subscriptions").update({ founding: true }).eq("id", s.id);
+  // Review of Price 1: an old founding checkout link paid after its 24-hour hold can make a 31st founding business. The price
+  // the owner was shown stands; staff hear about it.
+  if (family === "founding" && s.mode === "live") {
+    const { data: taken } = await admin().rpc("founding_places_taken");
+    if (typeof taken === "number" && taken > 30) {
+      await staffAlert(`Founding place ${taken} of 30 was taken by ${await businessName(s.organization_id)} (an older founding checkout link was paid). The price stands`, `founding_over:${s.id}`)
+        .catch((x) => captureError("billing", x, { step: "founding_over" }));
+    }
   }
+}
+/** The price family a running subscription is on: its product's family, else its founding flag. Changes stay in it. */
+export function familyOfSub(s: Pick<SubRow, "founding" | "product_id">, ids: ProductIds): PriceFamily {
+  return familyOfKey(keyOfProduct(ids, s.product_id ?? null)) ?? (s.founding ? "founding" : "list");
 }
 
 // ─── messages to the owner (WhatsApp and email) and to staff (WhatsApp, R-64) ──────────────────────────────────────
@@ -424,17 +435,38 @@ export async function startCheckout(org: string, userId: string | null, email: s
   if (!(await checkoutOpen(org))) throw new BillingError("plans_closed", "Plans open soon.");
   const running = await currentSub(org);
   if (running && running.state !== "paused") throw new BillingError("already_paid", "This business already has a plan.");
-  const key = planKey(plan, period);
-  const productId = (await productIds())[key];
-  if (!productId) throw new BillingError("not_configured", "Payments are not set up yet.");
-  const requestId = checkoutRequestId(org, key, 1, now);
+  const ids = await productIds();
+  if (!ids[planKey(plan, period, "founding")] && !ids[planKey(plan, period, "list")]) throw new BillingError("not_configured", "Payments are not set up yet.");
+  // Price 1: the request id names the plan, not the price, so a repeated tap keeps the price the owner was shown.
+  const requestId = checkoutRequestId(org, `${plan}_${period}`, 1, now);
   const db = admin();
-  const { data: prior } = await db.from("billing_checkouts").select("checkout_url, completed_at").eq("request_id", requestId).maybeSingle();
-  if (prior?.checkout_url && !prior.completed_at) return prior.checkout_url as string;
+  // Under one database lock: a checkout already started keeps its price; Founding 25 gets the founding price; otherwise the
+  // founding price while places are left (an open founding checkout holds its place for 24 hours), then the list price.
+  const { data: f, error: fe } = await db.rpc("billing_checkout_family", { p_org: org, p_request_id: requestId, p_mode: CREEM_MODE,
+    p_plan: plan, p_period: period, p_user: userId });
+  if (fe) throw fe;
+  const picked = f as { family: PriceFamily; checkout_url: string | null; completed: boolean };
+  if (picked.checkout_url && !picked.completed) return picked.checkout_url;
+  const key = planKey(plan, period, picked.family);
+  const productId = ids[key];
+  // A checkout that never reached Creem holds no founding place (review of Price 1).
+  const release = () => db.from("billing_checkouts").delete().eq("request_id", requestId).is("checkout_url", null).then(() => {}, () => {});
+  if (!productId) {
+    await release();
+    throw new BillingError("not_configured", "Payments are not set up yet.");
+  }
   const location = (await contacts(org))[0]?.location_id ?? "";
-  const c = await creem().createCheckout({ productId, units: 1, requestId, successUrl: SUCCESS_URL, email, metadata: { referenceId: org, business_id: location } });
-  await db.from("billing_checkouts").upsert({ request_id: requestId, organization_id: org, product_key: key, units: 1, mode: CREEM_MODE,
-    checkout_id: c.id, checkout_url: c.checkout_url, created_by: userId }, { onConflict: "request_id" });
+  let c: { id: string; checkout_url: string };
+  try {
+    c = await creem().createCheckout({ productId, units: 1, requestId, successUrl: SUCCESS_URL, email,
+      metadata: { referenceId: org, business_id: location, price_family: picked.family } });
+  } catch (err) {
+    await release();
+    throw err;
+  }
+  const { error: ue } = await db.from("billing_checkouts").update({ product_key: key, checkout_id: c.id, checkout_url: c.checkout_url })
+    .eq("request_id", requestId);
+  if (ue) throw ue;
   // 20.1: checkout_started, once per checkout request. An analytics problem never stops the checkout.
   await db.rpc("record_product_event", { p_event: "checkout_started", p_user: userId, p_location: location || null,
     p_props: { plan, period }, p_key: `checkout:${requestId}` }).then(() => {}, () => {});
@@ -491,7 +523,9 @@ export async function changePlan(org: string, to: Plan): Promise<{ effective: "n
   const s = await mustRun(org);
   if (s.plan === to) throw new BillingError("same_plan", `You are already on ${to === "pro" ? "Pro" : "Essentials"}.`);
   const period = (s.period === "year" ? "year" : "month") as Period;
-  const productId = (await productIds())[planKey(to, period)];
+  const ids = await productIds();
+  // Price 1: an upgrade or downgrade stays in the price family the business is on.
+  const productId = ids[planKey(to, period, familyOfSub(s, ids))];
   if (!productId) throw new BillingError("not_configured", "Payments are not set up yet.");
   if (to === "pro") {
     await creem().upgrade(s.provider_subscription_id!, productId, "proration-charge-immediately");

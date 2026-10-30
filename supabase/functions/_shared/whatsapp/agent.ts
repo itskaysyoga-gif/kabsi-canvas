@@ -31,7 +31,7 @@ import { type GrowthStats, growthLine } from "../review-growth/stats.ts";
 import { ANSWER_WINDOW_MS, readUpdate } from "../review-growth/monthly.ts";
 import { CATEGORY_MENU, categoryLabel, type PhotoCategory, pickCategory } from "../review-growth/photo.ts";
 import type { Transcript } from "../voice/transcribe.ts";
-import { CATALOGUE, extraKey, type Period, type Plan, planKey } from "../creem.ts";
+import { CATALOGUE, extraKey, type Period, type Plan, planKey, type PriceFamily } from "../creem.ts";
 import type { FirstBack, OnboardingHooks } from "../onboarding/hooks.ts";
 import { monthlyFacts, SAY_ONBOARDING, setupReply } from "../onboarding/stages.ts";
 import { inviteButtons } from "../onboarding/tick.ts";
@@ -82,7 +82,8 @@ export interface AgentDb {
 
 /** Session 10 (master plan 10.2.10): the owner's billing actions, by business. The server checks the owner again. */
 export interface BillingDeps {
-  status(locationId: string): Promise<{ plan: Plan; period: Period; state: string; periodEnd: string | null; cancelAtEnd: boolean } | null>;
+  /** Price 1: family is the price family the plan is on; a change is priced and made in it. */
+  status(locationId: string): Promise<{ plan: Plan; period: Period; state: string; periodEnd: string | null; cancelAtEnd: boolean; family: PriceFamily } | null>;
   portal(locationId: string): Promise<string>;
   cancel(locationId: string): Promise<string | null>;
   keep(locationId: string): Promise<string | null>;
@@ -429,11 +430,11 @@ async function sendMap(t: Turn): Promise<string> {
 
 const longDay = (d: string | null) =>
   d ? new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(d)) : null;
-const priceText = (plan: Plan | "extra", period: Period) => {
-  const cents = CATALOGUE[plan === "extra" ? extraKey(period) : planKey(plan, period)].price;
+const priceText = (plan: Plan | "extra", period: Period, family: PriceFamily) => {
+  const cents = CATALOGUE[plan === "extra" ? extraKey(period) : planKey(plan, period, family)].price;
   return `$${cents / 100} ${period === "year" ? "a year" : "a month"}`;
 };
-const planName = (plan: Plan, period: Period) => CATALOGUE[planKey(plan, period)].name;
+const planName = (plan: Plan, period: Period) => `Kabsi ${plan === "pro" ? "Pro" : "Essentials"}, ${period === "year" ? "yearly" : "monthly"}`;
 const CONFIRM = (op: string): Button[] => [{ id: `k:${op}`, title: "Confirm" }];
 const KEEP: Button[] = [{ id: "k:keep", title: "Keep my plan" }];
 
@@ -476,13 +477,13 @@ async function billing(t: Turn, arg: string | undefined): Promise<string> {
     }
     if (w === "upgrade") {
       if (s.plan === "pro") return answered(t, SAY.billingSamePlan("Pro"), "billing_same_plan");
-      return answered(t, SAY.billingUpgradeAsk(priceText("pro", s.period)), "billing_upgrade_ask", CONFIRM("upgrade"));
+      return answered(t, SAY.billingUpgradeAsk(priceText("pro", s.period, s.family)), "billing_upgrade_ask", CONFIRM("upgrade"));
     }
     if (w === "downgrade") {
       if (s.plan === "essentials") return answered(t, SAY.billingSamePlan("Essentials"), "billing_same_plan");
-      return answered(t, SAY.billingDowngradeAsk(priceText("essentials", s.period), end), "billing_downgrade_ask", CONFIRM("downgrade"));
+      return answered(t, SAY.billingDowngradeAsk(priceText("essentials", s.period, s.family), end), "billing_downgrade_ask", CONFIRM("downgrade"));
     }
-    if (w === "add a location") return answered(t, SAY.billingAddAsk(priceText("extra", s.period)), "billing_add_ask", CONFIRM("add_location"));
+    if (w === "add a location") return answered(t, SAY.billingAddAsk(priceText("extra", s.period, s.family)), "billing_add_ask", CONFIRM("add_location"));
     return answered(t, SAY.billingStatus(b.business, planName(s.plan, s.period), end, s.cancelAtEnd), "billing_status");
   } catch (e) {
     // A refusal the owner can act on ("There is no payment on record yet.") is shown; anything else is the retry line.
