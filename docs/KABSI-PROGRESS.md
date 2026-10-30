@@ -58,7 +58,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 30 Oct 2026, lane R: master plan 30.19 (R-99). Launch preserved, expansion by milestones; Scope 1, Outbound and the launch gate are next; the gate's blockers and waivers are decided there.
+- 30 Oct 2026, lane R: master plan 30.19 (R-99). Launch preserved, expansion on evidence; next Scope 1 then the launch gate, with Outbound on its own track; blockers and waivers decided there.
 - 28 Oct 2026, Eval 1 (PR 265). Detail: `docs/progress/archive/2026-10-27-eval1.md`.
 - 28 Oct 2026, Billing 2. Detail: `docs/progress/archive/2026-10-28-billing2.md`.
 
