@@ -42,7 +42,9 @@ export function D6Hero() {
     <section aria-labelledby="hero-title" data-hero className="relative isolate overflow-hidden">
       <div className="container-kb grid gap-10 pt-28 pb-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-10 lg:pt-32 lg:pb-24">
         <div className="max-w-[36rem]">
-          <h1 id="hero-title" className="animate-enter text-display text-balance">
+          {/* The headline paints at once, with no entrance: it is the page's largest text, and a fade from opacity 0 keeps
+              it out of the browser's LCP until the cookie bar arrives (Web 3 after-merge check, 31 Oct 2026). */}
+          <h1 id="hero-title" className="text-display text-balance">
             Your business on Google. Taken care of.
           </h1>
           <p
