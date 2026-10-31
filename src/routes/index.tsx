@@ -1,19 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { Suspense, lazy } from "react";
 import { SiteShell } from "@/components/kabsi/site-chrome";
 import { PHOTOS } from "@/components/kabsi/photos";
 import { HERO_LINE } from "@/components/kabsi/d6-data";
+import { D6Home } from "@/components/kabsi/d6-home";
 import { ORG_LD, PRODUCT_LD, WEBSITE_LD, pageHead } from "@/lib/site";
 import { faqJsonLd } from "@/lib/faq";
 import { FAQ, HOME_FAQ } from "@/components/kabsi/faq-data";
 
-// Home is Design 6, round 2 (Web 3; master plan 30.20 section 3, approved by lane R on 30 Oct 2026). The page and its
-// demonstration hydrate from their own chunk, so the shared bundle stays small (brief section 7). The server still
-// renders every section, so nothing shifts while it loads.
-const D6Home = lazy(() =>
-  import("@/components/kabsi/d6-home").then((m) => ({ default: m.D6Home })),
-);
+// Home is Design 6, round 2 (Web 3; master plan 30.20 section 3, approved by lane R on 30 Oct 2026). The route's own
+// chunk (the router splits each route) carries the page and its demonstration, so the shared bundle stays small. It is
+// not behind React.lazy: a lazy boundary that is still loading when the shell updates is thrown away and drawn again,
+// which blanked the hero for a moment on slow phones and pushed LCP past 5 s (Web 3 after-merge check, 31 Oct 2026).
 
 export const Route = createFileRoute("/")({
   // go.kabsi.co sends switched-off cards here with ?sticker=disabled
@@ -57,9 +55,7 @@ function Home() {
           This review link isn't active. Please ask the staff for help.
         </div>
       ) : null}
-      <Suspense fallback={null}>
-        <D6Home />
-      </Suspense>
+      <D6Home />
     </SiteShell>
   );
 }
