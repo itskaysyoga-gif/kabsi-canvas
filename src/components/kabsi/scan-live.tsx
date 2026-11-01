@@ -98,7 +98,7 @@ const STEPS = [
 
 export function ScanSearching({ query, progress = 1 }: { query: string; progress?: number }) {
   return (
-    <section className="container-kb pt-28 pb-20 lg:pt-36" aria-live="polite">
+    <section className="container-kb pt-12 pb-20 lg:pt-20" aria-live="polite">
       <p className="text-label font-bold text-text-3">Free check</p>
       <h1 className="mt-3 text-h2 sm:text-display">Searching for {query}</h1>
       <ol className="mt-10 max-w-lg space-y-4">
@@ -143,7 +143,7 @@ function NotFound({
   industry: string | null;
 }) {
   return (
-    <section className="container-kb pt-28 pb-20 lg:pt-36">
+    <section className="container-kb pt-12 pb-20 lg:pt-20">
       <span className="grid size-14 place-items-center rounded-full bg-surface-2 text-text-2">
         <SearchX className="size-7" aria-hidden />
       </span>
@@ -182,7 +182,7 @@ export function FreeCheckAgain({
   industry: string | null;
 }) {
   return (
-    <section className="container-kb pt-28 pb-20 lg:pt-36">
+    <section className="container-kb pt-12 pb-20 lg:pt-20">
       <p className="text-label font-bold text-text-3">Free check</p>
       <h1 className="mt-3 text-h2 sm:text-display">Find your business again</h1>
       <p className="mt-4 max-w-xl text-lead text-text-2">
@@ -214,7 +214,7 @@ function PickBusiness({
 }) {
   const one = places.length === 1;
   return (
-    <section className="container-kb pt-28 pb-20 lg:pt-36">
+    <section className="container-kb pt-12 pb-20 lg:pt-20">
       <p className="text-label font-bold text-text-3">Free check</p>
       <h1 className="mt-3 text-h2 sm:text-display">
         {one ? "Is this your business?" : "Pick your business"}
@@ -258,7 +258,7 @@ function PickBusiness({
 
 function Failed({ message }: { message: string }) {
   return (
-    <section className="container-kb pt-28 pb-20 lg:pt-36">
+    <section className="container-kb pt-12 pb-20 lg:pt-20">
       <h1 className="sr-only">Free check</h1>
       <ErrorState
         className="max-w-xl"
@@ -507,7 +507,7 @@ export function LiveResult({
 
   return (
     <>
-      <section className="container-kb pt-28 lg:pt-36">
+      <section className="container-kb pt-12 lg:pt-20">
         <p className="text-label font-bold text-text-3">
           Free check, {longDate(check?.created_at ? new Date(check.created_at) : new Date())}
         </p>
@@ -941,7 +941,7 @@ export function SavedFreeCheck({ code }: { code: string }) {
   if (c === null) return <ScanSearching query={`KAB-${code}`} progress={1} />;
   if (c === "missing" || !live)
     return (
-      <section className="container-kb pt-28 pb-20 lg:pt-36">
+      <section className="container-kb pt-12 pb-20 lg:pt-20">
         <h1 className="max-w-2xl text-display">This report has expired.</h1>
         <ScanBox className="mt-8 max-w-xl" />
       </section>
@@ -949,7 +949,7 @@ export function SavedFreeCheck({ code }: { code: string }) {
   const nearby = toNearbyCheck(live);
   return (
     <>
-      <section className="container-kb pt-28 lg:pt-36">
+      <section className="container-kb pt-12 lg:pt-20">
         <p className="text-label font-bold text-text-3">Free check</p>
         <h1 className="mt-3 text-h2 sm:text-display">
           {live.business}, for '{live.term}'

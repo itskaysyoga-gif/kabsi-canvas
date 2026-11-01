@@ -45,7 +45,7 @@ const NEVER = [
 function HowItWorks() {
   return (
     <SiteShell>
-      <section className="container-kb grid items-center gap-10 pt-28 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:pt-36">
+      <section className="container-kb grid items-center gap-10 pt-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:pt-20">
         <SectionHead
           as="h1"
           title="Kabsi does the work. You reply Yes."

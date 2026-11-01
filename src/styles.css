@@ -360,16 +360,25 @@ body:not(:has(.page-light)):has(.theme-dark),
   }
   html {
     min-width: 320px;
+    /* clip, not hidden, so the page is not a scroll container and the sticky header sticks (Web 4); hidden first for
+       browsers without clip. */
     overflow-x: hidden;
+    overflow-x: clip;
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     scroll-padding-top: 5rem;
   }
+  /* The Founding 25 line, once the visitor hid it: set before the first paint by the line's own script, so the page
+     never shifts (Web 4). */
+  html.founding-line-hidden [data-founding-line] {
+    display: none;
+  }
   body {
     min-width: 320px;
     overflow-x: hidden;
+    overflow-x: clip;
     background-color: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);

@@ -130,14 +130,22 @@ export { SOCIAL_LINKS };
  */
 export const WHATSAPP_URL = WHATSAPP_ON ? whatsappHref("general") : `mailto:${CONTACT_EMAIL}`;
 
-/** Header links (Design 6, Web 3): Free tools and Partners moved to the footer. Log in and the one action follow. */
+/**
+ * Header links (Design 8, Web 4): How it works and Pricing, then the Businesses menu (BUSINESS_MENU), Log in and the
+ * one action. Founding 25 has its slim line above the header; About, Partners and the free tools are in the footer.
+ */
 export const NAV_LINKS = [
   { to: "/how-it-works", label: "How it works" },
   { to: "/pricing", label: "Pricing" },
-  { to: "/for", label: "Businesses" },
-  { to: "/founding", label: "Founding 25" },
-  { to: "/about", label: "About" },
 ] as const;
+/** The Businesses menu (header and phone menu): the four finished trades, then every kind of business. */
+export const BUSINESS_MENU = [
+  { to: "/for/hair-salon", label: "Hair salons" },
+  { to: "/for/barbershop", label: "Barbershops" },
+  { to: "/for/nail-salon", label: "Nail salons" },
+  { to: "/for/restaurant", label: "Restaurants" },
+] as const;
+export const ALL_BUSINESSES = { to: "/for", label: "Every kind of business" } as const;
 export const BRAND_EXPLAINER =
   "Kabsi looks after your business on Google: a reply ready for every new review, your hours and details kept right, and fresh posts. You just approve.";
 /** The calls to action, worded once (R-02). */

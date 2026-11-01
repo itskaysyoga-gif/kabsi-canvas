@@ -44,7 +44,7 @@ export const YELLOW_PHRASE = "Taken care of.";
 
 function Crumbs({ items }: { items: { name: string; to: string }[] }) {
   return (
-    <nav aria-label="Breadcrumb" className="container-kb pt-24 lg:pt-28">
+    <nav aria-label="Breadcrumb" className="container-kb pt-8 lg:pt-12">
       <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-small text-text-2">
         {items.map((c, n) => (
           <li key={c.to} className="flex items-center gap-2">

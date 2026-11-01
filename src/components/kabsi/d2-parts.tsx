@@ -39,7 +39,7 @@ export function PageTop({
   className?: string | undefined;
 }) {
   return (
-    <section className={cn("container-kb pt-28 lg:pt-36", className)}>
+    <section className={cn("container-kb pt-12 lg:pt-20", className)}>
       <SectionHead as="h1" title={title} lead={lead} />
       {children}
     </section>

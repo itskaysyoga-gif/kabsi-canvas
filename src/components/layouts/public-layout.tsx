@@ -10,8 +10,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   useSectionRise(pathname);
   return (
     <SiteShell>
-      {/* The header sits on the dark ground; the light content starts under it. */}
-      <div aria-hidden className="h-16" />
       <div className="theme-light bg-surface-0 text-text-1">{children}</div>
     </SiteShell>
   );

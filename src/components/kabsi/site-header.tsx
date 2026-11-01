@@ -1,18 +1,35 @@
 import { useRouterState } from "@tanstack/react-router";
-import { ChevronRight, Menu, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronRight, Menu, MessageCircle, X } from "lucide-react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { cn } from "@/lib/utils";
-import { NAV_LINKS } from "@/lib/site";
+import { ALL_BUSINESSES, BUSINESS_MENU, MAIN_CTA, NAV_LINKS } from "@/lib/site";
 import { ButtonLink, Logo, TrialLine, WhatsAppLink, buttonClass } from "./ui";
 import { SiteLink } from "./site-link";
 import { setChrome, useMainCtaInView, useScrolledPast, useSearchFlag } from "./page-signals";
 
+/**
+ * The public header (Design 8, Web 4): sticky, so the slim Founding 25 line can sit above it in the flow. How it works,
+ * Pricing, the Businesses menu, Log in and "Check my business free". The phone menu opens Businesses in place.
+ */
+const navLinkCls =
+  "press inline-flex min-h-11 items-center gap-1 rounded-full px-3.5 text-small font-semibold text-text-2 hover:bg-surface-2 hover:text-text-1";
+
+/** Focusable parts of a panel that are actually shown (a closed sub-list is skipped). */
+function focusables(root: HTMLElement | null) {
+  if (!root) return [];
+  return Array.from(root.querySelectorAll<HTMLElement>("a,button")).filter(
+    (el) => el.offsetParent !== null,
+  );
+}
+
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const [menuTop, setMenuTop] = useState(64);
   const scrolled = useScrolledPast(8);
   const mainInView = useMainCtaInView();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const menuFlag = useSearchFlag("menu");
+  const header = useRef<HTMLElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
 
@@ -26,18 +43,21 @@ export function SiteHeader() {
   useEffect(() => {
     setChrome({ menuOpen: open });
     if (!open) return;
+    // The menu starts under the header, wherever the header sits (under the Founding 25 line at the top of the page).
+    const place = () =>
+      setMenuTop(Math.max(0, Math.round(header.current?.getBoundingClientRect().bottom ?? 64)));
+    place();
+    window.addEventListener("resize", place);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const first = panel.current?.querySelector<HTMLElement>("a,button");
-    first?.focus({ preventScroll: true });
+    focusables(panel.current)[0]?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setOpen(false);
         toggle.current?.focus();
       }
-      if (e.key === "Tab" && panel.current) {
-        const f = Array.from(panel.current.querySelectorAll<HTMLElement>("a,button"));
-        const all = [toggle.current!, ...f];
+      if (e.key === "Tab") {
+        const all = [toggle.current!, ...focusables(panel.current)];
         const i = all.indexOf(document.activeElement as HTMLElement);
         if (e.shiftKey && i <= 0) {
           e.preventDefault();
@@ -52,6 +72,7 @@ export function SiteHeader() {
     return () => {
       document.body.style.overflow = prev;
       document.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", place);
     };
   }, [open]);
 
@@ -60,11 +81,11 @@ export function SiteHeader() {
   const ctaVariant = mainInView ? "secondary" : "primary";
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
+    <header ref={header} className="sticky top-0 z-50">
       <div
         className={cn(
           "border-b transition-[background-color,border-color] duration-200 ease-kb",
-          scrolled || open ? "glass border-line" : "border-transparent",
+          scrolled || open ? "glass border-line" : "border-transparent bg-surface-0",
           open && "bg-surface-0",
         )}
       >
@@ -75,22 +96,20 @@ export function SiteHeader() {
               <SiteLink
                 key={n.to}
                 to={n.to}
-                className="press inline-flex min-h-11 items-center rounded-full px-3.5 text-small font-semibold text-text-2 hover:bg-surface-2 hover:text-text-1"
+                className={navLinkCls}
                 activeClassName="!text-text-1 bg-surface-2"
               >
                 {n.label}
               </SiteLink>
             ))}
+            <BusinessesMenu />
           </nav>
           <div className="ms-auto flex items-center gap-2">
-            <SiteLink
-              to="/login"
-              className="press hidden min-h-11 items-center rounded-full px-4 text-small font-semibold text-text-2 hover:bg-surface-2 hover:text-text-1 md:inline-flex"
-            >
+            <SiteLink to="/login" className={cn(navLinkCls, "hidden px-4 md:inline-flex")}>
               Log in
             </SiteLink>
             <ButtonLink to="/scan" size="md" variant={ctaVariant} className="hidden md:inline-flex">
-              Check my business free
+              {MAIN_CTA}
             </ButtonLink>
             <button
               ref={toggle}
@@ -110,51 +129,199 @@ export function SiteHeader() {
           </div>
         </div>
       </div>
+      <PhoneMenu open={open} top={menuTop} panel={panel} close={close} />
+    </header>
+  );
+}
 
-      {/* Phone and tablet menu */}
-      <div
-        id="phone-menu"
-        ref={panel}
-        hidden={!open}
-        className="fixed inset-x-0 top-16 bottom-0 overflow-y-auto bg-surface-0 lg:hidden"
+/** Businesses: a small disclosure menu. Escape and a click or focus outside close it; Escape returns focus. */
+function BusinessesMenu() {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+  const btn = useRef<HTMLButtonElement>(null);
+  const flag = useSearchFlag("biz");
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  useEffect(() => {
+    if (flag === "open") setOpen(true);
+  }, [flag]);
+  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        btn.current?.focus();
+      }
+    };
+    const onFocus = (e: FocusEvent) => {
+      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("focusin", onFocus);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("focusin", onFocus);
+    };
+  }, [open]);
+  const onFor = pathname === "/for" || pathname.startsWith("/for/");
+  return (
+    <div ref={wrap} className="relative">
+      <button
+        ref={btn}
+        type="button"
+        aria-expanded={open}
+        aria-controls="biz-menu"
+        onClick={() => setOpen((o) => !o)}
+        className={cn(navLinkCls, (open || onFor) && "bg-surface-2 text-text-1")}
       >
-        <div className="container-kb flex min-h-full flex-col pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-          <nav aria-label="Menu">
-            <ul className="divide-y divide-line border-b border-line">
-              {NAV_LINKS.map((n, i) => (
-                <li key={n.to} className="animate-enter" style={{ animationDelay: `${i * 40}ms` }}>
-                  <SiteLink
-                    to={n.to}
-                    onClick={close}
-                    className="press -mx-2 flex min-h-16 items-center justify-between gap-4 rounded-inner px-2 font-display text-h3 font-semibold text-text-1 focus-visible:outline-offset-0 active:bg-surface-1"
-                    activeClassName="[&>span]:underline [&>span]:decoration-2 [&>span]:underline-offset-8"
-                  >
-                    <span>{n.label}</span>
-                    <ChevronRight className="size-5 text-text-3 rtl:-scale-x-100" aria-hidden />
-                  </SiteLink>
-                </li>
-              ))}
-              <li className="animate-enter" style={{ animationDelay: "200ms" }}>
+        Businesses
+        <ChevronDown
+          className={cn("size-4 transition-transform duration-200", open && "rotate-180")}
+          aria-hidden
+        />
+      </button>
+      <div
+        id="biz-menu"
+        hidden={!open}
+        className="absolute start-0 top-full mt-2 w-64 animate-enter rounded-card border border-line bg-surface-1 p-2 shadow-float"
+      >
+        <ul>
+          {BUSINESS_MENU.map((b) => (
+            <li key={b.to}>
+              <SiteLink
+                to={b.to}
+                onClick={() => setOpen(false)}
+                className="press flex min-h-11 items-center rounded-inner px-3 text-small font-semibold text-text-1 hover:bg-surface-2"
+              >
+                {b.label}
+              </SiteLink>
+            </li>
+          ))}
+        </ul>
+        <SiteLink
+          to={ALL_BUSINESSES.to}
+          onClick={() => setOpen(false)}
+          className="press mt-1 flex min-h-11 items-center justify-between rounded-inner border-t border-line px-3 pt-1 text-small font-bold text-text-1 hover:bg-surface-2"
+        >
+          {ALL_BUSINESSES.label}
+          <ChevronRight className="size-4 rtl:-scale-x-100" aria-hidden />
+        </SiteLink>
+      </div>
+    </div>
+  );
+}
+
+function PhoneMenu({
+  open,
+  top,
+  panel,
+  close,
+}: {
+  open: boolean;
+  top: number;
+  panel: RefObject<HTMLDivElement | null>;
+  close: () => void;
+}) {
+  const [biz, setBiz] = useState(false);
+  useEffect(() => {
+    if (!open) setBiz(false);
+  }, [open]);
+  const rowCls =
+    "press -mx-2 flex min-h-16 w-[calc(100%+1rem)] items-center justify-between gap-4 rounded-inner px-2 font-display text-h3 font-semibold text-text-1 focus-visible:outline-offset-0 active:bg-surface-1";
+  return (
+    <div
+      id="phone-menu"
+      ref={panel}
+      hidden={!open}
+      style={{ top }}
+      className="fixed inset-x-0 bottom-0 overflow-y-auto bg-surface-0 lg:hidden"
+    >
+      <div className="container-kb flex min-h-full flex-col pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <nav aria-label="Menu">
+          <ul className="divide-y divide-line border-b border-line">
+            {NAV_LINKS.map((n, i) => (
+              <li key={n.to} className="animate-enter" style={{ animationDelay: `${i * 40}ms` }}>
                 <SiteLink
-                  to="/login"
+                  to={n.to}
                   onClick={close}
-                  className="press -mx-2 flex min-h-16 items-center justify-between gap-4 rounded-inner px-2 text-title font-semibold text-text-2 focus-visible:outline-offset-0 active:bg-surface-1"
+                  className={rowCls}
+                  activeClassName="[&>span]:underline [&>span]:decoration-2 [&>span]:underline-offset-8"
                 >
-                  <span>Log in</span>
+                  <span>{n.label}</span>
                   <ChevronRight className="size-5 text-text-3 rtl:-scale-x-100" aria-hidden />
                 </SiteLink>
               </li>
-            </ul>
-          </nav>
-          <div className="mt-auto space-y-3 pt-10">
-            <ButtonLink to="/scan" full onClick={close}>
-              Check my business free
-            </ButtonLink>
-            <WhatsAppLink full />
-            <TrialLine className="pt-1 text-center" />
-          </div>
+            ))}
+            <li className="animate-enter" style={{ animationDelay: "80ms" }}>
+              <button
+                type="button"
+                aria-expanded={biz}
+                aria-controls="phone-biz"
+                onClick={() => setBiz((b) => !b)}
+                className={rowCls}
+              >
+                <span>Businesses</span>
+                <ChevronDown
+                  className={cn("size-5 text-text-3 transition-transform", biz && "rotate-180")}
+                  aria-hidden
+                />
+              </button>
+              <ul id="phone-biz" hidden={!biz} className="pb-3">
+                {[...BUSINESS_MENU, ALL_BUSINESSES].map((b) => (
+                  <li key={b.to}>
+                    <SiteLink
+                      to={b.to}
+                      onClick={close}
+                      className={cn(
+                        "press flex min-h-11 items-center rounded-inner text-body text-text-2 hover:text-text-1",
+                        b === ALL_BUSINESSES && "font-bold text-text-1",
+                      )}
+                    >
+                      {b.label}
+                    </SiteLink>
+                  </li>
+                ))}
+              </ul>
+            </li>
+            <li className="animate-enter" style={{ animationDelay: "120ms" }}>
+              {/* Nora is always one tap away on a phone, even where the phone bar waits (Web 4 review). */}
+              <button
+                type="button"
+                onClick={() => {
+                  close();
+                  window.dispatchEvent(new CustomEvent("kabsi:open-nora"));
+                }}
+                className={cn(rowCls, "font-sans text-title text-text-2")}
+              >
+                <span>Ask Nora</span>
+                <MessageCircle className="size-5 text-text-3" aria-hidden />
+              </button>
+            </li>
+            <li className="animate-enter" style={{ animationDelay: "160ms" }}>
+              <SiteLink
+                to="/login"
+                onClick={close}
+                className={cn(rowCls, "font-sans text-title text-text-2")}
+              >
+                <span>Log in</span>
+                <ChevronRight className="size-5 text-text-3 rtl:-scale-x-100" aria-hidden />
+              </SiteLink>
+            </li>
+          </ul>
+        </nav>
+        <div className="mt-auto space-y-3 pt-10">
+          <ButtonLink to="/scan" full onClick={close}>
+            {MAIN_CTA}
+          </ButtonLink>
+          <WhatsAppLink full />
+          <TrialLine className="pt-1 text-center" />
         </div>
       </div>
-    </header>
+    </div>
   );
 }

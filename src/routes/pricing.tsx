@@ -49,7 +49,7 @@ function Pricing() {
 
   return (
     <SiteShell>
-      <section className="container-kb pt-28 lg:pt-36">
+      <section className="container-kb pt-12 lg:pt-20">
         <SectionHead
           as="h1"
           title="Two plans. Free for 14 days."

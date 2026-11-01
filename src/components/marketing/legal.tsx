@@ -53,7 +53,7 @@ export function LegalPage({
 
   return (
     <SiteShell>
-      <section className="container-kb pt-28 lg:pt-36">
+      <section className="container-kb pt-12 lg:pt-20">
         <SectionHead as="h1" title={title} lead="Plain words first. The full text follows." />
         <p className="mt-4 text-small text-text-3">Updated {updated}</p>
       </section>

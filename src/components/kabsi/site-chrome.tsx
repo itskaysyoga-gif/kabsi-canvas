@@ -1,17 +1,19 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
+import { MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MAIN_CTA, WHATSAPP_ON, WHATSAPP_URL } from "@/lib/site";
 import { ButtonLink, WhatsAppGlyph, buttonClass } from "./ui";
 import { setChrome, useChrome, usePhoneBarShown } from "./page-signals";
 import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
+import { FoundingLine } from "./founding-line";
 import { DeferredAssistant } from "@/components/assistant/deferred-assistant";
 
 /**
- * Every public page: header, main, footer and the phone bar. Design 6 (Web 3, master plan 30.20 section 3) made the
- * site light-led: ivory reading areas (.theme-light .page-light), near-black bands where a page puts .theme-dark, and
- * the footer on the dark band. The consent bar and "Your privacy choices" are the site-wide ones
- * (src/components/shared/privacy-banner.tsx, P0.6-01), loaded after the first paint from the root.
+ * Every public page: the Founding 25 line, the sticky header, main, footer and the phone bar. Design 6 (Web 3) made
+ * the site light-led; Design 8 (Web 4, lane R 1 Nov 2026) adds the Founding 25 line above the header, the Businesses
+ * menu, the three-group footer, and puts Nora in the phone bar on phones. The consent bar and "Your privacy choices"
+ * are the site-wide ones (src/components/shared/privacy-banner.tsx, P0.6-01), loaded after the first paint.
  */
 export function SiteShell({
   children,
@@ -20,7 +22,7 @@ export function SiteShell({
 }: {
   children: ReactNode;
   className?: string;
-  /** "dark" keeps a page on the dark ground until its own Web 3 pull request moves it. */
+  /** "dark" keeps a page on the dark ground until its own pull request moves it. */
   theme?: "light" | "dark";
 }) {
   const light = theme === "light";
@@ -38,6 +40,7 @@ export function SiteShell({
       >
         Skip to content
       </a>
+      <FoundingLine />
       <SiteHeader />
       <main id="main">{children}</main>
       <div className={light ? "theme-dark" : undefined}>
@@ -49,23 +52,41 @@ export function SiteShell({
   );
 }
 
-/* ---------- Sticky phone bar (once the visitor is past the hero) ---------- */
+/* ---------- Phone bar: the one action, and Nora beside it (lane R decision 5, Design 8) ---------- */
 
+/**
+ * Below 640 px Nora never floats over the page: her button sits in the phone bar, beside "Check my business free", so
+ * she covers neither content nor the action. The bar shows once the visitor is past the hero, with no other main
+ * action on screen, the menu and the consent bar closed; it steps aside while Nora is open. From 640 px the bar is
+ * gone and Nora's own launcher sits in the corner. Signed-in screens keep Polish 1's rule (no floating button).
+ */
 export function PhoneBar() {
   const { noraOpen } = useChrome();
-  // Nora sits above the bar only on pages that have one (not /get-started, for example).
+  const nora = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
   useEffect(() => {
     setChrome({ phoneBarMounted: true });
     return () => setChrome({ phoneBarMounted: false });
   }, []);
-  // The phone bar steps aside while Nora's panel is open.
   const show = usePhoneBarShown() && !noraOpen;
+  // Closing Nora returns focus to her button here (the panel's close falls back to the page when the bar is hidden).
+  useEffect(() => {
+    if (wasOpen.current && !noraOpen && window.innerWidth < 640) {
+      nora.current?.focus();
+      if (document.activeElement !== nora.current) {
+        const main = document.getElementById("main");
+        main?.setAttribute("tabindex", "-1");
+        main?.focus({ preventScroll: true });
+      }
+    }
+    wasOpen.current = noraOpen;
+  }, [noraOpen]);
   return (
     <div
       aria-hidden={!show}
       inert={!show}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-line glass pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 transition-[transform,opacity] duration-200 ease-kb md:hidden",
+        "fixed inset-x-0 bottom-0 z-40 border-t border-line glass pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 transition-[transform,opacity] duration-200 ease-kb sm:hidden",
         show ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-full opacity-0",
       )}
     >
@@ -84,6 +105,16 @@ export function PhoneBar() {
             <WhatsAppGlyph className="size-6" />
           </a>
         )}
+        <button
+          ref={nora}
+          type="button"
+          data-nora-bar
+          onClick={() => window.dispatchEvent(new CustomEvent("kabsi:open-nora"))}
+          className="press grid size-13 shrink-0 place-items-center rounded-full bg-kb-black text-kb-white"
+        >
+          <MessageCircle className="size-5" aria-hidden />
+          <span className="sr-only">Ask Nora, Kabsi's assistant</span>
+        </button>
       </div>
     </div>
   );
