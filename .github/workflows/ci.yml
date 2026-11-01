@@ -191,9 +191,55 @@ jobs:
         with:
           fail-on-severity: high
 
-  # Ops 1 part B (master plan 24.9): Lighthouse CI on a throttled phone for every public page. REPORT ONLY for now: the
-  # job never fails the pull request, and every assertion in lighthouserc.json is a "warn". Web 2 points it at the Vercel
-  # preview, changes "warn" to "error" and removes continue-on-error to make it blocking.
+  # Lean 1 (1 Nov 2026, master plan 24.9): the speed gate. Home at 390 px on a throttled phone, 3 runs, median. It FAILS the
+  # pull request when LCP is over 2.5 s or the script Home downloads is over its budget (LH_JS_KB). Claude branches have no
+  # Vercel preview (vercel.json switches them off), so the pull request is measured on its own production build behind
+  # scripts/serve-compressed.mjs, which serves like Vercel (HTTP/2 over a throwaway certificate, brotli quality 4, the long
+  # cache header on hashed files; over plain HTTP/1.1 the same build read 2.7 s instead of 2.1 s);
+  # lighthouse-live.yml runs the same gate on kabsi.co after each production deploy. LH_JS_KB is the number Home is at,
+  # ratcheted down by the pull request that earns it: the Lean 1 target is 150 KB, master plan 24.9 says 120 KB (see
+  # docs/progress/archive/2026-11-01-lean1.md for what stands in the way).
+  speed:
+    name: Speed gate (Home at 390 px)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Script size is exact, so it is gated tight. LCP is not: on a two-core runner Chrome shares the processor with the
+      # server, and the same build reads 2.1 s on a quiet machine and 2.6 s here. So the pull request guards LCP against a
+      # regression only (3.0 s); the real 2.5 s gate is lighthouse-live.yml, against kabsi.co, after each Production deploy.
+      LH_LCP_MS: "3000"
+      LH_JS_KB: "260"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Install
+        run: npm ci --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund
+      - name: Build and serve (HTTP/2 and compressed, like Vercel)
+        run: |
+          npm run build
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout "$RUNNER_TEMP/key.pem" -out "$RUNNER_TEMP/cert.pem" -subj /CN=localhost -days 1 2> /dev/null
+          PORT=4173 node .output/server/index.mjs > serve.log 2>&1 &
+          TLS_KEY="$RUNNER_TEMP/key.pem" TLS_CERT="$RUNNER_TEMP/cert.pem" node scripts/serve-compressed.mjs 4174 4173 > front.log 2>&1 &
+          for i in $(seq 1 30); do curl -skf https://localhost:4174/ > /dev/null && break; sleep 1; done
+      - name: Lighthouse on Home (3 runs, 390 px)
+        run: npx --yes @lhci/cli@0.15.1 collect --config=lighthouserc.speed.json
+      - name: Gate
+        run: node scripts/lighthouse-gate.mjs .lighthouseci /
+      - name: Keep the reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: speed-gate-report
+          path: .lighthouseci
+          include-hidden-files: true
+          if-no-files-found: ignore
+
+  # Ops 1 part B (master plan 24.9): Lighthouse CI on a throttled phone for every public page. REPORT ONLY: the job never
+  # fails the pull request, and every assertion in lighthouserc.json is a "warn". Lean 1: it now reads the build through
+  # scripts/serve-compressed.mjs (the plain Node server sent everything uncompressed and read about three times heavier
+  # than kabsi.co); the blocking check for Home is the `speed` job above.
   lighthouse:
     name: Lighthouse CI (report only)
     runs-on: ubuntu-latest
@@ -206,11 +252,13 @@ jobs:
           node-version: 22
       - name: Install
         run: npm ci --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund
-      - name: Build and serve
+      - name: Build and serve (HTTP/2 and compressed, like Vercel)
         run: |
           npm run build
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout "$RUNNER_TEMP/key.pem" -out "$RUNNER_TEMP/cert.pem" -subj /CN=localhost -days 1 2> /dev/null
           PORT=4173 node .output/server/index.mjs > serve.log 2>&1 &
-          for i in $(seq 1 30); do curl -sf http://localhost:4173/ > /dev/null && break; sleep 1; done
+          TLS_KEY="$RUNNER_TEMP/key.pem" TLS_CERT="$RUNNER_TEMP/cert.pem" node scripts/serve-compressed.mjs 4174 4173 > front.log 2>&1 &
+          for i in $(seq 1 30); do curl -skf https://localhost:4174/ > /dev/null && break; sleep 1; done
       - name: Lighthouse (3 runs per page)
         run: npx --yes @lhci/cli@0.15.1 autorun --config=lighthouserc.json
       - name: Summary
@@ -222,5 +270,5 @@ jobs:
         with:
           name: lighthouse-report
           path: .lighthouseci-report
+          include-hidden-files: true
           if-no-files-found: ignore
-

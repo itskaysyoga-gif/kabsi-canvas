@@ -1,9 +1,12 @@
 name: Lighthouse live
 
-# Lean 1 (30 Oct plan, speed): Lighthouse on a throttled phone (mobile, 3 runs, median) against the real site, by hand.
-# Run it from the Actions tab (Run workflow) before and after a speed change. It never touches the site and never fails a
-# pull request; the numbers land in the job summary and in the uploaded report.
+# Lean 1 (30 Oct plan, speed): Lighthouse on a throttled phone (mobile, 3 runs, median) against the real site.
+# By hand (Actions tab, Run workflow): five pages, before and after a speed change; the numbers land in the job summary
+# and the uploaded report. After every Production deploy (Vercel's deployment_status): Home at 390 px against kabsi.co,
+# and that run FAILS when Home misses the speed gate (scripts/lighthouse-gate.mjs; same budgets as the `speed` job of
+# ci.yml). A by-hand run never fails. It never touches the site and never fails a pull request.
 on:
+  deployment_status:
   workflow_dispatch:
     inputs:
       base_url:
@@ -21,8 +24,12 @@ permissions:
 jobs:
   lighthouse:
     name: Lighthouse (mobile, 3 runs, median)
+    if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      LH_LCP_MS: "2500"
+      LH_JS_KB: "260"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -30,19 +37,31 @@ jobs:
           node-version: 22
       - name: Lighthouse (3 runs per page)
         env:
-          BASE_URL: ${{ inputs.base_url }}
-          PAGES: ${{ inputs.pages }}
+          BASE_URL: ${{ inputs.base_url || 'https://kabsi.co' }}
+          PAGES: ${{ inputs.pages || '/' }}
+          EVENT: ${{ github.event_name }}
         run: |
+          set -f
           args=""
           for p in $PAGES; do args="$args --url=${BASE_URL%/}${p}"; done
-          npx --yes @lhci/cli@0.15.1 collect $args --numberOfRuns=3 --settings.formFactor=mobile "--settings.chromeFlags=--no-sandbox --headless=new"
+          # After a deploy: Home at 390 px (the speed gate's own setup). By hand: Lighthouse's default phone, so the numbers
+          # stay comparable with the "before" table of docs/progress/archive/2026-11-01-lean1.md.
+          if [ "$EVENT" = "deployment_status" ]; then
+            npx --yes @lhci/cli@0.15.1 collect --config=lighthouserc.speed.json $args
+          else
+            npx --yes @lhci/cli@0.15.1 collect $args --numberOfRuns=3 --settings.formFactor=mobile "--settings.chromeFlags=--no-sandbox --headless=new"
+          fi
       - name: Summary
         if: always()
         run: node scripts/lighthouse-summary.mjs .lighthouseci
+      - name: Gate (Home, after a deploy only)
+        if: github.event_name == 'deployment_status'
+        run: node scripts/lighthouse-gate.mjs .lighthouseci /
       - name: Keep the reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: lighthouse-live-report
           path: .lighthouseci
+          include-hidden-files: true
           if-no-files-found: ignore
