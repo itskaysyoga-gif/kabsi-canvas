@@ -124,6 +124,11 @@ export function renderReport(loc: { name: string }, r: ReportData): RenderedRepo
     parts.push(card({ label: rc.ai.heading, html: `${esc(rc.ai.line)}<br><span class="kb-t2" style="font-size:14px;color:${TOKENS.stone};">${esc(rc.ai.label)}</span>` }));
     text.push(`${rc.ai.heading}: ${rc.ai.line} ${rc.ai.label}`);
   }
+  // AI Answers 1: an AI answer that gives a fact differently from what Kabsi has (older reports have no such block).
+  if (rc?.accuracy) {
+    parts.push(card({ label: rc.accuracy.heading, html: `${esc(rc.accuracy.line)}<br>${esc(rc.accuracy.action)}<br><span class="kb-t2" style="font-size:14px;color:${TOKENS.stone};">${esc(rc.accuracy.label)}</span>` }));
+    text.push(`${rc.accuracy.heading}: ${rc.accuracy.line} ${rc.accuracy.action} ${rc.accuracy.label}`);
+  }
 
   const first = waiting.items[0];
   const button = waiting.count && first ? { label: "Review and approve", path: first.path } : { label: "Open your report", path: "/app/report" };

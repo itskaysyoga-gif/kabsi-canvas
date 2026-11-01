@@ -17,6 +17,7 @@ import { dateRange, renderReport } from "./email/report-body.ts";
 import { type AiAnswer, type GrowthStats, monthlyWeek, receipt, type RivalChange } from "./results-report/receipt.ts";
 import { sourceActions } from "./insights/ai-visibility.ts";
 import type { DoneRun } from "./visibility/ai/numbers.ts";
+import type { Finding } from "./visibility/ai/accuracy.ts";
 
 type Loc = { id: string; name: string; place_id: string | null; time_zone: string; emails_paused_until: string | null; google_location_id?: string | null; google_account_id?: string | null; is_demo?: boolean | null };
 const DAY = 86400_000;
@@ -123,6 +124,7 @@ export async function buildReport(loc: Loc, now = new Date()) {
     business: loc.name, counts: care.care.counts, needs: care.needs, needsTotal: care.needs_total, plan: care.plan,
     activity: care.activity ?? null, demo: !!loc.is_demo, growth, tz: loc.time_zone,
     ai: await latestAiAnswer(loc.id, now).catch(() => null), aiThisWeek: monthlyWeek(today),
+    accuracy: await latestFinding(loc.id, now).catch(() => null),
     rivals: await rivalChanges(loc.id, now).catch(() => []),
   });
 
@@ -152,6 +154,15 @@ async function latestAiAnswer(locationId: string, now: Date): Promise<AiAnswer |
     sources: (r.sources ?? []).slice(0, 3).map((x) => ({ domain: x.domain, title: x.title })),
     noticed: sourceActions(runs)[0]?.text ?? null,
   };
+}
+
+// AI Answers 1: the week's latest clear difference between a real AI answer and the facts Kabsi has (live runs only).
+async function latestFinding(locationId: string, now: Date): Promise<Finding | null> {
+  const since = new Date(now.getTime() - 7 * DAY).toISOString();
+  const { data } = await admin().from("ai_visibility_runs").select("accuracy").eq("location_id", locationId).eq("state", "done")
+    .eq("source", "live").gte("run_at", since).not("accuracy->>finding", "is", null).order("run_at", { ascending: false }).limit(1);
+  const f = (data?.[0]?.accuracy as { finding?: Finding | null } | null)?.finding;
+  return f?.fact && f.sentence ? f : null;
 }
 
 // 30.15 3.9: review gains over about a month for the business and the competitors it watches, from Kabsi's own public snapshots.

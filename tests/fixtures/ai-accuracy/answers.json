@@ -1,0 +1,109 @@
+{
+  "_note": "AI Answers 1: ten AI answers about the made-up Rose Lane Salon, each with the claims a model would return (claims) and what Kabsi must find. Fictional names and numbers (555 phone numbers). No real business, no paid call.",
+  "business": "Rose Lane Salon",
+  "knowledge": [
+    { "slot": "profile.regular_hours", "key": "regular_hours", "status": "verified", "value": { "display": "Mon to Sat 09:00 to 18:00", "raw": { "periods": [
+      { "openDay": "MONDAY", "openTime": { "hours": 9 }, "closeDay": "MONDAY", "closeTime": { "hours": 18 } },
+      { "openDay": "TUESDAY", "openTime": { "hours": 9 }, "closeDay": "TUESDAY", "closeTime": { "hours": 18 } },
+      { "openDay": "WEDNESDAY", "openTime": { "hours": 9 }, "closeDay": "WEDNESDAY", "closeTime": { "hours": 18 } },
+      { "openDay": "THURSDAY", "openTime": { "hours": 9 }, "closeDay": "THURSDAY", "closeTime": { "hours": 18 } },
+      { "openDay": "FRIDAY", "openTime": { "hours": 9 }, "closeDay": "FRIDAY", "closeTime": { "hours": 18 } },
+      { "openDay": "SATURDAY", "openTime": { "hours": 9 }, "closeDay": "SATURDAY", "closeTime": { "hours": 18 } } ] } } },
+    { "slot": "profile.phone", "key": "phone", "status": "verified", "value": { "display": "+1 212-555-0142", "raw": null } },
+    { "slot": "profile.website", "key": "website", "status": "verified", "value": { "display": "https://roselanesalon.com", "raw": null } },
+    { "slot": "profile.address", "key": "address", "status": "verified", "value": { "display": "214 Bedford Ave, Brooklyn, NY 11249", "raw": null } },
+    { "slot": "card.services:a", "key": "service", "status": "verified", "value": { "text": "Haircuts" } },
+    { "slot": "card.services:b", "key": "service", "status": "verified", "value": { "text": "Hair color" } },
+    { "slot": "card.price_notes", "key": "price_note", "status": "needs_confirmation", "value": { "text": "$$" } }
+  ],
+  "cases": [
+    {
+      "name": "right facts",
+      "answer": "Here are some options:\n1. **Rose Lane Salon** - a friendly salon in Williamsburg. It is open Monday to Saturday from 9 am to 6 pm. You can call them at (212) 555-0142 or book on roselanesalon.com.\n2. **Bedford Cuts** - quick walk-in haircuts.",
+      "claims": [
+        { "fact": "hours", "sentence": "It is open Monday to Saturday from 9 am to 6 pm.", "value": "Monday to Saturday 9 am to 6 pm", "about": "this", "certain": true, "closed_branch": false, "days": ["mon", "tue", "wed", "thu", "fri", "sat"], "opens": "9 am", "closes": "6 pm" },
+        { "fact": "phone", "sentence": "You can call them at (212) 555-0142 or book on roselanesalon.com.", "value": "(212) 555-0142", "about": "this", "certain": true, "closed_branch": false },
+        { "fact": "website", "sentence": "You can call them at (212) 555-0142 or book on roselanesalon.com.", "value": "roselanesalon.com", "about": "this", "certain": true, "closed_branch": false }
+      ],
+      "expect": { "differences": [], "agree": ["hours", "phone", "website"] }
+    },
+    {
+      "name": "wrong hours",
+      "answer": "Rose Lane Salon on Bedford Avenue is a popular choice. Rose Lane Salon is open Monday to Saturday from 9 am to 8 pm.",
+      "claims": [
+        { "fact": "hours", "sentence": "Rose Lane Salon is open Monday to Saturday from 9 am to 8 pm.", "value": "Monday to Saturday 9 am to 8 pm", "about": "this", "certain": true, "closed_branch": false, "days": ["mon", "tue", "wed", "thu", "fri", "sat"], "opens": "9 am", "closes": "8 pm" }
+      ],
+      "expect": { "differences": [{ "fact": "hours", "detail": "closing_time", "said": "8 pm", "day": "mon" }], "agree": [] }
+    },
+    {
+      "name": "wrong phone",
+      "answer": "1. **Rose Lane Salon** - known for color work. Call (212) 555-0199 to book.\n2. **Kent Street Hair** - good for quick trims.",
+      "claims": [
+        { "fact": "phone", "sentence": "Call (212) 555-0199 to book.", "value": "(212) 555-0199", "about": "this", "certain": true, "closed_branch": false }
+      ],
+      "expect": { "differences": [{ "fact": "phone", "detail": "phone", "said": "(212) 555-0199", "day": null }], "agree": [] }
+    },
+    {
+      "name": "business not named",
+      "answer": "Here are some options:\n1. **Bedford Cuts** - open until 9 pm every day.\n2. **Kent Street Hair** - call (212) 555-0170.",
+      "claims": [
+        { "fact": "hours", "sentence": "open until 9 pm every day.", "value": "until 9 pm every day", "about": "this", "certain": true, "closed_branch": false, "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "closes": "9 pm" }
+      ],
+      "expect": { "differences": [], "agree": [] }
+    },
+    {
+      "name": "two businesses with similar names",
+      "answer": "1. **Rose Lane Barbers** - open until 8 pm daily, call (212) 555-0111.\n2. **Rose Lane Salon** - opens at 9 am and closes at 6 pm.",
+      "claims": [
+        { "fact": "hours", "sentence": "open until 8 pm daily, call (212) 555-0111.", "value": "until 8 pm daily", "about": "this", "certain": true, "closed_branch": false, "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "closes": "8 pm" },
+        { "fact": "phone", "sentence": "open until 8 pm daily, call (212) 555-0111.", "value": "(212) 555-0111", "about": "this", "certain": true, "closed_branch": false },
+        { "fact": "hours", "sentence": "opens at 9 am and closes at 6 pm.", "value": "9 am to 6 pm", "about": "this", "certain": true, "closed_branch": false, "days": [], "opens": "9 am", "closes": "6 pm" }
+      ],
+      "expect": { "differences": [], "agree": ["hours"] }
+    },
+    {
+      "name": "an answer in another language",
+      "answer": "Rose Lane Salon es un salon muy conocido en Williamsburg. Rose Lane Salon abre de lunes a sabado de 9:00 a 20:00.",
+      "claims": [
+        { "fact": "hours", "sentence": "Rose Lane Salon abre de lunes a sabado de 9:00 a 20:00.", "value": "lunes a sabado de 9:00 a 20:00", "about": "this", "certain": true, "closed_branch": false, "days": ["mon", "tue", "wed", "thu", "fri", "sat"], "opens": "9:00", "closes": "20:00" }
+      ],
+      "expect": { "differences": [{ "fact": "hours", "detail": "closing_time", "said": "20:00", "day": "mon" }], "agree": [] }
+    },
+    {
+      "name": "a vague answer",
+      "answer": "Rose Lane Salon is a nice place. Rose Lane Salon is usually open until around 7 pm, but check before you go.",
+      "claims": [
+        { "fact": "hours", "sentence": "Rose Lane Salon is usually open until around 7 pm, but check before you go.", "value": "until around 7 pm", "about": "this", "certain": false, "closed_branch": false, "days": [], "closes": "7 pm" }
+      ],
+      "expect": { "differences": [], "agree": [] }
+    },
+    {
+      "name": "an answer citing a closed branch",
+      "answer": "Rose Lane Salon used to have a second salon at 88 Grand St, which has closed. Rose Lane Salon is at 214 Bedford Ave in Brooklyn.",
+      "claims": [
+        { "fact": "address", "sentence": "Rose Lane Salon used to have a second salon at 88 Grand St, which has closed.", "value": "88 Grand St", "about": "this", "certain": true, "closed_branch": true },
+        { "fact": "address", "sentence": "Rose Lane Salon is at 214 Bedford Ave in Brooklyn.", "value": "214 Bedford Ave, Brooklyn", "about": "this", "certain": true, "closed_branch": false }
+      ],
+      "expect": { "differences": [], "agree": ["address"] }
+    },
+    {
+      "name": "hours in 12-hour time",
+      "answer": "**Rose Lane Salon**\n  - Hours: Monday to Saturday 9:00 AM to 6:00 PM, and Sunday 10:00 AM to 4:00 PM.\n  - Phone: +1 212-555-0142",
+      "claims": [
+        { "fact": "hours", "sentence": "Hours: Monday to Saturday 9:00 AM to 6:00 PM, and Sunday 10:00 AM to 4:00 PM.", "value": "Monday to Saturday 9:00 AM to 6:00 PM", "about": "this", "certain": true, "closed_branch": false, "days": ["mon", "tue", "wed", "thu", "fri", "sat"], "opens": "9:00 AM", "closes": "6:00 PM" },
+        { "fact": "hours", "sentence": "Hours: Monday to Saturday 9:00 AM to 6:00 PM, and Sunday 10:00 AM to 4:00 PM.", "value": "Sunday 10:00 AM to 4:00 PM", "about": "this", "certain": true, "closed_branch": false, "days": ["sun"], "opens": "10:00 AM", "closes": "4:00 PM" },
+        { "fact": "phone", "sentence": "Phone: +1 212-555-0142", "value": "+1 212-555-0142", "about": "this", "certain": true, "closed_branch": false }
+      ],
+      "expect": { "differences": [{ "fact": "hours", "detail": "open_day", "said": "open", "day": "sun" }], "agree": ["phone"] }
+    },
+    {
+      "name": "a missing fact",
+      "answer": "Rose Lane Salon in Brooklyn also offers manicures. Rose Lane Salon is on the pricier side ($$$$).",
+      "claims": [
+        { "fact": "services", "sentence": "Rose Lane Salon in Brooklyn also offers manicures.", "value": "manicures", "about": "this", "certain": true, "closed_branch": false, "service": "manicures", "offered": true },
+        { "fact": "price", "sentence": "Rose Lane Salon is on the pricier side ($$$$).", "value": "$$$$", "about": "this", "certain": true, "closed_branch": false, "level": 4 }
+      ],
+      "expect": { "differences": [], "agree": [] }
+    }
+  ]
+}
