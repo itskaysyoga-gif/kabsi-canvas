@@ -2,7 +2,7 @@
 // where it comes up nearby, before Kabsi asks for anything. Public profile facts come from the profile-snapshot function
 // (Places, never stored), the nearby check from V4's POST and GET /visibility/check. Nothing here is a fixture: a part
 // the server did not return is not shown, and the waiting list shows while the nearby check is closed.
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Check, ChevronDown, LoaderCircle, Mail, MapPin, SearchX, Star } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Turnstile } from "@/components/turnstile";
@@ -133,7 +133,15 @@ export function ScanSearching({ query, progress = 1 }: { query: string; progress
   );
 }
 
-function NotFound({ query }: { query: string }) {
+function NotFound({
+  query,
+  keyword,
+  industry,
+}: {
+  query: string;
+  keyword: string | null;
+  industry: string | null;
+}) {
   return (
     <section className="container-kb pt-28 pb-20 lg:pt-36">
       <span className="grid size-14 place-items-center rounded-full bg-surface-2 text-text-2">
@@ -143,7 +151,103 @@ function NotFound({ query }: { query: string }) {
       <p className="mt-4 max-w-xl text-lead text-text-2">
         Check the name and city, or type the name exactly as it shows on Google.
       </p>
-      <ScanBox defaultValue={query} className="mt-8 max-w-xl" />
+      <ScanBox
+        defaultValue={query}
+        keyword={keyword ?? undefined}
+        industry={industry ?? undefined}
+        className="mt-8 max-w-xl"
+      />
+    </section>
+  );
+}
+
+/** Check 2: the way back to the search with the text kept ("Not here? Search again", "Not your business? Change it"). */
+function changeSearch(q: string, keyword: string | null, industry: string | null) {
+  return {
+    q,
+    change: true,
+    ...(keyword ? { keyword } : {}),
+    ...(industry ? { industry } : {}),
+  };
+}
+
+/** /scan?change: the search box again, with the text the visitor typed, before anything is looked up. */
+export function FreeCheckAgain({
+  query,
+  keyword,
+  industry,
+}: {
+  query: string;
+  keyword: string | null;
+  industry: string | null;
+}) {
+  return (
+    <section className="container-kb pt-28 pb-20 lg:pt-36">
+      <p className="text-label font-bold text-text-3">Free check</p>
+      <h1 className="mt-3 text-h2 sm:text-display">Find your business again</h1>
+      <p className="mt-4 max-w-xl text-lead text-text-2">
+        Add the city, or type the name exactly as it shows on Google.
+      </p>
+      <ScanBox
+        defaultValue={query}
+        keyword={keyword ?? undefined}
+        industry={industry ?? undefined}
+        className="mt-8 max-w-xl"
+      />
+    </section>
+  );
+}
+
+/** Check 2: Kabsi never picks for the visitor. One match is shown like several, and the visitor says yes. */
+function PickBusiness({
+  places,
+  query,
+  keyword,
+  industry,
+  onPick,
+}: {
+  places: FoundBusiness[];
+  query: string;
+  keyword: string | null;
+  industry: string | null;
+  onPick: (p: FoundBusiness) => void;
+}) {
+  const one = places.length === 1;
+  return (
+    <section className="container-kb pt-28 pb-20 lg:pt-36">
+      <p className="text-label font-bold text-text-3">Free check</p>
+      <h1 className="mt-3 text-h2 sm:text-display">
+        {one ? "Is this your business?" : "Pick your business"}
+      </h1>
+      <ul className="mt-8 max-w-2xl space-y-3">
+        {places.map((p) => (
+          <li key={p.place_id} className="rounded-card border border-line bg-surface-1 p-5">
+            <div className="flex items-start gap-4">
+              <MapPin className="mt-0.5 size-5 shrink-0 text-text-2" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className="text-title">{p.name}</p>
+                {p.address && <p className="mt-1 text-small text-text-2">{p.address}</p>}
+                {p.category && <p className="mt-1 text-small text-text-3">{p.category}</p>}
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant={one ? "primary" : "secondary"}
+              className="mt-4 w-full sm:w-auto"
+              onClick={() => onPick(p)}
+            >
+              This is my business
+            </Button>
+          </li>
+        ))}
+      </ul>
+      <Link
+        to="/scan"
+        search={changeSearch(query, keyword, industry) as never}
+        className="mt-6 inline-flex min-h-11 items-center text-small font-bold underline underline-offset-4"
+      >
+        Not here? Search again
+      </Link>
     </section>
   );
 }
@@ -183,10 +287,18 @@ export function LiveFreeCheck({
   query,
   keyword,
   industry,
+  placeId = null,
+  placeName = null,
+  sessionToken = null,
 }: {
   query: string;
   keyword: string | null;
   industry: string | null;
+  /** Check 2: the visitor chose a suggestion in the scan box; its Place ID goes straight to the check. */
+  placeId?: string | null;
+  placeName?: string | null;
+  /** The suggestions' session token: Place Details with it ends the Autocomplete session. */
+  sessionToken?: string | null;
 }) {
   const { take, widget } = useTokens();
   const [phase, setPhase] = useState<Phase>({ kind: "searching" });
@@ -200,9 +312,10 @@ export function LiveFreeCheck({
     pixelCustom("FreeScanStarted");
     void (async () => {
       try {
+        if (placeId) return void pick({ place_id: placeId, name: placeName ?? query, address: "" });
         const places = await findBusinesses(query, await take());
+        // Never pick for the visitor, not even the only match (Check 2).
         if (!places.length) setPhase({ kind: "none" });
-        else if (places.length === 1) void pick(places[0]!);
         else setPhase({ kind: "pick", places });
       } catch (e) {
         setPhase({ kind: "error", message: plainError(e) });
@@ -215,15 +328,20 @@ export function LiveFreeCheck({
     setPhase({ kind: "checking", place });
     setProgress(1);
     try {
-      const snapshot = await runCheck(place.place_id, await take());
+      const snapshot = await runCheck(
+        place.place_id,
+        await take(),
+        place.place_id === placeId ? (sessionToken ?? undefined) : undefined,
+      );
       setProgress(2);
       const term = keyword ?? snapshot.category?.toLowerCase() ?? null;
-      const country = countryOfAddress(place.address);
+      // The address Google returned for the chosen place (a suggestion carries only a short one).
+      const country = countryOfAddress(snapshot.address);
       let check: StartedCheck | null = null;
       if (country && (term || industry)) {
         check = await startFreeCheck({
-          name: place.name,
-          address: place.address,
+          name: snapshot.name,
+          address: snapshot.address,
           place_id: place.place_id,
           country,
           term,
@@ -242,38 +360,26 @@ export function LiveFreeCheck({
 
   return (
     <>
-      {phase.kind === "searching" && <ScanSearching query={query} progress={0} />}
+      {phase.kind === "searching" && <ScanSearching query={placeName ?? query} progress={0} />}
       {phase.kind === "checking" && <ScanSearching query={phase.place.name} progress={progress} />}
-      {phase.kind === "none" && <NotFound query={query} />}
+      {phase.kind === "none" && <NotFound query={query} keyword={keyword} industry={industry} />}
       {phase.kind === "error" && <Failed message={phase.message} />}
       {phase.kind === "pick" && (
-        <section className="container-kb pt-28 pb-20 lg:pt-36">
-          <p className="text-label font-bold text-text-3">Free check</p>
-          <h1 className="mt-3 text-h2 sm:text-display">Pick your business</h1>
-          <ul className="mt-8 max-w-2xl space-y-3">
-            {phase.places.map((p) => (
-              <li key={p.place_id}>
-                <button
-                  type="button"
-                  onClick={() => void pick(p)}
-                  className="press flex w-full items-start gap-4 rounded-card border border-line bg-surface-1 p-5 text-start hover:border-line-strong hover:bg-surface-2"
-                >
-                  <MapPin className="mt-0.5 size-5 shrink-0 text-text-2" aria-hidden />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-title">{p.name}</span>
-                    <span className="mt-1 block text-small text-text-2">{p.address}</span>
-                  </span>
-                  <span className="shrink-0 self-center text-small font-bold text-text-1">
-                    This one
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <PickBusiness
+          places={phase.places}
+          query={query}
+          keyword={keyword}
+          industry={industry}
+          onPick={(p) => void pick(p)}
+        />
       )}
       {phase.kind === "result" && (
-        <LiveResult snapshot={phase.snapshot} started={phase.check} keyword={keyword} />
+        <LiveResult
+          snapshot={phase.snapshot}
+          started={phase.check}
+          keyword={keyword}
+          change={{ q: query, keyword, industry }}
+        />
       )}
       <div className="container-kb">{widget}</div>
     </>
@@ -355,10 +461,13 @@ export function LiveResult({
   snapshot: s,
   started,
   keyword,
+  change,
 }: {
   snapshot: Snapshot;
   started: StartedCheck | null;
   keyword: string | null;
+  /** Where "Not your business? Change it" goes back to: the search with the text kept. */
+  change: { q: string; keyword: string | null; industry: string | null };
 }) {
   const navigate = useNavigate();
   const check = useCheck(started);
@@ -405,6 +514,13 @@ export function LiveResult({
           {term ? `, for '${term}'` : ""}
         </h1>
         <p className="mt-2 text-small text-text-2">{s.address}</p>
+        <Link
+          to="/scan"
+          search={changeSearch(change.q, change.keyword, change.industry) as never}
+          className="mt-1 inline-flex min-h-11 items-center text-small font-bold underline underline-offset-4"
+        >
+          Not your business? Change it
+        </Link>
 
         {/* One finding, one action, one button (brief section 14.7). */}
         <div
@@ -836,6 +952,13 @@ export function SavedFreeCheck({ code }: { code: string }) {
         <h1 className="mt-3 text-h2 sm:text-display">
           {live.business}, for '{live.term}'
         </h1>
+        <Link
+          to="/scan"
+          search={changeSearch(live.business, live.term, null) as never}
+          className="mt-1 inline-flex min-h-11 items-center text-small font-bold underline underline-offset-4"
+        >
+          Not your business? Change it
+        </Link>
       </section>
       <section className="container-kb mt-8 pb-20">
         <div className="grid gap-6 rounded-panel border border-line bg-surface-1 p-5 sm:p-7 lg:grid-cols-[minmax(0,30rem)_1fr] lg:items-start">

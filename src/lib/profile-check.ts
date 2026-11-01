@@ -7,7 +7,13 @@ import type { CoachRow } from "@/lib/coach";
  * supabase/functions/_shared/profile-snapshot.ts (tests/profile-check.test.ts checks it): it is stored as proof (G-21). */
 export const TIPS_CONSENT_TEXT = "Send me tips on managing my Google profile";
 
-export type FoundBusiness = { place_id: string; name: string; address: string };
+/** One match of the search (with its category) or one suggestion while typing (name and short address only). */
+export type FoundBusiness = {
+  place_id: string;
+  name: string;
+  address: string;
+  category?: string | null;
+};
 /** The words next to the WhatsApp tick. Keep equal to WHATSAPP_CONSENT_TEXT in
  * supabase/functions/_shared/profile-snapshot.ts (tests/profile-check.test.ts checks it): it is stored as proof (G-21). */
 export const WHATSAPP_CONSENT_TEXT =
@@ -77,9 +83,67 @@ export async function findBusinesses(query: string, turnstile: string) {
   return (await call<{ places: FoundBusiness[] }>({ action: "search", query, turnstile })).places;
 }
 
-export async function runCheck(placeId: string, turnstile: string) {
-  return (await call<{ snapshot: Snapshot }>({ action: "check", place_id: placeId, turnstile }))
-    .snapshot;
+/** `sessionToken` is the one the suggestions used: Place Details with it ends the Autocomplete session (Check 2). */
+export async function runCheck(placeId: string, turnstile: string, sessionToken?: string) {
+  return (
+    await call<{ snapshot: Snapshot }>({
+      action: "check",
+      place_id: placeId,
+      ...(sessionToken ? { session_token: sessionToken } : {}),
+      turnstile,
+    })
+  ).snapshot;
+}
+
+/** A new Autocomplete session token (a version 4 UUID). One typing session uses one; picking a place ends it. */
+export const newSessionToken = () => crypto.randomUUID();
+
+export type Suggested = {
+  suggestions: FoundBusiness[];
+  /** False when the server will not suggest (the daily cap, a limit, a Google error): the box becomes a plain search. */
+  available: boolean;
+  /** A signed pass the next calls send instead of a Turnstile token (a Turnstile token works once). */
+  pass?: string;
+};
+
+/**
+ * Check 2: suggestions while the visitor types, through Kabsi's own function (the Places key never reaches the browser).
+ * The first call of a typing session carries a Turnstile token; later calls carry the pass it returned. Any failure is
+ * `available: false`, never an error on screen.
+ */
+export async function suggestBusinesses(
+  o: {
+    query: string;
+    sessionToken: string;
+    turnstile?: string | undefined;
+    pass?: string | undefined;
+  },
+  signal?: AbortSignal,
+): Promise<Suggested> {
+  try {
+    const res = await fetch(`${supabaseUrl}/functions/v1/profile-snapshot`, {
+      method: "POST",
+      headers: { "content-type": "application/json", ...anonHeaders },
+      body: JSON.stringify({
+        action: "suggest",
+        query: o.query,
+        session_token: o.sessionToken,
+        ...(o.pass ? { pass: o.pass } : {}),
+        ...(o.turnstile ? { turnstile: o.turnstile } : {}),
+      }),
+      ...(signal ? { signal } : {}),
+    });
+    if (!res.ok) return { suggestions: [], available: false };
+    const j = (await res.json()) as Partial<Suggested>;
+    return {
+      suggestions: Array.isArray(j.suggestions) ? j.suggestions.slice(0, 5) : [],
+      available: j.available === true,
+      ...(typeof j.pass === "string" ? { pass: j.pass } : {}),
+    };
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") throw e;
+    return { suggestions: [], available: false };
+  }
 }
 
 export async function emailCheck(o: {

@@ -3,7 +3,13 @@
 // the logic lives here so the Deno tests can run it with a stubbed Places host and no network.
 //
 //   POST { action: "search", query, turnstile }                       -> { places: [{ place_id, name, address }] }
-//   POST { action: "check", place_id, turnstile }                     -> { snapshot }
+//   POST { action: "suggest", query, session_token, turnstile | pass } -> { suggestions: [{ place_id, name, address }], available, pass? }
+//     Check 2 (1 Nov 2026): suggestions while the visitor types (Places Autocomplete (New)). The first call of a typing
+//     session carries a Turnstile token; the answer carries a short-lived signed pass (15 minutes, tied to the visitor)
+//     that the next calls send instead, because a Turnstile token works once and typing makes several calls. Past the
+//     suggestion limits, the Places cap or any Google error, "available" is false and the page falls back to search.
+//   POST { action: "check", place_id, session_token?, turnstile }     -> { snapshot }
+//     The session token of the suggestions, passed to Place Details, ends the Autocomplete session.
 //   POST { action: "email", place_id, email, tips, consent_text, page, turnstile } -> { ok: true }
 //   POST { action: "whatsapp", place_id, phone, consent, consent_text, page, turnstile } -> { ok: true }
 //     Only while Kabsi has a WhatsApp number (WHATSAPP_NUMBER). One message, after a ticked opt-in whose words are
@@ -14,7 +20,7 @@
 // Google layer. Nothing from Places is stored but the place ID (master plan 30.10): the check, its email and its
 // WhatsApp copy each read Google live. A visitor is a salted hash of the IP, never the IP itself.
 // Every Places request carries a field mask and none asks for reviews (tests hold that).
-import type { Place } from "./google/types.ts";
+import type { AutocompleteResponse, Place } from "./google/types.ts";
 import type { PlacesResult } from "./google/places/live.ts";
 import type { EmailContent } from "./email/template.ts";
 import { type CoachRow, freeChecklist } from "./coach/catalog.ts";
@@ -32,7 +38,10 @@ export function normalizePhone(v: string): string | null {
 export const CHECK_PAGES = ["/", "/google-profile-check", "/get-started"];
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 const PLACE_ID_RE = /^[A-Za-z0-9_-]{10,200}$/;
-export const LIMITS = { perMinute: 10, checksPerDay: 3, searchesPerHour: 20, emailsPerHour: 5, emailsPerAddressPerDay: 2, whatsappPerHour: 3, whatsappPerNumberPerDay: 1 };
+/** The Autocomplete session token the page makes (a version 4 UUID); the same text is passed to Place Details. */
+const SESSION_RE = /^[A-Za-z0-9-]{16,64}$/;
+const PASS_SECONDS = 15 * 60;
+export const LIMITS = { perMinute: 10, checksPerDay: 3, searchesPerHour: 20, suggestPerMinute: 20, suggestPerHour: 120, emailsPerHour: 5, emailsPerAddressPerDay: 2, whatsappPerHour: 3, whatsappPerNumberPerDay: 1 };
 
 // A status flag (lane R, 22 Oct 2026): one plain fact about what Google shows, and what Kabsi would do about it. The tone
 // maps to the design tokens' states: "danger" is red (a real problem), "warning" is amber (needs attention), "neutral"
@@ -109,7 +118,11 @@ export type Deps = {
   giveBack: (key: string) => Promise<void>;
   verifyTurnstile: (token: string | undefined, ip?: string) => Promise<boolean>;
   searchText: (key: string, q: string, max: number, mask: string) => Promise<PlacesResult<{ places?: Place[] }>>;
-  getSnapshotPlace: (key: string, placeId: string) => Promise<PlacesResult<Place>>;
+  /** Check 2: Places Autocomplete (New), counted by its own daily cap (places_take 'autocomplete'). */
+  autocomplete: (key: string, input: string, sessionToken: string) => Promise<PlacesResult<AutocompleteResponse>>;
+  getSnapshotPlace: (key: string, placeId: string, sessionToken?: string) => Promise<PlacesResult<Place>>;
+  /** The clock in milliseconds (tests move it); the default is Date.now. */
+  nowMs?: () => number;
   saveEmail: (row: { email: string; place_id: string; tips_opt_in: boolean; consent_text: string; page: string }) => Promise<void>;
   /** True while Kabsi has a WhatsApp number (the one setting). The WhatsApp action answers 503 without it. */
   whatsappOn: boolean;
@@ -190,6 +203,9 @@ export function makeHandler(d: Deps) {
     const ip = d.ip(req);
     const visitor = (await d.sha256Hex(`${d.env("SUPABASE_URL")}:${d.today()}:${ip}`)).slice(0, 24);
 
+    // Check 2: suggestions while the visitor types have their own limits and their own bot check (suggestHandler below).
+    if (str(b.action) === "suggest") return suggestHandler(d, b, visitor, ip, reply, fail);
+
     // Paid lookups: if the limiter breaks, block instead of removing the limit (D266).
     if (!(await d.rateLimit(`snapshot:min:${visitor}`, LIMITS.perMinute, 60, { failClosed: true }))) {
       return fail("rate_limited", "That is a lot of requests. Wait a minute and try again.", 429);
@@ -208,12 +224,14 @@ export function makeHandler(d: Deps) {
         if (!(await d.rateLimit(`snapshot:search:${visitor}`, LIMITS.searchesPerHour, 3600, { failClosed: true }))) {
           return fail("rate_limited", "That is a lot of searches. Try again in an hour.", 429);
         }
-        const r = await d.searchText(key, q, 5, "places.id,places.displayName,places.formattedAddress");
+        // Check 2: the category joins the name and address, so the visitor can tell two matches apart (same Pro tier as the name).
+        const r = await d.searchText(key, q, 5, "places.id,places.displayName,places.formattedAddress,places.primaryTypeDisplayName");
         if (r.backSoon) return fail("back_soon", FREE_TOOL_BUSY, 503);
         if (!r.ok) throw new Error(`places ${r.status}`);
         return reply({
           places: (r.data.places ?? []).map((p) => ({
             place_id: p.id as string, name: p.displayName?.text ?? "", address: p.formattedAddress ?? "",
+            category: p.primaryTypeDisplayName?.text ?? null,
           })).filter((p) => PLACE_ID_RE.test(p.place_id)),
         });
       }
@@ -228,7 +246,9 @@ export function makeHandler(d: Deps) {
         if (!(await d.rateLimit(quotaKey, LIMITS.checksPerDay, 86400, { failClosed: true }))) {
           return fail("daily_limit", "You have used your 3 free checks for today. Please come back tomorrow.", 429);
         }
-        const r = await d.getSnapshotPlace(key, placeId);
+        // Check 2: the suggestions' session token, if the page has one, ends the Autocomplete session with this call.
+        const sessionToken = str(b.session_token);
+        const r = await d.getSnapshotPlace(key, placeId, SESSION_RE.test(sessionToken) ? sessionToken : undefined);
         if (r.backSoon) {
           await d.giveBack(quotaKey).catch(() => {});
           return fail("back_soon", FREE_TOOL_BUSY, 503);
@@ -308,4 +328,70 @@ export function makeHandler(d: Deps) {
       return fail("failed", "That didn't work. Please try again.", 502);
     }
   };
+}
+
+// ─── Check 2: suggestions while the visitor types
+
+// The suggest pass: "<expiry seconds>.<HMAC-SHA-256 of visitor and expiry>", keyed by the Turnstile secret (which never
+// leaves the server). It proves a Turnstile check passed a moment ago for this visitor; it grants nothing else.
+const nowSeconds = (d: Deps) => Math.floor((d.nowMs ?? Date.now)() / 1000);
+async function mac(secret: string, text: string) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return [...new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(text)))].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+async function makePass(d: Deps, visitor: string, expiry: number): Promise<string | null> {
+  const secret = d.env("TURNSTILE_SECRET_KEY");
+  return secret ? `${expiry}.${await mac(secret, `suggest:${visitor}:${expiry}`)}` : null;
+}
+async function passValid(d: Deps, visitor: string, pass: string): Promise<boolean> {
+  const expiry = Number(pass.split(".")[0]);
+  if (!Number.isInteger(expiry) || expiry < nowSeconds(d)) return false;
+  const want = await makePass(d, visitor, expiry);
+  if (want === null || want.length !== pass.length) return false;
+  let diff = 0;
+  for (let i = 0; i < want.length; i++) diff |= want.charCodeAt(i) ^ pass.charCodeAt(i);
+  return diff === 0;
+}
+
+// Suggestions while typing. They have their own limits (a typing session makes several calls) and do not use up the
+// visitor's 10 requests a minute; the bot check is the same Turnstile, once, then the signed pass.
+async function suggestHandler(
+  d: Deps, b: Record<string, unknown>, visitor: string, ip: string,
+  reply: (body: unknown, status?: number) => Response, fail: (code: string, message: string, status?: number) => Response,
+): Promise<Response> {
+  const str = (v: unknown) => (typeof v === "string" ? v : "");
+  const key = d.env("PLACES_API_KEY");
+  if (!key) return reply({ suggestions: [], available: false });
+  const q = str(b.query).trim();
+  const sessionToken = str(b.session_token);
+  if (q.length < 3 || q.length > 120 || !SESSION_RE.test(sessionToken)) return fail("bad_query", "Type your business name and city.");
+  if (!(await d.rateLimit(`snapshot:suggest-min:${visitor}`, LIMITS.suggestPerMinute, 60, { failClosed: true }))
+    || !(await d.rateLimit(`snapshot:suggest-hour:${visitor}`, LIMITS.suggestPerHour, 3600, { failClosed: true }))) {
+    return fail("rate_limited", "That is a lot of searches. Try again in a minute.", 429);
+  }
+  let pass: string | null = null;
+  const given = str(b.pass);
+  if (!(given && await passValid(d, visitor, given))) {
+    if (!(await d.verifyTurnstile(str(b.turnstile) || undefined, ip))) {
+      return fail("challenge_failed", "Please complete the check and try again.", 400);
+    }
+    pass = await makePass(d, visitor, nowSeconds(d) + PASS_SECONDS);
+  }
+  try {
+    const r = await d.autocomplete(key, q, sessionToken);
+    // The Autocomplete day cap, a Google error or a bad answer: the page falls back to search, then pick.
+    if (!r.ok) {
+      if (!r.backSoon) await d.captureError("profile-snapshot", new Error(`places autocomplete ${r.status}`)).catch(() => {});
+      return reply({ suggestions: [], available: false, ...(pass ? { pass } : {}) });
+    }
+    const suggestions = (r.data.suggestions ?? []).map((s) => s.placePrediction).flatMap((p) => {
+      if (!p?.placeId || !PLACE_ID_RE.test(p.placeId)) return [];
+      const name = p.structuredFormat?.mainText?.text ?? p.text?.text ?? "";
+      return name ? [{ place_id: p.placeId, name, address: p.structuredFormat?.secondaryText?.text ?? "" }] : [];
+    }).slice(0, 5);
+    return reply({ suggestions, available: true, ...(pass ? { pass } : {}) });
+  } catch (e) {
+    await d.captureError("profile-snapshot", e).catch(() => {});
+    return reply({ suggestions: [], available: false, ...(pass ? { pass } : {}) });
+  }
 }

@@ -1,18 +1,32 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell } from "@/components/kabsi/site-chrome";
 import { FreeCheckStart } from "@/components/kabsi/d4-free-check";
-import { LiveFreeCheck } from "@/components/kabsi/scan-live";
+import { FreeCheckAgain, LiveFreeCheck } from "@/components/kabsi/scan-live";
 import { pageHead } from "@/lib/site";
-import { matching, text } from "@/lib/search-params";
+import { flag, matching, text } from "@/lib/search-params";
 
 // The one free check (master plan 30.16 section 4). The scan box sends ?q= (and an industry page its search and
 // industry); without ?q the page explains the check and shows the box.
 const searchSchema = (
   s: Record<string, unknown>,
-): { q?: string | undefined; keyword?: string | undefined; industry?: string | undefined } => ({
+): {
+  q?: string | undefined;
+  keyword?: string | undefined;
+  industry?: string | undefined;
+  place?: string | undefined;
+  pn?: string | undefined;
+  st?: string | undefined;
+  change?: boolean | undefined;
+} => ({
   q: text(s["q"], { trim: true, min: 2, max: 120 }),
   keyword: text(s["keyword"], { trim: true, min: 2, max: 60 }),
   industry: matching(s["industry"], /^[a-z0-9-]{2,40}$/),
+  // Check 2: a suggestion chosen in the scan box (its Place ID, its name, the Autocomplete session token), and
+  // "Not your business? Change it" (the search box again with the text kept).
+  place: matching(s["place"], /^[A-Za-z0-9_-]{10,200}$/),
+  pn: text(s["pn"], { trim: true, min: 1, max: 120 }),
+  st: matching(s["st"], /^[A-Za-z0-9-]{16,64}$/),
+  change: flag(s["change"]),
 });
 
 export const Route = createFileRoute("/scan/")({
@@ -30,15 +44,20 @@ export const Route = createFileRoute("/scan/")({
 });
 
 function Scan() {
-  const { q, keyword, industry } = Route.useSearch();
+  const { q, keyword, industry, place, pn, st, change } = Route.useSearch();
   return (
     <SiteShell>
-      {q ? (
+      {q && change ? (
+        <FreeCheckAgain query={q} keyword={keyword ?? null} industry={industry ?? null} />
+      ) : q ? (
         <LiveFreeCheck
-          key={`${q}|${keyword ?? ""}|${industry ?? ""}`}
+          key={`${q}|${keyword ?? ""}|${industry ?? ""}|${place ?? ""}`}
           query={q}
           keyword={keyword ?? null}
           industry={industry ?? null}
+          placeId={place ?? null}
+          placeName={pn ?? null}
+          sessionToken={st ?? null}
         />
       ) : (
         <FreeCheckStart />

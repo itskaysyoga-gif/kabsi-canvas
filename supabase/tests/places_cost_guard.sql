@@ -72,5 +72,26 @@ select is(private.purge_places_cache(), 1, 'the hourly purge blanks the expired 
 select is((select data from public.places_cache where place_id = 'p1'), null::jsonb, 'only the place ID stays');
 select is(private.purge_places_cache(), 0, 'a second purge finds nothing');
 
+-- Check 2: Autocomplete requests are counted on their own, with their own cap (300 by default, never "no cap").
+select is(private.places_autocomplete_cap(), 300, 'the Autocomplete daily cap is 300');
+update public.app_settings set value = 'lots' where key = 'places_autocomplete_daily_cap';
+select is(private.places_autocomplete_cap(), 300, 'an Autocomplete setting that is not a number falls back to 300');
+update public.app_settings set value = '5' where key = 'places_autocomplete_daily_cap';
+select is(private.places_autocomplete_cap(), 5, 'the Autocomplete cap follows app_settings.places_autocomplete_daily_cap');
+select ok((select bool_and(not has_function_privilege(r, 'private.places_autocomplete_cap()', 'execute'))
+             from unnest(array['anon', 'authenticated', 'service_role']) r),
+  'the Autocomplete cap reader is out of reach of the API roles');
+create temp table ac_takes (n integer primary key, g jsonb);
+insert into ac_takes select n, public.places_take('autocomplete') from generate_series(1, 5) n order by n;
+select is((select count(*) from ac_takes where g ->> 'allowed' = 'true'), 5::bigint, 'five Autocomplete requests are allowed up to the cap of five');
+select is(public.places_take('autocomplete') ->> 'allowed', 'false', 'the sixth is refused: the box falls back to search then pick');
+select is((select calls from public.places_usage where kind = 'autocomplete' and day = (now() at time zone 'UTC')::date), 5,
+  'a refused Autocomplete request is not counted');
+select is(public.places_take('search') ->> 'allowed', 'true', 'Autocomplete at its cap does not stop search');
+select is((select cap from (select (public.places_take('details') ->> 'cap')::integer as cap) c), 10,
+  'details and search keep the places_daily_cap (10 here), not the Autocomplete cap');
+select is((select count(*) from public.ops_events where kind = 'places_cap' and dedupe_key like 'places_cap:autocomplete:%'), 1::bigint,
+  'one alert when the Autocomplete cap is reached');
+
 select * from finish();
 rollback;

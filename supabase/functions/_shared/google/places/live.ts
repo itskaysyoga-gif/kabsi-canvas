@@ -60,6 +60,7 @@ export async function getPlace(key: string, placeId: string, fieldMask: string, 
 export const SNAPSHOT_FIELD_MASK =
   "id,displayName,formattedAddress,primaryTypeDisplayName,businessStatus,rating,userRatingCount,regularOpeningHours,currentOpeningHours,nationalPhoneNumber,websiteUri,photos";
 
-export const getSnapshotPlace = (key: string, placeId: string): Promise<PlacesResult<Place>> =>
-  getPlace(key, placeId, SNAPSHOT_FIELD_MASK);
+// Check 2: with the session token of the suggestions the call ends the Autocomplete session.
+export const getSnapshotPlace = (key: string, placeId: string, sessionToken?: string): Promise<PlacesResult<Place>> =>
+  getPlace(key, placeId, SNAPSHOT_FIELD_MASK, sessionToken);
 

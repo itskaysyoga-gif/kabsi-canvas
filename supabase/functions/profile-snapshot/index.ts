@@ -2,7 +2,7 @@
 // Public data only, through the Google layer's Places guard (field mask, daily cap; nothing from Places is stored but the place ID). The Places key
 // never reaches the browser. The logic and its limits are in _shared/profile-snapshot.ts.
 import { clientIp } from "../_shared/client-ip.ts";
-import { getSnapshotPlace, searchText } from "../_shared/google/index.ts";
+import { autocomplete, getSnapshotPlace, searchText } from "../_shared/google/index.ts";
 import { admin, APP_URL, captureError, CORS, esc, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { notify } from "../_shared/notify.ts";
 import { makeHandler } from "../_shared/profile-snapshot.ts";
@@ -22,6 +22,7 @@ Deno.serve(withBodyCap(makeHandler({
   },
   verifyTurnstile,
   searchText,
+  autocomplete,
   getSnapshotPlace,
   saveEmail: async (row) => {
     const { error } = await admin().from("profile_check_emails").insert(row);
