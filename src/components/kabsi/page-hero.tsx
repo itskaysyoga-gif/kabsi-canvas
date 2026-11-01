@@ -49,7 +49,13 @@ export function PageHero({
           >
             {hero.line}
           </p>
-          <div className="mt-7 animate-enter" style={{ animationDelay: "120ms" }} data-main-cta>
+          {/* relative z-10: the entrance animation makes a stacking context, so the search box's suggestion list must sit
+              above the visual that follows (Web 4 review). */}
+          <div
+            className="relative z-10 mt-7 animate-enter"
+            style={{ animationDelay: "120ms" }}
+            data-main-cta
+          >
             {action ?? <ButtonLink to="/scan">{hero.action ?? MAIN_CTA}</ButtonLink>}
             {under && <p className="mt-3 text-small text-text-2">{under}</p>}
           </div>

@@ -142,6 +142,34 @@ test.describe("Check 2: suggestions while typing", () => {
     }
     await page.screenshot({ path: `${SHOTS}/home-suggestions-${info.project.name}.png` });
   });
+  // Web 4 review: toBeVisible does not see an element painted over another one. Each option and the attribution
+  // must be the topmost element at its own centre, on Home and on the free check page (hero visual after the box).
+  for (const path of ["/", "/scan"]) {
+    test(`nothing covers the suggestions or Google Maps on ${path}`, async ({ page }) => {
+      await stub(page);
+      await open(page, path);
+      const box = page.getByRole("combobox").first();
+      await box.scrollIntoViewIfNeeded();
+      await box.click();
+      await box.pressSequentially("smile d", { delay: 60 });
+      await expect(page.getByRole("option").first()).toBeVisible();
+      const covered = await page.evaluate(() => {
+        const els = [
+          ...document.querySelectorAll<HTMLElement>('[role="option"]'),
+          document.querySelector<HTMLElement>('[data-testid="places-attribution"]'),
+        ].filter((e): e is HTMLElement => !!e);
+        return els
+          .filter((el) => {
+            el.scrollIntoView({ block: "nearest" });
+            const r = el.getBoundingClientRect();
+            const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+            return !(top && (el === top || el.contains(top)));
+          })
+          .map((el) => el.textContent);
+      });
+      expect(covered, "covered options or attribution").toEqual([]);
+    });
+  }
 
   test("the combobox follows the keyboard pattern and tells a screen reader", async ({ page }) => {
     const calls = await stub(page);

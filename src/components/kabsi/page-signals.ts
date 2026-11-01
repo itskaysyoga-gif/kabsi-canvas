@@ -34,15 +34,18 @@ export function useMainCtaInView() {
           removed = visible.delete(el) || removed;
         }
       }
+      let added = false;
       for (const el of els) {
         if (!watched.has(el)) {
           watched.add(el);
           io.observe(el);
+          added = true;
         }
       }
       // Before the first observer answer the default stands, so the header button never flashes yellow on load.
       if (!els.length) setInView(false);
-      else if (removed) setInView(visible.size > 0);
+      // A new main action waits for the observer's first answer, so a swap never flashes the yellow header button.
+      else if (removed && !added) setInView(visible.size > 0);
     };
     scan();
     const main = document.getElementById("main");

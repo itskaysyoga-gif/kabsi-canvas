@@ -37,3 +37,17 @@ describe("the free check on Design 8", () => {
     }
   });
 });
+
+describe("the suggestion list opens above the hero visual (Web 4 review)", () => {
+  it("lifts the search box's wrapper above the visual on Home and on every PageHero", () => {
+    expect(read("src/components/kabsi/page-hero.tsx")).toMatch(
+      /className="relative z-10 mt-7 animate-enter"/,
+    );
+    expect(read("src/components/kabsi/d8-home.tsx")).toMatch(
+      /className="relative z-10 mt-5 animate-enter/,
+    );
+  });
+  it("keeps the free check page off Home's module", () => {
+    expect(read("src/components/kabsi/d4-free-check.tsx")).not.toContain('from "./d8-home"');
+  });
+});

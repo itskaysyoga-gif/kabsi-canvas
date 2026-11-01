@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { TRIAL_LINE } from "@/lib/site";
 import { ScanBox } from "./scan-box";
 import { PageHero, popCls, stagger } from "./page-hero";
-import { Pill, ResultPreview } from "./d8-home";
+import { Pill, ResultPreview } from "./result-preview";
 import { CHECK_HERO } from "./hero-lines";
 
 /**
