@@ -11,20 +11,27 @@ import { NOT_AFFILIATED, ORG_LD, SITE_URL, pageHead } from "@/lib/site";
 // One guide (D253, D256), in Design 2's guide template: breadcrumb, the question as H1, the byline, the short answer,
 // the steps, "See where you show up" with the free check, Google's own help pages, more guides and the closing band.
 // Content lives in src/lib/guides.tsx, building blocks in guide-kit.tsx.
+// Lean 1 (speed): a route's loader and head stay in the shared bundle on every page, so the guide texts load here, on
+// demand, and the head reads what the loader returns.
 export const Route = createFileRoute("/guides/$slug")({
-  loader: ({ params }) => {
-    const g = guideBySlug(params.slug);
+  loader: async ({ params }) => {
+    const { guideBySlug: find } = await import("@/lib/guides");
+    const g = find(params.slug);
     if (!g) throw notFound();
-    return { slug: g.slug };
+    return {
+      slug: g.slug,
+      title: g.title,
+      description: g.description,
+      updated: g.updated,
+      image: photoSrc(g.photo, 1600),
+    };
   },
-  head: ({ params }) => {
-    const g = guideBySlug(params.slug);
+  head: ({ loaderData: g, params }) => {
     if (!g) return { meta: [{ title: "Guide not found | Kabsi" }] };
-    const image = photoSrc(g.photo, 1600);
     return pageHead({
       title: `${g.title} | Kabsi`,
       description: g.description,
-      path: `/guides/${g.slug}`,
+      path: `/guides/${params.slug}`,
       type: "article",
       crumbs: [
         { name: "Guides", path: "/guides" },
@@ -36,7 +43,7 @@ export const Route = createFileRoute("/guides/$slug")({
           "@type": "Article",
           headline: g.title,
           description: g.description,
-          image: [image],
+          image: [g.image],
           datePublished: "2026-09-26",
           dateModified: g.updated,
           mainEntityOfPage: `${SITE_URL}/guides/${g.slug}`,

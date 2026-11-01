@@ -11,7 +11,12 @@ import { SITE_URL, pageHead } from "@/lib/site";
 // Guides index (D253, D256), in Design 2's guide template: the H1 and lead, the first guide large, the rest as cards,
 // and the closing band with the free check.
 export const Route = createFileRoute("/guides/")({
-  head: () =>
+  // Lean 1 (speed): the guide texts load here, on demand; the head only needs each guide's address and title.
+  loader: async () => {
+    const { GUIDES: all } = await import("@/lib/guides");
+    return { list: all.map((g) => ({ slug: g.slug, title: g.title })) };
+  },
+  head: ({ loaderData }) =>
     pageHead({
       title: "Guides for Google Business Profile owners | Kabsi",
       description:
@@ -26,7 +31,7 @@ export const Route = createFileRoute("/guides/")({
           url: `${SITE_URL}/guides`,
           mainEntity: {
             "@type": "ItemList",
-            itemListElement: GUIDES.map((g, i) => ({
+            itemListElement: (loaderData?.list ?? []).map((g, i) => ({
               "@type": "ListItem",
               position: i + 1,
               name: g.title,
