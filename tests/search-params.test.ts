@@ -3,7 +3,7 @@
 // the address can carry (the router hands over strings, numbers, booleans, arrays, objects or nothing).
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { flag, intBetween, matching, oneOf, text } from "../src/lib/search-params";
+import { flag, intBetween, matching, oneOf, readStartSearch, text } from "../src/lib/search-params";
 
 const SAMPLES: unknown[] = [
   undefined,
@@ -118,5 +118,79 @@ describe("the search readers equal the zod schemas they replaced", () => {
   it("flag(): z.coerce.boolean()", () => {
     for (const v of SAMPLES)
       same(flag(v), zodOf(z.coerce.boolean().optional().catch(undefined), v));
+  });
+});
+
+// Polish 1 (1 Nov 2026): the /start reader replaces the zod schema of src/routes/_authenticated/start.tsx.
+describe("the /start reader equals the zod schema it replaced", () => {
+  const schema = z.object({
+    code: z
+      .string()
+      .regex(/^[2-9A-HJKMNP-Za-hjkmnp-z]{6}$/)
+      .optional()
+      .catch(undefined),
+    new: z.coerce.boolean().optional().catch(undefined),
+    preview: z.enum(["wa", "wa-notyet", "wa-done", "rest"]).optional().catch(undefined),
+  });
+  const VALUES: unknown[] = [
+    ...SAMPLES,
+    "ABCDEF",
+    "abcdef",
+    "A2B3C4",
+    "A2B3C",
+    "A2B3C45",
+    "A2B3C0",
+    "A2B3CI",
+    "A2B3CO",
+    "AAAAAA\n",
+    "wa",
+    "rest",
+    "wa-notyet",
+    "wa-done",
+    "WA",
+    "true",
+    "false",
+    "0",
+    "1",
+    0,
+    1,
+    true,
+    false,
+    [],
+    ["wa"],
+    {},
+    NaN,
+  ];
+  it("gives the same result for every combination of values", () => {
+    const SMALL = [
+      undefined,
+      null,
+      "",
+      "ABCDEF",
+      "A2B3CI",
+      "wa",
+      "rest",
+      "false",
+      "0",
+      0,
+      true,
+      false,
+      [],
+      {},
+    ];
+    for (const code of SMALL)
+      for (const nw of SMALL)
+        for (const preview of SMALL) {
+          const input = { code, new: nw, preview };
+          expect(readStartSearch(input), JSON.stringify(input)).toEqual(schema.parse(input));
+        }
+  });
+  it("gives the same result when keys are missing", () => {
+    expect(readStartSearch({})).toEqual(schema.parse({}));
+    for (const v of VALUES) {
+      expect(readStartSearch({ code: v })).toEqual(schema.parse({ code: v }));
+      expect(readStartSearch({ new: v })).toEqual(schema.parse({ new: v }));
+      expect(readStartSearch({ preview: v })).toEqual(schema.parse({ preview: v }));
+    }
   });
 });

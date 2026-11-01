@@ -12,6 +12,7 @@ import {
   LifeBuoy,
   LogOut,
   Mail,
+  MessageCircle,
   MessageSquareText,
   Newspaper,
   QrCode,
@@ -363,6 +364,12 @@ function AccountMenu({
         <DropdownMenuLabel className="text-label font-normal text-text-2">
           Need a hand?
         </DropdownMenuLabel>
+        <DropdownMenuItem
+          className={item}
+          onSelect={() => window.dispatchEvent(new CustomEvent("kabsi:open-nora"))}
+        >
+          <MessageCircle className="size-4" aria-hidden /> Ask Nora
+        </DropdownMenuItem>
         <DropdownMenuItem asChild className={item}>
           <WhatsappLink kind="general" className="no-underline">
             <MessageSquareText className="size-4" aria-hidden /> WhatsApp

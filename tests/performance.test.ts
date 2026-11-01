@@ -223,15 +223,34 @@ describe("afterPaint", () => {
     vi.advanceTimersByTime(110);
     expect(run).toHaveBeenCalledTimes(1);
   });
-  it("with quiet, a touch starts it at the next idle moment, not in the touch itself", () => {
+  it("with quiet, the first scroll, tap or key press starts it in the next task, not in the touch itself, whichever comes first", () => {
+    for (const kind of ["scroll", "pointerdown", "touchstart", "keydown"]) {
+      const run = vi.fn();
+      const cancel = afterPaint(run, 5000, { quiet: true });
+      win.dispatchEvent(new Event(kind));
+      expect(run, kind).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(1);
+      expect(run, kind).toHaveBeenCalledTimes(1);
+      vi.advanceTimersByTime(10_000);
+      expect(run, kind).toHaveBeenCalledTimes(1);
+      cancel();
+    }
+  });
+  it("with quiet, a touch before the page has finished loading also starts it (a fast visitor who leaves still counts)", () => {
+    vi.stubGlobal("document", { readyState: "loading" });
     const run = vi.fn();
     afterPaint(run, 5000, { quiet: true });
-    win.dispatchEvent(new Event("scroll"));
-    expect(run).not.toHaveBeenCalled();
+    win.dispatchEvent(new Event("pointerdown"));
     vi.advanceTimersByTime(1);
     expect(run).toHaveBeenCalledTimes(1);
-    vi.advanceTimersByTime(10_000);
-    expect(run).toHaveBeenCalledTimes(1);
+  });
+  it("with quiet, cancelling after a touch stops the pending start", () => {
+    const run = vi.fn();
+    const cancel = afterPaint(run, 5000, { quiet: true });
+    win.dispatchEvent(new Event("scroll"));
+    cancel();
+    vi.advanceTimersByTime(10);
+    expect(run).not.toHaveBeenCalled();
   });
   it("with quiet and no touch, it runs once after the delay", () => {
     const run = vi.fn();
@@ -278,7 +297,7 @@ describe("a stored session", () => {
 });
 
 describe("statistics wait for the page, and keep what happened meanwhile", () => {
-  it("starts PostHog and Speed Insights 5 seconds after load or at the next idle moment after the first touch, and sends what waited if statistics are still allowed", () => {
+  it("starts PostHog and Speed Insights at the first scroll, tap or key press or 5 seconds after load, whichever comes first, and sends what waited if statistics are still allowed", () => {
     const code = read("src/lib/telemetry.ts");
     expect(code).toContain("const WAIT_MS = 5000;");
     expect(code).toContain("afterPaint(runStart, WAIT_MS, { quiet: true })");

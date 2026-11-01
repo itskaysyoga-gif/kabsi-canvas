@@ -300,7 +300,9 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
 
   return (
     <>
-      {!open && !setupScreen && !waitOnSite ? (
+      // Polish 1 (1 Nov 2026): no floating button on a signed-in screen; Nora opens from "Your
+      account and help".
+      {!open && !setupScreen && !waitOnSite && surface === "site" ? (
         <button
           ref={launcherRef}
           type="button"
@@ -308,22 +310,18 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
           aria-label="Chat with Nora, Kabsi's assistant"
           className={cn(
             "fixed bottom-4 right-4 z-40 flex size-12 items-center justify-center gap-2 rounded-full bg-kb-black text-sm font-bold text-kb-white shadow-[0_12px_32px_rgba(0,0,0,.28)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-kb-yellow sm:right-6",
-            surface === "app"
-              ? "bottom-24 lg:bottom-6 lg:size-14"
-              : "sm:bottom-6 sm:h-14 sm:w-auto sm:pl-4 sm:pr-5",
+            "sm:bottom-6 sm:h-14 sm:w-auto sm:pl-4 sm:pr-5",
             // The phone bar (below 768 px) is 64 px plus its bottom padding; the launcher keeps 12 px of air above it.
-            surface === "site" &&
-              barUp &&
+            barUp &&
               "bottom-[calc(4.75rem+max(0.75rem,env(safe-area-inset-bottom)))] sm:bottom-[calc(4.75rem+max(0.75rem,env(safe-area-inset-bottom)))] md:bottom-6",
           )}
         >
           <span className="grid size-8 place-items-center rounded-full bg-kb-yellow text-kb-black">
             <MessageCircle className="size-4" aria-hidden="true" />
           </span>
-          <span className={surface === "app" ? "sr-only" : "hidden sm:inline"}>Chat with Nora</span>
+          <span className="hidden sm:inline">Chat with Nora</span>
         </button>
       ) : null}
-
       {open ? (
         <div
           role="dialog"
