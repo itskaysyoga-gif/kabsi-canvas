@@ -223,6 +223,24 @@ describe("afterPaint", () => {
     vi.advanceTimersByTime(110);
     expect(run).toHaveBeenCalledTimes(1);
   });
+  it("with quiet, a touch starts it at the next idle moment, not in the touch itself", () => {
+    const run = vi.fn();
+    afterPaint(run, 5000, { quiet: true });
+    win.dispatchEvent(new Event("scroll"));
+    expect(run).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
+    expect(run).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(10_000);
+    expect(run).toHaveBeenCalledTimes(1);
+  });
+  it("with quiet and no touch, it runs once after the delay", () => {
+    const run = vi.fn();
+    afterPaint(run, 5000, { quiet: true });
+    vi.advanceTimersByTime(4999);
+    expect(run).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(10);
+    expect(run).toHaveBeenCalledTimes(1);
+  });
   it("can be cancelled", () => {
     const run = vi.fn();
     afterPaint(run, 100)();
@@ -260,10 +278,13 @@ describe("a stored session", () => {
 });
 
 describe("statistics wait for the page, and keep what happened meanwhile", () => {
-  it("starts PostHog 1.5 seconds after load or at the first touch, and sends what waited if statistics are still allowed", () => {
+  it("starts PostHog and Speed Insights 5 seconds after load or at the next idle moment after the first touch, and sends what waited if statistics are still allowed", () => {
     const code = read("src/lib/telemetry.ts");
-    expect(code).toContain("const WAIT_MS = 1500;");
-    expect(code).toContain("afterPaint(runStart, WAIT_MS)");
+    expect(code).toContain("const WAIT_MS = 5000;");
+    expect(code).toContain("afterPaint(runStart, WAIT_MS, { quiet: true })");
+    // Lean 1: Speed Insights is no longer a script of the head; it is added with the statistics.
+    expect(code).not.toMatch(/src: "\/_vercel\/speed-insights/);
+    expect(code).toContain("loadSpeedInsights();");
     expect(code).toMatch(
       /if \(paused \|\| !analyticsAllowed\(\)\) return;\s+for \(const \[event, properties\] of list\)/,
     );

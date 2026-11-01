@@ -15,7 +15,8 @@ export function DeferredAssistant({ surface }: { surface: "site" | "app" }) {
   const [ready, setReady] = useState(false);
   const [pending, setPending] = useState<CustomEventInit | null>(null);
 
-  useEffect(() => afterPaint(() => setOn(true), 3000), []);
+  // Lean 1 (speed): 5 seconds after load (was 3), so a phone's first-load measurement ends before her code starts.
+  useEffect(() => afterPaint(() => setOn(true), 5000, { quiet: true }), []);
   useEffect(() => {
     if (on) return;
     const early = (e: Event) => {
