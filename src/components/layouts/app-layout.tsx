@@ -1,31 +1,27 @@
-// The signed-in website's shell (Design 3, light; master plan 30.17 section 4): a side bar from 1024 px, a top bar and a
-// bottom bar with More below it. The places, the roles and the old addresses are in src/lib/app-nav.ts; this file only
+// The signed-in website's shell (Design 3, light; App 2, master plan 30.22 item 5): a side bar from 1024 px, and below it
+// a top bar (the business, and one account menu with the trial, help and Log out) and a bottom bar with the same five places. The places, the roles and the old addresses are in src/lib/app-nav.ts; this file only
 // draws them. The staff area (/staff) uses the same shell with its own single link.
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
-  BarChart3,
   BookOpen,
   Camera,
   ChevronDown,
-  ClipboardList,
   CircleUser,
   Home,
   LifeBuoy,
   LogOut,
   Mail,
   MessageSquareText,
-  MoreHorizontal,
   Newspaper,
   QrCode,
   Settings,
   ShieldCheck,
   Users,
-  X,
   type LucideIcon,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { chooseLocation, myLatestLocation, myLocations, type Location } from "@/lib/onboarding";
 import { amStaff } from "@/lib/reviews";
@@ -38,7 +34,6 @@ import { NOT_AFFILIATED } from "@/lib/site";
 import {
   canOpen,
   desktopSections,
-  moreSections,
   phoneBar,
   sectionFor,
   type Section,
@@ -64,8 +59,6 @@ const ICON: Record<SectionId, LucideIcon> = {
   reviews: MessageSquareText,
   "google-profile": ShieldCheck,
   content: Newspaper,
-  insights: BarChart3,
-  reports: ClipboardList,
   "get-reviews": QrCode,
   settings: Settings,
   photos: Camera,
@@ -181,6 +174,34 @@ function BusinessMenu({ compact = false }: { compact?: boolean }) {
 }
 
 /** "Pro trial, [n] days left." with its end date (COPY.md 19), for the owner while the trial runs. */
+function useTrial(loc: Location | null | undefined, role: Role | undefined) {
+  const ent = useQuery({
+    queryKey: ["entitlements", loc?.id],
+    queryFn: () => loadEntitlements(loc!.id),
+    enabled: !!loc && role === "owner",
+    staleTime: 60_000,
+  });
+  return ent.data?.state === "trial" ? ent.data.trial : null;
+}
+
+const daysLeft = (iso: string) =>
+  Math.max(0, Math.ceil((Date.parse(iso) - Date.now()) / 86_400_000));
+
+function TrialWords({ endsAt }: { endsAt: string }) {
+  const left = daysLeft(endsAt);
+  return (
+    <>
+      <CircleUser className="size-5 shrink-0 text-text-2" aria-hidden />
+      <span className="min-w-0 flex-1">
+        <span className="block font-bold">
+          Pro trial, {left} {left === 1 ? "day" : "days"} left.
+        </span>
+        <span className="block text-label text-text-2">Ends {fmtDate(endsAt, false)}</span>
+      </span>
+    </>
+  );
+}
+
 function TrialStrip({
   loc,
   role,
@@ -190,15 +211,8 @@ function TrialStrip({
   role?: Role | undefined;
   className?: string;
 }) {
-  const ent = useQuery({
-    queryKey: ["entitlements", loc?.id],
-    queryFn: () => loadEntitlements(loc!.id),
-    enabled: !!loc && role === "owner",
-    staleTime: 60_000,
-  });
-  const t = ent.data?.state === "trial" ? ent.data.trial : null;
+  const t = useTrial(loc, role);
   if (!t) return null;
-  const left = Math.max(0, Math.ceil((Date.parse(t.ends_at) - Date.now()) / 86_400_000));
   return (
     <Link
       to="/app/plan"
@@ -207,13 +221,7 @@ function TrialStrip({
         className,
       )}
     >
-      <CircleUser className="size-5 shrink-0 text-text-2" aria-hidden />
-      <span className="min-w-0 flex-1">
-        <span className="block font-bold">
-          Pro trial, {left} {left === 1 ? "day" : "days"} left.
-        </span>
-        <span className="block text-label text-text-2">Ends {fmtDate(t.ends_at, false)}</span>
-      </span>
+      <TrialWords endsAt={t.ends_at} />
     </Link>
   );
 }
@@ -313,90 +321,70 @@ function BarLink({
   );
 }
 
-function MoreSheet({
-  sections,
-  current,
+/** The phone's account menu (App 2: the bottom bar has no More): the trial, help and Log out. */
+function AccountMenu({
   loc,
   role,
-  onClose,
+  email,
   onSignOut,
 }: {
-  sections: Section[];
-  current: Section | undefined;
   loc: Location | null | undefined;
   role?: Role | undefined;
-  onClose: () => void;
+  email: string | undefined;
   onSignOut: () => void;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    ref.current?.querySelector<HTMLElement>("a,button")?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  const item = "min-h-11 cursor-pointer gap-3 rounded-inner text-small font-semibold";
+  const trial = useTrial(loc, role);
   return (
-    <div className="fixed inset-0 z-50 lg:hidden">
-      <button
-        type="button"
-        aria-label="Close"
-        tabIndex={-1}
-        className="absolute inset-0 bg-scrim animate-fade"
-        onClick={onClose}
-      />
-      <div
-        ref={ref}
-        id="more-sheet"
-        role="dialog"
-        aria-modal="true"
-        aria-label="More"
-        className="absolute inset-x-0 bottom-0 max-h-[85dvh] animate-enter overflow-y-auto rounded-t-panel border-t border-line bg-surface-1 px-4 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-float"
-      >
-        <div className="flex items-center justify-between">
-          <p className="text-title font-bold">More</p>
-          <button
-            type="button"
-            onClick={onClose}
-            className="press grid size-11 place-items-center rounded-full hover:bg-surface-2"
-            aria-label="Close"
-          >
-            <X className="size-5" aria-hidden />
-          </button>
-        </div>
-        <TrialStrip loc={loc} role={role} className="mt-2" />
-        <ul className="mt-3 grid grid-cols-2 gap-2">
-          {sections.map((s) => {
-            const I = ICON[s.id];
-            const on = current?.id === s.id;
-            return (
-              <li key={s.id}>
-                <Link
-                  to={s.to}
-                  onClick={onClose}
-                  aria-current={on ? "page" : undefined}
-                  className={cn(
-                    "press flex min-h-16 items-center gap-3 rounded-inner border px-3 text-small font-bold",
-                    on ? "border-text-1 bg-surface-2" : "border-line hover:bg-surface-2",
-                  )}
-                >
-                  <I className="size-5 shrink-0" aria-hidden />
-                  {s.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-        <NeedAHand className="mt-4" />
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
         <button
           type="button"
-          onClick={onSignOut}
-          className="press mt-2 flex min-h-11 w-full items-center gap-3 rounded-inner px-3 text-small font-semibold text-text-2"
+          aria-label="Your account and help"
+          className="press grid size-11 shrink-0 place-items-center rounded-full text-text-2 hover:bg-surface-2"
         >
-          <LogOut className="size-5" aria-hidden />
-          Log out
+          <CircleUser className="size-6" aria-hidden />
         </button>
-      </div>
-    </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="w-72 rounded-card border-line bg-surface-1 p-2 shadow-float"
+      >
+        {trial ? (
+          <DropdownMenuItem
+            asChild
+            className="mb-1 min-h-11 cursor-pointer gap-3 rounded-inner bg-surface-2 text-small"
+          >
+            <Link to="/app/plan">
+              <TrialWords endsAt={trial.ends_at} />
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
+        <DropdownMenuLabel className="text-label font-normal text-text-2">
+          Need a hand?
+        </DropdownMenuLabel>
+        <DropdownMenuItem asChild className={item}>
+          <WhatsappLink kind="general" className="no-underline">
+            <MessageSquareText className="size-4" aria-hidden /> WhatsApp
+          </WhatsappLink>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className={item}>
+          <a href="mailto:hello@kabsi.co">
+            <Mail className="size-4" aria-hidden /> hello@kabsi.co
+          </a>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className={item}>
+          <Link to="/guides">
+            <BookOpen className="size-4" aria-hidden /> Guides
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-line" />
+        <DropdownMenuItem className={item} onSelect={onSignOut}>
+          <LogOut className="size-4" aria-hidden /> Log out
+        </DropdownMenuItem>
+        {email ? <p className="truncate px-2 pt-1 text-label text-text-2">{email}</p> : null}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -427,8 +415,6 @@ export function AppLayout({
   const staffRole = role === "staff";
   const sections = desktopSections(role);
   const bar = phoneBar(role);
-  const more = moreSections(role);
-  const [moreOpen, setMoreOpen] = useState(false);
   const waiting = useQuery({
     queryKey: ["waiting-count", myLoc.data?.id],
     queryFn: () => waitingReplies(myLoc.data!.id),
@@ -438,9 +424,7 @@ export function AppLayout({
   // Demo workspace (P0.1-06): no analytics while a demo business is open.
   const isDemo = area === "app" && myLoc.data?.is_demo === true;
   useEffect(() => setAnalyticsPaused(isDemo), [isDemo]);
-  useEffect(() => setMoreOpen(false), [location.pathname]);
   const current = area === "app" ? sectionFor(location.pathname, role) : undefined;
-  const moreActive = !!current && more.includes(current);
   const badgeFor = (sec: Section) =>
     sec.id === "reviews" && waiting.data ? waiting.data : undefined;
   // K-16: a page that is not part of the person's role says so, instead of showing a screen the database would refuse.
@@ -539,6 +523,14 @@ export function AppLayout({
             {area === "staff" ? "Business" : "Staff"}
           </Link>
         ) : null}
+        {area === "app" ? (
+          <AccountMenu
+            loc={myLoc.data}
+            role={role}
+            email={user?.email}
+            onSignOut={() => void handleSignOut()}
+          />
+        ) : null}
         {area === "staff" ? (
           <button
             type="button"
@@ -620,7 +612,7 @@ export function AppLayout({
           <ul
             className="grid"
             style={{
-              gridTemplateColumns: `repeat(${bar.length + (more.length ? 1 : 0)}, minmax(0, 1fr))`,
+              gridTemplateColumns: `repeat(${bar.length}, minmax(0, 1fr))`,
             }}
           >
             {bar.map((s) => (
@@ -628,41 +620,8 @@ export function AppLayout({
                 <BarLink section={s} on={current?.id === s.id} badge={badgeFor(s)} />
               </li>
             ))}
-            {more.length ? (
-              <li>
-                <button
-                  type="button"
-                  aria-expanded={moreOpen}
-                  aria-controls="more-sheet"
-                  onClick={() => setMoreOpen((m) => !m)}
-                  className={cn(
-                    "press relative flex min-h-16 w-full flex-col items-center justify-center gap-1 text-label font-bold",
-                    moreOpen || moreActive ? "text-text-1" : "text-text-2",
-                  )}
-                >
-                  {moreActive && (
-                    <span
-                      aria-hidden
-                      className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-text-1"
-                    />
-                  )}
-                  <MoreHorizontal className="size-6" aria-hidden />
-                  More
-                </button>
-              </li>
-            ) : null}
           </ul>
         </nav>
-      ) : null}
-      {area === "app" && moreOpen ? (
-        <MoreSheet
-          sections={more}
-          current={current}
-          loc={myLoc.data}
-          role={role}
-          onClose={() => setMoreOpen(false)}
-          onSignOut={() => void handleSignOut()}
-        />
       ) : null}
     </div>
   );

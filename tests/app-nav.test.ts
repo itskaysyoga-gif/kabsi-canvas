@@ -4,48 +4,74 @@ import { describe, expect, it } from "vitest";
 import {
   canOpen,
   desktopSections,
-  moreSections,
   OLD_APP_ADDRESSES,
   phoneBar,
   sectionFor,
   SECTIONS,
+  tabOn,
   tabsFor,
 } from "../src/lib/app-nav";
 
-// P0.3-08, UX 1: account navigation and product names (K-02, K-03, Design 3's names). Eight places on a desktop, five
-// items on a phone, every old address still on a screen, and none of the retired module names in the account.
+// P0.3-08, UX 1, App 2 (master plan 30.22 item 5): account navigation and product names (K-02, K-03). Five places on a
+// computer and the same five in the phone's bottom bar with no More, every old address still on a screen, and none of the
+// retired module names in the account.
 const root = join(__dirname, "..");
 const appDir = join(root, "src/routes/_authenticated/app");
 
 describe("navigation", () => {
-  it("has Design 3's eight destinations on a desktop, in order", () => {
+  it("has five places on a computer, in order", () => {
     expect(desktopSections("owner").map((s) => s.label)).toEqual([
       "Home",
       "Reviews",
-      "Google profile",
       "Posts and photos",
-      "Where you show up",
-      "Reports",
-      "Get reviews",
+      "Google profile",
       "Settings",
     ]);
   });
 
-  it("has five items on a phone: Home, Reviews, Profile, Posts and More", () => {
-    const bar = phoneBar("owner").map((s) => s.short);
-    expect(bar).toEqual(["Home", "Reviews", "Profile", "Posts"]);
-    expect(bar.length + 1).toBe(5);
-    expect(moreSections("owner").map((s) => s.label)).toEqual([
-      "Where you show up",
-      "Reports",
-      "Get reviews",
+  it("has the same five places in the phone bar, with no More", () => {
+    expect(phoneBar("owner").map((s) => s.id)).toEqual(desktopSections("owner").map((s) => s.id));
+    expect(phoneBar("owner").map((s) => s.short)).toEqual([
+      "Home",
+      "Reviews",
+      "Posts",
+      "Profile",
       "Settings",
     ]);
+    expect(phoneBar("manager")).toHaveLength(5);
   });
 
-  it("puts every desktop destination on the phone, in the bar or in More", () => {
-    const onPhone = new Set([...phoneBar("owner"), ...moreSections("owner")].map((s) => s.id));
-    for (const s of desktopSections("owner")) expect(onPhone.has(s.id)).toBe(true);
+  it("puts every other screen in a tab of one of the five places", () => {
+    expect(SECTIONS.reviews.tabs?.map((t) => t.label)).toEqual([
+      "Waiting",
+      "On Google",
+      "Get reviews",
+    ]);
+    expect(SECTIONS["google-profile"].tabs?.map((t) => t.label)).toEqual([
+      "Profile watch",
+      "Hours",
+      "Profile Coach",
+      "Where you show up",
+    ]);
+    expect(SECTIONS.content.tabs?.map((t) => t.label)).toEqual(["Posts", "Photos"]);
+    const tabbed = new Set(
+      desktopSections("owner").flatMap((s) => [s.to, ...(s.tabs ?? []).map((t) => t.to)]),
+    );
+    for (const p of Object.keys(OLD_APP_ADDRESSES).filter((p) => p !== "/app/inbox"))
+      expect(tabbed.has(p), p).toBe(true);
+  });
+
+  it("lights the Reviews tab that matches the filter, old ?f= values included", () => {
+    const [waiting, google, get] = SECTIONS.reviews.tabs!;
+    expect(tabOn(waiting!, "/app/reviews", null)).toBe(true);
+    expect(tabOn(waiting!, "/app/reviews", "needs")).toBe(true);
+    expect(tabOn(google!, "/app/reviews", "google")).toBe(true);
+    expect(tabOn(google!, "/app/reviews", "replied")).toBe(true);
+    for (const f of ["all", "positive", "neutral", "negative", "high"]) {
+      expect(tabOn(waiting!, "/app/reviews", f), f).toBe(false);
+      expect(tabOn(google!, "/app/reviews", f), f).toBe(true);
+    }
+    expect(tabOn(get!, "/app/cards/", null)).toBe(true);
   });
 
   it("keeps every old app address on a screen, in the right place", () => {
@@ -60,12 +86,13 @@ describe("navigation", () => {
     }
   });
 
-  it("puts the Plan, Team and Business Knowledge inside Settings, and never says listing or visibility", () => {
+  it("puts Business knowledge, Team, Plan and Reports inside Settings, and never says listing or visibility", () => {
     expect(SECTIONS.settings.tabs?.map((t) => t.label)).toEqual([
-      "Settings",
-      "Business Knowledge",
+      "General",
+      "Business knowledge",
       "Team",
       "Plan",
+      "Reports",
     ]);
     for (const s of Object.values(SECTIONS)) {
       const words = [s.label, s.short, ...(s.tabs ?? []).map((t) => t.label)].join(" ");
@@ -75,10 +102,11 @@ describe("navigation", () => {
 });
 
 describe("roles in navigation", () => {
-  it("shows staff photos and the review link only, with no More", () => {
+  it("shows staff photos and the review link only", () => {
     expect(desktopSections("staff").map((s) => s.label)).toEqual(["Photos", "Get reviews"]);
-    expect(phoneBar("staff")).toHaveLength(2);
-    expect(moreSections("staff")).toHaveLength(0);
+    expect(phoneBar("staff").map((s) => s.label)).toEqual(["Photos", "Get reviews"]);
+    expect(sectionFor("/app/cards", "staff")?.id).toBe("get-reviews");
+    expect(sectionFor("/app", "staff")?.id).toBe("photos");
     expect(canOpen("/app/photos", "staff")).toBe(true);
     expect(canOpen("/app", "staff")).toBe(true);
     expect(canOpen("/app/cards", "staff")).toBe(true);
@@ -91,6 +119,10 @@ describe("roles in navigation", () => {
       "/app/team",
       "/app/report",
       "/app/knowledge",
+      "/app/insights",
+      "/app/hours",
+      "/app/posts",
+      "/app/settings",
     ]) {
       expect(canOpen(p, "staff"), p).toBe(false);
     }
@@ -102,12 +134,13 @@ describe("roles in navigation", () => {
     expect(canOpen("/app/inbox", "manager")).toBe(true);
     expect(canOpen("/app/report", "manager")).toBe(true);
     const tabs = tabsFor(SECTIONS.settings, "manager").map((t) => t.label);
-    expect(tabs).toEqual(["Settings", "Business Knowledge"]);
+    expect(tabs).toEqual(["General", "Business knowledge", "Reports"]);
     expect(tabsFor(SECTIONS.settings, "owner").map((t) => t.label)).toEqual([
-      "Settings",
-      "Business Knowledge",
+      "General",
+      "Business knowledge",
       "Team",
       "Plan",
+      "Reports",
     ]);
   });
 
