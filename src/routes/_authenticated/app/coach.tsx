@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
-import { ProfileGaps } from "@/components/app/profile-gaps";
-import { loadTasks } from "@/lib/tasks";
 import { CoachActions } from "@/components/coach/coach-actions";
 import { CoachList } from "@/components/coach/coach-list";
 import { AccountTop, Panel, SourceLabel } from "@/components/kabsi/d3-account";
@@ -30,13 +28,6 @@ function CoachPage() {
     enabled: !!loc && !loc.concierge,
     retry: false,
   });
-  // The profile suggestions Kabsi made as tasks (App 2 moved them here from Profile watch and Home).
-  const tasks = useQuery({
-    queryKey: ["tasks", loc?.id],
-    queryFn: () => loadTasks(loc!.id),
-    enabled: live,
-  });
-  const gaps = (tasks.data?.tasks ?? []).filter((t) => t.kind === "profile_gap");
   const c = coach.data;
   const rows = c ? coachRows(c) : [];
   const done = rows.filter((r) => r.status === "done").length;
@@ -112,13 +103,6 @@ function CoachPage() {
           >
             <CoachList rows={rows} />
           </Panel>
-          {gaps.length && loc ? (
-            <ProfileGaps
-              locationId={loc.id}
-              gaps={gaps}
-              title={`${gaps.length} ${gaps.length === 1 ? "thing" : "things"} to fix`}
-            />
-          ) : null}
           {c.pro && loc ? (
             <CoachActions locationId={loc.id} onChanged={changed} />
           ) : (

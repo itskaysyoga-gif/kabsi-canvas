@@ -61,7 +61,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 1 Nov 2026, App 2 (PRs 295, 300, part 3): five places; Home with one-tap Approve. Detail: `docs/progress/archive/2026-11-01-app2.md`.
+- 1 Nov 2026, App 2 (PRs 295, 300, 302): five places; Home with one-tap Approve. Detail: `docs/progress/archive/2026-11-01-app2.md`.
 
 - 30 Oct 2026, Web 3 (PRs 289 to 292): Design 6 ported in four parts: the light-led shell, Home with the demonstration, Pricing, Founding 25 and the industry pages, the free check, the Manager step, the signed-in Home, "Live on Google" and the rule books. 31 Oct: checked live; Home LCP fix. Detail: `docs/progress/archive/2026-10-30-web3.md`.
 

@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ShieldCheck } from "lucide-react";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { AccountTop, Panel } from "@/components/kabsi/d3-account";
+import { ProfileGaps } from "@/components/app/profile-gaps";
 import { TaskBlock } from "@/components/kabsi/d3-content-task";
 import {
   Button,
@@ -182,6 +183,16 @@ function ProfilePage() {
           <Panel title="Details" id="details">
             <Details rows={rows} />
           </Panel>
+
+          <ProfileGaps
+            locationId={loc.id}
+            gaps={d.fix}
+            title={
+              d.fix.length === 0
+                ? "Nothing to fix"
+                : `${d.fix.length} ${d.fix.length === 1 ? "thing" : "things"} to fix`
+            }
+          />
 
           <Panel title="Google's warnings" id="warnings" className="lg:col-span-2">
             {d.warnings.length ? (
