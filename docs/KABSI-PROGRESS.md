@@ -64,7 +64,6 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 - 1 Nov 2026, Web 4 (PR 313 and the next parts): Design 7 and Design 8 on kabsi.co, part by part. Detail: `docs/progress/archive/2026-11-01-web4.md`.
 - 1 Nov 2026, Check 2 (PR 311): suggestions while typing, Kabsi never picks for the visitor, "Not your business? Change it". Not yet seen live. Detail: `docs/progress/archive/2026-11-01-check2.md`.
-- 1 Nov 2026, AI Answers 1 (PR 305 and the screens PR): when an AI answer names the business, its facts are checked against Business knowledge inside the AI Visibility cap; a clear difference is one Needs attention line and one Results Report line; the free check shows only which fact differs and ChatGPT's sentence. Mock only until ai_visibility_mode is live; no paid call. Detail: `docs/progress/archive/2026-11-01-ai-answers1.md`.
 
 
 ## How a session updates this page
