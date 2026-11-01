@@ -47,10 +47,21 @@ select is(public.ai_answer_finding('a2000000-0000-4000-8000-000000000003', jsonb
 select is((select count(*)::int from public.tasks where location_id = 'a2000000-0000-4000-8000-000000000001'), 1, 'still one item');
 select throws_ok($$select public.ai_answer_finding('a2000000-0000-4000-8000-000000000004', '{"fact": "rating"}', '{}')$$, 'P0001', null, 'an unknown fact is refused');
 
--- A later answer that gives the hours right closes the item.
+-- Agreement on hours never closes an item (one day right says nothing about another day).
 select is(public.ai_answer_finding('a2000000-0000-4000-8000-000000000004', null, array['hours']), false, 'no difference opens nothing');
-select is((select state from public.tasks where location_id = 'a2000000-0000-4000-8000-000000000001'), 'done', 'the item closes when an answer gives the fact right');
+select is((select state from public.tasks where location_id = 'a2000000-0000-4000-8000-000000000001' and source_id = 'hours'), 'open', 'hours agreement leaves the hours item open');
 select is((select accuracy ->> 'finding' from public.ai_visibility_runs where id = 'a2000000-0000-4000-8000-000000000004'), null, 'a checked answer with no difference keeps no finding');
+
+-- A phone item from ChatGPT closes only when ChatGPT gives the phone right, not Perplexity.
+select public.ai_answer_finding('a2000000-0000-4000-8000-000000000003', jsonb_build_object('fact', 'phone', 'detail', 'phone',
+  'sentence', 's', 'assistant', 'chatgpt', 'question', 'q', 'asked_at', '2026-11-01T10:00:00Z', 'kabsi', 'k', 'title', 'T', 'why', 'W',
+  'recommendation', 'R', 'evidence', '{"fact": "phone", "assistant": "chatgpt"}'::jsonb), '{}');
+select public.ai_answer_finding('a2000000-0000-4000-8000-000000000004', null, array['phone']);
+select is((select state from public.tasks where location_id = 'a2000000-0000-4000-8000-000000000001' and source_id = 'phone'), 'open', 'another assistant does not close it');
+insert into public.ai_visibility_runs (id, location_id, prompt_id, provider) values
+  ('a2000000-0000-4000-8000-000000000005', 'a2000000-0000-4000-8000-000000000001', 'a2000000-0000-4000-8000-000000000002', 'chatgpt');
+select public.ai_answer_finding('a2000000-0000-4000-8000-000000000005', null, array['phone']);
+select is((select state from public.tasks where location_id = 'a2000000-0000-4000-8000-000000000001' and source_id = 'phone'), 'done', 'the same assistant giving it right closes it');
 
 select * from finish();
 rollback;

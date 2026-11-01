@@ -160,7 +160,7 @@ async function latestAiAnswer(locationId: string, now: Date): Promise<AiAnswer |
 async function latestFinding(locationId: string, now: Date): Promise<Finding | null> {
   const since = new Date(now.getTime() - 7 * DAY).toISOString();
   const { data } = await admin().from("ai_visibility_runs").select("accuracy").eq("location_id", locationId).eq("state", "done")
-    .eq("source", "live").gte("run_at", since).not("accuracy->finding", "is", null).order("run_at", { ascending: false }).limit(1);
+    .eq("source", "live").gte("run_at", since).not("accuracy->>finding", "is", null).order("run_at", { ascending: false }).limit(1);
   const f = (data?.[0]?.accuracy as { finding?: Finding | null } | null)?.finding;
   return f?.fact && f.sentence ? f : null;
 }

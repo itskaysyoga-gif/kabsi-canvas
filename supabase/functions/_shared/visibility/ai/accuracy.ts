@@ -122,8 +122,8 @@ export function extractUser(o: { answer: string; business: string; area: string 
   return `Business: ${o.business}${o.area ? `\nArea: ${o.area}` : ""}\n<answer>\n${answer}\n</answer>`;
 }
 
-/** What one extraction call cost, in millionths of a US dollar, before it is made (the cap check). Haiku, about 3k tokens. */
-export const EXTRACT_ESTIMATE_MICROS = 6_000;
+/** What one extraction call may cost, in millionths of a US dollar, before it is made (the cap check): 8000 characters in, 1200 tokens out on Haiku. */
+export const EXTRACT_ESTIMATE_MICROS = 10_000;
 
 export type Extracted = { claims: Claim[]; costMicros: number };
 export type Extractor = (o: { answer: string; business: string; area: string | null }) => Promise<Extracted>;
@@ -242,10 +242,52 @@ export function attributed(answer: string, sentence: string, business: string): 
   return namesStrictly(answer, business) && !lines.some((l) => { const n = leadName(l); return !!n && !namesStrictly(n, business); });
 }
 
-/** The claims Kabsi may compare: in the answer, under this business, plain, current. */
+const toks = (s: string | null | undefined) => norm(s).split(" ").filter(Boolean);
+const inSentence = (part: string | null | undefined, sentence: string) => {
+  const t = toks(part), have = new Set(toks(sentence));
+  return t.length > 0 && t.every((w) => have.has(w));
+};
+
+/**
+ * The model's values must be in the sentence itself, so a value it made up (or one planted in the answer's text) never
+ * becomes a finding: times, digits, the host, the house number, the service, the price signs. A time not in the sentence
+ * is dropped; any other value not in it drops the claim.
+ */
+export function grounded(c: Claim): Claim | null {
+  const s = c.sentence;
+  switch (c.fact) {
+    case "hours": {
+      const opens = c.opens && inSentence(c.opens, s) ? c.opens : null;
+      const closes = c.closes && inSentence(c.closes, s) ? c.closes : null;
+      if (c.closed_day) return /clos|cerrad|ferm|geschlossen|chius/i.test(s) ? { ...c, opens: null, closes: null } : null;
+      return opens || closes ? { ...c, opens, closes } : null;
+    }
+    case "phone": {
+      const d = digits(c.value);
+      return d.length >= 7 && digits(s).includes(d.slice(-7)) ? c : null;
+    }
+    case "website": {
+      const h = host(c.value);
+      return h && s.toLowerCase().includes(h) ? c : null;
+    }
+    case "address": {
+      const no = street(c.value).no;
+      return inSentence(c.value, s) || (no && toks(s).includes(no) && inSentence(c.value.replace(/^\D*\d+\s*/, "").split(",")[0], s)) ? c : null;
+    }
+    case "services":
+      return inSentence(c.service ?? c.value, s) ? c : null;
+    case "price":
+      return c.level != null && s.includes("$".repeat(c.level)) && !s.includes("$".repeat(c.level + 1)) ? c : null;
+  }
+}
+
+/** The claims Kabsi may compare: in the answer, under this business, plain, current, values in the sentence. */
 export function usable(claims: Claim[], answer: string, business: string): Claim[] {
   if (!namesStrictly(answer, business)) return [];
-  return claims.filter((c) => c.about === "this" && c.certain && !c.closed_branch && attributed(answer, c.sentence, business));
+  return claims
+    .filter((c) => c.about === "this" && c.certain && !c.closed_branch && attributed(answer, c.sentence, business))
+    .map(grounded)
+    .filter((c): c is Claim => c != null);
 }
 
 // ─── reading values ───────────────────────────────────────────────────────────────────────────────────────────────────
@@ -266,10 +308,10 @@ export function parseTime(raw: string | null | undefined): number | null {
     if (ap === "am") h = h === 12 ? 0 : h;
     else h = h === 12 ? 12 : h + 12;
   } else if (h > 24) return null;
-  if (!ap && !m[2] && ap !== "h" && h <= 12 && !/h$/.test(s)) {
-    // "open until 6" says neither am nor pm: unsure.
-    return null;
-  }
+  if (!ap && !m[2] && h <= 12) return null; // "open until 6" says neither am nor pm: unsure
+  // "6:00" with no am or pm and no leading zero could be morning or evening: unsure. "06:00", "18:00" and "18h" are read.
+  if (!ap && m[2] && m[1].length === 1 && h >= 1 && h <= 12) return null;
+  if (!ap && m[2] && h === 12) return null;
   return h * 60 + min;
 }
 const mins = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
@@ -292,9 +334,11 @@ const NOT_OWN = /(^|\.)(facebook|instagram|tiktok|x|twitter|yelp|tripadvisor|goo
 
 /** House number and the street's distinctive words. */
 function street(s: string): { no: string | null; words: Set<string> } {
-  const n = norm(s);
-  const no = n.match(/\b(\d{1,6})[a-z]?\b/)?.[1] ?? null;
-  const first = n.split(" ").slice(0, 8);
+  // The house number starts its own part of the address ("Suite 200, 123 Main St, Springfield, IL 62701": 123, not 200
+  // or the ZIP code). No such part: no number to compare.
+  const part = s.split(/,|\n/).map((x) => norm(x)).find((x) => /^\d{1,6}[a-z]?\s+\S/.test(x)) ?? "";
+  const no = part.match(/^(\d{1,6})/)?.[1] ?? null;
+  const first = part.split(" ").slice(0, 8);
   const words = new Set(first.filter((w) => w.length > 2 && !/^\d/.test(w) && !["street", "st", "road", "rd", "avenue", "ave", "the", "and", "suite", "floor", "unit", "building", "boulevard", "blvd", "lane", "ln"].includes(w)));
   return { no, words };
 }
@@ -310,9 +354,13 @@ function hoursDiff(c: Claim, week: Week): Difference | null {
     const open = days.find((d) => week[dayKey(d)].length > 0);
     return open ? { ...base, detail: "closed_day", said: "closed", day: open } : null;
   }
-  const o = c.opens ? parseTime(c.opens) : null, k = c.closes ? parseTime(c.closes) : null;
-  if ((c.opens && o == null) || (c.closes && k == null) || (o == null && k == null)) return null; // a time Kabsi cannot read
-  const matches = (d: DayKey) => week[d].some((p) => (o == null || near(o, mins(p.open))) && (k == null || near(k, close(p))));
+  // A time Kabsi cannot read is left out; with neither time read there is nothing to compare.
+  const o = parseTime(c.opens), k = parseTime(c.closes);
+  if (o == null && k == null) return null;
+  // Opening matches a period's opening and closing a period's closing: split hours ("9 to 7" for 9 to 1 and 3 to 7) are
+  // an omitted break, not a clear difference.
+  const matches = (d: DayKey) =>
+    (o == null || week[d].some((p) => near(o, mins(p.open)))) && (k == null || week[d].some((p) => near(k, close(p))));
   if (!days.length) {
     // No days said: a difference only when no day on record has these times.
     const openDays = DAY_KEYS.filter((d) => week[d].length);
@@ -481,7 +529,7 @@ export function freeLine(d: Difference): string {
   const said = clip(d.said.trim(), 60);
   return said
     ? `ChatGPT's answer gives your ${FACT_WORD[d.detail]}${on} as ${said}. Your Google profile says otherwise.`
-    : `ChatGPT's answer gives a different ${FACT_WORD[d.detail]}${on}. Your Google profile says otherwise.`;
+    : `ChatGPT's answer gives ${/s$/.test(FACT_WORD[d.detail]) ? "different" : "a different"} ${FACT_WORD[d.detail]}${on}. Your Google profile says otherwise.`;
 }
 
 /** What Kabsi has for this fact, in the owner's words (the owner's own Business Knowledge, never Places). */

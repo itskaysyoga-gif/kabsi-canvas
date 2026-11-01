@@ -23,6 +23,7 @@ export const ACTION: Record<FactKey, { label: string; path: string }> = {
   price: { label: "Check your business details", path: "/app/knowledge" },
 };
 
+const PLURAL = new Set<Detail>(["closed_day", "open_day", "hours", "services"]);
 export const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 3).trimEnd()}...` : s);
 
 /** The Home item and its Results Report line, from one finding. Never a promise that an assistant will change. */
@@ -32,7 +33,7 @@ export function findingTask(f: Finding, tz = "UTC") {
   const sentence = clip(f.sentence.replace(/\s+/g, " ").trim(), 220);
   const why = clip(`${who} was asked "${clip(f.question, 120)}" on ${when}. It said: "${sentence}" Kabsi has: ${clip(f.kabsi, 120)}.`, 500);
   return {
-    title: `${who}'s answer gives a different ${FACT_WORD[f.detail]} for your business`,
+    title: `${who}'s answer gives ${PLURAL.has(f.detail) ? "different" : "a different"} ${FACT_WORD[f.detail]} for your business`,
     why,
     recommendation: ACCURACY_ACTION,
     evidence: { fact: f.fact, detail: f.detail, assistant: f.assistant, question: f.question, asked_at: f.asked_at, sentence: f.sentence, kabsi: f.kabsi, label: ACCURACY_LABEL },

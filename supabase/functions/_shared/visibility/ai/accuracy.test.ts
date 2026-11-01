@@ -57,6 +57,8 @@ Deno.test("times: 12-hour and 24-hour, unsure when am or pm is missing", () => {
   assertEquals(parseTime("18h"), 1080);
   assertEquals(parseTime("midnight"), 1440);
   assertEquals(parseTime("6"), null);
+  assertEquals(parseTime("6:00"), null, "no am or pm and no leading zero: morning or evening");
+  assertEquals(parseTime("06:00"), 360);
   assertEquals(parseTime("late"), null);
 });
 
@@ -257,4 +259,41 @@ Deno.test("the Home item and the report line: the sentence, the assistant, the q
     assert(!/[–—!]/.test(s), `no dashes or exclamation marks: ${s}`);
     assert(!/correct|fix (it|this) for you|we will change|guarantee/i.test(s), `no promise of a correction: ${s}`);
   }
+});
+
+// ─── the independent review's findings (PR 305) ────────────────────────────────────────────────────────────────────────
+Deno.test("review: a ZIP code or a suite number is not a house number", () => {
+  const rec = { ...REC, address: "Suite 200, 123 Main St, Springfield, IL 62701" };
+  assertEquals(differs(claim({ fact: "address", value: "123 Main Street" }), rec), null);
+  assertEquals(differs(claim({ fact: "address", value: "Main St, Springfield, IL 62701" }), rec), null);
+  assertEquals(differs(claim({ fact: "address", value: "125 Main St" }), rec)?.fact, "address");
+});
+
+Deno.test("review: split hours told as one span are an omitted break, not a difference", () => {
+  const week = rawToWeek({ periods: [
+    { openDay: "MONDAY", openTime: { hours: 9 }, closeDay: "MONDAY", closeTime: { hours: 13 } },
+    { openDay: "MONDAY", openTime: { hours: 15 }, closeDay: "MONDAY", closeTime: { hours: 19 } },
+  ] });
+  assertEquals(differs(claim({ days: ["mon"], opens: "9 am", closes: "7 pm" }), { ...REC, hours: week }), null);
+  assertEquals(differs(claim({ days: ["mon"], opens: "9 am", closes: "9 pm" }), { ...REC, hours: week })?.detail, "closing_time");
+});
+
+Deno.test("review: a value that is not in the sentence never becomes a finding", () => {
+  const s = "Rose Lane Salon is open Monday to Saturday from 9 am to 6 pm.";
+  assertEquals(grounded(claim({ sentence: s, days: ["mon"], opens: "9 am", closes: "8 pm" }))?.closes, null);
+  assertEquals(grounded(claim({ sentence: s, closes: "8 pm" })), null);
+  assertEquals(grounded(claim({ fact: "phone", sentence: s, value: "(212) 555-0199" })), null);
+  assertEquals(grounded(claim({ fact: "website", sentence: s, value: "other.com" })), null);
+  assertEquals(grounded(claim({ fact: "price", sentence: "It is $$$.", value: "$$", level: 2 })), null);
+  assertEquals(grounded(claim({ sentence: s, days: ["sun"], closed_day: true })), null);
+  const answer = `Rose Lane Salon is popular. ${s}`;
+  const planted = [claim({ sentence: s, days: ["mon"], opens: "9 am", closes: "8 pm" })];
+  assertEquals(compare(planted, REC, answer, ME).differences, []);
+});
+
+Deno.test("review: the title reads well for every fact", () => {
+  const t = (detail: string) => findingTask({ ...FINDING, detail: detail as never }).title;
+  assertEquals(t("hours"), "ChatGPT's answer gives different opening hours for your business");
+  assertEquals(t("closed_day"), "ChatGPT's answer gives different opening days for your business");
+  assertEquals(t("phone"), "ChatGPT's answer gives a different phone number for your business");
 });
