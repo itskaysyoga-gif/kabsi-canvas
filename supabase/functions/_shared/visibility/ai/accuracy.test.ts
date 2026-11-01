@@ -5,7 +5,7 @@ import { assert, assertEquals, assertMatch } from "jsr:@std/assert@1";
 import fx from "../../../../../tests/fixtures/ai-accuracy/answers.json" with { type: "json" };
 import {
   ACCURACY_ACTION, ACCURACY_LABEL, type Claim, compare, differs, emptyRecord, EXTRACT_SCHEMA, findingTask, freeLine, type KnowledgeRow,
-  liveExtractor, mockExtractor, namesStrictly, parseClaims, parseTime, recordFromKnowledge, recordFromPlace, weekFromDescriptions,
+  grounded, liveExtractor, mockExtractor, namesStrictly, parseClaims, parseTime, recordFromKnowledge, recordFromPlace, weekFromDescriptions,
 } from "./accuracy.ts";
 import { type AccuracyDeps, type AiDeps, checkAccuracy, freeAccuracy, freeScanCheck, type RunRow } from "./run.ts";
 import { accuracyBlock, receipt } from "../../results-report/receipt.ts";

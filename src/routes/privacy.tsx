@@ -296,8 +296,9 @@ function Page() {
             the facts it states (hours, phone, address, website, services, price level) and compares
             them with what you confirmed. Kabsi keeps only which fact differs, the assistant&apos;s
             sentence, the question, the date and your own fact, with the answer. On the free check,
-            Kabsi compares the one answer with your Google profile as read during the check and keeps
-            only which fact differs and the assistant&apos;s sentence, nothing from the profile.
+            Kabsi compares the one answer with your Google profile as read during the check and
+            keeps only which fact differs and the assistant&apos;s sentence, nothing from the
+            profile.
           </li>
           <li>
             For posts, Kabsi may also use your category and area, phrases from your reviews and,
