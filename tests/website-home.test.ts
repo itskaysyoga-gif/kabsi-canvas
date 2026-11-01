@@ -9,6 +9,7 @@ import {
   BRAND_LINE,
   KABSI_GROUP_ID,
   MAIN_CTA,
+  BUSINESS_MENU,
   NAV_LINKS,
   ORG_LD,
   OPERATOR_LINE,
@@ -134,17 +135,28 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     );
     expect(home).toContain("{!WHATSAPP_ON && (");
   });
-  it("puts the Design 6 links in the header, with Free tools and Partners in the footer", () => {
-    expect(NAV_LINKS.map((n) => n.label)).toEqual([
-      "How it works",
-      "Pricing",
-      "Businesses",
-      "Founding 25",
-      "About",
+  it("puts the Design 8 links in the header, the Businesses menu, and three footer groups", () => {
+    expect(NAV_LINKS.map((n) => n.label)).toEqual(["How it works", "Pricing"]);
+    expect(BUSINESS_MENU.map((n) => n.label)).toEqual([
+      "Hair salons",
+      "Barbershops",
+      "Nail salons",
+      "Restaurants",
     ]);
     const footer = read("src/components/kabsi/site-footer.tsx");
-    expect(footer).toContain('title: "Free tools"');
+    for (const t of ['title: "Kabsi"', 'title: "Businesses"', 'title: "Company"'])
+      expect(footer).toContain(t);
+    // Lane R decision 4 (1 Nov 2026): the free tool stays in the Kabsi group.
+    expect(footer).toContain('{ label: "Review link and QR code", to: "/google-review-link" }');
     expect(footer).toContain('{ label: "Partners", to: "/partners" }');
+    expect(footer).toContain("SOCIAL_LINKS.map");
+    expect(footer).toContain("openPrivacyChoices");
+  });
+  it("never types the Founding 25 count in the line above the header", () => {
+    const line = read("src/components/kabsi/founding-line.tsx");
+    expect(line).toContain("useFoundingPlaces()");
+    expect(line).toContain("places && places.left > 0 &&");
+    expect(line).not.toMatch(/\b\d+ places left/);
   });
   it("say the access steps the same everywhere, with Add (on some screens, Invite)", () => {
     const access = read("src/components/kabsi/d5-access.tsx");

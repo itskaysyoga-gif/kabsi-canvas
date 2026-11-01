@@ -114,6 +114,8 @@ test.describe("public pages", () => {
       return route.fulfill(json({ ok: true }));
     });
     await page.goto("/scan?q=Rose%20Lane%20Salon");
+    // Check 2 (1 Nov 2026): Kabsi never picks for the visitor, so one match is confirmed first.
+    await page.getByRole("button", { name: "This is my business" }).click({ timeout: 30_000 });
     const save = page.getByRole("button", { name: "Save my place" });
     await expect(save).toBeVisible({ timeout: 30_000 });
     const form = page.locator("form", { has: save });

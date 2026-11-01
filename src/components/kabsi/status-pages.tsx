@@ -36,7 +36,7 @@ export function NotFoundPage() {
     <SiteShell>
       <title>Kabsi: This page is not here.</title>
       <meta name="robots" content="noindex" />
-      <section className="container-kb grid min-h-[80dvh] items-center gap-12 pt-28 pb-20 md:grid-cols-[1fr_auto]">
+      <section className="container-kb grid min-h-[80dvh] items-center gap-12 pt-12 pb-20 md:grid-cols-[1fr_auto]">
         <div className="max-w-xl">
           <h1 className="text-display">This page is not here.</h1>
           <p className="mt-5 text-lead text-text-2">
@@ -76,7 +76,7 @@ export function ErrorView({ onRetry }: { onRetry?: () => void }) {
     <SiteShell>
       <title>Kabsi: Something went wrong on our side.</title>
       <meta name="robots" content="noindex" />
-      <section className="container-kb grid min-h-[80dvh] items-center pt-28 pb-20">
+      <section className="container-kb grid min-h-[80dvh] items-center pt-12 pb-20">
         <div className="max-w-xl">
           <h1 className="text-display">Something went wrong on our side.</h1>
           <p className="mt-5 text-lead text-text-2">Nothing you did. Try again in a minute.</p>

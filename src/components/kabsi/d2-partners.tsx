@@ -112,7 +112,7 @@ export function PartnersPage() {
   const places = usePartnerPlaces();
   return (
     <>
-      <section className="container-kb grid items-center gap-10 pt-28 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:pt-36">
+      <section className="container-kb grid items-center gap-10 pt-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:pt-20">
         <div>
           <SectionHead
             as="h1"

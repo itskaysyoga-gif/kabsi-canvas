@@ -11,7 +11,7 @@ import { ExampleBadge } from "./ui";
 export function FreeCheckStart() {
   return (
     <>
-      <section className="container-kb pt-28 lg:pt-36">
+      <section className="container-kb pt-12 lg:pt-20">
         <ToolTabs current="/scan" />
         <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-16">
           <div>

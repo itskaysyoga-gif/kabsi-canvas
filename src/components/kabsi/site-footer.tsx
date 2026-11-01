@@ -1,6 +1,7 @@
-import { cn } from "@/lib/utils";
 import {
+  ALL_BUSINESSES,
   BRAND_LINE,
+  BUSINESS_MENU,
   CONTACT_EMAIL,
   GOOGLE_THIRD_PARTY_URL,
   NOT_AFFILIATED,
@@ -10,33 +11,28 @@ import { Logo, WhatsAppLink } from "./ui";
 import { SiteLink } from "./site-link";
 import { openPrivacyChoices } from "@/lib/consent";
 
-const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
+/**
+ * Design 8 footer (Web 4, lane R 1 Nov 2026): three short groups, then one quiet row with the legal links, Your privacy
+ * choices and SOCIAL_LINKS, the independence line, the operator and Creem line. "Review link and QR code" stays in
+ * the Kabsi group (lane R decision 4). Nothing legally needed is dropped.
+ */
+const GROUPS: { title: string; links: { label: string; to: string }[] }[] = [
   {
-    title: "Product",
+    title: "Kabsi",
     links: [
       { label: "How it works", to: "/how-it-works" },
       { label: "Pricing", to: "/pricing" },
+      { label: "Free check", to: "/scan" },
+      { label: "Review link and QR code", to: "/google-review-link" },
       { label: "Security", to: "/security" },
       { label: "FAQ", to: "/faq" },
     ],
   },
   {
-    title: "Free tools",
+    title: "Businesses",
     links: [
-      { label: "Free check", to: "/scan" },
-      { label: "Google profile check", to: "/google-profile-check" },
-      { label: "Review link and QR code", to: "/google-review-link" },
-    ],
-  },
-  {
-    title: "Learn",
-    links: [
-      { label: "Every kind of business", to: "/for" },
-      { label: "Hair salons", to: "/for/hair-salon" },
-      { label: "Barbershops", to: "/for/barbershop" },
-      { label: "Restaurants", to: "/for/restaurant" },
-      { label: "Dental clinics", to: "/for/dental-clinic" },
-      { label: "Guides", to: "/guides" },
+      { label: ALL_BUSINESSES.label, to: ALL_BUSINESSES.to },
+      ...BUSINESS_MENU.map((b) => ({ label: b.label, to: b.to })),
     ],
   },
   {
@@ -45,38 +41,35 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
       { label: "About", to: "/about" },
       { label: "Founding 25", to: "/founding" },
       { label: "Partners", to: "/partners" },
-      { label: "Partner terms", to: "/partners/terms" },
-      { label: "Privacy", to: "/privacy" },
-      { label: "Terms", to: "/terms" },
+      { label: "Guides", to: "/guides" },
     ],
   },
 ];
 
-const linkCls =
+const footLink =
   "inline-flex min-h-11 items-center text-small text-text-2 underline-offset-4 transition-colors duration-150 hover:text-text-1 hover:underline";
+const quietLink =
+  "inline-flex min-h-11 items-center text-label text-text-2 underline underline-offset-4 hover:text-text-1";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-line bg-band pb-28 md:pb-0">
-      <div className="container-kb pt-14 pb-10 lg:pt-20">
-        <div className="flex flex-col gap-8 border-b border-line pb-12 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <Logo className="-ms-1 ps-1" />
-            <p className="mt-5 max-w-[18ch] font-display text-h2 font-bold text-text-1">
-              {BRAND_LINE}
-            </p>
-          </div>
-          <WhatsAppLink className="self-start lg:self-auto" />
+    <footer className="bg-band pb-24 sm:pb-0">
+      <div className="container-kb grid gap-10 pt-14 pb-10 lg:grid-cols-[1fr_2fr] lg:pt-20">
+        <div>
+          <Logo className="-ms-1 ps-1" />
+          <p className="mt-4 max-w-[16ch] font-display text-h3 font-bold text-text-1">
+            {BRAND_LINE}
+          </p>
+          <WhatsAppLink className="mt-6" size="md" />
         </div>
-
-        <div className="grid grid-cols-2 gap-x-6 gap-y-10 pt-10 md:grid-cols-3 lg:grid-cols-5">
-          {COLUMNS.map((c) => (
-            <nav key={c.title} aria-label={c.title}>
-              <h2 className="font-sans text-label font-bold text-text-3">{c.title}</h2>
-              <ul className="mt-3">
-                {c.links.map((l) => (
+        <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3">
+          {GROUPS.map((g) => (
+            <nav key={g.title} aria-label={g.title}>
+              <h2 className="font-sans text-label font-bold text-text-3">{g.title}</h2>
+              <ul className="mt-2">
+                {g.links.map((l) => (
                   <li key={l.label}>
-                    <SiteLink to={l.to} className={linkCls}>
+                    <SiteLink to={l.to} className={footLink}>
                       {l.label}
                     </SiteLink>
                   </li>
@@ -84,24 +77,40 @@ export function SiteFooter() {
               </ul>
             </nav>
           ))}
-          <nav aria-label="Follow">
-            <h2 className="font-sans text-label font-bold text-text-3">Follow</h2>
-            <ul className="mt-3">
-              {SOCIAL_LINKS.map((s) => (
-                <li key={s.name}>
-                  <a href={s.href} target="_blank" rel="noreferrer" className={linkCls}>
-                    {s.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
         </div>
       </div>
-
       <div className="border-t border-line">
-        <div className="container-kb space-y-3 py-8 text-small text-text-3">
-          <p className="max-w-[70ch]">
+        <div className="container-kb space-y-2 py-6 text-label text-text-3">
+          <ul className="flex flex-wrap items-center gap-x-5">
+            <li>
+              <SiteLink to="/privacy" className={quietLink}>
+                Privacy
+              </SiteLink>
+            </li>
+            <li>
+              <SiteLink to="/terms" className={quietLink}>
+                Terms
+              </SiteLink>
+            </li>
+            <li>
+              <SiteLink to="/partners/terms" className={quietLink}>
+                Partner terms
+              </SiteLink>
+            </li>
+            <li>
+              <button type="button" onClick={openPrivacyChoices} className={quietLink}>
+                Your privacy choices
+              </button>
+            </li>
+            {SOCIAL_LINKS.map((s) => (
+              <li key={s.name}>
+                <a href={s.href} target="_blank" rel="noreferrer" className={quietLink}>
+                  {s.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p className="max-w-[80ch]">
             {NOT_AFFILIATED} Google Business Profile is free from Google. Kabsi is an independent
             paid service.{" "}
             <a
@@ -113,7 +122,7 @@ export function SiteFooter() {
               Google's guidance on working with a third party
             </a>
           </p>
-          <p className="max-w-[70ch]">
+          <p className="max-w-[80ch]">
             Kabsi is operated by Rashid Abou Hamzy. Contact:{" "}
             <a
               href={`mailto:${CONTACT_EMAIL}`}
@@ -121,18 +130,8 @@ export function SiteFooter() {
             >
               {CONTACT_EMAIL}
             </a>
-            . Payments are processed by Creem, our merchant of record.
+            . Payments are processed by Creem, our merchant of record. © 2026 Kabsi
           </p>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-1 pt-2">
-            <button
-              type="button"
-              onClick={openPrivacyChoices}
-              className={cn(linkCls, "text-text-2 underline")}
-            >
-              Your privacy choices
-            </button>
-            <span>© 2026 Kabsi</span>
-          </div>
         </div>
       </div>
     </footer>

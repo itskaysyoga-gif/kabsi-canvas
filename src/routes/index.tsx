@@ -52,7 +52,7 @@ function Home() {
       {sticker === "disabled" ? (
         <div
           role="status"
-          className="relative z-50 bg-kb-yellow px-5 pt-20 pb-3 text-center text-small font-bold text-kb-black"
+          className="relative z-40 bg-kb-yellow px-5 py-3 text-center text-small font-bold text-kb-black"
         >
           This review link isn't active. Please ask the staff for help.
         </div>

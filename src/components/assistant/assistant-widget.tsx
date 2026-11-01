@@ -21,13 +21,7 @@ import { WhatsappLink } from "@/components/shared/whatsapp-link";
 import { WHATSAPP_NUMBER, WHATSAPP_ON } from "@/lib/site";
 import { Turnstile } from "@/components/turnstile";
 import { useAuth } from "@/components/auth/auth-provider";
-import {
-  setChrome,
-  useChrome,
-  useConsentOpen,
-  useHeroState,
-  usePhoneBarShown,
-} from "@/components/kabsi/page-signals";
+import { setChrome, useChrome, useConsentOpen } from "@/components/kabsi/page-signals";
 
 type Msg = { role: "user" | "assistant"; content: string };
 const ENDPOINT = `${supabaseUrl}/functions/v1/assistant`;
@@ -108,15 +102,13 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
-  // Design 6 placement on the public pages (lane R, 30 Oct 2026): the consent bar comes first and the menu covers the
-  // page, so the launcher waits; on a phone it waits until the visitor is past the hero, so it never covers the
-  // hero's phone, and it sits 12 px above the phone bar while that shows. The phone bar steps aside while Nora is open.
+  // Placement on the public pages. Design 6 (lane R, 30 Oct 2026): the consent bar comes first and the menu covers the
+  // page, so the launcher waits. Design 8 (Web 4, lane R decision 5, 1 Nov 2026): below 640 px there is no floating
+  // launcher at all; Nora's button sits in the phone bar (site-chrome.tsx), which steps aside while she is open.
   const { menuOpen } = useChrome();
   const consentOpen = useConsentOpen();
-  const barUp = usePhoneBarShown();
-  const hero = useHeroState();
   const [phone, setPhone] = useState(false);
-  // Layout effect: the phone check is known before the launcher first paints, so it never flashes over the hero.
+  // Layout effect: the phone check is known before the launcher first paints, so it never flashes on a phone.
   useLayoutEffect(() => {
     const mq = window.matchMedia("(max-width: 639px)");
     const on = () => setPhone(mq.matches);
@@ -127,7 +119,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
   useEffect(() => {
     setChrome({ noraOpen: open });
   }, [open]);
-  const waitOnSite = surface === "site" && (consentOpen || menuOpen || (phone && hero === "on"));
+  const waitOnSite = surface === "site" && (consentOpen || menuOpen || phone);
 
   // Load the previous conversation the first time the panel opens.
   useEffect(() => {
@@ -199,6 +191,8 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
     setOpen(false);
     window.setTimeout(() => {
       if (launcherRef.current) return launcherRef.current.focus();
+      // On a phone the phone bar gives focus back to Nora's button in it (site-chrome.tsx).
+      if (document.querySelector("[data-nora-bar]") && window.innerWidth < 640) return;
       // The launcher may be waiting (over the hero on a phone, or behind the menu): focus goes back to the page.
       const main = document.getElementById("main");
       main?.setAttribute("tabindex", "-1");
@@ -310,9 +304,6 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
           className={cn(
             "fixed bottom-4 right-4 z-40 flex size-12 items-center justify-center gap-2 rounded-full bg-kb-black text-sm font-bold text-kb-white shadow-[0_12px_32px_rgba(0,0,0,.28)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-kb-yellow sm:right-6",
             "sm:bottom-6 sm:h-14 sm:w-auto sm:pl-4 sm:pr-5",
-            // The phone bar (below 768 px) is 64 px plus its bottom padding; the launcher keeps 12 px of air above it.
-            barUp &&
-              "bottom-[calc(4.75rem+max(0.75rem,env(safe-area-inset-bottom)))] sm:bottom-[calc(4.75rem+max(0.75rem,env(safe-area-inset-bottom)))] md:bottom-6",
           )}
         >
           <span className="grid size-8 place-items-center rounded-full bg-kb-yellow text-kb-black">
