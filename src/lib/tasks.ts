@@ -13,7 +13,8 @@ export type TaskKind =
   | "profile_gap"
   | "reconnect"
   | "billing"
-  | "google_needs_action";
+  | "google_needs_action"
+  | "ai_answer";
 export type TaskPriority = "urgent" | "recommended" | "nice";
 export type Task = {
   id: string;

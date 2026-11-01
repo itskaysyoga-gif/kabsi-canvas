@@ -163,6 +163,8 @@ export type FreeCheck = {
     label: string;
     provider?: string;
     competitors?: string[];
+    /** AI Answers 1: which fact ChatGPT gave differently from the Google profile, and its own sentence. */
+    accuracy?: { fact: string; sentence: string; line: string } | null;
   } | null;
   map:
     | {

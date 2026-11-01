@@ -143,6 +143,11 @@ export function cardAction(t: Task): CardAction {
       return { primary: "See your plan", secondary: "Later" };
     case "google_needs_action":
       return { primary: "See what Google asks", secondary: "Later" };
+    case "ai_answer":
+      return {
+        primary: AI_ANSWER_BUTTON[String(t.evidence["fact"])] ?? "Check your Google profile",
+        secondary: "Later",
+      };
     default:
       return { primary: "Open", secondary: "Later" };
   }
@@ -319,7 +324,26 @@ export const nextReportLine = (monday: string) =>
 // ── App 2 (1 Nov 2026, master plan 30.22 item 5): an owner knows in five seconds what needs them.
 
 /** One real problem on Home: one line and at most one button. */
-export type AttentionLine = { key: string; text: string; action?: { label: string; to: string } };
+export type AttentionLine = {
+  key: string;
+  text: string;
+  action?: { label: string; to: string };
+  /** AI Answers 1: the lines under the title (what the assistant said, what to do, the label). */
+  detail?: string[];
+};
+
+/** AI Answers 1 (docs/COPY.md 37): the button for a fact an AI answer gave differently. */
+const AI_ANSWER_BUTTON: Record<string, string> = {
+  hours: "Check your hours",
+  services: "Check your business details",
+  price: "Check your business details",
+};
+const aiAnswerDetail = (
+  t: Pick<Task, "evidence"> & { why?: string; recommendation?: string | null },
+) =>
+  [t.why, t.recommendation, t.evidence["label"]].filter(
+    (x): x is string => typeof x === "string" && x.length > 0,
+  );
 
 export const ATTENTION_DEFAULT_SETUP = "Setup is waiting for one step: add Kabsi as a Manager.";
 export const ACCESS_LOST_LINE = "Kabsi can't reach your Google profile any more.";
@@ -330,7 +354,8 @@ export const ACCESS_LOST_LINE = "Kabsi can't reach your Google profile any more.
  * draft to approve (a profile change, billing, a Google warning). Never a status that is fine.
  */
 export function attentionLines(i: {
-  tasks: Pick<Task, "id" | "kind" | "title" | "path" | "evidence" | "priority">[];
+  tasks: (Pick<Task, "id" | "kind" | "title" | "path" | "evidence" | "priority"> &
+    Partial<Pick<Task, "why" | "recommendation">>)[];
   accessLost: boolean;
   setup: { text: string; owner: boolean } | null;
   plan: { title: string; to: string; label: string } | null;
@@ -362,6 +387,7 @@ export function attentionLines(i: {
       key: t.id,
       text: t.title,
       action: { label: cardAction(t as Task).primary, to: t.path },
+      ...(t.kind === "ai_answer" ? { detail: aiAnswerDetail(t) } : {}),
     });
   }
   return out;

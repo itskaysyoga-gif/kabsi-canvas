@@ -145,9 +145,28 @@ export function NeedsAttention({ lines }: { lines: AttentionLine[] }) {
         {lines.map((l) => (
           <li
             key={l.key}
-            className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+            className={
+              l.detail?.length
+                ? "flex flex-col items-start gap-3 py-3 first:pt-0 last:pb-0"
+                : "flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+            }
           >
-            <p className="min-w-0 flex-1 text-body font-semibold">{l.text}</p>
+            <div className="min-w-0 flex-1 self-stretch">
+              <p className="text-body font-semibold">{l.text}</p>
+              {l.detail?.map((d, i) => (
+                <p
+                  key={i}
+                  dir="auto"
+                  className={
+                    i === l.detail!.length - 1 && l.detail!.length > 2
+                      ? "mt-1 text-label font-semibold text-text-2"
+                      : "mt-1 text-small text-text-2"
+                  }
+                >
+                  {d}
+                </p>
+              ))}
+            </div>
             {l.action ? (
               <Link to={l.action.to as "/"} className={buttonClass("secondary", "md")}>
                 {l.action.label}
