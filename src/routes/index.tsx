@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
+import { oneOf } from "@/lib/search-params";
 import { SiteShell } from "@/components/kabsi/site-chrome";
 import { PHOTOS } from "@/components/kabsi/photos";
 import { HERO_LINE } from "@/components/kabsi/d6-data";
@@ -15,7 +15,9 @@ import { FAQ, HOME_FAQ } from "@/components/kabsi/faq-data";
 
 export const Route = createFileRoute("/")({
   // go.kabsi.co sends switched-off cards here with ?sticker=disabled
-  validateSearch: z.object({ sticker: z.enum(["disabled"]).optional().catch(undefined) }),
+  validateSearch: (s: Record<string, unknown>): { sticker?: "disabled" | undefined } => ({
+    sticker: oneOf(s["sticker"], ["disabled"] as const),
+  }),
   head: () => {
     const h = pageHead({
       title: "Kabsi: Your business on Google. Taken care of.",

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Check, Clock, Undo2 } from "lucide-react";
-import { z } from "zod";
 import { HolidayAnswerForm } from "@/components/hours/holiday-answer";
 import { ConfirmLayout } from "@/components/layouts/confirm-layout";
 import { QuietMark, QuietTitle } from "@/components/kabsi/d2-quiet";
@@ -16,14 +15,17 @@ import {
   type HolidayLinkView,
 } from "@/lib/holidays";
 import { setAnalyticsPaused, track } from "@/lib/telemetry";
+import { oneOf } from "@/lib/search-params";
 
 // The holiday hours link in the email (P0.5-03, K-131). Opening it never does anything by itself (mail scanners open
 // links): the owner chooses, reads what Google will show and confirms. "Normal hours" needs only the link; "Closed" and
 // "Custom hours" are the approval of hours, so the person signs in first and comes back here (K-17). After a new approval
 // the page counts down 10 seconds with Undo (K-70).
 export const Route = createFileRoute("/h/$token")({
-  validateSearch: z.object({
-    a: z.enum(["normal", "closed", "custom"]).optional().catch(undefined),
+  validateSearch: (
+    s: Record<string, unknown>,
+  ): { a?: "normal" | "closed" | "custom" | undefined } => ({
+    a: oneOf(s["a"], ["normal", "closed", "custom"] as const),
   }),
   head: () => ({
     meta: [

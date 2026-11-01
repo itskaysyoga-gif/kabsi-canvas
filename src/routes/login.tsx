@@ -1,13 +1,15 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { z } from "zod";
 import { useEffect } from "react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { SignInPanel } from "@/components/auth/sign-in-panel";
 import { useAuth } from "@/components/auth/auth-provider";
 import { safeNext } from "@/lib/signup";
+import { text } from "@/lib/search-params";
 import { SiteLink } from "@/components/kabsi/site-link";
 
-const searchSchema = z.object({ next: z.string().optional().catch(undefined) });
+const searchSchema = (s: Record<string, unknown>): { next?: string | undefined } => ({
+  next: text(s["next"]),
+});
 
 // Log in and sign up are the same sheet (P0.4-02, K-91): Continue with Google, or a 6-digit email code. No passwords.
 // Google sends the owner back here; the session is picked up from the address and the page moves on to `next`.
