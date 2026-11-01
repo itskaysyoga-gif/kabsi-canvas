@@ -6,7 +6,7 @@ import { AlertTriangle, Check, ExternalLink, Undo2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { sectionFor, tabsFor } from "@/lib/app-nav";
+import { sectionFor, tabOn, tabsFor } from "@/lib/app-nav";
 import { myLatestLocation } from "@/lib/onboarding";
 import { myAccess } from "@/lib/team";
 import {
@@ -19,8 +19,6 @@ import {
 } from "@/lib/task-state";
 import type { TaskItem } from "@/lib/task-feed";
 import { StatusPill, buttonClass, type Tone } from "./ui";
-
-const clean = (p: string) => (p.length > 1 ? p.replace(/\/+$/, "") : p);
 
 /** The role of the signed-in person on the open business (cached with the shell's own queries). */
 export function useAccountRole() {
@@ -48,6 +46,12 @@ export function AccountTop({
   className?: string;
 }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const f = useRouterState({
+    select: (s) => {
+      const v = (s.location.search as Record<string, unknown>)["f"];
+      return typeof v === "string" ? v : null;
+    },
+  });
   const role = useAccountRole();
   const section = sectionFor(path, role);
   const list = section && tabs ? tabsFor(section, role) : [];
@@ -69,11 +73,12 @@ export function AccountTop({
         >
           <ul className="flex w-max gap-1 border-b border-line sm:w-auto">
             {list.map((t) => {
-              const on = clean(path) === t.to;
+              const on = tabOn(t, path, f);
               return (
-                <li key={t.to}>
+                <li key={`${t.to}${t.f ?? ""}`}>
                   <Link
                     to={t.to as "/"}
+                    search={(t.f ? { f: t.f } : {}) as never}
                     aria-current={on ? "page" : undefined}
                     className={cn(
                       "relative flex min-h-11 items-center whitespace-nowrap px-3 text-small font-bold",

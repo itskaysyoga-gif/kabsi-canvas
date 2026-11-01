@@ -42,10 +42,61 @@ test.describe("app screens (QA demo owner)", () => {
       await settle(page);
       expect(page.url(), "stayed signed in").toContain("/app");
       await axeClean(page, route, KNOWN_AXE);
-      // The QA post is due 20 days after the reset, so the post list is masked; the rest of the screen is compared.
-      const masks =
-        route === "/app/posts" ? [...MASKS(page), page.locator("ol > li")] : MASKS(page);
-      await expect(page).toHaveScreenshot(`${name}.png`, { ...(await keep(page)), mask: masks });
+      // App 2 (1 Nov 2026): a visual baseline only for Home and Reviews; every other screen is checked by axe and the
+      // journeys below, so a copy change does not need a new picture.
+      if (name === "home" || name === "reviews")
+        await expect(page).toHaveScreenshot(`${name}.png`, {
+          ...(await keep(page)),
+          mask: MASKS(page),
+        });
+    });
+  }
+});
+
+// App 2 (master plan 30.22 item 5): five places on a computer and the same five in the phone's bottom bar, no More, and
+// every older address opens its screen inside the right place.
+const PLACES = ["Home", "Reviews", "Posts and photos", "Google profile", "Settings"];
+const SHORT = ["Home", "Reviews", "Posts", "Profile", "Settings"];
+const OLD: [string, string, string][] = [
+  ["/app/inbox", "Reviews", "Reviews"],
+  ["/app/cards", "Reviews", "Get reviews"],
+  ["/app/insights", "Google profile", "Where you show up"],
+  ["/app/coach", "Google profile", "Profile Coach"],
+  ["/app/report", "Settings", "Reports"],
+  ["/app/knowledge", "Settings", "Business knowledge"],
+  ["/app/plan", "Settings", "Plan"],
+];
+
+test.describe("app menu (QA demo owner)", () => {
+  test.skip(() => !savedSession("demo"), "no KABSI_QA_CODE_DEMO for this run");
+  test.beforeEach(async ({ page, context }) => {
+    await noBanner(page);
+    await signedIn(context, "demo");
+  });
+
+  test("five places, no More", async ({ page }, info) => {
+    await page.goto("/app");
+    const nav = page
+      .getByRole("navigation", { name: "Your Kabsi account" })
+      .locator("visible=true");
+    await expect(nav.getByRole("link")).toHaveCount(5);
+    const names = info.project.name === "m390" ? SHORT : PLACES;
+    for (const name of names)
+      await expect(nav.getByRole("link", { name: new RegExp(name) })).toBeVisible();
+    await expect(page.getByRole("button", { name: "More" })).toHaveCount(0);
+  });
+
+  for (const [path, place, tab] of OLD) {
+    test(`${path} opens ${tab} in ${place}`, async ({ page }) => {
+      await page.goto(path);
+      await expect(page.locator("h1").first()).toBeVisible();
+      const tabs = page.getByRole("navigation", { name: "Pages in this section" });
+      if (path !== "/app/inbox")
+        await expect(tabs.getByRole("link", { name: tab, exact: true })).toHaveAttribute(
+          "aria-current",
+          "page",
+        );
+      await axeClean(page, path, KNOWN_AXE);
     });
   }
 });

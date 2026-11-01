@@ -732,3 +732,10 @@ The 16 conflicts of the Design 6 audit (section 5), as lane R decided them. Wher
 16. "Visibility Map" and "AI Visibility" are names inside the account only; public pages say "Where you come up nearby". Done in the skill.
 
 Other lines of this pass: header links "How it works", "Pricing", "Businesses", "Founding 25", "About", "Log in"; footer column "Free tools" ("Free check", "Google profile check", "Review link and QR code"); signed-in Home "Home", "Needs your yes", "Needs attention", "Done by Kabsi", "Your business on Google", "See your Google profile"; its lead "[n] things need you." with "Each one is on WhatsApp too: answer wherever you are." only once WhatsApp is on.
+
+## 36. App 2: the signed-in app, simplified (1 Nov 2026, lane R's decision of 1 Nov, master plan 30.22 item 5)
+
+Where an older section of this file says otherwise, this section wins for the signed-in website.
+
+- Shell: five places, the same on a computer and in the phone's bottom bar: "Home", "Reviews", "Posts and photos" (short "Posts"), "Google profile" (short "Profile"), "Settings". "More" is retired. Tabs: Reviews "Waiting", "On Google", "Get reviews"; Posts and photos "Posts", "Photos"; Google profile "Profile watch", "Hours", "Profile Coach", "Where you show up"; Settings "General", "Business knowledge", "Team", "Plan", "Reports". The phone's account menu: "Your account and help" (its label for screen readers), "Need a hand?", "WhatsApp", "hello@kabsi.co", "Guides", "Log out".
+- Reviews: the filter chips are replaced by the tabs; "See all reviews" opens the full list.

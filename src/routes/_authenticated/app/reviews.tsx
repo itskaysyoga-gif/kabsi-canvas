@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, MessageSquareText, QrCode, RefreshCw, Search, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { AccountTop, Panel } from "@/components/kabsi/d3-account";
-import { Button, ButtonLink, Chip, EmptyState, ErrorState, Skeleton } from "@/components/kabsi/ui";
+import { Button, ButtonLink, EmptyState, ErrorState, Skeleton } from "@/components/kabsi/ui";
 import { ReviewCard } from "@/components/reviews/review-card";
 import { ReviewDone } from "@/components/reviews/review-done";
 import { ReviewCounts } from "@/components/reviews/review-counts";
@@ -76,10 +76,8 @@ function ReviewsPage() {
   });
   const byReview = tasks.data ?? NO_TASKS;
   const all = useMemo(() => reviews.data ?? [], [reviews.data]);
-  const waitingCount = all.filter(needsReply).length;
-  // Waiting is where an owner starts; when nothing waits the full list is more useful than an empty one.
-  const view: ReviewView =
-    viewFor(search.f) ?? (waitingCount > 0 || reviews.isLoading ? "waiting" : "all");
+  // Waiting is where an owner starts (the first tab, App 2); "All" stays for the old addresses and the empty Waiting tab.
+  const view: ReviewView = viewFor(search.f) ?? "waiting";
   const needle = q.trim().toLowerCase();
   const list = useMemo(() => {
     const rows = sortReviews(
@@ -148,23 +146,6 @@ function ReviewsPage() {
       {all.length ? (
         <div className="mb-5 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Show">
-              {VIEWS.map((v) => {
-                const n = all.filter((r) =>
-                  matchesView(r, v.key, byReview.get(r.id), tasks.isSuccess),
-                ).length;
-                return (
-                  <Chip
-                    key={v.key}
-                    selected={view === v.key}
-                    aria-pressed={view === v.key}
-                    onClick={() => setView(v.key)}
-                  >
-                    {v.label} {n}
-                  </Chip>
-                );
-              })}
-            </div>
             <Button
               variant="tertiary"
               className="ms-auto"
@@ -249,6 +230,11 @@ function ReviewsPage() {
           {list.length > count ? (
             <Button variant="secondary" size="md" onClick={() => setCount((c) => c + PAGE)}>
               Show more
+            </Button>
+          ) : null}
+          {view !== "all" && all.length > list.length ? (
+            <Button variant="tertiary" onClick={() => setView("all")}>
+              See all reviews
             </Button>
           ) : null}
         </div>
