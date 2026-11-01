@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { SCAN_LINE, TRIAL_LINE } from "@/lib/site";
 import {
   HUBS,
+  crumbsFor,
   hubOf,
   industriesIn,
   industryCheck,
@@ -40,14 +41,6 @@ import { Bubble, CLOCK } from "./whatsapp";
 export const YELLOW_PHRASE = "Taken care of.";
 
 /* ---------- Breadcrumbs (and their BreadcrumbList data, in the route's head) ---------- */
-
-export function crumbsFor(i?: Industry, h?: Hub) {
-  const c = [{ name: "All businesses", to: "/for" }];
-  const theHub = h ?? (i ? hubOf(i) : undefined);
-  if (theHub) c.push({ name: theHub.name, to: `/for/${theHub.id}` });
-  if (i) c.push({ name: i.plural, to: `/for/${i.slug}` });
-  return c;
-}
 
 function Crumbs({ items }: { items: { name: string; to: string }[] }) {
   return (

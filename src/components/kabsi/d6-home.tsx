@@ -30,7 +30,7 @@ import { FAQ, HOME_FAQ } from "./faq-data";
 import { DemoProvider, DemoSteps, HeroDemo } from "./d6-demo";
 import { HERO_LINE, DEMO } from "./d6-data";
 import { PLANS } from "./plans";
-import { FOUNDING25_TOTAL } from "./d5-founding";
+import { FOUNDING25_TOTAL } from "./founding-total";
 
 const linkCls =
   "press inline-flex min-h-11 items-center gap-1.5 font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1";

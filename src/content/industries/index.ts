@@ -92,6 +92,14 @@ export const HUBS: Hub[] = [
 export const industry = (slug: string) => INDUSTRIES.find((i) => i.slug === slug);
 export const hub = (id: string) => HUBS.find((h) => h.id === id);
 export const hubOf = (i: Industry) => HUBS.find((h) => h.id === i.hub)!;
+/** Breadcrumb items for an industry or hub page: All businesses, the hub, the page. Lives with the content so a route can use it without loading the page code. */
+export function crumbsFor(i?: Industry, h?: Hub) {
+  const c = [{ name: "All businesses", to: "/for" }];
+  const theHub = h ?? (i ? hubOf(i) : undefined);
+  if (theHub) c.push({ name: theHub.name, to: `/for/${theHub.id}` });
+  if (i) c.push({ name: i.plural, to: `/for/${i.slug}` });
+  return c;
+}
 export const industriesIn = (id: HubId) => INDUSTRIES.filter((i) => i.hub === id);
 /** A hub is indexed when it holds at least one finished page. */
 export const hubIndexed = (id: HubId) => industriesIn(id).some((i) => i.finished);

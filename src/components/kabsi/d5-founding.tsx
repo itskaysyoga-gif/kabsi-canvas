@@ -16,9 +16,10 @@ import {
 } from "@/lib/public-api";
 import { PageTop, useFlagState } from "./d2-parts";
 import { FOUNDER } from "./photos";
+import { FOUNDING25_TOTAL } from "./founding-total";
 import { Banner, Button, ButtonLink, Faq, Field, SectionHead, Segmented, StatusPill } from "./ui";
 
-export const FOUNDING25_TOTAL = 25;
+export { FOUNDING25_TOTAL };
 export const FOUNDING25_LINE =
   "Founding 25: three months of Kabsi Pro, free, for 25 businesses. Kabsi does the Google work; you tell Rashid what to make better.";
 export const FOUNDING25_UNDER =
