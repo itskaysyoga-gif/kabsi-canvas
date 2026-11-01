@@ -10,6 +10,7 @@
 // pages. Every browser event carries an event_id, so Meta can match it with a server event of the same id.
 import { advertisingAllowed, runWhenAdvertisingAllowed } from "@/lib/consent";
 import { isPrivatePath } from "@/lib/private-paths";
+import { afterPaint } from "@/lib/after-paint";
 
 const PIXEL_ID = (import.meta.env.VITE_META_PIXEL_ID ?? "").trim();
 
@@ -42,6 +43,7 @@ declare global {
   }
 }
 
+const PIXEL_WAIT_MS = 5000;
 let loaded = false;
 let waiting = false;
 let currentPath = "/";
@@ -62,10 +64,18 @@ function load() {
   fbq.version = "2.0";
   window.fbq ??= fbq;
   window._fbq ??= window.fbq;
-  const s = document.createElement("script");
-  s.async = true;
-  s.src = "https://connect.facebook.net/en_US/fbevents.js";
-  document.head.appendChild(s);
+  // Lean 1 (speed): the stub above already queues every call, so the 200 KB of Meta's script can wait for the page: 5 seconds
+  // after load, or the next idle moment after the first touch. The events in the queue go out when it arrives.
+  afterPaint(
+    () => {
+      const s = document.createElement("script");
+      s.async = true;
+      s.src = "https://connect.facebook.net/en_US/fbevents.js";
+      document.head.appendChild(s);
+    },
+    PIXEL_WAIT_MS,
+    { quiet: true },
+  );
   window.fbq("init", PIXEL_ID);
 }
 

@@ -53,6 +53,7 @@ declare global {
     posthog?: PostHogLike;
     sentryOnLoad?: () => void;
     __kabsiStartAnalytics?: () => void;
+    __kabsiEnv?: string;
   }
 }
 
@@ -119,30 +120,42 @@ export const telemetryHeadScripts = [
     crossOrigin: "anonymous" as const,
     async: true, // never block the first paint; sentryOnLoad initialises it when it arrives
   },
-  // 20.5: Vercel Speed Insights, real visitors' Core Web Vitals, no cookies and no identifier. About 1 KB, deferred.
-  { src: "/_vercel/speed-insights/script.js", defer: true },
+  // 20.5: Vercel Speed Insights (real visitors' Core Web Vitals, no cookies, no identifier) is no longer in the head. Lean 1
+  // (speed): it is added after the first paint with the statistics, below (loadSpeedInsights).
 ];
+
+function loadSpeedInsights() {
+  if (typeof document === "undefined" || window.__kabsiEnv === "local") return;
+  if (document.querySelector('script[src="/_vercel/speed-insights/script.js"]')) return;
+  const s = document.createElement("script");
+  s.src = "/_vercel/speed-insights/script.js";
+  s.defer = true;
+  document.head.appendChild(s);
+}
 
 // Called once from the root component after hydration. Replays and the pending user id apply after it.
 let pendingUser: string | null = null;
 let consentWatched = false;
 let lastPath = "/";
 // PostHog's script (about 95 KB compressed, 330 KB to run) loads once the page has painted and settled, not while it is
-// being made ready: 1.5 seconds after load, or at the first touch (lane R, 22 Oct 2026, performance). A browser event
-// sent before then waits in a short list and goes out when PostHog starts, if statistics are still allowed.
-const WAIT_MS = 1500;
+// being made ready: 5 seconds after load, or at the first touch followed by the next idle moment (lane R, 22 Oct 2026,
+// performance; Lean 1, 1 Nov 2026: was 1.5 seconds, which still fell inside a phone's first-load measurement). Speed
+// Insights starts with it. A browser event sent before then waits in a short list and goes out when PostHog starts, if
+// statistics are still allowed.
+const WAIT_MS = 5000;
 const waiting: Array<[string, SafeProps]> = [];
 let started = false;
 let cancelStart: (() => void) | null = null;
 export function startAnalytics() {
   if (typeof window === "undefined" || started || cancelStart) return;
-  cancelStart = afterPaint(runStart, WAIT_MS);
+  cancelStart = afterPaint(runStart, WAIT_MS, { quiet: true });
 }
 function runStart() {
   if (typeof window === "undefined") return;
   started = true;
   cancelStart = null;
   try {
+    loadSpeedInsights();
     window.__kabsiStartAnalytics?.();
     flushWaiting();
     syncReplayWithPath(lastPath);
