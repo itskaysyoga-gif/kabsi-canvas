@@ -300,8 +300,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
 
   return (
     <>
-      // Polish 1 (1 Nov 2026): no floating button on a signed-in screen; Nora opens from "Your
-      account and help".
+      {/* Polish 1: no floating button on a signed-in screen; Nora opens from "Your account and help". */}
       {!open && !setupScreen && !waitOnSite && surface === "site" ? (
         <button
           ref={launcherRef}
