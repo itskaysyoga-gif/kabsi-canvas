@@ -241,6 +241,10 @@ function PickBusiness({
           </li>
         ))}
       </ul>
+      {/* Google's Places policy: Places results shown without a Google map carry the words "Google Maps". */}
+      <p className="mt-3 text-label font-semibold text-text-3">
+        <span translate="no">Google Maps</span>
+      </p>
       <Link
         to="/scan"
         search={changeSearch(query, keyword, industry) as never}
@@ -288,7 +292,6 @@ export function LiveFreeCheck({
   keyword,
   industry,
   placeId = null,
-  placeName = null,
   sessionToken = null,
 }: {
   query: string;
@@ -296,7 +299,6 @@ export function LiveFreeCheck({
   industry: string | null;
   /** Check 2: the visitor chose a suggestion in the scan box; its Place ID goes straight to the check. */
   placeId?: string | null;
-  placeName?: string | null;
   /** The suggestions' session token: Place Details with it ends the Autocomplete session. */
   sessionToken?: string | null;
 }) {
@@ -312,7 +314,7 @@ export function LiveFreeCheck({
     pixelCustom("FreeScanStarted");
     void (async () => {
       try {
-        if (placeId) return void pick({ place_id: placeId, name: placeName ?? query, address: "" });
+        if (placeId) return void pick({ place_id: placeId, name: query, address: "" });
         const places = await findBusinesses(query, await take());
         // Never pick for the visitor, not even the only match (Check 2).
         if (!places.length) setPhase({ kind: "none" });
@@ -360,7 +362,7 @@ export function LiveFreeCheck({
 
   return (
     <>
-      {phase.kind === "searching" && <ScanSearching query={placeName ?? query} progress={0} />}
+      {phase.kind === "searching" && <ScanSearching query={query} progress={0} />}
       {phase.kind === "checking" && <ScanSearching query={phase.place.name} progress={progress} />}
       {phase.kind === "none" && <NotFound query={query} keyword={keyword} industry={industry} />}
       {phase.kind === "error" && <Failed message={phase.message} />}
@@ -954,7 +956,7 @@ export function SavedFreeCheck({ code }: { code: string }) {
         </h1>
         <Link
           to="/scan"
-          search={changeSearch(live.business, live.term, null) as never}
+          search={changeSearch(live.business, null, null) as never}
           className="mt-1 inline-flex min-h-11 items-center text-small font-bold underline underline-offset-4"
         >
           Not your business? Change it

@@ -104,6 +104,8 @@ export type Suggested = {
   available: boolean;
   /** A signed pass the next calls send instead of a Turnstile token (a Turnstile token works once). */
   pass?: string;
+  /** The pass had run out (15 minutes) or did not fit: ask again with a fresh bot check. */
+  challengeFailed?: boolean;
 };
 
 /**
@@ -133,7 +135,14 @@ export async function suggestBusinesses(
       }),
       ...(signal ? { signal } : {}),
     });
-    if (!res.ok) return { suggestions: [], available: false };
+    if (!res.ok) {
+      const e = (await res.json().catch(() => ({}))) as { error?: string };
+      return {
+        suggestions: [],
+        available: false,
+        ...(e.error === "challenge_failed" ? { challengeFailed: true } : {}),
+      };
+    }
     const j = (await res.json()) as Partial<Suggested>;
     return {
       suggestions: Array.isArray(j.suggestions) ? j.suggestions.slice(0, 5) : [],

@@ -70,23 +70,47 @@ export function BusinessCombobox({
   const session = useRef(newSessionToken());
   const pass = useRef<string | undefined>(undefined);
   const token = useRef("");
-  const seq = useRef(0);
+  const waiters = useRef<((t: string) => void)[]>([]);
 
+  // A Turnstile token works once. The widget is replaced after every token taken (the `round` key) so the next one is
+  // ready; a run that is replaced by a newer keystroke cancels its wait, so it never takes the token the newer run needs.
   const onToken = useCallback((t: string) => {
     token.current = t;
+    if (t && waiters.current.length) {
+      const w = waiters.current.shift()!;
+      token.current = "";
+      setRound((n) => n + 1);
+      w(t);
+    }
   }, []);
-  const waitForToken = useCallback(async () => {
-    const until = Date.now() + TOKEN_WAIT_MS;
-    while (!token.current && Date.now() < until) await new Promise((r) => setTimeout(r, 100));
-    const t = token.current;
-    token.current = "";
-    return t;
+  const takeToken = useCallback(() => {
+    let timer: number | undefined;
+    let waiter: ((t: string) => void) | undefined;
+    const promise = new Promise<string>((resolve) => {
+      if (token.current) {
+        const t = token.current;
+        token.current = "";
+        setRound((n) => n + 1);
+        resolve(t);
+        return;
+      }
+      waiter = resolve;
+      waiters.current.push(resolve);
+      timer = window.setTimeout(() => cancel(), TOKEN_WAIT_MS);
+    });
+    // Cancelling (or timing out) answers "" and leaves the queue.
+    const cancel = () => {
+      window.clearTimeout(timer);
+      const i = waiter ? waiters.current.indexOf(waiter) : -1;
+      if (i >= 0) waiters.current.splice(i, 1);
+      waiter?.("");
+    };
+    return { promise, cancel };
   }, []);
 
   useEffect(() => {
     const q = typed.trim();
     if (!available || q.length < MIN_CHARS) {
-      seq.current++;
       setItems([]);
       setOpen(false);
       setActive(-1);
@@ -94,31 +118,46 @@ export function BusinessCombobox({
       return;
     }
     const ctrl = new AbortController();
-    const mine = ++seq.current;
+    let dead = false;
+    let cancelWait: (() => void) | undefined;
     const timer = window.setTimeout(() => {
       void (async () => {
-        try {
+        // Twice at most: the second time only when the pass had run out and a fresh bot check is needed.
+        for (let attempt = 0; attempt < 2 && !dead; attempt++) {
           let turnstile: string | undefined;
           if (!pass.current) {
             setNeedToken(true);
-            turnstile = await waitForToken();
+            const w = takeToken();
+            cancelWait = w.cancel;
+            turnstile = await w.promise;
+            cancelWait = undefined;
+            if (dead) return;
             if (!turnstile) {
               setAvailable(false);
               setNeedToken(false);
               return;
             }
           }
-          const r = await suggestBusinesses(
-            { query: q, sessionToken: session.current, turnstile, pass: pass.current },
-            ctrl.signal,
-          );
-          if (mine !== seq.current) return;
+          const sentPass = pass.current;
+          let r;
+          try {
+            // A call that carries a Turnstile token is not aborted: the server has spent the token and its answer holds
+            // the pass the next calls need.
+            r = await suggestBusinesses(
+              { query: q, sessionToken: session.current, turnstile, pass: sentPass },
+              turnstile ? undefined : ctrl.signal,
+            );
+          } catch {
+            return; // aborted: a newer call is on its way
+          }
           if (r.pass) {
             pass.current = r.pass;
             setNeedToken(false);
-          } else if (turnstile) {
-            // A Turnstile token works once: ask the widget for a fresh one for the next call.
-            setRound((n) => n + 1);
+          }
+          if (dead) return;
+          if (r.challengeFailed && sentPass) {
+            pass.current = undefined;
+            continue;
           }
           if (!r.available) {
             pass.current = undefined;
@@ -137,16 +176,23 @@ export function BusinessCombobox({
               ? `${r.suggestions.length} ${r.suggestions.length === 1 ? "suggestion" : "suggestions"}. Use the up and down arrow keys, then Enter to choose.`
               : "No suggestions. Press Enter to search.",
           );
-        } catch {
-          // An aborted call: a newer one is on its way.
+          return;
         }
       })();
     }, PAUSE_MS);
     return () => {
+      dead = true;
       window.clearTimeout(timer);
+      cancelWait?.();
       ctrl.abort();
     };
-  }, [typed, available, waitForToken]);
+  }, [typed, available, takeToken]);
+
+  // The highlighted option stays in view when the list scrolls (it is shortened on a small screen).
+  useEffect(() => {
+    if (open && active >= 0)
+      document.getElementById(optionId(active))?.scrollIntoView({ block: "nearest" });
+  }, [open, active]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // With the phone keyboard open the list can fall below the visible part of the page: scroll the page up (the box stays
   // under the header), and if the list still does not fit, shorten the list so its last row and the attribution show.
@@ -170,7 +216,6 @@ export function BusinessCombobox({
     const used = session.current;
     // The session ends with the pick: the next typing session gets a new token.
     session.current = newSessionToken();
-    seq.current++;
     setTyped("");
     setItems([]);
     setOpen(false);

@@ -14,17 +14,15 @@ const searchSchema = (
   keyword?: string | undefined;
   industry?: string | undefined;
   place?: string | undefined;
-  pn?: string | undefined;
   st?: string | undefined;
   change?: boolean | undefined;
 } => ({
   q: text(s["q"], { trim: true, min: 2, max: 120 }),
   keyword: text(s["keyword"], { trim: true, min: 2, max: 60 }),
   industry: matching(s["industry"], /^[a-z0-9-]{2,40}$/),
-  // Check 2: a suggestion chosen in the scan box (its Place ID, its name, the Autocomplete session token), and
+  // Check 2: a suggestion chosen in the scan box (its Place ID and the Autocomplete session token), and
   // "Not your business? Change it" (the search box again with the text kept).
   place: matching(s["place"], /^[A-Za-z0-9_-]{10,200}$/),
-  pn: text(s["pn"], { trim: true, min: 1, max: 120 }),
   st: matching(s["st"], /^[A-Za-z0-9-]{16,64}$/),
   change: flag(s["change"]),
 });
@@ -44,7 +42,7 @@ export const Route = createFileRoute("/scan/")({
 });
 
 function Scan() {
-  const { q, keyword, industry, place, pn, st, change } = Route.useSearch();
+  const { q, keyword, industry, place, st, change } = Route.useSearch();
   return (
     <SiteShell>
       {q && change ? (
@@ -56,7 +54,6 @@ function Scan() {
           keyword={keyword ?? null}
           industry={industry ?? null}
           placeId={place ?? null}
-          placeName={pn ?? null}
           sessionToken={st ?? null}
         />
       ) : (

@@ -559,7 +559,7 @@ Deno.test("suggest: too short, too long or a bad session token is refused before
   }
 });
 
-Deno.test("suggest: 20 a minute and 120 an hour per visitor, then 429 and no Places request", async () => {
+Deno.test("suggest: 20 a minute, 120 an hour and 60 a day per visitor, then 429 and no Places request", async () => {
   const w = world();
   try {
     const first = await w.call({ action: "suggest", query: "harbour", session_token: SESSION });
@@ -570,6 +570,18 @@ Deno.test("suggest: 20 a minute and 120 an hour per visitor, then 429 and no Pla
     assert.equal(over.status, 429);
     assert.equal(over.body.error, "rate_limited");
     assert.equal(w.requests.length, before);
+  } finally {
+    restore();
+  }
+  // The day limit: one visitor cannot use up the day's shared Autocomplete cap.
+  const d = world();
+  try {
+    const first = await d.call({ action: "suggest", query: "harbour", session_token: SESSION });
+    const dayKey = [...d.hits.keys()].find((k) => k.startsWith("snapshot:suggest-day:"))!;
+    d.hits.set(dayKey, LIMITS.suggestPerDay);
+    const over = await d.call({ action: "suggest", query: "harbour more", session_token: SESSION, pass: first.body.pass });
+    assert.equal(over.status, 429);
+    assert.equal(d.requests.length, 1, "the refused call made no Places request");
   } finally {
     restore();
   }

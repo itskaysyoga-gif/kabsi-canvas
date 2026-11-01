@@ -73,6 +73,17 @@ describe("suggestBusinesses", () => {
     ).toBe(false);
   });
 
+  it("tells the page when the pass ran out, so it asks again with a fresh bot check", async () => {
+    vi.stubGlobal("fetch", () => reply(400, { error: "challenge_failed", message: "x" }));
+    expect(await suggestBusinesses({ query: "smile", sessionToken: SESSION, pass: "old" })).toEqual(
+      {
+        suggestions: [],
+        available: false,
+        challengeFailed: true,
+      },
+    );
+  });
+
   it("lets an abort through, so a newer keystroke can cancel an older call", async () => {
     vi.stubGlobal("fetch", () => Promise.reject(new DOMException("aborted", "AbortError")));
     await expect(

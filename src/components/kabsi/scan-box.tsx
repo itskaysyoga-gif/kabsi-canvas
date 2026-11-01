@@ -70,9 +70,8 @@ function ScanForm({
     void navigate({
       to: "/scan",
       search: {
-        // What the visitor typed (kept for "Not your business? Change it"); the chosen name is for the waiting screen.
+        // What the visitor typed, kept for "Not your business? Change it". Nothing from Google but the Place ID is put in the address.
         q: q.trim().length >= 2 ? q.trim() : place.name,
-        pn: place.name,
         place: place.place_id,
         st: sessionToken,
         ...(keyword ? { keyword } : {}),

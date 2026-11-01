@@ -41,6 +41,10 @@ type Opts = {
   /** "off": suggestions are not available (the Autocomplete cap, a limit or a Google error). */
   suggest?: "on" | "off";
   /** What the search action returns. */
+  /** Turnstile takes this long to give a token (ms). */
+  turnstileMs?: number;
+  /** The first call that carries a pass is told the pass ran out (400 challenge_failed). */
+  expirePass?: boolean;
   found?: { place_id: string; name: string; address: string; category: string | null }[];
 };
 
@@ -52,7 +56,7 @@ async function stub(page: Page, opts: Opts = {}): Promise<Calls> {
     route.fulfill({
       contentType: "text/javascript",
       body: `window.turnstile = {
-        render: (el, o) => { setTimeout(() => o.callback("stub-token"), 30); return "w1"; },
+        render: (el, o) => { setTimeout(() => o.callback("stub-token"), ${opts.turnstileMs ?? 30}); return "w1"; },
         reset: () => {}, remove: () => {},
       };`,
     }),
@@ -68,6 +72,13 @@ async function stub(page: Page, opts: Opts = {}): Promise<Calls> {
         body: JSON.stringify(o),
       });
     if (body["action"] === "suggest") {
+      if (opts.expirePass && body["pass"] && !body["turnstile"]) {
+        opts.expirePass = false;
+        return json(
+          { error: "challenge_failed", message: "Please complete the check and try again." },
+          400,
+        );
+      }
       if (opts.suggest === "off") return json({ suggestions: [], available: false });
       const q = String(body["query"]).toLowerCase();
       const hits = SUGGESTIONS.filter((s) => s.name.toLowerCase().includes(q.slice(0, 3)));
@@ -228,6 +239,47 @@ test.describe("Check 2: suggestions while typing", () => {
     await box.press("Enter");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Pick your business");
     await expect(page.getByRole("button", { name: "This is my business" })).toHaveCount(2);
+  });
+
+  test("a fast typist with a slow bot check still gets suggestions, and they stay on", async ({
+    page,
+  }) => {
+    const calls = await stub(page, { turnstileMs: 1500 });
+    await open(page, "/scan");
+    const box = page.getByRole("combobox");
+    await box.click();
+    // Keys keep coming while the first bot check is still being solved: the older waits must not take the token the newer one needs.
+    await box.pressSequentially("smi", { delay: 40 });
+    await page.waitForTimeout(450);
+    await box.pressSequentially("le", { delay: 40 });
+    await page.waitForTimeout(450);
+    await box.pressSequentially(" d", { delay: 40 });
+    await expect(page.getByRole("option").first()).toBeVisible({ timeout: 8000 });
+    await box.pressSequentially("e", { delay: 40 });
+    await expect(page.getByRole("listbox")).toBeVisible();
+    expect(suggestCalls(calls).every((c) => c.body["turnstile"] || c.body["pass"])).toBe(true);
+  });
+
+  test("when the pass has run out the box asks for a fresh bot check and carries on", async ({
+    page,
+  }) => {
+    const calls = await stub(page, { expirePass: true });
+    await open(page, "/scan");
+    const box = page.getByRole("combobox");
+    await box.click();
+    await box.pressSequentially("smile", { delay: 40 });
+    await expect(page.getByRole("option").first()).toBeVisible();
+    await box.pressSequentially(" den", { delay: 40 });
+    await expect(page.getByRole("option").first()).toBeVisible();
+    await page.waitForTimeout(500);
+    const refused = calls.findIndex(
+      (c) => c.action === "suggest" && c.body["pass"] && !c.body["turnstile"],
+    );
+    expect(refused, "the pass was refused once").toBeGreaterThan(0);
+    expect(
+      calls.slice(refused + 1).some((c) => c.action === "suggest" && c.body["turnstile"]),
+      "and a fresh bot check followed",
+    ).toBe(true);
   });
 
   test("the list stays on screen with the phone keyboard open", async ({ page }, info) => {

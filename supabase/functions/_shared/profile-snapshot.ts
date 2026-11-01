@@ -41,7 +41,7 @@ const PLACE_ID_RE = /^[A-Za-z0-9_-]{10,200}$/;
 /** The Autocomplete session token the page makes (a version 4 UUID); the same text is passed to Place Details. */
 const SESSION_RE = /^[A-Za-z0-9-]{16,64}$/;
 const PASS_SECONDS = 15 * 60;
-export const LIMITS = { perMinute: 10, checksPerDay: 3, searchesPerHour: 20, suggestPerMinute: 20, suggestPerHour: 120, emailsPerHour: 5, emailsPerAddressPerDay: 2, whatsappPerHour: 3, whatsappPerNumberPerDay: 1 };
+export const LIMITS = { perMinute: 10, checksPerDay: 3, searchesPerHour: 20, suggestPerMinute: 20, suggestPerHour: 120, suggestPerDay: 60, emailsPerHour: 5, emailsPerAddressPerDay: 2, whatsappPerHour: 3, whatsappPerNumberPerDay: 1 };
 
 // A status flag (lane R, 22 Oct 2026): one plain fact about what Google shows, and what Kabsi would do about it. The tone
 // maps to the design tokens' states: "danger" is red (a real problem), "warning" is amber (needs attention), "neutral"
@@ -366,7 +366,9 @@ async function suggestHandler(
   const sessionToken = str(b.session_token);
   if (q.length < 3 || q.length > 120 || !SESSION_RE.test(sessionToken)) return fail("bad_query", "Type your business name and city.");
   if (!(await d.rateLimit(`snapshot:suggest-min:${visitor}`, LIMITS.suggestPerMinute, 60, { failClosed: true }))
-    || !(await d.rateLimit(`snapshot:suggest-hour:${visitor}`, LIMITS.suggestPerHour, 3600, { failClosed: true }))) {
+    || !(await d.rateLimit(`snapshot:suggest-hour:${visitor}`, LIMITS.suggestPerHour, 3600, { failClosed: true }))
+    // One visitor cannot use up the day's shared Autocomplete cap and switch suggestions off for everyone else.
+    || !(await d.rateLimit(`snapshot:suggest-day:${visitor}`, LIMITS.suggestPerDay, 86400, { failClosed: true }))) {
     return fail("rate_limited", "That is a lot of searches. Try again in a minute.", 429);
   }
   let pass: string | null = null;
