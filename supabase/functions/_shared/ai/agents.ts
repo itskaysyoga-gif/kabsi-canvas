@@ -52,10 +52,14 @@ export const AGENTS: Record<AgentName, Agent> = {
     tasks: {},
   },
   // V1 fills Scout in (Visibility Map, Competitor Watch, AI Visibility). Until then it has no tools and no tasks.
+  // AI Answers 1: Scout reads Business Knowledge to compare what an AI answer says about the business, and opens one
+  // Needs attention item for a clear difference. One small structured step (Haiku). Never writes to Google.
   scout: {
-    job: "Runs and reads the Visibility Map, Competitor Watch and AI Visibility jobs and turns raw ranks into three numbers and one line. Never writes to Google.",
-    tools: [],
-    tasks: {},
+    job: "Runs and reads the Visibility Map, Competitor Watch and AI Visibility jobs and turns raw ranks into three numbers and one line. Checks what AI answers say about the business against Business Knowledge. Never writes to Google.",
+    tools: ["read_business_knowledge", "open_task"],
+    tasks: {
+      check_facts: { model: MODELS.check, maxTokens: 1200 },
+    },
   },
   nora: {
     job: "Kabsi's voice on the site, in the app and in WhatsApp: answers only from the public facts, sells with the free check, supports owners, hands to a person.",

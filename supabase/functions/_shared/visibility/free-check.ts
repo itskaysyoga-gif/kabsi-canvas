@@ -61,7 +61,7 @@ export type StartDeps = {
   provider: MapsProvider;
   source: "mock" | "live";
   /** The one AI answer (28.1), or null when ai_visibility_free_scan is off or the cap is reached. */
-  ai: (o: { business: string; prompt: string; country: string; city: string | null }) => Promise<AiCheck | null>;
+  ai: (o: { business: string; prompt: string; country: string; city: string | null; place_id: string | null }) => Promise<AiCheck | null>;
   /** Room in this month's DataForSEO cap for this much, and recording what was spent. */
   room: (micros: number) => Promise<boolean>;
   spend: (calls: number, micros: number) => Promise<void>;
@@ -102,7 +102,9 @@ export async function startCheck(d: StartDeps, i: StartInput): Promise<Started> 
     state = "failed";
   }
   const where = i.city ? ` in ${i.city}` : "";
-  const ai = await d.ai({ business: found.title, prompt: `best ${i.term}${where}`, country: i.country, city: i.city }).catch(() => null);
+  // AI Answers 1: the answer is compared with the Google profile read live by its place ID; only the fact that differs and
+  // ChatGPT's sentence come back (ai.accuracy), never a value from Places.
+  const ai = await d.ai({ business: found.title, prompt: `best ${i.term}${where}`, country: i.country, city: i.city, place_id: self.place_id ?? null }).catch(() => null);
   return {
     ok: true,
     row: {

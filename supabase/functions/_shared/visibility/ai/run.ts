@@ -5,6 +5,9 @@
 import { type Analysis, analyze, type KnownCompetitor } from "./analyze.ts";
 import { type Cadence, nextRunAfter } from "./prompts.ts";
 import { type AiProvider, AiProviderError, type AiProviderName, ESTIMATE_MICROS, PROVIDERS, type RawAnswer } from "./providers.ts";
+import {
+  compare, EXTRACT_ESTIMATE_MICROS, type Extractor, type FactKey, type Finding, freeLine, kabsiHas, namesStrictly, type Record_, usable,
+} from "./accuracy.ts";
 
 export type PromptRow = { id: string; location_id: string; text: string; cadence: Cadence };
 export type RunRow = {
@@ -34,6 +37,16 @@ export type AiDeps = {
   staffAlert: (summary: string, key: string) => Promise<void>;
   enqueue: (runId: string, locationId: string) => Promise<void>;
   now: () => Date;
+  /** AI Answers 1: the accuracy check of an answer that names the business. Off when absent. */
+  accuracy?: AccuracyDeps;
+};
+export type AccuracyDeps = {
+  /** The one structured model call (live), or fixtures (mock): never a paid call in mock mode. */
+  extractor: (mode: "mock" | "live") => Extractor;
+  /** The facts Kabsi has for the business: Business Knowledge the owner confirmed and the hours on record. */
+  record: (locationId: string) => Promise<Record_>;
+  /** Keep the finding on the run and open (or close) the Home item. */
+  save: (runId: string, locationId: string, o: { finding: Finding | null; agree: FactKey[] }) => Promise<void>;
 };
 
 /** The monthly cap is reached: the job waits (not counted as a try) until `until`. */
@@ -98,18 +111,63 @@ export async function runOne(d: AiDeps, runId: string, o: { lastTry?: boolean } 
     // Gemini's Maps result is never kept (Additional Terms); the facts above are.
     answer: run.provider === "gemini" ? null : raw.text,
   });
+  // Accuracy never fails the run: the answer is already saved.
+  if (run.provider !== "gemini" && a.named && d.accuracy) await checkAccuracy(d, d.accuracy, run, raw.text, mode).catch(() => null);
   return "done";
 }
 
+const hasAny = (r: Record_) =>
+  !!(r.hours || r.phone || r.website || r.address || r.services.length || r.delivery != null || r.price != null);
+
+/** Room in the month's AI Visibility cap for one extraction (live only); records the spend after. */
+async function extractWithinCap(
+  d: Pick<AiDeps, "room" | "spend" | "staffAlert" | "now">, ex: Extractor, mode: "mock" | "live", o: Parameters<Extractor>[0],
+) {
+  if (mode === "live" && !(await d.room(EXTRACT_ESTIMATE_MICROS))) return null;
+  const got = await ex(o);
+  if (mode === "live" && got.costMicros > 0 && (await d.spend(0, got.costMicros))) {
+    await d.staffAlert("AI Visibility spend passed 80 percent of this month's cap", `ai_cap80:${month(d.now())}`);
+  }
+  return got;
+}
+
+/**
+ * AI Answers 1: the facts the answer states about the business, against the facts Kabsi has. One structured model call
+ * through the existing AI adapter, inside the same monthly cap, only when the answer names the business and Kabsi has
+ * something to compare with. A clear difference is one finding; facts the answer gave right close an open item.
+ */
+export async function checkAccuracy(d: AiDeps, acc: AccuracyDeps, run: RunRow, answer: string, mode: "mock" | "live"): Promise<Finding | null> {
+  if (!namesStrictly(answer, run.business)) return null;
+  const record = await acc.record(run.location_id);
+  if (!hasAny(record)) return null; // nothing to compare with: no call
+  const got = await extractWithinCap(d, acc.extractor(mode), mode, { answer, business: run.business, area: run.city });
+  if (!got) return null;
+  const { differences, agree } = compare(got.claims, record, answer, run.business);
+  const diff = differences[0];
+  const kabsi = diff ? kabsiHas(diff, record) : "";
+  const finding: Finding | null = diff && kabsi
+    ? { fact: diff.fact, detail: diff.detail, sentence: diff.sentence, assistant: run.provider, question: run.prompt, asked_at: d.now().toISOString(), kabsi }
+    : null;
+  await acc.save(run.id, run.location_id, { finding, agree });
+  return finding;
+}
+
 // ─── the free scan's one AI check (28.1), built here, switched on by V4 ──────────────────────────────────────────────
-export type FreeCheck = { provider: "chatgpt"; named: boolean; competitors: string[]; sources: { domain: string; title: string }[]; label: string };
+/** The free check's accuracy result: which fact differs and ChatGPT's own sentence, never a value from Places (30.10.3). */
+export type FreeAccuracy = { fact: FactKey; sentence: string; line: string };
+export type FreeCheck = {
+  provider: "chatgpt"; named: boolean; competitors: string[]; sources: { domain: string; title: string }[]; label: string;
+  accuracy?: FreeAccuracy | null;
+};
+/** The free check's accuracy deps: the extractor and the Google profile read live during the check (in memory only). */
+export type FreeAccuracyDeps = { extractor: (mode: "mock" | "live") => Extractor; profile: () => Promise<Record_ | null> };
 
 /**
  * One ChatGPT answer for "best [trade] in [area]" for a visitor's business: named or not, up to three competitors. Nothing is
  * stored here (the scan row is V4's). Off unless `ai_visibility_free_scan` is on; counts against the same monthly cap.
  */
 export async function freeScanCheck(
-  d: Pick<AiDeps, "provider" | "mode" | "room" | "spend" | "staffAlert" | "now"> & { on: () => Promise<boolean> },
+  d: Pick<AiDeps, "provider" | "mode" | "room" | "spend" | "staffAlert" | "now"> & { on: () => Promise<boolean>; accuracy?: FreeAccuracyDeps },
   o: { business: string; prompt: string; country: string | null; city: string | null },
 ): Promise<FreeCheck | null> {
   if (!(await d.on())) return null;
@@ -125,5 +183,27 @@ export async function freeScanCheck(
     await d.staffAlert("AI Visibility spend passed 80 percent of this month's cap", `ai_cap80:${month(d.now())}`);
   }
   const a = analyze({ text: raw.text, sources: raw.sources, business: o.business, prompt: o.prompt });
-  return { provider: "chatgpt", named: a.named, competitors: a.competitors.slice(0, 3).map((c) => c.name), sources: a.sources.slice(0, 3), label: "One sample. AI answers change from run to run." };
+  const accuracy = a.named && d.accuracy ? await freeAccuracy(d, d.accuracy, mode, raw.text, o).catch(() => null) : null;
+  return {
+    provider: "chatgpt", named: a.named, competitors: a.competitors.slice(0, 3).map((c) => c.name), sources: a.sources.slice(0, 3),
+    label: "One sample. AI answers change from run to run.", accuracy,
+  };
+}
+
+/**
+ * The free check's one answer against the business's Google profile, read live during the check. Only which fact differs
+ * and ChatGPT's sentence are returned; the profile's values stay in memory and are never kept or shown (30.10.3).
+ */
+export async function freeAccuracy(
+  d: Pick<AiDeps, "room" | "spend" | "staffAlert" | "now">, acc: FreeAccuracyDeps, mode: "mock" | "live", answer: string,
+  o: { business: string; city: string | null },
+): Promise<FreeAccuracy | null> {
+  if (!namesStrictly(answer, o.business)) return null;
+  const got = await extractWithinCap(d, acc.extractor(mode), mode, { answer, business: o.business, area: o.city });
+  // Read Google only when the answer states something about the business that could be compared.
+  if (!got || !usable(got.claims, answer, o.business).length) return null;
+  const profile = await acc.profile();
+  if (!profile) return null;
+  const diff = compare(got.claims, profile, answer, o.business).differences[0];
+  return diff ? { fact: diff.fact, sentence: diff.sentence, line: freeLine(diff) } : null;
 }

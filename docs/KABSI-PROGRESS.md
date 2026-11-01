@@ -62,7 +62,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 ## Recent entries (newest first)
 
 - 1 Nov 2026, AI Answers 1 (PR 305 and the screens PR): when an AI answer names the business, its facts are checked against Business knowledge inside the AI Visibility cap; a clear difference is one Needs attention line and one Results Report line; the free check shows only which fact differs and ChatGPT's sentence. Mock only until ai_visibility_mode is live; no paid call. Detail: `docs/progress/archive/2026-11-01-ai-answers1.md`.
-- 1 Nov 2026, Polish 1 (follow-ups of Lean 1 and App 2): analytics and the Pixel start at the first scroll, tap or key press or after 5 s; zod out of /start; no floating Nora button when signed in (Ask Nora in the account menu); Home script gate 260 to 213 KB (live 247). Detail: `docs/progress/archive/2026-11-01-polish1.md`.
+- 1 Nov 2026, Polish 1 (follow-ups of Lean 1 and App 2): analytics and the Pixel start at the first scroll, tap or key press or after 5 s; zod out of /start; no floating Nora button when signed in (Ask Nora in the account menu); Home script gate 260 to 213 KB (live 225; kabsi.co reads 215 KB, was 238). Detail: `docs/progress/archive/2026-11-01-polish1.md`.
 
 
 ## How a session updates this page
