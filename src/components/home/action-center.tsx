@@ -1,248 +1,275 @@
-import { useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, Check } from "lucide-react";
-import { Button, ButtonLink, EmptyState, ErrorState, Skeleton } from "@/components/kabsi/ui";
-import { Panel, TaskRow } from "@/components/kabsi/d3-account";
-import { ActionCard } from "@/components/home/action-card";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check } from "lucide-react";
+import { EmptyState, ErrorState, Skeleton, buttonClass } from "@/components/kabsi/ui";
+import { TaskPill } from "@/components/kabsi/d3-account";
 import { BacklogCard } from "@/components/home/backlog-card";
-import { HomeStrip } from "@/components/home/home-strip";
-import { PlanChoiceCard } from "@/components/home/plan-choice";
-import { TrialBanner } from "@/components/home/trial-banner";
-import { ProfileGaps } from "@/components/app/profile-gaps";
+import { YesItem, type Approved } from "@/components/home/yes-item";
 import {
-  checkStrip,
-  homeSections,
+  NEEDS_YES,
+  REPLY_NOTE,
+  attentionLines,
+  doneThisWeek,
+  emptyHomeLine,
   homeState,
   isBacklogSummary,
   nextMonday,
-  nextReportLine,
+  type AttentionLine,
 } from "@/lib/home-state";
-import { loadCardDetails, loadHomeFacts } from "@/lib/home";
-import { loadTasks, taskAction, type Task } from "@/lib/tasks";
-import { recentTasks, type TaskItem } from "@/lib/task-feed";
-import { timeAgo } from "@/lib/dashboard";
-import type { Role } from "@/lib/team";
+import { loadCardDetails } from "@/lib/home";
+import { loadTasks, type Task } from "@/lib/tasks";
+import { recentTasks } from "@/lib/task-feed";
+import { reviewGrowth } from "@/lib/reviews";
+import { loadEntitlements } from "@/lib/entitlements";
+import { planChoice } from "@/lib/plan-choice";
+import type { Access } from "@/lib/team";
 import type { Location } from "@/lib/onboarding";
 
-// Home (K-06, Design 3, COPY.md 19; Design 6 sections, Web 3): the tasks that need the owner, in "Needs your yes" and
-// "Needs attention", at most three cards with the rest behind "See all", or "All caught up.". Below: "Done by Kabsi"
-// with each task's state (30.15 section 3.1), "Your business on Google", the next report, and the profile suggestions.
-export function ActionCenter({ loc, role }: { loc: Location; role: Role }) {
+// Home (App 2, master plan 30.22 item 5): an owner who opens Kabsi on a phone knows in five seconds what needs them and
+// can approve it in one tap. In this order: Needs attention (real problems only, one line and one button each), Needs
+// your yes (compact items, "Nothing goes on Google until you approve it." said once), Done by Kabsi this week (at most
+// three, no duplicates), Your business on Google (at most three real numbers, or nothing). Nothing else.
+export function ActionCenter({ loc, access }: { loc: Location; access: Access }) {
   const qc = useQueryClient();
-  const facts = useQuery({
-    queryKey: ["home-facts", loc.id],
-    queryFn: () => loadHomeFacts(loc.id),
-    refetchInterval: 60_000,
-  });
+  const role = access.role;
   const list = useQuery({
     queryKey: ["tasks", loc.id],
     queryFn: () => loadTasks(loc.id),
     refetchInterval: 60_000,
   });
+  const ent = useQuery({
+    queryKey: ["entitlements", loc.id],
+    queryFn: () => loadEntitlements(loc.id),
+    staleTime: 60_000,
+    enabled: role === "owner",
+  });
+  // Items the owner just approved stay on screen through their Undo window, whatever the list says meanwhile.
+  const [held, setHeld] = useState<Map<string, { task: Task; a: Approved }>>(new Map());
   const state = homeState(list.data?.tasks ?? []);
+  const all = [...state.cards, ...state.rest];
+  const yes = all.filter((t) => NEEDS_YES.includes(t.kind));
+  for (const h of held.values()) if (!yes.some((t) => t.id === h.task.id)) yes.unshift(h.task);
   const details = useQuery({
-    queryKey: ["card-details", loc.id, state.cards.map((t) => t.id).join(",")],
-    queryFn: () => loadCardDetails(state.cards),
-    enabled: state.cards.length > 0,
+    queryKey: ["card-details", loc.id, yes.map((t) => t.id).join(",")],
+    queryFn: () => loadCardDetails(yes),
+    enabled: yes.length > 0,
   });
-  const later = useMutation({
-    mutationFn: (t: Task) => taskAction(t.id, "later"),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks", loc.id] }),
-  });
-  const [all, setAll] = useState(false);
-
-  const strip = checkStrip({
-    lastCheckAt: facts.data?.lastCheckAt ?? null,
+  const choice = role === "owner" ? planChoice(ent.data ?? null) : null;
+  const attention = attentionLines({
+    tasks: all,
     accessLost: !!loc.access_lost_at && !loc.access_granted_at,
-    concierge: loc.concierge === true,
+    setup: null,
+    owner: role === "owner",
+    plan:
+      choice && choice.tone === "attention"
+        ? { title: choice.title, to: choice.cta.to, label: choice.cta.label }
+        : null,
   });
-  // Billing is the owner's (K-16): a manager sees no plan line.
-  const plan = role === "owner" && facts.data ? facts.data.plan : null;
+  const settle = useCallback(
+    async (id: string) => {
+      // Read the lists again first, so the approved item never flashes back with its Approve button.
+      await Promise.all(
+        ["tasks", "waiting-count", "done-lately", "reviews", "review-tasks"].map((k) =>
+          qc.invalidateQueries({ queryKey: [k] }),
+        ),
+      );
+      setHeld((m) => {
+        const n = new Map(m);
+        n.delete(id);
+        return n;
+      });
+    },
+    [qc],
+  );
+
+  if (list.isError)
+    return (
+      <ErrorState title="This page did not load." onRetry={() => void list.refetch()}>
+        Nothing you did, and nothing changed on Google. Try again in a minute.
+      </ErrorState>
+    );
+  if (!list.data)
+    return (
+      <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading">
+        <Skeleton className="h-24 w-full rounded-card" />
+        <Skeleton className="h-24 w-full rounded-card" />
+      </div>
+    );
 
   return (
-    <div className="space-y-5">
-      {role === "owner" ? <TrialBanner locationId={loc.id} /> : null}
-      {role === "owner" ? <PlanChoiceCard locationId={loc.id} /> : null}
-      <HomeStrip strip={strip} plan={plan} />
-
-      {list.isError ? (
-        <ErrorState title="This page did not load." onRetry={() => void list.refetch()}>
-          Nothing you did, and nothing changed on Google. Try again in a minute.
-        </ErrorState>
-      ) : !list.data ? (
-        <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading">
-          {[0, 1].map((i) => (
-            <div key={i} className="rounded-card border border-line bg-surface-1 p-5">
-              <Skeleton className="h-5 w-1/2" />
-              <Skeleton className="mt-3 h-4 w-full" />
-              <Skeleton className="mt-2 h-4 w-4/5" />
-            </div>
-          ))}
-        </div>
-      ) : state.kind === "clear" ? (
-        <EmptyState icon={Check} title="All caught up.">
-          Kabsi will message you on WhatsApp when something needs you.
-        </EmptyState>
-      ) : (
-        <div className="space-y-8">
-          {(() => {
-            const view = homeSections(state.cards, state.rest);
-            return view.sections.map((sec) => (
-              <HomeSection key={sec.key} id={`${sec.key}-h`} title={sec.title} count={sec.total}>
-                {sec.shown.map((t) =>
-                  isBacklogSummary(t) ? (
-                    <BacklogCard
-                      key={t.id}
-                      task={t}
-                      locationId={loc.id}
-                      lead={t === state.cards[0]}
-                    />
-                  ) : (
-                    <ActionCard
-                      key={t.id}
-                      task={t}
-                      detail={details.data?.[t.id]}
-                      locationId={loc.id}
-                      lead={t === state.cards[0]}
-                      busy={later.isPending}
-                      onLater={(x) => later.mutate(x)}
-                    />
-                  ),
-                )}
-              </HomeSection>
-            ));
-          })()}
-          {homeSections(state.cards, state.rest).hidden.length > 0 ? (
-            <div>
-              <Button
-                variant="secondary"
-                size="md"
-                onClick={() => setAll((v) => !v)}
-                aria-expanded={all}
-              >
-                {all ? "Show fewer" : `See all ${state.total}`}
-              </Button>
-              {all ? (
-                <ul className="mt-3 divide-y divide-line rounded-card border border-line bg-surface-1 shadow-rest">
-                  {homeSections(state.cards, state.rest).hidden.map((t) => (
-                    <li key={t.id}>
-                      <Link
-                        to={t.path}
-                        className="flex min-h-14 items-center gap-3 px-4 py-3 text-body hover:bg-surface-2"
-                      >
-                        <span className="flex-1">{t.title}</span>
-                        <ArrowRight className="size-4 shrink-0 text-text-2" aria-hidden="true" />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-      )}
-
-      <div className="grid gap-4 pt-5 lg:grid-cols-2">
-        <DoneLately locationId={loc.id} />
-        <Panel title="Your business on Google" id="business-on-google">
-          <p className="text-body font-semibold text-text-1">{strip.connection}</p>
-          {strip.checked ? <p className="text-small text-text-2">{strip.checked}</p> : null}
-          <ButtonLink to="/app/shield" variant="tertiary" className="mt-2">
-            See your Google profile
-          </ButtonLink>
-        </Panel>
-        <Panel title="Your next report" id="next-report">
-          <p className="text-body text-text-2">{nextReportLine(nextMonday())}</p>
-          <ButtonLink to="/app/report" variant="tertiary" className="mt-2">
-            See last week's report
-          </ButtonLink>
-        </Panel>
-      </div>
-
-      {list.data && state.gaps.length > 0 ? (
-        <ProfileGaps locationId={loc.id} gaps={state.gaps} />
+    <div className="space-y-8">
+      <NeedsAttention lines={attention} />
+      {yes.length > 0 ? (
+        <HomeSection id="yes-h" title="Needs your yes" count={yes.length} note={REPLY_NOTE}>
+          <ul className="divide-y divide-line">
+            {yes.map((t, i) =>
+              isBacklogSummary(t) ? (
+                <li key={t.id} className="py-4 first:pt-0 last:pb-0">
+                  <BacklogCard task={t} locationId={loc.id} lead={i === 0} />
+                </li>
+              ) : (
+                <YesItem
+                  key={t.id}
+                  task={t}
+                  detail={details.data?.[t.id]}
+                  access={access}
+                  locationId={loc.id}
+                  lead={i === 0}
+                  approved={held.get(t.id)?.a}
+                  onApproved={(a) => setHeld((m) => new Map(m).set(t.id, { task: t, a }))}
+                  onSettled={() => void settle(t.id)}
+                />
+              ),
+            )}
+          </ul>
+        </HomeSection>
       ) : null}
+      {attention.length === 0 && yes.length === 0 ? (
+        <EmptyState icon={Check} title="Nothing needs you right now.">
+          {emptyHomeLine(nextMonday())}
+        </EmptyState>
+      ) : null}
+      <DoneThisWeek locationId={loc.id} />
+      <BusinessNumbers locationId={loc.id} />
     </div>
   );
 }
 
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1).trimEnd()}...` : s);
-
-/** One task's title in the list: what it was, a few of its words, and when. */
-function taskTitle(t: TaskItem) {
+/** Needs attention: one line and one button each. Shown only when something is wrong. */
+export function NeedsAttention({ lines }: { lines: AttentionLine[] }) {
+  if (!lines.length) return null;
   return (
-    <>
-      {cap(t.noun)}
-      {t.text ? (
-        <span dir="auto" className="block text-small font-normal text-text-2">
-          {clip(t.text, 90)}
-        </span>
-      ) : null}
-      <span className="block text-small font-normal text-text-3">{timeAgo(t.at)}</span>
-    </>
+    <HomeSection id="attention-h" title="Needs attention" count={lines.length}>
+      <ul className="divide-y divide-line">
+        {lines.map((l) => (
+          <li
+            key={l.key}
+            className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+          >
+            <p className="min-w-0 flex-1 text-body font-semibold">{l.text}</p>
+            {l.action ? (
+              <Link to={l.action.to as "/"} className={buttonClass("secondary", "md")}>
+                {l.action.label}
+              </Link>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </HomeSection>
   );
 }
 
-// "Done by Kabsi" (Design 6; Design 3's "Done lately"): what the owner approved in the last two weeks and where each one
-// is now. Read from the publications, so it never claims a task that did not happen; "Live on Google" only once Kabsi
-// saw it there.
-function DoneLately({ locationId }: { locationId: string }) {
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+// "Done by Kabsi this week": the latest state of what the owner approved in the last 7 days, each item once, at most
+// three, read from the publications so it never claims a task that did not happen. "See all" opens the reports.
+function DoneThisWeek({ locationId }: { locationId: string }) {
   const q = useQuery({
     queryKey: ["done-lately", locationId],
-    queryFn: () => recentTasks(locationId, { limit: 5, days: 14 }),
+    queryFn: () => recentTasks(locationId, { limit: 20, days: 7 }),
     refetchInterval: 60_000,
   });
+  const items = doneThisWeek(q.data ?? []);
+  if (!items.length) return null;
   return (
-    <Panel title="Done by Kabsi" id="done-lately">
-      {q.isLoading ? (
-        <div className="space-y-2" aria-hidden>
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
-        </div>
-      ) : q.isError ? (
-        <p className="text-small text-text-2">This did not load. Try again in a minute.</p>
-      ) : !q.data?.length ? (
-        <p className="text-body text-text-2">
-          Nothing yet. What you approve shows here, with where it is on Google.
-        </p>
-      ) : (
-        <ul className="divide-y divide-line">
-          {q.data.map((t) => (
-            <TaskRow key={t.id} task={t} title={taskTitle(t)} />
-          ))}
-        </ul>
-      )}
-    </Panel>
+    <HomeSection
+      id="done-h"
+      title="Done by Kabsi this week"
+      action={
+        <Link to="/app/report" className={buttonClass("tertiary")}>
+          See all
+        </Link>
+      }
+    >
+      <ul className="divide-y divide-line">
+        {items.map((t) => (
+          <li key={t.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+            <p className="min-w-0 flex-1 truncate text-body">
+              <span className="font-semibold">{cap(t.noun)}</span>
+              {t.text ? (
+                <span dir="auto" className="text-text-2">
+                  : {t.text}
+                </span>
+              ) : null}
+            </p>
+            <TaskPill state={t.owner} className="shrink-0" />
+          </li>
+        ))}
+      </ul>
+    </HomeSection>
   );
 }
 
-/** A Home section with its count (Design 6): "Needs your yes" and "Needs attention". */
+// "Your business on Google": one strip of real numbers (new reviews from the Google Business Profile this month, opens of
+// the Kabsi review link this month; never added together), or nothing when there is nothing to show.
+function BusinessNumbers({ locationId }: { locationId: string }) {
+  const q = useQuery({
+    queryKey: ["review-growth", locationId],
+    queryFn: () => reviewGrowth(locationId),
+    staleTime: 60_000,
+  });
+  const nums = [
+    { n: q.data?.reviews ?? 0, label: "New reviews this month" },
+    { n: q.data?.opens ?? 0, label: "Review link opens this month" },
+  ].filter((x) => x.n > 0);
+  if (!nums.length) return null;
+  return (
+    <section aria-labelledby="numbers-h">
+      <h2 id="numbers-h" className="mb-3 font-display text-h3 font-bold">
+        Your business on Google
+      </h2>
+      <dl className="grid grid-cols-2 gap-3">
+        {nums.map((x) => (
+          <div key={x.label} className="rounded-card border border-line bg-surface-1 p-4">
+            <dd className="font-display text-h2 font-bold">{x.n}</dd>
+            <dt className="text-small text-text-2">{x.label}</dt>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
+/** A Home section: its title with a count, at most one short line, and its items in one panel. */
 function HomeSection({
   id,
   title,
   count,
+  note,
+  action,
   children,
 }: {
   id: string;
   title: string;
-  count: number;
+  count?: number;
+  note?: string;
+  action?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <section aria-labelledby={id}>
-      <h2 id={id} className="mb-4 flex items-center gap-2 font-display text-h3 font-bold">
-        {title}
-        <span
-          aria-hidden
-          className="grid size-7 place-items-center rounded-full bg-text-1 text-label font-bold text-surface-0"
-        >
-          {count}
-        </span>
-        <span className="sr-only">, {count} waiting</span>
-      </h2>
-      <div className="space-y-4">{children}</div>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h2 id={id} className="flex items-center gap-2 font-display text-h3 font-bold">
+          {title}
+          {count ? (
+            <>
+              <span
+                aria-hidden
+                className="grid size-7 place-items-center rounded-full bg-text-1 text-label font-bold text-surface-0"
+              >
+                {count}
+              </span>
+              <span className="sr-only">, {count}</span>
+            </>
+          ) : null}
+        </h2>
+        {action}
+      </div>
+      {note ? <p className="-mt-1 mb-3 text-small text-text-2">{note}</p> : null}
+      <div className="rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5">
+        {children}
+      </div>
     </section>
   );
 }

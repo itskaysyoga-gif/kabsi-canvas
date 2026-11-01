@@ -86,7 +86,7 @@ Statuses: Setup not finished, Waiting for Google access, Free, Active. A busines
 2. Get reviews: copy your review link and print the QR code (three steps).
 3. Posts: under **Write a post**, write a first post and save it.
 4. Settings, About your business: add a few customer questions and never-say items.
-5. Settings, Emails: choose your daily email time and time zone, and which notices reach you by email and in the bell.
+5. Settings, Emails: choose your daily email time and time zone, and which notices reach you by email.
 
 ---
 

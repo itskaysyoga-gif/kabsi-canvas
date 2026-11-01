@@ -85,6 +85,10 @@ export type CardDetail = {
   quote: string | null;
   /** What Kabsi prepared, exactly as it would go out. */
   prepared: string | null;
+  /** A review's risk now (K-13), read from the review itself, not the task. */
+  risk: "low" | "medium" | "high" | null;
+  /** The draft passed Kabsi's checks, so it may be approved as it is (a reply's safety_ok; a post's draft). */
+  safe: boolean;
   /** The evidence in one or two plain lines ("Google shows 18:00. You approved 22:00."). */
   evidence: string[];
 };
@@ -121,13 +125,13 @@ export async function loadCardDetails(tasks: Task[]): Promise<Record<string, Car
     reviewIds.length
       ? supabase
           .from("reviews")
-          .select("id, reviewer_name, star_rating, comment, content_purged_at")
+          .select("id, reviewer_name, star_rating, comment, content_purged_at, risk")
           .in("id", reviewIds)
       : null,
     reviewIds.length
       ? supabase
           .from("reply_drafts")
-          .select("review_id, body, version")
+          .select("review_id, body, version, safety_ok")
           .in("review_id", reviewIds)
           .order("version", { ascending: false })
       : null,
@@ -147,6 +151,7 @@ export async function loadCardDetails(tasks: Task[]): Promise<Record<string, Car
     star_rating: number;
     comment: string | null;
     content_purged_at: string | null;
+    risk: "low" | "medium" | "high" | null;
   }>(reviews);
   const ch = byId<{
     id: string;
@@ -156,20 +161,28 @@ export async function loadCardDetails(tasks: Task[]): Promise<Record<string, Car
     google_value: ValueJson;
   }>(changes);
   const po = byId<{ id: string; body: string | null }>(posts);
-  const latestDraft = new Map<string, string>();
-  for (const d of (drafts?.data ?? []) as { review_id: string; body: string }[]) {
-    if (!latestDraft.has(d.review_id)) latestDraft.set(d.review_id, d.body);
+  const latestDraft = new Map<string, { body: string; safety_ok: boolean }>();
+  for (const d of (drafts?.data ?? []) as {
+    review_id: string;
+    body: string;
+    safety_ok: boolean | null;
+  }[]) {
+    if (!latestDraft.has(d.review_id))
+      latestDraft.set(d.review_id, { body: d.body, safety_ok: d.safety_ok === true });
   }
   for (const t of tasks) {
     if (t.kind === "review_reply") {
       const r = rv.get(idOf(t, "review_id") ?? "");
       const first = r?.reviewer_name?.trim().split(/\s+/)[0];
       const high = t.evidence["risk"] === "high";
+      const draft = high ? null : (latestDraft.get(idOf(t, "review_id") ?? "") ?? null);
       out[t.id] = {
         eyebrow: r ? `New review, ${stars(r.star_rating)}${first ? `, from ${first}` : ""}` : null,
         quote: r?.comment ? clip(r.comment, 160) : r ? "Rating only, no text" : null,
         // A high-risk review gets no draft (K-13); the card says so instead.
-        prepared: high ? null : (latestDraft.get(idOf(t, "review_id") ?? "") ?? null),
+        prepared: draft?.body ?? null,
+        safe: !!draft?.safety_ok,
+        risk: r?.risk ?? null,
         evidence: high ? ["Kabsi did not draft a reply. Open it to see what to check first."] : [],
       };
     } else if (t.kind === "profile_change") {
@@ -180,6 +193,8 @@ export async function loadCardDetails(tasks: Task[]): Promise<Record<string, Car
         eyebrow: null,
         quote: null,
         prepared: null,
+        safe: false,
+        risk: null,
         evidence: c
           ? [
               `Google shows ${shows ? `"${shows}"` : "nothing"}.`,
@@ -192,11 +207,20 @@ export async function loadCardDetails(tasks: Task[]): Promise<Record<string, Car
       out[t.id] = {
         eyebrow: "Google update ready",
         quote: null,
-        prepared: p?.body ? clip(p.body, 200) : null,
+        prepared: p?.body ?? null,
+        safe: !!p?.body,
+        risk: null,
         evidence: [],
       };
     } else {
-      out[t.id] = { eyebrow: null, quote: null, prepared: null, evidence: [] };
+      out[t.id] = {
+        eyebrow: null,
+        quote: null,
+        prepared: null,
+        safe: false,
+        risk: null,
+        evidence: [],
+      };
     }
   }
   return out;

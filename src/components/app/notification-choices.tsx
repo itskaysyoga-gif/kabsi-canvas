@@ -13,7 +13,7 @@ import {
 
 // What Kabsi tells you, and how (K-46, P0.4-09). Design 3's four switches on top (each one is the email choice of one stored
 // category: on is the category's default, off is off), and behind "Choose how each one reaches you" every kind of notice
-// with when its email comes (at once, in the daily email, or off) and whether it shows in the bell on Home. What the law or
+// with when its email comes (at once, in the daily email, or off). What the law or
 // your safety needs stays on. Each change is saved as soon as it is made.
 
 /** Design 3's switch labels, mapped onto the stored category keys (never renamed: the engine reads them). */
@@ -94,7 +94,7 @@ export function MessageSwitches({ locationId }: { locationId: string }) {
   );
 }
 
-/** Every kind of notice, with its email timing and the bell on Home. */
+/** Every kind of notice, with its email timing. (App 2 took the bell off Home: WhatsApp and email tell owners.) */
 export function NotificationChoices({ locationId }: { locationId: string }) {
   const { prefs, save, err, saved } = usePrefs(locationId);
   return (
@@ -115,7 +115,6 @@ export function NotificationChoices({ locationId }: { locationId: string }) {
               <ul className="mt-1 divide-y divide-line">
                 {g.items.map((c) => {
                   const email = choice(prefs.data, c.id, "email");
-                  const inApp = choice(prefs.data, c.id, "in_app");
                   return (
                     <li key={c.id} className="py-4">
                       <p className="text-body font-bold">{SHOWN_LABEL[c.id] ?? c.label}</p>
@@ -144,22 +143,6 @@ export function NotificationChoices({ locationId }: { locationId: string }) {
                           </option>
                         ))}
                       </select>
-                      {c.inApp ? (
-                        <div className="mt-3">
-                          <Switch
-                            label={`Show in the bell on Home${c.switchable ? "" : " (always on)"}`}
-                            checked={inApp !== "off"}
-                            disabled={!c.switchable || save.isPending}
-                            onChange={(v) =>
-                              save.mutate({
-                                category: c.id,
-                                channel: "in_app",
-                                frequency: v ? "default" : "off",
-                              })
-                            }
-                          />
-                        </div>
-                      ) : null}
                     </li>
                   );
                 })}

@@ -44,7 +44,7 @@ describe("features read entitlements, not plans (P0.4-06)", () => {
       "supabase/functions/api/cron.ts",
       "supabase/functions/assistant/index.ts",
       "src/lib/home.ts",
-      "src/routes/_authenticated/app/index.tsx",
+      "src/components/home/action-center.tsx",
     ]) {
       expect(readFileSync(join(ROOT, f), "utf8"), f).toMatch(/entitlements|loadEntitlements/);
     }
