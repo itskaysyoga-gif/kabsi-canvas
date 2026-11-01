@@ -30,8 +30,11 @@ if (existsSync(dir))
       js: (items.find((i) => i.resourceType === "script")?.transferSize ?? NaN) / 1024,
     });
   }
-if (runs.length === 0) {
-  console.error(`No Lighthouse report for ${want} in ${dir}: the gate cannot say yes.`);
+const need = Number(process.env.LH_RUNS ?? 3);
+if (runs.length < need || runs.some((r) => ![r.lcp, r.tbt, r.js].every(Number.isFinite))) {
+  console.error(
+    `::error::The gate needs ${need} complete Lighthouse reports for ${want} in ${dir} and has ${runs.length}: it cannot say yes.`,
+  );
   process.exit(1);
 }
 const lcp = median(runs.map((r) => r.lcp));

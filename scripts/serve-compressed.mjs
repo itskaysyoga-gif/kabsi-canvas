@@ -39,16 +39,23 @@ const handler = (req, res) => {
       const accept = String(req.headers["accept-encoding"] ?? "");
       if (/^\/assets\//.test(req.url ?? "") && r.statusCode === 200)
         out["cache-control"] = "public, max-age=31536000, immutable";
-      if (!out["content-encoding"] && TEXT.test(type) && /\b(br|gzip)\b/.test(accept)) {
+      const whole = r.statusCode === 200 && req.method !== "HEAD";
+      // An upstream that stops half way ends the client's response too, so Lighthouse never waits on a stalled one.
+      r.on("aborted", () => res.destroy());
+      r.on("error", () => res.destroy());
+      if (whole && !out["content-encoding"] && TEXT.test(type) && /\b(br|gzip)\b/.test(accept)) {
         const br = /\bbr\b/.test(accept);
         delete out["content-length"];
         out["content-encoding"] = br ? "br" : "gzip";
-        out["vary"] = "Accept-Encoding";
+        out["vary"] = out["vary"] ? `${out["vary"]}, Accept-Encoding` : "Accept-Encoding";
         res.writeHead(r.statusCode ?? 200, out);
         r.pipe(
           br
-            ? createBrotliCompress({ params: { [constants.BROTLI_PARAM_QUALITY]: 4 } })
-            : createGzip({ level: 6 }),
+            ? createBrotliCompress({
+                flush: constants.BROTLI_OPERATION_FLUSH, // streamed HTML reaches the browser as it is written, as on Vercel
+                params: { [constants.BROTLI_PARAM_QUALITY]: 4 },
+              })
+            : createGzip({ level: 6, flush: constants.Z_SYNC_FLUSH }),
         ).pipe(res);
       } else {
         res.writeHead(r.statusCode ?? 200, out);
@@ -57,6 +64,7 @@ const handler = (req, res) => {
     },
   );
   up.on("error", () => {
+    if (res.headersSent) return res.destroy();
     res.writeHead(502);
     res.end("upstream down");
   });

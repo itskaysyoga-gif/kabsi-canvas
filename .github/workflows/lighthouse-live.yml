@@ -3,8 +3,8 @@ name: Lighthouse live
 # Lean 1 (30 Oct plan, speed): Lighthouse on a throttled phone (mobile, 3 runs, median) against the real site.
 # By hand (Actions tab, Run workflow): five pages, before and after a speed change; the numbers land in the job summary
 # and the uploaded report. After every Production deploy (Vercel's deployment_status): Home at 390 px against kabsi.co,
-# and the job FAILS when Home misses the speed gate (scripts/lighthouse-gate.mjs; same budgets as the `speed` job of
-# ci.yml). It never touches the site and never fails a pull request.
+# and that run FAILS when Home misses the speed gate (scripts/lighthouse-gate.mjs; same budgets as the `speed` job of
+# ci.yml). A by-hand run never fails. It never touches the site and never fails a pull request.
 on:
   deployment_status:
   workflow_dispatch:
@@ -41,6 +41,7 @@ jobs:
           PAGES: ${{ inputs.pages || '/' }}
           EVENT: ${{ github.event_name }}
         run: |
+          set -f
           args=""
           for p in $PAGES; do args="$args --url=${BASE_URL%/}${p}"; done
           # After a deploy: Home at 390 px (the speed gate's own setup). By hand: Lighthouse's default phone, so the numbers
@@ -53,7 +54,8 @@ jobs:
       - name: Summary
         if: always()
         run: node scripts/lighthouse-summary.mjs .lighthouseci
-      - name: Gate (Home)
+      - name: Gate (Home, after a deploy only)
+        if: github.event_name == 'deployment_status'
         run: node scripts/lighthouse-gate.mjs .lighthouseci /
       - name: Keep the reports
         if: always()
