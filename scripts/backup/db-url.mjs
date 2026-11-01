@@ -27,6 +27,40 @@ try {
 }
 if (!/^postgres(ql)?:$/.test(u.protocol)) fail("SUPABASE_DB_URL must start with postgresql://");
 
+// What the address is made of, for a failed sign-in (lane R, 1 Nov 2026): the user, host, port and database, the
+// password's length and the usual paste mistakes. The password itself is never printed.
+{
+  const rest = url.slice(url.indexOf("://") + 3);
+  const at = rest.lastIndexOf("@");
+  const userinfo = at >= 0 ? rest.slice(0, at) : "";
+  const rawPass = userinfo.includes(":") ? userinfo.slice(userinfo.indexOf(":") + 1) : "";
+  const notes = [];
+  if (url !== url.trim()) notes.push("a space or line break at the start or end");
+  if (/YOUR-PASSWORD/i.test(rawPass)) notes.push("the [YOUR-PASSWORD] placeholder is still there");
+  else if (/[[\]]/.test(rawPass)) notes.push("square brackets around the password (remove them)");
+  if (/[^A-Za-z0-9._~%-]/.test(rawPass)) notes.push("characters that must be percent-encoded");
+  if (/%(?![0-9A-Fa-f]{2})/.test(rawPass)) notes.push("a % that is not part of an encoding");
+  if (/pooler\.supabase\.com$/.test(u.hostname) && !u.username.includes("."))
+    notes.push("the user is not postgres.<project ref>, which the session pooler needs");
+  if (
+    !/pooler\.supabase\.com$/.test(u.hostname) &&
+    !/^db\.[a-z0-9]{20}\.supabase\.co$/.test(u.hostname)
+  )
+    notes.push("the host is not a Supabase address");
+  let len = rawPass.length;
+  try {
+    len = decodeURIComponent(rawPass).length;
+  } catch {
+    notes.push("the password's percent-encoding is broken");
+  }
+  process.stderr.write(
+    `Database address: user ${u.username}, host ${u.hostname}, port ${u.port || "5432"}, ` +
+      `database ${u.pathname.replace(/^\//, "") || "none"}, password ${len} characters` +
+      (notes.length ? `. Check: ${notes.join("; ")}.` : ". No paste mistake found.") +
+      "\n",
+  );
+}
+
 const direct = /^db\.([a-z0-9]{20})\.supabase\.co$/.exec(u.hostname);
 if (!direct) {
   // Already a pooler (or another reachable) address.

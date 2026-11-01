@@ -1,6 +1,6 @@
 // Sec 2: the backup keeps 21 days (3 weekly sets), reaches the database over IPv4 (the session pooler), and the restore
 // drill applies deletions made after the backup again, restores Storage and records how long it took.
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
@@ -41,6 +41,39 @@ describe("Sec 2: backup and restore", () => {
     expect(direct.code).toBe(1);
     expect(direct.out).toMatch(/IPv6 only/);
     expect(direct.out).not.toContain("pw");
+  });
+
+  it("names the usual paste mistakes without printing the password", () => {
+    const run = (url: string) =>
+      execFileSync("node", ["scripts/backup/db-url.mjs"], {
+        env: { PATH: process.env.PATH ?? "", SUPABASE_DB_URL: url },
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+    const host = "@aws-0-eu-central-1.pooler.supabase.com:5432/postgres";
+    const err = (url: string) => {
+      const r = spawnSync("node", ["scripts/backup/db-url.mjs"], {
+        env: { PATH: process.env.PATH ?? "", SUPABASE_DB_URL: url },
+        encoding: "utf8",
+      });
+      return r.stderr;
+    };
+    expect(run(`postgresql://postgres.abcdefghijklmnopqrst:Secret123${host}`)).toContain(
+      "Secret123",
+    );
+    const ok = err(`postgresql://postgres.abcdefghijklmnopqrst:Secret123${host}`);
+    expect(ok).toMatch(/password 9 characters\. No paste mistake found/);
+    expect(ok).not.toContain("Secret123");
+    expect(err(`postgresql://postgres.abcdefghijklmnopqrst:[Secret123]${host}`)).toMatch(
+      /square brackets/,
+    );
+    expect(err(`postgresql://postgres.abcdefghijklmnopqrst:[YOUR-PASSWORD]${host}`)).toMatch(
+      /placeholder/,
+    );
+    expect(err(`postgresql://postgres:Secret123${host}`)).toMatch(/not postgres\.<project ref>/);
+    expect(err(`postgresql://postgres.abcdefghijklmnopqrst:Sec$ret!${host}`)).toMatch(
+      /percent-encoded/,
+    );
   });
 
   it("backup.sh resolves the address before pg_dump and never echoes it", () => {
