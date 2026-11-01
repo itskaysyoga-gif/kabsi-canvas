@@ -242,9 +242,7 @@ function PickBusiness({
         ))}
       </ul>
       {/* Google's Places policy: Places results shown without a Google map carry the words "Google Maps". */}
-      <p className="mt-3 text-label font-semibold text-text-3">
-        <span translate="no">Google Maps</span>
-      </p>
+      <PlacesAttribution className="mt-3" />
       <Link
         to="/scan"
         search={changeSearch(query, keyword, industry) as never}
@@ -516,6 +514,9 @@ export function LiveResult({
           {term ? `, for '${term}'` : ""}
         </h1>
         <p className="mt-2 text-small text-text-2">{s.address}</p>
+        {/* Google's Places policies (read 1 Nov 2026, Check 2): Places data shown without a Google map carries the
+            words "Google Maps", exactly and not translated. The name, address and facts on this screen are Places data. */}
+        <PlacesAttribution className="mt-1" />
         <Link
           to="/scan"
           search={changeSearch(change.q, change.keyword, change.industry) as never}
@@ -525,15 +526,13 @@ export function LiveResult({
         </Link>
 
         {/* One finding, one action, one button (brief section 14.7). */}
-        <div
-          data-main-cta
-          className="mt-8 rounded-panel border border-line bg-surface-1 p-6 shadow-rest sm:p-8"
-        >
+        {/* Design 8: the most important finding first, in plain words, on the dark band. */}
+        <div data-main-cta className="theme-dark mt-8 rounded-panel bg-band p-6 text-text-1 sm:p-8">
           {first && (
             <div className="mb-6">
-              <p className="text-label font-bold text-text-3">What to do first</p>
-              <p className="mt-2 max-w-2xl text-h3">{first.fact}</p>
-              <p className="mt-3 max-w-2xl text-body text-text-2">{first.action}</p>
+              <p className="text-label font-bold text-text-2">The most important thing</p>
+              <p className="mt-2 max-w-2xl font-display text-h2 font-bold">{first.fact}</p>
+              <p className="mt-3 max-w-2xl text-lead text-text-2">{first.action}</p>
             </div>
           )}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -667,6 +666,7 @@ export function LiveResult({
           <p className="mt-4 text-small text-text-3">
             Shown live from Google. Kabsi does not store it.
           </p>
+          <PlacesAttribution className="mt-2" />
         </Fold>
         {check && check.fast.competitors.length > 0 && (
           <Fold title="Who shows up around you">
@@ -992,5 +992,17 @@ export function SavedFreeCheck({ code }: { code: string }) {
         </div>
       </section>
     </>
+  );
+}
+
+/** The words Google's Places policies require where Places data is shown without a Google map (Check 2, Web 4). */
+export function PlacesAttribution({ className }: { className?: string }) {
+  return (
+    <p
+      className={cn("text-label font-semibold text-text-3", className)}
+      data-testid="places-attribution"
+    >
+      <span translate="no">Google Maps</span>
+    </p>
   );
 }
