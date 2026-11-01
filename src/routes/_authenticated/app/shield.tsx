@@ -3,8 +3,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ShieldCheck } from "lucide-react";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
+import { AccountTop, Panel } from "@/components/kabsi/d3-account";
 import { ProfileGaps } from "@/components/app/profile-gaps";
-import { AccountTop, Panel, SourceLabel } from "@/components/kabsi/d3-account";
 import { TaskBlock } from "@/components/kabsi/d3-content-task";
 import {
   Button,
@@ -126,17 +126,10 @@ function ProfilePage() {
     <>
       <AccountTop
         title="Your Google profile"
-        lead="Kabsi checks your details every day and tells you when anything changes."
-        action={
-          live ? (
-            <SourceLabel>
-              <ShieldCheck
-                className={running ? "size-4 text-ok" : "size-4 text-text-2"}
-                aria-hidden
-              />
-              {protectionLine({ running, checkedAt: d?.checkedAt ?? null })}
-            </SourceLabel>
-          ) : null
+        lead={
+          live
+            ? protectionLine({ running, checkedAt: d?.checkedAt ?? null })
+            : "Kabsi checks your details every day and tells you when anything changes."
         }
       />
       {!location.isLoading && !loc ? <ButtonLink to="/start">Add your business</ButtonLink> : null}

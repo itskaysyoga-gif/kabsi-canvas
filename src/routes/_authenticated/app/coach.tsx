@@ -42,7 +42,7 @@ function CoachPage() {
     <>
       <AccountTop
         title="Profile Coach"
-        lead="What a complete Google profile has, and what yours is missing. Nothing changes on Google until you approve it."
+        lead="What a complete Google profile has, and what yours is missing."
       />
       {!location.isLoading && !loc ? <ButtonLink to="/start">Add your business</ButtonLink> : null}
       {loc?.concierge ? <EarlyAccessNotice what="The Profile Coach" /> : null}

@@ -398,11 +398,7 @@ function DraftCard({
   return (
     <article className={cardCls} aria-label={post.event_title ?? TYPE_LABEL[post.topic_type]}>
       <CardHead post={post} />
-      <div className="mt-3">
-        <StatusPill tone="info">Waiting for your yes</StatusPill>
-      </div>
       <div className="mt-4">
-        <p className="text-small font-bold text-text-2">Post ready</p>
         {editing ? (
           <>
             <Label htmlFor={`post-${post.id}`} className="sr-only">
@@ -486,9 +482,6 @@ function DraftCard({
                 Skip
               </Button>
             </div>
-            <p className="mt-3 text-small text-text-2">
-              Nothing is published until you approve it.
-            </p>
           </>
         )}
         {err ? (

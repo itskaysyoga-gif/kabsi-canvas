@@ -19,7 +19,6 @@ import { HeldBack, useFirstTaskDone } from "@/components/kabsi/d3-settings-parts
 import { Button, ErrorState, Field, Segmented, buttonClass } from "@/components/kabsi/ui";
 import { MessageSwitches, NotificationChoices } from "@/components/app/notification-choices";
 import { WhatsappChannel } from "@/components/app/whatsapp-channel";
-import { ToneSetting } from "@/components/app/knowledge-form";
 import { supabase } from "@/lib/supabase";
 import { myLatestLocation } from "@/lib/onboarding";
 import { clearAssistantChat } from "@/lib/assistant-storage";
@@ -150,12 +149,6 @@ function SettingsPage() {
           {open === false ? (
             <Panel title="Your voice and AI questions" id="held-back">
               <HeldBack />
-            </Panel>
-          ) : null}
-          {open ? (
-            <Panel title="Your voice" id="voice">
-              <p className="mb-3 text-small text-text-2">How replies sound.</p>
-              <ToneSetting locationId={loc.id} />
             </Panel>
           ) : null}
           {open ? <AiQuestions locationId={loc.id} /> : null}

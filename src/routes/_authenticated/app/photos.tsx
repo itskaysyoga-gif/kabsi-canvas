@@ -390,9 +390,7 @@ function ReadyCard({
     <li className="overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest">
       <PhotoImage url={url} />
       <div className="p-4">
-        <StatusPill tone={photo.suitable ? "info" : "warn"}>
-          {photo.suitable ? "Waiting for your yes" : "Kabsi has a note"}
-        </StatusPill>
+        {photo.suitable ? null : <StatusPill tone="warn">Kabsi has a note</StatusPill>}
         {photo.suitability_note ? (
           <p className="mt-2 text-small text-text-2">{photo.suitability_note}</p>
         ) : null}
