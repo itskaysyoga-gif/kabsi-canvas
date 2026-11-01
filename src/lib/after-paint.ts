@@ -3,9 +3,10 @@
 // A tool the visitor did not ask for yet (the privacy banner, Nora's launcher, statistics) must not compete with the page
 // for the phone's processor while the page is still being drawn and made ready. On the server it never runs. Returns a
 // function that cancels.
-// Lean 1 (speed): `quiet` is for heavy third-party scripts (statistics, the Meta Pixel, Speed Insights). A touch no longer
-// starts them in the middle of the visitor's first scroll or tap: they start at the next idle moment after it (at the
-// latest 2 seconds later), so the page answers the touch first.
+// `quiet` is for heavy third-party scripts (statistics, the Meta Pixel, Speed Insights). They start at the visitor's first
+// scroll, tap or key press, or `delayMs` after load, whichever comes first (Polish 1, 1 Nov 2026: Lean 1 waited for an idle
+// moment after the touch, so a visitor who acted fast and left sent nothing, which the Meta ads need). On a touch they start
+// in the next task, after the touch has been handled, so the page still answers it first.
 export function afterPaint(
   run: () => void,
   delayMs = 1500,
@@ -15,6 +16,7 @@ export function afterPaint(
   let done = false;
   let timer = 0;
   let idle = 0;
+  let soon = 0;
   const events = ["pointerdown", "keydown", "touchstart", "scroll"] as const;
   function cleanup() {
     window.removeEventListener("load", arm);
@@ -26,8 +28,7 @@ export function afterPaint(
     if (done) return;
     done = true;
     cleanup();
-    if (opts.quiet && !alreadyIdle && typeof window.requestIdleCallback === "function")
-      idle = window.requestIdleCallback(run, { timeout: 2000 });
+    if (opts.quiet && !alreadyIdle) soon = window.setTimeout(run, 0);
     else run();
   }
   function arm() {
@@ -45,5 +46,6 @@ export function afterPaint(
   return () => {
     done = true;
     cleanup();
+    if (soon) window.clearTimeout(soon);
   };
 }
