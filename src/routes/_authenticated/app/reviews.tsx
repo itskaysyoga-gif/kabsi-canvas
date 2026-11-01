@@ -201,8 +201,16 @@ function ReviewsPage() {
             When a review comes in, Kabsi drafts a reply and sends it to you on WhatsApp.
           </EmptyState>
         ) : (
-          <EmptyState icon={MessageSquareText} title="No reviews match">
-            Try another filter.
+          <EmptyState
+            icon={MessageSquareText}
+            title={needle ? "No reviews match your search." : "Nothing on Google yet."}
+            action={
+              <Button variant="secondary" size="md" onClick={() => setView("all")}>
+                See all reviews
+              </Button>
+            }
+          >
+            {needle ? null : "Replies show here once Kabsi sees them on Google."}
           </EmptyState>
         )
       ) : (

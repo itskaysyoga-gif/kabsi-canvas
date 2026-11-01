@@ -41,7 +41,13 @@ export const SECTIONS: Record<SectionId, Section> = {
     paths: ["/app/inbox", "/app/reviews", "/app/cards"],
     tabs: [
       { label: "Waiting", to: "/app/reviews", f: "waiting", match: [null, "waiting", "needs"] },
-      { label: "On Google", to: "/app/reviews", f: "google", match: ["google", "replied"] },
+      // The full list (?f=all and the older filters) sits under On Google: it is where "See all reviews" leads.
+      {
+        label: "On Google",
+        to: "/app/reviews",
+        f: "google",
+        match: ["google", "replied", "all", "positive", "neutral", "negative", "high"],
+      },
       { label: "Get reviews", to: "/app/cards" },
     ],
   },

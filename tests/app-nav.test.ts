@@ -67,8 +67,10 @@ describe("navigation", () => {
     expect(tabOn(waiting!, "/app/reviews", "needs")).toBe(true);
     expect(tabOn(google!, "/app/reviews", "google")).toBe(true);
     expect(tabOn(google!, "/app/reviews", "replied")).toBe(true);
-    expect(tabOn(waiting!, "/app/reviews", "all")).toBe(false);
-    expect(tabOn(google!, "/app/reviews", "all")).toBe(false);
+    for (const f of ["all", "positive", "neutral", "negative", "high"]) {
+      expect(tabOn(waiting!, "/app/reviews", f), f).toBe(false);
+      expect(tabOn(google!, "/app/reviews", f), f).toBe(true);
+    }
     expect(tabOn(get!, "/app/cards/", null)).toBe(true);
   });
 

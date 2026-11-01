@@ -738,4 +738,4 @@ Other lines of this pass: header links "How it works", "Pricing", "Businesses", 
 Where an older section of this file says otherwise, this section wins for the signed-in website.
 
 - Shell: five places, the same on a computer and in the phone's bottom bar: "Home", "Reviews", "Posts and photos" (short "Posts"), "Google profile" (short "Profile"), "Settings". "More" is retired. Tabs: Reviews "Waiting", "On Google", "Get reviews"; Posts and photos "Posts", "Photos"; Google profile "Profile watch", "Hours", "Profile Coach", "Where you show up"; Settings "General", "Business knowledge", "Team", "Plan", "Reports". The phone's account menu: "Your account and help" (its label for screen readers), "Need a hand?", "WhatsApp", "hello@kabsi.co", "Guides", "Log out".
-- Reviews: the filter chips are replaced by the tabs; "See all reviews" opens the full list.
+- Reviews: the filter chips are replaced by the tabs; "See all reviews" opens the full list, under the On Google tab. Empty On Google: "Nothing on Google yet." with "Replies show here once Kabsi sees them on Google."; a search with no result: "No reviews match your search."

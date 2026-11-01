@@ -174,6 +174,34 @@ function BusinessMenu({ compact = false }: { compact?: boolean }) {
 }
 
 /** "Pro trial, [n] days left." with its end date (COPY.md 19), for the owner while the trial runs. */
+function useTrial(loc: Location | null | undefined, role: Role | undefined) {
+  const ent = useQuery({
+    queryKey: ["entitlements", loc?.id],
+    queryFn: () => loadEntitlements(loc!.id),
+    enabled: !!loc && role === "owner",
+    staleTime: 60_000,
+  });
+  return ent.data?.state === "trial" ? ent.data.trial : null;
+}
+
+const daysLeft = (iso: string) =>
+  Math.max(0, Math.ceil((Date.parse(iso) - Date.now()) / 86_400_000));
+
+function TrialWords({ endsAt }: { endsAt: string }) {
+  const left = daysLeft(endsAt);
+  return (
+    <>
+      <CircleUser className="size-5 shrink-0 text-text-2" aria-hidden />
+      <span className="min-w-0 flex-1">
+        <span className="block font-bold">
+          Pro trial, {left} {left === 1 ? "day" : "days"} left.
+        </span>
+        <span className="block text-label text-text-2">Ends {fmtDate(endsAt, false)}</span>
+      </span>
+    </>
+  );
+}
+
 function TrialStrip({
   loc,
   role,
@@ -183,15 +211,8 @@ function TrialStrip({
   role?: Role | undefined;
   className?: string;
 }) {
-  const ent = useQuery({
-    queryKey: ["entitlements", loc?.id],
-    queryFn: () => loadEntitlements(loc!.id),
-    enabled: !!loc && role === "owner",
-    staleTime: 60_000,
-  });
-  const t = ent.data?.state === "trial" ? ent.data.trial : null;
+  const t = useTrial(loc, role);
   if (!t) return null;
-  const left = Math.max(0, Math.ceil((Date.parse(t.ends_at) - Date.now()) / 86_400_000));
   return (
     <Link
       to="/app/plan"
@@ -200,13 +221,7 @@ function TrialStrip({
         className,
       )}
     >
-      <CircleUser className="size-5 shrink-0 text-text-2" aria-hidden />
-      <span className="min-w-0 flex-1">
-        <span className="block font-bold">
-          Pro trial, {left} {left === 1 ? "day" : "days"} left.
-        </span>
-        <span className="block text-label text-text-2">Ends {fmtDate(t.ends_at, false)}</span>
-      </span>
+      <TrialWords endsAt={t.ends_at} />
     </Link>
   );
 }
@@ -319,6 +334,7 @@ function AccountMenu({
   onSignOut: () => void;
 }) {
   const item = "min-h-11 cursor-pointer gap-3 rounded-inner text-small font-semibold";
+  const trial = useTrial(loc, role);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -334,7 +350,16 @@ function AccountMenu({
         align="end"
         className="w-72 rounded-card border-line bg-surface-1 p-2 shadow-float"
       >
-        <TrialStrip loc={loc} role={role} className="mb-1" />
+        {trial ? (
+          <DropdownMenuItem
+            asChild
+            className="mb-1 min-h-11 cursor-pointer gap-3 rounded-inner bg-surface-2 text-small"
+          >
+            <Link to="/app/plan">
+              <TrialWords endsAt={trial.ends_at} />
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuLabel className="text-label font-normal text-text-2">
           Need a hand?
         </DropdownMenuLabel>

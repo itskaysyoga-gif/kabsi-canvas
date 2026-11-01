@@ -58,7 +58,8 @@ test.describe("app screens (QA demo owner)", () => {
 const PLACES = ["Home", "Reviews", "Posts and photos", "Google profile", "Settings"];
 const SHORT = ["Home", "Reviews", "Posts", "Profile", "Settings"];
 const OLD: [string, string, string][] = [
-  ["/app/inbox", "Reviews", "Reviews"],
+  ["/app/inbox", "Reviews", "Waiting"],
+  ["/app/reviews?f=all", "Reviews", "On Google"],
   ["/app/cards", "Reviews", "Get reviews"],
   ["/app/insights", "Google profile", "Where you show up"],
   ["/app/coach", "Google profile", "Profile Coach"],
@@ -91,11 +92,10 @@ test.describe("app menu (QA demo owner)", () => {
       await page.goto(path);
       await expect(page.locator("h1").first()).toBeVisible();
       const tabs = page.getByRole("navigation", { name: "Pages in this section" });
-      if (path !== "/app/inbox")
-        await expect(tabs.getByRole("link", { name: tab, exact: true })).toHaveAttribute(
-          "aria-current",
-          "page",
-        );
+      await expect(tabs.getByRole("link", { name: tab, exact: true })).toHaveAttribute(
+        "aria-current",
+        "page",
+      );
       await axeClean(page, path, KNOWN_AXE);
     });
   }
