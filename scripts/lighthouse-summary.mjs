@@ -19,6 +19,9 @@ for (const f of readdirSync(dir).filter((n) => /^lhr-.*\.json$/.test(n))) {
   const script =
     r.audits["resource-summary"]?.details?.items?.find((i) => i.resourceType === "script")
       ?.transferSize ?? NaN;
+  const total =
+    r.audits["resource-summary"]?.details?.items?.find((i) => i.resourceType === "total")
+      ?.transferSize ?? NaN;
   const row = {
     perf: r.categories.performance.score * 100,
     a11y: r.categories.accessibility.score * 100,
@@ -28,6 +31,7 @@ for (const f of readdirSync(dir).filter((n) => /^lhr-.*\.json$/.test(n))) {
     tbt: r.audits["total-blocking-time"].numericValue,
     cls: r.audits["cumulative-layout-shift"].numericValue,
     js: script / 1024,
+    total: total / 1024,
   };
   const path = new URL(r.finalUrl).pathname;
   byUrl.set(path, [...(byUrl.get(path) ?? []), row]);
@@ -35,20 +39,21 @@ for (const f of readdirSync(dir).filter((n) => /^lhr-.*\.json$/.test(n))) {
 const lines = [
   "Lighthouse on a throttled phone, report only (budgets of master plan 24.9: performance 95 / 90, other scores 95, LCP 2.0 s, TBT 150 ms, CLS 0.05, JS 120 KB).",
   "",
-  "| Page | Perf | A11y | Best | SEO | LCP s | TBT ms | CLS | JS KB |",
-  "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+  "| Page | Perf | A11y | Best | SEO | LCP s | TBT ms | CLS | JS KB | Total KB |",
+  "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
 ];
 for (const [path, rows] of byUrl) {
   const m = (k) => median(rows.map((r) => r[k]));
   lines.push(
     `| ${path} | ${m("perf").toFixed(0)} | ${m("a11y").toFixed(0)} | ${m("bp").toFixed(0)} | ${m("seo").toFixed(0)} | ` +
-      `${(m("lcp") / 1000).toFixed(1)} | ${m("tbt").toFixed(0)} | ${m("cls").toFixed(3)} | ${m("js").toFixed(0)} |`,
+      `${(m("lcp") / 1000).toFixed(1)} | ${m("tbt").toFixed(0)} | ${m("cls").toFixed(3)} | ${m("js").toFixed(0)} | ${m("total").toFixed(0)} |`,
   );
 }
-lines.push(
-  "",
-  "The CI server is a plain Node server without Vercel's compression and CDN, so JS KB and LCP read worse here than on kabsi.co. Web 2 points this at the Vercel preview and makes it blocking.",
-);
+if (dir.endsWith("-report"))
+  lines.push(
+    "",
+    "The CI server is a plain Node server without Vercel's compression and CDN, so JS KB and LCP read worse here than on kabsi.co. Web 2 points this at the Vercel preview and makes it blocking.",
+  );
 console.log(lines.join("\n"));
 if (process.env.GITHUB_STEP_SUMMARY)
   appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
