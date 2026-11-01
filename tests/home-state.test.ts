@@ -277,13 +277,12 @@ describe("App 2 Home", () => {
         task(2, { kind: "billing", title: "Your payment did not go through", path: "/app/plan" }),
       ],
       accessLost: true,
-      setup: { text: "Setup is waiting", owner: true },
-      plan: { title: "Your trial has ended", to: "/app/plan", label: "See your plan" },
+      setup: null,
+      owner: true,
+      plan: null,
     });
     expect(lines.map((l) => l.text)).toEqual([
       ACCESS_LOST_LINE,
-      "Setup is waiting",
-      "Your trial has ended",
       "Google shows a new phone number",
       "Your payment did not go through",
     ]);
@@ -294,6 +293,30 @@ describe("App 2 Home", () => {
       tasks: [task(1, { kind: "reconnect", title: "Reconnect Google", path: "/app/settings" })],
     });
     expect(reconnect.map((l) => l.text)).toEqual(["Reconnect Google"]);
+  });
+  it("shows setup and the plan when access works, and says billing once and only to the owner", () => {
+    const billing = task(2, {
+      kind: "billing",
+      title: "Your payment did not go through",
+      path: "/app/plan",
+    });
+    const plan = { title: "Your trial has ended", to: "/app/plan", label: "See your plan" };
+    const owner = attentionLines({
+      ...none,
+      tasks: [billing],
+      setup: { text: "Setup is waiting", owner: true },
+      plan,
+      owner: true,
+    });
+    expect(owner.map((l) => l.text)).toEqual(["Setup is waiting", "Your trial has ended"]);
+    expect(attentionLines({ ...none, tasks: [billing], owner: false })).toEqual([]);
+    expect(
+      attentionLines({
+        ...none,
+        accessLost: true,
+        setup: { text: "Setup is waiting", owner: true },
+      }).map((l) => l.text),
+    ).toEqual([ACCESS_LOST_LINE]);
   });
   it("gives a manager or staff no setup button", () => {
     const [line] = attentionLines({ ...none, setup: { text: "Setup is waiting", owner: false } });
@@ -308,6 +331,8 @@ describe("App 2 Home", () => {
       { id: "p9", kind: "photo", targetId: "y" },
     ];
     expect(doneThisWeek(rows).map((r) => r.id)).toEqual(["p3", "p1", "p0"]);
+    const undone = [{ id: "u", kind: "review_reply", targetId: "r9", owner: "undone" }, ...rows];
+    expect(doneThisWeek(undone).map((r) => r.id)).toEqual(["p3", "p1", "p0"]);
   });
   it("says what Kabsi does and when the owner hears from it", () => {
     expect(emptyHomeLine("Monday 2 November", false)).toBe(

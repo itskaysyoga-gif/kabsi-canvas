@@ -6,6 +6,7 @@ import { AccountTop, Panel } from "@/components/kabsi/d3-account";
 import { ButtonLink, ErrorState, Skeleton, buttonClass } from "@/components/kabsi/ui";
 import { ActionCenter, NeedsAttention } from "@/components/home/action-center";
 import { myAccess } from "@/lib/team";
+import { loadEntitlements } from "@/lib/entitlements";
 import { attentionLines, ATTENTION_DEFAULT_SETUP } from "@/lib/home-state";
 import { loadScenario, myLatestLocation, type Location } from "@/lib/onboarding";
 import { screenFor } from "@/lib/scenarios";
@@ -147,6 +148,13 @@ function Setup({ loc, owner }: { loc: Location; owner: boolean }) {
   const text =
     said?.home ??
     (loc.concierge && loc.consent_at ? CONCIERGE_COPY.setup : ATTENTION_DEFAULT_SETUP);
+  // The trial line only while there is no trial or plan yet (the organisation's entitlements, P0.4-06).
+  const ent = useQuery({
+    queryKey: ["entitlements", loc.id],
+    queryFn: () => loadEntitlements(loc.id),
+    staleTime: 60_000,
+  });
+  const noPlan = !!ent.data && ent.data.state === "none";
   const lines = attentionLines({
     tasks: [],
     accessLost: !!loc.access_lost_at && !loc.access_granted_at,
@@ -156,7 +164,7 @@ function Setup({ loc, owner }: { loc: Location; owner: boolean }) {
   return (
     <div className="space-y-4">
       <NeedsAttention lines={lines} />
-      {loc.concierge ? null : (
+      {loc.concierge || !noPlan ? null : (
         <p className="text-body text-text-2">
           Your trial starts only when access is checked. Nothing has been published.
         </p>

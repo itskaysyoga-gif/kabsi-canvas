@@ -60,20 +60,25 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
     tasks: all,
     accessLost: !!loc.access_lost_at && !loc.access_granted_at,
     setup: null,
+    owner: role === "owner",
     plan:
       choice && choice.tone === "attention"
         ? { title: choice.title, to: choice.cta.to, label: choice.cta.label }
         : null,
   });
   const settle = useCallback(
-    (id: string) => {
+    async (id: string) => {
+      // Read the lists again first, so the approved item never flashes back with its Approve button.
+      await Promise.all(
+        ["tasks", "waiting-count", "done-lately", "reviews", "review-tasks"].map((k) =>
+          qc.invalidateQueries({ queryKey: [k] }),
+        ),
+      );
       setHeld((m) => {
         const n = new Map(m);
         n.delete(id);
         return n;
       });
-      for (const k of ["tasks", "waiting-count", "done-lately", "reviews", "review-tasks"])
-        void qc.invalidateQueries({ queryKey: [k] });
     },
     [qc],
   );
@@ -113,7 +118,7 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
                   lead={i === 0}
                   approved={held.get(t.id)?.a}
                   onApproved={(a) => setHeld((m) => new Map(m).set(t.id, { task: t, a }))}
-                  onSettled={() => settle(t.id)}
+                  onSettled={() => void settle(t.id)}
                 />
               ),
             )}

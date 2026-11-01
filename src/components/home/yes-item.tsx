@@ -9,6 +9,7 @@ import { loadHistory, type CardDetail } from "@/lib/home";
 import { postReply, undoReply } from "@/lib/reviews";
 import { publishPost, undoPost } from "@/lib/posts";
 import { approvedLine } from "@/lib/task-state";
+import { fmtDateTime } from "@/lib/format";
 import { timeAgo } from "@/lib/dashboard";
 import { track } from "@/lib/telemetry";
 import type { Access } from "@/lib/team";
@@ -60,7 +61,12 @@ export function YesItem({
   const oneTap =
     !!text &&
     !!detail?.safe &&
-    ((reviewId && risk !== "medium" && risk !== "high" && access.approve.review_reply) ||
+    ((reviewId &&
+      risk !== "medium" &&
+      risk !== "high" &&
+      (detail.risk ?? "low") === "low" &&
+      !task.evidence["google_refused"] &&
+      access.approve.review_reply) ||
       (postId && access.approve.post));
   const edit = reviewId
     ? { to: "/app/reviews", search: { f: "waiting", r: reviewId } }
@@ -196,6 +202,8 @@ function Countdown({
     return () => clearInterval(t);
   }, []);
   const left = Math.max(0, Math.ceil((until - now) / 1000));
+  // A post booked for a later day: say the day, as Posts does, not a countdown of days in seconds.
+  const later = left > 60;
   useEffect(() => {
     if (left === 0) {
       const t = setTimeout(onDone, 1500);
@@ -208,7 +216,9 @@ function Countdown({
       <TaskPill state={left > 0 ? "approved" : "sent"} />
       {left > 0 ? (
         <>
-          <p className="min-w-0 flex-1 text-small text-text-1">{approvedLine(left)}</p>
+          <p className="min-w-0 flex-1 text-small text-text-1">
+            {later ? `Approved. It goes to Google on ${fmtDateTime(until)}.` : approvedLine(left)}
+          </p>
           <Button
             variant="secondary"
             size="md"

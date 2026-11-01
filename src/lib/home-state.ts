@@ -334,6 +334,8 @@ export function attentionLines(i: {
   accessLost: boolean;
   setup: { text: string; owner: boolean } | null;
   plan: { title: string; to: string; label: string } | null;
+  /** Billing is the owner's (K-16): a manager never sees a billing line. */
+  owner?: boolean;
 }): AttentionLine[] {
   const out: AttentionLine[] = [];
   const reconnect = i.tasks.some((t) => t.kind === "reconnect");
@@ -343,7 +345,8 @@ export function attentionLines(i: {
       text: ACCESS_LOST_LINE,
       action: { label: "See how to fix it", to: "/manager-steps" },
     });
-  if (i.setup)
+  // Lost access is the one step that matters; the setup line would say the same thing again.
+  if (i.setup && !(i.accessLost && !reconnect))
     out.push({
       key: "setup",
       text: i.setup.text,
@@ -353,6 +356,8 @@ export function attentionLines(i: {
     out.push({ key: "plan", text: i.plan.title, action: { label: i.plan.label, to: i.plan.to } });
   for (const t of i.tasks) {
     if (NEEDS_YES.includes(t.kind) || t.kind === "profile_gap") continue;
+    // The plan line already says it, and only the owner handles billing.
+    if (t.kind === "billing" && (!i.owner || i.plan)) continue;
     out.push({
       key: t.id,
       text: t.title,
@@ -363,13 +368,15 @@ export function attentionLines(i: {
 }
 
 /** "Done by Kabsi this week": the latest state of each item once (no duplicates), at most three. */
-export function doneThisWeek<T extends { targetId: string; kind: string }>(
+export function doneThisWeek<T extends { targetId: string; kind: string; owner?: string }>(
   items: T[],
   max = 3,
 ): T[] {
   const seen = new Set<string>();
   const out: T[] = [];
   for (const t of items) {
+    // An undone approval is work that did not happen: never listed as done.
+    if (t.owner === "undone") continue;
     const k = `${t.kind}:${t.targetId}`;
     if (seen.has(k)) continue;
     seen.add(k);

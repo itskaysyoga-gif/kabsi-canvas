@@ -85,6 +85,8 @@ export type CardDetail = {
   quote: string | null;
   /** What Kabsi prepared, exactly as it would go out. */
   prepared: string | null;
+  /** A review's risk now (K-13), read from the review itself, not the task. */
+  risk: "low" | "medium" | "high" | null;
   /** The draft passed Kabsi's checks, so it may be approved as it is (a reply's safety_ok; a post's draft). */
   safe: boolean;
   /** The evidence in one or two plain lines ("Google shows 18:00. You approved 22:00."). */
@@ -123,7 +125,7 @@ export async function loadCardDetails(tasks: Task[]): Promise<Record<string, Car
     reviewIds.length
       ? supabase
           .from("reviews")
-          .select("id, reviewer_name, star_rating, comment, content_purged_at")
+          .select("id, reviewer_name, star_rating, comment, content_purged_at, risk")
           .in("id", reviewIds)
       : null,
     reviewIds.length
@@ -149,6 +151,7 @@ export async function loadCardDetails(tasks: Task[]): Promise<Record<string, Car
     star_rating: number;
     comment: string | null;
     content_purged_at: string | null;
+    risk: "low" | "medium" | "high" | null;
   }>(reviews);
   const ch = byId<{
     id: string;
@@ -179,6 +182,7 @@ export async function loadCardDetails(tasks: Task[]): Promise<Record<string, Car
         // A high-risk review gets no draft (K-13); the card says so instead.
         prepared: draft?.body ?? null,
         safe: !!draft?.safety_ok,
+        risk: r?.risk ?? null,
         evidence: high ? ["Kabsi did not draft a reply. Open it to see what to check first."] : [],
       };
     } else if (t.kind === "profile_change") {
@@ -190,6 +194,7 @@ export async function loadCardDetails(tasks: Task[]): Promise<Record<string, Car
         quote: null,
         prepared: null,
         safe: false,
+        risk: null,
         evidence: c
           ? [
               `Google shows ${shows ? `"${shows}"` : "nothing"}.`,
@@ -204,10 +209,18 @@ export async function loadCardDetails(tasks: Task[]): Promise<Record<string, Car
         quote: null,
         prepared: p?.body ?? null,
         safe: !!p?.body,
+        risk: null,
         evidence: [],
       };
     } else {
-      out[t.id] = { eyebrow: null, quote: null, prepared: null, safe: false, evidence: [] };
+      out[t.id] = {
+        eyebrow: null,
+        quote: null,
+        prepared: null,
+        safe: false,
+        risk: null,
+        evidence: [],
+      };
     }
   }
   return out;
