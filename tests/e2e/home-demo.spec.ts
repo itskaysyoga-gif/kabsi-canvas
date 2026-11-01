@@ -9,10 +9,11 @@ const chat = (page: Page) => page.getByRole("log", { name: "The chat with Kabsi"
 const card = (page: Page) => page.getByRole("list", { name: "Where the reply is" });
 const answer = (page: Page) => chat(page).getByRole("group", { name: "Your answer" });
 
-test.describe("the Home demonstration", () => {
+// Web 4 (Design 7): the demonstration moved from Home to How it works ("What happens after your yes.").
+test.describe("the demonstration on How it works", () => {
   test.beforeEach(async ({ page }) => {
     await noBanner(page);
-    await page.goto("/");
+    await page.goto("/how-it-works");
     await settle(page);
   });
 

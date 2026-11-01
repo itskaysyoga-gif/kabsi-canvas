@@ -127,11 +127,11 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     expect(MAIN_CTA).toBe("Check my business free");
     expect(SCAN_LINE).toBe("Free check. No Google access needed. Takes about 10 seconds.");
     expect(TRIAL_LINE).toBe("Free for 14 days once Kabsi is connected. No card.");
-    // Design 6 (Web 3): the H1 is the brand line itself, and the supporting line is 30.20's.
-    const home = read("src/components/kabsi/d6-home.tsx");
+    // Design 8 (Web 4): the H1 is the brand line itself, and the supporting line is Design 7's line 1.
+    const home = read("src/components/kabsi/d8-home.tsx");
     expect(home).toContain("Your business on Google. Taken care of.");
-    expect(read("src/components/kabsi/d6-data.ts")).toContain(
-      "Kabsi does the work and asks for your yes on WhatsApp.",
+    expect(read("src/components/kabsi/d8-data.ts")).toContain(
+      "prepares the replies, posts and fixes it needs, and asks for your yes on WhatsApp.",
     );
     expect(home).toContain("{!WHATSAPP_ON && (");
   });
@@ -297,5 +297,32 @@ describe("the head of every public page (30.16 section 4)", () => {
   it("gives Home the Organization data and the share image of the new brand line", () => {
     expect(read("src/routes/index.tsx")).toMatch(/jsonLd: \[ORG_LD, WEBSITE_LD/);
     expect(read("scripts/og.mjs")).toContain("Your business on Google. Taken care of.");
+  });
+});
+
+describe("Home on Design 8 (Web 4, lane R 1 Nov 2026)", () => {
+  const home = read("src/components/kabsi/d8-home.tsx");
+  const data = read("src/components/kabsi/d8-data.ts");
+  it("never types a count: the Founding 25 count and the founding price come from the real readers", () => {
+    expect(home).toContain("useFoundingPlaces()");
+    expect(home).toContain("useFoundingLeft()");
+    expect(home).toContain("left !== null && left > 0 &&");
+    expect(home + data).not.toMatch(/\b\d+ (of 25 )?places left/);
+  });
+  it("uses lane R's hours buttons and marks what is not live as At launch", () => {
+    expect(data).toContain('buttons: ["Use my hours", "Keep Google\'s"]');
+    expect(data.match(/atLaunch: true/g)).toHaveLength(2);
+  });
+  it("shows in the Example free check only what the free check can read (facts, K-82)", () => {
+    const example = data.slice(data.indexOf("EXAMPLE_RESULT"));
+    expect(example).not.toMatch(/without a reply|no reply|Last post|holiday hours/i);
+    expect(data).not.toContain("Your hours, replies, posts, photos and links");
+  });
+  it("cards only for finished trades, each with a photo", () => {
+    const cards = home.slice(
+      home.indexOf("TRADE_CARDS"),
+      home.indexOf("export function PickBusiness"),
+    );
+    expect(cards.match(/photo: PHOTOS\./g)).toHaveLength(4);
   });
 });
