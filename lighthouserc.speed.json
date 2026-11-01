@@ -1,7 +1,7 @@
 {
   "ci": {
     "collect": {
-      "url": ["http://localhost:4174/"],
+      "url": ["https://localhost:4174/"],
       "numberOfRuns": 3,
       "settings": {
         "formFactor": "mobile",
@@ -12,7 +12,7 @@
           "deviceScaleFactor": 3,
           "disabled": false
         },
-        "chromeFlags": "--no-sandbox --headless=new"
+        "chromeFlags": "--no-sandbox --headless=new --ignore-certificate-errors"
       }
     }
   }

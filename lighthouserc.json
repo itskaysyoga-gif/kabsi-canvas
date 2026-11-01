@@ -2,39 +2,39 @@
   "ci": {
     "collect": {
       "url": [
-        "http://localhost:4174/",
-        "http://localhost:4174/pricing",
-        "http://localhost:4174/google-review-link",
-        "http://localhost:4174/google-profile-check",
-        "http://localhost:4174/how-it-works",
-        "http://localhost:4174/faq",
-        "http://localhost:4174/about",
-        "http://localhost:4174/security",
-        "http://localhost:4174/partners",
-        "http://localhost:4174/guides",
-        "http://localhost:4174/for",
-        "http://localhost:4174/privacy",
-        "http://localhost:4174/terms",
-        "http://localhost:4174/scan",
-        "http://localhost:4174/founding",
-        "http://localhost:4174/for/hair-salon"
+        "https://localhost:4174/",
+        "https://localhost:4174/pricing",
+        "https://localhost:4174/google-review-link",
+        "https://localhost:4174/google-profile-check",
+        "https://localhost:4174/how-it-works",
+        "https://localhost:4174/faq",
+        "https://localhost:4174/about",
+        "https://localhost:4174/security",
+        "https://localhost:4174/partners",
+        "https://localhost:4174/guides",
+        "https://localhost:4174/for",
+        "https://localhost:4174/privacy",
+        "https://localhost:4174/terms",
+        "https://localhost:4174/scan",
+        "https://localhost:4174/founding",
+        "https://localhost:4174/for/hair-salon"
       ],
       "numberOfRuns": 3,
       "settings": {
         "formFactor": "mobile",
-        "chromeFlags": "--no-sandbox --headless=new"
+        "chromeFlags": "--no-sandbox --headless=new --ignore-certificate-errors"
       }
     },
     "assert": {
       "assertMatrix": [
         {
-          "matchingUrlPattern": "^http://localhost:4174/(pricing|google-review-link|google-profile-check|scan)?$",
+          "matchingUrlPattern": "^https://localhost:4174/(pricing|google-review-link|google-profile-check|scan)?$",
           "assertions": {
             "categories:performance": ["warn", { "minScore": 0.95 }]
           }
         },
         {
-          "matchingUrlPattern": "^http://localhost:4174/(how-it-works|faq|about|security|partners|guides|for|privacy|terms|founding|for/hair-salon)$",
+          "matchingUrlPattern": "^https://localhost:4174/(how-it-works|faq|about|security|partners|guides|for|privacy|terms|founding|for/hair-salon)$",
           "assertions": {
             "categories:performance": ["warn", { "minScore": 0.9 }]
           }
