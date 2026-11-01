@@ -1,5 +1,6 @@
 [
   { "path": "/app", "name": "home-tasks" },
+  { "path": "/app", "state": "ai-answer", "name": "home-ai-answer" },
   { "path": "/app", "state": "setup", "name": "home-setup-banner" },
   { "path": "/app", "state": "first-task", "name": "home-first-task" },
   { "path": "/app", "state": "empty", "name": "home-empty" },

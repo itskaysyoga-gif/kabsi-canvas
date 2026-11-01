@@ -521,6 +521,14 @@ export function LiveResult({
           <Card as="section" className="sm:p-7">
             <h2 className="text-h3">An answer customers might see</h2>
             {check.ai.line && <p className="mt-4 text-body font-semibold">{check.ai.line}</p>}
+            {check.ai.accuracy ? (
+              <div className="mt-4">
+                <p className="text-body font-semibold">{check.ai.accuracy.line}</p>
+                <p dir="auto" className="mt-2 text-small text-text-2">
+                  &ldquo;{check.ai.accuracy.sentence}&rdquo;
+                </p>
+              </div>
+            ) : null}
             <p className="mt-4 text-label font-semibold text-text-3">{check.ai.label}</p>
           </Card>
         </section>

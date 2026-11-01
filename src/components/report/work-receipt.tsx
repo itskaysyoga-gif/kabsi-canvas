@@ -38,6 +38,14 @@ export type ReceiptData = {
     label: string;
   } | null;
   competitor: string | null;
+  /** AI Answers 1: an AI answer that gave a fact differently from what Kabsi has (older reports have none). */
+  accuracy?: {
+    heading: string;
+    line: string;
+    action: string;
+    button: { label: string; path: string };
+    label: string;
+  } | null;
 };
 
 const QUIET = "A quiet week. Kabsi kept watching your Google profile.";
@@ -237,6 +245,23 @@ export function WorkReceipt({
             </p>
           ) : null}
           <p className="mt-3 text-label font-semibold text-text-2">{r.ai.label}</p>
+        </section>
+      ) : null}
+
+      {r.accuracy ? (
+        <section className="border-t border-line p-4 sm:p-5">
+          <h3 className="text-title font-bold">{r.accuracy.heading}</h3>
+          <p dir="auto" className="mt-2 text-body">
+            {r.accuracy.line}
+          </p>
+          <p className="mt-2 text-body font-semibold">{r.accuracy.action}</p>
+          <Link
+            to={r.accuracy.button.path as "/"}
+            className={cn(buttonClass("secondary", "md"), "mt-3")}
+          >
+            {r.accuracy.button.label}
+          </Link>
+          <p className="mt-3 text-label font-semibold text-text-2">{r.accuracy.label}</p>
         </section>
       ) : null}
     </article>

@@ -268,11 +268,34 @@ export const tables = {
   tasks: (c) => (empty(c) ? [] : TASKS.slice(0, 1)),
 };
 
+// AI Answers 1 (COPY 37): an AI answer that gives the closing time differently.
+const AI_ANSWER = task(9, {
+  kind: "ai_answer",
+  priority: "recommended",
+  title: "ChatGPT's answer gives a different closing time for your business",
+  why: 'ChatGPT was asked "best hair salon in williamsburg" on 2 November. It said: "Rose Lane Salon is open Monday to Saturday from 9 am to 8 pm." Kabsi has: Monday 09:00 to 18:00.',
+  recommendation: "Make sure your Google profile and website say this. AI assistants read them.",
+  path: "/app/hours",
+  evidence: {
+    fact: "hours",
+    label:
+      "Answers from ChatGPT and Perplexity through their API, which can differ from their apps.",
+  },
+});
+
 export const rpc = {
   list_tasks: (c) =>
     c.state === "error"
       ? fail
-      : { tasks: empty(c) || c.state === "setup" ? [] : TASKS, snoozed: 0 },
+      : {
+          tasks:
+            c.state === "ai-answer"
+              ? [AI_ANSWER, ...TASKS]
+              : empty(c) || c.state === "setup"
+                ? []
+                : TASKS,
+          snoozed: 0,
+        },
   list_my_notifications: { unread: 1, items: [] },
   list_review_reports: [],
   activity_feed: [],
