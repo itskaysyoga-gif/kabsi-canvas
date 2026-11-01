@@ -278,7 +278,8 @@ const AI_ANSWER = task(9, {
   path: "/app/hours",
   evidence: {
     fact: "hours",
-    label: "Answers from ChatGPT and Perplexity through their API, which can differ from their apps.",
+    label:
+      "Answers from ChatGPT and Perplexity through their API, which can differ from their apps.",
   },
 });
 
