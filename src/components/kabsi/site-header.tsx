@@ -1,5 +1,5 @@
 import { useRouterState } from "@tanstack/react-router";
-import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Menu, MessageCircle, X } from "lucide-react";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { cn } from "@/lib/utils";
 import { ALL_BUSINESSES, BUSINESS_MENU, MAIN_CTA, NAV_LINKS } from "@/lib/site";
@@ -44,7 +44,10 @@ export function SiteHeader() {
     setChrome({ menuOpen: open });
     if (!open) return;
     // The menu starts under the header, wherever the header sits (under the Founding 25 line at the top of the page).
-    setMenuTop(Math.max(0, Math.round(header.current?.getBoundingClientRect().bottom ?? 64)));
+    const place = () =>
+      setMenuTop(Math.max(0, Math.round(header.current?.getBoundingClientRect().bottom ?? 64)));
+    place();
+    window.addEventListener("resize", place);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     focusables(panel.current)[0]?.focus({ preventScroll: true });
@@ -69,6 +72,7 @@ export function SiteHeader() {
     return () => {
       document.body.style.overflow = prev;
       document.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", place);
     };
   }, [open]);
 
@@ -285,6 +289,20 @@ function PhoneMenu({
               </ul>
             </li>
             <li className="animate-enter" style={{ animationDelay: "120ms" }}>
+              {/* Nora is always one tap away on a phone, even where the phone bar waits (Web 4 review). */}
+              <button
+                type="button"
+                onClick={() => {
+                  close();
+                  window.dispatchEvent(new CustomEvent("kabsi:open-nora"));
+                }}
+                className={cn(rowCls, "font-sans text-title text-text-2")}
+              >
+                <span>Ask Nora</span>
+                <MessageCircle className="size-5 text-text-3" aria-hidden />
+              </button>
+            </li>
+            <li className="animate-enter" style={{ animationDelay: "160ms" }}>
               <SiteLink
                 to="/login"
                 onClick={close}
