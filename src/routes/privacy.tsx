@@ -133,14 +133,17 @@ function Page() {
           for one hour, never the address itself. Nothing else is stored.
         </p>
         <p>
-          <b>If you use the free Google Profile Check:</b> your search text is sent to Google's
-          Places API, and what Google shows publicly about the business you pick (rating, review
-          count, opening hours, phone, website, category and whether it has photos) is shown to you
-          and not kept; only the business's Google Place ID is kept. We keep the same one-way,
-          salted hash of your IP address for one day to enforce the limit of 3 checks a day. If you
-          ask for the check by email, we keep your address, the Google Place ID of the business,
-          whether you ticked "Send me tips on managing my Google profile", those words, the page and
-          the time, as proof of your choice.{" "}
+          <b>If you use the free Google Profile Check:</b> what you type in the box (from the third
+          character, after a short pause) is sent through Kabsi's server to Google's Places
+          Autocomplete, with a random session token, to suggest businesses; the suggestions are
+          shown to you and not kept. Your search text is sent to Google's Places API when you
+          search, and what Google shows publicly about the business you pick (rating, review count,
+          opening hours, phone, website, category and whether it has photos) is shown to you and not
+          kept; only the business's Google Place ID is kept. We keep the same one-way, salted hash
+          of your IP address for one day to enforce the limit of 3 checks a day. If you ask for the
+          check by email, we keep your address, the Google Place ID of the business, whether you
+          ticked "Send me tips on managing my Google profile", those words, the page and the time,
+          as proof of your choice.{" "}
           {WHATSAPP_ON
             ? "If you ask for the check on WhatsApp, we use your number once to send one message and keep only a one-way hash of it, the Google Place ID, the words next to the tick, the page, the time and whether the message was sent, as proof of your choice. We do not message you again unless you ask. "
             : ""}

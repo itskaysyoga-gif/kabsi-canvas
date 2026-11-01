@@ -27,6 +27,14 @@ Decisions taken while writing (lane R, R-41):
 - Under it: "Free check. No Google access needed. Takes about 10 seconds."
 - Waitlist state (cap 0): "The free check opens soon. Leave your email or WhatsApp number and Kabsi sends your result the day it opens." Button: "Save my place". Done: "Saved. You are on the list." On kabsi.co the waiting list is built (UX 1, section 25); "free scan" and "map" are not owner words, so the lines say "free check" and "result" (UX 1 round 2).
 
+**Finding your business (Check 2, 1 Nov 2026, lane R decisions; one box on Home, the industry pages and /scan):**
+- Suggestions while typing: after 3 characters and a 300 ms pause, at most 5, each the business name and a short address. Under the list, Google's required attribution, exactly "Google Maps" (Google's Places policy for results shown without a Google map; the one place Google's name appears here is that attribution, not a slogan).
+- Screen reader, when the list opens: "5 suggestions. Use the up and down arrow keys, then Enter to choose." When there is none: "No suggestions. Press Enter to search." The list is labelled "Suggestions".
+- Choosing a suggestion goes straight to the check. When the box is not suggesting (the daily cap, a limit, a problem on Google's side) it is a plain box and says nothing about it.
+- Search result, never picked for the visitor. One match: H1 "Is this your business?" Several: H1 "Pick your business". Each match: name, address, category, the button "This is my business" (the main button when there is one match, a second button when there are several). Under them: "Not here? Search again".
+- Search again (the box with the typed text kept; nothing is looked up until the visitor searches): eyebrow "Free check", H1 "Find your business again", line "Add the city, or type the name exactly as it shows on Google."
+- Every result (/scan and /scan/CODE), under the address or the heading: "Not your business? Change it". It goes to the same search again screen, with the text the visitor typed.
+
 ## 0.1 Words owners understand (lane R, 25 Oct 2026; 30.15 lines added 26 Oct)
 
 - Never "spot", "grid", "grid point", "geo" or "pin" in a line an owner reads. Say "places around you" and "searched like a customer". The number on a dot is "where you came up", 1 is first.

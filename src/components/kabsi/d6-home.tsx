@@ -39,7 +39,7 @@ const linkCls =
 
 export function D6Hero() {
   return (
-    <section aria-labelledby="hero-title" data-hero className="relative isolate overflow-hidden">
+    <section aria-labelledby="hero-title" data-hero className="relative isolate overflow-x-clip">
       <div className="container-kb grid gap-10 pt-28 pb-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-10 lg:pt-32 lg:pb-24">
         <div className="max-w-[36rem]">
           {/* The headline paints at once, with no entrance: it is the page's largest text, and a fade from opacity 0 keeps

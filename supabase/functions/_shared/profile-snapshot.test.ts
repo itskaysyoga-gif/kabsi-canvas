@@ -4,7 +4,7 @@
 // call. The real Google layer code (field masks, kill switch) runs unchanged on top of the stubs. Nothing from Places is
 // cached (master plan 30.10): every check, email and WhatsApp copy reads Google live.
 import assert from "node:assert/strict";
-import { getSnapshotPlace, guard, SNAPSHOT_FIELD_MASK, searchText } from "./google/places/live.ts";
+import { autocomplete, getSnapshotPlace, guard, SNAPSHOT_FIELD_MASK, searchText } from "./google/places/live.ts";
 import type { Place } from "./google/types.ts";
 import { buildSnapshot, CHECK_PAGES, checkEmail, type Deps, flags, LIMITS, makeHandler, normalizePhone, TIPS_CONSENT_TEXT, WHATSAPP_CONSENT_TEXT, whatsappParams } from "./profile-snapshot.ts";
 import { esc } from "./email-layout.ts";
@@ -26,10 +26,27 @@ const FULL: Place = {
   photos: [{ name: "places/x/photos/1" }, { name: "places/x/photos/2" }],
 };
 
+// Check 2: what Places Autocomplete (New) answers: five good predictions and the extras the function must drop
+// (a query prediction, a prediction with a bad place ID, a sixth place).
+const AUTOCOMPLETE_ANSWER = {
+  suggestions: [
+    ...["A", "B", "C", "D", "E", "F"].map((x, i) => ({
+      placePrediction: {
+        placeId: `ChIJsuggest${x}${x}${x}${x}${x}${x}`, text: { text: `Harbour Lane ${i}, 12 Harbour Lane, Example Town` },
+        structuredFormat: { mainText: { text: `Harbour Lane ${i}` }, secondaryText: { text: "12 Harbour Lane, Example Town" } },
+      },
+    })),
+    { queryPrediction: { text: { text: "harbour lane coffee" } } },
+    { placePrediction: { placeId: "bad id", text: { text: "Nope" } } },
+  ],
+};
+const SESSION = "6f1c2c2e-9a0b-4f0e-8d57-0a4e0d1f3b21";
+
 type Seen = { url: string; method: string; mask: string | null; body: string }[];
 
 // A world with the Places day cap, an in-memory limiter and every outbound effect recorded. PLACE_B is not on Google.
-function world(opts: { cap?: number; place?: Place; turnstile?: boolean; whatsapp?: boolean; waState?: "sent" | "mock_sent" | "held" | "failed" } = {}) {
+function world(opts: { cap?: number; place?: Place; turnstile?: boolean; whatsapp?: boolean; waState?: "sent" | "mock_sent" | "held" | "failed"; autoStatus?: number; noSecret?: boolean } = {}) {
+  const clock = { ms: Date.parse("2026-11-01T10:00:00Z") };
   const cap = opts.cap ?? 100;
   const requests: Seen = [];
   let used = 0;
@@ -43,6 +60,9 @@ function world(opts: { cap?: number; place?: Place; turnstile?: boolean; whatsap
     if (url.includes(":searchText")) {
       return Promise.resolve(new Response(JSON.stringify({ places: [{ id: PLACE_A, displayName: { text: "Harbour Lane Coffee" }, formattedAddress: "12 Harbour Lane, Example Town" }] }), { status: 200 }));
     }
+    if (url.includes(":autocomplete")) {
+      return Promise.resolve(new Response(JSON.stringify(opts.autoStatus && opts.autoStatus !== 200 ? { error: { code: opts.autoStatus } } : AUTOCOMPLETE_ANSWER), { status: opts.autoStatus ?? 200 }));
+    }
     if (url.includes(PLACE_B)) return Promise.resolve(new Response(JSON.stringify({ error: { code: 404 } }), { status: 404 }));
     return Promise.resolve(new Response(JSON.stringify(opts.place ?? FULL), { status: 200 }));
   };
@@ -53,7 +73,8 @@ function world(opts: { cap?: number; place?: Place; turnstile?: boolean; whatsap
   const errors: unknown[] = [];
   const wa = { saved: [] as Record<string, unknown>[], sent: [] as { to: string; params: string[] }[], marked: [] as { id: string; state: string }[] };
   const deps: Deps = {
-    env: (n) => (n === "PLACES_API_KEY" ? "test-key" : n === "SUPABASE_URL" ? "https://example.supabase.co" : undefined),
+    env: (n) => (n === "PLACES_API_KEY" ? "test-key" : n === "SUPABASE_URL" ? "https://example.supabase.co" : n === "TURNSTILE_SECRET_KEY" && !opts.noSecret ? "turnstile-secret" : undefined),
+    nowMs: () => clock.ms,
     ip: (req) => req.headers.get("x-forwarded-for") ?? "unknown",
     today: () => "2026-10-12",
     sha256Hex: async (t) => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)))].map((b) => b.toString(16).padStart(2, "0")).join(""),
@@ -68,6 +89,7 @@ function world(opts: { cap?: number; place?: Place; turnstile?: boolean; whatsap
     },
     verifyTurnstile: (t) => Promise.resolve(opts.turnstile === false ? false : t === "ok"),
     searchText,
+    autocomplete,
     getSnapshotPlace,
     whatsappOn: opts.whatsapp === true,
     saveWhatsapp: (row) => (wa.saved.push(row), Promise.resolve(`row-${wa.saved.length}`)),
@@ -87,7 +109,7 @@ function world(opts: { cap?: number; place?: Place; turnstile?: boolean; whatsap
     }));
     return { status: res.status, body: await res.json() as Record<string, any> };
   };
-  return { requests, saved, sent, errors, hits, call, wa };
+  return { requests, saved, sent, errors, hits, call, wa, clock };
 }
 function restore() {
   Object.assign(guard, real);
@@ -114,7 +136,8 @@ Deno.test("every Places request sends the field mask, and none asks for reviews"
       SNAPSHOT_FIELD_MASK.split(","),
       ["id", "displayName", "formattedAddress", "primaryTypeDisplayName", "businessStatus", "rating", "userRatingCount", "regularOpeningHours", "currentOpeningHours", "nationalPhoneNumber", "websiteUri", "photos"],
     );
-    assert.equal(w.requests.find((r) => r.url.includes(":searchText"))!.mask, "places.id,places.displayName,places.formattedAddress");
+    // Check 2: the category joins the name and address (the same Pro tier), so the visitor can tell two matches apart.
+    assert.equal(w.requests.find((r) => r.url.includes(":searchText"))!.mask, "places.id,places.displayName,places.formattedAddress,places.primaryTypeDisplayName");
   } finally {
     restore();
   }
@@ -451,6 +474,174 @@ Deno.test("Sec 1: one address gets at most two check emails a day, from any visi
     // Another address from the same visitor still goes.
     const other = await w.call({ action: "email", place_id: PLACE_A, email: "owner@example-cafe.com", tips: false, consent_text: TIPS_CONSENT_TEXT, page: "/google-profile-check" }, "203.0.113.3");
     assert.equal(other.status, 200);
+  } finally {
+    restore();
+  }
+});
+
+// ─── Check 2 (1 Nov 2026): suggestions while the visitor types
+
+Deno.test("suggest: the bot check comes first, and without it nothing reaches Places", async () => {
+  const w = world({ turnstile: false });
+  try {
+    const r = await w.call({ action: "suggest", query: "harbour", session_token: SESSION });
+    assert.equal(r.status, 400);
+    assert.equal(r.body.error, "challenge_failed");
+    const forged = await w.call({ action: "suggest", query: "harbour", session_token: SESSION, pass: `${Math.floor(w.clock.ms / 1000) + 600}.${"0".repeat(64)}` });
+    assert.equal(forged.status, 400, "a made-up pass is not a bot check");
+    assert.equal(w.requests.length, 0);
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("suggest: up to 5 name and short address pairs, the session token goes to Places, no field mask is faked, nothing about reviews", async () => {
+  const w = world();
+  try {
+    const r = await w.call({ action: "suggest", query: "  harbour lane  ", session_token: SESSION });
+    assert.equal(r.status, 200);
+    assert.equal(r.body.available, true);
+    assert.equal(r.body.suggestions.length, 5, "five at most, query predictions and bad place IDs dropped");
+    assert.deepEqual(r.body.suggestions[0], { place_id: "ChIJsuggestAAAAAA", name: "Harbour Lane 0", address: "12 Harbour Lane, Example Town" });
+    assert.equal(w.requests.length, 1);
+    const req = w.requests[0]!;
+    assert.match(req.url, /places:autocomplete$/);
+    assert.deepEqual(JSON.parse(req.body), { input: "harbour lane", sessionToken: SESSION });
+    assert.doesNotMatch(req.body, /review/i);
+    assert.equal(typeof r.body.pass, "string", "the first call earns a pass");
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("suggest: the pass replaces the Turnstile token for 15 minutes, for the same visitor only", async () => {
+  const w = world();
+  try {
+    const first = await w.call({ action: "suggest", query: "harbour", session_token: SESSION });
+    const pass = first.body.pass as string;
+    // Later calls carry the pass and no Turnstile token (a token works once): they pass.
+    const next = await w.call({ action: "suggest", query: "harbour lane", session_token: SESSION, pass, turnstile: "" });
+    assert.equal(next.status, 200);
+    assert.equal(next.body.pass, undefined, "a valid pass is not reissued");
+    // Another visitor cannot use it.
+    const other = await w.call({ action: "suggest", query: "harbour lane", session_token: SESSION, pass, turnstile: "" }, "198.51.100.9");
+    assert.equal(other.status, 400);
+    // A changed pass fails.
+    const [exp, mac] = pass.split(".");
+    const bad = await w.call({ action: "suggest", query: "harbour lane", session_token: SESSION, pass: `${exp}.${mac!.replace(/.$/, mac!.endsWith("0") ? "1" : "0")}`, turnstile: "" });
+    assert.equal(bad.status, 400);
+    // After 15 minutes it has run out, and the bot check is asked again.
+    w.clock.ms += 16 * 60 * 1000;
+    const late = await w.call({ action: "suggest", query: "harbour lane", session_token: SESSION, pass, turnstile: "" });
+    assert.equal(late.status, 400);
+    const again = await w.call({ action: "suggest", query: "harbour lane", session_token: SESSION, pass, turnstile: "ok" });
+    assert.equal(again.status, 200);
+    assert.equal(typeof again.body.pass, "string");
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("suggest: too short, too long or a bad session token is refused before Places; the visitor's 10 a minute is not used", async () => {
+  const w = world();
+  try {
+    assert.equal((await w.call({ action: "suggest", query: "ha", session_token: SESSION })).status, 400);
+    assert.equal((await w.call({ action: "suggest", query: "x".repeat(121), session_token: SESSION })).status, 400);
+    assert.equal((await w.call({ action: "suggest", query: "harbour", session_token: "short" })).status, 400);
+    assert.equal(w.requests.length, 0);
+    const first = await w.call({ action: "suggest", query: "harbour", session_token: SESSION });
+    const pass = first.body.pass as string;
+    for (let i = 0; i < 12; i++) assert.equal((await w.call({ action: "suggest", query: `harbour ${i}`, session_token: SESSION, pass })).status, 200);
+    // 13 suggestions did not touch the free check's own limit: a search still works.
+    assert.equal((await w.call({ action: "search", query: "Harbour Lane Coffee" })).status, 200);
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("suggest: 20 a minute, 120 an hour and 60 a day per visitor, then 429 and no Places request", async () => {
+  const w = world();
+  try {
+    const first = await w.call({ action: "suggest", query: "harbour", session_token: SESSION });
+    const pass = first.body.pass as string;
+    for (let i = 1; i < LIMITS.suggestPerMinute; i++) assert.equal((await w.call({ action: "suggest", query: `harbour ${i}`, session_token: SESSION, pass })).status, 200);
+    const before = w.requests.length;
+    const over = await w.call({ action: "suggest", query: "harbour more", session_token: SESSION, pass });
+    assert.equal(over.status, 429);
+    assert.equal(over.body.error, "rate_limited");
+    assert.equal(w.requests.length, before);
+  } finally {
+    restore();
+  }
+  // The day limit: one visitor cannot use up the day's shared Autocomplete cap.
+  const d = world();
+  try {
+    const first = await d.call({ action: "suggest", query: "harbour", session_token: SESSION });
+    const dayKey = [...d.hits.keys()].find((k) => k.startsWith("snapshot:suggest-day:"))!;
+    d.hits.set(dayKey, LIMITS.suggestPerDay);
+    const over = await d.call({ action: "suggest", query: "harbour more", session_token: SESSION, pass: first.body.pass });
+    assert.equal(over.status, 429);
+    assert.equal(d.requests.length, 1, "the refused call made no Places request");
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("suggest: the Autocomplete day cap, a Google error or a missing key give available false, so the page falls back to search", async () => {
+  // The cap: the Google layer refuses (places_take says no) and nothing is sent.
+  let w = world({ cap: 0 });
+  try {
+    const r = await w.call({ action: "suggest", query: "harbour", session_token: SESSION });
+    assert.equal(r.status, 200);
+    assert.deepEqual([r.body.available, r.body.suggestions], [false, []]);
+    assert.equal(w.requests.length, 0, "past the cap Google is not asked");
+  } finally {
+    restore();
+  }
+  // A Google error: available false, one error report without the typed text.
+  w = world({ autoStatus: 500 });
+  try {
+    const r = await w.call({ action: "suggest", query: "private business name", session_token: SESSION });
+    assert.equal(r.status, 200);
+    assert.equal(r.body.available, false);
+    assert.equal(w.errors.length, 1);
+    assert.doesNotMatch(String((w.errors[0] as Error).message), /private business name/);
+  } finally {
+    restore();
+  }
+  // Without the Turnstile secret no pass can be signed: each call needs its own Turnstile token, and still works.
+  w = world({ noSecret: true });
+  try {
+    const r = await w.call({ action: "suggest", query: "harbour", session_token: SESSION });
+    assert.equal(r.body.available, true);
+    assert.equal(r.body.pass, undefined);
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("check: the suggestions' session token goes to Place Details and ends the Autocomplete session; a bad token is ignored", async () => {
+  const w = world();
+  try {
+    assert.equal((await w.call({ action: "check", place_id: PLACE_A, session_token: SESSION })).status, 200);
+    assert.equal((await w.call({ action: "check", place_id: PLACE_C })).status, 200);
+    assert.equal((await w.call({ action: "check", place_id: PLACE_A, session_token: "bad token with spaces" })).status, 200);
+    const details = w.requests.filter((r) => r.url.includes("/places/"));
+    assert.match(details[0]!.url, new RegExp(`\\?sessionToken=${SESSION}$`));
+    assert.doesNotMatch(details[1]!.url, /sessionToken/);
+    assert.doesNotMatch(details[2]!.url, /sessionToken/);
+    for (const r of details) assert.equal(r.mask, SNAPSHOT_FIELD_MASK);
+  } finally {
+    restore();
+  }
+});
+
+Deno.test("search: the match carries its category, so two businesses with one name can be told apart", async () => {
+  const w = world();
+  try {
+    const r = await w.call({ action: "search", query: "Harbour Lane Coffee Example Town" });
+    assert.equal(r.status, 200);
+    assert.ok("category" in r.body.places[0]);
   } finally {
     restore();
   }
