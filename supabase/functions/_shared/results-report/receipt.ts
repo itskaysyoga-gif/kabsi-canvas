@@ -7,6 +7,7 @@
 // from the owner's own profile. The demo business keeps its labelled examples. Pure.
 import type { Counts, Line, WeekActivity } from "../care-report/compose.ts";
 import { updatesCount } from "../care-report/compose.ts";
+import { ACTION, type Finding, findingTask } from "../visibility/ai/accuracy-words.ts";
 
 export type Chip = { key: string; label: string; count: number };
 export type GrowthStats = { days: number; new_reviews: number; opens_message: number; opens_qr: number; opens_tag: number };
@@ -64,6 +65,16 @@ export function aiBlock(a: AiAnswer | null, tz: string) {
   };
 }
 
+/**
+ * AI Answers 1: one line when an AI answer this week gave a fact that differs from what Kabsi has. Every week it happens,
+ * not only monthly: the assistant's exact sentence, which assistant, the question, the date, Kabsi's fact, what to do.
+ */
+export function accuracyBlock(f: Finding | null, tz: string) {
+  if (!f) return null;
+  const t = findingTask(f, tz);
+  return { heading: "An AI answer to check", line: t.why, action: t.recommendation, button: ACTION[f.fact], label: AI_LABEL };
+}
+
 /** The first Monday report of a month carries the AI block: the report date is in the first 7 days of the month. */
 export const monthlyWeek = (localDate: string) => Number(localDate.slice(8, 10)) <= 7;
 
@@ -78,6 +89,8 @@ export function receipt(o: {
   growth: GrowthStats | null;
   ai: AiAnswer | null;
   aiThisWeek: boolean;
+  /** AI Answers 1: the week's latest clear difference, or null. */
+  accuracy?: Finding | null;
   rivals: RivalChange[];
   tz: string;
   /** The week in words ("19 to 25 October", email/report-body.ts dateRange), the start of the WhatsApp line. */
@@ -109,13 +122,14 @@ export function receipt(o: {
     }
     : null;
   const ai = o.aiThisWeek ? aiBlock(o.ai, o.tz) : null;
+  const accuracy = accuracyBlock(o.accuracy ?? null, o.tz);
   const rival = rivalLine(o.rivals);
   return {
     v: 3 as const,
     did, did_total: did.reduce((s, c) => s + c.count, 0), updates: updatesCount(o.counts),
     waiting, next_step: next ? { title: next.title, path: next.path } : null,
-    google, growth, ai, competitor: rival,
-    whatsapp: receiptText({ business: o.business, dates: o.dates, did, waiting: waiting.count, next: next?.title ?? null, google, growth, ai, rival }),
+    google, growth, ai, accuracy, competitor: rival,
+    whatsapp: receiptText({ business: o.business, dates: o.dates, did, waiting: waiting.count, next: next?.title ?? null, google, growth, ai, accuracy, rival }),
   };
 }
 export type Receipt = ReturnType<typeof receipt>;
@@ -125,6 +139,7 @@ export function receiptText(o: {
   business: string; dates?: string | undefined; did: Chip[]; waiting: number; next: string | null;
   google: { example: boolean; lines: string[] } | null; growth: { line: string } | null;
   ai: { line: string; label: string } | null; rival: string | null;
+  accuracy?: { line: string; action: string; label: string } | null;
 }): string {
   const parts: string[] = [];
   const list = o.did.map((c) => `${c.label.toLowerCase().replace(/\bgoogle\b/g, "Google")} ${c.count}`).join(", ");
@@ -137,5 +152,6 @@ export function receiptText(o: {
   if (o.growth) parts.push(o.growth.line);
   if (o.rival) parts.push(o.rival);
   if (o.ai) parts.push(`${o.ai.line} ${o.ai.label}`);
+  if (o.accuracy) parts.push(`${o.accuracy.line} ${o.accuracy.action} ${o.accuracy.label}`);
   return parts.join("\n\n");
 }

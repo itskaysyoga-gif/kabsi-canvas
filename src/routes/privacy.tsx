@@ -291,7 +291,13 @@ function Page() {
             From launch, to see what AI assistants say about your business, Kabsi sends questions in
             your customers' words that name your category and area (for example "best dentist in
             Jumeirah") to DataForSEO, which asks ChatGPT and Perplexity for them. The answers change
-            from run to run, so Kabsi shows them as a sample and never as a promise.
+            from run to run, so Kabsi shows them as a sample and never as a promise. When an answer
+            names your business, Kabsi sends that answer and your business name to Anthropic to list
+            the facts it states (hours, phone, address, website, services, price level) and compares
+            them with what you confirmed. Kabsi keeps only which fact differs, the assistant&apos;s
+            sentence, the question, the date and your own fact, with the answer. On the free check,
+            Kabsi compares the one answer with your Google profile as read during the check and keeps
+            only which fact differs and the assistant&apos;s sentence, nothing from the profile.
           </li>
           <li>
             For posts, Kabsi may also use your category and area, phrases from your reviews and,
@@ -332,9 +338,10 @@ function Page() {
           </li>
           <li>Resend: sending email, through Amazon's EU (Ireland) region.</li>
           <li>
-            Anthropic: drafting replies and posts, understanding your WhatsApp messages and writing
-            Nora's answers. Review text, your business facts and those messages reach Anthropic only
-            for this.
+            Anthropic: drafting replies and posts, understanding your WhatsApp messages, writing
+            Nora's answers and, from launch, checking the facts an AI answer states about your
+            business. Review text, your business facts, those messages and those answers reach
+            Anthropic only for this.
           </li>
           <li>Google: the Business Profile and Places APIs.</li>
           <li>

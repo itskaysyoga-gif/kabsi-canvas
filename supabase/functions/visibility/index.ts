@@ -31,7 +31,9 @@ import { freeScanCheck } from "../_shared/visibility/ai/run.ts";
 import { MARKETS, pickTerms, searchVolumes } from "../_shared/visibility/terms.ts";
 import { checkWaitlist } from "../_shared/visibility/waitlist.ts";
 import { WHATSAPP_ON } from "../_shared/whatsapp-setting.ts";
-import { aiDeps, doneRuns, enabledProviders, realProvider, setting as aiSetting, syncPrompts } from "../_shared/visibility/ai/deps.ts";
+import { accuracyDeps, aiDeps, doneRuns, enabledProviders, realProvider, setting as aiSetting, syncPrompts } from "../_shared/visibility/ai/deps.ts";
+import { recordFromPlace } from "../_shared/visibility/ai/accuracy.ts";
+import { getSnapshotPlace } from "../_shared/google/index.ts";
 import { tickAi } from "../_shared/visibility/ai/run.ts";
 import { analyze } from "../_shared/visibility/ai/analyze.ts";
 import { numbers, reportBlock } from "../_shared/visibility/ai/numbers.ts";
@@ -372,6 +374,14 @@ async function refreshCheck(c: CheckRow): Promise<CheckRow | null> {
   return next;
 }
 
+/** The public Google profile of a place, read live and never stored (master plan 30.10.3). Null when it cannot be read. */
+async function liveProfile(placeId: string | null) {
+  const key = Deno.env.get("PLACES_API_KEY");
+  if (!placeId || !key) return null;
+  const r = await getSnapshotPlace(key, placeId).catch(() => null);
+  return r?.ok && !r.backSoon ? recordFromPlace(r.data) : null;
+}
+
 async function startFreeCheck(req: Request): Promise<Response> {
   const body = await req.json().catch(() => ({})) as {
     name?: string; address?: string; country?: string; city?: string; place_id?: string; term?: string; industry?: string; turnstile?: string;
@@ -404,7 +414,12 @@ async function startFreeCheck(req: Request): Promise<Response> {
     provider: provider(mode, { title: name, place_id: body.place_id ?? null }), source: mode, code: () => newCode(),
     room: deps.room, spend: async (calls, micros) => void (await deps.spend(calls, micros)),
     // The one AI answer: never a made-up answer for a visitor (mock answers only on staff calls).
-    ai: (o) => (aiLive || internal) ? freeScanCheck({ ...aiDeps, on: async () => (await aiSetting("ai_visibility_free_scan")) === "on" }, o) : Promise.resolve(null),
+    ai: (o) => (aiLive || internal) ? freeScanCheck({
+      ...aiDeps, on: async () => (await aiSetting("ai_visibility_free_scan")) === "on",
+      // AI Answers 1: the Google profile is read live through the Places guard (field mask, daily cap) and compared in
+      // memory; only the fact that differs and ChatGPT's sentence are kept (30.10.3).
+      accuracy: { extractor: accuracyDeps.extractor, profile: () => liveProfile(o.place_id) },
+    }, o) : Promise.resolve(null),
   }, { name, address: body.address ? String(body.address).slice(0, 200) : null, country, city, place_id: body.place_id ?? null, term });
   if (!started.ok) return json({ error: started.reason }, started.reason === "paused" ? 503 : 404);
   const r = started.row;

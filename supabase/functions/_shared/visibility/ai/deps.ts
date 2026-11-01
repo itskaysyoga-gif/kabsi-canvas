@@ -4,12 +4,15 @@
 // ops_events row (13b part 2's staff alerts) and the owner's line goes through the whatsapp outbox, never its internals.
 import { admin } from "../../kabsi.ts";
 import { outDb } from "../../whatsapp/db.ts";
-import { type AiDeps, type AiRunDb, type PromptRow, type RunRow } from "./run.ts";
+import { type AccuracyDeps, type AiDeps, type AiRunDb, type PromptRow, type RunRow } from "./run.ts";
 import { dataForSeoAi, geminiAi, type AiProvider, type AiProviderName, PROVIDERS } from "./providers.ts";
 import { mockAi } from "./mock.ts";
 import { areaOf, cadenceOf, suggestPrompts } from "./prompts.ts";
 import { type DoneRun, numbers, ownerLine, type PeriodWords } from "./numbers.ts";
 import type { CompetitorNamed } from "./analyze.ts";
+import { findingTask, type KnowledgeRow, liveExtractor, mockExtractor, recordFromKnowledge } from "./accuracy.ts";
+import { useTool } from "../../ai/agents.ts";
+import { recordAiUsage } from "../../ai-budget.ts";
 
 const db = () => admin();
 const must = <T>(r: { data: T; error: unknown }) => {
@@ -88,6 +91,28 @@ export const aiRunDb: AiRunDb = {
   },
 };
 
+// ─── AI Answers 1: accuracy (the existing AI adapter, Scout's one structured step) ─────────────────────────────────────
+export const accuracyDeps: AccuracyDeps = {
+  // Mock mode never calls a model: fixtures only (none in production, so a mock answer states nothing).
+  extractor: (mode) => (mode === "live" ? liveExtractor((m) => recordAiUsage(null, m)) : mockExtractor()),
+  async record(locationId) {
+    useTool("scout", "read_business_knowledge");
+    const rows = must(await db().from("knowledge_facts").select("slot, key, value, status").eq("location_id", locationId).is("superseded_by", null)
+      .in("key", ["regular_hours", "phone", "website", "address", "service", "product", "delivery", "price_note"])) as KnowledgeRow[];
+    return recordFromKnowledge(rows);
+  },
+  async save(runId, locationId, o) {
+    useTool("scout", "open_task");
+    const { data: loc } = await db().from("locations").select("time_zone").eq("id", locationId).maybeSingle();
+    const t = o.finding ? findingTask(o.finding, (loc?.time_zone as string | undefined) ?? "UTC") : null;
+    must(await db().rpc("ai_answer_finding", {
+      p_run: runId,
+      p_finding: o.finding && t ? { ...o.finding, title: t.title, why: t.why, recommendation: t.recommendation, evidence: t.evidence } : null,
+      p_agree: o.agree,
+    }));
+  },
+};
+
 export const aiDeps: AiDeps = {
   db: aiRunDb,
   provider: realProvider,
@@ -107,6 +132,7 @@ export const aiDeps: AiDeps = {
     must(await db().rpc("enqueue_job", { p_kind: "ai_visibility_run", p_location: locationId, p_dedupe_key: `ai_visibility_run:${runId}`, p_payload: { run_id: runId } }));
   },
   now: () => new Date(),
+  accuracy: accuracyDeps,
 };
 
 export const enabledProviders = async () => {

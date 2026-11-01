@@ -9,11 +9,12 @@ import { buildMemory } from "./memory.ts";
 
 Deno.env.set("ANTHROPIC_API_KEY", "test-key");
 
-Deno.test("agents: six agents, each with a job; Scout is empty until V1 fills it", () => {
+Deno.test("agents: six agents, each with a job; Scout reads Business Knowledge and has one short check (AI Answers 1)", () => {
   assert.deepEqual(Object.keys(AGENTS).sort(), ["growth", "guard", "insights", "nora", "reply", "scout"]);
   for (const a of Object.values(AGENTS)) assert.ok(a.job.length > 20);
-  assert.deepEqual(AGENTS.scout.tools, []);
-  assert.deepEqual(AGENTS.scout.tasks, {});
+  assert.deepEqual(AGENTS.scout.tools, ["read_business_knowledge", "open_task"]);
+  assert.deepEqual(Object.keys(AGENTS.scout.tasks), ["check_facts"]);
+  assert.match(AGENTS.scout.tasks.check_facts.model, /haiku/);
 });
 
 Deno.test("agents: no agent has a tool that writes to Google; only the owner-approved pipeline does", () => {
