@@ -13,10 +13,12 @@ import {
   bookingUrl,
   pageHead,
 } from "@/lib/site";
-import { z } from "zod";
+import { oneOf } from "@/lib/search-params";
 
-const searchSchema = z.object({
-  topic: z.enum(["setup", "partner", "other"]).optional().catch(undefined),
+const searchSchema = (
+  s: Record<string, unknown>,
+): { topic?: "setup" | "partner" | "other" | undefined } => ({
+  topic: oneOf(s["topic"], ["setup", "partner", "other"] as const),
 });
 
 export const Route = createFileRoute("/setup-call")({
