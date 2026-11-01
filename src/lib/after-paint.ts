@@ -3,7 +3,14 @@
 // A tool the visitor did not ask for yet (the privacy banner, Nora's launcher, statistics) must not compete with the page
 // for the phone's processor while the page is still being drawn and made ready. On the server it never runs. Returns a
 // function that cancels.
-export function afterPaint(run: () => void, delayMs = 1500): () => void {
+// Lean 1 (speed): `quiet` is for heavy third-party scripts (statistics, the Meta Pixel, Speed Insights). A touch no longer
+// starts them in the middle of the visitor's first scroll or tap: they start at the next idle moment after it (at the
+// latest 2 seconds later), so the page answers the touch first.
+export function afterPaint(
+  run: () => void,
+  delayMs = 1500,
+  opts: { quiet?: boolean } = {},
+): () => void {
   if (typeof window === "undefined") return () => {};
   let done = false;
   let timer = 0;
@@ -11,25 +18,28 @@ export function afterPaint(run: () => void, delayMs = 1500): () => void {
   const events = ["pointerdown", "keydown", "touchstart", "scroll"] as const;
   function cleanup() {
     window.removeEventListener("load", arm);
-    for (const e of events) window.removeEventListener(e, go);
+    for (const e of events) window.removeEventListener(e, onTouch);
     if (timer) window.clearTimeout(timer);
     if (idle && typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idle);
   }
-  function go() {
+  function go(alreadyIdle = false) {
     if (done) return;
     done = true;
     cleanup();
-    run();
+    if (opts.quiet && !alreadyIdle && typeof window.requestIdleCallback === "function")
+      idle = window.requestIdleCallback(run, { timeout: 2000 });
+    else run();
   }
   function arm() {
     window.removeEventListener("load", arm);
     timer = window.setTimeout(() => {
       if (typeof window.requestIdleCallback === "function")
-        idle = window.requestIdleCallback(go, { timeout: 1000 });
-      else go();
+        idle = window.requestIdleCallback(() => go(true), { timeout: 1000 });
+      else go(true);
     }, delayMs);
   }
-  for (const e of events) window.addEventListener(e, go, { passive: true, once: true });
+  const onTouch = () => go();
+  for (const e of events) window.addEventListener(e, onTouch, { passive: true, once: true });
   if (document.readyState === "complete") arm();
   else window.addEventListener("load", arm, { once: true });
   return () => {
