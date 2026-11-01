@@ -94,10 +94,7 @@ function CardsPage() {
 
   return (
     <>
-      <AccountTop
-        title="Get reviews"
-        lead="A ready message you or your team send after a real visit. The same message to every customer."
-      />
+      <AccountTop title="Get reviews" lead="A ready message to send after a real visit." />
       {!location.isLoading && !loc ? (
         <ButtonLink to="/start">Add your business</ButtonLink>
       ) : location.isLoading || data.isLoading ? (

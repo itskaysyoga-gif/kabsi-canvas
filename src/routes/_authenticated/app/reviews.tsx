@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { CheckCircle2, MessageSquareText, QrCode, RefreshCw, Search, Send } from "lucide-react";
+import { CheckCircle2, MessageSquareText, RefreshCw, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { AccountTop, Panel } from "@/components/kabsi/d3-account";
 import { Button, ButtonLink, EmptyState, ErrorState, Skeleton } from "@/components/kabsi/ui";
 import { ReviewCard } from "@/components/reviews/review-card";
 import { ReviewDone } from "@/components/reviews/review-done";
-import { ReviewCounts } from "@/components/reviews/review-counts";
 import { ReportReminders } from "@/components/reviews/report-review";
 import { StaffTestTool } from "@/components/reviews/staff-test-tool";
 import { allReviews } from "@/lib/reviews";
@@ -138,7 +137,10 @@ function ReviewsPage() {
 
   return (
     <>
-      <AccountTop title="Reviews" />
+      <AccountTop
+        title="Reviews"
+        lead={view === "waiting" ? "Nothing goes on Google until you approve it." : undefined}
+      />
       <ReportReminders
         locationId={loc.id}
         onOpen={(id) => void navigate({ search: { f: "all", r: id } })}
@@ -248,29 +250,6 @@ function ReviewsPage() {
         </div>
       )}
 
-      <Panel title="Review Growth" id="growth" className="mt-8">
-        <ReviewCounts locationId={loc.id} />
-        <div className="mt-4 flex flex-wrap gap-2">
-          <ButtonLink
-            to="/app/cards"
-            hash="message"
-            variant="secondary"
-            size="md"
-            icon={<Send className="size-4" aria-hidden />}
-          >
-            Send your review link
-          </ButtonLink>
-          <ButtonLink
-            to="/app/cards"
-            hash="qr"
-            variant="quiet"
-            size="md"
-            icon={<QrCode className="size-4" aria-hidden />}
-          >
-            Get your QR card
-          </ButtonLink>
-        </div>
-      </Panel>
       <StaffTestTool locationId={loc.id} />
     </>
   );

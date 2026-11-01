@@ -9,14 +9,7 @@ import { cn } from "@/lib/utils";
 import { sectionFor, tabOn, tabsFor } from "@/lib/app-nav";
 import { myLatestLocation } from "@/lib/onboarding";
 import { myAccess } from "@/lib/team";
-import {
-  CONFIRMED_LINE,
-  OWNER_LABEL,
-  SENT_LINE,
-  UNDONE_LINE,
-  failedNext,
-  type OwnerState,
-} from "@/lib/task-state";
+import { OWNER_LABEL, UNDONE_LINE, failedNext, type OwnerState } from "@/lib/task-state";
 import type { TaskItem } from "@/lib/task-feed";
 import { StatusPill, buttonClass, type Tone } from "./ui";
 
@@ -55,12 +48,14 @@ export function AccountTop({
   const role = useAccountRole();
   const section = sectionFor(path, role);
   const list = section && tabs ? tabsFor(section, role) : [];
+  // App 2: one title per screen. Inside a place with tabs the title is the place, and the tab says which page is open.
+  const heading = list.length > 1 && section ? section.label : title;
   return (
     <div className={cn("mb-6", className)}>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
           <h1 className="font-display text-[2rem] leading-[1.1] font-bold tracking-[-0.02em] sm:text-[2.5rem]">
-            {title}
+            {heading}
           </h1>
           {lead && <p className="mt-2 max-w-[42rem] text-body text-text-2">{lead}</p>}
         </div>
@@ -236,18 +231,17 @@ export function TaskOutcome({
   className?: string;
   action?: ReactNode;
 }) {
+  // App 2: the state is already on the item (its pill and track); only what the owner can use is added: the Google link
+  // once Kabsi saw it there, or what happens next when it did not go through. No explanation repeated on every item.
   if (task.owner === "confirmed")
-    return (
-      <div className={cn("flex flex-wrap items-center justify-between gap-3", className)}>
-        <p className="text-small text-text-2">{CONFIRMED_LINE}</p>
-        {task.link && (
-          <a href={task.link} target="_blank" rel="noreferrer" className={buttonClass("tertiary")}>
-            See it on Google
-            <ExternalLink className="size-4" aria-hidden />
-          </a>
-        )}
+    return task.link ? (
+      <div className={className}>
+        <a href={task.link} target="_blank" rel="noreferrer" className={buttonClass("tertiary")}>
+          See it on Google
+          <ExternalLink className="size-4" aria-hidden />
+        </a>
       </div>
-    );
+    ) : null;
   if (task.owner === "failed")
     return (
       <div role="alert" className={className}>
@@ -260,12 +254,6 @@ export function TaskOutcome({
       <p className={cn("flex items-center gap-2 text-small text-text-2", className)}>
         <Undo2 className="size-4" aria-hidden />
         {UNDONE_LINE}
-      </p>
-    );
-  if (task.owner === "sent")
-    return (
-      <p className={cn("text-small text-text-2", className)} aria-live="polite">
-        {SENT_LINE}
       </p>
     );
   return null;

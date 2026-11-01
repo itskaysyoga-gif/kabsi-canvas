@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 30 Oct 2026 by Web 3 (master plan 30.20, 30.21) (master plan 19, 25.1, 26.6, 29.9, 30); first written by Session 0 (the docs diet, master plan 27.12). The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 1 Nov 2026 by App 2. The history that used to live here (about 750 KB: tasks, After merge checks, evidence, found not done, decisions to confirm, the log) was moved word for word to `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -15,7 +15,7 @@ One page, under 10 KB. Updated 30 Oct 2026 by Web 3 (master plan 30.20, 30.21) (
 - WhatsApp 2 (PRs 268, 270, 271, 28 Oct): Utility replacements for the Marketing templates, all approved 29 Oct (ladder); `/privacy` names Anthropic for WhatsApp and Nora. Detail: `docs/progress/archive/2026-10-28-whatsapp2.md`.
 - Billing 2 (PR 269, 28 Oct): extra locations as their own Creem subscription on the same customer; Remove a location. Detail: `docs/progress/archive/2026-10-28-billing2.md`.
 - Price 1 (PRs 285 to 288, 30 Oct): the site's claims match the facts; list prices 29 and 59 a month (290, 590 a year), the founding price 19 and 39 for the first 30 paying businesses chosen at checkout under one lock, Founding 25 too; built features only on the plan cards; the help lines; MRR from the plan's price. Creem test-mode list products made by the setup action. Detail: `docs/progress/archive/2026-10-30-price1.md`.
-- Web 3 (PRs 289 to 292, 30 Oct; LCP fix 31 Oct): kabsi.co on Design 6; the signed-in Home in four sections; "Live on Google".
+- Web 3 (PRs 289 to 292, 30 Oct): kabsi.co on Design 6.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
 ## WhatsApp ladder (master plan 25.5)
@@ -61,8 +61,9 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 1 Nov 2026, App 2 (PRs 295, 300, part 3): five places; Home with one-tap Approve. Detail: `docs/progress/archive/2026-11-01-app2.md`.
+
 - 30 Oct 2026, Web 3 (PRs 289 to 292): Design 6 ported in four parts: the light-led shell, Home with the demonstration, Pricing, Founding 25 and the industry pages, the free check, the Manager step, the signed-in Home, "Live on Google" and the rule books. 31 Oct: checked live; Home LCP fix. Detail: `docs/progress/archive/2026-10-30-web3.md`.
-- 30 Oct 2026, lane R: master plan 30.20 and 30.21 (R-100, R-101). Scope 1 verified; WhatsApp ownership confirmed; Creem payouts to Hussein; redesign track; prices 29 and 59 after Rashid's yes.
 
 ## How a session updates this page
 

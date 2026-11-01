@@ -342,9 +342,7 @@ export function ReviewCard({
   const status = reviewStatus(review);
   const pill = highNoDraft ? (
     <StatusPill tone="warn">A person should answer</StatusPill>
-  ) : status.key === "draft_ready" ? (
-    <StatusPill tone="info">Waiting for your yes</StatusPill>
-  ) : (
+  ) : status.key === "draft_ready" ? null : (
     <StatusPill tone={TONE[status.tone]}>{status.label}</StatusPill>
   );
 
@@ -642,9 +640,6 @@ export function ReviewCard({
                 Other options
               </Button>
             </div>
-            <p className="mt-3 text-small text-text-2">
-              Nothing is published until you approve it.
-            </p>
           </CardFoot>
         </>
       )}
