@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { oneOf } from "@/lib/search-params";
 import { SiteShell } from "@/components/kabsi/site-chrome";
 import { PHOTOS } from "@/components/kabsi/photos";
-import { HOME_LINE } from "@/components/kabsi/d8-data";
+import { HOME_LINE } from "@/components/kabsi/hero-lines";
 import { D8Home } from "@/components/kabsi/d8-home";
 import { ORG_LD, WEBSITE_LD, pageHead } from "@/lib/site";
 

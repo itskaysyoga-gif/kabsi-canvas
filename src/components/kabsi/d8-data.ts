@@ -2,9 +2,7 @@
 // knowledge/kabsi-facts.md (lane R decision 1); where Design 8 said more than the facts, the facts' wording is used and
 // the change is listed in COPY.md section 38. Every business and person here is an Example.
 
-/** Home's supporting line (Design 7 line 1, picked). The WhatsApp switch adds WHATSAPP_LAUNCH_LINE while it is off. */
-export const HOME_LINE =
-  "Kabsi checks your Google profile every day, prepares the replies, posts and fixes it needs, and asks for your yes on WhatsApp.";
+export { HOME_LINE } from "./hero-lines";
 
 export const HERO_BUSINESS = "Hollis Hair, Bristol";
 

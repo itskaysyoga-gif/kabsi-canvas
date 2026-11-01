@@ -130,7 +130,7 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     // Design 8 (Web 4): the H1 is the brand line itself, and the supporting line is Design 7's line 1.
     const home = read("src/components/kabsi/d8-home.tsx");
     expect(home).toContain("Your business on Google. Taken care of.");
-    expect(read("src/components/kabsi/d8-data.ts")).toContain(
+    expect(read("src/components/kabsi/hero-lines.ts")).toContain(
       "prepares the replies, posts and fixes it needs, and asks for your yes on WhatsApp.",
     );
     expect(home).toContain("{!WHATSAPP_ON && (");
