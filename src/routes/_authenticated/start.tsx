@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { z } from "zod";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { BusinessStep } from "@/components/onboarding/steps";
 import { ScenarioScreen } from "@/components/onboarding/scenario-screen";
@@ -18,6 +17,7 @@ import {
 } from "@/components/onboarding/stages";
 import { ErrorNote } from "@/components/onboarding/onboarding-shell";
 import { ErrorState } from "@/components/kabsi/ui";
+import { readStartSearch } from "@/lib/search-params";
 import { STAGE_OF, screenOf, type Screen } from "@/lib/onboarding-flow";
 import {
   activateCard,
@@ -38,20 +38,8 @@ import type { HelpStep } from "@/lib/onboarding-help";
 import { WHATSAPP_ON } from "@/lib/site";
 import { track } from "@/lib/telemetry";
 
-const searchSchema = z.object({
-  code: z
-    .string()
-    .regex(/^[2-9A-HJKMNP-Za-hjkmnp-z]{6}$/)
-    .optional()
-    .catch(undefined), // card to link
-  new: z.coerce.boolean().optional().catch(undefined), // start another business
-  // Screenshots on the development server only (scripts/app-shots/onboarding.mjs): states that need a tap or a
-  // WhatsApp number. Ignored in a production build.
-  preview: z.enum(["wa", "wa-notyet", "wa-done", "rest"]).optional().catch(undefined),
-});
-
 export const Route = createFileRoute("/_authenticated/start")({
-  validateSearch: searchSchema,
+  validateSearch: readStartSearch,
   head: () => ({
     meta: [
       { title: "Get set up | Kabsi" },

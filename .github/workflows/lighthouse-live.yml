@@ -32,7 +32,9 @@ jobs:
       # DevTools throttling stayed at 1.85 s (docs/progress/archive/2026-11-01-lean1.md). Until the cause of the simulated
       # rise is found (docs/LATER.md) this is a ratchet at 3.0 s; the target stays 2.5 s.
       LH_LCP_MS: "3000"
-      LH_JS_KB: "260"
+      # Polish 1 (1 Nov 2026): kabsi.co read 237 KB on this gate before the change, plus 10 (was 260). The pull request build
+      # reads lower (203 KB, local compression, no Sentry loader); see docs/progress/archive/2026-11-01-polish1.md.
+      LH_JS_KB: "247"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
