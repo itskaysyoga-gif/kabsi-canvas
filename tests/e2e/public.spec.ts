@@ -1,6 +1,8 @@
 // QA 1 (30.12 item 2, 30.7 item 7): every public page against production, at 390 and 1440 px (the two projects of
-// playwright.config.ts). Each page must load, show one h1, have no serious or critical axe issue, and match the approved
-// baseline in tests/e2e/baseline. A change that nobody explained fails the run.
+// playwright.config.ts). Each page must load, show one h1, have no sideways scroll and no serious or critical axe issue.
+// Lean 1 (1 Nov 2026): only five pages keep a picture (PICTURE below), compared with the approved baseline in
+// tests/e2e/baseline; the baselines of the other pages made the repository 52 MB heavy and were removed. A change that
+// nobody explained to one of the five fails the run.
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { axeClean, keep, MASKS, noBanner, settle } from "./helpers/page";
@@ -17,6 +19,9 @@ const ROUTES = [...new Set([...OTHERS, ...fromSitemap])].filter(Boolean);
 // every other serious or critical rule still is. Remove the entry when the page is fixed.
 // Web 2 (27 Oct 2026) rebuilt the home page; its green tint is gone, so the list is empty.
 const KNOWN_AXE: Record<string, string[]> = {};
+
+// Home, Pricing, the free check (its result with the example business), Founding 25 and one industry page.
+const PICTURE = new Set(["/", "/pricing", "/scan", "/founding", "/for/hair-salon"]);
 
 test.describe("public pages", () => {
   test.beforeEach(async ({ page }) => {
@@ -35,8 +40,10 @@ test.describe("public pages", () => {
       );
       expect(overflow, "horizontal scroll").toBeLessThanOrEqual(0);
       await axeClean(page, route, KNOWN_AXE[route] ?? []);
-      const name = (route === "/" ? "home" : route.slice(1).replaceAll("/", "-")) + ".png";
-      await expect(page).toHaveScreenshot(name, { ...(await keep(page)), mask: MASKS(page) });
+      if (PICTURE.has(route)) {
+        const name = (route === "/" ? "home" : route.slice(1).replaceAll("/", "-")) + ".png";
+        await expect(page).toHaveScreenshot(name, { ...(await keep(page)), mask: MASKS(page) });
+      }
       void info;
     });
   }
@@ -47,7 +54,6 @@ test.describe("public pages", () => {
     expect(res?.status()).toBe(404);
     await settle(page);
     await expect(page.locator("h1").first()).toBeVisible();
-    await expect(page).toHaveScreenshot("not-found.png", await keep(page));
   });
 
   // UX 1 (waiting list) and QA 2: while the nearby check is closed, /scan shows the public profile facts and "Save my place".

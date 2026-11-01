@@ -280,7 +280,7 @@ Everything below is open source (Playwright, `toHaveScreenshot`, `@axe-core/play
 
 | File | What it covers | Sign-in |
 |---|---|---|
-| `public.spec.ts` | every public page at 390 and 1440 px: loads, one heading, no sideways scroll, no serious or critical axe issue, matches the baseline; the 404 page | none |
+| `public.spec.ts` | every public page at 390 and 1440 px: loads, one heading, no sideways scroll, no serious or critical axe issue; five of them (Home, Pricing, the free check, Founding 25, Hair salon) also match a baseline picture (Lean 1); the 404 page | none |
 | `app.spec.ts` | every signed-in screen of the QA demo owner (Home, Reviews, Posts, Photos, Hours, Shield, Report, Insights, Knowledge, Team, Settings, Plan, Cards, Coach), clock fixed, axe, baseline | `KABSI_QA_CODE_DEMO` |
 | `journeys.spec.ts` | approve a reply and Undo it; approve and let it go; approve a post and Cancel it while it waits | `KABSI_QA_CODE_DEMO` |
 | `login.spec.ts` | the real sign-in sheet with an admin-made code (Turnstile and the mail send stood in for) | `KABSI_QA_CODE_UI` |
@@ -291,7 +291,7 @@ Everything below is open source (Playwright, `toHaveScreenshot`, `@axe-core/play
 
 Run: `npx playwright test` (all), `npx playwright test public.spec.ts` (one file), `--project=m390` or `--project=d1440` (one size). `KABSI_BASE_URL=https://<preview>.vercel.app` points a run at a preview. Reports: `npx playwright show-report`.
 
-**The baseline** is `tests/e2e/baseline/<project>/<file>/<name>.png`, made by `npx playwright test --update-snapshots` on the Linux Chromium that Playwright installs. A page keeps its first 3,000 px on a phone and 2,000 px on a desktop (the rest is covered by the overflow and axe checks). A change that nobody explained fails the run. To change it on purpose, run `--update-snapshots` for the files that changed, look at the images in the pull request, and say in the description why. Fonts and anti-aliasing differ between operating systems: make and compare baselines on Linux only.
+**The baseline** is `tests/e2e/baseline/<project>/<file>/<name>.png` (public pages: only the five named in `PICTURE` in `public.spec.ts`; Lean 1 removed the other 43 per width because they made the repository 52 MB; add a page to `PICTURE` and run `--update-snapshots` for it only when a page needs a picture), made by `npx playwright test --update-snapshots` on the Linux Chromium that Playwright installs. A page keeps its first 3,000 px on a phone and 2,000 px on a desktop (the rest is covered by the overflow and axe checks). A change that nobody explained fails the run. To change it on purpose, run `--update-snapshots` for the files that changed, look at the images in the pull request, and say in the description why. Fonts and anti-aliasing differ between operating systems: make and compare baselines on Linux only.
 
 **axe**: serious and critical issues fail; moderate and minor ones are not failed. Known issues that cannot be fixed in this session are listed in `docs/LATER.md`.
 
