@@ -49,6 +49,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
 - V3 heads-up (25 Oct): on the Yawmiyati phone tap Skip on the old photo message, never Yes, and reply No to the monthly question. Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
 - Templates: all approved 29 Oct (ladder). Voice notes stay off: the voice test failed for Gulf Arabic and mixed notes (LATER row).
+- Check 2: on a phone, pick 3 businesses at kabsi.co/scan, then read today's `places_usage` (autocomplete above 0, details 3 or more); add a Google Cloud quota alert for Places Autocomplete.
 - UX 1: after the deploy, `POST /visibility/terms` once (two DataForSEO calls, about 0.15 USD) and the read-back in the UX 1 archive file.
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up and Gemini billing at the launch gate.
 
@@ -61,7 +62,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 1 Nov 2026, Check 2 (branch claude/check2): the free check box suggests while typing (Places Autocomplete, 3 characters, 300 ms, 5 at most, own day cap of 300, falls back to search then pick); Kabsi never picks for the visitor; every result has "Not your business? Change it". Detail: `docs/progress/archive/2026-11-01-check2.md`.
+- 1 Nov 2026, Check 2 (PR 311): suggestions while typing, Kabsi never picks for the visitor, "Not your business? Change it". Not yet seen live. Detail: `docs/progress/archive/2026-11-01-check2.md`.
 - 1 Nov 2026, AI Answers 1 (PR 305 and the screens PR): when an AI answer names the business, its facts are checked against Business knowledge inside the AI Visibility cap; a clear difference is one Needs attention line and one Results Report line; the free check shows only which fact differs and ChatGPT's sentence. Mock only until ai_visibility_mode is live; no paid call. Detail: `docs/progress/archive/2026-11-01-ai-answers1.md`.
 
 
