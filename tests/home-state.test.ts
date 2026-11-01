@@ -17,6 +17,10 @@ import {
   waitingLead,
   splitCards,
   homeSections,
+  attentionLines,
+  doneThisWeek,
+  emptyHomeLine,
+  ACCESS_LOST_LINE,
 } from "../src/lib/home-state";
 import type { Task } from "../src/lib/tasks";
 
@@ -246,5 +250,69 @@ describe("Design 3 Home lines", () => {
     expect(nextReportLine("Monday 2 November")).toBe(
       "Monday 2 November on WhatsApp: what Kabsi did, what waits for your yes, and one next step.",
     );
+  });
+});
+
+// App 2 (master plan 30.22 item 5): Needs attention holds only real problems, one line and one button; Done by Kabsi shows
+// each item once, at most three; the empty Home says what Kabsi is doing and when the owner hears from it.
+describe("App 2 Home", () => {
+  const none = { tasks: [], accessLost: false, setup: null, plan: null };
+  it("says nothing in Needs attention when nothing is wrong, and never lists a draft to approve", () => {
+    expect(attentionLines(none)).toEqual([]);
+    expect(
+      attentionLines({
+        ...none,
+        tasks: [task(1), task(2, { kind: "post" }), task(3, { kind: "profile_gap" })],
+      }),
+    ).toEqual([]);
+  });
+  it("lists lost access first, once, then setup, the plan and the problems, each with one button", () => {
+    const lines = attentionLines({
+      tasks: [
+        task(1, {
+          kind: "profile_change",
+          title: "Google shows a new phone number",
+          path: "/app/shield",
+        }),
+        task(2, { kind: "billing", title: "Your payment did not go through", path: "/app/plan" }),
+      ],
+      accessLost: true,
+      setup: { text: "Setup is waiting", owner: true },
+      plan: { title: "Your trial has ended", to: "/app/plan", label: "See your plan" },
+    });
+    expect(lines.map((l) => l.text)).toEqual([
+      ACCESS_LOST_LINE,
+      "Setup is waiting",
+      "Your trial has ended",
+      "Google shows a new phone number",
+      "Your payment did not go through",
+    ]);
+    for (const l of lines) expect(l.action?.label).toBeTruthy();
+    const reconnect = attentionLines({
+      ...none,
+      accessLost: true,
+      tasks: [task(1, { kind: "reconnect", title: "Reconnect Google", path: "/app/settings" })],
+    });
+    expect(reconnect.map((l) => l.text)).toEqual(["Reconnect Google"]);
+  });
+  it("gives a manager or staff no setup button", () => {
+    const [line] = attentionLines({ ...none, setup: { text: "Setup is waiting", owner: false } });
+    expect(line?.action).toBeUndefined();
+  });
+  it("shows each finished item once, newest first, at most three", () => {
+    const rows = [
+      { id: "p3", kind: "review_reply", targetId: "r1" },
+      { id: "p2", kind: "review_reply", targetId: "r1" },
+      { id: "p1", kind: "post", targetId: "x" },
+      { id: "p0", kind: "review_reply", targetId: "r2" },
+      { id: "p9", kind: "photo", targetId: "y" },
+    ];
+    expect(doneThisWeek(rows).map((r) => r.id)).toEqual(["p3", "p1", "p0"]);
+  });
+  it("says what Kabsi does and when the owner hears from it", () => {
+    expect(emptyHomeLine("Monday 2 November", false)).toBe(
+      "Kabsi checks your Google profile every day and tells you by email when something needs your yes. Your next report comes on Monday 2 November.",
+    );
+    expect(emptyHomeLine("Monday 2 November", true)).toContain("on WhatsApp");
   });
 });

@@ -3,20 +3,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Camera, Link2 } from "lucide-react";
 import { AccountTop, Panel } from "@/components/kabsi/d3-account";
-import { Banner, ButtonLink, ErrorState, Skeleton, buttonClass } from "@/components/kabsi/ui";
-import { ActionCenter } from "@/components/home/action-center";
-import { NotificationBell } from "@/components/home/notification-bell";
+import { ButtonLink, ErrorState, Skeleton, buttonClass } from "@/components/kabsi/ui";
+import { ActionCenter, NeedsAttention } from "@/components/home/action-center";
 import { myAccess } from "@/lib/team";
-import { loadEntitlements } from "@/lib/entitlements";
-import { loadSetupStatus } from "@/lib/home";
-import { homeState, waitingLead } from "@/lib/home-state";
-import { loadTasks } from "@/lib/tasks";
+import { attentionLines, ATTENTION_DEFAULT_SETUP } from "@/lib/home-state";
 import { loadScenario, myLatestLocation, type Location } from "@/lib/onboarding";
 import { screenFor } from "@/lib/scenarios";
-import { KABSI_GROUP_ID } from "@/lib/site";
 
-// Home, "Waiting for you" (Design 3, COPY.md 19): what needs the owner now, what Kabsi sent to Google lately and the next
-// report. Facts only (section 3, D222). The shell (app-layout.tsx) gives the page its container.
+// Home (App 2, master plan 30.22 item 5): what needs the owner now, in one screen. No bell (WhatsApp tells owners), no
+// connection strip unless access is broken. Facts only (section 3, D222). The shell (app-layout.tsx) gives the page its
+// container.
 export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({ meta: [{ title: "Home | Kabsi" }, { name: "robots", content: "noindex" }] }),
   beforeLoad: async () => {
@@ -41,15 +37,6 @@ function HomePage() {
     enabled: !!loc,
   });
   const role = access.data?.role;
-  const live = !!loc && loc.status === "active" && !!role && role !== "staff";
-  // The same query as the list below (one request): the lead line counts what waits.
-  const tasks = useQuery({
-    queryKey: ["tasks", loc?.id],
-    queryFn: () => loadTasks(loc!.id),
-    enabled: live,
-    refetchInterval: 60_000,
-  });
-  const total = tasks.data ? homeState(tasks.data.tasks).total : 0;
 
   if (location.isLoading) return <PageSkeleton />;
   if (location.isError)
@@ -65,24 +52,21 @@ function HomePage() {
 
   return (
     <>
-      <AccountTop
-        title="Home"
-        lead={live && total > 0 ? waitingLead(total) : undefined}
-        action={role && role !== "staff" ? <NotificationBell locationId={loc.id} /> : undefined}
-      />
+      <AccountTop title="Home" />
       {role === "staff" ? (
         <StaffHome />
       ) : loc.status === "paused" || loc.status === "disabled" ? (
         <Paused loc={loc} />
       ) : (
         <>
-          <SetupBanner loc={loc} owner={role === "owner"} />
-          {loc.status !== "active" ? null : access.isError ? (
+          {loc.status !== "active" ? (
+            <Setup loc={loc} owner={role === "owner"} />
+          ) : access.isError ? (
             <ErrorState title="This page did not load." onRetry={() => void access.refetch()}>
               Nothing you did, and nothing changed on Google. Try again in a minute.
             </ErrorState>
           ) : access.data ? (
-            <ActionCenter loc={loc} role={access.data.role} />
+            <ActionCenter loc={loc} access={access.data} />
           ) : (
             <PageSkeleton bare />
           )}
@@ -151,61 +135,33 @@ function NoBusiness() {
   );
 }
 
-// Setup is waiting for Google access (V4's onboarding_status): one line and the way back to the next step. The trial
-// line is only said while there is no trial or plan yet (the organisation's entitlements, P0.4-06).
-function SetupBanner({ loc, owner }: { loc: Location; owner: boolean }) {
-  const status = useQuery({
-    queryKey: ["setup-status", loc.id],
-    queryFn: () => loadSetupStatus(loc.id),
-    staleTime: 60_000,
-  });
-  const ent = useQuery({
-    queryKey: ["entitlements", loc.id],
-    queryFn: () => loadEntitlements(loc.id),
-    staleTime: 60_000,
-  });
-  // The situation the owner reported while adding Kabsi (P0.4-04).
+// Setup is waiting for a step (V4's onboarding_status): one line with the way back to it, in Needs attention, and what
+// happens next. The line is the situation the owner reported while adding Kabsi (P0.4-04) when there is one.
+function Setup({ loc, owner }: { loc: Location; owner: boolean }) {
   const scenario = useQuery({
     queryKey: ["scenario", loc.id],
     queryFn: () => loadScenario(loc.id),
     enabled: !loc.access_granted_at,
   });
-  const lost = !!loc.access_lost_at && !loc.access_granted_at;
-  const waiting = status.data ? !status.data.checked : loc.status !== "active";
-  const noPlan = !ent.data || ent.data.state === "none";
-  const said =
-    scenario.data && !loc.access_granted_at
-      ? screenFor(scenario.data.scenario, scenario.data.variant)
-      : null;
+  const said = scenario.data ? screenFor(scenario.data.scenario, scenario.data.variant) : null;
+  const text =
+    said?.home ??
+    (loc.concierge && loc.consent_at ? CONCIERGE_COPY.setup : ATTENTION_DEFAULT_SETUP);
+  const lines = attentionLines({
+    tasks: [],
+    accessLost: !!loc.access_lost_at && !loc.access_granted_at,
+    setup: { text, owner },
+    plan: null,
+  });
   return (
-    <>
-      {lost ? (
-        <Banner tone="bad" title="Kabsi can't reach your Google profile any more." className="mb-5">
-          Someone may have removed Kabsi as a Manager. Invite the Kabsi group ID {KABSI_GROUP_ID}{" "}
-          again and Kabsi picks up where it left off.
-        </Banner>
-      ) : null}
-      {waiting && !lost ? (
-        <Banner
-          tone="warn"
-          title="Setup is waiting for one step: add Kabsi as a Manager."
-          className="mb-5"
-          action={
-            owner ? (
-              <ButtonLink to="/start" size="md" variant="secondary">
-                Continue setup
-              </ButtonLink>
-            ) : undefined
-          }
-        >
-          {noPlan ? <p>Your trial has not started and nothing has been published.</p> : null}
-          {said ? <p className={noPlan ? "mt-1" : ""}>{said.home}</p> : null}
-          {!said && loc.concierge && loc.consent_at ? (
-            <p className={noPlan ? "mt-1" : ""}>{CONCIERGE_COPY.setup}</p>
-          ) : null}
-        </Banner>
-      ) : null}
-    </>
+    <div className="space-y-4">
+      <NeedsAttention lines={lines} />
+      {loc.concierge ? null : (
+        <p className="text-body text-text-2">
+          Your trial starts only when access is checked. Nothing has been published.
+        </p>
+      )}
+    </div>
   );
 }
 

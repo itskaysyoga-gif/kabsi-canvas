@@ -315,3 +315,72 @@ export function nextMonday(now = new Date(), timeZone?: string | null): string {
 
 export const nextReportLine = (monday: string) =>
   `${monday} on WhatsApp: what Kabsi did, what waits for your yes, and one next step.`;
+
+// ── App 2 (1 Nov 2026, master plan 30.22 item 5): an owner knows in five seconds what needs them.
+
+/** One real problem on Home: one line and at most one button. */
+export type AttentionLine = { key: string; text: string; action?: { label: string; to: string } };
+
+export const ATTENTION_DEFAULT_SETUP = "Setup is waiting for one step: add Kabsi as a Manager.";
+export const ACCESS_LOST_LINE = "Kabsi can't reach your Google profile any more.";
+
+/**
+ * "Needs attention": only real problems, the most urgent first. Lost Google access comes first (once: a reconnect task
+ * already says it), then setup that waits for a step, then a plan the owner must choose, then the tasks that are not a
+ * draft to approve (a profile change, billing, a Google warning). Never a status that is fine.
+ */
+export function attentionLines(i: {
+  tasks: Pick<Task, "id" | "kind" | "title" | "path" | "evidence" | "priority">[];
+  accessLost: boolean;
+  setup: { text: string; owner: boolean } | null;
+  plan: { title: string; to: string; label: string } | null;
+}): AttentionLine[] {
+  const out: AttentionLine[] = [];
+  const reconnect = i.tasks.some((t) => t.kind === "reconnect");
+  if (i.accessLost && !reconnect)
+    out.push({
+      key: "access",
+      text: ACCESS_LOST_LINE,
+      action: { label: "See how to fix it", to: "/manager-steps" },
+    });
+  if (i.setup)
+    out.push({
+      key: "setup",
+      text: i.setup.text,
+      ...(i.setup.owner ? { action: { label: "Continue setup", to: "/start" } } : {}),
+    });
+  if (i.plan)
+    out.push({ key: "plan", text: i.plan.title, action: { label: i.plan.label, to: i.plan.to } });
+  for (const t of i.tasks) {
+    if (NEEDS_YES.includes(t.kind) || t.kind === "profile_gap") continue;
+    out.push({
+      key: t.id,
+      text: t.title,
+      action: { label: cardAction(t as Task).primary, to: t.path },
+    });
+  }
+  return out;
+}
+
+/** "Done by Kabsi this week": the latest state of each item once (no duplicates), at most three. */
+export function doneThisWeek<T extends { targetId: string; kind: string }>(
+  items: T[],
+  max = 3,
+): T[] {
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const t of items) {
+    const k = `${t.kind}:${t.targetId}`;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(t);
+    if (out.length === max) break;
+  }
+  return out;
+}
+
+/** The empty Home: what Kabsi is doing, and when the owner hears from it. */
+export const emptyHomeLine = (monday: string, whatsappOn: boolean = WHATSAPP_ON) =>
+  `Kabsi checks your Google profile every day and tells you ${
+    whatsappOn ? "on WhatsApp" : "by email"
+  } when something needs your yes. Your next report comes on ${monday}.`;

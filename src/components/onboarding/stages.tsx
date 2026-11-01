@@ -233,7 +233,7 @@ export function WhatsAppStage({
           <p className="font-bold">WhatsApp: coming soon</p>
           <p className="mt-1 text-small text-text-2">
             Review alerts and Approve on WhatsApp start when Kabsi&apos;s WhatsApp number is ready.
-            Until then everything comes by email and in the bell on Home.
+            Until then everything comes by email.
           </p>
         </div>
         <MainCta>
