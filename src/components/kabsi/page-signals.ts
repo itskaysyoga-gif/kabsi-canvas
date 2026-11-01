@@ -11,12 +11,8 @@ export function useMainCtaInView() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [inView, setInView] = useState(true);
   useEffect(() => {
-    const els = Array.from(document.querySelectorAll("[data-main-cta]"));
-    if (!els.length) {
-      setInView(false);
-      return;
-    }
     const visible = new Set<Element>();
+    const watched = new Set<Element>();
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -27,8 +23,38 @@ export function useMainCtaInView() {
       },
       { rootMargin: "-64px 0px -88px 0px" },
     );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+    // Web 4: a main action can appear after the page loads (the free check's result), so new ones are watched too.
+    const scan = () => {
+      const els = Array.from(document.querySelectorAll("[data-main-cta]"));
+      let removed = false;
+      for (const el of watched) {
+        if (!el.isConnected) {
+          io.unobserve(el);
+          watched.delete(el);
+          removed = visible.delete(el) || removed;
+        }
+      }
+      let added = false;
+      for (const el of els) {
+        if (!watched.has(el)) {
+          watched.add(el);
+          io.observe(el);
+          added = true;
+        }
+      }
+      // Before the first observer answer the default stands, so the header button never flashes yellow on load.
+      if (!els.length) setInView(false);
+      // A new main action waits for the observer's first answer, so a swap never flashes the yellow header button.
+      else if (removed && !added) setInView(visible.size > 0);
+    };
+    scan();
+    const main = document.getElementById("main");
+    const mo = main ? new MutationObserver(scan) : null;
+    if (main) mo?.observe(main, { childList: true, subtree: true });
+    return () => {
+      io.disconnect();
+      mo?.disconnect();
+    };
   }, [pathname]);
   return inView;
 }
