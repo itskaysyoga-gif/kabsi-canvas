@@ -60,14 +60,16 @@ describe("no app code in the first load of a public page", () => {
       /export \{ anonHeaders, anonJwt, supabaseUrl \} from/,
     );
   });
-  it("keep Home and its demonstration in the route's own chunk, with no lazy boundary over the hero (Design 6, Web 3)", () => {
-    // The router splits every route file into its own chunk, so d6-home rides in Home's chunk, not the shared one
+  it("keep Home in the route's own chunk, with no lazy boundary over the hero (Design 6, Web 3; Design 8, Web 4)", () => {
+    // The router splits every route file into its own chunk, so the Home page (d8-home since Web 4) rides in Home's chunk, not the shared one
     // (checked in the build on 31 Oct 2026: the Home text is in a 28 KB route chunk, the entry grew 0.6 KB). A React.lazy
     // boundary around it was thrown away and drawn again when the shell updated first, blanking the hero on slow phones.
     const top = read("src/routes/index.tsx");
-    expect(top).toMatch(/import \{ D6Home \} from "@\/components\/kabsi\/d6-home"/);
+    expect(top).toMatch(/import \{ D8Home \} from "@\/components\/kabsi\/d8-home"/);
     expect(top).not.toMatch(/\blazy\(|<Suspense/);
     expect(top).not.toMatch(/from "@\/components\/kabsi\/(d6-demo|whatsapp)"/);
+    // Web 4: the hero phone is HTML and CSS; the interactive demonstration does not load on Home.
+    expect(read("src/components/kabsi/d8-home.tsx")).not.toMatch(/from "\.\/(d6-demo|d6-home)"/);
     expect(read("vite.config.ts")).not.toMatch(/autoCodeSplitting:\s*false/);
   });
 });

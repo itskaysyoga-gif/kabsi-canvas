@@ -41,5 +41,6 @@ export const FAQ: { q: string; a: string }[] = [
   },
 ];
 
-export const HOME_FAQ = [11, 1, 4, 6];
+// Web 4 (Design 8): the fourth question on Home is "Can I cancel?".
+export const HOME_FAQ = [11, 1, 4, 8];
 export const PRICING_FAQ = [11, 3, 4, 5, 6, 7, 8, 9, 10];

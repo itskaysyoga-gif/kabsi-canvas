@@ -2,13 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { oneOf } from "@/lib/search-params";
 import { SiteShell } from "@/components/kabsi/site-chrome";
 import { PHOTOS } from "@/components/kabsi/photos";
-import { HERO_LINE } from "@/components/kabsi/d6-data";
-import { D6Home } from "@/components/kabsi/d6-home";
-import { ORG_LD, PRODUCT_LD, WEBSITE_LD, pageHead } from "@/lib/site";
-import { faqJsonLd } from "@/lib/faq";
-import { FAQ, HOME_FAQ } from "@/components/kabsi/faq-data";
+import { HOME_LINE } from "@/components/kabsi/hero-lines";
+import { D8Home } from "@/components/kabsi/d8-home";
+import { ORG_LD, WEBSITE_LD, pageHead } from "@/lib/site";
 
-// Home is Design 6, round 2 (Web 3; master plan 30.20 section 3, approved by lane R on 30 Oct 2026). The route's own
+// Home is Design 7 and Design 8 (Web 4, approved by lane R on 1 Nov 2026); before that Design 6 round 2 (Web 3). The route's own
 // chunk (the router splits each route) carries the page and its demonstration, so the shared bundle stays small. It is
 // not behind React.lazy: a lazy boundary that is still loading when the shell updates is thrown away and drawn again,
 // which blanked the hero for a moment on slow phones and pushed LCP past 5 s (Web 3 after-merge check, 31 Oct 2026).
@@ -21,10 +19,11 @@ export const Route = createFileRoute("/")({
   head: () => {
     const h = pageHead({
       title: "Kabsi: Your business on Google. Taken care of.",
-      description: HERO_LINE,
+      description: HOME_LINE,
       path: "/",
       image: "home",
-      jsonLd: [ORG_LD, WEBSITE_LD, PRODUCT_LD, faqJsonLd(HOME_FAQ.map((i) => FAQ[i - 1]!))],
+      // docs/SEO-PLAN.md (Design 8, lane R decision 8): Organization and WebSite only; no Product or Offer markup.
+      jsonLd: [ORG_LD, WEBSITE_LD],
     });
     return {
       ...h,
@@ -34,9 +33,9 @@ export const Route = createFileRoute("/")({
         {
           rel: "preload",
           as: "image",
-          href: PHOTOS.salonWash.large,
-          imageSrcSet: `${PHOTOS.salonWash.small} 800w, ${PHOTOS.salonWash.large} 1600w`,
-          imageSizes: "(min-width: 1024px) 40vw, 100vw",
+          href: PHOTOS.salonTablet.large,
+          imageSrcSet: `${PHOTOS.salonTablet.small} 800w, ${PHOTOS.salonTablet.large} 1600w`,
+          imageSizes: "(min-width: 1024px) 28vw, 60vw",
           media: "(min-width: 768px)",
         },
       ],
@@ -57,7 +56,7 @@ function Home() {
           This review link isn't active. Please ask the staff for help.
         </div>
       ) : null}
-      <D6Home />
+      <D8Home />
     </SiteShell>
   );
 }

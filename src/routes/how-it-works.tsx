@@ -6,6 +6,7 @@ import { ScanBox } from "@/components/kabsi/scan-box";
 import { SectionHead, StepList } from "@/components/kabsi/ui";
 import { Img, PHOTOS } from "@/components/kabsi/photos";
 import { pageHead } from "@/lib/site";
+import { AfterYes } from "@/components/kabsi/after-yes";
 
 const HowItWorksLive = lazy(() =>
   import("@/components/kabsi/hiw-sections").then((m) => ({ default: m.HowItWorksLive })),
@@ -64,6 +65,8 @@ function HowItWorks() {
       <Suspense fallback={null}>
         <HowItWorksLive />
       </Suspense>
+
+      <AfterYes />
 
       <section
         aria-labelledby="setup-h"

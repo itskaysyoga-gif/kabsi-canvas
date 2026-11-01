@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 // Web copies of the photos Rashid chose (docs/PHOTOS.md), 1600 and 800 px on the long side.
 import bakeryCounter1600 from "@/assets/photos/bakery-counter-1600.webp";
 import bakeryCounter800 from "@/assets/photos/bakery-counter-800.webp";
@@ -165,10 +166,13 @@ export function Img({
   className,
   priority = false,
   decorative = false,
+  style,
 }: {
   photo: Photo;
   sizes: string;
   className?: string | undefined;
+  /** An object-position for a crop (Design 8). */
+  style?: CSSProperties | undefined;
   priority?: boolean | undefined;
   decorative?: boolean | undefined;
 }) {
@@ -184,6 +188,7 @@ export function Img({
       decoding={priority ? "sync" : "async"}
       fetchPriority={priority ? "high" : "auto"}
       className={className}
+      style={style}
     />
   );
 }
