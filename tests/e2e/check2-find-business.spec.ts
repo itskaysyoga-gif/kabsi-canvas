@@ -231,7 +231,9 @@ test.describe("Check 2: suggestions while typing", () => {
     await box.fill("Smile Dental Clinic Example Town");
     await box.press("Enter");
     await expect(page).toHaveURL(/\/scan\?q=Smile/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Is this your business?");
+    await expect(
+      page.getByRole("heading", { level: 2, name: "Is this your business?" }),
+    ).toBeVisible();
     expect(calls.some((c) => c.action === "search")).toBe(true);
   });
 
@@ -265,7 +267,7 @@ test.describe("Check 2: suggestions while typing", () => {
     await page.waitForTimeout(700);
     expect(suggestCalls(calls).length, "after a refusal the page stops asking").toBe(before);
     await box.press("Enter");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Pick your business");
+    await expect(page.getByRole("heading", { level: 2, name: "Pick your business" })).toBeVisible();
     await expect(page.getByRole("button", { name: "This is my business" })).toHaveCount(2);
   });
 
@@ -346,7 +348,9 @@ test.describe("Check 2: Kabsi never picks for the visitor", () => {
       ],
     });
     await page.goto("/scan?q=Smile%20Dental");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Is this your business?");
+    await expect(
+      page.getByRole("heading", { level: 2, name: "Is this your business?" }),
+    ).toBeVisible();
     await expect(page.getByText("Smile Dental Clinic")).toBeVisible();
     await expect(page.getByText("12 Harbour Lane, Example Town, USA")).toBeVisible();
     await expect(page.getByText("Dentist", { exact: true })).toBeVisible();
