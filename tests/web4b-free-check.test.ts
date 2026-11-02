@@ -51,6 +51,12 @@ describe("the free check result on Design 8", () => {
     expect(rows.find((r) => r.label === "Reviews")!.value).toBe("38, rated 4.6");
     for (const r of rows) expect(`${r.label} ${r.why}`).not.toMatch(/repl|holiday|post|booking/i);
   });
+  it("never shows Google's 10-photo limit as the business's photo count", () => {
+    const photos = (n: number) =>
+      foundRows({ ...base, photo_count: n }).find((r) => r.label === "Photos")!.value;
+    expect(photos(10)).toBe("10 or more");
+    expect(photos(4)).toBe("4");
+  });
   it("counts fewer than 10 reviews as worth fixing, like the check's own finding", () => {
     expect(foundRows({ ...base, review_count: 3 }).find((r) => r.label === "Reviews")!.ok).toBe(
       false,
@@ -69,6 +75,9 @@ describe("the free check result on Design 8", () => {
       live.indexOf("function Competitors"),
     );
     expect(result.match(/<Pill>At launch<\/Pill>/g)).toHaveLength(2);
+    // Keyed on the waiting list, not on a missing check: a failed nearby check is not "At launch".
+    expect(result).toContain(") : waitlist ? (");
+    expect(result).toContain("{waitlist && <Pill>At launch</Pill>}");
     expect(result).toContain("Kabsi will search Google Maps from places around you");
   });
 });

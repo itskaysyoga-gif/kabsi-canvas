@@ -115,6 +115,8 @@ export function ScanSearching({ query, progress = 1 }: { query: string; progress
       <h2 className="mt-1 text-h3 break-words">
         {progress === 0 ? `Searching for ${query}` : query}
       </h2>
+      {/* After a pick the name is Places data, so it carries Google's attribution. */}
+      {progress > 0 && <PlacesAttribution className="mt-1" />}
       <ol className="mt-4 space-y-2.5">
         {STEPS.map((s, i) => {
           const state = i < progress ? "done" : i === progress ? "now" : "later";
@@ -519,7 +521,12 @@ export function foundRows(s: Snapshot): FoundRow[] {
     },
     {
       label: "Photos",
-      value: s.has_photos ? String(s.photo_count || "Shown") : null,
+      // Google returns at most 10 photos, so 10 means 10 or more.
+      value: !s.has_photos
+        ? null
+        : s.photo_count >= 10
+          ? "10 or more"
+          : String(s.photo_count || "Shown"),
       ok: s.has_photos,
       why: "Photos show customers what to expect.",
     },
@@ -744,7 +751,9 @@ export function LiveResult({
       <ResultHead
         date={check?.created_at ? new Date(check.created_at) : new Date()}
         name={s.name}
-        line={`${s.address}.${term ? ` Searched as '${term}'.` : ""}`}
+        line={[s.address ? `${s.address}.` : "", term ? `Searched as '${term}'.` : ""]
+          .filter(Boolean)
+          .join(" ")}
         change={change}
       />
       {/* Google's Places policies (read 1 Nov 2026, Check 2): Places data shown without a Google map carries the
@@ -809,8 +818,9 @@ export function LiveResult({
 
           {check?.ai ? (
             <AiAnswer ai={check.ai} />
-          ) : !check ? (
-            // The AI answer runs only with the nearby check; while that is closed it is marked At launch (decision 6).
+          ) : waitlist ? (
+            // The AI answer runs only with the nearby check; while that is closed (the waiting list) it is marked At launch
+            // (decision 6). A failed or skipped nearby check shows neither card's At launch.
             <section
               aria-labelledby="ai-h"
               className="rounded-panel border border-line bg-surface-1 p-5 sm:p-8"
@@ -841,11 +851,12 @@ export function LiveResult({
                     <h2 id="near-h" className="text-h3">
                       Where you come up nearby
                     </h2>
-                    <Pill>At launch</Pill>
+                    {waitlist && <Pill>At launch</Pill>}
                   </div>
                   <p className="mt-2 text-body text-text-2">
-                    Kabsi will search Google Maps from places around you, like a customer standing
-                    there.
+                    {waitlist
+                      ? "Kabsi will search Google Maps from places around you, like a customer standing there."
+                      : SCAN_LINE}
                   </p>
                 </div>
               </div>
@@ -1213,6 +1224,9 @@ export function SavedFreeCheck({ code }: { code: string }) {
         line={`Searched as '${live.term}'.`}
         change={{ q: live.business, keyword: null, industry: null }}
       />
+      <div className="container-kb">
+        <PlacesAttribution />
+      </div>
       <div className="container-kb mt-6 grid gap-4 pb-16 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-8 lg:pb-24">
         <div className="min-w-0 space-y-4">
           <NearbySection check={live} handoff={null} />

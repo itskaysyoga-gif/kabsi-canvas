@@ -117,7 +117,7 @@ export function FreeCheckFrame({
       <PageHero
         hero={CHECK_HERO}
         under={under}
-        action={<div aria-live="polite">{children}</div>}
+        action={<div>{children}</div>}
         visual={<CheckLooksAtVisual />}
       />
       <WhatYouGetBack />
