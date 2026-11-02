@@ -4,7 +4,7 @@
 import { CheckCircle2, Sparkles } from "lucide-react";
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { Turnstile } from "@/components/turnstile";
+import { useLazyTurnstile } from "@/components/turnstile";
 import {
   ApiError,
   FOUNDING_CONSENT,
@@ -381,8 +381,8 @@ function Application({ onSent }: { onSent: () => void }) {
     setF((x) => ({ ...x, [k]: v }));
     setErrors((e) => ({ ...e, [k]: "" }));
   };
-  const [token, setToken] = useState("");
-  const [round, setRound] = useState(0);
+  // The bot check loads on the form's first touch, not at page start (Fix 1); Send waits for its token.
+  const check = useLazyTurnstile();
   const [failure, setFailure] = useState<string | null>(null);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -399,9 +399,11 @@ function Application({ onSent }: { onSent: () => void }) {
     setFailure(null);
     if (Object.values(err).some(Boolean)) return;
     setSending(true);
-    const t = token;
-    setToken("");
-    setRound((n) => n + 1);
+    const t = await check.take();
+    if (!t) {
+      setSending(false);
+      return;
+    }
     try {
       await applyFounding({
         business_name: f.business.trim(),
@@ -434,7 +436,7 @@ function Application({ onSent }: { onSent: () => void }) {
     setSending(false);
   };
   return (
-    <form onSubmit={(e) => void submit(e)} noValidate className="space-y-5">
+    <form ref={check.area} onSubmit={(e) => void submit(e)} noValidate className="space-y-5">
       <h2 id="founding-form-h" className="text-h2">
         Apply for a place
       </h2>
@@ -517,7 +519,7 @@ function Application({ onSent }: { onSent: () => void }) {
       <Tick checked={f.checkIn} onChange={(v) => set("checkIn", v)} error={errors.checkIn || null}>
         {FOUNDING_CONSENT[f.caseStudy]}
       </Tick>
-      <Turnstile key={round} onToken={setToken} />
+      {check.widget}
       {failure && <Banner tone="bad" title={failure} />}
       <Button type="submit" loading={sending} full>
         Send my application
