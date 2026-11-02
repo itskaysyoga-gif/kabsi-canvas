@@ -216,7 +216,7 @@ export function PartnersPage() {
             <p className="mt-4 text-small">
               <SiteLink
                 to="/partners/terms"
-                className="font-semibold text-text-1 underline underline-offset-4"
+                className="inline-flex min-h-11 items-center font-semibold text-text-1 underline underline-offset-4"
               >
                 Read the partner terms
               </SiteLink>

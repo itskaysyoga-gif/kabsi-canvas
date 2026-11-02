@@ -86,13 +86,19 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
           <nav aria-label="Breadcrumb">
             <ol className="flex flex-wrap items-center gap-1.5">
               <li>
-                <SiteLink to="/" className="underline underline-offset-4">
+                <SiteLink
+                  to="/"
+                  className="-mx-1 -my-3.5 inline-block px-1 py-3.5 underline underline-offset-4"
+                >
                   Home
                 </SiteLink>
               </li>
               <li aria-hidden>/</li>
               <li>
-                <SiteLink to="/for" className="underline underline-offset-4">
+                <SiteLink
+                  to="/for"
+                  className="-mx-1 -my-3.5 inline-block px-1 py-3.5 underline underline-offset-4"
+                >
                   Businesses
                 </SiteLink>
               </li>
@@ -642,13 +648,19 @@ export function HubPage({ hub: h }: { hub: Hub }) {
           <nav aria-label="Breadcrumb">
             <ol className="flex flex-wrap items-center gap-1.5">
               <li>
-                <SiteLink to="/" className="underline underline-offset-4">
+                <SiteLink
+                  to="/"
+                  className="-mx-1 -my-3.5 inline-block px-1 py-3.5 underline underline-offset-4"
+                >
                   Home
                 </SiteLink>
               </li>
               <li aria-hidden>/</li>
               <li>
-                <SiteLink to="/for" className="underline underline-offset-4">
+                <SiteLink
+                  to="/for"
+                  className="-mx-1 -my-3.5 inline-block px-1 py-3.5 underline underline-offset-4"
+                >
                   Businesses
                 </SiteLink>
               </li>

@@ -27,7 +27,10 @@ test.describe("owner journeys (QA demo owner)", () => {
   async function openQaReview(page: import("@playwright/test").Page) {
     await page.goto("/app/reviews");
     await settle(page);
-    await expect(reviewCard(page).getByText("Quinn Tester")).toBeVisible();
+    // The card's heading names the reviewer (the star line names them too, so getByText would match twice).
+    await expect(
+      reviewCard(page).getByRole("heading", { name: "Reply to Quinn Tester" }),
+    ).toBeVisible();
   }
 
   test("approve a reply, then Undo it inside the 10 seconds: nothing is sent", async ({ page }) => {
