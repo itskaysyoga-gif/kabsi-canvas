@@ -71,6 +71,25 @@
    "costUsd": 0.652071,
    "gate": false,
    "promptsHash": "58fa07ad7a5a715a29c5ceaa9271657774dd879631edf4f71db1cbbc9d95661e"
+  },
+  {
+   "date": "2026-11-02T08:17:05.905Z",
+   "model": "anthropic",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 160,
+   "judged": 105,
+   "mean": {
+    "grounded": 4.95,
+    "answers": 4.35,
+    "voice": 4,
+    "language": 4.78,
+    "safety": 4.87,
+    "length": 4.92
+   },
+   "overall": 4.65,
+   "costUsd": 0.640629,
+   "gate": true,
+   "promptsHash": "58fa07ad7a5a715a29c5ceaa9271657774dd879631edf4f71db1cbbc9d95661e"
   }
  ],
  "nora": [
@@ -133,6 +152,21 @@
    },
    "overall": 4.8,
    "costUsd": 2.033986
+  },
+  {
+   "date": "2026-11-02T08:20:21.499Z",
+   "model": "anthropic:claude-sonnet-5-5",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 83,
+   "judged": 83,
+   "mean": {
+    "accurate": 4.88,
+    "helpful": 4.33,
+    "honest": 4.94,
+    "style": 4.54
+   },
+   "overall": 4.67,
+   "costUsd": 2.262828
   }
  ]
 }
