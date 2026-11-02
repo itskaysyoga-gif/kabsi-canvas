@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { keepFocus } from "@/lib/keep-focus";
 import { CONCIERGE_COPY } from "@/lib/concierge-copy";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -774,8 +774,15 @@ function ApprovedWindow({
   const undoRef = useRef<HTMLButtonElement>(null);
   const sentRef = useRef<HTMLParagraphElement>(null);
   const counting = left > 0;
+  // When the countdown ends, focus follows only if Undo itself had it (review of PR WEBFORMS): no jump for a reader
+  // elsewhere on the page.
+  const undoHadFocus = useRef(false);
+  useLayoutEffect(() => {
+    if (counting) undoHadFocus.current = document.activeElement === undoRef.current;
+  });
   useEffect(() => {
-    keepFocus(counting ? undoRef.current : sentRef.current);
+    if (counting) keepFocus(undoRef.current);
+    else if (undoHadFocus.current) keepFocus(sentRef.current);
   }, [counting]);
   return (
     <>

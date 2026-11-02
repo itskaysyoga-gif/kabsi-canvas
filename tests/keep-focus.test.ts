@@ -12,6 +12,7 @@ describe("focus after Approve", () => {
     const goneApprove = { isConnected: false } as unknown as Element;
     expect(keepFocus(undo, { activeElement: goneApprove, body })).toBe(true);
     expect(undo.focus).toHaveBeenCalledTimes(1);
+    expect(undo.focus).toHaveBeenCalledWith({ preventScroll: true });
   });
 
   it("moves to Undo when focus fell to the page body", () => {
@@ -35,7 +36,11 @@ describe("focus after Approve", () => {
       "src/components/kabsi/d3-content-task.tsx",
     ]) {
       const src = readFileSync(file, "utf8");
-      expect(src, file).toContain("keepFocus(counting ? undoRef.current");
+      expect(src, file).toContain("if (counting) keepFocus(undoRef.current)");
+      // Review of PR WEBFORMS: when the countdown ends, focus follows only if Undo had it.
+      expect(src, file).toContain(
+        "undoHadFocus.current = document.activeElement === undoRef.current",
+      );
       expect(src, file).toContain("ref={undoRef}");
     }
   });

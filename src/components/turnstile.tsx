@@ -30,7 +30,8 @@ declare global {
 // No token and no click asked for within this time means the check is not going to finish on its own.
 const GIVE_UP_MS = 10_000;
 // A form waits this long for a token after its submit before it stops (the widget's own 10 seconds come first).
-const TAKE_WAIT_MS = 30_000;
+// A submit waits at most this long for the check, then the form says the check failed (review of PR WEBFORMS: 30 s).
+const TAKE_WAIT_MS = 12_000;
 
 /**
  * Cloudflare Turnstile check (hotfix 20h). Invisible unless Cloudflare needs a click ("interaction-only"); then it sits
@@ -168,12 +169,16 @@ export function useLazyTurnstile(): {
   const [round, setRound] = useState(0);
   const token = useRef("");
   const waiters = useRef<((t: string) => void)[]>([]);
+  // The check failed earlier (the widget shows Try again): the next submit starts a fresh check instead of waiting on
+  // the failed one (review of PR WEBFORMS).
+  const failed = useRef(false);
   const stop = useRef<(() => void) | undefined>(undefined);
   const area = useCallback((el: HTMLElement | null) => {
     stop.current?.();
     stop.current = el ? startOnFirstTouch(el, () => setOn(true)) : undefined;
   }, []);
   const onToken = useCallback((t: string) => {
+    if (t) failed.current = false;
     token.current = t;
     if (t && waiters.current.length) {
       const w = waiters.current.shift()!;
@@ -183,6 +188,7 @@ export function useLazyTurnstile(): {
     }
   }, []);
   const onFail = useCallback(() => {
+    failed.current = true;
     for (const w of waiters.current.splice(0)) w("");
   }, []);
   const take = useCallback(
@@ -195,6 +201,10 @@ export function useLazyTurnstile(): {
           setRound((n) => n + 1);
           resolve(t);
           return;
+        }
+        if (failed.current) {
+          failed.current = false;
+          setRound((n) => n + 1);
         }
         waiters.current.push(resolve);
         window.setTimeout(() => {

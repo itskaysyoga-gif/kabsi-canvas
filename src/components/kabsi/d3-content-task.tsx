@@ -1,7 +1,7 @@
 // The task state on Hours, Posts and Photos (master plan 30.15 section 3.1, V4): a pill, the track and the line under
 // it, from the publication Kabsi sent (src/lib/task-feed.ts), or from the row's own state while no publication is found.
 // "On Google" only when Kabsi saw it there (verified); a row alone never says so. Plus the 10 second Undo bar.
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { Undo2 } from "lucide-react";
 import { keepFocus } from "@/lib/keep-focus";
 import { useQuery } from "@tanstack/react-query";
@@ -82,8 +82,15 @@ export function UndoBar({
   const undoRef = useRef<HTMLButtonElement>(null);
   const lineRef = useRef<HTMLParagraphElement>(null);
   const counting = left > 0;
+  // When the countdown ends, focus follows only if Undo itself had it (review of PR WEBFORMS): no jump for a reader
+  // elsewhere on the page.
+  const undoHadFocus = useRef(false);
+  useLayoutEffect(() => {
+    if (counting) undoHadFocus.current = document.activeElement === undoRef.current;
+  });
   useEffect(() => {
-    keepFocus(counting ? undoRef.current : lineRef.current);
+    if (counting) keepFocus(undoRef.current);
+    else if (undoHadFocus.current) keepFocus(lineRef.current);
   }, [counting]);
   return (
     <div

@@ -2,6 +2,7 @@
 // fails. Fake timers drive the app's own QueryClient defaults and its read timeout, with no network.
 import { readFileSync } from "node:fs";
 import { QueryClient, QueryObserver } from "@tanstack/react-query";
+import { createClient } from "@supabase/supabase-js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ERROR_WITHIN_MS,
@@ -78,6 +79,47 @@ describe("the error state within 5 seconds", () => {
     expect(at!).toBeLessThanOrEqual(ERROR_WITHIN_MS);
   });
 
+  it("through supabase-js, which gives the timeout back as a plain object a screen throws as it is: one try, in time", async () => {
+    const calls = vi.fn(silent);
+    const db = createClient(BASE, "anon-test-key", {
+      global: { fetch: withReadTimeout(calls, BASE) },
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+      db: { retry: false } as never,
+    });
+    const at = await msUntilError(async () => {
+      const { data, error } = await db.from("locations").select("id");
+      if (error) throw error;
+      return data;
+    });
+    expect(at).not.toBeNull();
+    expect(at!).toBeLessThanOrEqual(ERROR_WITHIN_MS);
+    expect(calls).toHaveBeenCalledTimes(1);
+  });
+
+  it("a read-only database function (Home's onboarding_status) is timed out too", async () => {
+    const calls = vi.fn(silent);
+    const f = withReadTimeout(calls, BASE);
+    const at = await msUntilError(async () => {
+      const res = await f(`${BASE}/rest/v1/rpc/onboarding_status`, { method: "POST", body: "{}" });
+      return res.json();
+    });
+    expect(at).not.toBeNull();
+    expect(at!).toBeLessThanOrEqual(ERROR_WITHIN_MS);
+  });
+
+  it("a slow failure just under the timeout, then no answer: still within 5 seconds", async () => {
+    let n = 0;
+    const calls: typeof fetch = (input, init) =>
+      n++ === 0
+        ? new Promise((_, reject) =>
+            setTimeout(() => reject(new TypeError("Failed to fetch")), READ_TIMEOUT_MS - 100),
+          )
+        : silent(input, init);
+    const at = await msUntilError(readWith(withReadTimeout(calls, BASE)));
+    expect(at).not.toBeNull();
+    expect(at!).toBeLessThanOrEqual(ERROR_WITHIN_MS);
+  });
+
   it("a read that answers in time is not cut off", async () => {
     const slowOk: typeof fetch = () =>
       new Promise((resolve) =>
@@ -105,6 +147,9 @@ describe("the error state within 5 seconds", () => {
     const e = new Error("AbortError: Kabsi read timeout after 3000 ms");
     expect(isReadTimeout(e)).toBe(true);
     expect(isReadTimeout(new Error("status 500"))).toBe(false);
+    expect(
+      isReadTimeout({ message: "AbortError: Kabsi read timeout after 2000 ms", code: "" }),
+    ).toBe(true);
     const client = readFileSync("src/lib/supabase.ts", "utf8");
     expect(client).toContain("db: { retry: false }");
     expect(client).toContain("withReadTimeout(sessionFetch, supabaseUrl)");

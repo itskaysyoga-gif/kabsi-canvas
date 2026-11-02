@@ -11,12 +11,12 @@ export function focusIsLost(doc: FocusDoc): boolean {
   return !a || a === doc.body || a.isConnected === false;
 }
 
-/** Puts focus on `el` when focus was lost; otherwise leaves it where it is. Answers whether it moved. */
+/** Puts focus on `el` when focus was lost; otherwise leaves it where it is. Never scrolls. Answers whether it moved. */
 export function keepFocus(
-  el: { focus: () => void } | null | undefined,
+  el: { focus: (o?: FocusOptions) => void } | null | undefined,
   doc: FocusDoc | undefined = typeof document === "undefined" ? undefined : document,
 ): boolean {
   if (!el || !doc || !focusIsLost(doc)) return false;
-  el.focus();
+  el.focus({ preventScroll: true });
   return true;
 }
