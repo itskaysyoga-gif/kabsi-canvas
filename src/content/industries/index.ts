@@ -15,7 +15,7 @@ import { bakery } from "./bakery";
 import { autoRepair } from "./auto-repair";
 import { gymFitness } from "./gym-fitness";
 
-export type { ChatLine, Hub, HubId, Industry, Task } from "./types";
+export type { ChatLine, Hub, HubId, Industry, Task, TradeCard, TradePage } from "./types";
 
 export const INDUSTRIES: Industry[] = [
   hairSalon,
@@ -92,12 +92,12 @@ export const HUBS: Hub[] = [
 export const industry = (slug: string) => INDUSTRIES.find((i) => i.slug === slug);
 export const hub = (id: string) => HUBS.find((h) => h.id === id);
 export const hubOf = (i: Industry) => HUBS.find((h) => h.id === i.hub)!;
-/** Breadcrumb items for an industry or hub page: All businesses, the hub, the page. Lives with the content so a route can use it without loading the page code. */
+/** Breadcrumb items for an industry or hub page (docs/SEO-PLAN.md: Home, Businesses, the page). Lives with the content
+ * so a route can use it without loading the page code. */
 export function crumbsFor(i?: Industry, h?: Hub) {
-  const c = [{ name: "All businesses", to: "/for" }];
-  const theHub = h ?? (i ? hubOf(i) : undefined);
-  if (theHub) c.push({ name: theHub.name, to: `/for/${theHub.id}` });
+  const c = [{ name: "Businesses", to: "/for" }];
   if (i) c.push({ name: i.plural, to: `/for/${i.slug}` });
+  else if (h) c.push({ name: h.name, to: `/for/${h.id}` });
   return c;
 }
 export const industriesIn = (id: HubId) => INDUSTRIES.filter((i) => i.hub === id);

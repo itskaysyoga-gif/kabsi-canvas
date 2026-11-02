@@ -2,7 +2,7 @@
 
 Master plan 30.17 section 2 and 30.16 section 4: every industry page has a claim sheet. One sheet per page, in this folder,
 named after the page's slug in `src/content/industries` (`barbershop.md` for `/for/barbershop`). Written by Content 1 on
-26 Oct 2026. Lane R read each sheet and approved the nine pages on 27 Oct 2026 after the fixes in DESIGN-BRIEF section 18; each is `finished: true` (indexed). Section 18's fixes are marked 'round 2' in the sheets.
+26 Oct 2026. Lane R read each sheet and approved the nine pages on 27 Oct 2026 after the fixes in DESIGN-BRIEF section 18; each is `finished: true` (indexed). Section 18's fixes are marked 'round 2' in the sheets. Web 4c (2 Nov 2026) ported Design 8's four trade pages: `hair-salon.md` and `restaurant.md` are new (the pages had no sheet before), and `barbershop.md` and `nail-salon.md` have a "Design 8" section for the new text. The dental clinic page still has no sheet (docs/LATER.md).
 
 ## How to read a sheet
 

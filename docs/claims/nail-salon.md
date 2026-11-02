@@ -65,3 +65,34 @@ and "beauty salon" always mean a business. The page keeps "nail salon" as the fr
 - Any claim that a gel or acrylic set lasts a number of weeks. No source was read; the review theme only says the reply promises nothing.
 - Dubai Health Authority or UK local council licensing for beauty treatments. Not sourced today; if lane R wants it, Web 2 reads the
   regulator pages first.
+
+## Design 8 (Web 4c, 2 Nov 2026)
+
+From 2 Nov 2026 the page shows Design 8's text (kabsi-design-studio `d7-trades.ts`, lane R's approval of 1 Nov 2026),
+checked against the facts. Rows above are the Content 1 page, kept for the record. Example business: Polish Room,
+Brighton (invented).
+
+| # | Sentence on the page | Type | Source | What the source says |
+| - | -------------------- | ---- | ------ | -------------------- |
+| D1 | Lead: "Seasonal designs as posts, photos of your work checked, holiday hours asked in time and a reply for every review." | K | facts "Posts", "Photos", "Holiday hours", 2.1a | As said. |
+| D2 | Hero message (Example): "Christmas designs post ready with your photo: 'Our Christmas designs are in: red velvet, gold foil and snowflakes, until 24 December.'" | A, K | facts "Posts" | Invented; waits for Yes, Edit or Skip. |
+| D3 | "Send the photo you are proud of. Kabsi checks it first and tells you when one is dark, blurry or too small, before anything goes to Google." | K | facts "Photos" | The checks Kabsi's own code runs. |
+| D4 | "Gel manicure, infill, soak off, pedicure. Google can show each service with a price and a description, so nobody has to phone to ask. Kabsi's Profile Coach lists what your profile is missing." | G, K | G6; facts 04 (Profile Coach) | As the barbershop sheet D5. |
+| D5 | "A review that names Mia gets a reply that passes the thanks on. Kabsi uses only the names on your team list." | K | K1 7.4 | Team names only. |
+| D6 | "Five days before each bank holiday Kabsi asks: normal hours, closed, or custom. Google keeps them as special hours." | K, G | facts "Holiday hours"; G4 | As said. |
+| D7 | Searches: nail salon near me, gel nails, manicure, acrylic nails, nail art; "People search for the service as often as the salon" | A | D1 ("nail salon" 74,000 UK) | Examples; "as often as" is wording about the list shown, no figure. The free check term is "nail salon", as D1 proposed. |
+| D8 | Free check example: Photos 4, Reviews 27 rated 4.7, Opening hours Shown, Website Shown | A, K | K-82 | Invented values; only what the check reads. |
+| D9 | "A post is the place for each new set, with a photo and a button to your own website. An offer or an event is a separate kind of post on Google. Google archives posts after six months unless a date range is set" | K, G | facts "Post checks"; G7 | Post types Updates, Offers, Events; "Posts older than 6 months are archived unless a date range is set." |
+| D10 | "Google asks for photos without significant alterations or excessive filters." "Photos need to be JPG or PNG, in focus and well lit." | G | G8 | As quoted. |
+| D11 | "Keep the price out of the name, because Google rejects a custom name that has one." | G | G6 | As the barbershop sheet row 8. |
+| D12 | "Google's own example of choosing a specific category is 'Nail salon' instead of 'Salon', and you cannot create a category of your own. Add a second category only for work you really do in the salon." | G | G1; G2 | "Nail salon" instead of "Salon"; you cannot create your own; use as few categories as possible. |
+| D13 | "When a review is unhappy about a nail that lifted, the reply asks the client to get in touch through the details on your profile, and never offers anything in return for changing the review." | K, G | K1 8.3; G10 | No incentive for changing a review. |
+| D14 | FAQ "Will Kabsi change my prices on Google without asking?" "No. Kabsi does not edit prices on Google today, and nothing reaches Google until you approve it." | K | facts 04 | Services are not edited yet; every change waits for approval. |
+| D15 | FAQ "What happens with a review about a reaction or an infection?" "Kabsi sends it to you with no draft and a way to reach a person" | K | K3 (sensitive reviews: health) | Health reviews go to the owner with no draft. |
+| D16 | FAQ "Can I create a category called 'nail bar'?" "No. Google does not let a business create its own category. Pick the most specific one from Google's list." | G | G1 | You cannot create your own category. |
+
+Changed from Design 8 to the facts: "flags one where a face is the main subject" (the facts' photo section says Kabsi
+does not look for faces yet: D3); "A booking link that works" (the booking button is [COMING]; replaced by D6); "Kabsi
+changes a price once you say yes" and the FAQ "it prepares the change for your yes" (Kabsi does not edit services:
+D14); "promises a free redo only if you have said so" (D13, so a reply never reads as an incentive); the free check
+example rows "Last post on Google", "Reviews with no reply", "Bank holiday hours" (K-82: D8).

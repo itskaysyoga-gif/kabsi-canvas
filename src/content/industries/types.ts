@@ -1,4 +1,4 @@
-// One content file per industry (brief section 16, item 3). The page component (d5-industry.tsx) only lays these
+// One content file per industry (brief section 16, item 3). The page component (d8-industry.tsx) only lays these
 // out; every line a reader sees about the trade comes from the trade's own file, written from its own facts.
 import type { Photo } from "@/components/kabsi/photos";
 
@@ -70,6 +70,33 @@ export type Industry = {
   faqs?: { q: string; a: string }[];
   /** Two guide slugs from GUIDES (d2-data.ts). */
   guides?: [string, string];
+  /** Design 8 (Web 4c): the four trades written for their own page. The other pages take the template's defaults. */
+  d8?: TradePage;
+};
+
+/** One Kabsi message in the hero, the one most typical of the trade's week (Example). */
+export type TradeCard = {
+  label: string;
+  text: string;
+  quote?: string;
+  buttons: string[];
+  time: string;
+};
+
+export type TradePage = {
+  /** docs/SEO-PLAN.md: a title under 90 characters and a description under 170, written for the trade. */
+  seo: { title: string; description: string };
+  /** The invented business of the hero message and the free check example: "Fade and Co, Leeds". */
+  business: string;
+  card: TradeCard;
+  jobsTitle: string;
+  searchText: string;
+  /** The free check's Example rows: only what the check reads from Google's public data (K-82). */
+  check: { label: string; value: string; tone: "ok" | "warn" }[];
+  checkText: string;
+  guide: { title: string; paras: string[] }[];
+  /** Two related trades, by slug. */
+  related: [string, string];
 };
 
 export type Task = { title: string; text: string };

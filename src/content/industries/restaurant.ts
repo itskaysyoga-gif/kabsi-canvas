@@ -1,156 +1,116 @@
 import { PHOTOS } from "@/components/kabsi/photos";
 import type { Industry } from "./types";
 
-// Finished page (model 2 of 3). Cedar Lane Kitchen is invented (Example).
+// Design 8 (Web 4c, lane R's approval of 1 Nov 2026): the restaurant page written for its own trade. Every Google
+// sentence has its row in docs/claims/restaurant.md (written in Web 4c before the page was indexed); the Kabsi
+// sentences follow knowledge/kabsi-facts.md (7.1). Cedar Lane Kitchen, Manchester, is invented (Example).
 export const restaurant: Industry = {
   slug: "restaurant",
   hub: "food-and-drink",
   name: "restaurant",
   plural: "Restaurants",
   finished: true,
-  lead: "Kabsi keeps your menu, kitchen hours and table booking link right on Google, drafts replies to the dozens of reviews a busy week brings, and turns a photo of tonight's special into a post. You approve each one on WhatsApp.",
+  lead: "Menu photos, dish photos, bank holiday hours and a reply for every review. Kabsi gets each one ready, and you approve it.",
   keyword: "restaurant",
   example: {
     business: "Cedar Lane Kitchen",
-    city: "Dubai",
+    city: "Manchester",
     kind: "restaurant",
-    rival: "Olive Court",
-    rival2: "The Copper Pot",
-    near: ["By the marina walk", "Near the office towers"],
+    rival: "The Olive Table",
+    rival2: "Northern Grill",
+    near: ["Near the station", "By the square"],
   },
-  photos: [PHOTOS.restaurantDining, PHOTOS.restaurantKitchen, PHOTOS.restaurantCooks],
+  photos: [PHOTOS.restaurantDining, PHOTOS.restaurantKitchen],
   focus: "50% 55%",
   searches: [
     "restaurants near me",
-    "lebanese restaurant",
-    "dinner with a view",
-    "family restaurant",
-    "iftar buffet",
-    "brunch near me",
-    "restaurant open late",
-    "table for 2 tonight",
+    "sunday roast near me",
+    "table for two tonight",
+    "restaurant open now",
+    "christmas lunch",
   ],
   tasks: [
     {
-      title: "Keep the menu on Google the same as the one on the table",
-      text: "Google shows menu items and photos of menus to people deciding where to eat. When a dish or a price changes, the menu on the profile changes too.",
+      title: "The menu on Google, the same as on the table",
+      text: "When a dish or a price changes, send a photo of the new menu. Kabsi checks it and adds it to your Google profile once you say yes.",
     },
     {
-      title: "Set kitchen, brunch and delivery hours apart",
-      text: "A restaurant has more than one set of hours. Google has room for each, so 'open' never means the kitchen closed an hour ago.",
+      title: "Kitchen hours apart from opening hours",
+      text: "Google has room for more than one set of hours, such as the kitchen. Kabsi checks your details every day and tells you when the hours on Google change.",
     },
     {
-      title: "Answer the weekend's reviews by Monday",
-      text: "A full Friday can bring twenty reviews. Each gets a reply that mentions the dish or the table they wrote about.",
+      title: "Bank holidays, asked in time",
+      text: "Easter Monday, Christmas Day, Boxing Day. Kabsi asks five days before each bank holiday and sets special hours once you say yes.",
     },
     {
-      title: "Post the special, the event and the set menu",
-      text: "Tonight's fish, a live music night, the iftar menu. A post with a photo stays on the profile for people searching this week.",
+      title: "Replies to a busy weekend",
+      text: "A full Saturday brings reviews. Each gets a reply drafted from what the guest wrote, never an invented dish or offer.",
     },
     {
-      title: "Keep the reservation and order links working",
-      text: "The booking button and the order link take people straight to a table or a delivery. When you change the system you book with, the links change the same day.",
-    },
-  ],
-  categories: {
-    primary: "Lebanese restaurant",
-    more: ["Restaurant", "Mediterranean restaurant", "Family restaurant", "Breakfast restaurant"],
-    note: "Pick the cuisine as the first category, not plain 'Restaurant'. Google's own advice is to choose the most specific one that fits.",
-  },
-  reviewThemes: [
-    {
-      theme: "The dish by name",
-      text: "'The lamb shoulder' or 'the fattoush'. A reply that names it shows someone read the review, and tells the next reader what to order.",
-    },
-    {
-      theme: "How long the food took",
-      text: "The usual complaint on a full night. Say sorry for the wait and leave the kitchen's reasons out.",
-    },
-    {
-      theme: "The table and the view",
-      text: "Terrace, window, booth. People write about where they sat, and the next guest asks for it.",
-    },
-    {
-      theme: "Delivery that arrived cold",
-      text: "Reviews of the delivery land on your profile too. The reply says sorry and keeps the driver out of it.",
-    },
-  ],
-  story: {
-    title: "A new menu on Monday, on Google by Monday.",
-    lead: "Send the new menu as a photo. Kabsi prepares the changes and waits for your yes.",
-    lines: [
-      {
-        from: "owner",
-        text: "New menu from Monday. Photo attached. The sea bass is now 89, and we added a mezze platter.",
-      },
-      {
-        from: "kabsi",
-        text: "Cedar Lane Kitchen: I have 3 changes ready. The menu photo on your Google profile. Sea bass from 79 to 89 in your menu items. A post: 'From Monday: our new menu, with a mezze platter for two to share.' Reply Yes for all three.",
-        buttons: ["Yes", "Edit", "Skip"],
-      },
-      { from: "owner", text: "Yes" },
-      {
-        from: "kabsi",
-        text: "Done on your Google profile: the photo, the price and the post. Your old winter menu photo is still there. Remove it?",
-        buttons: ["Remove it", "Keep it"],
-      },
-    ],
-  },
-  posts: [
-    "Tonight's catch, with one photo from the kitchen pass.",
-    "The iftar set menu and the time the doors open in Ramadan.",
-    "A live music night: the date, the time, and whether to book.",
-    "A long table for groups: how many it seats and how to reserve it.",
-  ],
-  photoTips: [
-    {
-      title: "The dishes people order most",
-      text: "Shot on the pass in good light, one plate at a time. These are the photos guests look at before they book.",
-    },
-    {
-      title: "The room at night",
-      text: "Lit as guests see it at dinner, with the tables set. Daytime photos of an evening place mislead.",
-    },
-    {
-      title: "The menu itself",
-      text: "A sharp photo of each page, replaced when the menu changes, so prices on Google match the bill.",
-    },
-  ],
-  holidays: [
-    {
-      when: "Ramadan",
-      text: "Closed by day, iftar at sunset, suhoor late at night. The hours change every week as sunset moves; Kabsi asks once and sets them all.",
-    },
-    {
-      when: "Eid",
-      text: "Families eat out. Longer hours and a post about booking ahead.",
-    },
-    {
-      when: "UK: Christmas, Boxing Day and New Year's Eve",
-      text: "Set menus, early closing on Christmas Eve, and New Year's Eve hours that run past midnight.",
-    },
-    {
-      when: "Mother's Day and Valentine's Day",
-      text: "Booked out weeks ahead. A post when tables open, and another when they are gone.",
+      title: "Dish photos, checked",
+      text: "Send photos of your best dishes. Kabsi tells you when one is dark, blurry or too small, and adds the rest to Google once you say yes.",
     },
   ],
   faqs: [
     {
-      q: "We get reviews on delivery platforms too. Does Kabsi reply there?",
-      a: "No. Kabsi looks after your Google profile only. Delivery reviews that people leave on Google, Kabsi does reply to.",
+      q: "Can Kabsi change my menu on Google?",
+      a: "Kabsi does not edit menu items on Google today. Send a photo of the new menu, and Kabsi adds it to your Google profile after your yes.",
     },
     {
-      q: "Can Kabsi change my menu prices on Google?",
-      a: "Yes, after your yes. Send the new menu or the price as a message, and Kabsi prepares the change for you to approve.",
+      q: "We get reviews on booking and delivery sites too. Does Kabsi reply there?",
+      a: "No. Kabsi works only with your Google profile. Reviews people leave on Google, Kabsi does reply to.",
     },
     {
       q: "My manager runs the floor. Can they approve instead of me?",
       a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything that goes out.",
     },
     {
-      q: "What about a review that says someone got ill?",
-      a: "Kabsi does not draft a reply to it. It comes to you with no draft, so you can speak to the guest and decide what to say.",
+      q: "Can Kabsi promise we come up first for 'restaurants near me'?",
+      a: "No one can promise that. Kabsi shows where you show up, what changed, and what you can do next.",
     },
   ],
   guides: ["how-to-reply-to-google-reviews", "someone-changed-my-business-info-on-google"],
+  d8: {
+    seo: {
+      title: "Kabsi for restaurants: menu photos, hours, bank holidays and replies on Google",
+      description:
+        "Kabsi keeps a restaurant's Google profile right: menu and dish photos, bank holiday hours asked in time, your details checked every day, and a reply for every review.",
+    },
+    business: "Cedar Lane Kitchen, Manchester",
+    card: {
+      label: "Menu photo",
+      text: "Your new winter menu photo is checked and ready for your Google profile. Post it with this line?",
+      quote: "Our winter menu starts today, with Sunday lunch from 12.",
+      buttons: ["Yes", "Edit", "Skip"],
+      time: "15:30",
+    },
+    jobsTitle: "The Google jobs that come back for a restaurant.",
+    searchText:
+      "People choose where to eat on the way there. They search for what is near and open, then read the menu, look at the dishes and check the latest replies before they book.",
+    check: [
+      { label: "Opening hours", value: "Shown", tone: "ok" },
+      { label: "Phone", value: "Shown", tone: "ok" },
+      { label: "Website", value: "Missing", tone: "warn" },
+      { label: "Reviews", value: "212, rated 4.4", tone: "ok" },
+    ],
+    checkText:
+      "For a restaurant the free check starts with what people look for on the way: your hours, your phone and your website, then your reviews. Example result for an invented restaurant in Manchester.",
+    guide: [
+      {
+        title: "The menu and the hours people check",
+        paras: [
+          "On Google you edit the menu from your Business Profile, and you can add photos of your menu and your best dishes. When the menu changes, the photo on Google should change the same week, so a guest who chose the lamb shank finds it on the table at the price they read.",
+          "A restaurant has more than one set of hours. Google lets you set more hours when different parts of what you offer keep different times, such as the kitchen or takeaway. Special hours cover the days that differ: a bank holiday, Christmas Eve, New Year's Eve, a private hire. In 2027 Christmas Day and Boxing Day fall on a weekend, so the bank holidays in England and Wales move to Monday 27 and Tuesday 28 December. Kabsi asks you five days before each bank holiday and sets the hours once you say yes.",
+        ],
+      },
+      {
+        title: "Replies, posts and the booking link",
+        paras: [
+          "A busy weekend can bring many reviews at once. A reply that names the dish or the table shows someone read it, and Kabsi names a dish only when the guest did and you gave Kabsi the facts. When a review is about a long wait or a cold plate, the reply says sorry once, leaves the kitchen's excuses out and asks the guest to get in touch through the details on your profile.",
+          "A post is the place for what is on this week: a Sunday lunch, a set menu for Christmas, a quiz night. Google archives posts after six months unless a date range is set. Google lets you add your own link to your Business Profile, so people can book a table from it; when you change the system you book with, check the link the same day.",
+        ],
+      },
+    ],
+    related: ["hair-salon", "barbershop"],
+  },
 };

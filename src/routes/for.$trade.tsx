@@ -1,7 +1,8 @@
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { SiteShell } from "@/components/kabsi/site-chrome";
-import { HubPage, IndustryPage } from "@/components/kabsi/d5-industry";
+import { HubPage, IndustryPage } from "@/components/kabsi/d8-industry";
 import { pageHead } from "@/lib/site";
+import { faqJsonLd } from "@/lib/faq";
 import { LEGACY_INDUSTRY_MOVES } from "@/lib/industry-redirects";
 
 // /for/<industry> or /for/<hub> (brief section 16, item 3). The old trade addresses move to the new ones.
@@ -12,7 +13,7 @@ export const Route = createFileRoute("/for/$trade")({
     const { MOVED, crumbsFor, hub, hubIndexed, industry } = await import("@/content/industries");
     const moved = MOVED[params.trade] ?? LEGACY_INDUSTRY_MOVES[params.trade];
     if (moved) throw redirect({ to: "/for/$trade", params: { trade: moved }, statusCode: 301 });
-    // crumbsFor gives Home, the hub and the page; pageHead adds Home itself.
+    // crumbsFor gives Businesses and the page; pageHead adds Home itself.
     const crumbs = (c: { name: string; to: string }[]) =>
       c.filter((x) => x.to !== "/").map((x) => ({ name: x.name, path: x.to }));
     const i = industry(params.trade);
@@ -31,13 +32,16 @@ export const Route = createFileRoute("/for/$trade")({
     if (!d) return {};
     return d.kind === "industry"
       ? pageHead({
-          title: `Kabsi: Your ${d.industry.name} on Google. Taken care of.`,
-          description: d.industry.lead,
+          // docs/SEO-PLAN.md: the four Design 8 trades carry their own title and description.
+          title:
+            d.industry.d8?.seo.title ?? `Kabsi: Your ${d.industry.name} on Google. Taken care of.`,
+          description: d.industry.d8?.seo.description ?? d.industry.lead,
           path: `/for/${d.industry.slug}`,
           image: "industry",
           crumbs: d.crumbs,
           // Only finished pages are indexed; the template pages wait for Content 1 (master plan 30.17).
           noindex: !d.industry.finished,
+          ...(d.industry.faqs ? { jsonLd: [faqJsonLd(d.industry.faqs)] } : {}),
         })
       : pageHead({
           title: `Kabsi for ${d.hub.name.toLowerCase()}`,

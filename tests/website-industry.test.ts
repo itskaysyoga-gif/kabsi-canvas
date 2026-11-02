@@ -102,7 +102,8 @@ describe("industry pages (Design 5, Web 2)", () => {
   it("every page has its searches, five tasks, its own example and photos with alt text", () => {
     const businesses = new Set<string>();
     for (const i of INDUSTRIES) {
-      expect(i.searches.length, i.slug).toBeGreaterThanOrEqual(6);
+      // Design 8 (Web 4c): the four trades written for their own page show five searches.
+      expect(i.searches.length, i.slug).toBeGreaterThanOrEqual(i.d8 ? 5 : 6);
       expect(i.tasks).toHaveLength(5);
       expect(i.keyword, i.slug).toBeTruthy();
       expect(hub(i.hub), i.slug).toBeDefined();
@@ -114,6 +115,20 @@ describe("industry pages (Design 5, Web 2)", () => {
 
   it("finished pages carry every section, and at least 600 words of their own", () => {
     for (const i of INDUSTRIES.filter((x) => x.finished)) {
+      expect(i.faqs?.length, i.slug).toBeGreaterThanOrEqual(4);
+      expect(pageText(i).length, i.slug).toBeGreaterThanOrEqual(600);
+      // Design 8 (Web 4c): the four trades carry their own hero message, two guide sections, the free check example
+      // (only what the check reads, K-82) and two related trades instead of Content 1's sections.
+      if (i.d8) {
+        expect(i.d8.guide.length, i.slug).toBe(2);
+        expect(i.d8.check.length, i.slug).toBe(4);
+        for (const c of i.d8.check)
+          expect(c.label, i.slug).toMatch(/^(Opening hours|Reviews|Photos|Website|Phone|Category)$/);
+        expect(i.d8.related.every((r) => industry(r)?.finished), i.slug).toBe(true);
+        expect(i.d8.seo.title.length, i.slug).toBeLessThan(90);
+        expect(i.d8.seo.description.length, i.slug).toBeLessThan(170);
+        continue;
+      }
       expect(i.categories, i.slug).toBeDefined();
       expect(i.reviewThemes?.length, i.slug).toBeGreaterThanOrEqual(4);
       expect(i.story?.lines.length, i.slug).toBeGreaterThanOrEqual(4);

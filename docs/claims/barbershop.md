@@ -71,3 +71,33 @@ volume for them is a DataForSEO task for Web 2.
 - "Men's hair salon" appears in Kabsi's own category suggestions (kabsi-canvas `supabase/functions/_shared/coach/categories.ts`). No
   Google page showed the name, so it is not on the page.
 - Any figure about how many men book or walk in. No source was read.
+
+## Design 8 (Web 4c, 2 Nov 2026)
+
+From 2 Nov 2026 the page shows Design 8's text (kabsi-design-studio `d7-trades.ts`, lane R's approval of 1 Nov 2026),
+checked against the facts. Rows 1 to 40 above are the Content 1 page, kept for the record; the sentences still on the
+page are listed again here. Example business: Fade and Co, Leeds (invented).
+
+| # | Sentence on the page | Type | Source | What the source says |
+| - | -------------------- | ---- | ------ | -------------------- |
+| D1 | Lead: "Walk-in times, bank holiday hours, posts about new cuts and a reply for every review. Kabsi gets each one ready, and you approve it." | K | facts "Posts", "Holiday hours", 2.1a | Posts and replies are prepared and wait for approval; Kabsi asks before public holidays. |
+| D2 | Hero message (Example): "Walk-in post ready for today: 'Walk-ins until 6 pm today. Two chairs free from 2 pm.'" | A, K | facts "Posts" | Invented; a post waits for Yes, Edit or Skip. |
+| D3 | "A quiet Tuesday afternoon or a late Thursday is a post with the times, and a button to your own website." | K, G | facts "Post checks" ("a button opens only your own website"); G7 | An update post's button "should direct customers to a website where they can complete the action". |
+| D4 | "Before Easter Monday or Boxing Day, Kabsi asks: normal hours, closed, or custom. Google keeps those as special hours and your normal week stays as it is." | K, G, T | facts "Holiday hours"; G4; H1 | Kabsi asks five days before; special hours keep regular hours unchanged; both days are bank holidays in England and Wales. |
+| D5 | "Google can show each service with a price and a short description. Kabsi's Profile Coach lists what your profile is missing, services included." | G, K | G6; facts 04 (Profile Coach) | "You can add info such as price and description."; services are listed in the checklist, filling them in on Google comes later. |
+| D6 | "A review that says 'ask for Jay' gets a reply that passes the thanks on. Kabsi only uses the names on your team list, so a barber who left is never named." | K | K1 7.4 | As rows 4 and 5. |
+| D7 | "Walk-in shops make people wait. The reply says sorry for the wait once, gives no excuse it cannot back up, and never argues." | A, K | K1 8.3 | As rows 18 and 19. |
+| D8 | Searches: barber near me, walk in barber, skin fade, beard trim, barber open now; "People look for a barber when they want a cut today..." | A | D1 for "barber" | Examples, no volume shown. The free check term stays "barber" (D1: 246,000 in the UK, 18,100 in the UAE). |
+| D9 | Free check example: Opening hours Shown, Reviews 64 rated 4.6, Website Missing, Photos 10 or more; "Replies, holiday hours and posts are what Kabsi checks once connected." | A, K | K-82; src/lib/profile-check.ts | Invented values; only what the check reads from Google's public data. |
+| D10 | "If Google says you are open until 7 and the door is locked at 6, that customer goes next door and remembers it." | A | none | Wording; no figure. |
+| D11 | "Google keeps your weekly hours apart from special hours, so a bank holiday or a staff training afternoon can differ without touching the normal week. It is a good idea, in Google's own words, to confirm your hours for official holidays." | G | G4 | Special hours "so that your regular hours don't change"; "It's a good idea to confirm your hours for official holidays." |
+| D12 | "In 2027 Good Friday is 26 March and Easter Monday is 29 March in England and Wales. Christmas Day and Boxing Day fall on a weekend, so the bank holidays move to Monday 27 and Tuesday 28 December." | T | H1 | 2027 table: 26 March, 29 March, 27 and 28 December (substitute days). |
+| D13 | "Kabsi asks you five days before each one what the shop will do, and sets the hours on Google once you say yes. If you also want to say when the last walk-in is taken, that goes in a post." | K, A | facts "Holiday hours"; G7 | As D4; the second sentence is advice. |
+| D14 | "Keep the price out of the service name itself: Google rejects a custom service name that has a price in it. A clear list (skin fade, beard line up, hot towel shave, the under 12 cut)..." | G, A | G6; P1 | As rows 7 and 8. |
+| D15 | "A reply never includes a phone number or a link, because Google can reject replies that do, and it never offers a free cut to change a review: Google does not allow anything in exchange for a review." | K, G | K1 8.3; G9; G10 | As rows 20 and 39. |
+| D16 | FAQ "Is Kabsi a booking system?" "No. Kabsi looks after your Google profile: hours, replies, posts and photos. It does not take bookings." | K | MASTERPLAN 30.15 section 4 (not planned: a booking system) | As row 37, without the booking link (Design 8 said "It tells you when your booking link is missing"; the booking button is [COMING]). |
+| D17 | FAQ "Will a reply know which barber did the cut?", "What does a reply to an unhappy customer say?", "Does Kabsi message my customers?" | K | K1 7.4, 8.3; facts FAQ "Does Kabsi message my customers?" | As rows 36 and 38; Kabsi talks only to the owner. |
+
+Changed from Design 8 to the facts: the job "New cuts on your price list" said "Kabsi prepares the line; you check the
+price" (Kabsi does not edit services yet: D5); the booking FAQ (D16); the free check example rows "Bank holiday hours",
+"Reviews with no reply" and "Last post on Google" (K-82: D9); the description's "new cuts with prices".
