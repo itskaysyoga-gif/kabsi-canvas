@@ -10,6 +10,8 @@ export const dentalClinic: Industry = {
   name: "dental clinic",
   plural: "Dental clinics",
   finished: true,
+  // No claim sheet in docs/claims yet: noindex and out of the sitemap until it has one (Fix 1, lane R 2 Nov 2026).
+  indexed: false,
   lead: "Kabsi keeps your clinic hours, emergency line and appointment link right on Google, and drafts careful replies that never confirm who is a patient. A review about treatment comes to you with no draft. You approve everything on WhatsApp.",
   keyword: "dentist",
   example: {

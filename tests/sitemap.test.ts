@@ -6,7 +6,7 @@ import { createRouter, rootRouteId } from "@tanstack/react-router";
 import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 import { routeTree } from "../src/routeTree.gen";
-import { HUBS, INDUSTRIES, hubIndexed } from "../src/content/industries";
+import { HUBS, INDUSTRIES, hubIndexed, industryIndexed } from "../src/content/industries";
 
 const xml = readFileSync("public/sitemap.xml", "utf8");
 const paths = [...xml.matchAll(/<loc>https:\/\/kabsi\.co([^<]*)<\/loc>/g)].map((m) => m[1] || "/");
@@ -33,8 +33,22 @@ describe("the sitemap", () => {
     expect(new Set(paths).size).toBe(paths.length);
   });
   it("lists the finished industry pages and their hubs, never a template page", () => {
-    for (const i of INDUSTRIES) expect(paths.includes(`/for/${i.slug}`), i.slug).toBe(i.finished);
+    for (const i of INDUSTRIES)
+      expect(paths.includes(`/for/${i.slug}`), i.slug).toBe(industryIndexed(i));
     for (const h of HUBS) expect(paths.includes(`/for/${h.id}`), h.id).toBe(hubIndexed(h.id));
+  });
+  it("leaves out the dental clinic page until it has a claim sheet (Fix 1), and counts 36 pages", () => {
+    const dental = INDUSTRIES.find((i) => i.slug === "dental-clinic")!;
+    let sheet = true;
+    try {
+      readFileSync("docs/claims/dental-clinic.md", "utf8");
+    } catch {
+      sheet = false;
+    }
+    // When the sheet lands, drop `indexed: false` from dental-clinic.ts and put the page back in the sitemap.
+    expect(industryIndexed(dental)).toBe(sheet);
+    expect(paths.includes("/for/dental-clinic")).toBe(sheet);
+    expect(paths).toHaveLength(sheet ? 37 : 36);
   });
   it("leaves out the pages that are noindex or one visitor's", () => {
     for (const p of paths)
