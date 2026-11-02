@@ -88,7 +88,10 @@ describe("session ended", () => {
 
   it("every signed-in call goes through it, and the screen blocks the app with one button", () => {
     const src = (p: string) => readFileSync(p, "utf8");
-    expect(src("src/lib/supabase.ts")).toMatch(/global: \{ fetch: sessionFetch \}/);
+    // Fix 1: the client's reads also stop after 3 seconds; every call still goes through sessionFetch.
+    expect(src("src/lib/supabase.ts")).toMatch(
+      /global: \{ fetch: withReadTimeout\(sessionFetch, supabaseUrl\) \}/,
+    );
     expect(src("src/lib/reviews.ts")).toMatch(
       /if \(!token\) throw endSession\(\);\n {2}return sessionFetch\(/,
     );
