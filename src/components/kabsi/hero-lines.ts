@@ -10,3 +10,15 @@ export const CHECK_HERO = {
   title: "Check your business on Google, free.",
   line: "See what customers see on your Google profile and what to do first. About 10 seconds, and no access needed.",
 } as const;
+
+/** Pricing's hero (approved, COPY 34 and 38). */
+export const PRICING_HERO = {
+  title: "Two plans. Free for 14 days.",
+  line: "Each plan does the Google work for one business, and you approve every change. Prices in US dollars, plus tax where it applies.",
+} as const;
+
+/** How it works' hero (Design 7 headline, Design 8 line). */
+export const HOW_HERO = {
+  title: "Kabsi prepares. You approve. Kabsi follows through.",
+  line: "One week at an Example salon in Bristol: the daily watch, a new review, holiday hours asked in time, and the Monday receipt.",
+} as const;

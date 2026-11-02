@@ -354,27 +354,3 @@ export const WEBSITE_LD = {
   inLanguage: "en",
   publisher: { "@id": `${SITE_URL}/#organization` },
 };
-export const PRODUCT_LD = {
-  "@context": "https://schema.org",
-  "@type": "Product",
-  name: "Kabsi",
-  description:
-    "Kabsi prepares a local business's review replies, posts and updates to its business details. The owner approves each one on WhatsApp before it goes live.",
-  brand: { "@type": "Brand", name: "Kabsi" },
-  // Card payments are not open yet, so the offers say pre-order, not in stock. The list prices (Price 1).
-  offers: (
-    [
-      ["Kabsi Essentials, monthly", PLAN_PRICES.essentialsMonthly],
-      ["Kabsi Essentials, yearly", PLAN_PRICES.essentialsYearly],
-      ["Kabsi Pro, monthly", PLAN_PRICES.proMonthly],
-      ["Kabsi Pro, yearly", PLAN_PRICES.proYearly],
-    ] as const
-  ).map(([name, price]) => ({
-    "@type": "Offer",
-    name,
-    price,
-    priceCurrency: "USD",
-    availability: "https://schema.org/PreOrder",
-    url: `${SITE_URL}/pricing`,
-  })),
-};

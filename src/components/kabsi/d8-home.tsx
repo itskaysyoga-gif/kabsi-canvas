@@ -10,13 +10,9 @@ import {
   Check,
   ClipboardList,
   ImageIcon,
-  KeyRound,
   MapPinned,
   MessageSquareText,
   ShieldCheck,
-  Store,
-  ThumbsUp,
-  UserRound,
   type LucideIcon,
 } from "lucide-react";
 import type { CSSProperties } from "react";
@@ -27,6 +23,7 @@ import { ExampleBadge, Faq, KabsiMark } from "./ui";
 import { Pill, ResultPreview } from "./result-preview";
 import { FOUNDER, Img, PHOTOS, type Photo } from "./photos";
 import { ScanBox } from "./scan-box";
+import { Closing, Control } from "./closing";
 import { SiteLink } from "./site-link";
 import { PLANS } from "./plans";
 import { useFoundingLeft } from "./founding-price";
@@ -35,7 +32,6 @@ import { FAQ, HOME_FAQ } from "./faq-data";
 import {
   BEATS,
   CHECK_SHOWS,
-  CONTROL,
   HERO_BUSINESS,
   HERO_STREAM,
   HOME_LINE,
@@ -330,40 +326,6 @@ export function Beats() {
 
 /* ---------- You stay in control ---------- */
 
-const CONTROL_ICONS: LucideIcon[] = [UserRound, KeyRound, ThumbsUp, Check, Store];
-
-export function Control() {
-  return (
-    <section aria-labelledby="control-h">
-      <div className="container-kb section-y grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-        <div>
-          <h2 id="control-h" className="text-h2">
-            You stay in control.
-          </h2>
-          <SiteLink to="/security" className={cn(linkCls, "mt-3 text-body")}>
-            See how to remove Kabsi on Security
-            <Arrow />
-          </SiteLink>
-        </div>
-        <ul className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
-          {CONTROL.map((c, i) => {
-            const Icon = CONTROL_ICONS[i] ?? Check;
-            return (
-              <li key={c.title} className="flex gap-3">
-                <Icon className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden />
-                <div>
-                  <h3 className="text-title">{c.title}</h3>
-                  <p className="mt-0.5 text-body text-text-2">{c.text}</p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
 /* ---------- Pick your business: only the finished trades, each with a photo (lane R decision 4) ---------- */
 
 export const TRADE_CARDS: { to: string; label: string; photo: Photo; focus: string }[] = [
@@ -533,28 +495,6 @@ function Questions() {
   );
 }
 
-export function Closing({ keyword, industry }: { keyword?: string; industry?: string }) {
-  return (
-    <section aria-labelledby="closing-title" className="border-t border-line bg-surface-1">
-      <div className="container-kb section-y">
-        <div className="mx-auto max-w-[44rem]">
-          <h2 id="closing-title" className="text-h2">
-            Start with a free check.
-          </h2>
-          <ScanBox
-            id="closing-scan"
-            className="mt-6"
-            keyword={keyword}
-            industry={industry}
-            note={SCAN_LINE}
-          />
-          <p className="mt-2 text-small text-text-2">{TRIAL_LINE}</p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export function D8Home() {
   return (
     <>
@@ -571,3 +511,6 @@ export function D8Home() {
     </>
   );
 }
+
+// Industry pages import the closing from here (Web 4); it lives in closing.tsx.
+export { Closing, Control };
