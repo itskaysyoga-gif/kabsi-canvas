@@ -3,8 +3,9 @@
 // keeping no value from Places. Every model call is a fixture or a stub: no network, no cost.
 import { assert, assertEquals, assertMatch } from "jsr:@std/assert@1";
 import fx from "../../../../../tests/fixtures/ai-accuracy/answers.json" with { type: "json" };
+import misses from "../../../../../tests/fixtures/ai-accuracy/qa2-misses.json" with { type: "json" };
 import {
-  ACCURACY_ACTION, ACCURACY_LABEL, type Claim, compare, differs, emptyRecord, EXTRACT_SCHEMA, findingTask, freeLine, type KnowledgeRow,
+  ACCURACY_ACTION, ACCURACY_LABEL, type Claim, compare, differs, emptyRecord, EXTRACT_SCHEMA, EXTRACT_SYSTEM, findingTask, freeLine, type KnowledgeRow,
   grounded, liveExtractor, mockExtractor, namesStrictly, parseClaims, parseTime, recordFromKnowledge, recordFromPlace, weekFromDescriptions,
 } from "./accuracy.ts";
 import { type AccuracyDeps, type AiDeps, checkAccuracy, freeAccuracy, freeScanCheck, type RunRow } from "./run.ts";
@@ -26,6 +27,60 @@ for (const c of fx.cases) {
     for (const d of r.differences) assert(c.answer.includes(d.sentence), "the sentence is the assistant's own words");
   });
 }
+
+// Fix 1 (QA 2 H4): the real model's two misses. Its QA 2 output raises no false alarm; the per-day shape finds the
+// wrong Sunday and the agreement on hours.
+for (const c of misses.cases) {
+  Deno.test(`QA 2 miss, as the model answered then: ${c.name}`, () => {
+    const r = compare(parseClaims({ claims: c.qa2 }), REC, c.answer, ME);
+    assertEquals(r.differences, [], "the safe way: no false alarm");
+    assertEquals(r.agree.sort(), [...c.qa2Expect.agree].sort());
+  });
+  Deno.test(`QA 2 miss, per day: ${c.name}`, () => {
+    const claims = parseClaims({ claims: c.perDay });
+    const r = compare(claims, REC, c.answer, ME);
+    assertEquals(r.differences.map((d) => ({ fact: d.fact, detail: d.detail, said: d.said, day: d.day })), c.expect.differences as never);
+    assertEquals(r.agree.sort(), [...c.expect.agree].sort());
+  });
+}
+
+Deno.test("per day, review of PR 326: overlapping days, swapped schedules and unnamed days raise no false alarm", () => {
+  const base = { fact: "hours", value: "x", about: "this", certain: true, closed_branch: false };
+  const ans = (sentence: string) => `Rose Lane Salon. ${sentence}`;
+  // The record: Monday to Saturday 9 to 6, Sunday closed.
+  const daily = "Open daily 9 AM to 6 PM, Sundays closed.";
+  const overlap = parseClaims({ claims: [{ ...base, sentence: daily, hours: [
+    { days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], opens: "9 AM", closes: "6 PM", closed: false },
+    { days: ["sun"], opens: null, closes: null, closed: true },
+  ] }] });
+  assertEquals(compare(overlap, REC, ans(daily), ME).differences, [], "Sunday is in two groups: left out of both");
+  const swapped = "Monday to Friday 9 AM to 6 PM, Saturday 10 AM to 4 PM.";
+  const sw = parseClaims({ claims: [{ ...base, sentence: swapped, hours: [
+    { days: ["mon", "tue", "wed", "thu", "fri"], opens: "10 AM", closes: "4 PM", closed: false },
+    { days: ["sat"], opens: "9 AM", closes: "6 PM", closed: false },
+  ] }] });
+  assertEquals(sw, [], "times paired with the wrong days are not believed");
+  const right = parseClaims({ claims: [{ ...base, sentence: swapped, hours: [
+    { days: ["mon", "tue", "wed", "thu", "fri"], opens: "9 AM", closes: "6 PM", closed: false },
+    { days: ["sat"], opens: "10 AM", closes: "4 PM", closed: false },
+  ] }] });
+  assertEquals(compare(right, REC, ans(swapped), ME).differences.map((d) => [d.detail, d.day]), [["closing_time", "sat"]]);
+  const many = parseClaims({ claims: Array.from({ length: 12 }, () => ({ ...base, sentence: swapped, hours: [
+    { days: ["mon"], opens: "9 AM", closes: "6 PM", closed: false }, { days: ["sat"], opens: "10 AM", closes: "4 PM", closed: false },
+  ] })) });
+  assert(many.length <= 12, "at most 12 claims");
+});
+
+Deno.test("per day: each group of days is its own claim, and the schema asks for it", () => {
+  const claims = parseClaims({ claims: misses.cases[0].perDay });
+  assertEquals(claims.filter((c) => c.fact === "hours").map((c) => [c.days, c.opens, c.closes]), [
+    [["mon", "tue", "wed", "thu", "fri", "sat"], "9:00 AM", "6:00 PM"],
+    [["sun"], "10:00 AM", "4:00 PM"],
+  ]);
+  const items = (EXTRACT_SCHEMA.properties.claims.items.properties as Record<string, unknown>);
+  assert("hours" in items);
+  assertMatch(EXTRACT_SYSTEM, /one entry per group of days/);
+});
 
 Deno.test("the record: owner-confirmed facts only, plus the hours on record; a price only from the owner's own $ signs", () => {
   assertEquals(REC.phone, "+1 212-555-0142");

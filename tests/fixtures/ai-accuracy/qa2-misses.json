@@ -1,0 +1,187 @@
+{
+ "_note": "Fix 1 (QA 2 H4): the two answers the real model got wrong in QA 2 (run 41412484576). 'qa2' holds the claims it returned then (a split schedule folded into one claim; times left out): Kabsi must raise no false alarm on them. 'perDay' holds the same answers in the per-day shape (hours, one entry per group of days) that the extraction now asks for: Kabsi must find the fixture's expectation. Fictional business, no paid call.",
+ "cases": [
+  {
+   "name": "hours in 12-hour time",
+   "answer": "**Rose Lane Salon**\n  - Hours: Monday to Saturday 9:00 AM to 6:00 PM, and Sunday 10:00 AM to 4:00 PM.\n  - Phone: +1 212-555-0142",
+   "qa2": [
+    {
+     "fact": "hours",
+     "sentence": "Hours: Monday to Saturday 9:00 AM to 6:00 PM, and Sunday 10:00 AM to 4:00 PM.",
+     "value": "Monday to Saturday 9:00 AM to 6:00 PM, Sunday 10:00 AM to 4:00 PM",
+     "about": "this",
+     "certain": true,
+     "closed_branch": false,
+     "days": [
+      "mon",
+      "tue",
+      "wed",
+      "thu",
+      "fri",
+      "sat",
+      "sun"
+     ],
+     "opens": "9:00 AM (Mon-Sat), 10:00 AM (Sun)",
+     "closes": "6:00 PM (Mon-Sat), 4:00 PM (Sun)",
+     "closed_day": false
+    },
+    {
+     "fact": "phone",
+     "sentence": "Phone: +1 212-555-0142",
+     "value": "+1 212-555-0142",
+     "about": "this",
+     "certain": true,
+     "closed_branch": false,
+     "days": [],
+     "closed_day": false
+    }
+   ],
+   "qa2Expect": {
+    "differences": [],
+    "agree": [
+     "phone"
+    ]
+   },
+   "expect": {
+    "differences": [
+     {
+      "fact": "hours",
+      "detail": "open_day",
+      "said": "open",
+      "day": "sun"
+     }
+    ],
+    "agree": [
+     "phone"
+    ]
+   },
+   "perDay": [
+    {
+     "fact": "hours",
+     "sentence": "Hours: Monday to Saturday 9:00 AM to 6:00 PM, and Sunday 10:00 AM to 4:00 PM.",
+     "value": "Monday to Saturday 9:00 AM to 6:00 PM, and Sunday 10:00 AM to 4:00 PM",
+     "about": "this",
+     "certain": true,
+     "closed_branch": false,
+     "hours": [
+      {
+       "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat"
+       ],
+       "opens": "9:00 AM",
+       "closes": "6:00 PM",
+       "closed": false
+      },
+      {
+       "days": [
+        "sun"
+       ],
+       "opens": "10:00 AM",
+       "closes": "4:00 PM",
+       "closed": false
+      }
+     ]
+    },
+    {
+     "fact": "phone",
+     "sentence": "Phone: +1 212-555-0142",
+     "value": "+1 212-555-0142",
+     "about": "this",
+     "certain": true,
+     "closed_branch": false
+    }
+   ]
+  },
+  {
+   "name": "two businesses with similar names",
+   "answer": "1. **Rose Lane Barbers** - open until 8 pm daily, call (212) 555-0111.\n2. **Rose Lane Salon** - opens at 9 am and closes at 6 pm.",
+   "qa2": [
+    {
+     "fact": "hours",
+     "sentence": "opens at 9 am and closes at 6 pm.",
+     "value": "9 am - 6 pm",
+     "about": "this",
+     "certain": true,
+     "closed_branch": false,
+     "days": [
+      "mon",
+      "tue",
+      "wed",
+      "thu",
+      "fri",
+      "sat",
+      "sun"
+     ],
+     "closed_day": false
+    },
+    {
+     "fact": "phone",
+     "sentence": "call (212) 555-0111.",
+     "value": "(212) 555-0111",
+     "about": "unsure",
+     "certain": true,
+     "closed_branch": false,
+     "days": [],
+     "closed_day": false
+    }
+   ],
+   "qa2Expect": {
+    "differences": [],
+    "agree": []
+   },
+   "expect": {
+    "differences": [],
+    "agree": [
+     "hours"
+    ]
+   },
+   "perDay": [
+    {
+     "fact": "hours",
+     "sentence": "open until 8 pm daily, call (212) 555-0111.",
+     "value": "until 8 pm daily",
+     "about": "other",
+     "certain": true,
+     "closed_branch": false,
+     "hours": [
+      {
+       "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+       ],
+       "opens": null,
+       "closes": "8 pm",
+       "closed": false
+      }
+     ]
+    },
+    {
+     "fact": "hours",
+     "sentence": "opens at 9 am and closes at 6 pm.",
+     "value": "9 am to 6 pm",
+     "about": "this",
+     "certain": true,
+     "closed_branch": false,
+     "hours": [
+      {
+       "days": [],
+       "opens": "9 am",
+       "closes": "6 pm",
+       "closed": false
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
