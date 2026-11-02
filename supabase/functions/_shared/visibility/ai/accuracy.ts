@@ -96,6 +96,22 @@ export const EXTRACT_SCHEMA = {
           opens: { anyOf: [{ type: "string" }, { type: "null" }] },
           closes: { anyOf: [{ type: "string" }, { type: "null" }] },
           closed_day: { type: "boolean" },
+          // Fix 1 (QA 2 H4): hours per group of days, so "Monday to Saturday 9 to 6, and Sunday 10 to 4" is compared
+          // day by day. Each entry has one opening and one closing time.
+          hours: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["days", "opens", "closes", "closed"],
+              properties: {
+                days: { type: "array", items: { type: "string", enum: [...DAYS] } },
+                opens: { anyOf: [{ type: "string" }, { type: "null" }] },
+                closes: { anyOf: [{ type: "string" }, { type: "null" }] },
+                closed: { type: "boolean" },
+              },
+            },
+          },
           service: { anyOf: [{ type: "string" }, { type: "null" }] },
           offered: { anyOf: [{ type: "boolean" }, { type: "null" }] },
           level: { anyOf: [{ type: "integer" }, { type: "null" }] },
@@ -109,7 +125,8 @@ export const EXTRACT_SYSTEM = [
   "You read one answer an AI assistant gave to a customer's question and list the facts it states about one business.",
   "Facts to list: opening hours, phone number, address, website, services or products (offered or not), price level.",
   "Copy each sentence exactly as written in the answer, word for word. Never rewrite, translate or join sentences.",
-  "Write each value as the answer wrote it. For hours give the days covered (mon to sun, empty when the answer does not say), the opening and closing times as written, and closed_day when it says the business is closed then.",
+  "Write each value as the answer wrote it.",
+  "For hours, fill hours with one entry per group of days that share the same times: \"Monday to Saturday 9:00 AM to 6:00 PM, and Sunday 10:00 AM to 4:00 PM\" is two entries, one for mon to sat and one for sun. Each entry has the days it covers (mon to sun, empty when the answer does not say which days), one opening time and one closing time exactly as written (\"9 am\", never two times or a day name in one value), and closed true when the answer says the business is closed on those days. \"Opens at 9 am and closes at 6 pm\" with no days is one entry with empty days, opens \"9 am\" and closes \"6 pm\".",
   "about is \"this\" only when the sentence is clearly about the business named in the request, not a business with a similar name, another branch or a nearby place. When in doubt, \"unsure\".",
   "certain is false when the answer hedges (may, might, around, usually, typically, check before you go) or is vague.",
   "closed_branch is true when the answer itself says the branch or address in the sentence is closed or has moved.",
@@ -137,6 +154,20 @@ export function parseClaims(raw: unknown): Claim[] {
     if (!c || typeof c !== "object") continue;
     if (!FACT_KEYS.includes(c.fact as FactKey) || typeof c.sentence !== "string" || typeof c.value !== "string") continue;
     if (!["this", "other", "unsure"].includes(c.about as string)) continue;
+    // Fix 1: hours per group of days become one claim per group (same sentence), compared day by day.
+    const groups = c.fact === "hours" && Array.isArray(c.hours) ? (c.hours as Record<string, unknown>[]).filter((h) => h && typeof h === "object").slice(0, 7) : [];
+    if (groups.length) {
+      for (const h of groups) {
+        out.push({
+          fact: "hours", sentence: c.sentence.slice(0, 400), value: c.value.slice(0, 200), about: c.about as Claim["about"],
+          certain: c.certain === true, closed_branch: c.closed_branch === true,
+          days: Array.isArray(h.days) ? (h.days as unknown[]).filter((d): d is string => typeof d === "string") : [],
+          opens: typeof h.opens === "string" ? h.opens : null, closes: typeof h.closes === "string" ? h.closes : null,
+          closed_day: h.closed === true, service: null, offered: null, level: null,
+        });
+      }
+      continue;
+    }
     out.push({
       fact: c.fact as FactKey, sentence: c.sentence.slice(0, 400), value: c.value.slice(0, 200), about: c.about as Claim["about"],
       certain: c.certain === true, closed_branch: c.closed_branch === true,

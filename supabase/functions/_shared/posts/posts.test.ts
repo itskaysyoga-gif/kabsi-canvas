@@ -45,6 +45,17 @@ Deno.test("no superlatives, no health, safety or results claims", () => {
   assertEquals(codes(post({ summary: "Our gluten free bread is 100% safe for everyone, baked fresh daily." })), ["claim"]);
 });
 
+Deno.test("Fix 1 (QA 2 H5): the business's own name never counts toward keyword stuffing", () => {
+  // QA 2's real draft for Iron Works Gym, Denver: "gym" three times, twice inside the name.
+  const gym = "Our gym in Denver is adding something new: a kettlebell class starts on November 10 at 6 pm at Iron Works Gym. Stop by Iron Works Gym and say hello.";
+  const c = ctx({ categoryLabel: "Gym", city: "Denver", category: "gym", allowedText: "Kettlebell class November 10 at 6 pm" });
+  assertEquals(codes(post({ summary: gym }), c).includes("stuffing"), true, "without the name the old count stops it");
+  assertEquals(codes(post({ summary: gym }), { ...c, businessName: "Iron Works Gym" }).includes("stuffing"), false);
+  // The category said three times outside the name is still stuffing.
+  const stuffed = "Iron Works Gym is the gym for you, a gym in Denver, the gym you need.";
+  assertEquals(codes(post({ summary: stuffed }), { ...c, businessName: "Iron Works Gym" }).includes("stuffing"), true);
+});
+
 Deno.test("no keyword stuffing: the category or city more than twice", () => {
   assertEquals(codes(post({ summary: "Brooklyn bakery bread for Brooklyn, the Brooklyn bakery you know." })).includes("stuffing"), true);
   assertEquals(codes(post({ summary: "A bakery in Brooklyn with sourdough every morning at 7." })).includes("stuffing"), false);
