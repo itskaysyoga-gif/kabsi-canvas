@@ -24,6 +24,14 @@ on:
         description: Run the reply and Nora evaluations
         type: boolean
         default: true
+      reply_languages:
+        description: "Fix 1: only the reviews in these languages, for example ar,fr,es,arabizi (empty: the whole cut)"
+        required: false
+        default: ""
+      nora_ids:
+        description: "Fix 1: only these Nora questions, for example en16,sc03 (empty: all 83)"
+        required: false
+        default: ""
       injection:
         description: Run the Sec 1 injection cases (at most 30 cases)
         type: boolean
@@ -54,14 +62,16 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           REPLY_BUDGET: ${{ inputs.reply_budget }}
-        run: bash scripts/eval/gate.sh --cut --judge --budget "$REPLY_BUDGET" --scores "$GITHUB_WORKSPACE/scripts/eval/scores.json"
+          REPLY_LANGUAGES: ${{ inputs.reply_languages }}
+        run: bash scripts/eval/gate.sh --cut --judge --budget "$REPLY_BUDGET" --scores "$GITHUB_WORKSPACE/scripts/eval/scores.json" ${REPLY_LANGUAGES:+--languages "$REPLY_LANGUAGES"}
         continue-on-error: true
       - name: Nora (80 questions, judged)
         if: inputs.evaluations
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           NORA_BUDGET: ${{ inputs.nora_budget }}
-        run: node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget "$NORA_BUDGET" --out nora-eval-result.json --scores scripts/eval/scores.json
+          NORA_IDS: ${{ inputs.nora_ids }}
+        run: node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget "$NORA_BUDGET" --out nora-eval-result.json --scores scripts/eval/scores.json ${NORA_IDS:+--ids "$NORA_IDS"}
         continue-on-error: true
       - name: Injection cases (Sec 1, real models)
         if: inputs.injection

@@ -74,6 +74,14 @@ export type CheckInput = {
   industry?: Industry | null;
 };
 
+/** "ar" when most of a text's letters are in Arabic script, else null. Used for the language and its check. */
+export function scriptLanguage(text: string | null | undefined): "ar" | null {
+  const t = String(text ?? "");
+  const arabic = t.match(/\p{Script=Arabic}/gu)?.length ?? 0;
+  const latin = t.match(/\p{Script=Latin}/gu)?.length ?? 0;
+  return arabic > 0 && arabic >= latin ? "ar" : null;
+}
+
 /** Every code check, in order. A failed check carries the sentence the owner sees. The sentences never quote the
  *  review or the draft: they are kept in reply_drafts.safety_notes, which outlives the review text (K-113.3). */
 export function replyChecks(i: CheckInput): Check[] {
@@ -116,6 +124,10 @@ export function replyChecks(i: CheckInput): Check[] {
   add("no_stock_phrases", stock.length === 0, `The draft uses stock wording ("${stock[0]}") that reads as automatic.`);
   const close = i.recentReplies.some((r) => similarity(reply, r) > 0.8);
   add("not_a_repeat", !close, "The draft is too close to a reply you already posted. Google can treat repeated replies as boilerplate.");
+  // Fix 1 (QA 2 H3): an Arabic review gets an Arabic reply, and a review in Latin letters never gets one in Arabic.
+  const reviewScript = scriptLanguage(i.reviewText), replyScript = scriptLanguage(reply);
+  const hasLetters = /\p{L}/u.test(i.reviewText);
+  add("reply_language", !hasLetters || reviewScript === replyScript, "The draft is not in the language of the review.");
   add("not_empty", reply.trim().length > 0 && reply.length <= 1200, "The draft is empty or too long.");
   return checks;
 }

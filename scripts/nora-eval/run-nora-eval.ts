@@ -53,7 +53,9 @@ const all = args.includes("--with-28")
   ? [...QUESTIONS, ...QUESTIONS_28, ...QUESTIONS_SCOPE1]
   : QUESTIONS;
 const n = Number(flag("--sample") ?? all.length);
-const only = n >= all.length ? all : sample(n);
+// Fix 1: --ids en16,en26 asks only those questions (a cheap check of a fix before the full run); the gate expects that many.
+const ids = flag("--ids")?.split(",").map((x) => x.trim()).filter(Boolean);
+const only = ids?.length ? all.filter((q) => ids.includes(q.id)) : n >= all.length ? all : sample(n);
 const judge =
   args.includes("--judge") && !stub ? makeJudge(process.env.ANTHROPIC_API_KEY!) : undefined;
 const spent = () => costMicros(noraModel, used) + (judge?.cost() ?? 0);
@@ -104,6 +106,8 @@ if (judge && flag("--scores")) {
     model: score.model,
     judge: JUDGE_MODEL,
     cases: score.questions,
+    // Fix 1: a run on some questions only names them, so it is never read as the full set.
+    ...(ids?.length ? { ids } : {}),
     judged: Object.keys(judged).length,
     ...sum,
     costUsd: cost.totalUsd,
