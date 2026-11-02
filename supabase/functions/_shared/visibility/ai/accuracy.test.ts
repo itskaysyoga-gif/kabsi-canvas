@@ -44,6 +44,33 @@ for (const c of misses.cases) {
   });
 }
 
+Deno.test("per day, review of PR 326: overlapping days, swapped schedules and unnamed days raise no false alarm", () => {
+  const base = { fact: "hours", value: "x", about: "this", certain: true, closed_branch: false };
+  const ans = (sentence: string) => `Rose Lane Salon. ${sentence}`;
+  // The record: Monday to Saturday 9 to 6, Sunday closed.
+  const daily = "Open daily 9 AM to 6 PM, Sundays closed.";
+  const overlap = parseClaims({ claims: [{ ...base, sentence: daily, hours: [
+    { days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], opens: "9 AM", closes: "6 PM", closed: false },
+    { days: ["sun"], opens: null, closes: null, closed: true },
+  ] }] });
+  assertEquals(compare(overlap, REC, ans(daily), ME).differences, [], "Sunday is in two groups: left out of both");
+  const swapped = "Monday to Friday 9 AM to 6 PM, Saturday 10 AM to 4 PM.";
+  const sw = parseClaims({ claims: [{ ...base, sentence: swapped, hours: [
+    { days: ["mon", "tue", "wed", "thu", "fri"], opens: "10 AM", closes: "4 PM", closed: false },
+    { days: ["sat"], opens: "9 AM", closes: "6 PM", closed: false },
+  ] }] });
+  assertEquals(sw, [], "times paired with the wrong days are not believed");
+  const right = parseClaims({ claims: [{ ...base, sentence: swapped, hours: [
+    { days: ["mon", "tue", "wed", "thu", "fri"], opens: "9 AM", closes: "6 PM", closed: false },
+    { days: ["sat"], opens: "10 AM", closes: "4 PM", closed: false },
+  ] }] });
+  assertEquals(compare(right, REC, ans(swapped), ME).differences.map((d) => [d.detail, d.day]), [["closing_time", "sat"]]);
+  const many = parseClaims({ claims: Array.from({ length: 12 }, () => ({ ...base, sentence: swapped, hours: [
+    { days: ["mon"], opens: "9 AM", closes: "6 PM", closed: false }, { days: ["sat"], opens: "10 AM", closes: "4 PM", closed: false },
+  ] })) });
+  assert(many.length <= 12, "at most 12 claims");
+});
+
 Deno.test("per day: each group of days is its own claim, and the schema asks for it", () => {
   const claims = parseClaims({ claims: misses.cases[0].perDay });
   assertEquals(claims.filter((c) => c.fact === "hours").map((c) => [c.days, c.opens, c.closes]), [

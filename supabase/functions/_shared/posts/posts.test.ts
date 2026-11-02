@@ -54,6 +54,11 @@ Deno.test("Fix 1 (QA 2 H5): the business's own name never counts toward keyword 
   // The category said three times outside the name is still stuffing.
   const stuffed = "Iron Works Gym is the gym for you, a gym in Denver, the gym you need.";
   assertEquals(codes(post({ summary: stuffed }), { ...c, businessName: "Iron Works Gym" }).includes("stuffing"), true);
+  // Review of PR 326: a name that is only the category or the city does not switch the check off, and a name said a
+  // third time counts again.
+  assertEquals(codes(post({ summary: "Gym news: the gym is open, come to the gym, the best gym." }), { ...c, businessName: "Gym" }).includes("stuffing"), true);
+  assertEquals(codes(post({ summary: "Denver Gym news for Denver: come to Denver Gym in Denver this week." }), { ...c, businessName: "Denver Gym" }).includes("stuffing"), true);
+  assertEquals(codes(post({ summary: "Iron Works Gym class. Iron Works Gym coaches. Iron Works Gym hello, a gym for all, gym time." }), { ...c, businessName: "Iron Works Gym" }).includes("stuffing"), true);
 });
 
 Deno.test("no keyword stuffing: the category or city more than twice", () => {

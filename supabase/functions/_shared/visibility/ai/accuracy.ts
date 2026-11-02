@@ -157,13 +157,13 @@ export function parseClaims(raw: unknown): Claim[] {
     // Fix 1: hours per group of days become one claim per group (same sentence), compared day by day.
     const groups = c.fact === "hours" && Array.isArray(c.hours) ? (c.hours as Record<string, unknown>[]).filter((h) => h && typeof h === "object").slice(0, 7) : [];
     if (groups.length) {
-      for (const h of groups) {
+      for (const h of safeGroups(groups, c.sentence)) {
         out.push({
           fact: "hours", sentence: c.sentence.slice(0, 400), value: c.value.slice(0, 200), about: c.about as Claim["about"],
           certain: c.certain === true, closed_branch: c.closed_branch === true,
           days: Array.isArray(h.days) ? (h.days as unknown[]).filter((d): d is string => typeof d === "string") : [],
-          opens: typeof h.opens === "string" ? h.opens : null, closes: typeof h.closes === "string" ? h.closes : null,
-          closed_day: h.closed === true, service: null, offered: null, level: null,
+          opens: h.opens, closes: h.closes,
+          closed_day: h.closed, service: null, offered: null, level: null,
         });
       }
       continue;
@@ -179,7 +179,53 @@ export function parseClaims(raw: unknown): Claim[] {
       level: Number.isInteger(c.level) && (c.level as number) >= 1 && (c.level as number) <= 4 ? (c.level as number) : null,
     });
   }
-  return out;
+  return out.slice(0, 12);
+}
+
+// Day names as an answer may write them (English, Spanish, French, German, Italian), for the per-day grounding.
+const DAY_WORDS: Record<Day, RegExp> = {
+  mon: /\b(mon(day)?|lunes|lundi|montag|luned[iì])\b/i,
+  tue: /\b(tue(s(day)?)?|martes|mardi|dienstag|marted[iì])\b/i,
+  wed: /\b(wed(nesday)?|mi[eé]rcoles|mercredi|mittwoch|mercoled[iì])\b/i,
+  thu: /\b(thu(rs(day)?)?|jueves|jeudi|donnerstag|gioved[iì])\b/i,
+  fri: /\b(fri(day)?|viernes|vendredi|freitag|venerd[iì])\b/i,
+  sat: /\b(sat(urday)?|s[aá]bado|samedi|samstag|sabato)\b/i,
+  sun: /\b(sun(day)?|domingo|dimanche|sonntag|domenica)\b/i,
+};
+const EVERY_DAY = /\b(daily|every day|7 days|seven days|todos los d[ií]as|tous les jours|t[aä]glich|tutti i giorni)\b/i;
+
+type Group = { days: string[]; opens: string | null; closes: string | null; closed: boolean };
+
+/**
+ * Fix 1 (review of PR 326): per-day groups are kept only when they are safe to compare. A day named by two groups
+ * ("daily 9 to 6, Sundays 10 to 4") is left out of both, so an overlap never makes a false alarm. With two or more
+ * groups in one sentence, a group is kept only when one part of the sentence (split at commas, semicolons and "and")
+ * holds its times and names one of its days, so a model that swaps two schedules is not believed.
+ */
+function safeGroups(raw: Record<string, unknown>[], sentence: string): Group[] {
+  const groups: Group[] = raw.map((h) => ({
+    days: Array.isArray(h.days) ? [...new Set((h.days as unknown[]).filter((d): d is string => typeof d === "string"))] : [],
+    opens: typeof h.opens === "string" ? h.opens : null,
+    closes: typeof h.closes === "string" ? h.closes : null,
+    closed: h.closed === true,
+  }));
+  const seen = new Map<string, number>();
+  for (const g of groups) for (const d of g.days) seen.set(d, (seen.get(d) ?? 0) + 1);
+  const twice = new Set([...seen].filter(([, n]) => n > 1).map(([d]) => d));
+  const out = groups
+    .map((g) => ({ ...g, dropped: g.days.some((d) => twice.has(d)), days: g.days.filter((d) => !twice.has(d)) }))
+    .filter((g) => !g.dropped || g.days.length > 0)
+    .map(({ dropped: _d, ...g }) => g);
+  if (raw.length < 2) return out;
+  const parts = sentence.split(/[,;]|\s+(?:and|y|et|und|e)\s+/i);
+  return out.filter((g) => {
+    if (!g.days.length) return false;
+    return parts.some((p) => {
+      const timesHere = (!g.opens || inSentence(g.opens, p)) && (!g.closes || inSentence(g.closes, p));
+      const daysHere = g.days.some((d) => DAY_WORDS[d as Day]?.test(p)) || (g.days.length >= 5 && EVERY_DAY.test(p));
+      return timesHere && daysHere;
+    });
+  });
 }
 
 /**

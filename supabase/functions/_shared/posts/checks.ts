@@ -96,14 +96,22 @@ function ownLink(url: string, website: string | null): boolean {
   return host === own || host.endsWith(`.${own}`);
 }
 
-/** The text with every mention of the business's name taken out, word by word as count() reads it. */
-const withoutName = (text: string, name: string) => {
+/**
+ * The text with the business's name taken out at most twice, word by word as count() reads it (review of PR 326):
+ * only a name with a word of its own (not just the category or the city, so "Gym" or "Denver Gym" keeps counting
+ * that word), and a name said a third time still counts.
+ */
+const withoutName = (text: string, name: string, phrases: (string | null)[]) => {
   const p = words(name), w = words(text);
-  if (!p.length) return text;
+  const plain = new Set(phrases.flatMap((x) => (x ? words(x) : [])));
+  if (!p.length || p.every((x) => plain.has(x))) return text;
   const kept: string[] = [];
+  let removed = 0;
   for (let i = 0; i < w.length; ) {
-    if (i + p.length <= w.length && p.every((x, j) => w[i + j] === x)) i += p.length;
-    else kept.push(w[i++]);
+    if (removed < 2 && i + p.length <= w.length && p.every((x, j) => w[i + j] === x)) {
+      i += p.length;
+      removed++;
+    } else kept.push(w[i++]);
   }
   return kept.join(" ");
 };
@@ -142,7 +150,7 @@ export function checkPost(f: PostFields, c: CheckContext): Issue[] {
   if (CLAIM.test(all)) add("claim", "No health, safety or results promises.");
 
   // Keyword stuffing: the category or the city more than twice, not counting the business's own name (Fix 1).
-  const own = c.businessName?.trim() ? withoutName(all, c.businessName) : all;
+  const own = c.businessName?.trim() ? withoutName(all, c.businessName, [c.categoryLabel, c.city]) : all;
   for (const phrase of [c.categoryLabel, c.city]) {
     if (phrase && count(own, phrase) > 2) add("stuffing", `"${phrase}" appears more than twice. Say it once, the way you would to a customer.`);
   }
