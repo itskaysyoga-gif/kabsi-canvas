@@ -10,14 +10,22 @@ import { LEGACY_INDUSTRY_MOVES } from "@/lib/industry-redirects";
 // here, on demand, and the head reads what the loader returns (the crumbs and the index flag), never the content itself.
 export const Route = createFileRoute("/for/$trade")({
   loader: async ({ params }) => {
-    const { MOVED, crumbsFor, hub, hubIndexed, industry } = await import("@/content/industries");
+    const { MOVED, crumbsFor, hub, hubIndexed, industry, industryIndexed } = await import(
+      "@/content/industries"
+    );
     const moved = MOVED[params.trade] ?? LEGACY_INDUSTRY_MOVES[params.trade];
     if (moved) throw redirect({ to: "/for/$trade", params: { trade: moved }, statusCode: 301 });
     // crumbsFor gives Businesses and the page; pageHead adds Home itself.
     const crumbs = (c: { name: string; to: string }[]) =>
       c.filter((x) => x.to !== "/").map((x) => ({ name: x.name, path: x.to }));
     const i = industry(params.trade);
-    if (i) return { kind: "industry" as const, industry: i, crumbs: crumbs(crumbsFor(i)) };
+    if (i)
+      return {
+        kind: "industry" as const,
+        industry: i,
+        crumbs: crumbs(crumbsFor(i)),
+        indexed: industryIndexed(i),
+      };
     const h = hub(params.trade);
     if (h)
       return {
@@ -39,8 +47,9 @@ export const Route = createFileRoute("/for/$trade")({
           path: `/for/${d.industry.slug}`,
           image: "industry",
           crumbs: d.crumbs,
-          // Only finished pages are indexed; the template pages wait for Content 1 (master plan 30.17).
-          noindex: !d.industry.finished,
+          // Only finished pages with a claim sheet are indexed; the template pages wait for Content 1 (master plan
+          // 30.17), and the dental clinic page for its claim sheet (Fix 1).
+          noindex: !d.indexed,
           ...(d.industry.faqs ? { jsonLd: [faqJsonLd(d.industry.faqs)] } : {}),
         })
       : pageHead({

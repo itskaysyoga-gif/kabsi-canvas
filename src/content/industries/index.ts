@@ -101,8 +101,10 @@ export function crumbsFor(i?: Industry, h?: Hub) {
   return c;
 }
 export const industriesIn = (id: HubId) => INDUSTRIES.filter((i) => i.hub === id);
-/** A hub is indexed when it holds at least one finished page. */
-export const hubIndexed = (id: HubId) => industriesIn(id).some((i) => i.finished);
+/** An industry page is in search when it is finished and has its claim sheet (`indexed` not false). */
+export const industryIndexed = (i: Industry) => i.finished && i.indexed !== false;
+/** A hub is indexed when it holds at least one indexed page. */
+export const hubIndexed = (id: HubId) => industriesIn(id).some(industryIndexed);
 
 /** Old addresses, kept working (brief section 16, item 3). */
 export const MOVED: Record<string, string> = {
