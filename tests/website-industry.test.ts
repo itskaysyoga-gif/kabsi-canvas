@@ -123,8 +123,13 @@ describe("industry pages (Design 5, Web 2)", () => {
         expect(i.d8.guide.length, i.slug).toBe(2);
         expect(i.d8.check.length, i.slug).toBe(4);
         for (const c of i.d8.check)
-          expect(c.label, i.slug).toMatch(/^(Opening hours|Reviews|Photos|Website|Phone|Category)$/);
-        expect(i.d8.related.every((r) => industry(r)?.finished), i.slug).toBe(true);
+          expect(c.label, i.slug).toMatch(
+            /^(Opening hours|Reviews|Photos|Website|Phone|Category)$/,
+          );
+        expect(
+          i.d8.related.every((r) => industry(r)?.finished),
+          i.slug,
+        ).toBe(true);
         expect(i.d8.seo.title.length, i.slug).toBeLessThan(90);
         expect(i.d8.seo.description.length, i.slug).toBeLessThan(170);
         continue;
