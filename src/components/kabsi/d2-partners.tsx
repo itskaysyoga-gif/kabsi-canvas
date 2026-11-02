@@ -2,7 +2,7 @@
 import { ArrowRight, Check, Gift, MessageCircle, QrCode as QrIcon, Video } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { WHATSAPP_ON, whatsappHref } from "@/lib/site";
-import { Turnstile } from "@/components/turnstile";
+import { useLazyTurnstile } from "@/components/turnstile";
 import { ApiError, applyPartner, usePartnerPlaces, type PartnerKind } from "@/lib/public-api";
 import { cn } from "@/lib/utils";
 import { PLANS } from "./plans";
@@ -327,8 +327,8 @@ function ApplyForm() {
   const [errors, setErrors] = useState<
     Partial<Record<"name" | "email" | "kind" | "terms", string>>
   >({});
-  const [token, setToken] = useState("");
-  const [round, setRound] = useState(0);
+  // The bot check loads on the form's first touch, not at page start (Fix 1); Apply waits for its token.
+  const check = useLazyTurnstile();
   const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
   const [failure, setFailure] = useState<string | null>(null);
   const submit = async (e: FormEvent) => {
@@ -343,9 +343,11 @@ function ApplyForm() {
     setFailure(null);
     if (Object.keys(err).length) return;
     setState("sending");
-    const t = token;
-    setToken("");
-    setRound((n) => n + 1);
+    const t = await check.take();
+    if (!t) {
+      setState("idle");
+      return;
+    }
     try {
       await applyPartner({
         name: name.trim(),
@@ -372,7 +374,7 @@ function ApplyForm() {
       </Banner>
     );
   return (
-    <form onSubmit={(e) => void submit(e)} noValidate className="space-y-5">
+    <form ref={check.area} onSubmit={(e) => void submit(e)} noValidate className="space-y-5">
       <Field
         label="Your name"
         autoComplete="name"
@@ -433,7 +435,7 @@ function ApplyForm() {
           <p className="mt-1 ms-8 text-small font-semibold text-bad">{errors.terms}</p>
         )}
       </div>
-      <Turnstile key={round} onToken={setToken} />
+      {check.widget}
       {failure && <Banner tone="bad" title={failure} />}
       <Button type="submit" variant="secondary" loading={state === "sending"} full>
         Apply by email

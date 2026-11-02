@@ -22,7 +22,8 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Can Kabsi promise where I come up on Google Maps?",
-    a: "No one can promise that. Kabsi shows where you show up, what changed, and what you can do next.",
+    // Fix 1: the nearby check is not open yet, so "where you show up" is said as at launch.
+    a: "No one can promise that. Kabsi shows what changed on your profile and what you can do next. Where you come up nearby opens at launch.",
   },
   { q: "Can I edit replies?", a: "Yes. Tap Edit on WhatsApp or on the Kabsi website." },
   {

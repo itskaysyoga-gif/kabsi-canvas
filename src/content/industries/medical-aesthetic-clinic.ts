@@ -115,7 +115,7 @@ export const medicalAestheticClinic: Industry = {
     },
     {
       title: "The waiting area, tidy and bright",
-      text: "Where a first visit starts. Google asks for photos in focus and well lit, and Kabsi flags any photo where a face is the main subject.",
+      text: "Where a first visit starts. Google asks for photos in focus and well lit, and Kabsi flags one that is dark, blurry or too small. It does not check faces, so keep patients out of it.",
     },
   ],
   holidays: [

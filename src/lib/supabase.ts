@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase-config";
 import { SUPABASE_READY_EVENT } from "@/lib/stored-session";
 import { makeSessionFetch } from "@/lib/session-ended";
+import { withReadTimeout } from "@/lib/read-timeout";
 
 // The Supabase client. Importing this file loads supabase-js, so a public page imports `@/lib/supabase-config` for the
 // URL and the anon headers and loads this file only when it needs a session (see auth-provider.tsx).
@@ -10,8 +11,11 @@ export { anonHeaders, anonJwt, supabaseUrl } from "@/lib/supabase-config";
 // Every call made as a signed-in person goes through sessionFetch: a session Kabsi no longer accepts ends here, with
 // "Your session ended. Sign in again." on screen (session-ended.ts).
 export const sessionFetch = makeSessionFetch((...a) => fetch(...a), supabasePublishableKey);
+// A database read with no answer stops after 3 seconds, and supabase-js does not retry reads itself: the screens' one
+// retry is in query-defaults.ts, so an error state shows within 5 seconds (Fix 1, QA 2 L9).
 export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
-  global: { fetch: sessionFetch },
+  global: { fetch: withReadTimeout(sessionFetch, supabaseUrl) },
+  db: { retry: false },
 });
 
 // Tell the auth provider the client exists (it may have been loaded by the sign-up sheet, not by the provider).

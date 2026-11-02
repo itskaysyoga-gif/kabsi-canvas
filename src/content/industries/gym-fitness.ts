@@ -107,7 +107,7 @@ export const gymFitness: Industry = {
   photoTips: [
     {
       title: "The floor and the racks, with no member in the frame",
-      text: "Wide, level and well lit. Kabsi flags a photo where a member's face is the main subject, so ask before anyone is shown.",
+      text: "Wide, level and well lit. Kabsi checks light, focus and size, not faces, so ask before anyone is shown.",
     },
     {
       title: "The changing rooms and showers, clean and empty",

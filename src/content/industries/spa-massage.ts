@@ -111,7 +111,7 @@ export const spaMassage: Industry = {
   photoTips: [
     {
       title: "The treatment room, empty and lit",
-      text: "Table made up, towels folded, lights low but enough for the camera. Never a client on the table: Kabsi flags a photo where a face is the main subject.",
+      text: "Table made up, towels folded, lights low but enough for the camera. Never a client on the table: Kabsi checks light, focus and size, not faces.",
     },
     {
       title: "A short walk through",
