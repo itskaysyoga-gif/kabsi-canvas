@@ -64,7 +64,6 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 - 2 Nov 2026, Web 4c: FAQ, About, Security, Founding 25 and Partners (PR 320), the Businesses hub and the industry pages with claim sheets for hair salon and restaurant (PR 321) on Design 8. The Design 7 and 8 port is complete. Detail: `docs/progress/archive/2026-11-02-web4c.md`.
 - 2 Nov 2026, Web 4b: the free check's states, result and /scan/CODE (PR 317), Pricing and How it works (PR 318) on Design 8; Pricing's live LCP back to 2.4 s. Parts 3 and 4 are Web 4c's. Detail: `docs/progress/archive/2026-11-02-web4b.md`.
-- 1 Nov 2026, Web 4 (PRs 313 to 315): the Design 8 shell, Home, the free check's start page and the result's attribution. The other pages are Web 4b's (list in the archive). Detail: `docs/progress/archive/2026-11-01-web4.md`.
 
 
 ## How a session updates this page
