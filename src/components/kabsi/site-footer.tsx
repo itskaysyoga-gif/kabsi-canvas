@@ -47,9 +47,9 @@ const GROUPS: { title: string; links: { label: string; to: string }[] }[] = [
 ];
 
 const footLink =
-  "inline-flex min-h-11 items-center text-small text-text-2 underline-offset-4 transition-colors duration-150 hover:text-text-1 hover:underline";
+  "inline-flex min-h-11 min-w-11 items-center text-small text-text-2 underline-offset-4 transition-colors duration-150 hover:text-text-1 hover:underline";
 const quietLink =
-  "inline-flex min-h-11 items-center text-label text-text-2 underline underline-offset-4 hover:text-text-1";
+  "inline-flex min-h-11 min-w-11 items-center text-label text-text-2 underline underline-offset-4 hover:text-text-1";
 
 export function SiteFooter() {
   return (
