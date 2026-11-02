@@ -27,7 +27,9 @@ mkdirSync(join(OUT, "shots"), { recursive: true });
 
 // The pages: the sitemap, the pages that are public but not indexed, and the 404.
 const sitemap = readFileSync(new URL("../../public/sitemap.xml", import.meta.url), "utf8");
-const fromSitemap = [...sitemap.matchAll(/<loc>https:\/\/kabsi\.co([^<]*)<\/loc>/g)].map((m) => m[1] || "/");
+const fromSitemap = [...sitemap.matchAll(/<loc>https:\/\/kabsi\.co([^<]*)<\/loc>/g)].map(
+  (m) => m[1] || "/",
+);
 const extra = [
   "/manager-steps",
   "/google-profile-check",
@@ -65,7 +67,11 @@ const SNAPSHOT = {
 const PLACE = (i) => ({
   place_id: `ChIJqa2place${i}AAAA`,
   name: ["Rose Lane Salon", "Rose Lane Studio", "Rose & Lane Hair"][i],
-  address: ["12 Harbour Lane, Example Town, NY 10001, USA", "4 Main Street, Example Town, NY 10001, USA", "90 Oak Avenue, Example Town, NY 10001, USA"][i],
+  address: [
+    "12 Harbour Lane, Example Town, NY 10001, USA",
+    "4 Main Street, Example Town, NY 10001, USA",
+    "90 Oak Avenue, Example Town, NY 10001, USA",
+  ][i],
   category: "Hair salon",
 });
 const STATES = [
@@ -94,10 +100,19 @@ async function stubScan(page, s) {
   await page.route("**/functions/v1/profile-snapshot", async (route) => {
     const body = route.request().postDataJSON() ?? {};
     const json = (o, status = 200) =>
-      route.fulfill({ status, contentType: "application/json", headers: { "access-control-allow-origin": "*" }, body: JSON.stringify(o) });
+      route.fulfill({
+        status,
+        contentType: "application/json",
+        headers: { "access-control-allow-origin": "*" },
+        body: JSON.stringify(o),
+      });
     if (body.action === "search") {
       if (s.search === "hang") return; // never answered: the searching state stays
-      if (s.search === "error") return json({ error: "unavailable", message: "The check is busy. Please try again in a minute." }, 503);
+      if (s.search === "error")
+        return json(
+          { error: "unavailable", message: "The check is busy. Please try again in a minute." },
+          503,
+        );
       return json({ places: s.search });
     }
     if (body.action === "check") {
@@ -108,7 +123,12 @@ async function stubScan(page, s) {
     return json({ error: "bad", message: "no" }, 400);
   });
   await page.route("**/functions/v1/visibility/**", (route) =>
-    route.fulfill({ status: 503, contentType: "application/json", headers: { "access-control-allow-origin": "*" }, body: "{}" }),
+    route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
+      body: "{}",
+    }),
   );
 }
 
@@ -127,14 +147,20 @@ async function visit(browser, item, width) {
   page.on("pageerror", (e) => errors.push(String(e.message).slice(0, 160)));
   const rec = { id: item.id, path: item.path, width, browser: BROWSER };
   try {
-    if (GEO) await page.route("**/api/geo", (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify({ country: GEO }) }));
+    if (GEO)
+      await page.route("**/api/geo", (route) =>
+        route.fulfill({ contentType: "application/json", body: JSON.stringify({ country: GEO }) }),
+      );
     if (item.search !== undefined) await stubScan(page, item);
     const res = await page.goto(BASE + item.path, { waitUntil: "load", timeout: 45000 });
     rec.status = res?.status() ?? null;
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(item.search !== undefined ? 1500 : 700);
     if (item.pick) {
-      await page.getByRole("button", { name: "This is my business" }).first().click({ timeout: 10000 });
+      await page
+        .getByRole("button", { name: "This is my business" })
+        .first()
+        .click({ timeout: 10000 });
       await page.waitForTimeout(item.check === "ok" ? 2500 : 1200);
     }
     const base = `${item.id}-${width}`;
@@ -143,11 +169,18 @@ async function visit(browser, item, width) {
     rec.coveredFirst = await covered(page);
     const m = await measure(page, width);
     // Then the whole page, after the cookie choice (the bar would otherwise sit over the footer of every shot).
-    const btn = page.getByRole("button", { name: /^(Only necessary|Necessary only|Reject|Decline|No thanks|Accept)/i }).first();
+    const btn = page
+      .getByRole("button", {
+        name: /^(Only necessary|Necessary only|Reject|Decline|No thanks|Accept)/i,
+      })
+      .first();
     rec.cookieBar = await btn.isVisible().catch(() => false);
     if (rec.cookieBar) await btn.click().catch(() => {});
     await page.evaluate(async () => {
-      for (let y = 0; y < document.documentElement.scrollHeight; y += 600) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 40)); }
+      for (let y = 0; y < document.documentElement.scrollHeight; y += 600) {
+        window.scrollTo(0, y);
+        await new Promise((r) => setTimeout(r, 40));
+      }
     });
     await page.waitForTimeout(400);
     rec.coveredBottom = await covered(page);
@@ -155,13 +188,45 @@ async function visit(browser, item, width) {
     await page.waitForTimeout(300);
     const m2 = await measure(page, width);
     rec.height = await page.evaluate(() => document.documentElement.scrollHeight);
-    if (!FULL.length || FULL.includes(width)) await page.screenshot({ path: join(OUT, "shots", `${base}-full.png`), fullPage: true }).catch((e) => (rec.shotError = String(e).slice(0, 120)));
-    Object.assign(rec, { sideways: m.sideways || m2.sideways, scrollWidth: Math.max(m.scrollWidth, m2.scrollWidth), wide: m2.wide.length ? m2.wide : m.wide, images: m2.images, small: m2.small, fixed: m.fixed });
+    if (!FULL.length || FULL.includes(width))
+      await page
+        .screenshot({ path: join(OUT, "shots", `${base}-full.png`), fullPage: true })
+        .catch((e) => (rec.shotError = String(e).slice(0, 120)));
+    Object.assign(rec, {
+      sideways: m.sideways || m2.sideways,
+      scrollWidth: Math.max(m.scrollWidth, m2.scrollWidth),
+      wide: m2.wide.length ? m2.wide : m.wide,
+      images: m2.images,
+      small: m2.small,
+      fixed: m.fixed,
+    });
     if (width === 390 || width === 1440) {
-      Object.assign(rec, { title: m.title, description: m.description, canonical: m.canonical, robots: m.robots, h1: m.h1, h1All: m.h1All, jsonld: m.jsonld, links: m.links });
+      Object.assign(rec, {
+        title: m.title,
+        description: m.description,
+        canonical: m.canonical,
+        robots: m.robots,
+        h1: m.h1,
+        h1All: m.h1All,
+        jsonld: m.jsonld,
+        links: m.links,
+      });
       rec.words = words(m2.text);
-      const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze().catch((e) => ({ violations: [{ id: "axe-error", impact: "n/a", help: String(e).slice(0, 100), nodes: [] }] }));
-      rec.axe = axe.violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help, n: v.nodes.length, first: v.nodes[0]?.target?.join(" ") }));
+      const axe = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+        .analyze()
+        .catch((e) => ({
+          violations: [
+            { id: "axe-error", impact: "n/a", help: String(e).slice(0, 100), nodes: [] },
+          ],
+        }));
+      rec.axe = axe.violations.map((v) => ({
+        id: v.id,
+        impact: v.impact,
+        help: v.help,
+        n: v.nodes.length,
+        first: v.nodes[0]?.target?.join(" "),
+      }));
     }
   } catch (e) {
     rec.error = String(e.message ?? e).slice(0, 200);
@@ -189,4 +254,6 @@ await Promise.all(
 await browser.close();
 results.sort((a, b) => a.id.localeCompare(b.id) || a.width - b.width);
 writeFileSync(join(OUT, "findings.json"), JSON.stringify(results, null, 1));
-console.log(`\n${results.length} visits, ${results.filter((r) => r.error).length} errors, ${results.filter((r) => r.sideways).length} sideways`);
+console.log(
+  `\n${results.length} visits, ${results.filter((r) => r.error).length} errors, ${results.filter((r) => r.sideways).length} sideways`,
+);
