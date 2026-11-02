@@ -29,7 +29,7 @@ Studio, Dubai (invented, labelled Example). Photos: one of its own (`gym-trainin
 | 19 | Story: one message becomes two posts; "Sent to Google. I check that both posts show on your profile, then tell you." | K | MASTERPLAN 30.15 section 3.1 and 3.3 | The owner's message becomes drafts to approve; tasks close after a check on Google. |
 | 20 | Story: HIIT with Karim, 6.30 pm, 15 November | A | none | Invented example, labelled Example. |
 | 21 | Post ideas (four) | A | none | Ideas. |
-| 22 | Photo tip: "Kabsi flags a photo where a member's face is the main subject." | K | K1 7.4 | "photos where a face is the main subject are flagged." |
+| 22 | Photo tip: "Kabsi checks light, focus and size, not faces, so ask before anyone is shown." (Fix 1, 2 Nov 2026) | K | `knowledge/facts/13-faq.md` "What photos can I post?" | "flags four things: a photo that is dark, blurry, smaller than Google's 720 by 720 pixels, or looks like one you already added. It does not look at what is in the photo yet: it does not check for faces" |
 | 23 | Photo tips "The changing rooms and showers, clean and empty" and "Reception and the way up" | A | none | Advice. "A gym on a first floor or inside a tower is hard to find" is advice, not a count. |
 | 24 | Holiday: "The UAE cuts private sector working hours by two hours a day for the month" | T | https://u.ae/en/information-and-services/jobs/Sector-of-employment/employment-in-the-private-sector/working-hours (H3) | "During the holy month of Ramadan, working hours are reduced by 2 hours, every day." |
 | 25 | Holiday: "which changes coach rotas" | A | none | A consequence of row 24, not a measurement. |

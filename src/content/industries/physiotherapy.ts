@@ -107,7 +107,7 @@ export const physiotherapy: Industry = {
   photoTips: [
     {
       title: "The treatment room and the exercise area",
-      text: "Couches made up, equipment tidy, no patient in the frame. Kabsi flags any photo where a face is the main subject.",
+      text: "Couches made up, equipment tidy, no patient in the frame. Kabsi checks light, focus and size, not faces, so keep patients out of it.",
     },
     {
       title: "The physios in clinic clothes",
