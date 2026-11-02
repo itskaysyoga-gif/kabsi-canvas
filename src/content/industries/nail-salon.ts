@@ -1,157 +1,111 @@
 import { PHOTOS } from "@/components/kabsi/photos";
 import type { Industry } from "./types";
 
-// Content 1: finished from docs/claims/nail-salon.md, approved by lane R on 27 Oct 2026 (brief section 18). Polish Room is invented
-// (Example). Every fact on this page has a row in the claim sheet; advice and wording are marked there.
+// Design 8 (Web 4c, lane R's approval of 1 Nov 2026): the nail salon page written for its own trade. Every Google
+// sentence has its row in docs/claims/nail-salon.md (section "Design 8"); the Kabsi sentences follow
+// knowledge/kabsi-facts.md. Polish Room, Brighton, is invented (Example).
 export const nailSalon: Industry = {
   slug: "nail-salon",
   hub: "beauty-and-wellness",
   name: "nail salon",
-  plural: "Nail and beauty salons",
+  plural: "Nail salons",
   finished: true,
-  lead: "Kabsi keeps your set prices and service menu right on Google, replies to reviews that name the technician, and turns your best nail photos into posts. You approve each one on WhatsApp.",
+  lead: "Seasonal designs as posts, photos of your work checked, holiday hours asked in time and a reply for every review. Kabsi gets each one ready, and you approve it.",
   keyword: "nail salon",
   example: {
     business: "Polish Room",
-    city: "Dubai",
+    city: "Brighton",
     kind: "salon",
-    rival: "Velvet Nails",
-    rival2: "Gloss Beauty Lounge",
-    near: ["Near the mall entrance", "By the community park"],
+    rival: "Nail Lounge",
+    rival2: "The Nail Studio",
+    near: ["Near the station", "By the seafront"],
   },
   photos: [PHOTOS.nailTechnician, PHOTOS.nailDesk],
   focus: "50% 50%",
-  searches: [
-    "nail salon",
-    "nail salon near me",
-    "beauty salon",
-    "manicure",
-    "gel nails",
-    "acrylic extensions",
-    "pedicure",
-    "lash extensions",
-    "nail art",
-  ],
+  searches: ["nail salon near me", "gel nails", "manicure", "acrylic nails", "nail art"],
   tasks: [
     {
-      title: "Put a price beside every set, fill and removal",
-      text: "Gel manicure, acrylic set, infill, soak off, pedicure, lash lift. Google gives each service its own price and description. Keep the price out of the name: Google rejects a custom name that has one.",
+      title: "Seasonal designs, as posts",
+      text: "Autumn colours, Christmas sets, summer brights. Each season's designs become a post with your photo, ready for your yes.",
     },
     {
-      title: "Thank the technician who did the set",
-      text: "'Noor did my set and it lasted.' The reply thanks the client and passes it to Noor. Kabsi uses only the technician names you list.",
+      title: "Photos that show the work",
+      text: "Send the photo you are proud of. Kabsi checks it first and tells you when one is dark, blurry or too small, before anything goes to Google.",
     },
     {
-      title: "Make the Book button open the right page",
-      text: "Google lets you add your own booking link. It should open your nail booking page, not your home page. When you change booking tool, tell Kabsi and the link changes once you say Yes.",
+      title: "A price list people understand",
+      text: "Gel manicure, infill, soak off, pedicure. Google can show each service with a price and a description, so nobody has to phone to ask. Kabsi's Profile Coach lists what your profile is missing.",
     },
     {
-      title: "Post the new set, not last season's",
-      text: "A seasonal colour, a chrome set, a lash lift added to the menu. An update post is for that. An offer or an event is a separate kind of post.",
+      title: "Thank the technician by name",
+      text: "A review that names Mia gets a reply that passes the thanks on. Kabsi uses only the names on your team list.",
     },
     {
-      title: "Send photos that look like the real nails",
-      text: "Google asks for photos without significant alterations or excessive filters. Take the hand from above in daylight and send it on WhatsApp. Kabsi checks it before it becomes a post.",
-    },
-  ],
-  categories: {
-    primary: "Nail salon",
-    more: ["Beauty salon"],
-    note: "Google's own example of choosing the specific category is 'Nail salon' instead of 'Salon'. Add 'Beauty salon' only if you also do lashes, brows or facials in the salon. You cannot create a category of your own, such as 'nail bar'.",
-  },
-  reviewThemes: [
-    {
-      theme: "The set that lasted",
-      text: "A client says her gel held for three weeks. The reply thanks her and names the technician. It promises nothing about how long a set lasts for the next client.",
-    },
-    {
-      theme: "A nail that lifted within days",
-      text: "The reply is calm and asks her to get in touch through the details on the profile. It promises a free redo only if you have said so.",
-    },
-    {
-      theme: "A reaction or an infection",
-      text: "This is a health review. Kabsi sends it to you with no draft and a way to reach a person, and nothing about it is replied to in public until you write it.",
-    },
-    {
-      theme: "Extras that were not in the quote",
-      text: "Nail art, removal, a repair. The reply points to the price list on the profile once and does not argue about the bill.",
-    },
-  ],
-  story: {
-    title: "A photo from the desk becomes a post.",
-    lead: "You send the photo, Kabsi checks it and writes the post, and you say yes. Nothing reaches Google before that.",
-    lines: [
-      {
-        from: "owner",
-        text: "Photo sent: chrome set by Noor, 180 dirhams, about 90 minutes.",
-      },
-      {
-        from: "kabsi",
-        text: "Polish Room: I checked the photo. It is in focus and shows the nails, not a face. Ready: a post, 'Chrome sets by Noor, from 180 dirhams, about 90 minutes. Book on our page.' Reply Yes to post.",
-        buttons: ["Yes", "Edit", "Skip"],
-      },
-      { from: "owner", text: "Yes" },
-      {
-        from: "kabsi",
-        text: "Sent to Google. I check that the post shows on your profile, then tell you.",
-      },
-    ],
-  },
-  posts: [
-    "A new seasonal colour, with the technician and the price.",
-    "A cancellation this afternoon, with your booking link.",
-    "Lash lifts now on the menu, with the starting price.",
-    "Hours for the long weekend and the last appointment.",
-  ],
-  photoTips: [
-    {
-      title: "The hand, from straight above",
-      text: "Daylight, a plain surface and no heavy filter. Google asks for photos in focus and well lit, without significant alterations. Keep the colour in the photo the colour on the nail.",
-    },
-    {
-      title: "The station and the colour wall",
-      text: "A new client wants to see where she will sit and how many colours there are. One wide photo covers both.",
-    },
-    {
-      title: "The way in",
-      text: "Salons on an upper floor or inside a mall are easy to walk past. A photo of the door and the lift sign saves a call.",
-    },
-  ],
-  holidays: [
-    {
-      when: "Eid al-Fitr, UAE",
-      text: "The UAE gives it as 1 to 3 Shawwal, three days, four when Ramadan has 30 days. The moon decides, so Kabsi asks five days ahead and you answer with your hours.",
-    },
-    {
-      when: "Hijri New Year and the Prophet's birthday, UAE",
-      text: "Public holidays on 1 Muharram and 12 Rabi' Awwal. Both follow the moon, so the exact day is confirmed late. Special hours go on Google as soon as you know.",
-    },
-    {
-      when: "UK: the May bank holidays",
-      text: "In 2027 the early May holiday is Monday 3 May and the spring holiday is Monday 31 May in England and Wales. Post the days you open and the last appointment.",
-    },
-    {
-      when: "UK: Christmas week 2027",
-      text: "Christmas Day falls on a Saturday and Boxing Day on a Sunday, so the bank holidays move to Monday 27 and Tuesday 28 December. Put your closed days on Google in November.",
+      title: "Holiday hours, asked in time",
+      text: "Five days before each bank holiday Kabsi asks: normal hours, closed, or custom. Google keeps them as special hours.",
     },
   ],
   faqs: [
     {
       q: "Will Kabsi change my prices on Google without asking?",
-      a: "No. Kabsi prepares the change and sends it to you on WhatsApp. Nothing reaches Google until you reply Yes, and you can edit the words first.",
+      a: "No. Kabsi does not edit prices on Google today, and nothing reaches Google until you approve it.",
     },
     {
-      q: "A client says she had a reaction. What happens to that review?",
-      a: "Health reviews go to you with no draft and a way to reach a person at Kabsi. A reply to a review like that is yours to write.",
+      q: "What happens with a review about a reaction or an infection?",
+      a: "Kabsi shows it to you with no draft, so you decide how to answer.",
     },
     {
-      q: "Can Kabsi answer the clients who message my salon on WhatsApp?",
-      a: "No. Kabsi's WhatsApp chat is between Kabsi and you. It does not message your clients, and it never receives a client's number.",
+      q: "Does Kabsi message my clients?",
+      a: "No. Kabsi talks only to you. It gives you a review link and a QR card to share after a real visit.",
     },
     {
-      q: "Can I make a category called 'nail bar'?",
-      a: "No. Google does not let a business create its own category. Pick 'Nail salon' from Google's list, which is the example Google itself gives of choosing the specific one.",
+      q: "Can I create a category called 'nail bar'?",
+      a: "No. Google does not let a business create its own category. Pick the most specific one from Google's list.",
     },
   ],
   guides: ["how-to-choose-your-primary-category", "how-to-reply-to-google-reviews"],
+  d8: {
+    seo: {
+      title: "Kabsi for nail salons: seasonal designs, photos, holiday hours and replies on Google",
+      description:
+        "Kabsi keeps a nail salon's Google profile right: seasonal designs as posts, photos checked, bank holiday hours asked in time, and a reply ready for every review.",
+    },
+    business: "Polish Room, Brighton",
+    card: {
+      label: "Post",
+      text: "Christmas designs post ready with your photo:",
+      quote:
+        "Our Christmas designs are in: red velvet, gold foil and snowflakes, until 24 December.",
+      buttons: ["Yes", "Edit", "Skip"],
+      time: "10:05",
+    },
+    jobsTitle: "The Google jobs that come back for a nail salon.",
+    searchText:
+      "People search for the service as well as the salon: gel nails, a manicure, nail art. Then they choose by the photos. Your services and your latest designs answer both.",
+    check: [
+      { label: "Photos", value: "4", tone: "warn" },
+      { label: "Reviews", value: "27, rated 4.7", tone: "ok" },
+      { label: "Opening hours", value: "Shown", tone: "ok" },
+      { label: "Website", value: "Shown", tone: "ok" },
+    ],
+    checkText:
+      "For a nail salon the free check starts with your photos, because clients choose by the work they see, then your reviews, hours and links. Example result for an invented salon in Brighton.",
+    guide: [
+      {
+        title: "Designs and photos, season by season",
+        paras: [
+          "A nail salon's work changes with the calendar: darker colours in autumn, sparkle before Christmas, brights for summer. A post is the place for each new set, with a photo and a button to your own website. An offer or an event is a separate kind of post on Google. Google archives posts after six months unless a date range is set, so last winter's set does not linger into spring.",
+          "Google asks for photos without significant alterations or excessive filters. Take the hand from above in daylight, keep the colour in the photo the colour on the nail, and send it to Kabsi. Kabsi checks it before it goes to Google. Photos need to be JPG or PNG, in focus and well lit.",
+        ],
+      },
+      {
+        title: "Prices, names and the right category",
+        paras: [
+          "Google gives each service its own price and description. Keep the price out of the name, because Google rejects a custom name that has one. A list of your main services with prices answers the question people would otherwise phone to ask.",
+          "Google's own example of choosing a specific category is 'Nail salon' instead of 'Salon', and you cannot create a category of your own. Add a second category only for work you really do in the salon. When a review names the technician, a reply that passes the thanks on tells the next client who to book. Kabsi uses only the names on your team list, so a technician who has left is never thanked once you take their name off the list. When a review is unhappy about a nail that lifted, the reply asks the client to get in touch through the details on your profile, and never offers anything in return for changing the review.",
+        ],
+      },
+    ],
+    related: ["hair-salon", "barbershop"],
+  },
 };
