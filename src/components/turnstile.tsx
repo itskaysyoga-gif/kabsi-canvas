@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { TURNSTILE_SITE_KEY } from "@/lib/site";
 import { reportError } from "@/lib/telemetry";
+import { loadTurnstileScript as load, startOnFirstTouch } from "@/lib/turnstile-script";
 
 type Api = {
   render: (
@@ -26,39 +27,31 @@ declare global {
   }
 }
 
-const SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 // No token and no click asked for within this time means the check is not going to finish on its own.
 const GIVE_UP_MS = 10_000;
-let loading: Promise<void> | null = null;
-function load() {
-  if (typeof window === "undefined") return Promise.resolve();
-  if (window.turnstile) return Promise.resolve();
-  loading ??= new Promise<void>((resolve, reject) => {
-    const s = document.createElement("script");
-    s.src = SRC;
-    s.async = true;
-    s.onload = () => resolve();
-    s.onerror = () => {
-      loading = null;
-      s.remove();
-      reject(new Error("turnstile"));
-    };
-    document.head.appendChild(s);
-  });
-  return loading;
-}
+// A form waits this long for a token after its submit before it stops (the widget's own 10 seconds come first).
+const TAKE_WAIT_MS = 30_000;
 
 /**
  * Cloudflare Turnstile check (hotfix 20h). Invisible unless Cloudflare needs a click ("interaction-only"); then it sits
  * in a box sized to the form. `onToken` gets a token when passed, and "" when it expires or fails. If the check errors
  * or gives no token within 10 seconds, one plain line offers Try again, and the error code goes to Sentry.
  */
-export function Turnstile({ onToken }: { onToken: (token: string) => void }) {
+export function Turnstile({
+  onToken,
+  onFail,
+}: {
+  onToken: (token: string) => void;
+  /** Told when the check failed and shows Try again. */
+  onFail?: () => void;
+}) {
   const box = useRef<HTMLDivElement>(null);
   const id = useRef<string | undefined>(undefined);
   const timer = useRef<number | undefined>(undefined);
   const cb = useRef(onToken);
   cb.current = onToken;
+  const failCb = useRef(onFail);
+  failCb.current = onFail;
   const [interactive, setInteractive] = useState(false);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -66,6 +59,7 @@ export function Turnstile({ onToken }: { onToken: (token: string) => void }) {
   const fail = useCallback((code: string) => {
     window.clearTimeout(timer.current);
     cb.current("");
+    failCb.current?.();
     setFailed(true);
     reportError(new Error(`Turnstile failed: ${code}`), { turnstile_code: code });
   }, []);
@@ -156,4 +150,63 @@ export function Turnstile({ onToken }: { onToken: (token: string) => void }) {
       ) : null}
     </div>
   );
+}
+
+/**
+ * The bot check for a public form, loaded on the form's first touch (Fix 1, QA 2 H6): `area` goes on the element that
+ * holds the form and `widget` inside it. Nothing from Cloudflare loads until a field gets focus, is pressed or typed in.
+ * `take()` gives one token for one request: if the visitor submits before the check is ready, it starts the check then
+ * and waits for it. It answers "" only when the check failed (the widget then shows Try again), so a form never sends
+ * without a token. Each token works once; the widget is replaced after each one so the next request gets a fresh one.
+ */
+export function useLazyTurnstile(): {
+  area: (el: HTMLElement | null) => void;
+  widget: ReactNode;
+  take: () => Promise<string>;
+} {
+  const [on, setOn] = useState(false);
+  const [round, setRound] = useState(0);
+  const token = useRef("");
+  const waiters = useRef<((t: string) => void)[]>([]);
+  const stop = useRef<(() => void) | undefined>(undefined);
+  const area = useCallback((el: HTMLElement | null) => {
+    stop.current?.();
+    stop.current = el ? startOnFirstTouch(el, () => setOn(true)) : undefined;
+  }, []);
+  const onToken = useCallback((t: string) => {
+    token.current = t;
+    if (t && waiters.current.length) {
+      const w = waiters.current.shift()!;
+      token.current = "";
+      setRound((n) => n + 1);
+      w(t);
+    }
+  }, []);
+  const onFail = useCallback(() => {
+    for (const w of waiters.current.splice(0)) w("");
+  }, []);
+  const take = useCallback(
+    () =>
+      new Promise<string>((resolve) => {
+        setOn(true);
+        if (token.current) {
+          const t = token.current;
+          token.current = "";
+          setRound((n) => n + 1);
+          resolve(t);
+          return;
+        }
+        waiters.current.push(resolve);
+        window.setTimeout(() => {
+          const i = waiters.current.indexOf(resolve);
+          if (i >= 0) {
+            waiters.current.splice(i, 1);
+            resolve("");
+          }
+        }, TAKE_WAIT_MS);
+      }),
+    [],
+  );
+  const widget = on ? <Turnstile key={round} onToken={onToken} onFail={onFail} /> : null;
+  return { area, widget, take };
 }

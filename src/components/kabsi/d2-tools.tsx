@@ -4,7 +4,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { cn } from "@/lib/utils";
 import { CTA_TRIAL, FREE_TOOL_BUSY, FREE_TOOL_BUSY_CODES } from "@/lib/site";
 import { anonHeaders, supabaseUrl } from "@/lib/supabase-config";
-import { Turnstile } from "@/components/turnstile";
+import { useLazyTurnstile } from "@/components/turnstile";
 import { track } from "@/lib/telemetry";
 import {
   CopyField,
@@ -126,8 +126,8 @@ export function ReviewLinkTool() {
   const [phase, setPhase] = useState<Phase>("empty");
   const [places, setPlaces] = useState<Place[]>([]);
   const [place, setPlace] = useState<Place | null>(null);
-  const [token, setToken] = useState("");
-  const [round, setRound] = useState(0);
+  // The bot check loads on the form's first touch, not at page start (Fix 1); the search waits for its token.
+  const check = useLazyTurnstile();
   const cardRef = useRef<HTMLDivElement>(null);
   const searching = phase === "searching";
 
@@ -139,9 +139,11 @@ export function ReviewLinkTool() {
     }
     setError(null);
     setPhase("searching");
-    const t = token;
-    setToken("");
-    setRound((n) => n + 1);
+    const t = await check.take();
+    if (!t) {
+      setPhase("empty");
+      return;
+    }
     try {
       const res = await fetch(`${supabaseUrl}/functions/v1/review-link`, {
         method: "POST",
@@ -207,7 +209,7 @@ export function ReviewLinkTool() {
                 </ButtonLink>
               </div>
             ) : (
-              <>
+              <div ref={check.area}>
                 <SearchForm
                   button="Get my link"
                   query={query}
@@ -218,10 +220,8 @@ export function ReviewLinkTool() {
                   loading={searching}
                 />
                 <p className="mt-3 text-small text-text-2">Free, no sign-up.</p>
-                <div className="mt-3">
-                  <Turnstile key={round} onToken={setToken} />
-                </div>
-              </>
+                <div className="mt-3">{check.widget}</div>
+              </div>
             )}
 
             {searching && (
