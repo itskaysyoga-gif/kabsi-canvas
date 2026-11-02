@@ -264,6 +264,7 @@ for (const ex of EXAMPLES) {
       recent: [],
       categoryLabel: ex.loc.category_label ?? null,
       city: ex.loc.area ?? null,
+      businessName: ex.loc.name,
       category: null,
       country: "US",
       website: ex.website,
