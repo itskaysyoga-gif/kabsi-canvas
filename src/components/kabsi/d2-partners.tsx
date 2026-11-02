@@ -1,11 +1,16 @@
 // Partners: the programme page, its terms, a partner's own page and the report a partner shares.
-import { Check, Gift, MessageCircle, QrCode as QrIcon, Video } from "lucide-react";
+import { ArrowRight, Check, Gift, MessageCircle, QrCode as QrIcon, Video } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { WHATSAPP_ON, whatsappHref } from "@/lib/site";
 import { Turnstile } from "@/components/turnstile";
 import { ApiError, applyPartner, usePartnerPlaces, type PartnerKind } from "@/lib/public-api";
+import { cn } from "@/lib/utils";
 import { PLANS } from "./plans";
-import { Img, PHOTOS } from "./photos";
+import { QrCode } from "./d2-parts";
+import { SiteLink } from "./site-link";
+import { PageHero, popCls, stagger } from "./page-hero";
+import { PARTNERS_HERO } from "./hero-lines";
+import { PARTNER_FAQ } from "./faq-data";
 import {
   Banner,
   Button,
@@ -56,19 +61,6 @@ export const PARTNER_RULES = [
   "No bulk or unsolicited messages.",
 ];
 
-const PARTNER_FAQ = [
-  {
-    q: "When do I get paid?",
-    a: "On the 5th of each month, once at least $25 has cleared its 30-day hold, with a statement.",
-  },
-  { q: "How?", a: "USDT or USDC, or PayPal." },
-  { q: "What do businesses I refer get?", a: "30 days of Pro free instead of 14, no card." },
-  {
-    q: "Can I see who joined?",
-    a: "You see the trade and area. The name only if the owner says yes.",
-  },
-];
-
 const PRO = PLANS.find((p) => p.id === "pro")!;
 
 function Earnings() {
@@ -108,156 +100,185 @@ function Earnings() {
   );
 }
 
+/** Partners' hero visual (Design 8): an Example partner page with its QR code and 25% of one Pro plan a month. */
+function PartnerCardVisual() {
+  const share = (PRO.monthly * 0.25).toFixed(2);
+  return (
+    <figure className="relative mx-auto max-w-[22rem]">
+      <div className="rounded-panel border border-line bg-surface-1 p-6 shadow-float">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-label font-bold text-text-2">Your partner page</p>
+          <ExampleBadge />
+        </div>
+        <p className="mt-3 font-display text-h3 font-bold">Recommended by Sam, Kabsi Partner</p>
+        <p className="mt-1 text-small text-text-2">kabsi.co/p/sam</p>
+        <QrCode
+          value="https://kabsi.co/partners"
+          label="Example QR code, to kabsi.co/partners"
+          className="mx-auto mt-5 size-36"
+        />
+        <p className="mt-4 text-small text-text-2">
+          Sam is a Kabsi Partner and earns a share if you subscribe.
+        </p>
+      </div>
+      <div
+        className={cn(
+          "absolute -end-2 -bottom-6 rounded-card bg-kb-black px-4 py-3 text-kb-white shadow-float sm:-end-8",
+          popCls,
+        )}
+        style={stagger(0, 400)}
+      >
+        <p className="text-label text-kb-paper/80">For each Pro business</p>
+        <p className="font-display text-h3 font-bold">${share} a month</p>
+      </div>
+      <figcaption className="sr-only">
+        An Example partner page with a QR code, and 25% of a ${PRO.monthly} Pro plan: ${share} a
+        month.
+      </figcaption>
+    </figure>
+  );
+}
+
 export function PartnersPage() {
   const places = usePartnerPlaces();
   return (
     <>
-      <section className="container-kb grid items-center gap-10 pt-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:pt-20">
-        <div>
-          <SectionHead
-            as="h1"
-            title="Earn 25% of every payment."
-            lead={`Recommend Kabsi to local business owners you know. You earn while the referred subscription stays paid. Kabsi Partners opens at launch.${
-              WHATSAPP_ON ? " Everything runs on WhatsApp." : ""
-            }`}
-          />
-          <ApplyButtons className="mt-8" />
-        </div>
-        <div className="overflow-hidden rounded-panel">
-          <Img
-            photo={PHOTOS.phoneTyping}
-            sizes="(min-width: 1024px) 45vw, 100vw"
-            priority
-            className="aspect-[4/3] w-full object-cover"
-          />
-        </div>
-      </section>
+      <PageHero
+        hero={{
+          ...PARTNERS_HERO,
+          line: `${PARTNERS_HERO.line}${WHATSAPP_ON ? " Everything runs on WhatsApp." : ""}`,
+        }}
+        under={`Pro is $${PRO.monthly} a month. You earn 25% of every payment, while the referred subscription stays paid.`}
+        action={<ApplyButtons />}
+        visual={<PartnerCardVisual />}
+      />
 
-      <section aria-labelledby="p-steps" className="container-kb section-y">
-        <SectionHead id="p-steps" title="How it works" />
-        <ol className="mt-10 grid gap-4 md:grid-cols-3">
-          {STEPS.map((s, i) => (
-            <li key={s.title}>
-              <Card className="h-full">
-                <span className="grid size-10 place-items-center rounded-full border border-line-strong font-display text-title font-bold">
-                  {i + 1}
+      <section aria-labelledby="p-steps" className="border-t border-line bg-surface-1">
+        <div className="container-kb section-y">
+          <h2 id="p-steps" className="text-h2">
+            How it works
+          </h2>
+          <ol className="mt-8 grid gap-6 md:grid-cols-3">
+            {STEPS.map((s, i) => (
+              <li key={s.title} className="border-t-2 border-text-1 pt-4">
+                <p className="text-label font-bold text-text-2">Step {i + 1}</p>
+                <h3 className="mt-1 text-title">{s.title}</h3>
+                <p className="mt-1 text-body text-text-2">{s.text}</p>
+              </li>
+            ))}
+          </ol>
+          <h3 className="sr-only">What partners get</h3>
+          <ul className="mt-12 grid gap-3 sm:grid-cols-2">
+            {GETS.map(([Icon, t]) => (
+              <li
+                key={t}
+                className="flex items-center gap-4 rounded-card border border-line bg-surface-0 p-4"
+              >
+                <span className="grid size-11 shrink-0 place-items-center rounded-full bg-surface-2">
+                  <Icon className="size-5" aria-hidden />
                 </span>
-                <h3 className="mt-5 text-h3">{s.title}</h3>
-                <p className="mt-2 text-body text-text-2">{s.text}</p>
-              </Card>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section aria-labelledby="p-gets" className="container-kb pb-20 lg:pb-28">
-        <SectionHead id="p-gets" title="What partners get" />
-        <ul className="mt-10 grid gap-4 sm:grid-cols-2">
-          {GETS.map(([Icon, t]) => (
-            <li
-              key={t}
-              className="flex items-center gap-4 rounded-card border border-line bg-surface-1 p-5"
-            >
-              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-surface-2">
-                <Icon className="size-6" strokeWidth={1.75} aria-hidden />
-              </span>
-              <span className="text-title">{t}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section aria-labelledby="p-earn" className="border-t border-line">
-        <div className="container-kb section-y grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-          <div>
-            <SectionHead
-              id="p-earn"
-              title="What you could earn"
-              lead={`Pro is $${PRO.monthly} a month. You earn 25% of every payment, while the referred subscription stays paid.`}
-            />
-          </div>
-          <Earnings />
+                <span className="text-body font-semibold">{t}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
-      <section aria-labelledby="p-suits" className="container-kb section-y">
-        <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+      <section aria-labelledby="p-suits" className="border-t border-line">
+        <div className="container-kb section-y grid gap-10 lg:grid-cols-2 lg:gap-16">
           <div>
-            <SectionHead id="p-suits" title="Who it suits" />
-            <ul className="mt-8 divide-y divide-line border-y border-line">
+            <h2 id="p-suits" className="text-h2">
+              Who it suits
+            </h2>
+            <ul className="mt-6 divide-y divide-line border-y border-line">
               {SUITS.map((s) => (
-                <li key={s} className="flex min-h-14 items-center gap-3 text-body">
+                <li key={s} className="flex min-h-13 items-center gap-3 text-body">
                   <Check className="size-5 shrink-0 text-ok" strokeWidth={2.5} aria-hidden />
                   {s}
                 </li>
               ))}
             </ul>
           </div>
-          <div>
-            <h2 className="text-h2">The rules</h2>
-            <ol className="mt-8 space-y-4">
-              {PARTNER_RULES.map((r, i) => (
-                <li key={r} className="flex gap-4 text-body">
-                  <span className="grid size-8 shrink-0 place-items-center rounded-full border border-line-strong text-small font-bold">
-                    {i + 1}
-                  </span>
-                  <span className="pt-0.5 text-text-1">{r}</span>
-                </li>
-              ))}
-            </ol>
-            <p className="mt-6 text-small">
-              <ButtonLink to="/partners/terms" variant="tertiary" className="text-small">
-                Read the partner terms
-              </ButtonLink>
-            </p>
-          </div>
+          <Earnings />
         </div>
       </section>
 
-      <section aria-labelledby="p-founding" className="container-kb pb-20 lg:pb-28">
-        <div className="flex flex-col gap-4 rounded-panel border border-line-strong bg-surface-1 p-6 sm:flex-row sm:items-center sm:p-8">
-          {places && (
-            <div
-              className="grid size-16 shrink-0 place-items-center rounded-full bg-surface-2 font-display text-h3 font-bold"
-              aria-hidden
-            >
-              {places.founding_left}
-            </div>
-          )}
-          <div className="flex-1">
-            <h2 id="p-founding" className="text-h3">
-              Founding Partners
+      <section aria-labelledby="p-rules" className="theme-dark bg-band">
+        <div className="container-kb section-y grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+          <div>
+            <h2 id="p-rules" className="text-h2">
+              The rules
             </h2>
-            <p className="mt-2 text-body text-text-2">
-              The first 20 partners get Kabsi Pro free for their own business and a monthly call
-              with Rashid.{places ? ` ${places.founding_left} places left.` : ""}
+            <p className="mt-4 text-body text-text-2">
+              Founding Partners: the first 20 partners get Kabsi Pro free for their own business and
+              a monthly call with Rashid.{places ? ` ${places.founding_left} places left.` : ""}
+            </p>
+            <p className="mt-4 text-small">
+              <SiteLink
+                to="/partners/terms"
+                className="font-semibold text-text-1 underline underline-offset-4"
+              >
+                Read the partner terms
+              </SiteLink>
             </p>
           </div>
+          <ol className="space-y-3">
+            {PARTNER_RULES.map((r, i) => (
+              <li key={r} className="flex gap-4 rounded-card border border-line p-4 text-body">
+                <span className="font-display font-bold text-text-2">{i + 1}</span>
+                {r}
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
       <section aria-labelledby="p-faq" className="border-t border-line">
-        <div className="container-kb section-y grid gap-10 lg:grid-cols-[1fr_1.6fr]">
-          <SectionHead id="p-faq" title="Questions partners ask" />
-          <Faq items={PARTNER_FAQ} />
+        <div className="container-kb section-y grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+          <h2 id="p-faq" className="text-h2">
+            Questions partners ask
+          </h2>
+          <div>
+            <Faq items={PARTNER_FAQ} />
+            <p className="mt-6 text-small text-text-2">
+              Owners, start with the{" "}
+              <SiteLink to="/pricing" className="font-semibold underline underline-offset-4">
+                plans
+              </SiteLink>
+              .
+            </p>
+          </div>
         </div>
       </section>
 
-      <section id="apply" className="theme-dark scroll-mt-20 border-t border-line bg-band">
+      <section
+        id="apply"
+        aria-labelledby="p-apply"
+        className="scroll-mt-20 border-t border-line bg-surface-1"
+      >
         <div className="container-kb section-y grid gap-10 lg:grid-cols-2 lg:gap-16">
           <div>
-            <h2 className="max-w-[40rem] text-h2">Earn 25% of every payment.</h2>
+            <h2 id="p-apply" className="max-w-[40rem] text-h2">
+              Earn 25% of every payment.
+            </h2>
             <p className="mt-4 text-body text-text-2">Kabsi Partners opens at launch.</p>
             {WHATSAPP_ON && (
               <a
                 href={whatsappHref("partner")}
                 target="_blank"
                 rel="noreferrer"
-                className={`${buttonClass("secondary")} mt-8`}
+                className={`${buttonClass("secondary")} mt-6`}
               >
                 Apply on WhatsApp
               </a>
             )}
+            <SiteLink
+              to="/scan"
+              className="press mt-4 flex min-h-11 items-center gap-1.5 text-body font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1"
+            >
+              Run a free check for a business you know
+              <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />
+            </SiteLink>
           </div>
           <ApplyForm />
         </div>

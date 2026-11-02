@@ -2,7 +2,7 @@
 // page, and /founding with the application. The count of places left is the real one (GET programs/founding); while it
 // has not loaded, or did not load, no number shows. The application posts to programs/founding (Partners session).
 import { CheckCircle2, Sparkles } from "lucide-react";
-import { useId, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Turnstile } from "@/components/turnstile";
 import {
@@ -14,10 +14,14 @@ import {
   type FoundingPlaces,
   type FoundingTrade,
 } from "@/lib/public-api";
-import { PageTop, useFlagState } from "./d2-parts";
+import { getConsent, onConsentChange } from "@/lib/consent";
+import { useFlagState } from "./d2-parts";
+import { PageHero, popCls, stagger } from "./page-hero";
+import { FOUNDING_HERO } from "./hero-lines";
+import { FOUNDING_FAQ } from "./faq-data";
 import { FOUNDER } from "./photos";
 import { FOUNDING25_TOTAL } from "./founding-total";
-import { Banner, Button, ButtonLink, Faq, Field, SectionHead, Segmented, StatusPill } from "./ui";
+import { Banner, Button, ButtonLink, Faq, Field, Segmented, StatusPill } from "./ui";
 
 export { FOUNDING25_TOTAL };
 export const FOUNDING25_LINE =
@@ -87,12 +91,12 @@ const GIVE = [
   "A case study, named or anonymous, in your words. You approve the final text.",
 ];
 
-/** The four groups of the 25 places; the numbers come from GET programs/founding. */
-const MIX: { group: string; trade: FoundingTrade }[] = [
-  { group: "Beauty and hair", trade: "beauty_hair" },
-  { group: "Food and drink", trade: "food" },
-  { group: "Health", trade: "health" },
-  { group: "Auto, fitness, home services and hotels", trade: "other" },
+/** The four groups of the 25 places (facts 4.1); the places left come from GET programs/founding. */
+const MIX: { group: string; trade: FoundingTrade; cap: number }[] = [
+  { group: "Beauty and hair", trade: "beauty_hair", cap: 10 },
+  { group: "Food and drink", trade: "food", cap: 5 },
+  { group: "Health", trade: "health", cap: 5 },
+  { group: "Other trades", trade: "other", cap: 5 },
 ];
 
 /** Each kind of business, and the group of the 25 places it counts in (programs.ts FOUNDING_TRADES). */
@@ -113,30 +117,23 @@ const TRADES: [string, FoundingTrade][] = [
   ["Home services", "other"],
   ["Something else", "other"],
 ];
-const COUNTRIES: [string, FoundingApplication["country"]][] = [
-  ["United Arab Emirates", "AE"],
-  ["United Kingdom", "GB"],
-  ["United States", "US"],
+/** The three countries Founding 25 is open to, each with an example number for the WhatsApp field (Design 8). */
+const COUNTRIES: { label: string; code: FoundingApplication["country"]; example: string }[] = [
+  { label: "United Arab Emirates", code: "AE", example: "+971 50 123 4567" },
+  { label: "United Kingdom", code: "GB", example: "+44 7700 900123" },
+  { label: "United States", code: "US", example: "+1 202 555 0143" },
 ];
+const DEFAULT_EXAMPLE = "+44 7700 900123";
 
-const FAQS = [
-  {
-    q: "What happens after 90 days?",
-    a: "You choose a plan at the founding price, kept while your subscription stays paid, or you stop. Nothing is charged by itself.",
-  },
-  {
-    q: "What goes in a case study?",
-    a: "Your words, the work Kabsi did from its own records (replies published, posts, details fixed) and only the numbers you choose to share from your own Google screens. Named or anonymous, and you approve the final text.",
-  },
-  {
-    q: "Why by application?",
-    a: "So the 25 cover the kinds of business Kabsi serves, and every place goes to someone who will use it every week.",
-  },
-  {
-    q: "Can I leave before the 90 days end?",
-    a: "Any time. Remove Kabsi from your Google profile and tell us on WhatsApp.",
-  },
-];
+/** The visitor's country, from /api/geo through the privacy banner's one read (consent.ts); null until it is known. */
+function useVisitorCountry(): string | null {
+  const [country, setCountry] = useState<string | null>(null);
+  useEffect(() => {
+    setCountry(getConsent().country);
+    return onConsentChange((c) => setCountry(c.country));
+  }, []);
+  return country;
+}
 
 export function FoundingPage() {
   const [flagged, setState] = useFlagState<State>("open", STATES);
@@ -145,83 +142,118 @@ export function FoundingPage() {
   const state: State = places?.left === 0 && flagged === "open" ? "full" : flagged;
   return (
     <>
-      <PageTop
-        title="Founding 25: three months of Kabsi Pro, free."
-        lead="For 25 businesses. Kabsi does the Google work; you tell Rashid what to make better."
+      <PageHero
+        hero={FOUNDING_HERO}
+        under={FOUNDING25_UNDER}
+        action={
+          places?.left === 0 ? null : (
+            <ButtonLink to="/founding" hash="apply">
+              {FOUNDING_HERO.action}
+            </ButtonLink>
+          )
+        }
+        visual={<PlacesVisual places={places} />}
       >
+        {/* The real count only (lane R decision 2): nothing while it is unknown. */}
         {places && (
-          <p className="mt-6 text-body font-bold">
-            {places.left} of {places.total} places left.
+          <p className="mt-4 text-body font-bold" data-qa-mask>
+            {places.left > 0
+              ? `${places.left} of ${places.total} places left.`
+              : "All 25 places are taken."}
           </p>
         )}
-      </PageTop>
+      </PageHero>
 
-      <section className="container-kb mt-12 grid gap-10 pb-6 lg:grid-cols-3 lg:gap-12">
-        <List title="Who can apply" items={WHO} />
-        <List title="What you get" items={GET} />
-        <List title="What Kabsi asks" items={GIVE} />
+      <section
+        aria-label="Who, what and what Kabsi asks"
+        className="border-t border-line bg-surface-1"
+      >
+        <div className="container-kb section-y grid gap-10 lg:grid-cols-3 lg:gap-12">
+          <List title="Who can apply" items={WHO} />
+          <List title="What you get" items={GET} />
+          <List title="What Kabsi asks" items={GIVE} />
+        </div>
       </section>
 
       <section
+        id="apply"
         aria-labelledby="founding-form-h"
-        className="container-kb section-y grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-16"
+        className="scroll-mt-20 border-t border-line"
       >
-        <div>
+        <div className="container-kb section-y max-w-3xl">
           {state === "open" && <Application onSent={() => setState("sent")} />}
           {state !== "open" && <Outcome state={state} />}
         </div>
-        <aside className="space-y-6">
-          <Mix places={places} />
-          <div className="flex items-center gap-4">
-            <img
-              src={FOUNDER.small}
-              width={FOUNDER.w}
-              height={FOUNDER.h}
-              alt={FOUNDER.alt}
-              loading="lazy"
-              decoding="async"
-              className="size-14 shrink-0 rounded-full object-cover"
-            />
-            <p className="text-small text-text-2">
-              Rashid Abou Hamzy, founder of Kabsi, reads every application himself.
-            </p>
-          </div>
-        </aside>
       </section>
 
-      <section aria-labelledby="founding-faq" className="border-t border-line">
-        <div className="container-kb section-y grid gap-10 lg:grid-cols-[1fr_1.6fr]">
-          <SectionHead id="founding-faq" title="Questions about Founding 25" />
-          <Faq items={FAQS} />
+      <section aria-labelledby="founding-faq" className="border-t border-line bg-surface-1">
+        <div className="container-kb section-y grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+          <h2 id="founding-faq" className="text-h2">
+            Questions about Founding 25
+          </h2>
+          <Faq items={FOUNDING_FAQ} />
         </div>
       </section>
     </>
   );
 }
 
-function Mix({ places }: { places: FoundingPlaces | null }) {
+/** The 25 places by group as rings, with Rashid. A ring fills only for a place the real count says is taken. */
+function PlacesVisual({ places }: { places: FoundingPlaces | null }) {
+  let n = 0;
   return (
-    <div className="rounded-card border border-line p-5">
-      <p className="text-small font-bold">The 25 places</p>
-      <ul className="mt-4 space-y-3">
+    <figure className="theme-dark relative rounded-panel bg-band p-5 text-text-1 shadow-float sm:p-7">
+      <div className="flex items-center gap-3">
+        <img
+          src={FOUNDER.small}
+          width={FOUNDER.w}
+          height={FOUNDER.h}
+          alt=""
+          decoding="async"
+          className="size-12 shrink-0 rounded-full object-cover"
+        />
+        <p className="text-small text-text-2">
+          Rashid Abou Hamzy, founder of Kabsi, reads every application himself.
+        </p>
+      </div>
+      <ul className="mt-6 space-y-4" data-qa-mask>
         {MIX.map((m) => {
           const t = places?.by_trade[m.trade];
+          const cap = t?.cap ?? m.cap;
+          const taken = t ? Math.min(cap, t.taken) : 0;
           return (
-            <li key={m.group} className="flex items-baseline justify-between gap-4">
-              <span className="text-small text-text-2">{m.group}</span>
-              {t && (
-                <span className="shrink-0 text-small font-bold">
-                  {Math.max(0, t.cap - t.taken)} of {t.cap} left
+            <li key={m.group}>
+              <p className="flex items-baseline justify-between gap-3 text-small">
+                <span className="font-bold">{m.group}</span>
+                <span className="text-text-2">
+                  {t ? `${Math.max(0, cap - taken)} of ${cap} left` : `${cap} places`}
                 </span>
-              )}
+              </p>
+              <p className="mt-2 flex flex-wrap gap-1.5" aria-hidden>
+                {Array.from({ length: cap }, (_, k) => ({ i: n++, full: k < taken })).map((r) => (
+                  <span
+                    key={r.i}
+                    className={cn(
+                      "size-5 rounded-full border-2 border-kb-paper/70",
+                      r.full && "bg-kb-paper/70",
+                      popCls,
+                    )}
+                    style={stagger(r.i, 200, 30)}
+                  />
+                ))}
+              </p>
             </li>
           );
         })}
       </ul>
-      <p className="mt-4 text-label text-text-3">
+      <p className="mt-5 text-label text-text-2">
         A place still open after 30 days goes to the next good applicant of any trade.
       </p>
-    </div>
+      <figcaption className="sr-only">
+        The 25 Founding places: 10 for beauty and hair, 5 for food and drink, 5 for health and 5 for
+        other trades.
+      </figcaption>
+    </figure>
   );
 }
 
@@ -335,6 +367,13 @@ function Application({ onSent }: { onSent: () => void }) {
     caseStudy: "anonymous" as "anonymous" | "named",
     checkIn: false,
   });
+  // The visitor's country preselects the field and picks the example number (lane R decision 4).
+  const geo = useVisitorCountry();
+  useEffect(() => {
+    const c = COUNTRIES.find((x) => x.code === geo);
+    if (c) setF((x) => (x.country ? x : { ...x, country: c.label }));
+  }, [geo]);
+  const example = COUNTRIES.find((c) => c.label === f.country)?.example ?? DEFAULT_EXAMPLE;
   const [errors, setErrors] = useState<Errors>({});
   const [sending, setSending] = useState(false);
   const whyId = useId();
@@ -366,7 +405,7 @@ function Application({ onSent }: { onSent: () => void }) {
     try {
       await applyFounding({
         business_name: f.business.trim(),
-        country: COUNTRIES.find(([l]) => l === f.country)![1],
+        country: COUNTRIES.find((c) => c.label === f.country)!.code,
         trade: TRADES.find(([l]) => l === f.trade)![1],
         business_kind: f.trade,
         whatsapp: f.phone.trim(),
@@ -395,7 +434,7 @@ function Application({ onSent }: { onSent: () => void }) {
     setSending(false);
   };
   return (
-    <form onSubmit={(e) => void submit(e)} noValidate className="space-y-5" data-main-cta>
+    <form onSubmit={(e) => void submit(e)} noValidate className="space-y-5">
       <h2 id="founding-form-h" className="text-h2">
         Apply for a place
       </h2>
@@ -410,7 +449,7 @@ function Application({ onSent }: { onSent: () => void }) {
       <div className="grid gap-5 sm:grid-cols-2">
         <Select
           label="Country"
-          options={COUNTRIES.map(([l]) => l)}
+          options={COUNTRIES.map((c) => c.label)}
           value={f.country}
           onChange={(v) => set("country", v)}
           error={errors.country || null}
@@ -428,7 +467,8 @@ function Application({ onSent }: { onSent: () => void }) {
         type="tel"
         inputMode="tel"
         autoComplete="tel"
-        placeholder="+971 50 000 0000"
+        placeholder={example}
+        hint={`With the country code, for example ${example}.`}
         value={f.phone}
         onChange={(e) => set("phone", e.target.value)}
         error={errors.phone || null}
@@ -491,15 +531,15 @@ function Outcome({ state }: { state: Exclude<State, "open"> }) {
   if (state === "sent")
     return (
       <Box pill={<StatusPill tone="ok">Sent</StatusPill>} title="Application sent.">
-        Rashid reads every application and answers on WhatsApp within 2 working days. Nothing
-        changes on your Google profile until you say yes.
+        Rashid reads every application and answers within 2 working days. Nothing changes on your
+        Google profile until you say yes.
       </Box>
     );
   if (state === "reviewing")
     return (
       <Box
         pill={<StatusPill tone="info">Reviewing</StatusPill>}
-        title="We are reading your application."
+        title="Rashid is reading your application."
       >
         Rashid is looking at your public Google profile. Nothing is needed from you, and nothing
         changes on Google.
@@ -523,7 +563,7 @@ function Outcome({ state }: { state: Exclude<State, "open"> }) {
         title="The places for your kind of business are taken for now."
       >
         A place still open after 30 days goes to the next good applicant of any trade. You are on
-        the list, and Rashid writes on WhatsApp if one opens.
+        the list, and Rashid writes to you if one opens.
       </Box>
     );
   return (

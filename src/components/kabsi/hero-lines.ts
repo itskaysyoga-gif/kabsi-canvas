@@ -22,3 +22,40 @@ export const HOW_HERO = {
   title: "Kabsi prepares. You approve. Kabsi follows through.",
   line: "One week at an Example salon in Bristol: the daily watch, a new review, holiday hours asked in time, and the Monday receipt.",
 } as const;
+
+/** FAQ's hero (Design 8; the headline approved). */
+export const FAQ_HERO = {
+  title: "Questions owners ask",
+  line: "Short answers, in five groups. If yours is not here, write to hello@kabsi.co and a person answers.",
+} as const;
+
+/** About's hero (Design 8; the headline approved). */
+export const ABOUT_HERO = {
+  title: "Kabsi is built for the owner at the counter.",
+  line: "One founder, one job: the Google work a local business never has time for, done and brought to the owner for a yes.",
+} as const;
+
+/** Security's hero (Design 8). */
+export const SECURITY_HERO = {
+  title: "Your Google profile stays yours.",
+  line: "Kabsi works as a Manager you add, never sees your password, publishes nothing without your yes, and is gone the moment you remove it.",
+} as const;
+
+/** Founding 25's hero (approved). */
+export const FOUNDING_HERO = {
+  title: "Founding 25: three months of Kabsi Pro, free.",
+  line: "For 25 businesses. Kabsi does the Google work; you tell Rashid what to make better.",
+  action: "Apply for a place",
+} as const;
+
+/** Partners' hero (approved). */
+export const PARTNERS_HERO = {
+  title: "Earn 25% of every payment.",
+  line: "Recommend Kabsi to local business owners you know. You earn while the referred subscription stays paid. Kabsi Partners opens at launch.",
+} as const;
+
+/** The Businesses hub's hero (Design 8). */
+export const HUB_HERO = {
+  title: "The Google work your kind of business has.",
+  line: "A barbershop's week on Google is not a restaurant's. Pick your trade to see the jobs that come back, the searches people use, and what the free check shows.",
+} as const;
