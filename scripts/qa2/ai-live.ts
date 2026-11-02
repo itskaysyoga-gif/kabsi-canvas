@@ -9,15 +9,20 @@
 import fx from "../../tests/fixtures/ai-accuracy/answers.json" with { type: "json" };
 import {
   compare,
+  EXTRACT_SCHEMA,
+  EXTRACT_SYSTEM,
+  extractUser,
   type KnowledgeRow,
-  liveExtractor,
+  parseClaims,
   recordFromKnowledge,
 } from "../../supabase/functions/_shared/visibility/ai/accuracy.ts";
 import {
   draftMessage,
+  message,
   meterCost,
   newMeter,
   noDashes,
+  parseJson,
   task,
 } from "../../supabase/functions/_shared/ai.ts";
 import { postSystem, type PostLoc } from "../../supabase/functions/_shared/posts.ts";
@@ -27,23 +32,71 @@ const arg = (n: string, d: string) => {
   const i = Deno.args.indexOf(`--${n}`);
   return i >= 0 ? Deno.args[i + 1] : d;
 };
-const BUDGET_ANSWERS = Number(arg("budget-answers", "0.4"));
-const BUDGET_POSTS = Number(arg("budget-posts", "0.6"));
+/** A budget is a plain number of US dollars, 0 or more; anything else stops the run before any call (a NaN would never stop). */
+function budget(name: string, dflt: string): number {
+  const raw = arg(name, dflt);
+  const n = /^\d+(\.\d+)?$/.test(raw.trim()) ? Number(raw) : NaN;
+  if (!Number.isFinite(n) || n < 0) {
+    console.log(
+      `--${name} must be a number of US dollars like 0.4 (got "${raw}"); nothing was run`,
+    );
+    Deno.exit(2);
+  }
+  return n;
+}
+const BUDGET_ANSWERS = budget("budget-answers", "0.4");
+const BUDGET_POSTS = budget("budget-posts", "0.6");
 const usd = (micros: number) => micros / 1_000_000;
 const out: Record<string, unknown> = { answers: [], posts: [] };
 
 // ── 1. AI Answers extraction ──
 let spentA = 0;
 const REC = recordFromKnowledge(fx.knowledge as KnowledgeRow[]);
-const extract = liveExtractor();
+const CHECK = task("scout", "check_facts");
+// The next call is started only when the budget has room for it, at the largest cost seen so far (at least 2 cents).
+let worstA = 20_000;
 let passA = 0,
   runA = 0;
 for (const c of fx.cases) {
-  if (spentA >= BUDGET_ANSWERS) {
+  if (spentA + usd(worstA) > BUDGET_ANSWERS) {
     console.log(`answers: budget reached at ${spentA.toFixed(4)} USD, stopped`);
     break;
   }
-  const got = await extract({ answer: c.answer, business: fx.business, area: "Williamsburg" });
+  // The production step (liveExtractor in accuracy.ts), with the meter kept here so a failed call's cost is counted too.
+  const meter = newMeter("scout");
+  let got: { claims: ReturnType<typeof parseClaims>; costMicros: number };
+  try {
+    const text = await message(
+      CHECK.model,
+      EXTRACT_SYSTEM,
+      extractUser({ answer: c.answer, business: fx.business, area: "Williamsburg" }),
+      CHECK.maxTokens,
+      meter,
+      { schema: EXTRACT_SCHEMA },
+    );
+    let claims: ReturnType<typeof parseClaims> = [];
+    try {
+      claims = parseClaims(parseJson(text));
+    } catch {
+      /* not the schema: states nothing, as in production */
+    }
+    got = { claims, costMicros: meterCost(meter) };
+  } catch (e) {
+    const cost = usd(meterCost(meter));
+    spentA += cost;
+    runA++;
+    (out.answers as unknown[]).push({
+      name: c.name,
+      ok: false,
+      costUsd: cost,
+      error: String(e).slice(0, 200),
+    });
+    console.log(
+      `answers | ERROR | ${c.name} | ${cost.toFixed(5)} USD | ${String(e).slice(0, 200)}`,
+    );
+    continue;
+  }
+  worstA = Math.max(worstA, got.costMicros);
   spentA += usd(got.costMicros);
   const r = compare(got.claims, REC, c.answer, fx.business);
   const diffs = r.differences.map((d) => ({
@@ -157,22 +210,41 @@ const EXAMPLES: Ex[] = [
     website: "https://ironworks.example",
   },
 ];
+let worstP = 60_000;
 let spentP = 0,
   passP = 0,
   runP = 0;
 const DRAFT = task("growth", "draft_post");
 for (const ex of EXAMPLES) {
-  if (spentP >= BUDGET_POSTS) {
+  if (spentP + usd(worstP) > BUDGET_POSTS) {
     console.log(`posts: budget reached at ${spentP.toFixed(4)} USD, stopped`);
     break;
   }
   const loc = { ...base, ...ex.loc } as PostLoc;
   const meter = newMeter("growth");
-  const raw = (
-    await draftMessage(postSystem(loc, ex.keywords), ex.note, DRAFT.maxTokens, meter, {
-      effort: DRAFT.effort,
-    })
-  ).text;
+  let raw: string;
+  try {
+    raw = (
+      await draftMessage(postSystem(loc, ex.keywords), ex.note, DRAFT.maxTokens, meter, {
+        effort: DRAFT.effort,
+      })
+    ).text;
+  } catch (e) {
+    const cost = usd(meterCost(meter));
+    spentP += cost;
+    runP++;
+    (out.posts as unknown[]).push({
+      name: ex.loc.name,
+      ok: false,
+      costUsd: cost,
+      error: String(e).slice(0, 200),
+    });
+    console.log(
+      `posts | ERROR | ${ex.loc.name} | ${cost.toFixed(5)} USD | ${String(e).slice(0, 200)}`,
+    );
+    continue;
+  }
+  worstP = Math.max(worstP, meterCost(meter));
   const text = noDashes(raw.replace(/^["“]|["”]$/g, "").trim()).slice(0, 1500);
   const cost = usd(meterCost(meter));
   spentP += cost;
@@ -200,9 +272,11 @@ for (const ex of EXAMPLES) {
   const rubric = {
     rules: issues.length === 0,
     noDashOrBang: !/[–—!]/.test(raw),
-    keywordEarly:
-      text.toLowerCase().indexOf(ex.keywords[0].split(" ")[0].toLowerCase()) >= 0 &&
-      text.toLowerCase().indexOf(ex.keywords[0].split(" ")[0].toLowerCase()) < 80,
+    // The whole search phrase, in the first 80 characters, as the prompt asks.
+    keywordEarly: (() => {
+      const at = text.toLowerCase().indexOf(ex.keywords[0].toLowerCase());
+      return at >= 0 && at + ex.keywords[0].length <= 80;
+    })(),
     grounded: !ex.forbid.some((f) => f.test(text)),
     noHashtagOrEmoji: !/#\w|\p{Extended_Pictographic}/u.test(text),
   };

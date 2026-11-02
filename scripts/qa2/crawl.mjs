@@ -90,6 +90,23 @@ function slug(path) {
   return (path === "/" ? "home" : path.replace(/^\//, "").replace(/[/?=&]+/g, "-")) || "home";
 }
 
+// Reads only: the cookie choice is never stored (the consent function is answered here), and no statistics or error
+// reports are sent from the crawl (PostHog through /ingest, Sentry), so production data stays clean.
+async function quiet(page) {
+  await page.route("**/functions/v1/consent**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
+      body: "{}",
+    }),
+  );
+  await page.route(
+    /\/ingest\/|sentry\.io|sentry-cdn\.com|connect\.facebook\.net|facebook\.com\/tr/,
+    (route) => route.abort(),
+  );
+}
+
 async function stubScan(page, s) {
   await page.route("https://challenges.cloudflare.com/**", (route) =>
     route.fulfill({
@@ -147,6 +164,7 @@ async function visit(browser, item, width) {
   page.on("pageerror", (e) => errors.push(String(e.message).slice(0, 160)));
   const rec = { id: item.id, path: item.path, width, browser: BROWSER };
   try {
+    await quiet(page);
     if (GEO)
       await page.route("**/api/geo", (route) =>
         route.fulfill({ contentType: "application/json", body: JSON.stringify({ country: GEO }) }),

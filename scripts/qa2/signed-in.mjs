@@ -53,6 +53,23 @@ const ROUTES = {
   owner: ["/start", "/app"],
 };
 
+// Reads only: the cookie choice is never stored (the consent function is answered here), and no statistics or error
+// reports are sent from the crawl (PostHog through /ingest, Sentry), so production data stays clean.
+async function quiet(page) {
+  await page.route("**/functions/v1/consent**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
+      body: "{}",
+    }),
+  );
+  await page.route(
+    /\/ingest\/|sentry\.io|sentry-cdn\.com|connect\.facebook\.net|facebook\.com\/tr/,
+    (route) => route.abort(),
+  );
+}
+
 async function session(who) {
   const a = ACCOUNTS[who];
   const token = process.env[a.env];
@@ -121,6 +138,7 @@ for (const who of Object.keys(ACCOUNTS)) {
         if (r.status() >= 500 && !route.includes("qa2=error"))
           failed.push(`${r.status()} ${r.url().replace(SUPA, "").slice(0, 90)}`);
       });
+      await quiet(page);
       // The error state: every Kabsi function answers 500, as when the backend is down.
       if (route.includes("qa2=error"))
         await page.route("**/functions/v1/**", (r) =>
