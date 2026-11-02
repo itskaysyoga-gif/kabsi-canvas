@@ -62,7 +62,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 2 Nov 2026, Web 4b: the free check's states, result and /scan/CODE on Design 8 (part 1). Detail: `docs/progress/archive/2026-11-02-web4b.md`.
+- 2 Nov 2026, Web 4b: the free check's states, result and /scan/CODE (PR 317), Pricing and How it works (part 2) on Design 8. Detail: `docs/progress/archive/2026-11-02-web4b.md`.
 - 1 Nov 2026, Web 4 (PRs 313 to 315): the Design 8 shell, Home, the free check's start page and the result's attribution. The other pages are Web 4b's (list in the archive). Detail: `docs/progress/archive/2026-11-01-web4.md`.
 
 
