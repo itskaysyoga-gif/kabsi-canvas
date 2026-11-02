@@ -7,14 +7,14 @@ import { type JsonSchema, message, parseJson, type Meter, type System } from "./
 import { task } from "./agents.ts";
 import { fenceDraft, fenceReview, houseStyle, type ReviewInput, UNTRUSTED } from "./fence.ts";
 import { type Memory, memoryParts } from "./memory.ts";
-import { type ReplyOutput, replyChecks, scriptLanguage } from "./checks.ts";
+import { type ReplyOutput, replyChecks } from "./checks.ts";
 import { runContract, type Send, type Workflow } from "./contract.ts";
-import { REPLY_RULES, REPLY_V3, replyTask } from "./prompts/reply.v3.ts";
+import { REPLY_RULES, REPLY_V2, replyTask } from "./prompts/reply.v2.ts";
 import { CHECK_RULES } from "./prompts/check.v1.ts";
 import { CLASSIFY_RULES } from "./prompts/classify.v2.ts";
 import { type Industry, mergeRisk, type Risk, riskByRules, type RiskReason } from "./risk.ts";
 
-export { CONTACT_LINE } from "./prompts/reply.v3.ts";
+export { CONTACT_LINE } from "./prompts/reply.v2.ts";
 
 // Language and risk level (K-13, P0.3-03): code rules first, then the small model; the higher level wins. A review
 // with no text is not sent to a model, and neither is one the code rules already mark high: nothing can lower it and
@@ -26,11 +26,8 @@ export async function classify(r: ReviewInput, o: { industry?: Industry | null; 
   const t = task("reply", "classify");
   const out = await (o.call ?? message)(t.model, CLASSIFY_RULES, fenceReview(r), t.maxTokens, o.meter);
   const j = parseJson<{ language?: string; risk?: unknown; reasons?: unknown }>(out);
-  const said = String(j.language ?? "unknown").slice(0, 12);
-  // Fix 1 (QA 2 H3): a review written in Arabic script is Arabic, whatever the small model said (code over the model).
-  return { language: scriptLanguage(r.comment) === "ar" && !said.startsWith("ar") ? "ar" : said, ...mergeRisk(code, j) };
+  return { language: String(j.language ?? "unknown").slice(0, 12), ...mergeRisk(code, j) };
 }
-
 
 // Which language the reply is written in (D232, K-119). Franco gets English.
 export function languageRule(language: string) {
@@ -84,7 +81,7 @@ export function replyWorkflow(o: { checkCall?: typeof message; meter?: Meter } =
   const call = o.checkCall ?? message;
   const draft = task("reply", "draft"), check = task("reply", "check");
   return {
-    promptVersion: REPLY_V3,
+    promptVersion: REPLY_V2,
     system: (i) => replySystem(i.memory),
     user: replyUser,
     maxTokens: draft.maxTokens,

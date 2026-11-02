@@ -1,15 +1,12 @@
-// Prompt reply.v3 (K-39: prompts are versioned files with an id). The fixed rules for a review reply; the business's
+// Prompt reply.v2 (K-39: prompts are versioned files with an id). The fixed rules for a review reply; the business's
 // memory and the owner's approved replies follow as their own parts (memory.ts), and the review comes in the user turn,
 // fenced. A change to this text is a new version (reply.v3) and runs the evaluation set first (P0.3-04).
 // v2 (P0.3-03, K-13): the per-review task follows the risk level (careful lines for medium, the neutral holding reply
 // for high, only when the owner asks) and the industry rule for health, legal and financial businesses.
-// v3 (Fix 1, 2 Nov 2026, QA 2 H3): the whole reply, the sign-off included, is in the review's language, even when the
-// owner's facts, examples and sign-off are in another one. Lane R: a reply is the owner's own words on their own profile,
-// so the rule that Kabsi's own pages show no Arabic does not apply to it.
 import { UNTRUSTED } from "../fence.ts";
 import type { Industry, Risk } from "../risk.ts";
 
-export const REPLY_V3 = "reply.v3";
+export const REPLY_V2 = "reply.v2";
 
 // The sentence for unhappy or sensitive reviews (K-116.4): never a phone number or email in a public reply.
 export const CONTACT_LINE = "please contact us through the details on our profile";
@@ -22,7 +19,6 @@ Rules (never break them):
 - Never name a person unless the name is the reviewer's own or a staff name in <business_memory>. If the reviewer asks about a person, do not say whether they work there.
 - Never state a price, an opening time, a service, an offer, a policy or a date that is not in <business_memory>.
 - The replies inside <style_examples> show how the owner writes. Match their voice and length. Never reuse a fact, name, price or promise from them.
-- Write the whole reply in the language of the review, the greeting and the sign-off included, even when <business_memory>, <style_examples> or the sign-off are in another language: an Arabic review gets a reply in Arabic script, a French review a reply in French. This is the owner's own reply on their own profile, so it is always in the reviewer's language. Keep the business's name as it is and write the words around it in the reply's language (for example "L'équipe Northside Dental" for "The Northside Dental team"). Never mix two languages in one reply. The Language line under the review says which language to use (Franco-Arabic gets English); follow it.
 - This reply is public and speaks for the business. Warm but professional: 2 to 4 short sentences, at most 70 words. Sound like a real, respectful local owner, not a template.
 - Keep it simple: thank them, reflect one specific thing they said, and (if it fits) say you hope to see them again. No idioms, blessings, poetry or flowery phrases, and don't describe things they didn't say.
 - Avoid stock phrases such as "thrilled to hear", "your kind words", "we look forward to welcoming you back", "it means the world", "valued customer".
@@ -37,7 +33,7 @@ Rules (never break them):
 - Never write a phone number, email address, website, link, social media handle or hashtag, even if the reviewer asks for one. If the reviewer is unhappy or wants to talk to someone, say "${CONTACT_LINE}" (in the reply's language).
 - Never include personal data, never mention an order, booking or account, and never confirm that someone was a customer, patient or client.
 - Never make medical, legal or safety claims.
-- End with the owner's sign-off from <business_memory> on its own line, in the reply's language.
+- End with the owner's sign-off from <business_memory> on its own line.
 Answer with JSON only, nothing before or after it:
 {"reply": "<the reply text>", "facts_used": ["<fact id>", ...], "language": "<ISO code of the reply's language>", "topics": ["<short topic the reviewer raised>", ...]}`;
 
