@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase-config";
 import { SUPABASE_READY_EVENT } from "@/lib/stored-session";
 import { makeSessionFetch } from "@/lib/session-ended";
-import { withReadTimeout } from "@/lib/query-defaults";
+import { withReadTimeout } from "@/lib/read-timeout";
 
 // The Supabase client. Importing this file loads supabase-js, so a public page imports `@/lib/supabase-config` for the
 // URL and the anon headers and loads this file only when it needs a session (see auth-provider.tsx).

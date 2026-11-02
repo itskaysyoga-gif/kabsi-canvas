@@ -7,10 +7,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ERROR_WITHIN_MS,
   QUERY_DEFAULTS,
-  READ_TIMEOUT_MS,
+  READ_TIMEOUT,
   isReadTimeout,
-  withReadTimeout,
 } from "../src/lib/query-defaults";
+import * as rt from "../src/lib/read-timeout";
+
+const { READ_TIMEOUT_MS, withReadTimeout } = rt;
 
 const BASE = "https://db.example";
 const READ = `${BASE}/rest/v1/locations?select=id`;
@@ -147,6 +149,7 @@ describe("the error state within 5 seconds", () => {
     const e = new Error("AbortError: Kabsi read timeout after 3000 ms");
     expect(isReadTimeout(e)).toBe(true);
     expect(isReadTimeout(new Error("status 500"))).toBe(false);
+    expect(rt.READ_TIMEOUT, "the two modules name the timeout the same way").toBe(READ_TIMEOUT);
     expect(
       isReadTimeout({ message: "AbortError: Kabsi read timeout after 2000 ms", code: "" }),
     ).toBe(true);
