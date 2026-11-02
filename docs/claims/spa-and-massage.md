@@ -31,7 +31,7 @@ Dubai (invented, labelled Example).
 | 21 | Story: Kabsi asks before National Day; special hours and an offer post; "Sent to Google. I check that the hours and the offer show on your profile, then tell you." | K | K2; MASTERPLAN 30.15 section 3.1 | Holiday question five days before; tasks close with a check on Google. |
 | 22 | Story: 10 to 8, 20 percent, couples package | A | none | Invented example, labelled Example. |
 | 23 | Post ideas (four) | A | none | Ideas. |
-| 24 | Photo tip: "Kabsi flags a photo where a face is the main subject." | K | K1 7.4 | As above. |
+| 24 | Photo tip: "Never a client on the table: Kabsi checks light, focus and size, not faces." (Fix 1, 2 Nov 2026) | K | `knowledge/facts/13-faq.md` "What photos can I post?" | The check flags a photo that is dark, blurry, smaller than 720 by 720 pixels, or already added; "it does not check for faces". |
 | 25 | Photo tip: "Google takes video up to 30 seconds long." | G | G8 | As row 11. |
 | 26 | Photo tip "Reception and the way in": "A spa inside a hotel or a tower is hard to find." | A | none | Advice, not a count. |
 | 27 | Holiday: "UAE National Day, 2 and 3 December. A public holiday of two days." | T | https://u.ae/en/information-and-services/public-holidays-and-religious-affairs/public-holidays (H2) | "National Day 2 and 3 December (2 days)". |

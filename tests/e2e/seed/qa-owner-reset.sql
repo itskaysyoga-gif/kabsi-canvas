@@ -6,10 +6,14 @@ insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at, r
 values ('de300000-0000-4000-8000-0000000000a6', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
   'delivered+kabsi-qa@resend.dev', now(), '{"provider":"email","providers":["email"]}', '{"qa":"qa-1"}', now(), now(), false, '', '', '', '', '', '', '', '')
 on conflict (id) do nothing;
--- 2. Every time: take the fictional business "Kabsi QA Cafe" back to the first onboarding step with no agreement given, so the
--- journey can run again at the other size. Updates only (no delete), so the connector runs it without asking. The business, its
--- organisation and its members stay (they are fixtures); the onboarding answers it saved stay too.
-update public.locations set onboarding_step = 'access', consent_at = null, consent_text = null, status = 'onboarding'
+-- 2. Every time: take the fictional business "Kabsi QA Cafe" back to the start of today's four stages (Fix 1): business not
+-- confirmed (stage 2), no WhatsApp setup yes (stage 3), no agreement and no Google access (stage 4), so the journey can run
+-- again at the other size. Updates only (no delete), so the connector runs it without asking. The business, its organisation
+-- and its members stay (they are fixtures); the onboarding answers it saved stay too. The QA owner has no WhatsApp opt in.
+update public.locations set onboarding_step = 'access', consent_at = null, consent_text = null, status = 'onboarding',
+  manage_confirmed_at = null, setup_whatsapp_at = null
 where place_id = 'qa-place-kabsi-qa-cafe' and created_by = 'de300000-0000-4000-8000-0000000000a6'
-returning id, name, onboarding_step;
--- Expect one row, step access.
+  and access_granted_at is null
+returning id, name, onboarding_step, manage_confirmed_at, consent_at;
+-- Expect one row: step access, manage_confirmed_at and consent_at null. No row means the business has Google access
+-- (access_granted_at set), which this journey never gives; ask before clearing it.

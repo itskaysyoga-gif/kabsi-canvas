@@ -37,6 +37,11 @@ export type Industry = {
   plural: string;
   /** Finished pages are indexed and linked; the rest stay noindex and unlinked until Content 1 finishes them. */
   finished: boolean;
+  /**
+   * false keeps a finished page linked but noindex and out of the sitemap until docs/claims holds its claim sheet
+   * (Fix 1, lane R 2 Nov 2026: the dental clinic page). Leave it out once the sheet exists.
+   */
+  indexed?: false;
   lead: string;
   /** The search the free check is prefilled with. */
   keyword: string;
