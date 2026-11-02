@@ -1,0 +1,81 @@
+// Two Design 8 sections shared by Home, Pricing, How it works and the industry pages: "You stay in control." and the
+// closing free check. Their own small file so those pages do not load Home's module (Web 4b).
+import {
+  ArrowRight,
+  Check,
+  KeyRound,
+  Store,
+  ThumbsUp,
+  UserRound,
+  type LucideIcon,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { SCAN_LINE, TRIAL_LINE } from "@/lib/site";
+import { ScanBox } from "./scan-box";
+import { SiteLink } from "./site-link";
+import { CONTROL } from "./d8-data";
+
+const linkCls =
+  "press inline-flex min-h-11 items-center gap-1.5 font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1";
+
+function Arrow() {
+  return <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />;
+}
+
+export function Closing({ keyword, industry }: { keyword?: string; industry?: string }) {
+  return (
+    <section aria-labelledby="closing-title" className="border-t border-line bg-surface-1">
+      <div className="container-kb section-y">
+        <div className="mx-auto max-w-[44rem]">
+          <h2 id="closing-title" className="text-h2">
+            Start with a free check.
+          </h2>
+          <ScanBox
+            id="closing-scan"
+            className="mt-6"
+            keyword={keyword}
+            industry={industry}
+            note={SCAN_LINE}
+          />
+          <p className="mt-2 text-small text-text-2">{TRIAL_LINE}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- You stay in control ---------- */
+
+const CONTROL_ICONS: LucideIcon[] = [UserRound, KeyRound, ThumbsUp, Check, Store];
+
+export function Control() {
+  return (
+    <section aria-labelledby="control-h">
+      <div className="container-kb section-y grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+        <div>
+          <h2 id="control-h" className="text-h2">
+            You stay in control.
+          </h2>
+          <SiteLink to="/security" className={cn(linkCls, "mt-3 text-body")}>
+            See how to remove Kabsi on Security
+            <Arrow />
+          </SiteLink>
+        </div>
+        <ul className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+          {CONTROL.map((c, i) => {
+            const Icon = CONTROL_ICONS[i] ?? Check;
+            return (
+              <li key={c.title} className="flex gap-3">
+                <Icon className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden />
+                <div>
+                  <h3 className="text-title">{c.title}</h3>
+                  <p className="mt-0.5 text-body text-text-2">{c.text}</p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </section>
+  );
+}
