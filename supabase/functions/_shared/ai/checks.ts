@@ -135,7 +135,10 @@ export function replyChecks(i: CheckInput): Check[] {
     : /^(en|es|fr|de|it|pt|nl|franco|none)\b/.test(lang) ? false
     : !lang || lang === "unknown" ? (/\p{L}/u.test(i.reviewText) ? scriptLanguage(i.reviewText) === "ar" : null)
     : null;
-  add("reply_language", wantArabic == null || wantArabic === replyArabic, "The draft is not in the language of the review.");
+  // Live run 41433139236: Arabic replies kept the English sign-off ("The Corner Loaf team"), so the last line counts too.
+  const lastLine = reply.trim().split("\n").pop() ?? "";
+  const signOffOk = wantArabic !== true || /\p{Script=Arabic}/u.test(lastLine);
+  add("reply_language", (wantArabic == null || wantArabic === replyArabic) && signOffOk, "The draft is not in the language of the review, or its sign-off is not.");
   add("not_empty", reply.trim().length > 0 && reply.length <= 1200, "The draft is empty or too long.");
   return checks;
 }

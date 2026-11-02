@@ -134,6 +134,7 @@ Deno.test("checks (Fix 1, QA 2 H3): an Arabic review needs an Arabic reply, and 
   const ar = { reviewer: "Sami", reviewText: "انتظرت ساعة رغم إنو عندي حجز." };
   assert.ok(failed(m, "Hi Sami, thank you for telling us about your experience.", [], ar).includes("reply_language"));
   assert.ok(!failed(m, "شكرا لك يا سامي على ملاحظتك، ونأسف لسماع ذلك.\nفريق Hamra Bakery", [], ar).includes("reply_language"));
+  assert.ok(failed(m, "شكرا لك يا سامي على ملاحظتك، ونأسف لسماع ذلك.\nThe Hamra Bakery team", [], ar).includes("reply_language"), "an English sign-off on an Arabic reply");
   assert.ok(failed(m, "شكرا لك يا مايا على كلامك الجميل.").includes("reply_language"));
   assert.ok(!failed(m, "Merci Maya, ravis que le pain vous plaise.", [], { reviewText: "Super pain" }).includes("reply_language"));
   assert.ok(!failed(m, "Thanks Maya.", [], { reviewText: "⭐⭐⭐⭐⭐" }).includes("reply_language"));

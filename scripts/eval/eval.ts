@@ -262,9 +262,10 @@ export async function runCase(
 export function wrongLanguage(c: Case, reply: string): boolean {
   const letters = (re: RegExp) => reply.match(re)?.length ?? 0;
   const arabic = letters(/\p{Script=Arabic}/gu) >= Math.max(1, letters(/\p{Script=Latin}/gu));
-  if (c.language === "ar") return !arabic;
-  if (arabic) return true;
   const last = reply.trim().split("\n").pop() ?? "";
+  // Live run 41433139236: an Arabic reply signed "The Corner Loaf team" is in the wrong language too.
+  if (c.language === "ar") return !arabic || !/\p{Script=Arabic}/u.test(last);
+  if (arabic) return true;
   return (
     (c.language === "fr" || c.language === "es") && /^(the|from the)\b.*\bteam\b/i.test(last.trim())
   );

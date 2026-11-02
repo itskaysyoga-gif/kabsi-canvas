@@ -141,6 +141,10 @@ Deno.test(
       ),
     );
     assert.ok(
+      wrongLanguage(lang[0], "أهلاً سامي، شكراً لتقييمك الخمس نجوم ولوقتك.\nThe Corner Loaf team"),
+      "an Arabic reply signed in English (live run 41433139236)",
+    );
+    assert.ok(
       !wrongLanguage(
         lang[0],
         "شكرا يا سامي على النجوم الخمس، ونتمنى أن نراك مرة أخرى.\nفريق Corner Loaf",
