@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { keepFocus } from "@/lib/keep-focus";
 import { CONCIERGE_COPY } from "@/lib/concierge-copy";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -225,6 +226,12 @@ export function ReviewCard({
   const [done, setDone] = useState("");
   const [sent, setSent] = useState<{ publication: string; until: number } | null>(null);
   const [offers, setOffers] = useState<StyleOffer[]>([]);
+  // After Approve reply, Skip or Replied myself the buttons are gone: the line that says what happened takes focus, so a
+  // keyboard stays on this card (Fix 1, QA 2 L7).
+  const doneRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (done) keepFocus(doneRef.current);
+  }, [done]);
   // A draft that failed a check is shown with its problems, never as ready (K-14 step 6).
   const flagged =
     review.draft && !review.draft.safety_ok && review.draft.body ? review.draft : null;
@@ -374,7 +381,7 @@ export function ReviewCard({
       >
         <ReviewCardTop review={review} />
         <CardFoot>
-          <p className="flex items-center gap-2 text-body" role="status">
+          <p ref={doneRef} tabIndex={-1} className="flex items-center gap-2 text-body" role="status">
             <CheckCircle2 className="size-5 shrink-0 text-ok" aria-hidden="true" />
             {done}
           </p>
@@ -758,6 +765,13 @@ function ApprovedWindow({
 }) {
   const left = useSecondsLeft(until);
   const state = left > 0 ? "approved" : "sent";
+  // Approve reply is gone: its Undo takes focus, then the sent line once Undo goes (Fix 1, QA 2 L7).
+  const undoRef = useRef<HTMLButtonElement>(null);
+  const sentRef = useRef<HTMLParagraphElement>(null);
+  const counting = left > 0;
+  useEffect(() => {
+    keepFocus(counting ? undoRef.current : sentRef.current);
+  }, [counting]);
   return (
     <>
       <div className="mt-3">
@@ -777,6 +791,7 @@ function ApprovedWindow({
           <div className="flex flex-wrap items-center gap-3" role="status" aria-live="polite">
             <p className="min-w-0 flex-1 text-body text-text-1">{approvedLine(left)}</p>
             <Button
+              ref={undoRef}
               variant="secondary"
               size="md"
               disabled={busy}
@@ -787,7 +802,13 @@ function ApprovedWindow({
             </Button>
           </div>
         ) : (
-          <p className="text-small text-text-2" role="status" aria-live="polite">
+          <p
+            ref={sentRef}
+            tabIndex={-1}
+            className="text-small text-text-2"
+            role="status"
+            aria-live="polite"
+          >
             {SENT_LINE}
           </p>
         )}
