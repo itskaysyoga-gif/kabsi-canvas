@@ -38,7 +38,7 @@ The page before Web 4c (Cedar Lane Kitchen, Dubai) had no claim sheet; it is ret
 | 25 | FAQ "Can Kabsi change my menu on Google?" "Kabsi does not edit menu items on Google today. Send a photo of the new menu, and Kabsi adds it to your Google profile after your yes." | K | facts 04 ("services and the booking link are not edited by Kabsi yet"; editors come later); facts "Photos" | Menu items are not edited; photos are. |
 | 26 | FAQ "We get reviews on booking and delivery sites too. Does Kabsi reply there?" "No. Kabsi works only with your Google profile. Reviews people leave on Google, Kabsi does reply to." | K | facts 7.5 ("Kabsi works with Google only, not booking sites"); 2.1a Reviews | As said. |
 | 27 | FAQ "My manager runs the floor. Can they approve instead of me?" | K | facts 2.1d; 4.1 (team roles on Pro) | As the hair salon sheet, row 26. |
-| 28 | FAQ "Can Kabsi promise we come up first for 'restaurants near me'?" "No one can promise that. Kabsi shows where you show up, what changed, and what you can do next." | K | COPY 16 FAQ 4 | Word for word the shared answer. |
+| 28 | FAQ "Can Kabsi promise we come up first for 'restaurants near me'?" "No one can promise that. Kabsi shows what changed on your profile and what you can do next." | K | COPY 16 FAQ 4; facts 2.1a | The shared answer without "where you show up" (the nearby check is At launch; review finding). |
 | 29 | Cedar Lane Kitchen, Manchester; lamb shank; Sunday lunch | A | none | Invented, labelled Example. |
 
 ## Changed from Design 8 to the facts (lane R decision 1)

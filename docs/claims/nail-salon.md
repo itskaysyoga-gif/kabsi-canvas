@@ -80,7 +80,7 @@ Brighton (invented).
 | D4 | "Gel manicure, infill, soak off, pedicure. Google can show each service with a price and a description, so nobody has to phone to ask. Kabsi's Profile Coach lists what your profile is missing." | G, K | G6; facts 04 (Profile Coach) | As the barbershop sheet D5. |
 | D5 | "A review that names Mia gets a reply that passes the thanks on. Kabsi uses only the names on your team list." | K | K1 7.4 | Team names only. |
 | D6 | "Five days before each bank holiday Kabsi asks: normal hours, closed, or custom. Google keeps them as special hours." | K, G | facts "Holiday hours"; G4 | As said. |
-| D7 | Searches: nail salon near me, gel nails, manicure, acrylic nails, nail art; "People search for the service as often as the salon" | A | D1 ("nail salon" 74,000 UK) | Examples; "as often as" is wording about the list shown, no figure. The free check term is "nail salon", as D1 proposed. |
+| D7 | Searches: nail salon near me, gel nails, manicure, acrylic nails, nail art; "People search for the service as well as the salon" | A | D1 ("nail salon" 74,000 UK) | Examples; no frequency is claimed ("as often as" was changed after the review). The free check term is "nail salon", as D1 proposed. |
 | D8 | Free check example: Photos 4, Reviews 27 rated 4.7, Opening hours Shown, Website Shown | A, K | K-82 | Invented values; only what the check reads. |
 | D9 | "A post is the place for each new set, with a photo and a button to your own website. An offer or an event is a separate kind of post on Google. Google archives posts after six months unless a date range is set" | K, G | facts "Post checks"; G7 | Post types Updates, Offers, Events; "Posts older than 6 months are archived unless a date range is set." |
 | D10 | "Google asks for photos without significant alterations or excessive filters." "Photos need to be JPG or PNG, in focus and well lit." | G | G8 | As quoted. |
@@ -88,7 +88,7 @@ Brighton (invented).
 | D12 | "Google's own example of choosing a specific category is 'Nail salon' instead of 'Salon', and you cannot create a category of your own. Add a second category only for work you really do in the salon." | G | G1; G2 | "Nail salon" instead of "Salon"; you cannot create your own; use as few categories as possible. |
 | D13 | "When a review is unhappy about a nail that lifted, the reply asks the client to get in touch through the details on your profile, and never offers anything in return for changing the review." | K, G | K1 8.3; G10 | No incentive for changing a review. |
 | D14 | FAQ "Will Kabsi change my prices on Google without asking?" "No. Kabsi does not edit prices on Google today, and nothing reaches Google until you approve it." | K | facts 04 | Services are not edited yet; every change waits for approval. |
-| D15 | FAQ "What happens with a review about a reaction or an infection?" "Kabsi sends it to you with no draft and a way to reach a person" | K | K3 (sensitive reviews: health) | Health reviews go to the owner with no draft. |
+| D15 | FAQ "What happens with a review about a reaction or an infection?" "Kabsi shows it to you with no draft, so you decide how to answer." | K | K3; facts (a high-risk review has no draft) | Health reviews reach the owner with no draft. "a way to reach a person" was cut: that WhatsApp button is [COMING] (review finding). |
 | D16 | FAQ "Can I create a category called 'nail bar'?" "No. Google does not let a business create its own category. Pick the most specific one from Google's list." | G | G1 | You cannot create your own category. |
 
 Changed from Design 8 to the facts: "flags one where a face is the main subject" (the facts' photo section says Kabsi
@@ -96,3 +96,5 @@ does not look for faces yet: D3); "A booking link that works" (the booking butto
 changes a price once you say yes" and the FAQ "it prepares the change for your yes" (Kabsi does not edit services:
 D14); "promises a free redo only if you have said so" (D13, so a reply never reads as an incentive); the free check
 example rows "Last post on Google", "Reviews with no reply", "Bank holiday hours" (K-82: D8).
+
+Review fixes (Web 4c): "most people would otherwise phone" became "people would otherwise phone"; "Reviews in a nail salon often name the technician" became "When a review names the technician"; "never thanked by mistake" became "never thanked once you take their name off the list".

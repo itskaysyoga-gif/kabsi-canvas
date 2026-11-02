@@ -171,7 +171,8 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
               ))}
             </ul>
             <p className="mt-4 text-small text-text-2">
-              Searches like these. Kabsi checks the ones your customers use in your area.
+              Searches like these. On Pro, Kabsi shows the words people searched on Google to find
+              you.
             </p>
           </div>
           <div className="rounded-panel border border-line bg-surface-1 p-5 shadow-rest sm:p-7">

@@ -52,7 +52,7 @@ export const nailSalon: Industry = {
     },
     {
       q: "What happens with a review about a reaction or an infection?",
-      a: "Kabsi sends it to you with no draft and a way to reach a person, so you decide how to answer.",
+      a: "Kabsi shows it to you with no draft, so you decide how to answer.",
     },
     {
       q: "Does Kabsi message my clients?",
@@ -81,7 +81,7 @@ export const nailSalon: Industry = {
     },
     jobsTitle: "The Google jobs that come back for a nail salon.",
     searchText:
-      "People search for the service as often as the salon: gel nails, a manicure, nail art. Then they choose by the photos. Your services and your latest designs answer both.",
+      "People search for the service as well as the salon: gel nails, a manicure, nail art. Then they choose by the photos. Your services and your latest designs answer both.",
     check: [
       { label: "Photos", value: "4", tone: "warn" },
       { label: "Reviews", value: "27, rated 4.7", tone: "ok" },
@@ -101,8 +101,8 @@ export const nailSalon: Industry = {
       {
         title: "Prices, names and the right category",
         paras: [
-          "Google gives each service its own price and description. Keep the price out of the name, because Google rejects a custom name that has one. A list of your main services with prices answers the question most people would otherwise phone to ask.",
-          "Google's own example of choosing a specific category is 'Nail salon' instead of 'Salon', and you cannot create a category of your own. Add a second category only for work you really do in the salon. Reviews in a nail salon often name the technician, and a reply that passes the thanks on tells the next client who to book. Kabsi uses only the names on your team list, so a technician who has left is never thanked by mistake. When a review is unhappy about a nail that lifted, the reply asks the client to get in touch through the details on your profile, and never offers anything in return for changing the review.",
+          "Google gives each service its own price and description. Keep the price out of the name, because Google rejects a custom name that has one. A list of your main services with prices answers the question people would otherwise phone to ask.",
+          "Google's own example of choosing a specific category is 'Nail salon' instead of 'Salon', and you cannot create a category of your own. Add a second category only for work you really do in the salon. When a review names the technician, a reply that passes the thanks on tells the next client who to book. Kabsi uses only the names on your team list, so a technician who has left is never thanked once you take their name off the list. When a review is unhappy about a nail that lifted, the reply asks the client to get in touch through the details on your profile, and never offers anything in return for changing the review.",
         ],
       },
     ],

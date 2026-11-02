@@ -66,7 +66,7 @@ export const restaurant: Industry = {
     },
     {
       q: "Can Kabsi promise we come up first for 'restaurants near me'?",
-      a: "No one can promise that. Kabsi shows where you show up, what changed, and what you can do next.",
+      a: "No one can promise that. Kabsi shows what changed on your profile and what you can do next.",
     },
   ],
   guides: ["how-to-reply-to-google-reviews", "someone-changed-my-business-info-on-google"],

@@ -30,11 +30,11 @@ export const hairSalon: Industry = {
     },
     {
       title: "A new stylist, announced",
-      text: "When someone joins, add the name to your team list in Kabsi. A post that says who joined is ready for your yes, and replies can thank them from their first review.",
+      text: "When someone joins, add the name to your team list so replies can thank them. A post that says who joined can go up once you approve it.",
     },
     {
       title: "Replies that thank the stylist by name",
-      text: "A review that names Amber gets a reply that passes the thanks on. Kabsi uses only the names on your team list, so a stylist who left is never thanked by mistake.",
+      text: "A review that names Amber gets a reply that passes the thanks on. Kabsi uses only the names on your team list, so a stylist who left is never thanked once you take their name off the list.",
     },
     {
       title: "Your colour work, as posts",
@@ -94,8 +94,8 @@ export const hairSalon: Industry = {
       {
         title: "Services and stylists clients can see",
         paras: [
-          "A client picking a new salon wants to know two things: do you do what they want, and who will do it. Google can show each service with a price and a description, and you can add services of your own. Keep the price out of a custom service name, because Google rejects a name that has a price in it. Google can show the same kind of business under a different name in different countries, so read the category name in the box on your own profile.",
-          "When a stylist joins, two things change on Google: what you offer and who clients will ask for. Add the name to your team list in Kabsi, and a post that says who joined and what they do is ready for your yes. From then on, a review that names them gets a reply that passes the thanks on. Kabsi uses only the names on your list, so a stylist who left is never thanked by mistake.",
+          "A client picking a new salon wants to know two things: do you do what they want, and who will do it. Google can show each service with a price and a description, and you can add services of your own. Keep the price out of a custom service name, because Google rejects a name that has a price in it. Google's name for a category can differ by country (Google's own example shows 'Hairdresser'), so read the category name in the box on your own profile.",
+          "When a stylist joins, two things change on Google: what you offer and who clients will ask for. Add the name to your team list in Kabsi, and a post that says who joined and what they do can go up once you approve it. From then on, a review that names them gets a reply that passes the thanks on. Kabsi uses only the names on your list, so a stylist who left is never thanked once you take their name off the list.",
         ],
       },
       {

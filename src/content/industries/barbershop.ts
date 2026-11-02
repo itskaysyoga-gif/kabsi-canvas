@@ -38,7 +38,7 @@ export const barbershop: Industry = {
     },
     {
       title: "Thank the barber the review names",
-      text: "A review that says 'ask for Jay' gets a reply that passes the thanks on. Kabsi only uses the names on your team list, so a barber who left is never named.",
+      text: "A review that says 'ask for Jay' gets a reply that passes the thanks on. Kabsi only uses the names on your team list, so a barber who left is never named once you take their name off the list.",
     },
     {
       title: "A calm reply after the Saturday queue",
@@ -101,7 +101,7 @@ export const barbershop: Industry = {
         title: "Services, prices and the barber by name",
         paras: [
           "Google can show each service with a price and a description. Keep the price out of the service name itself: Google rejects a custom service name that has a price in it. A clear list (skin fade, beard line up, hot towel shave, the under 12 cut) answers the question people would otherwise phone to ask.",
-          "Reviews in a barbershop often name the barber. A reply that passes the thanks on tells the next reader who to ask for. Kabsi drafts it in your voice, using only what the review says and only the names on your team list. A reply never includes a phone number or a link, because Google can reject replies that do, and it never offers a free cut to change a review: Google does not allow anything in exchange for a review.",
+          "When a review names the barber, a reply that passes the thanks on tells the next reader who to ask for. Kabsi drafts it in your voice, using only what the review says and only the names on your team list. A reply never includes a phone number or a link, and it never offers a free cut to change a review: Google does not allow anything in exchange for a review.",
         ],
       },
     ],
