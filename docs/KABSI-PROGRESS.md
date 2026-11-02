@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 1 Nov 2026, Web 4. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 2 Nov 2026, Web 4b. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -62,8 +62,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 2 Nov 2026, Web 4b: the free check's states, result and /scan/CODE on Design 8 (part 1). Detail: `docs/progress/archive/2026-11-02-web4b.md`.
 - 1 Nov 2026, Web 4 (PRs 313 to 315): the Design 8 shell, Home, the free check's start page and the result's attribution. The other pages are Web 4b's (list in the archive). Detail: `docs/progress/archive/2026-11-01-web4.md`.
-- 1 Nov 2026, Check 2 (PR 311): suggestions while typing, Kabsi never picks for the visitor, "Not your business? Change it". Not yet seen live. Detail: `docs/progress/archive/2026-11-01-check2.md`.
 
 
 ## How a session updates this page
