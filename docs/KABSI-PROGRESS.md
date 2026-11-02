@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 2 Nov 2026, QA 2. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 2 Nov 2026, Fix 1. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -62,8 +62,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 2 Nov 2026, QA 2: full pre-launch check (Chromium and WebKit, 5 widths, QA journeys, AI live 2.93 USD). 0 launch-critical, 9 high (2 fixed), 16 low (2 fixed), rest in LATER; open: Nora's live gate (6 wording misses), Arabic reviews answered in English. Report `docs/qa/2026-11-02-qa2.md`, detail in the archive file.
-- 2 Nov 2026, Web 4c: FAQ, About, Security, Founding 25 and Partners (PR 320), the Businesses hub and the industry pages with claim sheets for hair salon and restaurant (PR 321) on Design 8. The Design 7 and 8 port is complete. Detail: `docs/progress/archive/2026-11-02-web4c.md`.
+- 2 Nov 2026, Fix 1: merged PRs 325 (Nora: live rule failures 6 to 3), 326 (AI Answers per day, 10 of 10 live; post stuffing), 328 (dental noindex, photo check, nearby line, onboarding spec), 329 (bot check on first touch, errors within 5 s, focus). Open: PR 327 (reply.v3) for lane R's Prompt gate; one full live Nora run. AI 2.96 of 3 USD. Detail: `docs/progress/archive/2026-11-02-fix1.md`.
+- 2 Nov 2026, QA 2: full pre-launch check (Chromium and WebKit, 5 widths, AI live 2.93 USD): 0 launch-critical, 9 high, 16 low. Report `docs/qa/2026-11-02-qa2.md`.
 
 
 ## How a session updates this page
