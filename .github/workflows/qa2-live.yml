@@ -1,0 +1,93 @@
+name: QA 2 live (by hand)
+
+# QA 2 (2 Nov 2026): the parts of the pre-launch check this machine's sessions cannot run, by hand only (Actions, "QA 2 live",
+# Run workflow). Never on push or schedule; EVAL_LIVE stays false and nothing here is a required check.
+#   webkit: the public pages and the free check's states on the live site in WebKit (Safari's engine) at 320, 390, 768,
+#           1280 and 1440 px (scripts/qa2/crawl.mjs). Reads only: the free check's Places, visibility and Turnstile calls are
+#           answered in the browser, so nothing is spent or kept.
+#   ai:     AI Answers 1's extraction on its ten fixtures and post drafting on five invented businesses through the real
+#           models (scripts/qa2/ai-live.ts), each part stopped at its own budget. Needs the secret ANTHROPIC_API_KEY.
+# Results are artifacts; docs/qa/2026-11-02-qa2.md is the report.
+on:
+  workflow_dispatch:
+    inputs:
+      webkit:
+        description: Run the WebKit pass
+        type: boolean
+        default: true
+      ai:
+        description: Run the live AI checks
+        type: boolean
+        default: false
+      budget_answers:
+        description: Budget for the AI Answers extraction, US dollars
+        required: true
+        default: "0.4"
+      budget_posts:
+        description: Budget for post drafting, US dollars
+        required: true
+        default: "0.6"
+
+permissions:
+  contents: read
+
+jobs:
+  webkit:
+    name: Public pages in WebKit
+    if: inputs.webkit
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Install
+        run: npm ci --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund
+      - name: Install WebKit
+        run: npx playwright install --with-deps webkit
+      - name: Crawl kabsi.co
+        run: node scripts/qa2/crawl.mjs --browser webkit --out qa2-out --concurrency 4 --full-widths 390,1440
+      - name: Crawl kabsi.co as a visitor from the UK (the cookie bar)
+        run: node scripts/qa2/crawl.mjs --browser webkit --out qa2-out --geo GB --widths 320,390,1440 --only home,pricing,scan,scan-result,founding,for-hair-salon --full-widths 390
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: qa2-webkit
+          path: qa2-out
+          retention-days: 14
+
+  ai:
+    name: Live AI checks (real models)
+    if: inputs.ai
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: v2.x
+      - name: AI Answers extraction and post drafting
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BUDGET_ANSWERS: ${{ inputs.budget_answers }}
+          BUDGET_POSTS: ${{ inputs.budget_posts }}
+        # Like scripts/eval/gate.sh: the functions and the script next to a deno.json with nodeModulesDir.
+        run: |
+          scratch="$(mktemp -d)"
+          mkdir -p "$scratch/supabase/functions" "$scratch/scripts/qa2" "$scratch/tests/fixtures/ai-accuracy"
+          cp -r supabase/functions/. "$scratch/supabase/functions/"
+          cp scripts/qa2/ai-live.ts "$scratch/scripts/qa2/"
+          cp tests/fixtures/ai-accuracy/answers.json "$scratch/tests/fixtures/ai-accuracy/"
+          echo '{"nodeModulesDir":"auto"}' > "$scratch/deno.json"
+          cd "$scratch"
+          deno run --allow-env --allow-read --allow-write=qa2-ai-live.json --allow-net scripts/qa2/ai-live.ts --budget-answers "$BUDGET_ANSWERS" --budget-posts "$BUDGET_POSTS" | tee "$GITHUB_WORKSPACE/qa2-ai-live.txt"
+          cp qa2-ai-live.json "$GITHUB_WORKSPACE/"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: qa2-ai-live
+          path: |
+            qa2-ai-live.json
+            qa2-ai-live.txt
+          retention-days: 30
