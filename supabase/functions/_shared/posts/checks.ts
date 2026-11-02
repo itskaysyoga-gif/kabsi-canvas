@@ -34,6 +34,8 @@ export type CheckContext = {
   category: string | null;
   categoryLabel: string | null;
   city: string | null;
+  // The business's own name: it never counts toward keyword stuffing ("Iron Works Gym" may say its name, QA 2 H5).
+  businessName?: string | null;
   country: string | null;
   // Posts of the last 90 days (published, waiting or prepared), to keep each one different.
   recent: string[];
@@ -94,6 +96,25 @@ function ownLink(url: string, website: string | null): boolean {
   return host === own || host.endsWith(`.${own}`);
 }
 
+/**
+ * The text with the business's name taken out at most twice, word by word as count() reads it (review of PR 326):
+ * only a name with a word of its own (not just the category or the city, so "Gym" or "Denver Gym" keeps counting
+ * that word), and a name said a third time still counts.
+ */
+const withoutName = (text: string, name: string, phrases: (string | null)[]) => {
+  const p = words(name), w = words(text);
+  const plain = new Set(phrases.flatMap((x) => (x ? words(x) : [])));
+  if (!p.length || p.every((x) => plain.has(x))) return text;
+  const kept: string[] = [];
+  let removed = 0;
+  for (let i = 0; i < w.length; ) {
+    if (removed < 2 && i + p.length <= w.length && p.every((x, j) => w[i + j] === x)) {
+      i += p.length;
+      removed++;
+    } else kept.push(w[i++]);
+  }
+  return kept.join(" ");
+};
 const count = (text: string, phrase: string) => {
   const p = words(phrase);
   if (!p.length) return 0;
@@ -128,9 +149,10 @@ export function checkPost(f: PostFields, c: CheckContext): Issue[] {
   if (SUPERLATIVE.test(all)) add("superlative", "Say what you do, not that it is the best. Google does not allow claims like that.");
   if (CLAIM.test(all)) add("claim", "No health, safety or results promises.");
 
-  // Keyword stuffing: the category or the city more than twice.
+  // Keyword stuffing: the category or the city more than twice, not counting the business's own name (Fix 1).
+  const own = c.businessName?.trim() ? withoutName(all, c.businessName, [c.categoryLabel, c.city]) : all;
   for (const phrase of [c.categoryLabel, c.city]) {
-    if (phrase && count(all, phrase) > 2) add("stuffing", `"${phrase}" appears more than twice. Say it once, the way you would to a customer.`);
+    if (phrase && count(own, phrase) > 2) add("stuffing", `"${phrase}" appears more than twice. Say it once, the way you would to a customer.`);
   }
 
   const near = c.recent.find((r) => similarity(text, r) > 0.7);

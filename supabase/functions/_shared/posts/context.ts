@@ -7,7 +7,7 @@ import type { CheckContext } from "./checks.ts";
 export async function checkContext(db: SupabaseClient, locationId: string, ownerText = "", exceptPost?: string): Promise<CheckContext> {
   const since = new Date(Date.now() - 90 * 86400_000).toISOString();
   const [{ data: loc }, card, { data: site }, { data: recent }] = await Promise.all([
-    db.from("locations").select("category, category_label, area, country").eq("id", locationId).single(),
+    db.from("locations").select("name, category, category_label, area, country").eq("id", locationId).single(),
     loadCard(db, locationId, "posts"),
     db.from("knowledge_facts").select("value").eq("location_id", locationId).eq("slot", "profile.website").is("superseded_by", null).maybeSingle(),
     db.from("gbp_posts").select("id, body").eq("location_id", locationId).neq("state", "skipped").gte("created_at", since).limit(100),
@@ -19,6 +19,7 @@ export async function checkContext(db: SupabaseClient, locationId: string, owner
     category: loc?.category ?? null,
     categoryLabel: loc?.category_label ?? null,
     city: loc?.area ?? null,
+    businessName: loc?.name ?? null,
     country: loc?.country ?? null,
     recent: (recent ?? []).filter((r) => r.id !== exceptPost && r.body).map((r) => String(r.body)),
   };
