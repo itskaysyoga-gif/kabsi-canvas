@@ -1,8 +1,9 @@
 // The task state on Hours, Posts and Photos (master plan 30.15 section 3.1, V4): a pill, the track and the line under
 // it, from the publication Kabsi sent (src/lib/task-feed.ts), or from the row's own state while no publication is found.
 // "On Google" only when Kabsi saw it there (verified); a row alone never says so. Plus the 10 second Undo bar.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { Undo2 } from "lucide-react";
+import { keepFocus } from "@/lib/keep-focus";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { approvedLine, type OwnerState } from "@/lib/task-state";
@@ -77,6 +78,20 @@ export function UndoBar({
   }, []);
   const left = Math.max(0, Math.ceil((until - now) / 1000));
   const waiting = later && left > 60;
+  // Approve is gone: its Undo takes focus, then the line once Undo goes (Fix 1, QA 2 L7).
+  const undoRef = useRef<HTMLButtonElement>(null);
+  const lineRef = useRef<HTMLParagraphElement>(null);
+  const counting = left > 0;
+  // When the countdown ends, focus follows only if Undo itself had it (review of PR WEBFORMS): no jump for a reader
+  // elsewhere on the page.
+  const undoHadFocus = useRef(false);
+  useLayoutEffect(() => {
+    if (counting) undoHadFocus.current = document.activeElement === undoRef.current;
+  });
+  useEffect(() => {
+    if (counting) keepFocus(undoRef.current);
+    else if (undoHadFocus.current) keepFocus(lineRef.current);
+  }, [counting]);
   return (
     <div
       className="rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5"
@@ -85,11 +100,12 @@ export function UndoBar({
     >
       <TaskTrack state={left > 0 ? "approved" : "sent"} />
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <p className="min-w-0 flex-1 text-body text-text-1">
+        <p ref={lineRef} tabIndex={-1} className="min-w-0 flex-1 text-body text-text-1">
           {waiting ? later : left > 0 ? approvedLine(left) : "Approved. On its way to Google."}
         </p>
         {left > 0 ? (
           <Button
+            ref={undoRef}
             variant="secondary"
             size="md"
             loading={busy}
