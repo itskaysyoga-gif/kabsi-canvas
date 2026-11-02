@@ -69,7 +69,9 @@ describe("the error state within 5 seconds", () => {
     let n = 0;
     const calls: typeof fetch = (input, init) =>
       n++ === 0
-        ? new Promise((_, reject) => setTimeout(() => reject(new TypeError("Failed to fetch")), 1000))
+        ? new Promise((_, reject) =>
+            setTimeout(() => reject(new TypeError("Failed to fetch")), 1000),
+          )
         : silent(input, init);
     const at = await msUntilError(readWith(withReadTimeout(calls, BASE)));
     expect(at).not.toBeNull();
@@ -78,7 +80,9 @@ describe("the error state within 5 seconds", () => {
 
   it("a read that answers in time is not cut off", async () => {
     const slowOk: typeof fetch = () =>
-      new Promise((resolve) => setTimeout(() => resolve(new Response("[]")), READ_TIMEOUT_MS - 500));
+      new Promise((resolve) =>
+        setTimeout(() => resolve(new Response("[]")), READ_TIMEOUT_MS - 500),
+      );
     const res = withReadTimeout(slowOk, BASE)(READ, { method: "GET" });
     await vi.advanceTimersByTimeAsync(READ_TIMEOUT_MS);
     expect((await res).ok).toBe(true);

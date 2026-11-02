@@ -29,7 +29,9 @@ export function withReadTimeout(
 ): typeof fetch {
   return (input, init) => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-    const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
+    const method = (
+      init?.method ?? (input instanceof Request ? input.method : "GET")
+    ).toUpperCase();
     if (!readsOf(url, method, base)) return fetchImpl(input, init);
     const controller = new AbortController();
     const outer = init?.signal;
@@ -46,9 +48,10 @@ export function withReadTimeout(
         reject(e);
       }, ms);
     });
-    return Promise.race([fetchImpl(input, { ...init, signal: controller.signal }), timedOut]).finally(
-      () => clearTimeout(timer),
-    );
+    return Promise.race([
+      fetchImpl(input, { ...init, signal: controller.signal }),
+      timedOut,
+    ]).finally(() => clearTimeout(timer));
   };
 }
 

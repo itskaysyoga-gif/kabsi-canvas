@@ -381,7 +381,12 @@ export function ReviewCard({
       >
         <ReviewCardTop review={review} />
         <CardFoot>
-          <p ref={doneRef} tabIndex={-1} className="flex items-center gap-2 text-body" role="status">
+          <p
+            ref={doneRef}
+            tabIndex={-1}
+            className="flex items-center gap-2 text-body"
+            role="status"
+          >
             <CheckCircle2 className="size-5 shrink-0 text-ok" aria-hidden="true" />
             {done}
           </p>

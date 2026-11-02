@@ -2,7 +2,8 @@
 // the visitor first touches the form (Fix 1, lane R 2 Nov 2026; QA 2 H6), never at page start. Framework free, so a test
 // can prove the script is not asked for before the first touch.
 
-export const TURNSTILE_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+export const TURNSTILE_SRC =
+  "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 
 let loading: Promise<void> | null = null;
 
