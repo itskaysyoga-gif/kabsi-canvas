@@ -46,26 +46,28 @@ function WeekVisual() {
         <p className="text-title font-bold">This week at Hollis Hair</p>
         <ExampleBadge />
       </div>
-      <ol className="relative mt-5 space-y-4 ps-6">
+      <div className="relative mt-5">
         <span
           aria-hidden
           className="absolute start-[0.4375rem] top-2 bottom-2 w-px bg-line-strong"
         />
-        {WEEK_GLANCE.map((w, i) => (
-          <li key={w.day} className={cn("relative", popCls)} style={stagger(i, 250, 220)}>
-            <span
-              aria-hidden
-              className="absolute -start-6 top-1.5 size-3.5 rounded-full border-2 border-kb-paper bg-band"
-            />
-            <p className="text-label font-bold text-text-2">{w.day}</p>
-            <p className="text-body font-semibold">{w.what}</p>
-            <p className="mt-0.5 inline-flex items-center gap-1.5 text-small text-ok">
-              <Check className="size-4" strokeWidth={2.5} aria-hidden />
-              {w.state}
-            </p>
-          </li>
-        ))}
-      </ol>
+        <ol className="space-y-4 ps-6">
+          {WEEK_GLANCE.map((w, i) => (
+            <li key={w.day} className={cn("relative", popCls)} style={stagger(i, 250, 220)}>
+              <span
+                aria-hidden
+                className="absolute -start-6 top-1.5 size-3.5 rounded-full border-2 border-kb-paper bg-band"
+              />
+              <p className="text-label font-bold text-text-2">{w.day}</p>
+              <p className="text-body font-semibold">{w.what}</p>
+              <p className="mt-0.5 inline-flex items-center gap-1.5 text-small text-ok">
+                <Check className="size-4" strokeWidth={2.5} aria-hidden />
+                {w.state}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </div>
       <figcaption className="sr-only">
         An Example week: details checked every day, the Monday receipt, a reply approved on Tuesday,
         bank holiday hours chosen on Friday.
@@ -162,46 +164,49 @@ export function D8HowItWorks() {
             Hollis Hair, an invented salon in Bristol. Each message is what Kabsi sends; each answer
             is the owner's.
           </p>
-          <ol className="relative mt-10 space-y-8 ps-12 sm:ps-16 lg:mx-auto lg:max-w-[52rem]">
+          <div className="relative mt-10 lg:mx-auto lg:max-w-[52rem]">
             <span
               aria-hidden
               className="absolute start-5 top-2 bottom-2 w-px bg-line-strong sm:start-7"
             />
-            {WEEK.map((w) => {
-              const Icon = w.icon;
-              return (
-                <li key={w.day} className="relative">
-                  <span className="absolute -start-12 top-0 grid size-10 place-items-center rounded-full border border-line-strong bg-surface-1 sm:-start-16 sm:size-14">
-                    <Icon className="size-5" aria-hidden />
-                  </span>
-                  <p className="text-label font-bold text-text-2">{w.day}</p>
-                  <h3 className="mt-0.5 text-h3">{w.title}</h3>
-                  <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem] md:items-start">
-                    <div className="rounded-card bg-surface-2 p-4">
-                      <p className="text-label font-bold text-text-2">Kabsi</p>
-                      <p className="mt-1 text-body">{w.kabsi}</p>
-                      {w.buttons && (
-                        <p className="mt-3 flex flex-wrap gap-1.5" aria-hidden>
-                          {w.buttons.map((b) => (
-                            <span
-                              key={b}
-                              className="rounded-full border border-line-strong bg-surface-1 px-3 py-1 text-small font-semibold"
-                            >
-                              {b}
-                            </span>
-                          ))}
-                        </p>
-                      )}
+            <ol className="space-y-8 ps-12 sm:ps-16">
+              {WEEK.map((w) => {
+                const Icon = w.icon;
+                return (
+                  <li key={w.day} className="relative">
+                    <span className="absolute -start-12 top-0 grid size-10 place-items-center rounded-full border border-line-strong bg-surface-1 sm:-start-16 sm:size-14">
+                      <Icon className="size-5" aria-hidden />
+                    </span>
+                    <p className="text-label font-bold text-text-2">{w.day}</p>
+                    <h3 className="mt-0.5 text-h3">{w.title}</h3>
+                    <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem] md:items-start">
+                      <div className="rounded-card bg-surface-2 p-4">
+                        <p className="text-label font-bold text-text-2">Kabsi</p>
+                        <p className="mt-1 text-body">{w.kabsi}</p>
+                        {w.buttons && (
+                          <p className="mt-3 flex flex-wrap gap-1.5">
+                            <span className="sr-only">Buttons: </span>
+                            {w.buttons.map((b) => (
+                              <span
+                                key={b}
+                                className="rounded-full border border-line-strong bg-surface-1 px-3 py-1 text-small font-semibold"
+                              >
+                                {b}
+                              </span>
+                            ))}
+                          </p>
+                        )}
+                      </div>
+                      <p className="text-body md:pt-4">
+                        <span className="font-bold">You: </span>
+                        <span className="text-text-2">{w.you}</span>
+                      </p>
                     </div>
-                    <p className="text-body md:pt-4">
-                      <span className="font-bold">You: </span>
-                      <span className="text-text-2">{w.you}</span>
-                    </p>
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
           {!WHATSAPP_ON && (
             <p className="mt-8 text-small text-text-2 lg:mx-auto lg:max-w-[52rem]">
               {WHATSAPP_LAUNCH_LINE}

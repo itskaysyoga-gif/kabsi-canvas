@@ -272,7 +272,7 @@ export function D8Pricing() {
       <section aria-labelledby="offers-h" className="border-t border-line">
         <div className="container-kb section-y">
           <h2 id="offers-h" className="sr-only">
-            Two founding offers
+            Founding offers
           </h2>
           <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
             {/* The founding price shows only while places remain (facts, Price 1). */}
@@ -304,10 +304,18 @@ export function D8Pricing() {
               {f25Left === 0 ? (
                 <p className="mt-3 text-body font-bold">All 25 places are taken.</p>
               ) : (
-                <SiteLink to="/founding" className={cn(linkCls, "mt-2 text-body")}>
-                  Apply for a place
-                  <ArrowRight className="size-4" aria-hidden />
-                </SiteLink>
+                <>
+                  {/* The real count only (decision 2): nothing while it is unknown. */}
+                  {f25Left !== null && (
+                    <p className="mt-3 text-body font-bold">
+                      {f25Left} of {places?.total ?? FOUNDING25_TOTAL} places left.
+                    </p>
+                  )}
+                  <SiteLink to="/founding" className={cn(linkCls, "mt-2 text-body")}>
+                    Apply for a place
+                    <ArrowRight className="size-4" aria-hidden />
+                  </SiteLink>
+                </>
               )}
             </div>
           </div>

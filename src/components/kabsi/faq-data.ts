@@ -58,7 +58,7 @@ export const BILLING_FAQ: { q: string; a: string }[] = [
   FAQ[7]!,
   {
     q: "Which cancel is which?",
-    a: "Cancelling on the Plan page or by asking Kabsi ends your plan at the end of the period you paid for, and everything keeps working until then. Cancelling in Creem's own billing page ends the plan at once.",
+    a: "Cancelling on the Plan page ends your plan at the end of the period you paid for, and everything keeps working until then. Cancelling in Creem's own billing page ends the plan at once.",
   },
   {
     q: "Can I get a refund?",
