@@ -10,9 +10,8 @@ import { LEGACY_INDUSTRY_MOVES } from "@/lib/industry-redirects";
 // here, on demand, and the head reads what the loader returns (the crumbs and the index flag), never the content itself.
 export const Route = createFileRoute("/for/$trade")({
   loader: async ({ params }) => {
-    const { MOVED, crumbsFor, hub, hubIndexed, industry, industryIndexed } = await import(
-      "@/content/industries"
-    );
+    const { MOVED, crumbsFor, hub, hubIndexed, industry, industryIndexed } =
+      await import("@/content/industries");
     const moved = MOVED[params.trade] ?? LEGACY_INDUSTRY_MOVES[params.trade];
     if (moved) throw redirect({ to: "/for/$trade", params: { trade: moved }, statusCode: 301 });
     // crumbsFor gives Businesses and the page; pageHead adds Home itself.
