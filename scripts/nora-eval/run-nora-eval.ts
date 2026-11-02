@@ -54,8 +54,15 @@ const all = args.includes("--with-28")
   : QUESTIONS;
 const n = Number(flag("--sample") ?? all.length);
 // Fix 1: --ids en16,en26 asks only those questions (a cheap check of a fix before the full run); the gate expects that many.
-const ids = flag("--ids")?.split(",").map((x) => x.trim()).filter(Boolean);
-const only = ids?.length ? all.filter((q) => ids.includes(q.id)) : n >= all.length ? all : sample(n);
+const ids = flag("--ids")
+  ?.split(",")
+  .map((x) => x.trim())
+  .filter(Boolean);
+const only = ids?.length
+  ? all.filter((q) => ids.includes(q.id))
+  : n >= all.length
+    ? all
+    : sample(n);
 const judge =
   args.includes("--judge") && !stub ? makeJudge(process.env.ANTHROPIC_API_KEY!) : undefined;
 const spent = () => costMicros(noraModel, used) + (judge?.cost() ?? 0);

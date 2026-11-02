@@ -242,8 +242,7 @@ export async function runCase(
     }
     const shown = r.ready ? r.text : "";
     const healthCase =
-      c.category === "healthcare" ||
-      (c.category === "language" && business.industry === "health");
+      c.category === "healthcare" || (c.category === "language" && business.industry === "health");
     r.invented = !healthCase && matches(shown, c.expect.forbid);
     r.health = healthCase && matches(shown, c.expect.forbid);
     r.wrongLanguage = !!shown && wrongLanguage(c, shown);
@@ -266,7 +265,9 @@ export function wrongLanguage(c: Case, reply: string): boolean {
   if (c.language === "ar") return !arabic;
   if (arabic) return true;
   const last = reply.trim().split("\n").pop() ?? "";
-  return (c.language === "fr" || c.language === "es") && /^(the|from the)\b.*\bteam\b/i.test(last.trim());
+  return (
+    (c.language === "fr" || c.language === "es") && /^(the|from the)\b.*\bteam\b/i.test(last.trim())
+  );
 }
 
 export type Score = {

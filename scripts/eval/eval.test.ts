@@ -108,18 +108,52 @@ Deno.test("a failing stub is blocked, on every rule the gate holds", async () =>
   assert.ok(r.score.highRiskRouting < 1, "high-risk routing");
 });
 
-Deno.test("Fix 1: the language cases are QA 2's four reviews, and a reply in the wrong language is caught", () => {
-  const lang = CASES.filter((c) => c.category === "language");
-  const qa2 = ["I-025", "I-026", "M-020", "M-018"].map((id) => CASES.find((c) => c.id === id)!);
-  assert.deepEqual(lang.map((c) => c.comment), qa2.map((c) => c.comment));
-  assert.deepEqual(lang.map((c) => c.language), ["ar", "ar", "ar", "fr"]);
-  // QA 2's actual drafts (run 41411522439).
-  assert.ok(wrongLanguage(lang[0], "Hi Sami, thank you for the five stars. We hope to see you again.\nThe Corner Loaf team"));
-  assert.ok(wrongLanguage(lang[3], "Bonjour Rémi, merci d'avoir pris le temps de nous écrire.\nThe Northside Dental team"));
-  assert.ok(!wrongLanguage(lang[3], "Bonjour Rémi, merci d'avoir pris le temps de nous écrire.\nL'équipe Northside Dental"));
-  assert.ok(!wrongLanguage(lang[0], "شكرا يا سامي على النجوم الخمس، ونتمنى أن نراك مرة أخرى.\nفريق Corner Loaf"));
-  assert.ok(wrongLanguage({ ...lang[3], language: "en" }, "شكرا يا سامي على النجوم الخمس، ونتمنى أن نراك مرة أخرى."));
-});
+Deno.test(
+  "Fix 1: the language cases are QA 2's four reviews, and a reply in the wrong language is caught",
+  () => {
+    const lang = CASES.filter((c) => c.category === "language");
+    const qa2 = ["I-025", "I-026", "M-020", "M-018"].map((id) => CASES.find((c) => c.id === id)!);
+    assert.deepEqual(
+      lang.map((c) => c.comment),
+      qa2.map((c) => c.comment),
+    );
+    assert.deepEqual(
+      lang.map((c) => c.language),
+      ["ar", "ar", "ar", "fr"],
+    );
+    // QA 2's actual drafts (run 41411522439).
+    assert.ok(
+      wrongLanguage(
+        lang[0],
+        "Hi Sami, thank you for the five stars. We hope to see you again.\nThe Corner Loaf team",
+      ),
+    );
+    assert.ok(
+      wrongLanguage(
+        lang[3],
+        "Bonjour Rémi, merci d'avoir pris le temps de nous écrire.\nThe Northside Dental team",
+      ),
+    );
+    assert.ok(
+      !wrongLanguage(
+        lang[3],
+        "Bonjour Rémi, merci d'avoir pris le temps de nous écrire.\nL'équipe Northside Dental",
+      ),
+    );
+    assert.ok(
+      !wrongLanguage(
+        lang[0],
+        "شكرا يا سامي على النجوم الخمس، ونتمنى أن نراك مرة أخرى.\nفريق Corner Loaf",
+      ),
+    );
+    assert.ok(
+      wrongLanguage(
+        { ...lang[3], language: "en" },
+        "شكرا يا سامي على النجوم الخمس، ونتمنى أن نراك مرة أخرى.",
+      ),
+    );
+  },
+);
 
 Deno.test("today's prompts pass with a stub that does only what its prompts say", async () => {
   assert.ok(

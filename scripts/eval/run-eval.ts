@@ -49,7 +49,10 @@ const judge =
 const chosen = args.includes("--cut") ? cut() : size ? sample(size) : undefined;
 // Fix 1: --languages ar,fr,es,arabizi keeps only the reviews in those languages (a small, cheaper rerun on the 3 USD
 // budget); the gate then expects that many cases.
-const langs = flag("--languages")?.split(",").map((l) => l.trim()).filter(Boolean);
+const langs = flag("--languages")
+  ?.split(",")
+  .map((l) => l.trim())
+  .filter(Boolean);
 const list = langs?.length ? (chosen ?? CASES).filter((c) => langs.includes(c.language)) : chosen;
 const spent = () => meterCost(meter) + (judge?.cost() ?? 0);
 const { results, score, gate, stopped } = await runAll(model, {
