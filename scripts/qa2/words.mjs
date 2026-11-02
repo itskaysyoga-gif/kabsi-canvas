@@ -10,8 +10,9 @@ const strip = (h) =>
     .replace(/<style[\s\S]*?<\/style>/gi, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&#39;|&rsquo;/g, "'");
+    .replace(/&#39;|&rsquo;/g, "'")
+    // &amp; last, so "&amp;#39;" stays the text "&#39;" (no double unescaping).
+    .replace(/&amp;/g, "&");
 const files = [
   ...readdirSync("docs/email-previews")
     .filter((f) => f !== "index.html")
