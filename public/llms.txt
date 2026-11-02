@@ -43,7 +43,6 @@ Key facts:
 - [Barbershops](https://kabsi.co/for/barbershop)
 - [Nail salons](https://kabsi.co/for/nail-salon)
 - [Spas and massage](https://kabsi.co/for/spa-and-massage)
-- [Dental clinics](https://kabsi.co/for/dental-clinic)
 - [Medical and aesthetic clinics](https://kabsi.co/for/medical-and-aesthetic-clinic)
 - [Physiotherapy](https://kabsi.co/for/physiotherapy)
 - [Restaurants](https://kabsi.co/for/restaurant)

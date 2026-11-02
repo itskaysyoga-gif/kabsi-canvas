@@ -226,7 +226,7 @@ Only what you tell Kabsi. It never invents prices, offers or dates.
 It suggests words customers use for businesses like yours: your category and area, the services you listed, and (once connected) search terms Google reports for your profile. The button returns when Kabsi writes posts for you, once its AI credit is on.
 
 **What photos can I post?**
-Clear, real photos of your place, your team, your work and what you sell. Kabsi's check flags dark, blurry and small photos (under 720 by 720 pixels) and photos you already added. Kabsi removes the location data and other hidden details from every photo before it goes to Google.
+Clear, real photos of your place, your team, your work and what you sell. Kabsi's photo check runs in Kabsi's own code (no AI model sees your photos) and flags four things: a photo that is dark, blurry, smaller than Google's 720 by 720 pixels, or looks like one you already added. It does not look at what is in the photo yet: it does not check for faces, children, screens, flyers or other brands' logos, and it does not choose the photo's category (you do). So share your work, not your customers, and ask before anyone is shown. Kabsi removes the location data and other hidden details from every photo before it goes to Google.
 
 **Can I set holiday hours?**
 Yes. On Hours, choose the dates, Closed or different hours, review what Google will show, and tap Confirm and save to Google. Kabsi sends them to Google within a few minutes.
