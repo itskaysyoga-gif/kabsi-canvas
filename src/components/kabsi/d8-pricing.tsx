@@ -1,4 +1,5 @@
-// Pricing on Design 8 (Web 4b, lane R's approval of 1 Nov 2026): the hero with the 14 days on a calendar, who each plan
+// Pricing on Design 8 (Web 4b, lane R's approval of 1 Nov 2026; Polish 2 on 3 Nov: the calendar became one strip, each
+// card names its four most valuable built things and help is a small line): the hero with the 14 days, who each plan
 // is for, a comparison of built features only (PLAN_ROWS, Price 1), the trial from day 1 to cancelling, the founding
 // price and Founding 25 explained once each (the real counts only), and the billing questions. Every billing line is
 // checked against knowledge/kabsi-facts.md (lane R decision 1; COPY.md 38).
@@ -55,44 +56,25 @@ const TRIAL_STEPS = [
   },
 ] as const;
 
-function TrialVisual() {
-  const days = Array.from({ length: 14 }, (_, i) => i + 1);
+/** The trial in one strip (Polish 2, lane R decision 5: the 14-day calendar became one compact strip). */
+function TrialStrip() {
   return (
     <figure className="relative rounded-panel border border-line bg-surface-1 p-5 shadow-float sm:p-7">
-      <div className="flex items-baseline justify-between gap-3">
-        <p className="text-title font-bold">Your 14 days of Pro</p>
-        <p className="text-small text-text-2">No card</p>
+      <p className="text-title font-bold">Your 14 days of Pro</p>
+      <div className="mt-4 flex items-center gap-2 text-label font-bold" aria-hidden>
+        <span className="rounded-full bg-kb-black px-2.5 py-1 text-kb-white">Day 1</span>
+        <span className={cn("h-1.5 flex-1 rounded-full bg-surface-3", popCls)} style={stagger(0)} />
+        <span className="rounded-full bg-kb-black px-2.5 py-1 text-kb-white">Day 14</span>
       </div>
-      <ol className="mt-5 grid grid-cols-7 gap-1.5" aria-label="The trial, day by day">
-        {days.map((d) => {
-          const edge = d === 1 || d === 14;
-          return (
-            <li
-              key={d}
-              className={cn(
-                "grid aspect-square place-items-center rounded-inner text-small font-bold",
-                edge ? "bg-kb-black text-kb-white" : "bg-surface-2 text-text-2",
-                popCls,
-              )}
-              style={stagger(d, 150, 45)}
-            >
-              <span className="sr-only">Day </span>
-              {d}
-            </li>
-          );
-        })}
-      </ol>
-      <dl className="mt-5 grid gap-3 text-small sm:grid-cols-2">
-        <div>
-          <dt className="font-bold">Day 1</dt>
-          <dd className="text-text-2">Starts when Kabsi's access works.</dd>
-        </div>
-        <div>
-          <dt className="font-bold">Day 14</dt>
-          <dd className="text-text-2">Choose a plan, or stop. Nothing is charged by itself.</dd>
-        </div>
-      </dl>
-      <div className="mt-5 flex gap-2 border-t border-line pt-4">
+      <ul className="mt-4 space-y-1.5 text-small">
+        {TRIAL_STRIP.map((t) => (
+          <li key={t} className="flex gap-2">
+            <Check className="mt-0.5 size-4 shrink-0 text-ok" strokeWidth={2.5} aria-hidden />
+            {t}
+          </li>
+        ))}
+      </ul>
+      <div className="mt-4 flex gap-2 border-t border-line pt-4">
         <p className="flex-1 rounded-inner bg-surface-2 px-3 py-2 text-small">
           <span className="block font-bold">Essentials</span>${PLAN_PRICES.essentialsMonthly} a
           month
@@ -104,6 +86,13 @@ function TrialVisual() {
     </figure>
   );
 }
+
+/** The three facts of the trial (facts 4.3 and 4.6). */
+const TRIAL_STRIP = [
+  "Day 1 is the day Kabsi's access to your Google profile works.",
+  "No card.",
+  "On day 14 choose a plan or stop. Nothing is charged by itself.",
+] as const;
 
 function Cell({ v }: { v: string }) {
   if (v === "Yes")
@@ -138,7 +127,7 @@ export function D8Pricing() {
 
   return (
     <>
-      <PageHero hero={PRICING_HERO} under={TRIAL_LINE} visual={<TrialVisual />} />
+      <PageHero hero={PRICING_HERO} under={TRIAL_LINE} visual={<TrialStrip />} />
 
       <section aria-labelledby="plans-h" className="border-t border-line bg-surface-1">
         <div className="container-kb section-y">
@@ -187,10 +176,23 @@ export function D8Pricing() {
                     left={left}
                     className="mt-1 text-small text-text-2"
                   />
-                  <div className="mt-6 rounded-inner border border-line bg-surface-1 p-4">
-                    <p className="text-small font-bold">{p.help}</p>
-                    <p className="mt-1 text-label text-text-2">{WORKING_HOURS}</p>
-                  </div>
+                  {/* Polish 2 (decision 5): the four most valuable built things; help is a small line. */}
+                  {p.lead && <p className="mt-6 text-small font-bold">{p.lead}</p>}
+                  <ul className={cn("space-y-2.5", p.lead ? "mt-2" : "mt-6")}>
+                    {p.top.map((t) => (
+                      <li key={t} className="flex gap-2.5 text-body">
+                        <Check
+                          className="mt-1 size-4 shrink-0 text-ok"
+                          strokeWidth={2.5}
+                          aria-hidden
+                        />
+                        {t}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-5 text-label text-text-2">
+                    {p.help} {WORKING_HOURS}
+                  </p>
                   <div className="mt-auto pt-6">
                     <ButtonLink to="/get-started" full variant={pro ? "primary" : "secondary"}>
                       Start free

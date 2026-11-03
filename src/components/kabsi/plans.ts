@@ -18,6 +18,10 @@ export const PLANS: {
   work: string[];
   /** The help line of 30.21 section 2. */
   help: string;
+  /** Pricing's card (Polish 2, lane R decision 5 of 3 Nov 2026): the four most valuable built things, checked against
+   * plan_limits() in the database (posts_per_month 2 or weekly_posts, coach_actions, team_roles) and the search terms
+   * report (Pro). The nearby check's weekly or monthly runs are not listed until it opens. */
+  top: [string, string, string, string];
   badge?: string;
 }[] = [
   {
@@ -37,6 +41,12 @@ export const PLANS: {
       "A Results Report every Monday, with one next step",
     ],
     help: HELP_LINES.essentials,
+    top: [
+      "A reply ready for every new review",
+      "Your details checked every day, with an alert when something changes",
+      "Holiday hours and 2 posts a month, made ready",
+      "Your weekly report every Monday, with one next step",
+    ],
   },
   {
     id: "pro",
@@ -55,6 +65,12 @@ export const PLANS: {
       "A guide to report a review that breaks Google's rules",
     ],
     help: HELP_LINES.pro,
+    top: [
+      "A post every week, not 2 a month",
+      "Team roles and approval rules: choose who can say yes",
+      "Profile Coach actions: the change made for you after your yes",
+      "The words people searched on Google to find you, every month",
+    ],
     badge: "Weekly posts",
   },
 ];
@@ -74,7 +90,8 @@ export const PLAN_ROWS: [string, string, string][] = [
   ["Your photos, made ready for Google", "Yes", "Yes"],
   ["Your review link, a QR card and a ready message", "Yes", "Yes"],
   ["Profile Coach suggestions", "Yes", "Yes"],
-  // Lane R, 30 Oct 2026: the Coach's actions (built, Pro only) are named in this table only, not on the cards.
+  // Lane R, 30 Oct 2026: the Coach's actions (built, Pro only) were named in this table only; from 3 Nov (Polish 2,
+  // decision 5) Pro's card names them too.
   ["Profile Coach actions: the change made for you after your yes", "No", "Yes"],
   ["Results Report every Monday, with one next step", "Yes", "Yes"],
   ["Team roles and approval rules", "No", "Yes"],
