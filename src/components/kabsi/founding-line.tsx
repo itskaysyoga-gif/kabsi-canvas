@@ -15,6 +15,14 @@ export const FOUNDING_LINE_KEY = "kabsi-founding-line";
 const HIDDEN_CLASS = "founding-line-hidden";
 const BEFORE_PAINT = `try{var v=localStorage.getItem("${FOUNDING_LINE_KEY}");if(v==="hidden"||v==="closed")document.documentElement.classList.add("${HIDDEN_CLASS}")}catch(e){}`;
 
+/** The pages that show the Founding 25 line. */
+export function foundingLinePage(path: string): boolean {
+  const p = path.replace(/\/+$/, "") || "/";
+  return (
+    p === "/" || p === "/pricing" || p === "/how-it-works" || p === "/for" || p.startsWith("/for/")
+  );
+}
+
 function remember(value: "hidden" | "closed" | null) {
   try {
     if (value) {
@@ -32,7 +40,9 @@ function remember(value: "hidden" | "closed" | null) {
 export function FoundingLine() {
   const places = useFoundingPlaces();
   const [hidden, setHidden] = useState(false);
-  const onFounding = useRouterState({ select: (s) => s.location.pathname === "/founding" });
+  // Polish 2 (lane R decision 7 of 3 Nov 2026): only on Home, Pricing, How it works and the industry pages; never on
+  // legal, security, about, partners, sign-in or Founding 25 itself.
+  const shown = useRouterState({ select: (s) => foundingLinePage(s.location.pathname) });
   useEffect(() => {
     try {
       if (window.localStorage.getItem(FOUNDING_LINE_KEY) === "hidden") setHidden(true);
@@ -54,7 +64,7 @@ export function FoundingLine() {
     if (closed && v !== "closed") remember("closed");
     if (!closed && v === "closed") remember(null);
   }, [places, closed]);
-  if (hidden || onFounding || closed) return null;
+  if (hidden || !shown || closed) return null;
   const hide = () => {
     setHidden(true);
     remember("hidden");

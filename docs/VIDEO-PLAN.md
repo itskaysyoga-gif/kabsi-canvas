@@ -150,3 +150,47 @@ Commit and push. Do not post anywhere.
 1. Now: W3b re-record (Rashid), W1 and W8 (the tool), W5 script (lane R) then recording (Rashid).
 2. With Web 2: W2 and W6. With Content 1: W4 for the finished industry pages. With Email 1: W7.
 3. After the launch gate: S1 to S7 at three a week, then A1, A2 and A3 in that order.
+
+## 9. The product video on the website (Polish 2, lane R decision 9 of 3 Nov 2026; plan only, nothing bought)
+
+The rules of section 1 apply. This is the website's product video (the 15 to 25 second loop); the catalogue in
+section 4 is unchanged. Founder video plan: kabsi-design-studio docs/VIDEO-PLAN.md section 2 (Rashid records it).
+
+
+- **Purpose.** In 15 to 25 seconds, the whole loop for a cold visitor from a UK ad (lane R decision 9 of 3 Nov 2026):
+  a detail found, a reply or post prepared, the owner's yes, Kabsi seeing it live on Google, and the weekly report.
+- **Where (the slots are in the code, hidden until a real video exists).**
+  - Home: `<div data-slot="product-video" hidden />` in the three-beats band, `Beats()` in
+    `src/components/kabsi/d8-home.tsx` ("Kabsi prepares. You approve. Kabsi follows through."), shown inline, muted,
+    with a poster.
+  - How it works: `<div data-slot="product-video" hidden />` right under the hero (`PageHero`) in
+    `src/components/kabsi/d8-how.tsx`, before "A week with Kabsi".
+  - Social: Reels and Stories (9:16).
+- **Length and format.** 20 seconds (15 to 25 allowed). Site: 16:9 and 1:1, MP4 (H.264) under 2 MB plus WebM,
+  1080 px, poster JPEG under 80 KB, loads on tap or when in view (never in the first load: Home's script and LCP
+  budgets hold). Reels: 9:16, 1080 by 1920, safe area 250 px top and bottom, captions inside it.
+- **What must be real.** Kabsi's own screens as built (the WhatsApp-style messages, the Kabsi website screens, the
+  state words Approved, Sent to Google, Live on Google, the weekly report's three parts), Kabsi's mark, fonts and
+  colours, the line "Kabsi is independent and not affiliated with Google."
+- **What may be Examples.** The business (Hollis Hair, Bristol, or Fade and Co, Leeds), the reviewer, the review, the
+  post, the hours, the report's numbers. An "Example" badge stays on screen whenever an example shows.
+- **Storyboard** (16:9 timing; 9:16 stacks the same frames):
+
+| # | Time | Picture | Caption (burned in) |
+| --- | --- | --- | --- |
+| 1 | 0.0 to 2.5 s | A salon at opening time (licensed scene, no one presented as a customer), phone face up on the counter | Your business on Google. |
+| 2 | 2.5 to 6.0 s | A detail found: "Hours. Google shows you closed on bank holiday Monday. You told me 10:00 to 16:00." with Use my hours and Keep Google's | Kabsi checks your details every day. |
+| 3 | 6.0 to 10.0 s | Work prepared: a new review arrives and the reply is ready; then a post with the owner's photo, "Late appointments every Thursday" | A reply or a post, ready for you. |
+| 4 | 10.0 to 12.5 s | The owner's yes: a thumb taps Yes; "Approved" with Undo | Nothing goes live without your yes. |
+| 5 | 12.5 to 15.5 s | Kabsi sees it live: the status moves Approved, Sent to Google, Live on Google, then "See it on Google" | Kabsi checks it is live on Google. |
+| 6 | 15.5 to 18.0 s | The weekly report card: what Kabsi did (6 replies live on Google, 1 post), what waits for your yes, one next step | Every Monday, your weekly report. |
+| 7 | 18.0 to 20.0 s | Kabsi mark, "Check my business free", kabsi.co | Free check at kabsi.co. Free for 14 days once connected. No card. |
+
+  Sound: a light music bed and taps, no voice in the site version; the Reels version may add an English voice reading
+  the captions, with the same words.
+- **How it is made.** Render the site's components (the hero phone and report card in d8-home.tsx, the demonstration
+  on How it works) frame by frame in this repo (Playwright screenshots or a small canvas recorder), cut in any editor.
+  No stock footage of a "customer". Nothing is bought for it.
+- **Captions file.** WebVTT with the seven lines above, one per shot.
+- **Thumbnail / poster.** Frame 5 (Live on Google done), the Example badge visible, the caption "Kabsi prepares. You
+  approve. Kabsi follows through." No face, no star rating, no Google logo.

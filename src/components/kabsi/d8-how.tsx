@@ -149,7 +149,7 @@ export function D8HowItWorks() {
   return (
     <>
       <PageHero hero={HOW_HERO} under={TRIAL_LINE} visual={<WeekVisual />} />
-      {/* The product video goes here once a real one exists. Hidden until then. */}
+      {/* The product video goes here once a real one exists (docs/VIDEO-PLAN.md, section 9). Hidden until then. */}
       <div data-slot="product-video" hidden />
 
       <section aria-labelledby="week-h" className="border-t border-line bg-surface-1">

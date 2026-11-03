@@ -17,7 +17,8 @@ export type StreamItem = {
   time: string;
 };
 
-/** The hero phone: four different jobs (Example). The hours buttons are lane R decision 3. */
+/** The hero phone: three different jobs (Example; Polish 2 moved the weekly report to its own card, HERO_REPORT). The
+ * hours buttons are lane R decision 3 of 1 Nov. */
 export const HERO_STREAM: StreamItem[] = [
   {
     id: "hours",
@@ -43,13 +44,15 @@ export const HERO_STREAM: StreamItem[] = [
     photo: true,
     time: "12:40",
   },
-  {
-    id: "receipt",
-    label: "Weekly report",
-    text: "Last week: 6 replies live on Google, 1 post, details checked every day. One next step: add 3 photos of the team at work.",
-    time: "09:00",
-  },
 ];
+
+/** The weekly report beside the hero phone (Polish 2, lane R decision 3 of 3 Nov 2026; Example). */
+export const HERO_REPORT = {
+  title: "Your weekly report",
+  when: "Every Monday",
+  done: ["6 replies live on Google", "1 post", "Details checked every day"],
+  next: "Add 3 photos of the team at work.",
+} as const;
 
 /** The work Kabsi does (Design 7). "At launch" follows the existing switches (lane R decision 6). */
 export type Job = { title: string; text: string; atLaunch?: boolean };
