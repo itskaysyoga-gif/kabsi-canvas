@@ -1,9 +1,9 @@
 // The hero lines a route's head needs (Design 8, Web 4). Their own tiny file: route heads stay in the shared bundle on
 // every page (Lean 1), so a head must never import a page component or a page's data.
 
-/** Home's supporting line (Design 7 line 1, picked). The WhatsApp switch adds WHATSAPP_LAUNCH_LINE while it is off. */
+/** Home's supporting line (lane R, Polish 2, 3 Nov 2026: the owner's benefit first, then how it works). */
 export const HOME_LINE =
-  "Kabsi checks your Google profile every day, prepares the replies, posts and fixes it needs, and asks for your yes on WhatsApp.";
+  "Your details kept right, every review answered and your profile kept fresh, without doing it yourself. Kabsi prepares the work and asks for your yes before anything goes live.";
 
 /** The free check's hero. */
 export const CHECK_HERO = {
@@ -20,7 +20,7 @@ export const PRICING_HERO = {
 /** How it works' hero (Design 7 headline, Design 8 line). */
 export const HOW_HERO = {
   title: "Kabsi prepares. You approve. Kabsi follows through.",
-  line: "One week at an Example salon in Bristol: the daily watch, a new review, holiday hours asked in time, and the Monday receipt.",
+  line: "One week at an Example salon in Bristol: the daily watch, a new review, holiday hours asked in time, and your weekly report.",
 } as const;
 
 /** FAQ's hero (Design 8; the headline approved). */

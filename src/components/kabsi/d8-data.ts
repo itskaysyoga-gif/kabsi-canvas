@@ -45,7 +45,7 @@ export const HERO_STREAM: StreamItem[] = [
   },
   {
     id: "receipt",
-    label: "Monday receipt",
+    label: "Weekly report",
     text: "Last week: 6 replies live on Google, 1 post, details checked every day. One next step: add 3 photos of the team at work.",
     time: "09:00",
   },
@@ -54,34 +54,35 @@ export const HERO_STREAM: StreamItem[] = [
 /** The work Kabsi does (Design 7). "At launch" follows the existing switches (lane R decision 6). */
 export type Job = { title: string; text: string; atLaunch?: boolean };
 export const JOBS: Job[] = [
+  // Polish 2 (lane R, 3 Nov 2026): each job leads with the owner's benefit, then how Kabsi does it.
   {
-    title: "Your details, watched every day",
+    title: "Your details kept right",
     // Facts 2 (Google Protection): Kabsi tells the owner after Google shows a change; "you hear first" said more.
-    text: "Hours, phone, website and address. If Google shows something different, Kabsi tells you and you choose.",
+    text: "Kabsi checks your hours, phone, website and address every day. If Google shows something different, Kabsi tells you and you choose.",
   },
   {
-    title: "A reply for every review",
-    text: "In your voice, using only what the review says. You read it, then say Yes, Edit or Skip.",
+    title: "Every review answered",
+    text: "A reply in your voice, using only what the review says. You read it, then say Yes, Edit or Skip.",
   },
   {
-    title: "Posts and photos, made ready",
+    title: "Your profile kept fresh",
     text: "A new service, late opening, a quiet week. Kabsi writes the post and readies your photo.",
   },
   {
-    title: "Holiday hours, asked in time",
+    title: "The right hours on every holiday",
     text: "Five days before a bank holiday Kabsi asks what you will do, so Google shows the right hours.",
   },
   {
-    title: "The Monday receipt",
-    text: "What Kabsi did, what waits for your yes, and one next step.",
+    title: "Your weekly report",
+    text: "Every Monday: what Kabsi did, what waits for your yes, and one next step.",
   },
   {
-    title: "Where you show up nearby",
+    title: "See where you show up nearby",
     text: "Kabsi searches Google Maps from places around you, like a customer standing there.",
     atLaunch: true,
   },
   {
-    title: "What AI assistants say",
+    title: "Know what AI assistants say",
     text: "When ChatGPT names you with the wrong closing time, Kabsi shows you the exact sentence.",
     atLaunch: true,
   },
@@ -116,17 +117,18 @@ export const CONTROL = [
 /**
  * The Example free check result (Design 8, Hollis Hair). Changed to the facts (lane R decision 1): the free check reads
  * only Google's public data, which has no review replies, holiday hours or post dates (K-82, the check says so itself),
- * so the Example leads with a finding the check can really make and lists only what it reads.
+ * so the Example leads with a finding the check can really make and lists only what it reads. Polish 2 (lane R, 3 Nov
+ * 2026): the first finding is one Kabsi really acts on today (missing hours); Kabsi cannot add a missing website.
  */
 export const EXAMPLE_RESULT = {
   business: "Hollis Hair",
   address: "14 Gloucester Road, Bristol",
   first: {
-    fact: "No website is shown on Google.",
-    action: "Kabsi asks you to confirm the address and prepares the change for you to approve.",
+    fact: "No opening hours are shown on Google.",
+    action: "Kabsi asks you for your hours and sends them to Google once you say yes.",
   },
   found: [
-    { label: "Opening hours", value: "Shown" },
+    { label: "Website", value: "Shown" },
     { label: "Phone", value: "Shown" },
     { label: "Photos", value: "23" },
   ],

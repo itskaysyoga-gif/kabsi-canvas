@@ -111,7 +111,7 @@ export function HeroStream({
   items = HERO_STREAM,
   business = HERO_BUSINESS,
   photo = PHOTOS.salonStudio,
-  caption = "Example messages from Kabsi to an invented salon: different opening hours on Google, a reply ready for a review, a post ready with a photo, and the Monday receipt.",
+  caption = "Example messages from Kabsi to an invented salon: different opening hours on Google, a reply ready for a review, a post ready with a photo, and the weekly report.",
 }: {
   items?: StreamItem[];
   business?: string;

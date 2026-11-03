@@ -34,7 +34,7 @@ const linkCls =
 
 const WEEK_GLANCE = [
   { day: "Every day", what: "Details checked", state: "Done" },
-  { day: "Monday", what: "The receipt for last week", state: "Sent" },
+  { day: "Monday", what: "Your weekly report", state: "Sent" },
   { day: "Tuesday", what: "Reply ready for Chloe's review", state: "You said Yes" },
   { day: "Friday", what: "Bank holiday hours asked", state: "You chose Closed" },
 ] as const;
@@ -69,7 +69,7 @@ function WeekVisual() {
         </ol>
       </div>
       <figcaption className="sr-only">
-        An Example week: details checked every day, the Monday receipt, a reply approved on Tuesday,
+        An Example week: details checked every day, the weekly report, a reply approved on Tuesday,
         bank holiday hours chosen on Friday.
       </figcaption>
     </figure>
@@ -97,7 +97,7 @@ const WEEK: WeekRow[] = [
   {
     day: "Monday, 09:00",
     icon: ClipboardList,
-    title: "The Monday receipt",
+    title: "Your weekly report",
     kabsi:
       "Last week: 6 replies live on Google, 1 post, details checked every day. One next step: add 3 photos of the team at work.",
     you: "Read it in a minute.",

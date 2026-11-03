@@ -54,7 +54,7 @@ export function ResultPreview({ className }: { className?: string }) {
         <p className="mt-1 text-small text-text-1">{r.ai.line}</p>
       </div>
       <figcaption className="sr-only">
-        An Example free check result for an invented salon: no website on Google, opening hours and
+        An Example free check result for an invented salon: no opening hours on Google, website and
         phone shown, 23 photos, and an AI answer with a different closing time.
       </figcaption>
     </figure>

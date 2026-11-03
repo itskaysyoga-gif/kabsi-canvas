@@ -23,7 +23,8 @@ const base: Snapshot = {
     {
       tone: "warning",
       fact: "No website is shown on Google.",
-      action: "Kabsi asks you to confirm the address and prepares the change for you to approve.",
+      action:
+        "Add your website on your Google profile. Once you connect, Kabsi checks it every day with your other details.",
     },
     {
       tone: "neutral",
@@ -64,7 +65,7 @@ describe("the free check result on Design 8", () => {
   });
   it("day one lists the check's own actions, findings first, at most four", () => {
     const l = dayOne(base);
-    expect(l[0]).toMatch(/^Kabsi asks you to confirm/);
+    expect(l[0]).toMatch(/^Add your website on your Google profile/);
     expect(l[1]).toMatch(/^Once you connect/);
     expect(l.length).toBeLessThanOrEqual(4);
   });
