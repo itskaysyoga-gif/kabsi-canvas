@@ -946,10 +946,14 @@ export function LiveResult({
                 </div>
               ))}
             </dl>
-            <SiteLink to="/founding" className={cn(resultLinkCls, "mt-2")}>
-              Or apply for Founding 25: three months of Pro, free
-              <ArrowRight className="size-4" aria-hidden />
-            </SiteLink>
+            <p className="mt-3 text-small">
+              <SiteLink
+                to="/founding"
+                className="font-semibold underline decoration-text-3 underline-offset-4 hover:decoration-text-1"
+              >
+                Or apply for Founding 25: three months of Pro, free
+              </SiteLink>
+            </p>
           </section>
           <SideLinks />
         </aside>
