@@ -36,6 +36,7 @@ import {
   getFreeCheck,
   joinWaitlist,
   startFreeCheck,
+  useFoundingPlaces,
   type FreeCheck,
   type StartedCheck,
 } from "@/lib/public-api";
@@ -738,6 +739,8 @@ export function LiveResult({
   change: { q: string; keyword: string | null; industry: string | null };
 }) {
   const navigate = useNavigate();
+  // Founding 25 shows only while places remain (the real count; nothing while it is unknown). Polish 2 review.
+  const f25 = useFoundingPlaces();
   const check = useCheck(started);
   const waitlist = !!started && "state" in started && !("code" in started);
   const term = check?.term ?? keyword ?? s.category?.toLowerCase() ?? null;
@@ -946,14 +949,16 @@ export function LiveResult({
                 </div>
               ))}
             </dl>
-            <p className="mt-3 text-small">
-              <SiteLink
-                to="/founding"
-                className="font-semibold underline decoration-text-3 underline-offset-4 hover:decoration-text-1"
-              >
-                Or apply for Founding 25: three months of Pro, free
-              </SiteLink>
-            </p>
+            {f25 && f25.left > 0 && (
+              <p className="mt-3 text-small">
+                <SiteLink
+                  to="/founding"
+                  className="font-semibold underline decoration-text-3 underline-offset-4 hover:decoration-text-1"
+                >
+                  Or apply for Founding 25: three months of Pro, free
+                </SiteLink>
+              </p>
+            )}
           </section>
           <SideLinks />
         </aside>

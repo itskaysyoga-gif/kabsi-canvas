@@ -90,7 +90,8 @@ export const PLAN_ROWS: [string, string, string][] = [
   ["Your photos, made ready for Google", "Yes", "Yes"],
   ["Your review link, a QR card and a ready message", "Yes", "Yes"],
   ["Profile Coach suggestions", "Yes", "Yes"],
-  // Lane R, 30 Oct 2026: the Coach's actions (built, Pro only) are named in this table only, not on the cards.
+  // Lane R, 30 Oct 2026: the Coach's actions (built, Pro only) were named in this table only; from 3 Nov (Polish 2,
+  // decision 5) Pro's card names them too.
   ["Profile Coach actions: the change made for you after your yes", "No", "Yes"],
   ["Results Report every Monday, with one next step", "Yes", "Yes"],
   ["Team roles and approval rules", "No", "Yes"],

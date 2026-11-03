@@ -74,8 +74,7 @@ function TrialStrip() {
           </li>
         ))}
       </ul>
-      {/* On a phone the plan cards follow at once, so the two prices show from 640 px only. */}
-      <div className="mt-4 hidden gap-2 border-t border-line pt-4 sm:flex">
+      <div className="mt-4 flex gap-2 border-t border-line pt-4">
         <p className="flex-1 rounded-inner bg-surface-2 px-3 py-2 text-small">
           <span className="block font-bold">Essentials</span>${PLAN_PRICES.essentialsMonthly} a
           month
