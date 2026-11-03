@@ -191,14 +191,18 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
                 <p className="mt-2 text-small text-text-2">{d.checkText}</p>
                 <ul className="mt-4 divide-y divide-line">
                   {d.check.map((c) => (
-                    <li key={c.label} className="flex min-h-12 items-center gap-3 py-2 text-small">
-                      {c.tone === "ok" ? (
-                        <CircleCheck className="size-4 shrink-0 text-ok" aria-hidden />
-                      ) : (
-                        <CircleAlert className="size-4 shrink-0 text-warn" aria-hidden />
-                      )}
-                      <span className="flex-1">{c.label}</span>
-                      <span className="text-end font-semibold">{c.value}</span>
+                    <li key={c.label} className="py-2 text-small">
+                      <div className="flex min-h-8 items-center gap-3">
+                        {c.tone === "ok" ? (
+                          <CircleCheck className="size-4 shrink-0 text-ok" aria-hidden />
+                        ) : (
+                          <CircleAlert className="size-4 shrink-0 text-warn" aria-hidden />
+                        )}
+                        <span className="flex-1">{c.label}</span>
+                        <span className="text-end font-semibold">{c.value}</span>
+                      </div>
+                      {/* Polish 2: every problem leads to a next step Kabsi can do today. */}
+                      {c.next && <p className="mt-1 ps-7 text-text-2">{c.next}</p>}
                     </li>
                   ))}
                 </ul>

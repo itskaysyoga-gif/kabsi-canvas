@@ -83,12 +83,17 @@ export const barbershop: Industry = {
       "People look for a barber when they want a cut today, so they search for what is near and open. Your hours, your services and your latest replies are what they read before they walk in.",
     check: [
       { label: "Opening hours", value: "Shown", tone: "ok" },
-      { label: "Reviews", value: "64, rated 4.6", tone: "ok" },
-      { label: "Website", value: "Missing", tone: "warn" },
+      {
+        label: "Reviews",
+        value: "7, rated 4.6",
+        tone: "warn",
+        next: "Kabsi gives you a review link and a QR card to hand to every customer.",
+      },
       { label: "Photos", value: "10 or more", tone: "ok" },
+      { label: "Phone", value: "Shown", tone: "ok" },
     ],
     checkText:
-      "For a barbershop the free check starts with what a walk-in customer relies on: your hours, your reviews and a way to find out more. Example result for an invented shop in Leeds.",
+      "For a barbershop the free check starts with what a walk-in customer relies on: your hours, your reviews and your photos. Example result for an invented shop in Leeds.",
     guide: [
       {
         title: "Hours a walk-in customer can trust",

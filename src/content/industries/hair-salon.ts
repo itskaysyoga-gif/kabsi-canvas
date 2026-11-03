@@ -83,13 +83,18 @@ export const hairSalon: Industry = {
     searchText:
       "People choose a salon by the work they see and the stylist they read about. They search for a salon nearby or for the service itself, then look at photos, services and replies.",
     check: [
-      { label: "Website", value: "Missing", tone: "warn" },
-      { label: "Opening hours", value: "Shown", tone: "ok" },
+      {
+        label: "Opening hours",
+        value: "Missing",
+        tone: "warn",
+        next: "Kabsi asks you for your hours and sends them to Google once you say yes.",
+      },
       { label: "Reviews", value: "38, rated 4.8", tone: "ok" },
       { label: "Photos", value: "10 or more", tone: "ok" },
+      { label: "Website", value: "Shown", tone: "ok" },
     ],
     checkText:
-      "For a hair salon the free check starts with the link a client looks for before booking, then your hours, reviews and photos. Example result for an invented salon in Bristol.",
+      "For a hair salon the free check starts with your hours, because a client checks you are open before booking, then your reviews, photos and website. Example result for an invented salon in Bristol.",
     guide: [
       {
         title: "Services and stylists clients can see",

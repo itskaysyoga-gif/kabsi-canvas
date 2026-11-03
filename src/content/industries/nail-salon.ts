@@ -83,7 +83,12 @@ export const nailSalon: Industry = {
     searchText:
       "People search for the service as well as the salon: gel nails, a manicure, nail art. Then they choose by the photos. Your services and your latest designs answer both.",
     check: [
-      { label: "Photos", value: "4", tone: "warn" },
+      {
+        label: "Photos",
+        value: "4",
+        tone: "warn",
+        next: "Kabsi asks for photos of your work from your phone, checks each one and sends it to Google once you say yes.",
+      },
       { label: "Reviews", value: "27, rated 4.7", tone: "ok" },
       { label: "Opening hours", value: "Shown", tone: "ok" },
       { label: "Website", value: "Shown", tone: "ok" },

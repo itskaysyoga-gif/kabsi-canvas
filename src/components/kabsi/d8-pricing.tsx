@@ -41,7 +41,7 @@ const TRIAL_STEPS = [
   {
     when: "Day 1",
     title: "Your 14 days of Pro start when access works",
-    text: "Replies, details watched, posts, the Monday receipt. Everything waits for your yes.",
+    text: "Replies, details watched, posts, your weekly report. Everything waits for your yes.",
   },
   {
     when: "Day 14",

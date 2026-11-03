@@ -60,20 +60,22 @@ const ORDER: Record<Tone, number> = { danger: 0, warning: 1, neutral: 2 };
 
 // Only facts the public Places data holds become danger or warning flags. It has no review replies, holiday hours, posts
 // or photo dates (K-82), so those three say so in a neutral flag and promise only what Kabsi does after the owner
-// connects. Nothing here widens the Places field mask (tests hold the mask).
+// connects. Nothing here widens the Places field mask (tests hold the mask). Polish 2 (lane R, 3 Nov 2026): each finding's
+// next step is one Kabsi can do today; a phone, website, category or open status Kabsi cannot set for the owner names
+// the owner's own step and what Kabsi then does (the daily check, the Profile Coach).
 export function flags(s: Omit<Snapshot, "flags" | "checklist" | "cached">): Flag[] {
   const out: Flag[] = [];
   if (s.business_status === "CLOSED_PERMANENTLY") {
     out.push({ tone: "danger", fact: "Google shows this business as permanently closed.", action: "If that is wrong, Kabsi shows you the steps to ask Google to correct it." });
   } else if (s.business_status === "CLOSED_TEMPORARILY") {
-    out.push({ tone: "danger", fact: "Google shows this business as temporarily closed.", action: "If you are open, Kabsi prepares the update for you to approve." });
+    out.push({ tone: "danger", fact: "Google shows this business as temporarily closed.", action: "If you are open again, change it on your Google profile. Once you connect, Kabsi checks it every day and tells you if Google shows something different." });
   }
   if (s.hours.length === 0) {
-    out.push({ tone: "danger", fact: "No opening hours are shown on Google.", action: "Kabsi asks you for your hours and prepares them for you to approve." });
+    out.push({ tone: "danger", fact: "No opening hours are shown on Google.", action: "Kabsi asks you for your hours and sends them to Google once you say yes." });
   }
-  if (!s.phone) out.push({ tone: "warning", fact: "No phone number is shown on Google.", action: "Kabsi asks you to confirm it and prepares the change for you to approve." });
-  if (!s.website) out.push({ tone: "warning", fact: "No website is shown on Google.", action: "Kabsi asks you to confirm the address and prepares the change for you to approve." });
-  if (!s.category) out.push({ tone: "warning", fact: "No category is shown on Google.", action: "Kabsi suggests the closest category for you to approve." });
+  if (!s.phone) out.push({ tone: "warning", fact: "No phone number is shown on Google.", action: "Add your phone number on your Google profile. Once you connect, Kabsi checks it every day with your other details." });
+  if (!s.website) out.push({ tone: "warning", fact: "No website is shown on Google.", action: "Add your website on your Google profile. Once you connect, Kabsi checks it every day with your other details." });
+  if (!s.category) out.push({ tone: "warning", fact: "No category is shown on Google.", action: "Choose your main category on your Google profile. Once you connect, Kabsi's Profile Coach lists what else your profile is missing." });
   if (!s.has_photos) out.push({ tone: "warning", fact: "Google shows no photos for this business.", action: "Kabsi asks for photos from your phone and prepares them for you to approve." });
   if (s.review_count !== null && s.review_count < 10) {
     out.push({

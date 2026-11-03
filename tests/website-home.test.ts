@@ -127,11 +127,12 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     expect(MAIN_CTA).toBe("Check my business free");
     expect(SCAN_LINE).toBe("Free check. No Google access needed. Takes about 10 seconds.");
     expect(TRIAL_LINE).toBe("Free for 14 days once Kabsi is connected. No card.");
-    // Design 8 (Web 4): the H1 is the brand line itself, and the supporting line is Design 7's line 1.
+    // Design 8 (Web 4): the H1 is the brand line itself. Polish 2 (lane R, 3 Nov 2026): the supporting line leads with
+    // the owner's benefit, then how it works.
     const home = read("src/components/kabsi/d8-home.tsx");
     expect(home).toContain("Your business on Google. Taken care of.");
     expect(read("src/components/kabsi/hero-lines.ts")).toContain(
-      "prepares the replies, posts and fixes it needs, and asks for your yes on WhatsApp.",
+      "Your details kept right, every review answered and your profile kept fresh, without doing it yourself. Kabsi prepares the work and asks for your yes before anything goes live.",
     );
     expect(home).toContain("{!WHATSAPP_ON && (");
   });

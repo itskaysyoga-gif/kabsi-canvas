@@ -90,11 +90,16 @@ export const restaurant: Industry = {
     check: [
       { label: "Opening hours", value: "Shown", tone: "ok" },
       { label: "Phone", value: "Shown", tone: "ok" },
-      { label: "Website", value: "Missing", tone: "warn" },
+      {
+        label: "Photos",
+        value: "3",
+        tone: "warn",
+        next: "Kabsi asks for photos of your dishes and your room from your phone, checks each one and sends it to Google once you say yes.",
+      },
       { label: "Reviews", value: "212, rated 4.4", tone: "ok" },
     ],
     checkText:
-      "For a restaurant the free check starts with what people look for on the way: your hours, your phone and your website, then your reviews. Example result for an invented restaurant in Manchester.",
+      "For a restaurant the free check starts with what people look for on the way: your hours, your phone and your photos, then your reviews. Example result for an invented restaurant in Manchester.",
     guide: [
       {
         title: "The menu and the hours people check",

@@ -97,7 +97,8 @@ export type TradePage = {
   jobsTitle: string;
   searchText: string;
   /** The free check's Example rows: only what the check reads from Google's public data (K-82). */
-  check: { label: string; value: string; tone: "ok" | "warn" }[];
+  /** Polish 2 (lane R, 3 Nov 2026): a "warn" row carries the next step Kabsi can do today. */
+  check: { label: string; value: string; tone: "ok" | "warn"; next?: string }[];
   checkText: string;
   guide: { title: string; paras: string[] }[];
   /** Two related trades, by slug. */
