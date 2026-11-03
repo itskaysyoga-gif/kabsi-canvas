@@ -167,6 +167,46 @@
    },
    "overall": 4.67,
    "costUsd": 2.262828
+  },
+  {
+   "date": "2026-11-02T11:03:51.353Z",
+   "model": "anthropic:claude-sonnet-5-5",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 83,
+   "judged": 82,
+   "mean": {
+    "accurate": 4.89,
+    "helpful": 4.51,
+    "honest": 4.94,
+    "style": 4.59
+   },
+   "overall": 4.73,
+   "costUsd": 2.283655
+  }
+ ],
+ "reply.v3": [
+  {
+   "date": "2026-11-02T10:59:56.185Z",
+   "model": "anthropic",
+   "judge": "claude-haiku-4-5-20251001",
+   "cases": 24,
+   "languages": [
+    "ar",
+    "fr"
+   ],
+   "judged": 14,
+   "mean": {
+    "grounded": 5,
+    "answers": 3.29,
+    "voice": 4,
+    "language": 5,
+    "safety": 4.36,
+    "length": 4.79
+   },
+   "overall": 4.41,
+   "costUsd": 0.09572,
+   "gate": true,
+   "promptsHash": "43ef0b3783ae302ef7d0b0e79f7c1b49b19ec66ec2711ad41ad0e921dfdc83fc"
   }
  ]
 }

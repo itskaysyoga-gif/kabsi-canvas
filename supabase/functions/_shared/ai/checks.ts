@@ -72,7 +72,17 @@ export function nameCandidates(reply: string, review: string): string[] {
 export type CheckInput = {
   out: ReplyOutput; memory: Memory; reviewer: string; reviewText: string; recentReplies: string[];
   industry?: Industry | null;
+  /** The review's language as classified (classify), the label the prompt follows. */
+  language?: string | null;
 };
+
+/** "ar" when most of a text's letters are in Arabic script, else null. Used for the language and its check. */
+export function scriptLanguage(text: string | null | undefined): "ar" | null {
+  const t = String(text ?? "");
+  const arabic = t.match(/\p{Script=Arabic}/gu)?.length ?? 0;
+  const latin = t.match(/\p{Script=Latin}/gu)?.length ?? 0;
+  return arabic > 0 && arabic >= latin ? "ar" : null;
+}
 
 /** Every code check, in order. A failed check carries the sentence the owner sees. The sentences never quote the
  *  review or the draft: they are kept in reply_drafts.safety_notes, which outlives the review text (K-113.3). */
@@ -116,6 +126,19 @@ export function replyChecks(i: CheckInput): Check[] {
   add("no_stock_phrases", stock.length === 0, `The draft uses stock wording ("${stock[0]}") that reads as automatic.`);
   const close = i.recentReplies.some((r) => similarity(reply, r) > 0.8);
   add("not_a_repeat", !close, "The draft is too close to a reply you already posted. Google can treat repeated replies as boilerplate.");
+  // Fix 1 (QA 2 H3): the reply follows the review's language as classified (the same label the prompt follows): an
+  // Arabic review gets Arabic script, a review in a Latin-letter language (Franco-Arabic included) never does. Another
+  // language (Persian, Urdu) is not checked here. With no label, the review's own letters decide.
+  const lang = (i.language ?? "").toLowerCase();
+  const replyArabic = scriptLanguage(reply) === "ar";
+  const wantArabic = lang.startsWith("ar") ? true
+    : /^(en|es|fr|de|it|pt|nl|franco|none)\b/.test(lang) ? false
+    : !lang || lang === "unknown" ? (/\p{L}/u.test(i.reviewText) ? scriptLanguage(i.reviewText) === "ar" : null)
+    : null;
+  // Live run 41433139236: Arabic replies kept the English sign-off ("The Corner Loaf team"), so the last line counts too.
+  const lastLine = reply.trim().split("\n").pop() ?? "";
+  const signOffOk = wantArabic !== true || /\p{Script=Arabic}/u.test(lastLine);
+  add("reply_language", (wantArabic == null || wantArabic === replyArabic) && signOffOk, "The draft is not in the language of the review, or its sign-off is not.");
   add("not_empty", reply.trim().length > 0 && reply.length <= 1200, "The draft is empty or too long.");
   return checks;
 }

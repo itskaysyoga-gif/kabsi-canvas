@@ -8,7 +8,7 @@ import { buildMemory } from "./ai/memory.ts";
 import type { FactRow } from "./facts.ts";
 import type { Send } from "./ai/contract.ts";
 import { HIGH_RISK_CHECKLIST, HIGH_RISK_TITLE, industryOf, issueLines, mergeRisk, type Risk, riskByRules, type RiskReason } from "./ai/risk.ts";
-import { HOLDING_TASK } from "./ai/prompts/reply.v2.ts";
+import { HOLDING_TASK } from "./ai/prompts/reply.v3.ts";
 import { CLASSIFY_RULES } from "./ai/prompts/classify.v2.ts";
 import { highRiskBlock, instantEmail, riskPlan } from "./review-risk.ts";
 
