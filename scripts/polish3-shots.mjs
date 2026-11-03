@@ -106,7 +106,9 @@ for (const w of WIDTHS) {
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(600);
   const m = await page.evaluate(() => {
-    const b = [...document.querySelectorAll("button")].find((x) => x.textContent?.trim() === "Start free");
+    const b = [...document.querySelectorAll("button")].find(
+      (x) => x.textContent?.trim() === "Start free",
+    );
     const r = b?.getBoundingClientRect();
     const heads = [...document.querySelectorAll("main h2")].map((h) => h.textContent?.trim());
     return {
@@ -117,7 +119,12 @@ for (const w of WIDTHS) {
   });
   heights.push(`${w}: height ${m.height}, Start free top ${m.top}`);
   console.log(w, m.height, m.top, JSON.stringify(m.heads));
-  await page.screenshot({ path: `${out}/${name}-${w}.jpg`, fullPage: true, type: "jpeg", quality: 60 });
+  await page.screenshot({
+    path: `${out}/${name}-${w}.jpg`,
+    fullPage: true,
+    type: "jpeg",
+    quality: 60,
+  });
   await ctx.close();
 }
 await browser.close();
