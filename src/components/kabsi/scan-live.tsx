@@ -18,7 +18,7 @@ import {
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Turnstile } from "@/components/turnstile";
 import { cn } from "@/lib/utils";
-import { CONTACT_EMAIL, SCAN_LINE, TRIAL_LINE, WHATSAPP_DIGITS, WHATSAPP_ON } from "@/lib/site";
+import { CONTACT_EMAIL, SCAN_LINE, WHATSAPP_DIGITS, WHATSAPP_ON } from "@/lib/site";
 import {
   CheckError,
   TIPS_CONSENT_TEXT,
@@ -695,6 +695,23 @@ function NearbyMark() {
   );
 }
 
+/** Under "Start free" (Polish 2, decision 6; facts 4.3 and 5). */
+const START_STEPS = [
+  { dt: "Free", dd: "This check, and your first 14 days of Pro. No card." },
+  {
+    dt: "To start",
+    dd: "Add Kabsi as a Manager on your Google profile. It takes about two minutes, and you stay the owner.",
+  },
+  {
+    dt: "Your first days",
+    dd: "Kabsi checks your details on Google and prepares a reply for each new review. Each one waits for your yes.",
+  },
+  {
+    dt: "When the 14 days start",
+    dd: "Only once Kabsi's access works, so waiting for Google costs you nothing. Nothing is charged by itself.",
+  },
+] as const;
+
 const SideLinks = () => (
   <div className="flex flex-col items-start px-1 text-small">
     <SiteLink to="/how-it-works" className={resultLinkCls}>
@@ -919,7 +936,20 @@ export function LiveResult({
                 </button>
               )}
             </div>
-            <p className="mt-3 text-small text-text-2">{TRIAL_LINE}</p>
+            {/* Polish 2 (lane R decision 6 of 3 Nov 2026): what is free, what starting needs, the first days, and when the
+                14 days start. Founding 25 is a secondary link. The buttons and their events above are unchanged. */}
+            <dl className="mt-5 space-y-3 border-t border-line pt-4 text-small">
+              {START_STEPS.map((x) => (
+                <div key={x.dt}>
+                  <dt className="font-bold">{x.dt}</dt>
+                  <dd className="text-text-2">{x.dd}</dd>
+                </div>
+              ))}
+            </dl>
+            <SiteLink to="/founding" className={cn(resultLinkCls, "mt-2")}>
+              Or apply for Founding 25: three months of Pro, free
+              <ArrowRight className="size-4" aria-hidden />
+            </SiteLink>
           </section>
           <SideLinks />
         </aside>
