@@ -52,7 +52,7 @@ function Arrow() {
 function Hero() {
   return (
     <section aria-labelledby="hero-title" data-hero className="relative isolate">
-      <div className="container-kb grid gap-6 pt-6 pb-10 sm:gap-8 md:pt-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-center lg:gap-12 lg:pt-16 lg:pb-24">
+      <div className="container-kb grid gap-5 pt-6 pb-8 sm:gap-8 sm:pb-10 md:pt-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-center lg:gap-12 lg:pt-16 lg:pb-24">
         <div className="max-w-[36rem]">
           {/* The headline paints with no entrance animation, so it is the LCP at once (Web 3's fix). */}
           <h1 id="hero-title" className="text-display text-balance">
@@ -113,7 +113,7 @@ function HeroVisual() {
 function WeeklyReportCard() {
   const r = HERO_REPORT;
   return (
-    <figure className="relative z-10 mx-auto -mt-14 w-[18rem] rounded-card border border-line bg-surface-1 p-3.5 shadow-float sm:me-0 sm:w-[14.5rem] sm:p-4 md:absolute md:-end-4 md:-bottom-8 md:mt-0 lg:-end-8">
+    <figure className="relative z-10 mx-auto -mt-3 w-full max-w-[20.5rem] rounded-card border border-line bg-surface-1 p-3.5 shadow-float sm:me-0 sm:w-[14.5rem] sm:max-w-none sm:p-4 md:absolute md:-end-4 md:-bottom-8 md:mt-0 lg:-end-8">
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="hidden text-label font-bold text-text-2 sm:block">{r.when}</p>
@@ -154,7 +154,7 @@ export function HeroStream({
   caption?: string;
 }) {
   return (
-    <figure className="relative mx-auto w-[18rem] sm:w-[19.5rem] md:ms-0">
+    <figure className="relative mx-auto w-full max-w-[20.5rem] sm:w-[19.5rem] md:ms-0">
       <div className="rounded-[2.4rem] bg-kb-black p-[0.55rem] shadow-float">
         <div className="overflow-hidden rounded-[1.9rem] bg-wa-chat-bg">
           <div className="flex items-center gap-2 border-b border-wa-divider bg-wa-header px-3 pt-4 pb-2 text-wa-ink">
@@ -333,7 +333,7 @@ export function Beats() {
         <h2 id="beats-h" className="sr-only">
           How Kabsi works
         </h2>
-        {/* The product video goes here once a real one exists (docs/VIDEO-PLAN.md, section 1). */}
+        {/* The product video goes here once a real one exists (docs/VIDEO-PLAN.md, section 9). */}
         <div data-slot="product-video" hidden />
         <ol className="grid gap-8 md:grid-cols-3 md:gap-6">
           {BEATS.map((b, i) => (
