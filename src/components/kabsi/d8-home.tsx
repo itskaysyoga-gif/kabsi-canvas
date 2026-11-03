@@ -33,6 +33,7 @@ import {
   BEATS,
   CHECK_SHOWS,
   HERO_BUSINESS,
+  HERO_REPORT,
   HERO_STREAM,
   HOME_LINE,
   JOBS,
@@ -51,7 +52,7 @@ function Arrow() {
 function Hero() {
   return (
     <section aria-labelledby="hero-title" data-hero className="relative isolate">
-      <div className="container-kb grid gap-8 pt-6 pb-14 md:pt-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-center lg:gap-12 lg:pt-16 lg:pb-24">
+      <div className="container-kb grid gap-5 pt-6 pb-8 sm:gap-8 sm:pb-10 md:pt-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-center lg:gap-12 lg:pt-16 lg:pb-24">
         <div className="max-w-[36rem]">
           {/* The headline paints with no entrance animation, so it is the LCP at once (Web 3's fix). */}
           <h1 id="hero-title" className="text-display text-balance">
@@ -84,7 +85,8 @@ function Hero() {
   );
 }
 
-/** One phone over a workplace photo from 768 px. Four different jobs arrive in turn. */
+/** One phone over a workplace photo from 768 px. Three different jobs arrive in turn; the weekly report is its own small
+ * card over the phone's foot (Polish 2, lane R decision 3). The phone is an illustration: nothing in it is focusable. */
 function HeroVisual() {
   return (
     <div className="relative mx-auto w-full max-w-[30rem] lg:me-0">
@@ -101,7 +103,40 @@ function HeroVisual() {
         <div className="absolute inset-0 bg-kb-black/20" />
       </div>
       <HeroStream />
+      <WeeklyReportCard />
     </div>
+  );
+}
+
+/** The weekly report, a small Example card over the phone's lower corner, so the three messages stay readable. On a
+ * phone it is one short card over the phone's foot, so the next section starts sooner (lane R decision 3). */
+function WeeklyReportCard() {
+  const r = HERO_REPORT;
+  return (
+    <figure className="relative z-10 mx-auto -mt-3 w-full max-w-[20.5rem] rounded-card border border-line bg-surface-1 p-3.5 shadow-float sm:me-0 sm:w-[14.5rem] sm:max-w-none sm:p-4 md:absolute md:-end-4 md:-bottom-8 md:mt-0 lg:-end-8">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="hidden text-label font-bold text-text-2 sm:block">{r.when}</p>
+          <p className="text-title font-bold">{r.title}</p>
+        </div>
+        <ExampleBadge className="shrink-0" />
+      </div>
+      <p className="mt-1 text-small sm:hidden">
+        {r.when}: {r.done.slice(0, 2).join(", ")}. One next step: {r.next.toLowerCase()}
+      </p>
+      <ul className="mt-2 hidden space-y-1 text-small sm:block">
+        {r.done.map((d) => (
+          <li key={d} className="flex items-start gap-1.5">
+            <Check className="mt-0.5 size-4 shrink-0 text-ok" strokeWidth={2.5} aria-hidden />
+            {d}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-2 hidden border-t border-line pt-2 text-small sm:block">
+        <span className="font-bold">One next step: </span>
+        {r.next}
+      </p>
+    </figure>
   );
 }
 
@@ -111,7 +146,7 @@ export function HeroStream({
   items = HERO_STREAM,
   business = HERO_BUSINESS,
   photo = PHOTOS.salonStudio,
-  caption = "Example messages from Kabsi to an invented salon: different opening hours on Google, a reply ready for a review, a post ready with a photo, and the weekly report.",
+  caption = "Example messages from Kabsi to an invented salon: different opening hours on Google, a reply ready for a review, and a post ready with a photo.",
 }: {
   items?: StreamItem[];
   business?: string;
@@ -119,7 +154,7 @@ export function HeroStream({
   caption?: string;
 }) {
   return (
-    <figure className="relative mx-auto w-[18rem] sm:w-[19.5rem] md:ms-0">
+    <figure className="relative mx-auto w-full max-w-[20.5rem] sm:w-[19.5rem] md:ms-0">
       <div className="rounded-[2.4rem] bg-kb-black p-[0.55rem] shadow-float">
         <div className="overflow-hidden rounded-[1.9rem] bg-wa-chat-bg">
           <div className="flex items-center gap-2 border-b border-wa-divider bg-wa-header px-3 pt-4 pb-2 text-wa-ink">
@@ -298,7 +333,7 @@ export function Beats() {
         <h2 id="beats-h" className="sr-only">
           How Kabsi works
         </h2>
-        {/* The product video goes here once a real one exists (docs/VIDEO-PLAN.md in the design studio). */}
+        {/* The product video goes here once a real one exists (docs/VIDEO-PLAN.md, section 9). */}
         <div data-slot="product-video" hidden />
         <ol className="grid gap-8 md:grid-cols-3 md:gap-6">
           {BEATS.map((b, i) => (
@@ -434,43 +469,60 @@ function TwoPlans() {
   );
 }
 
-/* ---------- The founder and Founding 25 ---------- */
+/* ---------- From the founder, and Founding 25 (Polish 2, lane R decision 8: a real person, no invented proof) ---------- */
 
 export function Founder() {
-  // The real count only: no number while it is unknown (lane R decision 2).
+  // The real count only: no number while it is unknown (lane R decision 2 of 1 Nov).
   const places = useFoundingPlaces();
   return (
-    <section aria-labelledby="f25-h" className="theme-dark bg-band">
-      <div className="container-kb section-y grid items-center gap-8 md:grid-cols-[auto_1fr] md:gap-12">
-        <img
-          src={FOUNDER.large}
-          width={FOUNDER.w}
-          height={FOUNDER.h}
-          alt={FOUNDER.alt}
-          loading="lazy"
-          decoding="async"
-          className="size-28 rounded-full object-cover md:size-44"
-        />
-        <div className="max-w-[40rem]">
-          <p data-qa-mask className="mb-2 min-h-6 text-small font-bold text-text-2">
+    <section aria-labelledby="founder-h" className="theme-dark bg-band">
+      <div className="container-kb section-y grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
+        <figure className="grid items-start gap-6 sm:grid-cols-[auto_1fr] sm:gap-8">
+          <img
+            src={FOUNDER.large}
+            width={FOUNDER.w}
+            height={FOUNDER.h}
+            alt={FOUNDER.alt}
+            loading="lazy"
+            decoding="async"
+            className="size-24 rounded-full object-cover md:size-36"
+          />
+          <div className="max-w-[36rem]">
+            <h2 id="founder-h" className="text-h2">
+              From the founder
+            </h2>
+            <blockquote className="mt-3 text-lead text-text-2">
+              <p>
+                A Google profile needs work every week: replies, hours, posts. A busy owner rarely
+                has time for it. I built Kabsi to do that work for you. If you have a question,
+                write to me.
+              </p>
+            </blockquote>
+            <figcaption className="mt-4 text-body">
+              <span className="font-bold">Rashid Abou Hamzy</span>, founder of Kabsi.{" "}
+              <a
+                href="mailto:hello@kabsi.co"
+                className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4"
+              >
+                hello@kabsi.co
+              </a>
+            </figcaption>
+          </div>
+        </figure>
+        <div className="rounded-panel border border-line-strong p-6 sm:p-7 lg:self-center">
+          <p data-qa-mask className="min-h-6 text-small font-bold text-text-2">
             {places
               ? places.left > 0
                 ? `${places.left} of ${places.total || FOUNDING25_TOTAL} places left.`
                 : "All 25 places are taken."
               : null}
           </p>
-          <h2 id="f25-h" className="text-h2">
-            Founding 25: three months of Kabsi Pro, free.
-          </h2>
-          <p className="mt-3 text-lead text-text-2">
-            Rashid Abou Hamzy, founder of Kabsi, reads every application himself. Kabsi does the
-            Google work; you tell Rashid what to make better.
+          <h3 className="mt-1 text-h3">Founding 25: three months of Kabsi Pro, free.</h3>
+          <p className="mt-2 text-body text-text-2">
+            By application. Kabsi does the Google work; you tell Rashid what to make better. No
+            card. After 90 days, choose a plan or stop, nothing is charged by itself.
           </p>
-          <p className="mt-3 text-small text-text-2">
-            By application. No card. After 90 days, choose a plan or stop, nothing is charged by
-            itself.
-          </p>
-          <SiteLink to="/founding" className={cn(linkCls, "mt-3 text-body")}>
+          <SiteLink to="/founding" className={cn(linkCls, "mt-2 text-body")}>
             Apply for a place
             <Arrow />
           </SiteLink>

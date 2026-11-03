@@ -51,7 +51,9 @@ export const FAQ: { q: string; a: string }[] = [
 ];
 
 // Web 4 (Design 8): the fourth question on Home is "Can I cancel?".
-export const HOME_FAQ = [11, 1, 4, 8];
+// Polish 2 (lane R decision 8): "Does Kabsi need my Google password?" left Home's four, because "You stay in control."
+// says it on the same page; "What if I already reply to reviews myself?" took its place.
+export const HOME_FAQ = [11, 3, 4, 8];
 
 /** Pricing's "Billing questions" (Design 8), checked against the facts (4.3, 4.5, which cancel is which). With the shared FAQ
  * because the route head builds the FAQPage data from them. */
