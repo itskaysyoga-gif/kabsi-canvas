@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 3 Nov 2026, Polish 2. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 3 Nov 2026, Polish 3. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -62,8 +62,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 3 Nov 2026, Polish 3: the free check result reads most important, found, day one with Start free, then the two At launch cards, then the rest (Start free at 390 px: 1,679 down the page, was 2,461); `NEARBY_ON` is the one switch for the At launch labels of the nearby check and the AI answer; the FAQ answer about approving on WhatsApp follows `WHATSAPP_ON`; `docs/polish2/` deleted. Detail: `docs/progress/archive/2026-11-03-polish3.md`.
 - 3 Nov 2026, Polish 2: merged PRs 331 (copy and accuracy), 332 (Home), 333 (Pricing, the free check's next step). Detail: `docs/progress/archive/2026-11-03-polish2.md`.
-- 2 Nov 2026, Fix 1: merged PRs 325 (Nora: live rule failures 6 to 3), 326 (AI Answers per day, 10 of 10 live; post stuffing), 328 (dental noindex, photo check, nearby line, onboarding spec), 329 (bot check on first touch, errors within 5 s, focus). Open: PR 327 (reply.v3) for lane R's Prompt gate; one full live Nora run. AI 2.96 of 3 USD. Detail: `docs/progress/archive/2026-11-02-fix1.md`.
 
 
 ## How a session updates this page
