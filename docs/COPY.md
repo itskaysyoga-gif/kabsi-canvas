@@ -878,3 +878,29 @@ Rule for every Example finding (decision 1): each problem leads to a next step K
   - Help is a small line under the list: the plan's help line and "Working hours: Monday to Friday, 9:00 to 18:00, UAE time." (was a boxed block).
   - Every price, the founding price, Founding 25, yearly and extra location are unchanged.
 - The free check result, under "Start free" (decision 6), a short list: "Free" / "This check, and your first 14 days of Pro. No card."; "To start" / "Add Kabsi as a Manager on your Google profile. It takes about two minutes, and you stay the owner."; "Your first days" / "Kabsi checks your details on Google and prepares a reply for each new review. Each one waits for your yes."; "When the 14 days start" / "Only once Kabsi's access works, so waiting for Google costs you nothing. Nothing is charged by itself." Then the secondary link "Or apply for Founding 25: three months of Pro, free" (to /founding), only while Founding 25 places remain (the real count). The trial line under the button gave way to this list. The buttons, "Get this on WhatsApp", "Start free on the web" and every analytics and Meta event are unchanged.
+
+## 41. Polish 3: the free check result's order and one switch for the At launch labels (3 Nov 2026, lane R's decisions of 3 Nov, review of Polish 2)
+
+No line was reworded. What moved and what now follows a switch:
+
+### The free check result (decision 1)
+
+Order at every width: "The most important thing"; "What Kabsi found"; "What Kabsi would do from day one" with "Start free" and the next steps (Free, To start, Your first days, When the 14 days start, and "Or apply for Founding 25: three months of Pro, free" while places remain); the two At launch cards ("An answer customers might see", "Where you come up nearby" with its email form); "See how it works" and "See the plans"; "What Kabsi sees once connected" and "When you start: add Kabsi on Google"; "Send me this report". Every analytics and Meta event is unchanged.
+
+### One switch for the nearby check and the AI answer (decision 2)
+
+`NEARBY_ON` in `src/lib/site.ts`, false today, beside `WHATSAPP_ON`. While it is false:
+
+- Home's jobs "See where you show up nearby" and "Know what AI assistants say" carry the pill "At launch" (d8-data.ts).
+- The Example result's "An answer customers might see" carries it (result-preview.tsx), and the free check page's "What ChatGPT says" row (d4-free-check.tsx).
+- The FAQ answer to "Can Kabsi promise where I come up on Google Maps?" reads "No one can promise that. Kabsi shows what changed on your profile and what you can do next. Where you come up nearby opens at launch."
+
+With `NEARBY_ON` true the pills and the last sentence disappear and nothing else changes; the FAQ answer then ends "... and what you can do next." The live free check keeps its own waiting-list logic and its pills; Kabsi Partners keeps its own "opens at launch" lines.
+
+### The WhatsApp approval answer (decision 3)
+
+FAQ, "Can I approve a reply or a post on WhatsApp?", follows `WHATSAPP_ON`:
+
+- `WHATSAPP_ON` false (today): "Not yet. WhatsApp opens at launch. Until then you approve on kabsi.co."
+- `WHATSAPP_ON` true (written from the facts: the yes comes on WhatsApp, nothing goes live before it, and the changes that are confirmed on kabsi.co say so): "Yes. Kabsi sends each reply or post to you on WhatsApp, and nothing goes live on Google until you say yes. A change to your address, phone or business name is confirmed on kabsi.co instead." (was "Yes. Every reply, post and change waits for your yes on WhatsApp.")
+

@@ -2,6 +2,8 @@
 // knowledge/kabsi-facts.md (lane R decision 1); where Design 8 said more than the facts, the facts' wording is used and
 // the change is listed in COPY.md section 38. Every business and person here is an Example.
 
+import { NEARBY_ON } from "@/lib/site";
+
 export { HOME_LINE } from "./hero-lines";
 
 export const HERO_BUSINESS = "Hollis Hair, Bristol";
@@ -54,9 +56,10 @@ export const HERO_REPORT = {
   next: "Add 3 photos of the team at work.",
 } as const;
 
-/** The work Kabsi does (Design 7). "At launch" follows the existing switches (lane R decision 6). */
+/** The work Kabsi does (Design 7). "At launch" follows the one switch for the nearby check and the AI answer, NEARBY_ON
+ * (Polish 3, lane R decision 2 of 3 Nov 2026): the two jobs about them carry the pill while it is false. */
 export type Job = { title: string; text: string; atLaunch?: boolean };
-export const JOBS: Job[] = [
+export const jobs = (nearbyOn: boolean = NEARBY_ON): Job[] => [
   // Polish 2 (lane R, 3 Nov 2026): each job leads with the owner's benefit, then how Kabsi does it.
   {
     title: "Your details kept right",
@@ -82,14 +85,15 @@ export const JOBS: Job[] = [
   {
     title: "See where you show up nearby",
     text: "Kabsi searches Google Maps from places around you, like a customer standing there.",
-    atLaunch: true,
+    atLaunch: !nearbyOn,
   },
   {
     title: "Know what AI assistants say",
     text: "When ChatGPT names you with the wrong closing time, Kabsi shows you the exact sentence.",
-    atLaunch: true,
+    atLaunch: !nearbyOn,
   },
 ];
+export const JOBS: Job[] = jobs();
 
 export const BEATS = [
   { title: "Kabsi prepares.", text: "Each reply, post and fix comes to you ready, word for word." },
