@@ -1,7 +1,7 @@
 import { Check, CircleCheck, Search } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { TRIAL_LINE } from "@/lib/site";
+import { NEARBY_ON, TRIAL_LINE } from "@/lib/site";
 import { ScanBox } from "./scan-box";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { Pill, ResultPreview } from "./result-preview";
@@ -14,7 +14,8 @@ import { CHECK_HERO } from "./hero-lines";
  * public data (lane R decision 1; K-82: no review replies, holiday hours or post dates).
  */
 
-const LOOKS_AT: { title: string; text: string; atLaunch?: boolean }[] = [
+/** "What ChatGPT says" is the AI answer: its pill shows while NEARBY_ON is false (Polish 3, lane R decision 2). */
+const looksAt = (nearbyOn: boolean): { title: string; text: string; atLaunch?: boolean }[] => [
   { title: "Your hours", text: "The opening hours Google shows customers." },
   { title: "Your reviews", text: "How many there are, and your rating." },
   { title: "Photos and links", text: "Photos, your website and your phone." },
@@ -22,7 +23,7 @@ const LOOKS_AT: { title: string; text: string; atLaunch?: boolean }[] = [
   {
     title: "What ChatGPT says",
     text: "Whether its answer about you matches your Google profile.",
-    atLaunch: true,
+    atLaunch: !nearbyOn,
   },
 ];
 
@@ -32,7 +33,7 @@ const GET_BACK = [
   "Kabsi asks for nothing before you see the result.",
 ] as const;
 
-export function CheckLooksAtVisual() {
+export function CheckLooksAtVisual({ nearbyOn = NEARBY_ON }: { nearbyOn?: boolean } = {}) {
   return (
     <figure className="relative rounded-panel border border-line bg-surface-1 p-5 shadow-float sm:p-6">
       <div className="flex items-center gap-3">
@@ -45,7 +46,7 @@ export function CheckLooksAtVisual() {
         </div>
       </div>
       <ul className="mt-5 space-y-2.5">
-        {LOOKS_AT.map((r, i) => (
+        {looksAt(nearbyOn).map((r, i) => (
           <li
             key={r.title}
             className={cn("flex gap-3 rounded-inner bg-surface-2 px-3.5 py-3", popCls)}

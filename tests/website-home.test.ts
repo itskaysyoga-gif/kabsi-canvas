@@ -312,7 +312,8 @@ describe("Home on Design 8 (Web 4, lane R 1 Nov 2026)", () => {
   });
   it("uses lane R's hours buttons and marks what is not live as At launch", () => {
     expect(data).toContain('buttons: ["Use my hours", "Keep Google\'s"]');
-    expect(data.match(/atLaunch: true/g)).toHaveLength(2);
+    // Polish 3: the two labels follow NEARBY_ON (tests/polish3.test.ts renders both states).
+    expect(data.match(/atLaunch: !nearbyOn/g)).toHaveLength(2);
   });
   it("shows in the Example free check only what the free check can read (facts, K-82)", () => {
     const example = data.slice(data.indexOf("EXAMPLE_RESULT"));

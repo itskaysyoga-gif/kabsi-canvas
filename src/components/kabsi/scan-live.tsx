@@ -782,7 +782,10 @@ export function LiveResult({
         <PlacesAttribution />
       </div>
 
-      <div className="container-kb mt-6 grid gap-4 pb-16 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-8 lg:pb-24">
+      <div className="container-kb mt-6 grid gap-4 pb-16 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-x-8 lg:pb-24">
+        {/* Polish 3 (lane R decision 1 of 3 Nov 2026): the useful part first, at every width. The order in the page, and so
+            the tab order, is: the most important thing; what Kabsi found; what Kabsi would do from day one with Start free and
+            the next steps; the two At launch cards; the links, the two open questions and the report. Nothing was removed. */}
         <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-1">
           {/* Design 8: the most important finding first, in plain words, on the dark band. */}
           {first && (
@@ -835,64 +838,9 @@ export function LiveResult({
             </p>
             <PlacesAttribution className="mt-1" />
           </section>
-
-          {check?.ai ? (
-            <AiAnswer ai={check.ai} />
-          ) : waitlist ? (
-            // The AI answer runs only with the nearby check; while that is closed (the waiting list) it is marked At launch
-            // (decision 6). A failed or skipped nearby check shows neither card's At launch.
-            <section
-              aria-labelledby="ai-h"
-              className="rounded-panel border border-line bg-surface-1 p-5 sm:p-8"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 id="ai-h" className="text-h3">
-                  An answer customers might see
-                </h2>
-                <Pill>At launch</Pill>
-              </div>
-              <p className="mt-3 text-body text-text-2">
-                Whether its answer about you matches your Google profile.
-              </p>
-            </section>
-          ) : null}
-
-          {check ? (
-            <NearbySection check={check} handoff={handoff} />
-          ) : (
-            <section
-              aria-labelledby="near-h"
-              className="rounded-panel border border-dashed border-line-strong p-5 sm:p-8"
-            >
-              <div className="flex gap-4">
-                <NearbyMark />
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 id="near-h" className="text-h3">
-                      Where you come up nearby
-                    </h2>
-                    {waitlist && <Pill>At launch</Pill>}
-                  </div>
-                  <p className="mt-2 text-body text-text-2">
-                    {waitlist
-                      ? "Kabsi will search Google Maps from places around you, like a customer standing there."
-                      : SCAN_LINE}
-                  </p>
-                </div>
-              </div>
-              {waitlist && (
-                <Waitlist
-                  business={s.name}
-                  country={countryOfAddress(s.address)}
-                  placeId={s.place_id}
-                  term={term}
-                />
-              )}
-            </section>
-          )}
         </div>
 
-        <aside className="space-y-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+        <aside className="space-y-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-3 lg:row-start-1">
           <section
             aria-labelledby="day1-h"
             data-main-cta
@@ -960,11 +908,69 @@ export function LiveResult({
               </p>
             )}
           </section>
-          <SideLinks />
         </aside>
 
-        {/* The details after the main action on phones; under the findings, beside the action, on wide screens. */}
+        {/* The two At launch cards come after the action: the AI answer, then the nearby check with its email form. */}
         <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-2">
+          {check?.ai ? (
+            <AiAnswer ai={check.ai} />
+          ) : waitlist ? (
+            // The AI answer runs only with the nearby check; while that is closed (the waiting list) it is marked At launch
+            // (decision 6). A failed or skipped nearby check shows neither card's At launch.
+            <section
+              aria-labelledby="ai-h"
+              className="rounded-panel border border-line bg-surface-1 p-5 sm:p-8"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 id="ai-h" className="text-h3">
+                  An answer customers might see
+                </h2>
+                <Pill>At launch</Pill>
+              </div>
+              <p className="mt-3 text-body text-text-2">
+                Whether its answer about you matches your Google profile.
+              </p>
+            </section>
+          ) : null}
+
+          {check ? (
+            <NearbySection check={check} handoff={handoff} />
+          ) : (
+            <section
+              aria-labelledby="near-h"
+              className="rounded-panel border border-dashed border-line-strong p-5 sm:p-8"
+            >
+              <div className="flex gap-4">
+                <NearbyMark />
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 id="near-h" className="text-h3">
+                      Where you come up nearby
+                    </h2>
+                    {waitlist && <Pill>At launch</Pill>}
+                  </div>
+                  <p className="mt-2 text-body text-text-2">
+                    {waitlist
+                      ? "Kabsi will search Google Maps from places around you, like a customer standing there."
+                      : SCAN_LINE}
+                  </p>
+                </div>
+              </div>
+              {waitlist && (
+                <Waitlist
+                  business={s.name}
+                  country={countryOfAddress(s.address)}
+                  placeId={s.place_id}
+                  term={term}
+                />
+              )}
+            </section>
+          )}
+        </div>
+
+        {/* Then the links, the two open questions and the report. */}
+        <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-3">
+          <SideLinks />
           <div className="grid gap-4">
             {check && check.fast.competitors.length > 0 && <Competitors check={check} />}
             <Fold title="What Kabsi sees once connected">

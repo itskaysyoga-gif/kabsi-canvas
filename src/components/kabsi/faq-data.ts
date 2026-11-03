@@ -2,12 +2,29 @@ import {
   FOUNDING_SENTENCE,
   KABSI_GROUP_ID,
   KABSI_GROUP_NAME,
+  NEARBY_ON,
   PRICES_SENTENCE,
   WHATSAPP_ON,
 } from "@/lib/site";
 
+/** Polish 3 (lane R decision 2 of 3 Nov 2026): "Where you come up nearby opens at launch." is said only while NEARBY_ON
+ * is false; with it true the sentence goes and the answer ends at "what you can do next." (COPY.md section 41). */
+export const nearbyFaqAnswer = (nearbyOn: boolean = NEARBY_ON): string =>
+  `No one can promise that. Kabsi shows what changed on your profile and what you can do next.${
+    nearbyOn ? "" : " Where you come up nearby opens at launch."
+  }`;
+
+/** Polish 3 (lane R decision 3 of 3 Nov 2026): the answer to "Can I approve a reply or a post on WhatsApp?" follows the one
+ * WhatsApp switch, like the Home line. The "true" answer is written from the facts (section 01, WhatsApp for owners):
+ * the yes comes on WhatsApp, nothing goes live before it, and the few changes that are confirmed on kabsi.co say so. */
+export const WHATSAPP_APPROVE_Q = "Can I approve a reply or a post on WhatsApp?";
+export const whatsappApproveAnswer = (whatsappOn: boolean = WHATSAPP_ON): string =>
+  whatsappOn
+    ? "Yes. Kabsi sends each reply or post to you on WhatsApp, and nothing goes live on Google until you say yes. A change to your address, phone or business name is confirmed on kabsi.co instead."
+    : "Not yet. WhatsApp opens at launch. Until then you approve on kabsi.co.";
+
 // The shared FAQ (COPY.md section 16), numbered as there.
-export const FAQ: { q: string; a: string }[] = [
+export const buildFaq = (nearbyOn: boolean = NEARBY_ON): { q: string; a: string }[] => [
   {
     q: "Does Kabsi need my Google password?",
     a: "No. You add Kabsi as a Manager on your Google profile. You stay the owner and can remove Kabsi any time.",
@@ -22,8 +39,8 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Can Kabsi promise where I come up on Google Maps?",
-    // Fix 1: the nearby check is not open yet, so "where you show up" is said as at launch.
-    a: "No one can promise that. Kabsi shows what changed on your profile and what you can do next. Where you come up nearby opens at launch.",
+    // Fix 1: the nearby check is not open yet, so "where you show up" is said as at launch. Polish 3: that follows NEARBY_ON.
+    a: nearbyFaqAnswer(nearbyOn),
   },
   { q: "Can I edit replies?", a: "Yes. Tap Edit on WhatsApp or on the Kabsi website." },
   {
@@ -49,6 +66,7 @@ export const FAQ: { q: string; a: string }[] = [
     a: "Yes. Your Google profile is free, and you can reply to reviews and update it yourself. The subscription pays for the ongoing work: Kabsi keeps checking, drafts the replies and posts, follows up, and brings each one to you on WhatsApp for a yes.",
   },
 ];
+export const FAQ: { q: string; a: string }[] = buildFaq();
 
 // Web 4 (Design 8): the fourth question on Home is "Can I cancel?".
 // Polish 2 (lane R decision 8): "Does Kabsi need my Google password?" left Home's four, because "You stay in control."
@@ -86,147 +104,154 @@ export const BILLING_FAQ: { q: string; a: string }[] = [
  * word. The WhatsApp answers follow the WhatsApp switch, so the launch needs no change here. */
 export type FaqGroup = { id: string; title: string; items: { q: string; a: string }[] };
 
-export const FAQ_GROUPS: FaqGroup[] = [
-  {
-    id: "start",
-    title: "Getting started",
-    items: [
-      {
-        q: "What does the free check show?",
-        a: "What customers see on your Google profile today and what to do first: your opening hours, how many reviews you have and your rating, your photos, your website and phone, and your category. It takes about 10 seconds and needs no access.",
-      },
-      {
-        q: "How do I add Kabsi to my Google profile?",
-        a: `On Google, open your profile (search your business name while signed in), then Menu, Business Profile settings, People and access, Add. Paste ${KABSI_GROUP_ID}, choose Manager, then Add (on some screens, Invite). ${KABSI_GROUP_ID} is ${KABSI_GROUP_NAME}, Kabsi's business group on Google. Never send us a password or a code.`,
-      },
-      {
-        q: "Which businesses can use Kabsi?",
-        a: "A business with a verified Google profile that you own or manage: a place customers visit during stated hours, or a business that travels to its customers with a service area. Online-only businesses are not eligible on Google.",
-      },
-      FAQ[2]!,
-      {
-        q: "Can't I do this myself for free?",
-        a: "Yes. Your Google profile is free, and you can reply to reviews and update it yourself. The subscription pays for the ongoing work: Kabsi keeps checking, drafts the replies and posts, follows up, and brings each one to you for a yes.",
-      },
-    ],
-  },
-  {
-    id: "google",
-    title: "Google and control",
-    items: [
-      FAQ[0]!,
-      {
-        q: "Is anything posted without me?",
-        a: "No. Every reply, post and change waits for your yes. Kabsi sends it to Google, checks it is live, and tells you if anything did not go through.",
-      },
-      FAQ[5]!,
-      FAQ[3]!,
-      {
-        q: "How do I remove Kabsi?",
-        a: `In your Google profile, open People and access and remove ${KABSI_GROUP_NAME}. Kabsi stops at once. Cancelling a plan never removes Kabsi's access by itself; removing it is your choice.`,
-      },
-    ],
-  },
-  {
-    id: "plans",
-    title: "Plans and billing",
-    items: [
-      {
-        q: "What does Kabsi cost?",
-        a: `${PRICES_SENTENCE} ${FOUNDING_SENTENCE} Both plans are free for 14 days, with no card.`,
-      },
-      {
-        q: "When does the trial start?",
-        a: "When Kabsi's access to your Google profile works, so waiting for access costs you nothing. The trial is 14 days of Pro, one per business.",
-      },
-      BILLING_FAQ[1]!,
-      {
-        q: "Can I cancel?",
-        a: "Yes, any time. Your plan runs to the end of the period you paid for. Monthly plans can be cancelled at any time. Yearly plans are refundable within 14 days.",
-      },
-      {
-        q: "Can I run more than one location?",
-        a: "Yes. Each extra location is $15 a month or $150 a year, on the same plan.",
-      },
-      BILLING_FAQ[5]!,
-    ],
-  },
-  {
-    id: "whatsapp",
-    title: "WhatsApp",
-    items: WHATSAPP_ON
-      ? [
-          {
-            q: "Does Kabsi have a WhatsApp number?",
-            a: "Yes. Message Kabsi on WhatsApp, or write to hello@kabsi.co.",
-          },
-          {
-            q: "Can I approve a reply or a post on WhatsApp?",
-            a: "Yes. Every reply, post and change waits for your yes on WhatsApp.",
-          },
-          {
-            q: "Will Kabsi send me alerts on WhatsApp?",
-            a: "Only after your yes, and you can reply STOP at any time.",
-          },
-          {
-            q: "Does Kabsi message my customers?",
-            a: "No. Kabsi talks only to you. It gives you a review link and a QR card, and you send them.",
-          },
-          {
-            q: "Will Kabsi ever ask for my Google password or a code on WhatsApp?",
-            a: "Never, on WhatsApp or anywhere else.",
-          },
-        ]
-      : [
-          {
-            q: "Does Kabsi have a WhatsApp number?",
-            a: "Yes. It is being tested and opens to owners at launch. Until then write to hello@kabsi.co, and a person answers, not a bot.",
-          },
-          {
-            q: "Can I approve a reply or a post on WhatsApp?",
-            a: "Not yet. WhatsApp opens at launch. Until then you approve on kabsi.co.",
-          },
-          {
-            q: "Will Kabsi send me alerts on WhatsApp?",
-            a: "Not yet; email is the only alert channel today. WhatsApp alerts will need your yes first, and you can reply STOP at any time.",
-          },
-          {
-            q: "Does Kabsi message my customers?",
-            a: "No. Kabsi talks only to you. It gives you a review link and a QR card, and you send them.",
-          },
-          {
-            q: "Will Kabsi ever ask for my Google password or a code on WhatsApp?",
-            a: "Never, on WhatsApp or anywhere else.",
-          },
-        ],
-  },
-  {
-    id: "privacy",
-    title: "Privacy and data",
-    items: [
-      {
-        q: "Is my data safe?",
-        a: "Kabsi's database is in Frankfurt. The privacy policy lists every provider. Data is encrypted in transit.",
-      },
-      {
-        q: "Does Kabsi use my reviews to train AI?",
-        a: "No. Review text and business facts go to Anthropic's API for drafts and checks, and Anthropic does not train on them. Kabsi never uses Google data to train AI models.",
-      },
-      {
-        q: "What does the free check keep?",
-        a: "What Google shows about the business is shown to you and not kept; Kabsi keeps only the business's Google Place ID. If you ask for the result by email or join the waiting list, Kabsi keeps your email address too.",
-      },
-      {
-        q: "Can I delete my data?",
-        a: "Yes. Business data is deleted 7 days after a deletion request. Write to hello@kabsi.co.",
-      },
-      {
-        q: "Does Kabsi sell my data?",
-        a: "No. Kabsi does not sell or rent personal data and does not use it for advertising.",
-      },
-    ],
-  },
-];
+export const buildFaqGroups = (
+  whatsappOn: boolean = WHATSAPP_ON,
+  nearbyOn: boolean = NEARBY_ON,
+): FaqGroup[] => {
+  const faq = buildFaq(nearbyOn);
+  return [
+    {
+      id: "start",
+      title: "Getting started",
+      items: [
+        {
+          q: "What does the free check show?",
+          a: "What customers see on your Google profile today and what to do first: your opening hours, how many reviews you have and your rating, your photos, your website and phone, and your category. It takes about 10 seconds and needs no access.",
+        },
+        {
+          q: "How do I add Kabsi to my Google profile?",
+          a: `On Google, open your profile (search your business name while signed in), then Menu, Business Profile settings, People and access, Add. Paste ${KABSI_GROUP_ID}, choose Manager, then Add (on some screens, Invite). ${KABSI_GROUP_ID} is ${KABSI_GROUP_NAME}, Kabsi's business group on Google. Never send us a password or a code.`,
+        },
+        {
+          q: "Which businesses can use Kabsi?",
+          a: "A business with a verified Google profile that you own or manage: a place customers visit during stated hours, or a business that travels to its customers with a service area. Online-only businesses are not eligible on Google.",
+        },
+        faq[2]!,
+        {
+          q: "Can't I do this myself for free?",
+          a: "Yes. Your Google profile is free, and you can reply to reviews and update it yourself. The subscription pays for the ongoing work: Kabsi keeps checking, drafts the replies and posts, follows up, and brings each one to you for a yes.",
+        },
+      ],
+    },
+    {
+      id: "google",
+      title: "Google and control",
+      items: [
+        faq[0]!,
+        {
+          q: "Is anything posted without me?",
+          a: "No. Every reply, post and change waits for your yes. Kabsi sends it to Google, checks it is live, and tells you if anything did not go through.",
+        },
+        faq[5]!,
+        faq[3]!,
+        {
+          q: "How do I remove Kabsi?",
+          a: `In your Google profile, open People and access and remove ${KABSI_GROUP_NAME}. Kabsi stops at once. Cancelling a plan never removes Kabsi's access by itself; removing it is your choice.`,
+        },
+      ],
+    },
+    {
+      id: "plans",
+      title: "Plans and billing",
+      items: [
+        {
+          q: "What does Kabsi cost?",
+          a: `${PRICES_SENTENCE} ${FOUNDING_SENTENCE} Both plans are free for 14 days, with no card.`,
+        },
+        {
+          q: "When does the trial start?",
+          a: "When Kabsi's access to your Google profile works, so waiting for access costs you nothing. The trial is 14 days of Pro, one per business.",
+        },
+        BILLING_FAQ[1]!,
+        {
+          q: "Can I cancel?",
+          a: "Yes, any time. Your plan runs to the end of the period you paid for. Monthly plans can be cancelled at any time. Yearly plans are refundable within 14 days.",
+        },
+        {
+          q: "Can I run more than one location?",
+          a: "Yes. Each extra location is $15 a month or $150 a year, on the same plan.",
+        },
+        BILLING_FAQ[5]!,
+      ],
+    },
+    {
+      id: "whatsapp",
+      title: "WhatsApp",
+      items: whatsappOn
+        ? [
+            {
+              q: "Does Kabsi have a WhatsApp number?",
+              a: "Yes. Message Kabsi on WhatsApp, or write to hello@kabsi.co.",
+            },
+            {
+              q: WHATSAPP_APPROVE_Q,
+              a: whatsappApproveAnswer(true),
+            },
+            {
+              q: "Will Kabsi send me alerts on WhatsApp?",
+              a: "Only after your yes, and you can reply STOP at any time.",
+            },
+            {
+              q: "Does Kabsi message my customers?",
+              a: "No. Kabsi talks only to you. It gives you a review link and a QR card, and you send them.",
+            },
+            {
+              q: "Will Kabsi ever ask for my Google password or a code on WhatsApp?",
+              a: "Never, on WhatsApp or anywhere else.",
+            },
+          ]
+        : [
+            {
+              q: "Does Kabsi have a WhatsApp number?",
+              a: "Yes. It is being tested and opens to owners at launch. Until then write to hello@kabsi.co, and a person answers, not a bot.",
+            },
+            {
+              q: WHATSAPP_APPROVE_Q,
+              a: whatsappApproveAnswer(false),
+            },
+            {
+              q: "Will Kabsi send me alerts on WhatsApp?",
+              a: "Not yet; email is the only alert channel today. WhatsApp alerts will need your yes first, and you can reply STOP at any time.",
+            },
+            {
+              q: "Does Kabsi message my customers?",
+              a: "No. Kabsi talks only to you. It gives you a review link and a QR card, and you send them.",
+            },
+            {
+              q: "Will Kabsi ever ask for my Google password or a code on WhatsApp?",
+              a: "Never, on WhatsApp or anywhere else.",
+            },
+          ],
+    },
+    {
+      id: "privacy",
+      title: "Privacy and data",
+      items: [
+        {
+          q: "Is my data safe?",
+          a: "Kabsi's database is in Frankfurt. The privacy policy lists every provider. Data is encrypted in transit.",
+        },
+        {
+          q: "Does Kabsi use my reviews to train AI?",
+          a: "No. Review text and business facts go to Anthropic's API for drafts and checks, and Anthropic does not train on them. Kabsi never uses Google data to train AI models.",
+        },
+        {
+          q: "What does the free check keep?",
+          a: "What Google shows about the business is shown to you and not kept; Kabsi keeps only the business's Google Place ID. If you ask for the result by email or join the waiting list, Kabsi keeps your email address too.",
+        },
+        {
+          q: "Can I delete my data?",
+          a: "Yes. Business data is deleted 7 days after a deletion request. Write to hello@kabsi.co.",
+        },
+        {
+          q: "Does Kabsi sell my data?",
+          a: "No. Kabsi does not sell or rent personal data and does not use it for advertising.",
+        },
+      ],
+    },
+  ];
+};
+export const FAQ_GROUPS: FaqGroup[] = buildFaqGroups();
 
 /** Every FAQ answer on /faq, in order, for the FAQPage data. */
 export const FAQ_ALL = FAQ_GROUPS.flatMap((g) => g.items);
