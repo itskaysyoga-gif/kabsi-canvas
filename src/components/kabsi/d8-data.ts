@@ -141,19 +141,23 @@ export const CONTROL_SHORT = [
  * The Example free check result (Design 8, Hollis Hair). Changed to the facts (lane R decision 1): the free check reads
  * only Google's public data, which has no review replies, holiday hours or post dates (K-82, the check says so itself),
  * so the Example leads with a finding the check can really make and lists only what it reads. Polish 2 (lane R, 3 Nov
- * 2026): the first finding is one Kabsi really acts on today (missing hours); Kabsi cannot add a missing website.
+ * 2026): the first finding is one Kabsi really acts on today; Kabsi cannot add a missing website. Fix 2 (master plan
+ * 30.27 item 2): the result no longer contradicts itself. The Google profile shows Saturday closing at 18:00 and the AI
+ * answer gives 17:00, so the difference is between the two; the first finding is one the check really makes (no photos:
+ * Kabsi asks for photos and prepares them), and the counts are ones the check can read (it counts photos only up to 10).
  */
 export const EXAMPLE_RESULT = {
   business: "Hollis Hair",
   address: "14 Gloucester Road, Bristol",
   first: {
-    fact: "No opening hours are shown on Google.",
-    action: "Kabsi asks you for your hours and sends them to Google once you say yes.",
+    fact: "Google shows no photos for this business.",
+    action: "Kabsi asks for photos from your phone and prepares them for you to approve.",
   },
   found: [
+    { label: "Saturday", value: "09:00 to 18:00" },
     { label: "Website", value: "Shown" },
     { label: "Phone", value: "Shown" },
-    { label: "Photos", value: "23" },
+    { label: "Reviews", value: "38" },
   ],
   ai: {
     line: "ChatGPT's answer gives your closing time on Saturday as 17:00. Your Google profile says otherwise.",

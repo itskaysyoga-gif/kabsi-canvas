@@ -163,7 +163,7 @@ values ('00000000-0000-4000-8000-000000000302', 2, 'A new version the owner has 
 select is(public.whatsapp_approve((select v ->> 'token' from t where k = 'r2b'), '+15550001111') ->> 'reason', 'changed',
   'a changed draft is refused with the app link');
 -- A draft approved in the app first: the WhatsApp button finds it already handled.
-select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000311', '{"summary": "Fresh bread every morning from 7."}'::jsonb,
+select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000311', '{"summary": "Fresh bread every morning from 7.", "photo_id": null, "photo_sig": null}'::jsonb,
   '00000000-0000-4000-8000-0000000000a1', 'dashboard');
 select is(public.whatsapp_approve((select v ->> 'token' from t where k = 'p1'), '+15550001111') ->> 'reason', 'not_draft',
   'a post already approved in the app is not approved again');

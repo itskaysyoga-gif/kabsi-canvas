@@ -237,3 +237,54 @@ Deno.test("photo post: a refusal from the database skips the held photo, nothing
   assert.equal([...w.waPhotos.values()][0].state, "skipped");
   deps.db.photoPostPrepare = realPrepare;
 });
+
+// Fix 2 (master plan 30.27 item 2): the Approve under a photo post is bound to the post's text and its photo (the photo's id
+// and its file). Any change after the post was shown makes the old Approve answer the existing changed-draft line; nothing
+// is approved. A replayed Approve after a yes is the same yes.
+async function shownPost(id: string) {
+  const w = new World();
+  const deps = w.deps();
+  await send(w, deps, PHONES.owner, { media: img(id), text: CAPTION });
+  const post = onlyPost(w);
+  w.waPhotos.get(post.photo)!.state = "draft";
+  return { w, deps, post, approve: lastButtonId(w, PHONES.owner, "Approve") };
+}
+
+Deno.test("photo post binding: unchanged text and photo, Approve works; pressing it again is the same yes", async () => {
+  const { w, deps, post, approve } = await shownPost("fx1");
+  // The file was recorded before the photo check finished: the same token still holds once it is checked.
+  const a = await send(w, deps, PHONES.owner, { button: approve });
+  assert.equal(a.result, "approved");
+  assert.equal(post.state, "publishing");
+  const again = await send(w, deps, PHONES.owner, { button: approve });
+  assert.equal(again.result, "repeat");
+  assert.match(again.last!.body, /This one is already handled\. Nothing changed\./);
+});
+
+Deno.test("photo post binding: the text changed after it was shown, the old Approve is refused", async () => {
+  const { w, deps, post, approve } = await shownPost("fx2");
+  post.text = `${post.text} Now with oat milk.`;
+  const a = await send(w, deps, PHONES.owner, { button: approve });
+  assert.equal(a.result, "refused:changed");
+  assert.match(a.last!.body, /This one is already handled\. Nothing changed\./);
+  assert.equal(post.state, "draft", "nothing approved");
+});
+
+Deno.test("photo post binding: another photo after it was shown, the old Approve is refused", async () => {
+  const { w, deps, post, approve } = await shownPost("fx3");
+  const other = [...w.waPhotos.keys()].find((k) => k !== post.photo) ?? "photo-other";
+  w.waPhotos.set(other, { ...w.waPhotos.get(post.photo)!, file: "etag-2" });
+  post.photo = other;
+  const a = await send(w, deps, PHONES.owner, { button: approve });
+  assert.equal(a.result, "refused:changed");
+  assert.equal(post.state, "draft", "nothing approved");
+});
+
+Deno.test("photo post binding: the same photo with another file after it was shown, the old Approve is refused", async () => {
+  const { w, deps, post, approve } = await shownPost("fx4");
+  w.waPhotos.get(post.photo)!.file = "etag-replaced";
+  const a = await send(w, deps, PHONES.owner, { button: approve });
+  assert.equal(a.result, "refused:changed");
+  assert.equal(post.state, "draft", "nothing approved");
+  assert.ok(!w.calls.some((c) => c === `undo:${approve}`));
+});
