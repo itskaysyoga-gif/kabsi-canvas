@@ -452,6 +452,40 @@ export async function mediaExists(locationId: string, ref: string): Promise<bool
   }
 }
 
+// ─── Photos 2: removing a photo Kabsi put on Google, by the media name Kabsi stored when it uploaded it. Only a name
+// under this business's own location is ever sent: anything else is refused before Google is called. Google no longer
+// having it (404, the owner deleted it on Google) is what was approved, so it counts as removed.
+export const MEDIA_NAME = /^accounts\/[^/]+\/(locations\/[^/]+)\/media\/[^/]+$/;
+export async function removeMedia(locationId: string, ref: string): Promise<{ response: unknown; alreadyGone: boolean }> {
+  assertNotConcierge(locationId);
+  const m = MEDIA_NAME.exec(ref);
+  if (!m || m[1] !== locationId) throw new Error("media_not_this_business");
+  const mode = modeFor(locationId);
+  try {
+    const r = await by(mode, mediaLive, mediaMock).deleteMedia(ref);
+    return { response: mode === "mock" ? { mock: true, removed: ref } : r, alreadyGone: false };
+  } catch (e) {
+    if (/^Error: google 404 /.test(String(e))) return { response: { removed: ref, already_gone: true }, alreadyGone: true };
+    throw e;
+  }
+}
+
+// Whether a photo Kabsi removed is gone: read by its own name (404 is gone). If that read fails with anything else, the
+// business's photo list decides; null when the list has more pages than one read covers and the photo is not on the first.
+export async function mediaGone(accountId: string, locationId: string, ref: string): Promise<boolean | null> {
+  assertNotConcierge(locationId);
+  const api = by(modeFor(locationId), mediaLive, mediaMock);
+  try {
+    return !(await api.getMedia(ref)).name;
+  } catch (e) {
+    if (/^Error: google 404 /.test(String(e))) return true;
+    if (e instanceof RetryLater || /^Error: google (400|401|403) /.test(String(e))) throw e;
+  }
+  const list = await api.listMedia(accountId, locationId);
+  if ((list.mediaItems ?? []).some((i) => i.name === ref)) return false;
+  return list.nextPageToken ? null : true;
+}
+
 // ─── Search terms people used to find the profile, for post keywords (read only). The mock has none.
 export async function searchKeywords(locationId: string): Promise<{ keyword: string; count: number }[]> {
   assertNotConcierge(locationId);

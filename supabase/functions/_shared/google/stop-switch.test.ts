@@ -60,6 +60,7 @@ const WRITES: [string, () => Promise<unknown>][] = [
   ["post delete", () => posts.deleteLocalPost(`${ACCOUNT}/${LOCATION}/localPosts/p1`)],
   ["media create", () => media.createMedia(ACCOUNT, LOCATION, { mediaFormat: "PHOTO" })],
   ["media start upload", () => media.startUpload(ACCOUNT, LOCATION)],
+  ["media delete", () => media.deleteMedia(`${ACCOUNT}/${LOCATION}/media/m1`)],
   ["media bytes", () => media.uploadBytes({ resourceName: "ref-1" }, new Uint8Array([1, 2, 3]), "image/jpeg")],
   ["location patch", () => locations.patchLocation(LOCATION, "title", { title: "Harbour Lane Coffee" })],
   ["special hours", () => locations.patchLocation(LOCATION, "specialHours", { specialHours: { specialHourPeriods: [] } })],
@@ -169,9 +170,10 @@ Deno.test("every write in the live modules is covered by this test", async () =>
     const text = await Deno.readTextFile(file).catch(() => "");
     found += (text.match(/method:\s*"(POST|PUT|PATCH|DELETE)"/g) ?? []).length;
   }
-  // 10 distinct write calls; WRITES lists 12 rows because special hours and attributes reuse the location patch.
-  assert.equal(found, 10);
-  assert.equal(WRITES.length, 12);
+  // 11 distinct write calls (Photos 2 added the media delete); WRITES lists 13 rows because special hours and attributes
+  // reuse the location patch.
+  assert.equal(found, 11);
+  assert.equal(WRITES.length, 13);
 });
 
 Deno.test("the publish job keeps the approved item and is postponed while writes are paused", async () => {

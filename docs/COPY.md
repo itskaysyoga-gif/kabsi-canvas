@@ -922,3 +922,30 @@ WhatsApp lines (supabase/functions/_shared/whatsapp/say.ts). Each answer starts 
 - Unchanged and reused: the Approved line with Undo ("Approved for [Business]. It goes to Google in 10 seconds. Press Undo to stop it."), "Undone. Nothing was sent. The draft is waiting for you in Kabsi.", and the outcome lines of task-close.ts for Sent to Google and Live on Google.
 
 Website (Home, the work Kabsi does, src/components/kabsi/d8-data.ts): the job "Your profile kept fresh" now reads "Send a photo with a line about it. Kabsi turns it into a Google post and asks for your yes." (was "A new service, late opening, a quiet week. Kabsi writes the post and readies your photo."). Nothing else on the website changes (Design 9 and Web 5 do that).
+
+## 43. Photos 2: remove a photo from Google, the screenshot note, and a clearer Photos screen (4 Nov 2026, for lane R's next copy review)
+
+Website, Photos (`src/routes/_authenticated/app/photos.tsx`, `src/lib/photos.ts`, `src/components/kabsi/d3-account.tsx`). Owners and managers who may approve photos only; staff see none of the removal lines.
+
+- On a photo's card in "Sent to Google", once it is live on Google: the button "Remove from Google". It opens the confirm step: "Remove this photo from your Google profile? You have 10 seconds to undo." with "Remove from Google" and "Keep it". Then the existing Approved line with Undo ("Approved. It goes to Google in [n] seconds.").
+- The removal's three states, as a pill with one line under it:
+  - "Removing": "Kabsi asked Google to remove it and checks until it is gone."
+  - "Removed from Google": "Google no longer shows this photo." (also when the owner had already deleted it on Google)
+  - "Did not go through": the existing failed line of task-state.ts with the noun "photo removal", for example "Google did not accept this photo removal. Nothing changed on Google." The photo stays on Google and keeps its Remove from Google button.
+- Refused because Kabsi did not put the photo on Google: "Kabsi did not put this photo on Google, so it cannot remove it. Remove it on Google itself."
+- Undo too late: "Too late to undo: Kabsi already asked Google to remove it."
+- The screenshot note (the photo check, a note, never a block; Approve all leaves the photo out and "Approve anyway" still works): "This looks like a screenshot. Google asks for photos of your business itself: the outside, inside, your team, your work."
+- "What it shows" is now a set of tappable choices, nothing chosen for the owner, each with one line of help:
+  - Outside: "Your front, as customers see it."
+  - Inside: "The room your customers see."
+  - Team: "You and the people you work with."
+  - At work: "Your team doing the work."
+  - Product: "Something you make or sell."
+  - Food and drink: "A dish or a drink you serve."
+  - Menu: "Your menu, easy to read."
+  - Other: "Anything else about your place."
+  - Then, below a line: Preferred cover photo: "A wide photo works best." and Logo: "A square one works best." (the existing advice; the size advice of roleIssue still shows once chosen).
+- Approve pressed before a kind is chosen: "Choose what the photo shows first."
+- A photo still being checked has its own card: "Checking your photo. About a minute." (was one line for all, "Kabsi is checking [n] photos. This takes a minute.").
+- The state track on a narrow card shows "Approved", "Sent" and "Live"; screen readers hear "Approved", "Sent to Google" and "Live on Google". Wider cards show the full names as before.
+- Tapping a photo opens it full size: the title is the kind ("At work photo", or "Your photo"), with "The photo as Kabsi sends it to Google."

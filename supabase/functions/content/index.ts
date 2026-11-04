@@ -16,6 +16,7 @@
 //   POST { do: "hours_regular", location_id, week: { MONDAY: [{ open, close }], ... } }  → the weekly opening hours (P0.5-03)
 //   POST { do: "holiday_answer", prompt_id, answer: "normal" | "closed" | "custom", open?, close?, from?, to? }  → the holiday question
 //   POST { do: "photo_publish", photo_id, category } · { do: "photos_approve_all", location_id } · { do: "photo_skip", photo_id }
+//   POST { do: "photo_remove", photo_id } · { do: "photo_undo", photo_id, publication_id } (Photos 2: a photo Kabsi put on Google)
 //   (P0.5-01: uploads are checked by the process_photo job and the `photos` function, never here)
 //   POST { do: "shield_decide", change_id, decision: "revert" | "keep" }                  → Google Protection (D218)
 import { CONCIERGE_COPY } from "../_shared/concierge.ts";
@@ -37,7 +38,7 @@ type Loc = PostLoc;
 
 // The owner's approval of one post, photo or special hours period (the one approval path, K-38, P0.1-13b). The
 // publish job sends it to Google after the 10 second undo window; a second click gets the same publication back.
-async function approveChange(req: Request, userId: string, targetType: "local_post" | "local_post_removal" | "photo" | "special_hours", targetId: string, payload: Record<string, unknown>) {
+async function approveChange(req: Request, userId: string, targetType: "local_post" | "local_post_removal" | "photo" | "photo_removal" | "special_hours", targetId: string, payload: Record<string, unknown>) {
   const { data, error } = await auditedAdmin(auditHeaders(req, userId)).rpc("approve_publication", {
     p_target_type: targetType, p_target_id: targetId, p_payload: payload, p_approved_by: userId, p_channel: "dashboard",
   });
@@ -313,6 +314,26 @@ Deno.serve(async (req) => {
         const r = await approveChange(req, user.id, "photo", photo.id, { category });
         return json({ ok: true, ...r });
       }
+      case "photo_remove": {
+        // Photos 2: the owner, or a manager who may approve photos, removes a photo Kabsi put on Google. The same
+        // pipeline as the post removal: the approval, the 10 second undo, one DELETE of Kabsi's own upload by the media
+        // name Google gave it, then Kabsi reads Google until the photo is gone.
+        if (!photo || photo.state !== "posted") return fail("bad_input", "Only a photo that is live on Google can be removed.");
+        if (loc.status !== "active" || !loc.google_location_id) return fail("not_active", "This business isn't active yet.", 409);
+        const r = await approveChange(req, user.id, "photo_removal", photo.id, {});
+        return json({ ok: true, ...r });
+      }
+      case "photo_undo": {
+        // K-70: inside the 10 seconds an approved photo removal stops before Google has it.
+        if (!photo) return fail("bad_input", "Missing photo.");
+        const { data: found } = await db.from("publications").select("id").eq("id", String(b.publication_id ?? ""))
+          .eq("target_id", photo.id).eq("target_type", "photo_removal").maybeSingle();
+        if (!found) return fail("not_found", "Nothing to undo.", 404);
+        const { data, error } = await db.rpc("undo_publication", { p_publication: found.id, p_user: user.id });
+        if (error && /too_late/.test(error.message)) return fail("too_late", "Too late to undo: Kabsi already asked Google to remove it.", 409);
+        if (error) throw error;
+        return json({ ok: true, ...(data as Record<string, unknown>) });
+      }
       case "photos_approve_all": {
         // The batch card (K-23): each checked photo is its own approval and its own publication, so each goes to
         // Google once, after its own undo window. Photos Kabsi has doubts about are left for one by one.
@@ -361,6 +382,7 @@ Deno.serve(async (req) => {
     if (msg.includes("concierge_profile")) return fail("early_access", CONCIERGE_COPY.profile, 409);
     if (msg.includes("bad_post_text")) return fail("bad_text", "Posts must be between 10 and 1,500 characters.");
     if (msg.includes("video_later")) return fail("video_later", "Sending videos to Google comes later. Kabsi keeps this video for 30 days.", 409);
+    if (msg.includes("photo_not_on_google")) return fail("bad_input", "Kabsi did not put this photo on Google, so it cannot remove it. Remove it on Google itself.", 409);
     if (msg.includes("bad_category")) return fail("bad_input", "Choose a category for this photo.");
     await captureError("content", e);
     return fail("internal", "Something went wrong. Nothing was posted.", 500);

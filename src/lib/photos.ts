@@ -7,6 +7,8 @@ import { anonHeaders, supabase, supabaseUrl } from "@/lib/supabase";
 export type Photo = {
   id: string;
   storage_path: string;
+  /** Photos 2: the small copy for the list (null for photos checked before 4 Nov 2026). */
+  thumb_path: string | null;
   kind: "photo" | "video";
   category: string | null;
   suitable: boolean | null;
@@ -14,7 +16,17 @@ export type Photo = {
   issues: string[];
   width: number | null;
   height: number | null;
-  state: "checking" | "draft" | "publishing" | "posted" | "skipped" | "failed" | "refused" | "held";
+  state:
+    | "checking"
+    | "draft"
+    | "publishing"
+    | "posted"
+    | "skipped"
+    | "failed"
+    | "refused"
+    | "held"
+    | "removing"
+    | "removed";
   source: "app" | "staff_link" | "whatsapp";
   created_at: string;
 };
@@ -32,6 +44,32 @@ export const CATEGORIES: Record<string, string> = {
   COVER: "Preferred cover photo",
   LOGO: "Logo",
 };
+
+/** Photos 2: one line of help under each kind of photo (docs/COPY.md section 43). Cover and logo keep their advice. */
+export const CATEGORY_HELP: Record<string, string> = {
+  EXTERIOR: "Your front, as customers see it.",
+  INTERIOR: "The room your customers see.",
+  TEAMS: "You and the people you work with.",
+  AT_WORK: "Your team doing the work.",
+  PRODUCT: "Something you make or sell.",
+  FOOD_AND_DRINK: "A dish or a drink you serve.",
+  MENU: "Your menu, easy to read.",
+  ADDITIONAL: "Anything else about your place.",
+  COVER: "A wide photo works best.",
+  LOGO: "A square one works best.",
+};
+/** The order on the card: the eight kinds, then the preferred cover photo and the logo. */
+export const KINDS = [
+  "EXTERIOR",
+  "INTERIOR",
+  "TEAMS",
+  "AT_WORK",
+  "PRODUCT",
+  "FOOD_AND_DRINK",
+  "MENU",
+  "ADDITIONAL",
+] as const;
+export const ROLES = ["COVER", "LOGO"] as const;
 
 export const MAX_FILES = 20;
 export const MAX_BYTES = 20 * 1024 * 1024;
@@ -82,7 +120,7 @@ export async function loadPhotos(locationId: string) {
   const { data, error } = await supabase
     .from("photos")
     .select(
-      "id, storage_path, kind, category, suitable, suitability_note, issues, width, height, state, source, created_at",
+      "id, storage_path, thumb_path, kind, category, suitable, suitability_note, issues, width, height, state, source, created_at",
     )
     .eq("location_id", locationId)
     .neq("state", "skipped")
@@ -97,16 +135,32 @@ export async function loadPhotos(locationId: string) {
   const shown = photos.filter(
     (p) => p.kind === "photo" && !["checking", "refused"].includes(p.state),
   );
+  // Photos 2: the list loads the small copy (about 30 KB) and the full file only when a photo is opened. Keyed by
+  // photo id. 1-hour signed links, for members only (Storage policy owner_photos_select), so a link does not run out
+  // while the page is open.
   const urls: Record<string, string> = {};
   if (shown.length) {
-    // 5-minute signed links, for members only (Storage policy owner_photos_select).
-    const { data: signed } = await supabase.storage.from("owner-photos").createSignedUrls(
-      shown.map((p) => p.storage_path),
-      300,
-    );
-    for (const s of signed ?? []) if (s.path && s.signedUrl) urls[s.path] = s.signedUrl;
+    const path = (p: Photo) => p.thumb_path ?? p.storage_path;
+    const { data: signed } = await supabase.storage
+      .from("owner-photos")
+      .createSignedUrls(shown.map(path), 3600);
+    const byPath = new Map<string, string>();
+    for (const s of signed ?? []) if (s.path && s.signedUrl) byPath.set(s.path, s.signedUrl);
+    for (const p of shown) {
+      const u = byPath.get(path(p));
+      if (u) urls[p.id] = u;
+    }
   }
   return { photos, urls };
+}
+
+/** The full photo, signed when the owner opens it (5 minutes). */
+export async function fullPhotoUrl(storagePath: string): Promise<string> {
+  const { data, error } = await supabase.storage
+    .from("owner-photos")
+    .createSignedUrl(storagePath, 300);
+  if (error || !data) throw new Error("Couldn't open the photo. Try again.");
+  return data.signedUrl;
 }
 
 /** Upload chosen files one by one. Returns how many went in and the last problem in plain words. */

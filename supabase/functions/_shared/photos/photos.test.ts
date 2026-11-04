@@ -160,3 +160,70 @@ Deno.test("the mock media API counts one start, one upload and one create per ph
   await media.createMedia("accounts/a", "locations/l", { mediaFormat: "PHOTO", dataRef: ref });
   assertEquals([mediaCalls.startUpload - before.startUpload, mediaCalls.upload - before.upload, mediaCalls.create - before.create], [1, 1, 1]);
 });
+
+// Photos 2: the screenshot note. Two signals from the original file, no AI: no camera data (EXIF maker or model) and a
+// phone screen's shape (1.95 to 2.4), or a PNG at a common phone screen's exact size.
+import { hasCameraData, screenshotLikely } from "./screenshot.ts";
+import { FLAG_TEXT } from "./engine.ts";
+import { Image } from "https://deno.land/x/imagescript@1.3.0/mod.ts";
+
+const SCREENSHOT_NOTE = "This looks like a screenshot. Google asks for photos of your business itself: the outside, inside, your team, your work.";
+
+// A PNG of the given size with a little drawing on it (no metadata at all, like a phone's screenshot).
+async function pngOf(width: number, height: number): Promise<Uint8Array> {
+  const img = new Image(width, height);
+  img.fill(0xf4f4f4ff);
+  for (let y = 0; y < height; y += 40) img.drawBox(20, y, width - 40, 12, y % 80 ? 0x222222ff : 0x3366ccff);
+  return await img.encode(1);
+}
+
+Deno.test("camera data: a camera JPEG has it; a PNG, a cleaned JPEG and the HEIC fixture have none", async () => {
+  assert(hasCameraData(await fixture("gps.jpg")), "gps.jpg has Make TestPhone");
+  assert(!hasCameraData(await fixture("document.png")));
+  assert(!hasCameraData(await fixture("dark.jpg")));
+  assert(!hasCameraData(await fixture("iphone.heic")));
+  // A PNG eXIf chunk naming a maker counts, as in a JPEG.
+  const tiff = [0x4d, 0x4d, 0, 0x2a, 0, 0, 0, 8, 0, 1, 0x01, 0x0f, 0, 2, 0, 0, 0, 6, 0, 0, 0, 26, 0, 0, 0, 0, ...new TextEncoder().encode("Phone\0")];
+  const exifPng = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, tiff.length, ...new TextEncoder().encode("eXIf"), ...tiff]);
+  assert(hasCameraData(exifPng));
+});
+
+Deno.test("screenshot shapes: phone screens yes; camera photos, panoramas and camera data no", () => {
+  const no = { format: "png", camera: false };
+  for (const [w, h] of [[1170, 2532], [1080, 2400], [1440, 3200], [2400, 1080], [1103, 2400]]) {
+    assert(screenshotLikely({ ...no, width: w, height: h }), `${w} by ${h}`);
+  }
+  assert(screenshotLikely({ ...no, width: 1080, height: 1920 }), "a PNG at an exact phone screen size");
+  assert(!screenshotLikely({ format: "jpeg", camera: false, width: 1080, height: 1920 }), "a 16 by 9 JPEG is a camera shape");
+  for (const [w, h] of [[4032, 3024], [3024, 4032], [6000, 4000], [3840, 2160], [2000, 2000], [8000, 2000]]) {
+    assert(!screenshotLikely({ ...no, width: w, height: h }), `${w} by ${h}`);
+  }
+  assert(!screenshotLikely({ format: "jpeg", camera: true, width: 1080, height: 2400 }), "camera data is never a screenshot");
+});
+
+Deno.test("Rashid's photo of 4 Nov 2026 (its stored size, 1103 by 2400 PNG) gets the screenshot note, not a block", async () => {
+  const row = JSON.parse(await Deno.readTextFile(new URL("../../../../tests/fixtures/photos/screenshot-2026-11-04.json", import.meta.url)));
+  assertEquals([row.format, row.width, row.height], ["png", 1103, 2400]);
+  const m = memory({ "loc1/upload.jpg": await pngOf(row.width, row.height) });
+  assertEquals(await processUpload(row.id, m.deps), "draft", "a note, not a refusal");
+  const r = m.recorded[0];
+  assert(r.outcome === "ready");
+  assertEquals(r.flags, ["screenshot"]);
+  assertEquals(FLAG_TEXT.screenshot, SCREENSHOT_NOTE);
+  assert(r.note?.includes(SCREENSHOT_NOTE));
+  // The small copy for the list is stored beside the photo, 480 pixels on the long side, with no metadata.
+  assertEquals(r.thumb, `loc1/${row.id}_s.jpg`);
+  const small = await Image.decode(m.stored[`loc1/${row.id}_s.jpg`]);
+  assertEquals(Math.max(small.width, small.height), 480);
+  assert(m.stored[`loc1/${row.id}_s.jpg`].length < m.stored[`loc1/${row.id}.jpg`].length / 3, "the small copy is a fraction of the photo");
+});
+
+Deno.test("a camera photo (4 by 3, with camera data) and a 4 by 3 PNG get no screenshot note", async () => {
+  for (const name of ["gps.jpg", "document.png"]) {
+    const m = memory({ "loc1/upload.jpg": await fixture(name) });
+    await processUpload("p5", m.deps);
+    const r = m.recorded[0];
+    assert(r.outcome === "ready");
+    assert(!r.flags.includes("screenshot"), name);
+  }
+});
