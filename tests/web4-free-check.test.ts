@@ -43,11 +43,12 @@ describe("the suggestion list opens above the hero visual (Web 4 review)", () =>
     expect(read("src/components/kabsi/page-hero.tsx")).toMatch(
       /className="relative z-10 mt-7 animate-enter"/,
     );
-    expect(read("src/components/kabsi/d8-home.tsx")).toMatch(
-      /className="relative z-10 mt-5 animate-enter/,
+    expect(read("src/components/kabsi/d9-hero.tsx")).toMatch(
+      /className="relative z-10 mt-5 max-w-\[36rem\]/,
     );
   });
   it("keeps the free check page off Home's module", () => {
     expect(read("src/components/kabsi/d4-free-check.tsx")).not.toContain('from "./d8-home"');
+    expect(read("src/components/kabsi/d4-free-check.tsx")).not.toContain('from "./d9-home"');
   });
 });

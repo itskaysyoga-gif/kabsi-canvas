@@ -62,9 +62,9 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 4 Nov 2026, Photos 2: PR 340. Remove a photo from Google, the screenshot note, a clearer Photos screen; migration applied by lane R. Mock-tested; Rashid's live test in the file. Detail: `docs/progress/archive/2026-11-04-photos2.md`.
-- 4 Nov 2026, Web 5 (Design 9 on kabsi.co, master plan 30.24): part 0 PR 338 merged; part A (the shell) in progress. Detail: `docs/progress/archive/2026-11-04-web5.md`.
-- 4 Nov 2026, Photo Post 1: PRs 336 and 337 (a WhatsApp photo with words becomes a Google post). Mock-tested. Detail: `docs/progress/archive/2026-11-04-photo-post1.md`.
+- 4 Nov 2026, Photos 2: PR 340. Remove a photo from Google, the screenshot note, a clearer Photos screen. Mock-tested. Detail: `docs/progress/archive/2026-11-04-photos2.md`.
+- 4 Nov 2026, Web 5 (Design 9 on kabsi.co, 30.24): PRs 338, 339, 341, 342, 343, all merged and checked live (Home performance 95, script 225 of 225 KB, LATER row). Detail: `docs/progress/archive/2026-11-04-web5.md`.
+- 4 Nov 2026, Photo Post 1: PRs 336 (master plan 30.22, 30.23) and 337 (a WhatsApp photo with words becomes a Google post, for the owner's yes). Mock-tested, not live for owners. Detail: `docs/progress/archive/2026-11-04-photo-post1.md`.
 
 
 ## How a session updates this page

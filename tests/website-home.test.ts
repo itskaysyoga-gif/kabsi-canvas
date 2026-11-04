@@ -128,10 +128,11 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     expect(MAIN_CTA).toBe("Check my business free");
     expect(SCAN_LINE).toBe("Free check. No Google access needed. Takes about 10 seconds.");
     expect(TRIAL_LINE).toBe("Free for 14 days once Kabsi is connected. No card.");
-    // Design 8 (Web 4): the H1 is the brand line itself. Polish 2 (lane R, 3 Nov 2026): the supporting line leads with
-    // the owner's benefit, then how it works.
-    const home = read("src/components/kabsi/d8-home.tsx");
-    expect(home).toContain("Your business on Google. Taken care of.");
+    // Design 9 (Web 5 part B): the H1 is the brand line itself, "Taken care of." on the yellow bar; the meta description
+    // stays Polish 2's line (HOME_LINE), the visible hero line is Design 9's.
+    const home = read("src/components/kabsi/d9-hero.tsx");
+    expect(home).toContain('<D9Title text="Your business on Google. Taken care of." />');
+    expect(read("src/routes/index.tsx")).toContain("description: HOME_LINE");
     expect(read("src/components/kabsi/hero-lines.ts")).toContain(
       "Your details kept right, every review answered and your profile kept fresh, without doing it yourself. Kabsi prepares the work and asks for your yes before anything goes live.",
     );
@@ -311,8 +312,8 @@ describe("the head of every public page (30.16 section 4)", () => {
   });
 });
 
-describe("Home on Design 8 (Web 4, lane R 1 Nov 2026)", () => {
-  const home = read("src/components/kabsi/d8-home.tsx");
+describe("Home on Design 9 (Web 5 part B, master plan 30.24)", () => {
+  const home = read("src/components/kabsi/d9-home.tsx");
   const data = read("src/components/kabsi/d8-data.ts");
   it("never types a count: the Founding 25 count and the founding price come from the real readers", () => {
     expect(home).toContain("useFoundingPlaces()");
@@ -331,10 +332,7 @@ describe("Home on Design 8 (Web 4, lane R 1 Nov 2026)", () => {
     expect(data).not.toContain("Your hours, replies, posts, photos and links");
   });
   it("cards only for finished trades, each with a photo", () => {
-    const cards = home.slice(
-      home.indexOf("TRADE_CARDS"),
-      home.indexOf("export function PickBusiness"),
-    );
+    const cards = home.slice(home.indexOf("const TRADES"), home.indexOf("function D9PickBusiness"));
     expect(cards.match(/photo: PHOTOS\./g)).toHaveLength(4);
   });
 });

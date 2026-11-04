@@ -461,6 +461,22 @@ body:not(:has(.page-light)):has(.theme-dark),
 }
 
 /* WhatsApp style chat ground with a faint pattern of our own (never WhatsApp's doodles) */
+/* Design 9 hero treatment B (master plan 30.24): a Kabsi-yellow bar behind the H1's second sentence, in charcoal. Used
+   once per page, behind "Taken care of." only; yellow is never text on ivory or white. */
+@utility d9-mark {
+  color: var(--kb-ink);
+  background-image: linear-gradient(
+    transparent 0.1em,
+    var(--kb-yellow) 0.1em,
+    var(--kb-yellow) calc(100% - 0.02em),
+    transparent calc(100% - 0.02em)
+  );
+  padding-inline: 0.1em;
+  margin-inline: -0.1em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
 @utility wa-ground {
   background-color: var(--wa-chat-bg);
   background-image: radial-gradient(rgb(17 27 33 / 0.05) 1px, transparent 1.2px);

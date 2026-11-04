@@ -76,7 +76,7 @@ export const hairSalon: Industry = {
       label: "Post",
       text: "Amber starts on Tuesday. Post ready:",
       quote: "New to the team: Amber, colour and balayage, from Tuesday.",
-      buttons: ["Yes", "Edit", "Skip"],
+      buttons: ["Approve", "Edit", "Skip"],
       time: "09:20",
     },
     jobsTitle: "The Google jobs that come back for a hair salon.",
