@@ -49,7 +49,7 @@ Deno.test("photo removal: Google no longer has it (404, deleted on Google) count
 });
 
 Deno.test("photo removal: a name under another location, or not a media name, is refused before Google is called", async () => {
-  for (const ref of [`${ACC}/locations/999/media/x`, `${ACC}/${LOC}/localPosts/1`, `${MEDIA}/../../media/y`, ""]) {
+  for (const ref of [`${ACC}/locations/999/media/x`, `${ACC}/${LOC}/localPosts/1`, `${MEDIA}/../../media/y`, `${ACC}/${LOC}/media/..`, `${ACC}/${LOC}/media/.`, ""]) {
     const { calls } = await withGoogle([{ status: 200, body: {} }], () => google.removeMedia(LOC, ref).catch((e) => String(e)));
     assert.deepEqual(calls, [], ref);
   }

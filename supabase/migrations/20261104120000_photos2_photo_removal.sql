@@ -11,6 +11,8 @@
 --    file only when the photo is opened. Older photos have none and show the full file.
 -- 3. The WhatsApp outcome lines leave a photo removal out, as they do a post removal.
 -- 4. Retention: a removed photo's files go 30 days after it was removed, like a photo on Google.
+-- 5. detect_failed_publishes: a photo removal that did not go through opens a photo task ("A photo removal did not go
+--    through"), not a profile fix task (independent review finding 1).
 
 alter table public.photos add column if not exists thumb_path text;
 comment on column public.photos.thumb_path is
@@ -53,7 +55,7 @@ begin
      where target_type = 'photo' and target_id = p_target_id and location_id = ph.location_id and state = 'verified'
        and google_ref is not null
      order by created_at desc limit 1;
-    if v_text is null or v_text !~ '^accounts/[^/]+/locations/[^/]+/media/[^/]+$'
+    if v_text is null or v_text !~ '^accounts/[A-Za-z0-9_-]+/locations/[A-Za-z0-9_-]+/media/[A-Za-z0-9_-]+$'
        or split_part(v_text, '/', 3) || '/' || split_part(v_text, '/', 4)
           is distinct from (select google_location_id from public.locations where id = ph.location_id) then
       raise exception 'photo_not_on_google';
@@ -113,6 +115,18 @@ begin
   v_new := replace(v_def, $o$    update public.photos set storage_path = p_result ->> 'path', width = (p_result ->> 'width')::integer,$o$, $n$    if p_result ->> 'thumb' is not null and split_part(p_result ->> 'thumb', '/', 1) <> ph.location_id::text then raise exception 'bad_path'; end if;
     update public.photos set storage_path = p_result ->> 'path', thumb_path = p_result ->> 'thumb', width = (p_result ->> 'width')::integer,$n$);
   if v_new = v_def then raise exception 'photo_processed: no match'; end if;
+  execute v_new;
+
+  -- detect_failed_publishes: a failed photo removal is a photo task with its own title.
+  v_def := pg_get_functiondef('private.detect_failed_publishes(uuid)'::regprocedure);
+  v_new := replace(v_def, $o$when 'photo' then 'photo_batch'
+$o$, $n$when 'photo' then 'photo_batch' when 'photo_removal' then 'photo_batch'
+$n$);
+  if v_new = v_def then raise exception 'detect_failed_publishes: no match (kind)'; end if;
+  v_def := v_new;
+  v_new := replace(v_def, $o$when 'photo_batch' then 'A photo did not reach Google'$o$, $n$when 'photo_batch' then case p.target_type when 'photo_removal'
+                    then 'A photo removal did not go through' else 'A photo did not reach Google' end$n$);
+  if v_new = v_def then raise exception 'detect_failed_publishes: no match (title)'; end if;
   execute v_new;
 
   -- run_retention: a removed photo's files go 30 days (the photo limit) after it was removed.

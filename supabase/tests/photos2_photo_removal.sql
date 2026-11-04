@@ -94,6 +94,12 @@ select is(public.record_publication((select (j ->> 'publication_id')::uuid from 
   'rejected', 'a refusal is recorded');
 select is(pg_temp.photo_state('00000000-0000-4000-8000-000000000601'), 'posted', 'a refused removal leaves the photo as posted');
 
+-- A removal that did not go through opens a photo task with its own title, never a profile fix task.
+select private.detect_failed_publishes('00000000-0000-4000-8000-0000000000c1');
+select is((select kind || ': ' || title from public.tasks where source_type = 'publication'
+            and source_id = (select j ->> 'publication_id' from r2)),
+  'photo_batch: A photo removal did not go through', 'a failed photo removal is a photo task');
+
 -- Google applies it: removed only once verified, and its WhatsApp outcome line is never sent.
 create temp table r3 as select pg_temp.remove('00000000-0000-4000-8000-000000000601') as j;
 update public.publications set publish_after = now() - interval '1 second' where id = (select (j ->> 'publication_id')::uuid from r3);

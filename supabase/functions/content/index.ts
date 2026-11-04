@@ -331,7 +331,8 @@ Deno.serve(async (req) => {
         if (!found) return fail("not_found", "Nothing to undo.", 404);
         const { data, error } = await db.rpc("undo_publication", { p_publication: found.id, p_user: user.id });
         if (error && /too_late/.test(error.message)) return fail("too_late", "Too late to undo: Kabsi already asked Google to remove it.", 409);
-        if (error) throw error;
+        // The message, so the outer handler's checks (not_allowed_to_approve) read it.
+        if (error) throw new Error(error.message);
         return json({ ok: true, ...(data as Record<string, unknown>) });
       }
       case "photos_approve_all": {

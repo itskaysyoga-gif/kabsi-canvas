@@ -455,7 +455,7 @@ export async function mediaExists(locationId: string, ref: string): Promise<bool
 // ─── Photos 2: removing a photo Kabsi put on Google, by the media name Kabsi stored when it uploaded it. Only a name
 // under this business's own location is ever sent: anything else is refused before Google is called. Google no longer
 // having it (404, the owner deleted it on Google) is what was approved, so it counts as removed.
-export const MEDIA_NAME = /^accounts\/[^/]+\/(locations\/[^/]+)\/media\/[^/]+$/;
+export const MEDIA_NAME = /^accounts\/[A-Za-z0-9_-]+\/(locations\/[A-Za-z0-9_-]+)\/media\/[A-Za-z0-9_-]+$/;
 export async function removeMedia(locationId: string, ref: string): Promise<{ response: unknown; alreadyGone: boolean }> {
   assertNotConcierge(locationId);
   const m = MEDIA_NAME.exec(ref);

@@ -815,7 +815,9 @@ function PhotoImage({
   photo?: Photo | undefined;
   square?: boolean;
 }) {
-  const [broken, setBroken] = useState(false);
+  // The link that failed to load; a new link (signed again) is tried afresh.
+  const [brokenUrl, setBrokenUrl] = useState<string | null>(null);
+  const broken = !!url && brokenUrl === url;
   const [open, setOpen] = useState(false);
   const [full, setFull] = useState<string | null>(null);
   const [err, setErr] = useState("");
@@ -845,7 +847,7 @@ function PhotoImage({
       height={photo?.height ?? 600}
       loading="lazy"
       decoding="async"
-      onError={() => setBroken(true)}
+      onError={() => setBrokenUrl(url)}
       className="size-full object-contain"
     />
   );
@@ -867,7 +869,11 @@ function PhotoImage({
         <SheetContent side="bottom" className="max-h-[92vh] overflow-y-auto rounded-t-large">
           <SheetHeader className="text-left">
             <SheetTitle>{label}</SheetTitle>
-            <SheetDescription>The photo as Kabsi sends it to Google.</SheetDescription>
+            <SheetDescription>
+              {photo.state === "removed"
+                ? "Google no longer shows this photo."
+                : "The photo as Kabsi sends it to Google."}
+            </SheetDescription>
           </SheetHeader>
           <div className="mt-4 grid place-items-center bg-surface-2">
             <img
