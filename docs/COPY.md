@@ -999,3 +999,8 @@ Website, Photos (`src/routes/_authenticated/app/photos.tsx`, `src/lib/photos.ts`
 - A photo still being checked has its own card: "Checking your photo. About a minute." (was one line for all, "Kabsi is checking [n] photos. This takes a minute.").
 - The state track on a narrow card shows "Approved", "Sent" and "Live"; screen readers hear "Approved", "Sent to Google" and "Live on Google". Wider cards show the full names as before.
 - Tapping a photo opens it full size: the title is the kind ("At work photo", or "Your photo"), with "The photo as Kabsi sends it to Google."
+
+### Nora on phones (Polish 4 part B, master plan 30.25 item 4)
+
+- Her lone round button below 640 px: "Ask Nora, Kabsi's assistant" for screen readers (the same words as her button in the phone bar). From 640 px the launcher is unchanged: "Chat with Nora".
+- The phone sheet's header: "Nora, Kabsi's assistant" (was "Nora from Kabsi", which stays on a computer), the line under it and "Close the chat" unchanged.
