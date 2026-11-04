@@ -35,10 +35,11 @@ describe("Polish 2", () => {
     expect(HERO_STREAM.map((m) => m.id)).toEqual(["hours", "review", "post"]);
     expect(HERO_REPORT.title).toBe("Your weekly report");
   });
-  it("shows the Founding 25 line only on Home, Pricing, How it works and the industry pages (decision 7)", () => {
-    for (const p of ["/", "/pricing", "/how-it-works", "/for", "/for/barbershop", "/pricing/"])
+  it("shows the Founding 25 line only on Home, Pricing and the /for pages (master plan 30.24)", () => {
+    for (const p of ["/", "/pricing", "/for", "/for/barbershop", "/pricing/"])
       expect(foundingLinePage(p), p).toBe(true);
     for (const p of [
+      "/how-it-works",
       "/about",
       "/security",
       "/terms",
