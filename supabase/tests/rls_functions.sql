@@ -14,7 +14,7 @@ insert into tested values
   ('cancel_location_deletion(uuid)'), ('choose_plan(uuid,text)'),
   ('confirm_business_details(uuid,jsonb)'), ('entitlements(uuid,uuid)'), ('create_review_link(uuid,text)'),
   ('google_mode()'), ('handle_review_offline(uuid)'),
-  ('has_location_role(uuid,text[])'), ('is_member(uuid)'), ('is_org_member(uuid,text[])'), ('is_staff()'),
+  ('has_location_role(uuid,text[])'), ('is_member(uuid)'), ('photo_sig(gbp_posts)'), ('is_org_member(uuid,text[])'), ('is_staff()'),
   ('plan_summary(uuid)'),
   ('rename_card(text,text)'), ('set_review_link_mode(text,text)'), ('feature_access(uuid)'), ('start_review_report(uuid,text,text[])'), ('advance_review_report(uuid,text)'), ('list_review_reports(uuid)'),
   ('list_tasks(uuid)'), ('task_action(uuid,text)'), ('approve_backlog(uuid,jsonb)'),
@@ -118,8 +118,17 @@ insert into public.knowledge_facts (id, location_id, slot, key, value, status, s
 values ('00000000-0000-4000-8000-0000000000fd', '00000000-0000-4000-8000-0000000000c1', 'card.parking', 'parking',
         '{"text": "Victim parking"}', 'needs_confirmation', 'website');
 
+-- Fix 2: one photo of the victim's, and a post row naming it, for photo_sig below (a row can be forged over the API).
+insert into public.photos (id, location_id, storage_path, source, state, kind)
+values ('00000000-0000-4000-8000-0000000006f1', '00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000c1/rls.jpg', 'app', 'draft', 'photo');
+create temp table victim_post_row as
+  select jsonb_populate_record(null::public.gbp_posts, jsonb_build_object('id', '00000000-0000-4000-8000-0000000006f2',
+    'location_id', '00000000-0000-4000-8000-0000000000c1', 'photo_id', '00000000-0000-4000-8000-0000000006f1')) as r;
+grant select on victim_post_row to authenticated;
+
 -- As a signed-in stranger: S has no business and no staff row.
 select tests.act_as('00000000-0000-4000-8000-0000000000b1');
+select is((select public.photo_sig(v.r) from victim_post_row v), null, 'photo_sig reads nothing for a non-member');
 
 -- Owner RPCs on the victim's business.
 \ir _victim_calls.psql

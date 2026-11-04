@@ -89,13 +89,13 @@ select is((select (public.approve_publication('local_post', g.id, jsonb_build_ob
   from public.gbp_posts g where g.id = '00000000-0000-4000-8000-0000000006b6'), true, 'website: unchanged, approved');
 
 -- Who may read a post's photo signature: members of its business, never a stranger or anon.
-create temp table rowcopy as select * from public.gbp_posts where id = '00000000-0000-4000-8000-0000000006b6';
+create temp table rowcopy as select g as r from public.gbp_posts g where g.id = '00000000-0000-4000-8000-0000000006b6';
 grant select on rowcopy to authenticated;
 select tests.act_as('00000000-0000-4000-8000-0000000000b1');
-select is((select public.photo_sig(r) from rowcopy r), null, 'a stranger reads no signature, even with the post''s row');
+select is((select public.photo_sig(c.r) from rowcopy c), null, 'a stranger reads no signature, even with the post''s row');
 reset role;
 select tests.act_as('00000000-0000-4000-8000-0000000000a1');
-select isnt((select public.photo_sig(r) from rowcopy r), null, 'the owner reads it');
+select isnt((select public.photo_sig(c.r) from rowcopy c), null, 'the owner reads it');
 reset role;
 select ok(not has_function_privilege('anon', 'public.photo_sig(public.gbp_posts)', 'execute'), 'anon cannot read signatures');
 select ok(not has_function_privilege('authenticated', 'private.post_photo_sig(uuid)', 'execute'), 'the private function is closed');
