@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 4 Nov 2026, Web 5, Photos 2 and Polish 4. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 4 Nov 2026, App 3. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -10,11 +10,11 @@ One page, under 10 KB. Updated 4 Nov 2026, Web 5, Photos 2 and Polish 4. The his
 - V4 (PR 250, 26 Oct): onboarding in four stages, task states, the work receipt, nearby places, the free check route. Detail: `docs/progress/archive/2026-10-27-v4.md`.
 - UX 1: the signed-in website on Design 3, onboarding in four stages, Get reviews, the staff AI spend and Founding 25 checklist. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
 - Email 1: one email design for every email. Detail: `docs/progress/archive/2026-10-27-email1.md`.
-- Sec 1 (PR 261, 27 Oct): tenant isolation, roles, approvals, webhooks, the stop switch for Google writes, ASVS L1. Detail: `docs/progress/archive/2026-10-27-sec1.md`.
+- Sec 1 (PR 261, 27 Oct): tenant isolation, roles, approvals, webhooks, the Google stop switch. Detail: `docs/progress/archive/2026-10-27-sec1.md`.
 - Sec 2 (PR 266, 27 Oct, checked live): approvals bound to the draft shown, retention, backup drill, secrets audit, staff Operations. Detail: `docs/progress/archive/2026-10-27-sec2.md`.
 - WhatsApp 2 (PRs 268, 270, 271, 28 Oct): Utility replacements for the Marketing templates, all approved 29 Oct (ladder); `/privacy` names Anthropic for WhatsApp and Nora. Detail: `docs/progress/archive/2026-10-28-whatsapp2.md`.
-- Billing 2 (PR 269, 28 Oct): extra locations as their own Creem subscription on the same customer; Remove a location. Detail: `docs/progress/archive/2026-10-28-billing2.md`.
-- Price 1 (PRs 285 to 288, 30 Oct): the site's claims match the facts; list prices 29 and 59 a month (290, 590 a year), the founding price 19 and 39 for the first 30 paying businesses chosen at checkout under one lock, Founding 25 too; built features only on the plan cards; the help lines; MRR from the plan's price. Detail: `docs/progress/archive/2026-10-30-price1.md`.
+- Billing 2 (PR 269, 28 Oct): extra locations as their own Creem subscription. Detail: `docs/progress/archive/2026-10-28-billing2.md`.
+- Price 1 (PRs 285 to 288, 30 Oct): list prices 29 and 59 a month, the founding price 19 and 39 for the first 30 paying businesses, built features only on the plan cards. Detail: `docs/progress/archive/2026-10-30-price1.md`.
 - Web 3 (PRs 289 to 292, 30 Oct): kabsi.co on Design 6.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
@@ -62,8 +62,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 4 Nov 2026, App 3 (30.26, R-106): PRs 352 (30.26, speed budgets 215 and 205 KB), 353 (Photos card, Posts, shell, one state track), 354 (Home, Reviews), and part C (Google profile, Settings, onboarding), each merged on green; part A checked on kabsi.co signed in. Detail: `docs/progress/archive/2026-11-04-app3.md`.
 - 4 Nov 2026, Polish 4 (30.25): PRs 345 (30.25, R-105), 348 (shorter Home and How it works, yellow), 346 (smoke refusals tagged, one alert one message), 349 (Nora on phones), 350 (Home's lower sections after paint), all merged; live: Home script 208 of 225 KB, performance 97; a smoke run sent no staff alert. Detail: `docs/progress/archive/2026-11-04-polish4.md`.
-- 4 Nov 2026, Photos 2: PR 340, merged and deployed (Deploy 146). Remove a photo from Google, the screenshot note, a clearer Photos screen. Mock-tested. Detail: `docs/progress/archive/2026-11-04-photos2.md`.
 
 ## How a session updates this page
 
