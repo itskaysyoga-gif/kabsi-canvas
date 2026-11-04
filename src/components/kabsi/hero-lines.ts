@@ -20,7 +20,8 @@ export const PRICING_HERO = {
 /** How it works' hero (Design 7 headline, Design 8 line). */
 export const HOW_HERO = {
   title: "Kabsi prepares. You approve. Kabsi follows through.",
-  line: "One week at an Example salon in Bristol: the daily watch, a new review, holiday hours asked in time, and your weekly report.",
+  // Polish 4 (LATER row): the meta description describes the page's three cases, as the page now shows them.
+  line: "Three Example cases at an invented salon in Bristol: hours changed on Google, a photo turned into a post and a new review, from your yes to live on Google.",
 } as const;
 
 /** FAQ's hero (Design 8; the headline approved). */
