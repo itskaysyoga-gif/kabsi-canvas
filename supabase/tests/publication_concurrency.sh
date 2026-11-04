@@ -109,7 +109,7 @@ race() { # kind target payload
   [ "$c1" = "claimed" ] && [ "$c2" = "not_approved" ] || { echo "not ok: $1: exactly one claim expected"; fail=1; }
   [ "$attempts" -eq 1 ] || { echo "not ok: $1: one attempt expected"; fail=1; }
 }
-race local_post 00000000-0000-4000-8000-00000000ccd1 '{"summary": "Fresh bread every Friday."}'
+race local_post 00000000-0000-4000-8000-00000000ccd1 '{"summary": "Fresh bread every Friday.", "photo_id": null, "photo_sig": null}'
 race photo 00000000-0000-4000-8000-00000000ccd2 '{"category": "EXTERIOR"}'
 race special_hours 00000000-0000-4000-8000-00000000ccd3 '{}'
 race listing_revert 00000000-0000-4000-8000-00000000ccd4 '{}'
