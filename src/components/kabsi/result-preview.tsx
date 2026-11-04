@@ -62,8 +62,8 @@ export function ResultPreview({
         <p className="mt-1 text-small text-text-1">{r.ai.line}</p>
       </div>
       <figcaption className="sr-only">
-        An Example free check result for an invented salon: no opening hours on Google, website and
-        phone shown, 23 photos, and an AI answer with a different closing time.
+        An Example free check result for an invented salon: no photos on Google, Saturday 09:00 to
+        18:00, website and phone shown, 38 reviews, and an AI answer that gives 17:00 for Saturday.
       </figcaption>
     </figure>
   );

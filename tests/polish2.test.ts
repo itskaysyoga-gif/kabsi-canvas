@@ -7,11 +7,19 @@ import { HOME_FAQ } from "@/components/kabsi/faq-data";
 import { industry as industryBySlug } from "@/content/industries";
 
 describe("Polish 2", () => {
-  it("leads the Example result with a finding Kabsi acts on today (decision 1)", () => {
-    expect(EXAMPLE_RESULT.first.fact).toBe("No opening hours are shown on Google.");
+  // Changed on purpose by Fix 2 (master plan 30.27 item 2): the Example no longer says "no hours" while its AI answer
+  // compares a Saturday closing time with the profile; the first finding is still one Kabsi acts on today.
+  it("leads the Example result with a finding Kabsi acts on today (decision 1, Fix 2)", () => {
+    expect(EXAMPLE_RESULT.first.fact).toBe("Google shows no photos for this business.");
     expect(EXAMPLE_RESULT.first.action).toBe(
-      "Kabsi asks you for your hours and sends them to Google once you say yes.",
+      "Kabsi asks for photos from your phone and prepares them for you to approve.",
     );
+  });
+  it("keeps the Example result consistent: the profile shows Saturday to 18:00, the AI answer 17:00 (Fix 2)", () => {
+    const sat = EXAMPLE_RESULT.found.find((f) => f.label === "Saturday");
+    expect(sat?.value).toBe("09:00 to 18:00");
+    expect(EXAMPLE_RESULT.ai.line).toContain("Saturday as 17:00");
+    expect(EXAMPLE_RESULT.found.some((f) => f.label === "Photos")).toBe(false);
   });
   it("gives every warning row on the industry Examples its next step (decision 1)", () => {
     for (const slug of ["hair-salon", "barbershop", "nail-salon", "restaurant"]) {
