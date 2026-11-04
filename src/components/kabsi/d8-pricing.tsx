@@ -23,6 +23,7 @@ import { useSearchFlag } from "./page-signals";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { Pill } from "./result-preview";
 import { Closing } from "./closing";
+import { StepsLine } from "./d9-hero";
 import { FOUNDING_TOTAL, PLANS, PLAN_ROWS } from "./plans";
 import { FoundingPriceLine, useFoundingLeft } from "./founding-price";
 import { FOUNDING25_TOTAL } from "./founding-total";
@@ -128,6 +129,8 @@ export function D8Pricing() {
   return (
     <>
       <PageHero hero={PRICING_HERO} under={TRIAL_LINE} visual={<TrialStrip />} />
+      {/* Design 9 (Web 5 part D): the whole job in one line under the hero. */}
+      <StepsLine id="pricing-steps-h" />
 
       <section aria-labelledby="plans-h" className="border-t border-line bg-surface-1">
         <div className="container-kb section-y">

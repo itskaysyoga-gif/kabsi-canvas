@@ -42,7 +42,7 @@ export const HERO_STREAM: StreamItem[] = [
     label: "Post",
     text: "Post ready with your photo:",
     quote: "Late appointments every Thursday until 8 pm this month.",
-    buttons: ["Yes", "Edit", "Skip"],
+    buttons: ["Approve", "Edit", "Skip"],
     photo: true,
     time: "12:40",
   },

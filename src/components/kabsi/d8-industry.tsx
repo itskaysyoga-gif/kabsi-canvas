@@ -24,6 +24,7 @@ import { Img } from "./photos";
 import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
 import { PageHero, popCls, stagger } from "./page-hero";
+import { PhotoToPost } from "./d9-home";
 import { Closing, Control } from "./closing";
 import { HUB_HERO } from "./hero-lines";
 import { Bubble, CLOCK } from "./whatsapp";
@@ -111,6 +112,8 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         action={<ScanBox id="hero-scan" keyword={i.keyword} industry={i.slug} />}
         visual={<TradeVisual industry={i} card={card} business={business} />}
       />
+      {/* Design 9 (Web 5 part D): the hair salon page carries the photo story under the hero. */}
+      {i.slug === "hair-salon" && <PhotoToPost />}
 
       <section aria-labelledby="tjobs-h" className="border-t border-line bg-surface-1">
         <div className="container-kb section-y grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">

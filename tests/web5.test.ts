@@ -115,3 +115,17 @@ describe("How it works: the demonstration in three cases (Web 5 part C)", () => 
     expect(read("src/components/kabsi/how-page.tsx")).toContain("marked");
   });
 });
+
+describe("every public page on Design 9 (Web 5 part D)", () => {
+  it("gives every PageHero the yellow bar on its title's last sentence", () => {
+    expect(read("src/components/kabsi/page-hero.tsx")).toContain("marked = true");
+  });
+  it("puts the steps line under Pricing's hero and the photo story on the hair salon page only", () => {
+    expect(read("src/components/kabsi/d8-pricing.tsx")).toContain(
+      '<StepsLine id="pricing-steps-h" />',
+    );
+    expect(read("src/components/kabsi/d8-industry.tsx")).toContain(
+      '{i.slug === "hair-salon" && <PhotoToPost />}',
+    );
+  });
+});

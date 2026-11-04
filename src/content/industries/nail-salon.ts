@@ -76,7 +76,7 @@ export const nailSalon: Industry = {
       text: "Christmas designs post ready with your photo:",
       quote:
         "Our Christmas designs are in: red velvet, gold foil and snowflakes, until 24 December.",
-      buttons: ["Yes", "Edit", "Skip"],
+      buttons: ["Approve", "Edit", "Skip"],
       time: "10:05",
     },
     jobsTitle: "The Google jobs that come back for a nail salon.",
