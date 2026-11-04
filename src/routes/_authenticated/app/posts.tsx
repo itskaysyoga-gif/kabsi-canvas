@@ -36,6 +36,7 @@ import {
   monthOf,
   nextMonths,
   postPhotos,
+  POST_CHANGED,
   publishPost,
   removePost,
   savePost,
@@ -371,7 +372,9 @@ function DraftCard({
     setErr("");
     try {
       if (kind === "publish") {
-        wait.start(await publishPost(post.id, body));
+        wait.start(
+          await publishPost(post.id, body, { photo_id: post.photo_id, photo_sig: post.photo_sig }),
+        );
         setEditing(false);
         track("post_approved", { channel: "dashboard" });
       } else {
@@ -380,6 +383,8 @@ function DraftCard({
       }
     } catch (x) {
       setErr(x instanceof Error ? x.message : "Something went wrong.");
+      // Fix 2: the text or photo changed since the page read it; the new one is read again.
+      if (x instanceof Error && x.message === POST_CHANGED) onChanged();
     }
     setBusy("");
   }

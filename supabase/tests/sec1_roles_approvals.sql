@@ -194,7 +194,7 @@ select is((select state from public.reviews where id = '00000000-0000-4000-8000-
 insert into public.gbp_posts (id, location_id, owner_input, body, state)
 values ('00000000-0000-4000-8000-0000000004a1', '00000000-0000-4000-8000-0000000000c1', 'x', 'Fresh bread every morning from 7.', 'draft');
 insert into t values ('p20', public.approve_publication('local_post', '00000000-0000-4000-8000-0000000004a1',
-  '{"summary": "Fresh bread every morning from 7."}'::jsonb, '00000000-0000-4000-8000-0000000000a1', 'dashboard'));
+  '{"summary": "Fresh bread every morning from 7.", \"photo_id\": null, \"photo_sig\": null}'::jsonb, '00000000-0000-4000-8000-0000000000a1', 'dashboard'));
 update public.publications set approved_at = now() - interval '20 days', publish_after = now() - interval '1 second'
  where id = (select (v ->> 'publication_id')::uuid from t where k = 'p20');
 select is(public.claim_publication(((select v ->> 'publication_id' from t where k = 'p20'))::uuid) ->> 'result', 'claimed',

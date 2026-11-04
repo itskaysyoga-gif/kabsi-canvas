@@ -53,7 +53,7 @@ select is((select count(*)::int from public.tasks where location_id = '00000000-
 -- Approving each post of the month: published at its time from Kabsi's queue, once.
 create temp table r (n int, j jsonb);
 insert into r select row_number() over (order by publish_at), public.approve_publication('local_post', id,
-  jsonb_build_object('summary', body, 'language', 'en'), '00000000-0000-4000-8000-0000000000a1', 'dashboard')
+  jsonb_build_object('summary', body, 'language', 'en', 'photo_id', null, 'photo_sig', null), '00000000-0000-4000-8000-0000000000a1', 'dashboard')
   from public.gbp_posts where location_id = '00000000-0000-4000-8000-0000000000c1' and publish_at is not null;
 select is((select count(*)::int from r where j ->> 'created' = 'true'), 2, 'two publications');
 select ok((select max(abs(extract(epoch from p.publish_after - g.publish_at))) <= 1 from public.publications p
@@ -62,7 +62,7 @@ select is((select count(*)::int from public.jobs j join public.publications p on
             join public.gbp_posts g on g.id = p.target_id
            where p.target_type = 'local_post' and j.next_run_at = p.publish_after), 2, 'the publish job runs then');
 select is((public.approve_publication('local_post', (select target_id from public.publications where target_type = 'local_post' limit 1),
-  jsonb_build_object('summary', 'Our birthday cakes are made to order.', 'language', 'en'), '00000000-0000-4000-8000-0000000000a1', 'dashboard')) ->> 'created',
+  jsonb_build_object('summary', 'Our birthday cakes are made to order.', 'language', 'en', 'photo_id', null, 'photo_sig', null), '00000000-0000-4000-8000-0000000000a1', 'dashboard')) ->> 'created',
   'false', 'approving again is the same publication');
 select is((select payload ->> 'topic_type' from public.publications where target_type = 'local_post' limit 1), 'STANDARD', 'the type goes with it');
 select private.detect_post_drafts('00000000-0000-4000-8000-0000000000c1');
