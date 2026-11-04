@@ -11,11 +11,10 @@ import {
   MessageSquareText,
   Store,
   ThumbsUp,
-  UserRound,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CONTACT_EMAIL, TRIAL_LINE, WHATSAPP_LAUNCH_LINE, WHATSAPP_ON } from "@/lib/site";
+import { CONTACT_EMAIL, TRIAL_LINE } from "@/lib/site";
 import { useFoundingPlaces } from "@/lib/public-api";
 import { ExampleBadge, Faq, KabsiMark } from "./ui";
 import { Pill } from "./result-preview";
@@ -28,8 +27,16 @@ import { FOUNDING25_TOTAL } from "./founding-total";
 import { RankDot } from "./map";
 import { BAND_LABEL, type RankBand } from "./map-data";
 import { FAQ, HOME_FAQ } from "./faq-data";
-import { CONTROL } from "./d8-data";
-import { D9Arrow, D9Hero, PictureButtons, StepRail, StepsLine, d9LinkCls } from "./d9-hero";
+import { CONTROL_SHORT } from "./d8-data";
+import {
+  D9Arrow,
+  D9Hero,
+  NumberedPoints,
+  PictureButtons,
+  StepsLine,
+  YellowLabel,
+  d9LinkCls,
+} from "./d9-hero";
 import {
   D9_BUSINESS,
   D9_MAP_POINTS,
@@ -37,6 +44,7 @@ import {
   D9_REPORT,
   D9_SHOW_UP,
   D9_SUPPORT,
+  D9_SUPPORT_TITLE,
   D9_WATCH,
 } from "./d9-data";
 
@@ -56,19 +64,10 @@ function ProfileWatch() {
         )}
       >
         <div>
-          <StepRail on={["check", "ask", "follow"]} />
-          <h2 id="watch-h" className="mt-4 text-h2">
+          <h2 id="watch-h" className="text-h2">
             {w.title}
           </h2>
           <p className="mt-4 max-w-[34rem] text-body text-text-2 sm:text-lead">{w.line}</p>
-          <dl className="mt-6 divide-y divide-line border-y border-line">
-            {w.rules.map((r) => (
-              <div key={r.title} className="grid gap-1 py-3 sm:grid-cols-[12rem_1fr] sm:gap-4">
-                <dt className="text-small font-bold">{r.title}</dt>
-                <dd className="text-small text-text-2">{r.text}</dd>
-              </div>
-            ))}
-          </dl>
         </div>
         <WatchVisual />
       </div>
@@ -131,7 +130,7 @@ function WatchVisual() {
 
 /* ---------- Photo to post (the dark band) ---------- */
 
-export function PhotoToPost({ cadence = true }: { cadence?: boolean }) {
+export function PhotoToPost() {
   const p = D9_PHOTO;
   return (
     <section aria-labelledby="photo-h" className="theme-dark bg-band">
@@ -141,21 +140,15 @@ export function PhotoToPost({ cadence = true }: { cadence?: boolean }) {
           sectionY,
         )}
       >
-        <PhotoVisual />
-        <div className="lg:order-first">
-          <StepRail on={["prepare", "ask", "follow"]} />
+        <div>
+          <YellowLabel>{p.label}</YellowLabel>
           <h2 id="photo-h" className="mt-4 text-h2">
-            {p.title}
+            {p.title} <span className="text-phrase">{p.titleMark}</span>
           </h2>
           <p className="mt-4 max-w-[34rem] text-body text-text-2 sm:text-lead">{p.line}</p>
-          {!WHATSAPP_ON && (
-            <p className="mt-2 max-w-[34rem] text-label text-text-2 sm:text-small">
-              {WHATSAPP_LAUNCH_LINE}
-            </p>
-          )}
-          <p className="mt-3 max-w-[34rem] text-small text-text-2">{p.noWords}</p>
-          {cadence && <p className="mt-3 max-w-[34rem] text-small text-text-2">{p.cadence}</p>}
+          <NumberedPoints points={p.points} className="mt-6" />
         </div>
+        <PhotoVisual />
       </div>
     </section>
   );
@@ -226,10 +219,10 @@ function SupportRow() {
   return (
     <section aria-labelledby="support-h" className="border-b border-line bg-surface-1">
       <div className="container-kb py-10 sm:py-16 lg:py-20">
-        <h2 id="support-h" className="sr-only">
-          Reviews, holiday hours and your weekly report
+        <h2 id="support-h" className="text-h2">
+          {D9_SUPPORT_TITLE}
         </h2>
-        <div className="grid gap-6 md:grid-cols-[1fr_1fr_1.2fr] md:gap-8">
+        <div className="mt-6 grid gap-6 sm:mt-8 md:grid-cols-[1fr_1fr_1.2fr] md:gap-8">
           {D9_SUPPORT.map((s) => {
             const Icon = SUPPORT_ICONS[s.id] ?? Check;
             return (
@@ -250,7 +243,6 @@ function SupportRow() {
               </div>
               <ExampleBadge />
             </div>
-            <p className="mt-1 hidden text-small text-text-2 sm:block">{r.line}</p>
             <ul className="mt-3 grid grid-cols-1 gap-1 text-small font-semibold min-[400px]:grid-cols-3 md:grid-cols-1">
               {r.done.map((d) => (
                 <li key={d} className="flex items-center gap-1.5">
@@ -373,7 +365,6 @@ function NearbyMap() {
         </ul>
       </div>
       <p className="mt-4 text-small font-bold">{m.count}</p>
-      <p className="mt-1 text-small text-text-2">{m.line}</p>
       <figcaption className="mt-2 text-label text-text-2">{m.sample}</figcaption>
     </figure>
   );
@@ -398,7 +389,7 @@ function AiAnswer() {
       <blockquote className="mt-4 rounded-inner bg-surface-2 p-4 font-display text-title font-semibold">
         {a.answer}
       </blockquote>
-      <div className="mt-3 text-small">
+      <div className="mt-3 hidden text-small sm:block">
         <p className="text-text-2">Sources it cited</p>
         <ul className="mt-1 flex flex-wrap gap-1.5">
           {a.sources.map((s) => (
@@ -418,7 +409,7 @@ function AiAnswer() {
 
 /* ---------- You stay in control (the approved lines, d8-data CONTROL) ---------- */
 
-const CONTROL_ICONS: LucideIcon[] = [UserRound, KeyRound, ThumbsUp, Check, Store];
+const CONTROL_ICONS: LucideIcon[] = [KeyRound, ThumbsUp, Store];
 
 function D9Control() {
   return (
@@ -433,8 +424,8 @@ function D9Control() {
             <D9Arrow />
           </SiteLink>
         </div>
-        <ul className="grid gap-x-8 gap-y-3 sm:grid-cols-2 sm:gap-y-4">
-          {CONTROL.map((c, i) => {
+        <ul className="grid gap-x-8 gap-y-3 sm:grid-cols-3 sm:gap-y-4">
+          {CONTROL_SHORT.map((c, i) => {
             const Icon = CONTROL_ICONS[i] ?? Check;
             return (
               <li key={c.title} className="flex gap-3">
@@ -542,16 +533,17 @@ function PricingPreview() {
                 <span className="font-display text-h2 font-bold">${p.monthly}</span>
                 <span className="ms-1 text-small text-text-2">a month</span>
               </p>
-              {left !== null && left > 0 && (
-                <p className="mt-1 text-label text-text-2 sm:text-small">
-                  Founding price ${p.foundingMonthly} for the first 30 paying businesses.
-                </p>
-              )}
               <p className="mt-3 text-small text-text-1 sm:text-body">{p.line}</p>
             </li>
           ))}
         </ul>
-        <p className="mt-4 text-small text-text-2">
+        {left !== null && left > 0 && (
+          <p className="mt-4 text-small font-semibold">
+            Founding price {PLANS.map((p) => `$${p.foundingMonthly}`).join(" and ")} for the first
+            30 paying businesses.
+          </p>
+        )}
+        <p className="mt-2 text-small text-text-2">
           Prices in US dollars, plus tax where it applies. Nothing to pay today.
         </p>
       </div>
@@ -586,11 +578,7 @@ function FounderBand() {
               From the founder
             </h2>
             <blockquote className="mt-3 max-w-[36rem] text-body text-text-2 sm:text-lead">
-              <p>
-                A Google profile needs work every week: replies, hours, posts. A busy owner rarely
-                has time for it. I built Kabsi to do that work for you. If you have a question,
-                write to me.
-              </p>
+              <p>A Google profile needs work every week. I built Kabsi to do that work for you.</p>
             </blockquote>
             <figcaption className="mt-3 text-small">
               <span className="font-bold">Rashid Abou Hamzy</span>, founder of Kabsi.{" "}
@@ -611,10 +599,12 @@ function FounderBand() {
                 : "All 25 places are taken."
               : null}
           </p>
-          <h3 className="mt-1 text-h3">Founding 25: three months of Kabsi Pro, free.</h3>
+          <h3 className="mt-1 text-h3">
+            Founding 25. <span className="text-phrase">Three months of Kabsi Pro, free.</span>
+          </h3>
           <p className="mt-2 text-small text-text-2 sm:text-body">
-            By application. Kabsi does the Google work; you tell Rashid what to make better. No
-            card. After 90 days, choose a plan or stop, nothing is charged by itself.
+            By application, no card. After 90 days you choose a plan or stop. Nothing is charged by
+            itself.
           </p>
           <SiteLink to="/founding" className={cn(d9LinkCls, "mt-2 text-body")}>
             Apply for a place

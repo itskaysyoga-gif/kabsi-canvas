@@ -192,6 +192,57 @@ export function PictureButtons({ labels }: { labels: readonly string[] }) {
   );
 }
 
+/* ---------- Yellow, used well (Polish 4, master plan 30.25 item 3) ---------- */
+
+/** A short label, charcoal on yellow. */
+export function YellowLabel({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <p
+      className={cn(
+        "inline-flex rounded-full bg-kb-yellow px-3 py-1 text-label font-bold text-kb-black",
+        className,
+      )}
+    >
+      {children}
+    </p>
+  );
+}
+
+/** A numbered marker, charcoal on yellow. */
+export function YellowNumber({ n, className }: { n: number; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "inline-grid size-7 shrink-0 place-items-center rounded-full bg-kb-yellow text-label font-bold text-kb-black",
+        className,
+      )}
+    >
+      {n}
+    </span>
+  );
+}
+
+/** At most three short points, each with its yellow number. */
+export function NumberedPoints({
+  points,
+  className,
+}: {
+  points: readonly string[];
+  className?: string;
+}) {
+  return (
+    <ol className={cn("space-y-3", className)}>
+      {points.map((t, i) => (
+        <li key={t} className="flex items-center gap-3 text-body font-semibold">
+          <YellowNumber n={i + 1} />
+          {t}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 /* ---------- The whole job, in one line of steps ---------- */
 
 /**
@@ -226,12 +277,10 @@ export function StepsLine({
                   )}
                 />
                 <span className="inline-flex items-baseline gap-2 md:block">
-                  <span
-                    aria-hidden
-                    className="relative inline-grid size-7 shrink-0 translate-y-[-0.15em] place-items-center rounded-full bg-text-1 text-label font-bold text-surface-0 md:absolute md:top-0 md:translate-y-0"
-                  >
-                    {i + 1}
-                  </span>
+                  <YellowNumber
+                    n={i + 1}
+                    className="relative translate-y-[-0.15em] md:absolute md:top-0 md:translate-y-0"
+                  />
                   <span className="font-display text-h3 font-bold tracking-[-0.015em]">
                     {s.word}
                     {i < D9_STEPS.length - 1 ? <span className="md:hidden">,</span> : "."}

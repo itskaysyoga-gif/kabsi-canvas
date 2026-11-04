@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { SCAN_LINE, TRIAL_LINE } from "@/lib/site";
 import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
-import { CONTROL } from "./d8-data";
+import { CONTROL, CONTROL_SHORT } from "./d8-data";
 
 const linkCls =
   "press inline-flex min-h-11 items-center gap-1.5 font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1";
@@ -48,7 +48,10 @@ export function Closing({ keyword, industry }: { keyword?: string; industry?: st
 
 const CONTROL_ICONS: LucideIcon[] = [UserRound, KeyRound, ThumbsUp, Check, Store];
 
-export function Control() {
+/** `short` (Polish 4, How it works): the three short points of CONTROL_SHORT instead of the five. */
+export function Control({ short = false }: { short?: boolean }) {
+  const items = short ? CONTROL_SHORT : CONTROL;
+  const icons: LucideIcon[] = short ? [KeyRound, ThumbsUp, Store] : CONTROL_ICONS;
   return (
     <section aria-labelledby="control-h">
       <div className="container-kb section-y grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
@@ -61,9 +64,9 @@ export function Control() {
             <Arrow />
           </SiteLink>
         </div>
-        <ul className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
-          {CONTROL.map((c, i) => {
-            const Icon = CONTROL_ICONS[i] ?? Check;
+        <ul className={cn("grid gap-x-8 gap-y-5", short ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
+          {items.map((c, i) => {
+            const Icon = icons[i] ?? Check;
             return (
               <li key={c.title} className="flex gap-3">
                 <Icon className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden />
