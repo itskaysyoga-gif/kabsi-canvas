@@ -176,3 +176,104 @@ export const D9_MAP_POINTS: { x: number; y: number; rank: number }[] = [
   { x: 58, y: 86, rank: 9 },
   { x: 86, y: 86, rank: 25 },
 ];
+
+/* ---------- How it works: the demonstration in three cases (Web 5 part C) ---------- */
+
+/** The visible hero line (Design 9); the page's meta description stays HOW_HERO.line. */
+export const D9_HOW_LINE =
+  "Three Example cases at an invented salon in Bristol: hours changed on Google, a photo turned into a post, and a new review. Tap through each one.";
+
+export type CaseId = "hours" | "photo" | "review";
+export type DemoState = "ask" | "approved" | "sent" | "live" | "failed";
+
+export type DemoCase = {
+  id: CaseId;
+  tab: string;
+  /** What the owner sends first (the photo case), shown as the owner's own bubble. */
+  ownerFirst?: string;
+  ask: string;
+  quote?: string;
+  photo?: boolean;
+  yes: string;
+  others: readonly string[];
+  approved: string;
+  sent: string;
+  live: string;
+  failed: string;
+  summary: string;
+};
+
+const APPROVED = "Approved. You can undo it for 10 seconds.";
+const SENT = "Sent to Google. I will tell you when it is live.";
+const FAILED = "Google did not accept it. Nothing was changed. Kabsi will tell you what to do.";
+
+/** Buttons as the product sends them (30.24 item 2). */
+export const D9_CASES: DemoCase[] = [
+  {
+    id: "hours",
+    tab: "Hours changed",
+    ask: "Google shows you closed on bank holiday Monday. You told me 10:00 to 16:00.",
+    yes: "Use my hours",
+    others: ["Keep Google's"],
+    approved: APPROVED,
+    sent: SENT,
+    live: "Live on Google: bank holiday Monday, 10:00 to 16:00.",
+    failed: FAILED,
+    summary: "Google showed different hours. The owner chose their own.",
+  },
+  {
+    id: "photo",
+    tab: "Photo to post",
+    ownerFirst: "New balayage colours this month. Saturdays are open.",
+    ask: "Post ready with your photo:",
+    quote: "New balayage colours this month. Saturdays are open.",
+    photo: true,
+    yes: "Approve",
+    others: ["Edit", "Skip"],
+    approved: APPROVED,
+    sent: SENT,
+    live: "Live on Google: your post with your photo.",
+    failed: FAILED,
+    summary: "A photo and a line on WhatsApp became a Google post.",
+  },
+  {
+    id: "review",
+    tab: "New review",
+    ask: "New 5-star review from Chloe B. Reply ready:",
+    quote: "Thank you, Chloe. We will tell Amber. See you in six weeks.",
+    yes: "Yes",
+    others: ["Edit", "Skip"],
+    approved: APPROVED,
+    sent: SENT,
+    live: "Live on Google: your reply to Chloe B.",
+    failed: FAILED,
+    summary: "A new review got a reply in the owner's voice.",
+  },
+];
+
+export const D9_STATES: {
+  id: Exclude<DemoState, "ask" | "failed">;
+  label: string;
+  text: string;
+}[] = [
+  { id: "approved", label: "Approved", text: "You said yes. Nothing has reached Google yet." },
+  { id: "sent", label: "Sent to Google", text: "Kabsi sent it and has not seen it on Google yet." },
+  { id: "live", label: "Live on Google", text: "Kabsi checked it shows, then told you." },
+];
+export const D9_FAILED_LABEL = "Did not go through";
+export const D9_FAILED_TEXT = "Google said no. Kabsi tells you and nothing changes.";
+
+/** What the owner's other buttons answer in the demonstration. */
+export function d9OtherLine(label: string): string {
+  if (label === "Keep Google's") return "Kept. Google's hours stay, and nothing is sent.";
+  if (label === "Skip") return "Skipped. Nothing is sent.";
+  return "Edit opens the words for you to change, then you approve.";
+}
+
+/** The demonstration's pure steps, so the order is tested without a browser (tests/web5.test.ts). */
+export const D9_UNDO_SECONDS = 10;
+export function d9NextState(state: DemoState, googleSaysNo: boolean): DemoState {
+  if (state === "approved") return "sent";
+  if (state === "sent") return googleSaysNo ? "failed" : "live";
+  return state;
+}

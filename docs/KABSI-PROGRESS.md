@@ -62,7 +62,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 4 Nov 2026, Web 5 (Design 9 on kabsi.co, master plan 30.24): part 0 PR 338 and part A PR 339 merged (the shell, checked live); part B (Home) in progress. Detail: `docs/progress/archive/2026-11-04-web5.md`.
+- 4 Nov 2026, Web 5 (Design 9 on kabsi.co, master plan 30.24): parts 0, A (PR 339) and B (PR 341) merged and checked live (Home: performance 96, script 223 KB, was 216); part C (How it works) in progress. Detail: `docs/progress/archive/2026-11-04-web5.md`.
 - 4 Nov 2026, Photo Post 1: PRs 336 (master plan 30.22, 30.23) and 337 (a WhatsApp photo with words becomes a Google post, for the owner's yes). Mock-tested, not live for owners. Detail: `docs/progress/archive/2026-11-04-photo-post1.md`.
 
 

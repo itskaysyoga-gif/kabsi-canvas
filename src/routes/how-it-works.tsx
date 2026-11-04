@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell } from "@/components/kabsi/site-chrome";
 import { HOW_HERO } from "@/components/kabsi/hero-lines";
-import { D8HowItWorks } from "@/components/kabsi/d8-how";
+import { HowItWorksPage } from "@/components/kabsi/how-page";
 import { pageHead } from "@/lib/site";
 
 export const Route = createFileRoute("/how-it-works")({
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/how-it-works")({
   component: function HowItWorks() {
     return (
       <SiteShell>
-        <D8HowItWorks />
+        <HowItWorksPage />
       </SiteShell>
     );
   },

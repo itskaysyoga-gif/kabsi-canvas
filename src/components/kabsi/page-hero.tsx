@@ -5,6 +5,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { MAIN_CTA, SCAN_LINE } from "@/lib/site";
 import { ButtonLink } from "./ui";
+import { D9Title } from "./d9-title";
 
 export type PageHeroLines = { title: string; line: string; action?: string };
 
@@ -22,8 +23,11 @@ export function PageHero({
   visual,
   children,
   className,
+  marked = false,
 }: {
   hero: PageHeroLines;
+  /** Design 9 treatment B: the title's second sentence on the yellow bar (master plan 30.24). */
+  marked?: boolean;
   eyebrow?: ReactNode;
   /** Replaces the default action (the free check). */
   action?: ReactNode;
@@ -33,7 +37,11 @@ export function PageHero({
   className?: string;
 }) {
   return (
-    <section aria-labelledby="hero-title" data-hero className={cn("relative isolate", className)}>
+    <section
+      aria-labelledby="hero-title"
+      data-hero
+      className={cn("relative isolate z-10", className)}
+    >
       <div className="container-kb grid gap-10 pt-8 pb-12 md:pt-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-center lg:gap-14 lg:pt-16 lg:pb-20">
         <div className="max-w-[36rem]">
           {eyebrow && (
@@ -41,7 +49,7 @@ export function PageHero({
           )}
           {/* The headline paints with no entrance animation, so it can be the page's LCP at once (Web 3). */}
           <h1 id="hero-title" className="text-display text-balance">
-            {hero.title}
+            {marked ? <D9Title text={hero.title} /> : hero.title}
           </h1>
           <p
             className="mt-5 animate-enter text-lead text-text-2"
