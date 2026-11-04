@@ -62,17 +62,26 @@ test.describe("smoke @smoke", () => {
     expect((await request.get("https://go.kabsi.co/_check")).status()).toBe(200);
   });
 
-  test("the doors that must stay shut stay shut", async ({ request }) => {
+  // Polish 4 (master plan 30.25 item 5): these calls reach production, so they run in one project only (m390, the phone
+  // size), and every forged webhook call says it is the smoke test (x-kabsi-smoke: 1). The functions still refuse it the
+  // same way; the tag only keeps it out of the staff alert on bad signatures (up to 20 an hour) and counts it as smoke_401.
+  test("the doors that must stay shut stay shut", async ({ request }, testInfo) => {
+    test.skip(testInfo.project.name !== "m390", "runs once per smoke run, in the m390 project");
     const post = (path: string, extra: Record<string, string> = {}) =>
       request.post(`${FN}/${path}`, { headers: { ...headers, ...extra }, data: "{}" });
-    expect((await post("billing-creem")).status(), "Creem webhook without a signature").toBe(401);
+    const smoke = { "x-kabsi-smoke": "1" };
+    expect((await post("billing-creem", smoke)).status(), "Creem webhook without a signature").toBe(
+      401,
+    );
     expect(
-      (await post("billing-creem", { "creem-signature": "deadbeef" })).status(),
+      (await post("billing-creem", { ...smoke, "creem-signature": "deadbeef" })).status(),
       "Creem webhook with a wrong signature",
     ).toBe(401);
-    expect((await post("whatsapp")).status(), "WhatsApp webhook without a signature").toBe(401);
+    expect((await post("whatsapp", smoke)).status(), "WhatsApp webhook without a signature").toBe(
+      401,
+    );
     expect(
-      (await post("whatsapp", { "x-webhook-signature": "0".repeat(64) })).status(),
+      (await post("whatsapp", { ...smoke, "x-webhook-signature": "0".repeat(64) })).status(),
       "WhatsApp webhook with a wrong signature",
     ).toBe(401);
     expect(

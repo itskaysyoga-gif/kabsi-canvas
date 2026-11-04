@@ -32,7 +32,8 @@ async function rest(path: string, init: RequestInit = {}) {
 }
 async function jobsFreshness(): Promise<string> {
   const since = new Date(Date.now() - STALE_MINUTES * 60_000).toISOString();
-  const r = await rest(`jobs_log?ok=eq.true&created_at=gte.${encodeURIComponent(since)}&select=id&limit=1`);
+  // Polish 4: a billing alert is logged with ok true (an alert, not a failed job); it is not proof that the jobs run.
+  const r = await rest(`jobs_log?ok=eq.true&job=neq.billing_alert&created_at=gte.${encodeURIComponent(since)}&select=id&limit=1`);
   if (!r.ok) return `check failed (${r.status})`;
   if ((await r.json()).length) return "ok";
   const bucket = Math.floor(Date.now() / (STALE_MINUTES * 60_000));
