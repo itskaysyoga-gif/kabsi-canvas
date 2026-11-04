@@ -961,3 +961,14 @@ Source: src/components/kabsi/d9-how.tsx, how-page.tsx (was d8-how.tsx), d9-data.
 - The state track: "Approved" / "You said yes. Nothing has reached Google yet."; "Sent to Google" / "Kabsi sent it and has not seen it on Google yet."; "Live on Google" / "Kabsi checked it shows, then told you."; "Did not go through" / "Google said no. Kabsi tells you and nothing changes." Under it: "Nothing has happened yet. Nothing goes to Google before your yes.", the switch "Show what happens when Google says no", "Start again", and the WhatsApp launch line while WHATSAPP_ON is false.
 - Kept from kabsi-canvas word for word: Getting started (Run the free check, Add Kabsi as a Manager with the group ID, Your first task, the Manager recording), "You stay in control.", "Start with a free check.".
 - Removed: Design 8's "A week with Kabsi" timeline and the after-your-yes section (the demonstration shows the same states).
+
+### Part D: Pricing, the industry pages and every other public page
+
+No new words. Every public page keeps its own current wording and takes on the shell (part A) and Design 9's H1 treatment B through PageHero: a title of two or more sentences has its last sentence on the yellow bar; a one-sentence title stays plain. Per page:
+- /pricing: "Two plans. Free for 14 days." with "Free for 14 days." on the bar; the steps line (part B) under the hero; the Founding 25 line.
+- /for/hair-salon: "Your hair salon on Google. Taken care of." with "Taken care of." on the bar; the photo story band "Send a photo. Get a Google post." (part B lines) under the hero; the Founding 25 line.
+- /for/<trade> (every indexed trade page, the same template): "Your <trade> on Google. Taken care of." with the bar; the Founding 25 line.
+- /for and the hub pages: one-sentence titles, plain; the Founding 25 line.
+- /scan, /faq, /about, /security, /founding, /partners: one-sentence titles, plain; the shell; no Founding 25 line.
+- /privacy, /terms, /partners/terms, /guides, /guides/*, /login, /setup-call, /manager-steps, /google-review-link, /google-profile-check: their own layouts inside the shell, unchanged; no Founding 25 line.
+- Changed on the hair salon, barbershop and nail salon pages (and d8-data's old hero stream): the Example post card's buttons read "Approve", "Edit", "Skip" (were "Yes", "Edit", "Skip"), as the product sends posts (30.24 item 2). Review cards keep "Yes", "Edit", "Skip"; the older trade stories that offer several drafts at once keep "Reply Yes for both".

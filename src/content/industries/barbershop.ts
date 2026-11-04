@@ -75,7 +75,7 @@ export const barbershop: Industry = {
       label: "Post",
       text: "Walk-in post ready for today:",
       quote: "Walk-ins until 6 pm today. Two chairs free from 2 pm.",
-      buttons: ["Yes", "Edit", "Skip"],
+      buttons: ["Approve", "Edit", "Skip"],
       time: "11:40",
     },
     jobsTitle: "The Google jobs that come back for a barbershop.",

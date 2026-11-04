@@ -23,10 +23,10 @@ export function PageHero({
   visual,
   children,
   className,
-  marked = false,
+  marked = true,
 }: {
   hero: PageHeroLines;
-  /** Design 9 treatment B: the title's second sentence on the yellow bar (master plan 30.24). */
+  /** Design 9 treatment B on every page (Web 5 part D): the title's last sentence on the yellow bar; a one-sentence title stays plain. */
   marked?: boolean;
   eyebrow?: ReactNode;
   /** Replaces the default action (the free check). */
