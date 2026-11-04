@@ -41,7 +41,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 - Supabase Auth: leaked-password protection; paste the four rebuilt `emails/auth/*.html` templates (Email 1, steps in emails/auth/README.md).
 - Email 1: news.kabsi.co in Resend and Cloudflare before lifecycle emails go on (LATER row).
 - Google Cloud: Places quotas and budget alerts; contacts and owners on kabsi.co addresses only.
-- Supabase Pro with point-in-time recovery and Vercel Pro, before the first payment.
+- Hosting (30.25 item 1): Supabase stays on Free until 10 paying businesses or 60 percent of any Free limit, then Pro. Vercel Pro (its free trial first) before paid ads or payments open.
 - Price 1: before plans open, the test-mode checkout on both price families (LATER row: set `founding_places_test` to 0 in app_settings for the list price, then back to 30). The live list products are made by the setup action at going live, no dashboard step.
 - Creem (session 10): send one test event from Creem's dashboard to the webhook (expect 200 and one `billing_events` row), add the product bundle, mark Yawmiyati's organisation `billing_test` if you want to try the paid buttons. Hussein only at going live (verification, payout). Exact steps: `docs/progress/archive/2026-10-25-session-10-creem.md`.
 - A lawyer reads /terms, /privacy and the partner terms (master plan 29.8).
@@ -62,7 +62,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 4 Nov 2026, Photos 2: PR 340. Remove a photo from Google, the screenshot note, a clearer Photos screen. Mock-tested. Detail: `docs/progress/archive/2026-11-04-photos2.md`.
+- 4 Nov 2026, Photos 2: PR 340, merged and deployed (Deploy 146). Remove a photo from Google, the screenshot note, a clearer Photos screen. Mock-tested. Detail: `docs/progress/archive/2026-11-04-photos2.md`.
 - 4 Nov 2026, Web 5 (Design 9 on kabsi.co, 30.24): PRs 338, 339, 341, 342, 343, all merged and checked live (Home performance 95, script 225 of 225 KB, LATER row). Detail: `docs/progress/archive/2026-11-04-web5.md`.
 - 4 Nov 2026, Photo Post 1: PRs 336 (master plan 30.22, 30.23) and 337 (a WhatsApp photo with words becomes a Google post, for the owner's yes). Mock-tested, not live for owners. Detail: `docs/progress/archive/2026-11-04-photo-post1.md`.
 
