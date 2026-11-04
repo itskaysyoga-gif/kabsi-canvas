@@ -122,6 +122,22 @@ export const CONTROL = [
 ] as const;
 
 /**
+ * Polish 4 (master plan 30.25 item 3): the same promises as three short points, for Home and How it works. Manager
+ * access and the password are one point; the independence line stays in the footer on every page.
+ */
+export const CONTROL_SHORT = [
+  {
+    title: "Manager access, no password",
+    text: "You add Kabsi as a Manager and stay the owner.",
+  },
+  {
+    title: "Nothing goes live without your yes",
+    text: "Not a reply, not a post, not an hours change.",
+  },
+  { title: "Remove Kabsi any time", text: "One step in your Google profile." },
+] as const;
+
+/**
  * The Example free check result (Design 8, Hollis Hair). Changed to the facts (lane R decision 1): the free check reads
  * only Google's public data, which has no review replies, holiday hours or post dates (K-82, the check says so itself),
  * so the Example leads with a finding the check can really make and lists only what it reads. Polish 2 (lane R, 3 Nov
