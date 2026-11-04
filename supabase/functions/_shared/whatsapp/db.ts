@@ -345,7 +345,7 @@ export const agentDb: AgentDb = {
     const g = await rpc<{ new_reviews: number; opens_message: number; opens_qr: number; opens_tag: number }>("review_growth_stats", { p_location: l, p_days: days });
     return { days, newReviews: Number(g.new_reviews), opens: { message: Number(g.opens_message), qr: Number(g.opens_qr), tag: Number(g.opens_tag) } };
   },
-  // Photo Post 1 (20261104090000_photo_post1.sql).
+  // Photo Post 1 (20261104052301_photo_post1.sql).
   photoHold: (photo, user) => rpc<boolean>("whatsapp_photo_hold", { p_photo: photo, p_user: user }),
   photoPostPrepare: (l, u, photo, caption, text) =>
     rpc("whatsapp_photo_post_prepare", { p_location: l, p_user: u, p_photo: photo, p_caption: caption, p_text: text }),
