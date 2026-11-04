@@ -19,6 +19,8 @@ export type Command =
   | { k: "map"; action: "show" | "later"; scanId: string | null }
   | { k: "keyword"; action: "yes" | "change"; locationId: string }
   | { k: "photo_edit"; photoId: string } | { k: "photo_skip"; token: string }
+  // Photo Post 1: Skip under a photo post (by approval token), and the owner's choice for a photo that came with words.
+  | { k: "post_skip"; token: string } | { k: "held_photo"; action: "photo" | "skip"; photoId: string }
   // V4 (30.16 section 3): the setup replies under Kabsi's onboarding messages, and the owner's yes to the monthly answer's facts.
   | { k: "onboarding"; action: OnboardingAction; locationId: string }
   | { k: "facts"; action: "yes" | "no"; locationId: string; month: string }
@@ -128,6 +130,11 @@ export function parseButton(id: string): Command {
   if (pe) return { k: "photo_edit", photoId: pe[1] };
   const ps = /^ps:([A-Za-z0-9_-]{16,64})$/.exec(id);
   if (ps) return { k: "photo_skip", token: ps[1] };
+  // Photo Post 1: q s skips a photo post (by approval token); h p and h s are "Add as a photo" and Skip for a held photo.
+  const qs = /^qs:([A-Za-z0-9_-]{16,64})$/.exec(id);
+  if (qs) return { k: "post_skip", token: qs[1] };
+  const hp = /^h([ps]):([0-9a-f-]{36})$/.exec(id);
+  if (hp) return { k: "held_photo", action: hp[1] === "p" ? "photo" : "skip", photoId: hp[2] };
   if (id === "t:person") return { k: "tool", tool: "person" };
   const role = /^r:(business|partner|staff)$/.exec(id);
   if (role) return { k: "role_pick", to: role[1] as "business" | "partner" | "staff" };

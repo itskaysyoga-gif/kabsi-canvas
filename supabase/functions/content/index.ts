@@ -318,7 +318,7 @@ Deno.serve(async (req) => {
         // Google once, after its own undo window. Photos Kabsi has doubts about are left for one by one.
         if (loc.status !== "active" || !loc.google_location_id) return fail("not_active", "This business isn't active yet.", 409);
         const { data: drafts, error } = await db.from("photos").select("id, category, suitable")
-          .eq("location_id", loc.id).eq("state", "draft").eq("kind", "photo").eq("suitable", true).limit(20);
+          .eq("location_id", loc.id).eq("state", "draft").eq("kind", "photo").eq("suitable", true).eq("post_hold", false).limit(20);
         if (error) throw error;
         const results = [];
         for (const d of drafts ?? []) {

@@ -104,6 +104,13 @@ export class World {
   aiSlow = false;
   onItFast = false;
   mediaBytes = new Map<string, Uint8Array>();
+  /** Photo Post 1: WhatsApp photos by id (held when they came with words), photo posts by id, posts left per business. */
+  waPhotos = new Map<string, { location: string; user: string; state: string; hold: boolean; asked: boolean }>();
+  posts = new Map<string, { location: string; text: string; caption: string; photo: string; state: string }>();
+  postsLeft = new Map<string, number>();
+  /** Photo Post 1: Kabsi's draft when AI drafting is on (undefined: off; null: the draft failed). */
+  photoDraft: string | null | undefined = undefined;
+  photoDraftCalls: string[] = [];
   private n = 0;
 
   userByPhone = (phone: string) => this.users.find((u) => u.phone === phone && u.optin === "active") ?? null;
@@ -242,6 +249,10 @@ export class World {
         if (a.used) return { result: "approved", repeat: true, location_id: a.location };
         if (a.stale) return { result: "refused", reason: "not_draft", location_id: a.location };
         if (!w.biz.find((b) => b.id === a.location)?.members[a.user]) return { result: "refused", reason: "approver_not_member", location_id: a.location };
+        const po = a.type === "local_post" ? w.posts.get(a.target) : undefined;
+        if (po && po.state !== "draft") return { result: "refused", reason: "not_draft", location_id: a.location, target_type: a.type };
+        if (po && w.waPhotos.get(po.photo)?.state === "checking") return { result: "refused", reason: "approve_publication: post_photo_missing", location_id: a.location, target_type: a.type };
+        if (po) po.state = "publishing";
         a.used = true;
         return { result: "approved", location_id: a.location, target_type: a.type };
       },
@@ -281,6 +292,14 @@ export class World {
         return r.state === "drafted" ? { ok: true } : { ok: false, reason: "not_draft" };
       },
       async actionCreate(user, type, target) {
+        if (type === "local_post" && w.posts.has(target)) {
+          const po = w.posts.get(target)!;
+          if (po.state !== "draft") return { ok: false, reason: "not_draft" };
+          if (!w.biz.find((b) => b.id === po.location)?.members[user]) return { ok: false, reason: "not_member" };
+          const token = `ppo${String(++w.n).padStart(20, "0")}`;
+          w.actions.set(token, { token, user, location: po.location, type, target, used: false, stale: false });
+          return { ok: true, token, text: po.text };
+        }
         if (type === "photo") {
           const p = w.photoDrafts.get(target);
           if (!p || p.state !== "draft") return { ok: false, reason: "not_draft" };
@@ -303,7 +322,68 @@ export class World {
       },
       async acceptPhoto(l, u, bytes) {
         w.photos.push(`${l}:${u}:${bytes.length}`);
-        return { ok: true };
+        const id = uuid(500 + w.photos.length);
+        w.waPhotos.set(id, { location: l, user: u, state: "checking", hold: false, asked: false });
+        return { ok: true, photo_id: id };
+      },
+      async photoHold(photo, user) {
+        const p = w.waPhotos.get(photo);
+        if (!p || p.user !== user) return false;
+        p.hold = true;
+        return true;
+      },
+      async photoPostPrepare(l, u, photo, caption, text) {
+        const biz = w.biz.find((b) => b.id === l);
+        const role = biz?.members[u];
+        if (!role) return { ok: false, reason: "not_member" };
+        const p = w.waPhotos.get(photo);
+        if (!p || p.location !== l || p.user !== u) return { ok: false, reason: "photo_not_usable" };
+        if (text.length < 10 || /[–—!]/.test(text)) return { ok: false, reason: "house_style" };
+        p.hold = true;
+        const left = w.postsLeft.get(l);
+        if (left !== undefined && left <= 0) return { ok: false, reason: "posts_used_up" };
+        if (left !== undefined) w.postsLeft.set(l, left - 1);
+        const id = uuid(700 + w.posts.size);
+        w.posts.set(id, { location: l, text, caption, photo, state: "draft" });
+        w.calls.push(`photo_post:${l}:${text}`);
+        const self = role === "owner" || role === "manager";
+        const to = self ? [{ user_id: u }] : Object.entries(biz!.members).filter(([, r]) => r !== "staff")
+          .map(([id]) => w.users.find((x) => x.id === id)!).filter((x) => x.optin === "active" && x.phone).map((x) => ({ user_id: x.id, phone: x.phone! }));
+        return { ok: true, post_id: id, self, to };
+      },
+      async postContext(l, ownerText) {
+        const b = w.biz.find((x) => x.id === l)!;
+        return { allowedText: ownerText, website: null, category: "cafe", categoryLabel: "Coffee shop", city: "New York", businessName: b.name, country: b.country,
+          recent: [...w.posts.values()].filter((x) => x.location === l && x.state !== "skipped").map((x) => x.text) };
+      },
+      async postSkip(token, phone) {
+        const a = w.actions.get(token);
+        const u = a && w.users.find((x) => x.id === a.user);
+        if (!a || a.type !== "local_post" || u?.phone !== phone) return { result: "unknown" };
+        if (a.used) return { result: "already", location_id: a.location };
+        a.used = true;
+        const po = w.posts.get(a.target);
+        if (!po || po.state !== "draft") return { result: "already", location_id: a.location };
+        po.state = "skipped";
+        const ph = w.waPhotos.get(po.photo);
+        if (ph?.hold) ph.state = "skipped";
+        for (const x of w.actions.values()) if (x.target === a.target) x.stale = true;
+        return { result: "skipped", location_id: a.location };
+      },
+      async heldPhoto(phone, photo, action) {
+        const u = w.userByPhone(phone);
+        const p = w.waPhotos.get(photo);
+        if (!u || !p) return { result: "unknown" };
+        const role = w.biz.find((b) => b.id === p.location)?.members[u.id];
+        if (role !== "owner" && role !== "manager" && !(action === "skip" && p.user === u.id)) return { result: "not_yours" };
+        if (!p.hold || !["checking", "draft"].includes(p.state)) return { result: "already", location_id: p.location };
+        for (const po of w.posts.values()) if (po.photo === photo && po.state === "draft") po.state = "skipped";
+        if (action === "skip") {
+          p.state = "skipped";
+          return { result: "skipped", location_id: p.location };
+        }
+        p.hold = false;
+        return { result: "photo", location_id: p.location };
       },
       async growth(_l, days) {
         return { days, newReviews: 3, opens: { message: 5, qr: 2, tag: 1 } };
@@ -494,6 +574,7 @@ export class World {
         if (w.noraAnswer === "throw") throw new Error("anthropic 529");
         return w.noraAnswer ?? "Nothing goes to Google without your yes. Every reply waits for you to approve it on WhatsApp or at [your Kabsi account](/app).";
       },
+      draftPhotoPost: w.photoDraft === undefined ? undefined : async (loc, caption) => (w.photoDraftCalls.push(`${loc}:${caption}`), w.photoDraft ?? null),
       editDraft: async (review, instruction) => (w.calls.push(`edit:${review}:${instruction}`), { ok: true }),
       firstMap: async (loc) => (w.firstMaps.push(loc), w.firstMapAnswer),
       confirmKeyword: async (loc, k) => (w.calls.push(`keyword:${loc}:${k}`), w.keywordAnswer),

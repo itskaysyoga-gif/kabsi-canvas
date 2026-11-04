@@ -7,6 +7,20 @@
 
 export type Lang = "en" | "es" | "ar";
 
+/** Photo Post 1: a post check that failed (posts/checks.ts code), as the end of "because it ..." in SAY.postProblem. */
+export const POST_ISSUE: Record<string, string> = {
+  offer_not_given: "has an offer you did not give Kabsi",
+  superlative: "says it is the best, which Google does not allow",
+  claim: "makes a health, safety or results promise",
+  stuffing: "repeats the same words too often",
+  repeat: "is too close to a post from the last 90 days",
+  medical: "promises a medical result",
+  alcohol: "promotes alcohol, which posts here cannot do",
+  length: "is not 10 to 1,500 characters long",
+};
+export const postIssue = (i: { code: string; text: string }) =>
+  i.code === "contact" ? i.text.replace(/^This post /, "").replace(/\.$/, "") : POST_ISSUE[i.code] ?? "breaks one of Google's rules for posts";
+
 export const SAY = {
   // 24.8: a chat that arrives without the scan code.
   greeting:
@@ -93,6 +107,22 @@ export const SAY = {
   postShown: (business: string, text: string) => `${business}: Kabsi will post this on your Google profile after your yes.\n\n"${text}"`,
   postProblem: (business: string, problems: string[]) =>
     `${business}: Kabsi cannot post that as it is, because it ${problems.join(" and ")}. Please send it again without that.`,
+  // Photo Post 1 (docs/COPY.md 42): a photo with words becomes a post with that photo, for the owner's yes.
+  photoPostShown: (business: string, text: string) =>
+    `${business}: Kabsi will post this on your Google profile with the photo you just sent, after your yes.\n\n"${text}"`,
+  photoPostForOwner: (business: string, text: string) =>
+    `${business}: your team sent a photo with a note. Kabsi will post this on your Google profile with that photo, after your yes.\n\n"${text}"`,
+  photoPostTakenStaff: "Thank you. Kabsi made a post with your photo and words, and the owner is asked to approve it. Nothing goes on Google until they say yes.",
+  photoPostUsedUp: (business: string) =>
+    `${business}: your plan has no posts left this month, so Kabsi cannot make this a post. You can add the photo to your Google profile on its own, or skip it.`,
+  photoPostProblemTail: "Or add the photo to your Google profile on its own, or skip it.",
+  photoPostProblemTailStaff: "Or send the photo again without words to add it on its own, or skip it.",
+  photoPostUsedUpStaff: (business: string) =>
+    `${business}: the plan has no posts left this month, so Kabsi cannot make this a post. Send the photo again without words to add it on its own, or skip it.`,
+  photoPostOnSite: "Thank you. Kabsi made a post with your photo and words. It waits for the owner's yes on kabsi.co. Nothing goes on Google until they say yes.",
+  photoPostChecking: "Kabsi is still checking the photo. Press Approve again in a minute.",
+  photoPostSkipped: "Okay, skipped. Nothing was put on Google.",
+  heldAsPhoto: "Okay. Kabsi is getting the photo ready on its own and will ask you here: Yes, Edit or Skip. Nothing goes on Google until you say yes.",
   approverOnly: (business: string) => `Your role at ${business} cannot approve this. The owner can, on WhatsApp or on kabsi.co.`,
   notConnectedYet: (business: string, url: string) => `Kabsi cannot change ${business} on Google yet. Open your Kabsi account to finish setting up: ${url}`,
   // The map on WhatsApp (28.5, docs/COPY.md 0.1 and 20): places around you, never spots.
