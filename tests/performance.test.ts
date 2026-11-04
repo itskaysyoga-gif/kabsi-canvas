@@ -65,13 +65,22 @@ describe("no app code in the first load of a public page", () => {
     // (checked in the build on 31 Oct 2026: the Home text is in a 28 KB route chunk, the entry grew 0.6 KB). A React.lazy
     // boundary around it was thrown away and drawn again when the shell updated first, blanking the hero on slow phones.
     const top = read("src/routes/index.tsx");
-    expect(top).toMatch(/import \{ D9Home \} from "@\/components\/kabsi\/d9-home"/);
+    expect(top).toMatch(/import \{ D9Home, loadHomeLower \} from "@\/components\/kabsi\/d9-home"/);
     expect(top).not.toMatch(/\blazy\(|<Suspense/);
+    // Polish 4 part D: the hero and the steps line are static imports; only the sections below the first screen load
+    // later, through a kept server HTML (no lazy boundary, no Suspense fallback, nothing blanked). The route's loader
+    // awaits them, so the server render and an in-site visit to Home draw them at once.
+    const d9 = read("src/components/kabsi/d9-home.tsx");
+    expect(d9).toMatch(/import \{ D9Hero, StepsLine \} from "\.\/d9-hero"/);
+    expect(d9).not.toMatch(/\blazy\(|<Suspense|from "\.\/d9-home-lower"/);
+    expect(d9).toContain('import("./d9-home-lower")');
+    expect(d9).toContain("dangerouslySetInnerHTML");
+    expect(top).toContain("await loadHomeLower()");
     expect(top).not.toMatch(/from "@\/components\/kabsi\/(d6-demo|whatsapp)"/);
     // Web 4: the hero phone is HTML and CSS; the interactive demonstration does not load on Home.
-    expect(read("src/components/kabsi/d9-home.tsx")).not.toMatch(
-      /from "\.\/(d6-demo|d6-home|d8-home)"/,
-    );
+    expect(
+      read("src/components/kabsi/d9-home.tsx") + read("src/components/kabsi/d9-home-lower.tsx"),
+    ).not.toMatch(/from "\.\/(d6-demo|d6-home|d8-home)"/);
     expect(read("vite.config.ts")).not.toMatch(/autoCodeSplitting:\s*false/);
   });
 });

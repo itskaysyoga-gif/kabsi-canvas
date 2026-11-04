@@ -3,7 +3,7 @@ import { oneOf } from "@/lib/search-params";
 import { SiteShell } from "@/components/kabsi/site-chrome";
 import { PHOTOS } from "@/components/kabsi/photos";
 import { HOME_LINE } from "@/components/kabsi/hero-lines";
-import { D9Home } from "@/components/kabsi/d9-home";
+import { D9Home, loadHomeLower } from "@/components/kabsi/d9-home";
 import { ORG_LD, WEBSITE_LD, pageHead } from "@/lib/site";
 
 // Home is Design 9 (Web 5 part B, master plan 30.24); before that Design 7 and 8 (Web 4) and Design 6 (Web 3). The route's own
@@ -16,6 +16,11 @@ export const Route = createFileRoute("/")({
   validateSearch: (s: Record<string, unknown>): { sticker?: "disabled" | undefined } => ({
     sticker: oneOf(s["sticker"], ["disabled"] as const),
   }),
+  // Polish 4 part D: the server render (and a visit to Home from another page) has the lower sections' code before it
+  // draws; a first visit in the browser keeps their server HTML until the visitor scrolls (d9-home.tsx).
+  loader: async () => {
+    await loadHomeLower();
+  },
   head: () => {
     const h = pageHead({
       title: "Kabsi: Your business on Google. Taken care of.",
