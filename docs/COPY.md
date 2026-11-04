@@ -1000,6 +1000,29 @@ Website, Photos (`src/routes/_authenticated/app/photos.tsx`, `src/lib/photos.ts`
 - The state track on a narrow card shows "Approved", "Sent" and "Live"; screen readers hear "Approved", "Sent to Google" and "Live on Google". Wider cards show the full names as before.
 - Tapping a photo opens it full size: the title is the kind ("At work photo", or "Your photo"), with "The photo as Kabsi sends it to Google."
 
+## 45. Polish 4: shorter Home and How it works, with yellow used well (4 Nov 2026, master plan 30.25 item 3)
+
+The rule for every marketing section: a headline of at most 8 words, one line of at most 20 words, then a picture or at most three short points. WHATSAPP_LAUNCH_LINE shows once under the hero (Home and How it works) while WHATSAPP_ON is false. Yellow goes to the main action, the hero bar, the second sentence of a headline on a charcoal band and numbered markers (charcoal on yellow); never yellow text on ivory or white. Every line below is checked against knowledge/kabsi-facts.md (facts 04, "Home and How it works shorter").
+
+### Home
+
+- Steps line: unchanged words; the numbers 1 to 5 are yellow markers.
+- Profile watch: headline unchanged. Line (was 27 words, named the channel): "Kabsi checks your Google profile every day. When something differs, you choose, and nothing changes without your yes." The Example card stays (What Google shows, What you told Kabsi, the question with Use my hours and Keep Google's). Removed: the step rail and the three rules (Keep my information, Google is right, Never by itself); the card and the line carry them.
+- Photo to post (charcoal band): label "On WhatsApp" (charcoal on yellow); headline "Send a photo." with "Get a Google post." in yellow; line "Send it with a line about it. Kabsi writes the post and asks for your yes."; points 1 "Send a photo and a line", 2 "Read the post", 3 "Say yes. It goes on Google." (yellow markers). The phone stays. Removed: the step rail, "A photo with no words becomes a photo on your Google profile, also after your yes." (still true, in the facts), the posts-per-plan line (Pricing has it), the launch line. The same band on /for/hair-salon follows.
+- Supporting row: visible headline "Replies, holidays and a weekly report." (was screen reader only); "A reply for every new review" / "In the review's language. Yes, Edit or Skip."; "Holiday hours, asked in time" / "Five days before a bank holiday."; the weekly report card (Example) without its line.
+- Where you show up: unchanged headline, line and At launch label; removed the map's explanation line (the legend says what each mark means); the AI answer's sources show from 640 px.
+- You stay in control: three points (was five): "Manager access, no password" / "You add Kabsi as a Manager and stay the owner."; "Nothing goes live without your yes" / "Not a reply, not a post, not an hours change."; "Remove Kabsi any time" / "One step in your Google profile." (explanations from 640 px). The independence line stays in the footer.
+- Pricing preview: one line under the cards, "Founding price $19 and $39 for the first 30 paying businesses." (was one per card), only while places remain; the rest unchanged.
+- Founder band: quote "A Google profile needs work every week. I built Kabsi to do that work for you." (was 30 words); "Founding 25." with "Three months of Kabsi Pro, free." in yellow; "By application, no card. After 90 days you choose a plan or stop. Nothing is charged by itself."
+- Hero, Pick your business, the four questions and "Start with a free check." unchanged.
+
+### How it works
+
+- Hero: visible line "Three Example cases at an invented salon: different hours, a photo to a post, and a new review." (was 25 words); the launch line under the hero while WHATSAPP_ON is false (moved from the demonstration). Meta description (LATER row): "Three Example cases at an invented salon in Bristol: hours changed on Google, a photo turned into a post and a new review, from your yes to live on Google."
+- Demonstration: "Pick a case and tap the main button. Each state shows as it happens." (the state names show in the track).
+- Getting started: yellow number markers; "About 10 seconds, no access needed."; "In your Google profile: Business Profile settings, People and access, Add. Paste <group ID>, keep Manager, then Add. No password, and you stay the owner."; "Replies for your older reviews, ready for your yes. Your 14 days start when access works."
+- "You stay in control.": the three points above.
+
 ### Nora on phones (Polish 4 part B, master plan 30.25 item 4)
 
 - Her lone round button below 640 px: "Ask Nora, Kabsi's assistant" for screen readers (the same words as her button in the phone bar). From 640 px the launcher is unchanged: "Chat with Nora".

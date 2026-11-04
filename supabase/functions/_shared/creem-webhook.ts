@@ -4,13 +4,15 @@
 // billing.ts: once per event id, stale events kept but never applied).
 import { type CreemEvent, parseEvent, signatureProblem } from "./creem.ts";
 import { MAX_WEBHOOK_BODY, readCapped, textOf } from "./webhook-body.ts";
+import { isSmoke } from "./webhook-smoke.ts";
 
 export type CreemWebhookDeps = {
   secret: string;
   /** Stores the event once; answers "stored", "duplicate", "stale" or "other_mode". Throws when nothing was stored. */
   store: (e: CreemEvent) => Promise<string>;
-  /** A refused call (logged; repeated refusals alert staff). */
-  refused: (problem: "missing" | "wrong") => Promise<void>;
+  /** A refused call (logged; repeated refusals alert staff). `smoke`: the call carried x-kabsi-smoke: 1 (Polish 4), a label
+   * for the alert's count only; the call is refused all the same. */
+  refused: (problem: "missing" | "wrong", smoke: boolean) => Promise<void>;
   log: (fields: Record<string, unknown>) => void;
   captureError: (e: unknown, extra: Record<string, unknown>) => Promise<unknown>;
   json: (body: unknown, status?: number) => Response;
@@ -22,7 +24,7 @@ export async function creemWebhook(req: Request, d: CreemWebhookDeps): Promise<R
   const raw = textOf(bytes);
   const problem = await signatureProblem(raw, req.headers.get("creem-signature"), d.secret);
   if (problem) {
-    await d.refused(problem);
+    await d.refused(problem, isSmoke(req.headers));
     return d.json({ error: "unauthorized" }, 401);
   }
   const event = parseEvent(raw);

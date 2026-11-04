@@ -76,9 +76,8 @@ export const D9_HERO_STREAM: D9Message[] = [
  */
 export const D9_WATCH = {
   title: "When Google shows something different, you choose.",
-  line: WHATSAPP_ON
-    ? "Kabsi checks your Google profile every day: hours, phone, website, address, category, open status and more. When Google shows something different, Kabsi tells you on WhatsApp."
-    : "Kabsi checks your Google profile every day: hours, phone, website, address, category, open status and more. When Google shows something different, you hear about it by email, and on WhatsApp once it opens.",
+  /** Polish 4 (30.25 item 3): one line of at most 20 words. Channel-free, so it is true with WHATSAPP_ON either way. */
+  line: "Kabsi checks your Google profile every day. When something differs, you choose, and nothing changes without your yes.",
   watched: ["Name", "Hours", "Phone", "Website", "Address", "Category", "Open status", "Map pin"],
   rules: [
     {
@@ -102,11 +101,12 @@ export const D9_WATCH = {
 /* ---------- Photo to post ---------- */
 
 export const D9_PHOTO = {
-  title: "Send a photo. Get a Google post.",
-  line: "Take a photo at work and send it to Kabsi on WhatsApp with a line about it. Kabsi turns it into a Google post with that photo and asks for your yes.",
-  /** 30.24 item 2: a photo with no words waits for the owner's yes like every photo. */
-  noWords: "A photo with no words becomes a photo on your Google profile, also after your yes.",
-  cadence: "Kabsi also prepares posts for you: 2 a month on Essentials, every week on Pro.",
+  /** Polish 4 (30.25 item 3): a yellow label, the headline's second sentence in yellow on the charcoal band, one line, three points. */
+  label: "On WhatsApp",
+  title: "Send a photo.",
+  titleMark: "Get a Google post.",
+  line: "Send it with a line about it. Kabsi writes the post and asks for your yes.",
+  points: ["Send a photo and a line", "Read the post", "Say yes. It goes on Google."],
   ownerLine: "New balayage colours this month. Saturdays are open.",
   ready: "Post ready with your photo:",
   quote: "New balayage colours this month. Saturdays are open.",
@@ -118,16 +118,18 @@ export const D9_PHOTO = {
 
 /* ---------- The supporting row ---------- */
 
+/** Polish 4: the row gets a visible headline; each point is one short line. */
+export const D9_SUPPORT_TITLE = "Replies, holidays and a weekly report.";
 export const D9_SUPPORT = [
   {
     id: "reviews",
     title: "A reply for every new review",
-    text: "Ready in the review's language. You say Yes, Edit or Skip.",
+    text: "In the review's language. Yes, Edit or Skip.",
   },
   {
     id: "holiday",
     title: "Holiday hours, asked in time",
-    text: "Five days before a bank holiday Kabsi asks what you will do.",
+    text: "Five days before a bank holiday.",
   },
 ] as const;
 
@@ -181,7 +183,7 @@ export const D9_MAP_POINTS: { x: number; y: number; rank: number }[] = [
 
 /** The visible hero line (Design 9); the page's meta description stays HOW_HERO.line. */
 export const D9_HOW_LINE =
-  "Three Example cases at an invented salon in Bristol: hours changed on Google, a photo turned into a post, and a new review. Tap through each one.";
+  "Three Example cases at an invented salon: different hours, a photo to a post, and a new review.";
 
 export type CaseId = "hours" | "photo" | "review";
 export type DemoState = "ask" | "approved" | "sent" | "live" | "failed";

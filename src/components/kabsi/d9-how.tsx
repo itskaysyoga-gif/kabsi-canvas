@@ -5,7 +5,6 @@
 import { Circle, CircleAlert, CircleCheck, LoaderCircle, RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { WHATSAPP_LAUNCH_LINE, WHATSAPP_ON } from "@/lib/site";
 import { ExampleBadge, KabsiMark, Switch } from "./ui";
 import { Img, PHOTOS } from "./photos";
 import { useSearchFlag } from "./page-signals";
@@ -113,8 +112,7 @@ export function DemoThreeCases() {
           <ExampleBadge />
         </div>
         <p className="mt-3 max-w-[40rem] text-body text-text-2">
-          Pick a case, then tap the main button on the phone. Each state shows as it happens:
-          Approved, Sent to Google, Live on Google, or Did not go through.
+          Pick a case and tap the main button. Each state shows as it happens.
         </p>
         <div
           role="tablist"
@@ -184,7 +182,6 @@ export function DemoThreeCases() {
                 </button>
               )}
             </div>
-            {!WHATSAPP_ON && <p className="mt-6 text-small text-text-2">{WHATSAPP_LAUNCH_LINE}</p>}
           </div>
         </div>
       </div>
