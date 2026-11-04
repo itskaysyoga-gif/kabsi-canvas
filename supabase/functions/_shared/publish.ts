@@ -16,7 +16,7 @@
 import { RetryLater } from "./jobs.ts";
 import { errorText } from "./log-scrub.ts";
 
-export type TargetType = "review_reply" | "local_post" | "local_post_removal" | "photo" | "special_hours" | "listing_revert";
+export type TargetType = "review_reply" | "local_post" | "local_post_removal" | "photo" | "photo_removal" | "special_hours" | "listing_revert";
 
 // What the publish job gets from claim_publication and the reconcile job from claim_publication_check.
 export type Item = {
@@ -61,7 +61,7 @@ export type PublishDeps = {
 };
 
 const NOUN: Record<TargetType, string> = {
-  review_reply: "reply", local_post: "post", local_post_removal: "post removal", photo: "photo", special_hours: "change to your hours", listing_revert: "change",
+  review_reply: "reply", local_post: "post", local_post_removal: "post removal", photo: "photo", photo_removal: "photo removal", special_hours: "change to your hours", listing_revert: "change",
 };
 export const noun = (t: TargetType) => NOUN[t] ?? "change";
 

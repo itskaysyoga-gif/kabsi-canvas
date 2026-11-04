@@ -5,7 +5,12 @@ import { Camera, ImagePlus, ShieldCheck } from "lucide-react";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { CopyField } from "@/components/kabsi/d2-parts";
 import { AccountTop, Panel } from "@/components/kabsi/d3-account";
-import { OpensLater, TaskBlock, useFirstTaskDone } from "@/components/kabsi/d3-content-task";
+import {
+  OpensLater,
+  TaskBlock,
+  UndoBar,
+  useFirstTaskDone,
+} from "@/components/kabsi/d3-content-task";
 import {
   Button,
   ButtonLink,
@@ -15,21 +20,33 @@ import {
   WhatsAppLink,
 } from "@/components/kabsi/ui";
 import { SendReviewLink } from "@/components/shared/send-review-link";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { myLatestLocation } from "@/lib/onboarding";
 import { usePlaceLink } from "@/lib/place-link";
 import { contentCall } from "@/lib/reviews";
 import { WHATSAPP_ON } from "@/lib/site";
 import { latestByTarget, recentTasks, type TaskItem } from "@/lib/task-feed";
+import { failedNext } from "@/lib/task-state";
 import { myAccess } from "@/lib/team";
 import { track } from "@/lib/telemetry";
 import { cn } from "@/lib/utils";
 import {
   ACCEPT,
   CATEGORIES,
+  CATEGORY_HELP,
   createLink,
+  fullPhotoUrl,
+  KINDS,
   linkStatus,
   loadPhotos,
   revokeLink,
+  ROLES,
   roleIssue,
   uploadFiles,
   type Photo,
@@ -45,7 +62,7 @@ export const Route = createFileRoute("/_authenticated/app/photos")({
   component: PhotosPage,
 });
 
-const SENT = ["publishing", "posted", "failed"];
+const SENT = ["publishing", "posted", "failed", "removing", "removed"];
 
 function PhotosPage() {
   const queryClient = useQueryClient();
@@ -69,7 +86,8 @@ function PhotosPage() {
   const canWork = !!loc && loc.status === "active" && !loc.concierge;
   const feed = useQuery({
     queryKey: ["photo-tasks", loc?.id],
-    queryFn: () => recentTasks(loc!.id, { kinds: ["photo"], days: 120, limit: 100 }),
+    queryFn: () =>
+      recentTasks(loc!.id, { kinds: ["photo", "photo_removal"], days: 120, limit: 100 }),
     enabled: canWork && approvesHere,
     retry: false,
   });
@@ -87,7 +105,8 @@ function PhotosPage() {
   const urls = data.data?.urls ?? {};
   const ready = photos.filter((p) => p.state === "draft" && p.kind === "photo");
   const sent = photos.filter((p) => SENT.includes(p.state));
-  const tasks = latestByTarget(feed.data ?? []);
+  const tasks = latestByTarget((feed.data ?? []).filter((t) => t.kind === "photo"));
+  const removals = latestByTarget((feed.data ?? []).filter((t) => t.kind === "photo_removal"));
   // Staff are never held back: they only exist once the owner has a team. Owners wait for the first task (V4).
   const open = role === "staff" || firstDone === true;
 
@@ -220,9 +239,11 @@ function PhotosPage() {
                   <SentTile
                     key={p.id}
                     photo={p}
-                    url={urls[p.storage_path]}
+                    url={urls[p.id]}
                     task={tasks.get(p.id)}
+                    removal={removals.get(p.id)}
                     approvesHere={approvesHere}
+                    onChanged={refresh}
                   />
                 ))}
               </ul>
@@ -344,7 +365,7 @@ function ReadyBatch({
           <ReadyCard
             key={p.id}
             photo={p}
-            url={urls[p.storage_path]}
+            url={urls[p.id]}
             primary={!batch && i === ready.findIndex((x) => x.suitable)}
             onChanged={onChanged}
           />
@@ -365,7 +386,8 @@ function ReadyCard({
   primary: boolean;
   onChanged: () => unknown;
 }) {
-  const [category, setCategory] = useState(photo.category ?? "ADDITIONAL");
+  // Photos 2: nothing is chosen for the owner; a kind they chose before (on WhatsApp) stays chosen.
+  const [category, setCategory] = useState<string | null>(photo.category);
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
   const advice =
@@ -373,6 +395,10 @@ function ReadyCard({
       ? roleIssue(category, photo.width, photo.height)
       : null;
   async function run(kind: "publish" | "skip") {
+    if (kind === "publish" && !category) {
+      setErr("Choose what the photo shows first.");
+      return;
+    }
     setBusy(kind);
     setErr("");
     try {
@@ -388,26 +414,13 @@ function ReadyCard({
   }
   return (
     <li className="overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest">
-      <PhotoImage url={url} />
+      <PhotoImage url={url} photo={photo} />
       <div className="p-4">
         {photo.suitable ? null : <StatusPill tone="warn">Kabsi has a note</StatusPill>}
         {photo.suitability_note ? (
           <p className="mt-2 text-small text-text-2">{photo.suitability_note}</p>
         ) : null}
-        <label className="mt-3 block text-small font-bold text-text-1">
-          What it shows
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="mt-1 h-11 w-full rounded-input border border-stroke bg-surface-2 px-3 text-body font-normal text-text-1"
-          >
-            {Object.entries(CATEGORIES).map(([k, l]) => (
-              <option key={k} value={k}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </label>
+        <KindPicker name={`kind-${photo.id}`} value={category} onChange={setCategory} />
         {advice ? <p className="mt-2 text-small text-text-2">{advice}</p> : null}
         <div className="mt-4 flex flex-wrap gap-2">
           <Button
@@ -441,6 +454,49 @@ function ReadyCard({
   );
 }
 
+// Photos 2: what the photo shows, as tappable choices in plain words with one line of help each (was a dropdown). The
+// same values as before; the preferred cover photo and the logo come last, with their advice.
+function KindPicker({
+  name,
+  value,
+  onChange,
+}: {
+  name: string;
+  value: string | null;
+  onChange: (v: string) => void;
+}) {
+  const choice = (k: string) => (
+    <label
+      key={k}
+      className={cn(
+        "flex min-h-11 cursor-pointer gap-2.5 rounded-inner border-2 p-2.5",
+        value === k ? "border-text-1 bg-surface-2" : "border-line",
+      )}
+    >
+      <input
+        type="radio"
+        name={name}
+        className="mt-0.5 size-4 shrink-0 accent-black"
+        checked={value === k}
+        onChange={() => onChange(k)}
+      />
+      <span className="min-w-0">
+        <span className="block text-small font-bold text-text-1">{CATEGORIES[k]}</span>
+        <span className="block text-label leading-5 text-text-2">{CATEGORY_HELP[k]}</span>
+      </span>
+    </label>
+  );
+  return (
+    <fieldset className="mt-3">
+      <legend className="text-small font-bold text-text-1">What it shows</legend>
+      <div className="mt-2 grid grid-cols-2 gap-2">{KINDS.map(choice)}</div>
+      <div className="mt-2 grid grid-cols-2 gap-2 border-t border-line pt-2">
+        {ROLES.map(choice)}
+      </div>
+    </fieldset>
+  );
+}
+
 // Uploads still being checked, files Kabsi could not use, and kept videos: a short list with the reason.
 function Checking({ photos }: { photos: Photo[] }) {
   const queryClient = useQueryClient();
@@ -454,12 +510,19 @@ function Checking({ photos }: { photos: Photo[] }) {
   return (
     <section className="space-y-3">
       {checking.length ? (
-        <Panel>
-          <p className="text-body text-text-1" role="status">
-            Kabsi is checking {checking.length} {checking.length === 1 ? "photo" : "photos"}. This
-            takes a minute.
-          </p>
-        </Panel>
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Photos being checked">
+          {checking.map((p) => (
+            <li
+              key={p.id}
+              className="overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest"
+            >
+              <PhotoImage url={undefined} photo={p} />
+              <p className="p-4 text-body text-text-1" role="status">
+                Checking your photo. About a minute.
+              </p>
+            </li>
+          ))}
+        </ul>
       ) : null}
       {notes.length ? (
         <ul className="grid gap-2">
@@ -485,21 +548,73 @@ function Checking({ photos }: { photos: Photo[] }) {
   );
 }
 
-/** A photo that left the ready list, with its task state (approved, sent to Google, on Google, did not go through). */
+/** A photo that left the ready list, with its task state (approved, sent to Google, on Google, did not go through). Photos 2:
+ * a photo Kabsi put on Google can be removed from Google, with one confirmation and the 10 second undo. */
 function SentTile({
   photo,
   url,
   task,
+  removal,
   approvesHere,
+  onChanged,
 }: {
   photo: Photo;
   url: string | undefined;
   task: TaskItem | undefined;
+  removal: TaskItem | undefined;
   approvesHere: boolean;
+  onChanged: () => unknown;
 }) {
+  const [confirm, setConfirm] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [pending, setPending] = useState<{ publication: string; until: number } | null>(null);
+  const [undoBusy, setUndoBusy] = useState(false);
+  const [undoErr, setUndoErr] = useState("");
+  async function remove() {
+    setBusy(true);
+    setErr("");
+    try {
+      const r = await contentCall<{ publication: string; publish_after: string | null }>({
+        do: "photo_remove",
+        photo_id: photo.id,
+      });
+      setConfirm(false);
+      setPending({
+        publication: r.publication,
+        until: r.publish_after ? Date.parse(r.publish_after) : Date.now(),
+      });
+      onChanged();
+    } catch (x) {
+      setErr(x instanceof Error ? x.message : "Something went wrong.");
+    }
+    setBusy(false);
+  }
+  async function undo() {
+    if (!pending) return;
+    setUndoBusy(true);
+    setUndoErr("");
+    try {
+      await contentCall({
+        do: "photo_undo",
+        photo_id: photo.id,
+        publication_id: pending.publication,
+      });
+      setPending(null);
+      onChanged();
+    } catch (x) {
+      setUndoErr(
+        x instanceof Error ? x.message : "Couldn't undo. Check your connection and try again.",
+      );
+    }
+    setUndoBusy(false);
+  }
+  const counting = pending && pending.until > Date.now();
+  // The removal's own state: Removing, Removed from Google, or Did not go through (the photo is still on Google).
+  const removalFailed = photo.state === "posted" && removal?.owner === "failed" && !pending;
   return (
     <li className="overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest">
-      <PhotoImage url={url} />
+      <PhotoImage url={url} photo={photo} />
       <div className="p-4">
         <p className="text-small font-bold text-text-1">
           {CATEGORIES[photo.category ?? "ADDITIONAL"] ?? "Other"}
@@ -507,8 +622,74 @@ function SentTile({
             <span className="block font-normal text-text-2">From the team photo link</span>
           ) : null}
         </p>
-        {approvesHere ? (
-          <TaskBlock task={task} kind="photo" rowState={photo.state} className="mt-3" />
+        {!approvesHere ? null : photo.state === "removing" || photo.state === "removed" ? (
+          pending && counting ? (
+            <UndoBar
+              until={pending.until}
+              busy={undoBusy}
+              error={undoErr}
+              onUndo={() => void undo()}
+            />
+          ) : (
+            <div className="mt-3">
+              <StatusPill tone={photo.state === "removed" ? "ok" : "info"}>
+                {photo.state === "removed" ? "Removed from Google" : "Removing"}
+              </StatusPill>
+              <p className="mt-2 text-small text-text-2">
+                {photo.state === "removed"
+                  ? "Google no longer shows this photo."
+                  : "Kabsi asked Google to remove it and checks until it is gone."}
+              </p>
+            </div>
+          )
+        ) : (
+          <>
+            {removalFailed ? (
+              <div className="mt-3" role="alert">
+                <StatusPill tone="bad">Did not go through</StatusPill>
+                <p className="mt-2 text-small text-text-1">
+                  {failedNext("photo_removal", removal.state)}
+                </p>
+              </div>
+            ) : null}
+            <TaskBlock task={task} kind="photo" rowState={photo.state} className="mt-3" />
+            {photo.state === "posted" ? (
+              confirm ? (
+                <div className="mt-4 border-t border-line pt-4">
+                  <p className="text-body text-text-1">
+                    Remove this photo from your Google profile? You have 10 seconds to undo.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button
+                      size="md"
+                      variant="secondary"
+                      loading={busy}
+                      onClick={() => void remove()}
+                    >
+                      Remove from Google
+                    </Button>
+                    <Button
+                      size="md"
+                      variant="quiet"
+                      disabled={busy}
+                      onClick={() => setConfirm(false)}
+                    >
+                      Keep it
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Button variant="tertiary" className="mt-2" onClick={() => setConfirm(true)}>
+                  Remove from Google
+                </Button>
+              )
+            ) : null}
+          </>
+        )}
+        {err ? (
+          <p className="mt-3 text-small font-semibold text-bad" role="alert">
+            {err}
+          </p>
         ) : null}
       </div>
     </li>
@@ -532,7 +713,7 @@ function CoverAndLogo({ photos, urls }: { photos: Photo[]; urls: Record<string, 
           return (
             <div key={cat} className="flex gap-3 rounded-inner border border-line p-3">
               <div className="w-24 shrink-0 overflow-hidden rounded-inner">
-                <PhotoImage url={p ? urls[p.storage_path] : undefined} square />
+                <PhotoImage url={p ? urls[p.id] : undefined} photo={p} square />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-small font-bold text-text-1">{title}</p>
@@ -623,21 +804,93 @@ function TeamLink({ locationId }: { locationId: string }) {
   );
 }
 
-function PhotoImage({ url, square = false }: { url: string | undefined; square?: boolean }) {
+// Photos 2: the photo itself, fitted to its frame (never cropped, never a dark box): the small copy in the list, and the
+// full file only when the owner taps it. A link that no longer loads shows the plain frame.
+function PhotoImage({
+  url,
+  photo,
+  square = false,
+}: {
+  url: string | undefined;
+  photo?: Photo | undefined;
+  square?: boolean;
+}) {
+  // The link that failed to load; a new link (signed again) is tried afresh.
+  const [brokenUrl, setBrokenUrl] = useState<string | null>(null);
+  const broken = !!url && brokenUrl === url;
+  const [open, setOpen] = useState(false);
+  const [full, setFull] = useState<string | null>(null);
+  const [err, setErr] = useState("");
   const shape = square ? "aspect-square" : "aspect-[4/3]";
-  return url ? (
+  if (!url || broken)
+    return (
+      <div className={cn(shape, "grid w-full place-items-center bg-surface-2 text-text-3")}>
+        <Camera className="size-8" strokeWidth={1.5} aria-hidden />
+      </div>
+    );
+  const label = photo ? `${CATEGORIES[photo.category ?? ""] ?? "Your"} photo` : "Your photo";
+  async function openFull() {
+    setOpen(true);
+    setErr("");
+    if (!photo || full) return;
+    try {
+      setFull(await fullPhotoUrl(photo.storage_path));
+    } catch (x) {
+      setErr(x instanceof Error ? x.message : "Couldn't open the photo. Try again.");
+    }
+  }
+  const img = (
     <img
       src={url}
-      alt="Your photo"
-      width={800}
-      height={square ? 800 : 600}
+      alt={label}
+      width={photo?.width ?? 800}
+      height={photo?.height ?? 600}
       loading="lazy"
       decoding="async"
-      className={`${shape} w-full object-cover`}
+      onError={() => setBrokenUrl(url)}
+      className="size-full object-contain"
     />
-  ) : (
-    <div className={cn(shape, "grid w-full place-items-center bg-surface-2 text-text-3")}>
-      <Camera className="size-8" strokeWidth={1.5} aria-hidden />
-    </div>
+  );
+  if (!photo || square) return <div className={cn(shape, "w-full bg-surface-2")}>{img}</div>;
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => void openFull()}
+        className={cn(
+          shape,
+          "block w-full bg-surface-2 focus-visible:outline-2 focus-visible:outline-text-1",
+        )}
+        aria-label={`Open the ${label.toLowerCase()} full size`}
+      >
+        {img}
+      </button>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="bottom" className="max-h-[92vh] overflow-y-auto rounded-t-large">
+          <SheetHeader className="text-left">
+            <SheetTitle>{label}</SheetTitle>
+            <SheetDescription>
+              {photo.state === "removed"
+                ? "Google no longer shows this photo."
+                : "The photo as Kabsi sends it to Google."}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-4 grid place-items-center bg-surface-2">
+            <img
+              src={full ?? url}
+              alt={label}
+              width={photo.width ?? 800}
+              height={photo.height ?? 600}
+              className="max-h-[70vh] w-auto object-contain"
+            />
+          </div>
+          {err ? (
+            <p className="mt-3 text-small font-semibold text-bad" role="alert">
+              {err}
+            </p>
+          ) : null}
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }

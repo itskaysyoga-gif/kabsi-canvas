@@ -17,3 +17,7 @@ export const listMedia = (account: string, location: string): Promise<ListMediaI
   gbp(`${V4}/${account}/${location}/media?pageSize=100`);
 // item is "accounts/{a}/locations/{l}/media/{id}".
 export const getMedia = (item: string): Promise<MediaItem> => gbp(`${V4}/${item}`);
+// Photos 2 (4 Nov 2026): removes one photo Kabsi uploaded, by the media name Google gave it when Kabsi created it.
+// https://developers.google.com/my-business/reference/rest/v4/accounts.locations.media/delete (read 4 Nov 2026):
+// DELETE v4/{name=accounts/*/locations/*/media/*}, empty request body, empty response body.
+export const deleteMedia = (item: string): Promise<Record<string, never>> => gbp(`${V4}/${item}`, { method: "DELETE" });
