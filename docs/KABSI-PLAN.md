@@ -7,7 +7,7 @@ Version 1 was written on 4 Oct 2026 from the six source documents in `docs/sourc
 1. Guardrails (digest here; full text in the archive)
 2. Rules for every build chat (here, in full)
 3. Sources and precedence (here, in full)
-4. Review decisions R-01 to R-103 (table with status here; full text in the archive)
+4. Review decisions R-01 to R-104 (table with status here; full text in the archive)
 7. Order of work (here, short; the full section and the task cards are in the archive)
 8. Where everything went
 
@@ -186,9 +186,9 @@ Not a source of truth any more: `docs/KABSI-SPEC.md`, `docs/KABSI-STATE.md`, `do
 
 Added on 24 Oct 2026: the master plan (`docs/KABSI-MASTERPLAN.md`) sits above items 2 to 5 for everything it covers, with its later sections winning over its earlier ones.
 
-## 4. Review decisions (R-01 to R-103)
+## 4. Review decisions (R-01 to R-104)
 
-One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. Later decisions override earlier ones where they differ: R-103 over R-102 over R-101 over R-100 over R-99 over R-98 over R-97 over R-96 over R-95 over R-94 over R-93 over R-92 over R-91 over R-90 over R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
+One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. Later decisions override earlier ones where they differ: R-104 over R-103 over R-102 over R-101 over R-100 over R-99 over R-98 over R-97 over R-96 over R-95 over R-94 over R-93 over R-92 over R-91 over R-90 over R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
 
 | # | Decision | Status |
 |---|---|---|
@@ -297,6 +297,7 @@ One line per decision. The full text, with what each one changes and why, is `do
 | R-101 | WhatsApp ownership confirmed in Meta; say what should be done, never promise results; videos made in kabsi-design-studio after launch; priority help on Pro (4 working hours, a call when needed); AI-generated people as scenes only; no Google logo and no invented customers or trust rows (master plan 30.21) | Approved |
 | R-102 | The product decision: Kabsi stays the product, no rebuild; Outbound shelved; paid Meta ads from the launch gate (UK salons and barbers, then the UAE) with day 14 and day 30 gates; AI answer accuracy (AI Answers 1) built before launch; AI Presence Care a hypothesis only; Kapso on Pro with 12-month retention and model improvement off (master plan 30.22) | Approved |
 | R-103 | The website brief of 4 Nov: Kabsi shown doing the whole job, the profile watch and photo posts lead; Photo Post 1 first; Design 9 designs the system, Web 5 ports it; no Gemini, Claude or Google AI search shown as covered, no logos, no promises (master plan 30.23) | Approved |
+| R-104 | Lane R review of Photo Post 1 and Design 9: Photo Post 1 checked; Design 9 approved with hero B, the charcoal Free check button, the Founding 25 line on Home, Pricing and /for only, the product's own buttons kept; Web 5 runs now, before the launch gate, keeping WHATSAPP_ON and NEARBY_ON working (master plan 30.24) | Approved |
 
 ## 7. Order of work (R-84; master plan 27.11, 28.4, 29.8)
 
