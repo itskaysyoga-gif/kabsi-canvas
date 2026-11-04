@@ -192,9 +192,13 @@ describe("the lines of master plan 30.15 and 30.17", () => {
       /Profile Coach actions: the change made for you after your yes", "No", "Yes"/,
     );
     expect(rows).toMatch(/More checks come later\./);
+    // Fix 2 (master plan 30.27 item 2): the nearby check and the AI answer are named with each plan's allowance, marked
+    // At launch, in PLAN_CHECKS only; everything else not built stays off the plans.
     expect(rows).not.toMatch(
-      /Competitor Watch|category check|voice notes|monthly PDF|ChatGPT|search terms? checked/,
+      /Competitor Watch|category check|voice notes|monthly PDF|search terms? checked/,
     );
+    const outside = rows.replace(/export const PLAN_CHECKS = \{[\s\S]*?\} as const;/, "");
+    expect(outside).not.toMatch(/ChatGPT/);
   });
 });
 

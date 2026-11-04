@@ -7,6 +7,7 @@ import { ArrowRight, Check, Minus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
+  NEARBY_ON,
   FOUNDING_PRICES,
   PAY_TODAY_LINE,
   PLAN_PRICES,
@@ -24,7 +25,7 @@ import { PageHero, popCls, stagger } from "./page-hero";
 import { Pill } from "./result-preview";
 import { Closing } from "./closing";
 import { StepsLine } from "./d9-hero";
-import { FOUNDING_TOTAL, PLANS, PLAN_ROWS } from "./plans";
+import { FOUNDING_TOTAL, PLAN_CHECKS, PLANS, PLAN_ROWS, planChecks } from "./plans";
 import { FoundingPriceLine, useFoundingLeft } from "./founding-price";
 import { FOUNDING25_TOTAL } from "./founding-total";
 import { PRICING_HERO } from "./hero-lines";
@@ -113,7 +114,7 @@ function Cell({ v }: { v: string }) {
   return <td className="p-3 text-text-1 sm:p-4">{v}</td>;
 }
 
-export function D8Pricing() {
+export function D8Pricing({ nearbyOn = NEARBY_ON }: { nearbyOn?: boolean } = {}) {
   const periodFlag = useSearchFlag("period");
   const [period, setPeriod] = useState<"monthly" | "yearly">("monthly");
   useEffect(() => {
@@ -193,6 +194,19 @@ export function D8Pricing() {
                       </li>
                     ))}
                   </ul>
+                  {/* Fix 2: the nearby check and the AI answer, with this plan's allowance from plan_limits(). */}
+                  <div className="mt-5 border-t border-line pt-4">
+                    <p className="flex flex-wrap items-center gap-2 text-small font-bold">
+                      Where you show up {!nearbyOn && <Pill className="py-0">At launch</Pill>}
+                    </p>
+                    <ul className="mt-2 space-y-1.5">
+                      {planChecks(p.id).map((c) => (
+                        <li key={c.name} className="text-small text-text-2">
+                          <span className="text-text-1">{c.name}:</span> {c.value}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                   <p className="mt-5 text-label text-text-2">
                     {p.help} {WORKING_HOURS}
                   </p>
@@ -248,11 +262,28 @@ export function D8Pricing() {
                     <Cell v={p} />
                   </tr>
                 ))}
+                {[PLAN_CHECKS.nearby, PLAN_CHECKS.ai].map((c) => (
+                  <tr key={c.name}>
+                    <th scope="row" className="p-3 text-start font-semibold break-words sm:p-4">
+                      {c.name}
+                      {!nearbyOn && (
+                        <>
+                          {" "}
+                          <Pill className="mt-1 py-0">At launch</Pill>
+                        </>
+                      )}
+                    </th>
+                    <Cell v={c.essentials} />
+                    <Cell v={c.pro} />
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
           <p className="mt-3 text-small text-text-2">
-            Only what Kabsi does today. More checks come later.
+            {nearbyOn
+              ? "Only what Kabsi does today. More checks come later."
+              : "Only what Kabsi does today, and the two checks marked At launch. More checks come later."}
           </p>
         </div>
       </section>
