@@ -30,7 +30,9 @@ export const PHONES = {
 
 type Biz = { id: string; name: string; tz: string; country: string; pro: boolean; members: Record<string, "owner" | "manager" | "staff"> };
 type User = { id: string; phone: string | null; optin: "active" | "stopped" | "none" };
-type Action = { token: string; user: string; location: string; type: string; target: string; used: boolean; stale: boolean; risk?: string };
+// Fix 2: a post's Approve is bound to what was shown: its text, its photo and that photo's file (private.whatsapp_item).
+type Seen = { text: string; photo: string; file: string };
+type Action = { token: string; user: string; location: string; type: string; target: string; used: boolean; stale: boolean; risk?: string; seen?: Seen };
 export type SentMsg = { to: string; kind: string; body: string; buttons: string[]; live: boolean; template?: string };
 
 const uuid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
@@ -105,7 +107,7 @@ export class World {
   onItFast = false;
   mediaBytes = new Map<string, Uint8Array>();
   /** Photo Post 1: WhatsApp photos by id (held when they came with words), photo posts by id, posts left per business. */
-  waPhotos = new Map<string, { location: string; user: string; state: string; hold: boolean; asked: boolean }>();
+  waPhotos = new Map<string, { location: string; user: string; state: string; hold: boolean; asked: boolean; file?: string }>();
   posts = new Map<string, { location: string; text: string; caption: string; photo: string; state: string }>();
   postsLeft = new Map<string, number>();
   /** Photo Post 1: Kabsi's draft when AI drafting is on (undefined: off; null: the draft failed). */
@@ -251,6 +253,9 @@ export class World {
         if (!w.biz.find((b) => b.id === a.location)?.members[a.user]) return { result: "refused", reason: "approver_not_member", location_id: a.location };
         const po = a.type === "local_post" ? w.posts.get(a.target) : undefined;
         if (po && po.state !== "draft") return { result: "refused", reason: "not_draft", location_id: a.location, target_type: a.type };
+        if (po && a.seen && (a.seen.text !== po.text || a.seen.photo !== po.photo || a.seen.file !== (w.waPhotos.get(po.photo)?.file ?? ""))) {
+          return { result: "refused", reason: "changed", location_id: a.location, target_type: a.type };
+        }
         if (po && w.waPhotos.get(po.photo)?.state === "checking") return { result: "refused", reason: "approve_publication: post_photo_missing", location_id: a.location, target_type: a.type };
         if (po) po.state = "publishing";
         a.used = true;
@@ -297,7 +302,8 @@ export class World {
           if (po.state !== "draft") return { ok: false, reason: "not_draft" };
           if (!w.biz.find((b) => b.id === po.location)?.members[user]) return { ok: false, reason: "not_member" };
           const token = `ppo${String(++w.n).padStart(20, "0")}`;
-          w.actions.set(token, { token, user, location: po.location, type, target, used: false, stale: false });
+          const seen = { text: po.text, photo: po.photo, file: w.waPhotos.get(po.photo)?.file ?? "" };
+          w.actions.set(token, { token, user, location: po.location, type, target, used: false, stale: false, seen });
           return { ok: true, token, text: po.text };
         }
         if (type === "photo") {
@@ -323,7 +329,8 @@ export class World {
       async acceptPhoto(l, u, bytes) {
         w.photos.push(`${l}:${u}:${bytes.length}`);
         const id = uuid(500 + w.photos.length);
-        w.waPhotos.set(id, { location: l, user: u, state: "checking", hold: false, asked: false });
+        // The file as sent is stored at once (its hash does not change when the photo check finishes).
+        w.waPhotos.set(id, { location: l, user: u, state: "checking", hold: false, asked: false, file: `etag-${id}` });
         return { ok: true, photo_id: id };
       },
       async photoHold(photo, user) {
