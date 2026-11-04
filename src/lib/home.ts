@@ -141,7 +141,9 @@ export async function loadCardDetails(tasks: Task[]): Promise<Record<string, Car
           .select("id, field, previous_value, previous_fact_id, google_value")
           .in("id", changeIds)
       : null,
-    postIds.length ? supabase.from("gbp_posts").select("id, body").in("id", postIds) : null,
+    postIds.length
+      ? supabase.from("gbp_posts").select("id, body, photo_id").in("id", postIds)
+      : null,
   ]);
   const byId = <T extends { id: string }>(r: { data: unknown } | null) =>
     new Map(((r?.data ?? []) as T[]).map((x) => [x.id, x]));
@@ -160,7 +162,7 @@ export async function loadCardDetails(tasks: Task[]): Promise<Record<string, Car
     previous_fact_id: string | null;
     google_value: ValueJson;
   }>(changes);
-  const po = byId<{ id: string; body: string | null }>(posts);
+  const po = byId<{ id: string; body: string | null; photo_id: string | null }>(posts);
   const latestDraft = new Map<string, { body: string; safety_ok: boolean }>();
   for (const d of (drafts?.data ?? []) as {
     review_id: string;
@@ -208,7 +210,8 @@ export async function loadCardDetails(tasks: Task[]): Promise<Record<string, Car
         eyebrow: "Google update ready",
         quote: null,
         prepared: p?.body ?? null,
-        safe: !!p?.body,
+        // Fix 2: a post with a photo is approved where its photo is shown (Posts), never by one tap on its text alone.
+        safe: !!p?.body && !p.photo_id,
         risk: null,
         evidence: [],
       };

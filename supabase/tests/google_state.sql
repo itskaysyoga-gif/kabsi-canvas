@@ -16,7 +16,7 @@ values ('00000000-0000-4000-8000-000000000601', '00000000-0000-4000-8000-0000000
        ('00000000-0000-4000-8000-000000000602', '00000000-0000-4000-8000-0000000000c1', 'New cakes this weekend.', 'New cakes this weekend.', 'draft');
 
 create function pg_temp.approve(p_post text) returns uuid language sql as $$
-  select (public.approve_publication('local_post', p_post::uuid, jsonb_build_object('summary', (select body from public.gbp_posts where id = p_post::uuid)),
+  select (public.approve_publication('local_post', p_post::uuid, jsonb_build_object('summary', (select body from public.gbp_posts where id = p_post::uuid), 'photo_id', null, 'photo_sig', null),
     '00000000-0000-4000-8000-0000000000a1'::uuid, 'dashboard') ->> 'publication_id')::uuid
 $$;
 create function pg_temp.due(p uuid) returns void language sql as $$
