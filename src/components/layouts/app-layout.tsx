@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   BookOpen,
   Camera,
+  Check,
   ChevronDown,
   CircleUser,
   Home,
@@ -15,6 +16,7 @@ import {
   MessageCircle,
   MessageSquareText,
   Newspaper,
+  Plus,
   QrCode,
   Settings,
   ShieldCheck,
@@ -49,7 +51,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ButtonLink, ErrorState, ExampleBadge, KabsiMark } from "@/components/kabsi/ui";
+import {
+  ButtonLink,
+  ErrorState,
+  ExampleBadge,
+  KabsiMark,
+  buttonClass,
+} from "@/components/kabsi/ui";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { TestModeBanner } from "@/components/shared/test-mode-banner";
 import { useAuth } from "@/components/auth/auth-provider";
 import { setAnalyticsPaused } from "@/lib/telemetry";
@@ -75,14 +90,45 @@ const STATUS_LABEL: Record<string, string> = {
   waiting_list: "Waiting list",
 };
 
-/** The business card at the top of the side bar, and the business name in the phone top bar: one menu for both. */
+/** Below 1024 px the business sheet rises from the bottom; from 1024 px it opens beside the side bar. */
+function useWide() {
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    const m = window.matchMedia("(min-width: 1024px)");
+    const on = () => setWide(m.matches);
+    on();
+    m.addEventListener("change", on);
+    return () => m.removeEventListener("change", on);
+  }, []);
+  return wide;
+}
+
+function Initial({ name, on = false }: { name: string; on?: boolean }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "grid size-10 shrink-0 place-items-center rounded-full font-display text-title font-bold",
+        on ? "bg-text-1 text-surface-0" : "bg-surface-2 text-text-1",
+      )}
+    >
+      {name.charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
+/** App 3: the business picker at the top of the menu (and the business name in the phone top bar) opens one clear sheet
+ * listing each business with its status. Switching, Continue setup and Add another business work as before. */
 function BusinessMenu({ compact = false }: { compact?: boolean }) {
   const queryClient = useQueryClient();
   const location = useQuery({ queryKey: ["my-location"], queryFn: myLatestLocation });
   const all = useQuery({ queryKey: ["my-locations"], queryFn: myLocations });
+  const [open, setOpen] = useState(false);
+  const wide = useWide();
   const loc = location.data;
-  const others = (all.data ?? []).filter((l) => l.id !== loc?.id);
+  const list = loc ? [loc, ...(all.data ?? []).filter((l) => l.id !== loc.id)] : (all.data ?? []);
   async function switchTo(id: string) {
+    setOpen(false);
     chooseLocation(id);
     await queryClient.invalidateQueries();
   }
@@ -91,86 +137,125 @@ function BusinessMenu({ compact = false }: { compact?: boolean }) {
     : location.isError
       ? "Your business"
       : (loc?.name ?? "Add your business");
+  const statusOf = (l: Location) => (l.is_demo ? "Example" : (STATUS_LABEL[l.status] ?? l.status));
+  const row =
+    "press flex min-h-14 w-full items-center gap-3 rounded-card px-3 py-2.5 text-start hover:bg-surface-2";
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        {compact ? (
-          <button
-            type="button"
-            className="press flex min-h-11 min-w-0 flex-1 items-center gap-1.5 rounded-inner px-1 text-start"
-          >
-            <span className="truncate font-display text-title font-bold">{name}</span>
-            {loc?.is_demo ? <ExampleBadge className="shrink-0" /> : null}
-            <ChevronDown className="size-4 shrink-0 text-text-2" aria-hidden />
-            <span className="sr-only">: switch business</span>
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="press mx-3 flex items-center gap-3 rounded-inner border border-line bg-surface-0 px-3 py-2.5 text-start hover:bg-surface-2"
-          >
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-text-1 font-display text-title font-bold text-surface-0">
-              {(loc?.name ?? "K").charAt(0).toUpperCase()}
+    <>
+      {compact ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-haspopup="dialog"
+          className="press flex min-h-11 min-w-0 flex-1 items-center gap-1.5 rounded-inner px-1 text-start"
+        >
+          <span className="truncate font-display text-title font-bold">{name}</span>
+          {loc?.is_demo ? <ExampleBadge className="shrink-0" /> : null}
+          <ChevronDown className="size-4 shrink-0 text-text-2" aria-hidden />
+          <span className="sr-only">: switch business</span>
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-haspopup="dialog"
+          className="press mx-3 flex items-center gap-3 rounded-card border border-line bg-surface-0 px-3 py-2.5 text-start hover:bg-surface-2"
+        >
+          <Initial name={loc?.name ?? "K"} on />
+          <span className="min-w-0 flex-1">
+            <span className="line-clamp-2 block text-small font-bold break-words">{name}</span>
+            <span className="block truncate text-small text-text-2">
+              {loc ? statusOf(loc) : ""}
             </span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-small font-bold">{name}</span>
-              <span className="block truncate text-label text-text-2">
-                {loc?.is_demo ? "Example" : loc ? (STATUS_LABEL[loc.status] ?? loc.status) : ""}
-              </span>
-            </span>
-            <ChevronDown className="size-4 shrink-0 text-text-2" aria-hidden />
-            <span className="sr-only">: switch business</span>
-          </button>
-        )}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        className="w-72 rounded-card border-line bg-surface-1 p-2 shadow-float"
-      >
-        {loc ? (
-          <>
-            <DropdownMenuLabel className="text-small font-semibold">
-              <span className="block truncate">{loc.name}</span>
-              <span className="block text-label font-normal text-text-2">
-                {STATUS_LABEL[loc.status] ?? loc.status}
-              </span>
-            </DropdownMenuLabel>
-            {loc.status !== "active" ? (
-              <DropdownMenuItem asChild className="min-h-11 cursor-pointer rounded-inner">
-                <Link to="/start">Continue setup</Link>
-              </DropdownMenuItem>
+          </span>
+          <ChevronDown className="size-4 shrink-0 text-text-2" aria-hidden />
+          <span className="sr-only">: switch business</span>
+        </button>
+      )}
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent
+          side={wide ? "left" : "bottom"}
+          className={cn(
+            "flex flex-col gap-0 border-line bg-surface-1 p-0 text-text-1",
+            wide ? "w-[22rem] sm:max-w-[22rem]" : "max-h-[85dvh] rounded-t-panel",
+          )}
+        >
+          <SheetHeader className="border-b border-line px-5 pt-6 pb-4 text-start sm:text-start">
+            <SheetTitle className="font-display text-h3 font-bold text-text-1">
+              Your businesses
+            </SheetTitle>
+            <SheetDescription className="text-small text-text-2">
+              Tap a business to open it.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto px-2 py-3">
+            {list.length ? (
+              <ul className="space-y-1">
+                {list.map((l) => {
+                  const on = l.id === loc?.id;
+                  return (
+                    <li key={l.id}>
+                      <button
+                        type="button"
+                        aria-current={on ? "true" : undefined}
+                        onClick={() => (on ? setOpen(false) : void switchTo(l.id))}
+                        className={cn(row, on && "bg-surface-2")}
+                      >
+                        <Initial name={l.name} on={on} />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-body font-bold">{l.name}</span>
+                          <span className="block text-small text-text-2">{statusOf(l)}</span>
+                        </span>
+                        {on ? (
+                          <span className="grid size-7 shrink-0 place-items-center rounded-full bg-kb-yellow text-kb-black">
+                            <Check className="size-4" strokeWidth={2.75} aria-hidden />
+                            <span className="sr-only">Open now</span>
+                          </span>
+                        ) : null}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             ) : null}
-            {others.length ? (
-              <>
-                <DropdownMenuSeparator className="bg-line" />
-                <DropdownMenuLabel className="text-label font-normal text-text-2">
-                  Switch business
-                </DropdownMenuLabel>
-                {others.map((o) => (
-                  <DropdownMenuItem
-                    key={o.id}
-                    className="min-h-11 cursor-pointer rounded-inner"
-                    onSelect={() => void switchTo(o.id)}
-                  >
-                    <span className="truncate">{o.name}</span>
-                  </DropdownMenuItem>
-                ))}
-              </>
+          </div>
+          <div className="space-y-2 border-t border-line px-5 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+            {loc && loc.status !== "active" ? (
+              <ButtonLink
+                to="/start"
+                variant="secondary"
+                size="md"
+                full
+                onClick={() => setOpen(false)}
+              >
+                Continue setup
+              </ButtonLink>
             ) : null}
-            <DropdownMenuSeparator className="bg-line" />
-            <DropdownMenuItem asChild className="min-h-11 cursor-pointer rounded-inner">
-              <Link to="/start" search={{ new: true }}>
+            {loc ? (
+              <Link
+                to="/start"
+                search={{ new: true }}
+                onClick={() => setOpen(false)}
+                className={buttonClass("quiet", "md", true)}
+              >
+                <Plus className="size-4" aria-hidden />
                 Add another business
               </Link>
-            </DropdownMenuItem>
-          </>
-        ) : (
-          <DropdownMenuItem asChild className="min-h-11 cursor-pointer rounded-inner">
-            <Link to="/start">Add your business</Link>
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+            ) : (
+              <ButtonLink
+                to="/start"
+                variant="secondary"
+                size="md"
+                full
+                onClick={() => setOpen(false)}
+              >
+                Add your business
+              </ButtonLink>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
 
@@ -272,14 +357,17 @@ function SideLink({
       to={section.to}
       aria-current={on ? "page" : undefined}
       className={cn(
-        "press flex min-h-11 items-center gap-3 rounded-inner px-3 text-small font-semibold",
+        "press relative flex min-h-12 items-center gap-3 rounded-inner px-3 text-body font-semibold",
         on ? "bg-surface-2 text-text-1" : "text-text-2 hover:bg-surface-2 hover:text-text-1",
       )}
     >
+      {on && (
+        <span aria-hidden className="absolute inset-y-2.5 start-0 w-1 rounded-full bg-text-1" />
+      )}
       <I className="size-5 shrink-0" strokeWidth={on ? 2.25 : 1.75} aria-hidden />
       <span className="flex-1">{section.label}</span>
       {badge ? (
-        <span className="grid h-6 min-w-6 place-items-center rounded-full bg-text-1 px-1.5 text-label font-bold text-surface-0">
+        <span className="grid h-6 min-w-6 place-items-center rounded-full bg-kb-yellow px-1.5 text-label font-bold text-kb-black">
           {badge > 99 ? "99+" : badge}
           <span className="sr-only"> waiting</span>
         </span>
@@ -307,11 +395,15 @@ function BarLink({
         on ? "text-text-1" : "text-text-2",
       )}
     >
-      {on && <span aria-hidden className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-text-1" />}
-      <span className="relative">
+      <span
+        className={cn(
+          "relative grid h-8 w-14 place-items-center rounded-full",
+          on && "bg-surface-2",
+        )}
+      >
         <I className="size-6" strokeWidth={on ? 2.25 : 1.75} aria-hidden />
         {badge ? (
-          <span className="absolute -end-2.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-text-1 px-1 text-label font-bold text-surface-0">
+          <span className="absolute -end-2.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-kb-yellow px-1 text-label font-bold text-kb-black ring-2 ring-surface-1">
             {badge > 9 ? "9+" : badge}
             <span className="sr-only"> waiting</span>
           </span>
@@ -560,12 +652,7 @@ export function AppLayout({
           </p>
         ) : null}
         <TestModeBanner concierge={area === "app" && myLoc.data?.concierge === true} />
-        <div
-          className={cn(
-            "mx-auto w-full px-4 pt-5 sm:px-8 lg:pt-10",
-            area === "staff" ? "max-w-[72rem]" : "max-w-[60rem]",
-          )}
-        >
+        <div className={cn("mx-auto w-full px-4 pt-5 sm:px-8 lg:pt-10", "max-w-[72rem]")}>
           {blocked ? (
             <div className="max-w-xl py-6">
               <h1 className="font-display text-h3 font-bold">This page is not part of your role</h1>
@@ -592,8 +679,7 @@ export function AppLayout({
         </div>
         <footer
           className={cn(
-            "mx-auto mt-14 space-y-1 px-4 text-small text-text-2 sm:px-8",
-            area === "staff" ? "max-w-[72rem]" : "max-w-[60rem]",
+            "mx-auto mt-14 max-w-[72rem] space-y-1 px-4 text-small text-text-2 sm:px-8",
           )}
         >
           <p>{NOT_AFFILIATED}</p>

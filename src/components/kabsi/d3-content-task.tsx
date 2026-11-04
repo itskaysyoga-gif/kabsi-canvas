@@ -34,6 +34,7 @@ export function TaskBlock({
   kind,
   rowState,
   seen = false,
+  pill = true,
   className,
 }: {
   task: TaskItem | undefined;
@@ -42,6 +43,8 @@ export function TaskBlock({
   rowState: string;
   /** Kabsi itself read it back on Google (a put-back Google Protection saw corrected). */
   seen?: boolean | undefined;
+  /** App 3: a photo tile shows the track alone (the pill would say the same thing twice). */
+  pill?: boolean | undefined;
   className?: string | undefined;
 }) {
   const owner = task?.owner ?? (seen ? "confirmed" : ownerFromRow(rowState));
@@ -49,8 +52,8 @@ export function TaskBlock({
   const t = task ?? { owner, kind, state: rowState === "failed" ? "failed" : rowState, link: null };
   return (
     <div className={className}>
-      <TaskPill state={owner} />
-      {owner !== "undone" && <TaskTrack state={owner} className="mt-3" />}
+      {pill || owner === "undone" ? <TaskPill state={owner} /> : null}
+      {owner !== "undone" && <TaskTrack state={owner} className={pill ? "mt-3" : undefined} />}
       <TaskOutcome task={t} className="mt-3" />
     </div>
   );

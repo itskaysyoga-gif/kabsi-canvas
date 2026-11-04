@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Newspaper, Pencil, SkipForward } from "lucide-react";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
-import { AccountTop, Panel } from "@/components/kabsi/d3-account";
+import { AccountTop, ChoiceChips, Panel } from "@/components/kabsi/d3-account";
 import { TaskBlock, UndoBar } from "@/components/kabsi/d3-content-task";
 import {
   Button,
@@ -168,10 +168,10 @@ function PostsPage() {
                     aria-selected={m === month}
                     onClick={() => setMonth(m)}
                     className={cn(
-                      "min-h-11 rounded-full border px-4 text-small font-bold",
+                      "press min-h-11 rounded-full border px-4 text-small font-semibold",
                       m === month
-                        ? "border-text-1 bg-text-1 text-surface-0"
-                        : "border-line-strong bg-surface-1 text-text-1",
+                        ? "border-kb-yellow bg-kb-yellow text-kb-black"
+                        : "border-stroke bg-surface-1 text-text-1 hover:bg-surface-2",
                     )}
                   >
                     {monthName(m)}
@@ -190,8 +190,10 @@ function PostsPage() {
             </>
           )}
 
-          <WritePost locationId={loc.id} onSaved={refresh} />
-          <Settings locationId={loc.id} />
+          <div className="grid items-start gap-4 lg:grid-cols-[3fr_2fr]">
+            <WritePost locationId={loc.id} onSaved={refresh} />
+            <Settings locationId={loc.id} />
+          </div>
         </div>
       ) : null}
     </>
@@ -275,7 +277,7 @@ function MonthView({
         </p>
       ) : null}
       {order.length ? (
-        <ol className="space-y-4">
+        <ol className="grid items-start gap-4 lg:grid-cols-2">
           {order.map((p) => (
             <li key={p.id}>
               {p.state === "draft" ? (
@@ -318,7 +320,7 @@ function CardHead({ post }: { post: Post }) {
   );
 }
 
-const cardCls = "rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5";
+const cardCls = "rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-6";
 
 // The 10 seconds after an approval (K-70): the countdown with Undo, for a post or its removal.
 type Pending = { publication: string; until: number };
@@ -694,20 +696,17 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
   return (
     <Panel title="Write a post" id="write-post">
       <form onSubmit={(e) => void submit(e)} className="space-y-4">
-        <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Kind of post">
-          {(["STANDARD", "OFFER", "EVENT"] as PostType[]).map((t) => (
-            <button
-              key={t}
-              type="button"
-              role="radio"
-              aria-checked={type === t}
-              onClick={() => setType(t)}
-              className={`min-h-11 rounded-full border px-2 text-small font-bold ${type === t ? "border-text-1 bg-text-1 text-surface-0" : "border-line-strong text-text-1"}`}
-            >
-              {TYPE_LABEL[t]}
-            </button>
-          ))}
-        </div>
+        <ChoiceChips
+          name="post-kind"
+          legend="Kind of post"
+          legendClassName="sr-only"
+          options={(["STANDARD", "OFFER", "EVENT"] as PostType[]).map((t) => ({
+            value: t,
+            label: TYPE_LABEL[t],
+          }))}
+          value={type}
+          onChange={(v) => setType(v as PostType)}
+        />
         {type !== "STANDARD" ? (
           <div>
             <Label htmlFor="post-title">{type === "EVENT" ? "Event title" : "Offer title"}</Label>
@@ -809,17 +808,16 @@ function WritePost({ locationId, onSaved }: { locationId: string; onSaved: () =>
             </div>
           </>
         ) : null}
-        <label className="block text-small">
-          Button
-          <select value={cta} onChange={(e) => setCta(e.target.value)} className={field}>
-            <option value="">No button</option>
-            {Object.entries(CTA_LABEL).map(([k, l]) => (
-              <option key={k} value={k}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ChoiceChips
+          name="post-button"
+          legend="Button"
+          options={[
+            { value: "", label: "No button" },
+            ...Object.entries(CTA_LABEL).map(([value, label]) => ({ value, label })),
+          ]}
+          value={cta}
+          onChange={setCta}
+        />
         {cta && cta !== "CALL" ? (
           <div>
             <Label htmlFor="post-url">Link on your own website</Label>
@@ -925,31 +923,18 @@ function Settings({ locationId }: { locationId: string }) {
         onChange={(v) => void change(() => setAutoPosts(locationId, v))}
       />
       {on ? (
-        <div
-          className="mt-4 flex flex-wrap items-center gap-2"
-          role="radiogroup"
-          aria-label="Posts a month"
-        >
-          <span className="text-small text-text-1">Posts a month:</span>
-          {([4, 2] as const).map((n) => (
-            <button
-              key={n}
-              type="button"
-              role="radio"
-              aria-checked={settings.data?.posts_per_month === n}
-              disabled={busy}
-              onClick={() => void change(() => setCadence(locationId, n))}
-              className={cn(
-                "min-h-11 min-w-11 rounded-full border px-4 text-small font-bold",
-                settings.data?.posts_per_month === n
-                  ? "border-text-1 bg-text-1 text-surface-0"
-                  : "border-line-strong text-text-1",
-              )}
-            >
-              {n}
-            </button>
-          ))}
-        </div>
+        <ChoiceChips
+          className="mt-4"
+          name="posts-a-month"
+          legend="Posts a month"
+          options={[
+            { value: "4", label: "4" },
+            { value: "2", label: "2" },
+          ]}
+          value={settings.data ? String(settings.data.posts_per_month) : null}
+          disabled={busy}
+          onChange={(v) => void change(() => setCadence(locationId, Number(v) as 4 | 2))}
+        />
       ) : null}
       {err ? (
         <p className="mt-2 text-small font-semibold text-bad" role="alert">

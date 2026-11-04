@@ -1,4 +1,10 @@
 [
   { "path": "/app", "name": "home" },
-  { "path": "/app", "state": "setup", "name": "home-setup" }
+  { "path": "/app", "state": "setup", "name": "home-setup" },
+  {
+    "path": "/app",
+    "state": "businesses",
+    "name": "business-sheet",
+    "click": "switch business"
+  }
 ]
