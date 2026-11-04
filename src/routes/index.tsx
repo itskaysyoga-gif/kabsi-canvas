@@ -3,10 +3,10 @@ import { oneOf } from "@/lib/search-params";
 import { SiteShell } from "@/components/kabsi/site-chrome";
 import { PHOTOS } from "@/components/kabsi/photos";
 import { HOME_LINE } from "@/components/kabsi/hero-lines";
-import { D8Home } from "@/components/kabsi/d8-home";
+import { D9Home } from "@/components/kabsi/d9-home";
 import { ORG_LD, WEBSITE_LD, pageHead } from "@/lib/site";
 
-// Home is Design 7 and Design 8 (Web 4, approved by lane R on 1 Nov 2026); before that Design 6 round 2 (Web 3). The route's own
+// Home is Design 9 (Web 5 part B, master plan 30.24); before that Design 7 and 8 (Web 4) and Design 6 (Web 3). The route's own
 // chunk (the router splits each route) carries the page and its demonstration, so the shared bundle stays small. It is
 // not behind React.lazy: a lazy boundary that is still loading when the shell updates is thrown away and drawn again,
 // which blanked the hero for a moment on slow phones and pushed LCP past 5 s (Web 3 after-merge check, 31 Oct 2026).
@@ -56,7 +56,7 @@ function Home() {
           This review link isn't active. Please ask the staff for help.
         </div>
       ) : null}
-      <D8Home />
+      <D9Home />
     </SiteShell>
   );
 }
