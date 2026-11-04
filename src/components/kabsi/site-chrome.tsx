@@ -1,8 +1,8 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { MAIN_CTA, WHATSAPP_ON, WHATSAPP_URL } from "@/lib/site";
-import { ButtonLink, WhatsAppGlyph, buttonClass } from "./ui";
+import { MAIN_CTA } from "@/lib/site";
+import { ButtonLink } from "./ui";
 import { setChrome, useChrome, usePhoneBarShown } from "./page-signals";
 import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
@@ -11,8 +11,9 @@ import { DeferredAssistant } from "@/components/assistant/deferred-assistant";
 
 /**
  * Every public page: the Founding 25 line, the sticky header, main, footer and the phone bar. Design 6 (Web 3) made
- * the site light-led; Design 8 (Web 4, lane R 1 Nov 2026) adds the Founding 25 line above the header, the Businesses
- * menu, the three-group footer, and puts Nora in the phone bar on phones. The consent bar and "Your privacy choices"
+ * the site light-led; Design 8 (Web 4, lane R 1 Nov 2026) adds the Founding 25 line above the header and puts Nora in
+ * the phone bar on phones; Design 9 (Web 5 part A, master plan 30.24) simplifies the header, the phone menu and the
+ * footer, and the phone bar keeps one action and Nora. The consent bar and "Your privacy choices"
  * are the site-wide ones (src/components/shared/privacy-banner.tsx, P0.6-01), loaded after the first paint.
  */
 export function SiteShell({
@@ -52,7 +53,7 @@ export function SiteShell({
   );
 }
 
-/* ---------- Phone bar: the one action, and Nora beside it (lane R decision 5, Design 8) ---------- */
+/* ---------- Phone bar: the one action, and Nora beside it (Design 8; Design 9 drops WhatsApp from the bar) ---------- */
 
 /**
  * Below 640 px Nora never floats over the page: her button sits in the phone bar, beside "Check my business free", so
@@ -94,23 +95,12 @@ export function PhoneBar() {
         <ButtonLink to="/scan" full className="flex-1">
           {MAIN_CTA}
         </ButtonLink>
-        {WHATSAPP_ON && (
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Chat on WhatsApp"
-            className={cn(buttonClass("whatsapp"), "w-13 shrink-0 px-0")}
-          >
-            <WhatsAppGlyph className="size-6" />
-          </a>
-        )}
         <button
           ref={nora}
           type="button"
           data-nora-bar
           onClick={() => window.dispatchEvent(new CustomEvent("kabsi:open-nora"))}
-          className="press grid size-13 shrink-0 place-items-center rounded-full bg-kb-black text-kb-white"
+          className="press grid size-12 shrink-0 place-items-center rounded-full border border-line-strong bg-surface-1 text-text-1"
         >
           <MessageCircle className="size-5" aria-hidden />
           <span className="sr-only">Ask Nora, Kabsi's assistant</span>

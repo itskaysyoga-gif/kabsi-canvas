@@ -10,6 +10,7 @@ import {
   KABSI_GROUP_ID,
   MAIN_CTA,
   BUSINESS_MENU,
+  HEADER_CTA,
   NAV_LINKS,
   ORG_LD,
   OPERATOR_LINE,
@@ -136,22 +137,29 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     );
     expect(home).toContain("{!WHATSAPP_ON && (");
   });
-  it("puts the Design 8 links in the header, the Businesses menu, and three footer groups", () => {
-    expect(NAV_LINKS.map((n) => n.label)).toEqual(["How it works", "Pricing"]);
+  it("puts the Design 9 links in the header, Businesses as one link, and three footer groups (30.24)", () => {
+    expect(NAV_LINKS.map((n) => n.label)).toEqual(["How it works", "Businesses", "Pricing"]);
+    expect(NAV_LINKS.find((n) => n.label === "Businesses")?.to).toBe("/for");
+    expect(HEADER_CTA).toBe("Free check");
     expect(BUSINESS_MENU.map((n) => n.label)).toEqual([
       "Hair salons",
       "Barbershops",
       "Nail salons",
       "Restaurants",
     ]);
+    const header = read("src/components/kabsi/site-header.tsx");
+    expect(header).toContain('variant="dark"');
+    expect(header).toContain("{WHATSAPP_ON && (");
     const footer = read("src/components/kabsi/site-footer.tsx");
-    for (const t of ['title: "Kabsi"', 'title: "Businesses"', 'title: "Company"'])
+    for (const t of ['title: "Product"', 'title: "Explore"', 'title: "Company"'])
       expect(footer).toContain(t);
-    // Lane R decision 4 (1 Nov 2026): the free tool stays in the Kabsi group.
+    // No industry links in the footer (Design 9); the free tool stays in the first group (lane R decision 4).
+    expect(footer).not.toContain("BUSINESS_MENU");
     expect(footer).toContain('{ label: "Review link and QR code", to: "/google-review-link" }');
     expect(footer).toContain('{ label: "Partners", to: "/partners" }');
     expect(footer).toContain("SOCIAL_LINKS.map");
     expect(footer).toContain("openPrivacyChoices");
+    expect(footer).toContain("WHATSAPP_ON ?");
   });
   it("never types the Founding 25 count in the line above the header", () => {
     const line = read("src/components/kabsi/founding-line.tsx");
@@ -230,7 +238,9 @@ describe("no invented proof or number (plan 2.11, Web 2 item 4)", () => {
 describe("WhatsApp shows only when the one setting has a number (K-122)", () => {
   it("hides the WhatsApp buttons while there is no number", () => {
     expect(read("src/components/kabsi/ui.tsx")).toContain("if (!WHATSAPP_ON) return null;");
-    expect(read("src/components/kabsi/site-chrome.tsx")).toContain("{WHATSAPP_ON && (");
+    // Design 9: the phone bar has no WhatsApp; the phone menu's quiet row shows it only while the setting has a number.
+    expect(read("src/components/kabsi/site-chrome.tsx")).not.toContain("WHATSAPP");
+    expect(read("src/components/kabsi/site-header.tsx")).toContain("{WHATSAPP_ON && (");
     if (!WHATSAPP_ON) expect(WHATSAPP_URL).toBe("mailto:hello@kabsi.co");
   });
 });
