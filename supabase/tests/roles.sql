@@ -171,7 +171,7 @@ select is((select count(*) from public.audit_events where action = 'approval_pol
 select throws_ok($$ select public.approve_publication('review_reply', '00000000-0000-4000-8000-0000000000e1', '{"text": "Thank you."}',
   '00000000-0000-4000-8000-0000000000a5', 'dashboard') $$, '42501', 'not_allowed_to_approve', 'staff still cannot approve');
 select throws_ok($$ select public.approve_publication('local_post', (select id from public.gbp_posts where location_id = '00000000-0000-4000-8000-0000000000c1' limit 1),
-  '{"summary": "A post about our bread this week."}'::jsonb, '00000000-0000-4000-8000-0000000000a4', 'dashboard') $$, '42501', 'not_allowed_to_approve',
+  '{"summary": "A post about our bread this week.", "photo_id": null, "photo_sig": null}'::jsonb, '00000000-0000-4000-8000-0000000000a4', 'dashboard') $$, '42501', 'not_allowed_to_approve',
   'a policy for replies does not cover posts');
 -- A high-risk review always needs the owner.
 update public.reviews set risk = 'high', state = 'blocked' where id = '00000000-0000-4000-8000-0000000000e1';

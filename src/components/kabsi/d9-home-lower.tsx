@@ -368,7 +368,10 @@ function AiAnswer() {
   return (
     <figure className="flex flex-col rounded-panel border border-line bg-surface-1 p-4 sm:p-6">
       <div className="flex items-start justify-between gap-3">
-        <h3 className="text-title">{a.title}</h3>
+        <div>
+          <h3 className="text-title">{a.title}</h3>
+          <p className="text-label text-text-2">{a.label2}</p>
+        </div>
         <ExampleBadge />
       </div>
       <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-small">
@@ -630,8 +633,9 @@ export function D9HomeLowerSections() {
     <>
       <ProfileWatch />
       <PhotoToPost />
-      <SupportRow />
+      {/* Fix 2 (master plan 30.27 item 2): Where you show up straight after photo to post, before the supporting row. */}
       <WhereYouShowUp />
+      <SupportRow />
       <D9Control />
       <D9PickBusiness />
       <PricingPreview />

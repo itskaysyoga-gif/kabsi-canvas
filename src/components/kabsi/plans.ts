@@ -78,6 +78,28 @@ export const PLANS: {
 /** The founding price is for the first 30 paying businesses; the places left come from billing-creem/founding. */
 export { FOUNDING_TOTAL };
 
+/**
+ * Fix 2 (master plan 30.27 item 2): the two checks each plan has, with the allowance exactly as plan_limits() in the
+ * database gives it (map_keywords and map_every; ai_prompts and ai_every), held by supabase/tests/fix2_plan_checks.sql.
+ * Shown on the cards and in the comparison, marked At launch while NEARBY_ON is false.
+ */
+export const PLAN_CHECKS = {
+  nearby: {
+    name: "The nearby check on Google Maps",
+    essentials: "1 search, every month",
+    pro: "5 searches, every week",
+  },
+  ai: {
+    name: "The AI answer on ChatGPT and Perplexity",
+    essentials: "3 questions, every month",
+    pro: "10 questions, every 2 weeks",
+  },
+} as const;
+export const planChecks = (plan: PlanId) => [
+  { name: PLAN_CHECKS.nearby.name, value: PLAN_CHECKS.nearby[plan] },
+  { name: PLAN_CHECKS.ai.name, value: PLAN_CHECKS.ai[plan] },
+];
+
 /** Under the comparison table: nothing that is not built is listed. */
 export const MORE_LATER = "More checks come later.";
 

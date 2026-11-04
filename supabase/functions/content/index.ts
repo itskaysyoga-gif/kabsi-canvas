@@ -186,15 +186,26 @@ Deno.serve(async (req) => {
         if (!/^\d{4}-\d{2}$/.test(month)) return fail("bad_input", "Choose a month.");
         const { data: plan } = await db.rpc("post_month_plan", { p_location: loc.id, p_month: month });
         const ids = ((plan ?? []) as { id: string; state: string }[]).filter((x) => x.state === "draft").map((x) => x.id);
-        const { data: rows, error } = ids.length ? await db.from("gbp_posts").select(POST_ROW).in("id", ids) : { data: [], error: null };
+        const { data: rows, error } = ids.length ? await db.from("gbp_posts").select(`${POST_ROW}, photo_sig`).in("id", ids) : { data: [], error: null };
         if (error) throw error;
         const ctx = await checkContext(db, loc.id);
         const approved = [], held = [];
+        // Fix 2: each post is approved only as the page showed it (its words and its photo); one changed since, or not
+        // on the page at all, is held for its own look.
+        type Seen = { post_id: string; body: string | null; photo_id: string | null; photo_sig: string | null };
+        const seen = new Map((Array.isArray(b.seen) ? b.seen as Seen[] : []).filter((x) => x && typeof x.post_id === "string").map((x) => [x.post_id, x]));
         for (const r of (rows ?? []) as PostRow[]) {
+          const v = seen.get(r.id);
+          if (!v || (v.body ?? "") !== (r.body ?? "") || (v.photo_id ?? null) !== (r.photo_id ?? null) || (v.photo_sig ?? null) !== (r.photo_sig ?? null)) {
+            held.push({ post_id: r.id, issues: [{ code: "post_changed", text: "This post changed since you opened this page. Read it, then approve." }] });
+            continue;
+          }
           const f = fieldsOf(r);
           const issues = checkPost(f, { ...ctx, allowedText: `${ctx.allowedText}\n${ownerText(f)}`, recent: ctx.recent.filter((x) => x !== r.body), kabsiDraft: r.source === "auto" });
           if (issues.length) { held.push({ post_id: r.id, issues }); continue; }
-          approved.push({ post_id: r.id, ...(await approveChange(req, user.id, "local_post", r.id, { summary: f.summary, language: postLanguage(f.summary) })) });
+          approved.push({ post_id: r.id, ...(await approveChange(req, user.id, "local_post", r.id, {
+            summary: f.summary, language: postLanguage(f.summary), photo_id: v.photo_id ?? null, photo_sig: v.photo_sig ?? null,
+          })) });
         }
         return json({ ok: true, approved, held });
       }
@@ -209,7 +220,12 @@ Deno.serve(async (req) => {
         const issues = checkPost(f, { ...ctx, kabsiDraft: false });
         if (issues.length) return checksFailed(issues);
         // One approval (K-38): a double click or two tabs get the same publication back, never a second post.
-        const r = await approveChange(req, user.id, "local_post", post.id, { summary: text, language: postLanguage(text) });
+        // Fix 2: the yes is for exactly the photo the page showed (its id and its file's hash, null when none); the database
+        // refuses it ("post_changed") when the post's photo is no longer that one.
+        const shown = (v: unknown) => (typeof v === "string" && v ? v : null);
+        const r = await approveChange(req, user.id, "local_post", post.id, {
+          summary: text, language: postLanguage(text), photo_id: shown(b.photo_id), photo_sig: shown(b.photo_sig),
+        });
         return json({ ok: true, ...r });
       }
       case "post_remove": {
@@ -376,6 +392,9 @@ Deno.serve(async (req) => {
     if (msg.includes("already_saved")) return fail("already_saved", "You already saved special hours for these dates. Choose different dates, or change them under Hours.", 409);
     if (msg.includes("bad_answer")) return fail("bad_input", "That answer does not fit this holiday.");
     if (msg.includes("already_handled")) return fail("bad_input", "This was already handled.", 409);
+    if (msg.includes("post_changed")) {
+      return fail("post_changed", "This post changed since you opened this page. Here is the new one. Read it, then approve.", 409);
+    }
     if (msg.includes("not_allowed_to_approve") || msg.includes("owner_only")) {
       return fail("owner_approves", "The owner approves this one. They can let managers approve it in Settings, Team.", 403);
     }
@@ -396,7 +415,7 @@ type PostRow = {
   id: string; location_id: string; owner_input: string; body: string | null; cta_type: string | null; cta_url: string | null; state: string;
   keywords: string[]; source: string; topic_type: PostType; event_title: string | null; start_date: string | null; end_date: string | null;
   start_time: string | null; end_time: string | null; offer_terms: string | null; coupon_code: string | null; redeem_url: string | null;
-  photo_id: string | null; publish_at: string | null;
+  photo_id: string | null; publish_at: string | null; photo_sig?: string | null;
 };
 const opt = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim().slice(0, 1500) : null);
 function postFields(b: Record<string, unknown>): PostFields {

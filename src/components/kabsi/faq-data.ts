@@ -14,6 +14,17 @@ export const nearbyFaqAnswer = (nearbyOn: boolean = NEARBY_ON): string =>
     nearbyOn ? "" : " Where you come up nearby opens at launch."
   }`;
 
+/** Fix 2 (master plan 30.27 item 2): the AI answer made clear, written from the facts (13, the FAQ). The "opens at launch"
+ * sentence follows NEARBY_ON, like the nearby check's answer. */
+export const CHATGPT_Q = "Can Kabsi make my business appear in ChatGPT?";
+export const chatgptAnswer = (nearbyOn: boolean = NEARBY_ON): string =>
+  `No one can promise that. Kabsi checks selected questions on ChatGPT and Perplexity through their API, which can differ from what their apps show. It shows whether your business was named and which sources were cited. When an answer states a fact differently from what you confirmed, such as your hours, phone or address, Kabsi opens a task: to fix it on your Google profile, where Kabsi can, or to tell you what to check on your website or another site that lists you, where it cannot.${
+    nearbyOn ? "" : " The AI answer opens at launch."
+  }`;
+export const NEARBY_VS_AI_Q = "How is the nearby check different from the AI answer?";
+export const NEARBY_VS_AI_A =
+  "The nearby check searches Google Maps from places around your business, like a customer standing there, and shows where you came up. The AI answer asks ChatGPT and Perplexity questions a customer might ask, and shows whether they name you and what they say about you.";
+
 /** Polish 3 (lane R decision 3 of 3 Nov 2026): the answer to "Can I approve a reply or a post on WhatsApp?" follows the one
  * WhatsApp switch, like the Home line. The "true" answer is written from the facts (section 01, WhatsApp for owners):
  * the yes comes on WhatsApp, nothing goes live before it, and the few changes that are confirmed on kabsi.co say so. */
@@ -144,6 +155,8 @@ export const buildFaqGroups = (
         },
         faq[5]!,
         faq[3]!,
+        { q: CHATGPT_Q, a: chatgptAnswer(nearbyOn) },
+        { q: NEARBY_VS_AI_Q, a: NEARBY_VS_AI_A },
         {
           q: "How do I remove Kabsi?",
           a: `In your Google profile, open People and access and remove ${KABSI_GROUP_NAME}. Kabsi stops at once. Cancelling a plan never removes Kabsi's access by itself; removing it is your choice.`,

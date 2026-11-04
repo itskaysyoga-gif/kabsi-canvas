@@ -22,6 +22,8 @@ export type Post = {
   coupon_code: string | null;
   redeem_url: string | null;
   photo_id: string | null;
+  /** Fix 2: the photo's identity as read with the post (its id and its file's hash); sent back with the approval. */
+  photo_sig: string | null;
   publish_at: string | null;
   created_at: string;
   updated_at: string;
@@ -53,7 +55,7 @@ export const STATE_LABEL: Record<Post["state"], string> = {
 };
 
 const COLUMNS =
-  "id, owner_input, body, cta_type, cta_url, state, source, topic_type, event_title, start_date, end_date, start_time, end_time, offer_terms, coupon_code, redeem_url, photo_id, publish_at, created_at, updated_at";
+  "id, owner_input, body, cta_type, cta_url, state, source, topic_type, event_title, start_date, end_date, start_time, end_time, offer_terms, coupon_code, redeem_url, photo_id, photo_sig, publish_at, created_at, updated_at";
 
 export async function loadPosts(locationId: string): Promise<Post[]> {
   const since = new Date(Date.now() - 120 * 86400_000).toISOString();
@@ -65,7 +67,7 @@ export async function loadPosts(locationId: string): Promise<Post[]> {
     .order("created_at", { ascending: false })
     .limit(100);
   if (error) throw new Error(error.message);
-  return (data ?? []) as Post[];
+  return (data ?? []) as unknown as Post[];
 }
 
 /** The month a post belongs to (YYYY-MM, the owner's own clock): its publishing time, else when it was made. */
@@ -151,9 +153,26 @@ export const savePost = (locationId: string, input: PostInput, postId?: string) 
     ...input,
   });
 type Approval = { ok: true; state: string; publication: string; publish_after: string | null };
-// Approves exactly this text; it goes to Google after the 10 second undo window (K-70).
-export const publishPost = (postId: string, body: string) =>
-  contentCall<Approval>({ do: "post_publish", post_id: postId, body });
+/** Fix 2: the line the server answers when the post's text or photo changed after the page read it. */
+export const POST_CHANGED =
+  "This post changed since you opened this page. Here is the new one. Read it, then approve.";
+// Approves exactly this text with exactly the photo the page showed (none: null); it goes to Google after the 10 second
+// undo window (K-70). A post whose photo changed since is refused (Fix 2).
+export const publishPost = (
+  postId: string,
+  body: string,
+  photo: { photo_id: string | null; photo_sig: string | null } = {
+    photo_id: null,
+    photo_sig: null,
+  },
+) =>
+  contentCall<Approval>({
+    do: "post_publish",
+    post_id: postId,
+    body,
+    photo_id: photo.photo_id,
+    photo_sig: photo.photo_sig,
+  });
 // P0.7-05: removing a published post from Google, the same approval and undo as any write.
 export const removePost = (postId: string) =>
   contentCall<Approval>({ do: "post_remove", post_id: postId });
@@ -166,9 +185,14 @@ export const undoPost = (postId: string, publicationId: string) =>
 // A post waiting for its time goes back to a draft; nothing reaches Google.
 export const cancelPost = (postId: string) =>
   contentCall<{ ok: true; state: string }>({ do: "post_cancel", post_id: postId });
-export const approveMonth = (locationId: string, month: string) =>
+// Fix 2: the month's yes is for each post as this page shows it (its words and its photo); a post changed since, or
+// not on the page, is held for its own look.
+export const approveMonth = (locationId: string, month: string, shown: Post[]) =>
   contentCall<{ approved: unknown[]; held: { post_id: string }[] }>({
     do: "posts_approve_month",
     location_id: locationId,
     month,
+    seen: shown
+      .filter((p) => p.state === "draft")
+      .map((p) => ({ post_id: p.id, body: p.body, photo_id: p.photo_id, photo_sig: p.photo_sig })),
   });

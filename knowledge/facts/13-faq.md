@@ -18,7 +18,7 @@ Gemini is Google's free assistant for one verified profile that you open and ask
 Any business with a verified Google Business Profile that you own or manage. Setup asks first. If your profile isn't verified yet, or someone else manages it, setup shows what to do on Google, and you can come back.
 
 **Can I book a setup call?**
-Yes. The team offers a free 20-minute setup call, Monday to Friday, 8am to 6pm Beirut time. Book it at kabsi.co/setup-call, or email hello@kabsi.co and we'll arrange a time. Staff never sign in to your Google account: you send the invitation yourself.
+Yes. The team offers a free 20-minute setup call, Monday to Friday, 8am to 6pm Beirut time. Email hello@kabsi.co (kabsi.co/setup-call says how): Rashid, who runs Kabsi, replies with your steps, and with times when a call helps. There is no booking calendar. Staff never sign in to your Google account: you send the invitation yourself.
 
 **How does Kabsi protect my Google profile?**
 You invite the Kabsi Clients group (ID 5481006796) as a Manager, not as an owner, and you can remove it at any time from People and access. Kabsi only accepts an invitation that matches a business you have set up and only for the Manager role: the profile's exact name and its street must match, and when Google writes the address in another script (for example Greek or Cyrillic) Kabsi checks the profile's place on Google Maps against the place you picked at sign-up. An invitation with no street in its address waits for a person on the Kabsi team. If Kabsi ever finds itself a Manager of a profile nobody set up in Kabsi, it removes itself at once and the team is told. Kabsi's Google account uses Google's Advanced Protection. Nothing is written to Google without your approval, and each approval is recorded with the exact text, who approved it, when, and whether it came from the dashboard or an email link.
@@ -151,6 +151,12 @@ No one can promise a rating. Kabsi helps you answer every review calmly and keep
 
 **Will Kabsi improve my Google ranking?**
 Nobody can promise a ranking, and we don't. Kabsi does the parts you control: a reply ready for every review, complete and accurate details, opening hours kept right, photos and posts you approve, and an easy way for every customer to leave a review.
+
+**Can Kabsi make my business appear in ChatGPT?**
+No one can promise that. Kabsi checks selected questions on ChatGPT and Perplexity through their API, which can differ from what their apps show. It shows whether your business was named and which sources were cited. When an answer states a fact differently from what you confirmed, such as your hours, phone or address, Kabsi opens a task: to fix it on your Google profile, where Kabsi can, or to tell you what to check on your website or another site that lists you, where it cannot. Kabsi never says it can change what an assistant says. The AI answer opens at launch (Fix 2, 4 Nov 2026).
+
+**How is the nearby check different from the AI answer?**
+The nearby check searches Google Maps from places around your business, like a customer standing there, and shows where you came up. The AI answer asks ChatGPT and Perplexity questions a customer might ask, and shows whether they name you and what they say about you.
 
 **Is this local SEO?**
 Kabsi takes care of the parts of your profile you control: accurate details, answered reviews, regular posts, correct hours. It doesn't promise search results.
