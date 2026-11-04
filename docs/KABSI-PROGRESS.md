@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 4 Nov 2026, Web 5 and Photos 2. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 4 Nov 2026, Web 5, Photos 2 and Polish 4. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -62,10 +62,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 4 Nov 2026, Polish 4 (30.25): PRs 345 (30.25, R-105), 348 (shorter Home and How it works, yellow), 346 (smoke refusals tagged, one alert one message), 349 (Nora on phones), 350 (Home's lower sections after paint), all merged; live: Home script 208 of 225 KB, performance 97; a smoke run sent no staff alert. Detail: `docs/progress/archive/2026-11-04-polish4.md`.
 - 4 Nov 2026, Photos 2: PR 340, merged and deployed (Deploy 146). Remove a photo from Google, the screenshot note, a clearer Photos screen. Mock-tested. Detail: `docs/progress/archive/2026-11-04-photos2.md`.
-- 4 Nov 2026, Web 5 (Design 9 on kabsi.co, 30.24): PRs 338, 339, 341, 342, 343, all merged and checked live (Home performance 95, script 225 of 225 KB, LATER row). Detail: `docs/progress/archive/2026-11-04-web5.md`.
-- 4 Nov 2026, Photo Post 1: PRs 336 (master plan 30.22, 30.23) and 337 (a WhatsApp photo with words becomes a Google post, for the owner's yes). Mock-tested, not live for owners. Detail: `docs/progress/archive/2026-11-04-photo-post1.md`.
-
 
 ## How a session updates this page
 
