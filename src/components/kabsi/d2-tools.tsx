@@ -28,13 +28,17 @@ function NoneFound() {
   );
 }
 
-function RankToo() {
+// Fix 2 (master plan 30.27 item 2): the free check does not rank, so the closing line says what it does.
+function CheckToo() {
   return (
-    <section className="container-kb section-y" aria-labelledby="rank-too">
+    <section className="container-kb section-y" aria-labelledby="check-too">
       <div className="mx-auto max-w-[40rem]">
-        <h2 id="rank-too" className="text-h2">
-          Want to see where you rank too?
+        <h2 id="check-too" className="text-h2">
+          See what Google shows about you.
         </h2>
+        <p className="mt-3 text-lead text-text-2">
+          The free check reads your Google profile and names the one thing to do first.
+        </p>
         <ScanBox under="scan" className="mt-8" />
       </div>
     </section>
@@ -328,7 +332,7 @@ export function ReviewLinkTool() {
           {RULES_TEXT}
         </Banner>
       </section>
-      <RankToo />
+      <CheckToo />
     </>
   );
 }

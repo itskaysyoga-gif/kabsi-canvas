@@ -21,7 +21,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Can I book a setup call?",
-    a: `Yes. The team offers a free ${SETUP_CALL_MINUTES}-minute setup call at /setup-call, Monday to Friday, 8am to 6pm Beirut time. We guide you, you click, and we never ask for your Google password.`,
+    a: `Yes. Email hello@kabsi.co (kabsi.co/setup-call says how). Rashid, who runs Kabsi, replies with your steps, and with times for a free ${SETUP_CALL_MINUTES}-minute call, Monday to Friday, 8am to 6pm Beirut time, when a call helps. We guide you, you click, and we never ask for your Google password.`,
   },
   {
     q: "Will Kabsi get me more reviews, a better rating or a higher ranking?",
