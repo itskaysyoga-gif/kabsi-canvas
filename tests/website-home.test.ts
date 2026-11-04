@@ -313,7 +313,9 @@ describe("the head of every public page (30.16 section 4)", () => {
 });
 
 describe("Home on Design 9 (Web 5 part B, master plan 30.24)", () => {
-  const home = read("src/components/kabsi/d9-home.tsx");
+  // Polish 4 part D: the sections below the first screen live in d9-home-lower.tsx.
+  const home =
+    read("src/components/kabsi/d9-home.tsx") + read("src/components/kabsi/d9-home-lower.tsx");
   const data = read("src/components/kabsi/d8-data.ts");
   it("never types a count: the Founding 25 count and the founding price come from the real readers", () => {
     expect(home).toContain("useFoundingPlaces()");

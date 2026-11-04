@@ -24,7 +24,7 @@ import { Img } from "./photos";
 import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
 import { PageHero, popCls, stagger } from "./page-hero";
-import { PhotoToPost } from "./d9-home";
+import { PhotoToPost } from "./d9-home-lower";
 import { Closing, Control } from "./closing";
 import { HUB_HERO } from "./hero-lines";
 import { Bubble, CLOCK } from "./whatsapp";
