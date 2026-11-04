@@ -34,7 +34,8 @@ jobs:
       LH_LCP_MS: "3000"
       # Polish 1 (1 Nov 2026): kabsi.co read 215 KB on this gate after the change (237 before), plus 10 (was 260). The pull
       # request build reads lower (203 KB, local compression); see docs/progress/archive/2026-11-01-polish1.md.
-      LH_JS_KB: "225"
+      # R-106 (4 Nov 2026, master plan 30.26): lowered to 215 to keep Polish 4's gain (kabsi.co read 208 KB, run 41811248799).
+      LH_JS_KB: "215"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0

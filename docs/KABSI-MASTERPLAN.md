@@ -1426,3 +1426,10 @@ Rashid sent a fourth ChatGPT brief asking for one creative system across the pub
 4. Nora on phones: her round button shows on every public page from the first paint, and her panel opens as a bottom sheet of at most 75 percent of the screen.
 5. The webhook alert: refusals caused by Kabsi's own smoke test are tagged and kept out of the alert, and one alert sends one message, not two.
 6. Meta dataset 2179603053433551: kabsi.co on its allow list, kabsi-canvas.vercel.app on its block list, kabsi.co verified in Business settings (4 Nov 2026), and the Conversions API token renewed in Supabase. Meta's AI page-content collection and automatic advanced matching stay off, because the free check pages show businesses' details and matching runs through the Conversions API with consent.
+
+## 30.26 Lane R review of Polish 4, Photos 2 and Harvey 1 (4 Nov 2026, R-106)
+1. Polish 4 (PRs 345, 346, 348 to 351) and Photos 2 (PRs 340, 347) are approved. The 4 Nov screenshot photo reads Removed from Google after Rashid deleted it on Google, so the no-longer-exists path works live.
+2. The speed budgets are lowered to keep Polish 4's gain: Home's script 215 KB live and 205 KB in CI.
+3. At 768 px Nora keeps the wide button: accepted.
+4. Harvey 1 (kabsi-harvey PRs 1 to 3) read 80 salons in six UK cities: 22 with a published business email, 1 likely eligible. Its phase 1 gate fails, because OpenStreetMap lists about 245 salons with their own website in those cities and few show company details. Harvey is parked: data/STOP is committed, nothing runs, and there is no further Outbound build. If Outbound is reopened after launch, the one route worth testing starts from the Companies House register (active companies with hairdressing and beauty codes) with its free API key, and needs Rashid's yes. Kabsi's acquisition is the free check, Founding 25 and Meta ads.
+5. App 3 brings the signed-in website onto the Design 9 system, starting with the photo card Rashid rejected on 4 Nov.

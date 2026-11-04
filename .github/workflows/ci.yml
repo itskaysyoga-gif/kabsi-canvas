@@ -209,7 +209,8 @@ jobs:
       # regression only (3.0 s); the real 2.5 s gate is lighthouse-live.yml, against kabsi.co, after each Production deploy.
       LH_LCP_MS: "3000"
       # Polish 1 (1 Nov 2026): 203 KB measured by this gate on the pull request build, plus 10 (was 260). Lane R target: 200.
-      LH_JS_KB: "213"
+      # R-106 (4 Nov 2026, master plan 30.26): lowered to 205 to keep Polish 4's gain (the pull request build read 199 KB).
+      LH_JS_KB: "205"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
