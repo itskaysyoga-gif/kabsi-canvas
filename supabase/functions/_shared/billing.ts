@@ -399,7 +399,9 @@ export async function staffAlert(summary: string, key: string) {
     await outDb.add({ phone: r.phone, userId: null, locationId: null, kind: "staff_alert", urgent: true, body: `${summary}.`,
       template: ref("staff_alert", { summary }), dedupe: `billing_staff:${key}:${r.phone}` });
   }
-  await jobLog("billing_alert", false, { summary });
+  // Polish 4 (30.25 item 5): kept as an alert, not a failed job. A failed jobs_log row fires the job_failed staff alert
+  // (ops_on_job), so each billing alert used to reach the staff phone twice ("Job failed: billing_alert").
+  await jobLog("billing_alert", true, { summary, alert: true });
 }
 
 // ─── the owner's actions ────────────────────────────────────────────────────────────────────────────────────────────

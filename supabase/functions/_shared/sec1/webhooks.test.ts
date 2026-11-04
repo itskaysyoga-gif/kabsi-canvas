@@ -465,3 +465,65 @@ Deno.test("signature checks compare in constant time (no early exit on the first
   // The fake database never reached the network.
   assert.ok(FAKE_URL.endsWith(".invalid"));
 });
+
+// ─── Polish 4 (master plan 30.25 item 5): the smoke test's tag ─────────────────────────────────────────────────────
+Deno.test("polish4: a forged Creem call tagged x-kabsi-smoke: 1 is still refused with 401, nothing stored, counted as smoke_401", async () => {
+  const { counted } = await import("../webhook-rejections.ts");
+  const db = creemDb();
+  const body = JSON.stringify(creemEvent("evt_smoke", "subscription.active", Date.now(), "active"));
+  const recorded: string[] = [];
+  const rec = (s: string, r: string) => (recorded.push(`${s}:${r}`), Promise.resolve());
+  for (const [headers, smoke] of [
+    [{ "x-kabsi-smoke": "1" }, true],
+    [{ "x-kabsi-smoke": "1", "creem-signature": "deadbeef" }, true],
+    [{ "creem-signature": "deadbeef" }, false],
+  ] as const) {
+    const refused: [string, boolean][] = [];
+    const { deps } = creemDeps();
+    const res = await counted("creem", await creemWebhook(post(body, headers), { ...deps, refused: (p, s) => (refused.push([p, s]), Promise.resolve()) }), rec, smoke);
+    assert.equal(res.status, 401);
+    assert.deepEqual(await res.json(), { error: "unauthorized" }, "the same body as an untagged refusal");
+    assert.equal(refused.length, 1);
+    assert.equal(refused[0][1], smoke, "the refusal knows whether it was tagged");
+  }
+  assert.deepEqual(recorded, ["creem:smoke_401", "creem:smoke_401", "creem:status_401"]);
+  assert.equal(rows(db, "billing_events").length, 0);
+  // The tag never lets a call in or changes a signed one: a validly signed tagged event is handled like any other.
+  const tagged = post(body, { "creem-signature": await hmacHex(CREEM_SECRET, body), "x-kabsi-smoke": "1" });
+  assert.equal((await creemWebhook(tagged, creemDeps().deps)).status, 200);
+  assert.equal(rows(db, "billing_events").length, 1);
+});
+
+Deno.test("polish4: a forged WhatsApp call tagged x-kabsi-smoke: 1 is still refused with 401 and nothing is read", async () => {
+  const body = inbound("wamid.smoke");
+  for (const headers of [{ "x-kabsi-smoke": "1" }, { "x-kabsi-smoke": "1", "x-webhook-signature": "0".repeat(64) }]) {
+    const k = kapso();
+    const res = await kapsoWebhook(post(body, headers), k.deps);
+    assert.equal(res.status, 401);
+    assert.equal(k.seen.ctx, 0, "nothing past the signature check ran");
+    assert.equal(k.seen.stored.length, 0);
+  }
+});
+
+Deno.test("polish4: a billing alert goes to each staff phone once and is logged as an alert, not as a failed job", async () => {
+  const { staffAlert } = await import("../billing.ts");
+  const db = newDb();
+  db.tables.phone_roles = [
+    { phone: "+12025550101", role: "staff_admin", revoked_at: null },
+    { phone: "+12025550102", role: "staff_admin", revoked_at: null },
+    { phone: "+12025550103", role: "owner", revoked_at: null },
+  ];
+  db.rpc.whatsapp_outbox_add = () => 1;
+  useDb(db);
+  await staffAlert("Creem webhook refused more than 5 calls with a bad signature in the last hour", "sig:2026-11-04T10");
+  const sent = db.rpcCalls.filter((c) => c.fn === "whatsapp_outbox_add");
+  assert.deepEqual(sent.map((c) => c.args.p_phone), ["+12025550101", "+12025550102"]);
+  assert.ok(sent.every((c) => c.args.p_kind === "staff_alert" && c.args.p_urgent === true));
+  const logged = rows(db, "jobs_log");
+  assert.equal(logged.length, 1);
+  assert.equal(logged[0].job, "billing_alert");
+  assert.equal(logged[0].ok, true, "a failed jobs_log row would fire a second alert (Job failed: billing_alert)");
+  assert.equal((logged[0].detail as Record<string, unknown>).alert, true);
+  assert.equal(rows(db, "jobs_log").filter((r) => r.ok === false).length, 0);
+  useDb(null);
+});
