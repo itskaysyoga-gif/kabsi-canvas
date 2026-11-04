@@ -4,6 +4,7 @@ Rule from Rashid (25 Oct 2026, master plan 30.11): a session never loops on a pr
 
 | Item | Why it can wait | Must be fixed before | Owner |
 | --- | --- | --- | --- |
+| Web 5 (4 Nov 2026): How it works keeps its meta description "One week at an Example salon in Bristol: the daily watch, a new review, holiday hours asked in time, and your weekly report." (the task kept every description), but the page now shows three cases, not a week. | Search snippets only; the page itself is right. | Lane R's next copy review | Lane R, then a website session |
 | Web 5 (4 Nov 2026): Home's script on kabsi.co is 223 KB against the live gate's 225 KB budget (lighthouse-live.yml), 2 KB of room; the next Home change may fail it. | Web 5 is within budget and performance is 96; nothing fails today. | The next change that adds script to Home | Next website session |
 | Web 5 (4 Nov 2026): only the hair salon page carries the photo story band; the other trade pages have no trade-specific owner line or post for it. | Design 9 designed the band for the hair salon page only; each trade needs its own Example line checked against the facts. | Paid ads that land on a trade page other than hair salons | Lane R, then a website session |
 | Web 5 (4 Nov 2026): src/components/kabsi/d8-home.tsx and after-yes.tsx are no longer on any page (Home is d9-home, How it works shows the demonstration). | Dead code only: no page imports either file; some source tests still read d8-home.tsx and d8-data.ts (d8-data stays in use). | A cleanup session after launch | Next website session |
