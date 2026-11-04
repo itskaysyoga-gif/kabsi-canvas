@@ -6,10 +6,13 @@
 import { Image } from "https://deno.land/x/imagescript@1.3.0/mod.ts";
 import { issuesOf, measure, type Issue, type Metrics, type Pixels } from "./quality.ts";
 import { declaredSize, MAX_PIXELS, MAX_SIDE, type Sniffed } from "./sniff.ts";
+import { hasCameraData, screenshotLikely } from "./screenshot.ts";
 
 // Google takes photos from 250 pixels to about 5 MB; Kabsi keeps the long side at most this size.
 export const LONG_SIDE = 2400;
 export const MAX_JPEG = 5 * 1024 * 1024;
+// Photos 2: the small copy the Photos list shows (the full file only when the photo is opened).
+export const THUMB_SIDE = 480;
 
 export type Decode = (format: "jpeg" | "png" | "webp" | "heic", bytes: Uint8Array) => Promise<Pixels>;
 
@@ -97,9 +100,22 @@ export async function encodeJpeg(p: Pixels): Promise<Uint8Array> {
   throw new Error("photo_too_large");
 }
 
+// Photos 2: the small copy for the list, from the same clean pixels (no metadata), the long side at most THUMB_SIDE.
+export async function encodeThumb(p: Pixels): Promise<Uint8Array> {
+  const img = new Image(p.width, p.height);
+  img.bitmap.set(p.data);
+  if (Math.max(img.width, img.height) > THUMB_SIDE) {
+    if (img.width >= img.height) img.resize(THUMB_SIDE, Image.RESIZE_AUTO);
+    else img.resize(Image.RESIZE_AUTO, THUMB_SIDE);
+  }
+  return await img.encodeJPEG(75);
+}
+
 export type Processed = {
-  jpeg: Uint8Array; width: number; height: number; takenWidth: number; takenHeight: number;
+  jpeg: Uint8Array; thumb: Uint8Array; width: number; height: number; takenWidth: number; takenHeight: number;
   metrics: Metrics; issues: Issue[];
+  // Photos 2: very likely a phone screenshot (screenshot.ts), read from the original file before it is cleaned.
+  screenshot: boolean;
 };
 
 // One photo: decode, scale down, turn upright, measure, re-encode. `others` are the hashes of the business's other
@@ -118,8 +134,10 @@ export async function processPhoto(bytes: Uint8Array, s: Extract<Sniffed, { kind
   const upright = orient({ width: img.width, height: img.height, data: img.bitmap }, o);
   const metrics = measure(upright);
   const issues = issuesOf(metrics, takenWidth, takenHeight, others);
+  const screenshot = screenshotLikely({ format: s.format, width: takenWidth, height: takenHeight, camera: hasCameraData(bytes) });
   const jpeg = await encodeJpeg(upright);
-  return { jpeg, width: upright.width, height: upright.height, takenWidth, takenHeight, metrics, issues };
+  const thumb = await encodeThumb(upright);
+  return { jpeg, thumb, width: upright.width, height: upright.height, takenWidth, takenHeight, metrics, issues, screenshot };
 }
 
 // The decoders used in production: mozjpeg (jsquash) for JPEG, ImageScript for PNG, the WebP decoder from jsquash, and

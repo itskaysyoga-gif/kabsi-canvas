@@ -19,6 +19,7 @@ export type TaskKind =
   | "local_post"
   | "local_post_removal"
   | "photo"
+  | "photo_removal"
   | "special_hours"
   | "listing_revert"
   | "listing_edit";
@@ -54,6 +55,7 @@ const NOUN: Record<TaskKind, string> = {
   local_post: "post",
   local_post_removal: "post removal",
   photo: "photo",
+  photo_removal: "photo removal",
   special_hours: "change to your hours",
   listing_revert: "change",
   listing_edit: "change to your profile",

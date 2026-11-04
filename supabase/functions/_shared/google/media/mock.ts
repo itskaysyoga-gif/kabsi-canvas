@@ -2,7 +2,9 @@
 // counts the writes, so the tests can prove one upload and one create per approved photo.
 import type { ListMediaItemsResponse, MediaItem, MediaItemDataRef } from "../types.ts";
 
-export const calls = { startUpload: 0, upload: 0, create: 0 };
+export const calls = { startUpload: 0, upload: 0, create: 0, remove: 0 };
+// Photos 2: items removed in this run. Reading one again answers 404, as Google does for a deleted item.
+export const removed = new Set<string>();
 
 export function createMedia(account: string, location: string, body: MediaItem): Promise<MediaItem> {
   calls.create++;
@@ -24,4 +26,13 @@ export function uploadBytes(_ref: MediaItemDataRef, bytes: Uint8Array, _mime: st
   return Promise.resolve({});
 }
 export const listMedia = (_account: string, _location: string): Promise<ListMediaItemsResponse> => Promise.resolve({ totalMediaItemCount: 0 });
-export const getMedia = (item: string): Promise<MediaItem> => Promise.resolve({ name: item, mediaFormat: "PHOTO" });
+export const getMedia = (item: string): Promise<MediaItem> =>
+  removed.has(item)
+    ? Promise.reject(new Error(`google 404 mock media: {"message": "Requested entity was not found."}`))
+    : Promise.resolve({ name: item, mediaFormat: "PHOTO" });
+export function deleteMedia(item: string): Promise<Record<string, never>> {
+  calls.remove++;
+  if (removed.has(item)) return Promise.reject(new Error(`google 404 mock media: {"message": "Requested entity was not found."}`));
+  removed.add(item);
+  return Promise.resolve({});
+}

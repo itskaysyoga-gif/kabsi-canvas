@@ -1,0 +1,7 @@
+{
+  "_about": "Photos 2: the stored size of Rashid's photo of 4 Nov 2026 (photos id 1c9c0fd9-cab4-40cb-9c5a-73b0ecd8566d), read from the photos row on 4 Nov 2026. The original upload was a PNG with no camera data (original_path ends in .png). The test builds a PNG of this size; the live file is never read.",
+  "id": "1c9c0fd9-cab4-40cb-9c5a-73b0ecd8566d",
+  "format": "png",
+  "width": 1103,
+  "height": 2400
+}

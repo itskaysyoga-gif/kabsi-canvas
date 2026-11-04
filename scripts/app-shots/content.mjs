@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 // scripts/app-shots fixtures for this area (see fixtures.mjs). Values or (ctx) => value; ctx.state is the route's state.
 // Posts and photos (/app/posts, /app/photos) for the invented Rose Lane Salon. States: "posts-empty" (no post yet);
 // the base "first-task" (the photo ask and the team link wait for the first task) and "staff" (a staff member's
@@ -62,19 +63,32 @@ const POSTS = [
 
 const photo = (o) => ({
   storage_path: `loc/${o.id}.jpg`,
+  thumb_path: `loc/${o.id}_s.jpg`,
   kind: "photo",
   category: "AT_WORK",
   suitable: true,
   suitability_note: null,
   issues: [],
   width: 1600,
-  height: 1200,
+  height: 1067,
   source: "app",
   created_at: ago(1),
   ...o,
 });
 const PHOTOS = [
-  photo({ id: "ph-ready", state: "draft", category: "INTERIOR" }),
+  photo({ id: "ph-ready", state: "draft", category: null }),
+  // Photos 2: a phone screenshot gets the note and is left out of Approve all.
+  photo({
+    id: "ph-shot",
+    state: "draft",
+    category: null,
+    suitable: false,
+    suitability_note:
+      "This looks like a screenshot. Google asks for photos of your business itself: the outside, inside, your team, your work.",
+    width: 1103,
+    height: 2400,
+  }),
+  photo({ id: "ph-checking", state: "checking", thumb_path: null }),
   photo({ id: "ph-live", state: "posted", category: "AT_WORK", created_at: ago(4) }),
   photo({
     id: "ph-sent",
@@ -83,6 +97,8 @@ const PHOTOS = [
     source: "staff_link",
     created_at: ago(2),
   }),
+  photo({ id: "ph-removing", state: "removing", category: "INTERIOR", created_at: ago(6) }),
+  photo({ id: "ph-removed", state: "removed", category: "EXTERIOR", created_at: ago(7) }),
   photo({
     id: "ph-failed",
     state: "failed",
@@ -92,6 +108,26 @@ const PHOTOS = [
     created_at: ago(5),
   }),
 ];
+
+/** Photos 2: the picture served for a photo's small copy or full file (scripts/app-shots.mjs). Real photos from the
+ * site's own assets; SHOTS_PHOTO_DIR (a folder of <id>.jpg and <id>_s.jpg) replaces them, for the speed measurement. */
+const ASSET = {
+  "ph-ready": "cafe-counter",
+  "ph-shot": "phone-reading",
+  "ph-live": "barber-cut",
+  "ph-sent": "nail-technician",
+  "ph-removing": "bakery-counter",
+  "ph-removed": "bakery-window",
+  "ph-failed": "auto-garage",
+};
+export function photoFile(path) {
+  const name = path.split("/").pop() ?? "";
+  const dir = process.env.SHOTS_PHOTO_DIR;
+  if (dir && existsSync(`${dir}/${name}`)) return `${dir}/${name}`;
+  const id = name.replace(/(_s)?\.jpg$/, "");
+  const small = name.endsWith("_s.jpg");
+  return ASSET[id] ? `src/assets/photos/${ASSET[id]}-${small ? 800 : 1600}.webp` : null;
+}
 
 const pub = (id, target_type, target_id, state, o = {}) => ({
   id,
@@ -114,8 +150,14 @@ export function contentPublications() {
     }),
     pub("p-post-failed", "local_post", "post-failed", "rejected", { at: ago(3) }),
     pub("p-ph-live", "photo", "ph-live", "verified", { at: ago(4) }),
-    pub("p-ph-sent", "photo", "ph-sent", "publishing", { at: ago(0.1) }),
     pub("p-ph-failed", "photo", "ph-failed", "failed", { at: ago(5) }),
+    pub("p-ph-sent", "photo", "ph-sent", "verified", { at: ago(2) }),
+    pub("p-ph-removing", "photo", "ph-removing", "verified", { at: ago(6) }),
+    pub("p-ph-rm-removing", "photo_removal", "ph-removing", "publishing", { at: ago(0.05) }),
+    pub("p-ph-removed", "photo", "ph-removed", "verified", { at: ago(7) }),
+    pub("p-ph-rm-removed", "photo_removal", "ph-removed", "verified", { at: ago(1) }),
+    // A removal Google refused: the photo is still on Google.
+    pub("p-ph-rm-sent", "photo_removal", "ph-sent", "rejected", { at: ago(0.5) }),
   ];
 }
 
@@ -136,4 +178,16 @@ export const rpc = {
   get_place_link: () => null,
 };
 
-export const functions = {};
+export const functions = {
+  // Photos 2: Remove from Google answers like the content function (an approval with its 10 second undo).
+  "POST content": (c) =>
+    c.body?.do === "photo_remove"
+      ? {
+          ok: true,
+          state: "approved",
+          publication: "p-ph-rm-new",
+          publish_after: new Date(Date.now() + 10_000).toISOString(),
+          created: true,
+        }
+      : undefined,
+};

@@ -19,6 +19,7 @@ const KINDS = [
   "local_post",
   "local_post_removal",
   "photo",
+  "photo_removal",
   "special_hours",
   "listing_revert",
   "listing_edit",

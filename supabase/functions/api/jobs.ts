@@ -25,7 +25,7 @@ import { activeLocation, draftReview, isSyncable, notifyLocation, syncLocation }
 import { AiBudgetError } from "../_shared/ai-budget.ts";
 import { protectionCheck } from "../_shared/protection.ts";
 import {
-  addSpecialHours, coachRead, createLocalPost, hasSpecialHours, localPostGone, localPostState, mediaExists, patchListing, protectionShown, removeLocalPost,
+  addSpecialHours, coachRead, createLocalPost, hasSpecialHours, localPostGone, localPostState, MEDIA_NAME, mediaExists, mediaGone, patchListing, protectionShown, removeLocalPost, removeMedia,
   profileIdentity, readGoogleState, readReply, removeKabsiAccess, sendReply, type SpecialDay, uploadPhoto,
 } from "../_shared/google/index.ts";
 import { googleAction, stateDue, stateSummary } from "../_shared/google/state/merchant.ts";
@@ -245,6 +245,14 @@ async function send(i: Item): Promise<Sent> {
       const r = await uploadPhoto(account, location, new Uint8Array(await data.arrayBuffer()), str(p.category) || "ADDITIONAL");
       return { ref: r.ref, response: r.response, seen: r.ref ? "shown" : undefined };
     }
+    case "photo_removal": {
+      // Photos 2: the owner approved removing a photo Kabsi uploaded. Only the media name Google gave Kabsi's own upload
+      // (in the payload, from the photo's verified publication) and only under this business is ever sent.
+      const ref = str(p.media_ref);
+      if (MEDIA_NAME.exec(ref)?.[1] !== location) throw new NotSent("no photo of this business to remove");
+      const r = await removeMedia(location, ref);
+      return { ref, response: r.response, seen: r.alreadyGone ? "shown" : undefined };
+    }
     case "special_hours": {
       const r = await addSpecialHours(location, hoursOf(p));
       return { ref: null, response: r.response };
@@ -273,6 +281,9 @@ async function read(i: Item): Promise<Seen> {
     }
     case "photo":
       return i.google_ref && (await mediaExists(location, i.google_ref)) ? "shown" : "absent";
+    case "photo_removal":
+      // Removed means Google no longer has the photo; still there means Google has not applied it yet.
+      return (await mediaGone(account, location, str(p.media_ref))) ? "shown" : "pending";
     case "special_hours":
       return (await hasSpecialHours(location, hoursOf(p))) ? "shown" : "absent";
     case "listing_revert": {
