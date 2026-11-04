@@ -200,7 +200,11 @@ export function NoraLauncher() {
         inert={!showSolo}
         onTouchStart={prefetchNora}
         onClick={openNora}
-        style={{ bottom: `calc(max(1rem, env(safe-area-inset-bottom)) + ${lift}px)` }}
+        // Lifted above the consent bar with a transform, not with bottom, so the move is not a layout shift.
+        style={{
+          bottom: "max(1rem, env(safe-area-inset-bottom))",
+          transform: lift ? `translateY(-${lift}px)` : undefined,
+        }}
         className={cn(
           "press fixed end-[max(1rem,env(safe-area-inset-right))] z-40 grid size-14 place-items-center rounded-full bg-kb-black text-kb-white shadow-float transition-opacity duration-200 ease-kb sm:hidden",
           showSolo ? "opacity-100" : "pointer-events-none opacity-0",
