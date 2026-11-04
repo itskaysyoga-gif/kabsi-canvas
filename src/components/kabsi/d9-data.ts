@@ -155,7 +155,9 @@ export const D9_SHOW_UP = {
     count: "You came up in the first 3 at 3 of 8 places Kabsi checked.",
   },
   ai: {
-    title: "An answer customers might see",
+    // Fix 2 (master plan 30.27 item 2): the AI half's headline; the old title is the line under it.
+    title: "What AI says about you.",
+    label2: "An answer customers might see",
     question: "Which hair salon near Gloucester Road in Bristol takes late appointments?",
     assistant: "ChatGPT",
     date: "2 Nov 2026",
