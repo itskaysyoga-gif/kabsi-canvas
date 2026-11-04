@@ -1,6 +1,7 @@
 // Nora, the Kabsi assistant (D261): the AI helper on every public page and in the app. Answers only from the
 // knowledge base, saves contact details the visitor offers, and hands off to a person by email.
-// Phones: a full-screen sheet. Desktop: a panel above the launcher. The conversation survives a reload
+// Phones: a bottom sheet of at most 75 percent of the screen over the dimmed page (Polish 4, master plan 30.25 item 4).
+// Desktop: a panel above the launcher. The conversation survives a reload
 // (visitor and conversation ids in localStorage, messages fetched back from the server).
 import {
   useCallback,
@@ -83,7 +84,40 @@ async function accessToken(): Promise<string | undefined> {
   return data.session?.access_token;
 }
 
-export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
+/** Below 640 px: where the sheet sits and how tall it may be, kept above the phone keyboard (visualViewport). */
+function useSheetBox(on: boolean) {
+  const [box, setBox] = useState<{ bottom: number; height: number } | null>(null);
+  useLayoutEffect(() => {
+    if (!on) return;
+    const vv = window.visualViewport;
+    const read = () => {
+      const full = window.innerHeight;
+      const seen = vv ? vv.height : full;
+      const bottom = vv ? Math.max(0, full - (vv.offsetTop + vv.height)) : 0;
+      // At most 75 percent of the screen, and never taller than what the keyboard leaves.
+      setBox({ bottom, height: Math.min(Math.round(full * 0.75), Math.round(seen - 12)) });
+    };
+    read();
+    vv?.addEventListener("resize", read);
+    vv?.addEventListener("scroll", read);
+    window.addEventListener("resize", read);
+    return () => {
+      vv?.removeEventListener("resize", read);
+      vv?.removeEventListener("scroll", read);
+      window.removeEventListener("resize", read);
+    };
+  }, [on]);
+  return box;
+}
+
+export function AssistantWidget({
+  surface,
+  launcher = true,
+}: {
+  surface: "site" | "app";
+  /** false on the public pages: the page shell draws her button from the first paint (site-chrome.tsx). */
+  launcher?: boolean;
+}) {
   const path = useLocation({ select: (l) => l.pathname });
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -120,6 +154,10 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
     setChrome({ noraOpen: open });
   }, [open]);
   const waitOnSite = surface === "site" && (consentOpen || menuOpen || phone);
+  const sheet = useSheetBox(open && phone);
+  // Swipe down on the sheet's top to close it.
+  const [drag, setDrag] = useState(0);
+  const dragFrom = useRef<number | null>(null);
 
   // Load the previous conversation the first time the panel opens.
   useEffect(() => {
@@ -189,8 +227,11 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
 
   const close = useCallback(() => {
     setOpen(false);
+    setDrag(0);
     window.setTimeout(() => {
       if (launcherRef.current) return launcherRef.current.focus();
+      // On the public pages the shell's button takes focus back (site-chrome.tsx, NoraLauncher).
+      if (document.querySelector("[data-nora-launcher]")) return;
       // On a phone the phone bar gives focus back to Nora's button in it (site-chrome.tsx).
       if (document.querySelector("[data-nora-bar]") && window.innerWidth < 640) return;
       // The launcher may be waiting (over the hero on a phone, or behind the menu): focus goes back to the page.
@@ -295,7 +336,7 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
   return (
     <>
       {/* Polish 1: no floating button on a signed-in screen; Nora opens from "Your account and help". */}
-      {!open && !setupScreen && !waitOnSite && surface === "site" ? (
+      {launcher && !open && !setupScreen && !waitOnSite && surface === "site" ? (
         <button
           ref={launcherRef}
           type="button"
@@ -312,20 +353,59 @@ export function AssistantWidget({ surface }: { surface: "site" | "app" }) {
           <span className="hidden sm:inline">Chat with Nora</span>
         </button>
       ) : null}
+      {open && phone ? (
+        // The dimmed page: a tap on it closes the sheet. The page behind does not scroll (the effect above).
+        <div
+          aria-hidden="true"
+          data-nora-scrim
+          onClick={close}
+          className="fixed inset-0 z-50 touch-none bg-scrim"
+        />
+      ) : null}
       {open ? (
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby="kabsi-assistant-title"
-          className="fixed inset-0 z-50 flex flex-col bg-kb-white sm:inset-auto sm:bottom-6 sm:right-6 sm:h-[min(640px,calc(100vh-48px))] sm:w-[400px] sm:overflow-hidden sm:rounded-panel sm:shadow-[0_24px_60px_rgba(0,0,0,.28)] sm:ring-1 sm:ring-kb-hairline"
+          data-nora-panel
+          style={
+            phone && sheet
+              ? {
+                  bottom: sheet.bottom,
+                  height: sheet.height,
+                  transform: drag ? `translateY(${drag}px)` : undefined,
+                }
+              : undefined
+          }
+          className="fixed inset-x-0 bottom-0 z-50 flex h-[75dvh] flex-col overflow-hidden rounded-t-[1.25rem] bg-kb-white shadow-[0_-12px_40px_rgba(0,0,0,.25)] sm:inset-auto sm:bottom-6 sm:right-6 sm:h-[min(640px,calc(100vh-48px))] sm:w-[400px] sm:rounded-panel sm:shadow-[0_24px_60px_rgba(0,0,0,.28)] sm:ring-1 sm:ring-kb-hairline"
         >
-          <header className="flex items-center gap-3 bg-kb-carbon px-4 py-3 text-kb-white [padding-top:max(0.75rem,env(safe-area-inset-top))]">
+          <header
+            className="relative flex items-center gap-3 bg-kb-carbon px-4 pt-4 pb-3 text-kb-white sm:py-3"
+            onTouchStart={(e) => {
+              dragFrom.current = e.touches[0]?.clientY ?? null;
+            }}
+            onTouchMove={(e) => {
+              const y = e.touches[0]?.clientY;
+              if (dragFrom.current !== null && y !== undefined)
+                setDrag(Math.max(0, y - dragFrom.current));
+            }}
+            onTouchEnd={() => {
+              dragFrom.current = null;
+              if (drag > 80) close();
+              else setDrag(0);
+            }}
+          >
+            {/* The grabber: a swipe down on the top of the sheet closes it (phones only). */}
+            <span
+              aria-hidden="true"
+              className="absolute top-1.5 left-1/2 h-1 w-10 -translate-x-1/2 rounded-full bg-white/30 sm:hidden"
+            />
             <span className="grid size-9 place-items-center rounded-full bg-kb-yellow text-kb-black">
               <Sparkles className="size-4" aria-hidden="true" />
             </span>
             <div className="min-w-0 flex-1">
               <p id="kabsi-assistant-title" className="font-bold leading-tight">
-                Nora from Kabsi
+                {phone ? "Nora, Kabsi's assistant" : "Nora from Kabsi"}
               </p>
               <p className="text-xs text-kb-mute">
                 AI assistant · a real person is one message away
