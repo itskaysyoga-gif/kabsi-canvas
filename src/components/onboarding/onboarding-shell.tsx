@@ -80,7 +80,7 @@ export function Stages({ current }: { current: number }) {
             <span
               aria-hidden
               className={cn(
-                "mt-2 hidden text-label font-bold sm:block",
+                "mt-2 hidden text-small font-bold sm:block",
                 i <= current ? "text-text-1" : "text-text-2",
               )}
             >

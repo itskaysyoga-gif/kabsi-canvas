@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ChoiceChips } from "@/components/kabsi/d3-account";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Switch } from "@/components/kabsi/ui";
 import {
@@ -111,7 +112,7 @@ export function NotificationChoices({ locationId }: { locationId: string }) {
       {prefs.data
         ? groupedCategories().map((g) => (
             <div key={g.group} className="mt-5">
-              <h4 className="text-label font-bold text-text-2">{g.group}</h4>
+              <h4 className="text-small font-bold text-text-2">{g.group}</h4>
               <ul className="mt-1 divide-y divide-line">
                 {g.items.map((c) => {
                   const email = choice(prefs.data, c.id, "email");
@@ -119,30 +120,21 @@ export function NotificationChoices({ locationId }: { locationId: string }) {
                     <li key={c.id} className="py-4">
                       <p className="text-body font-bold">{SHOWN_LABEL[c.id] ?? c.label}</p>
                       <p className="mt-0.5 text-small text-text-2">{c.description}</p>
-                      <label
-                        className="mt-3 block text-label font-bold text-text-2"
-                        htmlFor={`email-${c.id}`}
-                      >
-                        Email
-                      </label>
-                      <select
-                        id={`email-${c.id}`}
+                      <ChoiceChips
+                        className="mt-3"
+                        name={`email-${c.id}`}
+                        legend="Email"
+                        legendClassName="text-small font-bold text-text-2"
+                        options={emailOptions(c)}
                         value={email}
-                        onChange={(e) =>
+                        onChange={(v) =>
                           save.mutate({
                             category: c.id,
                             channel: "email",
-                            frequency: e.target.value as Frequency,
+                            frequency: v as Frequency,
                           })
                         }
-                        className="mt-1 h-12 w-full rounded-input border border-stroke bg-surface-1 px-3 text-body"
-                      >
-                        {emailOptions(c).map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </li>
                   );
                 })}

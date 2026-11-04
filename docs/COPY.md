@@ -1044,3 +1044,7 @@ No wording changes on the signed-in screens except the lines below; every other 
 
 No new words. Home: on a computer, Needs attention and Needs your yes on the left, Done by Kabsi this week and Your business on Google on the right; the section counts are charcoal-on-yellow markers; each Done row shows its words on up to two lines with its pill under them when space is short (was cut on one line). Reviews: each card's heading at the card heading size, the review at the lead size; "Report this review"'s labels in sentence case (were capitals).
 
+
+### Part C: Google profile, Settings, onboarding and log in
+
+No new words. Settings, Team: each person's role (Owner, Manager, Staff) and the invitation's Role (Manager, Staff) are chips (were dropdowns; "Role of [email]" stays the screen reader label). Settings, notices: each kind's "Email" timing is chips (was a dropdown). The daily email time (24 hours) and the time zone stay dropdowns (more than eight options). Small labels on Where you show up, Reports, Get reviews, Business knowledge and onboarding are 15 px and in sentence case (one was in capitals). Log in already uses the Design 9 shell (Web 5) and is unchanged.

@@ -490,7 +490,7 @@ function FactsScreen({ location }: { location: Location }) {
       {GROUPS.map((g) => (
         <section
           key={g.id}
-          className="rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5"
+          className="rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-6"
           aria-labelledby={`kg-${g.id}`}
         >
           <GroupHeader id={`kg-${g.id}`} icon={g.icon} title={g.title} sub={g.sub} />
@@ -524,7 +524,7 @@ function FactsScreen({ location }: { location: Location }) {
       ))}
 
       <section
-        className="rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5"
+        className="rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-6"
         aria-labelledby="kg-faq"
       >
         <GroupHeader
@@ -601,10 +601,10 @@ function Question({
   const current = facts.find((f) => f.slot === q.slot);
   return (
     <section
-      className="rounded-card border border-warn bg-warn-soft p-4 shadow-rest sm:p-5"
+      className="rounded-card border border-warn bg-warn-soft p-5 shadow-rest sm:p-6"
       aria-label="A question about your facts"
     >
-      <p className="text-label font-bold text-text-2">{labelOf(fieldOf(q.slot))}</p>
+      <p className="text-small font-bold text-text-2">{labelOf(fieldOf(q.slot))}</p>
       <h2 className="mt-1 text-title font-bold leading-tight">
         Kabsi found two different answers. Which is right?
       </h2>
@@ -1038,7 +1038,7 @@ function TextInput({
         />
       )}
       {value.length > f.max * 0.8 ? (
-        <p className="mt-1 text-right text-label text-text-2">
+        <p className="mt-1 text-right text-small text-text-2">
           {value.length} / {f.max}
         </p>
       ) : null}

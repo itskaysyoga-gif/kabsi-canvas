@@ -908,7 +908,7 @@ export function ManagerMeaning() {
       </h2>
       <div className="mt-4 grid gap-5 sm:grid-cols-2">
         <div>
-          <p className="text-label font-bold text-text-2">Kabsi can</p>
+          <p className="text-small font-bold text-text-2">Kabsi can</p>
           <ul className="mt-2 space-y-2">
             {CAN.map((c) => (
               <li key={c} className="flex gap-2.5 text-small">
@@ -919,7 +919,7 @@ export function ManagerMeaning() {
           </ul>
         </div>
         <div>
-          <p className="text-label font-bold text-text-2">Kabsi cannot</p>
+          <p className="text-small font-bold text-text-2">Kabsi cannot</p>
           <ul className="mt-2 space-y-2">
             {CANNOT.map((c) => (
               <li key={c} className="flex gap-2.5 text-small">

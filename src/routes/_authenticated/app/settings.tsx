@@ -377,7 +377,7 @@ function AiQuestions({ locationId }: { locationId: string }) {
                   <span className="min-w-0 flex-1 break-words text-body">
                     &lsquo;{asSentence(p.text)}&rsquo;
                   </span>
-                  <span className="text-label font-bold text-text-2">
+                  <span className="text-small font-bold text-text-2">
                     {p.cadence === "biweekly" ? "Every 2 weeks" : "Monthly"}
                   </span>
                   <span className="flex w-full gap-1 sm:w-auto">
