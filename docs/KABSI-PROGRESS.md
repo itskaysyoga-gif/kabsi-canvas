@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 4 Nov 2026, Photo Post 1. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 4 Nov 2026, Photos 2. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -14,7 +14,7 @@ One page, under 10 KB. Updated 4 Nov 2026, Photo Post 1. The history (tasks, Aft
 - Sec 2 (PR 266, 27 Oct, checked live): approvals bound to the draft shown, retention, backup drill, secrets audit, staff Operations. Detail: `docs/progress/archive/2026-10-27-sec2.md`.
 - WhatsApp 2 (PRs 268, 270, 271, 28 Oct): Utility replacements for the Marketing templates, all approved 29 Oct (ladder); `/privacy` names Anthropic for WhatsApp and Nora. Detail: `docs/progress/archive/2026-10-28-whatsapp2.md`.
 - Billing 2 (PR 269, 28 Oct): extra locations as their own Creem subscription on the same customer; Remove a location. Detail: `docs/progress/archive/2026-10-28-billing2.md`.
-- Price 1 (PRs 285 to 288, 30 Oct): the site's claims match the facts; list prices 29 and 59 a month (290, 590 a year), the founding price 19 and 39 for the first 30 paying businesses chosen at checkout under one lock, Founding 25 too; built features only on the plan cards; the help lines; MRR from the plan's price. Creem test-mode list products made by the setup action. Detail: `docs/progress/archive/2026-10-30-price1.md`.
+- Price 1 (PRs 285 to 288, 30 Oct): the site's claims match the facts; list prices 29 and 59 a month (290, 590 a year), the founding price 19 and 39 for the first 30 paying businesses chosen at checkout under one lock, Founding 25 too; built features only on the plan cards; the help lines; MRR from the plan's price. Detail: `docs/progress/archive/2026-10-30-price1.md`.
 - Web 3 (PRs 289 to 292, 30 Oct): kabsi.co on Design 6.
 - No customer is live yet. The launch gate (master plan 27.13) is not started.
 
@@ -45,6 +45,7 @@ The facts say "WhatsApp is live" only when the last step is done.
 - Price 1: before plans open, the test-mode checkout on both price families (LATER row: set `founding_places_test` to 0 in app_settings for the list price, then back to 30). The live list products are made by the setup action at going live, no dashboard step.
 - Creem (session 10): send one test event from Creem's dashboard to the webhook (expect 200 and one `billing_events` row), add the product bundle, mark Yawmiyati's organisation `billing_test` if you want to try the paid buttons. Hussein only at going live (verification, payout). Exact steps: `docs/progress/archive/2026-10-25-session-10-creem.md`.
 - A lawyer reads /terms, /privacy and the partner terms (master plan 29.8).
+- Photos 2: the live photo removal test in its archive file.
 - Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
 - V3 heads-up (25 Oct): on the Yawmiyati phone tap Skip on the old photo message, never Yes, and reply No to the monthly question. Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
@@ -62,8 +63,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 4 Nov 2026, Photo Post 1: PRs 336 (master plan 30.22, 30.23) and 337 (a WhatsApp photo with words becomes a Google post, for the owner's yes). Mock-tested, not live for owners. Detail: `docs/progress/archive/2026-11-04-photo-post1.md`.
-- 3 Nov 2026, Polish 3: the free check result reads most important, found, day one with Start free, then the two At launch cards, then the rest (Start free at 390 px: 1,679 down the page, was 2,461); `NEARBY_ON` is the one switch for the At launch labels of the nearby check and the AI answer; the FAQ answer about approving on WhatsApp follows `WHATSAPP_ON`; `docs/polish2/` deleted. Detail: `docs/progress/archive/2026-11-03-polish3.md`.
+- 4 Nov 2026, Photos 2: PR 340. Remove from Google for a photo Kabsi put on Google, the screenshot note, a clearer Photos screen, small list copies. Mock-tested. Detail: `docs/progress/archive/2026-11-04-photos2.md`.
+- 4 Nov 2026, Photo Post 1: PRs 336 and 337 (a WhatsApp photo with words becomes a Google post). Mock-tested. Detail: `docs/progress/archive/2026-11-04-photo-post1.md`.
 
 
 ## How a session updates this page
