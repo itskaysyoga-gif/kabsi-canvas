@@ -62,6 +62,15 @@ for (const r of routes) {
       const req = route.request();
       const res = answer(req.method(), req.url(), req.headers(), req.postData(), r.state);
       if (res.missing) missing.add(res.missing);
+      // A picture from storage (Photos 2): the file itself.
+      if (res.file) {
+        await route.fulfill({
+          status: 200,
+          path: res.file,
+          headers: { "access-control-allow-origin": "*" },
+        });
+        return;
+      }
       await route.fulfill({
         status: res.status ?? 200,
         contentType: "application/json",

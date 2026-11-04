@@ -134,7 +134,7 @@ const pub = (id, target_type, target_id, state, o = {}) => ({
 });
 
 const MINE = ["listing_revert", "special_hours"];
-const CONTENT = ["local_post", "local_post_removal", "photo"];
+const CONTENT = ["local_post", "local_post_removal", "photo", "photo_removal"];
 /**
  * The publications table: a call filtered to profile or content kinds is answered here (content's list is in
  * content.mjs); any other call (Home's "Done lately") goes to home.mjs, so this file does not take over its answers.

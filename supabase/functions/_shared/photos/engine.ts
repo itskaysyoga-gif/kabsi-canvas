@@ -14,7 +14,8 @@ export const FLAG_TEXT: Record<Flag, string> = {
   children: "There seem to be children's faces in this photo.",
   screen: "This photo shows someone else's screen.",
   flyer: "This is mostly text, like a flyer. Kabsi suggests a photo of your real place or work instead.",
-  screenshot: "This looks like a screenshot.",
+  // Photos 2: the photo check sets this one itself (screenshot.ts); a note, never a block.
+  screenshot: "This looks like a screenshot. Google asks for photos of your business itself: the outside, inside, your team, your work.",
   stock_or_ai: "This looks like a stock or computer-made image. Google asks for real photos of your business.",
   brand_logo: "Another brand's logo is in this photo.",
 };
@@ -24,7 +25,7 @@ export type Result =
   | { outcome: "refused"; reason: string; bytes?: number }
   | { outcome: "video"; bytes: number }
   | {
-    outcome: "ready"; path: string; width: number; height: number; bytes: number; brightness: number; sharpness: number;
+    outcome: "ready"; path: string; thumb?: string; width: number; height: number; bytes: number; brightness: number; sharpness: number;
     phash: string; issues: string[]; flags: string[]; category: string | null; note: string | null;
   };
 
@@ -67,12 +68,16 @@ export async function processUpload(photoId: string, deps: EngineDeps): Promise<
     return await deps.record(photoId, { outcome: "refused", reason: UNREADABLE, bytes: bytes.length });
   }
   const seen = deps.classify ? await deps.classify(out.jpeg) : { category: null, flags: [] as Flag[] };
+  // Photos 2: the screenshot note from the photo check itself (no model), once.
+  const flags: Flag[] = [...new Set<Flag>([...(out.screenshot ? ["screenshot" as const] : []), ...seen.flags])];
   const path = `${photo.location_id}/${photoId}.jpg`;
+  const thumb = `${photo.location_id}/${photoId}_s.jpg`;
   await deps.upload(path, out.jpeg);
-  const notes = [...out.issues.map((i) => ISSUE_TEXT[i]), ...seen.flags.map((f) => FLAG_TEXT[f])];
+  await deps.upload(thumb, out.thumb);
+  const notes = [...out.issues.map((i) => ISSUE_TEXT[i]), ...flags.map((f) => FLAG_TEXT[f])];
   return await deps.record(photoId, {
-    outcome: "ready", path, width: out.width, height: out.height, bytes: out.jpeg.length,
+    outcome: "ready", path, thumb, width: out.width, height: out.height, bytes: out.jpeg.length,
     brightness: out.metrics.brightness, sharpness: out.metrics.sharpness, phash: out.metrics.phash,
-    issues: out.issues, flags: seen.flags, category: seen.category, note: notes.length ? notes.join(" ") : null,
+    issues: out.issues, flags, category: seen.category, note: notes.length ? notes.join(" ") : null,
   });
 }
