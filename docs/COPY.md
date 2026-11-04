@@ -1042,7 +1042,7 @@ No wording changes on the signed-in screens except the lines below; every other 
 
 ### Part B: Home and Reviews
 
-No new words. Home: on a computer, Needs attention and Needs your yes on the left, Done by Kabsi this week and Your business on Google on the right; the section counts are charcoal-on-yellow markers; each Done row shows its words on up to two lines with its pill under them when space is short (was cut on one line). Reviews: each card's heading at the card heading size, the review at the lead size; "Report this review"'s labels in sentence case (were capitals).
+No new words. Home: on a computer, Needs attention and Needs your yes on the left, Done by Kabsi this week and Your business on Google on the right (only when either has something to show; otherwise the left side takes the full width, part C); the section counts are charcoal-on-yellow markers; each Done row shows its words on up to two lines with its pill under them when space is short (was cut on one line). Reviews: each card's heading at the card heading size, the review at the lead size; "Report this review"'s labels in sentence case (were capitals).
 
 
 ### Part C: Google profile, Settings, onboarding and log in

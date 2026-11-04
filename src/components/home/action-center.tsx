@@ -99,7 +99,8 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
 
   return (
     // App 3: on a computer, what needs the owner on the left and what Kabsi did on the right, so the page uses the width.
-    <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_25rem]">
+    // The right column only takes room when it has something to show; otherwise the left one uses the full width.
+    <div className="grid items-start gap-8 lg:has-[>[data-side]>*]:grid-cols-[minmax(0,1fr)_22rem] xl:has-[>[data-side]>*]:grid-cols-[minmax(0,1fr)_25rem]">
       <div className="min-w-0 space-y-8">
         <NeedsAttention lines={attention} />
         {yes.length > 0 ? (
@@ -133,7 +134,7 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
           </EmptyState>
         ) : null}
       </div>
-      <div className="min-w-0 space-y-8">
+      <div data-side className="min-w-0 space-y-8 empty:hidden">
         <DoneThisWeek locationId={loc.id} />
         <BusinessNumbers locationId={loc.id} />
       </div>
