@@ -168,7 +168,7 @@ function ConfirmForm({
           return (
             <li key={r.key} className="rounded-card border-2 border-line p-4">
               <div className="flex items-start justify-between gap-3">
-                <p className="text-label font-bold uppercase text-text-2">{r.label}</p>
+                <p className="text-small font-bold text-text-2">{r.label}</p>
                 {confirmedNow && !isEditing ? (
                   <span className="inline-flex items-center gap-1 text-small font-bold text-ok">
                     <Check className="size-4" aria-hidden="true" /> Approved by you

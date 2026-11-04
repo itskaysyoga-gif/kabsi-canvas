@@ -598,7 +598,7 @@ function LinkRow({ link, taps, onChanged }: { link: Card; taps: Tap[]; onChanged
         </div>
         <div className="text-end">
           <p className="font-display text-h3 font-bold leading-none">{week}</p>
-          <p className="mt-1 text-label text-text-2">link activity, 7 days</p>
+          <p className="mt-1 text-small text-text-2">link activity, 7 days</p>
         </div>
       </div>
       <CopyField url={url} label="Copy review link" />
@@ -722,11 +722,11 @@ function CardRow({ card, taps, onChanged }: { card: Card; taps: Tap[]; onChanged
         <div className="grid shrink-0 grid-cols-2 gap-4 text-end">
           <div>
             <p className="font-display text-h3 font-bold leading-none">{week.length}</p>
-            <p className="mt-1 text-label text-text-2">link activity, 7 days</p>
+            <p className="mt-1 text-small text-text-2">link activity, 7 days</p>
           </div>
           <div>
             <p className="font-display text-h3 font-bold leading-none">{taps.length}</p>
-            <p className="mt-1 text-label text-text-2">link activity, 30 days</p>
+            <p className="mt-1 text-small text-text-2">link activity, 30 days</p>
           </div>
         </div>
       </div>

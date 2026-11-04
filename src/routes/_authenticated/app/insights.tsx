@@ -193,7 +193,7 @@ function AiPanel({ a }: { a: AiAnswerView }) {
           <p className="mt-4 text-small text-text-2">Sources it named: {a.sources.join(", ")}.</p>
         ) : null}
       </div>
-      <p className="mt-3 text-label font-semibold text-text-2">{AI_LABEL}</p>
+      <p className="mt-3 text-small font-semibold text-text-2">{AI_LABEL}</p>
     </Panel>
   );
 }
@@ -272,7 +272,7 @@ function Tile({
         {example ? <ExampleBadge /> : null}
       </dt>
       <dd className="mt-1 font-display text-h3 font-bold">{value.toLocaleString("en-US")}</dd>
-      {sub ? <dd className="text-label font-semibold text-text-2">{sub}</dd> : null}
+      {sub ? <dd className="text-small font-semibold text-text-2">{sub}</dd> : null}
     </div>
   );
 }
@@ -304,7 +304,7 @@ function Figures({ a }: { a: InsightsAnswer }) {
             />
           ))}
         </dl>
-        <p className="mt-3 text-label font-semibold text-text-2">
+        <p className="mt-3 text-small font-semibold text-text-2">
           {s.periods.kind === "month_so_far"
             ? `${s.periods.this_label} so far, against the same days of ${s.periods.last_label}.`
             : `${s.periods.this_label} against ${s.periods.last_label}.`}{" "}
@@ -385,7 +385,7 @@ function Figures({ a }: { a: InsightsAnswer }) {
                 ))}
               </ul>
             )}
-            <p className="mt-3 text-label font-semibold text-text-2">
+            <p className="mt-3 text-small font-semibold text-text-2">
               Google shows &quot;fewer than 15&quot; instead of a number when only a few people
               searched.
             </p>

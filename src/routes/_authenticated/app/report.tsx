@@ -158,7 +158,7 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
     <div className="rounded-inner bg-surface-2 p-3">
       <dt className="text-small text-text-2">{label}</dt>
       <dd className="mt-1 font-display text-h3 font-bold">{value}</dd>
-      {sub ? <dd className="text-label font-semibold text-text-2">{sub}</dd> : null}
+      {sub ? <dd className="text-small font-semibold text-text-2">{sub}</dd> : null}
     </div>
   );
 }
@@ -199,7 +199,7 @@ function OlderBody({ r, latest }: { r: ReportData; latest: boolean }) {
           sub={r.taps.total ? `${r.taps.nfc} tap, ${r.taps.qr} QR` : undefined}
         />
       </dl>
-      <p className="mt-3 text-label font-semibold text-text-2">
+      <p className="mt-3 text-small font-semibold text-text-2">
         Opens count how often your review page was opened, not how many reviews were written.
       </p>
       {latest && r.waiting ? (

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { ChoiceChips } from "@/components/kabsi/d3-account";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, UserPlus } from "lucide-react";
@@ -143,23 +144,22 @@ function TeamManager({ locationId }: { locationId: string }) {
                 {m.you ? <span className="font-normal text-text-2"> (you)</span> : null}
               </p>
               <div className="col-start-2 flex flex-wrap items-center gap-2 sm:col-start-3">
-                <select
-                  aria-label={`Role of ${m.email}`}
+                <ChoiceChips
+                  name={`role-${m.user_id}`}
+                  legend={`Role of ${m.email}`}
+                  legendClassName="sr-only"
+                  className="[&>div]:mt-0"
+                  options={(["owner", "manager", "staff"] as Role[]).map((r) => ({
+                    value: r,
+                    label: ROLE_LABEL[r],
+                  }))}
                   value={m.role}
                   disabled={act.isPending}
-                  onChange={(e) => {
-                    // Read the choice now: the select is controlled, so React puts the old value back.
-                    const next = e.target.value as Role;
+                  onChange={(v) => {
+                    const next = v as Role;
                     act.mutate(() => setMemberRole(locationId, m.user_id, next));
                   }}
-                  className="h-11 rounded-full border border-line-strong bg-surface-1 px-3 text-small font-bold"
-                >
-                  {(["owner", "manager", "staff"] as Role[]).map((r) => (
-                    <option key={r} value={r}>
-                      {ROLE_LABEL[r]}
-                    </option>
-                  ))}
-                </select>
+                />
                 {!m.you ? (
                   <Button
                     size="md"
@@ -218,18 +218,16 @@ function TeamManager({ locationId }: { locationId: string }) {
             onChange={(e) => setEmail(e.target.value)}
           />
           <div>
-            <label htmlFor="invite-role" className="mb-2 block text-small font-bold">
-              Role
-            </label>
-            <select
-              id="invite-role"
+            <ChoiceChips
+              name="invite-role"
+              legend="Role"
+              options={[
+                { value: "manager", label: "Manager" },
+                { value: "staff", label: "Staff" },
+              ]}
               value={role}
-              onChange={(e) => setRole(e.target.value as "manager" | "staff")}
-              className={selectClass}
-            >
-              <option value="manager">Manager</option>
-              <option value="staff">Staff</option>
-            </select>
+              onChange={(v) => setRole(v as "manager" | "staff")}
+            />
           </div>
           <p className="text-small text-text-2 sm:col-span-2">{ROLE_HINT[role]}</p>
           <div className="sm:col-span-2">
