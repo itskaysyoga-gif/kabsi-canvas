@@ -10,6 +10,7 @@ import { ExampleBadge, KabsiMark } from "./ui";
 import { Img, PHOTOS, type Photo } from "./photos";
 import { ScanBox } from "./scan-box";
 import { SiteLink } from "./site-link";
+import { D9Title } from "./d9-title";
 import {
   D9_BUSINESS,
   D9_HERO_LINE,
@@ -24,23 +25,6 @@ export const d9LinkCls =
 
 export function D9Arrow() {
   return <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />;
-}
-
-/** "Your business on Google. Taken care of." becomes its two sentences; a one-sentence title stays whole. */
-export function splitTitle(text: string): [string | null, string] {
-  const m = text.match(/^(.+?\.)\s+(.+)$/);
-  return m ? [m[1]!, m[2]!] : [null, text];
-}
-
-/** The inside of the one H1 in treatment B (the caller renders the <h1>, so there is always exactly one). */
-export function D9Title({ text }: { text: string }) {
-  const [first, second] = splitTitle(text);
-  if (!first) return <>{text}</>;
-  return (
-    <>
-      {first} <span className="d9-mark">{second}</span>
-    </>
-  );
 }
 
 /* ---------- Home hero ---------- */

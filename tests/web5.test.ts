@@ -2,7 +2,14 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { NEARBY_ON, WHATSAPP_ON } from "@/lib/site";
+import { D9Title, splitTitle } from "@/components/kabsi/d9-title";
 import {
+  D9_CASES,
+  D9_FAILED_LABEL,
+  D9_STATES,
+  D9_UNDO_SECONDS,
+  d9NextState,
+  d9OtherLine,
   D9_HERO_STREAM,
   D9_MAP_POINTS,
   D9_PHOTO,
@@ -14,8 +21,9 @@ const read = (f: string) => readFileSync(f, "utf8");
 
 describe("Design 9 Home (Web 5 part B)", () => {
   it("marks only the H1's second sentence with the yellow bar, once", () => {
-    const hero = read("src/components/kabsi/d9-hero.tsx");
-    expect(hero.match(/className="d9-mark"/g)).toHaveLength(1);
+    const title = read("src/components/kabsi/d9-title.tsx");
+    expect(title.match(/className="d9-mark"/g)).toHaveLength(1);
+    expect(read("src/components/kabsi/d9-hero.tsx")).not.toContain('className="d9-mark"');
     expect(read("src/components/kabsi/d9-home.tsx")).not.toContain("d9-mark");
   });
   it("keeps the product's own buttons (30.24 item 2)", () => {
@@ -55,10 +63,55 @@ describe("Design 9 Home (Web 5 part B)", () => {
       "src/components/kabsi/d9-data.ts",
       "src/components/kabsi/d9-home.tsx",
       "src/components/kabsi/d9-hero.tsx",
+      "src/components/kabsi/d9-how.tsx",
+      "src/components/kabsi/how-page.tsx",
+      "src/components/kabsi/d9-title.tsx",
     ]) {
       const text = read(f);
       expect(text, f).not.toMatch(/[–—؀-ۿ]/);
       expect(text.replace(/!==?|!\w|!\(|!\[|!places|!s\./g, ""), f).not.toMatch(/[a-z]!/i);
     }
+  });
+});
+
+describe("How it works: the demonstration in three cases (Web 5 part C)", () => {
+  it("has the three cases in order, with the product's own buttons", () => {
+    expect(D9_CASES.map((c) => c.tab)).toEqual(["Hours changed", "Photo to post", "New review"]);
+    const by = Object.fromEntries(D9_CASES.map((c) => [c.id, [c.yes, ...c.others]]));
+    expect(by["hours"]).toEqual(["Use my hours", "Keep Google's"]);
+    expect(by["photo"]).toEqual(["Approve", "Edit", "Skip"]);
+    expect(by["review"]).toEqual(["Yes", "Edit", "Skip"]);
+  });
+  it("goes Approved, Sent to Google, then Live on Google or Did not go through, never merged", () => {
+    expect(D9_STATES.map((s) => s.label)).toEqual(["Approved", "Sent to Google", "Live on Google"]);
+    expect(D9_FAILED_LABEL).toBe("Did not go through");
+    expect(d9NextState("approved", false)).toBe("sent");
+    expect(d9NextState("sent", false)).toBe("live");
+    expect(d9NextState("sent", true)).toBe("failed");
+    expect(d9NextState("live", true)).toBe("live");
+    expect(d9NextState("ask", false)).toBe("ask");
+    expect(D9_UNDO_SECONDS).toBe(10);
+  });
+  it("answers the other buttons without sending anything", () => {
+    expect(d9OtherLine("Keep Google's")).toContain("nothing is sent");
+    expect(d9OtherLine("Skip")).toContain("Nothing is sent");
+    expect(d9OtherLine("Edit")).toContain("then you approve");
+  });
+  it("calls no backend: the demonstration has no fetch, API or Supabase import", () => {
+    const demo = read("src/components/kabsi/d9-how.tsx");
+    expect(demo).not.toMatch(/fetch\(|@\/lib\/(api|public-api|supabase)|supabase/);
+  });
+  it("marks the second sentence of a PageHero title in treatment B", () => {
+    expect(splitTitle("Kabsi prepares. You approve. Kabsi follows through.")).toEqual([
+      "Kabsi prepares. You approve.",
+      "Kabsi follows through.",
+    ]);
+    expect(splitTitle("Your business on Google. Taken care of.")).toEqual([
+      "Your business on Google.",
+      "Taken care of.",
+    ]);
+    expect(splitTitle("Questions owners ask")).toEqual([null, "Questions owners ask"]);
+    expect(typeof D9Title).toBe("function");
+    expect(read("src/components/kabsi/how-page.tsx")).toContain("marked");
   });
 });
