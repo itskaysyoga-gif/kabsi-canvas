@@ -141,7 +141,9 @@ export async function loadCardDetails(tasks: Task[]): Promise<Record<string, Car
           .select("id, field, previous_value, previous_fact_id, google_value")
           .in("id", changeIds)
       : null,
-    postIds.length ? supabase.from("gbp_posts").select("id, body, photo_id").in("id", postIds) : null,
+    postIds.length
+      ? supabase.from("gbp_posts").select("id, body, photo_id").in("id", postIds)
+      : null,
   ]);
   const byId = <T extends { id: string }>(r: { data: unknown } | null) =>
     new Map(((r?.data ?? []) as T[]).map((x) => [x.id, x]));

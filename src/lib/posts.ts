@@ -161,7 +161,10 @@ export const POST_CHANGED =
 export const publishPost = (
   postId: string,
   body: string,
-  photo: { photo_id: string | null; photo_sig: string | null } = { photo_id: null, photo_sig: null },
+  photo: { photo_id: string | null; photo_sig: string | null } = {
+    photo_id: null,
+    photo_sig: null,
+  },
 ) =>
   contentCall<Approval>({
     do: "post_publish",
