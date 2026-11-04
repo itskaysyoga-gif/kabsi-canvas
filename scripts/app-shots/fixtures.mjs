@@ -166,6 +166,19 @@ export function answer(method, rawUrl, headers, body, state) {
     key = `function ${method} ${p.slice(14)}`;
     value =
       pick("functions", `${method} ${p.slice(14)}`, ctx) ?? pick("functions", p.slice(14), ctx);
+  } else if (p.startsWith("/storage/v1/object/sign/owner-photos")) {
+    // Photos 2: signed links to the business's photos, then the picture itself (content.mjs photoFile).
+    const rest = decodeURIComponent(
+      p.slice("/storage/v1/object/sign/owner-photos".length).replace(/^\//, ""),
+    );
+    const link = (path) => `/object/sign/owner-photos/${path}?token=shots`;
+    if (method === "POST" && !rest) {
+      const paths = ctx.body?.paths ?? [];
+      return { body: paths.map((path) => ({ path, signedURL: link(path), error: null })) };
+    }
+    if (method === "POST") return { body: { signedURL: link(rest) } };
+    const file = content.photoFile(rest);
+    return file ? { file } : { status: 404, body: { message: "not found" } };
   } else if (p.startsWith("/storage/v1/")) {
     return { body: [] };
   }

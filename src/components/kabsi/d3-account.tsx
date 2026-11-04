@@ -168,22 +168,28 @@ export function TaskPill({ state, className }: { state: OwnerState; className?: 
 
 type Step = "done" | "now" | "later" | "bad";
 
-/** Approved, Sent to Google, Live on Google; the middle step turns red when it did not go through. */
+/** Approved, Sent to Google, Live on Google; the middle step turns red when it did not go through. Photos 2: on a narrow
+ * card (under 22rem) the words are Approved, Sent and Live, never cut; screen readers always hear the full names. */
 export function TaskTrack({ state, className }: { state: OwnerState; className?: string }) {
   if (state === "undone") return null;
-  const steps: { label: string; s: Step }[] = [
-    { label: "Approved", s: "done" },
+  const steps: { label: string; short: string; s: Step }[] = [
+    { label: "Approved", short: "Approved", s: "done" },
     {
       label: "Sent to Google",
+      short: "Sent",
       s: state === "approved" ? "now" : state === "failed" ? "bad" : "done",
     },
     {
       label: "Live on Google",
+      short: "Live",
       s: state === "confirmed" ? "done" : state === "sent" ? "now" : "later",
     },
   ];
   return (
-    <ol className={cn("grid grid-cols-3 gap-2", className)} aria-label="Where this task is">
+    <ol
+      className={cn("@container grid grid-cols-3 gap-2", className)}
+      aria-label="Where this task is"
+    >
       {steps.map((st) => (
         <li key={st.label} className="min-w-0">
           <span
@@ -204,7 +210,13 @@ export function TaskTrack({ state, className }: { state: OwnerState; className?:
           >
             {st.s === "done" && <Check className="size-3.5 shrink-0" strokeWidth={3} aria-hidden />}
             {st.s === "bad" && <AlertTriangle className="size-3.5 shrink-0" aria-hidden />}
-            <span className="truncate">{st.label}</span>
+            <span aria-hidden className="whitespace-nowrap @[22rem]:hidden">
+              {st.short}
+            </span>
+            <span aria-hidden className="hidden whitespace-nowrap @[22rem]:inline">
+              {st.label}
+            </span>
+            <span className="sr-only">{st.label}</span>
             <span className="sr-only">
               {st.s === "done"
                 ? ", done"

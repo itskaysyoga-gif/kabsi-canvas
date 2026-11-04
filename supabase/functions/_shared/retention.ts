@@ -3,7 +3,7 @@
 // photo_files job. This removes the Storage objects through the Storage API (SQL cannot remove them), then stamps
 // file_deleted_at. The photo row (id, category, state, dates) stays. Removing an object that is already gone is not an
 // error, so a retry after a failure part way through is safe. Since P0.5-01 a photo has two files, the upload as it
-// came (original_path) and the processed JPEG (storage_path); both go. A refused file is due at once, a kept video
+// came (original_path) and the processed JPEG (storage_path), and since Photos 2 its small copy (thumb_path); all go. A refused file is due at once, a kept video
 // 30 days after it arrived.
 
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.57.4";
@@ -12,7 +12,7 @@ export const PHOTO_BUCKET = "owner-photos";
 const BATCH = 100;
 const MAX_BATCHES = 20;
 
-type Due = { id: string; storage_path: string; original_path?: string | null };
+type Due = { id: string; storage_path: string; original_path?: string | null; thumb_path?: string | null };
 
 export interface PhotoFileStore {
   due(limit: number): Promise<Due[]>;
@@ -25,7 +25,7 @@ export async function removeDuePhotoFiles(store: PhotoFileStore) {
   for (let i = 0; i < MAX_BATCHES; i++) {
     const rows = await store.due(BATCH);
     if (!rows.length) break;
-    await store.remove([...new Set(rows.flatMap((r) => [r.storage_path, r.original_path ?? r.storage_path]))]);
+    await store.remove([...new Set(rows.flatMap((r) => [r.storage_path, r.original_path ?? r.storage_path, ...(r.thumb_path ? [r.thumb_path] : [])]))]);
     await store.markDeleted(rows.map((r) => r.id));
     removed += rows.length;
     if (rows.length < BATCH) break;
@@ -37,7 +37,7 @@ export async function removeDuePhotoFiles(store: PhotoFileStore) {
 export function photoFileStore(db: SupabaseClient): PhotoFileStore {
   return {
     async due(limit) {
-      const { data, error } = await db.from("photos").select("id, storage_path, original_path")
+      const { data, error } = await db.from("photos").select("id, storage_path, original_path, thumb_path")
         .lte("file_due_at", new Date().toISOString()).is("file_deleted_at", null).order("file_due_at").limit(limit);
       if (error) throw error;
       return (data ?? []) as Due[];

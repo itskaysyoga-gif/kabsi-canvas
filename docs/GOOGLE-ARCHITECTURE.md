@@ -19,6 +19,7 @@ Google's text:
 
 - Every write (a reply, a post, a photo, special or regular hours, a put-back) goes through the one publication pipeline: the owner approves the exact item, a 10 second undo window passes, `claim_publication` claims it once and checks again that the plan, the approver's right and the business's state still allow it, then one write is sent and Google is read back. "Published" is shown only after the read back (25.3).
 - Pro auto-fix is the only write without a per-item tap, and only for regular hours, special hours and the website, after the owner opted in for that field in writing; two reverts of a field in 30 days stop it (K-130).
+- Removing what Kabsi published is a write of its own, through the same pipeline, on the dashboard only: a post (`local_post_removal`, P0.7-05, 22 Oct 2026) and, since Photos 2 (4 Nov 2026), a photo (`photo_removal`). For a photo the owner, or a manager the owner lets approve photos, approves it; after the undo window Kabsi sends one `DELETE https://mybusiness.googleapis.com/v4/{name=accounts/*/locations/*/media/*}` (empty body, empty answer) for the media name Google gave Kabsi's own upload, stored on the photo's verified publication. The database refuses a name under any other location, and the publish job checks it again before the call, so Kabsi never deletes a photo it did not upload. A 404 (the owner already deleted it on Google) counts as removed. Kabsi then reads the item by its name (404 is gone); if that read fails another way, the business's photo list decides. Source: https://developers.google.com/my-business/reference/rest/v4/accounts.locations.media/delete, read 4 Nov 2026 (no date shown on the page).
 - While Google needs action on a profile (suspended, verification, an ownership conflict, no Voice of Merchant) nothing is sent for that business (18.2).
 
 Google's text:
@@ -96,3 +97,4 @@ The limit after a business leaves is 7 days, and backups are kept 21 days, so th
 | Places API policies | https://developers.google.com/maps/documentation/places/web-service/policies | Last updated 21 Oct 2026 |
 | Maps user-contributed content policy | https://support.google.com/contributionpolicy/answer/7400114 | Not shown |
 | Working with a third party | https://support.google.com/business/answer/7163406 | Not shown |
+| Media delete (Business Profile API v4), read 4 Nov 2026 by Photos 2 | https://developers.google.com/my-business/reference/rest/v4/accounts.locations.media/delete | Not shown |
