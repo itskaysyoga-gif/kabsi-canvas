@@ -76,16 +76,16 @@ declare d text; n text;
 begin
   d := pg_get_functiondef('public.approve_publication(text, uuid, jsonb, uuid, text, integer)'::regprocedure);
   n := replace(d,
-    $x$    v_loc := po.location_id; v_state := po.state;
-    if po.photo_id is not null then$x$,
-    $x$    v_loc := po.location_id; v_state := po.state;
-    -- Fix 2: the yes is for the photo that was shown (its id and its file's content hash), not whatever the post has now.
+    $x$    if po.photo_id is not null then
+      select storage_path into v_photo from public.photos$x$,
+    $x$    -- Fix 2: the yes is for the photo that was shown (its id and its file's content hash), not whatever the post has now.
     if not (p_payload ? 'photo_id' and p_payload ? 'photo_sig')
        or nullif(p_payload ->> 'photo_id', '') is distinct from po.photo_id::text
        or nullif(p_payload ->> 'photo_sig', '') is distinct from private.post_photo_sig(po.photo_id) then
       raise exception 'post_changed';
     end if;
-    if po.photo_id is not null then$x$);
+    if po.photo_id is not null then
+      select storage_path into v_photo from public.photos$x$);
   if n = d then raise exception 'approve_publication: the local_post block was not found'; end if;
   execute n;
 end $$;

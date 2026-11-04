@@ -46,11 +46,11 @@ values ('00000000-0000-4000-8000-000000000204', '00000000-0000-4000-8000-0000000
 
 create temp table k (kind text, n int, target uuid, payload jsonb, primary key (kind, n));
 insert into k values
-  ('local_post', 2, '00000000-0000-4000-8000-000000000201', '{"summary": "Fresh bread every Friday morning.", "language": "en"}'),
+  ('local_post', 2, '00000000-0000-4000-8000-000000000201', '{"summary": "Fresh bread every Friday morning.", "language": "en", "photo_id": null, "photo_sig": null}'),
   ('photo', 2, '00000000-0000-4000-8000-000000000202', '{"category": "INTERIOR"}'),
   ('special_hours', 2, '00000000-0000-4000-8000-000000000203', '{}'),
   ('listing_revert', 2, '00000000-0000-4000-8000-000000000204', '{}'),
-  ('local_post', 3, '00000000-0000-4000-8000-000000000301', '{"summary": "Our new cake menu is here.", "language": "en"}'),
+  ('local_post', 3, '00000000-0000-4000-8000-000000000301', '{"summary": "Our new cake menu is here.", "language": "en", "photo_id": null, "photo_sig": null}'),
   ('photo', 3, '00000000-0000-4000-8000-000000000302', '{}'),
   ('special_hours', 3, '00000000-0000-4000-8000-000000000303', '{}'),
   ('listing_revert', 3, '00000000-0000-4000-8000-000000000304', '{}');
@@ -125,11 +125,11 @@ select is((select payload from public.publications where id = pg_temp.pid('listi
 -- Refusals.
 select throws_ok($$ select pg_temp.approve('local_post', 3, '00000000-0000-4000-8000-0000000000b2') $$,
   'P0001', 'approver_not_member', 'someone outside the business cannot approve a post');
-select throws_ok($$ select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000301', '{"summary": "Too short", \"photo_id\": null, \"photo_sig\": null}'::jsonb,
+select throws_ok($$ select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000301', '{"summary": "Too short", "photo_id": null, "photo_sig": null}'::jsonb,
   '00000000-0000-4000-8000-0000000000a1', 'dashboard') $$, 'P0001', 'bad_post_text', 'a post under 10 characters is refused');
 select throws_ok($$ select public.approve_publication('photo', '00000000-0000-4000-8000-000000000302', '{"category": "SELFIE"}'::jsonb,
   '00000000-0000-4000-8000-0000000000a1', 'dashboard') $$, 'P0001', 'bad_category', 'an unknown photo category is refused');
-select throws_ok($$ select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000391', '{"summary": "Concierge post text.", \"photo_id\": null, \"photo_sig\": null}'::jsonb,
+select throws_ok($$ select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000391', '{"summary": "Concierge post text.", "photo_id": null, "photo_sig": null}'::jsonb,
   '00000000-0000-4000-8000-0000000000b2', 'dashboard') $$, 'P0001', 'concierge_profile',
   'a concierge business has no Google profile work yet');
 select throws_ok($$ select public.approve_publication('listing_edit', '00000000-0000-4000-8000-000000000304', '{}'::jsonb,
@@ -212,7 +212,7 @@ select is(pg_temp.item('listing_revert', 3), 'failed', 'and the change shows it 
 -- A business that became concierge after the approval: stopped, nothing sent.
 insert into public.gbp_posts (id, location_id, owner_input, body)
 values ('00000000-0000-4000-8000-000000000401', '00000000-0000-4000-8000-0000000000c1', 'Late post', 'Draft text');
-select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000401', '{"summary": "A post approved before the switch.", \"photo_id\": null, \"photo_sig\": null}'::jsonb,
+select public.approve_publication('local_post', '00000000-0000-4000-8000-000000000401', '{"summary": "A post approved before the switch.", "photo_id": null, "photo_sig": null}'::jsonb,
   '00000000-0000-4000-8000-0000000000a1', 'dashboard') ->> 'publication_id' as late_id \gset
 update public.locations set concierge = true, google_location_id = 'locations/concierge-victim'
  where id = '00000000-0000-4000-8000-0000000000c1';

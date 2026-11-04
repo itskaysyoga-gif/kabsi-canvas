@@ -224,7 +224,7 @@ function MonthView({
     setBusy(true);
     setMsg("");
     try {
-      const r = await approveMonth(locationId, month);
+      const r = await approveMonth(locationId, month, posts);
       track("post_approved", { channel: "dashboard" });
       setMsg(
         r.held.length

@@ -190,13 +190,21 @@ Deno.serve(async (req) => {
         if (error) throw error;
         const ctx = await checkContext(db, loc.id);
         const approved = [], held = [];
+        // Fix 2: each post is approved only as the page showed it (its words and its photo); one changed since, or not
+        // on the page at all, is held for its own look.
+        type Seen = { post_id: string; body: string | null; photo_id: string | null; photo_sig: string | null };
+        const seen = new Map((Array.isArray(b.seen) ? b.seen as Seen[] : []).filter((x) => x && typeof x.post_id === "string").map((x) => [x.post_id, x]));
         for (const r of (rows ?? []) as PostRow[]) {
+          const v = seen.get(r.id);
+          if (!v || (v.body ?? "") !== (r.body ?? "") || (v.photo_id ?? null) !== (r.photo_id ?? null) || (v.photo_sig ?? null) !== (r.photo_sig ?? null)) {
+            held.push({ post_id: r.id, issues: [{ code: "post_changed", text: "This post changed since you opened this page. Read it, then approve." }] });
+            continue;
+          }
           const f = fieldsOf(r);
           const issues = checkPost(f, { ...ctx, allowedText: `${ctx.allowedText}\n${ownerText(f)}`, recent: ctx.recent.filter((x) => x !== r.body), kabsiDraft: r.source === "auto" });
           if (issues.length) { held.push({ post_id: r.id, issues }); continue; }
-          // Fix 2: the month's yes is read here, with the photo each post has now (LATER: bind it to the page's view).
           approved.push({ post_id: r.id, ...(await approveChange(req, user.id, "local_post", r.id, {
-            summary: f.summary, language: postLanguage(f.summary), photo_id: r.photo_id ?? null, photo_sig: r.photo_sig ?? null,
+            summary: f.summary, language: postLanguage(f.summary), photo_id: v.photo_id ?? null, photo_sig: v.photo_sig ?? null,
           })) });
         }
         return json({ ok: true, approved, held });

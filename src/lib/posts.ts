@@ -185,9 +185,14 @@ export const undoPost = (postId: string, publicationId: string) =>
 // A post waiting for its time goes back to a draft; nothing reaches Google.
 export const cancelPost = (postId: string) =>
   contentCall<{ ok: true; state: string }>({ do: "post_cancel", post_id: postId });
-export const approveMonth = (locationId: string, month: string) =>
+// Fix 2: the month's yes is for each post as this page shows it (its words and its photo); a post changed since, or
+// not on the page, is held for its own look.
+export const approveMonth = (locationId: string, month: string, shown: Post[]) =>
   contentCall<{ approved: unknown[]; held: { post_id: string }[] }>({
     do: "posts_approve_month",
     location_id: locationId,
     month,
+    seen: shown
+      .filter((p) => p.state === "draft")
+      .map((p) => ({ post_id: p.id, body: p.body, photo_id: p.photo_id, photo_sig: p.photo_sig })),
   });
