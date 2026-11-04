@@ -141,9 +141,7 @@ function Guide({ reviewId, locationId }: { reviewId: string; locationId: string 
         <div className="mt-3 space-y-4">
           {CATEGORY_GROUPS.map((g) => (
             <fieldset key={g.title}>
-              <legend className="text-small font-bold text-text-1">
-                {g.title}
-              </legend>
+              <legend className="text-small font-bold text-text-1">{g.title}</legend>
               <div className="mt-1.5 space-y-2">
                 {g.items.map((c) => (
                   <label
