@@ -1,11 +1,11 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 4 Nov 2026, App 3. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 4 Nov 2026, Fix 2. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati; the first real reply was published and verified; the post removal was verified on Google (23 Oct). kabsi.co runs on Vercel; Creem is the only payment route (test mode, not open). Evidence: `docs/progress/archive/evidence.md` and `where-things-stand.md`.
-- Sessions 19 PR 0, Ops 1 parts A and B, Session 0, Clean 1, 13b part 1 and part 2, Fix 1, Session 10 Creem, V1, V2, V3, QA 1, Growth 1 and the lane R notes of 25 and 26 Oct: one line each in `docs/progress/archive/where-things-stand.md` (moved 27 Oct by V4), detail in their own archive files.
+- Sessions 19 PR 0 to Growth 1 and the lane R notes of 25 and 26 Oct: one line each in `docs/progress/archive/where-things-stand.md`.
 - Web 2 (PR 252, 26 Oct): the public pages, real counts, Founding 25 and Partners forms, the free check. Detail: `docs/progress/archive/2026-10-27-web2.md`.
 - V4 (PR 250, 26 Oct): onboarding in four stages, task states, the work receipt, nearby places, the free check route. Detail: `docs/progress/archive/2026-10-27-v4.md`.
 - UX 1: the signed-in website on Design 3, onboarding in four stages, Get reviews, the staff AI spend and Founding 25 checklist. Detail: `docs/progress/archive/2026-10-27-ux1.md`.
@@ -62,8 +62,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
+- 4 Nov 2026, Fix 2 (30.27, R-107): PRs 356 (30.27), 357 (a post's approval bound to its text and photo, migration fix2_post_photo_binding), 358 (the Example, the review link line, /setup-call), 359 (the AI answer made clear: FAQ, Pricing allowances, Home order), 360 (two guides). Detail: `docs/progress/archive/2026-11-04-fix2.md`.
 - 4 Nov 2026, App 3 (30.26, R-106): PRs 352 (30.26, speed budgets 215 and 205 KB), 353 (Photos card, Posts, shell, one state track), 354 (Home, Reviews), and part C (Google profile, Settings, onboarding), each merged on green; part A checked on kabsi.co signed in. Detail: `docs/progress/archive/2026-11-04-app3.md`.
-- 4 Nov 2026, Polish 4 (30.25): PRs 345 (30.25, R-105), 348 (shorter Home and How it works, yellow), 346 (smoke refusals tagged, one alert one message), 349 (Nora on phones), 350 (Home's lower sections after paint), all merged; live: Home script 208 of 225 KB, performance 97; a smoke run sent no staff alert. Detail: `docs/progress/archive/2026-11-04-polish4.md`.
 
 ## How a session updates this page
 
