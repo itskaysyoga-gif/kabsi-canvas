@@ -904,3 +904,19 @@ FAQ, "Can I approve a reply or a post on WhatsApp?", follows `WHATSAPP_ON`:
 - `WHATSAPP_ON` false (today): "Not yet. WhatsApp opens at launch. Until then you approve on kabsi.co."
 - `WHATSAPP_ON` true (written from the facts: the yes comes on WhatsApp, nothing goes live before it, and the changes that are confirmed on kabsi.co say so): "Yes. Kabsi sends each reply or post to you on WhatsApp, and nothing goes live on Google until you say yes. A change to your address, phone or business name is confirmed on kabsi.co instead." (was "Yes. Every reply, post and change waits for your yes on WhatsApp.")
 
+
+## 42. Photo Post 1: a photo with words becomes a Google post (4 Nov 2026, master plan 30.23 item 2, for lane R's next copy review)
+
+WhatsApp lines (supabase/functions/_shared/whatsapp/say.ts). Each answer starts with the head line ("Business (role)") as every WhatsApp answer does. [Business] is the business's name.
+
+- The post shown to the person who may approve it: "[Business]: Kabsi will post this on your Google profile with the photo you just sent, after your yes." then the exact post text in quotes. Buttons: "Approve", "Edit on kabsi.co", "Skip".
+- The post sent to the owner and managers when staff sent the photo: "[Business]: your team sent a photo with a note. Kabsi will post this on your Google profile with that photo, after your yes." then the exact post text in quotes. Same three buttons.
+- To staff after they sent a photo with words: "Thank you. Kabsi made a post with your photo and words, and the owner is asked to approve it. Nothing goes on Google until they say yes."
+- No posts left on the plan this month: "[Business]: your plan has no posts left this month, so Kabsi cannot make this a post. You can add the photo to your Google profile on its own, or skip it." Buttons: "Add as a photo", "Skip".
+- Words that fail the post checks: the existing postProblem line ("[Business]: Kabsi cannot post that as it is, because it [problems]. Please send it again without that.") followed by "Or add the photo to your Google profile on its own, or skip it." Buttons: "Add as a photo", "Skip". The new problem endings: "has an offer you did not give Kabsi", "says it is the best, which Google does not allow", "makes a health, safety or results promise", "repeats the same words too often", "is too close to a post from the last 90 days", "promises a medical result", "promotes alcohol, which posts here cannot do", "is not 10 to 1,500 characters long", "does not fit a post", and for anything else "breaks one of Google's rules for posts".
+- After "Add as a photo": "Okay. Kabsi is getting the photo ready on its own and will ask you here: Yes, Edit or Skip. Nothing goes on Google until you say yes."
+- After Skip (on the post, or on a held photo): "Okay, skipped. Nothing was put on Google."
+- Approve pressed while the photo is still being checked: "Kabsi is still checking the photo. Press Approve again in a minute."
+- Unchanged and reused: the Approved line with Undo ("Approved for [Business]. It goes to Google in 10 seconds. Press Undo to stop it."), "Undone. Nothing was sent. The draft is waiting for you in Kabsi.", and the outcome lines of task-close.ts for Sent to Google and Live on Google.
+
+Website (Home, the work Kabsi does, src/components/kabsi/d8-data.ts): the job "Your profile kept fresh" now reads "Send a photo with a line about it. Kabsi turns it into a Google post and asks for your yes." (was "A new service, late opening, a quiet week. Kabsi writes the post and readies your photo."). Nothing else on the website changes (Design 9 and Web 5 do that).

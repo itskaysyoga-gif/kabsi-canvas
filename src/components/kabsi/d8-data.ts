@@ -72,7 +72,7 @@ export const jobs = (nearbyOn: boolean = NEARBY_ON): Job[] => [
   },
   {
     title: "Your profile kept fresh",
-    text: "A new service, late opening, a quiet week. Kabsi writes the post and readies your photo.",
+    text: "Send a photo with a line about it. Kabsi turns it into a Google post and asks for your yes.",
   },
   {
     title: "The right hours on every holiday",

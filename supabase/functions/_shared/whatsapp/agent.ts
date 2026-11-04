@@ -20,10 +20,12 @@ import {
   roleFor, type RoleName, type Who,
 } from "./roles.ts";
 import { type Command, isAbuse, parse } from "./router.ts";
-import { guessLang, headed, SAY, say } from "./say.ts";
+import { guessLang, headed, postIssue, SAY, say } from "./say.ts";
 import { forWhatsApp, type Nora } from "./nora.ts";
 import { describeHours, type HoursChange, parseHours } from "./hours-parse.ts";
 import { checkTypedPost } from "../posts/typed.ts";
+import { type CheckContext, checkPost } from "../posts/checks.ts";
+import { ref } from "./templates.ts";
 import { keywordFrom, type MapDetails, mapDetailsText } from "./map.ts";
 import { numbersText, type Summary } from "./staff-alerts.ts";
 import { ASK_INTRO, reviewRequestLink, reviewRequestMessage } from "../review-growth/message.ts";
@@ -62,7 +64,19 @@ export interface AgentDb {
   actionCreate(userId: string, targetType: string, targetId: string): Promise<{ ok: boolean; token?: string; text?: string; reason?: string }>;
   stats(locationId: string, days: number): Promise<{ new_reviews: number; answered: number; waiting: number; average: number | null }>;
   reviewLink(locationId: string): Promise<string | null>;
-  acceptPhoto(locationId: string, userId: string, bytes: Uint8Array): Promise<{ ok: boolean; reason?: string }>;
+  acceptPhoto(locationId: string, userId: string, bytes: Uint8Array): Promise<{ ok: boolean; reason?: string; photo_id?: string }>;
+  /** Photo Post 1: a photo that came with words waits for its post or the owner's choice; never offered as a plain photo on its own. */
+  photoHold(photoId: string, userId: string): Promise<boolean>;
+  /** Photo Post 1: the post draft with that photo, after the plan's posts are checked; `to` is who is asked for the yes. */
+  photoPostPrepare(locationId: string, userId: string, photoId: string, caption: string, text: string): Promise<{
+    ok: boolean; reason?: string; post_id?: string; self?: boolean; to?: { user_id: string; phone?: string }[];
+  }>;
+  /** Photo Post 1: what the post checks need (the owner's facts and words, website, category, recent posts). */
+  postContext(locationId: string, ownerText: string): Promise<CheckContext>;
+  /** Photo Post 1: Skip under a photo post, from the phone the button was made for. */
+  postSkip(token: string, phone: string): Promise<{ result: string; location_id?: string }>;
+  /** Photo Post 1: "Add as a photo" or Skip for a held photo. */
+  heldPhoto(phone: string, photoId: string, action: "photo" | "skip"): Promise<{ result: string; location_id?: string }>;
   /** V3: Review Growth numbers, link opens apart from new reviews (no person is counted). */
   growth(locationId: string, days: number): Promise<GrowthStats>;
   /** V3: Edit on a photo waiting for a yes: the category the owner picked. Owner or manager of that business only. */
@@ -113,6 +127,9 @@ export type AgentDeps = {
   mapImage(scanCode: string): Promise<Uint8Array | null>;
   /** V3 (28.3): a voice note to text. The audio stays in memory and is never stored; without it voice notes say they are off. */
   transcribe?(audio: Uint8Array, mime: string | null, phone: string): Promise<Transcript>;
+  /** Photo Post 1: Kabsi's own draft of a post from the owner's words and verified facts (writePost, its spend cap). Absent when
+   *  Kabsi's AI drafting is off; null when the draft failed. Either way the owner's words are the post. */
+  draftPhotoPost?(locationId: string, caption: string): Promise<string | null>;
   /** V4 (30.16 section 3): onboarding in four stages; absent where a test does not need it. */
   onboarding?: OnboardingHooks;
   /** Wakes the sender after a message opened the window (held messages go out). */
@@ -240,6 +257,8 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   // V3: a photo's Edit, Skip, and the category the owner picks; the monthly question's answer.
   if (cmd.k === "photo_edit") return photoEdit(t, cmd.photoId);
   if (cmd.k === "photo_skip") return photoSkip(t, cmd.token);
+  if (cmd.k === "post_skip") return postSkip(t, cmd.token);
+  if (cmd.k === "held_photo") return heldPhoto(t, cmd.action, cmd.photoId);
   const oq = conv?.open_question;
   if (oq?.type === "photo_category") {
     if (cmd.k === "number") return photoCategoryPicked(t, oq, String(cmd.n));
@@ -272,7 +291,15 @@ async function run(t: Turn, cmd: Command): Promise<string> {
   }
 
   // Media.
-  if (cmd.k === "photo") return withBusiness(t, "photo", null, (tb) => photo(tb, cmd.media.id, cmd.media.size));
+  if (cmd.k === "photo") {
+    // Photo Post 1: words with the photo make it a post with that photo; a photo with no words is a plain photo, as before.
+    const caption = (t.m.text ?? "").trim();
+    if (caption) {
+      const media = { id: cmd.media.id, size: cmd.media.size, mime: cmd.media.mime, caption: caption.slice(0, 1000) };
+      return withBusiness(t, "photo", null, (tb) => photoPost(tb, cmd.media.id, cmd.media.size, media.caption), { media });
+    }
+    return withBusiness(t, "photo", null, (tb) => photo(tb, cmd.media.id, cmd.media.size));
+  }
   if (cmd.k === "voice") return voice(t, cmd.media);
   if (cmd.k === "video") return withBusiness(t, "photo", null, (tb) => answered(tb, SAY.videoKept, "video"));
   if (cmd.k === "file") return answered(t, SAY.photoUnreadable, "file_refused");
@@ -290,13 +317,14 @@ async function run(t: Turn, cmd: Command): Promise<string> {
 // ─── Roles, business choice and the head line.
 
 /** Runs a tool for the business the message is about: the only one, the active one, or "Which business?" first. */
-async function withBusiness(t: Turn, toolName: string, pending: string | null, fn: (t: Turn) => Promise<string>): Promise<string> {
+async function withBusiness(t: Turn, toolName: string, pending: string | null, fn: (t: Turn) => Promise<string>,
+  keep: { media?: Extract<OpenQuestion, { type: "business" }>["media"] } = {}): Promise<string> {
   const list = businesses(t.who);
   if (!list.length) return answered(t, domains(t.who).includes("partner") ? SAY.businessOnly : SAY.needsAccount, "needs_account");
   const b = pickBusiness(t.who);
   if (!b) {
     const options = list.map((x) => ({ id: x.location_id, name: x.business }));
-    await t.d.db.setConv(t.phone, { open_question: { type: "business", pending, options } satisfies OpenQuestion });
+    await t.d.db.setConv(t.phone, { open_question: { type: "business", pending, options, ...keep } satisfies OpenQuestion });
     if (options.length <= 3) {
       return answered(t, SAY.whichBusiness, "which_business", options.map((o) => ({ id: `b:${o.id}`, title: o.name.slice(0, 20) })));
     }
@@ -319,6 +347,12 @@ async function pickedBusiness(t: Turn, locationId: string): Promise<string> {
   const conv = t.who.conversation ? { ...t.who.conversation, active_location_id: b.location_id, active_role: "business" as Domain, open_question: null } : null;
   const next: Turn = { ...t, who: { ...t.who, conversation: conv } };
   if (q?.type === "business" && q.pending) return run(next, parse({ ...t.m, text: q.pending, buttonId: null, media: null }));
+  // Photo Post 1: the photo sent with words before the business was picked is handled now, for the business just picked.
+  if (q?.type === "business" && q.media) {
+    const m = q.media;
+    return run({ ...next, m: { ...t.m, text: m.caption, buttonId: null } },
+      { k: "photo", media: { kind: "image", id: m.id, mime: m.mime ?? "image/jpeg", filename: null, size: m.size, voice: false } });
+  }
   return answered({ ...next, business: b, head: head(next.who, "business", b) }, SAY.switched(b.business), "business_set");
 }
 
@@ -657,6 +691,92 @@ async function photoSkip(t: Turn, token: string): Promise<string> {
   return answered(t, r.result === "skipped" ? SAY.photoSkipped : SAY.photoGone, r.result === "skipped" ? "photo_skipped" : `photo_skip:${r.result}`);
 }
 
+// ─── Photo Post 1 (master plan 30.23 item 2): a photo with words becomes a post with that photo, for the owner's yes.
+
+/** The text of the post: Kabsi's draft when AI drafting is on and the draft passes every check, else the owner's own words. */
+async function photoPostText(t: Turn, caption: string): Promise<{ ok: true; text: string } | { ok: false; problems: string[] }> {
+  const b = t.business!;
+  const ctx = await t.d.db.postContext(b.location_id, caption);
+  const issues = (text: string, kabsiDraft: boolean) => checkPost({ type: "STANDARD", summary: text }, { ...ctx, kabsiDraft });
+  if (t.d.draftPhotoPost) {
+    const draft = await t.d.draftPhotoPost(b.location_id, caption).catch(() => null);
+    const typed = draft ? checkTypedPost(draft) : null;
+    if (typed?.ok && !issues(typed.text, true).length) return { ok: true, text: typed.text };
+  }
+  const own = checkTypedPost(caption);
+  if (!own.ok) return own;
+  const found = issues(own.text, false);
+  return found.length ? { ok: false, problems: [...new Set(found.map(postIssue))] } : { ok: true, text: own.text };
+}
+
+async function photoPost(t: Turn, mediaId: string, size: number | null, caption: string): Promise<string> {
+  const b = t.business!;
+  if ((size ?? 0) > MAX_BYTES) return answered(t, SAY.photoUnreadable, "photo_too_big");
+  let bytes: Uint8Array;
+  try {
+    bytes = await t.d.media(mediaId);
+  } catch {
+    return answered(t, SAY.photoUnreadable, "photo_unreadable");
+  }
+  const refused = photoRefusal(bytes);
+  if (refused === "video") return answered(t, SAY.videoKept, "video");
+  if (refused) return answered(t, SAY.photoUnreadable, "photo_unreadable");
+  // The photo goes through the photo engine exactly as a plain photo does; it is held so it is never offered on its own.
+  const r = await t.d.db.acceptPhoto(b.location_id, b.user_id, bytes).catch(() => null);
+  if (!r) return answered(t, SAY.notConnectedYet(b.business, `${t.d.appUrl}/app`), "photo_not_connected");
+  if (!r.ok || !r.photo_id) return answered(t, SAY.photoUnreadable, "photo_refused");
+  const photoId = r.photo_id;
+  await t.d.db.photoHold(photoId, b.user_id);
+  const held: Button[] = [{ id: `hp:${photoId}`, title: "Add as a photo" }, { id: `hs:${photoId}`, title: "Skip" }];
+
+  const text = await photoPostText(t, caption);
+  if (!text.ok) return answered(t, `${SAY.postProblem(b.business, text.problems)} ${SAY.photoPostProblemTail}`, "photo_post_problem", held);
+  const p = await t.d.db.photoPostPrepare(b.location_id, b.user_id, photoId, caption, text.text);
+  if (!p.ok || !p.post_id) {
+    const why = p.reason ?? "unknown";
+    if (why === "posts_used_up") return answered(t, SAY.photoPostUsedUp(b.business), "photo_post_used_up", held);
+    if (why === "photo_not_usable") return answered(t, SAY.photoUnreadable, `photo_post_refused:${why}`);
+    if (/house_style|bad_post_text/.test(why)) return answered(t, `${SAY.postProblem(b.business, ["does not fit a post"])} ${SAY.photoPostProblemTail}`, `photo_post_refused:${why}`, held);
+    return prepareRefused(t, why, "post");
+  }
+  const buttons = (token: string): Button[] => [{ id: `a:${token}`, title: "Approve" }, { id: `e:${token}`, title: "Edit on kabsi.co" }, { id: `qs:${token}`, title: "Skip" }];
+  if (p.self) {
+    // The sender may approve posts: the same token and binding to this draft as a typed post.
+    const a = await t.d.db.actionCreate(b.user_id, "local_post", p.post_id);
+    if (!a.ok || !a.token) return prepareRefused(t, a.reason, "post");
+    return answered(t, SAY.photoPostShown(b.business, (a.text ?? text.text).trim()), "photo_post_shown", buttons(a.token));
+  }
+  // Staff (or anyone who may not approve posts): the owners and managers who may are asked; the sender never gets an Approve button.
+  for (const to of p.to ?? []) {
+    if (!to.phone) continue;
+    const a = await t.d.db.actionCreate(to.user_id, "local_post", p.post_id).catch(() => null);
+    if (!a?.ok || !a.token) continue;
+    await notify(t.d.out, { phone: to.phone, userId: to.user_id, locationId: b.location_id, kind: "post_ready",
+      body: SAY.photoPostForOwner(b.business, (a.text ?? text.text).trim()), buttons: buttons(a.token),
+      template: ref("post_ready", { business: b.business }), dedupe: `photo_post:${p.post_id}:${to.user_id}` }).catch(() => null);
+  }
+  return answered(t, SAY.photoPostTakenStaff, "photo_post_staff");
+}
+
+async function postSkip(t: Turn, token: string): Promise<string> {
+  const owner = await t.d.db.tokenOwner(token, t.phone);
+  if (owner === "not_yours") return answered(t, SAY.notYours, "not_yours");
+  if (owner === "unknown") return answered(t, SAY.alreadyHandled, "stale_button");
+  const r = await t.d.db.postSkip(token, t.phone);
+  return answered(t, r.result === "skipped" ? SAY.photoPostSkipped : SAY.alreadyHandled, r.result === "skipped" ? "photo_post_skipped" : `post_skip:${r.result}`);
+}
+
+async function heldPhoto(t: Turn, action: "photo" | "skip", photoId: string): Promise<string> {
+  if (!businesses(t.who).length) return answered(t, SAY.notYours, "held_photo_refused");
+  const r = await t.d.db.heldPhoto(t.phone, photoId, action);
+  const b = businesses(t.who).find((x) => x.location_id === r.location_id) ?? null;
+  const tb = b ? { ...t, business: b, head: head(t.who, "business", b) } : t;
+  if (r.result === "not_yours" || r.result === "unknown") return answered(tb, SAY.notYours, `held_photo:${r.result}`);
+  if (r.result === "skipped") return answered(tb, SAY.photoPostSkipped, "held_photo_skipped");
+  if (r.result === "photo") return answered(tb, SAY.heldAsPhoto, "held_photo_added");
+  return answered(tb, SAY.photoGone, `held_photo:${r.result}`);
+}
+
 /** "Ask a customer": the one ready message with the business's review link, as its own message so it can be forwarded. Kabsi never
  *  receives, keeps or messages a customer's number; the same message goes to every customer. */
 async function askCustomer(t: Turn): Promise<string> {
@@ -756,6 +876,8 @@ async function approveToken(t: Turn, token: string): Promise<string> {
   if (/not_member|not_allowed|approver_not_member/.test(reason)) return answered(tb, SAY.notYours, `refused:${reason}`);
   if (/not_draft|already|changed|expired/.test(reason)) return answered(tb, SAY.alreadyHandled, `refused:${reason}`);
   if (reason === "high_risk") return answered(tb, "This review needs a careful look, so it is approved only in Kabsi.", "refused:high_risk");
+  // Photo Post 1: Approve pressed before the photo engine finished with the post's photo. Nothing was used; Approve works again.
+  if (/post_photo_missing/.test(reason)) return answered(tb, SAY.photoPostChecking, "refused:post_photo_missing");
   if (reason === "plan_required") return answered(tb, "Your plan has ended, so nothing can be published. Open Kabsi to choose a plan.", "refused:plan_required");
   return answered(tb, `Kabsi could not approve this here. Open Kabsi to finish: ${t.d.appUrl}/app`, `refused:${reason}`);
 }

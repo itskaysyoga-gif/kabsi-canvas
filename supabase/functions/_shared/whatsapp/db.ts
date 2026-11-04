@@ -51,7 +51,7 @@ export const db: Db = {
       },
       register: (a) => rpc<string>("photo_upload", { p_location: a.locationId, p_path: a.path, p_source: a.source, p_user: a.userId, p_link_hash: null }),
     });
-    return r.ok ? { ok: true } : { ok: false, reason: r.reason };
+    return r.ok ? { ok: true, photo_id: r.photoId } : { ok: false, reason: r.reason };
   },
   async statusUpdate(id, state, error) {
     await rpc("whatsapp_status_update", { p_provider_id: id, p_state: state, p_error: error ? errorText(error, 300) : error });
@@ -226,6 +226,20 @@ export async function agentDeps(): Promise<AgentDeps> {
   return {
     db: agentDb, out: c.out!, phoneNumberId: c.phoneNumberId, appUrl: APP_URL,
     media: (id) => c.sender.media(id), ai, nora: noraFor(key),
+    // Photo Post 1: Kabsi's own draft only when its AI drafting is on (the key) and inside its spend cap (writePost takes the
+    // business and global AI budget and throws when it is used up); any failure leaves the owner's own words as the post.
+    draftPhotoPost: key ? async (locationId, caption) => {
+      try {
+        const { POST_LOC_COLUMNS, withFacts, writePost } = await import("../posts.ts");
+        const { data: loc } = await admin().from("locations").select(POST_LOC_COLUMNS).eq("id", locationId).single();
+        if (!loc) return null;
+        const w = await writePost(await withFacts(admin(), loc as never), [],
+          `Owner's note:\n${caption}\n\nThis post goes with the photo the owner just sent. Write it in English, 150 to 300 characters.`);
+        return w.ok ? w.text : null;
+      } catch {
+        return null;
+      }
+    } : undefined,
     editDraft: async (reviewId, instruction) => {
       const { draftReview } = await import("../reviews.ts");
       try {
@@ -331,6 +345,16 @@ export const agentDb: AgentDb = {
     const g = await rpc<{ new_reviews: number; opens_message: number; opens_qr: number; opens_tag: number }>("review_growth_stats", { p_location: l, p_days: days });
     return { days, newReviews: Number(g.new_reviews), opens: { message: Number(g.opens_message), qr: Number(g.opens_qr), tag: Number(g.opens_tag) } };
   },
+  // Photo Post 1 (20261104090000_photo_post1.sql).
+  photoHold: (photo, user) => rpc<boolean>("whatsapp_photo_hold", { p_photo: photo, p_user: user }),
+  photoPostPrepare: (l, u, photo, caption, text) =>
+    rpc("whatsapp_photo_post_prepare", { p_location: l, p_user: u, p_photo: photo, p_caption: caption, p_text: text }),
+  postContext: async (l, ownerText) => {
+    const { checkContext } = await import("../posts/context.ts");
+    return await checkContext(admin(), l, ownerText);
+  },
+  postSkip: (token, phone) => rpc("whatsapp_post_skip", { p_token: token, p_phone: phone }),
+  heldPhoto: (phone, photo, action) => rpc("whatsapp_held_photo", { p_phone: phone, p_photo: photo, p_action: action }),
   photoCategory: (u, photo, category) => rpc("whatsapp_photo_category", { p_user: u, p_photo: photo, p_category: category }),
   photoSkip: (token, phone) => rpc("whatsapp_photo_skip", { p_token: token, p_phone: phone }),
   monthlyAnswered: async (l) => {

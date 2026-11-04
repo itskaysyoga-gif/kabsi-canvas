@@ -213,6 +213,9 @@ Yes. On the Posts page, under Kabsi's posts, tap Turn off. Your own posts still 
 **Can I write my own post?**
 Yes. On Posts, under Write a post, choose Update, Offer or Event, write it in your words, add a photo and a button if you like, and tap Save the post. Kabsi checks it, then you approve it in its month.
 
+**Can I send photos on WhatsApp?**
+Yes, on both plans, once owners are switched on to WhatsApp. Send a photo on its own and Kabsi gets it ready and asks you to put it on your Google profile: Yes, Edit or Skip. Send a photo with a line about it and Kabsi turns it into a Google post with that photo, shows you the exact words, and asks for your yes: Approve, Edit on kabsi.co or Skip. A post counts against your plan's posts (2 a month on Essentials, one a week on Pro). Nothing goes on Google until you say yes. Staff can send photos too; the owner or a manager approves.
+
 **Which buttons can a post have?**
 Call now, Book, Order online, Shop, Learn more or Sign up, or no button. These are the buttons Google offers.
 
