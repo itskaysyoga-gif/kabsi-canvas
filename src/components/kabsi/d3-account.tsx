@@ -2,7 +2,7 @@
 // panels, source labels and the task track every task shows (approved, sent to Google, on Google, or did not go
 // through with what happens next; 30.15 section 3.1). The shell is src/components/layouts/app-layout.tsx.
 import { Link, useRouterState } from "@tanstack/react-router";
-import { AlertTriangle, Check, ExternalLink, Undo2 } from "lucide-react";
+import { Check, ExternalLink, Undo2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ import { myAccess } from "@/lib/team";
 import { OWNER_LABEL, UNDONE_LINE, failedNext, type OwnerState } from "@/lib/task-state";
 import type { TaskItem } from "@/lib/task-feed";
 import { StatusPill, buttonClass, type Tone } from "./ui";
+import { StateTrack, type TrackState } from "./state-track";
 
 /** The role of the signed-in person on the open business (cached with the shell's own queries). */
 export function useAccountRole() {
@@ -54,9 +55,7 @@ export function AccountTop({
     <div className={cn("mb-6", className)}>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="font-display text-[2rem] leading-[1.1] font-bold tracking-[-0.02em] sm:text-[2.5rem]">
-            {heading}
-          </h1>
+          <h1 className="font-display text-h2 font-bold text-balance text-text-1">{heading}</h1>
           {lead && <p className="mt-2 max-w-[42rem] text-body text-text-2">{lead}</p>}
         </div>
         {action}
@@ -64,7 +63,7 @@ export function AccountTop({
       {list.length > 1 && (
         <nav
           aria-label="Pages in this section"
-          className="-mx-4 mt-5 overflow-x-auto px-4 sm:mx-0 sm:px-0"
+          className="-mx-4 mt-6 overflow-x-auto px-4 sm:mx-0 sm:px-0"
         >
           <ul className="flex w-max gap-1 border-b border-line sm:w-auto">
             {list.map((t) => {
@@ -76,7 +75,7 @@ export function AccountTop({
                     search={(t.f ? { f: t.f } : {}) as never}
                     aria-current={on ? "page" : undefined}
                     className={cn(
-                      "relative flex min-h-11 items-center whitespace-nowrap px-3 text-small font-bold",
+                      "relative flex min-h-12 items-center whitespace-nowrap px-3 text-body font-semibold",
                       on ? "text-text-1" : "text-text-2 hover:text-text-1",
                     )}
                   >
@@ -116,7 +115,7 @@ export function Panel({
     <section
       aria-labelledby={title && id ? id : undefined}
       className={cn(
-        "rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5",
+        "rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-6",
         className,
       )}
     >
@@ -166,71 +165,24 @@ export function TaskPill({ state, className }: { state: OwnerState; className?: 
   );
 }
 
-type Step = "done" | "now" | "later" | "bad";
+const TRACK: Record<Exclude<OwnerState, "undone">, TrackState> = {
+  approved: "approved",
+  sent: "sent",
+  confirmed: "live",
+  failed: "failed",
+};
 
-/** Approved, Sent to Google, Live on Google; the middle step turns red when it did not go through. Photos 2: on a narrow
- * card (under 22rem) the words are Approved, Sent and Live, never cut; screen readers always hear the full names. */
-export function TaskTrack({ state, className }: { state: OwnerState; className?: string }) {
+/** Approved, Sent to Google, Live on Google, or Did not go through in place of Live (App 3: the one shared track, the same
+ * as the public demonstration). On a narrow card (under 22rem) the states stack, one line each, never cut. */
+export function TaskTrack({
+  state,
+  className,
+}: {
+  state: OwnerState;
+  className?: string | undefined;
+}) {
   if (state === "undone") return null;
-  const steps: { label: string; short: string; s: Step }[] = [
-    { label: "Approved", short: "Approved", s: "done" },
-    {
-      label: "Sent to Google",
-      short: "Sent",
-      s: state === "approved" ? "now" : state === "failed" ? "bad" : "done",
-    },
-    {
-      label: "Live on Google",
-      short: "Live",
-      s: state === "confirmed" ? "done" : state === "sent" ? "now" : "later",
-    },
-  ];
-  return (
-    <ol
-      className={cn("@container grid grid-cols-3 gap-2", className)}
-      aria-label="Where this task is"
-    >
-      {steps.map((st) => (
-        <li key={st.label} className="min-w-0">
-          <span
-            aria-hidden
-            className={cn(
-              "block h-1.5 rounded-full",
-              st.s === "done" && "bg-kb-green",
-              st.s === "now" && "bg-text-1",
-              st.s === "later" && "bg-line-strong",
-              st.s === "bad" && "bg-bad",
-            )}
-          />
-          <span
-            className={cn(
-              "mt-2 flex items-center gap-1 text-label font-bold",
-              st.s === "later" ? "text-text-3" : st.s === "bad" ? "text-bad" : "text-text-1",
-            )}
-          >
-            {st.s === "done" && <Check className="size-3.5 shrink-0" strokeWidth={3} aria-hidden />}
-            {st.s === "bad" && <AlertTriangle className="size-3.5 shrink-0" aria-hidden />}
-            <span aria-hidden className="whitespace-nowrap @[22rem]:hidden">
-              {st.short}
-            </span>
-            <span aria-hidden className="hidden whitespace-nowrap @[22rem]:inline">
-              {st.label}
-            </span>
-            <span className="sr-only">{st.label}</span>
-            <span className="sr-only">
-              {st.s === "done"
-                ? ", done"
-                : st.s === "now"
-                  ? ", in progress"
-                  : st.s === "bad"
-                    ? ", failed"
-                    : ""}
-            </span>
-          </span>
-        </li>
-      ))}
-    </ol>
-  );
+  return <StateTrack state={TRACK[state]} label="Where this task is" className={className} />;
 }
 
 /** The line under the track: what this state means, the Google link when Kabsi saw it, or what happens next. */
@@ -248,7 +200,12 @@ export function TaskOutcome({
   if (task.owner === "confirmed")
     return task.link ? (
       <div className={className}>
-        <a href={task.link} target="_blank" rel="noreferrer" className={buttonClass("tertiary")}>
+        <a
+          href={task.link}
+          target="_blank"
+          rel="noreferrer"
+          className={cn(buttonClass("tertiary"), "whitespace-normal text-start")}
+        >
           See it on Google
           <ExternalLink className="size-4" aria-hidden />
         </a>
@@ -282,5 +239,72 @@ export function TaskRow({ task, title }: { task: TaskItem; title: ReactNode }) {
       {task.owner !== "undone" && <TaskTrack state={task.owner} className="mt-3" />}
       <TaskOutcome task={task} className="mt-3" />
     </li>
+  );
+}
+
+export type ChoiceOption = { value: string; label: string };
+
+/**
+ * App 3: a choice of eight or fewer as compact chips in rows that wrap (was a dropdown or a grid of boxes). A radio group,
+ * so arrow keys move between the chips. The chosen chip is charcoal on yellow with a tick; the others are outlined. One
+ * help line shows under the chips, for the chosen one (the caller passes it), never inside every chip.
+ */
+export function ChoiceChips({
+  name,
+  legend,
+  options,
+  value,
+  onChange,
+  help,
+  legendClassName,
+  className,
+  disabled,
+}: {
+  name: string;
+  legend: ReactNode;
+  options: ChoiceOption[];
+  value: string | null;
+  onChange: (v: string) => void;
+  help?: ReactNode;
+  legendClassName?: string | undefined;
+  className?: string | undefined;
+  disabled?: boolean | undefined;
+}) {
+  return (
+    <fieldset className={className} disabled={disabled}>
+      <legend className={cn("text-small font-bold text-text-1", legendClassName)}>{legend}</legend>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {options.map((o) => {
+          const on = value === o.value;
+          return (
+            <label
+              key={o.value}
+              className={cn(
+                "press inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-full border px-4 text-small font-semibold transition-colors duration-150 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--focus)] has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50",
+                on
+                  ? "border-kb-yellow bg-kb-yellow text-kb-black"
+                  : "border-stroke bg-surface-1 text-text-1 hover:bg-surface-2",
+              )}
+            >
+              <input
+                type="radio"
+                name={name}
+                value={o.value}
+                checked={on}
+                onChange={() => onChange(o.value)}
+                className="sr-only"
+              />
+              {on ? <Check className="size-4 shrink-0" strokeWidth={2.5} aria-hidden /> : null}
+              {o.label}
+            </label>
+          );
+        })}
+      </div>
+      {help ? (
+        <p className="mt-2 text-small text-text-2" aria-live="polite">
+          {help}
+        </p>
+      ) : null}
+    </fieldset>
   );
 }

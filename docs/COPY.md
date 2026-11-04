@@ -1027,3 +1027,15 @@ The rule for every marketing section: a headline of at most 8 words, one line of
 
 - Her lone round button below 640 px: "Ask Nora, Kabsi's assistant" for screen readers (the same words as her button in the phone bar). From 640 px the launcher is unchanged: "Chat with Nora".
 - The phone sheet's header: "Nora, Kabsi's assistant" (was "Nora from Kabsi", which stays on a computer), the line under it and "Close the chat" unchanged.
+
+## 46. App 3: the signed-in website on the Design 9 system (4 Nov 2026, master plan 30.26 item 5)
+
+No wording changes on the signed-in screens except the lines below; every other line keeps its current words. The visual system (type, colour, chips, the shared state track) is in DESIGN.md, section "The signed-in website on Design 9". Each part of App 3 adds the lines it ships here, checked against knowledge/kabsi-facts.md.
+
+### Part A: Posts and photos, and the shell
+
+- Photos, a ready photo's card: the heading is "1 photo is ready" when one photo waits, and "Photo [n] of [total]" on each card when several wait ("[n] photos are ready" with Approve all stays above them, as before). The line under the heading on a photo with no note: "Kabsi checked it and removed the location data." (the several-photo line "Kabsi checked them and removed the location data." is unchanged).
+- "What it shows" (Outside, Inside, Team, At work, Product, Food and drink, Menu, Other) as chips, then on its own line "Use as" (new label) with "Preferred cover photo" and "Logo". The one help line under them is the chosen chip's line from section 44; before one is chosen it reads "Choose what the photo shows first." (section 44's line, now shown as the prompt). Approve photo waits until a kind is chosen.
+- The state track (every task, every photo tile, and How it works): "Approved", "Sent to Google", "Live on Google", or "Did not go through" in place of "Live on Google" when Google says no. Replaces section 44's narrow-card names ("Approved", "Sent" and "Live"): on a narrow card the three states now stack, one line each, with their full names.
+- Posts: "Kind of post" (screen readers only), "Button" and "Posts a month" are the chip groups' labels (were the radio group's label, the dropdown's label and "Posts a month:").
+- The business sheet, opened from the business at the top of the menu (or the business name in the phone top bar): title "Your businesses"; line "Tap a business to open it."; each business with its status (the existing words: "Active", "Setup not finished", "Waiting for Google access" and the rest, "Example" on the demo business); the open one carries a tick with "Open now" for screen readers; then "Continue setup" (while setup is not finished) and "Add another business" (unchanged). Retired: the dropdown's "Switch business" label.

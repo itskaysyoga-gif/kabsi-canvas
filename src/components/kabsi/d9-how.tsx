@@ -2,7 +2,8 @@
 // post, New review), each through Approved, Sent to Google and Live on Google, or Did not go through. Deterministic
 // Example data, no backend: nothing here calls Kabsi or Google. CSS only; the 10 second Undo window is real time, as
 // on the real card. Any state has a link for screenshots: ?case=hours|photo|review and ?state=approved|sent|live|failed.
-import { Circle, CircleAlert, CircleCheck, LoaderCircle, RotateCcw } from "lucide-react";
+import { CircleAlert, CircleCheck, RotateCcw } from "lucide-react";
+import { StateTrack as SharedTrack } from "./state-track";
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { ExampleBadge, KabsiMark, Switch } from "./ui";
@@ -11,7 +12,6 @@ import { useSearchFlag } from "./page-signals";
 import {
   D9_BUSINESS,
   D9_CASES,
-  D9_FAILED_LABEL,
   D9_FAILED_TEXT,
   D9_STATES,
   D9_UNDO_SECONDS,
@@ -189,46 +189,16 @@ export function DemoThreeCases() {
   );
 }
 
-/** Approved, Sent to Google, Live on Google: never merged. Did not go through replaces Live when Google says no. */
+/** Approved, Sent to Google, Live on Google: never merged. Did not go through replaces Live when Google says no. The
+ * shared track (state-track.tsx), the same one the signed-in website uses. */
 function StateTrack({ state }: { state: DemoState }) {
-  const order: DemoState[] = ["approved", "sent", "live"];
-  const at = state === "failed" ? 1 : order.indexOf(state);
   return (
-    <ol className="relative space-y-5 ps-11" aria-label="Where it is">
-      <span aria-hidden className="absolute start-[0.9rem] top-3 bottom-3 w-px bg-line-strong" />
-      {D9_STATES.map((s) => {
-        const i = order.indexOf(s.id);
-        const failedHere = state === "failed" && s.id === "live";
-        const now = state === s.id && s.id !== "live";
-        const done = !failedHere && !now && i <= at;
-        const Icon = failedHere ? CircleAlert : now ? LoaderCircle : done ? CircleCheck : Circle;
-        return (
-          <li key={s.id} className="relative">
-            <span
-              className={cn(
-                "absolute -start-11 top-0 grid size-7 place-items-center rounded-full bg-surface-1 transition-colors duration-200",
-                failedHere ? "text-bad" : done ? "text-ok" : now ? "text-text-1" : "text-text-3",
-              )}
-            >
-              <Icon
-                className={cn(
-                  "size-6",
-                  now && "motion-safe:animate-[kb-spin_1.2s_linear_infinite]",
-                )}
-                aria-hidden
-              />
-            </span>
-            <p className={cn("text-title", !done && !now && !failedHere && "text-text-3")}>
-              {failedHere ? D9_FAILED_LABEL : s.label}
-              <span className="sr-only">
-                {failedHere ? ", happened" : done ? ", done" : now ? ", now" : ", not yet"}
-              </span>
-            </p>
-            <p className="text-small text-text-2">{failedHere ? D9_FAILED_TEXT : s.text}</p>
-          </li>
-        );
-      })}
-    </ol>
+    <SharedTrack
+      layout="column"
+      state={state === "ask" ? "none" : state}
+      steps={D9_STATES}
+      failedText={D9_FAILED_TEXT}
+    />
   );
 }
 

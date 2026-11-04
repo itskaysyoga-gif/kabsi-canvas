@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera, ImagePlus, ShieldCheck } from "lucide-react";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { CopyField } from "@/components/kabsi/d2-parts";
-import { AccountTop, Panel } from "@/components/kabsi/d3-account";
+import { AccountTop, ChoiceChips, Panel } from "@/components/kabsi/d3-account";
 import {
   OpensLater,
   TaskBlock,
@@ -63,6 +63,10 @@ export const Route = createFileRoute("/_authenticated/app/photos")({
 });
 
 const SENT = ["publishing", "posted", "failed", "removing", "removed"];
+// App 3: photo tiles share one size, in a grid that uses the width (two on a phone, four on a computer).
+const TILE_GRID = "grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4";
+const TILE =
+  "flex min-w-0 flex-col overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest";
 
 function PhotosPage() {
   const queryClient = useQueryClient();
@@ -234,7 +238,7 @@ function PhotosPage() {
               <h2 id="sent-photos" className="font-display text-h3 font-bold">
                 Sent to Google
               </h2>
-              <ul className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <ul className={cn("mt-4", TILE_GRID)}>
                 {sent.map((p) => (
                   <SentTile
                     key={p.id}
@@ -289,7 +293,8 @@ function UploadButton({
   );
 }
 
-// The batch card (K-23): "3 photos are ready", Approve all, or one by one below it.
+// The batch (K-23): with several ready photos, "3 photos are ready" and Approve all above the cards; then one wide card
+// per photo (App 3: the photo on the left at its own shape, the choices and the buttons on the right; stacked on a phone).
 function ReadyBatch({
   locationId,
   ready,
@@ -325,47 +330,54 @@ function ReadyBatch({
     }
     setBusy(false);
   }
+  const many = ready.length > 1;
   return (
     <section className="space-y-4" aria-labelledby="ready-photos">
-      <Panel>
-        <h2 id="ready-photos" className="font-display text-h3 font-bold">
-          {ready.length} {ready.length === 1 ? "photo is" : "photos are"} ready
-        </h2>
-        <p className="mt-1 text-body text-text-2">
-          {clean.length === ready.length
-            ? "Kabsi checked them and removed the location data."
-            : `Kabsi has a note on ${ready.length - clean.length} of them. Look at those one by one below.`}
+      {many ? (
+        <div className="flex flex-col gap-4 rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div className="min-w-0">
+            <h2 id="ready-photos" className="font-display text-h3 font-bold">
+              {ready.length} photos are ready
+            </h2>
+            <p className="mt-1 text-body text-text-2">
+              {clean.length === ready.length
+                ? "Kabsi checked them and removed the location data."
+                : `Kabsi has a note on ${ready.length - clean.length} of them. Look at those one by one below.`}
+            </p>
+          </div>
+          {batch ? (
+            <Button
+              size="md"
+              data-main-cta
+              className="w-full shrink-0 sm:w-auto"
+              loading={busy}
+              onClick={() => void approveAll()}
+            >
+              {clean.length === ready.length
+                ? "Approve all"
+                : `Approve the ${clean.length} without a note`}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+      {done ? (
+        <p className="text-small text-text-1" role="status">
+          {done}
         </p>
-        {batch ? (
-          <Button
-            size="md"
-            data-main-cta
-            className="mt-4 w-full sm:w-auto"
-            loading={busy}
-            onClick={() => void approveAll()}
-          >
-            {clean.length === ready.length
-              ? "Approve all"
-              : `Approve the ${clean.length} without a note`}
-          </Button>
-        ) : null}
-        {done ? (
-          <p className="mt-3 text-small text-text-1" role="status">
-            {done}
-          </p>
-        ) : null}
-        {err ? (
-          <p className="mt-3 text-small font-semibold text-bad" role="alert">
-            {err}
-          </p>
-        ) : null}
-      </Panel>
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      ) : null}
+      {err ? (
+        <p className="text-small font-semibold text-bad" role="alert">
+          {err}
+        </p>
+      ) : null}
+      <ul className="space-y-4">
         {ready.map((p, i) => (
           <ReadyCard
             key={p.id}
             photo={p}
             url={urls[p.id]}
+            heading={many ? `Photo ${i + 1} of ${ready.length}` : "1 photo is ready"}
+            headingId={many ? undefined : "ready-photos"}
             primary={!batch && i === ready.findIndex((x) => x.suitable)}
             onChanged={onChanged}
           />
@@ -375,14 +387,21 @@ function ReadyBatch({
   );
 }
 
+const KIND_OPTIONS = KINDS.map((k) => ({ value: k, label: CATEGORIES[k] ?? k }));
+const ROLE_OPTIONS = ROLES.map((k) => ({ value: k, label: CATEGORIES[k] ?? k }));
+
 function ReadyCard({
   photo,
   url,
+  heading,
+  headingId,
   primary,
   onChanged,
 }: {
   photo: Photo;
   url: string | undefined;
+  heading: string;
+  headingId?: string | undefined;
   primary: boolean;
   onChanged: () => unknown;
 }) {
@@ -390,10 +409,9 @@ function ReadyCard({
   const [category, setCategory] = useState<string | null>(photo.category);
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
+  const isRole = category === "COVER" || category === "LOGO";
   const advice =
-    (category === "COVER" || category === "LOGO") && photo.width && photo.height
-      ? roleIssue(category, photo.width, photo.height)
-      : null;
+    isRole && photo.width && photo.height ? roleIssue(category, photo.width, photo.height) : null;
   async function run(kind: "publish" | "skip") {
     if (kind === "publish" && !category) {
       setErr("Choose what the photo shows first.");
@@ -412,22 +430,68 @@ function ReadyCard({
     }
     setBusy("");
   }
+  function choose(v: string) {
+    setCategory(v);
+    setErr("");
+  }
+  // One help line, for the chosen chip (or the short prompt before one is chosen), never inside every chip.
+  const kindHelp = !category
+    ? "Choose what the photo shows first."
+    : isRole
+      ? null
+      : CATEGORY_HELP[category];
+  const roleHelp = isRole ? [CATEGORY_HELP[category], advice].filter(Boolean).join(" ") : null;
+  const id = headingId ?? `photo-${photo.id}`;
   return (
-    <li className="overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest">
-      <PhotoImage url={url} photo={photo} />
-      <div className="p-4">
-        {photo.suitable ? null : <StatusPill tone="warn">Kabsi has a note</StatusPill>}
-        {photo.suitability_note ? (
-          <p className="mt-2 text-small text-text-2">{photo.suitability_note}</p>
-        ) : null}
-        <KindPicker name={`kind-${photo.id}`} value={category} onChange={setCategory} />
-        {advice ? <p className="mt-2 text-small text-text-2">{advice}</p> : null}
-        <div className="mt-4 flex flex-wrap gap-2">
+    <li
+      aria-labelledby={id}
+      className="overflow-hidden rounded-panel border border-line bg-surface-1 shadow-rest md:grid md:grid-cols-[2fr_3fr]"
+    >
+      <div className="bg-surface-2 p-3 sm:p-4">
+        <PhotoImage url={url} photo={photo} natural />
+      </div>
+      <div className="p-5 sm:p-6">
+        <h3 id={id} className="font-display text-h3 font-bold">
+          {heading}
+        </h3>
+        {photo.suitable ? (
+          <p className="mt-1 text-body text-text-2">
+            Kabsi checked it and removed the location data.
+          </p>
+        ) : (
+          <div className="mt-2">
+            <StatusPill tone="warn">Kabsi has a note</StatusPill>
+            {photo.suitability_note ? (
+              <p className="mt-2 text-body text-text-2">{photo.suitability_note}</p>
+            ) : null}
+          </div>
+        )}
+        <ChoiceChips
+          className="mt-5"
+          name={`kind-${photo.id}`}
+          legend="What it shows"
+          options={KIND_OPTIONS}
+          value={category}
+          onChange={choose}
+          help={kindHelp}
+        />
+        <div className="mt-5 border-t border-line pt-4">
+          <ChoiceChips
+            name={`kind-${photo.id}`}
+            legend="Use as"
+            options={ROLE_OPTIONS}
+            value={category}
+            onChange={choose}
+            help={roleHelp}
+          />
+        </div>
+        <div className="mt-6 flex flex-wrap gap-3">
           <Button
             size="md"
             {...(primary
               ? ({ variant: "primary", "data-main-cta": true } as const)
               : ({ variant: "secondary" } as const))}
+            aria-disabled={!category || undefined}
             loading={busy === "publish"}
             disabled={!!busy}
             onClick={() => void run("publish")}
@@ -445,55 +509,12 @@ function ReadyCard({
           </Button>
         </div>
         {err ? (
-          <p className="mt-2 text-small font-semibold text-bad" role="alert">
+          <p className="mt-3 text-small font-semibold text-bad" role="alert">
             {err}
           </p>
         ) : null}
       </div>
     </li>
-  );
-}
-
-// Photos 2: what the photo shows, as tappable choices in plain words with one line of help each (was a dropdown). The
-// same values as before; the preferred cover photo and the logo come last, with their advice.
-function KindPicker({
-  name,
-  value,
-  onChange,
-}: {
-  name: string;
-  value: string | null;
-  onChange: (v: string) => void;
-}) {
-  const choice = (k: string) => (
-    <label
-      key={k}
-      className={cn(
-        "flex min-h-11 cursor-pointer gap-2.5 rounded-inner border-2 p-2.5",
-        value === k ? "border-text-1 bg-surface-2" : "border-line",
-      )}
-    >
-      <input
-        type="radio"
-        name={name}
-        className="mt-0.5 size-4 shrink-0 accent-black"
-        checked={value === k}
-        onChange={() => onChange(k)}
-      />
-      <span className="min-w-0">
-        <span className="block text-small font-bold text-text-1">{CATEGORIES[k]}</span>
-        <span className="block text-label leading-5 text-text-2">{CATEGORY_HELP[k]}</span>
-      </span>
-    </label>
-  );
-  return (
-    <fieldset className="mt-3">
-      <legend className="text-small font-bold text-text-1">What it shows</legend>
-      <div className="mt-2 grid grid-cols-2 gap-2">{KINDS.map(choice)}</div>
-      <div className="mt-2 grid grid-cols-2 gap-2 border-t border-line pt-2">
-        {ROLES.map(choice)}
-      </div>
-    </fieldset>
   );
 }
 
@@ -510,14 +531,11 @@ function Checking({ photos }: { photos: Photo[] }) {
   return (
     <section className="space-y-3">
       {checking.length ? (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Photos being checked">
+        <ul className={TILE_GRID} aria-label="Photos being checked">
           {checking.map((p) => (
-            <li
-              key={p.id}
-              className="overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest"
-            >
+            <li key={p.id} className={TILE}>
               <PhotoImage url={undefined} photo={p} />
-              <p className="p-4 text-body text-text-1" role="status">
+              <p className="p-3 text-small text-text-1 sm:p-4" role="status">
                 Checking your photo. About a minute.
               </p>
             </li>
@@ -613,9 +631,9 @@ function SentTile({
   // The removal's own state: Removing, Removed from Google, or Did not go through (the photo is still on Google).
   const removalFailed = photo.state === "posted" && removal?.owner === "failed" && !pending;
   return (
-    <li className="overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest">
+    <li className={TILE}>
       <PhotoImage url={url} photo={photo} />
-      <div className="p-4">
+      <div className="flex-1 p-3 sm:p-4">
         <p className="text-small font-bold text-text-1">
           {CATEGORIES[photo.category ?? "ADDITIONAL"] ?? "Other"}
           {photo.source === "staff_link" ? (
@@ -652,17 +670,24 @@ function SentTile({
                 </p>
               </div>
             ) : null}
-            <TaskBlock task={task} kind="photo" rowState={photo.state} className="mt-3" />
+            <TaskBlock
+              task={task}
+              kind="photo"
+              rowState={photo.state}
+              pill={false}
+              className="mt-3"
+            />
             {photo.state === "posted" ? (
               confirm ? (
                 <div className="mt-4 border-t border-line pt-4">
-                  <p className="text-body text-text-1">
+                  <p className="text-small text-text-1">
                     Remove this photo from your Google profile? You have 10 seconds to undo.
                   </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="mt-3 grid gap-2">
                     <Button
                       size="md"
                       variant="secondary"
+                      full
                       loading={busy}
                       onClick={() => void remove()}
                     >
@@ -671,6 +696,7 @@ function SentTile({
                     <Button
                       size="md"
                       variant="quiet"
+                      full
                       disabled={busy}
                       onClick={() => setConfirm(false)}
                     >
@@ -679,7 +705,11 @@ function SentTile({
                   </div>
                 </div>
               ) : (
-                <Button variant="tertiary" className="mt-2" onClick={() => setConfirm(true)}>
+                <Button
+                  variant="tertiary"
+                  className="mt-2 whitespace-normal text-start"
+                  onClick={() => setConfirm(true)}
+                >
                   Remove from Google
                 </Button>
               )
@@ -810,10 +840,13 @@ function PhotoImage({
   url,
   photo,
   square = false,
+  natural = false,
 }: {
   url: string | undefined;
   photo?: Photo | undefined;
   square?: boolean;
+  /** App 3: the ready card shows the photo at its own shape, never boxed or cropped. */
+  natural?: boolean;
 }) {
   // The link that failed to load; a new link (signed again) is tried afresh.
   const [brokenUrl, setBrokenUrl] = useState<string | null>(null);
@@ -824,7 +857,13 @@ function PhotoImage({
   const shape = square ? "aspect-square" : "aspect-[4/3]";
   if (!url || broken)
     return (
-      <div className={cn(shape, "grid w-full place-items-center bg-surface-2 text-text-3")}>
+      <div
+        className={cn(
+          shape,
+          "grid w-full place-items-center bg-surface-2 text-text-3",
+          natural && "rounded-inner",
+        )}
+      >
         <Camera className="size-8" strokeWidth={1.5} aria-hidden />
       </div>
     );
@@ -848,7 +887,13 @@ function PhotoImage({
       loading="lazy"
       decoding="async"
       onError={() => setBrokenUrl(url)}
-      className="size-full object-contain"
+      className={
+        natural
+          ? "mx-auto block h-auto max-h-[36rem] w-auto max-w-full rounded-inner"
+          : square
+            ? "size-full object-contain"
+            : "size-full object-cover"
+      }
     />
   );
   if (!photo || square) return <div className={cn(shape, "w-full bg-surface-2")}>{img}</div>;
@@ -858,8 +903,8 @@ function PhotoImage({
         type="button"
         onClick={() => void openFull()}
         className={cn(
-          shape,
-          "block w-full bg-surface-2 focus-visible:outline-2 focus-visible:outline-text-1",
+          !natural && shape,
+          "block w-full rounded-inner bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-1",
         )}
         aria-label={`Open the ${label.toLowerCase()} full size`}
       >

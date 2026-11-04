@@ -227,6 +227,17 @@ export const tables = {
       emails_paused_until: null,
       deletion_requested_at: null,
     },
+    // App 3: "businesses" adds a second business still in setup, for the business sheet.
+    ...(c.state === "businesses"
+      ? [
+          {
+            ...location("setup"),
+            id: "00000000-0000-4000-8000-0000000000b2",
+            name: "Rose Lane Barbers",
+            created_at: ago(2),
+          },
+        ]
+      : []),
   ],
   visibility_scans: scans,
   visibility_points: points,
