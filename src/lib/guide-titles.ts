@@ -6,4 +6,8 @@ export const GUIDE_TITLES: Record<string, string> = {
   "can-you-remove-a-google-review": "Can you remove a Google review?",
   "add-manager-google-business-profile": "How to add a manager to your Google Business Profile",
   "google-review-link-and-qr-code": "How to get your Google review link and QR code",
+  "why-chatgpt-describes-your-business-wrongly":
+    "Why ChatGPT might describe your business wrongly, and what to check",
+  "keep-your-hours-and-details-the-same-everywhere":
+    "Keep your hours and details the same everywhere",
 };

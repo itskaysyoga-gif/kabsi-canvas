@@ -20,7 +20,7 @@ export const Route = createFileRoute("/guides/")({
     pageHead({
       title: "Guides for Google Business Profile owners | Kabsi",
       description:
-        "Short, practical guides: replying to Google reviews, handling negative reviews, reporting reviews, adding a manager, and getting your review link.",
+        "Short, practical guides: replying to Google reviews, handling negative reviews, reporting reviews, adding a manager, getting your review link, keeping your details the same everywhere, and why ChatGPT might describe your business wrongly.",
       path: "/guides",
       crumbs: [{ name: "Guides", path: "/guides" }],
       jsonLd: [
