@@ -7,7 +7,7 @@ Version 1 was written on 4 Oct 2026 from the six source documents in `docs/sourc
 1. Guardrails (digest here; full text in the archive)
 2. Rules for every build chat (here, in full)
 3. Sources and precedence (here, in full)
-4. Review decisions R-01 to R-101 (table with status here; full text in the archive)
+4. Review decisions R-01 to R-103 (table with status here; full text in the archive)
 7. Order of work (here, short; the full section and the task cards are in the archive)
 8. Where everything went
 
@@ -186,9 +186,9 @@ Not a source of truth any more: `docs/KABSI-SPEC.md`, `docs/KABSI-STATE.md`, `do
 
 Added on 24 Oct 2026: the master plan (`docs/KABSI-MASTERPLAN.md`) sits above items 2 to 5 for everything it covers, with its later sections winning over its earlier ones.
 
-## 4. Review decisions (R-01 to R-101)
+## 4. Review decisions (R-01 to R-103)
 
-One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. Later decisions override earlier ones where they differ: R-101 over R-100 over R-99 over R-98 over R-97 over R-96 over R-95 over R-94 over R-93 over R-92 over R-91 over R-90 over R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
+One line per decision. The full text, with what each one changes and why, is `docs/plan/archive/sec-04-review-decisions.md`. **Status (master plan 25.6, from R-55):** Approved, Building, Merged, Verified live or Retired. A row moves only with evidence (a pull request number, a check, a live response); a merged pull request or a passing mock test is never called live. Rows before R-55 were settled before the column existed. Later decisions override earlier ones where they differ: R-103 over R-102 over R-101 over R-100 over R-99 over R-98 over R-97 over R-96 over R-95 over R-94 over R-93 over R-92 over R-91 over R-90 over R-89 over R-88 over R-75 to R-87 over everything older. A new decision is added to the full table first, then to this index, in the same pull request.
 
 | # | Decision | Status |
 |---|---|---|
@@ -295,6 +295,8 @@ One line per decision. The full text, with what each one changes and why, is `do
 | R-99 | Launch preserved: Kabsi launches as a Google Business Profile assistant on WhatsApp; the wider assistant is a hypothesis, not a commitment; paid demand tracked apart from Founding 25 with a paid gate at day 45; three activation measures, an evidence log and a validation view (Scope 1); new capabilities chosen on wider evidence with Rashid's yes; five integration classes; Outbound a separate track that never blocks launch and sends only when the four conditions of 30.19 section 7 hold; the launch gate's blockers and waivers; point-in-time recovery from 500 US dollars MRR (master plan 30.19, docs/strategy/2026-10-30-expansion-evidence.md) | Approved |
 | R-100 | Scope 1 verified; Kapso: the WABA sits in the Kabsi.co portfolio (Rashid confirms in Meta); no lawyer now, sourced AI legal checks instead (Rashid's call, risk his); Creem: payouts only to Hussein's own account, Rashid listed as authorised representative, scheduled cancel built by Kabsi; the website redesign as a parallel design track (light editorial, the demonstration first, no invented proof); list prices 29 and 59 with the founding price 19 and 39 kept, live after Rashid's yes (master plan 30.20) | Approved |
 | R-101 | WhatsApp ownership confirmed in Meta; say what should be done, never promise results; videos made in kabsi-design-studio after launch; priority help on Pro (4 working hours, a call when needed); AI-generated people as scenes only; no Google logo and no invented customers or trust rows (master plan 30.21) | Approved |
+| R-102 | The product decision: Kabsi stays the product, no rebuild; Outbound shelved; paid Meta ads from the launch gate (UK salons and barbers, then the UAE) with day 14 and day 30 gates; AI answer accuracy (AI Answers 1) built before launch; AI Presence Care a hypothesis only; Kapso on Pro with 12-month retention and model improvement off (master plan 30.22) | Approved |
+| R-103 | The website brief of 4 Nov: Kabsi shown doing the whole job, the profile watch and photo posts lead; Photo Post 1 first; Design 9 designs the system, Web 5 ports it; no Gemini, Claude or Google AI search shown as covered, no logos, no promises (master plan 30.23) | Approved |
 
 ## 7. Order of work (R-84; master plan 27.11, 28.4, 29.8)
 
