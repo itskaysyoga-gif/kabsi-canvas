@@ -28,7 +28,7 @@ export function ReviewDone({
   return (
     <article
       aria-label={`Reply to ${review.reviewer_name ?? "a customer"}`}
-      className="rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5"
+      className="rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-6"
     >
       <ReviewCardTop review={review} />
       <div className="mt-3 flex flex-wrap items-center gap-2">

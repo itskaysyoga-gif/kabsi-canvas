@@ -98,40 +98,45 @@ export function ActionCenter({ loc, access }: { loc: Location; access: Access })
     );
 
   return (
-    <div className="space-y-8">
-      <NeedsAttention lines={attention} />
-      {yes.length > 0 ? (
-        <HomeSection id="yes-h" title="Needs your yes" count={yes.length} note={REPLY_NOTE}>
-          <ul className="divide-y divide-line">
-            {yes.map((t, i) =>
-              isBacklogSummary(t) ? (
-                <li key={t.id} className="py-4 first:pt-0 last:pb-0">
-                  <BacklogCard task={t} locationId={loc.id} lead={i === 0} />
-                </li>
-              ) : (
-                <YesItem
-                  key={t.id}
-                  task={t}
-                  detail={details.data?.[t.id]}
-                  access={access}
-                  locationId={loc.id}
-                  lead={i === 0}
-                  approved={held.get(t.id)?.a}
-                  onApproved={(a) => setHeld((m) => new Map(m).set(t.id, { task: t, a }))}
-                  onSettled={() => void settle(t.id)}
-                />
-              ),
-            )}
-          </ul>
-        </HomeSection>
-      ) : null}
-      {attention.length === 0 && yes.length === 0 ? (
-        <EmptyState icon={Check} title="Nothing needs you right now.">
-          {emptyHomeLine(nextMonday())}
-        </EmptyState>
-      ) : null}
-      <DoneThisWeek locationId={loc.id} />
-      <BusinessNumbers locationId={loc.id} />
+    // App 3: on a computer, what needs the owner on the left and what Kabsi did on the right, so the page uses the width.
+    <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_25rem]">
+      <div className="min-w-0 space-y-8">
+        <NeedsAttention lines={attention} />
+        {yes.length > 0 ? (
+          <HomeSection id="yes-h" title="Needs your yes" count={yes.length} note={REPLY_NOTE}>
+            <ul className="divide-y divide-line">
+              {yes.map((t, i) =>
+                isBacklogSummary(t) ? (
+                  <li key={t.id} className="py-4 first:pt-0 last:pb-0">
+                    <BacklogCard task={t} locationId={loc.id} lead={i === 0} />
+                  </li>
+                ) : (
+                  <YesItem
+                    key={t.id}
+                    task={t}
+                    detail={details.data?.[t.id]}
+                    access={access}
+                    locationId={loc.id}
+                    lead={i === 0}
+                    approved={held.get(t.id)?.a}
+                    onApproved={(a) => setHeld((m) => new Map(m).set(t.id, { task: t, a }))}
+                    onSettled={() => void settle(t.id)}
+                  />
+                ),
+              )}
+            </ul>
+          </HomeSection>
+        ) : null}
+        {attention.length === 0 && yes.length === 0 ? (
+          <EmptyState icon={Check} title="Nothing needs you right now.">
+            {emptyHomeLine(nextMonday())}
+          </EmptyState>
+        ) : null}
+      </div>
+      <div className="min-w-0 space-y-8">
+        <DoneThisWeek locationId={loc.id} />
+        <BusinessNumbers locationId={loc.id} />
+      </div>
     </div>
   );
 }
@@ -159,7 +164,7 @@ export function NeedsAttention({ lines }: { lines: AttentionLine[] }) {
                   dir="auto"
                   className={
                     i === l.detail!.length - 1 && l.detail!.length > 2
-                      ? "mt-1 text-label font-semibold text-text-2"
+                      ? "mt-1 text-small font-semibold text-text-2"
                       : "mt-1 text-small text-text-2"
                   }
                 >
@@ -203,8 +208,11 @@ function DoneThisWeek({ locationId }: { locationId: string }) {
     >
       <ul className="divide-y divide-line">
         {items.map((t) => (
-          <li key={t.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-            <p className="min-w-0 flex-1 truncate text-body">
+          <li
+            key={t.id}
+            className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2 py-3 first:pt-0 last:pb-0"
+          >
+            <p className="line-clamp-2 min-w-0 flex-1 basis-56 text-body break-words">
               <span className="font-semibold">{cap(t.noun)}</span>
               {t.text ? (
                 <span dir="auto" className="text-text-2">
@@ -240,7 +248,10 @@ function BusinessNumbers({ locationId }: { locationId: string }) {
       </h2>
       <dl className="grid grid-cols-2 gap-3">
         {nums.map((x) => (
-          <div key={x.label} className="rounded-card border border-line bg-surface-1 p-4">
+          <div
+            key={x.label}
+            className="rounded-card border border-line bg-surface-1 p-5 shadow-rest"
+          >
             <dd className="font-display text-h2 font-bold">{x.n}</dd>
             <dt className="text-small text-text-2">{x.label}</dt>
           </div>
@@ -275,7 +286,7 @@ function HomeSection({
             <>
               <span
                 aria-hidden
-                className="grid size-7 place-items-center rounded-full bg-text-1 text-label font-bold text-surface-0"
+                className="grid size-7 place-items-center rounded-full bg-kb-yellow text-label font-bold text-kb-black"
               >
                 {count}
               </span>
@@ -286,7 +297,7 @@ function HomeSection({
         {action}
       </div>
       {note ? <p className="-mt-1 mb-3 text-small text-text-2">{note}</p> : null}
-      <div className="rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5">
+      <div className="rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-6">
         {children}
       </div>
     </section>

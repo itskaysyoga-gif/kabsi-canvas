@@ -94,7 +94,7 @@ export function PublishingBanner({
   const left = useSecondsLeft(until);
   return (
     <div
-      className="rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5"
+      className="rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-6"
       role="status"
       aria-live="polite"
     >
@@ -160,7 +160,7 @@ export function ReviewCardTop({ review }: { review: InboxReview }) {
           <MessageSquareText className="size-5" strokeWidth={1.75} aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <h3 className="text-title font-bold">Reply to {name}</h3>
+          <h3 className="font-display text-h3 font-bold">Reply to {name}</h3>
           {date ? <p className="text-small text-text-3">{date}</p> : null}
         </div>
       </header>
@@ -171,7 +171,7 @@ export function ReviewCardTop({ review }: { review: InboxReview }) {
               <Star
                 key={n}
                 className={cn(
-                  "size-3.5",
+                  "size-4",
                   n <= review.star_rating ? "fill-current text-text-1" : "text-line-strong",
                 )}
               />
@@ -357,7 +357,7 @@ export function ReviewCard({
     return (
       <article
         aria-label={`Reply to ${review.reviewer_name ?? "a customer"}`}
-        className="rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5"
+        className="rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-6"
       >
         <ReviewCardTop review={review} />
         <ApprovedWindow
@@ -377,7 +377,7 @@ export function ReviewCard({
     return (
       <article
         aria-label={`Reply to ${review.reviewer_name ?? "a customer"}`}
-        className="rounded-card border border-line bg-surface-1 p-4 shadow-rest sm:p-5"
+        className="rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-6"
       >
         <ReviewCardTop review={review} />
         <CardFoot>
@@ -401,7 +401,7 @@ export function ReviewCard({
     <article
       aria-label={`Reply to ${review.reviewer_name ?? "a customer"}`}
       className={cn(
-        "rounded-card border bg-surface-1 p-4 shadow-rest sm:p-5",
+        "rounded-card border bg-surface-1 p-5 shadow-rest sm:p-6",
         review.risk === "high" ? "border-warn/40" : "border-line",
       )}
     >
@@ -539,7 +539,7 @@ export function ReviewCard({
               {safeDraft ? "Reply ready" : "Write your reply"}
             </Label>
             <span
-              className={cn("text-label", text.length > MAX ? "text-bad" : "text-text-2")}
+              className={cn("text-small", text.length > MAX ? "text-bad" : "text-text-2")}
               aria-live="polite"
             >
               {text.length > MAX * 0.75 ? `${text.length} / ${MAX}` : ""}
