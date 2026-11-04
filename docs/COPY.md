@@ -1022,3 +1022,8 @@ The rule for every marketing section: a headline of at most 8 words, one line of
 - Demonstration: "Pick a case and tap the main button. Each state shows as it happens." (the state names show in the track).
 - Getting started: yellow number markers; "About 10 seconds, no access needed."; "In your Google profile: Business Profile settings, People and access, Add. Paste <group ID>, keep Manager, then Add. No password, and you stay the owner."; "Replies for your older reviews, ready for your yes. Your 14 days start when access works."
 - "You stay in control.": the three points above.
+
+### Nora on phones (Polish 4 part B, master plan 30.25 item 4)
+
+- Her lone round button below 640 px: "Ask Nora, Kabsi's assistant" for screen readers (the same words as her button in the phone bar). From 640 px the launcher is unchanged: "Chat with Nora".
+- The phone sheet's header: "Nora, Kabsi's assistant" (was "Nora from Kabsi", which stays on a computer), the line under it and "Close the chat" unchanged.

@@ -133,7 +133,8 @@ export function SiteFooter() {
           ))}
         </div>
       </div>
-      <div className="border-t border-line">
+      {/* data-nora-avoid: Nora's lone button steps aside rather than cover the legal row (Polish 4). */}
+      <div className="border-t border-line" data-nora-avoid>
         <div className="container-kb space-y-2 py-5 text-label text-text-3 lg:py-6">
           <ul className="flex flex-wrap items-center gap-x-5">
             <li>
