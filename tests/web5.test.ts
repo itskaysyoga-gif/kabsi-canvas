@@ -56,8 +56,12 @@ describe("Design 9 Home (Web 5 part B)", () => {
     expect(D9_WATCH.line).not.toContain("WhatsApp");
     expect(D9_WATCH.line.split(" ").length).toBeLessThanOrEqual(20);
     expect(read("src/components/kabsi/d9-home.tsx")).not.toContain("WHATSAPP_LAUNCH_LINE");
-    expect(read("src/components/kabsi/d9-hero.tsx").match(/\{WHATSAPP_LAUNCH_LINE\}/g)).toHaveLength(1);
-    expect(WHATSAPP_ON || read("src/components/kabsi/d9-hero.tsx").includes("!WHATSAPP_ON")).toBe(true);
+    expect(
+      read("src/components/kabsi/d9-hero.tsx").match(/\{WHATSAPP_LAUNCH_LINE\}/g),
+    ).toHaveLength(1);
+    expect(WHATSAPP_ON || read("src/components/kabsi/d9-hero.tsx").includes("!WHATSAPP_ON")).toBe(
+      true,
+    );
   });
   it("uses the facts' watched list and promises no put-back without a yes", () => {
     expect(D9_WATCH.watched).not.toContain("Description");
