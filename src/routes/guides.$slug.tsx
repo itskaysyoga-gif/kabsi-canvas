@@ -85,8 +85,8 @@ function Page() {
         <p className="mt-4 max-w-2xl text-lead text-text-2">{g.description}</p>
         <p className="mt-5 flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-1 text-small text-text-2">
           <span>
-            Kabsi team, reviewed by Rashid Abou Hamzy. Published {date(PUBLISHED)}. Updated{" "}
-            {date(g.updated)}.
+            Kabsi team, reviewed by Rashid Abou Hamzy. Published {date(g.published ?? PUBLISHED)}.
+            Updated {date(g.updated)}.
           </span>
           <span className="inline-flex items-center gap-1.5">
             <Clock3 className="size-4" aria-hidden="true" /> {g.minutes} min read
@@ -106,7 +106,10 @@ function Page() {
             </div>
             <div className="mt-12">
               <h2 className="font-display text-h3 font-bold text-text-1">
-                Google&apos;s own help page
+                {/* Fix 2: guides that cite more than Google's help say "Sources". */}
+                {g.sources.every((s) => s.label.startsWith("Google:"))
+                  ? "Google's own help page"
+                  : "Sources"}
               </h2>
               <ul className="mt-3">
                 {g.sources.map((s) => (

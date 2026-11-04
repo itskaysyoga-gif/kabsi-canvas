@@ -25,6 +25,7 @@ import {
   Steps,
 } from "@/components/marketing/guide-kit";
 import type { PhotoId } from "@/lib/site-photos";
+import { NEARBY_ON } from "@/lib/site";
 
 // Guides (D253): short, practical how-tos for business owners. Every step is checked against Google's own
 // help pages (listed as sources at the end of each guide). Facts only (§3): no promises of reviews, ratings
@@ -35,6 +36,8 @@ export type Guide = {
   title: string;
   description: string;
   updated: string; // ISO date
+  /** Fix 2: a guide first published after the first set (26 Sep 2026) carries its own date. */
+  published?: string;
   minutes: number;
   /** Cover photo (site-photos). */
   photo: PhotoId;
@@ -64,6 +67,35 @@ const G = {
   link: {
     label: "Google: Create a link or QR code to request reviews",
     href: "https://support.google.com/business/answer/16816815?hl=en",
+  },
+  // Fix 2 (master plan 30.27 item 2): the sources of the two guides of 4 Nov 2026, each read on that day.
+  guidelines: {
+    label: "Google: Guidelines for representing your business on Google",
+    href: "https://support.google.com/business/answer/3038177?hl=en",
+  },
+  hours: {
+    label: "Google: Edit your business hours",
+    href: "https://support.google.com/business/answer/15300403?hl=en",
+  },
+  special: {
+    label: "Google: How to set special hours",
+    href: "https://support.google.com/business/answer/6303076?hl=en",
+  },
+  edit: {
+    label: "Google: Edit your Business Profile",
+    href: "https://support.google.com/business/answer/3039617?hl=en",
+  },
+  chatgptSearch: {
+    label: "OpenAI: Searching the web with ChatGPT",
+    href: "https://help.openai.com/en/articles/9237897-chatgpt-search",
+  },
+  openaiApi: {
+    label: "OpenAI: Web search (API guide)",
+    href: "https://developers.openai.com/api/docs/guides/tools-web-search",
+  },
+  perplexityApi: {
+    label: "Perplexity: API overview",
+    href: "https://docs.perplexity.ai/getting-started/overview",
   },
 };
 
@@ -502,6 +534,161 @@ export const GUIDES: Guide[] = [
           Ask everyone the same way. Google prohibits offering incentives, like free or discounted
           goods or services, in exchange for reviews, and asking only customers you expect to be
           happy isn't allowed either. An honest mix of reviews is also more convincing to readers.
+        </Callout>
+      </>
+    ),
+  },
+  {
+    slug: "why-chatgpt-describes-your-business-wrongly",
+    title: "Why ChatGPT might describe your business wrongly, and what to check",
+    description:
+      "Where AI assistants like ChatGPT and Perplexity get the details they give about a local business, why one can be out of date, and what to check, in order.",
+    updated: "2026-11-04",
+    published: "2026-11-04",
+    minutes: 4,
+    photo: "guideRemove",
+    summary: [
+      "ChatGPT and Perplexity answer from web pages they find, and cite some of them.",
+      "An old page or another site that lists you can carry an old closing time or phone number.",
+      "Check the sources the answer cites, then your Google profile, your website and the other sites.",
+      "No one can make an assistant say something. You can make sure what it reads is right.",
+    ],
+    sources: [G.chatgptSearch, G.openaiApi, G.perplexityApi, G.guidelines],
+    body: (
+      <>
+        <p>
+          Someone asks ChatGPT which salon near them is open late on Saturday, and the answer names
+          your business. Sometimes it gives a detail that is not right any more: a closing time, a
+          phone number, a street. Here is where those details come from and what you can check.
+        </p>
+        <h2>Where the answers come from</h2>
+        <p>
+          ChatGPT can search the web when a question needs current information, and its answer then
+          links to the sources it used. OpenAI's own help page says search results and citations can
+          be incomplete, outdated or incorrect, and suggests opening a source to check it.
+          Perplexity also answers from a search of the web, with its sources cited. Neither one says
+          exactly which pages it reads for a given question, and the same question can get a
+          different answer on another day.
+        </p>
+        <h2>Why a detail can be wrong</h2>
+        <IconGrid
+          items={[
+            {
+              icon: <Clock3 />,
+              title: "An old page",
+              text: "A page about your business that was never updated, such as an old menu or a past event.",
+            },
+            {
+              icon: <Store />,
+              title: "Another site that lists you",
+              text: "A directory, a map app or a booking site that still has your old hours or phone.",
+            },
+            {
+              icon: <MessageSquareText />,
+              title: "Two versions",
+              text: "Your website and your Google profile saying different things.",
+            },
+          ]}
+        />
+        <h2>What to check, in order</h2>
+        <Steps
+          items={[
+            "Open each source the answer cites and find the detail it got wrong.",
+            <>
+              Check your <b>Google profile</b>: name, address, phone, website and hours, with
+              special hours for holidays.
+            </>,
+            "Check your own website: the contact page, the footer and any page with hours.",
+            "Correct the other sites that list you, starting with the ones the answer cited.",
+            "Ask the same question again another day. Answers change from run to run.",
+          ]}
+        />
+        <Callout kind="warn" title="What no one can promise">
+          No one can promise what an assistant will say, or that it will name your business. The
+          facts in the places it reads are what you control.
+        </Callout>
+        <Callout title="Using Kabsi?">
+          Kabsi asks a few questions on ChatGPT and Perplexity through their API, which can differ
+          from their apps, and shows when an answer gives a fact differently from what you
+          confirmed. It opens a task: to fix the fact on your Google profile, after your yes, or to
+          tell you what to check on your website or another site, which Kabsi cannot change.
+          {NEARBY_ON ? "" : " The AI answer opens at launch."}
+        </Callout>
+      </>
+    ),
+  },
+  {
+    slug: "keep-your-hours-and-details-the-same-everywhere",
+    title: "Keep your hours and details the same everywhere",
+    description:
+      "Your name, address, phone and hours appear on your Google profile, your website and other sites. How to keep them the same, what to change first, and how to set holiday hours.",
+    updated: "2026-11-04",
+    published: "2026-11-04",
+    minutes: 4,
+    photo: "guideManager",
+    summary: [
+      "Customers read your details in many places: your Google profile, your website and other sites.",
+      "Write your name, address, phone and hours the same way everywhere.",
+      "When something changes, change your Google profile first, then your website, then the rest.",
+      "For a holiday, set special hours instead of changing your normal week.",
+    ],
+    sources: [G.guidelines, G.edit, G.hours, G.special],
+    body: (
+      <>
+        <p>
+          When your hours or your phone number change, the change has to reach every place people
+          look. Google's guidelines ask for your name as it is in the real world, a precise address
+          and your regular hours, the hours customers can come in.
+        </p>
+        <h2>The details to keep the same</h2>
+        <IconGrid
+          items={[
+            {
+              icon: <BadgeCheck />,
+              title: "Your name",
+              text: "As it is in the real world, on your sign. No extra words added.",
+            },
+            {
+              icon: <Store />,
+              title: "Address and phone",
+              text: "Written the same way on every site, with the number customers call.",
+            },
+            {
+              icon: <Clock3 />,
+              title: "Opening hours",
+              text: "The hours customers can come in, for every day of the week.",
+            },
+            {
+              icon: <Target />,
+              title: "Your website",
+              text: "The same address everywhere, so every site sends people to one place.",
+            },
+          ]}
+        />
+        <h2>When something changes</h2>
+        <Steps
+          items={[
+            <>
+              Change it on your <b>Google profile</b> first: open your profile, select{" "}
+              <b>Edit profile</b>, then the section, such as <b>Hours</b>.
+            </>,
+            "Change it on your website, everywhere it appears: the contact page, the footer, the booking page.",
+            "Change it on your social pages and the booking or directory sites that list you.",
+            "Keep a short list of every place, so the next change is quicker.",
+          ]}
+        />
+        <h2>Holidays and short closures</h2>
+        <p>
+          For a holiday, or a closure of a few days, set special hours instead of changing your
+          regular hours. Google shows special hours on those dates only, and your normal week stays
+          as it is. For a closure of more than 6 days in a row, Google asks you to mark the business
+          as temporarily closed instead.
+        </p>
+        <Callout title="Using Kabsi?">
+          Kabsi checks your Google profile every day and tells you when it shows something different
+          from what you confirmed. Five days before a bank holiday it asks what you will do, and
+          sends the special hours to Google once you say yes. Your website and the other sites stay
+          yours to change.
         </Callout>
       </>
     ),
