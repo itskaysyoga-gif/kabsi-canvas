@@ -923,7 +923,21 @@ WhatsApp lines (supabase/functions/_shared/whatsapp/say.ts). Each answer starts 
 
 Website (Home, the work Kabsi does, src/components/kabsi/d8-data.ts): the job "Your profile kept fresh" now reads "Send a photo with a line about it. Kabsi turns it into a Google post and asks for your yes." (was "A new service, late opening, a quiet week. Kabsi writes the post and readies your photo."). Nothing else on the website changes (Design 9 and Web 5 do that).
 
-## 43. Photos 2: remove a photo from Google, the screenshot note, and a clearer Photos screen (4 Nov 2026, for lane R's next copy review)
+## 43. Web 5: Design 9 on kabsi.co (4 Nov 2026, master plan 30.24, lane R's approval of Design 9)
+
+Design 9's new lines are approved by lane R with the changes in 30.24. Each part of Web 5 adds the lines it ships here, checked against knowledge/kabsi-facts.md. Everywhere else the pages keep kabsi-canvas's current wording, not the studio's older Design 8 lines.
+
+### Part A: the shell (header, phone menu, phone bar, footer, Founding 25 line)
+
+- Header links: "How it works", "Businesses" (one link to /for, no menu; was a Businesses menu with the four trades and "Every kind of business"), "Pricing", "Log in". The header's button: "Free check" (was "Check my business free"), filled charcoal with ivory text (30.24 item 2). Screen reader: "Open menu", "Close menu" (unchanged).
+- Phone menu: the rows "How it works", "Businesses", "Pricing", "Log in"; the button "Check my business free" and the trial line (unchanged); one quiet row: "Ask Nora", and "WhatsApp" only while WHATSAPP_ON. The menu's dialog label: "Menu"; its links: "Menu links".
+- Phone bar: "Check my business free" and Nora's round button ("Ask Nora, Kabsi's assistant" for screen readers, unchanged). No WhatsApp button in the bar.
+- Footer: the brand line "Your business on Google. Taken care of." (BRAND_LINE); Facebook and Instagram as icons from SOCIAL_LINKS, read as "Kabsi on Facebook" and "Kabsi on Instagram", the list as "Kabsi on social media". Groups "Product" (How it works, Pricing, Free check, Review link and QR code, Security), "Explore" (Businesses, Guides, FAQ, Partners), "Company" (About, Founding 25, Contact, and WhatsApp only while WHATSAPP_ON). No industry links. The quiet row is unchanged: Privacy, Terms, Partner terms, Your privacy choices, the independence line with "Google's guidance on working with a third party", the operator, contact and Creem line, "© 2026 Kabsi". The footer's "Chat on WhatsApp" button is gone; WhatsApp is the Company link while the number is set.
+- Founding 25 line: words, the real count and the hide button unchanged; it shows on Home, Pricing, /for and /for/* only (no longer on How it works, 30.24 item 2).
+- The WhatsApp glyph is now Meta's own file (WhatsApp Brand Resource Center, Digital_Glyph_Green_RGB_2026.svg), beside the word only.
+- Facts: 02 (Calls to action: the header's Free check) and 01 (the website's frame from 4 Nov 2026).
+
+## 44. Photos 2: remove a photo from Google, the screenshot note, and a clearer Photos screen (4 Nov 2026, for lane R's next copy review)
 
 Website, Photos (`src/routes/_authenticated/app/photos.tsx`, `src/lib/photos.ts`, `src/components/kabsi/d3-account.tsx`). Owners and managers who may approve photos only; staff see none of the removal lines.
 

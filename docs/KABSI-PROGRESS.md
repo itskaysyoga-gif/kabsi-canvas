@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 4 Nov 2026, Photos 2. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 4 Nov 2026, Web 5 and Photos 2. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -45,7 +45,6 @@ The facts say "WhatsApp is live" only when the last step is done.
 - Price 1: before plans open, the test-mode checkout on both price families (LATER row: set `founding_places_test` to 0 in app_settings for the list price, then back to 30). The live list products are made by the setup action at going live, no dashboard step.
 - Creem (session 10): send one test event from Creem's dashboard to the webhook (expect 200 and one `billing_events` row), add the product bundle, mark Yawmiyati's organisation `billing_test` if you want to try the paid buttons. Hussein only at going live (verification, payout). Exact steps: `docs/progress/archive/2026-10-25-session-10-creem.md`.
 - A lawyer reads /terms, /privacy and the partner terms (master plan 29.8).
-- Photos 2: the live photo removal test in its archive file.
 - Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
 - V3 heads-up (25 Oct): on the Yawmiyati phone tap Skip on the old photo message, never Yes, and reply No to the monthly question. Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
@@ -63,7 +62,8 @@ The facts say "WhatsApp is live" only when the last step is done.
 
 ## Recent entries (newest first)
 
-- 4 Nov 2026, Photos 2: PR 340. Remove from Google for a photo Kabsi put on Google, the screenshot note, a clearer Photos screen, small list copies. Mock-tested. Detail: `docs/progress/archive/2026-11-04-photos2.md`.
+- 4 Nov 2026, Photos 2: PR 340. Remove a photo from Google, the screenshot note, a clearer Photos screen. Mock-tested; Rashid's live test in the file. Detail: `docs/progress/archive/2026-11-04-photos2.md`.
+- 4 Nov 2026, Web 5 (Design 9 on kabsi.co, master plan 30.24): part 0 PR 338 merged; part A (the shell) in progress. Detail: `docs/progress/archive/2026-11-04-web5.md`.
 - 4 Nov 2026, Photo Post 1: PRs 336 and 337 (a WhatsApp photo with words becomes a Google post). Mock-tested. Detail: `docs/progress/archive/2026-11-04-photo-post1.md`.
 
 

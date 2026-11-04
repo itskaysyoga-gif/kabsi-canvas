@@ -131,14 +131,18 @@ export { SOCIAL_LINKS };
 export const WHATSAPP_URL = WHATSAPP_ON ? whatsappHref("general") : `mailto:${CONTACT_EMAIL}`;
 
 /**
- * Header links (Design 8, Web 4): How it works and Pricing, then the Businesses menu (BUSINESS_MENU), Log in and the
- * one action. Founding 25 has its slim line above the header; About, Partners and the free tools are in the footer.
+ * Header links (Design 9, Web 5 part A, master plan 30.24): How it works, Businesses (one link to /for, no menu) and
+ * Pricing, then Log in and "Free check". Founding 25 has its slim line above the header on Home, Pricing and /for only;
+ * About, Partners and the free tools are in the footer.
  */
 export const NAV_LINKS = [
   { to: "/how-it-works", label: "How it works" },
+  { to: "/for", label: "Businesses" },
   { to: "/pricing", label: "Pricing" },
 ] as const;
-/** The Businesses menu (header and phone menu): the four finished trades, then every kind of business. */
+/** The header's compact action (Design 9): filled charcoal with ivory text, so it never competes with the yellow one. */
+export const HEADER_CTA = "Free check";
+/** The four finished trades, then every kind of business (the /for hub and its pages). */
 export const BUSINESS_MENU = [
   { to: "/for/hair-salon", label: "Hair salons" },
   { to: "/for/barbershop", label: "Barbershops" },

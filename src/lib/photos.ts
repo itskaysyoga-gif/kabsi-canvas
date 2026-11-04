@@ -45,7 +45,7 @@ export const CATEGORIES: Record<string, string> = {
   LOGO: "Logo",
 };
 
-/** Photos 2: one line of help under each kind of photo (docs/COPY.md section 43). Cover and logo keep their advice. */
+/** Photos 2: one line of help under each kind of photo (docs/COPY.md section 44). Cover and logo keep their advice. */
 export const CATEGORY_HELP: Record<string, string> = {
   EXTERIOR: "Your front, as customers see it.",
   INTERIOR: "The room your customers see.",

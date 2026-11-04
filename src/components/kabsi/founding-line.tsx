@@ -15,12 +15,10 @@ export const FOUNDING_LINE_KEY = "kabsi-founding-line";
 const HIDDEN_CLASS = "founding-line-hidden";
 const BEFORE_PAINT = `try{var v=localStorage.getItem("${FOUNDING_LINE_KEY}");if(v==="hidden"||v==="closed")document.documentElement.classList.add("${HIDDEN_CLASS}")}catch(e){}`;
 
-/** The pages that show the Founding 25 line. */
+/** The pages that show the Founding 25 line: Home, Pricing and the /for pages only (master plan 30.24). */
 export function foundingLinePage(path: string): boolean {
   const p = path.replace(/\/+$/, "") || "/";
-  return (
-    p === "/" || p === "/pricing" || p === "/how-it-works" || p === "/for" || p.startsWith("/for/")
-  );
+  return p === "/" || p === "/pricing" || p === "/for" || p.startsWith("/for/");
 }
 
 function remember(value: "hidden" | "closed" | null) {
@@ -40,8 +38,8 @@ function remember(value: "hidden" | "closed" | null) {
 export function FoundingLine() {
   const places = useFoundingPlaces();
   const [hidden, setHidden] = useState(false);
-  // Polish 2 (lane R decision 7 of 3 Nov 2026): only on Home, Pricing, How it works and the industry pages; never on
-  // legal, security, about, partners, sign-in or Founding 25 itself.
+  // Design 9 (master plan 30.24, changes Polish 2's decision 7): only on Home, Pricing and the /for pages; never on How
+  // it works, legal, security, about, partners, sign-in or Founding 25 itself.
   const shown = useRouterState({ select: (s) => foundingLinePage(s.location.pathname) });
   useEffect(() => {
     try {
