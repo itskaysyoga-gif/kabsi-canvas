@@ -1,4 +1,5 @@
-// Design 9 hero and the steps line (Web 5, master plan 30.24: treatment B). The H1 is one element of real, selectable
+// Design 9 hero and the steps line (Web 5, master plan 30.24: treatment B). The hero sits at z-10, so the free check's
+// suggestion list stays above the steps line that follows (check2-find-business.spec.ts). The H1 is one element of real, selectable
 // text, painted at once: no entrance, no letter animation, no layout shift. "Taken care of." sits on the Kabsi-yellow
 // bar (the d9-mark utility), once per page, in charcoal; yellow is never text on ivory or white.
 import { ArrowRight } from "lucide-react";
@@ -46,7 +47,7 @@ export function D9Title({ text }: { text: string }) {
 
 export function D9Hero() {
   return (
-    <section aria-labelledby="hero-title" data-hero className="relative isolate">
+    <section aria-labelledby="hero-title" data-hero className="relative isolate z-10">
       <div className="container-kb grid gap-6 pt-6 pb-10 sm:gap-8 md:pt-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-12 lg:pt-14 lg:pb-20">
         <div className="max-w-[40rem]">
           <h1 id="hero-title" className="text-display text-balance">
