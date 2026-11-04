@@ -14,6 +14,8 @@
 --    photo engine refused is still told to its sender, and a post waiting with it is skipped.
 
 alter table public.photos add column if not exists post_hold boolean not null default false;
+alter table public.photos add column if not exists wa_post_id uuid;
+comment on column public.photos.wa_post_id is 'Photo Post 1: the post made on WhatsApp from this photo and its words. Skip and "Add as a photo" act only on that post.';
 comment on column public.photos.post_hold is
   'Photo Post 1: the photo came on WhatsApp with words. It goes to Google only with its post, or as a plain photo after the owner chooses "Add as a photo".';
 
@@ -28,7 +30,7 @@ end $$;
 
 -- How many posts a business may still send this month on its plan (Essentials 2 a month; Pro weekly, counted as up to 5 a
 -- month, one for each week a month can touch). Posts sent this month and photo posts already waiting for a yes count.
--- Null: no limit applies here (a demo or early-access business, or no plan; publishing itself still checks the plan).
+-- Null: no plan limits apply here (no plan at all; publishing itself still checks the plan).
 create or replace function private.photo_posts_left(p_location uuid) returns integer
 language plpgsql stable security definer set search_path = '' as $$
 declare l public.locations; v_lim jsonb; v_cap integer; v_month timestamptz; v_used integer;
@@ -58,7 +60,8 @@ language plpgsql security definer set search_path = '' as $$
 declare l public.locations; ph public.photos; v_text text := trim(coalesce(p_text, '')); v_id uuid; v_left integer; v_to jsonb;
   v_self boolean;
 begin
-  select * into l from public.locations where id = p_location;
+  -- The business row is locked, so two photos sent at the same moment cannot both take the last post of the month.
+  select * into l from public.locations where id = p_location for update;
   if not found then return jsonb_build_object('ok', false, 'reason', 'unknown_location'); end if;
   if not exists (select 1 from public.location_members where location_id = p_location and user_id = p_user) then
     return jsonb_build_object('ok', false, 'reason', 'not_member');
@@ -78,6 +81,7 @@ begin
   insert into public.gbp_posts (location_id, owner_input, body, state, source, topic_type, photo_id)
   values (p_location, left(trim(coalesce(p_caption, '')), 1000), v_text, 'draft', 'owner', 'STANDARD', p_photo)
   returning id into v_id;
+  update public.photos set wa_post_id = v_id where id = p_photo;
   v_self := private.may_approve(p_location, 'post', p_user, false);
   if v_self then
     v_to := jsonb_build_array(jsonb_build_object('user_id', p_user));
@@ -112,7 +116,8 @@ begin
   return jsonb_build_object('result', 'skipped', 'location_id', a.location_id);
 end $$;
 
--- 5. A held photo: the sender, or an owner or manager of its business, from their own phone with WhatsApp on.
+-- 5. A held photo, from a phone with WhatsApp on. "Add as a photo" only by an owner or manager of its business (the owner's own
+-- choice); Skip also by the person who sent it.
 create or replace function public.whatsapp_held_photo(p_phone text, p_photo uuid, p_action text) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare o public.whatsapp_optins; ph public.photos;
@@ -122,15 +127,16 @@ begin
   if not found then return jsonb_build_object('result', 'unknown'); end if;
   select * into ph from public.photos where id = p_photo for update;
   if not found or ph.source <> 'whatsapp' then return jsonb_build_object('result', 'unknown'); end if;
-  if not (ph.uploaded_by = o.user_id or exists (select 1 from public.location_members m where m.location_id = ph.location_id
-            and m.user_id = o.user_id and m.role in ('owner', 'manager'))) then
+  if not exists (select 1 from public.location_members m where m.location_id = ph.location_id
+                   and m.user_id = o.user_id and m.role in ('owner', 'manager'))
+     and not (p_action = 'skip' and ph.uploaded_by = o.user_id) then
     return jsonb_build_object('result', 'not_yours');
   end if;
   if not ph.post_hold or ph.state not in ('checking', 'draft') then
     return jsonb_build_object('result', 'already', 'location_id', ph.location_id);
   end if;
-  -- Either way the post waiting with this photo (if any) is skipped: the owner chose something else.
-  update public.gbp_posts set state = 'skipped' where photo_id = p_photo and state = 'draft';
+  -- Either way the post made on WhatsApp from this photo (if any) is skipped: the owner chose something else.
+  update public.gbp_posts set state = 'skipped' where id = ph.wa_post_id and state = 'draft';
   if p_action = 'skip' then
     update public.photos set state = 'skipped' where id = p_photo;
     return jsonb_build_object('result', 'skipped', 'location_id', ph.location_id);
@@ -149,7 +155,8 @@ language plpgsql security definer set search_path = '' as $$
 declare r record; v_out jsonb := '[]'::jsonb; v_role text; v_to jsonb;
 begin
   for r in
-    select p.id, p.location_id, p.state, p.category, p.suitable, p.issues, p.flags, p.suitability_note, p.uploaded_by, l.name as business
+    select p.id, p.location_id, p.state, p.category, p.suitable, p.issues, p.flags, p.suitability_note, p.uploaded_by, p.wa_post_id,
+           l.name as business
       from public.photos p join public.locations l on l.id = p.location_id
      where p.source = 'whatsapp' and p.kind = 'photo' and p.state in ('draft', 'refused') and p.wa_asked_at is null
        and p.processed_at > now() - interval '2 days' and p.uploaded_by is not null
@@ -158,7 +165,7 @@ begin
   loop
     update public.photos set wa_asked_at = now() where id = r.id;
     if r.state = 'refused' then
-      update public.gbp_posts set state = 'skipped' where photo_id = r.id and state = 'draft';
+      update public.gbp_posts set state = 'skipped' where id = r.wa_post_id and state = 'draft';
     end if;
     select m.role into v_role from public.location_members m where m.location_id = r.location_id and m.user_id = r.uploaded_by;
     if r.state = 'refused' or v_role in ('owner', 'manager') then
@@ -183,6 +190,19 @@ language sql stable security definer set search_path = '' as $$
                     and (state = 'refused' or not post_hold))
       or exists (select 1 from private.monthly_update_candidates())
 $$;
+
+-- 7. A held photo is never approved as a plain photo, from any screen (the app's Publish and Approve all included). It reaches
+-- Google only as its post's media, or as a plain photo after the owner chose "Add as a photo" (which clears the hold).
+do $$
+declare d text; n text;
+begin
+  d := pg_get_functiondef('public.approve_publication(text, uuid, jsonb, uuid, text, integer)'::regprocedure);
+  n := replace(d, $x$if ph.kind = 'video' then raise exception 'video_later'; end if;$x$,
+                  $x$if ph.kind = 'video' then raise exception 'video_later'; end if;
+    if ph.post_hold then raise exception 'photo_with_post'; end if;$x$);
+  if n = d then raise exception 'approve_publication: the photo check was not found'; end if;
+  execute n;
+end $$;
 
 revoke all on function public.whatsapp_photo_hold(uuid, uuid), public.whatsapp_photo_post_prepare(uuid, uuid, uuid, text, text),
   public.whatsapp_post_skip(text, text), public.whatsapp_held_photo(text, uuid, text) from public, anon, authenticated;

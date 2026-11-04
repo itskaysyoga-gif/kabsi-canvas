@@ -67,6 +67,7 @@ select is(public.whatsapp_held_photo('+12125550199', '00000000-0000-4000-8000-00
 select is(public.whatsapp_held_photo('+12125550101', '00000000-0000-4000-8000-0000000005a3', 'photo') ->> 'result', 'photo', 'Add as a photo');
 select is((select post_hold from public.photos where id = '00000000-0000-4000-8000-0000000005a3'), false, 'no longer held');
 select is(public.whatsapp_held_photo('+12125550101', '00000000-0000-4000-8000-0000000005a3', 'skip') ->> 'result', 'already', 'not held any more');
+select is(public.whatsapp_held_photo('+12125550105', '00000000-0000-4000-8000-0000000005a2', 'photo') ->> 'result', 'not_yours', 'staff cannot choose Add as a photo');
 select is(public.whatsapp_held_photo('+12125550101', '00000000-0000-4000-8000-0000000005a2', 'skip') ->> 'result', 'skipped', 'the owner skips staff''s held photo');
 select is((select state from public.gbp_posts where id = (select (r ->> 'post_id')::uuid from ps)), 'skipped', 'and the post waiting with it');
 
@@ -84,7 +85,8 @@ select ok(exists (select 1 from jsonb_array_elements(public.whatsapp_photos_due(
   'a refused held photo is told to its sender');
 select is((select state from public.gbp_posts where id = (select (r ->> 'post_id')::uuid from pr)), 'skipped', 'and its post is skipped');
 
--- The plan's posts: once none is left, no post is made.
+-- The plan's posts: the fixture's trial counts as Pro (up to 5 a month); once none is left, no post is made.
+select isnt(private.photo_posts_left('00000000-0000-4000-8000-0000000000c1'), null, 'a limit applies on the trial');
 insert into public.photos (id, location_id, storage_path, source, uploaded_by, state, kind) values
   ('00000000-0000-4000-8000-0000000005a5', '00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000c1/pp5.jpg', 'whatsapp', '00000000-0000-4000-8000-0000000000a1', 'checking', 'photo');
 do $$
@@ -94,10 +96,16 @@ begin
     insert into public.gbp_posts (location_id, owner_input, body, state) values ('00000000-0000-4000-8000-0000000000c1', 'x', 'Posted earlier this month.', 'posted');
   end loop;
 end $$;
-select ok(private.photo_posts_left('00000000-0000-4000-8000-0000000000c1') is null
-  or public.whatsapp_photo_post_prepare('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000a1',
-       '00000000-0000-4000-8000-0000000005a5', 'x', 'One more post this month.') ->> 'reason' = 'posts_used_up',
-  'no posts left: no post is made');
+select is(private.photo_posts_left('00000000-0000-4000-8000-0000000000c1'), 0, 'the plan''s posts are used up');
+select is(public.whatsapp_photo_post_prepare('00000000-0000-4000-8000-0000000000c1', '00000000-0000-4000-8000-0000000000a1',
+  '00000000-0000-4000-8000-0000000005a5', 'x', 'One more post this month.') ->> 'reason', 'posts_used_up', 'no posts left: no post is made');
+select is(private.plan_limits('essentials') ->> 'posts_per_month', '2', 'Essentials: 2 posts a month');
+select is((private.plan_limits('pro') ->> 'weekly_posts')::boolean, true, 'Pro: weekly posts');
+
+-- A held photo is never approved as a plain photo, from any screen.
+update public.photos set state = 'draft', processed_at = now() where id = '00000000-0000-4000-8000-0000000005a5';
+select throws_ok($$ select public.approve_publication('photo', '00000000-0000-4000-8000-0000000005a5', '{}'::jsonb,
+  '00000000-0000-4000-8000-0000000000a1', 'dashboard') $$, 'photo_with_post', 'a held photo is refused as a plain photo');
 
 select ok(not has_function_privilege('authenticated', 'public.whatsapp_photo_post_prepare(uuid, uuid, uuid, text, text)', 'execute'), 'service only');
 select ok(not has_function_privilege('authenticated', 'public.whatsapp_post_skip(text, text)', 'execute'), 'service only');

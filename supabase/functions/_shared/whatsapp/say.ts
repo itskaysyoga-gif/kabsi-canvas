@@ -116,6 +116,10 @@ export const SAY = {
   photoPostUsedUp: (business: string) =>
     `${business}: your plan has no posts left this month, so Kabsi cannot make this a post. You can add the photo to your Google profile on its own, or skip it.`,
   photoPostProblemTail: "Or add the photo to your Google profile on its own, or skip it.",
+  photoPostProblemTailStaff: "Or send the photo again without words to add it on its own, or skip it.",
+  photoPostUsedUpStaff: (business: string) =>
+    `${business}: the plan has no posts left this month, so Kabsi cannot make this a post. Send the photo again without words to add it on its own, or skip it.`,
+  photoPostOnSite: "Thank you. Kabsi made a post with your photo and words. It waits for the owner's yes on kabsi.co. Nothing goes on Google until they say yes.",
   photoPostChecking: "Kabsi is still checking the photo. Press Approve again in a minute.",
   photoPostSkipped: "Okay, skipped. Nothing was put on Google.",
   heldAsPhoto: "Okay. Kabsi is getting the photo ready on its own and will ask you here: Yes, Edit or Skip. Nothing goes on Google until you say yes.",

@@ -375,7 +375,7 @@ export class World {
         const p = w.waPhotos.get(photo);
         if (!u || !p) return { result: "unknown" };
         const role = w.biz.find((b) => b.id === p.location)?.members[u.id];
-        if (p.user !== u.id && role !== "owner" && role !== "manager") return { result: "not_yours" };
+        if (role !== "owner" && role !== "manager" && !(action === "skip" && p.user === u.id)) return { result: "not_yours" };
         if (!p.hold || !["checking", "draft"].includes(p.state)) return { result: "already", location_id: p.location };
         for (const po of w.posts.values()) if (po.photo === photo && po.state === "draft") po.state = "skipped";
         if (action === "skip") {

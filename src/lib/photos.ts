@@ -86,6 +86,8 @@ export async function loadPhotos(locationId: string) {
     )
     .eq("location_id", locationId)
     .neq("state", "skipped")
+    // Photo Post 1: a photo sent on WhatsApp with words belongs to its post, never a plain photo of its own.
+    .eq("post_hold", false)
     .is("file_deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(80);

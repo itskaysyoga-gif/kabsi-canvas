@@ -726,36 +726,50 @@ async function photoPost(t: Turn, mediaId: string, size: number | null, caption:
   if (!r) return answered(t, SAY.notConnectedYet(b.business, `${t.d.appUrl}/app`), "photo_not_connected");
   if (!r.ok || !r.photo_id) return answered(t, SAY.photoUnreadable, "photo_refused");
   const photoId = r.photo_id;
-  await t.d.db.photoHold(photoId, b.user_id);
-  const held: Button[] = [{ id: `hp:${photoId}`, title: "Add as a photo" }, { id: `hs:${photoId}`, title: "Skip" }];
+  // Held before anything else is decided. If the hold did not take, nothing more is done with it (it would go the plain photo
+  // way, which still needs the owner's Yes): the person is asked to send it again.
+  if (!(await t.d.db.photoHold(photoId, b.user_id).catch(() => false))) return answered(t, SAY.photoUnreadable, "photo_post_hold_failed");
+  // A held photo stays only if the owner says so: "Add as a photo" is the owner's or a manager's choice; staff can only skip it.
+  const staff = b.role === "staff";
+  const held: Button[] = staff ? [{ id: `hs:${photoId}`, title: "Skip" }]
+    : [{ id: `hp:${photoId}`, title: "Add as a photo" }, { id: `hs:${photoId}`, title: "Skip" }];
+  const tail = staff ? SAY.photoPostProblemTailStaff : SAY.photoPostProblemTail;
+  // Any other refusal: the photo and any post made from it are skipped, so nothing is left waiting with no buttons.
+  const drop = async (reply: Promise<string>) => {
+    await t.d.db.heldPhoto(t.phone, photoId, "skip").catch(() => null);
+    return reply;
+  };
 
   const text = await photoPostText(t, caption);
-  if (!text.ok) return answered(t, `${SAY.postProblem(b.business, text.problems)} ${SAY.photoPostProblemTail}`, "photo_post_problem", held);
+  if (!text.ok) return answered(t, `${SAY.postProblem(b.business, text.problems)} ${tail}`, "photo_post_problem", held);
   const p = await t.d.db.photoPostPrepare(b.location_id, b.user_id, photoId, caption, text.text);
   if (!p.ok || !p.post_id) {
     const why = p.reason ?? "unknown";
-    if (why === "posts_used_up") return answered(t, SAY.photoPostUsedUp(b.business), "photo_post_used_up", held);
-    if (why === "photo_not_usable") return answered(t, SAY.photoUnreadable, `photo_post_refused:${why}`);
-    if (/house_style|bad_post_text/.test(why)) return answered(t, `${SAY.postProblem(b.business, ["does not fit a post"])} ${SAY.photoPostProblemTail}`, `photo_post_refused:${why}`, held);
-    return prepareRefused(t, why, "post");
+    if (why === "posts_used_up") return answered(t, staff ? SAY.photoPostUsedUpStaff(b.business) : SAY.photoPostUsedUp(b.business), "photo_post_used_up", held);
+    if (/house_style|bad_post_text/.test(why)) return answered(t, `${SAY.postProblem(b.business, ["does not fit a post"])} ${tail}`, `photo_post_refused:${why}`, held);
+    if (why === "photo_not_usable") return drop(answered(t, SAY.photoUnreadable, `photo_post_refused:${why}`));
+    return drop(prepareRefused(t, why, "post"));
   }
   const buttons = (token: string): Button[] => [{ id: `a:${token}`, title: "Approve" }, { id: `e:${token}`, title: "Edit on kabsi.co" }, { id: `qs:${token}`, title: "Skip" }];
   if (p.self) {
     // The sender may approve posts: the same token and binding to this draft as a typed post.
     const a = await t.d.db.actionCreate(b.user_id, "local_post", p.post_id);
-    if (!a.ok || !a.token) return prepareRefused(t, a.reason, "post");
+    if (!a.ok || !a.token) return drop(prepareRefused(t, a.reason, "post"));
     return answered(t, SAY.photoPostShown(b.business, (a.text ?? text.text).trim()), "photo_post_shown", buttons(a.token));
   }
   // Staff (or anyone who may not approve posts): the owners and managers who may are asked; the sender never gets an Approve button.
+  let asked = 0;
   for (const to of p.to ?? []) {
     if (!to.phone) continue;
     const a = await t.d.db.actionCreate(to.user_id, "local_post", p.post_id).catch(() => null);
     if (!a?.ok || !a.token) continue;
-    await notify(t.d.out, { phone: to.phone, userId: to.user_id, locationId: b.location_id, kind: "post_ready",
+    const sent = await notify(t.d.out, { phone: to.phone, userId: to.user_id, locationId: b.location_id, kind: "post_ready",
       body: SAY.photoPostForOwner(b.business, (a.text ?? text.text).trim()), buttons: buttons(a.token),
-      template: ref("post_ready", { business: b.business }), dedupe: `photo_post:${p.post_id}:${to.user_id}` }).catch(() => null);
+      template: ref("post_ready", { business: b.business }), dedupe: `photo_post:${p.post_id}:${to.user_id}` }).catch(() => "failed");
+    if (sent !== "failed" && sent !== "dropped") asked++;
   }
-  return answered(t, SAY.photoPostTakenStaff, "photo_post_staff");
+  // Nobody who may approve has WhatsApp on: the post waits on kabsi.co, and the sender is told exactly that.
+  return asked ? answered(t, SAY.photoPostTakenStaff, "photo_post_staff") : answered(t, SAY.photoPostOnSite, "photo_post_staff_site");
 }
 
 async function postSkip(t: Turn, token: string): Promise<string> {

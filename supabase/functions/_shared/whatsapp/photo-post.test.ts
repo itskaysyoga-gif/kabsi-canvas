@@ -201,3 +201,39 @@ Deno.test("photo post: someone else's Skip or Add as a photo is refused", async 
   assert.equal(r.result, "held_photo:not_yours");
   assert.equal([...w.waPhotos.values()][0].hold, true);
 });
+
+Deno.test("photo post: staff words that fail the checks get Skip only; Add as a photo is the owner's choice", async () => {
+  const w = new World();
+  const deps = w.deps();
+  const r = await send(w, deps, PHONES.staff, { media: img("pp12"), text: "The best coffee in town, call 212 555 0188" });
+  assert.equal(r.result, "photo_post_problem");
+  assert.match(r.last!.body, /Or send the photo again without words to add it on its own, or skip it\.$/);
+  assert.deepEqual(r.last!.buttons, ["Skip"]);
+  const [photoId] = [...w.waPhotos.keys()];
+  const add = await send(w, deps, PHONES.staff, { button: `hp:${photoId}` });
+  assert.equal(add.result, "held_photo:not_yours", "staff cannot choose Add as a photo");
+  assert.equal(w.waPhotos.get(photoId)!.hold, true);
+  const skip = await send(w, deps, PHONES.staff, { button: `hs:${photoId}` });
+  assert.equal(skip.result, "held_photo_skipped", "the sender may skip their own photo");
+});
+
+Deno.test("photo post: staff when no owner or manager has WhatsApp on are told it waits on kabsi.co", async () => {
+  const w = new World();
+  for (const u of w.users) if (u.id === USERS.owner || u.id === USERS.manager) u.optin = "stopped";
+  const deps = w.deps();
+  const r = await send(w, deps, PHONES.staff, { media: img("pp13"), text: CAPTION });
+  assert.equal(r.result, "photo_post_staff_site");
+  assert.match(r.last!.body, /It waits for the owner's yes on kabsi\.co\./);
+  assert.ok(!w.outbox.some((x) => x.kind === "post_ready"));
+});
+
+Deno.test("photo post: a refusal from the database skips the held photo, nothing is left waiting", async () => {
+  const w = new World();
+  const deps = w.deps();
+  const realPrepare = deps.db.photoPostPrepare;
+  deps.db.photoPostPrepare = async () => ({ ok: false, reason: "location_not_active" });
+  const r = await send(w, deps, PHONES.owner, { media: img("pp14"), text: CAPTION });
+  assert.equal(r.result, "post_refused:location_not_active");
+  assert.equal([...w.waPhotos.values()][0].state, "skipped");
+  deps.db.photoPostPrepare = realPrepare;
+});
