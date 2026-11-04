@@ -15,6 +15,7 @@
 import { admin, captureError, CORS, currentUser, fail, isInternal, json, log, rateLimit } from "../_shared/kabsi.ts";
 import { creemWebhook } from "../_shared/creem-webhook.ts";
 import { counted } from "../_shared/webhook-rejections.ts";
+import { isSmoke, refusalAlertDue } from "../_shared/webhook-smoke.ts";
 import {
   addLocation, BillingError, cancelAtEnd, changePlan, CREEM_MODE, isCreemError, keepPlan, portal, removeLocation, setupProducts, staffAlert,
   startCheckout, storeEvent,
@@ -25,10 +26,11 @@ function webhook(req: Request): Promise<Response> {
   return creemWebhook(req, {
     secret: Deno.env.get("CREEM_WEBHOOK_SECRET") ?? "",
     store: (e) => storeEvent(e),
-    refused: async (problem) => {
-      log("billing-creem", { ok: false, refused: problem });
+    refused: async (problem, smoke) => {
+      log("billing-creem", { ok: false, refused: problem, smoke });
       // More than 5 refusals in an hour is somebody trying, or a secret that changed: staff hear about it once an hour.
-      if (!(await rateLimit("creem_signature_failures", 5, 3600))) {
+      // Polish 4: the smoke test's tagged calls count only above 20 an hour (_shared/webhook-smoke.ts).
+      if (await refusalAlertDue(smoke, rateLimit, { counted: "creem_signature_failures", smoke: "creem_smoke_refusals" }, 5)) {
         await staffAlert("Creem webhook refused more than 5 calls with a bad signature in the last hour", `sig:${new Date().toISOString().slice(0, 13)}`)
           .catch((e) => captureError("billing-creem", e, { step: "sig_alert" }));
       }
@@ -152,5 +154,6 @@ Deno.serve(async (req) => {
   if (path.endsWith("/owner")) return await owner(req);
   if (path.endsWith("/test-run")) return await testRun(req);
   // Sec 2: refused calls are counted for the staff operations view.
-  return await counted("creem", await webhook(req));
+  // Polish 4: a refusal tagged x-kabsi-smoke: 1 is counted as smoke_401; the tag never changes the answer.
+  return await counted("creem", await webhook(req), undefined, isSmoke(req.headers));
 });
