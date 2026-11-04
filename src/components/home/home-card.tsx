@@ -24,7 +24,7 @@ export function HomeCard({
   return (
     <article
       className={cn(
-        "rounded-card border bg-surface-1 p-4 shadow-rest sm:p-5",
+        "rounded-card border bg-surface-1 p-5 shadow-rest sm:p-6",
         tone === "warn" ? "border-warn/40" : "border-line",
         className,
       )}

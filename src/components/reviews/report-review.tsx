@@ -83,7 +83,7 @@ export function ReportReview({ review }: { review: { id: string; location_id: st
           ) : (
             <Guide reviewId={review.id} locationId={review.location_id} />
           )}
-          <p className="mt-6 text-label leading-5 text-text-2">
+          <p className="mt-6 text-small text-text-2">
             Categories and steps read on Google's own help pages on {GOOGLE_CHECKED}:{" "}
             <ExtLink href={GOOGLE_POLICY_URL}>the content policy</ExtLink> and{" "}
             <ExtLink href={GOOGLE_REPORT_HELP_URL}>how to report a review</ExtLink>. Google can
@@ -141,7 +141,7 @@ function Guide({ reviewId, locationId }: { reviewId: string; locationId: string 
         <div className="mt-3 space-y-4">
           {CATEGORY_GROUPS.map((g) => (
             <fieldset key={g.title}>
-              <legend className="text-label font-bold uppercase tracking-wider text-text-2">
+              <legend className="text-small font-bold text-text-1">
                 {g.title}
               </legend>
               <div className="mt-1.5 space-y-2">
@@ -265,7 +265,7 @@ function Tracker({ report, locationId }: { report: ReviewReport; locationId: str
   return (
     <div className="mt-5 space-y-5">
       <div className="rounded-card bg-surface-2 p-4">
-        <p className="text-label font-bold uppercase tracking-wider text-text-2">Where it stands</p>
+        <p className="text-small font-bold text-text-1">Where it stands</p>
         <p className="mt-1 text-title font-bold">{STATE_LABEL[report.state]}</p>
         {category ? (
           <p className="mt-1 text-small text-text-2">Reason you chose: {category.name}</p>

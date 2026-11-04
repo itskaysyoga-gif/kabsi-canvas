@@ -1039,3 +1039,8 @@ No wording changes on the signed-in screens except the lines below; every other 
 - The state track (every task, every photo tile, and How it works): "Approved", "Sent to Google", "Live on Google", or "Did not go through" in place of "Live on Google" when Google says no. Replaces section 44's narrow-card names ("Approved", "Sent" and "Live"): on a narrow card the three states now stack, one line each, with their full names.
 - Posts: "Kind of post" (screen readers only), "Button" and "Posts a month" are the chip groups' labels (were the radio group's label, the dropdown's label and "Posts a month:").
 - The business sheet, opened from the business at the top of the menu (or the business name in the phone top bar): title "Your businesses"; line "Tap a business to open it."; each business with its status (the existing words: "Active", "Setup not finished", "Waiting for Google access" and the rest, "Example" on the demo business); the open one carries a tick with "Open now" for screen readers; then "Continue setup" (while setup is not finished) and "Add another business" (unchanged). Retired: the dropdown's "Switch business" label.
+
+### Part B: Home and Reviews
+
+No new words. Home: on a computer, Needs attention and Needs your yes on the left, Done by Kabsi this week and Your business on Google on the right; the section counts are charcoal-on-yellow markers; each Done row shows its words on up to two lines with its pill under them when space is short (was cut on one line). Reviews: each card's heading at the card heading size, the review at the lead size; "Report this review"'s labels in sentence case (were capitals).
+

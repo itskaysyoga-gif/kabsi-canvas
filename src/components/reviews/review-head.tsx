@@ -84,7 +84,7 @@ export function ReviewHead({ review }: { review: InboxReview }) {
           </div>
         </div>
       </div>
-      <p dir="auto" className="mt-4 whitespace-pre-wrap text-[17px] leading-7">
+      <p dir="auto" className="mt-4 whitespace-pre-wrap text-lead">
         {review.comment || <span className="text-text-2">No written review, just a rating.</span>}
       </p>
     </>
