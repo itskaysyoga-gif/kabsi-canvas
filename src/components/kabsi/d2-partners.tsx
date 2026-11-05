@@ -31,14 +31,14 @@ const STEPS = [
     text: "Send a message. Kabsi replies with the next step.",
   },
   {
-    title: "Share your page or check a business for them",
-    text: "Send your own page, or run the free check for a business you know.",
+    title: "Share your link or check a business for them",
+    text: "Send your own link, or run the free check for a business you know.",
   },
   { title: "Get paid on the 5th of each month", text: "For every business that pays." },
 ];
 
 const GETS: [typeof QrIcon, string][] = [
-  [QrIcon, "Your own page and QR code"],
+  [QrIcon, "Your own link and QR code"],
   [Gift, "Free checks to send to businesses you know"],
   [Video, "A kit of ready posts and a short video"],
   [MessageCircle, "A WhatsApp summary every Monday"],
@@ -100,18 +100,19 @@ function Earnings() {
   );
 }
 
-/** Partners' hero visual (Design 8): an Example partner page with its QR code and 25% of one Pro plan a month. */
+/** Partners' hero visual (Design 8): an Example partner link with its QR code and 25% of one Pro plan a month. Go live 1
+ * (B-028): there is no /p page; the partner link is kabsi.co/?via=CODE (knowledge/facts/01, src/lib/attribution.ts). */
 function PartnerCardVisual() {
   const share = (PRO.monthly * 0.25).toFixed(2);
   return (
     <figure className="relative mx-auto max-w-[22rem]">
       <div className="rounded-panel border border-line bg-surface-1 p-6 shadow-float">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-label font-bold text-text-2">Your partner page</p>
+          <p className="text-label font-bold text-text-2">Your partner link</p>
           <ExampleBadge />
         </div>
         <p className="mt-3 font-display text-h3 font-bold">Recommended by Sam, Kabsi Partner</p>
-        <p className="mt-1 text-small text-text-2">kabsi.co/p/sam</p>
+        <p className="mt-1 text-small text-text-2">kabsi.co/?via=SAM</p>
         <QrCode
           value="https://kabsi.co/partners"
           label="Example QR code, to kabsi.co/partners"
@@ -132,7 +133,7 @@ function PartnerCardVisual() {
         <p className="font-display text-h3 font-bold">${share} a month</p>
       </div>
       <figcaption className="sr-only">
-        An Example partner page with a QR code, and 25% of a ${PRO.monthly} Pro plan: ${share} a
+        An Example partner link with a QR code, and 25% of a ${PRO.monthly} Pro plan: ${share} a
         month.
       </figcaption>
     </figure>

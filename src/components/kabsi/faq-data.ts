@@ -1,8 +1,10 @@
 import {
+  CONTACT_EMAIL,
   FOUNDING_SENTENCE,
   KABSI_GROUP_ID,
   KABSI_GROUP_NAME,
   PRICES_SENTENCE,
+  WHATSAPP_NUMBER,
   WHATSAPP_ON,
 } from "@/lib/site";
 
@@ -158,7 +160,7 @@ export const buildFaqGroups = (whatsappOn: boolean = WHATSAPP_ON): FaqGroup[] =>
       items: [
         {
           q: "What does Kabsi cost?",
-          a: `${PRICES_SENTENCE} ${FOUNDING_SENTENCE} Both plans are free for 14 days, with no card.`,
+          a: `${PRICES_SENTENCE} ${FOUNDING_SENTENCE} The trial is 14 days of Pro, one per business, with no card.`,
         },
         {
           q: "When does the trial start?",
@@ -183,7 +185,7 @@ export const buildFaqGroups = (whatsappOn: boolean = WHATSAPP_ON): FaqGroup[] =>
         ? [
             {
               q: "Does Kabsi have a WhatsApp number?",
-              a: "Yes. Message Kabsi on WhatsApp, or write to hello@kabsi.co.",
+              a: `Yes, ${WHATSAPP_NUMBER}. Message Kabsi on WhatsApp, or write to ${CONTACT_EMAIL}.`,
             },
             {
               q: WHATSAPP_APPROVE_Q,

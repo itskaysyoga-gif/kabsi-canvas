@@ -69,7 +69,7 @@ function SocialIcon({ name }: { name: string }) {
 
 export function SiteFooter() {
   return (
-    <footer className="bg-band pb-24 sm:pb-0">
+    <footer className="bg-band pb-24 sm:pb-20">
       <div className="container-kb grid gap-8 pt-12 pb-8 lg:grid-cols-[1fr_2fr] lg:gap-10 lg:pt-20 lg:pb-12">
         <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4 lg:block">
           <div>
@@ -78,7 +78,9 @@ export function SiteFooter() {
               {BRAND_LINE}
             </p>
           </div>
-          <ul className="flex gap-1 lg:mt-6" aria-label="Kabsi on social media">
+          {/* Go live 1 (B-035): Nora's button steps aside when it would cover these, and the footer's bottom padding from
+              640 px keeps the last row clear of her wide button (80 px from the bottom). */}
+          <ul className="flex gap-1 lg:mt-6" aria-label="Kabsi on social media" data-nora-avoid>
             {SOCIAL_LINKS.map((s) => (
               <li key={s.name}>
                 <a

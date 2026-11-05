@@ -49,9 +49,9 @@ function Page() {
       <section>
         <p>
           This policy explains what Kabsi collects, why, who helps us process it, how long we keep
-          it and what you can ask us to do. It covers the website, the Kabsi app, emails from Kabsi,
-          the free review link tool, Kabsi review links, QR codes and cards, WhatsApp messages with
-          Kabsi, and the Kabsi Partners program.
+          it and what you can ask us to do. It covers the website, your Kabsi account on kabsi.co,
+          emails from Kabsi, the free review link tool, Kabsi review links, QR codes and cards,
+          WhatsApp messages with Kabsi, and the Kabsi Partners program.
         </p>
       </section>
 
@@ -115,9 +115,9 @@ function Page() {
           <li>The date and wording of the authorisation you gave Kabsi.</li>
           <li>A log of the emails we send you (address, subject, time and delivery status).</li>
           <li>
-            A record of what you approve and change: who did what and when, from the app or an email
-            link, with the country of the connection and the browser, never your IP address and
-            never review text.
+            A record of what you approve and change: who did what and when, from your Kabsi account
+            or an email link, with the country of the connection and the browser, never your IP
+            address and never review text.
           </li>
         </ul>
         <p>
@@ -191,8 +191,8 @@ function Page() {
           </p>
         ) : null}
         <p>
-          <b>When you visit the website or app:</b> anonymous usage statistics and error reports
-          (see section 7).
+          <b>When you visit the website:</b> anonymous usage statistics and error reports (see
+          section 7).
         </p>
       </section>
 
@@ -333,8 +333,8 @@ function Page() {
             leaves that job, with a passphrase only Kabsi holds.
           </li>
           <li>
-            Vercel: hosting the website and app, and Speed Insights, which measures how fast pages
-            load for visitors without cookies or any identifier.
+            Vercel: hosting the website and your Kabsi account, and Speed Insights, which measures
+            how fast pages load for visitors without cookies or any identifier.
           </li>
           <li>
             Creem: card payments. Creem is our merchant of record and receives what it needs to take
@@ -354,8 +354,8 @@ function Page() {
           </li>
           <li>Geoapify: the map pictures, from map points only.</li>
           <li>
-            When switched on, Meta, for the Meta Pixel and the Conversions API: measuring which of
-            our ads bring owners (section 7).
+            Meta, for the Meta Pixel and the Conversions API: measuring which of our ads bring
+            owners (section 7).
           </li>
           <li>
             PayPal: only if you are a Kabsi Partner and choose it to be paid. Partners paid in USDT
@@ -397,7 +397,7 @@ function Page() {
             Sign-in: your browser stores your session so you stay logged in. This is essential.
           </li>
           <li>
-            Preferences: the app remembers which business you last opened, in your browser only.
+            Preferences: the website remembers which business you last opened, in your browser only.
           </li>
           <li>
             Your privacy choices: your browser remembers the choice you made, for 12 months, so we
@@ -408,9 +408,9 @@ function Page() {
           <li>
             Statistics: PostHog counts visits without cookies and without any identifier until you
             say yes. If you say yes, it also stores an anonymous identifier to see which pages are
-            used, and may record screens on public pages, never inside the app and never with review
-            text, names, email addresses or phone numbers. If you say no, it stops. IP addresses are
-            anonymised.
+            used, and may record screens on public pages, never inside your Kabsi account and never
+            with review text, names, email addresses or phone numbers. If you say no, it stops. IP
+            addresses are anonymised.
           </li>
           <li>
             Where you came from: for the length of your visit, your browser keeps the campaign
@@ -433,10 +433,10 @@ function Page() {
             servers. Nothing is sent for the demo workspace.
           </li>
           <li>
-            Advertising: we use no advertising cookies today and don't track you on other sites.
-            When it is switched on, the Meta Pixel runs on our public pages only, never inside the
-            app, the sign-up screens, the staff pages or the links in our emails. It sees page views
-            and a few steps: the pricing page, a finished free check, a sign-up, a trial and a plan
+            Advertising: the Meta Pixel runs on our public pages only, as your choice below allows,
+            and stores Meta's own cookie in your browser. It never runs inside your Kabsi account,
+            the sign-up screens, the staff pages or the links in our emails. It sees page views and
+            a few steps: the pricing page, a finished free check, a sign-up, a trial and a plan
             bought. For a trial or a plan, Kabsi also tells Meta from its own servers (the
             Conversions API), with your email and phone number scrambled by a one-way hash as Meta
             requires. If you came from a Click to WhatsApp ad, Kabsi sends Meta the click id of that
@@ -576,11 +576,11 @@ function Page() {
         <h2>10. Your rights</h2>
         <p>
           You can ask to see the personal data we hold about you, correct it, delete it, receive a
-          copy in a common format, or object to how we use it. You can do most of this in the app.
-          For anything else, email {CONTACT_EMAIL} from the address on your account and we reply
-          within 30 days. To get a copy of your data, ask by email: we send you a file you can open
-          in a spreadsheet or a browser within 30 days, covering your business, your reviews and
-          replies, your posts, your settings and your messages with us. If you think we got
+          copy in a common format, or object to how we use it. You can do most of this in your Kabsi
+          account. For anything else, email {CONTACT_EMAIL} from the address on your account and we
+          reply within 30 days. To get a copy of your data, ask by email: we send you a file you can
+          open in a spreadsheet or a browser within 30 days, covering your business, your reviews
+          and replies, your posts, your settings and your messages with us. If you think we got
           something wrong, you can also complain to the data protection authority where you live.
         </p>
         <p>

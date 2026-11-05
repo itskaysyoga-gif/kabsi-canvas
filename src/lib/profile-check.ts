@@ -54,6 +54,8 @@ export class CheckError extends Error {
   constructor(
     public code: string,
     message: string,
+    /** The HTTP status when the function answered; a 4xx is about the visitor's input, not Kabsi's side. */
+    public status?: number,
   ) {
     super(message);
   }
@@ -75,7 +77,11 @@ async function call<T>(body: Record<string, unknown>): Promise<T> {
   }
   const j = (await res.json().catch(() => ({}))) as { error?: string; message?: string };
   if (!res.ok)
-    throw new CheckError(j.error ?? "failed", j.message || "That didn't work. Please try again.");
+    throw new CheckError(
+      j.error ?? "failed",
+      j.message || "That didn't work. Please try again.",
+      res.status,
+    );
   return j as T;
 }
 
