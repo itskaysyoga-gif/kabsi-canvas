@@ -4,7 +4,6 @@ import { HubPage, IndustryPage } from "@/components/kabsi/d8-industry";
 import { pageHead } from "@/lib/site";
 import { faqJsonLd } from "@/lib/faq";
 import { LEGACY_INDUSTRY_MOVES } from "@/lib/industry-redirects";
-import { getIndustryGuides } from "@/lib/guides-server";
 
 // /for/<industry> or /for/<hub> (brief section 16, item 3). The old trade addresses move to the new ones.
 // Lean 1 (speed): the route's loader and head stay in the shared bundle on every page, so the twelve industry texts load
@@ -26,7 +25,9 @@ export const Route = createFileRoute("/for/$trade")({
         crumbs: crumbs(crumbsFor(i)),
         indexed: industryIndexed(i),
         // Guides 3: the public guides that link to this page link back from it (decided on the server).
-        guides: await getIndustryGuides({ data: i.slug }).catch(() => []),
+        guides: await import("@/lib/guides-server")
+          .then((m) => m.getIndustryGuides({ data: i.slug }))
+          .catch(() => []),
       };
     const h = hub(params.trade);
     if (h)
