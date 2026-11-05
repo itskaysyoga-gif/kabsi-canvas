@@ -34,7 +34,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       // A page that has not set its own title yet (a signed-in page still loading) still has one (App 4 audit). The 404 and
       // error screens write their own <title> in the page, so the default stays out there: one <title> per page (Guides 4 C4).
       ...(matches.some(
-        (m) => m.status === "notFound" || m.status === "error" || (m as { _notFound?: boolean })._notFound,
+        (m) =>
+          m.status === "notFound" ||
+          m.status === "error" ||
+          (m as { _notFound?: boolean })._notFound,
       )
         ? []
         : [{ title: "Kabsi" }]),

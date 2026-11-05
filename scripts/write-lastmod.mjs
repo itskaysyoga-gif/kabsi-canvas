@@ -7,7 +7,8 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 
 const pages = JSON.parse(readFileSync("src/content/sitemap-pages.json", "utf8"));
-const git = (...a) => execFileSync("git", a, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+const git = (...a) =>
+  execFileSync("git", a, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
 const OUT = "src/content/lastmod.json";
 
 try {
@@ -19,7 +20,9 @@ try {
     }
   }
   if (git("rev-parse", "--is-shallow-repository") === "true") {
-    console.log("write-lastmod: the git history is short here, so lastmod.json is kept as committed.");
+    console.log(
+      "write-lastmod: the git history is short here, so lastmod.json is kept as committed.",
+    );
     process.exit(0);
   }
   const out = {};

@@ -5,7 +5,15 @@
 // It logs the response code and never fails: a problem here must never stop a deploy, so the exit code is always 0.
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { ENDPOINT, KEY_LOCATION, INDEXNOW_KEY, changedUrls, guidePublishTimes, payload, publishedToday } from "./lib/indexnow-lib.mjs";
+import {
+  ENDPOINT,
+  KEY_LOCATION,
+  INDEXNOW_KEY,
+  changedUrls,
+  guidePublishTimes,
+  payload,
+  publishedToday,
+} from "./lib/indexnow-lib.mjs";
 
 const args = process.argv.slice(2);
 const dry = args.includes("--dry");
@@ -19,12 +27,16 @@ async function main() {
   } else if (args.includes("--deploy")) {
     const [before, after] = args.slice(args.indexOf("--deploy") + 1, args.indexOf("--deploy") + 3);
     if (!before || !after) throw new Error("--deploy needs the previous and this commit");
-    const changedFiles = execFileSync("git", ["diff", "--name-only", before, after], { encoding: "utf8" })
+    const changedFiles = execFileSync("git", ["diff", "--name-only", before, after], {
+      encoding: "utf8",
+    })
       .split("\n")
       .filter(Boolean);
     const pages = JSON.parse(readFileSync("src/content/sitemap-pages.json", "utf8"));
     urls = changedUrls({ changedFiles, pages, guides, now });
-    console.log(`${changedFiles.length} files changed between ${before.slice(0, 7)} and ${after.slice(0, 7)}.`);
+    console.log(
+      `${changedFiles.length} files changed between ${before.slice(0, 7)} and ${after.slice(0, 7)}.`,
+    );
   } else {
     throw new Error("use --deploy <before> <after> or --daily");
   }
@@ -38,7 +50,9 @@ async function main() {
   try {
     const k = await fetch(KEY_LOCATION);
     const body = (await k.text()).trim();
-    console.log(`Key file ${KEY_LOCATION}: HTTP ${k.status}, ${body === INDEXNOW_KEY ? "matches" : "does not match"}.`);
+    console.log(
+      `Key file ${KEY_LOCATION}: HTTP ${k.status}, ${body === INDEXNOW_KEY ? "matches" : "does not match"}.`,
+    );
   } catch (e) {
     console.log(`Key file not read: ${e.message}`);
   }

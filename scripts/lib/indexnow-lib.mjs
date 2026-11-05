@@ -26,7 +26,8 @@ export async function guidePublishTimes(dir = "src/content/guides") {
     let at;
     if (expr === "FIRST_PUBLISH") at = sched.FIRST_PUBLISH;
     else if (expr === "PUBLISH_ALL_AT") at = sched.PUBLISH_ALL_AT;
-    else if (/^weeklyAt\((\d+)\)$/.test(expr)) at = sched.weeklyAt(Number(/\((\d+)\)/.exec(expr)[1]));
+    else if (/^weeklyAt\((\d+)\)$/.test(expr))
+      at = sched.weeklyAt(Number(/\((\d+)\)/.exec(expr)[1]));
     else if (/^"[0-9T:Z-]+"$/.test(expr)) at = expr.slice(1, -1);
     if (at) out[f.replace(/\.tsx$/, "")] = at;
   }
@@ -64,5 +65,10 @@ export function publishedToday({ guides, now, hours = 24 }) {
 
 /** The body IndexNow takes: one host, the key and where to read it, and up to 10,000 addresses. */
 export function payload(urls) {
-  return { host: HOST, key: INDEXNOW_KEY, keyLocation: KEY_LOCATION, urlList: urls.slice(0, 10000) };
+  return {
+    host: HOST,
+    key: INDEXNOW_KEY,
+    keyLocation: KEY_LOCATION,
+    urlList: urls.slice(0, 10000),
+  };
 }
