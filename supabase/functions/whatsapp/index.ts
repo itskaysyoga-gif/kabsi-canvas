@@ -26,7 +26,7 @@ import { SCENARIO_NAMES, sign } from "../_shared/whatsapp/replay.ts";
 import { replayMedia } from "../_shared/whatsapp/replay-media.ts";
 import { replayIo } from "../_shared/whatsapp/replay-db.ts";
 import { runScenario } from "../_shared/whatsapp/replay-run.ts";
-import { alertHour, alertSummary } from "../_shared/whatsapp/smoke-alert.ts";
+import { alertCheck, alertHour, alertSummary } from "../_shared/whatsapp/smoke-alert.ts";
 import { reviewGrowthTick } from "../_shared/review-growth/tick.ts";
 import { runVoiceEval, table as voiceTable } from "../_shared/voice/eval.ts";
 import { onboardingTick } from "../_shared/onboarding/tick.ts";
@@ -109,17 +109,18 @@ async function smokeAlert(req: Request): Promise<Response> {
   const given = req.headers.get("x-smoke-token") ?? "";
   const { data: token } = await admin().rpc("internal_secret", { p_name: "qa_smoke_token" });
   if (!given || typeof token !== "string" || !token || !timingSafeEqual(given, token)) return fail("forbidden", "Forbidden.", 403);
-  const body = (await req.json().catch(() => ({}))) as { summary?: unknown; run?: unknown };
-  const text = `Nightly smoke test failed: ${alertSummary(body.summary)}`;
+  const body = (await req.json().catch(() => ({}))) as { summary?: unknown; run?: unknown; check?: unknown };
+  const check = alertCheck(body.check);
+  const text = `${check.title}: ${alertSummary(body.summary)}`;
   // The run's address goes in the full message only (a template carries no link); it must be a GitHub Actions address.
   const run = typeof body.run === "string" && /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/actions\/runs\/\d+$/.test(body.run) ? body.run : null;
   const hour = alertHour(new Date());
-  await admin().rpc("ops_emit", { p_kind: "smoke_failed", p_channel: "alerts", p_title: "Nightly smoke test failed", p_body: text, p_dedupe: `smoke:${hour}` });
+  await admin().rpc("ops_emit", { p_kind: "smoke_failed", p_channel: "alerts", p_title: check.title, p_body: text, p_dedupe: `${check.key}:${hour}` });
   const deps = await agentDeps();
   let told = 0;
   for (const phone of await staffAdminPhones()) {
     await notify(deps.out, { phone, userId: null, locationId: null, kind: "staff_alert", urgent: true, body: run ? `${text}. ${run}` : `${text}.`,
-      template: ref("staff_alert", { summary: text }), dedupe: `smoke:${hour}:${phone}` });
+      template: ref("staff_alert", { summary: text }), dedupe: `${check.key}:${hour}:${phone}` });
     told++;
   }
   return json({ ok: true, told });

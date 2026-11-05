@@ -185,3 +185,10 @@ Deno.test("the smoke alert is one plain short line whatever the failing page pri
   assert.ok(alertSummary("x".repeat(500)).length <= 140);
   assert.equal(alertHour(new Date("2026-10-26T03:30:00Z")), "2026-10-26T03");
 });
+
+Deno.test("Fix 3: the nightly kabsi.co check has its own title and dedupe, so it never hides the smoke alert", async () => {
+  const { alertCheck } = await import("./smoke-alert.ts");
+  assert.deepEqual(alertCheck("site"), { key: "site", title: "Nightly kabsi.co check failed" });
+  assert.deepEqual(alertCheck(undefined), { key: "smoke", title: "Nightly smoke test failed" });
+  assert.deepEqual(alertCheck("anything else"), { key: "smoke", title: "Nightly smoke test failed" });
+});
