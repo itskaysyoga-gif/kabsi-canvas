@@ -98,3 +98,21 @@ D14); "promises a free redo only if you have said so" (D13, so a reply never rea
 example rows "Last post on Google", "Reviews with no reply", "Bank holiday hours" (K-82: D8).
 
 Review fixes (Web 4c): "most people would otherwise phone" became "people would otherwise phone"; "Reviews in a nail salon often name the technician" became "When a review names the technician"; "never thanked by mistake" became "never thanked once you take their name off the list".
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field       | Line on the page                                                                                                                            | Row(s) above | Type |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ---- |
+| page.answer | "For a nail salon Google Business Profile, Kabsi turns new designs into posts, checks each photo and drafts every reply, all for your yes." | D1, D3, D9   | K    |
+| profile     | "Designs, season by season": "Each new set is a post with a photo and a button to your website."                                            | D9           | K, G |
+| profile     | "Photos true to the nail": "In focus, well lit, no heavy filters. Kabsi checks each photo first."                                           | D10, D3      | G, K |
+| profile     | "Prices and the right category": "A price in a service name is rejected. Google's example: Nail salon, not Salon."                          | D11, D12     | G    |
+| profile     | "The technician, by name": "When a review names them, the reply thanks them. Only team list names are used."                                | D5           | K    |
+| page.jobs   | "Work photos, checked": "Kabsi flags a dark, blurry or too small photo before it reaches Google."                                           | D3           | K    |
+
+Removed from the page: the two long guide sections (offers and events as other post types, posts archived after six
+months, JPG or PNG, no category of your own, a second category only for real work, the reply to a nail that lifted), and
+the daily main category check and holiday hours from the answer (the watch block still shows the category check). The old
+tasks were not shown and are deleted.

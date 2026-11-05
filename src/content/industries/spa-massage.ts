@@ -75,7 +75,7 @@ export const spaMassage: Industry = {
   holidays: [
     {
       title: "UAE National Day",
-      text: "2 and 3 December. Special hours a few days ahead, and packages with an end date.",
+      text: "2 and 3 December. Special hours a few days ahead, packages with an end date.",
     },
     {
       title: "Arafah Day and Eid al-Adha",
@@ -83,7 +83,7 @@ export const spaMassage: Industry = {
     },
     {
       title: "UK Christmas and New Year",
-      text: "Christmas 25 December, Boxing Day 28 December, New Year 1 January 2027. Set them early December.",
+      text: "Christmas 25, Boxing Day 28 December, New Year 1 January 2027. Set them early December.",
     },
   ],
   photoCards: [

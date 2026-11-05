@@ -49,3 +49,23 @@ labelled Example), with Leo, Ink Harbour and Northline Tattoo, all invented.
 ## Left out
 
 * None: all three category names were shown by live profiles on 5 Nov 2026.
+
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| Answer | "A tattoo shop Google Business Profile should say how to book. Kabsi checks your description daily and prepares healed work posts and replies." | 9, 10, 21, 22 | A, K |
+| Profile card "Photos are your portfolio" | "Fresh and healed shots both help. Kabsi tells you when one is blurry or dark." | 19, 20 | A, K |
+| Profile card "Say how people book" | "By appointment only? Say so in your description. Kabsi checks it every day." | 21, 22, 25 | A, K |
+| Profile card "Thanks passed to the artist" | "A review that names Leo thanks Leo, if he is on your team list." | 23, 30 | K, Example |
+| Profile card "A review about an infection" | "No draft, a short checklist, and a neutral holding reply only if you ask." | 24, 26 | K |
+| Categories line | "Choose the first by most of your work; add body piercing only if you do it. Names can differ by country." | 6 | A, G |
+| FAQ "Can Kabsi say we only work by appointment?" | "Yes. Write it in your description and posts. Kabsi checks the description every day and tells you when Google shows something else." | 25 | K, A |
+| FAQ "What happens with a review about an infection?" | "An infection is a safety matter: no draft and a short checklist. Kabsi writes a neutral holding reply only if you ask." | 26 | K |
+
+Jobs, the watch line and the AI answer are unchanged. Related: barbershop, lash and brow studio, nail salon, hair salon, medical and aesthetic clinic, spa and massage. Guides: photos, description examples, negative reviews.
+
+Removed from the page: the search text (row 18); the two guide blocks as paragraphs; "when their books open" (row 19); "too small" in the photo check (row 20); "a name not on your list is never used" (row 23, the FAQ keeps "Kabsi never guesses"); "Kabsi never gives medical advice" (row 24); "Read the names in your own profile" (row 6); from the answer, "show the work", "names the artist", "every review" and "asks about holiday hours in time" (rows 9, 10); "marked as needing a little more care" in the infection FAQ.

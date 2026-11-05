@@ -49,3 +49,19 @@ Example), with Frame and Lens and Northgate Eyecare, both invented.
 ## Left out
 
 * None: all three category names were shown by live profiles on 5 Nov 2026.
+
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| answer | "Kabsi looks after your optician Google Business Profile: the eye test link and hours checked daily, new frames as posts, careful replies for your yes." | 7, 10 | K |
+| profile | "The link patients book with": "Website, phone and hours checked against yours daily. Kabsi asks when they differ." | 19, 20 | A, K |
+| profile | "New frames on the shelf": "A shelf photo and a line become a post for your yes, checked for sharpness." | 21 | K |
+| profile | "Eye health stays private": "Eye tests are health care. Drafts thank patients and ask them to get in touch." | 22, 23 | K |
+| profile | "What Kabsi never says": "Add it in About your business; every draft follows it. Hard reviews come to you." | 24 | K |
+| categories.line | "Choose the first by what most visits are for, glasses or eye tests. Check the names in your own profile; they differ by country." | 6 | A, G |
+
+Removed from the page: the search text paragraph (row 18) and the two guide sections it replaces as long text; "Frames sell on looks", "well lit" in the photo check, "a result, a prescription or a condition" (the job and the first FAQ keep it), and the answer's opening sentence and holiday clause.

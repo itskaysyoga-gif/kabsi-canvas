@@ -61,3 +61,22 @@ The page before Web 4c (Cedar Lane Kitchen, Dubai) had no claim sheet; it is ret
 
 - Any figure about how many guests read the menu or reviews. No source was read.
 - Delivery and ordering links (G14 says they depend on location and provider).
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field       | Line on the page                                                                                                                                         | Row(s) above                                                      | Type |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ---- |
+| page.answer | "For a restaurant Google Business Profile, Kabsi checks your hours daily, drafts every reply and turns dish photos into posts, all for your yes."        | 1, 5, 8; `knowledge/facts` "Posts"                                | K    |
+| profile     | "The menu, as on the table": "Edit the menu from your Business Profile. Add photos of the menu and dishes."                                              | 13                                                                | G    |
+| profile     | "Kitchen hours, set apart": "Google lets you set more hours, such as the kitchen or takeaway."                                                           | 4, 15                                                             | G    |
+| profile     | "Special hours for odd days": "A bank holiday, Christmas Eve, New Year's Eve, a private hire."                                                           | 16                                                                | G    |
+| profile     | "The booking link": "Your own link lets people book a table. Check it when you change systems."                                                          | 24                                                                | G, A |
+| page.jobs   | "A reply for every review": "In the guest's language. An illness review gets a checklist and no draft."                                                  | 26; `knowledge/facts/13-faq.md` "What happens with hard reviews?" | K    |
+| page.jobs   | "Bank holiday hours": "Five days ahead, Kabsi asks what you will do, then sets it after your yes."                                                       | 6, 18                                                             | K    |
+| faqs        | "Can Kabsi change my menu on Google?": "Kabsi does not edit menu items on Google today. Send a photo of the new menu, and Kabsi adds it after your yes." | 25                                                                | K    |
+
+Removed from the page: the two long guide sections (the menu photo changing the same week, the 2027 Christmas dates, a
+busy weekend's replies, the post ideas, posts archived after six months), and the guest's language and the illness line
+from the answer (both stay in the jobs). The old tasks were not shown and are deleted.

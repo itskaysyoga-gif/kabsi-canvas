@@ -41,7 +41,7 @@ export const optician: Industry = {
     },
     {
       title: "Eye health stays private",
-      text: "Eye tests are health care. Drafts thank the patient and ask them to get in touch.",
+      text: "Eye tests are health care. Drafts thank patients and ask them to get in touch.",
     },
     {
       title: "What Kabsi never says",

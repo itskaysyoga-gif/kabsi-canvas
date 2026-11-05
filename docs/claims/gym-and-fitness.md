@@ -63,3 +63,30 @@ terms are service searches with no volume in the table.
   how a gym sets them on Google.
 - A claim that Google has no class timetable. Not checked, so the page does not make it.
 - A second photo: the gym has one (`gym-training`). Other gym photos show a sign or logo (DESIGN-PROPOSAL, Design 5; docs/PHOTOS.md).
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| Answer | "On a gym Google Business Profile, people check hours and classes. Kabsi drafts dated class posts and every reply, and asks about holiday hours ahead." | 1, 19, 29 | K |
+| Profile | "Each class, with day and coach": "A post can carry the day, time and coach. Undated posts archive after six months." | 2, 3 | A, G |
+| Profile | "The trial, with an end date": "A free first class fits an offer post, which gets a View Offer button." | 4, 5 | G, A |
+| Profile | "The hours people really get in": "Open round the clock? Say so. Different hours for different things go in more hours." | 6, 7 | P, G |
+| Profile | "What you teach, as services": "Personal training and group classes each get a line, with a description." | 8, 9 | G, A |
+| Reviews | "The coach, by name": "Thanks passed on to the coach from your team list. Nothing about body or weight." | 10, 15 | K, A |
+| Reviews | "Membership fees and cancelling": "No account detail in public. It asks them to get in touch through the profile." | 17 | K |
+| Reviews | "An injury in the gym": "No draft: a short checklist, and a neutral holding reply only if you ask." | 18; `knowledge/facts/13-faq.md` "What happens with hard reviews?" | K |
+| Categories line | "'Gym' shows on a real 24 hour UK gym profile. Before adding a second, read the names in your own profile; you cannot create one." | 12, 13, 14 | C, A, G |
+| Holidays | "Ramadan, UAE": "Private sector hours drop by two a day. Settle gym hours and class times beforehand." | 24, 25 | T, A |
+| Holidays | "UAE National Day": "2 and 3 December. Say if classes run, and give any offer an end date." | 26 | T, A |
+| Holidays | "UK: Christmas and New Year 2026": "25 December, 28 December and 1 January 2027. Add the last class of each day." | 27 | T, A |
+| Photos | "The floor, with no member shown": "Wide and well lit. Kabsi checks light, focus and size, not faces, so ask first." | 22 | K |
+| Photos | "Reception and the way up": "In a tower or upstairs? Photograph the entrance and lift sign for new members." | 23 | A |
+| Photos | "Post ideas": "A new class and coach, a free first session with its end date, holiday hours." | 21 | A |
+| FAQ | "A post can carry a class's days and times. Kabsi writes it from your times and prepares a new post when they change." | 29 | G, K |
+| FAQ | "Google has an offer post for it. It does not allow a reward for a review, like a free month for five stars." | 30, 31 | G |
+| FAQ | "No draft: a short checklist comes to you. Kabsi writes a neutral holding reply only if you ask. Nothing is published until you approve." | 32; `knowledge/facts/13-faq.md` "What happens with hard reviews?" | K |
+
+Removed from the page: the five long tasks, the HIIT with Karim example, the equipment and changing rooms review theme, the changing rooms photo tip, the day pass price idea, the UK Easter weekend 2027, the "route to a person at Kabsi" wording (replaced by the facts 13 rule), and the long answer (the daily category check stays in the watch line).

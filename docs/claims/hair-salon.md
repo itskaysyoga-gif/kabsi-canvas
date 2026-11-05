@@ -55,3 +55,21 @@ The page before Web 4c (Rose Lane Salon, Dubai) had no claim sheet; it is retire
 
 - Any figure about how often clients book from a profile. No source was read.
 - A list of Google categories for hair salons beyond the note in row 16.
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field       | Line on the page                                                                                                                                   | Row(s) above | Type       |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ---------- |
+| page.answer | "For a hair salon Google Business Profile, Kabsi drafts every reply, turns colour work into posts and asks about holiday hours, all for your yes." | 1, 7, 8      | K          |
+| profile     | "Services with a price": "Each service can carry a price. Google rejects a custom name that has one."                                              | 3, 15        | G          |
+| profile     | "A new stylist on the team": "Add them to your team list. Reviews that name them get a reply thanking them."                                       | 5, 6, 24     | K          |
+| profile     | "The booking link": "Google lets you add your own link. Check it each time you change tools."                                                      | 18, 19       | G, A       |
+| profile     | "Photos true to the chair": "Google asks for photos in focus and well lit. Kabsi checks each one first."                                           | 20, 21       | G, K       |
+| page.jobs   | "A reply for every review": "Thanks Amber when a review names her, using only names on your team list."                                            | 6, 24, 27    | K, Example |
+| page.jobs   | "Bank holiday hours": "Kabsi asks five days before each bank holiday and sets your answer after your yes."                                         | 8, 22        | K          |
+
+Removed from the page: the two long guide sections (custom services of your own, the category name by country, the
+reason a stylist matters, the Christmas line, the dark, blurry or too small detail), and the daily details check from the
+answer. The old tasks were not shown and are deleted.

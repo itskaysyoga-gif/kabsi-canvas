@@ -67,3 +67,31 @@ repair" suits the UAE and has no row either.
   block, and no Google page showed the second name.
 - UAE inspection rules outside Dubai (u.ae and the other emirates' pages). Only the Dubai RTA service page was read.
 - Anything on the price of an MOT or an inspection.
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| Answer | "On an auto repair shop Google Business Profile, the phone comes first. Kabsi checks phone and hours daily, drafts calm replies, and you approve." | 1, 9, 11 | K |
+| Profile | "Every job on the list": "Service, brakes, air conditioning. Google can show each with a price; drop what you stopped." | 2, 3, 4 | G, P, A |
+| Profile | "The MOT or the inspection": "In Great Britain most cars need a yearly MOT from three years. Post free slots." | 5, 7 | T, A |
+| Profile | "Phone and hours, exact": "Kabsi watches both every day for changes you did not make." | 9 | K |
+| Profile | "If you come to the car": "No workshop? One profile for the area, address hidden. A garage with bays shows it." | 12, 13 | G |
+| Reviews | "The bill against the quote": "Calm, never argues or promises a refund. You read it first: no quick Post button." | 11, 18 | K |
+| Reviews | "The same fault came back": "No argument, no admission of fault. It asks them to contact the garage." | 18 | K |
+| Reviews | "A safety problem with the car": "No draft: a short checklist, and a neutral holding reply only if you ask." | new: `knowledge/facts/13-faq.md` "What happens with hard reviews?" (High: injury, another safety problem) | K |
+| Categories line | "Google's guidelines name both in a tyre and service chain example. Add 'Tyre shop' only if you sell and fit tyres." | 16, 17 | G, A |
+| Holidays | "Bank holiday Mondays, England and Wales": "3 May, 31 May and 30 August 2027. Say until when keys can be collected." | 25 | T, A |
+| Holidays | "Eid al-Fitr, UAE": "1 to 3 Shawwal, by the moon. Special hours, and when you take cars again." | 26 | T, A |
+| Holidays | "Ramadan, UAE": "Private sector hours drop by two a day. Check key collection against the shorter day." | 27 | T, A |
+| Photos | "A car on the lift": "Tidy tools, good light, no customer's number plate in focus." | 23 | A |
+| Photos | "The front and the parking": "Google says an outside photo helps people recognise you. Show where to leave the car." | 24 | G, A |
+| Photos | "Post ideas": "Brake checks with the price, free MOT slots, air con checks before summer, Saturday hours." | 22 | A |
+| Job | "Workshop photos, as posts": "A photo and a line become a post, with no price you did not give." | 32 | K |
+| FAQ | "A calm draft that never admits fault or argues. A reply never changes your UK duty of reasonable care and skill. Not legal advice." | 30, 31 | K, T, A |
+| FAQ | "Only prices you give it. Kabsi never invents a price, offer or discount, and you approve each post." | 32 | K |
+| FAQ | "Google says a business serving customers at their location should have one profile and hide its address. Your profile then shows the area you serve." | 33 | G |
+
+Removed from the page: the five long tasks, the Dubai RTA inspection, the MOT a month early rule, Google's staffed hours rule, the honesty and late car review themes, the team photo tip, UK Christmas week 2027, and the long answer.

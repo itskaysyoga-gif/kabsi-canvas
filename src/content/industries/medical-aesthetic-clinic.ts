@@ -81,7 +81,7 @@ export const medicalAestheticClinic: Industry = {
       text: "Private sector hours drop by two a day. Check doctors' hours against the shorter day.",
     },
     {
-      title: "A closure of a week or more",
+      title: "Closed a week or more",
       text: "Special hours suit up to 6 days closed. From 7 days, mark temporarily closed.",
     },
   ],
@@ -188,7 +188,7 @@ export const medicalAestheticClinic: Industry = {
     },
     {
       q: "Does Kabsi follow the privacy law of my country?",
-      a: "Drafts follow a careful habit: a public reply never confirms a patient or mentions their care. Not legal advice; privacy law questions go to a person.",
+      a: "Drafts follow a careful habit: a public reply never confirms a patient or mentions their care. Not legal advice; ask a person about privacy law.",
     },
     {
       q: "Can Kabsi post before and after photos?",

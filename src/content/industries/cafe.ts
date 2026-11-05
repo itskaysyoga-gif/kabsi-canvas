@@ -62,7 +62,7 @@ export const cafe: Industry = {
     },
     {
       title: "Feeling unwell after a meal",
-      text: "A health review gets no draft, a short checklist, and a holding reply only if asked.",
+      text: "No draft: a short checklist, and a neutral holding reply only if you ask.",
     },
   ],
   categories: {

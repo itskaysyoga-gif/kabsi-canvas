@@ -101,3 +101,20 @@ page are listed again here. Example business: Fade and Co, Leeds (invented).
 Changed from Design 8 to the facts: the job "New cuts on your price list" said "Kabsi prepares the line; you check the
 price" (Kabsi does not edit services yet: D5); the booking FAQ (D16); the free check example rows "Bank holiday hours",
 "Reviews with no reply" and "Last post on Google" (K-82: D9); the description's "new cuts with prices".
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field       | Line on the page                                                                                                                                                                  | Row(s) above                                                              | Type |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ---- |
+| page.answer | "For a barber shop Google Business Profile, Kabsi drafts every reply, turns fresh cuts into posts and checks your hours daily, all for your yes."                                 | D1, D6, D13; `knowledge/facts` 2.1a (Google Profile, hours watched daily) | K    |
+| profile     | "Hours a walk-in can trust": "Google keeps weekly hours apart from special hours, so a bank holiday can differ."                                                                  | D11                                                                       | G    |
+| profile     | "Bank holidays in 2027": "England and Wales: Good Friday 26 March, Easter Monday 29 March, 27 and 28 December."                                                                   | D12                                                                       | T    |
+| profile     | "Cuts with a price": "Each cut can carry a price. Google rejects a custom name that has one."                                                                                     | D14, 6, 8                                                                 | G    |
+| profile     | "The barber, by name": "A reply passes the thanks on, and never offers a free cut for a review."                                                                                  | D6, D15                                                                   | K, G |
+| faqs        | "What does a reply to an unhappy customer say?": "It thanks them, names the problem and points to your contact details. It never argues or offers a free cut to change a review." | D17, 21, 38                                                               | K    |
+
+Removed from the page: the two long guide sections (the walk-in who goes next door, Google's "confirm your hours" line,
+why the December days move, the last walk-in post, the list of cuts, no phone number or link in a reply), and "in one
+sentence" from the unhappy customer answer. The old tasks were not shown and are deleted.

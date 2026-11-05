@@ -33,7 +33,7 @@ export const veterinaryClinic: Industry = {
   profile: [
     {
       title: "Hours and the phone first",
-      text: "Exact weekly hours. Before each holiday, Kabsi asks and sets special hours on your yes.",
+      text: "Exact hours. Kabsi asks before each public holiday and sets special hours on your yes.",
     },
     {
       title: "Out of hours calls",

@@ -78,7 +78,7 @@ export const dentalClinic: Industry = {
     },
     {
       title: "UAE National Day",
-      text: "2 and 3 December. Kabsi asks five days before, with the Saturday after if you open.",
+      text: "2 and 3 December. Kabsi asks five days before, and about the Saturday after.",
     },
     {
       title: "UK bank holidays",

@@ -66,3 +66,31 @@ other terms are service searches with no volume in the table, kept from the temp
   that is shown.
 - Any claim about conditions physio treats, outcomes or the number of sessions. The NHS page lists uses of physiotherapy but the page does not
   repeat them, because Kabsi does not make clinical claims.
+
+
+## Industries 3 (5 Nov 2026): the short lines
+
+The page was cut to master plan 30.33 item 2. Each line below replaces longer text and keeps a fact of the rows above.
+
+| Field | Line on the page | Row(s) above | Type |
+| --- | --- | --- | --- |
+| answer | "Kabsi looks after your physiotherapist Google Business Profile: open status checked daily, replies that name no injury, clinic news as posts for your yes." | 1, 5; `knowledge/facts/13-faq.md` "Google Protection" | K |
+| profile | "What you treat, in their words": "Back pain, knee rehab, sports injuries. Google can show each service with a description." | 2 | G, P |
+| profile | "Book opens the first assessment": "Add your own booking link. If the page changes, the link follows after your yes." | 3, 4 | G, K |
+| profile | "Home visit hours, set apart": "Home visits only: hide the address. Clinic and visits: set Google's more hours." | 7, 8, 9 | G, A |
+| profile | "Only names on your team list": "In the UK, only HCPC registered staff may be called physiotherapists. Kabsi uses listed names." | 10, 12 | T, K |
+| reviews | "The physio who explained the plan": "The reply thanks her, passes it to the team, and never mentions the injury." | 17 | K |
+| reviews | "Pain that did not improve": "A health review: no draft, a short checklist, a holding reply only if you ask." | 6, 18; `knowledge/facts/13-faq.md` "What happens with hard reviews?" | K |
+| reviews | "Times, parking and the waiting room": "A short reply that points to the hours and directions on the profile." | 19 | K |
+| categories.line | "Searches say physio, but real profiles show 'Physical therapist'. Pick it from Google's list; add a second only for a real department." | 14, 15, 16 | C, G |
+| holidays | "UK: late May and August": "31 May and 30 August 2027, both Mondays. Post who covers urgent bookings." | 27, 31 | T, A |
+| holidays | "Eid al-Fitr, UAE": "1 to 3 Shawwal, set by the moon. Say on Google when you reopen." | 28 | T |
+| holidays | "Closing at noon before a holiday": "Special hours for that day alone. The rest of the week stays as it is." | 30 | G |
+| photoCards | "Treatment room and exercise area": "Couches made up, equipment tidy, no patient in the frame. Kabsi does not check faces." | 24, 25 | A, K |
+| photoCards | "The physios in clinic clothes": "Patients want to know who they will meet. Good light, and ask each physio first." | 24 | A |
+| photoCards | "Post ideas": "A Thursday evening clinic, a new physio, home visit areas, bank holiday hours." | 23 | A |
+| faqs | Sessions: "No. Kabsi writes only the facts you give it, like what you treat and when you open. It promises nothing about results." | 32 | K |
+| faqs | GP referral: "Say it in a post: tell Kabsi your rule and it prepares one for your yes. NHS physio is sometimes possible without a GP referral." | 34, 35 | T, K |
+| faqs | Treatment named: "Yes: a careful draft that does not repeat the treatment. An injury gets no draft and a short checklist. You approve or write every reply." | `knowledge/facts/13-faq.md` "What happens with hard reviews?" and the clinics FAQ | K |
+
+Removed from the page: "'physical therapist' is protected too", "a business cannot create a category" (kept as "pick it from Google's list"), the review theme about insurance and receipts, the UAE National Day card, the way in photo tip and the accessibility details, "what a first assessment costs", "so patients may ask", and the answer's opening sentence and holiday clause.
