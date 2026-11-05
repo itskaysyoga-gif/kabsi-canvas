@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { fmtDate } from "@/lib/format";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -33,13 +33,19 @@ import {
   saveAiPrompt,
 } from "@/lib/insights";
 import {
-  choice,
   loadPrefs,
   loadRoutineChannel,
-  savePref,
-  saveRoutineChannel,
+  saveRoutineDelivery,
+  type Pref,
+  type RoutineChannel as DeliveryChannel,
 } from "@/lib/notifications";
-import { whatsappPrefs, whatsappStatus } from "@/lib/whatsapp-owner";
+import {
+  backOnEmail,
+  chosenChannel,
+  deliveryFailedLine,
+  whatsappBlock,
+} from "@/lib/routine-delivery";
+import { whatsappStatus, type WhatsappStatus } from "@/lib/whatsapp-owner";
 
 // Settings (UX 1, Design 3; COPY.md 19): the business and the email, where routine messages go and the four switches, the
 // email timing (D220, through the membership-checked update_notification_settings RPC), WhatsApp, the tone and the AI
@@ -229,9 +235,10 @@ function BusinessPanel({ locationId, name }: { locationId: string; name: string 
 
 /**
  * One place for routine messages (new reviews and the weekly report): WhatsApp or email, never both (Email 1). The choice
- * is stored once (routine_channels, set_routine_channel) and the notification engine reads it, so a routine email is not
- * sent while WhatsApp is chosen. WhatsApp's own review alerts and Monday report follow the same choice. Shown only once
- * WhatsApp is connected; until then everything comes by email.
+ * is stored once (routine_channels) and the notification engine reads it, so a routine email is not sent while WhatsApp is
+ * chosen. App 6: the choice shows at once and is saved in one call (set_routine_delivery); if the save fails the page goes
+ * back with a plain line. When WhatsApp cannot be chosen (not open yet, not connected, stopped) the control says why and
+ * what fixes it, in one line, instead of hiding.
  */
 function RoutineChannel({ locationId }: { locationId: string }) {
   const qc = useQueryClient();
@@ -251,47 +258,115 @@ function RoutineChannel({ locationId }: { locationId: string }) {
     enabled: WHATSAPP_ON,
   });
   const [err, setErr] = useState("");
+  const burst = useRef<{
+    shown: DeliveryChannel;
+    stored: DeliveryChannel | null | undefined;
+    prefs: Pref[] | undefined;
+    status: WhatsappStatus | undefined;
+  } | null>(null);
+  const prefsKey = ["notification-prefs", locationId];
+  const inputs = () => ({
+    whatsappOn: WHATSAPP_ON,
+    status: qc.getQueryData<WhatsappStatus>(["whatsapp-status"]),
+    statusFailed: false,
+    stored: qc.getQueryData<DeliveryChannel | null>(["routine-channel"]),
+    prefs: qc.getQueryData<Pref[]>(prefsKey) ?? [],
+  });
   const change = useMutation({
-    mutationFn: async (to: "whatsapp" | "email") => {
+    mutationKey: ["routine-delivery", locationId],
+    // One save after another, so two quick taps never cross.
+    scope: { id: "routine-delivery" },
+    mutationFn: (to: DeliveryChannel) => saveRoutineDelivery(locationId, to),
+    onMutate: async (to) => {
+      setErr("");
+      await Promise.all(
+        [["whatsapp-status"], ["routine-channel"], prefsKey].map((queryKey) =>
+          qc.cancelQueries({ queryKey }),
+        ),
+      );
+      // One snapshot per burst of taps: the page as it was before the first tap, so a failure goes back to what the server
+      // still holds, never to a tap that was never saved.
+      if (qc.isMutating({ mutationKey: ["routine-delivery", locationId] }) <= 1 || !burst.current)
+        burst.current = {
+          shown: chosenChannel(inputs()),
+          stored: qc.getQueryData<DeliveryChannel | null>(["routine-channel"]),
+          prefs: qc.getQueryData<Pref[]>(prefsKey),
+          status: qc.getQueryData<WhatsappStatus>(["whatsapp-status"]),
+        };
+      const before = burst.current;
+      // The choice shows now; the server's answer only confirms it.
       const wa = to === "whatsapp";
-      // The stored choice first: if WhatsApp stopped meanwhile it refuses, and nothing else changes.
-      await saveRoutineChannel(to);
-      await whatsappPrefs(wa, wa);
-      // Back on email: the two emails the earlier switch turned off come back to their default.
-      if (!wa)
-        for (const c of ["review_new", "weekly_report"])
-          await savePref(locationId, c, "email", "default");
+      qc.setQueryData(["routine-channel"], to);
+      if (before.status)
+        qc.setQueryData(["whatsapp-status"], {
+          ...before.status,
+          review_alerts: wa,
+          digest_optin: wa,
+        });
+      if (!wa && before.prefs) qc.setQueryData(prefsKey, backOnEmail(before.prefs));
     },
-    onMutate: () => setErr(""),
+    onError: () => {
+      // A save failed while another is still on its way: that one decides, and the last read-back corrects the page.
+      if (qc.isMutating({ mutationKey: ["routine-delivery", locationId] }) > 1) return;
+      const before = burst.current;
+      if (before) {
+        qc.setQueryData(["routine-channel"], before.stored);
+        qc.setQueryData(prefsKey, before.prefs);
+        qc.setQueryData(["whatsapp-status"], before.status);
+        setErr(deliveryFailedLine(before.shown));
+      } else setErr(deliveryFailedLine("email"));
+    },
     onSettled: () => {
+      // Read the truth back once the last save is done (not between two quick taps).
+      if (qc.isMutating({ mutationKey: ["routine-delivery", locationId] }) > 1) return;
       void qc.invalidateQueries({ queryKey: ["whatsapp-status"] });
       void qc.invalidateQueries({ queryKey: ["routine-channel"] });
-      void qc.invalidateQueries({ queryKey: ["notification-prefs", locationId] });
+      void qc.invalidateQueries({ queryKey: prefsKey });
     },
-    onError: () => setErr("Couldn't save. Please try again."),
   });
-  const s = status.data;
-  if (!WHATSAPP_ON || s?.state !== "active" || stored.isLoading || !prefs.data) return null;
-  // Before a stored choice, an owner whose two emails were switched off for WhatsApp (the earlier switch) reads WhatsApp.
-  const value =
-    stored.data ??
-    (s.review_alerts !== false &&
-    s.digest_optin === true &&
-    choice(prefs.data, "review_new", "email") === "off" &&
-    choice(prefs.data, "weekly_report", "email") === "off"
-      ? "whatsapp"
-      : "email");
+  const failed = WHATSAPP_ON && (stored.isError || prefs.isError);
+  if (WHATSAPP_ON && (status.isLoading || stored.isLoading || prefs.isLoading) && !failed)
+    return null;
+  if (failed)
+    return (
+      <p className="mt-4 text-small text-bad" role="alert">
+        We couldn&apos;t load your choice. Refresh and try again.
+      </p>
+    );
+  const input = {
+    whatsappOn: WHATSAPP_ON,
+    status: status.data,
+    statusFailed: status.isError,
+    stored: stored.data,
+    prefs: prefs.data ?? [],
+  };
+  const block = whatsappBlock(input);
   return (
     <div className="mt-4">
       <Segmented
         label="Where your routine messages go"
-        value={value}
+        value={chosenChannel(input)}
         onChange={(v) => change.mutate(v)}
+        describedBy={block ? "routine-why" : undefined}
         options={[
-          { value: "whatsapp", label: "WhatsApp" },
+          { value: "whatsapp", label: "WhatsApp", unavailable: block !== null },
           { value: "email", label: "Email" },
         ]}
       />
+      {block ? (
+        <p id="routine-why" className="mt-2 text-small text-text-2">
+          {block.fix === "connect" ? (
+            <a
+              href="#whatsapp"
+              className="inline-flex min-h-11 items-center font-bold underline underline-offset-4"
+            >
+              {block.line}
+            </a>
+          ) : (
+            block.line
+          )}
+        </p>
+      ) : null}
       {err ? (
         <p className="mt-2 text-small text-bad" role="alert">
           {err}

@@ -98,3 +98,19 @@ export async function saveRoutineChannel(channel: RoutineChannel): Promise<void>
   const { error } = await supabase.rpc("set_routine_channel", { p_channel: channel });
   if (error) throw new Error(error.message);
 }
+
+/**
+ * Where routine messages go, saved in one call for the business (App 6): the stored channel, the WhatsApp alert and report
+ * switches, and on Email the two routine emails back to default, in one transaction. Throws whatsapp_not_connected when
+ * WhatsApp was chosen without a connected WhatsApp.
+ */
+export async function saveRoutineDelivery(
+  locationId: string,
+  channel: RoutineChannel,
+): Promise<void> {
+  const { error } = await supabase.rpc("set_routine_delivery", {
+    p_location: locationId,
+    p_channel: channel,
+  });
+  if (error) throw new Error(error.message);
+}

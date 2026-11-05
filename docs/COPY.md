@@ -1650,6 +1650,18 @@ Staff pages are for the Kabsi team only and are never public. Owners never see t
   - Staff, Evidence log: "One row for each request Kabsi does not cover, a repeated problem, time saved, a missed enquiry or sale, or support given." (was "One row for each thing an owner asks for that Kabsi does not do, ...").
 - **Kept as they are, over the rule**: the WhatsApp consent text (stored word for word as the proof of the opt-in, K-113; a LATER row for lane R), an AI assistant's own answer, and the access steps shared with the public /manager-steps page.
 
+## 60. App 6: the delivery choice that answers at once (5 Nov 2026, master plan 30.34 item 5)
+
+Settings, "Where your routine messages go", the four switches and "Choose how each one reaches you". A change shows at once; if the save fails the page goes back and says so. The control is always shown; WhatsApp reads as unavailable with one line that says why and what fixes it.
+
+- Not open (Kabsi has no WhatsApp number yet): "WhatsApp is not open yet. Your reports and reminders come by email."
+- No opt-in (none or pending): "WhatsApp is not connected yet. Connect it below, then choose it here." (a link to the WhatsApp panel)
+- Stopped: "WhatsApp is stopped. Connect it again below, then choose it here." (the same link)
+- The opt-in could not be read: "We could not check your WhatsApp. Refresh the page and try again."
+- The choice could not be read: "We couldn't load your choice. Refresh and try again."
+- The save failed on the WhatsApp or Email choice: "Couldn't save that. Your messages still go by [WhatsApp or email]. Try again."
+- The save failed on a switch or an email timing: "Couldn't save that. It is back as it was. Try again."
+
 ## 58. Scan 3: the free check made simple, fast and in the Kabsi look (5 Nov 2026, master plan 30.34 items 2 and 3, R-114)
 
 Every new or changed line of Scan 3. The result's lines are in src/lib/scan-words.ts (tests/scan3.test.ts holds them) and src/components/kabsi/scan-live.tsx.
