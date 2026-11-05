@@ -6,7 +6,9 @@ import { PartnersPanel } from "@/components/staff/partners-panel";
 import { useStaffLocations } from "@/components/staff/businesses-panel";
 
 export const Route = createFileRoute("/_authenticated/staff/programs")({
-  head: () => ({ meta: [{ title: "Programs | Staff | Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Programs | Staff | Kabsi" }, { name: "robots", content: "noindex" }],
+  }),
   component: Programs,
 });
 

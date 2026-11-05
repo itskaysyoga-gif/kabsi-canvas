@@ -9,7 +9,9 @@ import { EvidencePanel } from "@/components/staff/evidence-panel";
 import { useStaffLocations } from "@/components/staff/businesses-panel";
 
 export const Route = createFileRoute("/_authenticated/staff/system")({
-  head: () => ({ meta: [{ title: "System | Staff | Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "System | Staff | Kabsi" }, { name: "robots", content: "noindex" }],
+  }),
   component: SystemPage,
 });
 

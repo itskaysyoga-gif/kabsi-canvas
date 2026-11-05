@@ -27,7 +27,9 @@ import { cn } from "@/lib/utils";
 // the same query keys, so opening a page after Today asks for nothing again. The caps and the provider refusals come
 // from staff_today (20261105170458_app5_staff_today.sql). Nothing here changes anything: every action is on its page.
 export const Route = createFileRoute("/_authenticated/staff/")({
-  head: () => ({ meta: [{ title: "Today | Staff | Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Today | Staff | Kabsi" }, { name: "robots", content: "noindex" }],
+  }),
   component: Today,
 });
 

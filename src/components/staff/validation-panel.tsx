@@ -204,12 +204,18 @@ export function ValidationPanel() {
                   ) : null}
                   {q.data.v.money.cash_by_month.map((m) => (
                     <tr key={m.month} className="border-t border-line">
-                      <th scope="row" className="py-1 pe-3 text-start font-semibold">{fmtDate(m.month)}</th>
+                      <th scope="row" className="py-1 pe-3 text-start font-semibold">
+                        {fmtDate(m.month)}
+                      </th>
                       <td data-label="Payments" className="py-1 pe-3">
                         {m.status === "ok" ? usd(m.payments_usd ?? 0) : NO}
                       </td>
-                      <td data-label="Refunds" className="py-1 pe-3">{m.status === "ok" ? usd(m.refunds_usd) : NO}</td>
-                      <td data-label="Chargebacks" className="py-1">{m.status === "ok" ? usd(m.chargebacks_usd) : NO}</td>
+                      <td data-label="Refunds" className="py-1 pe-3">
+                        {m.status === "ok" ? usd(m.refunds_usd) : NO}
+                      </td>
+                      <td data-label="Chargebacks" className="py-1">
+                        {m.status === "ok" ? usd(m.chargebacks_usd) : NO}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -237,11 +243,21 @@ export function ValidationPanel() {
                   ) : null}
                   {q.data.v.money.margin_per_account.map((m) => (
                     <tr key={m.business} className="border-t border-line">
-                      <th scope="row" className="py-1 pe-3 text-start font-semibold">{m.business}</th>
-                      <td data-label="Cash" className="py-1 pe-3">{usd(m.cash_usd)}</td>
-                      <td data-label="Refunds and chargebacks" className="py-1 pe-3">{usd(m.refunds_and_chargebacks_usd)}</td>
-                      <td data-label="Cost" className="py-1 pe-3">{usd(m.cost_usd)}</td>
-                      <td data-label="Margin" className="py-1">{usd(m.margin_usd)}</td>
+                      <th scope="row" className="py-1 pe-3 text-start font-semibold">
+                        {m.business}
+                      </th>
+                      <td data-label="Cash" className="py-1 pe-3">
+                        {usd(m.cash_usd)}
+                      </td>
+                      <td data-label="Refunds and chargebacks" className="py-1 pe-3">
+                        {usd(m.refunds_and_chargebacks_usd)}
+                      </td>
+                      <td data-label="Cost" className="py-1 pe-3">
+                        {usd(m.cost_usd)}
+                      </td>
+                      <td data-label="Margin" className="py-1">
+                        {usd(m.margin_usd)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -273,7 +289,9 @@ export function ValidationPanel() {
                   ) : null}
                   {q.data.rows.map((r) => (
                     <tr key={r.location_id} className="border-t border-line">
-                      <th scope="row" className="py-1 pe-3 text-start font-semibold">{r.business}</th>
+                      <th scope="row" className="py-1 pe-3 text-start font-semibold">
+                        {r.business}
+                      </th>
                       <td data-label="Cohort" className="py-1 pe-3">
                         {r.cohort === "founding" ? "Founding 25" : "Paying"}
                       </td>
@@ -282,9 +300,15 @@ export function ValidationPanel() {
                           ? fmtDate(r.free_check_before_signup_at)
                           : "None"}
                       </td>
-                      <td data-label="A" className="py-1 pe-3">{hours(r.a_hours)}</td>
-                      <td data-label="B" className="py-1 pe-3">{hours(r.b_hours)}</td>
-                      <td data-label="C" className="py-1">{hours(r.c_hours)}</td>
+                      <td data-label="A" className="py-1 pe-3">
+                        {hours(r.a_hours)}
+                      </td>
+                      <td data-label="B" className="py-1 pe-3">
+                        {hours(r.b_hours)}
+                      </td>
+                      <td data-label="C" className="py-1">
+                        {hours(r.c_hours)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

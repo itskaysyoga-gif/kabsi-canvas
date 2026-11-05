@@ -129,12 +129,21 @@ function JobHealth() {
               <tbody className="divide-y divide-line">
                 {h.schedules.map((s) => (
                   <tr key={s.name}>
-                    <th scope="row" className="p-3 text-start font-mono text-label font-bold">{s.name.replace(/^kabsi_/, "")}</th>
-                    <td data-label="Runs" className="p-3 font-mono text-label">{s.schedule}</td>
-                    <td data-label="Last run" className={cn("p-3", s.last_status === "failed" && "text-bad")}>
+                    <th scope="row" className="p-3 text-start font-mono text-label font-bold">
+                      {s.name.replace(/^kabsi_/, "")}
+                    </th>
+                    <td data-label="Runs" className="p-3 font-mono text-label">
+                      {s.schedule}
+                    </td>
+                    <td
+                      data-label="Last run"
+                      className={cn("p-3", s.last_status === "failed" && "text-bad")}
+                    >
                       {when(s.last_start)} · {s.active ? (s.last_status ?? "never") : "paused"}
                     </td>
-                    <td data-label="Failed 24h" className={cn("p-3", bad(s.failed_24h))}>{s.failed_24h}</td>
+                    <td data-label="Failed 24h" className={cn("p-3", bad(s.failed_24h))}>
+                      {s.failed_24h}
+                    </td>
                   </tr>
                 ))}
               </tbody>

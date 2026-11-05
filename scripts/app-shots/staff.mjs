@@ -182,7 +182,8 @@ export const rpc = {
           caps: { dataforseo_usd: 10, ai_visibility_usd: 5 },
           refusals_24h: [
             {
-              title: "DataForSEO refused the nearby check: no balance left. Kabsi tries again later on its own",
+              title:
+                "DataForSEO refused the nearby check: no balance left. Kabsi tries again later on its own",
               at: ago(0.2),
             },
           ],

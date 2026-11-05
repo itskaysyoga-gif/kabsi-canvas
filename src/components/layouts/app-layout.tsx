@@ -694,7 +694,10 @@ export function AppLayout({
               <p className="px-3 pb-2 text-small font-bold text-text-2">Staff</p>
               <ul className="space-y-0.5">
                 {STAFF_MENU.map((id) => (
-                  <li key={id} className={id === "settings" ? "mt-3 border-t border-line pt-3" : ""}>
+                  <li
+                    key={id}
+                    className={id === "settings" ? "mt-3 border-t border-line pt-3" : ""}
+                  >
                     <StaffSideLink id={id} on={staffPage?.id === id} />
                   </li>
                 ))}
@@ -740,7 +743,10 @@ export function AppLayout({
           <BusinessMenu compact />
         ) : (
           <p className="min-w-0 flex-1 truncate font-display text-title font-bold">
-            Staff{staffPage ? <span className="font-normal text-text-2"> · {staffPage.label}</span> : null}
+            Staff
+            {staffPage ? (
+              <span className="font-normal text-text-2"> · {staffPage.label}</span>
+            ) : null}
           </p>
         )}
         {isStaff.data && area === "app" ? (

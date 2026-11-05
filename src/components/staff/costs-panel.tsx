@@ -177,16 +177,26 @@ function SpendTable({
         <tbody className="divide-y divide-line">
           {rows.map((r) => (
             <tr key={r.label}>
-              <th scope="row" className="p-3 text-start font-normal">{r.label}</th>
-              <td data-label={countLabel} className="p-3 text-end tabular-nums">{r.count}</td>
-              <td data-label="Cost" className="p-3 text-end font-bold tabular-nums">{usd(r.micros)}</td>
+              <th scope="row" className="p-3 text-start font-normal">
+                {r.label}
+              </th>
+              <td data-label={countLabel} className="p-3 text-end tabular-nums">
+                {r.count}
+              </td>
+              <td data-label="Cost" className="p-3 text-end font-bold tabular-nums">
+                {usd(r.micros)}
+              </td>
             </tr>
           ))}
           {total !== undefined && rows.length > 1 ? (
             <tr>
-              <th scope="row" className="p-3 text-start font-bold">Total</th>
+              <th scope="row" className="p-3 text-start font-bold">
+                Total
+              </th>
               <td className="p-3 max-sm:hidden" />
-              <td data-label="Cost" className="p-3 text-end font-bold tabular-nums">{usd(total)}</td>
+              <td data-label="Cost" className="p-3 text-end font-bold tabular-nums">
+                {usd(total)}
+              </td>
             </tr>
           ) : null}
         </tbody>

@@ -101,9 +101,15 @@ export function FoundingPanel({ businesses }: { businesses: Business[] }) {
             <tbody>
               {o.members.map((m) => (
                 <tr key={m.application_id} className="border-t border-line">
-                  <th scope="row" className="py-2 pe-3 text-start font-bold">{m.business}</th>
-                  <td data-label="Day" className="py-2 pe-3">{m.day ?? "waiting for access"}</td>
-                  <td data-label="Approvals, 7 days" className="py-2 pe-3">{m.approvals_7d}</td>
+                  <th scope="row" className="py-2 pe-3 text-start font-bold">
+                    {m.business}
+                  </th>
+                  <td data-label="Day" className="py-2 pe-3">
+                    {m.day ?? "waiting for access"}
+                  </td>
+                  <td data-label="Approvals, 7 days" className="py-2 pe-3">
+                    {m.approvals_7d}
+                  </td>
                   <td data-label="Weeks with an approval" className="py-2 pe-3">
                     {m.weeks ? `${m.weeks_with_approval} of ${m.weeks}` : "-"}
                   </td>

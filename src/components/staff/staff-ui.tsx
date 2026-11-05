@@ -69,7 +69,8 @@ export function usePanelChips<T extends string>(ids: readonly T[]) {
   const raw = useRouterState({
     select: (s) => (s.location.search as Record<string, unknown>)["show"],
   });
-  const show = typeof raw === "string" && (ids as readonly string[]).includes(raw) ? (raw as T) : "all";
+  const show =
+    typeof raw === "string" && (ids as readonly string[]).includes(raw) ? (raw as T) : "all";
   const set = (v: string) =>
     void navigate({
       to: ".",

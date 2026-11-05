@@ -7,19 +7,46 @@ import { noBanner, axeClean } from "./helpers/page";
 import { signInFake } from "./helpers/fake-auth";
 
 const PAGES = [
-  { label: "Businesses", short: "Businesses", path: "/staff/businesses", h1: "Every business on Kabsi" },
-  { label: "Conversations", short: "Chats", path: "/staff/conversations", h1: "People waiting for an answer" },
-  { label: "Programs", short: "Programs", path: "/staff/programs", h1: "Founding 25 and Kabsi Partners" },
+  {
+    label: "Businesses",
+    short: "Businesses",
+    path: "/staff/businesses",
+    h1: "Every business on Kabsi",
+  },
+  {
+    label: "Conversations",
+    short: "Chats",
+    path: "/staff/conversations",
+    h1: "People waiting for an answer",
+  },
+  {
+    label: "Programs",
+    short: "Programs",
+    path: "/staff/programs",
+    h1: "Founding 25 and Kabsi Partners",
+  },
   { label: "System", short: "System", path: "/staff/system", h1: "How the system is running" },
   { label: "Costs", short: "Costs", path: "/staff/costs", h1: "What Kabsi spends", more: true },
-  { label: "Settings", short: "Settings", path: "/staff/settings", h1: "Staff settings", more: true },
+  {
+    label: "Settings",
+    short: "Settings",
+    path: "/staff/settings",
+    h1: "Staff settings",
+    more: true,
+  },
 ] as const;
 
 const wide = (page: Page) => page.viewportSize()!.width >= 1024;
 
-async function openFromMenu(page: Page, p: (typeof PAGES)[number] | { label: string; short: string; more?: boolean }) {
+async function openFromMenu(
+  page: Page,
+  p: (typeof PAGES)[number] | { label: string; short: string; more?: boolean },
+) {
   if (wide(page)) {
-    await page.getByRole("navigation", { name: "Staff" }).getByRole("link", { name: p.label }).click();
+    await page
+      .getByRole("navigation", { name: "Staff" })
+      .getByRole("link", { name: p.label })
+      .click();
   } else if ("more" in p && p.more) {
     await page.getByRole("button", { name: "Staff menu" }).click();
     await page.getByRole("menuitem", { name: p.label }).click();

@@ -106,7 +106,13 @@ export const STAFF_MENU: StaffPageId[] = [
 ];
 
 /** The phone bar holds five, as the owners' app does; Costs and Settings are in the phone's staff menu. */
-export const STAFF_BAR: StaffPageId[] = ["today", "businesses", "conversations", "programs", "system"];
+export const STAFF_BAR: StaffPageId[] = [
+  "today",
+  "businesses",
+  "conversations",
+  "programs",
+  "system",
+];
 export const STAFF_MORE: StaffPageId[] = ["costs", "settings"];
 
 const clean = (p: string) => (p.length > 1 ? p.replace(/\/+$/, "") : p);

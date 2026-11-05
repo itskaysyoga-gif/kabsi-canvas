@@ -3,13 +3,7 @@
 // not-found page before any page under it is drawn.
 import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import {
-  STAFF_BAR,
-  STAFF_MENU,
-  STAFF_MORE,
-  STAFF_PAGES,
-  staffPageFor,
-} from "@/lib/staff-nav";
+import { STAFF_BAR, STAFF_MENU, STAFF_MORE, STAFF_PAGES, staffPageFor } from "@/lib/staff-nav";
 import { capShare, failedRuns24h, newBusinesses, todayRows } from "@/lib/staff-today";
 import { isPrivatePath } from "@/lib/private-paths";
 import { isStaffPath } from "@/lib/idle";
@@ -137,9 +131,24 @@ describe("Today", () => {
     const day = 86_400_000;
     const got = newBusinesses(
       [
-        { name: "A", status: "onboarding", onboarding_step: "google_access", created_at: new Date(NOW - day).toISOString() },
-        { name: "B", status: "active", onboarding_step: "done", created_at: new Date(NOW - day).toISOString() },
-        { name: "C", status: "onboarding", onboarding_step: "find", created_at: new Date(NOW - 9 * day).toISOString() },
+        {
+          name: "A",
+          status: "onboarding",
+          onboarding_step: "google_access",
+          created_at: new Date(NOW - day).toISOString(),
+        },
+        {
+          name: "B",
+          status: "active",
+          onboarding_step: "done",
+          created_at: new Date(NOW - day).toISOString(),
+        },
+        {
+          name: "C",
+          status: "onboarding",
+          onboarding_step: "find",
+          created_at: new Date(NOW - 9 * day).toISOString(),
+        },
       ],
       NOW,
     );

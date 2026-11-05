@@ -4,7 +4,9 @@ import { StaffTop } from "@/components/staff/staff-ui";
 import { CostsPanel } from "@/components/staff/costs-panel";
 
 export const Route = createFileRoute("/_authenticated/staff/costs")({
-  head: () => ({ meta: [{ title: "Costs | Staff | Kabsi" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Costs | Staff | Kabsi" }, { name: "robots", content: "noindex" }],
+  }),
   component: () => (
     <>
       <StaffTop page={STAFF_PAGES.costs} />
