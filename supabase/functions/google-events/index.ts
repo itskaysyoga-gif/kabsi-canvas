@@ -3,6 +3,7 @@
 // audience (GOOGLE_PUBSUB_SERVICE_ACCOUNT and GOOGLE_PUBSUB_AUDIENCE). A forged or replayed push changes nothing. A
 // notification only offers jobs (a review sync, a Protection check, the Google state read); it never writes data.
 // Staff also call it with x-cron-secret and {"op":"register"} to point every account Kabsi manages through at the topic.
+import { serve } from "../_shared/kabsi.ts";
 import { admin, captureError, isInternal, json, log } from "../_shared/kabsi.ts";
 import { googleKeys, KABSI_PUBSUB_TOPIC } from "../_shared/google/events.ts";
 import { googlePush } from "../_shared/google/events-route.ts";
@@ -17,7 +18,7 @@ async function register() {
   return await registerNotifications(accounts, KABSI_PUBSUB_TOPIC);
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   if (req.headers.has("x-cron-secret")) {
     if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);

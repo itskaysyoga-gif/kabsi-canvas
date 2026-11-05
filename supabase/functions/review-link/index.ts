@@ -3,13 +3,14 @@
 // Abuse limits: 20 searches per visitor per hour (keyed by a salted hash of the IP, kept 1 hour, never the IP
 // itself) and 400 searches a day in total, so the Places bill stays inside the free monthly credit. Sec 1: every limit
 // fails closed (D266, a paid lookup), so a limiter outage cannot let the free tool use up the shared Places cap.
+import { serve } from "../_shared/kabsi.ts";
 import { clientIp } from "../_shared/client-ip.ts";
 import { searchText } from "../_shared/google/index.ts";
 import { captureError, CORS, fail, json, rateLimit, sha256Hex, verifyTurnstile } from "../_shared/kabsi.ts";
 import { FREE_TOOL_BUSY } from "../_shared/free-tool-busy.ts";
 import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.small).
   const capped = await capBody(req, BODY_LIMITS.small, CORS);

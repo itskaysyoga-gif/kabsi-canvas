@@ -3,11 +3,12 @@
 //        Sec 2: the code is in a header, never in the address; ?code= is still read while an older Worker runs.
 //   POST { code, source, country, device, is_bot }  → 204, one row in public.taps
 // No IP address is ever received or stored.
+import { serve } from "../_shared/kabsi.ts";
 import { admin, captureError, json, log, timingSafeEqual } from "../_shared/kabsi.ts";
 
 const CODE_RE = /^[2-9A-HJKMNP-Z]{6}$/;
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   const secret = Deno.env.get("TAP_SECRET");
   if (!secret) return json({ error: "not_configured" }, 503);
   if (!timingSafeEqual(req.headers.get("x-kabsi-secret") ?? "", secret)) return json({ error: "forbidden" }, 403);

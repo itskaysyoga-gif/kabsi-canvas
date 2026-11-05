@@ -12,6 +12,7 @@
 //   POST /billing-creem/test-run   Billing 2: staff only, Creem test mode only, an organisation marked billing_test only: the
 //                                  same actions for one named organisation, so a session can run the test-mode script
 //                                  (purchase, extra location, cancel the extra, cancel the plan) without an owner's login.
+import { serve } from "../_shared/kabsi.ts";
 import { admin, captureError, CORS, currentUser, fail, isInternal, json, log, rateLimit } from "../_shared/kabsi.ts";
 import { creemWebhook } from "../_shared/creem-webhook.ts";
 import { counted } from "../_shared/webhook-rejections.ts";
@@ -145,7 +146,7 @@ async function founding(): Promise<Response> {
   return json({ left: data }, 200, { "cache-control": "public, max-age=300" });
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   const path = new URL(req.url).pathname.replace(/\/+$/, "");
   if (req.method === "GET" && path.endsWith("/founding")) return await founding();

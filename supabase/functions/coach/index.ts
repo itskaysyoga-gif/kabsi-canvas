@@ -1,6 +1,7 @@
 // coach: the Profile Coach's actions (P0.8-09 part B). The logic and its checks are in _shared/coach/handler.ts; this file
 // wires it to the database, the Google layer (the mock until Gate A) and the network for the website check. It makes no
 // model call: the description writer waits for AI credit (K-146), so `draft` has no writer.
+import { serve } from "../_shared/kabsi.ts";
 import { admin, captureError, CORS, currentUser, log, rateLimit } from "../_shared/kabsi.ts";
 import { auditedAdmin, auditHeaders } from "../_shared/audit.ts";
 import { findCategory } from "../_shared/google/index.ts";
@@ -46,7 +47,7 @@ async function resolveHost(host: string): Promise<string[]> {
   return out;
 }
 
-Deno.serve((req) =>
+serve((req) =>
   makeHandler({
     getUser: async (r) => {
       const user = await currentUser(r);

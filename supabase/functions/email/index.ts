@@ -14,6 +14,7 @@
 //                                     mail-tester.com address, or one listed for the inbox test in
 //                                     app_settings.email_test_recipients), so a person can read them in a real inbox
 //                                     (P0.4-08, master plan 30.4). Never to anyone else.
+import { serve } from "../_shared/kabsi.ts";
 import { admin, captureError, CORS, internalSecret, isInternal, json, log } from "../_shared/kabsi.ts";
 import { capBody } from "../_shared/body-cap.ts";
 import { UNSUBSCRIBE_HEADERS, unsubscribeRequest, unsubscribeToken } from "../_shared/email/unsubscribe.ts";
@@ -67,7 +68,7 @@ async function webhook(req: Request) {
   return counted("resend", await resendWebhook(req, { secret: Deno.env.get("RESEND_WEBHOOK_SECRET") ?? "", db: admin(), log: (fields) => log(FN, fields), json }));
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   const url = new URL(req.url);
   const parts = url.pathname.split("/").filter(Boolean);
