@@ -69,7 +69,9 @@ describe("what the control shows as chosen", () => {
     expect(chosenChannel({ ...base, stored: "email" })).toBe("email");
   });
   it("reads Email while WhatsApp cannot carry anything, as the engine does", () => {
-    expect(chosenChannel({ ...base, stored: "whatsapp", status: { state: "stopped" } })).toBe("email");
+    expect(chosenChannel({ ...base, stored: "whatsapp", status: { state: "stopped" } })).toBe(
+      "email",
+    );
     expect(chosenChannel({ ...base, stored: "whatsapp", whatsappOn: false })).toBe("email");
   });
   it("before any stored choice reads Email, unless the earlier switch turned both routine emails off for WhatsApp", () => {
@@ -89,7 +91,11 @@ describe("the page's own copy of the choices", () => {
       { category: "review_new", channel: "email", frequency: "instant" },
       { category: "trial", channel: "email", frequency: "off" },
     ] as const;
-    const next = withPref([...before], { category: "review_new", channel: "email", frequency: "off" });
+    const next = withPref([...before], {
+      category: "review_new",
+      channel: "email",
+      frequency: "off",
+    });
     expect(next.find((p) => p.category === "review_new")?.frequency).toBe("off");
     expect(next.find((p) => p.category === "trial")?.frequency).toBe("off");
     expect(next).toHaveLength(2);

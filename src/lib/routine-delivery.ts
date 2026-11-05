@@ -22,16 +22,28 @@ const freq = (prefs: Pref[], category: string) =>
   prefs.find((p) => p.category === category && p.channel === "email")?.frequency ?? "default";
 
 /** The reason WhatsApp cannot be chosen right now, in one line, or null when it can. */
-export function whatsappBlock(i: Pick<DeliveryInput, "whatsappOn" | "status" | "statusFailed">): WhatsappBlock | null {
+export function whatsappBlock(
+  i: Pick<DeliveryInput, "whatsappOn" | "status" | "statusFailed">,
+): WhatsappBlock | null {
   if (!i.whatsappOn)
-    return { line: "WhatsApp is not open yet. Your reports and reminders come by email.", fix: null };
-  if (i.statusFailed) return { line: "We could not check your WhatsApp. Refresh the page and try again.", fix: null };
+    return {
+      line: "WhatsApp is not open yet. Your reports and reminders come by email.",
+      fix: null,
+    };
+  if (i.statusFailed)
+    return { line: "We could not check your WhatsApp. Refresh the page and try again.", fix: null };
   const state = i.status?.state;
   if (state === "active") return null;
   if (state === "stopped")
-    return { line: "WhatsApp is stopped. Connect it again below, then choose it here.", fix: "connect" };
+    return {
+      line: "WhatsApp is stopped. Connect it again below, then choose it here.",
+      fix: "connect",
+    };
   if (state === "none" || state === "pending")
-    return { line: "WhatsApp is not connected yet. Connect it below, then choose it here.", fix: "connect" };
+    return {
+      line: "WhatsApp is not connected yet. Connect it below, then choose it here.",
+      fix: "connect",
+    };
   return null;
 }
 

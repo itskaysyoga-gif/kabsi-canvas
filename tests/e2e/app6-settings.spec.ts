@@ -62,7 +62,9 @@ async function open(page: Page, srv: Server) {
     if (path.endsWith("/rpc/whatsapp_status")) return route.fulfill(json(srv.status));
     if (path.endsWith("/rpc/my_notification_prefs")) return route.fulfill(json(srv.prefs));
     if (path.endsWith("/rest/v1/routine_channels"))
-      return route.fulfill(json(srv.stored ? { channel: srv.stored } : null, srv.stored ? 200 : 406));
+      return route.fulfill(
+        json(srv.stored ? { channel: srv.stored } : null, srv.stored ? 200 : 406),
+      );
     if (path.endsWith("/rpc/set_routine_delivery")) {
       srv.calls.push(`delivery:${body.p_channel}`);
       await new Promise((r) => setTimeout(r, srv.delayMs));
@@ -77,7 +79,9 @@ async function open(page: Page, srv: Server) {
       await new Promise((r) => setTimeout(r, srv.delayMs));
       if (srv.failSaves) return route.fulfill(json({ message: "boom" }, 500));
       srv.prefs = [
-        ...srv.prefs.filter((p) => !(p.category === body.p_category && p.channel === body.p_channel)),
+        ...srv.prefs.filter(
+          (p) => !(p.category === body.p_category && p.channel === body.p_channel),
+        ),
         { category: body.p_category, channel: body.p_channel, frequency: body.p_frequency },
       ];
       return route.fulfill({ status: 204, headers: { "access-control-allow-origin": "*" } });
@@ -95,12 +99,15 @@ async function open(page: Page, srv: Server) {
     });
   });
   await page.goto("/app/settings");
-  await expect(page.getByRole("radiogroup", { name: "Where your routine messages go" })).toBeVisible({
+  await expect(
+    page.getByRole("radiogroup", { name: "Where your routine messages go" }),
+  ).toBeVisible({
     timeout: 20_000,
   });
 }
 
-const group = (page: Page) => page.getByRole("radiogroup", { name: "Where your routine messages go" });
+const group = (page: Page) =>
+  page.getByRole("radiogroup", { name: "Where your routine messages go" });
 const checked = (page: Page) => group(page).locator("[aria-checked=true]");
 
 async function axeClean(page: Page) {
@@ -111,7 +118,9 @@ async function axeClean(page: Page) {
 }
 
 test.describe("Settings: where routine messages go", () => {
-  test("WhatsApp shows at once while the save is slow, then stays after a reload", async ({ page }) => {
+  test("WhatsApp shows at once while the save is slow, then stays after a reload", async ({
+    page,
+  }) => {
     const srv = newServer({ delayMs: 1500 });
     await open(page, srv);
     await expect(checked(page)).toHaveText("Email");
@@ -179,7 +188,9 @@ test.describe("Settings: where routine messages go", () => {
     ["pending", "WhatsApp is not connected yet. Connect it below, then choose it here."],
     ["stopped", "WhatsApp is stopped. Connect it again below, then choose it here."],
   ] as const)
-    test(`WhatsApp ${state}: it says why and how to fix it, and changes nothing`, async ({ page }) => {
+    test(`WhatsApp ${state}: it says why and how to fix it, and changes nothing`, async ({
+      page,
+    }) => {
       const srv = newServer({
         stored: state === "stopped" ? "whatsapp" : null,
         status: { state, review_alerts: false, digest_optin: false, phone_last4: "" },
@@ -209,16 +220,30 @@ test.describe("Settings: the switches and the list", () => {
     await sw.click();
     await expect(sw).toHaveAttribute("aria-checked", "false", { timeout: 400 });
     await expect(sw).toBeEnabled();
-    await expect.poll(() => srv.prefs.find((p) => p.category === "review_new")?.frequency, { timeout: 8000 }).toBe("off");
+    await expect
+      .poll(() => srv.prefs.find((p) => p.category === "review_new")?.frequency, { timeout: 8000 })
+      .toBe("off");
     await page.reload();
-    await expect(page.getByRole("switch", { name: "New reviews" })).toHaveAttribute("aria-checked", "false");
+    await expect(page.getByRole("switch", { name: "New reviews" })).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
 
     srv.failSaves = true;
     srv.delayMs = 200;
     await page.getByRole("switch", { name: "New reviews" }).click();
-    await expect(page.getByRole("switch", { name: "New reviews" })).toHaveAttribute("aria-checked", "true", { timeout: 150 });
-    await expect(page.getByText("Couldn't save that. It is back as it was. Try again.").first()).toBeVisible();
-    await expect(page.getByRole("switch", { name: "New reviews" })).toHaveAttribute("aria-checked", "false");
+    await expect(page.getByRole("switch", { name: "New reviews" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+      { timeout: 150 },
+    );
+    await expect(
+      page.getByText("Couldn't save that. It is back as it was. Try again.").first(),
+    ).toBeVisible();
+    await expect(page.getByRole("switch", { name: "New reviews" })).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
     await axeClean(page);
   });
 
@@ -229,7 +254,11 @@ test.describe("Settings: the switches and the list", () => {
     await open(page, srv);
     await page.getByText("Choose how each one reaches you").click();
     const atOnce = page.getByRole("radio", { name: "At once", exact: true }).first();
-    await page.locator("label").filter({ hasText: /^At once$/ }).first().click();
+    await page
+      .locator("label")
+      .filter({ hasText: /^At once$/ })
+      .first()
+      .click();
     await expect(atOnce).toBeChecked({ timeout: 400 });
     await expect.poll(() => srv.prefs.length, { timeout: 8000 }).toBe(1);
     const saved = srv.prefs[0]!;
@@ -238,9 +267,15 @@ test.describe("Settings: the switches and the list", () => {
     srv.failSaves = true;
     srv.delayMs = 200;
     const digest = page.getByRole("radio", { name: "In the daily email", exact: true }).first();
-    await page.locator("label").filter({ hasText: /^In the daily email$/ }).first().click();
+    await page
+      .locator("label")
+      .filter({ hasText: /^In the daily email$/ })
+      .first()
+      .click();
     await expect(digest).toBeChecked({ timeout: 150 });
-    await expect(page.getByText("Couldn't save that. It is back as it was. Try again.").last()).toBeVisible();
+    await expect(
+      page.getByText("Couldn't save that. It is back as it was. Try again.").last(),
+    ).toBeVisible();
     await expect(atOnce).toBeChecked();
     await expect(digest).not.toBeChecked();
     expect(srv.prefs).toEqual([saved]);
