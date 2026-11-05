@@ -1,4 +1,4 @@
-import { Check, CircleCheck, Search } from "lucide-react";
+import { Check } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { TRIAL_LINE } from "@/lib/site";
@@ -6,7 +6,9 @@ import { ScanBox } from "./scan-box";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { ResultPreview } from "./result-preview";
 import { CHECK_HERO } from "./hero-lines";
-import { Marked } from "@/components/kabsi/highlight";
+import { Marked, YellowLabel, YellowNumber } from "@/components/kabsi/highlight";
+import salonTablet1600 from "@/assets/photos/salon-tablet-1600.webp";
+import salonTablet800 from "@/assets/photos/salon-tablet-800.webp";
 
 /**
  * The one free check's start page (master plan 30.16 section 4), on Design 8 (Web 4, lane R 1 Nov 2026): the hero with
@@ -34,32 +36,27 @@ const GET_BACK = [
 ] as const;
 
 export function CheckLooksAtVisual() {
+  // Scan 3 (30.34 item 2): yellow number markers and a short label pill (DESIGN.md, the highlight bar's other yellow uses).
   return (
     <figure className="relative rounded-panel border border-line bg-surface-1 p-5 shadow-float sm:p-6">
-      <div className="flex items-center gap-3">
-        <span className="grid size-10 place-items-center rounded-full bg-surface-2">
-          <Search className="size-5" aria-hidden />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-title font-bold">What the check looks at</p>
-          <p className="text-small text-text-2">About 10 seconds. No access needed.</p>
-        </div>
-      </div>
-      <ul className="mt-5 space-y-2.5">
+      <YellowLabel>About 10 seconds</YellowLabel>
+      <p className="mt-3 text-title font-bold">What Kabsi checks</p>
+      <p className="text-body text-text-2">On your public Google profile. No access needed.</p>
+      <ol className="mt-5 space-y-2.5">
         {LOOKS_AT.map((r, i) => (
           <li
             key={r.title}
             className={cn("flex gap-3 rounded-inner bg-surface-2 px-3.5 py-3", popCls)}
             style={stagger(i, 250, 180)}
           >
-            <CircleCheck className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden />
+            <YellowNumber n={i + 1} />
             <div>
-              <p className="text-small font-bold">{r.title}</p>
-              <p className="text-label text-text-2">{r.text}</p>
+              <p className="text-body font-bold">{r.title}</p>
+              <p className="text-small text-text-2">{r.text}</p>
             </div>
           </li>
         ))}
-      </ul>
+      </ol>
       <figcaption className="sr-only">
         What the free check reads on a public Google profile.
       </figcaption>
@@ -68,7 +65,7 @@ export function CheckLooksAtVisual() {
 }
 
 /** "What you get back" with the Example result: under the start page and under every state of the check. */
-export function WhatYouGetBack() {
+export function WhatYouGetBack({ photo = false }: { photo?: boolean }) {
   return (
     <section aria-labelledby="back-h" className="border-t border-line bg-surface-1">
       <div className="container-kb section-y grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
@@ -92,6 +89,20 @@ export function WhatYouGetBack() {
             What Google shows about the business is shown to you and not kept.
           </p>
           <p className="mt-2 text-small text-text-2">{TRIAL_LINE}</p>
+          {/* Scan 3 (30.34 item 2): a library photo on the empty /scan page (docs/PHOTOS.md, salon-tablet). */}
+          {photo && (
+            <img
+              src={salonTablet800}
+              srcSet={`${salonTablet800} 800w, ${salonTablet1600} 1600w`}
+              sizes="(min-width: 1024px) 34rem, calc(100vw - 40px)"
+              width={1600}
+              height={1067}
+              alt="A salon owner looking at a tablet in her salon"
+              loading="lazy"
+              decoding="async"
+              className="mt-8 aspect-[3/2] w-full max-w-[34rem] rounded-panel bg-surface-2 object-cover"
+            />
+          )}
         </div>
         <ResultPreview className="lg:ms-auto lg:w-[30rem]" />
       </div>
@@ -106,9 +117,12 @@ export function WhatYouGetBack() {
 export function FreeCheckFrame({
   children,
   under = null,
+  photo = false,
 }: {
   children: ReactNode;
   under?: string | null;
+  /** The empty /scan page shows a library photo under "What you get back". */
+  photo?: boolean;
 }) {
   return (
     <>
@@ -119,14 +133,14 @@ export function FreeCheckFrame({
         action={<div>{children}</div>}
         visual={<CheckLooksAtVisual />}
       />
-      <WhatYouGetBack />
+      <WhatYouGetBack photo={photo} />
     </>
   );
 }
 
 export function FreeCheckStart() {
   return (
-    <FreeCheckFrame>
+    <FreeCheckFrame photo>
       <ScanBox id="check-scan" className="max-w-xl" />
     </FreeCheckFrame>
   );

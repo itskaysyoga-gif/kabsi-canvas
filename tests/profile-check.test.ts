@@ -42,8 +42,10 @@ describe("Free Profile Check, status flags and WhatsApp (lane R sync, item D)", 
     const route = read("src/routes/google-profile-check.tsx");
     expect(route).toContain("<FreeCheckStart />");
     expect(route).toContain("${SITE_URL}/scan");
-    // The free check result shows the profile check's first flag as "What to do first".
-    expect(read("src/components/kabsi/scan-live.tsx")).toMatch(/f\.tone === "danger"/);
+    // The free check result shows the profile check's first red flag, else its first amber one, as the main finding
+    // (Scan 3: src/lib/scan-words.ts mainFinding, used by scan-live.tsx).
+    expect(read("src/lib/scan-words.ts")).toMatch(/x\.tone === "danger"/);
+    expect(read("src/components/kabsi/scan-live.tsx")).toContain("mainFinding(s.flags)");
     const src = read("src/components/profile-check/snapshot-result.tsx");
     expect(src).toContain('danger: "red", warning: "amber", neutral: "grey"');
   });
