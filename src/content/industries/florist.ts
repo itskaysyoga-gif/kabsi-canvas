@@ -122,7 +122,7 @@ export const florist: Industry = {
     },
   ],
   guides: [
-    "keep-your-hours-and-details-the-same-everywhere",
+    "google-posts-for-local-businesses",
     "how-to-set-holiday-hours-on-google",
     "how-to-reply-to-google-reviews",
   ],

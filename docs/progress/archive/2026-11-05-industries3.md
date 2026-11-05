@@ -15,26 +15,26 @@ The total falls less than the reading blocks did, because Read next now shows si
 
 | Page | Words before | Words after | Longest paragraph before | after |
 | --- | --- | --- | --- | --- |
-| auto-repair | 1571 | 1259 | 62 | 24 |
-| bakery | 1492 | 1207 | 60 | 24 |
-| barbershop | 1236 | 1031 | 78 | 25 |
-| cafe | 1543 | 1211 | 54 | 24 |
-| car-wash | 1165 | 1100 | 59 | 24 |
-| dental-clinic | 1338 | 1221 | 60 | 25 |
-| florist | 1125 | 1046 | 67 | 25 |
-| gym-and-fitness | 1571 | 1248 | 58 | 25 |
-| hair-salon | 1271 | 1051 | 87 | 25 |
-| lash-and-brow-studio | 1221 | 1088 | 65 | 25 |
-| medical-and-aesthetic-clinic | 1588 | 1261 | 56 | 24 |
-| nail-salon | 1235 | 1036 | 117 | 24 |
-| optician | 1123 | 1069 | 58 | 25 |
-| pet-grooming | 1205 | 1086 | 71 | 25 |
-| physiotherapy | 1533 | 1263 | 57 | 24 |
-| restaurant | 1252 | 1030 | 93 | 24 |
-| spa-and-massage | 1587 | 1265 | 57 | 25 |
-| tattoo-studio | 1183 | 1089 | 53 | 23 |
-| veterinary-clinic | 1162 | 1060 | 60 | 25 |
-| yoga-and-pilates-studio | 1164 | 1088 | 62 | 23 |
+| auto-repair | 1571 | 1225 | 62 | 24 |
+| bakery | 1492 | 1176 | 60 | 24 |
+| barbershop | 1236 | 1001 | 78 | 25 |
+| cafe | 1543 | 1181 | 54 | 24 |
+| car-wash | 1165 | 1067 | 59 | 24 |
+| dental-clinic | 1338 | 1189 | 60 | 25 |
+| florist | 1125 | 1013 | 67 | 25 |
+| gym-and-fitness | 1571 | 1217 | 58 | 25 |
+| hair-salon | 1271 | 1021 | 87 | 25 |
+| lash-and-brow-studio | 1221 | 1058 | 65 | 25 |
+| medical-and-aesthetic-clinic | 1588 | 1226 | 56 | 24 |
+| nail-salon | 1235 | 1006 | 117 | 24 |
+| optician | 1123 | 1035 | 58 | 25 |
+| pet-grooming | 1205 | 1052 | 71 | 25 |
+| physiotherapy | 1533 | 1228 | 57 | 24 |
+| restaurant | 1252 | 1000 | 93 | 24 |
+| spa-and-massage | 1587 | 1232 | 57 | 25 |
+| tattoo-studio | 1183 | 1058 | 53 | 23 |
+| veterinary-clinic | 1162 | 1031 | 60 | 25 |
+| yoga-and-pilates-studio | 1164 | 1054 | 62 | 23 |
 
 ## Independent check
 
@@ -63,4 +63,5 @@ Each fix has a line in its claim sheet ("fixed after the independent check").
 ## Found, not done
 
 - The `story` and the rest of `d8` in the content files are not shown on any page (dead data kept).
+- Two pages picked two guides with the same photo (Style 1 lets a photo serve two guides); the picks changed and tests/industries3.test.ts now asks three photos for three guides.
 - Several old claim sheet rows (cafe rows 21 and 37) still say "a route to a person at Kabsi"; the pages now follow facts 13 and cite it.

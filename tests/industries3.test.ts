@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { INDUSTRIES, industry, industryIndexed, type Card } from "../src/content/industries";
 import { ALL_GUIDES } from "../src/content/guides";
 import { pickIndustryGuides } from "../src/lib/guides-server";
+import { guideLook } from "../src/content/guides/look";
 
 const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
 const pages = INDUSTRIES.filter(industryIndexed);
@@ -97,6 +98,8 @@ describe("Industries 3: short, scannable industry pages (30.33 item 2)", () => {
     for (const i of pages) {
       expect(new Set(i.guides).size, i.slug).toBe(3);
       for (const g of i.guides) expect(slugs.has(g), `${i.slug} guide ${g}`).toBe(true);
+      // Three guide cards, three different photos (Style 1 lets one photo serve two guides).
+      expect(new Set(i.guides.map((g) => guideLook(g).photo)).size, `${i.slug} photos`).toBe(3);
     }
     const meta = ALL_GUIDES.map((g) => ({ ...g }));
     const cafe = industry("cafe")!;

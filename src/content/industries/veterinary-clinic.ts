@@ -131,6 +131,6 @@ export const veterinaryClinic: Industry = {
   guides: [
     "keep-your-hours-and-details-the-same-everywhere",
     "how-to-respond-to-negative-google-reviews",
-    "how-to-set-holiday-hours-on-google",
+    "someone-changed-my-hours-on-google",
   ],
 };
