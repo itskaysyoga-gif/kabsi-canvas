@@ -67,7 +67,7 @@ Deno.test("a business email puts the business name first in the subject (K-102),
   assert.ok(subjects.includes("Rose Lane Salon: one step left in your setup"));
   assert.ok(subjects.includes("Rose Lane Salon: a reply is ready for your yes"));
   assert.ok(subjects.includes("Rose Lane Salon: Kabsi's Google access stopped working"));
-  assert.ok(subjects.includes("Rose Lane Salon: your Results Report for 19 to 25 October"));
+  assert.ok(subjects.includes("Rose Lane Salon: your weekly report for 19 to 25 October"));
 });
 
 Deno.test("every email has a preview line and a plain-text version with its button address and the footer", () => {
@@ -169,8 +169,8 @@ Deno.test("P0.8-02: no email keeps the old Weekly Care Report subject or the old
     assert.doesNotMatch(all, /Your week on Google/, c.kind);
     assert.doesNotMatch(all, /will be deleted from Kabsi/, c.kind);
   }
-  // 30.18 section 3: the Monday email is the Results Report; "Weekly Care Report" is retired everywhere.
-  assert.equal(catalog().find((c) => c.kind === "weekly_report")!.content.subject, "Rose Lane Salon: your Results Report for 19 to 25 October");
+  // 30.18 section 3: the Monday email is the weekly report; "Weekly Care Report" is retired everywhere.
+  assert.equal(catalog().find((c) => c.kind === "weekly_report")!.content.subject, "Rose Lane Salon: your weekly report for 19 to 25 October");
   for (const c of catalog()) {
     const { html, text } = render(c);
     assert.doesNotMatch(`${c.content.subject}\n${text}\n${html}`, /Weekly Care Report/, c.kind);
@@ -309,7 +309,7 @@ Deno.test("Email 1: under 100 KB of HTML, light and dark, the logo with alt text
   }
 });
 
-Deno.test("Email 1: the Results Report is the work receipt; a row without real numbers hides", async () => {
+Deno.test("Email 1: the weekly report is the work receipt; a row without real numbers hides", async () => {
   const { renderReport } = await import("./report-body.ts");
   const { REPORT_NO_GOOGLE } = await import("./catalog.ts");
   const c = catalog().find((x) => x.kind === "weekly_report")!;

@@ -73,7 +73,7 @@ export type Deps = {
   /** The person's stored choices at this business, keyed `${category}:${channel}`. */
   prefs(userId: string, locationId: string): Promise<Map<string, Frequency>>;
   /** Where this person's routine message of this kind goes (routine_channels, Email 1): "whatsapp" only while their
-   *  WhatsApp is connected and carries that kind (review alerts, the Results Report), so nothing is lost. */
+   *  WhatsApp is connected and carries that kind (review alerts, the weekly report), so nothing is lost. */
   routineChannel(userId: string, category: string): Promise<"email" | "whatsapp">;
   /** The owner-approved opening hours text, or null. */
   hours(locationId: string): Promise<string | null>;

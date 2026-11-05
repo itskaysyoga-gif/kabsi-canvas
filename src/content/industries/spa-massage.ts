@@ -9,7 +9,7 @@ export const spaMassage: Industry = {
   name: "spa",
   plural: "Spas and massage",
   finished: true,
-  lead: "Kabsi puts each treatment on Google with its length and price, drafts calm replies that never describe a client's body, and has holiday hours ready before the long weekend. You approve each one on WhatsApp.",
+  lead: "Each treatment on Google with length and price, calm replies, holiday hours ready. You approve each one.",
   keyword: "spa",
   example: {
     business: "Stillwater Spa",

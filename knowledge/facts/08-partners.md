@@ -17,3 +17,7 @@
 
 ---
 - The partner terms are public at kabsi.co/partners/terms (added 24 Oct 2026): what the program is, the commission, the hold and payout, how a referral is credited, the rules every partner follows, fraud and ending, what a partner sees, liability and law. If someone asks about terms, earnings or dates, point to that page and to hello@kabsi.co. Do not quote earnings, and say Kabsi Partners opens when card payments open. The terms of service (section 17) and the privacy policy (sections 2, 6 and 8) mention partners.
+
+### Copy 3: the partners page shows the rate only (5 Nov 2026, B-029 and B-030)
+
+The partners page and its Example show the rate and no dollar earnings: "25 percent of what each referred business pays, for as long as it pays." Step 1 reads "Apply on WhatsApp or by email". The earnings slider is gone. Kabsi Partners still opens when card payments open.

@@ -10,7 +10,7 @@ export const physiotherapy: Industry = {
   name: "physiotherapy clinic",
   plural: "Physiotherapy",
   finished: true,
-  lead: "Kabsi keeps your physios, what you treat and the first assessment link right on Google, and replies to reviews without naming an injury or confirming a patient. You approve each one on WhatsApp.",
+  lead: "Physios, treatments and the assessment link right on Google, and replies that never name an injury. You approve each one.",
   keyword: "physio",
   example: {
     business: "Motion Works Physio",

@@ -69,7 +69,7 @@ function WhatsappConnected() {
               onChange={(v) => prefs.mutate({ alerts: v, digest: null })}
             />
             <Switch
-              label="Results Report on WhatsApp"
+              label="Your weekly report on WhatsApp"
               checked={s.digest_optin === true}
               disabled={prefs.isPending}
               onChange={(v) => prefs.mutate({ alerts: null, digest: v })}

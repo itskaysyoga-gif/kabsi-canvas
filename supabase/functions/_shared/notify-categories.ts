@@ -54,8 +54,8 @@ export const CATEGORIES = [
     description: "A post or photo Kabsi prepared, or a question about your hours before a holiday. Nothing goes on Google until you approve it.",
   },
   {
-    id: "weekly_report", why: "Your Results Report is sent once a week.", label: "Results Report", group: "Weekly and monthly", switchable: true, emailDefault: "instant",
-    quietExempt: false, inApp: true, noun: ["Results Report", "Results Reports"],
+    id: "weekly_report", why: "Your weekly report is sent once a week.", label: "Your weekly report", group: "Weekly and monthly", switchable: true, emailDefault: "instant",
+    quietExempt: false, inApp: true, noun: ["weekly report", "weekly reports"],
     description: "What Kabsi watched, prepared and sent to Google, once a week.",
   },
   {
@@ -88,7 +88,7 @@ export const CATEGORIES = [
 export type CategoryId = (typeof CATEGORIES)[number]["id"];
 
 /**
- * Routine messages (Email 1, docs/LATER.md): new reviews and the Monday Results Report. They go to the one place the owner
+ * Routine messages (Email 1, docs/LATER.md): new reviews and the Monday weekly report. They go to the one place the owner
  * chose in Settings ("Where your routine messages go"), email or WhatsApp, never both. Everything else keeps its own rules:
  * urgent items (a review that needs care, an urgent profile change, access, billing) always come by email too.
  */

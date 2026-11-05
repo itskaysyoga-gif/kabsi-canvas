@@ -1,4 +1,4 @@
-// The Monday Results Report as a work receipt (master plan 30.15 section 3.6, 30.18 section 3; V4 item 4). Data and WhatsApp
+// The Monday weekly report as a work receipt (master plan 30.15 section 3.6, 30.18 section 3; V4 item 4). Data and WhatsApp
 // text only; Email 1 designs the email. In this order: what Kabsi did, what waits for a yes, one next step. Then Google's numbers,
 // with calls and direction requests shown apart; review link opens, never counted as reviews; once a month "An answer customers
 // might see" (30.15 3.8); and a Competitor Watch line only when something changed that matters (3.9).

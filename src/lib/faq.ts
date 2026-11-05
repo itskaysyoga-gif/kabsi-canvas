@@ -1,6 +1,12 @@
 // Questions shown on /faq (all) and the homepage (the first five). Every answer must stay true of the
 // system as built (§3). Used for the FAQPage JSON-LD too, so answers are plain text.
-import { OPERATOR_NAME, PLAN_PRICES, SETUP_CALL_MINUTES, TAX_NOTE } from "@/lib/site";
+import {
+  OPERATOR_NAME,
+  PLAN_PRICES,
+  SETUP_CALL_MINUTES,
+  TAX_NOTE,
+  WORKING_HOURS,
+} from "@/lib/site";
 
 export const FAQ: { q: string; a: string }[] = [
   {
@@ -21,7 +27,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Can I book a setup call?",
-    a: `Yes. Email hello@kabsi.co (kabsi.co/setup-call says how). Rashid, who runs Kabsi, replies with your steps, and with times for a free ${SETUP_CALL_MINUTES}-minute call, Monday to Friday, 8am to 6pm Beirut time, when a call helps. We guide you, you click, and we never ask for your Google password.`,
+    a: `Yes. Email hello@kabsi.co (kabsi.co/setup-call says how). Rashid, who runs Kabsi, replies with your steps, and with times for a free ${SETUP_CALL_MINUTES}-minute call when a call helps. ${WORKING_HOURS} We guide you, you click, and we never ask for your Google password.`,
   },
   {
     q: "Will Kabsi get me more reviews, a better rating or a higher ranking?",
@@ -69,7 +75,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "What happens when my plan ends?",
-    a: "Watching and drafting stop: Reviews, Google Profile, Google Protection and the Results Report. Your review link and QR code keep working, and so does any NFC card that carries the link, and the free Google Profile Check stays free.",
+    a: "Watching and drafting stop: Reviews, Google Profile, Google Protection and the weekly report. Your review link and QR code keep working, and so does any NFC card that carries the link, and the free Google Profile Check stays free.",
   },
   {
     q: "Can I get a refund?",

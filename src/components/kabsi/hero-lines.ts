@@ -14,7 +14,7 @@ export const CHECK_HERO = {
 /** Pricing's hero (approved, COPY 34 and 38). */
 export const PRICING_HERO = {
   title: "Two plans. Free for 14 days.",
-  line: "Each plan does the Google work for one business, and you approve every change. Prices in US dollars, plus tax where it applies.",
+  line: "Each plan does the Google work for one business, and you approve every change.",
 } as const;
 
 /** How it works' hero (Design 7 headline, Design 8 line). */

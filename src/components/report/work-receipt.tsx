@@ -5,7 +5,7 @@ import { ExampleBadge, StatusPill, buttonClass } from "@/components/kabsi/ui";
 import { cn } from "@/lib/utils";
 import { asSentence } from "@/lib/insights";
 
-// The Monday Results Report as a short work receipt (master plan 30.15 section 3.6, V4 item 4; Design 3's WorkReceipt): what
+// The Monday weekly report as a short work receipt (master plan 30.15 section 3.6, V4 item 4; Design 3's WorkReceipt): what
 // Kabsi did as chips, what waits for a yes, one next step, then Google's numbers with calls and direction requests apart, each
 // block under the label of where it comes from. Drawn from weekly_reports.data.receipt (supabase/functions/_shared/
 // results-report/receipt.ts); nothing is invented, and a block with no data is not shown.
@@ -97,7 +97,7 @@ export function WorkReceipt({
         <div className="min-w-0">
           <p className="text-small text-text-2">{business}</p>
           <H id={`receipt-h-${id}`} className="font-display text-h3 font-bold">
-            Results Report, {dates}
+            Your weekly report, {dates}
           </H>
         </div>
       </header>

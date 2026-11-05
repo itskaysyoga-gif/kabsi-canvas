@@ -210,7 +210,7 @@ export function NoraLauncher() {
           showSolo ? "opacity-100" : "pointer-events-none opacity-0",
         )}
       >
-        <span className="grid size-9 place-items-center rounded-full bg-kb-yellow text-kb-black">
+        <span className="grid size-9 place-items-center rounded-full bg-kb-sand text-kb-black">
           <MessageCircle className="size-5" aria-hidden />
         </span>
         <span className="sr-only">Ask Nora, Kabsi's assistant</span>
@@ -229,7 +229,7 @@ export function NoraLauncher() {
           showWide ? "opacity-100" : "pointer-events-none opacity-0",
         )}
       >
-        <span className="grid size-8 place-items-center rounded-full bg-kb-yellow text-kb-black">
+        <span className="grid size-8 place-items-center rounded-full bg-kb-sand text-kb-black">
           <MessageCircle className="size-4" aria-hidden="true" />
         </span>
         <span>Chat with Nora</span>

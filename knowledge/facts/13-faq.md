@@ -18,7 +18,7 @@ Gemini is Google's free assistant for one verified profile that you open and ask
 Any business with a verified Google Business Profile that you own or manage. Setup asks first. If your profile isn't verified yet, or someone else manages it, setup shows what to do on Google, and you can come back.
 
 **Can I book a setup call?**
-Yes. The team offers a free 20-minute setup call, Monday to Friday, 8am to 6pm Beirut time. Email hello@kabsi.co (kabsi.co/setup-call says how): Rashid, who runs Kabsi, replies with your steps, and with times when a call helps. There is no booking calendar. Staff never sign in to your Google account: you send the invitation yourself.
+Yes. The team offers a free 20-minute setup call. Working hours: Monday to Friday, 9:00 to 18:00, UAE time. Email hello@kabsi.co (kabsi.co/setup-call says how): Rashid, who runs Kabsi, replies with your steps, and with times when a call helps. There is no booking calendar. Staff never sign in to your Google account: you send the invitation yourself.
 
 **How does Kabsi protect my Google profile?**
 You invite the Kabsi Clients group (ID 5481006796) as a Manager, not as an owner, and you can remove it at any time from People and access. Kabsi only accepts an invitation that matches a business you have set up and only for the Manager role: the profile's exact name and its street must match, and when Google writes the address in another script (for example Greek or Cyrillic) Kabsi checks the profile's place on Google Maps against the place you picked at sign-up. An invitation with no street in its address waits for a person on the Kabsi team. If Kabsi ever finds itself a Manager of a profile nobody set up in Kabsi, it removes itself at once and the team is told. Kabsi's Google account uses Google's Advanced Protection. Nothing is written to Google without your approval, and each approval is recorded with the exact text, who approved it, when, and whether it came from the dashboard or an email link.
@@ -343,7 +343,7 @@ Kabsi never charges on its own today. How renewals work with card payments will 
 When payment is confirmed and Kabsi's Google access works. Waiting for access doesn't count.
 
 **What happens when my plan ends?**
-Reviews, Google Profile, Google Protection and the Results Report stop. Get Reviews keeps working: your review link and QR code still open your Google review page.
+Reviews, Google Profile, Google Protection and the weekly report stop. Get Reviews keeps working: your review link and QR code still open your Google review page.
 
 **Can I get a refund?**
 Yearly plans are refundable in full within 14 days of the plan starting.

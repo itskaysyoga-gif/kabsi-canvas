@@ -2,6 +2,7 @@ import { useRouterState } from "@tanstack/react-router";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFoundingPlaces } from "@/lib/public-api";
+import { FOUNDING25_TOTAL } from "./founding-total";
 import { SiteLink } from "./site-link";
 
 /**
@@ -77,7 +78,7 @@ export function FoundingLine() {
           <span className="font-bold">Founding 25:</span> three months of Kabsi Pro, free.{" "}
           {places && places.left > 0 && (
             <span data-qa-mask className="text-text-2">
-              {places.left} {places.left === 1 ? "place" : "places"} left.{" "}
+              {places.left} of {places.total || FOUNDING25_TOTAL} places left.{" "}
             </span>
           )}
           <SiteLink

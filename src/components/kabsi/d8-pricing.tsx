@@ -208,7 +208,7 @@ export function D8Pricing() {
                     {p.help} {WORKING_HOURS}
                   </p>
                   <div className="mt-auto pt-6">
-                    <ButtonLink to="/get-started" full variant={pro ? "primary" : "secondary"}>
+                    <ButtonLink to="/get-started" full variant={pro ? "primary" : "dark"}>
                       Start free
                     </ButtonLink>
                   </div>

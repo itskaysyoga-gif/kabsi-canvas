@@ -27,7 +27,7 @@ select is(public.set_routine_channel('whatsapp'), 'whatsapp', 'with WhatsApp con
 select is((select channel from public.routine_channels where user_id = '00000000-0000-4000-8000-0000000000a1'), 'whatsapp', 'the owner reads their own choice');
 reset role;
 select is(public.routine_channel_of('00000000-0000-4000-8000-0000000000a1'), 'whatsapp', 'the engine reads WhatsApp');
--- Per kind: WhatsApp carries a review only with review alerts on, the Results Report only with its report on.
+-- Per kind: WhatsApp carries a review only with review alerts on, the weekly report only with its report on.
 update public.whatsapp_optins set review_alerts = true, digest_optin = false where user_id = '00000000-0000-4000-8000-0000000000a1';
 select is(public.routine_channel_of('00000000-0000-4000-8000-0000000000a1', 'review_new'), 'whatsapp', 'reviews go on WhatsApp with alerts on');
 select is(public.routine_channel_of('00000000-0000-4000-8000-0000000000a1', 'weekly_report'), 'email', 'the report stays on email while its WhatsApp report is off');

@@ -12,7 +12,7 @@ import { EmptyState, ErrorState, Skeleton, buttonClass } from "@/components/kabs
 import { CareBottom, CareTop, type CareData } from "@/components/report/care-blocks";
 import { WorkReceipt, type ReceiptData } from "@/components/report/work-receipt";
 
-// Reports (UX 1, Design 3): the Monday Results Report as a work receipt (V4's data.receipt), then the earlier ones, the last
+// Reports (UX 1, Design 3): the Monday weekly report as a work receipt (V4's data.receipt), then the earlier ones, the last
 // 12 weeks. Reports from before V4 have no receipt and keep their older blocks. Read through RLS (members only).
 export const Route = createFileRoute("/_authenticated/app/report")({
   head: () => ({
@@ -113,7 +113,7 @@ function ReportPage() {
             maps={maps}
           />
         ) : (
-          <Panel title={`Results Report, ${dates(latest.data)}`} id="latest">
+          <Panel title={`Your weekly report, ${dates(latest.data)}`} id="latest">
             <OlderBody r={latest.data} latest />
           </Panel>
         )
@@ -125,7 +125,7 @@ function ReportPage() {
               <li key={id}>
                 <details className="group">
                   <summary className="press flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 py-2 text-body font-semibold [&::-webkit-details-marker]:hidden">
-                    Results Report, {dates(r)}
+                    Your weekly report, {dates(r)}
                     <ChevronDown
                       className="size-5 shrink-0 text-text-2 transition-transform group-open:rotate-180"
                       aria-hidden

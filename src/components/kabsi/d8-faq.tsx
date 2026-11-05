@@ -74,7 +74,8 @@ export function D8Faq() {
               {WHATSAPP_ON ? (
                 <>
                   <p className="mt-2 text-body text-text-2">
-                    Ask on WhatsApp, or write to {MAIL}. A person reads it.
+                    Ask on WhatsApp, or write to {MAIL}. Nora, Kabsi's assistant, answers at once.
+                    Ask for a person and Rashid replies in working hours.
                   </p>
                   <a
                     href={WHATSAPP_URL}

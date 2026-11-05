@@ -10,7 +10,7 @@ export const bakery: Industry = {
   name: "bakery",
   plural: "Bakeries",
   finished: true,
-  lead: "Kabsi keeps your opening hours right on Google, early ones included, lists your cakes with a starting price, and replies to reviews of the bread without promising what is left on the shelf. You approve each one on WhatsApp.",
+  lead: "Early opening hours right on Google, your cakes listed with a starting price, replies drafted. You approve each one.",
   keyword: "bakery",
   example: {
     business: "Corner Bakery",

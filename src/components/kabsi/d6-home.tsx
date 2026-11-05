@@ -163,7 +163,7 @@ const JOBS: { icon: LucideIcon; title: string; text: string; visual: ReactNode }
   {
     icon: FileText,
     title: "See the work, every Monday",
-    text: "Your Results Report: what Kabsi did, what waits for your yes, and one next step.",
+    text: "Your weekly report: what Kabsi did, what waits for your yes, and one next step.",
     visual: (
       <MiniCard>
         <ul className="space-y-1.5 text-small">

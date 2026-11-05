@@ -77,7 +77,7 @@ export function deletionDone(business: string, appUrl: string): EmailContent {
 export type RenewalStage = "r5" | "r1";
 export function renewalReminder(stage: RenewalStage, business: string, planLabel: string, day: string, planKind: string, appUrl: string): EmailContent {
   const when = stage === "r1" ? "tomorrow" : "in a few days";
-  const plain = `Your ${planLabel} plan for ${business} ends ${when}, on ${day}. To keep reply drafts, Google Protection and the Results Report going, pay before then. Paying early adds the new period after this one, so you lose no days. Your review link and QR code keep working either way.`;
+  const plain = `Your ${planLabel} plan for ${business} ends ${when}, on ${day}. To keep reply drafts, Google Protection and the weekly report going, pay before then. Paying early adds the new period after this one, so you lose no days. Your review link and QR code keep working either way.`;
   const url = `${appUrl}/app/plan?pay=${encodeURIComponent(planKind)}`;
   return {
     subject: stage === "r1" ? `${business}: your plan ends tomorrow` : `${business}: your plan ends on ${day}`,
@@ -88,12 +88,12 @@ export function renewalReminder(stage: RenewalStage, business: string, planLabel
 
 // ─── the week ─────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** The Monday Results Report (30.18 section 3): the body is the visual work receipt of report-body.ts. */
+/** The Monday weekly report (30.18 section 3): the body is the visual work receipt of report-body.ts. */
 export function weeklyReport(business: string, o: { dates: string; preheader: string; button?: { label: string; path: string } }, html: string, text: string, appUrl: string): EmailContent {
   const report = `${appUrl}/app/report`;
   const main = o.button && o.button.path !== "/app/report" ? { label: o.button.label, url: `${appUrl}${o.button.path}` } : { label: "Open your report", url: report };
   return {
-    subject: `${business}: your Results Report for ${o.dates}`, preheader: o.preheader, title: `Your Results Report, ${o.dates}`,
+    subject: `${business}: your weekly report for ${o.dates}`, preheader: o.preheader, title: `Your weekly report, ${o.dates}`,
     bodyHtml: html, button: main, ...(main.url !== report ? { links: [{ label: "Open your report", url: report }] } : {}), text,
   };
 }

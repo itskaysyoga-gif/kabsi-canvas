@@ -73,7 +73,7 @@ export const CATEGORIES: readonly Category[] = [
   },
   {
     id: "weekly_report",
-    label: "Results Report",
+    label: "Your weekly report",
     group: "Weekly and monthly",
     switchable: true,
     emailDefault: "instant",

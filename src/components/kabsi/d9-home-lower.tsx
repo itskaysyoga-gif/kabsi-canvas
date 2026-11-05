@@ -356,7 +356,9 @@ function NearbyMap() {
         </ul>
       </div>
       <p className="mt-4 text-small font-bold">{m.count}</p>
-      <figcaption className="mt-2 text-label text-text-2">{m.sample}</figcaption>
+      <figcaption className="mt-2 text-label text-text-2">
+        {m.shows} {m.sample}
+      </figcaption>
     </figure>
   );
 }

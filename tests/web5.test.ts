@@ -45,11 +45,12 @@ describe("Design 9 Home (Web 5 part B)", () => {
     expect("atLaunch" in D9_SHOW_UP).toBe(false);
     expect(D9_SHOW_UP.line).toBe("Two checks Kabsi runs, shown as they are. No score.");
   });
-  it("says the map count the sample points really show", () => {
-    const top3 = D9_MAP_POINTS.filter((p) => p.rank <= 3).length;
-    expect(D9_SHOW_UP.map.count).toBe(
-      `You came up in the first 3 at ${top3} of ${D9_MAP_POINTS.length} places Kabsi checked.`,
-    );
+  // B-004 (Copy 3, master plan 30.29 item 2): the Example speaks of the 49 places the real check uses and says the map
+  // shows only some of them, and the sample really draws that many.
+  it("says the Example map count of 49 places and that the map shows the points it draws", () => {
+    expect(D9_SHOW_UP.map.count).toBe("In the first 3 at 18 of 49 places Kabsi checked.");
+    expect(D9_SHOW_UP.map.shows).toBe(`The map shows ${D9_MAP_POINTS.length} of them.`);
+    expect(D9_MAP_POINTS.length).toBe(8);
   });
   // Polish 4 (30.25 item 3): the watch line names no channel, so it is true either way. Go live 1 (30.28): the launch
   // line is gone from the hero and from every page.

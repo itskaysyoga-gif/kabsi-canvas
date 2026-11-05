@@ -346,8 +346,8 @@ export const QUESTIONS: Question[] = [
   {
     id: "en26",
     lang: "en",
-    topic: "the Results Report",
-    ask: "What is in the Results Report and when does it come?",
+    topic: "the weekly report",
+    ask: "What is in the weekly report and when does it come?",
     kb: [/every Monday, kept under Reports, and sent on WhatsApp or by email/],
     must: [/Monday/, /Reports/],
     reference:

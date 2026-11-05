@@ -28,3 +28,7 @@ Drafts are warm for celebrations and gentle for sympathy orders, never adding de
 
 ---
 
+### Copy 3: the industry pages (5 Nov 2026, B-014 and B-016)
+
+- Every industry page has a hero line of at most 20 words and the jobs headline "Google jobs that come back." The long reading sections "What people search for" and "Your Google profile, as a [trade] owner" stay long; they are reading content for search and are exempt from the section rule.
+- The scan box on each industry page says "Kabsi searches '[term]' on Google Maps around you, like a customer."

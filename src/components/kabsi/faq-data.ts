@@ -58,7 +58,7 @@ export const buildFaq = (): { q: string; a: string }[] => [
   },
   {
     q: "Can I cancel?",
-    a: "Yes, any time. Your plan runs to the end of the period you paid for.",
+    a: "Yes, any time. Cancel on the Plan page or on WhatsApp, and your plan runs to the end of the period you paid for.",
   },
   {
     q: "Where does the ranking data come from?",
@@ -78,7 +78,7 @@ export const FAQ: { q: string; a: string }[] = buildFaq();
 // says it on the same page; "What if I already reply to reviews myself?" took its place.
 export const HOME_FAQ = [11, 3, 4, 8];
 
-/** Pricing's "Billing questions" (Design 8), checked against the facts (4.3, 4.5, which cancel is which). With the shared FAQ
+/** Pricing's "Billing questions" (Design 8), checked against the facts (4.3, 4.5). With the shared FAQ
  * because the route head builds the FAQPage data from them. */
 export const BILLING_FAQ: { q: string; a: string }[] = [
   {
@@ -90,10 +90,6 @@ export const BILLING_FAQ: { q: string; a: string }[] = [
     a: "Choose a plan to keep going. If you do not, Kabsi keeps watching and drafting for 7 more days and publishes nothing. Your review link and QR code keep working.",
   },
   FAQ[7]!,
-  {
-    q: "Which cancel is which?",
-    a: "Cancelling on the Plan page ends your plan at the end of the period you paid for, and everything keeps working until then. Cancelling in Creem's own billing page ends the plan at once.",
-  },
   {
     q: "Can I get a refund?",
     a: "Yearly plans are refundable in full within 14 days of the plan starting. A monthly plan runs to the end of the month paid for. Write to hello@kabsi.co.",
@@ -169,13 +165,13 @@ export const buildFaqGroups = (whatsappOn: boolean = WHATSAPP_ON): FaqGroup[] =>
         BILLING_FAQ[1]!,
         {
           q: "Can I cancel?",
-          a: "Yes, any time. Your plan runs to the end of the period you paid for. Monthly plans can be cancelled at any time. Yearly plans are refundable within 14 days.",
+          a: "Yes, any time. Cancel on the Plan page or on WhatsApp, and your plan runs to the end of the period you paid for. Yearly plans are refundable within 14 days.",
         },
         {
           q: "Can I run more than one location?",
           a: "Yes. Each extra location is $15 a month or $150 a year, on the same plan.",
         },
-        BILLING_FAQ[5]!,
+        BILLING_FAQ[4]!,
       ],
     },
     {
@@ -241,7 +237,7 @@ export const buildFaqGroups = (whatsappOn: boolean = WHATSAPP_ON): FaqGroup[] =>
         },
         {
           q: "What does the free check keep?",
-          a: "What Google shows about the business is shown to you and not kept; Kabsi keeps only the business's Google Place ID. If you ask for the result by email or join the waiting list, Kabsi keeps your email address too.",
+          a: "What Google shows about the business is shown to you and not kept; Kabsi keeps only the business's Google Place ID. If you ask for the result by email, Kabsi keeps your email address too.",
         },
         {
           q: "Can I delete my data?",

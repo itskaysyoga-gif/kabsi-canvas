@@ -47,7 +47,7 @@ export const AGENTS: Record<AgentName, Agent> = {
     },
   },
   insights: {
-    job: "The Results Report, the three next actions, why calls dropped, the category check and AI Visibility sources turned into actions.",
+    job: "The weekly report, the three next actions, why calls dropped, the category check and AI Visibility sources turned into actions.",
     tools: ["read_insights", "read_rank_scans", "read_business_knowledge", "open_task"],
     tasks: {},
   },

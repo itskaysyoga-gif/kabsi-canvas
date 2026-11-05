@@ -10,7 +10,7 @@ export const gymFitness: Industry = {
   name: "gym",
   plural: "Gyms and fitness studios",
   finished: true,
-  lead: "Kabsi puts your classes and trial offers on Google as posts with real dates, keeps your hours right for holidays, and replies to reviews that name your coaches, and never argues about a bill in public. You approve each one on WhatsApp.",
+  lead: "Classes and trial offers as Google posts with real dates, holiday hours and replies drafted. You approve each one.",
   keyword: "gym",
   example: {
     business: "Harbour Strength Studio",

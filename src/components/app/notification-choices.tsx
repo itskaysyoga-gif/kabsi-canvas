@@ -25,12 +25,12 @@ const SWITCHES: { id: string; label: string; description?: string }[] = [
     label: "Changes to your Google profile",
     description: "Urgent changes, like your name, address or hours, always reach you.",
   },
-  { id: "weekly_report", label: "Results Report every Monday" },
+  { id: "weekly_report", label: "Your weekly report every Monday" },
   { id: "trial", label: "Tips during your trial" },
 ];
 
 /** Owner words for a category whose stored label is retired (the label lives in notify-categories.ts on the server). */
-const SHOWN_LABEL: Record<string, string> = { weekly_report: "Results Report" };
+const SHOWN_LABEL: Record<string, string> = { weekly_report: "Your weekly report" };
 
 function usePrefs(locationId: string) {
   const qc = useQueryClient();

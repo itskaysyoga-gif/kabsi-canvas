@@ -64,9 +64,9 @@ export function D8About() {
           </h2>
           <figure className="max-w-4xl">
             <blockquote className="font-display text-h2 font-bold text-text-1">
-              "I built Kabsi because local owners lose customers to a Google profile nobody has time
-              to look after. Kabsi measures where you show up, does the work, and asks for your yes
-              on WhatsApp before anything goes live."
+              "I built Kabsi because local owners have a Google profile nobody has time to look
+              after. Kabsi measures where you show up, does the work, and asks for your yes on
+              WhatsApp before anything goes live."
             </blockquote>
             <figcaption className="mt-6 text-body text-text-2">
               {OPERATOR_NAME}, founder of Kabsi.
@@ -121,7 +121,8 @@ export function D8About() {
             {WHATSAPP_ON && (
               <>
                 <p className="mt-8 text-body text-text-2">
-                  Or ask a question on WhatsApp. A person answers.
+                  Or ask a question on WhatsApp. Nora, Kabsi's assistant, answers at once. Ask for a
+                  person and Rashid replies in working hours.
                 </p>
                 <a
                   href={WHATSAPP_URL}

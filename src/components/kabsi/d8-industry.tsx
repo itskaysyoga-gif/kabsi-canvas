@@ -120,7 +120,7 @@ export function IndustryPage({ industry: i }: { industry: Industry }) {
         <div className="container-kb section-y grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div>
             <h2 id="tjobs-h" className="text-h2">
-              {d?.jobsTitle ?? `The Google jobs that come back for a ${i.name}.`}
+              {d?.jobsTitle ?? "Google jobs that come back."}
             </h2>
             {i.photos[1] && (
               <div className="relative mt-8 hidden aspect-[4/3] overflow-hidden rounded-panel sm:block">
