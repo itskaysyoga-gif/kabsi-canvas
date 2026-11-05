@@ -394,11 +394,11 @@ function Page() {
         <h2>7. Cookies and similar storage</h2>
         <ul>
           <li>
-            Sign-in: your browser stores your session so you stay logged in. This is essential.
-            You stay signed in on a device for 30 days after your last visit, and each visit starts
-            the 30 days again; Kabsi staff pages sign staff out after 12 hours without use. To know
-            when you last visited, your browser keeps the time of your last visit, on this device
-            only. Settings has Sign out on every device.
+            Sign-in: your browser stores your session so you stay logged in. This is essential. You
+            stay signed in on a device for 30 days after your last visit, and each visit starts the
+            30 days again; Kabsi staff pages sign staff out after 12 hours without use. To know when
+            you last visited, your browser keeps the time of your last visit, on this device only.
+            Settings has Sign out on every device.
           </li>
           <li>
             Preferences: the website remembers which business you last opened, in your browser only.
