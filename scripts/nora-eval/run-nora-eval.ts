@@ -5,6 +5,10 @@
 //   node scripts/nora-eval/run-nora-eval.ts --live --sample 20   the real Nora on 20 questions spread over the set; needs
 //                                                          ANTHROPIC_API_KEY; by hand only, when Rashid says so (R-45, 2.12)
 //   node scripts/nora-eval/run-nora-eval.ts --stub pass --pages   the 5 page-link questions of Guides 4 (no network)
+//   node scripts/nora-eval/run-nora-eval.ts --live --pages --concurrency 1 --budget 0.40   the same five with the real Nora,
+//                                                          one at a time (App 6): the first answer writes Nora's cached facts
+//                                                          (about 66,000 tokens), the other four read them, so five questions
+//                                                          cost about 0.25 US dollars instead of four cache writes at once
 //   node scripts/nora-eval/run-nora-eval.ts --live --with-28 --judge --budget 2.5   all 88 questions (the 60, the
 //                                                          20 of 28.7, the 3 of Scope 1 and the 5 page-link questions), each scored by the judge (26.1), stopped at the budget
 //
@@ -73,7 +77,7 @@ const judge =
 const spent = () => costMicros(noraModel, used) + (judge?.cost() ?? 0);
 const budgetUsd = flag("--budget") ? Number(flag("--budget")) : undefined;
 const { score, answers, stopped } = await runAll(model, kb, {
-  concurrency: stub ? 1 : 4,
+  concurrency: stub ? 1 : Math.max(1, Number(flag("--concurrency") ?? 4) || 4),
   only,
   budget: budgetUsd ? { spent, micros: budgetUsd * 1e6 } : undefined,
 });
