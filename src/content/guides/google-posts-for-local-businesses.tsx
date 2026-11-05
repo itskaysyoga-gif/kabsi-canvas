@@ -169,7 +169,10 @@ export const guide: GuideDoc = {
               Hotels. Google says hotels cannot create Offer posts or any post about deals,
               promotions, special offers or discounts.
             </li>
-            <li>Offensive, sexually suggestive or misleading content, or links to unsafe sites.</li>
+            <li>
+              Inappropriate or offensive language, sexually suggestive or explicit content, or links
+              to malware, viruses, phishing or pornographic material.
+            </li>
           </ul>
           <Callout kind="tip" title="Check the question mark">
             Google says a question mark next to Not approved shows which content policy the post
@@ -201,8 +204,8 @@ export const guide: GuideDoc = {
       <>
         <p>
           Kabsi prepares Google posts for you to approve: 2 a month on Essentials and one every week
-          on Pro. Each is an Update, an Offer or an Event with one of your own checked photos and
-          one button, and Kabsi writes it only from facts you confirmed and photos you approved. An
+          on Pro. Each is an Update, an Offer or an Event that can have one of your own checked
+          photos and one button, and Kabsi writes it only from facts you confirmed and photos you approved. An
           offer or an event is only one you typed in: Kabsi never invents a price, an offer or a
           date. When it has nothing true to say, it asks you one question instead, "Anything new
           this month? A dish, a service, an event?", and until Kabsi's own AI writing is switched
@@ -226,7 +229,7 @@ export const guide: GuideDoc = {
     },
     {
       q: "Can I post from my phone?",
-      a: "Usually, yes. Google's help says you can open and edit your profile in the Google Maps app by tapping Business at the bottom right, and that some features differ between Search and Maps and between phones and computers. If you cannot find Posts in the app, use Google Search while signed in.",
+      a: "Usually, yes. Google's help says you can open and edit your profile in the Google Maps app by tapping Business at the bottom right, and that certain features may differ between Search and Maps and your device's operating system. If you cannot find Posts in the app, use Google Search while signed in to the Google Account linked to your profile.",
     },
     {
       q: "Can I put the same post on several of my locations?",
