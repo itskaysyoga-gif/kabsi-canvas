@@ -7,7 +7,7 @@
 // Places API (New) is separate: it runs on PLACES_API_KEY and works before the grant.
 import { isConciergeLocationId } from "../concierge.ts";
 import { googleModeFor } from "../demo.ts";
-import { RetryLater } from "../jobs.ts";
+import { PermanentJobError, RetryLater } from "../jobs.ts";
 
 export const AM = "https://mybusinessaccountmanagement.googleapis.com/v1";
 export const BI = "https://mybusinessbusinessinformation.googleapis.com/v1";
@@ -96,6 +96,54 @@ export async function assertWritesOpen() {
   }
 }
 
+// Fix 3: the name guard. Every Business Profile URL names a Google resource: an account ("accounts/123"), a location
+// ("locations/456", alone or under its account), or one of the few documented collection forms (the account list, the
+// category list, the media upload). A live call whose path is anything else (Kabsi's own business id, a demo or
+// concierge id, an empty name) is refused before the network, with no retry, and reported to Sentry at most once a day.
+const ID = "[0-9]+";
+// What may follow the resource: a custom method (":accept", ":getGoogleUpdated"), the account's location list, or one of
+// the sub-collections the live modules read and write, with that collection's own item names after it.
+const SUB = "reviews|localPosts|media|admins|invitations|notificationSetting|attributes|searchkeywords|VoiceOfMerchantState|verifications|placeActionLinks";
+const RESOURCE = new RegExp(`^(accounts/${ID}(/locations/${ID})?|locations/${ID})(:[A-Za-z]+|/locations|/(${SUB})([/:][^?]*)?)?$`);
+const COLLECTIONS: Record<string, RegExp> = {
+  [AM]: /^accounts$/, // accounts.list
+  [BI]: /^categories$/, // categories.list
+  [UPLOAD]: /^v1\/media\/[^/?]+$/, // media.upload, to the resourceName Google gave startUpload
+};
+const BASES = [AM, BI, V4, UPLOAD, PERF, NOTIF, VERIF, PLACE_ACTIONS];
+export class GoogleNameRefused extends PermanentJobError {
+  override name = "GoogleNameRefused";
+}
+/** Whether a Business Profile URL names a Google resource in one of its documented forms. */
+export function googlePathOk(url: string): boolean {
+  const base = BASES.find((b) => url.startsWith(`${b}/`));
+  if (!base) return false;
+  const path = url.slice(base.length + 1).split("?")[0];
+  return RESOURCE.test(path) || (COLLECTIONS[base]?.test(path) ?? false);
+}
+// The refused path for the report, without the query and with Kabsi's own ids kept out of the message's grouping.
+const refusedPath = (url: string) => url.split("?")[0].slice(0, 200);
+// Sentry is told at most once a day across every function: the day is kept in app_settings (google_name_refused_day);
+// the first isolate to move it to today reports. A setting that cannot be written means no report, never a throw.
+const REFUSED_KEY = "google_name_refused_day";
+export async function refusalReportDue(today = new Date().toISOString().slice(0, 10)): Promise<boolean> {
+  try {
+    const db = await mockDb();
+    const ins = await db.from("app_settings").upsert({ key: REFUSED_KEY, value: today }, { onConflict: "key", ignoreDuplicates: true }).select("key");
+    if (!ins.error && (ins.data ?? []).length > 0) return true;
+    const up = await db.from("app_settings").update({ value: today, updated_at: new Date().toISOString() }).eq("key", REFUSED_KEY).neq("value", today).select("key");
+    return !up.error && (up.data ?? []).length > 0;
+  } catch {
+    return false;
+  }
+}
+async function reportRefusal(url: string) {
+  const { captureError } = await import("../kabsi.ts");
+  await captureError("google", new GoogleNameRefused(`google call refused: not a Google resource name: ${refusedPath(url)}`), {
+    note: "Fix 3 name guard; reported once a day", path: refusedPath(url),
+  });
+}
+
 // What gbp needs besides Google itself; the tests replace these. The limiter's state lives in the database, reached
 // with the same lazily loaded service client as the mocks.
 export const io = {
@@ -111,6 +159,9 @@ export const io = {
     if (error) throw error;
   },
   sleep: (ms: number) => new Promise<void>((r) => setTimeout(r, ms)),
+  /** Fix 3: whether today's report of a refused name is still to be sent, and the report itself. */
+  refusalDue: (): Promise<boolean> => refusalReportDue(),
+  reportRefusal: (url: string): Promise<void> => reportRefusal(url),
 };
 const MAX_WAIT_MS = 65_000;
 
@@ -147,6 +198,11 @@ const RETRIES = 4;
 // deno-lint-ignore no-explicit-any
 export async function gbp(url: string, init: RequestInit = {}): Promise<any> {
   const method = (init.method ?? "GET").toUpperCase();
+  // Fix 3: a path that is not a Google resource name never reaches Google, the limiter or the token.
+  if (!googlePathOk(url)) {
+    if (await io.refusalDue().catch(() => false)) await io.reportRefusal(url).catch(() => {});
+    throw new GoogleNameRefused(`google call refused: not a Google resource name: ${refusedPath(url)}`);
+  }
   const profile = profileOf(url, method);
   for (let attempt = 0; ; attempt++) {
     // Every try of a write asks the stop switch first, so a pause also stops a retry already under way.

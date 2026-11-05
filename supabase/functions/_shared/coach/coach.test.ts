@@ -30,6 +30,7 @@ function deps(due: boolean, log: string[]): CoachRefreshDeps {
     due: (id) => (log.push(`due ${id}`), Promise.resolve(due)),
     read: (id) => (log.push(`read ${id}`), Promise.resolve({ ...MOCK_COACH, source: "mock" as const })),
     save: (id, n) => (log.push(`save ${id} ${n.source} ${n.descriptionLength}`), Promise.resolve()),
+    failed: (id, e) => (log.push(`failed ${id} ${e}`), Promise.resolve()),
   };
 }
 
@@ -53,5 +54,27 @@ Deno.test("a failed read keeps nothing", async () => {
     failed = true;
   }
   assertEquals(failed, true);
-  assertEquals(log, ["due loc-1"]);
+  // Fix 3: the failure is recorded, so coach_read_due waits 24 hours before offering the read again.
+  assertEquals(log, ["due loc-1", "failed loc-1 Error: google 503"]);
+});
+
+Deno.test("Fix 3: a business with no Google profile to read is skipped and nothing is kept", async () => {
+  const log: string[] = [];
+  const d = deps(true, log);
+  d.read = (id) => (log.push(`read ${id}`), Promise.resolve(null));
+  assertEquals(await refreshCoach("loc-1", d), "skipped");
+  assertEquals(log, ["due loc-1", "read loc-1"]);
+});
+
+Deno.test("Fix 3: the read's own error is reported even when recording the failure fails", async () => {
+  const d = deps(true, []);
+  d.read = () => Promise.reject(new Error("google 404"));
+  d.failed = () => Promise.reject(new Error("db down"));
+  let msg = "";
+  try {
+    await refreshCoach("loc-1", d);
+  } catch (e) {
+    msg = String(e);
+  }
+  assertEquals(msg, "Error: google 404");
 });
