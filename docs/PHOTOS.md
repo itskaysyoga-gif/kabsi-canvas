@@ -50,7 +50,7 @@ WebP copies at quality 72 (10 to 134 KB each, 1.7 MB in all). The originals, ren
 | restaurant-tables   | Warm lit tables, people beyond (portrait)             | Restaurants page, phone hero              | Warmly lit tables in a restaurant                    |
 | restaurant-kitchen  | Cooks at work in a dark open kitchen                  | Restaurants page, dark sections           | Cooks at work in a restaurant kitchen                |
 | restaurant-cooks    | Cooks under copper lamps at a counter                 | Restaurants page, trades row              | Cooks preparing orders at a restaurant counter       |
-| founder-rashid      | Rashid Abou Hamzy, square, dark background (800, 400) | About, the founder line, Founding 25      | Rashid Abou Hamzy, founder of Kabsi                  |
+| founder-rashid      | Rashid Abou Hamzy, square; since 5 Nov 2026 (Site 2) his own portrait, photos-2026-11-06/rashid-portrait.jpeg (800, 400) | About, the founder line, Founding 25      | Rashid Abou Hamzy, founder of Kabsi                  |
 
 Left out on 26 Oct: a gym sign or logo in the frame (gym 1, gym 3, gym 4 is empty), a spa's own logo on the wall
 (spa working 2), an empty room (massage 2, spa 3), a supercar and tyre brand (auto 2), a needle close up (aesthetic 2),
