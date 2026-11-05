@@ -1,6 +1,6 @@
 // The staff Today page (App 5, master plan 30.33 item 3): one screen that says what needs a person now. Pure rules over
 // the reads the staff pages already make (and staff_today for the caps and the provider refusals), so the rows are
-// tested in tests/app5-staff-today.test.ts. Each row has its count and the page that handles it.
+// tested in tests/app5-staff.test.ts. Each row has its count and the page that handles it.
 import type { StaffPageId } from "@/lib/staff-nav";
 
 export type TodayInput = {
@@ -53,8 +53,17 @@ export function todayRows(i: TodayInput): TodayRow[] {
   });
   add({
     id: "jobs",
-    count: n(i.failedJobs24h) + n(i.deadJobs),
-    text: `${s(n(i.failedJobs24h) + n(i.deadJobs), "job", "jobs")} failed or stopped in the last 24 hours`,
+    count: n(i.failedJobs24h),
+    text: `${s(n(i.failedJobs24h), "job run", "job runs")} failed in the last 24 hours`,
+    page: "system",
+    show: "jobs",
+    button: "Open job health",
+    level: "red",
+  });
+  add({
+    id: "dead",
+    count: n(i.deadJobs),
+    text: `${s(n(i.deadJobs), "stopped job", "stopped jobs")} to retry or cancel`,
     page: "system",
     show: "health",
     button: "Open system health",
@@ -79,7 +88,7 @@ export function todayRows(i: TodayInput): TodayRow[] {
     )} in the last 24 hours`,
     page: "system",
     show: "health",
-    button: "See what was refused",
+    button: "Open system health",
     level: "amber",
   });
   add({
@@ -139,13 +148,16 @@ export function todayRows(i: TodayInput): TodayRow[] {
   return out;
 }
 
+/** The statuses of a business that has not finished setting up (paused or disabled ones have). */
+export const SETTING_UP = new Set(["onboarding", "access_pending", "awaiting_payment"]);
+
 /** Businesses made in the last 7 days that have not finished setting up, newest first (the list is newest first). */
 export function newBusinesses(
   rows: { name: string; status: string; onboarding_step: string; created_at: string }[],
   now: number,
 ): { name: string; step: string; status: string }[] {
   return rows
-    .filter((r) => r.status !== "active" && now - Date.parse(r.created_at) < 7 * 86_400_000)
+    .filter((r) => SETTING_UP.has(r.status) && now - Date.parse(r.created_at) < 7 * 86_400_000)
     .map((r) => ({ name: r.name, step: r.onboarding_step.replace(/_/g, " "), status: r.status }));
 }
 

@@ -119,7 +119,8 @@ describe("Today", () => {
     expect(by["partners"]).toMatchObject({ count: 1, text: "1 partner application to decide" });
     expect(by["chats"]).toMatchObject({ count: 3, page: "conversations", show: "chats" });
     expect(by["followups"]).toMatchObject({ text: "1 follow-up is due" });
-    expect(by["jobs"]).toMatchObject({ count: 3, page: "system" });
+    expect(by["jobs"]).toMatchObject({ count: 2, page: "system", show: "jobs" });
+    expect(by["dead"]).toMatchObject({ count: 1, text: "1 stopped job to retry or cancel" });
     expect(by["refusals"]).toMatchObject({ count: 7 });
     expect(by["new"]).toMatchObject({ count: 1, page: "businesses" });
     // The red rows come first.
@@ -127,7 +128,7 @@ describe("Today", () => {
     for (const r of rows) expect(r.text).not.toMatch(/[–—!]/);
   });
 
-  it("counts only businesses of the last 7 days that are still setting up", () => {
+  it("counts only businesses of the last 7 days that are still setting up (not paused or active)", () => {
     const day = 86_400_000;
     const got = newBusinesses(
       [
@@ -135,6 +136,12 @@ describe("Today", () => {
           name: "A",
           status: "onboarding",
           onboarding_step: "google_access",
+          created_at: new Date(NOW - day).toISOString(),
+        },
+        {
+          name: "P",
+          status: "paused",
+          onboarding_step: "done",
           created_at: new Date(NOW - day).toISOString(),
         },
         {

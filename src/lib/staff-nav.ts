@@ -1,4 +1,4 @@
-// The staff workspace's menu (App 5, master plan 30.33 item 3). Pure data, tested in tests/app5-staff-nav.test.ts; the
+// The staff workspace's menu (App 5, master plan 30.33 item 3). Pure data, tested in tests/app5-staff.test.ts; the
 // shell (app-layout.tsx) draws it in the same side bar and phone bar as the owners' app, labelled Staff. Every panel
 // that used to stack on the one /staff page sits whole on one of these pages, with the same queries and actions.
 

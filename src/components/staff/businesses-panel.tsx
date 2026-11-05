@@ -7,6 +7,7 @@ import { fmtDate } from "@/lib/format";
 import { supabase } from "@/lib/supabase";
 import { convertConcierge, setConcierge } from "@/lib/concierge";
 import { ChoiceChips } from "@/components/kabsi/d3-account";
+import { SETTING_UP } from "@/lib/staff-today";
 import { BusinessDiagnostics } from "./system-health-panel";
 import { Button, STAFF_CARD, STAFF_H2, STAFF_ITEM } from "./staff-ui";
 
@@ -48,7 +49,7 @@ const FILTERS = [
 ];
 const matches = (r: Row, f: string) =>
   f === "all" ||
-  (f === "setup" && r.status !== "active") ||
+  (f === "setup" && SETTING_UP.has(r.status)) ||
   (f === "active" && r.status === "active") ||
   (f === "concierge" && r.concierge);
 
