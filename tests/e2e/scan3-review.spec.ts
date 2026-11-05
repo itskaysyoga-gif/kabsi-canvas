@@ -108,12 +108,12 @@ test.describe("Scan 3: the review link tool", () => {
     await page.goto("/google-review-link");
     await expect(page.locator("h1 .d9-mark")).toHaveText("review link and QR code.");
     await expect(page.getByAltText("A cafe owner at the counter")).toBeVisible();
-    const box = page.getByRole("combobox");
+    const box = page.getByRole("combobox").first();
     await box.click();
     await box.pressSequentially("Fade", { delay: 40 });
     await page.getByRole("option", { name: /Fade Room Barbers/ }).click();
     // The confirm card: name, address, Change business. No server search was needed for a suggestion.
-    await expect(page.getByText("Your business on Google")).toBeVisible();
+    await expect(page.getByText("Your business on Google", { exact: true })).toBeVisible();
     await expect(page.getByText("12 High Street, Example Town, UK")).toBeVisible();
     await expect(page.getByRole("button", { name: "Change business" })).toBeVisible();
     expect(calls.filter((c) => c.fn === "review-link")).toHaveLength(0);
@@ -178,7 +178,7 @@ test.describe("Scan 3: the review link tool", () => {
   }) => {
     const calls = await stub(page);
     await page.goto("/google-review-link");
-    const box = page.getByRole("combobox");
+    const box = page.getByRole("combobox").first();
     await box.click();
     await box.fill("Pearl Beauty Dubai");
     await box.press("Escape");
@@ -188,10 +188,10 @@ test.describe("Scan 3: the review link tool", () => {
     await page.getByRole("button", { name: /Pearl Beauty Salon/ }).click();
     await expect(page.getByTestId("review-card")).toContainText("Pearl Beauty Salon");
     await page.getByRole("button", { name: "Change business" }).click();
-    await expect(page.getByRole("combobox")).toBeVisible();
+    await expect(page.getByRole("combobox").first()).toBeVisible();
     await expect(page.getByText(LINK("ChIJsalonAEAAAAAA"), { exact: true })).toHaveCount(0);
     // A long name with symbols still makes a card that decodes.
-    const b2 = page.getByRole("combobox");
+    const b2 = page.getByRole("combobox").first();
     await b2.fill("");
     await b2.pressSequentially("Exa", { delay: 40 });
     await page.getByRole("option", { name: /Example Dental/ }).click();

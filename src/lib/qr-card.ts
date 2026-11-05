@@ -117,9 +117,9 @@ export function cardShapes(business: string, link: string, measure: Measure = es
     width: measure(CARD_LINE, 13, false),
   });
   // The yellow frame, a white panel inside it, the code with a quiet zone of 4 modules on the white.
-  const S = 212;
+  const S = 240;
   const fx = (W - S) / 2;
-  const fy = y + 22;
+  const fy = y + 26;
   out.push({ kind: "rect", x: fx, y: fy, w: S, h: S, r: 22, fill: YELLOW });
   const inset = 14;
   const inner = S - inset * 2;
