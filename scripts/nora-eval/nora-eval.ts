@@ -141,9 +141,11 @@ export function pageFindings(q: Question, answer: string): ["must" | "forbid", s
   const listed = new Set((q.pages ?? []).map((p) => p.path));
   const links = pageLinks(answer);
   for (const path of new Set(links))
-    if (!listed.has(path)) out.push(["forbid", `links ${path}, which is not in the list she was given`]);
+    if (!listed.has(path))
+      out.push(["forbid", `links ${path}, which is not in the list she was given`]);
   if (links.length > 1) out.push(["forbid", `links ${links.length} pages, at most 1 is allowed`]);
-  if (q.link === null && links.length) out.push(["forbid", "links a page although no page answers the question"]);
+  if (q.link === null && links.length)
+    out.push(["forbid", "links a page although no page answers the question"]);
   if (q.link && !links.includes(q.link)) out.push(["must", `lacks the link ${q.link}`]);
   if (q.link && links.includes(q.link)) {
     // After the answer: the words before the first link, without the link's own text, are a real answer.

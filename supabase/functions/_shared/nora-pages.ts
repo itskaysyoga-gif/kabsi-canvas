@@ -18,7 +18,8 @@ export type NoraPage = {
 };
 
 export const PAGE_PATH = /^\/(?:guides|for)\/[a-z0-9-]{1,120}$/;
-const clip = (v: unknown, n: number) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, n) : "");
+const clip = (v: unknown, n: number) =>
+  typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, n) : "";
 
 /** Reads the website's list. Anything that is not a well-formed page is left out, so a broken answer gives no pages. */
 export function parsePages(json: unknown): NoraPage[] {
@@ -30,7 +31,13 @@ export function parsePages(json: unknown): NoraPage[] {
     const path = clip(o.path, 140);
     const title = clip(o.title, 160);
     if ((o.kind !== "guide" && o.kind !== "industry") || !PAGE_PATH.test(path) || !title) continue;
-    out.push({ kind: o.kind, path, title, summary: clip(o.summary, 300), question: clip(o.question, 200) });
+    out.push({
+      kind: o.kind,
+      path,
+      title,
+      summary: clip(o.summary, 300),
+      question: clip(o.question, 200),
+    });
   }
   return out;
 }
@@ -59,9 +66,7 @@ function stem(w: string): string {
   return s.length > 4 && s.endsWith("e") ? s.slice(0, -1) : s;
 }
 const stems = (text: string) =>
-  new Set(
-    (text.toLowerCase().match(/[a-z]{4,}/g) ?? []).filter((w) => !STOP.has(w)).map(stem),
-  );
+  new Set((text.toLowerCase().match(/[a-z]{4,}/g) ?? []).filter((w) => !STOP.has(w)).map(stem));
 
 /**
  * The pages that fit a question: a simple keyword match on the question and each page's title, question, summary and
@@ -95,18 +100,23 @@ export function pagesContext(pages: NoraPage[]): string[] {
 }
 
 // A guide or industry address in an answer: inside a Markdown link, as a full kabsi.co address, or bare. The index pages
-// /guides and /for have no slug and are not "pages" here.
-const LINK = /\[([^\]]{1,160})\]\((?:https?:\/\/(?:www\.)?kabsi\.co)?(\/(?:guides|for)\/[a-z0-9-]+)\/?(?:[?#][^)\s]*)?\)/gi;
-const BARE = /(?<![\w@./-])(?:https?:\/\/(?:www\.)?)?(?:kabsi\.co)?(\/(?:guides|for)\/[a-z0-9-]+)\/?(?![\w/-])/gi;
+// /guides and /for have no slug and are not "pages" here. An address is read to the next space or bracket and must then be
+// exactly a listed path (a trailing slash and sentence punctuation aside), so "/guides/ok/../other" or "/guides/ok?x" is not "/guides/ok".
+const MD =
+  /\[([^\]]{1,160})\]\(\s*(?:https?:\/\/(?:www\.)?kabsi\.co)?(\/(?:guides|for)\/[a-z0-9][^\s)]*)\s*\)/gi;
+const RAW =
+  /(?<![\w@./-])(?:https?:\/\/(?:www\.)?)?(?:kabsi\.co)?(\/(?:guides|for)\/[a-z0-9][^\s)<>[\]]*)/gi;
+const TAIL = /[.,;:!?'"]+$/;
+const normal = (token: string) => token.replace(TAIL, "").replace(/\/$/, "").toLowerCase();
 
 /** Every guide or industry address in a text, in order, as a path. Used by the answer filter and by the evaluation. */
 export function pageLinks(text: string): string[] {
   const hits: { at: number; path: string }[] = [];
-  const marked = text.replace(LINK, (m, _l: string, path: string, off: number) => {
-    hits.push({ at: off, path: path.toLowerCase() });
+  const marked = text.replace(MD, (m, _l: string, path: string, off: number) => {
+    hits.push({ at: off, path: normal(path) });
     return " ".repeat(m.length);
   });
-  for (const m of marked.matchAll(BARE)) hits.push({ at: m.index!, path: m[1].toLowerCase() });
+  for (const m of marked.matchAll(RAW)) hits.push({ at: m.index!, path: normal(m[1]) });
   return hits.sort((a, b) => a.at - b.at).map((h) => h.path);
 }
 
@@ -117,20 +127,29 @@ export function pageLinks(text: string): string[] {
 export function pageLinksOnly(text: string, pages: NoraPage[]): string {
   const known = new Set(pages.map((p) => p.path.toLowerCase()));
   let kept = 0;
-  const ok = (path: string) => {
-    if (!known.has(path.toLowerCase()) || kept >= 1) return false;
+  const ok = (token: string) => {
+    if (!known.has(normal(token)) || kept >= 1) return false;
     kept++;
     return true;
   };
   // Markdown links and bare addresses are walked in the order they appear, so "the first one" is the first the reader sees.
-  const all = new RegExp(`${LINK.source}|${BARE.source}`, "gi");
+  const all = new RegExp(`${MD.source}|${RAW.source}`, "gi");
   return text
-    .replace(all, (m: string, label: string | undefined, mdPath: string | undefined, bare: string | undefined) => {
-      const path = (mdPath ?? bare)!;
-      if (ok(path)) return m;
-      return label ?? "";
-    })
+    .replace(
+      all,
+      (
+        m: string,
+        label: string | undefined,
+        mdPath: string | undefined,
+        raw: string | undefined,
+      ) => {
+        if (ok((mdPath ?? raw)!)) return m;
+        if (label !== undefined) return label;
+        return (raw ?? "").match(TAIL)?.[0] ?? "";
+      },
+    )
     .replace(/\(\s*\)/g, "")
     .replace(/[ \t]{2,}/g, " ")
-    .replace(/ +([.,;:])/g, "$1");
+    .replace(/ +([.,;:])/g, "$1")
+    .replace(/[ \t]+$/gm, "");
 }

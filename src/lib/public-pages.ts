@@ -19,25 +19,21 @@ export function publicPagesOf(
   industries: Pick<Industry, "slug" | "plural" | "name" | "lead">[],
   now: Date,
 ): NoraPage[] {
-  const g = publicGuides(guides, now).map(
-    (x): NoraPage => ({
-      kind: "guide",
-      title: x.title,
-      path: `/guides/${x.slug}`,
-      summary: x.summary,
-      // A guide's title is the owner's question; a title that is not a question falls back to its description.
-      question: x.title.trim().endsWith("?") ? x.title : x.description,
-    }),
-  );
-  const i = industries.map(
-    (x): NoraPage => ({
-      kind: "industry",
-      title: `Kabsi for ${x.plural.toLowerCase()}`,
-      path: `/for/${x.slug}`,
-      summary: x.lead,
-      question: `What does Kabsi do for a ${x.name}?`,
-    }),
-  );
+  const g = publicGuides(guides, now).map((x): NoraPage => ({
+    kind: "guide",
+    title: x.title,
+    path: `/guides/${x.slug}`,
+    summary: x.summary,
+    // A guide's title is the owner's question; a title that is not a question falls back to its description.
+    question: x.title.trim().endsWith("?") ? x.title : x.description,
+  }));
+  const i = industries.map((x): NoraPage => ({
+    kind: "industry",
+    title: `Kabsi for ${x.plural.toLowerCase()}`,
+    path: `/for/${x.slug}`,
+    summary: x.lead,
+    question: `What does Kabsi do for a ${x.name}?`,
+  }));
   return [...g, ...i];
 }
 

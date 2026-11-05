@@ -13,7 +13,8 @@ const HOURS_GUIDE: NoraPage = {
   kind: "guide",
   title: "Someone changed my hours on Google. How do I fix it?",
   path: "/guides/someone-changed-my-hours-on-google",
-  summary: "Who can change your hours on Google, how to find the change and put the right hours back.",
+  summary:
+    "Who can change your hours on Google, how to find the change and put the right hours back.",
   question: "Someone changed my hours on Google. How do I fix it?",
 };
 const BARBER_PAGE: NoraPage = {
@@ -51,7 +52,12 @@ export const QUESTIONS_PAGES: Question[] = [
     lang: "en",
     topic: "a question no page covers",
     ask: "How much is Pro?",
-    kb: [/\$29 a month/, /\$290 a year/, /Pro \| \$59 \| \$590/, /Do not quote Essentials or Pro prices as available/],
+    kb: [
+      /\$29 a month/,
+      /\$290 a year/,
+      /Pro \| \$59 \| \$590/,
+      /Do not quote Essentials or Pro prices as available/,
+    ],
     pages: [],
     link: null,
     must: [/\$59/, /\$590/],
