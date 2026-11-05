@@ -15,6 +15,9 @@ export const CORS = {
   "access-control-allow-origin": "*",
   "access-control-allow-headers": "authorization, x-client-info, apikey, content-type",
   "access-control-allow-methods": "GET, POST, OPTIONS",
+  // Scan 3 (30.34 item 2): the browser keeps the answer to its preflight for 2 hours (Chrome's ceiling) instead of 5
+  // seconds, so a suggestion, a check or a form does not wait for an OPTIONS round trip each time.
+  "access-control-max-age": "7200",
 };
 export function json(body: unknown, status = 200, extra: Record<string, string> = {}) {
   return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", ...CORS, ...extra } });
