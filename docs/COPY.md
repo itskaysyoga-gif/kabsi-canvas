@@ -1672,6 +1672,15 @@ Every new or changed line of Scan 3. The result's lines are in src/lib/scan-word
 - **The saved result** (/scan/[code]): the same order; its main finding is the nearby lead and count; its action "Start with a free check." ("free check." on the bar) with the free check box, then the Manager access lines. Expired: "This report has expired." ("expired." on the bar).
 - **The empty /scan page**: the side list is "What Kabsi checks" with the pill "About 10 seconds", "On your public Google profile. No access needed." and five yellow numbers (the five rows unchanged). Under "What you get back", the photo salon-tablet ("A salon owner looking at a tablet in her salon").
 
+### Part B: the review link tool (branch claude/scan3-b)
+
+- **Hero**: "Get your Google review link and QR code." ("review link and QR code." on the bar), "One link that opens the review box on your Google profile. Free, no sign-up." and the photo cafe-counter ("A cafe owner at the counter").
+- **Search**: the free check's box ("Find your business on Google", "Business name and city", suggestions as you type) with the button "Get my link"; under it "Free, no sign-up." A typed search lists "Pick your business" with "This one" for every match, even one.
+- **Steps** (yellow numbers): "Type your business name and city, then choose it." "Check it is your business, or change it." "Put the card by the till, and send the link to every customer."
+- **Confirm card**: "Your business on Google", the name, the address, Google Maps, and "Change business".
+- **The card** (A6): the business name, "Scan to review us on Google", the code in a yellow frame, "kabsi.co". Under it on the page: "A6 card, 105 by 148 mm. Print it for your counter." Buttons: "Download the card (PNG)", "Download to print (A6 PDF)" and, where the phone can share, "Share the link" (shares "Leave a review for [business] on Google" and the link). "Download QR code" and "Print a counter card" are replaced by these.
+- Unchanged: "Your review link", "A message to send after a visit" with its message, the rules banner, the closing free check.
+
 ## 59. Site 2: header, footer, WhatsApp marks, photos, an honest About page, Beauty salon (5 Nov 2026, master plan 30.34 item 4)
 
 *Section 58 is Scan 3's, built beside this one.*
