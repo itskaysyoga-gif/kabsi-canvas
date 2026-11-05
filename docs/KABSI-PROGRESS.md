@@ -15,6 +15,7 @@ One page, under 10 KB. Updated 5 Nov 2026, App 5 and Industries 3. The history (
 - Style 1 (5 Nov 2026, 30.33, R-113, PRs 399, 400, 401, 404): every guide with a library photo (page, card, share image) and a filtered list; the yellow bar on every public headline, photos on Pricing, About, Founding 25 and Partners, Security in short lines; Sentry gets nothing from automated runs and a repeated Edge error once per 10 minutes. Detail: `docs/progress/archive/2026-11-05-style1.md`.
 - App 5 (5 Nov 2026, 30.33, PRs 402, 406, part C): a staff workspace with Today; the look on the signed-in site. Detail: `docs/progress/archive/2026-11-05-app5.md`.
 - Industries 3 (PR 403): short industry pages. Detail: `docs/progress/archive/2026-11-05-industries3.md`.
+- Site 2 (5 Nov 2026, 30.34 item 4, PRs 410, 412, 413, 416, part E): header with Guides and About, a short footer, WhatsApp glyphs, photos on /for and Security, About on true facts, Beauty salon as the 21st industry. Detail: `docs/progress/archive/2026-11-05-site2.md`.
 - No customer is live yet. Before the first Meta ad: the DataForSEO top-up and a nearby check on a real business. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -54,6 +55,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 - Sentry (30.33 item 4): Settings, Subscription, set a pay-as-you-go budget of 5 US dollars for errors, so errors are not dropped before 30 Nov.
 - App 5: may qa-staff@test.local be staff, for live staff runs? (LATER row)
+- Site 2: give the two founder lines on Meta advertising and the real estate partnership in your own words if you want them on About (LATER row).
 
 ## Open After merge checks and findings
 
@@ -64,8 +66,8 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 5 Nov 2026, Site 2: PRs 410, 412, 413, 416 and part E. Detail: `docs/progress/archive/2026-11-05-site2.md`.
 - 5 Nov 2026, App 5: PRs 402, 406 and part C. Detail: `docs/progress/archive/2026-11-05-app5.md`.
-- 5 Nov 2026, Industries 3: PR 403.
 
 ## How a session updates this page
 
