@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 5 Nov 2026, App 4 and Guides 3. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 5 Nov 2026, Industries 2. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -43,9 +43,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - A lawyer reads /terms, /privacy and the partner terms (master plan 29.8).
 - Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
-- V3 heads-up (25 Oct): on the Yawmiyati phone tap Skip on the old photo message, never Yes, and reply No to the monthly question. Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
+- V3 heads-up (25 Oct): on the Yawmiyati phone tap Skip on the old photo message and reply No to the monthly question (`docs/progress/archive/2026-10-26-v3-review-growth.md`).
 - Templates: all approved 29 Oct (ladder). Voice notes stay off: the voice test failed for Gulf Arabic and mixed notes (LATER row).
-- Check 2: on a phone, pick 3 businesses at kabsi.co/scan, then read today's `places_usage` (autocomplete above 0, details 3 or more); add a Google Cloud quota alert for Places Autocomplete.
+- Check 2: pick 3 businesses at kabsi.co/scan on a phone, read today's `places_usage` (autocomplete above 0, details 3 or more); add a Places Autocomplete quota alert.
 - UX 1: after the deploy, `POST /visibility/terms` once (two DataForSEO calls, about 0.15 USD) and the read-back in the UX 1 archive file.
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up (50 US dollars) before the first Meta ad (30.28; the balance read 0.31 after Scan 2 on 5 Nov); Gemini stays off.
 - Scan 2: on a phone, open kabsi.co/scan, pick SEVEN Burgers & Beyond, wait for the nearby places, untick tips and send the report to your email: it should hold the nearby places with "Most places put you ..." under the count, the AI question with its date, and kabsi.co/scan/[code] (the session could not pass Turnstile).
@@ -59,9 +59,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 5 Nov 2026, Industries 2: part A (PR 392) merged, part B in review.
 - 5 Nov 2026, App 4 (30.31, R-111): PRs 378 to 388, checked live. Detail: `docs/progress/archive/2026-11-05-app4.md`.
 - 5 Nov 2026, Guides 3: PRs 385 (scheduling, template, guide 1), 387 (guides 3 to 20), part C (7 earlier guides rewritten); live on release 5e7fc3c0. Detail: `docs/progress/archive/2026-11-05-guides3.md`.
-- 5 Nov 2026, Copy 3 (30.29, 30.30, R-110): PRs 374 (30.30), 375 (copy decisions B-001 to B-032), 376 (Scan 2 follow-ups, speed gate); live on release 841ab8e. Detail: `docs/progress/archive/2026-11-05-copy3.md`.
 
 ## How a session updates this page
 
