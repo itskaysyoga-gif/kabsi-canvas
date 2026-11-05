@@ -122,14 +122,14 @@ async function renderStep(opts: { number?: string; granted?: boolean }) {
 }
 
 describe("the step (P0.4-05)", () => {
-  it("shows the five questions, Skip for now and the defaults, and WhatsApp as coming soon while there is no number", async () => {
+  it("shows the five questions, Skip for now and the defaults, and Connect WhatsApp now the number is set", async () => {
     const html = await renderStep({});
     for (const q of QUESTIONS_FIVE) expect(html).toContain(q.label.replace(/'/g, "&#x27;"));
     expect(html).toContain("Skip for now");
     expect(html).toContain("Get your reviews on WhatsApp");
-    expect(html).toContain("WhatsApp: coming soon");
-    expect(html).not.toContain("Connect WhatsApp");
-    expect(html).not.toContain("wa.me");
+    // Go live 1 (5 Nov 2026): the number is set, so the card offers Connect WhatsApp, never "coming soon".
+    expect(html).not.toContain("WhatsApp: coming soon");
+    expect(html).toContain("Connect WhatsApp");
     expect(html).toContain("While you wait for access");
     expect((html.match(/bg-kb-yellow/g) ?? []).length).toBeGreaterThanOrEqual(1);
   });

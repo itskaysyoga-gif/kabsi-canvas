@@ -36,12 +36,14 @@ describe("WhatsApp processors and privacy text (P0.6-12)", () => {
     expect(termsSection).toMatch(/section 14/);
   });
 
-  it("says what is sent, how long it is kept, that nothing is approved and that alerts are not live", () => {
+  it("says what is sent, how long it is kept, what is approved and when alerts went live", () => {
+    // Go live 1 (5 Nov 2026): the facts say alerts and approvals are live; the pages hold both branches of WHATSAPP_ON.
+    expect(factsBlock).toMatch(/Live from 5 Nov 2026/);
     for (const text of [privacySection, termsSection, factsBlock]) {
       expect(text).toMatch(/approved/i);
       expect(text).toMatch(/Google password/);
       expect(text).toMatch(/kabsi\.co/);
-      expect(text).toMatch(/not available yet|Not available yet|Not live yet/);
+      expect(text).toMatch(/opt in|opts in/);
       expect(text).toMatch(/STOP/);
       expect(text).toMatch(/opt in|opts in/);
     }
@@ -116,13 +118,13 @@ describe("Nora's source answers WhatsApp questions without calling an AI model",
     ],
     [
       "Can I approve a reply or a post on WhatsApp?",
-      [/approved, published or changed over WhatsApp|approve on kabsi\.co/],
+      [/Yes, once you connect WhatsApp/, /kabsi\.co/],
     ],
     ["Who are the processors of my WhatsApp messages, Kapso and Meta?", [/Kapso/, /Meta/]],
     ["How long do you keep my WhatsApp chat?", [/no automatic deletion date/i]],
     [
       "Will Kabsi send me alerts on WhatsApp? How do I stop them, STOP?",
-      [/not available yet/i, /STOP/],
+      [/Yes, if you connect WhatsApp/, /STOP/],
     ],
   ];
   for (const [question, patterns] of cases) {

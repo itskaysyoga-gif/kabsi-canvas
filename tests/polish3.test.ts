@@ -26,7 +26,7 @@ const allFaqText = (nearbyOn: boolean, whatsappOn: boolean) =>
 describe("Polish 3: NEARBY_ON, the one switch for the nearby check and the AI answer (decision 2)", () => {
   it("is false today, beside WHATSAPP_ON, and the defaults follow it", () => {
     expect(NEARBY_ON).toBe(false);
-    expect(WHATSAPP_ON).toBe(false);
+    expect(WHATSAPP_ON).toBe(true); // Go live 1 (5 Nov 2026)
     expect(JOBS).toEqual(jobs(NEARBY_ON));
     expect(FAQ).toEqual(buildFaq(NEARBY_ON));
     expect(FAQ_GROUPS).toEqual(buildFaqGroups(WHATSAPP_ON, NEARBY_ON));

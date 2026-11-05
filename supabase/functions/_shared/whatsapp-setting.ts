@@ -3,6 +3,6 @@
 // the auth emails (emails/build.py reads this file) is hidden or points to hello@kabsi.co instead.
 // Turning WhatsApp back on is this one change: put the number here in the form "+1 201 555 0100", then rebuild the
 // email previews and auth emails and update knowledge/kabsi-facts.md (tests/whatsapp.test.ts says what is out of date).
-export const WHATSAPP_NUMBER: string = "";
+export const WHATSAPP_NUMBER: string = "+1 205 745 6874";
 export const WHATSAPP_ON = WHATSAPP_NUMBER.trim() !== "";
 export const WHATSAPP_DIGITS = WHATSAPP_NUMBER.replace(/\D/g, "");

@@ -121,17 +121,17 @@ export const QUESTIONS: Question[] = [
     reference:
       "An extra location is $15 a month or $150 a year for each extra Google profile, on top of the plan.",
   },
-  // ── WhatsApp (no number yet) ─────────────────────────────────────────────────────────────────────────────────────
+  // ── WhatsApp (owners switched on 5 Nov 2026, Go live 1) ──────────────────────────────────────────────────────────
   {
     id: "en08",
     lang: "en",
     topic: "WhatsApp number",
     ask: "What is your WhatsApp number?",
-    // 13b part 2 (25 Oct 2026): Kabsi has a number, in testing until launch; Nora still gives none.
-    kb: [/Kabsi has a WhatsApp number/, /do not give the number yet/],
-    must: [MAIL, /test|at launch|not open|not available yet|can't give|cannot give/i],
+    // Go live 1 (5 Nov 2026, master plan 30.28): owners and visitors are switched on, so Nora gives the number.
+    kb: [/Kabsi's WhatsApp number is \+1 205 745 6874/],
+    must: [/\+1 205 745 6874/],
     reference:
-      "Kabsi has a WhatsApp number, but it is still being tested and opens to owners at launch, so I can't give it out yet. Until then write to hello@kabsi.co and a person answers, it is not an automatic bot.",
+      "Kabsi's WhatsApp number is +1 205 745 6874. You can message it with a question, or write to hello@kabsi.co and a person answers.",
   },
   {
     id: "en09",
@@ -139,13 +139,12 @@ export const QUESTIONS: Question[] = [
     topic: "approving on WhatsApp",
     ask: "Can I approve my review replies on WhatsApp?",
     kb: [
-      /Approval on WhatsApp will work only for low and medium risk replies/,
-      /Not yet; approve on kabsi\.co/,
+      /Approval on WhatsApp works only for low and medium risk replies/,
+      /Yes, once you connect WhatsApp/,
     ],
     must: [/kabsi\.co/],
-    coming: true,
     reference:
-      "Not yet. Approving on WhatsApp is not available yet: Kabsi has a WhatsApp number, but owners are not switched on yet. Today you approve on kabsi.co, in the app or from the email. When it opens it will work for low and medium risk replies and weekly posts, never for high-risk reviews or your business name, address, categories, map pin, phone or open or closed status.",
+      "Yes, once you connect WhatsApp in setup or Settings. It works for low and medium risk replies and weekly posts, with a 10-second undo after Approve. High-risk reviews and your business name, address, categories, map pin, phone or open or closed status are approved on kabsi.co.",
   },
   {
     id: "en10",
@@ -154,12 +153,11 @@ export const QUESTIONS: Question[] = [
     ask: "Will Kabsi send me alerts on WhatsApp, and can I stop them?",
     kb: [
       /Reply STOP at any time and nothing more is sent/,
-      /email is the only alert channel today/,
+      /Yes, if you connect WhatsApp and choose it for routine messages/,
     ],
     must: [/STOP/, /email/i],
-    coming: true,
     reference:
-      "Not yet, so email is the only alert channel today. When WhatsApp alerts open they will need your opt in, and you can reply STOP at any time and Kabsi stops at once.",
+      "Yes, if you connect WhatsApp and choose it for routine messages; otherwise they come by email. You can reply STOP at any time and Kabsi stops at once.",
   },
   {
     id: "en11",
@@ -171,9 +169,8 @@ export const QUESTIONS: Question[] = [
       /The WhatsApp photo drop is on both plans/,
     ],
     must: [/Photos/],
-    coming: true,
     reference:
-      "Not yet. Sending photos on WhatsApp is on both plans and comes with WhatsApp for owners, which is not available yet. Today you add photos on the Photos page, or through a staff upload link, and you approve each one before it goes to Google.",
+      "Yes, on both plans, once you connect WhatsApp. Kabsi checks the photo and asks you to put it on your Google profile, with Yes, Edit or Skip. You can also add photos on the Photos page, or through a staff upload link, and you approve each one before it goes to Google.",
   },
   // ── what is coming (no date) ─────────────────────────────────────────────────────────────────────────────────────
   {
@@ -354,7 +351,7 @@ export const QUESTIONS: Question[] = [
     kb: [/every Monday, kept under Reports, and sent on WhatsApp or by email/],
     must: [/Monday/, /Reports/],
     reference:
-      "It comes every Monday at 08:00 local time, by email until owners are switched on to WhatsApp, and is kept under Reports. It shows what Kabsi did that week, what waits for your yes, one next step, then Google's own numbers against the week before, with calls and direction requests apart.",
+      "It comes every Monday at 08:00 local time, on WhatsApp or by email, the same place as your new reviews, and is kept under Reports. It shows what Kabsi did that week, what waits for your yes, one next step, then Google's own numbers against the week before, with calls and direction requests apart.",
   },
   {
     id: "en27",
@@ -648,11 +645,10 @@ export const QUESTIONS: Question[] = [
     topic: "WhatsApp number",
     ask: "¿Cuál es su número de WhatsApp?",
     gloss: "What is your WhatsApp number?",
-    kb: [/Kabsi has a WhatsApp number/, /do not give the number yet/],
-    must: [MAIL],
-    coming: true,
+    kb: [/Kabsi's WhatsApp number is \+1 205 745 6874/],
+    must: [/\+1 205 745 6874/],
     reference:
-      "Kabsi tiene un número de WhatsApp, pero todavía está en pruebas y se abre a los dueños con el lanzamiento, así que aún no puedo darlo. Escribe a hello@kabsi.co y te responde una persona. Aprobar respuestas por WhatsApp todavía no está disponible.",
+      "El número de WhatsApp de Kabsi es +1 205 745 6874. Puedes escribir ahí con tu pregunta, o a hello@kabsi.co, donde te responde una persona.",
   },
   {
     id: "fr53",
@@ -742,11 +738,10 @@ export const QUESTIONS: Question[] = [
     topic: "WhatsApp number",
     ask: "ما هو رقم الواتساب عندكم؟",
     gloss: "What is your WhatsApp number?",
-    kb: [/Kabsi has a WhatsApp number/, /do not give the number yet/],
-    must: [MAIL],
-    coming: true,
+    kb: [/Kabsi's WhatsApp number is \+1 205 745 6874/],
+    must: [/\+1 205 745 6874/],
     reference:
-      "لدى كابسي رقم واتساب، لكنه ما زال قيد التجربة ويفتح لأصحاب الأعمال عند الإطلاق، لذلك لا أستطيع إعطاءه بعد. اكتب إلى hello@kabsi.co ويرد عليك شخص. الموافقة على الردود عبر واتساب غير متاحة بعد.",
+      "رقم واتساب كابسي هو +1 205 745 6874. يمكنك مراسلتنا عليه بسؤالك، أو الكتابة إلى hello@kabsi.co ويرد عليك شخص.",
   },
 ];
 

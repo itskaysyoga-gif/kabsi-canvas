@@ -127,7 +127,7 @@ describe("what Nora knows, against what is built on main", () => {
       ["posts (P0.5-02)", /Approve the month/],
       [
         "WhatsApp channel built (P0.8-03), tested 25 Oct (13b)",
-        /Built 22 Oct 2026 \(P0\.8-03\), tested 25 Oct 2026, not live for owners yet/,
+        /Built 22 Oct 2026 \(P0\.8-03\), tested 25 Oct 2026, live for owners from 5 Nov 2026/,
       ],
       ["put-back (P0.8-04)", /Keep my information/],
       ["Manager guide (P0.4-03)", /Kabsi group ID 5481006796/],
@@ -142,7 +142,6 @@ describe("what Nora knows, against what is built on main", () => {
   it("marks the five coming items [COMING], not available yet, with no date", () => {
     const coming = section("**[COMING] Features.**", "**[CHANGING] Being replaced.**");
     for (const [name, re] of [
-      ["WhatsApp channel", /\*\*WhatsApp for owners:\*\*/],
       ["What customers say", /\*\*What customers say \(Pro\):\*\*/],
       ["own order button", /\*\*Order and booking button \(Pro\):\*\*/],
       ["Kabsi Partners", /\*\*Kabsi Partners:\*\*/],
@@ -154,7 +153,7 @@ describe("what Nora knows, against what is built on main", () => {
     const ledger = section("**Where each feature stands", "**[COMING] Plans and prices");
     expect(ledger).toMatch(/Card payments \(Creem\)/);
     expect(ledger).toMatch(
-      /Kabsi Partners; What customers say \(Pro\); the order and booking button \(Pro\); the WhatsApp channel/,
+      /Kabsi Partners; What customers say \(Pro\); the order and booking button \(Pro\); the Visibility Map/,
     );
     // no date or time frame next to a coming item in the ledger or the coming list
     for (const block of [ledger, coming]) {
@@ -164,7 +163,7 @@ describe("what Nora knows, against what is built on main", () => {
     }
   });
 
-  it("says auto-fix is off by Google's policy and that the WhatsApp number is not given yet", () => {
+  it("says auto-fix is off by Google's policy and gives the WhatsApp number now owners are on", () => {
     expect(facts).toMatch(
       /Off, and why \| Automatic put-back \("auto-fix"\) is \*\*off on every plan\*\*/,
     );
@@ -172,9 +171,9 @@ describe("what Nora knows, against what is built on main", () => {
       /You may not use the Business Profile APIs to automatically revert changes made by Google\./,
     );
     expect(facts).toMatch(/There is no automatic put-back/);
-    // 13b part 2: Kabsi has a number, in testing until launch, and gives none until owners are switched on.
-    expect(facts).toMatch(/Kabsi has a WhatsApp number/);
-    expect(facts).toMatch(/do not give the number yet/);
+    // Go live 1 (5 Nov 2026, master plan 30.28): owners are switched on and the facts give the number.
+    expect(facts).toMatch(/Kabsi's WhatsApp number is \+1 205 745 6874/);
+    expect(facts).not.toMatch(/do not give the number yet/);
     // the app and Nora's rules agree: with no number the rules give none
     const rules = noraRules(false, "");
     expect(rules).toMatch(
