@@ -1,78 +1,73 @@
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { SiteShell } from "@/components/kabsi/site-chrome";
-import { HubPage, IndustryPage } from "@/components/kabsi/d8-industry";
-import { pageHead } from "@/lib/site";
+import { IndustryPage } from "@/components/kabsi/d9-industry";
+import { ORG_LD, SITE_URL, pageHead } from "@/lib/site";
 import { faqJsonLd } from "@/lib/faq";
 import { LEGACY_INDUSTRY_MOVES } from "@/lib/industry-redirects";
 
-// /for/<industry> or /for/<hub> (brief section 16, item 3). The old trade addresses move to the new ones.
-// Lean 1 (speed): the route's loader and head stay in the shared bundle on every page, so the twelve industry texts load
-// here, on demand, and the head reads what the loader returns (the crumbs and the index flag), never the content itself.
+// /for/<industry> (brief section 16, item 3; Industries 2: every page on Design 9, no group pages). The old addresses move
+// to the new ones; an old group address goes to /for (vercel.json answers those first with a 301).
+// Lean 1 (speed): the route's loader and head stay in the shared bundle on every page, so the industry texts load here, on
+// demand, and the head reads what the loader returns, never the content module itself.
 export const Route = createFileRoute("/for/$trade")({
   loader: async ({ params }) => {
-    const { MOVED, crumbsFor, hub, hubIndexed, industry, industryIndexed } =
+    const { MOVED, OLD_GROUPS, crumbsFor, industry, industryIndexed } =
       await import("@/content/industries");
     const moved = MOVED[params.trade] ?? LEGACY_INDUSTRY_MOVES[params.trade];
+    if (moved === "" || (OLD_GROUPS as readonly string[]).includes(params.trade))
+      throw redirect({ to: "/for", statusCode: 301 });
     if (moved) throw redirect({ to: "/for/$trade", params: { trade: moved }, statusCode: 301 });
-    // crumbsFor gives Businesses and the page; pageHead adds Home itself.
-    const crumbs = (c: { name: string; to: string }[]) =>
-      c.filter((x) => x.to !== "/").map((x) => ({ name: x.name, path: x.to }));
     const i = industry(params.trade);
-    if (i)
-      return {
-        kind: "industry" as const,
-        industry: i,
-        crumbs: crumbs(crumbsFor(i)),
-        indexed: industryIndexed(i),
-        // Guides 3: the public guides that link to this page link back from it (decided on the server).
-        guides: await import("@/lib/guides-server")
-          .then((m) => m.getIndustryGuides({ data: i.slug }))
-          .catch(() => []),
-      };
-    const h = hub(params.trade);
-    if (h)
-      return {
-        kind: "hub" as const,
-        hub: h,
-        crumbs: crumbs(crumbsFor(undefined, h)),
-        indexed: hubIndexed(h.id),
-      };
-    throw notFound();
+    if (!i) throw notFound();
+    return {
+      industry: i,
+      // crumbsFor gives Businesses and the page; pageHead adds Home itself.
+      crumbs: crumbsFor(i).map((x) => ({ name: x.name, path: x.to })),
+      indexed: industryIndexed(i),
+      related: i.page.related
+        .map((s) => industry(s))
+        .filter((r) => r && industryIndexed(r))
+        .map((r) => r!),
+      // Guides 3: the public guides that link to this page link back from it (decided on the server).
+      guides: await import("@/lib/guides-server")
+        .then((m) => m.getIndustryGuides({ data: i.slug }))
+        .catch(() => []),
+    };
   },
   head: ({ loaderData: d }) => {
     if (!d) return {};
-    return d.kind === "industry"
-      ? pageHead({
-          // docs/SEO-PLAN.md: the four Design 8 trades carry their own title and description.
-          title:
-            d.industry.d8?.seo.title ?? `Kabsi: Your ${d.industry.name} on Google. Taken care of.`,
-          description: d.industry.d8?.seo.description ?? d.industry.lead,
-          path: `/for/${d.industry.slug}`,
-          image: "industry",
-          crumbs: d.crumbs,
-          // Only finished pages with a claim sheet are indexed; the template pages wait for Content 1 (master plan
-          // 30.17), and the dental clinic page for its claim sheet (Fix 1).
-          noindex: !d.indexed,
-          ...(d.industry.faqs ? { jsonLd: [faqJsonLd(d.industry.faqs)] } : {}),
-        })
-      : pageHead({
-          title: `Kabsi for ${d.hub.name.toLowerCase()}`,
-          description: d.hub.lead,
-          path: `/for/${d.hub.id}`,
-          image: "industry",
-          crumbs: d.crumbs,
-          noindex: !d.indexed,
-        });
+    const i = d.industry;
+    const url = `${SITE_URL}/for/${i.slug}`;
+    return pageHead({
+      title: i.page.title,
+      description: i.page.description,
+      path: `/for/${i.slug}`,
+      image: "industry",
+      crumbs: d.crumbs,
+      // Only finished pages with a claim sheet are indexed.
+      noindex: !d.indexed,
+      jsonLd: [
+        ORG_LD,
+        {
+          "@context": "https://schema.org",
+          "@type": "Service",
+          "@id": `${url}#service`,
+          name: `${i.plural}: Google Business Profile help`,
+          serviceType: "Google Business Profile management",
+          description: i.page.description,
+          url,
+          provider: { "@id": ORG_LD["@id"] },
+          audience: { "@type": "BusinessAudience", name: i.plural },
+        },
+        ...(i.faqs ? [faqJsonLd(i.faqs)] : []),
+      ],
+    });
   },
   component: function Trade() {
     const d = Route.useLoaderData();
     return (
       <SiteShell>
-        {d.kind === "industry" ? (
-          <IndustryPage industry={d.industry} guides={d.guides} />
-        ) : (
-          <HubPage hub={d.hub} />
-        )}
+        <IndustryPage industry={d.industry} related={d.related} guides={d.guides} />
       </SiteShell>
     );
   },

@@ -6,7 +6,6 @@ import type { Industry } from "./types";
 // details are ever sent on WhatsApp.
 export const dentalClinic: Industry = {
   slug: "dental-clinic",
-  hub: "health",
   name: "dental clinic",
   plural: "Dental clinics",
   finished: true,
@@ -22,7 +21,7 @@ export const dentalClinic: Industry = {
     rival2: "Northgate Dental Care",
     near: ["North of the mall", "By the school"],
   },
-  photos: [PHOTOS.dentistPatient],
+  photos: [PHOTOS.dentalClinicWide, PHOTOS.dentistPatient],
   focus: "50% 35%",
   searches: [
     "dentist near me",
@@ -91,7 +90,7 @@ export const dentalClinic: Industry = {
       { from: "owner", text: "Talk to a person" },
       {
         from: "kabsi",
-        text: "A person at Kabsi answers on WhatsApp the same working day. Write your own reply on the Kabsi website when you are ready. Nothing is published until you say yes.",
+        text: "Rashid at Kabsi replies in working hours. Write your own reply on the Kabsi website when you are ready. Nothing is published until you say yes.",
       },
       {
         from: "kabsi",
@@ -138,6 +137,52 @@ export const dentalClinic: Industry = {
       text: "Closed days on Google, and the urgent care line for patients in pain.",
     },
   ],
+  page: {
+    query: "dental clinic Google Business Profile",
+    title: "Dental clinic Google Business Profile help | Kabsi",
+    description:
+      "Kabsi looks after your dental clinic Google Business Profile: hours and phone right, careful replies that never confirm a patient, and posts for your yes.",
+    h1: "Your dental clinic on Google, handled with care.",
+    mark: "handled with care.",
+    line: "Kabsi looks after your dental clinic Google Business Profile: exact hours, the right phone, and careful replies you approve.",
+    card: "Exact hours, careful replies that name no patient.",
+    answer:
+      "A dental clinic Google Business Profile has to be exact and careful. Kabsi checks your hours, phone and website every day, drafts replies that never confirm someone is a patient or mention treatment, sends you a review about treatment without a draft so you decide, and asks about holiday hours in time. You approve every word before it reaches Google.",
+    watch: {
+      business: "Parkside Dental, Dubai",
+      line: "A patient with toothache calls the number and trusts the hours. Kabsi checks both every day.",
+      fields: ["Opening hours", "Special hours", "Phone", "Website", "Address", "Main category"],
+      what: "Sunday",
+      google: "Closed",
+      owner: "09:00 to 17:00",
+      message: "Google shows you closed on Sunday. You told me 09:00 to 17:00.",
+    },
+    post: {
+      owner: "Our new hygienist starts in March.",
+      quote: "A warm welcome to our new hygienist, who joins Parkside Dental in March.",
+    },
+    jobs: [
+      {
+        title: "Replies that name no patient",
+        text: "Every draft stays general: no treatment, no details, an invitation to get in touch.",
+      },
+      {
+        title: "Hours and phone, checked daily",
+        text: "When Google shows something different, you choose which one stays.",
+      },
+      {
+        title: "Holiday hours, asked ahead",
+        text: "Before each public holiday, Kabsi asks and sets your answer once you say yes.",
+      },
+    ],
+    nearby: { kind: "clinic", term: "dentist" },
+    ai: {
+      question: "Which dentist in Al Barsha, Dubai is open on Sundays?",
+      answer: "Parkside Dental in Al Barsha is open on Sundays from 9 am to 5 pm.",
+      sources: ["Parkside Dental's Google profile", "Parkside Dental's website"],
+    },
+    related: ["medical-and-aesthetic-clinic", "physiotherapy"],
+  },
   faqs: [
     {
       q: "Does Kabsi see my patients' records?",
@@ -154,6 +199,10 @@ export const dentalClinic: Industry = {
     {
       q: "Should a clinic reply to reviews at all?",
       a: "Yes, a short reply shows the next patient that someone reads them. What matters is what it says. Kabsi's drafts never confirm someone is a patient, and you approve every one.",
+    },
+    {
+      q: "Can my practice manager approve instead of me?",
+      a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
     },
   ],
   guides: ["how-to-reply-to-google-reviews", "how-to-choose-your-primary-category"],

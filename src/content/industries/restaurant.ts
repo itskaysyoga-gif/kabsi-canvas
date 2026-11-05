@@ -6,7 +6,6 @@ import type { Industry } from "./types";
 // sentences follow knowledge/kabsi-facts.md (7.1). Cedar Lane Kitchen, Manchester, is invented (Example).
 export const restaurant: Industry = {
   slug: "restaurant",
-  hub: "food-and-drink",
   name: "restaurant",
   plural: "Restaurants",
   finished: true,
@@ -20,7 +19,7 @@ export const restaurant: Industry = {
     rival2: "Northern Grill",
     near: ["Near the station", "By the square"],
   },
-  photos: [PHOTOS.restaurantDining, PHOTOS.restaurantKitchen],
+  photos: [PHOTOS.restaurantDining, PHOTOS.restaurantTables],
   focus: "50% 55%",
   searches: [
     "restaurants near me",
@@ -51,6 +50,53 @@ export const restaurant: Industry = {
       text: "Send photos of your best dishes. Kabsi tells you when one is dark, blurry or too small, and adds the rest to Google once you say yes.",
     },
   ],
+  page: {
+    query: "restaurant Google Business Profile",
+    title: "Restaurant Google Business Profile help | Kabsi",
+    description:
+      "Kabsi looks after your restaurant Google Business Profile: hours right for every service, dish photos as posts, and a reply to every review for your yes.",
+    h1: "Your restaurant on Google, ready for service.",
+    mark: "ready for service.",
+    line: "Kabsi looks after your restaurant Google Business Profile: closing times, dish photos as posts, and a reply to every review.",
+    card: "Closing times right, dish photos as posts.",
+    answer:
+      "Diners check a restaurant Google Business Profile for the closing time, the menu and the reviews. Kabsi checks your hours every day, drafts a reply to every review in the guest's language, turns a dish photo into a post, and asks about bank holiday hours five days ahead. Reviews about illness get a calm draft with no quick yes. You approve every change.",
+    watch: {
+      business: "Cedar Lane Kitchen, Manchester",
+      line: "A guest who reads the wrong closing time does not come. Kabsi checks your hours every day.",
+      fields: ["Opening hours", "Special hours", "Phone", "Website", "Address"],
+      what: "Sunday",
+      google: "Closes 21:00",
+      owner: "Closes 22:30",
+      message: "Google shows you closing at 21:00 on Sunday. You told me 22:30.",
+    },
+    post: {
+      owner: "Lamb shoulder is back on Sundays.",
+      quote: "Slow roast lamb shoulder is back on the Sunday menu. Tables from 12.",
+    },
+    jobs: [
+      {
+        title: "A reply for every review",
+        text: "In the guest's language. Illness and hygiene reviews get a calm draft, never a quick yes.",
+      },
+      {
+        title: "Dish photos, as posts",
+        text: "A photo from the pass and one line become a post for your yes.",
+      },
+      {
+        title: "Bank holiday hours",
+        text: "Five days ahead, Kabsi asks what you will do and sets it once you say yes.",
+      },
+    ],
+    nearby: { kind: "restaurant", term: "restaurant" },
+    ai: {
+      question: "Which restaurant in the Northern Quarter, Manchester serves a Sunday roast?",
+      answer:
+        "Cedar Lane Kitchen in the Northern Quarter serves slow roast lamb on Sundays from 12.",
+      sources: ["Cedar Lane Kitchen's Google profile", "Cedar Lane Kitchen's website"],
+    },
+    related: ["cafe", "bakery"],
+  },
   faqs: [
     {
       q: "Can Kabsi change my menu on Google?",
@@ -67,6 +113,10 @@ export const restaurant: Industry = {
     {
       q: "Can Kabsi promise we come up first for 'restaurants near me'?",
       a: "No one can promise that. Kabsi shows what changed on your profile and what you can do next.",
+    },
+    {
+      q: "Can Kabsi set our Christmas hours?",
+      a: "Yes. Five days before each bank holiday, Christmas included, Kabsi asks what you will do and sets special hours once you say yes.",
     },
   ],
   guides: ["how-to-reply-to-google-reviews", "someone-changed-my-business-info-on-google"],
@@ -116,6 +166,5 @@ export const restaurant: Industry = {
         ],
       },
     ],
-    related: ["hair-salon", "barbershop"],
   },
 };

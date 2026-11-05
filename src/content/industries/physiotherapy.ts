@@ -6,7 +6,6 @@ import type { Industry } from "./types";
 // injury or a result, no patient details. Every fact on this page has a row in the claim sheet.
 export const physiotherapy: Industry = {
   slug: "physiotherapy",
-  hub: "health",
   name: "physiotherapy clinic",
   plural: "Physiotherapy",
   finished: true,
@@ -136,6 +135,53 @@ export const physiotherapy: Industry = {
       text: "A clinic that closes at noon before a holiday sets special hours for that day alone. Google's hours for the rest of the week stay as they are.",
     },
   ],
+  page: {
+    query: "physiotherapist Google Business Profile",
+    title: "Physiotherapist Google Business Profile help | Kabsi",
+    description:
+      "Kabsi looks after your physiotherapist Google Business Profile: open status and hours right, replies that never name an injury, and posts for your yes.",
+    h1: "Your physio clinic on Google, in good shape.",
+    mark: "in good shape.",
+    line: "Kabsi looks after your physiotherapist Google Business Profile: hours, the assessment link, and replies that never name an injury.",
+    card: "Assessment link right, replies that name no injury.",
+    answer:
+      "A physiotherapist Google Business Profile needs exact hours and replies that protect patients. Kabsi checks your open status, hours and website every day, drafts replies that never name an injury or a treatment, turns news like a new physio into a post, and asks about holiday hours in time. You approve each one before it reaches Google.",
+    watch: {
+      business: "Motion Works Physio, Manchester",
+      line: "A clinic shown as closed loses the patients who check first. Kabsi checks your open status every day.",
+      fields: ["Open status", "Opening hours", "Website", "Phone", "Address"],
+      what: "Open status",
+      google: "Temporarily closed",
+      owner: "Open",
+      message: "Google shows you as temporarily closed. You told me you are open.",
+    },
+    post: {
+      owner: "Sports massage now on Saturday mornings.",
+      quote: "Sports massage is now available on Saturday mornings. Book on our website.",
+    },
+    jobs: [
+      {
+        title: "Replies that name no injury",
+        text: "Thanks, an invitation to get in touch, and nothing about the patient's care.",
+      },
+      {
+        title: "Open status and hours, checked daily",
+        text: "When Google shows something else, you choose which stays.",
+      },
+      {
+        title: "Clinic news, as posts",
+        text: "A new physio or a new session time becomes a post for your yes.",
+      },
+    ],
+    nearby: { kind: "clinic", term: "physio" },
+    ai: {
+      question: "Which physio in Didsbury, Manchester has Saturday appointments?",
+      answer:
+        "Motion Works Physio in Didsbury has appointments on Saturday mornings, with sports massage.",
+      sources: ["Motion Works Physio's Google profile", "Motion Works Physio's website"],
+    },
+    related: ["gym-and-fitness", "yoga-and-pilates-studio"],
+  },
   faqs: [
     {
       q: "Can Kabsi say how many sessions a patient needs?",
@@ -152,6 +198,10 @@ export const physiotherapy: Industry = {
     {
       q: "Can I give a free assessment to anyone who leaves a review?",
       a: "No. Google does not allow free or discounted services in return for a review. Ask every patient the same way.",
+    },
+    {
+      q: "Can Kabsi reply to a review that names a treatment?",
+      a: "Kabsi drafts a reply that does not repeat it, thanks the reviewer and asks them to get in touch. You approve or edit it first.",
     },
   ],
   guides: ["how-to-reply-to-google-reviews", "google-review-link-and-qr-code"],

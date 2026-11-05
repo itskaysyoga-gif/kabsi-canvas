@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { SCAN_LINE, TRIAL_LINE } from "@/lib/site";
 import { ScanBox } from "./scan-box";
+import { Highlight } from "./highlight";
 import { SiteLink } from "./site-link";
 import { CONTROL, CONTROL_SHORT } from "./d8-data";
 
@@ -22,13 +23,28 @@ function Arrow() {
   return <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />;
 }
 
-export function Closing({ keyword, industry }: { keyword?: string; industry?: string }) {
+export function Closing({
+  keyword,
+  industry,
+  marked = false,
+}: {
+  keyword?: string;
+  industry?: string;
+  /** Industries 2: "free check" on the yellow bar (the industry pages and /for). */
+  marked?: boolean;
+}) {
   return (
     <section aria-labelledby="closing-title" className="border-t border-line bg-surface-1">
       <div className="container-kb section-y">
         <div className="mx-auto max-w-[44rem]">
           <h2 id="closing-title" className="text-h2">
-            Start with a free check.
+            {marked ? (
+              <>
+                Start with a <Highlight>free check</Highlight>.
+              </>
+            ) : (
+              "Start with a free check."
+            )}
           </h2>
           <ScanBox
             id="closing-scan"

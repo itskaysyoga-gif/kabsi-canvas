@@ -6,7 +6,6 @@ import type { Industry } from "./types";
 // knowledge/kabsi-facts.md. Fade and Co, Leeds, is invented (Example).
 export const barbershop: Industry = {
   slug: "barbershop",
-  hub: "beauty-and-wellness",
   name: "barbershop",
   plural: "Barbershops",
   finished: true,
@@ -20,7 +19,7 @@ export const barbershop: Industry = {
     rival2: "The Barber Room",
     near: ["Near the station", "By the market"],
   },
-  photos: [PHOTOS.barberCut, PHOTOS.barberShave],
+  photos: [PHOTOS.barberCut, PHOTOS.barberShaveTall],
   focus: "50% 40%",
   searches: ["barber near me", "walk in barber", "skin fade", "beard trim", "barber open now"],
   tasks: [
@@ -45,6 +44,52 @@ export const barbershop: Industry = {
       text: "Walk-in shops make people wait. The reply says sorry for the wait once, gives no excuse it cannot back up, and never argues.",
     },
   ],
+  page: {
+    query: "barber shop Google Business Profile",
+    title: "Barber shop Google Business Profile help | Kabsi",
+    description:
+      "Kabsi looks after your barber shop Google Business Profile: walk-in hours right, bank holidays asked in time, new cuts posted and a reply to every review.",
+    h1: "Your barber shop on Google, kept sharp.",
+    mark: "kept sharp.",
+    line: "Kabsi runs your barber shop Google Business Profile: walk-in hours, fresh cuts as posts, and a reply to every review.",
+    card: "Walk-in hours right, fresh cuts as posts.",
+    answer:
+      "For a barber shop Google Business Profile, the work is small and constant: hours that match the door, a reply to every review, and photos of fresh cuts. Kabsi drafts each reply and names the barber only when the review does, turns your photos into posts, asks about bank holidays in time and checks your hours every day. You approve each one on WhatsApp.",
+    watch: {
+      business: "Fade and Co, Leeds",
+      line: "Walk-in customers trust the hours Google shows. Kabsi compares them with yours every day and asks before anything changes.",
+      fields: ["Opening hours", "Special hours", "Phone", "Address", "Open status"],
+      what: "Saturday",
+      google: "Closed",
+      owner: "08:00 to 18:00",
+      message: "Google shows you closed on Saturday. You told me 08:00 to 18:00.",
+    },
+    post: {
+      owner: "Skin fade and beard trim from this morning.",
+      quote: "Fresh skin fade and a sharp beard trim. Walk in until 6 today.",
+    },
+    jobs: [
+      {
+        title: "Replies that name the right barber",
+        text: "Only when the review names him, and only names on your team list.",
+      },
+      {
+        title: "Fresh cuts, as posts",
+        text: "A photo from the chair becomes a post. Kabsi checks the photo first.",
+      },
+      {
+        title: "Walk-in hours that match the door",
+        text: "Kabsi checks your hours daily and asks before each bank holiday.",
+      },
+    ],
+    nearby: { kind: "shop", term: "barber" },
+    ai: {
+      question: "Which barber near Leeds city centre takes walk-ins on Saturday?",
+      answer: "Fade and Co on Call Lane takes walk-ins on Saturdays from 8 am to 6 pm.",
+      sources: ["Fade and Co's Google profile", "Fade and Co's website"],
+    },
+    related: ["hair-salon", "tattoo-studio"],
+  },
   faqs: [
     {
       q: "Will a reply know which barber did the cut?",
@@ -61,6 +106,10 @@ export const barbershop: Industry = {
     {
       q: "Does Kabsi message my customers?",
       a: "No. Kabsi talks only to you. It gives you a review link and a QR card, and you share them after a real visit.",
+    },
+    {
+      q: "Can Kabsi post our prices?",
+      a: "Only prices you give it, in a post you approve. Kabsi never invents a price or an offer.",
     },
   ],
   guides: ["google-review-link-and-qr-code", "how-to-set-holiday-hours-on-google"],
@@ -110,6 +159,5 @@ export const barbershop: Industry = {
         ],
       },
     ],
-    related: ["hair-salon", "nail-salon"],
   },
 };

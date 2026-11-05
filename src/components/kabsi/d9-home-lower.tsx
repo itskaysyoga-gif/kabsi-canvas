@@ -20,6 +20,7 @@ import { useFoundingPlaces } from "@/lib/public-api";
 import { ExampleBadge, Faq, KabsiMark } from "./ui";
 import { FOUNDER, Img, PHOTOS, type Photo } from "./photos";
 import { Closing } from "./closing";
+import { Highlight } from "./highlight";
 import { SiteLink } from "./site-link";
 import { PLANS } from "./plans";
 import { useFoundingLeft } from "./founding-price";
@@ -122,7 +123,10 @@ function WatchVisual() {
 
 /* ---------- Photo to post (the dark band) ---------- */
 
-export function PhotoToPost() {
+/** Industries 2: an industry page passes its tall photo and its own Example post. */
+export type PhotoPostExample = { photo: Photo; owner: string; quote: string; alt?: string };
+
+export function PhotoToPost({ example }: { example?: PhotoPostExample } = {}) {
   const p = D9_PHOTO;
   return (
     <section aria-labelledby="photo-h" className="theme-dark bg-band">
@@ -140,20 +144,23 @@ export function PhotoToPost() {
           <p className="mt-4 max-w-[34rem] text-body text-text-2 sm:text-lead">{p.line}</p>
           <NumberedPoints points={p.points} className="mt-6" />
         </div>
-        <PhotoVisual />
+        <PhotoVisual example={example} />
       </div>
     </section>
   );
 }
 
-function PhotoVisual({ photo = PHOTOS.salonStudio }: { photo?: Photo }) {
+function PhotoVisual({ example }: { example?: PhotoPostExample | undefined }) {
   const p = D9_PHOTO;
+  const photo = example?.photo ?? PHOTOS.salonStudio;
+  const owner = example?.owner ?? p.ownerLine;
+  const quote = example?.quote ?? p.quote;
   return (
     <figure className="relative mx-auto grid w-full max-w-[20rem] items-end gap-4 sm:max-w-[34rem] sm:grid-cols-[0.8fr_1fr]">
       <div className="relative hidden aspect-[3/4] overflow-hidden rounded-panel sm:block">
         <Img
           photo={photo}
-          sizes="(min-width: 1024px) 18vw, 40vw"
+          sizes="(min-width: 1024px) 20rem, 40vw"
           decorative
           className="absolute inset-0 size-full object-cover object-[50%_30%]"
         />
@@ -171,12 +178,12 @@ function PhotoVisual({ photo = PHOTOS.salonStudio }: { photo?: Photo }) {
             decorative
             className="aspect-[4/3] w-full rounded-[0.375rem] object-cover object-[50%_30%]"
           />
-          <p className="px-1 pt-1 text-chat">{p.ownerLine}</p>
+          <p className="px-1 pt-1 text-chat">{owner}</p>
           <p className="px-1 text-end text-chat-meta text-wa-time-out">12:31</p>
         </div>
         <div className="mt-2 w-[92%] rounded-bubble rounded-ss-none bg-wa-in px-2.5 py-1.5 text-chat shadow-bubble">
           {p.ready}
-          <span className="mt-0.5 block italic">'{p.quote}'</span>
+          <span className="mt-0.5 block italic">'{quote}'</span>
           <span className="block text-end text-chat-meta text-wa-time-out">12:32</span>
         </div>
         <div className="-ms-1.5 w-[96%]">
@@ -194,7 +201,11 @@ function PhotoVisual({ photo = PHOTOS.salonStudio }: { photo?: Photo }) {
           ))}
         </ol>
       </div>
-      <figcaption className="sr-only">{p.caption}</figcaption>
+      <figcaption className="sr-only">
+        {example
+          ? `Example: the owner sends a photo with the line '${owner}' on WhatsApp, Kabsi prepares the Google post '${quote}' with that photo, the owner approves it, and it goes from Approved to Sent to Google to Live on Google.`
+          : p.caption}
+      </figcaption>
     </figure>
   );
 }
@@ -278,14 +289,19 @@ function WhereYouShowUp() {
   );
 }
 
-function NearbyMap() {
+/** Industries 2: an industry page's own nearby line (Example). */
+export type NearbyExample = { kind: string; term: string };
+
+export function NearbyMap({ example }: { example?: NearbyExample | undefined } = {}) {
   const m = D9_SHOW_UP.map;
   return (
     <figure className="rounded-panel border border-line bg-surface-1 p-4 sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-title">{m.title}</h3>
-          <p className="text-label text-text-2">{m.search}</p>
+          <p className="text-label text-text-2">
+            {example ? `Searched: ${example.term}, 2 Nov 2026` : m.search}
+          </p>
         </div>
         <ExampleBadge />
       </div>
@@ -355,7 +371,12 @@ function NearbyMap() {
           ))}
         </ul>
       </div>
-      <p className="mt-4 text-small font-bold">{m.count}</p>
+      {example && (
+        <p className="mt-4 text-small">
+          Near your {example.kind} you came up 2nd for '{example.term}'.
+        </p>
+      )}
+      <p className={cn("text-small font-bold", example ? "mt-1" : "mt-4")}>{m.count}</p>
       <figcaption className="mt-2 text-label text-text-2">
         {m.shows} {m.sample}
       </figcaption>
@@ -363,8 +384,11 @@ function NearbyMap() {
   );
 }
 
-function AiAnswer() {
-  const a = D9_SHOW_UP.ai;
+/** Industries 2: an industry page's own question and answer (Example). */
+export type AiExample = { question: string; answer: string; sources: readonly string[] };
+
+export function AiAnswer({ example }: { example?: AiExample | undefined } = {}) {
+  const a = { ...D9_SHOW_UP.ai, ...(example ?? {}) };
   return (
     <figure className="flex flex-col rounded-panel border border-line bg-surface-1 p-4 sm:p-6">
       <div className="flex items-start justify-between gap-3">
@@ -498,7 +522,8 @@ function D9PickBusiness() {
 
 /* ---------- Pricing preview (the founding price line only while founding places remain) ---------- */
 
-function PricingPreview() {
+/** Industries 2: an industry page puts the headline's key phrase on the yellow bar. */
+export function PricingPreview({ marked = false }: { marked?: boolean } = {}) {
   const left = useFoundingLeft();
   return (
     <section aria-labelledby="plans-h" className="border-t border-line">
@@ -506,7 +531,13 @@ function PricingPreview() {
         <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
           <div>
             <h2 id="plans-h" className="text-h2">
-              Two plans. The work comes first.
+              {marked ? (
+                <>
+                  Two plans. <Highlight>The work comes first.</Highlight>
+                </>
+              ) : (
+                "Two plans. The work comes first."
+              )}
             </h2>
             <p className="mt-3 text-body text-text-2">{TRIAL_LINE}</p>
           </div>

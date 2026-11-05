@@ -6,7 +6,6 @@ import type { Industry } from "./types";
 // sentences follow knowledge/kabsi-facts.md. Hollis Hair, Bristol, is invented (Example).
 export const hairSalon: Industry = {
   slug: "hair-salon",
-  hub: "beauty-and-wellness",
   name: "hair salon",
   plural: "Hair salons",
   finished: true,
@@ -20,7 +19,7 @@ export const hairSalon: Industry = {
     rival2: "Lark Salon",
     near: ["Near the station", "By the park"],
   },
-  photos: [PHOTOS.salonStudio, PHOTOS.salonWash],
+  photos: [PHOTOS.salonWash, PHOTOS.salonStudio],
   focus: "50% 30%",
   searches: ["hair salon near me", "hairdressers", "balayage", "hair colour near me", "blow dry"],
   tasks: [
@@ -45,6 +44,59 @@ export const hairSalon: Industry = {
       text: "Five days before each bank holiday Kabsi asks what you will do, so nobody arrives on Boxing Day to a closed door.",
     },
   ],
+  page: {
+    query: "hair salon Google Business Profile",
+    title: "Hair salon Google Business Profile help | Kabsi",
+    description:
+      "Kabsi looks after your hair salon Google Business Profile: a reply for every review, new stylists announced, colour work posted, holiday hours asked in time.",
+    h1: "Your salon on Google, taken care of.",
+    mark: "taken care of.",
+    line: "Kabsi looks after your hair salon Google Business Profile: replies, colour posts, holiday hours and stylists, each for your yes.",
+    card: "Stylists thanked by name, colour work as posts.",
+    answer:
+      "Kabsi does the weekly work of a hair salon Google Business Profile for you. It drafts a reply to every new review and passes the thanks to the stylist the client named, turns a photo of your colour work into a post, asks about bank holiday hours five days ahead, and checks your details every day. Nothing goes on Google until you say yes.",
+    watch: {
+      business: "Hollis Hair, Bristol",
+      line: "Clients check your hours and booking link before they come. Kabsi compares them with what you told it, every day.",
+      fields: [
+        "Opening hours",
+        "Special hours",
+        "Website",
+        "Phone",
+        "Main category",
+        "Description",
+      ],
+      what: "Website",
+      google: "Old booking page",
+      owner: "New booking page",
+      message: "Google shows your old booking page as your website. You told me the new one.",
+    },
+    post: {
+      owner: "Amber's first balayage with us. Booking from Tuesday.",
+      quote: "New to the team: Amber, colour and balayage. Book with her from Tuesday.",
+    },
+    jobs: [
+      {
+        title: "A reply for every review",
+        text: "A review that names Amber gets a reply that thanks Amber, using only the names on your team list.",
+      },
+      {
+        title: "Colour work, as posts",
+        text: "Send the photo with a line. Kabsi writes the post and checks the photo first.",
+      },
+      {
+        title: "Bank holiday hours",
+        text: "Five days before each bank holiday, Kabsi asks what you will do and sets it once you say yes.",
+      },
+    ],
+    nearby: { kind: "salon", term: "hair salon" },
+    ai: {
+      question: "Which hair salon in Clifton, Bristol does balayage on Saturdays?",
+      answer: "Hollis Hair on Gloucester Road does balayage and is open on Saturdays from 9 am.",
+      sources: ["Hollis Hair's Google profile", "Hollis Hair's website"],
+    },
+    related: ["barbershop", "nail-salon"],
+  },
   faqs: [
     {
       q: "Can Kabsi add a new service to my Google profile?",
@@ -61,6 +113,10 @@ export const hairSalon: Industry = {
     {
       q: "Can my salon manager approve instead of me?",
       a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
+    },
+    {
+      q: "How does Kabsi know what my salon is like?",
+      a: "You tell it once, in About your business: services, team, hours and anything it should never say. Every draft uses those facts.",
     },
   ],
   guides: ["how-to-reply-to-google-reviews", "how-to-set-holiday-hours-on-google"],
@@ -110,6 +166,5 @@ export const hairSalon: Industry = {
         ],
       },
     ],
-    related: ["barbershop", "nail-salon"],
   },
 };
