@@ -1,5 +1,6 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { signedOutLine, takeSignedOutReason } from "@/lib/signed-out";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { SignInPanel } from "@/components/auth/sign-in-panel";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -37,6 +38,11 @@ function LoginPage() {
   const { next } = Route.useSearch();
   const router = useRouter();
   const target = safeNext(next);
+  // Signed out after time away (App 4, 30.31 item 2): the line says why, once.
+  const [awayLine, setAwayLine] = useState<string | null>(null);
+  useEffect(() => {
+    setAwayLine(signedOutLine(takeSignedOutReason(["away-owner", "away-staff"])));
+  }, []);
 
   useEffect(() => {
     if (!loading && user) router.history.replace(target);
@@ -46,6 +52,14 @@ function LoginPage() {
     <PublicLayout>
       <section className="container-kb py-10 sm:py-16">
         <div className="mx-auto w-full max-w-md">
+          {awayLine ? (
+            <p
+              role="status"
+              className="mb-4 rounded-inner bg-surface-2 px-4 py-3 text-small font-semibold text-text-1"
+            >
+              {awayLine}
+            </p>
+          ) : null}
           <div className="rounded-card border border-line bg-surface-1 p-5 shadow-rest sm:p-8">
             <h1 className="font-display text-h2 font-bold text-text-1">Log in to Kabsi</h1>
             <p className="mt-3 mb-7 text-body text-text-2">

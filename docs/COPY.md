@@ -1229,6 +1229,13 @@ Each line is old, then new, then the files, found by grep first. Where a line ap
 - **After Log out** (site-chrome.tsx, under the header on Home): "You are signed out."
 - **Start free while signed in**: the free check result's "Start free" opens /start and Pricing's "Start free" opens /app, without the log in page. No word change.
 
+### Part B: how long a sign-in lasts (branch claude/app4-b)
+
+- **The log in page after time away** (login.tsx, above the sheet): "You were signed out after 30 days away. Log in again." and, on a staff page, "You were signed out after 12 hours away. Log in again."
+- **Settings, Your account** (settings.tsx): the line "You stay signed in on this device for 30 days after your last visit." after the code line; the button "Sign out of all devices" becomes "Sign out on every device"; the confirm reads "Sign out on every device?" / "This signs you out on every phone and computer, this one too. You can log in again with a code." with "Stay signed in" and "Sign out on every device" ("Signing out" while it works). After it, Home says "You are signed out." The card now shows before a business is added too.
+- **/privacy section 7** (privacy.tsx): the Sign-in item adds "You stay signed in on a device for 30 days after your last visit, and each visit starts the 30 days again; Kabsi staff pages sign staff out after 12 hours without use. To know when you last visited, your browser keeps the time of your last visit, on this device only. Settings has Sign out on every device."
+- **Facts 11**: the same rule, the lines, Sign out on every device, and that the times are enforced in the app until Supabase Pro.
+
 ## 53. Guides 3: twenty new guides, one every 2 days, each a way into the free check (5 Nov 2026)
 
 Every guide's words are in its own content file, src/content/guides/<slug>.tsx; each claim about Google is checked against the Google help page it cites, read on the date shown. The template's lines (src/components/marketing/guide-article.tsx), checked against knowledge/kabsi-facts.md:
