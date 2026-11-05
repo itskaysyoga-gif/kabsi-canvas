@@ -4,17 +4,20 @@ One page, under 10 KB. Updated 5 Nov 2026, Scan 3. The history (tasks, After mer
 
 ## Where things stand
 
+Files named in this list are in `docs/progress/archive/`.
+
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati; the first real reply was published and verified; the post removal was verified on Google (23 Oct). kabsi.co runs on Vercel; Creem is the only payment route (test mode, not open). Evidence: `docs/progress/archive/evidence.md` and `where-things-stand.md`.
 - Web 2, V4, UX 1, Email 1, Sec 1 and 2, WhatsApp 2, Billing 2, Price 1 and Web 3 (26 to 30 Oct): detail in the dated files in `docs/progress/archive/`.
-- Go live 1 (5 Nov 2026, 30.28, R-108): WhatsApp for owners, the nearby check and the AI answer are on; card payments stay closed. Detail: `docs/progress/archive/2026-11-05-golive1.md`.
-- Scan 2 and Copy 3 (5 Nov 2026, PRs 369 to 376): the free check names the town; Go live 1's copy decisions. Detail: `docs/progress/archive/2026-11-05-scan2.md`, `2026-11-05-copy3.md`.
-- App 4 (5 Nov 2026, 30.31, R-111, PRs 378 to 388): Dashboard link, sign-in times, /login, the signed-in audit. Detail: `docs/progress/archive/2026-11-05-app4.md`.
-- Guides 4, Fix 3 and Industries 2 (5 Nov 2026, 30.32, R-112, PRs 379 to 395): 27 public guides Nora knows; the Coach reads Google by location name; /for is one list of 20 industry pages. Detail: `docs/progress/archive/2026-11-05-guides4.md`, `-fix3.md`, `-industries2.md`.
-- Style 1 (R-113, PRs 399 to 404): guide photos, the yellow bar on every public headline, Sentry quiet for automated runs. Detail: `docs/progress/archive/2026-11-05-style1.md`.
-- App 5 (PRs 402, 406): staff workspace with Today. Detail: `docs/progress/archive/2026-11-05-app5.md`.
-- Industries 3 (PR 403): short industry pages. Detail: `docs/progress/archive/2026-11-05-industries3.md`.
-- App 6 (30.34 item 5, PRs 414, 415): Settings' delivery choice saves in one call and shows at once; checked live. Nora's live page-link run not run (no key in the session). Detail: `docs/progress/archive/2026-11-05-app6.md`.
-- Scan 3 (30.34, R-114, PRs 409 to 419): one bot check per search session; progressive free check; review link tool with an A6 QR card. Detail: `docs/progress/archive/2026-11-05-scan3.md`.
+- Go live 1 (5 Nov 2026, 30.28, R-108): WhatsApp for owners, the nearby check and the AI answer are on; card payments stay closed. Detail: `2026-11-05-golive1.md`.
+- Scan 2 and Copy 3 (5 Nov 2026, PRs 369 to 376): the free check names the town; Go live 1's copy decisions. Detail: `2026-11-05-scan2.md`, `2026-11-05-copy3.md`.
+- App 4 (5 Nov 2026, 30.31, R-111, PRs 378 to 388): Dashboard link, sign-in times, /login, the signed-in audit. Detail: `2026-11-05-app4.md`.
+- Guides 4, Fix 3 and Industries 2 (5 Nov 2026, 30.32, R-112, PRs 379 to 395): 27 public guides Nora knows; the Coach reads Google by location name; /for is one list of 20 industry pages. Detail: `2026-11-05-guides4.md`, `-fix3.md`, `-industries2.md`.
+- Style 1 (R-113, PRs 399 to 404): guide photos, the yellow bar on every public headline, Sentry quiet for automated runs. Detail: `2026-11-05-style1.md`.
+- App 5 (PRs 402, 406): staff workspace with Today. Detail: `2026-11-05-app5.md`.
+- Industries 3 (PR 403): short industry pages. Detail: `2026-11-05-industries3.md`.
+- App 6 (30.34 item 5, PRs 414, 415): Settings' delivery choice saves in one call and shows at once; checked live. Nora's live page-link run not run (no key in the session). Detail: `2026-11-05-app6.md`.
+- Scan 3 (30.34, R-114, PRs 409 to 419): one bot check per search session; progressive free check; review link tool with an A6 QR card. Detail: `2026-11-05-scan3.md`.
+- Site 2 (PRs 410, 412, 413, 416, 417): header, footer, WhatsApp marks, photos, About, Beauty salon. `2026-11-05-site2.md`.
 - No customer is live yet. Before the first Meta ad: the DataForSEO top-up and a nearby check on a real business. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -55,6 +58,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Scan 3: on a phone at kabsi.co/scan, type a business name and see suggestions within about a second; on /google-review-link pick yours, download the A6 PDF and scan the printed code with the phone camera.
 - Sentry (30.33 item 4): Settings, Subscription, set a pay-as-you-go budget of 5 US dollars for errors, so errors are not dropped before 30 Nov.
 - App 5: may qa-staff@test.local be staff, for live staff runs? (LATER row)
+- Site 2: your own words for About's founder lines, if wanted (LATER row).
 
 ## Open After merge checks and findings
 
@@ -65,8 +69,8 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 5 Nov 2026, App 6: PRs 414, 415. Detail: `docs/progress/archive/2026-11-05-app6.md`.
-- 5 Nov 2026, App 5: PRs 402, 406 and part C. Detail: `docs/progress/archive/2026-11-05-app5.md`.
+- 5 Nov 2026, Site 2: PRs 410, 412, 413, 416, 417. `2026-11-05-site2.md`.
+- 5 Nov 2026, App 6: PRs 414, 415. `2026-11-05-app6.md`.
 
 ## How a session updates this page
 

@@ -117,6 +117,12 @@
     "sources": ["src/content/industries/dental-clinic.ts", "src/components/kabsi/d9-industry.tsx"]
   },
   {
+    "path": "/for/beauty-salon",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/beauty-salon.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
     "path": "/for/lash-and-brow-studio",
     "changefreq": "monthly",
     "priority": "0.7",

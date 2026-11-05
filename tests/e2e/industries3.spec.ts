@@ -61,7 +61,7 @@ test.describe("Industries 3: short industry pages", () => {
     page,
   }) => {
     test.setTimeout(600_000);
-    expect(INDUSTRY_PAGES.length, "industry pages in the sitemap").toBe(20);
+    expect(INDUSTRY_PAGES.length, "industry pages in the sitemap").toBe(21);
     for (const route of INDUSTRY_PAGES) {
       await page.goto(route);
       await settle(page);
