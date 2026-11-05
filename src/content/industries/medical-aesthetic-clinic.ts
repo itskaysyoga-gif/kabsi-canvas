@@ -7,7 +7,6 @@ import type { Industry } from "./types";
 // row in the claim sheet; advice and wording are marked there.
 export const medicalAestheticClinic: Industry = {
   slug: "medical-and-aesthetic-clinic",
-  hub: "health",
   name: "clinic",
   plural: "Medical and aesthetic clinics",
   finished: true,
@@ -136,6 +135,53 @@ export const medicalAestheticClinic: Industry = {
       text: "Google's special hours suit a clinic closed up to 6 days in a row. For 7 days or more, mark the profile as temporarily closed instead.",
     },
   ],
+  page: {
+    query: "aesthetic clinic Google Business Profile",
+    title: "Aesthetic clinic Google Business Profile help | Kabsi",
+    description:
+      "Kabsi looks after your aesthetic clinic Google Business Profile: hours and consultation link right, replies that never confirm a patient, posts for your yes.",
+    h1: "Your clinic on Google, discreet and exact.",
+    mark: "discreet and exact.",
+    line: "Kabsi looks after your aesthetic clinic Google Business Profile: doctors' days, the consultation link, and discreet replies you approve.",
+    card: "Doctors' days exact, replies that confirm no patient.",
+    answer:
+      "Patients compare an aesthetic clinic on its reviews, its hours and how it answers. Kabsi looks after your aesthetic clinic Google Business Profile: replies that never confirm someone is a patient or name a treatment, your hours and consultation link checked every day, and clinic news as posts ready for your yes. You approve every one.",
+    watch: {
+      business: "Clearview Skin Clinic, London",
+      line: "Late evening clinics are easy to miss on Google. Kabsi checks your hours against yours every day.",
+      fields: ["Opening hours", "Website", "Phone", "Main category", "Description"],
+      what: "Wednesday",
+      google: "09:00 to 17:00",
+      owner: "11:00 to 20:00",
+      message: "Google shows Wednesday 09:00 to 17:00. You told me 11:00 to 20:00.",
+    },
+    post: {
+      owner: "Dr Shah adds Thursday evening consultations.",
+      quote: "Dr Shah now sees consultations on Thursday evenings until 8 pm. Book on our website.",
+    },
+    jobs: [
+      {
+        title: "Replies that confirm no patient",
+        text: "No name, no treatment, no result. An invitation to get in touch instead.",
+      },
+      {
+        title: "Doctors' days, as posts",
+        text: "A new clinic day becomes a post, ready for your yes.",
+      },
+      {
+        title: "Hours and links, checked daily",
+        text: "When Google shows something else, you choose which stays.",
+      },
+    ],
+    nearby: { kind: "clinic", term: "skin clinic" },
+    ai: {
+      question: "Which skin clinic in Marylebone, London has evening consultations?",
+      answer:
+        "Clearview Skin Clinic in Marylebone offers consultations until 8 pm on Wednesdays and Thursdays.",
+      sources: ["Clearview Skin Clinic's Google profile", "Clearview Skin Clinic's website"],
+    },
+    related: ["dental-clinic", "spa-and-massage"],
+  },
   faqs: [
     {
       q: "Will Kabsi ever put a patient's name or treatment in a reply?",
@@ -152,6 +198,10 @@ export const medicalAestheticClinic: Industry = {
     {
       q: "Does Kabsi follow the privacy law of my country?",
       a: "Kabsi's drafts follow a careful habit: a public reply never confirms someone is a patient or mentions their care. That is a habit, not legal advice. Questions about privacy law go to a person.",
+    },
+    {
+      q: "Can Kabsi post before and after photos?",
+      a: "Kabsi posts only photos you send and approve, and it never writes about results. Check your own country's rules on medical advertising before you send one.",
     },
   ],
   guides: ["how-to-reply-to-google-reviews", "how-to-choose-your-primary-category"],

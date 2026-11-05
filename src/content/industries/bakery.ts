@@ -1,4 +1,5 @@
 import { PHOTOS } from "@/components/kabsi/photos";
+import { MORE_PHOTOS } from "@/components/kabsi/photos-more";
 import type { Industry } from "./types";
 
 // Content 1: finished from docs/claims/bakery.md, approved by lane R on 27 Oct 2026 (brief section 18). Corner Bakery is invented
@@ -6,7 +7,6 @@ import type { Industry } from "./types";
 // Every fact on this page has a row in the claim sheet; advice and wording are marked there.
 export const bakery: Industry = {
   slug: "bakery",
-  hub: "food-and-drink",
   name: "bakery",
   plural: "Bakeries",
   finished: true,
@@ -20,7 +20,7 @@ export const bakery: Industry = {
     rival2: "Rye and Crumb",
     near: ["East of the station", "By the school"],
   },
-  photos: [PHOTOS.bakeryWindow],
+  photos: [PHOTOS.bakeryCounter, MORE_PHOTOS.bakeryWindowTall],
   focus: "50% 50%",
   searches: [
     "bakery",
@@ -140,6 +140,52 @@ export const bakery: Industry = {
       text: "Christmas Day is a Saturday, so the holidays fall on Monday 27 and Tuesday 28 December. Order deadlines and closed days go on Google in November.",
     },
   ],
+  page: {
+    query: "bakery Google Business Profile",
+    title: "Bakery Google Business Profile help | Kabsi",
+    description:
+      "Kabsi looks after your bakery Google Business Profile: early hours and holiday hours right, the day's bakes as posts, and a reply to every review.",
+    h1: "Your bakery on Google, fresh every morning.",
+    mark: "fresh every morning.",
+    line: "Kabsi looks after your bakery Google Business Profile: early hours, holiday baking hours, and the day's bakes as posts.",
+    card: "Early hours exact, holiday hours set ahead.",
+    answer:
+      "A bakery Google Business Profile lives on early hours and holiday hours. Kabsi checks your opening time every day, asks about Christmas Eve and every bank holiday five days ahead, turns a photo of the day's bake into a post, and drafts a reply to every review. You approve each one before it reaches Google.",
+    watch: {
+      business: "Corner Bakery, London",
+      line: "Holiday baking days have their own hours. Kabsi asks ahead and checks Google shows what you chose.",
+      fields: ["Opening hours", "Special hours", "Phone", "Website", "Address"],
+      what: "Christmas Eve",
+      google: "Normal hours",
+      owner: "06:00 to 14:00",
+      message: "Google shows normal hours on Christmas Eve. You told me 06:00 to 14:00.",
+    },
+    post: {
+      owner: "Sourdough with seeds, every Saturday from now.",
+      quote: "Seeded sourdough is now baked every Saturday. Come early, it goes fast.",
+    },
+    jobs: [
+      {
+        title: "Holiday hours, asked ahead",
+        text: "Christmas Eve and bank holidays, set once you say yes.",
+      },
+      {
+        title: "The day's bake, as a post",
+        text: "A photo of the counter becomes a post for your yes.",
+      },
+      {
+        title: "A reply for every review",
+        text: "Short and warm, using only what you told Kabsi.",
+      },
+    ],
+    nearby: { kind: "bakery", term: "bakery" },
+    ai: {
+      question: "Which bakery in Hackney, London sells sourdough on Saturdays?",
+      answer: "Corner Bakery in Hackney bakes seeded sourdough every Saturday and opens at 6 am.",
+      sources: ["Corner Bakery's Google profile", "Corner Bakery's website"],
+    },
+    related: ["cafe", "restaurant"],
+  },
   faqs: [
     {
       q: "Can Kabsi tell Google when we sell out?",
@@ -156,6 +202,10 @@ export const bakery: Industry = {
     {
       q: "Can Kabsi take cake orders on WhatsApp?",
       a: "No. The Kabsi chat is between Kabsi and you. It prepares your hours, posts and replies, and it does not talk to your customers.",
+    },
+    {
+      q: "Will Kabsi post prices for cakes?",
+      a: "Only prices you give it, in a post you approve. Kabsi never invents a price or an offer.",
     },
   ],
   guides: ["how-to-set-holiday-hours-on-google", "google-review-link-and-qr-code"],

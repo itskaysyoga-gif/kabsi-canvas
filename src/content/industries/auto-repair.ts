@@ -1,11 +1,11 @@
 import { PHOTOS } from "@/components/kabsi/photos";
+import { MORE_PHOTOS } from "@/components/kabsi/photos-more";
 import type { Industry } from "./types";
 
 // Content 1: finished from docs/claims/auto-repair.md, approved by lane R on 27 Oct 2026 (brief section 18). Westgate Auto Repair is
 // invented (Example). Every fact on this page has a row in the claim sheet; advice and wording are marked there.
 export const autoRepair: Industry = {
   slug: "auto-repair",
-  hub: "auto",
   name: "garage",
   plural: "Auto repair",
   finished: true,
@@ -19,7 +19,7 @@ export const autoRepair: Industry = {
     rival2: "Ring Road Motors",
     near: ["Past the ring road", "By the retail park"],
   },
-  photos: [PHOTOS.autoGarage, PHOTOS.autoMechanic],
+  photos: [PHOTOS.autoGarage, MORE_PHOTOS.autoMechanicTall],
   focus: "50% 55%",
   searches: [
     "car repair",
@@ -137,6 +137,52 @@ export const autoRepair: Industry = {
       text: "Christmas Day is a Saturday, so the bank holidays fall on Monday 27 and Tuesday 28 December. Put them on Google in November, with the last day for drop offs.",
     },
   ],
+  page: {
+    query: "auto repair shop Google Business Profile",
+    title: "Auto repair shop Google Business Profile help | Kabsi",
+    description:
+      "Kabsi looks after your auto repair shop Google Business Profile: the phone and hours right, calm replies to price complaints, and work photos as posts.",
+    h1: "Your garage on Google, running right.",
+    mark: "running right.",
+    line: "Kabsi looks after your auto repair shop Google Business Profile: the right phone, exact hours, and calm replies you approve.",
+    card: "The right phone number, calm replies.",
+    answer:
+      "Drivers call a garage from its auto repair shop Google Business Profile, so the phone number has to be right. Kabsi checks your phone and hours every day, drafts calm replies to reviews about price that never argue or promise refunds, turns a photo from the workshop into a post, and asks about bank holiday hours in time. You approve every change.",
+    watch: {
+      business: "Westgate Auto Repair, Manchester",
+      line: "Drivers call the number Google shows. Kabsi compares it with yours every day.",
+      fields: ["Phone", "Opening hours", "Address", "Website", "Main category"],
+      what: "Phone",
+      google: "An old number",
+      owner: "Your workshop line",
+      message: "Google shows a phone number that is not the one you gave me.",
+    },
+    post: {
+      owner: "Air con check before summer.",
+      quote: "Air con not cold any more? Book an air con check before the summer.",
+    },
+    jobs: [
+      {
+        title: "The right phone number",
+        text: "Checked every day. When it differs, you choose which stays.",
+      },
+      {
+        title: "Calm replies about price",
+        text: "Drafts never argue, admit fault or promise a refund, and wait for you.",
+      },
+      {
+        title: "Workshop photos, as posts",
+        text: "A photo and a line become a post. Kabsi never writes a price you did not give.",
+      },
+    ],
+    nearby: { kind: "garage", term: "car repair" },
+    ai: {
+      question: "Which garage in Salford, Manchester does same day MOTs?",
+      answer: "Westgate Auto Repair in Salford offers same day MOTs when you book before 10 am.",
+      sources: ["Westgate Auto Repair's Google profile", "Westgate Auto Repair's website"],
+    },
+    related: ["gym-and-fitness", "cafe"],
+  },
   faqs: [
     {
       q: "What does Kabsi say when a customer claims the repair was not done properly?",
@@ -153,6 +199,10 @@ export const autoRepair: Industry = {
     {
       q: "Where does the review QR code go in a garage?",
       a: "Where customers pay and collect keys, on the invoice, and in the message that says the car is ready. Ask every customer the same way.",
+    },
+    {
+      q: "Does Kabsi see my customers' records?",
+      a: "No. Kabsi works with your Google profile and the reviews on it, never your customer records.",
     },
   ],
   guides: ["how-to-reply-to-google-reviews", "someone-changed-my-business-info-on-google"],

@@ -54,9 +54,3 @@ export const PARTNERS_HERO = {
   title: "Earn 25% of every payment.",
   line: "Recommend Kabsi to local business owners you know. You earn while the referred subscription stays paid. Kabsi Partners opens when card payments open.",
 } as const;
-
-/** The Businesses hub's hero (Design 8). */
-export const HUB_HERO = {
-  title: "The Google work your kind of business has.",
-  line: "A barbershop's week on Google is not a restaurant's. Pick your trade to see the jobs that come back, the searches people use, and what the free check shows.",
-} as const;

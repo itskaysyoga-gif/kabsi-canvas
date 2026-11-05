@@ -339,6 +339,6 @@ describe("Home on Design 9 (Web 5 part B, master plan 30.24)", () => {
   });
   it("cards only for finished trades, each with a photo", () => {
     const cards = home.slice(home.indexOf("const TRADES"), home.indexOf("function D9PickBusiness"));
-    expect(cards.match(/photo: PHOTOS\./g)).toHaveLength(4);
+    expect(cards.match(/photo: (MORE_)?PHOTOS\./g)).toHaveLength(4);
   });
 });

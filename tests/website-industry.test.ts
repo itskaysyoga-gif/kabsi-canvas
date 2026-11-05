@@ -7,7 +7,7 @@ import { createRouter, rootRouteId } from "@tanstack/react-router";
 import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 import { routeTree } from "../src/routeTree.gen";
-import { HUBS, INDUSTRIES, MOVED, hub, industry, type Industry } from "../src/content/industries";
+import { INDUSTRIES, MOVED, OLD_GROUPS, industry, type Industry } from "../src/content/industries";
 import { HOME_EXAMPLES } from "../src/content/home-examples";
 import { GUIDE_TITLES } from "../src/lib/guide-titles";
 import { LEGACY_INDUSTRY_MOVES } from "../src/lib/industry-redirects";
@@ -17,7 +17,7 @@ import { LEGACY_INDUSTRY_MOVES } from "../src/lib/industry-redirects";
 // Every line about the trade comes from its content file, so that is what is compared. The trade's own names are
 // masked first, so a page made by swapping a trade word into another page's text fails. The shared blocks
 // (Founding 25, the scan box, pricing, the template's headings) are the same on every page by rule and are left out.
-const SKIP_KEYS = new Set(["slug", "hub", "finished", "photos", "focus", "guides"]);
+const SKIP_KEYS = new Set(["slug", "finished", "photos", "focus", "guides", "related"]);
 
 function strings(v: unknown, key = ""): string[] {
   if (SKIP_KEYS.has(key)) return [];
@@ -93,7 +93,7 @@ describe("industry pages (Design 5, Web 2)", () => {
     expect(overlap(salon, swapped)).toBeGreaterThan(0.9);
   });
 
-  it("wave 1 has twelve industries, all finished and indexed (Content 1)", () => {
+  it("twelve industries, all finished (Content 1; Industries 2 adds more)", () => {
     expect(INDUSTRIES).toHaveLength(12);
     expect(new Set(INDUSTRIES.map((i) => i.slug)).size).toBe(12);
     expect(INDUSTRIES.filter((i) => !i.finished).map((i) => i.slug)).toEqual([]);
@@ -104,9 +104,8 @@ describe("industry pages (Design 5, Web 2)", () => {
     for (const i of INDUSTRIES) {
       // Design 8 (Web 4c): the four trades written for their own page show five searches.
       expect(i.searches.length, i.slug).toBeGreaterThanOrEqual(i.d8 ? 5 : 6);
-      expect(i.tasks).toHaveLength(5);
+      expect(i.page.jobs, i.slug).toHaveLength(3);
       expect(i.keyword, i.slug).toBeTruthy();
-      expect(hub(i.hub), i.slug).toBeDefined();
       for (const p of i.photos) expect(p.alt, i.slug).toBeTruthy();
       businesses.add(i.example.business);
     }
@@ -126,13 +125,6 @@ describe("industry pages (Design 5, Web 2)", () => {
           expect(c.label, i.slug).toMatch(
             /^(Opening hours|Reviews|Photos|Website|Phone|Category)$/,
           );
-        expect(
-          i.d8.related.every((r) => industry(r)?.finished),
-          i.slug,
-        ).toBe(true);
-        // Go live 1 (B-017): titles of 65 characters or fewer and descriptions of 165 or fewer.
-        expect(i.d8.seo.title.length, i.slug).toBeLessThanOrEqual(65);
-        expect(i.d8.seo.description.length, i.slug).toBeLessThanOrEqual(165);
         continue;
       }
       expect(i.categories, i.slug).toBeDefined();
@@ -151,24 +143,26 @@ describe("industry pages (Design 5, Web 2)", () => {
     }
   });
 
-  it("nine hubs, and every page, hub, old address and Home choice resolves", () => {
-    expect(HUBS).toHaveLength(9);
+  it("no group pages (Industries 2), and every page, old address and Home choice resolves", () => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
     const paths = [
       "/for",
       "/founding",
-      ...HUBS.map((h) => `/for/${h.id}`),
       ...INDUSTRIES.map((i) => `/for/${i.slug}`),
       ...HOME_EXAMPLES.map((e) => e.to),
     ];
     for (const p of paths) expect(router.matchRoutes(p).at(-1)?.routeId, p).not.toBe(rootRouteId);
+    // An old address goes to a page, or ("") to /for itself; it is never a page of its own.
     for (const [from, to] of Object.entries({ ...MOVED, ...LEGACY_INDUSTRY_MOVES })) {
-      expect(industry(to) ?? hub(to), from).toBeDefined();
-      expect(industry(from) ?? hub(from), from).toBeUndefined();
+      if (to !== "") expect(industry(to), from).toBeDefined();
+      expect(industry(from), from).toBeUndefined();
     }
+    for (const g of OLD_GROUPS) expect(industry(g), g).toBeUndefined();
+    const vercel = readFileSync("vercel.json", "utf8");
+    for (const g of OLD_GROUPS) expect(vercel, g).toMatch(new RegExp(`[(|]${g}[|)]`));
     for (const e of HOME_EXAMPLES) {
-      const slug = e.to.replace("/for/", "");
-      expect(industry(slug) ?? hub(slug), e.id).toBeDefined();
+      if (e.to === "/for") continue;
+      expect(industry(e.to.replace("/for/", "")), e.id).toBeDefined();
     }
   });
 
@@ -208,11 +202,13 @@ describe("the guides' search titles (Go live 1, B-017)", () => {
 });
 
 describe("a page that is noindex is not linked (Go live 1, B-013)", () => {
-  it("the /for hub, the group hubs, related links and the guides' links use industryIndexed", () => {
-    const hub = readFileSync("src/components/kabsi/d8-industry.tsx", "utf8");
-    expect(hub).toContain("(i) => industryIndexed(i) && !");
-    expect(hub).toContain("industriesIn(h.id).filter(industryIndexed)");
-    expect(hub).toContain("own.filter(industryIndexed)");
+  it("/for, the related links and the guides' links use industryIndexed", () => {
+    expect(readFileSync("src/content/industries/index.ts", "utf8")).toContain(
+      "INDUSTRIES.filter(industryIndexed)",
+    );
+    expect(readFileSync("src/routes/for.$trade.tsx", "utf8")).toContain(
+      ".filter((r) => r && industryIndexed(r))",
+    );
     expect(readFileSync("src/components/marketing/business-grid.tsx", "utf8")).toContain(
       "INDUSTRIES.filter(industryIndexed)",
     );

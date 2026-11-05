@@ -60,9 +60,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
+- 5 Nov 2026, Industries 2: part A (PR 392) merged, part B (PR 395) in review.
 - 5 Nov 2026, Fix 3: PRs 379, 381, 383. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
 - 5 Nov 2026, App 4 (30.31, R-111): PRs 378 to 388, checked live. Detail: `docs/progress/archive/2026-11-05-app4.md`.
-- 5 Nov 2026, Guides 4 (30.32, R-112): PRs 390, 391, 393, 394, checked live on kabsi.co. Detail: `docs/progress/archive/2026-11-05-guides4.md`.
 
 ## How a session updates this page
 

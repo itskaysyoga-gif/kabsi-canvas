@@ -6,7 +6,6 @@ import type { Industry } from "./types";
 // knowledge/kabsi-facts.md. Polish Room, Brighton, is invented (Example).
 export const nailSalon: Industry = {
   slug: "nail-salon",
-  hub: "beauty-and-wellness",
   name: "nail salon",
   plural: "Nail salons",
   finished: true,
@@ -45,6 +44,53 @@ export const nailSalon: Industry = {
       text: "Five days before each bank holiday Kabsi asks: normal hours, closed, or custom. Google keeps them as special hours.",
     },
   ],
+  page: {
+    query: "nail salon Google Business Profile",
+    title: "Nail salon Google Business Profile help | Kabsi",
+    description:
+      "Kabsi looks after your nail salon Google Business Profile: new designs posted, work photos checked, holiday hours asked and a reply for every review.",
+    h1: "Your nail salon on Google, looking polished.",
+    mark: "looking polished.",
+    line: "Kabsi keeps your nail salon Google Business Profile fresh: new designs as posts, photos checked, replies for your yes.",
+    card: "Seasonal designs as posts, photos checked.",
+    answer:
+      "A nail salon Google Business Profile is mostly photos and reviews. Kabsi turns a photo of a new design into a post, checks each photo before it goes to Google, drafts a reply to every review, and asks about holiday hours five days ahead. It also checks your main category every day and tells you when Google shows a different one. You approve every change.",
+    watch: {
+      business: "Polish Room, Brighton",
+      line: "Clients looking for nails expect a nail salon. Kabsi checks your main category against yours every day.",
+      fields: ["Main category", "Opening hours", "Special hours", "Website", "Phone"],
+      what: "Main category",
+      google: "Beauty salon",
+      owner: "Nail salon",
+      message: "Google shows Beauty salon as your main category. You told me Nail salon.",
+    },
+    post: {
+      owner: "Autumn chrome set, done today.",
+      quote: "Our autumn chrome sets are here. Ask for them at your next appointment.",
+    },
+    jobs: [
+      {
+        title: "Seasonal designs, as posts",
+        text: "A photo of the new set and one line become a post for your yes.",
+      },
+      {
+        title: "Work photos, checked",
+        text: "Kabsi tells you when a photo is dark, blurry or too small before it reaches Google.",
+      },
+      {
+        title: "Careful replies",
+        text: "A review about a reaction gets a calm reply that asks the client to get in touch.",
+      },
+    ],
+    nearby: { kind: "salon", term: "nail salon" },
+    ai: {
+      question: "Which nail salon in Brighton does gel extensions on a Sunday?",
+      answer:
+        "Polish Room on Kensington Gardens does gel extensions and opens on Sundays from 11 am.",
+      sources: ["Polish Room's Google profile", "Polish Room's website"],
+    },
+    related: ["hair-salon", "spa-and-massage"],
+  },
   faqs: [
     {
       q: "Will Kabsi change my prices on Google without asking?",
@@ -61,6 +107,10 @@ export const nailSalon: Industry = {
     {
       q: "Can I create a category called 'nail bar'?",
       a: "No. Google does not let a business create its own category. Pick the most specific one from Google's list.",
+    },
+    {
+      q: "Will Kabsi post a client's hands?",
+      a: "Only photos you send it, and only after you approve the post. Send photos of the work, and ask the client first if you like.",
     },
   ],
   guides: ["how-to-choose-your-primary-category", "how-to-reply-to-google-reviews"],
@@ -111,6 +161,5 @@ export const nailSalon: Industry = {
         ],
       },
     ],
-    related: ["hair-salon", "barbershop"],
   },
 };

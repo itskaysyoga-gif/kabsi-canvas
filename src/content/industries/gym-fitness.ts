@@ -1,4 +1,5 @@
 import { PHOTOS } from "@/components/kabsi/photos";
+import { MORE_PHOTOS } from "@/components/kabsi/photos-more";
 import type { Industry } from "./types";
 
 // Content 1: finished from docs/claims/gym-and-fitness.md, approved by lane R on 27 Oct 2026 (brief section 18). Harbour Strength Studio
@@ -6,7 +7,6 @@ import type { Industry } from "./types";
 // DESIGN-PROPOSAL.md. Every fact on this page has a row in the claim sheet; advice and wording are marked there.
 export const gymFitness: Industry = {
   slug: "gym-and-fitness",
-  hub: "fitness-and-sport",
   name: "gym",
   plural: "Gyms and fitness studios",
   finished: true,
@@ -20,7 +20,7 @@ export const gymFitness: Industry = {
     rival2: "Core Box Studio",
     near: ["Near the metro station", "By the towers"],
   },
-  photos: [PHOTOS.gymTraining],
+  photos: [PHOTOS.gymTraining, MORE_PHOTOS.gymTrainingTall],
   focus: "50% 45%",
   searches: [
     "gym",
@@ -136,6 +136,49 @@ export const gymFitness: Industry = {
       text: "Good Friday is 26 March and Easter Monday 29 March in England and Wales. A post says which classes run.",
     },
   ],
+  page: {
+    query: "gym Google Business Profile",
+    title: "Gym Google Business Profile help | Kabsi",
+    description:
+      "Kabsi looks after your gym Google Business Profile: classes and trial weeks as posts, holiday hours asked in time, and a reply to every review for your yes.",
+    h1: "Your gym on Google, in top form.",
+    mark: "in top form.",
+    line: "Kabsi looks after your gym Google Business Profile: classes as posts, holiday hours asked, and replies ready for your yes.",
+    card: "Classes as posts, holiday hours asked ahead.",
+    answer:
+      "A gym Google Business Profile is where people check your hours, photos, classes and reviews. Kabsi turns a new class or trial week into a post with real dates, asks about public holiday hours in time, drafts a reply to every review, and checks your category and hours every day. You approve every change before it reaches Google.",
+    watch: {
+      business: "Harbour Strength Studio, Dubai",
+      line: "Your main category tells people what you are. Kabsi checks it, and your hours, every day.",
+      fields: ["Main category", "Opening hours", "Special hours", "Website", "Phone"],
+      what: "Main category",
+      google: "Sports club",
+      owner: "Gym",
+      message: "Google shows Sports club as your main category. You told me Gym.",
+    },
+    post: {
+      owner: "New 6 am strength class from Sunday. First class free.",
+      quote: "New: a 6 am strength class every weekday from Sunday. Your first class is on us.",
+    },
+    jobs: [
+      { title: "Classes, as posts", text: "A new class with its real dates, ready for your yes." },
+      {
+        title: "Holiday hours, asked ahead",
+        text: "Before each public holiday, Kabsi asks and sets your answer.",
+      },
+      {
+        title: "A reply for every review",
+        text: "Coaches thanked by name only when the review names them.",
+      },
+    ],
+    nearby: { kind: "gym", term: "gym" },
+    ai: {
+      question: "Which gym in Dubai Marina has a 6 am strength class?",
+      answer: "Harbour Strength Studio in Dubai Marina runs a 6 am strength class every weekday.",
+      sources: ["Harbour Strength Studio's Google profile", "Harbour Strength Studio's website"],
+    },
+    related: ["physiotherapy", "spa-and-massage"],
+  },
   faqs: [
     {
       q: "Can Kabsi post my class timetable?",
@@ -152,6 +195,10 @@ export const gymFitness: Industry = {
     {
       q: "Does Kabsi see my members?",
       a: "No. Kabsi has Manager access to your Google profile only. It never connects to your membership system and never receives a member's number.",
+    },
+    {
+      q: "Can my head coach approve posts?",
+      a: "On Pro, yes. You choose who can approve replies and posts, and you still see everything.",
     },
   ],
   guides: ["how-to-reply-to-google-reviews", "how-to-set-holiday-hours-on-google"],

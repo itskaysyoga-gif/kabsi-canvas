@@ -1,25 +1,7 @@
-// One content file per industry (brief section 16, item 3). The page component (d8-industry.tsx) only lays these
-// out; every line a reader sees about the trade comes from the trade's own file, written from its own facts.
+// One content file per industry (brief section 16, item 3). The page component (d9-industry.tsx, Industries 2) only lays
+// these out; every line a reader sees about the trade comes from the trade's own file, written from its own facts.
+// Industries 2 (5 Nov 2026): one flat list, no groups (Rashid), so there is no hub field any more.
 import type { Photo } from "@/components/kabsi/photos";
-
-export type HubId =
-  | "beauty-and-wellness"
-  | "food-and-drink"
-  | "health"
-  | "auto"
-  | "home-services"
-  | "hospitality"
-  | "fitness-and-sport"
-  | "retail"
-  | "professional-services";
-
-export type Hub = {
-  id: HubId;
-  name: string;
-  lead: string;
-  /** Wave 2 trades (master plan 30.17 section 2): named, not linked, until their pages exist. */
-  coming: string[];
-};
 
 export type ChatLine = {
   from: "kabsi" | "owner";
@@ -30,7 +12,6 @@ export type ChatLine = {
 
 export type Industry = {
   slug: string;
-  hub: HubId;
   /** Singular, lower case: "Your hair salon on Google." */
   name: string;
   /** "Hair salons", for lists and hubs. */
@@ -57,14 +38,16 @@ export type Industry = {
     /** B and C on the nearby drawing. Example names; kabsi-canvas takes them from the checked points. */
     near: [string, string];
   };
-  /** The first is the hero photo. */
-  photos: [Photo, ...Photo[]];
+  /** Industries 2: the wide photo (3:2, the hero and the /for card) and the tall one (beside the photo to post). */
+  photos: [Photo, Photo];
   /** object-position for the hero crop. */
   focus?: string;
   /** What customers type. Content 1 replaces these with DataForSEO keyword data before a page is indexed. */
   searches: string[];
-  /** The five recurring Google tasks of the trade. */
-  tasks: [Task, Task, Task, Task, Task];
+  /** The five recurring Google tasks of the trade (Content 1; the reading block of the pages that have them). */
+  tasks?: Task[];
+  /** Industries 2: the page on Design 9. Every finished page has it. */
+  page: D9Trade;
 
   /* The rest is written for the finished pages; template pages leave them out and the section hides. */
   categories?: { primary: string; more: string[]; note: string };
@@ -74,7 +57,7 @@ export type Industry = {
   photoTips?: { title: string; text: string }[];
   holidays?: { when: string; text: string }[];
   faqs?: { q: string; a: string }[];
-  /** Two guide slugs from GUIDES (d2-data.ts). */
+  /** Two guide slugs (GUIDE_TITLES); the page links the ones that are public. */
   guides?: [string, string];
   /** Design 8 (Web 4c): the four trades written for their own page. The other pages take the template's defaults. */
   d8?: TradePage;
@@ -102,8 +85,52 @@ export type TradePage = {
   check: { label: string; value: string; tone: "ok" | "warn"; next?: string }[];
   checkText: string;
   guide: { title: string; paras: string[] }[];
-  /** Two related trades, by slug. */
-  related: [string, string];
 };
 
 export type Task = { title: string; text: string };
+
+/**
+ * Industries 2 (master plan 30.32): the Design 9 page of one trade. Every line is the trade's own and is checked against
+ * knowledge/kabsi-facts.md; every business, person and number is an Example.
+ */
+export type D9Trade = {
+  /** The one search the page is written for, in owners' words (COPY.md section 52). */
+  query: string;
+  /** Under 60 characters: "<Trade> Google Business Profile help | Kabsi". */
+  title: string;
+  /** Under 160 characters, with the query once. */
+  description: string;
+  /** The H1: at most 8 words. `mark` is the phrase on the yellow bar, once. */
+  h1: string;
+  mark: string;
+  /** The hero line: at most 20 words. */
+  line: string;
+  /** One short line for the /for card. */
+  card: string;
+  /** The first answer paragraph (search and AI answers read it): what Kabsi does for this trade, with the query once. */
+  answer: string;
+  /** The profile watch Example: one detail Google shows differently from what the owner confirmed. */
+  watch: {
+    business: string;
+    /** At most 20 words. */
+    line: string;
+    /** The details this trade's customers look at first, from the ones Kabsi watches (facts 04, Google Profile). */
+    fields: string[];
+    /** "Saturday" or "Website": what the two boxes compare. */
+    what: string;
+    google: string;
+    owner: string;
+    /** Kabsi's WhatsApp line about it. */
+    message: string;
+  };
+  /** The photo to post Example: what the owner sends with the photo, and the post Kabsi prepares. */
+  post: { owner: string; quote: string };
+  /** Three jobs that come back for this trade: only what Kabsi does today. */
+  jobs: [Task, Task, Task];
+  /** The nearby Example: "Near your <kind> you came up 2nd for '<term>'." */
+  nearby: { kind: string; term: string };
+  /** The AI answer Example with its question. */
+  ai: { question: string; answer: string; sources: [string, string] };
+  /** Two related trades, by slug. */
+  related: [string, string];
+};

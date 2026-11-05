@@ -180,7 +180,7 @@ export const HOME_EXAMPLES: HomeExample[] = [
   {
     id: "hotel",
     label: "Hotel",
-    to: "/for/hospitality",
+    to: "/for",
     linkLabel: "Kabsi for hotels",
     business: "Linden House Hotel",
     photo: PHOTOS.phoneReading,
@@ -209,7 +209,7 @@ export const HOME_EXAMPLES: HomeExample[] = [
   {
     id: "home",
     label: "Home services",
-    to: "/for/home-services",
+    to: "/for",
     linkLabel: "Kabsi for home services",
     business: "Brightline Plumbing",
     photo: PHOTOS.phoneTyping,
@@ -238,7 +238,7 @@ export const HOME_EXAMPLES: HomeExample[] = [
   {
     id: "shop",
     label: "Shop",
-    to: "/for/retail",
+    to: "/for",
     linkLabel: "Kabsi for shops",
     business: "Paper Fern Gifts",
     photo: PHOTOS.phoneShop,

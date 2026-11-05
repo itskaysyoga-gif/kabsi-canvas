@@ -1,6 +1,6 @@
 // The sitemap (Guides 3: a server route, src/routes/sitemap[.]xml.ts, computed on each request). Only the pages that are
-// indexed (Web 2, master plan 30.16 section 4 and 30.17 section 2): template industry pages, the hubs without a finished
-// page, /manager-steps, free check results and the 404 stay out. The guides are added per request, public ones only.
+// indexed (Web 2, master plan 30.16 section 4 and 30.17 section 2): template industry pages, the old group pages (gone,
+// Industries 2), /manager-steps, free check results and the 404 stay out. The guides are added per request, public ones only.
 // tests/sitemap.test.ts keeps this list equal to the routes and the industry content.
 import type { GuideMeta } from "@/content/guides/types";
 import { SITE_URL } from "@/lib/site";

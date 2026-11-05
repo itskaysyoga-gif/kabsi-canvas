@@ -1,11 +1,11 @@
 import { PHOTOS } from "@/components/kabsi/photos";
+import { MORE_PHOTOS } from "@/components/kabsi/photos-more";
 import type { Industry } from "./types";
 
 // Content 1: finished from docs/claims/spa-and-massage.md, approved by lane R on 27 Oct 2026 (brief section 18). Stillwater Spa is
 // invented (Example). Every fact on this page has a row in the claim sheet; advice and wording are marked there.
 export const spaMassage: Industry = {
   slug: "spa-and-massage",
-  hub: "beauty-and-wellness",
   name: "spa",
   plural: "Spas and massage",
   finished: true,
@@ -19,7 +19,7 @@ export const spaMassage: Industry = {
     rival2: "Quiet Hands Massage",
     near: ["Near the beach road", "By the hotel district"],
   },
-  photos: [PHOTOS.massageTherapist, PHOTOS.spaFacial],
+  photos: [PHOTOS.massageTherapist, MORE_PHOTOS.spaFacialTall],
   focus: "50% 50%",
   searches: [
     "spa",
@@ -140,6 +140,50 @@ export const spaMassage: Industry = {
       text: "Monday 30 August in 2027 in England and Wales. A post with your opening hours for the weekend is enough.",
     },
   ],
+  page: {
+    query: "spa Google Business Profile",
+    title: "Spa Google Business Profile help | Kabsi",
+    description:
+      "Kabsi looks after your spa Google Business Profile: treatments clear, calm replies to every review, Eid and holiday hours asked in time, posts for your yes.",
+    h1: "Your spa on Google, calm and current.",
+    mark: "calm and current.",
+    line: "Kabsi keeps your spa Google Business Profile current: treatments clear, holiday hours set, calm replies ready for your yes.",
+    card: "Treatments clear, holiday hours set in time.",
+    answer:
+      "Guests choose a spa from its photos, its treatments and how it answers reviews. Kabsi keeps your spa Google Business Profile current: it drafts a calm reply to every review, asks about Eid and public holiday hours before they come, turns your photos into posts, and checks your details every day. Nothing reaches Google without your yes.",
+    watch: {
+      business: "Stillwater Spa, Dubai",
+      line: "Holiday hours differ from your week. Kabsi asks before each one and checks Google shows what you chose.",
+      fields: ["Opening hours", "Special hours", "Phone", "Website", "Description"],
+      what: "Eid al-Fitr, day 1",
+      google: "Normal hours",
+      owner: "14:00 to 23:00",
+      message: "Google shows normal hours on the first day of Eid. You told me 14:00 to 23:00.",
+    },
+    post: {
+      owner: "New hot stone ritual, 90 minutes.",
+      quote: "New this month: our 90 minute hot stone ritual. Ask at reception or book online.",
+    },
+    jobs: [
+      {
+        title: "Holiday hours, asked ahead",
+        text: "Before Eid and public holidays, Kabsi asks and sets your answer once you say yes.",
+      },
+      { title: "Calm replies", text: "Replies never describe what a treatment does for the body." },
+      {
+        title: "Treatments, as posts",
+        text: "A photo of the room and a line become a post for your yes.",
+      },
+    ],
+    nearby: { kind: "spa", term: "spa" },
+    ai: {
+      question: "Which spa in Jumeirah, Dubai is open late during Ramadan?",
+      answer:
+        "Stillwater Spa in Jumeirah is open until 1 am during Ramadan, with treatments from 60 minutes.",
+      sources: ["Stillwater Spa's Google profile", "Stillwater Spa's website"],
+    },
+    related: ["medical-and-aesthetic-clinic", "nail-salon"],
+  },
   faqs: [
     {
       q: "Can Kabsi say what a treatment does for the body?",
@@ -156,6 +200,10 @@ export const spaMassage: Industry = {
     {
       q: "What if I want to remove Kabsi?",
       a: "You can remove Kabsi any time. On Google: your profile, Business Profile settings, People and access, Kabsi Clients, Remove. Kabsi loses access at once.",
+    },
+    {
+      q: "Can Kabsi reply to a review that complains about a therapist?",
+      a: "Kabsi drafts a calm reply that thanks the guest and asks them to get in touch through the details on your profile. You read it and choose.",
     },
   ],
   guides: ["how-to-reply-to-google-reviews", "how-to-choose-your-primary-category"],

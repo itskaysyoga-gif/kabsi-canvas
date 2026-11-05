@@ -5,7 +5,6 @@ import type { Industry } from "./types";
 // (Example). Every fact on this page has a row in the claim sheet; advice and wording are marked there.
 export const cafe: Industry = {
   slug: "cafe",
-  hub: "food-and-drink",
   name: "cafe",
   plural: "Cafes",
   finished: true,
@@ -19,7 +18,7 @@ export const cafe: Industry = {
     rival2: "The Corner Cup",
     near: ["Near the station", "By the park"],
   },
-  photos: [PHOTOS.cafeBarista, PHOTOS.cafeCounter],
+  photos: [PHOTOS.cafeCounter, PHOTOS.cafeBarista],
   focus: "50% 30%",
   searches: [
     "cafe",
@@ -135,6 +134,53 @@ export const cafe: Industry = {
       text: "Arafah Day on 9 Dhu al-Hijjah and Eid al-Adha on 10 to 12 Dhu al-Hijjah, set by the moon. Kabsi asks five days ahead.",
     },
   ],
+  page: {
+    query: "cafe Google Business Profile",
+    title: "Cafe Google Business Profile help | Kabsi",
+    description:
+      "Kabsi looks after your cafe Google Business Profile: the opening time exact, what is fresh as posts, and a reply to every review, each for your yes.",
+    h1: "Your cafe on Google, open on time.",
+    mark: "open on time.",
+    line: "Kabsi looks after your cafe Google Business Profile: an exact opening time, fresh bakes as posts, replies after the rush.",
+    card: "Opening time exact, fresh bakes as posts.",
+    answer:
+      "Early customers check a cafe Google Business Profile for one thing first: are you open yet. Kabsi checks your opening time every day, turns a photo of what is fresh into a post, writes the posts once the morning rush is over, drafts a reply to every review, and asks about holiday hours in time. You approve each one on WhatsApp.",
+    watch: {
+      business: "Brew Lane Cafe, London",
+      line: "The first customer of the day reads your opening time on Google. Kabsi checks it every day.",
+      fields: ["Opening hours", "Special hours", "Website", "Phone", "Attributes"],
+      what: "Monday opening",
+      google: "08:00",
+      owner: "07:00",
+      message: "Google shows you opening at 08:00 on Monday. You told me 07:00.",
+    },
+    post: {
+      owner: "Pumpkin loaf is back from today.",
+      quote: "Pumpkin loaf is back on the counter from today, while it lasts.",
+    },
+    jobs: [
+      {
+        title: "An exact opening time",
+        text: "Checked every day, so the first customer finds you open.",
+      },
+      {
+        title: "What is fresh, as posts",
+        text: "A photo of today's bake becomes a post, written after the rush.",
+      },
+      {
+        title: "A reply for every review",
+        text: "In the language of the review, ready for your yes.",
+      },
+    ],
+    nearby: { kind: "cafe", term: "cafe" },
+    ai: {
+      question: "Which cafe near Brick Lane, London opens before 8 am?",
+      answer:
+        "Brew Lane Cafe near Brick Lane opens at 7 am on weekdays, with pastries baked that morning.",
+      sources: ["Brew Lane Cafe's Google profile", "Brew Lane Cafe's website"],
+    },
+    related: ["bakery", "restaurant"],
+  },
   faqs: [
     {
       q: "Where should the review QR code go in a cafe?",
@@ -151,6 +197,10 @@ export const cafe: Industry = {
     {
       q: "A customer says they were ill after eating here. What does Kabsi do?",
       a: "It sends the review to you with no draft and a way to reach a person at Kabsi. Nothing is published until you write and approve a reply.",
+    },
+    {
+      q: "Can Kabsi reply to reviews in other languages?",
+      a: "Yes. Each draft is written in the language of the review, and you approve it like any other.",
     },
   ],
   guides: ["google-review-link-and-qr-code", "how-to-set-holiday-hours-on-google"],

@@ -1,5 +1,7 @@
 // Design 9 hero treatment B (master plan 30.24): the H1's second sentence on the Kabsi-yellow bar (the d9-mark utility),
-// once per page, in charcoal. Its own tiny file so every PageHero can use it without loading Home's module.
+// once per page, in charcoal. Its own tiny file so every PageHero can use it without loading Home's module. The bar is
+// the shared Highlight component (highlight.tsx, Industries 2).
+import { Highlight } from "./highlight";
 
 /**
  * "Your business on Google. Taken care of." becomes the lead and the last sentence, which carries the bar; a
@@ -16,7 +18,7 @@ export function D9Title({ text }: { text: string }) {
   if (!first) return <>{text}</>;
   return (
     <>
-      {first} <span className="d9-mark">{second}</span>
+      {first} <Highlight>{second}</Highlight>
     </>
   );
 }

@@ -6,7 +6,7 @@ import { createRouter, rootRouteId } from "@tanstack/react-router";
 import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 import { routeTree } from "../src/routeTree.gen";
-import { HUBS, INDUSTRIES, hubIndexed, industryIndexed } from "../src/content/industries";
+import { INDUSTRIES, OLD_GROUPS, industryIndexed } from "../src/content/industries";
 import { ALL_GUIDES } from "../src/content/guides";
 import { publicGuides } from "../src/content/guides/schedule";
 import { sitemapXml } from "../src/lib/sitemap";
@@ -38,12 +38,12 @@ describe("the sitemap", () => {
       expect(paths, p).toContain(p);
     expect(new Set(paths).size).toBe(paths.length);
   });
-  it("lists the finished industry pages and their hubs, never a template page", () => {
+  it("lists the indexed industry pages, never a template page or an old group page (Industries 2)", () => {
     for (const i of INDUSTRIES)
       expect(paths.includes(`/for/${i.slug}`), i.slug).toBe(industryIndexed(i));
-    for (const h of HUBS) expect(paths.includes(`/for/${h.id}`), h.id).toBe(hubIndexed(h.id));
+    for (const g of OLD_GROUPS) expect(paths, g).not.toContain(`/for/${g}`);
   });
-  it("leaves out the dental clinic page until it has a claim sheet (Fix 1), and counts 40 pages on 5 Nov 2026 (Fix 2 added two guides, Go live 1 added /setup-call, Guides 3 its first guide)", () => {
+  it("leaves out the dental clinic page until it has a claim sheet (Fix 1), and counts 35 pages on 5 Nov 2026 (Industries 2 took out the five group pages)", () => {
     const dental = INDUSTRIES.find((i) => i.slug === "dental-clinic")!;
     let sheet = true;
     try {
@@ -54,7 +54,7 @@ describe("the sitemap", () => {
     // When the sheet lands, drop `indexed: false` from dental-clinic.ts and put the page back in the sitemap.
     expect(industryIndexed(dental)).toBe(sheet);
     expect(paths.includes("/for/dental-clinic")).toBe(sheet);
-    expect(paths).toHaveLength(sheet ? 41 : 40);
+    expect(paths).toHaveLength(sheet ? 36 : 35);
   });
   it("leaves out the pages that are noindex or one visitor's", () => {
     for (const p of paths)
