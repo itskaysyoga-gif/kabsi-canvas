@@ -191,20 +191,19 @@ describe("industry pages (Design 5, Web 2)", () => {
 });
 
 describe("the guide titles the industry pages link", () => {
-  it("are the guides that exist, with their titles", () => {
-    const guides = readFileSync("src/lib/guides.tsx", "utf8");
+  it("are the guides that exist, with their titles (Guides 3: one content file each)", () => {
     for (const [slug, title] of Object.entries(GUIDE_TITLES)) {
-      expect(guides, slug).toContain(`slug: "${slug}"`);
-      expect(guides, slug).toContain(`title: "${title}"`);
+      const guide = readFileSync(`src/content/guides/${slug}.tsx`, "utf8");
+      expect(guide, slug).toContain(`slug: "${slug}"`);
+      expect(guide, slug).toContain(`title: "${title}"`);
     }
   });
 });
 
 describe("the guides' search titles (Go live 1, B-017)", () => {
-  it("are 65 characters or fewer with the brand", async () => {
-    const { GUIDES } = await import("../src/lib/guides");
-    for (const g of GUIDES)
-      expect(`${g.seoTitle ?? g.title} | Kabsi`.length, g.slug).toBeLessThanOrEqual(65);
+  it("are under 60 characters (Guides 3: the brand is added only when it stays under 60)", async () => {
+    const { ALL_GUIDES } = await import("../src/content/guides");
+    for (const g of ALL_GUIDES) expect(g.title.length, g.slug).toBeLessThan(60);
   });
 });
 

@@ -3,7 +3,6 @@
 // Read on the server only (the server functions in src/lib/guides-server.ts, the sitemap and llms.txt routes): the
 // guide page itself loads its one content file on demand (load.ts).
 import type { GuideDoc } from "./types";
-import { LEGACY_GUIDES } from "@/lib/guides";
 
 export const ORDER = [
   "why-is-my-business-not-on-google-maps",
@@ -41,8 +40,6 @@ export const EARLIER = [
 const files = import.meta.glob<{ guide: GuideDoc }>("./*.tsx", { eager: true });
 const bySlug = new Map<string, GuideDoc>();
 for (const mod of Object.values(files)) bySlug.set(mod.guide.slug, mod.guide);
-// An earlier guide not yet moved to its own file comes from src/lib/guides.tsx in the same shape.
-for (const g of LEGACY_GUIDES) if (!bySlug.has(g.slug)) bySlug.set(g.slug, g);
 
 /** Every guide, public or not, in the order: the Guides 3 schedule, then the earlier guides. */
 export const ALL_GUIDES: GuideDoc[] = [...ORDER, ...EARLIER]

@@ -398,7 +398,7 @@ Nobody outside Google can remove a review. Report reviews that break Google's ru
 Readers see that you listen. Kabsi makes it easy by drafting every reply.
 
 **How long does Google take to show my reply?**
-Google checks each reply first, usually within 10 minutes, sometimes longer.
+Google checks each reply first, usually within 10 minutes, and sometimes up to 30 days.
 
 **Can I edit a reply after posting?**
 Yes, on your Google profile. Google lets you edit or delete your reply later.
