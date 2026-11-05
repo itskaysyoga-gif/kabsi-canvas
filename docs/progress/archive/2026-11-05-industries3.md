@@ -6,8 +6,8 @@ The 20 industry pages short, scannable and fully linked. Ran on Opus beside Styl
 
 | Part | PR | What |
 | --- | --- | --- |
-| A | see the session report | The template (d9-industry.tsx): "What people search for" is one answer line, chips and one line; "Your Google profile, as a [trade] owner" two to four cards; the review, categories, holidays and photos groups short cards; Read next with three guides as photo cards (Style 1's guide photos) (getIndustryGuides picks them on the server: the page's picks, then guides that name the page, then the newest) and six related businesses, 2 by 3 on a phone and 3 by 2 from 768 px, with "See every business"; /for 2 columns below 1024 px and 4 from 1024 px; every card grid centred so no card sits alone in a last row. The 20 content files and their claim sheets ("Industries 3" section in each). Each page's own share image (public/og/industries/<slug>.jpg, scripts/industry-og.mjs; og:image and twitter:image). Facts 09, COPY.md 56, DESIGN.md, LATER. |
-| B | docs | PROGRESS, this file, the live checks |
+| A | 403 (merged as 935489e) | The template (d9-industry.tsx): "What people search for" is one answer line, chips and one line; "Your Google profile, as a [trade] owner" two to four cards; the review, categories, holidays and photos groups short cards; Read next with three guides as photo cards (Style 1's guide photos) (getIndustryGuides picks them on the server: the page's picks, then guides that name the page, then the newest) and six related businesses, 2 by 3 on a phone and 3 by 2 from 768 px, with "See every business"; /for 2 columns below 1024 px and 4 from 1024 px; every card grid centred so no card sits alone in a last row. The 20 content files and their claim sheets ("Industries 3" section in each). Each page's own share image (public/og/industries/<slug>.jpg, scripts/industry-og.mjs; og:image and twitter:image). Facts 09, COPY.md 56, DESIGN.md, LATER. |
+| B | this PR | The live checks below |
 
 ## Word counts per page (the rendered main text of the local production build, before and after)
 
@@ -65,3 +65,16 @@ Each fix has a line in its claim sheet ("fixed after the independent check").
 - The `story` and the rest of `d8` in the content files are not shown on any page (dead data kept).
 - Two pages picked two guides with the same photo (Style 1 lets a photo serve two guides); the picks changed and tests/industries3.test.ts now asks three photos for three guides.
 - Several old claim sheet rows (cafe rows 21 and 37) still say "a route to a person at Kabsi"; the pages now follow facts 13 and cite it.
+
+## Tests run (part A)
+
+- `npx tsc --noEmit`: pass. `npm run lint:changed`: exit 0. `npx vitest run`: 109 files, 1210 tests passed (after the last main merge). `npm run build`: pass.
+- Playwright against the local production build (merged with Style 1 and App 5 part A), m390 and d1440 with axe: industries3, public, smoke and check2: 140 passed, 2 skipped. No baseline renewed (the hair salon picture is the hero, which did not change).
+- CI on PR 403 (run 42085586862): every job green, the speed gate included.
+
+## Live (deployment dpl_CVuXEvYkENYo18NsuLSRQQZo4jBu, commit 935489e)
+
+- `KABSI_BASE_URL=https://kabsi.co npx playwright test tests/e2e/industries3.spec.ts --project=m390`: 2 passed. On all 20 live industry pages no paragraph is over 25 words and no card line over 15, each shows 6 related businesses, 3 guides and See every business, and no grid leaves a lone card at 360, 390, 768, 1024, 1280 and 1440 px (/for 2 columns, 4 from 1024 px).
+- Share images: kabsi.co/for/cafe and /for/hair-salon carry og:image and twitter:image `https://kabsi.co/og/industries/<slug>.jpg`, og:image:type image/jpeg, alt "Kabsi. [H1]"; both images answer 200 image/jpeg (68 KB and 65 KB).
+- Vercel web_fetch_vercel_url of the deployment's /for/florist: 200, with florist.jpg as its share image, "Guides for you", "Businesses like yours", "See every business" and "Google categories that fit".
+- Nora's page links: every path in kabsi.co/nora-pages.json (47: 27 guides and 20 industry pages) answers 200 on kabsi.co. Her live page-link evaluation was not run (0 US dollars spent): the 0.10 cap does not cover one cache write of her facts; the LATER row stays open with the cost.
