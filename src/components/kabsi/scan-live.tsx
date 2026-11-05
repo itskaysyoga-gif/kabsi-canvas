@@ -844,7 +844,10 @@ export function LiveResult({
       ...(check?.code ? { check: check.code } : {}),
     });
     track("signup_started", { source: "snapshot" });
-    void navigate({ to: "/login", search: { next: "/start" } as never });
+    // Signed in already (App 4, 30.31 item 1): straight to /start, which claims the kept check; no log in page.
+    const { hasSessionKey } = await import("@/lib/stored-session");
+    if (hasSessionKey()) void navigate({ to: "/start" as never });
+    else void navigate({ to: "/login", search: { next: "/start" } as never });
   };
 
   return (
