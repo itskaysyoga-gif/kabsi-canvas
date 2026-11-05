@@ -18,6 +18,7 @@ import { Route as GetStartedRouteImport } from './routes/get-started'
 import { Route as GoogleProfileCheckRouteImport } from './routes/google-profile-check'
 import { Route as GoogleReviewLinkRouteImport } from './routes/google-review-link'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagerStepsRouteImport } from './routes/manager-steps'
 import { Route as PartnersRouteImport } from './routes/partners'
@@ -25,6 +26,7 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SecurityRouteImport } from './routes/security'
 import { Route as SetupCallRouteImport } from './routes/setup-call'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
@@ -105,6 +107,11 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
   path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -138,6 +145,11 @@ const SecurityRoute = SecurityRouteImport.update({
 const SetupCallRoute = SetupCallRouteImport.update({
   id: '/setup-call',
   path: '/setup-call',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -329,6 +341,7 @@ export interface FileRoutesByFullPath {
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/manager-steps': typeof ManagerStepsRoute
   '/partners': typeof PartnersRoute
@@ -336,6 +349,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/security': typeof SecurityRoute
   '/setup-call': typeof SetupCallRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/app': typeof AuthenticatedAppRouteRouteWithChildren
@@ -381,6 +395,7 @@ export interface FileRoutesByTo {
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/manager-steps': typeof ManagerStepsRoute
   '/partners': typeof PartnersRoute
@@ -388,6 +403,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/security': typeof SecurityRoute
   '/setup-call': typeof SetupCallRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/staff': typeof AuthenticatedStaffRoute
@@ -434,6 +450,7 @@ export interface FileRoutesById {
   '/google-profile-check': typeof GoogleProfileCheckRoute
   '/google-review-link': typeof GoogleReviewLinkRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/manager-steps': typeof ManagerStepsRoute
   '/partners': typeof PartnersRoute
@@ -441,6 +458,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/security': typeof SecurityRoute
   '/setup-call': typeof SetupCallRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteRouteWithChildren
@@ -488,6 +506,7 @@ export interface FileRouteTypes {
     | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
+    | '/llms.txt'
     | '/login'
     | '/manager-steps'
     | '/partners'
@@ -495,6 +514,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/security'
     | '/setup-call'
+    | '/sitemap.xml'
     | '/terms'
     | '/unsubscribe'
     | '/app'
@@ -540,6 +560,7 @@ export interface FileRouteTypes {
     | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
+    | '/llms.txt'
     | '/login'
     | '/manager-steps'
     | '/partners'
@@ -547,6 +568,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/security'
     | '/setup-call'
+    | '/sitemap.xml'
     | '/terms'
     | '/unsubscribe'
     | '/staff'
@@ -592,6 +614,7 @@ export interface FileRouteTypes {
     | '/google-profile-check'
     | '/google-review-link'
     | '/how-it-works'
+    | '/llms.txt'
     | '/login'
     | '/manager-steps'
     | '/partners'
@@ -599,6 +622,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/security'
     | '/setup-call'
+    | '/sitemap.xml'
     | '/terms'
     | '/unsubscribe'
     | '/_authenticated/app'
@@ -646,6 +670,7 @@ export interface RootRouteChildren {
   GoogleProfileCheckRoute: typeof GoogleProfileCheckRoute
   GoogleReviewLinkRoute: typeof GoogleReviewLinkRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   LoginRoute: typeof LoginRoute
   ManagerStepsRoute: typeof ManagerStepsRoute
   PartnersRoute: typeof PartnersRoute
@@ -653,6 +678,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SecurityRoute: typeof SecurityRoute
   SetupCallRoute: typeof SetupCallRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   ATokenRoute: typeof ATokenRoute
@@ -736,6 +762,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -783,6 +816,13 @@ declare module '@tanstack/react-router' {
       path: '/setup-call'
       fullPath: '/setup-call'
       preLoaderRoute: typeof SetupCallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -1101,6 +1141,7 @@ const rootRouteChildren: RootRouteChildren = {
   GoogleProfileCheckRoute: GoogleProfileCheckRoute,
   GoogleReviewLinkRoute: GoogleReviewLinkRoute,
   HowItWorksRoute: HowItWorksRoute,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   LoginRoute: LoginRoute,
   ManagerStepsRoute: ManagerStepsRoute,
   PartnersRoute: PartnersRoute,
@@ -1108,6 +1149,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SecurityRoute: SecurityRoute,
   SetupCallRoute: SetupCallRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   ATokenRoute: ATokenRoute,

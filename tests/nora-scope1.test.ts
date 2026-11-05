@@ -16,7 +16,7 @@ describe("the honest limits line", () => {
   it("is in the facts and in both llms files, word for word", () => {
     expect(facts).toContain(LINE);
     expect(readText("public/llms-full.txt")).toContain(LINE);
-    expect(readText("public/llms.txt")).toContain(LINE);
+    expect(readText("src/content/llms-base.txt")).toContain(LINE);
   });
   it("tells Nora to say not available today, never never, no date, and to offer the free check", () => {
     expect(facts).toMatch(/Say it is \*\*not available today\*\*\. Do not say "never"/);

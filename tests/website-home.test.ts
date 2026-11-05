@@ -266,7 +266,7 @@ describe("the operator, the merchant of record and the social links", () => {
       "src/lib/site.ts",
       "src/lib/faq.ts",
       "knowledge/kabsi-facts.md",
-      "public/llms.txt",
+      "src/content/llms-base.txt",
       "public/llms-full.txt",
       "supabase/functions/_shared/email-layout.ts",
       "supabase/functions/_shared/email/template.ts",

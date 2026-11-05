@@ -24,6 +24,10 @@ export const Route = createFileRoute("/for/$trade")({
         industry: i,
         crumbs: crumbs(crumbsFor(i)),
         indexed: industryIndexed(i),
+        // Guides 3: the public guides that link to this page link back from it (decided on the server).
+        guides: await import("@/lib/guides-server")
+          .then((m) => m.getIndustryGuides({ data: i.slug }))
+          .catch(() => []),
       };
     const h = hub(params.trade);
     if (h)
@@ -64,7 +68,11 @@ export const Route = createFileRoute("/for/$trade")({
     const d = Route.useLoaderData();
     return (
       <SiteShell>
-        {d.kind === "industry" ? <IndustryPage industry={d.industry} /> : <HubPage hub={d.hub} />}
+        {d.kind === "industry" ? (
+          <IndustryPage industry={d.industry} guides={d.guides} />
+        ) : (
+          <HubPage hub={d.hub} />
+        )}
       </SiteShell>
     );
   },
