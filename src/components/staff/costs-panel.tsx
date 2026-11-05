@@ -11,7 +11,7 @@ import { STAFF_CARD, STAFF_H2 } from "./staff-ui";
 //   cost_micros per provider). That function is service role only (20261026110000), so the page adds up the same rows of
 //   ai_visibility_runs, which staff read under RLS. Mock runs cost nothing and are left out, as there.
 
-type ProviderMonth = { provider: string; month: string; calls: number; micros: number };
+export type ProviderMonth = { provider: string; month: string; calls: number; micros: number };
 export type AiSpend = Record<string, { runs: number; micros: number }>;
 
 const PROVIDER: Record<string, string> = {
@@ -25,7 +25,7 @@ const name = (p: string) => PROVIDER[p] ?? p.replace(/_/g, " ");
 export const usd = (micros: number) =>
   `$${(micros / 1_000_000).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-async function providerMonths(): Promise<ProviderMonth[]> {
+export async function providerMonths(): Promise<ProviderMonth[]> {
   const { data, error } = await supabase
     .from("provider_spend" as never)
     .select("provider, month, calls, micros")
@@ -46,7 +46,7 @@ export function sumAiSpend(rows: { provider: string; cost_micros: number | null 
   return out;
 }
 
-async function aiSpend(days: number): Promise<AiSpend> {
+export async function aiSpend(days: number): Promise<AiSpend> {
   const since = new Date(Date.now() - days * 86_400_000).toISOString();
   // PostgREST answers at most 1000 rows a request: read page by page (at most 20 pages).
   const rows: { provider: string; cost_micros: number | null }[] = [];
@@ -166,7 +166,7 @@ function SpendTable({
       aria-label="Costs"
       className="mt-2 overflow-x-auto rounded-inner border border-line"
     >
-      <table className="w-full text-start text-small">
+      <table className="stack-table w-full text-start text-small">
         <thead className="text-text-2">
           <tr>
             <th className="p-3 text-start font-bold">Provider</th>
@@ -177,16 +177,26 @@ function SpendTable({
         <tbody className="divide-y divide-line">
           {rows.map((r) => (
             <tr key={r.label}>
-              <td className="p-3">{r.label}</td>
-              <td className="p-3 text-end tabular-nums">{r.count}</td>
-              <td className="p-3 text-end font-bold tabular-nums">{usd(r.micros)}</td>
+              <th scope="row" className="p-3 text-start font-normal">
+                {r.label}
+              </th>
+              <td data-label={countLabel} className="p-3 text-end tabular-nums">
+                {r.count}
+              </td>
+              <td data-label="Cost" className="p-3 text-end font-bold tabular-nums">
+                {usd(r.micros)}
+              </td>
             </tr>
           ))}
           {total !== undefined && rows.length > 1 ? (
             <tr>
-              <td className="p-3 font-bold">Total</td>
-              <td className="p-3" />
-              <td className="p-3 text-end font-bold tabular-nums">{usd(total)}</td>
+              <th scope="row" className="p-3 text-start font-bold">
+                Total
+              </th>
+              <td className="p-3 max-sm:hidden" />
+              <td data-label="Cost" className="p-3 text-end font-bold tabular-nums">
+                {usd(total)}
+              </td>
             </tr>
           ) : null}
         </tbody>

@@ -36,7 +36,7 @@ export type Operations = {
   webhooks_rejected: Row[];
 };
 
-async function loadOperations(): Promise<Operations> {
+export async function loadOperations(): Promise<Operations> {
   const { data, error } = await supabase.rpc("staff_operations");
   if (error) throw new Error(error.message);
   return data as Operations;

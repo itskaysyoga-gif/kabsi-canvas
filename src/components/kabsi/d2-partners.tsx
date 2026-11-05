@@ -21,6 +21,9 @@ import {
   SectionHead,
   buttonClass,
 } from "./ui";
+import { Marked } from "@/components/kabsi/highlight";
+import { PHOTOS } from "./photos";
+import { SectionPhoto } from "./section-photo";
 
 /* ---------- /partners ---------- */
 
@@ -122,6 +125,7 @@ export function PartnersPage() {
   return (
     <>
       <PageHero
+        mark="25% of every payment."
         hero={{
           ...PARTNERS_HERO,
           line: `${PARTNERS_HERO.line}${WHATSAPP_ON ? " Everything runs on WhatsApp." : ""}`,
@@ -134,12 +138,14 @@ export function PartnersPage() {
       <section aria-labelledby="p-steps" className="border-t border-line bg-surface-1">
         <div className="container-kb section-y">
           <h2 id="p-steps" className="text-h2">
-            How it works
+            <Marked text="How it works" mark="works" />
           </h2>
           <ol className="mt-8 grid gap-6 md:grid-cols-3">
             {STEPS.map((s, i) => (
               <li key={s.title} className="border-t-2 border-text-1 pt-4">
-                <p className="text-label font-bold text-text-2">Step {i + 1}</p>
+                <p className="inline-flex rounded-full bg-kb-yellow px-3 py-1 text-label font-bold text-kb-black">
+                  Step {i + 1}
+                </p>
                 <h3 className="mt-1 text-title">{s.title}</h3>
                 <p className="mt-1 text-body text-text-2">{s.text}</p>
               </li>
@@ -163,10 +169,13 @@ export function PartnersPage() {
       </section>
 
       <section aria-labelledby="p-suits" className="border-t border-line">
-        <div className="container-kb section-y grid gap-10 lg:grid-cols-2 lg:gap-16">
+        <div className="container-kb pt-18 lg:pt-30">
+          <SectionPhoto photo={PHOTOS.salonTablet} />
+        </div>
+        <div className="container-kb grid gap-10 pt-10 pb-18 lg:grid-cols-2 lg:gap-16 lg:pb-30">
           <div>
             <h2 id="p-suits" className="text-h2">
-              Who it suits
+              <Marked text="Who it suits" mark="suits" />
             </h2>
             <ul className="mt-6 divide-y divide-line border-y border-line">
               {SUITS.map((s) => (
@@ -214,7 +223,7 @@ export function PartnersPage() {
       <section aria-labelledby="p-faq" className="border-t border-line">
         <div className="container-kb section-y grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <h2 id="p-faq" className="text-h2">
-            Questions partners ask
+            <Marked text="Questions partners ask" mark="partners ask" />
           </h2>
           <div>
             <Faq items={PARTNER_FAQ} />
@@ -237,7 +246,7 @@ export function PartnersPage() {
         <div className="container-kb section-y grid gap-10 lg:grid-cols-2 lg:gap-16">
           <div>
             <h2 id="p-apply" className="max-w-[40rem] text-h2">
-              Earn 25% of every payment.
+              <Marked text="Earn 25% of every payment." mark="25% of every payment." />
             </h2>
             <p className="mt-4 text-body text-text-2">
               Kabsi Partners opens when card payments open.

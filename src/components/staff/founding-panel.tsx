@@ -88,7 +88,7 @@ export function FoundingPanel({ businesses }: { businesses: Business[] }) {
           aria-label="Founding businesses"
           className="mt-4 overflow-x-auto"
         >
-          <table className="w-full min-w-[34rem] text-start text-small">
+          <table className="stack-table w-full text-start text-small sm:min-w-[34rem]">
             <thead className="text-text-2">
               <tr>
                 <th className="py-1 pe-3 font-medium">Business</th>
@@ -101,13 +101,19 @@ export function FoundingPanel({ businesses }: { businesses: Business[] }) {
             <tbody>
               {o.members.map((m) => (
                 <tr key={m.application_id} className="border-t border-line">
-                  <td className="py-2 pe-3">{m.business}</td>
-                  <td className="py-2 pe-3">{m.day ?? "waiting for access"}</td>
-                  <td className="py-2 pe-3">{m.approvals_7d}</td>
-                  <td className="py-2 pe-3">
+                  <th scope="row" className="py-2 pe-3 text-start font-bold">
+                    {m.business}
+                  </th>
+                  <td data-label="Day" className="py-2 pe-3">
+                    {m.day ?? "waiting for access"}
+                  </td>
+                  <td data-label="Approvals, 7 days" className="py-2 pe-3">
+                    {m.approvals_7d}
+                  </td>
+                  <td data-label="Weeks with an approval" className="py-2 pe-3">
                     {m.weeks ? `${m.weeks_with_approval} of ${m.weeks}` : "-"}
                   </td>
-                  <td className="py-2">
+                  <td data-label="Plan" className="py-2">
                     {m.paying ? "Paying" : m.ends_at ? `Free until ${fmtDate(m.ends_at)}` : "-"}
                   </td>
                 </tr>

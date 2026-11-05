@@ -7,6 +7,7 @@
 // 3,000 a day in total. The knowledge base is the public /llms-full.txt (same facts the site shows),
 // cached here; the rules below and the knowledge base are sent as a cached prompt prefix (prompt caching),
 // so each turn only pays full price for the new messages.
+import { serve } from "../_shared/kabsi.ts";
 import { clientIp } from "../_shared/client-ip.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 import {
@@ -314,7 +315,7 @@ ${row("Passed to a person", c.status === "handoff" ? `Yes (${c.handoff_reason ??
   return sent;
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.chat).
   const capped = await capBody(req, BODY_LIMITS.chat, CORS);

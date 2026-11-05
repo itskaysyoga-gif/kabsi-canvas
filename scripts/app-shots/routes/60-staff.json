@@ -1,1 +1,37 @@
-[{ "path": "/staff", "state": "staff-admin", "name": "staff" }]
+[
+  {
+    "path": "/staff",
+    "state": "staff-admin",
+    "name": "staff"
+  },
+  {
+    "path": "/staff/businesses",
+    "state": "staff-admin",
+    "name": "staff-businesses"
+  },
+  {
+    "path": "/staff/conversations",
+    "state": "staff-admin",
+    "name": "staff-conversations"
+  },
+  {
+    "path": "/staff/programs",
+    "state": "staff-admin",
+    "name": "staff-programs"
+  },
+  {
+    "path": "/staff/system",
+    "state": "staff-admin",
+    "name": "staff-system"
+  },
+  {
+    "path": "/staff/costs",
+    "state": "staff-admin",
+    "name": "staff-costs"
+  },
+  {
+    "path": "/staff/settings",
+    "state": "staff-admin",
+    "name": "staff-settings"
+  }
+]

@@ -41,6 +41,7 @@ import {
   D9_SUPPORT_TITLE,
   D9_WATCH,
 } from "./d9-data";
+import { Marked } from "@/components/kabsi/highlight";
 
 /** Design 9's section rhythm on Home: py-10 on phones (keeps Home under 9,200 px at 390), 18 from 640 px, 28 from 1024 px. */
 const sectionY = "py-10 sm:py-18 lg:py-28";
@@ -59,7 +60,7 @@ function ProfileWatch() {
       >
         <div>
           <h2 id="watch-h" className="text-h2">
-            {w.title}
+            <Marked text={w.title} mark="you choose." />
           </h2>
           <p className="mt-4 max-w-[34rem] text-body text-text-2 sm:text-lead">{w.line}</p>
         </div>
@@ -237,7 +238,7 @@ function SupportRow() {
     <section aria-labelledby="support-h" className="border-b border-line bg-surface-1">
       <div className="container-kb py-10 sm:py-16 lg:py-20">
         <h2 id="support-h" className="text-h2">
-          {D9_SUPPORT_TITLE}
+          <Marked text={D9_SUPPORT_TITLE} mark="a weekly report." />
         </h2>
         <div className="mt-6 grid gap-6 sm:mt-8 md:grid-cols-[1fr_1fr_1.2fr] md:gap-8">
           {D9_SUPPORT.map((s) => {
@@ -290,7 +291,7 @@ function WhereYouShowUp() {
       <div className={cn("container-kb", sectionY)}>
         <div className="max-w-[40rem]">
           <h2 id="show-h" className="text-h2">
-            {s.title}
+            <Marked text={s.title} mark="show up" />
           </h2>
           <p className="mt-3 text-body text-text-2">{s.line}</p>
         </div>
@@ -451,7 +452,7 @@ function D9Control() {
       <div className={cn("container-kb grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16", sectionY)}>
         <div>
           <h2 id="control-h" className="text-h2">
-            You stay in control.
+            <Marked text="You stay in control." mark="in control." />
           </h2>
           <SiteLink to="/security" className={cn(d9LinkCls, "mt-3 text-body")}>
             See how to remove Kabsi on Security
@@ -508,7 +509,7 @@ function D9PickBusiness() {
       <div className={cn("container-kb", sectionY)}>
         <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
           <h2 id="pick-h" className="text-h2">
-            Pick your business
+            <Marked text="Pick your business" mark="your business" />
           </h2>
           <SiteLink to="/for" className={cn(d9LinkCls, "text-body")}>
             Every kind of business
@@ -548,7 +549,7 @@ function D9PickBusiness() {
 /* ---------- Pricing preview (the founding price line only while founding places remain) ---------- */
 
 /** Industries 2: an industry page puts the headline's key phrase on the yellow bar. */
-export function PricingPreview({ marked = false }: { marked?: boolean } = {}) {
+export function PricingPreview({ marked = true }: { marked?: boolean } = {}) {
   const left = useFoundingLeft();
   return (
     <section aria-labelledby="plans-h" className="border-t border-line">
@@ -675,7 +676,7 @@ function D9Questions() {
     <section aria-labelledby="faq-h" className="border-t border-line">
       <div className={cn("container-kb grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16", sectionY)}>
         <h2 id="faq-h" className="text-h2">
-          Questions owners ask
+          <Marked text="Questions owners ask" mark="owners ask" />
         </h2>
         <Faq items={HOME_FAQ.map((i) => FAQ[i - 1]!)} />
       </div>

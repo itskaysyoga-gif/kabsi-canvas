@@ -3,12 +3,13 @@
 // The browser sends the country it applied (read on kabsi.co from the network) and its time zone; the rule is worked
 // out here again and the exact wording stored is this function's own copy for that version, never text from the browser.
 // One row per choice. The signed-in user is attached when the call carries their session. No IP, email or name is kept.
+import { serve } from "../_shared/kabsi.ts";
 import { clientIp } from "../_shared/client-ip.ts";
 import { admin, captureError, CORS, currentUser, fail, json, rateLimit, sha256Hex } from "../_shared/kabsi.ts";
 import { type ConsentInput, consentRow } from "../_shared/consent-row.ts";
 import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.small).
   const capped = await capBody(req, BODY_LIMITS.small, CORS);

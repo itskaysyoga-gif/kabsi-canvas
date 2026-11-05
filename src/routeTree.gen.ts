@@ -31,7 +31,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
-import { Route as AuthenticatedStaffRouteImport } from './routes/_authenticated/staff'
+import { Route as AuthenticatedStaffRouteRouteImport } from './routes/_authenticated/staff/route'
 import { Route as AuthenticatedStartRouteImport } from './routes/_authenticated/start'
 import { Route as ATokenRouteImport } from './routes/a.$token'
 import { Route as ActivateCodeRouteImport } from './routes/activate.$code'
@@ -62,6 +62,8 @@ import { Route as AuthenticatedAppReviewsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app/settings'
 import { Route as AuthenticatedAppShieldRouteImport } from './routes/_authenticated/app/shield'
 import { Route as AuthenticatedAppTeamRouteImport } from './routes/_authenticated/app/team'
+import { Route as AuthenticatedStaffIndexRouteImport } from './routes/_authenticated/staff/index'
+import { Route as AuthenticatedStaffPageRouteImport } from './routes/_authenticated/staff/$page'
 import { Route as AuthenticatedStartResumeCodeRouteImport } from './routes/_authenticated/start_.resume.$code'
 
 const IndexRoute = IndexRouteImport.update({
@@ -173,7 +175,7 @@ const AuthenticatedAppRouteRoute = AuthenticatedAppRouteRouteImport.update({
   path: '/app',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedStaffRoute = AuthenticatedStaffRouteImport.update({
+const AuthenticatedStaffRouteRoute = AuthenticatedStaffRouteRouteImport.update({
   id: '/staff',
   path: '/staff',
   getParentRoute: () => AuthenticatedRouteRoute,
@@ -331,6 +333,16 @@ const AuthenticatedAppTeamRoute = AuthenticatedAppTeamRouteImport.update({
   path: '/team',
   getParentRoute: () => AuthenticatedAppRouteRoute,
 } as any)
+const AuthenticatedStaffIndexRoute = AuthenticatedStaffIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedStaffRouteRoute,
+} as any)
+const AuthenticatedStaffPageRoute = AuthenticatedStaffPageRouteImport.update({
+  id: '/$page',
+  path: '/$page',
+  getParentRoute: () => AuthenticatedStaffRouteRoute,
+} as any)
 const AuthenticatedStartResumeCodeRoute =
   AuthenticatedStartResumeCodeRouteImport.update({
     id: '/start_/resume/$code',
@@ -360,7 +372,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/app': typeof AuthenticatedAppRouteRouteWithChildren
-  '/staff': typeof AuthenticatedStaffRoute
+  '/staff': typeof AuthenticatedStaffRouteRouteWithChildren
   '/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
@@ -390,7 +402,9 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/shield': typeof AuthenticatedAppShieldRoute
   '/app/team': typeof AuthenticatedAppTeamRoute
+  '/staff/$page': typeof AuthenticatedStaffPageRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/staff/': typeof AuthenticatedStaffIndexRoute
   '/start/resume/$code': typeof AuthenticatedStartResumeCodeRoute
 }
 export interface FileRoutesByTo {
@@ -414,7 +428,6 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
-  '/staff': typeof AuthenticatedStaffRoute
   '/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
@@ -444,7 +457,9 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/shield': typeof AuthenticatedAppShieldRoute
   '/app/team': typeof AuthenticatedAppTeamRoute
+  '/staff/$page': typeof AuthenticatedStaffPageRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/staff': typeof AuthenticatedStaffIndexRoute
   '/start/resume/$code': typeof AuthenticatedStartResumeCodeRoute
 }
 export interface FileRoutesById {
@@ -471,7 +486,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteRouteWithChildren
-  '/_authenticated/staff': typeof AuthenticatedStaffRoute
+  '/_authenticated/staff': typeof AuthenticatedStaffRouteRouteWithChildren
   '/_authenticated/start': typeof AuthenticatedStartRoute
   '/a/$token': typeof ATokenRoute
   '/activate/$code': typeof ActivateCodeRoute
@@ -501,7 +516,9 @@ export interface FileRoutesById {
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
   '/_authenticated/app/shield': typeof AuthenticatedAppShieldRoute
   '/_authenticated/app/team': typeof AuthenticatedAppTeamRoute
+  '/_authenticated/staff/$page': typeof AuthenticatedStaffPageRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/staff/': typeof AuthenticatedStaffIndexRoute
   '/_authenticated/start_/resume/$code': typeof AuthenticatedStartResumeCodeRoute
 }
 export interface FileRouteTypes {
@@ -558,7 +575,9 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/shield'
     | '/app/team'
+    | '/staff/$page'
     | '/app/'
+    | '/staff/'
     | '/start/resume/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -582,7 +601,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/unsubscribe'
-    | '/staff'
     | '/start'
     | '/a/$token'
     | '/activate/$code'
@@ -612,7 +630,9 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/shield'
     | '/app/team'
+    | '/staff/$page'
     | '/app'
+    | '/staff'
     | '/start/resume/$code'
   id:
     | '__root__'
@@ -668,7 +688,9 @@ export interface FileRouteTypes {
     | '/_authenticated/app/settings'
     | '/_authenticated/app/shield'
     | '/_authenticated/app/team'
+    | '/_authenticated/staff/$page'
     | '/_authenticated/app/'
+    | '/_authenticated/staff/'
     | '/_authenticated/start_/resume/$code'
   fileRoutesById: FileRoutesById
 }
@@ -870,7 +892,7 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated/staff'
       path: '/staff'
       fullPath: '/staff'
-      preLoaderRoute: typeof AuthenticatedStaffRouteImport
+      preLoaderRoute: typeof AuthenticatedStaffRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/start': {
@@ -1083,6 +1105,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppTeamRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/staff/': {
+      id: '/_authenticated/staff/'
+      path: '/'
+      fullPath: '/staff/'
+      preLoaderRoute: typeof AuthenticatedStaffIndexRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
+    }
+    '/_authenticated/staff/$page': {
+      id: '/_authenticated/staff/$page'
+      path: '/$page'
+      fullPath: '/staff/$page'
+      preLoaderRoute: typeof AuthenticatedStaffPageRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
+    }
     '/_authenticated/start_/resume/$code': {
       id: '/_authenticated/start_/resume/$code'
       path: '/start/resume/$code'
@@ -1134,16 +1170,32 @@ const AuthenticatedAppRouteRouteWithChildren =
     AuthenticatedAppRouteRouteChildren,
   )
 
+interface AuthenticatedStaffRouteRouteChildren {
+  AuthenticatedStaffPageRoute: typeof AuthenticatedStaffPageRoute
+  AuthenticatedStaffIndexRoute: typeof AuthenticatedStaffIndexRoute
+}
+
+const AuthenticatedStaffRouteRouteChildren: AuthenticatedStaffRouteRouteChildren =
+  {
+    AuthenticatedStaffPageRoute: AuthenticatedStaffPageRoute,
+    AuthenticatedStaffIndexRoute: AuthenticatedStaffIndexRoute,
+  }
+
+const AuthenticatedStaffRouteRouteWithChildren =
+  AuthenticatedStaffRouteRoute._addFileChildren(
+    AuthenticatedStaffRouteRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRouteRoute: typeof AuthenticatedAppRouteRouteWithChildren
-  AuthenticatedStaffRoute: typeof AuthenticatedStaffRoute
+  AuthenticatedStaffRouteRoute: typeof AuthenticatedStaffRouteRouteWithChildren
   AuthenticatedStartRoute: typeof AuthenticatedStartRoute
   AuthenticatedStartResumeCodeRoute: typeof AuthenticatedStartResumeCodeRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRouteRoute: AuthenticatedAppRouteRouteWithChildren,
-  AuthenticatedStaffRoute: AuthenticatedStaffRoute,
+  AuthenticatedStaffRouteRoute: AuthenticatedStaffRouteRouteWithChildren,
   AuthenticatedStartRoute: AuthenticatedStartRoute,
   AuthenticatedStartResumeCodeRoute: AuthenticatedStartResumeCodeRoute,
 }

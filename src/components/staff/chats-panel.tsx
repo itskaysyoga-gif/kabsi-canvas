@@ -5,9 +5,10 @@ import { fmtDateTime } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
+import { ChoiceChips } from "@/components/kabsi/d3-account";
 import { Button, STAFF_CARD, STAFF_H2 } from "./staff-ui";
 
-type Chat = {
+export type Chat = {
   id: string;
   updated_at: string;
   surface: string;
@@ -50,27 +51,40 @@ const INTENTS = ["buyer", "existing_customer", "partner", "support", "researchin
 const TEMPS = ["hot", "warm", "cold"];
 const nice = (v: string | null) => (v ? v.replace(/_/g, " ") : "-");
 
+export type ChatFilter = {
+  country: string;
+  category: string;
+  intent: string;
+  temp: string;
+  days: number;
+};
+/** The staff_chats read, the same for this panel and the Today page (App 5). */
+export const chatsKey = (f: ChatFilter) =>
+  ["staff-chats", f.country, f.category, f.intent, f.temp, f.days] as const;
+export async function loadChats(f: ChatFilter): Promise<Chat[]> {
+  const { data, error } = await supabase.rpc("staff_chats", {
+    p_country: f.country || null,
+    p_category: f.category || null,
+    p_intent: f.intent || null,
+    p_temperature: f.temp || null,
+    p_days: f.days,
+    p_limit: 300,
+  });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as Chat[];
+}
+export const ALL_CHATS: ChatFilter = { country: "", category: "", intent: "", temp: "", days: 30 };
+
 export function ChatsPanel() {
   const [country, setCountry] = useState("");
   const [category, setCategory] = useState("");
   const [intent, setIntent] = useState("");
   const [temp, setTemp] = useState("");
   const [days, setDays] = useState(30);
-  const chats = useQuery({
-    queryKey: ["staff-chats", country, category, intent, temp, days],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc("staff_chats", {
-        p_country: country || null,
-        p_category: category || null,
-        p_intent: intent || null,
-        p_temperature: temp || null,
-        p_days: days,
-        p_limit: 300,
-      });
-      if (error) throw new Error(error.message);
-      return (data ?? []) as Chat[];
-    },
-  });
+  const [who, setWho] = useState<"all" | "handoff">("all");
+  const filter = { country, category, intent, temp, days };
+  const chats = useQuery({ queryKey: chatsKey(filter), queryFn: () => loadChats(filter) });
+  const shown = (chats.data ?? []).filter((c) => who === "all" || c.status === "handoff");
   const stats = useQuery({
     queryKey: ["staff-chat-stats", days],
     queryFn: async () => {
@@ -188,39 +202,43 @@ export function ChatsPanel() {
             </option>
           ))}
         </select>
-        <select
-          aria-label="Lead"
-          className={select}
-          value={temp}
-          onChange={(e) => setTemp(e.target.value)}
-        >
-          <option value="">All leads</option>
-          {TEMPS.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label="Period"
-          className={select}
-          value={days}
-          onChange={(e) => setDays(Number(e.target.value))}
-        >
-          {[7, 30, 90, 365].map((d) => (
-            <option key={d} value={d}>
-              Last {d} days
-            </option>
-          ))}
-        </select>
+      </div>
+      <div className="mt-4 grid gap-4 md:grid-cols-3">
+        <ChoiceChips
+          name="chat-who"
+          legend="Show"
+          value={who}
+          onChange={(v) => setWho(v as "all" | "handoff")}
+          options={[
+            { value: "all", label: "Every chat" },
+            { value: "handoff", label: "Needs a person" },
+          ]}
+        />
+        <ChoiceChips
+          name="chat-lead"
+          legend="Lead"
+          value={temp || "any"}
+          onChange={(v) => setTemp(v === "any" ? "" : v)}
+          options={[{ value: "any", label: "All" }, ...TEMPS.map((t) => ({ value: t, label: t }))]}
+        />
+        <ChoiceChips
+          name="chat-days"
+          legend="Period"
+          value={String(days)}
+          onChange={(v) => setDays(Number(v))}
+          options={[7, 30, 90, 365].map((d) => ({ value: String(d), label: `${d} days` }))}
+        />
       </div>
 
       {chats.isError ? <p className="mt-3 text-bad">{String(chats.error.message)}</p> : null}
       <div className="mt-4 space-y-3">
-        {chats.data && chats.data.length === 0 ? (
-          <p className="text-text-2">No chats match.</p>
+        {chats.isLoading ? <p className="text-text-2">Loading chats</p> : null}
+        {chats.data && shown.length === 0 ? (
+          <p className="text-text-2">
+            {who === "handoff" ? "Nobody is waiting for a person." : "No chats match."}
+          </p>
         ) : null}
-        {chats.data?.map((c) => (
+        {shown.map((c) => (
           <details
             key={c.id}
             className="rounded-inner border border-line bg-surface-1 p-4 text-small"

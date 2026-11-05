@@ -11,6 +11,7 @@ import { RemoveKabsi } from "./d5-access";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { Closing } from "./closing";
 import { SECURITY_HERO } from "./hero-lines";
+import { Marked } from "@/components/kabsi/highlight";
 
 const MAIL = (
   <a className="font-semibold underline underline-offset-4" href={`mailto:${CONTACT_EMAIL}`}>
@@ -90,7 +91,7 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div>
       <h3 className="text-h3">{title}</h3>
-      <div className="mt-3 space-y-3 text-body text-text-2 [&_a]:font-semibold [&_a]:text-text-1 [&_a]:underline [&_a]:underline-offset-4 [&_strong]:text-text-1">
+      <div className="mt-3 space-y-3 text-body text-text-2 [&_li]:marker:text-text-1 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:ps-5 [&_a]:font-semibold [&_a]:text-text-1 [&_a]:underline [&_a]:underline-offset-4 [&_strong]:text-text-1">
         {children}
       </div>
     </div>
@@ -100,12 +101,12 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
 export function D8Security() {
   return (
     <>
-      <PageHero hero={SECURITY_HERO} visual={<CanCannotVisual />} />
+      <PageHero mark="stays yours." hero={SECURITY_HERO} visual={<CanCannotVisual />} />
 
       <section aria-labelledby="sum-h" className="border-t border-line bg-surface-1">
         <div className="container-kb section-y grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <h2 id="sum-h" className="text-h2">
-            In plain words
+            <Marked text="In plain words" mark="plain words" />
           </h2>
           <ul className="divide-y divide-line border-y border-line">
             {SUMMARY.map((s) => (
@@ -125,7 +126,7 @@ export function D8Security() {
       >
         <div className="container-kb section-y">
           <h2 id="manager-h" className="text-h2">
-            Manager access, and how to remove it
+            <Marked text="Manager access, and how to remove it" mark="how to remove it" />
           </h2>
           <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-16">
             <Block title="What a Manager can do">
@@ -136,27 +137,34 @@ export function D8Security() {
                 </a>
                 . You stay the owner.
               </p>
-              <p>
-                Kabsi reads new reviews, prepares reply drafts, and posts only what you approved.
-                Every reply, post, photo and change shows you the exact text first and waits for
-                your tap. Kabsi cannot post on its own. Every Google action happens inside Kabsi,
-                for the business that asked. Kabsi gives no one else, partners included, a way to
-                read or write your Google data.
-              </p>
+              <ul>
+                <li>Kabsi reads new reviews and prepares reply drafts.</li>
+                <li>Every reply, post, photo and change shows you the exact text first.</li>
+                <li>Kabsi posts only what you approved. It cannot post on its own.</li>
+                <li>Every Google action happens inside Kabsi, for the business that asked.</li>
+                <li>
+                  No one else, partners included, gets a way to read or write your Google data.
+                </li>
+              </ul>
             </Block>
             <Block title="Disconnect Kabsi">
+              <ul>
+                <li>
+                  In Kabsi, open <strong>Settings</strong> and choose{" "}
+                  <strong>Disconnect Kabsi from Google</strong>.
+                </li>
+                <li>Only the signed-in owner can do it.</li>
+                <li>Kabsi stops at once and cancels what was waiting for your approval.</li>
+                <li>Then it removes its own Manager access, and an email confirms it.</li>
+                <li>
+                  If Google blocks that, our team does it within 7 business days, with the date.
+                </li>
+              </ul>
+              <p>You can also do it on Google, without asking us.</p>
               <p>
-                In Kabsi, open <strong>Settings</strong> and choose{" "}
-                <strong>Disconnect Kabsi from Google</strong>. Only the signed-in owner can do it.
-                Kabsi stops at once, cancels what was waiting for your approval and then removes its
-                own Manager access. You get an email that confirms it. If Google does not let Kabsi
-                remove itself, our team does it within 7 business days and tells you the date.
-              </p>
-              <p>
-                You can also do it on Google, without asking us. Open{" "}
-                <strong>Business Profile settings</strong>, choose{" "}
+                Open <strong>Business Profile settings</strong>, choose{" "}
                 <strong>People and access</strong>, then remove <strong>{KABSI_GROUP_NAME}</strong>{" "}
-                (group ID {KABSI_GROUP_ID}). Kabsi loses access to that profile at once.
+                (group ID {KABSI_GROUP_ID}). Kabsi loses access at once.
               </p>
             </Block>
           </div>
@@ -167,40 +175,47 @@ export function D8Security() {
       <section aria-labelledby="data-h" className="border-t border-line bg-surface-1">
         <div className="container-kb section-y">
           <h2 id="data-h" className="text-h2">
-            Your data, your sign-in, and who to ask
+            <Marked text="Your data, your sign-in, and who to ask" mark="who to ask" />
           </h2>
           <div className="mt-8 grid gap-10 md:grid-cols-2 md:gap-12">
             <Block title="Notice of any change">
               <p>
-                When Kabsi accepts your Manager invitation, or anything about its access changes, we
-                email you within 48 hours to say what changed and how to remove Kabsi. This is
-                separate from the notices Google sends.
+                When Kabsi accepts your Manager invitation, or its access changes, we email you
+                within 48 hours.
+              </p>
+              <p>
+                The email says what changed and how to remove Kabsi. Google's own notices are
+                separate.
               </p>
             </Block>
             <Block title="How you sign in, and what we never ask">
-              <p>
-                You sign in with a one-time code sent to your email. There are no passwords. Kabsi
-                never asks for your Google password or a Google verification code, and does not
-                store a Google token of yours. Kabsi's own access to Google is held on our servers
-                and never reaches your browser or anyone else's.
-              </p>
-              <p>
-                Links in Kabsi emails work once, expire after 72 hours and belong to the person they
-                were sent to. Opening one never does anything by itself. Profile changes and reviews
-                that need care also need that person signed in.
-              </p>
+              <ul>
+                <li>You sign in with a one-time code sent to your email. No passwords.</li>
+                <li>Kabsi never asks for your Google password or a Google verification code.</li>
+                <li>Kabsi stores no Google token of yours.</li>
+                <li>Kabsi's own Google access stays on our servers, never in anyone's browser.</li>
+                <li>Links in Kabsi emails work once and expire after 72 hours.</li>
+                <li>A link belongs to its recipient. Opening one does nothing by itself.</li>
+                <li>Profile changes and reviews that need care also need that person signed in.</li>
+              </ul>
             </Block>
             <Block title="How your data is handled">
+              <ul>
+                <li>Kabsi's database is in Frankfurt. Data is encrypted in transit.</li>
+                <li>Each business's data is separated at the database level.</li>
+                <li>Only its members, and Kabsi staff when helping you, can read it.</li>
+                <li>
+                  Review text and reviewer names from Google go 30 days after Google last returned
+                  them.
+                </li>
+                <li>Kabsi's own Google account uses Google's Advanced Protection Program.</li>
+                <li>We never sell Google data, advertise with it or train AI models on it.</li>
+                <li>
+                  Staff read it only with your consent, for security, or when the law requires.
+                </li>
+              </ul>
               <p>
-                Kabsi's database is in Frankfurt. The privacy policy lists every provider. Data is
-                encrypted in transit. Each business's data is separated at the database level, so
-                only its members, and Kabsi staff when helping you, can read it. Review text and
-                reviewer names that come from Google are removed 30 days after Google last returned
-                them. Kabsi's own Google account is protected with Google's Advanced Protection
-                Program. We never sell Google data, use it for advertising or use it to train AI
-                models. People at Kabsi read it only with your consent, to keep Kabsi secure, or
-                when the law requires it. Read the <Link to="/privacy">privacy policy</Link> for the
-                full list of what we keep and who helps us run Kabsi.
+                The <Link to="/privacy">privacy policy</Link> lists every provider and what we keep.
               </p>
             </Block>
             <Block title="Payments, and who to ask">
@@ -216,9 +231,13 @@ export function D8Security() {
           <h2 id="never-h" className="text-h2">
             What Kabsi never does
           </h2>
-          <ul className="grid gap-3 sm:grid-cols-2">
+          {/* Style 1 (30.33 item 2): five cards never leave one alone in the last row; it is centred. */}
+          <ul className="flex flex-wrap justify-center gap-3">
             {NEVER.map((n) => (
-              <li key={n} className="rounded-card border border-line p-4 text-body font-semibold">
+              <li
+                key={n}
+                className="w-full rounded-card border border-line p-4 text-body font-semibold sm:w-[calc((100%-0.75rem)/2)]"
+              >
                 {n}
               </li>
             ))}

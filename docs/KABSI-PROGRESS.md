@@ -9,10 +9,11 @@ One page, under 10 KB. Updated 5 Nov 2026, Industries 3. The history (tasks, Aft
 - Go live 1 (5 Nov 2026, 30.28, R-108): WhatsApp for owners, the nearby check and the AI answer are on; card payments stay closed. Detail: `docs/progress/archive/2026-11-05-golive1.md`.
 - Scan 2 and Copy 3 (5 Nov 2026, PRs 369 to 376): the free check names the town and country; the Go live 1 audit's copy decisions are on kabsi.co. Detail: `docs/progress/archive/2026-11-05-scan2.md`, `2026-11-05-copy3.md`.
 - App 4 (5 Nov 2026, 30.31, R-111, PRs 378 to 388): Dashboard in the header, sign-ins last 30 days (staff pages 12 hours), /login for every case, pages open at the top, the signed-in audit. Detail: `docs/progress/archive/2026-11-05-app4.md`.
-- Guides 4 (5 Nov 2026, 30.32, R-112, PRs 390 to 394): all 27 guides public; Nora knows every public page (kabsi.co/nora-pages.json); lastmod, IndexNow, the vercel.app redirect. Detail: `docs/progress/archive/2026-11-05-guides4.md`.
+- Guides 4 (5 Nov 2026, 30.32, R-112, PRs 390, 391, 393, 394): all 27 guides public; Nora knows the public pages; real lastmod, IndexNow, the vercel.app redirect. Detail: `docs/progress/archive/2026-11-05-guides4.md`.
 - Fix 3 (5 Nov 2026, PRs 379, 381, 383): the Coach reads Google by its location name (KABSI-EDGE-J stopped); a name guard; one reload after a deploy; a nightly kabsi.co check. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
-- Industries 2 (5 Nov 2026, PRs 392, 395, 398): /for is one list; 20 industry pages on Design 9. Detail: `docs/progress/archive/2026-11-05-industries2.md`.
-- Industries 3 (5 Nov 2026, 30.33 item 2): industry pages as short cards, six related businesses and three guides each, own share images. Detail: `docs/progress/archive/2026-11-05-industries3.md`.
+- Industries 2 (5 Nov 2026, 30.32, PRs 392, 395, part C): /for is one list; 20 industry pages on Design 9; old group pages 301 to /for. Detail: `docs/progress/archive/2026-11-05-industries2.md`.
+- Style 1 (5 Nov 2026, 30.33, R-113, PRs 399, 400, 401, 404): every guide with a library photo (page, card, share image) and a filtered list; the yellow bar on every public headline, photos on Pricing, About, Founding 25 and Partners, Security in short lines; Sentry gets nothing from automated runs and a repeated Edge error once per 10 minutes. Detail: `docs/progress/archive/2026-11-05-style1.md`.
+- Industries 3 (PR 403): short industry pages. Detail: `docs/progress/archive/2026-11-05-industries3.md`.
 - No customer is live yet. Before the first Meta ad: the DataForSEO top-up and a nearby check on a real business. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -44,13 +45,13 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
 - V3 heads-up (25 Oct): on the Yawmiyati phone tap Skip on the old photo message, never Yes, and reply No to the monthly question. Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
-- Fix 3: Cloudflare, Turnstile, the widget, Hostname management: add `kabsi-canvas.vercel.app` (KABSI-WEB-9).
 - Check 2: on a phone, pick 3 businesses at kabsi.co/scan, then read today's `places_usage` (autocomplete above 0, details 3 or more); add a Google Cloud quota alert for Places Autocomplete.
 - UX 1: after the deploy, `POST /visibility/terms` once (two DataForSEO calls, about 0.15 USD) and the read-back in the UX 1 archive file.
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up (50 US dollars) before the first Meta ad (30.28; the balance read 0.31 after Scan 2 on 5 Nov); Gemini stays off.
 - Scan 2: on a phone, open kabsi.co/scan, pick SEVEN Burgers & Beyond, wait for the nearby places, untick tips and send the report to your email: it should hold the nearby places with "Most places put you ..." under the count, the AI question with its date, and kabsi.co/scan/[code] (the session could not pass Turnstile).
 
-- Search (30.32 items 4 and 5): add kabsi.co to Bing Webmaster Tools; in Google Search Console add kabsi.co as a Domain property (DNS record at the registrar) and submit https://kabsi.co/sitemap.xml once, never again. Details: the Guides 4 archive file.
+
+- Sentry (30.33 item 4): Settings, Subscription, set a pay-as-you-go budget of 5 US dollars for errors, so errors are not dropped before 30 Nov.
 
 ## Open After merge checks and findings
 
@@ -61,8 +62,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 5 Nov 2026, Industries 3 (30.33 item 2).
-- 5 Nov 2026, Industries 2 (30.32): PRs 392, 395 and part C.
+- 5 Nov 2026, Industries 3: PR 403.
 
 ## How a session updates this page
 

@@ -165,6 +165,8 @@ The FAQ answer "Can I approve a reply or a post on WhatsApp?" follows the WhatsA
 - The profile check reads the town from Google's own address parts (locality, else postal town, else the first administrative area), and from the written address when those are missing.
 - Speed: Home, Pricing and /scan are each held to a script budget (live 215, 225 and 245 KB).
 
+
+**The look of the website from 5 Nov 2026 (Style 1, master plan 30.33, R-113).** Every guide has a photo from Kabsi's own licensed library on its page, its card in the guides list and its share image; the guides list can be filtered by topic (Reviews, Hours and details, Photos and posts, Setting up, Problems and fixes, Checklists, AI answers). Every public page has one key phrase of each light headline on the yellow bar. The security page says the same things in shorter lines: Kabsi stops at once when disconnected and cancels what waited for approval; review text and reviewer names from Google go 30 days after Google last returned them; staff read Google data only with consent, for security, or when the law requires. Kabsi's own automated tests and the nightly check of kabsi.co no longer send error reports to Sentry, and a repeated server error is reported at most once every 10 minutes (it is still logged each time).
 ## Facts that change
 
 Check this block first. It holds every fact likely to change, verified against the spec on 29 Sep 2026. If a later section disagrees with this block, this block wins. Items marked **[TIME-SENSITIVE]** need a re-check before quoting after that date.
