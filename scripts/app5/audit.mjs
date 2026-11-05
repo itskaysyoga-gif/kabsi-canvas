@@ -1,5 +1,6 @@
 // App 5 (master plan 30.33): App 4's audit of the signed-in site (scripts/app4/audit.mjs), with three more checks for the
-// 30.32 look: every H1 carries one phrase on the highlight bar, no paragraph runs past 25 words, and no grid leaves one
+// 30.32 look: every H1 carries one phrase on the highlight bar, no paragraph runs past 25 words (a list item past 15),
+// and no grid leaves one
 // card alone in its last row. Everything below is App 4's, unchanged but for those checks and the output folder.
 // App 4 part E (master plan 30.31 item 5): the audit of the signed-in site, as Go live 1 audited the public site. Built on
 // scripts/app-shots.mjs: a made-up owner (scripts/app-shots/fixtures.mjs) and every route and state in
@@ -222,6 +223,12 @@ for (const r of routes) {
         const n = (p.innerText || "").trim().split(/\s+/).filter(Boolean).length;
         if (n > 25) out.long.push(`${n} words: ${p.innerText.trim().slice(0, 70)}`);
       }
+      for (const li of document.querySelectorAll("main li, [role='dialog'] li")) {
+        if (!vis(li) || li.closest(".sr-only, [data-long-ok], nav") || li.querySelector("p, li, button, a, input"))
+          continue;
+        const n = (li.innerText || "").trim().split(/\s+/).filter(Boolean).length;
+        if (n > 15) out.long.push(`list item of ${n} words: ${li.innerText.trim().slice(0, 70)}`);
+      }
       for (const g of document.querySelectorAll("main *")) {
         if (!vis(g)) continue;
         const cs = getComputedStyle(g);
@@ -234,7 +241,12 @@ for (const r of routes) {
           return parseFloat(ks.borderTopWidth) > 0 || !/rgba\(0, 0, 0, 0\)|transparent/.test(ks.backgroundColor) || k.tagName === "IMG" || !!k.querySelector(":scope > img, :scope > picture");
         };
         if (!kids.every(card)) continue;
-        if (cols >= 2 && kids.length > 1 && kids.length % cols === 1)
+        // Lone: by the real layout, the last row holds one card, and it is narrower than 60 percent of the grid (a card that
+        // spans the row, or a row centred on purpose, is not lone).
+        const top = Math.max(...kids.map((k) => Math.round(k.getBoundingClientRect().top)));
+        const last = kids.filter((k) => Math.abs(Math.round(k.getBoundingClientRect().top) - top) < 4);
+        const gw = g.getBoundingClientRect().width;
+        if (cols >= 2 && kids.length > 1 && last.length === 1 && last[0].getBoundingClientRect().width < gw * 0.6)
           out.lone.push(`${kids.length} cards in ${cols} columns: ${(kids[0].textContent || "").trim().slice(0, 40)}`);
       }
       // Cut off: text clipped by its own box.

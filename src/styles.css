@@ -528,6 +528,54 @@ body:not(:has(.page-light)):has(.theme-dark),
   }
 }
 
+/* App 5 (master plan 30.33 item 2): grids never leave a lone card in the last row. Where the number of cards is data
+   (posts, photos, stats), a card left alone in the last row is centred at the width of one card. `balance-2` is for a
+   two-column grid, used with the breakpoint at which the grid has two columns (lg:balance-2); --g is the grid's gap.
+   `balance-tiles` is for the photo tiles: two columns, three from 768 px, four from 1024 px. */
+@utility balance-2 {
+  & > :last-child:nth-child(odd):not(:first-child) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc((100% - var(--g, 1rem)) / 2);
+  }
+}
+@utility balance-tiles {
+  --g: 0.75rem;
+  gap: var(--g);
+  & > :last-child:nth-child(2n + 1):not(:first-child) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc((100% - var(--g)) / 2);
+  }
+  @media (min-width: 640px) {
+    --g: 1rem;
+  }
+  @media (min-width: 768px) {
+    & > :last-child:nth-child(2n + 1):not(:first-child) {
+      grid-column: auto;
+      justify-self: stretch;
+      width: auto;
+    }
+    & > :last-child:nth-child(3n + 1):not(:first-child) {
+      grid-column: 1 / -1;
+      justify-self: center;
+      width: calc((100% - 2 * var(--g)) / 3);
+    }
+  }
+  @media (min-width: 1024px) {
+    & > :last-child:nth-child(3n + 1):not(:first-child) {
+      grid-column: auto;
+      justify-self: stretch;
+      width: auto;
+    }
+    & > :last-child:nth-child(4n + 1):not(:first-child) {
+      grid-column: 1 / -1;
+      justify-self: center;
+      width: calc((100% - 3 * var(--g)) / 4);
+    }
+  }
+}
+
 @utility wa-ground {
   background-color: var(--wa-chat-bg);
   background-image: radial-gradient(rgb(17 27 33 / 0.05) 1px, transparent 1.2px);

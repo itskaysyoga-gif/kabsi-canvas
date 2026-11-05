@@ -315,11 +315,11 @@ export function ChoiceChips({
   );
 }
 
-/** Sentences of a text, split after a full stop or question mark that is followed by a capital or a digit. */
+/** Sentences of a text, split after a full stop or question mark (and a closing quote) that a capital or a digit follows. */
 export function sentences(text: string): string[] {
   return text
     .trim()
-    .split(/(?<=[.?])\s+(?=[A-Z0-9"'])/)
+    .split(/(?<=[.?]["'\u2019]?)\s+(?=[A-Z0-9"'\u2018])/)
     .filter(Boolean);
 }
 

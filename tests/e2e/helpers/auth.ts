@@ -15,6 +15,13 @@ export const QA = {
     env: "KABSI_QA_CODE_OWNER",
     file: "tests/e2e/.auth/owner.json",
   },
+  // App 5: a QA account that is Kabsi staff, for the live staff run. It exists only once Rashid makes it staff
+  // (docs/progress/archive/2026-11-05-app5.md); until then the live staff spec skips.
+  staff: {
+    email: "qa-staff@test.local",
+    env: "KABSI_QA_CODE_STAFF",
+    file: "tests/e2e/.auth/staff.json",
+  },
 } as const;
 export type Who = keyof typeof QA;
 

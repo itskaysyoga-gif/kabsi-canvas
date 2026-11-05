@@ -2,6 +2,7 @@
 // check, "Is this your business?", Connect WhatsApp, Add Kabsi as a Manager with its three states, "Access works." with
 // the trial dates, the first task, and the rest of setup (only after the first task is done). Real data and real calls
 // only: onboarding_status, confirm_business, the WhatsApp connect code, the access steps and the task queue.
+import { ShortParas } from "@/components/kabsi/d3-account";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -772,7 +773,9 @@ export function FirstTaskStage({
         <div className="rounded-card border border-line bg-surface-1 p-5 shadow-rest">
           <p className="text-title font-bold">{task.title}</p>
           {task.kind === "review_reply" ? (
-            <p className="mt-1 text-small text-text-2">{task.why}</p>
+            <div className="mt-1">
+              <ShortParas className="text-small text-text-2" text={task.why} />
+            </div>
           ) : task.recommendation ? (
             <p className="mt-1 text-small text-text-2">{task.recommendation}</p>
           ) : null}

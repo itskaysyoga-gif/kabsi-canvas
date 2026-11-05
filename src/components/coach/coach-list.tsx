@@ -1,3 +1,4 @@
+import { ShortParas } from "@/components/kabsi/d3-account";
 import { StatusPill, type Tone } from "@/components/kabsi/ui";
 import { detailLine, STATUS_LABEL, type CoachRow, type CoachStatus } from "@/lib/coach";
 
@@ -26,7 +27,9 @@ export function CoachList({
               <p className="min-w-0 flex-1 text-body font-bold text-text-1">{r.title}</p>
               <StatusPill tone={TONE[r.status]}>{STATUS_LABEL[r.status]}</StatusPill>
             </div>
-            <p className="mt-1 text-small text-text-2">{r.why}</p>
+            <div className="mt-1">
+              <ShortParas className="text-small text-text-2" text={r.why} />
+            </div>
             {line ? <p className="mt-1 text-small font-semibold text-text-1">{line}</p> : null}
           </li>
         );

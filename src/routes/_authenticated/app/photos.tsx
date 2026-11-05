@@ -64,7 +64,7 @@ export const Route = createFileRoute("/_authenticated/app/photos")({
 
 const SENT = ["publishing", "posted", "failed", "removing", "removed"];
 // App 3: photo tiles share one size, in a grid that uses the width (two on a phone, four on a computer).
-const TILE_GRID = "grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4";
+const TILE_GRID = "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 balance-tiles";
 const TILE =
   "flex min-w-0 flex-col overflow-hidden rounded-card border border-line bg-surface-1 shadow-rest";
 
