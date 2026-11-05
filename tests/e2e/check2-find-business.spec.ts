@@ -327,7 +327,9 @@ test.describe("Check 2: suggestions while typing", () => {
     ).toBe(true);
   });
 
-  test("Scan 3: the pass is kept for the tab, so a second page asks no new bot check", async ({ page }) => {
+  test("Scan 3: the pass is kept for the tab, so a second page asks no new bot check", async ({
+    page,
+  }) => {
     const calls = await stub(page);
     await open(page, "/scan");
     const box = page.getByRole("combobox");
@@ -340,8 +342,13 @@ test.describe("Check 2: suggestions while typing", () => {
     await second.click();
     await second.pressSequentially("smi", { delay: 40 });
     await expect(page.getByRole("option").first()).toBeVisible();
-    expect(calls.filter((c) => c.action === "pass"), "one bot check for both pages").toHaveLength(1);
-    expect(suggestCalls(calls).every((c) => c.body["pass"] === STUB_PASS && !c.body["turnstile"])).toBe(true);
+    expect(
+      calls.filter((c) => c.action === "pass"),
+      "one bot check for both pages",
+    ).toHaveLength(1);
+    expect(
+      suggestCalls(calls).every((c) => c.body["pass"] === STUB_PASS && !c.body["turnstile"]),
+    ).toBe(true);
   });
 
   test("Scan 3: an older function without the pass action still suggests, with the bot check on the first call", async ({

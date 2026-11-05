@@ -123,7 +123,9 @@ describe("the lines a visitor reads", () => {
   });
   it("Scan 3: the tab keeps only the suggestions' signed pass, under one key, nothing from Places", () => {
     const store = readFileSync("src/lib/suggest-pass.ts", "utf8");
-    expect(store.match(/sessionStorage\.setItem\(([^,]+),/g)).toEqual(["sessionStorage.setItem(PASS_KEY,"]);
+    expect(store.match(/sessionStorage\.setItem\(([^,]+),/g)).toEqual([
+      "sessionStorage.setItem(PASS_KEY,",
+    ]);
     expect(store).not.toMatch(/localStorage|indexedDB|place_id|FoundBusiness|Snapshot/);
   });
   it("never ask Places for more than the place ID to keep: nothing is stored from a suggestion", () => {
