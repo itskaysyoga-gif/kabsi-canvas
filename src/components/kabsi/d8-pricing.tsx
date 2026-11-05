@@ -29,6 +29,7 @@ import { FoundingPriceLine, useFoundingLeft } from "./founding-price";
 import { FOUNDING25_TOTAL } from "./founding-total";
 import { PRICING_HERO } from "./hero-lines";
 import { BILLING_FAQ } from "./faq-data";
+import { useAccountLink } from "@/components/auth/use-account-link";
 
 const linkCls =
   "press inline-flex min-h-11 items-center gap-1.5 font-semibold text-text-1 underline decoration-text-3 decoration-1 underline-offset-4 hover:decoration-text-1";
@@ -114,6 +115,8 @@ function Cell({ v }: { v: string }) {
 }
 
 export function D8Pricing() {
+  // Signed in already (App 4, 30.31 item 1): Start free opens the dashboard, not the find-your-business step.
+  const signedIn = useAccountLink().state === "in";
   const periodFlag = useSearchFlag("period");
   const [period, setPeriod] = useState<"monthly" | "yearly">("monthly");
   useEffect(() => {
@@ -208,7 +211,11 @@ export function D8Pricing() {
                     {p.help} {WORKING_HOURS}
                   </p>
                   <div className="mt-auto pt-6">
-                    <ButtonLink to="/get-started" full variant={pro ? "primary" : "dark"}>
+                    <ButtonLink
+                      to={signedIn ? "/app" : "/get-started"}
+                      full
+                      variant={pro ? "primary" : "dark"}
+                    >
                       Start free
                     </ButtonLink>
                   </div>
