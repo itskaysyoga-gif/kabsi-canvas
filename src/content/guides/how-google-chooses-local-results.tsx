@@ -1,6 +1,6 @@
 import { Callout, Steps } from "@/components/marketing/guide-kit";
 import { GuideLink, SiteRef } from "@/components/marketing/guide-links";
-import { scheduledAt } from "./schedule";
+import { PUBLISH_ALL_AT } from "./schedule";
 import type { GuideDoc } from "./types";
 
 // Guides 3, guide 20. Every claim about Google is from the sources below, read on 5 Nov 2026.
@@ -11,7 +11,7 @@ export const guide: GuideDoc = {
   title: "How does Google choose which businesses to show nearby?",
   description:
     "What Google's own help says decides local results on Maps and Search: relevance, distance and popularity, and the parts of your profile you control.",
-  publishAt: scheduledAt(19),
+  publishAt: PUBLISH_ALL_AT,
   updated: READ,
   checked: READ,
   topic: "Local results",

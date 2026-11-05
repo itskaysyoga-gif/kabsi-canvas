@@ -1,6 +1,6 @@
 import { Callout, DoDont } from "@/components/marketing/guide-kit";
 import { GuideLink, SiteRef } from "@/components/marketing/guide-links";
-import { scheduledAt } from "./schedule";
+import { PUBLISH_ALL_AT } from "./schedule";
 import type { GuideDoc } from "./types";
 
 // Guides 3, guide 12. Every claim about Google is from the sources below, read on 5 Nov 2026.
@@ -11,7 +11,7 @@ export const guide: GuideDoc = {
   title: "What is review gating, and why does Google not allow it?",
   description:
     "Review gating means asking only happy customers for a Google review. What Google's policy says, what counts as gating, the risks, and how to ask without it.",
-  publishAt: scheduledAt(11),
+  publishAt: PUBLISH_ALL_AT,
   updated: READ,
   checked: READ,
   topic: "Reviews",
