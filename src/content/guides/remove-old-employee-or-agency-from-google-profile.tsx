@@ -1,6 +1,6 @@
 import { Callout, Steps } from "@/components/marketing/guide-kit";
 import { GuideLink, Out, SiteRef } from "@/components/marketing/guide-links";
-import { scheduledAt } from "./schedule";
+import { PUBLISH_ALL_AT } from "./schedule";
 import type { GuideDoc } from "./types";
 
 // Guides 3, guide 18. Every claim about Google is from the sources below, read on 5 Nov 2026.
@@ -11,7 +11,7 @@ export const guide: GuideDoc = {
   title: "How do I remove an old employee or agency from my profile?",
   description:
     "How to remove a former employee or agency from your Google Business Profile, why Google makes new owners wait 7 days, and what to do if they own it.",
-  publishAt: scheduledAt(17),
+  publishAt: PUBLISH_ALL_AT,
   updated: READ,
   checked: READ,
   topic: "Owners and managers",

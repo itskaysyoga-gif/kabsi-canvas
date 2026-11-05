@@ -1,6 +1,6 @@
 import { Callout, DoDont } from "@/components/marketing/guide-kit";
 import { GuideLink, SiteRef } from "@/components/marketing/guide-links";
-import { scheduledAt } from "./schedule";
+import { PUBLISH_ALL_AT } from "./schedule";
 import type { GuideDoc } from "./types";
 
 // Guides 3, guide 16. Every claim about Google is from the sources below, read on 5 Nov 2026.
@@ -11,7 +11,7 @@ export const guide: GuideDoc = {
   title: "Google Business Profile checklist for restaurants and cafes",
   description:
     "What a restaurant or cafe should have on its Google profile, from Google's own help pages: category, hours, menu, ordering, table booking, photos and replies.",
-  publishAt: scheduledAt(15),
+  publishAt: PUBLISH_ALL_AT,
   updated: READ,
   checked: READ,
   topic: "Checklist",
