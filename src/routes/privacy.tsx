@@ -624,9 +624,10 @@ function Page() {
           <>
             <p>
               <b>How it works.</b> The Kabsi WhatsApp number, {WHATSAPP_NUMBER}, is for questions,
-              sales and support, answered by a person and not an automatic bot. If you connect it in
-              Settings, it also brings you review alerts. We never ask for your Google password or a
-              code Google sends you, on WhatsApp or anywhere else.
+              sales and support. Nora, Kabsi's assistant, answers at once. Ask for a person and
+              Rashid replies in working hours. If you connect it in Settings, it also brings you
+              review alerts. We never ask for your Google password or a code Google sends you, on
+              WhatsApp or anywhere else.
             </p>
             <p>
               <b>Alerts and approvals, only if you opt in.</b> You opt in by sending a one-time code

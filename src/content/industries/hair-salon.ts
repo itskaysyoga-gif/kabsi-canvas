@@ -10,7 +10,7 @@ export const hairSalon: Industry = {
   name: "hair salon",
   plural: "Hair salons",
   finished: true,
-  lead: "New stylists announced, your colour work as posts, holiday hours asked in time, and a reply that thanks the stylist by name. You approve each one.",
+  lead: "New stylists announced, colour work as posts, holiday hours asked in time and replies ready. You approve each one.",
   keyword: "hair salon",
   example: {
     business: "Hollis Hair",
@@ -78,7 +78,7 @@ export const hairSalon: Industry = {
       buttons: ["Approve", "Edit", "Skip"],
       time: "09:20",
     },
-    jobsTitle: "The Google jobs that come back for a hair salon.",
+    jobsTitle: "Google jobs that come back.",
     searchText:
       "People choose a salon by the work they see and the stylist they read about. They search for a salon nearby or for the service itself, then look at photos, services and replies.",
     check: [

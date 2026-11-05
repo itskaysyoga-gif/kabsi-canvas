@@ -100,7 +100,7 @@ describe("the copy rules on every public line (kabsi-copy, K-112, K-144, 30.15)"
         /\b(autopilot|automatically|guaranteed?|approved by google|google partner|google-approved|more customers|set and forget|fully automatic|we manage everything|we remove bad reviews|no work needed)\b/i,
       );
       expect(s, at).not.toMatch(/Profile Score|Do now|Listing Shield|Put mine back/);
-      // The Results Report replaces the Weekly Care Report (30.18); the legal text changes with the lawyer's.
+      // The weekly report replaces the Weekly Care Report (30.18); the legal text changes with the lawyer's.
       if (!LEGAL.test(f)) expect(s, at).not.toMatch(/Weekly Care Report/);
       expect(s, at).not.toMatch(/partner(s|ed)? with Google|Google'?s? (partner|official)/i);
     }

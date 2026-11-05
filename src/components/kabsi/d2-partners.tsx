@@ -5,7 +5,6 @@ import { WHATSAPP_ON, whatsappHref } from "@/lib/site";
 import { useLazyTurnstile } from "@/components/turnstile";
 import { ApiError, applyPartner, usePartnerPlaces, type PartnerKind } from "@/lib/public-api";
 import { cn } from "@/lib/utils";
-import { PLANS } from "./plans";
 import { QrCode } from "./d2-parts";
 import { SiteLink } from "./site-link";
 import { PageHero, popCls, stagger } from "./page-hero";
@@ -27,7 +26,7 @@ import {
 
 const STEPS = [
   {
-    title: WHATSAPP_ON ? "Apply on WhatsApp" : "Apply by email",
+    title: WHATSAPP_ON ? "Apply on WhatsApp or by email" : "Apply by email",
     text: "Send a message. Kabsi replies with the next step.",
   },
   {
@@ -61,49 +60,27 @@ export const PARTNER_RULES = [
   "No bulk or unsolicited messages.",
 ];
 
-const PRO = PLANS.find((p) => p.id === "pro")!;
+const RATE_LINE = "25 percent of what each referred business pays, for as long as it pays.";
 
-function Earnings() {
-  const [n, setN] = useState(10);
-  const amount = (n * PRO.monthly * 0.25).toFixed(2);
+/** B-029 (Copy 3, master plan 30.29 item 2): the rate only. No dollar earnings and no calculator anywhere on the page. */
+function Rate() {
   return (
     <div className="rounded-panel border border-line bg-surface-1 p-6 sm:p-8">
       <div className="flex items-start justify-between gap-3">
-        <label htmlFor="refer-n" className="text-h3">
-          Businesses you refer
-        </label>
+        <h3 className="text-h3">What you earn</h3>
         <ExampleBadge />
       </div>
-      <div className="mt-6 flex items-center gap-5">
-        <input
-          id="refer-n"
-          type="range"
-          min={1}
-          max={30}
-          value={n}
-          onChange={(e) => setN(Number(e.target.value))}
-          aria-describedby="refer-out"
-          className="h-11 min-w-0 flex-1 cursor-pointer accent-kb-yellow"
-        />
-        <output
-          htmlFor="refer-n"
-          className="w-10 text-end font-display text-h3 font-bold tabular-nums"
-        >
-          {n}
-        </output>
-      </div>
-      <p id="refer-out" aria-live="polite" className="mt-4 text-title">
-        If {n} {n === 1 ? "business" : "businesses"} you refer pay{n === 1 ? "s" : ""} for Pro, you
-        earn about <span className="whitespace-nowrap font-bold">${amount}</span> a month.
+      <p className="mt-6 font-display text-h2 font-bold">25 percent</p>
+      <p className="mt-2 text-title">
+        Of what each referred business pays, for as long as it pays.
       </p>
     </div>
   );
 }
 
-/** Partners' hero visual (Design 8): an Example partner link with its QR code and 25% of one Pro plan a month. Go live 1
+/** Partners' hero visual (Design 8): an Example partner link with its QR code and the rate. Go live 1
  * (B-028): there is no /p page; the partner link is kabsi.co/?via=CODE (knowledge/facts/01, src/lib/attribution.ts). */
 function PartnerCardVisual() {
-  const share = (PRO.monthly * 0.25).toFixed(2);
   return (
     <figure className="relative mx-auto max-w-[22rem]">
       <div className="rounded-panel border border-line bg-surface-1 p-6 shadow-float">
@@ -129,12 +106,12 @@ function PartnerCardVisual() {
         )}
         style={stagger(0, 400)}
       >
-        <p className="text-label text-kb-paper/80">For each Pro business</p>
-        <p className="font-display text-h3 font-bold">${share} a month</p>
+        <p className="text-label text-kb-paper/80">For each business that pays</p>
+        <p className="font-display text-h3 font-bold">25 percent</p>
       </div>
       <figcaption className="sr-only">
-        An Example partner link with a QR code, and 25% of a ${PRO.monthly} Pro plan: ${share} a
-        month.
+        An Example partner link with a QR code, and the rate: 25 percent of what each referred
+        business pays.
       </figcaption>
     </figure>
   );
@@ -149,7 +126,7 @@ export function PartnersPage() {
           ...PARTNERS_HERO,
           line: `${PARTNERS_HERO.line}${WHATSAPP_ON ? " Everything runs on WhatsApp." : ""}`,
         }}
-        under={`Pro is $${PRO.monthly} a month. You earn 25% of every payment, while the referred subscription stays paid.`}
+        under={`You earn ${RATE_LINE}`}
         action={<ApplyButtons />}
         visual={<PartnerCardVisual />}
       />
@@ -200,7 +177,7 @@ export function PartnersPage() {
               ))}
             </ul>
           </div>
-          <Earnings />
+          <Rate />
         </div>
       </section>
 

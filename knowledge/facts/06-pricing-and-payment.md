@@ -40,7 +40,7 @@ By card, in US dollars, and nothing else. Payments are processed by Creem, our m
 
 - A **free trial** starts when Kabsi's access to your Google profile works and Google shows the profile as verified. It is 14 days. The Plan page shows the last day and how many days are left. It never starts for an early-access (concierge) business or a profile that is not verified.
 - **One trial per business and per person:** one per Google profile (place) and one per Google account (the owner's Google sign-in or email; Gmail dots and +tags count as the same address). A business or account that already had a trial goes straight to a paid plan.
-- **During the trial** you get the full product (new review drafts and publishing, Google Protection, the Results Report, one post a week, the review link and QR code, the assistant) with three limits: Kabsi lists every profile fix it finds but applies **3 of your choice** (the rest when you subscribe); it drafts replies for up to **10** older unanswered reviews (the rest when you subscribe); and after **100 drafts** it asks you to choose a plan or book a free setup call.
+- **During the trial** you get the full product (new review drafts and publishing, Google Protection, the weekly report, one post a week, the review link and QR code, the assistant) with three limits: Kabsi lists every profile fix it finds but applies **3 of your choice** (the rest when you subscribe); it drafts replies for up to **10** older unanswered reviews (the rest when you subscribe); and after **100 drafts** it asks you to choose a plan or book a free setup call.
 - A **paid plan** starts when payment is confirmed **and** Kabsi's access works. Time spent waiting for access doesn't count.
 - If you pay during your trial, your paid plan starts the day the trial ends. You keep every trial day. **[CHANGING]** Once card payments open, the paid period starts the day you pay (master plan 10.2.2).
 - If you pay before access works, the Plan page shows your plan as "Paid" and says: "Your plan starts the day Kabsi's access to your Google profile works, so you don't lose any days while you wait."
@@ -63,8 +63,13 @@ During a trial, Kabsi sends a few short emails, each only once and only while it
 ### 4.6 When a trial or plan ends
 
 - **After a free trial (day 14 to day 21):** 7 days of grace. Kabsi keeps watching your profile and drafting replies, but publishes nothing; Home says what is waiting ("1 reply ready, 1 change caught"). Choose a plan and everything that is waiting can be approved. On day 21 without a plan, Kabsi removes its Manager access and emails you. **[TIME-SENSITIVE]** Until card payments are live, Kabsi does not remove access on day 21; the team gets in touch instead.
-- **After a paid plan:** the business has no plan. Reply drafts, Google Protection and the Results Report stop. Kabsi's Google access is not removed by a plan ending; disconnecting is your choice (section 8.6).
+- **After a paid plan:** the business has no plan. Reply drafts, Google Protection and the weekly report stop. Kabsi's Google access is not removed by a plan ending; disconnecting is your choice (section 8.6).
 - The review link and QR code keep working, for as long as Kabsi operates, and so does any NFC card that carries the link. Choose a plan on the Plan page to turn everything back on.
 
 ---
 
+### Copy 3: Pricing's hero and buttons (5 Nov 2026, master plan 30.29 item 2)
+
+- Pricing's hero line is "Each plan does the Google work for one business, and you approve every change." The tax line stays under the cards: "Prices are in US dollars, plus tax where it applies."
+- On Pricing only Pro's "Start free" button is yellow, because the trial is Pro; Essentials' button is charcoal with ivory text.
+- Public answer to "Can I cancel?": "Yes, any time. Cancel on the Plan page or on WhatsApp, and your plan runs to the end of the period you paid for." Creem's own billing page (Card and invoices) ends the plan at once; that is said on the Plan page and in these facts only.

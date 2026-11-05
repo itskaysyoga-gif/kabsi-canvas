@@ -1,4 +1,4 @@
-// The Monday Results Report as the visual work receipt (master plan 30.15 section 3.6, 30.18 section 3; Email 1). In this
+// The Monday weekly report as the visual work receipt (master plan 30.15 section 3.6, 30.18 section 3; Email 1). In this
 // order: what Kabsi did as chips, what waits for a yes (the email's one button goes there), one next step, then Google's
 // numbers as small week-on-week cards with calls and direction requests apart, each block with its source label. The data
 // is V4's receipt (results-report/receipt.ts): Google's figures are there only when they were read live from the owner's

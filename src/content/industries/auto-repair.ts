@@ -9,7 +9,7 @@ export const autoRepair: Industry = {
   name: "garage",
   plural: "Auto repair",
   finished: true,
-  lead: "Kabsi lists the jobs you do, keeps your phone number and hours exact on Google, and writes calm replies to reviews about price and honesty that never argue or promise a refund. You approve each one on WhatsApp.",
+  lead: "Your jobs listed, your phone number and hours exact on Google, and calm replies drafted. You approve each one.",
   keyword: "car repair",
   example: {
     business: "Westgate Auto Repair",

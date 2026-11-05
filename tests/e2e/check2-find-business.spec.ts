@@ -385,7 +385,9 @@ test.describe("Check 2: Kabsi never picks for the visitor", () => {
     await page.getByRole("link", { name: "Not here? Search again" }).click();
     await expect(page).toHaveURL(/change=true/);
     await expect(page.getByRole("combobox")).toHaveValue("Smile Dental");
-    await expect(page.getByText("Kabsi searches for 'dentist'")).toBeVisible();
+    await expect(
+      page.getByText("Kabsi searches 'dentist' on Google Maps around you"),
+    ).toBeVisible();
     const searches = calls.filter((c) => c.action === "search").length;
     await page.waitForTimeout(500);
     expect(calls.filter((c) => c.action === "search").length).toBe(searches);

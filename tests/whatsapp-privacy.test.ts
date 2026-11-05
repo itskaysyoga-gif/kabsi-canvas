@@ -108,7 +108,7 @@ describe("Nora's source answers WhatsApp questions without calling an AI model",
   const cases: [string, RegExp[]][] = [
     [
       "Who answers my WhatsApp messages, a person or a bot?",
-      [/person at Kabsi|A person answers/, /not an automatic bot/],
+      [/Nora, Kabsi's assistant, answers at once/, /Rashid replies in working hours/],
     ],
     [
       "Do you ask for my Google password or a code on WhatsApp?",

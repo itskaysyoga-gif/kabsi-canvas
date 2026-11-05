@@ -10,7 +10,7 @@ export const restaurant: Industry = {
   name: "restaurant",
   plural: "Restaurants",
   finished: true,
-  lead: "Menu photos, dish photos, bank holiday hours and a reply for every review. Kabsi gets each one ready, and you approve it.",
+  lead: "Menu photos, dish photos, bank holiday hours and a reply for every review. You approve each one.",
   keyword: "restaurant",
   example: {
     business: "Cedar Lane Kitchen",
@@ -84,7 +84,7 @@ export const restaurant: Industry = {
       buttons: ["Yes", "Edit", "Skip"],
       time: "15:30",
     },
-    jobsTitle: "The Google jobs that come back for a restaurant.",
+    jobsTitle: "Google jobs that come back.",
     searchText:
       "People choose where to eat on the way there. They search for what is near and open, then read the menu, look at the dishes and check the latest replies before they book.",
     check: [

@@ -221,7 +221,7 @@ function BusinessPanel({ locationId, name }: { locationId: string; name: string 
 }
 
 /**
- * One place for routine messages (new reviews and the Results Report): WhatsApp or email, never both (Email 1). The choice
+ * One place for routine messages (new reviews and the weekly report): WhatsApp or email, never both (Email 1). The choice
  * is stored once (routine_channels, set_routine_channel) and the notification engine reads it, so a routine email is not
  * sent while WhatsApp is chosen. WhatsApp's own review alerts and Monday report follow the same choice. Shown only once
  * WhatsApp is connected; until then everything comes by email.

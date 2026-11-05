@@ -351,7 +351,7 @@ export function AssistantWidget({
             "sm:bottom-6 sm:h-14 sm:w-auto sm:pl-4 sm:pr-5",
           )}
         >
-          <span className="grid size-8 place-items-center rounded-full bg-kb-yellow text-kb-black">
+          <span className="grid size-8 place-items-center rounded-full bg-kb-sand text-kb-black">
             <MessageCircle className="size-4" aria-hidden="true" />
           </span>
           <span className="hidden sm:inline">Chat with Nora</span>
@@ -404,7 +404,7 @@ export function AssistantWidget({
               aria-hidden="true"
               className="absolute top-1.5 left-1/2 h-1 w-10 -translate-x-1/2 rounded-full bg-white/30 sm:hidden"
             />
-            <span className="grid size-9 place-items-center rounded-full bg-kb-yellow text-kb-black">
+            <span className="grid size-9 place-items-center rounded-full bg-kb-sand text-kb-black">
               <Sparkles className="size-4" aria-hidden="true" />
             </span>
             <div className="min-w-0 flex-1">

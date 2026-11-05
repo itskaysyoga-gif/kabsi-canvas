@@ -254,7 +254,7 @@ function Page() {
         <h2>9. Contact</h2>
         <p>
           Questions about the program or a payout: {CONTACT_EMAIL}, or "Talk to a person" on
-          WhatsApp. A person replies.
+          WhatsApp. Rashid replies in working hours.
         </p>
       </section>
     </LegalPage>

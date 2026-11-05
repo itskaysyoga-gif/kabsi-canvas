@@ -25,7 +25,7 @@ Kabsi's readers are busy local business owners. Write the way a calm, capable pe
 - Other approved lines: "Set up in a few steps, no passwords", "Nothing goes live without your yes", "You can remove Kabsi any time", "Cancel any time. Your plan runs to the end of the period you paid for."
 - Help lines (30.21): Essentials "A person answers on WhatsApp the same working day."; Pro "Priority help: a person answers on WhatsApp within 4 working hours, and a call when you need one."; with "Working hours: Monday to Friday, 9:00 to 18:00, UAE time."
 - Pages may say what an owner should do on Google (reply to every review, keep hours and details right, post when something changes, add photos) and that Kabsi does that work. Nothing promises more reviews, more customers, higher rankings or visibility.
-- The weekly report is the Results Report (27.3); "Weekly Care Report" is retired. Kabsi is never promoted as a review reply generator. Google's name never appears in a headline graphic or OG image.
+- The weekly report is the weekly report (27.3); "Weekly Care Report" is retired. Kabsi is never promoted as a review reply generator. Google's name never appears in a headline graphic or OG image.
 - Use these lines as they stand. Do not reword them or invent a near copy. A new line needs the lane R chat's yes.
 - Operator line: "Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co." Payments: "Payments are processed by Creem, our merchant of record."
 
@@ -40,7 +40,7 @@ Kabsi's readers are busy local business owners. Write the way a calm, capable pe
 - Facebook and Instagram links come from the SOCIAL_LINKS constant, never typed by hand (R-59).
 
 ## Names (K-02)
-Use exactly: Reviews, Google Profile, Google Protection, Get Reviews, Results Report, Visibility Map, AI Visibility, Competitor Watch, Review Growth, Ask Kabsi, Business Knowledge (screen title "About your business" where the design says so), Insights, Content, Settings, Essentials, Pro, Kabsi Partners, Profile Coach, What customers say, Report a fake review.
+Use exactly: Reviews, Google Profile, Google Protection, Get Reviews, Your weekly report, Visibility Map, AI Visibility, Competitor Watch, Review Growth, Ask Kabsi, Business Knowledge (screen title "About your business" where the design says so), Insights, Content, Settings, Essentials, Pro, Kabsi Partners, Profile Coach, What customers say, Report a fake review.
 "Visibility Map" and "AI Visibility" are names inside the account only; public pages say "Where you come up nearby" (Design 6, conflict 16).
 Never: Profile Score, Do now, Listing Shield, Profile Care, Replies as a module, Monday Report, Put mine back. There is no Free plan, Partner plan or Lebanon bundle in any copy.
 

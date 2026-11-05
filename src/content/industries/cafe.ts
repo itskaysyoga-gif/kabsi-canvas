@@ -9,7 +9,7 @@ export const cafe: Industry = {
   name: "cafe",
   plural: "Cafes",
   finished: true,
-  lead: "Kabsi gets your opening time exact on Google, shows the menu, puts your laptop rule in a post, and writes the day's drafts once the morning rush is over. You approve each one on WhatsApp.",
+  lead: "Opening time exact on Google, the menu shown, your laptop rule in a post. You approve every draft.",
   keyword: "cafe",
   example: {
     business: "Brew Lane Cafe",

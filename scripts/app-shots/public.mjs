@@ -76,7 +76,7 @@ export const functions = {
         }
       : { name: "Rose Lane Salon" },
   // /unsubscribe?t=TOKEN
-  "email/unsubscribe": { label: "Results Report" },
+  "email/unsubscribe": { label: "Your weekly report" },
   // /review/CODE: the review link page.
   "review-page": (c) =>
     c.state === "inactive"

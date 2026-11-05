@@ -1,4 +1,4 @@
-// The Results Report's dates on the Reports page, the same words as the email and WhatsApp
+// The weekly report's dates on the Reports page, the same words as the email and WhatsApp
 // (supabase/functions/_shared/email/report-body.ts dateRange; tests/date-range.test.ts keeps the two equal).
 const MONTHS = [
   "January",

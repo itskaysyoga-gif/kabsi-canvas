@@ -9,7 +9,7 @@ export const D9_BUSINESS = "Hollis Hair, Bristol";
 
 /** Home's hero line (Design 9, approved with "photos" kept, 30.24 item 2). The meta description stays HOME_LINE. */
 export const D9_HERO_LINE =
-  "Kabsi checks your Google profile every day, prepares the fixes, posts, photos and replies it needs, and brings each one to you on WhatsApp for a yes.";
+  "Kabsi checks your Google profile every day, prepares fixes, posts, photos and replies, and asks for your yes on WhatsApp.";
 
 /* ---------- The whole job, in one line of steps ---------- */
 
@@ -151,7 +151,8 @@ export const D9_SHOW_UP = {
     line: "Kabsi searches Google Maps from places around your business, like a customer standing there. The number is where you came up. 1 is first.",
     sample: "Sample Google Maps results, not customer counts.",
     search: "Searched: hair salon, 2 Nov 2026",
-    count: "You came up in the first 3 at 3 of 8 places Kabsi checked.",
+    count: "In the first 3 at 18 of 49 places Kabsi checked.",
+    shows: "The map shows 8 of them.",
   },
   ai: {
     // Fix 2 (master plan 30.27 item 2): the AI half's headline; the old title is the line under it.

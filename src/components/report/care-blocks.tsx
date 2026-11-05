@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ExampleBadge, buttonClass } from "@/components/kabsi/ui";
 
-// The Results Report's older blocks, for reports sent before V4's work receipt (P0.5-04, K-28, K-72): what Kabsi did, counted from the audit log; the customer
+// The weekly report's older blocks, for reports sent before V4's work receipt (P0.5-04, K-28, K-72): what Kabsi did, counted from the audit log; the customer
 // activity (Google's numbers, kept for 30 days at most); what needs the owner; the Profile Coach's plan; the time saved, an
 // estimate with its formula one tap away; and, on Pro, how people found the profile. Reports from before it have none.
 export type CareLine = { title: string; path: string };

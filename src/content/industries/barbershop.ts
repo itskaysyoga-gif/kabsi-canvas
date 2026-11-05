@@ -10,7 +10,7 @@ export const barbershop: Industry = {
   name: "barbershop",
   plural: "Barbershops",
   finished: true,
-  lead: "Walk-in times, bank holiday hours, posts about new cuts and a reply for every review. Kabsi gets each one ready, and you approve it.",
+  lead: "Walk-in times, bank holiday hours, posts about new cuts and a reply for every review. You approve each one.",
   keyword: "barber",
   example: {
     business: "Fade and Co",
@@ -78,7 +78,7 @@ export const barbershop: Industry = {
       buttons: ["Approve", "Edit", "Skip"],
       time: "11:40",
     },
-    jobsTitle: "The Google jobs that come back for a barbershop.",
+    jobsTitle: "Google jobs that come back.",
     searchText:
       "People look for a barber when they want a cut today, so they search for what is near and open. Your hours, your services and your latest replies are what they read before they walk in.",
     check: [

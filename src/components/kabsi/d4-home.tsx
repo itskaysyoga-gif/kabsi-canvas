@@ -357,7 +357,7 @@ export function ShortPricing() {
         <SectionHead
           id="price-h"
           title="Two plans. The work comes first."
-          lead="Each plan does the Google work for one business, and you approve every change. Prices in US dollars, plus tax where it applies."
+          lead="Each plan does the Google work for one business, and you approve every change."
         />
         <div className="mt-10 grid gap-4 md:grid-cols-2">
           {PLANS.map((p) => (

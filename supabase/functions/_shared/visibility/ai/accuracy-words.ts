@@ -1,4 +1,4 @@
-// AI Answers 1, the words (docs/COPY.md 37): the Home item, its Results Report line and where the owner acts. No imports,
+// AI Answers 1, the words (docs/COPY.md 37): the Home item, its weekly report line and where the owner acts. No imports,
 // so the signed-in website's report (src/components/report/work-receipt.tsx, through results-report/receipt.ts) can use it.
 export type FactKey = "hours" | "phone" | "address" | "website" | "services" | "price";
 export type Detail = "closing_time" | "opening_time" | "closed_day" | "open_day" | FactKey;
@@ -26,7 +26,7 @@ export const ACTION: Record<FactKey, { label: string; path: string }> = {
 const PLURAL = new Set<Detail>(["closed_day", "open_day", "hours", "services"]);
 export const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 3).trimEnd()}...` : s);
 
-/** The Home item and its Results Report line, from one finding. Never a promise that an assistant will change. */
+/** The Home item and its weekly report line, from one finding. Never a promise that an assistant will change. */
 export function findingTask(f: Finding, tz = "UTC") {
   const who = ASSISTANT[f.assistant] ?? f.assistant;
   const when = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", timeZone: tz }).format(new Date(f.asked_at));

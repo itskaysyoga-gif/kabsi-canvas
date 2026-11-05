@@ -72,7 +72,7 @@ function Page() {
             profile for changes (Google Protection). When something changes, you choose: Google is
             right, or Keep my information.
           </li>
-          <li>Sends the Results Report and shows your profile's facts on the Kabsi website.</li>
+          <li>Sends the weekly report and shows your profile's facts on the Kabsi website.</li>
           <li>
             Provides a review link and a QR code that open your Google review page for every
             customer. They work with your own QR codes and NFC cards. Kabsi sells no cards.
@@ -265,7 +265,7 @@ function Page() {
             renew automatically.
           </li>
           <li>
-            When a plan ends, reply drafts, posts, Google Protection and the Results Report stop.
+            When a plan ends, reply drafts, posts, Google Protection and the weekly report stop.
             Your review link and QR code keep working.
           </li>
         </ul>
@@ -383,9 +383,9 @@ function Page() {
         {WHATSAPP_ON ? (
           <ul>
             <li>
-              The Kabsi WhatsApp number, {WHATSAPP_NUMBER}, is for questions, sales and support. A
-              person answers it, and it is not an automatic bot. We never ask for your Google
-              password or a code Google sends you.
+              The Kabsi WhatsApp number, {WHATSAPP_NUMBER}, is for questions, sales and support.
+              Nora, Kabsi's assistant, answers at once. Ask for a person and Rashid replies in
+              working hours. We never ask for your Google password or a code Google sends you.
             </li>
             <li>
               If you opt in with Connect WhatsApp, we send you review alerts there and you can
@@ -446,8 +446,8 @@ function Page() {
           These terms are governed by the laws of the United Arab Emirates, and the courts of Dubai
           have jurisdiction, without taking away any protection the law of your country gives you.
           Questions or complaints: {CONTACT_EMAIL}
-          {WHATSAPP_ON ? ` or WhatsApp ${WHATSAPP_NUMBER}` : ""}. A person replies, and we try to
-          settle any problem with you directly first.
+          {WHATSAPP_ON ? ` or WhatsApp ${WHATSAPP_NUMBER}` : ""}. Rashid replies in working hours,
+          and we try to settle any problem with you directly first.
         </p>
       </section>
     </LegalPage>

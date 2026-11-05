@@ -10,7 +10,7 @@ export const nailSalon: Industry = {
   name: "nail salon",
   plural: "Nail salons",
   finished: true,
-  lead: "Seasonal designs as posts, photos of your work checked, holiday hours asked in time and a reply for every review. Kabsi gets each one ready, and you approve it.",
+  lead: "Seasonal designs as posts, your work photos checked, holiday hours asked in time and replies ready. You approve each one.",
   keyword: "nail salon",
   example: {
     business: "Polish Room",
@@ -79,7 +79,7 @@ export const nailSalon: Industry = {
       buttons: ["Approve", "Edit", "Skip"],
       time: "10:05",
     },
-    jobsTitle: "The Google jobs that come back for a nail salon.",
+    jobsTitle: "Google jobs that come back.",
     searchText:
       "People search for the service as well as the salon: gel nails, a manicure, nail art. Then they choose by the photos. Your services and your latest designs answer both.",
     check: [

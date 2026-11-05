@@ -11,7 +11,7 @@ export const medicalAestheticClinic: Industry = {
   name: "clinic",
   plural: "Medical and aesthetic clinics",
   finished: true,
-  lead: "Kabsi keeps your treatments, doctors' days and consultation link right on Google, and replies to reviews without confirming who is a patient. A review about a result comes to you with no draft. You approve everything on WhatsApp.",
+  lead: "Treatments, doctors' days and consultation link right on Google, and replies that never confirm a patient. You approve everything.",
   keyword: "aesthetic clinic",
   example: {
     business: "Clearview Skin Clinic",

@@ -4,9 +4,9 @@ import * as client from "../src/lib/date-range";
 import { receiptText } from "../supabase/functions/_shared/results-report/receipt";
 import { starRow } from "../supabase/functions/_shared/email/review";
 
-// Eval 1: the Results Report's dates read "19 to 25 October" within a month and "28 October to 3 November" across months,
+// Eval 1: the weekly report's dates read "19 to 25 October" within a month and "28 October to 3 November" across months,
 // the same in the email (subject, title, preheader), on WhatsApp and on the Reports page.
-describe("Results Report date ranges (Eval 1)", () => {
+describe("Your weekly report date ranges (Eval 1)", () => {
   const cases: [{ from: string; to: string }, string][] = [
     [{ from: "2026-10-19", to: "2026-10-25" }, "19 to 25 October"],
     [{ from: "2026-10-28", to: "2026-11-03" }, "28 October to 3 November"],

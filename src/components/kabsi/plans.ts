@@ -38,7 +38,7 @@ export const PLANS: {
       "Holiday hours, 2 posts a month and your photos, made ready",
       "Your review link, a QR card and a ready message to send after a visit",
       "Profile Coach suggestions",
-      "A Results Report every Monday, with one next step",
+      "Your weekly report every Monday, with one next step",
     ],
     help: HELP_LINES.essentials,
     top: [
@@ -115,7 +115,7 @@ export const PLAN_ROWS: [string, string, string][] = [
   // Lane R, 30 Oct 2026: the Coach's actions (built, Pro only) were named in this table only; from 3 Nov (Polish 2,
   // decision 5) Pro's card names them too.
   ["Profile Coach actions: the change made for you after your yes", "No", "Yes"],
-  ["Results Report every Monday, with one next step", "Yes", "Yes"],
+  ["Your weekly report every Monday, with one next step", "Yes", "Yes"],
   ["Team roles and approval rules", "No", "Yes"],
   ["Review graphics to share", "No", "Yes"],
   ["The words people searched on Google to find you", "No", "Yes"],

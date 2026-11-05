@@ -93,7 +93,11 @@ function ScanForm({
         }}
         onPick={pick}
         error={error}
-        hint={keyword ? `Kabsi searches for '${keyword}', like a customer.` : undefined}
+        hint={
+          keyword
+            ? `Kabsi searches '${keyword}' on Google Maps around you, like a customer.`
+            : undefined
+        }
         leading={<Search className="size-5 shrink-0 text-text-3" aria-hidden />}
       />
       <Button type="submit" className="sm:mt-[1.875rem]">

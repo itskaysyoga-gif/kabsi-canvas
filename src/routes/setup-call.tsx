@@ -11,6 +11,7 @@ import {
   SETUP_CALL_MINUTES,
   WHATSAPP_NUMBER,
   WHATSAPP_ON,
+  WORKING_HOURS,
   pageHead,
 } from "@/lib/site";
 import { oneOf } from "@/lib/search-params";
@@ -94,8 +95,7 @@ function SetupCallPage() {
               you send the Manager invitation yourself.
             </p>
             <p>
-              Calls run Monday to Friday, 8am to 6pm Beirut time. In your email, say what the call
-              is about.
+              {WORKING_HOURS} Calls run in those hours. In your email, say what the call is about.
             </p>
             {WHATSAPP_ON ? (
               <p>
@@ -105,7 +105,8 @@ function SetupCallPage() {
                 >
                   WhatsApp {WHATSAPP_NUMBER}
                 </WhatsappLink>
-                . A person replies. We never ask for your Google password or codes there either.
+                . Nora, Kabsi's assistant, answers at once. Ask for a person and Rashid replies in
+                working hours. We never ask for your Google password or codes there either.
               </p>
             ) : null}
           </aside>
