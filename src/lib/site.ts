@@ -105,6 +105,9 @@ export const OPERATOR_NAME = "Rashid Abou Hamzy";
 export const FOUNDER_SIGNATURE = `${OPERATOR_NAME}, founder`;
 /** The operator line for the footer, terms, privacy page and emails (R-55). Payments are processed by Creem, the merchant of record. */
 export const OPERATOR_LINE = `Kabsi is operated by ${OPERATOR_NAME}. Contact: ${CONTACT_EMAIL}.`;
+/** Who takes the payments (R-55). At the top of /terms and /privacy, beside OPERATOR_LINE (Site 2 moved both out of the
+ * footer, master plan 30.34 item 4). */
+export const MERCHANT_LINE = "Payments are processed by Creem, our merchant of record.";
 
 /** The brand line (master plan 30.15 section 1; was "Your reviews and listing. Taken care of."). Google's name only as
  * plain words, never in a logo or graphic (K-112). */
@@ -131,14 +134,16 @@ export { SOCIAL_LINKS };
 export const WHATSAPP_URL = WHATSAPP_ON ? whatsappHref("general") : `mailto:${CONTACT_EMAIL}`;
 
 /**
- * Header links (Design 9, Web 5 part A, master plan 30.24): How it works, Businesses (one link to /for, no menu) and
- * Pricing, then Log in and "Free check". Founding 25 has its slim line above the header on Home, Pricing and /for only;
- * About, Partners and the free tools are in the footer.
+ * Header links (Site 2, master plan 30.34 item 4): How it works, Businesses (one link to /for, no menu), Pricing, Guides
+ * and About, then Log in or Dashboard and "Free check". No dropdowns; the phone menu shows the same rows. Founding 25 has
+ * its slim line above the header on Home, Pricing and /for; Partners and the free tools are in the footer.
  */
 export const NAV_LINKS = [
   { to: "/how-it-works", label: "How it works" },
   { to: "/for", label: "Businesses" },
   { to: "/pricing", label: "Pricing" },
+  { to: "/guides", label: "Guides" },
+  { to: "/about", label: "About" },
 ] as const;
 /** The header's compact action (Design 9): filled charcoal with ivory text, so it never competes with the yellow one. */
 export const HEADER_CTA = "Free check";

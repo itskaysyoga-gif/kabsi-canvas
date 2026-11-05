@@ -14,6 +14,7 @@ import {
   NAV_LINKS,
   ORG_LD,
   OPERATOR_LINE,
+  MERCHANT_LINE,
   PLAN_PRICES,
   SCAN_LINE,
   SOCIAL_LINKS,
@@ -139,8 +140,14 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     // Go live 1 (30.28): the WhatsApp launch line is gone from the hero.
     expect(home).not.toMatch(/WHATSAPP_LAUNCH_LINE|opens at launch/);
   });
-  it("puts the Design 9 links in the header, Businesses as one link, and three footer groups (30.24)", () => {
-    expect(NAV_LINKS.map((n) => n.label)).toEqual(["How it works", "Businesses", "Pricing"]);
+  it("puts the Site 2 links in the header, Businesses as one link, and three footer groups (30.34 item 4)", () => {
+    expect(NAV_LINKS.map((n) => n.label)).toEqual([
+      "How it works",
+      "Businesses",
+      "Pricing",
+      "Guides",
+      "About",
+    ]);
     expect(NAV_LINKS.find((n) => n.label === "Businesses")?.to).toBe("/for");
     expect(HEADER_CTA).toBe("Free check");
     expect(BUSINESS_MENU.map((n) => n.label)).toEqual([
@@ -162,6 +169,11 @@ describe("the lines of master plan 30.15 and 30.17", () => {
     expect(footer).toContain("SOCIAL_LINKS.map");
     expect(footer).toContain("openPrivacyChoices");
     expect(footer).toContain("WHATSAPP_ON ?");
+    // Site 2: Security moves to Company; the legal row ends with one independence line and the year.
+    expect(footer).toContain('{ label: "Security", to: "/security" }');
+    expect(footer).toContain("{NOT_AFFILIATED} © 2026 Kabsi.");
+    expect(footer).not.toContain("GOOGLE_THIRD_PARTY_URL");
+    expect(read("src/components/kabsi/d8-faq.tsx")).toContain("GOOGLE_THIRD_PARTY_URL");
   });
   it("never types the Founding 25 count in the line above the header", () => {
     const line = read("src/components/kabsi/founding-line.tsx");
@@ -254,9 +266,10 @@ describe("WhatsApp shows only when the one setting has a number (K-122)", () => 
 describe("the operator, the merchant of record and the social links", () => {
   it("names Rashid with no city, and Creem as the merchant of record", () => {
     expect(OPERATOR_LINE).toBe("Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co.");
-    const footer = read("src/components/kabsi/site-footer.tsx");
-    expect(footer).toContain("Kabsi is operated by Rashid Abou Hamzy.");
-    expect(footer).toContain("Payments are processed by Creem, our merchant of record.");
+    expect(MERCHANT_LINE).toBe("Payments are processed by Creem, our merchant of record.");
+    // Site 2 (30.34 item 4): both lines open /terms and /privacy instead of sitting in the footer.
+    for (const f of ["src/routes/terms.tsx", "src/routes/privacy.tsx"])
+      expect(read(f), f).toContain("{OPERATOR_LINE} {MERCHANT_LINE}");
     expect(read("src/routes/terms.tsx")).toMatch(/processed by Creem,[\s\S]*merchant of record/);
     expect(ORG_LD).not.toHaveProperty("address");
   });

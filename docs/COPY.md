@@ -1649,3 +1649,13 @@ Staff pages are for the Kabsi team only and are never public. Owners never see t
   - Get reviews: "A link opens your Google review page, or a short page with the Google button first and a line to message the manager." (was "A link goes straight to your Google review page, or opens a short page with ..."), then "Everyone sees the same thing, and nobody is asked how their visit went." as its own paragraph.
   - Staff, Evidence log: "One row for each request Kabsi does not cover, a repeated problem, time saved, a missed enquiry or sale, or support given." (was "One row for each thing an owner asks for that Kabsi does not do, ...").
 - **Kept as they are, over the rule**: the WhatsApp consent text (stored word for word as the proof of the opt-in, K-113; a LATER row for lane R), an AI assistant's own answer, and the access steps shared with the public /manager-steps page.
+
+## 59. Site 2: header, footer, WhatsApp marks, photos, an honest About page, Beauty salon (5 Nov 2026, master plan 30.34 item 4)
+
+*Section 58 is Scan 3's, built beside this one.*
+
+### Part A: header and footer (branch claude/site2-a)
+
+- **Header**: "How it works", "Businesses", "Pricing", "Guides", "About", then "Log in" (or "Dashboard" while this browser holds a session, App 4), then "Free check". No dropdowns; the page you are on is underlined (and aria-current). The phone menu shows the same five rows, then "Log in" or "Dashboard", "Check my business free" with the trial line, then "Ask Nora" and "WhatsApp".
+- **Footer**: the logo, "Your business on Google. Taken care of." and the Facebook and Instagram icons. Product: "How it works", "Pricing", "Free check", "Review link and QR code". Explore: "Businesses", "Guides", "FAQ", "Partners". Company: "About", "Security", "Founding 25", "Contact", "WhatsApp" (with its glyph). The legal row: "Privacy", "Terms", "Partner terms", "Your privacy choices". One line: "Kabsi is independent and not affiliated with Google. © 2026 Kabsi."
+- **Moved out of the footer**: "Kabsi is operated by Rashid Abou Hamzy. Contact: hello@kabsi.co. Payments are processed by Creem, our merchant of record." now opens /terms and /privacy. On /privacy, "Who is responsible" reads "The operator, Rashid Abou Hamzy, is also the data controller for the personal data described here." (was the operator line again). "Google's guidance on working with a third party" is a link under the FAQ answer "How do I add Kabsi to my Google profile?". Removed: "Google Business Profile is free from Google. Kabsi is an independent paid service." (the FAQ answer "Can't I do this myself for free?" and /manager-steps still say it).
