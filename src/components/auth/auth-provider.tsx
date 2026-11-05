@@ -8,11 +8,17 @@ import { saveSignupAttribution } from "@/lib/attribution";
 import { clearSeen, isIdle, lastSeen, OWNER_IDLE_MS, STAFF_IDLE_MS, touch } from "@/lib/idle";
 import { hasStoredSession, signInInUrl, SUPABASE_READY_EVENT } from "@/lib/stored-session";
 import { resetSessionEnded } from "@/lib/session-ended";
+import { setSignedOutReason, takeSignedOutReason } from "@/lib/signed-out";
+
+/** The key supabase-js keeps the session under (not the code verifier of a Google sign-in in flight). */
+const SESSION_KEY = /^sb-.+-auth-token$/;
 
 type AuthContextValue = {
   session: Session | null;
   user: User | null;
   loading: boolean;
+  /** Whether the signed-in person is Kabsi staff (is_staff), null until known. The website's Dashboard link uses it. */
+  isStaff: boolean | null;
   signOut: () => Promise<void>;
 };
 
@@ -23,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [wanted, setWanted] = useState(false);
   const [client, setClient] = useState<SupabaseClient | null>(null);
+  const [isStaff, setIsStaff] = useState<boolean | null>(null);
   const queryClient = useQueryClient();
   const pathname = useLocation({ select: (l) => l.pathname });
 
@@ -75,7 +82,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearAssistantChat();
       }
       // A fresh sign-in clears "Your session ended" (session-ended.ts).
-      if (event === "SIGNED_IN") resetSessionEnded();
+      if (event === "SIGNED_IN") {
+        resetSessionEnded();
+        // A sign-in forgets an earlier sign-out's reason, so a later redirect is not mistaken for Log out.
+        if (nextSession) takeSignedOutReason();
+      }
       lastUser = nextUser;
       setSession(nextSession);
       setLoading(false);
@@ -86,7 +97,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [client, queryClient]);
 
+  // Signing out in one tab signs out the others (App 4, 30.31 item 1): another tab removed the stored session, so this
+  // tab drops its copy too and shows the signed-out Home, not a page that would refuse every call.
+  useEffect(() => {
+    if (!client) return;
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === null || (SESSION_KEY.test(e.key) && e.newValue === null)) {
+        if (e.key === null && hasStoredSession()) return;
+        setSignedOutReason("you");
+        void client.auth.signOut({ scope: "local" });
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [client]);
+
   const userId = session?.user.id ?? null;
+  useEffect(() => {
+    if (!userId || !client) {
+      setIsStaff(null);
+      return;
+    }
+    let active = true;
+    void client.rpc("is_staff").then(({ data }) => {
+      if (active) setIsStaff(data === true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [userId, client]);
   useEffect(() => {
     if (!loading) identify(userId);
     // Where a new account came from, saved on the server once (P0.6-02).
@@ -148,14 +187,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       user: session?.user ?? null,
       loading,
+      isStaff,
       signOut: async () => {
-        // Local scope: signing out here doesn't sign you out on your other devices.
+        // Local scope: signing out here doesn't sign you out on your other devices. Home then says "You are signed out."
         const { supabase } = await import("@/lib/supabase");
         const { error } = await supabase.auth.signOut({ scope: "local" });
         if (error) throw error;
+        setSignedOutReason("you");
       },
     }),
-    [loading, session],
+    [isStaff, loading, session],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

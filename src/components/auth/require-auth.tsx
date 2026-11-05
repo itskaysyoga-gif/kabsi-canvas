@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/components/auth/auth-provider";
 import { SessionEndedGate } from "@/components/auth/session-ended-gate";
+import { peekSignedOutReason } from "@/lib/signed-out";
 
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -14,6 +15,11 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     // and wraps /login inside ?next= again and again (an endless redirect loop).
     if (loading || user || redirected.current || location.pathname.startsWith("/login")) return;
     redirected.current = true;
+    // Log out (here or in another tab) ends on Home with "You are signed out.", not on the log in page.
+    if (peekSignedOutReason() === "you") {
+      void navigate({ to: "/", replace: true });
+      return;
+    }
     const next = `${location.pathname}${location.searchStr}${location.hash ? `#${location.hash}` : ""}`;
     void navigate({ to: "/login", search: { next }, replace: true });
   }, [loading, location.hash, location.pathname, location.searchStr, navigate, user]);
