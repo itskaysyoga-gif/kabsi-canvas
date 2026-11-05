@@ -1,6 +1,7 @@
 // google-capture: internal (cron secret), read-only. Captures real Google responses for the two Kabsi-owned profiles
 // (P0.7-01, K-34) with personal data removed. Every request is a GET (see _shared/google/capture.ts); it never
 // writes to Google and never changes GOOGLE_MODE.
+import { serve } from "../_shared/kabsi.ts";
 import { accountLocations, capture, categoriesList, inventory, invitations, postsList, reviews, v4Probe } from "../_shared/google/capture.ts";
 import { secretMatches } from "../_shared/sec1/guards.ts";
 
@@ -17,7 +18,7 @@ async function isInternal(req: Request) {
   return res.ok && secretMatches(given, await res.json());
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (!(await isInternal(req))) return json({ error: "forbidden" }, 403);
   const body = await req.json().catch(() => ({})) as { op?: string; profile?: string; name?: string };
   try {

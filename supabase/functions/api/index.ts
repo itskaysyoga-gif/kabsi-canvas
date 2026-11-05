@@ -5,6 +5,7 @@
 //   /api/holiday    public, the holiday hours links (the token is the credential; hours need the signed-in member)
 //   /api/approve    signed-in members (checked inside with the user's JWT)
 //   /api/resume     signed-in members: the onboarding resume link's next step (V4)
+import { serve } from "../_shared/kabsi.ts";
 import { CORS, json } from "../_shared/kabsi.ts";
 import { cronTick } from "./cron.ts";
 import { action } from "./action.ts";
@@ -14,7 +15,7 @@ import { dispatch } from "./jobs.ts";
 import { resume } from "./resume.ts";
 import { BODY_LIMITS, capBody } from "../_shared/body-cap.ts";
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   // Sec 2: the body is capped before anything reads it (413 past BODY_LIMITS.chat).
   const capped = await capBody(req, BODY_LIMITS.chat, CORS);

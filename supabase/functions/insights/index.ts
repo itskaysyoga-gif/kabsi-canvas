@@ -1,6 +1,7 @@
 // insights: this month's Google figures against last month's, and the search terms on Pro (P0.5-05, K-26, K-138). The
 // logic and its checks are in _shared/insights/handler.ts; this file wires it to the database and the Google layer.
 // Google's figures are read when the screen opens and are not stored; there is no write to the database in here.
+import { serve } from "../_shared/kabsi.ts";
 import { admin, captureError, CORS, currentUser, log, rateLimit } from "../_shared/kabsi.ts";
 import { dailyFigures, performanceSource, searchTermsFor } from "../_shared/google/index.ts";
 import { makeHandler } from "../_shared/insights/handler.ts";
@@ -15,7 +16,7 @@ async function googleId(locationId: string): Promise<string | null> {
   return id;
 }
 
-Deno.serve((req) => {
+serve((req) => {
   googleIds.clear();
   return makeHandler({
     getUser: async (r) => {

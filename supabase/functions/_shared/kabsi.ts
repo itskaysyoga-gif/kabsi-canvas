@@ -4,6 +4,7 @@ import { unsubscribeHeaders } from "./email/unsubscribe.ts";
 import { carriesUser } from "./jwt-user.ts";
 import { RELEASE } from "./release.ts";
 import { scrubFields as scrub, scrubText } from "./log-scrub.ts";
+import { fingerprint, inAutomatedRequest, limiterKey, repeatWindow, REPEAT_WINDOW_MS, withRequest } from "./sentry-gate.ts";
 
 export const APP_URL = Deno.env.get("APP_URL") ?? "https://kabsi.co";
 const SENTRY_DSN = Deno.env.get("SENTRY_DSN_EDGE") ??
@@ -89,11 +90,29 @@ export function log(fn: string, fields: Record<string, unknown>) {
 // D266: review text, reviewer names, emails and tokens must never reach Sentry or jobs_log: captureError, jobLog and log
 // are the choke points, and they share one scrub (log-scrub.ts, pure so the Node tests can run it too).
 export { scrubText };
+// Style 1 part C (30.33 item 4): every function starts through serve(), so captureError knows whether the request came
+// from an automated run (sentry-gate.ts) and sends it nothing; a repeated error goes to Sentry at most once per 10 minutes.
+export function serve(handler: (req: Request) => Response | Promise<Response>) {
+  return Deno.serve((req) => withRequest(req, () => handler(req)));
+}
+const repeats = repeatWindow();
+/** False when this error should not reach Sentry: an automated run, or the same error sent in the last 10 minutes. */
+export async function sentryShouldSend(fn: string, type: string, message: string): Promise<boolean> {
+  if (inAutomatedRequest()) return false;
+  const fp = fingerprint(fn, type, message);
+  if (!repeats.allow(fp)) return false;
+  try {
+    return await rateLimit(await limiterKey(fp), 1, REPEAT_WINDOW_MS / 1000);
+  } catch {
+    return true;
+  }
+}
 export async function captureError(fn: string, error: unknown, extra: Record<string, unknown> = {}) {
   const err = error instanceof Error ? error : new Error(String(error));
   const safeMessage = scrubText(String(err.message ?? "")).slice(0, 300);
   log(fn, { ok: false, err: safeMessage });
   try {
+    if (!(await sentryShouldSend(fn, err.name, safeMessage))) return;
     const m = SENTRY_DSN.match(/^https:\/\/([^@]+)@([^/]+)\/(\d+)$/);
     if (!m) return;
     const [, key, host, project] = m;

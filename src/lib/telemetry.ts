@@ -60,6 +60,9 @@ declare global {
 export { isPrivatePath } from "@/lib/private-paths";
 import { isPrivatePath } from "@/lib/private-paths";
 
+/** Style 1 part C: the user agents of Kabsi's own automated runs (the Edge Functions use the same list, sentry-gate.ts). */
+export const AUTOMATED_UA_PATTERN = "HeadlessChrome|Playwright|Chrome-Lighthouse|Lighthouse|kabsi-nightly|kabsi-qa";
+
 // Inline boot script: sets environment, configures Sentry before its loader runs, and installs
 // the standard PostHog snippet with replay off until a public page turns it on.
 const bootScript = `
@@ -76,10 +79,13 @@ const bootScript = `
   var pii = function(v){ return typeof v === "string" ? scrub(v).replace(PH, "[phone]") : v; };
   // distinct_id (a user id) and token (PostHog's public key) pass untouched: the phone rule could break an id.
   var props = function(o){ if (!o || typeof o !== "object") return o; Object.keys(o).forEach(function(k){ if (k === "distinct_id" || k === "token") return; if (SK.indexOf(k.toLowerCase()) >= 0) delete o[k]; else if (k.charAt(0) !== "$") o[k] = pii(o[k]); else o[k] = scrub(o[k]); }); return o; };
+  // Style 1 part C (master plan 30.33 item 4): Kabsi's own automated runs (Playwright and the nightly check, which drive a
+  // webdriver or headless browser, and Lighthouse) send Sentry nothing, so the errors quota is spent on real visitors.
+  var bot = navigator.webdriver === true || new RegExp(${JSON.stringify(AUTOMATED_UA_PATTERN)}, "i").test(navigator.userAgent || "");
   window.sentryOnLoad = function(){
     Sentry.init({ environment: env, release: ${JSON.stringify(SENTRY_RELEASE)}, sendDefaultPii: false, tracesSampleRate: 0,
       replaysSessionSampleRate: 0, replaysOnErrorSampleRate: 0,
-      beforeSend: function(event){ if (event.user) { event.user = event.user.id ? { id: event.user.id } : undefined; }
+      beforeSend: function(event){ if (bot) return null; if (event.user) { event.user = event.user.id ? { id: event.user.id } : undefined; }
         if (event.request && event.request.headers) { delete event.request.headers["X-Forwarded-For"]; delete event.request.cookies; }
         if (event.request) { event.request.url = scrub(event.request.url); event.request.query_string = undefined; delete event.request.data; if (event.request.headers) event.request.headers.Referer = scrub(event.request.headers.Referer); }
         if (event.transaction) event.transaction = scrub(event.transaction);
