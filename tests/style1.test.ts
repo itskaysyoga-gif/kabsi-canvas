@@ -80,7 +80,10 @@ describe("Style 1 part B: the 30.32 look on every public page", () => {
 
   it("gives Founding 25, Partners, About and Pricing a library photo", () => {
     for (const f of ["d5-founding", "d2-partners", "d8-about", "d8-pricing"])
-      expect(readFileSync(`src/components/kabsi/${f}.tsx`, "utf8"), f).toContain("<SectionPhoto");
+      // Site 2: About's library photo is its hero photo (an <Img>), the others a <SectionPhoto>.
+      expect(readFileSync(`src/components/kabsi/${f}.tsx`, "utf8"), f).toMatch(
+        /<SectionPhoto|<Img\s/,
+      );
   });
 
   it("keeps Security's reading blocks to short lines", () => {

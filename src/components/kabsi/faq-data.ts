@@ -118,7 +118,7 @@ export const buildFaqGroups = (whatsappOn: boolean = WHATSAPP_ON): FaqGroup[] =>
         },
         {
           q: "How do I add Kabsi to my Google profile?",
-          a: `On Google, open your profile (search your business name while signed in), then Menu, Business Profile settings, People and access, Add. Paste ${KABSI_GROUP_ID}, choose Manager, then Add (on some screens, Invite). ${KABSI_GROUP_ID} is ${KABSI_GROUP_NAME}, Kabsi's business group on Google. Never send us a password or a code.`,
+          a: `On Google, open your profile, then Menu, Business Profile settings, People and access, Add. Paste ${KABSI_GROUP_ID}, choose Manager, then Add (on some screens, Invite). ${KABSI_GROUP_ID} is ${KABSI_GROUP_NAME}, Kabsi's business group on Google. Never send us a password or a code.`,
         },
         {
           q: "Which businesses can use Kabsi?",
