@@ -110,7 +110,7 @@ describe("code errors", () => {
   });
   it("no line has an exclamation mark or a dash", () => {
     for (const l of [WRONG_CODE, EXPIRED_CODE, OFFLINE, UNREACHABLE])
-      expect(l).not.toMatch(/[!–—]/);
+      expect(l).not.toMatch(/[!\u2013\u2014]/);
   });
 });
 
