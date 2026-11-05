@@ -592,6 +592,43 @@ Deno.test("suggest: 20 a minute, 120 an hour and 60 a day per visitor, then 429 
   }
 });
 
+// Scan 3 (master plan 30.34 item 2): one Turnstile pass per search session, asked before the first suggestion.
+Deno.test("pass: one Turnstile token buys the pass, never reaches Places, and the suggestions then need no token", async () => {
+  const w = world();
+  try {
+    const p = await w.call({ action: "pass", turnstile: "ok" });
+    assert.equal(p.status, 200);
+    assert.equal(typeof p.body.pass, "string");
+    assert.equal(w.requests.length, 0, "the pass asks nothing of Places");
+    // The first suggestion carries the pass and no token, and is answered.
+    const s = await w.call({ action: "suggest", query: "harbour", session_token: SESSION, pass: p.body.pass, turnstile: "" });
+    assert.equal(s.status, 200);
+    assert.equal(s.body.available, true);
+    assert.equal(s.body.pass, undefined, "a valid pass is not reissued");
+    // Without a passing bot check there is no pass.
+    const bad = await w.call({ action: "pass", turnstile: "" });
+    assert.equal(bad.status, 400);
+    assert.equal(bad.body.error, "challenge_failed");
+    // The pass counts against the suggestions' per-minute limit: past it, 429 and no pass.
+    const minKey = [...w.hits.keys()].find((k) => k.startsWith("snapshot:suggest-min:"))!;
+    w.hits.set(minKey, LIMITS.suggestPerMinute);
+    const over = await w.call({ action: "pass", turnstile: "ok" });
+    assert.equal(over.status, 429);
+    assert.equal(over.body.pass, undefined);
+    // A suggestion refused by the minute limit does not count on the hour or the day, as when the limits ran in order.
+    const hourKey = () => [...w.hits.keys()].find((k) => k.startsWith("snapshot:suggest-hour:"))!;
+    const dayKey = () => [...w.hits.keys()].find((k) => k.startsWith("snapshot:suggest-day:"))!;
+    const [h, dd] = [w.hits.get(hourKey()), w.hits.get(dayKey())];
+    const refused = await w.call({ action: "suggest", query: "harbour more", session_token: SESSION, pass: p.body.pass, turnstile: "" });
+    assert.equal(refused.status, 429);
+    assert.deepEqual([w.hits.get(hourKey()), w.hits.get(dayKey())], [h, dd]);
+    // It does not use the free check's own 10 a minute.
+    assert.equal([...w.hits.keys()].some((k) => k.startsWith("snapshot:min:")), false);
+  } finally {
+    restore();
+  }
+});
+
 Deno.test("suggest: the Autocomplete day cap, a Google error or a missing key give available false, so the page falls back to search", async () => {
   // The cap: the Google layer refuses (places_take says no) and nothing is sent.
   let w = world({ cap: 0 });
