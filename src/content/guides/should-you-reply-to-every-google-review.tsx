@@ -32,9 +32,9 @@ export const guide: GuideDoc = {
       body: (
         <p>
           Read together, the advice is not 'reply to everything with the same line' and not 'only
-          reply to complaints'. It is: reply where you have something worth saying, and say it in your
-          own words. For most small businesses that means a short, specific reply to nearly every
-          review that has text, and a careful one to every negative review.
+          reply to complaints'. It is: reply where you have something worth saying, and say it in
+          your own words. For most small businesses that means a short, specific reply to nearly
+          every review that has text, and a careful one to every negative review.
         </p>
       ),
     },
@@ -69,7 +69,9 @@ export const guide: GuideDoc = {
         <ol>
           <li>One-star to three-star reviews, especially any that describe a real problem.</li>
           <li>Reviews that ask something: opening times, parking, whether you offer a service.</li>
-          <li>Reviews that mention a person, a dish or a service you can thank them for by name.</li>
+          <li>
+            Reviews that mention a person, a dish or a service you can thank them for by name.
+          </li>
           <li>Short positive reviews, with a brief, personal line.</li>
         </ol>
       ),
@@ -81,9 +83,9 @@ export const guide: GuideDoc = {
         "The Google help pages behind this guide set no separate rule for star-only reviews, so replying is your choice. A one-line thank-you that sounds like you is fine; the same pasted line on dozens of reviews is what Google's advice warns against.",
       body: (
         <p>
-          If you do reply, keep it to a sentence and vary it: thank them for coming in, or mention the
-          day or the service if you know it. If you have nothing to add, putting your time into the
-          reviews with text is the better use of it.
+          If you do reply, keep it to a sentence and vary it: thank them for coming in, or mention
+          the day or the service if you know it. If you have nothing to add, putting your time into
+          the reviews with text is the better use of it.
         </p>
       ),
     },
@@ -110,9 +112,12 @@ export const guide: GuideDoc = {
           />
           <p>
             To change a reply later, select <b>Edit</b> under it, change the text and select{" "}
-            <b>Update</b>; to remove it, select <b>Edit</b>, then <b>Delete</b> and confirm. The full walk-through, with examples, is
-            in{" "}
-            <GuideLink slug="how-to-reply-to-google-reviews">how to reply to Google reviews</GuideLink>.
+            <b>Update</b>; to remove it, select <b>Edit</b>, then <b>Delete</b> and confirm. The
+            full walk-through, with examples, is in{" "}
+            <GuideLink slug="how-to-reply-to-google-reviews">
+              how to reply to Google reviews
+            </GuideLink>
+            .
           </p>
         </>
       ),
@@ -124,8 +129,8 @@ export const guide: GuideDoc = {
         "Google checks every reply against its content policies before posting it. It says this usually takes up to 10 minutes but can sometimes take up to 30 days, and if a reply is not approved you will be asked to edit it.",
       body: (
         <Callout kind="tip" title="Keep it clean so it goes through">
-          A reply has to follow the same content policies as reviews. Stay polite, leave out personal
-          details about the customer, and do not turn it into an advert.
+          A reply has to follow the same content policies as reviews. Stay polite, leave out
+          personal details about the customer, and do not turn it into an advert.
         </Callout>
       ),
     },
@@ -160,7 +165,9 @@ export const guide: GuideDoc = {
         "Google's pages here name no separate rule for the UK or the UAE. Google does say reviews are available only in certain countries or regions and for certain business categories, so if you cannot see reviews at all, that may be why.",
       body: (
         <p>
-          The practical difference is language: in either country you may get reviews in more than one language, such as English and Arabic in the UAE. Replying in the language the customer wrote in is a natural way to make the reply personal.
+          The practical difference is language: in either country you may get reviews in more than
+          one language, such as English and Arabic in the UAE. Replying in the language the customer
+          wrote in is a natural way to make the reply personal.
         </p>
       ),
     },
@@ -171,12 +178,13 @@ export const guide: GuideDoc = {
       <>
         <p>
           Every new review reaches you with a reply already drafted in the reviewer's language, on
-          WhatsApp or by email, and you tap Approve reply, Edit or Skip; nothing goes on Google until
-          you approve it. A review with only stars gets a short thank-you draft, and a draft that reads
-          like a reply you already posted fails Kabsi's checks, so you are not pasting the same line.
-          Complaints get a careful draft with the issue shown above it, and a review with a legal
-          threat, a safety problem, or a complaint that names a member of your team gets no draft, only a short
-          checklist, so you decide what to say. You can also choose "I'll reply myself".
+          WhatsApp or by email, and you tap Approve reply, Edit or Skip; nothing goes on Google
+          until you approve it. A review with only stars gets a short thank-you draft, and a draft
+          that reads like a reply you already posted fails Kabsi's checks, so you are not pasting
+          the same line. Complaints get a careful draft with the issue shown above it, and a review
+          with a legal threat, a safety problem, or a complaint that names a member of your team
+          gets no draft, only a short checklist, so you decide what to say. You can also choose
+          "I'll reply myself".
         </p>
         <p>
           When you first connect, Kabsi drafts replies for your most recent unanswered reviews too.{" "}

@@ -62,8 +62,8 @@ export const guide: GuideDoc = {
           />
           <p>
             Before you remove an agency, ask for anything of yours they hold, such as photos they
-            took or reports they sent. If the agency added a
-            website or booking link you no longer use, change it on the profile after they are gone.
+            took or reports they sent. If the agency added a website or booking link you no longer
+            use, change it on the profile after they are gone.
           </p>
           <Callout kind="tip" title="Check the pending list too">
             An invitation that was never accepted sits under Pending on the same page. Select the
@@ -133,13 +133,13 @@ export const guide: GuideDoc = {
           <p>
             For a business with no shop or office that serves customers at their location, Google's
             page says to contact Google instead and choose the transfer of ownership option as the
-            issue. You can check the status of a request by signing in or from the
-            link in your confirmation email.
+            issue. You can check the status of a request by signing in or from the link in your
+            confirmation email.
           </p>
           <Callout kind="warn" title="Do not make a second profile">
-            Google says you can have only one Business Profile for each business, and that a
-            profile treated as a duplicate does not show on Google Search or Maps. Request ownership
-            of the existing one instead.
+            Google says you can have only one Business Profile for each business, and that a profile
+            treated as a duplicate does not show on Google Search or Maps. Request ownership of the
+            existing one instead.
           </Callout>
         </>
       ),
@@ -154,8 +154,8 @@ export const guide: GuideDoc = {
           <p>
             Google also says that if someone claims to work for Google, you should ask for their
             name and an email from their @google.com address, and that if they cannot give one they
-            likely do not. If a third party breaks Google's third-party policies, report them through
-            Google's{" "}
+            likely do not. If a third party breaks Google's third-party policies, report them
+            through Google's{" "}
             <Out href="https://support.google.com/business/answer/7163406?hl=en">
               third-party guidance page
             </Out>
@@ -193,9 +193,10 @@ export const guide: GuideDoc = {
         </p>
         <p>
           What Kabsi does is check your details every day, such as your name, phone, website,
-          address and hours, and tell you when something on Google changes, so an edit by someone who
-          still has access does not go unnoticed. You can remove Kabsi the same way as anyone else:
-          People and access, Kabsi Clients, Remove person. <SiteRef to="/scan">Run the free check</SiteRef>.
+          address and hours, and tell you when something on Google changes, so an edit by someone
+          who still has access does not go unnoticed. You can remove Kabsi the same way as anyone
+          else: People and access, Kabsi Clients, Remove person.{" "}
+          <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>
     ),

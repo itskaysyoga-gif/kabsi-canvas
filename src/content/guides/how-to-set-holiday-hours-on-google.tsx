@@ -44,8 +44,8 @@ export const guide: GuideDoc = {
             these More hours, which are separate from special hours.
           </li>
           <li>
-            <b>Seasonal hours:</b> Google's guidelines say you may use your current seasonal hours as
-            your regular hours.
+            <b>Seasonal hours:</b> Google's guidelines say you may use your current seasonal hours
+            as your regular hours.
           </li>
         </ul>
       ),
@@ -78,10 +78,10 @@ export const guide: GuideDoc = {
           />
           <p>
             For two sets of hours on one day, select More, then Add hours. To delete special hours
-            on a closed day, select Delete next to the date; on an open day, select More, then Remove
-            day. If you upload special hours in a spreadsheet, Google says a set cannot be longer
-            than 24 hours: a set that runs from before midnight one day to past noon the next is
-            split into one set to the end of the first day and one from midnight on the second.
+            on a closed day, select Delete next to the date; on an open day, select More, then
+            Remove day. If you upload special hours in a spreadsheet, Google says a set cannot be
+            longer than 24 hours: a set that runs from before midnight one day to past noon the next
+            is split into one set to the end of the first day and one from midnight on the second.
           </p>
         </>
       ),
@@ -143,15 +143,15 @@ export const guide: GuideDoc = {
           <ul>
             <li>
               <b>National Day:</b> 2 and 3 December, two days. In 2026 that is Wednesday 2 and
-              Thursday 3 December. Google's holiday list for the UAE shows 2 December, so set the 3rd
-              yourself if your hours change that day too.
+              Thursday 3 December. Google's holiday list for the UAE shows 2 December, so set the
+              3rd yourself if your hours change that day too.
             </li>
             <li>
               <b>Gregorian New Year:</b> 1 January, a Friday in 2027.
             </li>
             <li>
-              <b>Eid Al Fitr:</b> from 1 to 3 Shawwal. The portal says that if Ramadan lasts 30 days,
-              day 30 is also an official holiday for Eid Al Fitr.
+              <b>Eid Al Fitr:</b> from 1 to 3 Shawwal. The portal says that if Ramadan lasts 30
+              days, day 30 is also an official holiday for Eid Al Fitr.
             </li>
             <li>
               <b>Arafah Day and Eid Al Adha:</b> 9 Thu Al Hijjah, then 10 to 12 Thu Al Hijjah.
@@ -164,7 +164,8 @@ export const guide: GuideDoc = {
             The portal says that under Cabinet Resolution No. 27 of 2024, a public holiday is not
             moved to another day when it falls on a weekend or on another public holiday. Google's
             list for the UAE also marks 30 November, which is not on the portal's list of public
-            holidays, so a warning may show on that day; confirm your hours if you are open as usual.
+            holidays, so a warning may show on that day; confirm your hours if you are open as
+            usual.
           </p>
         </>
       ),
@@ -221,9 +222,9 @@ export const guide: GuideDoc = {
           Five days before a public holiday, Kabsi asks you by email, and in Kabsi under Hours, what
           your business will do: normal hours, closed or custom hours. It never assumes. Closed or
           custom hours become special hours for those days once you tap Confirm and save to Google,
-          and Kabsi checks that Google shows them. A holiday that follows the moon, such as Eid, says
-          "expected", and you can move the days up to three either way. Ramadan is asked once, before
-          the month starts.
+          and Kabsi checks that Google shows them. A holiday that follows the moon, such as Eid,
+          says "expected", and you can move the days up to three either way. Ramadan is asked once,
+          before the month starts.
         </p>
         <p>
           For the UK, Kabsi uses the England and Wales bank holidays from GOV.UK; Scotland and
