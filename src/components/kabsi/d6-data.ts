@@ -1,6 +1,6 @@
 // Design 6 (master plan 30.20 section 3, 30.21; Web 3): the hero line and the demonstration's Example review.
 
-/** The hero's supporting line (30.20 section 3, approved). The "at launch" line follows it while WhatsApp is off. */
+/** The hero's supporting line (30.20 section 3, approved). Nothing follows it. */
 export const HERO_LINE =
   "Reviews to reply to. Details to keep right. Posts to prepare. Kabsi does the work and asks for your yes on WhatsApp.";
 

@@ -1,7 +1,7 @@
 // Web 5 (Design 9 on kabsi.co, master plan 30.24): the rules the new Home and shell must keep.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { NEARBY_ON, WHATSAPP_ON } from "@/lib/site";
+import { WHATSAPP_ON } from "@/lib/site";
 import { D9Title, splitTitle } from "@/components/kabsi/d9-title";
 import {
   D9_CASES,
@@ -41,8 +41,9 @@ describe("Design 9 Home (Web 5 part B)", () => {
     expect(D9_PHOTO.points).toHaveLength(3);
     expect(D9_PHOTO.line).toContain("asks for your yes");
   });
-  it("labels Where you show up At launch until NEARBY_ON", () => {
-    expect(D9_SHOW_UP.atLaunch).toBe(!NEARBY_ON);
+  it("labels Where you show up with no At launch label (Go live 1, master plan 30.28)", () => {
+    expect("atLaunch" in D9_SHOW_UP).toBe(false);
+    expect(D9_SHOW_UP.line).toBe("Two checks Kabsi runs, shown as they are. No score.");
   });
   it("says the map count the sample points really show", () => {
     const top3 = D9_MAP_POINTS.filter((p) => p.rank <= 3).length;
@@ -50,18 +51,16 @@ describe("Design 9 Home (Web 5 part B)", () => {
       `You came up in the first 3 at ${top3} of ${D9_MAP_POINTS.length} places Kabsi checked.`,
     );
   });
-  // Polish 4 (30.25 item 3): the watch line names no channel, so it is true either way; the launch line shows once,
-  // under the hero, while WHATSAPP_ON is false.
-  it("promises no channel on the profile watch and shows the launch line once", () => {
+  // Polish 4 (30.25 item 3): the watch line names no channel, so it is true either way. Go live 1 (30.28): the launch
+  // line is gone from the hero and from every page.
+  it("promises no channel on the profile watch and shows no launch line", () => {
     expect(D9_WATCH.line).not.toContain("WhatsApp");
     expect(D9_WATCH.line.split(" ").length).toBeLessThanOrEqual(20);
     expect(read("src/components/kabsi/d9-home.tsx")).not.toContain("WHATSAPP_LAUNCH_LINE");
-    expect(
-      read("src/components/kabsi/d9-hero.tsx").match(/\{WHATSAPP_LAUNCH_LINE\}/g),
-    ).toHaveLength(1);
-    expect(WHATSAPP_ON || read("src/components/kabsi/d9-hero.tsx").includes("!WHATSAPP_ON")).toBe(
-      true,
+    expect(read("src/components/kabsi/d9-hero.tsx")).not.toMatch(
+      /WHATSAPP_LAUNCH_LINE|opens at launch/,
     );
+    expect(WHATSAPP_ON).toBe(true);
   });
   it("uses the facts' watched list and promises no put-back without a yes", () => {
     expect(D9_WATCH.watched).not.toContain("Description");

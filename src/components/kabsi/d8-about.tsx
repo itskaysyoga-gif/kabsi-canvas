@@ -6,7 +6,6 @@ import {
   NOT_AFFILIATED,
   OPERATOR_NAME,
   SOCIAL_LINKS,
-  WHATSAPP_LAUNCH_LINE,
   WHATSAPP_ON,
   WHATSAPP_URL,
 } from "@/lib/site";
@@ -70,7 +69,7 @@ export function D8About() {
               on WhatsApp before anything goes live."
             </blockquote>
             <figcaption className="mt-6 text-body text-text-2">
-              {OPERATOR_NAME}, founder of Kabsi.{WHATSAPP_ON ? "" : ` ${WHATSAPP_LAUNCH_LINE}`}
+              {OPERATOR_NAME}, founder of Kabsi.
             </figcaption>
           </figure>
         </div>

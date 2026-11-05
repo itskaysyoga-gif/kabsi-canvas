@@ -2,7 +2,7 @@
 // groups (faq-data.ts FAQ_GROUPS, the same words as the FAQPage data in the route head), "Talk to a person" and the
 // closing free check.
 import { ArrowRight } from "lucide-react";
-import { CONTACT_EMAIL, WHATSAPP_LAUNCH_LINE, WHATSAPP_ON, WHATSAPP_URL } from "@/lib/site";
+import { CONTACT_EMAIL, WHATSAPP_ON, WHATSAPP_URL } from "@/lib/site";
 import { Faq, buttonClass } from "./ui";
 import { PageHero, popCls, stagger } from "./page-hero";
 import { Closing } from "./closing";
@@ -86,10 +86,7 @@ export function D8Faq() {
                   </a>
                 </>
               ) : (
-                <>
-                  <p className="mt-2 text-body text-text-2">Write to {MAIL}. A person reads it.</p>
-                  <p className="mt-2 text-small text-text-2">{WHATSAPP_LAUNCH_LINE}</p>
-                </>
+                <p className="mt-2 text-body text-text-2">Write to {MAIL}. A person reads it.</p>
               )}
             </div>
           </div>

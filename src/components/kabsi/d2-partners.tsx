@@ -261,7 +261,9 @@ export function PartnersPage() {
             <h2 id="p-apply" className="max-w-[40rem] text-h2">
               Earn 25% of every payment.
             </h2>
-            <p className="mt-4 text-body text-text-2">Kabsi Partners opens at launch.</p>
+            <p className="mt-4 text-body text-text-2">
+              Kabsi Partners opens when card payments open.
+            </p>
             {WHATSAPP_ON && (
               <a
                 href={whatsappHref("partner")}

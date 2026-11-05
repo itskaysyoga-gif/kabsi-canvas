@@ -1,6 +1,6 @@
 ## 6. Partners
 
-**[COMING]** Kabsi Partners, an affiliate program, is not open yet: partner links switch on at the launch gate, and people can apply before (the partners page form, or hello@kabsi.co). The team approves each partner; the first 20 approved are Founding Partners. The rules (decided 26 Oct 2026, master plan 30.15 section 5; the partner terms at kabsi.co/partners/terms are the full text):
+**[COMING]** Kabsi Partners, an affiliate program, is not open yet: partner links switch on when card payments open, and people can apply before (the partners page form, or hello@kabsi.co). The team approves each partner; the first 20 approved are Founding Partners. The rules (decided 26 Oct 2026, master plan 30.15 section 5; the partner terms at kabsi.co/partners/terms are the full text):
 
 - A partner earns 25 percent of the subscription revenue Kabsi collects from a business they referred, not counting tax, refunds or chargebacks, for as long as that subscription stays paid, extra locations included: an extra location is paid as its own payment and earns the same 25 percent of what was collected for it. Trials earn nothing.
 - Each commission waits 30 days from the payment. A refund or chargeback inside the 30 days cancels it; one after a payout comes off the next payout.
@@ -15,4 +15,4 @@
 - Questions about becoming a partner: hello@kabsi.co. Do not promise terms, dates or earnings.
 
 ---
-- The partner terms are public at kabsi.co/partners/terms (added 24 Oct 2026): what the program is, the commission, the hold and payout, how a referral is credited, the rules every partner follows, fraud and ending, what a partner sees, liability and law. If someone asks about terms, earnings or dates, point to that page and to hello@kabsi.co. Do not quote earnings, and say Kabsi Partners opens at launch. The terms of service (section 17) and the privacy policy (sections 2, 6 and 8) mention partners.
+- The partner terms are public at kabsi.co/partners/terms (added 24 Oct 2026): what the program is, the commission, the hold and payout, how a referral is credited, the rules every partner follows, fraud and ending, what a partner sees, liability and law. If someone asks about terms, earnings or dates, point to that page and to hello@kabsi.co. Do not quote earnings, and say Kabsi Partners opens when card payments open. The terms of service (section 17) and the privacy policy (sections 2, 6 and 8) mention partners.

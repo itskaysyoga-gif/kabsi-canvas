@@ -176,20 +176,6 @@ export function heroSub(whatsappOn: boolean = WHATSAPP_ON): string {
     whatsappOn ? "You approve on WhatsApp." : "You approve in one tap."
   }`;
 }
-/**
- * The one switch for the nearby check ("Where you come up nearby") and the AI answer (Polish 3, lane R, 3 Nov 2026). Both
- * are tested but not open to owners. While it is false every hard-coded "At launch" label for those two features shows:
- * the pill on Home's two jobs, on the free check page and on the Example result, and the sentence "Where you come up
- * nearby opens at launch." in the FAQ. Set it to true when the nearby check opens and the pills and that sentence go,
- * with nothing else changing. The live free check keeps its own waiting-list logic (scan-live.tsx), and Kabsi Partners
- * keeps its own "opens at launch" lines.
- */
-export const NEARBY_ON = true; // Go live 1 (master plan 30.28, 5 Nov 2026)
-/**
- * The line beside every "on WhatsApp" line while Kabsi's WhatsApp number is not set (Design 6 audit section 4, Price 1).
- * Shown only while WHATSAPP_ON is false; the plain line stands alone once the number is set.
- */
-export const WHATSAPP_LAUNCH_LINE = "WhatsApp opens at launch. Until then you approve on kabsi.co.";
 /** The full non-affiliation notice, shown in every public footer (K-112). */
 export const GOOGLE_NOTICE =
   "Google and Google Business Profile are trademarks of Google LLC. Kabsi is independent and not affiliated with, sponsored by or endorsed by Google.";

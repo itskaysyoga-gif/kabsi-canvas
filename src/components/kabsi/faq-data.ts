@@ -2,25 +2,18 @@ import {
   FOUNDING_SENTENCE,
   KABSI_GROUP_ID,
   KABSI_GROUP_NAME,
-  NEARBY_ON,
   PRICES_SENTENCE,
   WHATSAPP_ON,
 } from "@/lib/site";
 
-/** Polish 3 (lane R decision 2 of 3 Nov 2026): "Where you come up nearby opens at launch." is said only while NEARBY_ON
- * is false; with it true the sentence goes and the answer ends at "what you can do next." (COPY.md section 41). */
-export const nearbyFaqAnswer = (nearbyOn: boolean = NEARBY_ON): string =>
-  `No one can promise that. Kabsi shows what changed on your profile and what you can do next.${
-    nearbyOn ? "" : " Where you come up nearby opens at launch."
-  }`;
+/** Polish 3 (COPY.md section 41); Go live 1 (30.28): the nearby check is open, so the answer ends at "what you can do next." */
+export const NEARBY_FAQ_A =
+  "No one can promise that. Kabsi shows what changed on your profile and what you can do next.";
 
-/** Fix 2 (master plan 30.27 item 2): the AI answer made clear, written from the facts (13, the FAQ). The "opens at launch"
- * sentence follows NEARBY_ON, like the nearby check's answer. */
+/** Fix 2 (master plan 30.27 item 2): the AI answer made clear, written from the facts (13, the FAQ). Go live 1: open. */
 export const CHATGPT_Q = "Can Kabsi make my business appear in ChatGPT?";
-export const chatgptAnswer = (nearbyOn: boolean = NEARBY_ON): string =>
-  `No one can promise that. Kabsi checks selected questions on ChatGPT and Perplexity through their API, which can differ from what their apps show. It shows whether your business was named and which sources were cited. When an answer states a fact differently from what you confirmed, such as your hours, phone or address, Kabsi opens a task: to fix it on your Google profile, where Kabsi can, or to tell you what to check on your website or another site that lists you, where it cannot.${
-    nearbyOn ? "" : " The AI answer opens at launch."
-  }`;
+export const CHATGPT_A =
+  "No one can promise that. Kabsi checks selected questions on ChatGPT and Perplexity through their API, which can differ from what their apps show. It shows whether your business was named and which sources were cited. When an answer states a fact differently from what you confirmed, such as your hours, phone or address, Kabsi opens a task: to fix it on your Google profile, where Kabsi can, or to tell you what to check on your website or another site that lists you, where it cannot.";
 export const NEARBY_VS_AI_Q = "How is the nearby check different from the AI answer?";
 export const NEARBY_VS_AI_A =
   "The nearby check searches Google Maps from places around your business, like a customer standing there, and shows where you came up. The AI answer asks ChatGPT and Perplexity questions a customer might ask, and shows whether they name you and what they say about you.";
@@ -32,10 +25,10 @@ export const WHATSAPP_APPROVE_Q = "Can I approve a reply or a post on WhatsApp?"
 export const whatsappApproveAnswer = (whatsappOn: boolean = WHATSAPP_ON): string =>
   whatsappOn
     ? "Yes. Kabsi sends each reply or post to you on WhatsApp, and nothing goes live on Google until you say yes. A change to your address, phone or business name is confirmed on kabsi.co instead."
-    : "Not yet. WhatsApp opens at launch. Until then you approve on kabsi.co.";
+    : "You approve on kabsi.co or from the email.";
 
 // The shared FAQ (COPY.md section 16), numbered as there.
-export const buildFaq = (nearbyOn: boolean = NEARBY_ON): { q: string; a: string }[] => [
+export const buildFaq = (): { q: string; a: string }[] => [
   {
     q: "Does Kabsi need my Google password?",
     a: "No. You add Kabsi as a Manager on your Google profile. You stay the owner and can remove Kabsi any time.",
@@ -50,8 +43,7 @@ export const buildFaq = (nearbyOn: boolean = NEARBY_ON): { q: string; a: string 
   },
   {
     q: "Can Kabsi promise where I come up on Google Maps?",
-    // Fix 1: the nearby check is not open yet, so "where you show up" is said as at launch. Polish 3: that follows NEARBY_ON.
-    a: nearbyFaqAnswer(nearbyOn),
+    a: NEARBY_FAQ_A,
   },
   { q: "Can I edit replies?", a: "Yes. Tap Edit on WhatsApp or on the Kabsi website." },
   {
@@ -112,14 +104,11 @@ export const BILLING_FAQ: { q: string; a: string }[] = [
 
 /** /faq on Design 8 (Web 4c): five groups, every answer checked against knowledge/kabsi-facts.md (COPY.md 38 lists the
  * answers changed to the facts). With the shared FAQ because the route head builds the FAQPage data from it, word for
- * word. The WhatsApp answers follow the WhatsApp switch, so the launch needs no change here. */
+ * word. The WhatsApp answers follow the WhatsApp switch (the one setting). */
 export type FaqGroup = { id: string; title: string; items: { q: string; a: string }[] };
 
-export const buildFaqGroups = (
-  whatsappOn: boolean = WHATSAPP_ON,
-  nearbyOn: boolean = NEARBY_ON,
-): FaqGroup[] => {
-  const faq = buildFaq(nearbyOn);
+export const buildFaqGroups = (whatsappOn: boolean = WHATSAPP_ON): FaqGroup[] => {
+  const faq = buildFaq();
   return [
     {
       id: "start",
@@ -155,7 +144,7 @@ export const buildFaqGroups = (
         },
         faq[5]!,
         faq[3]!,
-        { q: CHATGPT_Q, a: chatgptAnswer(nearbyOn) },
+        { q: CHATGPT_Q, a: CHATGPT_A },
         { q: NEARBY_VS_AI_Q, a: NEARBY_VS_AI_A },
         {
           q: "How do I remove Kabsi?",
@@ -216,7 +205,7 @@ export const buildFaqGroups = (
         : [
             {
               q: "Does Kabsi have a WhatsApp number?",
-              a: "Yes. It is being tested and opens to owners at launch. Until then write to hello@kabsi.co, and a person answers, not a bot.",
+              a: "Write to hello@kabsi.co, and a person answers, not a bot.",
             },
             {
               q: WHATSAPP_APPROVE_Q,
