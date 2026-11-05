@@ -78,9 +78,9 @@ export const guide: GuideDoc = {
       body: (
         <>
           <Callout kind="warn" title="Do not delete it">
-            Do not delete a profile you think is a duplicate: deleting it can lose its reviews. Google's
-            own page says that when a profile is removed, all its content and linked managers are
-            removed too. Ask Google to merge instead, and let Google decide.
+            Do not delete a profile you think is a duplicate: deleting it can lose its reviews.
+            Google's own page says that when a profile is removed, all its content and linked
+            managers are removed too. Ask Google to merge instead, and let Google decide.
           </Callout>
           <p>These are the steps on Google's Maps help page, signed in to your Google Account:</p>
           <Steps
@@ -96,9 +96,9 @@ export const guide: GuideDoc = {
           />
           <p>
             Google says it reviews these edits, so it can take some time for a change to show on the
-            map, and it gives no fixed time. Before you send the request, make sure your real profile
-            shows the same name, address and phone number you see on your sign, so the two clearly
-            describe one business.
+            map, and it gives no fixed time. Before you send the request, make sure your real
+            profile shows the same name, address and phone number you see on your sign, so the two
+            clearly describe one business.
           </p>
         </>
       ),
@@ -116,8 +116,8 @@ export const guide: GuideDoc = {
                 Go to <b>business.google.com/add</b> and enter your business name and address.
               </>,
               <>
-                Choose your business from the list. Google shows "Someone else may manage this Business
-                Profile."
+                Choose your business from the list. Google shows "Someone else may manage this
+                Business Profile."
               </>,
               <>
                 Select <b>Request Access</b>, fill out the form and select <b>Submit</b>.
@@ -151,8 +151,8 @@ export const guide: GuideDoc = {
             departments within other businesses, and individual practitioners at a shared location.
           </p>
           <p>
-            Before you appeal, take clear photos of each business's permanent sign at the entrance. A
-            salon and a nail bar sharing one shopfront under one sign are hard to show as two
+            Before you appeal, take clear photos of each business's permanent sign at the entrance.
+            A salon and a nail bar sharing one shopfront under one sign are hard to show as two
             businesses; two shops with their own names over their own doors are easier.
           </p>
         </>
@@ -187,11 +187,11 @@ export const guide: GuideDoc = {
         "Google's pages here name no separate rule for the UK or the UAE. One thing to know: Google's Maps help says some editing options are only available in some countries and regions, so if you do not see an option, use Google's help from your profile.",
       body: (
         <p>
-          In the UAE, where many addresses use a building and an area, two results for one business can
-          differ only in how the address is written, for example one with the building name and one with the street.
-          In the UK the postcode is usually the quickest way to see that two results are the same
-          place. Either way, compare the map marker: two markers on the same entrance with the same
-          name are the same business.
+          In the UAE, where many addresses use a building and an area, two results for one business
+          can differ only in how the address is written, for example one with the building name and
+          one with the street. In the UK the postcode is usually the quickest way to see that two
+          results are the same place. Either way, compare the map marker: two markers on the same
+          entrance with the same name are the same business.
         </p>
       ),
     },
@@ -201,11 +201,11 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          Kabsi does not delete, merge or claim profiles, and it cannot appeal to Google for you. Kabsi
-          is a Manager on your profile, so it cannot delete a profile either, and it never tells you to.
-          If Google sees someone else claiming your profile, Kabsi notices when it reads Google's state
-          for your profile once a day, stops sending anything to Google, and tells you what Google is
-          asking. Only you, as the owner, can act with Google.
+          Kabsi does not delete, merge or claim profiles, and it cannot appeal to Google for you.
+          Kabsi is a Manager on your profile, so it cannot delete a profile either, and it never
+          tells you to. If Google sees someone else claiming your profile, Kabsi notices when it
+          reads Google's state for your profile once a day, stops sending anything to Google, and
+          tells you what Google is asking. Only you, as the owner, can act with Google.
         </p>
         <p>
           If you are not sure which result is yours, write to hello@kabsi.co or ask for the free

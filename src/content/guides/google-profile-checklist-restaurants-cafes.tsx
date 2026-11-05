@@ -34,9 +34,9 @@ export const guide: GuideDoc = {
           <p>
             Open Edit profile and, next to Business category, select Edit. Add extra categories only
             for real parts of the business: Google's example is a grocery store with a bakery and a
-            deli adding 'Bakery' and 'Deli'. A cafe run separately inside another business, such as a
-            health club, should have its own profile with 'Cafe' as its main category rather than be
-            added to the club's.
+            deli adding 'Bakery' and 'Deli'. A cafe run separately inside another business, such as
+            a health club, should have its own profile with 'Cafe' as its main category rather than
+            be added to the club's.
           </p>
           <p>
             The category also opens features. Google says restaurants can add links for online
@@ -64,7 +64,10 @@ export const guide: GuideDoc = {
             may warn people that your hours might differ. For the UK it lists Christmas Eve,
             Christmas Day and Boxing Day, with Boxing Day observed on Monday 28 December 2026, and
             New Year's Day. Step by step:{" "}
-            <GuideLink slug="how-to-set-holiday-hours-on-google">how to set holiday hours on Google</GuideLink>.
+            <GuideLink slug="how-to-set-holiday-hours-on-google">
+              how to set holiday hours on Google
+            </GuideLink>
+            .
           </p>
         </>
       ),
@@ -132,8 +135,8 @@ export const guide: GuideDoc = {
           <p>
             For tables, Google says a provider may charge you for bookings through Google, and that
             restaurants can also add a waitlist through a Reserve with Google provider. You can add
-            up to 10 of your own links per type, such as reservations or food orders, and mark one as
-            Business preferred.
+            up to 10 of your own links per type, such as reservations or food orders, and mark one
+            as Business preferred.
           </p>
           <Callout kind="tip" title="Tap every button yourself">
             Once a month, open your profile on a phone signed out and tap Order, Reserve and Menu. A
@@ -194,16 +197,19 @@ export const guide: GuideDoc = {
           <p>
             Two rules matter for food and drink. Google allows posts from businesses in regulated
             industries, alcohol included, but says not to include content about those products. And
-            Google says featured posts, which can appear in place of reviews on a mobile profile, are
-            available in English for single-location food and drink businesses in the US, the UK,
-            Canada, Australia and New Zealand, so a UK restaurant may see them, while the UAE is not on
-            that list today.
+            Google says featured posts, which can appear in place of reviews on a mobile profile,
+            are available in English for single-location food and drink businesses in the US, the
+            UK, Canada, Australia and New Zealand, so a UK restaurant may see them, while the UAE is
+            not on that list today.
           </p>
           <p>
             For reviews, Google does not allow incentives such as a free dessert or a discount, and
             its policy says businesses must not discourage negative reviews or ask only happy
             guests. More in{" "}
-            <GuideLink slug="how-to-ask-for-google-reviews">how to ask customers for Google reviews</GuideLink>.
+            <GuideLink slug="how-to-ask-for-google-reviews">
+              how to ask customers for Google reviews
+            </GuideLink>
+            .
           </p>
         </>
       ),
@@ -216,16 +222,16 @@ export const guide: GuideDoc = {
         <p>
           Kabsi does not edit menu items, ordering settings or booking links on Google today, and it
           works only with your Google profile, not with delivery or booking platforms. Once it is a
-          Manager on your profile, Profile Coach lists what your profile is missing, and Kabsi checks
-          your details every day, hours and phone included, and tells you when something on Google
-          changes.
+          Manager on your profile, Profile Coach lists what your profile is missing, and Kabsi
+          checks your details every day, hours and phone included, and tells you when something on
+          Google changes.
         </p>
         <p>
           Send a photo of a new menu or a dish and Kabsi checks it for light, focus and size, then
           adds it to your profile once you say yes. Five days before a public holiday it asks what
           you will do and sets special hours after your yes. It drafts posts (2 a month on
-          Essentials, every week on Pro) and a reply for each new review, naming a dish only when the
-          guest did. Nothing goes on Google until you approve it.{" "}
+          Essentials, every week on Pro) and a reply for each new review, naming a dish only when
+          the guest did. Nothing goes on Google until you approve it.{" "}
           <SiteRef to="/scan">Run the free check</SiteRef>.
         </p>
       </>

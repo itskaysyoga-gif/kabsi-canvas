@@ -54,7 +54,9 @@ export const guide: GuideDoc = {
         <>
           <p>The same part of the policy also says merchants should not:</p>
           <ul>
-            <li>Require or pressure customers to leave ratings or reviews while on the premises.</li>
+            <li>
+              Require or pressure customers to leave ratings or reviews while on the premises.
+            </li>
             <li>Request that specific content be included in a review.</li>
             <li>Ask staff to collect a certain number of reviews.</li>
             <li>Ask staff to collect reviews that name a member of staff.</li>
@@ -84,7 +86,9 @@ export const guide: GuideDoc = {
             are not restored.
           </p>
           <Callout kind="warn" title="The tool does not carry the risk for you">
-            Some review apps offer a 'happy or unhappy' screen before the review link. Whatever the app does in your name is still your business asking your customers, and it is your Business Profile that is affected.
+            Some review apps offer a 'happy or unhappy' screen before the review link. Whatever the
+            app does in your name is still your business asking your customers, and it is your
+            Business Profile that is affected.
           </Callout>
         </>
       ),
@@ -102,13 +106,13 @@ export const guide: GuideDoc = {
             asked to rate their visit before they see the review link.
           </p>
           <p>
-            If a customer leaves a negative review anyway, reply calmly and offer to put it right, as
-            in{" "}
+            If a customer leaves a negative review anyway, reply calmly and offer to put it right,
+            as in{" "}
             <GuideLink slug="how-to-respond-to-negative-google-reviews">
               how to respond to negative Google reviews
             </GuideLink>
-            . Google's help says a constructive reply may even encourage the customer to update their
-            review; offering them something to change it is not allowed.
+            . Google's help says a constructive reply may even encourage the customer to update
+            their review; offering them something to change it is not allowed.
           </p>
         </>
       ),
@@ -176,9 +180,11 @@ export const guide: GuideDoc = {
           Kabsi's review link, QR code and printed cards open your own Google review page with no
           rating screen, no filtering and no reward: every customer sees the same thing. If you
           choose to show a short page before Google, it shows the Google review button first, the
-          same for every visitor, and, when you have added your WhatsApp number, one line to message the manager, open to anyone. The cards say
-          "Leave us a Google review" and never mention stars. The ready message for customers and the one staff send from their own WhatsApp are the same for everyone, and the staff message never uses words like "if you enjoyed", happy or 5 stars. Kabsi records nobody, so there are no staff counts
-          or targets.
+          same for every visitor, and, when you have added your WhatsApp number, one line to message
+          the manager, open to anyone. The cards say "Leave us a Google review" and never mention
+          stars. The ready message for customers and the one staff send from their own WhatsApp are
+          the same for everyone, and the staff message never uses words like "if you enjoyed", happy
+          or 5 stars. Kabsi records nobody, so there are no staff counts or targets.
         </p>
         <p>
           <SiteRef to="/scan">Run the free check</SiteRef>.
@@ -229,7 +235,11 @@ export const guide: GuideDoc = {
     },
   ],
   industries: ["hair-salon", "nail-salon", "restaurant", "spa-and-massage"],
-  related: ["how-to-ask-for-google-reviews", "google-review-link-and-qr-code", "report-fake-google-reviews"],
+  related: [
+    "how-to-ask-for-google-reviews",
+    "google-review-link-and-qr-code",
+    "report-fake-google-reviews",
+  ],
   summary:
     "Review gating, asking only happy customers for a Google review, explained: what Google's policy says, what counts, what can happen, the UK regulator's view, and how to ask everyone the same way.",
 };

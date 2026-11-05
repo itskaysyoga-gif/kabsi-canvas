@@ -36,8 +36,8 @@ export const guide: GuideDoc = {
             different times of day, so people recognise the door when they arrive.
           </li>
           <li>
-            <b>Interior:</b> at least three that truthfully show what it is like to stand inside as a
-            customer.
+            <b>Interior:</b> at least three that truthfully show what it is like to stand inside as
+            a customer.
           </li>
           <li>
             <b>Product:</b> at least three of your most popular items, evenly lit.
@@ -65,7 +65,8 @@ export const guide: GuideDoc = {
         <>
           <p>
             A photo straight from a recent phone is usually far above the minimum size. If the file
-            is larger than 5 MB, share or export a smaller copy from your phone before you upload it.
+            is larger than 5 MB, share or export a smaller copy from your phone before you upload
+            it.
           </p>
           <p>
             For videos Google asks for up to 30 seconds, up to 75 MB, and a resolution of 720p or
@@ -182,9 +183,9 @@ export const guide: GuideDoc = {
         "To remove your own photo, open Photos on your profile, select the photo, select Delete and confirm. For a photo a customer added, Google says you can request its removal.",
       body: (
         <p>
-          Google's pages here name no separate rule for the UK or the UAE. Google also says you are responsible for making
-          sure your photos comply with all applicable laws, so ask staff and customers before you
-          show them.
+          Google's pages here name no separate rule for the UK or the UAE. Google also says you are
+          responsible for making sure your photos comply with all applicable laws, so ask staff and
+          customers before you show them.
         </p>
       ),
     },
@@ -197,11 +198,11 @@ export const guide: GuideDoc = {
           On Photos you, a manager or your staff add up to 20 photos at a time from the phone's
           camera or gallery, as JPG, PNG, WebP or HEIC, up to 20 MB each. Kabsi turns each one
           upright, resizes it to Google's limits and saves a clean copy, so the location, the phone
-          model and the date taken never reach Google. It never draws on, generates or edits a
-          photo beyond that. The photo check then flags five things as notes, not blocks: a photo
-          that is dark, blurry, smaller than 720 by 720 pixels, looks like one you already added,
-          or looks like a phone screenshot. It does not look for faces, and you choose what each
-          photo shows (Outside, Inside, Team, At work, Product, Food and drink, Menu or Other).
+          model and the date taken never reach Google. It never draws on, generates or edits a photo
+          beyond that. The photo check then flags five things as notes, not blocks: a photo that is
+          dark, blurry, smaller than 720 by 720 pixels, looks like one you already added, or looks
+          like a phone screenshot. It does not look for faces, and you choose what each photo shows
+          (Outside, Inside, Team, At work, Product, Food and drink, Menu or Other).
         </p>
         <p>
           You can mark a photo as Preferred cover photo or Logo; Kabsi says "preferred" because

@@ -39,10 +39,10 @@ export const guide: GuideDoc = {
             product or service": the services list is where each treatment goes.
           </p>
           <p>
-            Google says health and beauty businesses can add a booking button and a list of services,
-            so the right category also decides which of the later items you see. Google also warns
-            that adding or editing a category can mean you are asked to verify your business again,
-            so make the change once, when you are sure.
+            Google says health and beauty businesses can add a booking button and a list of
+            services, so the right category also decides which of the later items you see. Google
+            also warns that adding or editing a category can mean you are asked to verify your
+            business again, so make the change once, when you are sure.
           </p>
         </>
       ),
@@ -218,11 +218,11 @@ export const guide: GuideDoc = {
     body: (
       <>
         <p>
-          Once Kabsi is a Manager on your profile, Profile Coach lists what a complete Google profile
-          has and what yours is missing, services and profile details included, with a reason for
-          each. Kabsi does not edit services, attributes or the booking link on Google today: you add
-          those yourself, and Kabsi checks your details every day and tells you when something on
-          Google changes.
+          Once Kabsi is a Manager on your profile, Profile Coach lists what a complete Google
+          profile has and what yours is missing, services and profile details included, with a
+          reason for each. Kabsi does not edit services, attributes or the booking link on Google
+          today: you add those yourself, and Kabsi checks your details every day and tells you when
+          something on Google changes.
         </p>
         <p>
           Five days before a public holiday Kabsi asks what you will do, normal hours, closed or
