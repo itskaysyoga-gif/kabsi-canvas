@@ -1,16 +1,27 @@
-name: QA 2 live (by hand)
+name: QA 2 live (nightly check, and by hand)
 
 # QA 2 (2 Nov 2026): the parts of the pre-launch check this machine's sessions cannot run, by hand only (Actions, "QA 2 live",
-# Run workflow). Never on push or schedule; EVAL_LIVE stays false and nothing here is a required check.
+# Run workflow). The webkit and ai jobs never run on push or schedule; EVAL_LIVE stays false and nothing here is a required check.
 #   webkit: the public pages and the free check's states on the live site in WebKit (Safari's engine) at 320, 390, 768,
 #           1280 and 1440 px (scripts/qa2/crawl.mjs). Reads only: the free check's Places, visibility and Turnstile calls are
 #           answered in the browser, so nothing is spent or kept.
 #   ai:     AI Answers 1's extraction on its ten fixtures and post drafting on five invented businesses through the real
 #           models (scripts/qa2/ai-live.ts), each part stopped at its own budget. Needs the secret ANTHROPIC_API_KEY.
 # Results are artifacts; docs/qa/2026-11-02-qa2.md is the report.
+#   nightly: Fix 3 part D. Every night at 03:45 UTC (and by hand): the public pages from kabsi.co's sitemap at 390 and 1440 px in
+#           Chromium (scripts/qa2/nightly.mjs): console errors, failed requests, broken internal links, one H1, axe serious or
+#           critical, and the free check page loading with no paid call. Reads only. A failure sends one staff WhatsApp alert
+#           with the page and the first error, through the smoke test's alert route (needs the secret QA_SMOKE_TOKEN); a pass
+#           sends nothing. Not a required check.
 on:
+  schedule:
+    - cron: "45 3 * * *"
   workflow_dispatch:
     inputs:
+      nightly:
+        description: Run the nightly kabsi.co check
+        type: boolean
+        default: true
       webkit:
         description: Run the WebKit pass
         type: boolean
@@ -32,6 +43,44 @@ permissions:
   contents: read
 
 jobs:
+  nightly:
+    name: Nightly check of kabsi.co
+    if: github.event_name == 'schedule' || inputs.nightly
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: qa2-nightly
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Install
+        run: npm ci --registry=https://registry.npmjs.org --legacy-peer-deps --no-audit --no-fund
+      - name: Install the browser
+        run: npx playwright install --with-deps chromium
+      - name: Check kabsi.co
+        run: node scripts/qa2/nightly.mjs --base https://kabsi.co --out nightly-out
+      - name: Tell staff on WhatsApp when it failed
+        if: failure()
+        env:
+          QA_SMOKE_TOKEN: ${{ secrets.QA_SMOKE_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$QA_SMOKE_TOKEN" ]; then echo "QA_SMOKE_TOKEN is not set: no WhatsApp alert (docs/testing.md)"; exit 0; fi
+          first=$(head -n 1 nightly-out/summary.txt 2>/dev/null || true)
+          [ -n "$first" ] || first="the check did not finish, see the run"
+          curl -sS -m 30 -X POST "https://ynjdqjlmdwjgbfezevxy.supabase.co/functions/v1/whatsapp/qa/alert" \
+            -H "x-smoke-token: $QA_SMOKE_TOKEN" -H "content-type: application/json" \
+            -d "$(node -e 'console.log(JSON.stringify({check: "site", summary: process.argv[1], run: process.argv[2]}))' "$first" "$RUN_URL")"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: qa2-nightly
+          path: nightly-out
+          retention-days: 14
+
   webkit:
     name: Public pages in WebKit
     if: inputs.webkit
