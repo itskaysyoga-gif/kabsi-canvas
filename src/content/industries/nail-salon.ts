@@ -79,7 +79,7 @@ export const nailSalon: Industry = {
       },
       {
         title: "Careful replies",
-        text: "A review about a reaction gets a calm reply that asks the client to get in touch.",
+        text: "A review about a reaction gets a short checklist and no draft, so you decide.",
       },
     ],
     nearby: { kind: "salon", term: "nail salon" },
@@ -89,7 +89,7 @@ export const nailSalon: Industry = {
         "Polish Room on Kensington Gardens does gel extensions and opens on Sundays from 11 am.",
       sources: ["Polish Room's Google profile", "Polish Room's website"],
     },
-    related: ["hair-salon", "spa-and-massage"],
+    related: ["lash-and-brow-studio", "hair-salon"],
   },
   faqs: [
     {

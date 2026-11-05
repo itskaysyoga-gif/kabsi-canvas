@@ -150,7 +150,7 @@ export const spaMassage: Industry = {
     line: "Kabsi keeps your spa Google Business Profile current: treatments clear, holiday hours set, calm replies ready for your yes.",
     card: "Treatments clear, holiday hours set in time.",
     answer:
-      "Guests choose a spa from its photos, its treatments and how it answers reviews. Kabsi keeps your spa Google Business Profile current: it drafts a calm reply to every review, asks about Eid and public holiday hours before they come, turns your photos into posts, and checks your details every day. Nothing reaches Google without your yes.",
+      "A spa is judged on its photos, its treatments and how it answers reviews. Kabsi keeps your spa Google Business Profile current: it drafts a calm reply to every review, asks about Eid and public holiday hours before they come, turns your photos into posts, and checks your details every day. Nothing reaches Google without your yes.",
     watch: {
       business: "Stillwater Spa, Dubai",
       line: "Holiday hours differ from your week. Kabsi asks before each one and checks Google shows what you chose.",
@@ -182,7 +182,7 @@ export const spaMassage: Industry = {
         "Stillwater Spa in Jumeirah is open until 1 am during Ramadan, with treatments from 60 minutes.",
       sources: ["Stillwater Spa's Google profile", "Stillwater Spa's website"],
     },
-    related: ["medical-and-aesthetic-clinic", "nail-salon"],
+    related: ["medical-and-aesthetic-clinic", "yoga-and-pilates-studio"],
   },
   faqs: [
     {
@@ -203,7 +203,7 @@ export const spaMassage: Industry = {
     },
     {
       q: "Can Kabsi reply to a review that complains about a therapist?",
-      a: "Kabsi drafts a calm reply that thanks the guest and asks them to get in touch through the details on your profile. You read it and choose.",
+      a: "A complaint that names a therapist comes to you marked as needing a little more care, with a short checklist and no draft. Kabsi writes a short, neutral holding reply only if you ask.",
     },
   ],
   guides: ["how-to-reply-to-google-reviews", "how-to-choose-your-primary-category"],

@@ -10,9 +10,7 @@ export const dentalClinic: Industry = {
   name: "dental clinic",
   plural: "Dental clinics",
   finished: true,
-  // No claim sheet in docs/claims yet: noindex and out of the sitemap until it has one (Fix 1, lane R 2 Nov 2026).
-  indexed: false,
-  lead: "Clinic hours, emergency line and appointment link right on Google, and careful replies you approve. No draft for treatment reviews.",
+  lead: "Clinic hours and phone right on Google, and careful replies that never confirm a patient. You approve each one.",
   keyword: "dentist",
   example: {
     business: "Parkside Dental",
@@ -45,15 +43,15 @@ export const dentalClinic: Industry = {
     },
     {
       title: "List the treatments you really offer",
-      text: "Whitening, implants, braces, children's care. Services on Google match what your dentists do now, with no treatment you stopped offering.",
+      text: "Whitening, implants, braces, children's care. Keep the services on Google to what your dentists do now; Profile Coach lists what is missing.",
     },
     {
       title: "Keep the appointment link current",
-      text: "Many patients book a check-up from the profile. The link opens your booking page, not the clinic's home page.",
+      text: "A patient who books from your profile should land on your booking page, not the clinic's home page.",
     },
     {
       title: "Set hours for public holidays",
-      text: "Closed for Eid or National Day, open on the Saturday after. Special hours go on Google a week ahead.",
+      text: "Closed for Eid or National Day, open on the Saturday after. Kabsi asks five days ahead and sets special hours once you say yes.",
     },
   ],
   categories: {
@@ -68,11 +66,11 @@ export const dentalClinic: Industry = {
     },
     {
       theme: "Cost explained before treatment",
-      text: "Or not explained. Reviews about bills are moved to a private conversation, never argued in public.",
+      text: "Or not explained. A reply about a bill never argues in public and invites the patient to get in touch.",
     },
     {
       theme: "The front desk and waiting time",
-      text: "Reception gets named more than the dentists. A reply passes the thanks on to the team.",
+      text: "Some reviews thank reception. A reply passes the thanks on to the team.",
     },
     {
       theme: "Children who were not scared",
@@ -85,7 +83,7 @@ export const dentalClinic: Industry = {
     lines: [
       {
         from: "kabsi",
-        text: "Parkside Dental: a new 2-star review needs you. It talks about a treatment, so I have not written a reply. Read it on your Kabsi account.",
+        text: "Parkside Dental: a new 2-star review needs you. It describes an injury, so I have not written a reply. Read it on your Kabsi account.",
         buttons: ["Open the review", "Talk to a person"],
       },
       { from: "owner", text: "Talk to a person" },
@@ -102,7 +100,7 @@ export const dentalClinic: Industry = {
   },
   posts: [
     "Saturday morning appointments for check-ups and cleaning.",
-    "Who to call for a dental emergency after hours.",
+    "What to do in a dental emergency after hours.",
     "A new dentist joins: their training and the days they see patients.",
     "School holiday check-ups for children, with the booking link.",
   ],
@@ -123,11 +121,11 @@ export const dentalClinic: Industry = {
   holidays: [
     {
       when: "Eid al-Fitr and Eid al-Adha",
-      text: "Many clinics close for days. Special hours, and the number to call in an emergency while closed.",
+      text: "If you close, special hours on Google, and a post that says what to do in an emergency while closed.",
     },
     {
-      when: "UAE National Day, 2 December",
-      text: "A public holiday. Hours on Google a week before, with the Saturday after if you open.",
+      when: "UAE National Day, 2 and 3 December",
+      text: "A public holiday. Kabsi asks five days before, with the Saturday after if you open.",
     },
     {
       when: "School holidays",
@@ -148,7 +146,7 @@ export const dentalClinic: Industry = {
     line: "Kabsi looks after your dental clinic Google Business Profile: exact hours, the right phone, and careful replies you approve.",
     card: "Exact hours, careful replies that name no patient.",
     answer:
-      "A dental clinic Google Business Profile has to be exact and careful. Kabsi checks your hours, phone and website every day, drafts replies that never confirm someone is a patient or mention treatment, sends you a review about treatment without a draft so you decide, and asks about holiday hours in time. You approve every word before it reaches Google.",
+      "A dental clinic Google Business Profile has to be exact and careful. Kabsi checks your hours, phone and website every day, drafts careful replies that never confirm someone is a patient or mention treatment, gives a review about an injury no draft so you decide, and asks about holiday hours in time. You approve every word before it reaches Google.",
     watch: {
       business: "Parkside Dental, Dubai",
       line: "A patient with toothache calls the number and trusts the hours. Kabsi checks both every day.",
@@ -187,11 +185,11 @@ export const dentalClinic: Industry = {
   faqs: [
     {
       q: "Does Kabsi see my patients' records?",
-      a: "No. Kabsi has Manager access to your Google profile only. It never connects to your clinic system and never sends patient details on WhatsApp.",
+      a: "No. Kabsi has Manager access to your Google profile only. It does not connect to your clinic system and never sends patient details on WhatsApp.",
     },
     {
       q: "Why are some reviews sent without a reply?",
-      a: "When a review talks about treatment, pain, money or a complaint, the safest reply is one you write yourself. Kabsi flags it and leaves the words to you.",
+      a: "A review about an injury, a safety problem or a named member of your team needs more care: it comes to you marked as needing a little more care, with a short checklist and no draft. Kabsi writes a short, neutral holding reply only if you ask.",
     },
     {
       q: "Can Kabsi ask patients for reviews?",

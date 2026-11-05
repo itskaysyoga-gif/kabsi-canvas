@@ -180,7 +180,7 @@ export const physiotherapy: Industry = {
         "Motion Works Physio in Didsbury has appointments on Saturday mornings, with sports massage.",
       sources: ["Motion Works Physio's Google profile", "Motion Works Physio's website"],
     },
-    related: ["gym-and-fitness", "spa-and-massage"],
+    related: ["gym-and-fitness", "yoga-and-pilates-studio"],
   },
   faqs: [
     {
@@ -201,7 +201,7 @@ export const physiotherapy: Industry = {
     },
     {
       q: "Can Kabsi reply to a review that names a treatment?",
-      a: "Kabsi drafts a reply that does not repeat it, thanks the reviewer and asks them to get in touch. You approve or edit it first.",
+      a: "A review that names a treatment gets a careful draft that does not repeat it; a review about an injury gets no draft and a short checklist. You approve or write every reply.",
     },
   ],
   guides: ["how-to-reply-to-google-reviews", "google-review-link-and-qr-code"],

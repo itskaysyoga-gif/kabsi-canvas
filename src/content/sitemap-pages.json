@@ -111,6 +111,69 @@
     "sources": ["src/content/industries/gym-fitness.ts", "src/components/kabsi/d9-industry.tsx"]
   },
   {
+    "path": "/for/dental-clinic",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/dental-clinic.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/lash-and-brow-studio",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": [
+      "src/content/industries/lash-and-brow-studio.ts",
+      "src/components/kabsi/d9-industry.tsx"
+    ]
+  },
+  {
+    "path": "/for/tattoo-studio",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/tattoo-studio.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/pet-grooming",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/pet-grooming.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/veterinary-clinic",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": [
+      "src/content/industries/veterinary-clinic.ts",
+      "src/components/kabsi/d9-industry.tsx"
+    ]
+  },
+  {
+    "path": "/for/car-wash",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/car-wash.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/florist",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/florist.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/optician",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": ["src/content/industries/optician.ts", "src/components/kabsi/d9-industry.tsx"]
+  },
+  {
+    "path": "/for/yoga-and-pilates-studio",
+    "changefreq": "monthly",
+    "priority": "0.7",
+    "sources": [
+      "src/content/industries/yoga-and-pilates-studio.ts",
+      "src/components/kabsi/d9-industry.tsx"
+    ]
+  },
+  {
     "path": "/about",
     "changefreq": "yearly",
     "priority": "0.5",

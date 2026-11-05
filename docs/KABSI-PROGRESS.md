@@ -1,6 +1,6 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 5 Nov 2026, Guides 4. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 5 Nov 2026, Industries 2. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
@@ -9,9 +9,9 @@ One page, under 10 KB. Updated 5 Nov 2026, Guides 4. The history (tasks, After m
 - Go live 1 (5 Nov 2026, 30.28, R-108): WhatsApp for owners, the nearby check and the AI answer are on; card payments stay closed. Detail: `docs/progress/archive/2026-11-05-golive1.md`.
 - Scan 2 and Copy 3 (5 Nov 2026, PRs 369 to 376): the free check names the town and country; the Go live 1 audit's copy decisions are on kabsi.co. Detail: `docs/progress/archive/2026-11-05-scan2.md`, `2026-11-05-copy3.md`.
 - App 4 (5 Nov 2026, 30.31, R-111, PRs 378 to 388): Dashboard in the header, sign-ins last 30 days (staff pages 12 hours), /login for every case, pages open at the top, the signed-in audit. Detail: `docs/progress/archive/2026-11-05-app4.md`.
-- Guides 3 (5 Nov 2026, PRs 385, 387, 389): 27 guides on one template, public or not decided per request on the server. Detail: `docs/progress/archive/2026-11-05-guides3.md`.
 - Guides 4 (5 Nov 2026, 30.32, R-112, PRs 390, 391, 393, 394): all 27 guides public now (new ones weekly from 16 Nov); Nora knows every public guide and industry page from kabsi.co/nora-pages.json and may link one after answering; lastmod from git, IndexNow, kabsi-canvas.vercel.app redirects to kabsi.co, one title per page, K-144 allows quoting Google's page, the free printable counter card. Detail: `docs/progress/archive/2026-11-05-guides4.md`.
 - Fix 3 (5 Nov 2026, PRs 379, 381, 383): the Coach reads Google by its location name (KABSI-EDGE-J stopped); a name guard; one reload after a deploy; a nightly kabsi.co check. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
+- Industries 2 (5 Nov 2026, 30.32, PRs 392, 395, part C): /for is one list; 20 industry pages on Design 9; old group pages 301 to /for. Detail: `docs/progress/archive/2026-11-05-industries2.md`.
 - No customer is live yet. Before the first Meta ad: the DataForSEO top-up and a nearby check on a real business. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -60,7 +60,7 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 5 Nov 2026, Industries 2: part A (PR 392) merged, part B (PR 395) in review.
+- 5 Nov 2026, Industries 2 (30.32): PRs 392, 395 and part C.
 - 5 Nov 2026, Fix 3: PRs 379, 381, 383. Detail: `docs/progress/archive/2026-11-05-fix3.md`.
 - 5 Nov 2026, App 4 (30.31, R-111): PRs 378 to 388, checked live. Detail: `docs/progress/archive/2026-11-05-app4.md`.
 

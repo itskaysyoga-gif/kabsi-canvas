@@ -38,18 +38,27 @@ Key facts:
 
 ## For each kind of business
 
-- [All businesses](https://kabsi.co/for)
-- [Hair salons](https://kabsi.co/for/hair-salon)
-- [Barbershops](https://kabsi.co/for/barbershop)
-- [Nail salons](https://kabsi.co/for/nail-salon)
-- [Spas and massage](https://kabsi.co/for/spa-and-massage)
-- [Medical and aesthetic clinics](https://kabsi.co/for/medical-and-aesthetic-clinic)
-- [Physiotherapy](https://kabsi.co/for/physiotherapy)
-- [Restaurants](https://kabsi.co/for/restaurant)
-- [Cafes](https://kabsi.co/for/cafe)
-- [Bakeries](https://kabsi.co/for/bakery)
-- [Auto repair](https://kabsi.co/for/auto-repair)
-- [Gyms and fitness studios](https://kabsi.co/for/gym-and-fitness)
+- [All businesses](https://kabsi.co/for): every kind of business with a page, in one list
+- [Auto repair](https://kabsi.co/for/auto-repair): the right phone number, calm replies.
+- [Bakeries](https://kabsi.co/for/bakery): early hours exact, holiday hours set ahead.
+- [Barbershops](https://kabsi.co/for/barbershop): walk-in hours right, fresh cuts as posts.
+- [Cafes](https://kabsi.co/for/cafe): opening time exact, fresh bakes as posts.
+- [Car washes and detailing](https://kabsi.co/for/car-wash): open status right, detailing work as posts.
+- [Dental clinics](https://kabsi.co/for/dental-clinic): exact hours, careful replies that name no patient.
+- [Florists](https://kabsi.co/for/florist): the right phone, arrangements as posts.
+- [Gyms and fitness studios](https://kabsi.co/for/gym-and-fitness): classes as posts, holiday hours asked ahead.
+- [Hair salons](https://kabsi.co/for/hair-salon): stylists thanked by name, colour work as posts.
+- [Lash and brow studios](https://kabsi.co/for/lash-and-brow-studio): fresh sets as posts, hours kept exact.
+- [Medical and aesthetic clinics](https://kabsi.co/for/medical-and-aesthetic-clinic): doctors' days exact, replies that confirm no patient.
+- [Nail salons](https://kabsi.co/for/nail-salon): seasonal designs as posts, photos checked.
+- [Opticians](https://kabsi.co/for/optician): eye test link right, new frames as posts.
+- [Pet groomers](https://kabsi.co/for/pet-grooming): areas you cover right, fresh trims as posts.
+- [Physiotherapy](https://kabsi.co/for/physiotherapy): assessment link right, replies that name no injury.
+- [Restaurants](https://kabsi.co/for/restaurant): closing times right, dish photos as posts.
+- [Spas and massage](https://kabsi.co/for/spa-and-massage): treatments clear, holiday hours set in time.
+- [Tattoo studios](https://kabsi.co/for/tattoo-studio): booking rules right, healed work as posts.
+- [Vet clinics](https://kabsi.co/for/veterinary-clinic): hours and phone checked daily, careful replies.
+- [Yoga and pilates studios](https://kabsi.co/for/yoga-and-pilates-studio): new classes as posts, address and hours right.
 
 ## Guides
 

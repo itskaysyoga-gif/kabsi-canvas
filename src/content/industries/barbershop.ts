@@ -52,10 +52,10 @@ export const barbershop: Industry = {
       "Kabsi looks after your barber shop Google Business Profile: walk-in hours right, bank holidays asked in time, new cuts posted and a reply to every review.",
     h1: "Your barber shop on Google, kept sharp.",
     mark: "kept sharp.",
-    line: "Kabsi runs your barber shop Google Business Profile: walk-in hours, fresh cuts as posts, and a reply to every review.",
+    line: "Kabsi looks after your barber shop Google Business Profile: walk-in hours, fresh cuts as posts, a reply to every review.",
     card: "Walk-in hours right, fresh cuts as posts.",
     answer:
-      "For a barber shop Google Business Profile, the work is small and constant: hours that match the door, a reply to every review, and photos of fresh cuts. Kabsi drafts each reply and names the barber only when the review does, turns your photos into posts, asks about bank holidays in time and checks your hours every day. You approve each one on WhatsApp.",
+      "For a barber shop Google Business Profile, the work is small and constant: hours that match the door, a reply to every review, and photos of fresh cuts. Kabsi drafts each reply and names the barber only when the review does, turns your photos into posts, asks about bank holidays in time and checks your hours every day. You approve each one.",
     watch: {
       business: "Fade and Co, Leeds",
       line: "Walk-in customers trust the hours Google shows. Kabsi compares them with yours every day and asks before anything changes.",
@@ -66,7 +66,7 @@ export const barbershop: Industry = {
       message: "Google shows you closed on Saturday. You told me 08:00 to 18:00.",
     },
     post: {
-      owner: "Skin fade and beard trim from this morning.",
+      owner: "Skin fade and beard trim from this morning. Walk-ins until 6 today.",
       quote: "Fresh skin fade and a sharp beard trim. Walk in until 6 today.",
     },
     jobs: [
@@ -89,7 +89,7 @@ export const barbershop: Industry = {
       answer: "Fade and Co on Call Lane takes walk-ins on Saturdays from 8 am to 6 pm.",
       sources: ["Fade and Co's Google profile", "Fade and Co's website"],
     },
-    related: ["hair-salon", "nail-salon"],
+    related: ["hair-salon", "tattoo-studio"],
   },
   faqs: [
     {

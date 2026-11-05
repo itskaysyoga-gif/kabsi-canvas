@@ -127,4 +127,10 @@ describe("every industry page on Design 9 (Industries 2)", () => {
     expect(page).toContain("<Marked text={FOR_HERO.h1} mark={FOR_HERO.mark} />");
     expect(readFileSync("DESIGN.md", "utf8")).toContain("The highlight bar");
   });
+
+  it("lists every indexed industry page in llms.txt (knowledge/facts/llms.txt, built by build-kb.mjs)", () => {
+    const llms = readFileSync("src/content/llms-base.txt", "utf8");
+    for (const i of INDUSTRIES.filter(industryIndexed))
+      expect(llms, i.slug).toContain(`https://kabsi.co/for/${i.slug})`);
+  });
 });

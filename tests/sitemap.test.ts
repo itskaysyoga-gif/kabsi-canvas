@@ -43,7 +43,7 @@ describe("the sitemap", () => {
       expect(paths.includes(`/for/${i.slug}`), i.slug).toBe(industryIndexed(i));
     for (const g of OLD_GROUPS) expect(paths, g).not.toContain(`/for/${g}`);
   });
-  it("leaves out the dental clinic page until it has a claim sheet (Fix 1), and counts 35 pages on 5 Nov 2026 (Industries 2 took out the five group pages)", () => {
+  it("leaves out the dental clinic page until it has a claim sheet (Fix 1), and counts 44 pages on 5 Nov 2026 (Industries 2 took out the five group pages and added the dental clinic and eight new pages)", () => {
     const dental = INDUSTRIES.find((i) => i.slug === "dental-clinic")!;
     let sheet = true;
     try {
@@ -54,7 +54,7 @@ describe("the sitemap", () => {
     // When the sheet lands, drop `indexed: false` from dental-clinic.ts and put the page back in the sitemap.
     expect(industryIndexed(dental)).toBe(sheet);
     expect(paths.includes("/for/dental-clinic")).toBe(sheet);
-    expect(paths).toHaveLength(sheet ? 36 : 35);
+    expect(paths).toHaveLength(sheet ? 44 : 43);
   });
   it("leaves out the pages that are noindex or one visitor's", () => {
     for (const p of paths)

@@ -157,11 +157,24 @@ function PhotoVisual({ example }: { example?: PhotoPostExample | undefined }) {
   const owner = example?.owner ?? p.ownerLine;
   const quote = example?.quote ?? p.quote;
   return (
-    <figure className="relative mx-auto grid w-full max-w-[20rem] items-end gap-4 sm:max-w-[34rem] sm:grid-cols-[0.8fr_1fr]">
-      <div className="relative hidden aspect-[3/4] overflow-hidden rounded-panel sm:block">
+    <figure
+      className={cn(
+        "relative mx-auto grid w-full max-w-[20rem] gap-4",
+        // Industries 2: on an industry page the trade's tall photo stands beside the chat at full 2:3 height.
+        example
+          ? "items-center sm:max-w-[38rem] sm:grid-cols-[1fr_1fr]"
+          : "items-end sm:max-w-[34rem] sm:grid-cols-[0.8fr_1fr]",
+      )}
+    >
+      <div
+        className={cn(
+          "relative hidden overflow-hidden rounded-panel sm:block",
+          example ? "aspect-[2/3]" : "aspect-[3/4]",
+        )}
+      >
         <Img
           photo={photo}
-          sizes="(min-width: 1024px) 20rem, 40vw"
+          sizes="(min-width: 1024px) 19rem, 45vw"
           decorative
           className="absolute inset-0 size-full object-cover object-[50%_30%]"
         />

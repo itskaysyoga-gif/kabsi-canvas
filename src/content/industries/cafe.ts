@@ -144,7 +144,7 @@ export const cafe: Industry = {
     line: "Kabsi looks after your cafe Google Business Profile: an exact opening time, fresh bakes as posts, replies after the rush.",
     card: "Opening time exact, fresh bakes as posts.",
     answer:
-      "Early customers check a cafe Google Business Profile for one thing first: are you open yet. Kabsi checks your opening time every day, turns a photo of what is fresh into a post, writes the posts once the morning rush is over, drafts a reply to every review, and asks about holiday hours in time. You approve each one on WhatsApp.",
+      "On a cafe Google Business Profile, the opening time comes first. Kabsi checks your opening time every day, turns a photo of what is fresh into a post, writes the posts once the morning rush is over, drafts a reply to every review, and asks about holiday hours in time. You approve each one.",
     watch: {
       business: "Brew Lane Cafe, London",
       line: "The first customer of the day reads your opening time on Google. Kabsi checks it every day.",

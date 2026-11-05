@@ -150,10 +150,10 @@ export const bakery: Industry = {
     line: "Kabsi looks after your bakery Google Business Profile: early hours, holiday baking hours, and the day's bakes as posts.",
     card: "Early hours exact, holiday hours set ahead.",
     answer:
-      "A bakery Google Business Profile lives on early hours and holiday hours. Kabsi checks your opening time every day, asks about Christmas Eve and every bank holiday five days ahead, turns a photo of the day's bake into a post, and drafts a reply to every review. You approve each one before it reaches Google.",
+      "A bakery Google Business Profile lives on early hours and holiday hours. Kabsi checks your opening time every day, asks about every bank holiday five days ahead, sets the Christmas Eve hours you give it, turns a photo of the day's bake into a post, and drafts a reply to every review. You approve each one before it reaches Google.",
     watch: {
       business: "Corner Bakery, London",
-      line: "Holiday baking days have their own hours. Kabsi asks ahead and checks Google shows what you chose.",
+      line: "Holiday baking days have their own hours. Kabsi checks Google shows the hours you chose.",
       fields: ["Opening hours", "Special hours", "Phone", "Website", "Address"],
       what: "Christmas Eve",
       google: "Normal hours",
@@ -162,12 +162,12 @@ export const bakery: Industry = {
     },
     post: {
       owner: "Sourdough with seeds, every Saturday from now.",
-      quote: "Seeded sourdough is now baked every Saturday. Come early, it goes fast.",
+      quote: "Seeded sourdough is now baked every Saturday.",
     },
     jobs: [
       {
         title: "Holiday hours, asked ahead",
-        text: "Christmas Eve and bank holidays, set once you say yes.",
+        text: "Bank holidays asked five days ahead; Christmas Eve hours set once you give them.",
       },
       {
         title: "The day's bake, as a post",
@@ -184,7 +184,7 @@ export const bakery: Industry = {
       answer: "Corner Bakery in Hackney bakes seeded sourdough every Saturday and opens at 6 am.",
       sources: ["Corner Bakery's Google profile", "Corner Bakery's website"],
     },
-    related: ["cafe", "restaurant"],
+    related: ["cafe", "florist"],
   },
   faqs: [
     {

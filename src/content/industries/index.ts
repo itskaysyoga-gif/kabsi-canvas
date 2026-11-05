@@ -15,6 +15,14 @@ import { cafe } from "./cafe";
 import { bakery } from "./bakery";
 import { autoRepair } from "./auto-repair";
 import { gymFitness } from "./gym-fitness";
+import { lashAndBrowStudio } from "./lash-and-brow-studio";
+import { tattooStudio } from "./tattoo-studio";
+import { petGrooming } from "./pet-grooming";
+import { veterinaryClinic } from "./veterinary-clinic";
+import { carWash } from "./car-wash";
+import { florist } from "./florist";
+import { optician } from "./optician";
+import { yogaAndPilatesStudio } from "./yoga-and-pilates-studio";
 
 export type { ChatLine, D9Trade, Industry, Task, TradeCard, TradePage } from "./types";
 
@@ -31,6 +39,15 @@ export const INDUSTRIES: Industry[] = [
   bakery,
   autoRepair,
   gymFitness,
+  // Industries 2 (5 Nov 2026): nine new industries (the dental clinic page above, finished, and these eight).
+  lashAndBrowStudio,
+  tattooStudio,
+  petGrooming,
+  veterinaryClinic,
+  carWash,
+  florist,
+  optician,
+  yogaAndPilatesStudio,
 ];
 
 export const industry = (slug: string) => INDUSTRIES.find((i) => i.slug === slug);
