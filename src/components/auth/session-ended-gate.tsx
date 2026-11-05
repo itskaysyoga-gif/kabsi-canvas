@@ -19,7 +19,8 @@ export function SessionEndedGate() {
   if (!ended) return null;
   async function again() {
     const next = `${location.pathname}${location.searchStr}`;
-    await signOut().catch(() => undefined);
+    // Quiet: the log in page follows, not Home's "You are signed out." (App 4 review).
+    await signOut({ quiet: true }).catch(() => undefined);
     void navigate({ to: "/login", search: { next }, replace: true });
   }
   return (

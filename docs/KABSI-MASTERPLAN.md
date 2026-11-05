@@ -1458,3 +1458,11 @@ Rashid decided to switch WhatsApp for owners and the nearby check and AI answer 
 4. The profile check's Places field mask adds addressComponents, so the town comes from Google's own address parts.
 5. The speed gate measures Pricing and /scan as well as Home, with the budgets of 30.29 item 2.
 6. The calibration row ai_calibration_scan2_seven stays, as the earlier calibration rows do.
+
+## 30.31 Lane R decisions of 5 Nov 2026, afternoon (R-111)
+1. Rashid, signed in, could not get from the dashboard to the website (the dashboard logo goes to /app; on a phone the logo is not a link), and the website's header said Log in while he was signed in, so Log in seemed to sign him in by itself. The Kabsi logo in the dashboard goes to kabsi.co's Home on every width; the website's header and phone menu show Dashboard instead of Log in while this browser holds a session.
+2. How long a sign-in lasts: an owner stays signed in on a device for 30 days after their last visit, and every visit starts the 30 days again; staff pages sign staff out after 12 hours without use. Approval links from WhatsApp and email work without signing in, as today. Settings has 'Sign out on every device'. Supabase's Free plan cannot time-box sessions on the server, so the 30 days and 12 hours are enforced in the app; this is recorded as a known limit until Supabase Pro (30.25).
+3. The log in page covers every case in 30.31's list in App 4's prompt, including in-app browsers: Instagram's and Facebook's own browsers block Google sign-in, and Meta ads open in them, so there the email code comes first.
+4. A new page always opens at its top; Back returns to where the visitor was.
+5. App 4 audits the signed-in site as Go live 1 audited the public site.
+6. Then Industries 2 (every industry page on Design 9, no category pages, 9 new industries) and Guides 3 (20 new guides, one every 2 days).
