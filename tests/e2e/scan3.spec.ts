@@ -7,10 +7,9 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page, type Route } from "@playwright/test";
 
 const SHOTS = "docs/scan3";
-const DONE = JSON.parse(readFileSync("tests/fixtures/scan3/free-check-done.json", "utf8")) as Record<
-  string,
-  unknown
->;
+const DONE = JSON.parse(
+  readFileSync("tests/fixtures/scan3/free-check-done.json", "utf8"),
+) as Record<string, unknown>;
 const PASS = `${Math.floor(Date.now() / 1000) + 900}.stubsignature`;
 
 type Flag = { tone: "danger" | "warning" | "neutral"; fact: string; action: string };
@@ -163,20 +162,32 @@ async function stub(page: Page, o: { business: Key; nearby?: "done" | "unavailab
       const q = String(body["query"]).toLowerCase();
       const hits = (Object.keys(BUSINESSES) as Key[])
         .filter((k) => BUSINESSES[k].snapshot.name.toLowerCase().includes(q.slice(0, 3)))
-        .map((k) => ({ place_id: `ChIJ${k}AAAAAAAA`, name: BUSINESSES[k].snapshot.name, address: "Example Town" }));
+        .map((k) => ({
+          place_id: `ChIJ${k}AAAAAAAA`,
+          name: BUSINESSES[k].snapshot.name,
+          address: "Example Town",
+        }));
       return json(route, { suggestions: hits, available: true });
     }
     if (a === "search") {
       const k = (Object.keys(BUSINESSES) as Key[]).find((x) => BUSINESSES[x].q === body["query"]);
       return json(route, {
         places: k
-          ? [{ place_id: `ChIJ${k}AAAAAAAA`, name: BUSINESSES[k].snapshot.name, address: "Example Town", category: "x" }]
+          ? [
+              {
+                place_id: `ChIJ${k}AAAAAAAA`,
+                name: BUSINESSES[k].snapshot.name,
+                address: "Example Town",
+                category: "x",
+              },
+            ]
           : [],
       });
     }
     if (a === "check") {
       const id = String(body["place_id"]);
-      const k = (Object.keys(BUSINESSES) as Key[]).find((x) => id === `ChIJ${x}AAAAAAAA`) ?? current;
+      const k =
+        (Object.keys(BUSINESSES) as Key[]).find((x) => id === `ChIJ${x}AAAAAAAA`) ?? current;
       current = k;
       return json(route, { snapshot: { ...BUSINESSES[k].snapshot, place_id: id } });
     }
@@ -240,20 +251,28 @@ test.describe("Scan 3: the free check result", () => {
           page.getByText(/You appeared in the first three at 5 of 49 points around you\./),
         ).toBeVisible();
         await expect(page.getByText("Who came up most around you")).toBeVisible();
-        await expect(page.getByText(/different results depending on where someone searches/)).toBeVisible();
+        await expect(
+          page.getByText(/different results depending on where someone searches/),
+        ).toBeVisible();
         await page.locator('details[data-detail="ai"] > summary').click();
-        await expect(page.getByRole("heading", { name: "Did ChatGPT name your business?" })).toBeVisible();
+        await expect(
+          page.getByRole("heading", { name: "Did ChatGPT name your business?" }),
+        ).toBeVisible();
         await expect(page.getByText("Model: ChatGPT (gpt-4.1-mini)")).toBeVisible();
         await expect(page.getByText(/^Question: 'best fast food restaurant/)).toBeVisible();
       }
       // One primary (yellow) button in the result: the trial.
-      await expect(page.getByRole("button", { name: "Start your 14-day free trial" })).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Start your 14-day free trial" }),
+      ).toBeVisible();
       await expect(
         page.getByText("The 14 days start when Kabsi's access to your Google profile works."),
       ).toBeVisible();
       await expect(page.getByText("No card. Cancel any time.")).toBeVisible();
       await expect(page.getByText("Why Kabsi asks for Manager access")).toBeVisible();
-      await expect(page.getByText("Or apply for Founding 25: three months of Pro, free")).toBeVisible();
+      await expect(
+        page.getByText("Or apply for Founding 25: three months of Pro, free"),
+      ).toBeVisible();
       const yellow = await main.evaluate(
         (el) =>
           [...el.querySelectorAll("a, button")].filter(
@@ -278,7 +297,10 @@ test.describe("Scan 3: the free check result", () => {
       expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
       await axe(page);
       if (k === "restaurant" || k === "missing")
-        await page.screenshot({ path: `${SHOTS}/after-result-${k}-${info.project.name}.png`, fullPage: true });
+        await page.screenshot({
+          path: `${SHOTS}/after-result-${k}-${info.project.name}.png`,
+          fullPage: true,
+        });
     });
   }
 
@@ -356,22 +378,31 @@ test.describe("Scan 3: the free check result", () => {
     await page.goto("/scan/TESTSCN3");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Harbour Burgers");
     await expect(page.getByRole("heading", { name: "The main thing we found" })).toBeVisible();
-    await expect(page.getByText(/you appear 2nd in this Google Maps check\./).first()).toBeVisible();
+    await expect(
+      page.getByText(/you appear 2nd in this Google Maps check\./).first(),
+    ).toBeVisible();
     await expect(page.getByRole("heading", { name: "What Kabsi would do" })).toBeVisible();
     await expect(page.locator("details[data-detail]")).toHaveCount(2);
     await expect(page.getByRole("combobox")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
     await axe(page);
-    await page.screenshot({ path: `${SHOTS}/after-saved-${info.project.name}.png`, fullPage: true });
+    await page.screenshot({
+      path: `${SHOTS}/after-saved-${info.project.name}.png`,
+      fullPage: true,
+    });
   });
 
-  test("the empty /scan page: highlight, numbered checks with a label, a photo", async ({ page }, info) => {
+  test("the empty /scan page: highlight, numbered checks with a label, a photo", async ({
+    page,
+  }, info) => {
     await page.goto("/scan");
     await expect(page.locator("h1 .d9-mark")).toHaveText("free.");
     await expect(page.getByText("What Kabsi checks")).toBeVisible();
     await expect(page.getByText("About 10 seconds", { exact: true })).toBeVisible();
     await expect(page.locator("figure ol li")).toHaveCount(5);
-    await expect(page.getByAltText("A salon owner looking at a tablet in her salon")).toHaveCount(1);
+    await expect(page.getByAltText("A salon owner looking at a tablet in her salon")).toHaveCount(
+      1,
+    );
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
     await axe(page);
     await page.screenshot({ path: `${SHOTS}/after-scan-${info.project.name}.png`, fullPage: true });
@@ -379,13 +410,20 @@ test.describe("Scan 3: the free check result", () => {
 });
 
 test.describe("Scan 3 live: SEVEN Burgers & Beyond (CFE4RMDN, reused, no new spend)", () => {
-  test.skip(!!process.env["KABSI_BASE_URL"] && !process.env["KABSI_BASE_URL"].includes("kabsi.co"), "production only");
+  test.skip(
+    !!process.env["KABSI_BASE_URL"] && !process.env["KABSI_BASE_URL"].includes("kabsi.co"),
+    "production only",
+  );
   test("the saved result reads in plain words, with no Arabic", async ({ page }) => {
     await page.goto("/scan/CFE4RMDN");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("SEVEN Burgers");
-    await expect(page.getByText(/you appear 2nd in this Google Maps check\./).first()).toBeVisible();
+    await expect(
+      page.getByText(/you appear 2nd in this Google Maps check\./).first(),
+    ).toBeVisible();
     await page.locator('details[data-detail="ai"] > summary').click();
-    await expect(page.getByText(/^Question: 'best fast food restaurant in Boqaata, Lebanon'/)).toBeVisible();
+    await expect(
+      page.getByText(/^Question: 'best fast food restaurant in Boqaata, Lebanon'/),
+    ).toBeVisible();
     expect(await page.locator("body").innerText()).not.toMatch(/[؀-ۿ]/);
   });
 });

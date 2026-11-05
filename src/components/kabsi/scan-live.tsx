@@ -1134,12 +1134,7 @@ export function LiveResult({
           ) : null}
 
           {ai ? (
-            <Detail
-              id="ai"
-              title={AI_QUESTION}
-              mark="ChatGPT"
-              summary={aiVerdict(ai).line}
-            >
+            <Detail id="ai" title={AI_QUESTION} mark="ChatGPT" summary={aiVerdict(ai).line}>
               <AiDetails ai={ai} />
             </Detail>
           ) : null}
@@ -1530,12 +1525,7 @@ export function SavedFreeCheck({ code }: { code: string }) {
             <NearbyDetails check={live} handoff={null} />
           </Detail>
           {live.ai && (
-            <Detail
-              id="ai"
-              title={AI_QUESTION}
-              mark="ChatGPT"
-              summary={aiVerdict(live.ai).line}
-            >
+            <Detail id="ai" title={AI_QUESTION} mark="ChatGPT" summary={aiVerdict(live.ai).line}>
               <AiDetails ai={live.ai} />
             </Detail>
           )}
