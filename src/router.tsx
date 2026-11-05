@@ -11,6 +11,10 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
+    // A new page opens at its top at once, and Back returns to the old place at once (App 4, 30.31 item 4). The site's
+    // html has scroll-behavior: smooth for #links on the same page; without "instant" the router's jump to the top was
+    // animated too, so a page opened scrolled down and slid up, and stopped part way when the page grew while loading.
+    scrollRestorationBehavior: "instant",
     defaultPreloadStaleTime: 0,
   });
 
