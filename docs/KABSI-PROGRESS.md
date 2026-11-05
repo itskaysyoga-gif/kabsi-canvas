@@ -1,17 +1,16 @@
 # Kabsi status
 
-One page, under 10 KB. Updated 5 Nov 2026, Industries 2. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
+One page, under 10 KB. Updated 5 Nov 2026, Guides 4. The history (tasks, After merge checks, evidence, decisions) is word for word in `docs/progress/archive/`; nothing was deleted. The plan index is `docs/KABSI-PLAN.md`, the core is `docs/KABSI-MASTERPLAN.md`, the order of work is plan section 7.
 
 ## Where things stand
 
 - Built and live: sessions 1 to 16, 18, 20, 20a, 20b, hotfix 20h and the 22 Oct sync session. Google is live on Yawmiyati; the first real reply was published and verified; the post removal was verified on Google (23 Oct). kabsi.co runs on Vercel; Creem is the only payment route (test mode, not open). Evidence: `docs/progress/archive/evidence.md` and `where-things-stand.md`.
-- Web 2, V4, UX 1 and Email 1 (26 and 27 Oct, PRs 250, 252): public pages, free check, onboarding, emails. Detail: `docs/progress/archive/2026-10-27-*.md`.
-- Sec 1 and Sec 2 (PRs 261, 266, 27 Oct), WhatsApp 2 (PRs 268, 270, 271), Billing 2 (PR 269), Price 1 (PRs 285 to 288, list prices 29 and 59, founding 19 and 39) and Web 3 (PRs 289 to 292, 30 Oct). Detail: the dated files in `docs/progress/archive/`.
+- Web 2, V4, UX 1, Email 1, Sec 1 and 2, WhatsApp 2, Billing 2, Price 1 and Web 3 (26 to 30 Oct): detail in the dated files in `docs/progress/archive/`.
 - Go live 1 (5 Nov 2026, 30.28, R-108): WhatsApp for owners, the nearby check and the AI answer are on; card payments stay closed. Detail: `docs/progress/archive/2026-11-05-golive1.md`.
-- Scan 2 (5 Nov 2026, 30.29, R-109, PRs 369 to 372): the free check names the town and country and only businesses Google Maps shows nearby. Detail: `docs/progress/archive/2026-11-05-scan2.md`.
-- Copy 3 (5 Nov 2026, 30.29 item 2, 30.30, R-110, PRs 374 to 376): the Go live 1 audit's copy decisions B-001 to B-032 and the Scan 2 follow-ups are on kabsi.co. Detail: `docs/progress/archive/2026-11-05-copy3.md`.
+- Scan 2 and Copy 3 (5 Nov 2026, PRs 369 to 376): the free check names the town and country; the Go live 1 audit's copy decisions are on kabsi.co. Detail: `docs/progress/archive/2026-11-05-scan2.md`, `2026-11-05-copy3.md`.
 - App 4 (5 Nov 2026, 30.31, R-111, PRs 378 to 388): Dashboard in the header, sign-ins last 30 days (staff pages 12 hours), /login for every case, pages open at the top, the signed-in audit. Detail: `docs/progress/archive/2026-11-05-app4.md`.
-- Guides 3 (5 Nov 2026, PRs 385, 387, part C): 27 guides; the server decides per request what is public, so one appears every 2 days at 06:00 UTC to 13 Dec with no deploy. Live: guide 1 200, guide 2 404 until 7 Nov. Detail: `docs/progress/archive/2026-11-05-guides3.md`.
+- Guides 3 (5 Nov 2026, PRs 385, 387, 389): 27 guides on one template, public or not decided per request on the server. Detail: `docs/progress/archive/2026-11-05-guides3.md`.
+- Guides 4 (5 Nov 2026, 30.32, R-112, PRs 390, 391, 393, 394): all 27 guides public now (new ones weekly from 16 Nov); Nora knows every public guide and industry page from kabsi.co/nora-pages.json and may link one after answering; lastmod from git, IndexNow, kabsi-canvas.vercel.app redirects to kabsi.co, one title per page, K-144 allows quoting Google's page, the free printable counter card. Detail: `docs/progress/archive/2026-11-05-guides4.md`.
 - No customer is live yet. Before the first Meta ad: the DataForSEO top-up and a nearby check on a real business. Before the first paying business: Kapso Pro and the rest of 30.19 section 6 (30.28).
 
 ## WhatsApp ladder (master plan 25.5)
@@ -30,10 +29,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Open for Rashid (as last recorded; the full table is `docs/progress/archive/steps-only-rashid-can-do.md`)
 
-- Done 25 Oct: Clean 1 drops, the Places purge, the Resend webhook, R2 and the backup secrets, SENTRY_AUTH_TOKEN in Vercel, Pub/Sub, WHATSAPP_LIVE true, the post Undo test (full line in `docs/progress/archive/2026-11-05-golive1.md`).
+- Done 25 Oct: Clean 1 drops, the Places purge, the Resend webhook, R2 and the backup secrets, Pub/Sub, WHATSAPP_LIVE true (detail: `docs/progress/archive/2026-11-05-golive1.md`).
 - Phone test (13b part 1): passed 25 Oct (ladder above). 13b part 2: send START from the staff phone (it is stopped); delete the Supabase secrets SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET and the Supabase SENTRY_AUTH_TOKEN; run `supabase/manual/20261025_drop_slack_leftovers.sql` (expect `0 | 0 | 0 | 0`); remove the Kabsi app from Slack when you like.
 - Sec 2: the backup secret, unused secrets, two-step logins (`docs/security/secrets-and-accounts.md` steps 1 to 3); the retention switch (`supabase/data/20261027_sec2_retention_on.sql`); check the go.kabsi.co rate limit is Deployed.
-- Postponed to `docs/LATER.md`: the failing Backup run, the disabled branch ruleset, the inbox tests, Sentry membership.
 - Supabase Auth: leaked-password protection; paste the four `emails/auth/*.html` templates again, rebuilt on 5 Nov with the WhatsApp line (steps in emails/auth/README.md).
 - Email 1: news.kabsi.co in Resend and Cloudflare before lifecycle emails go on (LATER row).
 - Google Cloud: Places quotas and budget alerts; contacts and owners on kabsi.co addresses only.
@@ -43,12 +41,13 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 - A lawyer reads /terms, /privacy and the partner terms (master plan 29.8).
 - Master plan 19.6: two-step verification everywhere, recovery codes offline, the second Kabsi Google account.
 - Growth 1: the Meta and Speed Insights steps in docs/EVENTS.md (last section).
-- V3 heads-up (25 Oct): on the Yawmiyati phone tap Skip on the old photo message and reply No to the monthly question (`docs/progress/archive/2026-10-26-v3-review-growth.md`).
-- Templates: all approved 29 Oct (ladder). Voice notes stay off: the voice test failed for Gulf Arabic and mixed notes (LATER row).
-- Check 2: pick 3 businesses at kabsi.co/scan on a phone, read today's `places_usage` (autocomplete above 0, details 3 or more); add a Places Autocomplete quota alert.
+- V3 heads-up (25 Oct): on the Yawmiyati phone tap Skip on the old photo message, never Yes, and reply No to the monthly question. Detail: `docs/progress/archive/2026-10-26-v3-review-growth.md`.
+- Check 2: on a phone, pick 3 businesses at kabsi.co/scan, then read today's `places_usage` (autocomplete above 0, details 3 or more); add a Google Cloud quota alert for Places Autocomplete.
 - UX 1: after the deploy, `POST /visibility/terms` once (two DataForSEO calls, about 0.15 USD) and the read-back in the UX 1 archive file.
 - V1: a free Geoapify key, saved as the Supabase secret GEOAPIFY_API_KEY (clicks in `docs/progress/archive/2026-10-25-v1-visibility-map.md`); until then maps draw on a plain ground. DataForSEO top-up (50 US dollars) before the first Meta ad (30.28; the balance read 0.31 after Scan 2 on 5 Nov); Gemini stays off.
 - Scan 2: on a phone, open kabsi.co/scan, pick SEVEN Burgers & Beyond, wait for the nearby places, untick tips and send the report to your email: it should hold the nearby places with "Most places put you ..." under the count, the AI question with its date, and kabsi.co/scan/[code] (the session could not pass Turnstile).
+
+- Search (30.32 items 4 and 5): add kabsi.co to Bing Webmaster Tools; in Google Search Console add kabsi.co as a Domain property (DNS record at the registrar) and submit https://kabsi.co/sitemap.xml once, never again. Details: the Guides 4 archive file.
 
 ## Open After merge checks and findings
 
@@ -59,9 +58,9 @@ The facts say "WhatsApp is live" only when the last step is done. Done 5 Nov 202
 
 ## Recent entries (newest first)
 
-- 5 Nov 2026, Industries 2: part A (PR 392) merged, part B in review.
+- 5 Nov 2026, Industries 2: part A (PR 392) merged, part B (PR 395) in review.
 - 5 Nov 2026, App 4 (30.31, R-111): PRs 378 to 388, checked live. Detail: `docs/progress/archive/2026-11-05-app4.md`.
-- 5 Nov 2026, Guides 3: PRs 385 (scheduling, template, guide 1), 387 (guides 3 to 20), part C (7 earlier guides rewritten); live on release 5e7fc3c0. Detail: `docs/progress/archive/2026-11-05-guides3.md`.
+- 5 Nov 2026, Guides 4 (30.32, R-112): PRs 390, 391, 393, 394, checked live on kabsi.co. Detail: `docs/progress/archive/2026-11-05-guides4.md`.
 
 ## How a session updates this page
 
