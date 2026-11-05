@@ -121,7 +121,8 @@ Pixel (`src/lib/meta-pixel.ts`): public pages only, never /app, /start, /staff, 
 | PageView                 | Browser                  | every public page   |
 | ViewContent              | Browser                  | pricing_viewed      |
 | FreeScanStarted (custom) | Browser                  | free_scan_started   |
-| Lead                     | Browser                  | free_scan_completed |
+| FreeScanCompleted (custom) | Browser                | free_scan_completed |
+| Lead                     | Browser                  | a contact given: "Send me this report" sent (email or WhatsApp), or a Founding 25 application sent (no PostHog event of its own) |
 | CompleteRegistration     | Server (Conversions API) | signup_completed    |
 | StartTrial               | Server (Conversions API) | trial_started       |
 | Subscribe                | Server (Conversions API) | paid                |
@@ -130,8 +131,9 @@ Conversions API (`supabase/functions/_shared/meta-capi.ts`, the `meta_capi` job)
 
 ### Retargeting audiences (26.4), made in Meta Ads Manager from the Pixel
 
-- Started the scan: FreeScanStarted in the last 30 days, excluding Lead.
-- Finished the scan: Lead in the last 30 days, excluding CompleteRegistration.
+- Started the scan: FreeScanStarted in the last 30 days, excluding FreeScanCompleted.
+- Finished the scan: FreeScanCompleted in the last 30 days, excluding Lead and CompleteRegistration.
+- Gave a contact (Lead: the report sent, or a Founding 25 application) in the last 30 days, excluding CompleteRegistration.
 - Signed up without Google access: CompleteRegistration in the last 30 days, excluding StartTrial (the trial starts only once Kabsi has Google access).
 
 Retargeting uses the Pixel audience only, never an owner's own data.

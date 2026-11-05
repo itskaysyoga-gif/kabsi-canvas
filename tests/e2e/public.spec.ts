@@ -6,6 +6,7 @@
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { axeClean, keep, MASKS, noBanner, settle } from "./helpers/page";
+import { mockFreeCheck } from "./helpers/scan2-mock";
 
 const sitemap = readFileSync("public/sitemap.xml", "utf8");
 const fromSitemap = [...sitemap.matchAll(/<loc>https:\/\/kabsi\.co([^<]*)<\/loc>/g)].map(
@@ -127,5 +128,40 @@ test.describe("public pages", () => {
       email: "qa-waiting@test.local",
       page: "/scan",
     });
+  });
+
+  // Scan 2 (master plan 30.29): the town goes to the check, the question and date show, at your address is in the open
+  // before the card, "How to read it" is under the card, no Arabic, and the report carries the check's code.
+  test("the free check result shows the question, at your address and the card with How to read it under it (Scan 2)", async ({
+    page,
+  }) => {
+    await noBanner(page);
+    const sent = await mockFreeCheck(page);
+    await page.goto("/scan?q=SEVEN%20Burgers");
+    await page.getByRole("button", { name: "This is my business" }).click({ timeout: 30_000 });
+    await expect(
+      page.getByText("We asked ChatGPT: 'best fast food restaurant in Boqaata, Lebanon'"),
+    ).toBeVisible({ timeout: 30_000 });
+    expect(sent.check?.["city"]).toBe("Boqaata");
+    await expect(page.getByText("No sources cited.")).toBeVisible();
+    await expect(
+      page.getByText(/^Asked on 5 November 2026 through OpenAI's API, with web search\./),
+    ).toBeVisible();
+    await expect(page.getByText("1 to look at, 5 shown on Google")).toBeVisible();
+    const at = page.getByRole("heading", { name: "At your address on Google Maps" });
+    await expect(at).toBeVisible();
+    await expect(page.getByText("West Diner").first()).toBeVisible();
+    const how = page.getByRole("heading", { name: "How to read it" });
+    const card = page.getByText("Another business came first.");
+    const [a, c, h] = await Promise.all([at.boundingBox(), card.boundingBox(), how.boundingBox()]);
+    expect(a!.y).toBeLessThan(c!.y);
+    expect(c!.y).toBeLessThan(h!.y);
+    expect(await page.locator("main").innerText()).not.toMatch(
+      /[\u0600-\u06FF]|already right|McDonald/,
+    );
+    await page.getByLabel("Email").last().fill("qa-report@test.local");
+    await page.getByRole("button", { name: "Send me this report" }).click();
+    await expect(page.getByText("Sent.")).toBeVisible();
+    expect(sent.report[0]?.["code"]).toBe("SEVEN234");
   });
 });

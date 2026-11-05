@@ -397,7 +397,8 @@ export function LiveFreeCheck({
       }
       setProgress(3);
       track("free_scan_completed", { source: "tool" });
-      pixelEvent("Lead", { content_name: "free_scan" });
+      // Scan 2 (30.29): a finished check is the custom FreeScanCompleted; Lead is a contact given.
+      pixelCustom("FreeScanCompleted");
       setPhase({ kind: "result", snapshot, check });
     } catch (e) {
       setPhase(errorPhase(e));
@@ -457,7 +458,8 @@ export function toNearbyCheck(c: FreeCheck): NearbyCheck | null {
     letter: letters[i]!,
     name: card.place,
     rank: card.rank ?? 0,
-    first: card.firstIsYou ? c.business : (card.first ?? ""),
+    // Scan 2 (30.29): a name not in Latin letters comes back hidden from the server and reads "Another business came first."
+    first: card.firstIsYou ? c.business : (card.first ?? "Another business"),
     point: card.row * 7 + card.col,
     where: card.kind === "home" ? "at the business" : "",
   })) as NearbyCheck["places"];
@@ -529,7 +531,10 @@ export function foundRows(s: Snapshot): FoundRow[] {
       label: "Opening hours",
       value: hours ? "Shown" : null,
       ok: hours,
-      why: hours ? "Customers see when you are open." : "Customers cannot see when you are open.",
+      // Scan 2 (30.29): shown is not right. Kabsi can only check the hours are right once connected.
+      why: hours
+        ? "Customers see your hours. Once connected, Kabsi checks they are right."
+        : "Customers cannot see when you are open.",
     },
     {
       label: "Reviews",
@@ -575,6 +580,10 @@ export function foundRows(s: Snapshot): FoundRow[] {
   return [...rows.filter((r) => !r.ok), ...rows.filter((r) => r.ok)];
 }
 
+/** Scan 2 (30.29, docs/COPY.md 49): what is missing to look at, and what Google shows. Shown is never called right. */
+export const foundCount = (look: number, shown: number) =>
+  `${look === 0 ? "Nothing" : look} to look at, ${shown} shown on Google`;
+
 /** "What Kabsi would do from day one": the free check's own actions, what it found first, then what it checks once
  * connected (never a finding about this business). */
 export function dayOne(s: Snapshot): string[] {
@@ -614,16 +623,46 @@ function ResultHead({
   );
 }
 
+/** Scan 2 (30.29): who comes up at the business's own address, in the open, before the cards (it was folded away). */
+function AtAddress({ check, line }: { check: FreeCheck; line: boolean }) {
+  const rows = check.fast.competitors;
+  if (!rows.length) return null;
+  return (
+    <div>
+      <h2 className="text-h3">At your address on Google Maps</h2>
+      {line && <p className="mt-2 text-body text-text-2">{check.fast.line}</p>}
+      <ol className="mt-3 divide-y divide-line rounded-inner border border-line bg-surface-2 px-4">
+        {rows.map((x, i) => (
+          <li key={x.name} className="flex min-h-14 items-center gap-3 py-2">
+            <span className="w-5 text-small font-bold text-text-3">{i + 1}</span>
+            <span className="min-w-0 flex-1 break-words text-body font-semibold">{x.name}</span>
+            {x.rating !== null && (
+              <span className="flex shrink-0 items-center gap-1 text-small text-text-2">
+                <Star className="size-4 fill-current text-warn" aria-hidden />
+                {x.rating}
+                {x.reviews !== null && <span className="text-text-3">({x.reviews} reviews)</span>}
+              </span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 function NearbySection({ check, handoff }: { check: FreeCheck; handoff: string | null }) {
   const nearby = toNearbyCheck(check);
+  // Scan 2 (30.29): at your address first, then the card, then "How to read it" under it, at every width (no column of
+  // text beside the card).
   return (
-    <section className="grid gap-6 rounded-panel border border-line bg-surface-1 p-5 sm:p-8 xl:grid-cols-[minmax(0,30rem)_1fr] xl:items-start">
+    <section className="space-y-6 rounded-panel border border-line bg-surface-1 p-5 sm:p-8">
+      <AtAddress check={check} line={!!nearby} />
       {nearby ? (
         <>
           <NearbyPlaces check={nearby} example={false} title="h2" />
           <div>
             <h2 className="text-h3">How to read it</h2>
-            <p className="mt-3 text-body text-text-2">
+            <p className="mt-3 max-w-[40rem] text-body text-text-2">
               Kabsi searched '{nearby.keyword}' on Google Maps from 49 places around you, like a
               customer standing there. A, B and C are three of them: near you, and the two places
               with the most different results. Your position changes with where someone searches.
@@ -639,28 +678,26 @@ function NearbySection({ check, handoff }: { check: FreeCheck; handoff: string |
             <p className="mt-3 text-body">{check.fast.line}</p>
             <p className="mt-3 text-small text-kb-stone">{NEARBY_SAMPLE}</p>
           </div>
-          <div>
-            {check.map.state === "mapping" ? (
-              <>
-                <StatusPill tone="info">Searching</StatusPill>
-                <p className="mt-4 text-h3">
-                  This was the quick check, from your address. The full check from 49 places around
-                  you takes a few minutes.
-                </p>
-                {handoff && (
-                  <a
-                    href={handoff}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={cn(buttonClass("whatsapp"), "mt-6")}
-                  >
-                    <WhatsAppGlyph />
-                    Send the full map to my WhatsApp
-                  </a>
-                )}
-              </>
-            ) : null}
-          </div>
+          {check.map.state === "mapping" ? (
+            <div>
+              <StatusPill tone="info">Searching</StatusPill>
+              <p className="mt-4 text-h3">
+                This was the quick check, from your address. The full check from 49 places around
+                you takes a few minutes.
+              </p>
+              {handoff && (
+                <a
+                  href={handoff}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={cn(buttonClass("whatsapp"), "mt-6")}
+                >
+                  <WhatsAppGlyph />
+                  Send the full map to my WhatsApp
+                </a>
+              )}
+            </div>
+          ) : null}
         </>
       )}
     </section>
@@ -850,9 +887,7 @@ export function LiveResult({
               <h2 id="found-h" className="text-h3">
                 What Kabsi found
               </h2>
-              <p className="text-small text-text-2">
-                {fix} to fix, {rows.length - fix} already right
-              </p>
+              <p className="text-small text-text-2">{foundCount(fix, rows.length - fix)}</p>
             </div>
             <ul className="mt-3 divide-y divide-line">
               {rows.map((r) => (
@@ -992,7 +1027,6 @@ export function LiveResult({
         <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-3">
           <SideLinks />
           <div className="grid gap-4">
-            {check && check.fast.competitors.length > 0 && <Competitors check={check} />}
             <Fold title="What Kabsi sees once connected">
               <p className="text-body text-text-2">
                 Reviews without a reply, posts, changes others made to your Google profile, and
@@ -1013,28 +1047,6 @@ export function LiveResult({
         </div>
       </div>
     </>
-  );
-}
-
-function Competitors({ check }: { check: FreeCheck }) {
-  return (
-    <Fold title="Who shows up around you">
-      <ol className="divide-y divide-line">
-        {check.fast.competitors.map((x, i) => (
-          <li key={x.name} className="flex min-h-14 items-center gap-3 py-2">
-            <span className="w-5 text-small font-bold text-text-3">{i + 1}</span>
-            <span className="min-w-0 flex-1 truncate text-body font-semibold">{x.name}</span>
-            {x.rating !== null && (
-              <span className="flex items-center gap-1 text-small text-text-2">
-                <Star className="size-4 fill-current text-warn" aria-hidden />
-                {x.rating}
-                {x.reviews !== null && <span className="text-text-3">({x.reviews} reviews)</span>}
-              </span>
-            )}
-          </li>
-        ))}
-      </ol>
-    </Fold>
   );
 }
 
@@ -1190,6 +1202,8 @@ function SendReport({ placeId, code }: { placeId: string; code: string | null })
           code,
         });
       track("free_tool_used", { source: "profile_check_email" });
+      // Scan 2 (30.29): Lead is a contact given, once, when the report was sent (consent rules unchanged in meta-pixel).
+      pixelEvent("Lead", { content_name: "free_check_report" });
       setState("sent");
     } catch (x) {
       setErr(plainError(x));
@@ -1298,7 +1312,6 @@ export function SavedFreeCheck({ code }: { code: string }) {
         <div className="min-w-0 space-y-4">
           <NearbySection check={live} handoff={null} />
           {live.ai && <AiAnswer ai={live.ai} />}
-          {live.fast.competitors.length > 0 && <Competitors check={live} />}
         </div>
         <aside className="space-y-4 lg:sticky lg:top-24">
           <section

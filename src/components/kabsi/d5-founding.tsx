@@ -5,6 +5,7 @@ import { CheckCircle2, Sparkles } from "lucide-react";
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useLazyTurnstile } from "@/components/turnstile";
+import { pixelEvent } from "@/lib/meta-pixel";
 import {
   ApiError,
   FOUNDING_CONSENT,
@@ -416,6 +417,8 @@ function Application({ onSent }: { onSent: () => void }) {
         checkin_consent: true,
         turnstile: t,
       });
+      // Scan 2 (30.29): a Founding 25 application is a contact given, Meta's Lead (once: the form is then replaced).
+      pixelEvent("Lead", { content_name: "founding_25" });
       onSent();
     } catch (x) {
       const map: Record<string, keyof Errors> = {

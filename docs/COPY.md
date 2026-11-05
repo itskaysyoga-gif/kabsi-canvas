@@ -1159,3 +1159,15 @@ Every new or changed line of Scan 2, for lane R. Each line names its file.
 - The WhatsApp report (the approved template, its second parameter): the profile line as today, then the count line, the AI line and "kabsi.co/scan/[code]", within 900 characters.
 - New error for a report asked with another business's code: "That report is for another business. Reload the page and try again."
 
+### The result page (scan-live.tsx; Scan 2 part C)
+
+- What Kabsi found, the count: "[n] to fix, [m] already right" becomes "[n] to look at, [m] shown on Google"; with nothing missing, "Nothing to look at, [m] shown on Google". No "already right" anywhere.
+- The hours row when hours are shown: "Customers see when you are open." becomes "Customers see your hours. Once connected, Kabsi checks they are right." Every other row keeps its words.
+- Who comes up at the address: the fold "Who shows up around you" goes; the nearby section opens with "At your address on Google Maps", the line "At your address you rank [n] for '[term]'." and the three businesses with rating and review count, before the cards, at every width (and on the saved /scan/[code] page).
+- The nearby section: the card first, "How to read it" under it at every width (no column beside the card). Its words are unchanged.
+- A card whose first business is not shown: "Another business came first."
+
+### Meta events (docs/EVENTS.md, no words a reader sees)
+
+- A finished free check sends Meta the custom event FreeScanCompleted instead of Lead. Lead fires once when "Send me this report" is sent, and once when a Founding 25 application is sent.
+
